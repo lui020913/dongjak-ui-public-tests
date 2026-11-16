@@ -1,36 +1,68 @@
 import { test, expect } from '@playwright/test';
+
+// The deployed app may create the onboarding dialog more than once while initializing.
+// Dismiss it through the real UI, never by removing DOM nodes or forcing hidden styles.
+// A separate assertion below reports unwanted reappearance as a product defect.
+async function dismissVisibleOnboarding(page) {
+  const dialog = page.locator('#dj860-onboarding');
+  for (let attempt = 0; attempt < 4; attempt++) {
+    await page.waitForTimeout(650);
+    if (!await dialog.isVisible().catch(() => false)) return;
+    const skip = dialog.locator('[data-dj860-action="skip"]');
+    await expect(skip, 'Onboarding requires an accessible skip control').toBeVisible();
+    await skip.click({ timeout: 8000 });
+    await expect(dialog, 'Onboarding must close when Skip is clicked').toBeHidden({ timeout: 8000 });
+  }
+  await expect(dialog, 'Onboarding is repeatedly reappearing').toBeHidden();
+}
+
 async function openPublishedMap(page) {
   const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
   expect(response, 'Published site returned no HTTP response').toBeTruthy();
   expect(response.status(), 'Published site returned an HTTP failure').toBeLessThan(400);
   await expect(page.locator('#app')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
-  const onboarding = page.locator('#dj860-onboarding');
-  if (await onboarding.isVisible().catch(() => false)) {
-    const skip = onboarding.locator('[data-dj860-action="skip"]');
-    await expect(skip).toBeVisible();
-    await skip.click();
-    await expect(onboarding).toBeHidden({ timeout: 10000 });
-  }
+  await dismissVisibleOnboarding(page);
 }
-test('published map opens and renders', async ({ page }) => { await openPublishedMap(page); });
+
+test('published map opens and renders', async ({ page }) => {
+  await openPublishedMap(page);
+});
+
+test('onboarding stays closed after one skip (regression guard)', async ({ page }) => {
+  const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
+  expect(response).toBeTruthy();
+  await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
+  const dialog = page.locator('#dj860-onboarding');
+  await expect(dialog, 'First-visit onboarding should initially appear').toBeVisible({ timeout: 10000 });
+  const skip = dialog.locator('[data-dj860-action="skip"]');
+  await skip.click();
+  await expect(dialog).toBeHidden({ timeout: 9000 });
+  await page.waitForTimeout(3500);
+  await expect(dialog, 'Onboarding must not automatically reopen after dismissal').toBeHidden();
+});
+
 test('five bottom tabs switch content and return to map', async ({ page }) => {
   await openPublishedMap(page);
   for (const [key, panel] of [
-    ['route','#route-panel'],['participate','#participation-panel'],
-    ['news','#news-panel'],['mine','#mine-panel']
+    ['route', '#route-panel'], ['participate', '#participation-panel'],
+    ['news', '#news-panel'], ['mine', '#mine-panel']
   ]) {
+    await dismissVisibleOnboarding(page);
     const tab = page.locator('#bottom-nav .nav-tab[data-tab="' + key + '"]');
     await expect(tab, key + ' tab must be visible').toBeVisible();
     await tab.click();
     await expect(page.locator('#app')).toHaveAttribute('data-tab', key);
     await expect(page.locator(panel)).toBeVisible();
   }
+  await dismissVisibleOnboarding(page);
   await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click();
   await expect(page.locator('#app')).toHaveAttribute('data-tab', 'map');
 });
+
 test('map tools or mobile more menu opens and closes', async ({ page }, info) => {
   await openPublishedMap(page);
+  await dismissVisibleOnboarding(page);
   if (info.project.name === 'mobile') {
     await page.locator('#dj-v794-more').click();
     await expect(page.locator('#dj-mobile-utilities')).toBeVisible();
@@ -43,11 +75,14 @@ test('map tools or mobile more menu opens and closes', async ({ page }, info) =>
     await expect(page.locator('#map-advanced-controls')).toBeHidden();
   }
 });
+
 test('text preferences are interactive without freezing the app', async ({ page }) => {
   await openPublishedMap(page);
+  await dismissVisibleOnboarding(page);
   await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click();
   const trigger = page.locator('#mine-panel [data-dj834-action="type"]');
   await expect(trigger).toBeVisible();
+  await dismissVisibleOnboarding(page);
   await trigger.click();
   const scale = page.locator('#mine-panel [data-dj877-type="scale"]');
   const weight = page.locator('#mine-panel [data-dj877-type="weight"]');
