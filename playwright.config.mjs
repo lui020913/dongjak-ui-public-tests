@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-const baseURL = process.env.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/';
+const baseURL = process.env.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/';
 export default defineConfig({
   testDir: 'tests',
   testMatch: '**/*.spec.mjs',
