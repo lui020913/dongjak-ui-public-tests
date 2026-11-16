@@ -19,10 +19,6 @@ on:
         type: string
         required: true
         default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
-  # Single verification push for fixed desktop rail hit test; then remove.
-  push:
-    branches: [main]
-    paths: ['.github/workflows/public-remote-playwright.yml']
   schedule:
     - cron: '30 18 * * *'
 
@@ -35,8 +31,6 @@ concurrency:
 
 jobs:
   chromium-remote-ui:
-    if: >-
-      github.event_name != 'push' || github.event.head_commit.message == 'ci: validate focused desktop map state'
     name: Anonymous Cloudflare UI check
     runs-on: ubuntu-24.04
     timeout-minutes: 35
