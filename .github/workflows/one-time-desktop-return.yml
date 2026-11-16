@@ -1,0 +1,45 @@
+name: One-time desktop return-to-map verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-desktop-return.yml'
+permissions:
+  contents: read
+jobs:
+  verify-desktop-home:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      CI: 'true'
+      DONGJAK_TARGET_URL: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
+      DONGJAK_EXPECTED_SOURCE_SHA: 'd8aec969beb90a5352fe292c773f7f4d157407e9'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify anonymous HTTPS target and exact release commit
+        run: |
+          node scripts/validate-target.mjs
+          node scripts/verify-release-source.mjs
+      - name: Install browser testing packages
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Run only the desktop tab return regression
+        run: |
+          node --check tests/desktop-full-tab-home.spec.mjs
+          npx playwright test tests/desktop-full-tab-home.spec.mjs --project=desktop --reporter=list,json --output=playwright-results/one-time-desktop
+      - name: Preserve failure DOM and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-home-diagnostic
+          path: |
+            playwright-results/one-time-desktop/
+            playwright-json/
+          retention-days: 2
+          if-no-files-found: warn
