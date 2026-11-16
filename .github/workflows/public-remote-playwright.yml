@@ -19,6 +19,10 @@ on:
         type: string
         required: true
         default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/remote-critical.spec.mjs'
   schedule:
     - cron: '30 18 * * *'
 
