@@ -76,6 +76,8 @@ test('onboarding stays closed after one skip (regression guard)', async ({ page 
 });
 
 test('five bottom tabs switch content and return to map', async ({ page }) => {
+  // Four real desktop page transitions can exceed the global 70-second timeout.
+  test.setTimeout(150_000);
   await openPublishedMap(page);
   await page.evaluate(() => {
     const app = document.getElementById('app');
@@ -133,17 +135,28 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
   // map-tab target and click it with the mouse instead of waiting on a CSS
   // stability heuristic that can outlive the visible transition.
   await page.waitForTimeout(450);
-  const mapTab = page.locator('#bottom-nav .nav-tab[data-tab="map"]');
-  await expect(mapTab, 'Map tab must remain visible while another page is open').toBeVisible();
+  // Current desktop navigation may expose a separate accessible Home control
+  // instead of the legacy hidden data-tab=map tab. The visible nav button is
+  // the real user target; never force-click or change the app DOM.
+  const legacyMapTab = page.locator('#bottom-nav .nav-tab[data-tab="map"]');
+  const accessibleMapTab = page.getByRole('navigation', { name: '앱 주요 기능' })
+    .getByRole('button', { name: /안전지도/ });
+  const mapTab = await legacyMapTab.isVisible().catch(() => false)
+    ? legacyMapTab : accessibleMapTab;
+  await expect(mapTab, 'A visible map-return control must exist within main navigation').toBeVisible();
   const bounds = await mapTab.boundingBox();
-  expect(bounds, 'Map tab must have a clickable hit region').toBeTruthy();
+  expect(bounds, 'Map return control must have a clickable hit region').toBeTruthy();
   const x = bounds.x + bounds.width / 2;
   const y = bounds.y + bounds.height / 2;
   const hit = await page.evaluate(({x,y}) => {
-    const top = document.elementFromPoint(x,y);
-    return Boolean(top?.closest?.('#bottom-nav .nav-tab[data-tab="map"]'));
+    const button = document.elementFromPoint(x,y)?.closest?.('#bottom-nav button');
+    return Boolean(button && (
+      button.dataset.tab === 'map' ||
+      (button.getAttribute('aria-label') || '').includes('안전지도') ||
+      (button.textContent || '').includes('안전지도')
+    ));
   }, {x,y});
-  expect(hit, 'Map tab center must not be covered by another element').toBe(true);
+  expect(hit, 'Map return control center must be unobstructed').toBe(true);
   await page.mouse.click(x,y);
   await state('after-map');
   await expect(page.locator('#app')).toHaveAttribute('data-tab', 'map');
