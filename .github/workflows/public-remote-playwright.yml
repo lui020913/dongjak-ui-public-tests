@@ -19,6 +19,10 @@ on:
         type: string
         required: true
         default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
+  # Single verification push, then remove this trigger.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/public-remote-playwright.yml']
   schedule:
     - cron: '30 18 * * *'
 
@@ -31,6 +35,8 @@ concurrency:
 
 jobs:
   chromium-remote-ui:
+    if: >-
+      github.event_name != 'push' || github.event.head_commit.message == 'ci: validate PC tab native pointer click only'
     name: Anonymous Cloudflare UI check
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -68,20 +74,11 @@ jobs:
           fi
           mkdir -p playwright-json playwright-results
           if [ "$RUN_SCOPE" = targeted ]; then
-            set +e
+            mkdir -p playwright-json
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-targeted.json \
               npx playwright test tests/remote-critical.spec.mjs \
                 --project=desktop --grep 'five bottom tabs switch content' \
                 --output=playwright-results/desktop-targeted --reporter=list,json
-            desktop=$?
-            PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/mobile-targeted.json \
-              npx playwright test tests/remote-critical.spec.mjs \
-                --project=mobile --grep 'map tools or mobile more menu' \
-                --output=playwright-results/mobile-targeted --reporter=list,json
-            mobile=$?
-            set -e
-            printf 'Outstanding checks: PC=%s, mobile=%s\n' "$desktop" "$mobile"
-            [ "$desktop" -eq 0 ] && [ "$mobile" -eq 0 ]
             exit $?
           fi
           if [ "$RUN_SCOPE" = release ]; then

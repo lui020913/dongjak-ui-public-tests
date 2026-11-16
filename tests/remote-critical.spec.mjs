@@ -84,7 +84,23 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
     await dismissVisibleOnboarding(page);
     const tab = page.locator('#bottom-nav .nav-tab[data-tab="' + key + '"]');
     await expect(tab, key + ' tab must be visible').toBeVisible();
-    await tab.click();
+    if ((page.viewportSize()?.width || 0) >= 700) {
+      // Desktop rail: real mouse pointer + unobstructed hit region, no force click.
+      // Avoid Playwright waiting indefinitely for unrelated navigation after click.
+      await tab.scrollIntoViewIfNeeded();
+      const bounds = await tab.boundingBox();
+      expect(bounds, key + ' tab needs a clickable region').toBeTruthy();
+      const x = bounds.x + bounds.width / 2;
+      const y = bounds.y + bounds.height / 2;
+      const hit = await page.evaluate(({x, y, key}) => {
+        const top = document.elementFromPoint(x, y);
+        return top?.closest?.('#bottom-nav .nav-tab')?.dataset.tab === key;
+      }, {x, y, key});
+      expect(hit, key + ' tab center must not be obstructed').toBe(true);
+      await page.mouse.click(x, y);
+    } else {
+      await tab.click();
+    }
     await expect(page.locator('#app')).toHaveAttribute('data-tab', key);
     await expect(page.locator(panel)).toBeVisible();
   }
