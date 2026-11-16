@@ -51,3 +51,13 @@ GitHub **Actions → Public remote UI audit → Run workflow** 에서 URL을 지
 - 검증 기준: 공개 UI 성공 https://github.com/lui020913/dongjak-ui-public-tests/actions/runs/43874812280 및 비공개 결과 반환 성공 https://github.com/lui020913/dongjak-safety-map/actions/runs/43873494989
 - 공개 표준 Ubuntu 러너 사용 시간은 무료이며, 비공개 러너가 공개 테스트 결과를 기다리는 시간은 비공개 Actions 사용량을 소비합니다.
 - Production 자동 배포는 활성화하지 않았으며, Preview와 Production 승인 단계는 별개입니다.
+
+## 자동 품질 보고서 (2026-11-16)
+
+- 실행 결과의 **Summary**에서 PC/모바일별 통과·실패·불안정 테스트와 실제 브라우저 뷰포트 크기를 확인할 수 있습니다.
+- **Artifacts → dongjak-public-ui-...**에서 `quality-report/summary.md`, `quality-report/summary.json`을 내려받을 수 있습니다. 보존 기간은 7일입니다.
+- `release` 범위는 기본 PC 1440×900 2건, 모바일 390×844 4건입니다. 그 외 화면 크기 검사는 `full` 또는 별도 반응형 테스트를 실행해야 하며, 수행하지 않은 뷰포트를 통과로 표시하지 않습니다.
+- 결과 파일이 없거나 `release`에서 PC 2건·모바일 4건보다 적으면 `NO_VALID_RESULTS`로 집계합니다. 실패·불안정 항목은 성공으로 간주하지 않습니다.
+- 보고서 집계기 자체는 Node 단위 테스트 3건으로 검증하며, 공개 저장소의 관련 코드가 변경되면 핵심 릴리스 UI 검사를 실행합니다.
+- 보고서에는 대상 호스트명만 포함하고 URL의 쿼리스트링과 오류 메시지에 포함된 URL은 제외합니다. 공개 스크린샷에는 로그인하거나 민감정보를 입력하지 마세요.
+- 본 보고서는 **정보 확인용**입니다. 운영 배포·비공개 저장소 브랜치 보호는 별도의 승인 단계입니다.
