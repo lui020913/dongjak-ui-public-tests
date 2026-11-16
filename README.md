@@ -1,6 +1,8 @@
 # 동작하는 안전지도 — 공개 원격 UI 테스트
 
-이 저장소는 공개 Cloudflare Pages 웹사이트의 **익명 브라우저 UI 검사만** 수행합니다.
+이 저장소의 기본 기능은 공개 Cloudflare Pages 웹사이트의 **익명 브라우저 UI 검사**입니다.
+
+별도의 작업 브랜치 `public/frontend-foundation-20261117`에는 **비밀정보가 없는 독립 프런트엔드 UI 작업실**을 추가했습니다. 현재는 정적 UI 프로토타입이며 실제 운영 앱을 대체하지 않습니다. [frontend/README.md](frontend/README.md)에서 범위와 실행 방법을 확인하세요.
 
 원본 `lui020913/dongjak-safety-map`은 비공개로 유지됩니다. 여기에는 원본 앱 소스, 원본 Git 기록, 로그인 정보, API 키, Cloudflare 배포 토큰을 넣지 않습니다.
 

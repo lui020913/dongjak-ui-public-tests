@@ -21,7 +21,8 @@ function visit(path){
       continue;
     }
     if(item.isDirectory()){
-      if(deniedDirs.has(item.name)||item.name==='node_modules'||item.name==='dist'||item.name==='test-results')continue;
+      if(deniedDirs.has(item.name)){errors.push('Forbidden server/data directory: '+name);continue;}
+      if(item.name==='node_modules'||item.name==='dist'||item.name==='test-results')continue;
       visit(itemPath);
     }else if(item.isFile()){
       if(!['.js','.mjs','.html','.css','.json'].includes(extname(item.name)))continue;
