@@ -7,7 +7,7 @@ on:
         description: 'Public Cloudflare Pages URL on approved domain'
         type: string
         required: true
-        default: 'https://dongjak-walk-safety-preview.pages.dev/'
+        default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
   push:
     branches: [main]
     paths:
@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 35
     env:
       CI: 'true'
-      DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/' }}
+      DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/' }}
     steps:
       - uses: actions/checkout@v4
         with:
