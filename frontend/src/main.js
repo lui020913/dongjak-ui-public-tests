@@ -86,6 +86,7 @@ let sheetStage = 'closed';
 let fontScale = 1;
 let toastTimer;
 let pointerStart = null;
+let suppressNextGripClick = false;
 let map;
 let mapReady = false;
 const updateActiveNav = () => document.querySelectorAll('[data-panel]').forEach(btn => btn.setAttribute('aria-pressed',String(btn.dataset.panel===selectedPanel)));
@@ -159,7 +160,10 @@ function onAction(name, target){
   if(name==='theme'){toggleTheme();return;}
   if(name==='night'){toggleNight();return;}
   if(name==='tools'){openPanel('tools');return;}
-  if(name==='sheet-step'){setSheet(sheetStage==='half'?'full':sheetStage==='full'?'half':'half');return;}
+  if(name==='sheet-step'){
+    if(suppressNextGripClick){suppressNextGripClick=false;return;}
+    setSheet(sheetStage==='half'?'full':sheetStage==='full'?'half':'half');return;
+  }
   if(name==='font-up'){changeFont(.05);return;}
   if(name==='font-down'){changeFont(-.05);return;}
   if(name==='zoom-in'&&mapReady){map.zoomIn();return;}
@@ -193,6 +197,8 @@ sheet.addEventListener('pointerup',event=>{
   const displacement=event.clientY-pointerStart.y;
   pointerStart=null;
   if(Math.abs(displacement)<42)return;
+  suppressNextGripClick=true;
+  window.setTimeout(()=>{suppressNextGripClick=false;},300);
   if(displacement<0)setSheet(sheetStage==='closed'?'half':'full');
   else setSheet(sheetStage==='full'?'half':'closed');
 });
