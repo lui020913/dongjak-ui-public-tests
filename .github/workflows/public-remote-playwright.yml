@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: 'Run only unresolved cases or full suite'
+        description: 'targeted: current unresolved, release: changed Preview smoke, full: all'
         type: choice
-        options: [targeted, full]
+        options: [targeted, release, full]
         default: targeted
       expected_source_sha:
         description: 'Optional exact private Preview source SHA (40 hex, no secrets)'
@@ -19,10 +19,6 @@ on:
         type: string
         required: true
         default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
-  push:
-    branches: [main]
-    paths:
-      - 'tests/remote-critical.spec.mjs'
   schedule:
     - cron: '30 18 * * *'
 
@@ -42,6 +38,7 @@ jobs:
       CI: 'true'
       DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/' }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha || '' }}
+      DONGJAK_AUDIT_SCOPE: ${{ inputs.scope || 'targeted' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,6 +67,23 @@ jobs:
             exit $?
           fi
           mkdir -p playwright-json
+          if [ "$RUN_SCOPE" = release ]; then
+            # Each new source revision gets a minimal core desktop/mobile audit.
+            # Do not spend time rerunning all six viewport snapshots.
+            set +e
+            PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-release.json \
+              npx playwright test tests/remote-critical.spec.mjs \
+                --project=desktop --grep 'published map opens and renders|five bottom tabs switch content' --reporter=list,json
+            desktop=$?
+            PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/mobile-release.json \
+              npx playwright test tests/remote-critical.spec.mjs \
+                --project=mobile --grep 'published map opens and renders|five bottom tabs switch content|map tools or mobile more menu|text preferences are interactive' --reporter=list,json
+            mobile=$?
+            set -e
+            printf 'New-source smoke results: PC=%s, mobile=%s\\n' "$desktop" "$mobile"
+            [ "$desktop" -eq 0 ] && [ "$mobile" -eq 0 ]
+            exit $?
+          fi
           PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-focus.json \
             npx playwright test tests/remote-critical.spec.mjs \
               --project=desktop --grep 'published map opens and renders' --reporter=list,json

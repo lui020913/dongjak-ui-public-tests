@@ -30,11 +30,11 @@ for (const path of paths) {
 const lines = [
   '### Dongjak public remote UI audit',
   '- Anonymous public Pages tests only; no private source, secrets, or deployment',
-  '- Scope: ' + (paths.length > 1 || paths[0].includes('focus') ? 'targeted unresolved checks' : 'full suite'),
+  '- Scope: ' + (process.env.DONGJAK_AUDIT_SCOPE || 'targeted'),
   '- Passed: ' + aggregate.expected + ', Failed: ' + aggregate.unexpected + ', Skipped: ' + aggregate.skipped,
   '- Failed tests: ' + failed.length,
   ...failed.slice(0, 12).map(x => '- ' + x.replace(/[\r\n]/g, ' ')),
-  '- Passed tests from previous runs were intentionally not repeated in targeted mode.',
+  '- Targeted scope runs only the outstanding PC check; release scope runs core UI smoke only for a new source SHA.',
   '- Public Actions screenshots and artifacts may be visible to anyone.',
   '- Cloudflare Production has not been modified.',
   ''
