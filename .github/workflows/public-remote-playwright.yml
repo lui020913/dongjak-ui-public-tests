@@ -71,7 +71,7 @@ jobs:
             mkdir -p playwright-json
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-targeted.json \
               npx playwright test tests/remote-critical.spec.mjs \
-                --project=desktop --grep 'desktop map return focused diagnostic' \
+                --project=desktop --grep 'five bottom tabs switch content and return to map' \
                 --output=playwright-results/desktop-targeted --reporter=list,json
             exit $?
           fi
