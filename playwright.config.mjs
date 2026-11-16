@@ -15,7 +15,7 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-json/results.json' }]
   ],
   use: {
-    baseURL, trace: 'retain-on-failure', screenshot: 'only-on-failure',
+    baseURL, trace: process.env.DONGJAK_TRACE === '1' ? 'retain-on-failure' : 'off', screenshot: 'only-on-failure',
     video: 'off', actionTimeout: 12_000, navigationTimeout: 30_000
   },
   projects: [
