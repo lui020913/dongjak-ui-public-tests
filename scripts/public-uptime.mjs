@@ -1,5 +1,5 @@
 // Public endpoint only. Never send cookies, authorization, API keys or private URLs.
-const fallback='https://dongjak-walk-safety-preview.pages.dev/';
+const fallback='https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/';
 const raw=process.env.DONGJAK_TARGET_URL || fallback;
 let u;
 try { u=new URL(raw); } catch { throw new Error('Invalid target URL'); }
