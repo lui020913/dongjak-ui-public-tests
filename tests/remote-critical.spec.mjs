@@ -42,8 +42,10 @@ test('onboarding stays closed after one skip (regression guard)', async ({ page 
   const skip = dialog.locator('[data-dj860-action="skip"]');
   await skip.click();
   await expect(dialog).toBeHidden({ timeout: 9000 });
+  // A late guest/auth refresh must not resurrect the tour after this-page dismissal.
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('dongjak:auth-state', { detail: { authenticated: false } })));
   await page.waitForTimeout(3500);
-  await expect(dialog, 'Onboarding must not automatically reopen after dismissal').toBeHidden();
+  await expect(dialog, 'Onboarding must not automatically reopen after dismissal or a late auth event').toBeHidden();
 });
 
 test('five bottom tabs switch content and return to map', async ({ page }) => {
