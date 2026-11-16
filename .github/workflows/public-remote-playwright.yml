@@ -3,6 +3,11 @@ name: Public remote UI audit - no source or secrets
 on:
   workflow_dispatch:
     inputs:
+      scope:
+        description: 'Run only unresolved cases or full suite'
+        type: choice
+        options: [targeted, full]
+        default: targeted
       target_url:
         description: 'Public Cloudflare Pages URL on approved domain'
         type: string
@@ -49,8 +54,28 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Install Chromium on standard GitHub runner
         run: npx playwright install --with-deps chromium
-      - name: Check published page (no credentials or private source)
-        run: npm test
+      - name: Check only unresolved cases (full only when explicitly requested)
+        env:
+          RUN_SCOPE: ${{ inputs.scope || 'targeted' }}
+        shell: bash
+        run: |
+          if [ "$RUN_SCOPE" = full ]; then
+            npm test
+            exit $?
+          fi
+          mkdir -p playwright-json
+          set +e
+          PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-focus.json \
+            npx playwright test tests/remote-critical.spec.mjs \
+              --project=desktop --grep 'published map opens and renders' --reporter=list,json
+          desktop=$?
+          PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/mobile-focus.json \
+            npx playwright test tests/remote-critical.spec.mjs \
+              --project=mobile --grep 'text preferences are interactive without freezing the app' --reporter=list,json
+          mobile=$?
+          set -e
+          printf 'Focused checks: desktop onboarding=%s, mobile text settings=%s\n' "$desktop" "$mobile"
+          [ "$desktop" -eq 0 ] && [ "$mobile" -eq 0 ]
       - name: Write run summary
         if: ${{ always() }}
         run: node scripts/summarize-results.mjs
@@ -61,7 +86,7 @@ jobs:
           name: dongjak-public-ui-${{ github.run_number }}
           path: |
             playwright-report/
-            playwright-json/results.json
+            playwright-json/
             test-results/
           if-no-files-found: warn
           retention-days: 2
