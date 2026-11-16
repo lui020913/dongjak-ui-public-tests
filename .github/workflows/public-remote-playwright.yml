@@ -51,6 +51,7 @@ jobs:
           npm run check:syntax
           npm run check:target
           node --check scripts/verify-release-source.mjs
+          node --check tests/desktop-full-tab-home.spec.mjs
       - name: Check deployed Preview source fingerprint
         run: node scripts/verify-release-source.mjs
       - name: Install pinned Playwright dependency
@@ -68,7 +69,8 @@ jobs:
           fi
           mkdir -p playwright-json playwright-results
           if [ "$RUN_SCOPE" = targeted ]; then
-            mkdir -p playwright-json
+            # Use the complete desktop five-tab route, not a partial Mine→Map
+            # shortcut or the legacy pointer timing-sensitive test.
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-targeted.json \
               npx playwright test tests/desktop-full-tab-home.spec.mjs \
                 --project=desktop --output=playwright-results/desktop-targeted --reporter=list,json
