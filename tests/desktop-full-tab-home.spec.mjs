@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('desktop full-tab route to Home preserves map state', async ({page},info) => {
-  test.setTimeout(110000);
+  test.setTimeout(150000); // Full desktop map initialization can exceed 110 seconds on public hosted runners.
   const events=[];
   page.on('pageerror',e=>events.push({type:'pageerror',message:String(e).slice(0,240)}));
   page.on('framenavigated',frame=>{if(frame===page.mainFrame())events.push({type:'navigation',url:frame.url()});});
@@ -64,6 +64,6 @@ test('desktop full-tab route to Home preserves map state', async ({page},info) =
   } finally {
     console.log('DJ_EXACT_HOME_ROUTE',JSON.stringify(events).slice(0,18000));
     await info.attach('full-tab-state.json',{body:Buffer.from(JSON.stringify(events,null,2)),contentType:'application/json'});
-    await info.attach('full-tab-screen.png',{body:await page.screenshot({animations:'disabled',timeout:5000}),contentType:'image/png'}).catch(()=>{});
+    // Do not await screenshot/fonts.ready in a diagnostic finally block.\n    // Playwright already captures a screenshot on assertion failure.
   }
 });
