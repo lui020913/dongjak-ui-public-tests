@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {mkdirSync} from 'node:fs';
 
 const viewports=[
   ['mobile-375',375,812],
@@ -27,6 +28,8 @@ for(const [name,width,height] of viewports){
     expect(dimensions.documentHeight).toBeLessThanOrEqual(dimensions.viewportHeight+1);
     if(width<700)await expect(page.getByRole('navigation',{name:'하단 메뉴'})).toBeVisible();
     else await expect(page.getByRole('navigation',{name:'주 메뉴'})).toBeVisible();
+    mkdirSync('visual-artifacts',{recursive:true});
+    await page.screenshot({path:'visual-artifacts/'+name+'.png',animations:'disabled'});
   });
 }
 
@@ -37,6 +40,8 @@ test('mobile drawer expands and collapses by stages',async({page})=>{
   await expect(page.locator('#sheet')).toHaveAttribute('data-stage','half');
   await page.locator('#sheet-grip').click();
   await expect(page.locator('#sheet')).toHaveAttribute('data-stage','full');
+  mkdirSync('visual-artifacts',{recursive:true});
+  await page.screenshot({path:'visual-artifacts/mobile-sheet-full.png',animations:'disabled'});
   await page.locator('#sheet-grip').click();
   await expect(page.locator('#sheet')).toHaveAttribute('data-stage','half');
   await page.locator('.sheet-head [data-action="close"]').click();
@@ -49,6 +54,8 @@ test('tablet uses dedicated side panel rather than mobile drawer',async({page})=
   await page.locator('.side-rail [data-panel="community"]').click();
   await expect(page.locator('#workspace')).toBeVisible();
   await expect(page.locator('#workspace-title')).toHaveText('커뮤니티');
+  mkdirSync('visual-artifacts',{recursive:true});
+  await page.screenshot({path:'visual-artifacts/tablet-side-panel.png',animations:'disabled'});
   await expect(page.locator('#sheet')).toHaveAttribute('data-stage','closed');
 });
 

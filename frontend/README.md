@@ -13,6 +13,7 @@
 - 검색 시연(노량진역·상도역·숭실대입구역), 테마, 야간 시야, 확대/축소, 현재 위치
 - MapLibre GL JS + OpenStreetMap 공개 지도 타일. OpenStreetMap 타일 사용 정책 및 출처 표기가 적용됩니다.
 - UI 액션·반응형 Playwright 검증, 비밀정보 불필요
+- GitHub Actions의 public-frontend-viewport-screenshots 아티팩트에서 8개 화면 크기와 열린 모바일·태블릿 패널 이미지 확인
 
 미구현: 원본 앱에 있는 안전시설/경사도/교통/길찾기/AI 검색/로그인/커뮤니티/Cloudflare Functions. 실제 데이터인 것처럼 샘플 위험도를 그리지 않습니다. 아직 실제 서비스용 프런트엔드로 교체해서는 안 됩니다.
 
