@@ -17,7 +17,7 @@
 GitHub **Actions → Public remote UI audit → Run workflow** 에서 URL을 지정해 실행합니다.
 
 기본 테스트 URL: `https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/`.
-대체 URL 예: `https://v880-audit-preview.dongjak-walk-safety-preview.pages.dev/`.
+이전 버전 비교용 URL은 필요할 때 별도로 지정합니다. 현재 기본 대상은 v8.8.1 통합 Preview입니다.
 
 실제 공개 URL이 유효한지 확인해야 합니다. 기본 주소가 접속되지 않으면 검사는 실패하며, 이는 검증되지 않은 앱의 성공을 의미하지 않습니다.
 
