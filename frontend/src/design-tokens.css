@@ -1,0 +1,57 @@
+/*
+ * Modern Civic Minimalism — Dongjak Safety Map public frontend
+ * Canonical design tokens. Keep visual output stable when migrating legacy CSS.
+ * Brand colours preserve the workbench's verified existing palette.
+ */
+:root {
+  /* Typography */
+  --ds-font-family: Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', Inter, system-ui, sans-serif;
+
+  /* Light palette */
+  --ds-color-page-text: #23352e;
+  --ds-color-page-bg: #edf4ef;
+  --ds-color-app-bg: #dce9de;
+  --ds-color-surface: #ffffff;
+  --ds-color-surface-soft: #f3f8f4;
+  --ds-color-text: #1e3028;
+  --ds-color-text-muted: #68796f;
+  --ds-color-border: #dce7df;
+  --ds-color-brand: #197253;
+  --ds-color-brand-soft: #e3f2e9;
+  --ds-color-focus: #46a884;
+  --ds-shadow-elevated: 0 10px 38px rgba(22, 58, 43, .13);
+
+  /* Spatial rhythm: use multiples of 4px in new components */
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 20px;
+  --ds-space-6: 24px;
+  --ds-space-8: 32px;
+
+  /* Shape */
+  --ds-radius-control: 12px;
+  --ds-radius-search: 15px;
+  --ds-radius-panel: 22px;
+
+  /* Motion; reduced-motion override remains in styles.css */
+  --ds-motion-fast: .2s;
+  --ds-motion-panel: .22s;
+  --ds-motion-sheet: .32s;
+  --ds-ease-standard: ease;
+  --ds-ease-sheet: cubic-bezier(.22, .72, .24, 1);
+}
+
+/* Use semantic aliases across components, never raw dark-mode hex overrides. */
+.app-shell.theme-dark {
+  --ds-color-app-bg: #182b23;
+  --ds-color-surface: #202e28;
+  --ds-color-surface-soft: #283c32;
+  --ds-color-text: #f1f7f2;
+  --ds-color-text-muted: #aec3b4;
+  --ds-color-border: #3a5142;
+  --ds-color-brand: #74d4aa;
+  --ds-color-brand-soft: #294d3d;
+  --ds-shadow-elevated: 0 16px 45px rgba(0, 0, 0, .32);
+}
