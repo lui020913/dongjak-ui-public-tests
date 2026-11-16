@@ -105,12 +105,17 @@ test('text preferences are interactive without freezing the app', async ({ page 
   await expect(trigger).toBeVisible();
   await dismissVisibleOnboarding(page);
   await trigger.click();
-  const scale = page.locator('#mine-panel [data-dj877-type="scale"]');
-  const weight = page.locator('#mine-panel [data-dj877-type="weight"]');
+  // v8.8.1 moved typography controls from legacy selects to the
+  // v8.8.5 segmented choice buttons in My Info. Assert the user-facing UI,
+  // then verify the legacy select state that still persists the preference.
+  const scale = page.locator('#mine-panel [data-dj885-type="scale"][data-value="large"]');
+  const weight = page.locator('#mine-panel [data-dj885-type="weight"][data-value="bold"]');
   await expect(scale).toBeVisible();
   await expect(weight).toBeVisible();
-  await scale.selectOption('large');
+  await scale.click();
+  await expect(scale).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#dj-type-scale')).toHaveValue('large');
-  await weight.selectOption('bold');
+  await weight.click();
+  await expect(weight).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#dj-type-weight')).toHaveValue('bold');
 });
