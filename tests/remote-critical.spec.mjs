@@ -87,7 +87,7 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
     if ((page.viewportSize()?.width || 0) >= 700) {
       // Desktop rail: real mouse pointer + unobstructed hit region, no force click.
       // Avoid Playwright waiting indefinitely for unrelated navigation after click.
-      await tab.scrollIntoViewIfNeeded();
+      // Avoid Playwright's stability wait; the desktop rail keeps moving under CSS transitions.
       const bounds = await tab.boundingBox();
       expect(bounds, key + ' tab needs a clickable region').toBeTruthy();
       const x = bounds.x + bounds.width / 2;

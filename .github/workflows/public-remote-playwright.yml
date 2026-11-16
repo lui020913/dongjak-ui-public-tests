@@ -19,7 +19,7 @@ on:
         type: string
         required: true
         default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
-  # Single verification push, then remove this trigger.
+  # Single verification push for fixed desktop rail hit test; then remove.
   push:
     branches: [main]
     paths: ['.github/workflows/public-remote-playwright.yml']
