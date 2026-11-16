@@ -53,14 +53,24 @@ export function aggregate(dir = 'playwright-json', meta = {}) {
   const counts = {passed:0,failed:0,flaky:0,skipped:0,unknown:0};
   for (const row of groups) for (const k of Object.keys(counts)) counts[k] += row[k];
   const total = tests.length;
-  const verdict = (!total || invalid.length) ? 'NO_VALID_RESULTS'
+  const scope = clean(meta.scope || 'targeted',40);
+  const projectCount = name => groups.filter(r => r.project === name)
+    .reduce((sum,r) => sum + r.passed + r.failed + r.flaky + r.skipped + r.unknown,0);
+  const missing = [];
+  if (scope === 'release') {
+    if (projectCount('desktop') < 2) missing.push('desktop: expected at least 2 tests');
+    if (projectCount('mobile') < 4) missing.push('mobile: expected at least 4 tests');
+  }
+  if (scope === 'targeted' && projectCount('desktop') < 1)
+    missing.push('desktop: expected at least 1 test');
+  const verdict = (!total || invalid.length || missing.length) ? 'NO_VALID_RESULTS'
     : (counts.failed || counts.flaky || counts.unknown) ? 'FAIL' : 'PASS';
   let host = 'not supplied';
   try { host = new URL(meta.targetUrl || '').hostname || host; } catch {}
   return {schemaVersion:1, generatedAt:new Date().toISOString(),
-    scope:clean(meta.scope || 'targeted',40),
+    scope,
     sourceSha:/^[a-f0-9]{40}$/i.test(meta.sha || '') ? meta.sha : 'not supplied',
-    targetHost:clean(host,90), verdict, total, counts, groups, tests, failures, invalid, files};
+    targetHost:clean(host,90), verdict, total, counts, groups, tests, failures, invalid, missing, files};
 }
 
 export function markdown(report) {
@@ -83,8 +93,9 @@ export function markdown(report) {
       lines.push((index+1) + '. **' + clean(f.project) + '** ' + clean(f.name) +
         ' [' + f.status + ', retry ' + f.retries + ']' + (f.error ? ' — ' + clean(f.error,175) : ''));
   }
-  if (report.invalid.length || !report.total) {
-    lines.push('', '### 보고서 오류', '');
+  if (report.invalid.length || !report.total || report.missing.length) {
+    lines.push('', '### 누락된 검사 또는 보고서 오류', '');
+    for (const message of report.missing) lines.push('- ' + clean(message));
     for (const issue of report.invalid) lines.push('- ' + issue.file + ': ' + issue.reason);
     if (!report.total) lines.push('- 유효한 Playwright 결과가 없습니다. 성공으로 판정하지 않습니다.');
   }
