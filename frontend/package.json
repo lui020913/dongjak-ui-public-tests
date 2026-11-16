@@ -7,9 +7,10 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "check": "node --check src/main.js && npm run check:safety",
+    "check": "node --check src/main.js && npm run check:production-overlay && npm run check:safety",
     "test:e2e": "playwright test",
-    "check:safety": "node scripts/check-public-safety.mjs"
+    "check:safety": "node scripts/check-public-safety.mjs",
+    "check:production-overlay": "node scripts/check-production-overlay.mjs"
   },
   "dependencies": {
     "maplibre-gl": "6.16.0"
