@@ -18,9 +18,16 @@ on:
         description: 'Public Cloudflare Pages URL on approved domain'
         type: string
         required: true
-        default: 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/'
+        default: 'https://v881-final-d1-preview.dongjak-walk-safety-preview.pages.dev/'
   schedule:
     - cron: '30 18 * * *'
+  # The reporter is self-tested on changes; regular UI runs still use dispatch/schedule.
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/quality-report.mjs'
+      - 'tests/quality-report.test.mjs'
+      - '.github/workflows/public-remote-playwright.yml'
 
 permissions:
   contents: read
@@ -36,9 +43,9 @@ jobs:
     timeout-minutes: 35
     env:
       CI: 'true'
-      DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/' }}
+      DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://v881-final-d1-preview.dongjak-walk-safety-preview.pages.dev/' }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha || '' }}
-      DONGJAK_AUDIT_SCOPE: ${{ inputs.scope || 'targeted' }}
+      DONGJAK_AUDIT_SCOPE: ${{ inputs.scope || (github.event_name == 'push' && 'release') || 'targeted' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,6 +59,8 @@ jobs:
           npm run check:target
           node --check scripts/verify-release-source.mjs
           node --check tests/desktop-full-tab-home.spec.mjs
+          node --check scripts/quality-report.mjs
+          node --test tests/quality-report.test.mjs
       - name: Check deployed Preview source fingerprint
         run: node scripts/verify-release-source.mjs
       - name: Install pinned Playwright dependency
@@ -60,7 +69,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Check only unresolved cases (full only when explicitly requested)
         env:
-          RUN_SCOPE: ${{ inputs.scope || 'targeted' }}
+          RUN_SCOPE: ${{ inputs.scope || (github.event_name == 'push' && 'release') || 'targeted' }}
         shell: bash
         run: |
           if [ "$RUN_SCOPE" = full ]; then
@@ -98,7 +107,7 @@ jobs:
               --project=desktop --grep 'published map opens and renders' --reporter=list,json
       - name: Write run summary
         if: ${{ always() }}
-        run: node scripts/summarize-results.mjs
+        run: node scripts/quality-report.mjs
       - name: Save anonymous-only UI report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -109,5 +118,6 @@ jobs:
             playwright-json/
             test-results/
             playwright-results/
+            quality-report/
           if-no-files-found: warn
-          retention-days: 2
+          retention-days: 7
