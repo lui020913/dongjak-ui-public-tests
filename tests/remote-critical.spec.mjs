@@ -163,3 +163,60 @@ test('text preferences are interactive without freezing the app', async ({ page 
   await expect(weight).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#dj-type-weight')).toHaveValue('bold');
 });
+
+// Focused investigation: a new Preview sometimes returns data-tab="" after a
+// legitimate desktop home click. Preserve the real pointer and record the DOM
+// state without modifying any app element or triggering force clicks.
+test('desktop map return focused diagnostic', async ({page}, info) => {
+  await openPublishedMap(page);
+  await page.evaluate(() => {
+    const app=document.getElementById('app');
+    window.__djObservedApp=app;
+    window.__djTabHistory=[];
+    new MutationObserver((records) => {
+      for (const record of records) {
+        window.__djTabHistory.push({
+          oldValue:record.oldValue,
+          current:app.getAttribute('data-tab'),
+          time:Math.round(performance.now())
+        });
+      }
+    }).observe(app,{attributes:true,attributeFilter:['data-tab'],attributeOldValue:true});
+  });
+  const hitClick=async (key)=>{
+    const tab=page.locator('#bottom-nav .nav-tab[data-tab="' + key + '"]');
+    await expect(tab).toBeVisible();
+    const bounds=await tab.boundingBox();
+    expect(bounds,key+' tab must have hit bounds').toBeTruthy();
+    const x=bounds.x+bounds.width/2;
+    const y=bounds.y+bounds.height/2;
+    const hit=await page.evaluate(({x,y,key})=>{
+      return document.elementFromPoint(x,y)?.closest?.('#bottom-nav .nav-tab')?.dataset.tab===key;
+    },{x,y,key});
+    expect(hit,key+' tab must not be obstructed').toBe(true);
+    await page.mouse.click(x,y);
+    await page.waitForTimeout(600);
+  };
+  await hitClick('mine');
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','mine');
+  await hitClick('map');
+  const snapshot=await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    return {
+      url:location.href,
+      appTab:app.getAttribute('data-tab'),
+      rootReplaced:app!==window.__djObservedApp,
+      activeTabs:[...document.querySelectorAll('#bottom-nav .nav-tab')].filter(x=>x.classList.contains('active')).map(x=>x.dataset.tab),
+      visiblePanels:[...document.querySelectorAll('#route-panel,#participation-panel,#news-panel,#mine-panel')].filter(x=>!x.hidden).map(x=>x.id),
+      history:window.__djTabHistory||[]
+    };
+  });
+  console.log('DJ_NAV_DIAGNOSTIC',JSON.stringify(snapshot));
+  await info.attach('desktop-map-return-state.json',{
+    body:Buffer.from(JSON.stringify(snapshot,null,2)),contentType:'application/json'
+  });
+  await info.attach('desktop-map-return.png',{
+    body:await page.screenshot({animations:'disabled'}),contentType:'image/png'
+  });
+  expect(snapshot.appTab,'Home must maintain app data-tab=map').toBe('map');
+});
