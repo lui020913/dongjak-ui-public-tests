@@ -59,6 +59,8 @@ svg{width:20px;height:20px;flex:none}
 .font-actions{display:flex;gap:6px}
 .tool-stack{position:absolute;right:20px;top:112px;z-index:11;display:flex;align-items:center;flex-direction:column;gap:7px;padding:8px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);transition:opacity .2s ease,transform .2s ease}
 .tool-btn{display:grid;place-items:center;width:39px;height:39px;padding:0;background:transparent;color:var(--ink);border:0;border-radius:12px}
+/* Desktop map controls: match the established 44px touch target without changing tablet/mobile. */
+@media (min-width:1100px){.tool-stack .tool-btn{width:44px;height:44px}}
 .tool-btn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
 .tool-separator{height:1px;width:25px;background:var(--line);margin:3px}
 .bottom-nav,.bottom-sheet{display:none}
