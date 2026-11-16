@@ -14,11 +14,11 @@ for (const [name,width,height] of [
     await expect(tools).toHaveCount(5);
     mkdirSync('visual-artifacts/desktop-map-tools',{recursive:true});
     // Baseline CSS is the original 39px rule, isolated for comparison without modifying source.
-    await page.addStyleTag({content:'@media (min-width:1100px){.tool-stack .tool-btn{width:39px!important;height:39px!important}}'});
+    const baselineStyle=await page.addStyleTag({content:'@media (min-width:1100px){.tool-stack .tool-btn{width:39px!important;height:39px!important}}'});
     const before=await tools.first().boundingBox();
     expect(before.width).toBe(39);
     await page.screenshot({path:'visual-artifacts/desktop-map-tools/'+name+'-before.png',animations:'disabled'});
-    await page.locator('style').last().evaluate(el=>el.remove());
+    await baselineStyle.evaluate(el=>el.remove());
     const bounds=[];
     for(const tool of await tools.all()){
       const r=await tool.boundingBox();
