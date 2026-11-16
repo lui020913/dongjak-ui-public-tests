@@ -57,18 +57,17 @@ dist/는 독립 UI 시제품의 정적 결과물입니다. 기존 Pages Producti
 이 작업 브랜치는 공개 저장소에 만들어졌지만 main이나 Production으로 자동 병합되지 않습니다.
 
 
-## 실시간 UI 작업실 미리보기 (GitHub Pages)
+## 실시간 UI 작업실 Preview (Cloudflare)
 
-개발 브랜치 `public/frontend-foundation-20261117`에 프런트엔드 코드가 push되면
-`.github/workflows/public-frontend-preview.yml`이 자동 실행됩니다.
+공개 프런트엔드 코드가 변경되면 비공개 GitHub Actions 브리지가 이를 읽어 검증합니다.
+전용 Cloudflare Preview는 익명 정적 UI 작업실로서 기존 Production과 분리되어 있습니다.
 
-1. JavaScript 및 공개 소스 안전 검사 → Vite 빌드 → Chromium Playwright 테스트
-2. 모든 검사가 통과한 경우에만 별도의 GitHub Pages 정적 UI 작업실을 배포
-3. 프리뷰 고정 주소 (GitHub Pages 활성화/첫 배포 성공 후): `https://lui020913.github.io/dongjak-ui-public-tests/`
-4. 확인 링크: `https://github.com/lui020913/dongjak-ui-public-tests/actions/workflows/public-frontend-preview.yml`
+- **고정 UI 작업실:** https://public-ui-workbench.dongjak-walk-safety-preview.pages.dev/
+- **검증/게시 Actions:** https://github.com/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-preview-bridge.yml
+- **자동 확인 간격:** 매시간 27분. 공개 CSS 및 UI 소스 SHA가 이전 배포와 같으면 재게시하지 않습니다.
+- **별도 Production 호환 CSS:** `production/dongjak-production-overlay.css`
+- **운영 릴리스 검증:** 비공개 `dongjak-public-ui-prod-gate.yml`이 매시간 49분 CSS 내용이 바뀐 경우에만 기존 실제 앱과 통합을 시도합니다.
 
-**최초 1회 사용자 설정 필요:** 공개 저장소의 **Settings → Pages → Build and deployment → Source: GitHub Actions**를 선택합니다. 아직 설정하지 않았다면 배포 작업이 실패할 수 있으며, 위 URL의 접속 여부만으로 배포 성공을 단정하지 마세요. 저장소 관리자에게 이 설정 변경 권한이 필요합니다.
-
-프리뷰는 공개된 익명 정적 UI 시제품이고 원본 앱의 실제 데이터·로그인·길찾기·운영 서비스가 아닙니다.
-원본 비공개 저장소의 Cloudflare Preview·Production을 변경하지 않으며 API 키/토큰을 사용하지 않습니다.
-테스트가 실패하면 마지막 성공한 화면이 그대로 보일 수 있으니 새 버전 여부는 배포 Action의 커밋 SHA를 확인하세요.
+현재 프리뷰는 독립 프로토타입입니다. 로그인·길찾기·대중교통·GIS를 포함한 실제 앱 자체와 동일하지 않으며 이를 Production에 곧바로 배포하지 않습니다.
+Production 자동 승격은 특정 공개 CSS의 허용목록 검사와 기존 앱 E2E·Preview·운영 바인딩·롤백 검증이 모두 통과한 경우에만 허용됩니다.
+이전 GitHub Pages 프리뷰 시도는 Pages 설정 미완료로 실패하여 비활성화했으며, 위 Cloudflare Preview를 사용합니다.
