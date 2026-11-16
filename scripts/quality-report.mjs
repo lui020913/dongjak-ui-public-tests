@@ -9,6 +9,12 @@ const clean = (value, limit = 160) => String(value ?? '')
 export function aggregate(dir = 'playwright-json', meta = {}) {
   const files = existsSync(dir) ? readdirSync(dir).filter(f => f.endsWith('.json')).sort() : [];
   const grouped = new Map(), failures = [], invalid = [], tests = [];
+  // Playwright JSON reporters omit project viewport dimensions in some versions.
+  // Use the exact project config exported by this same Actions run, never guessed sizes.
+  let configuredViewports = {};
+  try {
+    configuredViewports = JSON.parse(readFileSync('quality-report/viewport-config.json', 'utf8'));
+  } catch {}
   for (const file of files) {
     let data;
     try {
@@ -21,7 +27,7 @@ export function aggregate(dir = 'playwright-json', meta = {}) {
         for (const spec of suite.specs || []) {
           for (const test of spec.tests || []) {
             const project = clean(test.projectName || 'unassigned');
-            const vp = viewports.get(test.projectName);
+            const vp = viewports.get(test.projectName) || configuredViewports[test.projectName];
             const viewport = vp && Number.isFinite(vp.width) && Number.isFinite(vp.height)
               ? vp.width + '×' + vp.height : 'not supplied';
             const status = test.status === 'expected' ? 'passed'
@@ -78,7 +84,8 @@ export function markdown(report) {
   const lines = [
     '## 동작 안전지도 · PC/모바일 자동 품질 보고서', '',
     '**결과: ' + report.verdict + '** · 테스트 범위: ' + report.scope,
-    '대상 호스트: ' + report.targetHost + ' · 소스 SHA: ' + report.sourceSha, '',
+    '대상 호스트: ' + report.targetHost + ' · 소스 SHA: ' + report.sourceSha,
+    '소스 식별 근거: ' + clean(report.sourceFingerprint || 'not supplied'), '',
     '**전체 ' + report.total + '건** · 통과 ' + c.passed + ' / 실패 ' + c.failed +
       ' / 불안정 ' + c.flaky + ' / 건너뜀 ' + c.skipped + ' / 미확인 ' + c.unknown, '',
     '| 브라우저 프로젝트 | 실제 실행 화면 크기 | 통과 | 실패 | 불안정 | 건너뜀 |',
@@ -104,11 +111,34 @@ export function markdown(report) {
 }
 
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
+  let reportSha = process.env.DONGJAK_EXPECTED_SOURCE_SHA || '';
+  let fingerprint = reportSha ? 'matched by source verification step' : 'not supplied';
+  if (!reportSha) {
+    try {
+      const root = new URL(process.env.DONGJAK_TARGET_URL || '');
+      const approved = root.hostname === 'dongjak-walk-safety-preview.pages.dev' ||
+        root.hostname.endsWith('.dongjak-walk-safety-preview.pages.dev');
+      if (root.protocol === 'https:' && approved && root.pathname === '/' &&
+          !root.search && !root.hash && !root.username && !root.password) {
+        const response = await fetch(new URL('release-source.json', root), {
+          signal:AbortSignal.timeout(12000), cache:'no-store'
+        });
+        if (response.ok) {
+          const marker = await response.json();
+          if (/^[a-f0-9]{40}$/i.test(marker?.source_commit || '')) {
+            reportSha = marker.source_commit;
+            fingerprint = 'read from public Preview marker (standalone; not an approval)';
+          }
+        }
+      }
+    } catch {}
+  }
   const data = aggregate('playwright-json', {
     scope:process.env.DONGJAK_AUDIT_SCOPE,
-    sha:process.env.DONGJAK_EXPECTED_SOURCE_SHA,
+    sha:reportSha,
     targetUrl:process.env.DONGJAK_TARGET_URL
   });
+  data.sourceFingerprint = fingerprint;
   const output = markdown(data);
   mkdirSync('quality-report', {recursive:true});
   writeFileSync('quality-report/summary.json', JSON.stringify(data,null,2)+'\n');
