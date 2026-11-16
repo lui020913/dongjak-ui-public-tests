@@ -77,6 +77,28 @@ test('onboarding stays closed after one skip (regression guard)', async ({ page 
 
 test('five bottom tabs switch content and return to map', async ({ page }) => {
   await openPublishedMap(page);
+  await page.evaluate(() => {
+    const app = document.getElementById('app');
+    window.__djNavSequence = [];
+    const record = (kind, oldValue) => window.__djNavSequence.push({
+      kind, oldValue, current: app.getAttribute('data-tab'),
+      when: Math.round(performance.now())
+    });
+    record('initial', null);
+    new MutationObserver(records => {
+      for (const r of records) record('mutation', r.oldValue);
+    }).observe(app, {attributes:true, attributeFilter:['data-tab'],attributeOldValue:true});
+  });
+  const state = async (step) => {
+    const result = await page.evaluate(() => ({
+      href: location.href,
+      tab: document.getElementById('app').getAttribute('data-tab'),
+      activeTabs: [...document.querySelectorAll('#bottom-nav .nav-tab')].filter(x=>x.classList.contains('active')).map(x=>x.dataset.tab),
+      panels: [...document.querySelectorAll('#route-panel,#participation-panel,#news-panel,#mine-panel')].filter(x=>!x.hidden).map(x=>x.id),
+      events: window.__djNavSequence || []
+    }));
+    console.log('DJ_FULL_SEQUENCE',JSON.stringify({step,...result}));
+  };
   for (const [key, panel] of [
     ['route', '#route-panel'], ['participate', '#participation-panel'],
     ['news', '#news-panel'], ['mine', '#mine-panel']
@@ -103,6 +125,7 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
     }
     await expect(page.locator('#app')).toHaveAttribute('data-tab', key);
     await expect(page.locator(panel)).toBeVisible();
+    await state('after-'+key);
   }
   await dismissVisibleOnboarding(page);
   // The desktop rail and the current panel have coordinated top/enter
@@ -122,6 +145,7 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
   }, {x,y});
   expect(hit, 'Map tab center must not be covered by another element').toBe(true);
   await page.mouse.click(x,y);
+  await state('after-map');
   await expect(page.locator('#app')).toHaveAttribute('data-tab', 'map');
 });
 
