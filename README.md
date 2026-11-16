@@ -42,14 +42,12 @@ GitHub **Actions → Public remote UI audit → Run workflow** 에서 URL을 지
 - 공개 실행은 비용을 절약하기 위해 기본적으로 실패 항목만 검사합니다. 모든 기능을 검증하려면 Actions의 `scope=full`을 직접 선택하세요.
 - 비공개 저장소에서 실행 성공 여부를 판정할 때 공개 워크플로의 **특정 소스 커밋 및 완료 상태**를 일치시켜야 합니다. 오래된 통과 기록은 현재 릴리스 승인 근거로 사용할 수 없습니다.
 
-### 검증 범위(비용·시간 최소화)
-- `targeted`: 이전 실행에서 미통과했던 PC 온보딩 1건만 점검합니다.
-- `release`: **새 Preview 소스 SHA**가 공개 검사를 호출하면 PC 핵심 2건·모바일 핵심 4건만 검사합니다. 기존 화면 크기 캡처 6건은 재실행하지 않습니다.
-- `full`: 필요할 때 사용자가 수동 선택해 전체 테스트를 수행합니다.
-- 작업 중 설정 파일을 수정한다고 매번 전체 검사가 실행되지 않도록 공개 저장소의 `push` 자동 UI 검사는 제거했습니다.
+### 검증 범위와 검증된 저장소 연동 (2026-11-16)
 
-
-### Targeted repair mode
-- `targeted` now runs only the two unresolved cases from the latest source-pinned smoke: desktop return-to-map hit testing and mobile onboarding dismissal before opening More.
-- It stores desktop/mobile screenshots in separate output folders so a later Playwright invocation cannot erase the earlier project's diagnostics.
-- Already-passed map render, tab switching on mobile, and typography tests are not repeated in targeted mode.
+- `targeted`: PC **길찾기 → 커뮤니티 → 동작소식 → 내 정보 → 안전지도** 전체 복귀 경로 1건을 실제 마우스 입력으로 검사합니다. `tests/desktop-full-tab-home.spec.mjs`
+- `release`: 새 Preview 버전에 대해서만 PC 핵심 2건, 모바일 핵심 4건을 검사합니다. 변경되지 않은 화면 크기 캡처 6건은 반복하지 않습니다.
+- `full`: 필요할 때만 수동으로 전체 검사를 실행합니다.
+- 공개 저장소에는 민감정보와 비공개 원본 코드가 없습니다. 실제 비공개 빌드·Cloudflare 배포는 별도 러너에서 실행되므로 무료는 아닙니다.
+- 검증 기준: 공개 UI 성공 https://github.com/lui020913/dongjak-ui-public-tests/actions/runs/43874812280 및 비공개 결과 반환 성공 https://github.com/lui020913/dongjak-safety-map/actions/runs/43873494989
+- 공개 표준 Ubuntu 러너 사용 시간은 무료이며, 비공개 러너가 공개 테스트 결과를 기다리는 시간은 비공개 Actions 사용량을 소비합니다.
+- Production 자동 배포는 활성화하지 않았으며, Preview와 Production 승인 단계는 별개입니다.
