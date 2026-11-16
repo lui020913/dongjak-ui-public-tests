@@ -47,3 +47,9 @@ GitHub **Actions → Public remote UI audit → Run workflow** 에서 URL을 지
 - `release`: **새 Preview 소스 SHA**가 공개 검사를 호출하면 PC 핵심 2건·모바일 핵심 4건만 검사합니다. 기존 화면 크기 캡처 6건은 재실행하지 않습니다.
 - `full`: 필요할 때 사용자가 수동 선택해 전체 테스트를 수행합니다.
 - 작업 중 설정 파일을 수정한다고 매번 전체 검사가 실행되지 않도록 공개 저장소의 `push` 자동 UI 검사는 제거했습니다.
+
+
+### Targeted repair mode
+- `targeted` now runs only the two unresolved cases from the latest source-pinned smoke: desktop return-to-map hit testing and mobile onboarding dismissal before opening More.
+- It stores desktop/mobile screenshots in separate output folders so a later Playwright invocation cannot erase the earlier project's diagnostics.
+- Already-passed map render, tab switching on mobile, and typography tests are not repeated in targeted mode.

@@ -66,18 +66,35 @@ jobs:
             npm test
             exit $?
           fi
-          mkdir -p playwright-json
+          mkdir -p playwright-json playwright-results
+          if [ "$RUN_SCOPE" = targeted ]; then
+            set +e
+            PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-targeted.json \\
+              npx playwright test tests/remote-critical.spec.mjs \\
+                --project=desktop --grep 'five bottom tabs switch content' \\
+                --output=playwright-results/desktop-targeted --reporter=list,json
+            desktop=$?
+            PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/mobile-targeted.json \\
+              npx playwright test tests/remote-critical.spec.mjs \\
+                --project=mobile --grep 'map tools or mobile more menu' \\
+                --output=playwright-results/mobile-targeted --reporter=list,json
+            mobile=$?
+            set -e
+            printf 'Outstanding checks: PC=%s, mobile=%s\\n' "$desktop" "$mobile"
+            [ "$desktop" -eq 0 ] && [ "$mobile" -eq 0 ]
+            exit $?
+          fi
           if [ "$RUN_SCOPE" = release ]; then
             # Each new source revision gets a minimal core desktop/mobile audit.
             # Do not spend time rerunning all six viewport snapshots.
             set +e
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-release.json \
               npx playwright test tests/remote-critical.spec.mjs \
-                --project=desktop --grep 'published map opens and renders|five bottom tabs switch content' --reporter=list,json
+                --project=desktop --grep 'published map opens and renders|five bottom tabs switch content' --output=playwright-results/desktop-release --reporter=list,json
             desktop=$?
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/mobile-release.json \
               npx playwright test tests/remote-critical.spec.mjs \
-                --project=mobile --grep 'published map opens and renders|five bottom tabs switch content|map tools or mobile more menu|text preferences are interactive' --reporter=list,json
+                --project=mobile --grep 'published map opens and renders|five bottom tabs switch content|map tools or mobile more menu|text preferences are interactive' --output=playwright-results/mobile-release --reporter=list,json
             mobile=$?
             set -e
             printf 'New-source smoke results: PC=%s, mobile=%s\\n' "$desktop" "$mobile"

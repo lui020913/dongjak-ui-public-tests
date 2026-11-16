@@ -10,25 +10,19 @@ async function dismissVisibleOnboarding(page) {
     if (!await dialog.isVisible().catch(() => false)) return;
     const skip = dialog.locator('[data-dj860-action="skip"]');
     await expect(skip, 'Onboarding requires an accessible skip control').toBeVisible();
-    // Chromium locator.click() can await unrelated page navigation even after
-    // dispatching the pointer event. On desktop, validate actual hit testing
-    // and send a genuine mouse click, then assert the product dialog closes.
-    // No force click, DOM removal, direct event dispatch, or CSS overrides.
-    const viewport = page.viewportSize();
-    if (viewport && viewport.width >= 700) {
-      const bounds = await skip.boundingBox();
-      expect(bounds, 'Skip must have a visible hit-test region').toBeTruthy();
-      const x = bounds.x + bounds.width / 2;
-      const y = bounds.y + bounds.height / 2;
-      const hit = await page.evaluate(({x,y}) => {
-        const top = document.elementFromPoint(x,y);
-        return Boolean(top?.closest?.('[data-dj860-action="skip"]'));
-      }, {x,y});
-      expect(hit, 'Skip center must not be covered by another element').toBe(true);
-      await page.mouse.click(x,y);
-    } else {
-      await skip.click({ timeout: 8000 });
-    }
+    // Validate the actual visible hit target and send a genuine pointer click
+    // on both desktop and mobile. No force click, DOM removal, direct event
+    // dispatch, or CSS overrides.
+    const bounds = await skip.boundingBox();
+    expect(bounds, 'Skip must have a visible hit-test region').toBeTruthy();
+    const x = bounds.x + bounds.width / 2;
+    const y = bounds.y + bounds.height / 2;
+    const hit = await page.evaluate(({x,y}) => {
+      const top = document.elementFromPoint(x,y);
+      return Boolean(top?.closest?.('[data-dj860-action="skip"]'));
+    }, {x,y});
+    expect(hit, 'Skip center must not be covered by another element').toBe(true);
+    await page.mouse.click(x,y);
     await expect(dialog, 'Onboarding must close when Skip is clicked').toBeHidden({ timeout: 8000 });
   }
   await expect(dialog, 'Onboarding is repeatedly reappearing').toBeHidden();
@@ -95,7 +89,23 @@ test('five bottom tabs switch content and return to map', async ({ page }) => {
     await expect(page.locator(panel)).toBeVisible();
   }
   await dismissVisibleOnboarding(page);
-  await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click();
+  // The desktop rail and the current panel have coordinated top/enter
+  // transitions. Wait for the transition to settle, then hit-test the actual
+  // map-tab target and click it with the mouse instead of waiting on a CSS
+  // stability heuristic that can outlive the visible transition.
+  await page.waitForTimeout(450);
+  const mapTab = page.locator('#bottom-nav .nav-tab[data-tab="map"]');
+  await expect(mapTab, 'Map tab must remain visible while another page is open').toBeVisible();
+  const bounds = await mapTab.boundingBox();
+  expect(bounds, 'Map tab must have a clickable hit region').toBeTruthy();
+  const x = bounds.x + bounds.width / 2;
+  const y = bounds.y + bounds.height / 2;
+  const hit = await page.evaluate(({x,y}) => {
+    const top = document.elementFromPoint(x,y);
+    return Boolean(top?.closest?.('#bottom-nav .nav-tab[data-tab="map"]'));
+  }, {x,y});
+  expect(hit, 'Map tab center must not be covered by another element').toBe(true);
+  await page.mouse.click(x,y);
   await expect(page.locator('#app')).toHaveAttribute('data-tab', 'map');
 });
 
