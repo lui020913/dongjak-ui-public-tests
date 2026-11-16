@@ -70,9 +70,8 @@ jobs:
           if [ "$RUN_SCOPE" = targeted ]; then
             mkdir -p playwright-json
             PLAYWRIGHT_JSON_OUTPUT_FILE=playwright-json/desktop-targeted.json \
-              npx playwright test tests/remote-critical.spec.mjs \
-                --project=desktop --grep 'five bottom tabs switch content and return to map' \
-                --output=playwright-results/desktop-targeted --reporter=list,json
+              npx playwright test tests/desktop-full-tab-home.spec.mjs \
+                --project=desktop --output=playwright-results/desktop-targeted --reporter=list,json
             exit $?
           fi
           if [ "$RUN_SCOPE" = release ]; then
