@@ -73,6 +73,9 @@ svg{width:20px;height:20px;flex:none}
  .brand-copy strong{font-size:13px}
  .brand-copy span{font-size:10px}
  .top-actions{min-width:44px}
+ /* Tablet-only 44px hit areas; no desktop/mobile geometry changes. */
+ .top-actions .circle-btn{width:44px;height:44px}
+ .tool-stack .tool-btn{width:44px;height:44px}
  .preview-label{display:none}
  .side-rail{top:95px;left:14px;bottom:15px;width:67px;padding:8px 5px}
  .rail-item{min-height:64px;font-size:10px}
