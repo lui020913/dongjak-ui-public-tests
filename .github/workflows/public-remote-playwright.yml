@@ -30,7 +30,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: public-ui-audit-${{ github.event_name }}-${{ inputs.expected_source_sha || github.ref }}
+  group: public-ui-audit-${{ github.event_name }}-${{ inputs.expected_source_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -113,7 +113,6 @@ jobs:
             playwright-report/
             playwright-json/
             test-results/
-            playwright-results/
             playwright-results/
           if-no-files-found: warn
           retention-days: 2
