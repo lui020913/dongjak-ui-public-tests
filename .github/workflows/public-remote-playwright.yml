@@ -65,6 +65,15 @@ jobs:
         run: node scripts/verify-release-source.mjs
       - name: Install pinned Playwright dependency
         run: npm install --no-audit --no-fund
+      - name: Record configured PC/mobile viewport dimensions
+        run: |
+          mkdir -p quality-report
+          node --input-type=module <<'NODE'
+          import config from './playwright.config.mjs';
+          import { writeFileSync } from 'node:fs';
+          const values = Object.fromEntries((config.projects || []).map(p => [p.name, p.use?.viewport || null]));
+          writeFileSync('quality-report/viewport-config.json', JSON.stringify(values));
+          NODE
       - name: Install Chromium on standard GitHub runner
         run: npx playwright install --with-deps chromium
       - name: Check only unresolved cases (full only when explicitly requested)
