@@ -21,12 +21,20 @@ test('desktop full-tab route to Home preserves map state', async ({page},info) =
     };
   });
   const clickKey=async key=>{
-    const loc=page.locator('#bottom-nav .nav-tab[data-tab="'+key+'"]');
+    const legacy=page.locator('#bottom-nav .nav-tab[data-tab="'+key+'"]');
+    const loc=key==='map' && !await legacy.isVisible().catch(()=>false)
+      ? page.getByRole('navigation',{name:'앱 주요 기능'}).getByRole('button',{name:/안전지도/})
+      : legacy;
     await expect(loc).toBeVisible();
     const b=await loc.boundingBox();
     expect(b,key+' button needs a click region').toBeTruthy();
     const x=b.x+b.width/2,y=b.y+b.height/2;
-    const hit=await page.evaluate(({x,y,key})=>document.elementFromPoint(x,y)?.closest?.('#bottom-nav .nav-tab')?.dataset.tab===key,{x,y,key});
+    const hit=await page.evaluate(({x,y,key})=>{
+      const button=document.elementFromPoint(x,y)?.closest?.('#bottom-nav button');
+      return Boolean(button && (button.dataset.tab===key ||
+        (key==='map' && ((button.getAttribute('aria-label')||'').includes('안전지도') ||
+          (button.textContent||'').includes('안전지도')))));
+    },{x,y,key});
     expect(hit,key+' center must not be covered').toBe(true);
     await page.mouse.click(x,y);
     await page.waitForTimeout(350);
