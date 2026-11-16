@@ -17,8 +17,9 @@ test('aggregates PC/mobile failures with actual project viewport and redacts URL
   try {
     writeFileSync(join(dir,'desktop.json'),JSON.stringify(fixture('desktop','expected')));
     writeFileSync(join(dir,'mobile.json'),JSON.stringify(fixture('mobile','unexpected')));
-    const r=aggregate(dir,{scope:'release',sha:'a'.repeat(40),targetUrl:'https://demo.pages.dev/?secret=1'});
+    const r=aggregate(dir,{scope:'full',sha:'a'.repeat(40),targetUrl:'https://demo.pages.dev/?secret=1'});
     assert.equal(r.verdict,'FAIL');
+    assert.equal(aggregate(dir,{scope:'release'}).verdict,'NO_VALID_RESULTS');
     assert.equal(r.total,2);
     assert.deepEqual([r.counts.passed,r.counts.failed],[1,1]);
     assert.match(markdown(r),/1440×900/);
