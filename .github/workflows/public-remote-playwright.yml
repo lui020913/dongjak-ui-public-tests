@@ -35,7 +35,8 @@ concurrency:
 
 jobs:
   chromium-remote-ui:
-    if: github.event_name != 'push' || github.event.head_commit.message == 'ci: one-time targeted live UI verification'
+    if: >-
+      github.event_name != 'push' || github.event.head_commit.message == 'ci: one-time targeted live UI verification'
     name: Anonymous Cloudflare UI check
     runs-on: ubuntu-24.04
     timeout-minutes: 35
