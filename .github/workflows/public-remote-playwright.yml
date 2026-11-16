@@ -1,4 +1,5 @@
 name: Public remote UI audit - no source or secrets
+run-name: "Public UI source=${{ inputs.expected_source_sha || 'standalone' }}"
 
 on:
   workflow_dispatch:
@@ -8,6 +9,11 @@ on:
         type: choice
         options: [targeted, full]
         default: targeted
+      expected_source_sha:
+        description: 'Optional exact private Preview source SHA (40 hex, no secrets)'
+        type: string
+        required: false
+        default: ''
       target_url:
         description: 'Public Cloudflare Pages URL on approved domain'
         type: string
@@ -39,6 +45,7 @@ jobs:
     env:
       CI: 'true'
       DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/' }}
+      DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,6 +57,9 @@ jobs:
         run: |
           npm run check:syntax
           npm run check:target
+          node --check scripts/verify-release-source.mjs
+      - name: Check deployed Preview source fingerprint
+        run: node scripts/verify-release-source.mjs
       - name: Install pinned Playwright dependency
         run: npm install --no-audit --no-fund
       - name: Install Chromium on standard GitHub runner

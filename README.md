@@ -33,3 +33,11 @@ GitHub **Actions → Public remote UI audit → Run workflow** 에서 URL을 지
 - 비공개 저장소의 소스 빌드·PR 검증·Cloudflare 배포는 그대로 별개입니다. CI 중복 해소를 위해 타 브랜치 배포 권한을 자동으로 변경하지 않습니다.
 - 공개 저장소에서 업로드되는 Playwright 보고서·화면 캡처는 누구나 열람할 수 있으므로 테스트 계정 로그인을 수행하지 않습니다.
 - 대체 프리뷰를 점검하려면 공개 저장소 Settings → Secrets and variables → Actions → **Variables**에 `DONGJAK_TARGET_URL`을 등록하세요. `https://...pages.dev/` 형식의 익명 공개 URL만 사용합니다.
+
+## 비공개 → 공개 테스트 연동 (2026-11-16)
+
+- 비공개 릴리스 Preview 배포 성공 후 **별도의 비공개 Actions 브리지**가 이 공개 저장소의 `workflow_dispatch`를 호출하도록 준비했습니다. 이 공개 저장소는 개인 토큰을 보관하지 않습니다.
+- `expected_source_sha`가 지정된 호출에서 `/release-source.json`의 불변 커밋과 `release_status=CANDIDATE_PREVIEW_NOT_PRODUCTION`을 검증합니다. 다른 버전을 검사해 성공으로 오판하는 경우를 막습니다.
+- 디스패치를 실제 활성화하려면 **비공개** 저장소에 한정된 GitHub fine-grained PAT secret `DONGJAK_PUBLIC_TESTS_TOKEN`과 Actions variable `ENABLE_PUBLIC_BRIDGE=true`가 필요합니다. 토큰은 공개 저장소 하나에 대한 Actions 쓰기 권한만 부여하세요.
+- 공개 실행은 비용을 절약하기 위해 기본적으로 실패 항목만 검사합니다. 모든 기능을 검증하려면 Actions의 `scope=full`을 직접 선택하세요.
+- 비공개 저장소에서 실행 성공 여부를 판정할 때 공개 워크플로의 **특정 소스 커밋 및 완료 상태**를 일치시켜야 합니다. 오래된 통과 기록은 현재 릴리스 승인 근거로 사용할 수 없습니다.
