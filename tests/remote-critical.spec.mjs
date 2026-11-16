@@ -16,12 +16,26 @@ async function dismissVisibleOnboarding(page) {
   await expect(dialog, 'Onboarding is repeatedly reappearing').toBeHidden();
 }
 
+async function waitForAppReady(page) {
+  // App startup and Supabase session resolution can finish after #map
+  // becomes visible. A premature click would race the legitimate first tour.
+  const startup = page.locator('#map-startup-overlay');
+  if (await startup.count()) {
+    await expect(startup, 'Startup overlay must finish before navigation tests')
+      .toBeHidden({ timeout: 30000 });
+  }
+  await expect(page.locator('#app'), 'Authentication initialization must resolve')
+    .toHaveAttribute('data-dj-auth-state', /^(signed-out|signed-in)$/, { timeout: 30000 });
+  await page.waitForTimeout(350);
+}
+
 async function openPublishedMap(page) {
   const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
   expect(response, 'Published site returned no HTTP response').toBeTruthy();
   expect(response.status(), 'Published site returned an HTTP failure').toBeLessThan(400);
   await expect(page.locator('#app')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
+  await waitForAppReady(page);
   await dismissVisibleOnboarding(page);
 }
 
@@ -33,6 +47,7 @@ test('onboarding stays closed after one skip (regression guard)', async ({ page 
   const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
   expect(response).toBeTruthy();
   await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
+  await waitForAppReady(page);
   const dialog = page.locator('#dj860-onboarding');
   // A deployed desktop session may not offer the guest tour during initial
   // auth checking. That state cannot prove a dismissal regression.
