@@ -1,0 +1,67 @@
+name: Public remote UI audit - no source or secrets
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Public Cloudflare Pages URL on approved domain'
+        type: string
+        required: true
+        default: 'https://dongjak-walk-safety-preview.pages.dev/'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/public-remote-playwright.yml'
+      - 'package.json'
+      - 'playwright.config.mjs'
+      - 'tests/**'
+      - 'scripts/**'
+  schedule:
+    - cron: '30 18 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-ui-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium-remote-ui:
+    name: Anonymous Cloudflare UI check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CI: 'true'
+      DONGJAK_TARGET_URL: ${{ inputs.target_url || vars.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify syntax and approved target hostname
+        run: |
+          npm run check:syntax
+          npm run check:target
+      - name: Install pinned Playwright dependency
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium on standard GitHub runner
+        run: npx playwright install --with-deps chromium
+      - name: Check published page (no credentials or private source)
+        run: npm test
+      - name: Write run summary
+        if: ${{ always() }}
+        run: node scripts/summarize-results.mjs
+      - name: Save anonymous-only UI report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-public-ui-${{ github.run_number }}
+          path: |
+            playwright-report/
+            playwright-json/results.json
+            test-results/
+          if-no-files-found: warn
+          retention-days: 2

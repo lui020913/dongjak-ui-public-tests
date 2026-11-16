@@ -1,0 +1,14 @@
+{
+  "name": "dongjak-public-ui-audit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:syntax": "node --check playwright.config.mjs && node --check scripts/validate-target.mjs && node --check scripts/summarize-results.mjs && node --check tests/remote-critical.spec.mjs && node --check tests/remote-responsive.spec.mjs",
+    "check:target": "node scripts/validate-target.mjs",
+    "test": "playwright test",
+    "test:critical": "playwright test tests/remote-critical.spec.mjs",
+    "test:responsive": "playwright test tests/remote-responsive.spec.mjs"
+  },
+  "devDependencies": {"@playwright/test": "1.56.1"}
+}
