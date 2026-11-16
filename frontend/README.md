@@ -17,6 +17,10 @@
 
 미구현: 원본 앱에 있는 안전시설/경사도/교통/길찾기/AI 검색/로그인/커뮤니티/Cloudflare Functions. 실제 데이터인 것처럼 샘플 위험도를 그리지 않습니다. 아직 실제 서비스용 프런트엔드로 교체해서는 안 됩니다.
 
+## 디자인 언어
+
+이 작업실의 공식 디자인 기준은 [Modern Civic Minimalism 디자인 언어](DESIGN_LANGUAGE.md)이며, 실제 색상·간격·라운드·모션 값은 [`src/design-tokens.css`](src/design-tokens.css)에서 관리합니다. UI 자동 개선은 이 문서와 토큰을 기준으로 검증하고, 기존 서비스 Production에는 자동 적용하지 않습니다.
+
 ## 실행
 
 Node.js 22 이상 사용:
