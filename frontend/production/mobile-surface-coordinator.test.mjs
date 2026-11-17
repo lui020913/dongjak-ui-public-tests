@@ -56,7 +56,7 @@ test('preserves native horizontal toolbar edge-fade affordance',()=>{
   const end=css.indexOf('}',start);
   assert.notEqual(end,-1,'scrollport rule must close');
   const rule=css.slice(start,end);
-  assert.match(rule,/scroll-snap-type:\\s*x mandatory !important/);
-  assert.match(rule,/scroll-padding-inline:\\s*2px !important/);
-  assert.doesNotMatch(rule,/(?:-webkit-)?mask-image:\\s*none\\s*!important/);
+  assert.match(rule,/scroll-snap-type:\s*x mandatory !important/);
+  assert.match(rule,/scroll-padding-inline:\s*2px !important/);
+  assert.doesNotMatch(rule,/(?:-webkit-)?mask-image:\s*none\s*!important/);
 });
