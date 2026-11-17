@@ -6,6 +6,7 @@
 - `check-production-overlay.mjs`는 허용 셀렉터와 정확한 CSS 선언을 검사합니다. 새 지도 홈 규칙도 모바일 지도 화면의 특정 요소만 대상으로 합니다.
 - `mobile-surface-coordinator.mjs`는 검토된 단일 프레젠테이션 보조 모듈입니다. 실제 내비게이션 바와 MapLibre 축척을 측정해 하단 HUD를 배치하고 TIP 닫기 버튼만 관리합니다. 네트워크·API·인증·위치·지도 데이터에는 접근하지 않습니다.
 - 기존 지도 엔진, GIS 레이어, 검색·날씨·AI·내비게이션 이벤트 핸들러는 그대로 유지합니다. 공개 프로토타입의 `src/main.js` 또는 `src/styles.css`를 운영 앱에 복사하지 않습니다.
+- 모바일 지도 옵션 바로가기는 `#dj-user-map-options` 프록시로 제공하며, 기존 `#map-tools-toggle` 클릭을 전달합니다. 원본 지도 옵션 컨트롤러는 변경하지 않습니다.
 - 통합 릴리스 후보는 기존 비공개 검증 소스에서 빌드하고, 독립 Cloudflare Preview에서 실제 앱 브라우저 검사를 통과해야 합니다.
 - Production 승격은 별도의 소유자 승인 게이트를 통과한 경우에만 가능합니다. Preview 또는 테스트 성공은 Production 배포를 의미하지 않습니다.
 - 변경사항 없음, 정책 검사 실패, 브라우저 회귀, 비밀 설정 검증 실패, Preview 검증 실패 중 하나라도 발생하면 Production을 변경하지 않습니다.
