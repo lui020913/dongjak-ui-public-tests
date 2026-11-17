@@ -52,3 +52,5 @@ jobs:
             echo '- Deployment target: public-ui-workbench Preview only'
             echo '- The independent Preview freshness workflow verifies the deployed source SHA.'
           } >> "$GITHUB_STEP_SUMMARY"
+
+# Dispatch integration recheck after repository secret configuration.
