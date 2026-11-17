@@ -1,0 +1,60 @@
+name: Gemini isolated development sandbox
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/gemini-sandbox.yml'
+permissions:
+  contents: read
+concurrency:
+  group: gemini-isolated-sandbox
+  cancel-in-progress: false
+jobs:
+  sandbox:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      OVERLAY: frontend/production/dongjak-production-overlay.css
+      GEMINI_MODEL: gemini-3.5-flash-lite
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 210bcc7697f0527b37992c855ab9f7d818b88412
+          path: ui
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate and validate isolated CSS
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -euo pipefail
+          node scripts/ai-ui-overlay.mjs
+          node ui/frontend/scripts/check-production-overlay.mjs
+          git -C ui diff --check
+          test "$(git -C ui diff --name-only)" = "$OVERLAY"
+          mkdir -p sandbox-result
+          git -C ui diff > sandbox-result/change.patch
+      - name: Build and test isolated frontend
+        working-directory: ui/frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm run build
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gemini-isolated-result
+          path: |
+            sandbox-result/
+            ui/frontend/dist/
+            ui/frontend/playwright-report/
+          retention-days: 3
+          if-no-files-found: warn
