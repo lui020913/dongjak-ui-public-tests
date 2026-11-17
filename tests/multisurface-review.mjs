@@ -14,6 +14,8 @@ try{
 for(const theme of ['light','dark']){
  const context=await browser.newContext({viewport:{width,height},isMobile:width<700,hasTouch:width<1100,locale:'ko-KR',colorScheme:theme});
  const page=await context.newPage();
+ page.setDefaultTimeout(20000);
+ page.on('dialog',dialog=>/테마|theme/i.test(dialog.message())?dialog.accept():dialog.dismiss());
  page.on('pageerror',e=>report.errors.push(String(e)));
  await page.goto(site,{waitUntil:'domcontentloaded',timeout:60000});
  await page.locator('#map-startup-overlay').waitFor({state:'hidden',timeout:60000});
@@ -22,11 +24,18 @@ for(const theme of ['light','dark']){
  await page.locator('#bottom-nav').waitFor({state:'visible'});
  await page.waitForTimeout(600);
  if(await page.locator('#app').getAttribute('data-theme')!==theme){
-  await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click();
-  await page.getByRole('button',{name:/화면 테마/}).click();
-  await page.getByText('화면 테마를 전환할까요?',{exact:true}).waitFor({state:'visible'});
-  await page.getByRole('button',{name:/^(확인|전환|변경|예|계속|전환하기|변경하기)$/}).filter({visible:true}).last().click();
-  await page.waitForFunction(t=>document.querySelector('#app').dataset.theme===t,theme);
+  const headerTheme=page.locator('#theme-toggle');
+  if(await headerTheme.isVisible())await headerTheme.click();
+  else{
+   await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click();
+   await page.getByRole('button',{name:/화면 테마/}).click();
+  }
+  await page.waitForFunction(t=>document.querySelector('#app').dataset.theme===t||[...document.querySelectorAll('[role="dialog"],dialog,.dj-confirm')].some(e=>e.getBoundingClientRect().width>0),theme,{timeout:10000}).catch(()=>{});
+  if(await page.locator('#app').getAttribute('data-theme')!==theme){
+   const confirm=page.getByRole('button',{name:/^(확인|전환|변경|예|계속|전환하기|변경하기)$/}).filter({visible:true}).last();
+   await confirm.click();
+  }
+  await page.waitForFunction(t=>document.querySelector('#app').dataset.theme===t,theme,{timeout:15000});
   await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click();
  }
  if(await page.locator('#app').getAttribute('data-theme')!==theme)throw Error('Theme did not apply');

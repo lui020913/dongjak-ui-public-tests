@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: manual-multisurface-review-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   review:
     name: Review ${{ matrix.viewport.w }}px
