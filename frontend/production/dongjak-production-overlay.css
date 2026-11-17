@@ -408,3 +408,26 @@ html body #app [role="button"]:focus-visible {
     overflow-anchor: none !important;
   }
 }
+
+/* More: prevent legacy rise/translate restarting after fade class removal. Native drag remains owned by its controller. */
+@media (max-width: 699px) {
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities:not([hidden]):not(.dj-sheet-dragging):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out) {
+    animation: none !important;
+    translate: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj852-panel-fade-in:not([hidden]):not(.dj-sheet-dragging) {
+    animation: dj852-profile-fade-in .22s ease-out both !important;
+    translate: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj852-panel-fade-out:not([hidden]):not(.dj-sheet-dragging) {
+    animation: dj852-profile-fade-out .19s ease-in both !important;
+    translate: none !important;
+    transition: none !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+}
