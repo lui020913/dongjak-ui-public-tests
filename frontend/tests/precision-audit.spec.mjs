@@ -88,6 +88,12 @@ test('mobile sheets share a flush bottom navigation anchor and centered grip', a
     for (const panel of ['route', 'news']) {
       await page.locator(`.bottom-nav [data-panel="${panel}"]`).click();
       await expect(page.locator('#sheet')).toHaveAttribute('data-stage', 'half');
+      // Measure final geometry after the sheet height/translate transition settles.
+      await expect.poll(async () => page.evaluate(() => {
+        const sheet = document.querySelector('#sheet').getBoundingClientRect();
+        const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+        return Math.abs(sheet.bottom - nav.top);
+      }), { timeout: 5000 }).toBeLessThanOrEqual(1);
       const geometry = await page.evaluate(() => {
         const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
         const sheet = rect('#sheet');
