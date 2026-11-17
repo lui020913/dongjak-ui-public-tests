@@ -8,7 +8,7 @@ const key = process.env.GEMINI_API_KEY;
 if (!key) throw new Error('GEMINI_API_KEY is missing');
 const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 if (!/^gemini-[a-z0-9.-]+$/.test(model)) throw new Error('Invalid model');
-const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
+const request = () => fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', {
   method: 'POST',
   headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
   signal: AbortSignal.timeout(90_000),
@@ -18,7 +18,18 @@ const response = await fetch('https://generativelanguage.googleapis.com/v1beta/m
     generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 1024 }
   })
 });
-if (!response.ok) throw new Error('Gemini request failed with HTTP ' + response.status);
+let response;
+for (let attempt = 0; attempt < 3; attempt++) {
+  try { response = await request(); }
+  catch (error) { if (attempt === 2) throw error; }
+  if (response?.ok) break;
+  if (response && ![429, 500, 502, 503, 504].includes(response.status)) break;
+  if (attempt < 2) {
+    console.warn('Transient Gemini failure; retrying request');
+    await new Promise(resolve => setTimeout(resolve, 15000 * (attempt + 1)));
+  }
+}
+if (!response?.ok) throw new Error('Gemini request failed with HTTP ' + (response?.status ?? 'network'));
 const completion = await response.json();
 const output = completion.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('');
 const { before, after } = JSON.parse(output || '{}');
