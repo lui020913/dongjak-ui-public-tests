@@ -1,5 +1,10 @@
 name: Public deployed UI screen inventory (anonymous, NO DEPLOY)
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/visual-screen-inventory.spec.mjs'
+      - '.github/workflows/public-screen-inventory.yml'
   workflow_dispatch:
   schedule:
     - cron: '15 * * * *'
