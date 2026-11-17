@@ -1,0 +1,124 @@
+name: AI UI improvement after verified Production
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-ui-preview
+  cancel-in-progress: false
+
+jobs:
+  improve:
+    if: >-
+      github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      github.actor == 'lui020913' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.issue.number == 15 && !github.event.issue.pull_request &&
+        github.event.comment.user.login == 'lui020913' &&
+        startsWith(github.event.comment.body, '승인 ')))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 115
+    permissions:
+      contents: write
+    env:
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+      PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
+      SOURCE_BRANCH: public/frontend-foundation-20261117
+      OVERLAY: frontend/production/dongjak-production-overlay.css
+      POLICY_BLOB: 0d0ebb2b3010892909811e8176a10c68099307f6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_BRANCH }}
+          path: ui
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify approval and live release before generating a change
+        env:
+          APPROVAL: ${{ github.event.comment.body }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$OPENAI_API_KEY" || { echo "::error::Configure the OPENAI_API_KEY Actions secret."; exit 1; }
+          test -n "$DISPATCH_TOKEN" || { echo "::error::Missing existing Preview dispatch secret."; exit 1; }
+          local_css="$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)"
+          nonce() { date +%s; }
+          if [[ "$GITHUB_EVENT_NAME" == issue_comment ]]; then
+            [[ "$APPROVAL" =~ ^승인\ [a-f0-9]{40}\ [a-f0-9]{64}$ ]]
+            read -r _ approved_source approved_css <<< "$APPROVAL"
+            [[ "$approved_css" == "$local_css" ]]
+            curl -fsS --max-time 15 "$PREVIEW_URL/release-source.json?run=$GITHUB_RUN_ID" |
+              jq -e --arg sha "$approved_source" --arg css "$approved_css" \
+                '.release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION" and .public_ui_source_commit==$sha and .public_ui_overlay_sha256==$css' >/dev/null
+          fi
+          # Wait only in response to an owner approval. A manual bootstrap checks once.
+          attempts=1
+          [[ "$GITHUB_EVENT_NAME" != issue_comment ]] || attempts=82
+          for ((i=1; i<=attempts; i++)); do
+            if curl -fsS --max-time 12 "$PRODUCTION_URL/release-source.json?t=$(nonce)" -o "$RUNNER_TEMP/ui-live.json" &&
+               jq -e --arg css "$local_css" --arg sha "${approved_source:-}" \
+                 '.release_status=="DEPLOYED_PRODUCTION" and .public_ui_overlay_sha256==$css and
+                  (.build_run|tostring|test("^[0-9]+$")) and
+                  ($sha=="" or .public_ui_source_commit==$sha)' "$RUNNER_TEMP/ui-live.json" >/dev/null; then
+              exit 0
+            fi
+            if ((i < attempts)); then sleep 60; fi
+          done
+          echo "::error::Production has not deployed the exact current overlay. Keep the existing candidate."
+          exit 1
+      - name: Generate one design-preserving CSS adjustment
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test "$(git -C ui hash-object frontend/scripts/check-production-overlay.mjs)" = "$POLICY_BLOB"
+          node scripts/ai-ui-overlay.mjs
+          node ui/frontend/scripts/check-production-overlay.mjs
+          git -C ui diff --check
+          test "$(git -C ui diff --name-only)" = "$OVERLAY"
+      - name: Build and test the public frontend
+        working-directory: ui/frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+          npm run build
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Recheck Production and push tested CSS
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 15 "$PRODUCTION_URL/release-source.json?recheck=$GITHUB_RUN_ID" |
+            jq -e --slurpfile prior "$RUNNER_TEMP/ui-live.json" \
+              '.release_status=="DEPLOYED_PRODUCTION" and .build_run==$prior[0].build_run and
+               .public_ui_overlay_sha256==$prior[0].public_ui_overlay_sha256' >/dev/null
+          git -C ui config user.name 'github-actions[bot]'
+          git -C ui config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C ui add -- "$OVERLAY"
+          git -C ui commit -m 'Improve one public UI CSS detail'
+          gh auth setup-git
+          git -C ui push origin "HEAD:refs/heads/$SOURCE_BRANCH"
+          printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Dispatch existing full-app gate for Preview
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api --method POST \
+            repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches \
+            -f ref=main
+          echo 'Full-app build, regression testing and Preview requested. Review the resulting exact candidate in issue #15.' >> "$GITHUB_STEP_SUMMARY"
