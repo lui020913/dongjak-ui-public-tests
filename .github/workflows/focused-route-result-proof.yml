@@ -1,0 +1,128 @@
+name: Focused real walking-route result proof (NO DEPLOY)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/focused-route-result-proof.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: focused-real-route-result-proof
+  cancel-in-progress: false
+jobs:
+  route-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: '004bb33cde9575656c4f68651214b937f67184a1'
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Calculate one public walking route and compare existing result in isolated browser
+        env:
+          TARGET: https://dongjak-walk-safety-preview.pages.dev
+        run: |
+          mkdir -p route-proof
+          node --input-type=module <<'JS'
+          import {chromium,devices} from '@playwright/test';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const site=process.env.TARGET;
+          const css=readFileSync('candidate/frontend/production/dongjak-production-overlay.css','utf8');
+          const report={mode:'anonymous actual walking-route UI and local candidate CSS/markup experiment; camera code and integrated deployment are NOT tested',candidateCssSHA:createHash('sha256').update(css).digest('hex'),points:['상도역','장승배기역'],steps:[]};
+          const save=()=>writeFileSync('route-proof/comparison.json',JSON.stringify(report,null,2));
+          const marker=async()=>{
+            const res=await fetch(site+'/release-source.json?audit='+Date.now(),{signal:AbortSignal.timeout(20000),cache:'no-store'});
+            if(!res.ok)throw Error('Release marker HTTP '+res.status);
+            const m=await res.json();
+            if(m.release_status!=='DEPLOYED_PRODUCTION'||m.public_ui_source_commit!=='777d8cae655973815e694426ec560536cd116744'||m.public_ui_overlay_sha256!=='6fef095abbcfde431b26b648a2763cef3c27820548bc10b87a7e4fa2ffb833a5')throw Error('Unexpected live baseline; stop');
+            return m;
+          };
+          let browser;
+          try{
+            report.baseline=await marker();save();
+            browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({...devices['Pixel 7'],viewport:{width:390,height:844},colorScheme:'light',locale:'ko-KR'});
+            const page=await context.newPage();
+            const click=async selector=>page.locator(selector).click({timeout:30000,noWaitAfter:true});
+            await page.goto(site+'/',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.locator('#map').waitFor({state:'visible',timeout:60000});
+            await page.locator('#map-startup-overlay').waitFor({state:'hidden',timeout:60000});
+            const tour=page.locator('#dj860-onboarding');
+            if(await tour.isVisible()){
+              await click('#dj860-onboarding [data-dj860-action="skip"]');
+              await tour.waitFor({state:'hidden',timeout:15000});
+            }
+            const later=page.locator('#dj-browser-webapp-tip .dj-webapp-tip-later');
+            if(await later.isVisible())await later.click({timeout:15000});
+            if(await page.locator('#app').getAttribute('data-theme')!=='light')throw Error('Unexpected theme; no override');
+            await click('#bottom-nav .nav-tab[data-tab="route"]');
+            for(const [which,name] of [['start','상도역'],['end','장승배기역']]){
+              await click('#route-search-'+which);
+              await page.locator('#route-search-query').fill(name);
+              await click('#route-search-submit');
+              const item=page.locator('#route-search-results .route-search-item').filter({has:page.locator('strong').getByText(name,{exact:true})}).first();
+              await item.waitFor({state:'visible',timeout:45000});
+              await item.click({timeout:30000,noWaitAfter:true});
+              await page.locator('#route-transit-confirm').waitFor({state:'visible',timeout:30000});
+              const selected=await page.locator('#route-transit-confirm-name').innerText();
+              if(!selected.includes(name))throw Error('Unexpected selected public station '+selected);
+              await click('#route-transit-accept');
+              await page.locator('#route-panel').waitFor({state:'visible',timeout:30000});
+              const text=await page.locator('#route-'+which+'-label').innerText();
+              if(!text.includes(name))throw Error('Station not confirmed '+text);
+              report.steps.push({stage:which,name,label:text});save();
+            }
+            await click('#route-calc');
+            await page.locator('#route-map-card:not([hidden])').waitFor({state:'visible',timeout:120000});
+            await page.locator('#route-map-metrics').filter({hasText:/분/}).waitFor({state:'visible',timeout:30000});
+            const compare=page.locator('#dj804-route-compare:not([hidden]) .dj804-compare-card');
+            await compare.first().waitFor({state:'visible',timeout:45000});
+            await page.waitForTimeout(1500);
+            const measure=()=>page.evaluate(()=>{
+              const card=document.getElementById('route-map-card'),metrics=document.getElementById('route-map-metrics'),source=document.getElementById('route-map-source');
+              const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {x:r.x,y:r.y,w:r.width,h:r.height,scrollHeight:e.scrollHeight,clientHeight:e.clientHeight,fontSize:s.fontSize,padding:s.padding,gap:s.gap,overflowY:s.overflowY}};
+              return {card:rect(card),metrics:rect(metrics),source:rect(source),metricsText:metrics?.textContent,sourceText:source?.textContent,grid:rect(card.querySelector('.dj804-compare-grid')),cards:[...card.querySelectorAll('.dj804-compare-card')].map(e=>({rect:rect(e),text:e.innerText,metrics:rect(e.querySelector('.dj804-compare-metrics'))})),actions:[...card.querySelectorAll('.route-map-card-actions button')].map(e=>({id:e.id,rect:rect(e)}))};
+            });
+            const shot=async file=>{
+              const fonts=await page.evaluate(()=>Promise.race([document.fonts.ready.then(()=>true),new Promise(r=>setTimeout(()=>r(false),25000))]));
+              if(!fonts)throw Error('Fonts not ready');
+              await page.screenshot({path:'route-proof/'+file,animations:'disabled',timeout:45000});
+            };
+            report.before=await measure();save();await shot('route-result-before.png');
+            await page.addStyleTag({content:css});
+            // This mirrors only the approved, bounded routeMetricsFirst setting
+            // in an isolated browser, retaining the actual native DOM and data.
+            const matches=[...css.matchAll(/\/\* DONGJAK_UI_MARKUP (.*?) \*\//g)];
+            if(matches.length!==1||JSON.parse(matches[0][1]).routeMetricsFirst!==true)throw Error('Candidate markup setting missing');
+            await page.evaluate(()=>{
+              const metrics=document.getElementById('route-map-metrics'),source=document.getElementById('route-map-source');
+              if(metrics.parentElement!==source.parentElement)throw Error('Native route result structure changed');
+              source.before(metrics);
+            });
+            await page.waitForTimeout(700);
+            report.after=await measure();save();await shot('route-result-candidate.png');
+            if(report.after.metricsText!==report.before.metricsText||report.after.sourceText!==report.before.sourceText||JSON.stringify(report.before.cards.map(c=>c.text))!==JSON.stringify(report.after.cards.map(c=>c.text)))throw Error('Actual route data changed during comparison');
+            if(report.after.metrics.y>=report.after.source.y)throw Error('Route metric did not visibly move before its source');
+            report.visualChange='metric positioned above data-source label';
+            report.baselineAfter=await marker();save();
+            if(JSON.stringify(report.baseline)!==JSON.stringify(report.baselineAfter))throw Error('Baseline changed');
+          }catch(e){report.error=String(e);save();throw e;}
+          finally{await browser?.close();}
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-walking-route-proof
+          path: route-proof/
+          retention-days: 7
+          if-no-files-found: warn
