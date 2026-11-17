@@ -10,6 +10,7 @@ for (const [width,height] of [[1280,800],[1440,900],[1920,1080]]) {
     expect(bounds.width).toBeGreaterThanOrEqual(44);
     expect(bounds.height).toBeGreaterThanOrEqual(44);
     expect(bounds.x+bounds.width).toBeLessThanOrEqual(width+1);
+    await expect(toggle).toBeEnabled();
     await toggle.click();
     await expect(page.locator('#app-shell')).toHaveClass(/theme-dark/);
   });
