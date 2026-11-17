@@ -11,6 +11,7 @@ for (const [name,width,height] of [['tablet',768,1024],['tablet-landscape',1024,
     expect(rect.width).toBeGreaterThanOrEqual(44);
     expect(rect.height).toBeGreaterThanOrEqual(44);
     expect(rect.x+rect.width).toBeLessThanOrEqual(width+1);
+    await expect(close).toBeEnabled();
     await close.click();
     await expect(page.locator('#workspace')).toBeHidden();
   });
