@@ -25,7 +25,9 @@ test('native theme transition diagnostic',async({page})=>{
  await page.waitForTimeout(1500);
  console.log('AUDIT visible text='+JSON.stringify((await page.locator('body').innerText()).split('\n').filter(s=>/테마|다크|라이트|어둡|밝은|dark|light/i.test(s)).slice(0,40)));
  console.log('AUDIT theme choices='+JSON.stringify(await page.locator('button,[role="button"],[role="radio"],label').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).map(n=>({id:n.id,label:n.getAttribute('aria-label'),text:n.textContent.trim().slice(0,100)})).filter(n=>/테마|다크|라이트|dark/i.test(JSON.stringify(n))))));
- const control=page.getByText(/^(다크|다크 모드|다크모드|어두운 테마|어두운 모드|Dark)$/i).filter({visible:true}).first();
+ await expect(page.getByText('화면 테마를 전환할까요?',{exact:true})).toBeVisible();
+ console.log('AUDIT confirmation controls='+JSON.stringify(await page.locator('button,[role="button"],input[type="button"]').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).map(n=>({id:n.id,text:n.textContent.trim().slice(0,70),label:n.getAttribute('aria-label')})))));
+ const control=page.getByRole('button',{name:/^(확인|전환|변경|예|계속|전환하기|변경하기)$/}).filter({visible:true}).last();
  console.log('AUDIT visible='+await control.isVisible());
  if(await page.locator('#app').getAttribute('data-theme')!=='dark')await control.click({timeout:12000,noWaitAfter:true});
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark',{timeout:15000});
