@@ -477,7 +477,7 @@ html body #app#app#app#app#app#app#app#app .topbar > .header-tools {
   width: 62px !important;
   min-width: 62px !important;
   max-width: 62px !important;
-  margin-left: -7px !important;
+  margin-left: 0 !important;
 }
 html body #app#app#app#app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
   display: flex !important;
@@ -485,6 +485,8 @@ html body #app#app#app#app#app#app#app#app .topbar .header-tools > #dj890-ai-orb
   justify-content: center !important;
   flex: 0 0 62px !important;
   width: 62px !important;
+  min-width: 62px !important;
+  max-width: 62px !important;
   height: 42px !important;
   gap: 5px !important;
   border-radius: 999px !important;
