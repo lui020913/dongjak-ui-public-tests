@@ -31,7 +31,10 @@ for(const theme of ['light','dark']){
  }
  if(await page.locator('#app').getAttribute('data-theme')!==theme)throw Error('Theme did not apply');
  const capture=async (name,stage)=>{
-  await page.waitForTimeout(450);
+  const later=page.locator('.dj-webapp-tip-later');
+  if(await later.isVisible())await later.click();
+  await page.waitForTimeout(1000);
+  await page.screenshot({path:`${out}/${theme}-${name}-${stage}.png`,animations:'disabled'});
   const data=await page.evaluate(()=>{
    const box=e=>{if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {id:e.id,cls:e.className,text:(e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,80),x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom,display:s.display,visibility:s.visibility,font:s.fontSize,animation:s.animationName,overflow:s.overflowY,after:(()=>{const a=getComputedStyle(e,'::after');return {content:a.content,width:a.width,maxWidth:a.maxWidth,opacity:a.opacity,visibility:a.visibility,position:a.position}})()};};
    const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&!e.closest('[hidden]');};
@@ -40,12 +43,14 @@ for(const theme of ['light','dark']){
    return {theme:document.querySelector('#app').dataset.theme,overflow:document.documentElement.scrollWidth-innerWidth,nav:box(document.querySelector('#bottom-nav')),panels,controls};
   });
   report.cases.push({requestedTheme:theme,name,stage,...data});
-  await page.screenshot({path:`${out}/${theme}-${name}-${stage}.png`,animations:'disabled'});
   console.log(JSON.stringify({width,theme,name,stage,overflow:data.overflow,panels:data.panels,clipped:data.controls.filter(x=>x.clipped),small:data.controls.filter(x=>x.w<43.5||x.h<43.5).map(x=>({id:x.id,text:x.text,w:x.w,h:x.h}))}));
  };
  const compare=async name=>{
   await capture(name,'before');
   const injected=await page.addStyleTag({content:candidate});
+  // Force style resolution before timing the inherited opacity transition.
+  await page.evaluate(()=>document.querySelector('#app').getBoundingClientRect().width);
+  if(name==='map'&&width<700)await page.waitForFunction(()=>getComputedStyle(document.querySelector('#dj-v794-safety'),'::after').opacity==='1',{timeout:10000});
   await capture(name,'after');
   const last=report.cases.at(-1);
   if(last.theme!==theme)throw Error('Capture theme mismatch');
