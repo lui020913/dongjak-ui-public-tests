@@ -125,12 +125,13 @@ jobs:
           printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Dispatch existing full-app gate for Preview
         env:
+          EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
           GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
         run: |
           set -euo pipefail
           gh api --method POST \
             repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches \
-            -f ref=main
+            -f ref=main -f "inputs[candidate_source]=$EXPECTED_SOURCE"
           echo 'Full-app build, regression testing and Preview requested. Review the resulting exact candidate in issue #15.' >> "$GITHUB_STEP_SUMMARY"
       - name: Verify the exact deployed full-app Preview
         env:
