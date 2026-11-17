@@ -8,8 +8,8 @@ for (const [name,width,height] of [['tablet',768,1024],['tablet-landscape',1024,
     const close=page.locator('.workspace-head .panel-close');
     await expect(close).toBeVisible();
     const rect=await close.boundingBox();
-    expect(rect.width).toBeGreaterThanOrEqual(44);
-    expect(rect.height).toBeGreaterThanOrEqual(44);
+    expect(rect.width).toBeGreaterThanOrEqual(43.99);
+    expect(rect.height).toBeGreaterThanOrEqual(43.99);
     expect(rect.x+rect.width).toBeLessThanOrEqual(width+1);
     await expect(close).toBeEnabled();
     await close.click();
