@@ -695,4 +695,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app :has(#dj-browser-weba
   visibility: hidden !important;
   pointer-events: none !important;
 }
+html body #app#app#app#app#app#app#app#app#app#app#app#app #dj-user-tip-close[hidden] {
+  display: none !important;
+}
 }
