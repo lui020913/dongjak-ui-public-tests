@@ -110,8 +110,34 @@ jobs:
           done
           echo "::error::Production has not deployed the exact current overlay. Keep the existing candidate."
           exit 1
+      - name: Restore tested candidate from earlier attempt
+        id: restore
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          if (( GITHUB_RUN_ATTEMPT <= 1 )); then exit 0; fi
+          gh auth setup-git
+          base="$(git -C ui rev-parse HEAD)"
+          for ((attempt=GITHUB_RUN_ATTEMPT-1; attempt>=1; attempt--)); do
+            branch="$SOURCE_BRANCH-$GITHUB_RUN_ID-$attempt"
+            if ! git -C ui ls-remote --exit-code --heads origin "$branch" >/dev/null; then continue; fi
+            git -C ui fetch origin "refs/heads/$branch"
+            candidate="$(git -C ui rev-parse FETCH_HEAD)"
+            test "$(git -C ui rev-parse "$candidate^")" = "$base"
+            test "$(git -C ui diff --name-only "$base" "$candidate")" = "$OVERLAY"
+            git -C ui checkout --detach "$candidate"
+            test "$(git -C ui hash-object frontend/scripts/check-production-overlay.mjs)" = "$POLICY_BLOB"
+            node ui/frontend/scripts/check-production-overlay.mjs
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "source=$candidate" >> "$GITHUB_OUTPUT"
+            echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+            gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 · 검증된 수정 코드 복원 완료" || true
+            exit 0
+          done
       - name: Notify progress - Gemini CSS 개선 및 검증 (최대 요청 3회)
-        if: ${{ success() }}
+        if: ${{ success() && steps.restore.outputs.found != 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -121,6 +147,7 @@ jobs:
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Generate one design-preserving CSS adjustment
+        if: steps.restore.outputs.found != 'true'
         id: generate
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -132,7 +159,7 @@ jobs:
           git -C ui diff --check
           test "$(git -C ui diff --name-only)" = "$OVERLAY"
       - name: Notify progress - 공개 프런트엔드 빌드 및 테스트
-        if: ${{ success() }}
+        if: ${{ success() && steps.restore.outputs.found != 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -142,6 +169,7 @@ jobs:
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Build and test the public frontend
+        if: steps.restore.outputs.found != 'true'
         env:
           RECOVERY_NOTIFY_TOKEN: ${{ github.token }}
         working-directory: ui/frontend
@@ -170,6 +198,9 @@ jobs:
       - name: Recheck Production and push tested CSS
         id: publish
         env:
+          RESTORED: ${{ steps.restore.outputs.found }}
+          RESTORED_SOURCE: ${{ steps.restore.outputs.source }}
+          RESTORED_CSS: ${{ steps.restore.outputs.css }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -177,6 +208,11 @@ jobs:
             jq -e --slurpfile prior "$RUNNER_TEMP/ui-live.json" \
               '.release_status=="DEPLOYED_PRODUCTION" and .build_run==$prior[0].build_run and
                .public_ui_overlay_sha256==$prior[0].public_ui_overlay_sha256' >/dev/null
+          if [[ "$RESTORED" == true ]]; then
+            echo "source=$RESTORED_SOURCE" >> "$GITHUB_OUTPUT"
+            echo "css=$RESTORED_CSS" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git -C ui diff --check
           test "$(git -C ui diff --name-only)" = "$OVERLAY"
           node ui/frontend/scripts/check-production-overlay.mjs
