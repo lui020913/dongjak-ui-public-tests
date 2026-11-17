@@ -75,3 +75,5 @@ html body #app [role="button"]:focus-visible {
     min-width: 0 !important;
   }
 }
+
+/* DONGJAK_UI_MOTION {"duration":320,"expand":65,"collapse":55,"dismiss":105} */
