@@ -53,8 +53,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "운영 배포 확인 대기 (최대 약 100분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="운영 배포 확인 대기 (최대 약 100분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Verify approval and live release before generating a change
         env:
           APPROVAL: ${{ github.event.comment.body }}
@@ -99,8 +108,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "Gemini CSS 개선 및 검증 (최대 요청 3회) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="Gemini CSS 개선 및 검증 (최대 요청 3회) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Generate one design-preserving CSS adjustment
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -116,8 +134,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "공개 프런트엔드 빌드 및 테스트 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="공개 프런트엔드 빌드 및 테스트 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Build and test the public frontend
         working-directory: ui/frontend
         run: |
@@ -131,8 +158,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "검증된 후보 커밋 저장 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="검증된 후보 커밋 저장 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Recheck Production and push tested CSS
         id: publish
         env:
@@ -161,8 +197,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "전체 앱 Preview 배포 요청 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="전체 앱 Preview 배포 요청 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Dispatch existing full-app gate for Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -178,8 +223,17 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "Preview 검증 대기 (최대 약 45분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="Preview 검증 대기 (최대 약 45분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Verify the exact deployed full-app Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -212,19 +266,46 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 완료 - Preview 확인 및 승인 대기 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="작업 완료 - Preview 확인 및 승인 대기 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Notify progress - 작업 실패 - 실행 상세에서 실패 단계 확인
         if: ${{ failure() }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 실패 - 실행 상세에서 실패 단계 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="작업 실패 - 실행 상세에서 실패 단계 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
       - name: Notify progress - 작업 취소 - 실행 상세 확인
         if: ${{ cancelled() }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 취소 - 실행 상세 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          message="작업 취소 - 실행 상세 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            curl --silent --fail --max-time 15 --retry 2 --output /dev/null \
+              --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+              --data-urlencode "text=$message" \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" || echo "::warning::Telegram delivery failed"
+          fi
