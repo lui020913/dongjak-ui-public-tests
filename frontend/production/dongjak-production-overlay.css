@@ -43,3 +43,35 @@ html body #app [role="button"]:focus-visible {
   outline: 3px solid #17956c;
   outline-offset: 3px;
 }
+
+/* Mobile: compact map-first transit and route results. Preserve expanded sheet. */
+@media (max-width: 699px) {
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"]:not(.dj871-sheet-expanded):not([hidden]) {
+    max-height: 40dvh !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-direction-grid {
+    gap: 6px !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-direction-heading {
+    min-height: 32px !important;
+    padding: 5px 8px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row {
+    min-height: 44px !important;
+    padding: 6px 8px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet .dj875-transit-scroll {
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-map-card:not([hidden]) {
+    max-height: 35dvh !important;
+    overflow-y: auto !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-card {
+    padding: 8px !important;
+    min-width: 0 !important;
+  }
+}
