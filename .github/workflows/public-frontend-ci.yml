@@ -20,6 +20,11 @@ concurrency:
 
 jobs:
   frontend:
+    name: UI check (${{ matrix.device }})
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [mobile, tablet, desktop, shared]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
@@ -41,12 +46,21 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run responsive and interaction tests
-        run: npm run test:e2e
+        env:
+          DEVICE_GROUP: ${{ matrix.device }}
+        run: |
+          case "$DEVICE_GROUP" in
+            mobile)  npx playwright test --grep 'mobile' ;;
+            tablet)  npx playwright test --grep 'tablet' ;;
+            desktop) npx playwright test --grep 'desktop|pc-' ;;
+            shared)  npx playwright test --grep-invert 'mobile|tablet|desktop|pc-' ;;
+            *) exit 1 ;;
+          esac
       - name: Save anonymous UI screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: public-frontend-viewport-screenshots
+          name: public-frontend-viewport-screenshots-${{ matrix.device }}
           path: frontend/visual-artifacts/
           if-no-files-found: ignore
           retention-days: 7
@@ -54,7 +68,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: public-frontend-playwright
+          name: public-frontend-playwright-${{ matrix.device }}
           path: frontend/test-results/
           if-no-files-found: ignore
           retention-days: 3
