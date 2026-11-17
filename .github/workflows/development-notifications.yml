@@ -40,6 +40,9 @@ jobs:
               if [[ "$(jq -r .action "$GITHUB_EVENT_PATH")" == in_progress ]]; then title="개발 작업 시작"; else title="개발 작업 결과"; fi
               detail="$(jq -r '.workflow_run.name + " · " + .workflow_run.conclusion' "$GITHUB_EVENT_PATH")"
               url="$(jq -r '.workflow_run.html_url' "$GITHUB_EVENT_PATH")"
+              run="$(jq -r .workflow_run.id "$GITHUB_EVENT_PATH")"
+              jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" --jq '[.jobs[] | (.name + " · " + (.conclusion // .status))] | join("\n")' 2>/dev/null || true)"
+              if [[ -n "$jobs" ]]; then detail="$(printf '%s\n%s' "$detail" "$jobs")"; fi
               ;;
             *) exit 0 ;;
           esac
