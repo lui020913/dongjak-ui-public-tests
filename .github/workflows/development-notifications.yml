@@ -3,13 +3,9 @@ on:
   repository_dispatch:
     types: [private-development-status]
   workflow_dispatch:
-  push:
-    branches: ['**']
-  pull_request:
-    types: [opened, closed]
   workflow_run:
     workflows: ['*']
-    types: [in_progress, completed]
+    types: [completed]
 permissions:
   issues: write
   contents: read
@@ -74,5 +70,11 @@ jobs:
             fi
           else
             title="$title · 통합 집계 확인 불가"
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
+            conclusion="$(jq -r .workflow_run.conclusion "$GITHUB_EVENT_PATH")"
+            if [[ "$conclusion" == success && "${total:-unknown}" != 0 ]]; then exit 0; fi
+          elif [[ "$GITHUB_EVENT_NAME" == repository_dispatch && "${total:-unknown}" != 0 ]]; then
+            exit 0
           fi
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s\n공개 %s건 · 비공개 %s건\n%s' "$title" "$detail" "$public" "$private" "$url")"
