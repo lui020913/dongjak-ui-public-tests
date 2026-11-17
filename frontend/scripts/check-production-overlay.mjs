@@ -443,6 +443,7 @@ for(const [selector,source] of mapHomeRules){
   }));
   exactAlignment.set(selector,declarations);
 }
+exactAlignment.set("html body #app#app#app#app#app#app#app#app#app#app#app#app #dj-user-tip-close[hidden]",{display:'none !important'});
 let activeMedia='';
 let activeSelector='';
 const allowedProperties=new Set([
