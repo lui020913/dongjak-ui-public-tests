@@ -1,0 +1,121 @@
+name: Focused mobile design proof (browser experiment, NO DEPLOY)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/focused-mobile-design-proof.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: focused-mobile-design-proof
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: '004bb33cde9575656c4f68651214b937f67184a1'
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Capture real Production panels before and after local candidate CSS
+        env:
+          TARGET: https://dongjak-walk-safety-preview.pages.dev
+          EXPECTED_SOURCE: 777d8cae655973815e694426ec560536cd116744
+          EXPECTED_CSS: 6fef095abbcfde431b26b648a2763cef3c27820548bc10b87a7e4fa2ffb833a5
+        run: |
+          mkdir -p proof
+          node --input-type=module <<'JS'
+          import {chromium,devices} from '@playwright/test';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const base=process.env.TARGET;
+          const css=readFileSync('candidate/frontend/production/dongjak-production-overlay.css','utf8');
+          const report={mode:'local CSS cascade experiment on real deployed app; not integrated Preview or deployed code',viewport:{width:390,height:844},candidateCssSHA:createHash('sha256').update(css).digest('hex'),screens:[]};
+          const save=()=>writeFileSync('proof/comparison.json',JSON.stringify(report,null,2));
+          const marker=async()=>{
+            const r=await fetch(base+'/release-source.json?audit='+Date.now(),{signal:AbortSignal.timeout(20000),cache:'no-store'});
+            if(!r.ok)throw Error('Release marker HTTP '+r.status);
+            const m=await r.json();
+            if(m.release_status!=='DEPLOYED_PRODUCTION'||m.public_ui_source_commit!==process.env.EXPECTED_SOURCE||m.public_ui_overlay_sha256!==process.env.EXPECTED_CSS)throw Error('Production baseline changed; do not compare unrelated deployments');
+            return m;
+          };
+          let browser;
+          try{
+            report.baseline=await marker(); save();
+            browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({...devices['Pixel 7'],viewport:report.viewport,colorScheme:'light',locale:'ko-KR'});
+            const page=await context.newPage();
+            await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.locator('#map').waitFor({state:'visible',timeout:60000});
+            await page.locator('#map-startup-overlay').waitFor({state:'hidden',timeout:60000});
+            const tour=page.locator('#dj860-onboarding');
+            if(await tour.isVisible()){
+              await tour.locator('[data-dj860-action="skip"]').click({timeout:30000});
+              await tour.waitFor({state:'hidden',timeout:15000});
+            }
+            // Dismiss optional install suggestion via its existing user-facing button.
+            const later=page.locator('#dj-browser-webapp-tip .dj-webapp-tip-later');
+            if(await later.isVisible())await later.click({timeout:15000});
+            const actualTheme=await page.locator('#app').getAttribute('data-theme');
+            if(actualTheme!=='light')throw Error('Expected light theme; no synthetic style or theme override');
+            for(const [tab,panel] of [['route','route-panel'],['participate','participation-panel']]){
+              const entry={tab,panel};report.screens.push(entry);
+              let injected;
+              try {
+                await page.locator('#bottom-nav .nav-tab[data-tab="'+tab+'"]').click({timeout:25000,noWaitAfter:true});
+                await page.locator('#'+panel+' .dj-sheet-chrome').waitFor({state:'visible',timeout:25000});
+                await page.waitForTimeout(800);
+                if(await page.locator('#app').getAttribute('data-tab')!==tab)throw Error('Navigation did not reach requested tab');
+                const measure=()=>page.evaluate(id=>{
+                  const p=document.getElementById(id);
+                  if(!p)throw Error('Panel missing');
+                  const rect=e=>{if(!e)return null;let r=e.getBoundingClientRect(),s=getComputedStyle(e);return {x:r.x,y:r.y,w:r.width,h:r.height,padding:s.padding,overflowY:s.overflowY,scrollHeight:e.scrollHeight,clientHeight:e.clientHeight}};
+                  const h=p.querySelector('.dj-sheet-chrome'),b=p.querySelector('.dj836-sheet-body'),close=p.querySelector('.dj-sheet-chrome-close');
+                  let r=close?.getBoundingClientRect(),hit=r&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+                  return {panel:rect(p),header:rect(h),body:rect(b),close:rect(close),closeHit:Boolean(hit&&close.contains(hit)),theme:document.querySelector('#app')?.dataset.theme};
+                },panel);
+                const screenshot=async file=>{
+                  const ready=await page.evaluate(()=>Promise.race([document.fonts.ready.then(()=>true),new Promise(r=>setTimeout(()=>r(false),25000))]));
+                  if(!ready)throw Error('Fonts not ready; screenshot is not valid visual evidence');
+                  await page.screenshot({path:'proof/'+file,animations:'disabled',timeout:45000});
+                };
+                entry.before=await measure(); save();
+                await screenshot(tab+'-before.png');
+                injected=await page.addStyleTag({content:css});
+                await page.waitForTimeout(350);
+                entry.after=await measure();save();
+                await screenshot(tab+'-after.png');
+                const a=entry.before,b=entry.after;
+                if(!a.header||!b.header||!a.body||!b.body||!b.close)throw Error('Required native elements missing');
+                entry.headerPixelsGained=+(a.header.h-b.header.h).toFixed(1);
+                entry.bodyPixelsGained=+(b.body.h-a.body.h).toFixed(1);
+                entry.geometryChanged=Math.abs(entry.headerPixelsGained)>=8||Math.abs(entry.bodyPixelsGained)>=8||a.body.padding!==b.body.padding;
+                entry.accessibleClose=b.close.w>=43.99&&b.close.h>=43.99&&b.closeHit;
+                entry.status=entry.geometryChanged&&entry.accessibleClose?'geometry-changed':'not-proven';
+              }catch(e){entry.status='failed';entry.error=String(e).slice(0,1500);}
+              finally{if(injected)await injected.evaluate(e=>e.remove()).catch(()=>{});save();}
+            }
+            report.baselineAfter=await marker();
+            if(JSON.stringify(report.baseline)!==JSON.stringify(report.baselineAfter))throw Error('Deployment marker changed during comparison');
+            save();
+            if(report.screens.some(x=>x.status!=='geometry-changed'))throw Error('At least one screen has no verified geometry change or usable close control');
+          }catch(e){report.error=String(e);save();throw e;}
+          finally{await browser?.close();}
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-mobile-css-experiment
+          path: proof/
+          retention-days: 7
+          if-no-files-found: warn
