@@ -21,7 +21,9 @@ test('native theme transition diagnostic',async({page})=>{
  await mine.click({timeout:12000,noWaitAfter:true});
  await expect(page.locator('#app')).toHaveAttribute('data-tab','mine');
  console.log('AUDIT theme controls='+JSON.stringify(await page.locator('button,[role="button"]').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).map(n=>({id:n.id,label:n.getAttribute('aria-label'),text:n.textContent.trim().slice(0,100)})).filter(n=>/테마|다크|라이트|화면 모드|theme|dark/i.test(JSON.stringify(n))))));
- const control=page.getByRole('button',{name:/다크 모드|다크모드|다크 테마|다크로 전환/}).first();
+ await page.getByRole('button',{name:/화면 테마/}).click({timeout:12000,noWaitAfter:true});
+ console.log('AUDIT theme choices='+JSON.stringify(await page.locator('button,[role="button"],[role="radio"],label').evaluateAll(nodes=>nodes.filter(n=>n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0).map(n=>({id:n.id,label:n.getAttribute('aria-label'),text:n.textContent.trim().slice(0,100)})).filter(n=>/테마|다크|라이트|dark/i.test(JSON.stringify(n))))));
+ const control=page.getByRole('button',{name:/다크|dark/i}).filter({visible:true}).first();
  console.log('AUDIT visible='+await control.isVisible());
  if(await page.locator('#app').getAttribute('data-theme')!=='dark')await control.click({timeout:12000,noWaitAfter:true});
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark',{timeout:15000});
