@@ -19,7 +19,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
@@ -41,6 +41,14 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
     const form=doc.getElementById('community-form'),input=doc.activeElement;
     const focused=Boolean(form&&!form.hidden&&input?.matches('textarea,input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"])')&&form.contains(input));
+    const composerOpen=Boolean(form&&!form.hidden&&!doc.getElementById('participation-panel')?.hidden);
+    if(composerOpen&&!composerWasOpen&&!focused){
+      // The native opening action previously scrolled the nested form past
+      // its first field. Reset only on opening, never during editing.
+      const body=doc.querySelector('#participation-panel > .dj836-sheet-body');
+      body?.scrollTo({top:0,behavior:'instant'});
+    }
+    composerWasOpen=composerOpen;
     const keypad=keyboardBounds(h,win.visualViewport,focused);
     flag('data-dj-user-editor-keyboard',Boolean(keypad));
     set('--dj-user-editor-top',keypad?keypad.top+'px':null);
