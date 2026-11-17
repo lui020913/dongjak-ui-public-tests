@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {dockBottom,keyboardBounds,shouldClearMoreTranslate,tipHudPositions} from './mobile-surface-coordinator.mjs';
+import {dockBottom,hudScaleCorrection,keyboardBounds,shouldClearMoreTranslate,tipHudPositions} from './mobile-surface-coordinator.mjs';
 test('aligns to measured dock rather than historical 70px token',()=>{
   assert.equal(dockBottom(844,756),96);
   assert.equal(dockBottom(812,724),96);
@@ -35,4 +35,14 @@ test('does not invent HUD coordinates for invalid dock geometry',()=>{
   for(const [height,top] of [[844,0],[844,-1],[844,844],[844,900],[NaN,400],[844,NaN]])assert.equal(tipHudPositions(height,top),null);
   assert.equal(tipHudPositions(844,756,0),null);
   assert.equal(tipHudPositions(844,756,36,0),null);
+});
+
+test('corrects only actual physical scale-to-TIP spacing without changing scale width',()=>{
+  assert.equal(hudScaleCorrection(2),10);
+  assert.equal(hudScaleCorrection(12),0);
+  assert.equal(hudScaleCorrection(8),0);
+  assert.equal(hudScaleCorrection(16),0);
+  assert.equal(hudScaleCorrection(20),-8);
+  assert.equal(hudScaleCorrection(-100),36);
+  assert.equal(hudScaleCorrection(NaN),0);
 });
