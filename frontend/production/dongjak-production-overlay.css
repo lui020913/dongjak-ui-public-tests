@@ -698,4 +698,10 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app:has(#dj-browser-webap
 html body #app#app#app#app#app#app#app#app#app#app#app#app #dj-user-tip-close[hidden] {
   display: none !important;
 }
+html body #app#app#app#app#app#app#app#app #app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-safety::after {
+  content: '안전지도' !important;
+}
+html body #app#app#app#app#app#app#app#app #app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-weather::after {
+  display: none !important;
+}
 }
