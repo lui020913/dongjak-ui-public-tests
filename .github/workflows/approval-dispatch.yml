@@ -42,7 +42,7 @@ jobs:
           read -r command pub css <<< "$REQUEST"
           curl -fsSL --max-time 20 'https://public-ui-rc.dongjak-walk-safety-preview.pages.dev/release-source.json' |
             jq -e --arg pub "$pub" --arg css "$css" '.public_ui_source_commit==$pub and .public_ui_overlay_sha256==$css and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"'
-          payload="$(jq -n --arg approval "$REQUEST" --arg id "$COMMENT_ID" --arg user "$COMMENT_USER" '{ref:"main",inputs:{approval:$approval,approval_comment_id:$id,approval_comment_user:$user}}')"
+          payload="$(jq -n --arg approval "$REQUEST" --arg id "$COMMENT_ID" --arg user "$COMMENT_USER" --arg pub "$pub" '{ref:"main",inputs:{approval:$approval,approval_comment_id:$id,approval_comment_user:$user,candidate_source:$pub}}')"
           curl -fsS --max-time 25 --request POST \
             -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
             -H 'Accept: application/vnd.github+json' \
