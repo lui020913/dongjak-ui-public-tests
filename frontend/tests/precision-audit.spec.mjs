@@ -80,3 +80,40 @@ test('reduced motion disables panel and sheet transitions', async ({ page }) => 
   expect(seconds.length).toBeGreaterThan(0);
   expect(Math.max(...seconds)).toBeLessThan(0.02);
 });
+
+test('mobile sheets share a flush bottom navigation anchor and centered grip', async ({ page }) => {
+  for (const width of [375, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/');
+    for (const panel of ['route', 'news']) {
+      await page.locator(`.bottom-nav [data-panel="${panel}"]`).click();
+      await expect(page.locator('#sheet')).toHaveAttribute('data-stage', 'half');
+      // Measure final geometry after the sheet height/translate transition settles.
+      await expect.poll(async () => page.evaluate(() => {
+        const sheet = document.querySelector('#sheet').getBoundingClientRect();
+        const nav = document.querySelector('.bottom-nav').getBoundingClientRect();
+        return Math.abs(sheet.bottom - nav.top);
+      }), { timeout: 5000 }).toBeLessThanOrEqual(1);
+      const geometry = await page.evaluate(() => {
+        const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
+        const sheet = rect('#sheet');
+        const nav = rect('.bottom-nav');
+        const grip = rect('.sheet-grip');
+        const gripButton = rect('.sheet-grip-button');
+        return {
+          sheetBottom: sheet.bottom, navTop: nav.top,
+          gripCenter: grip.x + grip.width / 2,
+          gripButtonCenter: gripButton.x + gripButton.width / 2,
+          gripHeight: grip.height
+        };
+      });
+      expect(Math.abs(geometry.sheetBottom - geometry.navTop)).toBeLessThanOrEqual(1);
+      expect(Math.abs(geometry.gripCenter - geometry.gripButtonCenter)).toBeLessThanOrEqual(1);
+      expect(geometry.gripHeight).toBeGreaterThanOrEqual(4);
+      await page.screenshot({
+        path: `visual-artifacts/precision/mobile-${width}-${panel}-sheet.png`,
+        animations: 'disabled'
+      });
+    }
+  }
+});
