@@ -31,12 +31,16 @@ jobs:
         run: |
           npm run check:target
           node --check tests/visual-screen-inventory.spec.mjs
+          node --check scripts/build-screen-gallery.mjs
       - name: Install Playwright
         run: npm install --no-audit --no-fund
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Capture anonymous real app screens and geometry
         run: npx playwright test tests/visual-screen-inventory.spec.mjs --project=mobile --reporter=list
+      - name: Generate browsable visual gallery
+        if: always()
+        run: node scripts/build-screen-gallery.mjs
       - name: Upload per-screen screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
