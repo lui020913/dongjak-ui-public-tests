@@ -6,6 +6,7 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/public-preview-freshness.yml'
+      - '.github/workflows/request-private-preview.yml'
   workflow_dispatch:
 
 permissions:
