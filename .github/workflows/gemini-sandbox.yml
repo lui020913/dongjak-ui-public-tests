@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/gemini-sandbox.yml'
+      - 'scripts/ai-ui-overlay.mjs'
 permissions:
   contents: read
 concurrency:
