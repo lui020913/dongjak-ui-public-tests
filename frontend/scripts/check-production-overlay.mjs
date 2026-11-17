@@ -430,6 +430,7 @@ for (const [selector, declarations] of [
     }
   ]
 ]) exactAlignment.set(selector,declarations);
+for (const [selector, declarations] of [["html body #app#app#app#app#app#app#app#app#app#app:has(#ped-tools-panel:not([hidden])) #dj-browser-webapp-tip:not([hidden])",{"visibility":"hidden !important","pointer-events":"none !important","opacity":"0 !important"}],["html body #app#app#app#app#app#app#app#app#app#app:has(#dj832-data-sheet:not([hidden])) #dj-browser-webapp-tip:not([hidden])",{"visibility":"hidden !important","pointer-events":"none !important","opacity":"0 !important"}],["html body #app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) > .dj836-sheet-body",{"scroll-behavior":"auto !important","overflow-anchor":"none !important"}]]) exactAlignment.set(selector,declarations);
 let activeMedia='';
 let activeSelector='';
 const allowedProperties=new Set([
