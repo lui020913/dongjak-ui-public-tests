@@ -12,7 +12,7 @@ concurrency:
 jobs:
   proof:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 18
     strategy:
       fail-fast: false
       matrix:
@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: '7f7b2ecbd5bf7dd6447d88cfb03060f7193225cd'
+          ref: '7c7629f1eeb135d2c05b523b0e1fea376c4b0311'
           path: candidate
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -132,10 +132,21 @@ jobs:
           }catch(e){report.error=String(e);save();throw e;}
           finally{await browser?.close();}
           JS
+      - name: Verify five screenshot-specific surfaces and More motion (390px)
+        if: ${{ !cancelled() && matrix.width == 390 }}
+        run: node tests/mobile-surface-audit-proof.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mobile-alignment-${{ matrix.width }}
           path: alignment-proof/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() && matrix.width == 390 }}
+        with:
+          name: actual-mobile-surface-proof
+          path: mobile-surface-proof/
           retention-days: 7
           if-no-files-found: warn
