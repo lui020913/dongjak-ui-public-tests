@@ -117,6 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "dispatched=false" >> "$GITHUB_OUTPUT"
           if (( GITHUB_RUN_ATTEMPT <= 1 )); then exit 0; fi
           gh auth setup-git
           base="$(git -C ui rev-parse HEAD)"
@@ -130,6 +131,9 @@ jobs:
             git -C ui checkout --detach "$candidate"
             test "$(git -C ui hash-object frontend/scripts/check-production-overlay.mjs)" = "$POLICY_BLOB"
             node ui/frontend/scripts/check-production-overlay.mjs
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$attempt/jobs" | jq -e 'any(.jobs[]; .name=="improve" and any(.steps[]; .name=="Dispatch existing full-app gate for Preview" and .conclusion=="success"))' >/dev/null; then
+              echo "dispatched=true" >> "$GITHUB_OUTPUT"
+            fi
             echo "found=true" >> "$GITHUB_OUTPUT"
             echo "source=$candidate" >> "$GITHUB_OUTPUT"
             echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -228,7 +232,7 @@ jobs:
           echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Notify progress - 전체 앱 Preview 배포 요청
-        if: ${{ success() }}
+        if: ${{ success() && steps.restore.outputs.dispatched != 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -238,6 +242,7 @@ jobs:
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Dispatch existing full-app gate for Preview
+        if: steps.restore.outputs.dispatched != 'true'
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
           GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
