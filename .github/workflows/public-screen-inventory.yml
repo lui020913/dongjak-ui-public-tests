@@ -5,6 +5,13 @@ on:
     paths:
       - 'tests/visual-screen-inventory.spec.mjs'
       - '.github/workflows/public-screen-inventory.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/visual-screen-inventory.spec.mjs'
+      - 'scripts/build-screen-gallery.mjs'
+      - 'scripts/compare-screen-inventories.mjs'
+      - '.github/workflows/public-screen-inventory.yml'
   workflow_dispatch:
   schedule:
     - cron: '15 * * * *'
@@ -44,8 +51,17 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Record exact release identity before capture
+        run: |
+          mkdir -p quality-report/screen-captures
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/release-before.json
       - name: Capture anonymous real app screens and geometry
         run: npx playwright test tests/visual-screen-inventory.spec.mjs --project=mobile --project=desktop --reporter=list
+      - name: Confirm release did not change during capture
+        if: always()
+        run: |
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/release-after.json
+          cmp quality-report/screen-captures/release-before.json quality-report/screen-captures/release-after.json
       - name: Generate browsable visual gallery
         if: always()
         run: node scripts/build-screen-gallery.mjs
