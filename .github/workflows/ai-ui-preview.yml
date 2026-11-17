@@ -1,8 +1,6 @@
 name: AI UI improvement after verified Production
 
 on:
-  issue_comment:
-    types: [created]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +13,7 @@ concurrency:
 jobs:
   improve:
     if: >-
-      github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      false && github.repository == 'lui020913/dongjak-ui-public-tests' &&
       github.actor == 'lui020913' &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'workflow_dispatch' ||
