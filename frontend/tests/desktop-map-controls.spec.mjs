@@ -44,3 +44,5 @@ for (const [name,width,height] of [
     writeFileSync('visual-artifacts/desktop-map-tools/'+name+'.json',JSON.stringify({width,height,before,after:bounds,search,header,stack:stackRect,focus},null,2));
   });
 }
+
+// CI validation trigger: public frontend PR checks.
