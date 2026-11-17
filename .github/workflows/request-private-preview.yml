@@ -89,3 +89,4 @@ jobs:
             echo '- Production deployment occurs ONLY if the private gate validates source provenance, integrated E2E, full-app Preview, and Cloudflare bindings.'
             echo '- A successful dispatch does NOT imply a successful Production deployment.'
           } >> "$GITHUB_STEP_SUMMARY"
+# Revalidate guarded Production promotion after unique release-note generator fix.
