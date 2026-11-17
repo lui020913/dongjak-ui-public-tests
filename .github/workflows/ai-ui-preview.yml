@@ -29,10 +29,10 @@ jobs:
     env:
       PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
       PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
-      SOURCE_BRANCH: public/frontend-foundation-20261117
+      SOURCE_BRANCH: automation/gemini-production-baseline
       OVERLAY: frontend/production/dongjak-production-overlay.css
       GEMINI_MODEL: gemini-3.5-flash-lite
-      POLICY_BLOB: 0d0ebb2b3010892909811e8176a10c68099307f6
+      POLICY_BLOB: cc05ed6c2331add4b04c38f334385a446f573ad9
     steps:
       - uses: actions/checkout@v4
         with:
