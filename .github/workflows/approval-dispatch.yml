@@ -15,7 +15,7 @@ jobs:
           REQUEST: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
           COMMENT_USER: ${{ github.event.comment.user.login }}
-          PREVIEW_SOURCE_SHA: e8273b01ab558c393b456ec5e516be17a87de3f5
+          PREVIEW_SOURCE_SHA: 08cd97200c75bb9e21db8a864ea894543125753b
           PRIVATE_PREVIEW_DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
         shell: bash
         run: |
