@@ -168,29 +168,13 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
     const tip=doc.getElementById('dj840-map-tip');
     if(tip&&visible(tip)&&visible(scale)&&dock!==null){
-      const scaleRect=scale.getBoundingClientRect();
-      const positions=tipHudPositions(h,n.top,36,Math.max(18,scaleRect.height||36),12);
-      if(positions){
-        // Keep the true MapLibre distance scale on its own row above the TIP.
-        important(scale,'position','fixed');important(scale,'top',positions.scaleTop+'px');
-        important(scale,'bottom','auto');important(scale,'left','18px');important(scale,'right','auto');
-        important(scale,'z-index','2780');
-        important(tip,'position','fixed');important(tip,'top',positions.tipTop+'px');
-        important(tip,'bottom','auto');important(tip,'left','12px');important(tip,'right','12px');
-        important(tip,'width','auto');important(tip,'max-width','none');
-        important(tip,'height','36px');important(tip,'min-height','36px');important(tip,'max-height','36px');
-        important(tip,'box-sizing','border-box');
-        // The native MapLibre docking controller also writes scale coordinates.
-        // Correct only the measured presentation gap; never alter physical scale width.
-        const actualGap=tip.getBoundingClientRect().top-scale.getBoundingClientRect().bottom;
-        const adjustment=hudScaleCorrection(actualGap);
-        if(adjustment){
-          const previous=Number(scale.dataset.djUserHudOffset||0);
-          const next=Math.max(-60,Math.min(60,previous+adjustment));
-          if(next!==previous){scale.dataset.djUserHudOffset=String(next);important(scale,'translate',`0px ${-next}px`);schedule();}
-        }
+      const tipRect=tip.getBoundingClientRect();
+      if(tipRect.height>0){
+        // Native scale docking owns both rows. This module only positions the
+        // dismiss button against the actual TIP rectangle, never competing
+        // for scale/TIP coordinates or altering the measured distance.
         const close=ensureTipClose();close.hidden=false;
-        important(close,'position','fixed');important(close,'top',positions.tipTop+'px');
+        important(close,'position','fixed');important(close,'top',Math.round(tipRect.top+1)+'px');
         important(close,'right','19px');important(close,'left','auto');
         important(close,'width','34px');important(close,'height','34px');
         important(close,'z-index','2891');
