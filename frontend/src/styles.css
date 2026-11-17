@@ -33,6 +33,8 @@ svg{width:20px;height:20px;flex:none}
 .top-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-width:140px}
 .preview-label{color:var(--accent);font-size:10px;letter-spacing:.13em;font-weight:800;border:1px solid var(--line);background:var(--accent-soft);padding:8px 10px;border-radius:10px;white-space:nowrap}
 .circle-btn{display:grid;place-items:center;width:39px;height:39px;border:1px solid var(--line);color:var(--ink);background:var(--surface);border-radius:13px}
+/* Keep panel close controls at the 44px project hit-target minimum on desktop and tablet. */
+.workspace-head .panel-close{width:44px;height:44px;flex:none}
 .circle-btn:hover,.tool-btn:hover,.rail-item:hover{background:var(--accent-soft);color:var(--accent)}
 .side-rail{position:absolute;top:106px;bottom:25px;left:20px;z-index:10;display:flex;flex-direction:column;gap:8px;width:76px;padding:10px 7px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
 .rail-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:68px;width:100%;padding:8px 3px;border:0;border-radius:14px;background:transparent;color:var(--muted);font-size:calc(10px * var(--font-multiplier));font-weight:700;line-height:1.2}
