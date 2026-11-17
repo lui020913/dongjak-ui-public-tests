@@ -88,7 +88,7 @@ for(const [index,raw] of source.split(/\r?\n/).entries()){
     if(depth===0){mediaDepth=0;activeMedia='';}
     continue;
   }
-  const match=/^([a-z-]+): ([^;{}]+);$/.exec(line);
+  const match=/^(--dj890-dock-gap|[a-z-]+): ([^;{}]+);$/.exec(line);
   if(!match || depth<(mediaDepth?2:1))throw Error('Malformed or unscoped declaration at line '+(index+1));
   const property=match[1],value=match[2];
   if(exactAlignment.has(activeSelector)){
