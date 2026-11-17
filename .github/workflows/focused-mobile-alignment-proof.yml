@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: '97b438fd7637d3b79b6e6bce2bd23d5670c5d02d'
+          ref: '7f7b2ecbd5bf7dd6447d88cfb03060f7193225cd'
           path: candidate
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -31,6 +31,7 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: node candidate/frontend/scripts/check-production-overlay.mjs
+      - run: node --test candidate/frontend/production/mobile-surface-coordinator.test.mjs
       - run: npx playwright install --with-deps chromium
       - name: Compare actual app gaps and native menu alignment
         env:
@@ -47,7 +48,8 @@ jobs:
           const at=full.indexOf('/* Mobile alignment:');
           if(at<0)throw Error('Missing alignment delta');
           const css=full.slice(at);
-          const report={mode:'real app with temporary browser-only CSS; not deployed Preview',width,height,screens:[]};
+          const coordinator=readFileSync('candidate/frontend/production/mobile-surface-coordinator.mjs','utf8');
+          const report={mode:'real app with temporary browser-only CSS and reviewed candidate presentation module; not deployed Preview',width,height,screens:[]};
           const save=()=>writeFileSync('alignment-proof/comparison.json',JSON.stringify(report,null,2));
           const marker=async()=>{
             const r=await fetch(site+'/release-source.json?audit='+Date.now(),{signal:AbortSignal.timeout(20000),cache:'no-store'});
@@ -85,6 +87,7 @@ jobs:
                   const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {x:r.x,y:r.y,w:r.width,h:r.height,right:r.right,bottom:r.bottom,writingMode:s.writingMode,whiteSpace:s.whiteSpace,wordBreak:s.wordBreak,overflowWrap:s.overflowWrap,display:s.display}};
                   const panel=rect(p),dock=rect(nav);
                   return {panel,dock,gap:dock.y-panel.bottom,dockToken:getComputedStyle(app).getPropertyValue('--dj890-dock-gap').trim(),
+                    measuredDockBottom:getComputedStyle(app).getPropertyValue('--dj-user-dock-bottom').trim(),
                     expanded:p.classList.contains('dj871-sheet-expanded'),docWidth:document.documentElement.scrollWidth,viewport:innerWidth,
                     rows:[...p.querySelectorAll('.dj834-settings-group > button')].filter(e=>e.getBoundingClientRect().height>0).map(e=>({action:e.dataset.dj834Action,row:rect(e),icon:rect(e.querySelector('.dj834-setting-icon')),label:rect(e.querySelector('span:nth-child(2)')),chevron:rect(e.querySelector('.dj834-chevron')),text:e.querySelector('span:nth-child(2)')?.textContent})),
                     actions:[...p.querySelectorAll('.route-select-actions > button')].filter(e=>e.getBoundingClientRect().height>0).map(e=>({id:e.id,rect:rect(e),text:e.textContent,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth})),
@@ -98,12 +101,14 @@ jobs:
                 };
                 entry.before=await measure();save();await shot(tab+'-before.png');
                 injected=await page.addStyleTag({content:css});
+                await page.addScriptTag({type:'module',content:coordinator+'\nwindow.__djProofDispose=installMobileSurfaceCoordinator(document,window);'});
+                await page.waitForFunction(()=>document.getElementById('app').dataset.djUserSurfaceReady==='1',{timeout:15000});
                 await page.waitForTimeout(850);
                 entry.after=await measure();save();await shot(tab+'-after.png');
                 const a=entry.after;
                 if(a.expanded)throw Error('Expected resting sheet');
                 if(a.docWidth>a.viewport+1)throw Error('Horizontal overflow');
-                if(a.dockToken!=='8px')throw Error('Dock token did not apply');
+                if(!a.measuredDockBottom.endsWith('px'))throw Error('Measured dock reference did not apply');
                 if(tab==='mine'){
                   if(a.rows.length<4||a.rows.some(r=>!r.chevron||!r.label||r.label.w<40||r.label.writingMode!=='horizontal-tb'))throw Error('Missing or collapsed label');
                   const insets=a.rows.map(r=>r.row.right-r.chevron.right);
@@ -115,7 +120,7 @@ jobs:
                 }
                 entry.status='measured';
               }catch(e){entry.status='failed';entry.error=String(e).slice(0,1500);}
-              finally{if(injected)await injected.evaluate(e=>e.remove()).catch(()=>{});save();}
+              finally{await page.evaluate(()=>{window.__djProofDispose?.();delete window.__djProofDispose;}).catch(()=>{});if(injected)await injected.evaluate(e=>e.remove()).catch(()=>{});save();}
             }
             const measured=report.screens.filter(s=>s.status==='measured');
             report.gaps=measured.map(s=>({tab:s.tab,before:s.before.gap,after:s.after.gap}));
