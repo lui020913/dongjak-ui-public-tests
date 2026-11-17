@@ -8,7 +8,10 @@ const viewports = [
   { name: 'mobile-390', width: 390, height: 844 },
   { name: 'mobile-430', width: 430, height: 932 },
   { name: 'tablet-768', width: 768, height: 1024 },
-  { name: 'desktop-1440', width: 1440, height: 900 }
+  { name: 'tablet-1024', width: 1024, height: 768 },
+  { name: 'desktop-1280', width: 1280, height: 800 },
+  { name: 'desktop-1440', width: 1440, height: 900 },
+  { name: 'desktop-1920', width: 1920, height: 1080 }
 ];
 const tabs = [
   ['route', 'route-panel'], ['participate', 'participation-panel'],
@@ -29,7 +32,8 @@ async function dismissTour(page) {
 }
 
 for (const viewport of viewports) {
-  test('anonymous deployed screen audit: ' + viewport.name, async ({ page }) => {
+  test('anonymous deployed screen audit: ' + viewport.name, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== (viewport.width < 700 ? 'mobile' : 'desktop'));
     test.setTimeout(180000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -57,7 +61,7 @@ for (const viewport of viewports) {
         }
       }
       await page.waitForTimeout(550);
-      const metrics = await page.evaluate(() => {
+      const metrics = await page.evaluate((panelId) => {
         const rect = el => {
           if (!el) return null;
           const r = el.getBoundingClientRect();
@@ -65,16 +69,16 @@ for (const viewport of viewports) {
         };
         const visible = el => el && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0;
         const nav = document.querySelector('#bottom-nav');
-        const target = document.getElementById('route-panel') || document.getElementById('map');
+        const target = document.getElementById(panelId);
         return {
           documentWidth: document.documentElement.scrollWidth,
           viewportWidth: innerWidth,
           nav: rect(nav),
-          panel: rect(document.getElementById('route-panel') && visible(document.getElementById('route-panel')) ? document.getElementById('route-panel') : target),
+          panel: visible(target) ? rect(target) : null,
           activeTab: document.querySelector('#app')?.getAttribute('data-tab'),
           visibleDialogCount: [...document.querySelectorAll('[role="dialog"]')].filter(visible).length
         };
-      });
+      }, panel);
       const file = viewport.name + '-' + tab + '.png';
       await page.screenshot({ path: output + '/' + file, fullPage: false, animations: 'disabled' });
       report.screens.push({ tab, status: 'captured', file, metrics });
