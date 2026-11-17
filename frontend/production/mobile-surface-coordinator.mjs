@@ -177,5 +177,5 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();resize?.disconnect();tipClose?.remove();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
+  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();resize?.disconnect();tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
 }
