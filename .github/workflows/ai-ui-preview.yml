@@ -1,7 +1,9 @@
-name: Disabled paid AI UI workflow (manual only)
+name: Gemini UI improvement after approved Production
 
 on:
   workflow_dispatch:
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -13,8 +15,7 @@ concurrency:
 jobs:
   improve:
     if: >-
-      false &&
-      false && github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      github.repository == 'lui020913/dongjak-ui-public-tests' &&
       github.actor == 'lui020913' &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'workflow_dispatch' ||
@@ -30,6 +31,7 @@ jobs:
       PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
       SOURCE_BRANCH: public/frontend-foundation-20261117
       OVERLAY: frontend/production/dongjak-production-overlay.css
+      GEMINI_MODEL: gemini-2.5-flash-lite
       POLICY_BLOB: 0d0ebb2b3010892909811e8176a10c68099307f6
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +49,11 @@ jobs:
       - name: Verify approval and live release before generating a change
         env:
           APPROVAL: ${{ github.event.comment.body }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "$OPENAI_API_KEY" || { echo "::error::Configure the OPENAI_API_KEY Actions secret."; exit 1; }
+          test -n "$GEMINI_API_KEY" || { echo "::error::Configure the GEMINI_API_KEY Actions secret."; exit 1; }
           test -n "$GH_TOKEN" || { echo "::error::Missing existing Preview dispatch secret."; exit 1; }
           local_css="$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)"
           nonce() { date +%s; }
@@ -83,7 +85,7 @@ jobs:
           exit 1
       - name: Generate one design-preserving CSS adjustment
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           set -euo pipefail
           test "$(git -C ui hash-object frontend/scripts/check-production-overlay.mjs)" = "$POLICY_BLOB"
