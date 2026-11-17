@@ -38,6 +38,7 @@ for (const viewport of viewports) {
     test.setTimeout(180000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.emulateMedia({colorScheme: theme});
+    await page.addInitScript(selected => { localStorage.setItem('dongjak_safety_color_theme_v1', selected); }, theme);
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBeLessThan(400);
     await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
@@ -47,19 +48,6 @@ for (const viewport of viewports) {
     await page.screenshot({path: output + '/' + viewport.name + '-' + theme + '-startup.png', animations: 'disabled'});
     await dismissTour(page);
     const app = page.locator('#app');
-    if (await app.getAttribute('data-theme') !== theme) {
-      const toggle = page.locator('#theme-toggle');
-      if (await toggle.isVisible()) await toggle.click({noWaitAfter:true});
-      else {
-        const mine = page.locator('#bottom-nav .nav-tab[data-tab="mine"]');
-        if (await mine.isVisible()) {
-          await mine.click({noWaitAfter:true});
-          if (await toggle.isVisible()) await toggle.click({noWaitAfter:true});
-          const mapTab = page.locator('#bottom-nav .nav-tab[data-tab="map"]');
-          if (await mapTab.isVisible()) await mapTab.click({noWaitAfter:true});
-        }
-      }
-    }
     await expect(app).toHaveAttribute('data-theme', theme, {timeout: 7000});
     const report = { viewport, theme, source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
@@ -71,7 +59,7 @@ for (const viewport of viewports) {
           continue;
         }
         try {
-          await control.click({ timeout: 10000 });
+          await control.click({ timeout: 10000, noWaitAfter: true });
           await expect(page.locator('#app')).toHaveAttribute('data-tab', tab, { timeout: 7000 });
         } catch (e) {
           report.screens.push({ tab, status: 'interaction-failed', reason: String(e).slice(0, 220) });
