@@ -818,6 +818,7 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
     min-height: 44px !important;
     height: 44px !important;
     max-height: 44px !important;
+      pointer-events: auto !important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form {
     padding: 1px 5px 1px 8px !important;
