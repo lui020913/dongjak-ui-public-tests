@@ -1,0 +1,22 @@
+name: Gemini API connectivity check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: github.actor == 'lui020913' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Verify model and API key without source code
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$GEMINI_API_KEY"
+          status="$(curl -sS --max-time 60 -o "$RUNNER_TEMP/gemini.json" -w '%{http_code}' -H "x-goog-api-key: $GEMINI_API_KEY" -H 'Content-Type: application/json' -d '{"contents":[{"parts":[{"text":"Reply OK"}]}],"generationConfig":{"maxOutputTokens":32}}' 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent')"
+          echo "Gemini HTTP status: $status"
+          test "$status" = 200
+          jq -e '.candidates | length > 0' "$RUNNER_TEMP/gemini.json" >/dev/null
+          echo 'Gemini connection verified; no source or deployment changed.'
