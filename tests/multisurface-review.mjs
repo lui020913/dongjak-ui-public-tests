@@ -65,6 +65,12 @@ for(const theme of ['light','dark']){
     if(!a||a.opacity!=='1'||!a.content||a.content==='none'||a.maxWidth==='0px')throw Error('Map shortcut label remains invisible: '+id);
    }
   }
+  if(name==='map'&&width>=700&&width<=1079){
+   for(const id of ['dj-about-pc','dj887-ai-quick-entry','map-quick-search-submit','weather-label','theme-toggle','dj-settings-pc']){
+    const c=last.controls.find(x=>x.id===id);
+    if(!c||c.w<43.5||c.h<43.5||!c.hit)throw Error('Tablet header target is small or obscured: '+id);
+   }
+  }
   if(name==='news'){
    const links=await page.locator('#news-panel .dongjak-news-open').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().height));
    if(links.some(h=>h<44))throw Error('News action target is too small');

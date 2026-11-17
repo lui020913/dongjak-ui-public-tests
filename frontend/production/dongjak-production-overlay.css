@@ -799,3 +799,50 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
     line-height: 1.35 !important;
   }
 }
+
+/* Tablet evidence: align 38-43px header/compass controls and remove light tiles in dark mode. */
+@media (min-width: 700px) and (max-width: 1079px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar :is(#dj-about-pc,#dj887-ai-quick-entry,#theme-toggle,#dj-settings-pc) {
+    min-width: 44px !important;
+    width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form {
+    padding: 2px 5px 2px 8px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-submit {
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #weather-label {
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .map-actions {
+    min-width: 56px !important;
+    width: 56px !important;
+    max-width: 56px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .map-actions > button {
+    min-width: 44px !important;
+    width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .map-actions > button {
+    background: var(--dj-tablet-surface,#192c2b) !important;
+    color: var(--dj-tablet-ink,#e9f8f1) !important;
+    box-shadow: none !important;
+  }
+}
