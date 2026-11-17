@@ -1,5 +1,8 @@
 name: Development progress notifications
 on:
+  repository_dispatch:
+    types: [private-development-status]
+  workflow_dispatch:
   push:
     branches: ['**']
   pull_request:
@@ -18,11 +21,17 @@ jobs:
     timeout-minutes: 5
     env:
       GH_TOKEN: ${{ github.token }}
+      PRIVATE_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
     steps:
       - name: Notify owner of development event
         run: |
           set -euo pipefail
           case "$GITHUB_EVENT_NAME" in
+            repository_dispatch|workflow_dispatch)
+              title="전체 개발 현황"
+              detail="공개·비공개 저장소 상태 갱신"
+              url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions"
+              ;;
             push)
               title="코드 수정 저장"
               detail="$(jq -r '.ref + " · " + (.after[0:7])' "$GITHUB_EVENT_PATH")"
@@ -38,7 +47,7 @@ jobs:
             workflow_run)
               if [[ "$(jq -r '.workflow_run.conclusion' "$GITHUB_EVENT_PATH")" == skipped ]]; then exit 0; fi
               if [[ "$(jq -r .action "$GITHUB_EVENT_PATH")" == in_progress ]]; then title="개발 작업 시작"; else title="개발 작업 결과"; fi
-              detail="$(jq -r '.workflow_run.name + " · " + .workflow_run.conclusion' "$GITHUB_EVENT_PATH")"
+              detail="$(jq -r '.workflow_run.name + " · " + (.workflow_run.conclusion // .workflow_run.status)' "$GITHUB_EVENT_PATH")"
               url="$(jq -r '.workflow_run.html_url' "$GITHUB_EVENT_PATH")"
               run="$(jq -r .workflow_run.id "$GITHUB_EVENT_PATH")"
               jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" --jq '[.jobs[] | (.name + " · " + (.conclusion // .status))] | join("\n")' 2>/dev/null || true)"
@@ -46,6 +55,24 @@ jobs:
               ;;
             *) exit 0 ;;
           esac
-          active="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select((.status=="in_progress" or .status=="queued" or .status=="waiting") and .name!="Development progress notifications") ] | unique_by(.id) | length' 2>/dev/null || echo '?')"
-          title="$title · 진행·대기 ${active}건"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s\n%s' "$title" "$detail" "$url")"
+          count_active() {
+            local repo="$1" token="$2" status total=0 n
+            for status in queued in_progress waiting requested pending; do
+              n="$(GH_TOKEN="$token" gh api --paginate --method GET "repos/$repo/actions/runs" -f status="$status" -f per_page=100 --jq '.workflow_runs[] | select(.name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="Notification test") | .id' | wc -l)" || return 1
+              total=$((total+n))
+            done
+            echo "$total"
+          }
+          public="$(count_active "$GITHUB_REPOSITORY" "$GH_TOKEN")" || public="?"
+          private="$(count_active lui020913/dongjak-safety-map "$PRIVATE_TOKEN" 2>/dev/null)" || private="?"
+          if [[ "$public" =~ ^[0-9]+$ && "$private" =~ ^[0-9]+$ ]]; then
+            total=$((public+private))
+            title="$title · 진행·대기 ${total}건"
+            if [[ "$total" == 0 && "$GITHUB_EVENT_NAME" =~ ^(workflow_run|repository_dispatch|workflow_dispatch)$ ]]; then
+              title="전체 개발 실행 종료 · 0건"
+              detail="$(printf '%s\n실행 중인 작업 없음. 성공·실패 및 승인 대기는 별도 확인.' "$detail")"
+            fi
+          else
+            title="$title · 통합 집계 확인 불가"
+          fi
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s\n공개 %s건 · 비공개 %s건\n%s' "$title" "$detail" "$public" "$private" "$url")"
