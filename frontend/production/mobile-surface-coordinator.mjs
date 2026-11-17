@@ -139,7 +139,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     queued=0;if(disposed)return;
     observeMore();observeTip();
     ensureMapOptions();
-    if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
+    if(!media.matches){if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}scaleObserver?.disconnect();scaleObserver=null;set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
     const query=doc.getElementById('map-quick-search-query');
     if(query&&query.placeholder!=='어디로 가시나요?')query.placeholder='어디로 가시나요?';
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
