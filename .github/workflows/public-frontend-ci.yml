@@ -1,5 +1,16 @@
 name: Public frontend UI workbench CI (NO DEPLOY)
 on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: Development-only device group (all for full public regression)
+        type: choice
+        options: [all, mobile, tablet, desktop, shared]
+        default: all
+      viewport:
+        description: Optional test title width filter, e.g. 390 or 1440
+        type: string
+        required: false
   push:
     branches:
       - 'public/frontend-*'
@@ -24,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        device: [mobile, tablet, desktop, shared]
+        device: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.device != 'all' && format('["{0}"]', inputs.device) || '["mobile","tablet","desktop","shared"]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
@@ -48,14 +59,24 @@ jobs:
       - name: Run responsive and interaction tests
         env:
           DEVICE_GROUP: ${{ matrix.device }}
+          VIEWPORT_FILTER: ${{ inputs.viewport }}
         run: |
+          set -euo pipefail
+          args=()
+          if [[ -n "$VIEWPORT_FILTER" ]]; then
+            [[ "$VIEWPORT_FILTER" =~ ^[0-9]{3,4}$ ]] || { echo "Invalid viewport"; exit 1; }
+          fi
           case "$DEVICE_GROUP" in
-            mobile)  npx playwright test --grep 'mobile' ;;
-            tablet)  npx playwright test --grep 'tablet' ;;
-            desktop) npx playwright test --grep 'desktop|pc-' ;;
-            shared)  npx playwright test --grep-invert 'mobile|tablet|desktop|pc-' ;;
+            mobile)  pattern='mobile' ;;
+            tablet)  pattern='tablet' ;;
+            desktop) pattern='desktop|pc-' ;;
+            shared)  pattern='mobile|tablet|desktop|pc-'; args+=(--grep-invert "$pattern"); pattern='.*' ;;
             *) exit 1 ;;
           esac
+          if [[ -n "$VIEWPORT_FILTER" ]]; then
+            pattern="(?=.*($pattern))(?=.*$VIEWPORT_FILTER)"
+          fi
+          npx playwright test --grep "$pattern" "${args[@]}"
       - name: Save anonymous UI screenshots
         if: always()
         uses: actions/upload-artifact@v4
