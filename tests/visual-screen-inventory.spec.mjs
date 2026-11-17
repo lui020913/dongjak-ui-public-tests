@@ -32,7 +32,8 @@ async function dismissTour(page) {
 }
 
 for (const viewport of viewports) {
-  test('anonymous deployed screen audit: ' + viewport.name, async ({ page }, testInfo) => {
+ for (const theme of ['light', 'dark']) {
+  test('anonymous deployed screen audit: ' + viewport.name + ' / ' + theme, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== (viewport.width < 700 ? 'mobile' : 'desktop'));
     test.setTimeout(180000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -43,7 +44,13 @@ for (const viewport of viewports) {
     if (await startup.count()) await expect(startup).toBeHidden({ timeout: 30000 });
     await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state', /^(signed-out|signed-in)$/, { timeout: 30000 });
     await dismissTour(page);
-    const report = { viewport, source: page.url(), captured_at: new Date().toISOString(), screens: [] };
+    const app = page.locator('#app');
+    if (await app.getAttribute('data-theme') !== theme) {
+      const toggle = page.locator('#theme-toggle');
+      if (await toggle.isVisible()) await toggle.click();
+    }
+    await expect(app).toHaveAttribute('data-theme', theme, {timeout: 7000});
+    const report = { viewport, theme, source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
       await dismissTour(page);
       if (tab !== 'initial-map') {
@@ -79,11 +86,12 @@ for (const viewport of viewports) {
           visibleDialogCount: [...document.querySelectorAll('[role="dialog"]')].filter(visible).length
         };
       }, panel);
-      const file = viewport.name + '-' + tab + '.png';
+      const file = viewport.name + '-' + theme + '-' + tab + '.png';
       await page.screenshot({ path: output + '/' + file, fullPage: false, animations: 'disabled' });
       report.screens.push({ tab, status: 'captured', file, metrics });
     }
-    writeFileSync(output + '/' + viewport.name + '.json', JSON.stringify(report, null, 2));
+    writeFileSync(output + '/' + viewport.name + '-' + theme + '.json', JSON.stringify(report, null, 2));
     expect(report.screens.some(s => s.status === 'captured')).toBe(true);
   });
+}
 }
