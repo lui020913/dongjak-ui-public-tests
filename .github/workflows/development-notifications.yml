@@ -1,0 +1,51 @@
+name: Development progress notifications
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    types: [opened, closed]
+  workflow_run:
+    workflows: ['*']
+    types: [in_progress, completed]
+permissions:
+  issues: write
+  contents: read
+  actions: read
+jobs:
+  notify:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Notify owner of development event
+        run: |
+          set -euo pipefail
+          case "$GITHUB_EVENT_NAME" in
+            push)
+              title="코드 수정 저장"
+              detail="$(jq -r '.ref + " · " + (.after[0:7])' "$GITHUB_EVENT_PATH")"
+              url="$(jq -r '.compare' "$GITHUB_EVENT_PATH")"
+              ;;
+            pull_request)
+              if jq -e '.action=="closed" and .pull_request.merged==true' "$GITHUB_EVENT_PATH" >/dev/null; then title="PR 병합 완료"
+              elif jq -e '.action=="opened"' "$GITHUB_EVENT_PATH" >/dev/null; then title="PR 검토 시작"
+              else exit 0; fi
+              detail="$(jq -r '"#" + (.number|tostring) + " · " + .pull_request.title' "$GITHUB_EVENT_PATH")"
+              url="$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")"
+              ;;
+            workflow_run)
+              if [[ "$(jq -r '.workflow_run.conclusion' "$GITHUB_EVENT_PATH")" == skipped ]]; then exit 0; fi
+              if [[ "$(jq -r .action "$GITHUB_EVENT_PATH")" == in_progress ]]; then title="개발 작업 시작"; else title="개발 작업 결과"; fi
+              detail="$(jq -r '.workflow_run.name + " · " + .workflow_run.conclusion' "$GITHUB_EVENT_PATH")"
+              url="$(jq -r '.workflow_run.html_url' "$GITHUB_EVENT_PATH")"
+              run="$(jq -r .workflow_run.id "$GITHUB_EVENT_PATH")"
+              jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" --jq '[.jobs[] | (.name + " · " + (.conclusion // .status))] | join("\n")' 2>/dev/null || true)"
+              if [[ -n "$jobs" ]]; then detail="$(printf '%s\n%s' "$detail" "$jobs")"; fi
+              ;;
+            *) exit 0 ;;
+          esac
+          active="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select((.status=="in_progress" or .status=="queued" or .status=="waiting") and .name!="Development progress notifications") ] | unique_by(.id) | length' 2>/dev/null || echo '?')"
+          title="$title · 진행·대기 ${active}건"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s\n%s' "$title" "$detail" "$url")"
