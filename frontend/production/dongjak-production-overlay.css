@@ -685,12 +685,12 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #dj-user-tip-close {
   font-size: 23px !important;
   z-index: 2891 !important;
 }
-html body #app#app#app#app#app#app#app#app#app#app#app#app [data-dj-user-tip-dismissed="true"] :is(#dj840-map-tip,#dj-user-tip-close) {
+html body #app#app#app#app#app#app#app#app#app#app#app#app[data-dj-user-tip-dismissed="true"] :is(#dj840-map-tip,#dj-user-tip-close) {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
-html body #app#app#app#app#app#app#app#app#app#app#app#app :has(#dj-browser-webapp-tip:not([hidden])) #dj-user-tip-close {
+html body #app#app#app#app#app#app#app#app#app#app#app#app:has(#dj-browser-webapp-tip:not([hidden])) #dj-user-tip-close {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
