@@ -444,6 +444,8 @@ for(const [selector,source] of mapHomeRules){
   exactAlignment.set(selector,declarations);
 }
 exactAlignment.set("html body #app#app#app#app#app#app#app#app#app#app#app#app #dj-user-tip-close[hidden]",{display:'none !important'});
+exactAlignment.set("html body #app#app#app#app#app#app#app#app #app[data-tab=\"map\"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-safety::after",{"content":"'안전지도' !important"});
+exactAlignment.set("html body #app#app#app#app#app#app#app#app #app[data-tab=\"map\"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-weather::after",{"display":"none !important"});
 let activeMedia='';
 let activeSelector='';
 const allowedProperties=new Set([
