@@ -513,6 +513,8 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar {
   left: 12px !important;
   right: 12px !important;
   height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
   display: flex !important;
   align-items: center !important;
   gap: 5px !important;
@@ -524,6 +526,8 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
   flex: 1 1 auto !important;
   min-width: 0 !important;
   height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
   align-items: center !important;
   gap: 4px !important;
   overflow-x: auto !important;
@@ -534,7 +538,11 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
   display: flex !important;
   flex: 0 0 48px !important;
   width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
   height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
@@ -591,7 +599,11 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
   display: flex !important;
   flex: 0 0 56px !important;
   width: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
   height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
