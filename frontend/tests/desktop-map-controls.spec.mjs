@@ -45,4 +45,4 @@ for (const [name,width,height] of [
   });
 }
 
-// CI validation trigger: public frontend PR checks.
+// Public frontend CI validates this desktop regression at three viewport widths.
