@@ -77,3 +77,101 @@ html body #app [role="button"]:focus-visible {
 }
 
 /* DONGJAK_UI_MOTION {"duration":320,"expand":65,"collapse":55,"dismiss":105} */
+
+/* Mobile sheet redesign candidate: common fixed header, independently scrolling body, route result hierarchy. */
+@media (max-width: 699px) {
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj-sheet-chrome {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 68px !important;
+    max-height: none !important;
+    padding: 20px 14px 4px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj-sheet-chrome {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 68px !important;
+    max-height: none !important;
+    padding: 20px 14px 4px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj-sheet-chrome {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 68px !important;
+    max-height: none !important;
+    padding: 20px 14px 4px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj-sheet-chrome {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 68px !important;
+    max-height: none !important;
+    padding: 20px 14px 4px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body {
+    padding: 8px 14px 24px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj836-sheet-body {
+    padding: 8px 14px 24px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj836-sheet-body {
+    padding: 8px 14px 24px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj836-sheet-body {
+    padding: 8px 14px 24px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-card {
+    padding: 10px 8px !important;
+    gap: 5px !important;
+    border-radius: 12px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-metrics {
+    justify-content: space-between !important;
+    gap: 4px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* DONGJAK_UI_ROUTE_CAMERA {"bottomMargin":20} */
+/* DONGJAK_UI_MARKUP {"routeActions":["guide","edit","close"],"routeMetricsFirst":true} */
