@@ -1,0 +1,44 @@
+name: Public frontend PR validation
+on:
+  pull_request:
+    branches:
+      - public/frontend-foundation-20261117
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/public-frontend-pr.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Static and safety checks
+        run: npm run check
+      - name: Production build
+        run: npm run build
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Playwright regression suite
+        run: npm run test:e2e
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-ui-playwright-${{ github.run_id }}
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            frontend/visual-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
