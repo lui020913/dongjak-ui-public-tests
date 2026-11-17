@@ -68,7 +68,7 @@ for (const [selector, declarations] of [
     }
   ],
   [
-    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel:not([hidden]):not(.dj871-sheet-expanded)",
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel#participation-panel.page-panel:not([hidden]):not(.dj871-sheet-expanded)",
     {
       "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
       "margin-bottom": "0 !important"
