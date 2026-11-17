@@ -3,6 +3,8 @@ on:
   repository_dispatch:
     types: [private-development-status]
   workflow_dispatch:
+  issue_comment:
+    types: [created]
   workflow_run:
     workflows: ['*']
     types: [in_progress, completed]
@@ -15,7 +17,7 @@ permissions:
   actions: read
 jobs:
   notify:
-    if: github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller'))
+    if: (github.event_name != 'issue_comment' || (github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && github.event.comment.body == '통합 알림 테스트')) && github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller'))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
@@ -26,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$GITHUB_EVENT_NAME" in
-            repository_dispatch|workflow_dispatch)
+            repository_dispatch|workflow_dispatch|issue_comment)
               title="전체 개발 현황"
               detail="공개·비공개 저장소 상태 갱신"
               url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions"
@@ -67,7 +69,7 @@ jobs:
           if [[ "$public" =~ ^[0-9]+$ && "$private" =~ ^[0-9]+$ ]]; then
             total=$((public+private))
             title="$title · 진행·대기 ${total}건"
-            if [[ "$total" == 0 && "$GITHUB_EVENT_NAME" =~ ^(workflow_run|repository_dispatch|workflow_dispatch)$ ]]; then
+            if [[ "$total" == 0 && "$GITHUB_EVENT_NAME" =~ ^(workflow_run|repository_dispatch|workflow_dispatch|issue_comment)$ ]]; then
               title="전체 개발 실행 종료 · 0건"
               detail="$(printf '%s\n실행 중인 작업 없음. 성공·실패 및 승인 대기는 별도 확인.' "$detail")"
             fi
@@ -84,7 +86,7 @@ jobs:
               GH_TOKEN="$token" gh api --method GET "repos/$repo/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select(.name!="Development progress notifications" and .name!="Private development status relay") | (.id|tostring)+":"+(.run_attempt|tostring)] | sort | join(",")' || exit 1
             done | sha256sum | cut -d' ' -f1)"
             marker="<!-- combined-idle:$fingerprint -->"
-            if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[] | select(.user.login=="github-actions[bot]") | .body' | grep -F "$marker" >/dev/null; then exit 0; fi
+            if [[ "$GITHUB_EVENT_NAME" != issue_comment ]] && gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[] | select(.user.login=="github-actions[bot]") | .body' | grep -F "$marker" >/dev/null; then exit 0; fi
             detail="$(printf '%s\n%s' "$detail" "$marker")"
           fi
           if [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
