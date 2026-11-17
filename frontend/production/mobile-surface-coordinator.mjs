@@ -8,6 +8,17 @@ export function dockBottom(layoutHeight,navTop,gap=MOBILE_GAP){
   if(!Number.isFinite(layoutHeight)||!Number.isFinite(navTop)||navTop<=0||navTop>=layoutHeight)return null;
   return Math.ceil(layoutHeight-navTop+gap);
 }
+export function tipHudPositions(layoutHeight,navTop,tipHeight=36,scaleHeight=36,gap=12){
+  if(!Number.isFinite(layoutHeight)||!Number.isFinite(navTop)||navTop<=0||navTop>=layoutHeight)return null;
+  if(!Number.isFinite(tipHeight)||!Number.isFinite(scaleHeight)||tipHeight<=0||scaleHeight<=0||!Number.isFinite(gap)||gap<0)return null;
+  const tipTop=Math.ceil(navTop-gap-tipHeight);
+  const scaleTop=Math.ceil(tipTop-gap-scaleHeight);
+  return {tipTop,scaleTop};
+}
+export function hudScaleCorrection(actualGap,target=12){
+  if(!Number.isFinite(actualGap)||!Number.isFinite(target))return 0;
+  return actualGap<8||actualGap>16?Math.max(-36,Math.min(36,target-actualGap)):0;
+}
 export function keyboardBounds(layoutHeight,view,focused){
   if(!focused||!view||Math.abs((view.scale??1)-1)>.05)return null;
   const top=Math.max(0,Number(view.offsetTop)||0),height=Number(view.height);
@@ -25,13 +36,79 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,composerWasOpen=false,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,scaleObserver=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,mapOptionsButton=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
   const flag=(name,state)=>{if(state){if(app.getAttribute(name)!=='true')app.setAttribute(name,'true');}else if(app.hasAttribute(name))app.removeAttribute(name);};
   const visible=n=>Boolean(n&&!n.hidden&&n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0&&win.getComputedStyle(n).visibility!=='hidden'&&win.getComputedStyle(n).display!=='none');
   const viewportHeight=()=>doc.documentElement.clientHeight||win.innerHeight;
+  const important=(node,prop,value)=>{
+    const next=String(value);
+    if(node.style.getPropertyValue(prop)!==next||node.style.getPropertyPriority(prop)!=='important')node.style.setProperty(prop,next,'important');
+  };
+  const ensureTipClose=()=>{
+    if(tipClose?.isConnected)return tipClose;
+    tipClose=doc.createElement('button');
+    tipClose.type='button';
+    tipClose.id='dj-user-tip-close';
+    tipClose.setAttribute('aria-label','지도 TIP 닫기');
+    tipClose.setAttribute('aria-controls','dj840-map-tip');
+    tipClose.textContent='×';
+    tipClose.addEventListener('click',event=>{
+      event.preventDefault();event.stopPropagation();
+      app.dataset.djUserTipDismissed='true';
+      tipClose.hidden=true;
+    });
+    app.appendChild(tipClose);
+    return tipClose;
+  };
+  const observeTip=()=>{
+    const found=doc.getElementById('dj840-map-tip');
+    if(found===lastTip)return;
+    tipObserver?.disconnect();lastTip=found;
+    if(found&&win.MutationObserver){
+      tipObserver=new win.MutationObserver(schedule);
+      tipObserver.observe(found,{attributes:true,attributeFilter:['style','hidden','class']});
+    }
+  };
+  const ensureMapOptions=()=>{
+    const toolbar=doc.getElementById('dj-v794-toolbar');
+    const scroller=toolbar?.querySelector(':scope > .dj831-scrollport');
+    if(!media.matches||!scroller){
+      mapOptionsButton?.remove();mapOptionsButton=null;return;
+    }
+    if(!mapOptionsButton?.isConnected){
+      mapOptionsButton=doc.createElement('button');
+      mapOptionsButton.type='button';
+      mapOptionsButton.id='dj-user-map-options';
+      mapOptionsButton.className='dj-v794-tool dj832-native';
+      mapOptionsButton.dataset.dj832Label='지도 옵션';
+      mapOptionsButton.setAttribute('aria-label','지도 옵션 열기');
+      mapOptionsButton.setAttribute('aria-controls','map-advanced-controls');
+      mapOptionsButton.innerHTML='<span class="dj-v794-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg></span>';
+      mapOptionsButton.addEventListener('click',event=>{
+        event.preventDefault();event.stopPropagation();
+        const utilities=doc.getElementById('dj-mobile-utilities');
+        if(utilities&&!utilities.hidden)doc.getElementById('dj-mobile-more-trigger')?.click();
+        const source=doc.getElementById('map-tools-toggle');
+        if(source&&!source.disabled)source.click();
+        schedule();
+      });
+    }
+    mapOptionsButton.classList.add('dj-v794-tool','dj832-native');
+    mapOptionsButton.dataset.dj832Label='지도 옵션';
+    const open=app.classList.contains('map-controls-open');
+    mapOptionsButton.dataset.active=open?'true':'false';
+    mapOptionsButton.setAttribute('aria-expanded',String(open));
+    const night=doc.getElementById('dj-v794-night');
+    const expectedNext=night?.parentElement===scroller?night.nextSibling:null;
+    // v831 rebuilds shortcut buttons immediately after the night control.
+    // Keep the proxy in the same DOM order as its visual order for keyboard use.
+    if(mapOptionsButton.parentElement!==scroller||mapOptionsButton!==expectedNext){
+      scroller.insertBefore(mapOptionsButton,expectedNext);
+    }
+  };
   const keepFieldVisible=()=>{
     const input=doc.activeElement,form=doc.getElementById('community-form'),body=doc.querySelector('#participation-panel > .dj836-sheet-body');
     if(!input||!body||!form?.contains(input)||!app.hasAttribute('data-dj-user-editor-keyboard'))return;
@@ -60,8 +137,11 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   }
   function sync(){
     queued=0;if(disposed)return;
-    observeMore();
-    if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);return;}
+    observeMore();observeTip();
+    ensureMapOptions();
+    if(!media.matches){if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}scaleObserver?.disconnect();scaleObserver=null;set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
+    const query=doc.getElementById('map-quick-search-query');
+    if(query&&query.placeholder!=='어디로 가시나요?')query.placeholder='어디로 가시나요?';
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
     const form=doc.getElementById('community-form'),input=doc.activeElement;
@@ -80,14 +160,31 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     set('--dj-user-editor-bottom',keypad?keypad.bottom+'px':null);
     if(keypad){if(delayed)win.clearTimeout(delayed);delayed=win.setTimeout(keepFieldVisible,100);}
     const scale=doc.querySelector('#map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale');
-    if(scale&&scale!==lastScale){if(lastScale)resize?.unobserve(lastScale);resize?.observe(scale);lastScale=scale;}
-    if(visible(scale)&&dock!==null){
-      const r=scale.getBoundingClientRect();
-      // Preserve the native scale width, which encodes a distance.
-      const left=Math.ceil(r.right+8);
-      set('--dj-user-tip-left',left+ 'px');
-      set('--dj-user-tip-bottom',Math.ceil(h-r.bottom)+'px');
-    }else{set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);}
+    if(scale&&scale!==lastScale){
+      scaleObserver?.disconnect();
+      if(lastScale){resize?.unobserve(lastScale);lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}
+      resize?.observe(scale);lastScale=scale;
+      if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
+    }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
+    const tip=doc.getElementById('dj840-map-tip');
+    if(tip&&visible(tip)&&visible(scale)&&dock!==null){
+      const tipRect=tip.getBoundingClientRect();
+      if(tipRect.height>0){
+        // Native scale docking owns both rows. This module only positions the
+        // dismiss button against the actual TIP rectangle, never competing
+        // for scale/TIP coordinates or altering the measured distance.
+        const close=ensureTipClose();close.hidden=false;
+        important(close,'position','fixed');important(close,'top',Math.round(tipRect.top+1)+'px');
+        important(close,'right','19px');important(close,'left','auto');
+        important(close,'width','34px');important(close,'height','34px');
+        important(close,'z-index','2891');
+        set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
+      }
+    }else{
+      if(scale&&scale.dataset.djUserHudOffset){scale.style.removeProperty('translate');delete scale.dataset.djUserHudOffset;}
+      set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
+      if(tipClose)tipClose.hidden=true;
+    }
     // The native nearby-information sheet already owns permission/error/results.
     // Do not leave a generic explanatory surface on top of it.
     const native=doc.getElementById('ped-tools-panel'),data=doc.getElementById('dj832-data-sheet');
@@ -121,5 +218,5 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();resize?.disconnect();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserSurfaceReady;};
+  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();scaleObserver?.disconnect();resize?.disconnect();if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
 }
