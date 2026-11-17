@@ -5,7 +5,8 @@ const load=dir=>{
  if(!existsSync(dir))return map;
  for(const file of readdirSync(dir).filter(x=>x.endsWith('.json'))){
   const r=JSON.parse(readFileSync(dir+'/'+file,'utf8'));
-  for(const s of r.screens||[])map.set([r.viewport.name,r.theme,s.tab].join(' / '),s);
+  if(!r.viewport || !Array.isArray(r.screens))continue;
+  for(const s of r.screens)map.set([r.viewport.name,r.theme,s.tab].join(' / '),s);
  }
  return map;
 };
