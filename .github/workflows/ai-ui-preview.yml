@@ -57,17 +57,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="운영 배포 확인 대기 (최대 약 100분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="운영 배포 확인 대기 (최대 약 100분)"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -121,17 +124,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="Gemini CSS 개선 및 검증 (최대 요청 3회) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="Gemini CSS 개선 및 검증 (최대 요청 3회)"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -156,17 +162,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="공개 프런트엔드 빌드 및 테스트 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="공개 프런트엔드 빌드 및 테스트"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -189,17 +198,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="검증된 후보 커밋 저장 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="검증된 후보 커밋 저장"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -237,17 +249,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="전체 앱 Preview 배포 요청 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="전체 앱 Preview 배포 요청"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -272,17 +287,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="Preview 검증 대기 (최대 약 45분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="Preview 검증 대기 (최대 약 45분)"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -324,17 +342,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="작업 완료 - Preview 확인 및 승인 대기 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="작업 완료 - Preview 확인 및 승인 대기"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -349,17 +370,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="작업 실패 - 실행 상세에서 실패 단계 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="작업 실패 - 실행 상세에서 실패 단계 확인"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
@@ -374,17 +398,20 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          message="작업 취소 - 실행 상세 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message" || echo "::warning::GitHub progress comment failed"
+          title="작업 취소 - 실행 상세 확인"
+          message="$title"
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
-            MESSAGE="$message" python3 - <<'PY' || echo "::warning::Email delivery failed"
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
           import os, smtplib, ssl
           from email.message import EmailMessage
           msg = EmailMessage()
-          msg["From"] = os.environ["SMTP_USER"]
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "동작구 안전지도 개발 알림"
-          msg.set_content(os.environ["MESSAGE"])
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
           with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
               smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
               smtp.send_message(msg)
