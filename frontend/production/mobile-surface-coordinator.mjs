@@ -14,12 +14,18 @@ export function keyboardBounds(layoutHeight,view,focused){
   if(!Number.isFinite(height)||height<=0||layoutHeight-height<100)return null;
   return {top:Math.ceil(top+8),bottom:Math.max(8,Math.ceil(layoutHeight-top-height+8))};
 }
+// v8.0.6 writes an inline important 9% slide during its automatic transition.
+// CSS cannot override that declaration. Limit the cleanup to this one native
+// panel, only while its automatic transition owns it; never touch drag state.
+export function shouldClearMoreTranslate({mobile,hidden,dragging,automatic,translate}){
+  return Boolean(mobile&&!hidden&&!dragging&&automatic&&translate&&translate!=='none'&&translate!=='0px 0px');
+}
 export function installMobileSurfaceCoordinator(doc=document,win=window){
   const app=doc.getElementById('app'),nav=doc.getElementById('bottom-nav');
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,composerWasOpen=false,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
@@ -34,8 +40,27 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     if(r.bottom>max)body.scrollTop+=r.bottom-max;
     else if(r.top<min)body.scrollTop-=min-r.top;
   };
+  const fixMoreMotion=()=>{
+    if(!lastMore)return;
+    const n=lastMore;
+    const automatic=Boolean(n.dataset.dj810Animating)||n.classList.contains('dj870-more-entering')||n.classList.contains('dj870-more-leaving');
+    if(shouldClearMoreTranslate({mobile:media.matches,hidden:n.hidden,dragging:n.classList.contains('dj-sheet-dragging')||n.classList.contains('dj833-sheet-dismissing'),automatic,translate:n.style.getPropertyValue('translate')})){
+      n.style.removeProperty('translate');
+    }
+  };
+  function observeMore(){
+    const n=doc.getElementById('dj-mobile-utilities');
+    if(n===lastMore)return;
+    moreObserver?.disconnect();lastMore=n;
+    if(n&&win.MutationObserver){
+      moreObserver=new win.MutationObserver(fixMoreMotion);
+      moreObserver.observe(n,{attributes:true,attributeFilter:['style','class','hidden','data-dj810-animating']});
+      fixMoreMotion();
+    }
+  }
   function sync(){
     queued=0;if(disposed)return;
+    observeMore();
     if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);return;}
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
@@ -96,5 +121,5 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();resize?.disconnect();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserSurfaceReady;};
+  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();resize?.disconnect();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserSurfaceReady;};
 }
