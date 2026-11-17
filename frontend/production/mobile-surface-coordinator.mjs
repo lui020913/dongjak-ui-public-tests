@@ -19,7 +19,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
@@ -47,6 +47,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     set('--dj-user-editor-bottom',keypad?keypad.bottom+'px':null);
     if(keypad){if(delayed)win.clearTimeout(delayed);delayed=win.setTimeout(keepFieldVisible,100);}
     const scale=doc.querySelector('#map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale');
+    if(scale&&scale!==lastScale){if(lastScale)resize?.unobserve(lastScale);resize?.observe(scale);lastScale=scale;}
     if(visible(scale)&&dock!==null){
       const r=scale.getBoundingClientRect();
       // Preserve the native scale width, which encodes a distance.
@@ -59,6 +60,9 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     const native=doc.getElementById('ped-tools-panel'),data=doc.getElementById('dj832-data-sheet');
     if(visible(native)&&!data?.hidden&&data?.querySelector('.dj832-sheet-title')?.textContent?.trim()==='내 주변 보행정보'){
       data.querySelector('.dj832-sheet-close')?.click();
+    }else if(visible(data)){
+      const state=data.querySelector('.dj832-state-text');
+      if(state?.textContent==='실행 요청 (결과 미확인)')state.textContent='현재 상태를 확인할 수 없습니다';
     }
     const rail=doc.getElementById('dj831-scrollport');
     if(rail&&rail!==lastRail){
