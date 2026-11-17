@@ -31,7 +31,7 @@ jobs:
       PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
       SOURCE_BRANCH: public/frontend-foundation-20261117
       OVERLAY: frontend/production/dongjak-production-overlay.css
-      GEMINI_MODEL: gemini-2.5-flash-lite
+      GEMINI_MODEL: gemini-3.5-flash-lite
       POLICY_BLOB: 0d0ebb2b3010892909811e8176a10c68099307f6
     steps:
       - uses: actions/checkout@v4
