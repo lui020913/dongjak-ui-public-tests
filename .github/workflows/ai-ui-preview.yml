@@ -1,4 +1,4 @@
-name: AI UI improvement after verified Production
+name: Disabled paid AI UI workflow (manual only)
 
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ concurrency:
 jobs:
   improve:
     if: >-
+      false &&
       false && github.repository == 'lui020913/dongjak-ui-public-tests' &&
       github.actor == 'lui020913' &&
       github.ref == 'refs/heads/main' &&
