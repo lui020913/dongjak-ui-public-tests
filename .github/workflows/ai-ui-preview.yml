@@ -47,9 +47,7 @@ jobs:
           estimate="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/ai-ui-preview.yml/runs" -f status=success -f per_page=15 --jq '[.workflow_runs[] | select(.id != '"$GITHUB_RUN_ID"' and .run_started_at != null and .updated_at != null) | ((.updated_at|fromdateiso8601)-(.run_started_at|fromdateiso8601)) | select(. > 0)] | sort | if length >= 3 then .[(length/2|floor)]/60|ceil else empty end' 2>/dev/null || true)"
           if [[ "$estimate" =~ ^[0-9]+$ ]]; then title="개발 시작 · 약 ${estimate}분"; message="자동 UI 개선을 시작했습니다. 최근 성공 기록 기준 예상 소요: 약 ${estimate}분 (승인 대기 및 환경에 따라 달라질 수 있음)."; fi
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -72,9 +70,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="운영 확인 중"
           message="운영 배포 확인 대기 (최대 약 100분)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Verify approval and live release before generating a change
         env:
           APPROVAL: ${{ github.event.comment.body }}
@@ -114,8 +110,34 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           done
           echo "::error::Production has not deployed the exact current overlay. Keep the existing candidate."
           exit 1
+      - name: Restore tested candidate from earlier attempt
+        id: restore
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          if (( GITHUB_RUN_ATTEMPT <= 1 )); then exit 0; fi
+          gh auth setup-git
+          base="$(git -C ui rev-parse HEAD)"
+          for ((attempt=GITHUB_RUN_ATTEMPT-1; attempt>=1; attempt--)); do
+            branch="$SOURCE_BRANCH-$GITHUB_RUN_ID-$attempt"
+            if ! git -C ui ls-remote --exit-code --heads origin "$branch" >/dev/null; then continue; fi
+            git -C ui fetch origin "refs/heads/$branch"
+            candidate="$(git -C ui rev-parse FETCH_HEAD)"
+            test "$(git -C ui rev-parse "$candidate^")" = "$base"
+            test "$(git -C ui diff --name-only "$base" "$candidate")" = "$OVERLAY"
+            git -C ui checkout --detach "$candidate"
+            test "$(git -C ui hash-object frontend/scripts/check-production-overlay.mjs)" = "$POLICY_BLOB"
+            node ui/frontend/scripts/check-production-overlay.mjs
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "source=$candidate" >> "$GITHUB_OUTPUT"
+            echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+            gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 · 검증된 수정 코드 복원 완료" || true
+            exit 0
+          done
       - name: Notify progress - Gemini CSS 개선 및 검증 (최대 요청 3회)
-        if: ${{ success() }}
+        if: ${{ success() && steps.restore.outputs.found != 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -123,10 +145,10 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="UI 수정 중"
           message="Gemini CSS 개선 및 검증 (최대 요청 3회)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Generate one design-preserving CSS adjustment
+        if: steps.restore.outputs.found != 'true'
+        id: generate
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -137,7 +159,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           git -C ui diff --check
           test "$(git -C ui diff --name-only)" = "$OVERLAY"
       - name: Notify progress - 공개 프런트엔드 빌드 및 테스트
-        if: ${{ success() }}
+        if: ${{ success() && steps.restore.outputs.found != 'true' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -145,13 +167,20 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="자동 테스트 중"
           message="공개 프런트엔드 빌드 및 테스트"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Build and test the public frontend
+        if: steps.restore.outputs.found != 'true'
+        env:
+          RECOVERY_NOTIFY_TOKEN: ${{ github.token }}
         working-directory: ui/frontend
         run: |
-          npm install --no-audit --no-fund
+          for attempt in 1 2 3; do
+            if npm install --no-audit --no-fund; then break; fi
+            if [[ "$attempt" == 3 ]]; then exit 1; fi
+            echo "::warning::Dependency installation failed; retry $attempt/2"
+            GH_TOKEN="$RECOVERY_NOTIFY_TOKEN" gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 중 · 패키지 설치 재시도 $attempt/2" || true
+            sleep $((attempt * 15))
+          done
           npm run check
           npm run build
           npx playwright install --with-deps chromium
@@ -165,12 +194,13 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="수정 사항 저장"
           message="검증된 후보 커밋 저장"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Recheck Production and push tested CSS
         id: publish
         env:
+          RESTORED: ${{ steps.restore.outputs.found }}
+          RESTORED_SOURCE: ${{ steps.restore.outputs.source }}
+          RESTORED_CSS: ${{ steps.restore.outputs.css }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -178,6 +208,11 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
             jq -e --slurpfile prior "$RUNNER_TEMP/ui-live.json" \
               '.release_status=="DEPLOYED_PRODUCTION" and .build_run==$prior[0].build_run and
                .public_ui_overlay_sha256==$prior[0].public_ui_overlay_sha256' >/dev/null
+          if [[ "$RESTORED" == true ]]; then
+            echo "source=$RESTORED_SOURCE" >> "$GITHUB_OUTPUT"
+            echo "css=$RESTORED_CSS" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git -C ui diff --check
           test "$(git -C ui diff --name-only)" = "$OVERLAY"
           node ui/frontend/scripts/check-production-overlay.mjs
@@ -188,6 +223,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           gh auth setup-git
           candidate_branch="$SOURCE_BRANCH-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           git -C ui push origin "HEAD:refs/heads/$candidate_branch"
+          echo "Verified candidate checkpoint: $candidate_branch" >> "$GITHUB_STEP_SUMMARY"
           echo "source=$(git -C ui rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
@@ -200,9 +236,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="미리보기 배포 중"
           message="전체 앱 Preview 배포 요청"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Dispatch existing full-app gate for Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -222,9 +256,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="미리보기 검증 중"
           message="Preview 검증 대기 (최대 약 45분)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Verify the exact deployed full-app Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -261,9 +293,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="미리보기 승인 요청"
           message="작업 완료 - Preview 확인 및 승인 대기"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Notify progress - 작업 실패 - 실행 상세에서 실패 단계 확인
         if: ${{ failure() }}
         continue-on-error: true
@@ -273,9 +303,7 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="작업 실패"
           message="작업 실패 - 실행 상세에서 실패 단계 확인"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Notify progress - 작업 취소 - 실행 상세 확인
         if: ${{ cancelled() }}
         continue-on-error: true
@@ -285,6 +313,4 @@ $message · [상세 보기]($details)" || echo "::warning::GitHub progress comme
           title="작업 취소"
           message="작업 취소 - 실행 상세 확인"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 $title
-
-$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
