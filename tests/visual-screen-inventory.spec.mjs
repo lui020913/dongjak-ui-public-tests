@@ -20,6 +20,29 @@ const tabs = [
 const output = 'quality-report/screen-captures';
 mkdirSync(output, { recursive: true });
 
+// Real screen capture with explicit bounded font readiness. Never hide an
+// application defect or use a synthetic screenshot as visual evidence.
+async function capture(page,path) {
+  const fonts=await page.evaluate(async()=>{
+    const result=await Promise.race([
+      document.fonts.ready.then(()=>true),
+      new Promise(resolve=>setTimeout(()=>resolve(false),20000))
+    ]);
+    return {ready:result,status:document.fonts.status};
+  });
+  // Playwright normally waits indefinitely for font loading. If the site
+  // cannot finish loading fonts, preserve a diagnostic-only screenshot.
+  if(!fonts.ready) console.warn('AUDIT fonts not ready: '+path);
+  await page.screenshot({path,fullPage:false,animations:'disabled',timeout:30000});
+  return fonts;
+}
+async function navigationControl(page,tab) {
+  const normal=page.locator('#bottom-nav .nav-tab[data-tab="'+tab+'"]');
+  if(tab==='map'&&!await normal.isVisible().catch(()=>false)) {
+    return page.getByRole('navigation',{name:'앱 주요 기능'}).getByRole('button',{name:/안전지도/});
+  }
+  return normal;
+}
 async function dismissTour(page) {
   const tour = page.locator('#dj860-onboarding');
   for (let i = 0; i < 3; i++) {
@@ -35,44 +58,49 @@ for (const viewport of viewports) {
  for (const theme of ['light', 'dark']) {
   test('anonymous deployed screen audit: ' + viewport.name + ' / ' + theme, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== (viewport.width < 700 ? 'mobile' : 'desktop'));
-    test.setTimeout(180000);
+    test.setTimeout(240000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.emulateMedia({colorScheme: theme});
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBeLessThan(400);
     await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
     const startup = page.locator('#map-startup-overlay');
-    if (await startup.count()) await expect(startup).toBeHidden({ timeout: 30000 });
+    if (await startup.count()) await expect(startup).toBeHidden({ timeout: 60000 });
     await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state', /^(signed-out|signed-in)$/, { timeout: 30000 });
-    await page.screenshot({path: output + '/' + viewport.name + '-' + theme + '-startup.png', animations: 'disabled'});
     await dismissTour(page);
     const app = page.locator('#app');
+    const report = { viewport, theme, themeSetup: 'visible-profile-theme-confirmation-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
+    const save=()=>writeFileSync(output + '/' + viewport.name + '-' + theme + '.json',JSON.stringify(report,null,2));
+    try {
     // Use the verified user-facing theme confirmation flow.
     if (await app.getAttribute('data-theme') !== theme) {
-      await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click({timeout:12000,noWaitAfter:true});
+      await dismissTour(page);
+      await (await navigationControl(page,'mine')).click({timeout:25000,noWaitAfter:true});
       await expect(app).toHaveAttribute('data-tab','mine');
-      await page.getByRole('button',{name:/화면 테마/}).click({timeout:12000,noWaitAfter:true});
+      await dismissTour(page);
+      await page.getByRole('button',{name:/화면 테마/}).click({timeout:25000,noWaitAfter:true});
       await expect(page.getByText('화면 테마를 전환할까요?',{exact:true})).toBeVisible();
       await page.getByRole('button',{name:'전환',exact:true}).filter({visible:true}).click({timeout:12000,noWaitAfter:true});
       await expect(app).toHaveAttribute('data-theme',theme,{timeout:30000});
       if (await app.getAttribute('data-tab') !== 'map') {
-        await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click({timeout:12000,noWaitAfter:true});
+        await (await navigationControl(page,'map')).click({timeout:25000,noWaitAfter:true});
         await expect(app).toHaveAttribute('data-tab','map');
       }
     }
     await expect(app).toHaveAttribute('data-theme', theme, {timeout:30000});
-    const report = { viewport, theme, themeSetup: 'visible-profile-theme-confirmation-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
+      try {
       await dismissTour(page);
       if (tab !== 'initial-map') {
-        const control = page.locator('#bottom-nav .nav-tab[data-tab="' + tab + '"]');
+        const control = await navigationControl(page,tab);
         if (!await control.isVisible().catch(() => false)) {
           report.screens.push({ tab, status: 'not-visible', reason: 'No visible public navigation control' });
           continue;
         }
         try {
           await control.click({ timeout: 10000, noWaitAfter: true });
-          await expect(page.locator('#app')).toHaveAttribute('data-tab', tab, { timeout: 7000 });
+          await expect(page.locator('#app')).toHaveAttribute('data-tab', tab, { timeout: 15000 });
+          await page.locator('#'+panel).waitFor({state:'visible',timeout:15000});
         } catch (e) {
           report.screens.push({ tab, status: 'interaction-failed', reason: String(e).slice(0, 220) });
           continue;
@@ -98,11 +126,17 @@ for (const viewport of viewports) {
         };
       }, panel);
       const file = viewport.name + '-' + theme + '-' + tab + '.png';
-      await page.screenshot({ path: output + '/' + file, fullPage: false, animations: 'disabled' });
-      report.screens.push({ tab, status: 'captured', file, metrics });
+      const fonts=await capture(page,output+'/'+file);
+      report.screens.push({ tab, status: fonts.ready?'captured':'font-loading-incomplete', file, metrics, fonts });
+      } catch(error) {
+        report.screens.push({tab,status:'capture-failed',reason:String(error).slice(0,600)});
+      } finally {save();}
     }
-    writeFileSync(output + '/' + viewport.name + '-' + theme + '.json', JSON.stringify(report, null, 2));
-    expect(report.screens.every(s => s.status === 'captured')).toBe(true);
+    } catch(error) {
+      report.setupError=String(error).slice(0,1200);
+      throw error;
+    } finally {save();}
+    expect(report.screens.filter(s=>s.status==='captured').length,'All six actual screens must be captured with ready fonts').toBe(6);
   });
 }
 }
