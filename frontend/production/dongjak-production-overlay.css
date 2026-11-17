@@ -574,7 +574,7 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
 html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-night {
   order: 2 !important;
 }
-html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > #dj-v794-map {
+html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > #dj-user-map-options {
   order: 3 !important;
 }
 html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .dj831-scrollport > .dj832-feature[data-dj831-feature="safe-nearby"] {
