@@ -12,28 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
-      - name: Send test email
-        env:
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
-          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
-        run: |
-          python3 - <<'PY'
-          import os, smtplib, ssl
-          from email.message import EmailMessage
-          from email.utils import formataddr
-          msg = EmailMessage()
-          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
-          msg["To"] = os.environ["NOTIFY_EMAIL"]
-          msg["Subject"] = "알림 연결 완료"
-          msg.set_content("개발 알림 연결을 확인하는 테스트입니다. 실제 코드 수정이나 운영 배포는 진행하지 않았습니다.")
-          with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
-              smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
-              smtp.send_message(msg)
-          PY
-      - name: Report result
-        if: always()
+      - name: Send GitHub push test
         env:
           GH_TOKEN: ${{ github.token }}
-          RESULT: ${{ job.status }}
-        run: gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 이메일 알림 테스트 결과 - $RESULT"
+        run: gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 알림 연결 완료. 개발 진행 알림 테스트입니다."
