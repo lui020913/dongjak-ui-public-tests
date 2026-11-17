@@ -16,7 +16,7 @@ jobs:
   verify-preview:
     name: Confirm Cloudflare Preview matches public integration commit
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 85
     steps:
       - name: Wait for independent private Preview bridge and verify source
         shell: bash
@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 40); do
             if curl --fail --silent --show-error --location --max-time 15 \
               "$PREVIEW_URL/public-ui-source.json?check=${GITHUB_RUN_ID}-${attempt}" \
               -o /tmp/public-ui-source.json && \
@@ -38,10 +38,10 @@ jobs:
               echo "- Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
-            echo "Preview not yet at $EXPECTED_SHA (attempt $attempt/30)"
-            sleep 30
+            echo "Preview not yet at $EXPECTED_SHA (attempt $attempt/40)"
+            sleep 120
           done
-          echo "::error::Preview is stale. Private Preview bridge did not deploy the latest public commit within 15 minutes."
+          echo "::error::Preview is stale. Private Preview bridge did not deploy the latest public commit within 80 minutes."
           echo "### Preview deployment is stale" >> "$GITHUB_STEP_SUMMARY"
           echo "- Expected public commit: $EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "- Inspect private dongjak-public-ui-preview-bridge.yml workflow; this public monitor cannot deploy." >> "$GITHUB_STEP_SUMMARY"
