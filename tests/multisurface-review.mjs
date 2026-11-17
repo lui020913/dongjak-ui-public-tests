@@ -76,7 +76,7 @@ for(const theme of ['light','dark']){
   }
   if(name==='map'&&width>=700&&width<=1079){
    for(const id of ['dj-about-pc','dj887-ai-quick-entry','map-quick-search-submit','weather-label','theme-toggle','dj-settings-pc']){
-    const c=last.controls.find(x=>x.id===id);
+    const c=last.controls.find(x=>id==='map-quick-search-submit'?x.cls.split(' ').includes('map-quick-search-submit'):x.id===id);
     if(!c||c.w<43.5||c.h<43.5||!c.hit)throw Error('Tablet header target is small or obscured: '+id);
    }
   }
