@@ -1,4 +1,4 @@
-name: Dispatch approved full-app Preview validation
+name: Dispatch owner-requested Preview or approved Production validation
 on:
   issue_comment:
     types: [created]
@@ -10,19 +10,42 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
-      - name: Verify owner approval matches actual candidate
+      - name: Dispatch Preview-only request or verify exact owner approval
         env:
-          APPROVAL: ${{ github.event.comment.body }}
+          REQUEST: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
           COMMENT_USER: ${{ github.event.comment.user.login }}
+          PREVIEW_SOURCE_SHA: e8273b01ab558c393b456ec5e516be17a87de3f5
           PRIVATE_PREVIEW_DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$APPROVAL" =~ ^승인\ [a-f0-9]{40}\ [a-f0-9]{64}$ ]] || exit 0
-          read -r command pub css <<< "$APPROVAL"
+          test -n "$PRIVATE_PREVIEW_DISPATCH_TOKEN"
+
+          # Preview is a non-production request. It carries no approval inputs.
+          if [[ "$REQUEST" =~ ^Preview\ [a-f0-9]{40}$ ]]; then
+            read -r command pub <<< "$REQUEST"
+            test "$pub" = "$PREVIEW_SOURCE_SHA"
+            payload='{"ref":"main"}'
+            curl -fsS --max-time 25 --request POST \
+              -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              'https://api.github.com/repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches' \
+              --data "$payload"
+            echo "Preview-only dispatch submitted. Production approval inputs were omitted."
+            exit 0
+          fi
+
+          # Production is dispatched only for an exact owner approval matching the live candidate.
+          [[ "$REQUEST" =~ ^승인\ [a-f0-9]{40}\ [a-f0-9]{64}$ ]] || exit 0
+          read -r command pub css <<< "$REQUEST"
           curl -fsSL --max-time 20 'https://public-ui-rc.dongjak-walk-safety-preview.pages.dev/release-source.json' |
             jq -e --arg pub "$pub" --arg css "$css" '.public_ui_source_commit==$pub and .public_ui_overlay_sha256==$css and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"'
-          test -n "$PRIVATE_PREVIEW_DISPATCH_TOKEN"
-          payload="$(jq -n --arg approval "$APPROVAL" --arg id "$COMMENT_ID" --arg user "$COMMENT_USER" '{ref:"main",inputs:{approval:$approval,approval_comment_id:$id,approval_comment_user:$user}}')"
-          curl -fsS --max-time 25 --request POST -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' 'https://api.github.com/repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches' --data "$payload"
+          payload="$(jq -n --arg approval "$REQUEST" --arg id "$COMMENT_ID" --arg user "$COMMENT_USER" '{ref:"main",inputs:{approval:$approval,approval_comment_id:$id,approval_comment_user:$user}}')"
+          curl -fsS --max-time 25 --request POST \
+            -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            'https://api.github.com/repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches' \
+            --data "$payload"
