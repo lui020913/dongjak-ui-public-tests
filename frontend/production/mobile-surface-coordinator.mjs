@@ -15,6 +15,10 @@ export function tipHudPositions(layoutHeight,navTop,tipHeight=36,scaleHeight=36,
   const scaleTop=Math.ceil(tipTop-gap-scaleHeight);
   return {tipTop,scaleTop};
 }
+export function hudScaleCorrection(actualGap,target=12){
+  if(!Number.isFinite(actualGap)||!Number.isFinite(target))return 0;
+  return actualGap<8||actualGap>16?Math.max(-36,Math.min(36,target-actualGap)):0;
+}
 export function keyboardBounds(layoutHeight,view,focused){
   if(!focused||!view||Math.abs((view.scale??1)-1)>.05)return null;
   const top=Math.max(0,Number(view.offsetTop)||0),height=Number(view.height);
@@ -32,7 +36,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,mapOptionsButton=null,composerWasOpen=false,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,scaleObserver=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,mapOptionsButton=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
@@ -156,7 +160,12 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     set('--dj-user-editor-bottom',keypad?keypad.bottom+'px':null);
     if(keypad){if(delayed)win.clearTimeout(delayed);delayed=win.setTimeout(keepFieldVisible,100);}
     const scale=doc.querySelector('#map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale');
-    if(scale&&scale!==lastScale){if(lastScale)resize?.unobserve(lastScale);resize?.observe(scale);lastScale=scale;}
+    if(scale&&scale!==lastScale){
+      scaleObserver?.disconnect();
+      if(lastScale){resize?.unobserve(lastScale);lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}
+      resize?.observe(scale);lastScale=scale;
+      if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});}
+    }
     const tip=doc.getElementById('dj840-map-tip');
     if(tip&&visible(tip)&&visible(scale)&&dock!==null){
       const scaleRect=scale.getBoundingClientRect();
@@ -171,6 +180,15 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
         important(tip,'width','auto');important(tip,'max-width','none');
         important(tip,'height','36px');important(tip,'min-height','36px');important(tip,'max-height','36px');
         important(tip,'box-sizing','border-box');
+        // The native MapLibre docking controller also writes scale coordinates.
+        // Correct only the measured presentation gap; never alter physical scale width.
+        const actualGap=tip.getBoundingClientRect().top-scale.getBoundingClientRect().bottom;
+        const adjustment=hudScaleCorrection(actualGap);
+        if(adjustment){
+          const previous=Number(scale.dataset.djUserHudOffset||0);
+          const next=Math.max(-60,Math.min(60,previous+adjustment));
+          if(next!==previous){scale.dataset.djUserHudOffset=String(next);important(scale,'translate',`0px ${-next}px`);}
+        }
         const close=ensureTipClose();close.hidden=false;
         important(close,'position','fixed');important(close,'top',positions.tipTop+'px');
         important(close,'right','19px');important(close,'left','auto');
@@ -179,6 +197,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
         set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
       }
     }else{
+      if(scale&&scale.dataset.djUserHudOffset){scale.style.removeProperty('translate');delete scale.dataset.djUserHudOffset;}
       set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
       if(tipClose)tipClose.hidden=true;
     }
@@ -215,5 +234,5 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();resize?.disconnect();tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
+  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();scaleObserver?.disconnect();resize?.disconnect();if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
 }
