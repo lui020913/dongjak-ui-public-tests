@@ -26,10 +26,18 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/$ATTEMPT/jobs" > "$RUNNER_TEMP/jobs.json"
-          if ! jq -e 'any(.jobs[]; .name=="improve" and any(.steps[]; .name=="Recheck Production and push tested CSS" and .conclusion=="success") and any(.steps[]; .name=="Dispatch existing full-app gate for Preview" and .conclusion=="success") and any(.steps[]; .name=="Verify the exact deployed full-app Preview" and .conclusion=="failure"))' "$RUNNER_TEMP/jobs.json" >/dev/null; then
+          if ! jq -e 'any(.jobs[]; .name=="improve" and any(.steps[]; .name=="Recheck Production and push tested CSS" and .conclusion=="success") and any(.steps[]; .name=="Dispatch existing full-app gate for Preview" and (.conclusion=="success" or .conclusion=="skipped")) and any(.steps[]; .name=="Verify the exact deployed full-app Preview" and .conclusion=="failure"))' "$RUNNER_TEMP/jobs.json" >/dev/null; then
             echo "Not an eligible recovery; preserve failure for review."
             exit 0
           fi
+          dispatched=false
+          for ((i=1; i<=ATTEMPT; i++)); do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/attempts/$i/jobs" | jq -e 'any(.jobs[]; .name=="improve" and any(.steps[]; .name=="Dispatch existing full-app gate for Preview" and .conclusion=="success"))' >/dev/null; then
+              dispatched=true
+              break
+            fi
+          done
+          [[ "$dispatched" == true ]] || exit 0
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 시작 · 미리보기 확인 재시도 $ATTEMPT/2" || true
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/rerun" || {
             gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 재실행 요청 실패 · 수동 확인 필요" || true
