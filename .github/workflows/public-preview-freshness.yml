@@ -1,0 +1,48 @@
+name: Public UI Preview freshness (NO DEPLOY)
+on:
+  push:
+    branches:
+      - public/frontend-foundation-20261117
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-ui-preview-freshness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-preview:
+    name: Confirm Cloudflare Preview matches public integration commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Wait for independent private Preview bridge and verify source
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          PREVIEW_URL: https://public-ui-workbench.dongjak-walk-safety-preview.pages.dev
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --location --max-time 15 \
+              "$PREVIEW_URL/public-ui-source.json?check=${GITHUB_RUN_ID}-${attempt}" \
+              -o /tmp/public-ui-source.json && \
+              jq -e --arg sha "$EXPECTED_SHA" \
+              '.public_source_commit == $sha and .release_status == "PUBLIC_UI_WORKBENCH_PREVIEW_ONLY"' \
+              /tmp/public-ui-source.json >/dev/null; then
+              echo "### Preview is current" >> "$GITHUB_STEP_SUMMARY"
+              echo "- Public commit: $EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
+              echo "- Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Preview not yet at $EXPECTED_SHA (attempt $attempt/30)"
+            sleep 30
+          done
+          echo "::error::Preview is stale. Private Preview bridge did not deploy the latest public commit within 15 minutes."
+          echo "### Preview deployment is stale" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Expected public commit: $EXPECTED_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Inspect private dongjak-public-ui-preview-bridge.yml workflow; this public monitor cannot deploy." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
