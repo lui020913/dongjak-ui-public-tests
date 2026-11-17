@@ -48,7 +48,7 @@ jobs:
           title="개발 작업 시작"
           message="자동 UI 개선을 시작했습니다. 과거 실행 기록이 없으면 예상 시간은 표시하지 않습니다."
           estimate="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/ai-ui-preview.yml/runs" -f status=success -f per_page=15 --jq '[.workflow_runs[] | select(.id != '"$GITHUB_RUN_ID"' and .run_started_at != null and .updated_at != null) | ((.updated_at|fromdateiso8601)-(.run_started_at|fromdateiso8601)) | select(. > 0)] | sort | if length >= 3 then .[(length/2|floor)]/60|ceil else empty end' 2>/dev/null || true)"
-          if [[ "$estimate" =~ ^[0-9]+$ ]]; then message="자동 UI 개선을 시작했습니다. 최근 성공 기록 기준 예상 소요: 약 ${estimate}분 (승인 대기 및 환경에 따라 달라질 수 있음)."; fi
+          if [[ "$estimate" =~ ^[0-9]+$ ]]; then title="개발 시작 · 약 ${estimate}분"; message="자동 UI 개선을 시작했습니다. 최근 성공 기록 기준 예상 소요: 약 ${estimate}분 (승인 대기 및 환경에 따라 달라질 수 있음)."; fi
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -57,7 +57,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -88,8 +88,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="운영 배포 확인 대기 (최대 약 100분)"
-          message="$title"
+          title="운영 확인 중"
+          message="운영 배포 확인 대기 (최대 약 100분)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -98,7 +98,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -155,8 +155,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="Gemini CSS 개선 및 검증 (최대 요청 3회)"
-          message="$title"
+          title="UI 수정 중"
+          message="Gemini CSS 개선 및 검증 (최대 요청 3회)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -165,7 +165,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -193,8 +193,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="공개 프런트엔드 빌드 및 테스트"
-          message="$title"
+          title="자동 테스트 중"
+          message="공개 프런트엔드 빌드 및 테스트"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -203,7 +203,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -229,8 +229,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="검증된 후보 커밋 저장"
-          message="$title"
+          title="수정 사항 저장"
+          message="검증된 후보 커밋 저장"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -239,7 +239,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -280,8 +280,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="전체 앱 Preview 배포 요청"
-          message="$title"
+          title="미리보기 배포 중"
+          message="전체 앱 Preview 배포 요청"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -290,7 +290,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -318,8 +318,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="Preview 검증 대기 (최대 약 45분)"
-          message="$title"
+          title="미리보기 검증 중"
+          message="Preview 검증 대기 (최대 약 45분)"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -328,7 +328,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -373,8 +373,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="작업 완료 - Preview 확인 및 승인 대기"
-          message="$title"
+          title="미리보기 승인 요청"
+          message="작업 완료 - Preview 확인 및 승인 대기"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -383,7 +383,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -401,8 +401,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="작업 실패 - 실행 상세에서 실패 단계 확인"
-          message="$title"
+          title="작업 실패"
+          message="작업 실패 - 실행 상세에서 실패 단계 확인"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -411,7 +411,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
@@ -429,8 +429,8 @@ jobs:
           SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
-          title="작업 취소 - 실행 상세 확인"
-          message="$title"
+          title="작업 취소"
+          message="작업 취소 - 실행 상세 확인"
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
           if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
@@ -439,7 +439,7 @@ jobs:
           from email.message import EmailMessage
           msg = EmailMessage()
           from email.utils import formataddr
-          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["From"] = formataddr(("안전지도", os.environ["SMTP_USER"]))
           msg["To"] = os.environ["NOTIFY_EMAIL"]
           msg["Subject"] = os.environ["TITLE"]
           msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
