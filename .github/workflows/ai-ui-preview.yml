@@ -27,6 +27,7 @@ jobs:
     permissions:
       contents: write
       issues: write
+      actions: read
     env:
       PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
       PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
@@ -35,6 +36,36 @@ jobs:
       GEMINI_MODEL: gemini-3.5-flash-lite
       POLICY_BLOB: cc05ed6c2331add4b04c38f334385a446f573ad9
     steps:
+      - name: Notify progress - 개발 작업 시작
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+        run: |
+          title="개발 작업 시작"
+          message="자동 UI 개선을 시작했습니다. 과거 실행 기록이 없으면 예상 시간은 표시하지 않습니다."
+          estimate="$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/ai-ui-preview.yml/runs" -f status=success -f per_page=15 --jq '[.workflow_runs[] | select(.id != '"$GITHUB_RUN_ID"' and .run_started_at != null and .updated_at != null) | ((.updated_at|fromdateiso8601)-(.run_started_at|fromdateiso8601)) | select(. > 0)] | sort | if length >= 3 then .[(length/2|floor)]/60|ceil else empty end' 2>/dev/null || true)"
+          if [[ "$estimate" =~ ^[0-9]+$ ]]; then message="자동 UI 개선을 시작했습니다. 최근 성공 기록 기준 예상 소요: 약 ${estimate}분 (승인 대기 및 환경에 따라 달라질 수 있음)."; fi
+          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$message · [상세 보기]($details)" || echo "::warning::GitHub progress comment failed"
+          if [[ -n "$SMTP_USER" && -n "$SMTP_APP_PASSWORD" && -n "$NOTIFY_EMAIL" ]]; then
+            MESSAGE="$message" TITLE="$title" DETAILS="$details" python3 - <<'PY' || echo "::warning::Email delivery failed"
+          import os, smtplib, ssl
+          from email.message import EmailMessage
+          msg = EmailMessage()
+          from email.utils import formataddr
+          msg["From"] = formataddr(("동작구 안전지도", os.environ["SMTP_USER"]))
+          msg["To"] = os.environ["NOTIFY_EMAIL"]
+          msg["Subject"] = os.environ["TITLE"]
+          msg.set_content(os.environ["MESSAGE"] + "\n\n상세 보기: " + os.environ["DETAILS"])
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15, context=ssl.create_default_context()) as smtp:
+              smtp.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])
+              smtp.send_message(msg)
+          PY
+          fi
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
