@@ -26,7 +26,7 @@ async function dismissTour(page) {
     if (!await tour.isVisible().catch(() => false)) return;
     const skip = tour.locator('[data-dj860-action="skip"]');
     if (!await skip.isVisible().catch(() => false)) return;
-    await skip.click({ timeout: 20000 });
+    await skip.click({ timeout: 20000, noWaitAfter: true });
     await expect(tour).toBeHidden({ timeout: 7000 });
   }
 }
@@ -37,6 +37,7 @@ for (const viewport of viewports) {
     test.skip(testInfo.project.name !== (viewport.width < 700 ? 'mobile' : 'desktop'));
     test.setTimeout(180000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.emulateMedia({colorScheme: theme});
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBeLessThan(400);
     await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
@@ -48,7 +49,16 @@ for (const viewport of viewports) {
     const app = page.locator('#app');
     if (await app.getAttribute('data-theme') !== theme) {
       const toggle = page.locator('#theme-toggle');
-      if (await toggle.isVisible()) await toggle.click();
+      if (await toggle.isVisible()) await toggle.click({noWaitAfter:true});
+      else {
+        const mine = page.locator('#bottom-nav .nav-tab[data-tab="mine"]');
+        if (await mine.isVisible()) {
+          await mine.click({noWaitAfter:true});
+          if (await toggle.isVisible()) await toggle.click({noWaitAfter:true});
+          const mapTab = page.locator('#bottom-nav .nav-tab[data-tab="map"]');
+          if (await mapTab.isVisible()) await mapTab.click({noWaitAfter:true});
+        }
+      }
     }
     await expect(app).toHaveAttribute('data-theme', theme, {timeout: 7000});
     const report = { viewport, theme, source: page.url(), captured_at: new Date().toISOString(), screens: [] };
@@ -92,7 +102,7 @@ for (const viewport of viewports) {
       report.screens.push({ tab, status: 'captured', file, metrics });
     }
     writeFileSync(output + '/' + viewport.name + '-' + theme + '.json', JSON.stringify(report, null, 2));
-    expect(report.screens.some(s => s.status === 'captured')).toBe(true);
+    expect(report.screens.every(s => s.status === 'captured')).toBe(true);
   });
 }
 }
