@@ -102,7 +102,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     mapOptionsButton.dataset.active=open?'true':'false';
     mapOptionsButton.setAttribute('aria-expanded',String(open));
     const night=doc.getElementById('dj-v794-night');
-    const expectedNext=night?.nextSibling||null;
+    const expectedNext=night?.parentElement===scroller?night.nextSibling:null;
     // v831 rebuilds shortcut buttons immediately after the night control.
     // Keep the proxy in the same DOM order as its visual order for keyboard use.
     if(mapOptionsButton.parentElement!==scroller||mapOptionsButton!==expectedNext){
@@ -164,8 +164,8 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
       scaleObserver?.disconnect();
       if(lastScale){resize?.unobserve(lastScale);lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}
       resize?.observe(scale);lastScale=scale;
-      if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});}
-    }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});}
+      if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
+    }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
     const tip=doc.getElementById('dj840-map-tip');
     if(tip&&visible(tip)&&visible(scale)&&dock!==null){
       const scaleRect=scale.getBoundingClientRect();
@@ -187,7 +187,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
         if(adjustment){
           const previous=Number(scale.dataset.djUserHudOffset||0);
           const next=Math.max(-60,Math.min(60,previous+adjustment));
-          if(next!==previous){scale.dataset.djUserHudOffset=String(next);important(scale,'translate',`0px ${-next}px`);}
+          if(next!==previous){scale.dataset.djUserHudOffset=String(next);important(scale,'translate',`0px ${-next}px`);schedule();}
         }
         const close=ensureTipClose();close.hidden=false;
         important(close,'position','fixed');important(close,'top',positions.tipTop+'px');
