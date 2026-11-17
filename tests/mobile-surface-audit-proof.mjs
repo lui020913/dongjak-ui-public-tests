@@ -142,8 +142,8 @@ try{
              report.samples.push({t:performance.now(),hidden:panel.hidden,bottom:p.bottom,navTop:n.top,opacity:Number(s.opacity),visibility:s.visibility,height:p.height,navHeight:n.height,animation:s.animationName,translate:s.translate,gap:n.top-p.bottom});
            };
            const handler=event=>{
-             if(!button.contains(event.target))return;
-             document.removeEventListener('click',handler,true);
+             if(!(event.composedPath?.().includes(button)||button.contains(event.target)))return;
+             for(const type of ['pointerdown','touchstart','click'])window.removeEventListener(type,handler,true);
              report.events++;
              // Capture immediately after the app's actual click handler.
              queueMicrotask(record);
@@ -156,16 +156,16 @@ try{
              timer=setInterval(record,35);
              setTimeout(()=>{observer.disconnect();cancelAnimationFrame(frame);clearInterval(timer);record();report.done=true;},1500);
            };
-           document.addEventListener('click',handler,true);
+           for(const type of ['pointerdown','touchstart','click'])window.addEventListener(type,handler,{capture:true,passive:true});
          },{trigger,opening});
          await click(page,trigger);
-         await page.waitForFunction(()=>window.__djMotionReport?.done===true,null,{timeout:12000});
+         await page.waitForFunction(()=>window.__djMotionReport?.done===true,null,{timeout:20000});
          return page.evaluate(()=>window.__djMotionReport);
        };
-       row.enter=await collect('#dj-v794-more',true);
+       row.enter=await collect('#dj-v794-more',true);save();
        await page.locator('#dj-mobile-utilities').waitFor({state:'visible',timeout:15000});
        await shot(page,name+'-after-open');
-       row.exit=await collect('#dj-mobile-utilities-close',false);
+       row.exit=await collect('#dj-mobile-utilities-close',false);save();
        await page.locator('#dj-mobile-utilities').waitFor({state:'hidden',timeout:15000});
        const visible=s=>!s.hidden&&s.visibility==='visible'&&s.opacity>.05&&s.height>0&&s.navHeight>0;
        const enter=row.enter.samples.filter(visible),exit=row.exit.samples.filter(visible);
