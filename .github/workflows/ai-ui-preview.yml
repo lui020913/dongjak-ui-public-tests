@@ -41,6 +41,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.SOURCE_BRANCH }}
+          fetch-depth: 0
           path: ui
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -55,12 +56,10 @@ jobs:
           set -euo pipefail
           test -n "$GEMINI_API_KEY" || { echo "::error::Configure the GEMINI_API_KEY Actions secret."; exit 1; }
           test -n "$GH_TOKEN" || { echo "::error::Missing existing Preview dispatch secret."; exit 1; }
-          local_css="$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)"
           nonce() { date +%s; }
           if [[ "$GITHUB_EVENT_NAME" == issue_comment ]]; then
             [[ "$APPROVAL" =~ ^승인\ [a-f0-9]{40}\ [a-f0-9]{64}$ ]]
             read -r _ approved_source approved_css <<< "$APPROVAL"
-            [[ "$approved_css" == "$local_css" ]]
             curl -fsS --max-time 15 "$PREVIEW_URL/release-source.json?run=$GITHUB_RUN_ID" |
               jq -e --arg sha "$approved_source" --arg css "$approved_css" \
                 '.release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION" and .public_ui_source_commit==$sha and .public_ui_overlay_sha256==$css' >/dev/null
@@ -70,13 +69,17 @@ jobs:
           [[ "$GITHUB_EVENT_NAME" != issue_comment ]] || attempts=82
           for ((i=1; i<=attempts; i++)); do
             if curl -fsS --max-time 12 "$PRODUCTION_URL/release-source.json?t=$(nonce)" -o "$RUNNER_TEMP/ui-live.json" &&
-               jq -e --arg css "$local_css" --arg sha "${approved_source:-}" \
-                 '.release_status=="DEPLOYED_PRODUCTION" and .public_ui_overlay_sha256==$css and
+               jq -e --arg css "${approved_css:-}" --arg sha "${approved_source:-}" \
+                 '.release_status=="DEPLOYED_PRODUCTION" and ($css=="" or .public_ui_overlay_sha256==$css) and
                   (.build_run|tostring|test("^[0-9]+$")) and
                   ($sha=="" or .public_ui_source_commit==$sha)' "$RUNNER_TEMP/ui-live.json" >/dev/null &&
                run="$(jq -r .build_run "$RUNNER_TEMP/ui-live.json")" &&
                gh api "repos/lui020913/dongjak-safety-map/actions/runs/$run/jobs" |
                  jq -e 'any(.jobs[]; .name=="Guarded Production promotion and automatic rollback" and .conclusion=="success")' >/dev/null; then
+              source="$(jq -er '.public_ui_source_commit | select(test("^[a-f0-9]{40}$"))' "$RUNNER_TEMP/ui-live.json")"
+              git -C ui fetch origin "$source"
+              git -C ui checkout --detach "$source"
+              test "$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" = "$(jq -r .public_ui_overlay_sha256 "$RUNNER_TEMP/ui-live.json")"
               exit 0
             fi
             if ((i < attempts)); then sleep 60; fi
@@ -119,7 +122,8 @@ jobs:
           git -C ui add -- "$OVERLAY"
           git -C ui commit -m 'Improve one public UI CSS detail'
           gh auth setup-git
-          git -C ui push origin "HEAD:refs/heads/$SOURCE_BRANCH"
+          candidate_branch="$SOURCE_BRANCH-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git -C ui push origin "HEAD:refs/heads/$candidate_branch"
           echo "source=$(git -C ui rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
