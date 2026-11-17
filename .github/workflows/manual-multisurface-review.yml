@@ -1,0 +1,37 @@
+name: Manual UI multisurface review (no Gemini, no deploy)
+on:
+  push:
+    branches: [public/frontend-multisurface-refresh-20261118]
+    paths: ['tests/multisurface-review.mjs', '.github/workflows/manual-multisurface-review.yml', 'frontend/production/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: manual-multisurface-review-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  review:
+    name: Review ${{ matrix.viewport.w }}px
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [{w: 375, h: 812},{w: 390, h: 844},{w: 430, h: 932},{w: 768, h: 1024},{w: 1024, h: 768},{w: 1280, h: 800},{w: 1440, h: 900},{w: 1920, h: 1080}]
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/multisurface-review.mjs
+        env:
+          WIDTH: ${{ matrix.viewport.w }}
+          HEIGHT: ${{ matrix.viewport.h }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: multisurface-${{ matrix.viewport.w }}
+          path: multisurface-proof/
+          retention-days: 7
