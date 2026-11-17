@@ -121,6 +121,7 @@ jobs:
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Generate one design-preserving CSS adjustment
+        id: generate
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -141,12 +142,15 @@ jobs:
           details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
       - name: Build and test the public frontend
+        env:
+          RECOVERY_NOTIFY_TOKEN: ${{ github.token }}
         working-directory: ui/frontend
         run: |
           for attempt in 1 2 3; do
             if npm install --no-audit --no-fund; then break; fi
             if [[ "$attempt" == 3 ]]; then exit 1; fi
             echo "::warning::Dependency installation failed; retry $attempt/2"
+            GH_TOKEN="$RECOVERY_NOTIFY_TOKEN" gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 중 · 패키지 설치 재시도 $attempt/2" || true
             sleep $((attempt * 15))
           done
           npm run check
