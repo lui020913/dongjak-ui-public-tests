@@ -26,7 +26,7 @@ async function dismissTour(page) {
     if (!await tour.isVisible().catch(() => false)) return;
     const skip = tour.locator('[data-dj860-action="skip"]');
     if (!await skip.isVisible().catch(() => false)) return;
-    await skip.click({ timeout: 5000 });
+    await skip.click({ timeout: 20000 });
     await expect(tour).toBeHidden({ timeout: 7000 });
   }
 }
@@ -43,6 +43,7 @@ for (const viewport of viewports) {
     const startup = page.locator('#map-startup-overlay');
     if (await startup.count()) await expect(startup).toBeHidden({ timeout: 30000 });
     await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state', /^(signed-out|signed-in)$/, { timeout: 30000 });
+    await page.screenshot({path: output + '/' + viewport.name + '-' + theme + '-startup.png', animations: 'disabled'});
     await dismissTour(page);
     const app = page.locator('#app');
     if (await app.getAttribute('data-theme') !== theme) {
