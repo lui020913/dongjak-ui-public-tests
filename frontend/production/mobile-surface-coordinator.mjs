@@ -8,6 +8,13 @@ export function dockBottom(layoutHeight,navTop,gap=MOBILE_GAP){
   if(!Number.isFinite(layoutHeight)||!Number.isFinite(navTop)||navTop<=0||navTop>=layoutHeight)return null;
   return Math.ceil(layoutHeight-navTop+gap);
 }
+export function tipHudPositions(layoutHeight,navTop,tipHeight=36,scaleHeight=36,gap=12){
+  if(!Number.isFinite(layoutHeight)||!Number.isFinite(navTop)||navTop<=0||navTop>=layoutHeight)return null;
+  if(!Number.isFinite(tipHeight)||!Number.isFinite(scaleHeight)||tipHeight<=0||scaleHeight<=0||!Number.isFinite(gap)||gap<0)return null;
+  const tipTop=Math.ceil(navTop-gap-tipHeight);
+  const scaleTop=Math.ceil(tipTop-gap-scaleHeight);
+  return {tipTop,scaleTop};
+}
 export function keyboardBounds(layoutHeight,view,focused){
   if(!focused||!view||Math.abs((view.scale??1)-1)>.05)return null;
   const top=Math.max(0,Number(view.offsetTop)||0),height=Number(view.height);
@@ -25,13 +32,42 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,composerWasOpen=false,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
   const flag=(name,state)=>{if(state){if(app.getAttribute(name)!=='true')app.setAttribute(name,'true');}else if(app.hasAttribute(name))app.removeAttribute(name);};
   const visible=n=>Boolean(n&&!n.hidden&&n.getBoundingClientRect().width>0&&n.getBoundingClientRect().height>0&&win.getComputedStyle(n).visibility!=='hidden'&&win.getComputedStyle(n).display!=='none');
   const viewportHeight=()=>doc.documentElement.clientHeight||win.innerHeight;
+  const important=(node,prop,value)=>{
+    const next=String(value);
+    if(node.style.getPropertyValue(prop)!==next||node.style.getPropertyPriority(prop)!=='important')node.style.setProperty(prop,next,'important');
+  };
+  const ensureTipClose=()=>{
+    if(tipClose?.isConnected)return tipClose;
+    tipClose=doc.createElement('button');
+    tipClose.type='button';
+    tipClose.id='dj-user-tip-close';
+    tipClose.setAttribute('aria-label','지도 TIP 닫기');
+    tipClose.setAttribute('aria-controls','dj840-map-tip');
+    tipClose.textContent='×';
+    tipClose.addEventListener('click',event=>{
+      event.preventDefault();event.stopPropagation();
+      app.dataset.djUserTipDismissed='true';
+      tipClose.hidden=true;
+    });
+    app.appendChild(tipClose);
+    return tipClose;
+  };
+  const observeTip=()=>{
+    const found=doc.getElementById('dj840-map-tip');
+    if(found===lastTip)return;
+    tipObserver?.disconnect();lastTip=found;
+    if(found&&win.MutationObserver){
+      tipObserver=new win.MutationObserver(schedule);
+      tipObserver.observe(found,{attributes:true,attributeFilter:['style','hidden','class']});
+    }
+  };
   const keepFieldVisible=()=>{
     const input=doc.activeElement,form=doc.getElementById('community-form'),body=doc.querySelector('#participation-panel > .dj836-sheet-body');
     if(!input||!body||!form?.contains(input)||!app.hasAttribute('data-dj-user-editor-keyboard'))return;
@@ -60,8 +96,10 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   }
   function sync(){
     queued=0;if(disposed)return;
-    observeMore();
-    if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);return;}
+    observeMore();observeTip();
+    if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
+    const query=doc.getElementById('map-quick-search-query');
+    if(query&&query.placeholder!=='어디로 가시나요?')query.placeholder='어디로 가시나요?';
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
     const form=doc.getElementById('community-form'),input=doc.activeElement;
@@ -81,13 +119,31 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     if(keypad){if(delayed)win.clearTimeout(delayed);delayed=win.setTimeout(keepFieldVisible,100);}
     const scale=doc.querySelector('#map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale');
     if(scale&&scale!==lastScale){if(lastScale)resize?.unobserve(lastScale);resize?.observe(scale);lastScale=scale;}
-    if(visible(scale)&&dock!==null){
-      const r=scale.getBoundingClientRect();
-      // Preserve the native scale width, which encodes a distance.
-      const left=Math.ceil(r.right+8);
-      set('--dj-user-tip-left',left+ 'px');
-      set('--dj-user-tip-bottom',Math.ceil(h-r.bottom)+'px');
-    }else{set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);}
+    const tip=doc.getElementById('dj840-map-tip');
+    if(tip&&visible(tip)&&visible(scale)&&dock!==null){
+      const scaleRect=scale.getBoundingClientRect();
+      const positions=tipHudPositions(h,n.top,36,Math.max(18,scaleRect.height||36),12);
+      if(positions){
+        // Keep the true MapLibre distance scale on its own row above the TIP.
+        important(scale,'position','fixed');important(scale,'top',positions.scaleTop+'px');
+        important(scale,'bottom','auto');important(scale,'left','18px');important(scale,'right','auto');
+        important(scale,'z-index','2780');
+        important(tip,'position','fixed');important(tip,'top',positions.tipTop+'px');
+        important(tip,'bottom','auto');important(tip,'left','12px');important(tip,'right','12px');
+        important(tip,'width','auto');important(tip,'max-width','none');
+        important(tip,'height','36px');important(tip,'min-height','36px');important(tip,'max-height','36px');
+        important(tip,'box-sizing','border-box');
+        const close=ensureTipClose();close.hidden=false;
+        important(close,'position','fixed');important(close,'top',positions.tipTop+'px');
+        important(close,'right','19px');important(close,'left','auto');
+        important(close,'width','34px');important(close,'height','34px');
+        important(close,'z-index','2891');
+        set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
+      }
+    }else{
+      set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
+      if(tipClose)tipClose.hidden=true;
+    }
     // The native nearby-information sheet already owns permission/error/results.
     // Do not leave a generic explanatory surface on top of it.
     const native=doc.getElementById('ped-tools-panel'),data=doc.getElementById('dj832-data-sheet');
@@ -121,5 +177,5 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();resize?.disconnect();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserSurfaceReady;};
+  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();resize?.disconnect();tipClose?.remove();for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
 }
