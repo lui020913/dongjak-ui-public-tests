@@ -84,9 +84,22 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == issue_comment ]]; then
             [[ "$APPROVAL" =~ ^승인\ [a-f0-9]{40}\ [a-f0-9]{64}$ ]]
             read -r _ approved_source approved_css <<< "$APPROVAL"
-            curl -fsS --max-time 15 "$PREVIEW_URL/release-source.json?run=$GITHUB_RUN_ID" |
-              jq -e --arg sha "$approved_source" --arg css "$approved_css" \
-                '.release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION" and .public_ui_source_commit==$sha and .public_ui_overlay_sha256==$css' >/dev/null
+            checkpoint=false
+            if (( GITHUB_RUN_ATTEMPT > 1 )); then
+              for ((a=1; a<GITHUB_RUN_ATTEMPT; a++)); do
+                if git -C ui ls-remote --exit-code --heads origin "$SOURCE_BRANCH-$GITHUB_RUN_ID-$a" >/dev/null; then
+                  checkpoint=true
+                  break
+                fi
+              done
+            fi
+            if [[ "$checkpoint" != true ]]; then
+              curl -fsS --max-time 15 "$PREVIEW_URL/release-source.json?run=$GITHUB_RUN_ID" |
+                jq -e --arg sha "$approved_source" --arg css "$approved_css" \
+                  '.release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION" and .public_ui_source_commit==$sha and .public_ui_overlay_sha256==$css' >/dev/null
+            fi
+            # On checkpoint recovery the Preview may already have changed.
+            # Exact approved Production and the restored candidate parent are still checked.
           fi
           # Wait only in response to an owner approval. A manual bootstrap checks once.
           attempts=1
