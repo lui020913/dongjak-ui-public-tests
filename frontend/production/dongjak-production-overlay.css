@@ -78,100 +78,68 @@ html body #app [role="button"]:focus-visible {
 
 /* DONGJAK_UI_MOTION {"duration":320,"expand":65,"collapse":55,"dismiss":105} */
 
-/* Mobile sheet redesign candidate: common fixed header, independently scrolling body, route result hierarchy. */
+/* Mobile alignment: unified dock clearance, consistent right-hand settings chevrons, Korean action labels. */
 @media (max-width: 699px) {
-  html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj-sheet-chrome {
-    flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 68px !important;
-    max-height: none !important;
-    padding: 20px 14px 4px !important;
-    margin: 0 !important;
-    gap: 8px !important;
+  html body #app {
+    --dj890-dock-gap: 8px !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button {
+    display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj-sheet-chrome {
-    flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 68px !important;
-    max-height: none !important;
-    padding: 20px 14px 4px !important;
-    margin: 0 !important;
-    gap: 8px !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj-sheet-chrome {
-    flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 68px !important;
-    max-height: none !important;
-    padding: 20px 14px 4px !important;
-    margin: 0 !important;
-    gap: 8px !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj-sheet-chrome {
-    flex: 0 0 auto !important;
-    height: auto !important;
-    min-height: 68px !important;
-    max-height: none !important;
-    padding: 20px 14px 4px !important;
-    margin: 0 !important;
-    gap: 8px !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body {
-    padding: 8px 14px 24px !important;
-    margin: 0 !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
     min-width: 0 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overscroll-behavior-y: contain !important;
+    min-height: 62px !important;
+    padding: 11px 14px !important;
+    text-align: left !important;
   }
-  html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj836-sheet-body {
-    padding: 8px 14px 24px !important;
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button > .dj834-setting-icon {
+    flex: 0 0 33px !important;
     margin: 0 !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button > span:nth-child(2) {
+    flex: 1 1 0% !important;
     min-width: 0 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overscroll-behavior-y: contain !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj836-sheet-body {
-    padding: 8px 14px 24px !important;
-    margin: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overscroll-behavior-y: contain !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj836-sheet-body {
-    padding: 8px 14px 24px !important;
-    margin: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overscroll-behavior-y: contain !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-grid {
-    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
-    gap: 8px !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-card {
-    padding: 10px 8px !important;
-    gap: 5px !important;
-    border-radius: 12px !important;
-  }
-  html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-metrics {
-    justify-content: space-between !important;
-    gap: 4px !important;
-    font-size: 14px !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    writing-mode: horizontal-tb !important;
+    text-align: left !important;
     line-height: 1.4 !important;
   }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button > .dj834-current-theme {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button > .dj834-chevron {
+    flex: 0 0 16px !important;
+    width: 16px !important;
+    margin-left: auto !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel .route-select-actions > button {
+    flex: 0 0 auto !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    writing-mode: horizontal-tb !important;
+    text-align: center !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #route-panel .route-select-actions {
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
 }
-
-/* DONGJAK_UI_ROUTE_CAMERA {"bottomMargin":20} */
-/* DONGJAK_UI_MARKUP {"routeActions":["guide","edit","close"],"routeMetricsFirst":true} */
