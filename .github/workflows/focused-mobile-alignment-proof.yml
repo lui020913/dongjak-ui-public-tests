@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 'f4e98611cdc142a670fd28650f34333e23fbb9f7'
+          ref: '7ae0cbfa405c6fdb4e2921a991611b075c0bbe34'
           path: candidate
           persist-credentials: false
       - uses: actions/setup-node@v4
