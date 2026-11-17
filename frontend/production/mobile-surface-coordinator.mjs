@@ -32,7 +32,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:699px)');
-  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,composerWasOpen=false,disposed=false;
+  let queued=0,delayed=0,observer=null,resize=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,mapOptionsButton=null,composerWasOpen=false,disposed=false;
   const removers=[];
   const on=(target,event,fn,opts)=>{if(!target?.addEventListener)return;target.addEventListener(event,fn,opts);removers.push(()=>target.removeEventListener(event,fn,opts));};
   const set=(name,value)=>{const v=value==null?'':String(value);if(v){if(app.style.getPropertyValue(name)!==v)app.style.setProperty(name,v);}else app.style.removeProperty(name);};
@@ -68,6 +68,40 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
       tipObserver.observe(found,{attributes:true,attributeFilter:['style','hidden','class']});
     }
   };
+  const ensureMapOptions=()=>{
+    const toolbar=doc.getElementById('dj-v794-toolbar');
+    const scroller=toolbar?.querySelector(':scope > .dj831-scrollport');
+    if(!media.matches||!scroller){
+      mapOptionsButton?.remove();mapOptionsButton=null;return;
+    }
+    if(!mapOptionsButton?.isConnected){
+      mapOptionsButton=doc.createElement('button');
+      mapOptionsButton.type='button';
+      mapOptionsButton.id='dj-user-map-options';
+      mapOptionsButton.className='dj-v794-tool dj832-native';
+      mapOptionsButton.dataset.dj832Label='지도 옵션';
+      mapOptionsButton.setAttribute('aria-label','지도 옵션 열기');
+      mapOptionsButton.setAttribute('aria-controls','map-advanced-controls');
+      mapOptionsButton.innerHTML='<span class="dj-v794-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg></span>';
+      mapOptionsButton.addEventListener('click',event=>{
+        event.preventDefault();event.stopPropagation();
+        const utilities=doc.getElementById('dj-mobile-utilities');
+        if(utilities&&!utilities.hidden)doc.getElementById('dj-mobile-more-trigger')?.click();
+        const source=doc.getElementById('map-tools-toggle');
+        if(source&&!source.disabled)source.click();
+        schedule();
+      });
+    }
+    mapOptionsButton.classList.add('dj-v794-tool','dj832-native');
+    mapOptionsButton.dataset.dj832Label='지도 옵션';
+    const open=app.classList.contains('map-controls-open');
+    mapOptionsButton.dataset.active=open?'true':'false';
+    mapOptionsButton.setAttribute('aria-expanded',String(open));
+    if(mapOptionsButton.parentElement!==scroller){
+      const night=doc.getElementById('dj-v794-night');
+      scroller.insertBefore(mapOptionsButton,night?.nextSibling||null);
+    }
+  };
   const keepFieldVisible=()=>{
     const input=doc.activeElement,form=doc.getElementById('community-form'),body=doc.querySelector('#participation-panel > .dj836-sheet-body');
     if(!input||!body||!form?.contains(input)||!app.hasAttribute('data-dj-user-editor-keyboard'))return;
@@ -97,6 +131,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
   function sync(){
     queued=0;if(disposed)return;
     observeMore();observeTip();
+    ensureMapOptions();
     if(!media.matches){set('--dj-user-dock-bottom',null);set('--dj-user-editor-top',null);set('--dj-user-editor-bottom',null);set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);flag('data-dj-user-editor-keyboard',false);tipClose?.remove();tipClose=null;tipObserver?.disconnect();tipObserver=null;lastTip=null;return;}
     const query=doc.getElementById('map-quick-search-query');
     if(query&&query.placeholder!=='어디로 가시나요?')query.placeholder='어디로 가시나요?';
