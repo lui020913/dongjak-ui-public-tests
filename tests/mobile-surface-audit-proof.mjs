@@ -22,6 +22,11 @@ const rect=(page,selector)=>page.locator(selector).evaluate(e=>{
  const r=e.getBoundingClientRect(),s=getComputedStyle(e);
  return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,opacity:s.opacity,display:s.display,visibility:s.visibility,scrollHeight:e.scrollHeight,clientHeight:e.clientHeight};
 });
+const hit=async(page,selector)=>page.locator(selector).evaluate(e=>{
+ const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+ const t=e.ownerDocument.elementFromPoint(x,y);
+ return Boolean(t&&(t===e||e.contains(t)));
+});
 const gap=async(page,panel)=>Number(((await rect(page,'#bottom-nav')).top-(await rect(page,panel)).bottom).toFixed(2));
 const click=async(page,selector)=>page.locator(selector).click({timeout:20000,noWaitAfter:true});
 const shot=async(page,name)=>{
@@ -67,6 +72,8 @@ try{
        row.outerHeaderVisible=await outer.isVisible();
        row.closeVisible=await page.locator('#community-compose-close').isVisible();
        row.formVisible=await page.locator('#community-form').isVisible();
+       row.firstFieldHit=await hit(page,'#community-category');
+       assertions(row.firstFieldHit,'First editable field clipped or covered after opening composer');
        assertions(!row.outerHeaderVisible&&row.closeVisible&&row.formVisible,'Duplicate compose header or missing close');
        await shot(page,name+'-after');await click(page,'#community-compose-close');
        await page.locator('#community-form').waitFor({state:'hidden',timeout:10000});
@@ -82,7 +89,9 @@ try{
        row.afterNativeVisible=await page.locator('#ped-tools-panel').isVisible();
        row.afterGenericVisible=await page.locator('#dj832-data-sheet').isVisible();
        row.status=await page.locator('#ped-tools-status').innerText();
-       assertions(row.afterNativeVisible&&!row.afterGenericVisible,'Native result is not the sole information window');
+       row.closeHit=await hit(page,'#ped-tools-close');
+       row.bannerVisible=await page.locator('#dj-browser-webapp-tip').isVisible();
+       assertions(row.afterNativeVisible&&!row.afterGenericVisible&&row.closeHit&&!row.bannerVisible,'Native result is obscured or generic/install layer remains');
        await shot(page,name+'-after');
      }else if(name==='admin'){
        const trigger=page.locator('#dj831-scrollport [data-dj831-feature="map-dong"]');
@@ -98,25 +107,73 @@ try{
      }else if(name==='map-hud'){
        const tip=page.locator('#dj840-map-tip');await tip.waitFor({state:'visible',timeout:20000});
        await shot(page,name+'-before');await install(page);
+       // Test the installation CTA collision separately from the normal HUD.
+       const banner=page.locator('#dj-browser-webapp-tip');
+       if(await banner.isVisible()){
+         row.installCTAHit=await hit(page,'#dj-browser-webapp-tip .dj-webapp-tip-how');
+         row.tipHiddenWhileInstall=!(await tip.isVisible());
+         assertions(row.installCTAHit&&row.tipHiddenWhileInstall,'Install CTA is obscured');
+         await shot(page,name+'-install-after');
+         await click(page,'#dj-browser-webapp-tip .dj-webapp-tip-later');
+         await banner.waitFor({state:'hidden',timeout:10000});
+       }
+       await page.waitForFunction(()=>{const t=document.getElementById('dj840-map-tip');if(!t||t.hidden)return false;const s=getComputedStyle(t);return s.visibility==='visible'&&Number(s.opacity)>.9;},{timeout:25000});
        row.scale=await rect(page,'#map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale');row.tip=await rect(page,'#dj840-map-tip');
+       assertions(row.tip.visibility==='visible'&&Number(row.tip.opacity)>.9&&row.scale.visibility==='visible','HUD is not actually visible');
        row.rail=await rect(page,'#dj831-scrollport');row.more=await rect(page,'#dj-v794-more');
        assertions(Math.abs(row.scale.height-row.tip.height)<=2&&row.tip.left>=row.scale.right+4&&Math.abs(row.scale.bottom-row.tip.bottom)<=3,'HUD scale/TIP lanes conflict');
        assertions(row.rail.right<=row.more.left+1,'Rail covers More');
        await shot(page,name+'-after');
      }else{
        await install(page);
-       const collect=async trigger=>{
-         await page.evaluate(()=>{window.__djMotionPromise=new Promise(resolve=>{const samples=[],start=performance.now();function frame(t){const panel=document.getElementById('dj-mobile-utilities'),nav=document.getElementById('bottom-nav');if(panel&&nav&&!panel.hidden){const p=panel.getBoundingClientRect(),n=nav.getBoundingClientRect(),s=getComputedStyle(panel);if(Number(s.opacity)>.05&&s.visibility!=='hidden'&&p.height>0&&n.height>0)samples.push({bottom:p.bottom,navTop:n.top,opacity:Number(s.opacity),gap:n.top-p.bottom});}if(t-start<1000)requestAnimationFrame(frame);else resolve(samples);}requestAnimationFrame(frame);});});
-         await click(page,trigger);return page.evaluate(()=>window.__djMotionPromise);
+       const collect=async (trigger,opening)=>{
+         // Arm before the input but begin measuring on the actual click.
+         // A slow Playwright locator or loaded runner cannot exhaust the
+         // sampling interval before the real event occurs.
+         await page.evaluate(({trigger,opening})=>{
+           const button=document.querySelector(trigger);
+           if(!button)throw Error('Motion trigger missing');
+           window.__djMotionReport={events:0,samples:[],opening};
+           const report=window.__djMotionReport;
+           const record=()=>{
+             const panel=document.getElementById('dj-mobile-utilities'),nav=document.getElementById('bottom-nav');
+             if(!panel||!nav)return;
+             const p=panel.getBoundingClientRect(),n=nav.getBoundingClientRect(),s=getComputedStyle(panel);
+             report.samples.push({t:performance.now(),hidden:panel.hidden,bottom:p.bottom,navTop:n.top,opacity:Number(s.opacity),visibility:s.visibility,height:p.height,navHeight:n.height,animation:s.animationName,translate:s.translate,gap:n.top-p.bottom});
+           };
+           const handler=event=>{
+             if(!button.contains(event.target))return;
+             document.removeEventListener('click',handler,true);
+             report.events++;
+             // Capture immediately after the app's actual click handler.
+             queueMicrotask(record);
+             let frame=0,timer=0,observer;
+             const start=performance.now();
+             function tick(){record();if(performance.now()-start<1400)frame=requestAnimationFrame(tick);}
+             observer=new MutationObserver(record);
+             observer.observe(document.getElementById('dj-mobile-utilities'),{attributes:true,attributeFilter:['class','hidden','style']});
+             frame=requestAnimationFrame(tick);
+             timer=setInterval(record,35);
+             setTimeout(()=>{observer.disconnect();cancelAnimationFrame(frame);clearInterval(timer);record();report.done=true;},1500);
+           };
+           document.addEventListener('click',handler,true);
+         },{trigger,opening});
+         await click(page,trigger);
+         await page.waitForFunction(()=>window.__djMotionReport?.done===true,null,{timeout:12000});
+         return page.evaluate(()=>window.__djMotionReport);
        };
-       row.enter=await collect('#dj-v794-more');
+       row.enter=await collect('#dj-v794-more',true);
        await page.locator('#dj-mobile-utilities').waitFor({state:'visible',timeout:15000});
        await shot(page,name+'-after-open');
-       row.exit=await collect('#dj-mobile-utilities-close');
+       row.exit=await collect('#dj-mobile-utilities-close',false);
        await page.locator('#dj-mobile-utilities').waitFor({state:'hidden',timeout:15000});
-       const samples=[...row.enter,...row.exit];
+       const visible=s=>!s.hidden&&s.visibility==='visible'&&s.opacity>.05&&s.height>0&&s.navHeight>0;
+       const enter=row.enter.samples.filter(visible),exit=row.exit.samples.filter(visible);
+       const samples=[...enter,...exit];
        row.minGap=samples.length?Math.min(...samples.map(s=>s.gap)):null;
-       assertions(row.enter.length>2&&row.exit.length>2&&row.minGap>=-1,'More visible motion crosses dock or lacks frame evidence');
+       row.enterFadeObserved=row.enter.samples.some(s=>s.animation==='dj852-profile-fade-in'&&s.height>0);
+       row.exitFadeObserved=row.exit.samples.some(s=>s.animation==='dj852-profile-fade-out'&&s.height>0);
+       assertions(row.enter.events===1&&row.exit.events===1&&enter.length>=2&&exit.length>=2&&row.enterFadeObserved&&row.exitFadeObserved&&row.minGap>=-1,'Actual More fade/geometry evidence missing or dock was crossed');
      }
      row.result='pass';
    }catch(error){row.result='failed';row.error=String(error).slice(0,2000);}
