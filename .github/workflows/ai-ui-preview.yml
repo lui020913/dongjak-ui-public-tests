@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 145
     permissions:
       contents: write
+      issues: write
     env:
       PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
       PREVIEW_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
@@ -47,6 +48,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Notify progress - 운영 배포 확인 대기 (최대 약 100분)
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "운영 배포 확인 대기 (최대 약 100분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Verify approval and live release before generating a change
         env:
           APPROVAL: ${{ github.event.comment.body }}
@@ -86,6 +94,13 @@ jobs:
           done
           echo "::error::Production has not deployed the exact current overlay. Keep the existing candidate."
           exit 1
+      - name: Notify progress - Gemini CSS 개선 및 검증 (최대 요청 3회)
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "Gemini CSS 개선 및 검증 (최대 요청 3회) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Generate one design-preserving CSS adjustment
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -96,6 +111,13 @@ jobs:
           node ui/frontend/scripts/check-production-overlay.mjs
           git -C ui diff --check
           test "$(git -C ui diff --name-only)" = "$OVERLAY"
+      - name: Notify progress - 공개 프런트엔드 빌드 및 테스트
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "공개 프런트엔드 빌드 및 테스트 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Build and test the public frontend
         working-directory: ui/frontend
         run: |
@@ -104,6 +126,13 @@ jobs:
           npm run build
           npx playwright install --with-deps chromium
           npm run test:e2e
+      - name: Notify progress - 검증된 후보 커밋 저장
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "검증된 후보 커밋 저장 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Recheck Production and push tested CSS
         id: publish
         env:
@@ -127,6 +156,13 @@ jobs:
           echo "source=$(git -C ui rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "css=$(sha256sum "ui/$OVERLAY" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           printf 'Public CSS commit: `%s`\n\n' "$(git -C ui rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Notify progress - 전체 앱 Preview 배포 요청
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "전체 앱 Preview 배포 요청 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Dispatch existing full-app gate for Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -137,6 +173,13 @@ jobs:
             repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches \
             -f ref=main -f "inputs[candidate_source]=$EXPECTED_SOURCE"
           echo 'Full-app build, regression testing and Preview requested. Review the resulting exact candidate in issue #15.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Notify progress - Preview 검증 대기 (최대 약 45분)
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "Preview 검증 대기 (최대 약 45분) · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
       - name: Verify the exact deployed full-app Preview
         env:
           EXPECTED_SOURCE: ${{ steps.publish.outputs.source }}
@@ -164,3 +207,24 @@ jobs:
           done
           echo "::error::The exact tested Preview did not deploy before the verification timeout."
           exit 1
+      - name: Notify progress - 작업 완료 - Preview 확인 및 승인 대기
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 완료 - Preview 확인 및 승인 대기 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+      - name: Notify progress - 작업 실패 - 실행 상세에서 실패 단계 확인
+        if: ${{ failure() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 실패 - 실행 상세에서 실패 단계 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
+      - name: Notify progress - 작업 취소 - 실행 상세 확인
+        if: ${{ cancelled() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "작업 취소 - 실행 상세 확인 · [실행 상세]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) · attempt $GITHUB_RUN_ATTEMPT"
