@@ -17,9 +17,17 @@ jobs:
   capture:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: production
+            target: https://dongjak-walk-safety-preview.pages.dev/
+          - label: candidate
+            target: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev/
     env:
       CI: 'true'
-      DONGJAK_TARGET_URL: ${{ vars.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/' }}
+      DONGJAK_TARGET_URL: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,7 +53,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deployed-ui-screen-inventory-${{ github.run_id }}
+          name: deployed-ui-screen-inventory-${{ matrix.label }}-${{ github.run_id }}
           path: |
             quality-report/screen-captures/
             test-results/
