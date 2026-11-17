@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 const root = 'quality-report/screen-captures';
 if (!existsSync(root)) process.exit(0);
 const escape = value => String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-const reports = readdirSync(root).filter(x=>x.endsWith('.json')).map(x=>JSON.parse(readFileSync(root+'/'+x,'utf8')));
+const reports = readdirSync(root).filter(x=>x.endsWith('.json')).map(x=>JSON.parse(readFileSync(root+'/'+x,'utf8'))).filter(r=>r.viewport && Array.isArray(r.screens));
 const cards = reports.flatMap(report => report.screens.map(s => {
   const status = s.status === 'captured' ? '<img loading="lazy" src="'+encodeURIComponent(s.file)+'" alt="'+escape(s.tab)+'">' : '<p class="missing">화면 자동 탐색 미완료: '+escape(s.reason||s.status)+'</p>';
   const m = s.metrics || {};
