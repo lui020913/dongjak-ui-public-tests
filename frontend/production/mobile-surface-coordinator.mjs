@@ -97,9 +97,12 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     const open=app.classList.contains('map-controls-open');
     mapOptionsButton.dataset.active=open?'true':'false';
     mapOptionsButton.setAttribute('aria-expanded',String(open));
-    if(mapOptionsButton.parentElement!==scroller){
-      const night=doc.getElementById('dj-v794-night');
-      scroller.insertBefore(mapOptionsButton,night?.nextSibling||null);
+    const night=doc.getElementById('dj-v794-night');
+    const expectedNext=night?.nextSibling||null;
+    // v831 rebuilds shortcut buttons immediately after the night control.
+    // Keep the proxy in the same DOM order as its visual order for keyboard use.
+    if(mapOptionsButton.parentElement!==scroller||mapOptionsButton!==expectedNext){
+      scroller.insertBefore(mapOptionsButton,expectedNext);
     }
   };
   const keepFieldVisible=()=>{
