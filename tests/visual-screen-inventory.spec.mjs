@@ -47,14 +47,21 @@ for (const viewport of viewports) {
     await page.screenshot({path: output + '/' + viewport.name + '-' + theme + '-startup.png', animations: 'disabled'});
     await dismissTour(page);
     const app = page.locator('#app');
-    // Cold starts intentionally reset to light. Invoke the application's own
-    // theme control for capture setup, independently of its visibility.
-    // This is not a test of the user's ability to reach the control.
+    // Use the verified user-facing theme confirmation flow.
     if (await app.getAttribute('data-theme') !== theme) {
-      await page.locator('#theme-toggle').evaluate(button => button.click());
+      await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click({timeout:12000,noWaitAfter:true});
+      await expect(app).toHaveAttribute('data-tab','mine');
+      await page.getByRole('button',{name:/화면 테마/}).click({timeout:12000,noWaitAfter:true});
+      await expect(page.getByText('화면 테마를 전환할까요?',{exact:true})).toBeVisible();
+      await page.getByRole('button',{name:'전환',exact:true}).filter({visible:true}).click({timeout:12000,noWaitAfter:true});
+      await expect(app).toHaveAttribute('data-theme',theme,{timeout:30000});
+      if (await app.getAttribute('data-tab') !== 'map') {
+        await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click({timeout:12000,noWaitAfter:true});
+        await expect(app).toHaveAttribute('data-tab','map');
+      }
     }
-    await expect(app).toHaveAttribute('data-theme', theme, {timeout: 30000});
-    const report = { viewport, theme, themeSetup: 'native-button-programmatic-click-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
+    await expect(app).toHaveAttribute('data-theme', theme, {timeout:30000});
+    const report = { viewport, theme, themeSetup: 'visible-profile-theme-confirmation-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
       await dismissTour(page);
       if (tab !== 'initial-map') {
