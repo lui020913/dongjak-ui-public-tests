@@ -32,14 +32,14 @@
 }
 
 html body #app button:focus-visible {
-  outline: 3px solid #168866;
+  outline: 3px solid #17956c;
   outline-offset: 3px;
 }
 html body #app a:focus-visible {
-  outline: 3px solid #168866;
+  outline: 3px solid #17956c;
   outline-offset: 3px;
 }
 html body #app [role="button"]:focus-visible {
-  outline: 3px solid #168866;
+  outline: 3px solid #17956c;
   outline-offset: 3px;
 }
