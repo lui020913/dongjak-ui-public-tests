@@ -108,16 +108,17 @@ svg{width:20px;height:20px;flex:none}
  .tool-stack{top:calc(183px + env(safe-area-inset-top));right:12px;gap:4px;padding:6px;border-radius:16px}
  .tool-btn{height:44px;width:44px}
  .tool-btn svg{width:19px;height:19px}
- .bottom-nav{position:absolute;bottom:0;left:0;right:0;z-index:40;display:flex;align-items:flex-start;justify-content:space-around;gap:2px;height:calc(69px + env(safe-area-inset-bottom));padding:6px 5px calc(5px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 26px rgba(20,50,35,.07)}
+ .app-shell{--mobile-nav-height:calc(69px + env(safe-area-inset-bottom));--mobile-sheet-gap:0px}
+ .bottom-nav{position:absolute;bottom:0;left:0;right:0;z-index:40;display:flex;align-items:flex-start;justify-content:space-around;gap:2px;height:var(--mobile-nav-height);padding:6px 5px calc(5px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 26px rgba(20,50,35,.07)}
  .bottom-item{flex:1;min-width:0;height:55px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:6px 2px;border:0;border-radius:12px;background:none;color:var(--muted);font-size:calc(10px * var(--font-multiplier));font-weight:700;white-space:nowrap}
  .bottom-item svg{width:21px;height:21px}
  .bottom-item[aria-pressed=true]{color:var(--accent);background:var(--accent-soft)}
- .bottom-sheet{position:absolute;bottom:calc(69px + env(safe-area-inset-bottom));left:0;right:0;z-index:35;display:flex;flex-direction:column;overflow:hidden;height:0;border-radius:22px 22px 0 0;border:1px solid var(--line);border-bottom:0;background:var(--surface);box-shadow:0 -14px 38px rgba(24,53,39,.17);transition:height var(--ds-motion-sheet) var(--ds-ease-sheet),opacity var(--ds-motion-panel) var(--ds-ease-standard),transform var(--ds-motion-sheet) var(--ds-ease-sheet);overscroll-behavior:contain}
+ .bottom-sheet{position:absolute;bottom:calc(var(--mobile-nav-height) + var(--mobile-sheet-gap));left:0;right:0;z-index:35;display:flex;flex-direction:column;overflow:hidden;height:0;border-radius:22px 22px 0 0;border:1px solid var(--line);border-bottom:0;background:var(--surface);box-shadow:0 -14px 38px rgba(24,53,39,.17);transition:height var(--ds-motion-sheet) var(--ds-ease-sheet),opacity var(--ds-motion-panel) var(--ds-ease-standard),transform var(--ds-motion-sheet) var(--ds-ease-sheet);overscroll-behavior:contain}
  .bottom-sheet[data-stage=closed]{height:0;opacity:0;transform:translateY(16px);pointer-events:none}
  .bottom-sheet[data-stage=half]{height:min(46dvh,440px);opacity:1;transform:translateY(0)}
  .bottom-sheet[data-stage=full]{height:calc(100dvh - 86px - env(safe-area-inset-bottom) - env(safe-area-inset-top));opacity:1;transform:translateY(0)}
- .sheet-grip-button{display:grid;place-items:center;height:44px;width:100%;min-height:44px;background:var(--surface);border:0;touch-action:pan-x}
- .sheet-grip{height:4px;width:38px;border-radius:9px;background:var(--line)}
+ .sheet-grip-button{display:grid;place-items:center;height:44px;width:100%;min-height:44px;flex:none;padding:0;background:var(--surface);border:0;touch-action:pan-x}
+ .sheet-grip{display:block;height:5px;width:40px;border-radius:999px;background:var(--line)}
  .sheet-head{padding:8px 19px 16px}
  .sheet-head h2{font-size:calc(20px * var(--font-multiplier))}
  .sheet-head .circle-btn{width:44px;height:44px}
