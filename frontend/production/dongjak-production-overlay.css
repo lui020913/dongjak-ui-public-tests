@@ -675,6 +675,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #dj840-map-tip:not([h
   max-height: 36px !important;
   padding: 0 46px 0 12px !important;
   border-radius: 999px !important;
+  z-index: 2890 !important;
 }
 html body #app#app#app#app#app#app#app#app#app#app#app#app #dj840-map-tip > strong {
   display: inline-flex !important;
