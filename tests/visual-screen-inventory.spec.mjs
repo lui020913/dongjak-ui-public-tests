@@ -38,7 +38,6 @@ for (const viewport of viewports) {
     test.setTimeout(180000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.emulateMedia({colorScheme: theme});
-    await page.addInitScript(selected => { localStorage.setItem('dongjak_safety_color_theme_v1', selected); }, theme);
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBeLessThan(400);
     await expect(page.locator('#map')).toBeVisible({ timeout: 30000 });
@@ -48,8 +47,14 @@ for (const viewport of viewports) {
     await page.screenshot({path: output + '/' + viewport.name + '-' + theme + '-startup.png', animations: 'disabled'});
     await dismissTour(page);
     const app = page.locator('#app');
-    await expect(app).toHaveAttribute('data-theme', theme, {timeout: 7000});
-    const report = { viewport, theme, source: page.url(), captured_at: new Date().toISOString(), screens: [] };
+    // Cold starts intentionally reset to light. Invoke the application's own
+    // theme control for capture setup, independently of its visibility.
+    // This is not a test of the user's ability to reach the control.
+    if (await app.getAttribute('data-theme') !== theme) {
+      await page.locator('#theme-toggle').evaluate(button => button.click());
+    }
+    await expect(app).toHaveAttribute('data-theme', theme, {timeout: 30000});
+    const report = { viewport, theme, themeSetup: 'native-button-programmatic-click-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
     for (const [tab, panel] of [['initial-map', 'map'], ...tabs]) {
       await dismissTour(page);
       if (tab !== 'initial-map') {
