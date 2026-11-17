@@ -1,0 +1,92 @@
+name: Request guarded private Preview and Production release after public UI merge
+on:
+  push:
+    branches:
+      - public/frontend-foundation-20261117
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/public-preview-freshness.yml'
+      - '.github/workflows/request-private-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: request-private-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  request-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Request private Preview bridge without exposing credentials
+        env:
+          PRIVATE_PREVIEW_DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+          PUBLIC_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$PRIVATE_PREVIEW_DISPATCH_TOKEN" ]; then
+            echo "::warning::PRIVATE_PREVIEW_DISPATCH_TOKEN not configured; private hourly schedule remains fallback."
+            echo "### Immediate Preview dispatch not configured" >> "$GITHUB_STEP_SUMMARY"
+            echo "The independent private hourly bridge remains responsible for deployment." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          code="$(curl --silent --show-error --output /tmp/dispatch-response.json --write-out '%{http_code}' \
+            --max-time 25 --request POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
+            'https://api.github.com/repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-preview-bridge.yml/dispatches' \
+            --data '{"ref":"main"}')"
+          if [ "$code" != 204 ]; then
+            echo "::error::Private Preview dispatch failed (HTTP $code). Check token repository Actions write permission."
+            exit 1
+          fi
+          {
+            echo '### Private Preview bridge requested'
+            echo "- Public merge commit: $PUBLIC_SHA"
+            echo '- Target: private Preview bridge on main'
+            echo '- Deployment target: public-ui-workbench Preview only'
+            echo '- The independent Preview freshness workflow verifies the deployed source SHA.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
+
+  request-guarded-production:
+    name: Request protected full-app Production CSS promotion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Request guarded Production release workflow
+        env:
+          PRIVATE_PREVIEW_DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+          PUBLIC_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$PRIVATE_PREVIEW_DISPATCH_TOKEN" ]; then
+            echo "::error::Private workflow dispatch token missing; guarded Production not requested."
+            exit 1
+          fi
+          code="$(curl --silent --show-error --output /tmp/production-dispatch.json --write-out '%{http_code}' \
+            --max-time 25 --request POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
+            'https://api.github.com/repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-prod-gate.yml/dispatches' \
+            --data '{"ref":"main"}')"
+          if [ "$code" != 204 ]; then
+            echo "::error::Guarded Production workflow dispatch failed (HTTP $code)."
+            exit 1
+          fi
+          {
+            echo '### Guarded Production release requested'
+            echo "- Public source: $PUBLIC_SHA"
+            echo '- Existing private gate allows only audited CSS overlay onto trusted full app.'
+            echo '- Production deployment occurs ONLY if the private gate validates source provenance, integrated E2E, full-app Preview, and Cloudflare bindings.'
+            echo '- A successful dispatch does NOT imply a successful Production deployment.'
+          } >> "$GITHUB_STEP_SUMMARY"
+# Revalidate guarded Production promotion after unique release-note generator fix.

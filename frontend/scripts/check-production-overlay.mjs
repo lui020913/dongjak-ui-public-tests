@@ -1,0 +1,476 @@
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+
+// Allowlisted CSS-only UI delta for the *existing* integrated application.
+// Treat public commits as untrusted until these checks and full-app tests pass.
+const cssPath=fileURLToPath(new URL('../production/dongjak-production-overlay.css',import.meta.url));
+const original=readFileSync(cssPath,'utf8');
+if(original.length===0 || original.length>24000) throw Error('Production overlay must be nonempty and <= 24 KB');
+if(/[\u0000-\u0008\u000b\u000e-\u001f]/.test(original)) throw Error('Control character in overlay');
+const source=original.replace(/\/\*[\s\S]*?\*\//g,'');
+if(/\/\*|\*\//.test(source)) throw Error('Unterminated CSS comment');
+
+const allowedSelectors=new Set([
+  'html body #app .topbar .weather-widget #weather-label',
+  'html body #app .topbar .map-quick-search-form > input',
+  'html body #app .dj-sheet-chrome-title h2',
+  'html body #app .dj-sheet-chrome-close svg',
+  'html body #app #transport-close svg',
+  'html body #app button:focus-visible',
+  'html body #app a:focus-visible',
+  'html body #app [role="button"]:focus-visible'
+]);
+const layoutSelectors=new Set([
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind=\"subway\"]:not(.dj871-sheet-expanded):not([hidden])",
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind=\"subway\"] .metro-direction-grid",
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind=\"subway\"] .metro-direction-heading",
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind=\"subway\"] .metro-arrival-direction-group .transport-arrival-row",
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind=\"subway\"] .transport-panel-head",
+  "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet .dj875-transit-scroll",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-map-card:not([hidden])",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-card",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-grid",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-map-card .dj804-compare-metrics",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj-sheet-chrome",
+  "html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj-sheet-chrome",
+  "html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj-sheet-chrome",
+  "html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj-sheet-chrome",
+  "html body #app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body",
+  "html body #app#app#app#app#app#app#app#app#app#app #participation-panel .dj836-sheet-body",
+  "html body #app#app#app#app#app#app#app#app#app#app #news-panel .dj836-sheet-body",
+  "html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj836-sheet-body",
+  "html body #app#app#app#app#app#app#app#app#app#app #dj840-map-tip:not([hidden])",
+  "html body #app#app#app#app#app#app#app#app#app#app #bottom-nav .nav-tab"
+]);
+const layoutProperties=new Set(['max-height','min-height','height','padding','gap','margin','border-radius','grid-template-columns','align-items','justify-content','flex-shrink','flex','overflow-y','overscroll-behavior-y','min-width','text-align','line-height','font-size']);
+
+// Additional exact mobile alignment rules. These are a narrow, reviewed
+// exception: no generic selector/property expansion and no dynamic values.
+const alignmentPrefix='html body #app#app#app#app#app#app#app#app#app#app ';
+const exactAlignment=new Map([
+ [alignmentPrefix+'#mine-panel .dj834-settings-group > button', {
+   'display':'flex !important','align-items':'center !important','justify-content':'flex-start !important','gap':'12px !important','min-width':'0 !important','min-height':'62px !important','padding':'11px 14px !important','text-align':'left !important'
+ }],
+ [alignmentPrefix+'#mine-panel .dj834-settings-group > button > .dj834-setting-icon', {'flex':'0 0 33px !important','margin':'0 !important'}],
+ [alignmentPrefix+'#mine-panel .dj834-settings-group > button > span:nth-child(2)', {'flex':'1 1 0% !important','min-width':'0 !important','white-space':'normal !important','word-break':'keep-all !important','overflow-wrap':'break-word !important','writing-mode':'horizontal-tb !important','text-align':'left !important','line-height':'1.4 !important'}],
+ [alignmentPrefix+'#mine-panel .dj834-settings-group > button > .dj834-current-theme', {'flex':'0 0 auto !important','margin-left':'auto !important','white-space':'nowrap !important','word-break':'keep-all !important'}],
+ [alignmentPrefix+'#mine-panel .dj834-settings-group > button > .dj834-chevron', {'flex':'0 0 16px !important','width':'16px !important','margin-left':'auto !important','text-align':'right !important','white-space':'nowrap !important','line-height':'1 !important'}],
+ [alignmentPrefix+'#route-panel .route-select-actions > button', {'flex':'0 0 auto !important','min-width':'44px !important','min-height':'44px !important','white-space':'nowrap !important','word-break':'keep-all !important','overflow-wrap':'normal !important','writing-mode':'horizontal-tb !important','text-align':'center !important'}],
+ [alignmentPrefix+'#route-panel .route-location-text', {'flex':'1 1 auto !important','min-width':'0 !important','word-break':'keep-all !important','overflow-wrap':'break-word !important'}],
+ [alignmentPrefix+'#route-panel .route-select-actions', {'flex':'0 0 auto !important','gap':'6px !important','align-items':'center !important'}]
+]);
+for (const [selector, declarations] of [
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #route-panel:not([hidden]):not(.dj871-sheet-expanded):not(:has(#route-place-search:not([hidden])))",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel#participation-panel.page-panel:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #mine-panel:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #news-panel:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-picker:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #detail-sheet:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #entry-sheet:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #ped-tools-panel:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj832-data-sheet:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities:not([hidden]):not(.dj871-sheet-expanded)",
+    {
+      "bottom": "var(--dj-user-dock-bottom,var(--dj829-panel-bottom,96px)) !important",
+      "margin-bottom": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-picker .dj-sheet-chrome",
+    {
+      "min-height": "68px !important",
+      "height": "auto !important",
+      "max-height": "none !important",
+      "flex": "0 0 auto !important",
+      "padding": "20px 14px 4px !important",
+      "margin": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-picker > .dj836-sheet-body",
+    {
+      "min-height": "0 !important",
+      "overflow-y": "auto !important",
+      "padding": "8px 14px 16px !important",
+      "box-sizing": "border-box !important",
+      "overscroll-behavior-y": "contain !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-list",
+    {
+      "grid-template-columns": "repeat(3,minmax(0,1fr)) !important",
+      "gap": "8px !important",
+      "margin": "0 0 12px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-list button",
+    {
+      "min-width": "0 !important",
+      "min-height": "44px !important",
+      "padding": "7px 5px !important",
+      "text-align": "center !important",
+      "white-space": "nowrap !important",
+      "word-break": "keep-all !important",
+      "font-size": "13px !important",
+      "border-radius": "12px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #admin-dong-clear",
+    {
+      "min-height": "44px !important",
+      "margin": "0 0 8px !important",
+      "white-space": "normal !important",
+      "word-break": "keep-all !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) > .dj-sheet-chrome",
+    {
+      "display": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) > .dj836-sheet-body > :not(#community-form)",
+    {
+      "display": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel #community-form:not([hidden])",
+    {
+      "border": "0 !important",
+      "box-shadow": "none !important",
+      "border-radius": "0 !important",
+      "padding": "0 0 12px !important",
+      "margin": "0 !important",
+      "min-width": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel #community-form .community-form-top",
+    {
+      "position": "sticky !important",
+      "top": "0 !important",
+      "z-index": "8 !important",
+      "background": "var(--dj800-surface,#fff) !important",
+      "padding": "12px 0 10px !important",
+      "min-height": "44px !important",
+      "display": "flex !important",
+      "justify-content": "space-between !important",
+      "align-items": "center !important",
+      "margin": "0 0 10px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel #community-form #community-issue-details",
+    {
+      "padding": "10px !important",
+      "border-radius": "12px !important",
+      "margin": "8px 0 12px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #participation-panel #community-form #community-compose-close",
+    {
+      "min-height": "44px !important",
+      "min-width": "44px !important",
+      "flex": "0 0 44px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app[data-dj-user-editor-keyboard=\"true\"] #participation-panel:has(#community-form:not([hidden]))",
+    {
+      "top": "var(--dj-user-editor-top,8px) !important",
+      "bottom": "var(--dj-user-editor-bottom,8px) !important",
+      "height": "auto !important",
+      "max-height": "none !important",
+      "min-height": "0 !important",
+      "margin": "0 !important",
+      "padding": "0 !important",
+      "translate": "none !important",
+      "transform": "none !important",
+      "z-index": "6500 !important",
+      "animation": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app[data-dj-user-editor-keyboard=\"true\"] #participation-panel > .dj836-sheet-body",
+    {
+      "overflow-y": "auto !important",
+      "min-height": "0 !important",
+      "padding": "8px 14px 16px !important",
+      "scroll-padding-bottom": "16px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app[data-dj-user-editor-keyboard=\"true\"] #bottom-nav",
+    {
+      "visibility": "hidden !important",
+      "pointer-events": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-in:not([hidden])",
+    {
+      "animation": "dj852-profile-fade-in .22s ease-out both !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-out:not([hidden])",
+    {
+      "animation": "dj852-profile-fade-out .19s ease-in both !important",
+      "pointer-events": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj831-scrollport",
+    {
+      "scroll-snap-type": "x mandatory !important",
+      "scroll-padding-inline": "2px !important",
+      "mask-image": "none !important",
+      "-webkit-mask-image": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj831-scrollport > .dj-v794-tool",
+    {
+      "scroll-snap-align": "start !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj-v794-toolbar > #dj-v794-more",
+    {
+      "flex": "0 0 44px !important",
+      "min-width": "44px !important",
+      "min-height": "44px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab > .nav-icon",
+    {
+      "width": "34px !important",
+      "height": "34px !important",
+      "min-width": "34px !important",
+      "min-height": "34px !important",
+      "max-width": "34px !important",
+      "max-height": "34px !important",
+      "margin": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab > .nav-icon svg",
+    {
+      "width": "24px !important",
+      "height": "24px !important",
+      "min-width": "24px !important",
+      "min-height": "24px !important",
+      "max-width": "24px !important",
+      "max-height": "24px !important",
+      "margin": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab[data-tab=\"map\"] > .nav-icon",
+    {
+      "border": "0 !important",
+      "background": "transparent !important",
+      "box-shadow": "none !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab > span:last-child",
+    {
+      "text-align": "center !important",
+      "white-space": "nowrap !important",
+      "word-break": "keep-all !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale",
+    {
+      "height": "36px !important",
+      "min-height": "36px !important",
+      "line-height": "1 !important",
+      "padding": "5px 8px !important",
+      "border-radius": "17px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app[data-dj-user-surface-ready=\"1\"] #dj840-map-tip:not([hidden])",
+    {
+      "left": "var(--dj-user-tip-left,110px) !important",
+      "right": "12px !important",
+      "bottom": "var(--dj-user-tip-bottom,calc(var(--dj829-panel-bottom,96px) + 8px)) !important",
+      "width": "auto !important",
+      "max-width": "none !important",
+      "height": "36px !important",
+      "min-height": "36px !important",
+      "max-height": "36px !important",
+      "padding": "2px 8px !important",
+      "gap": "6px !important",
+      "border-radius": "17px !important",
+      "white-space": "normal !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj840-map-tip .dj840-tip-copy-viewport",
+    {
+      "flex": "1 1 auto !important",
+      "min-width": "0 !important",
+      "max-width": "100% !important",
+      "width": "auto !important",
+      "overflow": "hidden !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj840-map-tip .dj840-tip-copy",
+    {
+      "display": "-webkit-box !important",
+      "-webkit-line-clamp": "2 !important",
+      "-webkit-box-orient": "vertical !important",
+      "white-space": "normal !important",
+      "word-break": "keep-all !important",
+      "overflow-wrap": "break-word !important",
+      "max-width": "100% !important",
+      "width": "auto !important",
+      "animation": "none !important",
+      "transform": "none !important",
+      "line-height": "1.25 !important",
+      "font-size": "12px !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app:has(#dj-browser-webapp-tip:not([hidden])) #dj840-map-tip",
+    {
+      "visibility": "hidden !important",
+      "pointer-events": "none !important",
+      "opacity": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj832-data-sheet .dj832-state-row",
+    {
+      "gap": "8px !important",
+      "align-items": "center !important",
+      "min-width": "0 !important"
+    }
+  ],
+  [
+    "html body #app#app#app#app#app#app#app#app#app#app #dj832-data-sheet .dj832-state-text",
+    {
+      "word-break": "keep-all !important",
+      "overflow-wrap": "break-word !important",
+      "text-align": "right !important",
+      "line-height": "1.4 !important"
+    }
+  ]
+]) exactAlignment.set(selector,declarations);
+for (const [selector, declarations] of [["html body #app#app#app#app#app#app#app#app#app#app:has(#ped-tools-panel:not([hidden])) #dj-browser-webapp-tip:not([hidden])",{"visibility":"hidden !important","pointer-events":"none !important","opacity":"0 !important"}],["html body #app#app#app#app#app#app#app#app#app#app:has(#dj832-data-sheet:not([hidden])) #dj-browser-webapp-tip:not([hidden])",{"visibility":"hidden !important","pointer-events":"none !important","opacity":"0 !important"}],["html body #app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) > .dj836-sheet-body",{"scroll-behavior":"auto !important","overflow-anchor":"none !important"}]]) exactAlignment.set(selector,declarations);
+for (const [selector, declarations] of [["html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities:not([hidden]):not(.dj-sheet-dragging):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj870-more-entering):not(.dj870-more-leaving)",{"animation":"none !important","translate":"none !important","transition":"none !important","transform":"none !important"}],["html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj852-panel-fade-in:not([hidden]):not(.dj-sheet-dragging)",{"animation":"dj852-profile-fade-in .22s ease-out both !important","translate":"none !important","transition":"none !important","transform":"none !important"}],["html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj852-panel-fade-out:not([hidden]):not(.dj-sheet-dragging)",{"animation":"dj852-profile-fade-out .19s ease-in both !important","translate":"none !important","transition":"none !important","transform":"none !important","pointer-events":"none !important"}]]) exactAlignment.set(selector,declarations);
+for (const [selector, declarations] of [["html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj870-more-entering:not([hidden]):not(.dj-sheet-dragging)",{"animation":"dj852-profile-fade-in .22s ease-out both !important","translate":"none !important","transition":"none !important","transform":"none !important"}],["html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities#dj-mobile-utilities.dj870-more-leaving:not([hidden]):not(.dj-sheet-dragging)",{"animation":"dj852-profile-fade-out .19s ease-in both !important","translate":"none !important","transition":"none !important","transform":"none !important","pointer-events":"none !important"}]]) exactAlignment.set(selector,declarations);
+let activeMedia='';
+let activeSelector='';
+const allowedProperties=new Set([
+  'text-align','line-height','flex-shrink','outline','outline-offset'
+]);
+let depth=0;
+let mediaDepth=0;
+let ruleCount=0;
+for(const [index,raw] of source.split(/\r?\n/).entries()){
+  const line=raw.trim();
+  if(!line)continue;
+  if(/^@media \((min|max)-width: \d+px\) \{$/.test(line)){
+    if(depth!==0)throw Error('Nested CSS media queries are forbidden at '+(index+1));
+    depth=1;mediaDepth=1;activeMedia=line;continue;
+  }
+  if(line.endsWith('{')){
+    const selector=line.slice(0,-1).trim();
+    if(!allowedSelectors.has(selector)&&!layoutSelectors.has(selector)&&!exactAlignment.has(selector))throw Error('Production selector not allowlisted: '+selector);
+    if(exactAlignment.has(selector)&&activeMedia!=='@media (max-width: 699px) {')throw Error('Alignment rules must be in exactly the mobile media query');
+    if(depth>1)throw Error('Nested CSS selectors are not permitted');
+    activeSelector=selector;depth++;ruleCount++;continue;
+  }
+  if(line==='}'){
+    if(depth<1)throw Error('Unbalanced CSS closing brace');
+    depth--;
+    if(depth===0){mediaDepth=0;activeMedia='';}
+    continue;
+  }
+  const match=/^(--dj890-dock-gap|[a-z-]+): ([^;{}]+);$/.exec(line);
+  if(!match || depth<(mediaDepth?2:1))throw Error('Malformed or unscoped declaration at line '+(index+1));
+  const property=match[1],value=match[2];
+  if(exactAlignment.has(activeSelector)){
+    const declarations=exactAlignment.get(activeSelector);
+    if(!Object.hasOwn(declarations,property)||declarations[property]!==value)throw Error('Unreviewed mobile alignment value: '+activeSelector+' / '+property);
+    continue;
+  }
+  if(!(layoutSelectors.has(activeSelector)?layoutProperties:allowedProperties).has(property))throw Error('Unapproved CSS property: '+property);
+  if(/url\s*\(|@|\\|var\s*\(|expression\s*\(|[<>]/i.test(value) || (!layoutSelectors.has(activeSelector)&&/!important/i.test(value)) || !/^[a-zA-Z0-9#.,%() +/!-]+$/.test(value) || /!(?!important$)/.test(value))throw Error('Unsafe CSS value: '+property);
+}
+if(depth!==0 || ruleCount<1)throw Error('Unbalanced or empty CSS');
+console.log('PASS: production CSS delta is scoped, restricted and credential-free ('+ruleCount+' rules).');

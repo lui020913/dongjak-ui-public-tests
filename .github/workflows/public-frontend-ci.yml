@@ -1,0 +1,60 @@
+name: Public frontend UI workbench CI (NO DEPLOY)
+on:
+  push:
+    branches:
+      - 'public/frontend-*'
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/public-frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/public-frontend-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install public dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check JavaScript syntax
+        run: npm run check
+      - name: Build public UI preview
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run responsive and interaction tests
+        run: npm run test:e2e
+      - name: Save anonymous UI screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-frontend-viewport-screenshots
+          path: frontend/visual-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload failure diagnostics only
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-frontend-playwright
+          path: frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 3

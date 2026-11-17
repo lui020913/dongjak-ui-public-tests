@@ -1,0 +1,22 @@
+{
+  "name": "dongjak-public-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "check": "node --check src/main.js && npm run check:production-overlay && npm run check:safety",
+    "test:e2e": "playwright test",
+    "check:safety": "node scripts/check-public-safety.mjs",
+    "check:production-overlay": "node scripts/check-production-overlay.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "6.16.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "vite": "7.3.0"
+  }
+}
