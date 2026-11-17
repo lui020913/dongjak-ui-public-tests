@@ -16,7 +16,7 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       CI: 'true'
       DONGJAK_TARGET_URL: ${{ vars.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/' }}
@@ -37,7 +37,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Capture anonymous real app screens and geometry
-        run: npx playwright test tests/visual-screen-inventory.spec.mjs --project=mobile --reporter=list
+        run: npx playwright test tests/visual-screen-inventory.spec.mjs --project=mobile --project=desktop --reporter=list
       - name: Generate browsable visual gallery
         if: always()
         run: node scripts/build-screen-gallery.mjs
