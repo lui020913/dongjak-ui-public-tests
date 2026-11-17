@@ -165,7 +165,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
       if(lastScale){resize?.unobserve(lastScale);lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}
       resize?.observe(scale);lastScale=scale;
       if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});}
-    }
+    }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});}
     const tip=doc.getElementById('dj840-map-tip');
     if(tip&&visible(tip)&&visible(scale)&&dock!==null){
       const scaleRect=scale.getBoundingClientRect();
