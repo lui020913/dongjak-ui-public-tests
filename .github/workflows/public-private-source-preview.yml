@@ -1,14 +1,24 @@
 name: Public runner - private source build and Preview
-run-name: v911 build source=${{ inputs.source_sha }}
+run-name: ${{ github.event_name == 'push' && github.event.head_commit.message || format('v911 build source={0}', inputs.source_sha || 'latest') }}
 on:
+  push:
+    branches: [main]
+    paths: [release/preview-request.json]
   workflow_dispatch:
     inputs:
       source_sha:
-        description: Exact current private v8.9.11 hotfix source SHA
-        required: true
+        description: Leave blank for the current private hotfix head; or pin an exact SHA
+        required: false
         type: string
+        default: ''
+      force_rebuild:
+        description: Rebuild an already audited candidate
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: dongjak-public-release
   cancel-in-progress: false
@@ -25,17 +35,60 @@ jobs:
     environment: public-source-build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    outputs:
+      source_sha: ${{ steps.resolve.outputs.source_sha }}
+      duplicate: ${{ steps.dedup.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
-      - name: Check exact private source and fetch without publishing it
+      - name: Resolve and verify the current source pin
+        id: resolve
         env:
           GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
         run: |
           set -euo pipefail
           test "$GITHUB_RUN_ATTEMPT" = 1 || { echo '::error::Dispatch a fresh build instead of rerunning a candidate'; exit 1; }
+          if [ "$GITHUB_EVENT_NAME" = push ];then
+            SOURCE_SHA="$(jq -er '.source_sha | strings' release/preview-request.json)"
+            [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+            jq -e --arg msg "v911 build source=$SOURCE_SHA" '.head_commit.message==$msg' "$GITHUB_EVENT_PATH" >/dev/null
+          fi
+          test -n "$GH_TOKEN"
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          [[ "$actual" =~ ^[a-f0-9]{40}$ ]]
+          if [ -n "$SOURCE_SHA" ];then
+            [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] && test "$SOURCE_SHA" = "$actual" || { echo '::error::Requested source is no longer the current head'; exit 1; }
+          fi
+          echo "SOURCE_SHA=$actual" >> "$GITHUB_ENV"
+          echo "source_sha=$actual" >> "$GITHUB_OUTPUT"
+          echo "Resolved exact source: $actual"
+      - name: Skip an existing exact candidate with active or successful UI verification
+        id: dedup
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_REBUILD: ${{ inputs.force_rebuild }}
+        run: |
+          set -euo pipefail
+          echo 'skip=false' >> "$GITHUB_OUTPUT"
+          if [ "$FORCE_REBUILD" = true ];then exit 0;fi
+          marker="$(curl -fsSL --max-time 15 "$PREVIEW_URL/release-source.json?dedup=$GITHUB_RUN_ID" 2>/dev/null)" || exit 0
+          build="$(printf '%s' "$marker" | jq -er --arg sha "$SOURCE_SHA" 'select(.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION") | .build_run|tostring' 2>/dev/null)" || exit 0
+          [[ "$build" =~ ^[1-9][0-9]*$ ]] || exit 0
+          previous="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" 2>/dev/null)" || exit 0
+          printf '%s' "$previous" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null || exit 0
+          audits="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/runs?branch=main&event=workflow_dispatch&per_page=100" 2>/dev/null)" || exit 0
+          if printf '%s' "$audits" | jq -e --arg sha "$SOURCE_SHA" --arg build "$build" '[.workflow_runs[]|select(.display_title==("v911 UI source="+$sha+" build="+$build) and (.conclusion=="success" or .status=="queued" or .status=="in_progress" or .status=="requested" or .status=="waiting" or .status=="pending"))]|length>0' >/dev/null;then
+            echo 'skip=true' >> "$GITHUB_OUTPUT"
+            echo "Candidate $SOURCE_SHA already has an active or successful audit for build $build. No duplicate build or deployment."
+          fi
+      - name: Check exact private source and fetch without publishing it
+        if: steps.dedup.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
           test -n "$GH_TOKEN"
           actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
@@ -51,6 +104,7 @@ jobs:
           test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
           echo 'Exact private source verified; no repository contents published.'
       - name: Run full unit suite and release build with private output suppressed
+        if: steps.dedup.outputs.skip != 'true'
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
@@ -80,6 +134,7 @@ jobs:
           run_private 'Release consistency' npm run check:release
           jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
       - name: Verify private source is still the requested head before packaging
+        if: steps.dedup.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
         run: |
@@ -87,6 +142,7 @@ jobs:
           actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
           test "$actual" = "$SOURCE_SHA"
       - name: Seal exact deployment files; no plaintext public artifacts
+        if: steps.dedup.outputs.skip != 'true'
         env:
           RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
         run: |
@@ -96,8 +152,9 @@ jobs:
           node scripts/seal-private-release.mjs seal "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed" "$SOURCE_SHA"
           rm -f "$RUNNER_TEMP/deploy.tar.gz"
       - uses: actions/upload-artifact@v4
+        if: steps.dedup.outputs.skip != 'true'
         with:
-          name: encrypted-v911-${{ inputs.source_sha }}
+          name: encrypted-v911-${{ steps.resolve.outputs.source_sha }}
           path: ${{ runner.temp }}/deploy.sealed
           if-no-files-found: error
           compression-level: 0
@@ -107,6 +164,9 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/private-application" "$RUNNER_TEMP/private-build.log" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed"
   preview:
     needs: build
+    if: needs.build.outputs.duplicate != 'true'
+    env:
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
     environment: public-cloudflare-preview
     permissions:
       contents: read
@@ -120,7 +180,7 @@ jobs:
         with: {node-version: '24'}
       - uses: actions/download-artifact@v4
         with:
-          name: encrypted-v911-${{ inputs.source_sha }}
+          name: encrypted-v911-${{ needs.build.outputs.source_sha }}
           path: ${{ runner.temp }}/encrypted
       - name: Authenticate and unpack tested deployment files
         env:

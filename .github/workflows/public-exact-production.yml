@@ -5,7 +5,7 @@ on:
     inputs:
       source_sha: {description: Exact approved private source SHA, required: true, type: string}
       build_run: {description: Successful public encrypted build and Preview run ID, required: true, type: string}
-      audit_run: {description: Successful five-viewport public UI gate run ID, required: true, type: string}
+      audit_run: {description: Successful nine-viewport public UI gate run ID, required: true, type: string}
 permissions:
   contents: read
   actions: read
@@ -36,10 +36,10 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[0-9]+$ && "$AUDIT_RUN" =~ ^[0-9]+$ ]]
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and .display_title==("v911 build source="+$sha)' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" --arg build "$BUILD_RUN" '.conclusion=="success" and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .path==".github/workflows/v911-remote-ui-gate.yml" and .display_title==("v911 UI source="+$sha+" build="+$build)' >/dev/null
           gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN/jobs?per_page=100" --jq '.jobs[]|[.name,.conclusion]|@tsv' > "$RUNNER_TEMP/gate.txt"
-          for viewport in mobile375 mobile390 tablet768 tablet1024 pc1440;do grep -Fx "$(printf 'ui (%s)\tsuccess' "$viewport")" "$RUNNER_TEMP/gate.txt" >/dev/null;done
+          for viewport in mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920;do grep -Fx "$(printf 'ui (%s)\tsuccess' "$viewport")" "$RUNNER_TEMP/gate.txt" >/dev/null;done
           curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
       - uses: actions/download-artifact@v4
         with:

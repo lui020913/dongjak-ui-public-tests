@@ -13,7 +13,7 @@ test('public deployment and audit carry the exact build identity',()=>{
  assert.match(source,/target\.hostname !== 'ui-v911-motion-preview\.'/);
  assert.match(build,/expected_build_run:\$build/);
  assert.ok(prod.includes('("v911 UI source="+$sha+" build="+$build)'));
- assert.match(prod,/mobile375 mobile390 tablet768 tablet1024 pc1440/);
+ assert.match(prod,/mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920/);
  assert.equal((gate.match(/node scripts\/verify-release-source\.mjs/g)||[]).length,2);
 });
 
@@ -45,4 +45,21 @@ test('remote UI gate uses the matching preinstalled browser image instead of rep
  assert.match(gate,/PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
  assert.match(gate,/Verify preinstalled Chromium/);
  assert.match(gate,/viewport: \[mobile375,mobile390,tablet768,tablet820,tablet1024,tablet1180,pc1280,pc1440,pc1920\]/);
+});
+
+test('owner-only preview request pushes pin exact source and deduplicate before private fetch',()=>{
+ const build=read('.github/workflows/public-private-source-preview.yml');
+ const prod=read('.github/workflows/public-exact-production.yml');
+ assert.ok(build.includes('paths: [release/preview-request.json]'));
+ assert.ok(build.includes("github.actor == 'lui020913'"));
+ assert.ok(build.includes('id: resolve')&&build.includes('id: dedup'));
+ assert.ok(build.indexOf('id: dedup')<build.indexOf('git -C "$work" fetch'));
+ assert.ok(build.includes('needs.build.outputs.source_sha'));
+ assert.ok(build.includes('force_rebuild:'));
+ assert.ok(build.includes('test "$SOURCE_SHA" = "$actual"'));
+ assert.match(prod,/on:\s+workflow_dispatch:/);
+ assert.doesNotMatch(prod,/on:\s+push:/);
+ assert.ok(prod.includes("github.actor == 'lui020913'"));
+ assert.ok(prod.includes('environment: public-cloudflare-production'));
+ assert.ok(prod.includes('(.event=="push" and .display_title==("v911 build source="+$sha))'));
 });
