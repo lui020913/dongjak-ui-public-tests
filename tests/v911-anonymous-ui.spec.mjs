@@ -46,9 +46,9 @@ test.afterEach(async({page},info)=>{
  try{
    const debug=await page.evaluate(()=>{
      const app=document.getElementById('app');
-     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities'];
+     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities'];
      const describe=n=>{if(!n)return null;const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id,className:n.getAttribute('class'),hidden:n.hidden,ariaHidden:n.getAttribute('aria-hidden'),rect:[r.x,r.y,r.width,r.height],display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents};};
-     return {viewport:[innerWidth,innerHeight],tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
+     return {viewport:[innerWidth,innerHeight],tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,webappTipVisible:app?.dataset.djWebappTipVisible,runMode:document.documentElement.dataset.djRunMode,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
    });
    await info.attach('anonymous-layout-diagnostic.json',{body:Buffer.from(JSON.stringify(debug,null,2)),contentType:'application/json'});
    console.log('UI_LAYOUT_DIAGNOSTIC',JSON.stringify(debug));
@@ -58,7 +58,18 @@ test('compact HUD and visible motion; desktop navigation and dark theme',async({
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  if(compact(page)){
    const nav=page.locator('#bottom-nav'),tip=page.locator('#dj840-map-tip'),scale=page.locator('#map .maplibregl-ctrl-scale');
-   await expect(nav).toBeVisible();await expect(tip).toBeVisible();await expect(scale).toBeVisible();
+   await expect(nav).toBeVisible();
+   // The browser-only install advice intentionally replaces the map TIP.
+   // Exercise the real snooze button before checking the ordinary HUD;
+   // do not suppress the advice by injecting storage or modifying app state.
+   const installAdvice=page.locator('#dj-browser-webapp-tip');
+   if(page.viewportSize().width<700&&await page.locator('html').getAttribute('data-dj-run-mode')==='browser'){
+     await expect(installAdvice).toBeVisible({timeout:30000});
+     await expect(tip).toBeHidden();
+     await tap(page,installAdvice.locator('.dj-webapp-tip-later'));
+     await expect(installAdvice).toBeHidden();
+   }
+   await expect(tip).toBeVisible();await expect(scale).toBeVisible();
    await expect.poll(async()=>{const n=await nav.boundingBox(),t=await tip.boundingBox(),s=await scale.boundingBox();return n&&t&&s&&n.y-t.y-t.height>=3&&n.y-t.y-t.height<=10&&t.y-s.y-s.height>=3&&t.y-s.y-s.height<=10;}).toBe(true);
    const contained=await nav.evaluate(n=>{const r=n.getBoundingClientRect();return [...n.querySelectorAll('.nav-tab')].every(b=>{const q=b.getBoundingClientRect();return q.top>=r.top-1&&q.bottom<=r.bottom+1})});expect(contained).toBe(true);
    await enter(page,'route-panel','route');await expect(tip).toBeHidden();
