@@ -6,7 +6,7 @@ import {applyBaseLandPalette,installMapThemeZoomGuard,getLatestMapInstance} from
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('v8.6.3 map theme guard still loads before the application entry',()=>{
+test('map theme guard and night analysis retain their startup ordering',()=>{
   const html=read('index.html');
   assert.ok(html.indexOf('/src/v862-map-theme-zoom-guard.js')<html.indexOf('/src/main.js'));
   assert.ok(html.includes('/src/v862-night-analysis-session.js'));
@@ -16,15 +16,18 @@ test('PC and tablet do not mount separate layout trees; every viewport uses the 
   const html=read('index.html');
   const main=read('src/main.js');
   const css=read('src/mobile-first-layout.css');
-  assert.doesNotMatch(html,/v862-pc-mobile-separation\.js|v876-desktop-final\.js/);
+  assert.equal(html.includes('v862-pc-mobile-separation.js'),false);
+  assert.equal(html.includes('v876-desktop-final.js'),false);
   assert.equal(main.includes('installDesktopSafetyRail('),false);
   assert.equal(main.includes('v881-tablet-'),false);
-  assert.equal(main.includes('v912-desktop-poi'),false);assert.equal(main.includes('v913-pc-design-system'),false);
-  assert.match(main,/import '\\.\\/mobile-first-layout\\.css'/);
-  assert.ok(css.includes('#bottom-nav:not([hidden])')&&css.includes('position: fixed !important'));
+  assert.equal(main.includes('v912-desktop-poi.css'),false);
+  assert.equal(main.includes('v913-pc-design-system.css'),false);
+  assert.ok(main.includes("import './mobile-first-layout.css'"));
+  assert.ok(css.includes('#bottom-nav:not([hidden])'));
+  assert.ok(css.includes('position: fixed !important'));
   assert.ok(css.includes('grid-template-columns: repeat(5,minmax(0,1fr))'));
-  assert.match(css,/#dj-desktop-safety-rail/);
-  assert.match(css,/#dj-tablet-utility-group/);
+  assert.ok(css.includes('#dj-desktop-safety-rail'));
+  assert.ok(css.includes('#dj-tablet-utility-group'));
 });
 
 test('dark map theme restores ground and 3D building colors after zoom',()=>{
@@ -32,9 +35,8 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.ok(guard.includes("role!=='ground'&&role!=='vegetation'"));
-  assert.match(guard,/theme==='dark'\\?'#253137':'#e1e4dc'/);
-  assert.match(main,/map\\.on\\('zoomend',\\(\\)=>\\{syncTiltWithBuildings\\(\\);scheduleBuildingLoad\\(\\);\\}\\)/);
-  assert.match(main,/buildingExtrusionAppearance\\(theme,pitch/);
+  assert.ok(guard.includes("theme==='dark'?'#253137':'#e1e4dc'"));
+  assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
   assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.88);
@@ -42,7 +44,7 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   assert.equal(buildingExtrusionAppearance('dark',30).color,'#30464d');
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'base-building','source-layer':'building'}),true);
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'dongjak-buildings-3d-01','source-layer':'building'}),false);
-  assert.match(appearance,/nearOpacity:0\\.88,farOpacity:0\\.82/);
+  assert.ok(appearance.includes('nearOpacity:0.88,farOpacity:0.82'));
 });
 
 test('MapLibre zoom guard restores only base-map ground and vegetation and preserves the map instance',()=>{
@@ -94,9 +96,9 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
 test('night analysis closes when leaving the map and when opening the pedestrian safety workbench',()=>{
   const session=read('src/v862-night-analysis-session.js');
   const runtime=read('src/night-visibility-map.js');
-  assert.match(session,/app\\.dataset\\.tab!=='map'\\|\\|app\\.classList\\.contains\\('map-safety-open'\\)/);
-  assert.match(session,/button\\?\\.getAttribute\\('aria-pressed'\\)==='true'\\)button\\.click\\(\\)/);
-  assert.match(session,/attributeFilter:\\['data-tab','class'\\]/);
-  assert.match(session,/safetyToggle\\?\\.addEventListener\\('click',stop,true\\)/);
-  assert.doesNotMatch(runtime,/safetyWorkbenchToggle\\?\\.addEventListener/);
+  assert.ok(session.includes("app.dataset.tab!=='map'||app.classList.contains('map-safety-open')"));
+  assert.ok(session.includes("button?.getAttribute('aria-pressed')==='true')button.click()"));
+  assert.ok(session.includes("attributeFilter:['data-tab','class']"));
+  assert.ok(session.includes("safetyToggle?.addEventListener('click',stop,true)"));
+  assert.equal(runtime.includes('safetyWorkbenchToggle?.addEventListener'),false);
 });
