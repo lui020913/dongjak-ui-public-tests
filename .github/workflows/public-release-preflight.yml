@@ -7,6 +7,9 @@ on:
       - 'scripts/seal-private-release.mjs'
       - 'tests/release-bundle.test.mjs'
       - 'scripts/verify-release-source.mjs'
+      - 'scripts/release-evidence-policy.mjs'
+      - 'scripts/verify-release-evidence.mjs'
+      - 'tests/release-evidence.test.mjs'
       - 'tests/v911-release-proof.test.mjs'
       - 'tests/v911-recovery.test.mjs'
       - 'scripts/viewport-scope-policy.mjs'
@@ -43,6 +46,9 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --check playwright.v911-remote.config.mjs
           node --check scripts/verify-release-source.mjs
+          node --check scripts/release-evidence-policy.mjs
+          node --check scripts/verify-release-evidence.mjs
+          node --test tests/release-evidence.test.mjs
           node --test tests/v911-release-proof.test.mjs tests/private-test-fingerprint.test.mjs tests/v911-recovery.test.mjs
           node --check scripts/v911-recovery.mjs
           node --check scripts/resolve-viewport-scope.mjs
