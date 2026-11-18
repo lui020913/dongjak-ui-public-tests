@@ -31,9 +31,9 @@ fi
 PREVIEW_URL=''
 for n in $(seq 1 12); do
   deployments="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=preview&per_page=50")"
-  candidate="$(printf '%s' "$deployments" | jq -c --arg branch "$PREVIEW_BRANCH" --arg public "$PUBLIC_SHA" '[.result[] | select((.deployment_trigger.metadata.branch // "")==$branch and ((.deployment_trigger.metadata.commit_message // "") | contains("public="+$public)))] | sort_by(.created_on) | last // empty')"
+  candidate="$(printf '%s' "$deployments" | jq -c --arg branch "$PREVIEW_BRANCH" --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" '[.result[] | select((.deployment_trigger.metadata.branch // "")==$branch and (((.deployment_trigger.metadata.commit_hash // "")==$source) or ((.deployment_trigger.metadata.commit_message // "") | contains("public="+$public))))] | sort_by(.created_on) | last // empty')"
   if [ -n "$candidate" ]; then
-    PREVIEW_URL="$(printf '%s' "$candidate" | jq -er '.url // empty')"
+    PREVIEW_URL="$(printf '%s' "$candidate" | jq -er '.url // .aliases[0] // empty')"
     break
   fi
   sleep 5
