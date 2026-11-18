@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a white screen with the existing mobile-access notice; remove literal backslash-n characters from the notice markup; preserve all PC/tablet source; phone-only QA must pass before protected Production promotion",
-  "attempt": 20,
+  "attempt": 21,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User asked to remove only the visibly rendered literal \\\\n sequences from the current notice screen and deploy immediately. Kept the existing notice wording/layout and white background; rebuilt the screen markup as one continuous HTML string with no literal backslash-n tokens. Enabled release concurrency cancellation so the newest corrected candidate is not blocked by an older stuck Preview QA run."
+  "last_retry_reason": "Preserved the existing centered notice presentation while removing only the visible literal \\\\n sequences. Restored the original white full-screen grid, typography, message width and paragraph spacing; no additional layout redesign."
 }
