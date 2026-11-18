@@ -205,7 +205,7 @@ test('PC desktop chrome and independent facility categories',async({page})=>{
  await test.info().attach('pc-safety-first-map',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('PC visual contract: compact profile, single-row transit header, readable dark surfaces and night mode isolation',async({page})=>{
+test('PC visual contract: compact profile and unobscured route footer',async({page})=>{
  test.skip(compact(page),'desktop only');
  await ready(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),categories=page.locator('#dj912-poi-categories');
@@ -216,6 +216,7 @@ test('PC visual contract: compact profile, single-row transit header, readable d
  await expect(preview).toBeVisible();
  await expect.poll(()=>preview.evaluate(n=>{const a=n.getBoundingClientRect(),g=n.querySelector('svg,img')?.getBoundingClientRect();return !!g&&a.width<=60&&a.height<=60&&g.width<=60&&g.height<=60;})).toBe(true);
  await test.info().attach('pc-profile-bounded',{body:await page.screenshot(),contentType:'image/png'});
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));await expect(profile).toBeVisible();
  await tap(page,tab(page,'map'));
  await expect(page.locator('#mine-panel')).toBeHidden();
  await tap(page,tab(page,'route'));
@@ -226,6 +227,11 @@ test('PC visual contract: compact profile, single-row transit header, readable d
  await expect.poll(async()=>{const a=await body.boundingBox(),b=await footer.boundingBox();return !!a&&!!b&&a.y+a.height<=b.y+2;}).toBe(true);
  await tap(page,tab(page,'map'));
  await expect(route).toBeHidden();
+});
+
+test('PC dark transit surfaces and arrival rows remain readable and unclipped',async({page})=>{
+ test.skip(compact(page),'desktop only');await ready(page);
+ const app=page.locator('#app');
  await tap(page,tab(page,'mine'));
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
@@ -244,6 +250,11 @@ test('PC visual contract: compact profile, single-row transit header, readable d
  await expect(sheet).toBeVisible();await expect(head).toHaveCSS('background-color','rgb(25, 27, 31)');await expect(bar).toHaveCSS('background-color','rgb(25, 27, 31)');
  await test.info().attach('pc-dark-metro',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
+});
+
+test('PC night report fits workspace and facility categories restore on exit',async({page})=>{
+ test.skip(compact(page),'desktop only');await ready(page);
+ const app=page.locator('#app'),nav=page.locator('#bottom-nav'),categories=page.locator('#dj912-poi-categories');
  await expect(categories).toBeVisible();
  const selection=await app.getAttribute('data-dj912-poi-groups');
  await tap(page,nav.locator('#night-visibility-quick-off'));
