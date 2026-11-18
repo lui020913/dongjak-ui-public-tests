@@ -30,7 +30,8 @@ test('candidate publication is single-attempt and serializes with Production',()
  assert.ok(build.includes('group: dongjak-public-release'));
  assert.ok(prod.includes('group: dongjak-public-release'));
  assert.equal((build.match(/test "\$GITHUB_RUN_ATTEMPT" = 1/g)||[]).length,2);
- assert.match(prod,/\.run_attempt==1/);
+ assert.ok(prod.includes('test "$GITHUB_RUN_ATTEMPT" = 1'));
+ assert.match(read('scripts/release-evidence-policy.mjs'),/run\.run_attempt===1/);
 });
 
 test('public runner synchronizes visible version metadata before the complete Node test suite',()=>{
@@ -72,7 +73,7 @@ test('owner-only preview request pushes pin exact source and deduplicate before 
  assert.ok(prod.includes('[.files[].filename]|unique'));
  assert.doesNotMatch(prod,/\.head_commit\.added\[\]/);
  assert.ok(prod.includes('.pusher.name=="lui020913"'));
- assert.ok(prod.includes('v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN'));
+ assert.ok(prod.includes('v911 Production source=$SOURCE_SHA build=$BUILD_RUN evidence=$EVIDENCE_RUNS'));
  assert.ok(prod.includes('test "$GITHUB_RUN_ATTEMPT" = 1'));
  assert.ok(prod.includes('run-id: ${{ steps.resolve.outputs.build_run }}'));
  assert.ok(prod.includes("github.actor == 'lui020913'"));
