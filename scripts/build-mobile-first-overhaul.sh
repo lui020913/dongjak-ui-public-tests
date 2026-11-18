@@ -44,6 +44,7 @@ NODE
 echo "CHECKPOINT: mobile CSS import injected"
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-17-followup.mjs" "$work"
 node --check src/mobile-17-followup.js
+cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
 expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-verified-data-layers.js src/main.js src/map-appearance.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/v824-favorites-cloud.js src/v840-coordinated-ui.js)"
