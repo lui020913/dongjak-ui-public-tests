@@ -258,7 +258,9 @@ test('PC night report fits workspace and facility categories restore on exit',as
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),categories=page.locator('#dj912-poi-categories');
  await expect(categories).toBeVisible();
  const selection=await app.getAttribute('data-dj912-poi-groups');
- await tap(page,nav.locator('#night-visibility-quick-off'));
+ const nightAction=nav.locator('#night-visibility-quick-off');
+ await expect(nightAction.locator('.dj-night-action-text')).toBeVisible({timeout:45000});
+ await nightAction.click();
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  const night=page.locator('#night-visibility-float');
  await expect(night).toBeVisible();await expect(categories).toBeHidden();
