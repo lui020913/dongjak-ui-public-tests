@@ -71,6 +71,9 @@ test.afterEach(async({page},info)=>{
 test('compact HUD and visible motion; desktop navigation and dark theme',async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  if(compact(page)){
+   const header=page.locator('.topbar'),brandLogo=header.locator('.map-quick-search-form > .brand .logo img');
+   await expect(header.locator(':scope > #dj-settings-mobile')).toBeHidden();
+   await expect(brandLogo).toHaveCount(1);await expect(brandLogo).toBeVisible();
    const nav=page.locator('#bottom-nav'),tip=page.locator('#dj840-map-tip'),scale=page.locator('#map .maplibregl-ctrl-scale');
    await expect(nav).toBeVisible();
    // The browser-only install advice intentionally replaces the map TIP.
