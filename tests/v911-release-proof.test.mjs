@@ -20,7 +20,7 @@ test('public deployment verifies cumulative exact-source viewport evidence',()=>
  assert.ok(evidence.includes('validateFocusedTabletEvidence'));
  assert.ok(evidence.includes('missingViewports'));
  assert.match(prod,/\.approval=="explicit-owner-request"/);
- assert.match(prod,/mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920/);
+ assert.match(read('scripts/release-evidence-policy.mjs'),/mobile375.*mobile390.*tablet768.*tablet820.*tablet1024.*tablet1180.*pc1280.*pc1440.*pc1920/s);
  assert.equal((gate.match(/node scripts\/verify-release-source\.mjs/g)||[]).length,2);
 });
 
@@ -78,7 +78,7 @@ test('owner-only preview request pushes pin exact source and deduplicate before 
  assert.ok(prod.includes('run-id: ${{ steps.resolve.outputs.build_run }}'));
  assert.ok(prod.includes("github.actor == 'lui020913'"));
  assert.ok(prod.includes('environment: public-cloudflare-production'));
- assert.ok(prod.includes('(.event=="push" and .display_title==("v911 build source="+$sha))'));
+ assert.ok(read('scripts/release-evidence-policy.mjs').includes('run.display_title===`v911 build source=${sourceSha}`'));
 });
 
 test('v8.9.13 candidate checks the exact deployed v8.9.12 predecessor and marker without weakening audit gates',()=>{
