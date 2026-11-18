@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        viewport: [mobile375,mobile390,tablet768,tablet1024,pc1440]
+        viewport: [mobile375,mobile390,tablet768,tablet820,tablet1024,tablet1180,pc1280,pc1440,pc1920]
     env:
       DONGJAK_TARGET_URL: ${{ inputs.target_url }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}

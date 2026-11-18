@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const compact=page=>page.viewportSize().width<1080;
+const compact=page=>page.viewportSize().width<1080||page.viewportSize().width===1180;
 const tab=(page,key)=>page.locator('#bottom-nav .nav-tab[data-tab="'+key+'"]');
 async function tap(page,locator){
  await expect(locator).toBeVisible();
@@ -101,7 +101,7 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
 
 test('tablet workspace margins, unclipped tools, More and safety modal',async({page})=>{
   const width=page.viewportSize().width;
-  test.skip(width<700||width>=1080,'tablet only');
+  test.skip(width<700||!compact(page),'tablet only');
   await ready(page);
   const toolbar=page.locator('#dj-v794-toolbar'),scroll=toolbar.locator('.dj831-scrollport');
   await expect(toolbar).toBeVisible();
@@ -121,12 +121,14 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   const icon=more.locator('.dj832-more-icon svg').first();
   await expect(icon).toBeVisible();
   const i=await icon.boundingBox();expect(i.width).toBeLessThanOrEqual(24);expect(i.height).toBeLessThanOrEqual(24);
+  await test.info().attach('tablet-more',{body:await page.screenshot(),contentType:'image/png'});
   await tap(page,page.locator('#dj-mobile-utilities-close'));
   await tap(page,page.locator('#dj-v794-safety'));
   const shade=page.locator('#map-safety-backdrop'),panel=page.locator('#map-safety-controls');
   await expect(shade).toBeVisible();await expect(panel).toBeVisible();
   const d=await shade.boundingBox();expect(d.x).toBeGreaterThanOrEqual(-1);expect(d.y).toBeGreaterThanOrEqual(-1);
   expect(d.width).toBeGreaterThanOrEqual(width-1);expect(d.height).toBeGreaterThanOrEqual(page.viewportSize().height-1);
+  await test.info().attach('tablet-safety',{body:await page.screenshot(),contentType:'image/png'});
   await tap(page,page.locator('#map-safety-close'));
   await expect(shade).toBeHidden();
 });
