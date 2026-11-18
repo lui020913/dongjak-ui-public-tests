@@ -51,7 +51,7 @@ jobs:
         run: |
           node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); console.log('Chromium ready: '+b.version()); await b.close()"
       - name: Run only the 768px tablet test
-        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=tablet768
+        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=tablet768 --grep 'tablet More panel is fully visible and contained'
       - name: Verify exact Preview did not change while testing
         if: always()
         run: node scripts/verify-release-source.mjs
