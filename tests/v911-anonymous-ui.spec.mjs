@@ -264,6 +264,11 @@ test('PC night report fits workspace and facility categories restore on exit',as
  await expect(nightAction).toBeEnabled();
  await expect(nightAction.locator('.dj-night-action-text')).toBeVisible({timeout:45000});
  await nightAction.click();
+ const consent=page.locator('#dj876-night-confirm');
+ await expect(consent.getByRole('dialog')).toBeVisible();
+ await expect(app).toHaveAttribute('data-sangdo-night','off');
+ await consent.getByRole('button',{name:'전환',exact:true}).click();
+ await expect(consent).toBeHidden();
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  const night=page.locator('#night-visibility-float');
  await expect(night).toBeVisible();await expect(categories).toBeHidden();
@@ -272,4 +277,22 @@ test('PC night report fits workspace and facility categories restore on exit',as
  await tap(page,night.locator('#night-visibility-float-stop'));
  await expect(app).toHaveAttribute('data-sangdo-night','off',{timeout:30000});
  await expect(categories).toBeVisible();await expect(app).toHaveAttribute('data-dj912-poi-groups',selection);
+});
+
+test('phone night shortcut waits for the map, honors consent and exits',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ const app=page.locator('#app'),shortcut=page.locator('#dj-v794-night');
+ await expect(app).toHaveAttribute('data-dj-night-ready','true',{timeout:60000});
+ await expect(shortcut).toBeEnabled();
+ await shortcut.click();
+ const consent=page.locator('#dj833-night-modal');
+ await expect(consent.getByRole('dialog')).toBeVisible();
+ await expect(app).toHaveAttribute('data-sangdo-night','off');
+ await consent.getByRole('button',{name:'예, 시작',exact:true}).click();
+ const night=page.locator('#night-visibility-float');
+ await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
+ await expect(night).toBeVisible();
+ await night.locator('#night-visibility-float-stop').click();
+ await expect(app).toHaveAttribute('data-sangdo-night','off');
+ await expect(night).toBeHidden();
 });
