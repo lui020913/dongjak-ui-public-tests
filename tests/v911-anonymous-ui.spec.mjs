@@ -23,12 +23,24 @@ async function ready(page,{keepTour=false}={}){
  const tour=page.locator('#dj860-onboarding');
  await expect(page.locator('#app')).toHaveAttribute('data-dj860-auto-resolved','true',{timeout:45000});
  await expect(tour).toBeVisible({timeout:30000});
+ await visuallyPresented(tour);
  if(keepTour)return;
  await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 }
 async function geometry(page,sel){
  await expect.poll(async()=>{const p=await page.locator(sel).boundingBox(),n=await page.locator('#bottom-nav').boundingBox();return p&&n?n.y-p.y-p.height:-1000}).toBeGreaterThanOrEqual(5);
+}
+async function visuallyPresented(locator){
+ await expect.poll(()=>locator.evaluate(n=>{
+   const r=n.getBoundingClientRect();
+   if(r.width<1||r.height<1||r.right<=0||r.bottom<=0||r.left>=innerWidth||r.top>=innerHeight)return false;
+   for(let p=n;p;p=p.parentElement){const s=getComputedStyle(p);if(s.display==='none'||s.visibility!=='visible'||Number(s.opacity)<.98)return false;}
+   const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2));
+   const y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));
+   const hit=document.elementFromPoint(x,y);
+   return hit===n||n.contains(hit);
+ })).toBe(true);
 }
 async function enter(page,id,key){
  await page.evaluate(id=>{
@@ -129,6 +141,7 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   await tap(page,page.locator('#dj-v794-more'));
   const more=page.locator('#dj-mobile-utilities');
   await expect(more).toBeVisible();
+  await visuallyPresented(more);
   const r=await more.boundingBox();
   expect(r.x).toBeGreaterThanOrEqual(18);
   expect(width-r.x-r.width).toBeGreaterThanOrEqual(18);
@@ -141,6 +154,7 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   await tap(page,page.locator('#dj-v794-safety'));
   const shade=page.locator('#map-safety-backdrop'),panel=page.locator('#map-safety-controls');
   await expect(shade).toBeVisible();await expect(panel).toBeVisible();
+  await visuallyPresented(panel);
   const d=await shade.boundingBox();expect(d.x).toBeGreaterThanOrEqual(-1);expect(d.y).toBeGreaterThanOrEqual(-1);
   expect(d.width).toBeGreaterThanOrEqual(width-1);expect(d.height).toBeGreaterThanOrEqual(page.viewportSize().height-1);
   await test.info().attach('tablet-safety',{body:await page.screenshot(),contentType:'image/png'});
@@ -152,10 +166,12 @@ test('all five onboarding illustrations remain uncropped on tablet and desktop',
   test.skip(page.viewportSize().width<700,'tablet and desktop only');
   await ready(page,{keepTour:true});
   const tour=page.locator('#dj860-onboarding'),image=tour.locator('.dj860-screen-image');
+  await visuallyPresented(tour);
   for(let slide=1;slide<=5;slide++){
     await expect(tour.locator('#dj860-count')).toHaveText(new RegExp('0'+slide+'\\s*/\\s*05'));
     await expect(image).toBeVisible();
     await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
+    await visuallyPresented(image);
     await expect(image).toHaveCSS('object-fit','contain');
     await test.info().attach('onboarding-'+slide,{body:await page.screenshot(),contentType:'image/png'});
     if(slide<5)await tap(page,tour.locator('[data-dj860-action="next"]'));
@@ -176,6 +192,7 @@ test('phone compact toolbar, reachable swipe cue and bottom dock share a visual 
  const wx=scroll.locator('#dj-v794-weather .dj910-weather-icon svg');await expect(wx).toBeAttached();
  await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
  await tap(page,more);await expect(page.locator('#dj-mobile-utilities')).toBeVisible();
+ await visuallyPresented(page.locator('#dj-mobile-utilities'));
  await expect(page.locator('#dj-v794-toolbar')).toBeHidden();
  await tap(page,page.locator('#dj-mobile-utilities-close'));await expect(page.locator('#dj-mobile-utilities')).toBeHidden();
  await expect(page.locator('#dj-v794-toolbar')).toBeVisible();
@@ -200,6 +217,7 @@ test('PC desktop chrome and independent facility categories',async({page})=>{
  await tap(page,categories.locator('[data-poi-group="default"]'));await expect(food).toHaveAttribute('aria-pressed','false');await expect(cafe).toHaveAttribute('aria-pressed','false');
  await tap(page,page.locator('#map-quick-search-query'));
  const results=page.locator('#map-quick-search-dropdown');await expect(results).toBeVisible();
+ await visuallyPresented(results);
  await expect.poll(async()=>Math.abs((await nav.boundingBox()).y-idle.y)).toBeLessThanOrEqual(2);
  const r=await results.boundingBox();expect(r.x).toBeGreaterThanOrEqual(0);expect(r.x+r.width).toBeLessThanOrEqual(page.viewportSize().width);
  await test.info().attach('pc-search-and-stationary-navigation',{body:await page.screenshot(),contentType:'image/png'});
@@ -216,6 +234,8 @@ test('PC visual contract: compact profile and unobscured route footer',async({pa
  await tap(page,profile);
  const preview=page.locator('#mine-panel .dj877-photo-preview');
  await expect(preview).toBeVisible();
+ await visuallyPresented(page.locator('#mine-panel'));
+ await visuallyPresented(preview);
  await expect.poll(()=>preview.evaluate(n=>{const a=n.getBoundingClientRect(),g=n.querySelector('svg,img')?.getBoundingClientRect();return !!g&&a.width<=60&&a.height<=60&&g.width<=60&&g.height<=60;})).toBe(true);
  await test.info().attach('pc-profile-bounded',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,page.locator('#mine-panel .dj834-detail-back'));await expect(profile).toBeVisible();
@@ -224,6 +244,7 @@ test('PC visual contract: compact profile and unobscured route footer',async({pa
  await tap(page,tab(page,'route'));
  const route=page.locator('#route-panel');
  await expect(route).toBeVisible();
+ await visuallyPresented(route);
  await expect(route.locator('.dj-sheet-chrome-grip')).toBeHidden();
  const footer=route.locator('#dj910-route-footer'),body=route.locator('.dj836-sheet-body');
  await expect.poll(async()=>{const a=await body.boundingBox(),b=await footer.boundingBox();return !!a&&!!b&&a.y+a.height<=b.y+2;}).toBe(true);
@@ -243,13 +264,14 @@ test('PC dark transit surfaces and arrival rows remain readable and unclipped',a
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'bus',name:'노량진역5번출구',lng:126.9423,lat:37.5133,arsId:'20240'}}})));
  const sheet=page.locator('#transport-sheet'),head=sheet.locator('.transport-panel-head'),bar=sheet.locator('.transport-arrivals-title'),cards=sheet.locator('#transport-arrivals .transport-arrival-row');
  await expect(sheet).toBeVisible();await expect(cards).toHaveCount(2);
+ await visuallyPresented(sheet);
  await expect(head).toHaveCSS('background-color','rgb(25, 27, 31)');
  await expect(bar).toHaveCSS('background-color','rgb(25, 27, 31)');
  await expect.poll(async()=>{const h=await head.boundingBox(),a=await head.locator('.dj-news-transport-actions').boundingBox(),c=await sheet.locator('#transport-close').boundingBox(),b=await bar.boundingBox(),r=await cards.first().boundingBox();return !!h&&!!a&&!!c&&!!b&&!!r&&Math.abs((a.y+a.height/2)-(c.y+c.height/2))<=6&&r.y>=b.y+b.height-2;}).toBe(true);
  await test.info().attach('pc-dark-bus-no-overlap',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'노량진',lng:126.9411,lat:37.5142,lines:['1호선','9호선'],selectedLine:'1호선'}}})));
- await expect(sheet).toBeVisible();await expect(head).toHaveCSS('background-color','rgb(25, 27, 31)');await expect(bar).toHaveCSS('background-color','rgb(25, 27, 31)');
+ await expect(sheet).toBeVisible();await visuallyPresented(sheet);await expect(head).toHaveCSS('background-color','rgb(25, 27, 31)');await expect(bar).toHaveCSS('background-color','rgb(25, 27, 31)');
  await test.info().attach('pc-dark-metro',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
 });
@@ -271,7 +293,7 @@ test('PC night report fits workspace and facility categories restore on exit',as
  await expect(consent).toBeHidden();
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  const night=page.locator('#night-visibility-float');
- await expect(night).toBeVisible();await expect(categories).toBeHidden();
+ await expect(night).toBeVisible();await visuallyPresented(night);await expect(categories).toBeHidden();
  await expect.poll(async()=>{const n=await night.boundingBox(),r=await nav.boundingBox();return !!n&&!!r&&n.y>=r.y-3;}).toBe(true);
  await test.info().attach('pc-night-isolated',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,night.locator('#night-visibility-float-stop'));
@@ -292,6 +314,7 @@ test('phone night shortcut waits for the map, honors consent and exits',async({p
  const night=page.locator('#night-visibility-float');
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  await expect(night).toBeVisible();
+ await visuallyPresented(night);
  await night.locator('#night-visibility-float-stop').click();
  await expect(app).toHaveAttribute('data-sangdo-night','off');
  await expect(night).toBeHidden();
