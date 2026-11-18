@@ -1,5 +1,5 @@
 name: Mobile-only release — Preview, phone QA and protected Production
-run-name: Mobile-only release source=\${{ github.sha }}
+run-name: Mobile-only release source=${{ github.sha }}
 on:
   push:
     branches: [main]
@@ -20,10 +20,10 @@ jobs:
     environment: public-source-build
     timeout-minutes: 65
     outputs:
-      source_sha: \${{ steps.build.outputs.source_sha }}
-      app_version: \${{ steps.build.outputs.app_version }}
-      public_sha: \${{ steps.build.outputs.public_sha }}
-      css_sha: \${{ steps.build.outputs.css_sha }}
+      source_sha: ${{ steps.build.outputs.source_sha }}
+      app_version: ${{ steps.build.outputs.app_version }}
+      public_sha: ${{ steps.build.outputs.public_sha }}
+      css_sha: ${{ steps.build.outputs.css_sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,16 +41,16 @@ jobs:
       - name: Fetch, mobile-test, build and seal exact source
         id: build
         env:
-          GH_TOKEN: \${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
-          PRIVATE_SOURCE_READ_TOKEN: \${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
-          RELEASE_BUNDLE_KEY: \${{ secrets.RELEASE_BUNDLE_KEY }}
-          VITE_SUPABASE_URL: \${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: \${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+          PRIVATE_SOURCE_READ_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: bash scripts/build-mobile-first-overhaul.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: mobile-first-overhaul-sealed-\${{ steps.build.outputs.source_sha }}
-          path: \${{ runner.temp }}/mobile-overhaul.sealed
+          name: mobile-first-overhaul-sealed-${{ steps.build.outputs.source_sha }}
+          path: ${{ runner.temp }}/mobile-overhaul.sealed
           if-no-files-found: error
           compression-level: 0
           retention-days: 3
@@ -66,18 +66,18 @@ jobs:
     environment: public-cloudflare-preview
     timeout-minutes: 30
     outputs:
-      preview_url: \${{ steps.deploy.outputs.preview_url }}
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
     permissions:
       contents: read
     env:
-      MOBILE_SOURCE_SHA: \${{ needs.build.outputs.source_sha }}
-      MOBILE_APP_VERSION: \${{ needs.build.outputs.app_version }}
-      MOBILE_PUBLIC_SHA: \${{ needs.build.outputs.public_sha }}
-      MOBILE_CSS_SHA: \${{ needs.build.outputs.css_sha }}
-      CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      RELEASE_BUNDLE_KEY: \${{ secrets.RELEASE_BUNDLE_KEY }}
-      GH_TOKEN: \${{ github.token }}
+      MOBILE_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      MOBILE_APP_VERSION: ${{ needs.build.outputs.app_version }}
+      MOBILE_PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      MOBILE_CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,8 +87,8 @@ jobs:
           node-version: '24'
       - uses: actions/download-artifact@v4
         with:
-          name: mobile-first-overhaul-sealed-\${{ needs.build.outputs.source_sha }}
-          path: \${{ runner.temp }}
+          name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
+          path: ${{ runner.temp }}
       - name: Deploy exact candidate to isolated Preview only
         id: deploy
         run: bash scripts/deploy-mobile-first-overhaul-preview.sh
@@ -106,13 +106,13 @@ jobs:
       options: --ipc=host
     timeout-minutes: 30
     env:
-      DONGJAK_TARGET_URL: \${{ needs.preview.outputs.preview_url }}/
-      DONGJAK_EXPECTED_SOURCE_SHA: \${{ needs.build.outputs.source_sha }}
-      SOURCE_SHA: \${{ needs.build.outputs.source_sha }}
-      PUBLIC_SHA: \${{ needs.build.outputs.public_sha }}
-      CSS_SHA: \${{ needs.build.outputs.css_sha }}
-      APP_VERSION: \${{ needs.build.outputs.app_version }}
-      BUILD_RUN: \${{ github.run_id }}
+      DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}/
+      DONGJAK_EXPECTED_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      APP_VERSION: ${{ needs.build.outputs.app_version }}
+      BUILD_RUN: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -143,7 +143,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-only-phone-qa-\${{ github.run_id }}
+          name: mobile-only-phone-qa-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
@@ -158,17 +158,17 @@ jobs:
     environment: public-cloudflare-production
     timeout-minutes: 35
     env:
-      SOURCE_SHA: \${{ needs.build.outputs.source_sha }}
-      PUBLIC_SHA: \${{ needs.build.outputs.public_sha }}
-      CSS_SHA: \${{ needs.build.outputs.css_sha }}
-      APP_VERSION: \${{ needs.build.outputs.app_version }}
-      BUILD_RUN: \${{ github.run_id }}
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      APP_VERSION: ${{ needs.build.outputs.app_version }}
+      BUILD_RUN: ${{ github.run_id }}
       PAGES_PROJECT: dongjak-walk-safety-preview
       PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
-      CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      RELEASE_BUNDLE_KEY: \${{ secrets.RELEASE_BUNDLE_KEY }}
-      PRIVATE_SOURCE_READ_TOKEN: \${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      PRIVATE_SOURCE_READ_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -178,8 +178,8 @@ jobs:
           node-version: '24'
       - uses: actions/download-artifact@v4
         with:
-          name: mobile-first-overhaul-sealed-\${{ needs.build.outputs.source_sha }}
-          path: \${{ runner.temp }}/encrypted
+          name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
+          path: ${{ runner.temp }}/encrypted
       - name: Decrypt the exact mobile-tested artifact
         run: |
           set -euo pipefail
@@ -193,7 +193,7 @@ jobs:
             "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
       - name: Reconfirm archived source ref and exact source SHA
         env:
-          GH_TOKEN: \${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
         run: |
           set -euo pipefail
           source_ref="$(jq -er '.source_ref' release/mobile-first-overhaul-source.json)"
