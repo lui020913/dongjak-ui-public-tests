@@ -35,8 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # One-off scope for the explicitly requested 768px tablet More-panel check.
-        viewport: ${{ fromJSON(inputs.expected_build_run == '44281610172' && '["tablet768"]' || (inputs.viewport_scope == 'mobile' && '["mobile375","mobile390"]' || inputs.viewport_scope == 'tablet' && '["tablet768","tablet820","tablet1024","tablet1180"]' || inputs.viewport_scope == 'pc' && '["pc1280","pc1440","pc1920"]' || '["mobile375","mobile390","tablet768","tablet820","tablet1024","tablet1180","pc1280","pc1440","pc1920"]')) }}
+        viewport: ${{ fromJSON(inputs.viewport_scope == 'mobile' && '["mobile375","mobile390"]' || inputs.viewport_scope == 'tablet' && '["tablet768","tablet820","tablet1024","tablet1180"]' || inputs.viewport_scope == 'pc' && '["pc1280","pc1440","pc1920"]' || '["mobile375","mobile390","tablet768","tablet820","tablet1024","tablet1180","pc1280","pc1440","pc1920"]') }}
     env:
       DONGJAK_TARGET_URL: ${{ inputs.target_url }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
