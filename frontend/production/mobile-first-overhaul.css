@@ -913,3 +913,50 @@ html[data-theme="dark"] #app,
     box-shadow: var(--mf-shadow-raised) !important;
   }
 }
+
+
+/* Match the established app's charcoal dark surfaces and compact-toolbar
+   interaction contract used by the full nine-viewport regression gate. */
+html[data-theme="dark"] #app,
+#app[data-theme="dark"] {
+  --mf-surface: #191b1f;
+  --mf-surface-raised: #23262d;
+  --mf-surface-soft: #2c3038;
+  --mf-text: #f0f2f5;
+  --mf-muted: #aeb6c2;
+  --mf-border: #3a3f49;
+  --mf-brand: #65d2a8;
+  --mf-brand-strong: #83e0ba;
+  --mf-brand-soft: #263e35;
+  --mf-shadow: 0 8px 26px rgba(0, 0, 0, .24);
+  --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .34);
+  color-scheme: dark;
+}
+
+@media (max-width: 699px) {
+  html body #app .topbar .weather-widget {
+    display: none !important;
+  }
+
+  html body #app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool {
+    flex-basis: 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+  }
+
+  html body #app #dj-v794-toolbar > #dj-v794-more {
+    flex-basis: 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    border-radius: 16px !important;
+  }
+
+  html body #app #bottom-nav {
+    bottom: max(0px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
