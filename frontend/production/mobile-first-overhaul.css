@@ -4,7 +4,7 @@
  * The map engine, application state, route logic and backend remain untouched.
  */
 
-#app {
+#app#app#app#app#app {
   --mf-surface: #ffffff;
   --mf-surface-raised: #f7faf8;
   --mf-surface-soft: #edf5f0;
@@ -29,7 +29,7 @@
   color-scheme: light;
 }
 
-#app[data-theme="dark"] {
+#app#app#app#app#app[data-theme="dark"] {
   --mf-surface: #192c24;
   --mf-surface-raised: #20372d;
   --mf-surface-soft: #294638;
@@ -45,13 +45,13 @@
 }
 
 /* Shared visual language: layout can change by viewport, component treatment does not. */
-#app :is(.topbar .map-quick-search-form, #bottom-nav, .page-panel, #transport-sheet,
+#app#app#app#app#app :is(.topbar .map-quick-search-form, #bottom-nav, .page-panel, #transport-sheet,
   #detail-sheet, #entry-sheet, #dj-mobile-utilities, #map-safety-controls,
   #map-advanced-controls, #dj832-data-sheet) {
   color: var(--mf-text);
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel,
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel,
   #transport-sheet, #detail-sheet, #entry-sheet, #dj-mobile-utilities,
   #map-safety-controls, #map-advanced-controls, #dj832-data-sheet) {
   border-color: var(--mf-border);
@@ -59,13 +59,13 @@
   box-shadow: var(--mf-shadow-raised);
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
   .dj-sheet-chrome {
   background: var(--mf-surface);
   border-bottom: 1px solid var(--mf-border);
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
   .dj-sheet-chrome-title h2 {
   color: var(--mf-text);
   font-size: 18px;
@@ -74,12 +74,12 @@
   letter-spacing: -.035em;
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
   .dj-sheet-chrome-title :is(small, .eyebrow, .dj-page-intro) {
   color: var(--mf-muted);
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
   .dj-sheet-chrome-close {
   width: var(--mf-touch);
   height: var(--mf-touch);
@@ -91,7 +91,7 @@
   color: var(--mf-text);
 }
 
-#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+#app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
   .dj836-sheet-body {
   background: var(--mf-surface);
   color: var(--mf-text);
@@ -99,7 +99,7 @@
   scrollbar-width: thin;
 }
 
-#app :is(.route-card, .dongjak-news-item, .stat-grid > div, .dj877-pref-group,
+#app#app#app#app#app :is(.route-card, .dongjak-news-item, .stat-grid > div, .dj877-pref-group,
   .community-post, .community-empty, .dj815-route-section) {
   border: 1px solid var(--mf-border);
   border-radius: var(--mf-radius-card);
@@ -107,7 +107,7 @@
   box-shadow: none;
 }
 
-#app :is(.route-select-actions button, .route-gps-btn, .route-calc, .route-restore,
+#app#app#app#app#app :is(.route-select-actions button, .route-gps-btn, .route-calc, .route-restore,
   .community-category-tabs button, .community-compose-toggle,
   .dongjak-news-tabs button, #dongjak-news-refresh,
   .dj-sheet-chrome button, .dj836-sheet-body button) {
@@ -115,7 +115,7 @@
   border-radius: var(--mf-radius-control);
 }
 
-#app :is(.route-select-actions button, .route-gps-btn, .route-calc, .route-restore,
+#app#app#app#app#app :is(.route-select-actions button, .route-gps-btn, .route-calc, .route-restore,
   .community-category-tabs button, .community-compose-toggle,
   .dongjak-news-tabs button, #dongjak-news-refresh) {
   border-color: var(--mf-border);
@@ -123,22 +123,22 @@
   color: var(--mf-text);
 }
 
-#app :is(.route-calc, .community-compose-toggle):not(:disabled),
-#app #route-panel .route-select-actions button[aria-pressed="true"],
-#app #participation-panel .community-category-tabs button[aria-pressed="true"],
-#app #news-panel .dongjak-news-tabs button[aria-pressed="true"] {
+#app#app#app#app#app :is(.route-calc, .community-compose-toggle):not(:disabled),
+#app#app#app#app#app #route-panel .route-select-actions button[aria-pressed="true"],
+#app#app#app#app#app #participation-panel .community-category-tabs button[aria-pressed="true"],
+#app#app#app#app#app #news-panel .dongjak-news-tabs button[aria-pressed="true"] {
   border-color: var(--mf-brand);
   background: var(--mf-brand-soft);
   color: var(--mf-brand-strong);
 }
 
-#app :is(.dj-page-intro, .page-note, .route-location-text span, .helper-text) {
+#app#app#app#app#app :is(.dj-page-intro, .page-note, .route-location-text span, .helper-text) {
   color: var(--mf-muted);
 }
 
 /* Phone: the default composition is a map-first app, not a shrunk desktop page. */
 @media (max-width: 699px) {
-  html body #app .topbar {
+  html body #app#app#app#app#app .topbar {
     position: fixed !important;
     top: max(8px, env(safe-area-inset-top, 0px)) !important;
     left: 12px !important;
@@ -155,14 +155,14 @@
     z-index: 3300 !important;
   }
 
-  html body #app .topbar > .map-quick-search {
+  html body #app#app#app#app#app .topbar > .map-quick-search {
     flex: 1 1 auto !important;
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
   }
 
-  html body #app .topbar .map-quick-search-form {
+  html body #app#app#app#app#app .topbar .map-quick-search-form {
     display: flex !important;
     align-items: center !important;
     gap: 9px !important;
@@ -178,15 +178,15 @@
     overflow: hidden !important;
   }
 
-  html body #app .topbar .map-quick-search-form > .brand {
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand {
     flex: 0 0 auto !important;
     min-width: 0 !important;
     gap: 0 !important;
     margin: 0 !important;
   }
 
-  html body #app .topbar .map-quick-search-form > .brand .logo,
-  html body #app .topbar .map-quick-search-form > .brand .logo img {
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand .logo,
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand .logo img {
     width: 36px !important;
     height: 36px !important;
     min-width: 36px !important;
@@ -195,11 +195,11 @@
     object-fit: contain !important;
   }
 
-  html body #app .topbar .map-quick-search-form > .brand :is(.eyebrow, .brand-name) {
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand :is(.eyebrow, .brand-name) {
     display: none !important;
   }
 
-  html body #app .topbar .map-quick-search-form > input {
+  html body #app#app#app#app#app .topbar .map-quick-search-form > input {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     height: 44px !important;
@@ -213,16 +213,16 @@
     letter-spacing: -.02em !important;
   }
 
-  html body #app .topbar .map-quick-search-form > input::placeholder {
+  html body #app#app#app#app#app .topbar .map-quick-search-form > input::placeholder {
     color: var(--mf-muted) !important;
     opacity: 1 !important;
   }
 
-  html body #app .topbar .map-quick-search-submit {
+  html body #app#app#app#app#app .topbar .map-quick-search-submit {
     display: none !important;
   }
 
-  html body #app .topbar > .header-tools {
+  html body #app#app#app#app#app .topbar > .header-tools {
     flex: 0 0 48px !important;
     width: 48px !important;
     min-width: 48px !important;
@@ -230,7 +230,7 @@
     margin: 0 !important;
   }
 
-  html body #app .topbar .header-tools > #dj890-ai-orb {
+  html body #app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -247,7 +247,7 @@
     color: #fff !important;
   }
 
-  html body #app #dj-v794-toolbar {
+  html body #app#app#app#app#app #dj-v794-toolbar {
     position: fixed !important;
     top: var(--dj829-tools-top, 116px) !important;
     left: 12px !important;
@@ -263,7 +263,7 @@
     z-index: 3200 !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj831-scrollport {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport {
     display: flex !important;
     flex: 1 1 auto !important;
     align-items: center !important;
@@ -284,11 +284,11 @@
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%) !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj831-scrollport::-webkit-scrollbar {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport::-webkit-scrollbar {
     display: none !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool {
     display: flex !important;
     flex: 0 0 50px !important;
     align-items: center !important;
@@ -310,15 +310,15 @@
     scroll-snap-align: start !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"] {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"] {
     border-color: var(--mf-brand) !important;
     background: var(--mf-brand-soft) !important;
     color: var(--mf-brand-strong) !important;
     box-shadow: inset 0 0 0 1px rgba(22, 124, 96, .08) !important;
   }
 
-  html body #app #dj-v794-toolbar .dj-v794-icon,
-  html body #app #dj-v794-toolbar .dj-v794-icon svg {
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-icon,
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-icon svg {
     display: grid !important;
     place-items: center !important;
     width: 21px !important;
@@ -327,11 +327,11 @@
     min-height: 21px !important;
   }
 
-  html body #app #dj-v794-toolbar .dj-v794-icon svg {
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-icon svg {
     stroke-width: 2 !important;
   }
 
-  html body #app #dj-v794-toolbar > #dj-v794-more {
+  html body #app#app#app#app#app #dj-v794-toolbar > #dj-v794-more {
     display: grid !important;
     flex: 0 0 44px !important;
     place-items: center !important;
@@ -349,7 +349,7 @@
     box-shadow: var(--mf-shadow) !important;
   }
 
-  html body #app[data-tab="map"] .map-actions {
+  html body #app#app#app#app#app[data-tab="map"] .map-actions {
     position: fixed !important;
     top: calc(var(--dj829-tools-top, 116px) + 66px) !important;
     right: 12px !important;
@@ -361,7 +361,7 @@
     z-index: 3000 !important;
   }
 
-  html body #app[data-tab="map"] .map-actions > :is(#map-compass, #center-dongjak, #current-location) {
+  html body #app#app#app#app#app[data-tab="map"] .map-actions > :is(#map-compass, #center-dongjak, #current-location) {
     display: grid !important;
     place-items: center !important;
     width: 44px !important;
@@ -376,7 +376,7 @@
     box-shadow: var(--mf-shadow) !important;
   }
 
-  html body #app #bottom-nav {
+  html body #app#app#app#app#app #bottom-nav {
     position: fixed !important;
     left: 12px !important;
     right: 12px !important;
@@ -399,7 +399,7 @@
     z-index: 3600 !important;
   }
 
-  html body #app #bottom-nav > .nav-tab {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab {
     display: flex !important;
     flex: 1 1 0 !important;
     flex-direction: column !important;
@@ -420,12 +420,12 @@
     box-shadow: none !important;
   }
 
-  html body #app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
     background: var(--mf-brand-soft) !important;
     color: var(--mf-brand-strong) !important;
   }
 
-  html body #app #bottom-nav > .nav-tab > .nav-icon {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab > .nav-icon {
     display: grid !important;
     place-items: center !important;
     width: 25px !important;
@@ -440,7 +440,7 @@
     box-shadow: none !important;
   }
 
-  html body #app #bottom-nav > .nav-tab > .nav-icon :is(svg, img) {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab > .nav-icon :is(svg, img) {
     width: 22px !important;
     height: 22px !important;
     min-width: 22px !important;
@@ -449,7 +449,7 @@
     max-height: 22px !important;
   }
 
-  html body #app #bottom-nav > .nav-tab > span:last-child {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab > span:last-child {
     display: block !important;
     max-width: 100% !important;
     overflow: hidden !important;
@@ -462,7 +462,7 @@
     white-space: nowrap !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj-sheet-chrome {
     min-height: 68px !important;
     padding: 12px 14px 10px 16px !important;
@@ -470,7 +470,7 @@
     border-bottom: 1px solid var(--mf-border) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj-sheet-chrome-title h2 {
     color: var(--mf-text) !important;
     font-size: 18px !important;
@@ -479,7 +479,7 @@
     letter-spacing: -.035em !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj-sheet-chrome-close {
     display: grid !important;
     place-items: center !important;
@@ -494,7 +494,7 @@
     color: var(--mf-text) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj836-sheet-body {
     min-height: 0 !important;
     padding: 12px 14px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
@@ -505,14 +505,14 @@
     -webkit-overflow-scrolling: touch !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     :is(.dj-page-intro, .page-note) {
     color: var(--mf-muted) !important;
     font-size: 13px !important;
     line-height: 1.55 !important;
   }
 
-  html body #app #route-panel .route-card {
+  html body #app#app#app#app#app #route-panel .route-card {
     padding: 12px !important;
     border: 1px solid var(--mf-border) !important;
     border-radius: 18px !important;
@@ -520,30 +520,30 @@
     box-shadow: none !important;
   }
 
-  html body #app #route-panel .route-location-row {
+  html body #app#app#app#app#app #route-panel .route-location-row {
     gap: 8px !important;
     align-items: center !important;
   }
 
-  html body #app #route-panel .route-location-text {
+  html body #app#app#app#app#app #route-panel .route-location-text {
     min-width: 0 !important;
     color: var(--mf-text) !important;
   }
 
-  html body #app #route-panel .route-location-text strong {
+  html body #app#app#app#app#app #route-panel .route-location-text strong {
     color: var(--mf-text) !important;
     font-size: 14px !important;
     line-height: 1.35 !important;
   }
 
-  html body #app #route-panel .route-select-actions {
+  html body #app#app#app#app#app #route-panel .route-select-actions {
     display: flex !important;
     flex: 0 0 auto !important;
     align-items: center !important;
     gap: 6px !important;
   }
 
-  html body #app #route-panel .route-select-actions button {
+  html body #app#app#app#app#app #route-panel .route-select-actions button {
     flex: 0 0 auto !important;
     min-width: 44px !important;
     min-height: 44px !important;
@@ -551,8 +551,8 @@
     white-space: nowrap !important;
   }
 
-  html body #app #participation-panel .community-category-tabs,
-  html body #app #news-panel .dongjak-news-tabs {
+  html body #app#app#app#app#app #participation-panel .community-category-tabs,
+  html body #app#app#app#app#app #news-panel .dongjak-news-tabs {
     display: flex !important;
     gap: 6px !important;
     max-width: 100% !important;
@@ -561,8 +561,8 @@
     overscroll-behavior-x: contain !important;
   }
 
-  html body #app #participation-panel .community-category-tabs button,
-  html body #app #news-panel .dongjak-news-tabs button {
+  html body #app#app#app#app#app #participation-panel .community-category-tabs button,
+  html body #app#app#app#app#app #news-panel .dongjak-news-tabs button {
     flex: 0 0 auto !important;
     min-height: 42px !important;
     padding: 0 13px !important;
@@ -574,16 +574,16 @@
     font-weight: 700 !important;
   }
 
-  html body #app #participation-panel .community-category-tabs button[aria-pressed="true"],
-  html body #app #news-panel .dongjak-news-tabs button[aria-pressed="true"] {
+  html body #app#app#app#app#app #participation-panel .community-category-tabs button[aria-pressed="true"],
+  html body #app#app#app#app#app #news-panel .dongjak-news-tabs button[aria-pressed="true"] {
     border-color: var(--mf-brand) !important;
     background: var(--mf-brand-soft) !important;
     color: var(--mf-brand-strong) !important;
   }
 
-  html body #app #news-panel .dongjak-news-item,
-  html body #app #mine-panel .stat-grid > div,
-  html body #app #mine-panel .dj877-pref-group {
+  html body #app#app#app#app#app #news-panel .dongjak-news-item,
+  html body #app#app#app#app#app #mine-panel .stat-grid > div,
+  html body #app#app#app#app#app #mine-panel .dj877-pref-group {
     padding: 14px !important;
     border: 1px solid var(--mf-border) !important;
     border-radius: 18px !important;
@@ -591,8 +591,8 @@
     box-shadow: none !important;
   }
 
-  html body #app #map-safety-controls,
-  html body #app #map-advanced-controls {
+  html body #app#app#app#app#app #map-safety-controls,
+  html body #app#app#app#app#app #map-advanced-controls {
     max-width: calc(100vw - 24px) !important;
     border: 1px solid var(--mf-border) !important;
     border-radius: 20px !important;
@@ -602,7 +602,7 @@
     overflow: hidden !important;
   }
 
-  html body #app #dj-mobile-utilities {
+  html body #app#app#app#app#app #dj-mobile-utilities {
     border: 1px solid var(--mf-border) !important;
     border-radius: 22px !important;
     background: var(--mf-surface) !important;
@@ -610,7 +610,7 @@
     box-shadow: var(--mf-shadow-raised) !important;
   }
 
-  html body #app #dj840-map-tip:not([hidden]) {
+  html body #app#app#app#app#app #dj840-map-tip:not([hidden]) {
     border: 1px solid var(--mf-border) !important;
     border-radius: 18px !important;
     background: var(--mf-surface) !important;
@@ -618,7 +618,7 @@
     box-shadow: var(--mf-shadow) !important;
   }
 
-  html body #app #map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale {
+  html body #app#app#app#app#app #map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale {
     border: 1px solid var(--mf-border) !important;
     border-radius: 12px !important;
     background: var(--mf-surface) !important;
@@ -626,16 +626,16 @@
     box-shadow: var(--mf-shadow) !important;
   }
 
-  html body #app .map-actions > button:active,
-  html body #app #bottom-nav > .nav-tab:active,
-  html body #app #dj-v794-toolbar .dj-v794-tool:active {
+  html body #app#app#app#app#app .map-actions > button:active,
+  html body #app#app#app#app#app #bottom-nav > .nav-tab:active,
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-tool:active {
     transform: scale(.96) !important;
   }
 }
 
 /* Tablet: keep the same visual language, use the additional width for map and panels. */
 @media (min-width: 700px) and (max-width: 1079px) {
-  html body #app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
+  html body #app#app#app#app#app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
     #transport-sheet, #detail-sheet, #entry-sheet, #dj-mobile-utilities,
     #map-safety-controls, #map-advanced-controls) {
     border-color: var(--mf-border) !important;
@@ -643,29 +643,29 @@
     box-shadow: var(--mf-shadow-raised) !important;
   }
 
-  html body #app #bottom-nav {
+  html body #app#app#app#app#app #bottom-nav {
     border-radius: 22px !important;
     padding: 6px !important;
   }
 
-  html body #app #bottom-nav > .nav-tab {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab {
     min-height: 52px !important;
     border-radius: 15px !important;
     color: var(--mf-muted) !important;
   }
 
-  html body #app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
     background: var(--mf-brand-soft) !important;
     color: var(--mf-brand-strong) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj-sheet-chrome {
     border-bottom: 1px solid var(--mf-border) !important;
     background: var(--mf-surface) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj836-sheet-body {
     background: var(--mf-surface) !important;
     color: var(--mf-text) !important;
@@ -674,31 +674,31 @@
 
 /* Desktop: retain the existing wide workspace geometry, share the same component system. */
 @media (min-width: 1080px) {
-  html body #app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
+  html body #app#app#app#app#app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
     #transport-sheet, #detail-sheet, #entry-sheet, #map-safety-controls, #map-advanced-controls) {
     border-color: var(--mf-border) !important;
     background: var(--mf-surface) !important;
     box-shadow: var(--mf-shadow-raised) !important;
   }
 
-  html body #app #bottom-nav > .nav-tab {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab {
     min-height: 44px !important;
     border-radius: 13px !important;
     color: var(--mf-muted) !important;
   }
 
-  html body #app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
+  html body #app#app#app#app#app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
     background: var(--mf-brand-soft) !important;
     color: var(--mf-brand-strong) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj-sheet-chrome {
     border-bottom: 1px solid var(--mf-border) !important;
     background: var(--mf-surface) !important;
   }
 
-  html body #app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
+  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
     .dj836-sheet-body {
     background: var(--mf-surface) !important;
     color: var(--mf-text) !important;
@@ -706,7 +706,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #app :is(#bottom-nav > .nav-tab, .map-actions > button, #dj-v794-toolbar .dj-v794-tool) {
+  #app#app#app#app#app :is(#bottom-nav > .nav-tab, .map-actions > button, #dj-v794-toolbar .dj-v794-tool) {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
     scroll-behavior: auto !important;
@@ -716,8 +716,8 @@
 
 /* Source-aligned corrections: the real app theme is on <html>, and its header
    contains weather/theme/version controls rather than a standalone AI orb. */
-html[data-theme="dark"] #app,
-#app[data-theme="dark"] {
+html[data-theme="dark"] #app#app#app#app#app,
+#app#app#app#app#app[data-theme="dark"] {
   --mf-surface: #192c24;
   --mf-surface-raised: #20372d;
   --mf-surface-soft: #294638;
@@ -733,7 +733,7 @@ html[data-theme="dark"] #app,
 }
 
 @media (max-width: 699px) {
-  html body #app .topbar > .header-tools {
+  html body #app#app#app#app#app .topbar > .header-tools {
     display: flex !important;
     flex: 0 0 auto !important;
     align-items: center !important;
@@ -747,7 +747,7 @@ html[data-theme="dark"] #app,
     overflow: visible !important;
   }
 
-  html body #app .topbar .weather-widget {
+  html body #app#app#app#app#app .topbar .weather-widget {
     display: flex !important;
     flex: 0 0 42px !important;
     align-items: center !important;
@@ -760,12 +760,12 @@ html[data-theme="dark"] #app,
     padding: 0 !important;
   }
 
-  html body #app .topbar #weather-title,
-  html body #app .topbar #weather-my-location {
+  html body #app#app#app#app#app .topbar #weather-title,
+  html body #app#app#app#app#app .topbar #weather-my-location {
     display: none !important;
   }
 
-  html body #app .topbar #weather-label {
+  html body #app#app#app#app#app .topbar #weather-label {
     display: flex !important;
     flex: 0 0 42px !important;
     flex-direction: column !important;
@@ -787,7 +787,7 @@ html[data-theme="dark"] #app,
     line-height: 1 !important;
   }
 
-  html body #app .topbar #weather-label::before {
+  html body #app#app#app#app#app .topbar #weather-label::before {
     content: attr(data-dj-weather-icon);
     display: block;
     color: var(--mf-brand-strong);
@@ -796,7 +796,7 @@ html[data-theme="dark"] #app,
     line-height: 19px;
   }
 
-  html body #app .topbar #weather-label::after {
+  html body #app#app#app#app#app .topbar #weather-label::after {
     content: attr(data-dj-temperature);
     display: block;
     color: var(--mf-text);
@@ -805,7 +805,7 @@ html[data-theme="dark"] #app,
     line-height: 13px;
   }
 
-  html body #app .topbar #theme-toggle {
+  html body #app#app#app#app#app .topbar #theme-toggle {
     display: grid !important;
     flex: 0 0 42px !important;
     place-items: center !important;
@@ -823,18 +823,18 @@ html[data-theme="dark"] #app,
     font-size: 0 !important;
   }
 
-  html body #app .topbar #theme-toggle::before {
+  html body #app#app#app#app#app .topbar #theme-toggle::before {
     content: "◐";
     color: var(--mf-brand-strong);
     font-size: 20px;
     line-height: 1;
   }
 
-  html[data-theme="dark"] body #app .topbar #theme-toggle::before {
+  html[data-theme="dark"] body #app#app#app#app#app .topbar #theme-toggle::before {
     content: "☼";
   }
 
-  html body #app .topbar #version-history-trigger {
+  html body #app#app#app#app#app .topbar #version-history-trigger {
     display: grid !important;
     flex: 0 0 50px !important;
     place-items: center !important;
@@ -856,7 +856,7 @@ html[data-theme="dark"] #app,
     white-space: nowrap !important;
   }
 
-  html body #app .topbar .map-quick-search-icon {
+  html body #app#app#app#app#app .topbar .map-quick-search-icon {
     flex: 0 0 17px !important;
     width: 17px !important;
     min-width: 17px !important;
@@ -866,7 +866,7 @@ html[data-theme="dark"] #app,
     text-align: center !important;
   }
 
-  html body #app #dj-v794-toolbar .dj832-feature-label {
+  html body #app#app#app#app#app #dj-v794-toolbar .dj832-feature-label {
     display: block !important;
     max-width: 48px !important;
     overflow: hidden !important;
@@ -879,7 +879,7 @@ html[data-theme="dark"] #app,
     white-space: nowrap !important;
   }
 
-  html body #app #dj-v794-toolbar .dj910-weather-temp {
+  html body #app#app#app#app#app #dj-v794-toolbar .dj910-weather-temp {
     display: block !important;
     color: currentColor !important;
     font-size: 9px !important;
@@ -887,7 +887,7 @@ html[data-theme="dark"] #app,
     line-height: 1.05 !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj912-toolbar-next {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj912-toolbar-next {
     display: grid !important;
     flex: 0 0 28px !important;
     place-items: center !important;
@@ -904,7 +904,7 @@ html[data-theme="dark"] #app,
     box-shadow: var(--mf-shadow) !important;
   }
 
-  html body #app :is(#detail-sheet, #entry-sheet, #overview-sheet, #admin-dong-picker,
+  html body #app#app#app#app#app :is(#detail-sheet, #entry-sheet, #overview-sheet, #admin-dong-picker,
     #night-visibility-float, #dj-mobile-utilities) {
     border: 1px solid var(--mf-border) !important;
     border-radius: var(--mf-radius-sheet) !important;
@@ -917,8 +917,8 @@ html[data-theme="dark"] #app,
 
 /* Match the established app's charcoal dark surfaces and compact-toolbar
    interaction contract used by the full nine-viewport regression gate. */
-html[data-theme="dark"] #app,
-#app[data-theme="dark"] {
+html[data-theme="dark"] #app#app#app#app#app,
+#app#app#app#app#app[data-theme="dark"] {
   --mf-surface: #191b1f;
   --mf-surface-raised: #23262d;
   --mf-surface-soft: #2c3038;
@@ -934,18 +934,18 @@ html[data-theme="dark"] #app,
 }
 
 @media (max-width: 699px) {
-  html body #app .topbar .weather-widget {
+  html body #app#app#app#app#app .topbar .weather-widget {
     display: none !important;
   }
 
-  html body #app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool {
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool {
     flex-basis: 52px !important;
     width: 52px !important;
     min-width: 52px !important;
     max-width: 52px !important;
   }
 
-  html body #app #dj-v794-toolbar > #dj-v794-more {
+  html body #app#app#app#app#app #dj-v794-toolbar > #dj-v794-more {
     flex-basis: 52px !important;
     width: 52px !important;
     min-width: 52px !important;
@@ -956,7 +956,99 @@ html[data-theme="dark"] #app,
     border-radius: 16px !important;
   }
 
-  html body #app #bottom-nav {
+  html body #app#app#app#app#app #bottom-nav {
     bottom: max(0px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+
+/* Override the original v8.2.9 high-specificity mobile shell deliberately:
+   transfer the old standalone logo/settings slot into the search surface. */
+@media (max-width: 699px) {
+  html body #app#app#app#app#app .topbar > #dj-settings-mobile {
+    display: none !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand {
+    display: flex !important;
+    flex: 0 0 36px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand > div {
+    display: none !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand .logo {
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border-radius: 11px !important;
+    overflow: hidden !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand .logo img {
+    display: block !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    object-fit: contain !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-icon {
+    display: block !important;
+    flex: 0 0 17px !important;
+    width: 17px !important;
+    min-width: 17px !important;
+    color: var(--mf-brand) !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  html body #app#app#app#app#app .topbar .map-quick-search-submit {
+    display: none !important;
+  }
+
+  html body #app#app#app#app#app .topbar > .header-tools {
+    flex: 0 0 96px !important;
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+  }
+
+  html body #app#app#app#app#app .topbar #theme-toggle {
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+  }
+
+  html body #app#app#app#app#app .topbar #version-history-trigger {
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
   }
 }
