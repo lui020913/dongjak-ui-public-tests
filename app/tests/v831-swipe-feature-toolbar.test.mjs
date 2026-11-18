@@ -9,7 +9,7 @@ test('v8.2.11 mobile shortcuts are loaded after the existing toolbar and CSS',()
   assert.ok(html.indexOf('v831-swipe-feature-toolbar.css')>html.indexOf('v829-mobile-layout-system.css'));
   assert.ok(html.indexOf('v831-swipe-feature-toolbar.js')>html.indexOf('mobile-toolbar-v794.js'));
   assert.match(styles,/@media\(max-width:699px\)/);
-  assert.match(script,/\(max-width:1079px\)/);
+  assert.match(script,/matchMedia\('\(min-width: 0px\)'\)/);
 });
 test('v8.2.11 live bus and metro original toggles are preserved',()=>{
   for(const type of ['bus','metro']){
