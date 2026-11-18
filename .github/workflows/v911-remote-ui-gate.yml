@@ -1,0 +1,48 @@
+name: v8.9.11 anonymous Preview UI gate
+run-name: v911 UI source=${{ inputs.expected_source_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      expected_source_sha:
+        required: true
+        type: string
+      target_url:
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: v911-anonymous-ui
+  cancel-in-progress: true
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [mobile375,mobile390,tablet768,tablet1024,pc1440]
+    env:
+      DONGJAK_TARGET_URL: ${{ inputs.target_url }}
+      DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node scripts/verify-release-source.mjs
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config=playwright.v911-remote.config.mjs --project=${{ matrix.viewport }}
+      - name: Verify exact Preview did not change while testing
+        if: always()
+        run: node scripts/verify-release-source.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v911-anonymous-${{ matrix.viewport }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
