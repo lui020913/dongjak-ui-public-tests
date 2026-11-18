@@ -10,7 +10,7 @@ permissions:
   actions: read
 concurrency:
   group: mobile-only-release
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
