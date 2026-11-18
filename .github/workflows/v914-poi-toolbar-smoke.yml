@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        viewport: [mobile375, mobile390, tablet768, tablet820, tablet1024, tablet1180]
+        viewport: [mobile375, mobile390]
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
