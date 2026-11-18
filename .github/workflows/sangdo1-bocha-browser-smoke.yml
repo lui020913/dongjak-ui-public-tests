@@ -24,20 +24,27 @@ jobs:
         with: {node-version: '22'}
       - name: Wait for the exact isolated Preview (bounded)
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          SHA=$(jq -er '.source_sha' release/sangdo1-bocha-ui-request.json)
-          RUN=$(jq -er '.build_run' release/sangdo1-bocha-ui-request.json)
-          URL=https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev/
-          [[ "$SHA" =~ ^[a-f0-9]{40}$ && "$RUN" =~ ^[0-9]+$ ]]
-          for n in $(seq 1 24);do
-            if curl -fsSL --max-time 12 "${URL}release-source.json?check=$n" 2>/dev/null | jq -e --arg s "$SHA" --arg r "$RUN" '.source_commit==$s and (.build_run|tostring)==$r and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
-            if [ "$n" = 24 ];then echo 'Exact Preview unavailable';exit 1;fi
-            sleep 5
-          done
-          printf 'DONGJAK_TARGET_URL=%s\nDONGJAK_EXPECTED_SOURCE_SHA=%s\nDONGJAK_EXPECTED_BUILD_RUN=%s\n' "$URL" "$SHA" "$RUN" >> "$GITHUB_ENV"
+          node --input-type=module <<'NODE'
+          import {appendFileSync,readFileSync} from 'node:fs';
+          const request=JSON.parse(readFileSync('release/sangdo1-bocha-ui-request.json','utf8'));
+          const {source_sha:sha,build_run:run}=request;
+          if(!/^[a-f0-9]{40}$/.test(sha)||!/^\\d+$/.test(String(run)))throw new Error('Invalid exact Preview pin');
+          const url='https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev/';
+          let verified=false;
+          for(let n=1;n<=24;n++){
+            try{
+              const response=await fetch(url+'release-source.json?check='+n,{signal:AbortSignal.timeout(12000)});
+              if(response.ok){
+                const marker=await response.json();
+                if(marker.source_commit===sha&&String(marker.build_run)===String(run)&&marker.application_version==='8.9.15'&&marker.release_status==='CANDIDATE_PREVIEW_NOT_PRODUCTION'){verified=true;break;}
+              }
+            }catch{}
+            if(n<24)await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          if(!verified)throw new Error('Exact Preview unavailable');
+          appendFileSync(process.env.GITHUB_ENV,'DONGJAK_TARGET_URL='+url+'\\nDONGJAK_EXPECTED_SOURCE_SHA='+sha+'\\nDONGJAK_EXPECTED_BUILD_RUN='+run+'\\n');
+          NODE
       - name: Install pinned public test package
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
