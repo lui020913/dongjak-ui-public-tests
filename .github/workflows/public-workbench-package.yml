@@ -1,0 +1,79 @@
+name: Public workbench package
+run-name: Public workbench ${{ inputs.source_sha }} publish=${{ inputs.publish_preview }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Public frontend branch (public/frontend-...)
+        required: true
+        type: string
+        default: public/frontend-foundation-20261117
+      source_sha:
+        description: Exact 40-character current public source commit
+        required: true
+        type: string
+      publish_preview:
+        description: Request standalone Cloudflare Preview only after successful QA
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: public-workbench-${{ inputs.source_sha }}
+  cancel-in-progress: true
+jobs:
+  package:
+    if: github.ref == 'refs/heads/main' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SOURCE_REF: ${{ inputs.source_ref }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+    steps:
+      - name: Require exact first-party public branch head
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_REF" =~ ^public/frontend-[a-zA-Z0-9._-]+$ ]]
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          current=$(git ls-remote https://github.com/lui020913/dongjak-ui-public-tests.git "refs/heads/$SOURCE_REF" | cut -f1)
+          test "$current" = "$SOURCE_SHA"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and test public-only UI
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          if [[ -f package-lock.json ]]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+          npm run check
+          npm run build
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Stamp exact tested public source
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -s dist/index.html
+          test ! -e dist/_worker.js && test ! -e dist/functions && test ! -e dist/.wrangler
+          jq -n --arg sha "$SOURCE_SHA" --arg build "$GITHUB_RUN_ID" '{public_source_commit:$sha,build_run:$build,release_status:"PUBLIC_UI_WORKBENCH_PREVIEW_ONLY"}' > dist/public-ui-source.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-public-ui-static-${{ inputs.source_sha }}
+          path: frontend/dist/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-workbench-evidence-${{ github.run_id }}
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+            frontend/visual-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
