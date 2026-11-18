@@ -75,7 +75,7 @@ jobs:
           echo 'skip=false' >> "$GITHUB_OUTPUT"
           if [ "$FORCE_REBUILD" = true ];then exit 0;fi
           marker="$(curl -fsSL --max-time 15 "$PREVIEW_URL/release-source.json?dedup=$GITHUB_RUN_ID" 2>/dev/null)" || exit 0
-          build="$(printf '%s' "$marker" | jq -er --arg sha "$SOURCE_SHA" 'select(.source_commit==$sha and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION") | .build_run|tostring' 2>/dev/null)" || exit 0
+          build="$(printf '%s' "$marker" | jq -er --arg sha "$SOURCE_SHA" 'select(.source_commit==$sha and .application_version=="8.9.14" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION") | .build_run|tostring' 2>/dev/null)" || exit 0
           [[ "$build" =~ ^[1-9][0-9]*$ ]] || exit 0
           previous="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" 2>/dev/null)" || exit 0
           printf '%s' "$previous" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null || exit 0
@@ -156,7 +156,7 @@ jobs:
           rm -f "$log"
           run_private 'Application build' npm run build
           run_private 'Release consistency' npm run check:release
-          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.14" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
       - name: Verify private source is still the requested head before packaging
         if: steps.dedup.outputs.skip != 'true'
         env:
@@ -217,7 +217,7 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/release"
           tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
           rm -f "$RUNNER_TEMP/deploy.tar.gz"
-          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.14" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
       - name: Deploy Preview without showing private build or API contents
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -231,7 +231,7 @@ jobs:
           cd "$RUNNER_TEMP/release"
           if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=ui-v911-motion-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
           for n in $(seq 1 12);do
-            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.14" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
             [ "$n" != 12 ] || exit 1
             sleep 5
           done
