@@ -33,7 +33,7 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --check playwright.v911-remote.config.mjs
           node --check scripts/verify-release-source.mjs
-          node --test tests/v911-release-proof.test.mjs
+          node --test tests/v911-release-proof.test.mjs tests/private-test-fingerprint.test.mjs
   source-access:
     if: github.event_name == 'workflow_dispatch' && inputs.check_credentials && github.actor == 'lui020913' && github.ref == 'refs/heads/main'
     environment: public-source-build

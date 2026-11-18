@@ -25,3 +25,12 @@ test('candidate publication is single-attempt and serializes with Production',()
  assert.equal((build.match(/test "\$GITHUB_RUN_ATTEMPT" = 1/g)||[]).length,2);
  assert.match(prod,/\.run_attempt==1/);
 });
+
+test('public runner synchronizes visible version metadata before the complete Node test suite',()=>{
+ const build=read('.github/workflows/public-private-source-preview.yml');
+ const metadata=build.indexOf('node scripts/ci-v911-release.mjs');
+ const stamp=build.indexOf('node scripts/stamp-version.mjs');
+ const test=build.indexOf('node --test --test-reporter=tap tests/*.test.mjs');
+ assert.ok(metadata>=0 && stamp>metadata && test>stamp);
+ assert.match(build,/private-test-fingerprint\.mjs/);
+});

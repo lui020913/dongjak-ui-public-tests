@@ -63,8 +63,19 @@ jobs:
           umask 077
           run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
           run_private 'Release metadata' node scripts/ci-v911-release.mjs
+          run_private 'Synchronize visible version before tests' node scripts/stamp-version.mjs
           run_private 'Dependency install' npm ci --no-audit --no-fund
-          run_private 'Full Node suite' npm test
+          # Use the same test glob as the private npm test script. TAP output stays
+          # local; failures are reported only as test-name digests and counts.
+          if "${safe[@]}" node --test --test-reporter=tap tests/*.test.mjs >"$log" 2>&1; then
+            echo 'Full Node suite passed'
+          else
+            node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
+            rm -f "$log"
+            echo '::error::Full Node suite failed (private diagnostic output withheld)'
+            exit 1
+          fi
+          rm -f "$log"
           run_private 'Application build' npm run build
           run_private 'Release consistency' npm run check:release
           jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
