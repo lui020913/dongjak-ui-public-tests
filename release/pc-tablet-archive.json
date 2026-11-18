@@ -1,0 +1,29 @@
+{
+  "archive_status": "preserved-in-source-archive-branch",
+  "source_repository": "lui020913/dongjak-safety-map",
+  "source_ref": "archive/pc-tablet-ui-v8.26.1-20261119",
+  "source_commit": "0c4be7f51a4052b13315294229a044cc65d175d1",
+  "application_version": "8.26.1",
+  "note": "PC and tablet presentation files are retained unchanged at this immutable source snapshot. The mobile-only build omits their dedicated imports and prevents map startup on unsupported devices; the source files are not deleted.",
+  "preserved_paths": [
+    "platforms/pc-chromium/entry.js",
+    "platforms/pc-chromium/pc.css",
+    "src/v713-desktop-rail.js",
+    "src/v726-desktop-polish.css",
+    "src/v729-pc-consistency.css",
+    "src/v815-pc-visual-fixes.css",
+    "src/v853-pc-responsive-fixes.css",
+    "src/v854-weather-desktop.js",
+    "src/v862-pc-mobile-separation.css",
+    "src/v862-pc-mobile-separation.js",
+    "src/v872-pc-onboarding-weather.css",
+    "src/v876-desktop-final.css",
+    "src/v876-desktop-final.js",
+    "src/v881-desktop-ui.css",
+    "src/v881-portrait-zoom-responsive.css",
+    "src/v881-tablet-header-unified.css",
+    "src/v881-tablet-tool-rail.js",
+    "src/v881-tablet-workspace.css",
+    "src/v913-pc-design-system.css"
+  ]
+}
