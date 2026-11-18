@@ -1,4 +1,3 @@
-/* Mobile-only stylesheet: every rule is deliberately restricted to phone viewports. */
 @media (max-width: 699px) {
 /*
  * Mobile-first UI overhaul candidate for Dongjak Safety Map.
