@@ -2,19 +2,7 @@ name: Mobile-first overhaul — v8.26.1 full-app Preview
 run-name: Mobile-first overhaul public=${{ github.sha }}
 
 on:
-  push:
-    branches:
-      - public/mobile-first-overhaul-20261119
-    paths:
-      - 'frontend/production/mobile-first-overhaul.css'
-      - 'frontend/production/mobile-first-overhaul.test.mjs'
-      - 'frontend/scripts/verify-mobile-first-overhaul.mjs'
-      - 'release/mobile-first-overhaul-source.json'
-      - 'scripts/build-mobile-first-overhaul.sh'
-      - 'scripts/deploy-mobile-first-overhaul-preview.sh'
-      - 'scripts/seal-private-release.mjs'
-      - 'scripts/private-test-fingerprint.mjs'
-      - '.github/workflows/mobile-first-overhaul-preview.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
