@@ -67,6 +67,13 @@ jobs:
           run_private 'Application build' npm run build
           run_private 'Release consistency' npm run check:release
           jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+      - name: Verify private source is still the requested head before packaging
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          test "$actual" = "$SOURCE_SHA"
       - name: Seal exact deployment files; no plaintext public artifacts
         env:
           RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
@@ -121,6 +128,7 @@ jobs:
         run: |
           set -euo pipefail
           api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
+          curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api" 2>/dev/null | jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' >/dev/null
           before="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
           curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.10" and .source_commit=="6c631412030e314ec5b6f5011561616159d0b9ca" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
           cd "$RUNNER_TEMP/release"

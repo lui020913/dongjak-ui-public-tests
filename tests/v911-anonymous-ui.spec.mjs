@@ -3,7 +3,12 @@ const compact=page=>page.viewportSize().width<1080;
 const tab=(page,key)=>page.locator('#bottom-nav .nav-tab[data-tab="'+key+'"]');
 async function tap(page,locator){
  await expect(locator).toBeVisible();
- await expect.poll(()=>locator.evaluate(n=>{const r=n.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===n||n.contains(hit)})).toBe(true);
+ try{
+   await expect.poll(()=>locator.evaluate(n=>{const r=n.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===n||n.contains(hit)})).toBe(true);
+ }catch(error){
+   const hit=await locator.evaluate(n=>{const r=n.getBoundingClientRect();return {target:{id:n.id,className:n.getAttribute('class'),rect:[r.x,r.y,r.width,r.height]},layers:document.elementsFromPoint(r.left+r.width/2,r.top+r.height/2).slice(0,8).map(e=>({tag:e.tagName,id:e.id,className:e.getAttribute('class'),pointerEvents:getComputedStyle(e).pointerEvents}))};});
+   console.log('UI_HIT_DIAGNOSTIC',JSON.stringify(hit));throw error;
+ }
  const r=await locator.boundingBox();await page.mouse.click(r.x+r.width/2,r.y+r.height/2);
 }
 async function ready(page){
@@ -36,6 +41,19 @@ async function enter(page,id,key){
  if(key==='route')expect(frames.some(f=>(f.t!=='none'&&f.t.split(' ').some(v=>parseFloat(v)>2))||(f.p!=='none'&&parseFloat(f.p.replace('inset(',''))>4))).toBe(true);
  await geometry(page,'#'+id);
 }
+test.afterEach(async({page},info)=>{
+ if(info.status===info.expectedStatus)return;
+ try{
+   const debug=await page.evaluate(()=>{
+     const app=document.getElementById('app');
+     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities'];
+     const describe=n=>{if(!n)return null;const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id,className:n.getAttribute('class'),hidden:n.hidden,ariaHidden:n.getAttribute('aria-hidden'),rect:[r.x,r.y,r.width,r.height],display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents};};
+     return {viewport:[innerWidth,innerHeight],tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
+   });
+   await info.attach('anonymous-layout-diagnostic.json',{body:Buffer.from(JSON.stringify(debug,null,2)),contentType:'application/json'});
+   console.log('UI_LAYOUT_DIAGNOSTIC',JSON.stringify(debug));
+ }catch{console.log('Anonymous layout diagnostic unavailable.');}
+});
 test('compact HUD and visible motion; desktop navigation and dark theme',async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  if(compact(page)){
