@@ -13,8 +13,10 @@ test('Bocha reference layer enables, loads exact data and clears from the safety
  const panel=page.locator('#map-safety-controls');if(!await panel.isVisible()){
  const controls=page.locator('#dj-v794-safety:visible,#map-safety-toggle:visible');await expect(controls.first()).toBeVisible();await controls.first().click();}
  await expect(panel).toBeVisible();const toggle=page.locator('#sangdo-bocha-toggle');
- if(!await toggle.isVisible()){const menu=panel.locator('[data-dj-safety-target="dj-safety-data"]:visible');if(await menu.count())await menu.first().click();}
- if(!await toggle.isVisible()){const summary=page.locator('#dj-safety-data > summary:visible');if(await summary.count())await summary.first().click();}
+ const dataGroup=page.locator('#dj-safety-data');await expect(dataGroup).toHaveCount(1);
+ if(!await dataGroup.evaluate(el=>el.open))await dataGroup.locator(':scope > summary').click();
+ await expect(dataGroup).toHaveJSProperty('open',true);
+ await toggle.scrollIntoViewIfNeeded();
  await expect(toggle).toBeVisible();await expect(toggle).toHaveAttribute('aria-pressed','false');
  const response=page.waitForResponse(r=>new URL(r.url()).pathname===path&&r.ok(),{timeout:30000});await toggle.click();
  const data=await (await response).json();expect(data.features).toHaveLength(237);expect(data.features.every(f=>f.properties.score===null&&f.properties.route_penalty_allowed===false)).toBe(true);
