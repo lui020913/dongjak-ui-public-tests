@@ -22,4 +22,6 @@ for(const token of [
 assert.match(pin.source_sha,/^[a-f0-9]{40}$/);
 assert.equal(pin.application_version,'8.26.1');
 assert.equal(pin.release_status,'CANDIDATE_PREVIEW_NOT_PRODUCTION');
+assert.match(css,/^@media \\(max-width: 699px\\) \\{/);
+assert.doesNotMatch(css,/@media \\(min-width:/);
 console.log('PASS: mobile-first CSS is bounded, self-contained and covers the required responsive surfaces.');
