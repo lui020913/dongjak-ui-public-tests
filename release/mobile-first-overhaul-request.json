@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a completely blank pure-white screen with no text, logo, icons or loading UI; preserve all PC/tablet source; mobile-only QA must pass before protected Production promotion",
-  "attempt": 17,
+  "attempt": 18,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User clarified the PC/tablet experience must be only a blank white screen (#FFFFFF), with no mobile notice or other UI. The visual gate now inserts an empty aria-hidden div, hides all other body children on blocked devices, resets html/body to white, and preserves all PC/tablet CSS, scripts, app startup and platform dispatch. Tests explicitly reject any notice text."
+  "last_retry_reason": "Follow-up hardening: replace escaped-regex assertions for the empty screen markup and CSS selector with exact string assertions, avoiding JavaScript regex delimiter ambiguity. All behavioral checks remain in place."
 }
