@@ -43,7 +43,10 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
 'html[data-dj-mobile-only="blocked"],html[data-dj-mobile-only="blocked"] body{background:#fff!important}\n'+
 'html[data-dj-mobile-only="blocked"] body{margin:0!important;overflow:hidden!important}\n'+
 'html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}\n'+
-'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{position:fixed!important;inset:0!important;z-index:2147483647!important;display:block!important;box-sizing:border-box!important;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important}\n'+
+'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{position:fixed!important;inset:0!important;z-index:2147483647!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;padding:28px!important;border:0!important;background:#fff!important;color:#17221d!important;text-align:center!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}\n'+
+'#dj-mobile-only-screen .dj-mobile-only-message{width:min(420px,100%);margin:0 auto}\n'+
+'#dj-mobile-only-screen h1{margin:0;font-size:22px;font-weight:800;line-height:1.4;letter-spacing:-.04em}\n'+
+'#dj-mobile-only-screen p{margin:12px 0 0;color:#64746a;font-size:14px;line-height:1.65}\n'+
 '</style>';
 
   if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
