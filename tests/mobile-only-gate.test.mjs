@@ -18,7 +18,7 @@ test('tablet and desktop contexts are blocked',()=>{
 
 test('build patch displays the mobile-only notice and stops non-phone map startup',()=>{
   const indexHtml='<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head><body><div id="app"></div></body></html>';
-  const mainJs="import {installDesktopSafetyRail} from './v713-desktop-rail.js';\nimport './v726-desktop-polish.css';\nimport './v729-pc-consistency.css';\nimport './v881-desktop-ui.css';\nimport './v881-portrait-zoom-responsive.css';\nimport './v881-tablet-workspace.css';\nimport './v881-tablet-header-unified.css';\nimport './v881-tablet-tool-rail.js';\nimport './v913-pc-design-system.css';\nmaplibregl.setWorkerUrl(workerUrl);\nstartApp();\n";
+  const mainJs="import {installDesktopSafetyRail} from './v713-desktop-rail.js';\nimport './v726-desktop-polish.css';\nimport './v729-pc-consistency.css';\nimport './v881-desktop-ui.css';\nimport './v881-portrait-zoom-responsive.css';\nimport './v881-tablet-workspace.css';\nimport './v881-tablet-header-unified.css';\nimport './v881-tablet-tool-rail.js';\nimport './v913-pc-design-system.css';\nmaplibregl.setWorkerUrl(workerUrl);\ninstallDesktopSafetyRail({app});\nstartApp();\n";
   const platformEntry="if(target==='ios-pwa')await import('./ios-pwa/entry.js');\nelse if(target==='android')await import('./android/entry.js');\nelse await import('./pc-chromium/entry.js');\n// Mobile sheet presentation has its own entry, separate from desktop/MapLibre.\nif(target==='ios-pwa'||target==='android')await import('./shared/mobile-panel-layout.js');\nexport {target};\n";
   const result=applyMobileOnlyGate({indexHtml,mainJs,platformEntry});
   assert.match(result.indexHtml,/dj-mobile-only-gate-bootstrap/);
