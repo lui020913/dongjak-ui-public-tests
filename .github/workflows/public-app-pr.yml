@@ -1,0 +1,63 @@
+name: Public app source CI
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'tests/mobile-first-layout-contract.test.mjs'
+      - 'playwright.mobile-first.config.mjs'
+      - '.github/workflows/public-app-pr.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-app-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  app-build-and-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: app
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Install app dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Scan app source for accidentally committed secrets
+        working-directory: .
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz -o "$RUNNER_TEMP/gitleaks.tgz"
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          "$RUNNER_TEMP/gitleaks/gitleaks" detect --source app --config app/.gitleaks.toml --no-git --redact --exit-code 23
+      - name: Run full application regression suite
+        run: npm test
+      - name: Verify release metadata consistency
+        run: npm run check:release
+      - name: Build the exact public app source
+        run: npm run build
+      - name: Verify generated app entrypoint
+        run: test -s dist/index.html
+      - name: Summarize exact source
+        working-directory: .
+        run: |
+          {
+            echo "### Public app source CI"
+            echo "- Source commit: `$GITHUB_SHA`"
+            echo "- App version: `$(node -p "require('./app/package.json').version")`"
+            echo "- App files: `$(find app -type f | wc -l)`"
+            echo "- Secret scan: passed"
+            echo "- Unit tests and production build: passed"
+          } >> "$GITHUB_STEP_SUMMARY"
