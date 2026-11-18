@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 13,
+  "attempt": 14,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "The visual-only white gate passed all 7 focused tests and retained PC/tablet app startup. Build stopped at an outdated file-change allowlist that still expected src/main.js and platforms/entry.js edits from the abandoned invasive approach. Updated allowlist to the sole intended source change, index.html. Retry."
+  "last_retry_reason": "The white-screen patch and focused tests passed. The release script's changed-file allowlist was narrowed too far: its existing next step deliberately adds the mobile-first stylesheet import to src/main.js, so the legitimate change set is index.html plus src/main.js. Updated the allowlist to those two files only; PC/tablet CSS, scripts, startup and platform entry remain untouched."
 }
