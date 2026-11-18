@@ -5,5 +5,5 @@
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
   "attempt": 14,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "The white-screen patch and focused tests passed. The release script's changed-file allowlist was narrowed too far: its existing next step deliberately adds the mobile-first stylesheet import to src/main.js, so the legitimate change set is index.html plus src/main.js. Updated the allowlist to those two files only; PC/tablet CSS, scripts, startup and platform entry remain untouched."
+  "last_retry_reason": "The white-screen approach is now visual-only: PC/tablet app files and startup code remain untouched in the pinned source archive, while a full-screen white notice asks users to access the mobile site/app. Added explicit notice assertions and build checkpoints to identify the remaining pre-build guard failure. The private build still injects the mobile-only stylesheet into src/main.js, so its expected changed-file list remains index.html plus src/main.js."
 }
