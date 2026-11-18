@@ -23,6 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - name: Wait for the exact isolated Preview (bounded)
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
