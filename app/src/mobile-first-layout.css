@@ -999,3 +999,229 @@
     }
   }
 }
+
+
+@layer mobile-first-shell {
+  /* Shared facility detail card: identical draggable popup on every device. */
+  html body #app#app#app#app#app .maplibregl-popup.dj-place-detail-popup {
+    z-index: 6900 !important;
+    max-width: min(520px, calc(100vw - 24px)) !important;
+  }
+
+  html body #app#app#app#app#app .maplibregl-popup.dj-place-detail-popup .maplibregl-popup-content {
+    width: min(520px, calc(100vw - 24px)) !important;
+    max-width: min(520px, calc(100vw - 24px)) !important;
+    max-height: min(64dvh, 620px) !important;
+    padding: 0 !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 22px !important;
+    background: var(--mf-surface-solid) !important;
+    color: var(--mf-ink) !important;
+    box-shadow: var(--mf-shadow) !important;
+    overflow: hidden auto !important;
+  }
+
+  html body #app#app#app#app#app .maplibregl-popup.dj-place-detail-popup .maplibregl-popup-tip {
+    border-top-color: var(--mf-surface-solid) !important;
+    border-bottom-color: var(--mf-surface-solid) !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-detail {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: min(64dvh, 620px) !important;
+    overflow: hidden auto !important;
+    background: var(--mf-surface-solid) !important;
+    color: var(--mf-ink) !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-header {
+    position: sticky !important;
+    top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 62px !important;
+    padding: 14px 12px 10px !important;
+    border-bottom: 1px solid var(--mf-line) !important;
+    background: var(--mf-surface-solid) !important;
+    color: var(--mf-ink) !important;
+    z-index: 3 !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-edge-drag {
+    position: absolute !important;
+    top: 5px !important;
+    left: 50% !important;
+    width: 36px !important;
+    height: 4px !important;
+    border-radius: 99px !important;
+    background: var(--mf-muted) !important;
+    opacity: .55 !important;
+    transform: translateX(-50%) !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-header-title {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    padding-top: 5px !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-header-title h3 {
+    margin: 2px 0 0 !important;
+    color: var(--mf-ink) !important;
+    font-size: 17px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-kicker {
+    color: var(--mf-accent) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-header-actions,
+  html body #app#app#app#app#app .dj-place-personal-actions {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-header-actions button,
+  html body #app#app#app#app#app .dj-place-personal-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 12px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-ink) !important;
+  }
+
+  html body #app#app#app#app#app .dj-place-detail > .dj-place-body {
+    padding: 12px !important;
+  }
+
+  html body #app#app#app#app#app #dj854-weather-sheet:not([hidden]) {
+    position: fixed !important;
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: var(--mf-panel-bottom) !important;
+    display: block !important;
+    width: min(520px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - var(--mf-topbar-height) - var(--mf-toolbar-height) - var(--mf-nav-height) - 48px) !important;
+    padding: 18px !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 24px !important;
+    background: var(--mf-surface-solid) !important;
+    color: var(--mf-ink) !important;
+    box-shadow: var(--mf-shadow) !important;
+    overflow: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 6800 !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-head {
+    position: sticky !important;
+    top: -18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: -18px -18px 14px !important;
+    padding: 16px 18px 12px !important;
+    border-bottom: 1px solid var(--mf-line) !important;
+    background: var(--mf-surface-solid) !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-head h2 {
+    margin: 0 !important;
+    color: var(--mf-ink) !important;
+    font-size: 17px !important;
+    font-weight: 850 !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-close {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 12px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-ink) !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-place {
+    margin: 0 0 5px !important;
+    color: var(--mf-muted) !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-main {
+    display: block !important;
+    color: var(--mf-ink) !important;
+    font-size: 22px !important;
+    font-weight: 850 !important;
+    line-height: 1.3 !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-detail {
+    margin: 8px 0 16px !important;
+    color: var(--mf-muted) !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html body #app#app#app#app#app .dj854-weather-actions button {
+    min-height: 42px !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 13px !important;
+    background: var(--mf-accent-soft) !important;
+    color: var(--mf-accent) !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+  }
+
+  html body #app#app#app#app#app #route-map-card:not([hidden]),
+  html body #app#app#app#app#app #road-width-legend:not([hidden]) {
+    position: fixed !important;
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: var(--mf-panel-bottom) !important;
+    width: min(620px, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - var(--mf-topbar-height) - var(--mf-toolbar-height) - var(--mf-nav-height) - 48px) !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 22px !important;
+    background: var(--mf-surface-solid) !important;
+    color: var(--mf-ink) !important;
+    box-shadow: var(--mf-shadow) !important;
+    overflow: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 6600 !important;
+  }
+
+  html body #app#app#app#app#app[data-theme="dark"] .maplibregl-popup.dj-place-detail-popup .maplibregl-popup-tip {
+    border-top-color: var(--mf-surface-solid) !important;
+    border-bottom-color: var(--mf-surface-solid) !important;
+  }
+}
