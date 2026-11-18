@@ -13,8 +13,18 @@ test('Bocha reference layer enables, loads exact data and clears from the safety
  const panel=page.locator('#map-safety-controls');if(!await panel.isVisible()){
  const controls=page.locator('#dj-v794-safety:visible,#map-safety-toggle:visible');await expect(controls.first()).toBeVisible();await controls.first().click();}
  await expect(panel).toBeVisible();const toggle=page.locator('#sangdo-bocha-toggle');
+ const safetyNav=page.getByRole('navigation',{name:'보행안전 메뉴 바로가기'});
+ await expect(safetyNav).toBeVisible();
+ await safetyNav.getByRole('button',{name:'사고·지도자료'}).click();
  const dataGroup=page.locator('#dj-safety-data');await expect(dataGroup).toHaveCount(1);
- await dataGroup.evaluate(el=>{el.open=true;});
+ await expect(dataGroup).toHaveJSProperty('open',true);
+ if((page.viewportSize()?.width||0)>=1080){
+   const subnav=page.getByRole('group',{name:'사고·보행환경 데이터 세부 메뉴'});
+   await expect(subnav).toBeVisible();
+   const roadDataTab=subnav.getByRole('button',{name:'사고·횡단'});
+   await roadDataTab.click();
+   await expect(roadDataTab).toHaveAttribute('aria-pressed','true');
+ }
  await toggle.scrollIntoViewIfNeeded();
  await expect(toggle).toBeVisible();await expect(toggle).toHaveAttribute('aria-pressed','false');
  const response=page.waitForResponse(r=>new URL(r.url()).pathname===path&&r.ok(),{timeout:30000});await toggle.click();
