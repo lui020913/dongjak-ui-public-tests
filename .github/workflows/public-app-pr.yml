@@ -50,6 +50,25 @@ jobs:
         run: npm run build
       - name: Verify generated app entrypoint
         run: test -s dist/index.html
+      - name: Install root Playwright test dependencies
+        working-directory: .
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium for the real-browser layout matrix
+        working-directory: .
+        run: npx playwright install --with-deps chromium
+      - name: Verify the same mobile-first layout at ten viewport sizes
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs
+      - name: Upload viewport screenshots and measured layout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-first-layout-${{ github.run_id }}
+          path: |
+            playwright-report-mobile-first/
+            test-results-mobile-first/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Summarize exact source
         working-directory: .
         run: |
