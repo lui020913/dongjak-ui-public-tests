@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Full mobile-first UI overhaul Preview; no Production promotion",
-  "attempt": 5,
+  "attempt": 6,
   "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION",
-  "last_retry_reason": "Apply high-specificity overrides for the existing v8.2.9 mobile cascade, preserve the AI header orb, restore 5px edge blur, and align 52px toolbar/dock geometry"
+  "last_retry_reason": "The 2px blur came from the v914 request-completion cascade layer; moved the 5px override into that same layer so it wins correctly"
 }
