@@ -8,7 +8,8 @@ test('mobile-first design tokens and dark theme are defined',()=>{
   for(const token of ['--mf-surface:','--mf-text:','--mf-brand:','--mf-border:','--mf-radius-sheet:','--mf-touch:']) {
     assert.ok(css.includes(token), 'Missing '+token);
   }
-  assert.match(css,/#app\[data-theme="dark"\]/);\n  assert.match(css,/html\[data-theme="dark"\] #app/);
+  assert.match(css,/#app\[data-theme="dark"\]/);
+  assert.match(css,/html\[data-theme="dark"\] #app/);
 });
 
 test('phone layout uses safe areas and map-first navigation',()=>{
@@ -17,7 +18,10 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/env\(safe-area-inset-bottom/);
   assert.match(css,/#dj-v794-toolbar/);
   assert.match(css,/#bottom-nav/);
-  assert.match(css,/mask-image: linear-gradient/);\n  assert.match(css,/#weather-label/);\n  assert.match(css,/#theme-toggle/);\n  assert.match(css,/#version-history-trigger/);
+  assert.match(css,/mask-image: linear-gradient/);
+  assert.match(css,/#weather-label/);
+  assert.match(css,/#theme-toggle/);
+  assert.match(css,/#version-history-trigger/);
 });
 
 test('tablet and desktop share the same visual tokens',()=>{
