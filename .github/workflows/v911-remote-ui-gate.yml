@@ -15,11 +15,11 @@ on:
         type: string
         default: ''
       viewport_scope:
-        description: Optional development-only browser selection; full remains the release gate
+        description: Mobile-only phone viewport gate
         required: false
         type: choice
-        options: [full, mobile, tablet, pc]
-        default: full
+        options: [mobile]
+        default: mobile
 permissions:
   contents: read
 concurrency:
@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        viewport: ${{ fromJSON(inputs.viewport_scope == 'mobile' && '["mobile375","mobile390"]' || inputs.viewport_scope == 'tablet' && '["tablet768","tablet820","tablet1024","tablet1180"]' || inputs.viewport_scope == 'pc' && '["pc1280","pc1440","pc1920"]' || '["mobile375","mobile390","tablet768","tablet820","tablet1024","tablet1180","pc1280","pc1440","pc1920"]') }}
+        viewport: [mobile375, mobile390, mobile430]
     env:
       DONGJAK_TARGET_URL: ${{ inputs.target_url }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
