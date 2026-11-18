@@ -2619,8 +2619,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offset],
           zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:280});
         };
-        requestAnimationFrame(()=>requestAnimationFrame(settleFocus));
-        setTimeout(settleFocus,420);
+        if(typeof globalThis.requestAnimationFrame==='function'){
+          globalThis.requestAnimationFrame(()=>globalThis.requestAnimationFrame?.(settleFocus));
+        }
+        if(typeof globalThis.setTimeout==='function')globalThis.setTimeout(settleFocus,420);
       }
     }
     kindEl.textContent=place.kind==='bus'?'버스정류장':'지하철역';
