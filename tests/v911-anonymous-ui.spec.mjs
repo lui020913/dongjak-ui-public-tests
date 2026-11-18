@@ -231,6 +231,9 @@ test('mobile and touch tablet POI filters share the existing top toolbar with bl
      const max=n.scrollWidth-n.clientWidth;
      return {offset:n.scrollLeft,max,left:shown(l),right:shown(r)};
    });
+   if(page.viewportSize().width<700){
+     await expect.poll(async()=>Math.abs((await snapshot()).offset)).toBeLessThanOrEqual(3);
+   }
    console.log('TOOLBAR_INITIAL',JSON.stringify(await snapshot()));
    await expect.poll(async()=>{const d=await snapshot();return d.left===(d.offset>3)&&d.right===(d.max-d.offset>3);}).toBe(true);
    const move=async end=>{
@@ -254,6 +257,42 @@ test('mobile and touch tablet POI filters share the existing top toolbar with bl
  await expect(cafe).toHaveAttribute('aria-pressed','true');
  await expect(food).toHaveAttribute('aria-pressed','true');
  await test.info().attach('poi-toolbar-mobile-tablet',{body:await page.screenshot(),contentType:'image/png'});
+});
+
+
+test('phone onboarding copy is top aligned and artwork is not cropped',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page,{keepTour:true});
+ const overlay=page.locator('#dj860-onboarding'),content=overlay.locator('.dj860-content'),copy=content.locator('.dj860-copy'),image=overlay.locator('.dj860-screen-image');
+ await expect(image).toBeVisible();await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
+ await visuallyPresented(image);
+ await expect.poll(async()=>{
+   const p=await content.boundingBox(),c=await copy.boundingBox();
+   return p&&c?c.y-p.y:1000;
+ }).toBeLessThanOrEqual(24);
+ await test.info().attach('phone-onboarding-top-aligned',{body:await page.screenshot(),contentType:'image/png'});
+ await tap(page,overlay.locator('[data-dj860-action="skip"]'));await expect(overlay).toBeHidden();
+});
+test('phone sheets keep headers inside and scrollable content above fixed actions',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ await tap(page,tab(page,'route'));
+ const panel=page.locator('#route-panel'),body=panel.locator(':scope > .dj836-sheet-body'),footer=panel.locator(':scope > #dj910-route-footer');
+ await visuallyPresented(panel);await expect(footer.locator('#route-calc')).toBeVisible();
+ await expect.poll(async()=>{const b=await body.boundingBox(),f=await footer.boundingBox();return b&&f?f.y-(b.y+b.height):-1000;}).toBeGreaterThanOrEqual(-1);
+ const note=body.locator('.page-note').last();await note.scrollIntoViewIfNeeded();
+ await expect.poll(async()=>{const a=await body.boundingBox(),b=await note.boundingBox();return a&&b?a.y+a.height-b.y-b.height:-1000;}).toBeGreaterThanOrEqual(-2);
+ await test.info().attach('phone-route-footer',{body:await page.screenshot(),contentType:'image/png'});
+ await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
+ await tap(page,page.locator('#dj-v794-more'));
+ const more=page.locator('#dj-mobile-utilities'),heading=more.locator('.dj-mobile-utility-heading');
+ await visuallyPresented(more);await expect(heading).toBeVisible();
+ await expect.poll(async()=>{const p=await more.boundingBox(),h=await heading.boundingBox();return p&&h?h.x-p.x:-1000;}).toBeGreaterThanOrEqual(8);
+ await tap(page,page.locator('#dj-mobile-utilities-close'));await expect(more).toBeHidden();
+ await tap(page,tab(page,'participate'));
+ const community=page.locator('#participation-panel'),cb=community.locator(':scope > .dj836-sheet-body'),summary=cb.locator('.community-report-secondary > summary');
+ await visuallyPresented(community);await summary.scrollIntoViewIfNeeded();
+ await expect.poll(async()=>{const a=await cb.boundingBox(),b=await summary.boundingBox();return a&&b?a.y+a.height-b.y-b.height:-1000;}).toBeGreaterThanOrEqual(-2);
+ await test.info().attach('phone-community-last-content',{body:await page.screenshot(),contentType:'image/png'});
+ await tap(page,community.locator('.dj-sheet-chrome-close'));await expect(community).toBeHidden();
 });
 
 test('PC desktop chrome and independent facility categories',async({page})=>{
