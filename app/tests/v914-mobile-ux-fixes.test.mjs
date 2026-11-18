@@ -7,11 +7,11 @@ const compact=value=>value.replace(/\s+/g,'').toLowerCase();
 
 test('the shared mobile-first shell loads after the preserved mobile interaction fixes',()=>{
   const main=read('src/main.js');
-  const mobile = main.indexOf("import './v914-mobile-ux-fixes.css';");
-  const shared = main.indexOf("import './mobile-first-layout.css';");
-  assert.ok(mobile >= 0 && shared > mobile);
-  assert.doesNotMatch(main,/v913-pc-design-system\\.css/);
-  assert.doesNotMatch(main,/v881-tablet-workspace\\.css/);
+  const mobile=main.indexOf("import './v914-mobile-ux-fixes.css';");
+  const shared=main.indexOf("import './mobile-first-layout.css';");
+  assert.ok(mobile>=0&&shared>mobile);
+  assert.equal(main.includes('v913-pc-design-system.css'),false);
+  assert.equal(main.includes('v881-tablet-workspace.css'),false);
 });
 
 test('POI edge fades are narrow, translucent and never block category-chip taps',()=>{
