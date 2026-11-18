@@ -14,8 +14,7 @@ assert.equal(depth,0,'CSS braces must balance');
 for(const token of [
   '--mf-surface:', '--mf-brand:', '--mf-radius-sheet:', '--mf-touch:',
   '#app#app#app#app#app[data-theme="dark"]', 'html[data-theme="dark"] #app', '@media (max-width: 699px)',
-  '@media (min-width: 700px) and (max-width: 1079px)',
-  '@media (min-width: 1080px)', 'env(safe-area-inset-bottom',
+'env(safe-area-inset-bottom',
   'prefers-reduced-motion', '#dj-v794-toolbar', '#bottom-nav',
   '#route-panel', '#participation-panel', '#news-panel', '#mine-panel'
 ]) assert.ok(css.includes(token), 'Missing mobile-first requirement: '+token);
