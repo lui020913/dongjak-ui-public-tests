@@ -60,7 +60,7 @@ run_private(){
   rm -f "$log"
 }
 run_private "Dependency installation" npm ci --no-audit --no-fund --prefer-offline
-if node "$GITHUB_WORKSPACE/scripts/run-mobile-regressions.mjs" "$work" >"$log" 2>&1; then
+if "${safe[@]}" node "$GITHUB_WORKSPACE/scripts/run-mobile-regressions.mjs" "$work" >"$log" 2>&1; then
   echo "Mobile/shared private Node regression suite passed"
 else
   node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
