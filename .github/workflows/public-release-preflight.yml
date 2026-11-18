@@ -1,0 +1,74 @@
+name: Public release setup preflight - no deployment
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/seal-private-release.mjs'
+      - 'tests/release-bundle.test.mjs'
+      - '.github/workflows/public-release-preflight.yml'
+      - '.github/workflows/public-private-source-preview.yml'
+      - '.github/workflows/public-exact-production.yml'
+  workflow_dispatch:
+    inputs:
+      check_credentials:
+        description: Verify configured environments using read-only requests
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  crypto:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: node --test tests/release-bundle.test.mjs
+  source-access:
+    if: github.event_name == 'workflow_dispatch' && inputs.check_credentials && github.actor == 'lui020913' && github.ref == 'refs/heads/main'
+    environment: public-source-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Check source permission and configuration without downloading code
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN" || { echo '::error::PRIVATE_SOURCE_READ_TOKEN missing'; exit 1; }
+          node -e 'const s=process.env.RELEASE_BUNDLE_KEY||"",b=Buffer.from(s,"base64");if(b.length!==32||b.toString("base64")!==s)throw Error("RELEASE_BUNDLE_KEY must be 32 random bytes encoded as Base64")'
+          test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || { echo '::error::Public Supabase build variables missing'; exit 1; }
+          gh api repos/lui020913/dongjak-safety-map/git/ref/heads/hotfix/v8.9.11-motion-20261118 --jq .object.sha >/dev/null 2>&1 || { echo '::error::Private source read permission failed'; exit 1; }
+          echo 'Private source access and build configuration verified; no code downloaded.'
+  cloudflare-access:
+    if: github.event_name == 'workflow_dispatch' && inputs.check_credentials && github.actor == 'lui020913' && github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name: [public-cloudflare-preview,public-cloudflare-production]
+    environment: ${{ matrix.env_name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+    steps:
+      - name: Check secret format and read-only Cloudflare project access
+        env:
+          ENV_NAME: ${{ matrix.env_name }}
+        run: |
+          set -euo pipefail
+          node -e 'const s=process.env.RELEASE_BUNDLE_KEY||"",b=Buffer.from(s,"base64");if(b.length!==32||b.toString("base64")!==s)throw Error("RELEASE_BUNDLE_KEY must be 32 random bytes encoded as Base64")'
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo '::error::Cloudflare deployment configuration missing'; exit 1; }
+          curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/dongjak-walk-safety-preview" 2>/dev/null | jq -e '.success==true and .result.name=="dongjak-walk-safety-preview" and .result.production_branch=="main"' >/dev/null || { echo '::error::Cloudflare project read permission failed'; exit 1; }
+          if [ "$ENV_NAME" = public-cloudflare-production ];then
+            test -n "$GH_TOKEN" && gh api repos/lui020913/dongjak-safety-map/git/ref/heads/hotfix/v8.9.11-motion-20261118 --jq .object.sha >/dev/null 2>&1 || { echo '::error::Production private source read permission failed'; exit 1; }
+          fi
+          echo 'Read-only deployment configuration check passed; no deployment performed.'
