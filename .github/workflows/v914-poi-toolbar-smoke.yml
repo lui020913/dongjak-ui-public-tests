@@ -1,0 +1,38 @@
+name: v8.9.14 POI toolbar mobile/tablet browser smoke
+on:
+  push:
+    branches: [main]
+    paths: ['release/poi-toolbar-smoke-request.json']
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: v914-poi-toolbar-smoke
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Dispatch exact-source mobile and tablet UI checks
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          set -euo pipefail
+          jq -e '.viewport_scopes==["mobile","tablet"] and (.source_sha|test("^[a-f0-9]{40}$")) and (.build_run|type=="number" and .>0) and .target_url=="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/"' release/poi-toolbar-smoke-request.json >/dev/null
+          SOURCE_SHA="$(jq -er '.source_sha' release/poi-toolbar-smoke-request.json)"
+          BUILD_RUN="$(jq -er '.build_run|tostring' release/poi-toolbar-smoke-request.json)"
+          TARGET_URL="$(jq -er '.target_url' release/poi-toolbar-smoke-request.json)"
+          for scope in mobile tablet; do
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" \
+              -f ref=main \
+              -f "inputs[expected_source_sha]=$SOURCE_SHA" \
+              -f "inputs[target_url]=$TARGET_URL" \
+              -f "inputs[expected_build_run]=$BUILD_RUN" \
+              -f "inputs[viewport_scope]=$scope" >/dev/null
+            echo "Dispatched exact-source $scope UI verification for $SOURCE_SHA / build $BUILD_RUN."
+          done
