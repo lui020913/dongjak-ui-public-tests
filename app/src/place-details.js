@@ -135,8 +135,8 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   // Every POI click focuses the actual facility representative coordinate,
   // not the nearby cursor location. Keep station-specific clicks separate.
   try{
-    const isMobile=window.matchMedia?.('(max-width:1079px)')?.matches;
-    if(isMobile){
+    const useSharedSheetCameraOffset=true;
+    if(useSharedSheetCameraOffset){
       // Keep the real POI coordinate in the upper part of the map so the
       // location pin and popup do not go behind the bottom navigation.
       // MapLibre camera offsets also stay accurate if the zoom level changes.
@@ -154,8 +154,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   }
   catch(error){console.info('[시설 중심 이동] 현재 지도 보기 유지',error?.message);}
   const root=document.createElement('section');root.className='dj-place-detail';
-  const mobileDetail=Boolean(window.matchMedia?.('(max-width:1079px)')?.matches);
-  const desktopDetail=Boolean(window.matchMedia?.('(min-width:1080px)')?.matches);
+  const sharedSheet=true;
   let popup=null;
 
   // One real header is used at every width. On phones its top 24px is a
@@ -210,7 +209,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const folderSelect=document.createElement('select');
   for(const name of getPlaceFolders()){const option=document.createElement('option');option.value=name;option.textContent=name;folderSelect.append(option);}
   folderSelect.value=savedPlaces().find(item=>placeKey(item)===placeKey(p))?.folder||'즐겨찾기';
-  folderWrap.append(folderSelect);folderWrap.hidden=desktopDetail&&!isPlaceSaved(p);
+  folderWrap.append(folderSelect);folderWrap.hidden=false;
   folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;body.append(folderSection);
 
   const saveButton=document.createElement('button');saveButton.type='button';saveButton.className='dj854-place-favorite';
@@ -224,7 +223,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   syncFavorite();
   saveButton.addEventListener('click',()=>{
     const result=toggleSavedPlace(p);
-    if(result.ok){syncFavorite({saved:result.saved});if(desktopDetail)folderWrap.hidden=!result.saved;if(desktopDetail)folderSection.hidden=folderWrap.hidden;}
+    if(result.ok){syncFavorite({saved:result.saved});}
     else syncFavorite({saved:isPlaceSaved(p),error:true});
   });
   const shareButton=document.createElement('button');shareButton.type='button';shareButton.className='dj856-place-share';
@@ -241,7 +240,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     event.stopPropagation();
     const element=popup?.getElement?.();
     const motion=element?.querySelector?.('.maplibregl-popup-content');
-    if(element?.dataset.dj912ImmediateDismiss==='true'||!mobileDetail||!motion||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){popup?.remove();return;}
+    if(element?.dataset.dj912ImmediateDismiss==='true'||!sharedSheet||!motion||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){popup?.remove();return;}
     if(element.dataset.dj870Closing==='true')return;
     element.dataset.dj870Closing='true';element.style.pointerEvents='none';
     let closed=false;
@@ -260,7 +259,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   folderSelect.addEventListener('change',()=>{
     if(!isPlaceSaved(p)){
       const result=toggleSavedPlace(p);
-      if(result.ok){syncFavorite({saved:true});if(desktopDetail){folderWrap.hidden=false;folderSection.hidden=false;}}
+      if(result.ok){syncFavorite({saved:true});}
     }
     setSavedPlaceFolder(p,folderSelect.value);
   });
@@ -285,13 +284,13 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   aiSection.append(text('small','확인된 공개정보를 중심으로 설명합니다. 실제 운영·접근성·현장 안전 수준은 별도 확인이 필요합니다.','dj-place-ai-disclaimer'));
   const aiEndpoint=String(import.meta.env?.VITE_PLACE_AI_API_URL||'/api/place-insight');
   const controllerAI=new AbortController();
-  popup=new maplibregl.Popup({offset:22,maxWidth:mobileDetail?'calc(100vw - 24px)':(desktopDetail?'650px':'520px'),closeButton:false,anchor:window.matchMedia?.('(max-width:1079px)')?.matches?'top':undefined,className:'dj-place-detail-popup'})
+  popup=new maplibregl.Popup({offset:22,maxWidth:'min(520px, calc(100vw - 24px))',closeButton:false,anchor:'top',className:'dj-place-detail-popup'})
     .setLngLat([p.lng,p.lat]).setDOMContent(root).addTo(map);
 
-  // Mobile: the non-interactive part of the entire header is the gesture
-  // surface. Swipe up to expand; down to collapse or dismiss. Actions retain
+  // Shared mobile-first detail sheet: the non-interactive part of the header is the gesture
+  // surface at every viewport. Swipe up to expand; down to collapse or dismiss. Actions retain
   // ordinary click semantics. The map anchor never changes.
-  if(mobileDetail){
+  if(sharedSheet){
     const popupElement=popup.getElement?.();
     const INTERACTIVE='button,a,input,textarea,select,label,summary,[role="button"]';
     let gesture=null;
@@ -335,12 +334,12 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     header.addEventListener('pointerup',finish);
     header.addEventListener('pointercancel',finish);
   }
-  // PC keeps its anchored title-drag behavior; phones use the edge gesture above.
+  // The same header drag and edge-dismiss behavior is used on every viewport.
   enableAnchoredPopupDragging(popup,titleGroup);
   // Ephemeral selection pin: same verified POI coordinate, not an invented location.
   const pin=createSelectedLocationPin(document);pin.setAttribute('aria-hidden','true');
-  // Offset the pin above the feature's native map label on phones.
-  const mobilePin=window.matchMedia?.('(max-width:1079px)')?.matches;
+  // Keep the selected pin offset consistent with the shared detail sheet.
+  const mobilePin=true;
   const marker=new maplibregl.Marker({element:pin,anchor:'bottom',offset:[0,mobilePin?-15:-4]})
     .setLngLat([p.lng,p.lat]).addTo(map);
   popup.on('close',()=>{controllerAI.abort();marker.remove();});
