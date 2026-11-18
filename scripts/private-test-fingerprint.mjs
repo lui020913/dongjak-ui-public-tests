@@ -13,3 +13,10 @@ for(const line of raw.split(/\r?\n/)){
 const count=(name)=>raw.match(new RegExp('^# '+name+' (\\d+)\\s*$','m'))?.[1]||'unknown';
 console.log('Private test summary: total='+count('tests')+' passed='+count('pass')+' failed='+count('fail'));
 for (const fingerprint of [...new Set(failures)].slice(0,40))console.log('Failed test fingerprint: '+fingerprint);
+
+// Only forward the fixed, validated summary format; never forward raw private output.
+for(const line of raw.split(/\r?\n/)){
+ if(/^Safe regression summary: files=\d+ passed=\d+ failed=\d+ tests=\d+ test_passed=\d+ test_failed=\d+$/.test(line)||
+ /^Safe regression failure: area=(?:building|geo-data|auth|ui-lifecycle|facility-search|other) file=[a-f0-9]{64} kind=(?:runner|assertion)$/.test(line)||
+ /^Failed test fingerprint: [a-f0-9]{64}$/.test(line))console.log(line);
+}
