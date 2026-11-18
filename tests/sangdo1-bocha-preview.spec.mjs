@@ -30,7 +30,15 @@ test('Bocha reference layer enables, loads exact data and clears from the safety
  const response=page.waitForResponse(r=>new URL(r.url()).pathname===path&&r.ok(),{timeout:30000});await toggle.click();
  const data=await (await response).json();expect(data.features).toHaveLength(237);expect(data.features.every(f=>f.properties.score===null&&f.properties.route_penalty_allowed===false)).toBe(true);
  await expect(toggle).toHaveAttribute('aria-pressed','true');await expect(page.locator('#sangdo-bocha-status')).toContainText('237');
+ const switchState=toggle.locator('.dj-feature-state');
+ const knobOffset=()=>switchState.evaluate(el=>{const t=getComputedStyle(el,'::before').transform;if(t==='none')return 0;const v=t.slice(t.indexOf('(')+1,-1).split(',').map(Number);return v.length===6?v[4]:0;});
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe('rgb(200, 212, 209)');
+ await expect.poll(knobOffset,{timeout:3000}).toBeGreaterThan(10);
  await test.info().attach('bocha-reference-enabled',{body:await page.screenshot(),contentType:'image/png'});
  const clear=page.locator('#dj-safety-clear-imports');await expect(clear).toBeEnabled();await clear.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
- await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await release();
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).toBe('rgb(200, 212, 209)');
+ await expect.poll(knobOffset,{timeout:3000}).toBe(0);
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe('rgb(200, 212, 209)');
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await release();
 });
