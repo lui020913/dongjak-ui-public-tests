@@ -3,68 +3,38 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {buildingExtrusionAppearance,nativeBuildingExtrusion} from '../src/map-appearance.js';
 import {applyBaseLandPalette,installMapThemeZoomGuard,getLatestMapInstance} from '../src/v862-map-theme-zoom-guard-core.js';
+
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('v8.6.3 loads the theme guard before map initialization and PC separation after mobile rules',()=>{
+test('v8.6.3 map theme guard still loads before the application entry',()=>{
   const html=read('index.html');
   assert.ok(html.indexOf('/src/v862-map-theme-zoom-guard.js')<html.indexOf('/src/main.js'));
-  assert.ok(html.indexOf('/src/v862-pc-mobile-separation.js')>html.indexOf('/src/v861-mobile-sheet-repair.js'));
-  assert.match(read('src/v862-pc-mobile-separation.js'),/v862-pc-mobile-separation\.css/);
-  assert.doesNotMatch(read('src/v862-pc-mobile-separation.js'),/import ['\"]\.\/v862-transit-share/);
   assert.ok(html.includes('/src/v862-night-analysis-session.js'));
-  assert.match(read('src/v862-map-theme-zoom-guard-core.js'),/type==='zoomend'\|\|type==='style\.load'\|\|type==='pitchend'/);
 });
 
-test('desktop baseline is restored from v8.5.6 while tablet and phone use distinct width bands',()=>{
-  const css=read('src/v862-pc-mobile-separation.css');
-  const rail=read('src/v713-desktop-rail.js');
-  const v856=read('src/v856-ui-completion.js');
-  assert.match(css,/@media \(min-width:1080px\)/);
-  assert.match(css,/grid-template-columns:56px minmax\(0,1fr\) auto/);
-  assert.match(css,/@media \(min-width:700px\) and \(max-width:1079px\)/);
-  assert.match(css,/@media \(max-width:699px\)/);
-  assert.match(rail,/desktopActive=\(\)=>window\.innerWidth>=minWidth/);
-  assert.doesNotMatch(rail,/finePointer/);
-  assert.match(v856,/\(min-width:1080px\)/);
+test('PC and tablet do not mount separate layout trees; every viewport uses the shared app shell',()=>{
+  const html=read('index.html');
+  const main=read('src/main.js');
+  const css=read('src/mobile-first-layout.css');
+  assert.doesNotMatch(html,/v862-pc-mobile-separation\.js|v876-desktop-final\.js/);
+  assert.doesNotMatch(main,/installDesktopSafetyRail\\s*\\(/);
+  assert.doesNotMatch(main,/v881-tablet-workspace|v881-tablet-header-unified|v881-tablet-tool-rail/);
+  assert.doesNotMatch(main,/v912-desktop-poi|v913-pc-design-system/);
+  assert.match(main,/import '\\.\\/mobile-first-layout\\.css'/);
+  assert.match(css,/#bottom-nav:not\\(\\[hidden\\]\\)[\\s\\S]*?position: fixed !important/);
+  assert.match(css,/grid-template-columns: repeat\\(5,minmax\\(0,1fr\\)\\)/);
+  assert.match(css,/#dj-desktop-safety-rail/);
+  assert.match(css,/#dj-tablet-utility-group/);
 });
 
-test('desktop and tablet search suggestions are anchored to the search lane and width-bounded',()=>{
-  const css=read('src/v862-pc-mobile-separation.css');
-  assert.match(css,/map-quick-search-dropdown:not\(\[hidden\]\)\{[\s\S]*?left:0!important[\s\S]*?width:min\(680px,calc\(100vw - 120px\)\)/);
-  assert.match(css,/@media \(min-width:700px\) and \(max-width:1079px\)[\s\S]*?width:min\(640px,calc\(100vw - 88px\)\)/);
-  assert.doesNotMatch(css,/left:-80px!important/);
-});
-
-test('desktop transit header order is start, destination, centered favorite, share, close',()=>{
-  const transit=read('src/v8215-news-metro-compact-header.js');
-  const share=read('src/transport-map.js');
-  const header=read('src/v8215-news-metro-compact-header.js');
-  const css=read('src/v862-pc-mobile-separation.css');
-  assert.match(transit,/actionRow\.append\(start,end\)/);
-  assert.match(transit,/actionRow\.append\(bookmark\)/);
-  assert.match(share,/transportShare\.id='transport-share-place'/);
-  assert.match(header,/actionRow\.append\(share\)/);
-  assert.match(share,/const url=placeShareUrl\(place\)/);
-  assert.match(css,/\.dj-news-transport-bookmark,[\s\S]*?\.dj-news-transport-share\{[\s\S]*?place-items:center/);
-  assert.match(css,/transport-panel-head #transport-close\{[\s\S]*?right:6px!important/);
-});
-
-test('bus body is a dedicated adaptive route-card grid and metro neighbors have more header spacing',()=>{
-  const css=read('src/v862-pc-mobile-separation.css');
-  assert.match(css,/data-kind="bus"] #transport-arrivals\{[\s\S]*?repeat\(auto-fit,minmax\(230px,1fr\)\)/);
-  assert.match(css,/data-kind="bus"] #transport-arrivals \.transport-arrival-row\{[\s\S]*?min-height:78px/);
-  assert.match(css,/data-kind="bus"] #transport-neighbors\{display:none/);
-  assert.match(css,/#transport-neighbors:not\(:empty\)\{[\s\S]*?margin:22px 0 17px/);
-});
-
-test('dark map theme reapplies ground and 3D building colors after zoom',()=>{
+test('dark map theme restores ground and 3D building colors after zoom',()=>{
   const guard=read('src/v862-map-theme-zoom-guard-core.js');
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.match(guard,/role!=='ground'&&role!=='vegetation'/);
-  assert.match(guard,/theme==='dark'\?'#253137':'#e1e4dc'/);
-  assert.match(main,/map\.on\('zoomend',\(\)=>\{syncTiltWithBuildings\(\);scheduleBuildingLoad\(\);\}\)/);
-  assert.match(main,/buildingExtrusionAppearance\(theme,pitch/);
+  assert.match(guard,/theme==='dark'\\?'#253137':'#e1e4dc'/);
+  assert.match(main,/map\\.on\\('zoomend',\\(\\)=>\\{syncTiltWithBuildings\\(\\);scheduleBuildingLoad\\(\\);\\}\\)/);
+  assert.match(main,/buildingExtrusionAppearance\\(theme,pitch/);
   assert.match(main,/fill-extrusion-color/);
   assert.match(main,/fill-extrusion-opacity/);
   assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.88);
@@ -72,7 +42,7 @@ test('dark map theme reapplies ground and 3D building colors after zoom',()=>{
   assert.equal(buildingExtrusionAppearance('dark',30).color,'#30464d');
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'base-building','source-layer':'building'}),true);
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'dongjak-buildings-3d-01','source-layer':'building'}),false);
-  assert.match(appearance,/nearOpacity:0\.88,farOpacity:0\.82/);
+  assert.match(appearance,/nearOpacity:0\\.88,farOpacity:0\\.82/);
 });
 
 test('MapLibre zoom guard restores only base-map ground and vegetation and preserves the map instance',()=>{
@@ -124,9 +94,9 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
 test('night analysis closes when leaving the map and when opening the pedestrian safety workbench',()=>{
   const session=read('src/v862-night-analysis-session.js');
   const runtime=read('src/night-visibility-map.js');
-  assert.match(session,/app\.dataset\.tab!=='map'\|\|app\.classList\.contains\('map-safety-open'\)/);
-  assert.match(session,/button\?\.getAttribute\('aria-pressed'\)==='true'\)button\.click\(\)/);
-  assert.match(session,/attributeFilter:\['data-tab','class'\]/);
-  assert.match(session,/safetyToggle\?\.addEventListener\('click',stop,true\)/);
-  assert.doesNotMatch(runtime,/safetyWorkbenchToggle\?\.addEventListener/);
+  assert.match(session,/app\\.dataset\\.tab!=='map'\\|\\|app\\.classList\\.contains\\('map-safety-open'\\)/);
+  assert.match(session,/button\\?\\.getAttribute\\('aria-pressed'\\)==='true'\\)button\\.click\\(\\)/);
+  assert.match(session,/attributeFilter:\\['data-tab','class'\\]/);
+  assert.match(session,/safetyToggle\\?\\.addEventListener\\('click',stop,true\\)/);
+  assert.doesNotMatch(runtime,/safetyWorkbenchToggle\\?\\.addEventListener/);
 });
