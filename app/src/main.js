@@ -1691,19 +1691,7 @@ map.on('load',()=>{
   installRoadWidthLayer({map, maplibregl, app, canOpen:()=>app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode && detail.hidden && editor.hidden, onError:()=>toast('도로폭 데이터를 불러오지 못했습니다.')});
   // 동작구 행정동 경계와 이름은 행정동 GeoJSON 기준으로 따로 표시합니다.
   // 동작구 외곽선을 먼저 불러온 다음 같은 자료의 시군구·행정동 경계를 일치시킵니다.
-  const adminPicker=document.getElementById('admin-dong-picker');
-  function positionAdminBelowLeftPanel(){
-    if(window.innerWidth<1080||adminPicker?.hidden)return;
-    const parent=[document.getElementById('overview-sheet'),document.getElementById('map-advanced-controls'),document.getElementById('map-safety-controls')]
-      .find(node=>node && !node.hidden && node.getBoundingClientRect().height>0);
-    const defaultTop=Number.parseFloat(app.style.getPropertyValue('--dj-v724-rail-top'))||92;
-    const ideal=parent?parent.getBoundingClientRect().bottom+8:defaultTop+120;
-    app.style.setProperty('--dj-v725-admin-top',`${Math.round(Math.max(defaultTop,Math.min(ideal,window.innerHeight-235)))}px`);
-  }
-  const adminObserver=new MutationObserver(()=>requestAnimationFrame(positionAdminBelowLeftPanel));
-  if(adminPicker)adminObserver.observe(adminPicker,{attributes:true,attributeFilter:['hidden','style']});
-  document.getElementById('open-admin-dongs')?.addEventListener('click',()=>requestAnimationFrame(positionAdminBelowLeftPanel));
-  window.addEventListener('resize',positionAdminBelowLeftPanel,{passive:true});
+  // The administrative-district picker uses the same shared bottom-sheet shell on every viewport.
   const adminInit=()=>installAdminDongLayer({map,openButton:document.getElementById('open-admin-dongs'),
     picker:document.getElementById('admin-dong-picker'),
     onDistrictBoundary:(feature)=>{
