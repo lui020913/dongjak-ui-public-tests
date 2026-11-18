@@ -6,7 +6,7 @@ export function isMobilePhoneContext({userAgent='',platform='',userAgentDataMobi
   const applePhone=/iPhone|iPod/i.test(ua)||/iPhone|iPod/i.test(String(platform));
   const androidPhone=/Android/i.test(ua)&&(/Mobile/i.test(ua)||userAgentDataMobile===true);
   const legacyPhone=/Windows Phone|IEMobile|BlackBerry|Opera Mini/i.test(ua);
-  return (applePhone||androidPhone||legacyPhone)&&Number(width)>0&&Number(width)<=950;
+  return (applePhone||androidPhone||legacyPhone)&&Number(width)>0&&Number(width)<=699;
 }
 
 function replaceExactly(source,search,replacement,label) {
@@ -27,7 +27,7 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
   var root=document.documentElement;
   function update(){
     var width=Number(window.innerWidth||root.clientWidth||0);
-    root.dataset.djMobileOnly=((applePhone||androidPhone||legacyPhone)&&width>0&&width<=950)?'allowed':'blocked';
+    root.dataset.djMobileOnly=((applePhone||androidPhone||legacyPhone)&&width>0&&width<=699)?'allowed':'blocked';
   }
   update();
   window.addEventListener('resize',update,{passive:true});
