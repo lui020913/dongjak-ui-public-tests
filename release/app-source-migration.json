@@ -1,0 +1,9 @@
+{
+  "source_repository": "lui020913/dongjak-safety-map",
+  "source_ref": "feature/sangdo-bocha-v911-integration-20261118",
+  "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
+  "application_version": "8.26.1",
+  "target_branch": "public/app-source-migration-20261119",
+  "target_directory": "app",
+  "migration": "one-time sanitized source snapshot; no private history; no deployment"
+}
