@@ -227,7 +227,7 @@ jobs:
           api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
           curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api" 2>/dev/null | jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' >/dev/null
           before="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
-          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.12" and .source_commit=="bd8069299f4dc785a615ec6d0801569da44e635f" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.13" and .source_commit=="b752b6a0cbffca93b5e39642610b4ec4e9f122b2" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
           cd "$RUNNER_TEMP/release"
           if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=ui-v911-motion-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
           for n in $(seq 1 12);do
