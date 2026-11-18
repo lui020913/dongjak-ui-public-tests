@@ -1,0 +1,97 @@
+name: Mobile-first overhaul — v8.26.1 full-app Preview
+run-name: Mobile-first overhaul public=${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'release/mobile-first-overhaul-request.json'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: mobile-first-overhaul-preview
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
+    name: Build exact private v8.26.1 source with public mobile CSS
+    runs-on: ubuntu-24.04
+    environment: public-source-build
+    timeout-minutes: 65
+    outputs:
+      source_sha: ${{ steps.build.outputs.source_sha }}
+      app_version: ${{ steps.build.outputs.app_version }}
+      public_sha: ${{ steps.build.outputs.public_sha }}
+      css_sha: ${{ steps.build.outputs.css_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate public CSS and responsive regression tests
+        run: |
+          set -euo pipefail
+          node frontend/scripts/verify-mobile-first-overhaul.mjs
+          node --test frontend/production/mobile-first-overhaul.test.mjs
+      - name: Fetch, test, build and seal exact private source
+        id: build
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+          PRIVATE_SOURCE_READ_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bash scripts/build-mobile-first-overhaul.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-${{ steps.build.outputs.source_sha }}
+          path: ${{ runner.temp }}/mobile-overhaul.sealed
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+      - name: Remove sealed build after upload
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed" "$RUNNER_TEMP/mobile-overhaul.tar.gz"
+
+  preview:
+    needs: build
+    if: needs.build.result == 'success'
+    name: Deploy isolated Preview and dispatch nine-viewport browser gate
+    runs-on: ubuntu-24.04
+    environment: public-cloudflare-preview
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: write
+    env:
+      MOBILE_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      MOBILE_APP_VERSION: ${{ needs.build.outputs.app_version }}
+      MOBILE_PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      MOBILE_CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      GH_TOKEN: ${{ secrets.DONGJAK_PUBLIC_TESTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
+          path: ${{ runner.temp }}
+      - name: Deploy exact candidate to isolated Preview only
+        run: bash scripts/deploy-mobile-first-overhaul-preview.sh
+      - name: Remove sealed artifact
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed"
