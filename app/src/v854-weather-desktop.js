@@ -3,7 +3,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const app=doc.getElementById('app'),widget=doc.getElementById('weather-widget');
   const label=doc.getElementById('weather-label'),title=doc.getElementById('weather-title');
   if(!app||!widget||!label||!win.matchMedia)return ()=>{};
-  const media=win.matchMedia('(min-width:700px)');
+  const media=win.matchMedia('(min-width: 0px)');
   let sheet=null,observer=null,attached=false,refreshing=false;
   const temperature=text=>{
     const match=String(text||'').match(/-?\d+(?:\.\d+)?\s*(?:°|℃|도|C)?/);
