@@ -59,12 +59,14 @@ jobs:
           source="$RUNNER_TEMP/private-source"
           rm -rf app
           mkdir -p app
-          for dir in src public functions server platforms android migrations supabase scripts tests; do
+          for dir in src public functions server platforms android migrations supabase scripts tests docs; do
             test ! -d "$source/$dir" || cp -a "$source/$dir" app/
           done
-          for file in .gitignore index.html package.json package-lock.json vite.config.js capacitor.config.json wrangler.toml wrangler.seoul-facilities.jsonc playwright.config.js playwright.config.mjs playwright.v910.config.mjs; do
-            test ! -f "$source/$file" || cp -a "$source/$file" app/
-          done
+          while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+            [ "$base" = ".env.example" ] && continue
+            cp -a "$file" app/
+          done < <(find "$source" -maxdepth 1 -type f -print0)
           mkdir -p app/src
           cp frontend/production/mobile-first-overhaul.css app/src/mobile-first-overhaul.css
           node --input-type=module <<'NODE'
