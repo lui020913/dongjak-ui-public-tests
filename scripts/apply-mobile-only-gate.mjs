@@ -38,18 +38,13 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
 '})();\n'+
 '</script>';
 
-  const gateStyle=\`<style id="dj-mobile-only-gate-style">
-#dj-mobile-only-screen{display:none}
-html[data-dj-mobile-only="blocked"],html[data-dj-mobile-only="blocked"] body{background:#fff!important}
-html[data-dj-mobile-only="blocked"] body{margin:0!important;overflow:hidden!important}
-html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}
-html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{
-  position:fixed!important;inset:0!important;z-index:2147483647!important;
-  display:block!important;box-sizing:border-box!important;
-  width:100vw!important;height:100vh!important;height:100dvh!important;
-  margin:0!important;padding:0!important;border:0!important;background:#fff!important;
-}
-</style>\`;
+  const gateStyle='<style id="dj-mobile-only-gate-style">\n'+
+'#dj-mobile-only-screen{display:none}\n'+
+'html[data-dj-mobile-only="blocked"],html[data-dj-mobile-only="blocked"] body{background:#fff!important}\n'+
+'html[data-dj-mobile-only="blocked"] body{margin:0!important;overflow:hidden!important}\n'+
+'html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}\n'+
+'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{position:fixed!important;inset:0!important;z-index:2147483647!important;display:block!important;box-sizing:border-box!important;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important}\n'+
+'</style>';
 
   if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
     const viewport=/<meta name="viewport"[^>]*\/>/;
