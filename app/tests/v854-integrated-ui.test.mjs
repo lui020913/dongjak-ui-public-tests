@@ -54,12 +54,12 @@ test('weather icon and temperature use the shared toolbar and one weather sheet 
 });
 
 test('language selector remains accessible in the shared settings surface',()=>{
- const html=read('index.html'),settings=read('src/v854-language.js');
+ const html=read('index.html'),settings=read('src/v854-language.js'),appSettings=read('src/v7120-settings.js');
  assert.ok(read('src/v854-integrated-ui.css').includes('.dj854-language-section'));
  assert.ok(settings.includes('dj854-language-section'));
  assert.ok(settings.includes('select'));
  assert.ok(read('src/main.js').includes('v854-language.js'));
- assert.ok(settings.includes("mobile.id='dj-settings-mobile'"));
+ assert.ok(appSettings.includes("mobile.id='dj-settings-mobile'"));
 });
 
 test('map tip stays separate from the five-tab navigation dock',()=>{
