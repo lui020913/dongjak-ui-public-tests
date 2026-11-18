@@ -19,3 +19,6 @@ For a Windows PC with PowerShell 7 and GitHub CLI authenticated as the repositor
 
 ## Exact build proof
 A public candidate passes its build_run as well as source_commit to the remote UI gate. Each viewport verifies the exact candidate hostname, SHA, version and build_run before and after testing. Production rejects legacy SHA-only audits and requires five successful viewport jobs from the matching build run. A new build of the same Git commit requires a new audit; an old result cannot authorize Production.
+
+## Run identity and serialization
+Dispatch a fresh public candidate instead of rerunning its workflow. GitHub reruns retain the run ID, so candidate packaging and Preview reject attempts above 1 and Production rejects any candidate with a rerun history. Preview and Production share one concurrency group to prevent competing public release changes. Existing legacy private workflows must not be run in parallel with the public release path.

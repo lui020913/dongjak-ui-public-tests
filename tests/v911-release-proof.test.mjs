@@ -16,3 +16,12 @@ test('public deployment and audit carry the exact build identity',()=>{
  assert.match(prod,/mobile375 mobile390 tablet768 tablet1024 pc1440/);
  assert.equal((gate.match(/node scripts\/verify-release-source\.mjs/g)||[]).length,2);
 });
+
+test('candidate publication is single-attempt and serializes with Production',()=>{
+ const build=read('.github/workflows/public-private-source-preview.yml');
+ const prod=read('.github/workflows/public-exact-production.yml');
+ assert.ok(build.includes('group: dongjak-public-release'));
+ assert.ok(prod.includes('group: dongjak-public-release'));
+ assert.equal((build.match(/test "\$GITHUB_RUN_ATTEMPT" = 1/g)||[]).length,2);
+ assert.match(prod,/\.run_attempt==1/);
+});

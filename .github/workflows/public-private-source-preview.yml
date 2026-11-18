@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: v911-public-build-preview
+  group: dongjak-public-release
   cancel-in-progress: false
 env:
   SOURCE_SHA: ${{ inputs.source_sha }}
@@ -35,6 +35,7 @@ jobs:
           GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
         run: |
           set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = 1 || { echo '::error::Dispatch a fresh build instead of rerunning a candidate'; exit 1; }
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
           test -n "$GH_TOKEN"
           actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
@@ -116,6 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
+          test "$GITHUB_RUN_ATTEMPT" = 1 || { echo '::error::Dispatch a fresh build instead of rerunning Preview'; exit 1; }
           node scripts/seal-private-release.mjs open "$RUNNER_TEMP/encrypted/deploy.sealed" "$RUNNER_TEMP/deploy.tar.gz" "$SOURCE_SHA"
           mkdir -m 700 "$RUNNER_TEMP/release"
           tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
