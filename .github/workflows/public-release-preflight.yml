@@ -79,7 +79,7 @@ jobs:
           npm install --no-audit --no-fund
           node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); const p=await b.newPage(); await p.setContent('<title>browser-ready</title>'); if(await p.title()!=='browser-ready') throw Error('Browser smoke failed'); console.log('Preinstalled Chromium ready: '+b.version()); await b.close()"
   candidate-evidence:
-    if: github.event_name == 'push' && hashFiles('release/evidence-candidate.json') != ''
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
