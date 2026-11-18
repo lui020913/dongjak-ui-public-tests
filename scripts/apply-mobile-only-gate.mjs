@@ -38,14 +38,14 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
 '})();\n'+
 '</script>';
 
-  const gateStyle='<style id="dj-mobile-only-gate-style">\\n'+
-'#dj-mobile-only-screen{display:none}\\n'+
-'html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}\\n'+
-'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{\\n'+
-'  position:fixed!important;inset:0!important;z-index:2147483647!important;\\n'+
-'  display:block!important;width:100vw!important;height:100vh!important;height:100dvh!important;\\n'+
-'  margin:0!important;padding:0!important;background:#fff!important;color:#111!important;\\n'+
-'}\\n'+
+  const gateStyle='<style id="dj-mobile-only-gate-style">\n'+
+'#dj-mobile-only-screen{display:none}\n'+
+'html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}\n'+
+'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{\n'+
+'  position:fixed!important;inset:0!important;z-index:2147483647!important;\n'+
+'  display:block!important;width:100vw!important;height:100vh!important;height:100dvh!important;\n'+
+'  margin:0!important;padding:0!important;background:#fff!important;color:#111!important;\n'+
+'}\n'+
 '</style>';
 
   if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
@@ -58,7 +58,7 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
   }
   if(!indexHtml.includes('id="dj-mobile-only-screen"')) {
     const screen='<main id="dj-mobile-only-screen" role="main" aria-label="모바일 기기에서 이용해 주세요"></main>';
-    indexHtml=replaceExactly(indexHtml,'<body>','<body>\\n    '+screen,'body opening tag');
+    indexHtml=replaceExactly(indexHtml,'<body>','<body>\n    '+screen,'body opening tag');
   }
 
   return {indexHtml,mainJs,platformEntry};
