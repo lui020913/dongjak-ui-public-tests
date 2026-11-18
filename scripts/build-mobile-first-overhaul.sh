@@ -31,6 +31,7 @@ grep -Fq "import './public-ui-production-overlay.css';" src/main.js
 grep -Fq "public-ui-mobile-surface-coordinator.js" src/main.js
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-only-gate.mjs" "$work"
+echo "CHECKPOINT: mobile-only visual gate applied"
 node --input-type=module <<'NODE'
 import {readFileSync,writeFileSync} from 'node:fs';
 const path='src/main.js';
@@ -40,11 +41,17 @@ if(source.split(anchor).length!==2) throw new Error('Expected exactly one final 
 if(source.includes("import './mobile-first-overhaul.css';")) throw new Error('Mobile overhaul already injected');
 writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
 NODE
+echo "CHECKPOINT: mobile CSS import injected"
 git diff --check
+echo "CHECKPOINT: whitespace check passed"
 expected_changes="$(printf '%s\n' index.html src/main.js)"
 actual_changes="$(git diff --name-only | sort)"
-test "$actual_changes" = "$expected_changes"
+echo "Expected changed files: $expected_changes"
+echo "Actual changed files: $actual_changes"
+if [ "$actual_changes" != "$expected_changes" ]; then echo "::error::Unexpected source change list"; exit 1; fi
+echo "CHECKPOINT: changed-file allowlist passed"
 test -s src/mobile-first-overhaul.css
+echo "CHECKPOINT: mobile stylesheet exists"
 safe=(env -i "PATH=$PATH" "HOME=$HOME" CI=true DONGJAK_UI_ONLY=1 "GITHUB_SHA=$SOURCE_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY")
 log="$RUNNER_TEMP/private-build.log"
 run_private(){
