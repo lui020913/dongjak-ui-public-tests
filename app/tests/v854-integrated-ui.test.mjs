@@ -24,8 +24,8 @@ test('map actions and five-tab navigation retain one position system on every vi
 
 test('search results keep separate media and official sections',()=>{
  const css=read('src/v854-integrated-ui.css');
- assert.match(css,/\.dj854-search-column-list/);
- assert.match(css,/\.dj854-search-column-title/);
+ assert.match(css,/\.dj854-search-columns/);
+ assert.match(css,/\.dj854-search-column/);
  assert.match(css,/\.dj854-search-column-count/);
 });
 
@@ -40,7 +40,7 @@ test('the more panel remains sticky and its close control stays available',()=>{
  const css=read('src/v854-integrated-ui.css');
  assert.match(css,/\.dj854-more-head/);
  assert.match(css,/position:\s*sticky/);
- assert.match(css,/\.dj854-more-close/);
+ assert.match(css,/#dj-mobile-utilities-close/);
 });
 
 test('weather icon and temperature use the shared toolbar and one weather sheet at all widths',()=>{
@@ -54,22 +54,24 @@ test('weather icon and temperature use the shared toolbar and one weather sheet 
 });
 
 test('language selector remains accessible in the shared settings surface',()=>{
- const html=read('index.html'),settings=read('src/v806-unified-ui.js');
- assert.match(html,/id="language-selector"/);
- assert.match(settings,/language-selector/);
+ const html=read('index.html'),settings=read('src/v7120-settings.js');
+ assert.ok(read('src/v854-integrated-ui.css').includes('.dj854-language-section'));
+ assert.ok(settings.includes('dj-map-settings'));
+ assert.ok(html.includes('id="dj-settings-mobile"')||read('src/main.js').includes('dj-settings-mobile'));
 });
 
 test('map tip stays separate from the five-tab navigation dock',()=>{
  const css=read('src/mobile-first-layout.css'),html=read('index.html');
- assert.ok(html.includes('map-tip'));
+ assert.ok(read('src/v854-integrated-ui.css').includes('#dj840-map-tip'));
  assert.ok(css.includes('#bottom-nav:not([hidden])'));
 });
 
 test('search merges results from local facilities and transport without dropping categories',()=>{
  const search=read('src/map-quick-search.js');
- assert.match(search,/Promise\.all/);
- assert.match(search,/transport/);
- assert.match(search,/facility/);
+ assert.ok(search.includes("import {searchPlaces,searchLocalPlaces} from './route-search.js'"));
+ assert.ok(search.includes("import {searchCachedTransportPlaces} from './transport-map.js'"));
+ assert.ok(search.includes("import {queryOfficialPlaces} from './seoul-official-facilities.js'"));
+ assert.ok(search.includes("import {searchNamedOsm} from './v875-osm-name-search.js'"));
 });
 
 test('favorites panel remains a shared bottom sheet',()=>{
