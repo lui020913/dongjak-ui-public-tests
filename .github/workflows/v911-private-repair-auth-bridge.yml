@@ -1,0 +1,32 @@
+name: v911 repair authorization bridge
+on:
+  push:
+    branches: [main]
+    paths: [release/repair-auth-request.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v911-repair-authority-bridge
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Dispatch one isolated private authority check
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN" || { echo "::error::Existing private workflow dispatch credential missing"; exit 1; }
+          source="$(jq -er '.source_sha' release/repair-auth-request.json)"
+          [[ "$source" =~ ^[0-9a-f]{40}$ ]]
+          if ! gh api --method POST repos/lui020913/dongjak-safety-map/actions/workflows/v911-repair-authority.yml/dispatches -f ref=main -f "inputs[source_sha]=$source" >/dev/null 2>&1;then
+            echo "::error::Private authorization check dispatch was rejected; no source or deployment changed."
+            exit 1
+          fi
+          echo 'Private authorization check requested; no source changes or deployment.'
