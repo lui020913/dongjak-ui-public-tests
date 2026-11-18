@@ -1240,21 +1240,16 @@ function labelVisibility(map){
         'icon-rotation-alignment':'viewport'}});}
     catch(e){console.info('[버스정류장 아이콘] 새 레이어 추가 실패',e);}
   }
-  // PC에서는 버스 표식과 명칭 사이 간격을 넓히고 아이콘을 키웁니다.
-  // 모바일은 기존 크기와 간격을 그대로 유지합니다.
-  const syncDesktopBusPresentation=()=>{
-    const desktop=Boolean(globalThis.matchMedia?.('(min-width:1080px)')?.matches);
+  // Keep bus pictogram size and label clearance identical across all viewports.
+  const syncSharedBusPresentation=()=>{
     try{
-      if(map.getLayer?.('dj-transport-bus-pictogram'))map.setLayoutProperty('dj-transport-bus-pictogram','icon-size',desktop
-        ?['interpolate',['linear'],['zoom'],16.4,0.34,18.2,0.42,20,0.49]
-        :['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393]);
-      // PC labels need a wider visual gap below the enlarged stop pictogram.
-      if(map.getLayer?.('transport-bus-names'))map.setLayoutProperty('transport-bus-names','text-offset',desktop?[0,2.25]:[0,1.85]);
-      if(map.getLayer?.('transport-bus-names-close'))map.setLayoutProperty('transport-bus-names-close','text-offset',desktop?[0,2.1]:[0,1.85]);
-    }catch(error){console.debug('[버스정류장 PC 표시 간격]',error?.message);}
+      if(map.getLayer?.('dj-transport-bus-pictogram'))map.setLayoutProperty('dj-transport-bus-pictogram','icon-size',
+        ['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393]);
+      if(map.getLayer?.('transport-bus-names'))map.setLayoutProperty('transport-bus-names','text-offset',[0,1.85]);
+      if(map.getLayer?.('transport-bus-names-close'))map.setLayoutProperty('transport-bus-names-close','text-offset',[0,1.85]);
+    }catch(error){console.debug('[버스정류장 공통 표시 간격]',error?.message);}
   };
-  syncDesktopBusPresentation();
-  globalThis.addEventListener?.('resize',syncDesktopBusPresentation,{passive:true});
+  syncSharedBusPresentation();
 }
 
 export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>false,boundaryGeometry=null,
@@ -2600,7 +2595,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           (place.kind==='subway' && isNearBoundary(place.lng,place.lat)===true))){
       const mapBounds=map.getContainer?.()?.getBoundingClientRect?.();
       const viewportHeight=mapBounds?.height||map.getContainer?.()?.clientHeight||globalThis.innerHeight||800;
-      const phoneFocus=globalThis.matchMedia?.('(max-width:1079px)')?.matches;
+      const phoneFocus=true;
       const upward=Math.round(Math.min(112,Math.max(46,viewportHeight*.10)));
       const offsetY=phoneFocus
         ?mobileTransportFocusOffset({viewportHeight,panelTop:panel.getBoundingClientRect?.()?.top,
