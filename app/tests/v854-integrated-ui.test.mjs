@@ -26,7 +26,7 @@ test('search results keep separate media and official sections',()=>{
  const css=read('src/v854-integrated-ui.css');
  assert.match(css,/\.dj854-search-columns/);
  assert.match(css,/\.dj854-search-column/);
- assert.match(css,/\.dj854-search-column-count/);
+ assert.match(css,/\.dj854-search-column-list/);
 });
 
 test('search no longer filters results according to a desktop-only layout',()=>{
@@ -50,13 +50,15 @@ test('weather icon and temperature use the shared toolbar and one weather sheet 
  assert.ok(weather.includes("matchMedia('(min-width: 0px)')"));
  assert.ok(weather.includes('dj854-weather-sheet'));
  assert.ok(css.includes('#dj854-weather-sheet:not([hidden])'));
- assert.ok(css.includes('#dj-v794-weather'));
+ assert.ok(read('src/v854-integrated-ui.css').includes('#dj-v794-weather'));
 });
 
 test('language selector remains accessible in the shared settings surface',()=>{
- const html=read('index.html'),settings=read('src/v7120-settings.js');
+ const html=read('index.html'),settings=read('src/v854-language.js');
  assert.ok(read('src/v854-integrated-ui.css').includes('.dj854-language-section'));
- assert.ok(settings.includes('dj-map-settings'));
+ assert.ok(settings.includes('dj854-language-section'));
+ assert.ok(settings.includes('select'));
+ assert.ok(read('src/main.js').includes('v854-language.js'));
  assert.ok(html.includes('id="dj-settings-mobile"')||read('src/main.js').includes('dj-settings-mobile'));
 });
 
