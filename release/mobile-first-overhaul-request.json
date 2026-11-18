@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 12,
+  "attempt": 13,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Simplified the gate to a visual-only white screen: retained every PC/tablet stylesheet and script, retained desktop rail imports, retained MapLibre startup and platform entry dispatch. Removed only app-startup gating and source deletion. Phone landscape now remains allowed up to 1024 CSS px. Focused tests assert desktop/tablet source and startup are byte-for-byte preserved."
+  "last_retry_reason": "The visual-only white gate passed all 7 focused tests and retained PC/tablet app startup. Build stopped at an outdated file-change allowlist that still expected src/main.js and platforms/entry.js edits from the abandoned invasive approach. Updated allowlist to the sole intended source change, index.html. Retry."
 }
