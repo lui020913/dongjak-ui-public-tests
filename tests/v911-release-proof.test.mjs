@@ -61,6 +61,9 @@ test('owner-only preview request pushes pin exact source and deduplicate before 
  assert.match(prod,/paths: \[release\/production-request\.json\]/);
  assert.match(prod,/\.approval=="explicit-owner-request"/);
  assert.ok(prod.includes('==["release/production-request.json"]'));
+ assert.ok(prod.includes('gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA"'));
+ assert.ok(prod.includes('[.files[].filename]|unique'));
+ assert.doesNotMatch(prod,/\.head_commit\.added\[\]/);
  assert.ok(prod.includes('.pusher.name=="lui020913"'));
  assert.ok(prod.includes('v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN'));
  assert.ok(prod.includes('test "$GITHUB_RUN_ATTEMPT" = 1'));

@@ -35,6 +35,8 @@ jobs:
         with: {node-version: '24'}
       - name: Resolve explicit owner-requested release
         id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           test "$GITHUB_RUN_ATTEMPT" = 1
@@ -43,11 +45,13 @@ jobs:
             SOURCE_SHA="$(jq -er '.source_sha|strings' release/production-request.json)"
             BUILD_RUN="$(jq -er '.build_run|strings' release/production-request.json)"
             AUDIT_RUN="$(jq -er '.audit_run|strings' release/production-request.json)"
-            jq -e --arg msg "v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN" '
-              .head_commit.message==$msg and
-              (([.head_commit.added[],.head_commit.modified[],.head_commit.removed[]]|unique)==["release/production-request.json"]) and
-              .pusher.name=="lui020913"
-            ' "$GITHUB_EVENT_PATH" >/dev/null
+            # Actions push payloads omit per-commit changed-file arrays.
+            jq -e --arg sha "$GITHUB_SHA" '.after==$sha and .pusher.name=="lui020913"' "$GITHUB_EVENT_PATH" >/dev/null
+            gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA" | jq -e --arg sha "$GITHUB_SHA" --arg msg "v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN" '
+              .sha==$sha and .commit.message==$msg and
+              .author.login=="lui020913" and .committer.login=="lui020913" and
+              ([.files[].filename]|unique)==["release/production-request.json"]
+            ' >/dev/null
           fi
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[1-9][0-9]*$ && "$AUDIT_RUN" =~ ^[1-9][0-9]*$ ]]
           printf 'SOURCE_SHA=%s\nBUILD_RUN=%s\nAUDIT_RUN=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$AUDIT_RUN" >> "$GITHUB_ENV"
