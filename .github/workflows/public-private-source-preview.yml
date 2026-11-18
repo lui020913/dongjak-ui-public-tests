@@ -1,0 +1,146 @@
+name: Public runner - private source build and Preview
+run-name: v911 build source=${{ inputs.source_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact current private v8.9.11 hotfix source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: v911-public-build-preview
+  cancel-in-progress: false
+env:
+  SOURCE_SHA: ${{ inputs.source_sha }}
+  PRIVATE_REPO: lui020913/dongjak-safety-map
+  PRIVATE_REF: hotfix/v8.9.11-motion-20261118
+  PAGES_PROJECT: dongjak-walk-safety-preview
+  PREVIEW_URL: https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev
+  PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+jobs:
+  build:
+    if: github.actor == 'lui020913' && github.ref == 'refs/heads/main' && github.repository == 'lui020913/dongjak-ui-public-tests'
+    environment: public-source-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check exact private source and fetch without publishing it
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$GH_TOKEN"
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          test "$actual" = "$SOURCE_SHA"
+          work="$RUNNER_TEMP/private-application"
+          mkdir -m 700 "$work"
+          git -C "$work" init -q
+          git -C "$work" remote add origin "https://github.com/$PRIVATE_REPO.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="Authorization: Basic $auth" git -C "$work" fetch -q --depth=1 origin "$SOURCE_SHA" >/dev/null 2>&1
+          git -C "$work" checkout -q --detach FETCH_HEAD >/dev/null 2>&1
+          test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
+          echo 'Exact private source verified; no repository contents published.'
+      - name: Run full unit suite and release build with private output suppressed
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/private-application"
+          test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          safe=(env -i "PATH=$PATH" "HOME=$HOME" CI=true DONGJAK_UI_ONLY=1 "GITHUB_SHA=$SOURCE_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY")
+          log="$RUNNER_TEMP/private-build.log"
+          umask 077
+          run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
+          run_private 'Release metadata' node scripts/ci-v911-release.mjs
+          run_private 'Dependency install' npm ci --no-audit --no-fund
+          run_private 'Full Node suite' npm test
+          run_private 'Application build' npm run build
+          run_private 'Release consistency' npm run check:release
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+      - name: Seal exact deployment files; no plaintext public artifacts
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          tar -C "$RUNNER_TEMP/private-application" -czf "$RUNNER_TEMP/deploy.tar.gz" dist functions server src package.json package-lock.json
+          node scripts/seal-private-release.mjs seal "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed" "$SOURCE_SHA"
+          rm -f "$RUNNER_TEMP/deploy.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-v911-${{ inputs.source_sha }}
+          path: ${{ runner.temp }}/deploy.sealed
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Remove private working files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/private-application" "$RUNNER_TEMP/private-build.log" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed"
+  preview:
+    needs: build
+    environment: public-cloudflare-preview
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: encrypted-v911-${{ inputs.source_sha }}
+          path: ${{ runner.temp }}/encrypted
+      - name: Authenticate and unpack tested deployment files
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          node scripts/seal-private-release.mjs open "$RUNNER_TEMP/encrypted/deploy.sealed" "$RUNNER_TEMP/deploy.tar.gz" "$SOURCE_SHA"
+          mkdir -m 700 "$RUNNER_TEMP/release"
+          tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
+          rm -f "$RUNNER_TEMP/deploy.tar.gz"
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+      - name: Deploy Preview without showing private build or API contents
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
+          before="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.10" and .source_commit=="6c631412030e314ec5b6f5011561616159d0b9ca" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
+          cd "$RUNNER_TEMP/release"
+          if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=ui-v911-motion-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
+          for n in $(seq 1 12);do
+            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            [ "$n" != 12 ] || exit 1
+            sleep 5
+          done
+          curl -fsSL --max-time 30 "$PREVIEW_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
+          after="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          test "$before" = "$after"
+          echo 'Preview verified; Production unchanged.'
+      - name: Dispatch exact-source public browser gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+          echo 'Public viewport verification dispatched. No Production approval granted.'
+      - name: Remove plaintext files and diagnostic logs
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/private-deploy.log"

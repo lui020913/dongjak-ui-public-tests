@@ -1,0 +1,106 @@
+name: Public runner - approved exact Production deployment
+run-name: v911 Production source=${{ inputs.source_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha: {description: Exact approved private source SHA, required: true, type: string}
+      build_run: {description: Successful public encrypted build and Preview run ID, required: true, type: string}
+      audit_run: {description: Successful five-viewport public UI gate run ID, required: true, type: string}
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dongjak-public-production
+  cancel-in-progress: false
+env:
+  SOURCE_SHA: ${{ inputs.source_sha }}
+  BUILD_RUN: ${{ inputs.build_run }}
+  AUDIT_RUN: ${{ inputs.audit_run }}
+  PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+  PREVIEW_URL: https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev
+  PAGES_PROJECT: dongjak-walk-safety-preview
+jobs:
+  release:
+    if: github.actor == 'lui020913' && github.ref == 'refs/heads/main' && github.repository == 'lui020913/dongjak-ui-public-tests'
+    environment: public-cloudflare-production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Require exact successful build, Preview and UI gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[0-9]+$ && "$AUDIT_RUN" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and .display_title==("v911 build source="+$sha)' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .path==".github/workflows/v911-remote-ui-gate.yml" and .display_title==("v911 UI source="+$sha)' >/dev/null
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN/jobs?per_page=100" --jq '.jobs[]|[.name,.conclusion]|@tsv' > "$RUNNER_TEMP/gate.txt"
+          for viewport in mobile375 mobile390 tablet768 tablet1024 pc1440;do grep -Fx "$(printf 'ui (%s)\tsuccess' "$viewport")" "$RUNNER_TEMP/gate.txt" >/dev/null;done
+          curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
+      - uses: actions/download-artifact@v4
+        with:
+          name: encrypted-v911-${{ inputs.source_sha }}
+          run-id: ${{ inputs.build_run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/encrypted
+      - name: Decrypt exact tested artifact
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          node scripts/seal-private-release.mjs open "$RUNNER_TEMP/encrypted/deploy.sealed" "$RUNNER_TEMP/deploy.tar.gz" "$SOURCE_SHA"
+          mkdir -m 700 "$RUNNER_TEMP/release"
+          tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
+          rm -f "$RUNNER_TEMP/deploy.tar.gz"
+          jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+      - name: Verify current private branch before publishing
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/lui020913/dongjak-safety-map/git/ref/heads/hotfix/v8.9.11-motion-20261118 --jq .object.sha 2>/dev/null)" = "$SOURCE_SHA"
+      - name: Publish and verify; rollback only our own deployment on failure
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
+          cf(){ curl -fsS --max-time 45 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$@"; }
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.10" and .source_commit=="6c631412030e314ec5b6f5011561616159d0b9ca" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
+          previous="$(cf "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          cf "$api" > "$RUNNER_TEMP/before.json"
+          jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' "$RUNNER_TEMP/before.json" >/dev/null
+          jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' "$RUNNER_TEMP/before.json" > "$RUNNER_TEMP/bindings-before"
+          cd "$RUNNER_TEMP/release"
+          jq '.release_status="DEPLOYED_PRODUCTION"' dist/release-source.json > "$RUNNER_TEMP/release-marker.json"
+          cp "$RUNNER_TEMP/release-marker.json" dist/release-source.json
+          message="Owner approved v8.9.11 $SOURCE_SHA public run $GITHUB_RUN_ID"
+          rollback(){ local code=$?; if [ "$code" -ne 0 ];then
+            if cf "$api/deployments?env=production&per_page=1" | jq -e --arg msg "$message" '.result[0].deployment_trigger.metadata.commit_message==$msg' >/dev/null;then
+              cf -X POST "$api/deployments/$previous/rollback" | jq -e '.success==true' >/dev/null || echo '::error::Rollback failed; manual inspection required.'
+            fi
+          fi; exit "$code"; }
+          trap rollback EXIT
+          npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" >"$RUNNER_TEMP/private-deploy.log" 2>&1
+          for n in $(seq 1 15);do
+            if curl -fsSL --max-time 25 "$PRODUCTION_URL/release-source.json?post=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null;then break;fi
+            [ "$n" != 15 ] || exit 1
+            sleep 5
+          done
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json" | jq -e '.version=="8.9.11"' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/api/seoul-facilities?limit=1" | jq -e '.ok==true and .configured==true and (.places|length)>0' >/dev/null
+          cf "$api" | jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' > "$RUNNER_TEMP/bindings-after"
+          cmp -s "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after"
+          trap - EXIT
+          echo 'Production published and release/API/bindings verified.'
+      - name: Remove plaintext and private diagnostics
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/private-deploy.log" "$RUNNER_TEMP/before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/release-marker.json"
