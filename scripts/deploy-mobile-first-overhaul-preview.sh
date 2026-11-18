@@ -30,7 +30,7 @@ if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --br
 fi
 PREVIEW_URL=''
 for n in $(seq 1 12); do
-  deployments="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=preview&per_page=50")"
+  deployments="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=preview&per_page=20")"
   candidate="$(printf '%s' "$deployments" | jq -c --arg branch "$PREVIEW_BRANCH" --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" '[.result[] | select((.deployment_trigger.metadata.branch // "")==$branch and (((.deployment_trigger.metadata.commit_hash // "")==$source) or ((.deployment_trigger.metadata.commit_message // "") | contains("public="+$public))))] | sort_by(.created_on) | last // empty')"
   if [ -n "$candidate" ]; then
     PREVIEW_URL="$(printf '%s' "$candidate" | jq -er '.url // .aliases[0] // empty')"
@@ -57,7 +57,7 @@ curl -fsSL --max-time 30 "$PREVIEW_URL/version.json" | jq -e --arg version "$APP
 curl -fsSL --max-time 30 "$PREVIEW_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
 current="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
 test "$current" = "$previous"
-jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,viewport_scope:"full"}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" --arg build "$GITHUB_RUN_ID" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,expected_build_run:$build,viewport_scope:"full"}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
 echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
 echo "Private source: $SOURCE_SHA ($APP_VERSION)" >> "$GITHUB_STEP_SUMMARY"
 echo "Public UI commit: $PUBLIC_SHA" >> "$GITHUB_STEP_SUMMARY"
