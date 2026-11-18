@@ -1,3 +1,5 @@
+/* Mobile-only stylesheet: every rule is deliberately restricted to phone viewports. */
+@media (max-width: 699px) {
 /*
  * Mobile-first UI overhaul candidate for Dongjak Safety Map.
  * Applied only in the isolated 8.26.1 Preview build; no source or Production change.
@@ -634,76 +636,6 @@
 }
 
 /* Tablet: keep the same visual language, use the additional width for map and panels. */
-@media (min-width: 700px) and (max-width: 1079px) {
-  html body #app#app#app#app#app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
-    #transport-sheet, #detail-sheet, #entry-sheet, #dj-mobile-utilities,
-    #map-safety-controls, #map-advanced-controls) {
-    border-color: var(--mf-border) !important;
-    background: var(--mf-surface) !important;
-    box-shadow: var(--mf-shadow-raised) !important;
-  }
-
-  html body #app#app#app#app#app #bottom-nav {
-    border-radius: 22px !important;
-    padding: 6px !important;
-  }
-
-  html body #app#app#app#app#app #bottom-nav > .nav-tab {
-    min-height: 52px !important;
-    border-radius: 15px !important;
-    color: var(--mf-muted) !important;
-  }
-
-  html body #app#app#app#app#app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
-    background: var(--mf-brand-soft) !important;
-    color: var(--mf-brand-strong) !important;
-  }
-
-  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
-    .dj-sheet-chrome {
-    border-bottom: 1px solid var(--mf-border) !important;
-    background: var(--mf-surface) !important;
-  }
-
-  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
-    .dj836-sheet-body {
-    background: var(--mf-surface) !important;
-    color: var(--mf-text) !important;
-  }
-}
-
-/* Desktop: retain the existing wide workspace geometry, share the same component system. */
-@media (min-width: 1080px) {
-  html body #app#app#app#app#app :is(#bottom-nav, #route-panel, #participation-panel, #news-panel, #mine-panel,
-    #transport-sheet, #detail-sheet, #entry-sheet, #map-safety-controls, #map-advanced-controls) {
-    border-color: var(--mf-border) !important;
-    background: var(--mf-surface) !important;
-    box-shadow: var(--mf-shadow-raised) !important;
-  }
-
-  html body #app#app#app#app#app #bottom-nav > .nav-tab {
-    min-height: 44px !important;
-    border-radius: 13px !important;
-    color: var(--mf-muted) !important;
-  }
-
-  html body #app#app#app#app#app #bottom-nav > .nav-tab:is(.active, [aria-current="page"]) {
-    background: var(--mf-brand-soft) !important;
-    color: var(--mf-brand-strong) !important;
-  }
-
-  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
-    .dj-sheet-chrome {
-    border-bottom: 1px solid var(--mf-border) !important;
-    background: var(--mf-surface) !important;
-  }
-
-  html body #app#app#app#app#app :is(#route-panel, #participation-panel, #news-panel, #mine-panel)
-    .dj836-sheet-body {
-    background: var(--mf-surface) !important;
-    color: var(--mf-text) !important;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   #app#app#app#app#app :is(#bottom-nav > .nav-tab, .map-actions > button, #dj-v794-toolbar .dj-v794-tool) {
@@ -1112,4 +1044,6 @@ html[data-theme="dark"] #app#app#app#app#app,
     padding: 0 !important;
     overflow: hidden !important;
   }
+}
+
 }
