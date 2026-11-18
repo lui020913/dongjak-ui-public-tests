@@ -2,5 +2,5 @@
   "source_sha": "895e4dc322c0cb469142e4bc040de8433e31bede",
   "scope": "bocha control visual parity: same icon/text/toggle grid and pressed-state styling as existing safety layers; isolated Preview only",
   "previous_version": "8.9.14",
-  "verification_attempt": 2
+  "verification_attempt": 3
 }
