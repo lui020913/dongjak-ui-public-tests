@@ -3,7 +3,7 @@ set -euo pipefail
 PRIVATE_REPO="lui020913/dongjak-safety-map"
 PAGES_PROJECT="dongjak-walk-safety-preview"
 PREVIEW_BRANCH="mobile-first-overhaul-20261119"
-PREVIEW_URL="https://mobile-first-overhaul-20261119.dongjak-walk-safety-preview.pages.dev"
+PREVIEW_URL=""
 SOURCE_SHA="$MOBILE_SOURCE_SHA"
 APP_VERSION="$MOBILE_APP_VERSION"
 PUBLIC_SHA="$MOBILE_PUBLIC_SHA"
@@ -28,6 +28,22 @@ if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --br
   echo "::error::Preview deployment failed; deployment diagnostics withheld"
   exit 1
 fi
+PREVIEW_URL=''
+for n in $(seq 1 12); do
+  deployments="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=preview&per_page=50")"
+  candidate="$(printf '%s' "$deployments" | jq -c --arg branch "$PREVIEW_BRANCH" --arg public "$PUBLIC_SHA" '[.result[] | select((.deployment_trigger.metadata.branch // "")==$branch and ((.deployment_trigger.metadata.commit_message // "") | contains("public="+$public)))] | sort_by(.created_on) | last // empty')"
+  if [ -n "$candidate" ]; then
+    PREVIEW_URL="$(printf '%s' "$candidate" | jq -er '.url // empty')"
+    break
+  fi
+  sleep 5
+done
+test -n "$PREVIEW_URL"
+case "$PREVIEW_URL" in
+  https://*) ;;
+  *) PREVIEW_URL="https://$PREVIEW_URL" ;;
+esac
+echo "Detected exact Preview deployment URL: $PREVIEW_URL"
 verified=0
 for n in $(seq 1 12); do
   if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?verify=$GITHUB_RUN_ID-$n" | jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$GITHUB_RUN_ID" '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and .build_run==$build and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null; then
