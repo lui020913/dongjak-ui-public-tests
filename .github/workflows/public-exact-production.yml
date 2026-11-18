@@ -8,7 +8,7 @@ on:
     inputs:
       source_sha: {description: Exact approved private source SHA, required: true, type: string}
       build_run: {description: Successful public encrypted build and Preview run ID, required: true, type: string}
-      audit_run: {description: Successful nine-viewport public UI gate run ID, required: true, type: string}
+      evidence_runs: {description: Comma-separated successful UI evidence run IDs; coverage is combined by exact source SHA, required: true, type: string}
 permissions:
   contents: read
   actions: read
@@ -18,7 +18,7 @@ concurrency:
 env:
   SOURCE_SHA: ${{ inputs.source_sha }}
   BUILD_RUN: ${{ inputs.build_run }}
-  AUDIT_RUN: ${{ inputs.audit_run }}
+  EVIDENCE_RUNS: ${{ inputs.evidence_runs }}
   PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
   PREVIEW_URL: https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev
   PAGES_PROJECT: dongjak-walk-safety-preview
@@ -44,29 +44,26 @@ jobs:
             jq -e '.approval=="explicit-owner-request"' release/production-request.json >/dev/null
             SOURCE_SHA="$(jq -er '.source_sha|strings' release/production-request.json)"
             BUILD_RUN="$(jq -er '.build_run|strings' release/production-request.json)"
-            AUDIT_RUN="$(jq -er '.audit_run|strings' release/production-request.json)"
+            EVIDENCE_RUNS="$(jq -er '.evidence_runs | arrays | map(tostring) | join(",")' release/production-request.json)"
             # Actions push payloads omit per-commit changed-file arrays.
             jq -e --arg sha "$GITHUB_SHA" '.after==$sha and .pusher.name=="lui020913"' "$GITHUB_EVENT_PATH" >/dev/null
-            gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA" | jq -e --arg sha "$GITHUB_SHA" --arg msg "v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN" '
+            gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA" | jq -e --arg sha "$GITHUB_SHA" --arg msg "v911 Production source=$SOURCE_SHA build=$BUILD_RUN evidence=$EVIDENCE_RUNS" '
               .sha==$sha and .commit.message==$msg and
               .author.login=="lui020913" and .committer.login=="lui020913" and
               ([.files[].filename]|unique)==["release/production-request.json"]
             ' >/dev/null
           fi
-          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[1-9][0-9]*$ && "$AUDIT_RUN" =~ ^[1-9][0-9]*$ ]]
-          printf 'SOURCE_SHA=%s\nBUILD_RUN=%s\nAUDIT_RUN=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$AUDIT_RUN" >> "$GITHUB_ENV"
-          printf 'source_sha=%s\nbuild_run=%s\naudit_run=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$AUDIT_RUN" >> "$GITHUB_OUTPUT"
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[1-9][0-9]*$ && "$EVIDENCE_RUNS" =~ ^[1-9][0-9]*(,[1-9][0-9]*)*$ ]]
+          printf 'SOURCE_SHA=%s\nBUILD_RUN=%s\nEVIDENCE_RUNS=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$EVIDENCE_RUNS" >> "$GITHUB_ENV"
+          printf 'source_sha=%s\nbuild_run=%s\nevidence_runs=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$EVIDENCE_RUNS" >> "$GITHUB_OUTPUT"
           echo 'Explicit exact release request resolved. Protected Production environment remains required.'
-      - name: Require exact successful build, Preview and UI gate
+      - name: Require exact build and cumulative UI evidence
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[0-9]+$ && "$AUDIT_RUN" =~ ^[0-9]+$ ]]
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" --arg build "$BUILD_RUN" '.conclusion=="success" and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .path==".github/workflows/v911-remote-ui-gate.yml" and .display_title==("v911 UI source="+$sha+" build="+$build)' >/dev/null
-          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN/jobs?per_page=100" --jq '.jobs[]|[.name,.conclusion]|@tsv' > "$RUNNER_TEMP/gate.txt"
-          for viewport in mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920;do grep -Fx "$(printf 'ui (%s)\tsuccess' "$viewport")" "$RUNNER_TEMP/gate.txt" >/dev/null;done
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[0-9]+$ && "$EVIDENCE_RUNS" =~ ^[1-9][0-9]*(,[1-9][0-9]*)*$ ]]
+          node scripts/verify-release-evidence.mjs
           curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
       - uses: actions/download-artifact@v4
         with:
