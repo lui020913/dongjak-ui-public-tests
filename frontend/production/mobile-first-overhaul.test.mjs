@@ -18,6 +18,7 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/env\(safe-area-inset-top/);
   assert.match(css,/env\(safe-area-inset-bottom/);
   assert.match(css,/#dj-v794-toolbar/);
+  assert.match(css,/#app#app#app#app#app#app \.topbar > #dj-settings-mobile/);
   assert.match(css,/#bottom-nav/);
   assert.match(css,/mask-image: linear-gradient/);
   assert.match(css,/#weather-label/);
