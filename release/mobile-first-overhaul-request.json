@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 9,
+  "attempt": 10,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "First mobile-only workflow stopped in its public unit-test guard because the test regex omitted the documentElement.dataset prefix. Corrected the assertion; rerun the same exact source candidate."
+  "last_retry_reason": "Phone-only unit checks passed, then the private build correctly stopped on whitespace-only lines left after removing dedicated PC/tablet tags. The patcher was rebuilt as a single module, JavaScript escaping corrected, and whitespace normalization added with a regression assertion. Re-run the exact archived source candidate."
 }
