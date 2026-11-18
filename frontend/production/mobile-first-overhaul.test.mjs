@@ -26,6 +26,7 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/flex-basis: 52px/);
   assert.match(css,/bottom: max\(0px, env\(safe-area-inset-bottom/);
   assert.match(css,/backdrop-filter: blur\(5px\)/);
+  assert.match(css,/@layer request-completion/);
 });
 
 test('tablet and desktop share the same visual tokens',()=>{
