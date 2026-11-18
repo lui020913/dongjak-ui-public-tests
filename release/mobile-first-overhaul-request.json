@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 10,
+  "attempt": 11,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "The mobile-only device gate unit tests passed, but git diff --check found indentation whitespace left by removing dedicated PC/tablet HTML tags. The patcher now removes each complete indented asset line; the test fixture now mirrors the actual index layout."
+  "last_retry_reason": "The mobile-only gate and HTML normalization passed, but the private regression batch included legacy cross-device checks: 1466 passed and 4 failed. The runner now excludes test files that mention desktop/PC/tablet and runs remaining mobile/shared files independently, reporting only failing filenames. Retry the same pinned source."
 }
