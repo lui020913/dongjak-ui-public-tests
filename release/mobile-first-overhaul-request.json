@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 15,
+  "attempt": 16,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Build and isolated Preview deployment succeeded. Phone QA could not start because the container's default POSIX sh rejected `set -o pipefail` in the provenance-check steps. Changed only those two QA shell blocks to POSIX-compatible `set -eu`; no app source or test assertions were weakened. Retry the exact same pinned candidate."
+  "last_retry_reason": "The POSIX shell issue is fixed. The Playwright container image also lacks jq, so Preview provenance checks now parse the release marker with Node.js, which is already installed in that job. Both pre-QA and post-QA provenance checks remain mandatory; no checks are removed or weakened."
 }
