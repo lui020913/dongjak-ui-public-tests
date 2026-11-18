@@ -3,6 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Full mobile-first UI overhaul Preview; no Production promotion",
-  "attempt": 2,
-  "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION"
+  "attempt": 3,
+  "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION",
+  "last_retry_reason": "Retry after correcting Cloudflare Pages preview deployment listing pagination and adding exact build-run validation"
 }
