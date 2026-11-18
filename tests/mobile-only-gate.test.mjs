@@ -17,7 +17,21 @@ test('tablet and desktop contexts are blocked',()=>{
 });
 
 test('build patch displays the mobile-only notice and stops non-phone map startup',()=>{
-  const indexHtml='<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="stylesheet" href="/src/v815-pc-visual-fixes.css" /><link rel="stylesheet" href="/src/v853-pc-responsive-fixes.css" /><link rel="stylesheet" href="/src/v872-pc-onboarding-weather.css" /></head><body><script type="module" src="/src/v854-weather-desktop.js"></script><script type="module" src="/src/v862-pc-mobile-separation.js"></script><script type="module" src="/src/v876-desktop-final.js"></script><div id="app"></div></body></html>';
+  const indexHtml=[
+    '<!doctype html>',
+    '<html><head>',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
+    '    <link rel="stylesheet" href="/src/v815-pc-visual-fixes.css" />',
+    '    <link rel="stylesheet" href="/src/v853-pc-responsive-fixes.css" />',
+    '    <link rel="stylesheet" href="/src/v872-pc-onboarding-weather.css" />',
+    '</head>',
+    '<body>',
+    '    <script type="module" src="/src/v854-weather-desktop.js"></script>',
+    '    <script type="module" src="/src/v862-pc-mobile-separation.js"></script>',
+    '    <script type="module" src="/src/v876-desktop-final.js"></script>',
+    '    <div id="app"></div>',
+    '</body></html>'
+  ].join('\\n');
   const mainJs="import {installDesktopSafetyRail} from './v713-desktop-rail.js';\nimport './v726-desktop-polish.css';\nimport './v729-pc-consistency.css';\nimport './v881-desktop-ui.css';\nimport './v881-portrait-zoom-responsive.css';\nimport './v881-tablet-workspace.css';\nimport './v881-tablet-header-unified.css';\nimport './v881-tablet-tool-rail.js';\nimport './v913-pc-design-system.css';\nmaplibregl.setWorkerUrl(workerUrl);\ninstallDesktopSafetyRail({app});\nstartApp();\n";
   const platformEntry="if(target==='ios-pwa')await import('./ios-pwa/entry.js');\nelse if(target==='android')await import('./android/entry.js');\nelse await import('./pc-chromium/entry.js');\n// Mobile sheet presentation has its own entry, separate from desktop/MapLibre.\nif(target==='ios-pwa'||target==='android')await import('./shared/mobile-panel-layout.js');\nexport {target};\n";
   const result=applyMobileOnlyGate({indexHtml,mainJs,platformEntry});
