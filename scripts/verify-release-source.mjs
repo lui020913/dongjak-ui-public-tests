@@ -31,7 +31,7 @@ for (let n = 1; n <= 4; n++) {
     const sha = String(result.source_commit||'').trim().toLowerCase();
     if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error('Preview release-source.json is missing an immutable source_commit.');
     if (sha === raw.toLowerCase() && result.release_status === 'CANDIDATE_PREVIEW_NOT_PRODUCTION' &&
-        (!expectedBuild || (String(result.build_run)===expectedBuild && result.application_version==='8.9.12'))) {
+        (!expectedBuild || (String(result.build_run)===expectedBuild && result.application_version==='8.9.13'))) {
       marker = result; break;
     }
     console.log('Preview source not yet matching requested revision, attempt ' + n);

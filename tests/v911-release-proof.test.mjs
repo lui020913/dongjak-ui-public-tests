@@ -73,11 +73,11 @@ test('owner-only preview request pushes pin exact source and deduplicate before 
  assert.ok(prod.includes('(.event=="push" and .display_title==("v911 build source="+$sha))'));
 });
 
-test('v8.9.12 candidate checks the exact deployed v8.9.11 predecessor and marker without weakening audit gates',()=>{
+test('v8.9.13 candidate checks the exact deployed v8.9.12 predecessor and marker without weakening audit gates',()=>{
  const preview=read('.github/workflows/public-private-source-preview.yml'),prod=read('.github/workflows/public-exact-production.yml'),verify=read('scripts/verify-release-source.mjs');
  for(const workflow of [preview,prod]){
-   assert.ok(workflow.includes('.application_version=="8.9.12"'));
-   assert.ok(workflow.includes('.application_version=="8.9.11" and .source_commit=="bd2d45b71158f4dc66c0fa62157a993d7b8ac285"'));
+   assert.ok(workflow.includes('.application_version=="8.9.13"'));
+   assert.ok(workflow.includes('.application_version=="8.9.12" and .source_commit=="bd8069299f4dc785a615ec6d0801569da44e635f"'));
  }
- assert.ok(verify.includes("result.application_version==='8.9.12'"));
+ assert.ok(verify.includes("result.application_version==='8.9.13'"));
 });

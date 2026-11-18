@@ -67,7 +67,7 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" --arg build "$BUILD_RUN" '.conclusion=="success" and .event=="workflow_dispatch" and .head_branch=="main" and .head_repository.full_name==$repo and .path==".github/workflows/v911-remote-ui-gate.yml" and .display_title==("v911 UI source="+$sha+" build="+$build)' >/dev/null
           gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$AUDIT_RUN/jobs?per_page=100" --jq '.jobs[]|[.name,.conclusion]|@tsv' > "$RUNNER_TEMP/gate.txt"
           for viewport in mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920;do grep -Fx "$(printf 'ui (%s)\tsuccess' "$viewport")" "$RUNNER_TEMP/gate.txt" >/dev/null;done
-          curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.12" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
+          curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.13" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
       - uses: actions/download-artifact@v4
         with:
           name: encrypted-v911-${{ steps.resolve.outputs.source_sha }}
@@ -100,7 +100,7 @@ jobs:
           umask 077
           api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
           cf(){ curl -fsS --max-time 45 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$@"; }
-          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.11" and .source_commit=="bd2d45b71158f4dc66c0fa62157a993d7b8ac285" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.12" and .source_commit=="bd8069299f4dc785a615ec6d0801569da44e635f" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
           previous="$(cf "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
           cf "$api" > "$RUNNER_TEMP/before.json"
           jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' "$RUNNER_TEMP/before.json" >/dev/null
@@ -108,7 +108,7 @@ jobs:
           cd "$RUNNER_TEMP/release"
           jq '.release_status="DEPLOYED_PRODUCTION"' dist/release-source.json > "$RUNNER_TEMP/release-marker.json"
           cp "$RUNNER_TEMP/release-marker.json" dist/release-source.json
-          message="Owner approved v8.9.12 $SOURCE_SHA public run $GITHUB_RUN_ID"
+          message="Owner approved v8.9.13 $SOURCE_SHA public run $GITHUB_RUN_ID"
           rollback(){ local code=$?; if [ "$code" -ne 0 ];then
             if cf "$api/deployments?env=production&per_page=1" | jq -e --arg msg "$message" '.result[0].deployment_trigger.metadata.commit_message==$msg' >/dev/null;then
               cf -X POST "$api/deployments/$previous/rollback" | jq -e '.success==true' >/dev/null || echo '::error::Rollback failed; manual inspection required.'
@@ -117,11 +117,11 @@ jobs:
           trap rollback EXIT
           npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" >"$RUNNER_TEMP/private-deploy.log" 2>&1
           for n in $(seq 1 15);do
-            if curl -fsSL --max-time 25 "$PRODUCTION_URL/release-source.json?post=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.12" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null;then break;fi
+            if curl -fsSL --max-time 25 "$PRODUCTION_URL/release-source.json?post=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.13" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null;then break;fi
             [ "$n" != 15 ] || exit 1
             sleep 5
           done
-          curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json" | jq -e '.version=="8.9.12"' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json" | jq -e '.version=="8.9.13"' >/dev/null
           curl -fsSL --max-time 30 "$PRODUCTION_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
           curl -fsSL --max-time 30 "$PRODUCTION_URL/api/seoul-facilities?limit=1" | jq -e '.ok==true and .configured==true and (.places|length)>0' >/dev/null
           cf "$api" | jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' > "$RUNNER_TEMP/bindings-after"
