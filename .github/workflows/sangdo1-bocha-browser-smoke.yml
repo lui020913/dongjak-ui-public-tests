@@ -1,0 +1,54 @@
+name: Sangdo1 bocha Preview browser smoke
+on:
+  push:
+    branches: [main]
+    paths: ['release/sangdo1-bocha-ui-request.json']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: sangdo1-bocha-browser-smoke
+  cancel-in-progress: false
+jobs:
+  ui:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Wait for the exact isolated Preview (bounded)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SHA=$(jq -er '.source_sha' release/sangdo1-bocha-ui-request.json)
+          RUN=$(jq -er '.build_run' release/sangdo1-bocha-ui-request.json)
+          URL=https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev/
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ && "$RUN" =~ ^[0-9]+$ ]]
+          for n in $(seq 1 24);do
+            if curl -fsSL --max-time 12 "${URL}release-source.json?check=$n" 2>/dev/null | jq -e --arg s "$SHA" --arg r "$RUN" '.source_commit==$s and (.build_run|tostring)==$r and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            if [ "$n" = 24 ];then echo 'Exact Preview unavailable';exit 1;fi
+            sleep 5
+          done
+          printf 'DONGJAK_TARGET_URL=%s\nDONGJAK_EXPECTED_SOURCE_SHA=%s\nDONGJAK_EXPECTED_BUILD_RUN=%s\n' "$URL" "$SHA" "$RUN" >> "$GITHUB_ENV"
+      - name: Install pinned public test package
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund
+      - name: Test only the new safety layer on mobile tablet and PC
+        run: npx playwright test --config=playwright.sangdo1-bocha.config.mjs --project=mobile390 --project=tablet820 --project=pc1280
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sangdo1-bocha-browser-smoke
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 3
