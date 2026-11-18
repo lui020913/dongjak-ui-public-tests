@@ -1,5 +1,6 @@
 {
-  "source_sha": "f99b3f757dea6e444b5ab0eeaabbf24fe0fbf03b",
-  "build_run": "44263459656",
-  "verification": "onboarding-and-night-readiness"
+  "source_sha": "6fb80f221846f21d9fdc0d84832775f738b6b0cb",
+  "build_run": "44301815124",
+  "verification": "phone route controls and swipe direction; reuse successful exact-source tablet and PC evidence",
+  "viewport_scope": "mobile"
 }
