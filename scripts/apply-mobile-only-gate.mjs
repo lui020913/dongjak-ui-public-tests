@@ -55,8 +55,8 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
     indexHtml=replaceExactly(indexHtml,'</head>',gateStyle+'\n  </head>','head close tag');
   }
   if(!indexHtml.includes('id="dj-mobile-only-screen"')) {
-    const screen='<div id="dj-mobile-only-screen" aria-hidden="true"></div>';
-    indexHtml=replaceExactly(indexHtml,'<body>','<body>\n    '+screen,'body opening tag');
+    const screen='<main id="dj-mobile-only-screen" role="main" aria-labelledby="dj-mobile-only-title"><div class="dj-mobile-only-message"><h1 id="dj-mobile-only-title">모바일로 접속해 주세요</h1><p>동작하는 안전지도는 모바일 웹사이트와 모바일 앱에서 이용할 수 있습니다.</p></div></main>';
+    indexHtml=replaceExactly(indexHtml,'<body>','<body>'+screen,'body opening tag');
   }
 
   return {indexHtml,mainJs,platformEntry};
