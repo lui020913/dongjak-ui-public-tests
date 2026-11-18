@@ -21,8 +21,9 @@ async function ready(page,{keepTour=false}={}){
  await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-out|signed-in)$/,{timeout:30000});
  // Fresh anonymous context, never enter credentials.
  const tour=page.locator('#dj860-onboarding');
- if(keepTour){await expect(tour).toBeVisible({timeout:30000});return;}
- if(await tour.isVisible().catch(()=>false))await tap(page,tour.locator('[data-dj860-action="skip"]'));
+ await expect(tour).toBeVisible({timeout:30000});
+ if(keepTour)return;
+ await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 }
 async function geometry(page,sel){
