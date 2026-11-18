@@ -22,6 +22,9 @@ concurrency:
 jobs:
   ui:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -37,8 +40,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: node scripts/verify-release-source.mjs
-      - run: npm install --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: playwright-npm-noble-${{ hashFiles('package.json') }}
+      - name: Install pinned JS test package only (browsers and OS libraries are preinstalled)
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund
+      - name: Verify preinstalled Chromium
+        run: node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); console.log('Chromium ready: '+b.version()); await b.close()"
       - run: npx playwright test --config=playwright.v911-remote.config.mjs --project=${{ matrix.viewport }}
       - name: Verify exact Preview did not change while testing
         if: always()

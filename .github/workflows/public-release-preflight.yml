@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'package.json'
       - 'scripts/seal-private-release.mjs'
       - 'tests/release-bundle.test.mjs'
       - 'scripts/verify-release-source.mjs'
@@ -34,6 +35,29 @@ jobs:
           node --check playwright.v911-remote.config.mjs
           node --check scripts/verify-release-source.mjs
           node --test tests/v911-release-proof.test.mjs tests/private-test-fingerprint.test.mjs
+  browser-image:
+    # Public smoke test only. No app credentials, private source or deployments.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: playwright-npm-noble-${{ hashFiles('package.json') }}
+      - name: Verify pinned package and preinstalled Chromium without apt
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: |
+          npm install --no-audit --no-fund
+          node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); const p=await b.newPage(); await p.setContent('<title>browser-ready</title>'); if(await p.title()!=='browser-ready') throw Error('Browser smoke failed'); console.log('Preinstalled Chromium ready: '+b.version()); await b.close()"
   source-access:
     if: github.event_name == 'workflow_dispatch' && inputs.check_credentials && github.actor == 'lui020913' && github.ref == 'refs/heads/main'
     environment: public-source-build

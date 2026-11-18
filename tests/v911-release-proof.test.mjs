@@ -34,3 +34,15 @@ test('public runner synchronizes visible version metadata before the complete No
  assert.ok(metadata>=0 && stamp>metadata && test>stamp);
  assert.match(build,/private-test-fingerprint\.mjs/);
 });
+
+
+test('remote UI gate uses the matching preinstalled browser image instead of repeated system installs',()=>{
+ const gate=read('.github/workflows/v911-remote-ui-gate.yml');
+ const preflight=read('.github/workflows/public-release-preflight.yml');
+ const version=JSON.parse(read('package.json')).devDependencies['@playwright/test'];
+ for(const workflow of [gate,preflight]) assert.ok(workflow.includes('image: mcr.microsoft.com/playwright:v'+version+'-noble'));
+ assert.doesNotMatch(gate,/playwright install --with-deps/);
+ assert.match(gate,/PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
+ assert.match(gate,/Verify preinstalled Chromium/);
+ assert.match(gate,/viewport: \[mobile375,mobile390,tablet768,tablet820,tablet1024,tablet1180,pc1280,pc1440,pc1920\]/);
+});
