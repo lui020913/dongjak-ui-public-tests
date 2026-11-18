@@ -3,5 +3,6 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Full mobile-first UI overhaul Preview; no Production promotion",
+  "attempt": 2,
   "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION"
 }
