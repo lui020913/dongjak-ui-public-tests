@@ -5,34 +5,54 @@ on:
     paths: ['release/poi-toolbar-smoke-request.json']
 permissions:
   contents: read
-  actions: write
 concurrency:
   group: v914-poi-toolbar-smoke
   cancel-in-progress: false
 jobs:
-  dispatch:
+  toolbar:
     if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [mobile375, mobile390, tablet768, tablet820, tablet1024, tablet1180]
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Dispatch exact-source mobile and tablet UI checks
-        env:
-          GH_TOKEN: \${{ github.token }}
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Read exact Preview request
         run: |
-          set -euo pipefail
-          jq -e '.viewport_scopes==["mobile","tablet"] and (.source_sha|test("^[a-f0-9]{40}$")) and (.build_run|type=="number" and .>0) and .target_url=="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/"' release/poi-toolbar-smoke-request.json >/dev/null
-          SOURCE_SHA="$(jq -er '.source_sha' release/poi-toolbar-smoke-request.json)"
-          BUILD_RUN="$(jq -er '.build_run|tostring' release/poi-toolbar-smoke-request.json)"
-          TARGET_URL="$(jq -er '.target_url' release/poi-toolbar-smoke-request.json)"
-          for scope in mobile tablet; do
-            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" \
-              -f ref=main \
-              -f "inputs[expected_source_sha]=$SOURCE_SHA" \
-              -f "inputs[target_url]=$TARGET_URL" \
-              -f "inputs[expected_build_run]=$BUILD_RUN" \
-              -f "inputs[viewport_scope]=$scope" >/dev/null
-            echo "Dispatched exact-source $scope UI verification for $SOURCE_SHA / build $BUILD_RUN."
-          done
+          node --input-type=module - <<'JS'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const r=JSON.parse(readFileSync('release/poi-toolbar-smoke-request.json','utf8'));
+          if(!/^[a-f0-9]{40}$/.test(r.source_sha)||!Number.isSafeInteger(r.build_run)||r.build_run<1||r.target_url!=='https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/')throw Error('Invalid exact Preview request');
+          appendFileSync(process.env.GITHUB_ENV,'DONGJAK_EXPECTED_SOURCE_SHA='+r.source_sha+'\nDONGJAK_EXPECTED_BUILD_RUN='+r.build_run+'\nDONGJAK_TARGET_URL='+r.target_url+'\n');
+          JS
+      - run: node scripts/verify-release-source.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: playwright-npm-noble-${{ hashFiles('package.json') }}
+      - name: Install pinned test package
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund
+      - name: Run only new toolbar browser regression
+        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=${{ matrix.viewport }} --grep "POI filters share the existing top toolbar"
+      - name: Verify exact Preview did not change
+        if: always()
+        run: node scripts/verify-release-source.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v914-toolbar-${{ matrix.viewport }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
