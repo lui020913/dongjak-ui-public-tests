@@ -1,6 +1,6 @@
 {
-  "source_sha": "895e4dc322c0cb469142e4bc040de8433e31bede",
-  "scope": "bocha control visual parity: same icon/text/toggle grid and pressed-state styling as existing safety layers; isolated Preview only",
+  "source_sha": "5749c024de3f2654c0f402272cde8e56125323a8",
+  "scope": "Bocha real data, mobile UX and reviewed historical SemVer; isolated Preview only",
   "previous_version": "8.9.14",
-  "verification_attempt": 3
+  "verification_attempt": 4
 }

@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 const path='/data/sangdo1-analysis-view/bocha-mixed-roads.geojson';
 test('Bocha reference layer enables, loads exact data and clears from the safety drawer',async({page,request})=>{
- const release=async()=>{const r=await request.get('/release-source.json?verify='+Date.now());expect(r.ok()).toBe(true);const j=await r.json();expect(j.source_commit).toBe(process.env.DONGJAK_EXPECTED_SOURCE_SHA);expect(String(j.build_run)).toBe(process.env.DONGJAK_EXPECTED_BUILD_RUN);expect(j.application_version).toBe('8.9.15');expect(j.release_status).toBe('CANDIDATE_PREVIEW_NOT_PRODUCTION');};
+ const release=async()=>{const r=await request.get('/release-source.json?verify='+Date.now());expect(r.ok()).toBe(true);const j=await r.json();expect(j.source_commit).toBe(process.env.DONGJAK_EXPECTED_SOURCE_SHA);expect(String(j.build_run)).toBe(process.env.DONGJAK_EXPECTED_BUILD_RUN);expect(j.application_version).toBe(process.env.DONGJAK_EXPECTED_APP_VERSION||'8.9.15');expect(j.release_status).toBe('CANDIDATE_PREVIEW_NOT_PRODUCTION');};
  await release();await page.goto('/',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#map')).toBeVisible({timeout:45000});
  const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
@@ -27,18 +27,54 @@ test('Bocha reference layer enables, loads exact data and clears from the safety
  }
  await toggle.scrollIntoViewIfNeeded();
  await expect(toggle).toBeVisible();await expect(toggle).toHaveAttribute('aria-pressed','false');
+ const initialColor=await toggle.locator('.dj-feature-state').evaluate(el=>getComputedStyle(el).backgroundColor);
  const response=page.waitForResponse(r=>new URL(r.url()).pathname===path&&r.ok(),{timeout:30000});await toggle.click();
  const data=await (await response).json();expect(data.features).toHaveLength(237);expect(data.features.every(f=>f.properties.score===null&&f.properties.route_penalty_allowed===false)).toBe(true);
  await expect(toggle).toHaveAttribute('aria-pressed','true');await expect(page.locator('#sangdo-bocha-status')).toContainText('237');
  const switchState=toggle.locator('.dj-feature-state');
  const knobOffset=()=>switchState.evaluate(el=>{const t=getComputedStyle(el,'::before').transform;if(t==='none')return 0;const v=t.slice(t.indexOf('(')+1,-1).split(',').map(Number);return v.length===6?v[4]:0;});
- await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe('rgb(200, 212, 209)');
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe(initialColor);
  await expect.poll(knobOffset,{timeout:3000}).toBeGreaterThan(10);
  await test.info().attach('bocha-reference-enabled',{body:await page.screenshot(),contentType:'image/png'});
  const clear=page.locator('#dj-safety-clear-imports');await expect(clear).toBeEnabled();await clear.click();await expect(toggle).toHaveAttribute('aria-pressed','false');
- await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).toBe('rgb(200, 212, 209)');
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).toBe(initialColor);
  await expect.poll(knobOffset,{timeout:3000}).toBe(0);
  await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','true');
- await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe('rgb(200, 212, 209)');
+ await expect.poll(()=>switchState.evaluate(el=>getComputedStyle(el).backgroundColor),{timeout:3000}).not.toBe(initialColor);
  await toggle.click();await expect(toggle).toHaveAttribute('aria-pressed','false');await release();
+});
+
+test('phone toolbar, scale, More header and live subway actions have compact presentation',async({page,request})=>{
+ test.skip((page.viewportSize()?.width||0)>=700,'phone-only UI contract');
+ const marker=await (await request.get('/release-source.json?proof='+Date.now())).json();
+ expect(marker.source_commit).toBe(process.env.DONGJAK_EXPECTED_SOURCE_SHA);
+ expect(marker.application_version).toBe(process.env.DONGJAK_EXPECTED_APP_VERSION||'8.9.15');
+ await page.goto('/',{waitUntil:'domcontentloaded'});
+ const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
+ await expect.poll(async()=>!await startup.isVisible()||await next.isVisible(),{timeout:60000}).toBe(true);
+ if(await startup.isVisible()&&await next.isVisible())await next.click();
+ await expect(startup).toBeHidden({timeout:30000});
+ await expect(page.locator('#app')).toHaveAttribute('data-dj860-auto-resolved','true',{timeout:45000});
+ const tour=page.locator('#dj860-onboarding');if(await tour.isVisible())await tour.locator('[data-dj860-action="skip"]').click();
+ const tip=page.locator('#dj-browser-webapp-tip');if(await tip.isVisible())await tip.locator('.dj-webapp-tip-later').click();
+ const rail=page.locator('#dj831-scrollport'),cue=page.locator('.dj912-toolbar-next');
+ await expect(rail).toBeVisible();await expect(cue).toBeVisible();
+ await expect.poll(async()=>{const edge=page.locator('#dj-v794-toolbar .dj831-edge-blur:not([hidden])').first();if(!await edge.count())return false;return edge.evaluate(el=>{const s=getComputedStyle(el);return parseFloat(s.width)<=13&&s.pointerEvents==='none'})}).toBe(true);
+ const scale=page.locator('#map .maplibregl-ctrl-scale');await expect(scale).toBeVisible();
+ await expect.poll(async()=>{const box=await scale.boundingBox();return !!box&&box.height<=20&&box.width>0}).toBe(true);
+ await test.info().attach('toolbar-and-scale',{body:await page.screenshot(),contentType:'image/png'});
+ await page.locator('#dj-v794-more').click();
+ const more=page.locator('#dj-mobile-utilities'),head=more.locator('.dj854-more-head'),close=page.locator('#dj-mobile-utilities-close');
+ await expect(more).toBeVisible();
+ await expect.poll(async()=>{const h=await head.boundingBox(),c=await close.boundingBox();return !!h&&!!c&&h.height<=64&&c.width>=43&&c.height>=43}).toBe(true);
+ await test.info().attach('more-header',{body:await page.screenshot(),contentType:'image/png'});
+ await close.click();await expect(more).toBeHidden();
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'노량진',lng:126.9411,lat:37.5142,lines:['1호선','9호선'],selectedLine:'1호선'}}})));
+ const subway=page.locator('#transport-sheet[data-kind="subway"]'),actions=subway.locator('.dj-news-transport-actions > button');
+ await expect(subway).toBeVisible();await expect(actions).toHaveCount(4);
+ await expect.poll(async()=>actions.evaluateAll(buttons=>{const r=buttons.map(b=>b.getBoundingClientRect());return r.every(b=>b.width>0&&b.height>=40&&Math.abs(b.top-r[0].top)<=2)&&r.every((b,i)=>!i||b.left>=r[i-1].right-1)})).toBe(true);
+ const selected=subway.locator('.dj-metro-line-selector[aria-pressed="true"]').first();
+ await expect(selected).toBeVisible();
+ await expect.poll(()=>selected.evaluate(el=>getComputedStyle(el).boxShadow==='none')).toBe(true);
+ await test.info().attach('subway-header',{body:await page.screenshot(),contentType:'image/png'});
 });

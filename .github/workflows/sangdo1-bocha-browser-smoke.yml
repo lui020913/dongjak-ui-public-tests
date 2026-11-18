@@ -29,7 +29,7 @@ jobs:
           node --input-type=module <<'NODE'
           import {readFileSync,appendFileSync} from 'node:fs';
           const req=JSON.parse(readFileSync('release/sangdo1-bocha-ui-request.json','utf8'));
-          const {source_sha:sha,build_run:run}=req;
+          const {source_sha:sha,build_run:run,app_version:version='8.9.15'}=req;
           if(!/^[a-f0-9]{40}$/.test(sha)||!Number.isSafeInteger(run)) throw Error('Invalid exact Preview pin');
           const url='https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev/';
           let verified=false;
@@ -38,7 +38,7 @@ jobs:
               const response=await fetch(url+'release-source.json?check='+n,{signal:AbortSignal.timeout(12000)});
               if(response.ok){
                 const marker=await response.json();
-                if(marker.source_commit===sha&&String(marker.build_run)===String(run)&&marker.application_version==='8.9.15'&&marker.release_status==='CANDIDATE_PREVIEW_NOT_PRODUCTION'){verified=true;break;}
+                if(marker.source_commit===sha&&String(marker.build_run)===String(run)&&marker.application_version===version&&marker.release_status==='CANDIDATE_PREVIEW_NOT_PRODUCTION'){verified=true;break;}
               }
             }catch{}
             await new Promise(resolve=>setTimeout(resolve,5000));
@@ -48,6 +48,7 @@ jobs:
             'DONGJAK_TARGET_URL='+url,
             'DONGJAK_EXPECTED_SOURCE_SHA='+sha,
             'DONGJAK_EXPECTED_BUILD_RUN='+run,
+            'DONGJAK_EXPECTED_APP_VERSION='+version,
             ''
           ].join(String.fromCharCode(10)));
           NODE

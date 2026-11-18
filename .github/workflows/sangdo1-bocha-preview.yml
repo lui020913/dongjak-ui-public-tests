@@ -37,6 +37,7 @@ jobs:
     timeout-minutes: 35
     outputs:
       source_sha: ${{ steps.resolve.outputs.source_sha }}
+      app_version: ${{ steps.app_build.outputs.app_version }}
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
@@ -82,8 +83,11 @@ jobs:
           git -C "$work" checkout -q --detach FETCH_HEAD >/dev/null 2>&1
           test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
           echo 'Exact private source verified; no repository contents published.'
-      - name: Run focused GIS unit suite and application build with private output suppressed
+      - name: Run focused GIS and mobile UI regression suites with audited release metadata
+        id: app_build
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.5-flash-lite
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: |
@@ -94,8 +98,9 @@ jobs:
           log="$RUNNER_TEMP/private-build.log"
           umask 077
           run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
-          run_private 'Release baseline metadata' node scripts/ci-v911-release.mjs
-          run_private 'Bocha Preview version' node "$GITHUB_WORKSPACE/scripts/prepare-bocha-preview.mjs"
+          run_private 'Release-scope policy self-test' node --test "$GITHUB_WORKSPACE/scripts/release-scope-policy.test.mjs"
+          run_private 'Live-history preservation and AI release-scope review' env "GEMINI_API_KEY=$GEMINI_API_KEY" "GEMINI_MODEL=$GEMINI_MODEL" node "$GITHUB_WORKSPACE/scripts/prepare-bocha-preview.mjs"
+          unset GEMINI_API_KEY GEMINI_MODEL
           run_private 'Synchronize visible version before tests' node scripts/stamp-version.mjs
           # Retry only recognized transient npm/network failures; never retry failed tests.
           for attempt in 1 2 3; do
@@ -111,8 +116,8 @@ jobs:
           done
           # Use the same test glob as the private npm test script. TAP output stays
           # local; failures are reported only as test-name digests and counts.
-          if "${safe[@]}" node --test --test-reporter=tap tests/bocha-road-layer.test.mjs >"$log" 2>&1; then
-            echo 'Bocha GIS unit suite passed'
+          if "${safe[@]}" node --test --test-reporter=tap tests/bocha-road-layer.test.mjs tests/v914-mobile-ux-fixes.test.mjs >"$log" 2>&1; then
+            echo 'Bocha GIS and mobile UX regression suites passed'
           else
             node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
             rm -f "$log"
@@ -122,7 +127,11 @@ jobs:
           rm -f "$log"
           run_private 'Application build' npm run build
           run_private 'Release consistency' npm run check:release
-          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+          app_version="$(node -p \"require('./package.json').version\")"
+          [[ "$app_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          jq -e --arg sha "$SOURCE_SHA" --arg version "$app_version" '.source_commit==$sha and .application_version==$version and .release_scale=="minor" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+          echo "app_version=$app_version" >> "$GITHUB_OUTPUT"
+          echo "Audited candidate version: $app_version" >> "$GITHUB_STEP_SUMMARY"
       - name: Verify private source is still the requested head before packaging
         env:
           GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
@@ -153,6 +162,7 @@ jobs:
     needs: build
     env:
       SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      APP_VERSION: ${{ needs.build.outputs.app_version }}
     environment: public-cloudflare-preview
     permissions:
       contents: read
@@ -179,7 +189,7 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/release"
           tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
           rm -f "$RUNNER_TEMP/deploy.tar.gz"
-          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+          jq -e --arg sha "$SOURCE_SHA" --arg version "$APP_VERSION" '.source_commit==$sha and .application_version==$version and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
       - name: Deploy Preview without showing private build or API contents
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -193,7 +203,7 @@ jobs:
           cd "$RUNNER_TEMP/release"
           if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=sangdo1-bocha-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
           for n in $(seq 1 12);do
-            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" --arg version "$APP_VERSION" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version==$version and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
             [ "$n" != 12 ] || exit 1
             sleep 5
           done
@@ -205,3 +215,34 @@ jobs:
       - name: Remove plaintext files and diagnostic logs
         if: always()
         run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/private-deploy.log"
+
+  browser:
+    needs: [build, preview]
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 20
+    env:
+      DONGJAK_TARGET_URL: https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev/
+      DONGJAK_EXPECTED_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      DONGJAK_EXPECTED_BUILD_RUN: ${{ github.run_id }}
+      DONGJAK_EXPECTED_APP_VERSION: ${{ needs.build.outputs.app_version }}
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-audit --no-fund
+      - name: Verify exact deployed candidate on all nine screens, mobile presentation included
+        run: npx playwright test --config=playwright.sangdo1-bocha.config.mjs --timeout=120000
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bocha-and-mobile-ui-browser-proof
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 3
