@@ -12,10 +12,22 @@ replace('src/main.js',"import './mobile-first-overhaul.css';","import './mobile-
 replace('src/main.js','installMobileMapControls({app,map});','installMobileMapControls({app,map});\ninstallMobileFollowup({app,map,maplibregl});');
 replace('src/public-ui-mobile-surface-coordinator.js','    if(query&&query.placeholder!==placeholder)query.placeholder=placeholder;','    // The native rotating search placeholder is the sole phone writer.\n    if(!win.matchMedia("(max-width:699px)").matches&&query&&query.placeholder!==placeholder)query.placeholder=placeholder;');
 replace('src/dongjak-verified-data-layers.js',"const SANGDO1_ANALYSIS=new Set(['accidents','cctv-security','cctv-parking','cctv-other','survey-crosswalk','slope']);","const SANGDO1_ANALYSIS=new Set(['accidents','cctv-security','cctv-parking','cctv-other','survey-crosswalk','slope','road-incidents','sdot-environment','audio-signals']);");
-replace('src/dongjak-verified-data-layers.js',"            data.features=filteredDistrictPoints({type:'FeatureCollection',features},boundary).features;","            const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;\n            data.features=filteredDistrictPoints({type:'FeatureCollection',features},viewBoundary).features;");
+replace('src/dongjak-verified-data-layers.js',"            data.features=filteredDistrictPoints({type:'FeatureCollection',features},boundary).features;",`            const verifiedLocations=filteredDistrictPoints({type:'FeatureCollection',features},boundary);
+            const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;
+            data.features=filteredDistrictPoints(verifiedLocations,viewBoundary).features;`);
 replace('src/dongjak-verified-data-layers.js','  function onBoundaryUpdated(){','  async function onBoundaryUpdated(){');
 replace('src/dongjak-verified-data-layers.js','      const clipped=filteredDistrictPoints(raw,boundary);',"      const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;\n      const clipped=filteredDistrictPoints(raw,viewBoundary);");
-replace('src/map-appearance.js',"footprint:'#40575d',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#30464d',nearOpacity:0.88,farOpacity:0.82","footprint:'#30383d',footprintOpacity:1,obliqueOpacity:0,extrusion:'#353d43',nearOpacity:1,farOpacity:1");
+// Preserve the shared palette while using a more opaque phone-only dark palette.
+replace('src/map-appearance.js','export function nativeBuildingFootprint(layer={}){',`export const MOBILE_DARK_BUILDING_PALETTE=Object.freeze({...BUILDING_VISUAL_PALETTE.dark,footprint:'#30383d',extrusion:'#353d43',nearOpacity:0.98,farOpacity:0.96});
+export function buildingVisualPalette(theme='light',phone=Boolean(globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)){
+  return theme==='dark'&&phone?MOBILE_DARK_BUILDING_PALETTE:BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
+}
+export function nativeBuildingFootprint(layer={}){`);
+const appearancePath=resolve(root,'src/map-appearance.js');
+const appearance=readFileSync(appearancePath,'utf8');
+const paletteRead="const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];";
+if(appearance.split(paletteRead).length!==3)throw Error('Building paint anchors changed');
+writeFileSync(appearancePath,appearance.replaceAll(paletteRead,'const p=buildingVisualPalette(theme);'));
 replace('src/place-details.js','  if(mem.has(id))return mem.get(id);',`  if(mem.has(id))return mem.get(id);
   // First use the app's same-origin facility proxy; validate name and distance.
   if(p.name.length>=2&&p.name.length<=40&&!signal?.aborted){
