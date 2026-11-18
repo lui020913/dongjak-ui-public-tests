@@ -1,6 +1,6 @@
 import {
   REPOSITORY,PREVIEW_URL,parseEvidenceRunIds,isTrustedBuildRun,
-  standardAuditBuildId,successfulViewportCoverage,validateFocusedTabletEvidence,
+  standardAuditBuildId,successfulViewportCoverage,verifiedPartialCoverage,validateFocusedTabletEvidence,
   missingViewports,isValidSourceSha
 } from './release-evidence-policy.mjs';
 
@@ -25,16 +25,26 @@ if(!isTrustedBuildRun(build,sourceSha,buildRun))throw Error('Release build is no
 
 const covered=new Set();
 const accepted=[];
+let successfulStandard=false,usedPartial=false;
 for(const evidenceRunId of evidenceRunIds){
   const run=await api(`actions/runs/${evidenceRunId}`);
   const jobsResponse=await api(`actions/runs/${evidenceRunId}/jobs?per_page=100`);
   const jobs=jobsResponse.jobs||[];
 
-  const auditBuildId=standardAuditBuildId(run,sourceSha);
+  const auditBuildId=standardAuditBuildId(run,sourceSha,{allowPartial:true});
   if(auditBuildId){
     const auditBuild=await api(`actions/runs/${auditBuildId}`);
     if(!isTrustedBuildRun(auditBuild,sourceSha,auditBuildId))throw Error(`Audit ${evidenceRunId} references an unverified or different-source build`);
-    for(const viewport of successfulViewportCoverage(jobs))covered.add(viewport);
+    if(run.conclusion==='failure'){
+      if(auditBuildId!==buildRun)throw Error('Partial evidence must reference the exact release build');
+      const partial=verifiedPartialCoverage(jobs);
+      if(!partial.length)throw Error('Partial evidence has no verified successful jobs');
+      for(const viewport of partial)covered.add(viewport);
+      usedPartial=true;
+    }else{
+      if(auditBuildId===buildRun)successfulStandard=true;
+      for(const viewport of successfulViewportCoverage(jobs))covered.add(viewport);
+    }
     accepted.push(`${evidenceRunId}:standard-build-${auditBuildId}`);
     continue;
   }
@@ -58,6 +68,7 @@ for(const evidenceRunId of evidenceRunIds){
   throw Error(`Unsupported or untrusted UI evidence run: ${evidenceRunId}`);
 }
 
+if(usedPartial&&!successfulStandard)throw Error('Partial evidence requires a successful standard audit of the exact release build');
 const missing=missingViewports(covered);
 if(missing.length)throw Error(`Cumulative UI evidence incomplete; missing: ${missing.join(', ')}`);
 console.log(`Exact release build verified: ${buildRun} / ${sourceSha}`);

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   REPOSITORY,PREVIEW_URL,REQUIRED_VIEWPORTS,parseEvidenceRunIds,isTrustedBuildRun,
-  standardAuditBuildId,successfulViewportCoverage,validateFocusedTabletEvidence,
+  standardAuditBuildId,successfulViewportCoverage,verifiedPartialCoverage,validateFocusedTabletEvidence,
   missingViewports,mergeCoverage
 } from '../scripts/release-evidence-policy.mjs';
 
@@ -38,6 +38,8 @@ test('standard audit runs can reference an earlier successful build of the same 
   assert.equal(standardAuditBuildId(run,source),44279513261);
   assert.equal(standardAuditBuildId({...run,display_title:run.display_title.replace(source,'0'.repeat(40))},source),null);
   assert.equal(standardAuditBuildId({...run,conclusion:'failure'},source),null);
+  assert.equal(standardAuditBuildId({...run,conclusion:'failure',status:'completed'},source,{allowPartial:true}),44279513261);
+  assert.equal(standardAuditBuildId({...run,conclusion:'cancelled',status:'completed'},source,{allowPartial:true}),null);
 });
 
 test('successful viewport jobs are collected individually for cumulative evidence',()=>{
@@ -66,4 +68,12 @@ test('focused tablet evidence must pin the exact source, build, Preview URL and 
 
 test('cumulative coverage fails closed if any viewport is missing',()=>{
   assert.deepEqual(missingViewports(['mobile375','mobile390','tablet768']),['tablet820','tablet1024','tablet1180','pc1280','pc1440','pc1920']);
+});
+
+test('partial audit accepts only completed successful jobs with all three exact-source and browser steps',()=>{
+ const steps=[{name:'Run node scripts/verify-release-source.mjs',conclusion:'success'},{name:'Run npx playwright test --config=playwright.v911-remote.config.mjs --project=pc1280',conclusion:'success'},{name:'Verify exact Preview did not change while testing',conclusion:'success'}];
+ const job={name:'ui (pc1280)',status:'completed',conclusion:'success',steps};
+ assert.deepEqual(verifiedPartialCoverage([job]),['pc1280']);
+ assert.deepEqual(verifiedPartialCoverage([{...job,steps:steps.slice(0,2)}]),[]);
+ assert.deepEqual(verifiedPartialCoverage([{...job,conclusion:'failure'}]),[]);
 });

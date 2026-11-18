@@ -194,6 +194,8 @@ test('phone compact toolbar, reachable swipe cue and bottom dock share a visual 
  await expect(scroll).toBeVisible();await expect(cue).toBeVisible();await expect(more).toBeVisible();
  const geometry=()=>scroll.evaluate(n=>{const more=document.getElementById('dj-v794-more'),w=more.getBoundingClientRect().width;return {widths:[...n.children].filter(b=>b.tagName==='BUTTON'&&b.getClientRects().length).map(b=>b.getBoundingClientRect().width),more:w,overflow:n.scrollWidth-n.clientWidth};});
  await expect.poll(async()=>{const d=await geometry();return d.overflow>3&&d.widths.length>=4&&d.widths.every(w=>Math.abs(w-52)<=1)&&Math.abs(d.more-52)<=1;}).toBe(true);
+ await expect.poll(()=>scroll.evaluate(n=>Math.abs(n.scrollLeft))).toBeLessThanOrEqual(3);
+ await expect(cue).toHaveAttribute('data-direction','right');
  const left=await scroll.evaluate(n=>n.scrollLeft);
  await tap(page,cue);await expect.poll(()=>scroll.evaluate(n=>n.scrollLeft)).toBeGreaterThan(left+8);
  const district=scroll.locator('[data-dj831-feature="map-dong"]');await expect(district.locator('.dj832-feature-label')).toHaveText('행정동');
@@ -278,8 +280,16 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  const panel=page.locator('#route-panel'),body=panel.locator(':scope > .dj836-sheet-body'),footer=panel.locator(':scope > #dj910-route-footer');
  await visuallyPresented(panel);await expect(footer.locator('#route-calc')).toBeVisible();
  await expect.poll(async()=>{const b=await body.boundingBox(),f=await footer.boundingBox();return b&&f?f.y-(b.y+b.height):-1000;}).toBeGreaterThanOrEqual(-1);
- const note=body.locator('.page-note').last();await note.scrollIntoViewIfNeeded();
- await expect.poll(async()=>{const a=await body.boundingBox(),b=await note.boundingBox();return a&&b?a.y+a.height-b.y-b.height:-1000;}).toBeGreaterThanOrEqual(-2);
+ // The legacy page-note is intentionally hidden on phones. Verify the actual
+ // transit planner controls that were reported clipped, not the hidden note.
+ const planner=body.locator('#dj815-rail-planner');
+ await expect(planner).toBeVisible();
+ const railAction=planner.getByRole('button',{name:'지하철 연계 이동안 찾기'});
+ await railAction.scrollIntoViewIfNeeded({timeout:20000});
+ await expect.poll(async()=>{const a=await body.boundingBox(),b=await railAction.boundingBox();return a&&b?Math.min(b.y-a.y,a.y+a.height-b.y-b.height):-1000;}).toBeGreaterThanOrEqual(-2);
+ const last=body.locator('.dj815-route-share button:visible,#route-clear:visible').last();
+ if(await last.count()){await last.scrollIntoViewIfNeeded({timeout:20000});
+ await expect.poll(async()=>{const a=await body.boundingBox(),b=await last.boundingBox();return a&&b?Math.min(b.y-a.y,a.y+a.height-b.y-b.height):-1000;}).toBeGreaterThanOrEqual(-2);}
  await test.info().attach('phone-route-footer',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,page.locator('#dj-v794-more'));

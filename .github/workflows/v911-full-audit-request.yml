@@ -28,5 +28,7 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" | jq -e --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null
           url="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/"
           DONGJAK_TARGET_URL="$url" DONGJAK_EXPECTED_SOURCE_SHA="$sha" DONGJAK_EXPECTED_BUILD_RUN="$build" node scripts/verify-release-source.mjs
-          jq -n --arg sha "$sha" --arg url "$url" --arg build "$build" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,expected_build_run:$build,viewport_scope:"full"}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
-          echo 'Full nine-viewport audit requested without rebuilding. No Production approval or deployment.'
+          scope="$(jq -r '.viewport_scope // "full"' release/full-audit-request.json)"
+          [[ "$scope" =~ ^(full|mobile|tablet|pc)$ ]]
+          jq -n --arg sha "$sha" --arg url "$url" --arg build "$build" --arg scope "$scope" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,expected_build_run:$build,viewport_scope:"full"}} | .inputs.viewport_scope=$scope' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+          echo "$scope viewport audit requested without rebuilding. No Production approval or deployment."

@@ -23,8 +23,8 @@ export function isTrustedBuildRun(run,sourceSha,expectedId){
     run.display_title===`v911 build source=${sourceSha}`;
 }
 
-export function standardAuditBuildId(run,sourceSha){
-  if(!run||run.conclusion!=='success'||run.run_attempt!==1||
+export function standardAuditBuildId(run,sourceSha,{allowPartial=false}={}){
+  if(!run||!(run.conclusion==='success'||(allowPartial&&run.conclusion==='failure'&&run.status==='completed'))||run.run_attempt!==1||
      run.event!=='workflow_dispatch'||run.head_branch!=='main'||
      run.head_repository?.full_name!==REPOSITORY||
      !['github-actions[bot]','lui020913'].includes(run.actor?.login)||
@@ -39,6 +39,16 @@ export function successfulViewportCoverage(jobs){
   return REQUIRED_VIEWPORTS.filter(viewport=>successful.has(`ui (${viewport})`));
 }
 
+// Successful matrix jobs in a failed run are usable only if both source checks
+// and the actual Playwright step passed; another successful audit is required.
+export function verifiedPartialCoverage(jobs){
+  return successfulViewportCoverage((jobs||[]).filter(job=>{
+    const steps=job.steps||[];
+    return job.status==='completed'&&steps.some(s=>s.name==='Run node scripts/verify-release-source.mjs'&&s.conclusion==='success')&&
+      steps.some(s=>s.name?.startsWith('Run npx playwright test --config=playwright.v911-remote.config.mjs --project=')&&s.conclusion==='success')&&
+      steps.some(s=>s.name==='Verify exact Preview did not change while testing'&&s.conclusion==='success');
+  }));
+}
 export function validateFocusedTabletEvidence({run,request,workflow,jobs,sourceSha,buildRun}){
   if(!run||run.conclusion!=='success'||run.run_attempt!==1||
      run.event!=='push'||run.head_branch!=='main'||
