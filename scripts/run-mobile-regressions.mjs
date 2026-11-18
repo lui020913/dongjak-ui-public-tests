@@ -1,5 +1,5 @@
 import {readdirSync} from 'node:fs';
-import {resolve,join} from 'node:path';
+import {resolve,join,basename} from 'node:path';
 import {spawnSync} from 'node:child_process';
 
 const root=resolve(process.argv[2]||process.cwd());
@@ -10,7 +10,23 @@ const files=readdirSync(dir,{withFileTypes:true})
   .map(entry=>join('tests',entry.name))
   .sort();
 if(!files.length)throw new Error('No mobile/shared Node regression tests were selected.');
-console.log(`Running ${files.length} mobile/shared Node regression files; desktop and tablet suites are excluded.`);
-const result=spawnSync(process.execPath,['--test','--test-reporter=tap',...files],{cwd:root,stdio:'inherit'});
-if(result.error)throw result.error;
-process.exit(result.status??1);
+
+let totalPass=0,totalFail=0;
+const failures=[];
+for(const file of files){
+  const result=spawnSync(process.execPath,['--test','--test-reporter=tap',file],{
+    cwd:root,encoding:'utf8',maxBuffer:20*1024*1024
+  });
+  if(result.error)throw result.error;
+  const output=(result.stdout||'')+'\n'+(result.stderr||'');
+  const pass=Number((output.match(/(?:#|ℹ) pass (\\d+)/)||[])[1]||0);
+  const fail=Number((output.match(/(?:#|ℹ) fail (\\d+)/)||[])[1]||0);
+  totalPass+=pass;
+  totalFail+=fail;
+  if(result.status!==0||fail>0)failures.push({file:basename(file),pass,fail:Math.max(fail,1)});
+}
+console.log('Mobile/shared regression files: '+files.length);
+console.log('Mobile/shared assertions passed: '+totalPass);
+console.log('Mobile/shared assertions failed: '+totalFail);
+for(const item of failures)console.error('FAILED_MOBILE_FILE '+item.file+' pass='+item.pass+' fail='+item.fail);
+if(failures.length)process.exitCode=1;
