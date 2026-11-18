@@ -1,0 +1,26 @@
+name: v8.9.14 facility public-service proof
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/v914-facility-service-proof.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-services:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Check public service and one anonymized AI request
+        shell: bash
+        run: |
+          set -euo pipefail
+          site=https://dongjak-walk-safety-preview.pages.dev
+          curl -fsS --max-time 25 "$site/api/place-insight" | jq '{enabled,bindingPresent,provider,model,backupModel,version}'
+          curl -fsS --max-time 25 "$site/api/seoul-facilities?q=%EB%85%B8%EB%9F%89%EC%A7%84%EC%B4%88%EB%93%B1%ED%95%99%EA%B5%90&limit=10" | jq '{ok,configured,matchingSchoolCount:(.places|length)}'
+          response="$(curl -sS --max-time 90 -w '\n%{http_code}' -H 'Content-Type: application/json' -X POST "$site/api/place-insight" --data '{"name":"서울노량진초등학교","type":"학교","lat":37.513,"lng":126.941,"source":"공개 학교 시설 데이터 확인용 테스트"}')"
+          status="$(printf '%s\n' "$response" | tail -1)"
+          printf 'AI_HTTP_STATUS=%s\n' "$status"
+          printf '%s\n' "$response" | sed '$d' | jq '{hasText:((.text // "")|length>0),model,templateFallback,code,message}'
+          test "$status" = 200
+          printf '%s\n' "$response" | sed '$d' | jq -e '(.text|type=="string") and (.text|length>0)' >/dev/null
