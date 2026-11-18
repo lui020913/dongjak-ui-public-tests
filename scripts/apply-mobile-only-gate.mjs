@@ -38,20 +38,18 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
 '})();\n'+
 '</script>';
 
-  const gateStyle='<style id="dj-mobile-only-gate-style">\n'+
-'#dj-mobile-only-screen{display:none}\n'+
-'html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}\n'+
-'html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{\n'+
-'  position:fixed!important;inset:0!important;z-index:2147483647!important;\n'+
-'  display:block!important;width:100vw!important;height:100vh!important;height:100dvh!important;\n'+
-'  display:grid!important;place-items:center!important;box-sizing:border-box!important;\n'+
-'  margin:0!important;padding:28px!important;background:#fff!important;color:#17221d!important;\n'+
-'  text-align:center!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;\n'+
-'}\n'+
-'#dj-mobile-only-screen .dj-mobile-only-message{width:min(420px,100%);margin:0 auto}\n'+
-'#dj-mobile-only-screen h1{margin:0;font-size:22px;font-weight:800;line-height:1.4;letter-spacing:-.04em}\n'+
-'#dj-mobile-only-screen p{margin:12px 0 0;color:#64746a;font-size:14px;line-height:1.65}\n'+
-'</style>';
+  const gateStyle=\`<style id="dj-mobile-only-gate-style">
+#dj-mobile-only-screen{display:none}
+html[data-dj-mobile-only="blocked"],html[data-dj-mobile-only="blocked"] body{background:#fff!important}
+html[data-dj-mobile-only="blocked"] body{margin:0!important;overflow:hidden!important}
+html[data-dj-mobile-only="blocked"] body>:not(#dj-mobile-only-screen){display:none!important}
+html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen{
+  position:fixed!important;inset:0!important;z-index:2147483647!important;
+  display:block!important;box-sizing:border-box!important;
+  width:100vw!important;height:100vh!important;height:100dvh!important;
+  margin:0!important;padding:0!important;border:0!important;background:#fff!important;
+}
+</style>\`;
 
   if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
     const viewport=/<meta name="viewport"[^>]*\/>/;
@@ -62,12 +60,7 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
     indexHtml=replaceExactly(indexHtml,'</head>',gateStyle+'\n  </head>','head close tag');
   }
   if(!indexHtml.includes('id="dj-mobile-only-screen"')) {
-    const screen='<main id="dj-mobile-only-screen" role="main" aria-labelledby="dj-mobile-only-title">\\n'+
-'      <div class="dj-mobile-only-message">\\n'+
-'        <h1 id="dj-mobile-only-title">모바일로 접속해 주세요</h1>\\n'+
-'        <p>동작하는 안전지도는 모바일 웹사이트와 모바일 앱에서 이용할 수 있습니다.</p>\\n'+
-'      </div>\\n'+
-'    </main>';
+    const screen='<div id="dj-mobile-only-screen" aria-hidden="true"></div>';
     indexHtml=replaceExactly(indexHtml,'<body>','<body>\n    '+screen,'body opening tag');
   }
 
