@@ -34,3 +34,12 @@ test('recovery is event triggered and never holds deploy or private source crede
  assert.match(y,/workflow_run:/);
  assert.doesNotMatch(y,/schedule:|CLOUDFLARE_API_TOKEN|PRIVATE_SOURCE_READ_TOKEN|PRIVATE_PREVIEW_DISPATCH_TOKEN|contents: write/);
 });
+
+test('actual app recovery preserves the explicit design contract and archived design standards',()=>{
+ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+ const contract=read('docs/design/APP_DESIGN_CONTRACT.md');
+ for(const token of ['Modern Civic Minimalism','Pretendard','태블릿','Fade','온보딩','object-fit contain','9개 화면','Production','테스트 약화','iOS 실기기'])assert.ok(contract.includes(token),token);
+ assert.ok(read('docs/design/DESIGN_LANGUAGE.md').includes('Modern Civic Minimalism'));
+ assert.ok(read('docs/design/QUALITY_AUDIT.md').includes('P0'));
+ assert.ok(read('scripts/v911-recovery.mjs').includes('diagnostics:summary,attempt,designContract'));
+});

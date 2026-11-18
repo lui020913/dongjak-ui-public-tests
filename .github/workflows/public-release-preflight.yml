@@ -9,6 +9,7 @@ on:
       - 'scripts/verify-release-source.mjs'
       - 'tests/v911-release-proof.test.mjs'
       - 'tests/v911-recovery.test.mjs'
+      - 'docs/design/**'
       - 'scripts/v911-recovery-policy.mjs'
       - 'scripts/v911-recovery.mjs'
       - '.github/workflows/v911-failure-recovery.yml'

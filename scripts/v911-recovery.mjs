@@ -44,10 +44,11 @@ if(decision==='retry'){
 }
 // Bounded Gemini classification: enum-only response; no source, stack trace, raw log, credential or arbitrary generated command.
 let advice=summary[0]?.category||'unknown';
+const designContract=readFileSync(new URL('../docs/design/APP_DESIGN_CONTRACT.md',import.meta.url),'utf8');
 const key=process.env.GEMINI_API_KEY;
 if(key&&summary.length){
  try{
-   const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',{method:'POST',headers:{'x-goog-api-key':key,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({systemInstruction:{parts:[{text:'Choose the primary failure category from the given sanitized diagnostics. Return only one enum value. Do not propose commands or change the tests.'}]},contents:[{parts:[{text:JSON.stringify({diagnostics:summary,attempt})}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{category:{type:'STRING',enum:CATEGORIES}},required:['category']},maxOutputTokens:128}})});
+   const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',{method:'POST',headers:{'x-goog-api-key':key,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({systemInstruction:{parts:[{text:'Choose the primary failure category from the given sanitized diagnostics. Return only one enum value. Do not propose commands or change the tests.'}]},contents:[{parts:[{text:JSON.stringify({diagnostics:summary,attempt,designContract})}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{category:{type:'STRING',enum:CATEGORIES}},required:['category']},maxOutputTokens:128}})});
    if(res.ok){const out=await res.json();const result=JSON.parse(out.candidates?.[0]?.content?.parts?.filter(p=>!p.thought).map(p=>p.text||'').join('')||'{}');if(CATEGORIES.includes(result.category)&&summary.some(d=>d.category===result.category))advice=result.category;}
  }catch{console.log('Gemini diagnosis unavailable; deterministic classification retained.');}
 }
