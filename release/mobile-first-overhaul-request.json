@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Full mobile-first UI overhaul Preview; no Production promotion",
-  "attempt": 4,
+  "attempt": 5,
   "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION",
-  "last_retry_reason": "Retry with source-aligned mobile header controls, actual html[data-theme] dark selector, and source-SHA-only remote gate guard"
+  "last_retry_reason": "Apply high-specificity overrides for the existing v8.2.9 mobile cascade, preserve the AI header orb, restore 5px edge blur, and align 52px toolbar/dock geometry"
 }
