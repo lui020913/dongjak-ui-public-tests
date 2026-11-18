@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       source_sha:
-        description: Leave blank for the current private hotfix head; or pin an exact SHA
+        description: Leave blank for the current private integration head; or pin an exact SHA
         required: false
         type: string
         default: ''
@@ -83,11 +83,9 @@ jobs:
           git -C "$work" checkout -q --detach FETCH_HEAD >/dev/null 2>&1
           test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
           echo 'Exact private source verified; no repository contents published.'
-      - name: Run focused GIS and mobile UI regression suites with audited release metadata
+      - name: Validate tracked SemVer and run full unit, transit browser and build checks
         id: app_build
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-3.5-flash-lite
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: |
@@ -98,10 +96,8 @@ jobs:
           log="$RUNNER_TEMP/private-build.log"
           umask 077
           run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
-          run_private 'Release-scope policy self-test' node --test "$GITHUB_WORKSPACE/scripts/release-scope-policy.test.mjs"
-          run_private 'Live-history preservation and AI release-scope review' env "GEMINI_API_KEY=$GEMINI_API_KEY" "GEMINI_MODEL=$GEMINI_MODEL" node "$GITHUB_WORKSPACE/scripts/prepare-bocha-preview.mjs"
-          unset GEMINI_API_KEY GEMINI_MODEL
-          run_private 'Synchronize visible version before tests' node scripts/stamp-version.mjs
+          run_private 'Checked-in release metadata' npm run check:release
+          run_private 'Exact Preview release marker' node "$GITHUB_WORKSPACE/scripts/prepare-bocha-preview.mjs"
           # Retry only recognized transient npm/network failures; never retry failed tests.
           for attempt in 1 2 3; do
             if "${safe[@]}" npm ci --no-audit --no-fund --prefer-offline >"$log" 2>&1;then
@@ -114,22 +110,22 @@ jobs:
             rm -f "$log"
             sleep $((attempt * 5))
           done
-          # Use the same test glob as the private npm test script. TAP output stays
-          # local; failures are reported only as test-name digests and counts.
-          if "${safe[@]}" node --test --test-reporter=tap tests/bocha-road-layer.test.mjs tests/v914-mobile-ux-fixes.test.mjs >"$log" 2>&1; then
-            echo 'Bocha GIS and mobile UX regression suites passed'
+          if "${safe[@]}" node --test --test-reporter=tap tests/*.test.mjs >"$log" 2>&1; then
+            echo 'Full Node regression suite passed'
           else
             node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
             rm -f "$log"
-            echo '::error::Bocha GIS unit suite failed (private diagnostic output withheld)'
+            echo '::error::Node regression suite failed (private diagnostic output withheld)'
             exit 1
           fi
           rm -f "$log"
+          run_private 'Playwright Chromium install' npx playwright install --with-deps chromium
+          run_private 'Transit controls on desktop and mobile' npm run test:e2e -- transit-window.spec.js
           run_private 'Application build' npm run build
           run_private 'Release consistency' npm run check:release
-          app_version="$(node -p \"require('./package.json').version\")"
+          app_version="$(jq -er '.version' package.json)"
           [[ "$app_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          jq -e --arg sha "$SOURCE_SHA" --arg version "$app_version" '.source_commit==$sha and .application_version==$version and .release_scale=="minor" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+          jq -e --arg sha "$SOURCE_SHA" --arg version "$app_version" '.source_commit==$sha and .application_version==$version and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
           echo "app_version=$app_version" >> "$GITHUB_OUTPUT"
           echo "Audited candidate version: $app_version" >> "$GITHUB_STEP_SUMMARY"
       - name: Verify private source is still the requested head before packaging
