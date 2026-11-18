@@ -35,10 +35,10 @@ test('build patch adds only a blank white visual gate and preserves desktop/tabl
   const result=applyMobileOnlyGate({indexHtml,mainJs,platformEntry});
   assert.match(result.indexHtml,/dj-mobile-only-gate-bootstrap/);
   assert.match(result.indexHtml,/dj-mobile-only-screen/);
-  assert.match(result.indexHtml,/<div id="dj-mobile-only-screen" aria-hidden="true"><\\/div>/);
+  assert.ok(result.indexHtml.includes('<div id="dj-mobile-only-screen" aria-hidden="true"></div>'));
   assert.doesNotMatch(result.indexHtml,/모바일로 접속해 주세요|모바일 웹사이트와 모바일 앱/);
   assert.match(result.indexHtml,/background:#fff!important/);
-  assert.match(result.indexHtml,/body>:not\\(#dj-mobile-only-screen\\)\\{display:none!important\\}/);
+  assert.ok(result.indexHtml.includes('body>:not(#dj-mobile-only-screen){display:none!important}'));
   assert.doesNotMatch(result.indexHtml,/dj-mobile-only-message|dj-mobile-only-title/);
   assert.match(result.indexHtml,/v815-pc-visual-fixes\.css/);
   assert.match(result.indexHtml,/v854-weather-desktop\.js/);
