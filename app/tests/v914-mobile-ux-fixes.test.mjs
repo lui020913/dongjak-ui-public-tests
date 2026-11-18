@@ -5,11 +5,13 @@ import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const compact=value=>value.replace(/\s+/g,'').toLowerCase();
 
-test('v914 mobile UI stylesheet loads after the existing desktop design layer',()=>{
+test('the shared mobile-first shell loads after the preserved mobile interaction fixes',()=>{
   const main=read('src/main.js');
-  const desktop = main.indexOf("import './v913-pc-design-system.css';");
   const mobile = main.indexOf("import './v914-mobile-ux-fixes.css';");
-  assert.ok(desktop >= 0 && mobile > desktop);
+  const shared = main.indexOf("import './mobile-first-layout.css';");
+  assert.ok(mobile >= 0 && shared > mobile);
+  assert.doesNotMatch(main,/v913-pc-design-system\\.css/);
+  assert.doesNotMatch(main,/v881-tablet-workspace\\.css/);
 });
 
 test('POI edge fades are narrow, translucent and never block category-chip taps',()=>{
