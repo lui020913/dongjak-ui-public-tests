@@ -1225,3 +1225,30 @@
     border-bottom-color: var(--mf-surface-solid) !important;
   }
 }
+
+@layer mobile-first-shell {
+  html body #app#app#app#app#app .dj-active-transfer-line {
+    border-color: rgba(19,134,108,.46) !important;
+    background: var(--mf-accent-soft) !important;
+    color: var(--mf-accent) !important;
+    font-weight: 850 !important;
+    box-shadow: 0 0 0 1px rgba(19,134,108,.08) inset !important;
+  }
+
+  html body #app#app#app#app#app .maplibregl-popup.dj-place-detail-popup .dj-place-action,
+  html body #app#app#app#app#app .maplibregl-popup.dj-place-detail-popup .dj-place-folder-action {
+    min-height: 40px !important;
+    border: 1px solid var(--mf-line) !important;
+    border-radius: 13px !important;
+    background: var(--mf-accent-soft) !important;
+    color: var(--mf-accent) !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+  }
+
+  html body #app#app#app#app#app #map-safety-toggle::after,
+  html body #app#app#app#app#app #map-tools-toggle::after {
+    display: none !important;
+    content: none !important;
+  }
+}
