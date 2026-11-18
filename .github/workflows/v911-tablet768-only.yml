@@ -31,10 +31,11 @@ jobs:
           if(!/^[a-f0-9]{40}$/.test(r.source_sha||'')) throw new Error('Invalid source SHA');
           if(!Number.isSafeInteger(r.build_run)||r.build_run<1) throw new Error('Invalid build run');
           if(typeof r.target_url!=='string'||!r.target_url.startsWith('https://')) throw new Error('Invalid target URL');
+          const nl=String.fromCharCode(10);
           appendFileSync(process.env.GITHUB_ENV,
-            'DONGJAK_EXPECTED_SOURCE_SHA='+r.source_sha+'\\n'+
-            'DONGJAK_EXPECTED_BUILD_RUN='+r.build_run+'\\n'+
-            'DONGJAK_TARGET_URL='+r.target_url+'\\n');
+            'DONGJAK_EXPECTED_SOURCE_SHA='+r.source_sha+nl+
+            'DONGJAK_EXPECTED_BUILD_RUN='+r.build_run+nl+
+            'DONGJAK_TARGET_URL='+r.target_url+nl);
           NODE
       - name: Verify exact Preview source before test
         run: node scripts/verify-release-source.mjs
