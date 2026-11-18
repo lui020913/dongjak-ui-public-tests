@@ -34,10 +34,9 @@ async function geometry(page,sel){
 async function visuallyPresented(locator){
  await expect.poll(()=>locator.evaluate(n=>{
    const r=n.getBoundingClientRect();
-   if(r.width<1||r.height<1||r.right<=0||r.bottom<=0||r.left>=innerWidth||r.top>=innerHeight)return false;
+   if(r.width<1||r.height<1||r.left<0||r.top<0||r.right>innerWidth||r.bottom>innerHeight)return false;
    for(let p=n;p;p=p.parentElement){const s=getComputedStyle(p);if(s.display==='none'||s.visibility!=='visible'||Number(s.opacity)<.98)return false;}
-   const x=Math.max(0,Math.min(innerWidth-1,r.left+r.width/2));
-   const y=Math.max(0,Math.min(innerHeight-1,r.top+r.height/2));
+   const x=r.left+r.width/2,y=r.top+r.height/2;
    const hit=document.elementFromPoint(x,y);
    return hit===n||n.contains(hit);
  })).toBe(true);
@@ -142,6 +141,10 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   const more=page.locator('#dj-mobile-utilities');
   await expect(more).toBeVisible();
   await visuallyPresented(more);
+  await expect(more.locator('> .dj854-more-head')).toBeVisible();
+  await expect(more.locator('> .dj-mobile-utilities-body')).toBeVisible();
+  await expect(more.locator('#dj832-more-features')).toBeVisible();
+  await expect(more.locator('.dj832-more-title')).toHaveText('지도 기능 · 개인 설정');
   const r=await more.boundingBox();
   expect(r.x).toBeGreaterThanOrEqual(18);
   expect(width-r.x-r.width).toBeGreaterThanOrEqual(18);
