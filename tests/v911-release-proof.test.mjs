@@ -44,7 +44,7 @@ test('remote UI gate uses the matching preinstalled browser image instead of rep
  assert.doesNotMatch(gate,/playwright install --with-deps/);
  assert.match(gate,/PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD/);
  assert.match(gate,/Verify preinstalled Chromium/);
- assert.match(gate,/viewport: \[mobile375,mobile390,tablet768,tablet820,tablet1024,tablet1180,pc1280,pc1440,pc1920\]/);
+ assert.ok(gate.includes('["mobile375","mobile390","tablet768","tablet820","tablet1024","tablet1180","pc1280","pc1440","pc1920"]'));
 });
 
 test('owner-only preview request pushes pin exact source and deduplicate before private fetch',()=>{

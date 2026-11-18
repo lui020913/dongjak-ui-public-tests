@@ -1,0 +1,32 @@
+name: Request full release browser verification
+on:
+  push:
+    branches: [main]
+    paths: [release/full-audit-request.json]
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: v911-full-audit-request
+  cancel-in-progress: false
+jobs:
+  dispatch:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify exact existing build and dispatch all nine browsers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha="$(jq -er '.source_sha|strings' release/full-audit-request.json)"
+          build="$(jq -er '.build_run|strings' release/full-audit-request.json)"
+          [[ "$sha" =~ ^[a-f0-9]{40}$ && "$build" =~ ^[1-9][0-9]*$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" | jq -e --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null
+          url="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/"
+          DONGJAK_TARGET_URL="$url" DONGJAK_EXPECTED_SOURCE_SHA="$sha" DONGJAK_EXPECTED_BUILD_RUN="$build" node scripts/verify-release-source.mjs
+          jq -n --arg sha "$sha" --arg url "$url" --arg build "$build" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,expected_build_run:$build,viewport_scope:"full"}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+          echo 'Full nine-viewport audit requested without rebuilding. No Production approval or deployment.'
