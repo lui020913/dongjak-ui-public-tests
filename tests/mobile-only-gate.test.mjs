@@ -28,5 +28,6 @@ test('build patch displays the mobile-only notice and stops non-phone map startu
   assert.doesNotMatch(result.mainJs,/v713-desktop-rail|v726-desktop-polish|v729-pc-consistency|v881-desktop-ui|v881-tablet|v913-pc-design-system/);
   assert.match(result.mainJs,/dataset\.djMobileOnly !== 'blocked'/);
   assert.match(result.platformEntry,/dataset\.djMobileOnly!=='blocked'/);
+  assert.doesNotMatch(result.indexHtml,/^[ \\t]+$/m);
   assert.doesNotMatch(result.platformEntry,/else await import\('\.\/pc-chromium\/entry\.js'\);\n\/\/ Mobile sheet/);
 });
