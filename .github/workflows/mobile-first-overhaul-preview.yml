@@ -78,7 +78,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
-      GH_TOKEN: ${{ secrets.DONGJAK_PUBLIC_TESTS_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
         with:
