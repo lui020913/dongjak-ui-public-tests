@@ -15,9 +15,6 @@ function replaceExactly(source,search,replacement,label) {
   return source.replace(search,replacement);
 }
 
-function removeTag(html,tag) {
-  const escaped=tag.replaceAll('.','\\\\.').replaceAll('/','\\\\/');
-  const line=new RegExp('^[\\\\t ]*'+escaped+'[\\\\t ]*
   const bootstrap=`<script id="dj-mobile-only-gate-bootstrap">
 (function(){
   var nav=window.navigator||{};
@@ -77,14 +74,13 @@ html[data-theme="dark"][data-dj-mobile-only="blocked"] #dj-mobile-only-screen p{
   }
 
   for(const file of ['v815-pc-visual-fixes.css','v853-pc-responsive-fixes.css','v872-pc-onboarding-weather.css']) {
-    indexHtml=removeTag(indexHtml,`<link rel="stylesheet" href="/src/${file}" />`);
+    const tag=`<link rel="stylesheet" href="/src/${file}" />`;
+    indexHtml=indexHtml.replaceAll('    '+tag,'').replaceAll(tag,'');
   }
   for(const file of ['v854-weather-desktop.js','v862-pc-mobile-separation.js','v876-desktop-final.js']) {
-    indexHtml=removeTag(indexHtml,`<script type="module" src="/src/${file}"></script>`);
+    const tag=`<script type="module" src="/src/${file}"></script>`;
+    indexHtml=indexHtml.replaceAll('    '+tag,'').replaceAll(tag,'');
   }
-
-  // Removing dedicated assets can leave their original indentation behind.
-  indexHtml=indexHtml.replace(/^[\\t ]+$/gm,'');
 
   const desktopImports=[
     "import {installDesktopSafetyRail} from './v713-desktop-rail.js';",
