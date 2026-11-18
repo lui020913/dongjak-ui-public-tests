@@ -224,11 +224,25 @@ test('mobile and touch tablet POI filters share the existing top toolbar with bl
  const metrics=await rail.evaluate(n=>({scrollWidth:n.scrollWidth,clientWidth:n.clientWidth}));
  const left=toolbar.locator(':scope > .dj831-edge-blur-left'),right=toolbar.locator(':scope > .dj831-edge-blur-right');
  if(metrics.scrollWidth>metrics.clientWidth+3){
+   // Verify the actual initial state, then explicitly exercise both ends.
+   const snapshot=()=>rail.evaluate(n=>{
+     const l=n.parentElement.querySelector('.dj831-edge-blur-left'),r=n.parentElement.querySelector('.dj831-edge-blur-right');
+     const shown=e=>!!e&&!e.hidden&&getComputedStyle(e).display!=='none'&&e.getClientRects().length>0;
+     const max=n.scrollWidth-n.clientWidth;
+     return {offset:n.scrollLeft,max,left:shown(l),right:shown(r)};
+   });
+   console.log('TOOLBAR_INITIAL',JSON.stringify(await snapshot()));
+   await expect.poll(async()=>{const d=await snapshot();return d.left===(d.offset>3)&&d.right===(d.max-d.offset>3);}).toBe(true);
+   const move=async end=>{
+     await rail.evaluate((n,end)=>n.scrollTo({left:end?n.scrollWidth:0,behavior:'instant'}),end);
+     await expect.poll(async()=>{const d=await snapshot();return end?d.max-d.offset:Math.abs(d.offset);}).toBeLessThanOrEqual(3);
+   };
+   await move(false);
    await expect(left).toBeHidden();await expect(right).toBeVisible();
    expect(await right.evaluate(n=>getComputedStyle(n).backdropFilter)).toContain('blur(5px)');
-   await rail.evaluate(n=>{n.scrollLeft=n.scrollWidth;n.dispatchEvent(new Event('scroll'));});
+   await move(true);
    await expect(right).toBeHidden();await expect(left).toBeVisible();
-   await rail.evaluate(n=>{n.scrollLeft=0;n.dispatchEvent(new Event('scroll'));});
+   await move(false);
    await expect(left).toBeHidden();await expect(right).toBeVisible();
  }else{
    await expect(left).toBeHidden();await expect(right).toBeHidden();
