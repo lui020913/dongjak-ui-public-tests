@@ -21,6 +21,7 @@ async function ready(page,{keepTour=false}={}){
  await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-out|signed-in)$/,{timeout:30000});
  // Fresh anonymous context, never enter credentials.
  const tour=page.locator('#dj860-onboarding');
+ await expect(page.locator('#app')).toHaveAttribute('data-dj860-auto-resolved','true',{timeout:45000});
  await expect(tour).toBeVisible({timeout:30000});
  if(keepTour)return;
  await tour.locator('[data-dj860-action="skip"]').click();
@@ -50,7 +51,7 @@ test.afterEach(async({page},info)=>{
      const app=document.getElementById('app');
      const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities'];
      const describe=n=>{if(!n)return null;const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id,className:n.getAttribute('class'),hidden:n.hidden,ariaHidden:n.getAttribute('aria-hidden'),rect:[r.x,r.y,r.width,r.height],display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents};};
-     return {viewport:[innerWidth,innerHeight],tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,webappTipVisible:app?.dataset.djWebappTipVisible,runMode:document.documentElement.dataset.djRunMode,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
+     return {viewport:[innerWidth,innerHeight],nightReady:app?.dataset.djNightReady,nightState:app?.dataset.sangdoNight,tourResolved:app?.dataset.dj860AutoResolved,routeBlocks:['route-picking','route-preview','route-guiding'].filter(c=>app?.classList.contains(c)),routeDialogs:['route-pick-hint','route-transit-confirm','route-place-search','route-search-confirm'].filter(id=>{const n=document.getElementById(id);return n&&!n.hidden&&n.getClientRects().length;}),tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,webappTipVisible:app?.dataset.djWebappTipVisible,runMode:document.documentElement.dataset.djRunMode,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
    });
    await info.attach('anonymous-layout-diagnostic.json',{body:Buffer.from(JSON.stringify(debug,null,2)),contentType:'application/json'});
    console.log('UI_LAYOUT_DIAGNOSTIC',JSON.stringify(debug));
@@ -259,6 +260,8 @@ test('PC night report fits workspace and facility categories restore on exit',as
  await expect(categories).toBeVisible();
  const selection=await app.getAttribute('data-dj912-poi-groups');
  const nightAction=nav.locator('#night-visibility-quick-off');
+ await expect(app).toHaveAttribute('data-dj-night-ready','true',{timeout:60000});
+ await expect(nightAction).toBeEnabled();
  await expect(nightAction.locator('.dj-night-action-text')).toBeVisible({timeout:45000});
  await nightAction.click();
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
