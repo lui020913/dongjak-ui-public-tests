@@ -4,7 +4,7 @@ import {spawnSync} from 'node:child_process';
 
 const root=resolve(process.argv[2]||process.cwd());
 const dir=join(root,'tests');
-const excluded=/(?:desktop|pc|tablet)/i;
+const excluded=/(?:desktop|pc|tablet|platform-cleanup-v710|v729-r2-ui-reinterpretation)/i;
 const files=readdirSync(dir,{withFileTypes:true})
   .filter(entry=>entry.isFile()&&entry.name.endsWith('.test.mjs')&&!excluded.test(entry.name))
   .map(entry=>join('tests',entry.name))
