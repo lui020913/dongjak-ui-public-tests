@@ -218,7 +218,7 @@ export function enforcePriorityToolbarSingleRow(row,scrollport,more){
 export function installSwipeFeatureToolbar(doc=document,win=window){
  const app=doc.getElementById('app');
  if(!app||!win.matchMedia)return ()=>{};
- const media=win.matchMedia('(max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)');
+ const media=win.matchMedia('(min-width: 0px)');
  let row=null,scroller=null,sheet=null,extra=null,drawerObserver=null,sourceObserver=null,appObserver=null,resizeObserver=null;
  let current=null,activeButton=null,scheduled=false,drag=null,sourceNodes=[];
  let weatherSheet=null,nightConfirm=null,primary=loadPrimary(win),featureButtons=new Map(),weatherObserver=null;
