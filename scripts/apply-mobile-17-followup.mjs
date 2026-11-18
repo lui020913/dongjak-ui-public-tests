@@ -33,4 +33,17 @@ replace('src/place-details.js','  if(mem.has(id))return mem.get(id);',`  if(mem.
 replace('src/v824-favorites-cloud.js','    const popup=redirectOnly?null:openKakaoPopup(window);',"    window.dispatchEvent(new Event('dj:mobile-kakao-start'));\n    const popup=redirectOnly?null:openKakaoPopup(window);");
 replace('src/v824-favorites-cloud.js','      if(!linkExisting)await sendPendingKakaoNotice(session);',"      if(!linkExisting)await sendPendingKakaoNotice(session);\n      window.dispatchEvent(new Event('dj:mobile-kakao-completed'));");
 replace('src/v824-favorites-cloud.js','      try{popup?.close();}catch{}',"      window.dispatchEvent(new Event('dj:mobile-kakao-cancelled'));\n      try{popup?.close();}catch{}");
+// Add safety and the remaining registered windows to the shared expansion lifecycle.
+const controller='src/dj-v8212-sheet-controller.js';
+const controllerFile=resolve(root,controller);
+let controllerSource=readFileSync(controllerFile,'utf8');
+const oldExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide'].includes(id)";
+if(controllerSource.split(oldExpandable).length!==3)throw Error('Shared sheet expansion anchors changed');
+controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel'].includes(id)");
+writeFileSync(controllerFile,controllerSource);
+// A gesture has already animated the panel; do not replay the More exit.
+replace(controller,"if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;","if(id==='dj-mobile-utilities')panel.dispatchEvent(new CustomEvent('dongjak:close-more',{detail:{immediate:true}}));\n        else if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;");
+// Restore the tip only on a deliberate map-tab interaction.
+replace('src/v840-coordinated-ui.js',' const selectedMap=()=>{'," const selectedMap=()=>{\n   if(win.matchMedia('(max-width:699px)').matches){delete app.dataset.djUserTipDismissed;label.classList.remove('is-visible');label.hidden=true;}");
+
 console.log('Mobile follow-up anchors verified and applied.');
