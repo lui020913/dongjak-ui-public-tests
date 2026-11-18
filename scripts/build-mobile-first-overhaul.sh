@@ -41,7 +41,7 @@ if(source.includes("import './mobile-first-overhaul.css';")) throw new Error('Mo
 writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
 NODE
 git diff --check
-expected_changes="$(printf '%s\n' index.html)"
+expected_changes="$(printf '%s\n' index.html src/main.js)"
 actual_changes="$(git diff --name-only | sort)"
 test "$actual_changes" = "$expected_changes"
 test -s src/mobile-first-overhaul.css
