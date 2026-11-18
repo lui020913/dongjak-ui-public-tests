@@ -1,0 +1,70 @@
+/* v6.1.1 mobile bottom-navigation seam and survey point file attachments.
+   Imported last to supersede legacy rounded bottom-nav declarations. */
+@media (max-width:1079px) {
+  #app #bottom-nav,
+  #app[data-tab="map"] #bottom-nav,
+  #app[data-theme="dark"] #bottom-nav {
+    border-radius:0!important;
+    border-top:0!important;
+    background:#fff!important;
+    background-image:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    box-shadow:none!important;
+  }
+  /* Both panels meet at the same CSS pixel: no rounded nav corners revealing
+     the map behind the upper info sheet. */
+  #app[data-tab="map"] .sheet.overview-sheet:not([hidden]) {
+    margin-bottom:0!important;
+    border-bottom-left-radius:0!important;
+    border-bottom-right-radius:0!important;
+  }
+  #app[data-theme="dark"] #bottom-nav {background:#172831!important;}
+}
+#app .point-attachment-editor,
+#app .point-detail-attachments {
+  box-sizing:border-box;width:100%;min-width:0;
+  margin:13px 0;padding:14px 12px;
+  border:1px solid var(--dj-ui-border,#dce9e3);
+  border-radius:13px;background:var(--dj-ui-field,#f6faf8);
+  color:var(--dj-ui-text,#1f4137);
+}
+#app .point-attachment-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;line-height:1.45;}
+#app .point-attachment-heading span{font-size:11px;color:var(--dj-ui-muted,#607d72);font-weight:600;}
+#app .point-attachment-editor p{font-size:12px;line-height:1.5;margin:7px 0 11px;color:var(--dj-ui-muted,#617b70);}
+#app .point-attachment-editor small,
+#app .point-detail-attachments>small{display:block;font-size:11px;line-height:1.55;margin-top:9px;color:var(--dj-ui-muted,#617b70);}
+#app .point-attachment-pick {
+  display:inline-flex;align-items:center;justify-content:center;min-height:42px;
+  border:1px solid #8cb8a7;border-radius:10px;padding:8px 13px;
+  background:var(--dj-ui-bg,#fff);color:var(--dj-ui-text,#1b6750);
+  cursor:pointer;font-size:13px;font-weight:750;max-width:100%;box-sizing:border-box;
+}
+#app #point-attachment-input {
+  position:absolute!important;width:1px!important;height:1px!important;
+  clip-path:inset(50%)!important;opacity:0!important;overflow:hidden!important;
+  padding:0!important;margin:0!important;border:0!important;
+}
+#app .point-attachment-pick:focus-within {outline:2px solid #318a77;outline-offset:2px;}
+#app .point-attachment-list{display:grid;gap:7px;min-width:0;margin-top:10px;}
+#app .point-file-empty{font-size:12px;line-height:1.5;margin:4px 0;color:var(--dj-ui-muted,#617b70);}
+#app .point-file-row{display:flex;align-items:center;gap:9px;min-height:43px;min-width:0;
+  padding:8px 9px;box-sizing:border-box;border-radius:9px;
+  background:var(--dj-ui-bg,#fff);border:1px solid var(--dj-ui-border,#dce9e3);
+}
+#app .point-file-thumbnail{flex:0 0 40px;width:40px;height:40px;object-fit:cover;border-radius:7px;}
+#app .point-file-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;}
+#app .point-file-name{font-size:12px;font-weight:680;line-height:1.4;
+  white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
+#app .point-file-info small{font-size:11px;color:var(--dj-ui-muted,#617b70);}
+#app .point-file-action{flex:0 0 auto;min-width:37px;min-height:35px;border-radius:8px;
+  background:var(--dj-ui-field,#f0f6f2);color:var(--dj-ui-text,#265447);
+  border:1px solid var(--dj-ui-border,#dce9e3);font-weight:750;cursor:pointer;
+}
+#app .point-file-action:focus-visible,
+#app .point-attachment-pick:focus-visible{outline:2px solid #1b8a70;outline-offset:2px;}
+#app[data-theme="dark"] .point-attachment-pick{background:#25433f;color:#e5f6ef;border-color:#53776d;}
+@media(max-width:700px){
+  #app .point-attachment-editor,#app .point-detail-attachments{margin:10px 0;padding:12px 10px;}
+  #app .point-file-action{min-width:40px;min-height:40px;}
+}

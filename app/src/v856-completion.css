@@ -1,0 +1,175 @@
+/* v8.5.6 — close the remaining UI gaps found in the v8.5.5 source audit. */
+
+/* Narrow PC/tablet landscape: give the header its own inset lane. The old
+   700–1079px grid had no outer top inset, which made the search feel pinned
+   to the viewport edge and left the map-action stack too close to the header. */
+@media (min-width:700px) and (max-width:1079px){
+  html body #app#app .topbar{
+    position:absolute!important;top:8px!important;left:10px!important;right:10px!important;
+    bottom:auto!important;width:auto!important;max-width:none!important;
+    height:56px!important;min-height:56px!important;max-height:56px!important;
+    box-sizing:border-box!important;padding:6px 10px!important;margin:0!important;
+    border-radius:16px!important;overflow:visible!important;
+    grid-template-areas:'brand search tools'!important;
+    grid-template-columns:48px minmax(150px,1fr) max-content!important;
+    align-items:center!important;justify-items:stretch!important;gap:8px!important;
+  }
+  html body #app#app .topbar>#dj-settings-mobile{display:none!important;}
+  html body #app#app .topbar>#dj-about-pc{
+    grid-area:brand!important;display:grid!important;place-items:center!important;
+    width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;
+    margin:0!important;justify-self:start!important;
+  }
+  html body #app#app .topbar>#map-quick-search{
+    grid-area:search!important;position:relative!important;inset:auto!important;top:auto!important;
+    align-self:center!important;justify-self:start!important;box-sizing:border-box!important;
+    width:min(560px,100%)!important;max-width:560px!important;min-width:0!important;
+    margin:0!important;transform:none!important;
+  }
+  html body #app#app .topbar .map-quick-search-form{
+    box-sizing:border-box!important;width:100%!important;max-width:560px!important;min-width:0!important;
+    height:42px!important;min-height:42px!important;
+  }
+  html body #app#app .topbar>.header-tools{
+    grid-area:tools!important;position:relative!important;align-self:center!important;
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    justify-self:end!important;flex:0 0 auto!important;width:max-content!important;
+    max-width:100%!important;min-width:0!important;flex-wrap:nowrap!important;gap:5px!important;
+    margin:0!important;white-space:nowrap!important;
+  }
+  html body #app#app .topbar .header-tools #weather-widget{
+    display:flex!important;position:static!important;flex:0 1 88px!important;
+    width:88px!important;min-width:70px!important;max-width:88px!important;
+    margin:0!important;transform:none!important;gap:0!important;justify-content:center!important;
+  }
+  html body #app#app .topbar .header-tools #weather-widget :is(#weather-title,#weather-my-location){display:none!important;}
+  html body #app#app .topbar .header-tools #weather-label{
+    width:100%!important;min-width:0!important;padding:0 6px!important;font-size:0!important;
+  }
+  html body #app#app .topbar .header-tools #weather-label::before{
+    content:attr(data-dj-weather-icon) " " attr(data-dj-temperature)!important;
+    display:block!important;font-size:12px!important;font-weight:800!important;white-space:nowrap!important;
+  }
+  html body #app#app .topbar .header-tools #version-history-trigger{display:none!important;}
+  html body #app#app .topbar .header-tools :is(#theme-toggle,#dj-settings-pc){
+    display:inline-flex!important;flex:0 0 auto!important;min-width:0!important;
+    max-width:100%!important;padding-inline:9px!important;font-size:12px!important;
+  }
+  html body #app#app[data-tab="map"] .map-actions{
+    position:absolute!important;top:calc(var(--dj-header-h,68px) + 12px + env(safe-area-inset-top,0px))!important;
+    right:10px!important;left:auto!important;bottom:auto!important;z-index:1480!important;
+  }
+  html body #app#app #map-tools-toggle{top:calc(var(--dj-header-h,68px) + 12px)!important;}
+}
+
+/* Desktop: the bounded search lane and the utilities lane can never overlap. */
+@media (min-width:1080px){
+  html body #app#app .topbar{
+    grid-template-areas:'brand search tools'!important;
+    grid-template-columns:56px minmax(0,1fr) max-content!important;
+    align-items:center!important;gap:clamp(10px,1vw,16px)!important;
+  }
+  html body #app#app .topbar>#dj-settings-mobile{display:none!important;}
+  html body #app#app .topbar>#dj-about-pc{grid-area:brand!important;display:grid!important;}
+  html body #app#app .topbar>#map-quick-search{
+    grid-area:search!important;position:relative!important;inset:auto!important;
+    justify-self:start!important;align-self:center!important;
+    width:min(560px,100%)!important;max-width:560px!important;min-width:0!important;
+    margin:0!important;transform:none!important;
+  }
+  html body #app#app .topbar .map-quick-search-form{width:100%!important;max-width:560px!important;min-width:0!important;}
+  html body #app#app .topbar>.header-tools{
+    grid-area:tools!important;justify-self:end!important;justify-content:flex-end!important;
+    width:max-content!important;max-width:100%!important;min-width:0!important;flex-wrap:nowrap!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab{order:0!important;}
+  html body #app#app #bottom-nav>.nav-tab[data-tab="map"]{order:-1!important;}
+  /* Identical icon box and type scale for all three safety launchers. */
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle){
+    box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    height:46px!important;min-height:46px!important;max-height:46px!important;
+    margin:0!important;padding:6px 8px!important;gap:8px!important;
+    font-size:13px!important;font-weight:750!important;line-height:1.15!important;
+    letter-spacing:0!important;white-space:nowrap!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#map-safety-toggle)::before{
+    box-sizing:border-box!important;display:grid!important;place-items:center!important;
+    flex:0 0 18px!important;width:18px!important;height:18px!important;
+    min-width:18px!important;min-height:18px!important;max-width:18px!important;max-height:18px!important;
+    margin:0!important;padding:0!important;font-size:16px!important;line-height:18px!important;
+  }
+  html body #app#app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-symbol{
+    display:grid!important;place-items:center!important;flex:0 0 18px!important;
+    box-sizing:border-box!important;width:18px!important;height:18px!important;
+    min-width:18px!important;min-height:18px!important;max-width:18px!important;max-height:18px!important;
+    margin:0!important;padding:0!important;font-size:17px!important;line-height:18px!important;
+  }
+  html body #app#app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-text{
+    display:inline!important;min-width:0!important;margin:0!important;padding:0!important;
+    font-size:13px!important;font-weight:750!important;line-height:1.15!important;white-space:nowrap!important;
+  }
+}
+
+/* On phones, keep one weather pill. The bottom toolbar owns the weather sheet;
+   the duplicate top-right summary pill is hidden to avoid two competing bars. */
+@media (max-width:699px){
+  html body #app#app .topbar .header-tools #weather-widget{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app #dj840-map-tip:not([hidden]){
+    width:min(248px,calc(100vw - 128px))!important;
+    max-width:calc(100vw - 128px)!important;
+  }
+  html body #app#app #map-gesture-guide .dj803-ios-install-help{
+    box-sizing:border-box!important;margin:8px 0 0!important;padding:0!important;
+    border:1px solid var(--dj800-border,#d9e7df)!important;border-radius:15px!important;
+    background:var(--dj800-elevated,#f2f8f4)!important;overflow:hidden!important;
+  }
+  html body #app#app #map-gesture-guide .dj803-ios-install-help>summary{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    gap:8px!important;min-height:48px!important;padding:9px 12px!important;
+    font-size:13px!important;font-weight:800!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-ios-install-caption{
+    display:block!important;margin:0 12px 8px!important;font-size:10px!important;
+    font-weight:700!important;color:var(--dj800-muted,#71877d)!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-ios-install-steps{
+    display:grid!important;gap:7px!important;padding:0 12px 12px!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-ios-install-steps>div{
+    display:grid!important;grid-template-columns:23px minmax(0,1fr)!important;
+    align-items:center!important;gap:8px!important;min-width:0!important;
+    font-size:12px!important;line-height:1.4!important;font-weight:600!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-ios-install-steps>div>b{
+    display:grid!important;place-items:center!important;width:23px!important;height:23px!important;
+    border-radius:50%!important;background:var(--dj800-accent,#16856d)!important;color:#fff!important;
+    font-size:11px!important;font-weight:850!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-ios-install-steps>p{
+    margin:2px 0 0!important;padding-top:8px!important;border-top:1px solid var(--dj800-border,#d9e7df)!important;
+    font-size:11px!important;line-height:1.45!important;color:var(--dj800-muted,#71877d)!important;
+  }
+}
+
+/* A line change reuses the same transit sheet and only cross-fades its content. */
+#app #transport-sheet.dj856-line-switching :is(
+  #transport-title,#transport-neighbors,#transport-arrivals,#transport-lines,#transport-service-hours
+){animation:dj856-line-switch-in .22s ease both!important;}
+@keyframes dj856-line-switch-in{
+  from{opacity:.25;transform:translateY(3px);}
+  to{opacity:1;transform:translateY(0);}
+}
+#app .v707-release.dj856-release-focus{
+  animation:dj856-release-highlight 1.35s ease both!important;
+}
+@keyframes dj856-release-highlight{
+  0%,100%{outline:0 solid transparent;}
+  18%,70%{outline:2px solid var(--dj800-accent,#16856d);outline-offset:3px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #app #transport-sheet.dj856-line-switching :is(#transport-title,#transport-neighbors,#transport-arrivals,#transport-lines,#transport-service-hours),
+  #app .v707-release.dj856-release-focus{animation:none!important;}
+}

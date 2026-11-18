@@ -1,0 +1,56 @@
+/* v8.4.5: keep map measuring aids simultaneous; remove iOS transient black panel gaps. */
+/* WebKit sometimes draws a rectangular black native tap highlight during a
+   profile/menu button press. Preserve CSS focus/active affordances, but not
+   this temporary platform overlay. This applies to all app dialogs and tabs. */
+@media (hover:none) and (pointer:coarse){
+  html body :is(button,a,summary,[role="button"],[tabindex]):not(input):not(textarea){
+    -webkit-tap-highlight-color:transparent!important;
+  }
+}
+@media (max-width:699px){
+  /* Tip is separate HUD text; scale is independently positioned above it by scale docking. */
+  html body #app#app#app#app#app#app #dj840-map-tip:not([hidden]){
+    will-change:opacity!important;contain:paint!important;
+    -webkit-backface-visibility:hidden!important;backface-visibility:hidden!important;
+  }
+  /* Stable opaque backing prevents the map/video compositor showing through
+     while internal account/settings DOM is moved in WebKit.  No global dark
+     color-scheme reset or fullscreen paint flash. */
+  html body #app#app#app#app#app#app :is(#mine-panel,#participation-panel,#news-panel,#route-panel):not([hidden]),
+  html body #app#app#app#app#app#app #mine-panel :is(.dj836-sheet-body,.dj834-my-home,.dj834-my-detail,.dj834-detail-content,.dj834-account-container,.dj834-records-container){
+    background-color:var(--dj800-surface,#fff)!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  html body #app#app#app#app#app#app #mine-panel :is(.dj834-my-detail,.dj834-my-home,.dj834-detail-content){
+    -webkit-mask-image:none!important;mask-image:none!important;
+    clip-path:none!important;filter:none!important;
+  }
+  /* The primary three pages are full-height. The old fullscreen transform:none
+     rule blocked the common swipe controller's drag and dismiss transitions.
+     Keep geometry untouched until the gesture class is present. */
+  html body #app#app#app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel.dj-sheet-dragging:not([hidden]){
+    transform:translate3d(0,var(--dj-sheet-drag-y,0px),0)!important;
+    opacity:var(--dj-sheet-drag-opacity,1)!important;
+    transition:none!important;
+    will-change:transform,opacity!important;
+    touch-action:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel.dj833-sheet-dismissing:not([hidden]){
+    transform:translate3d(0,110dvh,0)!important;
+    opacity:0!important;
+    transition:transform 180ms ease-in,opacity 180ms ease-in!important;
+    will-change:transform,opacity!important;
+  }
+  /* Only the top grip captures downward swipes. Keep all body scrolling native. */
+  html body #app#app#app#app#app#app#app #mine-panel > .dj-sheet-chrome > .dj836-edge-drag,
+  html body #app#app#app#app#app#app#app #news-panel > .dj-sheet-chrome > .dj836-edge-drag,
+  html body #app#app#app#app#app#app#app #participation-panel > .dj-sheet-chrome > .dj836-edge-drag{
+    pointer-events:auto!important;touch-action:none!important;
+    -webkit-user-select:none!important;user-select:none!important;
+  }
+}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  html body #app#app#app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel.dj833-sheet-dismissing:not([hidden]){
+    transition:none!important;
+  }
+}

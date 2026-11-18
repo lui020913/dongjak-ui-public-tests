@@ -1,0 +1,57 @@
+/* v8.0.3 additive tools. Scoped rules, no override of base mobile panels. */
+#dj804-route-compare,#dj804-safety-extensions{box-sizing:border-box;color:var(--text,inherit)}
+#dj804-route-compare[hidden],#dj804-weather-detail[hidden],#dj804-weather-refresh[hidden],#dj804-weather-sensors[hidden]{display:none!important}
+#dj804-route-compare{margin:12px 0;padding:12px;border:1px solid var(--border,rgba(100,125,132,.22));border-radius:16px;background:var(--panel,#f7faf9)}
+#dj804-route-compare header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#dj804-route-compare header strong{font-size:14px;font-weight:800;letter-spacing:-.02em}
+#dj804-route-compare header small{font-size:11px;opacity:.72}
+.dj804-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dj804-compare-card{all:unset;display:flex;flex-direction:column;box-sizing:border-box;gap:8px;cursor:pointer;min-width:0;padding:12px 10px;border-radius:13px;border:1px solid #d3e3de;background:#fff;color:#183f39;box-shadow:0 2px 6px rgba(30,80,60,.03)}
+.dj804-compare-card:focus-visible{outline:2px solid #159783;outline-offset:2px}
+.dj804-compare-card[aria-pressed=true]{border-color:#118e7e;background:#e7f6ef;box-shadow:0 0 0 1px #158e7e}
+.dj804-compare-title{display:flex;justify-content:space-between;gap:6px;font-size:13px;font-weight:800;flex-wrap:wrap}
+.dj804-compare-action{font-size:10px;color:#217d72;font-weight:700}
+.dj804-compare-metrics{display:flex;gap:10px;flex-wrap:wrap;font-size:14px}
+.dj804-compare-metrics b{font-weight:850;font-variant-numeric:tabular-nums}
+.dj804-compare-meta{font-size:11px;line-height:1.5;overflow-wrap:anywhere;color:#516d66}
+.dj804-compare-note{font-size:11px;line-height:1.55;margin:9px 1px 0;color:var(--muted,#61726f)}
+#dj804-safety-extensions{display:grid;gap:12px;margin:13px 0 0}
+#dj804-safety-extensions .dj804-tool{display:grid;gap:9px;padding:14px;border:1px solid rgba(90,132,130,.22);background:var(--panel,#f8fbfa);border-radius:15px;min-width:0}
+.dj804-tool-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dj804-tool-head>div{display:grid;gap:2px;min-width:0}
+.dj804-tool-head strong{font-size:14px;font-weight:800;letter-spacing:-.025em}
+.dj804-tool-head small,.dj804-pill{font-size:11px;color:var(--muted,#657b79)}
+.dj804-pill{padding:4px 7px;border-radius:12px;background:rgba(46,143,126,.1);white-space:nowrap}
+#dj804-safety-extensions button{border:1px solid rgba(75,124,118,.29);background:var(--surface,#fff);border-radius:10px;color:inherit;padding:9px 11px;min-height:37px;font-weight:720;font-size:12px;cursor:pointer;text-align:center;line-height:1.25}
+#dj804-safety-extensions button:focus-visible{outline:2px solid #168d80;outline-offset:2px}
+#dj804-safety-extensions button:disabled{opacity:.6;cursor:progress}
+#dj804-safety-extensions .dj804-main-button,#dj804-report-print{background:#157e72;color:#fff;border-color:#157e72}
+#dj804-weather-toggle[aria-pressed=true]{background:#0d8878;border-color:#0d8878;color:#fff}
+.dj804-inline-actions{display:flex;gap:7px;flex-wrap:wrap}
+.dj804-inline-actions button{flex:1 1 118px}
+.dj804-status{font-size:12px;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.dj804-weather-advice{display:grid;gap:7px;padding:10px;border-radius:10px;background:rgba(26,136,113,.07)}
+.dj804-weather-advice strong{font-size:13px}
+.dj804-weather-advice ul{padding-left:20px;margin:0;font-size:12px;line-height:1.65}
+.dj804-weather-advice small{font-size:11px;line-height:1.4;opacity:.8}
+#dj804-weather-safety[data-weather-level=caution] .dj804-weather-advice{background:rgba(196,111,43,.1)}
+#dj804-report-area{width:100%;min-height:38px;border:1px solid rgba(95,127,128,.32);border-radius:9px;background:var(--surface,#fff);color:inherit;padding:7px 8px;font:inherit;font-size:13px}
+.dj804-report-label{font-size:12px;font-weight:700}
+.dj804-caveat{font-size:11px;opacity:.76;line-height:1.55;margin:0}
+#app #nav-live-card .dj804-nav-extra-options{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:0 0 11px}
+#app #nav-live-card .dj804-nav-extra-options button{border:1px solid #cdded8;background:#f4f8f6;color:#365e53;border-radius:10px;padding:9px 5px;font-size:12px;min-height:36px;font-weight:750}
+#app #nav-live-card .dj804-nav-extra-options button[aria-pressed=true]{border-color:#55a58e;background:#e0f4e9;color:#0c7155}
+#app #nav-live-card .dj804-nav-gps-quality{grid-column:1/-1;text-align:center;font-size:11px;padding:6px;border-radius:7px;background:rgba(90,120,125,.09);font-weight:700}
+#app #nav-live-card .dj804-nav-gps-quality[data-level=poor]{background:rgba(192,87,65,.13);color:#ac4838}
+#app #nav-live-card .dj804-nav-gps-quality[data-level=good]{background:rgba(42,137,94,.13);color:#247c57}
+#app[data-theme=dark] .dj804-compare-card{background:#1d3336;color:#e4eeed;border-color:#45646b}
+#app[data-theme=dark] .dj804-compare-card[aria-pressed=true]{background:#173e39;border-color:#52b29d}
+#app[data-theme=dark] .dj804-compare-meta{color:#afc4bf}
+#app[data-theme=dark] .dj804-compare-action{color:#8ce0c5}
+#app[data-theme=dark] #dj804-safety-extensions button,#app[data-theme=dark] #dj804-report-area{background:#263c3c;color:#e4f1ee;border-color:#4e6565}
+#app[data-theme=dark] #dj804-safety-extensions .dj804-main-button,#app[data-theme=dark] #dj804-report-print{background:#166f65;color:white}
+#app[data-theme=dark] #nav-live-card .dj804-nav-extra-options button{background:#263b3a;color:#d3e7de;border-color:#4a6962}
+#app[data-theme=dark] #nav-live-card .dj804-nav-extra-options button[aria-pressed=true]{background:#135342;border-color:#2b9376;color:#f0fff8}
+#app[data-theme=dark] .dj804-weather-advice{background:rgba(41,150,125,.16)}
+@media(max-width:650px){.dj804-compare-grid{grid-template-columns:1fr}.dj804-compare-card{gap:6px}.dj804-tool-head{flex-wrap:wrap}#dj804-route-compare{padding:10px}#dj804-safety-extensions .dj804-tool{padding:12px}#app #nav-live-card .dj804-nav-extra-options button{font-size:11px;padding:7px 4px}}
+@media(prefers-reduced-motion:reduce){#dj804-safety-extensions *,#dj804-route-compare *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

@@ -1,0 +1,64 @@
+/* v824: local-first transit bookmarks, custom folders, opt-in account sync. */
+#app .dj824-group-toolbar{display:flex;align-items:center;gap:7px;margin:10px 0 4px;min-width:0}
+#app .dj824-group-input,#app .dj824-folder-select,#app .dj824-login-form input{
+  box-sizing:border-box;min-width:0;min-height:34px;border:1px solid rgba(91,133,121,.30);
+  background:var(--surface,#fff);color:inherit;border-radius:9px;padding:7px 9px;
+  font-family:"Pretendard Variable",sans-serif;font-size:12px;
+}
+#app .dj824-group-input{flex:1}
+#app .dj824-folder-heading{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:12px 0 4px}
+#app .dj824-folder-heading h4{margin:0 auto 0 0!important}
+#app .dj824-saved-row{display:grid;grid-template-columns:minmax(115px,1fr) auto;gap:6px;align-items:center}
+#app .dj824-saved-row>button:first-child{width:100%;max-width:none;text-align:left;white-space:normal;overflow-wrap:anywhere}
+#app .dj824-row-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;min-width:0}
+#app .dj824-row-actions .dj824-folder-select{max-width:120px;min-width:82px;font-size:11px}
+#app .dj824-row-actions button{padding:5px!important;min-height:32px;white-space:nowrap}
+#app .dj824-account{margin:14px 0 0;padding:12px;border-top:1px solid rgba(91,133,121,.25);border-radius:8px;background:rgba(65,143,119,.055)}
+#app .dj824-account>strong{font-size:13px;font-weight:750}
+#app .dj824-login-form{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+#app .dj824-login-form input{flex:1;min-width:150px}
+#app .dj824-login-form button{flex:none}
+#app #transport-sheet .dj824-transport-favorites{
+  display:flex;gap:8px;align-items:center;padding:9px 0 11px;min-width:0;flex-wrap:wrap;
+  border-bottom:1px solid rgba(100,140,130,.18);
+}
+#app #transport-sheet .dj824-transport-favorites button,
+#app #transport-sheet .dj824-transport-favorites select{
+  box-sizing:border-box;min-height:36px;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;
+  color:var(--text,inherit);border:1px solid rgba(70,135,119,.31);
+  background:var(--surface,#fff);font-family:"Pretendard Variable",sans-serif;
+}
+#app #transport-sheet .dj824-transport-favorites button{color:#147c67!important;background:#e8f5ef!important;cursor:pointer}
+#app #transport-sheet .dj824-transport-favorites select:disabled{opacity:.55}
+#app[data-theme=dark] :is(.dj824-group-input,.dj824-folder-select,.dj824-login-form input),
+html[data-theme=dark] #app :is(.dj824-group-input,.dj824-folder-select,.dj824-login-form input){background:#294144;color:#e4f3ec;border-color:#4b6968}
+#app[data-theme=dark] .dj824-account,html[data-theme=dark] #app .dj824-account{background:rgba(67,158,137,.1)}
+#app[data-theme=dark] #transport-sheet .dj824-transport-favorites button,
+html[data-theme=dark] #app #transport-sheet .dj824-transport-favorites button{background:#26463c!important;color:#a5e9cf!important;border-color:#416d5d}
+#app[data-theme=dark] #transport-sheet .dj824-transport-favorites select,
+html[data-theme=dark] #app #transport-sheet .dj824-transport-favorites select{background:#294144;color:#e4f3ec;border-color:#4b6968}
+@media(max-width:699px){
+ #app .dj824-saved-row{grid-template-columns:minmax(0,1fr);gap:3px}
+ #app .dj824-row-actions{justify-content:flex-start;flex-wrap:wrap}
+ #app .dj824-group-toolbar{flex-wrap:wrap}
+ #app .dj824-group-input{min-width:145px}
+ #app #transport-sheet .dj824-transport-favorites{padding:7px 0;gap:6px}
+ #app .dj824-login-form input{min-width:140px}
+}
+
+/* v8.1.2: accessible, always-visible account entry above saved groups. */
+#app .dj824-account-slot{margin:0 0 15px;min-width:0}
+#app .dj824-account{margin:0;padding:13px 14px;border:1px solid rgba(91,133,121,.25);border-radius:12px;background:rgba(65,143,119,.055)}
+#app .dj824-account-header{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+#app .dj824-account-header strong{font-weight:750;font-size:15px;line-height:1.35}
+#app#app #dj824-account .dj824-account-toggle{font-family:inherit;font-size:14px;font-weight:750;min-height:38px;padding:7px 18px;border-radius:10px;border:1px solid #18846e;background:#168774;color:#fff;cursor:pointer;flex-shrink:0;white-space:nowrap}
+#app#app #dj824-account .dj824-account-toggle:focus-visible{outline:3px solid #6ac7ae;outline-offset:2px}
+#app .dj824-account-status{margin:6px 0 0!important;line-height:1.5;opacity:.9}
+#app .dj824-account-details{margin-top:10px;min-width:0}
+#app .dj824-account-instructions{margin:0 0 7px!important}
+#app .dj824-account-details[hidden],#app .dj824-account-details [hidden]{display:none!important}
+#app[data-theme="dark"] .dj824-account-toggle,html[data-theme="dark"] #app#app #dj824-account .dj824-account-toggle{background:#238a77;color:#fff;border-color:#67aa94}
+@media(max-width:699px){
+  #app .dj824-account{padding:11px 12px}
+  #app#app #dj824-account .dj824-account-toggle{min-height:40px;padding:8px 15px}
+}

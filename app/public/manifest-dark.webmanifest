@@ -1,0 +1,24 @@
+{
+  "name": "동작하는 안전지도",
+  "short_name": "동작안전지도",
+  "description": "동작구 보행안전 지도",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#192d32",
+  "theme_color": "#192d32",
+  "icons": [
+    {
+      "src": "/icons/dongjak-dark-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/dongjak-dark-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

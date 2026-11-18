@@ -1,0 +1,91 @@
+/* v7.0.29 — desktop-only panel coordinates, persistent map controls,
+   accurate transfer color and full-screen theme crossfade. */
+@media(min-width:1080px){
+  #app{--dj-v729-rail-top:var(--dj-v724-rail-top,92px);}
+  /* All left-docked panels start exactly at the actual measured nav rail top. */
+  #app #route-panel.page-panel:not([hidden]),
+  #app #news-panel.page-panel:not([hidden]),
+  #app #community-panel.page-panel:not([hidden]),
+  #app #mine-panel.page-panel:not([hidden]),
+  #app .page-panel:not([hidden]),
+  #app #overview-sheet:not([hidden]),
+  #app #transport-sheet:not([hidden]),
+  #app.map-controls-open #map-advanced-controls,
+  #app.map-safety-open #map-safety-controls,
+  #app #road-width-legend:not([hidden]),
+  #app #night-visibility-float:not([hidden]){
+    position:fixed!important;
+    top:var(--dj-v729-rail-top)!important;
+    left:calc(var(--dj-v724-rail-right,130px) + 8px)!important;
+    right:auto!important;bottom:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+    max-height:calc(100dvh - var(--dj-v729-rail-top) - 12px)!important;
+  }
+  /* Search dropdown opens ABOVE the sidebar. Move it and its attached panels
+     together; v726's background transition had overwritten the top animation. */
+  #app #bottom-nav{
+    transition:top .34s cubic-bezier(.22,.75,.3,1),max-height .34s ease,
+      background-color .3s ease,color .3s ease,border-color .3s ease!important;
+  }
+  #app .page-panel:not([hidden]),#app #overview-sheet:not([hidden]),
+  #app #transport-sheet:not([hidden]),#app.map-controls-open #map-advanced-controls,
+  #app.map-safety-open #map-safety-controls,#app #road-width-legend:not([hidden]){
+    transition:top .34s cubic-bezier(.22,.75,.3,1),background-color .3s ease,
+      border-color .3s ease!important;
+  }
+  /* Never hide the 4 fixed right-edge controls when navigation or a side
+     panel is open. Keep them at the physical top-right, not under any drawer. */
+  #app[data-tab]:not([data-tab="unused"]) .map-actions,
+  #app[data-tab]:not([data-tab="unused"]).detail-open .map-actions,
+  #app[data-tab]:not([data-tab="unused"]).route-picking .map-actions,
+  #app[data-tab]:not([data-tab="unused"]).route-guiding .map-actions{
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    position:fixed!important;top:10px!important;right:12px!important;
+    left:auto!important;bottom:auto!important;transform:none!important;
+    flex-direction:column!important;align-items:stretch!important;gap:8px!important;
+    z-index:4100!important;pointer-events:auto!important;
+  }
+  #app[data-tab] .map-actions :is(#map-gesture-guide-open,#map-compass,#center-dongjak,#current-location){
+    display:grid!important;visibility:visible!important;opacity:1!important;
+    place-items:center!important;pointer-events:auto!important;
+  }
+  /* The scale is part of the persistent map controls, independent of a tab. */
+  #app[data-tab] .maplibregl-ctrl-bottom-left,
+  #app[data-tab] .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{
+    display:block!important;visibility:visible!important;opacity:1!important;
+    pointer-events:none!important;
+  }
+  #app .topbar .map-quick-search-submit{
+    width:120px!important;min-width:120px!important;max-width:120px!important;
+    flex:0 0 120px!important;
+  }
+  /* Each transfer line keeps its own operator color. Only selected line gets
+     a thin outline; other badges remain visible, not falsely recolored. */
+  #app #transport-sheet .metro-badge-number{flex:none!important;}
+  #app #transport-sheet .metro-badge-number.dj-active-transfer-line{
+    outline:2px solid var(--dj-desktop-text,#21483c)!important;outline-offset:2px!important;
+  }
+  #app #transport-sheet .metro-neighbor-status{
+    margin:10px 0 0;padding:9px 12px;border-radius:11px;
+    background:var(--dj-desktop-panel,#fff);color:var(--dj-desktop-text,#21483c);
+    border:1px solid var(--dj-desktop-stroke,#d4e5db);font-size:13px;
+  }
+  /* Overlay above the ENTIRE screen during a user-requested theme change. */
+  #app .dj-theme-switch-flash:not([hidden]){
+    display:block!important;position:fixed!important;inset:0!important;
+    z-index:2147480000!important;pointer-events:none!important;
+    background:rgba(145,167,160,.15)!important;
+    -webkit-backdrop-filter:blur(5px) saturate(.84)!important;
+    backdrop-filter:blur(5px) saturate(.84)!important;
+    animation:dj-v729-whole-screen-transition .43s ease-in-out both!important;
+  }
+}
+@keyframes dj-v729-whole-screen-transition{
+  0%{opacity:0;}30%{opacity:.98;}66%{opacity:.8;}100%{opacity:0;}
+}
+@media(min-width:1080px) and (prefers-reduced-motion:reduce){
+  #app .dj-theme-switch-flash:not([hidden]){display:none!important;animation:none!important;}
+  #app #bottom-nav{transition:none!important;}
+  #app .page-panel:not([hidden]){transition:none!important;}
+}

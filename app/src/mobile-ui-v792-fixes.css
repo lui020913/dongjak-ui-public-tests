@@ -1,0 +1,115 @@
+/* v7.9.2 — mobile ONLY (<=699px).
+   Fixes the R2 history shortcut conflict, search geometry on tab changes,
+   iOS app-owned header material, theme-specific top controls, and modal scrim.
+   MapLibre, basemap data, route/transport logic and desktop layout are untouched. */
+@media (max-width:699px) {
+  /* Let the map continue behind the safe area. Safari/PWA controls its native
+     scroll-edge material; this rule removes only app-generated white paint. */
+  html, html body, html body #app {background-color:transparent!important;}
+  html body #app #dj-mobile-safe-top {
+    display:none!important;visibility:hidden!important;opacity:0!important;
+    height:0!important;background:transparent!important;
+  }
+  html body #app::before,
+  html body #app .topbar::before,
+  html body #app .topbar::after,
+  html body #app .map-quick-search::before,
+  html body #app .map-quick-search::after {
+    content:none!important;display:none!important;
+  }
+  /* A single safe-area-relative viewport coordinate on ALL five tabs. Avoid
+     iOS tab-specific transforms, hardcoded 0px top, and extra white toolbar. */
+  html body #app#app[data-tab] .topbar,
+  html body #app#app[data-theme="dark"][data-tab] .topbar {
+    position:fixed!important;
+    inset:calc(env(safe-area-inset-top,0px) + 8px) 0 auto 0!important;
+    top:calc(env(safe-area-inset-top,0px) + 8px)!important;
+    right:0!important;left:0!important;bottom:auto!important;
+    width:100%!important;max-width:none!important;
+    height:58px!important;min-height:58px!important;max-height:58px!important;
+    margin:0!important;padding:0 12px!important;
+    transform:none!important;translate:none!important;
+    display:flex!important;align-items:center!important;
+    background:transparent!important;background-image:none!important;
+    box-shadow:none!important;border:0!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    -webkit-mask-image:none!important;mask-image:none!important;
+    filter:none!important;z-index:3101!important;
+  }
+  html body #app#app[data-tab] .topbar>.map-quick-search,
+  html body #app#app[data-tab]:not([data-tab="map"]) .topbar>.map-quick-search {
+    display:block!important;visibility:visible!important;opacity:1!important;
+    position:relative!important;top:auto!important;bottom:auto!important;
+    left:auto!important;right:auto!important;
+    margin:0!important;transform:none!important;translate:none!important;
+    align-self:center!important;min-width:0!important;flex:1 1 0%!important;
+  }
+  html body #app#app[data-tab] .topbar>.map-quick-search .map-quick-search-form {
+    background:var(--dj-ui-bg,#fff)!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    filter:none!important;
+  }
+  /* R2 shortcut must never be shown on phones. The mobile More menu retains
+     the existing full release-history action. JS also blocks its creation. */
+  html body #app#app[data-tab] #dj-r2-history-shortcut,
+  html body #app#app[data-tab="map"] #dj-r2-history-shortcut,
+  html body #app#app[data-theme="dark"][data-tab="map"] #dj-r2-history-shortcut {
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+    opacity:0!important;width:0!important;height:0!important;
+  }
+  /* Light mode must stay light on route/community/news/mine panels. v7.9.1
+     incorrectly forced charcoal solely because data-tab != map. */
+  html body #app#app[data-tab]:not([data-theme="dark"]) :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger),
+  html body #app#app[data-tab]:not([data-tab="map"]):not([data-theme="dark"]) :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
+    background:#fff!important;color:#24483d!important;border-color:#d7e6de!important;
+    box-shadow:0 2px 10px rgba(21,49,39,.08)!important;
+  }
+  html body #app#app[data-tab]:not([data-theme="dark"]) #dj-mobile-more-trigger::before,
+  html body #app#app[data-tab]:not([data-tab="map"]):not([data-theme="dark"]) #dj-mobile-more-trigger::before {color:#24483d!important;}
+  html body #app#app[data-tab]:not([data-theme="dark"]) #night-visibility-quick-off .dj-night-action-text {color:inherit!important;}
+  html body #app#app[data-tab]:not([data-theme="dark"]) #night-visibility-quick-off[aria-pressed="true"] {
+    background:#e6f3ed!important;color:#176d55!important;border-color:#8fbca9!important;
+  }
+  html body #app#app[data-theme="dark"][data-tab] :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
+    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
+  }
+  html body #app#app[data-theme="dark"][data-tab] #dj-mobile-more-trigger::before,
+  html body #app#app[data-theme="dark"][data-tab] #night-visibility-quick-off .dj-night-action-text {color:#e9f5ef!important;}
+  /* Match the native map-options/safety scrim's 36% opacity ABOVE the map
+     backdrop, including search and the transparent top gap. Keep tool row
+     tappable: scrim covers chrome, not the four launcher buttons. */
+  html body #app #dj-mobile-header-dim {
+    display:none!important;
+    position:fixed!important;inset:0 0 auto 0!important;
+    height:calc(env(safe-area-inset-top,0px) + 131px)!important;
+    background:rgba(9,29,32,.36)!important;
+    border:0!important;opacity:1!important;
+    z-index:3110!important;pointer-events:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  html body #app#app.map-controls-open #dj-mobile-header-dim,
+  html body #app#app.map-safety-open #dj-mobile-header-dim {display:block!important;}
+  html body #app#app[data-tab] :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#dj-mobile-more-trigger){
+    z-index:3120!important;
+  }
+  html body #app #dj-mobile-utilities {z-index:3130!important;}
+  /* Keep options backdrop aligned with header dim for a seamless transition. */
+  html body #app#app.map-controls-open #map-options-backdrop:not([hidden]),
+  html body #app#app.map-safety-open #map-safety-backdrop:not([hidden]) {
+    top:calc(env(safe-area-inset-top,0px) + 131px)!important;
+  }
+}
+
+
+@media (max-width:699px) {
+  html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="dark"] body #app {
+    background-color:#192d32!important;
+  }
+  html body #app #dj-mobile-header-dim{display:none!important;opacity:0!important;}
+  html body #app#app.map-controls-open #map-options-backdrop:not([hidden]),
+  html body #app#app.map-safety-open #map-safety-backdrop:not([hidden]) {
+    background:transparent!important;
+    opacity:1!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}

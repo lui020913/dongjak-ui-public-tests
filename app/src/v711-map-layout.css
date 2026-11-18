@@ -1,0 +1,63 @@
+/* v7.0.11 — one coherent layout spec after all legacy overrides. */
+:root{--dj-side-panel-w:430px;--dj-search-h:56px;--dj-left-dock-x:148px;--dj-rail-top:88px;}
+/* Always one button icon. The underlying textual × is removed from markup. */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+ #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+ #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+ #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+ #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,
+ #news-close-to-map,.page-dismiss){font-size:0!important;line-height:0!important;}
+/* A single cross (do not permit the older ::after stroke to duplicate it). */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+ #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+ #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+ #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+ #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,
+ #news-close-to-map,.page-dismiss)::after{content:none!important;display:none!important;}
+#app #news-close-to-map{position:absolute!important;right:14px!important;top:14px!important;}
+#app #news-close-to-map::before{content:""!important;position:absolute;top:50%;left:50%;
+ width:16px;height:16px;transform:translate(-50%,-50%);
+ background:linear-gradient(45deg,transparent 43%,currentColor 43% 56%,transparent 56%),
+ linear-gradient(-45deg,transparent 43%,currentColor 43% 56%,transparent 56%);}
+/* A useful standard panel width without forcing all content to a tall empty box. */
+@media(min-width:1080px){
+ #app #overview-sheet:not([hidden]),#app .page-panel:not([hidden]),
+ #app.map-controls-open #map-advanced-controls,
+ #app.map-safety-open #map-safety-controls,
+ #app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+  box-sizing:border-box!important;width:min(var(--dj-side-panel-w),calc(100vw - 174px))!important;
+  max-width:min(var(--dj-side-panel-w),calc(100vw - 174px))!important;
+ }
+ #app.map-controls-open #map-advanced-controls,#app.map-safety-open #map-safety-controls,
+ #app .page-panel:not([hidden]),#app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+  left:var(--dj-left-dock-x)!important;right:auto!important;
+  top:var(--dj-rail-top)!important;
+  transform:none!important;
+ }
+ /* Right-side map buttons begin just under the search rather than drifting mid-map. */
+ #app .map-actions{top:calc(92px + env(safe-area-inset-top))!important;
+  bottom:auto!important;right:16px!important;left:auto!important;
+  display:flex!important;flex-direction:column!important;gap:8px!important;}
+ /* Match the height of weather, theme and version chips to the search box. */
+ #app .topbar>.header-tools{flex:0 0 auto!important;width:auto!important;max-width:none!important;
+  min-width:0!important;height:var(--dj-search-h)!important;gap:9px!important;}
+ #app .topbar .header-tools .weather-widget{
+  position:static!important;box-sizing:border-box!important;height:var(--dj-search-h)!important;
+  min-height:var(--dj-search-h)!important;max-height:var(--dj-search-h)!important;
+  display:flex!important;align-items:center!important;gap:6px!important;
+ }
+ #app .topbar .header-tools>.theme-toggle,#app .topbar .header-tools>.version-history-trigger{
+  height:var(--dj-search-h)!important;min-height:var(--dj-search-h)!important;
+  max-height:var(--dj-search-h)!important;align-self:center!important;
+  box-sizing:border-box!important;
+ }
+}
+/* Phones retain the floating weather chip position; only align panel widths. */
+@media(max-width:1079px){
+ #app .map-actions{right:12px!important;left:auto!important;}
+ #app .sheet.overview-sheet:not([hidden]),#app .page-panel:not([hidden]),
+ #app.map-controls-open #map-advanced-controls,#app.map-safety-open #map-safety-controls,
+ #app #night-visibility-float:not([hidden]):not(.dj-float-user-positioned){
+  box-sizing:border-box!important;max-width:calc(100vw - 24px)!important;
+ }
+}

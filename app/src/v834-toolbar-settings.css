@@ -1,0 +1,62 @@
+/* v8.2.15: one visible toggle per More feature; no duplicate pin/editor. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > :is(.dj832-feature,.dj832-native).dj832-expanded{
+   box-sizing:border-box!important;flex:0 0 var(--dj833-expanded-width,94px)!important;
+   width:var(--dj833-expanded-width,94px)!important;
+   min-width:var(--dj833-expanded-width,94px)!important;
+   max-width:var(--dj833-expanded-width,94px)!important;
+   padding:0 8px!important;gap:5px!important;justify-content:flex-start!important;
+ }
+ html body #app#app#app#app#app#app #dj-v794-toolbar .dj831-scrollport > .dj832-feature.dj832-expanded .dj832-feature-label{
+   max-width:calc(var(--dj833-expanded-width,94px) - 50px)!important;
+   text-overflow:clip!important;
+ }
+ html body #app#app#app#app#app#app #dj-v794-toolbar .dj831-scrollport > .dj832-native.dj832-expanded::after{
+   max-width:calc(var(--dj833-expanded-width,94px) - 45px)!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-status{
+   font-size:11px!important;line-height:1.5!important;color:var(--dj800-muted,#71877d)!important;
+   margin:1px 4px 6px!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-feature-group{
+   display:flex!important;flex-direction:column!important;gap:3px!important;
+   border-top:1px solid var(--dj800-border,#dce9e0)!important;
+   padding-top:8px!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-feature-line{
+   display:grid!important;grid-template-columns:minmax(0,1fr) 96px!important;
+   align-items:center!important;gap:5px!important;min-height:46px!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-feature-line>.dj832-more-feature{
+   min-width:0!important;max-width:none!important;min-height:42px!important;
+   font-size:12px!important;font-weight:560!important;text-align:left!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch{
+   display:flex!important;align-items:center!important;justify-content:flex-end!important;
+   width:96px!important;min-width:0!important;gap:5px!important;
+   font-size:10px!important;font-weight:560!important;color:var(--dj800-muted,#687e74)!important;
+   white-space:nowrap!important;cursor:pointer!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input{
+   appearance:none!important;-webkit-appearance:none!important;display:block!important;
+   position:relative!important;width:34px!important;height:21px!important;min-width:34px!important;max-width:34px!important;
+   padding:0!important;margin:0!important;border-radius:999px!important;outline-offset:3px!important;
+   border:1px solid var(--dj800-border,#bacfc4)!important;background:#a9b8b0!important;
+   transition:background-color .2s,border-color .2s!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input::after{
+   content:'';display:block!important;position:absolute;left:2px;top:2px;width:15px;height:15px;
+   background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;
+   transition:transform .2s!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input:checked{
+   background:var(--dj800-accent,#148b72)!important;border-color:var(--dj800-accent,#148b72)!important;
+ }
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input:checked::after{transform:translateX(13px)!important}
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj833-more-edit,
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj833-pin{display:none!important}
+}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input,
+ html body #app#app#app#app#app#app #dj-mobile-utilities .dj834-shortcut-switch input::after{transition:none!important}
+}

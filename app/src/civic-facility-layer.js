@@ -1,0 +1,135 @@
+import {openPlaceDetails} from './place-details.js';
+import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
+import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
+/** Dongjak schools, civic offices and recreation facilities from the map's
+ * already downloaded OpenMapTiles 'poi' vector source. No second API request.
+ * These points are only rendered inside the verified district polygon. */
+
+export const CIVIC_POI_TYPES=Object.freeze({
+  school:['school'],
+  civic:['town_hall','police','fire_station','post','library'],
+  sports:['stadium','swimming','sports_centre','fitness_centre']
+});
+
+const colors={school:'#3f7a70',civic:'#4f718a',sports:'#986e3e'};
+const sourceClasses=['school','town_hall','police','fire_station','post','library','stadium','swimming','sports_centre','fitness_centre'];
+const featuredNames=['동작구청','국립서울현충원','중앙대학교','숭실대학교','총신대학교'];
+const placeDisplayName=['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''];
+const notFeatured=['!', ['any',['in',placeDisplayName,['literal',featuredNames]],
+  ['==',['slice',placeDisplayName,0,4],'동작구청']]];
+const civicClassFilter=type=>{
+ const matches=values=>['any',['in',['get','class'],['literal',values]],['in',['get','subclass'],['literal',values]]];
+ if(type==='hospital')return matches(['hospital','clinic','doctor','doctors']);
+ if(type==='pharmacy')return matches(['pharmacy']);
+ if(type==='police')return matches(['police']);
+ if(type==='fire')return matches(['fire_station']);
+  if(type==='school')return ['all',['==',['get','class'],'school'],['!=',['get','subclass'],'kindergarten']];
+  if(type==='civic')return ['any',
+    ['in',['get','class'],['literal',CIVIC_POI_TYPES.civic.filter(x=>!['police','fire_station'].includes(x))]],
+    ['==',['get','subclass'],'government'],['==',['get','subclass'],'public_building']];
+  return ['any',
+    ['in',['get','class'],['literal',CIVIC_POI_TYPES.sports]],
+    ['in',['get','subclass'],['literal',['sports_centre','swimming_pool','fitness_centre','sports_hall']]]];
+};
+export const civicFilter=(type,boundary)=>['all',civicClassFilter(type),notFeatured,['within',boundary],
+  ['!=',['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''],'']];
+
+function buildIcon(type){
+  const size=64,canvas=document.createElement('canvas');canvas.width=size;canvas.height=size;
+  const ctx=canvas.getContext('2d');if(!ctx)return null;
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(32,32,28,0,2*Math.PI);ctx.fill();
+  ctx.fillStyle=colors[type];ctx.beginPath();ctx.arc(32,32,25,0,2*Math.PI);ctx.fill();
+  ctx.strokeStyle='#fff';ctx.fillStyle='#fff';ctx.lineWidth=3.4;ctx.lineCap='round';ctx.lineJoin='round';
+  if(type==='school'){
+    // Open-book pictogram, not the previous house-shaped school/roof icon.
+    ctx.beginPath();ctx.moveTo(31,21);ctx.quadraticCurveTo(23,17,17,23);
+    ctx.lineTo(17,43);ctx.quadraticCurveTo(23,38,31,43);ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(33,21);ctx.quadraticCurveTo(41,17,47,23);
+    ctx.lineTo(47,43);ctx.quadraticCurveTo(41,38,33,43);ctx.closePath();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(32,21);ctx.lineTo(32,45);ctx.stroke();
+  }else if(type==='civic'){
+    ctx.beginPath();ctx.moveTo(16,27);ctx.lineTo(32,18);ctx.lineTo(48,27);ctx.closePath();ctx.fill();
+    ctx.fillRect(17,44,30,4);ctx.fillRect(19,29,5,14);ctx.fillRect(29,29,5,14);ctx.fillRect(40,29,5,14);
+  }else{
+    ctx.fillRect(17,29,6,13);ctx.fillRect(41,29,6,13);ctx.fillRect(23,33,18,5);
+    ctx.fillRect(13,26,4,19);ctx.fillRect(47,26,4,19);
+  }
+  return {width:size,height:size,data:ctx.getImageData(0,0,size,size).data};
+}
+function escapeName(feature){return String(feature?.properties?.['name:ko']||feature?.properties?.['name:nonlatin']||feature?.properties?.name||'').trim();}
+export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={}){
+  if(!map?.getStyle||!boundaryGeometry)return {ok:false,reason:'boundary-unavailable'};
+  // Sidecar: keep the protected map engine byte-identical. The official layer is independent.
+  installSeoulOfficialFacilities({map,maplibregl,getBoundary:()=>boundaryGeometry,app});
+  const base=map.getStyle().layers.find(layer=>layer.source&&layer['source-layer']==='poi');
+  if(!base)return {ok:false,reason:'poi-vector-source-unavailable'};
+  const source=base.source;
+  // Keep a single school/civic/sports label system; suppress matching native POI
+  // symbols without altering the underlying vector data or transit POIs.
+  const types=['hospital','pharmacy','police','fire','school','civic','sports'];
+  registerFacilityIcons(map);
+  const hidden=[...Object.values(CIVIC_POI_TYPES).flat(),'hospital','clinic','doctor','doctors','pharmacy','restaurant','cafe','fast_food','food','convenience','supermarket','bakery'];
+  for(const native of map.getStyle().layers){
+    if(native.type!=='symbol'||native.source!==source||native['source-layer']!=='poi'||native.id.startsWith('dj-'))continue;
+    try{
+      const original=map.getFilter(native.id);
+      const exclude=['!', ['any',['in',['get','class'],['literal',hidden]],['in',['get','subclass'],['literal',hidden]]]];
+      map.setFilter(native.id,original?['all',original,exclude,notFeatured]:['all',exclude,notFeatured]);
+    }catch(error){console.info('[기본 POI 중복 제거] 레이어별 적용 제외',native.id,error?.message);}
+  }
+  for(const type of types){
+    const iconId=iconName(type);
+    const safety=['hospital','pharmacy','police','fire'].includes(type);
+    const layerId=`dj-civic-poi-${type}`;
+    if(map.getLayer(layerId))continue;
+    try{
+      const isSchool=type==='school';
+      map.addLayer({id:layerId,type:'symbol',source,'source-layer':'poi',
+        minzoom:safety?13.5:isSchool?14.8:14.2,
+        filter:civicFilter(type,boundaryGeometry),
+        layout:{
+          'icon-image':iconId,
+          'icon-size':['interpolate',['linear'],['zoom'],14.3,.65,16,.78,18,.90],
+          'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
+          'icon-optional':false,
+          'text-field':['step',['zoom'],'',safety?15.5:16.2,['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],'']],
+          'text-font':['Noto Sans Regular','Open Sans Regular'],
+          'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
+          'text-anchor':'top','text-offset':[0,1.8],'text-max-width':15,
+          'text-optional':true,'text-allow-overlap':false,'text-padding':3,'symbol-sort-key':safety?0:isSchool?4:3
+        },paint:{'text-color':['case',['==',['get','class'],'school'], '#315f54','#34566c'],
+          'text-halo-color':'#ffffff','text-halo-width':1.7}});
+      map.on('click',layerId,event=>{
+        const feat=event.features?.[0];if(!feat||!maplibregl?.Popup)return;
+        const name=escapeName(feat);if(!name)return;
+        const tags=feat.properties||{};
+        const coords=feat.geometry?.type==='Point'?feat.geometry.coordinates:null;
+        const placePosition=Array.isArray(coords)&&coords.length>=2&&coords.every(Number.isFinite)
+          ?{lng:coords[0],lat:coords[1]}:{lng:event.lngLat.lng,lat:event.lngLat.lat};
+        openPlaceDetails({map,maplibregl,lngLat:event.lngLat,place:{...placePosition,
+          name,type:({hospital:'병원',pharmacy:'약국',police:'경찰서',fire:'소방서',school:'학교',civic:'공공기관',sports:'체육시설'})[type],
+          address:tags['addr:full']||tags.address||'',
+          phone:tags['contact:phone']||tags.phone||'',
+          website:tags.website||tags['contact:website']||'',
+          source:'OpenMapTiles / © OpenStreetMap 기여자'
+        }});
+      });
+      map.on('mouseenter',layerId,()=>{map.getCanvas().style.cursor='pointer';});
+      map.on('mouseleave',layerId,()=>{map.getCanvas().style.cursor='';});
+    }catch(error){console.warn('[시설 POI 레이어]',type,error?.message||error);}
+  }
+  const recolor=()=>{
+    const dark=app?.dataset?.theme==='dark';
+    for(const type of types){
+      const layerId=`dj-civic-poi-${type}`;
+      if(map.getLayer(layerId))try{
+        map.setPaintProperty(layerId,'text-color',dark?'#e0f0eb':'#315f54');
+        map.setPaintProperty(layerId,'text-halo-color',dark?'#172d31':'#ffffff');
+      }catch{}
+    }
+  };
+  document.getElementById('theme-toggle')?.addEventListener('click',()=>requestAnimationFrame(recolor));
+  const syncGroups=()=>{const groups=new Set((app?.dataset?.dj912PoiGroups??DEFAULT_POI_GROUPS.join(',')).split(','));for(const type of types){const layerId='dj-civic-poi-'+type;const group=['hospital','pharmacy','police','fire'].includes(type)?'safety':'public';if(map.getLayer(layerId))map.setLayoutProperty(layerId,'visibility',groups.has(group)?'visible':'none');}};
+  app?.addEventListener('dongjak:poi-groups',syncGroups);syncGroups();recolor();
+  return {ok:true,layers:types.map(type=>`dj-civic-poi-${type}`)};
+}

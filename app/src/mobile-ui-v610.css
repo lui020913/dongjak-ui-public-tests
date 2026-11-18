@@ -1,0 +1,131 @@
+/* v6.1.0: single FINAL mobile override (loaded after the legacy stylesheet stack).
+   Header and search must never be painted through any blur / fog overlay. */
+@media (max-width: 1079px) {
+  #app .topbar, #app[data-theme="dark"] .topbar {
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    filter:none!important;isolation:isolate!important;opacity:1!important;
+    background:var(--dj-ui-bg,#fafffc)!important;
+  }
+  #app[data-theme="dark"] .topbar {
+    background:var(--dj-ui-bg,#192d31)!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+    background:var(--dj-ui-field,#20383d)!important;
+  }
+  #app .topbar>.map-quick-search,
+  #app .topbar>.map-quick-search .map-quick-search-form,
+  #app .topbar>.map-quick-search .map-quick-search-form input {
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    filter:none!important;opacity:1!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background:var(--dj-ui-field,#f4f8f6)!important;
+    box-shadow:none!important;
+  }
+  /* The CSS haze began immediately below the search and looked like a blurred
+     rectangular patch. Keep MapLibre horizon fog, remove the screen mask on phones. */
+  #app #map.dj-far-haze-active::before{display:none!important;content:none!important;}
+  #app[data-tab="map"].map-controls-open .map-advanced-controls,
+  #app[data-tab="map"].map-safety-open #map-safety-controls{
+    max-height:min(67dvh,calc(var(--dj-visible-vh,100dvh) - var(--dj-header-h,72px) - var(--dj-mobile-nav-h,66px) - 10px))!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+  }
+  /* Do not show two modal sheets or a nighttime report underneath the active sheet. */
+  #app[data-tab="map"].map-controls-open :is(#map-safety-controls,#map-safety-backdrop,#night-visibility-float,
+    #road-width-legend,.road-width-legend,.sheet.overview-sheet,#transport-sheet,#map-gesture-guide),
+  #app[data-tab="map"].map-safety-open :is(.map-advanced-controls,#map-options-backdrop,#night-visibility-float,
+    #road-width-legend,.road-width-legend,.sheet.overview-sheet,#transport-sheet,#map-gesture-guide){
+    display:none!important;pointer-events:none!important;
+  }
+  #app[data-tab="map"] #night-visibility-float:not([hidden]){
+    max-height:min(55dvh,calc(var(--dj-visible-vh,100dvh) - var(--dj-header-h,72px) - var(--dj-mobile-nav-h,66px) - 10px))!important;
+  }
+  #app[data-tab="map"] #bottom-nav {z-index:2400!important;}
+  #app[data-tab="map"] .topbar {z-index:2410!important;}
+  #app #map-quick-search-results{max-width:100%;overflow-x:hidden;}
+}
+@media (max-width: 700px){
+  #app[data-tab="map"] .topbar>.map-quick-search {min-width:0!important;max-width:100%!important;}
+  #app[data-tab="map"] .topbar>.map-quick-search .map-quick-search-form{width:100%;box-sizing:border-box;}
+  #app[data-tab="map"] #night-visibility-float:not([hidden]){left:8px!important;right:8px!important;bottom:calc(var(--dj-mobile-nav-h,66px) + 6px)!important;}
+}
+
+/* Version summary is a compact categorized overview, not duplicated release entries. */
+.version-feature-categories{padding:12px 0;border-bottom:1px solid var(--dj-ui-border,#dce9e4)}
+.version-feature-categories h3{margin:0 0 10px;font-size:14px}
+.version-feature-categories ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;list-style:none;padding:0;margin:0}
+.version-feature-categories li{display:grid;gap:4px;min-width:0;padding:9px;border:1px solid var(--dj-ui-border,#dce9e4);border-radius:10px}
+.version-feature-categories li strong{font-size:12px}
+.version-feature-categories li span{font-size:11px;line-height:1.45;overflow-wrap:anywhere;color:var(--dj-ui-muted,#667e74)}
+@media(max-width:480px){.version-feature-categories ul{grid-template-columns:1fr}}
+
+/* v6.1.1 · 2026-11-10: iOS/mobile upper-screen clarity hotfix.
+   A map edge vignette and tilted-map screen scrim must NEVER wash over the
+   header or the map. This is deliberately the last rule in the stylesheet. */
+@media (max-width: 1079px) {
+  /* Hide BOTH old pseudo-element overlays, not just the tilted-map variant.
+     Native MapLibre fog remains untouched. */
+  #app #map::before,
+  #app #map::after,
+  #app[data-theme="dark"] #map::before,
+  #app[data-theme="dark"] #map::after {
+    content:none!important;
+    display:none!important;
+    opacity:0!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+  /* One solid header surface across iOS safe-area and app search row. */
+  #app .topbar,
+  #app[data-theme="dark"] .topbar {
+    background:var(--dj-ui-bg,#fff)!important;
+    background-image:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+    filter:none!important;
+    opacity:1!important;
+    box-shadow:none!important;
+  }
+  #app .topbar::before,
+  #app .topbar::after {content:none!important;display:none!important;}
+  #app .topbar>.map-quick-search,
+  #app .topbar>.map-quick-search .map-quick-search-form,
+  #app .topbar>.map-quick-search .map-quick-search-form input {
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+    filter:none!important;
+    opacity:1!important;
+    text-shadow:none!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form {
+    background:var(--dj-ui-field,#f6faf8)!important;
+    background-image:none!important;
+    border:1px solid #bdcdc6!important;
+    box-shadow:none!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form {
+    background:var(--dj-ui-field,#233a40)!important;
+    border-color:#647d7c!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form input,
+  #app .topbar>.map-quick-search .map-quick-search-form input::placeholder {
+    color:#45665c!important;
+    opacity:1!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form input:not(:placeholder-shown),
+  #app .topbar>.map-quick-search .map-quick-search-form input:focus {
+    color:var(--dj-ui-text,#19392f)!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form input::placeholder {
+    color:#c3d7d2!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form input {
+    color:var(--dj-ui-text,#ebf5ef)!important;
+  }
+}

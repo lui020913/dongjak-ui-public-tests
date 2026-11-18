@@ -1,0 +1,162 @@
+/* v7.0.1 - Mobile transit, map chrome, and consistent controls.
+   LAST import: overrides the v613/v614 one-column metro regression.
+   Does not modify MapLibre map, markers or API responses. */
+@media(max-width:699px){
+  /* Route direction has priority over large cards: two compact columns. */
+  #app #transport-sheet[data-kind="subway"] .metro-direction-grid,
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-direction-grid,
+  #app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-direction-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group{
+    min-width:0!important;margin:0!important;align-self:stretch!important;
+    border-radius:14px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-direction-heading{
+    min-height:38px!important;padding:7px 9px!important;gap:6px!important;
+    font-size:12px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-direction-arrow{
+    flex:0 0 23px!important;width:23px!important;height:23px!important;font-size:13px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;justify-content:space-between!important;
+    min-height:88px!important;gap:5px!important;
+    padding:9px 9px 10px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-detail strong{
+    font-size:12px!important;line-height:1.32!important;
+    overflow-wrap:anywhere!important;word-break:keep-all!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-route{
+    font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-time-block{
+    display:flex!important;align-items:flex-end!important;justify-content:center!important;
+    text-align:right!important;margin-top:auto!important;min-width:0!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-countdown{
+    font-size:clamp(12px,3.4vw,16px)!important;
+    line-height:1.35!important;overflow-wrap:anywhere!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-planned-time-meta,
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-position{font-size:10px!important;line-height:1.35!important;}
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-arrival-direction-group .transport-arrival-row{
+    min-height:70px!important;padding:8px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-arrival-time-block{
+    align-items:flex-start!important;text-align:left!important;
+  }
+  /* A map-tool launch button must never appear above an opened station sheet. */
+  #app.transport-sheet-open :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off),
+  #app:has(#transport-sheet:not([hidden])) :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off){
+    visibility:hidden!important;pointer-events:none!important;
+  }
+  /* The top search must be opaque and sharp, including the upper border on iOS. */
+  #app .topbar,#app[data-theme="dark"] .topbar{
+    background:#ffffff!important;background-image:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    -webkit-mask-image:none!important;mask-image:none!important;
+    opacity:1!important;filter:none!important;
+    border-bottom:1px solid #dce8e3!important;
+  }
+  #app[data-theme="dark"] .topbar{background:#192d31!important;border-bottom-color:#435e5f!important;}
+  #app .topbar>.map-quick-search,
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background-image:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    filter:none!important;opacity:1!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background:#fff!important;border:1px solid #bdcfc8!important;
+    border-radius:12px!important;box-shadow:none!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+    background:#223a40!important;border-color:#557574!important;
+  }
+  #app .topbar .map-quick-search-submit{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border-radius:9px!important;background:#118874!important;
+    box-shadow:none!important;
+  }
+  #app .topbar .map-quick-search-submit::after{
+    content:""!important;display:block!important;flex:0 0 18px!important;
+    width:18px!important;height:18px!important;
+    background:center/contain no-repeat url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"%3E%3Ccircle cx="10.5" cy="10.5" r="6"/%3E%3Cpath d="m15 15 5 5"/%3E%3C/svg%3E')!important;
+  }
+  #app .topbar .map-quick-search-form input{
+    font-size:13px!important;line-height:1.35!important;letter-spacing:-.15px!important;
+  }
+}
+/* 9호선: direction cards remain two columns; each direction independently
+   separates only confirmed 일반 / 급행 / unknown service types. */
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading{
+  font-size:11px;font-weight:800;line-height:1.3;
+  color:#476078;background:#f1f6fa;
+  padding:7px 10px;border-top:1px solid #e1eaf0;
+}
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  background:#fff4df;color:#8c5810;border-color:#f0dfbd;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading{
+  background:#29404b;color:#d3e8ed;border-color:#3d5661;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  background:#483b29;color:#f4d399;border-color:#766041;
+}
+/* Make the secondary '계획 시간표' banner disappear; source is kept on cards. */
+#app #transport-sheet[data-kind="subway"] .metro-scheduled-banner{display:none!important;}
+/* Unified map-action visual rhythm. Text labels are controlled by JS. */
+#app #map-tools-toggle,#app #map-safety-toggle,#app #night-visibility-quick-off{
+  align-items:center!important;justify-content:center!important;
+  gap:7px!important;font-size:12px!important;
+  line-height:1.2!important;letter-spacing:-.22px!important;
+  font-weight:750!important;white-space:nowrap!important;
+  padding:7px 8px!important;
+}
+#app #map-tools-toggle::before,#app #map-safety-toggle::before{
+  content:""!important;display:inline-block!important;flex:0 0 16px!important;
+  width:16px!important;height:16px!important;
+  background-color:currentColor!important;
+  -webkit-mask-repeat:no-repeat!important;mask-repeat:no-repeat!important;
+  -webkit-mask-size:contain!important;mask-size:contain!important;
+}
+#app #map-tools-toggle::before{
+  -webkit-mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M4 6h16M4 12h16M4 18h16"/%3E%3Cpath d="M8 4v4M16 10v4M10 16v4"/%3E%3C/svg%3E')!important;
+  mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M4 6h16M4 12h16M4 18h16"/%3E%3Cpath d="M8 4v4M16 10v4M10 16v4"/%3E%3C/svg%3E')!important;
+}
+#app #map-safety-toggle::before{
+  -webkit-mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M12 2 4 5v6c0 5.1 3.5 8.7 8 11 4.5-2.3 8-5.9 8-11V5l-8-3Z"/%3E%3Cpath d="m8.5 11.8 2.2 2.2 4.7-4.7"/%3E%3C/svg%3E')!important;
+  mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M12 2 4 5v6c0 5.1 3.5 8.7 8 11 4.5-2.3 8-5.9 8-11V5l-8-3Z"/%3E%3Cpath d="m8.5 11.8 2.2 2.2 4.7-4.7"/%3E%3C/svg%3E')!important;
+}
+/* Consistent bottom navigation size and text spacing. */
+@media(max-width:1079px){
+  #app #bottom-nav .nav-tab{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:5px!important;
+    padding:6px 2px!important;line-height:1.22!important;
+    font-weight:720!important;letter-spacing:-.25px!important;
+  }
+  #app #bottom-nav .nav-tab .nav-icon{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    font-size:19px!important;line-height:1!important;
+    width:24px!important;height:24px!important;
+  }
+  #app .topbar .theme-toggle{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border:1px solid #c9d9d2!important;border-radius:11px!important;
+    box-shadow:none!important;line-height:1!important;
+  }
+  #app .topbar .theme-toggle::after{font-size:18px!important;line-height:1!important;}
+  #app[data-theme="dark"] .topbar .theme-toggle{border-color:#4a6968!important;}
+}
+@media(max-width:699px){
+  #app #map-tools-toggle,#app #map-safety-toggle,#app #night-visibility-quick-off{
+    width:112px!important;min-width:112px!important;max-width:112px!important;
+    height:44px!important;min-height:44px!important;max-height:44px!important;
+  }
+}

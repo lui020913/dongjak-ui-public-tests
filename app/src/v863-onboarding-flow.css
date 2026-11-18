@@ -1,0 +1,161 @@
+/* v8.6.3 — guest onboarding flow, compact guide cards and isolated map TIP marquee. */
+#app .dj860-onboarding {
+  touch-action:pan-y!important;
+}
+#app .dj860-onboarding .dj860-visual-pane {
+  touch-action:pan-y!important;
+}
+
+@media(max-width:699px){
+  /* The onboarding is a true full-viewport surface on phones, not a small card. */
+  html body #app#app#app .dj860-onboarding {
+    position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+    padding:0!important;place-items:stretch!important;overflow:hidden!important;
+  }
+  html body #app#app#app .dj860-card {
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:calc(56px + env(safe-area-inset-top,0px)) minmax(190px,34dvh) minmax(0,1fr) auto!important;
+    width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:100dvh!important;
+    border:0!important;border-radius:0!important;overflow:hidden!important;
+  }
+  html body #app#app#app .dj860-head {
+    grid-column:1!important;min-height:calc(56px + env(safe-area-inset-top,0px))!important;
+    justify-content:flex-end!important;padding:env(safe-area-inset-top,0px) 20px 0!important;
+  }
+  html body #app#app#app .dj860-skip {
+    min-height:40px!important;padding:8px 15px!important;font-size:13px!important;
+  }
+  html body #app#app#app .dj860-visual-pane {
+    grid-column:1!important;min-height:0!important;padding:12px 18px 15px!important;
+    touch-action:pan-y!important;
+  }
+  html body #app#app#app .dj860-visual {border-radius:20px!important;}
+  html body #app#app#app .dj860-content {
+    grid-column:1!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;
+    padding:22px 24px 17px!important;align-items:flex-start!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  }
+  html body #app#app#app .dj860-copy {max-width:620px!important;margin:auto!important;}
+  html body #app#app#app .dj860-copy h1 {
+    margin:0 0 12px!important;font-size:clamp(27px,7.2vw,35px)!important;line-height:1.22!important;
+  }
+  html body #app#app#app .dj860-description {font-size:15px!important;line-height:1.7!important;}
+  html body #app#app#app .dj860-points {gap:9px!important;margin-top:18px!important;}
+  html body #app#app#app .dj860-points li {gap:9px!important;font-size:13.5px!important;line-height:1.58!important;}
+  html body #app#app#app .dj860-points li>span:first-child {
+    width:20px!important;height:20px!important;font-size:12px!important;
+  }
+  html body #app#app#app .dj860-note {
+    margin-top:16px!important;padding:10px 13px!important;font-size:12.5px!important;line-height:1.55!important;
+  }
+  html body #app#app#app .dj860-account-link {margin-top:14px!important;font-size:13px!important;}
+  html body #app#app#app .dj860-footer {
+    grid-column:1!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;
+    padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app .dj860-progress-label,
+  html body #app#app#app .dj860-count {font-size:12px!important;}
+  html body #app#app#app .dj860-progress-track {height:4px!important;}
+  html body #app#app#app .dj860-dots {gap:7px!important;}
+  html body #app#app#app .dj860-dot {width:8px!important;height:8px!important;min-width:8px!important;min-height:8px!important;}
+  html body #app#app#app .dj860-dot.is-active {width:23px!important;}
+  html body #app#app#app .dj860-actions {
+    display:flex!important;justify-content:flex-start!important;gap:8px!important;
+  }
+  html body #app#app#app .dj860-actions button {
+    width:auto!important;min-width:84px!important;min-height:48px!important;
+    padding:12px 20px!important;font-size:15px!important;border-radius:16px!important;
+  }
+  html body #app#app#app .dj860-actions .dj860-next {min-width:104px!important;}
+}
+@media(max-width:370px){
+  html body #app#app#app .dj860-card {
+    grid-template-rows:calc(54px + env(safe-area-inset-top,0px)) minmax(170px,30dvh) minmax(0,1fr) auto!important;
+  }
+  html body #app#app#app .dj860-content {padding:17px 19px 12px!important;}
+  html body #app#app#app .dj860-copy h1 {font-size:25px!important;}
+  html body #app#app#app .dj860-description {font-size:14px!important;}
+  html body #app#app#app .dj860-points li {font-size:13px!important;}
+}
+
+/* iPhone install and map tips share one compact accordion surface and chevron. */
+html body #app#app#app #map-gesture-guide #dj841-guide-tips,
+html body #app#app#app #map-gesture-guide details.dj803-ios-install-help {
+  box-sizing:border-box!important;margin:6px 0!important;padding:4px 10px!important;
+  border:1px solid var(--dj800-border,#d9e7df)!important;border-radius:14px!important;
+  background:var(--dj800-elevated,#f2f8f4)!important;overflow:hidden!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips .dj852-tip-toggle,
+html body #app#app#app #map-gesture-guide details.dj803-ios-install-help>summary {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  width:100%!important;min-height:38px!important;margin:0!important;padding:2px 0!important;
+  gap:10px!important;font-size:13.5px!important;line-height:1.35!important;
+  font-weight:800!important;list-style:none!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips .dj852-tip-chevron,
+html body #app#app#app #map-gesture-guide .dj803-ios-install-help>summary .dj852-tip-chevron {
+  display:grid!important;place-items:center!important;flex:0 0 24px!important;
+  width:24px!important;height:24px!important;margin:0!important;padding:0!important;
+  font-size:22px!important;font-weight:750!important;line-height:1!important;
+  transform:translateY(1px)!important;transition:transform .18s ease!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips.is-collapsed .dj852-tip-chevron {
+  transform:translateY(1px) rotate(0deg)!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips:not(.is-collapsed) .dj852-tip-chevron,
+html body #app#app#app #map-gesture-guide details.dj803-ios-install-help[open]>summary .dj852-tip-chevron {
+  transform:translateY(1px) rotate(180deg)!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips ul {
+  margin:5px 0 1px!important;padding:0 0 0 18px!important;gap:5px!important;
+}
+html body #app#app#app #map-gesture-guide #dj841-guide-tips ul li {
+  font-size:12.5px!important;line-height:1.48!important;
+}
+html body #app#app#app #map-gesture-guide details.dj803-ios-install-help>summary::after {
+  content:none!important;display:none!important;
+}
+html body #app#app#app #map-gesture-guide details.dj803-ios-install-help>summary::-webkit-details-marker {
+  display:none!important;
+}
+html body #app#app#app #map-gesture-guide .dj856-ios-install-caption {
+  margin:0 0 5px!important;font-size:11px!important;
+}
+html body #app#app#app #map-gesture-guide .dj856-ios-install-steps {
+  gap:6px!important;padding:0 0 7px!important;
+}
+html body #app#app#app #map-gesture-guide .dj856-ios-install-steps>div {
+  font-size:12.5px!important;line-height:1.45!important;
+}
+/* Keep the TIP label fixed; only the sentence moves inside a padded clipping lane. */
+@media(max-width:699px){
+  html body #app#app#app#app #dj840-map-tip:not([hidden]) {
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    gap:8px!important;padding:7px 12px!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app #dj840-map-tip>strong {
+    display:block!important;position:relative!important;z-index:2!important;
+    flex:0 0 auto!important;margin:0!important;white-space:nowrap!important;
+  }
+  html body #app#app#app#app #dj840-map-tip .dj840-tip-copy-viewport {
+    display:block!important;position:relative!important;flex:1 1 auto!important;
+    width:auto!important;min-width:0!important;max-width:100%!important;height:100%!important;
+    box-sizing:border-box!important;margin:0 5px 0 0!important;padding:0 6px!important;
+    overflow:hidden!important;white-space:nowrap!important;animation:none!important;transform:none!important;
+  }
+  html body #app#app#app#app #dj840-map-tip .dj840-tip-copy {
+    display:block!important;position:relative!important;flex:0 0 auto!important;
+    width:max-content!important;min-width:0!important;max-width:none!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+    white-space:nowrap!important;text-overflow:clip!important;
+    transition:opacity .18s ease!important;will-change:transform;
+  }
+  html body #app#app#app#app #dj840-map-tip.dj854-tip-marquee .dj840-tip-copy {
+    animation:dj854-tip-marquee var(--dj854-tip-duration,9s) ease-in-out infinite alternate!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #app .dj860-onboarding,#app .dj860-onboarding * {scroll-behavior:auto!important;}
+  #app #map-gesture-guide .dj852-tip-chevron {transition:none!important;}
+}

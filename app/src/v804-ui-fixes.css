@@ -1,0 +1,143 @@
+/* UI corrective layer, loaded last. Based on the user-provided v8.0.3 ZIP.
+   Desktop rules and mobile rules are deliberately separated. */
+:root {color-scheme:light;}
+html[data-theme="dark"] {color-scheme:dark;}
+html,body {overscroll-behavior:none;}
+html body #app#app .dj-about-description{
+  max-width:min(335px,100%)!important;
+  text-wrap:balance!important;overflow-wrap:break-word!important;
+  word-break:keep-all!important;line-height:1.65!important;
+}
+/* Avoid title/badge competing for a single horizontal row. */
+html body #app#app #transport-sheet[data-kind="subway"] #transport-title{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:center!important;gap:7px!important;min-width:0!important;
+  text-align:center!important;
+}
+html body #app#app #transport-title .dj804-station-name{display:block!important;max-width:100%!important;word-break:keep-all!important;}
+html body #app#app #transport-title .dj804-station-lines{
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  flex-wrap:wrap!important;gap:6px!important;
+}
+/* Bus stop title: center in the FULL panel width, not only the space left by X. */
+html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head{position:relative!important;}
+html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head>div{
+  width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  padding-inline:38px!important;
+}
+html body #app#app #transport-sheet[data-kind="bus"] #transport-title{
+  display:block!important;width:100%!important;text-align:center!important;
+  margin-inline:auto!important;word-break:keep-all!important;
+}
+html body #app#app #transport-sheet[data-kind="bus"] #transport-close{
+  position:absolute!important;top:8px!important;right:0!important;left:auto!important;
+}
+/* Data tables stay visible; the underlined explanatory paragraphs go away
+   on ALL bus stops, and only bus stops. */
+html body #app#app #transport-sheet[data-kind="bus"] #transport-hours-heading,
+html body #app#app #transport-sheet[data-kind="bus"] .dj-v723-source-note,
+html body #app#app #transport-sheet[data-kind="bus"] .dj-v724-bus-label,
+html body #app#app #transport-sheet[data-kind="bus"] .transport-hours-disclaimer{display:none!important;}
+/* Preserve errors, missing-data notices, timetable rows and bus route names. */
+
+/* Readable accident/location popup. Keep the real source date + caveat. */
+html body #app#app .maplibregl-popup:has(.safety-popup) .maplibregl-popup-content{
+  border-radius:18px!important;padding:16px 17px!important;
+  background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#244036)!important;
+  border:1px solid var(--dj800-border,#d5e7dc)!important;
+  box-shadow:0 15px 38px rgba(12,48,40,.20)!important;
+}
+html body #app#app .safety-popup{
+  width:min(300px,75vw)!important;max-width:min(300px,75vw)!important;min-width:0!important;
+  color:var(--dj800-text)!important;line-height:1.6!important;font-family:inherit!important;
+}
+html body #app#app .safety-popup strong{display:block!important;color:var(--dj800-text)!important;font-size:16px!important;line-height:1.45!important;margin:0 0 9px!important;font-weight:800!important;}
+html body #app#app .safety-popup p{color:var(--dj800-text)!important;font-size:13px!important;line-height:1.65!important;margin:0 0 10px!important;word-break:keep-all!important;overflow-wrap:break-word!important;}
+html body #app#app .safety-popup small{display:block!important;font-size:11px!important;line-height:1.6!important;color:var(--dj800-muted)!important;padding-top:10px!important;border-top:1px solid var(--dj800-border)!important;word-break:keep-all!important;}
+html body #app#app .maplibregl-popup:has(.safety-popup) .maplibregl-popup-close-button{
+  width:31px!important;height:31px!important;border-radius:10px!important;
+  color:var(--dj800-text)!important;font-size:22px!important;line-height:1!important;
+}
+/* Safety drawer was legible only at its headings, not layer descriptions. */
+html body #app#app #map-safety-controls :is(.dj-feature-copy b,.dj-safety-group-name strong){font-size:15px!important;font-weight:750!important;line-height:1.45!important;}
+html body #app#app #map-safety-controls :is(.dj-feature-copy small,.dj-feature-legend,.dj-safety-overview p,.dj-safety-group-name small,.dj-section-intro small){font-size:12.5px!important;line-height:1.55!important;font-weight:550!important;}
+html body #app#app #map-safety-controls .map-safety-head strong{font-size:20px!important;font-weight:800!important;}
+/* Road width: visible float animation and larger labels, without map state edits. */
+@keyframes dj804-road-open{0%{opacity:0;translate:0 18px;scale:.98}100%{opacity:1;translate:0 0;scale:1}}
+html body #app#app #road-width-legend:not([hidden]){
+  animation:dj804-road-open .32s cubic-bezier(.18,.85,.24,1) both!important;
+  will-change:opacity,translate,scale;
+}
+html body #app#app #road-width-legend .road-width-legend-head strong{font-size:18px!important;line-height:1.4!important;font-weight:800!important;}
+html body #app#app #road-width-legend>div:not(.road-width-legend-head){font-size:15px!important;line-height:1.65!important;}
+html body #app#app #road-width-legend .roadwidth-note,
+html body #app#app #road-width-legend small{font-size:13px!important;line-height:1.55!important;}
+/* Make the safety-map pictogram itself larger, not just its button label. */
+html body #app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon{
+  font-size:29px!important;width:32px!important;height:32px!important;
+  display:grid!important;place-items:center!important;line-height:1!important;
+}
+/* One weight stronger for ordinary labels; don't turn map symbols bold. */
+html body #app#app #bottom-nav>.nav-tab>span:last-child{font-weight:800!important;}
+html body #app#app #transport-sheet :is(.transport-panel-head h2,.transport-section-title strong){font-weight:800!important;}
+html body #app#app #map-advanced-controls :is(button,label){font-weight:700!important;}
+/* PC weather: three separate responsive grid cells; temperature may ellipsize. */
+@media(min-width:700px){
+ html body #app#app .topbar .header-tools #weather-widget{
+   display:grid!important;grid-template-columns:max-content minmax(0,1fr) max-content!important;
+   align-items:center!important;column-gap:8px!important;min-width:0!important;
+   max-width:300px!important;box-sizing:border-box!important;
+ }
+ html body #app#app #weather-widget #weather-title{white-space:nowrap!important;min-width:0!important;}
+ html body #app#app #weather-widget #weather-label{
+   display:block!important;min-width:0!important;width:100%!important;
+   max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;
+   white-space:nowrap!important;margin:0!important;padding:0!important;
+ }
+ html body #app#app #weather-widget #weather-my-location{
+   flex:none!important;min-width:max-content!important;white-space:nowrap!important;
+   padding:6px 9px!important;margin:0!important;
+ }
+}
+@media(min-width:1080px){
+ /* Do not stretch short transport panels down to bottom of the screen. */
+ html body #app#app #transport-sheet:not([hidden]){
+   height:max-content!important;bottom:auto!important;min-height:0!important;
+   max-height:calc(100dvh - var(--dj800-panel-top,92px) - 16px)!important;
+   overflow-y:auto!important;
+ }
+}
+@media(max-width:699px){
+ /* All mobile UI text becomes 1px smaller at its default '기본' setting. */
+ html body #app#app{--dj803-text-delta:-1px!important;--dj-ux-text-delta:-1px;}
+ html body #app#app[data-dj-settings-text="small"]{--dj803-text-delta:-3px!important;--dj-ux-text-delta:-2px;}
+ html body #app#app[data-dj-settings-text="large"]{--dj803-text-delta:2px!important;--dj-ux-text-delta:2px;}
+ html body #app#app :is(.page-panel,.transport-sheet,#overview-sheet,.dj-map-settings-card,.dj-about-card){
+   font-size:calc(13px + var(--dj803-text-delta))!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab>span:last-child{font-size:calc(14px + var(--dj803-text-delta))!important;}
+ html body #app#app #dj-v794-toolbar #dj800-type-trigger .dj800-type-icon{gap:1px!important;letter-spacing:-.055em!important;}
+ html body #app#app #dj800-type-trigger .dj800-type-icon b{letter-spacing:-.12em!important;}
+ html body #app#app #dj800-type-panel .dj800-type-options select{font-size:calc(13px + var(--dj803-text-delta))!important;}
+ html body #app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon{font-size:28px!important;width:30px!important;height:30px!important;}
+ /* Small screen sheets use content height until scrolling is necessary. */
+ html body #app#app #transport-sheet:not([hidden]){
+   height:max-content!important;min-height:0!important;
+   max-height:min(63dvh,570px)!important;overflow-y:auto!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-title{font-size:clamp(18px,calc(22px + var(--dj803-text-delta)),26px)!important;}
+ html body #app#app #road-width-legend>div:not(.road-width-legend-head){font-size:calc(16px + var(--dj803-text-delta))!important;}
+ html body #app#app #road-width-legend .road-width-legend-head strong{font-size:calc(19px + var(--dj803-text-delta))!important;}
+ html body #app#app #map-safety-controls :is(.dj-feature-copy b,.dj-safety-group-name strong){font-size:clamp(12px,calc(15.5px + var(--dj803-text-delta)),18px)!important;}
+ html body #app#app #map-safety-controls :is(.dj-feature-copy small,.dj-feature-legend,.dj-safety-overview p){font-size:clamp(11px,calc(13px + var(--dj803-text-delta)),15px)!important;}
+ html body #app#app .dj-about-description{font-size:clamp(11px,calc(14px + var(--dj803-text-delta)),16px)!important;max-width:100%!important;}
+ /* iOS PWA: no opposite-theme white/black strip between document and map. */
+ html,html body,html body #app#app{background-color:#e5ede8!important;}
+ html[data-theme="dark"],html[data-theme="dark"] body,
+ html[data-theme="dark"] body #app#app{background-color:#14292d!important;}
+ html body #app#app .dj-theme-switch-flash:not([hidden]){background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+}
+@media(prefers-reduced-motion:reduce){
+ html body #app#app #road-width-legend:not([hidden]){animation:none!important;will-change:auto!important;}
+}
+html body #app#app.dj-reduced-animation #road-width-legend:not([hidden]){animation:none!important;will-change:auto!important;}

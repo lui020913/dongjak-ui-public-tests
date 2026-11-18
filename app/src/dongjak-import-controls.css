@@ -1,0 +1,10 @@
+/* Data pack v7.10.3: opt-in controls; follows host light/dark theme. */
+.dj-import-controls{display:flex;flex-direction:column;gap:9px;margin:12px 0 4px;padding:12px;border:1px solid var(--border,rgba(120,140,150,.36));border-radius:12px;background:var(--card,transparent);color:inherit}
+.dj-import-controls>strong{font-size:13px;line-height:1.45}
+.dj-import-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.dj-import-grid button{min-height:37px;max-width:100%;white-space:normal;overflow-wrap:keep-all;word-break:keep-all;padding:7px 5px;border:1px solid rgba(120,140,150,.36);border-radius:9px;background:transparent;color:inherit;font-size:12px;line-height:1.35;cursor:pointer}
+.dj-import-grid button[aria-pressed='true']{border-color:#0e9183;background:rgba(10,150,134,.14);font-weight:700}
+.dj-import-grid button:disabled{opacity:.5;cursor:wait}
+.dj-import-hint,#dj-import-status{font-size:11px;line-height:1.55;overflow-wrap:anywhere;opacity:.85;margin:0}
+
+.route-data-note{font-size:11px;line-height:1.5;color:inherit;opacity:.8;grid-column:1/-1;margin:7px 0 0;overflow-wrap:anywhere}

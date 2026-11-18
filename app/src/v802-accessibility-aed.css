@@ -1,0 +1,21 @@
+/* v8.0.2 · official accessible crossings + AED. Within existing safety drawer. */
+#app .dj-access-facility-controls{margin:1px 0 9px!important;max-width:100%;}
+#app .dj-access-facility-controls .dj-section-intro{margin:0 0 8px;}
+#app .dj-access-facility-controls .dj-feature-copy small{word-break:keep-all;line-height:1.5;}
+#app .dj-access-facility-controls .dj-feature-state{white-space:nowrap;}
+#app .dj-access-facility-controls .dj-feed-meta{padding:1px 12px 5px 45px;}
+#app .dj-access-facility-controls .dj-feed-indicator{font-size:10.5px;}
+#app .dj-access-caveat{font-size:10.5px;line-height:1.55;margin:6px 8px 1px;color:var(--dj-safe-muted, #64756f);word-break:keep-all;}
+#app .dj-safety-access-popup{display:flex;flex-direction:column;gap:8px;font-size:12px;line-height:1.55;max-width:min(300px,calc(100vw - 64px));word-break:keep-all;}
+#app .dj-safety-access-popup strong{font-size:14px;line-height:1.35;}
+#app .dj-safety-access-popup p{margin:0;}
+#app .dj-safety-access-popup small{font-size:10.5px;line-height:1.5;color:var(--dj-safe-muted,#586c65);}
+#app .dj-safety-access-popup .dj-access-popup-actions{display:flex;gap:7px;flex-wrap:wrap;}
+#app .dj-safety-access-popup .dj-access-popup-actions button{border:1px solid #198d82;background:#198d82;color:white;font:inherit;font-weight:750;padding:8px 10px;border-radius:10px;cursor:pointer;touch-action:manipulation;}
+#app .dj-safety-access-popup .dj-access-popup-actions button+button{background:transparent;color:inherit;border-color:rgba(122,150,143,.45);}
+@media(max-width:699px){#app .dj-access-facility-controls .dj-feed-meta{padding-left:11px;}#app .dj-access-caveat{margin-left:3px;margin-right:3px;}}
+html[data-theme="dark"] #app .dj-access-caveat,#app[data-theme="dark"] .dj-access-caveat{color:#b0cfc6;}
+@media(prefers-reduced-motion:reduce){#app .dj-safety-access-popup *{animation:none!important;transition:none!important;}}
+
+#app .dj-safety-access-popup .dj-access-popup-actions :is(button,a){display:inline-flex;align-items:center;justify-content:center;min-height:34px;text-decoration:none;font-size:11px;}
+#app .dj-safety-access-popup .dj-access-popup-actions a{background:transparent;border:1px solid rgba(122,150,143,.45);padding:8px 10px;border-radius:10px;color:inherit;font-weight:750;}

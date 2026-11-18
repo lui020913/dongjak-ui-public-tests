@@ -1,0 +1,57 @@
+{
+  "theme": "Dongjak green (#13866c), mint, ivory",
+  "layout": "2:1 horizontal, one person per page, alternating woman/man/woman/man/woman",
+  "source": "AI-generated artwork, not actual application screenshots",
+  "images": [
+    {
+      "filename": "01-map-overview.png",
+      "character": "여성",
+      "page": "메인 지도 소개",
+      "original_sha256": "ad9cb896526f1672c2c113e59456a8329f92ce01413213c6296a2de2f11465d8",
+      "optimized_sha256": "4aa508c651bfd590cd10522e8cbc3334513c68112ecbb1efa0e52dfc28a836bf",
+      "width": 1440,
+      "height": 720,
+      "bytes": 198545
+    },
+    {
+      "filename": "02-safety-layers.png",
+      "character": "남성",
+      "page": "보행안전 시설",
+      "original_sha256": "168a99460c609061bca77f18494aa6ca72a2f9916ba90d60f9bcd28d62262dfb",
+      "optimized_sha256": "fd01c71e60d61cfabd1dfda6462757875ce8c5b48b7d0cf465cf30d4264e29e6",
+      "width": 1440,
+      "height": 720,
+      "bytes": 236014
+    },
+    {
+      "filename": "03-walking-route.png",
+      "character": "여성",
+      "page": "도보 경로 비교",
+      "original_sha256": "0c86608cdc3a2174f8d86f30aa33fb7c04e7745d24453fcd474b2111865ab215",
+      "optimized_sha256": "2de89ee86c59616ae4785706551655cf032fbf4fae117fdb1e44563517fc2d7b",
+      "width": 1440,
+      "height": 720,
+      "bytes": 220055
+    },
+    {
+      "filename": "04-local-discovery.png",
+      "character": "남성",
+      "page": "지하철 도착 정보",
+      "original_sha256": "61fed3fa3f94cb173281194236abec76735fe027fd720407d228fe3483c13650",
+      "optimized_sha256": "607f1377f89dade757c9a737a91ad370deccc0205c7d994b05e70e5252f40f21",
+      "width": 1440,
+      "height": 720,
+      "bytes": 222429
+    },
+    {
+      "filename": "05-account-favorites.png",
+      "character": "여성",
+      "page": "내 정보 및 즐겨찾기",
+      "original_sha256": "f35a297dee681b3be44e96d2627578cc2307bebb25dea0175681892d42dd6a9a",
+      "optimized_sha256": "72b41c2f4e3e750318af9f36ff4694a3433b05f7ea53408a58e9fd9557e72ea1",
+      "width": 1440,
+      "height": 720,
+      "bytes": 210573
+    }
+  ]
+}

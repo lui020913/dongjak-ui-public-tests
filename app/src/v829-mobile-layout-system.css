@@ -1,0 +1,486 @@
+/* Dongjak v8.2.9 — mobile coordinate consolidation.
+ * Loaded LAST; previous releases remain intact for desktop and feature logic.
+ * All phone surfaces use one safe-area-aware header / tools / bottom-dock grid.
+ * Never style MapLibre feature layers, underlying map geometry or OAuth data.
+ */
+@media (max-width:699px) {
+  html body #app#app#app#app#app {
+    --dj829-gutter: max(10px, env(safe-area-inset-left, 0px));
+    --dj829-gutter-right: max(10px, env(safe-area-inset-right, 0px));
+    --dj829-top: calc(env(safe-area-inset-top, 0px) + 8px);
+    --dj829-header-h: 52px;
+    --dj829-tools-top: calc(env(safe-area-inset-top, 0px) + 76px);
+    --dj829-tools-h: 44px;
+    --dj829-nav-bottom: max(6px, calc(env(safe-area-inset-bottom, 0px) - 22px));
+    --dj829-nav-h: 70px;
+    --dj829-sheet-max-height: 50dvh;
+    --dj829-panel-bottom: calc(var(--dj829-nav-bottom) + var(--dj829-nav-h) + 8px);
+    --dj829-panel-top-safe: calc(env(safe-area-inset-top, 0px) + 144px);
+    --dj-v724-panel-bottom: var(--dj829-panel-bottom);
+    --dj800-panel-bottom: var(--dj829-panel-bottom);
+    --dj-gps-bottom-offset: var(--dj829-panel-bottom);
+  }
+  html body #app#app#app#app#app .topbar,
+  html body #app#app#app#app#app[data-theme="dark"] .topbar {
+    position:fixed!important;inset:var(--dj829-top) 0 auto 0!important;
+    top:var(--dj829-top)!important;left:0!important;right:0!important;bottom:auto!important;
+    width:100%!important;height:var(--dj829-header-h)!important;
+    max-width:none!important;min-height:var(--dj829-header-h)!important;
+    max-height:var(--dj829-header-h)!important;
+    padding:0 var(--dj829-gutter-right) 0 var(--dj829-gutter)!important;
+    gap:8px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
+    flex-wrap:nowrap!important;box-sizing:border-box!important;
+    transform:none!important;translate:none!important;overflow:visible!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+    z-index:3101!important;
+  }
+  html body #app#app#app#app#app .topbar > #dj-settings-mobile {
+    display:grid!important;place-items:center!important;position:relative!important;
+    flex:0 0 48px!important;width:48px!important;min-width:48px!important;max-width:48px!important;
+    height:48px!important;min-height:48px!important;max-height:48px!important;
+    padding:0!important;margin:0!important;border:0!important;transform:none!important;
+    background:transparent!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app .topbar > #dj-settings-mobile img {
+    display:block!important;width:46px!important;height:46px!important;max-width:46px!important;
+    max-height:46px!important;object-fit:contain!important;
+  }
+  html body #app#app#app#app#app .topbar > #dj-about-pc,
+  html body #app#app#app#app#app .topbar > .brand{display:none!important;}
+  html body #app#app#app#app#app .topbar > .map-quick-search {
+    display:block!important;flex:1 1 0%!important;min-width:0!important;max-width:none!important;
+    width:auto!important;position:relative!important;inset:auto!important;
+    margin:0!important;padding:0!important;align-self:center!important;
+    transform:none!important;
+  }
+  html body #app#app#app#app#app .topbar .map-quick-search-form {
+    box-sizing:border-box!important;display:flex!important;align-items:center!important;
+    flex-direction:row!important;width:100%!important;min-width:0!important;
+    height:50px!important;min-height:50px!important;max-height:50px!important;
+    gap:5px!important;padding:4px 5px 4px 12px!important;margin:0!important;
+    border-radius:17px!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app .topbar .map-quick-search-form > .brand,
+  html body #app#app#app#app#app .topbar .map-quick-search-icon{display:none!important;}
+  html body #app#app#app#app#app .topbar #map-quick-search-query {
+    display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;
+    max-width:none!important;min-height:36px!important;
+    font-size:16px!important;line-height:1.3!important;
+    padding:5px 0!important;margin:0!important;box-sizing:border-box!important;
+    text-overflow:ellipsis!important;
+  }
+  html body #app#app#app#app#app .topbar .map-quick-search-submit {
+    flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+    display:grid!important;place-items:center!important;padding:0!important;
+    margin:0!important;border-radius:13px!important;
+  }
+  html body #app#app#app#app#app .topbar > .header-tools {
+    flex:0 0 48px!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    width:48px!important;min-width:48px!important;max-width:48px!important;
+    height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;
+    gap:0!important;position:relative!important;inset:auto!important;
+  }
+  html body #app#app#app#app#app .topbar #theme-toggle {
+    display:grid!important;place-items:center!important;position:relative!important;
+    flex:0 0 48px!important;width:48px!important;min-width:48px!important;max-width:48px!important;
+    height:50px!important;min-height:50px!important;max-height:50px!important;
+    padding:0!important;margin:0!important;border-radius:17px!important;
+  }
+  /* Six icons: map / safety / night / type / weather / more. Never expand one
+     active control: that formerly pushed the two right-hand icons offscreen. */
+  html body #app#app#app#app#app #dj-v794-toolbar {
+    position:fixed!important;inset:var(--dj829-tools-top) var(--dj829-gutter-right) auto var(--dj829-gutter)!important;
+    top:var(--dj829-tools-top)!important;left:var(--dj829-gutter)!important;
+    right:var(--dj829-gutter-right)!important;bottom:auto!important;
+    width:auto!important;height:var(--dj829-tools-h)!important;max-width:none!important;
+    display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+    gap:clamp(4px,1.4vw,7px)!important;padding:0!important;margin:0!important;
+    justify-content:flex-start!important;transform:none!important;overflow:visible!important;
+    z-index:3120!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj-v794-tool,
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj-v794-tool[data-active="true"],
+  html body #app#app#app#app#app #dj-v794-toolbar > #dj800-type-trigger {
+    box-sizing:border-box!important;display:grid!important;place-items:center!important;
+    position:relative!important;inset:auto!important;
+    flex:0 0 clamp(38px,11vw,44px)!important;
+    width:clamp(38px,11vw,44px)!important;min-width:clamp(38px,11vw,44px)!important;
+    max-width:clamp(38px,11vw,44px)!important;
+    height:clamp(38px,11vw,44px)!important;min-height:clamp(38px,11vw,44px)!important;
+    max-height:clamp(38px,11vw,44px)!important;
+    padding:0!important;margin:0!important;border-radius:50%!important;
+    transform:none!important;translate:none!important;
+    text-align:center!important;font-size:12px!important;line-height:1!important;
+    pointer-events:auto!important;overflow:hidden!important;transition:background-color .18s ease!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > #dj-v794-weather {margin-left:auto!important;}
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-caption {display:none!important;}
+  html body #app#app#app#app#app #dj-v794-toolbar :is(.dj-v794-icon,.dj800-type-icon){
+    position:static!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    flex:none!important;width:22px!important;height:22px!important;margin:0!important;gap:1px!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar .dj-v794-icon svg{
+    width:22px!important;height:22px!important;max-width:22px!important;max-height:22px!important;
+    display:block!important;position:static!important;margin:0!important;transform:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj-v794-tool[data-active="true"] {
+    border-radius:50%!important;outline:2px solid var(--dj800-accent,#118570)!important;outline-offset:-2px!important;
+    background:var(--dj800-elevated,#e4f3ec)!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool[data-active="true"]{
+    background:#31574e!important;color:#f0fff8!important;
+  }
+  html body #app#app#app#app#app :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off){
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  /* v8.2.15 unified: toolbar stays visible on all five main tabs. */
+  html body #app#app#app#app#app #dj-mobile-utilities:not([hidden]) {
+    position:fixed!important;top:calc(var(--dj829-tools-top) + 50px)!important;
+    right:var(--dj829-gutter-right)!important;left:auto!important;bottom:auto!important;
+    box-sizing:border-box!important;width:min(285px,calc(100vw - 20px))!important;
+    max-height:min(48dvh,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-tools-top) - 60px))!important;
+    overflow-x:hidden!important;overflow-y:auto!important;transform:none!important;z-index:3210!important;
+  }
+  /* One bottom dock. A narrow device still gets five equal hit targets. */
+  html body #app#app#app#app#app #bottom-nav {
+    position:fixed!important;inset:auto var(--dj829-gutter-right) var(--dj829-nav-bottom) var(--dj829-gutter)!important;
+    left:var(--dj829-gutter)!important;right:var(--dj829-gutter-right)!important;
+    top:auto!important;bottom:var(--dj829-nav-bottom)!important;
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:stretch!important;justify-content:stretch!important;
+    width:auto!important;max-width:none!important;
+    height:var(--dj829-nav-h)!important;min-height:var(--dj829-nav-h)!important;
+    max-height:var(--dj829-nav-h)!important;
+    padding:5px!important;margin:0!important;gap:2px!important;
+    box-sizing:border-box!important;border-radius:22px!important;overflow:hidden!important;
+    transform:none!important;translate:none!important;z-index:2900!important;
+  }
+  html body #app#app#app#app#app #bottom-nav > .nav-tab {
+    display:flex!important;flex:1 1 0%!important;flex-direction:column!important;
+    align-items:center!important;justify-content:center!important;
+    width:100%!important;min-width:0!important;height:100%!important;min-height:0!important;
+    max-height:none!important;padding:3px 0!important;margin:0!important;gap:4px!important;
+    white-space:nowrap!important;word-break:keep-all!important;line-height:1.15!important;
+    font-size:clamp(10px,2.8vw,12px)!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app #bottom-nav .nav-icon {
+    display:grid!important;place-items:center!important;flex:0 0 23px!important;
+    width:23px!important;min-width:23px!important;height:23px!important;min-height:23px!important;
+    margin:0!important;padding:0!important;line-height:0!important;
+  }
+  html body #app#app#app#app#app #bottom-nav .dj827-nav-glyph {
+    position:static!important;display:block!important;width:22px!important;height:22px!important;
+    min-width:22px!important;min-height:22px!important;margin:0!important;transform:none!important;
+  }
+  /* Map action stack must sit UNDER toolbar and ABOVE the bottom sheets. */
+  html body #app#app#app#app#app[data-tab="map"] .map-actions{
+    position:fixed!important;top:calc(var(--dj829-tools-top) + 56px)!important;
+    right:var(--dj829-gutter-right)!important;left:auto!important;bottom:auto!important;
+    width:auto!important;display:flex!important;flex-direction:column!important;align-items:center!important;
+    gap:7px!important;margin:0!important;padding:0!important;
+    transform:none!important;translate:none!important;z-index:2800!important;
+  }
+  html body #app#app#app#app#app[data-tab="map"] .map-actions > button {
+    flex:0 0 42px!important;display:grid!important;place-items:center!important;
+    box-sizing:border-box!important;width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;
+    padding:0!important;margin:0!important;border-radius:14px!important;
+  }
+  html body #app#app#app#app#app[data-tab="map"] .map-actions :is(svg,.dj-road-width-icon){
+    width:22px!important;height:22px!important;display:block!important;
+    margin:0!important;position:static!important;transform:none!important;
+  }
+  html body #app#app#app#app#app #dj-mobile-map-actions{display:none!important;}
+  html body #app#app#app#app#app[data-tab="map"] .map-actions > button{
+    box-shadow:0 2px 8px rgba(23,43,38,.08)!important;
+    text-shadow:none!important;filter:none!important;-webkit-filter:none!important;
+    transform:none!important;translate:none!important;will-change:auto!important;
+    backface-visibility:visible!important;
+  }
+  html body #app#app#app#app#app[data-tab="map"] .map-actions > button::before,
+  html body #app#app#app#app#app[data-tab="map"] .map-actions > button::after{
+    content:none!important;display:none!important;
+  }
+  html body #app#app#app#app#app[data-search-open="true"] .map-actions,
+  html body #app#app#app#app#app[data-search-open="true"] #dj-v794-toolbar{
+    visibility:hidden!important;pointer-events:none!important;opacity:0!important;
+  }
+  html body #app#app#app#app#app .topbar .map-quick-search-dropdown:not([hidden]){
+    position:absolute!important;inset:calc(100% + 6px) 0 auto 0!important;
+    max-height:min(52dvh,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-top) - 68px))!important;
+    overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+    z-index:3303!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker .admin-dong-heading{
+    position:relative!important;display:grid!important;
+    grid-template-columns:minmax(0,1fr) 44px!important;align-items:center!important;
+    gap:10px!important;padding:21px 0 9px!important;margin:0 0 12px!important;
+    min-height:66px!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker .admin-dong-heading::before{
+    content:''!important;display:block!important;position:absolute!important;
+    top:3px!important;left:50%!important;transform:translateX(-50%)!important;
+    width:42px!important;height:4px!important;border-radius:999px!important;
+    background:var(--dj800-border,#cbd8d2)!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker .admin-dong-heading > div{
+    min-width:0!important;align-self:center!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker #admin-dong-close{
+    position:relative!important;inset:auto!important;top:auto!important;left:auto!important;
+    right:auto!important;bottom:auto!important;grid-column:2!important;grid-row:1!important;
+    align-self:center!important;justify-self:end!important;z-index:2!important;
+    width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker #admin-dong-list{
+    overflow-y:auto!important;max-height:calc(58dvh - 126px)!important;
+    padding-bottom:10px!important;overscroll-behavior:contain!important;
+  }
+  /* Every panel owns vertical scrolling; its border never leaves the viewport. */
+  html body #app#app#app#app#app :is(
+      #transport-sheet,#route-panel,#participation-panel,#news-panel,#mine-panel,
+      #detail-sheet,#entry-sheet,#overview-sheet,#admin-dong-picker,
+      #road-width-legend,#ped-tools-panel,#night-visibility-float,#pza-road-sheet
+    ):not([hidden]),
+  html body #app#app#app#app#app.map-controls-open #map-advanced-controls,
+  html body #app#app#app#app#app.map-safety-open #map-safety-controls {
+    position:fixed!important;top:auto!important;bottom:var(--dj829-panel-bottom)!important;
+    left:var(--dj829-gutter)!important;right:var(--dj829-gutter-right)!important;
+    width:auto!important;max-width:none!important;min-width:0!important;
+    height:auto!important;min-height:0!important;
+    max-height:min(var(--dj829-sheet-max-height),calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe) + 12px))!important;
+    margin:0!important;transform:none!important;translate:none!important;
+    box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+    border-radius:22px!important;scrollbar-width:none!important;
+  }
+  html body #app#app#app#app#app :is(
+      #transport-sheet,#route-panel,#participation-panel,#news-panel,#mine-panel,
+      #detail-sheet,#entry-sheet,#overview-sheet,#admin-dong-picker,
+      #road-width-legend,#ped-tools-panel,#night-visibility-float,#pza-road-sheet
+    ):not([hidden])::-webkit-scrollbar,
+  html body #app#app#app#app#app.map-controls-open #map-advanced-controls::-webkit-scrollbar,
+  html body #app#app#app#app#app.map-safety-open #map-safety-controls::-webkit-scrollbar{display:none!important;}
+  html body #app#app#app#app#app[data-tab="route"] #route-panel:not([hidden]){
+    height:auto!important;max-height:min(var(--dj829-sheet-max-height),calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+  }
+  html body #app#app#app#app#app #transport-sheet[data-kind="bus"]:not([hidden]) {
+    max-height:min(43dvh,390px,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+  }
+  html body #app#app#app#app#app #transport-sheet[data-kind="subway"]:not([hidden]) {
+    max-height:min(50dvh,475px,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+  }
+  html body #app#app#app#app#app #overview-sheet:not([hidden]){max-height:min(38dvh,350px)!important;}
+  html body #app#app#app#app#app :is(#map-advanced-controls,#map-safety-controls) {
+    scrollbar-width:none!important;
+  }
+  html body #app#app#app#app#app #map-gesture-guide:not([hidden]) {
+    max-height:calc(100dvh - var(--dj829-panel-top-safe) - var(--dj829-panel-bottom))!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  /* Route content uses the same edge-to-edge header as News. Only its body
+     has horizontal padding, rather than padding the entire floating panel. */
+  html body #app#app#app#app#app[data-tab="route"] #route-panel.page-panel:not([hidden]) {
+    padding:0 0 16px!important;
+  }
+  html body #app#app#app#app#app #route-panel.page-panel > :not(.page-heading) {
+    margin-left:15px!important;margin-right:15px!important;
+    max-width:calc(100% - 30px)!important;
+    box-sizing:border-box!important;
+  }
+  /* One authoritative header layout: icon + title left, X at the far right.
+     The v833 3-column grid may enhance this, but if its stylesheet is missing
+     the core mobile stylesheet must still preserve the news-style close. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading{
+    position:relative!important;display:flex!important;flex-flow:row nowrap!important;
+    align-items:center!important;justify-content:flex-start!important;
+    box-sizing:border-box!important;min-width:0!important;width:100%!important;
+    height:auto!important;min-height:62px!important;
+    gap:10px!important;margin:0 0 9px!important;
+    padding:10px 0 12px!important;
+  }
+  /* Genuine DOM handle instead of an iOS-sensitive ::before pseudo element. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading::before {content:none!important;display:none!important;}
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > .dj-sheet-grabber {
+    display:block!important;position:absolute!important;
+    left:50%!important;right:auto!important;top:2px!important;
+    width:42px!important;height:5px!important;border-radius:999px!important;
+    transform:translateX(-50%)!important;translate:none!important;
+    background:#cbd7d1!important;opacity:1!important;
+    pointer-events:auto!important;touch-action:none!important;z-index:5!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > .dj-sheet-grabber{background:#78978a!important;}
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > button.page-dismiss{
+    position:relative!important;inset:auto!important;
+    top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+    display:grid!important;place-items:center!important;
+    flex:0 0 44px!important;order:3!important;margin-left:auto!important;
+    justify-self:auto!important;align-self:center!important;
+    grid-area:auto!important;float:none!important;
+    box-sizing:border-box!important;width:44px!important;height:44px!important;
+    min-width:44px!important;min-height:44px!important;
+    max-width:44px!important;max-height:44px!important;
+    margin:0!important;margin-left:auto!important;padding:0!important;
+    transform:none!important;translate:none!important;z-index:3!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > .dj-page-title-icon{
+    position:relative!important;display:grid!important;place-items:center!important;
+    flex:0 0 26px!important;order:1!important;
+    align-self:center!important;grid-area:auto!important;
+    width:26px!important;height:26px!important;
+    min-width:26px!important;min-height:26px!important;
+    margin:0!important;padding:0!important;color:var(--dj800-accent,#168570)!important;
+    font-size:0!important;line-height:0!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > .dj-page-title-icon svg{
+    display:block!important;width:24px!important;height:24px!important;
+    position:static!important;transform:none!important;flex:none!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > h2.dj-page-title-text{
+    position:relative!important;flex:1 1 auto!important;order:2!important;
+    grid-area:auto!important;align-self:center!important;justify-self:auto!important;
+    min-width:0!important;width:auto!important;max-width:100%!important;
+    margin:0!important;padding:0!important;
+    line-height:1.2!important;font-size:clamp(20px,5.6vw,25px)!important;
+    white-space:normal!important;word-break:keep-all!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#mine-panel) > .dj-page-intro{
+    margin:0 0 14px!important;padding:0 4px!important;
+    font-size:clamp(13px,3.8vw,16px)!important;line-height:1.5!important;
+    word-break:keep-all!important;
+  }
+  /* Only the SVG draws the X; never mix legacy pseudo crosses. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) .page-heading > button.page-dismiss::before,
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) .page-heading > button.page-dismiss::after{
+    content:none!important;display:none!important;
+  }
+  /* Stable touch targets, avoiding collision with the header's title or iOS zoom. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet)
+    :is(input[type="text"],input[type="search"],input[type="email"],input[type="password"],textarea,select){
+    font-size:16px!important;max-width:100%!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet) :is(button,select){
+    min-width:0;overflow-wrap:anywhere;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#mine-panel,#transport-sheet) :is(.route-card,.route-location-row,.transport-panel-head,.dj820-account-card,.dj824-account-card){
+    min-width:0!important;max-width:100%!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app #transport-sheet #transport-arrivals{min-width:0!important;max-width:100%!important;}
+  html body #app#app#app#app#app :is(#transport-close,#admin-dong-close,#map-safety-close,#road-width-legend-close,#map-options-mobile-close,#map-quick-search-close){
+    box-sizing:border-box!important;display:grid!important;place-items:center!important;
+    min-width:40px!important;min-height:40px!important;padding:0!important;
+    text-align:center!important;line-height:1!important;
+  }
+  /* Overlay controls above the dock, but never over the system status bar. */
+  html body #app#app#app#app#app #dj800-type-panel:not([hidden]){
+    top:calc(var(--dj829-tools-top) + 50px)!important;left:var(--dj829-gutter)!important;
+    right:var(--dj829-gutter-right)!important;bottom:auto!important;
+    max-width:calc(100vw - 20px)!important;
+    max-height:min(50dvh,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-tools-top) - 50px))!important;
+    overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app #dj-map-settings:not([hidden]) .dj-map-settings-card,
+  html body #app#app#app#app#app #dj-app-about:not([hidden]) .dj-about-card,
+  html body #app#app#app#app#app #version-history-modal:not([hidden]) .version-history-dialog{
+    box-sizing:border-box!important;width:min(calc(100% - 24px),500px)!important;
+    max-width:calc(100vw - 24px)!important;
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 30px)!important;
+    overflow-y:auto!important;
+  }
+}
+@media (max-width:359px){
+  html body #app#app#app#app#app {
+    --dj829-gutter:8px;--dj829-gutter-right:8px;
+    --dj829-nav-h:66px;
+  }
+  html body #app#app#app#app#app .topbar{gap:5px!important;}
+  html body #app#app#app#app#app .topbar > #dj-settings-mobile{flex-basis:42px!important;width:42px!important;min-width:42px!important;max-width:42px!important;}
+  html body #app#app#app#app#app .topbar > #dj-settings-mobile img{width:42px!important;height:42px!important;}
+  html body #app#app#app#app#app .topbar > .header-tools{flex-basis:44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;}
+  html body #app#app#app#app#app .topbar #theme-toggle{width:44px!important;min-width:44px!important;max-width:44px!important;}
+  html body #app#app#app#app#app #bottom-nav > .nav-tab{font-size:10px!important;letter-spacing:-.025em!important;}
+}
+@media (max-width:699px) and (max-height:660px){
+  html body #app#app#app#app#app {--dj829-panel-top-safe:calc(env(safe-area-inset-top,0px) + 128px);}
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
+    max-height:min(var(--dj829-sheet-max-height),calc(100dvh - var(--dj829-panel-bottom) - 125px))!important;
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce){
+  html body #app#app#app#app#app #dj-v794-toolbar>.dj-v794-tool {transition:none!important;}
+}
+
+/* Post-cascade guards: some legacy styles give a hidden transport sheet
+ * display:block!important. The HTML hidden state must always win. */
+@media (max-width:699px){
+  html body #app#app#app#app#app#app :is(
+    #transport-sheet,#overview-sheet,#admin-dong-picker,#route-panel,
+    #participation-panel,#news-panel,#mine-panel,#detail-sheet,#entry-sheet,
+    #road-width-legend,#ped-tools-panel,#night-visibility-float,#pza-road-sheet,
+    #nav-live-card,#version-history-modal,#dj800-type-panel,#dj-map-settings,
+    #dj-app-about,#dj-mobile-utilities,#map-quick-search-dropdown
+  )[hidden]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  html body #app#app#app#app#app#app[data-tab="route"] #route-panel.page-panel:not([hidden]){
+    left:var(--dj829-gutter)!important;right:var(--dj829-gutter-right)!important;
+    top:auto!important;bottom:var(--dj829-panel-bottom)!important;
+    width:auto!important;max-width:none!important;
+    height:auto!important;min-height:0!important;
+    max-height:min(var(--dj829-sheet-max-height),calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+    overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app#app #transport-sheet:not([hidden]){
+    left:var(--dj829-gutter)!important;right:var(--dj829-gutter-right)!important;
+    top:auto!important;bottom:var(--dj829-panel-bottom)!important;
+    width:auto!important;max-width:none!important;min-height:0!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app#app #transport-sheet[data-kind="bus"]:not([hidden]){
+    height:auto!important;max-height:min(43dvh,390px,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+  }
+  html body #app#app#app#app#app#app #transport-sheet[data-kind="subway"]:not([hidden]){
+    height:auto!important;max-height:min(50dvh,475px,calc(100dvh - var(--dj829-panel-bottom) - var(--dj829-panel-top-safe)))!important;
+  }
+}
+/* Functional state takes precedence over the normal five-tab dock. */
+@media (max-width:699px){
+  html body #app#app#app#app#app.route-guiding #bottom-nav,
+  html body #app#app#app#app#app.map-immersive #bottom-nav,
+  html body #app#app#app#app#app.map-immersive #dj-v794-toolbar{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app.dj-hide-map-tools .map-actions{
+    display:none!important;pointer-events:none!important;
+  }
+  /* One visible map sheet owns interaction. Do not leave the vertical map
+     control rail on top of the active district picker. */
+  html body #app#app#app#app#app[data-dj-active-sheet="admin-dong-picker"] .map-actions,
+  html body #app#app#app#app#app[data-dj-active-sheet="admin-dong-picker"] #dj-mobile-map-actions{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  /* Transform is applied only during a real touch drag, never at rest. */
+  html body #app#app#app#app#app :is(.page-panel,.admin-dong-picker,.transport-sheet,
+    .detail-sheet,.entry-sheet,.overview-sheet,.pza-road-sheet,.night-visibility-float,
+    .road-width-legend,.map-advanced-controls,.map-safety-controls).dj-sheet-dragging{
+    transform:translate3d(0,var(--dj-sheet-drag-y,0px),0)!important;
+    opacity:var(--dj-sheet-drag-opacity,1)!important;
+    transition:none!important;will-change:transform,opacity!important;
+  }
+  /* Only the header/handle can start a vertical dismiss gesture. */
+  html body #app#app#app#app#app .dj-sheet-swipe-zone{
+    touch-action:pan-x!important;
+  }
+  /* Native placeholder is the only source of search hint text. */
+  html body #app#app#app#app#app .topbar #map-quick-search-query{
+    font-weight:540!important;color:var(--dj800-text,#264f43)!important;
+  }
+  html body #app#app#app#app#app .topbar #map-quick-search-query::placeholder{
+    opacity:1!important;visibility:visible!important;
+    color:var(--dj800-muted,#647e73)!important;
+    font-size:clamp(13px,3.5vw,16px)!important;font-weight:490!important;
+  }
+  /* High-specificity legacy transport rules must not resurrect a closed panel. */
+  html body #app#app#app#app#app#app#app#app#app :is(#transport-sheet,#route-panel,#mine-panel,#news-panel,#participation-panel)[hidden]{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+}

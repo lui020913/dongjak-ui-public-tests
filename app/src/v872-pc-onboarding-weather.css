@@ -1,0 +1,97 @@
+/* v8.7.2: PC onboarding controls and consistent desktop weather control.
+   Keeps mobile v8.6.4 floating onboarding and bottom navigation unchanged. */
+@media (min-width:700px){
+  /* The tour must be interactive while the map stays blocked behind it. */
+  html body #app#app#app .dj860-onboarding .dj860-card{
+    pointer-events:auto!important;
+  }
+  html body #app#app#app .dj860-onboarding :is(.dj860-head,.dj860-footer,.dj860-actions){
+    position:relative;z-index:3;pointer-events:auto!important;
+  }
+  html body #app#app#app .dj860-onboarding button{
+    pointer-events:auto!important;touch-action:manipulation;cursor:pointer;
+  }
+  html body #app#app#app .dj860-skip{
+    min-height:42px!important;padding:9px 16px!important;font-size:14px!important;
+  }
+  html body #app#app#app .dj860-content{
+    padding:32px clamp(25px,3vw,46px)!important;
+  }
+  html body #app#app#app .dj860-copy h1{
+    font-size:clamp(30px,3.0vw,43px)!important;
+    line-height:1.23!important;letter-spacing:-.04em!important;
+  }
+  html body #app#app#app .dj860-description{
+    font-size:clamp(16px,1.18vw,18px)!important;
+    line-height:1.66!important;font-weight:580!important;
+  }
+  html body #app#app#app .dj860-points{
+    margin-top:22px!important;gap:12px!important;
+  }
+  html body #app#app#app .dj860-points li{
+    font-size:clamp(14px,1.03vw,16px)!important;
+    font-weight:650!important;line-height:1.55!important;gap:10px!important;
+  }
+  html body #app#app#app .dj860-points li>span:first-child{
+    width:22px!important;height:22px!important;flex:0 0 22px!important;
+    font-size:13px!important;
+  }
+  html body #app#app#app .dj860-note{
+    margin-top:20px!important;padding:13px 15px!important;
+    font-size:clamp(13px,0.93vw,14.5px)!important;line-height:1.55!important;
+  }
+  html body #app#app#app .dj860-account-link{font-size:14px!important;min-height:35px!important;}
+  html body #app#app#app .dj860-progress-label,
+  html body #app#app#app .dj860-count{font-size:13px!important;}
+  html body #app#app#app .dj860-footer{
+    min-height:96px!important;padding:14px 27px!important;gap:18px!important;
+  }
+  html body #app#app#app .dj860-actions button{
+    min-height:50px!important;min-width:100px!important;padding:12px 20px!important;
+    font-size:16px!important;line-height:1.2!important;border-radius:15px!important;
+  }
+  html body #app#app#app .dj860-actions .dj860-next{min-width:150px!important;}
+  html body #app#app#app .dj860-dot{
+    width:10px!important;height:10px!important;min-width:10px!important;min-height:10px!important;
+  }
+  html body #app#app#app .dj860-dot.is-active{width:26px!important;}
+
+  /* Topbar weather: one 56px-tall pill, identical to adjacent controls. */
+  html body #app#app#app#app .topbar .header-tools #weather-widget{
+    box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    flex:0 0 96px!important;width:96px!important;min-width:96px!important;max-width:96px!important;
+    height:56px!important;min-height:56px!important;max-height:56px!important;
+    padding:0 9px!important;margin:0!important;gap:0!important;border-radius:25px!important;
+  }
+  html body #app#app#app#app .topbar .header-tools #weather-widget :is(#weather-title,#weather-my-location){
+    display:none!important;
+  }
+  html body #app#app#app#app .topbar .header-tools #weather-label{
+    box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    height:100%!important;min-height:100%!important;max-height:100%!important;
+    padding:0!important;margin:0!important;border:0!important;border-radius:25px!important;
+    background:transparent!important;font-size:0!important;white-space:nowrap!important;cursor:pointer;
+  }
+  html body #app#app#app#app .topbar .header-tools #weather-label::before{
+    content:attr(data-dj-weather-icon) ' ' attr(data-dj-temperature)!important;
+    display:block!important;max-width:100%!important;line-height:1!important;
+    color:inherit!important;font-size:14px!important;font-weight:800!important;white-space:nowrap!important;
+  }
+}
+@media(min-width:700px) and (max-width:1079px){
+  /* Prevent weather from forcing the hybrid topbar beyond viewport width. */
+  html body #app#app#app#app .topbar .header-tools #weather-widget{
+    flex-basis:88px!important;width:88px!important;min-width:88px!important;max-width:88px!important;
+  }
+  html body #app#app#app .dj860-footer{padding-inline:20px!important;}
+  html body #app#app#app .dj860-actions .dj860-next{min-width:120px!important;}
+}
+@media(min-width:700px) and (max-height:650px){
+  html body #app#app#app .dj860-content{padding-block:17px!important;}
+  html body #app#app#app .dj860-copy h1{font-size:30px!important;}
+  html body #app#app#app .dj860-description{font-size:15px!important;}
+  html body #app#app#app .dj860-points li{font-size:14px!important;}
+  html body #app#app#app .dj860-note{margin-top:11px!important;}
+  html body #app#app#app .dj860-footer{min-height:82px!important;padding-block:9px!important;}
+}

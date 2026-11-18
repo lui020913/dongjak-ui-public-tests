@@ -1,0 +1,71 @@
+/* v7.0.12: shared layout contract; imported LAST to supersede historical rules. */
+:root{--dj-header-mini-h:40px;--dj-rail-btn-w:102px;--dj-rail-left:14px;--dj-rail-gap:9px}
+@media (min-width:1080px){
+ /* Three helper chips are deliberately shorter than the 56px search field. */
+ #app .topbar>.header-tools{height:56px!important;min-height:0!important;align-items:center!important;gap:8px!important;}
+ #app .topbar .header-tools .weather-widget,
+ #app .topbar .header-tools>.theme-toggle,
+ #app .topbar .header-tools>.version-history-trigger{
+   box-sizing:border-box!important;height:var(--dj-header-mini-h)!important;
+   min-height:var(--dj-header-mini-h)!important;max-height:var(--dj-header-mini-h)!important;
+   align-self:center!important;border-radius:14px!important;
+ }
+ #app[data-tab="map"] .map-actions{top:calc(16px + env(safe-area-inset-top))!important;bottom:auto!important;right:14px!important;left:auto!important;}
+ #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+   left:var(--dj-rail-left)!important;right:auto!important;
+   width:var(--dj-rail-btn-w)!important;min-width:var(--dj-rail-btn-w)!important;
+   max-width:var(--dj-rail-btn-w)!important;
+ }
+}
+@media (min-width:700px) and (max-width:1079px){
+ #app[data-tab="map"] .map-actions{top:calc(12px + env(safe-area-inset-top))!important;bottom:auto!important;right:10px!important;}
+}
+/* Map options must never hide the adjacent safety/night launchers. */
+#app[data-tab="map"].map-controls-open #map-tools-toggle,
+#app[data-tab="map"].map-controls-open #map-safety-toggle,
+#app[data-tab="map"].map-controls-open #night-visibility-quick-off:not([hidden]){
+ display:flex!important;visibility:visible!important;pointer-events:auto!important;
+ opacity:1!important;z-index:2402!important;
+}
+#app[data-tab="map"].map-controls-open #map-options-backdrop:not([hidden]){
+ pointer-events:auto!important;
+}
+/* The options sheet stays offset from the rail; controls remain tappable. */
+@media (min-width:700px){
+ #app.map-controls-open #map-advanced-controls{
+ left:var(--dj-left-dock-x,148px)!important;right:auto!important;
+ top:var(--dj-rail-top,88px)!important;
+ }
+}
+@media (max-width:699px){
+ #app[data-tab="map"].map-controls-open #map-advanced-controls{
+   z-index:2000!important;pointer-events:auto!important;
+   top:calc(var(--dj-header-h,60px) + 192px)!important;
+   bottom:calc(var(--dj-mobile-nav-h,88px) + 12px)!important;
+   max-height:calc(100dvh - var(--dj-header-h,60px) - var(--dj-mobile-nav-h,88px) - 210px)!important;
+ }
+}
+/* Guide is a true actionable surface; clicking X does not hit the canvas behind it. */
+#app #map-gesture-guide.map-gesture-guide{pointer-events:auto!important;z-index:3500!important;}
+#app #map-gesture-guide-close{
+ position:relative!important;z-index:2!important;pointer-events:auto!important;
+ display:grid!important;place-items:center!important;width:36px!important;height:36px!important;
+ border-radius:11px!important;cursor:pointer!important;
+}
+/* Station-specific side panel: center map on selected station, info on the left. */
+@media (min-width:700px){
+ #app #transport-sheet[data-station-focus="left"]:not([hidden]){
+   left:var(--dj-left-dock-x,148px)!important;right:auto!important;
+   width:min(460px,calc(100vw - 190px))!important;
+   max-width:min(460px,calc(100vw - 190px))!important;
+   transform:none!important;
+ }
+}
+/* On phones, the right-hand tools begin directly below the floating weather
+   chip, instead of drifting down when another panel has been expanded. */
+@media (max-width:699px){
+ #app[data-tab="map"] .map-actions{
+   top:calc(122px + env(safe-area-inset-top))!important;
+   bottom:auto!important;right:10px!important;left:auto!important;
+ }
+}

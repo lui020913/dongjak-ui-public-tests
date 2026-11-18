@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+import {isMobileWeb} from '../src/mobile-map-controls.js';
+const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const html=read('index.html');
+const css=read('src/v607-mobile-sheet.css');
+const mobile=read('src/mobile-map-controls.js');
+const main=read('src/main.js');
+test('mobile options sheet is separate from overlay buttons, has close and backdrop handlers',()=>{
+  assert.match(html,/id="map-options-mobile-close"/);
+  assert.match(html,/id="map-options-backdrop"/);
+  assert.match(main,/mapOptionsBackdrop\?\.addEventListener\('click',closeMapOptions\)/);
+  assert.match(main,/map-options-mobile-close'\)\?\.addEventListener\('click',closeMapOptions\)/);
+  assert.match(css,/#app\.map-controls-open \.map-advanced-controls\{[\s\S]*position:fixed!important/);
+  assert.match(css,/#app\.map-controls-open \.sheet\.overview-sheet/);
+  assert.match(css,/#app\.map-controls-open #map-safety-toggle/);
+  assert.match(css,/@media \(hover:none\) and \(orientation:landscape\)/);
+});
+test('iPhone Safari receives web-app installation instructions, not unsupported fullscreen action',()=>{
+  assert.match(html,/id="mobile-webapp-help"/);
+  assert.match(html,/웹 앱으로 열기/);
+  assert.match(mobile,/if\(isIOS\(\)\|\|!fullscreenSupported\(\)\)/);
+  assert.match(mobile,/isStandalone\(\)/);
+  assert.doesNotMatch(mobile,/전체화면 미지원/);
+  assert.equal((html.match(/id="mobile-fullscreen-toggle"/g)||[]).length,1);
+  assert.equal(isMobileWeb({width:390,coarse:true,native:false}),true);
+  assert.equal(isMobileWeb({width:844,coarse:true,native:false}),true);
+  assert.equal(isMobileWeb({width:1440,coarse:false,native:false}),false);
+});
+test('standalone manifest and home screen icons are present',()=>{
+  const manifest=JSON.parse(read('public/manifest.webmanifest'));
+  assert.equal(manifest.display,'standalone');
+  assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));
+  assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));
+  assert.match(html,/apple-mobile-web-app-capable/);
+  assert.match(html,/rel="apple-touch-icon"/);
+  assert.ok(existsSync(new URL('../public/icons/dongjak-webapp-192.png',import.meta.url)));
+  assert.ok(existsSync(new URL('../public/icons/dongjak-webapp-512.png',import.meta.url)));
+});

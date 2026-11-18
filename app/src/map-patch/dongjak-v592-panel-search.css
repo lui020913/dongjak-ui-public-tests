@@ -1,0 +1,146 @@
+/* v5.9.2 – Override conflicting v5.3~v5.9.1 search/sheet position rules.
+   Keep map/GIS/API layers unchanged; only touch the information chrome. */
+
+/* Small desktop/tablet: search belongs in the WHITE HEADER's unused center,
+   not a floating full-width bar over the map. */
+@media (min-width:850px) and (max-width:1079px){
+  #app .topbar{
+    display:grid!important;
+    
+    
+    
+    
+    
+    
+    background:#fff!important;
+    z-index:1660!important;
+  }
+  #app .topbar>.brand{grid-area:brand!important;min-width:0!important;}
+  #app .topbar>.header-tools{}
+  #app .topbar>.map-quick-search{
+    
+    
+    
+    
+    z-index:1670!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{min-height:48px!important;}
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    
+  }
+  #app #map-tools-toggle{}
+}
+
+/* Narrow viewport: keep brand on row 1, search on row 2 within the same
+   continuous opaque header. Search is no longer painted over the map. */
+@media (max-width:849px){
+  #app .topbar{
+    
+    
+    
+    
+    
+    display:flex!important;
+    
+    background:#fff!important;border-radius:0!important;
+    border-bottom:1px solid #ddebe3!important;
+    box-shadow:0 4px 14px rgba(17,59,44,.06)!important;
+    z-index:1670!important;
+  }
+  #app .topbar>.brand{min-width:0!important;flex:1 1 auto!important;}
+  #app .topbar>.header-tools{}
+  #app .topbar>.map-quick-search{
+    
+    
+    
+    
+    
+    z-index:1675!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background:#fff!important;border:1px solid #d7e6df!important;
+    box-shadow:0 2px 10px rgba(15,49,35,.06)!important;
+    border-radius:14px!important;min-height:49px!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form input{min-width:0!important;}
+  /* Search no longer occupies the map, so put tools/weather directly below the header. */
+  #app #map-tools-toggle{
+    
+    z-index:1460!important;
+  }
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    
+    
+    z-index:1460!important;
+  }
+  #app[data-tab="map"] .map-actions,
+  #app[data-tab="map"] .map-actions.map-actions-horizontal{
+    
+    
+  }
+  #app.map-controls-open .map-advanced-controls{
+    
+    
+  }
+}
+
+/* Touch sheet – compact state stays compact during dragging. On release the
+   content-fitted expanded sheet is shown, never a blank half-screen curtain. */
+@media (max-width:1079px){
+  #app[data-tab="map"] .sheet.overview-sheet,
+  #app[data-tab="map"] .sheet.overview-sheet.dragging,
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="half"],
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="expanded"]{
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    overflow-y:auto!important;overflow-x:hidden!important;
+    border-radius:22px 22px 0 0!important;
+    background:#fff!important;
+    box-shadow:0 -5px 22px rgba(28,52,42,.13)!important;
+    transition:height .18s ease,box-shadow .18s ease!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"],
+  #app[data-tab="map"] .sheet.overview-sheet.dragging[data-sheet-state="collapsed"]{
+    
+    overflow:hidden!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] :is(.sheet-summary,.primary-btn,.footer-note,.section-label,#points-count){
+    display:none!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    gap:12px!important;min-width:0!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top>div:first-child{
+    min-width:0!important;flex:1 1 auto!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top h1{
+    margin:0!important;font-size:clamp(12px,3.4vw,15px)!important;
+    line-height:1.4!important;white-space:nowrap!important;
+    overflow:hidden!important;text-overflow:ellipsis!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet .sheet-toggle{white-space:nowrap!important;}
+  #app[data-tab="map"] .sheet.overview-sheet #overview-sheet-handle{
+    display:block!important;margin:0 auto 11px!important;
+    width:48px!important;height:6px!important;border-radius:999px!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet.dragging{transition:none!important;}
+  /* Scale stays on the map ABOVE the sheet instead of on top of its title. */
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+    
+    
+  }
+  #app[data-overview-sheet-state="expanded"] .maplibregl-ctrl-bottom-left,
+  #app[data-overview-sheet-state="expanded"] .map-actions{display:none!important;}
+  #app[data-theme="dark"][data-tab="map"] .sheet.overview-sheet{background:#172831!important;}
+}

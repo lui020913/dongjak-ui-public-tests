@@ -1,0 +1,130 @@
+/* v7.0.21. One final pass on transport/map action collision, mobile PWA
+   chrome and bottom-sheets. Loaded LAST; data, routes and APIs stay intact. */
+
+/* The help control must receive clicks, even with the map canvas behind it. */
+#app[data-tab="map"] .map-actions{
+  z-index:2750!important;
+  pointer-events:auto!important;
+  isolation:isolate;
+}
+#app[data-tab="map"] #map-gesture-guide-open{
+  position:relative!important;
+  z-index:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+}
+/* Opening the help dialog intentionally puts its scrim above map actions. */
+#app:has(#map-gesture-guide:not([hidden])) #map-gesture-guide{
+  z-index:9000!important;
+  pointer-events:auto!important;
+}
+
+@media (min-width:700px){
+  /* Right-aligned transit drawer takes the right-most 460px. Shift the entire
+     control stack into the map's remaining viewport instead of overlaying
+     station names, refresh and dismiss buttons. */
+  #app:has(#transport-sheet:not([hidden]))[data-tab="map"] .map-actions{
+    right:calc(min(460px,calc(100vw - 165px)) + 30px)!important;
+    top:calc(var(--dj-header-h,72px) + 10px)!important;
+    bottom:auto!important;
+  }
+  #app:has(#transport-sheet:not([hidden])) #transport-sheet{
+    z-index:2700!important;
+  }
+}
+@media (min-width:700px) and (max-width:900px){
+  #app:has(#transport-sheet:not([hidden]))[data-tab="map"] .map-actions{
+    right:calc(min(460px,calc(100vw - 165px)) + 16px)!important;
+  }
+}
+
+@media (max-width:1079px){
+  /* No blur/compositing on the mobile header or its children. Crucially the
+     search bar is solid, not glass; native iOS statusbar is outside this CSS. */
+  #app .topbar,
+  #app[data-theme="dark"] .topbar,
+  #app .topbar>.map-quick-search,
+  #app .topbar>.map-quick-search .map-quick-search-form,
+  #app .topbar>.map-quick-search .map-quick-search-form>*{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-filter:none!important;
+    filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+    text-shadow:none!important;
+    opacity:1!important;
+  }
+  #app .topbar,
+  #app[data-theme="dark"] .topbar{
+    background:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    isolation:auto!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background:#fff!important;
+    background-image:none!important;
+    box-shadow:0 1px 5px rgba(18,48,38,.08)!important;
+    -webkit-font-smoothing:antialiased!important;
+    transform:none!important;
+    will-change:auto!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+    background:#20373b!important;
+    box-shadow:0 1px 5px rgba(0,0,0,.18)!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form input,
+  #app .topbar>.map-quick-search .map-quick-search-form input::placeholder{
+    text-shadow:none!important;
+    -webkit-font-smoothing:antialiased!important;
+  }
+  /* Nothing is rendered over top map pixels as a CSS haze or scrim. */
+  #app #map::before,#app #map::after,
+  #app #map.dj-far-haze-active::before,
+  #app[data-theme="dark"] #map::before,
+  #app[data-theme="dark"] #map::after{
+    content:none!important;display:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+
+  /* Bring longer auxiliary pages lower, into a scrollable bottom card.
+     A tall "내 기록" will no longer start halfway up the map. */
+  #app .page-panel:not([hidden]),
+  #app #news-panel.page-panel:not([hidden]){
+    top:auto!important;
+    bottom:calc(var(--dj-v720-nav-bottom,8px) + var(--dj-v720-nav-height,70px) + 5px)!important;
+    max-height:min(51dvh,calc(100dvh - var(--dj-header-h,80px) - 110px))!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
+    border-radius:24px!important;
+    box-shadow:0 10px 28px rgba(13,42,33,.16)!important;
+  }
+  /* Contents remain accessible by scrolling, not truncated. */
+  #app #mine-panel.page-panel:not([hidden]){
+    max-height:min(53dvh,calc(100dvh - var(--dj-header-h,80px) - 110px))!important;
+  }
+  /* Transit panels on phones are a bottom sheet, leaving room above for
+     right-hand map buttons instead of overlapping their click targets. */
+  #app #transport-sheet:not([hidden]){
+    position:absolute!important;
+    top:auto!important;
+    bottom:calc(var(--dj-v720-nav-bottom,8px) + var(--dj-v720-nav-height,70px) + 5px)!important;
+    max-height:min(53dvh,calc(100dvh - var(--dj-header-h,80px) - 110px))!important;
+    min-height:0!important;
+    overflow:auto!important;
+    border-radius:24px!important;
+  }
+}
+
+/* The map attribution is listed under Map Options > 지도 데이터 출처.
+   Hide any leftover MapLibre compact icon from cached or previous styles. */
+#app .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib,
+#app .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib-button{
+  display:none!important;
+}

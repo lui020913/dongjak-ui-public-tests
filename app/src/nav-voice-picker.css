@@ -1,0 +1,19 @@
+/* Lightweight in-navigation voice picker. Never changes route cards or GPS state. */
+#app #nav-live-card .dj816-voice-box{margin:8px 0 10px;border:1px solid var(--dj-route-border,#dce7e3);border-radius:12px;background:var(--dj-route-secondary,#f4f8f6);color:var(--dj-route-ink,#264237);font-size:12px;overflow:hidden}
+#app #nav-live-card .dj816-voice-box summary{cursor:pointer;display:flex;gap:7px;align-items:center;min-height:36px;padding:8px 11px;font-size:12px;font-weight:750;list-style:none}
+#app #nav-live-card .dj816-voice-box summary::-webkit-details-marker{display:none}
+#app #nav-live-card .dj816-voice-box summary:focus-visible{outline:2px solid #168a76;outline-offset:-2px}
+#app #nav-live-card .dj816-voice-current{margin-left:auto;font-size:11px;opacity:.8;font-weight:650}
+#app #nav-live-card .dj816-voice-content{display:grid;gap:7px;padding:8px 11px 11px;border-top:1px solid rgba(128,148,140,.23)}
+#app #nav-live-card .dj816-voice-content label{font-size:11px;font-weight:750;color:inherit}
+#app #nav-live-card .dj816-voice-content select{width:100%;min-width:0;max-width:100%;min-height:36px;padding:7px 10px;border-radius:9px;border:1px solid rgba(125,150,141,.5);background:var(--dj-route-bg,#fff);color:var(--dj-route-ink,#264237);font-size:12px;box-sizing:border-box}
+#app #nav-live-card .dj816-voice-content select:disabled{opacity:.65}
+#app #nav-live-card .dj816-voice-actions button{min-height:34px;padding:6px 12px;border:1px solid #75aa9b;border-radius:9px;background:rgba(25,137,112,.09);color:inherit;font-weight:750;font-size:12px}
+#app #nav-live-card .dj816-voice-actions button:disabled{opacity:.45}
+#app #nav-live-card .dj816-voice-status{margin:1px 0;font-size:11px;line-height:1.5}
+#app #nav-live-card .dj816-voice-note{margin:0;color:var(--dj-route-muted,#63756e);font-size:10px;line-height:1.5}
+#app #nav-live-card:has(.dj816-voice-box[open]){max-height:calc(100dvh - 112px);overflow-y:auto;overscroll-behavior:contain}
+#app[data-theme="dark"] #nav-live-card .dj816-voice-box{background:#263b3a;border-color:#4a6962;color:#e7f5ef}
+#app[data-theme="dark"] #nav-live-card .dj816-voice-content select{background:#1b302f;color:#e7f5ef;border-color:#57766d}
+#app[data-theme="dark"] #nav-live-card .dj816-voice-actions button{background:#164f42;border-color:#438d78;color:#e6fff2}
+@media(max-width:390px){#app #nav-live-card .dj816-voice-box summary{min-height:33px;padding:7px 9px;font-size:11px}#app #nav-live-card .dj816-voice-content{padding:7px 9px 9px}}

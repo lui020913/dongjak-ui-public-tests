@@ -1,0 +1,148 @@
+/* v7.11.0 unified experiences. Colors use per-platform theme state. */
+#dj-full-transition[hidden]{display:none!important;}
+#dj-full-transition{
+  position:fixed!important;inset:0!important;z-index:2147483000!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  gap:16px!important;box-sizing:border-box!important;padding:20px!important;
+  background:rgba(222,237,230,.42)!important;
+  -webkit-backdrop-filter:blur(19px) saturate(.62)!important;backdrop-filter:blur(19px) saturate(.62)!important;
+  color:#123f35!important;text-align:center!important;pointer-events:all!important;
+  font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
+}
+html[data-theme="dark"] #dj-full-transition{background:rgba(10,30,33,.62)!important;color:#e2f7ee!important;}
+#dj-full-transition .dj-progress-spinner{
+  width:46px;height:46px;flex:0 0 46px;box-sizing:border-box;
+  border-radius:50%;border:4px solid rgba(21,116,90,.20);border-top-color:#158769;
+  animation:dj-v711-spin .83s linear infinite;
+}
+html[data-theme="dark"] #dj-full-transition .dj-progress-spinner{border-color:rgba(189,241,220,.19);border-top-color:#96ecc7;}
+#dj-full-transition strong{font-size:19px;font-weight:850;letter-spacing:-.04em;}
+#dj-full-transition p{font-size:12px;margin:0;opacity:.78;}
+@keyframes dj-v711-spin{to{transform:rotate(360deg)}}
+/* Prepaint matching: retained PWA token keeps the same blurred transition
+   screen visible during navigation, without showing the app icon. */
+html[data-dj-reload-splash="true"] #dj-full-transition{display:flex!important;}
+html[data-dj-reload-splash="true"] body::before,html[data-dj-reload-splash="true"] body::after{display:none!important;content:none!important;}
+/* Hide legacy small flash, while the dedicated loader owns the transition. */
+#app .dj-theme-switch-flash{display:none!important;}
+@media(max-width:699px){
+  /* Logo itself is the button: no white secondary circle, ring or shadow. */
+  html body #app#app .topbar .map-quick-search-form > .brand{
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    flex:0 0 46px!important;width:46px!important;max-width:46px!important;min-width:46px!important;
+    padding:0!important;margin:0!important;border:0!important;box-shadow:none!important;background:none!important;
+    cursor:pointer!important;overflow:hidden!important;
+    transition:flex-basis .26s cubic-bezier(.2,.8,.2,1),width .26s cubic-bezier(.2,.8,.2,1),max-width .26s cubic-bezier(.2,.8,.2,1)!important;
+  }
+  html body #app#app .topbar .map-quick-search-form > .brand .logo{
+    display:block!important;flex:0 0 45px!important;width:45px!important;height:45px!important;
+    border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;
+    overflow:visible!important;padding:0!important;margin:0!important;
+  }
+  html body #app#app .topbar .map-quick-search-form > .brand .logo img{
+    display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;
+    border-radius:0!important;box-shadow:none!important;border:0!important;
+  }
+  html body #app#app .topbar .map-quick-search-form > .brand > div{
+    display:block!important;white-space:nowrap!important;flex:0 0 auto!important;
+    max-width:0!important;opacity:0!important;overflow:hidden!important;
+    transform:translateX(-10px);transition:max-width .26s ease,opacity .22s ease,transform .26s ease!important;
+  }
+  html body #app#app .topbar .map-quick-search-form > .brand .eyebrow{display:none!important;}
+  html body #app#app .topbar .map-quick-search-form > .brand .brand-name{
+    display:block!important;white-space:nowrap!important;font-size:clamp(10px,2.75vw,12px)!important;
+    font-weight:800!important;color:inherit!important;letter-spacing:-.05em!important;
+  }
+  html body #app#app.dj-v711-brand-expanded .topbar .map-quick-search-form > .brand{
+    flex:0 0 min(175px,calc(100vw - 216px))!important;width:min(175px,calc(100vw - 216px))!important;max-width:min(175px,calc(100vw - 216px))!important;
+  }
+  html body #app#app.dj-v711-brand-expanded .topbar .map-quick-search-form > .brand > div{
+    max-width:125px!important;opacity:1!important;transform:translateX(0)!important;margin-left:5px!important;
+  }
+  html body #app#app .topbar .map-quick-search-form #map-quick-search-query{
+    min-width:0!important;flex:1 1 0!important;transition:width .26s ease,flex-basis .26s ease!important;
+  }
+  html body #app#app .topbar .map-quick-search-form{gap:7px!important;}
+  /* Controls use the PC button markup (SVG, including N+arrow for compass). */
+  html body #app #dj-mobile-map-actions .dj-mobile-pc-icon{display:flex!important;align-items:center!important;justify-content:center!important;}
+  html body #app #dj-mobile-map-actions .dj-mobile-pc-icon svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;}
+  html body #app #dj-mobile-map-actions .compass-direction{display:flex;flex-direction:column;align-items:center;gap:0;line-height:1;}
+  html body #app #dj-mobile-map-actions .compass-n{font-weight:900;font-size:11px;line-height:1;}
+  html body #app #dj-mobile-map-actions .compass-direction svg{width:20px;height:20px;fill:currentColor!important;stroke:none!important;}
+  /* Save taps: compact introductory text; original information remains in DOM. */
+  html body #app .dj-mobile-panel-split .dj-mobile-page-content{padding:13px 14px 15px!important;}
+  html body #app #route-panel.dj-mobile-panel-split .dj-mobile-page-content > p,
+  html body #app #participation-panel.dj-mobile-panel-split .dj-mobile-page-content > p{font-size:12px!important;line-height:1.35!important;margin-bottom:8px!important;}
+  html body #app #route-panel.dj-mobile-panel-split .route-card{padding:12px!important;margin-bottom:8px!important;}
+  html body #app #route-panel.dj-mobile-panel-split .route-card button{min-height:38px!important;}
+  /* Use 48% of the display for tap targets; long content still scrolls inside. */
+  html body #app#app #route-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app#app #participation-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app#app #news-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app#app #mine-panel.dj-mobile-panel-split.page-panel:not([hidden]){
+    height:min(48dvh,520px)!important;
+  }
+}
+/* PC: left sidebar controls define spacing and card treatment. */
+@media(min-width:700px){
+  #app#app[data-tab] .map-actions{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+  #app#app .map-actions :is(#map-gesture-guide-open,#map-compass,#center-dongjak,#current-location){
+    display:grid!important;visibility:visible!important;opacity:1!important;
+    background:var(--dj-desktop-panel,#fff)!important;color:var(--dj-desktop-text,#21483c)!important;
+    border:1px solid var(--dj-desktop-stroke,#d4e5db)!important;
+    border-radius:14px!important;min-width:44px!important;min-height:44px!important;
+    font-size:15px!important;font-weight:800!important;
+  }
+  #app#app .map-actions #map-gesture-guide-open{font-family:system-ui,sans-serif!important;font-weight:900!important;font-size:21px!important;line-height:1!important;}
+  #app#app #dj-desktop-safety-rail button,#app#app #bottom-nav .nav-tab,
+  #app#app #map-advanced-controls button,#app#app #map-safety-controls button,
+  #app#app .data-layer-controls button{
+    border-radius:14px!important;font-size:calc(1em + 1px)!important;
+    font-weight:750!important;transition:background-color .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease!important;
+  }
+  #app#app #dj-desktop-safety-rail button{background:var(--dj-desktop-panel,#fff)!important;border:1px solid var(--dj-desktop-stroke,#d4e5db)!important;color:var(--dj-desktop-text,#21483c)!important;}
+  #app#app #dj-desktop-safety-rail button:hover,#app#app .map-actions button:hover{transform:translateY(-1px)!important;box-shadow:0 7px 20px rgba(12,55,39,.14)!important;}
+  #app#app #transport-sheet:not([hidden]),#app#app #transport-sheet[data-kind="subway"]:not([hidden]){
+    box-sizing:border-box!important;position:fixed!important;top:var(--dj-v729-rail-top,92px)!important;
+    left:calc(var(--dj-v724-rail-right,130px) + 8px)!important;
+    right:auto!important;bottom:auto!important;transform:none!important;
+    width:min(510px,calc(100vw - var(--dj-v724-rail-right,130px) - 40px))!important;
+    max-width:min(510px,calc(100vw - var(--dj-v724-rail-right,130px) - 40px))!important;
+    max-height:calc(100dvh - var(--dj-v729-rail-top,92px) - 13px)!important;
+    height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;
+    padding:19px 21px!important;border-radius:22px!important;
+    background:var(--dj-desktop-panel,#fff)!important;color:var(--dj-desktop-text,#21483c)!important;
+    border:1px solid var(--dj-desktop-stroke,#d4e5db)!important;
+    box-shadow:0 18px 45px rgba(10,38,31,.16)!important;
+    animation:dj-v711-entrance .26s cubic-bezier(.2,.8,.3,1) both!important;
+  }
+  #app#app #transport-sheet #transport-title{display:flex!important;align-items:center!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important;}
+  #app#app #transport-title .dj-metro-line-selector{
+    padding:3px!important;border-radius:12px!important;background:transparent!important;
+    border:1px solid transparent!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;
+    transition:transform .18s ease,background-color .18s ease,border-color .18s ease!important;
+  }
+  #app#app #transport-title .dj-metro-line-selector[aria-pressed="true"]{border-color:var(--dj-desktop-stroke,#d4e5db)!important;background:rgba(63,151,118,.09)!important;}
+  #app#app #transport-title .dj-metro-line-selector:hover{transform:translateY(-2px)!important;}
+  #app#app #transport-title .dj-metro-line-selector .metro-badge-number{margin:0!important;}
+  /* Old extra transfer-row selector is redundant: choose route from title. */
+  #app#app #transport-sheet[data-kind="subway"] #transport-chips{display:none!important;}
+  #app#app #transport-sheet[data-kind="subway"] .metro-info-line-card{max-width:100%!important;}
+  #app#app #road-width-legend:not([hidden]){
+    animation:dj-v711-entrance .3s cubic-bezier(.2,.8,.3,1) both!important;
+    transform-origin:top left!important;
+  }
+  #app#app #version-history-modal:not([hidden]) .version-history-dialog{
+    animation:dj-v711-entrance .33s cubic-bezier(.2,.8,.3,1) both!important;
+    background:var(--dj-desktop-panel,#fff)!important;color:var(--dj-desktop-text,#21483c)!important;
+    border-radius:22px!important;border:1px solid var(--dj-desktop-stroke,#d4e5db)!important;
+    box-shadow:0 28px 75px rgba(12,48,38,.23)!important;
+  }
+  #app#app .version-history-head{padding:22px 29px 16px!important;border-bottom:1px solid var(--dj-desktop-stroke,#d4e5db)!important;}
+  #app#app .v707-history-timeline,#app#app .v707-history-sources{border-radius:18px!important;}
+  #app#app .v707-history-switch-button{transition:background-color .2s ease,color .2s ease,transform .17s ease!important;}
+  #app#app .v707-history-switch-button:active{transform:scale(.96)!important;}
+  #app#app .dj-v711-history-enter .v707-history-columns>*{animation:dj-v711-entrance .22s ease both!important;}
+}
+@keyframes dj-v711-entrance{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#dj-full-transition .dj-progress-spinner{animation:none!important;}#app#app #road-width-legend:not([hidden]),#app#app #version-history-modal:not([hidden]) .version-history-dialog{animation:none!important;}}

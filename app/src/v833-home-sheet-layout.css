@@ -1,0 +1,58 @@
+/* 8.2.13 delta: one mobile sheet header and size contract.
+   This is intentionally limited to the phone layout; desktop layout stays owned
+   by the existing desktop controller. No map renderer override. */
+@media (max-width:699px) {
+  /* Main tabs and district selection remain anchored above the existing dock.
+     A drawer never consumes more than half of the visible viewport. */
+  html body #app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,
+    #admin-dong-picker,#overview-sheet
+  ):not([hidden]),
+  html body #app#app#app#app#app[data-tab="route"] #route-panel.page-panel:not([hidden]) {
+    box-sizing:border-box!important;
+    position:fixed!important;top:auto!important;
+    bottom:var(--dj829-panel-bottom)!important;
+    height:auto!important;min-height:0!important;
+    max-height:min(50dvh,calc(100dvh - var(--dj829-panel-bottom) - env(safe-area-inset-top,0px) - 12px))!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+  }
+  html body #app#app#app#app#app #admin-dong-picker #admin-dong-list {
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+    padding-bottom:10px!important;
+  }
+  /* Header geometry and gray handle belong solely to v829-mobile-layout-system.css.
+     v833 owns mobile half-height and sheet-dismiss animation only. */
+  html body #app#app#app#app#app #admin-dong-picker > #admin-dong-status {
+    display:block!important;margin:0 10px 12px!important;
+    color:var(--dj800-muted,#72887e)!important;
+    font-size:12px!important;line-height:1.4!important;
+  }
+  html body #app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,
+    #admin-dong-picker
+  ) :is(.page-heading,.admin-dong-heading).dj-sheet-swipe-zone {
+    touch-action:pan-x!important;cursor:grab;
+  }
+  html body #app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,
+    #admin-dong-picker,#overview-sheet,#transport-sheet,#detail-sheet,
+    #entry-sheet,#pza-road-sheet,#night-visibility-float,
+    #road-width-legend,#ped-tools-panel
+  ).dj833-sheet-dismissing {
+    transform:translate3d(0,115dvh,0)!important;
+    opacity:0!important;
+    transition:transform 180ms ease-in,opacity 180ms ease-in!important;
+    pointer-events:none!important;
+  }
+  @media (prefers-reduced-motion:reduce) {
+    html body #app#app#app#app#app .dj833-sheet-dismissing {transition:none!important;}
+  }
+  /* The original administrative opener stays in map options; it is activated
+     by the existing public shortcut, and never occupies the safety home page. */
+  html body #app#app#app#app#app .dj-admin-original-trigger[hidden] {display:none!important;}
+}

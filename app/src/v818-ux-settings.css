@@ -1,0 +1,41 @@
+/* v818: no proprietary fonts distributed. Local Apple SD Gothic Neo is used
+ * only when installed on the visitor's operating system. Licensed webfonts
+ * can be enabled later via a separately permitted /fonts resource. */
+html body #app#app,
+html body #app#app *:not(svg):not(path):not(canvas){
+  font-family:'Apple SD Gothic Neo','AppleSDGothicNeo',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif!important;
+}
+/* Weather follows JS WAAPI opacity transitions.  Only after fade-out does
+ * the stored hide class switch the actual control to display:none. */
+html body #app#app .topbar :is(#weather-widget,#dj-mobile-weather-trigger,#dj-v794-weather){
+  will-change:opacity;
+}
+/* Lock the road-width legend to the measured rail before first visible paint.
+ * No legacy transform, scale or positional transition may pull it rightward. */
+@media(min-width:1080px){
+  html body #app#app #road-width-legend:not([hidden]):not(.dj-float-user-positioned){
+    position:fixed!important;
+    left:var(--dj800-panel-left,200px)!important;
+    top:var(--dj800-panel-top,92px)!important;
+    right:auto!important;bottom:auto!important;
+    transform:none!important;translate:none!important;scale:none!important;
+    animation:none!important;transition-property:background-color,border-color,color!important;
+  }
+}
+/* Mobile topbar: equal physical spacing between logo/search and search/theme. */
+@media(max-width:699px){
+  html body #app#app .topbar{
+    display:flex!important;align-items:center!important;column-gap:10px!important;
+  }
+  html body #app#app .topbar #dj-settings-mobile,
+  html body #app#app .topbar .header-tools{
+    flex:0 0 50px!important;width:50px!important;max-width:50px!important;
+    min-width:50px!important;padding:0!important;margin:0!important;
+  }
+  html body #app#app .topbar #map-quick-search{
+    flex:1 1 0%!important;min-width:0!important;margin:0!important;
+  }
+  html body #app#app .topbar .header-tools #theme-toggle{
+    margin:0!important;width:50px!important;min-width:50px!important;max-width:50px!important;
+  }
+}

@@ -1,0 +1,709 @@
+/* A named important layer deliberately supersedes the legacy unlayered
+   !important cascade without another generation of repeated #app selectors. */
+@layer request-completion {
+  #app {--dj910-dock-bottom:88px;--dj910-header-bottom:72px;--dj910-map-top:136px;}
+  #app .map-quick-search-form {display:flex!important;align-items:center!important;gap:6px!important;padding:3px 10px 3px 4px!important;}
+  #app .map-quick-search-icon {display:none!important;}
+  #app .map-quick-search-form :is(#dj-settings-mobile,#dj-about-pc) {position:static!important;inset:auto!important;order:-1!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;transform:none!important;}
+  #app .map-quick-search-form :is(#dj-settings-mobile,#dj-about-pc) img {background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;object-fit:contain!important;}
+  #app .map-quick-search-form input {flex:1 1 0%!important;min-width:0!important;width:0!important;padding:0 4px!important;text-align:start!important;}
+  #app :is(.dj-sheet-chrome-close,#transport-close,.dj-place-header-close,#dj-mobile-utilities-close,#dj-settings-close) {display:grid!important;place-items:center!important;position:relative!important;inset:auto!important;width:40px!important;min-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;line-height:1!important;flex:0 0 40px!important;}
+  #app :is(.dj-sheet-chrome-close,#transport-close,.dj-place-header-close,#dj-mobile-utilities-close) svg {position:static!important;inset:auto!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;margin:0!important;transform:none!important;translate:none!important;display:block!important;}
+  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) {display:grid!important;place-items:center!important;color:var(--dj800-text,#263a32)!important;padding:0!important;}
+  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) svg {position:static!important;inset:auto!important;width:21px!important;height:21px!important;margin:0!important;transform:none!important;translate:none!important;stroke:currentColor!important;}
+  #app :is(#transport-save-place,.dj854-place-favorite)::before,#app :is(#transport-save-place,.dj854-place-favorite)::after {content:none!important;display:none!important;}
+  #app :is(#transport-save-place,.dj854-place-favorite)[aria-pressed="true"] svg {fill:currentColor!important;}
+  #app :is(.news-tab,.dj-news-tab,[data-news-source],#dongjak-news-refresh,.route-transit-confirm-actions button,.route-map-card-actions button,.route-mini-btn,.dj-place-route-button) {border-radius:999px!important;min-height:40px!important;}
+  #app :is(#route-calc,#dj815-rail-planner > button) {background:var(--dj800-accent,#0c8069)!important;color:#fff!important;border-radius:999px!important;}
+  #app #dj910-route-footer {position:sticky!important;bottom:0!important;z-index:12!important;padding:10px 0 2px!important;background:var(--dj800-surface,#fff)!important;}
+  #app #route-calc {width:100%!important;margin:0!important;min-height:46px!important;}
+  #app #route-map-card .dj804-compare-card {border-radius:22px!important;text-align:start!important;}
+  #app #route-map-card .dj804-compare-note {font-size:11px!important;line-height:1.45!important;}
+  #app .dj-place-header-title::before,#app .dj-place-header-title::after,#app .dj-place-header-title h3::after {content:none!important;display:none!important;}
+  #app .dj-place-header-title h3 {border:0!important;box-shadow:none!important;text-decoration:none!important;}
+  #app .dj-selected-transport-location {display:block!important;width:28px!important;height:36px!important;z-index:8!important;filter:drop-shadow(0 2px 3px #0005)!important;}
+  #app .dj-selected-transport-location svg {display:block!important;width:28px!important;height:36px!important;}
+  #app .dj-selected-transport-location svg path {fill:#10816d!important;stroke:#fff!important;stroke-width:2px!important;}
+  #app .dj-selected-transport-location svg circle {fill:#fff!important;stroke:none!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:68px!important;padding:10px 12px!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main {flex:1 1 0%!important;min-width:0!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main small {font-size:12px!important;line-height:1.3!important;word-break:keep-all!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-time {flex:0 0 auto!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;text-align:right!important;max-width:46%!important;font-size:14px!important;line-height:1.35!important;}
+  #app .dj-transit-bus-route[data-bus-class="trunk"],#app .dj-transit-bus-route[data-bus-class="night"] {background:#3156a0!important;color:#fff!important;}
+  #app .dj-transit-bus-route[data-bus-class="branch"],#app .dj-transit-bus-route[data-bus-class="village"] {background:#278044!important;color:#fff!important;}
+  #app .dj-transit-bus-route[data-bus-class="metro"] {background:#b43d3b!important;color:#fff!important;}
+  #app .dj-transit-bus-route[data-bus-class="circular"] {background:#d4a52b!important;color:#161616!important;}
+  #app .dj-transit-bus-route[data-bus-class="airport"] {background:#846b3b!important;color:#fff!important;}
+  #app .dj-transit-bus-route[data-bus-class="unknown"] {background:#62676b!important;color:#fff!important;}
+  #app[data-dj910-sheet-open="true"] #dj-browser-webapp-tip {display:none!important;}
+  #app .dj-theme-switch-flash {backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none!important;animation-duration:180ms!important;}
+  #app[data-theme="dark"] {
+    --dj800-surface:#191b1f!important;--dj800-elevated:#25282d!important;--dj800-text:#e5e7eb!important;--dj800-muted:#a5acb5!important;--dj800-border:#3a3e45!important;--dj800-accent:#527f72!important;
+    --surface:#191b1f!important;--card:#191b1f!important;--panel:#191b1f!important;--text:#e5e7eb!important;--muted:#a5acb5!important;--border:#3a3e45!important;
+  }
+  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:#191b1f!important;color:#e5e7eb!important;border-color:#3a3e45!important;box-shadow:0 8px 28px #0003!important;}
+  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:#25282d!important;color:#d7dde3!important;border-color:#3a3e45!important;}
+  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.nav-tab,.dj-v794-tool,.dj832-feature) {color:#c5cec9!important;}
+  #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#c3ded2!important;background:#303e39!important;}
+  #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:#b4c1bb!important;}
+  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:#35574c!important;color:#fff!important;box-shadow:none!important;}
+  html[data-theme="dark"],html[data-theme="dark"] body {background:#151619!important;}
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;left:12px!important;right:12px!important;width:auto!important;height:50px!important;min-height:50px!important;padding:0!important;gap:8px!important;background:transparent!important;backdrop-filter:none!important;}
+    #app .topbar #map-quick-search {display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;max-width:none!important;}
+    #app .topbar .map-quick-search-form {width:100%!important;height:50px!important;box-sizing:border-box!important;border-radius:999px!important;}
+    #app .topbar .map-quick-search-form #dj-settings-mobile {display:grid!important;place-items:center!important;pointer-events:auto!important;overflow:visible!important;visibility:visible!important;opacity:1!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;flex:0 0 44px!important;}
+    #app .topbar .map-quick-search-form #dj-settings-mobile img {display:block!important;visibility:visible!important;opacity:1!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important;max-height:40px!important;}
+    #app .topbar .map-quick-search-form #dj-about-pc {display:none!important;}
+    #app .topbar .header-tools {display:flex!important;align-items:center!important;flex:0 0 62px!important;width:62px!important;min-width:62px!important;max-width:62px!important;}
+    #app #dj890-ai-orb {display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;width:62px!important;min-width:62px!important;height:46px!important;min-height:46px!important;padding:0!important;border-radius:999px!important;border:1px solid var(--dj800-border,#d7e6de)!important;background:var(--dj800-accent,#12856c)!important;color:#fff!important;font-size:17px!important;font-weight:750!important;}
+    #app #dj890-ai-orb::before {content:'✦'!important;display:block!important;font-size:14px!important;}
+    #app #dj890-ai-orb .dj890-ai-orb-text {color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important;}
+    #app:is(.route-guiding,.map-immersive) #bottom-nav {display:none!important;}
+    #app .topbar .header-tools > :not(#dj890-ai-orb):not(#dj800-ai-search-trigger) {display:none!important;}
+    #app #dj-v794-toolbar {position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 70px)!important;left:12px!important;right:12px!important;display:flex!important;gap:6px!important;align-items:center!important;height:58px!important;min-height:58px!important;padding:0!important;}
+    #app:not([data-tab="map"]) #dj-v794-toolbar {display:none!important;}
+    #app #dj-v794-toolbar > .dj831-scrollport {display:flex!important;flex:1 1 0%!important;min-width:0!important;gap:6px!important;height:58px!important;align-items:center!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-padding-inline:4px!important;padding-right:8px!important;mask-image:none!important;-webkit-mask-image:none!important;}
+    #app #dj-v794-toolbar :is(.dj832-native,.dj832-feature,#dj-v794-weather),#app #dj-v794-more {display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;flex:0 0 58px!important;width:58px!important;min-width:58px!important;max-width:58px!important;height:56px!important;min-height:56px!important;max-height:56px!important;gap:3px!important;padding:4px 2px!important;border-radius:17px!important;border:1px solid var(--dj800-border,#d7e6de)!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#263f35)!important;font-size:11px!important;line-height:1.15!important;overflow:hidden!important;box-sizing:border-box!important;white-space:nowrap!important;}
+    #app #dj-v794-toolbar .dj-v794-icon,#app #dj-v794-toolbar .dj832-feature-icon {display:grid!important;place-items:center!important;width:25px!important;height:25px!important;min-height:25px!important;margin:0!important;font-size:23px!important;}
+    #app #dj-v794-toolbar :is(.dj-v794-caption,.dj832-feature-label) {display:block!important;position:static!important;width:auto!important;max-width:100%!important;height:auto!important;opacity:1!important;visibility:visible!important;transform:none!important;font-size:11px!important;white-space:nowrap!important;text-overflow:ellipsis!important;overflow:hidden!important;}
+    #app #dj-v794-toolbar .dj832-native::after {content:attr(data-dj832-label)!important;display:block!important;position:static!important;width:auto!important;max-width:100%!important;height:auto!important;opacity:1!important;visibility:visible!important;font-size:11px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+    #app #dj-v794-toolbar .dj832-native .dj-v794-caption {display:none!important;}
+    #app[data-dj-language="en"] #dj-v794-toolbar .dj832-native::after,#app[data-dj-language="en"] #dj-v794-toolbar .dj832-feature-label {font-size:9px!important;white-space:normal!important;line-height:1.1!important;max-height:20px!important;text-align:center!important;word-break:normal!important;}
+    #app #dj-v794-toolbar #dj-v794-weather::before,#app #dj-v794-toolbar #dj-v794-weather::after {content:none!important;display:none!important;}
+    #app #dj-v794-toolbar #dj-v794-weather .dj910-weather-temp {display:block!important;font-size:12px!important;font-weight:750!important;}
+    #app #dj-v794-more::after {content:'더보기'!important;display:block!important;font-size:11px!important;line-height:1.15!important;}
+    #app[data-dj-language="en"] #dj-v794-more::after {content:'More'!important;}
+    #app #dj-v794-more > svg {display:block!important;width:25px!important;height:25px!important;min-width:25px!important;min-height:25px!important;margin:0!important;}
+    #app #bottom-nav {position:fixed!important;top:auto!important;left:12px!important;right:12px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 3px)!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important;grid-auto-flow:column!important;align-items:stretch!important;width:auto!important;min-width:0!important;max-width:none!important;height:70px!important;min-height:70px!important;max-height:70px!important;padding:4px 6px!important;margin:0!important;box-sizing:border-box!important;transform:none!important;translate:none!important;border-radius:32px!important;background:var(--dj800-surface,#fff)!important;backdrop-filter:none!important;z-index:4800!important;}
+    #app #bottom-nav::before,#app #bottom-nav::after {content:none!important;display:none!important;}
+    #app #bottom-nav .nav-tab {grid-column:auto!important;grid-row:1!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;min-width:0!important;width:auto!important;height:100%!important;gap:3px!important;padding:3px 2px!important;border-radius:28px!important;line-height:1.15!important;}
+    #app #bottom-nav .nav-tab .nav-icon {display:grid!important;place-items:center!important;width:24px!important;height:24px!important;font-size:0!important;line-height:0!important;color:inherit!important;-webkit-text-fill-color:currentColor!important;}
+    #app #bottom-nav .nav-tab .nav-icon::before,#app #bottom-nav .nav-tab .nav-icon::after {content:none!important;display:none!important;}
+    #app #bottom-nav .nav-tab .nav-icon svg {display:block!important;width:24px!important;height:24px!important;stroke:currentColor!important;color:inherit!important;fill:none!important;opacity:1!important;visibility:visible!important;}
+    #app #bottom-nav .nav-tab > span:last-child {font-size:11px!important;font-weight:700!important;white-space:normal!important;text-overflow:clip!important;overflow:visible!important;max-width:100%!important;line-height:1.15!important;}
+    #app #bottom-nav .nav-tab.active {color:var(--dj800-accent,#0d7b64)!important;}
+    #app[data-dj-language="en"] #bottom-nav .nav-tab > span:last-child {font-size:9px!important;}
+    #app :is(#transport-sheet,.page-panel,#dj-mobile-utilities,#route-map-card,#route-transit-confirm,#dj-browser-webapp-tip) {bottom:var(--dj910-dock-bottom)!important;}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities) {position:fixed!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;box-sizing:border-box!important;min-height:0!important;overflow:hidden!important;transform:none!important;z-index:4200!important;visibility:visible!important;}
+    #app .page-panel:not([hidden]) {visibility:visible!important;scale:1!important;display:flex!important;flex-direction:column!important;top:auto!important;height:min(62dvh,calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom)))!important;max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;}
+    #app .page-panel > .dj836-sheet-body {flex:1 1 0%!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding-bottom:12px!important;}
+    #app #transport-sheet:not([hidden]) {display:flex!important;flex-direction:column!important;top:auto!important;height:min(52dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;max-height:calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom))!important;border-radius:24px!important;}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities).dj871-sheet-expanded {top:var(--dj910-header-bottom)!important;height:auto!important;max-height:none!important;}
+    /* Preserve resting geometry, not a blanket animation ban. The frame owner
+       writes inline motion; native fade and staged drag classes remain eligible. */
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities):not([hidden]):not([data-dj810-animating]):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj870-more-entering):not(.dj870-more-leaving) {translate:0 0!important;scale:1!important;}
+    #app .page-panel:not([hidden]):not([data-dj810-animating]):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning) {opacity:1!important;}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities)[data-dj810-animating] {animation:none!important;}
+    #app #transport-sheet > .handle {position:relative!important;inset:auto!important;display:block!important;width:100%!important;height:16px!important;min-height:16px!important;flex:0 0 16px!important;}
+    #app #transport-sheet > .handle::after {position:absolute!important;top:6px!important;left:calc(50% - 20px)!important;width:40px!important;height:4px!important;}
+    #app #transport-sheet .transport-panel-head {position:relative!important;inset:auto!important;display:grid!important;grid-template-columns:minmax(0,1fr) 40px!important;grid-template-areas:'title close' 'actions actions'!important;grid-template-rows:auto auto!important;align-items:center!important;gap:6px 8px!important;flex:0 0 auto!important;min-height:0!important;height:auto!important;padding:0 12px 10px!important;}
+    #app #transport-sheet .dj857-transport-title-group {grid-area:title!important;display:block!important;text-align:start!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;}
+    #app #transport-kind {display:block!important;font-size:10px!important;line-height:1.2!important;margin:0 0 3px!important;}
+    #app #transport-title {display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;text-align:start!important;font-size:18px!important;line-height:1.2!important;}
+    #app #transport-title .dj-metro-station-name {display:inline!important;width:auto!important;max-width:100%!important;margin:0!important;text-align:start!important;font-size:inherit!important;}
+    #app #transport-title .dj-metro-badge-row {display:flex!important;align-items:center!important;width:auto!important;margin:0!important;}
+    #app #transport-title .dj-metro-line-selector {display:grid!important;place-items:center!important;width:26px!important;min-width:26px!important;height:26px!important;padding:0!important;margin:0!important;}
+    #app #transport-title .metro-panel-badge {width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;font-size:13px!important;}
+    #app #transport-close {grid-area:close!important;align-self:center!important;}
+    #app #transport-description,#app #transport-chips,#app #transport-sheet .dj857-title-divider {display:none!important;}
+    #app #transport-sheet .dj-news-transport-actions {grid-area:actions!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:6px!important;width:auto!important;min-height:40px!important;margin:0!important;padding:0!important;}
+    #app #transport-sheet .dj-news-transport-actions button {position:relative!important;inset:auto!important;display:grid!important;place-items:center!important;height:36px!important;min-height:36px!important;max-height:36px!important;width:52px!important;min-width:44px!important;max-width:none!important;flex:0 0 auto!important;padding:0 10px!important;border-radius:999px!important;font-size:12px!important;line-height:1!important;}
+    #app #transport-sheet .dj875-transit-scroll {position:relative!important;inset:auto!important;transform:none!important;flex:1 1 0%!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:0 12px 12px!important;}
+    #app #transport-neighbors {position:static!important;inset:auto!important;width:auto!important;margin:4px 0 8px!important;padding:0!important;}
+    #app #transport-neighbors .metro-line-card {padding:0!important;margin:0!important;}
+    #app #transport-neighbors .metro-neighbor-row {min-height:36px!important;padding:4px 8px!important;margin:0!important;}
+    #app #transport-neighbors :is(.metro-rail-current,.metro-rail-previous,.metro-rail-next) {padding:4px 8px!important;min-height:28px!important;font-size:12px!important;}
+    #app #transport-sheet .transport-arrivals-title {position:sticky!important;top:0!important;left:auto!important;right:auto!important;width:auto!important;background:var(--dj800-surface,#fff)!important;z-index:4!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;min-height:40px!important;padding:4px 0!important;margin:0 0 6px!important;}
+    #app #transport-sheet .transport-mode-tabs {display:flex!important;flex:0 0 auto!important;width:auto!important;gap:2px!important;padding:3px!important;border-radius:999px!important;margin:0!important;}
+    #app #transport-sheet .transport-mode-tabs button {min-height:30px!important;padding:4px 10px!important;border-radius:999px!important;font-size:12px!important;}
+    #app #transport-update-time {font-size:10px!important;}
+    #app #transport-refresh {min-height:32px!important;padding:5px 9px!important;border-radius:999px!important;font-size:11px!important;white-space:nowrap!important;}
+    #app #transport-arrivals {grid-template-columns:1fr!important;gap:6px!important;}
+    #app #transport-arrivals .metro-direction-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;}
+    #app .dj-place-detail-popup {position:fixed!important;top:auto!important;bottom:var(--dj910-dock-bottom)!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;transform:none!important;height:min(52dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;max-height:calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom))!important;z-index:4200!important;}
+    #app :is(.dj-place-detail-popup.dj871-place-expanded,.dj-place-detail-popup.dj871-sheet-expanded) {top:var(--dj910-header-bottom)!important;height:auto!important;max-height:none!important;}
+    #app .dj-place-detail-popup .maplibregl-popup-content {width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;overflow:hidden!important;padding:0!important;display:flex!important;flex-direction:column!important;border-radius:24px!important;background:var(--dj800-surface,#fff)!important;backdrop-filter:none!important;}
+    #app .dj-place-detail-popup .maplibregl-popup-tip {display:none!important;}
+    #app .dj-place-detail-popup .maplibregl-popup-content::before {display:none!important;content:none!important;}
+    #app .dj-place-detail {display:flex!important;flex-direction:column!important;flex:1 1 0%!important;min-height:0!important;width:100%!important;margin:0!important;padding:0!important;}
+    #app .dj-place-header {display:grid!important;grid-template-columns:minmax(0,1fr) 40px!important;grid-template-areas:'title close' 'actions actions'!important;grid-template-rows:minmax(40px,auto) 36px!important;gap:6px 8px!important;position:relative!important;flex:0 0 auto!important;min-height:0!important;padding:18px 12px 10px!important;}
+    #app .dj-place-edge-drag {position:absolute!important;top:0!important;left:calc(50% - 20px)!important;right:auto!important;width:40px!important;height:4px!important;margin:6px 0 0!important;background:#c7d1cd!important;border-radius:99px!important;}
+    #app .dj-place-edge-drag::before,#app .dj-place-edge-drag::after {display:none!important;content:none!important;}
+    #app .dj-place-header-title {grid-area:title!important;min-height:0!important;height:auto!important;max-height:none!important;display:block!important;width:auto!important;padding:0!important;text-align:start!important;}
+    #app .dj-place-header-title .dj-place-kicker {text-align:start!important;font-size:10px!important;line-height:1.2!important;margin:0 0 3px!important;}
+    #app .dj-place-header-title h3 {text-align:start!important;font-size:18px!important;line-height:1.25!important;margin:0!important;padding:0!important;}
+    #app .dj-place-header-close {grid-area:close!important;align-self:center!important;}
+    #app .dj-place-header-actions {grid-area:actions!important;min-height:36px!important;height:36px!important;max-height:36px!important;margin:0!important;flex-flow:row nowrap!important;display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:6px!important;width:auto!important;padding:0!important;}
+    #app .dj-place-header-actions :is(.dj-place-route-actions,.dj815-place-actions) {display:flex!important;gap:6px!important;}
+    #app .dj-place-header-actions button {height:36px!important;min-height:36px!important;max-height:36px!important;width:52px!important;min-width:44px!important;padding:0 8px!important;border-radius:999px!important;font-size:12px!important;}
+    #app .dj-place-body {display:flex!important;flex-direction:column!important;flex:1 1 0%!important;min-height:0!important;max-height:none!important;height:auto!important;overflow-y:auto!important;gap:10px!important;padding:10px 12px 16px!important;}
+    #app .dj-place-body :is(.dj-place-info-card,.dj-place-favorites-section,.dj-place-ai-section) {display:block!important;flex:0 0 auto!important;padding:8px 10px!important;margin:0!important;min-height:0!important;border-radius:16px!important;}
+    #app .dj-place-body .dj-place-row {display:grid!important;grid-template-columns:58px minmax(0,1fr)!important;align-items:start!important;gap:8px!important;min-height:28px!important;margin:0!important;padding:5px 0!important;}
+    #app .dj-place-body .dj-place-row :is(span,strong,a) {font-size:12px!important;line-height:1.35!important;}
+    #app .dj-place-body .dj-place-section-heading {display:block!important;font-size:12px!important;margin:0 0 4px!important;}
+    #app .dj-place-body .dj-place-favorites-section {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;}
+    #app .dj-place-favorites-section .dj-place-section-heading {margin:0!important;white-space:nowrap!important;font-size:12px!important;}
+    #app .dj-place-body .dj815-place-folder {display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;padding:0!important;}
+    #app .dj-place-body .dj815-place-folder select {height:34px!important;min-height:34px!important;font-size:12px!important;padding:4px 8px!important;}
+    #app #dj-mobile-utilities {max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;border-radius:24px!important;}
+    #app #dj-mobile-utilities :is(.dj840-more-quick-actions button,.dj860-more-launch,.dj832-more-feature) {min-height:44px!important;height:44px!important;padding:8px 12px!important;border-radius:999px!important;box-sizing:border-box!important;}
+    #app #dj-map-settings {position:fixed!important;inset:var(--dj910-header-bottom) 12px var(--dj910-dock-bottom)!important;padding:0!important;background:transparent!important;backdrop-filter:none!important;}
+    #app #dj-map-settings .dj-map-settings-card {display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;max-height:none!important;border-radius:24px!important;overflow:hidden!important;}
+    #app #dj-map-settings .dj-map-settings-head {padding:14px!important;flex:0 0 auto!important;}
+    #app #dj-map-settings .dj-map-settings-head h2 {font-size:20px!important;}
+    #app #dj-map-settings .dj-map-settings-head p,#app #dj-map-settings .dj-map-settings-kicker {display:none!important;}
+    #app #dj-map-settings .dj-map-settings-content {flex:1 1 0%!important;min-height:0!important;overflow-y:auto!important;padding:12px!important;}
+    #app #dj-map-settings .dj-map-settings-footer {padding:10px 12px!important;flex:0 0 auto!important;}
+    #app #dj-map-settings .dj-map-settings-footer button {border-radius:999px!important;min-height:40px!important;}
+    #app #dj-browser-webapp-tip {max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;overflow-y:auto!important;}
+    #app #dj840-map-tip {min-height:44px!important;height:44px!important;max-height:44px!important;padding:0 42px 0 10px!important;border-radius:999px!important;font-size:12px!important;}
+    #app #map .maplibregl-ctrl-scale {height:24px!important;min-height:24px!important;max-height:24px!important;padding:0 6px!important;font-size:10px!important;border-radius:999px!important;}
+    #app #route-transit-confirm {left:12px!important;right:12px!important;width:auto!important;max-height:calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom))!important;overflow-y:auto!important;}
+    #app #route-map-card {left:12px!important;right:12px!important;width:auto!important;max-height:min(44dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;overflow-y:auto!important;padding:12px!important;}
+    #app #route-map-card .dj804-compare-grid {gap:8px!important;}
+    #app #route-map-card .dj804-compare-title {font-size:13px!important;}
+    #app #route-map-card .dj804-compare-action {display:none!important;}
+    #app #route-map-card .dj804-compare-meta {font-size:11px!important;}
+    #app #route-panel .route-card {display:flex!important;flex-direction:column!important;}
+    #app #route-panel #dj910-route-footer {position:relative!important;order:90!important;flex:0 0 auto!important;padding:10px 14px!important;border-top:1px solid var(--dj800-border,#d7e6de)!important;}
+    #app #route-panel #route-status {order:91!important;}
+    #app #route-panel #route-clear {order:89!important;}
+    #app #route-panel .page-panel-description {font-size:12px!important;line-height:1.45!important;}
+    #app #news-panel :is(.dj-news-tabs,.news-tabs,.dongjak-news-tabs) {border-radius:999px!important;padding:4px!important;}
+    #app #news-panel :is(.news-tab,.dj-news-tab,[data-news-source]) {font-size:13px!important;}
+    #app #news-panel #dongjak-news-refresh {min-height:36px!important;padding:6px 12px!important;font-size:12px!important;}
+  }
+  @media (min-width:700px) and (max-width:1079px) {
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities,#route-map-card,#route-transit-confirm,.dj-place-detail-popup,#bottom-nav) {left:max(20px,calc((100vw - 720px)/2))!important;right:max(20px,calc((100vw - 720px)/2))!important;max-width:720px!important;}
+    #app .topbar {left:20px!important;right:20px!important;}
+    #app #bottom-nav {height:74px!important;max-height:74px!important;}
+    #app #transport-sheet:not([hidden]),#app .dj-place-detail-popup {height:52dvh!important;}
+    #app #transport-sheet.dj871-sheet-expanded,#app :is(.dj-place-detail-popup.dj871-place-expanded,.dj-place-detail-popup.dj871-sheet-expanded) {height:auto!important;}
+    #app .page-panel:not([hidden]) {visibility:visible!important;scale:1!important;height:66dvh!important;}
+    #app .page-panel.dj871-sheet-expanded {height:auto!important;}
+    #app #transport-arrivals {grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+    #app #transport-arrivals:has(.metro-arrival-group) {grid-template-columns:1fr!important;}
+    #app #transport-title,#app .dj-place-header-title h3 {font-size:21px!important;}
+  }
+  @media (min-width:1080px) {
+    #app .map-quick-search-form #dj-settings-mobile {display:none!important;}
+    #app .map-quick-search-form #dj-about-pc {display:grid!important;place-items:center!important;width:44px!important;min-width:44px!important;height:44px!important;}
+    #app .map-quick-search-form #dj-about-pc img {width:38px!important;height:38px!important;}
+    #app .transport-panel-head {min-height:0!important;padding:12px 16px!important;}
+    #app #transport-description {display:none!important;}
+    #app .dj-place-header {padding:12px 16px!important;}
+    #app .dj-place-meta .dj-place-row {min-height:30px!important;padding:5px 0!important;}
+    #app #route-map-card {max-height:55dvh!important;overflow-y:auto!important;}
+    /* Keep desktop motion on geometric/opacity properties, never the theme
+       background. CSS transitions outrank even important theme colors. */
+    #app #mine-panel {transition-property:opacity,transform,translate,clip-path!important;}
+    #app[data-theme="dark"] #mine-panel {background:#191b1f!important;background-color:#191b1f!important;color:#e5e7eb!important;}
+    #app[data-theme="light"] #mine-panel {background:#fff!important;background-color:#fff!important;}
+  }
+  #app :is(.dj-place-header-close,#transport-close) {background:var(--dj800-elevated,#e8f3ed)!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;color:var(--dj800-text,#263a32)!important;box-sizing:border-box!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:#25282d!important;color:#e5e7eb!important;transition:none!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-name,.dj834-settings-group>button>span) {color:#e5e7eb!important;-webkit-text-fill-color:#e5e7eb!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-meta small,.dj834-current-theme,.dj834-chevron) {color:#a5acb5!important;-webkit-text-fill-color:#a5acb5!important;}
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app #dj-tablet-utility-group {display:none!important;}
+    #app #dj-v794-toolbar .dj832-feature::after,#app #dj-v794-toolbar .dj832-feature::before {content:none!important;display:none!important;}
+    #app #dj-v794-toolbar .dj832-feature-label {overflow:visible!important;max-height:none!important;min-height:13px!important;flex:0 0 auto!important;}
+  }
+  @media(max-width:699px) {
+    #app #dj-v794-toolbar > .dj831-scrollport {padding:0!important;scroll-snap-type:x mandatory!important;scroll-padding:0!important;}
+    #app #dj-v794-toolbar > .dj831-scrollport > :is(.dj832-native,.dj832-feature,#dj-v794-weather) {flex-basis:var(--dj910-tool-width)!important;width:var(--dj910-tool-width)!important;min-width:var(--dj910-tool-width)!important;max-width:var(--dj910-tool-width)!important;scroll-snap-align:start!important;}
+    #app {--dj910-tool-width:calc((100vw - 106px)/4);}
+  }
+  @media(min-width:421px) and (max-width:599px) {#app {--dj910-tool-width:calc((100vw - 112px)/5);}}
+  @media(min-width:600px) and (max-width:699px) {#app {--dj910-tool-width:calc((100vw - 118px)/6);}}
+  #app[data-theme="light"] :is(#transport-sheet,.dj-place-detail,.dj-place-header,.dj-place-detail-popup .maplibregl-popup-content,#dj-mobile-utilities) {background:#fff!important;backdrop-filter:none!important;}
+  #app .dj-place-actions .dj-place-action {border-radius:999px!important;min-height:36px!important;background:var(--dj800-accent,#12856c)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;}
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app .map-quick-search-form :is(.map-quick-search-submit,#dj887-ai-quick-entry,#dj-ai-search-entry) {display:none!important;}
+    #app #transport-sheet > .handle {background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+    #app #transport-sheet > .handle::before {content:none!important;display:none!important;}
+    #app #bottom-nav .nav-tab {border:0!important;box-shadow:none!important;background-image:none!important;}
+    #app #bottom-nav .nav-tab::before,#app #bottom-nav .nav-tab::after {content:none!important;display:none!important;}
+    #app[data-theme="dark"] #bottom-nav .nav-tab {background:transparent!important;color:#c5cec9!important;-webkit-text-fill-color:#c5cec9!important;}
+    #app[data-theme="dark"] #bottom-nav .nav-tab.active {background:#303e39!important;color:#c3ded2!important;-webkit-text-fill-color:#c3ded2!important;}
+    #app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {color:inherit!important;-webkit-text-fill-color:currentColor!important;}
+    #app #dj-v794-weather .dj910-weather-icon {display:grid!important;place-items:center!important;width:25px!important;height:25px!important;min-height:25px!important;flex:0 0 25px!important;font-size:23px!important;line-height:1!important;}
+  }
+  @media(min-width:700px) and (max-width:1079px) {
+    #app .map-actions {top:calc(var(--dj910-map-top) + 12px)!important;bottom:auto!important;right:12px!important;left:auto!important;width:44px!important;min-width:44px!important;height:auto!important;max-height:none!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;}
+    #app .map-actions button {width:44px!important;min-width:44px!important;max-width:44px!important;height:44px!important;min-height:44px!important;max-height:44px!important;flex:0 0 44px!important;padding:0!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:50%!important;background:var(--dj800-surface,#fff)!important;}
+  }
+  /* Screenshot-driven compact shell: one coordinate owner for each surface. */
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app #bottom-nav {overflow:hidden!important;align-content:stretch!important;padding:4px 6px!important;}
+    #app #bottom-nav .nav-tab {position:relative!important;inset:auto!important;box-sizing:border-box!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:0!important;transform:none!important;translate:none!important;scale:1!important;overflow:hidden!important;background-clip:padding-box!important;}
+    #app #bottom-nav .nav-tab.active {border-radius:25px!important;}
+    #app:is([data-dj910-sheet-open="true"],:not([data-tab="map"])) #dj840-map-tip,
+    #app[data-dj910-sheet-open="true"] #map .maplibregl-ctrl-bottom-left {visibility:hidden!important;pointer-events:none!important;}
+    #app #dj-mobile-utilities {display:flex!important;flex-direction:column!important;top:auto!important;padding:0!important;height:auto!important;overflow:hidden!important;}
+    #app #dj-mobile-utilities[hidden] {display:none!important;}
+    #app #dj-mobile-utilities > .dj854-more-head {position:relative!important;top:auto!important;display:grid!important;grid-template-columns:minmax(0,1fr) 40px!important;align-items:center!important;gap:8px!important;min-height:64px!important;padding:16px 12px 8px!important;margin:0!important;flex:0 0 auto!important;box-sizing:border-box!important;}
+    #app #dj-mobile-utilities .dj-sheet-chrome-title {grid-column:1!important;position:static!important;min-width:0!important;margin:0!important;padding:0!important;transform:none!important;translate:none!important;}
+    #app #dj-mobile-utilities .dj-mobile-utility-heading {margin:0!important;text-align:left!important;line-height:1.2!important;}
+    #app #dj-mobile-utilities #dj-mobile-utilities-close {grid-column:2!important;grid-row:1!important;justify-self:end!important;align-self:center!important;position:static!important;inset:auto!important;margin:0!important;transform:none!important;translate:none!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;z-index:3!important;pointer-events:auto!important;}
+    #app #dj-mobile-utilities .dj856-more-edge-drag {position:absolute!important;left:0!important;right:0!important;top:0!important;width:auto!important;height:14px!important;transform:none!important;translate:none!important;}
+    #app #dj-mobile-utilities .dj-sheet-chrome-grip {position:absolute!important;left:50%!important;right:auto!important;top:6px!important;width:40px!important;height:4px!important;translate:-50% 0!important;transform:none!important;margin:0!important;}
+    #app #dj-mobile-utilities > .dj-mobile-utilities-body {min-height:0!important;flex:0 1 auto!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:10px 12px 14px!important;}
+    #app #transport-sheet #transport-kind {display:none!important;}
+    /* The header and real top grip already own pointer gestures. This
+       decorative legacy edge is a 23px overlay above the line selectors;
+       letting it hit-test hides their real click targets at compact widths. */
+    #app #transport-sheet .dj856-transport-edge-drag {pointer-events:none!important;touch-action:auto!important;}
+    /* Keep the real transfer badges above the scroll content and decorative grip. */
+    #app #transport-sheet .transport-panel-head {isolation:isolate!important;z-index:30!important;overflow:visible!important;}
+    #app #transport-sheet .dj857-transport-title-group {position:relative!important;z-index:2!important;grid-row:1!important;grid-column:1!important;}
+    #app #transport-title .dj-metro-badge-row {position:relative!important;z-index:3!important;pointer-events:auto!important;max-width:100%!important;flex:0 0 auto!important;}
+    #app #transport-title .dj-metro-line-selector {position:relative!important;z-index:4!important;pointer-events:auto!important;touch-action:manipulation!important;}
+    #app #transport-title .dj-metro-line-selector :is(span,svg) {pointer-events:none!important;}
+    #app #transport-title .dj-metro-badge-row {gap:6px!important;}
+    #app #transport-sheet #transport-arrivals[data-loading-line] .transport-empty {min-height:52px!important;display:grid!important;place-items:center!important;text-align:center!important;}
+    #app:is([data-dj910-sheet-open="true"],:not([data-tab="map"]),[data-dj-user-tip-dismissed="true"]) #dj-user-tip-close {visibility:hidden!important;pointer-events:none!important;}
+    #app #transport-sheet #transport-close {grid-row:1!important;grid-column:2!important;}
+    #app #transport-sheet .dj875-transit-scroll {z-index:0!important;}
+    #app #transport-sheet>.handle {z-index:1!important;}
+    #app #transport-sheet>.handle::after {pointer-events:none!important;}
+    #app #transport-sheet .transport-panel-head::before,#app #transport-sheet .transport-panel-head::after {pointer-events:none!important;}
+    #app #transport-sheet > .handle {position:relative!important;inset:auto!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:16px!important;min-height:16px!important;max-height:16px!important;align-self:center!important;flex:0 0 16px!important;margin:0!important;padding:0!important;transform:none!important;translate:none!important;}
+    #app #transport-sheet > .handle::after {content:""!important;display:block!important;position:absolute!important;left:50%!important;right:auto!important;top:6px!important;width:40px!important;height:4px!important;transform:none!important;translate:-50% 0!important;margin:0!important;border-radius:99px!important;background:#c7d1cd!important;}
+    #app .dj-place-header .dj-place-edge-drag {left:50%!important;right:auto!important;top:6px!important;width:40px!important;height:4px!important;transform:none!important;translate:-50% 0!important;margin:0!important;}
+    #app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded) {height:auto!important;max-height:min(58dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;}
+    #app #transport-sheet:not(.dj871-sheet-expanded) .dj875-transit-scroll {flex:0 1 auto!important;min-height:0!important;max-height:none!important;}
+    #app #transport-sheet.dj871-sheet-expanded .dj875-transit-scroll {flex:1 1 0%!important;min-height:0!important;}
+    #app #transport-sheet .dj875-transit-scroll {box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 12px 12px!important;scroll-padding-bottom:12px!important;}
+    #app #transport-sheet[data-kind="subway"] #transport-arrivals {display:block!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;margin:0!important;padding:0!important;}
+    #app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-arrival-group {height:auto!important;min-height:0!important;max-height:none!important;margin:0!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:auto!important;align-items:stretch!important;gap:6px!important;padding:0!important;margin:0!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row {display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,auto)!important;grid-template-rows:auto!important;align-items:center!important;gap:5px!important;min-width:0!important;width:auto!important;min-height:60px!important;height:auto!important;max-height:none!important;padding:7px 6px!important;margin:0!important;box-sizing:border-box!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main {grid-column:1!important;grid-row:1!important;min-width:0!important;width:auto!important;max-width:none!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;margin:0!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-main small {font-size:10px!important;line-height:1.2!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-time {grid-column:2!important;grid-row:1!important;position:static!important;inset:auto!important;align-self:center!important;justify-self:end!important;min-width:0!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;transform:none!important;translate:none!important;text-align:right!important;align-items:flex-end!important;font-size:11px!important;line-height:1.2!important;white-space:normal!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-time :is(.dj875-arrival-eta,.dj875-stop-count) {display:block!important;text-align:right!important;white-space:nowrap!important;font-size:inherit!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-empty {grid-column:1/-1!important;}
+    #app .dj-place-body .dj815-place-folder {min-width:0!important;flex:1 1 auto!important;}
+    #app .dj-place-body .dj815-place-folder select {min-width:0!important;width:100%!important;}
+    #app .dj-place-body .dj815-place-folder label {white-space:nowrap!important;}
+  }
+  /* Do not override native transition-property: each existing motion owner
+     controls its own transition, including staged drag and theme changes. */
+  #app[data-dj-language="en"] #dj-desktop-safety-rail::before {content:'Map Tools'!important;}
+  @media(prefers-reduced-motion:reduce) {#app .dj-theme-switch-flash {display:none!important;}}
+}
+
+/* Tablet workspace: one coordinate system; independent from phone sheets and desktop rail. */
+@layer request-completion {
+  @media (min-width:700px) {
+    #app .dj860-onboarding .dj860-visual-pane.dj860-ai-banner-pane > .dj860-visual.dj860-has-ai-banner > .dj860-screen-image {
+      object-fit:contain!important;object-position:center!important;
+    }
+  }
+  #app #transport-neighbors .metro-neighbor-row {display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;}
+  #app #transport-neighbors .metro-neighbor-row .metro-rail-previous {grid-column:1!important;grid-row:1!important;}
+  #app #transport-neighbors .metro-neighbor-row .metro-rail-current {grid-column:2!important;grid-row:1!important;}
+  #app #transport-neighbors .metro-neighbor-row .metro-rail-next {grid-column:3!important;grid-row:1!important;}
+  #app #transport-neighbors .metro-neighbor-row .metro-neighbor-status {grid-column:1/-1!important;}
+  #app #transport-neighbors .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next)[hidden] {display:none!important;}
+  #app #transport-arrivals .metro-direction-grid:has(> :only-child) {grid-template-columns:minmax(0,1fr)!important;}
+  @media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app {--dj911-tablet-gutter:clamp(20px,3vw,36px);--dj911-tablet-card-width:clamp(440px,63vw,780px);--dj911-tablet-nav-width:min(680px,calc(100vw - 2 * var(--dj911-tablet-gutter)));}
+    #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 14px)!important;left:var(--dj911-tablet-gutter)!important;right:var(--dj911-tablet-gutter)!important;width:auto!important;max-width:none!important;height:52px!important;min-height:52px!important;gap:12px!important;padding:0!important;margin:0!important;border:0!important;background:none!important;box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;z-index:4700!important;}
+    #app .topbar :is(#map-quick-search,.header-tools) {background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;padding:0!important;margin:0!important;}
+    #app .topbar::before,#app .topbar::after,#app .topbar .header-tools::before,#app .topbar .header-tools::after {content:none!important;display:none!important;}
+    #app .topbar #map-quick-search {flex:1 1 0%!important;width:0!important;min-width:0!important;max-width:none!important;}
+    #app .topbar .map-quick-search-form {display:flex!important;align-items:center!important;width:100%!important;height:52px!important;border-radius:999px!important;background:var(--dj800-surface,#fff)!important;box-sizing:border-box!important;overflow:visible!important;}
+    #app .topbar .map-quick-search-form :is(#dj-settings-mobile,#dj-about-pc) {display:grid!important;place-items:center!important;flex:0 0 42px!important;width:42px!important;height:42px!important;}
+    #app .topbar .map-quick-search-form #dj-about-pc {display:none!important;}
+    #app .topbar .map-quick-search-form :is(.map-quick-search-submit,#dj887-ai-quick-entry,#dj-ai-search-entry) {display:none!important;}
+    #app .topbar .header-tools {display:flex!important;flex:0 0 72px!important;min-width:72px!important;width:72px!important;max-width:72px!important;align-items:center!important;}
+    #app .topbar .header-tools > :not(#dj890-ai-orb):not(#dj800-ai-search-trigger) {display:none!important;}
+    #app #dj890-ai-orb {display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;width:72px!important;min-width:72px!important;height:48px!important;min-height:48px!important;padding:0!important;margin:0!important;border-radius:999px!important;background:var(--dj800-accent,#12856c)!important;color:white!important;box-shadow:none!important;}
+    #app #dj890-ai-orb::after {content:none!important;display:none!important;}
+    #app #dj-tablet-utility-group {display:none!important;}
+    #app[data-tab="map"] #dj-v794-toolbar {display:flex!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 76px)!important;left:var(--dj911-tablet-gutter)!important;right:var(--dj911-tablet-gutter)!important;width:auto!important;max-width:none!important;height:68px!important;min-height:68px!important;max-height:68px!important;align-items:center!important;gap:8px!important;margin:0!important;padding:0!important;overflow:visible!important;background:none!important;box-shadow:none!important;clip-path:none!important;z-index:4650!important;}
+    #app:not([data-tab="map"]) #dj-v794-toolbar {display:none!important;}
+    #app #dj-v794-toolbar > .dj831-scrollport {display:flex!important;flex:1 1 0%!important;min-width:0!important;width:auto!important;height:68px!important;min-height:68px!important;max-height:68px!important;align-items:center!important;gap:8px!important;padding:4px 2px!important;box-sizing:border-box!important;overflow-x:auto!important;overflow-y:hidden!important;clip-path:none!important;mask-image:none!important;-webkit-mask-image:none!important;}
+    #app #dj-v794-toolbar :is(.dj832-native,.dj832-feature,#dj-v794-weather),#app #dj-v794-toolbar #dj-v794-more {display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;min-width:76px!important;max-width:76px!important;height:58px!important;min-height:58px!important;max-height:58px!important;gap:4px!important;padding:4px 3px!important;box-sizing:border-box!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:16px!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#263f35)!important;clip-path:none!important;overflow:visible!important;margin:0!important;}
+    #app #dj-v794-toolbar :is(.dj-v794-icon,.dj832-feature-icon,#dj-v794-more > svg) {width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;max-width:24px!important;max-height:24px!important;flex:0 0 24px!important;}
+    #app #dj-v794-toolbar :is(.dj832-feature-label,.dj-v794-caption),#app #dj-v794-toolbar .dj832-native::after,#app #dj-v794-toolbar #dj-v794-more::after {font-size:10px!important;line-height:1.2!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+    #app #dj-v794-toolbar .dj832-native .dj-v794-caption {display:none!important;}
+    #app #dj-v794-toolbar .dj832-native[data-dj832-label="행정동 선택"]::after {content:"행정동"!important;}
+    #app #dj-v794-toolbar .dj832-feature[data-dj831-feature="map-dong"] .dj832-feature-label {font-size:9px!important;}
+    #app #bottom-nav {position:fixed!important;top:auto!important;left:calc((100vw - var(--dj911-tablet-nav-width))/2)!important;right:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 14px)!important;width:var(--dj911-tablet-nav-width)!important;max-width:680px!important;height:64px!important;min-height:64px!important;max-height:64px!important;margin:0!important;padding:4px 6px!important;box-sizing:border-box!important;transform:none!important;translate:none!important;border-radius:24px!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;background:var(--dj800-surface,#fff)!important;z-index:4800!important;}
+    #app:is(.route-guiding,.map-immersive) #bottom-nav {display:none!important;}
+    #app #bottom-nav .nav-tab {display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:auto!important;height:100%!important;min-height:0!important;padding:3px!important;margin:0!important;border-radius:20px!important;gap:4px!important;border:0!important;box-shadow:none!important;}
+    #app #bottom-nav .nav-tab .nav-icon svg {width:24px!important;height:24px!important;}
+    #app #bottom-nav .nav-tab > span:last-child {font-size:12px!important;line-height:1.15!important;}
+    #app #dj840-map-tip:not([hidden]) {position:fixed!important;left:calc((100vw - var(--dj911-tablet-nav-width))/2)!important;right:auto!important;width:var(--dj911-tablet-nav-width)!important;max-width:680px!important;bottom:var(--dj910-dock-bottom)!important;min-height:40px!important;height:40px!important;max-height:40px!important;display:flex!important;align-items:center!important;gap:8px!important;padding:0 44px 0 14px!important;margin:0!important;border-radius:999px!important;border:1px solid var(--dj800-border,#d7e6de)!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#263f35)!important;font:inherit!important;font-size:12px!important;box-shadow:0 4px 16px #173b2210!important;box-sizing:border-box!important;overflow:hidden!important;transform:none!important;translate:none!important;}
+    #app #dj840-map-tip > strong {color:var(--dj800-accent,#12856c)!important;flex:none!important;}
+    #app #dj840-map-tip .dj840-tip-copy-viewport {min-width:0!important;flex:1!important;overflow:hidden!important;}
+    #app #dj-user-tip-close {position:fixed!important;left:auto!important;right:calc((100vw - var(--dj911-tablet-nav-width))/2 + 5px)!important;bottom:calc(var(--dj910-dock-bottom) + 4px)!important;width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;border:0!important;border-radius:50%!important;background:var(--dj800-elevated,#e8f3ed)!important;color:var(--dj800-text,#263f35)!important;box-shadow:none!important;padding:0!important;z-index:4701!important;}
+    #app:is([data-dj910-sheet-open="true"],:not([data-tab="map"]),[data-dj-user-tip-dismissed="true"],.map-safety-open) :is(#dj840-map-tip,#dj-user-tip-close) {display:none!important;}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities,.dj-place-detail-popup,#route-map-card,#route-transit-confirm):not([hidden]) {position:fixed!important;left:auto!important;right:var(--dj911-tablet-gutter)!important;top:auto!important;bottom:var(--dj910-dock-bottom)!important;width:var(--dj911-tablet-card-width)!important;max-width:calc(100vw - 2 * var(--dj911-tablet-gutter))!important;max-height:calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom))!important;min-height:0!important;box-sizing:border-box!important;margin:0!important;border-radius:24px!important;transform:none!important;overflow:hidden!important;box-shadow:0 10px 32px #0b2e2024!important;background:var(--dj800-surface,#fff)!important;z-index:4400!important;}
+    #app .page-panel:not([hidden]),#app #dj-mobile-utilities:not([hidden]) {display:flex!important;flex-direction:column!important;height:min(660px,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;}
+    #app .page-panel > .dj836-sheet-body,#app #dj-mobile-utilities > .dj-mobile-utilities-body {flex:1 1 0%!important;min-height:0!important;height:auto!important;max-height:none!important;padding:16px 20px!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;overscroll-behavior:contain!important;}
+    #app .page-panel .dj-sheet-chrome,#app #dj-mobile-utilities > .dj854-more-head {padding:14px 20px!important;flex:0 0 auto!important;min-height:58px!important;box-sizing:border-box!important;background:var(--dj800-surface,#fff)!important;border-bottom:1px solid var(--dj800-border,#d7e6de)!important;}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities,.dj-place-detail-popup).dj871-sheet-expanded,#app .dj-place-detail-popup.dj871-place-expanded {top:var(--dj910-map-top)!important;height:auto!important;max-height:none!important;}
+    #app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded),#app .dj-place-detail-popup:not(.dj871-place-expanded):not(.dj871-sheet-expanded) {height:auto!important;max-height:min(580px,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;}
+    #app #transport-sheet:not([hidden]) {display:flex!important;flex-direction:column!important;}
+    #app #transport-sheet .transport-panel-head,#app .dj-place-header {display:grid!important;grid-template-columns:minmax(0,1fr) 40px!important;grid-template-areas:"title close" "actions actions"!important;grid-template-rows:auto auto!important;gap:8px!important;align-items:center!important;min-height:0!important;height:auto!important;padding:12px 20px!important;}
+    #app #transport-sheet .dj857-transport-title-group,#app .dj-place-header-title {grid-area:title!important;min-width:0!important;margin:0!important;padding:0!important;}
+    #app #transport-sheet #transport-close,#app .dj-place-header-close {grid-area:close!important;justify-self:end!important;}
+    #app #transport-title,#app .dj-place-header-title h3 {font-size:21px!important;line-height:1.3!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:start!important;}
+    #app #transport-title {display:flex!important;align-items:center!important;flex-wrap:wrap!important;justify-content:flex-start!important;gap:6px!important;}
+    #app #transport-sheet .dj-news-transport-actions,#app .dj-place-header-actions {grid-area:actions!important;display:flex!important;justify-content:flex-start!important;align-items:center!important;gap:8px!important;width:auto!important;height:auto!important;min-height:40px!important;margin:0!important;padding:0!important;}
+    #app #transport-sheet .dj-news-transport-actions button,#app .dj-place-header-actions button {min-width:44px!important;width:auto!important;height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:999px!important;border:1px solid var(--dj800-border,#d7e6de)!important;background:var(--dj800-elevated,#e8f3ed)!important;color:var(--dj800-text,#263f35)!important;box-shadow:none!important;}
+    #app #transport-sheet .dj-news-transport-actions button[aria-pressed="true"],#app .dj-place-header-actions button[aria-pressed="true"] {background:var(--dj800-accent,#12856c)!important;color:white!important;}
+    #app #transport-sheet .dj875-transit-scroll,#app .dj-place-body {flex:0 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;padding:12px 20px 20px!important;box-sizing:border-box!important;}
+    #app #transport-sheet .transport-arrivals-title {gap:8px!important;margin:0 0 10px!important;}
+    #app #transport-arrivals .metro-direction-grid {gap:10px!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals {display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr))!important;gap:10px!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row {padding:10px 12px!important;min-height:68px!important;}
+    #app .dj-place-detail-popup .maplibregl-popup-content {width:100%!important;height:auto!important;max-height:inherit!important;min-height:0!important;padding:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;border-radius:24px!important;background:var(--dj800-surface,#fff)!important;}
+    #app .dj-place-detail {display:flex!important;flex-direction:column!important;min-height:0!important;max-height:inherit!important;width:100%!important;padding:0!important;margin:0!important;}
+    #app .dj-place-body {display:flex!important;flex-direction:column!important;gap:12px!important;}
+    #app .dj-place-body :is(.dj-place-info-card,.dj-place-favorites-section,.dj-place-ai-section) {margin:0!important;padding:12px!important;min-height:0!important;border-radius:14px!important;}
+    #app .dj-place-body .dj-place-row {display:grid!important;grid-template-columns:72px minmax(0,1fr)!important;gap:10px!important;min-height:32px!important;}
+    #app .dj-place-body .dj-place-favorites-section {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;align-items:start!important;}
+    #app .dj-place-body .dj815-place-folder {display:flex!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;}
+    #app .dj-place-body .dj815-place-folder label {white-space:nowrap!important;flex:0 0 auto!important;}
+    #app .dj-place-body .dj815-place-folder select {flex:1 1 0%!important;width:0!important;min-width:0!important;max-width:100%!important;}
+    #app #dj-mobile-utilities :is(.dj840-more-quick-actions button,.dj832-more-feature,.dj833-more-type,#dj-mobile-utilities-close) {appearance:none!important;-webkit-appearance:none!important;border:1px solid var(--dj800-border,#d7e6de)!important;background:var(--dj800-elevated,#e8f3ed)!important;color:var(--dj800-text,#263f35)!important;box-shadow:none!important;font:inherit!important;}
+    #app #dj-mobile-utilities #dj832-more-features {display:grid!important;gap:12px!important;}
+    #app #dj-mobile-utilities .dj833-feature-group {display:grid!important;gap:0!important;padding:8px 12px!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:16px!important;background:var(--dj800-surface,#fff)!important;}
+    #app #dj-mobile-utilities .dj833-feature-line {display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important;min-height:56px!important;border-bottom:1px solid var(--dj800-border,#d7e6de)!important;}
+    #app #dj-mobile-utilities .dj833-feature-line:last-child {border-bottom:0!important;}
+    #app #dj-mobile-utilities .dj833-feature-line .dj832-more-feature {display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;width:100%!important;min-width:0!important;height:auto!important;min-height:50px!important;border:0!important;border-radius:10px!important;background:transparent!important;text-align:left!important;padding:8px 4px!important;}
+    #app #dj-mobile-utilities .dj832-more-icon {display:grid!important;place-items:center!important;width:32px!important;height:32px!important;min-width:32px!important;flex:0 0 32px!important;border-radius:10px!important;background:var(--dj800-elevated,#e8f3ed)!important;color:var(--dj800-accent,#12856c)!important;}
+    #app #dj-mobile-utilities .dj832-more-icon svg {display:block!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;}
+    #app #dj-mobile-utilities .dj832-more-label {flex:1!important;min-width:0!important;font-size:13px!important;line-height:1.4!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch[hidden] {display:none!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch:not([hidden]) {display:flex!important;align-items:center!important;justify-content:center!important;width:44px!important;height:30px!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input {appearance:none!important;-webkit-appearance:none!important;position:relative!important;width:40px!important;height:24px!important;min-width:40px!important;margin:0!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:99px!important;background:#a8bab1!important;cursor:pointer!important;opacity:1!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input::before {content:""!important;position:absolute!important;inset:2px auto auto 2px!important;width:18px!important;height:18px!important;border-radius:50%!important;background:white!important;box-shadow:0 1px 3px #0002!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input:checked {background:var(--dj800-accent,#12856c)!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input:checked::before {transform:translateX(16px)!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input:focus-visible {outline:2px solid var(--dj800-accent,#12856c)!important;outline-offset:2px!important;}
+    #app #dj-mobile-utilities .dj834-shortcut-switch input:disabled {opacity:.5!important;cursor:not-allowed!important;}
+    #app .map-safety-backdrop[hidden] {display:none!important;}
+    #app.map-safety-open #map-safety-backdrop:not([hidden]) {display:block!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;transform:none!important;translate:none!important;background:rgba(12,27,23,.38)!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;z-index:6000!important;}
+    #app.map-safety-open #map-safety-controls {position:fixed!important;inset:calc(env(safe-area-inset-top,0px) + 20px) var(--dj911-tablet-gutter) calc(env(safe-area-inset-bottom,0px) + 20px) auto!important;width:min(520px,calc(100vw - 2 * var(--dj911-tablet-gutter)))!important;max-width:calc(100vw - 2 * var(--dj911-tablet-gutter))!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;background:var(--dj800-surface,#fff)!important;border-radius:24px!important;z-index:6001!important;}
+    #app.map-safety-open #map-safety-controls .map-safety-head {position:sticky!important;top:0!important;z-index:3!important;background:var(--dj800-surface,#fff)!important;}
+    #app.map-safety-open #map-safety-controls .dj-safety-nav {display:flex!important;flex-wrap:wrap!important;gap:6px!important;overflow:visible!important;}
+    #app.map-safety-open #map-safety-controls .dj-safety-nav button {flex:0 0 auto!important;white-space:nowrap!important;}
+  }
+  @media (min-width:700px) and (max-width:1079px) and (orientation:portrait), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) and (orientation:portrait) {
+    #app {--dj911-tablet-card-width:min(680px,calc(100vw - 2 * var(--dj911-tablet-gutter)));}
+    #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities,.dj-place-detail-popup,#route-map-card,#route-transit-confirm):not([hidden]) {left:calc((100vw - var(--dj911-tablet-card-width))/2)!important;right:auto!important;}
+  }
+}
+
+@layer request-completion {
+ @media (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  #app #dj-v794-toolbar #dj-v794-more::after {content:'더보기'!important;display:block!important;}
+  #app[data-dj-language="en"] #dj-v794-toolbar #dj-v794-more::after {content:'More'!important;}
+  #app #dj-v794-toolbar #dj-v794-weather::before,#app #dj-v794-toolbar #dj-v794-weather::after {content:none!important;display:none!important;}
+  #app #dj-v794-toolbar #dj-v794-weather .dj910-weather-temp {display:block!important;font-size:12px!important;}
+  #app #dj890-ai-orb::before {content:'✦'!important;display:block!important;font-size:14px!important;}
+  #app #dj890-ai-orb .dj890-ai-orb-text {color:#fff!important;-webkit-text-fill-color:#fff!important;}
+  #app #transport-sheet #transport-kind {display:none!important;}
+  #app #transport-sheet > .handle {position:relative!important;inset:auto!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:16px!important;min-height:16px!important;max-height:16px!important;align-self:center!important;flex:0 0 16px!important;margin:0!important;padding:0!important;transform:none!important;translate:none!important;}
+  #app #transport-sheet > .handle::after {content:''!important;position:absolute!important;display:block!important;left:50%!important;top:6px!important;width:40px!important;height:4px!important;translate:-50% 0!important;transform:none!important;border-radius:99px!important;background:#c7d1cd!important;}
+ }
+}
+
+@layer request-completion {
+  /* Idle map tip visibility owner: the shell's is-visible state, not a stale
+     legacy hide declaration. A real panel or dismissal still takes priority. */
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app[data-tab="map"]:not([data-dj910-sheet-open="true"]):not([data-dj-user-tip-dismissed="true"]):not([data-dj-webapp-tip-visible="true"]):not(.map-safety-open):not(.map-controls-open) #dj840-map-tip.is-visible:not([hidden]) {visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+  }
+  /* The approved illustrations are landscape (2:1). A portrait tablet
+     has enough vertical room for a complete image above the text instead of
+     a narrow side-by-side crop. Keep the footer and text separately scrollable. */
+  @media (min-width:700px) and (max-width:1366px) and (orientation:portrait) {
+    #app .dj860-onboarding .dj860-card {display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:58px minmax(0,min(32dvh,340px)) minmax(0,1fr) 82px!important;width:min(720px,100%)!important;height:min(880px,calc(100dvh - 48px))!important;max-height:calc(100dvh - 48px)!important;}
+    #app .dj860-onboarding :is(.dj860-head,.dj860-visual-pane,.dj860-content,.dj860-footer) {grid-column:1!important;min-height:0!important;min-width:0!important;}
+    #app .dj860-onboarding .dj860-head {grid-row:1!important;}
+    #app .dj860-onboarding .dj860-visual-pane {grid-row:2!important;}
+    #app .dj860-onboarding .dj860-content {grid-row:3!important;padding:22px 32px!important;overflow-y:auto!important;}
+    #app .dj860-onboarding .dj860-copy {max-width:none!important;}
+    #app .dj860-onboarding .dj860-footer {grid-row:4!important;padding:12px 24px!important;}
+  }
+}
+
+@layer request-completion {
+  @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app[data-dj-webapp-tip-visible="true"] :is(#dj840-map-tip,#dj-user-tip-close) {display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  }
+  @media (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    #app #bottom-nav .nav-tab {position:relative!important;inset:auto!important;box-sizing:border-box!important;height:100%!important;min-height:0!important;max-height:100%!important;transform:none!important;translate:none!important;scale:1!important;overflow:hidden!important;}
+    #app #dj-mobile-utilities > .dj854-more-head {position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr) 40px!important;align-items:center!important;padding:14px 20px!important;}
+    #app #dj-mobile-utilities #dj-mobile-utilities-close {position:static!important;grid-column:2!important;grid-row:1!important;justify-self:end!important;align-self:center!important;margin:0!important;inset:auto!important;transform:none!important;translate:none!important;}
+    #app #transport-sheet > .handle::after {right:auto!important;margin:0!important;}
+  }
+}
+
+@layer request-completion {
+  @media (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+    /* A desktop sheet reserves its own side rail and hides its grip. A touch
+       tablet uses a full-width, in-flow drag target with a centered marker. */
+    #app #transport-sheet:not([hidden]) {padding-inline:0!important;align-items:stretch!important;overflow:hidden!important;scrollbar-gutter:auto!important;}
+    #app #transport-sheet .dj875-transit-scroll {overflow-y:auto!important;scrollbar-gutter:stable both-edges!important;}
+    #app #transport-sheet:not([hidden]) > .handle {
+      display:block!important;visibility:visible!important;opacity:1!important;
+      position:relative!important;inset:auto!important;box-sizing:border-box!important;
+      width:100%!important;min-width:0!important;max-width:none!important;
+      height:16px!important;min-height:16px!important;max-height:16px!important;
+      flex:0 0 16px!important;align-self:stretch!important;
+      margin:0!important;padding:0!important;transform:none!important;translate:none!important;scale:1!important;
+    }
+    #app #transport-sheet:not([hidden]) > .handle::after {
+      content:""!important;display:block!important;visibility:visible!important;opacity:1!important;
+      position:absolute!important;inset:6px auto auto calc(50% - 20px)!important;
+      width:40px!important;height:4px!important;min-width:0!important;max-width:none!important;
+      transform:none!important;translate:none!important;scale:1!important;margin:0!important;
+      border-radius:99px!important;background:#c7d1cd!important;pointer-events:none!important;
+    }
+  }
+}
+
+/* Mobile design contract: compact real controls, one dock coordinate, one motion owner.
+   Do not change tablet/desktop geometry or the protected map/data controllers. */
+@layer request-completion {
+ @media (max-width:699px) {
+  #app {--dj910-tool-width:52px;--dj912-sheet-pad:12px;--dj912-small-radius:14px;}
+  #app #bottom-nav {bottom:max(3px,calc(env(safe-area-inset-bottom,0px) - 16px))!important;}
+  #app #dj-v794-toolbar {height:52px!important;min-height:52px!important;max-height:52px!important;gap:5px!important;box-sizing:border-box!important;}
+  #app #dj-v794-toolbar > .dj831-scrollport {height:52px!important;min-height:52px!important;max-height:52px!important;gap:5px!important;padding:1px 2px 1px 0!important;scroll-snap-type:x proximity!important;}
+  #app #dj-v794-toolbar > .dj831-scrollport > :is(.dj832-native,.dj832-feature,#dj-v794-weather),#app #dj-v794-toolbar > #dj-v794-more {flex:0 0 52px!important;width:52px!important;min-width:52px!important;max-width:52px!important;height:50px!important;min-height:50px!important;max-height:50px!important;border-radius:14px!important;gap:2px!important;padding:3px 1px!important;overflow:hidden!important;box-sizing:border-box!important;}
+  #app #dj-v794-toolbar :is(.dj-v794-icon,.dj832-feature-icon,.dj910-weather-icon,#dj-v794-more > svg) {width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;flex:0 0 22px!important;font-size:20px!important;}
+  #app #dj-v794-toolbar :is(.dj-v794-icon,.dj832-feature-icon,.dj910-weather-icon) svg {width:22px!important;height:22px!important;stroke-width:1.8!important;}
+  #app #dj-v794-toolbar :is(.dj832-feature-label,.dj-v794-caption,.dj910-weather-temp),#app #dj-v794-toolbar .dj832-native::after,#app #dj-v794-toolbar #dj-v794-more::after {font-size:10px!important;font-weight:700!important;line-height:1.15!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  #app #dj-v794-toolbar > .dj912-toolbar-next {display:grid!important;pointer-events:auto!important;position:relative!important;touch-action:manipulation!important;place-items:center!important;flex:0 0 18px!important;width:18px!important;height:42px!important;min-width:18px!important;padding:0!important;border:0!important;border-radius:10px!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-accent,#12856c)!important;box-shadow:0 1px 5px #0001!important;}
+  #app #dj-v794-toolbar > .dj912-toolbar-next[hidden] {display:none!important;}
+  #app #dj-v794-toolbar > .dj912-toolbar-next svg {width:16px!important;height:16px!important;display:block!important;}
+  #app #dj-v794-toolbar > .dj912-toolbar-next[data-direction="left"] svg {transform:rotate(180deg)!important;}
+  #app #dj840-map-tip:not([hidden]) {height:38px!important;min-height:38px!important;max-height:38px!important;padding:0 37px 0 8px!important;gap:7px!important;}
+  #app #dj840-map-tip > strong {height:22px!important;min-height:22px!important;padding:0 8px!important;font-size:10px!important;border-radius:11px!important;}
+  #app #dj840-map-tip .dj840-tip-copy {font-size:11px!important;line-height:1.25!important;font-weight:600!important;white-space:normal!important;overflow:hidden!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;}
+  #app #dj-user-tip-close {border:0!important;background:transparent!important;color:var(--dj800-muted,#627b70)!important;font-size:20px!important;line-height:1!important;}
+  #app[data-dj910-sheet-open="true"] #dj-v794-toolbar {visibility:hidden!important;pointer-events:none!important;}
+  #app #dj-mobile-utilities > .dj854-more-head {min-height:52px!important;padding:12px 12px 6px!important;}
+  #app #dj-mobile-utilities .dj-mobile-utility-heading {font-size:18px!important;font-weight:750!important;}
+  #app #dj-mobile-utilities > .dj-mobile-utilities-body {padding:8px 12px 16px!important;scroll-padding-bottom:16px!important;}
+  #app #dj-mobile-utilities #dj832-more-features {display:grid!important;gap:10px!important;}
+  #app #dj-mobile-utilities .dj833-feature-group {display:grid!important;gap:0!important;padding:6px 10px!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;background:var(--dj800-surface,#fff)!important;}
+  #app #dj-mobile-utilities .dj832-more-group-label {font-size:12px!important;color:var(--dj800-muted,#627b70)!important;padding:4px 0 6px!important;}
+  #app #dj-mobile-utilities .dj833-feature-line {display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;min-height:44px!important;border-bottom:1px solid var(--dj800-border,#d7e6de)!important;}
+  #app #dj-mobile-utilities .dj833-feature-line:last-child {border-bottom:0!important;}
+  #app #dj-mobile-utilities .dj833-feature-line .dj832-more-feature {display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:100%!important;min-width:0!important;height:auto!important;min-height:44px!important;border:0!important;border-radius:8px!important;background:transparent!important;text-align:start!important;padding:4px 0!important;box-shadow:none!important;}
+  #app #dj-mobile-utilities .dj832-more-icon {display:grid!important;place-items:center!important;width:30px!important;height:30px!important;min-width:30px!important;flex:0 0 30px!important;border-radius:9px!important;background:var(--dj800-elevated,#e8f3ed)!important;color:var(--dj800-accent,#12856c)!important;}
+  #app #dj-mobile-utilities .dj832-more-icon svg {width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;}
+  #app #dj-mobile-utilities .dj832-more-label {flex:1!important;min-width:0!important;font-size:12px!important;font-weight:650!important;line-height:1.35!important;white-space:normal!important;}
+  #app #dj-mobile-utilities .dj834-shortcut-switch[hidden] {display:none!important;}
+  #app #dj-mobile-utilities .dj834-shortcut-switch:not([hidden]) {display:flex!important;align-items:center!important;justify-content:center!important;width:40px!important;height:30px!important;}
+  #app #transport-sheet:not([hidden]),#app #map .dj-place-detail-popup {left:12px!important;right:12px!important;width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;margin:0!important;box-sizing:border-box!important;}
+  #app #transport-sheet.dj871-sheet-expanded:not([hidden]) {top:auto!important;height:auto!important;max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;}
+  #app #transport-sheet.dj871-sheet-expanded .dj875-transit-scroll {flex:0 1 auto!important;}
+  #app #transport-sheet .transport-panel-head,#app .dj-place-header {grid-template-rows:auto auto!important;gap:6px!important;padding:4px var(--dj912-sheet-pad) 8px!important;}
+  #app .dj-place-header {padding-top:16px!important;}
+  #app #transport-title,#app .dj-place-header-title h3 {font-size:17px!important;font-weight:750!important;line-height:1.25!important;overflow-wrap:anywhere!important;}
+  #app #transport-title[data-dj912-ars]::after {content:"ARS " attr(data-dj912-ars)!important;display:block!important;flex:0 0 100%!important;font-size:10px!important;font-weight:600!important;color:var(--dj800-muted,#627b70)!important;}
+  #app #transport-title .dj-metro-line-selector {margin-inline-start:2px!important;}
+  #app #transport-sheet .dj-news-transport-actions,#app .dj-place-header-actions {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:center!important;gap:6px!important;min-height:36px!important;height:auto!important;width:100%!important;max-height:none!important;}
+  #app .dj-place-header-actions :is(.dj-place-route-actions,.dj815-place-actions) {display:contents!important;}
+  #app #transport-sheet .dj-news-transport-actions button,#app .dj-place-header-actions button {width:100%!important;min-width:0!important;max-width:none!important;height:36px!important;min-height:36px!important;max-height:36px!important;padding:0 4px!important;font-size:12px!important;}
+  #app #transport-neighbors {margin:2px 0 4px!important;}
+  #app #transport-neighbors .metro-neighbor-row {min-height:32px!important;padding:3px 6px!important;}
+  #app #transport-sheet .transport-arrivals-title {gap:8px!important;min-height:34px!important;padding:3px 0!important;margin:0 0 5px!important;}
+  #app #transport-sheet .transport-mode-tabs button {min-height:28px!important;padding:4px 8px!important;font-size:11px!important;}
+  #app #transport-update-time {font-size:10px!important;margin-inline-end:3px!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row {min-height:54px!important;padding:6px!important;border-radius:12px!important;}
+  #app #transport-sheet[data-kind="bus"] .transport-arrival-row[data-dj912-ended="true"] .transport-arrival-time {color:var(--dj800-muted,#627b70)!important;}
+  #app #transport-sheet[data-kind="bus"] .transport-arrival-row[data-dj912-ended="true"] .dj-transit-bus-route {filter:saturate(.35)!important;}
+  #app .dj-place-body {gap:8px!important;padding:8px var(--dj912-sheet-pad) 14px!important;}
+  #app .dj-place-body :is(.dj-place-info-card,.dj-place-favorites-section,.dj-place-ai-section) {padding:8px 10px!important;border-radius:var(--dj912-small-radius)!important;}
+  #app .dj-place-body .dj-place-row {padding:4px 0!important;min-height:24px!important;border-block-start:0!important;}
+  #app .dj-place-body .dj-place-favorites-section {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:5px!important;}
+  #app .dj-place-body .dj815-place-folder {display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:8px!important;width:100%!important;}
+  #app .dj-place-body .dj815-place-folder .dj-place-folder-label {white-space:nowrap!important;font-size:11px!important;}
+  #app .dj-place-body .dj-place-ai-response {background:transparent!important;border:0!important;box-shadow:none!important;margin:0!important;padding:4px 0!important;font-size:12px!important;line-height:1.5!important;}
+  #app .dj-place-body .dj-place-ai-heading {font-size:14px!important;}
+ }
+ @media (min-width:700px) {#app #dj-v794-toolbar > .dj912-toolbar-next {display:none!important;}}
+}
+
+/* Keep the real scroll containers inside the mobile sheet frame. */
+@layer request-completion {
+  #app #dj-mobile-utilities #dj800-type-trigger[hidden] {display:none!important;}
+ @media (max-width:699px) {
+  #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities):not([hidden]),
+  #app #map .dj-place-detail-popup {
+    left:max(12px,env(safe-area-inset-left))!important;
+    right:max(12px,env(safe-area-inset-right))!important;
+    width:auto!important;min-width:0!important;max-width:none!important;margin-inline:0!important;
+    border-radius:24px!important;box-sizing:border-box!important;bottom:var(--dj910-dock-bottom)!important;
+  }
+  #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities).dj871-sheet-expanded:not([hidden]),
+  #app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) {
+    top:max(12px,env(safe-area-inset-top))!important;height:auto!important;max-height:none!important;
+  }
+  #app[data-dj806-motion="on"] :is(.page-panel,#transport-sheet,#dj-mobile-utilities):not(.dj870-more-leaving) {
+    animation:none!important;
+  }
+  #app .page-panel > .dj-sheet-chrome {position:relative!important;inset:auto!important;flex:none!important;}
+  #app .page-panel > .dj836-sheet-body,
+  #app #dj-mobile-utilities > .dj-mobile-utilities-body {
+    position:relative!important;inset:auto!important;flex:1 1 0%!important;
+    min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  }
+  #app[data-dj-user-editor-keyboard="true"] #participation-panel:has(#community-form:not([hidden])) {
+    top:var(--dj-user-editor-top,8px)!important;bottom:var(--dj-user-editor-bottom,8px)!important;
+    height:auto!important;max-height:none!important;transform:none!important;translate:none!important;
+    z-index:6500!important;animation:none!important;
+  }
+  #app[data-dj-user-editor-keyboard="true"] #bottom-nav {visibility:hidden!important;pointer-events:none!important;}
+  #app #transport-sheet.dj871-sheet-expanded .dj875-transit-scroll,
+  #app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) .dj-place-body {
+    flex:1 1 0%!important;min-height:0!important;overflow-y:auto!important;
+  }
+  #app #dj-mobile-utilities > .dj854-more-head {
+    padding:16px 16px 10px!important;min-height:64px!important;
+  }
+  #app #dj-mobile-utilities #dj-mobile-utilities-close {place-items:center!important;}
+  #app #dj-mobile-utilities #dj-mobile-utilities-close svg {margin:auto!important;}
+  #app #dj-v794-toolbar > .dj912-toolbar-next,
+  #app #dj912-poi-categories .dj912-poi-more {
+    width:32px!important;min-width:32px!important;flex:0 0 32px!important;
+    padding:0!important;border:1px solid var(--dj800-border,#d7e6de)!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#203f36)!important;
+    border-radius:12px!important;
+  }
+  #app #dj-v794-toolbar > .dj831-scrollport,
+  #app #dj912-poi-categories .dj912-poi-scroll {scroll-snap-type:x mandatory!important;}
+  #app #dj-v794-toolbar > .dj831-scrollport > button,
+  #app #dj912-poi-categories .dj912-poi-scroll > button {scroll-snap-align:start!important;}
+  #app[data-dj910-sheet-open="true"] :is(#dj-v794-toolbar,#dj912-poi-categories,#dj840-map-tip,#dj-user-tip-close,#dj-browser-webapp-tip) {
+    visibility:hidden!important;opacity:0!important;transition:none!important;animation:none!important;pointer-events:none!important;
+  }
+  #app:has(#night-visibility-float:not([hidden])) :is(#dj840-map-tip,#dj-user-tip-close) {
+    display:none!important;pointer-events:none!important;
+  }
+  #app #map .maplibregl-ctrl-scale {
+    border-radius:4px 4px 2px 2px!important;
+    border:solid currentColor!important;border-width:0 1px 2px!important;
+  }
+  #app #transport-title .dj-metro-line-selector {border-radius:50%!important;padding:0!important;}
+  #app #transport-title .dj-metro-line-selector[aria-pressed="true"] {outline:2px solid currentColor!important;outline-offset:2px!important;background:transparent!important;box-shadow:none!important;}
+  #app .metro-planned-notice {
+    grid-column:1/-1;margin:0;padding:8px 10px;border-radius:8px;
+    color:var(--dj800-text,#263a32);background:var(--dj800-elevated,#e8f3ed);
+    font-weight:700;font-size:12px;line-height:1.4;
+  }
+  #app[data-theme="dark"] :is(.metro-nine-service-heading,.metro-planned-notice) {
+    background:#30343b!important;color:#e5e7eb!important;border-color:#4c535f!important;
+  }
+  #app[data-theme="dark"] .metro-nine-service-heading.express {color:#ffe3a2!important;}
+  #app[data-theme="dark"] .metro-direction-arrow {color:#f2f5f8!important;background:#263848!important;}
+  #app[data-theme="dark"] #transport-arrivals .transport-arrival-time {color:#d4ebe1!important;}
+  #app .dj-place-meta .dj-place-row:first-child {border-top:0!important;}
+  #app .dj-place-meta .dj-place-row:last-child {border-bottom:0!important;}
+  #app .dj860-onboarding .dj860-content {align-items:flex-start!important;padding:16px 20px!important;}
+  #app .dj860-onboarding .dj860-footer {grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;padding:10px 16px!important;}
+  #app .dj860-onboarding .dj860-progress-label {display:none!important;}
+  #app .dj860-onboarding .dj860-count {margin-inline-end:auto!important;}
+  #app .dj860-onboarding .dj860-dots {display:none!important;}
+  #app #dj-app-about:not([hidden]) {background:rgba(12,22,21,.33)!important;}
+  #app #map-gesture-guide :is(.dj8212-ios-install-help > summary,.dj852-tip-toggle) {
+    min-height:44px!important;padding-block:7px!important;align-items:center!important;
+  }
+  #app #map-gesture-guide .dj852-tip-chevron {align-self:center!important;line-height:1!important;}
+  #app #map-gesture-guide .dj-guide-release-heading strong {font-size:12px!important;}
+  #app :is(#participation-panel,#route-panel) > .dj836-sheet-body {scroll-padding-bottom:16px!important;}
+  #app .dj-about-card {gap:10px!important;}
+  #app #mine-panel:has(.dj834-my-detail:not([hidden])) .dj854-language-section {display:none!important;}
+  #app .dj-about-card :is(.dj-about-kicker,.dj-about-done) {display:none!important;}
+  html[data-dj-run-mode="browser"] body #app[data-tab="map"][data-theme="dark"] #dj-browser-webapp-tip:not([hidden]) {
+    background:#191b1f!important;border-color:#3a3e45!important;color:#e5e7eb!important;
+  }
+  #app[data-theme="dark"] #dj-browser-webapp-tip :is(.dj-webapp-tip-copy,.dj-webapp-tip-close) {color:#c6cbd2!important;}
+ }
+}
+
+/* v8.9.14: phone-only corrections. Retain the actual sheet and map controllers. */
+@layer request-completion {
+ @media (max-width:699px) {
+  #app#app #dj-v794-toolbar > .dj831-scrollport {overflow-anchor:none!important;}
+  #app#app .page-panel > .dj-sheet-chrome {flex:0 0 auto!important;min-width:0!important;box-sizing:border-box!important;}
+  #app#app .page-panel > .dj836-sheet-body {
+    flex:1 1 0%!important;min-height:0!important;min-width:0!important;
+    box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;
+    padding-bottom:20px!important;scroll-padding-bottom:20px!important;overscroll-behavior-y:contain!important;
+  }
+  #app#app #route-panel > #dj910-route-footer {
+    position:relative!important;inset:auto!important;order:90!important;flex:0 0 auto!important;
+    padding:9px 12px 12px!important;box-sizing:border-box!important;
+    background:var(--dj800-surface,#fff)!important;border-top:1px solid var(--dj800-border,#d7e6de)!important;
+  }
+  #app#app #route-panel .route-location-row {
+    min-width:0!important;box-sizing:border-box!important;gap:8px!important;padding:8px 9px!important;
+    border-radius:10px!important;background:var(--dj800-elevated,#f2f8f4)!important;
+  }
+  #app#app #route-panel .route-location-text {min-width:0!important;overflow-wrap:anywhere!important;}
+  #app#app #route-panel .route-location-divider {background:var(--dj800-border,#d7e6de)!important;border-color:var(--dj800-border,#d7e6de)!important;}
+  #app#app #dj-mobile-utilities > .dj854-more-head {
+    padding:16px 14px 10px!important;grid-template-columns:minmax(0,1fr) 40px!important;box-sizing:border-box!important;
+  }
+  #app#app #dj-mobile-utilities .dj-sheet-chrome-title {
+    display:flex!important;min-width:0!important;max-width:100%!important;width:auto!important;
+    margin:0!important;padding:0!important;position:static!important;justify-content:flex-start!important;translate:none!important;transform:none!important;
+  }
+  #app#app #dj-mobile-utilities .dj-mobile-utility-heading {
+    position:static!important;inset:auto!important;transform:none!important;translate:none!important;
+    margin:0!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important;
+  }
+  #app#app :is(.dj-sheet-chrome-close,#transport-close,.dj-place-header-close,#dj-mobile-utilities-close,#version-history-close,#dj-settings-close) {
+    box-sizing:border-box!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+    max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;border-radius:12px!important;
+    background:var(--dj800-elevated,#e4f3ec)!important;border:1px solid var(--dj800-border,#d7e6de)!important;
+    color:var(--dj800-text,#203e34)!important;box-shadow:none!important;
+  }
+  #app#app #transport-title .dj-metro-line-selector[aria-pressed="true"] {
+    outline:none!important;box-shadow:0 0 0 2px var(--dj800-text,#203e34)!important;
+  }
+  #app#app #transport-title .dj-metro-line-selector:focus:not(:focus-visible) {outline:none!important;}
+  #app#app #transport-title .dj-metro-line-selector:focus-visible {
+    outline:2px solid var(--dj800-accent,#12856c)!important;outline-offset:3px!important;
+  }
+  #app#app #map .maplibregl-ctrl-scale {
+    box-shadow:none!important;border:solid var(--dj800-text,#203e34)!important;border-width:0 1px 1.5px!important;
+    border-radius:3px 3px 0 0!important;background:color-mix(in srgb,var(--dj800-surface,#fff) 80%,transparent)!important;
+    color:var(--dj800-text,#203e34)!important;
+  }
+  #app#app .dj860-onboarding .dj860-copy {margin:0 auto auto!important;align-self:flex-start!important;}
+  #app#app .dj860-onboarding .dj860-content {padding-top:16px!important;align-items:flex-start!important;min-height:0!important;overflow-y:auto!important;}
+  #app#app #news-panel .dongjak-news-item {padding:12px!important;border-radius:14px!important;gap:8px!important;box-shadow:none!important;}
+  #app#app #news-panel .dongjak-news-item :is(h3,strong) {line-height:1.45!important;overflow-wrap:anywhere!important;}
+  #app#app #news-panel .dongjak-news-item a {min-height:40px!important;padding:8px 12px!important;}
+  #app#app #participation-panel .community-report-secondary {margin-bottom:4px!important;}
+  #app#app[data-theme="dark"] :is(.version-history-dialog,.version-history-head,.dj860-card,.dj860-head,.dj860-content,.dj860-footer) {
+    background:var(--dj800-surface,#191b1f)!important;color:var(--dj800-text,#e5e7eb)!important;border-color:var(--dj800-border,#3a3e45)!important;
+  }
+  #app#app[data-theme="dark"] :is(.version-history-list,.dongjak-news-item,.dj860-note) {
+    background:var(--dj800-elevated,#25282d)!important;color:var(--dj800-text,#e5e7eb)!important;border-color:var(--dj800-border,#3a3e45)!important;
+  }
+  #app#app[data-theme="dark"] #news-panel .dongjak-news-item a {
+    background:#304741!important;color:#e5f0eb!important;border:1px solid #48635a!important;
+  }
+ }
+ @media (max-width:399px) {
+  #app#app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-direction-grid {
+    grid-template-columns:minmax(0,1fr)!important;gap:8px!important;
+  }
+ }
+}

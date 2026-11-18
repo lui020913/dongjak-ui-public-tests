@@ -1,0 +1,131 @@
+/* v6.0.8: a single layout/visibility policy for mobile map chrome.
+   This stylesheet MUST be the last CSS import from main.js.
+   Keep interactive map controls, the overview card and the map-options sheet
+   mutually exclusive when opening options. Do not move the actual map canvas. */
+@media (max-width: 1079px) {
+  #app[data-tab="map"] {
+    --dj-map-sheet-gap: 8px;
+  }
+  /* Options closed: the overview card is the only lower panel. Ensure the
+     old floating fullscreen control can never cover the overview actions. */
+  #app[data-tab="map"]:not(.map-controls-open) #mobile-fullscreen-toggle {
+    display: none !important;
+  }
+  #app[data-tab="map"]:not(.map-controls-open) .map-options-mobile-heading,
+  #app[data-tab="map"]:not(.map-controls-open) #map-options-backdrop {
+    display: none !important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] {
+    box-sizing: border-box !important;
+    bottom: var(--dj-mobile-nav-h) !important;
+    height: 68px !important;
+    min-height: 68px !important;
+    max-height: 68px !important;
+    padding: 9px 16px !important;
+    overflow: hidden !important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top {
+    min-height: 48px !important;
+    align-items: center !important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] :is(.section-label,.sheet-summary,.footer-note,.overview-boundary-actions,#points-count) {
+    display: none !important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] h1 {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] #overview-sheet-toggle {
+    font-size: 12px !important;
+    min-height: 36px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+  }
+  /* When options are open, no map chrome floats above/on either the sheet
+     or its backdrop. The close button IN the sheet stays available. */
+  #app[data-tab="map"].map-controls-open :is(
+      #map-tools-toggle,#map-safety-toggle,#map-safety-controls,
+      #night-visibility-quick-off,.sheet.overview-sheet,
+      .map-actions,.weather-widget,.night-visibility-float,
+      .transport-sheet,.admin-dong-picker,.detail-sheet,
+      #map-gesture-guide,#map-chrome-restore
+    ) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  #app[data-tab="map"].map-controls-open #map-options-backdrop:not([hidden]) {
+    display: block !important;
+    position: fixed !important;
+    inset: var(--dj-header-h) 0 var(--dj-mobile-nav-h) 0 !important;
+    z-index: 1900 !important;
+    background: rgba(9, 29, 32, 0.36) !important;
+    border: none !important;
+  }
+  #app[data-tab="map"].map-controls-open .map-advanced-controls {
+    display: flex !important;
+    flex-flow: column nowrap !important;
+    position: fixed !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--dj-mobile-nav-h) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: min(64dvh, calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 12px)) !important;
+    margin: 0 !important;
+    padding: 12px 15px 16px !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    border: 1px solid var(--dj-ui-border,#d3e4db) !important;
+    border-radius: 18px 18px 0 0 !important;
+    background: var(--dj-ui-bg,#f9fcfa) !important;
+    box-shadow: 0 -10px 28px rgba(9,31,28,.22) !important;
+    z-index: 2200 !important;
+  }
+  #app[data-tab="map"].map-controls-open .map-advanced-controls .map-options-mobile-heading {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    position: sticky !important;
+    top: -12px !important;
+    z-index: 2 !important;
+    background: var(--dj-ui-bg,#f9fcfa) !important;
+  }
+  #app[data-tab="map"].map-controls-open .map-advanced-controls #mobile-fullscreen-toggle:not([hidden]) {
+    position: static !important;
+    display: inline-flex !important;
+    width: auto !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    inset: auto !important;
+    z-index: auto !important;
+  }
+  #app[data-tab="map"].map-controls-open .map-advanced-controls .map-options-mobile-actions #map-options-mobile-close {
+    position: static !important;
+    display: inline-flex !important;
+  }
+  /* The bottom nav and top search remain outside the options sheet. */
+  #app[data-tab="map"].map-controls-open #bottom-nav { z-index: 2300 !important; }
+  #app[data-tab="map"].map-controls-open .topbar { z-index: 2300 !important; }
+}
+/* Keep mobile sheet/controls inside the short viewport in landscape. */
+@media (max-width: 1079px) and (max-height: 600px) and (orientation: landscape) {
+  #app[data-tab="map"].map-controls-open .map-advanced-controls {
+    position: fixed !important;
+    top: calc(var(--dj-header-h) + 7px) !important;
+    bottom: calc(var(--dj-mobile-nav-h) + 7px) !important;
+    left: calc(8px + env(safe-area-inset-left)) !important;
+    right: auto !important;
+    width: min(370px, 53vw) !important;
+    max-width: min(370px, 53vw) !important;
+    height: auto !important;
+    max-height: calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 14px) !important;
+    border-radius: 15px !important;
+  }
+}

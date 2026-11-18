@@ -1,0 +1,93 @@
+/* v5.4 2026-11-06: responsive interaction repair. Imported LAST. */
+#app #map-chrome-restore{display:none!important;}
+#app[data-tab="map"] .topbar,
+#app[data-tab="map"] #bottom-nav,
+#app[data-tab="map"] .map-quick-search{opacity:1!important;visibility:visible!important;pointer-events:auto!important;}
+/* A calm physical scale bar, distinct from the map toolbar. */
+#app .maplibregl-ctrl-bottom-left{z-index:950!important;pointer-events:none;}
+#app .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{
+  background:rgba(255,255,255,.96)!important;color:#16453d!important;
+  border:1px solid #cadfd5!important;border-bottom:3px solid #187d68!important;
+  border-radius:7px!important;min-width:52px!important;max-width:170px!important;
+  box-shadow:0 3px 12px #163e3124!important;
+  height:27px!important;line-height:22px!important;
+  padding:0 9px!important;text-align:center!important;
+  font-weight:800!important;font-size:11px!important;letter-spacing:.1px;
+}
+/* Width legend belongs to the width toggle on the right, not a floating left-hand article. */
+#app .road-width-legend{
+  position:absolute!important;left:auto!important;right:76px!important;top:195px!important;
+  bottom:auto!important;transform:none!important;width:min(292px,calc(100vw - 110px))!important;
+  max-height:min(65dvh,460px)!important;overflow:auto!important;
+  border:1px solid #bcd8ca!important;box-shadow:0 8px 30px #183e2e25!important;
+}
+#app .road-width-legend[hidden]{display:none!important;}
+#app .roadwidth-popup{font-family:"Pretendard Variable",system-ui,sans-serif;}
+#app .roadwidth-popup strong{display:block;margin-bottom:5px;}
+#app .roadwidth-popup small{display:block;line-height:1.55;margin-top:7px;color:#65796e;}
+/* Feed first; writing is an optional step, not the landing screen. */
+#app .community-report-secondary{border:1px solid #deebe4;border-radius:15px;background:#f7faf8;margin:20px 0 8px;padding:9px 12px;}
+#app .community-report-secondary summary{font-size:12px;font-weight:850;color:#13705c;cursor:pointer;padding:7px;}
+#app .community-report-secondary .feature-card{margin:12px 0;}
+#app .community-report-secondary .local-only{margin:0 0 8px;}
+#app .community-feed{margin-top:12px;min-height:84px;}
+#app .community-heading-row{align-items:center;}
+#app .community-heading-row .micro-label{letter-spacing:0;}
+/* Stable desktop sidebar; menu items must never stack inside the same icon cell. */
+@media(min-width:1080px){
+  #app #bottom-nav{display:flex!important;}
+  #app #bottom-nav .nav-tab{display:flex!important;flex-direction:column!important;
+    width:100%!important;height:70px!important;min-height:70px!important;
+    flex:0 0 auto!important;white-space:nowrap!important;overflow:hidden!important;}
+  #app #bottom-nav .nav-tab .nav-icon{font-size:19px!important;line-height:23px!important;}
+  #app .maplibregl-ctrl-bottom-left{}
+  #app .road-width-legend{top:196px!important;right:76px!important;left:auto!important;bottom:auto!important;}
+}
+@media(min-width:701px) and (max-width:1079px){
+  #app #bottom-nav{display:grid!important;}
+  #app #bottom-nav .nav-tab{width:100%!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;}
+  #app .road-width-legend{top:auto!important;bottom:calc(285px + env(safe-area-inset-bottom))!important;right:72px!important;}
+}
+@media(max-width:700px){
+  #app .topbar{z-index:1510!important;}
+  #app .topbar>.map-quick-search{display:block!important;
+    
+    z-index:1511!important;}
+  #app .map-quick-search-form{min-height:46px!important;}
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    
+    z-index:1512!important;
+    
+    border-radius:12px!important;
+    background:rgba(255,255,255,.97)!important;border:1px solid #d9e9e1!important;
+    box-shadow:0 2px 12px #18392a20!important;
+  }
+  #app .topbar .weather-widget #weather-title{font-size:10px!important;white-space:nowrap!important;}
+  #app .topbar .weather-widget .weather-info{font-size:11px!important;white-space:nowrap!important;max-width:92px!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  #app .topbar .weather-widget #weather-my-location{font-size:10px!important;padding:5px!important;min-width:0!important;white-space:nowrap!important;}
+  #app #bottom-nav{z-index:1490!important;display:grid!important;
+    
+    
+    border-radius:15px 15px 0 0!important;box-shadow:0 -4px 18px #132b2017!important;
+  }
+  #app #bottom-nav .nav-tab{flex-direction:column!important;min-width:0!important;width:100%!important;
+    font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;}
+  #app #bottom-nav .nav-tab .nav-icon{font-size:18px!important;}
+  /* Occupy lower left without competing with the folded white sheet. */
+  #app .maplibregl-ctrl-bottom-left{}
+  #app .road-width-legend{left:auto!important;right:70px!important;
+    top:auto!important;bottom:calc(145px + env(safe-area-inset-bottom))!important;
+    width:min(260px,calc(100vw - 92px))!important;max-height:50dvh!important;}
+  /* avoid right-side tools swallowing the weather badge */
+  #app .map-actions{}
+  #app .page-panel,#app #news-panel.page-panel{top:calc(169px + env(safe-area-inset-top))!important;
+    height:auto!important;max-height:none!important;bottom:calc(68px + env(safe-area-inset-bottom))!important;}
+}
+@media(max-width:385px){
+  #app .brand-name{font-size:12px!important;}
+  #app .topbar .weather-widget #weather-title{display:none!important;}
+}
+
+#app .community-demo-label{font-size:12px;color:#56756a;padding:10px 0 0;}
+#app .community-example{background:#f7faf8;border:1px dashed #bdd6ca;opacity:.94;}

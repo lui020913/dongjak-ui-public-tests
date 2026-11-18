@@ -1,0 +1,317 @@
+/* v8.6.1 — mobile More sheet, TIP lane and first-use guide repairs.
+ * Deliberately outranks the older v8.2.9 top-right More dropdown rules.
+ * No map, routing, transit or account data/controllers are changed here.
+ */
+
+@keyframes dj861-more-enter {
+  from { opacity:0; translate:0 38px; }
+  to   { opacity:1; translate:0 0; }
+}
+@keyframes dj861-more-exit {
+  from { opacity:1; translate:0 0; }
+  to   { opacity:0; translate:0 28px; }
+}
+
+@media (max-width:699px) {
+  /* The More panel is a true floating bottom sheet above the five-tab dock.
+     Eight repeated app IDs intentionally beat the legacy v8.2.9 selector. */
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities:not([hidden]) {
+    position:fixed!important;
+    top:auto!important;
+    left:12px!important;
+    right:12px!important;
+    bottom:calc(var(--dj829-panel-bottom,86px) + 8px)!important;
+    width:auto!important;
+    max-width:620px!important;
+    height:min(72dvh,620px)!important;
+    max-height:min(72dvh,620px,calc(100dvh - env(safe-area-inset-top,0px) - var(--dj829-panel-bottom,86px) - 20px))!important;
+    min-height:0!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:0!important;
+    overflow:hidden!important;
+    border:1px solid var(--dj800-border,#dce8e1)!important;
+    border-radius:24px!important;
+    background:var(--dj800-surface,#fff)!important;
+    color:var(--dj800-text,#21483b)!important;
+    box-shadow:0 18px 48px rgba(17,47,37,.24)!important;
+    z-index:7000!important;
+    pointer-events:auto!important;
+    isolation:isolate!important;
+    will-change:opacity,translate!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities[hidden] {
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-in:not([hidden]) {
+    animation:dj861-more-enter .32s cubic-bezier(.18,.84,.22,1) both!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-out:not([hidden]) {
+    animation:dj861-more-exit .19s ease-in both!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities>.dj854-more-head {
+    position:relative!important;
+    inset:auto!important;
+    flex:0 0 76px!important;
+    width:100%!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:24px 14px 10px!important;
+    border:0!important;
+    border-bottom:1px solid var(--dj800-border,#dce8e1)!important;
+    border-radius:24px 24px 0 0!important;
+    background:var(--dj800-surface,#fff)!important;
+    overflow:visible!important;
+    z-index:20!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj-sheet-chrome-title {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj-mobile-utility-heading {
+    display:block!important;
+    margin:0!important;
+    padding:0!important;
+    color:var(--dj800-text,#203d34)!important;
+    font-size:22px!important;
+    line-height:1.2!important;
+    font-weight:820!important;
+    letter-spacing:-.04em!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj-sheet-chrome-grip {
+    position:absolute!important;
+    top:8px!important;
+    left:50%!important;
+    right:auto!important;
+    display:block!important;
+    width:42px!important;
+    height:5px!important;
+    min-height:5px!important;
+    border-radius:999px!important;
+    background:#cbd6d0!important;
+    transform:translateX(-50%)!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj856-more-edge-drag {
+    position:absolute!important;
+    z-index:25!important;
+    top:0!important;
+    left:0!important;
+    right:0!important;
+    display:block!important;
+    width:100%!important;
+    height:23px!important;
+    touch-action:none!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close {
+    position:relative!important;
+    inset:auto!important;
+    z-index:30!important;
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 44px!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    align-self:center!important;
+    margin:0!important;
+    padding:0!important;
+    border:1px solid var(--dj800-border,#d6e4dc)!important;
+    border-radius:13px!important;
+    background:var(--dj800-elevated,#edf5f0)!important;
+    color:var(--dj800-text,#1d3931)!important;
+    box-shadow:none!important;
+    font-size:0!important;
+    line-height:0!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close::before,
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close::after {
+    content:none!important;
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close svg {
+    display:block!important;
+    position:static!important;
+    width:23px!important;
+    height:23px!important;
+    min-width:23px!important;
+    min-height:23px!important;
+    max-width:23px!important;
+    max-height:23px!important;
+    margin:auto!important;
+    stroke:currentColor!important;
+    fill:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities>.dj-mobile-utilities-body {
+    display:flex!important;
+    flex:1 1 auto!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:auto!important;
+    box-sizing:border-box!important;
+    padding:12px 14px calc(16px + env(safe-area-inset-bottom,0px))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior:contain!important;
+    scrollbar-width:none!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities>.dj-mobile-utilities-body::-webkit-scrollbar {
+    display:none!important;
+    width:0!important;
+    height:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj840-more-quick-actions {
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+    width:100%!important;
+    margin:0 0 12px!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities .dj840-more-quick-actions>button {
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:10px!important;
+    border:1px solid var(--dj800-border,#d8e7df)!important;
+    border-radius:15px!important;
+    background:var(--dj800-elevated,#eef6f1)!important;
+    color:var(--dj800-text,#21483b)!important;
+    font-size:14px!important;
+    font-weight:780!important;
+    line-height:1.2!important;
+    text-align:center!important;
+    white-space:normal!important;
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+    cursor:pointer!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities button,
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities summary,
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities input,
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities select {
+    pointer-events:auto!important;
+    touch-action:manipulation!important;
+  }
+  html body #app[data-theme="dark"] #dj-mobile-utilities>.dj854-more-head {
+    background:var(--dj800-surface,#192e31)!important;
+    border-bottom-color:var(--dj800-border,#49625d)!important;
+  }
+  html body #app[data-theme="dark"] #dj-mobile-utilities .dj-mobile-utility-heading {
+    color:var(--dj800-text,#e6f5ed)!important;
+  }
+
+  /* The first-use map guide is a centered dialog, not a left/right drawer.
+     This also corrects stale anchor coordinates left by earlier guide code. */
+  html body #app#app#app#app#app#app#app#app #map-gesture-guide.dj-guide-centered:not([hidden]),
+  html body #app#app#app#app#app#app#app#app #map-gesture-guide:not([hidden]) {
+    position:fixed!important;
+    left:50%!important;
+    right:auto!important;
+    top:50%!important;
+    bottom:auto!important;
+    width:min(470px,calc(100vw - 24px))!important;
+    max-width:calc(100vw - 24px)!important;
+    height:auto!important;
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    transform:translate(-50%,-50%)!important;
+    translate:none!important;
+    overflow:hidden!important;
+    border-radius:24px!important;
+    z-index:9000!important;
+  }
+  html body #app#app#app#app#app#app#app#app #map-gesture-guide>.dj856-guide-body {
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 100px)!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior:contain!important;
+  }
+}
+
+/* Reserve the left HUD lane for the MapLibre distance scale. The TIP stays
+   compact and right-aligned even when older, higher-specificity centering
+   rules are present. */
+@media (max-width:699px) {
+  html body #app#app#app#app#app#app#app#app #dj840-map-tip:not([hidden]) {
+    position:fixed!important;
+    left:auto!important;
+    right:12px!important;
+    bottom:calc(var(--dj829-panel-bottom,84px) + 4px)!important;
+    width:min(248px,calc(100vw - 150px))!important;
+    min-width:0!important;
+    max-width:calc(100vw - 150px)!important;
+    height:38px!important;
+    min-height:38px!important;
+    max-height:38px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    box-sizing:border-box!important;
+    gap:7px!important;
+    padding:7px 10px!important;
+    border-radius:999px!important;
+    overflow:hidden!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+    transform:none!important;
+    z-index:3150!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj840-map-tip strong {
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+  }
+  html body #app#app#app#app#app#app#app#app #dj840-map-tip span {
+    display:block!important;
+    flex:0 0 auto!important;
+    width:max-content!important;
+    max-width:none!important;
+    white-space:nowrap!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-in:not([hidden]),
+  html body #app#app#app#app#app#app#app#app #dj-mobile-utilities.dj852-panel-fade-out:not([hidden]) {
+    animation:none!important;
+  }
+}

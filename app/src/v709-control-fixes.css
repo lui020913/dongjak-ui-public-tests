@@ -1,0 +1,177 @@
+/* v7.0.9: Consolidated, final-order corrections for floating map chrome.
+   Keep component handlers and all existing data/analysis layers unchanged. */
+
+/* Draw the X instead of using the typographic × glyph (whose font baseline
+   renders lower than its actual hit box on iOS and Windows). */
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+){
+  box-sizing:border-box!important;
+  display:grid!important;place-items:center!important;
+  padding:0!important;
+  font-size:0!important;line-height:0!important;
+  text-indent:0!important;
+  overflow:visible!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  isolation:isolate!important;
+}
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+)::before,
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+)::after{
+  content:""!important;position:absolute!important;
+  top:50%!important;left:50%!important;
+  width:17px!important;height:2.6px!important;
+  border:0!important;border-radius:4px!important;
+  background:currentColor!important;pointer-events:none!important;
+  transform-origin:center!important;translate:-50% -50%!important;
+  margin:0!important;
+}
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::before{
+  rotate:45deg!important;
+}
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::after{
+  rotate:-45deg!important;
+}
+/* Buttons with normal flow need their own containing block for the
+   centered cross strokes. Absolute-positioned sheet dismissers stay absolute. */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#admin-dong-close,#close-detail,#cancel-add,
+  #route-search-close,#community-compose-close,#pza-road-close){
+  position:relative!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-close{
+  position:absolute!important;
+}
+/* Unified color in the active dark theme, including on-map night summary. */
+#app[data-theme="dark"] :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss){
+  background:#284741!important;border:1px solid #50786d!important;
+  color:#e4f4ec!important;box-shadow:none!important;
+}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions #night-visibility-float-stop{
+  background:#284741!important;border-color:#668c7c!important;color:#effff5!important;
+}
+#app #night-visibility-float-stop{
+  flex:none!important;position:relative!important;
+  width:34px!important;height:34px!important;min-width:34px!important;
+  min-height:34px!important;border-radius:11px!important;
+}
+/* Anchor dismiss controls to the card, not to the heading's line box. */
+#app #news-panel:not([hidden]){position:absolute!important;}
+#app #news-panel>.page-heading{position:static!important;padding-right:55px!important;}
+#app #news-panel #news-close-to-map,
+#app .page-panel>.page-dismiss{
+  position:absolute!important;top:14px!important;right:14px!important;left:auto!important;
+  width:38px!important;min-width:38px!important;max-width:38px!important;
+  height:38px!important;min-height:38px!important;max-height:38px!important;
+  margin:0!important;z-index:40!important;
+}
+#app #overview-sheet .sheet-top{position:static!important;}
+#app #overview-sheet #overview-sheet-close{
+  position:absolute!important;top:14px!important;right:14px!important;
+  left:auto!important;grid-column:auto!important;grid-row:auto!important;
+  width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;
+  margin:0!important;z-index:40!important;
+}
+#app #overview-sheet .sheet-top>div:first-child{padding-right:45px!important;}
+#app #overview-sheet .sheet-top-actions{padding-right:45px!important;}
+#app #overview-sheet[data-sheet-state="collapsed"] #overview-sheet-close{
+  top:50%!important;transform:translateY(-50%)!important;
+}
+
+/* Each action is the same footprint and 10px apart; compact, not tall tiles. */
+#app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+  box-sizing:border-box!important;position:absolute!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:5px!important;white-space:nowrap!important;
+  padding:6px 9px!important;line-height:1.1!important;
+  height:44px!important;min-height:44px!important;max-height:44px!important;
+  border-radius:13px!important;margin:0!important;
+  font-size:12px!important;font-weight:800!important;
+}
+#app #night-visibility-quick-off[hidden]{display:none!important;}
+#app #night-visibility-quick-off[aria-pressed="true"]:not([hidden]){
+  background:#574325!important;border-color:#c39a4f!important;color:#fff5db!important;
+}
+#app #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text{color:#fff5db!important;}
+#app #night-visibility-quick-off .dj-night-action-symbol{
+  flex:0 0 22px!important;font-size:23px!important;
+}
+@media(min-width:1080px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:14px!important;right:auto!important;width:102px!important;
+    min-width:102px!important;max-width:102px!important;
+  }
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 54px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 108px)!important;}
+  /* The floating night analysis moves from right to left of the map, beside
+     the nav rail rather than over the right-hand map controls. */
+  #app #night-visibility-float:not(.dj-float-user-positioned){
+    left:132px!important;right:auto!important;top:calc(102px + env(safe-area-inset-top))!important;
+    width:min(378px,calc(100vw - 164px))!important;
+  }
+}
+@media(min-width:700px) and (max-width:1079px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:12px!important;right:auto!important;width:116px!important;min-width:116px!important;max-width:116px!important;
+    height:42px!important;min-height:42px!important;max-height:42px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,60px) + 56px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,60px) + 107px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,60px) + 158px)!important;}
+  #app #night-visibility-float:not(.dj-float-user-positioned){
+    left:140px!important;right:auto!important;top:calc(125px + env(safe-area-inset-top))!important;
+    width:min(355px,calc(100vw - 160px))!important;
+  }
+}
+@media(max-width:699px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:12px!important;right:auto!important;
+    width:112px!important;min-width:112px!important;max-width:112px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+    padding:5px 7px!important;font-size:11px!important;border-radius:12px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,60px) + 54px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,60px) + 101px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,60px) + 148px)!important;}
+  #app[data-tab] #night-visibility-float:not(.dj-float-user-positioned){
+    left:12px!important;right:auto!important;top:auto!important;
+    bottom:calc(102px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 24px)!important;
+  }
+}

@@ -1,0 +1,69 @@
+/* v8.11: requested motion choice and mobile UI corrections. */
+/* Fade-only UI transitions: do not translate, clip, zoom or blur panels. */
+@keyframes dj811-mobile-soft-open {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes dj811-mobile-soft-close {
+  from { opacity:1; }
+  to   { opacity:0; }
+}
+@media(max-width:699px){
+  /* Remove each tab's inner border while retaining a soft shadow on the outer dock. */
+  html body #app#app #bottom-nav {box-shadow:0 8px 22px rgba(23,66,52,.16)!important;}
+  html body #app#app #bottom-nav>.nav-tab,
+  html body #app#app #bottom-nav>.nav-tab.active {
+    border:0!important;outline:0!important;box-shadow:none!important;
+    filter:none!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab:focus-visible {outline:2px solid #128b75!important;outline-offset:-3px!important;}
+  html body #app#app .topbar .dj807-search-copy[hidden]{display:none!important;}
+  html body #app#app .topbar .map-quick-search-form:focus-within .dj807-search-copy,
+  html body #app#app .topbar .map-quick-search-form.dj807-has-input .dj807-search-copy {display:none!important;}
+  /* Small transit bottom sheets: map selection remains visible above it. */
+  html body #app#app #transport-sheet:not([hidden]){
+    top:auto!important;bottom:calc(var(--dj800-panel-bottom,95px) + 4px)!important;
+    height:auto!important;min-height:0!important;
+    max-height:min(65dvh,580px)!important;overflow-y:auto!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"]:not([hidden]){
+    max-height:min(69dvh,610px)!important;
+  }
+  html body #app#app #transport-sheet .transport-panel-head {margin-bottom:5px!important;padding-top:1px!important;}
+  html body #app#app #transport-sheet .transport-arrivals-title {margin-block:5px!important;}
+  html body #app#app #transport-sheet .transport-mode-tabs{margin-block:5px!important;}
+  html body #app#app #transport-sheet .transport-selection-actions{margin-block:6px!important;}
+  /* Facilities use the space above the dock, not behind it. */
+  html body #app#app #map .dj-place-detail-popup {
+    width:min(340px,calc(100vw - 42px))!important;max-width:min(340px,calc(100vw - 42px))!important;
+    z-index:2600!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content {
+    max-height:min(51dvh,490px)!important;overflow-y:auto!important;
+    border-radius:22px!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-close-button{
+    width:38px!important;height:38px!important;top:8px!important;right:8px!important;
+    display:grid!important;place-items:center!important;border-radius:12px!important;
+    border:1px solid var(--dj800-border,#cce0d5)!important;
+    background:var(--dj800-secondary,#f2f8f4)!important;
+    color:var(--dj800-text,#23463b)!important;
+    font-size:29px!important;font-weight:700!important;line-height:1!important;
+  }
+}
+/* Loading messages remain visible on every first paint, not only the app icon. */
+html body #app#app #map-startup-overlay:not([hidden]) :is(.map-startup-title,.map-startup-subtitle,#map-startup-message,#map-startup-note,.map-startup-progress){
+  display:block!important;visibility:visible!important;opacity:1!important;
+}
+html body #app#app #map-startup-overlay:not([hidden]) .map-startup-inner {gap:4px!important;}
+html body #app#app #map-startup-overlay:not([hidden]) #map-startup-message{font-size:14px!important;font-weight:800!important;}
+@media(prefers-reduced-motion:reduce){
+  html body #app#app [data-dj810-animating]{animation-duration:.01ms!important;}
+}
+
+/* v8.12: close the two readability glyphs by just 1px (3px -> 2px). */
+@media (max-width:699px) {
+  html body #app#app #dj-v794-toolbar #dj800-type-trigger .dj800-type-icon {
+    gap:2px!important;
+  }
+}

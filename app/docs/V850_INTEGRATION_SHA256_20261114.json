@@ -1,0 +1,101 @@
+{
+  "version": "8.5.0",
+  "baseVersion": "8.4.4",
+  "files": [
+    {
+      "path": "README_V850_SEOUL_ONE_KEY_FACILITIES_20261114.md",
+      "size": 7774,
+      "sha256": "56f95965a74c4ff165c112de2ea603fc6a6f4ae0cc128c2db0038ce233d09758"
+    },
+    {
+      "path": "functions/api/seoul-facilities.js",
+      "size": 2819,
+      "sha256": "d16f5c02c7886f2b9b9085cb342f9e5a7e05456fad7dee9182d860e0f428cbf1"
+    },
+    {
+      "path": "functions/lib/seoul-facility-core.mjs",
+      "size": 5328,
+      "sha256": "d237574941a7b9b5aef636c0924623c887fe85f6acfe5745a9210c3ba2772e3a"
+    },
+    {
+      "path": "index.html",
+      "size": 102347,
+      "sha256": "6513c9ba82ccbe0a89bfac7ea59278f5330306b75ca897e68ca7df5c25ba67c9"
+    },
+    {
+      "path": "migrations/0001_seoul_facility_cache.sql",
+      "size": 955,
+      "sha256": "6b72cdb48fbb725f183e6b97156a55c2186e40c7f705c91ee273deabd43802c1"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 90146,
+      "sha256": "2b543c0d946deb6aa40033cd2c0eb5266d82a83bd7297dc1c74e6690cf0bdacd"
+    },
+    {
+      "path": "package.json",
+      "size": 2030,
+      "sha256": "9ddf644c93fd04e8b65bc6de566bb46747f76df70d8c2eb7fd9aad705b7d56fb"
+    },
+    {
+      "path": "public/version.json",
+      "size": 66,
+      "sha256": "270747a8b6029c680009c8177cdbf47fb4b208ebcfc70c9a0358a37c43b0b8ff"
+    },
+    {
+      "path": "scripts/configure-seoul-facilities.mjs",
+      "size": 995,
+      "sha256": "970f5d3e5910e029239a7a9a85708ba26c87ba78031c3e3c7716403252c6102d"
+    },
+    {
+      "path": "src/app-release-log.json",
+      "size": 15592,
+      "sha256": "196ed61f10216468440fe3753c637f1f8b64db1d5f33d0770f1574a3ca64ea67"
+    },
+    {
+      "path": "src/app-version.js",
+      "size": 15151,
+      "sha256": "09be0ebaa1feb808303173a9a9b7811dd252aa1613d64bdd0c89d8d344f41018"
+    },
+    {
+      "path": "src/build-info.json",
+      "size": 66,
+      "sha256": "270747a8b6029c680009c8177cdbf47fb4b208ebcfc70c9a0358a37c43b0b8ff"
+    },
+    {
+      "path": "src/civic-facility-layer.js",
+      "size": 7879,
+      "sha256": "76b4f472ceeed91e839c2524efe23c2ec8b91a15c198578d7f9f5252da4ea750"
+    },
+    {
+      "path": "src/map-quick-search.js",
+      "size": 11265,
+      "sha256": "4e7cc461f9fb380f7f6754935bae8fac5bc1051819b8a209d055fdd0ccb79664"
+    },
+    {
+      "path": "src/seoul-official-facilities.js",
+      "size": 6347,
+      "sha256": "7b83246e9ea1a9bc567d17d7c8ea5dc57d8e86a7671b5e102710e90032e9deb5"
+    },
+    {
+      "path": "src/v7120-settings.js",
+      "size": 12915,
+      "sha256": "263b8b34c24d094e450587570d906ea163d5009864cb7ef3e663a5a62155d86e"
+    },
+    {
+      "path": "src/workers/seoul-facility-sync.mjs",
+      "size": 5384,
+      "sha256": "f97a5ea3a52c4836bac9a4167be212aabc875d5609459807d2b18a040123c55f"
+    },
+    {
+      "path": "tests/seoul-facilities-v850.test.mjs",
+      "size": 3707,
+      "sha256": "62cf4cf9b5bc4f40d3a9b2572eca736e02ec277b7e089b84c108085f74b7aeaf"
+    },
+    {
+      "path": "wrangler.seoul-facilities.jsonc",
+      "size": 447,
+      "sha256": "6bb47282bec536cc65df55317fcdebfbfa8e65a98f9146ef14d0e2cf9d84bbfc"
+    }
+  ]
+}

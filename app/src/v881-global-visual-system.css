@@ -1,0 +1,128 @@
+/* v8.8.0 global visual system — scoped to the existing map shell.
+ * No layout engine, interactive state, map layers or breakpoints are modified.
+ */
+#app {
+  --dj881-surface: #ffffff;
+  --dj881-subtle: #f5f9f7;
+  --dj881-soft: #eaf5ee;
+  --dj881-text: #233e35;
+  --dj881-muted: #657b70;
+  --dj881-line: #d9e7df;
+  --dj881-accent: #12816b;
+  --dj881-accent-hover: #0a715c;
+  --dj881-shadow: 0 10px 28px rgba(15,53,39,.075);
+  --dj881-focus: rgba(14,134,104,.17);
+}
+#app[data-theme="dark"] {
+  --dj881-surface: #192d32;
+  --dj881-subtle: #20393c;
+  --dj881-soft: #2a4843;
+  --dj881-text: #ecf6f0;
+  --dj881-muted: #b7cec5;
+  --dj881-line: #41615a;
+  --dj881-accent: #58c3a0;
+  --dj881-accent-hover: #76d5b4;
+  --dj881-shadow: 0 12px 36px rgba(0,0,0,.19);
+  --dj881-focus: rgba(69,197,158,.24);
+}
+
+/* Shared information hierarchy: all four main pages, transit and facilities. */
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+  .dj-sheet-chrome-title h2 {
+  letter-spacing:-.035em;
+  font-weight:800;
+  color:var(--dj881-text);
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+  :is(.dj-page-intro,.page-note) {
+  overflow-wrap:break-word;
+  word-break:keep-all;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+  .dj-page-intro {
+  color:var(--dj881-muted);
+  font-size:13px;
+  font-weight:480;
+  line-height:1.6;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+  .page-note {
+  color:var(--dj881-muted);
+  font-size:12px;
+  line-height:1.65;
+  overflow-wrap:break-word;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+  :is(.page-section-title,.community-heading-row h3) {
+  color:var(--dj881-text);
+  font-weight:750;
+  letter-spacing:-.025em;
+}
+
+/* Cards from distinct feature versions now share a gentle border treatment.
+ * Avoid forcing geometry, visibility, or height: some are virtualized panels. */
+#app :is(
+  #route-panel .route-card,
+  #route-panel .route-summary,
+  #route-panel .route-variants,
+  #participation-panel .feature-card,
+  #participation-panel .community-form,
+  #participation-panel .community-note,
+  #news-panel .dongjak-news-item,
+  #mine-panel .record-item,
+  #mine-panel .dj877-pref-group,
+  #transport-sheet .transport-selection-box
+) {
+  border-color:var(--dj881-line);
+  border-radius:16px;
+}
+#app :is(
+  #route-panel .route-location-text strong,
+  #route-panel .route-card h3,
+  #participation-panel .community-heading-row h3,
+  #news-panel .dongjak-news-item strong,
+  #transport-sheet .transport-panel-head h2
+) {
+  color:var(--dj881-text);
+}
+#app :is(
+  #route-panel .route-location-text span,
+  #transport-sheet .transport-hours-disclaimer,
+  #participation-panel .community-form-note,
+  #news-panel .dongjak-news-status
+) {
+  color:var(--dj881-muted);
+  line-height:1.55;
+}
+
+/* Consistent accessible focus; respect per-feature pressed/selected colors. */
+#app :is(
+  #bottom-nav,.topbar,#route-panel,#participation-panel,
+  #news-panel,#mine-panel,#transport-sheet,
+  #map-safety-controls,#map-advanced-controls
+) :is(button,a,input,select,textarea):focus-visible {
+  outline:3px solid var(--dj881-accent);
+  outline-offset:2px;
+}
+#app :is(
+  #route-panel,#participation-panel,#news-panel,#mine-panel
+) :is(button,select,input,textarea) {
+  font-family:'Pretendard Variable',Pretendard,'Apple SD Gothic Neo',sans-serif;
+}
+#app :is(
+  #route-panel,#participation-panel,#news-panel,#mine-panel
+) :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]) {
+  accent-color:var(--dj881-accent);
+}
+#app :is(
+  #route-panel,#participation-panel,#news-panel,#mine-panel
+) :is(button,a):disabled,
+#app :is(#route-panel,#participation-panel) button[aria-disabled="true"] {
+  cursor:not-allowed;
+}
+@media (prefers-reduced-motion:reduce) {
+  #app :is(#bottom-nav,.topbar,#route-panel,#participation-panel,
+    #news-panel,#mine-panel,#transport-sheet) :is(button,a) {
+    transition:none!important;
+  }
+}

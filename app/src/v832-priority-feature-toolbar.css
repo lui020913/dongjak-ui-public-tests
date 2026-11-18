@@ -1,0 +1,153 @@
+/* v8.2.13 - Mobile priority shortcuts, animated labels and accessible data sheet.
+   Loaded after the v831 rail. Other app controls, map styles and OAuth untouched. */
+@media(max-width:699px){
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-feature {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;
+    height:44px!important;padding:0!important;gap:0!important;border-radius:999px!important;
+    overflow:hidden!important;white-space:nowrap!important;
+    transition:flex-basis .3s cubic-bezier(.22,.7,.25,1),width .3s cubic-bezier(.22,.7,.25,1),min-width .3s cubic-bezier(.22,.7,.25,1),max-width .3s cubic-bezier(.22,.7,.25,1),background-color .2s ease,border-color .2s ease,box-shadow .2s ease!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-feature.dj832-expanded {
+    flex:0 0 auto!important;width:auto!important;min-width:126px!important;max-width:min(246px,calc(100vw - 82px))!important;
+    padding:0 13px!important;gap:8px!important;justify-content:flex-start!important;
+    border-color:var(--dj800-accent,#118570)!important;
+    background:var(--dj800-elevated,#e4f3ec)!important;
+    box-shadow:inset 0 0 0 1px var(--dj800-accent,#118570),0 2px 10px rgba(18,90,72,.12)!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar .dj831-scrollport > .dj832-feature .dj-v794-icon {
+    display:flex!important;flex:0 0 22px!important;width:22px!important;height:22px!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar .dj831-scrollport > .dj832-feature .dj832-feature-label {
+    display:inline-block!important;overflow:hidden!important;min-width:0!important;max-width:0!important;
+    margin:0!important;opacity:0!important;visibility:hidden!important;
+    font-size:12px!important;font-weight:650!important;line-height:1.1!important;
+    white-space:nowrap!important;text-overflow:ellipsis!important;
+    transition:max-width .28s ease,opacity .22s ease,visibility .22s ease!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar .dj831-scrollport > .dj832-feature.dj832-expanded .dj832-feature-label {
+    max-width:176px!important;opacity:1!important;visibility:visible!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport .dj832-feature[data-unavailable="true"] {
+    opacity:.8!important;
+  }
+  /* Existing map/safety/night/typography/weather buttons keep their native
+     actions, but use the same icon-to-text expand/collapse treatment. */
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-native {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex:0 0 44px!important;width:44px!important;min-width:44px!important;max-width:44px!important;
+    padding:0!important;gap:0!important;border-radius:999px!important;white-space:nowrap!important;
+    transition:width .3s ease,min-width .3s ease,max-width .3s ease,background-color .2s ease!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-native.dj832-expanded {
+    flex:0 0 auto!important;width:auto!important;min-width:120px!important;max-width:180px!important;
+    padding:0 12px!important;gap:6px!important;justify-content:flex-start!important;
+    background:var(--dj800-elevated,#e4f3ec)!important;
+    border-color:var(--dj800-accent,#118570)!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-native::after {
+    content:attr(data-dj832-label)!important;display:inline-block!important;min-width:0!important;
+    max-width:0!important;overflow:hidden!important;white-space:nowrap!important;
+    font-size:12px!important;font-weight:650!important;opacity:0!important;
+    transition:max-width .28s ease,opacity .2s ease!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj832-native.dj832-expanded::after {
+    max-width:110px!important;opacity:1!important;
+  }
+  /* Keep the fixed More control above the slide rail with the original handlers. */
+  html body #app#app#app#app#app#app #dj-v794-toolbar > #dj-v794-more {z-index:2!important;}
+  html body #app#app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport{scroll-behavior:smooth!important;}
+  /* The original PNG contains transparent padding. Slightly enlarge the artwork,
+     not the header geometry, to visually match the 48px theme control. */
+  html body #app#app#app#app#app#app .topbar > #dj-settings-mobile {
+    display:grid!important;place-items:center!important;padding:0!important;overflow:hidden!important;
+    width:48px!important;min-width:48px!important;max-width:48px!important;height:50px!important;
+  }
+  html body #app#app#app#app#app#app .topbar > #dj-settings-mobile img {
+    width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
+    transform:scale(1.13)!important;transform-origin:center!important;object-fit:contain!important;object-position:center!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities{width:min(330px,calc(100vw - 24px))!important;}
+  html body #app#app#app#app#app#app #dj-mobile-utilities #dj832-more-features {
+    display:flex!important;flex-direction:column!important;gap:7px!important;min-width:0!important;
+    padding-top:10px!important;margin-top:4px!important;border-top:1px solid var(--dj800-border,#d8e6df)!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-title {
+    font-size:14px!important;font-weight:700!important;color:inherit!important;padding:2px 4px!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-group-label {
+    font-size:11px!important;font-weight:600!important;color:var(--dj800-muted,#6d857b)!important;
+    padding:6px 4px 1px!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities button.dj832-more-feature {
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    gap:9px!important;min-height:43px!important;padding:8px 10px!important;text-align:left!important;
+    font-size:12px!important;font-weight:550!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-icon {
+    display:grid!important;place-items:center!important;flex:0 0 19px!important;
+  }
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-icon svg {width:18px!important;height:18px!important;}
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-label {flex:1!important;min-width:0!important;overflow-wrap:anywhere!important;}
+  html body #app#app#app#app#app#app #dj-mobile-utilities .dj832-more-chevron {font-size:19px!important;color:var(--dj800-muted,#6d857b)!important;}
+  html body #app#app#app#app#app#app #dj832-data-sheet {
+    position:fixed!important;inset:auto 10px var(--dj832-bottom,var(--dj829-panel-bottom,90px)) 10px!important;
+    box-sizing:border-box!important;width:auto!important;max-width:none!important;
+    max-height:min(39dvh,325px,calc(100dvh - var(--dj829-panel-bottom,90px) - var(--dj829-panel-top-safe,140px) - 12px))!important;
+    overflow:hidden!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#24483d)!important;
+    border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:22px!important;
+    box-shadow:0 14px 35px rgba(15,48,38,.18)!important;z-index:2880!important;
+    padding:0 17px 12px!important;
+    transform:translate3d(0,var(--dj832-drag,0px),0)!important;
+    transition:transform .24s ease,box-shadow .24s ease!important;
+    overscroll-behavior:contain!important;
+  }
+  html body #app#app#app#app#app#app #dj832-data-sheet[hidden]{display:none!important;}
+  html body #app#app#app#app#app#app #dj832-data-sheet.dj832-dragging{transition:none!important;}
+  html body #app#app#app#app#app#app #dj832-data-sheet .dj832-handle-area {
+    display:grid!important;place-items:center!important;flex:0 0 27px!important;height:27px!important;
+    touch-action:none!important;cursor:grab!important;user-select:none!important;
+  }
+  html body #app#app#app#app#app#app #dj832-data-sheet .dj832-grab-bar {
+    width:43px!important;height:5px!important;border-radius:99px!important;
+    background:var(--dj800-border,#d8e5df)!important;
+  }
+  html body #app#app#app#app#app#app #dj832-data-sheet .dj832-sheet-header {
+    display:grid!important;grid-template-columns:minmax(0,1fr) 38px!important;align-items:center!important;
+    gap:8px!important;flex:none!important;margin:0 0 5px!important;padding:0!important;
+  }
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-title {
+    margin:0!important;font-size:17px!important;font-weight:700!important;line-height:1.3!important;
+    min-width:0!important;overflow-wrap:anywhere!important;
+  }
+  html body #app#app#app#app#app#app #dj832-data-sheet .dj832-sheet-close {
+    display:grid!important;place-items:center!important;width:38px!important;height:38px!important;min-width:38px!important;
+    padding:0!important;margin:0!important;border-radius:12px!important;
+    border:1px solid var(--dj800-border,#d8e6df)!important;color:inherit!important;
+    background:var(--dj800-elevated,#edf6f1)!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-close svg {display:block!important;width:20px!important;height:20px!important;}
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-body {
+    min-height:0!important;flex:1 1 auto!important;overflow:auto!important;overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;padding:3px 2px 6px!important;
+  }
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-state-row {
+    display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important;
+    background:var(--dj800-elevated,#edf6f1)!important;border-radius:11px!important;
+    padding:9px 12px!important;margin-bottom:12px!important;font-size:12px!important;
+  }
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-state-text {font-weight:650!important;text-align:right!important;}
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-body h3 {margin:10px 0 4px!important;font-size:12px!important;font-weight:700!important;}
+  html body #app#app#app#app#app #dj832-data-sheet .dj832-sheet-body p {margin:0!important;font-size:12px!important;font-weight:450!important;line-height:1.55!important;overflow-wrap:anywhere!important;}
+  html body #app#app#app#app#app[data-theme="dark"] #dj832-data-sheet {background:var(--dj800-surface,#1c3437)!important;color:var(--dj800-text,#e7f5ed)!important;border-color:var(--dj800-border,#47645d)!important;}
+}
+@media(max-width:359px){
+ html body #app#app#app#app#app#app .topbar > #dj-settings-mobile {width:44px!important;min-width:44px!important;max-width:44px!important;}
+ html body #app#app#app#app#app#app #dj832-data-sheet {left:8px!important;right:8px!important;}
+}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+ html body #app#app#app#app#app#app #dj-v794-toolbar .dj832-feature,
+ html body #app#app#app#app#app#app #dj-v794-toolbar .dj832-feature-label,
+ html body #app#app#app#app#app#app #dj832-data-sheet {transition:none!important;}
+}

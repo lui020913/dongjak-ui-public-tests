@@ -1,0 +1,240 @@
+/* v5.9.4: one-line search app bar and complete light/dark surface system.
+   Imported after prior patches; do not change #map positioning or MapLibre layers. */
+#app{
+  --dj-ui-bg:#ffffff;
+  --dj-ui-field:#f6faf8;
+  --dj-ui-border:#dbe6e1;
+  --dj-ui-text:#19392f;
+  --dj-ui-subtext:#698278;
+  --dj-ui-shadow:0 3px 15px rgba(28,48,39,.07);
+}
+#app[data-theme="dark"]{
+  --dj-ui-bg:#192d32;
+  --dj-ui-field:#233a40;
+  --dj-ui-border:#3d5658;
+  --dj-ui-text:#ebf5ef;
+  --dj-ui-subtext:#b7cdc5;
+  --dj-ui-shadow:0 3px 15px rgba(2,11,14,.24);
+}
+#app .topbar,
+#app[data-theme="dark"] .topbar{
+  
+  
+  
+  display:grid!important;
+  
+  
+  
+  
+  
+  
+  border-radius:0!important;
+  background:var(--dj-ui-bg)!important;
+  border-bottom:1px solid var(--dj-ui-border)!important;
+  box-shadow:var(--dj-ui-shadow)!important;
+  backdrop-filter:none!important;
+  overflow:visible!important;
+  z-index:1700!important;
+}
+#app .topbar>.brand{grid-area:brand!important;min-width:0!important;width:auto!important;max-width:100%!important;margin:0!important;}
+#app .topbar>.map-quick-search{
+  
+  
+  
+  
+  background:none!important;border:0!important;box-shadow:none!important;z-index:1701!important;
+}
+#app .map-quick-search-form,
+#app[data-theme="dark"] .map-quick-search-form{
+  display:flex!important;align-items:center!important;
+  min-height:42px!important;height:42px!important;
+  gap:6px!important;padding:3px 4px 3px 12px!important;
+  background:var(--dj-ui-field)!important;border:1px solid var(--dj-ui-border)!important;
+  border-radius:11px!important;box-shadow:none!important;
+}
+#app .map-quick-search-form input,
+#app[data-theme="dark"] .map-quick-search-form input{
+  background:transparent!important;color:var(--dj-ui-text)!important;
+  min-width:0!important;font-size:12px!important;padding:7px 0!important;
+}
+#app .map-quick-search-form input::placeholder{color:var(--dj-ui-subtext)!important;opacity:1!important;}
+#app .map-quick-search-icon{color:#16836f!important;font-size:20px!important;}
+#app .map-quick-search-submit{height:34px!important;min-height:34px!important;padding:0 13px!important;border-radius:8px!important;font-size:11px!important;}
+#app .topbar>.header-tools{}
+#app .brand-name{color:var(--dj-ui-text)!important;}
+#app .brand .eyebrow{color:var(--dj-ui-subtext)!important;}
+#app .theme-toggle,#app .prototype.version-history-trigger{font-size:11px!important;padding:7px 10px!important;box-shadow:none!important;}
+#app[data-theme="dark"] .theme-toggle,
+#app[data-theme="dark"] .prototype.version-history-trigger,
+#app[data-theme="dark"] .weather-widget,
+#app[data-theme="dark"] .map-quick-search-dropdown,
+#app[data-theme="dark"] .map-quick-search-result,
+#app[data-theme="dark"] .map-quick-search-suggestion{
+  background:var(--dj-ui-field)!important;color:var(--dj-ui-text)!important;
+  border-color:var(--dj-ui-border)!important;
+}
+#app[data-theme="dark"] .map-quick-search-dropdown-head,
+#app[data-theme="dark"] .map-quick-search-dropdown strong,
+#app[data-theme="dark"] .map-quick-search-dropdown p,
+#app[data-theme="dark"] .map-quick-search-result strong,
+#app[data-theme="dark"] .map-quick-search-result small{color:var(--dj-ui-text)!important;}
+#app[data-theme="dark"] .map-quick-search-dropdown,
+#app[data-theme="dark"] .map-advanced-controls,
+#app[data-theme="dark"] .sheet.overview-sheet,
+#app[data-theme="dark"] .page-panel,
+#app[data-theme="dark"] .detail-sheet,
+#app[data-theme="dark"] .entry-sheet,
+#app[data-theme="dark"] .transport-sheet,
+#app[data-theme="dark"] #bottom-nav,
+#app[data-theme="dark"] .road-width-legend{
+  background:var(--dj-ui-bg)!important;color:var(--dj-ui-text)!important;
+  border-color:var(--dj-ui-border)!important;
+}
+#app[data-theme="dark"] .sheet h1,
+#app[data-theme="dark"] .sheet h2,
+#app[data-theme="dark"] .page-panel h2,
+#app[data-theme="dark"] .page-panel h3,
+#app[data-theme="dark"] .transport-sheet h2,
+#app[data-theme="dark"] .detail-sheet h2,
+#app[data-theme="dark"] .brand-name{color:var(--dj-ui-text)!important;}
+#app[data-theme="dark"] .sheet p,
+#app[data-theme="dark"] .sheet small,
+#app[data-theme="dark"] .page-heading p,
+#app[data-theme="dark"] .footer-note{color:var(--dj-ui-subtext)!important;}
+#app[data-theme="dark"] .maplibregl-ctrl-scale{background:var(--dj-ui-bg)!important;color:var(--dj-ui-text)!important;border-color:#3b9c85!important;}
+#app[data-theme="dark"] .map-tools-toggle,
+#app[data-theme="dark"] .map-actions button{background:var(--dj-ui-bg)!important;color:var(--dj-ui-text)!important;border-color:var(--dj-ui-border)!important;}
+#app[data-theme="dark"] .dongjak-education-name{background:var(--dj-ui-bg)!important;color:var(--dj-ui-text)!important;border-color:var(--dj-ui-border)!important;}
+#app[data-theme="dark"] .dongjak-landmark-name{background:var(--dj-ui-bg)!important;color:var(--dj-ui-text)!important;border-color:var(--dj-ui-border)!important;}
+#app[data-theme="dark"] .weather-info,
+#app[data-theme="dark"] #weather-title{color:var(--dj-ui-text)!important;}
+#app[data-theme="dark"] .prototype.version-history-trigger{color:#d0f4e4!important;}
+/* Provided university emblems, not generated letter abbreviations. */
+#app .dongjak-education-marker.university .dongjak-education-icon{
+  display:grid!important;place-items:center!important;
+  width:37px!important;height:37px!important;min-width:37px!important;
+  padding:3px!important;background:#ffffff!important;border:1px solid #d5e2db!important;
+  border-radius:50%!important;box-shadow:0 2px 7px rgba(25,41,33,.14)!important;
+  overflow:hidden!important;
+}
+#app .dongjak-education-marker.university .dongjak-education-icon img{
+  display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;
+}
+#app .dongjak-education-marker.university.compact .dongjak-education-icon{
+  width:31px!important;height:31px!important;min-width:31px!important;
+}
+#app .dongjak-education-marker.university .dongjak-education-icon:has(img){font-size:0!important;}
+/* Desktop: solid 64px top toolbar, no translucent empty panel underneath. */
+@media(min-width:951px){
+  #app .topbar{}
+  #app .topbar>.header-tools .weather-widget{display:flex!important;visibility:visible!important;}
+  #app #map-tools-toggle{}
+  #app.map-controls-open .map-advanced-controls{}
+  #app[data-tab="map"] .map-actions{}
+}
+@media(min-width:701px) and (max-width:950px){
+  #app .topbar{}
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    z-index:1710!important;
+  }
+  #app #map-tools-toggle{}
+  #app.map-controls-open .map-advanced-controls{}
+  #app[data-tab="map"] .map-actions{}
+}
+/* Mobile: brand and search share the SAME row. No separate white search box below. */
+@media(max-width:700px){
+  #app .topbar{
+    
+    
+    
+    
+    
+  }
+  #app .brand{gap:5px!important;min-width:0!important;}
+  #app .brand .logo{height:33px!important;width:33px!important;min-width:33px!important;border-radius:9px!important;font-size:16px!important;}
+  #app .brand .eyebrow{display:none!important;}
+  #app .brand-name{font-size:clamp(11px,3.0vw,12.5px)!important;letter-spacing:-.5px!important;line-height:1.25!important;white-space:nowrap!important;}
+  #app .topbar>.map-quick-search{}
+  #app .map-quick-search-form{height:37px!important;min-height:37px!important;padding:2px 2px 2px 7px!important;gap:2px!important;border-radius:9px!important;}
+  #app .map-quick-search-icon{display:none!important;}
+  #app .map-quick-search-form input{font-size:12px!important;padding:6px 2px!important;}
+  #app .map-quick-search-submit{width:32px!important;height:31px!important;min-height:31px!important;padding:0!important;font-size:0!important;border-radius:7px!important;}
+  #app .map-quick-search-submit::after{content:"⌕";font-size:23px;line-height:1;color:white;display:block;}
+  #app .topbar>.header-tools{display:flex!important;}
+  #app .topbar .theme-toggle{width:34px!important;height:34px!important;padding:0!important;border-radius:9px!important;font-size:0!important;overflow:hidden!important;}
+  #app .topbar .theme-toggle::after{content:"◐";font-size:19px;color:var(--dj-ui-text);}
+  #app .topbar .prototype.version-history-trigger{display:none!important;}
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    
+    
+    
+    z-index:1660!important;
+    background:var(--dj-ui-bg)!important;border:1px solid var(--dj-ui-border)!important;
+    color:var(--dj-ui-text)!important;
+  }
+  #app #map-tools-toggle{z-index:1620!important;}
+  #app.map-controls-open .map-advanced-controls{}
+  #app[data-tab="map"] .map-actions,
+  #app[data-tab="map"] .map-actions.map-actions-horizontal{
+    
+    display:flex!important;
+  }
+  #app[data-tab="map"] .map-actions button{height:42px!important;width:42px!important;}
+  #app .map-quick-search-dropdown{position:absolute!important;top:calc(100% + 8px)!important;left:0!important;right:0!important;max-height:65dvh!important;min-width:min(320px,calc(100vw - 16px));}
+}
+@media(max-width:359px){
+  #app .topbar{}
+  #app .brand-name{font-size:10.5px!important;}
+  #app .topbar .theme-toggle{width:30px!important;}
+}
+
+/* Stronger than older v5.9.2 mobile-specific white search rule. */
+#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form,
+#app[data-theme="dark"] .map-quick-search-form{
+  background:#233a40!important;border-color:#3d5658!important;
+  color:#ebf5ef!important;
+}
+#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form input{
+  background:transparent!important;color:#ebf5ef!important;
+}
+#app[data-theme="dark"] .map-quick-search-form input::placeholder{color:#aec7bf!important;}
+#app[data-theme="dark"] #bottom-nav .active,
+#app[data-theme="dark"] #bottom-nav [aria-current="page"],
+#app[data-theme="dark"] #bottom-nav .selected{
+  background:#28473f!important;color:#d7faeb!important;
+}
+#app[data-theme="dark"] .version-history-dialog,
+#app[data-theme="dark"] .version-entry,
+#app[data-theme="dark"] .dongjak-news-item,
+#app[data-theme="dark"] .news-empty,
+#app[data-theme="dark"] .transport-hours-line-panel,
+#app[data-theme="dark"] .transport-timetable-route-panel,
+#app[data-theme="dark"] .transport-timetable-pane,
+#app[data-theme="dark"] .transport-timetable-service-group,
+#app[data-theme="dark"] .transport-timetable-service-head,
+#app[data-theme="dark"] .transport-timetable-pane-header,
+#app[data-theme="dark"] .transport-timetable-pane-count,
+#app[data-theme="dark"] .map-options-group,
+#app[data-theme="dark"] .base-layer-menu,
+#app[data-theme="dark"] .metro-info-line-card,
+#app[data-theme="dark"] .dongjak-education-popup,
+#app[data-theme="dark"] .dongjak-landmark-popup{
+  background:var(--dj-ui-field)!important;color:var(--dj-ui-text)!important;
+  border-color:var(--dj-ui-border)!important;
+}
+#app[data-theme="dark"] .version-history-dialog p,
+#app[data-theme="dark"] .version-history-dialog li,
+#app[data-theme="dark"] .dongjak-news-item p,
+#app[data-theme="dark"] .transport-timetable-pane-title,
+#app[data-theme="dark"] .transport-timetable-pane-count{
+  color:var(--dj-ui-text)!important;
+}
+#app[data-theme="dark"] .map-options-group summary,
+#app[data-theme="dark"] .version-entry h3,
+#app[data-theme="dark"] .transport-timetable-service-head strong{
+  color:var(--dj-ui-text)!important;
+}
+#app .version-history-menu{min-height:36px;align-self:flex-start;background:transparent;border:1px solid var(--dj-ui-border);color:var(--dj-ui-text);border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700;}
+#app[data-theme="dark"] .version-history-menu{background:var(--dj-ui-field)!important;color:var(--dj-ui-text)!important;}

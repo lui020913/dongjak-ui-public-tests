@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {csvRows,cameraImportPreview,normalizedCameraPoints} from '../src/sangdo-camera-import.js';
+import {speedFeatureFilter,speedGeojsonStats,sparseSpeedSignGeojson,SPEED_COLORS} from '../src/sangdo-speed-map.js';
+const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+test('speed sign layer uses actual road links and draws four circular regulatory signs',()=>{
+  const code=read('src/sangdo-speed-map.js');
+  assert.match(code,/symbol-placement':'point'/);
+  assert.match(code,/SIGN_DENSITIES/);
+  assert.match(code,/drawSpeedSign\(/);
+  assert.match(code,/SPEED_IMAGE_PREFIX/);
+  assert.match(code,/icon-pitch-alignment':'viewport'/);
+  assert.deepEqual(Object.keys(SPEED_COLORS),['10','30','40','50']);
+  assert.deepEqual(speedFeatureFilter([10,50]),['in',['get','speed'],['literal',[10,50]]]);
+  const {features}=JSON.parse(read('public/data/road-speed/sangdo1_speed_links.geojson'));
+  assert.deepEqual(speedGeojsonStats(features),{10:23,30:68,40:20,50:95});
+});
+test('zoom-tier road signs are thinned without removing speed-bearing road lines',()=>{
+  const {features}=JSON.parse(read('public/data/road-speed/sangdo1_speed_links.geojson'));
+  const sparse=sparseSpeedSignGeojson(features,190);
+  const medium=sparseSpeedSignGeojson(features,140);
+  const detail=sparseSpeedSignGeojson(features,95);
+  assert.equal(sparse.features.length,24);
+  assert.equal(medium.features.length,30);
+  assert.equal(detail.features.length,47);
+  assert.ok(sparse.features.length<features.length/4);
+  assert.ok(sparse.features.every(f=>f.geometry.type==='Point'&&[10,30,40,50].includes(f.properties.speed)));
+  assert.deepEqual(sparse,sparseSpeedSignGeojson(features,190),'selection is deterministic across visits');
+  const code=read('src/sangdo-speed-map.js');
+  assert.match(code,/\.\.\.LINE_LAYERS,\.\.\.SIGN_LAYERS/);
+  assert.match(code,/SIGN_DENSITIES\.forEach/);
+  assert.match(read('src/speed-ui-and-scrollbar.css'),/#app #map-safety-toggle\{/);
+});
+test('quoted UTF-8 CSV values keep names, coordinates and camera category without guessing',()=>{
+  const rows=csvRows('시군구명,위도,경도,설치장소,단속구분,제한속도\n동작구,37.5022,126.9512,"강남초교, 앞",1,30');
+  assert.equal(rows[0].설치장소,'강남초교, 앞');
+  const {features}=normalizedCameraPoints(rows);
+  assert.equal(features.length,1);
+  assert.deepEqual(features[0].geometry.coordinates,[126.9512,37.5022]);
+  assert.equal(features[0].properties.kind,'1');
+});
+test('camera markers are never manufactured from street names or rows lacking actual coordinates',()=>{
+  assert.deepEqual(normalizedCameraPoints([{시군구명:'동작구',설치장소:'강남초교',위도:'',경도:''}]).features,[]);
+  assert.deepEqual(normalizedCameraPoints([{시군구명:'용산구',설치장소:'점',위도:'37.5022',경도:'126.9512'}]).features,[]);
+  assert.deepEqual(normalizedCameraPoints([{시군구명:'동작구',설치장소:'점',위도:'37.6022',경도:'126.9512'}]).features,[]);
+  assert.deepEqual(cameraImportPreview(JSON.stringify({type:'FeatureCollection',features:[]}),'sample.geojson').features,[]);
+  assert.match(read('index.html'),/id="sangdo-camera-file"/);
+  assert.match(read('src/version-history-v7.js'),/전국무인교통단속카메라 표준데이터/);
+});

@@ -1,0 +1,6 @@
+/* Desktop Chromium-only boundary: never override mobile safe area or toolbar. */
+@media(min-width:700px){
+  html[data-dj-platform="pc-chromium"]{
+    --dj-desktop-platform:1;
+  }
+}

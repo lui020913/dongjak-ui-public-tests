@@ -1,0 +1,106 @@
+/* v6.0.10: One active map drawer at a time. Layouts use the same
+   mobile navigation/header variables as the options drawer (v6.0.8). */
+.map-safety-backdrop[hidden]{display:none!important}
+@media (max-width:1079px){
+  /* Mobile Safari/PWA top header: an opaque surface, never a frosted layer. */
+  #app .topbar,#app[data-theme="dark"] .topbar{
+    background:#fcfefd!important;
+    filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  #app[data-theme="dark"] .topbar{background:#192d31!important}
+  /* v6.0.11: the full-height (58%) near-white haze was washing out the
+     entire upper phone map, directly below the search bar. Mobile gets a
+     short, gently graded distant horizon starting BELOW the opaque header;
+     desktop long-distance haze is unchanged. Never blur actual map pixels. */
+  #app #map.dj-far-haze-active::before{
+    top:var(--dj-header-h,80px)!important;
+    bottom:auto!important;
+    height:clamp(60px,16dvh,160px)!important;
+    background:linear-gradient(to bottom,
+      rgba(245,249,247,.22) 0%,
+      rgba(245,249,247,.07) 63%,
+      rgba(245,249,247,0) 100%)!important;
+    opacity:clamp(0, var(--dj-far-haze-opacity,1), .65)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+  }
+  #app[data-theme="dark"] #map.dj-far-haze-active::before{
+    background:linear-gradient(to bottom,
+      rgba(22,37,39,.26) 0%,rgba(22,37,39,.07) 63%,
+      rgba(22,37,39,0) 100%)!important;
+  }
+  /* Hide every floating map control which could overlap the safety drawer.
+     Use display, not just visibility, so inert controls cannot take focus. */
+  #app[data-tab="map"].map-safety-open :is(
+    #map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,
+    .sheet.overview-sheet,.map-actions,.weather-widget,
+    .night-visibility-float,.transport-sheet,.admin-dong-picker,
+    .detail-sheet,#map-gesture-guide,#map-chrome-restore,
+    #mobile-fullscreen-toggle
+  ){
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  #app[data-tab="map"].map-safety-open #map-safety-backdrop:not([hidden]){
+    display:block!important;
+    position:fixed!important;
+    inset:var(--dj-header-h) 0 var(--dj-mobile-nav-h) 0!important;
+    border:0!important;padding:0!important;
+    background:rgba(7,26,26,.35)!important;
+    z-index:1900!important;
+  }
+  #app[data-tab="map"].map-safety-open #map-safety-controls{
+    display:flex!important;
+    flex-flow:column nowrap!important;
+    box-sizing:border-box!important;
+    position:fixed!important;
+    inset:auto 0 var(--dj-mobile-nav-h) 0!important;
+    left:0!important;right:0!important;top:auto!important;
+    bottom:var(--dj-mobile-nav-h)!important;
+    width:100%!important;max-width:100%!important;
+    height:auto!important;min-height:0!important;
+    max-height:min(66dvh,calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 12px))!important;
+    margin:0!important;padding:13px 16px 18px!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    transform:none!important;
+    border-radius:18px 18px 0 0!important;
+    border:1px solid var(--dj-ui-border,#d6e3dc)!important;
+    background:var(--dj-ui-bg,#fff)!important;
+    color:var(--dj-ui-text,#203d32)!important;
+    box-shadow:0 -12px 30px rgba(9,31,28,.2)!important;
+    z-index:2200!important;
+  }
+  #app[data-tab="map"].map-safety-open #map-safety-controls .map-safety-head{
+    position:sticky!important;
+    top:-13px!important;
+    z-index:1!important;
+    padding:9px 0 12px!important;
+    background:var(--dj-ui-bg,#fff)!important;
+  }
+  /* Map header/navigation stay accessible above the modal scrim. */
+  #app[data-tab="map"].map-safety-open .topbar,
+  #app[data-tab="map"].map-safety-open #bottom-nav{z-index:2300!important}
+}
+@media (max-width:1079px) and (max-height:600px) and (orientation:landscape){
+  #app[data-tab="map"].map-safety-open #map-safety-controls{
+    top:calc(var(--dj-header-h) + 8px)!important;
+    bottom:calc(var(--dj-mobile-nav-h) + 8px)!important;
+    left:calc(8px + env(safe-area-inset-left))!important;
+    right:auto!important;
+    width:min(380px,53vw)!important;
+    max-width:min(380px,53vw)!important;
+    height:auto!important;
+    max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 16px)!important;
+    border-radius:15px!important;
+  }
+}
+@media (max-width:1079px) and (display-mode:standalone){
+  html,body{background:#fcfefd!important}
+  html[data-theme="dark"],html[data-theme="dark"] body{background:#192d31!important}
+}

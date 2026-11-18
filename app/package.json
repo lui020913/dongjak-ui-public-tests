@@ -1,0 +1,52 @@
+{
+  "name": "dongjak-safety-app",
+  "private": true,
+  "version": "8.26.1",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/start-local.mjs",
+    "build": "node scripts/stamp-version.mjs && vite build",
+    "preview": "vite preview --port 4194",
+    "test": "node --test tests/*.test.mjs",
+    "android:add": "npm run build:android && npx cap add android && npx cap sync android",
+    "android:sync": "npm run build:android && npx cap sync android",
+    "android:open": "npx cap open android",
+    "transport:server": "node server/transport-proxy.mjs",
+    "deploy:pages": "npm run build && npx wrangler pages deploy dist --project-name dongjak-walk-safety-preview --branch main",
+    "check:buildings": "node scripts/check-building-files.mjs",
+    "check:bus-stops": "node scripts/check-static-bus-stops.mjs",
+    "dev:map": "vite --host 127.0.0.1 --port 5195 --strictPort",
+    "dev:ai": "npm run build && npx wrangler pages dev dist --port 8788",
+    "build:pc": "node scripts/stamp-version.mjs && vite build --mode pc-chromium",
+    "build:ios": "node scripts/stamp-version.mjs && vite build --mode ios-pwa",
+    "build:android": "node scripts/stamp-version.mjs && vite build --mode android",
+    "check:platforms": "node --test tests/platform-split-v710.test.mjs",
+    "predev": "node scripts/stamp-version.mjs",
+    "predev:map": "node scripts/stamp-version.mjs",
+    "version:major": "node scripts/bump-app-version.mjs major",
+    "version:minor": "node scripts/bump-app-version.mjs minor",
+    "version:next": "node scripts/bump-app-version.mjs next",
+    "version:patch": "node scripts/bump-app-version.mjs patch",
+    "check:release": "node scripts/check-release-version.mjs",
+    "check:kakao": "node scripts/check-kakao-oauth.mjs",
+    "test:e2e": "playwright test --config=playwright.config.mjs",
+    "test:e2e:desktop": "playwright test --config=playwright.config.mjs --project=desktop",
+    "test:e2e:mobile": "playwright test --config=playwright.config.mjs --project=mobile",
+    "test:e2e:headed": "playwright test --config=playwright.config.mjs --headed",
+    "test:e2e:report": "playwright show-report playwright-report",
+    "test:historical": "node scripts/audit-historical-baselines.mjs",
+    "dev:ui": "vite --host 127.0.0.1 --port 5195 --strictPort --mode ui-only"
+  },
+  "dependencies": {
+    "maplibre-gl": "6.16.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/geolocation": "^8.0.0",
+    "admdongkor": "^0.5.2"
+  },
+  "devDependencies": {
+    "vite": "7.3.0",
+    "@capacitor/cli": "^8.0.0",
+    "@playwright/test": "^1.65.1"
+  }
+}

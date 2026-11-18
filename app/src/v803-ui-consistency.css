@@ -1,0 +1,187 @@
+/* v8.0.3 — platform presentation corrections. Data and map layers unchanged. */
+html body #app#app{
+  --dj803-ink:#20443a;--dj803-mute:#657e74;--dj803-surface:#fff;
+  --dj803-card:#f2f8f4;--dj803-border:#d9e7dd;--dj803-accent:#0b826a;
+  --dj803-text-delta:0px;
+}
+html body #app#app[data-theme="dark"]{
+  --dj803-ink:#e9f6ef;--dj803-mute:#bdd7cb;--dj803-surface:#20363a;
+  --dj803-card:#294640;--dj803-border:#4e7268;--dj803-accent:#8ee4c4;
+}
+html body #app#app[data-dj-settings-text="small"]{--dj803-text-delta:-2px;}
+html body #app#app[data-dj-settings-text="large"]{--dj803-text-delta:3px;}
+/* Selection theme is explicit. Text preferences also adjust controls with their
+   own historical px font-size instead of merely inheriting from their parent. */
+html body #app#app :is(#bottom-nav .nav-tab>span:last-child,#dj-desktop-safety-rail button,#map-advanced-controls button,#map-safety-controls button,#dj-map-settings button,#dj-map-settings label){
+  font-size:calc(15px + var(--dj803-text-delta))!important;
+}
+html body #app#app :is(.page-panel,.map-advanced-controls,.map-safety-controls,.dj-map-settings-card) :is(h1,h2,.page-heading h2,.page-heading strong,.map-safety-head strong,.map-options-heading strong){
+  font-weight:850!important;letter-spacing:-.045em!important;
+}
+html body #app#app #route-panel .page-heading>p{display:none!important;}
+/* Keep the legacy selects alive for the separate mobile type button; never
+   present readability as a safety-layer category on either platform. */
+html body #app#app #map-safety-controls #dj-type-settings{display:none!important;}
+/* Shared preference changes must affect both headings and explanatory text,
+   not only select/button labels. */
+html body #app#app #dj-map-settings :is(.dj-map-settings-head h2,.dj-map-settings-group h3){
+  font-size:calc(20px + var(--dj803-text-delta))!important;font-weight:850!important;
+}
+html body #app#app #dj-map-settings :is(.dj-map-settings-head p,.dj-map-settings-group p,.dj-map-settings-kicker){
+  font-size:calc(13px + var(--dj803-text-delta))!important;line-height:1.55!important;
+}
+/* Settings privacy controls must actually hide weather / map buttons even
+   when desktop platform rules force display:flex !important. */
+html body #app#app.dj-hide-weather :is(#weather-widget,#dj-v794-weather,#dj-mobile-weather-trigger){display:none!important;}
+html body #app#app.dj-hide-map-tools :is(.map-actions,#dj-mobile-map-actions){display:none!important;}
+/* Consistent click/selection feedback across controls */
+html body #app#app :is(.nav-tab,#dj-desktop-safety-rail button,.map-actions button,#dj-v794-toolbar button){
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+html body #app#app .map-quick-search-submit{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  text-align:center!important;line-height:1!important;box-sizing:border-box!important;
+  padding-block:0!important;
+}
+/* Close glyphs are drawn as two centered strokes. Avoid a stray old pseudo
+   element crossing the button edge (observed in dark map options). */
+html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close){
+  position:relative!important;display:grid!important;place-items:center!important;
+  overflow:hidden!important;isolation:isolate!important;
+}
+html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::before,
+html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::after{
+  content:""!important;display:block!important;position:absolute!important;
+  width:50%!important;height:3px!important;border-radius:6px!important;
+  inset:auto!important;left:25%!important;top:calc(50% - 1.5px)!important;
+  background:currentColor!important;margin:0!important;
+  transform:none!important;translate:none!important;scale:none!important;
+}
+html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::before{rotate:45deg!important;}
+html body #app#app :is(#map-options-mobile-close,#map-options-desktop-close,#map-safety-close)::after{rotate:-45deg!important;}
+/* Strong dark palettes independent of the light page rules. */
+html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#map-advanced-controls,#map-safety-controls) :is(h2,h3,strong,.page-heading,.page-heading h2,.page-heading strong){
+  color:#f0fbf5!important;
+}
+html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(.record-empty,.records-list>div,.empty-state,.records-list .record-item){
+  color:#e6f5ed!important;background:#29443f!important;border-color:#54756c!important;
+}
+html body #app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(.records-list>div,.record-empty,.empty-state) :is(p,small,span){color:#d6ece2!important;}
+/* On deliberate iOS theme reload only, do not reveal the initial brand splash
+   at any intermediary map state. The dedicated transition covers it until map
+   restoration has genuinely completed. Cold opens still show startup artwork. */
+html[data-dj-reload-splash="true"] #map-startup-overlay,
+html[data-dj-reload-splash="true"] #app #map-startup-overlay{
+  visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+}
+html[data-dj-reload-splash="true"] #dj-full-transition{
+  opacity:1!important;visibility:visible!important;display:flex!important;
+}
+/* The transition overlays current content before the theme state changes; it
+   does not swap to the startup app artwork. */
+html #dj-full-transition:not([hidden]){
+  background:rgba(218,233,225,.91)!important;
+  -webkit-backdrop-filter:blur(19px) saturate(.75)!important;
+  backdrop-filter:blur(19px) saturate(.75)!important;
+}
+html[data-theme="dark"] #dj-full-transition:not([hidden]){
+  background:rgba(17,40,43,.92)!important;
+}
+#dj-app-about .dj803-about-credit{
+  margin:11px 5px 0!important;text-align:center!important;font-size:12px!important;
+  line-height:1.5!important;color:var(--dj803-mute)!important;font-weight:750!important;
+}
+#map-gesture-guide .dj803-ios-install-help{
+  margin:15px 0!important;padding:14px 16px!important;border-radius:15px!important;
+  background:var(--dj803-card,#eaf5f0)!important;border:1px solid var(--dj803-border,#d9e7df)!important;
+  color:var(--dj803-ink,#21483a)!important;
+}
+#map-gesture-guide .dj803-ios-install-help strong{font-size:14px!important;font-weight:850!important;}
+#map-gesture-guide .dj803-ios-install-help p{margin:7px 0 0!important;font-size:12px!important;line-height:1.65!important;}
+@media(min-width:700px){
+  /* Search remains the height reference. The emblem may extend a few pixels,
+     but the input itself never shrinks in response to the icon. */
+  html body #app#app .topbar{gap:14px!important;align-items:center!important;}
+  html body #app#app .topbar #dj-about-pc{
+    flex:0 0 60px!important;width:60px!important;min-width:60px!important;max-width:60px!important;
+    height:60px!important;min-height:60px!important;max-height:60px!important;
+    border-radius:17px!important;overflow:hidden!important;
+  }
+  html body #app#app .topbar #dj-about-pc img{width:100%!important;height:100%!important;object-fit:contain!important;}
+  html body #app#app .topbar :is(#map-quick-search,.map-quick-search-form){
+    height:56px!important;min-height:56px!important;max-height:56px!important;
+  }
+  html body #app#app .topbar .header-tools{gap:13px!important;column-gap:13px!important;align-items:center!important;}
+  html body #app#app .topbar .header-tools :is(#theme-toggle,#version-history-trigger,#dj-settings-pc,#weather-widget){
+    border-radius:25px!important;height:56px!important;min-height:56px!important;max-height:56px!important;
+    padding-inline:18px!important;
+  }
+  html body #app#app .topbar .header-tools #weather-widget{gap:12px!important;}
+  html body #app#app .topbar #weather-widget :is(#weather-label,#weather-my-location){
+    margin-left:4px!important;margin-right:4px!important;line-height:1.4!important;
+  }
+  html body #app#app .topbar .map-quick-search-submit{min-width:76px!important;}
+  /* Identical icon/text grid on every left rail tab, regardless of word width. */
+  html body #app#app #bottom-nav>.nav-tab{
+    display:grid!important;grid-template-columns:25px 76px!important;justify-content:center!important;
+    align-items:center!important;column-gap:9px!important;padding:9px 6px!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab .nav-icon{
+    width:25px!important;height:25px!important;justify-self:center!important;
+    font-size:21px!important;line-height:1!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab .nav-icon svg{
+    width:21px!important;height:21px!important;max-width:21px!important;max-height:21px!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab>span:last-child{
+    width:76px!important;text-align:left!important;justify-self:start!important;
+    font-size:calc(15px + var(--dj803-text-delta))!important;font-weight:790!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#toggle-road-width){
+    border:0!important;border-radius:16px!important;
+    background:var(--dj803-surface)!important;color:var(--dj803-ink)!important;
+    font-size:calc(15px + var(--dj803-text-delta))!important;font-weight:790!important;
+    gap:9px!important;min-height:53px!important;
+  }
+  html body #app#app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-symbol{
+    font-size:21px!important;line-height:1!important;font-weight:800!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off,#toggle-road-width) :is(span,.dj-night-action-text){
+    font-size:calc(15px + var(--dj803-text-delta))!important;font-weight:790!important;
+  }
+  html body #app#app .page-panel .page-heading h2,
+  html body #app#app .page-panel .page-heading strong{font-weight:900!important;}
+  html body #app#app #route-panel .page-heading>p{display:none!important;}
+}
+@media(max-width:699px){
+  html body #app#app .topbar .map-quick-search-form{gap:7px!important;}
+  /* The type tool keeps a modest separation without crowding small phones. */
+  html body #app#app #dj800-type-trigger .dj800-type-icon{gap:4px!important;}
+  html body #app#app #dj800-type-panel .dj800-type-done{
+    background:#0d806b!important;color:#fff!important;border-radius:15px!important;
+  }
+  html body #app#app[data-theme="dark"] #dj800-type-panel .dj800-type-done{
+    background:#7bddb7!important;color:#123a31!important;
+  }
+  /* Preserve map interaction hit-targets. Floating sheet animations use their
+     own appearance layer, never moving the search field or bottom nav. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#admin-dong-picker,#overview-sheet,#detail-sheet,#pza-road-sheet,#night-visibility-float):not([hidden]){
+    will-change:opacity,clip-path;
+  }
+  html body #app#app #map-advanced-controls .map-options-mobile-heading,
+  html body #app#app #map-safety-controls .map-safety-head{
+    background:var(--dj803-surface)!important;color:var(--dj803-ink)!important;
+  }
+  html body #app#app[data-theme="dark"] #map-advanced-controls .map-options-mobile-heading,
+  html body #app#app[data-theme="dark"] #map-safety-controls .map-safety-head{
+    background:#20363a!important;color:#e9f6ef!important;
+  }
+  html body #app#app :is(#map-options-mobile-close,#map-safety-close){
+    width:43px!important;height:43px!important;min-width:43px!important;min-height:43px!important;
+    padding:0!important;inset:auto!important;
+    margin-left:auto!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+ html body #app#app :is(.page-panel,#transport-sheet,#admin-dong-picker,#map-advanced-controls,#map-safety-controls){will-change:auto!important;}
+}

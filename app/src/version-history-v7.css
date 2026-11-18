@@ -1,0 +1,120 @@
+/* v7.0: fully expanded, category-first release history. */
+#app .version-history-dialog{
+  width:min(930px,calc(100vw - 36px));max-height:min(91dvh,940px);
+  border-radius:18px;background:#fff;color:#1e3932;
+}
+#app .version-history-head{padding:20px 27px 14px;align-items:center;flex-shrink:0;}
+#app .version-history-head h2{font-size:22px;line-height:1.35;}
+#app .version-history-list{padding:0 27px 28px;scrollbar-width:thin;scrollbar-color:#9fbcb1 transparent;}
+#app .v7-history-summary{padding:24px 0 14px;}
+#app .v7-history-eyebrow{margin:0 0 6px;font-size:11px;color:#13816b;font-weight:800;letter-spacing:.04em;}
+#app .v7-history-summary-heading{font-size:20px;letter-spacing:-.025em;margin:0 0 7px;color:#173e33;}
+#app .v7-history-summary-copy{margin:0;max-width:730px;line-height:1.7;font-size:13px;color:#536d64;word-break:keep-all;}
+#app .v7-history-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:17px 0 22px;}
+#app .v7-history-stat{padding:13px 16px;border:1px solid #e0eae5;border-radius:12px;background:#f6faf8;display:flex;flex-direction:column;gap:2px;}
+#app .v7-history-stat strong{font-size:22px;line-height:1.3;color:#137863;font-variant-numeric:tabular-nums;}
+#app .v7-history-stat span{font-size:11px;color:#5c7469;}
+#app .v7-history-nav-heading{display:block;font-size:12px;color:#244e41;margin:0 0 9px;}
+#app .v7-history-nav-buttons{display:flex;flex-wrap:wrap;gap:7px;}
+#app .v7-history-nav-button{appearance:none;background:#fff;border:1px solid #cddfd6;padding:9px 11px;border-radius:9px;color:#256353;cursor:pointer;font-size:12px;font-weight:750;line-height:1.3;}
+#app .v7-history-nav-button:hover,#app .v7-history-nav-button:focus-visible{background:#eaf7f1;border-color:#5aa88f;outline-offset:2px;}
+#app .v7-history-major{padding:24px 0 17px;border-top:1px solid #c9dcd3;scroll-margin-top:12px;}
+#app .v7-history-major-head{display:flex;align-items:flex-start;gap:12px;margin:0 0 15px;}
+#app .v7-history-major-index{display:flex;justify-content:center;align-items:center;width:35px;height:35px;flex:none;border-radius:9px;background:#e3f3eb;color:#11765e;font-size:14px;font-weight:850;}
+#app .v7-history-major-title{flex:1;min-width:0;}
+#app .v7-history-major-title h3{margin:0;font-size:17px;color:#166a55;line-height:1.4;}
+#app .v7-history-major-title p{margin:5px 0 0;font-size:12px;color:#668277;line-height:1.5;}
+#app .v7-history-major-count{flex:none;font-size:11px;padding:6px 10px;border-radius:8px;background:#f1f6f3;color:#44705f;white-space:nowrap;}
+#app .v7-history-topic{margin:12px 0 18px;border:1px solid #e0e9e4;border-radius:12px;overflow:hidden;background:#fff;}
+#app .v7-history-topic-head{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f4f9f6;padding:11px 15px;border-bottom:1px solid #e1ece6;}
+#app .v7-history-topic-head h4{margin:0;font-size:13px;line-height:1.5;color:#24493b;}
+#app .v7-history-topic-head span{font-size:11px;color:#668277;white-space:nowrap;}
+#app .v7-history-items{margin:0;padding:4px 14px;list-style:none;}
+#app .v7-history-item{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:start;gap:12px;padding:11px 0;line-height:1.65;font-size:12.5px;border-bottom:1px solid #edf2ee;}
+#app .v7-history-item:last-child{border-bottom:0;}
+#app .v7-history-item-version{color:#397c68;font-weight:800;font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums;padding-top:2px;}
+#app .v7-history-item-text{color:#334c42;word-break:keep-all;overflow-wrap:anywhere;}
+#app .v7-history-end{font-size:11px;line-height:1.7;color:#728579;padding:4px 0 12px;margin:0;}
+#app[data-theme="dark"] .version-history-dialog{background:#182c30;color:#e7f2ed;}
+#app[data-theme="dark"] .version-history-list{scrollbar-color:#57756d transparent;}
+#app[data-theme="dark"] .v7-history-summary-heading{color:#d9f8e7;}
+#app[data-theme="dark"] .v7-history-eyebrow,#app[data-theme="dark"] .v7-history-stat strong{color:#86dbb7;}
+#app[data-theme="dark"] .v7-history-summary-copy,#app[data-theme="dark"] .v7-history-major-title p,#app[data-theme="dark"] .v7-history-end{color:#b6cdc3;}
+#app[data-theme="dark"] .v7-history-stat,#app[data-theme="dark"] .v7-history-topic{background:#20383a;border-color:#395851;}
+#app[data-theme="dark"] .v7-history-stat span,#app[data-theme="dark"] .v7-history-topic-head span{color:#accbbd;}
+#app[data-theme="dark"] .v7-history-nav-heading,#app[data-theme="dark"] .v7-history-topic-head h4{color:#def4e9;}
+#app[data-theme="dark"] .v7-history-nav-button{background:#233c3d;border-color:#436259;color:#cbefdc;}
+#app[data-theme="dark"] .v7-history-nav-button:hover,#app[data-theme="dark"] .v7-history-nav-button:focus-visible{background:#2d514b;}
+#app[data-theme="dark"] .v7-history-major{border-color:#43625a;}
+#app[data-theme="dark"] .v7-history-major-index{background:#275248;color:#c9f3d9;}
+#app[data-theme="dark"] .v7-history-major-title h3{color:#99e5be;}
+#app[data-theme="dark"] .v7-history-major-count{background:#26453f;color:#c5e2d4;}
+#app[data-theme="dark"] .v7-history-topic-head{background:#294444;border-color:#42625a;}
+#app[data-theme="dark"] .v7-history-item{border-color:#38514c;}
+#app[data-theme="dark"] .v7-history-item-version{color:#8fdcc0;}
+#app[data-theme="dark"] .v7-history-item-text{color:#e1ede6;}
+@media(max-width:580px){
+  #app .version-history-dialog{width:calc(100vw - 16px);max-height:94dvh;border-radius:15px;}
+  #app .version-history-head{padding:14px 16px 12px;}
+  #app .version-history-head h2{font-size:18px;}
+  #app .version-history-list{padding:0 14px 22px;}
+  #app .v7-history-summary{padding-top:16px;}
+  #app .v7-history-stats{gap:5px;margin:13px 0 17px;}
+  #app .v7-history-stat{padding:10px 8px;}
+  #app .v7-history-stat strong{font-size:19px;}
+  #app .v7-history-stat span{font-size:10px;}
+  #app .v7-history-major-head{gap:9px;}
+  #app .v7-history-major-title h3{font-size:15px;}
+  #app .v7-history-major-count{padding:5px 7px;}
+  #app .v7-history-item{grid-template-columns:55px minmax(0,1fr);gap:8px;font-size:12px;}
+  #app .v7-history-item-version{font-size:10px;}
+  #app .v7-history-items{padding:2px 10px;}
+}
+
+/* On narrow layouts the original header version button is hidden; keep the log accessible. */
+#app .version-history-mobile-trigger{display:none;}
+@media(max-width:1079px){
+  #app .version-history-mobile-trigger{display:block;width:100%;min-height:38px;margin:9px 0 12px;padding:9px 12px;border:1px solid #9acabc;border-radius:9px;background:#eaf8f1;color:#19664e;font-size:12px;font-weight:800;text-align:left;cursor:pointer;}
+  #app[data-theme="dark"] .version-history-mobile-trigger{background:#234c45;border-color:#5d9d85;color:#d3f7e5;}
+}
+
+/* v7.0.1: source register is kept in the update-history appendix, not in every tool panel. */
+#app .v7-history-sources{padding:24px 0 16px;border-top:1px solid #c9dcd3;}
+#app .v7-history-sources-title{margin:0 0 7px;font-size:18px;color:#166a55;}
+#app .v7-history-sources-copy{margin:0 0 15px;font-size:12px;line-height:1.7;color:#668277;}
+#app .v7-history-source-group{margin:13px 0 17px;border:1px solid #e0e9e4;border-radius:12px;overflow:hidden;background:#fff;}
+#app .v7-history-source-group>h4{margin:0;padding:11px 14px;background:#f4f9f6;border-bottom:1px solid #e1ece6;font-size:13px;color:#24493b;}
+#app .v7-history-source-list{list-style:none;margin:0;padding:2px 14px;}
+#app .v7-history-source-item{padding:11px 0;border-bottom:1px solid #edf2ee;}
+#app .v7-history-source-item:last-child{border-bottom:0;}
+#app .v7-history-source-head{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+#app .v7-history-source-head strong{font-size:12px;color:#274b3d;}
+#app .v7-history-source-head>span{flex:1 1 180px;min-width:0;font-size:11px;line-height:1.5;color:#627c70;}
+#app .v7-history-source-link,#app .v7-history-source-local{flex:none;font-size:10px;font-weight:800;color:#14785f;text-decoration:underline;text-underline-offset:2px;}
+#app .v7-history-source-local{color:#72877d;text-decoration:none;}
+#app .v7-history-source-note{margin:5px 0 0;font-size:10px;line-height:1.6;color:#83948b;}
+#app[data-theme="dark"] .v7-history-sources{border-color:#43625a;}
+#app[data-theme="dark"] .v7-history-sources-title{color:#99e5be;}
+#app[data-theme="dark"] .v7-history-sources-copy{color:#b6cdc3;}
+#app[data-theme="dark"] .v7-history-source-group{background:#20383a;border-color:#395851;}
+#app[data-theme="dark"] .v7-history-source-group>h4{background:#294444;border-color:#42625a;color:#def4e9;}
+#app[data-theme="dark"] .v7-history-source-item{border-color:#38514c;}
+#app[data-theme="dark"] .v7-history-source-head strong{color:#e1ede6;}
+#app[data-theme="dark"] .v7-history-source-head>span,#app[data-theme="dark"] .v7-history-source-note{color:#b6cdc3;}
+#app[data-theme="dark"] .v7-history-source-link{color:#8fdcc0;}
+@media(max-width:580px){
+  #app .v7-history-sources{padding-top:18px;}
+  #app .v7-history-source-group>h4{padding:10px 12px;font-size:12px;}
+  #app .v7-history-source-list{padding:2px 11px;}
+  #app .v7-history-source-head{gap:5px;}
+  #app .v7-history-source-head>span{flex-basis:100%;}
+}
+
+/* Historical SemVer recategorization: decorative labels only; no map styling. */
+#app .dj-semver-explanation{margin:-12px 0 15px;font-size:11px;line-height:1.6;color:#62786c;word-break:keep-all;}
+#app .v707-release-head .dj-semver-size{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border:1px solid #d4e4db;border-radius:6px;font-size:10px;font-weight:750;white-space:nowrap;color:#496e5f;background:#f2f8f5;}
+#app .v707-release[data-release-type=major] .dj-semver-size{border-color:#a4d2bf;color:#12674f;background:#e9f5ee;}
+#app .v707-release[data-release-type=minor] .dj-semver-size{border-color:#b4d3ea;color:#285f7b;background:#eef7fc;}
+#app[data-theme=dark] .dj-semver-explanation{color:#b6cdc3;}
+#app[data-theme=dark] .v707-release-head .dj-semver-size{background:#28433d;border-color:#436257;color:#d7eee0;}
+@media(max-width:580px){#app .dj-semver-explanation{margin:-8px 0 12px;font-size:10px;}}

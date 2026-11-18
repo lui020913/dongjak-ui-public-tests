@@ -1,0 +1,46 @@
+/* v8.2.1 Account hub: email/password, Kakao OAuth, self-service profile.
+ * The account does not hold passwords or private OAuth secrets in the browser. */
+html body #app#app #dj824-account .dj824-account-details{display:block;min-width:0;padding-top:6px}
+html body #app#app #dj824-account .dj824-account-details[hidden],
+html body #app#app #dj824-account .dj824-account-details [hidden]{display:none!important}
+html body #app#app #dj824-account :is(.dj820-auth-panel,.dj820-account-panel){min-width:0;display:grid;gap:13px}
+html body #app#app #dj824-account :is(.dj820-auth-tabs,.dj820-manage-tabs){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:4px;border:1px solid var(--dj800-border,#d7e5df);border-radius:12px;background:var(--dj800-secondary,#f0f6f3);}
+html body #app#app #dj824-account :is(.dj820-auth-tab,.dj820-manage-tab){min-width:0;padding:10px 6px;border:0!important;border-radius:9px;background:transparent!important;color:var(--dj800-text,#1d3630)!important;font-size:13px!important;font-weight:620!important;cursor:pointer;}
+html body #app#app #dj824-account :is(.dj820-auth-tab,.dj820-manage-tab).active{background:var(--dj800-surface,#fff)!important;color:var(--dj800-accent,#0c8069)!important;box-shadow:0 2px 9px rgba(3,24,18,.10)!important;font-weight:800!important;}
+html body #app#app #dj824-account .dj824-login-form.dj820-credentials-form,
+html body #app#app #dj824-account .dj820-settings-form{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;margin:0;min-width:0}
+html body #app#app #dj824-account :is(.dj820-credentials-form input,.dj820-settings-form input){display:block;width:100%;box-sizing:border-box;min-width:0;min-height:44px;border-radius:10px;background:var(--dj800-surface,#fff);color:var(--dj800-text,#1d3630);border:1px solid var(--dj800-border,#cfdfd7);padding:10px 12px;font:500 14px/1.4 'Pretendard Variable',sans-serif}
+html body #app#app #dj824-account .dj820-settings-form label{display:block;font-size:13px!important;font-weight:700!important;line-height:1.6!important}
+html body #app#app #dj824-account :is(.dj820-credentials-form,.dj820-settings-form) :is(button[type=submit]){min-height:43px;padding:10px 13px;border-radius:10px;border:1px solid #168774;background:#168774;color:white;font-weight:750!important;font-size:14px!important;cursor:pointer}
+html body #app#app #dj824-account .dj821-kakao-login{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:43px;padding:10px 13px;border:1px solid var(--dj800-border,#d0ded7);border-radius:10px;background:#FEE500;color:#191919;font-weight:750!important;font-size:14px!important;cursor:pointer}
+html body #app#app #dj824-account .dj821-kakao-login::before{content:'톡';display:grid;place-items:center;flex:0 0 21px;width:21px;height:21px;border-radius:50%;background:#191919;color:#FEE500;font-size:10px;font-weight:850;line-height:1}
+html body #app#app #dj824-account .dj820-text-action{border:0!important;text-decoration:underline;text-underline-offset:3px;background:transparent!important;color:var(--dj800-accent,#168774)!important;padding:6px 2px;justify-self:start;cursor:pointer;font-weight:600!important}
+html body #app#app #dj824-account :is(.dj820-auth-help,.dj820-account-readonly,.dj820-linked-providers){margin:0!important;overflow-wrap:anywhere;word-break:keep-all;color:var(--dj800-muted,#657d75)!important;line-height:1.5!important;font-size:13px!important}
+html body #app#app #dj824-account .dj820-account-user{display:flex;align-items:center;gap:12px;min-width:0;border:1px solid var(--dj800-border,#cfe1d7);background:var(--dj800-secondary,#edf6f2);border-radius:13px;padding:13px}
+html body #app#app #dj824-account .dj820-account-avatar{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:50%;color:#fff;background:#168774;font-weight:800;font-size:18px}
+html body #app#app #dj824-account .dj820-account-identity{display:flex;flex-direction:column;gap:3px;min-width:0}
+html body #app#app #dj824-account .dj820-account-identity strong{font-size:17px!important;font-weight:780!important}
+html body #app#app #dj824-account .dj820-account-identity span{font-size:12px!important;color:var(--dj800-muted,#657d75)!important;overflow-wrap:anywhere}
+html body #app#app #dj824-account .dj820-manage-panel{min-width:0;display:grid;gap:12px}
+html body #app#app #dj824-account .dj820-settings-form+.dj820-settings-form{padding-top:13px;border-top:1px solid var(--dj800-border,#d5e1d9)}
+html body #app#app #dj824-account .dj820-logout{justify-self:start;min-height:38px;padding:7px 15px;border-radius:10px;border:1px solid var(--dj800-border,#d2dfd9);color:var(--dj800-text,#1d3630);background:var(--dj800-surface,#fff);cursor:pointer}
+html body #app#app #dj824-account button:disabled{cursor:wait;opacity:.55}
+html body #app#app #dj824-account :is(button,input):focus-visible{outline:3px solid #29a78e!important;outline-offset:2px!important}
+html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-auth-tabs,.dj820-manage-tabs){background:#294144;border-color:#4d746b}
+html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-auth-tab,.dj820-manage-tab).active{background:#36574c!important;color:#c1f3df!important}
+html body #app#app[data-theme="dark"] #dj824-account :is(.dj820-account-user,.dj820-credentials-form input,.dj820-settings-form input){background:#294144;color:#e4f3ec;border-color:#4d746b}
+html body #app#app[data-theme="dark"] #dj824-account .dj821-kakao-login{background:#FEE500!important;color:#191919!important;border-color:#E8CF00!important}
+/* Unified close placement for all four floating pages, including iPhone PWA.
+ * The close button belongs to the heading: no left-hand flex/grid reflow. */
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading{position:relative!important;box-sizing:border-box!important;min-width:0!important;min-height:55px!important;padding-inline-end:62px!important}
+html body #app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(.page-dismiss,#news-close-to-map){position:absolute!important;inset:0 0 auto auto!important;top:0!important;right:0!important;left:auto!important;bottom:auto!important;float:none!important;margin:0!important;transform:none!important;translate:none!important;grid-area:auto!important;order:initial!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;z-index:90!important}
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading :is(.page-dismiss,#news-close-to-map)::before,
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading :is(.page-dismiss,#news-close-to-map)::after{content:none!important;display:none!important}
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading :is(.page-dismiss,#news-close-to-map) .dj817-x-svg{display:block!important;width:24px!important;height:24px!important;stroke:currentColor!important;stroke-width:2.6!important;position:static!important;transform:none!important}
+@media(max-width:699px){
+  html body #app#app #dj824-account .dj824-account{padding:13px!important}
+  html body #app#app #dj824-account :is(.dj820-auth-tab,.dj820-manage-tab){font-size:12px!important;padding:10px 4px!important;}
+  html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading{padding-inline-start:0!important;padding-inline-end:57px!important;min-height:55px!important;margin-top:0!important;}
+  html body #app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(.page-dismiss,#news-close-to-map){top:0!important;right:0!important;left:auto!important;width:42px!important;height:42px!important;min-height:42px!important;min-width:42px!important;}
+  html body #app#app#app #route-panel.page-panel > .dj813-route-heading > .page-dismiss{top:0!important;right:0!important;left:auto!important;width:42px!important;height:42px!important;}
+}

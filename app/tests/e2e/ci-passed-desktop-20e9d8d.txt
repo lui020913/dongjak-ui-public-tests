@@ -1,0 +1,24 @@
+# Incremental draft PR: 21 verified unchanged desktop passes.
+# Evidence: GitHub Actions #42, #57, #62. Revalidate if app or relevant test behavior changes.
+# Full release suite remains required before production merge.
+[desktop] > bottom-tabs.spec.js:4:1 > 하단탭 페이지 전환 및 지도 복귀
+[desktop] > ci-visual-audit.spec.js:27:3 > visual evidence pc-1920
+[desktop] > ci-visual-audit.spec.js:27:3 > visual evidence pc-1440
+[desktop] > ci-visual-audit.spec.js:27:3 > visual evidence pc-1366
+[desktop] > ci-visual-audit.spec.js:27:3 > visual evidence pc-1024
+[desktop] > ci-critical-paths.spec.js:4:1 > critical: onboarding close and all five navigation tabs work
+[desktop] > ci-critical-paths.spec.js:28:1 > critical: PC 1920x1080 onboarding skip responds to a real pointer click
+[desktop] > ci-critical-paths.spec.js:37:1 > critical: safety tool and mobile more menu are usable
+[desktop] > ci-critical-paths.spec.js:61:1 > critical: v8.7.7 map settings opens from My Info
+[desktop] > ci-critical-paths.spec.js:92:1 > critical: v8.7.7 typography controls update the existing preferences
+[desktop] > ci-critical-paths.spec.js:107:1 > critical: v8.7.7 local profile photo can be chosen and removed
+[desktop] > facility-window.spec.js:15:1 > 내 정보 등록 지점 상세창 열기·X닫기
+[desktop] > floating-window.spec.js:4:1 > 업데이트 내역 플로팅 창 열기·닫기
+[desktop] > map-controls-lifecycle.spec.js:6:1 > PC 지도 옵션 열기·X닫기
+[desktop] > map-controls-lifecycle.spec.js:24:1 > 보행안전 메뉴 열기·X닫기
+[desktop] > map-controls.spec.js:4:1 > PC 지도 옵션과 보행안전 메뉴는 서로 겹치지 않음
+[desktop] > map-controls.spec.js:32:1 > 보행안전 메뉴는 PC·모바일에서 X버튼으로 닫힘
+[desktop] > map-screen.spec.js:4:1 > 온보딩 제외 후 지도 캔버스와 주요 도구 표시
+[desktop] > ui-inventory.spec.js:3:1 > 초기 안내창 상태 및 실제 UI 구조 수집
+[desktop] > smoke.spec.js:4:1 > 동작하는 안전지도 페이지와 기본 내비게이션 로딩
+[desktop] > transit-window.spec.js:4:1 > 저장 교통장소 이벤트로 지하철 정보창 열기·호선 전환·닫기

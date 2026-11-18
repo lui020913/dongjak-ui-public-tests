@@ -1,0 +1,216 @@
+/* v8.5.2 — mobile guide, HUD, sheet motion and tap-state stabilization. */
+@keyframes dj852-sheet-rise {
+  from { opacity:0; translate:0 17px; }
+  to   { opacity:1; translate:0 0; }
+}
+@keyframes dj852-panel-fade-in {
+  from { opacity:0; translate:0 -7px; }
+  to   { opacity:1; translate:0 0; }
+}
+@keyframes dj852-panel-fade-out {
+  from { opacity:1; translate:0 0; }
+  to   { opacity:0; translate:0 -6px; }
+}
+@keyframes dj852-profile-fade-in {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes dj852-profile-fade-out {
+  from { opacity:1; }
+  to   { opacity:0; }
+}
+
+/* Remove WebKit's dark/green touch flash and give all controls one calm state transition. */
+html body #app :is(button,a,[role="button"],summary,.nav-tab) {
+  -webkit-tap-highlight-color:transparent!important;
+  transition:background-color .17s ease,color .17s ease,border-color .17s ease,
+    box-shadow .17s ease,opacity .17s ease,filter .17s ease,transform .17s ease,translate .17s ease!important;
+}
+html body #app :is(button,a,[role="button"],summary,.nav-tab):active {
+  -webkit-tap-highlight-color:transparent!important;
+}
+html body #app :is(button,a,[role="button"],summary):focus:not(:focus-visible) {
+  outline:none!important;
+}
+
+/* The map tab has the same fixed icon and label tracks in every selection state. */
+@media(max-width:699px){
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab,
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab.active {
+    display:grid!important;
+    grid-template-rows:34px 18px!important;
+    align-content:center!important;align-items:center!important;justify-items:center!important;
+    gap:1px!important;padding:0!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab>.nav-icon,
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab[data-tab="map"]>.nav-icon {
+    grid-row:1!important;position:static!important;align-self:center!important;justify-self:center!important;
+    box-sizing:border-box!important;width:34px!important;height:34px!important;
+    min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;
+    flex:0 0 34px!important;margin:0!important;padding:0!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab .nav-icon svg,
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon svg {
+    display:block!important;width:24px!important;height:24px!important;
+    min-width:24px!important;min-height:24px!important;max-width:24px!important;max-height:24px!important;
+    margin:0!important;transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab>span:last-child {
+    grid-row:2!important;position:static!important;align-self:center!important;justify-self:center!important;
+    display:block!important;width:100%!important;height:18px!important;max-height:18px!important;
+    margin:0!important;padding:0!important;line-height:18px!important;
+    transform:none!important;translate:none!important;inset:auto!important;
+  }
+  html body #app#app#app#app#app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon {
+    border:1px solid var(--dj800-border,#d1e3d9)!important;
+    border-radius:50%!important;background:var(--dj800-surface,#fff)!important;
+    box-shadow:0 1px 4px rgba(14,63,49,.08)!important;
+  }
+}
+
+/* Initial gesture guide: pinned header/X, one scroll area, invisible scrollbar. */
+html body #app#app #map-gesture-guide:not([hidden]) {
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+}
+html body #app#app #map-gesture-guide::-webkit-scrollbar {display:none!important;width:0!important;height:0!important;}
+html body #app#app #map-gesture-guide .map-gesture-guide-head {
+  position:sticky!important;top:0!important;z-index:12!important;
+  flex:0 0 auto!important;align-self:stretch!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  min-height:54px!important;margin:0 0 4px!important;padding:2px 0 12px!important;
+  background:var(--dj-ui-bg,#fcfefd)!important;
+  border-bottom:1px solid var(--dj-ui-border,#dbe8e0)!important;
+}
+html body #app#app #map-gesture-guide .map-gesture-guide-head strong {
+  line-height:1.3!important;align-self:center!important;
+}
+html body #app#app #map-gesture-guide #map-gesture-guide-close {
+  flex:0 0 44px!important;width:44px!important;height:44px!important;
+  min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;
+  margin:0!important;align-self:center!important;transform:none!important;translate:none!important;
+}
+html body #app#app #map-gesture-guide .dj803-ios-install-help {
+  overflow:hidden!important;
+}
+html body #app#app #map-gesture-guide .dj803-ios-install-help>summary {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;min-height:52px!important;box-sizing:border-box!important;
+  list-style:none!important;padding:10px 14px!important;
+}
+html body #app#app #map-gesture-guide .dj803-ios-install-help>summary::-webkit-details-marker {display:none!important;}
+html body #app#app #map-gesture-guide .dj803-ios-install-help>summary::after {
+  content:"⌄";display:grid;place-items:center;flex:0 0 28px;
+  width:28px;height:28px;font-size:25px;font-weight:850;line-height:1;
+  transform:translateY(1px);transition:transform .18s ease;
+}
+html body #app#app #map-gesture-guide .dj803-ios-install-help[open]>summary::after {transform:translateY(1px) rotate(180deg);}
+#app #dj841-guide-tips {overflow:hidden!important;}
+#app #dj841-guide-tips .dj852-tip-toggle {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;width:100%!important;min-height:42px!important;
+  margin:0!important;padding:4px 2px!important;border:0!important;border-radius:9px!important;
+  background:transparent!important;color:var(--dj800-text,#25473b)!important;
+  text-align:left!important;font-size:15px!important;font-weight:850!important;
+}
+#app #dj841-guide-tips .dj852-tip-chevron {
+  display:grid!important;place-items:center!important;flex:0 0 28px!important;
+  width:30px!important;height:30px!important;font-size:26px!important;line-height:1!important;
+  transform:translateY(1px);transition:transform .18s ease!important;
+}
+#app #dj841-guide-tips.is-collapsed .dj852-tip-chevron {transform:translateY(1px) rotate(-90deg)!important;}
+#app #dj841-guide-tips ul[hidden] {display:none!important;}
+#app #dj841-guide-tips ul {padding-bottom:2px!important;}
+
+/* The scale and map TIP occupy fixed left/right lanes above the bottom dock. */
+@media(max-width:699px){
+  html body #app#app #map .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    box-sizing:border-box!important;min-height:30px!important;padding:6px 13px!important;
+    border:1px solid var(--dj800-border,#d3e4db)!important;border-top:1px solid var(--dj800-border,#d3e4db)!important;
+    border-radius:999px!important;background:var(--dj800-surface,#fff)!important;
+    color:var(--dj800-text,#24483c)!important;
+    box-shadow:0 4px 14px rgba(20,58,46,.13)!important;
+    font-family:inherit!important;font-size:12px!important;font-weight:850!important;line-height:1!important;
+  }
+  html body #app#app #dj840-map-tip:not([hidden]) {
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    gap:7px!important;box-sizing:border-box!important;
+    position:fixed!important;left:auto!important;right:max(12px,env(safe-area-inset-right,0px))!important;
+    top:auto!important;bottom:calc(var(--dj829-panel-bottom,90px) + 1px)!important;
+    width:max-content!important;max-width:calc(100vw - 148px)!important;
+    min-width:0!important;min-height:34px!important;max-height:40px!important;
+    margin:0!important;padding:7px 12px!important;border-radius:999px!important;
+    overflow:hidden!important;white-space:nowrap!important;text-align:left!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#25473b)!important;
+    border:1px solid var(--dj800-border,#d5e5dc)!important;
+    box-shadow:0 4px 14px rgba(20,58,46,.13)!important;
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+    transform:translate3d(0,7px,0)!important;
+    transition:opacity .22s ease,transform .22s ease,visibility .22s ease!important;
+    z-index:2801!important;cursor:pointer!important;
+  }
+  html body #app#app #dj840-map-tip.is-visible:not([hidden]) {
+    opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+    transform:translate3d(0,0,0)!important;
+  }
+  html body #app#app #dj840-map-tip strong {
+    flex:0 0 auto!important;font-size:12px!important;line-height:1!important;
+    color:var(--dj800-accent,#138b75)!important;font-weight:900!important;
+  }
+  html body #app#app #dj840-map-tip span {
+    display:block!important;flex:0 1 auto!important;min-width:0!important;max-width:100%!important;
+    overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+    font-size:12px!important;line-height:1.3!important;font-weight:650!important;
+  }
+  html body #app#app #dj840-map-tip span {
+    transition:opacity .18s ease!important;
+  }
+  html body #app#app #dj840-map-tip span.dj852-tip-copy-fade {opacity:0!important;}
+  html body #app#app #dj840-map-tip:focus-visible {
+    outline:2px solid var(--dj800-accent,#138b75)!important;outline-offset:2px!important;
+  }
+}
+
+/* More drawer fade-out is delayed until the animation has actually completed. */
+#app #dj-mobile-utilities.dj852-panel-fade-in:not([hidden]) {
+  animation:dj852-panel-fade-in .22s cubic-bezier(.2,.75,.25,1) both!important;
+}
+#app #dj-mobile-utilities.dj852-panel-fade-out:not([hidden]) {
+  animation:dj852-panel-fade-out .19s ease-in both!important;pointer-events:none!important;
+}
+
+/* Every mobile sheet rises into view; facility popups and transit use the same motion. */
+@media(max-width:699px){
+  html body #app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker,
+    #overview-sheet,#transport-sheet,#detail-sheet,#entry-sheet,#road-width-legend,
+    #ped-tools-panel,#map-advanced-controls,#map-safety-controls,#night-visibility-float,
+    #pza-road-sheet,#dj832-data-sheet,#dj833-weather-sheet,#dj833-night-modal,
+    #dj832-info-sheet,#dj832-feature-sheet,#dj-map-settings,#dj-app-about,
+    #version-history-modal,#route-map-card,#map-gesture-guide
+  ):not([hidden]),
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content {
+    animation:dj852-sheet-rise .29s cubic-bezier(.18,.84,.22,1) both!important;
+    will-change:opacity,translate!important;
+  }
+  html body #app#app .dj-sheet-swipe-zone {
+    touch-action:pan-x!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;
+    box-sizing:border-box!important;min-height:42px!important;
+  }
+  html body #app#app .dj-sheet-swipe-zone :is(button,a,input,select,textarea,summary,[role="button"]) {
+    touch-action:manipulation!important;user-select:auto!important;-webkit-user-select:auto!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html body #app#app :is(#dj-mobile-utilities,.page-panel,#admin-dong-picker,#overview-sheet,
+    #transport-sheet,#detail-sheet,#entry-sheet,#road-width-legend,#ped-tools-panel,
+    #map-advanced-controls,#map-safety-controls,#night-visibility-float,#pza-road-sheet,#map-gesture-guide):not([hidden]) {
+    animation:none!important;translate:none!important;
+  }
+}

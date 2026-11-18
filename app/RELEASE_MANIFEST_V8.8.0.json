@@ -1,0 +1,5465 @@
+{
+  "release": "DongjakApp v8.8.0 FINAL INTEGRATED",
+  "source_archive": "dongjak-source-review-fixed.zip",
+  "source_archive_sha256": "b6997702eefc0a28dbbd1bb80b4db9521d0caf3de2ab5478554e357ea64fb511",
+  "reported_git_branch": "fix/v8.8.0-regression",
+  "reported_baseline_commit": "8cc32f0",
+  "file_count_including_manifest": 1092,
+  "files": [
+    {
+      "path": ".github/workflows/dongjak-ci-alerts.yml",
+      "size_bytes": 4459,
+      "sha256": "bf45173d6c786e0a9d032537f0a20eb6c113906a621cbf57aad86de452d65ffc"
+    },
+    {
+      "path": ".github/workflows/dongjak-cloudflare-preview.yml",
+      "size_bytes": 7106,
+      "sha256": "74b43e8477b12bf2c62e3cd8a5318657bf43a16030e611ef7f472358652234bd"
+    },
+    {
+      "path": ".github/workflows/dongjak-cloudflare-rollback-inspection.yml",
+      "size_bytes": 1227,
+      "sha256": "0f83a5ed1a47c4fbe354144ff794f2a296f36cdb1c55597e111c5a58c633aaf3"
+    },
+    {
+      "path": ".github/workflows/dongjak-security-audit.yml",
+      "size_bytes": 2235,
+      "sha256": "b65f56af5ce093e2ec17b1b4abe6a4414d8f99c67f807be42b2fcd7042f07f2d"
+    },
+    {
+      "path": ".github/workflows/dongjak-source-backup.yml",
+      "size_bytes": 7490,
+      "sha256": "39e9540f9d8d5d6a83a4694361582e7c4ae33a4247f3f836efeb1a1fbc20a39e"
+    },
+    {
+      "path": ".github/workflows/dongjak-uptime-monitor.yml",
+      "size_bytes": 1187,
+      "sha256": "ea207a61636c5399bf34b5107a89a961ed98bb297424833f3df3904b8bae4f89"
+    },
+    {
+      "path": ".github/workflows/dongjak-visual-audit.yml",
+      "size_bytes": 5332,
+      "sha256": "8ba48cafb128155447db63fe430007c8c5ded62c7216301812d5a8b67f6919ba"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 653,
+      "sha256": "d52ec43bccc4e07bfa09e553af1b30d44710c47af3da075f70c4ad76be997bee"
+    },
+    {
+      "path": "PC_MAP_PROTECTED_SHA256.json",
+      "size_bytes": 955,
+      "sha256": "94edf98aaa1df767943445a57930808510170ed865e1cf39688f67928c95d511"
+    },
+    {
+      "path": "PLAYWRIGHT_V880_INTEGRATION_REPORT.md",
+      "size_bytes": 3187,
+      "sha256": "3c408c4232c944b919710fc8821f0e26efcc1ec41f451c9c195bc2b91adb2ec8"
+    },
+    {
+      "path": "R2_PRESERVED_BASELINE_SHA256.json",
+      "size_bytes": 854,
+      "sha256": "e9c4cf8e37f6ad0af2985c228da1d0b5c558b5aa2bd7ab11a8e3aa6e45c8e794"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 11057,
+      "sha256": "c3925041f9381e46cdc168415c53bfa73dc69d0e6bcdba3da022b2d7bdaf860a"
+    },
+    {
+      "path": "README_AUTOMATION_OPERATIONS.md",
+      "size_bytes": 5235,
+      "sha256": "a75b8c853964e68bff2e7bd571d76b71a9e5a8691ed44261916337b505f0b6ed"
+    },
+    {
+      "path": "README_GITHUB_ACTIONS_SETUP.md",
+      "size_bytes": 3905,
+      "sha256": "48dd41108094c19724848e79a248342af7a98019a5d34314b5e08a4049644f68"
+    },
+    {
+      "path": "README_GPS_SAFETY_v826_INTEGRATION_20261113.md",
+      "size_bytes": 4777,
+      "sha256": "c7cdcd368e79b134f038788638469878f844c509f6322bae4d009c595fae3c07"
+    },
+    {
+      "path": "README_MOBILE_MOTION_20261113.md",
+      "size_bytes": 2974,
+      "sha256": "32e566400d22b2466f2797d8c6c74d0dd8f51b2b18da387b8954e27268a3a85a"
+    },
+    {
+      "path": "README_MOBILE_MOTION_V810_20261113.md",
+      "size_bytes": 1955,
+      "sha256": "b2c7e8a6357073d09fa7b1a9b1520960f3a0e386a9cf4522c61b9b6bbfbe4fd9"
+    },
+    {
+      "path": "README_PLAYWRIGHT.md",
+      "size_bytes": 4672,
+      "sha256": "576184c93440617688ac6037ee6fea420d6df0ed3993117314bb29c02179d86a"
+    },
+    {
+      "path": "README_SECURITY_MONITOR_BACKUP.md",
+      "size_bytes": 4288,
+      "sha256": "3a14e0b1eac8798fa32c6740d8ce070ace90662d4ad2adec5e285414b3994afd"
+    },
+    {
+      "path": "README_TEST_FIX_20261113.md",
+      "size_bytes": 1901,
+      "sha256": "c4ad38aa5663e42b5398820bf48d96407f14cd258214f0eab8a56efc52d17389"
+    },
+    {
+      "path": "README_UI_FIXED_20261113.md",
+      "size_bytes": 1707,
+      "sha256": "958948333166966758b141313ba310fb523e9eb58093e65667925e4806d9578a"
+    },
+    {
+      "path": "README_UX_FIX_20261113.md",
+      "size_bytes": 4727,
+      "sha256": "212bf3420a08dd62fbe36dfb2f6a12778f4353ac148d0173a1f793e45b7db783"
+    },
+    {
+      "path": "README_V806_20261113.md",
+      "size_bytes": 3110,
+      "sha256": "5e37ae1c1b426d99105c75e59591fcdcc5d41c00cde52cb86f35dc047a949658"
+    },
+    {
+      "path": "README_V807_20261113.md",
+      "size_bytes": 2425,
+      "sha256": "50045a83a7441699db85ffe78ff70182cf244a6a9395c1e02007d1839fe2cb09"
+    },
+    {
+      "path": "README_V809_20261113.md",
+      "size_bytes": 2457,
+      "sha256": "9cd22a65c564c6d0559117a58156951039348dc35f7744a2333a38a889721d3a"
+    },
+    {
+      "path": "README_V810_ICON_20261113.md",
+      "size_bytes": 1206,
+      "sha256": "99d1daef16e2d6bac7d9c920cdba43ef661ea0f0f7e88f8a5921ba57160064b5"
+    },
+    {
+      "path": "README_V811_ICON_SEPARATION_20261113.md",
+      "size_bytes": 1143,
+      "sha256": "e3ba00f7a67c7e1a5f5b05807ebe53d1b937676d2659a2b9687d8c4a0d0d389f"
+    },
+    {
+      "path": "README_V811_MOBILE_UI_20261113.md",
+      "size_bytes": 2754,
+      "sha256": "829817eaae46ef02b8b3479cf04592e929549c4731848c8bbe10814123e2dcc0"
+    },
+    {
+      "path": "README_V811_NAV_VERSION_SYSTEM_20261113.md",
+      "size_bytes": 3858,
+      "sha256": "3a4dc585e77670698c380a07d4bfd712b7dad0a6214e7b80081ba17c3ffe443b"
+    },
+    {
+      "path": "README_V812_FADE_ICON_20261113.md",
+      "size_bytes": 2160,
+      "sha256": "599fd62e79838f445cd321c3d273a1d2eaebc3797815e84eb2c6021c7e3f3703"
+    },
+    {
+      "path": "README_V812_LOGIN_BUTTON_20261113.md",
+      "size_bytes": 3138,
+      "sha256": "c48bfcabd216993b5c38c8198bc1767d14ef6e7c9d750aa2184b4e1c67d0b80f"
+    },
+    {
+      "path": "README_V813_SUPABASE_ROUTE_CLOSE_20261113.md",
+      "size_bytes": 3643,
+      "sha256": "0115a1a0b21d10493bc58728e13c3161a7c15dddd63b9843a25d87ae9329ad0f"
+    },
+    {
+      "path": "README_V813_VISIBLE_FADE_20261113.md",
+      "size_bytes": 2337,
+      "sha256": "0e5b451725c02235b4cd2ebd8fe6661564f9b299be720b28b0917b8b92dfb3aa"
+    },
+    {
+      "path": "README_V814_EXCLUSIVE_20261113.md",
+      "size_bytes": 2730,
+      "sha256": "736e70ee67dab1f8125b8928ae2a374322b8ed119aa456d84fbe111ac2861beb"
+    },
+    {
+      "path": "README_V815_PC_LAYER_FADE_20261113.md",
+      "size_bytes": 2142,
+      "sha256": "4ec59361209bab6d32f82d9c51c1632c12fcd67dd26b60c3524a06a77347570e"
+    },
+    {
+      "path": "README_V816_PC_MOBILE_TYPOGRAPHY_20261113.md",
+      "size_bytes": 2321,
+      "sha256": "a351eac4c75ff0c35cb1bd4e1387f940665d907e500dedf3a7842d1edad457d1"
+    },
+    {
+      "path": "README_V817_DIALOG_SEARCH_20261113.md",
+      "size_bytes": 3178,
+      "sha256": "826677c8826d692f44e06d4ea9949eb611d732cbf434e66fafa00e0bd3818ae2"
+    },
+    {
+      "path": "README_V818_UI_FIX_20261113.md",
+      "size_bytes": 3367,
+      "sha256": "59c94f42bf2c1e9bc04b8a1e6a37dd385fb5b11e61c659e3cbd697e23a9ee6af"
+    },
+    {
+      "path": "README_V819_PC_SAFETY_WEBFONT_20261113.md",
+      "size_bytes": 3333,
+      "sha256": "90e993d96d83c0462dd014a74e2397b366b49ba3d8fa0b5f53d7f68028a53fa7"
+    },
+    {
+      "path": "README_V820_3PATCH_INTEGRATION.md",
+      "size_bytes": 5327,
+      "sha256": "4e9fc37c8b2cab458b8b4e6b78b4f69f40d6d7fda18659101d7a84355a5279f0"
+    },
+    {
+      "path": "README_V820_ACCOUNTS_GOOGLE_MOBILE_CLOSE_20261113.md",
+      "size_bytes": 5734,
+      "sha256": "73774f5c977fbc7ec5e4aded68a9d10a4f75b5558470378e7987b93cc9472e51"
+    },
+    {
+      "path": "README_V8210_KAKAO_KEEP_MAP_20261114.md",
+      "size_bytes": 3841,
+      "sha256": "490314d515e1293e16b5d6d1b6f9a456e5fe489fb318067233dea0dd0cb96707"
+    },
+    {
+      "path": "README_V8210_REQUESTED_UI_20261114.md",
+      "size_bytes": 2949,
+      "sha256": "494523821af01ae0935e894ca99606eecfce884ea131ce51b4c79c66c81bf019"
+    },
+    {
+      "path": "README_V8212_SWIPABLE_UI_OVERLAY_GUIDE_20261114.md",
+      "size_bytes": 2191,
+      "sha256": "6e6b73cdc3d9df85083f438f1479260fc6926bed2e7e8fb6332d2ca38d226e9a"
+    },
+    {
+      "path": "README_V8212_UI_KAKAO_GUARD_INTEGRATED_20261114.md",
+      "size_bytes": 1328,
+      "sha256": "c7ffe85191373b0a135e09992d698da97a620b75cfac8b434fed5bc7306d3884"
+    },
+    {
+      "path": "README_V8213_UI_KAKAO_PRIORITY_SAFE_20261114.md",
+      "size_bytes": 3652,
+      "sha256": "d6abdc83712aa6a1e1fe663dbcfa963254c219ed6a6888e2013187cea5ee8de0"
+    },
+    {
+      "path": "README_V8214_HOME_HALF_SHEETS_MERGED_20261114.md",
+      "size_bytes": 3269,
+      "sha256": "eceaec6f0e2a3cc3c62f8b03d4219a0d58e4a4dce0491c704b3a4ec2a9941e0e"
+    },
+    {
+      "path": "README_V8214_MOBILE_TOOLBAR_PERSONALIZATION_20261114.md",
+      "size_bytes": 3846,
+      "sha256": "8929a1fa39d8853cbcf856704480f43d6b6fd716a14c694a6458447723ca8994"
+    },
+    {
+      "path": "README_V8214_UI_KAKAO_PRIORITY_SAFE_MERGE_20261114.md",
+      "size_bytes": 1865,
+      "sha256": "0b1a1e3ca90f72c48232dd95f32396d5e7d850b1fa6839c5e1dabf3a6e992f79"
+    },
+    {
+      "path": "README_V8215_HOME_HALF_SHEETS_KAKAO_MERGE_20261114.md",
+      "size_bytes": 1672,
+      "sha256": "e926050555e8d867c862a3cab4a9c21506bf71dea61786c0d6925fdda7d86323"
+    },
+    {
+      "path": "README_V8215_LAYOUT_FIXED_20261114.md",
+      "size_bytes": 2901,
+      "sha256": "da7144524b584fc056d5521d14c938249c3f95d2baffe839d652411381d42dfb"
+    },
+    {
+      "path": "README_V8215_METRO_UI_MERGED_20261114.md",
+      "size_bytes": 2919,
+      "sha256": "3900623b13e2015df1090192ea1affd28bdfe1a53dd9cdc54d397685b12c2910"
+    },
+    {
+      "path": "README_V8215_MY_INFO_REVIEWS_SHORTCUTS_20261114.md",
+      "size_bytes": 2170,
+      "sha256": "b7e64b12ea4c265e0397a1c4cf37a0b7bb336c6f4d317f72ca514f7ef9688896"
+    },
+    {
+      "path": "README_V8215_NEWS_SHEET_REBUILT.md",
+      "size_bytes": 2816,
+      "sha256": "d22d080406a283aac28a554fa56fbd4ab479e8991fa7fb173ed5aa093590b799"
+    },
+    {
+      "path": "README_V8215_X_RIGHT_HALF_HEIGHT_APPLIED_20261114.md",
+      "size_bytes": 1536,
+      "sha256": "b7787237fe764336280108d33b2e1e83c13773ecccbf0ab7c8cd8e4cfef8577c"
+    },
+    {
+      "path": "README_V8216_LAYOUT_FIXED_MERGE_20261114.md",
+      "size_bytes": 1693,
+      "sha256": "50e832b7460f7b743a20b4b0e32327ec741af355a981078a41de2582b66604f8"
+    },
+    {
+      "path": "README_V8216_TRANSIT_FIVE_UI_VERSION_20261114.md",
+      "size_bytes": 2174,
+      "sha256": "f3f58454f3837cb4feded161dbd54d06a911a16f32432f9451aeb39b1c618f19"
+    },
+    {
+      "path": "README_V821_FONT_V816_FIX_20261113.md",
+      "size_bytes": 1717,
+      "sha256": "9858c3ad27858ee8f223decc98bd496a0a09030058c9c7b8336583a87821de7c"
+    },
+    {
+      "path": "README_V821_KAKAO_OAUTH_20261113.md",
+      "size_bytes": 1834,
+      "sha256": "01289f615cdd4ffdbbfba07aa08a242563b17a346499955eaf53a11e9bfa4787"
+    },
+    {
+      "path": "README_V822_LOCAL_APPLE_FACE_20261113.md",
+      "size_bytes": 1798,
+      "sha256": "156931a9a34918c80182a9d82075b9d4fe20fa64899c0d6b06de0c7c226f5e51"
+    },
+    {
+      "path": "README_V823_PRETENDARD_ONLINE_20261113.md",
+      "size_bytes": 1242,
+      "sha256": "55f6b49fa5e1ca810b33418313fd9398a2acfa1022dbbee192485bfa14a8c32e"
+    },
+    {
+      "path": "README_V823_ROUTE_HEADER_ACTION_20261113.md",
+      "size_bytes": 2288,
+      "sha256": "b3d87f06d465f28ee5c2540cd85945c82bf7cfd779b156515343bd56e7e29392"
+    },
+    {
+      "path": "README_V824_MOBILE_LAYOUT_KAKAO_20261113.md",
+      "size_bytes": 3297,
+      "sha256": "fd543329a02ab5b327e98901bed0f0be67ae12c7c59bcbbadae65a026567ff3b"
+    },
+    {
+      "path": "README_V825_UI_FACILITY_TRANSIT_20261113.md",
+      "size_bytes": 3055,
+      "sha256": "6c1ab0b06869c2ce7ffb6a63818599cf86c0e5ee1e22280f11d91d0a4ba09c05"
+    },
+    {
+      "path": "README_V825_WALK_NAVIGATION_20261113.md",
+      "size_bytes": 3110,
+      "sha256": "5d270dbb0aaf7683db4225dc30c8a6b5438fe99f627342ef27bc62e0074b375f"
+    },
+    {
+      "path": "README_V826_FAVORITES_ACCOUNT_SETUP_20261113.md",
+      "size_bytes": 5737,
+      "sha256": "1846c8f4ccdd36a7950e7f4ab93b9a32fcda3d5125ce55b61d8a5ec9347919cc"
+    },
+    {
+      "path": "README_V828_KAKAO_OAUTH_DIAG_20261113.md",
+      "size_bytes": 4600,
+      "sha256": "5964e3476abb06c2a7ff7dfeb5b5212536d4a3c947713aeb78c85405c0d76925"
+    },
+    {
+      "path": "README_V829_ACCOUNT_LOGIN_KAKAO_NOTICE_20261114.md",
+      "size_bytes": 5334,
+      "sha256": "cf48c6dbdc2f8a864e2715ff33a7f67089422338f3af9108c921fe14b8b81d01"
+    },
+    {
+      "path": "README_V829_MOBILE_LAYOUT_20261114.md",
+      "size_bytes": 3111,
+      "sha256": "123b0b1828c22d495927e42c4e645c8c5f24e0f78862c6b8ac0c4b116719c3ca"
+    },
+    {
+      "path": "README_V830_SEMVER_OPERATIONS_20261114.md",
+      "size_bytes": 1877,
+      "sha256": "e45dd22dbf765ad6136dfb8ed31996039d49b5894f74125ea95a937d8cd3bb04"
+    },
+    {
+      "path": "README_V831_TRANSIT_FAVORITES_BUS_UI_20261114.md",
+      "size_bytes": 2440,
+      "sha256": "d189e93cd2a59c9ff985c13b9cc4f68c8c4bc2f68fd49f163deb0a6e647b5721"
+    },
+    {
+      "path": "README_V840_V831_MERGE_20261114.md",
+      "size_bytes": 2484,
+      "sha256": "9957ffe2ee2da0194f53296401579a08625365709458949361a3f87011499fe8"
+    },
+    {
+      "path": "README_V841_V840_TRANSIT_ROUTE_MOBILE_MERGE_20261114.md",
+      "size_bytes": 2283,
+      "sha256": "0d145577313bb5f93ee37a343b3650921eed11409c0ff07787a6ba45a1fd16e9"
+    },
+    {
+      "path": "README_V842_MOBILE_SCALE_OVERLAY_POLICY_20261114.md",
+      "size_bytes": 1921,
+      "sha256": "656ac708876ffe8adeb2a9344a1b91c48eab85ada46adcf5fa2bb56fcdb04623"
+    },
+    {
+      "path": "README_V843_SCALE_ROUTE_TIP_MERGE_20261114.md",
+      "size_bytes": 2883,
+      "sha256": "839dab1351fdfa6631fad5607a975aeb7369988e2a684cbddd7a6032797ac074"
+    },
+    {
+      "path": "README_V850_SEOUL_ONE_KEY_FACILITIES_20261114.md",
+      "size_bytes": 7774,
+      "sha256": "56f95965a74c4ff165c112de2ea603fc6a6f4ae0cc128c2db0038ce233d09758"
+    },
+    {
+      "path": "README_V851_KOREAN_FUZZY_SEARCH_20261114.md",
+      "size_bytes": 1935,
+      "sha256": "afac01e6dd83029a23d220c32b56955f7c7afdc9e873cf4b1f851f656abc5386"
+    },
+    {
+      "path": "README_V851_MOBILE_UI_MOTION_20261114.md",
+      "size_bytes": 1617,
+      "sha256": "42eda303b4494ff4c0070b590f4c7b45b557bbc568f40959e38c20cfb95c874a"
+    },
+    {
+      "path": "README_V852_MOBILE_UX_20261114.md",
+      "size_bytes": 2745,
+      "sha256": "999e18c0b64a7d147fc67379b3d00f0d38865b0206e536dd36e9dcbc768e17a0"
+    },
+    {
+      "path": "README_V854_INTEGRATED_20261114.md",
+      "size_bytes": 4344,
+      "sha256": "e4d1fed972bb3587f3eab9efdd0b61a4daf3d033a66c0dea3067e1532e402fc5"
+    },
+    {
+      "path": "README_V855_MAP_STARTUP_FIX_20261114.md",
+      "size_bytes": 3205,
+      "sha256": "345d6b95602fd5ce62bce16e5482659fa7f338917ca9acbae9d12053b6ad2ae1"
+    },
+    {
+      "path": "README_V856_INTEGRATED_20261114.md",
+      "size_bytes": 3863,
+      "sha256": "f94c3d13e00164a6c007befc27d45e9e6f89a991145912c2f9da125e75bef572"
+    },
+    {
+      "path": "README_V857_REQUESTED_UX_20261114.md",
+      "size_bytes": 5686,
+      "sha256": "97cf439d1060e3291853fe3595710f15050e8bf5000b448514d110605b0c4acf"
+    },
+    {
+      "path": "README_V860_ONBOARDING_20261114.md",
+      "size_bytes": 4484,
+      "sha256": "1ac8f7c4670240e57b455c93c038dec3e22a7a420da0a8385c4efbf5db761c2c"
+    },
+    {
+      "path": "README_V861_MOBILE_UI_REPAIR_20261114.md",
+      "size_bytes": 1466,
+      "sha256": "d25be7a3440e58e46e83e4250f97c657010e83af2c6a562f4427f33a6a7eb6d3"
+    },
+    {
+      "path": "README_V862_REQUESTED_UX_INTEGRATED_20261114.md",
+      "size_bytes": 2916,
+      "sha256": "269ae870b91fcc9e14e3d756cdac9daba4d72a46f1615bb3dd90070b4e8816a3"
+    },
+    {
+      "path": "README_V863_GUEST_ONBOARDING_20261114.md",
+      "size_bytes": 3259,
+      "sha256": "d4775b004bb1c3397693729afcb1f84b8c6bc3d19be43d1d649207055b30270d"
+    },
+    {
+      "path": "README_V864_FLOATING_ONBOARDING_TRANSIT_REPAIR_20261115.md",
+      "size_bytes": 3077,
+      "sha256": "629aca919afd30bf70bc378e8a396e226db7ed41016edd867d305b6987d2c3fa"
+    },
+    {
+      "path": "README_V865_PATCHES_MERGED_20261115.md",
+      "size_bytes": 2742,
+      "sha256": "75bf1c054ed74d8918b80c70c5779aba326133efd76d1b3701cfc0b196b50f47"
+    },
+    {
+      "path": "README_V866_CLOSE_EVENT_FIX_20261115.md",
+      "size_bytes": 1923,
+      "sha256": "013af4cdeff5899503589847d6f8fddfa77c610ce3d09758f87b6266729ebf2a"
+    },
+    {
+      "path": "README_V867_WINDOW_LIFECYCLE_REBUILD_20261115.md",
+      "size_bytes": 1460,
+      "sha256": "1466646a3917365c7497f2beb72ef291c97d691f487d66237f654137910f695f"
+    },
+    {
+      "path": "README_V868_UNIFIED_WINDOW_LIFECYCLE_20261115.md",
+      "size_bytes": 1710,
+      "sha256": "f6984a068dc236c5aa3a782cc3f0f9bbbfb63cc2284a38d606af258213d6637c"
+    },
+    {
+      "path": "README_V869_HOME_TAB_TIP_ALIGNMENT_20261115.md",
+      "size_bytes": 2076,
+      "sha256": "71a216cdbe612315517e80661eb7fe57dad51d1af0c37cf2963594bdaa866e9b"
+    },
+    {
+      "path": "README_V870_MOBILE_TEN_ISSUES_20261115.md",
+      "size_bytes": 3212,
+      "sha256": "e11e188c1688eb9afd4f7a62128e93f5c86208e6fc3071a6503fd53595198118"
+    },
+    {
+      "path": "README_V8710_STABILITY_PHASE3_20261115.md",
+      "size_bytes": 3687,
+      "sha256": "0cfa7fab50fd06893fde022688d4f83d23af52513c0224a7ce2b019dd5d13e0c"
+    },
+    {
+      "path": "README_V871_SEARCH_SHEET_NODEULSEOM_20261115.md",
+      "size_bytes": 1090,
+      "sha256": "c7cf285178fc2de01079ef71703b2a5d5918b9326b6ae81efd1da3737c9006bf"
+    },
+    {
+      "path": "README_V872_PC_ONBOARDING_WEATHER_20261115.md",
+      "size_bytes": 1090,
+      "sha256": "be74af49790b4f2ad3e393563e9a3ccb197fd86568b7fe8c1833d74585c1bfef"
+    },
+    {
+      "path": "README_V873_HOME_FACILITY_MOBILE_QUALITY_20261115.md",
+      "size_bytes": 3420,
+      "sha256": "43370392317c589f00b2ba3d3526b8f82b47d4abbc71dcfdcc5a36d1033e811d"
+    },
+    {
+      "path": "README_V874_SEARCH_TRANSIT_UI_20261115.md",
+      "size_bytes": 2186,
+      "sha256": "da75d02dab9beadbbd0268f61fb126ad0713bfc52ed57e7c264117eb3ad0376a"
+    },
+    {
+      "path": "README_V875_MOBILE_STABILITY_SEARCH_AND_RESTORE_20261115.md",
+      "size_bytes": 2525,
+      "sha256": "b0a307174a94ba9df0fd3a679b5a6fe744461225f8b8300dbc3e02ace2bc1335"
+    },
+    {
+      "path": "README_V876_DESKTOP_FINAL_20261115.md",
+      "size_bytes": 464,
+      "sha256": "280995900a435d1044a0c4b3c7173f6844d09a09fa0909fb972625c0e2e8ae0f"
+    },
+    {
+      "path": "README_V877_MOBILE_EXPAND_MYINFO_SETTINGS_20261115.md",
+      "size_bytes": 2513,
+      "sha256": "5d695b2527e3ca3d12e968ee64b8422e22f78212938b6cd7c2eabd27d866e684"
+    },
+    {
+      "path": "README_V878_STABILITY_PHASE1_20261115.md",
+      "size_bytes": 1406,
+      "sha256": "223730797ed96cb66a1a23e07b997c91e9147afcd24701c6e688fa06eb93cb1e"
+    },
+    {
+      "path": "README_V879_STABILITY_TEST_AUDIT_20261115.md",
+      "size_bytes": 2963,
+      "sha256": "f7c861dc9470176ac4eae34c2e7901591800afc6a276424b0d5c004dae1df1ba"
+    },
+    {
+      "path": "README_V880_STABILITY_PHASE4_20261115.md",
+      "size_bytes": 3890,
+      "sha256": "13d937924892e3870343b17f20fc72f5784ad6f95d69a62e06248955786d2c78"
+    },
+    {
+      "path": "README_v7.10.1.md",
+      "size_bytes": 1705,
+      "sha256": "d60bae47a75b2e41a19eb7e8e056af10b8e6fefab930f3d66af41c99ec364c29"
+    },
+    {
+      "path": "README_v7.10.2.md",
+      "size_bytes": 1878,
+      "sha256": "e82ebff3bf8b3f362e08eef44f4d1a7e18029a835d3060505c984c01ee55f8c4"
+    },
+    {
+      "path": "README_v7.10.3.md",
+      "size_bytes": 2665,
+      "sha256": "f624436d6982735fe0be7fdc380b13a9d05b6ba846d8bbc7636b7bc203881e85"
+    },
+    {
+      "path": "README_v7.11.0.md",
+      "size_bytes": 2434,
+      "sha256": "ab72e67720e7873dcc6f2eb2e8a67fad5cb108b599e30491426957678df21bed"
+    },
+    {
+      "path": "README_v7.12.0.md",
+      "size_bytes": 1644,
+      "sha256": "a64e8fc50f60a4e9509a596c7f1987207895b2f9f01b986ae2681d1760460d1a"
+    },
+    {
+      "path": "README_v7.13.0.md",
+      "size_bytes": 2110,
+      "sha256": "756f1258e3b383f9ce830b354d44fef0bea364b9f6bcb6a379428c6a7e2b6b38"
+    },
+    {
+      "path": "README_v8.0.0.md",
+      "size_bytes": 3440,
+      "sha256": "52cc5d024dd983858e5fb02034251687d3a5e66a6d3223d70cfbe26588d14e7e"
+    },
+    {
+      "path": "README_v8.0.1.md",
+      "size_bytes": 2020,
+      "sha256": "4cee71638b25b62f15e416e5e8fb7327513e3ef3665ef7410660a8f64d463454"
+    },
+    {
+      "path": "README_v8.0.2.md",
+      "size_bytes": 1937,
+      "sha256": "bc8caa4d1f64c9e7e6027f15b5744a5c769e2876e13aac112adbda4fad60e3b8"
+    },
+    {
+      "path": "README_v8.0.3.md",
+      "size_bytes": 2524,
+      "sha256": "9435ad1015abcd33c57e38df8d4df372ade11f92c816905b2736719dd4468c5d"
+    },
+    {
+      "path": "README_v8.2.7_FULL_INTEGRATED_20261113.md",
+      "size_bytes": 2633,
+      "sha256": "ac5effccb818e5c299aab00aee92d607520bdf4f3435c12372f6835cfca51d53"
+    },
+    {
+      "path": "RELEASE_NOTES_V8.8.0_FINAL.md",
+      "size_bytes": 2633,
+      "sha256": "b33c97a01ec9f4da72eb082481f2303fa3a9c288beba96bc90108bc6d7382edc"
+    },
+    {
+      "path": "RUN_DONGJAK.cmd",
+      "size_bytes": 161,
+      "sha256": "ef422dd4f29bdb68beb3eea287f5d61e272c00bbd527f400cd9b82a053ca71aa"
+    },
+    {
+      "path": "SETUP_SUPABASE.cmd",
+      "size_bytes": 372,
+      "sha256": "2d144c2459acc2fea6309625f2c297aaa0da256b4d533c6332308492d3d89ccb"
+    },
+    {
+      "path": "SETUP_SUPABASE.ps1",
+      "size_bytes": 2310,
+      "sha256": "d90e69e9fddcdb5d0d38f6b5a8d6fe901ff1f15da9d74aecc41e119033d6f7fc"
+    },
+    {
+      "path": "TEST_RESULTS_V8.8.0.md",
+      "size_bytes": 1777,
+      "sha256": "2635bcc9f26fc6fac8729fb6ddf695d797cb5a62413e479bc4ac65e70c4a3c92"
+    },
+    {
+      "path": "__motion_809_fixture.html",
+      "size_bytes": 2067,
+      "sha256": "cac2836e5ca0885ee872c6c07bcbfb23e340a2f5806fbab1a54cdfeaae9852e2"
+    },
+    {
+      "path": "android/app/build.gradle",
+      "size_bytes": 2138,
+      "sha256": "43bf8242eb08e8bdd1c836624fba6ff915c1c1f18266ded027239e1b28170577"
+    },
+    {
+      "path": "android/app/capacitor.build.gradle",
+      "size_bytes": 422,
+      "sha256": "d620e0ab995456c49b52ee2e9c3a20430cddaaf5dc02b84ddb2f3f4d38190ae1"
+    },
+    {
+      "path": "android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java",
+      "size_bytes": 774,
+      "sha256": "ff50b4c110a7434312f9af54171f9e8523b015836f707c9b387b76d4c38a97f8"
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "size_bytes": 1537,
+      "sha256": "b642d0f51d088301d0107c9b94c85994fbc612e0a7b6a9cb1754113ae1be90cd"
+    },
+    {
+      "path": "android/app/src/main/assets/capacitor.config.json",
+      "size_bytes": 169,
+      "sha256": "a1df9ff07d7789907c77dfedee3240c561473d67a25605797587bef264893986"
+    },
+    {
+      "path": "android/app/src/main/assets/capacitor.plugins.json",
+      "size_bytes": 116,
+      "sha256": "610a7b6446653826880a4f3df8fc64f91d8066f7e50933ac966d25714929636a"
+    },
+    {
+      "path": "android/app/src/main/java/kr/dongjak/safetyapp/MainActivity.java",
+      "size_bytes": 124,
+      "sha256": "af85a64b9bfe00dc070eec547dae2bf49cfa57b470b19b0794787e94d13fe452"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-land-hdpi/splash.png",
+      "size_bytes": 7705,
+      "sha256": "08cc34ad7713fe7ed58bceaa37b2387b670c53cd60264b4bd6442db3098e75dc"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-land-mdpi/splash.png",
+      "size_bytes": 4040,
+      "sha256": "5cf98b4451bd99b20df26f9e608a46946118be6b0ae90762f9ca1786a30c76ff"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-land-xhdpi/splash.png",
+      "size_bytes": 9251,
+      "sha256": "22f87e1e3bc89aa01a7dbc39c9a4db058cd0bf4ad3fe9f55712bf69eb997f4bf"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-land-xxhdpi/splash.png",
+      "size_bytes": 13984,
+      "sha256": "42aa26392546fcdee1b8d3ac6d4b41bfcceb41dc6a4f3a3c30c24a8a8f4db862"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-land-xxxhdpi/splash.png",
+      "size_bytes": 17683,
+      "sha256": "60393ce8636fd263e4e1fea3fd4ab2de948c6295e898fda9b50ac4e5283be809"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-port-hdpi/splash.png",
+      "size_bytes": 7934,
+      "sha256": "c5015f4ba3628392b538386c5e210f0b94f352a3160adab934fd0311972137ca"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-port-mdpi/splash.png",
+      "size_bytes": 4096,
+      "sha256": "07fa579e1c83e04ba7f9cbcbfcf41b68e15fe3638f2c44a04e58b809103e6b69"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-port-xhdpi/splash.png",
+      "size_bytes": 9875,
+      "sha256": "b73049cb37fe76d6c11b87a796766bf6af0c85483b31eb6a921657b0d764a4b9"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-port-xxhdpi/splash.png",
+      "size_bytes": 13346,
+      "sha256": "0c7f1212f25b7b90e9a6e1d320013e4ff3d3e03e634cbb07b7b7981cac51627f"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-port-xxxhdpi/splash.png",
+      "size_bytes": 17489,
+      "sha256": "3db071a03b2f8ffe0dfd4170fc59842d53cd15bba5e88af59401d58efabf7827"
+    },
+    {
+      "path": "android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml",
+      "size_bytes": 1880,
+      "sha256": "a8514094f754b099d3e55ce1d6e0b2de79db418b2eeacb0fc2a6bb0bfadef221"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "size_bytes": 5606,
+      "sha256": "718ba51adf166bb55c3e9936bb8199a0148457f7f0191aaa2f37a94f3159d6ec"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/splash.png",
+      "size_bytes": 4040,
+      "sha256": "5cf98b4451bd99b20df26f9e608a46946118be6b0ae90762f9ca1786a30c76ff"
+    },
+    {
+      "path": "android/app/src/main/res/layout/activity_main.xml",
+      "size_bytes": 535,
+      "sha256": "5d770feb791313b947020cbfc57e5c733c556dac5e9e49261a1190e527073253"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "size_bytes": 265,
+      "sha256": "9c3a7e0a6515c6e1a7ae834a9ae430311ebc3241f7b2e5e7f0460aa690709a7c"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "size_bytes": 265,
+      "sha256": "9c3a7e0a6515c6e1a7ae834a9ae430311ebc3241f7b2e5e7f0460aa690709a7c"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "size_bytes": 2786,
+      "sha256": "72b71c3581ca3b5a23b1c168d69b9d855b3f184fa079902a01f088eb4f0607d5"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png",
+      "size_bytes": 3450,
+      "sha256": "32baa10d2632a4417454a579f992bd640e0a3cec79321423559b2c9940de58a9"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png",
+      "size_bytes": 4341,
+      "sha256": "bfcc1b0fa931b14bb241372c76ab4f04374b67d02363c98d9cb12edfdacdf5f3"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "size_bytes": 1869,
+      "sha256": "27ed3603010ebc278f64f8645741ab132ff517abb5308eb9df6c8e42a48956b2"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png",
+      "size_bytes": 2110,
+      "sha256": "58e78a618778926b1f6d9472a6468de878de8530970934e94aab5ba4ba08cc00"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png",
+      "size_bytes": 2725,
+      "sha256": "0166fc333074c373fbd0ce6b5defd71552166165ac778121ca9c9dff6b83f0fc"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "size_bytes": 3981,
+      "sha256": "d35dbfff175b83c13ef59cf924abfc810f7b6a158595d7417c5498ea8c7c7ed1"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png",
+      "size_bytes": 5036,
+      "sha256": "6f88083b8166cc559102f7044688de7525287632ebe09ac45d001ac8bf4b3eae"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png",
+      "size_bytes": 6593,
+      "sha256": "40911a00922868686854a4804b93fd6e56b503664696de03f450bff690affb6d"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "size_bytes": 6644,
+      "sha256": "ed346eb1e3f0280f15709393705899b3ff55c20b88f4e0308006b3c33cf5fe14"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "size_bytes": 9793,
+      "sha256": "4a82bc1e9923576275869998925ce0ae021a79aa18b24a0dd87ad6b61ca85053"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png",
+      "size_bytes": 10455,
+      "sha256": "1ee4cd9ff371dcb2e3938097e434f6fb8731688ed7165e61fc63693ad5b2f455"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "size_bytes": 9441,
+      "sha256": "87cb2f2ffe992652bb4fa768c73719a37b5852ab17fbf8e170e888f7a42b0761"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "size_bytes": 15529,
+      "sha256": "bd24fd383253bf8d43f0a81f11c071d76d1d555114376dd647cd9fb38fa0a9da"
+    },
+    {
+      "path": "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png",
+      "size_bytes": 15916,
+      "sha256": "ab93096331e7cd8ec379f73f1e9adcaaa9ee1115c9f4ff10411a811fb9700174"
+    },
+    {
+      "path": "android/app/src/main/res/values/ic_launcher_background.xml",
+      "size_bytes": 120,
+      "sha256": "cd40bafe618ff506f4088778b135cb4faa15f25e0c9b475e22d730c74b7be115"
+    },
+    {
+      "path": "android/app/src/main/res/values/strings.xml",
+      "size_bytes": 330,
+      "sha256": "78f9ff3cc5c368be8933759bd75f89258aa8b60c2d987423ca8092310e11572c"
+    },
+    {
+      "path": "android/app/src/main/res/values/styles.xml",
+      "size_bytes": 823,
+      "sha256": "18ebba36575e9461347ee67361b23caf095f158ee85dbefe1b83a4669ba5bd6c"
+    },
+    {
+      "path": "android/app/src/main/res/xml/config.xml",
+      "size_bytes": 185,
+      "sha256": "e9dcda493e663c5c4db9e3cb3bd968477a6e90aa8840bcbba40d72ed54b767ce"
+    },
+    {
+      "path": "android/app/src/main/res/xml/file_paths.xml",
+      "size_bytes": 213,
+      "sha256": "a46ed43ef65c90cb6778f4581decf3556e3f0055aad8f36d69dae16f9a0e99aa"
+    },
+    {
+      "path": "android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java",
+      "size_bytes": 402,
+      "sha256": "d4045ae8fac1f0807e6b24eb34e68409a9a235df9d1a3f896fb8c9a49424363d"
+    },
+    {
+      "path": "android/build.gradle",
+      "size_bytes": 637,
+      "sha256": "46ade7db7afeb8049ccea59fce83095dca736ceb8c9acd79cc944e988c3357d9"
+    },
+    {
+      "path": "android/capacitor-cordova-android-plugins/build.gradle",
+      "size_bytes": 1668,
+      "sha256": "28e3fa281f4d1e388bf98abc7f5bb31e672516e385c165c719d201ed54b8236e"
+    },
+    {
+      "path": "android/capacitor-cordova-android-plugins/cordova.variables.gradle",
+      "size_bytes": 312,
+      "sha256": "b13104b34f7738abceec358ae8226ba5e64855e97babde54a115880e9b9bd47b"
+    },
+    {
+      "path": "android/capacitor-cordova-android-plugins/src/main/AndroidManifest.xml",
+      "size_bytes": 210,
+      "sha256": "2e3e383475f0e6cb76f0a7b46017a546663fba8e5bd1ef2a537412afac2ee9b5"
+    },
+    {
+      "path": "android/capacitor.settings.gradle",
+      "size_bytes": 347,
+      "sha256": "5264fbd0372a73d21291a10266c9aaf056cdc4f965388354917fcbd253df7d6f"
+    },
+    {
+      "path": "android/gradle.properties",
+      "size_bytes": 987,
+      "sha256": "3bab15c5b8bc4c2f4b6cf525497d15ad4abca53a460e6dd2eb0f0135817d31e6"
+    },
+    {
+      "path": "android/gradle/wrapper/gradle-wrapper.properties",
+      "size_bytes": 253,
+      "sha256": "9a479a85aa879bb55284fc16d0de5b81a745c3854f4e2d88c42e7debaf007435"
+    },
+    {
+      "path": "android/gradlew",
+      "size_bytes": 8733,
+      "sha256": "b187b4c52e749f5760afdd6fadc31b2a98ad35fb249bf0dff03b72650f320409"
+    },
+    {
+      "path": "android/gradlew.bat",
+      "size_bytes": 2937,
+      "sha256": "1d297e00bd21de3ace22b4d7f2de1f9dfa858883d66bbf7c1ccbecccec8f4f3b"
+    },
+    {
+      "path": "android/local.properties",
+      "size_bytes": 381,
+      "sha256": "bc8346fc1e2c0960cc402bce6c32d720add52c67192a2de8ea9254c59a656c41"
+    },
+    {
+      "path": "android/settings.gradle",
+      "size_bytes": 208,
+      "sha256": "6ce098d15ebd69b44c4ecd786bca1bdc366340d2459b2af4d7bb0ab317aa9669"
+    },
+    {
+      "path": "android/variables.gradle",
+      "size_bytes": 498,
+      "sha256": "83d502c9ed8fcf1dd4791482067abeedbebae49fafe9cd14a8a1f5891deb0d88"
+    },
+    {
+      "path": "capacitor.config.json",
+      "size_bytes": 181,
+      "sha256": "11b62328b59cfcc757f68c90f645d75b4e4ff9e494864ceade4fcfd84251f794"
+    },
+    {
+      "path": "docs/ACCESSIBILITY-v52.md",
+      "size_bytes": 3148,
+      "sha256": "b7eaffbad2cff0faa3e82ffe8be07e068aabedd0c399b10989c731b7f2ddebfd"
+    },
+    {
+      "path": "docs/AI_AND_TRANSPORT_SETUP_v6.0.14.md",
+      "size_bytes": 4005,
+      "sha256": "e30c7967909b71a6ef07ac20865cc9475392f753ab8edb6e45ccee8a1092fc4d"
+    },
+    {
+      "path": "docs/CHANGELOG.md",
+      "size_bytes": 2264,
+      "sha256": "47f7ae80356b0fce58e4e49a292069ced5e909165ffe48b7bf3b6f434d6c17c1"
+    },
+    {
+      "path": "docs/CHANGELOG_LEGACY_NOTES.md",
+      "size_bytes": 3268,
+      "sha256": "5ae5718eea36d68b6daee3d3a6a786dba23a9d850284e39721caad92ac446a55"
+    },
+    {
+      "path": "docs/CHANGELOG_SEMVER_FULL.md",
+      "size_bytes": 80500,
+      "sha256": "1b5d5e91d89fa025840b3886c224d2bb0b86be28dc699e6bd0d539a7d66102c0"
+    },
+    {
+      "path": "docs/CLEANUP_REPORT.md",
+      "size_bytes": 1106,
+      "sha256": "f4c83b995170eb33a83ede3a9e5a8fbc2a2e8a9507c1d4d136bace3b8bec3eb9"
+    },
+    {
+      "path": "docs/INTEGRATED_WALK_V7104_MERGE_REPORT.md",
+      "size_bytes": 2039,
+      "sha256": "52229dba646d2f0588073c6f23d04db273ceb34ad5e373ca0124c0b8ba1ed087"
+    },
+    {
+      "path": "docs/METRO_ZOOM_ADAPTIVE_MARKERS_20261106.md",
+      "size_bytes": 1013,
+      "sha256": "7a1430c4a78d1ee302358905420a54c53cc25bfd6ecf1cc8642475bc7be8d8f8"
+    },
+    {
+      "path": "docs/PLATFORM_GUIDE.md",
+      "size_bytes": 1340,
+      "sha256": "c0e71d24a5ca1317dbbd9ad1845e9ac3ac4bb70621f8e670f8a786e8896df0a1"
+    },
+    {
+      "path": "docs/PROTECTION_1TO3_SOURCE_REGISTER.md",
+      "size_bytes": 2713,
+      "sha256": "6e29a9e038906d2de7e4f2c7d140e01bb6a58fcb4d05528dae784781639a2e95"
+    },
+    {
+      "path": "docs/README.md",
+      "size_bytes": 3610,
+      "sha256": "1f6c0306d2f511290165af217ff5110384da56035ec6f99ffdd720e3b3f10ecf"
+    },
+    {
+      "path": "docs/RELEASE_HISTORY_CONSOLIDATED.md",
+      "size_bytes": 3316,
+      "sha256": "050f9a1d46621017d4ed51ee4be5f4df88b8d6b98871c364604cc823136e42c3"
+    },
+    {
+      "path": "docs/RELEASE_HISTORY_LEGACY_FULL.md",
+      "size_bytes": 20626,
+      "sha256": "9252da91b2d602e96bcbaba9c389b67e4684f7cfcb8eb1cae1836c156e2418bc"
+    },
+    {
+      "path": "docs/RELEASE_HISTORY_V1_V6.md",
+      "size_bytes": 24074,
+      "sha256": "6d9e14f52e12893b19f4bdac12365aefaae3ecf7d627168354f57d5cd137d7e3"
+    },
+    {
+      "path": "docs/RELEASE_V6_1_0_INTEGRATED.md",
+      "size_bytes": 2775,
+      "sha256": "244efb6bdd17156fff087332371968312ca2a205782f13825d077453ae350383"
+    },
+    {
+      "path": "docs/RELEASE_V824_20261113.md",
+      "size_bytes": 1307,
+      "sha256": "9802d1a40069cb9150c5368efadd64605795315e82947cff2a6ed5531bb4ce66"
+    },
+    {
+      "path": "docs/REMOVED_FILES_MANIFEST.json",
+      "size_bytes": 63294,
+      "sha256": "d210cc680b71a5c6d1206855bae6f329ad5e1446c9e91a31cf451a73ae889e00"
+    },
+    {
+      "path": "docs/SAFETY_UX_PERFORMANCE_FULL_INTEGRATED_20261112.md",
+      "size_bytes": 1161,
+      "sha256": "d6f570e9f6272ba60ec1f290713f01b915eb0a1b79efbaee241172880de21cab"
+    },
+    {
+      "path": "docs/SANGDO1_TEAM_ACCIDENT_REVIEW_20261113.md",
+      "size_bytes": 2675,
+      "sha256": "96279edd470b0c48dc81fc051716bc5b4b3ad6b413afdbeb7810565f5b8baf3f"
+    },
+    {
+      "path": "docs/STATION_BADGES_AND_EXITS_20261106.md",
+      "size_bytes": 3951,
+      "sha256": "8c0c06326e3e0dbd80202f200d4152f203d11fb6b4eb6eb254ec1d0a692b2254"
+    },
+    {
+      "path": "docs/UI_ENVIRONMENT_V795_CHANGE.md",
+      "size_bytes": 754,
+      "sha256": "f59db02afcd9aa163d9e9213f8968734f85ea188065612d187f82aa4c5520930"
+    },
+    {
+      "path": "docs/UX_FIX_BASELINE_PRESERVATION_20261113.json",
+      "size_bytes": 456,
+      "sha256": "c564c50b05d96388fe6be8f31044125a174e433c60b5f328f810019fa240f2e1"
+    },
+    {
+      "path": "docs/V7120_PC_MOBILE_UX_FIX_20261112.md",
+      "size_bytes": 3208,
+      "sha256": "b52a9ae0938ac5968f2407a9cd49f9fec754164583fd9fdb316ad36d40e63d25"
+    },
+    {
+      "path": "docs/V7120_SMOOTH_SEARCH_FPS_NIGHT_HOTFIX_20261112.md",
+      "size_bytes": 3432,
+      "sha256": "af3ae7d5fd0d1364655de784e647c6bc04d398ce5b8c01b622655adedf34613a"
+    },
+    {
+      "path": "docs/V7130_MOTION_SEARCH_FPS_HOTFIX_20261112.md",
+      "size_bytes": 2973,
+      "sha256": "4dc2bb715a061f41b4b954acaeb7ac01de58282165b9070160e23a0856bb134e"
+    },
+    {
+      "path": "docs/V801_TOPIS_SDOT_INTEGRATION_20261112.md",
+      "size_bytes": 6268,
+      "sha256": "a1456d172db282f47a5c6ab49004dcfafca571f1eec4dd5034356f7fba506126"
+    },
+    {
+      "path": "docs/V802_AUDIO_AED_INTEGRATION_20261112.md",
+      "size_bytes": 3654,
+      "sha256": "275c1bd9aeb94d175beddeeab02c1d61552fd9878772753ed6a8dae79e5b7ee7"
+    },
+    {
+      "path": "docs/V803_SAFE_WALKING_FOUR_FEATURES_20261113.md",
+      "size_bytes": 4604,
+      "sha256": "f7b2e3e9260b61b15368dff538274fa0f2bf616c49a2e7e2e031ecd8961b6190"
+    },
+    {
+      "path": "docs/V815_MAP_PRODUCT_PHASE1_PHASE2_20261113.md",
+      "size_bytes": 5394,
+      "sha256": "bb654bd539d29c4c4ba8d56c2b7b41b208023b947eb7c0e7b410117ab3b8d40b"
+    },
+    {
+      "path": "docs/V816_NAV_TTS_VOICE_CHOICES_20261113.md",
+      "size_bytes": 3014,
+      "sha256": "9fb26d60eb5007cc505fc4eca8b0770d44b207e1b6bcef700d1fdee2fe9ee7c3"
+    },
+    {
+      "path": "docs/V850_INTEGRATION_SHA256_20261114.json",
+      "size_bytes": 3134,
+      "sha256": "4ea16fbd44c0d28d611a6ee1f2014bde26e5f47a9651a97a4e8b867f5dcaaac0"
+    },
+    {
+      "path": "docs/V850_INTEGRATION_VERIFICATION_20261114.md",
+      "size_bytes": 1011,
+      "sha256": "78b059f7ec0fc070ff0f29abafe4ee545abc22c04f4d6fa4d99bd2fa1a908b8d"
+    },
+    {
+      "path": "docs/VERIFIED-PATCH-20261106.md",
+      "size_bytes": 1981,
+      "sha256": "5b4d3bd77d91cee9b630f874d67546db125d3898f1e0580c73c55a09e0104e39"
+    },
+    {
+      "path": "docs/VERSIONING_OPERATIONS.md",
+      "size_bytes": 3172,
+      "sha256": "42760a1307a9f93b5bcb254c08c9bb3319eb4cd7a477ada3e6b95cd44dff26a9"
+    },
+    {
+      "path": "docs/VERSION_MIGRATION_MAP.csv",
+      "size_bytes": 5733,
+      "sha256": "4d38d109e29ee53bda8f4ff0a0ff25a7059f4834677b292c4b017e3845700859"
+    },
+    {
+      "path": "docs/VERSION_POLICY_NEW.md",
+      "size_bytes": 2636,
+      "sha256": "281ff1144ffc072980105307467060be40a6a18dd244eee302989e32ff1548d7"
+    },
+    {
+      "path": "docs/WALK_SAFETY_INTEGRATION_20261112.md",
+      "size_bytes": 2513,
+      "sha256": "7b6c11db3b37cd3e899cbd62c0e3d51f802f9d11c1fba27fd9c6aacaac856244"
+    },
+    {
+      "path": "docs/archive/INSTALL_SEMVER_7_8_1.txt",
+      "size_bytes": 1428,
+      "sha256": "f4dfa38acfe9c4cd0aa6321a9d216f50ddee29d0678b0a5acb164b25b5a4bb49"
+    },
+    {
+      "path": "docs/example-integration.jsx",
+      "size_bytes": 1818,
+      "sha256": "ccf97bdd92ed79903fc214d99af01c7c0d73a13a81b2fc4ee81ff422133bb3ac"
+    },
+    {
+      "path": "docs/station-coordinate-reference.md",
+      "size_bytes": 1092,
+      "sha256": "aa2efe6e5a71bc89c4011c66c9a2ac7506eb4cfe881818e969be8a6228d4ba3b"
+    },
+    {
+      "path": "functions/api/account/login-notification.js",
+      "size_bytes": 2900,
+      "sha256": "cfdbde68fc95a9cc2d5de8a8bfe0cef5585ce55794b88b40e65a4c7377963ef3"
+    },
+    {
+      "path": "functions/api/aed.js",
+      "size_bytes": 3294,
+      "sha256": "7bc8137225764e35b4dc0733ac0927b766f8f67c65c1ef6905c2f9d0fcaeedc0"
+    },
+    {
+      "path": "functions/api/osm-general-facilities.js",
+      "size_bytes": 2302,
+      "sha256": "5a10bade572dc899c36abe92a74d1033c608985ab7ba50aad16fa2854ffab4a8"
+    },
+    {
+      "path": "functions/api/osm-name-search.js",
+      "size_bytes": 1783,
+      "sha256": "47db65d6b512a3fe23f303e50feed02ab46fe7648595c562474940fd0e1a7527"
+    },
+    {
+      "path": "functions/api/place-insight.js",
+      "size_bytes": 17214,
+      "sha256": "49329939d71f3a98c8beabd17714fc46a54f13caf3e1a2a0cdccbbc45f2b6822"
+    },
+    {
+      "path": "functions/api/place-search.js",
+      "size_bytes": 1253,
+      "sha256": "e61072881b0007baf3bde7574f7b2aa15a1fd0537e882efc478dbd4d3b49a43d"
+    },
+    {
+      "path": "functions/api/road-incidents.js",
+      "size_bytes": 1879,
+      "sha256": "6d27e73dcdbb04a87935af9c252d8b17ccf5c2b2c4fe2fdb5c16816370e81635"
+    },
+    {
+      "path": "functions/api/sdot-environment.js",
+      "size_bytes": 3152,
+      "sha256": "04b6b9e87171b8d2a0fc24aff322b55a29c725baef7d59d37ce4d8bb4debb494"
+    },
+    {
+      "path": "functions/api/seoul-facilities.js",
+      "size_bytes": 2819,
+      "sha256": "d16f5c02c7886f2b9b9085cb342f9e5a7e05456fad7dee9182d860e0f428cbf1"
+    },
+    {
+      "path": "functions/api/transport/[[path]].js",
+      "size_bytes": 26601,
+      "sha256": "b83567ecf5cb9439345f77c4c2af108283af83a9ca76f229f3c32189a9aec415"
+    },
+    {
+      "path": "functions/api/transport/live-vehicles.js",
+      "size_bytes": 10146,
+      "sha256": "d0c1cdaa7abecd7579055a8965650b161583b0047ceeafe65c84e6e49015ef51"
+    },
+    {
+      "path": "functions/lib/seoul-facility-core.mjs",
+      "size_bytes": 5328,
+      "sha256": "d237574941a7b9b5aef636c0924623c887fe85f6acfe5745a9210c3ba2772e3a"
+    },
+    {
+      "path": "functions/routing/route.js",
+      "size_bytes": 3545,
+      "sha256": "ced9b84683ebf30daab552dc8591441c5e117935d8130b8a2fbfd4acc083b1da"
+    },
+    {
+      "path": "index.html",
+      "size_bytes": 105845,
+      "sha256": "abc190a18175ca09d835281827c350a4b722fe3336c03ca14051b81378347145"
+    },
+    {
+      "path": "migrations/0001_seoul_facility_cache.sql",
+      "size_bytes": 955,
+      "sha256": "6b72cdb48fbb725f183e6b97156a55c2186e40c7f705c91ee273deabd43802c1"
+    },
+    {
+      "path": "package-lock.json",
+      "size_bytes": 91613,
+      "sha256": "bc5157365a395a05ae5c4a5a88da7a9aa50b6aa6d8765676971142b29f79b54c"
+    },
+    {
+      "path": "package.json",
+      "size_bytes": 2532,
+      "sha256": "026082f9b37b72b2ac3d3837aa00349e2c7e47e6ce7586ba5a3427294cb154ab"
+    },
+    {
+      "path": "platforms/android/android.css",
+      "size_bytes": 217,
+      "sha256": "0d202961ea6d8e7d7da5ce939fa8aeab4e6c6485fcd6d826731fe42cfc61cfbc"
+    },
+    {
+      "path": "platforms/android/entry.js",
+      "size_bytes": 114,
+      "sha256": "ec5d287da4d45cc8671f0263f77f80b6dac29e0309eeb7e8c5f7f79f3b4bf35a"
+    },
+    {
+      "path": "platforms/entry.js",
+      "size_bytes": 830,
+      "sha256": "f14c3f6df30980f887ee7944e7053ea56ccc6940a849c97b246470becb689e83"
+    },
+    {
+      "path": "platforms/ios-pwa/entry.js",
+      "size_bytes": 5888,
+      "sha256": "936b7594f6a0ea6ed71a9bb0e419e58c362dde79b1496f2a52532019b3989a0c"
+    },
+    {
+      "path": "platforms/ios-pwa/ios-pwa.css",
+      "size_bytes": 1015,
+      "sha256": "92e1ab897330651ccd87c266fbc7db07b2d00eae103ceb97b1c302b433a5c8b9"
+    },
+    {
+      "path": "platforms/pc-chromium/entry.js",
+      "size_bytes": 98,
+      "sha256": "d61259614ba8336943674753248bfb842840b46015890ce96b10b638625ab630"
+    },
+    {
+      "path": "platforms/pc-chromium/pc.css",
+      "size_bytes": 182,
+      "sha256": "de9c507e0de6d0657deb0a4693f68a66530e84884be235f950ca9fe25942c214"
+    },
+    {
+      "path": "platforms/shared/detect-platform.js",
+      "size_bytes": 874,
+      "sha256": "99624d41aff2d2669b9214adcce1f2b6abc68eadaf086890fc4e02844db4f215"
+    },
+    {
+      "path": "platforms/shared/mobile-actions-v7104.css",
+      "size_bytes": 1474,
+      "sha256": "42887b303065523134f1b428b155481e9b27bf52ddd378abbd7c070c4ee57dda"
+    },
+    {
+      "path": "platforms/shared/mobile-actions-v7104.js",
+      "size_bytes": 1800,
+      "sha256": "65eb518818bfe4cebaf1a947e0c9a169991a0e44111494ad3453fd8476a54ad7"
+    },
+    {
+      "path": "platforms/shared/mobile-panel-layout.css",
+      "size_bytes": 16696,
+      "sha256": "4d9b436e70b0c806f1dbf9bcde6e1502fbdb137e2e12c6342a537038c42ad8f8"
+    },
+    {
+      "path": "platforms/shared/mobile-panel-layout.js",
+      "size_bytes": 6367,
+      "sha256": "f687a843d157310ee275b127f4feaaf465445e86f1fb83a16a35ad411fbc3fa2"
+    },
+    {
+      "path": "platforms/shared/platform-html.js",
+      "size_bytes": 1154,
+      "sha256": "280e30ce5848132164f8fc39389a1fec4cff2c929e34fa00c231a822f97ea9d2"
+    },
+    {
+      "path": "playwright.config.js",
+      "size_bytes": 106,
+      "sha256": "6ab726cf209227bbf7a638a59ee60683d51be9698f05f2785e71f7cfc8a82186"
+    },
+    {
+      "path": "playwright.config.mjs",
+      "size_bytes": 982,
+      "sha256": "259497948a966479ede3b6c0741b20a23d8c2fa46f577eb1519dc404e980cebe"
+    },
+    {
+      "path": "public/buildings/manifest.json",
+      "size_bytes": 2704,
+      "sha256": "53fab03a2e9db2204df8c251e46bccef53fe6053b216cffbdba165eda80507f3"
+    },
+    {
+      "path": "public/buildings/supplement_1.geojson",
+      "size_bytes": 3467,
+      "sha256": "7cd550789ae436e5dc200740e047a2bb895b0023b046ad5dd50e6a47c54de7f6"
+    },
+    {
+      "path": "public/buildings/supplement_2.geojson",
+      "size_bytes": 586146,
+      "sha256": "a36088193b8aa8a77aa183a40983e2a1fb7dbca8a03d639d550263caea5e981a"
+    },
+    {
+      "path": "public/buildings/supplement_3.geojson",
+      "size_bytes": 655395,
+      "sha256": "b65112c3819938a5bb2f86887737450188b187cdfefff9b9d197ad3366dc8fe2"
+    },
+    {
+      "path": "public/buildings/supplement_4.geojson",
+      "size_bytes": 4347,
+      "sha256": "b168a22a014db55ab7677d3d20497bcb6b2f345546a36d5a13ef9d541d4087dd"
+    },
+    {
+      "path": "public/buildings/supplement_5.geojson",
+      "size_bytes": 27031,
+      "sha256": "f73644f543194d7a2c9a875f82322491bc519066c3fadda8f686b85165d4e8c1"
+    },
+    {
+      "path": "public/buildings/supplement_6.geojson",
+      "size_bytes": 266715,
+      "sha256": "fa1ae74192aeacb526ee3870518f444b0e6f5853b3a00ae7139f4f85a89556fe"
+    },
+    {
+      "path": "public/buildings/supplement_7.geojson",
+      "size_bytes": 179484,
+      "sha256": "6fdc7d46ee6477a25c8fc90e287609f195a80482027fa4e83dbd9df1cf65b92e"
+    },
+    {
+      "path": "public/buildings/supplement_8.geojson",
+      "size_bytes": 167032,
+      "sha256": "363989d966c2085d2b1b41e7c4565616b4c40463f30392ee8fe01f85c4890af8"
+    },
+    {
+      "path": "public/buildings/tile_1.geojson",
+      "size_bytes": 5679140,
+      "sha256": "86de5d7c29833fd5a5f5936e17fdbb36aad282d385034de4f03a6c40b71e8b62"
+    },
+    {
+      "path": "public/buildings/tile_2.geojson",
+      "size_bytes": 3517868,
+      "sha256": "3f2873934c9c949b5a80e648abe95bcfcf99e13a8b7d7b490c79bd7b34998727"
+    },
+    {
+      "path": "public/buildings/tile_3.geojson",
+      "size_bytes": 2379509,
+      "sha256": "9297296436a6895d81416cbd7c0e8151166a1ac1b81087adfd4a79064b413842"
+    },
+    {
+      "path": "public/buildings/tile_4.geojson",
+      "size_bytes": 1134164,
+      "sha256": "c832558d49ea1787d95b44b5d5e8fad47b96d66ace59a51d2488978bc356bb43"
+    },
+    {
+      "path": "public/buildings/tile_5.geojson",
+      "size_bytes": 6306376,
+      "sha256": "5c7cba4bd323e5e8ca7c4b2b4eba6a4c52d9a88954849683e22df8b08eb51c95"
+    },
+    {
+      "path": "public/buildings/tile_6.geojson",
+      "size_bytes": 6797529,
+      "sha256": "e5ac861dba98819b84fbfdf1c00f26338b10e0d94ba9bdcbb6bcba8d81812333"
+    },
+    {
+      "path": "public/buildings/tile_7.geojson",
+      "size_bytes": 4591934,
+      "sha256": "af4015e225b21352909f1c89e5a11ca4bef72bbb61c5201662b295c5d74f5dea"
+    },
+    {
+      "path": "public/buildings/tile_8.geojson",
+      "size_bytes": 4922746,
+      "sha256": "13fc6af6e83150bc31d6f6bb1c59ac9546fcf66bdca30e90d1337953f2f61dbd"
+    },
+    {
+      "path": "public/data/dongjak_roadwidth_estimated_202610.geojson",
+      "size_bytes": 3706469,
+      "sha256": "2882c081e6c8f8328e07d82359826a49faa86efef45ef9d23b0ac83410535c88"
+    },
+    {
+      "path": "public/data/metro-accessibility-verified.geojson",
+      "size_bytes": 52,
+      "sha256": "b3049ad7a1062091e169bd352424d59721a26b8b6229942aef26d11b0c6a96e1"
+    },
+    {
+      "path": "public/data/protection-zone/accident_hotspots.geojson",
+      "size_bytes": 10708,
+      "sha256": "f526d7b3819e630f3b577d5c787b6d76e6006a56aca38bfe63e08788146e6924"
+    },
+    {
+      "path": "public/data/protection-zone/boundary_reference.geojson",
+      "size_bytes": 981,
+      "sha256": "c95d48573369e96533d2e2f7e4b4c0840427067a17e3084e7bd837ac82f3784d"
+    },
+    {
+      "path": "public/data/protection-zone/candidates.geojson",
+      "size_bytes": 188079,
+      "sha256": "15545c76e1873bd327ce2593ddd47a3699d8bab46765b9b7059bf7a5736cdba0"
+    },
+    {
+      "path": "public/data/protection-zone/distance_rings_reference.geojson",
+      "size_bytes": 61590,
+      "sha256": "86bc28b21c63dbc643f5f51c2b337130ab24f8992ecfcbbe189e23a14327ee34"
+    },
+    {
+      "path": "public/data/protection-zone/facilities.geojson",
+      "size_bytes": 2354,
+      "sha256": "c02e412319bda11e99c67d919cc1146c1524fe8eeaf9ac0c59d8ef286f07f580"
+    },
+    {
+      "path": "public/data/protection-zone/metadata.json",
+      "size_bytes": 1587,
+      "sha256": "d3442efe3bcb28ce8512444c29dd5f8352389c5b4122854b073ade34fa5396fa"
+    },
+    {
+      "path": "public/data/protection-zone/zones.geojson",
+      "size_bytes": 7335,
+      "sha256": "1ac7dd97da0a5a1303c58c64cc523159804920e56e35b4db930dccad05ea0b17"
+    },
+    {
+      "path": "public/data/road-speed/dongjak_enforcement_points.geojson",
+      "size_bytes": 43,
+      "sha256": "6d18edfe75b3149104038dcbca4d0096bbcb923f0f9fa4b49f4815344e75bb90"
+    },
+    {
+      "path": "public/data/road-speed/metadata.json",
+      "size_bytes": 809,
+      "sha256": "a534d0db3a6170d016bf1966aba2d5efd8edcbb3bc277bd22c8cfc359397870a"
+    },
+    {
+      "path": "public/data/road-speed/sangdo1_speed_links.geojson",
+      "size_bytes": 53621,
+      "sha256": "84291823c81133a311dca53d626902d4c2f4f929664dd44a2cd08dfe945d2678"
+    },
+    {
+      "path": "public/data/safety/accessibility/dongjak_audio_signals_candidates.geojson",
+      "size_bytes": 336917,
+      "sha256": "397575eedb3870b7be54243cb2728d052c7fe1d468b5bd5e9a7e987f30940a41"
+    },
+    {
+      "path": "public/data/safety/accidents/dongjak_accident_areas_all.geojson",
+      "size_bytes": 204052,
+      "sha256": "8a581af9e56058b50ab1340c435b04b367b2f1eb3f78c4f22761ab135b29963e"
+    },
+    {
+      "path": "public/data/safety/accidents/dongjak_accident_points_2026.geojson",
+      "size_bytes": 11243,
+      "sha256": "5c15984afe58845ed62a63426b9d259cc7779275e880ef902942d3efb6167fa1"
+    },
+    {
+      "path": "public/data/safety/accidents/dongjak_accident_points_all.geojson",
+      "size_bytes": 103188,
+      "sha256": "2c95fddde11298f6f57dc8fbce4068f12e1488216b1a6532569dab45d52772bb"
+    },
+    {
+      "path": "public/data/safety/accidents/metadata.json",
+      "size_bytes": 1952,
+      "sha256": "6c4a875c39a2b670525f48495d597679eb38a612c8ea53bcb5c6238e051362c4"
+    },
+    {
+      "path": "public/data/safety/accidents/sangdo1_team_osm_reference_boundary.geojson",
+      "size_bytes": 2665,
+      "sha256": "d62f8934571a383d23d38f0e85beb5fc3868cdd2459799ab9cbe1a04636edc0c"
+    },
+    {
+      "path": "public/data/safety/accidents/sangdo1_team_review.geojson",
+      "size_bytes": 3339,
+      "sha256": "63e4dc1081a2a251f2d37a08bf7f54eaf2ae1862b5285071056bdfde559e0724"
+    },
+    {
+      "path": "public/data/safety/cctv/dongjak_cctv_multipurpose.geojson",
+      "size_bytes": 41652,
+      "sha256": "64698744c7ca6bd0a2dabb839e20cf0e5dec5f26f2450080d0f95ae24d0a7bb6"
+    },
+    {
+      "path": "public/data/safety/cctv/dongjak_cctv_other.geojson",
+      "size_bytes": 97284,
+      "sha256": "963059487078c6a22a8464da69389eabf016c7c329d918437d9fa3160117c2e5"
+    },
+    {
+      "path": "public/data/safety/cctv/dongjak_cctv_parking.geojson",
+      "size_bytes": 47342,
+      "sha256": "58623f7e6cfdd25ae840769f95769229f51bcc5a47e62931272c811801d57dea"
+    },
+    {
+      "path": "public/data/safety/cctv/dongjak_cctv_security.geojson",
+      "size_bytes": 295409,
+      "sha256": "56b1c2ff8a5fa02afe256e19e023d214429cdd0ea31cb657c51cfe0fea5740ca"
+    },
+    {
+      "path": "public/data/safety/cctv/metadata.json",
+      "size_bytes": 1314,
+      "sha256": "0a1fa991246da9454a9bd17cb1d20aefbd6ad9a06a510dcfd964dd6c9647bcf3"
+    },
+    {
+      "path": "public/data/safety/metro/dongjak_elevators_review.geojson",
+      "size_bytes": 865,
+      "sha256": "4423de97c9bcb0debd73a6dda15170d6ec5f4bf69dd2b2b3ee87b6ccadf0a6a1"
+    },
+    {
+      "path": "public/data/safety/metro/dongjak_elevators_verified.geojson",
+      "size_bytes": 11622,
+      "sha256": "a7c79455ebebea222a96834f5f10f8e91b34942f11fbb50948e8719eea6b9981"
+    },
+    {
+      "path": "public/data/safety/metro/dongjak_metro_metadata.json",
+      "size_bytes": 1192,
+      "sha256": "da2dc687134f0f9ffac9627862cd48e264f3ae124651155e7ef8d7e91f9adbd8"
+    },
+    {
+      "path": "public/data/safety/sdot/dongjak_sdot_archive_20261026_1101.json",
+      "size_bytes": 1238,
+      "sha256": "59e51896a288ba29e3ddf5615d1d915021df7b2ea73ebcdb3abaf29f88e42304"
+    },
+    {
+      "path": "public/data/safety/sdot/dongjak_sdot_locations.geojson",
+      "size_bytes": 277,
+      "sha256": "a3217cf630251d9876a8491a24e409fa51f22ab023979f6a49adfd436ad0387d"
+    },
+    {
+      "path": "public/data/safety/slope/dongjak_walk_links_slope_visual.geojson",
+      "size_bytes": 3063605,
+      "sha256": "995cb53aeb420cac1ab802f519b1638f98ab1dc89ce64643adb5c498939c3994"
+    },
+    {
+      "path": "public/data/safety/slope/dongjak_walk_links_with_slope.geojson",
+      "size_bytes": 5670472,
+      "sha256": "cc74eec120a871bb20e462403d1d144341a745e5e28f7b738f546c08d3dc5e22"
+    },
+    {
+      "path": "public/data/safety/slope/dongjak_walk_slope_by_link.json",
+      "size_bytes": 556886,
+      "sha256": "b2777d73e549505f348474e2610e1abd1dc6bcc993c4eac0a960d321b2960c06"
+    },
+    {
+      "path": "public/data/safety/slope/dongjak_walk_slope_metadata.json",
+      "size_bytes": 1532,
+      "sha256": "5052dfe7e980dc5954b17c7d197ccfc0d15af32afebbd6c96cd1e6a2c9449ae3"
+    },
+    {
+      "path": "public/data/safety/walk/dongjak_walk_graph.json",
+      "size_bytes": 1370981,
+      "sha256": "3f80b417f5b6fe27b0fb7f31c107c0b19f967daf86836cd024d68ea38787607a"
+    },
+    {
+      "path": "public/data/safety/walk/dongjak_walk_links.geojson",
+      "size_bytes": 4301828,
+      "sha256": "1bcef6360c28a2f4ad7a92741e147200208956c4d5189329c3246df2506abc01"
+    },
+    {
+      "path": "public/data/safety/walk/dongjak_walk_metadata.json",
+      "size_bytes": 1467,
+      "sha256": "1af15ae5d740e56db24d720830d607b5f22589281f6e60d9ec47b2beebe4f613"
+    },
+    {
+      "path": "public/data/sangdo1-analysis-view/roadwidth.geojson",
+      "size_bytes": 350709,
+      "sha256": "9e203589fbca536bb6d540622cfef59c178bd2785f21caa879732af44ca9b2dd"
+    },
+    {
+      "path": "public/data/sangdo1-analysis-view/slope.geojson",
+      "size_bytes": 268615,
+      "sha256": "afaae67ca303255ca5ae3e84aa5c39397d3b13d536103554a256ceb20fc21131"
+    },
+    {
+      "path": "public/data/sangdo1-crosswalks-team-review.geojson",
+      "size_bytes": 23917,
+      "sha256": "acd6c684294716f23aaa7b2c173b27ec79bfa04d695ce1413d94135619c0efc8"
+    },
+    {
+      "path": "public/data/sangdo1-night/lights.json",
+      "size_bytes": 20932,
+      "sha256": "67cd00af9920f767a56f7ac88401f35fcae3c68d835ddd4f8ddb47ef54603bb8"
+    },
+    {
+      "path": "public/data/sangdo1-night/occlusion-light-reach.geojson",
+      "size_bytes": 1283504,
+      "sha256": "d6702a33e1c77f6d5d4cdbef7b080de11361b8fe2e4e141faee0389d7a88b65b"
+    },
+    {
+      "path": "public/data/sangdo1-night/occlusion-road-samples.json",
+      "size_bytes": 3682997,
+      "sha256": "696354b9a9a23167f11c3869a48f3ca88b99be0ef2734dd608f4f9d300898070"
+    },
+    {
+      "path": "public/data/sangdo1-night/security.json",
+      "size_bytes": 57451,
+      "sha256": "76a8bd2b225fa10180148b0a24327e0bcc617f28fd3961918142f40ddd4424f3"
+    },
+    {
+      "path": "public/data/transport/README_IMPORT_REQUIRED.txt",
+      "size_bytes": 830,
+      "sha256": "326af30add8e3d1e34f688ccdf0582a45691229bb244b41275bdb24f7aa09385"
+    },
+    {
+      "path": "public/data/transport/korail-line1-stations.json",
+      "size_bytes": 288578,
+      "sha256": "c4a8e20a0d0f2ec2522188cb14b526f624efce3126cfd4c43964e0ddd8dff668"
+    },
+    {
+      "path": "public/data/transport/seoul-bus-stops.json",
+      "size_bytes": 962743,
+      "sha256": "174ab71836e7339ec4253d2a05bc56f68dc9c8f8aab220ebf9e3cee8b622b3e0"
+    },
+    {
+      "path": "public/icons/dongjak-dark-1024.png",
+      "size_bytes": 728045,
+      "sha256": "d93f76d3a60848676f4ebd819a722077d2e42df4a91cbc49e7f1ffabfc9d63a7"
+    },
+    {
+      "path": "public/icons/dongjak-dark-180.png",
+      "size_bytes": 34333,
+      "sha256": "2441dd7c5ca635297aa9ccf5c360174be0f21152355beeefb8e41b590d80ab3d"
+    },
+    {
+      "path": "public/icons/dongjak-dark-192.png",
+      "size_bytes": 38018,
+      "sha256": "4819e9f8ba2a0396e76e4f5ac96d2c32acac172426580bf856f987651d782538"
+    },
+    {
+      "path": "public/icons/dongjak-dark-512.png",
+      "size_bytes": 211171,
+      "sha256": "b9039fc1a33d70a780b719a167206788618f74aa524f69bf4f94a338a0620df9"
+    },
+    {
+      "path": "public/icons/dongjak-ios-home-180.png",
+      "size_bytes": 23137,
+      "sha256": "df5b0cd6488404b1dfc8eb697139407855c7961b39298941ca96da5589c07c48"
+    },
+    {
+      "path": "public/icons/dongjak-ios-home-192.png",
+      "size_bytes": 25296,
+      "sha256": "2ed337da8d3086aee88f79dab70634f67b0523d9cc54f8c320ddc23f41d3d465"
+    },
+    {
+      "path": "public/icons/dongjak-ios-home-512.png",
+      "size_bytes": 86536,
+      "sha256": "d52e160484aa35ef8c8a4155d9667db5f1a52642d055a79b5f84052e1e6cc5a3"
+    },
+    {
+      "path": "public/icons/dongjak-light-1024.png",
+      "size_bytes": 214762,
+      "sha256": "af2bea3ab4552fd521314b1c210b6a0750d3bed93812b7ad692a33693b7cef9e"
+    },
+    {
+      "path": "public/icons/dongjak-light-180.png",
+      "size_bytes": 26266,
+      "sha256": "7a0b68393c129d4b66e43c0f56f3bdfeb5fbc92dd81b1b2077dbd9e146497be2"
+    },
+    {
+      "path": "public/icons/dongjak-light-192.png",
+      "size_bytes": 28540,
+      "sha256": "5f9851c9d820d270134a40e8e2c8bd05e749864730c7ef1cf892104d474ab09a"
+    },
+    {
+      "path": "public/icons/dongjak-light-512.png",
+      "size_bytes": 93834,
+      "sha256": "0afb91263c6dab7e3fb086c27b30fd66c166203802c7c392014e602aeef0700d"
+    },
+    {
+      "path": "public/icons/dongjak-webapp-192.png",
+      "size_bytes": 2812,
+      "sha256": "09e5ba6027b67bc2d23cef3ddcaa21ff33cbbeb580fc5a9ac74c0aa8e86bf5e6"
+    },
+    {
+      "path": "public/icons/dongjak-webapp-512.png",
+      "size_bytes": 8379,
+      "sha256": "0518ed2daa8b23c92a7f78e5315132fd5b3d6fc855275ea536dd017456030457"
+    },
+    {
+      "path": "public/icons/dongjak.png",
+      "size_bytes": 3472,
+      "sha256": "e314570a1fc075012e02b37cf4102589441f11454cbbf7930fdca256b23624d3"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-1.png",
+      "size_bytes": 11763,
+      "sha256": "4c22c9dacf6e33dcb365b175981b73b6eb1d671e53a47defc2549ed97e9e2144"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-2.png",
+      "size_bytes": 16675,
+      "sha256": "20f87d638d5d44af276c635cade3cc004e11b279f730c94d5aa752ab73395ccb"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-4.png",
+      "size_bytes": 14179,
+      "sha256": "c369121124297ef8c8414ae52b41027598cae93891b816340756d2dbf8821d48"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-7.png",
+      "size_bytes": 12941,
+      "sha256": "91919fd6628b46a24e76891dd455f286bc6e028ad352572071f68f0678b9696e"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-9.png",
+      "size_bytes": 19408,
+      "sha256": "2fe56d328ce3c8664cff18cd32c2474feeb7370a99c2fc4a90b30065dd15178f"
+    },
+    {
+      "path": "public/icons/metro-user-20261114/line-신림.png",
+      "size_bytes": 12014,
+      "sha256": "33eb36ea57d4254214451205be233ce54c8f9c45819c8469010618fead073169"
+    },
+    {
+      "path": "public/images/shinlim-line.png",
+      "size_bytes": 11668,
+      "sha256": "6b19077feccba9d6a2e0dde581b9adda45bc9026617d74e6cdc34e18307bc2d1"
+    },
+    {
+      "path": "public/logos/chongshin.png",
+      "size_bytes": 47487,
+      "sha256": "926422d4b4ce3852e24e30b845f41c2777f431175e082fb1c1b6fdf1ee4dfa44"
+    },
+    {
+      "path": "public/logos/chungang.png",
+      "size_bytes": 80130,
+      "sha256": "3dd4fb7058706d9b902b955c4edc0fa4bccb1185a1cf6f34c66fddd74c8f49a7"
+    },
+    {
+      "path": "public/logos/dongjak-gu.png",
+      "size_bytes": 9307,
+      "sha256": "4f75adfae9bb0d9c6657401f028099621cb0c59c1532127ae4e959c3a5620022"
+    },
+    {
+      "path": "public/logos/dongjak-safety.png",
+      "size_bytes": 86239,
+      "sha256": "64af433aaea97d1d47364a9f01c216c7329472b1394d7b3399c9c23cd2c6c77c"
+    },
+    {
+      "path": "public/logos/dongjak-symbol-20261108.png",
+      "size_bytes": 15427,
+      "sha256": "678773a4537b067bfd43b7374dabce46b9c6686f93c720794e97712d15bf67b1"
+    },
+    {
+      "path": "public/logos/dongjak-symbol-transparent-5911.png",
+      "size_bytes": 9307,
+      "sha256": "4f75adfae9bb0d9c6657401f028099621cb0c59c1532127ae4e959c3a5620022"
+    },
+    {
+      "path": "public/logos/featured/chongshin.png",
+      "size_bytes": 10061,
+      "sha256": "94317803200e346d7d143dc3a6432584280116c66009698ecb317b8d076fc84b"
+    },
+    {
+      "path": "public/logos/featured/chungang.png",
+      "size_bytes": 6859,
+      "sha256": "0d0535deb3985e2b8221a0fd3fa824a33b71f8ac28a867616a8f89a446dce959"
+    },
+    {
+      "path": "public/logos/featured/dongjak.png",
+      "size_bytes": 9307,
+      "sha256": "4f75adfae9bb0d9c6657401f028099621cb0c59c1532127ae4e959c3a5620022"
+    },
+    {
+      "path": "public/logos/featured/memorial.png",
+      "size_bytes": 5833,
+      "sha256": "778cb7fb8684f31fa9407317c82f24a5f11c6072608fa38cb5b67857593fae5b"
+    },
+    {
+      "path": "public/logos/featured/soongsil.png",
+      "size_bytes": 2097,
+      "sha256": "f016b3077bab932184de0ef81977e58b689d752b681813e2d6319d33455cecd6"
+    },
+    {
+      "path": "public/logos/seoul-memorial.png",
+      "size_bytes": 33435,
+      "sha256": "38f2e180e35a42d48a9e1e4e2fc0a9cae35f01e7ef77fbefe858ba6b7fe69680"
+    },
+    {
+      "path": "public/logos/soongsil.png",
+      "size_bytes": 38907,
+      "sha256": "6cb919d04184784cda527fe0b928ae841e7344656bd3ef562ce2bad9ba51b3d6"
+    },
+    {
+      "path": "public/manifest-dark.webmanifest",
+      "size_bytes": 537,
+      "sha256": "79a9a05456dac3cd1887f28cdf578f81595759b41e12c8c01742af96b2cec068"
+    },
+    {
+      "path": "public/manifest-light.webmanifest",
+      "size_bytes": 539,
+      "sha256": "c1029fa868e59e7dc85ccdbd96bfd4d63355cfff32233710a02fa9395ccc7be6"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "size_bytes": 539,
+      "sha256": "c1029fa868e59e7dc85ccdbd96bfd4d63355cfff32233710a02fa9395ccc7be6"
+    },
+    {
+      "path": "public/oauth-popup.html",
+      "size_bytes": 3253,
+      "sha256": "a8e51c9d2cb756609de91b68c1fcac0e5733c5b4863cb0ea64c58e40812bd89a"
+    },
+    {
+      "path": "public/version.json",
+      "size_bytes": 66,
+      "sha256": "ff8bbb20edffe98b60fdd55851eee790108ad8857fb1044bb12ef86601afbd9b"
+    },
+    {
+      "path": "scripts/audit-historical-baselines.mjs",
+      "size_bytes": 442,
+      "sha256": "d6228a98ffc97b91cc7d9096983634c1fc6554daba3519b008bc23dc124932f2"
+    },
+    {
+      "path": "scripts/bump-app-version.mjs",
+      "size_bytes": 2694,
+      "sha256": "cf026a80cf9267ffc6907831df514f3fc686655724f28dff674d49369dd099f1"
+    },
+    {
+      "path": "scripts/check-basemap.mjs",
+      "size_bytes": 3254,
+      "sha256": "f914a7d87a952a81c0b8f4ede876e6dedcdd5ca8f5afdd936481fb4ae4e33b26"
+    },
+    {
+      "path": "scripts/check-building-files.mjs",
+      "size_bytes": 1593,
+      "sha256": "7e0ad7df142ee4a5354bf7ccb537005d672ef0c23fb735a031de6f521d1578a8"
+    },
+    {
+      "path": "scripts/check-bus-auth-deep.mjs",
+      "size_bytes": 6401,
+      "sha256": "735b8a6b1ec84829bf9fc4cd2962d3c5e3313318a541c4414a690d36ea5e414a"
+    },
+    {
+      "path": "scripts/check-bus-key-local.mjs",
+      "size_bytes": 2748,
+      "sha256": "6ca6824a283ea933195b6200d4cdf0ecaf818e47e529e024a2fe7bab0d959c23"
+    },
+    {
+      "path": "scripts/check-kakao-oauth.mjs",
+      "size_bytes": 7487,
+      "sha256": "832cd08e96a26df6900ab17a9fb73d39eb944edda68e37796a2b41d132ed1f5a"
+    },
+    {
+      "path": "scripts/check-line1-schedule-file.mjs",
+      "size_bytes": 1776,
+      "sha256": "35c1cc694a08acab7162646c3e323a513027c092623899adc355ea61c0219afc"
+    },
+    {
+      "path": "scripts/check-line1-sillim-live.mjs",
+      "size_bytes": 1919,
+      "sha256": "e3e5b030e944f4be02ab5e3c9cdd5e70d0af0d4c2734263c9577f701e32412b6"
+    },
+    {
+      "path": "scripts/check-metro-eta-values.mjs",
+      "size_bytes": 3863,
+      "sha256": "95f8fb82f5cc64a79d200c6e08d4ff241b08e1263cebe80ece9e2fdf1d58fa78"
+    },
+    {
+      "path": "scripts/check-official-bus-live.mjs",
+      "size_bytes": 2488,
+      "sha256": "ee5022f0ba552926eb19ed3f42d4c658ffbf95add69cc8e9d99cea3e2dd7d33f"
+    },
+    {
+      "path": "scripts/check-public-api-status.mjs",
+      "size_bytes": 748,
+      "sha256": "41d88eb83fe5ad6d879366dc11f9e5583190993f8b8a085dd59e3dcc85eba5b8"
+    },
+    {
+      "path": "scripts/check-release-version.mjs",
+      "size_bytes": 2235,
+      "sha256": "a4409dc9e5db126c497ab9c682d9e904cfd03de41b4169fb089b3f7c342aae3e"
+    },
+    {
+      "path": "scripts/check-static-bus-stops.mjs",
+      "size_bytes": 1171,
+      "sha256": "02e8f1cb47666529b892d1312123569dc5aff4e50df7525babe59be30bf5f882"
+    },
+    {
+      "path": "scripts/check-subway-source.mjs",
+      "size_bytes": 2057,
+      "sha256": "e516c6e0b426faeb286b84f40b831b1f73aca5e81afff87393ecac3f47ecd40f"
+    },
+    {
+      "path": "scripts/check-transport-live.mjs",
+      "size_bytes": 4508,
+      "sha256": "a934cd9c5222915995efaa4a2c2ca4fab0de27285731b9e02fe6ddfbb64d4c09"
+    },
+    {
+      "path": "scripts/check-transport-raw-comparison.mjs",
+      "size_bytes": 5837,
+      "sha256": "f79dc2f05329188eb16b78e69912f0bec94dd34f904a3f70f1a66a896b8d227a"
+    },
+    {
+      "path": "scripts/ci-cloudflare-rollback-candidates.mjs",
+      "size_bytes": 2828,
+      "sha256": "9a79dd756269cecfeb81840313b1a33dae45d5501eb85e05724b47fdc2347a88"
+    },
+    {
+      "path": "scripts/ci-security-guard.mjs",
+      "size_bytes": 3547,
+      "sha256": "d85b26f74f6688a70ad39a11de2d09a762dc32541358a88ec367dfe465383ff0"
+    },
+    {
+      "path": "scripts/ci-summarize-playwright.mjs",
+      "size_bytes": 5472,
+      "sha256": "36ec2b8f07b1158e911d919f41b31eab09f0ef0195bf8ddb2c300355527a93dd"
+    },
+    {
+      "path": "scripts/ci-uptime-check.mjs",
+      "size_bytes": 3989,
+      "sha256": "1b2f71ffdf7c1b6484113f8a1b996d5213ef5170fe8352fce4b9e396732de725"
+    },
+    {
+      "path": "scripts/configure-seoul-facilities.mjs",
+      "size_bytes": 995,
+      "sha256": "970f5d3e5910e029239a7a9a85708ba26c87ba78031c3e3c7716403252c6102d"
+    },
+    {
+      "path": "scripts/convert-user-official-bus-xlsx.py",
+      "size_bytes": 4281,
+      "sha256": "3ea8abf61f904b706a909eaa6079ec01bc01d38666a5ca443d6f7973bc7d1600"
+    },
+    {
+      "path": "scripts/export-semver-history.mjs",
+      "size_bytes": 2455,
+      "sha256": "da0f926c35498274a37970e0095719a0151801ddabbc58537b767925d0d55ded"
+    },
+    {
+      "path": "scripts/import-dongjak-cameras.mjs",
+      "size_bytes": 1578,
+      "sha256": "2847539bd88f117d79da3a98146bb564c8bc429dfd171488050841d7435ccf01"
+    },
+    {
+      "path": "scripts/import-korail-line1-csv.py",
+      "size_bytes": 2716,
+      "sha256": "7d430a9f52297a5febfa59507976b32a67c0163e1cc8e60ab51a7d718a276056"
+    },
+    {
+      "path": "scripts/import-korail-line1-xlsx.py",
+      "size_bytes": 8749,
+      "sha256": "d5427cc81268f31e620f31499eb3974a4985e89cf57675a4cd44d215ff72cda0"
+    },
+    {
+      "path": "scripts/import-official-bus-stops.py",
+      "size_bytes": 4293,
+      "sha256": "a7121183d1a7e27954e0b564b15a227d4a7af91eba5866ee9f074b5984c8b70b"
+    },
+    {
+      "path": "scripts/import-sangdo-speed.py",
+      "size_bytes": 2720,
+      "sha256": "b73a71499fb4c39554874738336d5df23ee97c01eaf1da97fbeb9999c0a9f11f"
+    },
+    {
+      "path": "scripts/import-sdot-locations.py",
+      "size_bytes": 3926,
+      "sha256": "2b412b197e1d2368954d5d5ce32325f043dfa9fc2f720209579b0488c02bbe5e"
+    },
+    {
+      "path": "scripts/lib/semver-release.mjs",
+      "size_bytes": 1381,
+      "sha256": "a195f0b7c7924615e98b305dd7276863926c012b09a046613ff1b84bb00295ca"
+    },
+    {
+      "path": "scripts/precompute-night-occlusion.py",
+      "size_bytes": 18741,
+      "sha256": "49beb87232f9adf6620cdf3df0ad02c8407330c86a02d7c976036fd05fa85fb3"
+    },
+    {
+      "path": "scripts/stamp-version.mjs",
+      "size_bytes": 2666,
+      "sha256": "0c58ae6612c4cda23e6f6e3d9c01ca0a692e292790543d80dca117f2b625d85d"
+    },
+    {
+      "path": "scripts/start-local.mjs",
+      "size_bytes": 2029,
+      "sha256": "6450ed25fcc17db82c057e3b884134c69c0c9f00e8428ff88e47771cc7f8d3d6"
+    },
+    {
+      "path": "scripts/stop-old-servers.ps1",
+      "size_bytes": 1266,
+      "sha256": "327031e09454efd9db675b4ac70cec44abce558b01c7399e5bfcc31e3ddbe2b1"
+    },
+    {
+      "path": "server/aed-openapi.mjs",
+      "size_bytes": 4978,
+      "sha256": "d67e1769423b5b861cd22809aa389f436b6772b485187d232a7a5b0504d2bffd"
+    },
+    {
+      "path": "server/bus-route-list.mjs",
+      "size_bytes": 1510,
+      "sha256": "003eb7a38db0cb21ba42bc6a72fd380175afe4bd2196036d68df8963477108ae"
+    },
+    {
+      "path": "server/dongjak-news.mjs",
+      "size_bytes": 20432,
+      "sha256": "c241ef4959baf8965936acd5c8b5e7cc730b6c33989eb94eebbfdf345629f037"
+    },
+    {
+      "path": "server/metro-timetable-common.mjs",
+      "size_bytes": 7249,
+      "sha256": "845217ecd0a3f965fa790fb7e249f38bd92480caa1636a7fa068ce88fb7f01bf"
+    },
+    {
+      "path": "server/sdot-environment.mjs",
+      "size_bytes": 3964,
+      "sha256": "f9cb7e9d51dbf12da25a010ac12ebe59b644be95b10b5ab2eba49ca677b904a9"
+    },
+    {
+      "path": "server/sdot-openapi-tcp.mjs",
+      "size_bytes": 1628,
+      "sha256": "ba25a9de86d7dc250c04e5f038ed900998158aeaf32da2942672170b803842e8"
+    },
+    {
+      "path": "server/seoul-openapi-tcp.mjs",
+      "size_bytes": 3699,
+      "sha256": "6a1b90010af54c3ed9e2b3107cceddb76772555d2dff2e6c55d42c567f433000"
+    },
+    {
+      "path": "server/service-hours.mjs",
+      "size_bytes": 7234,
+      "sha256": "ec3d35fb10d8b540a1ff57f20e3f0d4e8cfd5e630a6e21dba0d6e27bfe7cf602"
+    },
+    {
+      "path": "server/sillim-published-timetable.mjs",
+      "size_bytes": 3594,
+      "sha256": "85974cacbe52b8bc574b3cf5a86016b695e8f78df75e084ced6140070d164464"
+    },
+    {
+      "path": "server/station-accessibility-data.mjs",
+      "size_bytes": 4950,
+      "sha256": "921861147ee1986f1430dca74dd036b0a5d40e11acdd0c4893d0c474e9040c54"
+    },
+    {
+      "path": "server/topis-road-incidents.mjs",
+      "size_bytes": 4857,
+      "sha256": "af8f430209a40e5def404874083e8b73bc654c38d4f862b7aa53841053eccd77"
+    },
+    {
+      "path": "server/topis-xml-tcp.mjs",
+      "size_bytes": 2917,
+      "sha256": "ab79cdd0f58653cd30f6d51f1883e04ff71384f6d17acbda28308f91581d549f"
+    },
+    {
+      "path": "server/transport-proxy.mjs",
+      "size_bytes": 25054,
+      "sha256": "1ccc31b9a76e10753d01f0f26e8c4bc30ef5490f22e42289286f6f592ed69047"
+    },
+    {
+      "path": "src/adaptive-map-actions.js",
+      "size_bytes": 3117,
+      "sha256": "67d8ef1938655af1d552228980d51a84cd2aefcc4b5f8607a5d4abc36dfb9df5"
+    },
+    {
+      "path": "src/admin-dong-layer.js",
+      "size_bytes": 9294,
+      "sha256": "e0c469b373f0dabb0612172ca3dbbc5abcc26c39a4d48b7e03eb9df1b24964e7"
+    },
+    {
+      "path": "src/apartment-labels.js",
+      "size_bytes": 2593,
+      "sha256": "edf48fe1001d282b47e4b82b68e3d92de989d4bbe7c536a68323b249261fca87"
+    },
+    {
+      "path": "src/app-artwork-v7104.js",
+      "size_bytes": 1105,
+      "sha256": "5e07e782d1fb164675f127524e682e4a843c25b4edb9e56344cf6f418e3da7c7"
+    },
+    {
+      "path": "src/app-release-log.json",
+      "size_bytes": 39401,
+      "sha256": "6c5a6fa04eeb03595f0764919e0ed7fb648517ee8714f755b88de7dba7bc30b5"
+    },
+    {
+      "path": "src/app-version.js",
+      "size_bytes": 38248,
+      "sha256": "7b09286e6c0da02ea43b77672e60c5f6513d514473f7a5a2cf46caa539425c04"
+    },
+    {
+      "path": "src/base-layer-controls.js",
+      "size_bytes": 5322,
+      "sha256": "4822b6eac910dd81fe36318809e9d930fa6b7d1444e09b8591b9171be5b833b7"
+    },
+    {
+      "path": "src/build-info.json",
+      "size_bytes": 66,
+      "sha256": "ff8bbb20edffe98b60fdd55851eee790108ad8857fb1044bb12ef86601afbd9b"
+    },
+    {
+      "path": "src/building-assets.js",
+      "size_bytes": 1791,
+      "sha256": "9f90ee4479fb893bb27de53a46f287d4a9414c5182f249b10bf54daf76954aa4"
+    },
+    {
+      "path": "src/building-prewarm.js",
+      "size_bytes": 685,
+      "sha256": "0301a6b14a8c3b5c21e3a0faa3d090d5a9e95f09ba0dcc41f522975ccd9e7cb1"
+    },
+    {
+      "path": "src/bus-coverage-grid.js",
+      "size_bytes": 1580,
+      "sha256": "af388f7e7acb6ac15a32c8292f928cf78558f11787d1e04fb032c6201cc3c4e8"
+    },
+    {
+      "path": "src/bus-last-service.js",
+      "size_bytes": 1247,
+      "sha256": "9bf40383e794a16146581ce9ac95995992f74548033f162f6c75a9882433a3ef"
+    },
+    {
+      "path": "src/bus-service-key.js",
+      "size_bytes": 322,
+      "sha256": "0d02c669508050ed275a5e53e03b8f1ded441c03b6a97d0e0f85d40f1ce17ef1"
+    },
+    {
+      "path": "src/bus-stop-dedup.js",
+      "size_bytes": 4479,
+      "sha256": "e286d69cbb06d1526b8d002ed928688b4ee5881e00c23bc068317dd7d3515f83"
+    },
+    {
+      "path": "src/bus-stop-label-theme.js",
+      "size_bytes": 1334,
+      "sha256": "a2d66342dc33728149f1373f31dcc1897f1b0e388330495472b64ce7411a4145"
+    },
+    {
+      "path": "src/civic-facility-layer.js",
+      "size_bytes": 7879,
+      "sha256": "76b4f472ceeed91e839c2524efe23c2ec8b91a15c198578d7f9f5252da4ea750"
+    },
+    {
+      "path": "src/community-store.js",
+      "size_bytes": 2724,
+      "sha256": "950d519807ed9f129190605f70e2f6925f99cb11dc19604f8a94739cf7d48745"
+    },
+    {
+      "path": "src/distant-haze.js",
+      "size_bytes": 4537,
+      "sha256": "94320cbd1b80f9e8174b3214db0d26a614c0bd710a5af8f5ac0bf6d0d4b2775d"
+    },
+    {
+      "path": "src/dj-v8212-sheet-controller.js",
+      "size_bytes": 9564,
+      "sha256": "fcc3823f7f3781ee803bcd4d9f38c8a61c0f145e95b0733470c80c0b6e66aa45"
+    },
+    {
+      "path": "src/dongjak-import-controls.css",
+      "size_bytes": 1118,
+      "sha256": "722969c330a3e29a89ee80c27a8680d4ca233e633b994aa1820b0a1c3cb55642"
+    },
+    {
+      "path": "src/dongjak-local-routing.js",
+      "size_bytes": 3192,
+      "sha256": "bf9d0fea04cc6d017f4b479b27525fcb19e9dde2a742a8efab31fa1da16ae3aa"
+    },
+    {
+      "path": "src/dongjak-location-alert.js",
+      "size_bytes": 1137,
+      "sha256": "aa6a6a65afae27ec7269255eaf43e543583a9462644966c9ee994f5a3a936a34"
+    },
+    {
+      "path": "src/dongjak-news.js",
+      "size_bytes": 8969,
+      "sha256": "ec3e53de2970075ce34deb8590682824e8ef9b3792c58784ca5e80960b89fa11"
+    },
+    {
+      "path": "src/dongjak-safety-symbols.js",
+      "size_bytes": 3552,
+      "sha256": "d6b5f28055d86591b95d1c528d32d9600c42c844f5d21365148bbac1ec423647"
+    },
+    {
+      "path": "src/dongjak-verified-data-layers.js",
+      "size_bytes": 31477,
+      "sha256": "c2f2a15fc2d9ff55897894559959e479cf7892e99c10d0966fca58c379ec2ce5"
+    },
+    {
+      "path": "src/draggable-floats.css",
+      "size_bytes": 1190,
+      "sha256": "62539e4d5165d52e247464a1daed1f48d245dfa4bb096d1aa6c3602f5677e904"
+    },
+    {
+      "path": "src/draggable-floats.js",
+      "size_bytes": 4540,
+      "sha256": "08700a315bc9176536f8d6bc1667b467761d7512c79f0ec33be3b87c9ad1a823"
+    },
+    {
+      "path": "src/education-layer.js",
+      "size_bytes": 12864,
+      "sha256": "5ce688fd746bfa5038ea6f3cf730c50d25c485881915dbefdbd181148a54306b"
+    },
+    {
+      "path": "src/featured-place-labels.js",
+      "size_bytes": 14307,
+      "sha256": "2d85f0e3ab7a6da383bf48ee490856d485fc7e2c7d10e149c75e4d6b1801eb12"
+    },
+    {
+      "path": "src/features/liveTransit/geometry.js",
+      "size_bytes": 2891,
+      "sha256": "b56b34506be901403e15c9bfb1624a004a5e84a39352da2a405ce90e870ee297"
+    },
+    {
+      "path": "src/features/liveTransit/index.js",
+      "size_bytes": 7414,
+      "sha256": "ecc43fa8db0e67d020fbfb4d059f60662f1ac29f471a3d19e4d2d852dafe34f0"
+    },
+    {
+      "path": "src/features/liveTransit/integrate.js",
+      "size_bytes": 6127,
+      "sha256": "3487fb21d1e30c39cd9fe76e86ece41fa2c675168120d391d7254dd0c2e7ee4a"
+    },
+    {
+      "path": "src/features/liveTransit/live-transit.css",
+      "size_bytes": 1426,
+      "sha256": "e9488a938537fd08c68e9eb7380e6fe128dbbd744af2cc68183521876e06f871"
+    },
+    {
+      "path": "src/features/liveTransit/normalize.js",
+      "size_bytes": 5740,
+      "sha256": "3967d1f9aaacccd4247a3639bb7754fc7c7534c547acc4e41082ffd07e33deb1"
+    },
+    {
+      "path": "src/fixed-rail-data.js",
+      "size_bytes": 10308,
+      "sha256": "9290f2ab52e9555ad4fd265bf486cda04ca336e6661ab19e6b99818228f24a10"
+    },
+    {
+      "path": "src/fixed-rail-lines.js",
+      "size_bytes": 6252,
+      "sha256": "e975a4fd9ded4e063ac7b10cd74137ad2c22f349014360393a665687f622c2c1"
+    },
+    {
+      "path": "src/gps-safety-model.js",
+      "size_bytes": 6862,
+      "sha256": "fe66e51182a75fcfe3beee60b67663c2df51b99556be8c28fd769204d31768a3"
+    },
+    {
+      "path": "src/gps-safety-popup.css",
+      "size_bytes": 13542,
+      "sha256": "689952cbdf289aad53b0f7b96551e659652677ae31550db494637d48a74b16e4"
+    },
+    {
+      "path": "src/gps-safety-popup.js",
+      "size_bytes": 15317,
+      "sha256": "857b4ea9a1a01f3ddcc6320954e13969996e779124d9ab53f611646c5095a0ec"
+    },
+    {
+      "path": "src/hangang-bridge-labels.js",
+      "size_bytes": 17357,
+      "sha256": "effe7b8f59119ffce5734c5d722566df5995b87c30238c2fd08ec07ac6669bda"
+    },
+    {
+      "path": "src/important-place-click.js",
+      "size_bytes": 2873,
+      "sha256": "a22099e8c89ba65212f6c0e625d269e952a788f6f45ce200bfbbb609f624b36c"
+    },
+    {
+      "path": "src/korean-labels.js",
+      "size_bytes": 2142,
+      "sha256": "5c62486c57a5cb106f7e43a7db71647f975480efc4b334e9bd2ae024733e3005"
+    },
+    {
+      "path": "src/korean-search.js",
+      "size_bytes": 3848,
+      "sha256": "e5f4acaf147032d1695a665b5329fc4829e1c8099e37e224f6c618f341acf0d0"
+    },
+    {
+      "path": "src/landmark-layer.js",
+      "size_bytes": 6132,
+      "sha256": "7e06d4e4dab66f4ad3ad55f8eb22f4e0cb9ed25c0b7ced18eb32bfd2c5e3e8fb"
+    },
+    {
+      "path": "src/layout-core.css",
+      "size_bytes": 16399,
+      "sha256": "3629707bb12fcadc88a0e9fdbfed338fb2d12ace7902580c1b48841ada2d05fc"
+    },
+    {
+      "path": "src/lib/dongjakWalkSlopeRouter.mjs",
+      "size_bytes": 12086,
+      "sha256": "9d694684de8afd45612f7c09253ed66aa14f3f225cab488afec69daf0237c35a"
+    },
+    {
+      "path": "src/local-font.css",
+      "size_bytes": 1325,
+      "sha256": "1a506dfea2296dd953552e47c8a41058db2d02d58d03b379be604e91af7f5324"
+    },
+    {
+      "path": "src/main.js",
+      "size_bytes": 162757,
+      "sha256": "3dc7559d547aafe3cf66087a81e713a4c01d643af90deebaed1677ac0fc88ff1"
+    },
+    {
+      "path": "src/map-appearance.js",
+      "size_bytes": 10109,
+      "sha256": "eccd282959947483380d74196ffa47c52694edab556f881fbdab82393d740e9a"
+    },
+    {
+      "path": "src/map-direction.js",
+      "size_bytes": 547,
+      "sha256": "8f5336820d4ee44861eb1c27a0c8fee6cae29a47a551b939fe4b77ceaacab8c2"
+    },
+    {
+      "path": "src/map-immersive.js",
+      "size_bytes": 1045,
+      "sha256": "8a44688cbd83ad391856ee066f5d07c5d4bb225dcb5ff70c0142607484f7b9bf"
+    },
+    {
+      "path": "src/map-infrastructure-labels.js",
+      "size_bytes": 3815,
+      "sha256": "3a9444ed577c6d86b8a39edcb0202abe9f9ff5a170a4b5b0cacfb76429bafcd1"
+    },
+    {
+      "path": "src/map-label-halo.js",
+      "size_bytes": 1068,
+      "sha256": "bf5f769234edb83a884a6e7c8f220fbdd4c588518121f4c196b36d9ea0927cea"
+    },
+    {
+      "path": "src/map-layer-fade-v815.js",
+      "size_bytes": 3493,
+      "sha256": "fc8ddc5ef463f22cdb2a1c643d6582044860317bdfbc17ed95c620ddd0db9971"
+    },
+    {
+      "path": "src/map-marker-occlusion.js",
+      "size_bytes": 3010,
+      "sha256": "569bb38f9df006754bb6b0ddf5160cd180d3c256283b7657f85ec3fd885673d8"
+    },
+    {
+      "path": "src/map-patch/dj-v5911-place-polish.css",
+      "size_bytes": 4202,
+      "sha256": "eef585c08b5fa060b4bc6c2e24eb7e2c81c24cfbfe07b6f6bf74fe772ff324ae"
+    },
+    {
+      "path": "src/map-patch/dongjak-always-visible.css",
+      "size_bytes": 3278,
+      "sha256": "e2a35c1bffa8c10cf7b827565919dae9fe0c206701a4f58a7550e959f8434e06"
+    },
+    {
+      "path": "src/map-patch/dongjak-integration.css",
+      "size_bytes": 935,
+      "sha256": "e42c7a8753e72856d0bf4a5c51dae7ca3f36816decefa9c51b9d7b127e05f8a5"
+    },
+    {
+      "path": "src/map-patch/dongjak-map-patch.js",
+      "size_bytes": 14671,
+      "sha256": "0cbaf3cb3accf23df5d75cc8367a4872461112ec23aa12808ba4b13ef7d5663e"
+    },
+    {
+      "path": "src/map-patch/dongjak-v54-polish.css",
+      "size_bytes": 5631,
+      "sha256": "39984d87a5e4ec7cada35b84ba0053979466ac355355edae13343050faf43147"
+    },
+    {
+      "path": "src/map-patch/dongjak-v55-mobile-fix.css",
+      "size_bytes": 9227,
+      "sha256": "5896ebe1f23f69ed46a8de1f498f6b4e39165a73a9cc6cfc03d245dfc7676989"
+    },
+    {
+      "path": "src/map-patch/dongjak-v592-panel-search.css",
+      "size_bytes": 4979,
+      "sha256": "b695ac9cb906356bad328e6b59929b009539ce2132fad627e21a44b46e623a67"
+    },
+    {
+      "path": "src/map-patch/dongjak-v593-ui-cleanup.css",
+      "size_bytes": 4014,
+      "sha256": "d00bded14f59729dafc905a9b2c602f7a882855a6135b24474ec27d0add0cd17"
+    },
+    {
+      "path": "src/map-patch/dongjak-v594-layout-theme.css",
+      "size_bytes": 11589,
+      "sha256": "24e4857bcadd1ad015c0b42e9618cdee56b0dfcc626741bbeddc746bb4526a2b"
+    },
+    {
+      "path": "src/map-patch/dongjak-v595-pedestrian-tools.css",
+      "size_bytes": 8837,
+      "sha256": "aed3ba70b78550a057a447027663c72d12ec69de88df4c91d504f750c3245240"
+    },
+    {
+      "path": "src/map-patch/dongjak-v597-header-access.css",
+      "size_bytes": 7720,
+      "sha256": "939ac3d41bd3aac55d29c68449be3eb913eb614e69a1e9d46a2839b43213e8a8"
+    },
+    {
+      "path": "src/map-polish.js",
+      "size_bytes": 11140,
+      "sha256": "21538883ca8ef4300b36d1d2bc487bc7cd09e2b275eeedc3f558aaffc1f6c3f3"
+    },
+    {
+      "path": "src/map-popup-viewport.js",
+      "size_bytes": 5170,
+      "sha256": "1ba44383041523bfc1e09eabd49c97c6ae29541ce80e63243d63650106351734"
+    },
+    {
+      "path": "src/map-quick-search.js",
+      "size_bytes": 15217,
+      "sha256": "baa8067c7169362de090647cf04579b811a9c3e9d5ce2de3702320a7260ff1f5"
+    },
+    {
+      "path": "src/map-scale-docking.js",
+      "size_bytes": 18405,
+      "sha256": "a3dbdbfbeb6f91ab52375286e2934e82db1ec1fdf69d5c838e28f39c286eb059"
+    },
+    {
+      "path": "src/map-scope.js",
+      "size_bytes": 1322,
+      "sha256": "9c545782be532ca630a17e5531beb1657dd9736a38717754901858683e7b1783"
+    },
+    {
+      "path": "src/map-startup-loader.js",
+      "size_bytes": 2436,
+      "sha256": "20bfb58dc5a0c212842e41f4b4b2d1d889d8a832a9b1eed296310ad3c83c1ea6"
+    },
+    {
+      "path": "src/median-bus-stops.js",
+      "size_bytes": 2970,
+      "sha256": "1eb9758a641f50d477f2ac81823b5eb464ead689f732a1f03e6f2dd9738ff36f"
+    },
+    {
+      "path": "src/metro-arrival-display.js",
+      "size_bytes": 1706,
+      "sha256": "855939f9cdd2f181cb50b7bfa4c2e2ee375058a5234b3e1f5b2610d7377b9b60"
+    },
+    {
+      "path": "src/metro-inline-schedules.js",
+      "size_bytes": 5064,
+      "sha256": "9f90c79a39ccf5a8e7d1d1aa330a62978e9702d4c05211e28c9b5d260569a4fa"
+    },
+    {
+      "path": "src/metro-korail-line1.js",
+      "size_bytes": 1558,
+      "sha256": "ba8ad3c431a638fef478f6e0e5cf95b98def25a68f8fdfd4f69293f5de5f8e04"
+    },
+    {
+      "path": "src/metro-marker-geodata.js",
+      "size_bytes": 4804,
+      "sha256": "1fdf8bb21d672a7af345d6c9f6fa048299c8bc431abff9922b4134a0f82c212e"
+    },
+    {
+      "path": "src/metro-operator-timetables.js",
+      "size_bytes": 1808,
+      "sha256": "ee5d70bb32a8a402ace6074aecdec0fa17d62568805f12f22467db277012c2a3"
+    },
+    {
+      "path": "src/metro-overview-visibility.js",
+      "size_bytes": 4240,
+      "sha256": "fa1e43d5639c944d8df979deb401b3523103407d7d22f19a9fdb09acbe24ec30"
+    },
+    {
+      "path": "src/metro-planned-arrivals.js",
+      "size_bytes": 3026,
+      "sha256": "49f8598ef52c13a459a21acdb8ea394f5ea2be3fbd833ca19be31333381ac62a"
+    },
+    {
+      "path": "src/metro-schedule-view.js",
+      "size_bytes": 217,
+      "sha256": "3ba3b27f824933bc4c9330064b79b3d6fe8ea495ccdd965bb52c975a903136d8"
+    },
+    {
+      "path": "src/metro-sidepanel-20261110.css",
+      "size_bytes": 1954,
+      "sha256": "f336f03c5b28364967526322b3d4ce102672e8671ba93068d37bb6288e89d503"
+    },
+    {
+      "path": "src/metro-status-compact.css",
+      "size_bytes": 6401,
+      "sha256": "9b6e76bd4ca48782537f23c6f48c85345f46c84fe9929bd42825cc555f5eaf14"
+    },
+    {
+      "path": "src/metro-status-view.js",
+      "size_bytes": 1761,
+      "sha256": "06da7ea34791b3ecf59543f12f352c6d259584fa402f62c569223eeaad308a0f"
+    },
+    {
+      "path": "src/mobile-chrome-v790.css",
+      "size_bytes": 18730,
+      "sha256": "2f7ebe94522f403d33caed702653dbdffb6af75c54713d05c6a1f6fc24483960"
+    },
+    {
+      "path": "src/mobile-chrome-v790.js",
+      "size_bytes": 10753,
+      "sha256": "dffb7a0dea705bdc5ca3870ff5a312dbcf91fb2dc35a97be538bb973b0f918e3"
+    },
+    {
+      "path": "src/mobile-map-controls.js",
+      "size_bytes": 7825,
+      "sha256": "e3fb2e24dbb22e19f1a53f635a55473a22b8dd446a3e35e6a15ff4188ecf43c6"
+    },
+    {
+      "path": "src/mobile-pwa-status-tone-v793.css",
+      "size_bytes": 3449,
+      "sha256": "e0ee473aee9f4084ed31c5a00d78ca4b4549dcfd3911b19e8e82273363d790ce"
+    },
+    {
+      "path": "src/mobile-pwa-status-tone-v793.js",
+      "size_bytes": 2797,
+      "sha256": "195f610286667eb86e7c16688887d2c6c22123e8c12e229c06b078f720ac7b04"
+    },
+    {
+      "path": "src/mobile-toolbar-v794.css",
+      "size_bytes": 4572,
+      "sha256": "486228081a31ead7bc572b6a6794966d39bf9b0064afc254bac48c07bfa24086"
+    },
+    {
+      "path": "src/mobile-toolbar-v794.js",
+      "size_bytes": 6348,
+      "sha256": "d9727e1e5b482f29d22ae3ef474ae52f4743b1269339765b56927db2c8475a0b"
+    },
+    {
+      "path": "src/mobile-ui-coordinator.js",
+      "size_bytes": 2327,
+      "sha256": "747f77f95a849457f5b14cd79d8de080fb403c553a8e5743fec8798e32422542"
+    },
+    {
+      "path": "src/mobile-ui-v610.css",
+      "size_bytes": 6547,
+      "sha256": "002d09740490e2a0e99c1ad683491eb1af02939801a939b150d4d9fa2a387d2c"
+    },
+    {
+      "path": "src/mobile-ui-v792-fixes.css",
+      "size_bytes": 6743,
+      "sha256": "751292a909fe04e61d5127c597e09786ba8303b137be850eb848fdddd09ccb2a"
+    },
+    {
+      "path": "src/mobile-ui-v792-fixes.js",
+      "size_bytes": 2017,
+      "sha256": "ad5bf331d10069739a110ae044f1e287da9e771f14b9392c203d00da9985fedd"
+    },
+    {
+      "path": "src/mobile-ui-v795.css",
+      "size_bytes": 2569,
+      "sha256": "1bde65bcf96379ef1b5e90ab2f27fd3c529f32c3cb71ca0ca433a8a8f7c2495f"
+    },
+    {
+      "path": "src/nav-voice-logic.js",
+      "size_bytes": 1386,
+      "sha256": "3a3a2782fb12aae779cf95a34233cd5a956ce109087f190a2d7d001a12f9eda6"
+    },
+    {
+      "path": "src/nav-voice-picker.css",
+      "size_bytes": 2494,
+      "sha256": "0af1bd291256a5abffada0b9ddc2245b306cb8f340cc57bfa4466dac6230c82a"
+    },
+    {
+      "path": "src/nav-voice-picker.js",
+      "size_bytes": 6780,
+      "sha256": "bd3c834b54a10f0ef8a98d6cc6888d4313801f4267eacc8e57dae2c07ab3b2d3"
+    },
+    {
+      "path": "src/navigation-experience.js",
+      "size_bytes": 1314,
+      "sha256": "f535176ef995a73edd1f03668a8cb49afd9f02b8ea835483701f851675d2478e"
+    },
+    {
+      "path": "src/navigation-geometry.js",
+      "size_bytes": 2304,
+      "sha256": "34aee38146575a3699b0d53e0db7a968dc3c9b540b563a13a012f118b4d4ce3b"
+    },
+    {
+      "path": "src/nearby-place-labels.js",
+      "size_bytes": 8981,
+      "sha256": "fdd3f34ec44dffd6eeec6cd529b3dac404a5c8b4c8c1e69925bafe625d718517"
+    },
+    {
+      "path": "src/night-map-roads-gl.js",
+      "size_bytes": 11381,
+      "sha256": "543e56eb9fb8ac10a0b3c08eb7d7541ac3e19423772050a935552c290e45ead1"
+    },
+    {
+      "path": "src/night-occlusion.js",
+      "size_bytes": 4669,
+      "sha256": "caa1cfdb3edd2272bf4e6fde89be87531b7eb39b73233938e1b069285a4f50b8"
+    },
+    {
+      "path": "src/night-road-canvas.js",
+      "size_bytes": 201,
+      "sha256": "0e7fc337d40a21d8a39bb95d27d6bb833d8f83fcf2daabadd4f8d4129336078b"
+    },
+    {
+      "path": "src/night-visibility-analysis.js",
+      "size_bytes": 5411,
+      "sha256": "18f3c124abdffba89266f0dd1e666a73654844313a5231f9589d9e256cc4ea12"
+    },
+    {
+      "path": "src/night-visibility-map.js",
+      "size_bytes": 54231,
+      "sha256": "0486c9d01a6005df4014fe81e581e2260c4a5b3e5b9fce1668897966b319edcf"
+    },
+    {
+      "path": "src/night-visibility-panel.css",
+      "size_bytes": 13417,
+      "sha256": "112dabdb60dc641cbdd6b688ff9d64083ee89344ef0596557bfefd8b59295856"
+    },
+    {
+      "path": "src/night-visibility.css",
+      "size_bytes": 5051,
+      "sha256": "a695f917678e5832de524731c06af5973d023175babf52e576036c554d4f356e"
+    },
+    {
+      "path": "src/park-info-click.js",
+      "size_bytes": 2737,
+      "sha256": "1acbd4abb11855c4adc14d3241e1c5859d19a3ffd28e0c24291022e2aeea7ec5"
+    },
+    {
+      "path": "src/pedestrian-tools.js",
+      "size_bytes": 24465,
+      "sha256": "0b9521a70bd25133d69648d60a780010135de6fa05bbec48483de3c9acaa66d8"
+    },
+    {
+      "path": "src/place-details.js",
+      "size_bytes": 24939,
+      "sha256": "03806b5898ad394929390233cf2e3c5d2cb9085c4a82719e1624bf2334802908"
+    },
+    {
+      "path": "src/point-attachments.js",
+      "size_bytes": 5699,
+      "sha256": "4c7e81448bdf26925cf3fd798dc2be9aaae09f727b21ef53f9ef492141f35236"
+    },
+    {
+      "path": "src/priority-place-marker.js",
+      "size_bytes": 1212,
+      "sha256": "0d73a123eb23d5dc580fadfaef8cad35f86c52c0eeea4ea5b0d111fac8112e68"
+    },
+    {
+      "path": "src/protection-zone-context.js",
+      "size_bytes": 1334,
+      "sha256": "779af352d1aa83fce71ce585a6e17b3260da576d8e8b063878883259e1a0574e"
+    },
+    {
+      "path": "src/protection-zone-fieldwork.js",
+      "size_bytes": 3809,
+      "sha256": "be1d3dc0cee72f90fda9bf21ce0cab09d57c10e0edc6d6c88e797f103fd8ca1c"
+    },
+    {
+      "path": "src/protection-zone-guidance.js",
+      "size_bytes": 5239,
+      "sha256": "0c530994deb292a8ccc156afbd596f002d6d59ae9390ac85a8fb2fc441d9b2ea"
+    },
+    {
+      "path": "src/protection-zone-map.css",
+      "size_bytes": 13290,
+      "sha256": "24cdc906287c671af67bb586789b2181e1a5c187a02c70acfde948a1b25cd13b"
+    },
+    {
+      "path": "src/protection-zone-map.js",
+      "size_bytes": 28626,
+      "sha256": "7fe56fba70b29086afabb8252fc732e4c1438a5d1f8e22cd4e3a01b3021cb4a5"
+    },
+    {
+      "path": "src/rail-official-shapes.js",
+      "size_bytes": 7989,
+      "sha256": "9cfb842aa05edd4a1180c3a3367395f6350444e5f67418fcc2848538ce3de6eb"
+    },
+    {
+      "path": "src/readable-3d-labels.js",
+      "size_bytes": 5057,
+      "sha256": "f6cdb21a7db0588e126a8bd036b815a9d92d47088b2f1ea6f91951edf6fad522"
+    },
+    {
+      "path": "src/release-semver.js",
+      "size_bytes": 21127,
+      "sha256": "2e941c5cdea53af79f673eff3557275a1d1f8fa0e1d08ebfdc196d5b0dedf6d1"
+    },
+    {
+      "path": "src/road-width-layer.js",
+      "size_bytes": 7225,
+      "sha256": "fd228c1b29a2bbb407a5ba11bddcaa3ae0abd4af90be25cac0181bc6e7c03d03"
+    },
+    {
+      "path": "src/route-search.js",
+      "size_bytes": 5076,
+      "sha256": "13f26aa152e0008348f11a156e2861658b529d2b4ab73910fd12d25310981f00"
+    },
+    {
+      "path": "src/safety-home-guard.js",
+      "size_bytes": 2416,
+      "sha256": "08d38accaf5cd85efc0158d64b6c59ac95567cd7e4f09a7ea480abdfd89486f2"
+    },
+    {
+      "path": "src/safety-layers.js",
+      "size_bytes": 18865,
+      "sha256": "e34793d32b71954bf361a1cef7fadfff5360acf6962c09c8f56efc236432bdb0"
+    },
+    {
+      "path": "src/safety-polish-v7104.css",
+      "size_bytes": 12031,
+      "sha256": "5d607d544491eef56192e068565d2931e1990b8b97ffd660a44da55d77309ef4"
+    },
+    {
+      "path": "src/safety-workbench-entry-v7104.js",
+      "size_bytes": 449,
+      "sha256": "6c14b4c5d4379489a921ef0dc96af0db2f5bae53edcfaf53b64538221dd3d1f7"
+    },
+    {
+      "path": "src/safety-workbench-v7103.css",
+      "size_bytes": 13549,
+      "sha256": "8e04aba97f02be6986ea369dcf18323db43a68c54f2cea76fa1601fb4bcb824e"
+    },
+    {
+      "path": "src/safety-workbench-v7103.js",
+      "size_bytes": 5089,
+      "sha256": "c58282dce89c070839d5963c50374aeb8c753338e4146b96e07f2f884daa711e"
+    },
+    {
+      "path": "src/safety-workspace.css",
+      "size_bytes": 9317,
+      "sha256": "ef736a7132747c9157d9a16a35207aea15d49cf84ea059dad7a5f63ac980afb5"
+    },
+    {
+      "path": "src/sangdo-accident-team-review.js",
+      "size_bytes": 6821,
+      "sha256": "15e413033fdcb950cdc03ad74cc226286936a6a11a3be09d3002bfa3b30a0a20"
+    },
+    {
+      "path": "src/sangdo-camera-import.js",
+      "size_bytes": 4312,
+      "sha256": "e41930d86861ae617978b114665b8f51d57107224db7f94bc8c58964b5709bc9"
+    },
+    {
+      "path": "src/sangdo-speed-map.js",
+      "size_bytes": 19145,
+      "sha256": "2d8897431f825e98197804eb61c3b76b2a33eae4fa5e287379802b2021e7b7f0"
+    },
+    {
+      "path": "src/selected-location-pin.js",
+      "size_bytes": 549,
+      "sha256": "a055aab77f735d36862af825e62a8aff6e3036c1fcf51c3a2264ae6cf4924e69"
+    },
+    {
+      "path": "src/seoul-official-facilities.js",
+      "size_bytes": 13282,
+      "sha256": "adce03acf0edcad566f1406d07dd8dccfff094bca0a487ac1eadd217cbb4807e"
+    },
+    {
+      "path": "src/site-updater.js",
+      "size_bytes": 1292,
+      "sha256": "2da660cc4b8c8cb84cec0bdbfa2e187114de2b6397e518863037d8e01f823dd2"
+    },
+    {
+      "path": "src/speed-ui-and-scrollbar.css",
+      "size_bytes": 6959,
+      "sha256": "73319e51f91b9f32c69c6db77d373a9bb3fe11a4d642a8fce3f2f0b2b8e607cd"
+    },
+    {
+      "path": "src/static-bus-stops.js",
+      "size_bytes": 2010,
+      "sha256": "f429780a0b20f7a15343a4ed56bf1527acbd4adaefd9253bb95e2c38282b1e9f"
+    },
+    {
+      "path": "src/station-accessibility.js",
+      "size_bytes": 18773,
+      "sha256": "1ffc684e59520e7bc2a4374d2d6829f4b8f0aaabb3e9fd994dafb7d88eef56dd"
+    },
+    {
+      "path": "src/style.css",
+      "size_bytes": 148023,
+      "sha256": "b7296c069f6891fb5e4417f22cae12f404d52d2e071f2047bdf9dd55056f9be8"
+    },
+    {
+      "path": "src/subway-source-recovery.js",
+      "size_bytes": 1928,
+      "sha256": "289d258dacebed8fb980d8680f5f12c19e561e5534bb3bd41407e80081265612"
+    },
+    {
+      "path": "src/transport-data.js",
+      "size_bytes": 6359,
+      "sha256": "30461cfb76fc64fb3fb8c08ffbd2d20b099bcad3cf1a6bb0d5aa5b4281a54ce3"
+    },
+    {
+      "path": "src/transport-freshness.js",
+      "size_bytes": 7471,
+      "sha256": "918b2e750febb3c807d49d3e6562a5e93f98f4f2afe042a6fba0f6d81556847f"
+    },
+    {
+      "path": "src/transport-map.js",
+      "size_bytes": 167942,
+      "sha256": "72fb90cf15729eeda439d568100f10d12d793b421d891106521a7716186ca3d8"
+    },
+    {
+      "path": "src/transport-selection-marker.js",
+      "size_bytes": 2330,
+      "sha256": "0b72ba6967d3dde5dc4d07f25b588916f9a745fb9857e3678444ae49c9c28e3b"
+    },
+    {
+      "path": "src/transport-timetable-cache.js",
+      "size_bytes": 4769,
+      "sha256": "3a972949b16e1ff315d22be6620168fb39568f55c64cd7b5399ed69a27c81ab1"
+    },
+    {
+      "path": "src/transport-window-lifecycle.js",
+      "size_bytes": 1741,
+      "sha256": "dfd70c970b7158eb6887ec202942b36ef6a4f5bc37f4fbfa1d8f2352704de018"
+    },
+    {
+      "path": "src/ui-environment.js",
+      "size_bytes": 20586,
+      "sha256": "0b7c1d9daf77fa5cb40100d58b23f809b01aa9dc6c06084528b546ea684a9ead"
+    },
+    {
+      "path": "src/v601-responsive.css",
+      "size_bytes": 3461,
+      "sha256": "8ba37f5fdb51eeeb13f982d2b12cf38c249d9b1bcb58d25e9f12c3dc4dd079b6"
+    },
+    {
+      "path": "src/v602-fixes.css",
+      "size_bytes": 1314,
+      "sha256": "957b43e1015f1b8d1f078c3c8e3c1a7f9f51d311d81ac3cff90a4f609ed711b0"
+    },
+    {
+      "path": "src/v607-mobile-sheet.css",
+      "size_bytes": 4357,
+      "sha256": "15a34ed4aa4767e884bf075f9556eb51e6f13c8f58533a5acb8e1822d700b128"
+    },
+    {
+      "path": "src/v608-mobile-coordination.css",
+      "size_bytes": 5605,
+      "sha256": "9adcc1a005a1b7a2779aa5284418f095adf999beba268ecd4fa9041ecc27cc15"
+    },
+    {
+      "path": "src/v610-mobile-safety.css",
+      "size_bytes": 4706,
+      "sha256": "fc29c4a7e60a67618de6e6c54ae09da3cbee3650402a8a6b112b574b74a2d308"
+    },
+    {
+      "path": "src/v611-registration-seam.css",
+      "size_bytes": 3844,
+      "sha256": "93a10334152c1bdceed81f3d1f4de3f070a8390066d8b774055d5795b0f12714"
+    },
+    {
+      "path": "src/v613-map-ux.css",
+      "size_bytes": 21738,
+      "sha256": "444031077a5b91134e0a81787a1ec733bf50125255c51896e9acc0a726546562"
+    },
+    {
+      "path": "src/v614-transport-compact.css",
+      "size_bytes": 3731,
+      "sha256": "77535950d9a50d76387f75113a8b88b4e33dc8f2787474f0051c334a03bceccf"
+    },
+    {
+      "path": "src/v700-mobile-cleanup.css",
+      "size_bytes": 9637,
+      "sha256": "b47fbe19480c8b54a9488effee0ff3f616b0f79607ee17ac7fccfd5ebdc8af4b"
+    },
+    {
+      "path": "src/v701-compact-info-panels.css",
+      "size_bytes": 3049,
+      "sha256": "385a25ace496845550178870461bafb7703e8bd5512f9a59c84f24e420106af2"
+    },
+    {
+      "path": "src/v702-ui-alignment.css",
+      "size_bytes": 8593,
+      "sha256": "82135fcf4f4f24f2a31e81bf1c07155127f63469cc90bf2b09b13f2fac440771"
+    },
+    {
+      "path": "src/v703-ui-layout-tightening.css",
+      "size_bytes": 4993,
+      "sha256": "0c7c1ac12d6557d0aa3e692912cf88a60430c6c9bf48ed69890182be822f92bc"
+    },
+    {
+      "path": "src/v704-user-request-fixes.css",
+      "size_bytes": 12216,
+      "sha256": "66d798436941d6e8a066b97f216f25641e2f2fa9bf2488008a459ffcedbe1b85"
+    },
+    {
+      "path": "src/v705-integrated-ui.css",
+      "size_bytes": 7419,
+      "sha256": "15be049fbd2ea43cd6a2cf0698f3cece9fd7daeb6d5594fe88ffd3c3745d64e6"
+    },
+    {
+      "path": "src/v706-walk-navigation.css",
+      "size_bytes": 1198,
+      "sha256": "ed586ee49427b405928aefc1dfb1eb868a6953324da1abe511597c3dbf76b2e6"
+    },
+    {
+      "path": "src/v707-responsive-metro-history.css",
+      "size_bytes": 18659,
+      "sha256": "19b25755b7561e16f0a60d060e568874d3ee66091c24a873557e352702527c57"
+    },
+    {
+      "path": "src/v708-floating-ux.css",
+      "size_bytes": 15227,
+      "sha256": "7db52c8c128b624cf48f6fac7de3a99de5194610b3e5065195f706690ed55f64"
+    },
+    {
+      "path": "src/v709-control-fixes.css",
+      "size_bytes": 9577,
+      "sha256": "e06e874f10a45de8df2b70af4725a138a13993891e5c3bfae583c37947977438"
+    },
+    {
+      "path": "src/v710-exclusive-panels.css",
+      "size_bytes": 8013,
+      "sha256": "1105fcedd744a2a64fca83c65be42a60db6c036e1cc63f390e7e4c1ac35795ce"
+    },
+    {
+      "path": "src/v711-experience.css",
+      "size_bytes": 11853,
+      "sha256": "e59325f9396add3934cf91cfce9c3bf9747f851786fad7fd20b6c6f88cd681b6"
+    },
+    {
+      "path": "src/v711-experience.js",
+      "size_bytes": 6007,
+      "sha256": "1350b4b5ff1e947eeda343fea5799c093cf6206f4567061cd28191f60f123814"
+    },
+    {
+      "path": "src/v711-map-layout.css",
+      "size_bytes": 4136,
+      "sha256": "9193ce32239a77fd2210953bf0946c5892a1c6f35741c8659daebae2f8358959"
+    },
+    {
+      "path": "src/v712-interaction-layout.css",
+      "size_bytes": 3713,
+      "sha256": "826937e9344671165302d9cc3ec1566904fe9a484d3cab3c20e388efe27c0bc3"
+    },
+    {
+      "path": "src/v7120-night-panel.js",
+      "size_bytes": 2404,
+      "sha256": "0b37faa9d9032b20c4d818872a971c4c4f052e3ba9522f788d58f1c990075fce"
+    },
+    {
+      "path": "src/v7120-polish.css",
+      "size_bytes": 15890,
+      "sha256": "afd39ff3fe68c0ece205dfbbaf151abf8db209496cb0101199e44ad2d6ec5f0c"
+    },
+    {
+      "path": "src/v7120-settings.js",
+      "size_bytes": 12915,
+      "sha256": "6b423aebc4daacc73eee7e8cfa2aeea52c6cee8b2b7b8d5c4250db769d4122f9"
+    },
+    {
+      "path": "src/v7121-responsive-fixes.css",
+      "size_bytes": 12062,
+      "sha256": "d313bbbfa52883460d33228ee12c30c36bf8a3cf61cc0d72f7e358a1449301df"
+    },
+    {
+      "path": "src/v7121-ui-behavior.js",
+      "size_bytes": 1804,
+      "sha256": "0b90a35683fa93dba484311b0ff43d7915ddf6aa89b93672c42a31ebf96044a5"
+    },
+    {
+      "path": "src/v7122-map-performance.js",
+      "size_bytes": 2136,
+      "sha256": "db487441d5d64e5d178eeeffcde9358e3dde4a342ed107590a9576a65d3ea7b8"
+    },
+    {
+      "path": "src/v7122-smooth-interactions.css",
+      "size_bytes": 2191,
+      "sha256": "d29fc198782a8d6751ee5bb8b0cde650340f843f85d498b1eee63a1a81cdb97a"
+    },
+    {
+      "path": "src/v713-desktop-rail.js",
+      "size_bytes": 5400,
+      "sha256": "804211cdb25af2b98e5b32b83c8e4b5595999ca61bc8c1eba35510cd74253639"
+    },
+    {
+      "path": "src/v713-rail-scale.css",
+      "size_bytes": 2023,
+      "sha256": "e37e3f78cf6becdbc26111a316c99712ea8e1381ae0f36109e39decca2858b09"
+    },
+    {
+      "path": "src/v7130-ux.css",
+      "size_bytes": 13040,
+      "sha256": "8ee41ac90df5e46e8b46a7af6002681c71a5f8407246181e0028ea292c493c48"
+    },
+    {
+      "path": "src/v7130-ux.js",
+      "size_bytes": 2532,
+      "sha256": "d736fc0bb78f8e05dfd5674fa823df209919237a4ed1cdb719905e7c5eb844f5"
+    },
+    {
+      "path": "src/v7131-motion-search-hotfix.css",
+      "size_bytes": 5670,
+      "sha256": "40745a134d6d2d2cb1da2c48f741ec680bdd50cd2b71299e75d0290085676e9c"
+    },
+    {
+      "path": "src/v714-map-first-layout.css",
+      "size_bytes": 5803,
+      "sha256": "fef3fe1b13bd363378bbc6859eb9e4916446a000c4e963c033e7e8ae496d0c67"
+    },
+    {
+      "path": "src/v715-mobile-polish.css",
+      "size_bytes": 5072,
+      "sha256": "97a50033c31f29d6825fcd60046728ac41b165041693e9d93da5a71a55367eb2"
+    },
+    {
+      "path": "src/v716-standalone-edges.css",
+      "size_bytes": 3547,
+      "sha256": "62c1ebc0db921d86dc55d65c0745655800a60853097b82d9fadb025e5dae00e4"
+    },
+    {
+      "path": "src/v718-facts-empty.css",
+      "size_bytes": 2984,
+      "sha256": "d395e52a58d83c72d9cdb8f0d0e33bfd6984c47cfbbd97eaf06cca14a42b8aef"
+    },
+    {
+      "path": "src/v718-mobile-polish.css",
+      "size_bytes": 7078,
+      "sha256": "a6a967a0c458998b78b927772d592c1818f7488e98c20984edb0bea164ac2c67"
+    },
+    {
+      "path": "src/v719-repair-ui.css",
+      "size_bytes": 8468,
+      "sha256": "688e3b4658402f066e2c9f8c27a4a0bb5b83dc1401b0db56f61b46df0a5cfcf2"
+    },
+    {
+      "path": "src/v720-ui-consistency.css",
+      "size_bytes": 8053,
+      "sha256": "3263a03671c920caf533c11c658954c5e6d485a5464bc1b8181823b3bbf04339"
+    },
+    {
+      "path": "src/v721-overlay-interactions.css",
+      "size_bytes": 5150,
+      "sha256": "f04348259287c0a3a233b86a9ca9370aa6e7759a8c79ddc5c5b6879ca0ee0112"
+    },
+    {
+      "path": "src/v722-bottom-panels-ios-header.css",
+      "size_bytes": 3123,
+      "sha256": "0c4a8a8b400955fba3a9147e77aef1f0473cb86a1d276634121e5a72a7f4965a"
+    },
+    {
+      "path": "src/v723-navigation-and-panels.css",
+      "size_bytes": 11757,
+      "sha256": "fb168d6723fe9b74eac088e496e4c6d0c5b46ec81a7d360b292e26e80b730a26"
+    },
+    {
+      "path": "src/v724-final-layout.css",
+      "size_bytes": 10449,
+      "sha256": "e682a5e9724abc226c472a697505c4ad90ca1464bf90d63398aab943af9ae45d"
+    },
+    {
+      "path": "src/v725-layout-state.css",
+      "size_bytes": 4511,
+      "sha256": "7b1b2c2eeedef82786d31303fcb9464b526b28f2924478296b1976349f6529c8"
+    },
+    {
+      "path": "src/v726-desktop-polish.css",
+      "size_bytes": 7806,
+      "sha256": "fa5d74e45f4133cfa3ce50391668e085f1a049f70cc226cb1607168f42a37c8b"
+    },
+    {
+      "path": "src/v727-ios-edge-and-safety-buttons.css",
+      "size_bytes": 6745,
+      "sha256": "6fe58a51f7f3735de79b6d68966e1a21bc6303f2933fd05467b35d5a8cd2a01e"
+    },
+    {
+      "path": "src/v728-exclusive-responsive.css",
+      "size_bytes": 10711,
+      "sha256": "f612a9fc2c291a3106d7909045e1aef5d3291f9906ec8b7b00aba47f9746e484"
+    },
+    {
+      "path": "src/v729-pc-consistency.css",
+      "size_bytes": 4842,
+      "sha256": "8ddeed1c632cb985f05fb61b78fdfab152050084bd9cb05d4549453235f97484"
+    },
+    {
+      "path": "src/v729-r1-responsive-ui.css",
+      "size_bytes": 3800,
+      "sha256": "4ab166223731920347f71201a5dfa1f1db300671464695d17c628af1d61eff46"
+    },
+    {
+      "path": "src/v729-r1-visual-check.js",
+      "size_bytes": 3379,
+      "sha256": "9a367514457c89c835cf281ae7b5b8008f3f1fbc569d17062f40eba973c8caa4"
+    },
+    {
+      "path": "src/v729-r2-new-ui.css",
+      "size_bytes": 9486,
+      "sha256": "9b0d3f7c7f8faaed3dc59266c30c8a41b5abf54c4b8ecd71bf8459f077a9e005"
+    },
+    {
+      "path": "src/v729-r2-new-ui.js",
+      "size_bytes": 1699,
+      "sha256": "d572a241e583a1ff103f93d32a5c0d992c2f7d22746830a4b7a7920d3da0b46e"
+    },
+    {
+      "path": "src/v800-live-environment.css",
+      "size_bytes": 2710,
+      "sha256": "857a6145e73265fe11b0fb1324b711d4364e479b3ec264c7aef535b348651f92"
+    },
+    {
+      "path": "src/v800-ui-architecture.css",
+      "size_bytes": 27337,
+      "sha256": "d066a21209c4a1742521dd2b8e8352dd52a17bf84e4d5f43e685daada7e8bdc2"
+    },
+    {
+      "path": "src/v800-ui-architecture.js",
+      "size_bytes": 13285,
+      "sha256": "8dfd25c319e94f61c076c9dc2ec7383ec4abc8eb99841acc6006574bd43a9c67"
+    },
+    {
+      "path": "src/v802-accessibility-aed.css",
+      "size_bytes": 2272,
+      "sha256": "01adb77f64d9d8eacf6e6e94fb80ae5a826be2e64fb997f944552cc8b4d6455c"
+    },
+    {
+      "path": "src/v802-panel-motion.js",
+      "size_bytes": 3830,
+      "sha256": "c3c41a139a39340cfecf3447b5bb039151153065b9e1b971d7976d95c49d3c65"
+    },
+    {
+      "path": "src/v802-sangdo-accident-review.css",
+      "size_bytes": 2645,
+      "sha256": "d5d433180bebb8579d10c54b3a155b0adf97d9666516573389db5f39953bf3a6"
+    },
+    {
+      "path": "src/v802-ui-polish.css",
+      "size_bytes": 10585,
+      "sha256": "31dd2b3418f4f39ac00ac8230ac21d8c8a418c11962ec4d4b040c37e196ea9dc"
+    },
+    {
+      "path": "src/v803-ui-consistency.css",
+      "size_bytes": 11977,
+      "sha256": "a78f914037ec084432b7561899901edd8d459b5ef1ec9570d30c26f7d5c6dadb"
+    },
+    {
+      "path": "src/v803-ui-consistency.js",
+      "size_bytes": 4151,
+      "sha256": "e28e82eba441cba1dbbb6948da981c9e8aa3a412911cca8b9cb541b7adaf6ac9"
+    },
+    {
+      "path": "src/v804-analysis-report.js",
+      "size_bytes": 11025,
+      "sha256": "487459c642e58b570833d7f31b075983b4d30eb4620abe43f8aab97aec1b8ae0"
+    },
+    {
+      "path": "src/v804-navigation-extras.js",
+      "size_bytes": 3919,
+      "sha256": "522aec33d74a42b05d0f98966ff1d8134ae7ba87b1628c1ed64a8dc7fca1a355"
+    },
+    {
+      "path": "src/v804-new-features.css",
+      "size_bytes": 6231,
+      "sha256": "10acf821e8d7d331297865db55c70587f4ec9ad36ade077ca450861173a41941"
+    },
+    {
+      "path": "src/v804-new-features.js",
+      "size_bytes": 3903,
+      "sha256": "db448104fc24e508d2b712f97d8fd65e6b73c1399cce210c9f269ea219b9ef04"
+    },
+    {
+      "path": "src/v804-route-comparison.js",
+      "size_bytes": 5997,
+      "sha256": "3147f6db882e6584415b4da2f59106aaf27e3f819914685f9e6437228fafa8d7"
+    },
+    {
+      "path": "src/v804-ui-fixes.css",
+      "size_bytes": 10451,
+      "sha256": "945f73dbea13eeabca778184351908975ee73f079b1e4122aadf04a2942e4e2e"
+    },
+    {
+      "path": "src/v804-ui-fixes.js",
+      "size_bytes": 6076,
+      "sha256": "5bfc29a132bfe85092d202ff9365526ef1fd41c5c89a6ef4d7c604df0f30cef6"
+    },
+    {
+      "path": "src/v804-weather-safety.js",
+      "size_bytes": 5436,
+      "sha256": "45e2f36dd629f0c225c1610e30b84aa6bd63ff43eec23e2210902a0961c571f1"
+    },
+    {
+      "path": "src/v805-responsive-readability.css",
+      "size_bytes": 17601,
+      "sha256": "cb3192237f9e04f58d78c4a9f9d330cccedef2844a8e086fdae37985432d5a8a"
+    },
+    {
+      "path": "src/v805-responsive-readability.js",
+      "size_bytes": 5635,
+      "sha256": "65b6b68fbdb7f1eadc7b35a10a22b43a2c201ba0662317e1dcba3770cf0e4235"
+    },
+    {
+      "path": "src/v806-unified-ui.css",
+      "size_bytes": 11900,
+      "sha256": "a088ffc3ed174caf3d82f90e1aa6248d585c1c4d4588c03ed94168dfede4e3f6"
+    },
+    {
+      "path": "src/v806-unified-ui.js",
+      "size_bytes": 27496,
+      "sha256": "f33fa5aef24e878f17fadccbc8f5727d030bcd79a14f6d8f2c3e5b439b2a8cc5"
+    },
+    {
+      "path": "src/v807-ui-refine.css",
+      "size_bytes": 10705,
+      "sha256": "ecfa4b326e4a4394eb69c4bf1c0091a8cbe4bed6e7b8df8c0bb1d778efc9f0cd"
+    },
+    {
+      "path": "src/v807-ui-refine.js",
+      "size_bytes": 3153,
+      "sha256": "1eb927bb02007726ac3f4794b106627a667f1528a58f8fb95ccaf384d5ba0eb8"
+    },
+    {
+      "path": "src/v809-precision-polish.css",
+      "size_bytes": 7684,
+      "sha256": "9a889848c4e771df750e356ebd703f78423fe00fcf5faa9ca850dd6f2c83f5eb"
+    },
+    {
+      "path": "src/v809-precision-polish.js",
+      "size_bytes": 2107,
+      "sha256": "ec2e218e6c3abb77d104bcebf70cbd08256ea91d91bceab9653cbb8f6753b28f"
+    },
+    {
+      "path": "src/v810-mobile-sheet-motion.css",
+      "size_bytes": 803,
+      "sha256": "436b3985f676270e4cbd2dced5aceccd31ef788405c6e219a1163e9d15f6d737"
+    },
+    {
+      "path": "src/v811-mobile-experience.css",
+      "size_bytes": 3765,
+      "sha256": "fa8522e0fff3389eb4e26703bfaff656800e5bca40914925c89cbcf994b956aa"
+    },
+    {
+      "path": "src/v811-mobile-experience.js",
+      "size_bytes": 1390,
+      "sha256": "b84be4b2c7d2add909e7a84a9a2fea66f0dadee0b2a1e45922a601264bbb8254"
+    },
+    {
+      "path": "src/v813-route-account-fix.css",
+      "size_bytes": 3079,
+      "sha256": "65da9a431a7bf1b5fbdeea0038eb141c9bc7638277b3acc0cc63f0b2a9f01557"
+    },
+    {
+      "path": "src/v815-map-product.css",
+      "size_bytes": 6040,
+      "sha256": "4c1de734894913c5713725886f26bc159f200d9149d18eee2d3809db807e46c9"
+    },
+    {
+      "path": "src/v815-map-product.js",
+      "size_bytes": 15615,
+      "sha256": "e4f6d7387790b34e50ef92d3f9ae685d77e7f3c21aae1879faf4b0cdc7706005"
+    },
+    {
+      "path": "src/v815-pc-visual-fixes.css",
+      "size_bytes": 6356,
+      "sha256": "a188421d483d0d9ef649b8a60ba003d60935a475e0c1e3d673c5a2004fb53715"
+    },
+    {
+      "path": "src/v815-place-store.js",
+      "size_bytes": 9916,
+      "sha256": "1388435fa155aed5d6097076203a77deefb590f4bee542aadd98980fc3b4e0c2"
+    },
+    {
+      "path": "src/v815-route-planner.js",
+      "size_bytes": 6259,
+      "sha256": "d1b90b130d9cf8182bc1f40b7a0c16db54a9d4e231df5dcc8d8b6db133de9cde"
+    },
+    {
+      "path": "src/v816-panel-weather-font.css",
+      "size_bytes": 3808,
+      "sha256": "a126a4f4db521812ebbe4e1a5e40904e5895d9d71da92c0fc03e224c66eaf511"
+    },
+    {
+      "path": "src/v817-dialog-search-safety.css",
+      "size_bytes": 8454,
+      "sha256": "962f705d470272016a5600628054d874366eedf39ac252c8a19bf323bee271f2"
+    },
+    {
+      "path": "src/v817-dialog-search-safety.js",
+      "size_bytes": 4145,
+      "sha256": "879b11d829bed2aa07720257c520abda33417acfa72e1a5157994844cfc6fe41"
+    },
+    {
+      "path": "src/v818-ux-settings.css",
+      "size_bytes": 2059,
+      "sha256": "d246fdff98a86483b6b7cc7a592f0a4e9fb35d17f7c1e477217687c9d3c54bbf"
+    },
+    {
+      "path": "src/v818-ux-settings.js",
+      "size_bytes": 7702,
+      "sha256": "3f1f0655f9d621cdbc01a4e93e24678f0f579b4cbecafd28338818394df4c335"
+    },
+    {
+      "path": "src/v819-safety-one-screen.css",
+      "size_bytes": 10129,
+      "sha256": "c056b48013017ed9e1ac57702679289684ccf146240afc50ef151408785d8ae8"
+    },
+    {
+      "path": "src/v819-safety-one-screen.js",
+      "size_bytes": 4185,
+      "sha256": "ef5f2b10cf9ae717df66b8f83960092b27414a3e8e655e4a3a3d161997dc853e"
+    },
+    {
+      "path": "src/v820-account-center.css",
+      "size_bytes": 8311,
+      "sha256": "10c186616d7154eb2f5b7607f5649e9852a1d60f1f5182d3d9e3a15d089edd19"
+    },
+    {
+      "path": "src/v820-integration-polish.css",
+      "size_bytes": 4013,
+      "sha256": "4778f0f9ae19f291eabf4778892ce41b31ade367195a26fc32577531e2f613ed"
+    },
+    {
+      "path": "src/v821-panel-visibility.css",
+      "size_bytes": 4854,
+      "sha256": "e8571412f25039d308d03d720ea8f6052ad5a9b426c664b0df2106caa5b89c37"
+    },
+    {
+      "path": "src/v8212-mobile-overlay-guide-fixes.css",
+      "size_bytes": 9872,
+      "sha256": "b56d9484464803a8ab7bc48fa5d9722ff99788d3b7c44fa366539fe8305fe5d4"
+    },
+    {
+      "path": "src/v8215-news-metro-compact-header.css",
+      "size_bytes": 13068,
+      "sha256": "b98e4bd38b187ecdef23ad1d865d3fedc34c2c9e9226f70237788b20b40db74f"
+    },
+    {
+      "path": "src/v8215-news-metro-compact-header.js",
+      "size_bytes": 8775,
+      "sha256": "86f8647ee006ce464be0b6b0d39eb40d7f093d87ad959e23646cda10946873cd"
+    },
+    {
+      "path": "src/v8215-news-transit-sticky-redesign.css",
+      "size_bytes": 23806,
+      "sha256": "4f762644b35bd876691bb8c53a9cb3f76f6bcfc4bc49d7163a1fe638fd49154a"
+    },
+    {
+      "path": "src/v8215-transit-auth-bus-sheet.css",
+      "size_bytes": 10575,
+      "sha256": "f92904c9f6081b2f11f4a5efd1946540926b08d85edce7df2150a8f8ca73add6"
+    },
+    {
+      "path": "src/v8215-transit-auth-bus-sheet.js",
+      "size_bytes": 8521,
+      "sha256": "4cb9f4ba270280003c06258f501c2e2114a927279f6f1bb052db2198770dffbf"
+    },
+    {
+      "path": "src/v822-close-button-position.css",
+      "size_bytes": 3526,
+      "sha256": "000f865d45174b0762fa822a53c7a121903edcad4e445a30e4571b2d749b4519"
+    },
+    {
+      "path": "src/v823-route-panel.css",
+      "size_bytes": 3456,
+      "sha256": "7d92e611db4387f22f123df993ef0537675f5519ad02c69ce374bee9580fb08f"
+    },
+    {
+      "path": "src/v823-route-panel.js",
+      "size_bytes": 1320,
+      "sha256": "081d14aaceaff4f11c3b094dff5ab2016a613856995155196598083ce41135f7"
+    },
+    {
+      "path": "src/v824-auth-keyboard.js",
+      "size_bytes": 2095,
+      "sha256": "90d8d514aed5155076e0015ff1afbb0ce0a0255b3204d38dd445ab789aede9a6"
+    },
+    {
+      "path": "src/v824-favorites-cloud.js",
+      "size_bytes": 36891,
+      "sha256": "a9d5dddfcc11e3cf2e0b6a814222e4cc2220f71c19f35cc72fd0400a4bfc2f92"
+    },
+    {
+      "path": "src/v824-favorites.css",
+      "size_bytes": 4926,
+      "sha256": "fbf5a8e024630ae3eed651318108aaaf431892cc75bb437dd6310aaf5a359b9d"
+    },
+    {
+      "path": "src/v824-mobile-sheet-and-keyboard.css",
+      "size_bytes": 4276,
+      "sha256": "81a4466ed706d3c5f20c3819501bff36db6cbfbc2373e2971990c4726c6768e6"
+    },
+    {
+      "path": "src/v825-navigation-experience.css",
+      "size_bytes": 7070,
+      "sha256": "aef5e4ffc2084f4eb8ed78b048942677c93641f214e446ea1ad25a1a9ab36b86"
+    },
+    {
+      "path": "src/v825-navigation-experience.js",
+      "size_bytes": 9044,
+      "sha256": "e626d7f8a6e67d6211b7947cb9220ad4e9ed1d02e12952f85f7bc5ec9adcee8f"
+    },
+    {
+      "path": "src/v825-typography-facility-transport.css",
+      "size_bytes": 21147,
+      "sha256": "ac5a625149829a7f939a909459445c5ee43358b4a448b92c20820b4bd0cd9a78"
+    },
+    {
+      "path": "src/v825-walk-guidance.js",
+      "size_bytes": 2767,
+      "sha256": "b9afdd311c22e4a64ba30e0f7b173894854f0d61206fa465a6f57be333df62d2"
+    },
+    {
+      "path": "src/v827-nav-close.css",
+      "size_bytes": 4824,
+      "sha256": "369efc44b3c149a44232f232c6093ed08bfb04a1385da5a6f1a052e3a90677f6"
+    },
+    {
+      "path": "src/v827-navigation-state.js",
+      "size_bytes": 1408,
+      "sha256": "990318ecb22b5b012edfb4b19efd75c5054e901ae5f7fdf15fad0ac326fe4b36"
+    },
+    {
+      "path": "src/v828-kakao-oauth-help.css",
+      "size_bytes": 1025,
+      "sha256": "ee976074a1c2c51fd1e98da5e81c411383049928c48a8afaa1b247e2771b91eb"
+    },
+    {
+      "path": "src/v829-account-auth.css",
+      "size_bytes": 3561,
+      "sha256": "bad0763179eeb5e6c0b8d435a09b295e1d61f9e2fc270fde387c1a04b38c93ae"
+    },
+    {
+      "path": "src/v829-login-notice.js",
+      "size_bytes": 2412,
+      "sha256": "81c6b00e9be7a7485a584829f7c2b3fcadebcf4c9bafd13f36b2a9dc06e3b2eb"
+    },
+    {
+      "path": "src/v829-mobile-layout-system.css",
+      "size_bytes": 31801,
+      "sha256": "0b1ca43d1795afde0838f6b990bd21452a8b00f529895414a41c577d6473fcb8"
+    },
+    {
+      "path": "src/v830-requested-detail-ui.css",
+      "size_bytes": 10156,
+      "sha256": "cea157d015b785f376ce4457b47c6a0dc64280065afa690af4a7535356bb157b"
+    },
+    {
+      "path": "src/v830-sheet-swipe-close.css",
+      "size_bytes": 1808,
+      "sha256": "7b6381195dfbb42e9b8b42b29fa885a75933eebccb20fec19b23a24503a362b1"
+    },
+    {
+      "path": "src/v830-sheet-swipe-close.js",
+      "size_bytes": 5582,
+      "sha256": "2301a08b8419ff4ad9ea4744e79d0fbf1a0ebcb82864966daf6b0aa8647a50a4"
+    },
+    {
+      "path": "src/v830-transit-title.js",
+      "size_bytes": 1589,
+      "sha256": "0fb4319aa0a4e2e0988e07eddb8114fa8b04f049dd2e4070bdd2d47a3c2d99a4"
+    },
+    {
+      "path": "src/v831-kakao-popup.js",
+      "size_bytes": 4131,
+      "sha256": "996acda4d9dccfd44d70942aba0b38f70333c11f28a704b068c06e66f5177f24"
+    },
+    {
+      "path": "src/v831-swipe-feature-toolbar.css",
+      "size_bytes": 6929,
+      "sha256": "4ac37fcd641a351ab1a48705a3ff64ca58355e03e31f531adad360f9987d9340"
+    },
+    {
+      "path": "src/v831-swipe-feature-toolbar.js",
+      "size_bytes": 46710,
+      "sha256": "0c4c8e917b25703b2475c70ebf817ddbe2725bebdc9b61c8cafa295eb0e3b1b0"
+    },
+    {
+      "path": "src/v832-mobile-interaction.css",
+      "size_bytes": 11165,
+      "sha256": "e7436fed885475bea6abab9f30acac430d29805e224c6654faf95c18b18929c6"
+    },
+    {
+      "path": "src/v832-mobile-interaction.js",
+      "size_bytes": 3942,
+      "sha256": "ed00ba4139dd235086c1fe0704d119b3e52d52a05b09524043753fca690a5bd5"
+    },
+    {
+      "path": "src/v832-priority-feature-toolbar.css",
+      "size_bytes": 11546,
+      "sha256": "3957148bb1e3221ad7a110899e87848fcf233563ac167d76bec84656b3c62ac9"
+    },
+    {
+      "path": "src/v833-home-reset.js",
+      "size_bytes": 6509,
+      "sha256": "fe5eba8f28555735f0f0f070debfa217a201f2d3f3e8420e50ea5991867581ea"
+    },
+    {
+      "path": "src/v833-home-sheet-layout.css",
+      "size_bytes": 2841,
+      "sha256": "12e5a27de20fffa6d7a4155275da03f0f3f550bc987e2556484492ae0675c952"
+    },
+    {
+      "path": "src/v833-toolbar-personalization.css",
+      "size_bytes": 9913,
+      "sha256": "75cb955631bcb5564fea869a050b028b2ddbd20ab5000dc188c76ce55441b64f"
+    },
+    {
+      "path": "src/v834-my-info.css",
+      "size_bytes": 4214,
+      "sha256": "d521fd12224e38c853807df966e62f0d150479f0bace3560f4ed978e25722abd"
+    },
+    {
+      "path": "src/v834-my-info.js",
+      "size_bytes": 14158,
+      "sha256": "2549f1d3a73f67dd7694e4a86feefd88b71adb1831221d2c65795e1082cab0d3"
+    },
+    {
+      "path": "src/v834-place-reviews.css",
+      "size_bytes": 3226,
+      "sha256": "a3fc3cd11a2df6a1d4e72cf09806ad8bb0a5f310ca1e8cd7829ad64f931833c7"
+    },
+    {
+      "path": "src/v834-place-reviews.js",
+      "size_bytes": 7728,
+      "sha256": "9a6c2d55811697e1bbee64ac9f547d5b8f38ed5068be607302bc42b30086ef9f"
+    },
+    {
+      "path": "src/v834-toolbar-settings.css",
+      "size_bytes": 3974,
+      "sha256": "3f7df3374560d8dfc13fc501e5face7882c3158a80b576e17de71ffa19d771d7"
+    },
+    {
+      "path": "src/v835-metro-user-icons.css",
+      "size_bytes": 2984,
+      "sha256": "d954f400837335822c46b3560c70d1113a9773530920718a7245ce48a8b35a1a"
+    },
+    {
+      "path": "src/v835-news-style-drawer.css",
+      "size_bytes": 9508,
+      "sha256": "01b2a0542a200b52262872ed96deaeb41dedf05cbc23171852e7b4508727afd1"
+    },
+    {
+      "path": "src/v835-requested-ui-fixes.css",
+      "size_bytes": 7242,
+      "sha256": "743a8dc249a9a86cbe064751223776aba99b264ea705dd4ee415f059d4cb17f3"
+    },
+    {
+      "path": "src/v836-mobile-controls.js",
+      "size_bytes": 1109,
+      "sha256": "6185d2d07f29f1b1224b06b872ff6e646794525577e9ca11068ace758cc8a27f"
+    },
+    {
+      "path": "src/v836-sheet-toolbar-controls.css",
+      "size_bytes": 9534,
+      "sha256": "364e2d8ed2090e6ec6b4b7801f2ce8edb89eaa7c21fc55c107fe50d6407ba978"
+    },
+    {
+      "path": "src/v840-coordinated-ui.css",
+      "size_bytes": 5223,
+      "sha256": "c6834556733ec679926d7da3239262532b988908a03235c2d10fc1a1a5f5b0f6"
+    },
+    {
+      "path": "src/v840-coordinated-ui.js",
+      "size_bytes": 7915,
+      "sha256": "f7092f90a5a9fcd4774acac96c4e5d40f7471fbe0c2ce210bb931d8f3b1f41f6"
+    },
+    {
+      "path": "src/v840-ui-core.js",
+      "size_bytes": 2947,
+      "sha256": "db1d195c76d0822d36984d0f9a820d259fcdf77b21c8e6145174c05c4a7fa929"
+    },
+    {
+      "path": "src/v841-route-and-tips.css",
+      "size_bytes": 4906,
+      "sha256": "93b0049603ae8a0df34c2809666f0266d2f63ed6698c27bd16a511bd986bd45b"
+    },
+    {
+      "path": "src/v841-route-and-tips.js",
+      "size_bytes": 3513,
+      "sha256": "613e977b8417e7f265648a482dc874066e43e35134ca14122014322738e8132e"
+    },
+    {
+      "path": "src/v845-mobile-motion.css",
+      "size_bytes": 3407,
+      "sha256": "e28a6470d909ffbab0891d8f346c63e0735c3ee5646068d79f36021209c4b054"
+    },
+    {
+      "path": "src/v845-mobile-motion.js",
+      "size_bytes": 4596,
+      "sha256": "d1db20d0c6b25ed5791712459751ae24d12c76b286d705b7931b06d064d7c6bf"
+    },
+    {
+      "path": "src/v852-mobile-ux.css",
+      "size_bytes": 11995,
+      "sha256": "a5339495f54ab8266c529f226b8279f4bb5fbe4b0ef8e26b040de26a95a863bd"
+    },
+    {
+      "path": "src/v852-mobile-ux.js",
+      "size_bytes": 2783,
+      "sha256": "56e4dc30be3592adea66c13704afed7a5b2fc526631d5386186c43d8915a8a8f"
+    },
+    {
+      "path": "src/v852-panel-transition.js",
+      "size_bytes": 1853,
+      "sha256": "8859f0d7e36f876b010d2b519594cbb95e35ea9b19c044ccdbb0477a9cd33612"
+    },
+    {
+      "path": "src/v853-pc-responsive-fixes.css",
+      "size_bytes": 23365,
+      "sha256": "7d30e2fc09926638b6c9fe35dfe0fc7e1095f80ec1cd1a707e6360e36ac6362d"
+    },
+    {
+      "path": "src/v854-integrated-ui.css",
+      "size_bytes": 21275,
+      "sha256": "df06f7cf6ca86104814665ae42e012a69e808a316caebf19289786609632f2d8"
+    },
+    {
+      "path": "src/v854-language.js",
+      "size_bytes": 21877,
+      "sha256": "9fcc00d5d846768df397a7f2a53c6c80db64ef6dfd4855bed96cab0fb457eb2b"
+    },
+    {
+      "path": "src/v854-tip-marquee.js",
+      "size_bytes": 3281,
+      "sha256": "41471b5589eb1cd89b0c87700ba6bd560af71f5a9e22bb9de041a13156a231ea"
+    },
+    {
+      "path": "src/v854-weather-desktop.js",
+      "size_bytes": 4628,
+      "sha256": "8d58a2037cdc9cf5fe700277d22438a9c55de4b041dfa2f13523c9883590f481"
+    },
+    {
+      "path": "src/v856-completion.css",
+      "size_bytes": 10588,
+      "sha256": "68fb3723ef19a6eb5d5e754d027ae751dd4706852112d656568c2e9b766f32fd"
+    },
+    {
+      "path": "src/v856-ui-completion.js",
+      "size_bytes": 4515,
+      "sha256": "10f9cd5afd99605979be3d433c6a9093bfe632939a3decc3932cc5f59a61e7ae"
+    },
+    {
+      "path": "src/v857-requested-ux.css",
+      "size_bytes": 44590,
+      "sha256": "b380e80c7c6dc66be302f71c98e06f61cb9d86a78c20afca1f0a2e11647675b3"
+    },
+    {
+      "path": "src/v857-requested-ux.js",
+      "size_bytes": 6084,
+      "sha256": "695bcfc05fa42bdb9014649e79e770a708600e9c285b8c154fa2a361a12b4fb0"
+    },
+    {
+      "path": "src/v860-onboarding.css",
+      "size_bytes": 14566,
+      "sha256": "0709cec2e06ddc0469d2862b7563f9f1ba682c8b33437f93353ad7cb937e4ea0"
+    },
+    {
+      "path": "src/v860-onboarding.js",
+      "size_bytes": 27446,
+      "sha256": "7da3857bf3e70907a1361ed33a2e4c616a3c9baad222b7656977289557764c00"
+    },
+    {
+      "path": "src/v861-mobile-sheet-repair.css",
+      "size_bytes": 11852,
+      "sha256": "873e4fd17a8c4dda29495127953287fe4ed306222fc1eb3188f2c9c4985503c9"
+    },
+    {
+      "path": "src/v861-mobile-sheet-repair.js",
+      "size_bytes": 125,
+      "sha256": "83f0642a1feee66618bce8ee29c8fb004b8744034153d86ee7130ad2148f9dbf"
+    },
+    {
+      "path": "src/v861-requested-ux.css",
+      "size_bytes": 7580,
+      "sha256": "22fe318f2ec2fa932773dc7966a8fb0b23ea9db14391d5976ba862d08b50dccc"
+    },
+    {
+      "path": "src/v861-requested-ux.js",
+      "size_bytes": 2722,
+      "sha256": "dd7283a19b1df8f68cd8258e512f138e270179e04b1ba3384964bded955cea62"
+    },
+    {
+      "path": "src/v862-map-theme-zoom-guard-core.js",
+      "size_bytes": 3321,
+      "sha256": "41e352ebd22ef954c0bdffaecbcc187af02843f4932ca946fa3f93d57ef67cde"
+    },
+    {
+      "path": "src/v862-map-theme-zoom-guard.js",
+      "size_bytes": 400,
+      "sha256": "28190ed3ac491c5a9cac2611715f0d7a748e99b0b52c52c59df05c695b8a21a2"
+    },
+    {
+      "path": "src/v862-night-analysis-session.js",
+      "size_bytes": 1370,
+      "sha256": "cd5416438501fc1a9b1e8a339ddc5f266a681deb8205eb33ef7676db2f1c8f4c"
+    },
+    {
+      "path": "src/v862-pc-mobile-separation.css",
+      "size_bytes": 19356,
+      "sha256": "37a0dea24104eaa466841b0e720bb94eba2a8c983530acaa6392f9d11b44ce5d"
+    },
+    {
+      "path": "src/v862-pc-mobile-separation.js",
+      "size_bytes": 205,
+      "sha256": "305646cdb976320b5c31ec4c5f0aa922a46c1388081fa8920a640d916b52cc3f"
+    },
+    {
+      "path": "src/v863-onboarding-flow.css",
+      "size_bytes": 8980,
+      "sha256": "6c9d524182f24b1d552d0c4358b011b20a8a1c5c77c1325a7541e6d5cd67aaed"
+    },
+    {
+      "path": "src/v864-facility-detail-redesign.css",
+      "size_bytes": 15370,
+      "sha256": "4c2e245317d497a17ed776958ecd3a3618fb4c16adba8c27481d3b8157887236"
+    },
+    {
+      "path": "src/v864-facility-detail-redesign.js",
+      "size_bytes": 205,
+      "sha256": "8a6ee6f314e4d6e2d2d6e1d4669dc07d90469690a88bd7624b2d8f822ad47aaf"
+    },
+    {
+      "path": "src/v864-refinements.css",
+      "size_bytes": 27879,
+      "sha256": "04ad66156e2412ed21993b455637b3e2cec0e7ce9d6c21e9bd3d3c85401bd4c8"
+    },
+    {
+      "path": "src/v864-refinements.js",
+      "size_bytes": 5633,
+      "sha256": "a4093ab081bd3336f0bd59061864c83b6e5a2b4b6a47272b7a2ec4f6c2e25c9d"
+    },
+    {
+      "path": "src/v865-close-dispatch.js",
+      "size_bytes": 1035,
+      "sha256": "bfa7d9826cb5ff07c4f79df1df2213d82a486a7156da2f98bb995f371b2c55a6"
+    },
+    {
+      "path": "src/v868-window-lifecycle.css",
+      "size_bytes": 1076,
+      "sha256": "498b7a17d0545ad42123db2f6617b1de327f69035fd708141069e4e92c456392"
+    },
+    {
+      "path": "src/v869-safety-home-tip.css",
+      "size_bytes": 2716,
+      "sha256": "ed06f22ac22193bcefaddf31c7a18b8f83057b3bd44326489c7575e60d2d43b8"
+    },
+    {
+      "path": "src/v870-mobile-repairs.js",
+      "size_bytes": 4636,
+      "sha256": "39ad231a2b04aac80b9d7e8b9e1ac27db94a70860c77fc1b3fa969296e518f07"
+    },
+    {
+      "path": "src/v870-mobile-ui.css",
+      "size_bytes": 8687,
+      "sha256": "c3994a17b1ab1aa7944426396cda417ed15dec96d2e983b3cf7978bf87a1ad0f"
+    },
+    {
+      "path": "src/v871-mobile-search-sheet.css",
+      "size_bytes": 7538,
+      "sha256": "2ca536ac95ab740fee41ba8f26cc7e6f7f998965e927e3a7ef2c2b72f6326083"
+    },
+    {
+      "path": "src/v872-pc-onboarding-weather.css",
+      "size_bytes": 5140,
+      "sha256": "3437538eb7099ae5798941bc44b832bf7eca5785c951878657430fc09804d729"
+    },
+    {
+      "path": "src/v873-mobile-performance.css",
+      "size_bytes": 1088,
+      "sha256": "ba3362f63788fae2d40efa92d7e13435d8d78afea90826a03cee5d77ad67862f"
+    },
+    {
+      "path": "src/v874-comprehensive-ui.css",
+      "size_bytes": 22764,
+      "sha256": "2f8f622b80297d32ce79fe92c92a7ea41b96e9cec1dfb28378aaea3b23ffb592"
+    },
+    {
+      "path": "src/v874-comprehensive-ui.js",
+      "size_bytes": 6946,
+      "sha256": "1fae9605b718d1e823f01ac5d74ec59df661ee51bba9a646818ab87b31bdc6af"
+    },
+    {
+      "path": "src/v875-map-resume.js",
+      "size_bytes": 3017,
+      "sha256": "ba9f8e2fdac3f2f6622f8639da999bbbe83a40d8f8c3cd6166d203abbab4295f"
+    },
+    {
+      "path": "src/v875-mobile-stability.css",
+      "size_bytes": 12774,
+      "sha256": "105b0e00566a0700ce0f6464582a3fd44d1d8d684a65d7d1639d189480b17dcc"
+    },
+    {
+      "path": "src/v875-mobile-stability.js",
+      "size_bytes": 9071,
+      "sha256": "6fd8613ce0dee0ecf857e2af21470ea8d32c171a49aed6eca443538b5d4f3fcd"
+    },
+    {
+      "path": "src/v875-osm-name-search.js",
+      "size_bytes": 1993,
+      "sha256": "f6b203ab45edd64e419cafce1deb86b28539af59b2974c7823d5fb9186ee3891"
+    },
+    {
+      "path": "src/v876-desktop-final.css",
+      "size_bytes": 16477,
+      "sha256": "49df1d2d4741c0fcbf41756c77057a16b916c41849518882a514a845d0bb2b01"
+    },
+    {
+      "path": "src/v876-desktop-final.js",
+      "size_bytes": 3430,
+      "sha256": "b5fc929fe50ead919ee3a2294078a3d34c2f2a8a1f4c4a47449e35f1619b187c"
+    },
+    {
+      "path": "src/v877-mobile-settings.css",
+      "size_bytes": 7675,
+      "sha256": "989055c4dfe64e0d6ce84f5104b16a312a4654fb610320de5b62859b01f24872"
+    },
+    {
+      "path": "src/v877-mobile-settings.js",
+      "size_bytes": 9820,
+      "sha256": "947684b9a6b2f5667a03193ec69503dc7b6c7301a5e2735b24e85a3531924a25"
+    },
+    {
+      "path": "src/v880-sheet-state.js",
+      "size_bytes": 3230,
+      "sha256": "196a1d3991947ed6044f9f3c4a04d2e6c7b2f5e330ba9d32f6e15608d22ac6fc"
+    },
+    {
+      "path": "src/v880-unified-sheet.css",
+      "size_bytes": 2840,
+      "sha256": "c9b75ba8c2f327e840e175cf088acc8f7a6ebadca54c103f763dd561f1d1ef2c"
+    },
+    {
+      "path": "src/verified-place-directory.js",
+      "size_bytes": 3332,
+      "sha256": "fcbe975729fa91d35e39cae3103dc800f3755876df410c051b97638641f65a6a"
+    },
+    {
+      "path": "src/version-history-legacy.js",
+      "size_bytes": 21973,
+      "sha256": "783adcf4b195dc86771838880d9ff13fbed434783eca6b1a6f505df3e160bc0e"
+    },
+    {
+      "path": "src/version-history-v7.css",
+      "size_bytes": 10022,
+      "sha256": "c25dd5a587f51475fcf7d986810df91dd977751534b4e2d39165050ae742ba85"
+    },
+    {
+      "path": "src/version-history-v7.js",
+      "size_bytes": 19432,
+      "sha256": "029d89a7d9fe8a00448dba00ca95b081706383e9ddf48e80a961485400bdd470"
+    },
+    {
+      "path": "src/version-history.js",
+      "size_bytes": 47620,
+      "sha256": "a40074b9c4ed3894dfc89272dc7325aee044d0897421407b5bdfc331a16b96e1"
+    },
+    {
+      "path": "src/window-lifecycle-state.js",
+      "size_bytes": 1324,
+      "sha256": "431a82b2400db0e8b34cbcab6fcb99e9ed58231c20905f3203cb04ac1ccc747d"
+    },
+    {
+      "path": "src/window-surface-cleanup.js",
+      "size_bytes": 1299,
+      "sha256": "58c028fefc218121dea07ec0d7128ffbd513c9720896ee2920233d3c7c449ba7"
+    },
+    {
+      "path": "src/workers/dongjak-walk-worker.mjs",
+      "size_bytes": 727,
+      "sha256": "cff283d17129fa20ad6aefb9d493c6db9167546713acd966c2e51e293338cf06"
+    },
+    {
+      "path": "src/workers/seoul-facility-sync.mjs",
+      "size_bytes": 5384,
+      "sha256": "f97a5ea3a52c4836bac9a4167be212aabc875d5609459807d2b18a040123c55f"
+    },
+    {
+      "path": "supabase/favorites.sql",
+      "size_bytes": 1472,
+      "sha256": "9fd98f5155456b8b907972740a2011e9fceb72c73f0c09f88ca5e74a9dc4946b"
+    },
+    {
+      "path": "supabase/place_reviews.sql",
+      "size_bytes": 1991,
+      "sha256": "5f9b53b8ddc671342f11959b3c2c3649f5545199bcb54dbc5e07fc1d917567c6"
+    },
+    {
+      "path": "test-evidence/pc-1920-onboarding-click-diagnostic.json",
+      "size_bytes": 8175,
+      "sha256": "8a09cbef28d6dd2c23d24f0d4da39524e536f5cbc3bac64c91b11f9d1589496a"
+    },
+    {
+      "path": "test-evidence/pc-1920-onboarding-click-diagnostic.png",
+      "size_bytes": 426591,
+      "sha256": "babc19995c956bab8745d23b62200c0ec396c3aaf3b50cd0f116348e7838dbf0"
+    },
+    {
+      "path": "tests/accessibility-v52-access-v2.test.mjs",
+      "size_bytes": 1740,
+      "sha256": "b5d44869efc460a7e3ca042ab256ba0005965b49ec62e0a7e8d5f886ae1c5c16"
+    },
+    {
+      "path": "tests/accessibility-v52-next.test.mjs",
+      "size_bytes": 3099,
+      "sha256": "3c4e6f8981b87a915cd981e10bb9d43c103b852d7a697f65f33dc891aa626399"
+    },
+    {
+      "path": "tests/ai-place-integration-v615.test.mjs",
+      "size_bytes": 6971,
+      "sha256": "9cf3aae8b45eb2e7566980634cfbaf7e0336d286ea0021856ce805177778de40"
+    },
+    {
+      "path": "tests/base-layer-controls.test.mjs",
+      "size_bytes": 2637,
+      "sha256": "10eaba9d75178492fcf767cf698466b1b1219a66b01f4b3159fa3055e8a75710"
+    },
+    {
+      "path": "tests/base-map-usability-next.test.mjs",
+      "size_bytes": 2906,
+      "sha256": "aaf315d6bd62ab685f7ecaba0e7f33dfb8bbe0f242272390270bd8d0860603f7"
+    },
+    {
+      "path": "tests/basemap-v3-responsive-access.test.mjs",
+      "size_bytes": 4623,
+      "sha256": "e8e433e843c53ec1f441c52976f067c1d356803d79d46b980379cf19ebd94e30"
+    },
+    {
+      "path": "tests/basemap-v4-zoom-responsive.test.mjs",
+      "size_bytes": 2174,
+      "sha256": "f662c576af45d571a7ea0ef22d713f744fd840891a72d2f1f873c788c364931e"
+    },
+    {
+      "path": "tests/bottom-tabs.spec.js",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/building-assets.test.mjs",
+      "size_bytes": 2650,
+      "sha256": "d911fcc37411f3d3e00a432bfc65c1e6843cdcb74f871b2040bd1f16f2496835"
+    },
+    {
+      "path": "tests/bus-api-diagnostics.test.mjs",
+      "size_bytes": 1577,
+      "sha256": "ce1e238df66d7149a0dcedbf5adf687ed4fd76a5884f97a3c2d121493ebc2223"
+    },
+    {
+      "path": "tests/bus-servicekey-case.test.mjs",
+      "size_bytes": 1759,
+      "sha256": "4399f0d07d74a61e53389df2d1ad93f3f24812e54b1f34ac8955ea654f6156aa"
+    },
+    {
+      "path": "tests/cloudflare-transport-api.test.mjs",
+      "size_bytes": 3219,
+      "sha256": "386144d3b1225314d58669d6a3bca115e38ecc77350da6b3b65667aaa2c7bcbd"
+    },
+    {
+      "path": "tests/community.test.mjs",
+      "size_bytes": 1334,
+      "sha256": "de64b73ed8ae49cf8638fe002bde89c86dd577ac6d56b8b5f3c44603a0dcabe6"
+    },
+    {
+      "path": "tests/console.spec.js",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/daerim-station-coordinate.test.mjs",
+      "size_bytes": 1400,
+      "sha256": "557c5b7307579936c66a221f478d579814fdf9d6ebe08ba51a2c4dbf767deccf"
+    },
+    {
+      "path": "tests/dj-v8212-stability.test.mjs",
+      "size_bytes": 2195,
+      "sha256": "9c662f4a0e0da999695ab4f367e771c50da6b6e502b3946ff325e961dbc236b5"
+    },
+    {
+      "path": "tests/dongjak-update-map-10km-median.test.mjs",
+      "size_bytes": 4572,
+      "sha256": "2fac20d2a2412a324b1fbc1172a47c088c1161cc42c4a3f116f1f27d23e9afbb"
+    },
+    {
+      "path": "tests/e2e/bottom-tabs.spec.js",
+      "size_bytes": 1012,
+      "sha256": "d4ebeeeb4e7ae42bea69c3561d1000264a3d34c068cecbc04124eda414d3b769"
+    },
+    {
+      "path": "tests/e2e/ci-critical-paths.spec.js",
+      "size_bytes": 6239,
+      "sha256": "c10a7d534da5040456199ca1e6add16c546282d2adaa9e27a82ab221aa78c1a8"
+    },
+    {
+      "path": "tests/e2e/ci-visual-audit.spec.js",
+      "size_bytes": 9927,
+      "sha256": "fb22a9ec99a606bd91fcde43f2a3d733dcacc48f4949460e369f6fa5871408ef"
+    },
+    {
+      "path": "tests/e2e/facility-window.spec.js",
+      "size_bytes": 2164,
+      "sha256": "803b34982574ef5dab64792d5960077fdff69645b610192a651147bddb68f568"
+    },
+    {
+      "path": "tests/e2e/floating-window.spec.js",
+      "size_bytes": 750,
+      "sha256": "740d7264cce979a92fe4749ffedb984ce18c434ddc5c06a0655ad7c256d1f191"
+    },
+    {
+      "path": "tests/e2e/helpers.js",
+      "size_bytes": 808,
+      "sha256": "8fb47b2ac2b395ce14d72a5202938dfe3a9a1d362c3aaacecd1b91c8479f5e1d"
+    },
+    {
+      "path": "tests/e2e/map-controls-lifecycle.spec.js",
+      "size_bytes": 2040,
+      "sha256": "02a30f849505541b85f111d11f4484e14a78b27d84bd5197c908bc68f1a6eadc"
+    },
+    {
+      "path": "tests/e2e/map-controls.spec.js",
+      "size_bytes": 2432,
+      "sha256": "a33686aeda1fbe246693c3d85f834e7e372b251b0a436546643ba7e4348b1ede"
+    },
+    {
+      "path": "tests/e2e/map-screen.spec.js",
+      "size_bytes": 2115,
+      "sha256": "5e01fe97289f463a9dc96ed9166f7dcc5ff5b4c383a78529bf33b561e1b7083b"
+    },
+    {
+      "path": "tests/e2e/onboarding-network-diagnostic.spec.js",
+      "size_bytes": 440,
+      "sha256": "308353ee240770596795ddefe059c16e33ca6f39f92a993fe824fd4a1aefee92"
+    },
+    {
+      "path": "tests/e2e/smoke.spec.js",
+      "size_bytes": 530,
+      "sha256": "cccad1ffd0fb3296970dd08c5b298a1ef1fc9f223318e32fb51c712d1acc4962"
+    },
+    {
+      "path": "tests/e2e/transit-window.spec.js",
+      "size_bytes": 1468,
+      "sha256": "1cdb2b2396a644bef11e47ad658aa029d58f3c0549ed0842aca0fda4dde2f295"
+    },
+    {
+      "path": "tests/e2e/ui-inventory.spec.js",
+      "size_bytes": 2714,
+      "sha256": "91fb9c3bb42f78d361389e22b50140e9c5fe1c245511a38e2416d66a72354c82"
+    },
+    {
+      "path": "tests/facility-window.spec.js",
+      "size_bytes": 533,
+      "sha256": "52d24fcf4d4b67b25dc46a3b8d4f244d8d65f1f24733cc092bdcf92b2396ea41"
+    },
+    {
+      "path": "tests/fixed-rail-v53.test.mjs",
+      "size_bytes": 3436,
+      "sha256": "aa3235b0abbc693e29a6dd82cb03ae3900302e84cb062cb93590a1ea2d0aaaf6"
+    },
+    {
+      "path": "tests/floating-window.spec.js",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/gps-safety-popup-v824-addon.test.mjs",
+      "size_bytes": 4083,
+      "sha256": "7b9d4506a074376dceee5b07bed3115bb2900c67307ad2e7ad6ff64b1573e91e"
+    },
+    {
+      "path": "tests/gps-safety-v826-integration.test.mjs",
+      "size_bytes": 2772,
+      "sha256": "c56855cdd260a8d1079f02b68b78b5c7a66ad5a1a7805c6cc59b872e7563666d"
+    },
+    {
+      "path": "tests/korail-line1-20260901-official-data.test.mjs",
+      "size_bytes": 4059,
+      "sha256": "b561ffcee6ca426048a5a3b0719e288fb22a524b7b045c15dda2e42fbce48739"
+    },
+    {
+      "path": "tests/korean-search.test.mjs",
+      "size_bytes": 993,
+      "sha256": "75a3e0d246d6f0a7cde6b4b502e95acdecef83fade159737188e0130e57e729d"
+    },
+    {
+      "path": "tests/liveTransit.test.mjs",
+      "size_bytes": 8910,
+      "sha256": "bdb99d7a4d0bd47a996d14802e21a432a52914fe71c53630e96fa4af51b54d81"
+    },
+    {
+      "path": "tests/map-appearance-v179.test.mjs",
+      "size_bytes": 2445,
+      "sha256": "82612f57d2ce7fd59f397be37ea582e69b0e5bdca7daff957ec8f52dfb2067fa"
+    },
+    {
+      "path": "tests/map-patch.test.mjs",
+      "size_bytes": 2223,
+      "sha256": "31b40ad98fcdc29654e6e9deb2d19fde0bf9d75c9c516856ff2fd90e9cf4c4a9"
+    },
+    {
+      "path": "tests/map-polish-v178.test.mjs",
+      "size_bytes": 3867,
+      "sha256": "495bf013f3ae299a0118df5447fbe936323f9ee37288591a056a035f2147458b"
+    },
+    {
+      "path": "tests/metro-all-stations-timetable.test.mjs",
+      "size_bytes": 8253,
+      "sha256": "9be5e71b86abf336a7f6603183141c9232f3fc4d4ef63782b2f76f518a7236b7"
+    },
+    {
+      "path": "tests/metro-eta-equal-label-20261110.test.mjs",
+      "size_bytes": 1809,
+      "sha256": "bd0c5f30781566a7e1b3804c398b24ecf82e39aa5a4e6653f2788cbaa735d7e6"
+    },
+    {
+      "path": "tests/metro-full-timetable.test.mjs",
+      "size_bytes": 2838,
+      "sha256": "f8f1dcf5e474400384ff143a2d3d510354e18d88b5e45bbf8810bc0532e42190"
+    },
+    {
+      "path": "tests/metro-geographic-markers.test.mjs",
+      "size_bytes": 6411,
+      "sha256": "6ced645e774abce4abdbbf9e1a0c364d779229d04a61413e1ecba53c37cf21eb"
+    },
+    {
+      "path": "tests/metro-inline-schedules-20261110.test.mjs",
+      "size_bytes": 2466,
+      "sha256": "653b2d18ac8be6c0b2c680fd9285ad43471b99342f99d3acd6d56c072566bd63"
+    },
+    {
+      "path": "tests/metro-last-report-v612.test.mjs",
+      "size_bytes": 4252,
+      "sha256": "4074f69f6f118f6b752dd1e4809ae66db01a8b06cbc7778ae469192191e8e491"
+    },
+    {
+      "path": "tests/metro-line9-express-groups.test.mjs",
+      "size_bytes": 2827,
+      "sha256": "4640dbf0c32d2537f284a3a9484e294c7252bb39707b76d4d0f6f8681213ba93"
+    },
+    {
+      "path": "tests/metro-operator-timetable-tab-20261110.test.mjs",
+      "size_bytes": 2531,
+      "sha256": "48b83c0757224ed34dc535e8a898c1cc052ed7e485cd6070dac7873c42be4536"
+    },
+    {
+      "path": "tests/metro-per-line-badges-v54.test.mjs",
+      "size_bytes": 5012,
+      "sha256": "2d87ce275325bc27269ad3ebdb9312e4a32a418bc88bddc2f6f565ff61881e39"
+    },
+    {
+      "path": "tests/metro-planned-arrivals-20261110.test.mjs",
+      "size_bytes": 2313,
+      "sha256": "587ffb8cd5d4e8ec3b54c32715acb2810a4197f035d9437da6c2054678078cf7"
+    },
+    {
+      "path": "tests/metro-sidepanel-20261110.test.mjs",
+      "size_bytes": 2131,
+      "sha256": "b4f89456a0a55aea744bac4c1e2cf05576c65afa4b6f8eac87cdaf6c66d9cd07"
+    },
+    {
+      "path": "tests/metro-station-split.test.mjs",
+      "size_bytes": 4397,
+      "sha256": "2cb332d0d886eec2f4ee49321fc4ed59a02076b6dc52a34b274b49936f0ccf7e"
+    },
+    {
+      "path": "tests/metro-status-ux-v612.test.mjs",
+      "size_bytes": 2116,
+      "sha256": "0d08b83fd87f76e206e5dfdfb9cda2786d12cf4dbc21d5cfd260fe67a052eb6e"
+    },
+    {
+      "path": "tests/metro-timetable-direction-design.test.mjs",
+      "size_bytes": 1849,
+      "sha256": "03136ce443853824d4f64e9bdd34edb0bd986787f00e7b584cae9bac8a49fb50"
+    },
+    {
+      "path": "tests/metro-zoom-bus-tunnel-v56.test.mjs",
+      "size_bytes": 3417,
+      "sha256": "fb54f03b7135ee679473e19a0d71abbaa68864c7497d61d1e9672b2e648a5c21"
+    },
+    {
+      "path": "tests/navigation.test.mjs",
+      "size_bytes": 1439,
+      "sha256": "8b1d6e6aaa3199b86702dd5daf03cc1312945efdb21c5e4fec7e1263e45a299c"
+    },
+    {
+      "path": "tests/night-building-contrast.test.mjs",
+      "size_bytes": 3022,
+      "sha256": "f8a9e49543516bfb43b806d871335d8c5e799bf7a396873096db111067f5b1cc"
+    },
+    {
+      "path": "tests/night-occlusion-v5120.test.mjs",
+      "size_bytes": 3181,
+      "sha256": "371793e767fa26e748f47f10280ee996c667e66194945808396e61b96ac7ac0a"
+    },
+    {
+      "path": "tests/night-safety-workspace.test.mjs",
+      "size_bytes": 2073,
+      "sha256": "c8fcca2e2de913a95ed2a161c17fb69438f4ef3e0002c5090b3e5b57c4f49343"
+    },
+    {
+      "path": "tests/night-visibility-floating-panel.test.mjs",
+      "size_bytes": 1562,
+      "sha256": "936efafba8882e0d4de1e156f8446af3053de70fd111a83e5dc66542aa214eff"
+    },
+    {
+      "path": "tests/night-visibility-integration.test.mjs",
+      "size_bytes": 3409,
+      "sha256": "f10c8b0c71a7094fefa1eda8b00fbb8f7998239dce19549ff8ab9a4f5c9473cf"
+    },
+    {
+      "path": "tests/night-visibility-map-runtime.test.mjs",
+      "size_bytes": 9768,
+      "sha256": "0d1df9881f6b7d7b547454106303c0bc8bd45c72a36bee7d505189a8ca189c36"
+    },
+    {
+      "path": "tests/official-bus-upload-real-data.test.mjs",
+      "size_bytes": 3233,
+      "sha256": "a48ab7cdd18355c1358de66a4f4cc1d185070ae84f751c539e870e282d44a9c3"
+    },
+    {
+      "path": "tests/pages-full-api.test.mjs",
+      "size_bytes": 3581,
+      "sha256": "3bd11ece3d0210c98981415b45be6b75fd12c034dfd61c872b5b4a7bc0c1b586"
+    },
+    {
+      "path": "tests/park-metro-bus-density-v612.test.mjs",
+      "size_bytes": 3666,
+      "sha256": "fc744bf791c2d190884808057f43a2a17f0f850d54624811fa269ebfb157babf"
+    },
+    {
+      "path": "tests/platform-cleanup-v710.test.mjs",
+      "size_bytes": 1740,
+      "sha256": "f337a60c207695c46ec283d977a4f0754fedfe9face086b34ccffff139f7f8d0"
+    },
+    {
+      "path": "tests/platform-split-v710.test.mjs",
+      "size_bytes": 2275,
+      "sha256": "66aab8a00fd97f9363bef66f712c1a17ad1d374c9658a4ff9fc97fbc3cc361b8"
+    },
+    {
+      "path": "tests/protection-zone-fieldwork-v611.test.mjs",
+      "size_bytes": 3208,
+      "sha256": "2cefd2fc6529533aea67e760473eefb673885a20c0767cef321c5dada31c1a4a"
+    },
+    {
+      "path": "tests/protection-zone-integration.test.mjs",
+      "size_bytes": 5131,
+      "sha256": "e6c8342f8aaeefe8df01c11d549338782fb706b3a7f718589d10f7c3ca498124"
+    },
+    {
+      "path": "tests/protection-zone-phase123-integration.test.mjs",
+      "size_bytes": 6291,
+      "sha256": "9b893f6537218f0b9425efddea5e895012247b2069a5b4607af66ef1cdd86918"
+    },
+    {
+      "path": "tests/protection-zone-visibility-recovery.test.mjs",
+      "size_bytes": 4514,
+      "sha256": "1208257b69144bca9a862ca722ec486acd523167866567a644bac0779f116b92"
+    },
+    {
+      "path": "tests/rail-fade-follows-route.test.mjs",
+      "size_bytes": 3682,
+      "sha256": "ca6a17e80c063249fec68f7743f74fbde6e4b9f73710ce833b7bd4bad1a5a1b6"
+    },
+    {
+      "path": "tests/rail-road-river-alignment.test.mjs",
+      "size_bytes": 3518,
+      "sha256": "5b5a0c53cbb748c59bf223e5ddeac07cbde97470acb1eeca1654035f1dce4bb3"
+    },
+    {
+      "path": "tests/realtime-source-freshness.test.mjs",
+      "size_bytes": 4440,
+      "sha256": "dd1600fb879ad659823aa23ce32abf445651971452c7fd4e51223eb272dadd7a"
+    },
+    {
+      "path": "tests/responsive.spec.js",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/route-search.test.mjs",
+      "size_bytes": 2025,
+      "sha256": "caa20ef7b73c28dd6b10f63a4128a5a91d318037d0067734f7efdeb659f7d7b6"
+    },
+    {
+      "path": "tests/safety-layers-v177.test.mjs",
+      "size_bytes": 2501,
+      "sha256": "f306ca633b67c8c1cfa93cb7728bdf152a1191be85b4c30bb32057e5451d6516"
+    },
+    {
+      "path": "tests/sangdo-team-accident-review.test.mjs",
+      "size_bytes": 5239,
+      "sha256": "8aff3469bef69e1dfad9e1598ab7ce41a5e952ed649b00cb0533f12a9fea1ea5"
+    },
+    {
+      "path": "tests/sdot-environment.test.mjs",
+      "size_bytes": 2860,
+      "sha256": "ebe0e42ab191b966cc61c4297c2029f076b0f53903a088b5950209fa42d5af8b"
+    },
+    {
+      "path": "tests/semver-retrospective-history.test.mjs",
+      "size_bytes": 4486,
+      "sha256": "a7edfc1af4fa9eb0fda7ea88fbed138c98bf0b87032060835df5315f0cf16147"
+    },
+    {
+      "path": "tests/seoul-api-response.test.mjs",
+      "size_bytes": 1549,
+      "sha256": "a39c23c7202d4a03983a5830a8fe2a065aff4602c4556a5e307538647ac6b143"
+    },
+    {
+      "path": "tests/seoul-facilities-v850.test.mjs",
+      "size_bytes": 3707,
+      "sha256": "62cf4cf9b5bc4f40d3a9b2572eca736e02ec277b7e089b84c108085f74b7aeaf"
+    },
+    {
+      "path": "tests/service-hours.test.mjs",
+      "size_bytes": 3463,
+      "sha256": "47539cc7858ddaddff856b407442e9ca21220b2d9069ebeb87d3ad2af861d20e"
+    },
+    {
+      "path": "tests/sillim-operator-fetch-parser-20261110.test.mjs",
+      "size_bytes": 2943,
+      "sha256": "b2d9f4240283546283fae8b97b7b8b1a4e76e2457027190ba9561c03fcebd82e"
+    },
+    {
+      "path": "tests/support/approved-v818-transport-focus.mjs",
+      "size_bytes": 2950,
+      "sha256": "f06baddc8c4584ca71eed8e439576149ea2544e300318a84542a9f37cb9d167c"
+    },
+    {
+      "path": "tests/support/approved-v825-transport-ui.mjs",
+      "size_bytes": 8418,
+      "sha256": "429c0ab3772eae1a3a0b392089a930a37cff401e5e3a526c1c511f05402a0800"
+    },
+    {
+      "path": "tests/support/approved-walk-integration.mjs",
+      "size_bytes": 2973,
+      "sha256": "93a496368a30aeb7debf0248d3d8c4d17539991948a9e991adec578eea9cbb6a"
+    },
+    {
+      "path": "tests/support/historical-snapshot-audit.mjs",
+      "size_bytes": 571,
+      "sha256": "97abd6dc653a29363bdfe2285cceaf77472f6110081316ae43b1dc6dbe52c511"
+    },
+    {
+      "path": "tests/topis-road-incidents.test.mjs",
+      "size_bytes": 2965,
+      "sha256": "1d16f67fab5415a8f1b0e5b7e87729b001ce0b7ccc4adc6aafede7ef25b4cb67"
+    },
+    {
+      "path": "tests/transit-window.spec.js",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tests/transport-click.test.mjs",
+      "size_bytes": 3617,
+      "sha256": "fa77412a39c26822d571a15713c60b2206a9c0d8f74a649e08e13b950d3bfee1"
+    },
+    {
+      "path": "tests/transport-data.test.mjs",
+      "size_bytes": 1431,
+      "sha256": "b3592e377088bc75c0df42b2f58d527429fefe45b607d871773f7e6c9be6d279"
+    },
+    {
+      "path": "tests/transport-map.test.mjs",
+      "size_bytes": 2523,
+      "sha256": "4d9c0871cea109ef7f60a904b1adc5d2c0798172418952598b203c38b6de6361"
+    },
+    {
+      "path": "tests/transport-night-bus-labels.test.mjs",
+      "size_bytes": 3121,
+      "sha256": "61b8e429bba3a5882f62e0545bc2f54086194b164b9823440619d28aac1c589b"
+    },
+    {
+      "path": "tests/transport-source-recovery.test.mjs",
+      "size_bytes": 4544,
+      "sha256": "b8fa4acae5c9b8b393ca5c9bcc4e2c34ba6caf5144d82bb98519d2b60f6d32e3"
+    },
+    {
+      "path": "tests/transport-verified-boundary.test.mjs",
+      "size_bytes": 1632,
+      "sha256": "3c427be3dd0ab4fcc0b1b9f2908c87d2ffb8c46affacf9ebc60736cd58be2834"
+    },
+    {
+      "path": "tests/update-news-location-immersive.test.mjs",
+      "size_bytes": 8206,
+      "sha256": "217e9d54f75c0f3b740464219dfcb7ea08367a2b7677bc18292deee406f6ebc2"
+    },
+    {
+      "path": "tests/v100-road-precision-history.test.mjs",
+      "size_bytes": 3504,
+      "sha256": "a0121adab510290453c508d5988eb317a26b2914d34a96672afa0600c732b06c"
+    },
+    {
+      "path": "tests/v1710-map-cleanup.test.mjs",
+      "size_bytes": 4132,
+      "sha256": "33069387f6dcff05813e617e86c71ca624c7ecea38397f1928cadb96b08ebcd0"
+    },
+    {
+      "path": "tests/v1711-visual-labels.test.mjs",
+      "size_bytes": 4545,
+      "sha256": "e4f6fc42de76cd787d630343f74e78c389ceeff616d59b1dc3ca5b5c1c8c7eae"
+    },
+    {
+      "path": "tests/v1713-building-translucency.test.mjs",
+      "size_bytes": 1221,
+      "sha256": "1b09a2d844e23bc2e602d0950318a1379fc7ff09df81b1030983ff7671c370cd"
+    },
+    {
+      "path": "tests/v1713-subway-overview.test.mjs",
+      "size_bytes": 4133,
+      "sha256": "a1ea4d416d3992153d40e69d9d3b4437ca33c14c383df25c76a0ca10330ea397"
+    },
+    {
+      "path": "tests/v1714-interactions.test.mjs",
+      "size_bytes": 3545,
+      "sha256": "2b8aef1a4af9d03579357c93f8e2104fedda887747b7747d659ba87a1e9333f3"
+    },
+    {
+      "path": "tests/v1716-fixes.test.mjs",
+      "size_bytes": 2203,
+      "sha256": "7b680d380d95f5229bd4ebe92294dfbfb71007e670acd269e0cf995808024aae"
+    },
+    {
+      "path": "tests/v1717-subway-landmarks-history.test.mjs",
+      "size_bytes": 3516,
+      "sha256": "fdf0598a0169c8783d00eceb4d7b38225a996d9da597ca9cf039a279d89a2d57"
+    },
+    {
+      "path": "tests/v1718-stations-ui.test.mjs",
+      "size_bytes": 3833,
+      "sha256": "49515c0eac746e35670950a4cd70d852ea9d44c6f27495fe18f84c46dcae4ad4"
+    },
+    {
+      "path": "tests/v50-release.test.mjs",
+      "size_bytes": 4902,
+      "sha256": "4040abe37a72af2083c12b2e2ff814052c0fa5af1eefa71c1cb5794f48e23919"
+    },
+    {
+      "path": "tests/v5100-consolidation.test.mjs",
+      "size_bytes": 3435,
+      "sha256": "55cead78ca7a75efb16fb2c6e21b396d91e7fff8eda1accdcef94f4f8acec8b8"
+    },
+    {
+      "path": "tests/v5101-screen-rail-and-dock.test.mjs",
+      "size_bytes": 3179,
+      "sha256": "cc945f23695c347923f4838981fb83fcb523fdfb4bf91b36d292bf67902b2399"
+    },
+    {
+      "path": "tests/v5102-haze-tree-logo.test.mjs",
+      "size_bytes": 2577,
+      "sha256": "4880097890ac9995f1a69bba51bca92b973d0aa22d7b692a573081ab7397172d"
+    },
+    {
+      "path": "tests/v5103-perspective-logo.test.mjs",
+      "size_bytes": 2244,
+      "sha256": "5bbf07457423ff1da6f91a1a6480b2271109580c814634bfb5126e2be6babf35"
+    },
+    {
+      "path": "tests/v5121-night-ui.test.mjs",
+      "size_bytes": 2286,
+      "sha256": "70430fc9da7220030851e3da2ccf1ce47fadbd693d9640b9198bd16ee35aaf28"
+    },
+    {
+      "path": "tests/v5122-night-contrast.test.mjs",
+      "size_bytes": 1609,
+      "sha256": "dc11606b6784278a90adb0da02012ed7ed9987cd8d14d90ad442edba32f6effc"
+    },
+    {
+      "path": "tests/v5123-building-logo.test.mjs",
+      "size_bytes": 1707,
+      "sha256": "e11efb1c8d744d818b08225415861a9065dbe0bd61a48f62b003853045a3df55"
+    },
+    {
+      "path": "tests/v5124-contrast-api.test.mjs",
+      "size_bytes": 2945,
+      "sha256": "702eb43a02fb55089c7514ead6a26f7371dcf1c1af01759641290917d51c8079"
+    },
+    {
+      "path": "tests/v5125-boundary-building-ui.test.mjs",
+      "size_bytes": 3075,
+      "sha256": "ed980ee8f4338045957f870c33b3b61d7b79507c7fc6b88525cf0d2fe430a3ea"
+    },
+    {
+      "path": "tests/v5126-building-surface.test.mjs",
+      "size_bytes": 2504,
+      "sha256": "19da7b84fef1bb83c20ee06809b20676f25738f7e61d994930a5e4b87d7ddb5c"
+    },
+    {
+      "path": "tests/v5127-night-road-legend.test.mjs",
+      "size_bytes": 2288,
+      "sha256": "582b19280e13149695f4b92b0f103812aaed2d85bd2ee52a3f17db6a3dc0ec22"
+    },
+    {
+      "path": "tests/v5128-pitched-road-visibility.test.mjs",
+      "size_bytes": 7026,
+      "sha256": "04cb761442d8a38b159034cee7b22bf4a3df147a4aeddab24932aace8ab8cdc8"
+    },
+    {
+      "path": "tests/v5129-night-roads-boundary-fallback.test.mjs",
+      "size_bytes": 13298,
+      "sha256": "20620bebc025ce02e0ab0d4663d9f4e768aa90af8eed3c2931acf15a9ae5c523"
+    },
+    {
+      "path": "tests/v52-usability.test.mjs",
+      "size_bytes": 3197,
+      "sha256": "170533def49f622b110ecb362d4a0737a6eeb715575ec4849b9a9d328cfe1a2e"
+    },
+    {
+      "path": "tests/v54-polish-regressions.test.mjs",
+      "size_bytes": 3617,
+      "sha256": "17ac5134dee2f50f4da01343e3602cc1c4c4e448040b13e9db4b600cac8adbc8"
+    },
+    {
+      "path": "tests/v55-mobile-overlays.test.mjs",
+      "size_bytes": 2278,
+      "sha256": "5e581a7b7bafcc5af64fe95ed9434992553a1c89fd0ec484d6a561a3b7d07a76"
+    },
+    {
+      "path": "tests/v57-mobile-map-visual-fixes.test.mjs",
+      "size_bytes": 2902,
+      "sha256": "732099311ee52192b8c62ff705c44b1a41c5ab06338094a64923df6d628e5505"
+    },
+    {
+      "path": "tests/v58-mobile-sheet-density.test.mjs",
+      "size_bytes": 2043,
+      "sha256": "1ea349e9206cdaa3cbf0460a0bbc8126676b98a630b36c56207407b80d72e06c"
+    },
+    {
+      "path": "tests/v5910-logo-zoom-gate.test.mjs",
+      "size_bytes": 2206,
+      "sha256": "c779ac1f939a462968e85ec3f090ed26e41d2d607e35f7121b7ac9d2253d87ee"
+    },
+    {
+      "path": "tests/v5911-place-consistency.test.mjs",
+      "size_bytes": 4448,
+      "sha256": "f9429013275f86f15c54fb031cbbf6f633f4aac50bf1042dd7f0f14ad541f45d"
+    },
+    {
+      "path": "tests/v5911-startup-theme-polish.test.mjs",
+      "size_bytes": 2648,
+      "sha256": "02dba1e76b5f19403149dc9b0fa1e6140e46d5d23ed9f07e884c9dac3514cafc"
+    },
+    {
+      "path": "tests/v5912-map-label-layout.test.mjs",
+      "size_bytes": 4314,
+      "sha256": "42aac5931c29d5474d80c59f9e50f7a345c045a4a8490877f42446e65cf76e54"
+    },
+    {
+      "path": "tests/v592-header-sheet.test.mjs",
+      "size_bytes": 946,
+      "sha256": "4b1169c317fc3798ee5f3adac44569681e395f42c9eca86996fb1dd6ac34073a"
+    },
+    {
+      "path": "tests/v594-ui-landmarks-logos.test.mjs",
+      "size_bytes": 2525,
+      "sha256": "d98d2cf2c0e66e8d6909ced8e13dfe280d2bd29867ca7e741d2398027ddb40cf"
+    },
+    {
+      "path": "tests/v595-pedestrian-tools.test.mjs",
+      "size_bytes": 3460,
+      "sha256": "40766381cc5bab041506df0e4060312bf339ae20e3d1577d60e29d916ec3ddbd"
+    },
+    {
+      "path": "tests/v596-controls-collision.test.mjs",
+      "size_bytes": 1546,
+      "sha256": "129068b668636501d554fe88f142b7c69c9a8cab11ec635c66e1b828e1b24ecc"
+    },
+    {
+      "path": "tests/v596-desktop-scale-dock.test.mjs",
+      "size_bytes": 2292,
+      "sha256": "30c8658551fc08c3a7b3219cc97729174677526e09368dba71ee6df71e49776a"
+    },
+    {
+      "path": "tests/v596-header-access-panel-fix.test.mjs",
+      "size_bytes": 2342,
+      "sha256": "64ca2bf6803ca7de523e047f4cb90692f26ed527495b906dd49df7b1a38dc180"
+    },
+    {
+      "path": "tests/v596-scale-bus-hours-logo.test.mjs",
+      "size_bytes": 3394,
+      "sha256": "ad3c7bdda7eb3c6079bd9d4589c487dcb854ea7bba122eafa5a08256ce04f541"
+    },
+    {
+      "path": "tests/v597-school-bus-hangang.test.mjs",
+      "size_bytes": 3060,
+      "sha256": "ea8d6c0d4532bf7b4f84998fb7588b4a32a62f8c4a4ad777a8e5176b77458372"
+    },
+    {
+      "path": "tests/v598-loading-bus-bridge-timetable.test.mjs",
+      "size_bytes": 4207,
+      "sha256": "9c37d791c1bec587cca7232c53b52635dddd4f1414c0a95d15c100a553fd5176"
+    },
+    {
+      "path": "tests/v599-news-civic-brand.test.mjs",
+      "size_bytes": 3048,
+      "sha256": "084063e39c57e4126f2407237a9a4b0227069d48ba6ce8e5dab5a9cf99c74883"
+    },
+    {
+      "path": "tests/v60-solid-slim-night-roads.test.mjs",
+      "size_bytes": 2385,
+      "sha256": "04be0dd1a7eafc998e18131a489171f8f2f7cee0b5d1aad6a2dbdcf83a037afc"
+    },
+    {
+      "path": "tests/v601-layout-news.test.mjs",
+      "size_bytes": 3332,
+      "sha256": "e63506ad545ca29135b1da36247e8a175d4a95619436a64f08566980c8736768"
+    },
+    {
+      "path": "tests/v601-transport-recovery.test.mjs",
+      "size_bytes": 2725,
+      "sha256": "5def9c7db345966510b30c677f01bb343300827b086bba2a3cf49e40b511a612"
+    },
+    {
+      "path": "tests/v602-overlay-news-places.test.mjs",
+      "size_bytes": 3637,
+      "sha256": "7c58d497001ca6b4b3a5541a9c8d9e8c5d8be3aa0169ab29b1953816b29cbb7f"
+    },
+    {
+      "path": "tests/v603-bridges-news-history.test.mjs",
+      "size_bytes": 4922,
+      "sha256": "3d1f5fd1d4aa18392de433bdfbe9a3607ee51d3528453157a7c639dc55c00e58"
+    },
+    {
+      "path": "tests/v604-featured-bus-names.test.mjs",
+      "size_bytes": 3645,
+      "sha256": "ba38e9698c064ebef4f42d7aaca8db6b8678b8971738a46827683f32e681bd9f"
+    },
+    {
+      "path": "tests/v605-logos-labels-ai.test.mjs",
+      "size_bytes": 5384,
+      "sha256": "772cbbe3ce82cd40f0a93ca6dc1896de4ad7f2921ca462b250c7e59a521b6fee"
+    },
+    {
+      "path": "tests/v606-responsive-place-logos.test.mjs",
+      "size_bytes": 3987,
+      "sha256": "1852a1193f383a8909b76c29a63b4ac76c2a444508bbd0e9aeadd78e533d78af"
+    },
+    {
+      "path": "tests/v607-mobile-safari.test.mjs",
+      "size_bytes": 2377,
+      "sha256": "ee3d1c47f17e35bdd27103eeb82bb5d2f62081bba30425b97213724e45d0a78c"
+    },
+    {
+      "path": "tests/v608-mobile-collision-regression.test.mjs",
+      "size_bytes": 1930,
+      "sha256": "f3e0bfa6c2f63e48f8b2da6060998a7a1747206ccd95e2770b52f6383278a0a1"
+    },
+    {
+      "path": "tests/v609-3d-native-label-priority.test.mjs",
+      "size_bytes": 4206,
+      "sha256": "a49dbd5b15f9048f245d757172edb6c9b6ff5558ee3ff0816ad17e204e89da9a"
+    },
+    {
+      "path": "tests/v610-integrated-stability.test.mjs",
+      "size_bytes": 5276,
+      "sha256": "bc889280ea216a822feda1b23d0f8772f13a43f59ccb91ff64957b166bce81bc"
+    },
+    {
+      "path": "tests/v610-safety-sheet-pwa-header.test.mjs",
+      "size_bytes": 2253,
+      "sha256": "0e2c3abbdb7dadfb56448271915968d8397b44c8ed482b373235f98aed6a6041"
+    },
+    {
+      "path": "tests/v611-grounded-labels-mobile-haze.test.mjs",
+      "size_bytes": 2689,
+      "sha256": "fdeb848078e9d9ab4434252bb1467c4f03667797414e4723f9f4a3ec3aa965be"
+    },
+    {
+      "path": "tests/v611-live-diagnostics-news.test.mjs",
+      "size_bytes": 1982,
+      "sha256": "866b5f14f1bafdefd75677f816aea5a7c9185cc28d5c4f17497db3a5a3c3def0"
+    },
+    {
+      "path": "tests/v611-mobile-seam-point-files.test.mjs",
+      "size_bytes": 3062,
+      "sha256": "183251e18cc8b755c8edd09a1630caa9d35572d881f3358112a3d8f072114c30"
+    },
+    {
+      "path": "tests/v611-mobile-top-clarity-hotfix.test.mjs",
+      "size_bytes": 1972,
+      "sha256": "15fb177094ef0aec6ce731e09283274d5a4c5b20ff78c141a20fa5064bc0cc61"
+    },
+    {
+      "path": "tests/v611-static-bus-ai-floating.test.mjs",
+      "size_bytes": 3403,
+      "sha256": "b8c8c01db788217eee46d78206fcf3ae85bed252a809bac40b2b5d502a0aaed1"
+    },
+    {
+      "path": "tests/v612-speed-sign-camera-import.test.mjs",
+      "size_bytes": 3404,
+      "sha256": "0218262cc83759d50ce90a16aeb449c7e440e57dece39834cb8367198703b0d4"
+    },
+    {
+      "path": "tests/v612-speed-terrain-schedule.test.mjs",
+      "size_bytes": 2834,
+      "sha256": "f41705ab553b23bc7901ade3c6db778955380f46be897a082e9141ee2df206e5"
+    },
+    {
+      "path": "tests/v613-hotfix-regressions.test.mjs",
+      "size_bytes": 2301,
+      "sha256": "5db5f06b9aa3648b2121df6681f6093946ac84d16deb22f161e00c90a2efdb10"
+    },
+    {
+      "path": "tests/v613-integrated-ui.test.mjs",
+      "size_bytes": 6138,
+      "sha256": "0c8a06cf9b24bda03d6031e28c4494a99f63e38e020c529353ccd44c105b83b8"
+    },
+    {
+      "path": "tests/v613-visual-5fix-qa.test.mjs",
+      "size_bytes": 4488,
+      "sha256": "1b764dc34c79e57e848c5ec975619f9a49de516f69c7a45fe5c9c00b8ca56a44"
+    },
+    {
+      "path": "tests/v614-transport-bridge-ai.test.mjs",
+      "size_bytes": 2540,
+      "sha256": "77c702c11ea43d42fbaf022c346784960d4b7ac3a5c0a6fbe7088d3b7104960b"
+    },
+    {
+      "path": "tests/v618-bus-ai-regressions.test.mjs",
+      "size_bytes": 2083,
+      "sha256": "3415ff1c1b4abf0a2e78dee818c03c17b84423bba60d23a24e822932cdd2813c"
+    },
+    {
+      "path": "tests/v618-bus-visibility-hotfix.test.mjs",
+      "size_bytes": 3354,
+      "sha256": "bb6debbd5a204f96585f800ae8c324808ef9dd380d583e1fd98d7e5d17a636aa"
+    },
+    {
+      "path": "tests/v619-verified-autoai-buszoom.test.mjs",
+      "size_bytes": 3470,
+      "sha256": "6bead8fb42712734647328f896570431023fc8b3d559b482896b4190547ff292"
+    },
+    {
+      "path": "tests/v620-bus-stop-dedup.test.mjs",
+      "size_bytes": 3752,
+      "sha256": "63b58bdde7656202076ace9765b6fc56e834710fe495c0b0d53d9847e2e72f49"
+    },
+    {
+      "path": "tests/v621-halo-night-bus-boundary.test.mjs",
+      "size_bytes": 2877,
+      "sha256": "d88ddcc1a0ac7593ea3b648b5aaeb698984f46d0963b25fbc965775bdbce4b43"
+    },
+    {
+      "path": "tests/v700-mobile-polish-regressions.test.mjs",
+      "size_bytes": 3647,
+      "sha256": "e1e1752efe3d98749d6938523cfc5e6fe0ce303ba3c1e2d0e894278672f189ca"
+    },
+    {
+      "path": "tests/v700-version-catalog.test.mjs",
+      "size_bytes": 2620,
+      "sha256": "b0ddab4241ede2de77b54a5eab6e0a7161f5147dd0dcdb48776b0ae2c7ba4776"
+    },
+    {
+      "path": "tests/v701-compact-ui-source-registry.test.mjs",
+      "size_bytes": 3989,
+      "sha256": "ede033f3342cd7d7139d4bfc0762a76d89825c9fe9fd1cdad41f223ab58afff8"
+    },
+    {
+      "path": "tests/v702-ui-transport-and-cleanup.test.mjs",
+      "size_bytes": 3804,
+      "sha256": "42e0ec89351e98482c140063953c1654f23ea84a8c1fdf90eefc35eceb50d42f"
+    },
+    {
+      "path": "tests/v703-ui-layout-tightening.test.mjs",
+      "size_bytes": 2520,
+      "sha256": "a3163523ad507bff2d3d4a58b7eb744ad266f3bb10c1ded13999aa67257c1424"
+    },
+    {
+      "path": "tests/v704-user-request-fixes.test.mjs",
+      "size_bytes": 6614,
+      "sha256": "b00ccf13583f0c43eef2edc92457a1a8e2c1daa19a53473be36da4d68e9869d2"
+    },
+    {
+      "path": "tests/v705-integrated-user-requests.test.mjs",
+      "size_bytes": 3984,
+      "sha256": "c9a5bbfb3bd1799cc8c19861141057df209f50ae7844f725693b7a469ab1ea64"
+    },
+    {
+      "path": "tests/v706-walk-navigation.test.mjs",
+      "size_bytes": 3143,
+      "sha256": "3631a0c99e880e1407fad9ef501eb29b78e0709ff2ea945fdf6b8d697c9d38de"
+    },
+    {
+      "path": "tests/v707-request-integration.test.mjs",
+      "size_bytes": 4170,
+      "sha256": "9f852c92e1f0be06a40c0788adcc8cac6ad6c6ae49f585648cb76e16fbc49eb2"
+    },
+    {
+      "path": "tests/v708-floating-interactions.test.mjs",
+      "size_bytes": 3089,
+      "sha256": "0f1eb68cfcade245e0ad1a4714682cb4c9844f7121ac8674b9bab280b2c184c7"
+    },
+    {
+      "path": "tests/v709-ui-safety-regressions.test.mjs",
+      "size_bytes": 1857,
+      "sha256": "c67cbb2d188bf1104c05ba8f2ef77e58dc1dc81be10646d07d0be973ff449032"
+    },
+    {
+      "path": "tests/v710-panel-exclusion.test.mjs",
+      "size_bytes": 1681,
+      "sha256": "6c40e3ac99943dd18ee5c89e1b08a12d416199bde73685875b4c85810a38ea49"
+    },
+    {
+      "path": "tests/v7101-mobile-panel-unification.test.mjs",
+      "size_bytes": 2085,
+      "sha256": "e871fb8ef13ce8b609232ee01a83072d6681f7ceb305e157af1ec691948aead0"
+    },
+    {
+      "path": "tests/v7102-mobile-sheet-status-theme.test.mjs",
+      "size_bytes": 1914,
+      "sha256": "306c5f3d44e1045bd2cecaad96ff8bfb24ca3e3df06c8a9584f4026d5f20ae25"
+    },
+    {
+      "path": "tests/v7103-dongjak-walk-data-integration.test.mjs",
+      "size_bytes": 4060,
+      "sha256": "2f99d17ec0460d3e18589ad523414e7e9fc3f23eb982b00f097138fec338b7ea"
+    },
+    {
+      "path": "tests/v7103-pwa-admin-more-regression.test.mjs",
+      "size_bytes": 3102,
+      "sha256": "f2394075043d244b90f15ca544eb16fc8d06ef68894df7ff0e9ce95faea8370a"
+    },
+    {
+      "path": "tests/v7104-pwa-controls-icons-regression.test.mjs",
+      "size_bytes": 3475,
+      "sha256": "a9e12bb84abac961324f317f9815db9ec80ec71b348fdb8c1a0ce3ba599250af"
+    },
+    {
+      "path": "tests/v7104-safety-readability-clusters.test.mjs",
+      "size_bytes": 5422,
+      "sha256": "6995e73c926584eb2f2b1178a6b406a4fdc771ab688de73684aa5765e3ed7c2f"
+    },
+    {
+      "path": "tests/v7104-safety-ui-preservation.test.mjs",
+      "size_bytes": 1301,
+      "sha256": "f63dd61dbe34e7c4f60c115ff6160046d735785c435a6343fd49e794170a26f5"
+    },
+    {
+      "path": "tests/v7104-safety-workbench-redesign.test.mjs",
+      "size_bytes": 4901,
+      "sha256": "80f12877abb888181242fe9756d134fea891d3a35cfca4f835c91fdfe9bfb710"
+    },
+    {
+      "path": "tests/v7104-walk-merge-integrity.test.mjs",
+      "size_bytes": 1913,
+      "sha256": "d9662f9e757157edb1e8f7f22049bd6b4a94e542add3957aeeaac2e8d0d17e7f"
+    },
+    {
+      "path": "tests/v711-layout-prewarm.test.mjs",
+      "size_bytes": 2516,
+      "sha256": "33db97daebdb06d40670756cbda6eb599cfe5d8ab14c9a21e7e0317df02fa859"
+    },
+    {
+      "path": "tests/v7110-experience-regression.test.mjs",
+      "size_bytes": 4208,
+      "sha256": "cc4c575aef037d75638590c25d950c5ef8e024d500c37afac1f02b6e49c63a7b"
+    },
+    {
+      "path": "tests/v7110-safety-ui-merge.test.mjs",
+      "size_bytes": 1288,
+      "sha256": "8aa13f066aa0de46365d1866b4455d387be517fb504e912018d0f40c7dc4065d"
+    },
+    {
+      "path": "tests/v712-interaction-layout.test.mjs",
+      "size_bytes": 2559,
+      "sha256": "b74ad32005f9aba1f23772a9908d86f136dc3203a070b1adb99247e2d14ff078"
+    },
+    {
+      "path": "tests/v7120-settings-and-night-regression.test.mjs",
+      "size_bytes": 2795,
+      "sha256": "7761baf45f82b8cd14435a89511291e18dcd7304886fcd5109e08f00f533f7b1"
+    },
+    {
+      "path": "tests/v7121-requested-ux.test.mjs",
+      "size_bytes": 3894,
+      "sha256": "9a475bcf4ac0e8f1ff96f977549f0bdf699a1e227cf55f5fa9df94f8d0006ff3"
+    },
+    {
+      "path": "tests/v7122-interaction-hotfix.test.mjs",
+      "size_bytes": 2706,
+      "sha256": "655b5618b7657f7f3aa9cd5f0d69d8b948a532064b12d483637d25541622ca58"
+    },
+    {
+      "path": "tests/v713-rail-bus-logo.test.mjs",
+      "size_bytes": 2332,
+      "sha256": "a9d20bef760694e94c7d8ad1463f81209405c428ca9265cbd19e026cbc8148e6"
+    },
+    {
+      "path": "tests/v7130-platform-ux.test.mjs",
+      "size_bytes": 2894,
+      "sha256": "3a5569a47c3e35c9739031582dcda9ba8af1199ab8b36881d9a884a9058473ca"
+    },
+    {
+      "path": "tests/v7131-ported-ux-hotfix.test.mjs",
+      "size_bytes": 3788,
+      "sha256": "9f71dd521119d2d946d934e9b925bc8afb373fc3c1d144f21b4a9b1fd7dd7456"
+    },
+    {
+      "path": "tests/v714-map-first-layout.test.mjs",
+      "size_bytes": 2336,
+      "sha256": "9f8840c87845b3b9d95101ee9ada395042fc34737e39203c21f794b0748d7e9d"
+    },
+    {
+      "path": "tests/v715-ui-search-news.test.mjs",
+      "size_bytes": 2103,
+      "sha256": "6820a06f1e1b25745318d44405e905e63d059e4046e51fd36bd6e9a856073354"
+    },
+    {
+      "path": "tests/v716-pwa-edge.test.mjs",
+      "size_bytes": 2045,
+      "sha256": "910668860ca3b3c50634298c57bd3ff9fe8370892e44cc008a9ce47ca602097e"
+    },
+    {
+      "path": "tests/v718-facility-empty-ui.test.mjs",
+      "size_bytes": 2146,
+      "sha256": "f8e7db0f37cea52e7b4b1b0eeffe03fca63eba0e9e9c02f349c9a5969eb84332"
+    },
+    {
+      "path": "tests/v719-repair-delta.test.mjs",
+      "size_bytes": 1823,
+      "sha256": "184bf9ef8f51fe161dba79ae3db430072e980574e946600e555aea3057198eba"
+    },
+    {
+      "path": "tests/v720-user-requests.test.mjs",
+      "size_bytes": 2908,
+      "sha256": "6baa62c28137a69067f9adeb2e2ab8b373921a6248e60fc55e8188fa8a61bb6b"
+    },
+    {
+      "path": "tests/v721-guide-click-runtime.test.mjs",
+      "size_bytes": 2421,
+      "sha256": "b1c30fd2b7f53fe7d4eae2523adb591741bd3739189b60756b5091ebb7ca3be6"
+    },
+    {
+      "path": "tests/v721-overlay-interaction.test.mjs",
+      "size_bytes": 2100,
+      "sha256": "db1484ba0871b2047075e5a4bae47179fc24e52d38097298e52b8ca0fb1e3e74"
+    },
+    {
+      "path": "tests/v722-two-ui-fixes.test.mjs",
+      "size_bytes": 1746,
+      "sha256": "6381ada180bc8dc6fbbeb1e6abf97469eab799b02020b431692174ee0107a3f3"
+    },
+    {
+      "path": "tests/v723-layout-and-source-tables.test.mjs",
+      "size_bytes": 2881,
+      "sha256": "034f5056fef6410283aa176d7d702a07e5d3b5c9dc527ea8546645a9e72d6dcb"
+    },
+    {
+      "path": "tests/v724-layout-cache.test.mjs",
+      "size_bytes": 4160,
+      "sha256": "3595bb69ca2bca239e37dcde4d18817e38b593cb1c0e89fb47105d64a28740c8"
+    },
+    {
+      "path": "tests/v725-interaction-corrections.test.mjs",
+      "size_bytes": 3464,
+      "sha256": "e16f0feb0da9a9234cde78bcf9222d54fbced3f4b83c1a3beb65a8584d4f3756"
+    },
+    {
+      "path": "tests/v726-pc-polish.test.mjs",
+      "size_bytes": 3394,
+      "sha256": "ab38a5dcaca1582f6de6625b5a2ffd8b486761682d2e7d9e75d314fb32f9c054"
+    },
+    {
+      "path": "tests/v727-ios-edge-safety-tabs.test.mjs",
+      "size_bytes": 2050,
+      "sha256": "e74c137fd144b78ce629f42dce805dd2e782d6da62b70eab25480d9a02729d8f"
+    },
+    {
+      "path": "tests/v728-exclusive-mobile-news.test.mjs",
+      "size_bytes": 3231,
+      "sha256": "ad559707d57f495bc9e6513739beb2badb108f944f23829851e469a89700e87f"
+    },
+    {
+      "path": "tests/v729-pc-layout-and-stations.test.mjs",
+      "size_bytes": 3399,
+      "sha256": "2315504a60d03a8a5f2211c52e608a7672581f9d27c299e835b9b40f1d6e0a8b"
+    },
+    {
+      "path": "tests/v729-r1-fresh-ui.test.mjs",
+      "size_bytes": 1021,
+      "sha256": "18e54774c7746cca6b2bebafd9702abad7ba1fc13f3d85a26b8f5465a5c8e280"
+    },
+    {
+      "path": "tests/v729-r2-ui-reinterpretation.test.mjs",
+      "size_bytes": 2826,
+      "sha256": "cb92b7a3c26314dd26b424a613a58ab3c450d4d1d294976f43ee590842db9afc"
+    },
+    {
+      "path": "tests/v790-mobile-independent.test.mjs",
+      "size_bytes": 2490,
+      "sha256": "850bf5f8e36ff0f5b39de2a5c2e9b993e2833c493da4019bfc6875d97d884262"
+    },
+    {
+      "path": "tests/v792-mobile-header-regressions.test.mjs",
+      "size_bytes": 2008,
+      "sha256": "f75f85e3565ee19f8c15357d5e7829bd4698cc2f1263090547eea9898f1249cd"
+    },
+    {
+      "path": "tests/v793-ios-pwa-tone.test.mjs",
+      "size_bytes": 3051,
+      "sha256": "dba3263d128cf5944a010a7966d55fdea38d0e00190469198491286a93dc3780"
+    },
+    {
+      "path": "tests/v794-mobile-toolbar-no-overlap.test.mjs",
+      "size_bytes": 1351,
+      "sha256": "3f0fd6016a104c803b5e45ace97c866a01035788f403dd7519016c5ef7a30be3"
+    },
+    {
+      "path": "tests/v795-mobile-search-theme.test.mjs",
+      "size_bytes": 1530,
+      "sha256": "b59645502a82bda7ddf8bedeab30c6dc44287580217fe50dbf2b046c22a782b4"
+    },
+    {
+      "path": "tests/v800-topis-sdot-integration.test.mjs",
+      "size_bytes": 3247,
+      "sha256": "0f8296094931b2be1a5052dd88623bafc0e4107ac6852415ca6ae503d7df5f0a"
+    },
+    {
+      "path": "tests/v800-ui-architecture.test.mjs",
+      "size_bytes": 3116,
+      "sha256": "0556ecb5ac6bb68ed838f9bc5efdeccb7e45a2019fb57cbc463667166a32f641"
+    },
+    {
+      "path": "tests/v801-mobile-motion-logo-header.test.mjs",
+      "size_bytes": 2534,
+      "sha256": "68e26f19463bc135d9efd99ae77026de248238dd7a01501f1539915c6d437d8e"
+    },
+    {
+      "path": "tests/v801-topis-sdot-mobile-regression.test.mjs",
+      "size_bytes": 1765,
+      "sha256": "a732c793d25f3cc32119839568bc44e56522457f6145e67726e50ca1b814d91b"
+    },
+    {
+      "path": "tests/v802-accessible-crossing-aed.test.mjs",
+      "size_bytes": 6202,
+      "sha256": "62a543a3483c85393f9a98ad65cc14e17c8e7fb01d3312e3ac9d604433a85552"
+    },
+    {
+      "path": "tests/v802-desktop-mobile-typography-and-about.test.mjs",
+      "size_bytes": 3088,
+      "sha256": "431197c4b8d9f48902a8f36a8464d2a9c8c30f39909487c2f08fd7bfae968047"
+    },
+    {
+      "path": "tests/v803-platform-ux-regression.test.mjs",
+      "size_bytes": 3841,
+      "sha256": "3639468ef2eae8179ac7cec743529bb707e6f0723647440773403b2583ff083b"
+    },
+    {
+      "path": "tests/v804-map-ui-hotfix.test.mjs",
+      "size_bytes": 1708,
+      "sha256": "fe3c5102035d3105bec35e0da5804747d7288df5a47b052ff14bde1cca5cacd8"
+    },
+    {
+      "path": "tests/v804-safe-walking-extensions.test.mjs",
+      "size_bytes": 4525,
+      "sha256": "0d7eb1f84a144cfdfff699bd77d4b1886ba49a6b359b099954b0f5466fc144ce"
+    },
+    {
+      "path": "tests/v805-user-feedback-regression.test.mjs",
+      "size_bytes": 3641,
+      "sha256": "bc7ae9494719c859b1e08363512eb525a90430537e895823cdd62913f18e74f3"
+    },
+    {
+      "path": "tests/v806-approved-bus-icon-scope.test.mjs",
+      "size_bytes": 2758,
+      "sha256": "ba92f685a8509312633a50164ac17a1bb32582b3262eb3f80181ed9e83bbb185"
+    },
+    {
+      "path": "tests/v806-layout-and-scope.test.mjs",
+      "size_bytes": 3558,
+      "sha256": "25b63f12d3eb1c35fab2279aeab28112fd77ebd776bef1fe5180ac4d733521d0"
+    },
+    {
+      "path": "tests/v807-refinement-regression.test.mjs",
+      "size_bytes": 5230,
+      "sha256": "c4a8a4333d47823b57998624f442e547d41092aee5cf909f95766ae328c184da"
+    },
+    {
+      "path": "tests/v808-mobile-motion-regression.test.mjs",
+      "size_bytes": 2198,
+      "sha256": "51236bcd1d674e82808759619e97fe804b451dfb5a70048ab172d47bf37f8af3"
+    },
+    {
+      "path": "tests/v809-pc-mobile-precision.test.mjs",
+      "size_bytes": 2209,
+      "sha256": "abc1fba45e7c668afdf5120fc223563940821bffd6080a0402f489d925a44db7"
+    },
+    {
+      "path": "tests/v810-mobile-motion-reliable.test.mjs",
+      "size_bytes": 2177,
+      "sha256": "152779d0ddc0f16d1c18b21a710a29da4a80c51583320887ee554ff2812bacc5"
+    },
+    {
+      "path": "tests/v811-independent-ios-icons.test.mjs",
+      "size_bytes": 3146,
+      "sha256": "0f22f2b613876ee95a8ddaafada30d1f7f60db2b29924033431f90af88c69286"
+    },
+    {
+      "path": "tests/v811-motion-search-popup-regression.test.mjs",
+      "size_bytes": 2877,
+      "sha256": "9d1c513a523cb156196fb271c3e94d97fae8e4b42994d0cc3cf1c72dea558a60"
+    },
+    {
+      "path": "tests/v812-fade-dark-icon.test.mjs",
+      "size_bytes": 1208,
+      "sha256": "a18ae35caa2c2c8d7a0bc8ec4237f275e3e159888604f163965cb66d21b0a307"
+    },
+    {
+      "path": "tests/v812-login-visibility.test.mjs",
+      "size_bytes": 2344,
+      "sha256": "caff3bde765c7c6f4c4f37ba7015335bb2b1182ddcc1f1de319dc391ae8cb4c9"
+    },
+    {
+      "path": "tests/v813-supabase-route-header.test.mjs",
+      "size_bytes": 2818,
+      "sha256": "7ea6959163a248fb34a148daa9e044af5574d589484cb9a7c3e99e7b81d87ea0"
+    },
+    {
+      "path": "tests/v813-visible-fade-regression.test.mjs",
+      "size_bytes": 2022,
+      "sha256": "53650d710b5322743bcf01c5b725e7a6b280932f76dd29956fec2fd5c94f1ce6"
+    },
+    {
+      "path": "tests/v814-exclusive-surface-regression.test.mjs",
+      "size_bytes": 2323,
+      "sha256": "9cf81bbc45265bcf549270f7317635ccf18c201e68cdcd7914710d42c6f93e8a"
+    },
+    {
+      "path": "tests/v815-map-product-and-routes.test.mjs",
+      "size_bytes": 5631,
+      "sha256": "b86276a7653cd3392caa5d05004c15809325767d548b0494eda3f5d4d42db4ba"
+    },
+    {
+      "path": "tests/v815-panel-and-layer-fade.test.mjs",
+      "size_bytes": 2990,
+      "sha256": "cde78955c70d5dd9ea2a902f8eb60564fab96b8259e154a857d064c7fc4317e1"
+    },
+    {
+      "path": "tests/v816-navigation-voice-picker.test.mjs",
+      "size_bytes": 2481,
+      "sha256": "16a2db5deb67205a7f47200dca883cfb76f530ffdef7493095264fde8633efd4"
+    },
+    {
+      "path": "tests/v816-pc-night-weather-font.test.mjs",
+      "size_bytes": 2390,
+      "sha256": "8d5557e5565c70a2661353f89fa0b90ced66c9a541b6c325fc98b0f06a4f096c"
+    },
+    {
+      "path": "tests/v817-dialog-search-safety.test.mjs",
+      "size_bytes": 4244,
+      "sha256": "097af0542d17a59ff28ab476bb2976d904923a388d637443da2384c350c0060b"
+    },
+    {
+      "path": "tests/v818-font-weather-panel-focus.test.mjs",
+      "size_bytes": 3819,
+      "sha256": "5df0288cc5a4aed76c687f10b470f052dd0133a18b91a8630157ee8372638432"
+    },
+    {
+      "path": "tests/v819-safety-one-screen.test.mjs",
+      "size_bytes": 2223,
+      "sha256": "946ee4cea728d286fab30f50623b375fa580a99a04636199b0b05b3a24f88587"
+    },
+    {
+      "path": "tests/v820-account-center.test.mjs",
+      "size_bytes": 2523,
+      "sha256": "0642c32e20ca7196105f26c7f0a2fe3a02d4400206383b0e8d3b329f86b2af3f"
+    },
+    {
+      "path": "tests/v820-integrated-patches.test.mjs",
+      "size_bytes": 2428,
+      "sha256": "ce21a5ba21e0616169f887183e6ce14a4d0e43d5b408661012607eccfd703f41"
+    },
+    {
+      "path": "tests/v821-kakao-login-regression.test.mjs",
+      "size_bytes": 1934,
+      "sha256": "035ecfa6c959f7ef56c2d58e1489d2b19ecb4ff9932d752f9dd7e6da9ec0b0b6"
+    },
+    {
+      "path": "tests/v821-panel-visibility.test.mjs",
+      "size_bytes": 1576,
+      "sha256": "4b5ad2e9c42211ac34718960d203031e724b6faf1685f46df48265050e458e49"
+    },
+    {
+      "path": "tests/v8212-overlay-guide-merged.test.mjs",
+      "size_bytes": 2550,
+      "sha256": "f77e74d6d1114c50b6fc1ebab856498140126f459126fed9dd4c8615710faa55"
+    },
+    {
+      "path": "tests/v8212-toolbar-overflow-guard.test.mjs",
+      "size_bytes": 1324,
+      "sha256": "7fa24fab0183bfe7d1870ec2215df99dcf88e6aae91b88e19672c9488bc72c7f"
+    },
+    {
+      "path": "tests/v8213-compatible-ui-toolbar-guard.test.mjs",
+      "size_bytes": 2018,
+      "sha256": "9862783759c3fade08c2ad1d3e62dac4b1f1ee5f3bde083f5f092af4f094ebdb"
+    },
+    {
+      "path": "tests/v8214-home-merge-preservation.test.mjs",
+      "size_bytes": 1810,
+      "sha256": "0175b6f9162eaf5a2dc569a1b3c8c0d74c5fea6e17915fd2396091df9494cdf5"
+    },
+    {
+      "path": "tests/v8214-mobile-header-consistency.test.mjs",
+      "size_bytes": 1379,
+      "sha256": "cc9ee42d60acf1274a8e9e862039027e9f7aff6b7482dd45a0ba43a742aa601b"
+    },
+    {
+      "path": "tests/v8215-five-ui-hotfix.test.mjs",
+      "size_bytes": 2323,
+      "sha256": "c85451c3243abc216d382192f6c1ea34dcf2861e9217be328c25ccc95e0c18be"
+    },
+    {
+      "path": "tests/v8215-half-sheets-kakao-preservation.test.mjs",
+      "size_bytes": 1852,
+      "sha256": "0b427d4b62969e50632a4637dbbdaea7a6802294371e44169a73da2490c48325"
+    },
+    {
+      "path": "tests/v8215-news-metro-compact.test.mjs",
+      "size_bytes": 2429,
+      "sha256": "45c8e417fa6bf2a3b97654f118fb1c0674cfcb4f1214e6d2777dec7a97eb72a6"
+    },
+    {
+      "path": "tests/v8215-panel-layout-recovery.test.mjs",
+      "size_bytes": 3084,
+      "sha256": "50246914fcf449f41bd33a80126980c11210af2e33d7f579c3585abe7d32a2b7"
+    },
+    {
+      "path": "tests/v8215-transit-auth-bus-sheet.test.mjs",
+      "size_bytes": 2220,
+      "sha256": "ba05ec3d0b07aceb34a0cecb2685c7d57c118316e4bc9a54918b0ed1f1fbd54d"
+    },
+    {
+      "path": "tests/v8216-release-merge.test.mjs",
+      "size_bytes": 2421,
+      "sha256": "042dfdf72f2ffc42409286b90e35e2966df7b7aa4ecaf7bc8c3c18ac0882c711"
+    },
+    {
+      "path": "tests/v822-apple-local-face-mapping.test.mjs",
+      "size_bytes": 1005,
+      "sha256": "b1789f8d645e644f01f63b8b0f4ba6b851a4185a3f158be32e73d0e5ff7e00b5"
+    },
+    {
+      "path": "tests/v823-mobile-route-layout.test.mjs",
+      "size_bytes": 2727,
+      "sha256": "d67b771dee8eae1be80e8dae4042877cb3d88c8a0d59aeee62e4e73493f41c58"
+    },
+    {
+      "path": "tests/v823-online-pretendard-unified.test.mjs",
+      "size_bytes": 1567,
+      "sha256": "75e1bb4d158f4744e4e7d8d1a7bebda5f933ad70e42e3c9320c47d30aaaa667f"
+    },
+    {
+      "path": "tests/v824-mobile-modal-oauth-regression.test.mjs",
+      "size_bytes": 3778,
+      "sha256": "57305842480137c6cbf8baec55884793b4a0e1d7f2692ea26a299826cdf70548"
+    },
+    {
+      "path": "tests/v825-navigation-map-first.test.mjs",
+      "size_bytes": 2947,
+      "sha256": "5e3f5709047e7b07dceb5485f916bdf13024053521c090bb048471d32c52dc69"
+    },
+    {
+      "path": "tests/v825-ui-facility-transit.test.mjs",
+      "size_bytes": 5618,
+      "sha256": "122607564f7c9fa9f81636809d0f75d28d7d6d7d01ce798cdb85faea7b385a60"
+    },
+    {
+      "path": "tests/v826-favorites-cloud.test.mjs",
+      "size_bytes": 6554,
+      "sha256": "a60be6e09ac04c12b89d5555133daea47d1edbfd62a77c4674406715d571f83a"
+    },
+    {
+      "path": "tests/v827-navigation-version-regression.test.mjs",
+      "size_bytes": 4121,
+      "sha256": "c1c13db4fc6c3cb04333f87bc2635fe89e19f05eef9aa68c6202a867da5932db"
+    },
+    {
+      "path": "tests/v828-kakao-oauth-preflight.test.mjs",
+      "size_bytes": 2380,
+      "sha256": "6e8a635f2f88449ac4539e65c2e415437684ed3e03da0b1d3464027780f50aa9"
+    },
+    {
+      "path": "tests/v829-auth-state-kakao-notice.test.mjs",
+      "size_bytes": 4951,
+      "sha256": "8253dfdedfa624d9fb0d8670928a7a33ea5e2a0b312fc683ab7c0eb2b2245cf5"
+    },
+    {
+      "path": "tests/v829-mobile-layout.test.mjs",
+      "size_bytes": 2590,
+      "sha256": "ae6a340e337ffc82cba7fd0abcc648c5b055267995ce19b6d3583a001c856011"
+    },
+    {
+      "path": "tests/v830-requested-ui.test.mjs",
+      "size_bytes": 3204,
+      "sha256": "a6a7dddacb81f2a6a075e39416ada3e7684008064ad74dd61ca625e9ce3ea622"
+    },
+    {
+      "path": "tests/v831-kakao-popup.test.mjs",
+      "size_bytes": 3002,
+      "sha256": "0316842fc0ef8b638019a60edad26a554cc51744d609d53823af96f4e36f141f"
+    },
+    {
+      "path": "tests/v831-swipe-feature-toolbar.test.mjs",
+      "size_bytes": 1778,
+      "sha256": "f06d671987d9bef173297420710ce09abc7434c1ef42f83e242c715630395995"
+    },
+    {
+      "path": "tests/v832-mobile-route-transit.test.mjs",
+      "size_bytes": 3049,
+      "sha256": "e8a2c72d3705eb9d60b57cc2e7aaa9be22b14a6a2fd4b1df2618d5625f4531e2"
+    },
+    {
+      "path": "tests/v832-priority-feature-toolbar.test.mjs",
+      "size_bytes": 2896,
+      "sha256": "c12bc73f04d62d4abfc8863da8ec74b8e766e590b31b60f7190df58256bca8cf"
+    },
+    {
+      "path": "tests/v832-structural-fixes.test.mjs",
+      "size_bytes": 2628,
+      "sha256": "d2402442d94ef467f023db19bd3d40b3108250e41e318078e7d31693bbbb62a7"
+    },
+    {
+      "path": "tests/v833-home-sheet-auth.test.mjs",
+      "size_bytes": 3879,
+      "sha256": "d94b251c838cf3320a01b28382b8f62979c4063b2d850cad06bfceb4ad37cdbb"
+    },
+    {
+      "path": "tests/v833-mobile-toolbar-boundary.test.mjs",
+      "size_bytes": 4042,
+      "sha256": "91881d79807b9ff5ac7e14db9375e83cb5d5ee38cc8681c59d88aaef01f1feea"
+    },
+    {
+      "path": "tests/v834-my-info-reviews.test.mjs",
+      "size_bytes": 3283,
+      "sha256": "8d6faeb5f9efc060afbccbbdc9254d73164f208de2df3045a643ad27b0860384"
+    },
+    {
+      "path": "tests/v835-news-style-drawer.test.mjs",
+      "size_bytes": 2455,
+      "sha256": "d6326fc23475f3fd6e22a5e97647cc36b183e3df03e385b112cd4e0c8c23eae7"
+    },
+    {
+      "path": "tests/v835-requested-fixes.test.mjs",
+      "size_bytes": 2759,
+      "sha256": "105ad0301bf4b46c45a7c95f7ba236db16a0143f03b410bb5143c1e7c22a06f2"
+    },
+    {
+      "path": "tests/v836-sheet-home-toolbar.test.mjs",
+      "size_bytes": 2900,
+      "sha256": "f1c4d7cb19b7c4e1409479d5d8472b52a6121f78ea47021433a3dee23bc88c01"
+    },
+    {
+      "path": "tests/v840-coordinated-shell-imports.test.mjs",
+      "size_bytes": 2701,
+      "sha256": "ac8f8d4ec27cf361810e62bbe8d4e3e8fe449d6a5531055b0808a0de3f63a969"
+    },
+    {
+      "path": "tests/v840-user-requests.test.mjs",
+      "size_bytes": 5028,
+      "sha256": "ac381288cefd5d223fb41be0c668f465e61e831ec0de941ec7a2197b9941034a"
+    },
+    {
+      "path": "tests/v841-branch-merge-regression.test.mjs",
+      "size_bytes": 1680,
+      "sha256": "123bfff3ca4a58fbfbd6a8b496699ed213297162f333a424f1ec585da32ffa3a"
+    },
+    {
+      "path": "tests/v841-five-followups.test.mjs",
+      "size_bytes": 3302,
+      "sha256": "dcbc209c3d09217ff5102380d1f707c7c0535211df8c3a82d95e12af3b7d83e5"
+    },
+    {
+      "path": "tests/v842-scale-overlay-policy.test.mjs",
+      "size_bytes": 3058,
+      "sha256": "5257844b18bebd0882afc4c3a7c12224b3990c6e0becd8187f4af6813532d29c"
+    },
+    {
+      "path": "tests/v843-preserve-overlay-scale.test.mjs",
+      "size_bytes": 1358,
+      "sha256": "09747cb55a06624ce3d47a31dc0994a78e1acb3d5461fc74be233e77a4ade33d"
+    },
+    {
+      "path": "tests/v844-safety-scale-tip-branch-merge.test.mjs",
+      "size_bytes": 2333,
+      "sha256": "51ab5cfd2b1573eadd09970ccc276cce1c8b307b6f8f3e3baa8dccd9016aa4f8"
+    },
+    {
+      "path": "tests/v845-mobile-motion.test.mjs",
+      "size_bytes": 2488,
+      "sha256": "e8f7ae1d4639fa05c207e5e4597a25e3794aadc9d41a92e0d9fe2e59a180d2d0"
+    },
+    {
+      "path": "tests/v852-mobile-ux.test.mjs",
+      "size_bytes": 7000,
+      "sha256": "4bfdf9f41409d1751897d1971954d6f7256a06a0610cfd41ff39f9cb5d95ed45"
+    },
+    {
+      "path": "tests/v853-pc-responsive-layout.test.mjs",
+      "size_bytes": 4959,
+      "sha256": "216d583e94cc9130c3c42777ab200291b219bf3435a092931eb3e1938d42d9d1"
+    },
+    {
+      "path": "tests/v854-integrated-ui.test.mjs",
+      "size_bytes": 4821,
+      "sha256": "e75f36b98e0d98c910dcbfd44d47ce2798ef48e4e720766293097d289966c4ab"
+    },
+    {
+      "path": "tests/v855-map-load-regression.test.mjs",
+      "size_bytes": 6097,
+      "sha256": "7a5792bea2fd66c4e45e0b240b90a2b90a066e77c1ebc25dfc3b4d8a533e187e"
+    },
+    {
+      "path": "tests/v856-ui-completion.test.mjs",
+      "size_bytes": 5775,
+      "sha256": "51e83b0cec608b9082a3b0d7aa159b176617e07968ef21f2b4fa6b072f025287"
+    },
+    {
+      "path": "tests/v857-requested-ux.test.mjs",
+      "size_bytes": 8985,
+      "sha256": "e03b682aca5ee950a7b46d8c44f7f43f63689bf0091d6392e9fd98661294abca"
+    },
+    {
+      "path": "tests/v860-onboarding.test.mjs",
+      "size_bytes": 4797,
+      "sha256": "0c91155d64ef56a5238155303ddf6b1a0c15d89dcf2b8550f2b4a73018c21525"
+    },
+    {
+      "path": "tests/v861-mobile-sheet-repair.test.mjs",
+      "size_bytes": 2583,
+      "sha256": "bddbac3db09f148bb0c8fe21cab34832beb0b517e2d92421f3ce7aaf18b247bb"
+    },
+    {
+      "path": "tests/v861-requested-ux.test.mjs",
+      "size_bytes": 3477,
+      "sha256": "8319644b53627e381b751c51c6fa73d442f1001a7f1a6cb506089adc4ad317de"
+    },
+    {
+      "path": "tests/v862-pc-mobile-separation.test.mjs",
+      "size_bytes": 7543,
+      "sha256": "9f77333be7efb81e60c26aecb0344270341be72c108f055acf2f43273fb101d4"
+    },
+    {
+      "path": "tests/v863-guest-onboarding-flow.test.mjs",
+      "size_bytes": 3991,
+      "sha256": "83a68469c6ba6b3530b4f3511d2b27d9a1f4338feaad313f782194c52d80a102"
+    },
+    {
+      "path": "tests/v864-facility-detail-redesign.test.mjs",
+      "size_bytes": 3185,
+      "sha256": "07503146120cd3e8a38c71191f8832160a8f96280938cbe703432e005a13064d"
+    },
+    {
+      "path": "tests/v864-floating-onboarding-transit.test.mjs",
+      "size_bytes": 2675,
+      "sha256": "c52bd911453f08b19f36d6ee86834e23afb32d432f3b76058e18e2733f0cddb0"
+    },
+    {
+      "path": "tests/v865-close-behavior.test.mjs",
+      "size_bytes": 3634,
+      "sha256": "128e8a6b6ab64159eb6d2491eae27ca2c76b08fb8a8b0e416a0201bacd424fb4"
+    },
+    {
+      "path": "tests/v867-transport-window-lifecycle.test.mjs",
+      "size_bytes": 2695,
+      "sha256": "3f271debfc30394e8f595ce74c6380661a2326fa82d412af188a13222207bf2d"
+    },
+    {
+      "path": "tests/v869-map-home-tip-regression.test.mjs",
+      "size_bytes": 3222,
+      "sha256": "10ba2c4b82cca0a7bf3ab7688df78f55cb755a1b5f37863573ebc0db9a7ee147"
+    },
+    {
+      "path": "tests/v871-search-sheet-nodeulseom.test.mjs",
+      "size_bytes": 1796,
+      "sha256": "cc16b4a5ecc8afb4cdcf1d94b7a2d49c37ef6b845d6018911e06be4b19a3877a"
+    },
+    {
+      "path": "tests/v8710-stability-phase3.test.mjs",
+      "size_bytes": 5051,
+      "sha256": "560813bf69bf1f739f7637945392e06bfbe05efce4a462441743b7110ab02c7f"
+    },
+    {
+      "path": "tests/v872-pc-onboarding-weather.test.mjs",
+      "size_bytes": 1398,
+      "sha256": "c7af7bc52252b4c1f3051fc23b2ba13d7e8d04b7a50a7c9ac7d1b02900f47424"
+    },
+    {
+      "path": "tests/v873-home-facilities-quality.test.mjs",
+      "size_bytes": 6100,
+      "sha256": "a9c76a2e2c4f88a0590b729584ac0f5de21a3c4b9aa53569bb8c4e9ff553bca5"
+    },
+    {
+      "path": "tests/v874-search-transit-ui.test.mjs",
+      "size_bytes": 3069,
+      "sha256": "205a9d853eb04e786336b54020a269f3cbc3c92826230884a693c0e3de4ed4f0"
+    },
+    {
+      "path": "tests/v875-mobile-stability.test.mjs",
+      "size_bytes": 2437,
+      "sha256": "e5de5ea57d65b16c146dceb46a3da6da1f26752e3d3f9a4cdbb37690d14cacdd"
+    },
+    {
+      "path": "tests/v877-mobile-settings.test.mjs",
+      "size_bytes": 2464,
+      "sha256": "7be7454a7553cd654b4c310f1caa9aec4de5673c086d72afbb9ed5bb08701f1c"
+    },
+    {
+      "path": "tests/v878-stability-phase1.test.mjs",
+      "size_bytes": 5504,
+      "sha256": "36f6646e37fa44a95a25b0493066d47a7cb42e077e2e711071fe2fc4340b670d"
+    },
+    {
+      "path": "tests/v880-window-stability.test.mjs",
+      "size_bytes": 7733,
+      "sha256": "7093c35e41b25ba10a2a3d1f1300d323a9575f7f74770484593882dd19df52c4"
+    },
+    {
+      "path": "tests/version-release-commands.test.mjs",
+      "size_bytes": 4957,
+      "sha256": "c1b81fe2826752113b214e04348078b6eeb9f8d862704b06b1f9b3430af97967"
+    },
+    {
+      "path": "tests/window-lifecycle-v868.test.mjs",
+      "size_bytes": 2247,
+      "sha256": "5f9e38615ca4aaba0e0e15056330f0baba3b384fa17aa8efd89c02aa4ad153e2"
+    },
+    {
+      "path": "vite.config.js",
+      "size_bytes": 2494,
+      "sha256": "fabe3dc376ac657d33b0351288aed1c70ea2407ab0286502934895dc22d2a819"
+    },
+    {
+      "path": "wrangler.toml",
+      "size_bytes": 371,
+      "sha256": "8020d64e01f6e48c56c5bf593233598aa278865da1138dff81e37d45f277aa7e"
+    }
+  ]
+}

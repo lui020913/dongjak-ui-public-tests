@@ -1,0 +1,30 @@
+/* v7.0.18 | Compact, aligned fact-first place information and clean map chrome. */
+#app .dj-place-detail{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:keep-all;color:#244437;}
+#app .dj-place-grip{font-size:11px;line-height:1.35;color:#6d8c80;padding:0 26px 9px 0;}
+#app .dj-place-detail .dj-place-kicker{display:block;font-size:11px;font-weight:750;color:#0c7962;margin-top:7px;}
+#app .dj-place-detail h3{font-size:19px;line-height:1.35;margin:4px 0 13px!important;padding:0 22px 12px 0;border-bottom:1px solid #dbe9e4;word-break:keep-all;}
+#app .dj-place-meta{display:grid;gap:8px;min-width:0;}
+#app .dj-place-row{display:grid!important;grid-template-columns:minmax(64px,75px) minmax(0,1fr)!important;align-items:start!important;gap:9px!important;padding:3px 0!important;line-height:1.5!important;}
+#app .dj-place-row>span{font-size:12px;color:#637c72;white-space:nowrap;}
+#app .dj-place-row>:is(strong,a){min-width:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere;text-align:left;}
+#app .dj-place-route-actions{margin:13px 0 12px!important;gap:8px!important;}
+#app .dj-place-ai-heading{margin-top:14px!important;font-size:12px!important;}
+#app .dj-place-ai-response{margin-top:7px!important;font-size:12px!important;line-height:1.55!important;}
+#app .dj-place-source{display:block;margin-top:9px;font-size:10px;line-height:1.4;}
+#app .dj-place-ai-disclaimer{font-size:10px!important;line-height:1.5!important;}
+#app .dj-place-detail-popup .maplibregl-popup-close-button{width:32px!important;height:32px!important;display:grid!important;place-items:center!important;line-height:1!important;font-size:20px!important;border-radius:10px!important;}
+/* Selection remains available even when the zero-records overview is hidden. */
+#app .dj-admin-map-shortcut{display:block;width:100%;box-sizing:border-box;border:1px solid #bdd7cd;border-radius:12px;background:#f6fbf8;color:#126955;font-weight:800;font-size:12px;min-height:42px;margin:9px 0 5px;padding:9px 12px;text-align:center;}
+#app .dj-admin-map-shortcut:hover{background:#e8f5ef;}
+#app[data-theme='dark'] .dj-admin-map-shortcut{background:#1e3b38;color:#e4f7ef;border-color:#476e62;}
+/* Compact MapLibre attribution remains accessible via its info control.
+   It must never sit underneath the floating navigation or the overview card. */
+#app .maplibregl-ctrl-bottom-right{right:12px!important;bottom:18px!important;z-index:805!important;}
+#app .maplibregl-ctrl-attrib.maplibregl-compact{max-width:min(92vw,340px)!important;}
+#app .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show){width:30px!important;height:30px!important;border-radius:50%!important;overflow:hidden!important;}
+@media(max-width:1079px){
+  #app .maplibregl-ctrl-bottom-right{bottom:calc(97px + env(safe-area-inset-bottom,0px))!important;right:12px!important;}
+}
+@media(max-width:699px) and (display-mode:standalone){
+  #app .maplibregl-ctrl-bottom-right{bottom:calc(var(--dj-pwa-nav-edge,4px) + 87px)!important;}
+}

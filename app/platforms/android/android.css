@@ -1,0 +1,7 @@
+/* Capacitor Android / mobile Chrome only. iOS native status strip is not simulated. */
+@media(max-width:699px){
+  html[data-dj-platform="android"]{
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+}

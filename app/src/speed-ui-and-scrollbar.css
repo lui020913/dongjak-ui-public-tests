@@ -1,0 +1,95 @@
+/* v6.2 speed limits: a separate research layer, not an accident risk score. */
+#app .sangdo-speed-tool{
+  min-width:0;display:grid;gap:10px;padding:12px;
+  border:1px solid var(--dj-ui-border,#d4e0dc);border-radius:14px;
+  background:var(--dj-ui-field,#f4faf7);color:var(--dj-ui-text,#1f3932);
+}
+#app .sangdo-speed-head{display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:space-between;align-items:center}
+#app .sangdo-speed-head strong{font-size:13px;font-weight:800}
+#app .sangdo-speed-head span{font-size:10px;color:var(--dj-ui-subtext,#648277)}
+#app #sangdo-speed-toggle,#app #sangdo-speed-zoom{
+  cursor:pointer;min-height:38px;border-radius:9px;border:1px solid #377f77;
+  background:#207d69;color:white;font-weight:750;font-size:12px;
+}
+#app #sangdo-speed-toggle[aria-pressed="false"]{background:transparent;color:var(--dj-ui-text,#203a32);border-color:var(--dj-ui-border,#d4e0dc)}
+#app .sangdo-speed-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#app .sangdo-speed-filters label{display:flex;align-items:center;gap:6px;min-width:0;
+  font-size:12px;font-weight:750;cursor:pointer;border-radius:9px;padding:8px 6px;
+  border:1px solid var(--dj-ui-border,#d4e0dc);background:var(--dj-ui-bg,#fff)}
+#app .sangdo-speed-filters input{accent-color:#258472;margin:0}
+#app .sangdo-speed-filters i{width:18px;height:5px;border-radius:5px;flex-shrink:0}
+#app .sangdo-speed-filters .speed-10{background:#bc3454}
+#app .sangdo-speed-filters .speed-30{background:#e17a34}
+#app .sangdo-speed-filters .speed-40{background:#b18a17}
+#app .sangdo-speed-filters .speed-50{background:#3377b7}
+#app .sangdo-speed-actions{display:grid;gap:4px}
+#app #sangdo-speed-status{font-size:11px;color:var(--dj-ui-subtext,#648277)}
+#app .sangdo-speed-tool p{margin:0;font-size:10.7px;line-height:1.65;color:var(--dj-ui-subtext,#648277);word-break:keep-all}
+.sangdo-speed-popup{display:grid;gap:4px;line-height:1.5;color:#183b36;font-size:11px}
+.sangdo-speed-popup b{font-size:14px}
+.sangdo-speed-popup small{color:#526963}
+#app[data-theme="dark"] .sangdo-speed-tool{background:#203a3e;border-color:#47605c}
+#app[data-theme="dark"] .sangdo-speed-filters label{background:#1a3135;border-color:#3d5c5d}
+#app[data-theme="dark"] #sangdo-speed-toggle[aria-pressed="false"]{color:#daefec}
+/* The previously white, wide Chromium scrollbar in the safety drawer. */
+#app .map-safety-controls,#app .pza-road-sheet,#app .map-advanced-controls,
+#app .page-panel,#app .night-visibility-panel,#app .pza-advanced-tools{
+  scrollbar-width:thin!important;
+  scrollbar-color:#7d9b95 transparent!important;
+}
+#app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar{width:7px;height:7px}
+#app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-track{background:transparent;border-radius:10px}
+#app :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-thumb{background:#7d9b95;border-radius:10px;border:1px solid transparent;background-clip:padding-box}
+#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools){scrollbar-color:#43666b #192f34!important}
+#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-track{background:#192f34}
+#app[data-theme="dark"] :is(.map-safety-controls,.pza-road-sheet,.map-advanced-controls,.page-panel,.night-visibility-panel,.pza-advanced-tools)::-webkit-scrollbar-thumb{background:#43666b;border-color:#192f34}
+/* Only one source of ETA for 1호선/신림선: remove the redundant timetable tabs. */
+#app #transport-sheet[data-schedule-merged="true"] #transport-mode-tabs,
+#app #transport-sheet[data-schedule-merged="true"] #transport-tab-hours{display:none!important}
+/* Original-looking regulatory speed symbols are drawn onto the MapLibre layer;
+ * these controls do not simulate camera positions without verified points. */
+#app .sangdo-camera-tool{border-top:1px solid var(--dj-ui-border,#d4e0dc);padding-top:10px;display:grid;gap:8px}
+#app .sangdo-camera-tool>strong{font-size:12px;font-weight:800}
+#app .sangdo-camera-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#app .sangdo-camera-actions button{cursor:pointer;min-height:38px;padding:6px;border-radius:9px;border:1px solid var(--dj-ui-border,#d4e0dc);background:var(--dj-ui-bg,#fff);color:var(--dj-ui-text,#17372f);font-size:11px;font-weight:750}
+#app .sangdo-camera-actions #sangdo-camera-toggle[aria-pressed="true"]{background:#275b60;color:#f7fffc;border-color:#275b60}
+#app .sangdo-camera-actions #sangdo-camera-toggle[aria-pressed="false"]{background:transparent}
+#app #sangdo-camera-file{display:none!important}
+#app #sangdo-camera-status{color:var(--dj-ui-subtext,#648277);font-size:11px;line-height:1.5}
+#app .sangdo-camera-tool a{color:var(--dj-ui-link,#148977);text-decoration:underline;text-underline-offset:2px}
+#app[data-theme="dark"] .sangdo-camera-actions button{background:#1b3135;border-color:#496466;color:#dceeea}
+#app[data-theme="dark"] .sangdo-camera-actions #sangdo-camera-toggle[aria-pressed="true"]{background:#255e5d;border-color:#56857f}
+
+/* The map's primary action should read as "pedestrian safety", not another
+ * utility button. Keep dimensions unchanged to prevent mobile overlap. */
+#app #map-safety-toggle{
+  position:absolute!important;
+  background:linear-gradient(138deg,#138b75 0%,#0c6858 100%)!important;
+  color:#fff!important;
+  border:1.5px solid #85d8b6!important;
+  box-shadow:0 0 0 3px rgba(24,151,119,.16),0 6px 16px rgba(7,81,63,.30)!important;
+  letter-spacing:-.12px!important;
+  text-shadow:0 1px 1px rgba(0,52,40,.24)!important;
+}
+#app #map-safety-toggle::after{
+  content:"";position:absolute;right:5px;top:5px;width:5px;height:5px;
+  background:#ffe2a1;border:1px solid #fff;border-radius:50%;
+  box-shadow:0 0 0 1px rgba(4,52,43,.15);
+  pointer-events:none;
+}
+#app #map-safety-toggle:hover:not(:disabled){
+  background:linear-gradient(138deg,#14a087 0%,#0d7564 100%)!important;
+  box-shadow:0 0 0 3px rgba(24,151,119,.21),0 7px 19px rgba(7,81,63,.34)!important;
+}
+#app #map-safety-toggle[aria-expanded="true"]{
+  background:#0e5e50!important;border-color:#9dd9c2!important;
+  box-shadow:0 0 0 3px rgba(24,151,119,.22),0 6px 16px rgba(7,81,63,.27)!important;
+}
+#app[data-theme="dark"] #map-safety-toggle{
+  background:linear-gradient(138deg,#176f66,#104b48)!important;
+  border-color:#75cdb1!important;color:#f2fffa!important;
+  box-shadow:0 0 0 3px rgba(56,178,148,.22),0 6px 19px rgba(0,0,0,.42)!important;
+}
+#app[data-theme="dark"] #map-safety-toggle[aria-expanded="true"]{
+  background:#186f62!important;color:#fff!important;
+}
