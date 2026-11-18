@@ -25,12 +25,17 @@ jobs:
           node-version: '22'
       - name: Load exact Preview target
         run: |
-          set -eu
-          jq -er '.source_sha | strings' release/tablet768-audit-request.json | grep -Eq '^[a-f0-9]{40}$'
-          jq -er '.build_run | tostring' release/tablet768-audit-request.json | grep -Eq '^[1-9][0-9]*$'
-          echo "DONGJAK_EXPECTED_SOURCE_SHA=$(jq -er '.source_sha' release/tablet768-audit-request.json)" >> "$GITHUB_ENV"
-          echo "DONGJAK_EXPECTED_BUILD_RUN=$(jq -er '.build_run | tostring' release/tablet768-audit-request.json)" >> "$GITHUB_ENV"
-          echo "DONGJAK_TARGET_URL=$(jq -er '.target_url' release/tablet768-audit-request.json)" >> "$GITHUB_ENV"
+          node --input-type=module <<'NODE'
+          import {appendFileSync,readFileSync} from 'node:fs';
+          const r=JSON.parse(readFileSync('release/tablet768-audit-request.json','utf8'));
+          if(!/^[a-f0-9]{40}$/.test(r.source_sha||'')) throw new Error('Invalid source SHA');
+          if(!Number.isSafeInteger(r.build_run)||r.build_run<1) throw new Error('Invalid build run');
+          if(typeof r.target_url!=='string'||!r.target_url.startsWith('https://')) throw new Error('Invalid target URL');
+          appendFileSync(process.env.GITHUB_ENV,
+            'DONGJAK_EXPECTED_SOURCE_SHA='+r.source_sha+'\\n'+
+            'DONGJAK_EXPECTED_BUILD_RUN='+r.build_run+'\\n'+
+            'DONGJAK_TARGET_URL='+r.target_url+'\\n');
+          NODE
       - name: Verify exact Preview source before test
         run: node scripts/verify-release-source.mjs
       - uses: actions/cache@v4
