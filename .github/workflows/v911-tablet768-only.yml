@@ -25,7 +25,7 @@ jobs:
           node-version: '22'
       - name: Load exact Preview target
         run: |
-          set -euo pipefail
+          set -eu
           jq -er '.source_sha | strings' release/tablet768-audit-request.json | grep -Eq '^[a-f0-9]{40}$'
           jq -er '.build_run | tostring' release/tablet768-audit-request.json | grep -Eq '^[1-9][0-9]*$'
           echo "DONGJAK_EXPECTED_SOURCE_SHA=$(jq -er '.source_sha' release/tablet768-audit-request.json)" >> "$GITHUB_ENV"
