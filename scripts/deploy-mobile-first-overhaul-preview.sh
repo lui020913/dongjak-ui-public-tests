@@ -57,10 +57,10 @@ curl -fsSL --max-time 30 "$PREVIEW_URL/version.json" | jq -e --arg version "$APP
 curl -fsSL --max-time 30 "$PREVIEW_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
 current="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
 test "$current" = "$previous"
-jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,viewport_scope:"full"}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
 echo "Preview: $PREVIEW_URL" >> "$GITHUB_STEP_SUMMARY"
 echo "Private source: $SOURCE_SHA ($APP_VERSION)" >> "$GITHUB_STEP_SUMMARY"
 echo "Public UI commit: $PUBLIC_SHA" >> "$GITHUB_STEP_SUMMARY"
 echo "CSS SHA-256: $CSS_SHA" >> "$GITHUB_STEP_SUMMARY"
-echo "Full nine-viewport anonymous browser gate dispatched. Production remains unchanged." >> "$GITHUB_STEP_SUMMARY"
+echo "Only mobile phone browser QA will run before the protected Production promotion job." >> "$GITHUB_STEP_SUMMARY"
 echo "Preview deployed and Production deployment identity verified unchanged."
