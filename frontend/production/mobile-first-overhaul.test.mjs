@@ -9,7 +9,7 @@ test('mobile-first design tokens and dark theme are defined',()=>{
     assert.ok(css.includes(token), 'Missing '+token);
   }
   assert.match(css,/#app\[data-theme="dark"\]/);
-  assert.match(css,/html\[data-theme="dark"\] #app/);
+  assert.match(css,/html\[data-theme="dark"\] #app/);\n  assert.ok(css.includes('--mf-surface: #191b1f'));
 });
 
 test('phone layout uses safe areas and map-first navigation',()=>{
@@ -21,7 +21,7 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/mask-image: linear-gradient/);
   assert.match(css,/#weather-label/);
   assert.match(css,/#theme-toggle/);
-  assert.match(css,/#version-history-trigger/);
+  assert.match(css,/#version-history-trigger/);\n  assert.match(css,/flex-basis: 52px/);\n  assert.match(css,/bottom: max\(0px, env\(safe-area-inset-bottom/);
 });
 
 test('tablet and desktop share the same visual tokens',()=>{
