@@ -1,9 +1,9 @@
 {
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
-  "public_work_branch": "public/mobile-first-overhaul-20261119",
-  "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a white screen with the existing mobile-access notice; remove literal backslash-n characters from the notice markup; preserve all PC/tablet source; phone-only QA must pass before protected Production promotion",
-  "attempt": 21,
+  "public_work_branch": "fix/mobile-17-followup-20261119",
+  "purpose": "Phone-only follow-up for the seventeen requested UI, data display, pilot district and authentication-return changes; preserve PC/tablet gate and originals; run phone QA before guarded Production promotion",
+  "attempt": 22,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preserved the existing centered notice presentation while removing only the visible literal \\\\n sequences. Restored the original white full-screen grid, typography, message width and paragraph spacing; no additional layout redesign."
+  "last_retry_reason": "Follow-up candidate; no production claim until mobile QA and exact deployment verification succeed."
 }

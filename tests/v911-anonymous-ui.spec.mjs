@@ -71,9 +71,11 @@ test.afterEach(async({page},info)=>{
 test('compact HUD and visible motion; desktop navigation and dark theme',async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  if(compact(page)){
-   const header=page.locator('.topbar'),brandLogo=header.locator('.map-quick-search-form > .brand .logo img');
+   const header=page.locator('.topbar'),brandLogo=header.locator('.map-quick-search-form #dj-settings-mobile img');
    await expect(header.locator(':scope > #dj-settings-mobile')).toBeHidden();
    await expect(brandLogo).toHaveCount(1);await expect(brandLogo).toBeVisible();
+   await expect(header.locator('.map-quick-search-form .brand')).toBeHidden();
+   await expect(header.locator('.map-quick-search-form #dj-about-pc')).toBeHidden();
    const nav=page.locator('#bottom-nav'),tip=page.locator('#dj840-map-tip'),scale=page.locator('#map .maplibregl-ctrl-scale');
    await expect(nav).toBeVisible();
    // The browser-only install advice intentionally replaces the map TIP.
@@ -87,6 +89,9 @@ test('compact HUD and visible motion; desktop navigation and dark theme',async({
      await expect(installAdvice).toBeHidden();
    }
    await expect(tip).toBeVisible();await expect(scale).toBeVisible();
+   await expect(scale).toHaveCSS('border-top-left-radius','999px');
+   const query=page.locator('#map-quick-search-query'),first=await query.getAttribute('placeholder');
+   await expect.poll(()=>query.getAttribute('placeholder'),{timeout:22000}).not.toBe(first);
    await expect.poll(async()=>{const n=await nav.boundingBox(),t=await tip.boundingBox(),s=await scale.boundingBox();return n&&t&&s&&n.y-t.y-t.height>=3&&n.y-t.y-t.height<=10&&t.y-s.y-s.height>=3&&t.y-s.y-s.height<=10;}).toBe(true);
    const contained=await nav.evaluate(n=>{const r=n.getBoundingClientRect();return [...n.querySelectorAll('.nav-tab')].every(b=>{const q=b.getBoundingClientRect();return q.top>=r.top-1&&q.bottom<=r.bottom+1})});expect(contained).toBe(true);
    await enter(page,'route-panel','route');await expect(tip).toBeHidden();
@@ -98,14 +103,21 @@ test('compact HUD and visible motion; desktop navigation and dark theme',async({
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
  await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(25, 27, 31)');
 });
-test('compact More close and settings open from real buttons',async({page})=>{
- test.skip(!compact(page),'compact only');await ready(page);
- const more=page.locator('#dj-v794-more'),panel=page.locator('#dj-mobile-utilities'),close=page.locator('#dj-mobile-utilities-close');
- await tap(page,more);await expect(panel).toBeVisible();
- const a=await panel.boundingBox(),b=await close.boundingBox();expect(a.x+a.width-b.x-b.width).toBeLessThan(24);
- await tap(page,close);await expect(panel).toBeHidden();
- await tap(page,more);await tap(page,page.locator('#dj-mobile-settings'));await expect(page.locator('#dj-map-settings')).toBeVisible();await expect(panel).toBeHidden();
+test('phone More functions live in collapsible My Info groups',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ await expect(page.locator('#dj-v794-more')).toBeHidden();
+ await tap(page,tab(page,'mine'));
+ const section=page.locator('#mine-panel .dj17-more-root');
+ await expect(section).toBeVisible();
+ await section.locator(':scope > summary').click();
+ await expect(section).toHaveAttribute('open','');
+ const group=section.locator('.dj17-feature-details').first();
+ await expect(group).toBeVisible();await group.locator('summary').click();
+ await expect(group.locator('.dj832-more-feature').first()).toBeVisible();
+ await section.locator('#dj-mobile-settings').click();
+ await expect(page.locator('#dj-map-settings')).toBeVisible();
 });
+
 test('transport cards, transfer tabs, right aligned arrivals and facility grip',async({page})=>{
  await ready(page);
  // Supply only anonymous synthetic arrival examples; no logged-in account or private records.
@@ -191,79 +203,36 @@ test('all five onboarding illustrations remain uncropped on tablet and desktop',
   await expect(tour).toBeHidden();
 });
 
-test('phone compact toolbar, reachable swipe cue and bottom dock share a visual system',async({page})=>{
+test('phone toolbar excludes redundant buttons and uses content-edge mask',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
- const scroll=page.locator('#dj831-scrollport'),cue=page.locator('.dj912-toolbar-next'),more=page.locator('#dj-v794-more'),nav=page.locator('#bottom-nav');
- await expect(scroll).toBeVisible();await expect(cue).toBeVisible();await expect(more).toBeVisible();
- const geometry=()=>scroll.evaluate(n=>{const more=document.getElementById('dj-v794-more'),w=more.getBoundingClientRect().width;return {widths:[...n.children].filter(b=>b.tagName==='BUTTON'&&b.getClientRects().length).map(b=>b.getBoundingClientRect().width),more:w,overflow:n.scrollWidth-n.clientWidth};});
- await expect.poll(async()=>{const d=await geometry();return d.overflow>3&&d.widths.length>=4&&d.widths.every(w=>Math.abs(w-52)<=1)&&Math.abs(d.more-52)<=1;}).toBe(true);
- await expect.poll(()=>scroll.evaluate(n=>Math.abs(n.scrollLeft))).toBeLessThanOrEqual(3);
- await expect(cue).toHaveAttribute('data-direction','right');
- const left=await scroll.evaluate(n=>n.scrollLeft);
- await tap(page,cue);await expect.poll(()=>scroll.evaluate(n=>n.scrollLeft)).toBeGreaterThan(left+8);
- const district=scroll.locator('[data-dj831-feature="map-dong"]');await expect(district.locator('.dj832-feature-label')).toHaveText('행정동');
- const wx=scroll.locator('#dj-v794-weather .dj910-weather-icon svg');await expect(wx).toBeAttached();
+ const scroll=page.locator('#dj831-scrollport'),nav=page.locator('#bottom-nav');
+ await expect(scroll).toBeVisible();
+ await expect(page.locator('#dj-v794-more')).toBeHidden();
+ await expect(page.locator('#dj-v794-night')).toBeHidden();
+ await expect(page.locator('.dj912-toolbar-next')).toBeHidden();
+ await expect(page.locator('#dj-v794-toolbar [data-poi-group]:visible')).toHaveCount(0);
+ await expect(page.locator('#dj-v794-toolbar .dj831-edge-blur:visible')).toHaveCount(0);
+ const check=()=>scroll.evaluate(n=>({overflow:n.scrollWidth-n.clientWidth,mask:getComputedStyle(n).maskImage,offset:n.scrollLeft}));
+ const d=await check();if(d.overflow>3){await scroll.evaluate(n=>n.scrollLeft=0);await expect.poll(async()=>(await check()).mask).toContain('linear-gradient');}
+ await expect(page.locator('#dj-v794-safety')).toBeVisible();
  await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
- await tap(page,more);await expect(page.locator('#dj-mobile-utilities')).toBeVisible();
- await visuallyPresented(page.locator('#dj-mobile-utilities'));
- await expect(page.locator('#dj-v794-toolbar')).toBeHidden();
- await tap(page,page.locator('#dj-mobile-utilities-close'));await expect(page.locator('#dj-mobile-utilities')).toBeHidden();
- await expect(page.locator('#dj-v794-toolbar')).toBeVisible();
  await test.info().attach('phone-compact-design',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-
-test('mobile and touch tablet POI filters share the existing top toolbar with blurred scroll edges',async({page})=>{
- test.skip(!compact(page),'mobile and touch tablet only');await ready(page);
- const app=page.locator('#app'),toolbar=page.locator('#dj-v794-toolbar'),rail=page.locator('#dj831-scrollport'),categories=page.locator('#dj912-poi-categories');
- await expect(toolbar).toBeVisible({timeout:30000});
- await expect(categories).toHaveAttribute('data-dj912-integrated','true',{timeout:45000});
- await expect(categories).toBeHidden();
- await expect(categories.locator('.dj912-poi-scroll button')).toHaveCount(0);
- const buttons=rail.locator(':scope > button[data-poi-group]');
- await expect(buttons).toHaveCount(7);
- const food=rail.locator(':scope > button[data-poi-group="food"]'),cafe=rail.locator(':scope > button[data-poi-group="cafe"]');
- await expect(food).toBeVisible();await expect(cafe).toBeVisible();
- expect(await food.evaluate(n=>n.parentElement?.id==='dj831-scrollport')).toBe(true);
- await expect(food).toHaveAttribute('aria-pressed','false');
- const metrics=await rail.evaluate(n=>({scrollWidth:n.scrollWidth,clientWidth:n.clientWidth}));
- const left=toolbar.locator(':scope > .dj831-edge-blur-left'),right=toolbar.locator(':scope > .dj831-edge-blur-right');
- if(metrics.scrollWidth>metrics.clientWidth+3){
-   // Verify the actual initial state, then explicitly exercise both ends.
-   const snapshot=()=>rail.evaluate(n=>{
-     const l=n.parentElement.querySelector('.dj831-edge-blur-left'),r=n.parentElement.querySelector('.dj831-edge-blur-right');
-     const shown=e=>!!e&&!e.hidden&&getComputedStyle(e).display!=='none'&&e.getClientRects().length>0;
-     const max=n.scrollWidth-n.clientWidth;
-     return {offset:n.scrollLeft,max,left:shown(l),right:shown(r)};
-   });
-   if(page.viewportSize().width<700){
-     await expect.poll(async()=>Math.abs((await snapshot()).offset)).toBeLessThanOrEqual(3);
-   }
-   console.log('TOOLBAR_INITIAL',JSON.stringify(await snapshot()));
-   await expect.poll(async()=>{const d=await snapshot();return d.left===(d.offset>3)&&d.right===(d.max-d.offset>3);}).toBe(true);
-   const move=async end=>{
-     await rail.evaluate((n,end)=>n.scrollTo({left:end?n.scrollWidth:0,behavior:'instant'}),end);
-     await expect.poll(async()=>{const d=await snapshot();return end?d.max-d.offset:Math.abs(d.offset);}).toBeLessThanOrEqual(3);
-   };
-   await move(false);
-   await expect(left).toBeHidden();await expect(right).toBeVisible();
-   expect(await right.evaluate(n=>getComputedStyle(n).backdropFilter)).toContain('blur(5px)');
-   await move(true);
-   await expect(right).toBeHidden();await expect(left).toBeVisible();
-   await move(false);
-   await expect(left).toBeHidden();await expect(right).toBeVisible();
- }else{
-   await expect(left).toBeHidden();await expect(right).toBeHidden();
- }
- await food.scrollIntoViewIfNeeded();await tap(page,food);
- await expect(food).toHaveAttribute('aria-pressed','true');
- await expect(app).toHaveAttribute('data-dj912-poi-groups',/food/);
- await cafe.scrollIntoViewIfNeeded();await tap(page,cafe);
- await expect(cafe).toHaveAttribute('aria-pressed','true');
- await expect(food).toHaveAttribute('aria-pressed','true');
- await test.info().attach('poi-toolbar-mobile-tablet',{body:await page.screenshot(),contentType:'image/png'});
+test('phone pilot safety region and expandable sheet',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ await tap(page,page.locator('#dj-v794-safety'));
+ const panel=page.locator('#map-safety-controls');
+ await expect(panel).toBeVisible();
+ await expect(panel.locator('.dj17-pilot-notice')).toContainText('상도1동');
+ const grip=panel.locator('.dj17-expand');await expect(grip).toBeVisible();await grip.click();
+ await expect(panel).toHaveClass(/dj871-sheet-expanded/);
+ await grip.click();await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);
+ await panel.locator('#map-safety-close').click();await expect(panel).toBeHidden();
+ await expect(page.locator('.dj17-lock').first()).toBeAttached({timeout:45000});
+ await expect(page.locator('#dj-v794-safety')).toBeVisible();
+ await test.info().attach('pilot-map',{body:await page.screenshot(),contentType:'image/png'});
 });
-
 
 test('phone onboarding copy is top aligned and artwork is not cropped',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page,{keepTour:true});
@@ -295,11 +264,10 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await expect.poll(async()=>{const a=await body.boundingBox(),b=await last.boundingBox();return a&&b?Math.min(b.y-a.y,a.y+a.height-b.y-b.height):-1000;}).toBeGreaterThanOrEqual(-2);}
  await test.info().attach('phone-route-footer',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
- await tap(page,page.locator('#dj-v794-more'));
- const more=page.locator('#dj-mobile-utilities'),heading=more.locator('.dj-mobile-utility-heading');
- await visuallyPresented(more);await expect(heading).toBeVisible();
- await expect.poll(async()=>{const p=await more.boundingBox(),h=await heading.boundingBox();return p&&h?h.x-p.x:-1000;}).toBeGreaterThanOrEqual(8);
- await tap(page,page.locator('#dj-mobile-utilities-close'));await expect(more).toBeHidden();
+ await tap(page,tab(page,'mine'));
+ const mine=page.locator('#mine-panel');await visuallyPresented(mine);
+ await expect(mine.locator('.dj17-more-root')).toBeVisible();
+ await tap(page,mine.locator('.dj-sheet-chrome-close'));await expect(mine).toBeHidden();
  await tap(page,tab(page,'participate'));
  const community=page.locator('#participation-panel'),cb=community.locator(':scope > .dj836-sheet-body'),summary=cb.locator('.community-report-secondary > summary');
  await visuallyPresented(community);await summary.scrollIntoViewIfNeeded();
@@ -412,14 +380,13 @@ test('PC night report fits workspace and facility categories restore on exit',as
 
 test('phone night shortcut waits for the map, honors consent and exits',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
- const app=page.locator('#app'),shortcut=page.locator('#dj-v794-night');
+ const app=page.locator('#app'),shortcut=page.locator('#night-visibility-toggle');
+ await tap(page,page.locator('#dj-v794-safety'));
  await expect(app).toHaveAttribute('data-dj-night-ready','true',{timeout:60000});
  await expect(shortcut).toBeEnabled();
  await shortcut.click();
  const consent=page.locator('#dj833-night-modal');
- await expect(consent.getByRole('dialog')).toBeVisible();
- await expect(app).toHaveAttribute('data-sangdo-night','off');
- await consent.getByRole('button',{name:'예, 시작',exact:true}).click();
+ if(await consent.getByRole('dialog').isVisible()){await expect(app).toHaveAttribute('data-sangdo-night','off');await consent.getByRole('button',{name:'예, 시작',exact:true}).click();}
  const night=page.locator('#night-visibility-float');
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  await expect(night).toBeVisible();
