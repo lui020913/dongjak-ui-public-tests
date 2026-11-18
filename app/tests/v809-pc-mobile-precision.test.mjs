@@ -28,7 +28,8 @@ test('transit sheets and arrival cards remain accessible in the shared panel sys
  assert.ok(css.includes('max-height: calc(100dvh'));
  assert.ok(transit.includes('.dj854-search-column-list'));
  assert.ok(transit.includes('.dj854-more-head'));
- assert.ok(transit.includes('transport-arrivals'));
+ assert.ok(transit.includes('.dj854-search-columns'));
+ assert.ok(transit.includes('.dj854-search-column'));
 });
 
 test('the five navigation tabs retain vertical icon and label alignment on every viewport',()=>{
@@ -43,7 +44,9 @@ test('mobile motion owner still provides one entrance and exit transition system
  const js=read('src/v806-unified-ui.js');
  assert.ok(js.includes('data-dj806-motion'));
  assert.ok(js.includes('prefers-reduced-motion'));
- assert.ok(js.includes('transitionend'));
+ assert.ok(js.includes('playMobileMotion'));
+ assert.ok(js.includes('data-dj806-motion'));
+ assert.ok(read('src/v810-mobile-sheet-motion.css').includes('@media (prefers-reduced-motion: reduce)'));
 });
 
 test('version history remains in the header; no duplicate release shortcut is mounted',()=>{
