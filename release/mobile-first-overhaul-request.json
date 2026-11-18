@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 8,
+  "attempt": 9,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Scope is now strictly phone-only. Preserve PC/tablet source in the archive branch, suppress desktop/tablet UI and map startup, run only mobile phone regressions at 375/390/430 CSS px, then promote the exact tested artifact through the protected Production environment."
+  "last_retry_reason": "First mobile-only workflow stopped in its public unit-test guard because the test regex omitted the documentElement.dataset prefix. Corrected the assertion; rerun the same exact source candidate."
 }
