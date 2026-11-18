@@ -43,7 +43,7 @@ const POI_BUTTON_PATHS=Object.freeze({
  cafe:'M4 8h13v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z M17 9h2a3 3 0 0 1 0 6h-2 M3 22h17 M8 3v2 M12 3v2',
  transit:'M6 18V5a6 6 0 0 1 12 0v13 M4 18h16 M7 21l2-3 M17 21l-2-3 M8 8h8'
 });
-const MOBILE_TOOLBAR_MEDIA='(max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)';
+const MOBILE_TOOLBAR_MEDIA='(min-width: 0px)';
 function setPoiButtonLabel(button,label){
  if(button.dataset.dj912Toolbar==='true'){
   button.dataset.dj832Label=label;button.setAttribute('aria-label',label);button.title=label;
