@@ -30,14 +30,14 @@ test('build patch adds only a blank white visual gate and preserves desktop/tabl
     <script type="module" src="/src/v876-desktop-final.js"></script>
     <div id="app"></div>
 </body></html>`;
-  const mainJs="import {installDesktopSafetyRail} from './v713-desktop-rail.js';\\nimport './v726-desktop-polish.css';\\nimport './v729-pc-consistency.css';\\nimport './v881-desktop-ui.css';\\nimport './v881-portrait-zoom-responsive.css';\\nimport './v881-tablet-workspace.css';\\nimport './v881-tablet-header-unified.css';\\nimport './v881-tablet-tool-rail.js';\\nimport './v913-pc-design-system.css';\\nmaplibregl.setWorkerUrl(workerUrl);\\ninstallDesktopSafetyRail({app});\\nstartApp();\\n";
-  const platformEntry="if(target==='ios-pwa')await import('./ios-pwa/entry.js');\\nelse if(target==='android')await import('./android/entry.js');\\nelse await import('./pc-chromium/entry.js');\\n// Mobile sheet presentation has its own entry, separate from desktop/MapLibre.\\nif(target==='ios-pwa'||target==='android')await import('./shared/mobile-panel-layout.js');\\nexport {target};\\n";
+  const mainJs="import {installDesktopSafetyRail} from './v713-desktop-rail.js';\nimport './v726-desktop-polish.css';\nimport './v729-pc-consistency.css';\nimport './v881-desktop-ui.css';\nimport './v881-portrait-zoom-responsive.css';\nimport './v881-tablet-workspace.css';\nimport './v881-tablet-header-unified.css';\nimport './v881-tablet-tool-rail.js';\nimport './v913-pc-design-system.css';\nmaplibregl.setWorkerUrl(workerUrl);\ninstallDesktopSafetyRail({app});\nstartApp();\n";
+  const platformEntry="if(target==='ios-pwa')await import('./ios-pwa/entry.js');\nelse if(target==='android')await import('./android/entry.js');\nelse await import('./pc-chromium/entry.js');\n// Mobile sheet presentation has its own entry, separate from desktop/MapLibre.\nif(target==='ios-pwa'||target==='android')await import('./shared/mobile-panel-layout.js');\nexport {target};\n";
   const result=applyMobileOnlyGate({indexHtml,mainJs,platformEntry});
   assert.match(result.indexHtml,/dj-mobile-only-gate-bootstrap/);
   assert.match(result.indexHtml,/dj-mobile-only-screen/);
   assert.match(result.indexHtml,/background:#fff!important/);
-  assert.match(result.indexHtml,/v815-pc-visual-fixes\\.css/);
-  assert.match(result.indexHtml,/v854-weather-desktop\\.js/);
+  assert.match(result.indexHtml,/v815-pc-visual-fixes\.css/);
+  assert.match(result.indexHtml,/v854-weather-desktop\.js/);
   assert.equal(result.mainJs,mainJs);
   assert.equal(result.platformEntry,platformEntry);
 });
