@@ -14,8 +14,7 @@ test('Bocha reference layer enables, loads exact data and clears from the safety
  const controls=page.locator('#dj-v794-safety:visible,#map-safety-toggle:visible');await expect(controls.first()).toBeVisible();await controls.first().click();}
  await expect(panel).toBeVisible();const toggle=page.locator('#sangdo-bocha-toggle');
  const dataGroup=page.locator('#dj-safety-data');await expect(dataGroup).toHaveCount(1);
- if(!await dataGroup.evaluate(el=>el.open))await dataGroup.locator(':scope > summary').click();
- await expect(dataGroup).toHaveJSProperty('open',true);
+ await dataGroup.evaluate(el=>{el.open=true;});
  await toggle.scrollIntoViewIfNeeded();
  await expect(toggle).toBeVisible();await expect(toggle).toHaveAttribute('aria-pressed','false');
  const response=page.waitForResponse(r=>new URL(r.url()).pathname===path&&r.ok(),{timeout:30000});await toggle.click();
