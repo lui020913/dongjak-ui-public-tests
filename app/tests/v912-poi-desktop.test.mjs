@@ -12,12 +12,20 @@ test('symbols replace plain dots, prioritize safety and preserve click data',()=
  const s=read('src/seoul-official-facilities.js');
  assert.match(s,/id:POINTS,type:'symbol'/);assert.doesNotMatch(s,/id:POINTS,type:'circle'/);assert.match(s,/'symbol-sort-key':\['get','priority'\]/);assert.match(s,/const wanted=\['약국'/);
 });
-test('separate PC workspace and stationary search navigation',()=>{
- const s=read('src/v912-desktop-poi.css');assert.match(s,/@media \(min-width:1080px\) and \(pointer:fine\)/);assert.match(s,/--dj912-pc-edge:16px/);assert.match(s,/#transport-sheet > \.handle/);assert.match(read('src/v713-desktop-rail.js'),/const push=0;/);
+test('food, cafe and safety categories are integrated into the shared feature toolbar at all widths',()=>{
+ const poi=read('src/v912-poi-presentation.js');
+ const main=read('src/main.js');
+ assert.match(poi,/const MOBILE_TOOLBAR_MEDIA='\\(min-width: 0px\\)'/);
+ assert.match(poi,/installMobilePoiToolbarIntegration/);
+ assert.match(poi,/rail\\.appendChild\\(button\\)/);
+ assert.match(poi,/data-dj912Integrated/);
+ assert.doesNotMatch(main,/v912-desktop-poi\\.css/);
+ assert.doesNotMatch(main,/v913-pc-design-system\\.css/);
 });
-
-test('PC presentation stylesheet loads in the browser entry, not the Node-testable geometry coordinator',()=>{
- const entry=read('src/main.js'),coordinator=read('src/v910-request-completion.js');
- assert.ok(entry.indexOf("import './v912-desktop-poi.css';")>entry.indexOf("import './v910-request-completion.css';"));
- assert.doesNotMatch(coordinator,/import\s+['"][^'"]+\.css['"]/);
+test('the category shell is hidden after its buttons move into the shared toolbar',()=>{
+ const css=read('src/mobile-first-layout.css');
+ const poi=read('src/v912-poi-presentation.js');
+ assert.match(css,/#dj912-poi-categories/);
+ assert.match(poi,/shell\\.dataset\\.dj912Integrated='true';right\\.hidden=true/);
+ assert.match(poi,/if\\(button\\.parentElement!==rail\\)rail\\.appendChild\\(button\\)/);
 });
