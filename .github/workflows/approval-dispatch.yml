@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   dispatch:
-    if: github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && !github.event.issue.pull_request
+    if: github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && !github.event.issue.pull_request && (startsWith(github.event.comment.body, 'Preview ') || startsWith(github.event.comment.body, '승인 '))
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
@@ -15,7 +15,6 @@ jobs:
           REQUEST: ${{ github.event.comment.body }}
           COMMENT_ID: ${{ github.event.comment.id }}
           COMMENT_USER: ${{ github.event.comment.user.login }}
-          PREVIEW_SOURCE_SHA: 210bcc7697f0527b37992c855ab9f7d818b88412
           PRIVATE_PREVIEW_DISPATCH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
         shell: bash
         run: |
@@ -25,8 +24,9 @@ jobs:
           # Preview is a non-production request. It carries no approval inputs.
           if [[ "$REQUEST" =~ ^Preview\ [a-f0-9]{40}$ ]]; then
             read -r command pub <<< "$REQUEST"
-            test "$pub" = "$PREVIEW_SOURCE_SHA"
-            payload='{"ref":"main"}'
+            # The private gate independently checks exact reviewed source and proof pins.
+            # Never launch an approval-free Production promotion.
+            payload="$(jq -n --arg pub "$pub" '{ref:"main",inputs:{candidate_source:$pub}}')"
             curl -fsS --max-time 25 --request POST \
               -H "Authorization: Bearer $PRIVATE_PREVIEW_DISPATCH_TOKEN" \
               -H 'Accept: application/vnd.github+json' \
