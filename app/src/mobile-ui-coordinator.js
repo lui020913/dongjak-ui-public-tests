@@ -11,8 +11,7 @@ export function installMobileLayoutCoordinator({app,map}={}){
   let raf=0;
   const sync=()=>{
     raf=0;
-    const mobile=window.innerWidth<=1079;
-    if(!mobile)return;
+    // Shared layout metrics are synchronized for phones, tablets and desktop.
     const hb=header?.getBoundingClientRect?.().bottom||0;
     const nh=nav?.getBoundingClientRect?.().height||0;
     const size=mobileChromeMetrics({headerBottom:hb,navHeight:nh,
