@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {dockBottom,hudScaleCorrection,keyboardBounds,shouldClearMoreTranslate,tipHudPositions} from './mobile-surface-coordinator.mjs';
 test('aligns to measured dock rather than historical 70px token',()=>{
   assert.equal(dockBottom(844,756),96);
@@ -45,4 +46,17 @@ test('corrects only actual physical scale-to-TIP spacing without changing scale 
   assert.equal(hudScaleCorrection(20),-8);
   assert.equal(hudScaleCorrection(-100),36);
   assert.equal(hudScaleCorrection(NaN),0);
+});
+
+test('preserves native horizontal toolbar edge-fade affordance',()=>{
+  const css=readFileSync(new URL('./dongjak-production-overlay.css',import.meta.url),'utf8');
+  const selector='html body #app#app#app#app#app#app#app#app#app#app #dj831-scrollport';
+  const start=css.indexOf(selector+' {');
+  assert.notEqual(start,-1,'scrollport override must remain explicitly scoped');
+  const end=css.indexOf('}',start);
+  assert.notEqual(end,-1,'scrollport rule must close');
+  const rule=css.slice(start,end);
+  assert.match(rule,/scroll-snap-type:\s*x mandatory !important/);
+  assert.match(rule,/scroll-padding-inline:\s*2px !important/);
+  assert.doesNotMatch(rule,/(?:-webkit-)?mask-image:\s*none\s*!important/);
 });

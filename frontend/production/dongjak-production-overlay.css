@@ -292,8 +292,6 @@ html body #app [role="button"]:focus-visible {
   html body #app#app#app#app#app#app#app#app#app#app #dj831-scrollport {
     scroll-snap-type: x mandatory !important;
     scroll-padding-inline: 2px !important;
-    mask-image: none !important;
-    -webkit-mask-image: none !important;
   }
   html body #app#app#app#app#app#app#app#app#app#app #dj831-scrollport > .dj-v794-tool {
     scroll-snap-align: start !important;
