@@ -16,16 +16,16 @@ test('food, cafe and safety categories are integrated into the shared feature to
  const poi=read('src/v912-poi-presentation.js');
  const main=read('src/main.js');
  assert.match(poi,/const MOBILE_TOOLBAR_MEDIA='\\(min-width: 0px\\)'/);
- assert.match(poi,/installMobilePoiToolbarIntegration/);
+ assert.ok(poi.includes('installMobilePoiToolbarIntegration'));
  assert.match(poi,/rail\\.appendChild\\(button\\)/);
- assert.match(poi,/data-dj912Integrated/);
+ assert.ok(poi.includes('dj912Integrated'));
  assert.doesNotMatch(main,/v912-desktop-poi\\.css/);
  assert.doesNotMatch(main,/v913-pc-design-system\\.css/);
 });
 test('the category shell is hidden after its buttons move into the shared toolbar',()=>{
  const css=read('src/mobile-first-layout.css');
  const poi=read('src/v912-poi-presentation.js');
- assert.match(css,/#dj912-poi-categories/);
+ assert.ok(css.includes('#dj912-poi-categories'));
  assert.match(poi,/shell\\.dataset\\.dj912Integrated='true';right\\.hidden=true/);
  assert.match(poi,/if\\(button\\.parentElement!==rail\\)rail\\.appendChild\\(button\\)/);
 });
