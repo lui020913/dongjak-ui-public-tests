@@ -62,7 +62,7 @@ jobs:
           for dir in src public functions server platforms android migrations supabase scripts tests; do
             test ! -d "$source/$dir" || cp -a "$source/$dir" app/
           done
-          for file in .gitignore .env.example index.html package.json package-lock.json vite.config.js capacitor.config.json wrangler.toml wrangler.seoul-facilities.jsonc playwright.config.js playwright.config.mjs playwright.v910.config.mjs; do
+          for file in .gitignore index.html package.json package-lock.json vite.config.js capacitor.config.json wrangler.toml wrangler.seoul-facilities.jsonc playwright.config.js playwright.config.mjs playwright.v910.config.mjs; do
             test ! -f "$source/$file" || cp -a "$source/$file" app/
           done
           mkdir -p app/src
@@ -92,6 +92,15 @@ jobs:
           npm run dev
           ```
           EOF
+          cat > app/.gitleaks.toml <<'EOF'
+          [allowlist]
+          description = "Known non-secret local storage identifiers; no credentials."
+          regexes = [
+            '''dj-pwa-transition-v7104''',
+            '''dongjak-nav-tts-voice-v1''',
+            '''dongjak_safety_navigation_v3'''
+          ]
+          EOF
           test -s app/src/main.js
           test -s app/index.html
           test -s app/package.json
@@ -111,7 +120,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/gitleaks"
           tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP/gitleaks" gitleaks
           set +e
-          "$RUNNER_TEMP/gitleaks/gitleaks" detect --source app --no-git --redact --report-format json --report-path "$RUNNER_TEMP/gitleaks.json" --exit-code 23 > "$RUNNER_TEMP/gitleaks.log" 2>&1
+          "$RUNNER_TEMP/gitleaks/gitleaks" detect --source app --config app/.gitleaks.toml --no-git --redact --report-format json --report-path "$RUNNER_TEMP/gitleaks.json" --exit-code 23 > "$RUNNER_TEMP/gitleaks.log" 2>&1
           result=$?
           set -e
           if [ "$result" -ne 0 ]; then
