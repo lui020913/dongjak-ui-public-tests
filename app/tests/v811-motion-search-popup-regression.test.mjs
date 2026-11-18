@@ -11,7 +11,7 @@ test('Only fade is available, and previously saved rise/none preferences are ign
   assert.match(src,/delete prefs\.motionStyle/);
   assert.doesNotMatch(src,/dj-settings-motion-style/);
   assert.match(motion,/function playMobileMotion/);
-  assert.match(motion,/target.style.setProperty\('opacity'/);
+  assert.match(motion,/target\.style\.setProperty\('opacity'/);
   assert.doesNotMatch(motion,/dj810-mobile-sheet-open/);
   assert.match(css,/@keyframes dj811-mobile-soft-open/);
   assert.match(css,/from \{ opacity:0; \}/);
@@ -30,13 +30,14 @@ test('Suggested searches synchronize the real input before executing actual sear
   const mirror=read('src/v807-ui-refine.js');
   assert.match(mirror,/searchForm\?\.querySelectorAll\('\.dj807-search-copy'\)/);
 });
-test('Place popup uses an actual geographic pin and mobile camera offset',()=>{
+test('Place popup uses an actual geographic pin and the same mobile-first sheet anchor on all screens',()=>{
   const place=read('src/place-details.js');
   assert.match(place,/createSelectedLocationPin\(document\)/);
   assert.match(read('src/selected-location-pin.js'),/dj807-facility-pin/);
   assert.match(place,/offset:\[0,Math\.round\(desiredY-h\/2\)\]/);
-  assert.match(place,/anchor:window\.matchMedia/);
-  assert.match(place,/\?'top':undefined/);
+  assert.ok(place.includes("anchor:'top'"));
+  assert.ok(place.includes("maxWidth:'min(520px, calc(100vw - 24px))'"));
+  assert.equal(place.includes('desktopDetail'),false);
 });
 test('Bus name labels appear alongside icons from street zoom with normal collision',()=>{
   const calls=[];
