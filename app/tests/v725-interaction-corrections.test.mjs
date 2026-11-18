@@ -1,36 +1,47 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const source=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
-test('v7.0.25 rail uses real search dropdown height and animates position',()=>{
-  const js=source('src/v713-desktop-rail.js'),css=source('src/v725-layout-state.css');
-  assert.match(js,/searchOpen==='true'/);
-  assert.match(js,/dropdown\.getBoundingClientRect\(\)\.bottom/);
-  assert.match(js,/--dj-v725-search-rail-push/);
-  assert.match(css,/transition:top \.32s/);
+test('the app uses one mobile-first shell instead of a desktop safety rail',()=>{
+  const main=source('src/main.js'),html=source('index.html'),css=source('src/mobile-first-layout.css');
+  assert.equal(main.includes('v725-layout-state.css'),false);
+  assert.equal(main.includes('v726-desktop-polish.css'),false);
+  assert.equal(main.includes('v729-pc-consistency.css'),false);
+  assert.equal(main.includes('positionAdminBelowLeftPanel'),false);
+  assert.equal(main.includes('installDesktopSafetyRail('),false);
+  assert.equal(html.includes('v729-r1-responsive-ui.css'),false);
+  assert.equal(html.includes('v729-r2-new-ui.css'),false);
+  assert.ok(css.includes('#bottom-nav:not([hidden])'));
+  assert.ok(css.includes('grid-template-columns: repeat(5,minmax(0,1fr))'));
+  assert.ok(css.includes('.map-actions'));
 });
-test('v7.0.25 desktop theme button is legible text; right map actions are upper right',()=>{
-  const css=source('src/v725-layout-state.css'),js=source('src/ui-environment.js');
-  assert.match(css,/#app #theme-toggle\{[\s\S]*?font-size:12px!important/);
-  assert.match(css,/#app #theme-toggle::after\{display:none!important/);
-  assert.match(js,/themeState\.value==='dark'\?'라이트 모드':'다크 모드'/);
-  assert.match(css,/top:12px!important;right:12px!important/);
+
+test('the search, theme and version controls share one floating header',()=>{
+  const css=source('src/mobile-first-layout.css'),environment=source('src/ui-environment.js'),html=source('index.html');
+  assert.ok(css.includes('.topbar'));
+  assert.ok(css.includes('#theme-toggle'));
+  assert.ok(css.includes('#version-history-trigger'));
+  assert.ok(environment.includes("themeState.value==='dark'?'라이트 모드':'다크 모드'"));
+  assert.ok(html.includes('id="version-history-trigger"'));
 });
-test('v7.0.25 night flag switches off BEFORE restoring light theme',()=>{
+
+test('night flag switches off BEFORE restoring light theme',()=>{
   const js=source('src/night-visibility-map.js');
   const segment=js.slice(js.indexOf('v7.0.25: set the analysis flag FIRST'));
   assert.ok(segment.indexOf("app.dataset.sangdoNight=enabled?'on':'off'")>=0);
   assert.ok(segment.indexOf("app.dataset.sangdoNight=enabled?'on':'off'")<segment.indexOf('applyTemporaryTheme(themeBeforeNight)'));
   assert.match(segment,/theme\?\.refresh\?\.\(\)/);
 });
-test('v7.0.25 news fetches media and official on initial map load, caches in memory',()=>{
+
+test('news fetches media and official on initial map load, caches in memory',()=>{
   const news=source('src/dongjak-news.js'),main=source('src/main.js');
   assert.match(news,/Promise\.allSettled\(\['media','official'\]/);
   assert.match(news,/latest\.set\(type,\{at:Date\.now\(\)/);
   assert.match(main,/dongjakNews\.prefetch\(\)/);
 });
-test('v7.0.25 neighbor stations have keyboard-select and map movement, no invented station coords',()=>{
+
+test('neighbor stations have keyboard-select and map movement, no invented station coords',()=>{
   const js=source('src/transport-map.js');
   assert.match(js,/lineStationKey\(item\.name\)===lineStationKey\(name\)/);
   assert.match(js,/neighbor\.setAttribute\('role','button'\)/);
@@ -41,20 +52,23 @@ test('v7.0.25 neighbor stations have keyboard-select and map movement, no invent
   assert.match(js,/map\.easeTo\?\.\(\{center:\[destination\.lng,destination\.lat\]/);
   assert.match(js,/void open\(\{\.\.\.destination,selectedLine:line\}\)/);
 });
-test('v7.0.25 desktop releases always display sources beside update notes',()=>{
-  const css=source('src/v725-layout-state.css'),js=source('src/version-history-v7.js');
-  assert.match(css,/\.v707-history-switch\.dj-mobile-history-switch\{display:none!important/);
-  assert.match(css,/\.v707-history-timeline,#app \.v707-history-sources\{display:block!important/);
-  assert.match(js,/controls\.classList\.add\('dj-mobile-history-switch'\)/);
+
+test('version history remains available from the shared header without a separate PC shortcut',()=>{
+  const html=source('index.html'),css=source('src/mobile-first-layout.css');
+  assert.ok(html.includes('id="version-history-trigger"'));
+  assert.ok(css.includes('#version-history-trigger'));
+  assert.equal(html.includes('v729-r2-new-ui.js'),false);
 });
-test('v7.0.25 admin panel sits below left content and mobile route scrolls above five-tab nav',()=>{
-  const main=source('src/main.js'),css=source('src/v725-layout-state.css');
-  assert.match(main,/function positionAdminBelowLeftPanel/);
-  assert.match(main,/--dj-v725-admin-top/);
-  assert.match(css,/#app #admin-dong-picker:not\(\[hidden\]\)/);
-  assert.match(css,/#app\[data-tab="route"\] #route-panel:not\(\[hidden\]\)/);
+
+test('administrative picker and route panel use the shared bottom-sheet position',()=>{
+  const main=source('src/main.js'),css=source('src/mobile-first-layout.css');
+  assert.equal(main.includes('positionAdminBelowLeftPanel'),false);
+  assert.equal(main.includes('--dj-v725-admin-top'),false);
+  assert.ok(css.includes('#admin-dong-picker:not([hidden])'));
+  assert.ok(css.includes('#route-panel,#participation-panel,#news-panel,#mine-panel'));
 });
-test('v7.0.25 generic railway geometry popup does not obscure station/bus information',()=>{
+
+test('generic railway geometry popup does not obscure station/bus information',()=>{
   const js=source('src/transport-map.js');
   assert.doesNotMatch(js,/map\.on\('click','transport-schematic-subway',/);
   assert.match(js,/do not open a generic MOIS rail provenance popup/);
