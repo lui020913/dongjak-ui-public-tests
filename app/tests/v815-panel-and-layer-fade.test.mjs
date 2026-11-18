@@ -52,14 +52,17 @@ test('v815: reduced motion applies without delayed animation',()=>{
   fader.apply('layer',false);
   assert.equal(layout.visibility,'none');
 });
-test('v815: PC search/settings are flat; close buttons unified; safety drawer widened',()=>{
-  const css=read('src/v815-pc-visual-fixes.css');
-  assert.match(css,/#map-quick-search-query/);
-  assert.match(css,/background:transparent!important/);
-  assert.match(css,/#dj-map-settings \.dj-map-settings-group/);
-  assert.match(css,/#dj-settings-close,#map-safety-close/);
-  assert.match(css,/width:min\(790px/);
-  assert.match(read('index.html'),/v815-pc-visual-fixes\.css/);
+test('v815: shared search and settings panels use the mobile-first surface system',()=>{
+  const css=read('src/mobile-first-layout.css');
+  const main=read('src/main.js');
+  const html=read('index.html');
+  assert.ok(css.includes('.topbar'));
+  assert.ok(css.includes('#map-safety-controls'));
+  assert.ok(css.includes('#map-advanced-controls'));
+  assert.ok(css.includes('#bottom-nav:not([hidden])'));
+  assert.equal(main.includes('v726-desktop-polish.css'),false);
+  assert.equal(main.includes('v729-pc-consistency.css'),false);
+  assert.equal(html.includes('v815-pc-visual-fixes.css'),false);
 });
 test('v815: road width and opt-in GeoJSON layers share controlled fade',()=>{
   assert.match(read('src/road-width-layer.js'),/layerFader\.apply\(id,shown\)/);
