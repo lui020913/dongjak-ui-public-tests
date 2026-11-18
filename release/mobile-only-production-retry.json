@@ -6,5 +6,8 @@
   "css_sha256": "4022b314c362731ced8c353987b503a4744499c42d9c2fe2bc3602465453f519",
   "app_version": "8.26.1",
   "phone_qa": "24 passed, 21 skipped",
-  "purpose": "Retry protected Production promotion of the exact artifact that passed Preview and phone-only Playwright QA. No rebuild or test bypass."
+  "purpose": "Retry protected Production promotion of the exact artifact that passed Preview and phone-only Playwright QA. No rebuild or test bypass.",
+  "retry_attempt": 2,
+  "production_compatibility_patch": "Temporary release-artifact-only change: add mode = off under [env.production.placement] in wrangler.toml, matching root [placement]. Do not modify private source repository.",
+  "previous_failure": "Wrangler 4.164.0 rejected the existing empty [env.production.placement] section because placement.mode is required. The deploy-time artifact patch supplies mode=off without changing the archived private source commit."
 }
