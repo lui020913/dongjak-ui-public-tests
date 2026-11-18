@@ -94,6 +94,25 @@ jobs:
           cp "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/release/dist/release-source.json"
           stage="Wrangler Production deployment"
           cd "$RUNNER_TEMP/release"
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='wrangler.toml';
+          const source=readFileSync(path,'utf8');
+          const header='[env.production.placement]';
+          if(source.split(header).length!==2) throw new Error('Expected exactly one env.production.placement section');
+          const start=source.indexOf(header)+header.length;
+          const next=source.indexOf('\\n[',start);
+          const section=source.slice(start,next<0?source.length:next);
+          if(!/^\\s*mode\\s*=/m.test(section)){
+            writeFileSync(path,source.replace(header,header+'\\nmode = "off"'));
+          }
+          const verified=readFileSync(path,'utf8');
+          const at=verified.indexOf(header)+header.length;
+          const end=verified.indexOf('\\n[',at);
+          const block=verified.slice(at,end<0?verified.length:end);
+          if(!/^\\s*mode\\s*=\\s*"off"\\s*$/m.test(block)) throw new Error('Production placement mode is not explicitly off');
+          NODE
+          echo "Production Wrangler compatibility: env.production.placement.mode=off" >> "$GITHUB_STEP_SUMMARY"
           if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" > "$RUNNER_TEMP/production-deploy.log" 2>&1; then
             tail -n 100 "$RUNNER_TEMP/production-deploy.log"
             exit 1
