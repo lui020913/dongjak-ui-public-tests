@@ -5,5 +5,5 @@
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
   "attempt": 10,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Phone-only unit checks passed, then the private build correctly stopped on whitespace-only lines left after removing dedicated PC/tablet tags. The patcher was rebuilt as a single module, JavaScript escaping corrected, and whitespace normalization added with a regression assertion. Re-run the exact archived source candidate."
+  "last_retry_reason": "The mobile-only device gate unit tests passed, but git diff --check found indentation whitespace left by removing dedicated PC/tablet HTML tags. The patcher now removes each complete indented asset line; the test fixture now mirrors the actual index layout."
 }
