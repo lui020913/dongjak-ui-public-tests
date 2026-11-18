@@ -1,0 +1,11 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+const read=p=>JSON.parse(readFileSync(p,'utf8'));
+const write=(p,d)=>writeFileSync(p,JSON.stringify(d,null,2)+'\n');
+const pkg=read('package.json'),lock=read('package-lock.json'),log=read('src/app-release-log.json'),source=read('public/release-source.json');
+if(pkg.version!=='8.9.14'||log.releases[0].version!=='8.9.14'||source.source_commit!==process.env.GITHUB_SHA||source.release_status!=='CANDIDATE_PREVIEW_NOT_PRODUCTION')throw Error('Wrong candidate baseline');
+const version='8.9.15';
+log.releases.unshift({version,date:'2026-11-18',scale:'patch',items:['상도1동 보차혼용도로·이면도로 참고 레이어 및 상세정보 제공.','PDF 기반 근사 선형은 미평가 유지; 위험등급과 안전경로 비용 미반영.']});
+pkg.version=lock.version=lock.packages[''].version=version;
+source.application_version=version;source.profile='sangdo1-bocha-reference-preview';
+write('package.json',pkg);write('package-lock.json',lock);write('src/app-release-log.json',log);write('public/release-source.json',source);
+write('public/batch-v911-candidate.json',{scope:'Sangdo1 bocha reference layer; isolated Preview only',previous_version:'8.9.13',source_commit:process.env.GITHUB_SHA});

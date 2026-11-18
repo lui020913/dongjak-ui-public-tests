@@ -1,0 +1,207 @@
+name: Sangdo1 bocha reference - isolated Preview
+run-name: ${{ github.event_name == 'push' && github.event.head_commit.message || format('bocha preview source={0}', inputs.source_sha || 'latest') }}
+on:
+  push:
+    branches: [main]
+    paths: [release/sangdo1-bocha-preview-request.json]
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Leave blank for the current private hotfix head; or pin an exact SHA
+        required: false
+        type: string
+        default: ''
+      force_rebuild:
+        description: Rebuild an already audited candidate
+        required: false
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: sangdo1-bocha-isolated-preview
+  cancel-in-progress: false
+env:
+  SOURCE_SHA: ${{ inputs.source_sha }}
+  PRIVATE_REPO: lui020913/dongjak-safety-map
+  PRIVATE_REF: feature/sangdo-bocha-v911-integration-20261118
+  PAGES_PROJECT: dongjak-walk-safety-preview
+  PREVIEW_URL: https://sangdo1-bocha-preview.dongjak-walk-safety-preview.pages.dev
+  PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+jobs:
+  build:
+    if: github.actor == 'lui020913' && github.ref == 'refs/heads/main' && github.repository == 'lui020913/dongjak-ui-public-tests'
+    environment: public-source-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    outputs:
+      source_sha: ${{ steps.resolve.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Resolve and verify the current source pin
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = 1 || { echo '::error::Dispatch a fresh build instead of rerunning a candidate'; exit 1; }
+          if [ "$GITHUB_EVENT_NAME" = push ];then
+            SOURCE_SHA="$(jq -er '.source_sha | strings' release/sangdo1-bocha-preview-request.json)"
+            [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+            jq -e --arg msg "bocha preview source=$SOURCE_SHA" '.head_commit.message==$msg' "$GITHUB_EVENT_PATH" >/dev/null
+          fi
+          test -n "$GH_TOKEN"
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          [[ "$actual" =~ ^[a-f0-9]{40}$ ]]
+          if [ -n "$SOURCE_SHA" ];then
+            [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] && test "$SOURCE_SHA" = "$actual" || { echo '::error::Requested source is no longer the current head'; exit 1; }
+          fi
+          echo "SOURCE_SHA=$actual" >> "$GITHUB_ENV"
+          echo "source_sha=$actual" >> "$GITHUB_OUTPUT"
+          echo "Resolved exact source: $actual"
+      - name: Check exact private source and fetch without publishing it
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$GH_TOKEN"
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          test "$actual" = "$SOURCE_SHA"
+          work="$RUNNER_TEMP/private-application"
+          mkdir -m 700 "$work"
+          git -C "$work" init -q
+          git -C "$work" remote add origin "https://github.com/$PRIVATE_REPO.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="Authorization: Basic $auth" git -C "$work" fetch -q --depth=1 origin "$SOURCE_SHA" >/dev/null 2>&1
+          git -C "$work" checkout -q --detach FETCH_HEAD >/dev/null 2>&1
+          test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
+          echo 'Exact private source verified; no repository contents published.'
+      - name: Run focused GIS unit suite and application build with private output suppressed
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/private-application"
+          test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          safe=(env -i "PATH=$PATH" "HOME=$HOME" CI=true DONGJAK_UI_ONLY=1 "GITHUB_SHA=$SOURCE_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY")
+          log="$RUNNER_TEMP/private-build.log"
+          umask 077
+          run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
+          run_private 'Release baseline metadata' node scripts/ci-v911-release.mjs
+          run_private 'Bocha Preview version' node "$GITHUB_WORKSPACE/scripts/prepare-bocha-preview.mjs"
+          run_private 'Synchronize visible version before tests' node scripts/stamp-version.mjs
+          # Retry only recognized transient npm/network failures; never retry failed tests.
+          for attempt in 1 2 3; do
+            if "${safe[@]}" npm ci --no-audit --no-fund --prefer-offline >"$log" 2>&1;then
+              echo 'Dependency install passed'; rm -f "$log"; break
+            fi
+            if [ "$attempt" = 3 ] || ! grep -Eiq '(ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENETUNREACH|ERR_SOCKET_TIMEOUT|E429|E502|E503|E504)' "$log";then
+              echo '::error::Dependency install failed (private diagnostic output withheld)'; rm -f "$log"; exit 1
+            fi
+            echo "Transient dependency installation failure; retry $attempt/2"
+            rm -f "$log"
+            sleep $((attempt * 5))
+          done
+          # Use the same test glob as the private npm test script. TAP output stays
+          # local; failures are reported only as test-name digests and counts.
+          if "${safe[@]}" node --test --test-reporter=tap tests/bocha-road-layer.test.mjs >"$log" 2>&1; then
+            echo 'Bocha GIS unit suite passed'
+          else
+            node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
+            rm -f "$log"
+            echo '::error::Bocha GIS unit suite failed (private diagnostic output withheld)'
+            exit 1
+          fi
+          rm -f "$log"
+          run_private 'Application build' npm run build
+          run_private 'Release consistency' npm run check:release
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' dist/release-source.json >/dev/null
+      - name: Verify private source is still the requested head before packaging
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$PRIVATE_REF" --jq .object.sha 2>/dev/null)"
+          test "$actual" = "$SOURCE_SHA"
+      - name: Seal exact deployment files; no plaintext public artifacts
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          tar -C "$RUNNER_TEMP/private-application" -czf "$RUNNER_TEMP/deploy.tar.gz" dist functions server src package.json package-lock.json
+          node scripts/seal-private-release.mjs seal "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed" "$SOURCE_SHA"
+          rm -f "$RUNNER_TEMP/deploy.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-bocha-${{ steps.resolve.outputs.source_sha }}
+          path: ${{ runner.temp }}/deploy.sealed
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Remove private working files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/private-application" "$RUNNER_TEMP/private-build.log" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/deploy.sealed"
+  preview:
+    needs: build
+    env:
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+    environment: public-cloudflare-preview
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: encrypted-bocha-${{ needs.build.outputs.source_sha }}
+          path: ${{ runner.temp }}/encrypted
+      - name: Authenticate and unpack tested deployment files
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$GITHUB_RUN_ATTEMPT" = 1 || { echo '::error::Dispatch a fresh build instead of rerunning Preview'; exit 1; }
+          node scripts/seal-private-release.mjs open "$RUNNER_TEMP/encrypted/deploy.sealed" "$RUNNER_TEMP/deploy.tar.gz" "$SOURCE_SHA"
+          mkdir -m 700 "$RUNNER_TEMP/release"
+          tar -xzf "$RUNNER_TEMP/deploy.tar.gz" -C "$RUNNER_TEMP/release"
+          rm -f "$RUNNER_TEMP/deploy.tar.gz"
+          jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
+      - name: Deploy Preview without showing private build or API contents
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PAGES_PROJECT"
+          curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api" 2>/dev/null | jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' >/dev/null
+          before="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?pre=$GITHUB_RUN_ID" | jq -e '.application_version=="8.9.13" and .source_commit=="b752b6a0cbffca93b5e39642610b4ec4e9f122b2" and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null
+          cd "$RUNNER_TEMP/release"
+          if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=sangdo1-bocha-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
+          for n in $(seq 1 12);do
+            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.15" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            [ "$n" != 12 ] || exit 1
+            sleep 5
+          done
+          curl -fsSL --max-time 30 "$PREVIEW_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
+          after="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          test "$before" = "$after"
+          curl -fsSL --max-time 30 "$PREVIEW_URL/data/sangdo1-analysis-view/bocha-mixed-roads.geojson" | jq -e '(.features|length)==237 and all(.features[]; .properties.score==null and .properties.route_penalty_allowed==false)' >/dev/null
+          echo 'Isolated bocha Preview verified; Production unchanged.'
+      - name: Remove plaintext files and diagnostic logs
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release" "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/deploy.tar.gz" "$RUNNER_TEMP/private-deploy.log"
