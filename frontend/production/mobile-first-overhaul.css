@@ -712,3 +712,204 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Source-aligned corrections: the real app theme is on <html>, and its header
+   contains weather/theme/version controls rather than a standalone AI orb. */
+html[data-theme="dark"] #app,
+#app[data-theme="dark"] {
+  --mf-surface: #192c24;
+  --mf-surface-raised: #20372d;
+  --mf-surface-soft: #294638;
+  --mf-text: #edf6f0;
+  --mf-muted: #aec5b7;
+  --mf-border: #3b5949;
+  --mf-brand: #65d2a8;
+  --mf-brand-strong: #83e0ba;
+  --mf-brand-soft: #294b3b;
+  --mf-shadow: 0 8px 26px rgba(0, 0, 0, .22);
+  --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .32);
+  color-scheme: dark;
+}
+
+@media (max-width: 699px) {
+  html body #app .topbar > .header-tools {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 48px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body #app .topbar .weather-widget {
+    display: flex !important;
+    flex: 0 0 42px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html body #app .topbar #weather-title,
+  html body #app .topbar #weather-my-location {
+    display: none !important;
+  }
+
+  html body #app .topbar #weather-label {
+    display: flex !important;
+    flex: 0 0 42px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 3px 0 !important;
+    border: 1px solid var(--mf-border) !important;
+    border-radius: 14px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-text) !important;
+    box-shadow: var(--mf-shadow) !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+  }
+
+  html body #app .topbar #weather-label::before {
+    content: attr(data-dj-weather-icon);
+    display: block;
+    color: var(--mf-brand-strong);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 19px;
+  }
+
+  html body #app .topbar #weather-label::after {
+    content: attr(data-dj-temperature);
+    display: block;
+    color: var(--mf-text);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 13px;
+  }
+
+  html body #app .topbar #theme-toggle {
+    display: grid !important;
+    flex: 0 0 42px !important;
+    place-items: center !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    border: 1px solid var(--mf-border) !important;
+    border-radius: 14px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-text) !important;
+    box-shadow: var(--mf-shadow) !important;
+    font-size: 0 !important;
+  }
+
+  html body #app .topbar #theme-toggle::before {
+    content: "◐";
+    color: var(--mf-brand-strong);
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  html[data-theme="dark"] body #app .topbar #theme-toggle::before {
+    content: "☼";
+  }
+
+  html body #app .topbar #version-history-trigger {
+    display: grid !important;
+    flex: 0 0 50px !important;
+    place-items: center !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 3px !important;
+    border: 1px solid var(--mf-border) !important;
+    border-radius: 14px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-muted) !important;
+    box-shadow: var(--mf-shadow) !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+    letter-spacing: -.03em !important;
+    white-space: nowrap !important;
+  }
+
+  html body #app .topbar .map-quick-search-icon {
+    flex: 0 0 17px !important;
+    width: 17px !important;
+    min-width: 17px !important;
+    color: var(--mf-brand) !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  html body #app #dj-v794-toolbar .dj832-feature-label {
+    display: block !important;
+    max-width: 48px !important;
+    overflow: hidden !important;
+    color: currentColor !important;
+    font-size: 9px !important;
+    font-weight: 750 !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html body #app #dj-v794-toolbar .dj910-weather-temp {
+    display: block !important;
+    color: currentColor !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+  }
+
+  html body #app #dj-v794-toolbar > .dj912-toolbar-next {
+    display: grid !important;
+    flex: 0 0 28px !important;
+    place-items: center !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-brand-strong) !important;
+    box-shadow: var(--mf-shadow) !important;
+  }
+
+  html body #app :is(#detail-sheet, #entry-sheet, #overview-sheet, #admin-dong-picker,
+    #night-visibility-float, #dj-mobile-utilities) {
+    border: 1px solid var(--mf-border) !important;
+    border-radius: var(--mf-radius-sheet) !important;
+    background: var(--mf-surface) !important;
+    color: var(--mf-text) !important;
+    box-shadow: var(--mf-shadow-raised) !important;
+  }
+}
