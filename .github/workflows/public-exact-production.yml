@@ -1,6 +1,9 @@
 name: Public runner - approved exact Production deployment
-run-name: v911 Production source=${{ inputs.source_sha }}
+run-name: ${{ github.event_name == 'push' && github.event.head_commit.message || format('v911 Production source={0}', inputs.source_sha) }}
 on:
+  push:
+    branches: [main]
+    paths: [release/production-request.json]
   workflow_dispatch:
     inputs:
       source_sha: {description: Exact approved private source SHA, required: true, type: string}
@@ -30,6 +33,26 @@ jobs:
         with: {persist-credentials: false}
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
+      - name: Resolve explicit owner-requested release
+        id: resolve
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          if [ "$GITHUB_EVENT_NAME" = push ];then
+            jq -e '.approval=="explicit-owner-request"' release/production-request.json >/dev/null
+            SOURCE_SHA="$(jq -er '.source_sha|strings' release/production-request.json)"
+            BUILD_RUN="$(jq -er '.build_run|strings' release/production-request.json)"
+            AUDIT_RUN="$(jq -er '.audit_run|strings' release/production-request.json)"
+            jq -e --arg msg "v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN" '
+              .head_commit.message==$msg and
+              (([.head_commit.added[],.head_commit.modified[],.head_commit.removed[]]|unique)==["release/production-request.json"]) and
+              .pusher.name=="lui020913"
+            ' "$GITHUB_EVENT_PATH" >/dev/null
+          fi
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$BUILD_RUN" =~ ^[1-9][0-9]*$ && "$AUDIT_RUN" =~ ^[1-9][0-9]*$ ]]
+          printf 'SOURCE_SHA=%s\nBUILD_RUN=%s\nAUDIT_RUN=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$AUDIT_RUN" >> "$GITHUB_ENV"
+          printf 'source_sha=%s\nbuild_run=%s\naudit_run=%s\n' "$SOURCE_SHA" "$BUILD_RUN" "$AUDIT_RUN" >> "$GITHUB_OUTPUT"
+          echo 'Explicit exact release request resolved. Protected Production environment remains required.'
       - name: Require exact successful build, Preview and UI gate
         env:
           GH_TOKEN: ${{ github.token }}
@@ -43,8 +66,8 @@ jobs:
           curl -fsSL --max-time 30 "$PREVIEW_URL/release-source.json?release=$GITHUB_RUN_ID" | jq -e --arg sha "$SOURCE_SHA" --arg run "$BUILD_RUN" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
       - uses: actions/download-artifact@v4
         with:
-          name: encrypted-v911-${{ inputs.source_sha }}
-          run-id: ${{ inputs.build_run }}
+          name: encrypted-v911-${{ steps.resolve.outputs.source_sha }}
+          run-id: ${{ steps.resolve.outputs.build_run }}
           github-token: ${{ github.token }}
           path: ${{ runner.temp }}/encrypted
       - name: Decrypt exact tested artifact

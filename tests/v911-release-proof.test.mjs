@@ -57,8 +57,14 @@ test('owner-only preview request pushes pin exact source and deduplicate before 
  assert.ok(build.includes('needs.build.outputs.source_sha'));
  assert.ok(build.includes('force_rebuild:'));
  assert.ok(build.includes('test "$SOURCE_SHA" = "$actual"'));
- assert.match(prod,/on:\s+workflow_dispatch:/);
- assert.doesNotMatch(prod,/on:\s+push:/);
+ assert.match(prod,/workflow_dispatch:/);
+ assert.match(prod,/paths: \[release\/production-request\.json\]/);
+ assert.match(prod,/\.approval=="explicit-owner-request"/);
+ assert.ok(prod.includes('==["release/production-request.json"]'));
+ assert.ok(prod.includes('.pusher.name=="lui020913"'));
+ assert.ok(prod.includes('v911 Production source=$SOURCE_SHA build=$BUILD_RUN audit=$AUDIT_RUN'));
+ assert.ok(prod.includes('test "$GITHUB_RUN_ATTEMPT" = 1'));
+ assert.ok(prod.includes('run-id: ${{ steps.resolve.outputs.build_run }}'));
  assert.ok(prod.includes("github.actor == 'lui020913'"));
  assert.ok(prod.includes('environment: public-cloudflare-production'));
  assert.ok(prod.includes('(.event=="push" and .display_title==("v911 build source="+$sha))'));
