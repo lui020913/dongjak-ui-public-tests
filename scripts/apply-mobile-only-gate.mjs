@@ -54,12 +54,6 @@ html[data-theme="dark"][data-dj-mobile-only="blocked"] #dj-mobile-only-screen p{
 </style>`;
 
   if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
-    indexHtml=replaceExactly(indexHtml,
-      /(<meta name="viewport"[^>]*\/>)/.exec(indexHtml)?.[0]||'__missing_viewport__',
-      match=>match,
-      'viewport meta');
-  }
-  if(!indexHtml.includes('id="dj-mobile-only-gate-bootstrap"')) {
     const viewport=/<meta name="viewport"[^>]*\/>/;
     if(!viewport.test(indexHtml)) throw new Error('Viewport meta tag is missing');
     indexHtml=indexHtml.replace(viewport,match=>match+'\n    '+bootstrap);
