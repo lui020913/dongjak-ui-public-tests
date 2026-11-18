@@ -1,43 +1,54 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const css=read('src/v809-precision-polish.css');
-const js=read('src/v809-precision-polish.js');
-const motion=read('src/v806-unified-ui.js');
-const html=read('index.html');
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('v809 styles and module are loaded after v807 in both platforms',()=>{
- assert.ok(html.indexOf('v809-precision-polish.css')>html.indexOf('v807-ui-refine.css'));
- assert.ok(html.indexOf('v809-precision-polish.js')>html.indexOf('v807-ui-refine.js'));
+test('legacy PC precision layer and shortcut script are no longer loaded',()=>{
+ const html=read('index.html'),main=read('src/main.js');
+ assert.equal(html.includes('v809-precision-polish.css'),false);
+ assert.equal(html.includes('v809-precision-polish.js'),false);
+ assert.equal(main.includes('v725-layout-state.css'),false);
+ assert.equal(main.includes('v726-desktop-polish.css'),false);
+ assert.ok(main.includes("import './mobile-first-layout.css'"));
 });
-test('desktop left rail and outer search shell are opaque/single-layer',()=>{
- assert.match(css,/#bottom-nav\{[\s\S]*?background:#fff!important/);
- assert.match(css,/#map-quick-search\{[\s\S]*?background:transparent!important/);
- assert.match(css,/#map-quick-search::before/);
- assert.match(css,/#bottom-nav>\.nav-tab \.nav-icon svg/);
+
+test('search, feature rail and map controls use the shared floating layout',()=>{
+ const css=read('src/mobile-first-layout.css');
+ assert.ok(css.includes('.topbar'));
+ assert.ok(css.includes('#dj-v794-toolbar'));
+ assert.ok(css.includes('.map-actions'));
+ assert.ok(css.includes('#bottom-nav:not([hidden])'));
+ assert.ok(css.includes('scroll-snap-type: x proximity !important'));
+ assert.ok(css.includes('.dj831-edge-blur'));
 });
-test('metro copy +1px, bus cards preserve independent two-column layout',()=>{
- assert.match(css,/transport-sheet\[data-kind="subway"\]/);
- assert.match(css,/font-size:calc\(1em \+ 1px\)/);
- assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(css,/transport-arrivals>\.transport-arrival-row/);
+
+test('transit sheets and arrival cards remain accessible in the shared panel system',()=>{
+ const css=read('src/mobile-first-layout.css'),transit=read('src/v854-integrated-ui.css');
+ assert.ok(css.includes('#transport-sheet:not([hidden])'));
+ assert.ok(css.includes('max-height: calc(100dvh'));
+ assert.ok(transit.includes('.dj854-search-column-list'));
+ assert.ok(transit.includes('.dj854-more-head'));
+ assert.ok(transit.includes('transport-arrivals'));
 });
-test('mobile nav uses a common label row and shadow; search is one point bolder/larger',()=>{
- assert.match(css,/grid-template-rows:29px 24px/);
- assert.match(css,/#bottom-nav>\.nav-tab>span:last-child/);
- assert.match(css,/box-shadow:0 -6px 20px/);
- assert.match(css,/dj807-search-copy/);
- assert.match(css,/font-weight:850!important/);
+
+test('the five navigation tabs retain vertical icon and label alignment on every viewport',()=>{
+ const css=read('src/mobile-first-layout.css');
+ assert.ok(css.includes('grid-template-columns: repeat(5,minmax(0,1fr))'));
+ assert.ok(css.includes('flex-direction: column !important'));
+ assert.ok(css.includes('.nav-icon'));
+ assert.ok(css.includes('> span:last-child'));
 });
-test('mobile motion owner retains entrance effects while X uses native dismiss',()=>{
- assert.match(motion,/clipPath:vertical\?'inset\(88% 0 0 0 round 22px\)'/);
- assert.match(motion,/on\(doc,'click',schedule,false\)/);
- assert.match(motion,/duration:phone\(\)\?410:260/);
- assert.match(motion,/on\(doc,'click',nativeDismiss,true\)/);
+
+test('mobile motion owner still provides one entrance and exit transition system',()=>{
+ const js=read('src/v806-unified-ui.js');
+ assert.ok(js.includes('data-dj806-motion'));
+ assert.ok(js.includes('prefers-reduced-motion'));
+ assert.ok(js.includes('transitionend'));
 });
-test('Help release shortcut is removed safely without removing the version history feature',()=>{
- assert.match(js,/releaseButton\.remove\(\)/);
- assert.match(js,/if\(releaseButton\)/);
- assert.match(html,/id="version-history-trigger"/);
+
+test('version history remains in the header; no duplicate release shortcut is mounted',()=>{
+ const html=read('index.html'),css=read('src/mobile-first-layout.css');
+ assert.ok(html.includes('id="version-history-trigger"'));
+ assert.ok(css.includes('#version-history-trigger'));
+ assert.equal(html.includes('v729-r2-new-ui.js'),false);
 });
