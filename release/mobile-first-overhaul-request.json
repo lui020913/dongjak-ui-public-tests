@@ -2,8 +2,8 @@
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
-  "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
-  "attempt": 16,
+  "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a completely blank pure-white screen with no text, logo, icons or loading UI; preserve all PC/tablet source; mobile-only QA must pass before protected Production promotion",
+  "attempt": 17,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "The POSIX shell issue is fixed. The Playwright container image also lacks jq, so Preview provenance checks now parse the release marker with Node.js, which is already installed in that job. Both pre-QA and post-QA provenance checks remain mandatory; no checks are removed or weakened."
+  "last_retry_reason": "User clarified the PC/tablet experience must be only a blank white screen (#FFFFFF), with no mobile notice or other UI. The visual gate now inserts an empty aria-hidden div, hides all other body children on blocked devices, resets html/body to white, and preserves all PC/tablet CSS, scripts, app startup and platform dispatch. Tests explicitly reject any notice text."
 }
