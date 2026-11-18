@@ -12,17 +12,14 @@ test('night hides ordinary labels only and restores previous category visibility
  layers.push({id:'native-poi',type:'symbol','source-layer':'poi'});handlers.idle();assert.equal(state.get('native-poi'),'none');isolate.set(false);assert.equal(nightOwnsLayerOrder(map),false);
  assert.equal(state.get('dj-civic-poi-hospital'),'visible');assert.equal(state.get('dj-seoul-official-points'),'none');assert.equal(state.get('native-poi'),'visible');
 });
-test('PC-only tokens and real transport scroll layout override older sticky surface',()=>{
- const css=read('src/v913-pc-design-system.css');
- assert.match(css,/@media \(min-width:1080px\) and \(pointer:fine\)/);
- assert.match(css,/--pc-surface:#191b1f/);
- assert.match(css,/grid-template-areas:"title actions close"/);
- assert.match(css,/\.dj877-photo-preview,\.dj834-user-avatar/);
- assert.match(css,/transport-arrivals-title\) \{position:relative!important/);
- assert.match(read('src/night-visibility-map.js'),/poiIsolation\.set\(false\)/);
- assert.match(read('src/main.js'),/import '\.\/v913-pc-design-system\.css'/);
+test('night mode remains available without a PC-only design system',()=>{
+ const main=read('src/main.js');
+ const css=read('src/mobile-first-layout.css');
+ assert.doesNotMatch(main,/v913-pc-design-system\\.css/);
+ assert.match(main,/import '\\.\\/mobile-first-layout\\.css'/);
+ assert.match(css,/#app#app#app#app#app\\[data-theme="dark"\\]/);
+ assert.match(read('src/night-visibility-map.js'),/poiIsolation\\.set\\(false\\)/);
 });
-
 test('three competing layer promoters defer to night analysis ownership',()=>{for(const f of ['src/readable-3d-labels.js','src/hangang-bridge-labels.js','src/featured-place-labels.js'])assert.match(read(f),/nightOwnsLayerOrder\(map\)/);assert.equal(conflictsWithNight({id:'dongjak-featured-place-names',type:'symbol'}),true);});
 
 test('night isolation continues when a late style layer disappears',()=>{
