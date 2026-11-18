@@ -116,61 +116,20 @@ test('Profile save confirmation is a status notice, not a button-like toast',()=
   assert.match(css,/dj840-profile-toast\{display:none/);
 });
 
-test('PC, tablet and mobile layout modes use width-only breakpoints without pointer hybrids',()=>{
+test('one shared mobile-first layout replaces separate desktop and tablet modes',()=>{
   const main=read('src/main.js');
-  const rail=read('src/v713-desktop-rail.js');
-  const css=read('src/v857-requested-ux.css');
-  const separated=read('src/v862-pc-mobile-separation.css');
-  const completion=read('src/v856-ui-completion.js');
-  assert.match(main,/installDesktopSafetyRail\(\{app\}\)/);
-  assert.match(rail,/minWidth=1080/);
-  assert.match(rail,/desktopActive=\(\)=>window\.innerWidth>=minWidth/);
-  assert.doesNotMatch(rail,/finePointer/);
-  assert.match(completion,/\(min-width:1080px\)/);
-  assert.match(read('src/v857-requested-ux.js'),/dj-r2-history-shortcut/);
-  assert.doesNotMatch(css,/@media\(min-width:700px\) and \(hover:hover\) and \(pointer:fine\)/);
-  assert.match(separated,/@media \(min-width:1080px\)/);
-  assert.match(separated,/@media \(min-width:700px\) and \(max-width:1079px\)/);
-  assert.match(separated,/@media \(max-width:699px\)/);
-  assert.match(separated,/width:min\(680px,calc\(100vw - 120px\)\)/);
-});
-
-
-test('Safety Map tab closes the district picker before legacy document handlers can stop propagation',()=>{
-  const ux=read('src/v857-requested-ux.js');
-  assert.match(ux,/win\.addEventListener\('click',closeAdmin,true\)/);
-  assert.match(ux,/picker\.hidden=true/);
-  assert.match(ux,/delete app\.dataset\.djActiveSheet/);
-});
-
-test('Facility header keeps route, favorite, share and close controls grouped in one action row',()=>{
-  const css=read('src/v857-requested-ux.css');
-  assert.match(css,/dj-place-header-actions :is\(\.dj-place-route-actions,\.dj815-place-actions\)\{\s*display:flex!important/);
-  assert.match(css,/\.dj-place-route-actions button\{[\s\S]*?font-size:14px!important/);
-  assert.doesNotMatch(css,/dj-place-header-actions :is\(\.dj-place-route-actions,\.dj815-place-actions\)\{\s*display:contents!important/);
-});
-
-test('Bus header has a separate title row, a compact action row and centered arrival cards',()=>{
-  const css=read('src/v857-requested-ux.css');
-  assert.match(css,/\[data-kind="bus"\] \.transport-panel-head\{[\s\S]*?grid-template-rows:auto auto/);
-  assert.match(css,/\[data-kind="bus"\] \.dj857-transport-title-group\{[\s\S]*?grid-column:1\/3/);
-  assert.match(css,/\[data-kind="bus"\] #transport-arrivals \.transport-arrival-row\{[\s\S]*?align-items:center/);
-  assert.match(css,/\[data-kind="bus"\] #transport-arrivals \.transport-arrival-time\{[\s\S]*?text-align:center/);
-});
-
-test('Profile save action is explicit and success feedback is a non-interactive inline status',()=>{
-  const profile=read('src/v824-favorites-cloud.js');
-  const css=read('src/v857-requested-ux.css');
-  assert.match(profile,/savedProfile\?'변경사항 저장':'이름 저장'/);
-  assert.match(profile,/profileNotice\.textContent='표시 이름이 변경되었습니다\.'/);
-  assert.match(css,/dj856-profile-status\{[\s\S]*?background:transparent!important/);
-  assert.match(css,/dj856-profile-status\{[\s\S]*?pointer-events:none!important/);
-});
-
-test('Mobile search requests the native search action and does not add an app-owned keyboard dimmer',()=>{
-  const chrome=read('src/mobile-chrome-v790.js');
-  const css=read('src/v857-requested-ux.css');
-  assert.match(chrome,/enterkeyhint','search'/);
-  assert.match(chrome,/autocapitalize','off'/);
-  assert.match(css,/map-quick-search-dropdown:not\(\[hidden\]\)[\s\S]*?backdrop-filter:none!important/);
+  const html=read('index.html');
+  const css=read('src/mobile-first-layout.css');
+  const coordinator=read('src/mobile-ui-coordinator.js');
+  const toolbar=read('src/mobile-toolbar-v794.js');
+  assert.doesNotMatch(main,/installDesktopSafetyRail\\s*\\(/);
+  assert.doesNotMatch(main,/v881-tablet-(?:workspace|header-unified|tool-rail)/);
+  assert.doesNotMatch(main,/v913-pc-design-system|v912-desktop-poi/);
+  assert.doesNotMatch(html,/v862-pc-mobile-separation|v876-desktop-final/);
+  assert.match(toolbar,/matchMedia\\('\\(min-width: 0px\\)'\\)/);
+  assert.doesNotMatch(coordinator,/window\\.innerWidth\\s*<=\\s*1079/);
+  assert.match(css,/#bottom-nav:not\\(\\[hidden\\]\\)[\\s\\S]*?position: fixed !important/);
+  assert.match(css,/grid-template-columns: repeat\\(5,minmax\\(0,1fr\\)\\)/);
+  assert.match(css,/\.topbar[\\s\\S]*?position: fixed !important/);
+  assert.match(css,/#dj-v794-toolbar[\\s\\S]*?position: fixed !important/);
 });
