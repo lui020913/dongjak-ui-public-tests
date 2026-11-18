@@ -16,3 +16,6 @@ Use Actions → Public release setup preflight - no deployment → Run workflow,
 
 ## Windows one-time local setup
 For a Windows PC with PowerShell 7 and GitHub CLI authenticated as the repository owner, run the reviewed script `scripts/configure-public-release.ps1` locally. It prompts for the limited source and Cloudflare credentials, confirms the owner and Pages project, creates main-only environments only if absent, requires an owner reviewer for Production, and registers the encrypted bundle key without printing it. It refuses to modify existing incompatible environment settings. Running again rotates the key and invalidates previous encrypted bundles. Use the optional `-RunPreflight` flag to dispatch the read-only checks; it never starts a build or deploy. Never run scripts downloaded from untrusted refs or enter credentials into chat.
+
+## Exact build proof
+A public candidate passes its build_run as well as source_commit to the remote UI gate. Each viewport verifies the exact candidate hostname, SHA, version and build_run before and after testing. Production rejects legacy SHA-only audits and requires five successful viewport jobs from the matching build run. A new build of the same Git commit requires a new audit; an old result cannot authorize Production.

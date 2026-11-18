@@ -134,7 +134,7 @@ jobs:
           cd "$RUNNER_TEMP/release"
           if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=ui-v911-motion-preview --commit-hash="$SOURCE_SHA" >"$RUNNER_TEMP/private-deploy.log" 2>&1;then echo "::error::Preview deployment failed; private log withheld"; exit 1;fi
           for n in $(seq 1 12);do
-            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" '.source_commit==$sha and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
+            if curl -fsSL --max-time 25 "$PREVIEW_URL/release-source.json?check=$GITHUB_RUN_ID-$n" | jq -e --arg sha "$SOURCE_SHA" --arg run "$GITHUB_RUN_ID" '.source_commit==$sha and (.build_run|tostring)==$run and .application_version=="8.9.11" and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null;then break;fi
             [ "$n" != 12 ] || exit 1
             sleep 5
           done
@@ -147,7 +147,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
+          jq -n --arg sha "$SOURCE_SHA" --arg url "$PREVIEW_URL/" --arg build "$GITHUB_RUN_ID" '{ref:"main",inputs:{expected_source_sha:$sha,target_url:$url,expected_build_run:$build}}' | gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/dispatches" --input - >/dev/null
           echo 'Public viewport verification dispatched. No Production approval granted.'
       - name: Remove plaintext files and diagnostic logs
         if: always()

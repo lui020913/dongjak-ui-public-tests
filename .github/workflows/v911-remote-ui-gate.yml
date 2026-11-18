@@ -1,5 +1,5 @@
 name: v8.9.11 anonymous Preview UI gate
-run-name: v911 UI source=${{ inputs.expected_source_sha }}
+run-name: v911 UI source=${{ inputs.expected_source_sha }} build=${{ inputs.expected_build_run || 'legacy' }}
 on:
   workflow_dispatch:
     inputs:
@@ -9,6 +9,11 @@ on:
       target_url:
         required: true
         type: string
+      expected_build_run:
+        description: Exact public candidate build run ID; omit only for legacy private Preview audits
+        required: false
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -25,6 +30,7 @@ jobs:
     env:
       DONGJAK_TARGET_URL: ${{ inputs.target_url }}
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+      DONGJAK_EXPECTED_BUILD_RUN: ${{ inputs.expected_build_run }}
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
