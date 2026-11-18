@@ -19,7 +19,7 @@ permissions:
   actions: read
 jobs:
   notify:
-    if: (github.event_name != 'issue_comment' || (github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && github.event.comment.body == '통합 알림 테스트')) && github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller'))
+    if: (github.event_name != 'issue_comment' || (github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && github.event.comment.body == '통합 알림 테스트')) && github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller' && github.event.workflow_run.name != 'v911 exact Preview failure recovery'))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     env:
@@ -62,7 +62,7 @@ jobs:
           count_active() {
             local repo="$1" token="$2" status total=0 n
             for status in queued in_progress waiting requested pending; do
-              n="$(GH_TOKEN="$token" gh api --paginate --method GET "repos/$repo/actions/runs" -f status="$status" -f per_page=100 --jq '.workflow_runs[] | select(.name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="Notification test") | .id' | wc -l)" || return 1
+              n="$(GH_TOKEN="$token" gh api --paginate --method GET "repos/$repo/actions/runs" -f status="$status" -f per_page=100 --jq '.workflow_runs[] | select(.name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="v911 exact Preview failure recovery" and .name!="Notification test") | .id' | wc -l)" || return 1
               total=$((total+n))
             done
             echo "$total"
@@ -89,7 +89,7 @@ jobs:
             # Select recent real work, not notification, maintenance or scheduled monitoring runs.
             latest_work() {
               local repo="$1" token="$2"
-              GH_TOKEN="$token" gh api --method GET "repos/$repo/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select(.status=="completed" and .conclusion!="skipped" and .event!="schedule" and .name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="Safety map notification test" and .name!="Notification test")] | sort_by(.updated_at) | last | if .==null then "" else ((.id|tostring)+":"+(.run_attempt|tostring)+":"+.conclusion) end'
+              GH_TOKEN="$token" gh api --method GET "repos/$repo/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select(.status=="completed" and .conclusion!="skipped" and .event!="schedule" and .name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="v911 exact Preview failure recovery" and .name!="Safety map notification test" and .name!="Notification test")] | sort_by(.updated_at) | last | if .==null then "" else ((.id|tostring)+":"+(.run_attempt|tostring)+":"+.conclusion) end'
             }
             public_key="$(latest_work "$GITHUB_REPOSITORY" "$GH_TOKEN")" || exit 1
             private_key="$(latest_work lui020913/dongjak-safety-map "$PRIVATE_TOKEN" 2>/dev/null)" || exit 1

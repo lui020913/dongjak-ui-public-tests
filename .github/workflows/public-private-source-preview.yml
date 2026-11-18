@@ -118,7 +118,18 @@ jobs:
           run_private(){ local title="$1"; shift; if "${safe[@]}" "$@" >"$log" 2>&1; then echo "$title passed"; else echo "::error::$title failed (private diagnostic output withheld)"; rm -f "$log"; exit 1; fi; rm -f "$log"; }
           run_private 'Release metadata' node scripts/ci-v911-release.mjs
           run_private 'Synchronize visible version before tests' node scripts/stamp-version.mjs
-          run_private 'Dependency install' npm ci --no-audit --no-fund
+          # Retry only recognized transient npm/network failures; never retry failed tests.
+          for attempt in 1 2 3; do
+            if "${safe[@]}" npm ci --no-audit --no-fund --prefer-offline >"$log" 2>&1;then
+              echo 'Dependency install passed'; rm -f "$log"; break
+            fi
+            if [ "$attempt" = 3 ] || ! grep -Eiq '(ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENETUNREACH|ERR_SOCKET_TIMEOUT|E429|E502|E503|E504)' "$log";then
+              echo '::error::Dependency install failed (private diagnostic output withheld)'; rm -f "$log"; exit 1
+            fi
+            echo "Transient dependency installation failure; retry $attempt/2"
+            rm -f "$log"
+            sleep $((attempt * 5))
+          done
           # Use the same test glob as the private npm test script. TAP output stays
           # local; failures are reported only as test-name digests and counts.
           if "${safe[@]}" node --test --test-reporter=tap tests/*.test.mjs >"$log" 2>&1; then

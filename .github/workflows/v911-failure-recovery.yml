@@ -1,0 +1,33 @@
+name: v911 exact Preview failure recovery
+on:
+  workflow_run:
+    workflows: ["v8.9.11 anonymous Preview UI gate", "Public runner - private source build and Preview"]
+    types: [completed]
+permissions:
+  contents: read
+  actions: write
+  issues: write
+concurrency:
+  group: v911-recovery-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: >-
+      github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == 'lui020913/dongjak-ui-public-tests'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check exact candidate and retry only eligible failures
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/v911-recovery.mjs
