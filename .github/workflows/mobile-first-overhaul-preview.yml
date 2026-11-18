@@ -127,9 +127,8 @@ jobs:
       - name: Verify exact mobile Preview provenance
         run: |
           set -eu
-          curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-qa=$GITHUB_RUN_ID" |
-            jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$BUILD_RUN" \
-              '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and (.build_run|tostring)==$build and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
+          curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-qa=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/mobile-preview-provenance.json"
+          node -e 'const fs=require("node:fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=d.source_commit===process.env.SOURCE_SHA&&d.public_ui_source_commit===process.env.PUBLIC_SHA&&d.public_ui_overlay_sha256===process.env.CSS_SHA&&d.application_version===process.env.APP_VERSION&&String(d.build_run)===process.env.BUILD_RUN&&d.release_status==="CANDIDATE_PREVIEW_NOT_PRODUCTION";if(!ok)throw new Error("Preview provenance mismatch")' "$RUNNER_TEMP/mobile-preview-provenance.json"
           node scripts/verify-release-source.mjs
       - name: Run mobile phone viewports only (375, 390 and 430 CSS px)
         run: npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
@@ -137,9 +136,8 @@ jobs:
         if: always()
         run: |
           set -eu
-          curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-post=$GITHUB_RUN_ID" |
-            jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$BUILD_RUN" \
-              '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and (.build_run|tostring)==$build and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null
+          curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-post=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/mobile-preview-post.json"
+          node -e 'const fs=require("node:fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=d.source_commit===process.env.SOURCE_SHA&&d.public_ui_source_commit===process.env.PUBLIC_SHA&&d.public_ui_overlay_sha256===process.env.CSS_SHA&&d.application_version===process.env.APP_VERSION&&String(d.build_run)===process.env.BUILD_RUN&&d.release_status==="CANDIDATE_PREVIEW_NOT_PRODUCTION";if(!ok)throw new Error("Preview provenance changed during QA")' "$RUNNER_TEMP/mobile-preview-post.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
