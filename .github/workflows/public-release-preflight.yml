@@ -79,7 +79,7 @@ jobs:
           npm install --no-audit --no-fund
           node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); const p=await b.newPage(); await p.setContent('<title>browser-ready</title>'); if(await p.title()!=='browser-ready') throw Error('Browser smoke failed'); console.log('Preinstalled Chromium ready: '+b.version()); await b.close()"
   candidate-evidence:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && contains(github.event.head_commit.modified, 'release/evidence-candidate.json')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -91,7 +91,7 @@ jobs:
       - name: Load pinned release evidence candidate
         run: |
           set -euo pipefail
-          jq -e '.application_version=="8.9.13" and .preview_url=="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/" and (.evidence_runs|type=="array" and length>0)' release/evidence-candidate.json >/dev/null
+          jq -e '.application_version=="8.9.14" and .preview_url=="https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/" and (.evidence_runs|type=="array" and length>0)' release/evidence-candidate.json >/dev/null
           printf 'SOURCE_SHA=%s\nBUILD_RUN=%s\nEVIDENCE_RUNS=%s\n' \
             "$(jq -er '.source_sha' release/evidence-candidate.json)" \
             "$(jq -er '.build_run|tostring' release/evidence-candidate.json)" \
