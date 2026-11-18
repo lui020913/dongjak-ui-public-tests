@@ -80,9 +80,14 @@ jobs:
           previous="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build" 2>/dev/null)" || exit 0
           printf '%s' "$previous" | jq -e --arg sha "$SOURCE_SHA" --arg repo "$GITHUB_REPOSITORY" '.conclusion=="success" and .run_attempt==1 and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and .path==".github/workflows/public-private-source-preview.yml" and ((.event=="push" and .display_title==("v911 build source="+$sha)) or (.event=="workflow_dispatch" and (.display_title==("v911 build source="+$sha) or .display_title=="v911 build source=latest")))' >/dev/null || exit 0
           audits="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/v911-remote-ui-gate.yml/runs?branch=main&event=workflow_dispatch&per_page=100" 2>/dev/null)" || exit 0
-          if printf '%s' "$audits" | jq -e --arg sha "$SOURCE_SHA" --arg build "$build" '[.workflow_runs[]|select(.display_title==("v911 UI source="+$sha+" build="+$build) and (.conclusion=="success" or .status=="queued" or .status=="in_progress" or .status=="requested" or .status=="waiting" or .status=="pending"))]|length>0' >/dev/null;then
-            echo 'skip=true' >> "$GITHUB_OUTPUT"
-            echo "Candidate $SOURCE_SHA already has an active or successful audit for build $build. No duplicate build or deployment."
+          audit_sha="$(printf '%s' "$audits" | jq -r --arg sha "$SOURCE_SHA" --arg build "$build" '[.workflow_runs[]|select(.display_title==("v911 UI source="+$sha+" build="+$build) and (.conclusion=="success" or .status=="queued" or .status=="in_progress" or .status=="requested" or .status=="waiting" or .status=="pending"))] | first | .head_sha // ""')"
+          if [ -n "$audit_sha" ];then
+            if git fetch --no-tags --depth=1 origin "$audit_sha" >/dev/null 2>&1 && git diff --quiet "$audit_sha" HEAD -- tests playwright.v911-remote.config.mjs package.json package-lock.json scripts/verify-release-source.mjs;then
+              echo 'skip=true' >> "$GITHUB_OUTPUT"
+              echo "Candidate $SOURCE_SHA already has an active or successful audit for build $build using the same browser test suite. No duplicate build or deployment."
+            else
+              echo "Browser test suite or harness changed since audit $audit_sha; rebuild and re-audit the exact source."
+            fi
           fi
       - name: Prove changed device scope against last full browser audit
         if: steps.dedup.outputs.skip != 'true'
