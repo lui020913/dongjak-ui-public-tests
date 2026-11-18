@@ -89,6 +89,9 @@ test('compact HUD and visible motion; desktop navigation and dark theme',async({
      await expect(installAdvice).toBeHidden();
    }
    await expect(tip).toBeVisible();await expect(scale).toBeVisible();
+   await expect(scale).toHaveCSS('border-top-left-radius','999px');
+   const query=page.locator('#map-quick-search-query'),first=await query.getAttribute('placeholder');
+   await expect.poll(()=>query.getAttribute('placeholder'),{timeout:22000}).not.toBe(first);
    await expect.poll(async()=>{const n=await nav.boundingBox(),t=await tip.boundingBox(),s=await scale.boundingBox();return n&&t&&s&&n.y-t.y-t.height>=3&&n.y-t.y-t.height<=10&&t.y-s.y-s.height>=3&&t.y-s.y-s.height<=10;}).toBe(true);
    const contained=await nav.evaluate(n=>{const r=n.getBoundingClientRect();return [...n.querySelectorAll('.nav-tab')].every(b=>{const q=b.getBoundingClientRect();return q.top>=r.top-1&&q.bottom<=r.bottom+1})});expect(contained).toBe(true);
    await enter(page,'route-panel','route');await expect(tip).toBeHidden();
