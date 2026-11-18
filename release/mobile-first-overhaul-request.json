@@ -2,8 +2,8 @@
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
-  "purpose": "Full mobile-first UI overhaul Preview; no Production promotion",
-  "attempt": 7,
-  "release_status": "CANDIDATE_PREVIEW_NOT_PRODUCTION",
-  "last_retry_reason": "Visual QA of the successful nine-viewport candidate found the old v8.9.1 standalone settings logo still visible because its six-ID selector outranked the five-ID override; suppress it at equal specificity and add a regression assertion"
+  "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a mobile-access notice; dedicated PC/tablet source remains preserved in archive branch; mobile-only QA must pass before protected Production promotion",
+  "attempt": 8,
+  "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
+  "last_retry_reason": "Scope is now strictly phone-only. Preserve PC/tablet source in the archive branch, suppress desktop/tablet UI and map startup, run only mobile phone regressions at 375/390/430 CSS px, then promote the exact tested artifact through the protected Production environment."
 }
