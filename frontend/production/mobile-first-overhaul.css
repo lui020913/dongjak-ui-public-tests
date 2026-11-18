@@ -1052,3 +1052,31 @@ html[data-theme="dark"] #app#app#app#app#app,
     max-height: 44px !important;
   }
 }
+
+
+/* Keep the established AI orb as the sole top-right primary action; weather
+   stays in the map toolbar and update history remains a compact secondary chip. */
+@media (max-width: 699px) {
+  html body #app#app#app#app#app .topbar > .header-tools {
+    flex: 0 0 104px !important;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+  }
+
+  html body #app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-radius: 16px !important;
+  }
+
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur {
+    -webkit-backdrop-filter: blur(5px) !important;
+    backdrop-filter: blur(5px) !important;
+  }
+}
