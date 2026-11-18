@@ -98,3 +98,35 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
  if(compact(page)){await geometry(page,'.dj-place-detail-popup');expect(await popup.evaluate(n=>{const a=n.getBoundingClientRect(),b=n.querySelector('.dj-place-edge-drag').getBoundingClientRect();return Math.abs(a.left+a.width/2-b.left-b.width/2)<3})).toBe(true);}
  await tap(page,popup.locator('.dj-place-header-close'));await expect(popup).toBeHidden();
 });
+
+test('tablet workspace margins, unclipped tools, More and safety modal',async({page})=>{
+  const width=page.viewportSize().width;
+  test.skip(width<700||width>=1080,'tablet only');
+  await ready(page);
+  const toolbar=page.locator('#dj-v794-toolbar'),scroll=toolbar.locator('.dj831-scrollport');
+  await expect(toolbar).toBeVisible();
+  expect(await scroll.evaluate(n=>{
+    const r=n.getBoundingClientRect();
+    return [...n.querySelectorAll(':scope > button')].filter(b=>b.getClientRects().length).every(b=>{
+      const q=b.getBoundingClientRect();return q.top>=r.top-1&&q.bottom<=r.bottom+1;
+    });
+  })).toBe(true);
+  await tap(page,page.locator('#dj-v794-more'));
+  const more=page.locator('#dj-mobile-utilities');
+  await expect(more).toBeVisible();
+  const r=await more.boundingBox();
+  expect(r.x).toBeGreaterThanOrEqual(18);
+  expect(width-r.x-r.width).toBeGreaterThanOrEqual(18);
+  await geometry(page,'#dj-mobile-utilities');
+  const icon=more.locator('.dj832-more-icon svg').first();
+  await expect(icon).toBeVisible();
+  const i=await icon.boundingBox();expect(i.width).toBeLessThanOrEqual(24);expect(i.height).toBeLessThanOrEqual(24);
+  await tap(page,page.locator('#dj-mobile-utilities-close'));
+  await tap(page,page.locator('#dj-v794-safety'));
+  const shade=page.locator('#map-safety-backdrop'),panel=page.locator('#map-safety-controls');
+  await expect(shade).toBeVisible();await expect(panel).toBeVisible();
+  const d=await shade.boundingBox();expect(d.x).toBeGreaterThanOrEqual(-1);expect(d.y).toBeGreaterThanOrEqual(-1);
+  expect(d.width).toBeGreaterThanOrEqual(width-1);expect(d.height).toBeGreaterThanOrEqual(page.viewportSize().height-1);
+  await tap(page,page.locator('#map-safety-close'));
+  await expect(shade).toBeHidden();
+});
