@@ -8,7 +8,7 @@ test('mobile-first design tokens and dark theme are defined',()=>{
   for(const token of ['--mf-surface:','--mf-text:','--mf-brand:','--mf-border:','--mf-radius-sheet:','--mf-touch:']) {
     assert.ok(css.includes(token), 'Missing '+token);
   }
-  assert.match(css,/#app\[data-theme="dark"\]/);
+  assert.match(css,/#app(?:#app){0,4}\[data-theme="dark"\]/);
   assert.match(css,/html\[data-theme="dark"\] #app/);
   assert.ok(css.includes('--mf-surface: #191b1f'));
 });
