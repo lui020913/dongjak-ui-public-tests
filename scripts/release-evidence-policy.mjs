@@ -20,8 +20,7 @@ export function isTrustedBuildRun(run,sourceSha,expectedId){
     ownerActor(run.actor?.login)&&
     run.path==='.github/workflows/public-private-source-preview.yml'&&
     ['push','workflow_dispatch'].includes(run.event)&&
-    (run.display_title===`v911 build source=${sourceSha}`||
-     (run.event==='workflow_dispatch'&&run.display_title==='v911 build source=latest'));
+    run.display_title===`v911 build source=${sourceSha}`;
 }
 
 export function standardAuditBuildId(run,sourceSha){
