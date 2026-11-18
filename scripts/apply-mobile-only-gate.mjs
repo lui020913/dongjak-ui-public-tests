@@ -27,7 +27,10 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
   var root=document.documentElement;
   function update(){
     var width=Number(window.innerWidth||root.clientWidth||0);
-    root.dataset.djMobileOnly=((applePhone||androidPhone||legacyPhone)&&width>0&&width<=699)?'allowed':'blocked';
+    var next=((applePhone||androidPhone||legacyPhone)&&width>0&&width<=699)?'allowed':'blocked';
+    var previous=root.dataset.djMobileOnly;
+    root.dataset.djMobileOnly=next;
+    if(previous==='blocked'&&next==='allowed'&&document.readyState!=='loading')window.location.reload();
   }
   update();
   window.addEventListener('resize',update,{passive:true});
