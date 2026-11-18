@@ -44,7 +44,12 @@ jobs:
             await new Promise(resolve=>setTimeout(resolve,5000));
           }
           if(!verified)throw Error('Exact isolated Preview release marker was not found');
-          appendFileSync(process.env.GITHUB_ENV,'DONGJAK_TARGET_URL='+url+'\\nDONGJAK_EXPECTED_SOURCE_SHA='+sha+'\\nDONGJAK_EXPECTED_BUILD_RUN='+run+'\\n');
+          appendFileSync(process.env.GITHUB_ENV,[
+            'DONGJAK_TARGET_URL='+url,
+            'DONGJAK_EXPECTED_SOURCE_SHA='+sha,
+            'DONGJAK_EXPECTED_BUILD_RUN='+run,
+            ''
+          ].join(String.fromCharCode(10)));
           NODE
       - name: Install pinned public test package
         env:
