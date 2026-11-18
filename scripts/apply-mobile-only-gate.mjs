@@ -83,6 +83,9 @@ html[data-theme="dark"][data-dj-mobile-only="blocked"] #dj-mobile-only-screen p{
     indexHtml=removeTag(indexHtml,`<script type="module" src="/src/${file}"></script>`);
   }
 
+  // Removing dedicated assets can leave their original indentation behind.
+  indexHtml=indexHtml.replace(/^[\\t ]+$/gm,'');
+
   const desktopImports=[
     "import {installDesktopSafetyRail} from './v713-desktop-rail.js';",
     "import './v726-desktop-polish.css';",
