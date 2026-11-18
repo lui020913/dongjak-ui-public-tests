@@ -207,6 +207,41 @@ test('phone compact toolbar, reachable swipe cue and bottom dock share a visual 
  await test.info().attach('phone-compact-design',{body:await page.screenshot(),contentType:'image/png'});
 });
 
+
+test('mobile and touch tablet POI filters share the existing top toolbar with blurred scroll edges',async({page})=>{
+ test.skip(!compact(page),'mobile and touch tablet only');await ready(page);
+ const app=page.locator('#app'),toolbar=page.locator('#dj-v794-toolbar'),rail=page.locator('#dj831-scrollport'),categories=page.locator('#dj912-poi-categories');
+ await expect(toolbar).toBeVisible({timeout:30000});
+ await expect(categories).toHaveAttribute('data-dj912-integrated','true',{timeout:45000});
+ await expect(categories).toBeHidden();
+ await expect(categories.locator('.dj912-poi-scroll button')).toHaveCount(0);
+ const buttons=rail.locator(':scope > button[data-poi-group]');
+ await expect(buttons).toHaveCount(7);
+ const food=rail.locator(':scope > button[data-poi-group="food"]'),cafe=rail.locator(':scope > button[data-poi-group="cafe"]');
+ await expect(food).toBeVisible();await expect(cafe).toBeVisible();
+ expect(await food.evaluate(n=>n.parentElement?.id==='dj831-scrollport')).toBe(true);
+ await expect(food).toHaveAttribute('aria-pressed','false');
+ const metrics=await rail.evaluate(n=>({scrollWidth:n.scrollWidth,clientWidth:n.clientWidth}));
+ const left=toolbar.locator(':scope > .dj831-edge-blur-left'),right=toolbar.locator(':scope > .dj831-edge-blur-right');
+ if(metrics.scrollWidth>metrics.clientWidth+3){
+   await expect(left).toBeHidden();await expect(right).toBeVisible();
+   expect(await right.evaluate(n=>getComputedStyle(n).backdropFilter)).toContain('blur(5px)');
+   await rail.evaluate(n=>{n.scrollLeft=n.scrollWidth;n.dispatchEvent(new Event('scroll'));});
+   await expect(right).toBeHidden();await expect(left).toBeVisible();
+   await rail.evaluate(n=>{n.scrollLeft=0;n.dispatchEvent(new Event('scroll'));});
+   await expect(left).toBeHidden();await expect(right).toBeVisible();
+ }else{
+   await expect(left).toBeHidden();await expect(right).toBeHidden();
+ }
+ await food.scrollIntoViewIfNeeded();await tap(page,food);
+ await expect(food).toHaveAttribute('aria-pressed','true');
+ await expect(app).toHaveAttribute('data-dj912-poi-groups',/food/);
+ await cafe.scrollIntoViewIfNeeded();await tap(page,cafe);
+ await expect(cafe).toHaveAttribute('aria-pressed','true');
+ await expect(food).toHaveAttribute('aria-pressed','true');
+ await test.info().attach('poi-toolbar-mobile-tablet',{body:await page.screenshot(),contentType:'image/png'});
+});
+
 test('PC desktop chrome and independent facility categories',async({page})=>{
  test.skip(compact(page),'desktop only');await ready(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),form=page.locator('.topbar .map-quick-search-form'),settings=page.locator('#dj-settings-pc'),actions=page.locator('.map-actions');
