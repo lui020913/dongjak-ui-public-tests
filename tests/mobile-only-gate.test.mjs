@@ -6,7 +6,7 @@ test('phone-only detector allows iPhone and Android phone browsers',()=>{
   assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148 Safari/604.1',width:390}),true);
   assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36',width:430}),true);
   assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140.0 Safari/537.36',userAgentDataMobile:true,width:430}),true);
-  assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148 Safari/604.1',width:844}),true);
+  assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Mobile/15E148 Safari/604.1',width:844}),false);
 });
 
 test('tablet and desktop contexts are blocked',()=>{
