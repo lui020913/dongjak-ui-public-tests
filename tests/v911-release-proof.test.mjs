@@ -2,17 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-test('public deployment and audit carry the exact build identity',()=>{
+test('public deployment verifies cumulative exact-source viewport evidence',()=>{
  const gate=read('.github/workflows/v911-remote-ui-gate.yml');
  const source=read('scripts/verify-release-source.mjs');
  const build=read('.github/workflows/public-private-source-preview.yml');
  const prod=read('.github/workflows/public-exact-production.yml');
+ const evidence=read('scripts/verify-release-evidence.mjs');
  assert.match(gate,/expected_build_run:/);
  assert.match(gate,/DONGJAK_EXPECTED_BUILD_RUN:/);
  assert.match(source,/String\(result\.build_run\)===expectedBuild/);
  assert.match(source,/target\.hostname !== 'ui-v911-motion-preview\.'/);
  assert.match(build,/expected_build_run:\$build/);
- assert.ok(prod.includes('("v911 UI source="+$sha+" build="+$build)'));
+ assert.ok(prod.includes('evidence_runs:'));
+ assert.ok(prod.includes('node scripts/verify-release-evidence.mjs'));
+ assert.ok(prod.includes('v911 Production source=$SOURCE_SHA build=$BUILD_RUN evidence=$EVIDENCE_RUNS'));
+ assert.ok(evidence.includes('standardAuditBuildId'));
+ assert.ok(evidence.includes('validateFocusedTabletEvidence'));
+ assert.ok(evidence.includes('missingViewports'));
+ assert.match(prod,/\.approval=="explicit-owner-request"/);
  assert.match(prod,/mobile375 mobile390 tablet768 tablet820 tablet1024 tablet1180 pc1280 pc1440 pc1920/);
  assert.equal((gate.match(/node scripts\/verify-release-source\.mjs/g)||[]).length,2);
 });
