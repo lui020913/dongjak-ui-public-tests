@@ -1080,3 +1080,15 @@ html[data-theme="dark"] #app#app#app#app#app,
     backdrop-filter: blur(5px) !important;
   }
 }
+
+
+/* v914 places its important declarations in the named request-completion
+   layer. Keep this correction in that same layer so the 5px edge blur wins. */
+@layer request-completion {
+  @media (max-width: 699px) {
+    html body #app#app#app#app#app #dj-v794-toolbar .dj831-edge-blur {
+      -webkit-backdrop-filter: blur(5px) !important;
+      backdrop-filter: blur(5px) !important;
+    }
+  }
+}
