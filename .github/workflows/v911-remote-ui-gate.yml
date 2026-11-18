@@ -49,7 +49,8 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: npm install --no-audit --no-fund
       - name: Verify preinstalled Chromium
-        run: node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); console.log('Chromium ready: '+b.version()); await b.close()"
+        run: |
+          node --input-type=module -e "import {chromium} from '@playwright/test'; const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}); console.log('Chromium ready: '+b.version()); await b.close()"
       - run: npx playwright test --config=playwright.v911-remote.config.mjs --project=${{ matrix.viewport }}
       - name: Verify exact Preview did not change while testing
         if: always()
