@@ -1,0 +1,11 @@
+{
+  "application_version": "8.9.13",
+  "source_sha": "b752b6a0cbffca93b5e39642610b4ec4e9f122b2",
+  "build_run": 44281610172,
+  "evidence_runs": [
+    44279699056,
+    44283065167
+  ],
+  "preview_url": "https://ui-v911-motion-preview.dongjak-walk-safety-preview.pages.dev/",
+  "status": "CANDIDATE_PREVIEW_NOT_PRODUCTION"
+}
