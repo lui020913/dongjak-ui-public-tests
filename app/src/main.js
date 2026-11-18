@@ -1,4 +1,3 @@
-import {installDesktopSafetyRail} from './v713-desktop-rail.js';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -127,7 +126,6 @@ import './v729-pc-consistency.css';
 import './v815-map-product.css';
 import './v880-responsive-tap-guard.css';
 import './v881-global-visual-system.css';
-import './v881-desktop-ui.css';
 import './v881-mobile-ui.css';
 import './v882-secondary-surface-polish.css';
 import './v884-mobile-surface-fixes.css';
@@ -142,17 +140,11 @@ import './mobile-browser-webapp-tip.js';
 import './v880-unified-sheet.css';
 import './v889-mobile-visual-polish.css';
 // Isolated portrait/tablet UI additions; keep the v8.9.1 mobile/HUD logic intact.
-import './v881-portrait-zoom-responsive.css';
-import './v881-tablet-workspace.css';
-import './v881-tablet-header-unified.css';
-import './v881-tablet-tool-rail.js';
 
 import './public-ui-production-overlay.css';
 import './v910-request-completion.css';
-import './v912-desktop-poi.css';
-import './v913-pc-design-system.css';
 import './v914-mobile-ux-fixes.css';
-import './mobile-first-overhaul.css';
+import './mobile-first-layout.css';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
@@ -226,7 +218,7 @@ let detailHeroObjectURL = null;
 
 const app = document.getElementById('app');
 app.dataset.tab = 'map'; // First entry always selects 안전지도 on PC and mobile.
-installDesktopSafetyRail({app});
+// One shared bottom navigation is used at every viewport width.
 installFloatingPanelUX();
 initVersionHistory();
 
