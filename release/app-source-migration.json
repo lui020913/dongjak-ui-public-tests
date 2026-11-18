@@ -6,6 +6,6 @@
   "target_branch": "public/app-source-migration-20261119",
   "target_directory": "app",
   "migration": "one-time sanitized source snapshot; no private history; no deployment",
-  "attempt": 2,
-  "last_retry_reason": "Exclude empty .env.example from snapshot scan and allowlist only known non-secret local storage identifiers"
+  "attempt": 3,
+  "last_retry_reason": "Restore docs and root test fixtures required by the app's existing 1,547-test suite; continue excluding .env.example and private operational files"
 }
