@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs';
+import {readFileSync,appendFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {classify,sourcePin,recoveryDecision,modelInput,ADVICE,CATEGORIES,MAX_ATTEMPTS} from './v911-recovery-policy.mjs';
 const repo='lui020913/dongjak-ui-public-tests';
@@ -13,10 +13,21 @@ if(build&&(!['push','workflow_dispatch'].includes(run.event)||run.actor?.login!=
 const gh=(endpoint,...args)=>execFileSync('gh',['api',endpoint,...args],{encoding:'utf8',maxBuffer:16*1024*1024,timeout:30000,stdio:['ignore','pipe','ignore']});
 const jobs=JSON.parse(gh('repos/'+repo+'/actions/runs/'+run.id+'/attempts/'+run.run_attempt+'/jobs?per_page=100')).jobs;
 const failed=jobs.filter(j=>j.conclusion==='failure'||j.conclusion==='timed_out');
+const hints=[];
+function preciseHint(job,log){
+ if(!(job.steps||[]).some(t=>t.conclusion==='failure'&&t.name.includes('playwright test')))return null;
+ if((job.steps||[]).some(t=>t.conclusion==='failure'&&t.name.includes('Verify exact Preview')))return null;
+ if(!/\b1 failed\b/.test(log)||/\b[2-9]\d* failed\b/.test(log))return null;
+ if(job.name==='ui (tablet1180)'&&/TRANSIT_GRIP_DIAGNOSTIC \{"centerError":(?:[2-9]|[1-9][0-9]+)(?:\.\d+)?[,}]/.test(log))return 'transit-grip';
+ if(/^ui \(mobile(?:375|390)\)$/.test(job.name)&&/locator\('#dj840-map-tip'\)/.test(log)&&/toBeHidden/.test(log)&&/"webappTipVisible":"true"/.test(log))return 'install-tip';
+ if(/toHaveCSS/.test(log)&&/object-fit/.test(log)&&/Expected:\s*"?contain"?/.test(log)&&/Received:\s*"?(?:cover|fill)"?/.test(log)&&/dj860-screen-image/.test(log))return 'onboarding-fit';
+ return null;
+}
 const diagnostics=failed.map(j=>{
  let log='';
  // Public anonymous browser logs only; never fetch private-build output.
  if(ui&&Number.isSafeInteger(j.id))try{log=gh('repos/'+repo+'/actions/jobs/'+j.id+'/logs').replace(/\x1b\[[0-9;]*m/g,'');}catch{}
+ hints.push(ui?preciseHint(j,log):null);
  return classify(j,log);
 });
 const pin=ui?sourcePin(run.display_title):null;
@@ -51,6 +62,12 @@ if(key&&summary.length){
    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',{method:'POST',headers:{'x-goog-api-key':key,'Content-Type':'application/json'},signal:AbortSignal.timeout(45000),body:JSON.stringify({systemInstruction:{parts:[{text:'Choose the primary failure category from the given sanitized diagnostics. Return only one enum value. Do not propose commands or change the tests.'}]},contents:[{parts:[{text:JSON.stringify({diagnostics:summary,attempt,designContract})}]}],generationConfig:{responseMimeType:'application/json',responseSchema:{type:'OBJECT',properties:{category:{type:'STRING',enum:CATEGORIES}},required:['category']},maxOutputTokens:128}})});
    if(res.ok){const out=await res.json();const result=JSON.parse(out.candidates?.[0]?.content?.parts?.filter(p=>!p.thought).map(p=>p.text||'').join('')||'{}');if(CATEGORIES.includes(result.category)&&summary.some(d=>d.category===result.category))advice=result.category;}
  }catch{console.log('Gemini diagnosis unavailable; deterministic classification retained.');}
+}
+// Only one independently reproducible repair ID, never generated code.
+if(ui&&exactCandidate&&attempt<MAX_ATTEMPTS&&hints.length&&hints[0]&&hints.every(x=>x===hints[0])&&process.env.GITHUB_OUTPUT){
+ appendFileSync(process.env.GITHUB_OUTPUT,'repair='+hints[0]+'\nsource='+pin.sha+'\naudit='+run.id+'\n');
+ console.log('Eligible private repair requested: '+hints[0]);
+ process.exit(0);
 }
 const detail=summary.map(d=>(d.viewport||'build')+' · '+d.category).join('\n')||'확인 가능한 실패 단계 없음';
 const text='@lui020913 자동 복구 중단 · 코드 또는 환경 확인 필요\n\n'+detail+'\n\n'+ADVICE[advice]+'\n검증을 생략하거나 Production을 배포하지 않았습니다.\n'+url;

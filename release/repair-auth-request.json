@@ -1,3 +1,4 @@
 {
-  "source_sha": "bd2d45b71158f4dc66c0fa62157a993d7b8ac285"
+  "source_sha": "bd2d45b71158f4dc66c0fa62157a993d7b8ac285",
+  "check": "repair-policy-smoke"
 }

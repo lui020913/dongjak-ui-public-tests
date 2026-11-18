@@ -32,7 +32,7 @@ test('only allowlisted fields are transmitted to the diagnostic model',()=>{
 test('recovery is event triggered and never holds deploy or private source credentials',()=>{
  const y=readFileSync(new URL('../.github/workflows/v911-failure-recovery.yml',import.meta.url),'utf8');
  assert.match(y,/workflow_run:/);
- assert.doesNotMatch(y,/schedule:|CLOUDFLARE_API_TOKEN|PRIVATE_SOURCE_READ_TOKEN|PRIVATE_PREVIEW_DISPATCH_TOKEN|contents: write/);
+ assert.doesNotMatch(y,/schedule:|CLOUDFLARE_API_TOKEN|PRIVATE_SOURCE_READ_TOKEN|contents: write/);
 });
 
 test('actual app recovery preserves the explicit design contract and archived design standards',()=>{
@@ -42,4 +42,14 @@ test('actual app recovery preserves the explicit design contract and archived de
  assert.ok(read('docs/design/DESIGN_LANGUAGE.md').includes('Modern Civic Minimalism'));
  assert.ok(read('docs/design/QUALITY_AUDIT.md').includes('P0'));
  assert.ok(read('scripts/v911-recovery.mjs').includes('diagnostics:summary,attempt,designContract'));
+});
+
+test('private repair dispatcher accepts only explicit fixed recipe IDs and cannot write source',()=>{
+ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+ const workflow=read('.github/workflows/v911-failure-recovery.yml'),script=read('scripts/v911-recovery.mjs');
+ assert.ok(workflow.includes('v911-private-repair.yml/dispatches'));
+ assert.ok(workflow.includes('transit-grip|install-tip|onboarding-fit'));
+ assert.ok(script.includes('hints.every(x=>x===hints[0])'));
+ assert.ok(script.includes('ui&&exactCandidate&&attempt<MAX_ATTEMPTS'));
+ assert.doesNotMatch(workflow,/contents: write|CLOUDFLARE_API_TOKEN/);
 });

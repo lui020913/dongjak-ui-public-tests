@@ -27,7 +27,21 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
       - name: Check exact candidate and retry only eligible failures
+        id: analyze
         env:
           GH_TOKEN: ${{ github.token }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/v911-recovery.mjs
+      - name: Dispatch independently verified private repair
+        if: steps.analyze.outputs.repair != ''
+        env:
+          GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+          SOURCE: ${{ steps.analyze.outputs.source }}
+          AUDIT: ${{ steps.analyze.outputs.audit }}
+          RECIPE: ${{ steps.analyze.outputs.repair }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE" =~ ^[a-f0-9]{40}$ && "$AUDIT" =~ ^[1-9][0-9]*$ && "$RECIPE" =~ ^(transit-grip|install-tip|onboarding-fit)$ ]]
+          test -n "$GH_TOKEN"
+          gh api --method POST repos/lui020913/dongjak-safety-map/actions/workflows/v911-private-repair.yml/dispatches -f ref=main -f "inputs[source_sha]=$SOURCE" -f "inputs[audit_run]=$AUDIT" -f "inputs[recipe]=$RECIPE" >/dev/null
+          echo 'Private exact-source repair requested; no private code or deploy token in this job.'
