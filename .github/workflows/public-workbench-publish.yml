@@ -1,0 +1,33 @@
+name: Request verified standalone Preview
+on:
+  workflow_run:
+    workflows: [Public workbench package]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  request:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'workflow_dispatch' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.actor.login == 'lui020913' &&
+      endsWith(github.event.workflow_run.display_title, ' publish=true')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+      TITLE: ${{ github.event.workflow_run.display_title }}
+      PUBLIC_RUN: ${{ github.event.workflow_run.id }}
+    steps:
+      - name: Dispatch one private Preview (no Production)
+        run: |
+          set -euo pipefail
+          [[ "$TITLE" =~ ^Public\ workbench\ ([a-f0-9]{40})\ publish=true$ ]]
+          sha="${BASH_REMATCH[1]}"
+          [[ "$PUBLIC_RUN" =~ ^[0-9]+$ ]]
+          test -n "$GH_TOKEN"
+          jq -n --arg sha "$sha" --arg run "$PUBLIC_RUN" '{ref:"main",inputs:{public_sha:$sha,public_run:$run}}' |
+            gh api --method POST repos/lui020913/dongjak-safety-map/actions/workflows/dongjak-public-ui-preview-bridge.yml/dispatches --input -
+          echo 'Verified standalone Preview requested; Production not requested.' >> "$GITHUB_STEP_SUMMARY"
