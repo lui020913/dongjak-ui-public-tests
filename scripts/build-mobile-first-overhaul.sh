@@ -30,6 +30,7 @@ grep -Fq "import './v914-mobile-ux-fixes.css';" src/main.js
 grep -Fq "import './public-ui-production-overlay.css';" src/main.js
 grep -Fq "public-ui-mobile-surface-coordinator.js" src/main.js
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+node "$GITHUB_WORKSPACE/scripts/apply-mobile-only-gate.mjs" "$work"
 node --input-type=module <<'NODE'
 import {readFileSync,writeFileSync} from 'node:fs';
 const path='src/main.js';
@@ -40,7 +41,9 @@ if(source.includes("import './mobile-first-overhaul.css';")) throw new Error('Mo
 writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
 NODE
 git diff --check
-test "$(git diff --name-only)" = "src/main.js"
+expected_changes="$(printf '%s\n' index.html platforms/entry.js src/main.js)"
+actual_changes="$(git diff --name-only | sort)"
+test "$actual_changes" = "$expected_changes"
 test -s src/mobile-first-overhaul.css
 safe=(env -i "PATH=$PATH" "HOME=$HOME" CI=true DONGJAK_UI_ONLY=1 "GITHUB_SHA=$SOURCE_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY")
 log="$RUNNER_TEMP/private-build.log"
@@ -57,12 +60,12 @@ run_private(){
   rm -f "$log"
 }
 run_private "Dependency installation" npm ci --no-audit --no-fund --prefer-offline
-if "${safe[@]}" node --test --test-reporter=tap tests/*.test.mjs >"$log" 2>&1; then
-  echo "Full private Node regression suite passed"
+if node "$GITHUB_WORKSPACE/scripts/run-mobile-regressions.mjs" "$work" >"$log" 2>&1; then
+  echo "Mobile/shared private Node regression suite passed"
 else
   node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
   rm -f "$log"
-  echo "::error::Private Node regression suite failed; details withheld"
+  echo "::error::Mobile/shared private Node regression suite failed; private diagnostics withheld"
   exit 1
 fi
 rm -f "$log"
