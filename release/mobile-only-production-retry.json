@@ -1,0 +1,10 @@
+{
+  "tested_workflow_run": 44372494679,
+  "tested_artifact": "mobile-first-overhaul-sealed-0c4be7f51a4052b13315294229a044cc65d175d1",
+  "private_source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
+  "public_source_sha": "dc44e070b48b7192a267c3b65edc971b32773edd",
+  "css_sha256": "4022b314c362731ced8c353987b503a4744499c42d9c2fe2bc3602465453f519",
+  "app_version": "8.26.1",
+  "phone_qa": "24 passed, 21 skipped",
+  "purpose": "Retry protected Production promotion of the exact artifact that passed Preview and phone-only Playwright QA. No rebuild or test bypass."
+}
