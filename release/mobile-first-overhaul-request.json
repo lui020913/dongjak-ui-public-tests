@@ -3,7 +3,7 @@
   "application_version": "8.26.1",
   "public_work_branch": "public/mobile-first-overhaul-20261119",
   "purpose": "Mobile-only app release: iPhone and Android phones only; PC and tablet show a completely blank pure-white screen with no text, logo, icons or loading UI; preserve all PC/tablet source; mobile-only QA must pass before protected Production promotion",
-  "attempt": 18,
+  "attempt": 19,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Follow-up hardening: replace escaped-regex assertions for the empty screen markup and CSS selector with exact string assertions, avoiding JavaScript regex delimiter ambiguity. All behavioral checks remain in place."
+  "last_retry_reason": "Fixed the release-blocking syntax error in the visual gate CSS string. The previous edit had escaped a JavaScript template-literal delimiter, so Node rejected the gate module before the build. Replaced it with ordinary concatenated CSS strings; blank-white screen behavior and phone-only tests remain unchanged."
 }
