@@ -160,3 +160,21 @@ test('all five onboarding illustrations remain uncropped on tablet and desktop',
   await tap(page,tour.locator('[data-dj860-action="skip"]'));
   await expect(tour).toBeHidden();
 });
+
+test('phone compact toolbar, reachable swipe cue and bottom dock share a visual system',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ const scroll=page.locator('#dj831-scrollport'),cue=page.locator('.dj912-toolbar-next'),more=page.locator('#dj-v794-more'),nav=page.locator('#bottom-nav');
+ await expect(scroll).toBeVisible();await expect(cue).toBeVisible();await expect(more).toBeVisible();
+ const geometry=()=>scroll.evaluate(n=>{const more=document.getElementById('dj-v794-more'),w=more.getBoundingClientRect().width;return {widths:[...n.children].filter(b=>b.tagName==='BUTTON'&&b.getClientRects().length).map(b=>b.getBoundingClientRect().width),more:w,overflow:n.scrollWidth-n.clientWidth};});
+ await expect.poll(async()=>{const d=await geometry();return d.overflow>3&&d.widths.length>=4&&d.widths.every(w=>Math.abs(w-52)<=1)&&Math.abs(d.more-52)<=1;}).toBe(true);
+ const left=await scroll.evaluate(n=>n.scrollLeft);
+ await tap(page,cue);await expect.poll(()=>scroll.evaluate(n=>n.scrollLeft)).toBeGreaterThan(left+8);
+ const district=scroll.locator('[data-dj831-feature="map-dong"]');await expect(district.locator('.dj832-feature-label')).toHaveText('행정동');
+ const wx=scroll.locator('#dj-v794-weather .dj910-weather-icon svg');await expect(wx).toBeAttached();
+ await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
+ await tap(page,more);await expect(page.locator('#dj-mobile-utilities')).toBeVisible();
+ await expect(page.locator('#dj-v794-toolbar')).toBeHidden();
+ await tap(page,page.locator('#dj-mobile-utilities-close'));await expect(page.locator('#dj-mobile-utilities')).toBeHidden();
+ await expect(page.locator('#dj-v794-toolbar')).toBeVisible();
+ await test.info().attach('phone-compact-design',{body:await page.screenshot(),contentType:'image/png'});
+});
