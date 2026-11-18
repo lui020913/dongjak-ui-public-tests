@@ -30,9 +30,9 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/@layer request-completion/);
 });
 
-test('tablet and desktop share the same visual tokens',()=>{
-  assert.match(css,/@media \(min-width: 700px\) and \(max-width: 1079px\)/);
-  assert.match(css,/@media \(min-width: 1080px\)/);
+test('the overhaul stylesheet is mobile-only',()=>{
+  assert.match(css,/^@media \(max-width: 699px\) \{/);
+  assert.doesNotMatch(css,/@media \(min-width:/);
   assert.match(css,/var\(--mf-surface\)/);
   assert.match(css,/var\(--mf-brand-soft\)/);
 });
