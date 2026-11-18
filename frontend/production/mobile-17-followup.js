@@ -23,15 +23,15 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   if(body&&body.parentElement!==root){root.append(body)}
   const target=root.querySelector('.dj-mobile-utilities-body');
   if(!target)return;
+  const extra=$('dj832-more-features');if(extra&&!target.contains(extra))target.append(extra);
+  for(const old of target.querySelectorAll('.dj17-feature-details'))if(!old.querySelector('.dj833-feature-group'))old.remove();
   for(const group of target.querySelectorAll('.dj833-feature-group')){
    if(group.parentElement?.classList.contains('dj17-feature-details'))continue;
    const section=doc.createElement('details');section.className='dj17-feature-details';
    const s=doc.createElement('summary');s.textContent=group.querySelector('.dj832-more-group-label')?.textContent||'추가 기능';
    group.before(section);section.append(s,group);
   }
-  for(const button of doc.querySelectorAll('#dj-v794-toolbar [data-poi-group]')){
-   if(!button.dataset.dj17Moved){button.dataset.dj17Moved='1';let group=root.querySelector('.dj17-poi');if(!group){group=doc.createElement('details');group.className='dj17-poi';const s=doc.createElement('summary');s.textContent='기본 지도 시설 표시';group.append(s);root.append(group)}group.append(button)}
-  }
+
  }
  function expandSafety(){
   const panel=$('map-safety-controls'),head=panel?.querySelector('.map-safety-head');if(!head||head.querySelector('.dj17-expand'))return;
@@ -67,11 +67,11 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
  const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});schedule();
  doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){pilot=false;paint();delete app.dataset.djUserTipDismissed}},true);
  function snapshot(){
-  try{const c=map.getCenter();const value={time:Date.now(),tab:app.dataset.tab||'mine',center:[c.lng,c.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),phase:'pending'};win.sessionStorage.setItem(KEY,JSON.stringify(value))}catch{}
+  try{const c=map.getCenter();const detail=doc.querySelector('#mine-panel .dj834-my-detail');const value={time:Date.now(),tab:app.dataset.tab||'mine',profile:!!detail&&!detail.hidden,center:[c.lng,c.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),phase:'pending'};win.sessionStorage.setItem(KEY,JSON.stringify(value))}catch{}
  }
  win.addEventListener('dj:mobile-kakao-start',snapshot);
  win.addEventListener('dj:mobile-kakao-completed',()=>{try{const s=JSON.parse(win.sessionStorage.getItem(KEY)||'null');if(!s||s.phase!=='pending')return;s.phase='reload';win.sessionStorage.setItem(KEY,JSON.stringify(s));win.location.reload()}catch{}});
  win.addEventListener('dj:mobile-kakao-cancelled',()=>{try{win.sessionStorage.removeItem(KEY)}catch{}});
- function restore(){try{const s=JSON.parse(win.sessionStorage.getItem(KEY)||'null');if(!s||Date.now()-s.time>600000)return;win.sessionStorage.removeItem(KEY);map.jumpTo({center:s.center,zoom:s.zoom,pitch:s.pitch,bearing:s.bearing});const tab=doc.querySelector('#bottom-nav [data-tab="'+s.tab+'"]');tab?.click()}catch{}}
+ function restore(){try{const s=JSON.parse(win.sessionStorage.getItem(KEY)||'null');if(!s||Date.now()-s.time>600000)return;win.sessionStorage.removeItem(KEY);map.jumpTo({center:s.center,zoom:s.zoom,pitch:s.pitch,bearing:s.bearing});const tab=doc.querySelector('#bottom-nav [data-tab="'+s.tab+'"]');tab?.click();if(s.profile&&s.tab==='mine')win.setTimeout(()=>doc.querySelector('#mine-panel [data-dj834-action="profile"]')?.click(),250)}catch{}}
  map.once('load',()=>{const state=()=>app.dataset.authState||app.dataset.djAuthState||'';let s;try{s=JSON.parse(win.sessionStorage.getItem(KEY)||'null')}catch{}if(s?.phase==='reload'){win.setTimeout(restore,300);return}if(!s)return;const authObserver=new MutationObserver(()=>{if(/signed-in|authenticated/.test(state())){authObserver.disconnect();restore()}});authObserver.observe(app,{attributes:true});if(/signed-in|authenticated/.test(state())){authObserver.disconnect();restore()}win.setTimeout(()=>authObserver.disconnect(),60000)});
 }
