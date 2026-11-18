@@ -11,7 +11,7 @@ async function tap(page,locator){
  }
  const r=await locator.boundingBox();await page.mouse.click(r.x+r.width/2,r.y+r.height/2);
 }
-async function ready(page){
+async function ready(page,{keepTour=false}={}){
  await page.goto('/',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#map')).toBeVisible({timeout:45000});
  const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
@@ -21,6 +21,7 @@ async function ready(page){
  await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-out|signed-in)$/,{timeout:30000});
  // Fresh anonymous context, never enter credentials.
  const tour=page.locator('#dj860-onboarding');
+ if(keepTour){await expect(tour).toBeVisible({timeout:30000});return;}
  if(await tour.isVisible().catch(()=>false))await tap(page,tour.locator('[data-dj860-action="skip"]'));
  await expect(tour).toBeHidden();
 }
@@ -142,4 +143,20 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   await test.info().attach('tablet-safety',{body:await page.screenshot(),contentType:'image/png'});
   await tap(page,page.locator('#map-safety-close'));
   await expect(shade).toBeHidden();
+});
+
+test('all five onboarding illustrations remain uncropped on tablet and desktop',async({page})=>{
+  test.skip(page.viewportSize().width<700,'tablet and desktop only');
+  await ready(page,{keepTour:true});
+  const tour=page.locator('#dj860-onboarding'),image=tour.locator('.dj860-screen-image');
+  for(let slide=1;slide<=5;slide++){
+    await expect(tour.locator('#dj860-count')).toHaveText(new RegExp('0'+slide+'\\s*/\\s*05'));
+    await expect(image).toBeVisible();
+    await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
+    await expect(image).toHaveCSS('object-fit','contain');
+    await test.info().attach('onboarding-'+slide,{body:await page.screenshot(),contentType:'image/png'});
+    if(slide<5)await tap(page,tour.locator('[data-dj860-action="next"]'));
+  }
+  await tap(page,tour.locator('[data-dj860-action="skip"]'));
+  await expect(tour).toBeHidden();
 });
