@@ -1,9 +1,9 @@
 {
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
-  "public_work_branch": "fix/mobile-17-followup-20261119",
+  "public_work_branch": "fix/mobile-regression-recovery-20261119",
   "purpose": "Phone-only follow-up for the seventeen requested UI, data display, pilot district and authentication-return changes; preserve PC/tablet gate and originals; run phone QA before guarded Production promotion",
-  "attempt": 22,
+  "attempt": 23,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Follow-up candidate; no production claim until mobile QA and exact deployment verification succeed."
+  "last_retry_reason": "Fix legacy building palette contract via a phone-only variant; preserve verified district filtering and add Sangdo1 display clipping. Report sanitized test fingerprints and release stage status."
 }
