@@ -75,12 +75,10 @@ html[data-theme="dark"][data-dj-mobile-only="blocked"] #dj-mobile-only-screen p{
   }
 
   for(const file of ['v815-pc-visual-fixes.css','v853-pc-responsive-fixes.css','v872-pc-onboarding-weather.css']) {
-    const re=new RegExp('^[\\t ]*<link rel="stylesheet" href="/src/'+file.replaceAll('.','\\.')+'" \/>\\r?\\n?','m');
-    indexHtml=indexHtml.replace(re,'');
+    indexHtml=indexHtml.replaceAll(`<link rel="stylesheet" href="/src/${file}" />`,'');
   }
   for(const file of ['v854-weather-desktop.js','v862-pc-mobile-separation.js','v876-desktop-final.js']) {
-    const re=new RegExp('^[\\t ]*<script type="module" src="/src/'+file.replaceAll('.','\\.')+'"><\\/script>\\r?\\n?','m');
-    indexHtml=indexHtml.replace(re,'');
+    indexHtml=indexHtml.replaceAll(`<script type="module" src="/src/${file}"></script>`,'');
   }
 
   const desktopImports=[
