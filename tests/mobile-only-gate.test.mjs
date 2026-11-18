@@ -39,6 +39,8 @@ test('build patch adds only a blank white visual gate and preserves desktop/tabl
   assert.match(result.indexHtml,/모바일로 접속해 주세요/);
   assert.match(result.indexHtml,/모바일 웹사이트와 모바일 앱/);
   assert.match(result.indexHtml,/background:#fff!important/);
+  assert.ok(result.indexHtml.includes('font-size:22px;font-weight:800'));
+  assert.ok(result.indexHtml.includes('font-size:14px;line-height:1.65'));
   assert.ok(result.indexHtml.includes('body>:not(#dj-mobile-only-screen){display:none!important}'));
   assert.equal(result.indexHtml.includes('\\n'),false);
   assert.match(result.indexHtml,/v815-pc-visual-fixes\.css/);
