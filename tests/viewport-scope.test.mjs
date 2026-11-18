@@ -38,8 +38,10 @@ test('selective success can never become full release proof',()=>{
  assert.equal(isFullAudit(jobs('mobile')),false);
  assert.equal(isFullAudit(jobs('full')),true);
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
- const prod=read('.github/workflows/public-exact-production.yml');
- assert.ok(prod.includes('for viewport in '+VIEWPORTS.full.join(' ')+';do'));
+  const policy=read('scripts/release-evidence-policy.mjs');
+  const verifier=read('scripts/verify-release-evidence.mjs');
+  for(const viewport of VIEWPORTS.full)assert.ok(policy.includes("'"+viewport+"'"));
+  assert.ok(verifier.includes('missingViewports'));
  assert.ok(read('.github/workflows/v911-full-audit-request.yml').includes('viewport_scope:"full"'));
  assert.ok(read('.github/workflows/public-private-source-preview.yml').includes('node --test --test-reporter=tap tests/*.test.mjs'));
 });
