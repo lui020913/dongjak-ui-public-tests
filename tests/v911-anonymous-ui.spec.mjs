@@ -125,7 +125,7 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
  await tap(page,popup.locator('.dj-place-header-close'));await expect(popup).toBeHidden();
 });
 
-test('tablet workspace margins, unclipped tools, More and safety modal',async({page})=>{
+test('tablet More panel is fully visible and contained',async({page})=>{
   const width=page.viewportSize().width;
   test.skip(width<700||!compact(page),'tablet only');
   await ready(page);
@@ -153,7 +153,12 @@ test('tablet workspace margins, unclipped tools, More and safety modal',async({p
   await expect(icon).toBeVisible();
   const i=await icon.boundingBox();expect(i.width).toBeLessThanOrEqual(24);expect(i.height).toBeLessThanOrEqual(24);
   await test.info().attach('tablet-more',{body:await page.screenshot(),contentType:'image/png'});
-  await tap(page,page.locator('#dj-mobile-utilities-close'));
+});
+
+test('tablet safety modal remains visible and contained',async({page})=>{
+  const width=page.viewportSize().width;
+  test.skip(width<700||!compact(page),'tablet only');
+  await ready(page);
   await tap(page,page.locator('#dj-v794-safety'));
   const shade=page.locator('#map-safety-backdrop'),panel=page.locator('#map-safety-controls');
   await expect(shade).toBeVisible();await expect(panel).toBeVisible();
