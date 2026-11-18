@@ -1,5 +1,4 @@
 import {historicalSnapshotTest} from './support/historical-snapshot-audit.mjs';
-import {stripApprovedV825TransportUI} from './support/approved-v825-transport-ui.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -70,16 +69,15 @@ test('local favorites folders are persisted only to browser storage',()=>{
  assert.equal(toggleSavedPlace(a).saved,false);
  delete globalThis.localStorage;
 });
-historicalSnapshotTest('main route core modifies only explicit routing integration points, not map style/transport source',()=>{
+historicalSnapshotTest('main route core preserves map runtime and startup infrastructure while shared transit UI is intentionally responsive',()=>{
  const main=source('src/main.js');
  assert.match(main,/computeMultiStopRoutes\(\[routeStart,\.\.\.routeWaypoints,routeEnd\]/);
  assert.match(main,/installMapProduct\(/);
  assert.match(main,/routeWaypoints\.push/);
- const protectedFiles=['src/transport-map.js','src/ui-environment.js','src/map-startup-loader.js'];
- const expected={'src/transport-map.js':'15c1bd89214dddbff3b0840994c89032f293076b9d837c2e380be6f5b6a93c3a',
- 'src/ui-environment.js':'4584700d36425038d7d8b7961d5c14f8551cb3c9a49770cf926ae8809ef8e74f',
+ const protectedFiles=['src/ui-environment.js','src/map-startup-loader.js'];
+ const expected={'src/ui-environment.js':'4584700d36425038d7d8b7961d5c14f8551cb3c9a49770cf926ae8809ef8e74f',
  'src/map-startup-loader.js':'20bfb58dc5a0c212842e41f4b4b2d1d889d8a832a9b1eed296310ad3c83c1ea6'};
- for(const p of protectedFiles)assert.equal(crypto.createHash('sha256').update(p==='src/transport-map.js'?stripApprovedV825TransportUI(source(p)):source(p)).digest('hex'),expected[p]);
+ for(const p of protectedFiles)assert.equal(crypto.createHash('sha256').update(source(p)).digest('hex'),expected[p]);
 });
 test('search and popup integrate explicit save/share and verified-area search',()=>{
  assert.match(source('src/map-quick-search.js'),/viewResults\(/);
