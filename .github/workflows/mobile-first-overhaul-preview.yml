@@ -175,9 +175,45 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  desktop-tablet-qa:
+    needs: [build, preview]
+    if: needs.preview.result == 'success'
+    name: 'PC·태블릿 이용 방식 선택 검증'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 25
+    env:
+      DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}/
+      DONGJAK_EXPECTED_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      DONGJAK_EXPECTED_VERSION: ${{ needs.build.outputs.app_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Playwright test package
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund --prefer-offline
+      - name: Verify selection state, external APK warning and QR interaction on PC and tablet
+        run: npx playwright test --config=playwright.config.mjs tests/install-gate-selection.spec.mjs --project=desktop --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: install-gate-selection-qa-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   production:
-    needs: [build, preview, mobile-qa]
-    if: needs.mobile-qa.result == 'success'
+    needs: [build, preview, mobile-qa, desktop-tablet-qa]
+    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success'
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -295,8 +331,8 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log"
 
   notify-preview:
-    needs: [build, preview, mobile-qa]
-    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    needs: [build, preview, mobile-qa, desktop-tablet-qa]
+    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -359,7 +395,7 @@ jobs:
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state=pending -f context=mobile-release -f description="Mobile release validation started" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
   report:
-    needs: [announce, build, preview, mobile-qa, production]
+    needs: [announce, build, preview, mobile-qa, desktop-tablet-qa, production]
     if: always() && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
     name: '최종 결과 기록'
     runs-on: ubuntu-24.04
@@ -373,8 +409,9 @@ jobs:
           BUILD: ${{ needs.build.result }}
           PREVIEW: ${{ needs.preview.result }}
           QA: ${{ needs.mobile-qa.result }}
+          DESKTOP_QA: ${{ needs.desktop-tablet-qa.result }}
           PROD: ${{ needs.production.result }}
         run: |
           state=failure
           if [ "$PROD" = success ]; then state=success; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context=mobile-release -f description="Build $BUILD; Preview $PREVIEW; QA $QA; Production $PROD" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context=mobile-release -f description="Build $BUILD; Preview $PREVIEW; mobile QA $QA; PC/tablet QA $DESKTOP_QA; Production $PROD" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
