@@ -3,9 +3,9 @@
   "application_version": "9.2.14",
   "public_work_branch": "main",
   "purpose": "Show persistent selected state for install choices and restore clear Google Play external APK security warning",
-  "attempt": 76,
+  "attempt": 77,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Update release workflow contract regression to require the new PC/tablet install selection QA gate.",
+  "last_retry_reason": "Preserve the legacy empty Android status label when a verified APK is available; selected state remains shown by the new badge.",
   "release_kind": "patch",
   "beta_number": 1
 }

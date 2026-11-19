@@ -77,7 +77,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  links={}; // iOS native distribution is paused; ignore any configured iOS download URL.
  if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-debug-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok)links.android=androidReleaseAsset(marker,await response.json(),'debug');}}}catch{}}
  const androidUrl=safeDownloadUrl(links.android,'android');
- buttons.get('android').status.textContent=androidUrl?'다운로드 가능':'준비 중';
+ buttons.get('android').status.textContent=androidUrl?'':'준비 중';
  if(selectedKey==='android')showAndroidGuide(androidUrl);
  }).catch(()=>{buttons.get('android').status.textContent='준비 중';if(selectedKey==='android')showAndroidGuide(null);});
  return card;
