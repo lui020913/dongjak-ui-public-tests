@@ -79,7 +79,7 @@ html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-row{pos
 html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action{display:flex!important;flex-direction:column!important;width:100%!important;min-width:0!important;gap:3px!important;text-align:center!important;align-items:center!important;border:0!important;box-shadow:none!important;background:transparent!important;color:var(--djNext-text)!important;padding:0!important;font-size:11px!important;line-height:1.2!important}
 .djNext-layer-action>span:not(.djNext-layer-tile){font-weight:600;max-width:100%;overflow-wrap:anywhere}
 html body #app#app#app#app#app#app#app .djNext-layer-tile{position:relative;display:grid!important;place-items:center;width:54px;height:54px;max-width:100%;border:1px solid var(--djNext-border);border-radius:13px;background:linear-gradient(150deg,var(--djNext-tile),var(--djNext-raised));color:var(--djNext-tile-ink);overflow:hidden}
-.djNext-layer-tile::before{content:"";position:absolute;inset:-10px;background:repeating-linear-gradient(37deg,transparent 0 12px,#ffffff18 12px 14px,transparent 14px 23px);pointer-events:none}
+.djNext-layer-tile::before{content:none}
 .djNext-layer-action .djNext-layer-tile svg{width:29px;height:29px;z-index:1;grid-row:auto}
 .djNext-layer-action[aria-pressed="true"] .djNext-layer-tile{outline:2px solid var(--djNext-active);outline-offset:2px}
 html body #app#app#app#app#app#app#app .djNext-layer-state{font-size:9px!important;color:var(--djNext-muted)!important;line-height:1.15!important;white-space:nowrap}
@@ -442,7 +442,7 @@ html body #app#app#app#app#app#app#app [data-dj810-animating]{animation:none!imp
 
 /* 9.2.5 shared phone surface polish; preserve keyboard focus indication. */
 @media(max-width:699px){
-html body #app #djNext-rail{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+html body #app #djNext-rail{grid-template-columns:repeat(7,minmax(0,1fr))}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]){border-radius:999px!important;box-shadow:var(--dj-elev-low,0 2px 6px #0002)!important;outline-offset:2px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]):not(:focus-visible){outline:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(.community-toolbar,.community-category-tabs){margin-bottom:10px!important;gap:6px!important}
@@ -475,4 +475,27 @@ html body #dj-ai-search-modal .dj-ai-search-names{flex:1}
 html body #dj-ai-search-modal .dj-ai-search-names h2{font-size:18px!important}
 html body #dj-ai-search-modal .dj926-ai-glyph{font-size:22px;color:var(--ai-accent,#11836e)}
 html body #dj-ai-search-modal .dj-ai-close:not(:focus-visible){outline:none!important;box-shadow:0 2px 5px #0003!important}
+}
+
+@media(max-width:699px){
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail{display:flex!important;justify-content:flex-start!important;gap:4px!important;overflow-x:auto!important;scrollbar-width:none}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>button{flex:0 0 calc((100% - 24px)/7)!important;min-width:44px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide-close:focus-visible{outline:0!important;box-shadow:0 0 0 2px var(--djNext-active) inset,0 2px 5px #0002!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(button,summary):not(#map-gesture-guide-close){border-radius:999px!important;box-shadow:0 2px 5px #0002!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide{padding-top:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide::before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:99px;background:var(--djNext-muted);opacity:.45;pointer-events:none}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-category-tabs{margin-top:10px!important;margin-bottom:10px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-sort{color:var(--djNext-text)!important;box-shadow:0 2px 5px #0002!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-report-secondary:not([open]){border-radius:999px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-list .empty-hint):not(.dj871-sheet-expanded):not(:has(#community-form:not([hidden]))){height:auto!important;min-height:0!important;max-height:65dvh!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-tile::before{content:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body{margin-inline:2px!important;max-height:calc(100dvh - 180px)!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:36px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-pin{width:32px!important;height:32px!important;min-height:32px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-group-title{margin-block:8px!important}
+html body:has(#dj-ai-search-modal[open]) #app :is(.map-actions,#bottom-nav,.map-tip),html body:has(#djNext-layer-panel:not([hidden])) #app #bottom-nav{visibility:hidden!important;pointer-events:none!important}
+html body #dj-ai-search-modal .dj-ai-search-header{align-items:flex-start!important}
+html body #dj-ai-search-modal .dj926-ai-glyph{margin-top:2px!important}
+html body #dj-ai-search-modal .dj-ai-example{min-height:34px!important;padding:6px 10px!important;box-shadow:0 1px 3px #0002!important}
+html body #dj-ai-search-modal .dj-ai-close{border-radius:50%!important;background:var(--ai-line,#e5f1eb)!important;box-shadow:0 2px 5px #0002!important}
 }

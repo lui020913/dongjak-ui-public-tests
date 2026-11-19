@@ -276,7 +276,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
     max-width:100%;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
   }
   #dj-ai-search-modal :is(.dj-ai-status,.dj-ai-disclaimer) {word-break:keep-all;}
-  #dj-ai-search-modal .dj-ai-close:focus-visible {outline:2px solid currentColor;outline-offset:-5px;}
+  #dj-ai-search-modal .dj-ai-close:focus-visible {outline:2px solid currentColor;outline-offset:2px;}
   #dj-ai-search-modal::backdrop {backdrop-filter:none;animation:none;}
   #dj-ai-search-modal .dj-ai-login {
     justify-self:start;min-height:44px;padding:8px 14px;

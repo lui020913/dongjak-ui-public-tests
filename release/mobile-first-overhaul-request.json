@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.10",
+  "application_version": "9.2.11",
   "public_work_branch": "main",
-  "purpose": "Improve blocked PC/tablet install typography, panel width and QR readability without changing mobile map or mobile welcome layout.",
-  "attempt": 67,
+  "purpose": "Fix actual layer pattern pseudo-element, mobile focus and sheet spacing.",
+  "attempt": 68,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Small desktop install typography.",
+  "last_retry_reason": "Screenshot visual regression repair.",
   "release_kind": "patch",
   "beta_number": 1
 }

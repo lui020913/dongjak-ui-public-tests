@@ -102,7 +102,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.
     if(window.matchMedia?.('(max-width:699px)')?.matches){
-      close.focus({preventScroll:true});
+      names.firstChild.setAttribute('tabindex','-1');names.firstChild.focus({preventScroll:true});
     }else{
       input.focus({preventScroll:true});
     }
