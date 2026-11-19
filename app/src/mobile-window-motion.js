@@ -15,3 +15,21 @@ export function windowMotionFrame(progress,opening,distance,height,docked=false)
 /** Confirmations are stationary; fade the entire overlay and backdrop together. */
 export const CONFIRM_MOTION=Object.freeze({open:200,close:180});
 export function confirmMotionOpacity(progress,opening){const p=cubicProgress(progress,.42,.58);return opening?p:1-p;}
+
+// Apple HIG / WWDC fluid motion principles; web-specific tuning, not UIKit constants.
+export const INTERACTION_MOTION=Object.freeze({press:100,tab:240,settle:350,feedback:220,spring:'cubic-bezier(.22,.80,.32,1.04)'});
+export function rubberBand(delta,limit=72){
+  const d=Number(delta)||0,l=Math.max(1,Number(limit)||72);
+  return Math.sign(d)*l*(1-1/(1+Math.abs(d)*.55/l));
+}
+export function sheetDragOffset(delta,upLimit,expandable=true){
+  const d=Number(delta)||0,min=expandable?-Math.max(0,Number(upLimit)||0):0;
+  return d<min?min+rubberBand(d-min):d;
+}
+export function projectedDrag(delta,velocity){
+  return (Number(delta)||0)+Math.max(-180,Math.min(180,(Number(velocity)||0)*110));
+}
+export function continuationOffset(offset,progress,opening,distance){
+  const p=windowMotionProgress(progress),to=opening?0:Math.max(0,distance);
+  return offset+(to-offset)*p;
+}

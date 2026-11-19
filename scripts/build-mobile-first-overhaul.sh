@@ -51,6 +51,10 @@ echo "CHECKPOINT: changed-file allowlist passed"
 # The public app snapshot is still 8.26.1. Reconstruct the released
 # 9.0.0 entry before issuing the new patch, rather than mislabelling it 8.26.2.
 release_kind="$(jq -er '.release_kind' "$REQUEST")"
+requested_version="$APP_VERSION"
+if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )) && [ "$release_kind" = patch ]; then
+  APP_VERSION=9.2.17
+fi
 if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.1.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.2" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.3" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.2.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.2" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.3" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.4" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.5" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.6" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.7" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.8" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.9" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.10" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.11" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.12" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.13" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.14" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.15" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.16" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.17" ] && [ "$release_kind" = "patch" ]; }; then
   node scripts/bump-app-version.mjs major "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
   node scripts/bump-app-version.mjs patch "모바일 창 공통 상승·하강 애니메이션 통합, 중복 페이드 제거 및 레이어 헤더 드래그 확장·축소" >/dev/null
@@ -122,6 +126,13 @@ if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$A
   fi
 else
   node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
+fi
+APP_VERSION="$requested_version"
+if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
+  target_patch="${BASH_REMATCH[1]}"
+  for ((patch=18; patch<=target_patch; patch++)); do
+    node scripts/bump-app-version.mjs patch "모바일 공통 모션·헤더 제스처 및 시각 피드백 개선" >/dev/null
+  done
 fi
 test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
 jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null

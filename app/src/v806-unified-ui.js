@@ -1,7 +1,7 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
-import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,confirmMotionOpacity} from './mobile-window-motion.js';
+import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,confirmMotionOpacity,continuationOffset} from './mobile-window-motion.js';
 /** One coordinated motion/visibility owner, added after v8.0.3 UI modules.
  * Retains the original map, route, station and dialog click handlers.
  * CSS entrance animations and earlier JS coordinators opt out while enabled.
@@ -71,7 +71,7 @@ export function installUnifiedUI(doc=document, win=window){
   const animationTimers=new Set();
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
-  function playMobileMotion(target,opening,afterClose,fadeFrom){
+  function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom){
     if(!phone()||!target?.style||reduced())return false;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
@@ -83,6 +83,8 @@ export function installUnifiedUI(doc=document, win=window){
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
     const beforeTranslate=target.style.getPropertyValue('translate');
     const beforeTranslatePriority=target.style.getPropertyPriority('translate');
+    const beforeAnimation=target.style.getPropertyValue('animation');
+    const beforeAnimationPriority=target.style.getPropertyPriority('animation');
     const beforeTransition=target.style.getPropertyValue('transition');
     const beforeTransitionPriority=target.style.getPropertyPriority('transition');
     const rect=target.getBoundingClientRect();
@@ -93,7 +95,8 @@ export function installUnifiedUI(doc=document, win=window){
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
-    const record={cancel:()=>finish(false)};
+    let liveOffset=opening?distance:0;
+    const record={cancel:()=>finish(false),offset:()=>liveOffset};
     const restore=()=>{
       if(isGuide)app.style.removeProperty('--dj-guide-fade');
       scrim?.style.removeProperty('--dj-scrim-alpha');
@@ -103,6 +106,8 @@ export function installUnifiedUI(doc=document, win=window){
       else target.style.removeProperty('translate');
       if(beforeClip)target.style.setProperty('clip-path',beforeClip,beforeClipPriority);
       else target.style.removeProperty('clip-path');
+      if(beforeAnimation)target.style.setProperty('animation',beforeAnimation,beforeAnimationPriority);
+      else target.style.removeProperty('animation');
       if(beforeTransition)target.style.setProperty('transition',beforeTransition,beforeTransitionPriority);
       else target.style.removeProperty('transition');
     };
@@ -127,6 +132,8 @@ export function installUnifiedUI(doc=document, win=window){
         return;
       }
       const frame=windowMotionFrame(progress,opening,distance,rect.height,docked);
+      if(Number.isFinite(offsetFrom)){frame.offset=continuationOffset(offsetFrom,progress,opening,distance);frame.clip=docked?Math.min(rect.height,Math.max(0,frame.offset)):0;}
+      liveOffset=frame.offset;
       target.style.setProperty('opacity','1','important');
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
       if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
@@ -208,13 +215,15 @@ export function installUnifiedUI(doc=document, win=window){
     open(target){
       if(!target||target.dataset.dj810Animating==='opening')return;
       const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='closing'?Number(win.getComputedStyle(target).opacity):undefined;
-      cancelActive(target);playMobileMotion(target,true,undefined,from);
+      const offset=activeAnimation.get(target)?.offset?.();
+      cancelActive(target);playMobileMotion(target,true,undefined,from,offset);
     },
     close(target,finish){
       if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}
       if(target.dataset.dj810Animating==='closing')return;
       const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
-      cancelActive(target);if(!playMobileMotion(target,false,finish,from))finish();
+      const offset=activeAnimation.get(target)?.offset?.();
+      cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset))finish();
     },
     cancel:cancelActive
   };
@@ -567,7 +576,7 @@ export function installUnifiedUI(doc=document, win=window){
     if(id==='dj860-onboarding'||(id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches))return;
     entranceIntent.delete(id);
     const animated=id==='maplibre-popup'?container.querySelector('.maplibregl-popup-content'):content(container);
-    if(animated?.dataset.dj810Animating==='opening')cancelActive(animated);
+    // Native close handler reverses the current position, rather than cancelling it first.
     lifecycle.dismiss(id);
     // Original target listeners must run. After their microtasks, ensure
     // that a racing old controller did not reopen the same closed window.

@@ -1,5 +1,6 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
+import {sheetDragOffset,projectedDrag} from './mobile-window-motion.js';
 import {
   clearMobileSheetDrag,
   dismissMobileSheet,
@@ -132,7 +133,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
         'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
-      const offset=expandable?Math.max(-g.upLimit,dy):Math.max(0,dy);
+      const offset=sheetDragOffset(dy,g.upLimit,expandable);
       panel.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
       panel.style.setProperty('translate',`0 ${offset}px`,'important');
       panel.style.setProperty('transition','none','important');
@@ -143,6 +144,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       const g=gesture;if(!g||event.pointerId!==g.pointer)return;
       gesture=null;
       const delta=event.clientY-g.y;
+      const projected=projectedDrag(delta,g.velocity);
       if(g.dragging){
         suppressNextClick=true;
         if(suppressClickTimer!==null)win.clearTimeout(suppressClickTimer);
@@ -155,7 +157,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       // Expansion and collapse are two distinct, deliberate stops. A downward
       // gesture from the expanded state first returns to compact; a second
       // downward gesture closes the sheet.
-      if(expandable&&g.dragging&&delta<-65&&!panel.classList.contains('dj871-sheet-expanded')){
+      if(expandable&&g.dragging&&projected<-65&&!panel.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(panel,true,doc,win);
         return;
       }
@@ -163,7 +165,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         setMobileSheetExpanded(panel,false,doc,win);
         return;
       }
-      const close=g.dragging&&(delta>105||(delta>45&&g.velocity>.8));
+      const close=g.dragging&&(delta>105||(delta>45&&projected>105));
       if(!close){settleMobileSheetDrag(panel,win);return;}
       if(closing)return;
       closing=true;

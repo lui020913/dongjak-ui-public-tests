@@ -1,4 +1,4 @@
-import {WINDOW_MOTION} from './mobile-window-motion.js';
+import {WINDOW_MOTION,INTERACTION_MOTION} from './mobile-window-motion.js';
 /**
  * v8.8.9 — staged, compositor-friendly mobile sheet motion.
  * FLIP uses the independent CSS translate property so legacy centering
@@ -62,11 +62,11 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   }
 
   const compactDelta=rectDelta(compactRect,expandedRect);
-  const startDelta=collapsing?rectDelta(fromRect,expandedRect):compactDelta;
+  const startDelta=rectDelta(fromRect,expandedRect);
   const endDelta=collapsing?compactDelta:{x:0,y:0};
   const startOpacity=1;
   const clipped=Math.max(0,expandedRect.height-compactRect.height);
-  const startClip=collapsing?0:clipped;
+  const startClip=collapsing?0:Math.min(clipped,Math.max(0,startDelta.y));
   const endClip=collapsing?clipped:0;
   const token=(Number(panel.dataset.dj889MotionToken)||0)+1;
   panel.dataset.dj889MotionToken=String(token);
@@ -90,7 +90,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
     if(started||finished||panel.dataset.dj889MotionToken!==String(token))return;
     started=true;
     if(rafTimer!==null){win.clearTimeout(rafTimer);rafTimer=null;}
-    panel.style.setProperty('transition',`translate ${DURATION}ms ${EASING}, clip-path ${DURATION}ms ${EASING}`,'important');
+    panel.style.setProperty('transition',`translate ${DURATION}ms ${INTERACTION_MOTION.spring}, clip-path ${DURATION}ms ${EASING}`,'important');
     panel.style.setProperty('translate',`${endDelta.x}px ${endDelta.y}px`,'important');
     panel.style.setProperty('clip-path',`inset(0 0 ${endClip}px 0 round 24px)`,'important');
     panel.style.setProperty('opacity','1','important');

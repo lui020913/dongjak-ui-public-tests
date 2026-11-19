@@ -2745,6 +2745,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       liveHeading.parentNode.insertBefore(neighborsEl,liveHeading);
     else if(place.kind==='bus'&&selectionBox?.parentNode)
       selectionBox.parentNode.insertBefore(neighborsEl,selectionBox);
+    arrivalsEl.setAttribute('aria-busy','true');
     if(!sameStationLineChange)arrivalsEl.replaceChildren(el('p','transport-empty','실시간 도착정보 연결 상태를 확인하고 있습니다.'));
     else {
       // The previous line's live results must never be presented as the newly
@@ -2756,6 +2757,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     void refreshServiceHours(place,thisSeq);
     const arrival=await requestArrival(place,{forceRefresh:refresh&&!sameStationLineChange});
     if(thisSeq!==seq)return;
+    arrivalsEl.removeAttribute('aria-busy');
     if(arrivalsEl.dataset)delete arrivalsEl.dataset.loadingLine;
     if(arrival.state==='ok'){
       if(place.kind==='bus')storeBusObservation(place.arsId||arrival.arsId,arrival.items||[]);

@@ -1,5 +1,6 @@
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
+import {sheetDragOffset,projectedDrag} from './mobile-window-motion.js';
 import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
 import {createSelectedLocationPin} from './selected-location-pin.js';
@@ -308,7 +309,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       gesture.lastY=event.clientY;gesture.lastTime=now;gesture.delta=event.clientY-gesture.y;
       if(!gesture.active){if(Math.abs(gesture.delta)<7)return;if(Math.abs(event.clientX-gesture.x)>Math.abs(gesture.delta)){gesture=null;reset();return;}gesture.active=true;}
       popupElement.classList.add('dj-sheet-dragging');
-      const offset=Math.max(-gesture.upLimit,gesture.delta);
+      const offset=sheetDragOffset(gesture.delta,gesture.upLimit);
       popupElement.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
       popupElement.style.setProperty('translate',`0 ${offset}px`,'important');
       popupElement.style.setProperty('transition','none','important');
@@ -319,11 +320,11 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       if(!gesture||gesture.id!==event.pointerId)return;
       const {delta,velocity,active}=gesture;gesture=null;
       if(!active){reset();return;}
-      if(delta<-68&&!popupElement.classList.contains('dj871-sheet-expanded')){setMobileSheetExpanded(popupElement,true,document,window);}
+      if(projectedDrag(delta,velocity)<-68&&!popupElement.classList.contains('dj871-sheet-expanded')){setMobileSheetExpanded(popupElement,true,document,window);}
       else if(delta>55&&popupElement?.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(popupElement,false,document,window);
       }else if((delta>88||(delta>48&&velocity>.8))&&popupElement){
-        popupElement.style.setProperty('--dj-sheet-drag-y',String(delta));
+        popupElement.style.setProperty('--dj-sheet-drag-y',`${delta}px`);
         dismissMobileSheet(popupElement,document,window,()=>popup?.remove());
       }else settleMobileSheetDrag(popupElement,window);
       event.stopPropagation();

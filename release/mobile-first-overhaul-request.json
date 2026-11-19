@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.18",
+  "application_version": "9.2.19",
   "public_work_branch": "main",
-  "purpose": "Restore short tab transitions and live header drag; remove duplicate facility motion; improve iOS scrim and controls",
-  "attempt": 85,
+  "purpose": "Shared iOS-inspired interaction feedback, spring detents, reversal continuity and version reconstruction fix",
+  "attempt": 86,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "iPhone screen recordings of tab transition and facility flicker",
+  "last_retry_reason": "Fix prior version stamping gate and consolidate motion policy after Apple HIG and WebKit review",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
