@@ -125,3 +125,17 @@ test('V11 dark sheets and centered guide inherit the established charcoal surfac
  assert.match(css, /#map-gesture-guide\{background:var\(--dj-v4-surface\)!important/);
  assert.doesNotMatch(css, /#191b1e\b/i);
 });
+
+test('phone repair keeps the optional permission controls and their status in one button',()=>{
+ const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
+ assert.match(js,/<button type="button" data-permission="location" aria-label="위치 권한 허용"><span>위치 권한 허용<\/span><small role="status"/);
+ assert.match(js,/djNext-permission-skip'\)\.addEventListener\('click',continueIntro\)/);
+ assert.match(css,/#map-quick-search-dropdown\[hidden\]\{display:none!important\}/);
+ assert.match(css,/#news-panel \[data-news-source\]\[aria-pressed="true"\]\{background:var\(--djNext-active\)/);
+});
+test('safety drawer dismissal cannot clear selected-data pilot visibility',()=>{
+ const js=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
+ assert.match(js,/const wanted=app\.dataset\.tab==='map'&&\(app\.classList\.contains\('map-safety-open'\)\|\|selected\)/);
+ assert.match(js,/attributeFilter:\['class','aria-pressed','data-tab'\]/);
+});

@@ -87,6 +87,7 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
           content.style.maxHeight=placePopup
             ?`${Math.max(190,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-30))}px`
             :boundedPhonePopup?`${Math.max(60,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-20))}px`:'min(72dvh,calc(100dvh - 52px))';
+          if(boundedPhonePopup)content.style.setProperty('max-height',`${Math.max(60,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-20))}px`,'important');
           content.style.overflowY='auto';
           content.style.overscrollBehavior='contain';
         }

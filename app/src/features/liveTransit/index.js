@@ -25,7 +25,7 @@ export function trainFacing(map,props,previous=null){
 }
 export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const canvas=doc?.createElement?.('canvas');if(!canvas)return null;
-  canvas.width=96;canvas.height=96;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
+  const size=96;canvas.width=size;canvas.height=size;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
   ctx.scale(3,3);ctx.clearRect(0,0,32,32);
   const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
   // Side train only: transparent canvas, no backing plate, keyline or track.
@@ -38,15 +38,15 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   for(const x of [4,8.8,13.6]){rounded(x,10,3.8,6.4,.8);ctx.fillStyle='#f1f7f8';ctx.fill();}
   ctx.beginPath();ctx.moveTo(19.5,10);ctx.lineTo(21.3,10);ctx.quadraticCurveTo(22.2,10,23.4,11.6);ctx.lineTo(27,16.4);ctx.lineTo(19.5,16.4);ctx.quadraticCurveTo(18.6,16.4,18.6,15.5);ctx.lineTo(18.6,10.9);ctx.quadraticCurveTo(18.6,10,19.5,10);ctx.closePath();ctx.fillStyle='#f1f7f8';ctx.fill();
   rounded(26,18.3,2.2,1.7,.65);ctx.fillStyle='#f1f7f8';ctx.fill();
-  const image=ctx.getImageData(0,0,96,96);const data=new Uint8Array(image.data);
+  const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);
-    for(let y=0;y<64;y++)for(let x=0;x<64;x++){
-      const offset=(y*64+x)*4;mirrored.set(data.subarray(offset,offset+4),(y*64+63-x)*4);
+    for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+      const offset=(y*size+x)*4;mirrored.set(data.subarray(offset,offset+4),(y*size+size-1-x)*4);
     }
-    return {width:64,height:64,data:mirrored};
+    return {width:size,height:size,data:mirrored};
   }
-  return {width:64,height:64,data};
+  return {width:size,height:size,data};
 }
 function ensureTrainImages(map){
   if(typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;

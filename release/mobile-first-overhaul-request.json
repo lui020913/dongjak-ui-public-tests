@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.1.0",
-  "public_work_branch": "fix/mobile-ui-v11-integrated-20261119",
-  "purpose": "Deploy cumulative V11 mobile UI and directional metro overlay after successful PR #66 source CI; require exact artifact Preview and all mobile browser shards before protected Production.",
-  "attempt": 48,
+  "application_version": "9.1.1",
+  "public_work_branch": "main",
+  "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
+  "attempt": 49,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 47 exact Preview failed three instances of the same dark surface contract at 375, 390 and 430 px: V11 introduced #191b1e instead of the established #191b1f. Reuse the existing dark surface token for V11 sheets and guide; preserve all browser checks and add a regression contract.",
-  "release_kind": "minor",
-  "beta_number": 2
+  "last_retry_reason": "9.1.0 live-device observations: search results, popup viewport, safety state, duplicate facility animation, permission, dark palette and status strip; retain all deployment health checks.",
+  "release_kind": "patch",
+  "beta_number": 1
 }

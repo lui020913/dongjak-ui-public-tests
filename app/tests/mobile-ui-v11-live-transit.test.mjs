@@ -72,3 +72,12 @@ test('rendered icon key flips with map orientation without moving train',async()
  const overlay=attachLiveTransitOverlay(map,{stationLines:routes,renderIntervalMs:100,getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]})});
  try{overlay.start();const current=()=>map.getSource(LIVE_SOURCE)?.data.features[0];await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선');const coords=current().geometry.coordinates;sign=-1;await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선-left');assert.deepEqual(current().geometry.coordinates,coords);sign=1;await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선');assert.deepEqual(current().geometry.coordinates,coords);}finally{overlay.destroy()}
 });
+
+test('high-DPI train icons retain full raster and mirror all pixels',async()=>{
+ const {trainIconImage}=await import('../src/features/liveTransit/index.js');
+ const ctx=new Proxy({getImageData(x,y,w,h){const data=new Uint8ClampedArray(w*h*4);for(let i=0;i<w*h;i++){data[i*4]=i%w;data[i*4+3]=255}return {data}}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});
+ const doc={createElement:()=>({getContext:()=>ctx})};
+ const right=trainIconImage('#123456',doc,'right'),left=trainIconImage('#123456',doc,'left');
+ assert.equal(right.width,96);assert.equal(left.height,96);assert.equal(right.data.length,96*96*4);assert.equal(left.data.length,right.data.length);
+ for(let y=0;y<96;y++)for(let x=0;x<96;x++)assert.equal(left.data[(y*96+x)*4],right.data[(y*96+95-x)*4]);
+});
