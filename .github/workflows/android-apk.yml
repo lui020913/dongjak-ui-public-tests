@@ -302,6 +302,8 @@ jobs:
           name: Dongjak-Safety-Map-v${{ needs.apk.outputs.version }}-debug
           path: ${{ runner.temp }}/public-debug
       - name: Verify and publish exact public download without overwriting
+        env:
+          RELEASE_PUBLISH_TOKEN: ${{ secrets.ANDROID_RELEASE_PUBLISH_TOKEN }}
         run: |
           set -euo pipefail
           [[ "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ && "$EXPECTED_CERT" =~ ^[A-Fa-f0-9]{64}$ ]]
@@ -326,5 +328,18 @@ jobs:
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo 'Version already published; refusing overwrite'; exit 1
           fi
-          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --target "$sha" --title "Android v$VERSION (test APK)" --notes "Fixed-signature debug test APK from verified Production $sha. Not a Play Store release." --latest=false
+          # The default token can reject a tag on an earlier commit when workflow files differ.
+          # A dedicated, repository-scoped publishing credential is optional; never reuse unrelated secrets.
+          if [[ -n "$RELEASE_PUBLISH_TOKEN" ]]; then export GH_TOKEN="$RELEASE_PUBLISH_TOKEN"; fi
+          if ! ref="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" 2>"$RUNNER_TEMP/android-tag-error")"; then
+            if ! grep -q 'HTTP 404' "$RUNNER_TEMP/android-tag-error"; then
+              echo '::error::Unable to inspect existing Android tag; refusing publication.'; exit 1
+            fi
+            if ! ref="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$sha")"; then
+              echo "::error::Cannot create the exact Production tag. Add ANDROID_RELEASE_PUBLISH_TOKEN to android-distribution (Contents and Workflows write), or create the lightweight tag $tag at $sha using an authorized account."
+              exit 1
+            fi
+          fi
+          jq -e --arg sha "$sha" '.object.type=="commit" and .object.sha==$sha' <<< "$ref" >/dev/null
+          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --verify-tag --title "Android v$VERSION (test APK)" --notes "Fixed-signature debug test APK from verified Production $sha. Not a Play Store release." --latest=false
           echo "Public download: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$apk" >> "$GITHUB_STEP_SUMMARY"
