@@ -1,0 +1,82 @@
+name: Prepare reusable public CI tool caches
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/package-lock.json'
+      - 'app/package.json'
+      - 'package.json'
+      - '.github/workflows/prewarm-public-ci-tools.yml'
+permissions:
+  contents: read
+concurrency:
+  group: prewarm-public-ci-tools
+  cancel-in-progress: true
+jobs:
+  warm:
+    if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Restore public app dependency downloads
+        id: app-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - name: Prepare app packages from exact lockfile
+        if: steps.app-cache.outputs.cache-hit != 'true'
+        working-directory: app
+        run: npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
+      - name: Restore pinned browser package downloads
+        id: browser-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/browser-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
+      - name: Prepare pinned Playwright package
+        if: steps.browser-cache.outputs.cache-hit != 'true'
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --ignore-scripts --prefer-offline --no-audit --no-fund
+      - name: Restore Wrangler package downloads
+        id: wrangler-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/wrangler-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
+      - name: Prepare public Cloudflare deployment tool downloads
+        if: steps.wrangler-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/wrangler-prewarm"
+          cd "$RUNNER_TEMP/wrangler-prewarm"
+          NPM_CONFIG_CACHE="$HOME/.cache/dongjak/wrangler-npm" npm install --ignore-scripts --no-audit --no-fund --no-save wrangler@4
+      - name: Restore pinned security scanner archive
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/gitleaks-v8.24.2/gitleaks.tgz
+          key: ${{ runner.os }}-${{ runner.arch }}-gitleaks-v8.24.2-archive-v1
+      - name: Prepare and verify security scanner archive
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.cache/dongjak/gitleaks-v8.24.2"
+          archive_path="$HOME/.cache/dongjak/gitleaks-v8.24.2/gitleaks.tgz"
+          base=https://github.com/gitleaks/gitleaks/releases/download/v8.24.2
+          archive=gitleaks_8.24.2_linux_x64.tar.gz
+          curl -fsSL "$base/gitleaks_8.24.2_checksums.txt" -o "$RUNNER_TEMP/gitleaks-checksums.txt"
+          expected="$(awk -v name="$archive" '$2==name || $2=="*"name {print $1}' "$RUNNER_TEMP/gitleaks-checksums.txt")"
+          [[ "$expected" =~ ^[a-f0-9]{64}$ ]]
+          if ! printf '%s  %s\n' "$expected" "$archive_path" | sha256sum --check --status; then
+            curl -fsSL "$base/$archive" -o "$archive_path"
+          fi
+          printf '%s  %s\n' "$expected" "$archive_path" | sha256sum --check --status
+      - name: Report cache preparation
+        run: echo 'Public package and verified scanner caches ready; browsers are supplied by the pinned Playwright image.' >> "$GITHUB_STEP_SUMMARY"
