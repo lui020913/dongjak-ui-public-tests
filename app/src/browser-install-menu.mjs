@@ -27,8 +27,11 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const env=installEnvironment(win);if(env.mode!=='browser'||doc.getElementById('dj-install-menu'))return;
  const gate=doc.getElementById('dj-mobile-only-screen'),blocked=doc.documentElement.dataset.djMobileOnly==='blocked';
  const card=doc.createElement(blocked?'section':'dialog');card.id='dj-install-menu';card.className='dj-install-menu';card.setAttribute('aria-labelledby','dj-install-heading');
- const add=(tag,cls,txt,parent=card)=>{const e=doc.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;parent.append(e);return e;};
- const heading=add('h2','','동작하는 안전지도');heading.id='dj-install-heading';add('p','dj-install-subtitle','이용하실 방법을 선택해 주세요.');
+ const content=doc.createElement('div');content.className='dj-install-content';card.append(content);
+ const add=(tag,cls,txt,parent=content)=>{const e=doc.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;parent.append(e);return e;};
+ const brand=add('header','dj-install-brand');
+ const logo=add('img','dj-install-logo',null,brand);logo.src=doc.documentElement.dataset.theme==='dark'&&!blocked?'/icons/dongjak-dark-512.png':'/icons/dongjak-light-512.png';logo.alt='';logo.width=76;logo.height=76;
+ const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle','이용하실 방법을 선택해 주세요.',brand);
  const list=add('div','dj-install-list'),info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={};
  const showInfo=texts=>{info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
