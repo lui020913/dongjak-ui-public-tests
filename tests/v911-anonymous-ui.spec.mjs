@@ -70,7 +70,7 @@ test.afterEach(async({page},info)=>{
    console.log('UI_LAYOUT_DIAGNOSTIC',JSON.stringify(debug));
  }catch{console.log('Anonymous layout diagnostic unavailable.');}
 });
-test('compact HUD and visible motion; desktop navigation and dark theme',async({page})=>{
+test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@phone-layout'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  if(compact(page)){
    const header=page.locator('.topbar'),brandLogo=header.locator('.map-quick-search-form #dj-settings-mobile img');
@@ -105,7 +105,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',async({
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
  await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(25, 27, 31)');
 });
-test('phone More functions live in collapsible My Info groups',async({page})=>{
+test('phone More functions live in collapsible My Info groups',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await expect(page.locator('#dj-v794-more')).toBeHidden();
  await tap(page,tab(page,'mine'));
@@ -122,7 +122,7 @@ test('phone More functions live in collapsible My Info groups',async({page})=>{
  await expect(page.locator('#dj-map-settings')).toBeVisible();
 });
 
-test('transport cards, transfer tabs, right aligned arrivals and facility grip',async({page})=>{
+test('transport cards, transfer tabs, right aligned arrivals and facility grip',{tag:'@phone-layout'},async({page})=>{
  await ready(page);
  // Supply only anonymous synthetic arrival examples; no logged-in account or private records.
  await page.route('**/api/transport/bus?**',r=>r.fulfill({json:{status:'ok',items:[{route:'152',routeType:'3',destination:'삼막사거리',message:'5분후 [4정거장 전]'},{route:'6515',routeType:'4',destination:'경인교육대학교',message:'1분후 [1정거장 전]'}]}}));
@@ -144,7 +144,7 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
  await tap(page,popup.locator('.dj-place-header-close'));await expect(popup).toBeHidden();
 });
 
-test('tablet More panel is fully visible and contained',async({page})=>{
+test('tablet More panel is fully visible and contained',{tag:'@non-phone'},async({page})=>{
   const width=page.viewportSize().width;
   test.skip(width<700||!compact(page),'tablet only');
   await ready(page);
@@ -174,7 +174,7 @@ test('tablet More panel is fully visible and contained',async({page})=>{
   await test.info().attach('tablet-more',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('tablet safety modal remains visible and contained',async({page})=>{
+test('tablet safety modal remains visible and contained',{tag:'@non-phone'},async({page})=>{
   const width=page.viewportSize().width;
   test.skip(width<700||!compact(page),'tablet only');
   await ready(page);
@@ -189,7 +189,7 @@ test('tablet safety modal remains visible and contained',async({page})=>{
   await expect(shade).toBeHidden();
 });
 
-test('all five onboarding illustrations remain uncropped on tablet and desktop',async({page})=>{
+test('all five onboarding illustrations remain uncropped on tablet and desktop',{tag:'@non-phone'},async({page})=>{
   test.skip(page.viewportSize().width<700,'tablet and desktop only');
   await ready(page,{keepTour:true});
   const tour=page.locator('#dj860-onboarding'),image=tour.locator('.dj860-screen-image');
@@ -214,7 +214,7 @@ async function pinPhoneShortcut(page,label,key){
  await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
  const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();return shortcut;
 }
-test('phone toolbar has stable seven slots, three saved shortcuts maximum and no overlapping legacy controls',async({page})=>{
+test('phone toolbar has stable seven slots, three saved shortcuts maximum and no overlapping legacy controls',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const rail=page.locator('#djNext-rail'),nav=page.locator('#bottom-nav'),panel=page.locator('#djNext-layer-panel');
  await expect(rail).toBeVisible();await expect(rail.locator(':scope>button')).toHaveCount(7);
@@ -247,7 +247,7 @@ test('phone toolbar has stable seven slots, three saved shortcuts maximum and no
  await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
  await test.info().attach('phone-seven-slot-toolbar',{body:await page.screenshot(),contentType:'image/png'});
 });
-test('phone pilot safety symbols are native and disappear when the mode closes',async({page})=>{
+test('phone pilot safety symbols are native and disappear when the mode closes',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const shortcut=await pinPhoneShortcut(page,'보행안전','pilot');
  await tap(page,shortcut);
@@ -269,7 +269,7 @@ test('phone pilot safety symbols are native and disappear when the mode closes',
  await panel.locator('#map-safety-close').click();await expect(app).toHaveAttribute('data-dj-pilot-lock-count','0');
  await test.info().attach('pilot-off',{body:await page.screenshot(),contentType:'image/png'});
 });
-test('phone onboarding copy is top aligned and artwork is not cropped',async({page})=>{
+test('phone onboarding copy is top aligned and artwork is not cropped',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page,{keepTour:true});
  const overlay=page.locator('#dj860-onboarding'),content=overlay.locator('.dj860-content'),copy=content.locator('.dj860-copy'),image=overlay.locator('.dj860-screen-image');
  await expect(image).toBeVisible();await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
@@ -281,7 +281,7 @@ test('phone onboarding copy is top aligned and artwork is not cropped',async({pa
  await test.info().attach('phone-onboarding-top-aligned',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,overlay.locator('[data-dj860-action="skip"]'));await expect(overlay).toBeHidden();
 });
-test('phone sheets keep headers inside and scrollable content above fixed actions',async({page})=>{
+test('phone sheets keep headers inside and scrollable content above fixed actions',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await tap(page,tab(page,'route'));
  const panel=page.locator('#route-panel'),body=panel.locator(':scope > .dj836-sheet-body'),footer=panel.locator(':scope > #dj910-route-footer');
@@ -311,7 +311,7 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await tap(page,community.locator('.dj-sheet-chrome-close'));await expect(community).toBeHidden();
 });
 
-test('PC desktop chrome and independent facility categories',async({page})=>{
+test('PC desktop chrome and independent facility categories',{tag:'@non-phone'},async({page})=>{
  test.skip(compact(page),'desktop only');await ready(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),form=page.locator('.topbar .map-quick-search-form'),settings=page.locator('#dj-settings-pc'),actions=page.locator('.map-actions');
  const categories=page.locator('#dj912-poi-categories');
@@ -337,7 +337,7 @@ test('PC desktop chrome and independent facility categories',async({page})=>{
  await test.info().attach('pc-safety-first-map',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('PC visual contract: compact profile and unobscured route footer',async({page})=>{
+test('PC visual contract: compact profile and unobscured route footer',{tag:'@non-phone'},async({page})=>{
  test.skip(compact(page),'desktop only');
  await ready(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),categories=page.locator('#dj912-poi-categories');
@@ -364,7 +364,7 @@ test('PC visual contract: compact profile and unobscured route footer',async({pa
  await expect(route).toBeHidden();
 });
 
-test('PC dark transit surfaces and arrival rows remain readable and unclipped',async({page})=>{
+test('PC dark transit surfaces and arrival rows remain readable and unclipped',{tag:'@non-phone'},async({page})=>{
  test.skip(compact(page),'desktop only');await ready(page);
  const app=page.locator('#app');
  await tap(page,tab(page,'mine'));
@@ -388,7 +388,7 @@ test('PC dark transit surfaces and arrival rows remain readable and unclipped',a
  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
 });
 
-test('PC night report fits workspace and facility categories restore on exit',async({page})=>{
+test('PC night report fits workspace and facility categories restore on exit',{tag:'@non-phone'},async({page})=>{
  test.skip(compact(page),'desktop only');await ready(page);
  const app=page.locator('#app'),nav=page.locator('#bottom-nav'),categories=page.locator('#dj912-poi-categories');
  await expect(categories).toBeVisible();
@@ -413,7 +413,7 @@ test('PC night report fits workspace and facility categories restore on exit',as
  await expect(categories).toBeVisible();await expect(app).toHaveAttribute('data-dj912-poi-groups',selection);
 });
 
-test('phone night shortcut waits for the map, honors consent and exits',async({page})=>{
+test('phone night shortcut waits for the map, honors consent and exits',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const app=page.locator('#app'),shortcut=page.locator('#night-visibility-toggle');
  const safety=await pinPhoneShortcut(page,'보행안전','pilot');
@@ -436,7 +436,7 @@ test('phone night shortcut waits for the map, honors consent and exits',async({p
  await expect(night).toBeHidden();
 });
 
-test('phone nearby safety opens its own sheet without TIP overlap even when location is denied',async({page})=>{
+test('phone nearby safety opens its own sheet without TIP overlap even when location is denied',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.addInitScript(()=>Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,fail)=>queueMicrotask(()=>fail({code:1}))}));
  await ready(page);await tap(page,page.locator('#djNext-near'));
@@ -445,7 +445,7 @@ test('phone nearby safety opens its own sheet without TIP overlap even when loca
  await expect(page.locator('#dj840-map-tip')).toBeHidden();
  await geometry(page,'#ped-tools-panel');await panel.locator('#ped-tools-close').click();await expect(panel).toBeHidden();
 });
-test('phone first-run permission intro handles denial and stops permission-check audio tracks',async({page})=>{
+test('phone first-run permission intro handles denial and stops permission-check audio tracks',{tag:'@phone-platform'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.addInitScript(()=>{
   Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,fail)=>queueMicrotask(()=>fail({code:1}))});
@@ -461,7 +461,7 @@ test('phone first-run permission intro handles denial and stops permission-check
  expect(await page.evaluate(()=>window.__permissionMicStopped)).toBe(true);
  await panel.getByRole('button',{name:'계속하기'}).click();await expect(panel).toBeHidden();
 });
-test('phone route comparison uses actual pedestrian graph and does not invent a PRI score',async({page})=>{
+test('phone route comparison uses actual pedestrian graph and does not invent a PRI score',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await page.evaluate(()=>{for(const [which,lng,lat,name] of [['start',126.960,37.510,'검증용 출발지'],['end',126.962,37.512,'검증용 목적지']])window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:{which,place:{lng,lat,name}}}))});
  await expect(page.locator('#route-start-label')).toHaveText('검증용 출발지',{timeout:30000});
@@ -477,7 +477,7 @@ test('phone route comparison uses actual pedestrian graph and does not invent a 
  await test.info().attach('phone-real-route-comparison',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('phone weather single window and layer grid dark surfaces, header stays fixed',async({page})=>{
+test('phone weather single window and layer grid dark surfaces, header stays fixed',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await tap(page,page.locator('#djNext-weather'));
  const weather=page.locator('#dj854-weather-sheet');
@@ -503,7 +503,7 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  expect(colors[0]).toBe('rgb(39, 46, 50)');expect(colors[1]).toBe('rgb(230, 239, 235)');
  await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
 });
-test('phone report composer has non-overlapping independent header and input scroll',async({page})=>{
+test('phone report composer has non-overlapping independent header and input scroll',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-report'));
  const form=page.locator('#community-form'),scroll=form.locator('.djNext-form-scroll'),head=form.locator('.community-form-top');
  await expect(form).toBeVisible();await expect(scroll).toBeVisible();
@@ -514,7 +514,7 @@ test('phone report composer has non-overlapping independent header and input scr
 });
 
 
-test('phone windows share the opaque gradual slide on open and close',async({page})=>{
+test('phone windows share the opaque gradual slide on open and close',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  async function audit(selector,parentSelector,trigger,close){
    const target=page.locator(selector);const parent=page.locator(parentSelector);
@@ -547,7 +547,7 @@ test('phone windows share the opaque gradual slide on open and close',async({pag
 });
 
 
-test('layer header follows a real pointer upward and downward; content and X stay independent',async({page,browserName})=>{
+test('layer header follows a real pointer upward and downward; content and X stay independent',{tag:'@phone-layout'},async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-layers'));
  const modal=page.locator('#djNext-layer-panel'),body=modal.locator('.djNext-modal-body'),header=modal.locator('header'),scroll=modal.locator('.djNext-layer-scroll');
  await expect(modal).toBeVisible();await expect.poll(()=>body.getAttribute('data-dj810-animating')).toBeNull();
@@ -583,7 +583,7 @@ test('layer header follows a real pointer upward and downward; content and X sta
 });
 
 
-test('theme confirmation fades in place with its backdrop, unlike bottom sheets',async({page})=>{
+test('theme confirmation fades in place with its backdrop, unlike bottom sheets',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  const dialog=page.locator('#dj840-theme-confirm'),card=dialog.locator('.dj840-theme-card');
  await page.evaluate(()=>{const rows=[];window.__confirmFrames=rows;const until=performance.now()+35000;
@@ -596,7 +596,7 @@ test('theme confirmation fades in place with its backdrop, unlike bottom sheets'
 });
 
 
-test('phone update history rises monotonically and never paints over bottom navigation',async({page})=>{
+test('phone update history rises monotonically and never paints over bottom navigation',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();
  await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();

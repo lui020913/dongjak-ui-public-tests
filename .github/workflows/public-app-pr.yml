@@ -5,6 +5,10 @@ on:
     paths:
       - 'app/**'
       - 'tests/mobile-first-layout-contract.test.mjs'
+      - 'tests/v911-anonymous-ui.spec.mjs'
+      - 'tests/mobile-qa-parallel.test.mjs'
+      - 'playwright.v911-remote.config.mjs'
+      - '.github/workflows/mobile-first-overhaul-preview.yml'
       - 'playwright.mobile-first.config.mjs'
       - '.github/workflows/public-app-pr.yml'
   workflow_dispatch:
@@ -40,6 +44,12 @@ jobs:
           path: ~/.npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
           restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - name: Validate mobile browser test contracts before app build
+        working-directory: .
+        run: |
+          node --check playwright.v911-remote.config.mjs
+          node --check tests/v911-anonymous-ui.spec.mjs
+          node --test tests/mobile-qa-parallel.test.mjs
       - name: Install app dependencies
         run: npm ci --no-audit --no-fund --prefer-offline
       - name: Restore versioned security scanner archive
