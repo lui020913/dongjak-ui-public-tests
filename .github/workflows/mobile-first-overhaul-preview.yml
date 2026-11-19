@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           node frontend/scripts/verify-mobile-first-overhaul.mjs
-          node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs
+          node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs
           node --check scripts/apply-mobile-only-gate.mjs
           node --check scripts/apply-mobile-next.mjs
           node --check frontend/production/mobile-next.js
@@ -151,7 +151,7 @@ jobs:
         run: >-
           npx playwright test --config=playwright.v911-remote.config.mjs
           --project=mobile375 --project=mobile390 --project=mobile430
-          --project=mobile390-webkit-header --workers=2
+          --project=mobile390-webkit-header --workers=4
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
