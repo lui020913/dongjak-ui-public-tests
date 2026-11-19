@@ -628,16 +628,18 @@ installScaleDocking({map,app,overview});
 // If the remote Bright style cannot load, keep a usable map rather than a blank screen.
 // This is an emergency fallback only; ordinary navigation uses the original vector map.
 let mapStyleRecovered=false;
+app.dataset.djBasemapSource='loading';
 let mapRecoveryTimer=setTimeout(()=>{
   if(mapReady||mapStyleRecovered)return;
   mapStyleRecovered=true;
-  status('지도 스타일 연결 지연 · 기본 지도로 전환 중');
+  app.dataset.djBasemapSource='emergency-osm';
+  status('지도 연결 지연 · 임시 기본지도');
   try{
     map.setStyle({version:8,sources:{'osm-emergency':{
       type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize:256,attribution:'© OpenStreetMap contributors'
     }},layers:[{id:'osm-emergency-base',type:'raster',source:'osm-emergency'}]});
-  }catch(error){console.error('[지도 기본 모드 전환 실패]',error);status('지도 로딩 실패 · 네트워크를 확인한 뒤 새로고침하세요');}
+  }catch(error){app.dataset.djBasemapSource='error';console.error('[지도 기본 모드 전환 실패]',error);status('지도 로딩 실패 · 네트워크를 확인한 뒤 새로고침하세요');}
 },12000);
 const quickSearch=initMapQuickSearch({map,maplibregl,app,onPick:()=>{
   // Search is available in every app tab. Selecting a result must reveal the map.
@@ -763,7 +765,11 @@ function syncTiltWithBuildings() {
 
 // Night analysis changes the 3D building opacity to prevent bright roads
 // showing through translucent roofs. Restore normal opacity when turned off.
-new MutationObserver(()=>syncTiltWithBuildings()).observe(app,{attributes:true,attributeFilter:['data-sangdo-night']});
+new MutationObserver(()=>{
+  // The night analysis requires the original building occlusion even mid-gesture.
+  if(app.dataset.sangdoNight==='on')movementIsSlow=false;
+  syncTiltWithBuildings();
+}).observe(app,{attributes:true,attributeFilter:['data-sangdo-night']});
 
 function intersects(a,b){return a[0]<=b[2]&&a[2]>=b[0]&&a[1]<=b[3]&&a[3]>=b[1];}
 function getVisibleBBox(){
@@ -929,7 +935,7 @@ map.on('zoomend',()=>{syncTiltWithBuildings();});
 let interactiveMoving=false,slowSamples=0,lastFrameStamp=0;
 map.on('movestart',()=>{interactiveMoving=true;slowSamples=0;lastFrameStamp=0;});
 map.on('render',()=>{
-  if(!interactiveMoving||movementIsSlow||!baseBuildingsVisible||map.getPitch()<PITCH_BUILDING_START)return;
+  if(!interactiveMoving||movementIsSlow||!baseBuildingsVisible||app.dataset.sangdoNight==='on'||map.getPitch()<PITCH_BUILDING_START)return;
   const now=performance.now();
   if(lastFrameStamp){
     const interval=now-lastFrameStamp;
@@ -1613,6 +1619,8 @@ map.on('load',()=>{
   startupLoader.baseReady();
   mapReady=true;
   clearTimeout(mapRecoveryTimer);
+  app.dataset.djBasemapSource=mapStyleRecovered?'emergency-osm':'openfreemap-bright';
+  if(mapStyleRecovered)toast('임시 기본지도입니다. 원래 지도는 새로고침 후 다시 연결됩니다.');
   // 기존 버스/지하철 레이어는 그대로 유지: 새 레이어로 겹쳐 표시하지 않습니다.
   // 배경지도 벡터 타일에서 이름이 확인되는 건물에 한해 17배율 이상 라벨을 추가합니다.
   try {
