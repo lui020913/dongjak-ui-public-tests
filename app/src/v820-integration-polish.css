@@ -1,0 +1,36 @@
+/* v820 compatibility polish — scoped; all v819 PC/mobile layouts remain intact. */
+#app .dj820-safety-addons{margin:10px 0 0;min-width:0;border:1px solid rgba(86,141,129,.25);border-radius:13px;background:var(--panel,rgba(131,176,167,.05));color:inherit;overflow:clip}
+#app .dj820-safety-addons>summary{box-sizing:border-box;list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;min-height:51px;padding:10px 12px;user-select:none}
+#app .dj820-safety-addons>summary::-webkit-details-marker{display:none}
+#app .dj820-safety-addons>summary:focus-visible{outline:2px solid #178779;outline-offset:-3px;border-radius:12px}
+#app .dj820-addon-symbol{display:grid;place-items:center;flex:none;width:29px;height:29px;border:1px solid rgba(50,147,129,.22);border-radius:9px;background:rgba(34,150,123,.10);color:var(--accent,#138b79);font-size:17px}
+#app .dj820-addon-label{display:grid;gap:3px;min-width:0;flex:1}
+#app .dj820-addon-label strong{font-size:13px;font-weight:780;line-height:1.25}
+#app .dj820-addon-label small{font-size:11px;line-height:1.35;opacity:.73;overflow-wrap:anywhere}
+#app .dj820-addon-chevron{font-size:19px;line-height:1;transition:transform .18s ease;opacity:.65}
+#app .dj820-safety-addons[open] .dj820-addon-chevron{transform:rotate(180deg)}
+#app .dj820-safety-addons #dj804-safety-extensions{margin:0;padding:10px;border-top:1px solid rgba(96,143,133,.18);gap:9px;grid-template-columns:minmax(0,1fr)}
+#app .dj820-safety-addons .dj804-tool{padding:11px 12px;gap:8px;border-radius:12px}
+#app .dj820-safety-addons .dj804-tool-head strong{font-size:13px}
+#app .dj820-safety-addons .dj804-status{font-size:12px}
+#app .dj820-safety-addons button{transition:background-color .16s ease,border-color .16s ease}
+#app .dj815-search-filters{max-height:94px;overflow-y:auto;overscroll-behavior:contain}
+#app .dj815-search-viewport{font-size:12px;font-weight:600}
+#app .dj815-search-filters button{min-height:29px;line-height:1.25;white-space:nowrap}
+#app .dj815-route-section .dj815-waypoint-row{gap:7px}
+#app .dj815-route-section .dj815-waypoint-title{font-size:13px}
+#app .dj815-route-section .dj815-waypoint-row .dj815-actions{margin-left:auto}
+#app .dj815-my-places,#app .dj815-route-section{max-width:100%}
+#app #nav-live-card .dj804-nav-extra-options button{touch-action:manipulation}
+#app[data-theme="dark"] .dj820-safety-addons{background:rgba(31,57,56,.7);border-color:rgba(117,164,150,.32)}
+#app[data-theme="dark"] .dj820-addon-symbol{background:rgba(67,183,149,.16);border-color:rgba(118,201,175,.28);color:#90dfc3}
+#app[data-theme="dark"] .dj820-safety-addons #dj804-safety-extensions{border-top-color:rgba(130,178,158,.2)}
+#app[data-theme="dark"] .dj820-safety-addons .dj804-tool{background:#213638;border-color:#426060}
+#app[data-theme="dark"] .dj820-safety-addons .dj804-pill{background:rgba(75,177,151,.16);color:#b4d5cb}
+#app[data-theme="dark"] .dj820-safety-addons .dj804-status{color:#dcebe7}
+#app[data-theme="dark"] .dj815-search-viewport{color:#e3eee8}
+#app[data-theme="dark"] .dj815-search-filters button:focus-visible,#app[data-theme="dark"] .dj815-route-section button:focus-visible{outline:2px solid #84d6bd;outline-offset:1px}
+@media(min-width:900px){#app .dj820-safety-addons #dj804-safety-extensions{grid-template-columns:repeat(2,minmax(0,1fr))}#app .dj820-safety-addons .dj804-tool-head{align-items:flex-start}#app .dj820-safety-addons .dj804-pill{font-size:10px}}
+@media(max-width:699px){#app .dj820-safety-addons>summary{padding:10px;gap:9px}#app .dj820-safety-addons #dj804-safety-extensions{padding:8px}#app .dj820-safety-addons .dj804-tool{padding:10px}#app .dj815-search-filters{max-height:83px}#app .dj815-search-viewport{min-height:30px}}
+@media(max-width:350px){#app .dj820-addon-label strong{font-size:12px}#app .dj820-addon-label small{font-size:10px}#app .dj820-safety-addons .dj804-inline-actions button{min-width:0}}
+@media(prefers-reduced-motion:reduce){#app .dj820-addon-chevron,#app .dj820-safety-addons button{transition:none!important}}

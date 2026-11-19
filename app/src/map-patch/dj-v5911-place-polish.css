@@ -1,0 +1,56 @@
+/* v5.9.11 – coherent map markers and fact-first place details. */
+.dongjak-education-marker,.dongjak-landmark{
+  width:38px!important;height:38px!important;position:relative!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:0!important;transform:none!important;filter:none!important;
+}
+.dongjak-education-marker .dongjak-education-icon,
+.dongjak-landmark .dongjak-landmark-icon{
+  position:absolute!important;top:2px!important;left:3px!important;
+  width:32px!important;height:32px!important;min-width:32px!important;
+  box-sizing:border-box!important;border-radius:50%!important;
+  border:2px solid #fff!important;box-shadow:0 2px 5px #0b2e3040!important;
+  background:#4c7e74;display:flex;align-items:center;justify-content:center;
+}
+.dongjak-education-marker.university .dongjak-education-icon{background:#fff!important;}
+.dongjak-education-marker img,.dongjak-landmark img{max-width:27px!important;max-height:27px!important;object-fit:contain;}
+.dongjak-education-marker .dongjak-education-name,
+.dongjak-landmark .dongjak-landmark-name{
+  position:absolute!important;top:38px!important;left:50%!important;
+  transform:translateX(-50%)!important;margin:0!important;max-width:185px;
+  padding:2px 6px!important;border:0!important;border-radius:5px!important;
+  background:rgba(255,255,255,.92)!important;color:#294c47!important;
+  font-size:11px!important;font-weight:750!important;line-height:1.35!important;
+  white-space:nowrap;box-shadow:0 1px 5px #16342a20!important;
+}
+.dongjak-education-marker.label-hidden .dongjak-education-name{display:none!important;}
+.dongjak-education-marker.compact:not(.university) .dongjak-education-name{display:none!important;}
+.dongjak-education-marker .dongjak-education-kind{display:none!important;}
+.dj-priority-label{appearance:none;border:1px solid rgba(75,113,126,.25);
+  background:rgba(255,255,255,.93);color:#245869;
+  border-radius:5px;padding:3px 7px;font:750 12px/1.3 'Pretendard Variable','Malgun Gothic',sans-serif;
+  letter-spacing:-.02em;white-space:nowrap;cursor:pointer;
+  box-shadow:0 2px 7px rgba(18,50,48,.16);}
+.dj-priority-label.dj-island-name{color:#225f65;font-size:12.5px;}
+#app[data-theme="dark"] .dj-priority-label{background:#203840;color:#e4f1ee;border-color:#45606a;}
+#app[data-theme="dark"] .dongjak-education-marker .dongjak-education-name,
+#app[data-theme="dark"] .dongjak-landmark .dongjak-landmark-name{
+  background:#203740!important;color:#edf6f1!important;
+}
+.dj-place-detail{width:min(305px,calc(100vw - 80px));padding:4px 1px 2px;color:#193a34;}
+.dj-place-kicker{display:block;color:#21846e;font-size:11px;font-weight:800;margin-bottom:5px;}
+.dj-place-detail h3{font-size:17px!important;letter-spacing:-.03em;line-height:1.35;margin:0 0 12px!important;color:inherit;}
+.dj-place-meta{display:grid;gap:7px;border-top:1px solid #e1ebe7;border-bottom:1px solid #e1ebe7;padding:10px 0;}
+.dj-place-row{display:grid;grid-template-columns:65px minmax(0,1fr);gap:8px;align-items:start;font-size:12px;line-height:1.55;}
+.dj-place-row span{color:#627a73;}.dj-place-row strong,.dj-place-row a{font-size:12px;font-weight:650;word-break:break-word;color:#20463f;}
+.dj-place-note{font-size:12px;line-height:1.55;color:#576e68;margin:10px 0 5px;}
+.dj-place-source{display:block;color:#82938e;font-size:10px;line-height:1.5;margin-top:7px;}
+.dj-place-actions{display:flex;gap:7px;margin-top:12px;}
+.dj-place-action{font:750 12px/1.4 'Pretendard Variable','Malgun Gothic',sans-serif;appearance:none;border:1px solid #cde0d7;border-radius:8px;padding:8px 10px;background:#ecf6f1;color:#126a57!important;text-decoration:none;cursor:pointer;}
+.dj-place-action[aria-disabled="true"]{opacity:.5;pointer-events:none;}
+.dj-place-action:disabled{opacity:.55;cursor:wait;}
+.dj-place-ai-response{margin-top:10px;padding:10px;border-radius:9px;background:#f1f6f3;color:#294f44;font-size:12px;line-height:1.65;white-space:pre-wrap;}
+#app[data-theme="dark"] .dj-place-detail{color:#e5f1ec;}
+#app[data-theme="dark"] .dj-place-row strong{color:#ecf3f0;}
+#app[data-theme="dark"] .dj-place-meta{border-color:#3d5a58;}
+#app[data-theme="dark"] .dj-place-ai-response{background:#24433f;color:#e5f3eb;}

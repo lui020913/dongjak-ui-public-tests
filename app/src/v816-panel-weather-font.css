@@ -1,0 +1,61 @@
+/* v816 final fixes: preserve MapLibre vector-tile labels and existing UI state. */
+/* Apple SD Gothic Neo comes from the device's OS or user's local installation.
+   Do NOT package proprietary font binaries in a public web application. */
+html body #app#app,
+html body #app#app *:not(svg):not(path):not(canvas){
+  font-family:'Apple SD Gothic Neo','AppleSDGothicNeo',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif!important;
+}
+html body #app#app :is(h1,h2,h3,.page-heading h2,.map-options-heading strong,.map-safety-head strong){font-weight:700!important;}
+html body #app#app :is(button,.nav-tab,select,input,.transport-section-title strong){font-weight:600!important;}
+html body #app#app :is(p,small,dd,dt,.page-note){font-weight:400!important;}
+
+/* v816: weather preference must win over legacy media-query display rules.
+   v7120-settings.js also sets inline important when toggled off. */
+html body #app#app.dj-hide-weather .topbar .header-tools #weather-widget,
+html body #app#app.dj-hide-weather #dj-mobile-weather-trigger,
+html body #app#app.dj-hide-weather #dj-v794-weather,
+html body #app#app.dj-hide-weather .weather-widget{
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+
+/* Community: the report box used a pale local-only surface even in dark mode. */
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary,
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .report-feature,
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .feature-card{
+  background:#29464a!important;color:#eefbf5!important;
+  border-color:#4d746b!important;
+}
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary :is(summary,p,strong,span,small){color:#e2f4ee!important;opacity:1!important;}
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .local-only{
+  background:#223c40!important;color:#d4e9df!important;border:1px solid #527469!important;
+}
+html body #app#app[data-theme="dark"] #participation-panel .community-report-secondary .inline-action{
+  background:#126e60!important;color:#f4fff9!important;border:1px solid #76b9a6!important;
+}
+
+/* Slightly larger station prev/next chevrons without enlarging the names. */
+html body #app#app #transport-sheet .metro-neighbor-row .metro-rail-previous,
+html body #app#app #transport-sheet .metro-neighbor-row .metro-rail-next{
+  font-size:clamp(13px,1.3vw,15px)!important;line-height:1.4!important;font-weight:600!important;
+}
+
+/* PC: lock both drawers to their final sidebar position before first paint.
+   The unified motion manager now fades only (no shift or scaling). */
+@media (min-width:1080px){
+  html body #app#app #admin-dong-picker:not([hidden]){
+    position:fixed!important;box-sizing:border-box!important;
+    left:var(--dj800-panel-left,200px)!important;top:var(--dj800-panel-top,92px)!important;
+    right:auto!important;bottom:auto!important;transform:none!important;
+    margin:0!important;max-height:calc(100dvh - var(--dj800-panel-top,92px) - 14px)!important;
+    width:min(510px,var(--dj800-panel-max,510px))!important;
+    max-width:min(510px,var(--dj800-panel-max,510px))!important;
+    animation:none!important;transition-property:background-color,border-color,color!important;
+  }
+  html body #app#app #road-width-legend:not([hidden]):not(.dj-float-user-positioned){
+    position:fixed!important;box-sizing:border-box!important;
+    left:var(--dj800-panel-left,200px)!important;top:var(--dj800-panel-top,92px)!important;
+    right:auto!important;bottom:auto!important;transform:none!important;
+    margin:0!important;animation:none!important;
+    transition-property:background-color,border-color,color!important;
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "dataset": "표준노드링크 최고제한속도 상도1동 경계 교차 도로 (수집자료)",
+  "boundary_date": "2025-06-30",
+  "speed_record_updated": "2025-05-12",
+  "crs": "EPSG:4326",
+  "counts": {
+    "10": {
+      "links": 23,
+      "clipped_length_km": 2.103
+    },
+    "30": {
+      "links": 68,
+      "clipped_length_km": 5.173
+    },
+    "40": {
+      "links": 20,
+      "clipped_length_km": 1.787
+    },
+    "50": {
+      "links": 95,
+      "clipped_length_km": 7.008
+    }
+  },
+  "notes": [
+    "최고제한속도 링크 속성으로 법정 지정·현장 표지와 차이가 있을 수 있음",
+    "상도1동 경계로 기하 절단했으며 반대 방향·분할 링크는 각각 보존",
+    "제공된 GeoPackage 자료에서 생성. PDF 요약표 74건과 범위가 다름"
+  ]
+}

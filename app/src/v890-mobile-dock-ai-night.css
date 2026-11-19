@@ -1,0 +1,131 @@
+/* v8.9.0 — Requested mobile layout corrections (2026-11-17).
+ * Scope: only narrow mobile. Preserve other chats' 7-staged sheet gestures,
+ * full-screen expanded mode, native theme switching needed by night analysis,
+ * route controls, community content and the desktop layout. */
+@media (max-width:699px) {
+  #app { --dj890-dock-gap:30px; --dj890-pill-gap:35px; }
+
+  /* Keep a visible breathing space between the TIP pill and bottom dock.
+     The nav origin is the existing v829 viewport-safe coordinate system. */
+  html body #app#app#app#app#app#app#app#app#app #dj840-map-tip:not([hidden]) {
+    bottom:calc(var(--dj829-nav-bottom,6px) + var(--dj829-nav-h,70px) + var(--dj890-pill-gap))!important;
+  }
+
+  /* Route and community now share one dock clearance. Never override the
+     expanded sheet inset (which is owned by v880) or active finger motion. */
+  html body #app#app#app#app#app#app#app#app#app
+  :is(#route-panel,#participation-panel).page-panel:not([hidden]):not(.dj871-sheet-expanded) {
+    position:fixed!important;
+    top:auto!important;
+    bottom:calc(var(--dj829-nav-bottom,6px) + var(--dj829-nav-h,70px) + var(--dj890-dock-gap))!important;
+    margin-bottom:0!important;
+    max-height:min(var(--dj829-sheet-max-height,50dvh),calc(100dvh - var(--dj829-panel-top-safe,165px) - var(--dj829-nav-bottom,6px) - var(--dj829-nav-h,70px) - var(--dj890-dock-gap)))!important;
+  }
+  /* The community panel used an old vertical centering transform. Remove
+     only when idle so the v8.8.9 compositor drag stays finger-following. */
+  html body #app#app#app#app#app#app#app#app#app
+  #participation-panel.page-panel:not([hidden]):not(.dj871-sheet-expanded):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning) {
+    transform:none!important;
+  }
+
+  /* The theme switch remains in the DOM because night visibility calls
+     themeToggle.click(); only replace its MOBILE visual position. */
+  html body #app#app#app#app#app .topbar #theme-toggle {
+    display:none!important;
+  }
+  html body #app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
+    box-sizing:border-box!important;
+    display:grid!important;place-items:center!important;
+    position:relative!important;
+    flex:0 0 48px!important;
+    width:48px!important;min-width:48px!important;max-width:48px!important;
+    height:50px!important;min-height:50px!important;max-height:50px!important;
+    padding:0!important;margin:0!important;
+    border:1px solid rgba(203,225,215,.9)!important;
+    border-radius:50%!important;
+    background:var(--dj800-surface,#fff)!important;
+    box-shadow:0 2px 10px rgba(25,64,49,.09)!important;
+    cursor:pointer!important;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* There must be only one visible mobile AI entry, not a duplicate in search. */
+  html body #app#app#app#app#app .topbar #dj887-ai-quick-entry {
+    display:none!important;
+  }
+  #app #dj890-ai-orb .dj890-ai-orb-text {
+    display:block;
+    font:850 16px/1 "Pretendard Variable",Pretendard,system-ui,sans-serif!important;
+    letter-spacing:-.045em;
+    color:#13866c;
+    background:linear-gradient(105deg,#087755 0%,#39c993 25%,#0b7357 49%,#73d8a5 75%,#087755 100%);
+    background-size:300% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:dj890-ai-green-cycle 3s linear infinite;
+  }
+  #app #dj890-ai-orb:focus-visible {
+    outline:3px solid #36b38b!important;outline-offset:3px!important;
+  }
+  #app[data-theme="dark"] #dj890-ai-orb {
+    background:#192e31!important;
+    border-color:#4d7567!important;
+  }
+}
+@keyframes dj890-ai-green-cycle {
+  from{background-position:0% 50%;}
+  to{background-position:300% 50%;}
+}
+@media (prefers-reduced-motion:reduce) {
+  #app #dj890-ai-orb .dj890-ai-orb-text {
+    animation:none!important;
+    background-position:0 50%;
+  }
+}
+
+/* Night visibility should dim, not blur, the actual map and controls.
+ * The night confirmation is #dj833-night-modal; do not globally disable
+ * other unrelated dialogs' blur. */
+html body #app#app#app#app #dj833-night-modal,
+html body #app#app#app#app #dj833-night-modal::before,
+html body #app#app#app#app #dj833-night-modal::after,
+html body #app#app#app#app #night-visibility-float,
+html body #app#app#app#app #night-visibility-float::before,
+html body #app#app#app#app #night-visibility-float::after {
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+html body #app#app#app#app #dj833-night-modal {
+  filter:none!important;
+  background:rgba(12,34,27,.36)!important;
+}
+/* PWA reload splash used by the night switch also blurred the entire map. */
+html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::before {
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Final iOS specificity guard.
+ * v829 has 5 repeated #app selectors and may be bundled after this file.
+ * Keep the native theme button mounted but ensure only one visible AI action. */
+@media(max-width:699px) {
+  html body #app#app#app#app#app#app#app#app#app#app .topbar .header-tools #theme-toggle {
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form #dj887-ai-quick-entry {
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  /* The dock is the sole lower-edge reference. */
+  html body #app#app#app#app#app#app#app#app#app#app #dj840-map-tip:not([hidden]) {
+    bottom:calc(var(--dj829-nav-bottom,6px) + var(--dj829-nav-h,70px) + var(--dj890-pill-gap))!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app
+    :is(#route-panel,#participation-panel).page-panel:not([hidden]):not(.dj871-sheet-expanded) {
+    top:auto!important;
+    bottom:calc(var(--dj829-nav-bottom,6px) + var(--dj829-nav-h,70px) + var(--dj890-dock-gap))!important;
+  }
+}

@@ -1,0 +1,99 @@
+/* v821 · PC anchor after search, scrollable facility facts, compact mobile transit.
+   Scope deliberately excludes map layers, search results, navigation and route data. */
+
+@media (min-width:1080px) {
+  /* The search dropdown intentionally shifts the left rail while it is open.
+     After it closes, the rail must return to its fixed desktop anchor even if
+     the older controller's --dj-v725-search-rail-push token was left behind. */
+  html body #app#app:not([data-search-open="true"]) #bottom-nav {
+    top:calc(90px + env(safe-area-inset-top,0px))!important;
+    max-height:calc(100dvh - 112px)!important;
+  }
+  /* Sheets must NOT use the rail's transient search-shifted screen position.
+     Use a stable header-level anchor. Preserve explicit manual dragging. */
+  html body #app#app {
+    --dj821-panel-dock-top:calc(92px + env(safe-area-inset-top,0px));
+  }
+  html body #app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,
+    #overview-sheet,#admin-dong-picker,#transport-sheet,#detail-sheet,#entry-sheet,
+    #pza-road-sheet,#map-advanced-controls,#map-safety-controls,
+    #night-visibility-float,#road-width-legend
+  ):not([hidden]):not(.dj-float-user-positioned) {
+    top:var(--dj821-panel-dock-top)!important;
+    max-height:calc(100dvh - var(--dj821-panel-dock-top) - 14px)!important;
+  }
+  html body #app#app #map .dj-place-detail-popup {
+    box-sizing:border-box!important;
+    width:min(530px,calc(100vw - 300px))!important;
+    max-width:min(530px,calc(100vw - 300px))!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content {
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-height:min(62dvh,640px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior-y:contain!important;
+    scrollbar-width:thin!important;
+    scrollbar-color:var(--dj800-border,#cadfd4) transparent!important;
+    padding:15px 18px 18px!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content::-webkit-scrollbar{width:7px}
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content::-webkit-scrollbar-thumb{
+    border-radius:99px;background:var(--dj800-border,#cadfd4);
+  }
+  html body #app#app #map .dj-place-detail-popup .dj-place-row{
+    grid-template-columns:112px minmax(0,1fr)!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .dj-place-row :is(strong,a){
+    min-width:0!important;overflow-wrap:anywhere!important;
+  }
+  /* A round pictogram control inside the selected Safety Map rail tab.
+     Other navigation tabs, their labels and their click targets stay intact. */
+  html body #app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon {
+    box-sizing:border-box!important;
+    width:39px!important;height:39px!important;min-width:39px!important;
+    flex:0 0 39px!important;border-radius:50%!important;
+    display:grid!important;place-items:center!important;
+    background:#d9ede4!important;border:1px solid #bbdacb!important;
+    color:#087e68!important;font-size:26px!important;line-height:1!important;
+  }
+  html body #app#app[data-theme="dark"] #bottom-nav>.nav-tab[data-tab="map"] .nav-icon,
+  html[data-theme="dark"] body #app#app #bottom-nav>.nav-tab[data-tab="map"] .nav-icon{
+    background:#315e55!important;border-color:#5d9785!important;color:#a2edd0!important;
+  }
+}
+
+@media (max-width:699px) {
+  /* Keep the bottom-nav unobstructed, but leave a visible map window ABOVE
+     both transit details. The information remains scrollable inside the card. */
+  html body #app#app #transport-sheet:not([hidden]) {
+    position:fixed!important;top:auto!important;
+    bottom:calc(var(--dj800-panel-bottom,96px) + 4px)!important;
+    height:max-content!important;min-height:0!important;
+    max-height:min(43dvh,440px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"]:not([hidden]) {
+    max-height:min(50dvh,515px)!important;
+  }
+  html body #app#app #transport-sheet .transport-panel-head {
+    position:sticky!important;top:-10px!important;
+    z-index:5!important;background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app #transport-sheet .transport-mode-tabs {
+    position:sticky!important;top:0!important;z-index:4!important;
+    background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app #transport-sheet .transport-selection-actions {
+    padding-bottom:2px!important;
+  }
+}
+
+@media (max-width:699px) and (max-height:640px) {
+  html body #app#app #transport-sheet:not([hidden]){max-height:43dvh!important;}
+  html body #app#app #transport-sheet[data-kind="subway"]:not([hidden]){max-height:47dvh!important;}
+}

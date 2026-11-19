@@ -1,0 +1,153 @@
+/* v5.11.1 — Separate safety workbench. A single accessible trigger remains on
+   the map; the analysis and facility controls are not buried in map options. */
+#app #map-safety-toggle{
+  position:absolute!important;z-index:1621!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;gap:3px!important;
+  box-sizing:border-box!important;min-height:42px!important;width:88px!important;
+  padding:8px 5px!important;border:1px solid #b7d7c7!important;border-radius:14px!important;
+  background:#f5fbf7!important;color:#175b46!important;font-size:11px!important;
+  line-height:1.3!important;font-weight:800!important;white-space:normal!important;
+  cursor:pointer!important;box-shadow:0 3px 12px rgba(16,55,39,.12)!important;
+}
+#app #map-safety-toggle[aria-expanded="true"]{background:#197b62!important;border-color:#197b62!important;color:white!important;}
+#app #map-safety-toggle:focus-visible,#app #map-safety-close:focus-visible{
+  outline:3px solid #d5aa55!important;outline-offset:2px!important;
+}
+#app .map-safety-controls{
+  box-sizing:border-box!important;display:none!important;position:absolute!important;
+  z-index:1619!important;top:88px!important;left:116px!important;right:auto!important;
+  width:min(390px,calc(100vw - 250px))!important;
+  max-height:calc(100dvh - 108px - env(safe-area-inset-bottom))!important;
+  overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  flex-direction:column!important;gap:12px!important;padding:15px!important;
+  border:1px solid var(--dj-ui-border,#d6e3dc)!important;
+  border-radius:17px!important;background:var(--dj-ui-bg,#fff)!important;
+  color:var(--dj-ui-text,#203d32)!important;
+  box-shadow:0 14px 34px rgba(13,34,29,.18)!important;
+}
+#app.map-safety-open .map-safety-controls{display:flex!important;}
+#app .map-safety-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  padding-bottom:10px;border-bottom:1px solid var(--dj-ui-border,#d6e3dc);}
+#app .map-safety-head>div{display:grid;gap:4px;}
+#app .map-safety-head strong{font-size:15px;font-weight:800;}
+#app .map-safety-head span{font-size:11px;color:var(--dj-ui-subtext,#607970);}
+#app #map-safety-close{width:32px;min-width:32px;height:32px;border-radius:9px;
+  background:var(--dj-ui-field,#f5faf7);border:1px solid var(--dj-ui-border,#d6e3dc);
+  color:var(--dj-ui-text,#244437);font-size:20px;cursor:pointer;}
+#app .safety-layer-menu{min-width:0;display:flex;flex-direction:column;gap:9px;padding-bottom:10px;
+  border-bottom:1px solid var(--dj-ui-border,#d6e3dc);}
+#app .safety-layer-menu>strong{font-size:12px;color:var(--dj-ui-text,#244437);}
+#app .map-safety-controls .data-layer-controls{
+  position:static!important;display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+  gap:7px!important;width:100%!important;max-width:100%!important;
+  padding:0!important;margin:0!important;transform:none!important;box-shadow:none!important;
+  background:transparent!important;border:0!important;
+}
+#app .map-safety-controls .data-layer-controls>button{
+  width:auto!important;max-width:100%!important;min-height:36px!important;
+  padding:7px 10px!important;margin:0!important;
+  background:var(--dj-ui-field,#f5faf7)!important;
+  color:var(--dj-ui-text,#244437)!important;
+  border:1px solid var(--dj-ui-border,#d6e3dc)!important;
+  border-radius:9px!important;box-shadow:none!important;
+  font-size:11px!important;line-height:1.4!important;font-weight:700!important;
+  white-space:normal!important;word-break:keep-all!important;cursor:pointer!important;
+}
+#app .map-safety-controls .data-layer-controls>button[aria-pressed="true"]{
+  border-color:#269475!important;background:#daf3e8!important;color:#125943!important;
+}
+#app .map-safety-controls :is(#metro-access-status,#safety-layer-status){
+  position:static!important;display:block!important;flex:1 1 100%!important;width:100%!important;
+  border:0!important;padding:2px 0!important;margin:0!important;
+  background:transparent!important;color:var(--dj-ui-subtext,#607970)!important;
+  font-size:11px!important;line-height:1.5!important;overflow-wrap:anywhere!important;
+}
+#app .map-safety-controls .ped-tools-menu{padding:1px 0 3px!important;border-bottom:0!important;}
+#app .map-safety-controls .night-visibility-tool{margin:0!important;}
+#app[data-theme="dark"] #map-safety-toggle{
+  background:#203c39!important;border-color:#578875!important;color:#d6f5e8!important;
+}
+#app[data-theme="dark"] #map-safety-toggle[aria-expanded="true"]{background:#225e4b!important;color:#fff!important;}
+#app[data-theme="dark"] .map-safety-controls .data-layer-controls>button[aria-pressed="true"]{
+  background:#205845!important;border-color:#48a989!important;color:#e2ffef!important;
+}
+#app[data-theme="dark"] .map-safety-controls .ped-tools-menu>strong,
+#app[data-theme="dark"] .map-safety-controls .ped-tools-menu>p{color:var(--dj-ui-text)!important;}
+#app[data-theme="dark"] .map-safety-controls .ped-tools-actions>button{
+  background:var(--dj-ui-field)!important;border-color:var(--dj-ui-border)!important;color:var(--dj-ui-text)!important;
+}
+#app[data-theme="dark"] .map-safety-controls .ped-tools-actions>button[aria-pressed="true"]{
+  background:#245b49!important;border-color:#4aa885!important;color:#e7fff2!important;
+}
+#app.map-safety-open .map-actions,#app.map-safety-open .sheet.overview-sheet{
+  visibility:hidden!important;pointer-events:none!important;
+}
+#app.map-safety-open .night-visibility-quick-off{display:none!important;}
+#app[data-tab]:not([data-tab="map"]) :is(#map-safety-toggle,.map-safety-controls){display:none!important;}
+#app:is(.route-picking,.route-preview,.route-guiding,.adding,.detail-open) #map-safety-toggle{display:none!important;}
+
+@media(min-width:1080px){
+  #app #map-safety-toggle{left:16px!important;right:auto!important;
+    top:calc(var(--dj-controls-under-nav,490px) + 51px)!important;}
+}
+@media(min-width:701px) and (max-width:1079px){
+  #app #map-safety-toggle{left:12px!important;right:auto!important;
+    top:calc(128px + env(safe-area-inset-top))!important;width:112px!important;}
+  #app .map-safety-controls{top:calc(182px + env(safe-area-inset-top))!important;
+    left:12px!important;right:auto!important;
+    width:min(400px,calc(100vw - 94px))!important;
+    max-height:calc(100dvh - 198px - env(safe-area-inset-bottom))!important;}
+}
+@media(max-width:700px){
+  #app #map-safety-toggle{left:10px!important;right:auto!important;
+    top:calc(114px + env(safe-area-inset-top))!important;width:112px!important;min-height:40px!important;}
+  #app .map-safety-controls{top:calc(162px + env(safe-area-inset-top))!important;
+    left:10px!important;right:10px!important;
+    width:calc(100vw - 20px)!important;max-width:none!important;
+    max-height:calc(100dvh - 251px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    padding:12px!important;}
+  #app .map-safety-controls .ped-tools-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+}
+@media(max-width:380px){
+  #app .map-safety-controls .ped-tools-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-height:600px) and (min-width:1080px){
+  #app #map-safety-toggle{top:auto!important;bottom:16px!important;}
+}
+
+/* One-tap night-vision access is also outside map options. The dedicated
+   safety workbench remains the place for radius and segment filters. */
+#app #night-visibility-quick-off{
+  box-sizing:border-box!important;z-index:1621!important;
+  width:88px!important;min-height:40px!important;padding:8px 5px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  border:1px solid #d0d4dd!important;border-radius:14px!important;
+  background:var(--dj-ui-bg,#fff)!important;color:var(--dj-ui-text,#244437)!important;
+  font-size:11px!important;font-weight:800!important;line-height:1.25!important;
+  box-shadow:0 3px 12px rgba(16,55,39,.12)!important;
+}
+#app #night-visibility-quick-off[hidden]{display:none!important;}
+#app #night-visibility-quick-off[aria-pressed="true"]{
+  border-color:#cf9951!important;background:#fff1d5!important;color:#7a4a19!important;
+}
+#app[data-theme="dark"] #night-visibility-quick-off[aria-pressed="true"]{
+  background:#4a3925!important;color:#ffe5b0!important;border-color:#c8a163!important;
+}
+#app[data-tab]:not([data-tab="map"]) #night-visibility-quick-off,
+#app:is(.route-picking,.route-preview,.route-guiding,.adding,.detail-open) #night-visibility-quick-off{display:none!important;}
+@media(min-width:1080px){
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 51px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 101px)!important;
+    left:16px!important;right:auto!important;}
+}
+@media(min-width:701px) and (max-width:1079px){
+  #app #night-visibility-quick-off{top:calc(176px + env(safe-area-inset-top))!important;
+    left:12px!important;right:auto!important;width:112px!important;}
+}
+@media(max-width:700px){
+  #app #night-visibility-quick-off{top:calc(162px + env(safe-area-inset-top))!important;
+    left:10px!important;right:auto!important;width:112px!important;}
+}
+@media(max-height:600px) and (min-width:1080px){
+  #app #night-visibility-quick-off{top:auto!important;bottom:65px!important;}
+}

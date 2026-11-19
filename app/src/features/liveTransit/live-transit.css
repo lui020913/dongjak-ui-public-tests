@@ -1,0 +1,12 @@
+/* Scoped to the existing v8.2.6 map-options content; no new floating panel. */
+#dj-live-vehicle-controls{display:flex;flex-direction:column;gap:8px;border-top:1px solid rgba(120,139,153,.22);padding:12px 0 3px;margin-top:8px;min-width:0}
+#dj-live-vehicle-controls>strong{font-size:14px;font-weight:750;line-height:1.45;color:inherit}
+#dj-live-vehicle-controls [data-live-vehicle]{font:inherit;font-size:13px;font-weight:650;line-height:1.4;white-space:normal;min-height:39px;text-align:left;cursor:pointer;border:1px solid rgba(105,123,141,.28);padding:9px 12px;border-radius:11px;color:inherit;background:rgba(134,151,171,.09)}
+#dj-live-vehicle-controls [data-live-vehicle][aria-pressed="true"]{background:rgba(35,133,205,.16);border-color:rgba(48,138,199,.65);box-shadow:inset 3px 0 0 #2694dc}
+#dj-live-vehicle-controls [data-live-vehicle]:focus-visible{outline:2px solid #328ac9;outline-offset:2px}
+#dj-live-vehicle-status{font-size:12px;font-weight:650;line-height:1.55;color:inherit;overflow-wrap:anywhere;opacity:.85}
+#dj-live-vehicle-controls small{font-size:11px;line-height:1.55;opacity:.72;color:inherit;overflow-wrap:break-word}
+.dj-live-popup{font-size:13px;line-height:1.5;color:#172334;min-width:170px;max-width:270px}
+.dj-live-popup strong{display:block;font-size:14px;font-weight:750;margin-bottom:5px}
+.dj-live-popup p{margin:4px 0 8px;word-break:keep-all}
+.dj-live-popup small{font-size:11px;color:#526273}

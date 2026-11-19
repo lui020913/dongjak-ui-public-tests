@@ -1,0 +1,7 @@
+[allowlist]
+description = "Known non-secret local storage identifiers; no credentials."
+regexes = [
+  '''dj-pwa-transition-v7104''',
+  '''dongjak-nav-tts-voice-v1''',
+  '''dongjak_safety_navigation_v3'''
+]

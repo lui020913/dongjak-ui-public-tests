@@ -1,0 +1,50 @@
+/* v6.0.1 last-loaded overrides: avoid old mobile portrait geometry winning in landscape. */
+@media (hover:none) and (orientation:landscape) and (max-height:600px) and (max-width:1079px){
+  #app{--dj-header-h:calc(46px + env(safe-area-inset-top));--dj-mobile-nav-h:calc(51px + env(safe-area-inset-bottom));}
+  #app .topbar,#app[data-theme='dark'] .topbar{
+    height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
+    grid-template-columns:minmax(128px,170px) minmax(110px,1fr) 42px!important;
+    padding:calc(5px + env(safe-area-inset-top)) 9px 5px!important;gap:7px!important;
+  }
+  #app .topbar .brand-name{font-size:12px!important;line-height:1.2!important}
+  #app .topbar .map-quick-search-form{height:36px!important;min-height:36px!important}
+  #app .topbar .header-tools .weather-widget{display:none!important}
+  #app #bottom-nav{
+    height:var(--dj-mobile-nav-h)!important;max-height:var(--dj-mobile-nav-h)!important;
+    padding:2px 12px calc(2px + env(safe-area-inset-bottom))!important;
+  }
+  #app #bottom-nav .nav-tab{min-height:35px!important;padding:2px!important;font-size:10px!important}
+  #app #map-tools-toggle{top:calc(var(--dj-header-h) + 8px)!important;left:9px!important}
+  #app[data-tab='map'] .map-actions{top:calc(var(--dj-header-h) + 7px)!important;right:8px!important;gap:4px!important}
+  #app .map-actions button{width:36px!important;height:36px!important;min-height:36px!important}
+  #app .sheet.overview-sheet{
+    left:9px!important;right:auto!important;bottom:calc(var(--dj-mobile-nav-h) + 5px)!important;
+    top:auto!important;width:min(290px,43vw)!important;max-width:43vw!important;
+    max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 14px)!important;
+    border-radius:14px!important;overflow:auto!important;
+  }
+  #app .night-visibility-float{
+    right:calc(54px + env(safe-area-inset-right))!important;left:auto!important;
+    top:calc(var(--dj-header-h) + 4px)!important;bottom:auto!important;
+    width:min(355px,45vw)!important;max-width:45vw!important;
+    max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 14px)!important;
+    overflow-y:auto!important;
+  }
+  #app .transport-sheet{
+    width:min(380px,47vw)!important;max-width:47vw!important;
+    max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h))!important;overflow:auto!important;
+  }
+  #app.map-controls-open .map-advanced-controls{
+    left:9px!important;right:auto!important;top:calc(var(--dj-header-h) + 42px)!important;
+    width:min(300px,44vw)!important;
+    max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 50px)!important;
+  }
+  #app .maplibregl-ctrl-bottom-left{bottom:calc(var(--dj-mobile-nav-h) + 5px)!important}
+  .mobile-fullscreen-toggle{right:calc(54px + env(safe-area-inset-right));bottom:calc(var(--dj-mobile-nav-h) + 6px)}
+  .map-gesture-guide{top:calc(var(--dj-header-h) + 4px);right:55px;max-height:calc(100dvh - var(--dj-header-h) - 10px)}
+}
+/* Ensure every MapLibre popup inherits the active app theme, including overlays added late. */
+#app[data-theme="dark"] .maplibregl-popup-content{background:#1b3033!important;border-color:#45635e!important;color:#eaf7f0!important;}
+#app[data-theme="dark"] .maplibregl-popup-content :is(h2,h3,strong){color:#eaf7f0!important}
+#app[data-theme="dark"] .maplibregl-popup-content :is(p,small,span){color:#c6ddd5}
+#app[data-theme="dark"] .maplibregl-popup-close-button{color:#eaf7f0!important}

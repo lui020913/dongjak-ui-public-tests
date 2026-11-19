@@ -1,0 +1,16 @@
+/* v8.10 — visually reliable mobile floating surfaces. CSS keyframes are
+   applied by the existing unified visibility owner through inline !important
+   animation, avoiding historical animation:none!important collisions.
+   No sheet layout coordinates or MapLibre transforms are changed. */
+@keyframes dj810-mobile-sheet-open {
+  0% { opacity:.04; clip-path:inset(100% 0 0 0 round 24px); }
+  34% { opacity:.82; clip-path:inset(51% 0 0 0 round 24px); }
+  100% { opacity:1; clip-path:inset(0 0 0 0 round 24px); }
+}
+@keyframes dj810-mobile-sheet-close {
+  0% { opacity:1; clip-path:inset(0 0 0 0 round 24px); }
+  100% { opacity:0; clip-path:inset(100% 0 0 0 round 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body #app#app [data-dj810-animating] { animation-duration:.01ms!important; }
+}

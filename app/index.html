@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" id="dj-browser-theme-color" content="#f3f7f5" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="동작하는 안전지도" />
+    <link rel="manifest" id="dj-app-manifest" href="/manifest-light.webmanifest" />
+    <link rel="apple-touch-icon" id="dj-apple-touch-icon" sizes="180x180" href="/icons/dongjak-ios-home-180.png" />
+    <script>
+      // Apply the SAME theme before the first visible frame; no light flash on dark entry.
+      (function(){
+        var selected=null;
+        try{selected=localStorage.getItem('dongjak_safety_color_theme_v1');}catch(_e){}
+        var chosen=selected==='light'||selected==='dark'?selected:null;
+        if(!chosen)chosen='light';
+        var pending=null;
+        try {pending=JSON.parse(sessionStorage.getItem('dj-pwa-transition-v7104')||'null');}catch(_e){}
+        if(pending && pending.expires && pending.expires<Date.now()) {
+          try{sessionStorage.removeItem('dj-pwa-transition-v7104');}catch(_e){}
+          pending=null;
+        }
+        // Every cold app start is light. Only an intentional in-flight iOS PWA
+        // theme/night reload may keep its saved selection for restoration.
+        var displayTheme=pending ? (pending.night==='on'?'dark':chosen) : 'light';
+        document.documentElement.dataset.theme=displayTheme;
+        if(!pending){try{localStorage.setItem('dongjak_safety_color_theme_v1','light');}catch(_e){}}
+        if(pending){
+          document.documentElement.dataset.djReloadSplash='true';
+          document.documentElement.dataset.djReloadMode=pending.night==='on'?'night':'theme';
+          document.documentElement.dataset.djReloadLabel=pending.night?'야간 시야 전환 중…':'테마 전환 중…';
+        }
+        var iconSuffix=displayTheme==='dark'?'dark':'light';
+        // iOS Home Screen art is independent of the application's light/dark theme.
+        // Never rewrite #dj-apple-touch-icon here; Safari caches it at installation.
+        var manifest=document.getElementById('dj-app-manifest');
+        if(manifest)manifest.href='/manifest-'+iconSuffix+'.webmanifest';
+        // Home Screen iOS PWA: let WebKit color the native status strip
+        // to match the map. Older black-translucent mode is intentionally absent.
+        var nav=typeof navigator==='undefined'?{}:navigator;
+        var win=typeof window==='undefined'?{}:window;
+        var ios=/iPhone|iPad|iPod/.test(nav.userAgent||'') ||
+          (nav.platform==='MacIntel' && nav.maxTouchPoints>1);
+        var standalone=nav.standalone===true ||
+          (win.matchMedia && win.matchMedia('(display-mode: standalone)').matches);
+        var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
+        var iosHome=Boolean(ios && standalone && phone);
+        document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
+        var themeColor=document.getElementById('dj-browser-theme-color');
+        if(themeColor)themeColor.content=iosHome
+          ? (displayTheme==='dark'?'#192d32':'#e5ece8')
+          : (displayTheme==='dark'?'#101f25':'#f3f7f5');
+      })();
+    </script>
+    <style>
+      /* Critical PWA pre-paint. NEVER show the normal app-startup logo during
+         a theme/night reload; the main transition UI takes over once loaded. */
+      html[data-dj-reload-splash="true"] body::before {
+        content:"";position:fixed;inset:0;z-index:29000;
+        background:linear-gradient(150deg,#e5ece8,#dce9e3);
+        -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+        pointer-events:all;
+      }
+      html[data-theme="dark"][data-dj-reload-splash="true"] body::before,
+      html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::before{
+        background:linear-gradient(150deg,#192d32,#0e2025);
+      }
+      html[data-dj-reload-splash="true"] body::after{
+        content:attr(data-dj-reload-label);position:fixed;top:50%;left:0;right:0;
+        transform:translateY(-50%);z-index:29001;color:#19493b;text-align:center;
+        font-weight:750;font-size:17px;letter-spacing:.02em;
+        font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
+        pointer-events:none;
+      }
+      html[data-theme="dark"][data-dj-reload-splash="true"] body::after,
+      html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::after{color:#e1f4eb;}
+      /* Critical first paint: no unstyled logo or white-theme flash. */
+      html,body{margin:0;min-height:100%;}
+      .map-startup-overlay{
+        --start-bg:#f3f7f5;--start-fg:#183b32;--start-muted:#688177;--start-track:#dceae3;
+        position:fixed;inset:0;z-index:16000;display:grid;place-items:center;
+        background:radial-gradient(ellipse at 50% 39%,#ffffff 0%,var(--start-bg) 75%);
+        color:var(--start-fg);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
+        opacity:1;transition:opacity .3s ease;overflow:hidden;
+      }
+      html[data-theme="dark"] .map-startup-overlay{
+        --start-bg:#101f25;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
+        background:radial-gradient(ellipse at 50% 39%,#1a3334 0%,var(--start-bg) 78%);
+      }
+      .map-startup-overlay[hidden]{display:none!important;}
+      .map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}
+      .map-startup-inner{
+        box-sizing:border-box;width:min(340px,calc(100vw - 44px));
+        display:flex;flex-direction:column;align-items:center;gap:0;padding:26px 20px;
+        text-align:center;transform:translateY(-3vh);
+      }
+      .map-startup-eyebrow{color:var(--start-muted);font-size:11px;font-weight:700;letter-spacing:.16em;margin-bottom:28px;}
+      .map-startup-logo{display:grid;place-items:center;box-sizing:border-box;
+        width:110px;height:80px;min-width:110px;min-height:80px;max-width:110px;max-height:80px;
+        border:none;border-radius:0;box-shadow:none;background:transparent!important;overflow:visible;
+        margin:0 auto 22px;
+      }
+      html body #app .map-startup-logo {width:124px!important;height:124px!important;min-width:124px!important;min-height:124px!important;max-width:124px!important;max-height:124px!important;overflow:visible!important;background:transparent!important;border:none!important;box-shadow:none!important;}
+      .map-startup-logo img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;
+        object-fit:contain;opacity:0;transition:opacity .22s ease;}
+      .map-startup-logo img.is-ready{opacity:1;}
+      .map-startup-title{font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.055em;margin:0;color:var(--start-fg);}
+      .map-startup-subtitle{font-size:13px;line-height:1.55;color:var(--start-muted);margin:9px 0 29px;}
+      .map-startup-progress{width:184px;height:3px;overflow:hidden;border-radius:99px;background:var(--start-track);position:relative;margin-bottom:19px;}
+      .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:38%;border-radius:99px;background:#0a9770;
+        animation:dj-start-progress 1.65s ease-in-out infinite;}
+      .map-startup-spinner{display:none!important;}
+      @keyframes dj-start-progress{0%{transform:translateX(-110%)}55%{transform:translateX(155%)}100%{transform:translateX(370%)}}
+      .map-startup-inner #map-startup-message{font-size:13px;color:var(--start-fg);margin:0;line-height:1.55;font-weight:650;}
+      .map-startup-inner #map-startup-note{font-size:11px;color:var(--start-muted);line-height:1.6;margin:6px 0 0;max-width:300px;}
+      .map-startup-inner #map-startup-continue{margin-top:23px;padding:10px 15px;font-size:12px;font-weight:650;
+        border-radius:9px;background:transparent;color:var(--start-fg);border:1px solid var(--start-track);cursor:pointer;}
+      .map-startup-inner #map-startup-continue[hidden]{display:none!important;}
+      .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));
+        left:0;right:0;text-align:center;color:var(--start-muted);font-size:11px;letter-spacing:-.01em;}
+      @media(max-width:480px){.map-startup-inner{transform:translateY(-1.5vh)}html body #app .map-startup-logo{width:116px!important;height:116px!important;min-width:116px!important;min-height:116px!important;max-width:116px!important;max-height:116px!important}.map-startup-title{font-size:23px}}
+      @media(prefers-reduced-motion:reduce){.map-startup-progress::before{animation:none;transform:none;width:60%}.map-startup-logo img{transition:none}.map-startup-overlay{transition:none}}
+    </style>
+    <link rel="preload" as="image" href="/icons/dongjak-light-512.png" />
+    <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+    <link rel="dns-prefetch" href="https://tiles.openfreemap.org" />
+    <meta name="dongjak-ui-rebuild" content="v729-r1-from-original-20261112" />
+    <meta name="dongjak-ui-reinterpretation" content="v729-r2-fresh-ui-from-r1-20261112" />
+    <link rel="stylesheet" href="/src/mobile-chrome-v790.css" />
+    <link rel="stylesheet" href="/src/mobile-ui-v792-fixes.css" />
+    <link rel="stylesheet" href="/src/mobile-pwa-status-tone-v793.css" />
+    <link rel="stylesheet" href="/src/mobile-toolbar-v794.css" />
+    <link rel="stylesheet" href="/src/mobile-ui-v795.css" />
+    <link rel="stylesheet" href="/src/v711-experience.css" />
+    <link rel="stylesheet" href="/src/v7120-polish.css" />
+    <link rel="stylesheet" href="/src/v7121-responsive-fixes.css" />
+    <link rel="stylesheet" href="/src/v7130-ux.css" />
+    <link rel="stylesheet" href="/src/v7131-motion-search-hotfix.css" />
+    <link rel="stylesheet" href="/src/v800-ui-architecture.css" />
+    <link rel="stylesheet" href="/src/v800-live-environment.css" />
+    <link rel="stylesheet" href="/src/v802-accessibility-aed.css" />
+    <link rel="stylesheet" href="/src/v802-sangdo-accident-review.css" />
+    <link rel="stylesheet" href="/src/v834-my-info.css" />
+    <link rel="stylesheet" href="/src/v834-place-reviews.css" />
+    <link rel="stylesheet" href="/src/v802-ui-polish.css" />
+    <link rel="stylesheet" href="/src/v803-ui-consistency.css" />
+    <link rel="stylesheet" href="/src/v804-ui-fixes.css" />
+    <link rel="stylesheet" href="/src/v805-responsive-readability.css" />
+    <!-- v823: shared online Pretendard Variable for desktop and mobile (OFL 1.1). -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <link rel="stylesheet" href="/src/v806-unified-ui.css" />
+    <link rel="stylesheet" href="/src/v807-ui-refine.css" />
+    <link rel="stylesheet" href="/src/v810-mobile-sheet-motion.css" />
+    <link rel="stylesheet" href="/src/v811-mobile-experience.css" />
+    <link rel="stylesheet" href="/src/v816-panel-weather-font.css" />
+    <link rel="stylesheet" href="/src/v817-dialog-search-safety.css" />
+    <link rel="stylesheet" href="/src/v818-ux-settings.css" />
+    <link rel="stylesheet" href="/src/v819-safety-one-screen.css" />
+    <link rel="stylesheet" href="/src/v821-panel-visibility.css" />
+    <meta name="description" content="동작구를 위한 간편한 보행안전지도 지도 서비스" />
+    <title>동작하는 안전지도 · 보행안전 지도 v8.26.1</title>
+    <link rel="stylesheet" href="/src/local-font.css" />
+    <link rel="stylesheet" href="/src/v825-typography-facility-transport.css" />
+    <link rel="stylesheet" href="/src/v824-favorites.css" />
+    <link rel="stylesheet" href="/src/v827-nav-close.css" />
+    <link rel="stylesheet" href="/src/v813-route-account-fix.css" />
+    <link rel="stylesheet" href="/src/v820-account-center.css" />
+    <link rel="stylesheet" href="/src/v828-kakao-oauth-help.css" />
+    <link rel="stylesheet" href="/src/v829-account-auth.css" />
+    <link rel="stylesheet" href="/src/v822-close-button-position.css" />
+    <link rel="stylesheet" href="/src/v823-route-panel.css" />
+    <link rel="stylesheet" href="/src/v824-mobile-sheet-and-keyboard.css" />
+    <!-- v8.2.9: single responsive coordinate system, loaded after legacy UI patches. -->
+    <link rel="stylesheet" href="/src/v829-mobile-layout-system.css" />
+    <!-- v8.2.10: scoped transit/facility presentation fixes; kept last. -->
+    <link rel="stylesheet" href="/src/v830-requested-detail-ui.css" />
+    <link rel="stylesheet" href="/src/v831-swipe-feature-toolbar.css" />
+    <script type="module" src="/src/v830-transit-title.js"></script>
+    <link rel="stylesheet" href="/src/v8212-mobile-overlay-guide-fixes.css" />
+    <link rel="stylesheet" href="/src/v832-priority-feature-toolbar.css" />
+    <link rel="stylesheet" href="/src/v833-toolbar-personalization.css" />
+    <link rel="stylesheet" href="/src/v833-home-sheet-layout.css" />
+    <link rel="stylesheet" href="/src/v834-toolbar-settings.css" />
+    <!-- Rebuilt news-style drawer chrome, isolated from all legacy header classes. -->
+    <link rel="stylesheet" href="/src/v835-news-style-drawer.css" />
+    <link rel="stylesheet" href="/src/v836-sheet-toolbar-controls.css" />
+    <!-- NEWS branch: compact metro header, line colors, unified direction cards. -->
+    <link rel="stylesheet" href="/src/v8215-news-metro-compact-header.css" />
+    <link rel="stylesheet" href="/src/v8215-news-transit-sticky-redesign.css" />
+    <link rel="stylesheet" href="/src/v8215-transit-auth-bus-sheet.css" />
+    <link rel="stylesheet" href="/src/v832-mobile-interaction.css" />
+    <link rel="stylesheet" href="/src/v852-mobile-ux.css" />
+    <link rel="stylesheet" href="/src/v854-integrated-ui.css" />
+    <script type="module" src="/src/v8215-news-metro-compact-header.js"></script>
+      <link rel="stylesheet" href="/src/v868-window-lifecycle.css" />
+    <link rel="stylesheet" href="/src/v869-safety-home-tip.css" />
+    <link rel="stylesheet" href="/src/v870-mobile-ui.css" />
+    <link rel="stylesheet" href="/src/v871-mobile-search-sheet.css" />
+    <link rel="stylesheet" href="/src/v873-mobile-performance.css" />
+    <link rel="stylesheet" href="/src/v874-comprehensive-ui.css" />
+    <link rel="stylesheet" href="/src/v875-mobile-stability.css" />
+    <!-- v890 isolated mobile feedback fixes, appended after legacy mobile CSS. -->
+    <link rel="stylesheet" href="/src/v890-mobile-dock-ai-night.css" />
+    <link rel="stylesheet" href="/src/v891-mobile-hud-ai-logo.css" />
+</head>
+  <body>
+    <div id="dj-full-transition" role="status" aria-live="polite" aria-atomic="true" hidden>
+      <div class="dj-transition-card">
+        <div class="dj-progress-spinner" aria-hidden="true"></div>
+        <span class="dj-transition-kicker">DONGJAK MAP</span>
+        <strong id="dj-full-transition-label">테마 전환 중…</strong>
+        <p id="dj-transition-message">지도와 화면 색상을 적용하고 있습니다.</p>
+        <div class="dj-transition-line" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div id="app" data-tab="map">
+      <div id="map" aria-label="동작구 중심 지도"></div>
+      <div id="map-startup-overlay" class="map-startup-overlay" role="status" aria-live="polite" aria-busy="true">
+        <div class="map-startup-inner">
+          <div class="map-startup-logo" aria-hidden="true"><img class="dj-app-artwork" src="/icons/dongjak-light-512.png" alt="" /></div>
+          <script>(function(){var logo=document.querySelector('.map-startup-logo .dj-app-artwork');if(logo&&document.documentElement.dataset.theme==='dark')logo.src='/icons/dongjak-dark-512.png';})();</script>
+          <h1 class="map-startup-title">동작하는 안전지도</h1>
+          <p class="map-startup-subtitle">우리 동네 길을 더 안전하게</p>
+          <div class="map-startup-progress" aria-hidden="true"></div>
+          <p id="map-startup-message">동작구 지도를 준비하고 있습니다</p>
+          <p id="map-startup-note">도로와 보행안전 정보를 불러오는 중입니다.</p>
+          <button id="map-startup-continue" type="button" hidden>기본 지도 먼저 보기</button>
+        </div>
+        <div class="map-startup-footer" aria-hidden="true">동작구 보행안전 지도 서비스</div>
+      </div>
+      <header class="topbar">
+
+      <section id="map-quick-search" class="map-quick-search" aria-label="지도 장소 검색">
+        <form class="map-quick-search-form" autocomplete="off">
+          <label for="map-quick-search-query" class="sr-only">지도에서 장소 또는 주소 검색</label>
+        <div class="brand"><span class="logo" aria-hidden="true"><img class="dj-app-artwork" src="/icons/dongjak-light-192.png" alt="" /></span><div><div class="eyebrow">우리 동네 보행안전</div><div class="brand-name">동작하는 안전지도</div></div></div>
+          <span class="map-quick-search-icon" aria-hidden="true">⌕</span>
+          <input id="map-quick-search-query" type="search" maxlength="80" placeholder="장소 검색" />
+          <button type="submit" class="map-quick-search-submit" aria-label="장소 검색 실행">검색</button>
+        </form>
+        <div id="map-quick-search-dropdown" class="map-quick-search-dropdown" role="region" aria-label="장소 검색 결과" hidden>
+          <div class="map-quick-search-dropdown-head"><strong>추천 장소 · 검색 결과</strong><button type="button" id="map-quick-search-close" aria-label="검색 결과 닫기"></button></div>
+          <p id="map-quick-search-status" role="status" aria-live="polite">추천 장소를 선택하거나 검색하세요.</p>
+          <div id="map-quick-search-results" class="map-quick-search-results"></div>
+        </div>
+      </section>
+        <div class="header-tools">
+          <div class="weather-widget" id="weather-widget" aria-label="현재 날씨">
+            <span id="weather-title">동작구</span>
+            <button type="button" class="weather-info" id="weather-label" data-dj-weather-icon="◌" data-dj-temperature="—" title="날씨 상세정보 보기">날씨 조회 중</button>
+            <button type="button" id="weather-my-location" aria-label="내 위치 날씨 보기">내 위치</button>
+          </div>
+          <button type="button" id="theme-toggle" class="theme-toggle" aria-label="라이트/다크 테마 변경">다크</button>
+          <button type="button" id="version-history-trigger" class="prototype version-history-trigger" aria-haspopup="dialog" aria-controls="version-history-modal" aria-label="업데이트 내역 보기">v8.26.1</button>
+        </div>
+      </header>
+      <section id="version-history-modal" class="version-history-backdrop" hidden>
+        <div role="dialog" aria-modal="true" aria-labelledby="version-history-heading" class="version-history-dialog">
+          <div class="version-history-head">
+            <div><div class="section-label">UPDATE HISTORY</div><h2 id="version-history-heading">업데이트 내역</h2>
+</div>
+            <button id="version-history-close" type="button" aria-label="업데이트 내역 닫기"></button>
+          </div>
+          <!-- Catalog coverage: v1.0.0부터 recorded, without the previous explanatory header. -->
+          <div id="version-history-list" class="version-history-list"></div>
+          <details class="dj-map-attribution-details"><summary>지도 데이터 출처</summary><p>기본 지도: <a href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap 기여자</a>. 지형 데이터: Mapzen Terrain Tiles 및 원자료 제공자.</p></details>
+        </div>
+      </section>
+      <button type="button" id="map-tools-toggle" class="map-tools-toggle" aria-expanded="false" aria-controls="map-advanced-controls">지도 옵션</button>
+      <button type="button" id="map-safety-toggle" class="map-safety-toggle" aria-expanded="false" aria-controls="map-safety-controls" aria-label="보행안전 도구 열기">보행안전</button>
+      <button type="button" id="map-safety-backdrop" class="map-safety-backdrop" aria-label="보행안전 메뉴 닫기" hidden></button>
+      <div id="map-safety-controls" class="map-safety-controls" aria-label="보행안전 도구">
+        <div class="map-safety-head"><div><strong>보행안전 도구</strong><span>안전시설 · 야간 시야 · 교통약자</span></div><button type="button" id="map-safety-close" aria-label="보행안전 메뉴 닫기"></button></div>
+        <div class="dj-safety-overview" aria-label="보행안전 정보 안내">
+          <div class="dj-safety-overview-icon" aria-hidden="true">✓</div>
+          <div><strong>필요한 안전정보만 지도에 표시</strong><p>카테고리를 열고 각 항목을 켜거나 끄세요. 지도 범례는 항목 바로 아래에 있습니다.</p></div>
+          <span id="dj-safety-active-count" class="dj-safety-active-count" aria-live="polite">표시 0</span>
+        </div>
+        <details class="dj-type-settings" id="dj-type-settings">
+          <summary><span aria-hidden="true" class="dj-type-settings-icon">Aa</span><span><strong>글자 가독성</strong><small>글자 크기·굵기 조절</small></span><span class="dj-type-settings-arrow" aria-hidden="true"></span></summary>
+          <div class="dj-type-settings-body">
+            <label for="dj-type-scale">글자 크기
+              <select id="dj-type-scale" aria-label="화면 글자 크기">
+                <option value="small">작게</option><option value="normal">기본</option><option value="large">크게</option><option value="xlarge">더 크게</option>
+              </select>
+            </label>
+            <label for="dj-type-weight">글자 굵기
+              <select id="dj-type-weight" aria-label="화면 글자 굵기">
+                <option value="normal">기본</option><option value="bold">굵게</option>
+              </select>
+            </label>
+          </div>
+          <p>메뉴 및 주요 플로팅 창의 글자를 조절합니다. 지도 위 지명 크기는 변경하지 않습니다.</p>
+        </details>
+        <nav class="dj-safety-nav" aria-label="보행안전 메뉴 바로가기">
+          <button type="button" data-dj-safety-target="dj-safety-data">사고·지도자료</button>
+          <button type="button" data-dj-safety-target="dj-safety-facilities">안전시설</button>
+          <button type="button" data-dj-safety-target="dj-safety-traffic">보호구역·교통</button>
+          <button type="button" data-dj-safety-target="dj-safety-night">야간시야</button>
+          <button type="button" data-dj-safety-target="dj-safety-actions">보행도구</button>
+        </nav>
+        <details class="dj-safety-group" id="dj-safety-data" open>
+          <summary><span class="dj-safety-group-name"><strong>사고·보행환경 데이터</strong><small>돌발정보 · 환경센서 · 사고 · 경사 · CCTV</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <div class="dj-safety-group-body">
+        <section class="dj-import-controls" aria-label="공공자료 기반 보행안전 레이어">
+          <div class="dj-section-intro"><span><strong>지도에 표시할 정보</strong><small>레이어를 선택하면 지도에 아이콘과 범례가 적용됩니다.</small></span><button type="button" id="dj-safety-clear-imports" aria-label="추가 보행안전 자료 모두 끄기">모두 끄기</button></div>
+          <div class="dj-import-grid">
+            <div class="dj-import-category dj-live-category"><strong>실시간·도시환경</strong><span>TOPIS 돌발정보 · S-DoT 관측</span></div>
+            <div class="dj-import-entry dj-feed-entry" data-dj-entry="road-incidents">
+              <button type="button" data-dj-import="road-incidents" aria-pressed="false" aria-describedby="dj-legend-road-incidents dj-feed-road-status"><span class="dj-feature-mark" data-dj-icon="road-incidents" aria-hidden="true"></span><span class="dj-feature-copy"><b>도로 돌발정보</b><small>TOPIS · 교통사고·통제 등 · 2분마다 갱신 확인</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <div class="dj-feed-meta"><span class="dj-feed-indicator" id="dj-feed-road-status" role="status" aria-live="polite">선택하면 최신 정보를 조회합니다</span><span class="dj-feed-source">서울시 TOPIS</span></div>
+              <p id="dj-legend-road-incidents" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#d46b3b"></i>주황색 주의 아이콘 · 도로상 돌발 지점 <small>차량 통제 ≠ 보도 통제</small></p>
+            </div>
+            <div class="dj-import-entry dj-feed-entry" data-dj-entry="sdot-environment">
+              <button type="button" data-dj-import="sdot-environment" aria-pressed="false" aria-describedby="dj-legend-sdot dj-feed-sdot-status"><span class="dj-feature-mark" data-dj-icon="sdot-environment" aria-hidden="true"></span><span class="dj-feature-copy"><b>도시환경 관측</b><small>S-DoT · 기온·습도·풍속 · 30분마다 갱신 확인</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <div class="dj-feed-meta"><span class="dj-feed-indicator" id="dj-feed-sdot-status" role="status" aria-live="polite">실시간 API 연결 시 현재 관측값 표시</span><span class="dj-feed-source">서울시 S-DoT</span></div>
+              <div id="dj-sdot-summary" class="dj-sdot-summary" hidden aria-live="polite"></div>
+              <p id="dj-legend-sdot" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#a76d31"></i>갈색 온도계 아이콘 · 좌표 확인된 센서만 표시 <small>미세먼지 제외 · 센서 위치 미제공시 지점 미표시</small></p>
+            </div>
+            <div class="dj-import-category"><strong>사고·횡단 지점</strong><span>과거 사고기록과 현장 조사 위치</span></div>
+            <div class="dj-import-entry" data-dj-entry="accidents">
+              <button type="button" data-dj-import="accidents" aria-pressed="false" aria-describedby="dj-legend-accidents"><span class="dj-feature-mark" data-dj-icon="accidents" aria-hidden="true"></span><span class="dj-feature-copy"><b>보행사고 다발지역</b><small>연도별 사고다발지역 기록</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-accidents" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#c75039"></i>빨강 사고 아이콘 · 대표점 표시 <small>사고건수 ≠ 지점 수</small></p>
+              <div class="dj-sangdo-team-action">
+                <button type="button" id="dj-sangdo-team-toggle" aria-pressed="false" aria-expanded="false" aria-controls="dj-sangdo-team-panel"><span aria-hidden="true">◎</span><span>상도1동 집중 검토</span><small>팀원 QGIS 분석</small></button>
+                <div id="dj-sangdo-team-panel" class="dj-sangdo-team-panel" hidden role="region" aria-label="상도1동 사고다발지역 팀 분석 결과"></div>
+              </div>
+            </div>
+            <div class="dj-import-entry" data-dj-entry="survey-crosswalk">
+              <button type="button" data-dj-import="survey-crosswalk" aria-pressed="false" aria-describedby="dj-legend-crosswalk"><span class="dj-feature-mark" data-dj-icon="survey-crosswalk" aria-hidden="true"></span><span class="dj-feature-copy"><b>상도1동 횡단 지점</b><small>현장 조사 41개 위치</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-crosswalk" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#0d9488"></i>청록 횡단 아이콘 · 조사 지점 <small>회색은 재확인 필요</small></p>
+            </div>
+            <div class="dj-import-entry" data-dj-entry="bocha-reference">
+              <button type="button" id="sangdo-bocha-toggle" data-bocha-import aria-pressed="false" aria-describedby="sangdo-bocha-status dj-legend-bocha"><span class="dj-feature-mark bocha-feature-mark" aria-hidden="true">↔</span><span class="dj-feature-copy"><b>보차혼용도로·이면도로</b><small>상도1동 · 팀 현황자료 237개 구간</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-bocha" class="dj-feature-legend"><i class="bocha-legend-line"></i>황토색 점선 · 실제 현황자료 표시선 <small>선형 위치는 근사</small></p>
+              <p id="sangdo-bocha-status" class="dj-feature-legend" role="status" aria-live="polite">선택하면 상도1동 현황자료를 표시합니다.</p>
+            </div>
+            <div class="dj-import-category"><strong>CCTV 설치시설</strong><span>목적별로 분리 표시</span></div>
+            <div class="dj-import-entry" data-dj-entry="cctv-security">
+              <button type="button" data-dj-import="cctv-security" aria-pressed="false" aria-describedby="dj-legend-cctv-security"><span class="dj-feature-mark" data-dj-icon="cctv-security" aria-hidden="true"></span><span class="dj-feature-copy"><b>방범·어린이 CCTV</b><small>생활방범·어린이보호 설치지점</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-cctv-security" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#19847c"></i>청록 카메라 · 방범 목적 <small>촬영범위는 미확인</small></p>
+            </div>
+            <div class="dj-import-entry" data-dj-entry="cctv-parking">
+              <button type="button" data-dj-import="cctv-parking" aria-pressed="false" aria-describedby="dj-legend-cctv-parking"><span class="dj-feature-mark" data-dj-icon="cctv-parking" aria-hidden="true"></span><span class="dj-feature-copy"><b>불법주정차 CCTV</b><small>교통단속 설치지점</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-cctv-parking" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#b68128"></i>황토색 P 아이콘 · 주정차 단속</p>
+            </div>
+            <div class="dj-import-entry" data-dj-entry="cctv-other">
+              <button type="button" data-dj-import="cctv-other" aria-pressed="false" aria-describedby="dj-legend-cctv-other"><span class="dj-feature-mark" data-dj-icon="cctv-other" aria-hidden="true"></span><span class="dj-feature-copy"><b>기타·다목적 CCTV</b><small>기타 설치 목적 분류</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-cctv-other" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#6a6b88"></i>보라 카메라 · 다목적/기타 시설</p>
+            </div>
+            <div class="dj-import-category"><strong>보행 지형·교통약자</strong><span>추정 경사와 승강시설</span></div>
+            <div class="dj-import-entry" data-dj-entry="slope">
+              <button type="button" data-dj-import="slope" aria-pressed="false" aria-describedby="dj-legend-slope"><span class="dj-feature-mark" data-dj-icon="slope" aria-hidden="true"></span><span class="dj-feature-copy"><b>보행로 경사도</b><small>지형자료 기반 링크별 추정</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <div id="dj-legend-slope" class="dj-feature-legend dj-slope-legend" aria-label="경사도 선 색상 범례"><span><i style="--dj-dot:#239787"></i>5% 미만</span><span><i style="--dj-dot:#e0af42"></i>5~10%</span><span><i style="--dj-dot:#d77c3b"></i>10~15%</span><span><i style="--dj-dot:#bc4d48"></i>15% 이상</span><span><i style="--dj-dot:#9a9da2"></i>검토 필요</span></div>
+            </div>
+            <div class="dj-import-entry" data-dj-entry="metro-elevator">
+              <button type="button" data-dj-import="metro-elevator" aria-pressed="false" aria-describedby="dj-legend-elevator"><span class="dj-feature-mark" data-dj-icon="metro-elevator" aria-hidden="true"></span><span class="dj-feature-copy"><b>지하철 엘리베이터 위치</b><small>위치자료 · 운영상태는 미확인</small></span><span class="dj-feature-state">꺼짐</span></button>
+              <p id="dj-legend-elevator" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#4e7cc3"></i>파랑 승강기 · 2020년 위치 기록 <small>실시간 가동정보 아님</small></p>
+            </div>
+          </div>
+          <p class="dj-import-hint">아이콘은 버스정류장 대비 1.5배 크기입니다. 여러 지점이 겹치면 같은 아이콘에 숫자 배지가 표시됩니다. 배지를 누르면 해당 위치가 확대됩니다.</p>
+          <p id="dj-import-status" role="status" aria-live="polite">자료를 켜면 지도에 표시됩니다. 위치·운영상태는 별도 검증이 필요합니다.</p>
+        </section>
+          </div>
+        </details>
+        <details class="dj-safety-group" id="dj-safety-facilities">
+          <summary><span class="dj-safety-group-name"><strong>안전시설·생활편의</strong><small>음향신호기 · AED · 횡단보도 · 공공시설</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <div class="dj-safety-group-body">
+        <section class="dj-import-controls dj-access-facility-controls" aria-label="공식 교통약자 및 응급시설 위치정보">
+  <div class="dj-section-intro"><span><strong>교통약자 · 응급시설</strong><small>공식 위치기록을 선택해 지도에 표시합니다.</small></span></div>
+  <div class="dj-import-grid">
+    <div class="dj-import-entry" data-dj-entry="audio-signals">
+      <button type="button" data-dj-import="audio-signals" aria-pressed="false" aria-describedby="dj-legend-audio-signals dj-audio-status"><span class="dj-feature-mark" data-dj-icon="audio-signals" aria-hidden="true"></span><span class="dj-feature-copy"><b>보행자 음향신호기</b><small>서울시 설치 현황 · 횡단보도 음향안내 시설</small></span><span class="dj-feature-state">꺼짐</span></button>
+      <div class="dj-feed-meta"><span id="dj-audio-status" class="dj-feed-indicator" role="status" aria-live="polite">선택하면 동작구 설치 기록을 표시합니다.</span><span class="dj-feed-source">서울시 · 2026.05.28 원본</span></div>
+      <p id="dj-legend-audio-signals" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#178e89"></i>청록색 스피커 · 설치 지점 <small>정상 작동 여부 미확인</small></p>
+    </div>
+    <div class="dj-import-entry dj-feed-entry" data-dj-entry="official-aed">
+      <button type="button" data-dj-import="official-aed" aria-pressed="false" aria-describedby="dj-legend-official-aed dj-aed-status"><span class="dj-feature-mark" data-dj-icon="official-aed" aria-hidden="true"></span><span class="dj-feature-copy"><b>자동심장충격기 AED</b><small>국립중앙의료원 · 설치기관 및 상세 위치</small></span><span class="dj-feature-state">꺼짐</span></button>
+      <div class="dj-feed-meta"><span id="dj-aed-status" class="dj-feed-indicator" role="status" aria-live="polite">선택하면 공공데이터 API를 조회합니다.</span><span class="dj-feed-source">국립중앙의료원</span></div>
+      <p id="dj-legend-official-aed" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#cb4b66"></i>분홍색 심장 아이콘 · AED 등록 위치 <small>24시간 이용·현재 작동 여부 미확인 · 응급시 119</small></p>
+    </div>
+  </div>
+  <p class="dj-access-caveat">동작구 행정경계로 지점을 제한합니다. AED의 건물 출입과 음향신호기의 작동 상태는 현장에서 확인해야 합니다.</p>
+</section>
+        <section class="safety-layer-menu" aria-label="안전시설 지도 표시">
+          <div class="dj-section-intro"><strong>생활 안전시설</strong><small>공개지도 등록시설 · 위치 확인용</small></div>
+      <div class="data-layer-controls" aria-label="안전 데이터 지도 표시">
+        <button type="button" id="toggle-safety-facilities" aria-pressed="false">안전시설</button>
+        <button type="button" id="toggle-crosswalks" aria-pressed="false">횡단보도</button>
+        <button type="button" id="toggle-essentials" aria-pressed="false">약국·편의점</button>
+        <button type="button" id="toggle-public-facilities" aria-pressed="false">공공·교육시설</button>
+        <button type="button" id="refresh-general-facilities" title="일반시설 자료 다시 조회">일반시설 새로고침</button>
+        <span id="general-facility-status" role="status" aria-live="polite">일반시설: 확대하면 자동으로 조회합니다.</span>
+        <button type="button" id="toggle-station-accessibility" aria-pressed="true" title="지하철 출입구·엘리베이터 위치 (확대 14 이상)">지하철 출입구·편의시설</button>
+        <button type="button" id="metro-access-retry" title="실제 지하철 출입구 좌표 다시 조회">출구 다시 조회</button>
+        <span id="metro-access-status" role="status" aria-live="polite">출입구·편의시설 조회 대기</span>
+        <span id="safety-layer-status" role="status" aria-live="polite"></span>
+        <div class="dj-standard-legend" aria-label="생활안전시설 색상 범례">
+          <span><i style="--dj-dot:#2861a9"></i>경찰시설</span><span><i style="--dj-dot:#c33d37"></i>소방</span><span><i style="--dj-dot:#b33b5b"></i>병원</span><span><i style="--dj-dot:#8a56b2"></i>OSM 등록 AED</span><span><i style="--dj-dot:#7862c7"></i>일반 횡단보도</span><span><i style="--dj-dot:#208769"></i>약국</span><span><i style="--dj-dot:#4689b8"></i>편의점</span><span><i style="--dj-dot:#517bb1"></i>학교 등 공공시설</span>
+        </div>
+        <p class="dj-standard-hint">색상은 시설 종류를 뜻하며, 시설의 운영·이용 가능 여부를 보증하지 않습니다. 지하철 출입구는 별도 교통정보 레이어입니다.</p>
+      </div>
+        </section>
+          </div>
+        </details>
+        <details class="dj-safety-group" id="dj-safety-traffic">
+          <summary><span class="dj-safety-group-name"><strong>보호구역·교통안전</strong><small>보호구역 경계 · 제한속도 · 단속시설</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <div class="dj-safety-group-body">
+        <section id="protection-zone-controls" class="pza-tool" data-mode="simple" aria-label="상도1동 보호구역 분석">
+          <div class="pza-section-title">
+            <div><strong>상도1동 보행안전 검토</strong><span>보호구역 지정 범위와 생활도로 보행환경 비교</span></div>
+            <span class="pza-research-tag">1~3차 검증 반영</span>
+          </div>
+          <div class="pza-mode-switch" role="group" aria-label="지도 분석 표시 방식">
+            <button type="button" id="protection-zone-mode-simple" aria-pressed="true" aria-controls="pza-advanced-tools">간단 보기</button>
+            <button type="button" id="protection-zone-mode-detail" aria-pressed="false" aria-controls="pza-advanced-tools">상세 분석</button>
+          </div>
+          <p id="pza-mode-guide" class="pza-intro">보호구역 밖의 검토 대상 도로를 선택하면 보행 시 참고사항과 아직 확인되지 않은 정보를 볼 수 있습니다.</p>
+          <div class="pza-overview" aria-label="연구자료 요약">
+            <span><b>9곳</b><small>공개 보호구역 경계</small></span>
+            <span><b>2구간</b><small>보행환경 우선 검토</small></span>
+          </div>
+          <div class="pza-action-row pza-main-actions">
+            <button type="button" id="protection-zone-toggle" aria-pressed="false">지도에 표시하기</button>
+            <button type="button" id="protection-zone-zoom">상도1동 전체 보기</button>
+          </div>
+          <div class="pza-legend" aria-label="보호구역 지도 범례">
+            <span><i class="child"></i>어린이 보호구역 경계</span>
+            <span><i class="senior"></i>노인 보호구역 경계</span>
+            <span><i class="candidate"></i>보행환경 검토 도로(위험등급 아님)</span>
+          </div>
+          <div class="pza-focus-panel" aria-label="우선 현장검토 구간">
+            <div class="pza-focus-title"><strong>보행환경 확인 권장 도로 2곳</strong><small>선택하면 지도에서 해당 위치로 이동합니다.</small></div>
+            <div class="pza-focus-grid">
+              <button type="button" id="protection-zone-focus54"><b>상도로54길</b><span>상현초 인근 · 보행 시 참고사항</span></button>
+              <button type="button" id="protection-zone-focus62"><b>상도로62길</b><span>샛별유치원·청송경로당 인근</span></button>
+            </div>
+          </div>
+          <div id="pza-advanced-tools" class="pza-advanced-tools" hidden>
+            <strong class="pza-subhead">분석자료 선택하기</strong>
+            <p class="pza-intro">필요한 자료만 켜서 비교하세요. 거리 참고선과 사고자료는 처음엔 꺼져 있습니다.</p>
+            <div class="pza-options" aria-label="보호구역 분석 레이어 표시">
+              <label><input type="checkbox" id="protection-zone-child" checked /> <span>어린이 보호구역 <small>공식 지정 범위</small></span></label>
+              <label><input type="checkbox" id="protection-zone-senior" checked /> <span>노인 보호구역 <small>공식 지정 범위</small></span></label>
+              <label><input type="checkbox" id="protection-zone-candidates" /> <span>검토 후보 125구간 <small>공식 위험등급 아님</small></span></label>
+              <label><input type="checkbox" id="protection-zone-accidents" /> <span>사고다발지역 <small>과거 연도 포함</small></span></label>
+              <label class="pza-full-row"><input type="checkbox" id="protection-zone-radii" /> <span>시설 대표점 300m·500m 참고선 <small>실제 지정 경계가 아닌 거리 분석용</small></span></label>
+            </div>
+            <div class="pza-research-notice"><strong>해석할 때 주의하세요</strong><p>색이 있는 검토 도로는 실제 사고 발생 지점이나 공식 위험도로가 아닙니다. 사고다발지역은 통계 범위이며, 거리 참고선은 법정 보호구역 경계가 아닙니다.</p></div>
+          </div>
+          <span id="protection-zone-status" role="status" aria-live="polite">대기 중 · ‘지도에 표시하기’를 누르면 보호구역을 볼 수 있습니다.</span>
+          <div class="pza-public-notice"><strong>지도를 어떻게 이용하나요?</strong><p>파란색·보라색은 기존 보호구역의 공개 지정 범위입니다. 빨간색 도로를 누르면 보행 중 참고할 사항을 볼 수 있습니다. 빨간색은 사고 위험이 확정된 구간이라는 의미가 아닙니다.</p></div>
+        </section>
+        <section id="sangdo-speed-controls" class="sangdo-speed-tool" aria-label="상도1동 도로별 제한속도">
+          <div class="sangdo-speed-head"><strong>상도1동 도로별 제한속도</strong><span>표준노드링크 속성 · 최고제한속도</span></div>
+          <button type="button" id="sangdo-speed-toggle" aria-pressed="false">제한속도 지도 표시하기</button>
+          <div class="sangdo-speed-filters" role="group" aria-label="표시할 제한속도 선택">
+            <label><input type="checkbox" value="10" /><i class="speed-10"></i>10km/h</label>
+            <label><input type="checkbox" value="30" /><i class="speed-30"></i>30km/h</label>
+            <label><input type="checkbox" value="40" /><i class="speed-40"></i>40km/h</label>
+            <label><input type="checkbox" value="50" /><i class="speed-50"></i>50km/h</label>
+          </div>
+          <p class="dj-standard-hint">범례: 선 색상은 선택한 제한속도(10·30·40·50km/h) 유형을 구분합니다. 속도 제한값은 사고위험 등급이 아닙니다.</p>
+          <div class="sangdo-speed-actions"><button type="button" id="sangdo-speed-zoom">상도1동 제한속도 보기</button><span id="sangdo-speed-status" role="status" aria-live="polite">지도 준비 중</span></div>
+          <div class="sangdo-camera-tool" aria-label="무인교통단속카메라 위치">
+            <strong>무인교통단속카메라</strong>
+            <p class="dj-standard-hint">범례: 카메라 표시점은 등록된 단속시설 위치이며 운영 여부는 별도 확인이 필요합니다.</p>
+            <div class="sangdo-camera-actions">
+              <button type="button" id="sangdo-camera-toggle" aria-pressed="false">단속 지점 표시: 꺼짐</button>
+              <button type="button" id="sangdo-camera-import">단속 좌표 CSV/GeoJSON 가져오기</button>
+              <input id="sangdo-camera-file" type="file" accept=".csv,.json,.geojson,text/csv,application/json" hidden aria-label="무인교통단속카메라 좌표 파일 선택" />
+            </div>
+            <span id="sangdo-camera-status" role="status" aria-live="polite">단속 지점 좌표 미확보 · 표시된 지점 없음</span>
+          </div>
+        </section>
+          </div>
+        </details>
+        <details class="dj-safety-group" id="dj-safety-night">
+          <summary><span class="dj-safety-group-name"><strong>야간 보행환경</strong><small>가로등 · 보안등 · 건물 차폐 · 조명 추정</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <div class="dj-safety-group-body">
+        <section class="night-visibility-tool" aria-label="상도1동 야간 시야 분석">
+          <div class="night-visibility-heading"><strong>야간 시야 분석</strong><span>상도1동 시범 · 건물 차폐 반영</span></div>
+          <button type="button" id="night-visibility-toggle" disabled aria-pressed="false" aria-controls="night-visibility-controls">야간 시야 켜기</button>
+          <div id="night-visibility-controls" hidden>
+            <label class="night-visibility-radius-label" for="night-visibility-radius">
+              <span>가정한 조명 영향 반경</span><output id="night-visibility-radius-value" for="night-visibility-radius">20 m</output>
+            </label>
+            <input type="range" id="night-visibility-radius" min="10" max="40" step="1" value="20" />
+            <label class="night-visibility-checkbox"><input id="night-visibility-exclude-major" type="checkbox" checked /> 상도로·양녕로·지하차도 제외</label>
+            <label class="night-visibility-checkbox"><input id="night-visibility-show-alley" type="checkbox" checked /> <span class="night-line alley" aria-hidden="true"></span> 골목·차도 조명 미도달 추정</label>
+            <label class="night-visibility-checkbox"><input id="night-visibility-show-path" type="checkbox" checked /> <span class="night-line path" aria-hidden="true"></span> 보행로 조명 미도달 추정</label>
+            <p class="night-visibility-legend"><i class="night-dot street" aria-hidden="true"></i>가로등 <i class="night-dot security" aria-hidden="true"></i>보안등</p>
+            <p class="night-coverage-legend" aria-label="조명 영향 영역 범례"><span class="night-coverage street">가로등 영향권 추정</span><span class="night-coverage security">보안등 영향권 추정</span><span class="night-coverage unlit">색상 없음: 영향권 밖 또는 미확인</span></p>
+            <p class="night-result-legend" aria-label="도로 조명 추정 구간 3종 범례">
+              <span class="lit">조명 도달 추정</span>
+              <span class="alley">골목·차도 조명 미도달 추정</span>
+              <span class="path">보행로 조명 미도달 추정</span>
+            </p>
+            <p id="night-visibility-status" class="night-visibility-status" role="status" aria-live="polite">지도에 야간 시야를 표시할 수 있습니다.</p>
+            <div id="night-visibility-stats" class="night-visibility-stats" aria-live="polite"></div>
+            <div id="night-visibility-top" class="night-visibility-top"></div>
+            <details class="night-visibility-explanation">
+              <summary>분석 기준과 주의사항 자세히</summary>
+              <div id="night-occlusion-details" class="night-occlusion-details" aria-live="polite"></div>
+              <p class="night-visibility-disclaimer">분석은 가정된 조명 높이·건물 높이·거리 반경에 기초한 직광 경로 추정입니다. 실제 조도·보행안전 등급이 아닙니다. 골목·보행로 체크박스는 지도 표시만 제어하고 통계는 두 유형을 모두 포함합니다. 가로등 위치는 지번 중심으로 실제 기둥과 차이가 날 수 있고, 반사광·상가 조명·식생·지형 차폐는 미반영이며, 건물 차폐 모드에서도 건물 높이는 층수 기반 추정값입니다. 도로는 OpenStreetMap에서 조회하며, 상도1동 행정경계를 못 불러오면 분석을 대기합니다. 등록된 조명에 한정되며 실제 밝기나 안전도를 판정하지 않습니다.</p>
+            </details>
+          </div>
+        </section>
+          </div>
+        </details>
+        <details class="dj-safety-group" id="dj-safety-actions">
+          <summary><span class="dj-safety-group-name"><strong>보행도구</strong><small>교통약자 모드 · 제보 · 내 주변 정보</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <div class="dj-safety-group-body">
+        <section class="ped-tools-menu" aria-label="보행정보 도구">
+          <strong>보행정보 도구</strong>
+          <p>확인된 공개지도 정보를 보거나, 불편 위치를 기록합니다.</p>
+          <div class="ped-tools-actions">
+            <button type="button" id="ped-access-toggle" aria-pressed="false">교통약자 모드</button>
+            <button type="button" id="ped-report-open">보행불편 제보</button>
+            <button type="button" id="ped-nearby-open">내 주변 요약</button>
+          </div>
+        </section>
+          </div>
+        </details>
+      </div>
+      <!-- 야간 시야를 켜면 기존 제어 요소를 이 패널로 이동합니다. ID/이벤트 중복 없음. -->
+      <aside id="night-visibility-float" class="night-visibility-float" aria-label="상도1동 야간 시야 분석 패널" hidden>
+        <div class="night-visibility-float-head">
+          <div class="night-visibility-float-heading"><strong>☾ 야간 시야</strong><span id="night-visibility-float-summary">상도1동 · 건물 차폐 반영 · 20m</span></div>
+          <div class="night-visibility-float-actions">
+            <button type="button" id="night-visibility-float-collapse" aria-controls="night-visibility-float-content" aria-expanded="false">설정·결과 보기</button>
+            <button type="button" id="night-visibility-float-stop" class="night-visibility-float-stop-icon" aria-label="야간 시야 종료" title="닫기"></button>
+          </div>
+        </div>
+        <section id="night-visibility-float-content" class="night-visibility-tool night-visibility-float-content" aria-label="조명 반경 및 도달 추정 분석 결과">
+          <div id="night-visibility-float-slot"></div>
+        </section>
+      </aside>
+      <button type="button" id="map-options-backdrop" class="map-options-backdrop" aria-label="지도 표시 옵션 닫기" hidden></button>
+      <div id="map-advanced-controls" class="map-advanced-controls" aria-label="지도 표시 옵션">
+        <div class="map-options-mobile-heading">
+          <strong>지도 표시 옵션</strong>
+          <div class="map-options-mobile-actions">
+            <button type="button" id="mobile-fullscreen-toggle" class="mobile-fullscreen-toggle" hidden aria-label="앱 화면으로 보기">앱으로 보기</button>
+            <button type="button" id="map-options-mobile-close" class="map-options-mobile-close" aria-label="지도 표시 옵션 닫기"></button>
+          </div>
+        </div>
+        <div id="mobile-webapp-help" class="mobile-webapp-help" hidden role="status" aria-live="polite">
+          <strong>iPhone에서 앱 화면으로 보는 방법</strong>
+          <p>Safari에서 공유 → 홈 화면에 추가 → <b>웹 앱으로 열기</b>를 켜고 추가한 뒤, 홈 화면 아이콘으로 실행해 주세요.</p>
+          <p>현재 Safari 안에서는 페이지가 브라우저 상단·하단 UI를 강제로 숨길 수 없습니다. Safari의 페이지 메뉴 → 도구 막대 가리기도 이용할 수 있습니다.</p>
+          <button type="button" id="mobile-webapp-help-close">확인</button>
+        </div>
+        <div class="map-options-heading"><div class="map-options-heading-copy"><strong>지도 표시 옵션</strong><span>원하는 항목만 표시하세요.</span></div><button type="button" id="map-options-desktop-close" class="map-options-desktop-close" aria-label="지도 표시 옵션 닫기"></button></div>
+        <!-- 지도 옵션 내부의 중복 출처 섹션 제거. 법적 지도 저작자 표시는 지도 컨트롤에 유지. -->
+
+
+      <button type="button" id="stop-gps-tracking" class="stop-gps-tracking" hidden>위치 추적 끄기</button>
+      <div class="map-badge"><span class="pulse"></span><span id="map-status">경계 불러오는 중</span></div>
+      <button type="button" id="open-admin-dongs-from-options" class="dj-admin-map-shortcut">행정동 선택 · 경계 보기</button>
+      <button type="button" id="overview-admin-clear" class="overview-admin-clear" hidden>선택 해제</button>
+      <button type="button" id="open-admin-dongs" class="dj-admin-map-shortcut dj-admin-original-trigger" aria-label="행정동 선택 열기" hidden>행정동 선택 열기</button>
+      <button type="button" id="toggle-add" class="add-point-button">＋ 지점 등록</button>
+      <div id="add-hint" class="add-hint" hidden>지도를 눌러 등록할 위치를 선택하세요.</div>
+      <div id="transport-source-status" class="transport-source-status" aria-live="polite">교통 정류소 정보 준비 중</div>
+      <details class="map-options-group" id="map-report-options"><summary>조사 지점 필터</summary>
+      <nav class="filter-bar" aria-label="보행환경 유형별 지도 필터">
+        <button type="button" class="filter-chip selected" data-filter="전체" aria-pressed="true">전체</button>
+        <button type="button" class="filter-chip" data-filter="보행공간" aria-pressed="false">보행공간</button>
+        <button type="button" class="filter-chip" data-filter="교차로·시야" aria-pressed="false">교차로·시야</button>
+        <button type="button" class="filter-chip" data-filter="횡단시설" aria-pressed="false">횡단시설</button>
+        <button type="button" class="filter-chip" data-filter="조명·시설물" aria-pressed="false">조명·시설물</button>
+        <button type="button" class="filter-chip" data-filter="기타" aria-pressed="false">기타</button>
+      </nav>
+      <div id="filter-result" class="filter-result" aria-live="polite">제보 0곳</div>
+      </details>
+      <details class="map-options-group" open><summary>기본 지도·교통 레이어</summary>
+        <div class="data-layer-controls">
+        <details id="base-layer-controls" class="base-layer-controls">
+          <summary>지도 표시 설정</summary>
+          <div class="base-layer-menu" role="group" aria-label="지도 표시 레이어">
+            <button type="button" data-base-layer="metro" aria-pressed="true">지하철 노선·역</button>
+            <button type="button" data-base-layer="bus" aria-pressed="true">버스정류장</button>
+            <button type="button" data-base-layer="buildings" aria-pressed="true">3D 건물</button>
+            <button type="button" data-base-layer="boundary" aria-pressed="true">동작구 경계선</button>
+            <p>데이터를 삭제하지 않고 지도에 보이는 항목만 조정합니다. 설정은 이 브라우저에 저장됩니다.</p>
+            <div class="dj-live-vehicle-controls" id="dj-live-vehicle-controls" role="group" aria-label="실시간 차량 위치 표시">
+              <strong>이동 중인 버스·지하철</strong>
+              <button type="button" data-live-vehicle="metro" aria-pressed="false">지하철 열차 움직임 · 추정</button>
+              <button type="button" data-live-vehicle="bus" aria-pressed="false">실시간 버스 위치 · GPS</button>
+              <span id="dj-live-vehicle-status" role="status" aria-live="polite">기본 OFF · 켜면 약 25초마다 공식 API 조회</span>
+              <small>13.2배율부터 동작구 내부에 표시됩니다. 역간 열차는 GPS가 아닌 출발·진입 정보 기반 추정이며 신림선은 현재 API 제공 여부를 확인해야 합니다.</small>
+            </div>
+          </div>
+        </details>
+        </div>
+      </details>
+      </div>
+      <button type="button" id="map-chrome-restore" class="map-chrome-restore" aria-label="상단 메뉴와 하단 탭 다시 보이기" hidden>메뉴·정보 보기 ↑</button>
+      <button id="night-visibility-quick-off" class="night-visibility-quick-off" type="button" disabled hidden aria-pressed="false" aria-label="야간 시야 켜기">☾ 야간 시야</button>
+      <section id="map-gesture-guide" class="map-gesture-guide" role="dialog" aria-modal="true" aria-labelledby="map-gesture-guide-title" hidden>
+        <header class="map-gesture-guide-head dj856-guide-head">
+          <span class="dj856-guide-edge-drag" aria-hidden="true"></span>
+          <span class="dj856-guide-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9L12 3Z"/><path d="m8 15 2.3-6 5.7-2-2.3 6L8 15Z"/></svg></span>
+          <strong id="map-gesture-guide-title">지도 조작 안내</strong>
+          <button type="button" id="map-gesture-guide-close" aria-label="조작 안내 닫기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj856-guide-body">
+          <dl><dt>지도 이동</dt><dd><span class="dj807-guide-platform"><b>PC</b> 드래그</span><span class="dj807-guide-platform"><b>모바일</b> 한 손가락으로 밀기</span></dd>
+          <dt>확대·축소</dt><dd><span class="dj807-guide-platform"><b>PC</b> 마우스 휠</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락 벌리기/오므리기</span></dd>
+          <dt>회전</dt><dd><span class="dj807-guide-platform"><b>PC</b> 마우스 오른쪽 버튼 드래그</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락 회전</span></dd>
+          <dt>기울기(3D)</dt><dd><span class="dj807-guide-platform"><b>PC</b> 오른쪽 버튼을 누른 채 위아래로 드래그</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락을 함께 위아래로 이동</span></dd>
+          <dt>원위치</dt><dd><span class="dj807-guide-platform">오른쪽 나침반을 누르면 북쪽으로 맞춥니다.</span><span class="dj807-guide-platform">집 모양은 동작구 전체 보기입니다.</span></dd></dl>
+          <details class="dj803-ios-install-help dj8212-ios-install-help" aria-label="iPhone 홈 화면 앱 안내">
+            <summary aria-expanded="false"><span>iPhone에서 앱처럼 사용하기</span><span class="dj852-tip-chevron" aria-hidden="true">⌄</span></summary>
+            <div class="dj864-accordion-content">
+              <small class="dj856-ios-install-caption">Safari · 홈 화면 추가</small>
+              <div class="dj856-ios-install-steps">
+                <div><b>1</b><span>Safari에서 동작하는 안전지도를 엽니다.</span></div>
+                <div><b>2</b><span>화면 아래의 공유 버튼을 누릅니다.</span></div>
+                <div><b>3</b><span><strong>홈 화면에 추가</strong>를 선택합니다.</span></div>
+              </div>
+            </div>
+          </details>
+          <section class="dj-guide-release" aria-label="최신 업데이트 요약">
+            <div class="dj-guide-release-heading"><span>최근 업데이트</span><strong id="dj-guide-latest-version">v8.26.1</strong></div>
+            <p>지도 창의 드래그·헤더와 검색·시설·대중교통 화면을 개선했습니다.</p>
+            <button id="dj-guide-release-details" type="button">전체 업데이트 내역 보기</button>
+          </section>
+          <label class="map-gesture-guide-remember"><input id="map-gesture-guide-hide-next" type="checkbox">다음부터 안내 표시하지 않기</label>
+        </div>
+      </section>
+      <div class="map-actions" aria-label="지도 조작">
+        <button type="button" id="map-gesture-guide-open" title="지도 조작 안내" aria-label="지도 조작 안내 열기">?</button>
+        <button type="button" id="map-compass" title="북쪽 정렬 / 현재 정방향 확인" aria-label="북쪽 정렬 / 현재 정방향 확인"><span class="compass-direction"><span class="compass-n">N</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 6 18-6-4-6 4z"/></svg></span></button>
+        <button type="button" id="center-dongjak" title="동작구 전체 보기" aria-label="동작구 전체 보기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
+        <button type="button" id="toggle-road-width" title="추정 도로폭 보기" aria-label="도로폭 추정 레이어" aria-pressed="false"><svg class="dj-road-width-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3 4 21M16.8 3 20 21M12 4.5v3M12 10.5v3M12 16.5v3"/></svg><span class="dj-road-width-label">도로폭</span></button>
+        <button type="button" id="current-location" title="현재 위치 확인" aria-label="현재 위치 확인"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
+      </div>
+      <aside id="ped-tools-panel" class="ped-tools-panel" hidden aria-label="보행정보 도구 결과">
+        <div class="ped-tools-panel-head"><strong id="ped-tools-heading">보행정보</strong><button type="button" id="ped-tools-close" aria-label="보행정보 닫기"></button></div>
+        <p id="ped-tools-status" role="status" aria-live="polite"></p>
+        <div id="ped-tools-results" class="ped-tools-results"></div>
+        <button type="button" id="ped-tools-width" class="ped-tools-width" hidden>추정 도로폭 레이어 보기</button>
+      </aside>
+      <aside id="road-width-legend" class="road-width-legend" hidden aria-label="도로폭 범례">
+        <div class="road-width-legend-head"><strong>도로폭 추정 · 상도1동</strong><button type="button" id="road-width-legend-close" aria-label="도로폭 범례 닫기"></button></div>
+        <span class="roadwidth-note">상도1동 분석 화면 · 동작구 전체 원본 별도 보존</span>
+        <div><i style="background:#D94B45"></i> 4m 미만</div>
+        <div><i style="background:#F2A23A"></i> 4~8m 미만</div>
+        <div><i style="background:#299D78"></i> 8m 이상</div>
+        <div><i style="background:#94A3B8"></i> 미판정</div>
+        <small>모두 형상 기반 추정치입니다. 색상은 안전등급이 아니며, 저신뢰 구간은 연하게 표시됩니다.</small>
+      </aside>
+      <section id="transport-sheet" class="transport-sheet" aria-label="정류소 및 지하철역 교통정보" hidden>
+        <div class="handle"></div>
+        <div class="transport-panel-head">
+          <div><span id="transport-kind" class="section-label">교통정보</span><h2 id="transport-title">정류소 정보</h2><p id="transport-description"></p></div>
+          <button type="button" id="transport-close" class="detail-close" aria-label="교통정보 닫기"></button>
+        </div>
+        <div class="transport-chips" id="transport-chips"></div>
+        <div id="transport-mode-tabs" class="transport-mode-tabs" role="tablist" aria-label="교통정보 화면">
+          <button type="button" id="transport-tab-live" role="tab" aria-selected="true" aria-pressed="true" aria-controls="transport-arrivals">실시간</button>
+          <button type="button" id="transport-tab-hours" role="tab" aria-selected="false" aria-pressed="false" aria-controls="transport-service-hours">시간표</button>
+        </div>
+        <div class="transport-section-title transport-arrivals-title"><strong>실시간 도착정보</strong><div class="transport-updated-actions"><span class="transport-auto-refresh-label">15초 자동 갱신</span><span id="transport-update-time"></span><button type="button" id="transport-refresh">다시 조회</button></div></div>
+        <div id="transport-arrivals" class="transport-arrivals" aria-live="polite">연결 상태를 확인하는 중입니다.</div>
+        <div id="transport-neighbors" class="transport-neighbors" aria-label="호선별 이전역과 다음역"></div>
+        <div class="transport-selection-box">
+          <div class="transport-selection-actions">
+            <button type="button" id="transport-use-start">여기서 출발</button>
+            <button type="button" id="transport-use-end">여기로 도착</button>
+          </div>
+        </div>
+        <div class="transport-section-title" id="transport-line-section-heading"><strong>경유 노선 / 역 정보</strong></div>
+        <div id="transport-lines" class="transport-lines" aria-live="polite">정보를 불러오는 중입니다.</div>
+        <div class="transport-section-title" id="transport-hours-heading"><strong>첫차 · 막차 · 계획 운행시간표</strong></div>
+        <div id="transport-service-hours" class="transport-service-hours" aria-live="polite">정류장 또는 역을 선택하면 운행시간표를 조회합니다.</div>
+        <p class="transport-hours-disclaimer">첫차·막차 시간은 계획 시간표입니다. 실제 운행 및 막차 통과 여부는 지연·변경될 수 있습니다. 정보가 없으면 통과 여부를 단정하지 않습니다.</p>
+      </section>
+      <section id="overview-sheet" class="sheet overview-sheet" aria-label="동작구 안전정보 안내" hidden>
+        <div id="overview-sheet-handle" class="handle" aria-hidden="true"></div>
+        <div class="sheet-top">
+          <div>
+            <h1>안전정보</h1>
+          </div>
+          <div class="sheet-top-actions">
+            <span class="status-tag" id="points-count">등록 0곳</span>
+            <button type="button" id="overview-sheet-close" class="sheet-dismiss" aria-label="안전정보 안내 닫기"></button>
+          </div>
+        </div>
+        <div class="overview-boundary-actions">
+        </div>
+      </section>
+      <section id="admin-dong-picker" class="admin-dong-picker" aria-label="동작구 행정동 선택" hidden>
+        <header class="dj-sheet-chrome" data-dj-sheet-header="admin">
+          <span class="dj-sheet-chrome-grip" aria-hidden="true"></span>
+          <span class="dj836-edge-drag" aria-hidden="true"></span>
+          <div class="dj-sheet-chrome-title">
+            <svg class="dj-sheet-chrome-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.6" y="3.6" width="6.4" height="6.4" rx="1"/><rect x="14" y="3.6" width="6.4" height="6.4" rx="1"/><rect x="3.6" y="14" width="6.4" height="6.4" rx="1"/><rect x="14" y="14" width="6.4" height="6.4" rx="1"/></svg>
+            <h2>행정동 선택</h2>
+          </div>
+          <button type="button" class="dj-sheet-chrome-close page-dismiss" id="admin-dong-close" aria-label="행정동 선택 닫기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj836-sheet-body">
+        <p id="admin-dong-status">경계 데이터를 불러오는 중입니다.</p>
+        <div id="admin-dong-list" class="admin-dong-list"></div>
+        <button type="button" id="admin-dong-clear" class="admin-dong-clear">선택 해제 · 동작구 전체 보기</button>
+      
+        </div>
+      </section>
+      <!-- 2단계: 위치 마커 선택 시 표시되는 상세정보 카드 -->
+      <section id="detail-sheet" class="detail-sheet" aria-label="보행환경 지점 상세정보" hidden>
+        <div class="handle"></div>
+        <div class="detail-topline">
+          <span id="detail-subtitle" class="section-label">동작구 · 조사 후보</span>
+          <button type="button" id="close-detail" class="detail-close" aria-label="상세정보 닫기"></button>
+        </div>
+        <div class="detail-titleline">
+          <h2 id="detail-title">조사 후보지</h2>
+          <span class="status-tag">조사 후보</span>
+        </div>
+        <div class="detail-photo" id="detail-photo" aria-label="지점 현장사진">
+          <img id="detail-photo-image" alt="등록된 지점 현장사진" hidden />
+          <div id="detail-photo-placeholder" class="photo-placeholder">
+            <span class="detail-photo-icon" aria-hidden="true">▧</span>
+            <span>등록된 현장사진이 없습니다</span>
+          </div>
+        </div>
+        <input id="detail-photo-input" type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="현장사진 파일 선택" />
+        <button type="button" id="upload-photo" class="photo-upload-button">＋ 현장사진 추가 / 교체</button>
+        <button type="button" id="remove-photo" class="photo-remove-button" hidden>사진 삭제</button>
+        <div class="detail-info">
+          <div><span>자료 유형</span><strong id="detail-category">보행환경 조사</strong></div>
+          <div><span>확인 상태</span><strong>조사 후보 · 검증 전</strong></div>
+          <div><span>관찰 내용</span><strong id="detail-observation">미입력</strong></div>
+          <div><span>개선방안</span><strong id="detail-improvement">미입력</strong></div>
+        </div>
+        <section id="detail-attachment-section" class="point-detail-attachments" aria-label="등록된 지점 첨부파일">
+          <div class="point-attachment-heading"><strong>첨부 사진 · 문서</strong><span id="detail-attachment-count"></span></div>
+          <div id="detail-attachment-list" class="point-attachment-list" aria-live="polite"></div>
+          <small>첨부자료는 현재 기기에 보관됩니다. 다른 기기로 자동 전송되지 않습니다.</small>
+        </section>
+        <p class="detail-disclaimer">등록한 위치는 조사 후보이며, 위험 여부와 개선방안은 현장 확인 전까지 확정된 사실이 아닙니다.</p>
+        <button type="button" id="bookmark-point" class="photo-upload-button bookmark-button">☆ 관심 지점으로 저장</button>
+        <button type="button" id="edit-point" class="photo-upload-button edit-point-button">✎ 조사내용 수정</button>
+        <button type="button" id="back-to-map" class="primary-btn"><span>지도 돌아가기</span><span aria-hidden="true">↘</span></button>
+        <button type="button" id="delete-point" class="subtle-btn danger-btn">이 지점 삭제</button>
+      </section>
+      <section id="entry-sheet" class="entry-sheet" aria-label="조사 후보지 등록" hidden>
+        <div class="handle"></div>
+        <div class="entry-head"><div><span class="section-label">NEW LOCATION</span><h2 id="entry-heading">조사 지점 등록</h2></div><button type="button" id="cancel-add" class="detail-close" aria-label="등록 취소"></button></div>
+        <div id="chosen-position" class="coordinate-note">선택한 좌표</div>
+        <form id="point-form">
+          <label for="point-title">지점 이름 <span aria-hidden="true">*</span></label>
+          <input id="point-title" name="title" required maxlength="70" placeholder="예: ① 골목길 보행공간 조사" />
+          <label for="point-category">조사 유형</label>
+          <select id="point-category" name="category">
+            <option>보행공간</option><option>교차로·시야</option><option>횡단시설</option><option>조명·시설물</option><option>기타</option>
+          </select>
+          <label for="point-observation">관찰 내용</label>
+          <textarea id="point-observation" name="observation" rows="2" maxlength="600" placeholder="현장에서 관찰했거나 확인할 사항을 적으세요."></textarea>
+          <label for="point-improvement">개선방안 (선택)</label>
+          <textarea id="point-improvement" name="improvement" rows="2" maxlength="600" placeholder="검토할 개선방안을 적으세요."></textarea>
+          <section class="point-attachment-editor" aria-label="조사 지점 사진 및 파일 첨부">
+            <div class="point-attachment-heading"><strong>사진 · 파일 첨부</strong><span>선택사항</span></div>
+            <p>현장 사진과 조사 문서를 등록할 때 함께 보관할 수 있습니다.</p>
+            <label for="point-attachment-input" class="point-attachment-pick">＋ 사진 또는 파일 선택</label>
+            <input id="point-attachment-input" type="file" multiple
+              accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.pdf,.txt,.csv,.hwp,.hwpx,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+              aria-describedby="point-attachment-help" />
+            <div id="point-attachment-list" class="point-attachment-list" aria-live="polite"></div>
+            <small id="point-attachment-help">최대 6개 · 개당 8MB · 총 24MB. 사진·파일은 이 기기의 브라우저에만 저장됩니다. 구청에 제출되지 않습니다.</small>
+          </section>
+          <button type="submit" class="primary-btn"><span id="entry-submit-label">조사 후보지 저장</span><span aria-hidden="true">✓</span></button>
+        </form>
+      </section>
+
+      <!-- 참고 시안의 기능을 경량 서비스에 맞게 재구성한 보조 화면입니다. -->
+      <main id="route-panel" class="page-panel" data-page="route" hidden aria-label="도보 길찾기">
+        <header class="dj-sheet-chrome" data-dj-sheet-header="route">
+          <span class="dj-sheet-chrome-grip" aria-hidden="true"></span>
+          <span class="dj836-edge-drag" aria-hidden="true"></span>
+          <div class="dj-sheet-chrome-title">
+            <svg class="dj-sheet-chrome-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg>
+            <h2>도보 길찾기</h2>
+          </div>
+          <button type="button" class="dj-sheet-chrome-close page-dismiss" data-close-page="route" aria-label="길찾기 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj836-sheet-body">
+        <p class="dj-page-intro">장소를 지정한 뒤 경로를 선택하면 GPS 이동 안내·경로 이탈 자동 재탐색·선택형 음성 안내를 이용할 수 있습니다.</p>
+        <div class="route-card">
+          <div class="route-location-row">
+            <span class="route-dot start" aria-hidden="true"></span>
+            <div class="route-location-text"><span>출발지</span><strong id="route-start-label">선택되지 않음</strong></div>
+            <div class="route-select-actions"><button type="button" class="route-mini-btn search" id="route-search-start">검색</button><button type="button" class="route-mini-btn" id="route-pick-start">지도</button></div>
+          </div>
+          <button type="button" class="route-gps-btn" id="route-gps-start">⌖ 현재 위치를 출발지로 지정</button>
+          <div class="route-location-divider"></div>
+          <div class="route-location-row">
+            <span class="route-dot end" aria-hidden="true"></span>
+            <div class="route-location-text"><span>목적지</span><strong id="route-end-label">선택되지 않음</strong></div>
+            <div class="route-select-actions"><button type="button" class="route-mini-btn search" id="route-search-end">검색</button><button type="button" class="route-mini-btn" id="route-pick-end">지도</button></div>
+          </div>
+          <section id="route-place-search" class="route-place-search" hidden aria-label="장소명·주소 검색">
+            <div class="route-place-search-head"><strong id="route-search-title">출발지 검색</strong><button type="button" id="route-search-close" aria-label="장소 검색 닫기"></button></div>
+            <form id="route-search-form" class="route-search-form">
+              <input id="route-search-query" type="search" maxlength="80" placeholder="역명 · 정류장 · 건물명 · 주소" aria-label="검색할 장소 또는 주소" required />
+              <button type="submit" id="route-search-submit">검색</button>
+            </form>
+            <p id="route-search-status" class="route-search-status" role="status" aria-live="polite">장소명 또는 주소를 입력하고 검색을 누르세요.</p>
+            <div id="route-search-results" class="route-search-results" aria-live="polite"></div>
+            <div id="route-search-confirm" class="route-search-confirm" hidden>
+              <span class="section-label">선택 장소 확인</span><strong id="route-search-confirm-name"></strong>
+              <p id="route-search-confirm-address"></p>
+              <div class="route-search-confirm-actions"><button type="button" id="route-search-back">다른 결과</button><button type="button" id="route-search-accept">이 위치로 설정</button></div>
+            </div>
+            </section>
+          <button type="button" id="route-calc" class="primary-btn route-calc"><span>도보 경로 찾기</span><span aria-hidden="true">↗</span></button>
+          <p id="route-status" class="route-status" role="status" aria-live="polite"></p>
+          <div id="route-variants" class="route-variants" hidden aria-label="도보 경로 비교">
+            <div class="route-variant-choice">
+              <button type="button" data-route-variant="standard" aria-pressed="true">일반 보행 경로</button>
+              <button type="button" data-route-variant="gentle" aria-pressed="false">경사 회피 우선</button>
+            </div>
+            <p>동작구 내 서울시 도보 네트워크를 우선 사용합니다. 경사도는 지형 기반 추정이며 무계단·휠체어 통행 가능을 보장하지 않습니다. 범위 밖에서는 외부 경로 서버를 사용합니다.</p>
+          </div>
+          <div id="route-summary" class="route-summary" hidden>
+            <strong id="route-length">—</strong>
+            <span id="route-duration">—</span>
+            <p id="route-data-note" class="route-data-note" aria-live="polite"></p>
+            <button type="button" id="route-return-map" class="route-restore">지도에서 경로 보기 →</button>
+            <div class="route-start-options">
+              <button type="button" id="route-start-gps" class="guide-button">GPS 안내 시작</button>
+            </div>
+          </div>
+          <button type="button" id="route-clear" class="route-clear">경로 및 지정 위치 초기화</button>
+        </div>
+        <p class="page-note">동작구 내에서는 서울시 도보 링크(2026-11-11 수집)로 경로를 계산합니다. 보행자 통행 허용 링크라도 차도와 혼용될 수 있으며 실제 보도·계단·공사 및 통행제한은 검증되지 않았습니다. 동작구 경계 밖, 단절 또는 데이터 오류 시에는 외부 시험용 경로 서버로 출발·도착 좌표를 전송합니다.</p>
+      
+        </div>
+      </main>
+      <!-- 지도 위치 선택 안내 -->
+      <div id="route-pick-hint" class="route-pick-hint" hidden>
+        <span id="route-pick-text">지도에서 출발지를 누르세요.</span>
+        <button type="button" id="route-pick-cancel">취소</button>
+      </div>
+      <!-- '선택한 위치 확인'은 구형 UI 명칭입니다. 현재는 장소 확인창으로 표기합니다. -->
+      <section id="route-transit-confirm" class="route-transit-confirm" hidden aria-label="길찾기 장소 확인">
+        <span class="route-confirm-kicker">장소 확인</span>
+        <strong id="route-transit-confirm-name">선택한 장소</strong>
+        <div id="route-transit-confirm-lines" class="route-transit-confirm-lines"></div>
+        <p id="route-transit-confirm-desc">지도에서 표시된 마커 위치가 맞습니까?</p>
+        <div class="route-transit-confirm-actions"><button type="button" id="route-transit-retry">다시 선택</button><button type="button" id="route-transit-accept">이 위치 확인</button></div>
+      </section>
+      <div id="community-map-hint" class="community-map-hint" hidden>지도에서 게시글에 연결할 위치를 눌러 주세요. <button type="button" id="community-map-cancel">취소</button></div>
+      <!-- 경로가 표시된 지도에서 사용하는 간략한 요약 카드 -->
+      <section id="route-map-card" class="route-map-card" hidden aria-label="도보 경로 결과">
+        <div><small id="route-map-source">도보 경로 · 안전도 미평가</small><strong id="route-map-metrics">—</strong></div>
+        <div class="route-map-card-actions">
+          <button type="button" id="route-guide-start">GPS 안내</button>
+          <button type="button" id="route-map-edit">변경</button>
+          <button type="button" id="route-map-close">종료</button>
+        </div>
+      </section>
+      <section id="nav-live-card" class="nav-live-card" aria-label="진행 중인 도보 안내" hidden>
+        <div class="nav-live-head"><span id="nav-mode-tag">GPS 안내</span><span id="nav-accuracy">GPS 대기 중</span></div>
+        <strong id="nav-instruction">위치를 확인하고 있습니다…</strong>
+        <div class="nav-live-metrics"><div><small>남은 거리</small><b id="nav-remain-distance">—</b></div><div><small>예상 시간</small><b id="nav-remain-time">—</b></div></div>
+        <p id="nav-warning" aria-live="polite">현재 위치를 확인하고 있습니다.</p>
+        <div class="nav-live-options" aria-label="도보 안내 설정">
+          <button type="button" id="nav-voice" aria-pressed="false">음성 안내 꺼짐</button>
+          <button type="button" id="nav-orientation" aria-pressed="true">진행방향 보기</button>
+        </div>
+        <div class="nav-live-actions"><button type="button" id="nav-follow">◎ 내 위치 따라가기</button><button type="button" id="nav-stop">안내 종료</button></div>
+      </section>
+      <main id="participation-panel" class="page-panel" data-page="participate" hidden aria-label="동네 참여">
+        <header class="dj-sheet-chrome" data-dj-sheet-header="participate">
+          <span class="dj-sheet-chrome-grip" aria-hidden="true"></span>
+          <span class="dj836-edge-drag" aria-hidden="true"></span>
+          <div class="dj-sheet-chrome-title">
+            <svg class="dj-sheet-chrome-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.2 15.4-.9 5.3 5.3-.9 11-11a2.6 2.6 0 0 0-3.7-3.7zM13.8 7.2l3 3"/></svg>
+            <h2>우리 동네 이야기</h2>
+          </div>
+          <button type="button" class="dj-sheet-chrome-close page-dismiss" data-close-page="participate" aria-label="동네 참여 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj836-sheet-body">
+        <p class="dj-page-intro">보행 중 불편했던 곳을 지도에 남기거나, 개선 아이디어를 기록할 수 있습니다.</p>
+        <div class="community-heading-row">
+          <div><span class="micro-label">게시글</span><h3>동네 커뮤니티</h3><p>보행환경에 관한 이야기와 개선 의견을 이 브라우저에 기록합니다.</p></div>
+          <button type="button" id="community-compose-toggle" class="community-compose-toggle">＋ 글쓰기</button>
+        </div>
+        <div class="community-toolbar">
+          <div class="community-category-tabs" aria-label="게시글 분류">
+            <button type="button" class="community-filter active" data-community-filter="전체" aria-pressed="true">전체</button>
+            <button type="button" class="community-filter" data-community-filter="보행 불편" aria-pressed="false">보행 불편</button>
+            <button type="button" class="community-filter" data-community-filter="개선 제안" aria-pressed="false">개선 제안</button>
+            <button type="button" class="community-filter" data-community-filter="동네 질문" aria-pressed="false">동네 질문</button>
+          </div>
+          <select id="community-sort" aria-label="게시글 정렬"><option value="new">최신순</option><option value="popular">공감순</option></select>
+        </div>
+        <form id="community-form" class="community-form" hidden>
+          <div class="community-form-top"><strong>새 게시글</strong><button type="button" id="community-compose-close" aria-label="글쓰기 닫기"></button></div>
+          <label for="community-category">게시글 유형</label>
+          <select id="community-category"><option>보행 불편</option><option>개선 제안</option><option>동네 질문</option></select>
+          <div id="community-issue-details" class="community-issue-details">
+            <label for="community-issue-type">보행불편 유형</label>
+            <select id="community-issue-type"><option>보도 단차</option><option>보행공간 협소</option><option>횡단시설</option><option>조명·시야</option><option>시설물 장애</option><option>기타</option></select>
+            <label for="community-priority">현장 확인 필요도</label>
+            <select id="community-priority"><option>일반 확인</option><option>우선 확인 요청</option></select>
+            <p>분류는 이용자가 선택한 기록입니다. 실제 안전등급이나 행정기관 처리상태가 아닙니다.</p>
+          </div>
+          <label for="community-nickname">표시 이름</label>
+          <input id="community-nickname" maxlength="20" placeholder="익명 주민 (선택)" autocomplete="off" />
+          <label for="community-title">제목</label>
+          <input id="community-title" maxlength="70" required placeholder="예: 골목길 보행공간에 대한 의견" />
+          <label for="community-text">내용</label>
+          <textarea id="community-text" maxlength="1200" rows="4" required placeholder="어떤 상황인지, 무엇이 개선되면 좋을지 작성하세요."></textarea>
+          <div class="community-attach-row"><label for="community-photo-input" class="community-attach-action">▧ 사진 첨부</label><button type="button" id="community-map-pick" class="community-attach-action">⌖ 지도 위치 선택</button></div>
+          <input type="file" id="community-photo-input" accept="image/jpeg,image/png,image/webp" hidden />
+          <div id="community-photo-preview" class="community-photo-preview" hidden><img id="community-photo-image" alt="첨부 사진 미리보기" /><button type="button" id="community-photo-remove">사진 제거</button></div>
+          <p id="community-location-label" class="community-location-label">위치 지정 없음 · 선택사항</p>
+          <button type="submit" class="primary-btn"><span>게시글 저장</span><span>✓</span></button>
+          <p class="community-form-note">작성한 내용은 이 브라우저에만 저장되며 다른 사용자와 공유되거나 행정기관에 접수되지 않습니다.</p>
+        </form>
+        <div id="community-list" class="community-feed" aria-live="polite"></div>
+        <details class="community-report-secondary"><summary>지도에서 보행환경 제보하기</summary>
+        <div class="feature-card report-feature"><div class="feature-icon">＋</div><div><strong>지도에서 보행환경 제보하기</strong><p>위치를 지정하고 관찰 내용·사진·개선 제안을 기록합니다.</p><button type="button" id="participate-register" class="inline-action">지도에서 위치 선택하기 ↗</button></div></div>
+        <p class="local-only">이 브라우저에만 저장되는 기록이며 동작구청·안전신문고로 접수되지 않습니다.</p>
+        </details>
+      
+        </div>
+      </main>
+      <main id="news-panel" class="page-panel" data-page="news" hidden aria-label="동작구 지역 소식">
+        <header class="dj-sheet-chrome" data-dj-sheet-header="news">
+          <span class="dj-sheet-chrome-grip" aria-hidden="true"></span>
+          <span class="dj836-edge-drag" aria-hidden="true"></span>
+          <div class="dj-sheet-chrome-title">
+            <svg class="dj-sheet-chrome-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+            <h2>동작구 소식</h2>
+          </div>
+          <button type="button" class="dj-sheet-chrome-close page-dismiss" id="news-close-to-map" aria-label="동작 소식 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj836-sheet-body">
+        <div class="dongjak-news-toolbar">
+          <div class="dongjak-news-tabs" role="group" aria-label="소식 유형">
+            <button type="button" class="active" data-news-source="media" aria-pressed="true">지역 뉴스</button>
+            <button type="button" data-news-source="official" aria-pressed="false">구청 소식</button>
+          </div>
+          <button id="dongjak-news-refresh" type="button">새로고침</button>
+        </div>
+        <p id="dongjak-news-status" class="dongjak-news-status" role="status" aria-live="polite">소식을 조회하지 않았습니다.</p>
+        <div id="dongjak-news-list" class="dongjak-news-list" aria-live="polite"></div>
+        <div class="dongjak-news-links">
+          <a href="https://www.dongjak.go.kr/portal/bbs/B0000022/list.do?menuNo=200638" target="_blank" rel="noopener noreferrer">동작구청 공식 공지사항 확인 ↗</a>
+          <a href="https://news.google.com/search?q=%EB%8F%99%EC%9E%91%EA%B5%AC&hl=ko&gl=KR&ceid=KR%3Ako" target="_blank" rel="noopener noreferrer">Google 뉴스에서 더 보기 ↗</a>
+        </div>
+      
+        </div>
+      </main>
+      <main id="mine-panel" class="page-panel" data-page="mine" hidden aria-label="내 정보">
+        <header class="dj-sheet-chrome" data-dj-sheet-header="mine">
+          <span class="dj-sheet-chrome-grip" aria-hidden="true"></span>
+          <span class="dj836-edge-drag" aria-hidden="true"></span>
+          <div class="dj-sheet-chrome-title">
+            <svg class="dj-sheet-chrome-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.3-3.7 3-6.1 7-6.1s6.7 2.4 7 6.1"/></svg>
+            <h2>내 정보</h2>
+          </div>
+          <button type="button" class="dj-sheet-chrome-close page-dismiss" data-close-page="mine" aria-label="내 정보 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
+        </header>
+        <div class="dj836-sheet-body">
+        <p class="dj-page-intro">즐겨찾기와 계정 정보를 관리할 수 있습니다.</p>
+        <div class="stat-grid"><div><strong id="my-count">0</strong><small>등록 지점</small></div><div><strong id="my-saved-count">0</strong><small>관심 지점</small></div><div><strong id="my-note-count">0</strong><small>내 게시글</small></div></div>
+        <div class="page-section-title">관심 지점</div><div id="my-favorites" class="records-list"></div>
+        <div class="page-section-title">등록한 조사 지점</div><div id="my-points" class="records-list"></div>
+        <p class="page-note">현재 계정·서버 연결이 없으므로 다른 휴대전화나 팀원과 자동 공유되지 않습니다.</p>
+      
+        </div>
+      </main>
+      <aside id="pza-road-sheet" class="pza-road-sheet" role="dialog" aria-modal="false" aria-labelledby="pza-road-title" hidden>
+        <div class="pza-sheet-head">
+          <div><small id="pza-road-label">보행환경 검토 구간</small><strong id="pza-road-title">도로 정보</strong></div>
+          <button type="button" id="pza-road-close" aria-label="도로 설명 닫기"></button>
+        </div>
+        <div id="pza-road-guidance" class="pza-road-guidance" aria-live="polite"></div>
+        <div class="pza-road-core" aria-label="기초 공간정보">
+          <span>추정 도로폭<b id="pza-road-width">미확인</b></span>
+          <span>가까운 보호구역 경계까지<b id="pza-road-distance">미확인</b></span>
+        </div>
+        <p id="pza-road-summary" class="pza-sheet-summary"></p>
+        <details id="pza-road-details">
+          <summary>공간분석 수치 자세히</summary>
+          <div id="pza-road-evidence" class="pza-road-evidence"></div>
+        </details>
+        <details id="pza-road-verification-details">
+          <summary>1~3차 검증 현황</summary>
+          <div id="pza-road-verification" class="pza-road-evidence"></div>
+        </details>
+        <details id="pza-fieldwork-details">
+          <summary>연구팀 조사 기록 (이 브라우저에만 저장)</summary>
+          <p class="pza-fieldwork-warning">관리·연구용 기록입니다. 직접 확인한 내용만 입력하세요. 이 기록은 일반 이용자의 공식 위험등급에 반영되지 않습니다.</p>
+          <form id="pza-fieldwork-form" class="pza-fieldwork-form">
+            <div class="pza-survey-grid">
+              <label>보도·보차분리 <select name="sidewalk"><option>미확인</option><option>있음</option><option>일부 있음</option><option>없음</option></select></label>
+              <label>장애물 <select name="obstacles"><option>미확인</option><option>없음</option><option>있음</option></select></label>
+              <label>조명 환경 <select name="lighting"><option>미확인</option><option>충분해 보임</option><option>부족해 보임</option><option>야간 확인 필요</option></select></label>
+              <label>횡단시설 <select name="crossing"><option>미확인</option><option>시설 확인</option><option>개선 검토 필요</option><option>해당 없음</option></select></label>
+              <label>시설 이용 동선 <select name="facility_route"><option>미확인</option><option>이용 동선 관찰</option><option>이용 동선 미확인</option></select></label>
+              <label>검토 상태 <select name="review_status"><option>미조사</option><option>조사 중</option><option>현장 확인</option><option>추가 검증 필요</option></select></label>
+              <label>조사 날짜 <input name="survey_date" type="date" /></label>
+              <label>사진 파일명 (저장 안 함) <input name="photo_reference" maxlength="180" placeholder="예: 현장01.jpg" /></label>
+            </div>
+            <label>메모 <textarea name="notes" maxlength="800" placeholder="자료 출처·관찰 근거·추가 검증 내용을 기입하세요."></textarea></label>
+            <div class="pza-survey-actions"><button type="submit">이 기기에 저장</button><button type="button" id="pza-fieldwork-remove">기록 삭제</button></div>
+          </form>
+          <p id="pza-fieldwork-status" class="pza-fieldwork-warning" role="status" aria-live="polite"></p>
+          <p id="pza-fieldwork-count" class="pza-fieldwork-warning"></p>
+        </details>
+      </aside>
+      <nav id="bottom-nav" class="bottom-nav" aria-label="앱 주요 기능">
+        <button type="button" class="nav-tab" data-tab="route"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="dj827-nav-glyph" focusable="false" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span><span>길찾기</span></button>
+        <button type="button" class="nav-tab" data-tab="participate"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="dj827-nav-glyph" focusable="false" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.2 15.4-.9 5.3 5.3-.9 11-11a2.6 2.6 0 0 0-3.7-3.7zM13.8 7.2l3 3"/></svg></span><span>커뮤니티</span></button>
+        <button type="button" class="nav-tab active" data-tab="map" aria-current="page"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="dj827-nav-glyph" focusable="false" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><rect x="7" y="7" width="3.4" height="3.4" rx=".6"/><rect x="13.6" y="7" width="3.4" height="3.4" rx=".6"/><rect x="7" y="13.6" width="3.4" height="3.4" rx=".6"/><rect x="13.6" y="13.6" width="3.4" height="3.4" rx=".6"/></svg></span><span>안전지도</span></button>
+        <button type="button" class="nav-tab" data-tab="news"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" class="dj827-nav-glyph" focusable="false" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span>동작 소식</span></button>
+        <button type="button" class="nav-tab" data-tab="mine"><span class="nav-icon nav-icon-user" aria-hidden="true"><svg viewBox="0 0 24 24" class="dj827-nav-glyph" focusable="false" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.3-3.7 3-6.1 7-6.1s6.7 2.4 7 6.1"/></svg></span><span>내 정보</span></button>
+      </nav>
+
+      <div id="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script>
+      // Smoothly reveal the preload logo after the image has decoded.
+      (function(){
+        var logo=document.querySelector('#map-startup-overlay .map-startup-logo img');
+        if(!logo)return;
+        function reveal(){
+          if(logo.decode){logo.decode().catch(function(){}).then(function(){logo.classList.add('is-ready');});}
+          else logo.classList.add('is-ready');
+        }
+        if(logo.complete&&logo.naturalWidth>0)reveal();
+        else logo.addEventListener('load',reveal,{once:true});
+      })();
+      // Safety net if the main JS bundle itself fails to execute. The user
+      // must never be trapped behind a permanent loading screen.
+      window.setTimeout(function(){
+        var pane=document.getElementById('map-startup-overlay');
+        if(!pane||pane.hidden||pane.classList.contains('is-hidden'))return;
+        var text=document.getElementById('map-startup-message');
+        var note=document.getElementById('map-startup-note');
+        var button=document.getElementById('map-startup-continue');
+        if(text)text.textContent='지도를 불러오는 데 시간이 걸리고 있습니다';
+        if(note)note.textContent='연결 상태를 확인하거나 기본 지도 화면을 먼저 열어 주세요.';
+        if(button){button.hidden=false;button.onclick=function(){pane.hidden=true;};}
+      },25000);
+    </script>
+    <script type="module" src="/src/v827-navigation-state.js"></script>
+    <script type="module" src="/src/v862-map-theme-zoom-guard.js"></script>
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/mobile-chrome-v790.js"></script>
+    <script type="module" src="/src/mobile-ui-v792-fixes.js"></script>
+    <script type="module" src="/src/mobile-pwa-status-tone-v793.js"></script>
+    <script type="module" src="/src/mobile-toolbar-v794.js"></script>
+    <script type="module" src="/src/app-artwork-v7104.js"></script>
+    <script type="module" src="/src/v711-experience.js"></script>
+    <script type="module" src="/src/v7120-settings.js"></script>
+    <script type="module" src="/src/v803-ui-consistency.js"></script>
+    <script type="module" src="/src/v7120-night-panel.js"></script>
+    <script type="module" src="/src/v7121-ui-behavior.js"></script>
+    <script type="module" src="/src/v7130-ux.js"></script>
+    <script type="module" src="/src/safety-workbench-entry-v7104.js"></script>
+    <script type="module" src="/platforms/entry.js"></script>
+    <script type="module" src="/src/v800-ui-architecture.js"></script>
+    <script type="module" src="/src/v802-panel-motion.js"></script>
+    <script type="module" src="/src/v804-ui-fixes.js"></script>
+    <script type="module" src="/src/v805-responsive-readability.js"></script>
+    <script type="module" src="/src/v806-unified-ui.js"></script>
+    <script type="module" src="/src/v807-ui-refine.js"></script>
+    <script type="module" src="/src/v811-mobile-experience.js"></script>
+    <script type="module" src="/src/v817-dialog-search-safety.js"></script>
+    <script type="module" src="/src/v818-ux-settings.js"></script>
+    <script type="module" src="/src/v819-safety-one-screen.js"></script>
+    <script type="module" src="/src/v804-new-features.js"></script>
+    <script type="module" src="/src/v823-route-panel.js"></script>
+    <script type="module" src="/src/dj-v8212-sheet-controller.js"></script>
+    <script type="module" src="/src/v824-auth-keyboard.js"></script>
+    <script type="module" src="/src/v825-navigation-experience.js"></script>
+    <!-- GPS location-based walking safety: standalone, does not replace GPS tracking -->
+    <script type="module" src="/src/gps-safety-popup.js"></script>
+    <script type="module" src="/src/v831-swipe-feature-toolbar.js"></script>
+    <script type="module" src="/src/v833-home-reset.js"></script>
+    <script type="module" src="/src/v834-my-info.js"></script>
+    <script type="module" src="/src/v836-mobile-controls.js"></script>
+    <script type="module" src="/src/v8215-transit-auth-bus-sheet.js"></script>
+    <script type="module" src="/src/v832-mobile-interaction.js"></script>
+    <script type="module" src="/src/v840-coordinated-ui.js"></script>
+    <script type="module" src="/src/v841-route-and-tips.js"></script>
+    <script type="module" src="/src/v845-mobile-motion.js"></script>
+    <script type="module" src="/src/v852-mobile-ux.js"></script>
+    <script type="module" src="/src/v854-weather-desktop.js"></script>
+    <script type="module" src="/src/v854-language.js"></script>
+    <script type="module" src="/src/v854-tip-marquee.js"></script>
+    <script type="module" src="/src/v856-ui-completion.js"></script>
+    <script type="module" src="/src/v857-requested-ux.js"></script>
+    <script type="module" src="/src/v860-onboarding.js"></script>
+    <script type="module" src="/src/v861-mobile-sheet-repair.js"></script>
+    <script type="module" src="/src/v861-requested-ux.js"></script>
+    <script type="module" src="/src/v864-refinements.js"></script>
+    <script type="module" src="/src/v862-night-analysis-session.js"></script>
+    <script type="module" src="/src/v864-facility-detail-redesign.js"></script>
+    <script type="module" src="/src/v870-mobile-repairs.js"></script>
+    <script type="module" src="/src/v874-comprehensive-ui.js"></script>
+    <script type="module" src="/src/v875-mobile-stability.js"></script>
+    <script type="module" src="/src/v877-mobile-settings.js"></script>
+    <script type="module" src="/src/v890-mobile-ai-orb.js"></script>
+    <script type="module" src="/src/v891-mobile-hud-ai-logo.js"></script>
+  </body>
+</html>

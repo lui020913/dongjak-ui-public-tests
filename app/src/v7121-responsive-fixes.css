@@ -1,0 +1,204 @@
+/* v7.12.0 user-requested corrective layout, 2026-11-12.
+ * Presentation only: map, transport layers and routing calculations untouched.
+ * Theme attributes apply to #app and html to support iOS PWA transitions.
+ */
+#app#app{
+  --dj-route-card-bg:var(--dj-ui-bg,#fff);
+  --dj-route-ink:var(--dj-ui-text,#213d33);
+  --dj-route-muted:var(--dj-ui-subtext,#6b8178);
+  --dj-route-stroke:var(--dj-ui-border,#dce8e2);
+  --dj-route-secondary:var(--dj-ui-field,#f0f7f3);
+}
+#app#app[data-theme="dark"],html[data-theme="dark"] #app#app{
+  --dj-route-card-bg:#20373c;
+  --dj-route-ink:#e8f5ef;
+  --dj-route-muted:#b3c8c0;
+  --dj-route-stroke:#49645e;
+  --dj-route-secondary:#2b4946;
+}
+
+/* One complete location-pick instruction; never draw a floating toast on top. */
+#app#app.route-picking #toast{display:none!important;}
+#app#app #route-pick-hint:not([hidden]){
+  box-sizing:border-box!important;
+  background:var(--dj-route-card-bg)!important;color:var(--dj-route-ink)!important;
+  border:1px solid var(--dj-route-stroke)!important;
+  box-shadow:0 10px 35px rgba(9,39,32,.17)!important;
+  border-radius:20px!important;gap:12px!important;
+  font-size:14px!important;line-height:1.45!important;font-weight:800!important;
+}
+#app#app #route-pick-hint #route-pick-cancel{
+  background:var(--dj-route-secondary)!important;color:var(--dj-route-ink)!important;
+  border:1px solid var(--dj-route-stroke)!important;border-radius:11px!important;
+  min-height:41px!important;min-width:66px!important;font-size:13px!important;
+}
+
+/* Confirmation and route summary share the same UI tokens as tab sheets. */
+#app#app :is(#route-transit-confirm,#route-map-card,#nav-live-card):not([hidden]){
+  box-sizing:border-box!important;background:var(--dj-route-card-bg)!important;
+  color:var(--dj-route-ink)!important;border:1px solid var(--dj-route-stroke)!important;
+  box-shadow:0 14px 38px rgba(8,32,30,.18)!important;
+  border-radius:24px!important;
+}
+#app#app #route-transit-confirm .route-confirm-kicker{
+  display:block;color:var(--dj-route-muted)!important;font-size:12px!important;
+  font-weight:750!important;letter-spacing:0!important;margin-bottom:7px!important;
+}
+#app#app #route-transit-confirm>strong{
+  color:var(--dj-route-ink)!important;font-weight:850!important;
+  font-size:clamp(19px,5vw,24px)!important;line-height:1.3!important;
+  overflow-wrap:anywhere!important;margin:0 0 9px!important;
+}
+#app#app #route-transit-confirm>p{
+  color:var(--dj-route-muted)!important;font-size:13px!important;
+  line-height:1.4!important;margin:0 0 16px!important;
+}
+#app#app #route-transit-confirm .route-transit-confirm-actions{
+  display:grid!important;grid-template-columns:1fr 1.3fr!important;
+  gap:10px!important;width:100%!important;
+}
+#app#app #route-transit-confirm .route-transit-confirm-actions button{
+  min-width:0!important;min-height:46px!important;font-size:14px!important;
+  font-weight:800!important;border-radius:13px!important;
+  color:var(--dj-route-ink)!important;background:var(--dj-route-secondary)!important;
+  border:1px solid var(--dj-route-stroke)!important;
+}
+#app#app #route-transit-confirm #route-transit-accept{
+  background:#16866f!important;border-color:#16866f!important;color:white!important;
+}
+#app#app #route-map-card>div:first-child{min-width:0!important;gap:12px!important;}
+#app#app #route-map-card :is(#route-map-source,#route-map-metrics),
+#app#app #nav-live-card :is(#nav-instruction,#nav-remain-distance,#nav-remain-time){color:var(--dj-route-ink)!important;}
+#app#app #route-map-card #route-map-source{color:var(--dj-route-muted)!important;line-height:1.35!important;}
+#app#app #route-map-card .route-map-card-actions{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  justify-content:stretch!important;align-items:stretch!important;
+  gap:9px!important;width:100%!important;margin:0!important;
+}
+#app#app #route-map-card .route-map-card-actions button{
+  min-width:0!important;min-height:44px!important;padding:8px 7px!important;
+  margin:0!important;border-radius:12px!important;font-size:14px!important;font-weight:800!important;
+  color:var(--dj-route-ink)!important;background:var(--dj-route-secondary)!important;
+  border:1px solid var(--dj-route-stroke)!important;
+}
+#app#app #route-map-card #route-guide-start{background:#16866f!important;color:white!important;border-color:#16866f!important;}
+#app#app #nav-live-card :is(.nav-live-head,.nav-live-metrics,#nav-warning){color:var(--dj-route-muted)!important;}
+#app#app #nav-live-card :is(.nav-live-metrics>div,.nav-live-options button,.nav-live-actions button){
+  background:var(--dj-route-secondary)!important;border-color:var(--dj-route-stroke)!important;
+  color:var(--dj-route-ink)!important;
+}
+#app#app #nav-live-card .nav-live-options button[aria-pressed="true"]{
+  background:#166c58!important;color:#fff!important;border-color:#308d72!important;
+}
+#app#app #nav-live-card #nav-stop{background:var(--dj-route-secondary)!important;color:var(--dj-route-ink)!important;}
+#app#app #nav-live-card #nav-follow{background:#16866f!important;color:#fff!important;}
+
+@media(min-width:1080px){
+  /* A 112px dock cannot hold icon+label horizontally. Give the rail enough
+     width and allow the original desktop controller to remeasure its right edge. */
+  html body #app#app{--dj-v724-rail-right:178px;}
+  html body #app#app #bottom-nav{
+    width:164px!important;min-width:164px!important;max-width:164px!important;
+    box-sizing:border-box!important;
+  }
+  /* Desktop rail: icon left, label right; four utility controls share style. */
+  html body #app#app #bottom-nav>.nav-tab{
+    display:flex!important;flex-direction:row!important;align-items:center!important;
+    justify-content:flex-start!important;gap:11px!important;
+    text-align:left!important;padding:9px 13px!important;
+    min-width:0!important;white-space:nowrap!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab .nav-icon{
+    flex:0 0 22px!important;width:22px!important;height:22px!important;
+    margin:0!important;display:grid!important;place-items:center!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab>span:last-child{
+    flex:1 1 auto!important;text-align:left!important;white-space:nowrap!important;
+    font-size:14px!important;font-weight:820!important;letter-spacing:-.025em!important;
+    min-width:0!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle,#toggle-road-width){
+    font-family:inherit!important;font-size:14px!important;line-height:1.15!important;
+    font-weight:820!important;letter-spacing:-.025em!important;
+    text-shadow:none!important;
+    background:var(--dj-ui-bg,#fff)!important;color:var(--dj-ui-text,#19392f)!important;
+    border:1px solid var(--dj-ui-border,#d6e5dd)!important;
+    box-shadow:0 4px 13px rgba(15,55,44,.07)!important;
+    min-height:50px!important;height:50px!important;padding:8px 6px!important;
+    align-items:center!important;justify-content:center!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle,#toggle-road-width)[aria-expanded="true"]{
+    background:var(--dj-ui-field,#e7f4ed)!important;
+  }
+  /* Identical height contract for news, routing, records and community. */
+  html body #app#app :is(#route-panel,#news-panel,#mine-panel,#participation-panel).page-panel:not([hidden]){
+    height:calc(100dvh - var(--dj-v729-rail-top,var(--dj-v724-rail-top,92px)) - 14px)!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--dj-v729-rail-top,var(--dj-v724-rail-top,92px)) - 14px)!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+}
+
+@media(max-width:699px){
+  /* The tab sheet owns the bottom spacing, so no modal floats over navigation. */
+  html body #app#app :is(#route-transit-confirm,#route-map-card,#nav-live-card):not([hidden]){
+    position:fixed!important;top:auto!important;left:12px!important;right:12px!important;
+    bottom:var(--dj-v724-panel-bottom,calc(env(safe-area-inset-bottom) + 88px))!important;
+    width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;
+    transform:none!important;margin:0!important;
+    max-height:min(58dvh,calc(100dvh - var(--dj-header-h,80px) - 125px))!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+    border-radius:24px!important;padding:17px 18px!important;
+    z-index:3000!important;
+  }
+  html body #app#app #route-transit-confirm .route-transit-confirm-actions{margin-top:7px!important;}
+  html body #app#app #route-map-card>div:first-child{
+    display:flex!important;justify-content:space-between!important;align-items:center!important;
+    gap:8px!important;flex-wrap:wrap!important;
+  }
+  html body #app#app #route-map-card #route-map-source{font-size:12px!important;}
+  html body #app#app #route-map-card #route-map-metrics{font-size:clamp(20px,5.2vw,25px)!important;}
+  html body #app#app #route-map-card .route-map-card-actions{margin-top:9px!important;}
+  /* Small notice from the old toast is suppressed; the route pick banner is enough. */
+  html body #app#app #route-pick-hint:not([hidden]){
+    position:fixed!important;left:12px!important;right:12px!important;
+    top:auto!important;
+    bottom:var(--dj-v724-panel-bottom,calc(env(safe-area-inset-bottom) + 88px))!important;
+    width:calc(100% - 24px)!important;max-width:none!important;transform:none!important;
+    padding:12px 14px!important;z-index:2600!important;
+    font-size:13px!important;
+  }
+  /* Route tab compact: no unnecessary scroll for basic origin/destination input. */
+  html body #app#app #route-panel .page-note{display:none!important;}
+  html body #app#app #route-panel.dj-mobile-panel-split .dj-mobile-page-content{padding:8px 12px 14px!important;}
+  html body #app#app #route-panel.dj-mobile-panel-split .route-card,
+  html body #app#app #route-panel .route-card{padding:10px 12px!important;margin:3px 0 7px!important;}
+  html body #app#app #route-panel .route-location-row{min-height:43px!important;gap:9px!important;}
+  html body #app#app #route-panel .route-location-divider{margin:7px 0!important;}
+  html body #app#app #route-panel .route-gps-btn{padding:3px 0 3px 20px!important;font-size:11px!important;}
+  html body #app#app #route-panel .route-location-text{gap:2px!important;}
+  html body #app#app #route-panel .route-select-actions button{min-height:36px!important;padding:7px 9px!important;}
+  html body #app#app #route-panel .route-calc{margin-top:9px!important;min-height:43px!important;}
+  html body #app#app #route-panel .route-clear{padding:9px 0 0!important;}
+  html body #app#app #route-panel .page-heading{margin-bottom:8px!important;}
+  html body #app#app #route-panel .page-heading>p{display:none!important;}
+  /* PWA header/search and sheets are theme matched after an in-session switch. */
+  html[data-theme="dark"] body #app#app .topbar .map-quick-search-form,
+  html body #app#app[data-theme="dark"] .topbar .map-quick-search-form{
+    background:#1b3238!important;border-color:#49655f!important;color:#edf7f1!important;
+  }
+  html[data-theme="dark"] body #app#app .topbar #map-quick-search-query,
+  html body #app#app[data-theme="dark"] .topbar #map-quick-search-query{
+    background:transparent!important;color:#edf7f1!important;
+  }
+  html[data-theme="dark"] body #app#app .topbar #map-quick-search-query::placeholder,
+  html body #app#app[data-theme="dark"] .topbar #map-quick-search-query::placeholder{color:#b8d0c7!important;}
+  html[data-theme="dark"] body #app#app #bottom-nav,
+  html body #app#app[data-theme="dark"] #bottom-nav{
+    background:#1a3335!important;border-color:#49655f!important;color:#d5e8de!important;
+  }
+  html[data-theme="dark"] body #app#app #bottom-nav .nav-tab,
+  html body #app#app[data-theme="dark"] #bottom-nav .nav-tab{color:#d5e8de!important;}
+  html[data-theme="dark"] body #app#app #bottom-nav .nav-tab.active,
+  html body #app#app[data-theme="dark"] #bottom-nav .nav-tab.active{background:#284c42!important;color:#b9f5df!important;}
+}

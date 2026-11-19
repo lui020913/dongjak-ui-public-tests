@@ -1,0 +1,238 @@
+/* v8.8.0 mobile UI polish: 375 / 390 / 430 and all supported <700px.
+ * Preserve gesture handlers, sheet transform, scroll containers,
+ * page visibility and iOS safe-area calculations from v8.7.5–8.8.0.
+ */
+@media (max-width:699px) {
+  /* Map search remains opaque as requested, with a unified touch surface. */
+  html body #app#app .topbar > .map-quick-search .map-quick-search-form {
+    border:1px solid var(--dj881-line)!important;
+    border-radius:19px!important;
+    box-shadow:0 4px 14px rgba(17,52,40,.07)!important;
+  }
+  #app .topbar .map-quick-search-form > input {
+    min-width:0;
+    font-size:16px!important; /* prevent iOS Safari focus zoom */
+    letter-spacing:-.018em;
+    font-weight:550;
+  }
+
+  /* Dedicated mobile safety/weather/More row: existing four controls are
+   * clickable proxies. Keep their real click handling and activation widths. */
+  html body #app #dj-v794-toolbar > .dj-v794-tool:not([data-active="true"]) {
+    flex-basis:44px!important;
+    width:44px!important;min-width:44px!important;max-width:44px!important;
+    height:44px!important;min-height:44px!important;max-height:44px!important;
+    background:var(--dj881-surface)!important;
+    color:var(--dj881-text)!important;
+    border-color:var(--dj881-line)!important;
+    box-shadow:0 3px 11px rgba(15,52,39,.10)!important;
+  }
+  html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"] {
+    color:var(--dj881-accent)!important;
+    border-color:var(--dj881-accent)!important;
+    background:var(--dj881-soft)!important;
+  }
+  #app #dj-v794-toolbar .dj-v794-icon svg {
+    stroke-width:2;
+  }
+
+  /* Five navigation cells retain the stable grid and exact v875 sizes.
+   * This only clarifies pressed status and contrast. */
+  html body #app#app #bottom-nav > .nav-tab.active,
+  html body #app#app #bottom-nav > .nav-tab[aria-current="page"] {
+    background:var(--dj881-soft)!important;
+    color:var(--dj881-accent)!important;
+    border-radius:16px!important;
+  }
+  #app #bottom-nav > .nav-tab:not(.active):not([aria-current="page"]) {
+    color:var(--dj881-muted);
+  }
+  #app #bottom-nav > .nav-tab > span:last-child {
+    letter-spacing:-.025em;
+    font-weight:700;
+  }
+  #app #bottom-nav > .nav-tab .nav-icon {
+    color:inherit;
+  }
+
+  /* Sheet header stays fixed by existing coordinator; only colors/spacings
+   * of its *contents* are touched. No top, height, position or transform. */
+  html body #app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ) .dj-sheet-chrome {
+    background:var(--dj881-surface);
+    border-bottom:1px solid var(--dj881-line);
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title {
+    gap:9px;
+    min-width:0;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title h2 {
+    font-size:19px;
+    font-weight:800;
+    line-height:1.3;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-icon {
+    color:var(--dj881-accent);
+    flex-shrink:0;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close {
+    border:1px solid var(--dj881-line);
+    background:var(--dj881-subtle);
+    border-radius:13px;
+    color:var(--dj881-text);
+  }
+
+  /* A clear grouping around departure/destination, rather than multiple
+   * competing outlined cards. Keep the action row and content scrollable. */
+  #app #route-panel .route-card {
+    border:1px solid var(--dj881-line);
+    border-radius:17px;
+    background:var(--dj881-surface);
+    box-shadow:none;
+  }
+  #app #route-panel .route-location-row {
+    min-width:0;
+    gap:8px;
+  }
+  #app #route-panel .route-location-text {
+    min-width:0;
+  }
+  #app #route-panel .route-location-text span {
+    font-size:11px;
+    font-weight:700;
+    color:var(--dj881-muted);
+  }
+  #app #route-panel .route-location-text strong {
+    font-size:13px;
+    font-weight:750;
+    line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+  #app #route-panel .route-select-actions {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex:0 0 auto;
+  }
+  #app #route-panel .route-select-actions button {
+    min-width:44px;
+    min-height:44px;
+    border-radius:11px;
+    font-weight:750;
+  }
+  #app #route-panel .route-gps-btn {
+    font-size:12px;
+    line-height:1.4;
+  }
+  #app #route-panel :is(.route-calc,.route-restore) {
+    min-height:46px;
+    border-radius:12px;
+    font-weight:750;
+  }
+  #app #route-panel .page-note {
+    border-top:1px solid var(--dj881-line);
+    padding-top:12px;
+    margin-top:14px;
+    font-size:12px;
+  }
+  #app #route-panel .dj-page-intro {
+    margin-bottom:11px;
+    font-size:12px;
+    line-height:1.55;
+  }
+
+  /* Other four screens use equal-height touch targets with consistent type. */
+  #app #participation-panel .community-category-tabs button,
+  #app #participation-panel .community-compose-toggle,
+  #app #news-panel .dongjak-news-tabs button,
+  #app #news-panel #dongjak-news-refresh,
+  #app #transport-sheet .transport-mode-tabs button {
+    min-height:44px;
+    font-size:13px;
+    font-weight:700;
+  }
+  #app #participation-panel .community-category-tabs {
+    min-width:0;
+  }
+  #app #participation-panel .community-category-tabs button {
+    border-radius:999px;
+  }
+  #app #participation-panel .community-form :is(input,select,textarea),
+  #app #route-panel .route-search-form input {
+    font-size:16px!important; /* iOS input zoom safeguard */
+  }
+  #app #mine-panel .stat-grid > div {
+    border:1px solid var(--dj881-line);
+    border-radius:15px;
+  }
+  #app #news-panel .dongjak-news-item {
+    border:1px solid var(--dj881-line);
+    border-radius:15px;
+  }
+  #app #transport-sheet .transport-panel-head {
+    border-bottom:1px solid var(--dj881-line);
+    background:var(--dj881-surface);
+  }
+  #app #transport-sheet .transport-panel-head h2 {
+    color:var(--dj881-text);
+    font-size:19px;
+    font-weight:800;
+    letter-spacing:-.03em;
+  }
+  #app #transport-sheet .transport-hours-disclaimer {
+    font-size:12px;
+    line-height:1.65;
+  }
+  #app #map-safety-controls .map-safety-head,
+  #app #map-advanced-controls .map-controls-header {
+    border-bottom:1px solid var(--dj881-line);
+  }
+  #app #map-safety-controls :is(.dj-safety-group, .dj-type-settings) > summary {
+    min-height:44px;
+  }
+}
+
+@media (max-width:390px) {
+  /* 375px: a small reduction in utility-row gutter; all controls still
+   * retain >=44px hit targets, including the weather and More buttons. */
+  html body #app #dj-v794-toolbar {
+    gap:5px!important;
+    left:10px!important;
+    right:10px!important;
+  }
+  #app #route-panel .route-location-row {gap:6px;}
+}
+@media (min-width:391px) and (max-width:699px) {
+  html body #app #dj-v794-toolbar {gap:7px!important;}
+}
+
+/* Match theme contrast without changing original mode behavior. */
+@media (max-width:699px) {
+  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool:not([data-active="true"]) {
+    color:var(--dj881-text)!important;
+    background:var(--dj881-subtle)!important;
+    border-color:var(--dj881-line)!important;
+  }
+  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool[data-active="true"] {
+    color:#e3faef!important;
+    background:#31574e!important;
+    border-color:#66bfa3!important;
+  }
+}
+
+/* Actual 390px safety drawer capture: floating TIP overlaps safety controls
+ * around the bottom edge. Only suppress TIP while the main map options or
+ * safety drawer is open; normal map tips remain unchanged. */
+@media (max-width:699px) {
+  html body #app#app.map-safety-open #dj840-map-tip,
+  html body #app#app.map-controls-open #dj840-map-tip {
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+}

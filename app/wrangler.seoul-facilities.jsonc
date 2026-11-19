@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dongjak-seoul-facilities-sync",
+  "main": "src/workers/seoul-facility-sync.mjs",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": true,
+  "triggers": {
+    "crons": ["0 18 * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "SEOUL_FACILITIES_DB",
+      "database_name": "dongjak-seoul-facilities",
+      "database_id": "6bc278d1-ee7a-45e9-b451-680b88041b5a"
+    }
+  ]
+}

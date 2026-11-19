@@ -1,0 +1,34 @@
+{
+  "district": "동작구",
+  "terrain_source": "서울시 등고선.zip, 2025-03 processing history from source .shp.xml",
+  "comparison_archive": "서울시 경사도.zip, 2022-06 processing history; not used in elevation surface",
+  "reference_archive": "Dongjak_WalkNetwork_20261112_Ready.zip",
+  "spatial_reference": "EPSG:5174 for terrain processing, EPSG:4326 for GeoJSON output",
+  "link_count": 10232,
+  "control_contour_sample_points_before_de_dup": 62633,
+  "control_spot_points": 3091,
+  "control_unique_points": 65153,
+  "sampling_every_approx_m": 15,
+  "contour_control_spacing_approx_m": 20,
+  "quality_counts": {
+    "model_estimate": 9293,
+    "review_extreme": 308,
+    "lower_confidence": 327,
+    "non_ground_structure": 304
+  },
+  "cross_validation_spot_height_error": {
+    "held_out_spot_points": 400,
+    "predicted_valid": 400,
+    "median_absolute_error_m": 0.81,
+    "p90_absolute_error_m": 2.79,
+    "mean_absolute_error_m": 1.24
+  },
+  "data_caveats": [
+    "No surveyed sidewalk grade; interpolation over historical contours and spot heights.",
+    "Ground terrain is not the traveling surface for overpasses, footbridges, tunnels, and indoor links.",
+    "Cross-validation reflects elevation error at withheld spot heights, not direct slope accuracy.",
+    "Maximum grade refers to approx 15m sampling windows and may be noisy.",
+    "Do not call this wheelchair-accessible without step/width/curb/ramp data.",
+    "Do not promise shortest or safe routes until integrated and validated in app."
+  ]
+}

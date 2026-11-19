@@ -1,0 +1,182 @@
+/* Dongjak v7.0.29-R2 — newly designed v7.0.30 UX requirements.
+ * R1 is the parent. This stylesheet ONLY addresses app chrome, panels,
+ * navigation, station-information presentation, and modal accessibility.
+ * Do not touch #map, MapLibre canvas/controls, map startup or map imagery.
+ */
+
+/* Search & common panels: no stray content outside visible browser edges. */
+html body #app .topbar .map-quick-search-form{min-width:0!important;}
+html body #app .topbar .map-quick-search-form #map-quick-search-query{
+  min-width:0!important;max-width:100%!important;flex:1 1 0%!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;
+}
+html body #app .topbar .map-quick-search-submit{
+  white-space:nowrap!important;word-break:keep-all!important;flex-shrink:0!important;
+}
+html body #app .map-quick-search-dropdown:not([hidden]){
+  box-sizing:border-box!important;min-width:0!important;
+  max-height:min(65dvh,560px)!important;overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+html body #app :is(#route-panel,#news-panel,#community-panel,#mine-panel).page-panel:not([hidden]),
+html body #app :is(#transport-sheet,#overview-sheet,#map-advanced-controls,#map-safety-controls):not([hidden]){
+  box-sizing:border-box!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+}
+html body #app #version-history-modal .version-history-dialog{
+  max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+  overflow-y:auto!important;overscroll-behavior:contain!important;
+}
+html body #app #version-history-modal .version-history-list{min-width:0!important;}
+html body #app .dj-theme-switch-flash:not([hidden]){
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important;
+  background:rgba(85,135,117,.045)!important;pointer-events:none!important;
+}
+
+/* Existing Metro transport renderer already supplies a line-specific color.
+   Enhance contrast and selection without rewriting a single route value. */
+html body #app #transport-sheet .metro-badge-number{
+  flex:0 0 auto!important;display:inline-grid!important;place-items:center!important;
+  color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.3)!important;
+}
+html body #app #transport-sheet .metro-badge-number[title="7호선"]{
+  background-color:#657b2f!important;color:#fff!important;
+}
+html body #app #transport-sheet .metro-badge-number.dj-active-transfer-line{
+  outline:2px solid var(--dj-ui-text,#20493e)!important;outline-offset:2px!important;
+}
+html body #app #transport-sheet #transport-title.subway-title{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-wrap:wrap!important;gap:7px!important;min-width:0!important;
+  text-align:center!important;overflow-wrap:anywhere!important;
+}
+html body #app #transport-sheet .transport-panel-head>div{
+  min-width:0!important;flex:1 1 auto!important;
+}
+html body #app #transport-sheet .transport-chips{
+  display:flex!important;flex-wrap:wrap!important;gap:6px!important;
+}
+html body #app #transport-sheet .metro-neighbor-row{
+  min-width:0!important;display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr)!important;
+  align-items:center!important;text-align:center!important;
+}
+html body #app #transport-sheet .metro-neighbor-row>*{
+  min-width:0!important;overflow-wrap:anywhere!important;text-align:center!important;
+}
+html body #app #transport-sheet #transport-mode-tabs{
+  display:flex!important;align-items:stretch!important;gap:5px!important;
+}
+html body #app #transport-sheet #transport-mode-tabs>button{
+  flex:1 1 0!important;min-width:0!important;white-space:nowrap!important;
+}
+
+/* Independent mobile history shortcut connects to the EXISTING modal, not
+   an invented second history surface. It has no desktop footprint. */
+html body #app #dj-r2-history-shortcut{display:none!important;}
+
+@media(min-width:1080px){
+  /* Desktop PC: panel scroll stays within nav-rail/screen, not behind header. */
+  html body #app .topbar .map-quick-search-submit{
+    width:clamp(112px,9vw,148px)!important;min-width:112px!important;
+    max-width:148px!important;flex:0 0 clamp(112px,9vw,148px)!important;
+  }
+  html body #app #transport-sheet:not([hidden]){
+    box-sizing:border-box!important;
+    top:var(--dj-v729-rail-top,var(--dj-v724-rail-top,92px))!important;
+    left:calc(var(--dj-v724-rail-right,130px) + 8px)!important;
+    right:auto!important;bottom:auto!important;
+    max-height:calc(100dvh - var(--dj-v729-rail-top,var(--dj-v724-rail-top,92px)) - 12px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    scrollbar-gutter:stable!important;
+  }
+  html body #app #transport-sheet .transport-panel-head{
+    display:flex!important;align-items:flex-start!important;gap:10px!important;
+  }
+  html body #app #transport-sheet #transport-description{max-width:100%!important;}
+  html body #app .page-panel:not([hidden]),
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls{
+    max-height:calc(100dvh - var(--dj-v729-rail-top,var(--dj-v724-rail-top,92px)) - 12px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+  }
+}
+
+@media(max-width:1079px){
+  /* Header stays readable while options/safety backdrops cover the map below. */
+  html body #app.map-controls-open #map-options-backdrop:not([hidden]),
+  html body #app.map-safety-open #map-safety-backdrop:not([hidden]){
+    top:var(--dj-header-h,64px)!important;
+  }
+  html body #app .topbar .header-tools{min-width:0!important;}
+  html body #app[data-tab="map"] #dj-r2-history-shortcut{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    position:fixed!important;top:calc(var(--dj-header-h,64px) + 25px)!important;
+    left:136px!important;right:auto!important;bottom:auto!important;
+    z-index:3102!important;box-sizing:border-box!important;
+    width:89px!important;min-width:89px!important;max-width:89px!important;
+    height:44px!important;min-height:44px!important;
+    border-radius:14px!important;padding:0 6px!important;
+    background:var(--dj-ui-bg,#fff)!important;color:var(--dj-ui-text,#21483d)!important;
+    border:1px solid var(--dj-ui-border,#d4e4dc)!important;
+    box-shadow:0 2px 8px rgba(23,43,38,.07)!important;
+    line-height:1!important;font-size:13px!important;font-weight:800!important;
+    letter-spacing:-.05em!important;white-space:nowrap!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  html body #app[data-theme="dark"] #dj-r2-history-shortcut{
+    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
+  }
+  html body #app #dj-r2-history-shortcut:focus-visible{
+    outline:3px solid #1e9070!important;outline-offset:2px!important;
+  }
+  /* Retain all FIVE existing bottom-nav actions; never restructure navigation JS. */
+  html body #app #bottom-nav{
+    display:flex!important;box-sizing:border-box!important;gap:2px!important;
+    padding-inline:5px!important;overflow:visible!important;
+  }
+  html body #app #bottom-nav>.nav-tab{
+    min-width:0!important;flex:1 1 0%!important;width:auto!important;max-width:100%!important;
+    padding:4px 1px!important;overflow:hidden!important;
+    white-space:nowrap!important;word-break:keep-all!important;
+  }
+  html body #app #bottom-nav>.nav-tab>span:last-child{
+    min-width:0!important;max-width:100%!important;
+    display:block!important;white-space:nowrap!important;
+    overflow:hidden!important;text-overflow:clip!important;
+    font-size:clamp(9px,2.65vw,12px)!important;letter-spacing:-.04em!important;
+  }
+  html body #app[data-tab] :is(#map-tools-toggle,#map-safety-toggle){
+    white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;
+  }
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls{
+    overflow-x:hidden!important;overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+  html body #app #transport-sheet:not([hidden]){
+    overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+}
+@media(max-width:699px){
+  /* R1 owns the positions: adjust only internal dimensions and safe areas. */
+  html body #app[data-tab="map"] #dj-r2-history-shortcut{
+    top:calc(var(--dj-header-h,64px) + 25px)!important;
+    left:132px!important;width:85px!important;min-width:85px!important;max-width:85px!important;
+    height:44px!important;min-height:44px!important;font-size:12px!important;
+  }
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls{
+    max-height:calc(100dvh - var(--dj-header-h,64px) - var(--dj-v724-panel-bottom,85px) - 12px)!important;
+  }
+  html body #app #version-history-modal .version-history-dialog{
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 16px)!important;
+  }
+  html body #app #transport-sheet #transport-title.subway-title{font-size:clamp(18px,5.3vw,23px)!important;}
+}
+@media(max-width:359px){
+  html body #app #bottom-nav>.nav-tab>span:last-child{font-size:9px!important;letter-spacing:-.07em!important;}
+  html body #app[data-tab="map"] #dj-r2-history-shortcut{font-size:11px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #app #dj-r2-history-shortcut{transition:none!important;}
+}

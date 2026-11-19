@@ -1,0 +1,77 @@
+/* v8.1.1: stable page close controls, honest selection state, shared map-options icon geometry. */
+html body #app#app#app :is(#participation-panel,#route-panel,#mine-panel).page-panel{position:absolute!important;}
+html body #app#app#app :is(#participation-panel,#route-panel,#mine-panel).page-panel > .page-dismiss,
+html body #app#app#app #news-panel #news-close-to-map{
+  position:absolute!important;inset-block-start:16px!important;inset-inline-end:16px!important;
+  top:16px!important;right:16px!important;left:auto!important;bottom:auto!important;
+  margin:0!important;transform:none!important;translate:none!important;
+  width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+  max-width:44px!important;max-height:44px!important;display:grid!important;place-items:center!important;
+  z-index:45!important;
+}
+html body #app#app#app :is(#participation-panel,#route-panel,#mine-panel,#news-panel) > .page-heading{
+  padding-inline-end:62px!important;min-height:54px!important;
+}
+/* v825 still paints a second CSS multiplication sign after the v817 SVG. */
+html body #app#app#app .dj817-close-button::before,
+html body #app#app#app .dj817-close-button::after{
+  content:none!important;display:none!important;visibility:hidden!important;
+  width:0!important;height:0!important;background:none!important;
+}
+html body #app#app#app .dj817-close-button > .dj817-x-svg{
+  display:block!important;width:24px!important;height:24px!important;
+  stroke:currentColor!important;stroke-width:2.6!important;
+  transform:none!important;position:static!important;margin:auto!important;
+}
+/* A map tab is selected only if both the actual app page and button state agree. */
+html body #app#app#app #bottom-nav > .nav-tab:not(.active),
+html body #app#app#app #bottom-nav > .nav-tab:not([aria-current="page"]),
+html body #app#app#app[data-tab]:not([data-tab="map"]) #bottom-nav > .nav-tab[data-tab="map"]{
+  background:transparent!important;color:var(--dj800-muted,#768981)!important;
+  box-shadow:none!important;border-color:transparent!important;
+}
+html body #app#app#app #bottom-nav > .nav-tab[data-tab="map"]:not(.active) .nav-icon,
+html body #app#app#app #bottom-nav > .nav-tab[data-tab="map"]:not([aria-current="page"]) .nav-icon,
+html body #app#app#app[data-tab]:not([data-tab="map"]) #bottom-nav > .nav-tab[data-tab="map"] .nav-icon{
+  background:transparent!important;color:inherit!important;border-color:transparent!important;
+  box-shadow:none!important;
+}
+html body #app#app#app #bottom-nav > .nav-tab.active[aria-current="page"]{
+  background:var(--dj800-elevated,#e4f3ec)!important;color:var(--dj800-accent,#11866c)!important;
+}
+html body #app#app#app #bottom-nav > .nav-tab[data-tab="map"].active[aria-current="page"] .nav-icon{
+  background:transparent!important;border-color:transparent!important;color:inherit!important;
+}
+/* All five tabs use a single 24px canvas and 2.2px stroke (same as map options). */
+html body #app#app#app #bottom-nav > .nav-tab .nav-icon,
+html body #app#app#app #bottom-nav > .nav-tab[data-tab="map"] .nav-icon{
+  display:grid!important;place-items:center!important;
+  width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;
+  flex:0 0 24px!important;font-size:0!important;line-height:0!important;border:0!important;
+}
+html body #app#app#app #bottom-nav .nav-tab .dj827-nav-glyph,
+html body #app#app#app #bottom-nav .nav-tab[data-tab="participate"] .dj827-nav-glyph{
+  display:block!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;
+  fill:none!important;stroke:currentColor!important;stroke-width:2.2!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;flex:none!important;
+}
+/* Keep the original buttons/events; normalize pictogram visual footprints. */
+html body #app#app#app :is(#map-tools-toggle,#map-safety-toggle)::before{
+  width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;
+  flex:0 0 22px!important;background-size:22px!important;
+}
+html body #app#app#app #toggle-road-width .dj-road-width-icon{
+  width:22px!important;height:22px!important;flex:0 0 22px!important;
+  fill:none!important;stroke:currentColor!important;stroke-width:2.2!important;
+  stroke-linecap:round!important;stroke-linejoin:round!important;
+}
+html body #app#app#app #night-visibility-quick-off .dj-night-action-symbol{
+  width:22px!important;height:22px!important;flex:0 0 22px!important;font-size:22px!important;
+  display:inline-grid!important;place-items:center!important;
+}
+@media(max-width:699px){
+  html body #app#app#app #bottom-nav > .nav-tab .nav-icon,
+  html body #app#app#app #bottom-nav > .nav-tab[data-tab="map"] .nav-icon{
+    width:24px!important;height:24px!important;flex:0 0 24px!important;
+  }
+}

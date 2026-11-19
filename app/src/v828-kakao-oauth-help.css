@@ -1,0 +1,19 @@
+/* v8.2.8: non-sensitive OAuth diagnostics inside the existing account hub. */
+html body #app#app #dj824-account .dj828-kakao-help{
+  min-width:0;border:1px solid var(--dj800-border,#cfe0d6);
+  border-radius:12px;padding:11px 13px;margin:5px 0;
+  background:var(--dj800-secondary,#f1f7f3);color:var(--dj800-text,#25463b);
+}
+html body #app#app #dj824-account .dj828-kakao-help>summary{
+  cursor:pointer;font-size:14px!important;font-weight:750!important;
+  line-height:1.5;outline-offset:3px;
+}
+html body #app#app #dj824-account .dj828-kakao-help :is(p,a){
+  display:block;font-size:13px!important;line-height:1.65!important;
+  margin:10px 0 0;overflow-wrap:anywhere;word-break:keep-all;
+}
+html body #app#app #dj824-account .dj828-kakao-help a{color:var(--dj800-accent,#117d66);text-decoration:underline;}
+html body #app#app[data-theme="dark"] #dj824-account .dj828-kakao-help{
+  background:#294144;border-color:#4b7369;color:#e5f3ee;
+}
+html body #app#app[data-theme="dark"] #dj824-account .dj828-kakao-help a{color:#a9e8cf;}

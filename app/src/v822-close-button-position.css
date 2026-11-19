@@ -1,0 +1,80 @@
+/* v8.2.2 — final close-button anchoring for floating pages.
+   Some page headers could still inherit earlier absolute-left rules on mobile.
+   Force the close action to belong to the header's top-right corner only. */
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading,
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading{
+  position:relative!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  min-width:0!important;
+  min-height:56px!important;
+  padding-inline-start:0!important;
+  padding-inline-end:62px!important;
+}
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(button.page-dismiss,#news-close-to-map),
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > button.page-dismiss{
+  position:absolute!important;
+  inset:auto 0 auto auto!important;
+  top:0!important;
+  right:0!important;
+  bottom:auto!important;
+  left:auto!important;
+  inset-inline-start:auto!important;
+  inset-inline-end:0!important;
+  margin:0!important;
+  padding:0!important;
+  float:none!important;
+  clear:none!important;
+  transform:none!important;
+  translate:none!important;
+  grid-area:auto!important;
+  order:0!important;
+  justify-self:auto!important;
+  align-self:auto!important;
+  display:grid!important;
+  place-items:center!important;
+  box-sizing:border-box!important;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  max-width:44px!important;
+  max-height:44px!important;
+  z-index:150!important;
+}
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(button.page-dismiss,#news-close-to-map)::before,
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(button.page-dismiss,#news-close-to-map)::after,
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > button.page-dismiss::before,
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > button.page-dismiss::after{
+  content:none!important;
+  display:none!important;
+}
+html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(button.page-dismiss,#news-close-to-map) > .dj817-x-svg,
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > button.page-dismiss > .dj817-x-svg{
+  display:block!important;
+  width:24px!important;
+  height:24px!important;
+  min-width:24px!important;
+  min-height:24px!important;
+  margin:auto!important;
+  position:static!important;
+  transform:none!important;
+  stroke:currentColor!important;
+  stroke-width:2.6!important;
+}
+@media (max-width:699px){
+  html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading,
+  html body #app#app#app #route-panel.page-panel > .dj813-route-heading{
+    min-height:55px!important;
+    padding-inline-end:58px!important;
+  }
+  html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(button.page-dismiss,#news-close-to-map),
+  html body #app#app#app #route-panel.page-panel > .dj813-route-heading > button.page-dismiss{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+    max-width:42px!important;
+    max-height:42px!important;
+  }
+}

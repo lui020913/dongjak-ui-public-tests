@@ -1,0 +1,1817 @@
+:root{font-family:'Pretendard Variable',system-ui,-apple-system,'Malgun Gothic',sans-serif;color:#172922;background:#f8faf9;font-synthesis:none}*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden}button{font:inherit;cursor:pointer}#map{position:absolute;inset:0;background:#e6efed}.leaflet-container{font:inherit}.leaflet-control-attribution{font-size:10px!important;background:rgba(255,255,255,.88)!important;margin-bottom:env(safe-area-inset-bottom)!important}.topbar{position:absolute;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(env(safe-area-inset-top) + 18px) 20px 18px;background:linear-gradient(180deg,#fff 55%,rgba(255,255,255,.95) 83%,rgba(255,255,255,0))}.brand{display:flex;align-items:center;gap:11px}.logo{height:41px;width:41px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:#13836b;color:#fff;font-size:21px;font-weight:800}.eyebrow{font-size:10px;letter-spacing:.8px;font-weight:700;color:#758c85}.brand-name{font-weight:800;font-size:17px;letter-spacing:-.5px}.prototype{padding:6px 9px;border-radius:999px;font-size:11px;color:#4d8274;background:#e4f3ed;font-weight:700;white-space:nowrap}.map-badge{position:absolute;z-index:900;top:calc(env(safe-area-inset-top) + 95px);left:16px;background:#fff;border:1px solid #e4ebe8;border-radius:100px;display:flex;align-items:center;gap:8px;box-shadow:0 5px 15px rgba(27,42,36,.09);padding:9px 13px;font-size:12px;font-weight:700}.pulse{width:8px;height:8px;border-radius:50%;background:#1caa82}.map-actions{position:absolute;right:15px;bottom:calc(env(safe-area-inset-bottom) + 240px);z-index:900;display:flex;flex-direction:column;gap:9px}.map-actions button{height:49px;width:49px;background:white;border:1px solid #e2e9e6;border-radius:16px;box-shadow:0 3px 14px rgba(32,47,41,.13);display:grid;place-items:center}.map-actions svg{width:23px;height:23px;stroke:#204438;stroke-width:1.85;fill:none;stroke-linecap:round;stroke-linejoin:round}.sheet{position:absolute;z-index:900;left:0;right:0;bottom:0;border-radius:26px 26px 0 0;padding:9px 22px calc(env(safe-area-inset-bottom) + 18px);background:white;box-shadow:0 -5px 30px rgba(23,44,34,.12)}
+.overview-sheet{max-height:min(78dvh,420px);overflow:auto;transform:translateY(var(--sheet-offset,0px));transition:transform .22s ease,box-shadow .22s ease;overscroll-behavior:contain;touch-action:pan-y;}
+.overview-sheet.dragging{transition:none;}
+.overview-sheet[data-sheet-state="collapsed"]{box-shadow:0 -4px 20px rgba(23,44,34,.10);}
+.sheet-top-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.sheet-toggle{border:1px solid #d7e6de;background:#f6fbf8;color:#166f58;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;white-space:nowrap;}
+.sheet-summary{margin-bottom:11px;}
+#overview-sheet-handle{width:52px;height:6px;margin-bottom:14px;cursor:grab;touch-action:none;}
+#overview-sheet-handle:active{cursor:grabbing;}.handle{height:5px;width:38px;background:#dde6e2;margin:0 auto 19px;border-radius:20px}.sheet-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:#13836b}.sheet h1{font-size:18px;letter-spacing:-.8px;line-height:1.5;margin:4px 0 0;font-weight:800}.status-tag{border-radius:9px;background:#f1f6f4;padding:7px 8px;white-space:nowrap;font-size:11px;color:#5a776b;font-weight:700}.sheet p{color:#63766d;font-size:12px;line-height:1.75;margin:9px 0 13px}.primary-btn{border:0;border-radius:13px;background:#13836b;color:#fff;width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 15px;font-size:13px;font-weight:800}.primary-btn:hover{background:#08765e}.footer-note{margin-top:10px;color:#90a29b;font-size:10px;text-align:center}#toast{position:absolute;z-index:2000;left:50%;top:calc(env(safe-area-inset-top) + 138px);transform:translateX(-50%) translateY(-12px);max-width:calc(100% - 40px);padding:10px 15px;color:white;background:#233b31;border-radius:12px;font-size:12px;box-shadow:0 8px 20px #0002;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;text-align:center}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}@media (min-width:700px){.topbar{left:50%;width:460px;transform:translateX(-50%);border-radius:0 0 16px 16px}.sheet{left:50%;width:460px;right:auto;transform:translateX(-50%);border-radius:26px 26px 0 0}.overview-sheet{transform:translateX(-50%) translateY(var(--sheet-offset,0px));}.map-badge{left:calc(50% - 214px)}.map-actions{right:calc(50% - 214px)}.sheet h1{font-size:19px}}
+
+
+/* 2단계: 지도 마커 선택 시 하단 상세정보 카드 */
+.sheet[hidden], .detail-sheet[hidden] { display: none !important; }
+.detail-sheet {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px 22px calc(env(safe-area-inset-bottom) + 20px);
+  max-height: 72dvh;
+  overflow-y: auto;
+  border-radius: 26px 26px 0 0;
+  background: #fff;
+  box-shadow: 0 -8px 36px rgba(20, 45, 33, .22);
+}
+.detail-topline { display:flex; align-items:center; justify-content:space-between; }
+.detail-close {
+  border: 0;
+  background: #f0f5f2;
+  color: #486055;
+  font-size: 25px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  line-height: 1;
+}
+.detail-titleline { display:flex; align-items:center; justify-content:space-between; gap: 12px; margin: 6px 0 13px; }
+.detail-titleline h2 { margin: 0; font-size: 19px; letter-spacing: -.7px; }
+.detail-photo {
+  height: 112px;
+  border-radius: 15px;
+  background: #f0f5f2;
+  color: #81948a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.detail-photo-icon {font-size: 25px; line-height: 1.1;}
+.detail-info { margin: 12px 0; }
+.detail-info > div {display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding: 9px 0; border-bottom: 1px solid #edf1ee; font-size: 12px;}
+.detail-info span {color: #73867b; flex-shrink: 0;}
+.detail-info strong {font-weight:700; text-align:right; color:#253f33;}
+.detail-disclaimer {font-size:11px; color:#73867b; line-height: 1.65; margin: 9px 0 14px;}
+.detail-open .map-actions { display:none; }
+@media (min-width:700px){
+  .detail-sheet {left:50%;width:460px;right:auto;transform:translateX(-50%);}
+}
+
+
+/* 3단계: 지도에서 직접 조사지점을 추가하는 기능 */
+.add-point-button{position:absolute;top:calc(env(safe-area-inset-top) + 95px);right:15px;z-index:950;border:1px solid #bfded2;border-radius:100px;background:#12846c;color:white;padding:10px 15px;font-weight:800;font-size:12px;box-shadow:0 5px 18px #102e2425}
+.add-point-button.active{background:#354d43}
+.add-hint{position:absolute;z-index:950;left:50%;top:calc(env(safe-area-inset-top) + 145px);transform:translateX(-50%);padding:10px 13px;border-radius:11px;background:#172d26;color:#fff;font-size:12px;font-weight:700;box-shadow:0 5px 15px #0003;white-space:nowrap;max-width:calc(100% - 20px);text-align:center}
+.add-hint[hidden],.entry-sheet[hidden]{display:none!important}
+.subtle-btn{display:block;width:100%;border:0;padding:11px 12px;background:transparent;color:#147c65;font-size:12px;font-weight:700;border-radius:10px;margin-top:8px}
+.subtle-btn:hover{background:#f0f6f3}
+.danger-btn{color:#a64d43}
+.entry-sheet{position:absolute;z-index:1000;bottom:0;left:0;right:0;max-height:82dvh;overflow-y:auto;border-radius:26px 26px 0 0;padding:9px 22px calc(env(safe-area-inset-bottom) + 20px);background:#fff;box-shadow:0 -8px 36px #152d222f}
+.entry-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.entry-head h2{font-size:19px;margin:4px 0 6px;letter-spacing:-.6px}
+.coordinate-note{background:#eff5f1;border-radius:10px;padding:8px 10px;color:#60796e;font-size:11px;margin:8px 0 12px}
+#point-form{display:flex;flex-direction:column;gap:6px}
+#point-form label{font-size:12px;color:#354d43;font-weight:700;margin-top:5px}
+#point-form input,#point-form select,#point-form textarea{font:inherit;font-size:13px;width:100%;border:1px solid #dbe6df;background:#fafcfb;border-radius:10px;padding:10px 11px;color:#20392e;resize:vertical;outline-color:#14866c}
+#point-form .primary-btn{margin-top:9px}
+.detail-info strong{max-width:68%;white-space:pre-wrap;word-break:break-word}
+.adding .map-actions{display:none}
+@media(min-width:700px){.add-point-button{right:calc(50% - 214px)}.entry-sheet{left:50%;width:460px;right:auto;transform:translateX(-50%)}}
+@media(max-width:380px){.add-point-button{font-size:11px;padding:10px}.map-badge{font-size:11px;padding:9px 10px}}
+
+
+/* 4단계: 현장사진 추가 및 삭제 */
+.detail-photo{height:152px;overflow:hidden;position:relative;}
+.detail-photo img{height:100%;width:100%;object-fit:cover;display:block;}
+.detail-photo img[hidden],.photo-placeholder[hidden],.photo-remove-button[hidden]{display:none!important;}
+.photo-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:100%;width:100%;}
+.photo-upload-button{display:block;width:100%;border:1px solid #b8d8cb;border-radius:12px;padding:11px 12px;background:#ecf7f1;color:#11735b;font:inherit;font-size:12px;font-weight:800;cursor:pointer;margin-top:10px;}
+.photo-upload-button:disabled{opacity:.6;cursor:wait;}
+.photo-remove-button{display:block;margin:7px 0 0 auto;padding:6px;border:0;background:transparent;color:#a74d40;font:inherit;font-size:11px;cursor:pointer;}
+
+
+/* 5단계: 토스형 가벼운 유형 필터 - 데이터는 기존 localStorage 그대로 사용 */
+.filter-bar{
+  position:absolute;top:calc(env(safe-area-inset-top) + 145px);left:50%;
+  transform:translateX(-50%);z-index:920;
+  width:min(100%,460px);padding:0 15px;
+  display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;
+  overscroll-behavior-x:contain;white-space:nowrap;
+}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{
+  flex:0 0 auto;padding:9px 12px;border-radius:999px;border:1px solid #d8e6de;
+  background:#fff;color:#38564a;font:inherit;font-size:12px;font-weight:700;
+  box-shadow:0 2px 9px rgba(25,45,35,.07);cursor:pointer;
+}
+.filter-chip.selected{background:#13836b;border-color:#13836b;color:#fff}
+.filter-chip:focus-visible{outline:3px solid #9ddac7;outline-offset:2px}
+.filter-result{
+  position:absolute;top:calc(env(safe-area-inset-top) + 190px);left:50%;
+  transform:translateX(-50%);z-index:919;padding:5px 10px;
+  border-radius:999px;background:rgba(255,255,255,.88);color:#587568;
+  font-size:10px;font-weight:700;pointer-events:none;
+}
+.adding .filter-bar,.adding .filter-result,
+.detail-open .filter-bar,.detail-open .filter-result,
+.edit-open .filter-bar,.edit-open .filter-result{display:none}
+.edit-open .map-actions{display:none}
+.edit-point-button{margin-bottom:10px;background:#f7faf8}
+/* 현장 콜라주나 가로 사진은 잘리지 않고 전체가 보이도록 표시 */
+.detail-photo{height:175px;background:#f1f5f2}
+.detail-photo img{object-fit:contain}
+/* 작은 화면에서 필터와 지도가 모두 보이도록 카드 높이를 제한 */
+.detail-sheet{max-height:70dvh}
+@media(max-height:650px){.detail-sheet{max-height:67dvh}.filter-result{display:none}}
+
+/* 통합 지도: MapLibre GL JS(벡터 2D/3D) */
+#map{position:absolute;inset:0;background:#e5ece8}
+.maplibregl-map{font:inherit;}
+.maplibregl-ctrl-attrib{font-size:10px!important;background:rgba(255,255,255,.85)!important;}
+.maplibregl-ctrl-bottom-right{bottom:env(safe-area-inset-bottom)}
+.maplibregl-marker{z-index:0}
+.view-switch{position:absolute;z-index:925;top:calc(env(safe-area-inset-top) + 208px);left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border-radius:100px;background:#fff;box-shadow:0 4px 19px #17332925;border:1px solid #d9e6e1}
+.view-switch button{padding:8px 18px;background:none;border:0;border-radius:100px;color:#4c6b5c;font-size:12px;font-weight:800;white-space:nowrap}
+.view-switch button.active{background:#13836b;color:#fff}
+.adding .view-switch,.detail-open .view-switch,.edit-open .view-switch{display:none}
+/* 지도의 조작 버튼은 기본 정보 카드보다 위에 배치 */
+.map-actions{bottom:calc(env(safe-area-inset-bottom) + 245px)}
+@media (max-height:710px){.view-switch{top:calc(env(safe-area-inset-top) + 191px)}.filter-result{display:none}}
+@media (min-width:700px){.view-switch{left:50%;}}
+
+/* 6단계: 경량 서비스 구조 — 기존 지도 스타일은 유지하고 핵심 기능만 묶습니다. */
+.bottom-nav {
+  position:absolute;left:0;right:0;bottom:0;z-index:1410;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;
+  height:calc(67px + env(safe-area-inset-bottom));padding:6px 10px calc(7px + env(safe-area-inset-bottom));
+  background:#fff;border-top:1px solid #e5ece8;box-shadow:0 -2px 14px #152b2013;
+}
+.nav-tab {border:0;background:transparent;color:#84948c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:10px;font-weight:750;min-width:0;border-radius:13px;padding:4px 2px;}
+.nav-icon{font-size:22px;line-height:24px;font-weight:900}
+.nav-tab.active{color:#087c62;background:#eef8f2}
+.nav-tab:focus-visible{outline:2px solid #13836b;outline-offset:2px}
+.sheet,.detail-sheet,.entry-sheet {bottom:calc(67px + env(safe-area-inset-bottom));padding-bottom:16px;}
+.sheet{max-height:calc(100dvh - 280px);overflow-y:auto}
+.detail-sheet{max-height:calc(100dvh - 175px)}
+.entry-sheet{max-height:calc(100dvh - 160px)}
+.map-actions{bottom:calc(67px + env(safe-area-inset-bottom) + 220px)}
+.page-panel{position:absolute;z-index:940;top:calc(97px + env(safe-area-inset-top));bottom:calc(67px + env(safe-area-inset-bottom));left:0;right:0;overflow-y:auto;padding:26px 20px 38px;background:#fafbf9;overscroll-behavior:contain}
+.page-panel[hidden]{display:none!important}
+.page-heading{margin-bottom:23px}.micro-label{font-size:10px;font-weight:850;letter-spacing:1px;color:#198a73}.page-heading h2{margin:6px 0 7px;font-size:26px;letter-spacing:-1px;font-weight:850}.page-heading p{font-size:13px;color:#718179;line-height:1.7;margin:0}
+.feature-card{display:flex;gap:13px;padding:18px;border:1px solid #dfeae3;border-radius:19px;background:#fff;box-shadow:0 5px 20px #1b37210b;margin-bottom:16px}.feature-card strong{display:block;margin:0 0 7px;font-size:15px}.feature-card p{font-size:12px;line-height:1.8;color:#60776a;margin:0}.feature-icon{flex:0 0 40px;height:40px;border-radius:14px;background:#e6f3ec;color:#087e62;font-size:23px;font-weight:800;display:grid;place-items:center}.muted-feature .feature-icon{background:#eaf0ec;color:#657c6f}
+.page-section-title{font-size:15px;font-weight:850;margin:26px 0 11px;color:#1c3228}.info-stack{background:white;border:1px solid #e6ede8;border-radius:18px;overflow:hidden}.info-stack>div{padding:13px 16px;border-bottom:1px solid #eff2f0}.info-stack>div:last-child{border:0}.info-stack b{display:block;font-size:13px;margin-bottom:5px}.info-stack small{font-size:11px;color:#76867e;line-height:1.6}.page-action{margin-top:20px}.page-note{font-size:11px;line-height:1.75;color:#84968b;margin:16px 3px}.inline-action{margin-top:12px;border:0;background:#eaf7ee;color:#007b5b;padding:9px 11px;font-weight:800;font-size:12px;border-radius:11px}.local-only{border-radius:12px;color:#627d6e;background:#eef5f0;font-size:11px;padding:11px 13px;line-height:1.7}
+.community-form{background:#fff;border:1px solid #e6ede8;padding:17px;border-radius:18px;display:flex;flex-direction:column;gap:8px}.community-form label{font-size:12px;font-weight:700;color:#3a5548}.community-form input,.community-form textarea{font:inherit;font-size:13px;padding:10px 12px;border-radius:10px;border:1px solid #d9e5df;background:#fcfdfc;color:#213b2e;resize:vertical}.community-form button{margin-top:9px}
+.records-list{display:flex;flex-direction:column;gap:9px}.empty-hint{padding:17px;background:#fff;color:#84978b;font-size:12px;line-height:1.75;border-radius:13px;border:1px solid #ebf0ec;margin:0}.community-note{border:1px solid #e6ede8;background:white;border-radius:16px;padding:16px}.community-note strong{font-size:14px}.community-note p{font-size:12px;line-height:1.7;color:#647970;white-space:pre-wrap;word-break:break-word}.note-foot{display:flex;align-items:center;justify-content:space-between}.note-foot small{color:#97a59b}.note-foot button{border:0;background:transparent;color:#ac514b;font-size:11px;font-weight:700}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat-grid>div{background:#e9f4ed;border-radius:16px;display:flex;flex-direction:column;gap:4px;padding:15px 8px;align-items:center}.stat-grid strong{font-size:24px;color:#0f7b61}.stat-grid small{font-size:11px;color:#607b6b}.record-item{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid #e6ede8;background:#fff;border-radius:13px;padding:13px 15px;text-align:left;gap:7px}.record-text{display:flex;flex-direction:column;gap:5px;min-width:0}.record-text strong{font-size:13px;overflow-wrap:anywhere}.record-text small{font-size:11px;color:#8b9e92}.record-arrow{font-size:22px;color:#98ac9d}.soft-action{width:100%;border:1px solid #c2dbcb;background:#e9f5ed;color:#08785b;border-radius:13px;margin-top:20px;padding:14px;font:inherit;font-weight:850;font-size:13px}
+.bookmark-button{background:#f7faf7}
+#app[data-tab]:not([data-tab="map"]) .map-badge,
+#app[data-tab]:not([data-tab="map"]) .add-point-button,
+#app[data-tab]:not([data-tab="map"]) .add-hint,
+#app[data-tab]:not([data-tab="map"]) .filter-bar,
+#app[data-tab]:not([data-tab="map"]) .filter-result,
+#app[data-tab]:not([data-tab="map"]) .view-switch,
+#app[data-tab]:not([data-tab="map"]) .terrain-toggle,
+#app[data-tab]:not([data-tab="map"]) .map-actions,
+#app[data-tab]:not([data-tab="map"]) .sheet,
+#app[data-tab]:not([data-tab="map"]) .detail-sheet,
+#app[data-tab]:not([data-tab="map"]) .entry-sheet {display:none!important}
+@media(min-width:700px){.bottom-nav{left:50%;right:auto;width:460px;transform:translateX(-50%)}.page-panel{left:50%;right:auto;width:460px;transform:translateX(-50%)}}
+@media(max-height:690px){.sheet{max-height:calc(100dvh - 270px);}.overview-sheet{max-height:calc(100dvh - 240px);}.filter-result{display:none}.map-actions{bottom:calc(67px + env(safe-area-inset-bottom) + 200px)}}
+
+/* v11: 바깥 지도도 모두 보이게 하며 동작구 경계만 강조합니다. */
+#map { background: #f1f5f3; }
+
+/* v11: 기울기 조절 UI 제거. 마우스/터치 조작만 사용합니다. */
+.view-switch{display:none!important;}
+/* v10: 지형은 지도 기울기로 자동 제어하므로 별도 토글 버튼이 없습니다. */
+
+
+/* v13 도보 길찾기 — 지도와 동일한 가벼운 UI */
+.route-card{background:#fff;border:1px solid #dfebe5;border-radius:20px;padding:18px 15px;box-shadow:0 4px 16px #142e2110}
+.route-location-row{display:flex;align-items:center;gap:12px;min-height:56px}
+.route-dot{height:12px;width:12px;flex:0 0 12px;border-radius:100%;background:#2563eb;box-shadow:0 0 0 4px #e7efff}
+.route-dot.end{background:#0ba876;box-shadow:0 0 0 4px #dff7e8}
+.route-location-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.route-location-text span{font-size:11px;color:#799187}
+.route-location-text strong{font-size:13px;color:#20392f;overflow-wrap:anywhere}
+.route-mini-btn{border:1px solid #cfe1d7;background:#f2faf5;color:#137b61;border-radius:11px;padding:9px 11px;font-size:12px;font-weight:800;white-space:nowrap}
+.route-location-divider{height:1px;background:#e8efea;margin:14px 0}
+.route-gps-btn{display:block;border:0;background:transparent;color:#2775ba;text-align:left;padding:4px 0 3px 24px;font-weight:750;font-size:11px}
+.route-calc{margin-top:20px;min-height:48px}
+.route-calc:disabled,.route-gps-btn:disabled{opacity:.5;cursor:wait}
+.route-status{min-height:20px;margin:12px 2px 0;color:#648074;line-height:1.7;font-size:12px}
+.route-summary{display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:#ebf8ef;padding:15px;border-radius:14px;margin-top:12px}
+.route-summary[hidden]{display:none!important}
+.route-summary strong{font-size:21px;color:#087d61}
+.route-summary span{font-size:14px;color:#426858;font-weight:700}
+.route-restore{width:100%;padding:11px 12px;border-radius:10px;background:#13836b;color:#fff;border:0;font-size:12px;font-weight:800}
+.route-clear{display:block;width:100%;background:transparent;border:0;color:#738d7e;padding:13px 0 0;font-weight:700;font-size:11px}
+.route-pick-hint{position:absolute;z-index:1350;left:50%;top:calc(env(safe-area-inset-top) + 120px);transform:translateX(-50%);width:min(440px,calc(100% - 32px));display:flex;gap:12px;justify-content:space-between;align-items:center;padding:12px 15px;border-radius:14px;background:#203b31;color:white;box-shadow:0 10px 25px #142e213b;font-size:12px;font-weight:800}
+.route-pick-hint[hidden]{display:none!important}
+.route-pick-hint button{border:1px solid #90ab9c;background:#fff;color:#164e3d;border-radius:9px;padding:8px 10px;font-size:11px;font-weight:800}
+.route-picking .sheet,.route-picking .detail-sheet,.route-picking .entry-sheet,.route-picking .map-badge,.route-picking .add-point-button,.route-picking .add-hint,.route-picking .filter-bar,.route-picking .filter-result,.route-picking .map-actions,
+.route-preview .sheet,.route-preview .detail-sheet,.route-preview .entry-sheet,.route-preview .add-point-button,.route-preview .add-hint,.route-preview .filter-bar,.route-preview .filter-result{display:none!important}
+.route-map-card{position:absolute;z-index:1200;bottom:calc(75px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(460px,calc(100% - 20px));border-radius:19px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 14px;background:#fff;box-shadow:0 7px 30px #1a38252b;border:1px solid #e5eee8}
+.route-map-card[hidden]{display:none!important}
+.route-map-card>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+.route-map-card small{color:#698a7c;font-size:10px;font-weight:700}
+.route-map-card strong{font-size:17px;white-space:nowrap}
+.route-map-card-actions{display:flex;gap:5px}
+.route-map-card-actions button{white-space:nowrap;border:1px solid #bcdccd;background:#ebf7f0;color:#08785c;border-radius:10px;padding:10px 9px;font-size:11px;font-weight:800}
+.route-map-card-actions button:last-child{border-color:#edf0ed;background:#f4f7f5;color:#6c8175}
+@media(max-width:390px){.route-map-card{gap:5px;padding:11px 10px}.route-map-card strong{font-size:14px}.route-map-card-actions button{padding:9px 7px;font-size:10px}}
+
+
+/* v14 · 실시간 GPS 진행 안내 & 구간 색상 구분 */
+.route-start-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.guide-button{border:0;border-radius:10px;background:#147f68;color:#fff;font-size:12px;font-weight:800;padding:11px 9px}
+.guide-button.demo{color:#167864;background:#e4f5ec}
+.route-map-card{flex-direction:column;align-items:stretch}
+.route-map-card>div:first-child{display:flex;flex-direction:row;align-items:center;justify-content:space-between}
+.route-map-card-actions{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;width:100%}
+.route-map-card-actions button{padding:9px 4px;font-size:11px}
+#route-guide-start{background:#11856b;color:#fff;border-color:#11856b}
+#route-demo-start{background:#e7f3ec;color:#127b5d}
+.nav-live-card{position:absolute;z-index:1230;bottom:calc(75px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(460px,calc(100% - 20px));background:#fff;border:1px solid #dfece5;border-radius:20px;padding:14px 16px;box-shadow:0 9px 34px #1a38252b}
+.nav-live-card[hidden]{display:none!important}
+.nav-live-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;font-weight:800;margin-bottom:8px}
+#nav-mode-tag{color:#0d8164}
+#nav-accuracy{color:#85968c;font-weight:650}
+#nav-instruction{display:block;font-size:17px;line-height:1.4;color:#20392e;margin-bottom:13px}
+.nav-live-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nav-live-metrics>div{display:flex;flex-direction:column;background:#f1f7f3;padding:10px 12px;border-radius:11px;gap:3px}
+.nav-live-metrics small{font-size:11px;color:#688676}
+.nav-live-metrics b{font-size:18px;color:#086f58}
+#nav-warning{margin:10px 0;font-size:11px;color:#6e8274;line-height:1.55}
+.nav-live-actions{display:grid;grid-template-columns:1fr 100px;gap:7px}
+.nav-live-actions button{background:#e6f5ed;border:0;color:#08785f;font-size:12px;font-weight:800;padding:11px 8px;border-radius:10px}
+#nav-stop{background:#f4eee9;color:#9b4f43}
+.nav-position-dot{width:19px;height:19px;background:#2267e9;border:3px solid white;border-radius:50%;box-shadow:0 0 0 5px #2b7fff33,0 2px 10px #122a3755;pointer-events:none}
+.route-guiding .sheet,.route-guiding .detail-sheet,.route-guiding .entry-sheet,.route-guiding .add-point-button,.route-guiding .filter-bar,.route-guiding .filter-result{display:none!important}
+.route-guiding .map-actions{bottom:calc(75px + env(safe-area-inset-bottom) + 232px)}
+@media(max-width:390px){.nav-live-card{padding:11px 12px}.nav-live-actions{grid-template-columns:1fr 92px}.route-map-card-actions button{font-size:10px}}
+
+/* v15: 주민용 커뮤니티 시연 UI (서버 미연결) */
+.community-heading-row{display:flex;justify-content:space-between;align-items:center;gap:13px;margin:23px 0 12px}
+.community-heading-row h3{font-size:19px;margin:4px 0;color:#19392e;letter-spacing:-.6px}
+.community-heading-row p{font-size:11px;line-height:1.5;color:#779087;margin:5px 0 0}
+.community-compose-toggle{flex:0 0 auto;border:0;border-radius:12px;background:#0f8065;color:#fff;font-size:12px;font-weight:800;padding:12px 13px}
+.community-toolbar{display:flex;gap:8px;align-items:flex-start;margin-bottom:12px}
+.community-category-tabs{display:flex;flex:1;gap:5px;overflow-x:auto;scrollbar-width:none;padding:1px 0 5px}
+.community-category-tabs::-webkit-scrollbar{display:none}
+.community-filter{white-space:nowrap;background:#f0f5f2;border:1px solid transparent;color:#667f73;padding:9px 11px;border-radius:999px;font-size:11px;font-weight:800}
+.community-filter.active{border-color:#b0d5c4;color:#08775e;background:#e5f4eb}
+#community-sort{border:1px solid #dce8df;background:#fff;border-radius:10px;padding:9px 4px;font:inherit;font-size:11px;font-weight:700;color:#406254}
+.community-demo-notice{padding:11px 12px;margin:12px 0;background:#eff6f0;border:1px solid #e1ebe3;border-radius:12px;font-size:11px;line-height:1.55;color:#557465}
+.community-feed{display:flex;flex-direction:column;gap:11px}
+.community-post{border:1px solid #e4ece6;border-radius:18px;padding:17px 15px;background:#fff;box-shadow:0 3px 10px #233e2910}
+.community-post-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.community-post-category{background:#e8f5ed;border-radius:8px;padding:5px 8px;font-size:10px;font-weight:850;color:#128267}
+.community-post-meta{font-size:10px;color:#8da197;text-align:right}
+.community-post-title{font-size:15px;letter-spacing:-.5px;color:#1f3c2e;margin:13px 0 7px}
+.community-post-body{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;color:#566e61;margin:0 0 13px}
+.community-post-image{display:block;width:100%;max-height:270px;object-fit:contain;background:#f2f6f3;border-radius:12px;margin:0 0 12px}
+.community-location-link{border:0;background:#f1f7f3;color:#0c8166;padding:10px 11px;font-size:11px;border-radius:10px;font-weight:800;margin-bottom:9px}
+.community-post-actions{border-top:1px solid #e9efeb;display:flex;align-items:center;gap:10px;padding-top:10px}
+.community-post-actions button{border:0;background:transparent;color:#667f73;font:inherit;font-size:11px;font-weight:750;padding:6px 3px}
+.community-post-actions .liked{color:#d34e68}
+.community-post-actions .community-post-delete{margin-left:auto;color:#a78b8b}
+.community-comments{padding:11px;background:#f5f8f5;border-radius:12px;margin-top:9px}
+.community-comments[hidden]{display:none!important}
+.community-comment-row{padding:9px 2px;border-bottom:1px solid #e0e8e1}
+.community-comment-row b{font-size:11px;color:#356350}
+.community-comment-row p{font-size:11px;color:#465b4c;line-height:1.65;margin:5px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.community-comment-row small{font-size:9px;color:#879a90}
+.community-comment-form{display:flex;gap:7px;margin-top:11px}
+.community-comment-form input{min-width:0;flex:1;background:white;border:1px solid #dce9e0;border-radius:10px;padding:10px;font:inherit;font-size:11px}
+.community-comment-form button{background:#10876b;border:0;color:white;border-radius:10px;font-size:11px;font-weight:800;padding:10px}
+.community-form[hidden]{display:none!important}
+.community-form{margin-bottom:14px;gap:7px}
+.community-form-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.community-form-top strong{font-size:15px}
+.community-form-top button{border:0;background:#f2f5f2;color:#5d7568;border-radius:9px;font-size:20px;width:32px;height:32px}
+.community-form select{font:inherit;background:#fcfdfc;color:#233d31;border:1px solid #d9e5df;border-radius:10px;padding:11px;font-size:12px}
+.community-attach-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.community-attach-action{display:flex;align-items:center;justify-content:center;font-size:11px!important;font-weight:800!important;border:1px solid #beddd0;border-radius:11px;padding:11px 8px;background:#eff8f2;color:#0e7e62;cursor:pointer;margin:0!important}
+.community-photo-preview{border-radius:13px;overflow:hidden;background:#f1f7f1;position:relative}
+.community-photo-preview[hidden]{display:none!important}
+.community-photo-preview img{width:100%;max-height:180px;object-fit:contain;display:block}
+.community-photo-preview button{position:absolute;right:8px;top:8px;border:0;border-radius:9px;background:#fff;color:#995850;font-size:11px;padding:7px 10px}
+.community-location-label{background:#f4f7f4;color:#698474;border-radius:10px;padding:10px 12px;margin:5px 0;font-size:11px}
+.community-form-note{font-size:10px;line-height:1.5;color:#8fa095}
+.community-export{margin:18px 0 0;border:1px solid #d6e7dc;background:#eff8f1;color:#11775c;width:100%;border-radius:12px;padding:13px;font-size:12px;font-weight:800}
+.community-map-hint{position:absolute;top:calc(env(safe-area-inset-top) + 150px);left:50%;transform:translateX(-50%);width:min(430px,calc(100% - 25px));z-index:1340;background:#253e34;color:#fff;box-shadow:0 8px 20px #21382b39;padding:13px;border-radius:12px;font-size:12px;line-height:1.6;font-weight:800}
+.community-map-hint button{background:#fff;border:0;padding:6px 9px;border-radius:7px;color:#155e49;font-size:11px;font-weight:800;float:right}
+.community-map-hint[hidden]{display:none!important}
+/* 페이지 전환 시에도 지도 위치 지정 안내를 보이게 유지 */
+
+/* v17: 별도 교통 정보 레이어 및 하단 정류장 상세정보 패널 */
+.transport-source-status{position:absolute;z-index:875;top:calc(env(safe-area-inset-top) + 224px);left:16px;max-width:calc(100% - 32px);background:#ffffffeb;color:#4d6b60;border:1px solid #dfebe5;border-radius:10px;padding:7px 10px;font-size:10px;font-weight:700;box-shadow:0 4px 14px #1b3b2920;pointer-events:none}
+.transport-sheet{position:absolute;z-index:1150;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 65px);max-height:64dvh;overflow-y:auto;background:#fff;border-radius:23px 23px 0 0;padding:9px 19px 18px;box-shadow:0 -9px 36px #172c2240;border:1px solid #e2eae5}
+.transport-sheet[hidden]{display:none!important}
+.transport-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.transport-panel-head h2{font-size:19px;line-height:1.5;letter-spacing:-.6px;margin:5px 0 3px}.transport-panel-head .subway-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.transport-panel-head .subway-title::before{content:'Ⓜ';display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:#f2effa;color:#5a43a6;font-size:13px;font-weight:900}
+.transport-panel-head p{color:#7a9186;font-size:11px;margin:0}
+.transport-panel-head .detail-close{flex-shrink:0}
+.transport-chips{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0 4px}
+.transport-chip{background:#eaf2fb;color:#276eb5;font-size:10px;font-weight:800;padding:6px 9px;border-radius:8px}
+.transport-chip.muted{background:#f2f5f2;color:#60796e}
+.transport-chip-line{background:var(--line-bg,#efeaf8)!important;color:var(--line-text,#57429e)!important;border:1px solid var(--line-border,#cdbfe6);box-shadow:inset 0 0 0 1px #ffffffb3}
+.transport-section-title{display:flex;align-items:center;justify-content:space-between;gap:7px;margin:15px 0 9px;padding-top:10px;border-top:1px solid #e8eeea;font-size:12px}
+.transport-section-title button{font:inherit;border:0;background:#eaf6f0;color:#0a7d5f;font-weight:800;border-radius:8px;padding:7px 9px;font-size:11px}
+#transport-update-time{font-size:10px;color:#819489}
+.transport-lines{display:flex;flex-wrap:wrap;gap:6px;min-height:30px}
+.transport-line{display:inline-flex;align-items:center;padding:7px 10px;background:#eaf2fd;color:#1665af;border-radius:8px;font-size:12px;font-weight:850}
+.transport-line.subway{color:var(--line-text,#57429e);background:var(--line-bg,#f0ebf8);border:1px solid var(--line-border,#d7caee);box-shadow:inset 0 0 0 1px #ffffffb0}
+.transport-empty{margin:4px 0;color:#7a8c81;font-size:12px;line-height:1.6}
+.transport-arrivals{display:flex;flex-direction:column;gap:6px}
+.transport-arrival-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e8ede9;background:#f9fbf9;border-radius:11px;padding:11px 12px}
+.transport-arrival-main{display:flex;flex-direction:column;gap:4px}
+.transport-arrival-main strong{font-size:13px}.transport-arrival-main small{font-size:10px;color:#77877d}
+.transport-arrival-time{font-size:12px;font-weight:800;color:#0b8165;text-align:right}
+.transport-note{font-size:10px;line-height:1.7;color:#8b9b91;margin:17px 0 0}
+@media(min-width:700px){.transport-sheet{left:50%;right:auto;width:460px;transform:translateX(-50%)}.transport-source-status{left:calc(50% - 214px)}}
+#app[data-tab]:not([data-tab="map"]) .transport-sheet,
+#app[data-tab]:not([data-tab="map"]) .transport-source-status,
+.route-picking .transport-sheet,.route-preview .transport-sheet,.adding .transport-sheet{display:none!important}
+
+.route-picking .transport-source-status,.route-preview .transport-source-status,.route-guiding .transport-source-status,.adding .transport-source-status{display:none!important}
+
+/* v17.4: 장소명·주소 검색과 지하철/정류장 선택 확인 */
+.route-select-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.route-select-actions .route-mini-btn{padding:9px 10px}
+.route-select-actions .route-mini-btn.search{background:#13836b;color:white;border-color:#13836b}
+.route-place-search{margin-top:17px;padding:13px;border-radius:15px;border:1px solid #cddfd5;background:#f5faf7}
+.route-place-search[hidden],.route-search-confirm[hidden],.route-transit-confirm[hidden]{display:none!important}
+.route-place-search-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+.route-place-search-head strong{font-size:14px;color:#1e4031}
+.route-place-search-head button{font-size:20px;font-weight:800;border:0;background:#e5efe9;color:#416452;border-radius:9px;width:32px;height:32px}
+.route-search-form{display:flex;gap:7px}
+.route-search-form input{min-width:0;flex:1;border:1px solid #cfdfd5;border-radius:10px;padding:11px;font:inherit;font-size:13px;background:#fff;color:#223b30}
+.route-search-form button{border:0;border-radius:10px;padding:0 15px;background:#13836b;color:white;font-size:12px;font-weight:800}
+.route-search-form button:disabled{opacity:.5}
+.route-search-status{font-size:11px!important;color:#56766a!important;margin:9px 2px!important;line-height:1.5!important}
+.route-search-results{display:flex;flex-direction:column;gap:7px;max-height:230px;overflow-y:auto}
+.route-search-item{border:1px solid #deebe3;background:#fff;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px;align-items:stretch;text-align:left}
+.route-search-item strong{font-size:13px;color:#253d31}
+.route-search-item small{font-size:10px;color:#789083;line-height:1.45}
+.route-search-item:focus-visible,.route-search-item:hover{border-color:#14886b;background:#f3faf5}
+.route-search-confirm{border:1px solid #b5dac7;background:#fff;border-radius:12px;padding:12px;margin-top:12px}
+.route-search-confirm>strong{display:block;margin-top:5px;font-size:15px;color:#193b30}
+.route-search-confirm>p{font-size:11px;color:#648074;margin:8px 0 12px!important;line-height:1.55}
+.route-search-confirm-actions,.route-transit-confirm-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px}
+.route-search-confirm-actions button,.route-transit-confirm-actions button{border:1px solid #d4e7dc;background:#f1f7f3;color:#50715f;padding:11px 8px;border-radius:10px;font-size:12px;font-weight:800}
+#route-search-accept,#route-transit-accept{background:#13836b;color:#fff;border-color:#13836b}
+.route-place-search>small{display:block;font-size:10px;color:#8b9e93;line-height:1.6;margin-top:11px}
+.route-transit-confirm{position:absolute;z-index:1370;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 76px);width:min(460px,calc(100% - 20px));background:#fff;border:1px solid #cce5d7;box-shadow:0 9px 35px #1f382b3b;border-radius:21px;padding:20px 18px}
+.route-transit-confirm>strong{display:block;color:#193729;font-size:20px;font-weight:850;margin:6px 0 8px}
+.route-transit-confirm>p{font-size:12px;color:#59786b;line-height:1.55;margin:9px 0 15px}
+.route-transit-confirm-lines{display:flex;flex-wrap:wrap;gap:5px}
+.route-confirm-line{border-radius:8px;padding:6px 8px;font-size:11px;color:var(--route-line-color,#5e4aa2);background:#f4f6f5;border:1px solid var(--route-line-color,#cab9e5);font-weight:850}
+.transport-selection-box{border:1px solid #d9eae0;background:#f4faf6;padding:12px;border-radius:13px;margin:12px 0}
+.transport-selection-box>strong{display:block;font-size:12px;color:#214333}
+.transport-selection-box>p{font-size:10px;line-height:1.5;color:#648071;margin:6px 0 10px}
+.transport-selection-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.transport-selection-actions button{border:1px solid #bcd9c9;background:#fff;color:#087b60;padding:10px 6px;border-radius:9px;font-size:11px;font-weight:800}
+.transport-selection-actions button:last-child{background:#13836b;color:#fff;border-color:#13836b}
+
+
+/* v17.4.1 추정 도로폭 분석 레이어 */
+#toggle-road-width{color:#31554b;font-weight:900;font-size:15px}
+#toggle-road-width[aria-pressed="true"]{background:#dff2e8;border-color:#7abfa7;color:#08765e}
+.road-width-legend{position:absolute;z-index:910;left:16px;top:calc(env(safe-area-inset-top) + 260px);width:192px;padding:12px 13px;border:1px solid #dce7e1;border-radius:15px;background:rgba(255,255,255,.97);box-shadow:0 5px 22px #142b2023;font-size:11px;line-height:1.55;color:#35473f}
+.road-width-legend[hidden]{display:none!important}
+.road-width-legend strong{display:block;font-size:13px;margin-bottom:2px}
+.road-width-legend .roadwidth-note{display:block;font-size:10px;color:#6d8175;margin-bottom:8px}
+.road-width-legend div{display:flex;gap:9px;align-items:center;padding:2px 0}
+.road-width-legend i{display:inline-block;width:18px;height:10px;border-radius:3px}
+.road-width-legend small{display:block;color:#69786e;margin-top:8px;border-top:1px solid #e4ece8;padding-top:7px;line-height:1.5}
+.roadwidth-popup{font-size:12px;line-height:1.6;min-width:180px;color:#23392f}
+.roadwidth-popup strong{font-size:14px}
+.roadwidth-popup .roadwidth-value{color:#0c765e;font-size:17px;font-weight:900}
+.roadwidth-popup p{margin:6px 0}
+.roadwidth-popup small{display:block;color:#607669;margin-top:7px}
+#app[data-tab]:not([data-tab="map"]) .road-width-legend,
+.route-picking .road-width-legend,
+.route-preview .road-width-legend,
+.route-guiding .road-width-legend,
+.adding .road-width-legend,
+.detail-open .road-width-legend{display:none!important}
+@media (min-width:700px){.road-width-legend{left:calc(50% - 214px)}}
+@media (max-height:690px){.road-width-legend{top:calc(env(safe-area-inset-top) + 235px);max-height:140px;overflow:auto}}
+
+@media(max-width:390px){.sheet-top-actions{gap:6px}.sheet-toggle{padding:6px 10px;font-size:10px}}
+
+/* ── v17.7: 접히는 지도, 반응형 화면, 안전 데이터, 다크 테마 ── */
+/* 이탈릭 서체 해제: 지도의 회전과 글자 모양은 별도 설정입니다. */
+:root,body,#app,button,input,textarea,select {font-style:normal!important;}
+#app *:not(.maplibregl-canvas):not(svg):not(path) {font-style:normal!important;}
+#app {--ui-surface:#fff;--ui-ink:#172922;--ui-muted:#5e776a;--ui-stroke:#dceae3;}
+#app button {touch-action:manipulation;}
+.topbar{gap:clamp(6px,1.5vw,18px);padding-left:clamp(10px,2.2vw,20px);padding-right:clamp(10px,2.2vw,20px);}
+.brand{min-width:0;flex-shrink:1;}
+.brand>div:last-child{min-width:0;}
+.brand-name{font-size:clamp(13px,2.05vw,17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.header-tools{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 auto;}
+.weather-widget{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;min-width:0;background:#eff7f3;border:1px solid #dceae3;border-radius:15px;padding:5px 7px;}
+#weather-title{font-size:10px;font-weight:800;color:#476859;white-space:nowrap;}
+.weather-info{border:0;background:transparent;color:#135840;font-size:12px;font-weight:800;padding:5px 3px;white-space:nowrap;min-width:0;}
+#weather-my-location{border:1px solid #b9dccc;background:#fff;color:#126b54;border-radius:9px;padding:5px 7px;font-size:10px;font-weight:800;white-space:nowrap;}
+#weather-my-location:disabled{opacity:.6;cursor:wait;}
+.theme-toggle{border:1px solid #c7ddd1;background:#fff;color:#21664f;border-radius:12px;padding:9px 10px;white-space:nowrap;font-size:11px;font-weight:800;}
+.transport-source-status{display:none!important;}
+.data-layer-controls{position:absolute;z-index:926;top:calc(env(safe-area-inset-top) + 206px);left:16px;max-width:calc(100% - 32px);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.data-layer-controls>button{border:1px solid #e0e4e3;background:#fff;color:#365e50;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:800;box-shadow:0 2px 9px #102b1d18;}
+.data-layer-controls>button[aria-pressed="true"]{border-color:#1c8265;background:#167e65;color:#fff;}
+.data-layer-controls>button:disabled{opacity:.55;}
+#safety-layer-status{font-size:10px;line-height:1.3;max-width:200px;color:#214d3d;border-radius:9px;background:#fffffff0;padding:5px 8px;}
+#safety-layer-status:empty{display:none;}
+.filter-result{pointer-events:none;font-size:10px;opacity:.84;top:calc(env(safe-area-inset-top) + 183px);}
+.map-actions{bottom:calc(env(safe-area-inset-bottom) + 185px);}
+.map-badge{max-width:min(62vw,375px);min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+#map-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.safety-popup{color:#244236;font:normal 12px/1.55 'Pretendard Variable',sans-serif;min-width:160px;max-width:230px;}
+.safety-popup strong{display:block;font-size:14px;line-height:1.4;color:#173e30;}
+.safety-popup p{margin:8px 0;}
+.safety-popup small{display:block;color:#648576;line-height:1.5;}
+#app[data-tab]:not([data-tab="map"]) .data-layer-controls,
+.route-picking .data-layer-controls,.route-preview .data-layer-controls,
+.route-guiding .data-layer-controls,.adding .data-layer-controls,
+.detail-open .data-layer-controls{display:none!important;}
+
+/* 폴더블 내측 화면, 태블릿, 데스크톱 뷰에서 460px 고정폭 해제 */
+@media(min-width:700px){
+  .topbar{left:50%;width:min(calc(100vw - 32px),920px);max-width:none;transform:translateX(-50%);padding-inline:16px;}
+  .sheet{left:50%;right:auto;width:min(calc(100vw - 32px),720px);transform:translateX(-50%);}
+  .overview-sheet{transform:translateX(-50%) translateY(var(--sheet-offset,0px));}
+  .page-panel{left:50%;right:auto;width:min(calc(100vw - 32px),820px);max-width:none;transform:translateX(-50%);}
+  .bottom-nav{left:50%;right:auto;width:min(calc(100vw - 12px),920px);transform:translateX(-50%);}
+  .transport-sheet,.detail-sheet,.entry-sheet{left:50%;right:auto;width:min(calc(100vw - 32px),720px);transform:translateX(-50%);}
+  .map-badge{left:max(16px,calc((100vw - 920px)/2 + 16px));}
+  .add-point-button,.map-actions{right:max(16px,calc((100vw - 920px)/2 + 16px));}
+  .filter-bar{width:min(calc(100vw - 32px),920px);}
+  .data-layer-controls,.road-width-legend{left:max(16px,calc((100vw - 920px)/2 + 16px));}
+  .route-transit-confirm{width:min(720px,calc(100% - 32px));}
+}
+/* 작은 화면에서도 상단 컨트롤을 2행으로 옮겨 지도 조작 가능 영역 확보 */
+@media(max-width:600px){
+  .topbar{flex-wrap:wrap;row-gap:6px;padding-top:calc(env(safe-area-inset-top) + 8px);padding-bottom:11px;}
+  .brand{flex:1 1 47%;}
+  .brand .logo{width:35px;height:35px;border-radius:11px;font-size:19px;}
+  .header-tools{flex:1 1 100%;justify-content:space-between;gap:5px;}
+  .weather-widget{flex:1;justify-content:flex-start;min-width:0;}
+  .weather-info{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;}
+  .prototype{padding:5px 7px;font-size:10px;}
+  .theme-toggle{padding:8px 10px;}
+  .map-badge,.add-point-button{top:calc(env(safe-area-inset-top) + 118px);}
+  .filter-bar{top:calc(env(safe-area-inset-top) + 172px);}
+  .filter-result{top:calc(env(safe-area-inset-top) + 210px);}
+  .data-layer-controls{top:calc(env(safe-area-inset-top) + 234px);}
+  .add-hint{top:calc(env(safe-area-inset-top) + 169px);}
+  .road-width-legend{top:calc(env(safe-area-inset-top) + 292px);}
+}
+@media(max-width:360px){
+  .brand-name{font-size:13px;}
+  .brand .eyebrow{font-size:9px;}
+  .prototype{display:none;}
+  .map-badge{max-width:53vw;font-size:10px;padding:9px;}
+  .filter-chip{padding:8px 10px;font-size:11px;}
+  .data-layer-controls>button{padding:7px 9px;font-size:10px;}
+  .sheet{padding-inline:15px;}
+  .page-panel{padding-inline:13px;}
+}
+@media (orientation:landscape) and (max-height:540px){
+  .map-badge,.filter-result{display:none;}
+  .filter-bar{top:calc(env(safe-area-inset-top) + 95px);}
+  .data-layer-controls{top:calc(env(safe-area-inset-top) + 139px);}
+  .map-actions{bottom:calc(env(safe-area-inset-bottom) + 85px);}
+  .overview-sheet{max-height:calc(100dvh - 150px);}
+}
+
+/* 다크 테마: CSS 패널과 기존 맵 타일의 색을 함께 전환합니다. */
+#app[data-theme="dark"]{--ui-surface:#172831;--ui-ink:#e8f2ef;--ui-muted:#b2c9bf;--ui-stroke:#3b5455;color:#e8f2ef;background:#102129;}
+#app[data-theme="dark"] #map{background:#11222c;}
+#app[data-theme="dark"] .topbar{background:linear-gradient(180deg,#152730 60%,#152730e8 85%,transparent);}
+#app[data-theme="dark"] .brand-name,#app[data-theme="dark"] .sheet h1,#app[data-theme="dark"] .page-panel h2,#app[data-theme="dark"] .page-panel h3{color:#eff8f3;}
+#app[data-theme="dark"] .eyebrow,#app[data-theme="dark"] .sheet p,#app[data-theme="dark"] .page-heading p{color:#c2d4cc;}
+#app[data-theme="dark"] .sheet,#app[data-theme="dark"] .detail-sheet,#app[data-theme="dark"] .entry-sheet,#app[data-theme="dark"] .transport-sheet,#app[data-theme="dark"] .page-panel,#app[data-theme="dark"] .bottom-nav{background:#172831;border-color:#344f52;color:#ecf6ef;}
+#app[data-theme="dark"] .map-badge,#app[data-theme="dark"] .filter-chip:not(.selected),#app[data-theme="dark"] .map-actions button,#app[data-theme="dark"] .data-layer-controls>button:not([aria-pressed="true"]),#app[data-theme="dark"] .weather-widget,#app[data-theme="dark"] .theme-toggle,#app[data-theme="dark"] .road-width-legend{background:#21363c;color:#e1eee9;border-color:#41605c;}
+#app[data-theme="dark"] .weather-info,#app[data-theme="dark"] #weather-title,#app[data-theme="dark"] .status-tag{color:#e1eee9;}
+#app[data-theme="dark"] #weather-my-location{background:#2b4349;color:#e1eee9;border-color:#456461;}
+#app[data-theme="dark"] .prototype,#app[data-theme="dark"] .status-tag{background:#28483e;}
+#app[data-theme="dark"] .filter-result,#app[data-theme="dark"] #safety-layer-status{background:#20343ceb;color:#e2f3e9;}
+#app[data-theme="dark"] .page-panel .route-card,#app[data-theme="dark"] .feature-card,#app[data-theme="dark"] .community-note,#app[data-theme="dark"] .route-search-item,#app[data-theme="dark"] .route-place-search,#app[data-theme="dark"] .route-search-confirm,#app[data-theme="dark"] .route-summary,#app[data-theme="dark"] .record-item,#app[data-theme="dark"] .transport-arrival-row,#app[data-theme="dark"] .transport-selection-box{background:#233b40;color:#e6f1ed;border-color:#405e5c;}
+#app[data-theme="dark"] .page-panel strong,#app[data-theme="dark"] .route-location-text strong,#app[data-theme="dark"] .route-search-item strong,#app[data-theme="dark"] .transport-sheet strong{color:#e9f4ed;}
+#app[data-theme="dark"] input,#app[data-theme="dark"] select,#app[data-theme="dark"] textarea{background:#20383e;border-color:#46645e;color:#e9f4ed;}
+#app[data-theme="dark"] .detail-close,#app[data-theme="dark"] .sheet-toggle,#app[data-theme="dark"] .route-mini-btn,#app[data-theme="dark"] .transport-section-title button{background:#294840;color:#dff1e9;border-color:#54766a;}
+#app[data-theme="dark"] .map-actions svg{stroke:#e9f5ee;}
+#app[data-theme="dark"] .road-width-legend small,#app[data-theme="dark"] .road-width-legend .roadwidth-note,#app[data-theme="dark"] .footer-note{color:#bed1c9;}
+#app[data-theme="dark"] .detail-photo,#app[data-theme="dark"] .coordinate-note{background:#2a4247;color:#e6f2eb;}
+#app[data-theme="dark"] .page-panel .page-note,#app[data-theme="dark"] .transport-note,#app[data-theme="dark"] .detail-disclaimer{color:#bacdc5;}
+/* 기본으로 접힌 안내 패널 위에 지도 조작 버튼이 가려지지 않도록 위치 보정 */
+@media (orientation:portrait) and (min-height:541px){.map-actions{bottom:calc(env(safe-area-inset-bottom) + 245px);}}
+
+/* ── v17.8: 더 또렷한 호선 표시, 지도 축척, 나침반, 넓은 화면 정리 ── */
+#map-compass{position:relative;}
+.compass-direction{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:transform .12s linear;transform-origin:center center;}
+.compass-direction svg{width:21px!important;height:21px!important;stroke:#3c6457!important;stroke-width:1.4!important;fill:#d9554a!important;}
+.compass-n{font-size:9px;font-weight:900;color:#bf4c43;line-height:1.1;}
+#app[data-theme="dark"] .compass-direction svg{fill:#f1806e!important;stroke:#d9ede5!important;}
+.maplibregl-ctrl-bottom-left{bottom:calc(82px + env(safe-area-inset-bottom))!important;left:clamp(8px,2vw,30px)!important;z-index:910;pointer-events:none;}
+.maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{border:0;border-bottom:3px solid #244b41;border-left:2px solid #244b41;border-right:2px solid #244b41;background:#fffffff0;color:#143b30;border-radius:0 0 4px 4px;font:bold 11px/1.2 'Pretendard Variable',sans-serif;box-shadow:0 2px 10px #253b3425;padding:2px 6px;}
+#app[data-theme="dark"] .maplibregl-ctrl-bottom-left .maplibregl-ctrl-scale{background:#20343deb;color:#e8f5ee;border-color:#e8f5ee;}
+#app[data-tab]:not([data-tab="map"]) .maplibregl-ctrl-bottom-left,
+.route-picking .maplibregl-ctrl-bottom-left,.route-guiding .maplibregl-ctrl-bottom-left{display:none!important;}
+/* 호선별 번호 배지: M 한 글자보다 실제 노선 정보를 드러냅니다. */
+.metro-station-marker{appearance:none;border:0;background:transparent;padding:0;display:flex;align-items:center;flex-direction:column;gap:3px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(11,36,34,.18));font:normal 12px/1.1 'Pretendard Variable','Malgun Gothic',sans-serif;max-width:170px;}
+.metro-badges{display:flex;align-items:center;gap:2px;padding:3px 4px;border-radius:999px;border:1.5px solid #eff7f2;background:#ffffffed;box-shadow:0 1px 5px #25373333;}
+.metro-badge-number{color:#fff;font-size:11px;font-weight:900;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;white-space:nowrap;flex:none;text-shadow:0 1px 1px #0003;}
+.metro-station-name{font-size:12px;font-weight:850;white-space:nowrap;background:#ffffffea;color:#234237;border:1px solid #e0e9e3;padding:3px 7px;border-radius:7px;text-shadow:none;}
+#app[data-theme="dark"] .metro-badges,#app[data-theme="dark"] .metro-station-name{background:#243c42f5;color:#e9f6ed;border-color:#50736c;}
+.metro-station-marker:hover .metro-badges,.metro-station-marker:focus-visible .metro-badges{outline:2px solid #16886d;outline-offset:2px;}
+.metro-station-marker:focus-visible{outline:0;}
+/* 높은 건물과 지도 아이콘이 시각적으로 부딪히지 않도록 개별 마커는 작고 선명하게 유지합니다. */
+@media(max-width:420px){.metro-badge-number{width:21px;height:21px;font-size:10px}.metro-station-name{font-size:11px}.metro-station-marker{max-width:114px;}}
+@media(min-width:700px){.maplibregl-ctrl-bottom-left{left:max(16px,calc((100vw - 920px)/2 + 16px))!important;}}
+@media (orientation:landscape) and (max-height:540px){.maplibregl-ctrl-bottom-left{bottom:calc(60px + env(safe-area-inset-bottom))!important;}}
+
+/* 축척은 지도 하단 안내 패널 위에 남도록 배치 */
+@media(max-width:699px){.maplibregl-ctrl-bottom-left{bottom:calc(216px + env(safe-area-inset-bottom))!important;}}
+@media (orientation:landscape) and (max-height:540px){.maplibregl-ctrl-bottom-left{bottom:calc(158px + env(safe-area-inset-bottom))!important;}}
+/* 안내 패널에 집중할 때도 축척/나침반 조작 버튼이 과도하게 겹치지 않게 유지 */
+#app .metro-station-marker{font-style:normal!important;}
+
+/* ── v17.9 화면 비율별 확장 레이아웃 ── */
+:root{--layout-width:min(calc(100vw - 28px),1180px);}
+@media (min-width:700px){
+  .topbar{width:var(--layout-width);max-width:none;}
+  .sheet{width:var(--layout-width);max-width:none;}
+  .overview-sheet{min-height:clamp(218px,25vh,275px);}
+  .bottom-nav{width:var(--layout-width);max-width:none;}
+  .filter-bar{width:var(--layout-width);max-width:none;}
+  .page-panel{width:min(calc(100vw - 28px),1020px);max-width:none;}
+  .map-badge,.data-layer-controls,.road-width-legend{left:max(16px,calc((100vw - 1180px)/2 + 16px));}
+  .add-point-button,.map-actions{right:max(16px,calc((100vw - 1180px)/2 + 16px));}
+  .maplibregl-ctrl-bottom-left{left:max(16px,calc((100vw - 1180px)/2 + 16px))!important;}
+}
+@media (min-width:700px) and (max-width:1208px){
+  .map-badge,.data-layer-controls,.road-width-legend{left:22px;}
+  .add-point-button,.map-actions{right:22px;}
+}
+@media(min-width:1200px){
+  .overview-sheet .sheet-top{align-items:center;}
+  .overview-sheet .sheet-summary{max-width:900px;}
+  .overview-sheet .primary-btn{font-size:clamp(13px,.96vw,16px);padding-block:14px;}
+}
+@media (min-width:700px) and (max-height:650px){
+  .overview-sheet{min-height:0;max-height:60dvh;}
+}
+@media (max-width:699px){
+  .overview-sheet{width:100%;min-height:0;}
+}
+@media (min-width:700px) and (max-width:960px){
+  .topbar{gap:8px;}
+  .brand-name{font-size:clamp(14px,1.7vw,18px);}
+}
+/* 새 배포가 감지되면 입력 중인 내용을 잃지 않도록 새로고침은 사용자가 선택합니다. */
+.site-update-banner{position:absolute;z-index:2100;top:calc(env(safe-area-inset-top) + 70px);left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);width:fit-content;border:1px solid #a0cabb;background:#f1fff6;color:#134a39;border-radius:14px;padding:11px 12px;box-shadow:0 8px 30px #1b342833;display:flex;gap:12px;align-items:center;font-size:12px;font-weight:700;}
+.site-update-banner[hidden]{display:none!important;}
+.site-update-banner button{white-space:nowrap;border:0;background:#10846c;border-radius:9px;color:white;padding:9px 12px;font-size:12px;font-weight:800;}
+#app[data-theme="dark"] .site-update-banner{background:#1f3b37;color:#e5f6ec;border-color:#537a67;}
+
+/* v17.10 · map controls follow the *visible* sheet position, not a fixed pixel offset. */
+#app[data-tab="map"] .map-actions{z-index:990;max-height:calc(100dvh - 88px);}
+#app[data-tab="map"] .map-actions.map-actions-horizontal{flex-direction:row;gap:6px;width:max-content;}
+#app[data-tab="map"] .map-actions.map-actions-horizontal button{width:clamp(36px,10vw,44px);height:clamp(36px,10vw,44px);border-radius:12px;}
+#app[data-tab="map"] .map-actions button{flex:none;}
+@media (max-width:390px){#app[data-tab="map"] .map-actions.map-actions-horizontal{gap:4px;}}
+/* Public/educational facilities must remain readable but do not crowd the whole-district view. */
+.data-layer-controls{flex-wrap:wrap;row-gap:6px;}
+
+/* v17.11 · 모바일은 현재 위치 계산을 유지하고, 데스크톱 기본값은 하단 왼쪽으로 둡니다. */
+#app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+  left:clamp(12px,2vw,30px)!important;
+  top:clamp(255px,46dvh,490px)!important;
+  bottom:auto!important;
+  z-index:900;
+}
+@media(min-width:700px){
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+    left:14px!important;
+    top:auto!important;
+    bottom:14px!important;
+  }
+}
+@media(max-height:620px){
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{top:clamp(210px,45dvh,280px)!important;}
+}
+
+/* v17.14 · 지도가 우선인 컴팩트 UI: 설정 메뉴를 열 때만 상세 필터 노출 */
+.map-tools-toggle{position:absolute;z-index:1050;left:max(16px,calc((100vw - 1180px)/2 + 16px));
+  top:calc(env(safe-area-inset-top) + 94px);border:1px solid #bedbd0;background:#ffffffec;
+  color:#176751;font-weight:850;font-size:12px;border-radius:999px;padding:10px 16px;
+  box-shadow:0 4px 15px #1b3c2920;white-space:nowrap;}
+.map-advanced-controls{display:none;}
+#app.map-controls-open .map-advanced-controls{display:contents;}
+#app.map-controls-open .map-badge{top:calc(env(safe-area-inset-top) + 143px);max-width:min(55vw,520px);}
+#app.map-controls-open .add-point-button{top:calc(env(safe-area-inset-top) + 144px);}
+#app.map-controls-open .filter-bar{top:calc(env(safe-area-inset-top) + 188px);}
+#app.map-controls-open .filter-result{top:calc(env(safe-area-inset-top) + 230px);}
+#app.map-controls-open .data-layer-controls{top:calc(env(safe-area-inset-top) + 251px);}
+.stop-gps-tracking{position:absolute;z-index:940;top:calc(env(safe-area-inset-top) + 342px);
+ left:max(16px,calc((100vw - 1180px)/2 + 16px));border:1px solid #b5d5c6;background:#fff;
+ color:#28614f;border-radius:14px;font-size:12px;font-weight:800;padding:9px 11px;}
+.stop-gps-tracking[hidden]{display:none!important}
+.map-actions #current-location.gps-active{border:2px solid #218d79;background:#dff5ed;}
+#app[data-tab]:not([data-tab="map"]) .map-tools-toggle,
+#app[data-tab]:not([data-tab="map"]) .map-advanced-controls,
+.route-picking .map-tools-toggle,.route-preview .map-tools-toggle,.route-guiding .map-tools-toggle,
+.adding .map-tools-toggle,.detail-open .map-tools-toggle{display:none!important;}
+/* 손잡이만이 아니라 안내판의 일반 본문에서도 직접 드래그 시작 */
+.overview-sheet{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;}
+.overview-sheet.dragging{cursor:grabbing;}
+.overview-sheet button,.overview-sheet a{cursor:pointer;touch-action:manipulation;}
+/* 행정동 선택 패널 */
+.admin-dong-picker{position:absolute;z-index:1380;left:50%;transform:translateX(-50%);
+ bottom:calc(env(safe-area-inset-bottom) + 78px);width:min(720px,calc(100vw - 28px));
+ max-height:min(62dvh,520px);overflow-y:auto;background:#fffffffa;border:1px solid #d4e8de;
+ border-radius:22px;padding:18px;box-shadow:0 11px 35px #193f3333;}
+.admin-dong-picker[hidden]{display:none!important}
+.admin-dong-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+.admin-dong-heading strong{font-size:17px;color:#174d3c}
+.admin-dong-heading p{font-size:12px;line-height:1.5;color:#627e70;margin:5px 0 0}
+#admin-dong-close{border:0;border-radius:12px;background:#eaf5ee;color:#235946;font-size:23px;width:34px;height:34px;flex:0 0 34px}
+.admin-dong-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px}
+.admin-dong-choice{padding:12px 7px;border:1px solid #dce9e1;border-radius:12px;background:#f5faf7;
+ color:#25634f;font-size:13px;font-weight:800}
+.admin-dong-choice[aria-pressed="true"]{background:#13836b;color:#fff;border-color:#13836b}
+.admin-dong-clear{width:100%;border:1px solid #cadecf;background:white;color:#247660;font-size:12px;
+ padding:11px;border-radius:12px;font-weight:800;margin:12px 0}
+.admin-dong-picker small{font-size:10px;color:#7e8c85}
+#app[data-theme="dark"] .admin-dong-picker{background:#22373b;color:#dbeee6;border-color:#3c6258}
+#app[data-theme="dark"] .admin-dong-heading strong{color:#dbeee6}
+#app[data-theme="dark"] .admin-dong-choice{background:#2d4545;color:#dbeee6;border-color:#45615b}
+#app[data-theme="dark"] .admin-dong-choice[aria-pressed="true"]{background:#147e65}
+#app[data-theme="dark"] .map-tools-toggle{background:#243c42;color:#e1f2e9;border-color:#42665c}
+/* 화면 폭이 작은 경우 버튼들이 겹치지 않게 상세 옵션을 한 곳에 표시 */
+@media(max-width:699px){
+  .map-tools-toggle{top:calc(env(safe-area-inset-top) + 135px);left:12px;}
+  #app.map-controls-open .map-badge{top:calc(env(safe-area-inset-top) + 178px);left:12px;max-width:69vw;}
+  #app.map-controls-open .add-point-button{top:calc(env(safe-area-inset-top) + 179px);right:12px;}
+  #app.map-controls-open .filter-bar{top:calc(env(safe-area-inset-top) + 225px);}
+  #app.map-controls-open .filter-result{display:none!important}
+  #app.map-controls-open .data-layer-controls{top:calc(env(safe-area-inset-top) + 269px);}
+  .stop-gps-tracking{top:calc(env(safe-area-inset-top) + 372px);left:12px;}
+  .admin-dong-picker{bottom:calc(env(safe-area-inset-bottom) + 71px);padding:14px;}
+  .admin-dong-list{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:380px){.admin-dong-list{grid-template-columns:repeat(2,minmax(0,1fr));}.map-tools-toggle{padding:8px 12px}}
+/* 동작구 외부의 지하철역은 주변 맥락용으로 소형 아이콘만 남김 */
+.metro-station-marker.outside-district-station{opacity:.72;}
+.metro-station-marker.outside-district-station .metro-station-name{display:none;}
+.metro-station-marker.outside-district-station .metro-badges{padding:2px;border-color:#d9e4dfcc;}
+.metro-station-marker.outside-district-station .metro-badge-number{width:20px;height:20px;font-size:10px;}
+
+/* v17.17 · 버전 버튼과 누적 업데이트 정보 */
+.version-history-trigger{appearance:none;border:0;cursor:pointer;flex-shrink:0;}
+.version-history-trigger:hover{filter:brightness(.96);}
+.version-history-trigger:focus-visible{outline:3px solid #218a70;outline-offset:2px;}
+.version-history-backdrop{position:absolute;inset:0;z-index:3500;background:#091918b7;display:flex;justify-content:center;align-items:center;padding:24px;}
+.version-history-backdrop[hidden]{display:none!important;}
+.version-history-dialog{background:#fff;color:#19352b;width:min(560px,100%);max-height:min(85dvh,740px);display:flex;flex-direction:column;border-radius:20px;box-shadow:0 15px 50px #0003;overflow:hidden;}
+.version-history-head{display:flex;justify-content:space-between;gap:12px;align-items:start;padding:22px 22px 12px;border-bottom:1px solid #e5ece6;}
+.version-history-head h2{font-size:20px;letter-spacing:-.04em;margin:4px 0;}
+.version-history-head p{font-size:12px;color:#708377;margin:5px 0 0;}
+#version-history-close{width:38px;height:38px;border:0;background:#eff5f1;border-radius:11px;color:#294e41;font-size:25px;flex:none;}
+.version-history-list{overflow-y:auto;overscroll-behavior:contain;padding:8px 22px 22px;}
+.version-entry{padding:14px 0;border-bottom:1px solid #e9eeea;}
+.version-legacy-details{margin:16px 0;border:1px solid #d5e2dc;border-radius:12px;overflow:hidden;}
+.version-legacy-details>summary{cursor:pointer;padding:13px 15px;font-weight:700;font-size:13px;line-height:1.5;}
+.version-legacy-list{padding:0 15px 12px;border-top:1px solid #d5e2dc;}
+#app[data-theme="dark"] .version-legacy-details,#app[data-theme="dark"] .version-legacy-list{border-color:#425a56;}
+
+.version-entry h3{font-size:14px;color:#11765e;margin:0 0 8px;}
+.version-entry ul{margin:0;padding-left:19px;line-height:1.7;font-size:12px;color:#3a544b;}
+#app[data-theme="dark"] .version-history-dialog{background:#172a30;color:#eaf5ef;}
+#app[data-theme="dark"] .version-history-head,#app[data-theme="dark"] .version-entry{border-color:#425a56;}
+#app[data-theme="dark"] .version-entry ul{color:#c6d9d0;}
+#app[data-theme="dark"] .version-history-head p{color:#b4cdc2;}
+#app[data-theme="dark"] #version-history-close{background:#29483f;color:#e8f8ef;}
+@media (max-width:420px){.topbar .prototype.version-history-trigger{display:inline-block;font-size:10px;padding:5px 7px;}.version-history-backdrop{padding:12px}.version-history-head{padding:16px}.version-history-list{padding:8px 16px 16px}}
+
+/* v17.17 · 수도권 철도 노선 표기 */
+.metro-badge-number.metro-badge-shinlim{color:transparent!important;text-indent:-9999px;overflow:hidden;
+ background:#6789CA url('/images/shinlim-line.png') center/cover no-repeat!important;
+ width:26px;height:26px;border:0;box-shadow:0 0 0 1px #ffffffaf;}
+.metro-badge-number.metro-badge-gyeongui{font-size:8px;letter-spacing:-.5px;padding:0 3px;width:41px;height:24px;border-radius:13px;}
+.outside-district-station .metro-badge-number.metro-badge-shinlim{width:19px;height:19px;}
+.outside-district-station .metro-badge-number.metro-badge-gyeongui{width:33px;height:19px;font-size:7px;}
+.dongjak-landmark{appearance:none;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;
+ gap:3px;cursor:pointer;filter:drop-shadow(0 2px 5px #21382d44);font:normal 12px/1.2 'Pretendard Variable','Malgun Gothic',sans-serif;}
+.dongjak-landmark-icon{width:32px;height:32px;border:2px solid #fff;background:#347c6f;color:#fff;border-radius:12px;
+ display:grid;place-items:center;font-size:17px;box-shadow:0 1px 5px #1b393538;}
+.dongjak-landmark-name{background:#ffffffed;border:1px solid #dae6dd;color:#1d5746;border-radius:7px;
+ font-size:11px;font-weight:800;padding:3px 6px;white-space:nowrap;}
+.dongjak-landmark.landmark-compact .dongjak-landmark-icon{width:27px;height:27px;font-size:14px;}
+.dongjak-landmark.landmark-compact .dongjak-landmark-name{display:none;}
+#app[data-theme='dark'] .dongjak-landmark-name{background:#213a40;color:#e8f4eb;border-color:#52776c;}
+#app[data-theme='dark'] .dongjak-landmark-icon{border-color:#42665c;background:#276c62;}
+.dongjak-landmark-popup strong{font-size:14px;color:#145d4c;}
+.dongjak-landmark-popup p{font-size:12px;color:#3b5b50;margin:7px 0;}
+.dongjak-landmark-popup small{color:#849a91;font-size:10px;}
+
+/* v17.18 · 교통정보 패널: 컨테이너 외곽을 어지럽히는 스크롤바 숨김 */
+.transport-sheet {box-sizing:border-box;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;
+  max-height:min(calc(100dvh - 145px),730px);overscroll-behavior:contain;}
+.transport-sheet::-webkit-scrollbar {display:none;width:0;height:0;}
+.transport-sheet .transport-section-title{margin-top:15px;}
+.transport-sheet .transport-panel-head {align-items:center;}
+.transport-neighbors {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:8px;margin:10px 0 16px;}
+.metro-info-line-card {border:1px solid #dce9e2;border-radius:13px;padding:10px 11px;background:#f8faf8;min-width:0;}
+.metro-info-line-head {display:flex;align-items:center;gap:8px;color:#203d30;font-size:13px;font-weight:800;}
+.metro-neighbor-row {display:flex;justify-content:space-between;gap:12px;margin-top:8px;color:#53685c;font-size:11px;font-weight:700;}
+.metro-neighbor-row span {min-width:0;overflow-wrap:anywhere;}
+.transport-line.subway {display:inline-flex;align-items:center;gap:7px;}
+.transport-chip-line {display:inline-flex;align-items:center;gap:5px;}
+.transport-arrival-main.metro-arrival-main {flex-direction:row;align-items:center;gap:9px;}
+.metro-arrival-detail {display:flex;flex-direction:column;gap:3px;}
+.metro-badge-number.metro-panel-badge {width:25px;height:25px;font-size:11px;border-radius:50%;flex:none;letter-spacing:-.5px;}
+.metro-badge-number.metro-panel-badge.metro-badge-gyeongui {font-size:6px;letter-spacing:-.8px;padding:1px;}
+.metro-badge-number.metro-panel-badge.metro-badge-shinlim {background-size:cover;}
+#app[data-theme="dark"] .metro-info-line-card{background:#20383d;border-color:#47675f;}
+#app[data-theme="dark"] .metro-info-line-head{color:#e7f6ed;}
+#app[data-theme="dark"] .metro-neighbor-row{color:#c7d7d1;}
+
+/* 멀리서 작고 단정한 역 마커: 역명만 적게 보이고 노선표시는 주요 노선 하나만 */
+.metro-station-marker.metro-overview {gap:2px;filter:drop-shadow(0 1px 2px #263b3540);}
+.metro-overview .metro-badges{padding:1px;border-width:1px;box-shadow:0 1px 3px #18292720;}
+.metro-overview .metro-badge-number{width:12px!important;height:12px!important;min-width:12px!important;
+  font-size:7px!important;letter-spacing:-.8px!important;line-height:1!important;padding:0!important;}
+.metro-overview .metro-badge-number.metro-badge-gyeongui{font-size:4px!important;}
+.metro-overview .metro-badge-number.metro-badge-shinlim{font-size:0!important;}
+.metro-overview .metro-extra-badge{display:none!important;}
+.metro-overview .metro-station-name{font-size:9px!important;line-height:1!important;padding:2px 3px!important;max-width:70px;overflow:hidden;text-overflow:ellipsis;}
+.metro-station-marker.metro-mid-zoom .metro-badge-number{width:18px!important;height:18px!important;font-size:9px!important;}
+.metro-station-marker.metro-mid-zoom .metro-station-name{font-size:10px!important;padding:2px 4px!important;}
+.metro-station-marker:not(.metro-overview):not(.metro-mid-zoom) .metro-badge-number {width:24px;height:24px;}
+.metro-station-marker.outside-district-station .metro-station-name {display:block;opacity:.86;}
+.metro-station-marker.outside-district-station.metro-overview .metro-station-name{font-size:8px!important;}
+.metro-station-marker.outside-district-station{opacity:.85;}
+@media (min-width:700px){.transport-sheet{width:min(calc(100vw - 48px),760px)!important;}}
+@media (max-width:699px){.transport-sheet{border-radius:18px 18px 0 0;max-height:min(calc(100dvh - 160px),76dvh);}}
+
+/* v17.18 지하철 도착정보 노선별 그룹과 고정 높이 */
+.transport-arrivals{gap:12px;}
+.metro-arrival-group{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.metro-arrival-group-heading{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12px;}
+#app[data-theme="dark"] .metro-arrival-group-heading{color:#e4f6ec;}
+.transport-sheet .subway-title::before{display:none!important;content:none!important;}
+.transport-sheet .subway-title{display:flex;gap:9px;align-items:center;}
+.transport-sheet[data-kind="subway"] #transport-lines{display:none;}
+.transport-sheet[data-kind="subway"] #transport-line-section-heading{margin-top:0;padding:0;height:0;overflow:hidden;}
+
+/* 경의중앙선도 타원 아닌 원형 배지 */
+.metro-badge-number.metro-badge-gyeongui{width:27px!important;height:27px!important;border-radius:50%!important;
+  font-size:6.5px!important;line-height:1.05;letter-spacing:-.95px;word-break:keep-all;padding:0 1px!important;}
+.metro-station-marker.metro-overview .metro-badge-number.metro-badge-gyeongui{width:12px!important;height:12px!important;font-size:3.8px!important;}
+.metro-station-marker.metro-mid-zoom .metro-badge-number.metro-badge-gyeongui{width:18px!important;height:18px!important;font-size:4.7px!important;}
+.transport-updated-actions{display:flex;align-items:center;gap:10px;}
+.transport-updated-actions button{border:0;border-radius:10px;padding:8px 10px;background:#e5f3ec;color:#0b785c;font-size:11px;font-weight:800;cursor:pointer;}
+#app[data-theme="dark"] .transport-updated-actions button{background:#345d50;color:#e7fff3;}
+
+.transport-sheet .subway-title{flex-direction:row-reverse!important;justify-content:flex-end;}
+
+/* v5.0: 실시간 지하철 도착정보를 호선별 · 상행/하행으로 읽기 쉽게 구분 */
+.metro-arrival-direction-group{display:flex;flex-direction:column;gap:7px;margin:5px 0 12px;min-width:0;}
+.metro-direction-heading{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;
+  background:#eef4f1;color:#2c5146;border:1px solid #d9e6de;padding:9px 12px;border-radius:12px;}
+.metro-direction-heading.up{color:#145e95;background:#e9f3fa;border-color:#cee3f4;}
+.metro-direction-heading.down{color:#925b14;background:#fff3e4;border-color:#efdfc7;}
+.metro-direction-arrow{font-size:16px;line-height:1;}
+#app[data-theme="dark"] .metro-direction-heading{background:#2b4342;color:#d9f2e3;border-color:#456861;}
+#app[data-theme="dark"] .metro-direction-heading.up{background:#253e55;color:#c2e5ff;border-color:#355d7c;}
+#app[data-theme="dark"] .metro-direction-heading.down{background:#514331;color:#ffe6bd;border-color:#7c623d;}
+.metro-arrival-direction-group .transport-arrival-row{margin:0;}
+
+/* 교육시설 전용 표지: 대학은 전체 지역 뷰에서, 초중고는 동네로 확대할 때 표시 */
+.dongjak-education-marker{appearance:none;border:0;background:transparent;display:flex;flex-direction:column;
+  align-items:center;gap:3px;padding:0;cursor:pointer;font-family:'Pretendard Variable','Malgun Gothic',sans-serif;
+  font-style:normal!important;filter:drop-shadow(0 2px 4px #1e3b3f35);}
+.dongjak-education-icon{width:31px;height:31px;border:2px solid #fff;border-radius:12px;
+  display:flex;justify-content:center;align-items:center;background:#4b70a6;font-size:17px;line-height:1;}
+.dongjak-education-marker.university .dongjak-education-icon{background:#47639c;}
+.dongjak-education-name{border:1px solid #d7e0ed;background:#fffffff0;color:#244e75;
+  padding:3px 7px;font-size:11px;font-weight:800;line-height:1.18;border-radius:7px;white-space:nowrap;}
+.dongjak-education-kind{display:none;}
+.dongjak-education-marker.compact .dongjak-education-icon{width:27px;height:27px;font-size:14px;}
+.dongjak-education-marker.compact:not(.university) .dongjak-education-name{display:none;}
+#app[data-theme="dark"] .dongjak-education-name{background:#203c4a;color:#e3effa;border-color:#577991;}
+.dongjak-education-popup strong{color:#21547e;font-size:14px;}
+.dongjak-education-popup p{font-size:12px;margin:7px 0;color:#526977;}
+.dongjak-education-popup small{font-size:11px;color:#718896;}
+.version-entry-major{border-left:3px solid #138568;padding-left:14px;}
+.version-entry-minor{padding-left:17px;}
+.version-release-type{margin-left:10px;font-size:10px;color:#6b8580;font-weight:600;}
+
+
+/* v5.1: 상행/하행 좌우 분할, 원거리 역 비활성 처리 */
+.metro-direction-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;}
+.metro-arrival-direction-group{background:#f5f8f6;border:1px solid #e2ebe5;border-radius:16px;padding:10px;}
+.metro-arrival-direction-group.up{background:#f2f8fc;border-color:#d8e8f4;}
+.metro-arrival-direction-group.down{background:#fff8ef;border-color:#efe0c9;}
+#app[data-theme="dark"] .metro-arrival-direction-group{background:#203537;border-color:#3a5856;}
+#app[data-theme="dark"] .metro-arrival-direction-group.up{background:#213649;border-color:#3b607a;}
+#app[data-theme="dark"] .metro-arrival-direction-group.down{background:#473c2e;border-color:#7b623d;}
+.metro-arrival-direction-group .transport-arrival-row{background:rgba(255,255,255,0.72);}
+#app[data-theme="dark"] .metro-arrival-direction-group .transport-arrival-row{background:#233b40;}
+.metro-passive-station{cursor:default!important;opacity:.96;}
+.metro-passive-station .metro-station-name{opacity:.88;}
+
+/* v5.2: 모든 앱 라벨에서 단어 중간 강제 줄바꿈 방지. 긴 명칭은 단어 경계에서만 줄바꿈 */
+#app :is(h1,h2,h3,strong,button,label,.transport-arrival-time,.metro-station-name,.dongjak-education-name,.dongjak-landmark-name,.version-entry li){word-break:keep-all;overflow-wrap:normal;hyphens:none;}
+.metro-station-name,.dongjak-education-name,.dongjak-landmark-name{white-space:nowrap;max-width:none;}
+.transport-arrival-main{min-width:0;flex:1;}
+.transport-arrival-main strong{white-space:normal;word-break:keep-all;overflow-wrap:normal;}
+.transport-arrival-row{min-width:0;gap:12px;}
+.transport-arrival-time{white-space:nowrap;flex:0 0 auto;word-break:keep-all;}
+.metro-arrival-detail{min-width:0;}
+.metro-direction-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.metro-direction-grid .metro-arrival-direction-group{min-width:0;}
+.route-variants{width:100%;border:1px solid #d7e7df;background:#f5faf7;border-radius:13px;margin-top:12px;padding:12px;}
+.route-variants[hidden]{display:none!important;}
+.route-variant-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.route-variant-choice button{border:1px solid #c5dcd2;border-radius:11px;padding:12px 7px;font-size:12px;font-weight:800;background:#fff;color:#335949;}
+.route-variant-choice button[aria-pressed="true"]{background:#0f8068;color:white;border-color:#0f8068;}
+.route-variant-choice button:disabled{opacity:.38;cursor:default;}
+.route-variants p{font-size:11px;line-height:1.65;color:#5d7369;margin:9px 0 0;}
+#app[data-theme="dark"] .route-variants{background:#223c38;border-color:#3c6156;}
+#app[data-theme="dark"] .route-variant-choice button{background:#24433e;color:#e6f4ec;border-color:#456a5e;}
+#app[data-theme="dark"] .route-variant-choice button[aria-pressed="true"]{background:#138469;}
+#app[data-theme="dark"] .route-variants p{color:#d4e2dc;}
+@media(max-width:460px){.metro-direction-grid{gap:7px;}.metro-arrival-direction-group{padding:7px;}.metro-direction-grid .transport-arrival-row{display:flex;flex-wrap:wrap;align-items:flex-start;}.metro-direction-grid .transport-arrival-time{margin-left:auto;}}
+
+.metro-direction-grid .transport-arrival-row{flex-wrap:wrap;}
+/* v5.2 map refinements: accessibility status stays readable in a narrow map-tools sheet. */
+#metro-access-status{font-size:10px;line-height:1.4;max-width:min(290px,100%);color:#1d604c;
+  border-radius:9px;background:#fffffff0;padding:5px 9px;overflow-wrap:break-word;word-break:keep-all;}
+#app[data-theme="dark"] #metro-access-status{background:#20343ceb;color:#d6f1e5;}
+/* v5.2: 출구 조회 상태는 메뉴 안에서 길게 잘리지 않게 표시 */
+#metro-access-retry{border:1px solid #b7d8c9;border-radius:9px;background:#e6f4ee;
+  color:#225b4b;font-size:11px;padding:6px 9px;cursor:pointer;white-space:nowrap;}
+#metro-access-status{display:inline-block;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
+  max-width:min(340px,100%);line-height:1.45;}
+
+
+/* v5.2 next update: user-controlled immersive map after dragging/pinching. */
+.bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr));}
+#map-chrome-restore[hidden]{display:none!important;}
+.map-chrome-restore{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 12px);left:50%;transform:translateX(-50%);
+  z-index:1420;background:#fff;color:#12654f;border:1px solid #bad9c8;border-radius:999px;
+  box-shadow:0 5px 22px #173b2c36;padding:11px 19px;font:inherit;font-size:12px;font-weight:800;white-space:nowrap;}
+#app[data-tab="map"].map-immersive .topbar,
+#app[data-tab="map"].map-immersive .bottom-nav,
+#app[data-tab="map"].map-immersive .overview-sheet{display:none!important;}
+#app[data-tab="map"].map-immersive .map-actions{bottom:calc(env(safe-area-inset-bottom) + 75px)!important;}
+#app[data-theme="dark"] .map-chrome-restore{background:#213b40;color:#ecf5f2;border-color:#4d7065;}
+/* Reading panel: articles are sourced live, never represented as user submissions. */
+.dongjak-news-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;}
+.dongjak-news-tabs{display:flex;gap:5px;padding:4px;border-radius:12px;background:#e9f2ed;flex:1;}
+.dongjak-news-tabs button{border:0;border-radius:9px;flex:1;padding:10px 4px;background:transparent;color:#476e5a;font:inherit;font-size:12px;font-weight:800;}
+.dongjak-news-tabs button.active{color:#fff;background:#158169;}
+#dongjak-news-refresh{border:1px solid #bfdbc9;border-radius:12px;background:#fff;color:#17745a;font:inherit;font-size:11px;font-weight:800;padding:12px 10px;white-space:nowrap;}
+#dongjak-news-refresh:disabled{opacity:.5;}
+.dongjak-news-status{margin:13px 0 16px;font-size:11px;color:#627f70;line-height:1.6;}
+.dongjak-news-list{display:grid;gap:11px;}
+.dongjak-news-item{background:#fff;border:1px solid #dfeae4;border-radius:15px;padding:14px 15px;display:grid;gap:9px;}
+.dongjak-news-item strong{font-size:13px;line-height:1.6;color:#23392e;overflow-wrap:break-word;}
+.dongjak-news-item-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:#718579;}
+.dongjak-news-open{justify-self:start;border:0;background:#e8f5ec;color:#0b775d;padding:7px 9px;border-radius:9px;font:inherit;font-size:11px;font-weight:800;}
+.dongjak-news-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:19px;}
+.dongjak-news-links a{font-size:12px;font-weight:800;color:#147d65;text-decoration:underline;text-underline-offset:3px;}
+.news-empty{padding:20px 14px;border-radius:13px;border:1px solid #e0eae2;background:#fff;color:#5e7469;font-size:12px;line-height:1.7;}
+.transport-auto-refresh-label{font-size:10px;color:#15765c;white-space:nowrap;}
+#app[data-theme="dark"] .dongjak-news-tabs{background:#25413f;}
+#app[data-theme="dark"] .dongjak-news-tabs button{color:#bfd4cb;}
+#app[data-theme="dark"] .dongjak-news-tabs button.active{color:#fff;background:#117a68;}
+#app[data-theme="dark"] #dongjak-news-refresh,#app[data-theme="dark"] .dongjak-news-item,#app[data-theme="dark"] .news-empty{background:#233b40;color:#e6f1ed;border-color:#405e5c;}
+#app[data-theme="dark"] .dongjak-news-item strong{color:#e6f1ed;}
+#app[data-theme="dark"] .dongjak-news-item-meta,#app[data-theme="dark"] .dongjak-news-status{color:#bfd4cb;}
+#app[data-theme="dark"] .transport-auto-refresh-label{color:#a6dcc9;}
+@media(max-width:360px){.nav-tab{font-size:9px;}.nav-icon{font-size:19px;}}
+
+/* 환승역: 11.1~13.05배율은 통합 마커, 13.05 이상은 호선별 승강장 마커. */
+.metro-station-marker.metro-platform-detail{max-width:none;filter:drop-shadow(0 2px 5px rgba(17,38,50,.24));}
+.metro-platform-detail .metro-badges{padding:3px;border:2px solid #ffffff;box-shadow:0 2px 9px rgba(29,42,52,.2);}
+.metro-platform-detail .metro-badge-number{width:25px;height:25px;font-size:11px;}
+.metro-platform-detail .metro-station-name{font-size:11px!important;line-height:1.2;padding:4px 6px;border:1px solid #d8e2e5;box-shadow:0 2px 6px rgba(12,34,43,.14);}
+#app[data-theme="dark"] .metro-platform-detail .metro-station-name{border-color:#577179;}
+
+/* 첫차·막차 안내: 실제 시간표와 실시간 도착정보를 구분합니다. */
+.transport-service-hours{display:grid;gap:8px;font-size:12px;color:var(--text,#284438);margin:7px 0 2px;}
+.transport-hours-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e2eae5;border-radius:11px;padding:10px;background:rgba(245,250,247,.88);flex-wrap:wrap;}
+.transport-hours-row .hours-line{font-weight:800;min-width:70px;}
+.transport-hours-times{display:flex;gap:10px;flex-wrap:wrap;font-variant-numeric:tabular-nums;}
+.transport-hours-times b{color:#174f48;}
+.transport-hours-alert{flex-basis:100%;font-weight:800;color:#ae5033;}
+.transport-hours-notice{line-height:1.6;color:var(--muted,#687d76);font-size:12px;}
+.transport-hours-disclaimer{font-size:10px;line-height:1.55;color:#758980;margin:7px 0 0;}
+
+.transport-hours-line-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0;}
+.transport-hours-line-panel{display:grid;gap:10px;padding:12px;border:1px solid #dcebe3;border-radius:16px;background:#fff;min-width:0;}
+.transport-hours-line-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.transport-hours-line-title{display:inline-flex;align-items:center;gap:8px;font-size:16px;color:#21493b;font-weight:850;}
+.transport-hours-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;}
+.transport-hours-summary-grid--line9{grid-template-columns:repeat(2,minmax(0,1fr));}
+.transport-hours-summary-card{align-items:flex-start;justify-content:flex-start;display:grid;gap:8px;min-width:0;}
+.transport-hours-summary-labels{display:grid;gap:4px;min-width:0;}
+.transport-hours-summary-card .hours-line{font-size:13px;line-height:1.4;min-width:0;}
+.transport-hours-summary-card .transport-hours-times{display:grid;gap:4px;}
+.transport-hours-summary-card--empty{min-height:92px;align-content:center;}
+.transport-hours-panel-note{margin:0;font-size:11px;line-height:1.6;color:#6a8176;}
+#app[data-theme="dark"] .transport-hours-line-panel{background:#233a37;border-color:#406058;}
+#app[data-theme="dark"] .transport-hours-line-title{color:#e8f5ef;}
+#app[data-theme="dark"] .transport-hours-panel-note{color:#b7cdc4;}
+
+.transport-timetable-line-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0;}
+.transport-timetable-route-panel{display:grid;gap:12px;padding:12px;border:1px solid #dcebe3;border-radius:16px;background:#f9fcfb;min-width:0;}
+.transport-timetable-route-header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.transport-timetable-route-title{display:inline-flex;align-items:center;gap:8px;font-size:16px;color:#21493b;font-weight:850;}
+.transport-timetable-route-count{font-size:11px;font-weight:800;color:#5d786d;background:#edf5f1;border-radius:999px;padding:6px 10px;white-space:nowrap;}
+.transport-timetable-service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;align-items:start;}
+#app[data-theme="dark"] .transport-timetable-route-panel{background:#233a37;border-color:#406058;}
+#app[data-theme="dark"] .transport-timetable-route-title{color:#e8f5ef;}
+#app[data-theme="dark"] .transport-timetable-route-count{background:#294541;color:#e8f5ef;}
+
+#app[data-theme="dark"] .transport-hours-row{background:#233a37;border-color:#406058;color:#e5f3ee;}
+#app[data-theme="dark"] .transport-hours-times b{color:#dafff0;}
+#app[data-theme="dark"] .transport-hours-alert{color:#ffb392;}
+
+/* 전체 지하철 시간표: 작은 화면에서도 별도 스크롤로 모든 편성을 표시 */
+.transport-timetable-toggle{align-self:flex-start;border:1px solid #9bbdb4;border-radius:11px;background:#e5f3ee;color:#126954;font-weight:850;font-size:13px;padding:10px 14px;cursor:pointer;}
+.transport-timetable-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.transport-timetable-controls select{flex:1 1 115px;max-width:100%;padding:9px 10px;border:1px solid #cdded6;border-radius:9px;background:var(--surface,#fff);color:var(--text,#29463d);font-size:12px;}
+.transport-timetable-count{font-size:12px;color:var(--muted,#5c766d);margin:2px 0;}
+.transport-timetable-scroll{max-height:420px;max-width:100%;overflow:auto;border:1px solid #d9e7df;border-radius:12px;overscroll-behavior:contain;}
+.transport-timetable-table{border-collapse:collapse;width:100%;font-size:12px;min-width:370px;color:var(--text,#2b4038);}
+.transport-timetable-table th,.transport-timetable-table td{text-align:left;padding:9px 8px;border-bottom:1px solid #e9efeb;white-space:nowrap;}
+.transport-timetable-table th{position:sticky;top:0;background:#e8f3ed;color:#234f41;font-weight:800;z-index:1;}
+.transport-timetable-table td:first-child{font-weight:800;font-variant-numeric:tabular-nums;}
+#app[data-theme="dark"] .transport-timetable-toggle{background:#264e47;color:#e4f5ed;border-color:#628b78;}
+#app[data-theme="dark"] .transport-timetable-table th{background:#304a43;color:#f1fff7;}
+#app[data-theme="dark"] .transport-timetable-table td{border-color:#4b6058;}
+
+
+/* Direction-separated timetable: light, compact, and legible on mobile. */
+.transport-timetable-toggle{
+  display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;
+  border:1px solid #b6d9ce;border-radius:13px;
+  background:#e7f5ef;color:#087457;font:inherit;font-size:13px;font-weight:800;
+  cursor:pointer;transition:background .16s ease,border-color .16s ease;
+}
+.transport-timetable-toggle:hover{background:#d9eee4;border-color:#82beab;}
+.transport-timetable-toggle:focus-visible,
+.transport-timetable-direction-button:focus-visible,
+.transport-timetable-filter select:focus-visible{outline:3px solid #77bca9;outline-offset:2px;}
+.transport-timetable-content{display:grid;gap:13px;min-width:0;width:100%;padding:3px 0 5px;}
+.transport-timetable-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.transport-timetable-filter{display:grid;gap:6px;min-width:0;}
+.transport-timetable-filter-label{color:#526d63;font-size:11px;font-weight:750;}
+.transport-timetable-filter select{
+  width:100%;min-height:42px;padding:10px 12px;border:1px solid #d6e6de;border-radius:12px;
+  color:#243e37;background:#fff;font:inherit;font-size:12px;font-weight:750;
+}
+.transport-timetable-direction-switch{
+  display:flex;gap:5px;align-items:stretch;padding:4px;border:1px solid #e0eae5;
+  border-radius:13px;background:#eef5f1;
+}
+.transport-timetable-direction-button{
+  flex:1;min-width:0;min-height:40px;border:0;border-radius:10px;
+  background:transparent;color:#60786c;font:inherit;font-size:12px;font-weight:800;
+  cursor:pointer;white-space:normal;line-height:1.35;
+}
+.transport-timetable-direction-button[aria-pressed="true"]{
+  background:#fff;color:#0c7357;box-shadow:0 1px 6px #163b2d16;
+}
+.transport-timetable-count{margin:0;font-size:12px;color:#627c70;font-weight:650;}
+.transport-timetable-direction-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0;}
+.transport-timetable-direction-grid:has(> :only-child){grid-template-columns:minmax(0,1fr);}
+.transport-timetable-pane{display:flex;flex-direction:column;min-width:0;max-height:475px;
+  overflow:hidden;border:1px solid #dcebe3;border-radius:16px;background:#fff;}
+.transport-timetable-pane--up{border-color:#c7e6d9;}
+.transport-timetable-pane--down{border-color:#ceddec;}
+.transport-timetable-pane-header{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:13px 14px;flex:0 0 auto;
+}
+.transport-timetable-pane--up .transport-timetable-pane-header{background:#e7f5ec;}
+.transport-timetable-pane--down .transport-timetable-pane-header{background:#edf3fa;}
+.transport-timetable-pane-heading{display:grid;gap:3px;min-width:0;}
+.transport-timetable-pane-title{font-size:14px;color:#1f4939;font-weight:850;}
+.transport-timetable-pane--down .transport-timetable-pane-title{color:#365370;}
+.transport-timetable-pane-subtitle{font-size:10px;color:#70867b;}
+.transport-timetable-pane-count{flex:0 0 auto;font-size:11px;font-weight:800;
+  padding:6px 9px;background:#fff;border-radius:999px;color:#315b48;}
+.transport-timetable-pane--down .transport-timetable-pane-count{color:#365370;}
+.transport-timetable-pane-list{overflow-y:auto;overscroll-behavior:contain;min-height:0;
+  flex:1;padding:0 12px 12px;scrollbar-width:thin;scrollbar-color:#b6d5c5 transparent;}
+.transport-timetable-line-group{padding-top:6px;}
+.transport-timetable-line-group + .transport-timetable-line-group{
+  margin-top:11px;border-top:1px solid #ebf1ed;padding-top:12px;
+}
+.transport-timetable-line-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:7px 2px 9px;position:sticky;top:0;background:#fff;z-index:1;
+}
+.transport-timetable-line-name{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#344f45;}
+.transport-timetable-line-name::before{content:"";width:7px;height:16px;border-radius:5px;
+  background:var(--timetable-line-color,#17816a);}
+.transport-timetable-line-count{font-size:10px;color:#8a9b92;white-space:nowrap;}
+.transport-timetable-train{
+  display:flex;align-items:center;gap:12px;min-width:0;
+  padding:11px 4px;border-top:1px solid #edf2ee;
+}
+.transport-timetable-train-time{flex:0 0 78px;font-variant-numeric:tabular-nums;
+  font-size:15px;letter-spacing:-.35px;font-weight:850;color:#263d38;white-space:normal;}
+.transport-timetable-train-info{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;}
+.transport-timetable-train-dest{font-size:12px;font-weight:700;color:#435f52;
+  line-height:1.4;overflow-wrap:anywhere;}
+.transport-timetable-express{display:inline-flex;align-items:center;padding:3px 6px;
+  font-size:10px;font-weight:850;border-radius:6px;background:#fff2df;color:#ad640d;}
+.transport-timetable-no-trains{margin:13px 2px;color:#70857b;font-size:12px;line-height:1.65;}
+#app[data-theme="dark"] .transport-timetable-toggle{background:#254c41;color:#d9f1e6;border-color:#4c8270;}
+#app[data-theme="dark"] .transport-timetable-toggle:hover{background:#315b4e;}
+#app[data-theme="dark"] .transport-timetable-filter-label,#app[data-theme="dark"] .transport-timetable-count{color:#b9cfc7;}
+#app[data-theme="dark"] .transport-timetable-filter select{background:#243c3e;color:#e7f2ec;border-color:#47605b;}
+#app[data-theme="dark"] .transport-timetable-direction-switch{background:#243d3d;border-color:#3e5852;}
+#app[data-theme="dark"] .transport-timetable-direction-button{color:#bfd0c9;}
+#app[data-theme="dark"] .transport-timetable-direction-button[aria-pressed="true"]{background:#345b51;color:#f1fff7;}
+#app[data-theme="dark"] .transport-timetable-pane{background:#243b3e;border-color:#405950;}
+#app[data-theme="dark"] .transport-timetable-pane--up .transport-timetable-pane-header{background:#2a5144;}
+#app[data-theme="dark"] .transport-timetable-pane--down .transport-timetable-pane-header{background:#2d4760;}
+#app[data-theme="dark"] .transport-timetable-pane-title,#app[data-theme="dark"] .transport-timetable-pane--down .transport-timetable-pane-title{color:#e4f5ee;}
+#app[data-theme="dark"] .transport-timetable-pane-count{background:#233b3a;color:#e4f5ee;}
+#app[data-theme="dark"] .transport-timetable-pane-subtitle,#app[data-theme="dark"] .transport-timetable-line-count{color:#b3cbc1;}
+#app[data-theme="dark"] .transport-timetable-line-head{background:#243b3e;}
+#app[data-theme="dark"] .transport-timetable-line-name,#app[data-theme="dark"] .transport-timetable-train-time{color:#eaf6f0;}
+#app[data-theme="dark"] .transport-timetable-line-group + .transport-timetable-line-group,
+#app[data-theme="dark"] .transport-timetable-train{border-color:#425850;}
+#app[data-theme="dark"] .transport-timetable-train-dest{color:#c7e1d5;}
+@media(max-width:640px){
+  .transport-hours-line-grid,.transport-timetable-line-grid,.transport-timetable-service-grid,.transport-hours-summary-grid{grid-template-columns:minmax(0,1fr);}
+  .transport-timetable-direction-grid{grid-template-columns:minmax(0,1fr);}
+  .transport-timetable-pane{max-height:350px;}
+  .transport-timetable-controls{gap:8px;}
+  .transport-timetable-pane-list{padding:0 10px 10px;}
+}
+@media(max-width:360px){
+  .transport-timetable-direction-button{font-size:11px;}
+  .transport-timetable-train-time{flex-basis:73px;font-size:14px;}
+}
+
+/* Line 9: local/express subgroups, independently within each direction. */
+.transport-timetable-service-group{
+  margin:4px 0 11px;border:1px solid #e0e8e4;border-radius:12px;
+  overflow:hidden;background:#fff;min-width:0;
+}
+.transport-timetable-service-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 12px;background:#f1f5f3;
+}
+.transport-timetable-service-title{font-size:12px;font-weight:850;color:#365e4e;}
+.transport-timetable-service-count{font-size:11px;font-weight:750;color:#5c756b;white-space:nowrap;}
+.transport-timetable-service-group--local{border-color:#d4e6df;}
+.transport-timetable-service-group--local .transport-timetable-service-head{background:#eef7f2;}
+.transport-timetable-service-group--express{border-color:#ecd4a3;}
+.transport-timetable-service-group--express .transport-timetable-service-head{background:#fff2d8;}
+.transport-timetable-service-group--express .transport-timetable-service-title{color:#87520c;}
+.transport-timetable-service-group--unknown .transport-timetable-service-head{background:#f4f4f4;}
+.transport-timetable-service-group .transport-timetable-train{padding:10px 12px;}
+.transport-timetable-service-empty{margin:0;padding:12px;font-size:11px;line-height:1.5;color:#72847b;}
+#app[data-theme="dark"] .transport-timetable-service-group{background:#263e3e;border-color:#4a665c;}
+#app[data-theme="dark"] .transport-timetable-service-group--local .transport-timetable-service-head{background:#305246;}
+#app[data-theme="dark"] .transport-timetable-service-group--express{border-color:#8b6e42;}
+#app[data-theme="dark"] .transport-timetable-service-group--express .transport-timetable-service-head{background:#4e4029;}
+#app[data-theme="dark"] .transport-timetable-service-group--unknown .transport-timetable-service-head{background:#394a49;}
+#app[data-theme="dark"] .transport-timetable-service-title{color:#e6f4ec;}
+#app[data-theme="dark"] .transport-timetable-service-group--express .transport-timetable-service-title{color:#ffdb9e;}
+#app[data-theme="dark"] .transport-timetable-service-count,#app[data-theme="dark"] .transport-timetable-service-empty{color:#b8cac0;}
+
+/* 베이스 지도 레이어 선택: 지도 옵션 내 펼침 메뉴로 표시해 조작 영역 보호 */
+.base-layer-controls{position:relative;z-index:1400;max-width:min(360px,calc(100vw - 32px));font-size:12px;}
+.base-layer-controls>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;
+  padding:8px 12px;border:1px solid #a9cfbf;background:#f1f9f4;color:#216a51;font-weight:850;
+  border-radius:999px;box-shadow:0 2px 10px #142f2117;white-space:nowrap;}
+.base-layer-controls>summary::-webkit-details-marker{display:none;}
+.base-layer-controls>summary:after{content:"⌄";font-size:12px;}
+.base-layer-controls[open]>summary:after{content:"⌃";}
+.base-layer-menu{position:absolute;z-index:1401;top:calc(100% + 8px);left:0;
+  width:min(310px,calc(100vw - 32px));max-height:min(58vh,360px);overflow:auto;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  padding:12px;background:#fff;border:1px solid #cfdfd6;border-radius:16px;
+  box-shadow:0 12px 30px #162c2630;}
+.base-layer-menu>button{min-height:40px;padding:8px 7px;background:#f5f7f6;color:#61756b;
+  border:1px solid #d7e5de;border-radius:11px;font:inherit;font-size:11px;font-weight:800;
+  word-break:keep-all;white-space:normal;}
+.base-layer-menu>button[aria-pressed="true"]{background:#dff2e8;color:#12644d;border-color:#77bda4;}
+.base-layer-menu>button:focus-visible,.base-layer-controls>summary:focus-visible{outline:3px solid #70bba6;outline-offset:2px;}
+.base-layer-menu>p{grid-column:1/-1;margin:4px 0 0;color:#6d8176;font-size:10px;line-height:1.6;word-break:keep-all;}
+#app[data-base-metro="off"] .metro-station-marker{display:none!important;}
+#app[data-theme="dark"] .base-layer-controls>summary{background:#274a42;border-color:#507c6e;color:#e3f4ea;}
+#app[data-theme="dark"] .base-layer-menu{background:#21383a;border-color:#4c615b;}
+#app[data-theme="dark"] .base-layer-menu>button{background:#2b4544;color:#c4d9d0;border-color:#547067;}
+#app[data-theme="dark"] .base-layer-menu>button[aria-pressed="true"]{background:#185b4c;color:#f0fff7;border-color:#438c75;}
+#app[data-theme="dark"] .base-layer-menu>p{color:#bad1c5;}
+@media(max-width:380px){.base-layer-menu{grid-template-columns:minmax(0,1fr);}}
+
+/* 2026-11-06: tidy map search and one compact options drawer. */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.map-quick-search{position:absolute;z-index:1150;top:calc(env(safe-area-inset-top) + 91px);left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));font-family:inherit;}
+.map-quick-search-form{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 13px;border-radius:17px;background:rgba(255,255,255,.97);border:1px solid #d1e3da;box-shadow:0 6px 24px #233b312b;}
+.map-quick-search-icon{font-size:25px;line-height:1;color:#2e7f6d;}
+.map-quick-search-form input{flex:1;min-width:0;max-width:100%;border:0;outline:0;background:transparent;font:inherit;color:#203a33;font-size:13px;padding:10px 0;}
+.map-quick-search-form input:focus{outline:0;}
+.map-quick-search-submit{border:0;background:#13836b;color:white;border-radius:11px;padding:10px 16px;font-size:12px;font-weight:800;flex-shrink:0;}
+.map-quick-search-dropdown{position:absolute;top:calc(100% + 7px);left:0;right:0;max-height:min(54dvh,400px);overflow-y:auto;border-radius:17px;background:#fffffff9;border:1px solid #d4e5dc;box-shadow:0 13px 40px #24393130;padding:11px;}
+.map-quick-search-dropdown[hidden]{display:none!important;}
+.map-quick-search-dropdown-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#214b3c;font-size:12px;padding:3px 3px 7px;}
+#map-quick-search-close{border:0;border-radius:9px;background:#edf5f0;color:#406554;font-size:20px;width:28px;height:28px;}
+#map-quick-search-status{margin:0 3px 9px;color:#708579;font-size:11px;line-height:1.5;}
+.map-quick-search-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+.map-quick-search-result,.map-quick-search-suggestion{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;border:1px solid #e1ece5;border-radius:11px;padding:11px;background:#f6faf7;color:#25483c;font:inherit;font-size:12px;min-width:0;cursor:pointer;}
+.map-quick-search-result strong{font-size:12px;color:#25483c;line-height:1.4;word-break:keep-all;}
+.map-quick-search-result small{font-size:10px;color:#7a8c80;word-break:keep-all;line-height:1.35;}
+.map-quick-search-result:hover,.map-quick-search-suggestion:hover{border-color:#72bfa5;background:#e9f6ee;}
+#app[data-tab]:not([data-tab="map"]) .map-quick-search,.route-picking .map-quick-search,.route-preview .map-quick-search,.route-guiding .map-quick-search,.adding .map-quick-search{display:none!important;}
+
+/* The old filter chips were scattered across the map. Keep them inside the drawer. */
+.map-tools-toggle{top:calc(env(safe-area-inset-top) + 154px);}
+#app.map-controls-open .map-advanced-controls{display:flex;flex-direction:column;gap:10px;position:absolute;z-index:1140;top:calc(env(safe-area-inset-top) + 206px);left:max(16px,calc((100vw - 1180px)/2 + 16px));width:min(410px,calc(100vw - 32px));max-height:min(67dvh,610px);overflow-y:auto;overscroll-behavior:contain;padding:14px;background:#fffffff7;border:1px solid #cbded4;border-radius:18px;box-shadow:0 12px 40px #1f38292c;}
+#app.map-controls-open .map-advanced-controls :is(.map-badge,.add-point-button,.filter-bar,.filter-result,.data-layer-controls,.transport-source-status,.stop-gps-tracking){position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;max-width:100%!important;width:auto;box-shadow:none;}
+#app.map-controls-open .map-advanced-controls .map-badge{align-self:flex-start;font-size:11px;padding:6px 9px;background:#edf6f0;}
+#app.map-controls-open .map-advanced-controls .add-point-button{width:100%;border-radius:12px;}
+#app.map-controls-open .map-advanced-controls .filter-bar{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-start;padding:6px 0;margin:0;}
+#app.map-controls-open .map-advanced-controls .filter-chip{margin:0;flex:0 0 auto;}
+#app.map-controls-open .map-advanced-controls .data-layer-controls{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding-top:8px;}
+#app.map-controls-open .map-advanced-controls :is(#metro-access-status,#safety-layer-status){display:block;flex:1 1 100%;border:0;padding:5px 0;background:transparent;white-space:normal;font-size:11px;line-height:1.5;}
+#app.map-controls-open .map-advanced-controls .base-layer-controls{max-width:100%;}
+#app.map-controls-open .map-advanced-controls .base-layer-menu{position:static;max-height:none;width:100%;margin-top:8px;box-shadow:none;}
+.map-options-heading{display:grid;gap:4px;padding:2px 1px 8px;border-bottom:1px solid #e8efeb;}
+.map-options-heading strong{color:#1e543f;font-size:15px;}
+.map-options-heading span{color:#748e80;font-size:11px;}
+.map-options-group{border:1px solid #dce9e2;border-radius:13px;padding:10px;background:#f8fcf9;min-width:0;}
+.map-options-group>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:850;color:#2c604d;}
+.map-options-group>summary::-webkit-details-marker{display:none;}
+.map-options-group>summary:after{content:'⌄';font-size:14px;}
+.map-options-group[open]>summary:after{content:'⌃';}
+#app.map-controls-open .map-advanced-controls .transport-source-status{font-size:11px;line-height:1.5;white-space:normal;background:transparent;}
+#app.map-controls-open .map-advanced-controls .stop-gps-tracking{align-self:flex-start;}
+#app.map-controls-open .map-advanced-controls .add-hint{display:none!important;}
+#app[data-theme="dark"] .map-quick-search-form,#app[data-theme="dark"] .map-quick-search-dropdown,#app[data-theme="dark"].map-controls-open .map-advanced-controls{background:#20383d;color:#eff7f2;border-color:#45625a;}
+#app[data-theme="dark"] .map-quick-search-form input{color:#eff7f2;background:transparent;}
+#app[data-theme="dark"] .map-quick-search-suggestion,#app[data-theme="dark"] .map-quick-search-result,#app[data-theme="dark"] .map-options-group{background:#284640;border-color:#4a655b;color:#ecf6ee;}
+#app[data-theme="dark"] .map-quick-search-result strong,#app[data-theme="dark"] .map-quick-search-dropdown-head,#app[data-theme="dark"] .map-options-heading strong{color:#e5f4e9;}
+@media(max-width:699px){
+  .map-quick-search{top:calc(env(safe-area-inset-top) + 87px);width:calc(100vw - 24px);}
+  .map-tools-toggle{top:calc(env(safe-area-inset-top) + 150px);left:12px;}
+  #app.map-controls-open .map-advanced-controls{top:calc(env(safe-area-inset-top) + 200px);left:12px;max-height:calc(100dvh - 260px);width:calc(100vw - 24px);}
+}
+@media(max-width:420px){.map-quick-search-results{grid-template-columns:minmax(0,1fr);} .map-quick-search-form input{font-size:12px;}.map-quick-search-submit{padding:10px 12px;}}
+
+/* v3 responsive layout and metro center-anchored badges */
+:root{font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Malgun Gothic',sans-serif;}
+html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Malgun Gothic',sans-serif;}
+.maplibregl-popup,.maplibregl-control-container{font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Malgun Gothic',sans-serif;}
+.metro-station-marker{position:relative;gap:0;overflow:visible;}
+.metro-station-marker .metro-badges{position:relative;z-index:2;}
+.metro-station-marker .metro-station-name{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);z-index:1;max-width:180px;overflow:visible;text-overflow:clip;white-space:nowrap;}
+.metro-station-marker.metro-overview .metro-station-name{max-width:145px;overflow:visible;text-overflow:clip;}
+.dongjak-news-item{display:grid;grid-template-columns:108px minmax(0,1fr);align-items:start;column-gap:14px;row-gap:6px;}
+.dongjak-news-thumb{grid-row:1/4;width:108px;aspect-ratio:4/3;border-radius:12px;object-fit:cover;background:#edf3ef;border:1px solid #e3ede7;display:block;}
+.dongjak-news-thumb-placeholder{display:grid;place-items:center;gap:3px;align-content:center;background:linear-gradient(135deg,#e4f0ea,#f3f8f5);color:#729285;text-align:center;font-size:11px;font-weight:800;}
+.dongjak-news-thumb-placeholder span:first-child{font-size:19px;line-height:1;}
+.dongjak-news-item-meta,.dongjak-news-item>strong,.dongjak-news-open{min-width:0;}
+.dongjak-news-item>strong{line-height:1.5;overflow-wrap:anywhere;}
+#app[data-theme="dark"] .dongjak-news-thumb-placeholder{background:linear-gradient(135deg,#294740,#1f3437);color:#cee4da;border-color:#405b55;}
+@media (min-width:1000px){
+  /* Desktop uses a compact left rail; map stays tappable on the right. */
+  .page-panel{left:18px!important;right:auto!important;top:calc(80px + env(safe-area-inset-top));bottom:calc(81px + env(safe-area-inset-bottom));width:clamp(430px,36vw,610px)!important;max-width:calc(100vw - 48px)!important;transform:none!important;border:1px solid #dce9e3;border-radius:20px;box-shadow:0 14px 44px #102e2529;}
+  .page-panel .page-heading{margin-bottom:15px;}
+  .dongjak-news-item{grid-template-columns:112px minmax(0,1fr);}
+}
+@media (min-width:641px) and (max-width:999px){
+  .page-panel{width:min(calc(100vw - 32px),720px)!important;}
+}
+@media (max-width:640px){
+  .page-panel{top:calc(74px + env(safe-area-inset-top));bottom:calc(74px + env(safe-area-inset-bottom));padding:16px 13px 32px;max-width:100%;}
+  .dongjak-news-item{grid-template-columns:80px minmax(0,1fr);gap:8px 10px;}
+  .dongjak-news-thumb{width:80px;}
+  .page-heading h2{font-size:21px;}
+  .dongjak-news-toolbar{flex-wrap:wrap;}
+  .map-quick-search{width:min(calc(100vw - 20px),440px);}
+}
+@media (max-height:550px){
+  .page-panel{top:calc(56px + env(safe-area-inset-top));bottom:calc(56px + env(safe-area-inset-bottom));}
+  .topbar{padding-top:calc(5px + env(safe-area-inset-top));padding-bottom:5px;}
+  .bottom-nav{height:calc(54px + env(safe-area-inset-bottom));}
+}
+
+/* Mobile news is a bottom sheet, leaving a live map area above to tap and close it. */
+@media (max-width:640px){
+  #news-panel.page-panel{top:auto!important;bottom:calc(67px + env(safe-area-inset-bottom));height:min(67dvh,620px);max-height:calc(100dvh - 145px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:22px 22px 0 0;box-shadow:0 -8px 30px #143d3029;border-top:1px solid #dce9e3;}
+  #news-panel .dongjak-news-toolbar{position:sticky;top:-16px;background:var(--surface,#fff);padding:8px 0;z-index:1;}
+}
+#news-panel .page-heading{position:relative;padding-right:92px;}
+#news-close-to-map{position:absolute;right:0;top:2px;border:1px solid #caddd4;border-radius:11px;background:#eef8f3;color:#16775b;font-size:12px;font-weight:800;padding:9px 11px;}
+#app[data-theme="dark"] #news-close-to-map{background:#2c4b42;color:#d5f2e5;border-color:#456d5c;}
+
+
+/* Base map V4: stable ground anchor, non-jumping transfer-line buttons. */
+.metro-station-marker.metro-fixed-anchor{
+  position:relative!important;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;box-sizing:border-box;
+  width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;
+  max-width:none!important;padding:0!important;gap:0!important;border:0!important;
+  overflow:visible!important;background:transparent!important;
+}
+.metro-station-marker.metro-fixed-anchor .metro-badges{
+  position:absolute!important;left:50%!important;top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex;align-items:center;justify-content:center;gap:2px;
+  padding:3px 4px;white-space:nowrap;z-index:2;
+}
+.metro-station-marker.metro-fixed-anchor .metro-line-choice{
+  appearance:none;display:grid;place-items:center;flex:none;
+  width:auto;height:auto;margin:0;padding:0;border:0;border-radius:50%;
+  background:transparent;cursor:pointer;line-height:1;
+}
+.metro-station-marker.metro-fixed-anchor .metro-line-choice:focus-visible{
+  outline:2px solid #10896d;outline-offset:3px;
+}
+.metro-station-marker.metro-fixed-anchor.metro-choices-expanded .metro-badges{gap:6px;padding:4px 6px;}
+.metro-station-marker.metro-fixed-anchor.metro-choices-expanded .metro-line-choice .metro-badge-number{
+  width:27px;height:27px;font-size:12px;
+}
+.metro-station-marker.metro-fixed-anchor .metro-station-name{
+  position:absolute!important;left:50%!important;top:calc(100% + 4px)!important;
+  transform:translateX(-50%)!important;
+  line-height:1.2;min-width:max-content;
+  max-width:min(200px,70vw)!important;width:max-content;
+  overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;
+  z-index:1;pointer-events:none;
+}
+
+/* Desktop, tablet and mobile have intentionally different panel geometry.
+   Override the old desktop left:18px rule without moving the map. */
+@media(min-width:1100px){
+  .page-panel{
+    left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+    width:min(860px,calc(100vw - 96px))!important;max-width:860px!important;
+    top:calc(env(safe-area-inset-top) + 94px)!important;
+    bottom:calc(env(safe-area-inset-bottom) + 94px)!important;
+    border:1px solid #deebe4;border-radius:22px;padding:27px 30px 32px;
+    box-shadow:0 16px 52px rgba(20,42,33,.16);scrollbar-width:thin;
+  }
+  #news-panel.page-panel{width:min(840px,calc(100vw - 96px))!important;}
+  .page-panel .page-heading{margin-bottom:20px;}
+}
+@media(min-width:768px) and (max-width:1099px){
+  .page-panel{
+    left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+    width:min(720px,calc(100vw - 40px))!important;
+    max-width:720px!important;
+    top:calc(env(safe-area-inset-top) + 88px)!important;
+    bottom:calc(env(safe-area-inset-bottom) + 80px)!important;
+    border:1px solid #deebe4;border-radius:20px;padding:22px 23px 26px;
+    box-shadow:0 12px 42px rgba(20,42,33,.14);scrollbar-width:thin;
+  }
+}
+@media(max-width:767px){
+  .page-panel, #news-panel.page-panel{
+    left:0!important;right:0!important;top:auto!important;transform:none!important;
+    width:100%!important;max-width:100%!important;
+    bottom:calc(67px + env(safe-area-inset-bottom))!important;
+    height:min(72dvh,calc(100dvh - 142px - env(safe-area-inset-top)))!important;
+    max-height:calc(100dvh - 142px - env(safe-area-inset-top))!important;
+    border:1px solid #e1ebe5;border-bottom:0;border-radius:24px 24px 0 0;
+    padding:20px 16px 24px;box-shadow:0 -10px 40px rgba(20,42,33,.17);
+    scrollbar-width:thin;
+  }
+  .page-panel .page-heading h2{font-size:23px;}
+}
+@media(max-height:560px) and (min-width:768px){
+  .page-panel{
+    top:calc(env(safe-area-inset-top) + 67px)!important;
+    bottom:calc(env(safe-area-inset-bottom) + 65px)!important;
+    padding-top:15px;padding-bottom:15px;
+  }
+}
+@media(max-height:560px) and (max-width:767px){
+  .page-panel, #news-panel.page-panel{
+    bottom:calc(54px + env(safe-area-inset-bottom))!important;
+    height:65dvh!important;max-height:65dvh!important;
+  }
+}
+@media(min-width:1100px){
+  .topbar{width:min(1100px,calc(100vw - 48px));}
+  .bottom-nav{
+    left:50%;right:auto;transform:translateX(-50%);
+    width:min(860px,calc(100vw - 96px))!important;
+    border-radius:16px 16px 0 0;
+  }
+}
+
+/* DONGJAK-RESPONSIVE-DESKTOP-MOBILE-20261106 BEGIN */
+/* ───────────────────────────────────────────────────────────────
+   2026-11-06 · Consistent responsive layout, not the old centered
+   phone-width shell on desktop. The map data/API is unaffected.
+   Desktop: header search + left navigation + left information panel.
+   Tablet/phone: header, search beneath it, full-width bottom navigation.
+   ─────────────────────────────────────────────────────────────── */
+.topbar{overflow:visible;}
+.topbar>.map-quick-search{min-width:0;}
+.map-quick-search-dropdown{z-index:2;}
+#app .map-quick-search-form{min-height:45px;}
+#app .map-quick-search-form input{width:100%;}
+#app .nav-tab{transition:background-color .12s,color .12s;}
+
+@media (min-width:1080px){
+  #app .topbar{
+    top:0!important;left:0!important;right:0!important;bottom:auto!important;
+    width:100%!important;max-width:none!important;transform:none!important;
+    height:calc(76px + env(safe-area-inset-top))!important;
+    padding:calc(10px + env(safe-area-inset-top)) 22px 10px!important;
+    display:grid!important;
+    grid-template-columns:minmax(220px,260px) minmax(280px,520px) minmax(260px,1fr);
+    grid-template-areas:'brand search tools';align-items:center;gap:clamp(12px,2vw,28px);
+    border-radius:0!important;border-bottom:1px solid #e4eee7;
+    background:rgba(255,255,255,.97);box-shadow:0 3px 18px rgba(16,42,32,.08);
+  }
+  #app .topbar>.brand{grid-area:brand;justify-self:start;min-width:0;}
+  #app .topbar>.map-quick-search{
+    grid-area:search;position:relative!important;z-index:1;
+    top:auto!important;left:auto!important;right:auto!important;
+    width:100%!important;max-width:none!important;transform:none!important;
+  }
+  #app .topbar>.header-tools{grid-area:tools;justify-self:end;min-width:0;flex-wrap:nowrap;}
+  #app .map-quick-search-form{box-shadow:0 2px 12px rgba(25,59,43,.07);border-radius:13px;}
+  #app[data-tab]:not([data-tab="map"]) .topbar{
+    grid-template-columns: minmax(220px,1fr) auto;
+    grid-template-areas:'brand tools';
+  }
+  #app #bottom-nav{
+    position:absolute!important;left:16px!important;right:auto!important;
+    top:calc(90px + env(safe-area-inset-top))!important;bottom:auto!important;
+    width:88px!important;max-width:88px!important;height:auto!important;min-height:0!important;
+    padding:8px!important;display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:minmax(66px,auto);
+    gap:5px;transform:none!important;
+    border-radius:17px!important;border:1px solid #deebe3;
+    background:rgba(255,255,255,.97);box-shadow:0 8px 26px rgba(23,44,34,.12);
+  }
+  #app #bottom-nav .nav-tab{width:100%;min-height:60px;max-width:100%;padding:9px 3px;gap:4px;font-size:11px;line-height:1.2;}
+  #app #bottom-nav .nav-tab .nav-icon{font-size:22px;line-height:24px;}
+  #app .page-panel,
+  #app #news-panel.page-panel{
+    position:absolute;top:calc(90px + env(safe-area-inset-top))!important;
+    left:120px!important;right:auto!important;bottom:18px!important;
+    width:min(510px,calc(100vw - 250px))!important;max-width:none!important;
+    height:auto!important;max-height:none!important;transform:none!important;
+    padding:22px 23px 30px;border-radius:18px;border:1px solid #dce9e3;
+    box-shadow:0 12px 40px rgba(20,42,33,.17);overscroll-behavior:contain;
+  }
+  #app .sheet.overview-sheet{
+    position:absolute;left:120px!important;right:auto!important;bottom:18px!important;
+    width:min(450px,calc(100vw - 250px))!important;max-width:none!important;
+    min-height:0!important;max-height:min(340px,48dvh)!important;
+    padding:10px 18px 15px;border-radius:18px!important;
+    transform:translateY(var(--sheet-offset,0px))!important;
+    box-shadow:0 10px 34px rgba(20,42,33,.16);
+  }
+  #app #overview-sheet-handle{margin-bottom:9px;}
+  #app .overview-sheet .sheet-summary{font-size:12px;line-height:1.5;}
+  #app .overview-sheet .sheet-top{align-items:start;}
+  #app .overview-sheet .primary-btn{padding:10px 13px;font-size:12px;}
+  #app .transport-sheet,
+  #app .detail-sheet,
+  #app .entry-sheet{
+    left:120px!important;right:auto!important;bottom:18px!important;top:auto!important;
+    width:min(540px,calc(100vw - 250px))!important;max-width:none!important;
+    max-height:calc(100dvh - 110px - env(safe-area-inset-top))!important;
+    transform:none!important;border-radius:18px!important;
+    box-shadow:0 12px 40px rgba(20,42,33,.17);
+  }
+  #app .map-tools-toggle{left:120px!important;top:calc(90px + env(safe-area-inset-top))!important;right:auto!important;transform:none!important;}
+  #app.map-controls-open .map-advanced-controls{
+    left:120px!important;top:calc(141px + env(safe-area-inset-top))!important;
+    width:min(390px,calc(100vw - 260px))!important;max-height:calc(100dvh - 170px)!important;
+  }
+  #app .map-actions{right:18px!important;bottom:22px!important;left:auto!important;}
+  #app .road-width-legend{left:120px!important;}
+  #app .maplibregl-ctrl-bottom-left{left:110px!important;}
+  #app #map-chrome-restore{left:120px!important;transform:none!important;}
+}
+
+@media (max-width:1079px){
+  #app .topbar{
+    position:absolute;left:0!important;right:0!important;top:0!important;
+    width:100%!important;max-width:none!important;transform:none!important;
+    height:calc(64px + env(safe-area-inset-top))!important;
+    padding:calc(9px + env(safe-area-inset-top)) 14px 9px!important;
+    display:flex!important;flex-wrap:nowrap!important;align-items:center;justify-content:space-between;
+    gap:8px;border-radius:0!important;
+    background:rgba(255,255,255,.97);border-bottom:1px solid #e4eee7;
+  }
+  #app .topbar .brand{flex:0 1 auto;min-width:0;}
+  #app .topbar .header-tools{flex:0 0 auto;min-width:0;justify-content:flex-end;gap:6px;}
+  #app .topbar>.map-quick-search{
+    position:absolute!important;top:calc(100% + 8px)!important;
+    left:12px!important;right:12px!important;bottom:auto!important;
+    width:min(560px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;
+    transform:none!important;z-index:1;
+  }
+  #app #bottom-nav{
+    position:absolute!important;top:auto!important;left:0!important;right:0!important;
+    bottom:0!important;width:100%!important;max-width:none!important;
+    height:calc(65px + env(safe-area-inset-bottom))!important;
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    transform:none!important;border-radius:0!important;gap:3px;
+    padding:6px 8px calc(8px + env(safe-area-inset-bottom));
+  }
+  #app #bottom-nav .nav-tab{font-size:11px;min-width:0;gap:2px;}
+  #app .page-panel,
+  #app #news-panel.page-panel{
+    top:auto!important;left:0!important;right:0!important;
+    bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    width:100%!important;max-width:none!important;transform:none!important;
+    height:min(69dvh,calc(100dvh - 145px - env(safe-area-inset-top)))!important;
+    max-height:calc(100dvh - 145px - env(safe-area-inset-top))!important;
+    border-radius:22px 22px 0 0!important;padding:18px 16px 26px;
+  }
+  #app .sheet.overview-sheet{
+    left:0!important;right:0!important;bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    width:100%!important;max-width:none!important;
+    max-height:calc(100dvh - 175px - env(safe-area-inset-top))!important;
+    border-radius:22px 22px 0 0!important;
+    transform:translateY(var(--sheet-offset,0px))!important;
+  }
+  #app .transport-sheet,#app .detail-sheet,#app .entry-sheet{
+    left:0!important;right:0!important;bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    width:100%!important;max-width:none!important;transform:none!important;
+    max-height:calc(100dvh - 165px - env(safe-area-inset-top))!important;
+    border-radius:22px 22px 0 0!important;
+  }
+  #app .map-tools-toggle{left:12px!important;top:calc(138px + env(safe-area-inset-top))!important;transform:none!important;}
+  #app.map-controls-open .map-advanced-controls{
+    left:12px!important;top:calc(188px + env(safe-area-inset-top))!important;
+    width:min(400px,calc(100vw - 24px))!important;
+    max-height:calc(100dvh - 260px - env(safe-area-inset-top))!important;
+  }
+  #app .map-actions{right:12px!important;left:auto!important;}
+  #app .maplibregl-ctrl-bottom-left{left:0!important;}
+}
+@media (max-width:560px){
+  #app .topbar{height:calc(57px + env(safe-area-inset-top))!important;padding:calc(7px + env(safe-area-inset-top)) 11px 7px!important;}
+  #app .topbar .brand .logo{width:34px;height:34px;font-size:18px;}
+  #app .topbar .brand-name{font-size:13px;}
+  #app .topbar .eyebrow{font-size:9px;}
+  #app .topbar .header-tools .weather-widget{display:none!important;}
+  #app .topbar .theme-toggle{padding:8px 9px;}
+  #app .map-quick-search-form{min-height:45px;}
+  #app .map-quick-search-form input{font-size:12px;}
+  #app #bottom-nav .nav-tab{font-size:10px;}
+  #app #bottom-nav .nav-icon{font-size:20px;}
+  #app .page-panel,#app #news-panel.page-panel{padding:16px 13px 22px;}
+}
+@media (max-height:570px){
+  #app .page-panel,#app #news-panel.page-panel{max-height:70dvh!important;}
+  #app .topbar .eyebrow{display:none;}
+}
+
+/* DONGJAK-RESPONSIVE-DESKTOP-MOBILE-20261106 END */
+
+/* DONGJAK-MAP-ALIGNMENT-PATCH-20261106 BEGIN */
+/* DONGJAK-DESKTOP-MAP-ALIGNMENT-20261106
+   Do not change rail, transport, or GIS data here. UI coordinates only.
+   Sidebar, tools, scale and intro card share 16px desktop gutters.
+ */
+@media (min-width:1080px){
+  #app .topbar{
+    height:72px!important;
+    padding:10px 16px!important;
+    grid-template-columns:minmax(194px,218px) minmax(290px,540px) minmax(240px,1fr)!important;
+    column-gap:18px!important;
+  }
+  #app .topbar>.map-quick-search{justify-self:stretch!important;}
+  #app .topbar>.header-tools{gap:8px!important;}
+  #app #bottom-nav{
+    left:16px!important;top:88px!important;
+    width:88px!important;max-width:88px!important;
+    padding:8px!important;gap:5px!important;
+  }
+  #app .map-tools-toggle{
+    left:16px!important;top:474px!important;right:auto!important;
+    width:88px!important;min-height:43px;
+    padding:9px 3px!important;border-radius:14px!important;
+    font-size:11px!important;line-height:1.25!important;
+    text-align:center;white-space:normal!important;
+    background:#fff;border-color:#dce9e2;
+  }
+  #app.map-controls-open .map-tools-toggle{background:#e9f5ef!important;border-color:#78bda4!important;}
+  #app.map-controls-open .map-advanced-controls{
+    left:116px!important;top:88px!important;right:auto!important;
+    width:min(390px,calc(100vw - 155px))!important;
+    max-height:calc(100dvh - 108px)!important;
+  }
+  /* The home sheet is a disclosure, not a permanent map-blocking panel. */
+  #app .sheet.overview-sheet{
+    left:116px!important;right:auto!important;bottom:20px!important;top:auto!important;
+    width:min(382px,calc(100vw - 254px))!important;
+    max-height:min(380px,calc(100dvh - 128px))!important;
+    min-height:0!important;padding:14px 16px 16px!important;
+    transform:none!important;transition:box-shadow .16s ease!important;
+    cursor:default!important;
+    border:1px solid #d9e9e1;
+    overflow-y:auto!important;
+  }
+  #app #overview-sheet-handle{display:none!important;}
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"]{
+    width:min(315px,calc(100vw - 254px))!important;
+    padding:11px 12px!important;
+    max-height:none!important;overflow:visible!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] :is(.sheet-summary,.primary-btn,.footer-note,.section-label,#points-count){
+    display:none!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top{gap:8px;align-items:center;}
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] h1{font-size:12px!important;line-height:1.35;margin:0!important;letter-spacing:-.2px;}
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] #overview-sheet-toggle{
+    font-size:11px!important;white-space:nowrap;padding:8px 9px!important;
+  }
+  #app .page-panel,#app #news-panel.page-panel{
+    left:116px!important;top:88px!important;bottom:20px!important;
+    width:min(490px,calc(100vw - 260px))!important;
+  }
+  #app .transport-sheet,#app .detail-sheet,#app .entry-sheet{
+    left:116px!important;bottom:20px!important;
+    width:min(490px,calc(100vw - 260px))!important;
+  }
+  /* Keep the common map controls away from the greeting card and map scale. */
+  #app[data-tab="map"] .map-actions{
+    top:88px!important;bottom:auto!important;
+    left:auto!important;right:16px!important;
+  }
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+    top:auto!important;bottom:20px!important;left:16px!important;
+  }
+  #app .road-width-legend{
+    left:116px!important;top:auto!important;bottom:86px!important;
+  }
+  #app #map-chrome-restore{left:116px!important;right:auto!important;}
+}
+/* Tablet remains a touch-first layout. Make the search/nav and overview
+   consistent without forcing the desktop sidebar at narrow widths. */
+@media (min-width:701px) and (max-width:1079px){
+  #app .topbar>.map-quick-search{left:16px!important;right:auto!important;}
+  #app .map-tools-toggle{left:16px!important;}
+  #app .map-actions{right:16px!important;}
+}
+/* Phones: safe-area-aware bottom controls; search and panels do not overlap. */
+@media (max-width:700px){
+  #app .topbar>.map-quick-search{
+    left:12px!important;right:12px!important;
+    width:calc(100vw - 24px)!important;
+  }
+  #app #bottom-nav{padding-left:8px!important;padding-right:8px!important;}
+  #app .map-actions{right:12px!important;}
+}
+
+/* DONGJAK-MAP-ALIGNMENT-PATCH-20261106 END */
+
+/* v5.9 map edge vignette and calmer canvas */
+#map{position:absolute;inset:0;overflow:hidden;}
+#map::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:22;
+  background:
+    linear-gradient(180deg,rgba(244,248,246,.72) 0%,rgba(244,248,246,0) 9%,rgba(244,248,246,0) 91%,rgba(244,248,246,.62) 100%),
+    linear-gradient(90deg,rgba(244,248,246,.72) 0%,rgba(244,248,246,0) 7%,rgba(244,248,246,0) 93%,rgba(244,248,246,.72) 100%);
+}
+#app[data-theme='dark'] #map::after{
+  background:
+    linear-gradient(180deg,rgba(26,38,35,.6) 0%,rgba(26,38,35,0) 9%,rgba(26,38,35,0) 91%,rgba(26,38,35,.55) 100%),
+    linear-gradient(90deg,rgba(26,38,35,.6) 0%,rgba(26,38,35,0) 7%,rgba(26,38,35,0) 93%,rgba(26,38,35,.6) 100%);
+}
+
+/* v5.9.7 school building pictogram (university PNG emblems remain unchanged). */
+.dongjak-education-marker:not(.university) .dongjak-education-icon{background:#4c7e74;color:#fff;}
+.dongjak-school-pictogram{width:23px;height:23px;display:block;flex:none;}
+.dongjak-education-marker.compact .dongjak-school-pictogram{width:20px;height:20px;}
+#app[data-theme="dark"] .dongjak-education-marker:not(.university) .dongjak-education-icon{background:#487b72;}
+
+/* v5.9.8 first-load gate: it never blocks access forever on a slow external API. */
+.map-startup-overlay{position:fixed;inset:0;z-index:16000;display:grid;place-items:center;background:#f7faf8;color:#193e34;opacity:1;transition:opacity .3s ease;pointer-events:auto;}
+.map-startup-overlay[hidden]{display:none!important;}
+.map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}
+.map-startup-inner{width:min(360px,calc(100vw - 40px));display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:26px 18px;}
+.map-startup-logo{display:grid;place-items:center;width:60px;height:60px;background:#12836e;color:white;border-radius:16px;font-size:28px;font-weight:850;}
+.map-startup-inner strong{font-size:20px;letter-spacing:-.04em;}
+.map-startup-inner p{margin:0;font-size:14px;line-height:1.5;}
+.map-startup-inner #map-startup-note{font-size:12px;color:#64786e;max-width:300px;}
+.map-startup-spinner{height:26px;width:26px;margin:5px 0;border:3px solid #d6e6dc;border-top-color:#13846c;border-radius:50%;animation:dj-start-spin .9s linear infinite;}
+@keyframes dj-start-spin{to{transform:rotate(360deg);}}
+.map-startup-inner button{border:1px solid #b9d8c9;background:#fff;color:#166950;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:750;cursor:pointer;}
+#app[data-theme=dark] .map-startup-overlay{background:#102329;color:#e9f3ef;}
+#app[data-theme=dark] .map-startup-inner #map-startup-note{color:#b6cdc6;}
+#app[data-theme=dark] .map-startup-inner button{background:#1a3739;color:#eaf5ed;border-color:#446c61;}
+@media(prefers-reduced-motion:reduce){.map-startup-spinner{animation:none}.map-startup-overlay{transition:none}}
+
+/* v5.9.9 user-supplied district, memorial and brand marks */
+#app .brand .logo{background:transparent!important;box-shadow:none!important;overflow:hidden!important;}
+#app .brand .logo img{display:block;width:100%;height:100%;object-fit:contain;}
+#app[data-theme="dark"] .brand .logo{background:rgba(255,255,255,.96)!important;}
+#app .dongjak-landmark.has-official-logo .dongjak-landmark-icon{background:rgba(255,255,255,.95)!important;border:1px solid #dce6e1!important;overflow:hidden;padding:2px;box-shadow:0 2px 7px rgba(16,38,34,.12)!important;}
+#app .dongjak-landmark.has-official-logo .dongjak-landmark-icon img{display:block;width:100%;height:100%;object-fit:contain;}
+#app[data-theme="dark"] .dongjak-landmark.has-official-logo .dongjak-landmark-icon{background:#f5f7f5!important;}
+#app .map-startup-logo{background:#fff;color:#1e5847;overflow:hidden;border:1px solid #d6e5db;}
+#app .map-startup-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+
+
+/* v5.9.11: first-paint loader polish — keep identical colors before/after Vite CSS. */
+#app .map-startup-overlay{
+  background:radial-gradient(ellipse at 50% 39%,#ffffff 0%,#f3f7f5 75%)!important;
+  color:#183b32!important;
+}
+html[data-theme="dark"] #app .map-startup-overlay,
+#app[data-theme="dark"] .map-startup-overlay{
+  background:radial-gradient(ellipse at 50% 39%,#1a3334 0%,#101f25 78%)!important;
+  color:#edf7f2!important;
+}
+#app .map-startup-inner{width:min(340px,calc(100vw - 44px));gap:0;transform:translateY(-3vh);}
+#app .map-startup-logo{
+  display:grid;place-items:center;width:110px;height:80px;min-width:110px;min-height:80px;
+  max-width:110px;max-height:80px;margin:0 auto 22px;padding:0;background:transparent!important;
+  border:0!important;box-shadow:none!important;border-radius:0!important;overflow:visible;
+}
+#app .map-startup-logo img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;}
+#app .map-startup-eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;margin-bottom:28px;color:#688177;}
+#app .map-startup-title{font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.055em;margin:0;color:#183b32;}
+#app .map-startup-subtitle{font-size:13px;line-height:1.55;color:#688177;margin:9px 0 29px;}
+#app .map-startup-progress{width:184px;height:3px;overflow:hidden;border-radius:99px;background:#dceae3;position:relative;margin-bottom:19px;}
+#app .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:38%;border-radius:99px;background:#0a9770;animation:dj-start-progress 1.65s ease-in-out infinite;}
+#app .map-startup-spinner{display:none!important;}
+#app .map-startup-inner #map-startup-message{color:#183b32;font-size:13px;font-weight:650;line-height:1.55;margin:0;}
+#app .map-startup-inner #map-startup-note{color:#688177;font-size:11px;line-height:1.6;margin:6px 0 0;}
+#app .map-startup-inner #map-startup-continue{background:transparent;border:1px solid #dceae3;border-radius:9px;color:#183b32;font-size:12px;margin-top:23px;}
+#app .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:#688177;font-size:11px;}
+html[data-theme="dark"] #app .map-startup-eyebrow,#app[data-theme="dark"] .map-startup-eyebrow,
+html[data-theme="dark"] #app .map-startup-subtitle,#app[data-theme="dark"] .map-startup-subtitle,
+html[data-theme="dark"] #app .map-startup-inner #map-startup-note,#app[data-theme="dark"] .map-startup-inner #map-startup-note,
+html[data-theme="dark"] #app .map-startup-footer,#app[data-theme="dark"] .map-startup-footer{color:#a0b9af!important;}
+html[data-theme="dark"] #app .map-startup-title,#app[data-theme="dark"] .map-startup-title,
+html[data-theme="dark"] #app .map-startup-inner #map-startup-message,#app[data-theme="dark"] .map-startup-inner #map-startup-message{color:#edf7f2!important;}
+html[data-theme="dark"] #app .map-startup-progress,#app[data-theme="dark"] .map-startup-progress{background:#28443e!important;}
+html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-theme="dark"] .map-startup-inner #map-startup-continue{color:#edf7f2!important;border-color:#28443e!important;background:transparent!important;}
+@media(max-width:480px){#app .map-startup-inner{transform:translateY(-1.5vh);}#app .map-startup-logo{width:102px;height:75px;min-width:102px;min-height:75px;max-width:102px;max-height:75px}#app .map-startup-title{font-size:23px}}
+@media(prefers-reduced-motion:reduce){#app .map-startup-progress::before{animation:none!important;transform:none!important;width:60%}#app .map-startup-logo img{transition:none}}
+
+/* v5.12.5 — PC overview is open by default; selection clear is independent. */
+#app .overview-boundary-actions{display:flex;align-items:stretch;gap:8px;min-width:0;}
+#app .overview-boundary-actions #open-admin-dongs{flex:1 1 auto;min-width:0;}
+#app .overview-admin-clear{flex:none;padding:8px 11px;border:1px solid var(--dj-ui-border,#cadcd3);border-radius:12px;background:var(--dj-ui-field,#f1f7f3);color:var(--dj-ui-text,#245a4c);font-size:12px;font-weight:750;cursor:pointer;}
+#app .overview-admin-clear[hidden]{display:none!important;}
+#app[data-theme="dark"] .overview-admin-clear{background:#2c4644;color:#e5f4ee;border-color:#52736b;}
+@media (min-width:1080px){
+  #app .sheet.overview-sheet[data-sheet-state="expanded"]{display:block!important;max-height:min(470px,calc(100dvh - 120px))!important;}
+  #app .sheet.overview-sheet[data-sheet-state="expanded"] .sheet-summary{display:block;}
+}
+/* Keep the independent clear control inside the opened overview card only. */
+#app .overview-sheet[data-sheet-state="collapsed"] .overview-boundary-actions{display:none!important;}
+@media (max-width:1079px){
+  /* When night analysis is active, the bottom-sheet replaces the overview sheet
+     rather than stacking two panels over the same mobile map viewport. */
+  #app[data-sangdo-night="on"] .sheet.overview-sheet{display:none!important;}
+}
+
+/* v6.0.1 — map instruction card and mobile browser fullscreen */
+.map-gesture-guide{position:absolute;right:clamp(10px,5vw,74px);top:clamp(100px,18vh,172px);z-index:2250;
+  width:min(355px,calc(100vw - 30px));max-height:min(70dvh,530px);overflow:auto;background:#f8fcfa;
+  color:#1d4038;border:1px solid #b9d2c7;box-shadow:0 12px 36px #0927212c;border-radius:16px;padding:17px;box-sizing:border-box}
+.map-gesture-guide[hidden],.mobile-fullscreen-toggle[hidden]{display:none!important}
+.map-gesture-guide-head{display:flex;align-items:center;justify-content:space-between;font-size:16px}
+.map-gesture-guide-head button{border:0;background:transparent;color:inherit;font-size:22px;cursor:pointer}
+.map-gesture-guide dl{display:grid;grid-template-columns:80px 1fr;gap:9px 10px;font-size:12px;line-height:1.6;margin:12px 0}
+.map-gesture-guide dt{font-weight:800;color:#167d65}.map-gesture-guide dd{margin:0}
+.map-gesture-guide-remember{font-size:12px;display:flex;align-items:center;gap:7px}
+#map-gesture-guide-open{font-size:19px;font-weight:850}
+.mobile-fullscreen-toggle{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(67px + env(safe-area-inset-bottom));z-index:1800;
+  color:#ecfff6;background:#127d69;border:1px solid #87cbb7;border-radius:11px;padding:10px 11px;font-size:12px;font-weight:800;box-shadow:0 2px 10px #0005}
+#app[data-theme="dark"] .map-gesture-guide{background:#192f33;color:#e7f5ef;border-color:#476861}
+#app[data-theme="dark"] .map-gesture-guide dt{color:#89e2c7}
+/* Popup theme: same palette for registered point, landmark, transit and safety layers */
+#app .maplibregl-popup-content{background:#fcfffd;color:#25493d;border:1px solid #d5e6de;border-radius:14px;
+  box-shadow:0 8px 22px #132c2733;padding:14px}
+#app .maplibregl-popup-content :is(strong,h3,dt){color:#19473a}
+#app .maplibregl-popup-content :is(p,small,dd,.dj-place-source){color:#4f6b60}
+#app .maplibregl-popup-anchor-bottom .maplibregl-popup-tip{border-top-color:#fcfffd}
+#app .maplibregl-popup-anchor-top .maplibregl-popup-tip{border-bottom-color:#fcfffd}
+#app[data-theme="dark"] .maplibregl-popup-content{background:#1b3033;color:#ebf5f1;border-color:#466662;box-shadow:0 10px 28px #0008}
+#app[data-theme="dark"] .maplibregl-popup-content :is(strong,h3,dt,.safety-popup strong,.dongjak-landmark-popup strong){color:#ecfff5}
+#app[data-theme="dark"] .maplibregl-popup-content :is(p,small,dd,.dj-place-source,.safety-popup small,.dongjak-landmark-popup p,.dongjak-landmark-popup small){color:#bed7d0}
+#app[data-theme="dark"] .maplibregl-popup-anchor-bottom .maplibregl-popup-tip{border-top-color:#1b3033}
+#app[data-theme="dark"] .maplibregl-popup-anchor-top .maplibregl-popup-tip{border-bottom-color:#1b3033}
+#app[data-theme="dark"] .dj-place-detail,#app[data-theme="dark"] .safety-popup{color:#e6f3ef}
+#app[data-theme="dark"] .maplibregl-popup-close-button{color:#e8f4ef}
+/* Narrow landscape: let the map remain usable, keep controls above the bottom nav */
+@media (hover:none) and (orientation:landscape) and (max-height:600px){
+ #app .topbar{min-height:46px!important;height:46px!important;padding-top:env(safe-area-inset-top)!important}
+ #app .brand-name{font-size:12px!important}
+ #app .brand .logo{width:33px!important;height:33px!important}
+ #app .weather-widget{display:none!important}
+ #app .map-actions{right:calc(8px + env(safe-area-inset-right));top:calc(54px + env(safe-area-inset-top));bottom:auto!important;gap:5px!important}
+ #app .map-actions button{width:38px!important;height:38px!important;min-height:38px!important}
+ #app .sheet.overview-sheet{max-width:min(330px,43vw)!important;max-height:calc(100dvh - 106px)!important;overflow:auto!important}
+ #app .night-visibility-float{max-height:calc(100dvh - 110px)!important;overflow:auto!important;max-width:min(370px,45vw)!important}
+ #app .transport-sheet{max-width:min(390px,47vw)!important;max-height:calc(100dvh - 70px)!important;overflow:auto!important}
+ #app .bottom-nav{max-height:52px!important;padding-bottom:max(3px,env(safe-area-inset-bottom))!important}
+ #app .maplibregl-ctrl-bottom-left{bottom:calc(61px + env(safe-area-inset-bottom))!important}
+ .mobile-fullscreen-toggle{bottom:calc(61px + env(safe-area-inset-bottom));right:calc(62px + env(safe-area-inset-right))}
+ .map-gesture-guide{top:56px;max-height:calc(100dvh - 68px);right:55px}
+}
+
+/* v6.0.3 - News cards without a usable preview use full-width text, no placeholder. */
+#app .dongjak-news-item.dongjak-news-no-image{grid-template-columns:minmax(0,1fr)!important;}
+#app .dongjak-news-item.dongjak-news-no-image>.dongjak-news-item-meta,
+#app .dongjak-news-item.dongjak-news-no-image>strong,
+#app .dongjak-news-item.dongjak-news-no-image>.dongjak-news-open{grid-column:1/-1;}
+
+/* v6.0.3 chronological update entries */
+.version-history-list>.version-entry{padding:15px 0;}
+.version-history-list>.version-entry h3{font-size:14px;line-height:1.55;}
+.version-history-list>.version-entry-major h3{font-weight:800;}
+
+/* v6.0.3: version-by-version chronological release history, v1 to v6. */
+.version-major-group{padding:15px 0;border-bottom:1px solid #dbe8e1;}
+.version-major-group>h3{font-size:15px;margin:0 0 5px;color:#0d795e;line-height:1.5;}
+.version-major-count,.version-archive-note{font-size:12px;color:#688277;margin:4px 0 10px;line-height:1.6;}
+.version-release-details{border:1px solid #e1eae6;border-radius:10px;margin:6px 0;background:#f7faf8;}
+.version-release-details>summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:700;line-height:1.5;}
+.version-release-details ul{margin:0;padding:0 14px 12px 30px;font-size:12px;line-height:1.65;color:#36574b;}
+#app[data-theme="dark"] .version-major-group{border-color:#425a56;}
+#app[data-theme="dark"] .version-major-group>h3{color:#89e2c4;}
+#app[data-theme="dark"] .version-major-count,#app[data-theme="dark"] .version-archive-note{color:#bacdc7;}
+#app[data-theme="dark"] .version-release-details{background:#20373a;border-color:#3c5750;}
+#app[data-theme="dark"] .version-release-details ul{color:#d6e6df;}
+
+/* v6.0.5: small consistent location details; the official place logos are map sprites. */
+#app .dj-place-ai-response{margin-top:10px;padding:10px 12px;border:1px solid #d5e6de;border-radius:10px;background:#edf8f3;color:#234b3e;font-size:13px;line-height:1.55;white-space:pre-wrap}
+#app[data-theme="dark"] .dj-place-ai-response{background:#243d3d;border-color:#466e65;color:#e1f6ec}
+#app .dj-place-actions{display:flex;align-items:center;gap:8px}
+#app .dj-place-actions .dj-place-ai{background:#137e68;color:#fff;border:0;border-radius:9px;padding:9px 13px;font-weight:700;cursor:pointer}
+#app .dj-place-actions .dj-place-ai:disabled{opacity:.65;cursor:progress}
+
+/* v6.0.15: AI descriptions are informative, not verified hazard ratings. */
+#app .dj-place-ai-disclaimer{display:block;margin-top:8px;font-size:11px;line-height:1.45;opacity:.78;}
+
+/* v6.0.19: AI explanation appears automatically, so the main popup has no action button. */
+#app .dj-place-ai-heading{display:block;margin-top:12px;color:#176851;font-size:13px;letter-spacing:.01em;}
+#app[data-theme="dark"] .dj-place-ai-heading{color:#9de4c4;}
+#app .dj-place-actions:has(>button[hidden]){display:none;}
+#app .dj-place-actions .dj-place-ai[hidden]{display:none!important;}
+#app .dj-place-meta a{color:#167b69;text-decoration:underline;overflow-wrap:anywhere;}
+#app[data-theme="dark"] .dj-place-meta a{color:#a3e5d0;}
+
+
+/* 2026-11-10: actual two-view transport sheet, not a scroll-only toggle. */
+#transport-sheet[data-transport-view="live"] #transport-hours-heading,
+#transport-sheet[data-transport-view="live"] #transport-service-hours,
+#transport-sheet[data-transport-view="live"] .transport-hours-disclaimer{display:none!important;}
+#transport-sheet[data-transport-view="hours"] .transport-arrivals-title,
+#transport-sheet[data-transport-view="hours"] #transport-arrivals,
+#transport-sheet[data-transport-view="hours"] #transport-neighbors,
+#transport-sheet[data-transport-view="hours"] .transport-selection-box,
+#transport-sheet[data-transport-view="hours"] #transport-line-section-heading,
+#transport-sheet[data-transport-view="hours"] #transport-lines{display:none!important;}
+.transport-official-time-sources{display:grid;gap:10px;border:1px solid #c6ddd5;border-radius:14px;padding:13px;background:#f4faf7;min-width:0;}
+.transport-official-time-heading{color:#144c40;font-size:14px;}
+.transport-official-time-explainer{font-size:12px;line-height:1.6;color:#536f65;margin:0;}
+.transport-official-time-card{display:grid;gap:7px;background:#fff;border:1px solid #d8e7df;border-radius:11px;padding:11px;min-width:0;}
+.transport-official-time-line{font-size:13px;color:#164e40;}
+.transport-official-time-guidance{font-size:12px;line-height:1.6;margin:0;color:#37534c;}
+.transport-official-time-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 12px;border-radius:9px;color:#fff!important;background:#137d68;text-decoration:none;font-weight:800;font-size:13px;max-width:100%;}
+.transport-official-time-link:focus-visible{outline:3px solid #74bea6;outline-offset:2px;}
+.transport-official-time-notice{font-size:11px;line-height:1.5;color:#647f75;}
+#app[data-theme="dark"] .transport-official-time-sources{background:#203b34;border-color:#42695d;}
+#app[data-theme="dark"] .transport-official-time-heading,#app[data-theme="dark"] .transport-official-time-line{color:#e0f8ef;}
+#app[data-theme="dark"] .transport-official-time-explainer,#app[data-theme="dark"] .transport-official-time-guidance{color:#d4e6df;}
+#app[data-theme="dark"] .transport-official-time-card{background:#1a302c;border-color:#3f5b52;}
+#app[data-theme="dark"] .transport-official-time-notice{color:#bdcfc8;}
+#app[data-theme="dark"] .transport-official-time-link{background:#167e6b;color:white!important;}
+@media(max-width:600px){.transport-official-time-sources{padding:10px;}.transport-official-time-card{padding:10px;}.transport-official-time-link{width:100%;box-sizing:border-box;}}
+
+/* Operator-provided departures shown directly inside the timetable tab. */
+.transport-hours-inline-credit{margin:8px 2px 12px;padding:11px 13px;border:1px solid #b9daca;border-radius:12px;background:#eff9f3;color:#1e654f;font-size:12px;font-weight:680;line-height:1.6;}
+#app[data-theme="dark"] .transport-hours-inline-credit{background:#254139;border-color:#426e5e;color:#d8f5e8;}
+@media (max-width:600px){.transport-timetable-direction-grid{grid-template-columns:minmax(0,1fr);}.transport-timetable-pane{max-height:315px;}.transport-timetable-controls{gap:8px;}}

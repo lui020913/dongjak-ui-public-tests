@@ -1,0 +1,97 @@
+/*
+ * v7.0.29-R1 (fresh implementation, 2026-11-12)
+ * Pure presentation layer. It deliberately never selects #map, MapLibre
+ * controls/canvas, or the startup loader. Do not import v7.0.30-33 patches.
+ * Retains the final v7.0.29 PC/mobile positioning and adjusts only surface UI.
+ */
+
+/* Make the existing search form usable at intermediate viewport widths. */
+html body #app .topbar .map-quick-search-form:focus-within{
+  outline:2px solid rgba(22,124,96,.48)!important;
+  outline-offset:1px!important;
+}
+html body #app .map-quick-search-submit{white-space:nowrap!important;word-break:keep-all!important;}
+
+/* A panel should scroll inside itself, rather than under the app controls. */
+html body #app #version-history-modal .version-history-dialog{
+  box-sizing:border-box!important;
+  max-height:calc(100dvh - 32px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+html body #app #version-history-modal .version-history-head{
+  min-width:0!important;
+}
+
+/* Theme switching should not dim or blur the entire map and search surface. */
+html body #app .dj-theme-switch-flash:not([hidden]){
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  filter:none!important;
+  background:rgba(75,113,104,.06)!important;
+  pointer-events:none!important;
+}
+
+@media(min-width:1080px){
+  /* Responsive search action; keep the v7.0.29 desktop navigation geometry. */
+  html body #app .topbar .map-quick-search-submit{
+    box-sizing:border-box!important;
+    width:clamp(96px,8vw,136px)!important;
+    min-width:96px!important;
+    max-width:136px!important;
+    flex:0 0 clamp(96px,8vw,136px)!important;
+  }
+  html body #app #transport-sheet:not([hidden]),
+  html body #app #overview-sheet:not([hidden]),
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls,
+  html body #app .page-panel:not([hidden]){
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    scrollbar-gutter:stable!important;
+  }
+}
+
+@media(max-width:1079px){
+  /* The original header owns its stacking and placement; option backdrops
+   * start BELOW it, so the search input does not become greyed out. */
+  html body #app.map-controls-open #map-options-backdrop:not([hidden]),
+  html body #app.map-safety-open #map-safety-backdrop:not([hidden]){
+    top:var(--dj-header-h,64px)!important;
+  }
+  html body #app[data-tab] :is(#map-tools-toggle,#map-safety-toggle){
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    overflow-wrap:normal!important;
+  }
+  html body #app #bottom-nav .nav-tab,
+  html body #app #bottom-nav .nav-tab>span:last-child{
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    min-width:0!important;
+  }
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls,
+  html body #app #transport-sheet:not([hidden]){
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    box-sizing:border-box!important;
+  }
+}
+
+@media(max-width:699px){
+  /* Avoid assigning a new top/bottom position: v7.0.29 already measures
+   * the safe-area and navigation. Only constrain the contents. */
+  html body #app.map-controls-open #map-advanced-controls,
+  html body #app.map-safety-open #map-safety-controls{
+    max-height:calc(100dvh - var(--dj-header-h,64px) - var(--dj-v724-panel-bottom,85px) - 12px)!important;
+  }
+  html body #app #version-history-modal .version-history-dialog{
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html body #app .dj-theme-switch-flash:not([hidden]){animation:none!important;display:none!important;}
+}

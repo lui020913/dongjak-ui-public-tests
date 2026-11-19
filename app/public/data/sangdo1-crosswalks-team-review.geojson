@@ -1,0 +1,880 @@
+{
+  "type": "FeatureCollection",
+  "name": "상도1동 팀원 조사 횡단지점(미검증)",
+  "metadata": {
+    "source": "팀원 제출 상도 1동 횡단보도 경도위도.pdf 및 gemini-code-1794426991112.json",
+    "survey_status": "unverified_not_authoritative",
+    "not_for_risk_certification": true,
+    "coordinate_system": "EPSG:4326",
+    "reference_radius_m": 100,
+    "reference_radius_meaning": "근처 조사 지점 안내용 거리 기준. 가시거리 또는 안전/위험 기준이 아님",
+    "excluded_from_nearby_search": [
+      "crosswalk_07",
+      "crosswalk_24"
+    ],
+    "legal_basis_included": false
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95153308933428,
+          37.508016903395074
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_01",
+        "number": 1,
+        "name": "상도1동 횡단보도 1번",
+        "description": "가장 북측 기점 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95177669263175,
+          37.50734124944442
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_02",
+        "number": 2,
+        "name": "상도1동 횡단보도 2번",
+        "description": "1번 남측 인접 지점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9512116525961,
+          37.50662922349262
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_03",
+        "number": 3,
+        "name": "상도1동 횡단보도 3번",
+        "description": "은빛어르신복지관 및 예담어린이집 인근",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95097986621032,
+          37.50652551195362
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_04",
+        "number": 4,
+        "name": "상도1동 횡단보도 4번",
+        "description": "3번 지점 인근 연계 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95219040353663,
+          37.50594035479428
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_05",
+        "number": 5,
+        "name": "상도1동 횡단보도 5번",
+        "description": "중앙 생활권 단절 구간 연계 지점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9537234588657,
+          37.505017434982605
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_06",
+        "number": 6,
+        "name": "상도1동 횡단보도 6번",
+        "description": "통학로 및 주거지 연계 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95336156759667,
+          37.504985757471935
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_07",
+        "number": 7,
+        "name": "상도1동 횡단보도 7번",
+        "description": "6번 지점 서측 인접 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": true,
+        "review_reason": "팀원 JSON과 좌표 PDF 불일치. PDF 좌표로 정정했지만 실제 위치 확인 필요",
+        "candidate_for_nearby_notice": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95356518144735,
+          37.50492276731586
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_08",
+        "number": 8,
+        "name": "상도1동 횡단보도 8번",
+        "description": "통학로 인근 보행 단절 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9520553450385,
+          37.50490864908446
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_09",
+        "number": 9,
+        "name": "상도1동 횡단보도 9번",
+        "description": "상도터널 교차로 인근 권역",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95069263304308,
+          37.50474590718314
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_10",
+        "number": 10,
+        "name": "상도1동 횡단보도 10번",
+        "description": "상도터널 북측 진입부",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9463949765309,
+          37.504717004971695
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_11",
+        "number": 11,
+        "name": "상도1동 횡단보도 11번",
+        "description": "상도서측 주거지 연계",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94952813698261,
+          37.50415075183991
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_12",
+        "number": 12,
+        "name": "상도1동 횡단보도 12번",
+        "description": "터널 주변 보행 단절 구간 중간지점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95382583727876,
+          37.50405790434149
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_13",
+        "number": 13,
+        "name": "상도1동 횡단보도 13번",
+        "description": "초등학교 통학로 동측 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94748726200301,
+          37.503429057861055
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_14",
+        "number": 14,
+        "name": "상도1동 횡단보도 14번",
+        "description": "상도역 상부 교차로 일대",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94790016113151,
+          37.50328057477838
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_15",
+        "number": 15,
+        "name": "상도1동 횡단보도 15번",
+        "description": "상도역 인근 이면도로 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94793412077225,
+          37.50323553947458
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_16",
+        "number": 16,
+        "name": "상도1동 횡단보도 16번",
+        "description": "15번 지점 남측 직인접",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9474366441387,
+          37.503037097942105
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_17",
+        "number": 17,
+        "name": "상도1동 횡단보도 17번",
+        "description": "상도역 교차로 핵심 거점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95426191532088,
+          37.5029768673758
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_18",
+        "number": 18,
+        "name": "상도1동 횡단보도 18번",
+        "description": "강남초교 통학로 동측 라인",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94791182424191,
+          37.502771511777034
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_19",
+        "number": 19,
+        "name": "상도1동 횡단보도 19번",
+        "description": "상도역 남측 상업/주거 연계",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95363242436243,
+          37.50134580161854
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_20",
+        "number": 20,
+        "name": "상도1동 횡단보도 20번",
+        "description": "숭실대·상도SH빌 방면 연계 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9536834769878,
+          37.50108452994581
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_21",
+        "number": 21,
+        "name": "상도1동 횡단보도 21번",
+        "description": "20번 지점 남측 직인접 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94930665204006,
+          37.501371054688384
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_22",
+        "number": 22,
+        "name": "상도1동 횡단보도 22번",
+        "description": "상도1동 중앙 보행축 연결지점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95370691848876,
+          37.49975105027642
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_23",
+        "number": 23,
+        "name": "상도1동 횡단보도 23번",
+        "description": "햇님 어린이공원 남동측 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95146833241375,
+          37.49885365070874
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_24",
+        "number": 24,
+        "name": "상도1동 횡단보도 24번",
+        "description": "햇님공원 인근 4갈래 교차로 권역",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": true,
+        "review_reason": "보고서는 지점 인근 횡단시설 누락을 지적하고 JSON은 횡단보도로 표시. 실제 시설 존재 여부 확인 필요",
+        "candidate_for_nearby_notice": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95332897528101,
+          37.498295776558166
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_25",
+        "number": 25,
+        "name": "상도1동 횡단보도 25번",
+        "description": "남부 주거지 이면도로 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95315960645365,
+          37.49787674157685
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_26",
+        "number": 26,
+        "name": "상도1동 횡단보도 26번",
+        "description": "25번 지점 남측 인접 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9527413145986,
+          37.497673848547386
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_27",
+        "number": 27,
+        "name": "상도1동 횡단보도 27번",
+        "description": "상도남부 이면도로 연계",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95246988803265,
+          37.49770527487839
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_28",
+        "number": 28,
+        "name": "상도1동 횡단보도 28번",
+        "description": "27번 지점 서측 인근",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9527075620771,
+          37.49739902808146
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_29",
+        "number": 29,
+        "name": "상도1동 횡단보도 29번",
+        "description": "남측 주거단지 내부 교차점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95235697077274,
+          37.49743943250113
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_30",
+        "number": 30,
+        "name": "상도1동 횡단보도 30번",
+        "description": "29번 지점 서측 인접 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95146944028599,
+          37.49714173910366
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_31",
+        "number": 31,
+        "name": "상도1동 횡단보도 31번",
+        "description": "상도남부 권역 서측 축",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95035549968738,
+          37.4972178617917
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_32",
+        "number": 32,
+        "name": "상도1동 횡단보도 32번",
+        "description": "상도남부 서측 단절 구간 연계",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.94591075705226,
+          37.501811041437875
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_33",
+        "number": 33,
+        "name": "상도1동 횡단보도 33번",
+        "description": "서측 외곽 연계 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95458302777473,
+          37.49563153856481
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_34",
+        "number": 34,
+        "name": "상도1동 횡단보도 34번",
+        "description": "최남단 권역 동측 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95424656325658,
+          37.49570123675504
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_35",
+        "number": 35,
+        "name": "상도1동 횡단보도 35번",
+        "description": "34번 지점 서측 인접 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95639813826324,
+          37.495411475772656
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_36",
+        "number": 36,
+        "name": "상도1동 횡단보도 36번",
+        "description": "최남단 동측 주거지 연계",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95685051818829,
+          37.49532604622636
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_37",
+        "number": 37,
+        "name": "상도1동 횡단보도 37번",
+        "description": "36번 지점 동측 인접 지점",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95863170987815,
+          37.49506989643556
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_38",
+        "number": 38,
+        "name": "상도1동 횡단보도 38번",
+        "description": "최남단 동측 연장선",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.9592480614926,
+          37.494970999903764
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_39",
+        "number": 39,
+        "name": "상도1동 횡단보도 39번",
+        "description": "38번 지점 동측 인접 구간",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.96067866702252,
+          37.494746233016706
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_40",
+        "number": 40,
+        "name": "상도1동 횡단보도 40번",
+        "description": "최동남단 외곽 연계 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          126.95652710580575,
+          37.49239314988351
+        ]
+      },
+      "properties": {
+        "id": "crosswalk_41",
+        "number": 41,
+        "name": "상도1동 횡단보도 41번",
+        "description": "가장 남측 최하단 기점 횡단보도",
+        "data_source": "team_survey",
+        "verification": "unverified",
+        "review_required": false,
+        "review_reason": "",
+        "candidate_for_nearby_notice": true
+      }
+    }
+  ]
+}

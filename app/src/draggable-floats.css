@@ -1,0 +1,21 @@
+/* Desktop floating cards can be repositioned without covering mobile map controls. */
+@media(min-width:801px){
+  #app .dj-float-drag-handle{cursor:grab;user-select:none;touch-action:none}
+  #app .dj-float-drag-handle:active{cursor:grabbing}
+  #app .dj-float-user-positioned{z-index:2600!important;max-height:calc(100dvh - 16px)!important;overflow-y:auto}
+  #app .dj-float-drag-handle button{cursor:pointer}
+}
+#app .road-width-legend-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:5px}
+#app .road-width-legend-head strong{margin:0}
+#app .road-width-legend-head button{
+  border:1px solid currentColor;border-radius:6px;background:transparent;color:inherit;
+  font-size:17px;line-height:1;cursor:pointer;min-width:26px;min-height:26px
+}
+#app .night-visibility-float-stop-icon{font-size:20px;font-weight:700;line-height:1}
+#app .dj-place-grip{
+  display:block;margin:-3px 20px 7px 0;padding:5px 0;
+  color:var(--dj-ui-muted,#647b76);font-size:10px;line-height:1.4;
+  border-bottom:1px solid rgba(115,145,135,.20)
+}
+@media(min-width:801px){#app .dj-place-grip{cursor:grab;user-select:none}}
+@media(max-width:800px){#app .dj-place-grip{display:none}}

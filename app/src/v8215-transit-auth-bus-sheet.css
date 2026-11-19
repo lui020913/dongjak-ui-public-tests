@@ -1,0 +1,144 @@
+/* v8.2.15 NEWS/METRO branch: transport-only presentation changes.
+   No global header, map or bottom-nav dimensions are changed. */
+html body #app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark{
+  width:38px!important;min-width:38px!important;height:40px!important;min-height:40px!important;
+  border:0!important;box-shadow:none!important;background:transparent!important;
+  border-radius:50%!important;overflow:visible!important;flex:none!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark::before{
+  content:'☆'!important;font:500 31px/40px 'Pretendard Variable',system-ui,sans-serif!important;
+  color:#277d69!important;line-height:40px!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark[aria-pressed="true"]::before{
+  content:'★'!important;color:#c5a233!important;
+}
+/* Name/ARS are a single LEFT-aligned information group; action buttons
+   have their own separate RIGHT-aligned row and can never overlap the X. */
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;
+  grid-template-rows:auto auto!important;column-gap:7px!important;row-gap:4px!important;
+  align-items:center!important;justify-content:stretch!important;
+  min-height:103px!important;padding:9px 0 8px!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head>div:first-child{
+  grid-column:1/-1!important;grid-row:1!important;width:100%!important;
+  display:flex!important;align-items:flex-start!important;justify-content:center!important;
+  flex-direction:column!important;text-align:left!important;gap:2px!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-kind,
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-title,
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-description{
+  text-align:left!important;align-self:flex-start!important;max-width:100%!important;margin-left:0!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-kind{
+  font-size:calc(12px + var(--dj803-text-delta,0px))!important;font-weight:650!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-description{
+  font-size:calc(12px + var(--dj803-text-delta,0px))!important;line-height:1.25!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head>.dj-news-transport-actions{
+  grid-column:2!important;grid-row:2!important;justify-self:end!important;
+  max-width:none!important;width:max-content!important;display:flex!important;
+  flex-direction:row!important;gap:5px!important;white-space:nowrap!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head>#transport-close{
+  grid-column:3!important;grid-row:2!important;justify-self:end!important;
+}
+/* Only station and bus stop rows have slightly enlarged secondary text. */
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-main small{
+  font-size:calc(12px + var(--dj803-text-delta,0px))!important;line-height:1.35!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-time{
+  font-size:calc(13px + var(--dj803-text-delta,0px))!important;line-height:1.3!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed .transport-arrivals-title #transport-update-time{
+  font-size:calc(12px + var(--dj803-text-delta,0px))!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] .metro-arrival-detail small,
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] .metro-planned-time-meta,
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] .metro-arrival-position{
+  font-size:calc(11px + var(--dj803-text-delta,0px))!important;
+}
+/* Category palettes: only names with a defensible class get an asserted type.
+   Unrecognized services use neutral rather than an invented classification. */
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  align-self:flex-start!important;width:max-content!important;max-width:100%!important;
+  box-sizing:border-box!important;padding:3px 9px!important;border-radius:8px!important;
+  background:#ebf0ee!important;color:#294b42!important;font-size:calc(14px + var(--dj803-text-delta,0px))!important;
+  font-weight:750!important;line-height:1.3!important;white-space:nowrap!important;
+}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="trunk"]{background:#337ed1!important;color:#fff!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="branch"]{background:#299e4d!important;color:#fff!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="village"]{background:#319c70!important;color:#fff!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="metro"]{background:#d4464b!important;color:#fff!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="airport"]{background:#d4a22d!important;color:#1e302c!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="circular"]{background:#e3b93a!important;color:#283626!important;}
+html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-transit-bus-route[data-bus-class="night"]{background:#293d75!important;color:#fff!important;}
+/* Real sticky grabber, unlike the former purely decorative ::after handle.
+   Existing dj-v8212-sheet-controller handles swipe and close-button dispatch. */
+@media(max-width:699px){
+  html body #app#app #transport-sheet.dj-news-transit-fixed>.handle{
+    position:sticky!important;top:0!important;left:0!important;display:block!important;
+    height:24px!important;min-height:24px!important;width:100%!important;
+    box-sizing:border-box!important;padding:0!important;margin:0!important;
+    border:0!important;border-radius:0!important;background:#fff!important;
+    z-index:21!important;cursor:grab!important;touch-action:none!important;
+    pointer-events:auto!important;user-select:none!important;-webkit-user-select:none!important;
+  }
+  html body #app#app #transport-sheet.dj-news-transit-fixed>.handle::after{
+    content:'';display:block;position:absolute;left:50%;top:8px;width:42px;height:5px;
+    transform:translateX(-50%);border-radius:99px;background:#d8e3df;pointer-events:none;
+  }
+  html body #app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head::before,
+  html body #app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head::after{
+    display:none!important;content:none!important;
+  }
+  html body #app#app #transport-sheet.dj-news-transit-fixed{
+    --dj-news-sticky-top:24px!important;
+  }
+}
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed>.handle{
+  background:#172831!important;
+}
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed>.handle::after{
+  background:#58746b!important;
+}
+/* Login required floating sheet sits above the bottom tab, not over the map's
+   existing transport heading. It never displays a fake successful login. */
+#dj-transit-signin-prompt[hidden]{display:none!important}
+#dj-transit-signin-prompt{
+  position:fixed;inset:0;z-index:21000;display:flex;align-items:flex-end;justify-content:center;
+  font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
+}
+#dj-transit-signin-prompt .dj-transit-signin-backdrop{position:absolute;inset:0;background:rgba(12,28,25,.38)}
+#dj-transit-signin-prompt .dj-transit-signin-card{
+  position:relative;box-sizing:border-box;width:min(calc(100% - 28px),440px);
+  margin-bottom:calc(108px + env(safe-area-inset-bottom,0px));
+  padding:23px 20px 19px;border-radius:25px;border:1px solid #d4e6dd;
+  box-shadow:0 18px 55px rgba(11,40,30,.21);background:#fff;color:#1d3930;
+  animation:dj-transit-signin-rise .28s cubic-bezier(.17,.9,.28,1) both;
+}
+#dj-transit-signin-prompt .dj-transit-signin-symbol{font-size:32px;color:#16866c;margin-bottom:8px}
+#dj-transit-signin-prompt .dj-transit-signin-x{
+  position:absolute;right:16px;top:15px;display:grid;place-items:center;width:39px;height:39px;
+  background:#eff6f2;color:#254b3e;border:1px solid #d6e5dd;border-radius:11px;
+  font:400 31px/1 system-ui;cursor:pointer;
+}
+#dj-transit-signin-prompt h3{margin:0 46px 7px 0;font-size:18px;font-weight:740;line-height:1.35;word-break:keep-all}
+#dj-transit-signin-prompt p{font-size:14px;line-height:1.6;margin:0 0 17px;color:#60756c;word-break:keep-all}
+#dj-transit-signin-prompt .dj-transit-signin-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#dj-transit-signin-prompt .dj-transit-signin-buttons button{
+  border:1px solid #b5dacc;border-radius:13px;min-height:45px;padding:8px 9px;
+  font:720 13px/1.25 'Pretendard Variable',sans-serif;cursor:pointer;word-break:keep-all;
+}
+#dj-transit-signin-prompt .dj-transit-signin-kakao{background:#fee500;color:#1a1918;border-color:#fee500!important}
+#dj-transit-signin-prompt .dj-transit-signin-account{background:#eaf6f1;color:#146c58}
+html body #app#app[data-theme="dark"] #dj-transit-signin-prompt .dj-transit-signin-card,
+html body #app#app[data-theme="dark"] ~ #dj-transit-signin-prompt .dj-transit-signin-card{background:#1f3030;color:#e3f2e9;border-color:#42665a}
+@keyframes dj-transit-signin-rise{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#dj-transit-signin-prompt .dj-transit-signin-card{animation:none!important}}
+@media(max-width:380px){
+  html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head{column-gap:4px!important}
+  html body #app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark{width:32px!important;min-width:32px!important}
+}

@@ -1,0 +1,132 @@
+/* v809 — visible user-reported PC/mobile corrections. Applied after v807.
+ * All layout overrides are scoped to the matching platform; no GIS data edits. */
+html body #app#app :is(.nav-tab,.page-panel button,.map-actions button,
+ #map-advanced-controls button,#map-safety-controls button,#road-width-legend button,
+ #transport-sheet button,#dj-map-settings button,#map-gesture-guide button){font-weight:850!important;}
+html body #app#app :is(.page-panel,#map-advanced-controls,#map-safety-controls,
+ #road-width-legend,#transport-sheet,#dj-map-settings,#map-gesture-guide)
+ :is(p,small,label,dd,dt,li,span:not(.nav-icon)){font-weight:700!important;}
+
+@media (min-width:1080px){
+ /* Navigation rail must be genuinely opaque, not a map-blurred glass layer. */
+ html body #app#app #bottom-nav{
+   background:#fff!important;background-color:#fff!important;opacity:1!important;
+   -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+   border:1px solid #d6e8de!important;box-shadow:0 9px 30px rgba(24,53,47,.12)!important;
+   isolation:isolate!important;
+ }
+ html body #app#app[data-theme="dark"] #bottom-nav{
+   background:#192f32!important;background-color:#192f32!important;
+   border-color:#47665f!important;box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab{opacity:1!important;}
+ html body #app#app[data-theme="dark"] #bottom-nav>.nav-tab{color:#e5f4ed!important;}
+ html body #app#app[data-theme="dark"] #bottom-nav>.nav-tab:not(.active){background:#20383b!important;}
+ html body #app#app[data-theme="dark"] #bottom-nav>.nav-tab.active{background:#30574c!important;}
+ /* Only the search form should be a visible pill. Remove the second shell. */
+ html body #app#app .topbar #map-quick-search{
+   background:transparent!important;background-color:transparent!important;
+   border:0!important;outline:0!important;box-shadow:none!important;
+   -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+   border-radius:0!important;overflow:visible!important;padding:0!important;
+ }
+ html body #app#app .topbar #map-quick-search::before,
+ html body #app#app .topbar #map-quick-search::after{content:none!important;display:none!important;}
+ html body #app#app .topbar .map-quick-search-form{
+   background:#fff!important;border:1px solid #d9e7df!important;
+   box-shadow:0 5px 16px rgba(15,45,38,.11)!important;border-radius:26px!important;
+   padding:5px 5px 5px 16px!important;overflow:hidden!important;
+ }
+ html body #app#app[data-theme="dark"] .topbar .map-quick-search-form{
+   background:#1f3639!important;border-color:#48635d!important;
+   box-shadow:0 6px 20px rgba(0,0,0,.24)!important;
+ }
+ html body #app#app .topbar .map-quick-search-submit{
+   font-weight:900!important;letter-spacing:-.015em!important;border-radius:22px!important;
+ }
+ html body #app#app .topbar .header-tools :is(button,#weather-label,#weather-title,#weather-my-location){
+   font-weight:850!important;
+ }
+ /* Make all five PC icons use the pencil's optical bounding box and stroke. */
+ html body #app#app #bottom-nav>.nav-tab .nav-icon{
+   width:26px!important;height:26px!important;min-width:26px!important;
+   display:grid!important;place-items:center!important;line-height:1!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab .nav-icon svg{
+   width:23px!important;height:23px!important;max-width:23px!important;max-height:23px!important;
+   stroke:currentColor!important;stroke-width:2.35!important;
+   stroke-linecap:round!important;stroke-linejoin:round!important;fill:none!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab .nav-icon svg :is(path,rect,circle){
+   stroke:currentColor!important;stroke-width:2.35!important;fill:none!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab>span:last-child{font-weight:850!important;}
+ /* Menu/analysis drawers share the same heading scale as walking directions. */
+ html body #app#app #map-advanced-controls :is(.map-options-heading strong,.map-options-mobile-heading strong),
+ html body #app#app #map-safety-controls :is(.map-safety-head strong,.map-safety-heading strong),
+ html body #app#app #road-width-legend .road-width-legend-head strong,
+ html body #app#app #night-visibility-float :is(h2,.night-visibility-title),
+ html body #app#app #admin-dong-picker .admin-dong-heading strong{
+   font-size:29px!important;line-height:1.27!important;font-weight:900!important;
+   letter-spacing:-.042em!important;
+ }
+ /* Station sheet's one-pixel readability increase; preserve line colors. */
+ html body #app#app #transport-sheet[data-kind="subway"] :is(.metro-neighbor-row,.metro-arrival-direction-group,
+ .transport-arrival-row,.transport-empty,.metro-direction-heading,.metro-arrival-detail,
+ .transport-service-hours,.transport-section-title,.transport-section-title strong,
+ .transport-mode-tabs button){font-size:calc(1em + 1px)!important;}
+ html body #app#app #transport-sheet[data-kind="subway"] .transport-section-title strong{font-size:18px!important;}
+ /* Prevent bus route cards from merging at narrow desktop panel widths. */
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals{
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+   gap:12px!important;align-items:stretch!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals>.transport-arrival-row{
+   box-sizing:border-box!important;min-width:0!important;width:auto!important;max-width:100%!important;
+   margin:0!important;padding:12px 13px!important;min-height:105px!important;
+   overflow-wrap:anywhere!important;overflow:hidden!important;
+   border:1px solid var(--dj800-border)!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals>.transport-arrival-row :is(span,small,strong){
+   max-width:100%!important;min-width:0!important;word-break:keep-all!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-time{
+   overflow-wrap:anywhere!important;white-space:normal!important;
+ }
+}
+@media (max-width:699px){
+ /* Search remains one functional input; only its empty overlay increases. */
+ html body #app#app .topbar .dj807-search-copy{
+   font-size:clamp(12px,calc(2.8vw + 1px),14.5px)!important;
+   line-height:1.22!important;font-weight:850!important;
+ }
+ html body #app#app .topbar #map-quick-search-query{
+   font-size:calc(14px + var(--dj803-text-delta,0px) + 1px)!important;
+   font-weight:800!important;
+ }
+ /* Normalized two-row geometry prevents the map label from sinking. */
+ html body #app#app #bottom-nav{
+   box-shadow:0 -6px 20px rgba(15,52,43,.14)!important;
+   filter:none!important;
+ }
+ html body #app#app[data-theme="dark"] #bottom-nav{
+   box-shadow:0 -7px 23px rgba(0,0,0,.38)!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab{
+   display:grid!important;grid-template-rows:29px 24px!important;
+   align-content:center!important;justify-items:center!important;gap:3px!important;
+   padding-top:6px!important;padding-bottom:6px!important;
+   box-shadow:0 2px 7px rgba(29,70,55,.055)!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab .nav-icon{
+   grid-row:1!important;width:26px!important;height:26px!important;
+   font-size:23px!important;align-self:center!important;margin:0!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab>span:last-child{
+   grid-row:2!important;align-self:center!important;justify-self:center!important;
+   margin:0!important;padding:0!important;width:auto!important;
+   line-height:1.15!important;font-weight:850!important;
+   text-align:center!important;white-space:nowrap!important;
+ }
+ html body #app#app #bottom-nav>.nav-tab.active{box-shadow:0 2px 10px rgba(9,101,78,.13)!important;}
+}

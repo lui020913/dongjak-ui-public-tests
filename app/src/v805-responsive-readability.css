@@ -1,0 +1,250 @@
+/* v8.0.3 AUDIO/AED/SANGDO user-reported responsive UI follow-up.
+   Loaded last. Data layers, route results and service API state are not changed. */
+
+/* Shared: route labels and action buttons. The long warning remains in the
+   underlying document as a provenance notice but is not repeated visually. */
+html body #app#app #route-panel .page-heading h2{font-weight:900!important;letter-spacing:-.04em!important;}
+html body #app#app #route-panel>.page-note{display:none!important;}
+html body #app#app #transport-sheet .transport-selection-box,
+html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-box{
+  padding:0!important;margin:12px 0 6px!important;background:transparent!important;
+  background-color:transparent!important;border:0!important;box-shadow:none!important;
+  outline:none!important;border-radius:0!important;
+}
+html body #app#app #transport-sheet .transport-selection-box::before,
+html body #app#app #transport-sheet .transport-selection-box::after{content:none!important;display:none!important;}
+html body #app#app #transport-sheet .transport-selection-actions{
+  background:none!important;border:0!important;box-shadow:none!important;
+  padding:0!important;max-width:100%!important;
+}
+html body #app#app #transport-sheet .transport-selection-actions button{
+  background-clip:padding-box!important;box-shadow:none!important;
+}
+
+/* Consistent entrance for desktop modal as well as the missing help/update
+   dialog; reduced-motion settings opt out. Existing click handlers stay bound. */
+@keyframes dj805-float-in{
+  from{opacity:0;translate:0 19px;scale:.982;filter:blur(2px)}
+  to{opacity:1;translate:0 0;scale:1;filter:none}
+}
+@keyframes dj805-side-in{
+  from{opacity:0;translate:-13px 0;scale:.992}
+  to{opacity:1;translate:0 0;scale:1}
+}
+html body #app#app #version-history-modal:not([hidden]) .version-history-dialog,
+html body #app#app #map-gesture-guide:not([hidden]),
+html body #app#app #road-width-legend:not([hidden]),
+html body #app#app #dj-app-about:not([hidden]) .dj-about-card,
+html body #app#app #dj-map-settings:not([hidden]) .dj-map-settings-card,
+html body #app#app #dj800-type-panel:not([hidden]),
+html body #app#app .maplibregl-popup:not(.maplibregl-popup-anchor-bottom) .maplibregl-popup-content{
+  animation:dj805-float-in .30s cubic-bezier(.19,.83,.23,1) both!important;
+}
+html body #app#app #admin-dong-picker:not([hidden]),
+html body #app#app #transport-sheet:not([hidden]),
+html body #app#app .page-panel:not([hidden]),
+html body #app#app.map-controls-open #map-advanced-controls,
+html body #app#app.map-safety-open #map-safety-controls{
+  animation:dj805-side-in .30s cubic-bezier(.19,.83,.23,1) both!important;
+}
+/* Modern iOS/Safari/Chromium can animate the discrete display change when
+   panels are hidden. The JS opening animation above remains the fallback. */
+@supports (transition-behavior:allow-discrete){
+  html body #app#app :is(#version-history-modal,#map-gesture-guide,#admin-dong-picker,#transport-sheet,#road-width-legend,#dj-app-about,#dj-map-settings,#dj800-type-panel){
+    transition:opacity .19s ease,display .19s allow-discrete!important;
+    transition-behavior:allow-discrete!important;
+  }
+  html body #app#app :is(#version-history-modal,#map-gesture-guide,#admin-dong-picker,#transport-sheet,#road-width-legend,#dj-app-about,#dj-map-settings,#dj800-type-panel)[hidden]{opacity:0!important;}
+}
+
+/* Desktop panels must fit their CONTENT rather than reserving the entire
+   remaining viewport. Only large dynamic pages (news/history) scroll. */
+@media (min-width:1080px){
+  html body #app#app #admin-dong-picker:not([hidden]),
+  html body #app#app #transport-sheet:not([hidden]){
+    height:max-content!important;min-height:0!important;bottom:auto!important;
+    max-height:calc(100dvh - var(--dj800-panel-top,92px) - 20px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+  }
+  html body #app#app #admin-dong-picker:not([hidden]){
+    top:var(--dj800-panel-top,92px)!important;
+    padding:20px 21px 17px!important;
+  }
+  html body #app#app #admin-dong-list{
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  html body #app#app .admin-dong-heading strong{font-size:21px!important;font-weight:850!important;}
+  html body #app#app .admin-dong-heading p{font-size:14px!important;line-height:1.5!important;}
+  html body #app#app .admin-dong-choice{font-size:15px!important;line-height:1.35!important;min-height:45px!important;}
+  html body #app#app .admin-dong-clear{font-size:15px!important;min-height:43px!important;margin-bottom:0!important;}
+  html body #app#app .topbar .map-quick-search-submit{
+    border-radius:999px!important;font-size:16px!important;font-weight:850!important;
+  }
+  /* Older CSS uses small fixed px sizes; explicitly scale content, not just
+     the parent font-size. Long headlines still wrap naturally. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#map-advanced-controls,#map-safety-controls,#road-width-legend){
+    font-size:16px!important;line-height:1.55!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) .page-heading h2{
+    font-size:29px!important;line-height:1.26!important;font-weight:880!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(p,.page-note,.record-text small,.empty-hint,.news-empty){
+    font-size:15px!important;line-height:1.65!important;font-weight:590!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(button,label,select,.page-section-title){
+    font-size:16px!important;font-weight:750!important;
+  }
+  html body #app#app #news-panel .dongjak-news-item>strong{font-size:16px!important;line-height:1.55!important;font-weight:750!important;}
+  html body #app#app #news-panel .dongjak-news-item-meta,
+  html body #app#app #news-panel .dongjak-news-status{font-size:14px!important;line-height:1.55!important;}
+  html body #app#app #news-panel .dongjak-news-open{font-size:15px!important;font-weight:800!important;}
+  html body #app#app #mine-panel .stat-grid strong{font-size:28px!important;}
+  html body #app#app #mine-panel .stat-grid small{font-size:14px!important;}
+  html body #app#app #mine-panel .record-item strong{font-size:16px!important;}
+  html body #app#app #mine-panel .record-item small{font-size:14px!important;}
+  html body #app#app #transport-sheet .transport-panel-head #transport-title{
+    font-size:26px!important;line-height:1.32!important;font-weight:850!important;
+  }
+  html body #app#app #transport-sheet :is(#transport-kind,#transport-description,.transport-updated-actions,#transport-update-time,.transport-auto-refresh-label){
+    font-size:14px!important;line-height:1.5!important;
+  }
+  html body #app#app #transport-sheet .transport-section-title strong{font-size:17px!important;}
+  html body #app#app #transport-sheet :is(.transport-arrival-row,.transport-arrival-row strong,.transport-arrival-row span,.transport-empty,.metro-report-no-eta,.transport-hours-notice){
+    font-size:15px!important;line-height:1.55!important;
+  }
+  html body #app#app #transport-sheet :is(.transport-mode-tabs button,.transport-selection-actions button,#transport-refresh,.metro-neighbor-row){
+    font-size:16px!important;font-weight:760!important;
+  }
+  html body #app#app #map-safety-controls :is(.dj-feature-copy small,.dj-feature-legend,.dj-safety-overview p,.dj-safety-group-name small,.dj-section-intro small){
+    font-size:14px!important;line-height:1.6!important;
+  }
+  html body #app#app #map-safety-controls :is(.dj-feature-copy b,.dj-safety-group-name strong,.dj-import-category strong){font-size:17px!important;}
+  /* On PC do not mix mobile installation instructions into map controls. */
+  html body #app#app #map-gesture-guide{width:min(600px,calc(100vw - 340px))!important;max-height:calc(100dvh - 90px)!important;overflow:auto!important;}
+  html body #app#app #map-gesture-guide .dj803-ios-install-help{display:none!important;}
+  html body #app#app #map-gesture-guide .map-gesture-guide-head strong{font-size:24px!important;}
+  html body #app#app #map-gesture-guide dl{display:grid!important;grid-template-columns:130px minmax(0,1fr)!important;gap:16px 12px!important;}
+  html body #app#app #map-gesture-guide dt,
+  html body #app#app #map-gesture-guide dd{font-size:16px!important;line-height:1.65!important;}
+  html body #app#app #map-gesture-guide .dj-guide-release{font-size:15px!important;line-height:1.55!important;}
+  html body #app#app #map-gesture-guide .dj-guide-release :is(p,button){font-size:15px!important;}
+  html body #app#app #map-gesture-guide .map-gesture-guide-remember{font-size:15px!important;}
+}
+/* Provide slightly better readability for intermediate tablets without
+   changing desktop left-rail positioning. */
+@media(min-width:700px) and (max-width:1079px){
+  html body #app#app #transport-sheet:not([hidden]),
+  html body #app#app #admin-dong-picker:not([hidden]){
+    height:max-content!important;bottom:auto!important;max-height:calc(100dvh - 100px)!important;
+  }
+  html body #app#app #transport-sheet :is(p,small,button){font-size:14px!important;}
+}
+
+@media(max-width:699px){
+  /* Two 가 glyphs must remain distinct but nearly touch. */
+  html body #app#app #dj-v794-toolbar #dj800-type-trigger .dj800-type-icon{
+    display:inline-flex!important;gap:2px!important;letter-spacing:0!important;
+  }
+  html body #app#app #dj800-type-trigger .dj800-type-icon b,
+  html body #app#app #dj800-type-trigger .dj800-type-icon small{letter-spacing:0!important;}
+  /* The transit sheet uses available room between status area and nav. No
+     oversized empty min-height and no unnecessary scrolling on station cards. */
+  html body #app#app #transport-sheet:not([hidden]){
+    height:max-content!important;min-height:0!important;
+    max-height:min(72dvh,calc(100dvh - var(--dj800-panel-bottom,96px) - env(safe-area-inset-top,0px) - 30px))!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    padding:13px 16px 16px!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"]:not([hidden]){
+    overflow-y:auto!important;scrollbar-width:none!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-panel-head{padding-top:0!important;padding-bottom:4px!important;margin-bottom:3px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] #transport-title{font-size:21px!important;gap:4px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .dj804-station-lines{gap:4px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-mode-tabs{margin:4px auto 8px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row{padding:5px!important;margin:4px 0 7px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-arrivals-title{margin:4px 0!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] :is(.transport-selection-box,.transport-service-hours,.transport-arrivals){margin-block:6px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-selection-actions button{min-height:37px!important;padding:7px 5px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] :is(.transport-empty,.transport-hours-notice,.metro-report-no-eta){font-size:12px!important;line-height:1.48!important;margin:6px 0!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-section-title{margin:6px 0!important;padding:4px 0!important;}
+  /* Bus stop label and ARS share the same optical centre even when a close
+     button is right-aligned. Data rows are shorter and show four at a glance. */
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head>div{padding-inline:34px!important;box-sizing:border-box!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] :is(#transport-kind,#transport-description,#transport-title){
+    display:block!important;max-width:100%!important;text-align:center!important;
+    margin-inline:auto!important;word-break:keep-all!important;overflow-wrap:anywhere!important;
+  }
+  html body #app#app #transport-sheet[data-kind="bus"] #transport-kind{font-size:12px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] #transport-description{font-size:13px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] #transport-title{font-size:clamp(17px,4.6vw,22px)!important;line-height:1.35!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head{padding:7px 0!important;margin-bottom:0!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-mode-tabs{margin:7px auto 9px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row{
+    min-height:0!important;padding:10px 11px!important;margin:0!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+    border-radius:14px!important;
+  }
+  html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals{display:grid!important;gap:7px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row :is(strong,span,small){line-height:1.35!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row strong{font-size:14px!important;font-weight:800!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row small{font-size:12px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-arrivals-title{margin:4px 0 7px!important;}
+  html body #app#app #transport-sheet[data-kind="bus"] .transport-section-title strong{font-size:14px!important;}
+  /* Facility information should never hide the right map action rail nor its
+     own footer behind the bottom nav. Scroll belongs INSIDE the popup card. */
+  html body #app#app #map .dj-place-detail-popup{
+    max-width:calc(100vw - 110px)!important;width:min(340px,calc(100vw - 110px))!important;
+    z-index:2800!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+    max-width:100%!important;max-height:calc(100dvh - var(--dj800-panel-bottom,96px) - env(safe-area-inset-top,0px) - 24px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    padding:12px 11px!important;
+    overscroll-behavior:contain!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .dj-place-detail{
+    font-size:12.5px!important;line-height:1.54!important;
+  }
+  html body #app#app #map .dj-place-detail-popup .dj-place-detail h3{font-size:18px!important;}
+  html body #app#app #map .dj-place-detail-popup .dj-place-ai-response{font-size:12.5px!important;line-height:1.56!important;}
+}
+@media(max-width:365px){
+  html body #app#app #transport-sheet[data-kind="subway"] #transport-title{font-size:18px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-current,.metro-rail-next){font-size:10px!important;padding:5px 3px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"] .transport-section-title{margin:4px 0!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #app#app :is(#version-history-modal,#map-gesture-guide,#road-width-legend,#admin-dong-picker,#transport-sheet,.page-panel):not([hidden]),
+  html body #app#app #version-history-modal:not([hidden]) .version-history-dialog,
+  html body #app#app #dj-app-about:not([hidden]) .dj-about-card{animation:none!important;transition:none!important;}
+}
+html body #app#app.dj-reduced-animation :is(#version-history-modal,#map-gesture-guide,#road-width-legend,#admin-dong-picker,#transport-sheet,.page-panel):not([hidden]){animation:none!important;transition:none!important;}
+@media(max-width:699px){
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-no-scroll:not([hidden]){
+    overflow-y:hidden!important;overscroll-behavior:contain!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight:not([hidden]){
+    padding-top:10px!important;padding-bottom:10px!important;
+  }
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight .transport-panel-head{padding:0!important;margin:0!important;}
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight .transport-mode-tabs{margin:3px auto 4px!important;}
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight .metro-neighbor-row{padding:3px!important;margin:3px 0!important;}
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight .transport-selection-box{margin:3px 0!important;}
+  html body #app#app #transport-sheet[data-kind="subway"].dj805-subway-tight .transport-section-title{margin:3px 0!important;padding:2px 0!important;}
+}
+/* This must be more specific than the old `data-kind` desktop sheet rule,
+   which otherwise stretches the sheet from top=92px to bottom=14px. */
+@media(min-width:1080px){
+  html body #app#app #transport-sheet[data-kind="subway"]:not([hidden]),
+  html body #app#app #transport-sheet[data-kind="bus"]:not([hidden]){
+    position:fixed!important;
+    top:var(--dj800-panel-top,92px)!important;
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--dj800-panel-top,92px) - 20px)!important;
+    overflow-y:auto!important;
+  }
+}

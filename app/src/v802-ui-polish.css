@@ -1,0 +1,175 @@
+/* v8.0.2 · PC typography / compact sheets and mobile motion polish.
+   Platform-specific presentation only; GIS and transport data are unaffected. */
+html body #app#app{
+  --dj802-desktop-header:56px;
+  --dj802-reading-weight:680;
+}
+html[data-theme="dark"] body #app#app,
+html body #app#app[data-theme="dark"]{
+  --dj802-reading-weight:725;
+}
+/* Strong headings, without treating informational body text as a heading. */
+html body #app#app :is(.page-panel,#transport-sheet,#overview-sheet,#map-advanced-controls,#map-safety-controls,#dj-map-settings,#dj-app-about)
+ :is(h1,h2,h3,.page-heading strong,.section-title,.transport-section-title){
+  font-weight:850!important;letter-spacing:-.035em!important;
+}
+html body #app#app :is(.page-panel,#transport-sheet,#map-advanced-controls,#map-safety-controls)
+ :is(p,small,li,.page-note,.local-only,.records-list,.record-empty){
+  font-weight:var(--dj802-reading-weight)!important;
+}
+html body #app#app :is(.page-panel,#transport-sheet) :is(button,[role="tab"]){font-weight:790!important;}
+/* Distinct dark palette: light empty-state cards used to have near-white type
+   on a pale surface. Maintain strong contrast for both panel and card ink. */
+html[data-theme="dark"] body #app#app,
+html body #app#app[data-theme="dark"]{
+  --dj800-text:#f2fff9;--dj800-muted:#c1ded1;
+  --dj800-secondary:#29413f;--dj800-border:#54756d;
+}
+html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
+ :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state){
+  color:#f2fff9!important;background:#29413f!important;
+  border-color:#5a7c70!important;
+}
+html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
+ :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state)
+ :is(p,small,span){color:#e1f0e7!important;}
+html[data-theme="dark"] body #app#app :is(#mine-panel,#participation-panel,#news-panel)
+ :is(h1,h2,h3,h4,strong,.stat-grid b){color:#f5fff9!important;font-weight:850!important;}
+/* Standalone app-about dialog uses exactly the same click path in both
+   themes. Do not show a release-history drawer on logo press. */
+html body #app#app #dj-app-about .dj-about-card{
+  color:var(--dj800-text)!important;background:var(--dj800-surface)!important;
+  border:1px solid var(--dj800-border)!important;
+  box-shadow:var(--dj800-shadow)!important;
+}
+html body #app#app #dj-app-about :is(.dj-about-description,.dj-about-version){color:var(--dj800-muted)!important;}
+html body #app#app #dj-app-about :is(h2,.dj-about-version strong){color:var(--dj800-text)!important;}
+html body #app#app #dj-app-about .dj-about-updates{display:none!important;}
+html body #app#app #dj-app-about:not([hidden]) .dj-about-card{
+  animation:dj802-about-in .43s cubic-bezier(.17,.85,.24,1.04) both!important;
+}
+@keyframes dj802-about-in{
+  0%{opacity:0;translate:0 26px;scale:.955;filter:blur(4px)}
+  75%{filter:blur(0)}
+  100%{opacity:1;translate:0 0;scale:1;filter:none}
+}
+/* Clearer mobile opening of every bottom sheet, including sheets whose
+   position is controlled by an older module. */
+@keyframes dj802-mobile-sheet-in{
+  0%{opacity:0;translate:0 38px;scale:.97;filter:blur(3px)}
+  78%{filter:none}
+  100%{opacity:1;translate:0 0;scale:1;filter:none}
+}
+@media(max-width:699px){
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#overview-sheet,#admin-dong-picker,#transport-sheet,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float):not([hidden]){
+    animation:dj802-mobile-sheet-in .46s cubic-bezier(.18,.88,.22,1) both!important;
+  }
+  html body #app#app #dj800-type-trigger .dj800-type-icon{
+    display:inline-flex!important;align-items:baseline!important;justify-content:center!important;
+    gap:7px!important;letter-spacing:0!important;
+  }
+  html body #app#app #dj800-type-trigger .dj800-type-icon b{font-size:18px!important;letter-spacing:0!important;}
+  html body #app#app #dj800-type-trigger .dj800-type-icon small{font-size:10px!important;letter-spacing:0!important;}
+}
+@media(min-width:700px){
+  /* Recovered 56px header contract: the logo, search, submit and utilities
+     now scale together rather than having a 56px outer box / tiny 14px text. */
+  html body #app#app .topbar{gap:12px!important;}
+  html body #app#app .topbar #dj-about-pc{
+    flex:0 0 var(--dj802-desktop-header)!important;
+    width:var(--dj802-desktop-header)!important;min-width:var(--dj802-desktop-header)!important;
+    height:var(--dj802-desktop-header)!important;min-height:var(--dj802-desktop-header)!important;
+    max-width:var(--dj802-desktop-header)!important;
+    padding:0!important;border-radius:15px!important;
+  }
+  html body #app#app .topbar #dj-about-pc img{width:100%!important;height:100%!important;object-fit:contain!important;}
+  html body #app#app .topbar #map-quick-search,
+  html body #app#app .topbar .map-quick-search-form{
+    height:56px!important;min-height:56px!important;max-height:56px!important;
+    box-sizing:border-box!important;
+  }
+  html body #app#app .topbar :is(#map-quick-search-query,.map-quick-search-input){
+    font-size:17px!important;line-height:1.4!important;font-weight:650!important;
+    letter-spacing:-.02em!important;min-width:0!important;
+  }
+  html body #app#app .topbar #map-quick-search-query::placeholder{font-weight:600!important;}
+  html body #app#app .topbar .map-quick-search-submit{
+    min-height:46px!important;height:46px!important;font-size:16px!important;
+    font-weight:850!important;padding:0 18px!important;border-radius:13px!important;
+  }
+  html body #app#app .topbar .header-tools{gap:11px!important;column-gap:11px!important;min-width:0!important;}
+  html body #app#app .topbar :is(#theme-toggle,#version-history-trigger,#dj-settings-pc){
+    min-height:56px!important;height:56px!important;max-height:56px!important;
+    padding:0 16px!important;font-size:15px!important;font-weight:830!important;
+    white-space:nowrap!important;border-radius:14px!important;
+  }
+  html body #app#app .topbar #weather-widget{
+    min-height:56px!important;height:56px!important;max-height:56px!important;
+    padding:0 13px!important;gap:8px!important;
+  }
+  html body #app#app .topbar #weather-widget :is(button,span){font-size:14px!important;font-weight:760!important;}
+  html body #app#app .topbar #dj-settings-pc{
+    position:relative!important;visibility:visible!important;opacity:1!important;
+    z-index:25!important;pointer-events:auto!important;cursor:pointer!important;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  }
+  /* Center the rail contents by equal-width icon and text columns.
+     Do NOT shift the whole rail: all buttons keep their hit areas. */
+  html body #app#app #bottom-nav>.nav-tab{
+    display:grid!important;grid-template-columns:25px minmax(0,1fr)!important;
+    align-items:center!important;column-gap:10px!important;justify-content:stretch!important;
+    text-align:left!important;padding:10px 13px!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab .nav-icon{
+    width:25px!important;height:25px!important;margin:0!important;
+    display:grid!important;place-items:center!important;justify-self:center!important;
+  }
+  html body #app#app #bottom-nav>.nav-tab>span:last-child{
+    text-align:left!important;margin:0!important;justify-self:start!important;
+    font-size:15px!important;font-weight:820!important;letter-spacing:-.03em!important;
+  }
+  html body #app#app #dj-desktop-safety-rail :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle,#toggle-road-width){
+    font-size:15px!important;font-weight:820!important;line-height:1.2!important;
+    text-align:center!important;letter-spacing:-.025em!important;
+  }
+  html body #app#app #dj-desktop-safety-rail #night-visibility-quick-off :is(span,.dj-night-action-text){
+    font-size:15px!important;font-weight:820!important;
+  }
+  html body #app#app .map-actions #map-gesture-guide-open{
+    font-size:25px!important;font-weight:900!important;line-height:1!important;
+    display:grid!important;place-items:center!important;
+  }
+  /* Unlike legacy fixed-height sheets, short records / community pages
+     should end after their content. Long news still scrolls in the card. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]){
+    bottom:auto!important;height:max-content!important;min-height:0!important;
+    max-height:calc(100dvh - var(--dj800-panel-top,92px) - 16px)!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    align-content:start!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) :is(.dj-page-content,.dj-mobile-page-content){
+    flex:0 1 auto!important;min-height:0!important;height:auto!important;
+  }
+}
+@media (min-width:700px) and (max-width:1079px){
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]){
+    bottom:auto!important;height:max-content!important;max-height:calc(100dvh - 90px)!important;overflow-y:auto!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html body #app#app :is(#dj-app-about,.page-panel,#transport-sheet,#overview-sheet,#admin-dong-picker):not([hidden]),
+  html body #app#app #dj-app-about:not([hidden]) .dj-about-card{animation:none!important;filter:none!important;}
+}
+html body #app#app.dj-reduced-animation :is(#dj-app-about,.page-panel,#transport-sheet,#overview-sheet,#admin-dong-picker):not([hidden]),
+html body #app#app.dj-reduced-animation #dj-app-about:not([hidden]) .dj-about-card{animation:none!important;filter:none!important;}
+
+/* Also honor app-local theme switches before the document theme dataset has synchronized. */
+html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
+ :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state){
+  color:#f2fff9!important;background:#29413f!important;border-color:#5a7c70!important;
+}
+html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
+ :is(.records-list>div,.records-list .record-item,.record-empty,.stat-grid>div,.community-feed>article,.empty-state)
+ :is(p,small,span){color:#e1f0e7!important;}
+html body #app#app[data-theme="dark"] :is(#mine-panel,#participation-panel,#news-panel)
+ :is(h1,h2,h3,h4,strong,.stat-grid b){color:#f5fff9!important;font-weight:850!important;}

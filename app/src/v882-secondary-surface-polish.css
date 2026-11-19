@@ -1,0 +1,234 @@
+/* v8.8.0 secondary surfaces — CSS-only refinement, isolated from v881.
+ * Targets verified existing DOM classes. Do not touch element visibility,
+ * panel geometry, map layers, gestures, transforms, API state or z-index.
+ */
+#app {
+  --dj882-card-tint: #f7faf8;
+  --dj882-hover: #f0f8f3;
+  --dj882-card-shadow: 0 3px 13px rgba(17,55,42,.045);
+}
+#app[data-theme="dark"] {
+  --dj882-card-tint: #21383b;
+  --dj882-hover: #29453f;
+  --dj882-card-shadow: 0 3px 14px rgba(0,0,0,.11);
+}
+
+/* Shared visual rhythm for non-primary map sheets and secondary settings. */
+#app :is(
+  #overview-sheet,#transport-sheet,#map-safety-controls,
+  #map-advanced-controls,#road-width-legend
+) :is(h1,h2,h3) {
+  color: var(--dj881-text);
+  letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+#app :is(
+  #transport-sheet,#map-safety-controls,#map-advanced-controls,
+  #road-width-legend,#mine-panel
+) :is(p,small,label) {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+#app :is(
+  #map-safety-controls,#map-advanced-controls,#transport-sheet,
+  #road-width-legend,#overview-sheet
+) :is(button,a,input,select,textarea):focus-visible {
+  outline: 3px solid var(--dj881-accent);
+  outline-offset: 2px;
+}
+
+/* Informational cards: shared surface, restrained dividers and hierarchy. */
+#app #news-panel .dongjak-news-item {
+  border: 1px solid var(--dj881-line);
+  background: var(--dj881-surface);
+  box-shadow: var(--dj882-card-shadow);
+}
+#app #news-panel .dongjak-news-item strong {
+  line-height: 1.48;
+  letter-spacing: -.014em;
+  overflow-wrap: anywhere;
+}
+#app #participation-panel :is(.community-note,.community-form,.feature-card) {
+  border-color: var(--dj881-line);
+  background-color: var(--dj881-surface);
+}
+#app #participation-panel :is(.community-note,.community-form-note) {
+  line-height: 1.6;
+}
+#app #mine-panel :is(.stat-grid > div,.dj877-pref-group,.record-item) {
+  border-color: var(--dj881-line);
+}
+#app #mine-panel .stat-grid > div {
+  background: var(--dj882-card-tint);
+  box-shadow: none;
+}
+
+/* Transit titles, grouped options and arrival disclaimers. */
+#app #transport-sheet .transport-panel-head {
+  border-bottom: 1px solid var(--dj881-line);
+}
+#app #transport-sheet .transport-panel-head h2 {
+  color: var(--dj881-text);
+  line-height: 1.3;
+  letter-spacing: -.034em;
+}
+#app #transport-sheet .transport-selection-actions button {
+  border-radius: 12px;
+  font-weight: 740;
+  letter-spacing: -.01em;
+}
+#app #transport-sheet .transport-hours-disclaimer {
+  color: var(--dj881-muted);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+/* Safety drawer and map settings are utility panels, not ad-like cards. */
+#app #map-safety-controls :is(.map-safety-head,.dj-safety-group > summary),
+#app #map-advanced-controls :is(.map-controls-header,.dj-type-settings > summary) {
+  color: var(--dj881-text);
+}
+#app #map-safety-controls :is(.dj-safety-group,.dj-type-settings),
+#app #map-advanced-controls :is(details,.dj-type-settings) {
+  border-color: var(--dj881-line);
+  border-radius: 13px;
+}
+#app #map-safety-controls :is(.dj-safety-group,.dj-type-settings) > summary,
+#app #map-advanced-controls details > summary {
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+#app #road-width-legend .road-width-legend-head {
+  gap: 12px;
+  border-bottom: 1px solid var(--dj881-line);
+}
+#app #road-width-legend .road-width-legend-head strong {
+  color: var(--dj881-text);
+  font-weight: 780;
+}
+
+/* PC — distinguish main action from auxiliary content without changing
+ * left rail, floating coordinates, heights or draggable regions. */
+@media (min-width: 1080px) {
+  #app #route-panel .dj815-route-section {
+    border: 1px solid var(--dj881-line);
+    border-radius: 14px;
+    background: var(--dj882-card-tint);
+  }
+  #app #route-panel .dj815-route-section h3 {
+    color: var(--dj881-text);
+    font-weight: 780;
+  }
+  #app #route-panel .dj815-route-section .dj815-helper {
+    color: var(--dj881-muted);
+    line-height: 1.55;
+  }
+  #app #route-panel .dj815-route-share {
+    border-color: var(--dj881-line);
+    border-radius: 12px;
+    background: var(--dj881-surface);
+  }
+  #app #route-panel .route-select-actions button {
+    border-radius: 11px;
+    transition: background-color .16s ease, border-color .16s ease;
+  }
+  #app #overview-sheet:not([hidden]),
+  #app #transport-sheet:not([hidden]),
+  #app #road-width-legend:not([hidden]),
+  #app.map-safety-open #map-safety-controls,
+  #app.map-controls-open #map-advanced-controls {
+    border-color: var(--dj881-line)!important;
+    box-shadow: var(--dj881-shadow);
+  }
+  #app #transport-sheet .transport-panel-head h2 {
+    font-size: 20px;
+    font-weight: 800;
+  }
+  #app #overview-sheet .sheet-top h1 {
+    font-weight: 800;
+    line-height: 1.4;
+  }
+}
+
+/* Mobile — readable, consistent inner controls. Leave drawer swipe target,
+ * sheet dimensions, safe-area offsets and fixed map toolbar untouched. */
+@media (max-width: 699px) {
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title h2 {
+    letter-spacing: -.032em;
+    text-wrap: balance;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    box-shadow: none;
+  }
+  #app #participation-panel .community-category-tabs button,
+  #app #news-panel .dongjak-news-tabs button {
+    min-height: 44px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  #app #participation-panel .community-note {
+    border-radius: 15px;
+    line-height: 1.65;
+  }
+  #app #participation-panel .community-compose-toggle {
+    border-radius: 12px;
+    letter-spacing: -.015em;
+  }
+  #app #news-panel .dongjak-news-item {
+    border-radius: 16px;
+    padding: 14px 15px;
+  }
+  #app #news-panel .dongjak-news-item strong {
+    font-weight: 760;
+    line-height: 1.5;
+  }
+  #app #news-panel #dongjak-news-refresh {
+    min-height: 44px;
+    border-radius: 12px;
+  }
+  #app #mine-panel .stat-grid > div,
+  #app #mine-panel .dj877-pref-group {
+    border-radius: 16px;
+  }
+  #app #transport-sheet .transport-panel-head {
+    background: var(--dj881-surface);
+  }
+  #app #transport-sheet .transport-panel-head h2 {
+    font-size: 19px;
+    font-weight: 800;
+  }
+  #app #transport-sheet .transport-selection-actions button {
+    min-height: 44px;
+  }
+  #app #map-safety-controls .map-safety-head,
+  #app #map-advanced-controls .map-controls-header {
+    border-bottom: 1px solid var(--dj881-line);
+  }
+  #app #map-safety-controls :is(.dj-safety-group,.dj-type-settings) > summary {
+    min-height: 44px;
+  }
+  #app #road-width-legend .road-width-legend-head button {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 12px;
+  }
+}
+@media (hover:hover) and (pointer:fine) {
+  #app #route-panel .route-select-actions button:not(:disabled):hover,
+  #app #transport-sheet .transport-selection-actions button:not(:disabled):hover {
+    border-color: var(--dj881-accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app #route-panel .route-select-actions button {
+    transition: none;
+  }
+}

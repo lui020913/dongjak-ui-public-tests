@@ -1,0 +1,133 @@
+/* v8.2.11: scrollable circular mobile shortcuts + stationary More control.
+   Loaded last so older v794/v829 fixed-width rules cannot push buttons away. */
+@media(max-width:699px){
+  html body #app#app#app#app#app #dj-v794-toolbar:has(>.dj831-scrollport){
+    display:flex!important;align-items:center!important;flex-wrap:nowrap!important;
+    justify-content:space-between!important;gap:clamp(6px,1.8vw,10px)!important;
+    overflow:visible!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport{
+    display:flex!important;position:relative!important;align-items:center!important;
+    flex:1 1 auto!important;min-width:0!important;width:auto!important;height:100%!important;
+    box-sizing:border-box!important;gap:clamp(6px,1.8vw,9px)!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+    overscroll-behavior-x:contain!important;touch-action:pan-x!important;
+    scroll-snap-type:x proximity!important;scroll-padding-inline:4px!important;
+    -webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;overflow-anchor:none!important;
+    pointer-events:auto!important;
+    -webkit-mask-image:none;mask-image:none;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport::-webkit-scrollbar{display:none!important;}
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool,
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"],
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > #dj800-type-trigger{
+    display:grid!important;place-items:center!important;position:relative!important;inset:auto!important;
+    flex:0 0 clamp(38px,11vw,44px)!important;
+    width:clamp(38px,11vw,44px)!important;min-width:clamp(38px,11vw,44px)!important;max-width:clamp(38px,11vw,44px)!important;
+    height:clamp(38px,11vw,44px)!important;min-height:clamp(38px,11vw,44px)!important;max-height:clamp(38px,11vw,44px)!important;
+    padding:0!important;margin:0!important;border-radius:50%!important;
+    border:1px solid var(--dj800-border,#d7e6de)!important;
+    background:var(--dj800-surface,#fff)!important;
+    color:var(--dj800-text,#23483d)!important;
+    box-shadow:0 2px 10px rgba(21,49,39,.10)!important;
+    line-height:1!important;text-align:center!important;pointer-events:auto!important;
+    overflow:hidden!important;scroll-snap-align:start!important;
+    transform:none!important;translate:none!important;
+    -webkit-tap-highlight-color:transparent;
+    transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"],
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[aria-pressed="true"]{
+    background:var(--dj800-elevated,#e4f3ec)!important;
+    border-color:var(--dj800-accent,#118570)!important;
+    box-shadow:inset 0 0 0 1px var(--dj800-accent,#118570),0 2px 9px rgba(18,90,72,.12)!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool:disabled{
+    opacity:.38!important;cursor:not-allowed!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport .dj-v794-caption {display:none!important;}
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport .dj-v794-icon,
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport .dj800-type-icon{
+    width:22px!important;height:22px!important;display:flex!important;justify-content:center!important;align-items:center!important;
+    position:static!important;margin:0!important;gap:1px!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport .dj-v794-icon svg{
+    display:block!important;width:22px!important;height:22px!important;max-width:22px!important;max-height:22px!important;
+    margin:0!important;position:static!important;transform:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > #dj-v794-more{
+    display:grid!important;place-items:center!important;flex:0 0 clamp(38px,11vw,44px)!important;
+    width:clamp(38px,11vw,44px)!important;min-width:clamp(38px,11vw,44px)!important;max-width:clamp(38px,11vw,44px)!important;
+    height:clamp(38px,11vw,44px)!important;min-height:clamp(38px,11vw,44px)!important;max-height:clamp(38px,11vw,44px)!important;
+    position:relative!important;inset:auto!important;margin:0!important;padding:0!important;
+    border-radius:50%!important;pointer-events:auto!important;transform:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport:focus-visible{
+    outline:2px solid var(--dj800-accent,#118570)!important;outline-offset:2px!important;border-radius:8px!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool:focus-visible{
+    outline:2px solid var(--dj800-accent,#118570)!important;outline-offset:-3px!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool{
+    background:var(--dj800-surface,#21383b)!important;
+    color:var(--dj800-text,#e9f5ef)!important;border-color:var(--dj800-border,#49625d)!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[aria-pressed="true"],
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool[data-active="true"]{
+    background:var(--dj800-elevated,#31574e)!important;border-color:var(--dj800-accent,#6eac91)!important;
+  }
+}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport{scroll-behavior:auto!important;}
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj-v794-tool{transition:none!important;}
+}
+
+/* One toolbar only: POI categories are native top buttons, not a second row. */
+@media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app #dj912-poi-categories[data-dj912-integrated="true"] {
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button {
+    scroll-snap-align:start!important;-webkit-tap-highlight-color:transparent!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button .dj912-poi-icon {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button .dj912-poi-icon svg {
+    display:block!important;width:100%!important;height:100%!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button[aria-pressed="true"] {
+    background:var(--dj800-elevated,#e4f3ec)!important;
+    border-color:var(--dj800-accent,#118570)!important;
+    box-shadow:inset 0 0 0 1px var(--dj800-accent,#118570),0 2px 9px rgba(18,90,72,.12)!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur {
+    position:absolute!important;top:0!important;bottom:0!important;display:block!important;
+    width:20px!important;min-width:20px!important;max-width:20px!important;
+    border:0!important;border-radius:12px!important;padding:0!important;margin:0!important;
+    pointer-events:none!important;z-index:8!important;
+    -webkit-backdrop-filter:blur(5px)!important;backdrop-filter:blur(5px)!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur-left {
+    background:linear-gradient(90deg,rgba(246,250,247,.88) 0%,rgba(246,250,247,.44) 52%,transparent 100%)!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur-right {
+    background:linear-gradient(270deg,rgba(246,250,247,.88) 0%,rgba(246,250,247,.44) 52%,transparent 100%)!important;
+  }
+  html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur[hidden] {display:none!important;}
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-edge-blur-left {
+    background:linear-gradient(90deg,rgba(17,31,34,.92) 0%,rgba(17,31,34,.48) 52%,transparent 100%)!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar > .dj831-edge-blur-right {
+    background:linear-gradient(270deg,rgba(17,31,34,.92) 0%,rgba(17,31,34,.48) 52%,transparent 100%)!important;
+  }
+  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  html body #app#app#app#app#app:not([data-tab="map"]) #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  html body #app#app#app#app#app[data-dj910-sheet-open="true"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  html body #app#app#app#app#app[data-search-open="true"] #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  html body #app#app#app#app#app.map-safety-open #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button,
+  html body #app#app#app#app#app.map-controls-open #dj-v794-toolbar > .dj831-scrollport > .dj912-poi-toolbar-button {
+    visibility:hidden!important;pointer-events:none!important;
+  }
+}

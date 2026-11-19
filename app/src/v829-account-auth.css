@@ -1,0 +1,51 @@
+/* v8.2.9: persistent authenticated identity and opt-in Kakao self-message UI. */
+html body #app#app #dj824-account .dj829-signed-summary[hidden]{display:none!important}
+html body #app#app #dj824-account .dj829-signed-summary{
+  display:flex;align-items:center;gap:12px;min-width:0;padding:12px 13px;
+  margin-top:11px;border:1px solid var(--dj800-border,#d3e7dd);
+  border-radius:14px;background:var(--dj800-surface,#fff);
+}
+html body #app#app #dj824-account .dj829-summary-avatar{
+  display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;
+  border-radius:50%;background:#15866d;color:white;font-size:18px;font-weight:800;
+}
+html body #app#app #dj824-account .dj829-summary-copy{
+  display:flex;flex-direction:column;gap:3px;min-width:0;
+}
+html body #app#app #dj824-account .dj829-summary-copy strong{
+  font-size:16px!important;line-height:1.4!important;color:var(--dj800-text,#1d3930)!important;
+}
+html body #app#app #dj824-account .dj829-summary-copy span{
+  font-size:12px!important;color:var(--dj800-muted,#748b80)!important;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+html body #app#app #dj824-account .dj829-summary-copy small{
+  font-size:12px!important;color:var(--dj800-accent,#13866e)!important;font-weight:730;
+}
+html body #app#app #dj824-account[data-auth-state="signed-in"] .dj824-account-header>strong{font-size:17px!important}
+html body #app#app #bottom-nav .nav-tab[data-tab="mine"] .nav-icon{position:relative!important;overflow:visible!important}
+html body #app#app #bottom-nav .nav-tab[data-tab="mine"] .dj829-nav-auth-dot{display:none!important}
+html body #app#app #bottom-nav .nav-tab[data-tab="mine"][data-auth-state="signed-in"] .dj829-nav-auth-dot{
+  display:block!important;position:absolute;right:-3px;top:-3px;width:8px;height:8px;
+  border-radius:50%;background:#13b98b;box-shadow:0 0 0 2px var(--dj800-surface,#fff);
+}
+html body #app#app #dj824-account .dj829-notice-settings{
+  display:grid;gap:9px;margin:14px 0 0;padding:13px 14px;
+  background:var(--dj800-secondary,#eef6f1);border:1px solid var(--dj800-border,#d2e5d9);border-radius:13px;
+}
+html body #app#app #dj824-account .dj829-notice-settings>strong{font-size:15px!important}
+html body #app#app #dj824-account .dj829-notice-toggle{
+  display:flex!important;gap:10px;align-items:center;cursor:pointer;font-weight:700!important;line-height:1.5;
+}
+html body #app#app #dj824-account .dj829-notice-toggle input{
+  appearance:auto!important;width:19px!important;height:19px!important;min-width:19px!important;
+  min-height:19px!important;accent-color:#168774;flex:0 0 19px;padding:0!important;
+}
+html body #app#app #dj824-account .dj829-notice-settings .dj815-helper{margin:0!important;font-size:12px!important;line-height:1.55!important}
+html body #app#app #dj824-account .dj829-notice-settings .dj829-notice-status{font-weight:650!important;color:var(--dj800-accent,#168774)!important}
+html body #app#app #dj824-account .dj829-notice-link{font-size:12px!important;font-weight:650;color:var(--dj800-accent,#168774)!important;text-decoration:underline;}
+html body #app#app[data-theme="dark"] #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){background:#294144;border-color:#4b7368}
+html body #app#app[data-theme="dark"] #dj824-account .dj829-summary-copy strong{color:#effaf5!important}
+html body #app#app[data-theme="dark"] #dj824-account .dj829-summary-copy small,
+html body #app#app[data-theme="dark"] #dj824-account .dj829-notice-link,
+html body #app#app[data-theme="dark"] #dj824-account .dj829-notice-status{color:#a0eacc!important}

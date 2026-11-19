@@ -1,0 +1,134 @@
+/* v8.7.0: phone-only corrections; PC and tablet geometry stays untouched. */
+/* The onboarding title is focused programmatically for accessibility; it is not an input. */
+#app .dj860-onboarding #dj860-title:focus,
+#app .dj860-onboarding #dj860-title:focus-visible {outline:0!important;box-shadow:none!important;border-color:transparent!important;}
+
+@media(max-width:699px){
+  /* More: header geometry and native X hit area. The top-edge drag handle stays independent. */
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities>.dj854-more-head{
+    position:sticky!important;top:0!important;display:flex!important;align-items:center!important;
+    justify-content:flex-start!important;box-sizing:border-box!important;min-height:70px!important;
+    padding:12px 70px 12px 18px!important;gap:0!important;z-index:32!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities .dj-mobile-utility-heading{
+    margin:0!important;line-height:1.3!important;text-align:left!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close{
+    position:absolute!important;left:auto!important;right:14px!important;top:50%!important;bottom:auto!important;
+    transform:translateY(-50%)!important;inset-inline-start:auto!important;
+    z-index:90!important;width:44px!important;height:44px!important;min-width:44px!important;
+    min-height:44px!important;margin:0!important;padding:0!important;
+    display:grid!important;place-items:center!important;pointer-events:auto!important;touch-action:manipulation!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #dj-mobile-utilities #dj-mobile-utilities-close svg{
+    display:block!important;width:23px!important;height:23px!important;
+    margin:auto!important;transform:none!important;
+  }
+  /* More is an independent bottom sheet. No synthetic click is issued at its exit. */
+  html body #app#app#app#app #dj-mobile-utilities.dj870-more-leaving:not([hidden]){
+    pointer-events:none!important;animation:dj870-down-out .26s cubic-bezier(.32,0,1,1) both!important;
+  }
+  /* Ghosts are painted ONLY while actually closing, after their owner changed hidden. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #transport-sheet,#admin-dong-picker,#overview-sheet,#detail-sheet,#entry-sheet,
+    #map-gesture-guide,#dj-map-settings,#dj-app-about,#version-history-modal)[hidden].dj870-sheet-exit{
+    display:block!important;visibility:visible!important;pointer-events:none!important;
+    animation:dj870-down-out .25s cubic-bezier(.32,0,1,1) both!important;
+  }
+  /* Onboarding card and info sheet retain their own scroll and entry transitions. */
+  html body #app#app#app#app #transport-sheet[data-kind="subway"] .transport-panel-head{
+    position:sticky!important;top:24px!important;z-index:35!important;
+    background:var(--dj800-surface,#fff)!important;box-shadow:0 4px 12px rgba(26,60,46,.06)!important;
+  }
+  html body #app#app#app#app #transport-sheet .dj-news-transport-bookmark{
+    display:grid!important;place-items:center!important;align-items:center!important;justify-items:center!important;
+    line-height:1!important;vertical-align:middle!important;
+  }
+  html body #app#app#app#app #transport-sheet .dj-news-transport-bookmark::before{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    position:absolute!important;inset:0!important;line-height:1!important;
+    transform:translateY(2px)!important;margin:0!important;padding:0!important;
+  }
+  /* Bus: title occupies its OWN full-width row, actions sit BELOW (never over the stop name). */
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head{
+    position:relative!important;display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;
+    gap:13px!important;align-items:stretch!important;min-height:0!important;
+    padding:25px 10px 13px!important;overflow:visible!important;
+    background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head>.dj857-transport-title-group,
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head>div:first-child{
+    display:flex!important;grid-row:1!important;grid-column:1!important;
+    min-width:0!important;width:100%!important;box-sizing:border-box!important;
+    padding-right:48px!important;margin:0!important;overflow:visible!important;
+  }
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-title{
+    display:block!important;max-width:100%!important;width:100%!important;min-width:0!important;
+    margin:0!important;white-space:normal!important;overflow-wrap:anywhere!important;
+    word-break:keep-all!important;line-height:1.28!important;
+  }
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-news-transport-actions{
+    grid-row:2!important;grid-column:1!important;justify-self:center!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+    gap:6px!important;margin:0!important;padding:0 0 0 0!important;white-space:nowrap!important;
+  }
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-news-transport-quick-button{
+    flex:0 1 62px!important;min-width:0!important;width:auto!important;max-width:62px!important;
+    height:42px!important;padding:0 5px!important;
+  }
+  html body #app#app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-close{
+    position:absolute!important;top:26px!important;right:10px!important;left:auto!important;
+    grid-row:auto!important;grid-column:auto!important;transform:none!important;
+    width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+    z-index:39!important;margin:0!important;
+  }
+  /* POI detail: stop oversized modal from hiding map focus, keep header and body separated. */
+  html body #app#app#app#app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+    max-height:min(48dvh,420px)!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-header{
+    position:relative!important;gap:10px!important;padding:24px 13px 12px!important;
+    min-height:0!important;align-items:center!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-header-title{
+    width:100%!important;padding:0 46px!important;box-sizing:border-box!important;
+    min-height:45px!important;justify-content:center!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions{
+    width:100%!important;margin-top:4px!important;padding-right:0!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions .dj-place-header-close{
+    position:absolute!important;right:12px!important;top:27px!important;left:auto!important;
+    transform:none!important;z-index:50!important;
+    width:40px!important;height:40px!important;margin:0!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-body{
+    max-height:calc(48dvh - 133px)!important;min-height:0!important;
+    padding:18px 13px 20px!important;gap:14px!important;
+  }
+  html body #app#app#app#app#app #map .dj-place-detail-popup .dj-place-info-card{
+    padding:13px 13px!important;
+  }
+  /* Selection marker: use the existing geographic marker; do not synthesize a second pin. */
+  html body #app#app#app #map .dj-selected-transport-location{
+    z-index:28!important;pointer-events:none!important;overflow:visible!important;
+    filter:drop-shadow(0 3px 5px rgba(14,46,39,.24));
+  }
+  /* Accordions: optically center disclosure chevrons for iPhone Safari glyph metrics. */
+  html body #app#app#app#app #map-gesture-guide .dj852-tip-chevron{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    vertical-align:middle!important;line-height:1!important;
+    padding:0!important;margin:0!important;
+    translate:0 -2px!important;
+  }
+}
+@keyframes dj870-down-out{
+  0%{opacity:1;translate:0 0;visibility:visible;}
+  100%{opacity:0;translate:0 110%;visibility:hidden;}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #app#app#app .dj870-more-leaving,
+  html body #app#app#app .dj870-sheet-exit{animation:none!important;}
+}

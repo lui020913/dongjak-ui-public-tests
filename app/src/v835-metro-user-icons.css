@@ -1,0 +1,44 @@
+/* v8.2.16: User-provided metro badges. Keep station map geometry and title handlers intact. */
+html body #app .metro-badge-number[title="1호선"],
+html body #app .metro-badge-number[aria-label="1호선"] {
+ background:#fff url('/icons/metro-user-20261114/line-1.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number[title="7호선"],
+html body #app .metro-badge-number[aria-label="7호선"] {
+ background:#fff url('/icons/metro-user-20261114/line-7.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number[title="9호선"],
+html body #app .metro-badge-number[aria-label="9호선"] {
+ background:#fff url('/icons/metro-user-20261114/line-9.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number[title="신림선"],
+html body #app .metro-badge-number[aria-label="신림선"] {
+ background:#fff url('/icons/metro-user-20261114/line-신림.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number[title="2호선"],
+html body #app .metro-badge-number[aria-label="2호선"] {
+ background:#fff url('/icons/metro-user-20261114/line-2.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number[title="4호선"],
+html body #app .metro-badge-number[aria-label="4호선"] {
+ background:#fff url('/icons/metro-user-20261114/line-4.png') center / contain no-repeat!important;
+ font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;
+ padding:0!important;box-sizing:border-box!important;text-indent:-9999px!important;
+ border-radius:50%!important;overflow:hidden!important;
+}
+html body #app .metro-badge-number.metro-badge-shinlim { background-image:url('/icons/metro-user-20261114/line-신림.png')!important; }

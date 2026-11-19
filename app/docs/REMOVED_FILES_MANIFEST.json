@@ -1,0 +1,1739 @@
+{
+  "baseline": "v7.9.5",
+  "new": "v7.10.0",
+  "count": 346,
+  "bytes": 25113586,
+  "reason": "Removed from deployable source, archived separately",
+  "files": [
+    {
+      "path": "APPLY_PATCH.cmd",
+      "bytes": 1840,
+      "sha256": "a0fef4e2e41c493223eb646cc72915ee170350df9b0c2bc0f5e08d2c4b277681"
+    },
+    {
+      "path": "APPLY_PATCH_V727.cmd",
+      "bytes": 136,
+      "sha256": "a57ed4cce62edaaa8ca03871e7b6261e56fc2a6fc29d854f8a766713d3617848"
+    },
+    {
+      "path": "APPLY_PATCH_V727.ps1",
+      "bytes": 2891,
+      "sha256": "f34968ec0c52a003f75bb5a70db69dd4130107fac68946787ebdb7104cdc9baf"
+    },
+    {
+      "path": "APPLY_RECOVERY.cmd",
+      "bytes": 152,
+      "sha256": "531f732f3f6ac96fe83eb65bf0ee70af352026654713c06e6931ce13ddb6b939"
+    },
+    {
+      "path": "APPLY_V7_PATCH.cmd",
+      "bytes": 303,
+      "sha256": "ad85decbb608d8a36ba1bd2d9e20d1d1b96dc24c0c68780e6266891365d37334"
+    },
+    {
+      "path": "APPLY_V7_PATCH.ps1",
+      "bytes": 2392,
+      "sha256": "63af02bf525af91a55261f40a22178bac8a53c0891cd3d21d485edda7be9f987"
+    },
+    {
+      "path": "Apply-Dongjak-Alignment.ps1",
+      "bytes": 1015,
+      "sha256": "4875b5d9b5a56c2ba3f2acc9dfc836140b9cb072e7308b87a661875bcc765658"
+    },
+    {
+      "path": "Apply-Dongjak-BaseMap.ps1",
+      "bytes": 1900,
+      "sha256": "a78812a0053132661d9da9ef598a270f6b8d3285be0bb9e56687c1ec5459afb6"
+    },
+    {
+      "path": "Apply-Dongjak-StationIcon-OnLine.ps1",
+      "bytes": 1439,
+      "sha256": "5ff87d26115d9f799121f2a850e6560472977b5b60f4088886f612cdac953a7a"
+    },
+    {
+      "path": "Apply-Dongjak-UI.ps1",
+      "bytes": 1482,
+      "sha256": "434d6203e65d04239178321bf4bc20d5c6bacc8d3a64d720ca528a9c84fb0ee6"
+    },
+    {
+      "path": "Apply-Dongjak-V3.ps1",
+      "bytes": 1841,
+      "sha256": "21d0177225b7e60d5372863e9b5771944b752a4b4f6919c3ae73ee36fd5f7dc6"
+    },
+    {
+      "path": "Apply-Dongjak-V4.ps1",
+      "bytes": 1633,
+      "sha256": "d478bd024f204e7ff768311834d8021320ab35eca05b9b308aff64aa4303e363"
+    },
+    {
+      "path": "Apply-Dongjak-V53.ps1",
+      "bytes": 1999,
+      "sha256": "436c9a470c6e59a9426af2e0a2f6bc59eb18c85497f276521be8449fe3899205"
+    },
+    {
+      "path": "Apply-Patch.ps1",
+      "bytes": 3186,
+      "sha256": "34717096494204303ed2ff0219c644b32363b99c152d196a67051ad43e20e713"
+    },
+    {
+      "path": "Apply-Protection-UX-v611.ps1",
+      "bytes": 3477,
+      "sha256": "b085abe37336d473b0ce7e74b285a0765e6d81e517ec16387264074086a82597"
+    },
+    {
+      "path": "Apply-Protection-Zone-To-Copy.ps1",
+      "bytes": 2150,
+      "sha256": "c90054191634ee522396b501fb11002874dd9504d3f6005c65b7b183e0b87e7c"
+    },
+    {
+      "path": "Apply-V611-Recovery.ps1",
+      "bytes": 3493,
+      "sha256": "995feebbb051cf4eca7c9d3e627250283ba0137eca988d4bb4d188da6672cb86"
+    },
+    {
+      "path": "Apply-v609-Protection-To-Copy.ps1",
+      "bytes": 1947,
+      "sha256": "42bdaad755320a70c2045a503403a38c11e57361798ab53e3f8b1cf421817ced"
+    },
+    {
+      "path": "BUS_API_DIAGNOSTICS_PATCH_MANIFEST.json",
+      "bytes": 686,
+      "sha256": "af1e736f7066152fa512b43522e2db7ed8c6e05f27ce05d50e43f12754223021"
+    },
+    {
+      "path": "Deploy-Dongjak-Cloudflare-20261106.ps1",
+      "bytes": 4570,
+      "sha256": "a10f1c21b0179003c6245675d81f11613ea8e70e813df3e59158fa566e06ed32"
+    },
+    {
+      "path": "IMPORT_SEOUL_BUS_STOPS.cmd",
+      "bytes": 663,
+      "sha256": "b60edbc269d0931a9ec1a55a97ab4a72c3fac497ccc41843c04b83eb3da4372d"
+    },
+    {
+      "path": "INSTALL.txt",
+      "bytes": 1008,
+      "sha256": "654f512e4dc7e5d6c7cea13a57919e2d29d81490d6183be840f359e054312410"
+    },
+    {
+      "path": "INSTALL_SPEEDSIGNS_CAMERA_PATCH.cmd",
+      "bytes": 2191,
+      "sha256": "3edc51c5843558ae70cd7948333100733cc1e5c6532bc115c01eb33ee05c8321"
+    },
+    {
+      "path": "INSTALL_v7.9.0.txt",
+      "bytes": 799,
+      "sha256": "484179f23f67e0829c42f30e11c60d4b968a1133f1a1bb0f2f853462a9fc18dc"
+    },
+    {
+      "path": "METRO_STATUS_UX_PATCH_MANIFEST_20261110.json",
+      "bytes": 547,
+      "sha256": "05abe40213ff4359ae7c9ca9306bc5ccc8c3d9fd21266bc0ff12b9d85d571235"
+    },
+    {
+      "path": "PATCH_DELTA_v7.0.6_to_v7.0.7.json",
+      "bytes": 6933,
+      "sha256": "e30cc91a210def201da6996d61a979d3a5add4d69a971f972f26ed589d87a053"
+    },
+    {
+      "path": "PATCH_MANIFEST.json",
+      "bytes": 1479,
+      "sha256": "0c2b1cb4f231f6f6e43997cc09f496e5ae5fcc00cfaca579e1042c24d866fa97"
+    },
+    {
+      "path": "PATCH_MANIFEST_7km.json",
+      "bytes": 300,
+      "sha256": "d5808d13c2e3929aad3e30e7225fe4253e54f4bc204917ca982d8a6d715c2f7c"
+    },
+    {
+      "path": "PATCH_MANIFEST_MOBILE_TOPCLEAR.json",
+      "bytes": 581,
+      "sha256": "6128522433a8c4369fc3154ce780ecb0ce378a2ea40ab964cd2476c5c197829b"
+    },
+    {
+      "path": "PATCH_MANIFEST_SIDE_METRO_20261110.json",
+      "bytes": 434,
+      "sha256": "31eb44d0401816886c2a1160a313cab359621774e488753640d40e8e2933259e"
+    },
+    {
+      "path": "PATCH_MANIFEST_UI_ATTACHMENTS_20261110.json",
+      "bytes": 676,
+      "sha256": "0c896da633890754a5fbab9a66cc42f7d2b227dbc852edb781c2adf3ecaba4eb"
+    },
+    {
+      "path": "PATCH_MANIFEST_V703.json",
+      "bytes": 4523,
+      "sha256": "e890f3a86aded3751c706d19c0426207d42d2d6dee7e1bdb508b20f078270f40"
+    },
+    {
+      "path": "PATCH_MANIFEST_V704.json",
+      "bytes": 3893,
+      "sha256": "f8f0d6847e08b92b4f6bae17543e8a196c7e7be1016cee93cb3cc83626b0b56c"
+    },
+    {
+      "path": "PATCH_MANIFEST_V705.json",
+      "bytes": 1873,
+      "sha256": "6dd582833d5e1b97dca6d67e7d7304ed9aee344402e09c415b5b74bcc095cf20"
+    },
+    {
+      "path": "PATCH_MANIFEST_V706.json",
+      "bytes": 642,
+      "sha256": "efeb21c5373c234bf73b4ebfe8011f4eecbde6bfbe05dbc48c7bce2f13669cb3"
+    },
+    {
+      "path": "PATCH_MANIFEST_V707.json",
+      "bytes": 1312,
+      "sha256": "46d4a1c4b881f97f0ecaac3bff288e60d32f0ec47ec1c64537791d7ead13cc2d"
+    },
+    {
+      "path": "PATCH_MANIFEST_V708.json",
+      "bytes": 5828,
+      "sha256": "cea0e670f463b9294449ba1083eaea7a0e7c1a08427e14d0bf598a1c0ff8f0db"
+    },
+    {
+      "path": "PATCH_MANIFEST_V709.json",
+      "bytes": 5461,
+      "sha256": "3fadf94785e22ad91eef6c12c54666aeee53ac148f1086b442f3390db14b373e"
+    },
+    {
+      "path": "PATCH_MANIFEST_V710.json",
+      "bytes": 4962,
+      "sha256": "d42f78be87d8fefafd9fb1e772afc64e0f2b1b00ead733cee936b9eb1ef7d04c"
+    },
+    {
+      "path": "PATCH_MANIFEST_V711.json",
+      "bytes": 5038,
+      "sha256": "ea813560cbaf95c51cbb07c9d814ed2c66df2977d39c101053ad7984abe455ee"
+    },
+    {
+      "path": "PATCH_MANIFEST_V712.json",
+      "bytes": 9621,
+      "sha256": "b5051d382cdee7ab89d993ec1283a7a7d4771e5538b2dcbec2efa6ad052b8fcf"
+    },
+    {
+      "path": "PATCH_MANIFEST_V713.json",
+      "bytes": 5789,
+      "sha256": "515c098cc30c01c07daba979d4461fe301ad0109fd5b9d960af96800b5ea6ebf"
+    },
+    {
+      "path": "PATCH_MANIFEST_V714.json",
+      "bytes": 5000,
+      "sha256": "b62fbbd417ba549bf61359d2253bd2ea7a92aba61db3ee2e9a5382a3238548a1"
+    },
+    {
+      "path": "PATCH_MANIFEST_V715.json",
+      "bytes": 5754,
+      "sha256": "71fdf5f058c817b1b2a3982fdb96547f13dfea8e659e89d7a3c4ff57847524ce"
+    },
+    {
+      "path": "PATCH_MANIFEST_V716.json",
+      "bytes": 5196,
+      "sha256": "9210794cc3f405b8817a1a93603a25027c36f6738a30abec30e7f2e18ef40a1e"
+    },
+    {
+      "path": "PATCH_MANIFEST_V718.json",
+      "bytes": 5630,
+      "sha256": "de994917f6accc72c1a9f74cdf3ade8e6df062020f51f7146c900b25e3b40a74"
+    },
+    {
+      "path": "PATCH_MANIFEST_V727.json",
+      "bytes": 6120,
+      "sha256": "b194f9035953fdd4027e23138185c46182ab9cc159509668a6e8771e1e8ba8d0"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.10.0.json",
+      "bytes": 3707,
+      "sha256": "c95279473d8713d753d7fa43dd1a180e76ac53ac5dc526474d08a6d4ee580d3f"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.10.1.json",
+      "bytes": 3063,
+      "sha256": "9a7239bf8f9172b812125b18f31d4cea542e78b1281e540d3c071d1c7c58d62b"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.12.2.json",
+      "bytes": 2507,
+      "sha256": "5be19f6fcf58c0ca8d2398cbf86d54faefe5d07d504e71a71bbc24e9b3d4c404"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.12.3.json",
+      "bytes": 3884,
+      "sha256": "a2afdd1c8773e24a935cae0c58e6981d8fc05970db8951110a6bee640f5ebb5a"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.12.4.json",
+      "bytes": 3641,
+      "sha256": "e874f9b9e1bc0b18412998d435e5ad6b9738c1747f0981567f753d7ae0e7eff3"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.12.5.json",
+      "bytes": 2579,
+      "sha256": "162ffe1d0c9ff930791c2342b03b960d9064e91c183376ec6ed2034ca9cf2b15"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.12.6.json",
+      "bytes": 2419,
+      "sha256": "8b5ccd3bc841f1955d06767dd73f75a4fef01de9db99fdf421fadb79a72ac190"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.6.json",
+      "bytes": 1068,
+      "sha256": "44f6e2a8b4344e3de3dc1d5fac92da05979bf77e715000b6759ac0f43068c3d2"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.7.json",
+      "bytes": 1077,
+      "sha256": "9542049e1fea02a1c0da0d9582944eb0c413d178f8ddb70977103fabefdedfac"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.8.json",
+      "bytes": 3061,
+      "sha256": "654d80158469cbce2658a6b983bf99fc9de5cb1afb208deeefd34617e948a0cb"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.1.json",
+      "bytes": 1150,
+      "sha256": "179f8034e2465a557c551f3dd43fa9e9a524971b7737221e58094d1457442fe8"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.10.json",
+      "bytes": 946,
+      "sha256": "735ecc339cb13edd1cc95c38522c6d21099e1f1a06be06ccd0a3f29d421c917c"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.11.json",
+      "bytes": 974,
+      "sha256": "875121d28e02549cdf9c3004605b90b3b13f4d54e493b53257af1364d2b398f6"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.2.json",
+      "bytes": 891,
+      "sha256": "9e0385f7f75233e94d7cc8fc715a05abfaa7b1ac9c21361ce28fd20181e102e7"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.4.json",
+      "bytes": 3723,
+      "sha256": "975f84eee93e8c26853e282f370ff6e2acba07ecf3d1033bc59ed96c56c59fe5"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.5.json",
+      "bytes": 2606,
+      "sha256": "53b841b4ad6e46cc012eb45aa1c8efd94e42052dab08a4a8436fc9ef05d0eec3"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.6.json",
+      "bytes": 890,
+      "sha256": "1b7c449f2ffb222efcc513ecb7d962705203039eec774d88bbcbb024cc05243b"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.7.json",
+      "bytes": 1001,
+      "sha256": "9893be6a48ce7d19581da1aa43c1026bb92d9e0ce5be4d1b7a03dc05d13d3ecf"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.8.json",
+      "bytes": 3767,
+      "sha256": "d45be7455a6c8dd8bdf6ca63a2e9e3a7a214b9f877ebac6a1cbe54feae77f171"
+    },
+    {
+      "path": "PATCH_MANIFEST_v5.9.9.json",
+      "bytes": 1138,
+      "sha256": "dcd227ee561bbe44f120ce4cd587e3e1c8d432bfc6802b3f3be8959a6dd28cfa"
+    },
+    {
+      "path": "PATCH_MANIFEST_v596_UI_FIX.json",
+      "bytes": 730,
+      "sha256": "4b230076d8db206478e02f2666f23d89d55a42342202eacd7eccb55c9f7a1814"
+    },
+    {
+      "path": "PATCH_MANIFEST_v6.0.1.json",
+      "bytes": 5020,
+      "sha256": "b4baadc05e2146f697458c3645111822f13d768375967135d5f82ca59534746d"
+    },
+    {
+      "path": "PATCH_MANIFEST_v6.0.4.json",
+      "bytes": 1089,
+      "sha256": "8ba93ee4734c79b1a66c992d1b2005f79247ed2ed5d091c5158ac21617fc6f2d"
+    },
+    {
+      "path": "PATCH_MANIFEST_v6.0.json",
+      "bytes": 1123,
+      "sha256": "a53edf3beef5e62930f106a9b88eecbd130a73c959cba5d72cde928f8857ba0a"
+    },
+    {
+      "path": "PATCH_MANIFEST_v7.0.22_to_v7.0.23.json",
+      "bytes": 6501,
+      "sha256": "9352f4a8763bca0cc63a5de52be78c021ae7937b0940f24dd207114cbe7227dc"
+    },
+    {
+      "path": "PATCH_MANIFEST_v7.0.json",
+      "bytes": 3461,
+      "sha256": "eee5be5f4d28bc2e27da5734573b27a21ee2d2e8acc1ddacc70e6e31012c55f9"
+    },
+    {
+      "path": "PATCH_REPAIR_MANIFEST.json",
+      "bytes": 8385,
+      "sha256": "b7e0df3b8eb9cf34d2f8f4f0df4d87a11ae8dcba2eae08a014b381e0583595b3"
+    },
+    {
+      "path": "PATCH_SHA256.json",
+      "bytes": 1799,
+      "sha256": "e6795582113f30048c458ce6f228e71f28d1f906dd48d7490a3eb7ee245d740b"
+    },
+    {
+      "path": "PATCH_V614_MANIFEST.json",
+      "bytes": 1252,
+      "sha256": "4b854e1aa6faac617ad1c9c5461289ad99e9b02cf75268bfc0d5d1601902b2ae"
+    },
+    {
+      "path": "PATCH_v611_MANIFEST.json",
+      "bytes": 4867,
+      "sha256": "e8af1432d23af1bb869d764fdb851433bc7262287e53244428fa3329f943ae52"
+    },
+    {
+      "path": "PATCH_지하철_시간표_분리_20261110.json",
+      "bytes": 1283,
+      "sha256": "5f5e435ae19d6dfa4344facb527f9a435b0389af9f2e86c44799821db17921b1"
+    },
+    {
+      "path": "PHASE123_PATCH_MANIFEST.json",
+      "bytes": 1363,
+      "sha256": "b86d3b92927f214cffd2c1726e134732837cba07cf9cf78aa84111ccaf2d75b3"
+    },
+    {
+      "path": "PZA_VISIBILITY_FIX_MANIFEST.json",
+      "bytes": 873,
+      "sha256": "0cbd335b59efea1e2af06e7a2271ea6ee7e8e580c39d5a7c8a22d66712f4ecd0"
+    },
+    {
+      "path": "R2_IMPLEMENTATION.md",
+      "bytes": 2320,
+      "sha256": "1b348872fc81d2eb3b7bfb236cd4d60c707dca725ed2698ec95343f2a33af736"
+    },
+    {
+      "path": "README-ALL-STATIONS.txt",
+      "bytes": 1626,
+      "sha256": "2150c1a23ef6bb48495fc8b7abf208765aea82141b42e1a0ec30b99969240e11"
+    },
+    {
+      "path": "README-BOUNDARY-DISTINCT.txt",
+      "bytes": 237,
+      "sha256": "255355fb36cc7f61cc677bc92264b2b0d460615a52e4aec15daae727d6c2fd33"
+    },
+    {
+      "path": "README-COMBINED.txt",
+      "bytes": 1114,
+      "sha256": "15fc65a3638ab0853a172b9dbe1d8feb621d911a66d40214218c2878a6a0b8a6"
+    },
+    {
+      "path": "README-DAERIM.txt",
+      "bytes": 1013,
+      "sha256": "d64d51b87b5b01061856d1918aab10879c0ef516ccbff6a52c320a97c96c9374"
+    },
+    {
+      "path": "README-FIRSTLAST-GPS.txt",
+      "bytes": 2132,
+      "sha256": "f5340a761d5becc1fc7c9b36e7823f22517b031affe38f49e8a56158083d04ea"
+    },
+    {
+      "path": "README-RAIL-FADE.txt",
+      "bytes": 1005,
+      "sha256": "efae655de57c213c1e179276b84e48008123f6318d7bdb8ed5fc4289ca705cd2"
+    },
+    {
+      "path": "README-TIMETABLE-DESIGN.txt",
+      "bytes": 806,
+      "sha256": "5ef9638d074a7282132b43667ade7e724cf4130c50eb16f2b6bc12cf4cd6ec37"
+    },
+    {
+      "path": "README-UPDATE-LOCATION-NEWS.txt",
+      "bytes": 3248,
+      "sha256": "3d546b5eb0f42ef1a764a9b9a051d7cece59ca0c3cc959ca0e85ac7e1b7606d6"
+    },
+    {
+      "path": "README-UPDATE.txt",
+      "bytes": 1920,
+      "sha256": "cb013921a356007bd04ecb8bfe646f8dfb1b92c906b243f1db3d981d8b0a32a6"
+    },
+    {
+      "path": "README.txt",
+      "bytes": 1521,
+      "sha256": "fb4e033eb6c6492b2355c3509674582ccf5ef4f34309904c5ab057460aa933b1"
+    },
+    {
+      "path": "README_FULL_v7.0.19.md",
+      "bytes": 1733,
+      "sha256": "05baf6686901cc0657100146d549c94defa232b581e784d2613455d108267237"
+    },
+    {
+      "path": "README_FULL_v7.0.20.md",
+      "bytes": 3268,
+      "sha256": "3115a8d71f47ce81efa21503ef11c9b739232b00b264a07a4169925b18660651"
+    },
+    {
+      "path": "README_FULL_v7.0.21.md",
+      "bytes": 2199,
+      "sha256": "47fb97acbb75fa81438234af16a7f5625bc2afd823a40cda6c8b70f683d33558"
+    },
+    {
+      "path": "README_FULL_v7.0.22.md",
+      "bytes": 1595,
+      "sha256": "d66f9fe6d0dc17bea2a589ffe74bba79a92cdd374d07f6917d171e94cd611341"
+    },
+    {
+      "path": "README_FULL_v7.0.23.md",
+      "bytes": 2611,
+      "sha256": "61b7ffc475736a71e09bbf3175971e4953a66862323d286216ced19822a510cc"
+    },
+    {
+      "path": "README_FULL_v7.0.24.md",
+      "bytes": 2357,
+      "sha256": "23e9c48bcc429f5de961795ec930160faafc08da4dae528beba602bf1a92aea6"
+    },
+    {
+      "path": "README_FULL_v7.0.25.md",
+      "bytes": 639,
+      "sha256": "d4f18479ac80dbc323f0bd71b8865347e4a391082bc3c6cae929d2e131a760d4"
+    },
+    {
+      "path": "README_FULL_v7.0.26.md",
+      "bytes": 546,
+      "sha256": "b24d303eadea67035ae1420ff6b6ca42262855eb970d815fcd9f1e3f11079b11"
+    },
+    {
+      "path": "README_FULL_v7.0.27.md",
+      "bytes": 1164,
+      "sha256": "206ddbe2ebd608e1055a148ab02123fbae3b132fe9e946a9a7f7659c89eb7f39"
+    },
+    {
+      "path": "README_FULL_v7.0.28.md",
+      "bytes": 1302,
+      "sha256": "89a371b973f437f58362adfc19cf866e68aa446f9d2c505800e30c7240fdd7d7"
+    },
+    {
+      "path": "README_FULL_v7.0.29_PC.md",
+      "bytes": 2087,
+      "sha256": "154d0bd8dbc56e505fd44aace7973260b228c69be7d1bbf3a549ca67dd21e3e7"
+    },
+    {
+      "path": "README_HOTFIX_20261112.md",
+      "bytes": 701,
+      "sha256": "339416aa8d7b6d6a2a4d35906c983bf992674676ba0a2db5e0fbb896b4fb9680"
+    },
+    {
+      "path": "README_MOBILE_7_9_0.md",
+      "bytes": 913,
+      "sha256": "3941fb3e2633a48df1a218389abf89f0c9fb883ad744e6ebc13ed5266914449a"
+    },
+    {
+      "path": "README_MOBILE_7_9_3.md",
+      "bytes": 2079,
+      "sha256": "28d36820d84189ba36d7b352f00f2dd8e674832715460fddea2766c4389bebf5"
+    },
+    {
+      "path": "README_PATCH_v1.0.0.md",
+      "bytes": 2649,
+      "sha256": "829811243dd60f87edfc16f6d1a76e00bdd207af8ab7ab36f4e114ccdf859c9b"
+    },
+    {
+      "path": "README_PATCH_v6.0.1.md",
+      "bytes": 4212,
+      "sha256": "c4bb63cf57421d8f943631be88afb5c320fe212e1d1b93f9fe16da385cf54d99"
+    },
+    {
+      "path": "README_PATCH_v6.0.10.md",
+      "bytes": 868,
+      "sha256": "230bae80ac56442e85321325cddc24e7558f50211e0854a84f4d60bbeb3502a3"
+    },
+    {
+      "path": "README_PATCH_v6.0.10_FROM_UPLOAD.md",
+      "bytes": 1179,
+      "sha256": "00118c1e11ec289dce72108555e2c134545d360a89c32e56509e0f4d6eed4dea"
+    },
+    {
+      "path": "README_PATCH_v6.0.2.md",
+      "bytes": 1798,
+      "sha256": "46e447ef4ac3dd42fe0bf5600052d8cbdc3f59e13777f558fcc5992e6a2bc154"
+    },
+    {
+      "path": "README_PATCH_v6.0.3.md",
+      "bytes": 2721,
+      "sha256": "2630f475a0d693d53168ff53094658f62a3ac7ecd96ce64c0b7c6428d2c09585"
+    },
+    {
+      "path": "README_PATCH_v6.0.4.md",
+      "bytes": 1480,
+      "sha256": "1699deae4536b1e3164bab8c1ac2d509624dd2bd73bd61d6722b205712422f34"
+    },
+    {
+      "path": "README_PATCH_v6.0.5.md",
+      "bytes": 1847,
+      "sha256": "b373ebbca12e251d7e356462b1b3ace114f4f7d5c111b6dbcfbb449773cfdb72"
+    },
+    {
+      "path": "README_PATCH_v6.0.6.md",
+      "bytes": 1419,
+      "sha256": "0b65c3ba5e34e2840b1ce2c4a95b9156b89a94b71d727e67d9eb76eff9a58f85"
+    },
+    {
+      "path": "README_PATCH_v6.0.8.md",
+      "bytes": 1132,
+      "sha256": "8d804c7d73744ef004c1f5fc020ab3de9980a6468e3270a2848cd29c8c130a52"
+    },
+    {
+      "path": "README_PATCH_v6.0.9.md",
+      "bytes": 1882,
+      "sha256": "f69ea8d8d8e6a311ea67fb24b908ac7108e5f6446607c4d7ad9a8d1388a8fedd"
+    },
+    {
+      "path": "README_PATCH_v6.0.md",
+      "bytes": 1657,
+      "sha256": "a9e7734052dc8c311676d2f4c9c7605e549e8c0eda6bee28f838f24949184270"
+    },
+    {
+      "path": "README_PATCH_v7.0.10.md",
+      "bytes": 1245,
+      "sha256": "cee63b4b22718d14022a0e23414c49e58edca7897f3b6f4370aa0c6126ec900f"
+    },
+    {
+      "path": "README_PATCH_v7.0.11.md",
+      "bytes": 1325,
+      "sha256": "533ac12aca662542053f624c5cc434b630bd0921e6408ef95238b0fc592c9815"
+    },
+    {
+      "path": "README_PATCH_v7.0.12.md",
+      "bytes": 1316,
+      "sha256": "76424011e3a911eaf2654114090e71e8b9f29988fc1c9f1511d2d20356a02693"
+    },
+    {
+      "path": "README_PATCH_v7.0.13.md",
+      "bytes": 1549,
+      "sha256": "12b6bb922f7ca37d96ec478400d3d04f129ab8cfcb79055f1bc422e0f8ebcf00"
+    },
+    {
+      "path": "README_PATCH_v7.0.14.md",
+      "bytes": 1199,
+      "sha256": "b0ee259977b072bc8c29d818c76fc6d0754c44fac0d81d246a7b06c0f3319b79"
+    },
+    {
+      "path": "README_PATCH_v7.0.15.md",
+      "bytes": 2709,
+      "sha256": "5255edc53b2a4161aee3e72dee4b5a8ca5e28a1dfae4b7e1b3d01e1107be9c95"
+    },
+    {
+      "path": "README_PATCH_v7.0.16.md",
+      "bytes": 1782,
+      "sha256": "9ab6a32297035d58728eec154f4e1428b661bd92317eec0323cb155ad6913d6a"
+    },
+    {
+      "path": "README_PATCH_v7.0.17.md",
+      "bytes": 901,
+      "sha256": "2d721d0c64c6831cff43e273c6a667ddd4dde9adf8b0e287716abd242cd84ad4"
+    },
+    {
+      "path": "README_PATCH_v7.0.18.md",
+      "bytes": 2393,
+      "sha256": "7913d72a4607c3ecd2c43fcf2e7f218efdd99ae45b3ab44349c7df6197696734"
+    },
+    {
+      "path": "README_PATCH_v7.0.19.md",
+      "bytes": 1763,
+      "sha256": "02e2b29627e1477b23aae2335ebfabcb0dafc82e8d25311899393adc3579d721"
+    },
+    {
+      "path": "README_PATCH_v7.0.21_to_v7.0.22.md",
+      "bytes": 825,
+      "sha256": "f0e2c08b556965c0fe07ce570e7944172144015fad942ab9b4df5df85bd48d14"
+    },
+    {
+      "path": "README_PATCH_v7.0.22_to_v7.0.23.md",
+      "bytes": 2358,
+      "sha256": "030e5d467d4216cd002d9853868aa9c340fc83010b82d8a1857e196c839a3df3"
+    },
+    {
+      "path": "README_PATCH_v7.0.23_to_v7.0.24.md",
+      "bytes": 570,
+      "sha256": "eb2dbe05f54e2b2314f30057593b737f632c278161180ddb386fc574dacbafc0"
+    },
+    {
+      "path": "README_PATCH_v7.0.24_to_v7.0.25.md",
+      "bytes": 2056,
+      "sha256": "0346f7498bcbe483c2f01c70ab29c1d0807980af934aec0a1023ae72e78cd157"
+    },
+    {
+      "path": "README_PATCH_v7.0.25_to_v7.0.26.md",
+      "bytes": 1330,
+      "sha256": "47eddf71b697d4708734706d14e3d36f7ee5828751be755ed5afc32eefcb9877"
+    },
+    {
+      "path": "README_PATCH_v7.0.26_to_v7.0.27.md",
+      "bytes": 2159,
+      "sha256": "a7b881296e64a8846af143eeedc3ed7512ad94bedfc43c497a1b0d7e91318957"
+    },
+    {
+      "path": "README_PATCH_v7.0.4.md",
+      "bytes": 2483,
+      "sha256": "1938cd9ff07dc08aec8c670dc8d2f18683bbe85edc30e429ca520b6b7ca56089"
+    },
+    {
+      "path": "README_PATCH_v7.0.5.md",
+      "bytes": 2982,
+      "sha256": "7cfd459b7dcdc7840e4d1c89a0496ca2e0a27744f7ab856e25b1d3b74fa40c87"
+    },
+    {
+      "path": "README_PATCH_v7.0.6.md",
+      "bytes": 3504,
+      "sha256": "948c800770129f6de3303a05872ea4a309cc875e09c253136b4c2afd4a1c35b8"
+    },
+    {
+      "path": "README_PATCH_v7.0.8.md",
+      "bytes": 3078,
+      "sha256": "14d040e19d86e39983266ba5ad829c81c99aaafa378e0a63563715fcd967f269"
+    },
+    {
+      "path": "README_PATCH_v7.0.9.md",
+      "bytes": 2924,
+      "sha256": "cb96f30ec40af7f31d570ac7c63f24390e2727ce6f19a6de82231e08b1ce8c3f"
+    },
+    {
+      "path": "README_REPAIR_v7.0.19.md",
+      "bytes": 2950,
+      "sha256": "b8dc45e1a2b09c54fb668f585aba6fa22e5741133a1a5dc3cc2ed5ab1ca9509f"
+    },
+    {
+      "path": "README_SPEEDSIGNS_CAMERA.txt",
+      "bytes": 3678,
+      "sha256": "51600bc4448af9ee04fc663fc02ec31bbe7954d338cd7785893f8c7ed1e317e8"
+    },
+    {
+      "path": "README_v6.1.2_SPEED_TERRAIN.md",
+      "bytes": 3527,
+      "sha256": "5dd824513859df8d168af5cfa019e28ee277dfe27a2650f71f9248654cf0f706"
+    },
+    {
+      "path": "README_v7.0.3_FULL.txt",
+      "bytes": 866,
+      "sha256": "f075c45710c543d982157d609eb36a6a5d4190b32d380aa3e525994bea2679a8"
+    },
+    {
+      "path": "README_v7.9.4.md",
+      "bytes": 2005,
+      "sha256": "443881b6da1719f5b3e5a84ff9e67a56200dae0210cbb7b72cae6d21bbcfaec9"
+    },
+    {
+      "path": "README_v7.9.5.md",
+      "bytes": 878,
+      "sha256": "a6b27a13d65e57d27d89c86f17a21b5088741fcbf78e12463023b795a4f0de1e"
+    },
+    {
+      "path": "README_∞á£φò£∞åìδÅä_∞ºÇδÅäφæ£∞ï£_∞╢öΩ░Çφî¿∞╣ÿ.txt",
+      "bytes": 1042,
+      "sha256": "90b708ec1d2d12fc5f0e6f073dac124b5e93f259f14d55174124c956e7044215"
+    },
+    {
+      "path": "README_∞äñ∞╣ÿδ░⌐δ▓ò.txt",
+      "bytes": 2759,
+      "sha256": "dee45a969b1d193aa9542c52e6c00e321087ba4bff40c4c0249550f6b07b312b"
+    },
+    {
+      "path": "README_∞åìδÅäφæ£∞ºÇ_φü¼Ω╕░∞╢ò∞åî.txt",
+      "bytes": 648,
+      "sha256": "d6a00edbbb97f26dada4a761fcf819086e86d90893fbd7aebec8190b0aba0081"
+    },
+    {
+      "path": "README_적용방법.txt",
+      "bytes": 2518,
+      "sha256": "0e7e1cc223dee469038266092ca8bb10a2703f060abf2ad1cb0eef402328efb1"
+    },
+    {
+      "path": "REBUILD_FROM_V729_README.md",
+      "bytes": 1985,
+      "sha256": "5eca6227789690e05e0d8bfa92b24f1ae14f661e04f4fe1c5581cf9bb845ede3"
+    },
+    {
+      "path": "RELEASE_V610_MANIFEST.json",
+      "bytes": 1960,
+      "sha256": "36915815a3051a4ff86747c6276099159326de32609c5704b41b427b09f4afe0"
+    },
+    {
+      "path": "RUN_DONGJAK_v7.9.0.cmd",
+      "bytes": 171,
+      "sha256": "adf14e72bf842646ff4fc0ea05620027e53edfa5f403a0fd464ba3b168d3511f"
+    },
+    {
+      "path": "RUN_LOCAL_v707.cmd",
+      "bytes": 197,
+      "sha256": "5abe1d5e3e5718eef7c56c870ebaa8ade2781f3166bd0bf4f5640fec399a93d3"
+    },
+    {
+      "path": "RUN_SEMVER_CURRENT.cmd",
+      "bytes": 770,
+      "sha256": "97d673f50cec47f283eb03e30a7109169aff0375a667d5365255135bb524e649"
+    },
+    {
+      "path": "TEST_AFTER_INSTALL.cmd",
+      "bytes": 302,
+      "sha256": "d87ffbce7a543d1afa6fe6dee4e824f2b34c10872591fd46689b5f9f17d8ad5c"
+    },
+    {
+      "path": "TEST_AND_DEPLOY_v707.cmd",
+      "bytes": 290,
+      "sha256": "806021e09a676d4cd4eba962438725dfcab082fb7aa705e55c33aa2d10a65f12"
+    },
+    {
+      "path": "TRANSPORT_REALTIME_DARKBUS_PATCH_MANIFEST.json",
+      "bytes": 2027,
+      "sha256": "bab2cda1ad7ce1ce81273a91cea3cb5b254b2bcffad5317c2ea51ce04cba609a"
+    },
+    {
+      "path": "VERIFICATION_MOBILE_7_9_0.md",
+      "bytes": 1767,
+      "sha256": "e33a0f6fb4f7f6832850069dcdb76c6f40ea74a58f0cb2a9426d923b093a2704"
+    },
+    {
+      "path": "VERSION_CHANGELOG_INTEGRATED.md",
+      "bytes": 975,
+      "sha256": "0260d033b1c43723a8750dca82ecfb2fe8f0e2624b5dd6841105ffc30510b6ca"
+    },
+    {
+      "path": "__test_new.html",
+      "bytes": 649515,
+      "sha256": "22f4d09b8c9ad0643f07ee18cdddea3abdca2d6afea6a8490df430e8d3536ea3"
+    },
+    {
+      "path": "__test_orig.html",
+      "bytes": 631172,
+      "sha256": "5d34386c886fdc639d44640f7000c1e34a9153326aefa237e74f9836fcdd34fb"
+    },
+    {
+      "path": "admin-dong-layer.js",
+      "bytes": 8620,
+      "sha256": "562307a134dea234988a85545bd9584f6d1f030f1ed1461045f8062c57f151d0"
+    },
+    {
+      "path": "analysis/protection-zone/01_행정동경계추출.mjs",
+      "bytes": 2059,
+      "sha256": "45b84555bcd18ff8417023efc1ab394d2044a6c5e3203b57bc3e49aaf4731357"
+    },
+    {
+      "path": "analysis/protection-zone/02_도로_행정동클립.py",
+      "bytes": 4117,
+      "sha256": "65149a1de8c8584b7457073f9292cfeeffcf1b0211b4ce7911fa4371dde6442e"
+    },
+    {
+      "path": "analysis/protection-zone/02_현장검토_후보도로_법적사각지대아님.geojson",
+      "bytes": 1467282,
+      "sha256": "b776891c16cb5bb84b715c6bb247690ee08128838f67a3e3a3bccaef044b71cc"
+    },
+    {
+      "path": "analysis/protection-zone/README_정정방법.txt",
+      "bytes": 1646,
+      "sha256": "954488f564ad54a81c815628df4c2cad8fd1ec161627e0f6c043ba363a9d5dbb"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/00_상도1동_참고경계.geojson",
+      "bytes": 1242,
+      "sha256": "aff366afc6a7f2f9ef8ead055554f5af0078ab5bddef66e9ff27d67392b1bf39"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/01_상도1동_도로_835개_재검증.geojson",
+      "bytes": 1015826,
+      "sha256": "77ec95fee07812207b86c3e588b7975ef2872a816b3cc009183a3d38ffeccc4c"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/02_우선현장검토_134개_법적사각지대아님.geojson",
+      "bytes": 149424,
+      "sha256": "4f09c63fc94896296cafbc2bde2433b3226d8277c5014383e4a75ec0cf6eb082"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/03_도로분류_재계산.csv",
+      "bytes": 389,
+      "sha256": "271b4f3bcdc8f1565cc77201e36d3e8f567287b5cbb60c176062806e17e432c4"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/04_현장조사_후보도로별_길이.csv",
+      "bytes": 773,
+      "sha256": "89e7d4858eeef6e58d96ee4c12d5dae8847cb39fa1e69a5b4b4a3e4d4863f456"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/05_검증결과_메타정보.json",
+      "bytes": 1667,
+      "sha256": "29c4944cd457e38ebff568fab4cb5bd4b468ad8c57decffc26774f0d625b8e27"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/06_상도1동_참고경계_검증_현장후보지도.png",
+      "bytes": 434793,
+      "sha256": "961635981e6c8b3d15d58d6af636919cb4e6a098f25648ea7b955a0a2d74ea74"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/07_공식보호구역_있을때만_중첩.py",
+      "bytes": 4383,
+      "sha256": "9bea98f85168733e4db63805c5f341b66b6e557b55a03d6ddd8f5058485d475c"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/08_공간검증_분석보고서.md",
+      "bytes": 4148,
+      "sha256": "9d42f559bb5c49b81383ca81dd1c6dd0b2b7b70a9f08c18fd1cbc626a6ff38cb"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/README_VSCode.txt",
+      "bytes": 992,
+      "sha256": "1aeb02dc8295bec79a6c0bb632350b0b8dd1ab414b1d0b899d84190ea79edcbc"
+    },
+    {
+      "path": "analysis/protection-zone/boundary_verification_20261109/상도1동_예비검증_QGIS.gpkg",
+      "bytes": 925696,
+      "sha256": "5d4c70aba57bb18b8446c50040e7f8766c9765e32fdd2a8ba61b510328440d11"
+    },
+    {
+      "path": "analysis/protection-zone/official-data/01_공식자료_목록_확보상태.csv",
+      "bytes": 2140,
+      "sha256": "b7c95dc6b510e87ed4b8faddd55c1d628134a43bcb4e2edcc34c3821c4262420"
+    },
+    {
+      "path": "analysis/protection-zone/official-data/02_확인된_보호구역_시설후보_12곳_2차출처.csv",
+      "bytes": 4984,
+      "sha256": "e8f5fb107ad44c78f333679010f5df1dbc70bfd357468d98599797d5311130db"
+    },
+    {
+      "path": "analysis/protection-zone/official-data/03_정보공개청구_복사용.txt",
+      "bytes": 2043,
+      "sha256": "49b778bfc4a965c7f0871251699844b96b9b4136a8e06da67ca391dc0a247b3d"
+    },
+    {
+      "path": "analysis/protection-zone/official-data/04_기존앱_SHA256_참고.txt",
+      "bytes": 159,
+      "sha256": "71b634c2d10990b667ef6de4d7c5f6dbcbdf79d2ba3c72f24f5cfa76493ff412"
+    },
+    {
+      "path": "analysis/protection-zone/official-data/README_자료확보_현황.md",
+      "bytes": 3595,
+      "sha256": "dc3a386bd60f70edc2074d8af633b01d7654167f2eb89bb8d0ed0df5cc8fdce2"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/01_focus4_verified_metrics.csv",
+      "bytes": 946,
+      "sha256": "2add3bc43aeb77464d6cc978e84626698a97986e4763c8275f762c28a1667304"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/02_facility_specific_gaps_and_entrance_uncertainty.csv",
+      "bytes": 8067,
+      "sha256": "97121c4cead5f8ed63be6b07056b99387ccfdd3079b50cde88cf5f24f5575138"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/03_hotspot_evidence_by_year.csv",
+      "bytes": 2252,
+      "sha256": "b14046887a5e7f26b2574742ef652854da49732f7aa22e9ed2c535688696a65f"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/04_field_validation_worksheet.csv",
+      "bytes": 8411,
+      "sha256": "2a21d48b523e07d6dee4501084bd1a1c9e6c5bf8d5c03cf4c38cd0334d7f58ef"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/05_focus_roads_zone_specific_map.png",
+      "bytes": 164148,
+      "sha256": "e7ff07979f7f060840d2d28d0cdda593c9d32fe6b01753bbaea412d2f6e6add4"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/06_interactive_validation_map.html",
+      "bytes": 32830,
+      "sha256": "eb9373ab3a05fe87e89ec60d6aa0177f0fb6c2f1cb3330757702d2129f9a7c89"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/07_information_request_draft.txt",
+      "bytes": 1773,
+      "sha256": "98ed756db317b037bc2f147fb2164e03fb02ccd391a2a360bd0997aac314bf41"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/README_phase10_findings.md",
+      "bytes": 7025,
+      "sha256": "fa3abf7c42d59f755ca2e0fc4fa8052b7828723bc4c757cbb5a11201b42d8b57"
+    },
+    {
+      "path": "analysis/protection-zone/phase10/phase10_legal_review.gpkg",
+      "bytes": 221184,
+      "sha256": "c8eaa175cdabfc4736fead996200254268ac666aa1e80693ac62da6cdeb8e11f"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/01_엄격후보56_지도용.geojson",
+      "bytes": 66531,
+      "sha256": "3b0073d1187bc7e0f11eb76f75d33a4a7c0347eef81fb3d541c04172cd1e3168"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/02_기준민감78_지도용.geojson",
+      "bytes": 102594,
+      "sha256": "c6ec562608a789e07af729ef04013e7dd313b90a174e963fb7e69702917d4299"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/03_폭자료누락153_지도용.geojson",
+      "bytes": 202257,
+      "sha256": "df19162df0217277d8ef111e01320d6557b893e63cca649983aea0e82f46f400"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/04_추가검토_30_40m.geojson",
+      "bytes": 26780,
+      "sha256": "ccb3d9e7b47d667d3a33023c026a07e460f95ff3d0d2b88a9216145c5b4612ae"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/05_거리임계치_민감도_3개폭기준.csv",
+      "bytes": 1896,
+      "sha256": "499c71496fd7b2bb3f5ab5e1073e7a1ea4e41350e3a10b4a5beb454c4d38cc5f"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/06_통합현장조사_287개_검증서식.csv",
+      "bytes": 46327,
+      "sha256": "574a589fe485dc6ff29799f91f47224f54a3371636db9b00beb89ec135ced1d3"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/07_엄격후보56_연장순.csv",
+      "bytes": 8202,
+      "sha256": "6b002758ab73974d8c6218a4d5ebfaabb8dcd63a5856340f7522daccec053cc9"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/08_엄격후보_도로명별집계.csv",
+      "bytes": 1415,
+      "sha256": "bc42f1bb915c3ed8f9cc16d38d89a7e154cf9859a1eb5f09d98369f5dfe0ae9d"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/09_민감도_구간별_예비지도.png",
+      "bytes": 358680,
+      "sha256": "022c4be0b7b9f585e3594dda445256e1a88e678116f7cc5f604b8d7f363fb93a"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/10_민감도분석_대화형지도.html",
+      "bytes": 1017510,
+      "sha256": "5915077b1de8ad76d1de6b86ec0bee53ef878537e46b50c5886e527db465df53"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/11_원본파일_검증.txt",
+      "bytes": 280,
+      "sha256": "b82b940ccd5f3d242f13940f8883fb6be8ffac4924d38a500cfe52989fbb7502"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/12_분석요약.json",
+      "bytes": 6065,
+      "sha256": "0c16a2bd217a0e40b20c8d948803a802b815740859bc3a64e6021a5aba8afae3"
+    },
+    {
+      "path": "analysis/protection-zone/phase2/README_분석보고서.md",
+      "bytes": 3847,
+      "sha256": "a0147b308dd49497c25d53a2f00123d38f20de3e967488611bfae93b1c069710"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/00_기존도로835.geojson",
+      "bytes": 1015826,
+      "sha256": "77ec95fee07812207b86c3e588b7975ef2872a816b3cc009183a3d38ffeccc4c"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/00_상도1동참고경계.geojson",
+      "bytes": 2089,
+      "sha256": "a8771014ff481f99eacd2e24e572da48604bdb443e5214fe78e71e741e52f954"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/01_초등학교8곳_대표좌표_주출입문아님.csv",
+      "bytes": 1738,
+      "sha256": "6fc485e916b2a769ce3423e6f68ef02b936e850273d29478e1bf8e291395775a"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/02_추가확인시설_출입문좌표미확보.csv",
+      "bytes": 784,
+      "sha256": "2cfcbe3b7bc163ce32ffe74d2897dd7011e05a91701054cd20b64e6cf10b92b2"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/03_초등학교8곳_기준거리구간_보호구역아님.geojson",
+      "bytes": 58590,
+      "sha256": "44cda4feb90c976fab733db8a4ca0750f386e6f716e5d16cfc0b515aaae429a7"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/04_도로835_학교대표점_거리구간별연장.csv",
+      "bytes": 103707,
+      "sha256": "62f0f164b719928947688777840b697d586463ef68daa776120ff498becae530"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/05_도로구간_거리등급별_분할.geojson",
+      "bytes": 626664,
+      "sha256": "09047a654a7fa2c7f86125277ebad6f66172526668d6a0ecd13c93cf607f71f0"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/06_거리구간별_집계_참고용.csv",
+      "bytes": 1514,
+      "sha256": "aff9f671950f6cfa1754495b9de2962deec0a3ec604d53b28e3fc77c00ce992d"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/07_엄격후보56_학교500m초과연장순_법적사각지대아님.csv",
+      "bytes": 8349,
+      "sha256": "28017dbc5c61706783ff2bf08273b1f74e30f03300571e99b34c486fa95e510d"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/08_초등학교8곳_대표점.geojson",
+      "bytes": 3289,
+      "sha256": "91a6079019bf309ce2caf5207f8aeaad10cc5a1fa5ec825c35e735ce4809da6f"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/09_학교거리_예비지도.png",
+      "bytes": 425285,
+      "sha256": "4a8df4f52881d0043feebad1905330a29b5f869ed0201b04a45c2f0ac21b73ea"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/10_초등학교거리_대화형지도.html",
+      "bytes": 167206,
+      "sha256": "7a95393a8f0035b09ae415c136b685f3226e8b03511987199d956b348acb097e"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/11_다시계산_사용법.txt",
+      "bytes": 651,
+      "sha256": "33c7d2dc2d33e7c6738eb3bb598c6bdbbcec66f6994e84b60f55c7f1b8181103"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/12_품질검증_메타.json",
+      "bytes": 4690,
+      "sha256": "28b5fa0d18bd32faa33db13dd908709a2987905035caa6ea81a70a6726459dd7"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/13_시설좌표수정후_거리재계산.py",
+      "bytes": 2561,
+      "sha256": "7cb478dd99e465601d7beaa2141c6196d2709a748088157036ca490416a162bd"
+    },
+    {
+      "path": "analysis/protection-zone/phase3/README_3차_분석보고서.md",
+      "bytes": 3462,
+      "sha256": "068db79c9158bf1e0c216141dba6e28ab33710a83fca3aa5ee1d12b11f153181"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/01_시설명부_근거_좌표검증현황.csv",
+      "bytes": 5431,
+      "sha256": "6422ab65c850e380cf974146604cb4620f574681482f419c4bba19881c084507"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/02_시설위치_대표점_출입문아님.geojson",
+      "bytes": 10025,
+      "sha256": "7038a60b10021b121a744818dce876956656efc8626d3cd22c4c89d3b8b9bb84"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/03_시나리오별_거리구간_연장집계.csv",
+      "bytes": 7959,
+      "sha256": "8477560c1c12d73e7c63825725711886e921295f23982af80434204febe29e34"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/04_도로835_시설시나리오별_거리연장.csv",
+      "bytes": 112188,
+      "sha256": "a75174202f7ec9cc3722e241c693da3a3b65ae23472c0a789bcd7d1d3365a8be"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/05_강남유치원_추가반경_변화도로.csv",
+      "bytes": 7865,
+      "sha256": "3019ee3cd12f7789955375539df9ef5247393e62277544c891b50c282cc59d14"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/06_엄격후보56_아동시설300_500m_참고.csv",
+      "bytes": 9675,
+      "sha256": "57f0917b7acaba5bcc06efcf32f6305d43f356001e362c19d06e34c997705c07"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/07_시설300_500m_참고거리영역.geojson",
+      "bytes": 108405,
+      "sha256": "820c952be340c4aac9a2a7eff8b7842e5537779a89a3bb28be053c30d760d18f"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/08_도로_아동시설거리등급_분할.geojson",
+      "bytes": 633284,
+      "sha256": "cad4590194bf8451f092d14fc289926c12d7d1d0675c925dc35700b3a58c9120"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/09_초등학교_유치원확대_거리비교지도.png",
+      "bytes": 490237,
+      "sha256": "4a5b889423152dda7acebd86e69bc73270b325814aa2d4fc8872b628fe6eb8fd"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/10_4차_시설범위_대화형지도.html",
+      "bytes": 365319,
+      "sha256": "1d2c055d4be10f15df437537ee2ff3783e536cbe38221332fc6b6e51d7ac6af0"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/11_검증및시나리오요약.json",
+      "bytes": 1354,
+      "sha256": "43418020335da4fe9a8a94c0b04e12693a67f1673770eefac1fde4e3425a5e68"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/12_시나리오_재분석_코드.py",
+      "bytes": 21714,
+      "sha256": "dc60a380c94849874791acbf14be05d420ad533586588110c9126afd6990ea34"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/13_원본앱_비수정_SHA256.txt",
+      "bytes": 161,
+      "sha256": "df7474e5fd72ebc9472c21b772340ea2b0784c9c8ea8727e878faaabc62b5c3b"
+    },
+    {
+      "path": "analysis/protection-zone/phase4/README_4차_분석보고서.md",
+      "bytes": 4104,
+      "sha256": "52a6049a032b8ffa33f18f51cd59d1596d8fc86100f0bd8a22a6fefd1a6d9da6"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/00_원본비수정_SHA256검증.txt",
+      "bytes": 786,
+      "sha256": "562359b5e49bd9b6b2997beb4695d1a417bbda37d5a0b27b1a53f58b2393c7c3"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/01_공식보호구역_64건_현황.csv",
+      "bytes": 10936,
+      "sha256": "e24e2754e5d805cbee0da9d36d08b4ea5622ab9781edebfdf956dbc6275b2a63"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/02_도로835_지정구역_중첩_결과.csv",
+      "bytes": 150835,
+      "sha256": "f1856a2a8eb924a4207b67537c1dc3dcaf2ad32e0d5e88e2cf75e4a08bee5ca6"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/03_상도1동_교차_공식보호구역9곳.geojson",
+      "bytes": 7335,
+      "sha256": "1ac7dd97da0a5a1303c58c64cc523159804920e56e35b4db930dccad05ea0b17"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/04_공식시설위치_64곳.geojson",
+      "bytes": 16649,
+      "sha256": "28f207ff074cd998985c43ef00063cc122c7c39a0904cb271df34d5dc29b2837"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/05_공식지정구역_안_도로.geojson",
+      "bytes": 40488,
+      "sha256": "c3781f7ff246e7d50f80b494ab9d1721696ef5e448d80bf2ca7800414dbc128f"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/06_공식지정구역_밖_도로.geojson",
+      "bytes": 756770,
+      "sha256": "c25571d92e3abf8ba8319995d976b1a56e6e4ec62b7a981f7dae882785321104"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/07_공식지정구역_밖_현장검토_134기준.geojson",
+      "bytes": 109189,
+      "sha256": "2c07c6175b733431080b8b407bdf17c73c74a9c6942b01602718887bfe5bad59"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/08_공식지정구역_밖_엄격후보_60m.geojson",
+      "bytes": 41198,
+      "sha256": "27bb2dc968b880367e590e88d8078cbcfa82eae445d055ac18078e23c9f3fafd"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/09_공식지정구역_밖_도로폭미상_조명거리40m.geojson",
+      "bytes": 135014,
+      "sha256": "979bb96bf1cb58ac13ab82bda57e393d05ee43a0bdf140198fc7e85b691ba514"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/10_상도1동_참고행정경계.geojson",
+      "bytes": 981,
+      "sha256": "c95d48573369e96533d2e2f7e4b4c0840427067a17e3084e7bd837ac82f3784d"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/11_공식경계_중첩_허용거리별_민감도.csv",
+      "bytes": 1353,
+      "sha256": "1fcf874319ae2498d8c088202fcad478fd149db5d1adb23d73bb3f95fe2a6842"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/12_도로명별_예비후보_보호구역_밖_연장.csv",
+      "bytes": 1001,
+      "sha256": "852fd6ea09368fba9b82bdb12cd232bbd02b74a7e6c48ab4961ae8d69240c513"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/13_QGIS_공식보호구역_중첩.gpkg",
+      "bytes": 782336,
+      "sha256": "ff861a77ac9fc2c9f3f3300e01174afae8b8b0283926a28bf777be5dab0fee38"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/14_공식보호구역_상도1동_중첩지도.png",
+      "bytes": 387760,
+      "sha256": "41cdc81ad48de954600c1fa039b765094c5ff4ba411b128d7d51627ab32a3689"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/15_공식보호구역_대화형지도.html",
+      "bytes": 1199083,
+      "sha256": "4efeced9d6f337081afa388da5a39eeb4115b737a9bab276b3c23ed7aeaa4eeb"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/16_공식중첩_핵심수치.json",
+      "bytes": 1748,
+      "sha256": "f914050779fee5bb32719ff1f74ce582079440a3f1049fcab76c9f3fe8aa9521"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/17_미지정_예비후보_보호구역까지_거리.csv",
+      "bytes": 26548,
+      "sha256": "bb7fb68f83e5edd88a8a0b9c96b75b8a23543ba13cab20f08683d06293956579"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/18_보호구역밖_후보_최단거리_추가.geojson",
+      "bytes": 126889,
+      "sha256": "46359b64727b08bb386f4d9a5d02c09365aac4482e65df8777f5fccd5e4bf0bf"
+    },
+    {
+      "path": "analysis/protection-zone/phase5/README_5차_공식경계_중첩보고서.md",
+      "bytes": 6928,
+      "sha256": "249ef4cd70c7123e5955c0dc33ac0c4df8f69a731904d77eaef3db5bf9f23b31"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/01_보호구역_정합민감도_0부터100m.csv",
+      "bytes": 1057,
+      "sha256": "d22cd7a0426c7142141684e7eb29fb31e69103a18b54c4485a19f10832e4f395"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/02_후보도로_134기준_객체별_정합거리.csv",
+      "bytes": 15610,
+      "sha256": "c989ce119d7c49c098e193bb52ddc7ab509d6c3bcc379662578232ad17a7e407"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/03_공식도형과50m초과_현장검증_구간.csv",
+      "bytes": 18464,
+      "sha256": "e8761cdc15d028c3b6d8a672ac916ce0502950d5656377df203563495acab79c"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/04_도로명별_위치오차제외_후보연장.csv",
+      "bytes": 1270,
+      "sha256": "51a3328464f07773b407314dca31dad8153f926aa45220300df2153b97ae8e1f"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/05_현장후보_공식구역50m초과_참고.geojson",
+      "bytes": 122824,
+      "sha256": "8955aa4283b2b0ba3fa60a6fc75b846574eab1bf84bffd99ded1bc7769e76639"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/06_엄격후보_공식구역50m초과_참고.geojson",
+      "bytes": 45840,
+      "sha256": "7305bc1703c7ba4cc65dad4fece8b4cdca8ad8bbb128fbbfe95a0bb5df5a2348"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/07_상도1동_교차_공식보호구역.geojson",
+      "bytes": 12252,
+      "sha256": "7e9bbf396abb665c4ca32a1cf2652973a83b2934dd5c9661a63cdb364c0fb488"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/08_6차분석_핵심수치_검증.json",
+      "bytes": 3643,
+      "sha256": "85e8adf67395cb4e45e4a41baf2dca0366679dc5b774ec5c45714e55092f1fe3"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/09_6차_상도1동_현장검증.gpkg",
+      "bytes": 217088,
+      "sha256": "d4469c66081b1e511d07336e90ca4fb441a680924a19602c10b214a4d316a1a6"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/10_6차_현장검토_대화형지도.html",
+      "bytes": 162156,
+      "sha256": "9a05b151b05553469a0d936f8010c25af2748d09591aa8eb1ddb85a042d846eb"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/11_6차_현장검증_예비지도.png",
+      "bytes": 154343,
+      "sha256": "4fa5b201b216a761745d7ca150fecff19586aa62ec8a99b46e8d5954937b32e8"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/12_현장검증표_상위40_기록용.csv",
+      "bytes": 3940,
+      "sha256": "80d46b515fe27dc868db8f9c82de5ec696e528b1ed078596b0051f25e135784a"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/13_원본파일_SHA256_비수정검증.txt",
+      "bytes": 449,
+      "sha256": "36eaf8905e130f1ea1c0e81100e771c1bec8d7a3be7363a4a1c6cf2a05daf641"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/14_재현코드_안내.txt",
+      "bytes": 288,
+      "sha256": "2b01cd40a0a4772fdf1bd7f1fe384841080b6c00f1c7739adaa1931291c55aec"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/README_6차_정합검증_보고서.md",
+      "bytes": 6509,
+      "sha256": "3a7445e018275ae3d468849ac1dbf804e60c8df53498a97f095f78b421ee5153"
+    },
+    {
+      "path": "analysis/protection-zone/phase6/build_phase6.py",
+      "bytes": 23888,
+      "sha256": "213476b9c96ac74af85eaa4e6a9621d306e3d4b7a7c659270ccd95bbfc3fb31c"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/01_사고다발지역_CSV자동다운로드시도.py",
+      "bytes": 1638,
+      "sha256": "8ccf2a0959f3c31258552ab1248b4fa48c3c44aa2f0b3b31b7248d52223aedfb"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/02_사고다발지역_중첩분석.py",
+      "bytes": 9757,
+      "sha256": "3eb45c1a30c06c2b21bb9593497f48817a4f20718efcfdcefa403d17dbd8d5a1"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/README_실행방법_분석한계.md",
+      "bytes": 4224,
+      "sha256": "13466be453560a4c448ac56c5d81e58a8c94d2d9061938b6e4d0867769a4507c"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/input/candidate_50m.geojson",
+      "bytes": 122824,
+      "sha256": "8955aa4283b2b0ba3fa60a6fc75b846574eab1bf84bffd99ded1bc7769e76639"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/input/candidate_strict.geojson",
+      "bytes": 45840,
+      "sha256": "7305bc1703c7ba4cc65dad4fece8b4cdca8ad8bbb128fbbfe95a0bb5df5a2348"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/input/official_zones_sangdo1.geojson",
+      "bytes": 12252,
+      "sha256": "7e9bbf396abb665c4ca32a1cf2652973a83b2934dd5c9661a63cdb364c0fb488"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/input/sangdo1_boundary.geojson",
+      "bytes": 981,
+      "sha256": "c95d48573369e96533d2e2f7e4b4c0840427067a17e3084e7bd837ac82f3784d"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/input/여기에_공식_TAAS_CSV_저장.txt",
+      "bytes": 101,
+      "sha256": "da5cf4775f0b844eb30d7a12e2437f7fab2136564cb7fbe064f0d30bace9d1c0"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/output/00_분석전_검증요약.json",
+      "bytes": 439,
+      "sha256": "2878f35b883e80cc070d04c622b3f1cc16f1a2b70664bfc3b5f994462c0287a0"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/output/01_사고자료결합전_조사대상125.csv",
+      "bytes": 12543,
+      "sha256": "4d45df66b744a329c4bf58ae4dc776334ddda56d5130a475811ec23fd2064f39"
+    },
+    {
+      "path": "analysis/protection-zone/phase7/원본_보존_확인.txt",
+      "bytes": 212,
+      "sha256": "ca63fa0d11549bd990e4516226a9460f13ab0084edd9a676ae769100700dde68"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/01_125_roads_evidence.csv",
+      "bytes": 19890,
+      "sha256": "7562d5a6726048a90de91eb599d2c81a3a44c41f1865ea24e37a66ca683c4611"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/02_recent_label_hotspot_overlap.csv",
+      "bytes": 1088,
+      "sha256": "b4a1d130e2b1ec717d8a977a3ef3938fad42b8daa4a6b550e7575e295d3c2fdc"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/03_field_survey_top25.csv",
+      "bytes": 7211,
+      "sha256": "49ef27487a777c1b564a9e016a226cc6cd45106480b0cabcea99f50b805da38c"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/04_group_statistics.csv",
+      "bytes": 357,
+      "sha256": "553b5663317a3e3a47c16cf31d14acefbb7cd4cd1ee26e1868bdca79081c26e2"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/09_priority_map.png",
+      "bytes": 215340,
+      "sha256": "88ffa65be2bb8f181bff771bf2c7210dfe20fecf35c695adf70e85b0246297a2"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/10_interactive_map.html",
+      "bytes": 253195,
+      "sha256": "d1e1fdfc259128e78d8267da1f05c7128f3a033261f84ab6305e433a92b45d2f"
+    },
+    {
+      "path": "analysis/protection-zone/phase8/README_8th_analysis.md",
+      "bytes": 5053,
+      "sha256": "152ef3aec56598ff8d18cbc01bfda8b45b8342d01dd5b139a1b750da4b62a6ed"
+    },
+    {
+      "path": "analysis/protection-zone/phase9/05_phase9_QGIS_layers.gpkg",
+      "bytes": 335872,
+      "sha256": "c7da1113d9e3ad1cd974a6209055ef4ca0cc1263edbdef564f6fd4f8371e9646"
+    },
+    {
+      "path": "analysis/protection-zone/phase9/09_phase9_interactive_map.html",
+      "bytes": 155330,
+      "sha256": "51db3bf17919e4cc701f4a81702cce004859569e36e485914b5d4dc60da265dc"
+    },
+    {
+      "path": "analysis/protection-zone/phase9/11_focus_54_62_map.png",
+      "bytes": 114628,
+      "sha256": "a3f9c6496b0da37a834ceb106fe296e13ba4f7a0f0f9f3a95cb9eb49a5ff2627"
+    },
+    {
+      "path": "analysis/protection-zone/phase9/12_field_checklist_54_62.csv",
+      "bytes": 2598,
+      "sha256": "25fcebecc8e54da8147bc1436d39af533758efeac967219d2b938bdf3b446f8c"
+    },
+    {
+      "path": "analysis/protection-zone/phase9/README_phase9_review.md",
+      "bytes": 6174,
+      "sha256": "8fcc4211a631ea53fb04312c274fa491168a8894ce699efa69f5475a2794f4ed"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/01_현장확인_상위15개구간.csv",
+      "bytes": 3099,
+      "sha256": "ce0db1f422a7167aae5dbd30e6c49dcdf754158f6910ec8c94a0cfcb986d31d4"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/02_현장조사표_134개구간.csv",
+      "bytes": 24694,
+      "sha256": "843ef813b80975fb9ee69cc6c4cd4aa62b6ad5b8cef23507ee5ad681510cd5b2"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/03_폭미상_추가점검153개구간.csv",
+      "bytes": 27240,
+      "sha256": "4c02fb2ed0ca5533de6c71b30bdc51fab944cf9ae033a361fe4d552ab218233a"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/04_현장확인_상위15개구간.geojson",
+      "bytes": 19375,
+      "sha256": "eb9a5208978eab4bf1e31187ef152df029dfbd27c762cac27c2c5e7545efe907"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/05_폭미상_추가점검153개구간.geojson",
+      "bytes": 108500,
+      "sha256": "f1a431510d249772fab3df9fddae9913970d9fd2d209bf95bceb4e340f276c00"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/06_현장조사_후보_대화형지도.html",
+      "bytes": 1507049,
+      "sha256": "e15354887d083e0f0c5636d2912c55e1cddf64595d5f5f1e27b1fe9c23e8de87"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/07_분석현황.json",
+      "bytes": 596,
+      "sha256": "9951b2c472e2953081531c2771020651504948de5978c84991aa0dfd4dd5f7d2"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/08_원본앱_SHA256_무변경.txt",
+      "bytes": 128,
+      "sha256": "150bfa0f33237fafabe1d27019e4f18fba5858b4ee7363faa30362e42a73627f"
+    },
+    {
+      "path": "analysis/protection-zone/pre-api/README_다음단계_분석가이드.md",
+      "bytes": 3997,
+      "sha256": "0b5d934bac7016135b01d10d6e06594cdc84d584570e6c29c4076f4315c33e17"
+    },
+    {
+      "path": "analysis/protection-zone/results.zip",
+      "bytes": 489060,
+      "sha256": "91671594544dd551d930263df400e9577a9c36d11030f83c71842e8a74ca6379"
+    },
+    {
+      "path": "analysis/protection-zone/results/상도제1동_경계클립_예비지도.png",
+      "bytes": 383254,
+      "sha256": "8bfea44d6315c84eb6747ad5b187053d97ae307afd1041ac11ca3ed93a3524e3"
+    },
+    {
+      "path": "analysis/protection-zone/results/상도제1동_범위정정_요약.json",
+      "bytes": 811,
+      "sha256": "e5e05f02af9810bc572f5b982bfd31142c23ce8a015716af6d6fc64b1bbb7b66"
+    },
+    {
+      "path": "analysis/protection-zone/results/상도제1동_예비연장_재집계.csv",
+      "bytes": 199,
+      "sha256": "cfd1af2ddfa25003303aced64924e208e49347b176371703f165230b4037e5da"
+    },
+    {
+      "path": "analysis/protection-zone/results/상도제1동_예비후보도로_경계클립.geojson",
+      "bytes": 1033209,
+      "sha256": "1ba3f6245b72fc7ad0e4686dad9a93311e6474a040abc9dbe46654e200e9ee43"
+    },
+    {
+      "path": "analysis/protection-zone/sangdo1_results_verified_20261109/검증요약.json",
+      "bytes": 344,
+      "sha256": "6376c6ad27f5c824de33e30ded54cbd671924a5b59d1080e376b48c74c2d7232"
+    },
+    {
+      "path": "analysis/protection-zone/sangdo1_results_verified_20261109/상도제1동_경계클립_예비지도.png",
+      "bytes": 383254,
+      "sha256": "8bfea44d6315c84eb6747ad5b187053d97ae307afd1041ac11ca3ed93a3524e3"
+    },
+    {
+      "path": "analysis/protection-zone/sangdo1_results_verified_20261109/상도제1동_우선현장확인_후보134구간.geojson",
+      "bytes": 129139,
+      "sha256": "186cba40439621c874e3a0fb10012c0121f9fb9671450c0e2f7333287269da03"
+    },
+    {
+      "path": "analysis/protection-zone/sangdo1_results_verified_20261109/상도제1동_클리핑결과_검증보고서.md",
+      "bytes": 4741,
+      "sha256": "22ca530cd4f98c2b9b9751ee4bc5619f05dfd051cc1fa98bb2e58c90c88017bd"
+    },
+    {
+      "path": "analysis/protection-zone/범위오류_정정.txt",
+      "bytes": 1311,
+      "sha256": "c09f3bbd553853448a82121c6ff8926807e1f8df6eb8b117c11477d66a5842d1"
+    },
+    {
+      "path": "analysis/protection-zone/상도제1동_행정경계_20261001.geojson",
+      "bytes": 2089,
+      "sha256": "a8771014ff481f99eacd2e24e572da48604bdb443e5214fe78e71e741e52f954"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_10km_링크.gpkg",
+      "bytes": 118784,
+      "sha256": "06cad3f5d7703a6012b8e4008e230f6fba4673a0b5211faf8523602d24601e79"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_30km_링크.gpkg",
+      "bytes": 126976,
+      "sha256": "83d44c97fb788c54882babbe74d386e3ae892967e38ee6a1d54dc9b571e85083"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_40km_링크.gpkg",
+      "bytes": 114688,
+      "sha256": "5ae87915bd32a0ebb5c0c4d516248b0970d8271967f51bc2211e81a8462191fb"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_50km_링크_노드 결합.gpkg",
+      "bytes": 143360,
+      "sha256": "51e6986971d33df212ce18e74657c08bb59dfc89094f74246708d5a530253b20"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_50km_링크_좌표.gpkg",
+      "bytes": 151552,
+      "sha256": "18a622b4f33ff1107f1f0f95a52f2bf33a11afe9ce74f5b455346e808295e3d9"
+    },
+    {
+      "path": "analysis/road-speed-originals/상도1동_경계.gpkg",
+      "bytes": 118784,
+      "sha256": "b8ecd05617cbb19016497d4a627a40fa281646844df4cea2df1ec3302545da45"
+    },
+    {
+      "path": "analysis/transport-bus-source/20260902.xlsx",
+      "bytes": 741052,
+      "sha256": "73eb0a5f4fd0f6128237b5e23fa361fd1c6d8a31a83bcee2884e6a48481852bb"
+    },
+    {
+      "path": "analysis/transport-bus-source/README_공식정류소_적용.md",
+      "bytes": 1404,
+      "sha256": "f71bc49d0fb5270879fd1bb6df440614e47645297f1b7f38fdbf9fa71a8d8563"
+    },
+    {
+      "path": "apply-ui-alignment.mjs",
+      "bytes": 4508,
+      "sha256": "fd34a0e622266d3ed1e0b235bda3c1c01408b9d83361d3a77d3c60ed259250a0"
+    },
+    {
+      "path": "assets/desktop-mobile.css",
+      "bytes": 9289,
+      "sha256": "fae74f303106c193c0f8c4e1a162721e50acae63807234167515b118259cdf57"
+    },
+    {
+      "path": "assets/ui-alignment.css",
+      "bytes": 4296,
+      "sha256": "b000f637f7e83212fe6e17adf50d80eb2b387b704b1d79cf553dc98f044d21dc"
+    },
+    {
+      "path": "build-info.json",
+      "bytes": 63,
+      "sha256": "2f5b67294e195ce22d64ba59104c7cdd272483deba5fd812abcdcdf55f3668a6"
+    },
+    {
+      "path": "check-local-imports.mjs",
+      "bytes": 1553,
+      "sha256": "a9c4fb8a0f661677339289907cb362434086fd680f811d338409994d229959e2"
+    },
+    {
+      "path": "fallback-only/public/data/metro-accessibility-verified.geojson",
+      "bytes": 52,
+      "sha256": "b3049ad7a1062091e169bd352424d59721a26b8b6229942aef26d11b0c6a96e1"
+    },
+    {
+      "path": "fallback-only/server/station-accessibility-data.mjs",
+      "bytes": 4784,
+      "sha256": "bc17fe5a138dcec97f856a49dffab23916f5367fe8e682c29ae582bcd7227bb9"
+    },
+    {
+      "path": "fallback-only/src/map-direction.js",
+      "bytes": 547,
+      "sha256": "8f5336820d4ee44861eb1c27a0c8fee6cae29a47a551b939fe4b77ceaacab8c2"
+    },
+    {
+      "path": "fallback-only/src/station-accessibility.js",
+      "bytes": 6786,
+      "sha256": "e0495183bc5cca5566f9a5ee3768e9f7829537a9fbb721d3c4ecfb62c024e2da"
+    },
+    {
+      "path": "input-roads.geojson",
+      "bytes": 930415,
+      "sha256": "da55f864330eb14d93ebed7933acc34990aed17640f746031fc05ffa80247084"
+    },
+    {
+      "path": "install-missing-deps.ps1",
+      "bytes": 736,
+      "sha256": "c37c62398643bef3a4ec3417e7938db34fdcd43438b98c3050092a4747a54c08"
+    },
+    {
+      "path": "install-missing-only.ps1",
+      "bytes": 1398,
+      "sha256": "758785f8b63354e3098799267e46f36221210dfd6f2eaf275d48b33aaa341e1d"
+    },
+    {
+      "path": "main.js",
+      "bytes": 120636,
+      "sha256": "1c191ac4daf6567807a768dee55e989a268bc1c637afbd64fcd748a6ce60addc"
+    },
+    {
+      "path": "map-appearance.js",
+      "bytes": 7008,
+      "sha256": "fd78430e619bd0194c2f39898eb16cc74a2608a44ccd258cb9c29e23856c04a5"
+    },
+    {
+      "path": "night-visibility-map.js",
+      "bytes": 33933,
+      "sha256": "7a0288a46282236e02654e7af1b21805b76325b00c7e95bc6e46785f456928bd"
+    },
+    {
+      "path": "night-visibility-panel.css",
+      "bytes": 12185,
+      "sha256": "73a7ef3071b1f0431b72f4708b10dcbe9aafe6e642e34b8628622c2533d33da9"
+    },
+    {
+      "path": "scripts/Apply-Dongjak-Cloudflare.ps1",
+      "bytes": 1501,
+      "sha256": "a2bc2a4f2cc5088df875543a4429bfd2cb02da0e08225f5e383a4240ebf13a4f"
+    },
+    {
+      "path": "scripts/Apply-Dongjak-v55-Mobile.ps1",
+      "bytes": 1258,
+      "sha256": "4c2df902fae8a47d8cbc6ae52114b1ca0b92303d954616e4b646760dbb31b797"
+    },
+    {
+      "path": "scripts/Deploy-Dongjak-Cloudflare.ps1",
+      "bytes": 1914,
+      "sha256": "905fadc4346c73dd75f13189decba7fda3227dd8032c0c9a9e9a5059ebc13162"
+    },
+    {
+      "path": "scripts/_apply_v7_mobile_patch.py",
+      "bytes": 8336,
+      "sha256": "52c38759af0b7ded7350bfdfda59cbec151514b367a72d9cace494b5ed722385"
+    },
+    {
+      "path": "scripts/release_windows.ps1",
+      "bytes": 2622,
+      "sha256": "c870a6755e252c747387a5d717b9f1d203054d08a3bcd9f0e470de57aedcd853"
+    },
+    {
+      "path": "scripts/set-version-v53.mjs",
+      "bytes": 822,
+      "sha256": "f8dfdc61621876c4b50576f8d317f2425d032218006313a4527404ce07b5731d"
+    },
+    {
+      "path": "style.css",
+      "bytes": 137139,
+      "sha256": "4b37184037a2121ca9c0f5477cc688071683112ac4c04740f7e145c93010ee9f"
+    },
+    {
+      "path": "ui-environment.js",
+      "bytes": 17020,
+      "sha256": "495cf1dce91e980208e2c6e91470e57f2880bdf49b9bf7c108851c8f28df8fd6"
+    },
+    {
+      "path": "v720_preview.html",
+      "bytes": 67848,
+      "sha256": "5e945b0ac94d80f57d975df585e63e1b9f28d1bf5cd7af3865f2959a5c3f4558"
+    },
+    {
+      "path": "version-history.js",
+      "bytes": 20073,
+      "sha256": "0ebf268d7f994e1b2835718183d85245e0b03f8844a68f64f95ecbb343d2a7d8"
+    }
+  ]
+}

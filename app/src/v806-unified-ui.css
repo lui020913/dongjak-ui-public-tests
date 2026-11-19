@@ -1,0 +1,198 @@
+/* v8.0.3 integrated follow-up — consistent typography, motion and layout.
+   A single Web Animations coordinator owns entrance/exit after DOM startup. */
+html body #app#app,
+html body #app#app *:not(svg):not(path):not(canvas){
+  font-family:'NanumSquareNeo','NanumSquare Neo','NanumSquareNeoBold','Apple SD Gothic Neo','Malgun Gothic',sans-serif!important;
+}
+html body #app#app{--dj806-text:var(--dj800-text);--dj806-muted:var(--dj800-muted);}
+html body #app#app :is(h1,h2,h3,.page-heading h2,.transport-section-title strong,.road-width-legend-head strong){font-weight:800!important;letter-spacing:-.035em!important;}
+html body #app#app :is(p,small,dd,dt,.record-item,button,input,select,textarea){letter-spacing:-.012em;}
+/* Preserve canvas typography: MapLibre's native vector-tile glyphs are not DOM text. */
+
+/* One entrance owner; prevent old CSS keyframes, competing opacity layers,
+   and discrete-display/backdrop transitions which flashed black on closing. */
+html body #app#app[data-dj806-motion="on"] :is(
+ #transport-sheet,#admin-dong-picker,#overview-sheet,#route-panel,
+ #participation-panel,#news-panel,#mine-panel,#road-width-legend,
+ #map-gesture-guide,#map-safety-controls,#map-advanced-controls,
+ #pza-road-sheet,#night-visibility-float,#dj800-type-panel,
+ #detail-sheet,#entry-sheet):not([hidden]),
+html body #app#app[data-dj806-motion="on"] :is(
+ #dj-app-about:not([hidden]) .dj-about-card,
+ #dj-map-settings:not([hidden]) .dj-map-settings-card,
+ #version-history-modal:not([hidden]) .version-history-dialog){
+ animation:none!important;transition-property:background-color,border-color,color!important;
+ filter:none!important;will-change:auto!important;
+}
+html body #app#app #version-history-modal,
+html body #app#app #dj-map-settings,
+html body #app#app #dj-app-about{
+ transition:none!important;transition-behavior:normal!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+html body #app#app #version-history-modal:not([hidden]),
+html body #app#app #dj-map-settings:not([hidden]),
+html body #app#app #dj-app-about:not([hidden]){
+ background:transparent!important;background-color:transparent!important;
+}
+
+/* Distinct, readable light/dark surfaces. Avoid pale boxes in dark panels. */
+html[data-theme="dark"] body #app#app,
+html body #app#app[data-theme="dark"]{
+ --dj800-canvas:#14282c;--dj800-surface:#1e3439;
+ --dj800-secondary:#29464a;--dj800-elevated:#31564f;
+ --dj800-border:#4d746b;--dj800-text:#effbf7;
+ --dj800-muted:#c0d6d2;--dj800-accent:#9be4c6;
+ --dj800-hover:#355951;--dj800-shadow:0 16px 45px rgba(0,0,0,.28);
+ color-scheme:dark;
+}
+html body #app#app[data-theme="dark"] :is(
+ .page-panel,#map-advanced-controls,#map-safety-controls,#road-width-legend,
+ #transport-sheet,#admin-dong-picker,#overview-sheet,#map-gesture-guide,
+ #dj800-type-panel,#dj-map-settings .dj-map-settings-card,
+ #version-history-modal .version-history-dialog,#dj-app-about .dj-about-card,
+ .dj-place-detail-popup .maplibregl-popup-content){
+ background:var(--dj800-surface)!important;color:var(--dj800-text)!important;
+ border-color:var(--dj800-border)!important;
+}
+html body #app#app[data-theme="dark"] :is(
+ .route-card,.route-location-row,.route-select-actions,
+ .community-feed>article,.community-note,.community-feed .empty,
+ .community-feed .empty-state,.community-empty,.empty-state,
+ .records-list .empty,.records-list .record-item,.record-item,
+ .stat-grid>div,.dongjak-news-item,.dongjak-news-card,
+ .transport-arrival-row,.transport-timetable-route-panel,.transport-mode-tabs,
+ .dj-import-entry,.dj-safety-overview,.dj-safety-group,
+ .transport-hours-line-panel,.transport-selection-actions,.transport-selection-box,
+ .dj-settings-segment,.dj-map-settings-group,.dj-map-settings-footer,
+ .dj-place-ai-response,.dj-place-ai-text){
+ background:var(--dj800-secondary)!important;border-color:var(--dj800-border)!important;
+ color:var(--dj800-text)!important;
+}
+html body #app#app[data-theme="dark"] :is(
+ .community-feed .empty,.community-feed .empty-state,.community-empty,.empty-state,
+ .records-list .empty,.records-list .record-item,.record-item,
+ .stat-grid>div,.dongjak-news-item,.dongjak-news-card,
+ .dj-map-settings-group,.dj-place-ai-response,.dj-place-ai-text)
+ :is(p,small,span,dd,label){color:var(--dj800-muted)!important;}
+html body #app#app[data-theme="dark"] :is(
+ .community-feed .empty,.community-feed .empty-state,.community-empty,
+ .route-card,.route-location-row,.dj-import-entry,.record-item)
+ :is(strong,b,h2,h3){color:var(--dj800-text)!important;}
+html body #app#app[data-theme="dark"] :is(
+ input,textarea,select,.dj-map-settings-group button,.dj-map-settings-footer button,
+ .community-filter button,.community-feed button,.route-select-actions button){
+ background:var(--dj800-secondary)!important;color:var(--dj800-text)!important;
+ border-color:var(--dj800-border)!important;
+}
+html body #app#app[data-theme="dark"] :is(input,textarea)::placeholder{color:#a8c0ba!important;opacity:1!important;}
+html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-box,
+html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-actions{background:transparent!important;border:0!important;}
+html body #app#app[data-theme="dark"] #transport-sheet .transport-selection-actions :is(button,#transport-use-start,#transport-use-end){
+ box-shadow:none!important;filter:none!important;
+}
+html body #app#app[data-theme="dark"] #transport-use-start{
+ background:#294943!important;border:1px solid #63988a!important;color:#f2fff9!important;
+}
+html body #app#app[data-theme="dark"] #transport-use-end{
+ background:#137d68!important;border-color:#559d89!important;color:#fff!important;
+}
+
+/* Center all bus titles, category and ARS independent of the close button. */
+html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head{position:relative!important;}
+html body #app#app #transport-sheet[data-kind="bus"] .transport-panel-head>div{width:100%!important;box-sizing:border-box!important;padding-inline:42px!important;min-width:0!important;}
+html body #app#app #transport-sheet[data-kind="bus"] :is(#transport-kind,#transport-title,#transport-description){
+ width:100%!important;display:block!important;text-align:center!important;margin-inline:auto!important;
+ text-wrap:balance!important;overflow-wrap:anywhere!important;
+}
+html body #app#app #transport-sheet[data-kind="bus"] #transport-close{right:0!important;left:auto!important;position:absolute!important;}
+
+/* Route title should anchor to the form, never hang in empty vertical space. */
+html body #app#app #route-panel .page-heading{
+ min-height:0!important;margin:0 0 14px!important;padding:0!important;
+ display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;
+}
+html body #app#app #route-panel .page-heading .micro-label{font-size:13px!important;line-height:1.35!important;}
+html body #app#app #route-panel .page-heading h2{margin:0!important;font-size:clamp(24px,3.6vw,29px)!important;line-height:1.25!important;font-weight:850!important;}
+html body #app#app #route-panel .route-card{margin-top:0!important;}
+
+/* More map facility icons become discoverable at zoom >=14; layer count and
+   actual feature coordinates remain those of the source vector tiles. */
+html body #app#app :is(.dj-place-detail-popup,.maplibregl-popup-content){color:var(--dj800-text)!important;}
+html body #app#app #map .dj-place-detail-popup{
+ max-width:min(360px,calc(100vw - 36px))!important;
+}
+html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+ max-height:min(72dvh,640px)!important;
+}
+
+/* Desktop: match the *measured* left navigation rail height, not viewport
+   bottom. Road-width and safety are mutually exclusive in JS. */
+@media(min-width:1080px){
+ html body #app#app #road-width-legend:not([hidden]){
+   position:fixed!important;box-sizing:border-box!important;
+   left:var(--dj800-panel-left,200px)!important;right:auto!important;
+   top:var(--dj800-panel-top,92px)!important;bottom:auto!important;
+   width:min(510px,var(--dj800-panel-max,510px))!important;
+   max-width:min(510px,var(--dj800-panel-max,510px))!important;
+   height:var(--dj806-rail-height,650px)!important;
+   min-height:0!important;max-height:calc(100dvh - var(--dj800-panel-top,92px) - 12px)!important;
+   display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+   overflow-y:auto!important;overflow-x:hidden!important;
+   padding:23px 25px!important;border-radius:24px!important;
+ }
+ html body #app#app #road-width-legend .road-width-legend-head{width:100%!important;margin-bottom:8px!important;}
+ html body #app#app #road-width-legend>div:not(.road-width-legend-head){padding:9px 0!important;}
+ html body #app#app #road-width-legend>small{margin-top:auto!important;}
+ html body #app#app #road-width-legend .roadwidth-note{font-size:15px!important;}
+ html body #app#app #dj-map-settings .dj-map-settings-card{
+   width:min(560px,calc(100vw - 48px))!important;
+   max-height:calc(100dvh - 36px)!important;height:max-content!important;
+   overflow:visible!important;
+ }
+ html body #app#app #dj-map-settings .dj-map-settings-content{
+   overflow:visible!important;min-height:0!important;max-height:none!important;
+   padding:5px 25px 12px!important;
+ }
+ html body #app#app #dj-map-settings .dj-map-settings-group{padding:12px 0!important;}
+ html body #app#app #dj-map-settings .dj-map-settings-footer{padding:13px 25px!important;}
+ html body #app#app #dj-map-settings .dj-map-settings-head{padding:17px 25px 12px!important;}
+ html body #app#app #dj-map-settings :is(.dj-map-settings-group h3,.dj-map-settings-group button){font-size:15px!important;}
+ html body #app#app #dj-map-settings :is(.dj-map-settings-head p,.dj-map-settings-group p){font-size:13px!important;}
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-title{font-size:26px!important;}
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-description{font-size:14px!important;}
+}
+@media(min-width:1080px) and (max-height:720px){
+ html body #app#app #dj-map-settings .dj-map-settings-card{max-height:calc(100dvh - 24px)!important;overflow:hidden!important;}
+ html body #app#app #dj-map-settings .dj-map-settings-content{overflow-y:auto!important;}
+}
+@media(max-width:699px){
+ /* Prevent floating title and preserve normal bottom-sheet safe area. */
+ html body #app#app #route-panel .page-heading{margin:0 0 10px!important;gap:3px!important;}
+ html body #app#app #route-panel .page-heading h2{font-size:23px!important;}
+ html body #app#app #route-panel:not([hidden]){padding-top:18px!important;}
+ html body #app#app #dj-v794-toolbar #dj800-type-trigger .dj800-type-icon{gap:3px!important;}
+ html body #app#app #map .dj-place-detail-popup{
+   width:min(340px,calc(100vw - 115px))!important;
+   max-width:calc(100vw - 115px)!important;
+ }
+ html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+   max-height:calc(100dvh - var(--dj800-panel-bottom,96px) - env(safe-area-inset-top,0px) - 30px)!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html body #app#app *{scroll-behavior:auto!important;}
+}
+
+/* Naver supplies optical weights as separate webfont families. */
+html body #app#app :is(h1,h2,h3,h4,strong,b,.page-heading h2,.transport-section-title strong){
+ font-family:'NanumSquareNeoExtraBold','NanumSquareNeo','Apple SD Gothic Neo',sans-serif!important;
+}
+html body #app#app :is(button,.nav-tab,.map-quick-search-submit,.route-mini-btn,.primary-btn){
+ font-family:'NanumSquareNeoBold','NanumSquareNeo','Apple SD Gothic Neo',sans-serif!important;
+}
+/* MapLibre location popups also use the one JavaScript motion coordinator. */
+html body #app#app[data-dj806-motion="on"] .maplibregl-popup .maplibregl-popup-content{
+ animation:none!important;
+}

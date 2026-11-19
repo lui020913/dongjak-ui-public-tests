@@ -1,0 +1,57 @@
+/* v7.9.5: mobile-only search priority, brand spacing and persistent theme transition. */
+@media (max-width:699px) {
+  /* Keep the logo's original visual size while allowing a real separation
+     from the search text (the previous layout had only a 5px flex gap). */
+  html body #app#app .topbar>.map-quick-search .map-quick-search-form {
+    gap:12px!important;
+    padding-left:10px!important;
+  }
+  html body #app#app .topbar>.map-quick-search .map-quick-search-form>.brand {
+    flex:0 0 33px!important;
+    width:33px!important;min-width:33px!important;max-width:33px!important;
+    padding:0 7px 0 0!important;
+    box-sizing:content-box!important;
+    border-right:1px solid #dceae3!important;
+    margin:0!important;
+  }
+  html body #app#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form>.brand {
+    border-right-color:#4a6a62!important;
+  }
+  /* Suggestions own the space below the search card while text is focused.
+     Temporarily hide the entire auxiliary button row instead of trying to
+     layer the dropdown through its interactive buttons. */
+  html body #app#app[data-search-open="true"] #dj-v794-toolbar {
+    visibility:hidden!important;opacity:0!important;
+    pointer-events:none!important;
+  }
+  html body #app#app[data-search-open="true"] .topbar {
+    z-index:3300!important;
+  }
+  html body #app#app[data-search-open="true"] .topbar>.map-quick-search {
+    z-index:3301!important;
+  }
+  html body #app#app[data-search-open="true"] .topbar>.map-quick-search .map-quick-search-dropdown:not([hidden]) {
+    z-index:3302!important;
+    max-height:min(var(--dj-search-results-max,370px),calc(100dvh - env(safe-area-inset-top,0px) - 108px))!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Unlike the prior fixed 320ms fade, this layer remains visible until the
+     JavaScript theme controller observes a stable MapLibre render (or a
+     safety timeout). Reduced-motion preferences are respected below. */
+  html body #app#app .dj-theme-switch-flash:not([hidden]) {
+    position:fixed!important;inset:0!important;
+    display:block!important;opacity:1!important;
+    background:rgba(65,91,86,.10)!important;
+    -webkit-backdrop-filter:blur(3px) saturate(.86)!important;
+    backdrop-filter:blur(3px) saturate(.86)!important;
+    animation:none!important;
+    pointer-events:none!important;
+    z-index:3900!important;
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce) {
+  html body #app#app .dj-theme-switch-flash:not([hidden]) {
+    display:none!important;
+  }
+}

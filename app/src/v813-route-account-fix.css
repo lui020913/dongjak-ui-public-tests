@@ -1,0 +1,67 @@
+/* v8.1.3 — Route header close control belongs to its header, not the page flow.
+   Old CSS positioned .page-panel > .page-dismiss only; the header-owned control
+   is now independent of page flex/grid rules and survives width changes. */
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative!important;
+  float:none!important;
+  min-width:0!important;
+  min-height:56px!important;
+  padding:0 62px 9px 0!important;
+  margin:0 0 11px!important;
+  border:0!important;
+}
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > .page-dismiss{
+  position:absolute!important;
+  inset:0 0 auto auto!important;
+  top:0!important;right:0!important;left:auto!important;bottom:auto!important;
+  float:none!important;
+  grid-column:auto!important;grid-row:auto!important;
+  order:unset!important;
+  margin:0!important;
+  padding:0!important;
+  translate:none!important;transform:none!important;
+  box-sizing:border-box!important;
+  width:44px!important;height:44px!important;
+  min-width:44px!important;min-height:44px!important;
+  max-width:44px!important;max-height:44px!important;
+  display:grid!important;place-items:center!important;
+  z-index:70!important;
+  pointer-events:auto!important;
+}
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > .page-dismiss::before,
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > .page-dismiss::after{
+  content:none!important;display:none!important;
+}
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > .page-dismiss > .dj817-x-svg{
+  display:block!important;width:24px!important;height:24px!important;
+  stroke:currentColor!important;stroke-width:2.6!important;
+  flex:none!important;margin:auto!important;
+}
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > h2{
+  min-width:0!important;margin-top:3px!important;
+  overflow-wrap:break-word!important;
+}
+html body #app#app#app #route-panel.page-panel > .dj813-route-heading > p{
+  overflow-wrap:anywhere!important;word-break:keep-all!important;
+}
+/* Server setup form is visible only on explicit account action. */
+#app .dj824-cloud-setup{display:grid;gap:8px;margin:10px 0 8px;min-width:0;}
+#app .dj824-cloud-setup label{font-size:13px;font-weight:650;}
+#app .dj824-cloud-setup input{
+  min-width:0;width:100%;box-sizing:border-box;border:1px solid rgba(100,140,130,.36);
+  border-radius:10px;min-height:40px;padding:9px 11px;background:var(--surface,#fff);
+  color:inherit;font:500 14px/1.4 'Pretendard Variable',sans-serif;
+}
+#app .dj824-cloud-setup button{
+  min-height:40px;border-radius:10px;background:#168774;color:#fff;
+  font-weight:700;border:1px solid #168774;padding:9px 14px;
+}
+#app .dj824-cloud-help,#app .dj824-account-instructions{
+  overflow-wrap:anywhere;word-break:keep-all;line-height:1.5;
+}
+#app[data-theme="dark"] .dj824-cloud-setup input{
+  background:#294144;color:#e4f3ec;border-color:#4b6968;
+}
+#app #dj824-account .dj824-cloud-setup[hidden]{display:none!important;}

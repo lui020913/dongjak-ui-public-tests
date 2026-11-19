@@ -1,0 +1,235 @@
+/* v5.5 mobile layout repair. Imported last to override older v17/v5.4 patches.
+ * MapLibre labels/official data/API calls are not changed by this stylesheet. */
+#app .transport-sheet .transport-arrivals,
+#app .transport-sheet .metro-arrival-group,
+#app .transport-sheet .metro-arrival-direction-group,
+#app .transport-sheet .metro-arrival-detail{min-width:0;max-width:100%;}
+#app .transport-sheet .metro-arrival-detail strong{
+  display:block;max-width:100%;white-space:normal;word-break:keep-all;
+  overflow-wrap:break-word;line-height:1.5;
+}
+#app .transport-sheet .metro-arrival-route{display:block;line-height:1.5;overflow-wrap:break-word;}
+#app .transport-sheet .metro-direction-grid .transport-arrival-row{min-width:0;}
+#app .transport-sheet .metro-direction-grid .transport-arrival-time{
+  max-width:100%;white-space:normal;overflow-wrap:break-word;text-align:left;
+  font-variant-numeric:tabular-nums;
+}
+/* Short arrival-time tokens belong in their own space, never inside the destination heading. */
+@media (max-width:800px){
+  #app .transport-sheet .metro-direction-grid{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;
+  }
+  #app .transport-sheet .metro-arrival-direction-group{margin:0!important;padding:10px!important;}
+  #app .transport-sheet .metro-direction-grid .transport-arrival-row{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;gap:8px!important;padding:11px 12px!important;
+    width:100%;
+  }
+  #app .transport-sheet .metro-direction-grid .transport-arrival-main{min-width:0!important;width:auto!important;}
+  #app .transport-sheet .metro-direction-grid .transport-arrival-time{
+    margin:0!important;justify-self:end;align-self:start;
+    white-space:nowrap!important;font-size:12px!important;
+    line-height:1.35!important;background:#e6f5ee;padding:5px 8px;
+    border-radius:8px;color:#0b765b;
+  }
+  #app .transport-sheet .transport-section-title{
+    flex-wrap:wrap!important;align-items:center!important;gap:8px 12px!important;
+  }
+  #app .transport-sheet .transport-updated-actions{
+    flex-wrap:wrap!important;gap:6px!important;min-width:0;
+  }
+  #app[data-theme="dark"] .transport-sheet .metro-direction-grid .transport-arrival-time{
+    background:#315848;color:#dbffed;
+  }
+}
+@media (max-width:360px){
+  #app .transport-sheet .metro-direction-grid .transport-arrival-row{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #app .transport-sheet .metro-direction-grid .transport-arrival-time{justify-self:start;}
+}
+/* Shared mobile coordinate system: top header / search / weather / map / sheet / bottom tabs. */
+@media(max-width:700px){
+  #app{--dj-mobile-nav-height:calc(65px + env(safe-area-inset-bottom));}
+  #app .topbar{z-index:1600!important;}
+  #app .topbar>.map-quick-search{
+    
+    z-index:3!important;
+  }
+  #app .topbar .header-tools .weather-widget{
+    display:flex!important;visibility:visible!important;
+    
+    
+    
+    z-index:2!important;box-shadow:0 2px 10px #143a2f24!important;
+  }
+  #app .map-tools-toggle{
+     /* fallback */
+     /* resolved below via topbar height */
+  }
+  /* Keep map tools and weather on a separate row, left and right respectively. */
+  #app #map-tools-toggle{
+    
+    z-index:1100!important;
+    
+  }
+  #app .map-actions,
+  #app[data-tab="map"] .map-actions,
+  #app[data-tab="map"] .map-actions.map-actions-horizontal{
+    display:flex!important;
+    
+    
+    
+    z-index:990!important;
+  }
+  #app .map-actions button,
+  #app[data-tab="map"] .map-actions.map-actions-horizontal button{
+    width:42px!important;height:42px!important;border-radius:13px!important;
+  }
+  /* The collapsed sheet is deliberately short, rather than a tall panel
+     translated behind the bottom nav. This prevents hidden controls from
+     covering map gestures and makes every state predictable. */
+  #app .sheet.overview-sheet{
+    
+    
+    
+    
+    overflow-y:auto!important;transition:height .18s ease,box-shadow .18s ease!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"]{
+    
+    overflow:hidden!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="half"]{
+    
+  }
+  #app .sheet.overview-sheet[data-sheet-state="expanded"]{
+    
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] :is(.sheet-summary,.primary-btn,.footer-note,.section-label,#points-count){
+    display:none!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] #overview-sheet-handle{
+    margin-bottom:9px!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] h1{
+    margin:0!important;font-size:13px!important;line-height:1.4!important;
+    letter-spacing:-.3px!important;
+  }
+  #app .sheet.overview-sheet .sheet-top-actions{flex:0 0 auto;}
+  #app .sheet.overview-sheet .sheet-toggle{padding:8px 10px!important;font-size:11px!important;}
+  #app #bottom-nav{z-index:1500!important;}
+  /* Reserve the top search + weather rows for live transport information. */
+  #app #transport-sheet.transport-sheet:not([hidden]){
+    top:auto!important;bottom:var(--dj-mobile-nav-height)!important;
+    max-height:calc(100dvh - 171px - var(--dj-mobile-nav-height))!important;
+    min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;
+    padding:12px 14px 22px!important;
+  }
+  #app #transport-sheet .transport-panel-head{min-width:0;gap:8px;}
+  #app #transport-sheet .transport-panel-head>div{min-width:0;}
+  #app #transport-sheet .transport-panel-head h2{overflow-wrap:break-word;}
+  #app #transport-sheet .transport-section-title{line-height:1.4;}
+  /* Scale belongs to the map, not inside the information sheet. */
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+    
+    z-index:975!important;
+  }
+  #app[data-overview-sheet-state="half"] .map-actions,
+  #app[data-overview-sheet-state="expanded"] .map-actions{
+    display:none!important;
+  }
+  #app[data-overview-sheet-state="half"] .maplibregl-ctrl-bottom-left,
+  #app[data-overview-sheet-state="expanded"] .maplibregl-ctrl-bottom-left,
+  #app:has(#transport-sheet:not([hidden])) .maplibregl-ctrl-bottom-left{
+    display:none!important;
+  }
+  #app:has(#transport-sheet:not([hidden])) .map-actions{display:none!important;}
+  #app.map-controls-open .map-advanced-controls{
+    
+    
+  }
+}
+@media (min-width:701px) and (max-width:800px){
+  #app .transport-sheet .metro-direction-grid{grid-template-columns:minmax(0,1fr)!important;}
+}
+/* Keep the sheet priority above both the vertical and horizontal tool variants. */
+@media(max-width:700px){
+  #app[data-tab="map"][data-overview-sheet-state="half"] .map-actions,
+  #app[data-tab="map"][data-overview-sheet-state="expanded"] .map-actions,
+  #app[data-tab="map"][data-overview-sheet-state="half"] .map-actions.map-actions-horizontal,
+  #app[data-tab="map"][data-overview-sheet-state="expanded"] .map-actions.map-actions-horizontal{
+    display:none!important;
+  }
+}
+@media(min-width:701px) and (max-width:1079px){
+  #app #transport-sheet.transport-sheet:not([hidden]){
+    top:auto!important;max-height:calc(100dvh - 145px - env(safe-area-inset-bottom))!important;
+  }
+}
+
+/* v5.8: Fixed-bottom sheet; never translate the whole surface while swiping. */
+@media (max-width:700px){
+  #app[data-tab="map"] .sheet.overview-sheet,
+  #app[data-tab="map"] .sheet.overview-sheet.dragging{
+    
+    
+    background:#ffffff!important;
+    box-shadow:0 -7px 22px rgba(20,44,34,.13)!important;
+    
+    border-radius:20px 20px 0 0!important;
+    opacity:1!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet.dragging{
+    
+    
+    
+    transition:none!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"]{
+    
+    
+    
+    
+  }
+  #app[data-tab="map"] .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top h1{
+    font-size:13px!important;line-height:1.35!important;
+  }
+  #app[data-tab="map"] .sheet.overview-sheet .sheet-toggle{font-size:11px!important;}
+  /* Keep the scale below the content, not overlapping the floating sheet. */
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{
+    
+  }
+  #app[data-theme="dark"][data-tab="map"] .sheet.overview-sheet{background:#172831!important;}
+}
+
+@media(max-width:700px){
+  #app[data-tab="map"] .sheet.overview-sheet.dragging[data-sheet-state]{
+    
+    
+    
+    
+  }
+}
+
+/* v5.9.1: one stable mobile search row below the header, visible during map gestures. */
+@media (max-width:700px){
+  #app .topbar{background:rgba(255,255,255,.985)!important;z-index:1600!important;}
+  #app .topbar>.map-quick-search{
+    
+    
+    
+    
+    z-index:1650!important;
+    background:#ffffff!important;border:1px solid #dce9e2!important;
+    border-radius:20px!important;
+    box-shadow:0 5px 18px rgba(22,48,38,.12)!important;
+  }
+  #app .map-quick-search-form{background:#fff!important;border:0!important;box-shadow:none!important;}
+  #app .topbar .header-tools .weather-widget{z-index:1610!important;}
+  #app #map-tools-toggle{z-index:1610!important;}
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left{}
+}

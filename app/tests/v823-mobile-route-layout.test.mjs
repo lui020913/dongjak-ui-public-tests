@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stabilizePageHeaders,PANEL_HEADINGS} from '../src/v823-route-panel.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('main page header has no JS-injected inline styles; canonical CSS owns geometry',()=>{
+  let mutations=0;
+  const close={style:{setProperty(){mutations++;}}};
+  const title={textContent:'도보 길찾기'};
+  const header={style:{setProperty(){mutations++;}},querySelector:sel=>sel.includes('button')?close:title};
+  const panel={querySelector:()=>header};
+  const doc={getElementById:id=>id==='route-panel'?panel:null};
+  assert.equal(stabilizePageHeaders(doc),1);
+  assert.equal(mutations,0);
+  const source=read('src/v823-route-panel.js');
+  assert.doesNotMatch(source,/style\.setProperty/);
+  const mobile=read('src/v829-mobile-layout-system.css');
+  assert.match(mobile,/display:flex!important;flex-flow:row nowrap!important/);
+  assert.match(mobile,/flex:0 0 44px!important;order:3!important;margin-left:auto!important/);
+});
+test('v8.2.3 preserves all four page close handlers and full mobile sheet scroll',()=>{
+  const html=read('index.html');
+  const css=read('src/v823-route-panel.css');
+  assert.deepEqual(PANEL_HEADINGS,['route-panel','participation-panel','news-panel','mine-panel']);
+  assert.match(html,/v823-route-panel\.css/);
+  assert.match(html,/v823-route-panel\.js/);
+  for(const id of PANEL_HEADINGS)assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(css,/overflow-y:auto!important/);
+  assert.match(css,/grid-column:2!important/);
+  assert.doesNotMatch(css,/max-height:min\(73dvh/);
+  assert.match(read('src/v833-home-sheet-layout.css'),/max-height:min\(50dvh/);
+});
+test('v8.3.2 shows waypoint editing before route computation with compact plus entry',()=>{
+  const src=read('src/v815-map-product.js');
+  assert.match(src,/calcBtn\?\.before\(waySection\)/);
+  assert.doesNotMatch(src,/calcBtn\?\.after\(waySection\)/);
+  const html=read('index.html');
+  assert.match(html,/id="route-calc" class="primary-btn route-calc"/);
+  assert.match(html,/data-close-page="route"/);
+});
+test('v8.2.3 release records the close/route fixes and previous Kakao history',()=>{
+  const releases=JSON.parse(read('src/app-release-log.json')).releases;
+  const route = releases.find(r=>r.previousVersion==='8.2.3');
+  const backup = releases.find(r=>r.previousVersion==='8.2.2');
+  const kakao = releases.find(r=>r.previousVersion==='8.2.1');
+  assert.ok(route && backup && kakao);
+  assert.ok(releases.indexOf(route)<releases.indexOf(backup) && releases.indexOf(backup)<releases.indexOf(kakao));
+  assert.match(route.originalItems.join(' '),/X 버튼/);
+  assert.match(route.originalItems.join(' '),/경로 찾기/);
+  assert.match(kakao.originalItems.join(' '),/카카오/);
+});

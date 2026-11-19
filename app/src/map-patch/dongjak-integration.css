@@ -1,0 +1,30 @@
+/* 동작구 현행 vanilla JS/MapLibre 통합: 검색/상단 및 네비게이션 상시 유지.
+   src/style.css가 먼저 로드된 후 이 파일로 필요한 부분만 덮어씁니다. */
+#app[data-tab="map"].map-immersive .topbar {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+#app[data-tab="map"].map-immersive #bottom-nav {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+/* 좌측 사이드바(가로 88px)보다 아래에 축척을 배치. 정보 카드(좌측 116px~)와 겹치지 않습니다. */
+#app[data-tab="map"] .maplibregl-ctrl-bottom-left {
+  
+  
+  
+}
+@media (max-width: 1079px) {
+  #app[data-tab="map"].map-immersive .topbar { display: flex !important; }
+}
+@media (max-width: 700px) {
+  #app[data-tab="map"] .maplibregl-ctrl-bottom-left {
+    
+    
+    
+  }
+}

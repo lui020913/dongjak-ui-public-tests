@@ -1,0 +1,118 @@
+/* v7.0.3 — Dongjak logo fit, aligned page panels, consistent map controls, compact empty states. */
+:root{
+  --dj-v703-green:#13836b;
+  --dj-v703-green-dark:#0e6655;
+  --dj-v703-surface:#fbfdfb;
+  --dj-v703-border:#d7e7df;
+}
+
+/* Restore the actual Dongjak brand artwork; a legacy hamburger mask was clipping the logo. */
+#app .topbar>.brand .logo,
+#app .topbar>.brand .logo img{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+#app .topbar>.brand .logo{
+  background:transparent!important;
+  overflow:visible!important;
+  border-radius:0!important;
+}
+#app .topbar>.brand .logo img{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+}
+#app .map-startup-logo{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#app .map-startup-logo img{object-fit:contain!important;padding:2px!important;}
+
+/* Desktop page panels share the exact top edge of the left navigation. */
+@media(min-width:1080px){
+  #app #route-panel.page-panel,
+  #app #news-panel.page-panel,
+  #app #participation-panel.page-panel,
+  #app #mine-panel.page-panel{
+    top:calc(88px + env(safe-area-inset-top))!important;
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 112px - env(safe-area-inset-top))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* On phones and tablets, bottom sheets wrap their content and grow only when needed. */
+@media(max-width:1079px){
+  #app .page-panel,
+  #app #news-panel.page-panel{
+    top:auto!important;
+    bottom:var(--dj-mobile-nav-h,70px)!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,70px) - 12px)!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* Any information drawer uses content height; max-height and internal scrolling remain in force. */
+#app :is(.map-advanced-controls,.map-safety-controls,.transport-sheet,.detail-sheet,.entry-sheet,
+  .night-visibility-float,.night-visibility-panel){
+  height:max-content!important;
+  min-height:0!important;
+}
+@media(min-width:700px){
+  #app #transport-sheet:not([hidden]){
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 104px - env(safe-area-inset-top))!important;
+  }
+}
+
+/* Map Options and Pedestrian Safety launchers use the same geometry as a desktop nav tab. */
+@media(min-width:1080px){
+  #app #map-tools-toggle,
+  #app #map-safety-toggle{
+    box-sizing:border-box!important;
+    width:88px!important;min-width:88px!important;max-width:88px!important;
+    height:60px!important;min-height:60px!important;max-height:60px!important;
+    padding:8px 6px!important;
+    border-radius:15px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    gap:5px!important;white-space:normal!important;text-align:center!important;
+  }
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 72px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 144px)!important;}
+}
+
+/* The drawer closes from its own heading; the floating launcher keeps one stable label. */
+@media(min-width:1080px){
+  #app .map-options-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;}
+}
+#app .map-options-heading-copy{display:grid;gap:4px;min-width:0;}
+#app .map-options-desktop-close{
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;border:1px solid var(--dj-v703-border)!important;border-radius:11px!important;
+  background:#edf5f0!important;color:#31584a!important;font-size:25px!important;line-height:1!important;font-weight:500!important;
+  cursor:pointer!important;
+}
+#app .map-options-desktop-close:hover{background:#e0f0e8!important;border-color:#9ccbb8!important;}
+#app #map-options-mobile-close{
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;
+  padding:0!important;border-radius:11px!important;font-size:25px!important;line-height:1!important;font-weight:500!important;
+}
+#app #map-tools-toggle{white-space:nowrap!important;}
+#app.map-controls-open #map-tools-toggle{color:inherit!important;}
+#app[data-theme="dark"] .map-options-desktop-close{
+  background:#263f3d!important;border-color:#49665d!important;color:#e3f4eb!important;
+}
+#app[data-theme="dark"] .map-options-desktop-close:hover{background:#31544a!important;}
+
+@media(prefers-reduced-motion:reduce){
+  #app .map-options-desktop-close{transition:none!important;}
+}

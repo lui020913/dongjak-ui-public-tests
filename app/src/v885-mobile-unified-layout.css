@@ -1,0 +1,403 @@
+/* v8.8.0 / v885: mobile surface system for the 2026-11-16 iPhone audit.
+ * This file is loaded LAST. One spacing scale and one header geometry.
+ * Maps, API calls, navigation state and source data are not modified here.
+ */
+@media (max-width:699px) {
+  #app {
+    --dj885-space-1: 6px;
+    --dj885-space-2: 10px;
+    --dj885-space-3: 14px;
+    --dj885-space-4: 18px;
+    --dj885-space-5: 24px;
+    --dj885-control-h: 44px;
+    --dj885-card-radius: 16px;
+    --dj885-sheet-radius: 24px;
+    --dj885-scale: 1;
+    --dj885-font-weight: 700;
+  }
+  #app[data-dj-type-scale="small"] { --dj885-scale: .94; }
+  #app[data-dj-type-scale="large"] { --dj885-scale: 1.095; }
+  #app[data-dj-type-scale="xlarge"] { --dj885-scale: 1.19; }
+  #app[data-dj-type-weight="bold"] { --dj885-font-weight: 820; }
+
+  /* Avoid the costly per-node font reflow on iOS while preserving the visual
+     hierarchy of each named UI component through bounded CSS rules. */
+  #app[data-dj885-type-engine="css"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+     .dj-sheet-chrome-title h2 {
+       font-size:calc(19px * var(--dj885-scale))!important;
+       font-weight:var(--dj885-font-weight)!important;
+  }
+  #app[data-dj885-type-engine="css"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+     .dj-page-intro,
+  #app[data-dj885-type-engine="css"] #route-panel .route-location-text strong,
+  #app[data-dj885-type-engine="css"] #participation-panel .community-heading-row p {
+    font-size:calc(13px * var(--dj885-scale))!important;
+  }
+  #app[data-dj885-type-engine="css"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+     :is(.page-section-title,.community-heading-row h3,.dj834-detail-title) {
+    font-size:calc(17px * var(--dj885-scale))!important;
+    font-weight:var(--dj885-font-weight)!important;
+  }
+  #app[data-dj885-type-engine="css"] #mine-panel .dj834-settings-group>button,
+  #app[data-dj885-type-engine="css"] #mine-panel .dj885-type-choices>button {
+    font-size:calc(15px * var(--dj885-scale))!important;
+    font-weight:var(--dj885-font-weight)!important;
+  }
+  #app[data-dj885-type-engine="css"] #transport-sheet .transport-panel-head h2 {
+    font-size:calc(20px * var(--dj885-scale))!important;
+    font-weight:var(--dj885-font-weight)!important;
+  }
+  #app[data-dj885-type-engine="css"] #transport-sheet :is(.transport-arrival-row,.transport-arrival-row strong,.transport-arrival-row span) {
+    font-size:calc(13px * var(--dj885-scale))!important;
+  }
+  #app[data-dj885-type-engine="css"] #bottom-nav>.nav-tab>span:last-child {
+    font-size:calc(12px * var(--dj885-scale))!important;
+    font-weight:var(--dj885-font-weight)!important;
+  }
+
+  /* Fullscreen buttons are intentionally removed, not merely restyled.
+     Existing edge-grip swipe-up/swipe-down remains the expansion control. */
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet)
+      .dj877-expand-button {display:none!important;}
+
+  /* One shared top bar for route/community/news/my-info. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+      >.dj-sheet-chrome {
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:var(--dj885-space-2)!important;
+    min-height:74px!important;
+    padding:17px var(--dj885-space-4) 12px!important;
+    position:relative!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+      .dj-sheet-chrome-title {
+    flex:1 1 auto!important;min-width:0!important;
+    display:flex!important;align-items:center!important;
+    gap:var(--dj885-space-2)!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+      .dj-sheet-chrome-icon {
+    width:23px!important;height:23px!important;flex:0 0 23px!important;
+    margin:0!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+      .dj-sheet-chrome-close {
+    display:grid!important;place-items:center!important;
+    width:44px!important;height:44px!important;min-width:44px!important;
+    min-height:44px!important;flex:0 0 44px!important;
+    margin:0!important;padding:9px!important;border-radius:13px!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+      .dj-sheet-chrome-grip {
+    position:absolute!important;top:7px!important;left:50%!important;
+    transform:translateX(-50%)!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+     >.dj836-sheet-body {
+    box-sizing:border-box!important;
+    padding:var(--dj885-space-4)!important;
+    padding-bottom:max(var(--dj885-space-5),env(safe-area-inset-bottom,0px))!important;
+  }
+  /* Avoid multiple nested gray outlines competing for hierarchy. */
+  #app #route-panel .route-card,
+  #app #participation-panel .community-form,
+  #app #mine-panel .dj834-settings-group {
+    border:1px solid var(--dj881-line)!important;
+    border-radius:var(--dj885-card-radius)!important;
+    box-shadow:none!important;
+  }
+  #app #route-panel .route-select-actions {
+    align-items:center!important;gap:var(--dj885-space-1)!important;
+  }
+  #app #route-panel .route-location-row {gap:var(--dj885-space-2)!important;}
+  #app #route-panel .route-location-text {min-width:0!important;}
+  #app #route-panel .route-mini-btn,
+  #app #route-panel .route-gps-btn {
+    min-height:var(--dj885-control-h)!important;
+    border-radius:12px!important;
+  }
+  #app #route-panel .dj-page-intro {margin:0 0 var(--dj885-space-4)!important;line-height:1.6!important;}
+
+  /* Text-size controls are direct buttons, no native select or heavy JS loop. */
+  #app #mine-panel .dj877-type-settings {
+    display:grid!important;gap:var(--dj885-space-5)!important;
+    padding:var(--dj885-space-2) 0 var(--dj885-space-5)!important;
+  }
+  #app #mine-panel .dj885-type-field {
+    display:grid!important;gap:var(--dj885-space-2)!important;min-width:0!important;
+  }
+  #app #mine-panel .dj885-type-label {
+    font-size:14px!important;font-weight:750!important;color:var(--dj881-text)!important;
+  }
+  #app #mine-panel .dj885-type-choices {
+    display:grid!important;grid-auto-flow:column!important;
+    grid-auto-columns:minmax(0,1fr)!important;gap:5px!important;
+    padding:5px!important;border:1px solid var(--dj881-line)!important;
+    background:var(--dj881-soft)!important;border-radius:16px!important;
+  }
+  #app #mine-panel .dj885-type-choices>button {
+    min-width:0!important;min-height:46px!important;
+    padding:8px 3px!important;border:0!important;
+    border-radius:11px!important;background:transparent!important;
+    color:var(--dj881-muted)!important;white-space:nowrap!important;
+    cursor:pointer!important;
+  }
+  #app #mine-panel .dj885-type-choices>button[aria-pressed="true"] {
+    background:var(--dj881-accent)!important;color:#fff!important;
+    box-shadow:0 2px 7px rgba(13,90,65,.13)!important;
+  }
+  #app #mine-panel .dj834-detail-nav {
+    display:flex!important;align-items:center!important;
+    min-height:52px!important;gap:var(--dj885-space-2)!important;
+    border-bottom:1px solid var(--dj881-line)!important;
+    padding-bottom:var(--dj885-space-3)!important;
+    margin-bottom:var(--dj885-space-4)!important;
+  }
+  #app #mine-panel .dj834-detail-back {
+    flex:0 0 auto!important;min-height:44px!important;
+    display:inline-flex!important;align-items:center!important;
+  }
+
+  /* Transit has the same header baseline, with independent, accessible
+     arrival cards. The map and arrival update code remain authoritative. */
+  html body #app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head {
+    box-sizing:border-box!important;
+    padding:18px 4px 14px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-height:96px!important;gap:8px!important;
+    border-bottom:1px solid var(--dj881-line)!important;
+  }
+  html body #app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed .transport-panel-head>div:first-child {
+    padding:0 48px!important;min-width:0!important;
+    width:100%!important;flex:1 1 auto!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:center!important;text-align:center!important;gap:4px!important;
+  }
+  html body #app#app#app#app#app#app #transport-sheet .transport-panel-head #transport-close {
+    right:4px!important;top:18px!important;margin:0!important;
+    display:grid!important;place-items:center!important;
+    width:44px!important;height:44px!important;
+  }
+  #app #transport-sheet #transport-title {
+    min-width:0!important;max-width:100%!important;text-align:center!important;
+    justify-content:center!important;gap:8px!important;line-height:1.28!important;
+    word-break:keep-all!important;
+  }
+  #app #transport-sheet #transport-description,
+  #app #transport-sheet #transport-kind {text-align:center!important;line-height:1.4!important;}
+  #app #transport-sheet .dj-news-transport-actions {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex-wrap:wrap!important;gap:var(--dj885-space-2)!important;
+    margin:10px 0 0!important;padding:0!important;
+  }
+  #app #transport-sheet .dj-news-transport-actions button {
+    min-width:44px!important;min-height:44px!important;
+    display:grid!important;place-items:center!important;
+    padding:8px!important;border-radius:12px!important;
+  }
+  #app #transport-sheet .transport-mode-tabs {
+    display:flex!important;align-items:center!important;
+    min-height:46px!important;margin:10px 0!important;
+    border-radius:999px!important;overflow:hidden!important;
+  }
+  #app #transport-sheet .transport-mode-tabs button {
+    min-height:44px!important;min-width:0!important;border-radius:999px!important;
+  }
+  #app #transport-sheet .transport-arrivals-title {
+    display:flex!important;align-items:center!important;gap:8px!important;
+    padding:10px 0!important;margin:0!important;
+  }
+  #app #transport-sheet .transport-updated-actions {
+    margin-left:auto!important;min-width:0!important;gap:6px!important;
+  }
+  #app #transport-sheet .transport-updated-actions button {min-height:40px!important;border-radius:11px!important;}
+  #app #transport-sheet[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
+    box-sizing:border-box!important;min-width:0!important;
+    padding:12px!important;align-items:stretch!important;
+    border-radius:var(--dj885-card-radius)!important;gap:6px!important;
+  }
+
+  /* Previous/current/next station: genuine three-segment capsule bar.
+     Existing station pointers and route validation continue to work. */
+  html body #app#app#app#app #transport-sheet[data-kind="subway"] .metro-info-line-card {
+    margin:10px 0!important;padding:0!important;overflow:visible!important;
+    border-radius:999px!important;background:transparent!important;
+  }
+  html body #app#app#app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)!important;
+    align-items:stretch!important;gap:0!important;
+    padding:4px!important;margin:0!important;min-height:52px!important;
+    border:1px solid var(--dj881-line)!important;border-radius:999px!important;
+    background:var(--dj881-soft)!important;overflow:hidden!important;
+    box-sizing:border-box!important;
+  }
+  html body #app#app#app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row
+      :is(.metro-rail-previous,.metro-rail-current,.metro-rail-next) {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-width:0!important;min-height:44px!important;margin:0!important;
+    padding:7px 5px!important;line-height:1.3!important;
+    font-size:clamp(11px,3vw,13px)!important;
+    font-weight:750!important;text-align:center!important;
+    border:0!important;box-shadow:none!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body #app#app#app#app #transport-sheet[data-kind="subway"]
+      .metro-neighbor-row .metro-rail-current {
+    background:var(--dj-metro-route-color,var(--dj881-accent))!important;
+    color:white!important;border-radius:999px!important;
+    font-weight:850!important;font-size:clamp(12px,3.4vw,14px)!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-rail-previous[role="button"],
+  #app #transport-sheet[data-kind="subway"] .metro-rail-next[role="button"] {
+    cursor:pointer!important;
+  }
+  #app #transport-sheet .transport-neighbors {margin:12px 0 14px!important;}
+  #app #transport-sheet .transport-hours-disclaimer {
+    margin:10px 0!important;color:var(--dj881-muted)!important;line-height:1.65!important;
+  }
+  #app #transport-sheet .transport-service-hours {
+    padding-bottom:12px!important;
+  }
+
+  /* Other floating surfaces share spacing, type hierarchy and touch size. */
+  #app :is(#detail-sheet,#admin-dong-picker,#dj-mobile-utilities)
+     :is(button,[role="button"]) {min-height:44px;}
+  #app #detail-sheet .detail-topline,
+  #app #admin-dong-picker .dj-sheet-chrome,
+  #app #dj-mobile-utilities .dj854-more-head {
+    box-sizing:border-box!important;padding:14px 16px!important;
+    display:flex!important;align-items:center!important;gap:10px!important;
+  }
+  #app #detail-sheet .detail-titleline {
+    align-items:center!important;gap:10px!important;margin:6px 0 10px!important;
+  }
+  #app #detail-sheet :is(.detail-info,.dj-detail-info-grid) {
+    border-radius:var(--dj885-card-radius)!important;gap:10px!important;
+  }
+  #app #dj-mobile-utilities .dj840-more-quick-actions {gap:var(--dj885-space-2)!important;}
+  #app #dj-mobile-utilities :is(.dj840-more-quick-actions button,.dj860-more-launch) {
+    border-radius:12px!important;min-height:44px!important;
+  }
+
+  /* Uniform entry animation, no reliance on completion events for state.
+     Existing pointer/edge gestures and close owners remain in place. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #transport-sheet,#detail-sheet,#admin-dong-picker,#map-gesture-guide,#dj-mobile-utilities):not([hidden]):not(.dj-sheet-dragging):not(.dj833-sheet-dismissing):not(.dj871-sheet-expanded) {
+    animation:dj885-sheet-in .22s cubic-bezier(.23,.8,.3,1) both!important;
+  }
+  @keyframes dj885-sheet-in {
+    from{opacity:.72;translate:0 12px;}
+    to{opacity:1;translate:0 0;}
+  }
+
+  /* Initial tour should be a floating CARD, not an edge-to-edge full app. */
+  html body #app#app .dj860-onboarding {
+    padding:max(16px,env(safe-area-inset-top,0px)) 14px max(16px,env(safe-area-inset-bottom,0px))!important;
+    place-items:center!important;
+  }
+  html body #app#app .dj860-onboarding .dj860-card {
+    width:100%!important;max-width:460px!important;
+    height:min(790px,calc(100dvh - 44px))!important;
+    max-height:calc(100dvh - 34px)!important;
+    border-radius:26px!important;border:1px solid var(--dj881-line)!important;
+    grid-template-rows:52px minmax(145px,28%) minmax(0,1fr) auto!important;
+    box-shadow:0 16px 48px rgba(0,0,0,.18)!important;
+  }
+  #app .dj860-onboarding .dj860-content {padding:18px 22px!important;}
+  #app .dj860-onboarding .dj860-copy {margin:0 auto!important;}
+  #app .dj860-onboarding .dj860-copy h1 {font-size:clamp(22px,6vw,27px)!important;line-height:1.28!important;}
+  #app .dj860-onboarding .dj860-description {font-size:13px!important;line-height:1.55!important;}
+  #app .dj860-onboarding .dj860-visual-pane {padding:10px 18px!important;}
+  #app .dj860-onboarding .dj860-footer {padding:13px 20px max(15px,env(safe-area-inset-bottom,0px))!important;}
+}
+@media (max-width:374px) {
+  #app #mine-panel .dj885-type-choices>button {font-size:12px!important;padding:8px 2px!important;}
+  #app #transport-sheet[data-kind="subway"] .metro-neighbor-row {grid-template-columns:1fr 1.05fr 1fr!important;}
+}
+@media (prefers-reduced-motion:reduce) {
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #transport-sheet,#detail-sheet,#admin-dong-picker,#map-gesture-guide,#dj-mobile-utilities):not([hidden]) {
+    animation:none!important;
+  }
+}
+
+
+/* v885.1 WebKit regression: older high-ID CSS overrides font-size and the
+ * metro neighbor corner radius despite the v885 layout declarations.
+ * Use explicit pixel tokens (not typed multiplication inside calc()) and a
+ * final high-specificity surface rule. Keep action targets and live data. */
+@media (max-width:699px) {
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"] {
+    --dj885-heading-px:19px;
+    --dj885-caption-px:13px;
+    --dj885-section-px:17px;
+    --dj885-transit-heading-px:20px;
+    --dj885-option-px:15px;
+    --dj885-bottom-px:12px;
+    --dj885-weight:700;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"][data-dj-type-scale="small"] {
+    --dj885-heading-px:18px;--dj885-caption-px:12px;
+    --dj885-section-px:16px;--dj885-transit-heading-px:19px;
+    --dj885-option-px:14px;--dj885-bottom-px:11px;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"][data-dj-type-scale="large"] {
+    --dj885-heading-px:22px;--dj885-caption-px:15px;
+    --dj885-section-px:19px;--dj885-transit-heading-px:23px;
+    --dj885-option-px:17px;--dj885-bottom-px:14px;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"][data-dj-type-scale="xlarge"] {
+    --dj885-heading-px:24px;--dj885-caption-px:16px;
+    --dj885-section-px:21px;--dj885-transit-heading-px:25px;
+    --dj885-option-px:18px;--dj885-bottom-px:15px;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"][data-dj-type-weight="bold"] {
+    --dj885-weight:850;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    :is(#route-panel,#participation-panel,#news-panel,#mine-panel) .dj-sheet-chrome-title h2 {
+    font-size:var(--dj885-heading-px)!important;font-weight:var(--dj885-weight)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    :is(.dj-page-intro,.page-note) {
+    font-size:var(--dj885-caption-px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    :is(.page-section-title,.community-heading-row h3,.dj834-detail-title) {
+    font-size:var(--dj885-section-px)!important;font-weight:var(--dj885-weight)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    #mine-panel :is(.dj834-settings-group>button,.dj885-type-choices>button) {
+    font-size:var(--dj885-option-px)!important;font-weight:var(--dj885-weight)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    #transport-sheet .transport-panel-head h2 {
+    font-size:var(--dj885-transit-heading-px)!important;font-weight:var(--dj885-weight)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app[data-dj885-type-engine="css"]
+    #bottom-nav>.nav-tab>span:last-child {
+    font-size:var(--dj885-bottom-px)!important;font-weight:var(--dj885-weight)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app
+    #transport-sheet[data-kind="subway"] .metro-neighbor-row {
+    border-radius:999px!important;
+    padding:4px!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)!important;
+    gap:0!important;
+    min-height:52px!important;
+    border:1px solid var(--dj881-line)!important;
+    background:var(--dj881-soft)!important;
+    overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app
+    #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current {
+    border-radius:999px!important;
+  }
+}

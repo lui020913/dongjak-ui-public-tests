@@ -1,0 +1,84 @@
+/* v7.9.4: mobile-only responsive tool row.
+   Hide the v7.9.3 row entirely, rather than trying to override the older
+   high-specificity fixed positioning of its descendant buttons. */
+@media (max-width:699px) {
+  html body #app #dj-mobile-tool-row {display:none!important;}
+  html body #app #dj-v794-toolbar {
+    position:fixed!important;
+    top:calc(env(safe-area-inset-top,0px) + 79px)!important;
+    left:12px!important;right:12px!important;
+    bottom:auto!important; width:auto!important;
+    display:flex!important;align-items:center!important;gap:6px!important;
+    height:46px!important;padding:0!important;margin:0!important;
+    z-index:3120!important;pointer-events:none!important;
+  }
+  html body #app #dj-v794-toolbar > .dj-v794-tool {
+    pointer-events:auto!important;
+    position:relative!important;inset:auto!important;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    flex:0 0 42px!important;
+    width:42px!important;min-width:42px!important;max-width:42px!important;
+    height:42px!important;min-height:42px!important;max-height:42px!important;
+    box-sizing:border-box!important;
+    margin:0!important;padding:0!important;
+    border-radius:999px!important;
+    border:1px solid #d7e6de!important;
+    background:#fff!important;color:#23483d!important;
+    box-shadow:0 2px 10px rgba(21,49,39,.10)!important;
+    font:700 12px/1.1 system-ui,-apple-system,sans-serif!important;
+    white-space:nowrap!important;word-break:keep-all!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    transform:none!important;
+    transition:width .18s ease,flex-basis .18s ease,background-color .18s ease!important;
+  }
+  html body #app #dj-v794-toolbar > #dj-v794-weather {margin-left:auto!important;font-size:12px!important;}
+  html body #app #dj-v794-toolbar > #dj-v794-more {font-size:21px!important;letter-spacing:-.09em!important;}
+  html body #app #dj-v794-toolbar .dj-v794-icon{display:inline-flex!important;width:22px!important;height:22px!important;flex:none!important;}
+  html body #app #dj-v794-toolbar .dj-v794-icon svg{display:block!important;width:100%!important;height:100%!important;}
+  html body #app #dj-v794-toolbar .dj-v794-caption{display:none!important;}
+  html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"]{
+    flex:0 0 min(112px,calc(100vw - 216px))!important;
+    width:min(112px,calc(100vw - 216px))!important;
+    min-width:0!important;
+    max-width:min(112px,calc(100vw - 216px))!important;
+    gap:5px!important;
+    border-radius:14px!important;
+    background:#e4f3ec!important;border-color:#76b99e!important;
+    box-shadow:0 4px 13px rgba(20,85,61,.18)!important;
+  }
+  html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"] .dj-v794-icon{width:19px!important;height:19px!important;}
+  html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"] .dj-v794-caption{
+    display:inline!important;font-size:clamp(10px,2.9vw,12px)!important;
+  }
+  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool {
+    background:#21383b!important;color:#e9f5ef!important;border-color:#49625d!important;
+  }
+  html body #app[data-theme="dark"] #dj-v794-toolbar > .dj-v794-tool[data-active="true"]{
+    background:#31574e!important;color:#f3fff9!important;border-color:#6eac91!important;
+  }
+  html body #app.map-immersive #dj-v794-toolbar{display:none!important;}
+}
+@media (max-width:359px){
+  html body #app #dj-v794-toolbar{gap:5px!important;left:9px!important;right:9px!important;}
+  html body #app #dj-v794-toolbar > .dj-v794-tool {
+    flex-basis:40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+  }
+  html body #app #dj-v794-toolbar > .dj-v794-tool[data-active="true"]{
+    flex-basis:calc(100vw - 216px)!important;width:calc(100vw - 216px)!important;max-width:calc(100vw - 216px)!important;
+  }
+}
+@media (max-width:699px) {
+  /* Original action buttons remain click targets for the old controller,
+     but must never escape a hidden ancestor due to an old fixed-position rule. */
+  html body #app#app[data-tab] #map-tools-toggle,
+  html body #app#app[data-tab] #map-safety-toggle,
+  html body #app#app[data-tab] #night-visibility-quick-off,
+  html body #app#app #map-tools-toggle,
+  html body #app#app #map-safety-toggle,
+  html body #app#app #night-visibility-quick-off {
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}

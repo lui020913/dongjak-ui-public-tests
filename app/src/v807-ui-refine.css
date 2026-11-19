@@ -1,0 +1,145 @@
+/* v8.0.3 / UI refinement 807. Loaded after v806; original map data and APIs unchanged. */
+/* One typographic step up in weight, without changing authored hierarchy. */
+html body #app#app :is(p,small,li,dd,dt,label,input,select,textarea,.empty-hint,.dj-place-detail,.transport-arrival-time){font-weight:600!important;}
+html body #app#app :is(button,.nav-tab,.map-quick-search-submit,.filter-chip,.transport-chip,.transport-mode-tabs,.transport-arrival-row strong){font-weight:750!important;}
+html body #app#app :is(h1,h2,h3,h4,strong,b,.page-section-title,.transport-section-title strong){font-weight:850!important;}
+html body #app#app :is(.empty-hint,.record-empty,.records-list .empty,.community-feed .empty,.community-feed .empty-hint){line-height:1.62!important;}
+
+/* Real PC/mobile lines rather than inline text forced to wrap at random words. */
+html body #app#app #map-gesture-guide .dj807-guide-platform{display:block!important;margin:0 0 5px!important;line-height:1.55!important;word-break:keep-all!important;}
+html body #app#app #map-gesture-guide .dj807-guide-platform:last-child{margin-bottom:0!important;}
+html body #app#app #map-gesture-guide .dj807-guide-platform b{display:inline-block;min-width:50px;color:var(--dj800-accent,#147e65)!important;font-weight:850!important;}
+
+/* Pin belongs to the selected facility only. It is removed on popup close. */
+.dj807-facility-pin{display:block;width:28px;height:36px;pointer-events:none;filter:drop-shadow(0 3px 4px #0005);}
+.dj807-facility-pin svg{display:block;width:100%;height:100%;overflow:visible;}
+.dj807-facility-pin svg path{fill:#0f9276;stroke:#fff;stroke-width:1.6;}
+.dj807-facility-pin svg circle{fill:#fff;}
+html body #app#app #map .dj-place-detail-popup{max-width:min(410px,calc(100vw - 32px))!important;}
+html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{width:auto!important;max-height:min(70dvh,660px)!important;overflow-y:auto!important;overflow-x:hidden!important;border-radius:19px!important;}
+
+/* Dark state: all empty cards and the text they contain must be legible. */
+html[data-theme="dark"] body #app#app,
+html body #app#app[data-theme="dark"]{
+ --dj807-bg:#1a3034;--dj807-card:#29464b;--dj807-card-soft:#223e42;
+ --dj807-border:#51756f;--dj807-text:#edf8f4;--dj807-muted:#bfd9d1;
+}
+html body #app#app[data-theme="dark"] :is(
+ .empty-hint,.record-empty,.records-list>.empty,.records-list .empty,.community-feed>.empty-hint,
+ .community-feed>.empty,.community-feed>.empty-state,.community-empty,.community-feed>p,
+ #mine-panel .empty-hint,#mine-panel .record-empty,#participation-panel .empty-hint,
+ .records-list>p,.records-list>div,.community-note,.records-list .record-item,
+ .dj-place-detail-popup .dj-place-ai-response){
+ background:var(--dj807-card)!important;border:1px solid var(--dj807-border)!important;
+ color:var(--dj807-text)!important;opacity:1!important;
+}
+html body #app#app[data-theme="dark"] :is(
+ .empty-hint,.record-empty,.records-list>.empty,.records-list .empty,
+ .community-feed>.empty-hint,.community-feed>.empty,.community-feed>.empty-state,
+ .records-list>p,.records-list>div,.community-note,.records-list .record-item,
+ .stat-grid>div,.dj-place-detail-popup .dj-place-ai-response)
+ :is(span,p,small,li,dt,dd){color:var(--dj807-text)!important;opacity:1!important;}
+html body #app#app[data-theme="dark"] :is(
+ #participation-panel,#mine-panel,#news-panel,#route-panel,#map-advanced-controls,#map-safety-controls)
+ :is(.page-section-title,.page-heading,h2,h3,strong,summary,label){color:var(--dj807-text)!important;opacity:1!important;}
+html body #app#app[data-theme="dark"] :is(
+ #map-advanced-controls,#map-safety-controls,#route-panel,#participation-panel,#news-panel,#mine-panel,
+ #transport-sheet,#road-width-legend,#map-gesture-guide,#dj-app-about .dj-about-card,
+ #dj-map-settings .dj-map-settings-card,#version-history-modal .version-history-dialog){
+ background:var(--dj807-bg)!important;border-color:var(--dj807-border)!important;
+ color:var(--dj807-text)!important;
+}
+html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
+ .transport-arrival-row,.transport-hours-line-panel,.route-card,.route-location-row,.community-filter,.stat-grid>div){
+ background:var(--dj807-card-soft)!important;color:var(--dj807-text)!important;border-color:var(--dj807-border)!important;
+}
+html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
+ .transport-arrival-row,.route-card,.route-location-row,.community-filter,.stat-grid>div)
+ :is(p,small,span,label){color:var(--dj807-muted)!important;}
+html body #app#app[data-theme="dark"] :is(.map-options-group,.base-layer-controls,.dj-safety-group,.dj-import-entry,
+ .transport-arrival-row,.route-card,.route-location-row,.stat-grid>div)
+ :is(strong,b,h2,h3,summary){color:var(--dj807-text)!important;}
+html body #app#app[data-theme="dark"] :is(.transport-arrival-time,.transport-auto-refresh-label,.map-options-heading strong){color:#9cebd0!important;}
+
+@media(min-width:1080px){
+ /* Match major desktop panel headings. */
+ html body #app#app #map-advanced-controls :is(.map-options-heading strong,.map-options-mobile-heading strong){font-size:25px!important;line-height:1.3!important;letter-spacing:-.035em!important;}
+ html body #app#app #admin-dong-picker .admin-dong-heading strong{font-size:25px!important;line-height:1.3!important;letter-spacing:-.035em!important;}
+ html body #app#app #admin-dong-picker .admin-dong-heading p{font-size:15px!important;}
+ /* Two compact bus arrival cards per row on desktop; mobile retains one column. */
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals:has(.transport-arrival-row){
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row{
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   justify-content:space-between!important;min-width:0!important;min-height:103px!important;
+   padding:11px 13px!important;gap:9px!important;border-radius:15px!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-main{
+   min-width:0!important;display:flex!important;flex-direction:column!important;gap:3px!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-time{
+   text-align:right!important;align-self:stretch!important;font-size:13px!important;
+   line-height:1.35!important;overflow-wrap:anywhere!important;
+ }
+ html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row strong{font-size:15px!important;}
+ html body #app#app #transport-sheet[data-kind="bus"] .transport-arrival-row small{font-size:13px!important;}
+ /* Previously stretched to the full left-rail height, leaving a giant blank area. */
+ html body #app#app #road-width-legend:not([hidden]){
+   display:block!important;position:fixed!important;top:var(--dj800-panel-top,92px)!important;
+   bottom:auto!important;height:max-content!important;min-height:0!important;
+   max-height:calc(100dvh - var(--dj800-panel-top,92px) - 14px)!important;
+   padding:22px 24px!important;overflow-y:auto!important;justify-content:flex-start!important;
+ }
+ html body #app#app #road-width-legend>small{margin:14px 0 0!important;padding-top:10px!important;}
+ html body #app#app #road-width-legend>div:not(.road-width-legend-head){padding:6px 0!important;}
+ /* Localized 1px bump only for minor labels and helper text. */
+ html body #app#app :is(#news-panel,#mine-panel,#participation-panel,#map-advanced-controls)
+ :is(.empty-hint,small,.page-note,.local-only,.community-feed p,.records-list p){font-size:14px!important;line-height:1.6!important;}
+}
+
+@media(max-width:699px){
+ /* Normalize all five icons against the original 24px pencil linework. */
+ html body #app#app #bottom-nav .nav-tab .nav-icon{
+   display:grid!important;place-items:center!important;width:26px!important;height:26px!important;
+   font-size:23px!important;line-height:1!important;font-weight:650!important;
+ }
+ html body #app#app #bottom-nav .nav-tab .nav-icon svg{
+   display:block!important;width:24px!important;height:24px!important;
+   max-width:24px!important;max-height:24px!important;
+   stroke:currentColor!important;stroke-width:2.4!important;stroke-linecap:round!important;
+   stroke-linejoin:round!important;fill:none!important;
+ }
+ html body #app#app #bottom-nav .nav-tab .nav-icon svg path,
+ html body #app#app #bottom-nav .nav-tab .nav-icon svg circle{fill:none!important;stroke:currentColor!important;stroke-width:2.4!important;}
+ html body #app#app #bottom-nav .nav-tab>span:last-child{font-weight:800!important;}
+ /* A native one-line <input> cannot wrap. Reflect placeholder text in an
+    accessible, non-interactive overlay while the field is empty and unfocused. */
+ html body #app#app .topbar .map-quick-search-form{position:relative!important;}
+ html body #app#app .topbar .dj807-search-copy{
+   position:absolute;display:none!important;align-items:center;overflow:hidden;pointer-events:none;
+   box-sizing:border-box;z-index:1;color:var(--dj800-muted,#647f72);
+   font-size:clamp(11px,2.8vw,13.5px);font-weight:700;line-height:1.22;
+   text-align:left;word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty;
+   max-height:3em;white-space:normal;
+ }
+ /* Native input placeholder is the only visible search hint. */
+ html body #app#app .topbar .map-quick-search-form:focus-within .dj807-search-copy,
+ html body #app#app .topbar .map-quick-search-form.dj807-has-input .dj807-search-copy{display:none!important;}
+ /* Metro line changes must update the already-open card without a second
+    entrance animation or a white flash. */
+ html body #app#app #transport-sheet[data-dj807-switching="true"]{
+   animation:none!important;transition-property:background-color,color,border-color!important;
+   opacity:1!important;visibility:visible!important;
+ }
+ html body #app#app #transport-sheet[data-dj807-switching="true"] :is(.transport-panel-head,.transport-arrivals,.metro-info-line-card){
+   animation:none!important;transition:background-color .12s ease,color .12s ease!important;
+ }
+ html body #app#app #map .dj-place-detail-popup{width:min(375px,calc(100vw - 97px))!important;max-width:calc(100vw - 97px)!important;}
+ html body #app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+   max-width:100%!important;max-height:calc(100dvh - var(--dj800-panel-bottom,96px) - env(safe-area-inset-top,0px) - 22px)!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html body #app#app .dj807-facility-pin{animation:none!important;}
+}

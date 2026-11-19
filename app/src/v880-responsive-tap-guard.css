@@ -1,0 +1,52 @@
+/* v8.8.0 scoped responsive tap and text-overflow hardening.
+ * Keep map, overlay positioning, themes, and all navigation logic unchanged.
+ * Applies only to user-facing panel controls and content. */
+@media (max-width: 699px) {
+  /* The prior 38/42px close/expand controls undercut a 44px touch target. */
+  html body #app#app#app .dj877-expand-button {
+    min-width: 44px!important; width: 44px!important;
+    min-height: 44px!important; height: 44px!important;
+    flex: 0 0 44px!important;
+    box-sizing: border-box!important;
+  }
+  #app #map-options-mobile-close,
+  #app #road-width-legend-close {
+    min-width: 44px!important; width: 44px!important;
+    min-height: 44px!important; height: 44px!important;
+    flex: 0 0 44px!important;
+    box-sizing: border-box!important;
+  }
+}
+/* Long place names and user-generated text cannot force a narrow viewport
+ * wider. No panel geometry or deliberate scroll regions are overridden. */
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+  #map-safety-controls,#map-advanced-controls) :is(p,small,strong,h1,h2,h3,label) {
+  overflow-wrap: anywhere;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+  #map-safety-controls,#map-advanced-controls) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+  #map-safety-controls,#map-advanced-controls) :is(button,a,input,textarea,select):focus-visible {
+  outline: 3px solid var(--dj-ui-accent,#248872);
+  outline-offset: 2px;
+}
+/* Reduce background propagation when scrolling a full-height side panel. */
+@media (min-width: 1080px) {
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #map-safety-controls,#map-advanced-controls) {
+    overscroll-behavior: contain;
+  }
+}
+
+/* Production 1280px evidence: the Settings pill is partly obscured by the
+ * separate top-right (?) help button. The earlier topbar padding was
+ * ineffective because the header tools are independently placed on the grid.
+ * Move only that tool group to the left on narrow desktop widths. */
+@media (min-width:1200px) and (max-width:1359px) {
+  html body #app#app#app#app .topbar > .header-tools {
+    transform: translateX(-56px)!important;
+  }
+}

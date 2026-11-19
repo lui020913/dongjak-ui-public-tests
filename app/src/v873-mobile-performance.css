@@ -1,0 +1,33 @@
+/* v8.7.3 – GPU budget applies only during map gestures, never on PC. */
+@media (max-width:699px) {
+  #app.dj873-map-moving .topbar,
+  #app.dj873-map-moving #bottom-nav,
+  #app.dj873-map-moving #dj840-map-tip,
+  #app.dj873-map-moving .map-controls-float,
+  #app.dj873-map-moving .map-quick-search-form {
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  #app .maplibregl-canvas { image-rendering:auto; }
+}
+
+/* General facility refresh is a distinct data action, not an extra overlay. */
+#app #map-safety-controls .data-layer-controls #refresh-general-facilities,
+#app #map-safety-controls .data-layer-controls #general-facility-status {
+  grid-column:1 / -1;
+}
+#app #map-safety-controls .data-layer-controls #general-facility-status {
+  display:block;
+  max-width:100%;
+  padding:5px 2px;
+  line-height:1.55;
+  font-size:12px;
+  overflow-wrap:anywhere;
+  color:var(--dj-text-secondary,#667f79);
+}
+@media (max-width:699px) {
+  #app #map-safety-controls .data-layer-controls #refresh-general-facilities {
+    min-height:40px;
+    font-size:13px;
+  }
+}

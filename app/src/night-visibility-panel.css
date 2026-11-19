@@ -1,0 +1,206 @@
+/* v5.11.2: on-map night analysis panel. One DOM source for slider/stats/filters. */
+#app #night-visibility-float[hidden],
+#app #night-visibility-float #night-visibility-float-content[hidden]{display:none!important;}
+#app #night-visibility-float{
+  position:absolute!important;z-index:1630!important;right:78px!important;top:88px!important;
+  width:min(398px,calc(100vw - 240px))!important;max-height:calc(100dvh - 108px - env(safe-area-inset-bottom))!important;
+  display:flex!important;flex-direction:column!important;overflow:hidden!important;
+  box-sizing:border-box!important;background:#f9fcfa!important;border:1px solid #bed4ca!important;
+  border-radius:17px!important;box-shadow:0 14px 40px rgba(14,42,31,.24)!important;
+  color:#263e34!important;overscroll-behavior:contain!important;
+}
+#app #night-visibility-float .night-visibility-float-head{
+  flex:none;display:flex;gap:10px;align-items:center;justify-content:space-between;
+  min-width:0;padding:12px 13px;background:#20304d;color:#fff;
+}
+#app #night-visibility-float .night-visibility-float-heading{display:grid;gap:2px;min-width:0;}
+#app #night-visibility-float .night-visibility-float-heading strong{font-size:15px;font-weight:850;line-height:1.35;}
+#app #night-visibility-float .night-visibility-float-heading span{font-size:10px;opacity:.82;line-height:1.3;word-break:keep-all;}
+#app #night-visibility-float .night-visibility-float-actions{display:flex;gap:5px;flex:none;}
+#app #night-visibility-float .night-visibility-float-actions button{
+  min-height:30px;padding:5px 8px;font-size:11px;font-weight:750;color:#20304d;
+  background:#eef2fa;border:1px solid #b8c2d4;border-radius:8px;white-space:nowrap;
+}
+#app #night-visibility-float .night-visibility-float-actions button:focus-visible{
+  outline:3px solid #f1bc60;outline-offset:2px;
+}
+#app #night-visibility-float .night-visibility-float-content{
+  display:block!important;flex:1 1 auto!important;min-height:0!important;margin:0!important;padding:12px!important;
+  border:0!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+  background:transparent!important;overscroll-behavior:contain!important;
+}
+#app #night-visibility-float #night-visibility-float-slot{display:block;min-width:0;}
+#app #night-visibility-float #night-visibility-controls{display:grid!important;gap:11px!important;}
+#app #night-visibility-float .night-visibility-stats{padding:12px!important;}
+#app #night-visibility-float .night-visibility-stat{align-items:flex-start!important;gap:5px!important;flex-wrap:wrap!important;}
+#app #night-visibility-float .night-visibility-stat span{min-width:100px;flex:0 0 100px;}
+#app #night-visibility-float .night-visibility-stat strong{flex:1 1 175px;min-width:0;overflow-wrap:anywhere;}
+#app #night-visibility-float #night-visibility-radius{
+  min-height:24px!important;touch-action:pan-x!important;accent-color:#1678ff!important;
+}
+#app #night-visibility-float #night-visibility-radius-value{font-size:15px!important;color:#126fc5!important;}
+#app #night-visibility-float .night-visibility-checkbox{font-size:12px!important;}
+#app #night-visibility-float .night-visibility-checkbox input{height:17px;width:17px;}
+#app #night-visibility-float .night-visibility-legend{font-size:11px!important;flex-wrap:wrap;line-height:1.45;}
+#app #night-visibility-float .night-visibility-disclaimer{font-size:11px!important;line-height:1.55!important;}
+#app[data-theme="dark"] #night-visibility-float{
+  background:#1b2f31!important;color:#e4f3eb!important;border-color:#496b66!important;
+}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-head{background:#1c2948!important;}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions button{
+  background:#35455e;color:#eef4ff;border-color:#55617b;
+}
+#app[data-theme="dark"] #night-visibility-float #night-visibility-radius-value{color:#9dc8ff!important;}
+#app[data-tab]:not([data-tab="map"]) #night-visibility-float{display:none!important;}
+#app.map-safety-open #night-visibility-float{display:none!important;}
+#app:is(.route-picking,.route-preview,.route-guiding,.adding,.detail-open) #night-visibility-float{display:none!important;}
+@media(max-width:1079px){
+  #app #night-visibility-float{right:12px!important;top:calc(228px + env(safe-area-inset-top))!important;
+    width:min(390px,calc(100vw - 148px))!important;
+    max-height:calc(100dvh - 245px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;}
+}
+@media(max-width:700px){
+  #app #night-visibility-float{top:auto!important;left:10px!important;right:10px!important;
+    bottom:calc(77px + env(safe-area-inset-bottom))!important;
+    width:calc(100vw - 20px)!important;
+    max-height:min(58dvh,calc(100dvh - 208px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    border-radius:16px!important;}
+  #app #night-visibility-float .night-visibility-float-head{padding:10px 12px;}
+  #app #night-visibility-float .night-visibility-float-content{padding:10px!important;}
+  #app #night-visibility-float .night-visibility-stat span{flex:0 0 93px;min-width:93px;}
+  #app #night-visibility-float .night-visibility-stat strong{flex:1 1 155px;}
+}
+@media(max-height:540px){
+  #app #night-visibility-float{top:calc(70px + env(safe-area-inset-top))!important;
+    bottom:calc(66px + env(safe-area-inset-bottom))!important;max-height:none!important;}
+}
+/* v5.12.0: explicit distance-vs-building-occlusion comparison */
+#app .night-occlusion-mode{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0;padding:10px;border:1px solid #8caaa363;border-radius:10px;min-width:0;}
+#app .night-occlusion-mode legend{padding:0 5px;font-size:12px;font-weight:800;}
+#app .night-occlusion-mode label{display:inline-flex;align-items:center;gap:5px;min-height:28px;font-size:12px;font-weight:650;cursor:pointer;}
+#app .night-occlusion-mode input{accent-color:#217bff;width:15px;height:15px;}
+#app .night-occlusion-details{font-size:11px;line-height:1.6;overflow-wrap:anywhere;}
+#app .night-occlusion-details:not(:empty){padding:8px 10px;border-radius:8px;border:1px dashed #7b9a9480;}
+#app[data-theme="dark"] .night-occlusion-details{color:#c6e4e4;}
+#app .night-visibility-stats .night-occlusion-breakdown{font-size:11px;font-weight:650;}
+
+#app .night-occlusion-legend{display:flex;align-items:center;gap:5px 9px;flex-wrap:wrap;font-size:10px;line-height:1.5;margin:0;}
+#app .night-occlusion-legend span{white-space:nowrap;font-weight:750;}
+#app .night-occlusion-legend span::before{content:"";display:inline-block;width:14px;height:4px;vertical-align:middle;border-radius:2px;margin-right:4px;}
+#app .night-occlusion-legend .clear::before{background:#79DEC1;}
+#app .night-occlusion-legend .blocked::before{background:#FF8A5B;}
+#app .night-occlusion-legend .outside::before{background:#5D9EFF;}
+#app .night-occlusion-legend .uncertain::before{background:#B2BCC7;}
+/* Primary road classes have one stable hue in both analysis modes. */
+#app .night-result-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
+  gap:8px;padding:10px 11px;margin:0;border-radius:10px;
+  background:rgba(27,105,91,.06);border:1px solid rgba(92,151,139,.25);
+  color:inherit;font-size:11px;line-height:1.45;font-weight:700;}
+#app .night-result-legend span{display:flex;align-items:center;gap:8px;min-width:0;}
+#app .night-result-legend span::before{content:"";display:inline-block;flex:none;
+  width:22px;height:4px;border-radius:3px;background:#79DEC1;}
+#app .night-result-legend .alley::before{background:#FF8A5B;}
+#app .night-result-legend .path::before{background:#5D9EFF;}
+#app[data-theme="dark"] .night-result-legend{background:rgba(5,22,27,.22);border-color:rgba(135,185,171,.25);}
+#app[data-theme="dark"] .night-result-legend span{color:#e5f2ee;}
+@media(max-width:480px){#app .night-result-legend{grid-template-columns:1fr;}}
+
+/* v5.12.1: compact on-map summary + accessible mobile bottom sheet */
+#app #night-visibility-float[data-collapsed="true"]{
+  height:auto!important;min-height:0!important;max-height:88px!important;
+}
+#app #night-visibility-float[data-collapsed="true"] .night-visibility-float-content{display:none!important;}
+#app #night-visibility-float .night-visibility-float-heading span{
+  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#app #night-visibility-float .night-visibility-float-actions button{cursor:pointer;}
+#app #night-visibility-float .night-visibility-explanation{
+  border-top:1px solid rgba(120,155,145,.38);padding:10px 2px 1px;
+  font-size:11px;line-height:1.6;
+}
+#app #night-visibility-float .night-visibility-explanation summary{
+  cursor:pointer;user-select:none;font-size:11px;font-weight:800;
+  padding:5px 3px;list-style:revert;
+}
+#app #night-visibility-float .night-visibility-explanation[open] summary{margin-bottom:6px;}
+@media(max-width:700px){
+  #app #night-visibility-float{
+    position:absolute!important;top:auto!important;
+    bottom:calc(var(--dj-mobile-nav-h,66px) + 8px)!important;
+    left:8px!important;right:8px!important;width:calc(100vw - 16px)!important;
+    max-height:min(56dvh,calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,66px) - 42px))!important;
+    border-radius:18px 18px 12px 12px!important;
+    box-shadow:0 -6px 24px rgba(0,0,0,.22)!important;
+  }
+  #app #night-visibility-float[data-collapsed="true"]{max-height:85px!important;}
+  #app #night-visibility-float .night-visibility-float-head{
+    position:relative;padding:19px 12px 12px!important;touch-action:pan-y;
+  }
+  #app #night-visibility-float .night-visibility-float-head::before{
+    content:"";position:absolute;top:6px;left:calc(50% - 17px);
+    width:34px;height:4px;border-radius:5px;background:rgba(230,240,246,.54);
+    pointer-events:none;
+  }
+  #app #night-visibility-float .night-visibility-float-heading strong{font-size:14px;}
+  #app #night-visibility-float .night-visibility-float-heading span{font-size:10px;}
+  #app #night-visibility-float .night-visibility-float-actions button{
+    min-height:34px;min-width:40px;font-size:11px;
+  }
+}
+@media(max-height:540px) and (max-width:700px){
+  #app #night-visibility-float{
+    top:auto!important;bottom:calc(var(--dj-mobile-nav-h,66px) + 4px)!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,66px) - 10px)!important;
+  }
+  #app #night-visibility-float[data-collapsed="true"]{max-height:85px!important;}
+}
+
+/* v5.12.2: explicitly label lit regions vs. uncolored/unconfirmed map surface. */
+#app .night-coverage-legend{display:flex;flex-wrap:wrap;gap:6px 9px;align-items:center;margin:0;font-size:10px;line-height:1.45;}
+#app .night-coverage{display:inline-flex;align-items:center;gap:5px;padding:3px 6px;border-radius:6px;border:1px solid rgba(127,164,164,.24);white-space:normal;}
+#app .night-coverage::before{content:"";width:11px;height:11px;display:inline-block;border-radius:3px;flex:none;}
+#app .night-coverage.street::before{background:#ffd376;}
+#app .night-coverage.security::before{background:#47e7cf;}
+#app .night-coverage.unlit::before{background:#071725;border:1px solid #4f6672;box-sizing:border-box;}
+#app[data-theme="dark"] .night-coverage{background:rgba(8,25,34,.35);color:#d8e9e9;}
+
+/* v5.12.4 — Night analysis card uses the same theme tokens as the other panels. */
+#app #night-visibility-float{
+  background:var(--dj-ui-bg,#fff)!important;
+  color:var(--dj-ui-text,#19392f)!important;
+  border-color:var(--dj-ui-border,#dbe6e1)!important;
+}
+#app #night-visibility-float .night-visibility-float-head{
+  background:var(--dj-ui-field,#f6faf8)!important;
+  color:var(--dj-ui-text,#19392f)!important;
+  border-bottom:1px solid var(--dj-ui-border,#dbe6e1)!important;
+}
+#app #night-visibility-float .night-visibility-float-heading span{color:var(--dj-ui-subtext,#698278)!important;opacity:1!important;}
+#app #night-visibility-float .night-visibility-float-actions button{
+  background:var(--dj-ui-field,#f6faf8)!important;
+  color:var(--dj-ui-text,#19392f)!important;
+  border-color:var(--dj-ui-border,#dbe6e1)!important;
+}
+#app #night-visibility-float .night-visibility-float-actions button:hover{filter:brightness(.94);}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions button:hover{filter:brightness(1.15);}
+#app #night-visibility-float #night-visibility-radius-value{color:#168b75!important;}
+#app[data-theme="dark"] #night-visibility-float #night-visibility-radius-value{color:#8fdfc8!important;}
+
+/* v5.12.5 — override the older blue header rules at the same specificity. */
+#app[data-theme="dark"] #night-visibility-float,
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-head{
+  background:#1b3031!important;color:#e8f6ef!important;border-color:#47665e!important;
+}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-head{border-bottom:1px solid #47665e!important;}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions button{
+  background:#2c4643!important;color:#ecf7f1!important;border-color:#52756b!important;
+}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-heading span{color:#bedcd2!important;}
+
+
+@media(max-width:700px){
+  #app #night-visibility-float{
+    max-height:min(44dvh,calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,66px) - 72px))!important;
+  }
+  #app #night-visibility-float[data-collapsed="true"]{max-height:85px!important;}
+}

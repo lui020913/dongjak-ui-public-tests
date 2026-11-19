@@ -1,0 +1,220 @@
+/* v8.6.4 — mobile facility detail redesign.
+   Deliberately scoped to phones: desktop/PC facility layout remains untouched. */
+/* Keep the new semantic wrappers layout-neutral on PC; mobile promotes them to cards. */
+#app #map .dj-place-detail-popup .dj-place-info-card,
+#app #map .dj-place-detail-popup .dj-place-favorites-section,
+#app #map .dj-place-detail-popup .dj-place-ai-section{display:contents;}
+#app #map .dj-place-detail-popup .dj-place-favorites-section[hidden]{display:none!important;}
+#app #map .dj-place-detail-popup .dj-place-section-heading{display:none;}
+@media (max-width:699px){
+  html body #app#app#app#app #map .dj-place-detail-popup{
+    width:calc(100vw - 20px)!important;
+    max-width:calc(100vw - 20px)!important;
+    left:10px!important;right:10px!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .maplibregl-popup-content{
+    display:flex!important;flex-direction:column!important;
+    box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+    max-height:min(60dvh,calc(100dvh - var(--dj829-panel-bottom,100px) - env(safe-area-inset-top,0px) - 56px))!important;
+    min-height:0!important;padding:0!important;margin:0!important;
+    overflow:hidden!important;border-radius:22px!important;
+    background:var(--dj800-surface,#fff)!important;
+    box-shadow:0 14px 34px rgba(18,48,38,.18)!important;
+    overscroll-behavior:contain!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .maplibregl-popup-tip{display:none!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-detail{
+    display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+    box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+    min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;
+    overflow:hidden!important;background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header{
+    position:relative!important;z-index:12!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:"title" "actions"!important;
+    align-items:center!important;justify-items:stretch!important;gap:11px!important;
+    box-sizing:border-box!important;width:100%!important;min-width:0!important;
+    flex:0 0 auto!important;margin:0!important;padding:22px 13px 13px!important;
+    background:var(--dj800-surface,#fff)!important;
+    border:0!important;border-bottom:1px solid var(--dj800-border,#d9e8df)!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-edge-drag{
+    position:absolute!important;z-index:25!important;top:0!important;left:0!important;right:0!important;
+    display:block!important;width:100%!important;height:22px!important;
+    touch-action:none!important;cursor:grab!important;pointer-events:auto!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-title{
+    grid-area:title!important;display:flex!important;flex-direction:column!important;
+    align-items:center!important;justify-content:center!important;gap:3px!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:0 4px!important;text-align:center!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-title .dj-place-kicker{
+    display:block!important;width:100%!important;margin:0!important;padding:0!important;
+    color:var(--dj800-accent,#168873)!important;font-size:12px!important;
+    font-weight:780!important;line-height:1.3!important;text-align:center!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-title h3{
+    display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:0!important;color:var(--dj800-text,#20483b)!important;
+    font-size:clamp(18px,4.7vw,21px)!important;font-weight:850!important;
+    line-height:1.28!important;text-align:center!important;
+    overflow-wrap:anywhere!important;word-break:keep-all!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions{
+    grid-area:actions!important;display:flex!important;flex-flow:row nowrap!important;
+    align-items:center!important;justify-content:center!important;gap:6px!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-route-actions,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj815-place-actions{
+    display:flex!important;flex:0 0 auto!important;flex-flow:row nowrap!important;
+    align-items:center!important;justify-content:center!important;gap:6px!important;
+    width:auto!important;min-width:0!important;margin:0!important;padding:0!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions button{
+    box-sizing:border-box!important;display:grid!important;place-items:center!important;
+    flex:0 0 auto!important;min-width:0!important;max-width:none!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+    margin:0!important;padding:0!important;border-radius:12px!important;
+    font-size:13px!important;font-weight:780!important;line-height:1!important;
+    white-space:nowrap!important;overflow:hidden!important;
+  }
+  /* Keep the two route actions textual and make the three utility icons identical. */
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-route-actions button{
+    display:grid!important;place-items:center!important;
+    flex:0 0 58px!important;width:58px!important;min-width:58px!important;max-width:58px!important;
+    height:40px!important;min-height:40px!important;padding:0 5px!important;
+    border-radius:12px!important;font-size:13px!important;font-weight:800!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions button:is(.dj854-place-favorite,.dj856-place-share,.dj-place-header-close){
+    display:grid!important;place-items:center!important;
+    flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+    padding:0!important;color:var(--dj800-text,#24483c)!important;
+    background:var(--dj800-elevated,#edf6f0)!important;
+    border:1px solid var(--dj800-border,#d5e6dd)!important;
+    border-radius:12px!important;font-size:0!important;line-height:0!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions button:is(.dj854-place-favorite,.dj856-place-share,.dj-place-header-close) svg{
+    display:block!important;width:20px!important;height:20px!important;
+    min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;
+    margin:0!important;padding:0!important;fill:none!important;
+    stroke:currentColor!important;stroke-width:2.25!important;
+    stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  /* v8.5.4 drew a text star in ::before on top of the real SVG. Use one centered SVG only. */
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions .dj854-place-favorite::before,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions .dj854-place-favorite::after{
+    content:none!important;display:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions .dj854-place-favorite[aria-pressed="true"] svg path{
+    fill:var(--dj800-accent,#168873)!important;stroke:var(--dj800-text,#24483c)!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-body{
+    display:grid!important;grid-auto-rows:max-content!important;gap:11px!important;
+    box-sizing:border-box!important;flex:1 1 auto!important;
+    width:100%!important;min-width:0!important;min-height:0!important;
+    max-height:calc(60dvh - 132px)!important;overflow-x:hidden!important;overflow-y:auto!important;
+    margin:0!important;padding:13px 13px calc(18px + env(safe-area-inset-bottom,0px))!important;
+    background:var(--dj800-surface,#fff)!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+    scrollbar-width:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-body::-webkit-scrollbar{display:none!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-info-card,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-favorites-section,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-reviews,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-ai-section{
+    display:grid!important;grid-auto-rows:max-content!important;gap:8px!important;
+    box-sizing:border-box!important;width:100%!important;min-width:0!important;
+    margin:0!important;padding:11px 12px!important;
+    border:1px solid var(--dj800-border,#d8e8df)!important;border-radius:15px!important;
+    background:var(--dj800-elevated,#f7fbf8)!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-meta{
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    gap:0!important;width:100%!important;margin:0!important;padding:0!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-row{
+    display:grid!important;grid-template-columns:74px minmax(0,1fr)!important;
+    align-items:center!important;gap:9px!important;width:100%!important;min-width:0!important;
+    min-height:40px!important;margin:0!important;padding:8px 0!important;
+    border:0!important;border-bottom:1px solid var(--dj800-border,#e1ece5)!important;
+    background:transparent!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-row:last-child{border-bottom:0!important;padding-bottom:3px!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-row span{
+    color:var(--dj800-muted,#6c8378)!important;font-size:12px!important;font-weight:720!important;line-height:1.4!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-row :is(strong,a){
+    min-width:0!important;margin:0!important;color:var(--dj800-text,#24483c)!important;
+    font-size:13px!important;font-weight:700!important;line-height:1.45!important;
+    overflow-wrap:anywhere!important;word-break:keep-all!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-note{
+    margin:8px 0 0!important;padding:9px 10px!important;border-radius:11px!important;
+    background:var(--dj800-secondary,#edf6f0)!important;color:var(--dj800-muted,#60796e)!important;
+    font-size:12px!important;line-height:1.55!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-section-heading{
+    display:block!important;margin:0!important;color:var(--dj800-text,#24483c)!important;
+    font-size:13px!important;font-weight:820!important;line-height:1.35!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj815-place-folder{
+    display:grid!important;grid-template-columns:74px minmax(0,1fr)!important;
+    align-items:center!important;gap:9px!important;width:100%!important;
+    margin:0!important;padding:0!important;color:var(--dj800-muted,#6c8378)!important;
+    font-size:12px!important;font-weight:720!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj815-place-folder select{
+    box-sizing:border-box!important;display:block!important;width:100%!important;min-width:0!important;
+    min-height:42px!important;margin:0!important;padding:8px 11px!important;
+    border:1px solid var(--dj800-border,#d5e6dd)!important;border-radius:11px!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#24483c)!important;
+    font-size:13px!important;font-weight:680!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-official-lookup{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    box-sizing:border-box!important;width:100%!important;min-height:44px!important;
+    margin:0!important;padding:10px 12px!important;border-radius:12px!important;
+    border:1px solid var(--dj800-border,#d5e6dd)!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#24483c)!important;
+    font-size:12px!important;font-weight:760!important;line-height:1.4!important;text-align:center!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-reviews{border-top:1px solid var(--dj800-border,#d8e8df)!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-review-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-review-head>strong{font-size:14px!important;font-weight:820!important;color:var(--dj800-text,#24483c)!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-review-open{min-height:38px!important;padding:7px 12px!important;border-radius:10px!important;font-size:12px!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj834-review-status{margin:0!important;font-size:12px!important;line-height:1.5!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-ai-heading{
+    display:block!important;margin:0!important;padding:0!important;
+    color:var(--dj800-text,#24483c)!important;font-size:15px!important;font-weight:850!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-ai-response{
+    box-sizing:border-box!important;width:100%!important;margin:0!important;padding:11px 12px!important;
+    border:1px solid var(--dj800-border,#e0ebe4)!important;border-radius:12px!important;
+    background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#24483c)!important;
+    font-size:12.5px!important;line-height:1.6!important;overflow-wrap:anywhere!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-actions{display:flex!important;gap:8px!important;margin:0!important;}
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-actions button{
+    min-height:38px!important;padding:8px 11px!important;border-radius:10px!important;
+    border:1px solid var(--dj800-border,#d5e6dd)!important;background:var(--dj800-secondary,#edf6f0)!important;
+    color:var(--dj800-text,#24483c)!important;font-size:12px!important;font-weight:750!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-ai-disclaimer{
+    display:block!important;margin:0!important;color:var(--dj800-muted,#71877c)!important;
+    font-size:10.5px!important;line-height:1.5!important;
+  }
+}
+
+/* Night analysis owns a clear map view: never apply the perspective screen blur while active. */
+html body #app[data-sangdo-night="on"] #map.dj-far-haze-active::before{
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}

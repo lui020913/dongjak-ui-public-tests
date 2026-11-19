@@ -1,0 +1,20 @@
+/* v6.0.2: content pages must never be covered by the expanded overview card. */
+#app[data-tab]:not([data-tab="map"]) #overview-sheet.sheet.overview-sheet,
+#app[data-tab]:not([data-tab="map"]) #overview-sheet.sheet.overview-sheet[data-sheet-state="expanded"],
+#app[data-tab]:not([data-tab="map"]) #overview-sheet.sheet.overview-sheet[data-sheet-state="collapsed"] {
+  display:none!important; visibility:hidden!important; pointer-events:none!important;
+}
+/* The help bubble is anchored in JS to the exact ? button; no fixed guessed position. */
+#app #map-gesture-guide.map-gesture-guide {
+  position:fixed!important; top:var(--dj-guide-y,100px)!important;
+  left:var(--dj-guide-x,10px)!important;right:auto!important;bottom:auto!important;
+  transform:none!important; width:min(390px,calc(100vw - 20px))!important;
+  max-height:var(--dj-guide-height,calc(100dvh - 110px))!important;
+  overflow:auto!important; z-index:2250!important;
+}
+#app[data-tab]:not([data-tab="map"]) #map-gesture-guide{display:none!important;}
+@media (max-width:700px){
+  #app #map-gesture-guide.map-gesture-guide{width:min(360px,calc(100vw - 20px))!important;}
+}
+/* No fake suggestion that an article lacks photos when an RSS preview is unavailable. */
+#app .dongjak-news-thumb-placeholder{font-size:11px;line-height:1.5;text-align:center;}

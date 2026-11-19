@@ -1,0 +1,97 @@
+/* Optional browser-only web-app install encouragement.
+ * Kept above the bottom dock but below any modal/onboarding.
+ * No desktop, PWA, map geometry or existing sheet layout changes.
+ */
+#app .dj-browser-webapp-tip[hidden],
+#app .dj-webapp-tip-steps[hidden]{display:none!important;}
+@media (max-width:699px){
+  html[data-dj-run-mode="browser"] body #app[data-tab="map"] #dj-browser-webapp-tip:not([hidden]){
+    position:fixed!important;
+    z-index:2850!important;
+    left:max(12px,env(safe-area-inset-left,0px))!important;
+    right:max(12px,env(safe-area-inset-right,0px))!important;
+    bottom:calc(var(--dj829-nav-bottom,8px) + var(--dj829-nav-h,66px) + 12px)!important;
+    max-width:430px!important;
+    width:auto!important;
+    margin:0 auto!important;
+    box-sizing:border-box!important;
+    padding:13px 14px!important;
+    border-radius:18px!important;
+    border:1px solid #c8e0d6!important;
+    background:rgba(249,253,250,.97)!important;
+    color:#24473d!important;
+    box-shadow:0 8px 25px rgba(23,62,49,.13)!important;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    animation:dj-webapp-tip-enter .23s ease-out both;
+    pointer-events:auto!important;
+  }
+  #app #dj-browser-webapp-tip *{box-sizing:border-box!important;}
+  #app .dj-webapp-tip-heading{
+    display:flex;align-items:center;gap:10px;
+  }
+  #app .dj-webapp-tip-emblem{
+    flex:0 0 32px;width:32px;height:32px;display:grid;place-items:center;
+    border-radius:11px;background:#e2f3ec;color:#10846a;
+    font-size:22px;font-weight:700;line-height:1;
+  }
+  #app .dj-webapp-tip-titles{flex:1;min-width:0;}
+  #app .dj-webapp-tip-titles strong{
+    font-size:14px;font-weight:800;line-height:1.35;letter-spacing:-.025em;color:inherit;
+  }
+  #app .dj-webapp-tip-copy{
+    font-size:12px;font-weight:550;line-height:1.5;color:#607c70;
+    margin:8px 0 11px;word-break:keep-all;
+  }
+  #app .dj-webapp-tip-close{
+    display:grid;place-items:center;flex:0 0 34px;
+    width:34px;height:34px;min-height:34px;
+    padding:8px!important;margin:0;border:0;
+    border-radius:10px;background:transparent;color:#66877a;cursor:pointer;
+  }
+  #app .dj-webapp-tip-close svg{display:block;width:18px;height:18px;}
+  #app .dj-webapp-tip-actions{display:flex;align-items:center;gap:8px;}
+  #app .dj-webapp-tip-actions button{
+    display:grid;place-items:center;min-height:38px;
+    border-radius:11px;font-size:12px;font-weight:750;
+    padding:7px 13px;cursor:pointer;white-space:nowrap;
+  }
+  #app .dj-webapp-tip-how{flex:1;border:1px solid #10846a;background:#10846a;color:#fff;}
+  #app .dj-webapp-tip-later{flex:0 0 auto;border:1px solid #c9e0d5;background:#fff;color:#567367;}
+  #app .dj-webapp-tip-steps{
+    margin:10px 0 0;padding:10px 10px 10px 27px;
+    border-radius:12px;background:#ebf5ef;color:#33574a;
+    font-size:12px;line-height:1.6;max-height:min(180px,28dvh);overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  #app .dj-webapp-tip-steps li+li{margin-top:5px;}
+  #app .dj-webapp-tip-close:focus-visible,
+  #app .dj-webapp-tip-actions button:focus-visible{
+    outline:2px solid #08a17f;outline-offset:2px;
+  }
+  html[data-dj-run-mode="browser"] body #app[data-theme="dark"] #dj-browser-webapp-tip{
+    background:rgba(26,46,42,.97)!important;border-color:#47695b!important;
+    color:#e6f4ee!important;box-shadow:0 12px 28px rgba(0,0,0,.3)!important;
+  }
+  #app[data-theme="dark"] .dj-webapp-tip-emblem{background:#29483c;color:#9ce4c3;}
+  #app[data-theme="dark"] .dj-webapp-tip-copy{color:#bbd0c5;}
+  #app[data-theme="dark"] .dj-webapp-tip-close{color:#afc9ba;}
+  #app[data-theme="dark"] .dj-webapp-tip-later{background:#29473c;border-color:#456b59;color:#e0f1e7;}
+  #app[data-theme="dark"] .dj-webapp-tip-steps{background:#244239;color:#d1eadb;}
+}
+@keyframes dj-webapp-tip-enter{
+  from{opacity:0;transform:translateY(9px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion:reduce){
+  html[data-dj-run-mode="browser"] body #app #dj-browser-webapp-tip{animation:none!important;}
+}
+
+/* Never stack the existing animated map TIP above a dismissible web-app tip.
+ * The older TIP is restored automatically as soon as the new hint is closed. */
+@media (max-width:699px) {
+  html[data-dj-run-mode="browser"] body #app[data-dj-webapp-tip-visible="true"] #dj840-map-tip {
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}

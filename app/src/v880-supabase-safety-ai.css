@@ -1,0 +1,287 @@
+/* Dongjak v8.8.0 UI/UX polish — isolated Supabase evidence search
+ * Keep verified map, route, transit and account behavior exactly as-is.
+ * Modal lives under <body>, outside #app theme scope: dark mode must be
+ * bridged explicitly with :has(#app[data-theme="dark"]).
+ */
+.dj-ai-search-entry{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-width:0;min-height:44px;box-sizing:border-box;
+  border:1px solid var(--dj800-border,#cfe1d6);border-radius:999px;
+  padding:9px 15px;background:var(--dj800-elevated,#eff8f2);
+  color:var(--dj800-text,#174a3a);
+  font:700 13px/1.35 'Pretendard Variable',Pretendard,'Apple SD Gothic Neo',sans-serif;
+  letter-spacing:-.015em;white-space:nowrap;cursor:pointer;
+  transition:background-color .2s,border-color .2s,box-shadow .2s;
+}
+.dj-ai-search-entry::before{
+  content:'';display:block;flex:0 0 17px;width:17px;height:17px;
+  border:2px solid currentColor;border-radius:50%;
+  box-sizing:border-box;opacity:.83;
+}
+.dj-ai-search-entry:hover{background:var(--dj800-surface,#fff);border-color:var(--dj800-accent,#11866c);}
+#app[data-theme="dark"] .dj-ai-search-entry{
+  background:#24443e;color:#e6f8ef;border-color:#527369;
+}
+#app[data-theme="dark"] .dj-ai-search-entry:hover{background:#31544a;}
+
+.dj-ai-search-modal{
+  --ai-bg:#fff;--ai-card:#f5f9f7;--ai-text:#203f36;
+  --ai-muted:#60796e;--ai-line:#d9e8df;--ai-accent:#0d8069;
+  --ai-accent-hover:#096c58;--ai-ring:rgba(15,132,106,.18);
+  position:fixed;inset:0;margin:auto;box-sizing:border-box;
+  width:min(640px,calc(100vw - 32px));max-height:min(760px,calc(100dvh - 40px));
+  overflow-y:auto;overscroll-behavior:contain;
+  border:1px solid var(--ai-line);border-radius:24px;
+  padding:0;background:var(--ai-bg);color:var(--ai-text);
+  box-shadow:0 26px 90px rgba(14,37,33,.23),0 6px 24px rgba(10,35,30,.08);
+  font-family:'Pretendard Variable',Pretendard,'Apple SD Gothic Neo',sans-serif;
+  font-size:14px;line-height:1.5;letter-spacing:-.012em;color-scheme:light;
+  -webkit-font-smoothing:antialiased;
+}
+body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
+  --ai-bg:#192d32;--ai-card:#243e3e;--ai-text:#ecf7f0;
+  --ai-muted:#b8d1c6;--ai-line:#44635b;--ai-accent:#15a582;
+  --ai-accent-hover:#119175;--ai-ring:rgba(34,195,148,.26);
+  color-scheme:dark;
+}
+.dj-ai-search-modal[open]{animation:djAiModalAppear .24s cubic-bezier(.2,.75,.3,1) both;}
+.dj-ai-search-modal::backdrop{
+  background:rgba(15,31,32,.43);backdrop-filter:blur(3px);
+  animation:djAiBackdropAppear .22s ease-out both;
+}
+.dj-ai-search-body{display:grid;gap:17px;padding:27px 29px 25px;min-width:0;}
+.dj-ai-search-header{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding-bottom:17px;border-bottom:1px solid var(--ai-line);
+}
+.dj-ai-search-names{min-width:0;}
+.dj-ai-search-names h2{
+  margin:0;color:var(--ai-text);font-size:22px;
+  font-weight:800;line-height:1.25;letter-spacing:-.032em;
+}
+.dj-ai-search-names p{
+  margin:6px 0 0;color:var(--ai-muted);
+  font-size:13px;font-weight:500;line-height:1.45;
+}
+.dj-ai-close{
+  display:grid;place-items:center;flex:0 0 44px;
+  width:44px;height:44px;min-height:44px;box-sizing:border-box;
+  border:1px solid var(--ai-line);border-radius:14px;
+  background:var(--ai-card);color:var(--ai-text);
+  font:400 26px/1 Arial,sans-serif;cursor:pointer;
+  transition:background-color .18s,transform .18s;
+}
+.dj-ai-close:hover{background:var(--ai-line);}
+.dj-ai-close:active{transform:scale(.96);}
+.dj-ai-search-form{display:grid;gap:9px;min-width:0;margin:0;}
+.dj-ai-search-label{font-size:13px;font-weight:750;color:var(--ai-text);}
+.dj-ai-search-input-row{
+  display:grid;grid-template-columns:minmax(0,1fr) 82px;
+  gap:9px;min-width:0;
+}
+.dj-ai-query{
+  width:100%;min-width:0;min-height:48px;box-sizing:border-box;
+  border:1px solid var(--ai-line);border-radius:12px;
+  background:var(--ai-bg);color:var(--ai-text);
+  padding:12px 14px;font:500 14px/1.4 'Pretendard Variable',Pretendard,sans-serif;
+  font-family:inherit;font-size:14px;outline:none;
+  transition:border-color .18s,box-shadow .18s;
+}
+.dj-ai-query::placeholder{color:var(--ai-muted);opacity:.84;}
+.dj-ai-query:hover{border-color:var(--ai-accent);}
+.dj-ai-query:focus{border-color:var(--ai-accent);box-shadow:0 0 0 3px var(--ai-ring);}
+.dj-ai-submit,.dj-ai-map-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;min-height:46px;min-width:0;
+  border:1px solid transparent;border-radius:12px;
+  padding:10px 16px;background:var(--ai-accent);color:#fff;
+  font:750 14px/1.4 'Pretendard Variable',Pretendard,sans-serif;
+  letter-spacing:-.015em;cursor:pointer;
+  transition:background-color .18s,transform .18s;
+}
+.dj-ai-submit:hover,.dj-ai-map-btn:hover{background:var(--ai-accent-hover);}
+.dj-ai-submit:active,.dj-ai-map-btn:active{transform:scale(.98);}
+.dj-ai-submit:disabled{opacity:.56;cursor:wait;}
+.dj-ai-examples{display:flex;gap:8px;flex-wrap:wrap;min-width:0;}
+.dj-ai-example{
+  flex:0 1 auto;box-sizing:border-box;
+  min-height:42px;max-width:100%;border:1px solid var(--ai-line);
+  border-radius:999px;padding:9px 13px;background:var(--ai-card);
+  color:var(--ai-text);font:650 13px/1.35 'Pretendard Variable',Pretendard,sans-serif;
+  cursor:pointer;transition:border-color .18s,background-color .18s;
+}
+.dj-ai-example:hover{border-color:var(--ai-accent);background:var(--ai-bg);}
+.dj-ai-status{
+  margin:0;padding:12px 14px;border-left:3px solid var(--ai-accent);
+  border-radius:0 11px 11px 0;background:var(--ai-card);
+  color:var(--ai-text);font-size:13px;font-weight:550;line-height:1.6;
+  overflow-wrap:anywhere;
+}
+.dj-ai-search-results{display:grid;gap:10px;min-width:0;}
+.dj-ai-result{
+  display:grid;gap:10px;min-width:0;
+  padding:17px;border:1px solid var(--ai-line);
+  border-radius:16px;background:var(--ai-bg);
+}
+.dj-ai-result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.dj-ai-result-top strong{
+  min-width:0;color:var(--ai-text);font-size:15px;font-weight:750;
+  line-height:1.45;overflow-wrap:anywhere;
+}
+.dj-ai-result-category{
+  flex:0 0 auto;box-sizing:border-box;
+  border:1px solid var(--ai-line);border-radius:999px;padding:5px 9px;
+  color:var(--ai-accent);background:var(--ai-card);
+  font-size:12px;font-weight:700;line-height:1.35;
+}
+.dj-ai-result p{margin:0;color:var(--ai-text);font-size:14px;line-height:1.62;overflow-wrap:anywhere;}
+.dj-ai-result .dj-ai-source{font-size:12px;font-weight:650;color:var(--ai-muted);}
+.dj-ai-result .dj-ai-limits{font-size:12px;line-height:1.6;color:var(--ai-muted);}
+.dj-ai-map-btn{justify-self:start;min-height:44px;font-size:13px;}
+.dj-ai-empty{padding:12px 0;color:var(--ai-muted);font-size:13px;}
+.dj-ai-disclaimer{
+  margin:0;padding:15px 0 0;border-top:1px solid var(--ai-line);
+  color:var(--ai-muted);font-size:12px;font-weight:450;
+  line-height:1.65;overflow-wrap:anywhere;
+}
+.dj-ai-search-modal :is(button,input):focus-visible,
+.dj-ai-search-entry:focus-visible{
+  outline:3px solid var(--ai-accent,#0d8069);outline-offset:3px;
+}
+/* Search already receives a 3px focus halo from box-shadow; do not add
+ * an extra outer outline that appears as a double teal ring on touch. */
+.dj-ai-search-modal .dj-ai-query:focus-visible{outline:none;}
+@keyframes djAiModalAppear{
+  from{opacity:0;transform:translateY(10px) scale(.985);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes djAiBackdropAppear{from{opacity:0;}to{opacity:1;}}
+
+@media(max-width:600px){
+  .dj-ai-search-modal{
+    inset:auto 0 0;width:100%;max-width:none;max-height:calc(100dvh - 52px);
+    margin:0;border:1px solid var(--ai-line);border-bottom:0;
+    border-radius:24px 24px 0 0;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    box-shadow:0 -16px 60px rgba(9,29,27,.24);
+  }
+  .dj-ai-search-body{gap:14px;padding:18px 18px 24px;}
+  .dj-ai-search-header{position:relative;padding-top:19px;padding-bottom:15px;gap:10px;}
+  .dj-ai-search-header::before{
+    content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+    width:38px;height:5px;border-radius:99px;background:var(--ai-line);
+  }
+  .dj-ai-search-names h2{font-size:20px;}
+  .dj-ai-search-names p{font-size:12px;margin-top:5px;}
+  .dj-ai-close{width:44px;height:44px;flex-basis:44px;}
+  .dj-ai-search-input-row{grid-template-columns:minmax(0,1fr) 74px;gap:8px;}
+  .dj-ai-query{min-height:48px;padding:10px 12px;font-size:14px;}
+  .dj-ai-submit{min-height:48px;padding:9px 12px;font-size:14px;}
+  /* Horizontal single-row examples prevent uneven wrapping on 375/390/430. */
+  .dj-ai-examples{
+    flex-wrap:nowrap;overflow-x:auto;max-width:100%;
+    padding:1px 0 5px;scroll-padding-inline:2px;
+    scroll-snap-type:x proximity;overscroll-behavior-x:contain;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .dj-ai-examples::-webkit-scrollbar{display:none;}
+  .dj-ai-example{
+    flex:0 0 auto;max-width:min(76vw,255px);white-space:nowrap;
+    text-overflow:ellipsis;overflow:hidden;scroll-snap-align:start;
+    min-height:44px;padding:10px 13px;font-size:13px;
+  }
+  .dj-ai-status{padding:11px 12px;font-size:13px;}
+  .dj-ai-disclaimer{font-size:12px;padding-top:13px;}
+  .dj-ai-result{padding:14px;gap:9px;}
+  .dj-ai-search-entry{min-height:44px;padding-inline:12px;}
+  @keyframes djAiModalAppear{
+    from{opacity:0;transform:translateY(24px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .dj-ai-search-modal[open],.dj-ai-search-modal::backdrop{animation:none;}
+  .dj-ai-search-modal button,.dj-ai-search-entry,.dj-ai-query{transition:none;}
+}
+
+/* v887 audit: the AI search entry is visible beside the ordinary map search.
+ * It is a separate action, never an extra submit control. The existing
+ * search field, search button and map controls retain their click handling. */
+#app .topbar #map-quick-search .dj887-ai-quick-entry{
+  flex:0 0 39px;display:inline-grid;place-items:center;
+  box-sizing:border-box;width:39px;height:40px;min-width:39px;min-height:40px;
+  margin:0;padding:0;border:1px solid #b8dacd;border-radius:12px;
+  background:#e9f7f1;color:#08735d;
+  font:800 13px/1 'Pretendard Variable',Pretendard,'Apple SD Gothic Neo',sans-serif;
+  letter-spacing:-.04em;white-space:nowrap;cursor:pointer;
+  transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+#app .topbar #map-quick-search .dj887-ai-quick-entry:is(:hover,:focus-visible){
+  border-color:var(--dj881-accent,#12816b);
+  background:#d7f0e4;box-shadow:0 0 0 2px rgba(18,129,107,.10);
+}
+#app .topbar #map-quick-search .dj887-ai-quick-entry:active{
+  background:#b9e3d0;
+}
+#app[data-theme="dark"] .topbar #map-quick-search .dj887-ai-quick-entry{
+  border-color:#467665;background:#244840;color:#c3f4d9;
+}
+#app[data-theme="dark"] .topbar #map-quick-search .dj887-ai-quick-entry:hover{
+  border-color:#64bd9f;background:#30584a;
+}
+@media(max-width:699px){
+  #app .topbar #map-quick-search .map-quick-search-form{
+    gap:5px!important;
+  }
+  #app .topbar #map-quick-search .dj887-ai-quick-entry{
+    width:36px;min-width:36px;min-height:40px;height:40px;
+    flex-basis:36px;border-radius:11px;font-size:12px;
+    -webkit-tap-highlight-color:transparent;
+  }
+}
+@media(max-width:374px){
+  #app .topbar #map-quick-search .map-quick-search-form{gap:3px!important;padding-left:8px!important;}
+  #app .topbar #map-quick-search .dj887-ai-quick-entry{flex-basis:32px;min-width:32px;width:32px;}
+}
+/* Consistent alpha-only exit; the JS timeout owns the hidden state and
+ * cannot leave a modal covering the map if WebKit misses animationend. */
+.dj-ai-search-modal[open].dj887-ai-closing{
+  pointer-events:none;
+  animation:dj887-ai-close .175s ease-in both!important;
+}
+.dj-ai-search-modal.dj887-ai-closing::backdrop{
+  animation:dj887-ai-backdrop-close .175s ease-in both!important;
+}
+@keyframes dj887-ai-close {
+  from{opacity:1;}
+  to{opacity:0;}
+}
+@keyframes dj887-ai-backdrop-close {
+  from{background:rgba(15,31,32,.43);opacity:1;}
+  to{background:transparent;opacity:0;}
+}
+@media(prefers-reduced-motion:reduce){
+  .dj-ai-search-modal[open].dj887-ai-closing,
+  .dj-ai-search-modal.dj887-ai-closing::backdrop{animation:none!important;}
+}
+
+@media (max-width:699px) {
+  body:has(#app[data-theme="dark"]) #dj-ai-search-modal {
+    --ai-bg:#191b1f;--ai-card:#25282d;--ai-text:#e5e7eb;
+    --ai-muted:#bfc7d0;--ai-line:#454a52;--ai-accent:#375e51;
+    --ai-accent-hover:#426e60;--ai-ring:#a1d3c1;
+  }
+  #dj-ai-search-modal .dj-ai-examples {flex-wrap:wrap;overflow:visible;}
+  #dj-ai-search-modal .dj-ai-example {
+    max-width:100%;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
+  }
+  #dj-ai-search-modal :is(.dj-ai-status,.dj-ai-disclaimer) {word-break:keep-all;}
+  #dj-ai-search-modal .dj-ai-close:focus-visible {outline:2px solid currentColor;outline-offset:-5px;}
+  #dj-ai-search-modal::backdrop {backdrop-filter:none;animation:none;}
+  #dj-ai-search-modal .dj-ai-login {
+    justify-self:start;min-height:44px;padding:8px 14px;
+    border:1px solid var(--ai-line);border-radius:12px;background:var(--ai-card);
+    color:var(--ai-text);font:inherit;font-weight:700;cursor:pointer;
+  }
+  #dj-ai-search-modal .dj-ai-login[hidden] {display:none;}
+}

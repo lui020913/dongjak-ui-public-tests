@@ -1,0 +1,22 @@
+# Incremental draft PR: 19 verified unchanged mobile passes.
+# Evidence: GitHub Actions #57/#62. New CSS change is scoped to expanded sheets only.
+# Full release suite remains required before production merge.
+[mobile] > facility-window.spec.js:15:1 > 내 정보 등록 지점 상세창 열기·X닫기
+[mobile] > floating-window.spec.js:4:1 > 업데이트 내역 플로팅 창 열기·닫기
+[mobile] > map-controls-lifecycle.spec.js:24:1 > 보행안전 메뉴 열기·X닫기
+[mobile] > map-controls.spec.js:32:1 > 보행안전 메뉴는 PC·모바일에서 X버튼으로 닫힘
+[mobile] > map-controls.spec.js:49:1 > 모바일 더보기 창 열기·닫기
+[mobile] > map-screen.spec.js:4:1 > 온보딩 제외 후 지도 캔버스와 주요 도구 표시
+[mobile] > ui-inventory.spec.js:3:1 > 초기 안내창 상태 및 실제 UI 구조 수집
+[mobile] > bottom-tabs.spec.js:4:1 > 하단탭 페이지 전환 및 지도 복귀
+[mobile] > ci-critical-paths.spec.js:4:1 > critical: onboarding close and all five navigation tabs work
+[mobile] > ci-critical-paths.spec.js:37:1 > critical: safety tool and mobile more menu are usable
+[mobile] > ci-critical-paths.spec.js:61:1 > critical: v8.7.7 map settings opens from My Info
+[mobile] > ci-critical-paths.spec.js:92:1 > critical: v8.7.7 typography controls update the existing preferences
+[mobile] > ci-critical-paths.spec.js:107:1 > critical: v8.7.7 local profile photo can be chosen and removed
+[mobile] > ci-visual-audit.spec.js:27:3 > visual evidence mobile-390
+[mobile] > ci-visual-audit.spec.js:27:3 > visual evidence mobile-375
+[mobile] > ci-visual-audit.spec.js:27:3 > visual evidence mobile-360
+[mobile] > ci-visual-audit.spec.js:27:3 > visual evidence mobile-320
+[mobile] > smoke.spec.js:4:1 > 동작하는 안전지도 페이지와 기본 내비게이션 로딩
+[mobile] > transit-window.spec.js:4:1 > 저장 교통장소 이벤트로 지하철 정보창 열기·호선 전환·닫기

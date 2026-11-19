@@ -1,0 +1,111 @@
+/* v815: targeted fixes for PC dark search/settings surfaces and drawer geometry.
+   Loaded last so old theme patches cannot create rectangular inner boxes. */
+html body #app#app .topbar .map-quick-search-form #map-quick-search-query,
+html body #app#app .topbar .map-quick-search-form #map-quick-search-query:focus,
+html body #app#app .topbar .map-quick-search-form #map-quick-search-query:hover{
+  background:transparent!important;background-color:transparent!important;
+  background-image:none!important;box-shadow:none!important;
+  border:0!important;outline:0!important;border-radius:0!important;
+  -webkit-appearance:none!important;appearance:none!important;
+}
+html body #app#app .topbar .map-quick-search-form .dj807-search-copy{
+  background:transparent!important;background-color:transparent!important;
+  box-shadow:none!important;border:0!important;
+}
+html body #app#app .topbar .map-quick-search-form{
+  isolation:isolate!important;
+}
+/* Settings card supplies the background; its individual rows must not
+   create full-width grey letterboxes. Keep a hairline separator instead. */
+html body #app#app #dj-map-settings .dj-map-settings-content,
+html body #app#app #dj-map-settings .dj-map-settings-group,
+html body #app#app #dj-map-settings .dj-map-settings-footer{
+  background:transparent!important;background-color:transparent!important;
+  background-image:none!important;box-shadow:none!important;
+}
+html body #app#app #dj-map-settings .dj-map-settings-group{
+  border-radius:0!important;border-left:0!important;border-right:0!important;
+  border-top:0!important;
+  border-bottom:1px solid var(--dj800-border)!important;
+}
+html body #app#app #dj-map-settings .dj-map-settings-group:last-child{border-bottom:0!important;}
+/* Equal close glyphs on actual dialog buttons. Do not modify map pins or tabs. */
+html body #app#app :is(
+ #dj-settings-close,#map-safety-close,#map-options-mobile-close,#map-options-desktop-close,
+ #transport-close,#admin-dong-close,#road-width-legend-close,#map-gesture-guide-close,
+ #version-history-close,#map-quick-search-close,#overview-sheet-close,#close-detail){
+  box-sizing:border-box!important;flex:0 0 42px!important;
+  width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;
+  padding:0!important;display:grid!important;place-items:center!important;
+  border:1px solid var(--dj800-border)!important;border-radius:13px!important;
+  background:var(--dj800-secondary)!important;color:var(--dj800-text)!important;
+  font-size:0!important;line-height:1!important;box-shadow:none!important;
+}
+html body #app#app :is(
+ #dj-settings-close,#map-safety-close,#map-options-mobile-close,#map-options-desktop-close,
+ #transport-close,#admin-dong-close,#road-width-legend-close,#map-gesture-guide-close,
+ #version-history-close,#map-quick-search-close,#overview-sheet-close,#close-detail)::after{
+  content:'\00d7'!important;display:block!important;position:static!important;
+  font-family:Arial,sans-serif!important;font-size:32px!important;font-weight:550!important;
+  line-height:1!important;color:inherit!important;transform:none!important;margin:0!important;
+}
+@media(min-width:700px){
+  /* Theme label is longer in dark mode. Size by content, not a fixed chip width. */
+  html body #app#app .topbar #theme-toggle{
+    width:max-content!important;min-width:max-content!important;max-width:none!important;
+    flex:0 0 auto!important;padding:0 21px!important;white-space:nowrap!important;
+    text-overflow:clip!important;overflow:visible!important;
+  }
+  html body #app#app .topbar #theme-toggle::after{margin:0!important;}
+}
+@media(min-width:1080px){
+  /* Wider safety workspace, still inside the available viewport. */
+  html body #app#app #map-safety-controls{
+    box-sizing:border-box!important;
+    width:min(790px,calc(100vw - var(--dj800-panel-left,200px) - 22px))!important;
+    max-width:calc(100vw - var(--dj800-panel-left,200px) - 22px)!important;
+    overflow-x:hidden!important;
+  }
+  html body #app#app #map-safety-controls :is(.map-safety-head,.dj-safety-overview,.dj-safety-section,.dj-safety-card){min-width:0!important;}
+}
+@media(min-width:700px){
+  html body #app#app .topbar #theme-toggle{
+    font-size:14px!important;font-weight:850!important;letter-spacing:0!important;
+  }
+  html body #app#app .topbar #theme-toggle::after{content:none!important;display:none!important;}
+}
+
+html body #app#app :is(
+ #dj-settings-close,#map-safety-close,#map-options-mobile-close,#map-options-desktop-close,
+ #transport-close,#admin-dong-close,#road-width-legend-close,#map-gesture-guide-close,
+ #version-history-close,#map-quick-search-close,#overview-sheet-close,#close-detail)::before{
+ content:none!important;display:none!important;
+}
+/* Settings heading had a higher-specificity font rule, so the original glyph
+   was visible alongside our unified pseudo-icon. Hide that duplicate. */
+html body #app#app #dj-map-settings .dj-map-settings-head #dj-settings-close{
+  font-size:0!important;
+}
+html body #app#app #dj-map-settings .dj-map-settings-head #dj-settings-close::after{
+  font-size:32px!important;color:var(--dj800-text)!important;
+}
+/* Other page-level dialogs use the same close affordance. */
+html body #app#app :is(
+ #route-search-close,#community-compose-close,#ped-tools-close,#pza-road-close,
+ #cancel-add,#route-transit-confirm-close){
+ box-sizing:border-box!important;width:42px!important;height:42px!important;
+ min-width:42px!important;min-height:42px!important;padding:0!important;
+ border:1px solid var(--dj800-border)!important;border-radius:13px!important;
+ background:var(--dj800-secondary)!important;color:var(--dj800-text)!important;
+ display:grid!important;place-items:center!important;font-size:0!important;line-height:1!important;
+}
+html body #app#app :is(
+ #route-search-close,#community-compose-close,#ped-tools-close,#pza-road-close,
+ #cancel-add,#route-transit-confirm-close)::before{content:none!important;display:none!important;}
+html body #app#app :is(
+ #route-search-close,#community-compose-close,#ped-tools-close,#pza-road-close,
+ #cancel-add,#route-transit-confirm-close)::after{
+ content:'\00d7'!important;display:block!important;position:static!important;
+ font-family:Arial,sans-serif!important;font-size:32px!important;font-weight:550!important;
+ line-height:1!important;color:inherit!important;transform:none!important;
+}

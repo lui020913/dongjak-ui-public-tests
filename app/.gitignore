@@ -1,0 +1,37 @@
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+*.log
+npm-debug.log*
+
+# Local secrets and machine-specific settings
+.env
+.env.*
+!.env.example
+!.env.sample
+.dev.vars
+.dev.vars.*
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Local editor/system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local deployment state
+.wrangler/
+.cache/
+
+android/local.properties
+*.keystore
+*.jks
+google-services.json
+.npmrc

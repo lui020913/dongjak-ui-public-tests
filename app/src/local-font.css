@@ -1,0 +1,31 @@
+/* v823: ONE shared online typeface for the entire PC/mobile web application.
+ * The stylesheet is fetched in index.html from Pretendard's official jsDelivr CDN.
+ * No bundled proprietary font assets; online Pretendard is the sole UI font.
+ * Keep title/body sizes and the user's text-size/text-weight preferences intact.
+ */
+:root {
+  --dj-ui-font: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  font-family: var(--dj-ui-font);
+}
+
+html, html body, html body #app#app,
+html body #app#app :is(#app, *):not(svg):not(path):not(canvas),
+html body #app#app :is(#app, *):not(svg):not(path):not(canvas)::before,
+html body #app#app :is(#app, *):not(svg):not(path):not(canvas)::after,
+html body .map-startup-overlay,
+html body #dj-full-transition,
+html body #dj-full-transition *,
+html body .maplibregl-popup,
+html body .maplibregl-popup *,
+html body .maplibregl-control-container,
+html body .maplibregl-control-container *,
+html body button,
+html body input,
+html body select,
+html body textarea {
+  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif !important;
+}
+
+/* A third ID in :is() outranks legacy v806 heading/button font-family rules.
+ * Scope: DOM controls, panels and popups. MapLibre canvas/vector-tile glyphs
+ * are rasterized by the map renderer and cannot inherit a CSS font-family. */

@@ -1,0 +1,23 @@
+/* v8.2.15: verified facility-specific reviews, keeping popup internals scrollable. */
+#app .dj-place-detail .dj834-reviews{display:grid;gap:10px;border-top:1px solid var(--dj800-border,#d9e6de);padding-top:14px;margin-top:12px;min-width:0}
+#app .dj-place-detail .dj834-review-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#app .dj-place-detail .dj834-review-head>strong{font-size:15px;font-weight:730;color:var(--dj800-text,#20483b)}
+#app .dj-place-detail .dj834-review-open{flex:none;min-height:36px;border:1px solid var(--dj800-accent,#17846d);background:var(--dj800-elevated,#ebf7f1);color:var(--dj800-accent,#0b7b63);border-radius:11px;padding:7px 12px;font-size:13px;font-weight:640}
+#app .dj-place-detail .dj834-review-status{font-size:12px!important;line-height:1.45;color:var(--dj800-muted,#688076);margin:0!important}
+#app .dj-place-detail .dj834-review-form{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;border:1px solid var(--dj800-border,#d5e7dd);border-radius:14px;padding:12px;background:var(--dj800-secondary,#f4faf6)}
+#app .dj-place-detail .dj834-review-form[hidden]{display:none!important}
+#app .dj-place-detail .dj834-review-form label{display:grid;gap:6px;font-size:12px;font-weight:620}
+#app .dj-place-detail .dj834-review-form :is(select,textarea){width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--dj800-border,#cfddd5);background:var(--dj800-surface,#fff);color:var(--dj800-text,#254338);border-radius:10px;padding:10px 11px;font:450 16px/1.5 'Pretendard Variable',system-ui,sans-serif}
+#app .dj-place-detail .dj834-review-form textarea{resize:vertical;min-height:91px}
+#app .dj-place-detail .dj834-review-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#app .dj-place-detail .dj834-review-buttons button{min-height:39px;border-radius:10px;font-size:13px;font-weight:650;border:1px solid var(--dj800-border,#c7dfd0);background:var(--dj800-surface,#fff);color:var(--dj800-text,#214c3c)}
+#app .dj-place-detail .dj834-review-buttons .dj834-review-submit{background:var(--dj800-accent,#128773);color:#fff;border-color:transparent}
+#app .dj-place-detail .dj834-review-disclaimer{margin:0;font-size:11px!important;line-height:1.5;color:var(--dj800-muted,#72887d)}
+#app .dj-place-detail .dj834-review-list{display:grid;gap:8px;min-width:0}
+#app .dj-place-detail .dj834-review-item{border-radius:12px;border:1px solid var(--dj800-border,#dce9e0);padding:11px;min-width:0;background:var(--dj800-surface,#fff)}
+#app .dj-place-detail .dj834-review-item-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px}
+#app .dj-place-detail .dj834-review-stars{font-size:13px;color:#d39b1c;letter-spacing:1px}
+#app .dj-place-detail .dj834-review-item p{font-size:13px!important;line-height:1.55;margin:8px 0 4px;overflow-wrap:anywhere;white-space:pre-wrap}
+#app .dj-place-detail .dj834-review-item small,#app .dj-place-detail .dj834-review-local-note{font-size:11px;color:var(--dj800-muted,#6e867b)}
+#app .dj-place-detail .dj834-review-local-body{font-size:12px;line-height:1.4;margin:0}
+#app .dj-place-detail .dj834-review-empty{font-size:12px!important;color:var(--dj800-muted,#768b80)!important;margin:0!important}

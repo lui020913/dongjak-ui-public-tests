@@ -1,0 +1,102 @@
+/* v7.0.26 — PC UI consolidation. This file must be imported last. */
+@media (min-width:1080px){
+  #app{--dj-desktop-panel:#fff;--dj-desktop-text:#21483c;--dj-desktop-stroke:#d4e5db;}
+  #app[data-theme="dark"]{--dj-desktop-panel:#1c3135;--dj-desktop-text:#e7f6ef;--dj-desktop-stroke:#46645e;}
+  /* Rail and content panels share the exact same opaque surface. */
+  #app #bottom-nav,
+  #app #dj-desktop-safety-rail,
+  #app .page-panel:not([hidden]),
+  #app #transport-sheet:not([hidden]),
+  #app .sheet.overview-sheet:not([hidden]),
+  #app.map-controls-open #map-advanced-controls,
+  #app.map-safety-open #map-safety-controls,
+  #app #road-width-legend:not([hidden]){
+    background:var(--dj-desktop-panel)!important;
+    border-color:var(--dj-desktop-stroke)!important;
+    color:var(--dj-desktop-text)!important;
+  }
+  #app #bottom-nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  #app #mine-panel.page-panel:not([hidden]){
+    top:calc(90px + env(safe-area-inset-top,0px) + var(--dj-v725-search-rail-push,0px))!important;
+    max-height:calc(100dvh - 112px - var(--dj-v725-search-rail-push,0px))!important;
+    box-sizing:border-box!important;
+  }
+  /* The desktop safety controls use one theme-aware icon/text color. */
+  #app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-symbol,
+  #app #dj-desktop-safety-rail #night-visibility-quick-off .dj-night-action-text{
+    color:var(--dj-desktop-text)!important;opacity:1!important;
+  }
+  #app #dj-desktop-safety-rail #night-visibility-quick-off[aria-pressed="true"] :is(.dj-night-action-symbol,.dj-night-action-text){
+    color:var(--dj-desktop-text)!important;
+  }
+  #app #dj-desktop-safety-rail #toggle-road-width .dj-road-width-icon,
+  #app #dj-desktop-safety-rail #toggle-road-width .dj-road-width-label{color:var(--dj-desktop-text)!important;stroke:currentColor!important;}
+  #app #dj-desktop-safety-rail #map-safety-toggle::after{content:none!important;display:none!important;}
+  /* The right-side controls and form buttons inherit the same palette. */
+  #app .map-actions>button{background:var(--dj-desktop-panel)!important;color:var(--dj-desktop-text)!important;border:1px solid var(--dj-desktop-stroke)!important;}
+  #app .map-actions :is(#map-gesture-guide-open,#map-compass,#center-dongjak,#toggle-road-width,#current-location){
+    background:var(--dj-desktop-panel)!important;color:var(--dj-desktop-text)!important;
+    border-color:var(--dj-desktop-stroke)!important;
+  }
+  #app .map-actions #toggle-road-width .dj-road-width-icon{
+    stroke:var(--dj-desktop-text)!important;fill:none!important;
+  }
+  #app .map-actions>button svg{stroke:currentColor!important;}
+  #app #map-compass .compass-direction svg{fill:var(--dj-desktop-text)!important;stroke:var(--dj-desktop-text)!important;}
+  #app #map-compass .compass-n{color:#178369!important;}
+  #app[data-theme="dark"] #map-compass .compass-n{color:#a5dfc2!important;}
+  #app .map-actions>button:hover{background:#eef6f1!important;}
+  #app[data-theme="dark"] .map-actions>button:hover{background:#2d4a45!important;}
+  /* Harmonize source column with the release-note column. */
+  #app .v707-history-timeline,#app .v707-history-sources{background:#fff!important;border:1px solid #dbe9e3!important;border-radius:16px!important;}
+  #app .v707-history-sources{padding:18px!important;}
+  #app[data-theme="dark"] .v707-history-timeline,#app[data-theme="dark"] .v707-history-sources{background:#20383a!important;border-color:#45645b!important;}
+  #app .v707-history-source-group{background:transparent!important;}
+  /* A clear, compact route card with a dedicated three-button row. */
+  #app #route-map-card:not([hidden]){
+    position:fixed!important;left:calc(var(--dj-v724-rail-right,130px) + 10px)!important;
+    right:auto!important;top:auto!important;bottom:18px!important;transform:none!important;
+    box-sizing:border-box!important;width:min(460px,calc(100vw - var(--dj-v724-rail-right,130px) - 120px))!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:13px!important;
+    padding:18px!important;border-radius:20px!important;
+    background:var(--dj-desktop-panel)!important;border:1px solid var(--dj-desktop-stroke)!important;
+    box-shadow:0 15px 38px rgba(24,49,40,.2)!important;z-index:2100!important;
+  }
+  #app #route-map-card>div:first-child{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;}
+  #app #route-map-card>div:first-child strong{font-size:18px!important;color:var(--dj-desktop-text)!important;}
+  #app #route-map-card .route-map-card-actions{display:grid!important;grid-template-columns:1.15fr 1fr 1fr!important;gap:9px!important;width:100%!important;}
+  #app #route-map-card .route-map-card-actions button{margin:0!important;min-width:0!important;min-height:42px!important;padding:9px!important;font-size:13px!important;border-radius:12px!important;}
+  #app #route-map-card #route-guide-start{background:#13836b!important;border-color:#13836b!important;color:white!important;}
+  #app #route-map-card #route-map-edit{background:#eaf4ee!important;border-color:#aacfc1!important;color:#126a55!important;}
+  #app #route-map-card #route-map-close{background:#f3f6f4!important;border-color:#dae6df!important;color:#47685a!important;}
+  #app[data-theme="dark"] #route-map-card #route-map-edit{background:#2b5146!important;border-color:#60877a!important;color:#e9f8f0!important;}
+  #app[data-theme="dark"] #route-map-card #route-map-close{background:#2b3f40!important;border-color:#45655e!important;color:#cde1d6!important;}
+  /* Legend resembles other desktop floating cards, including the close icon. */
+  #app #road-width-legend:not([hidden]){
+    width:min(370px,calc(100vw - var(--dj-v724-rail-right,130px) - 100px))!important;
+    padding:22px!important;border-radius:22px!important;
+    box-shadow:0 18px 45px rgba(16,47,40,.17)!important;
+  }
+  #app #road-width-legend .road-width-legend-head{margin-bottom:12px!important;padding-bottom:12px!important;border-bottom:1px solid var(--dj-desktop-stroke)!important;}
+  #app #road-width-legend #road-width-legend-close{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border:1px solid var(--dj-desktop-stroke)!important;border-radius:12px!important;display:grid!important;place-items:center!important;color:var(--dj-desktop-text)!important;background:transparent!important;}
+  #app #road-width-legend>div:not(.road-width-legend-head){margin:8px 0!important;}
+  /* Desktop search gets a longer, more comfortable submit target. */
+  #app .topbar .map-quick-search-submit{min-width:80px!important;width:80px!important;min-height:42px!important;height:42px!important;border-radius:14px!important;padding:0 15px!important;font-size:13px!important;}
+}
+/* A small, desktop-only theme transition on UI chrome; do not animate map geometry. */
+@media(min-width:1080px){
+  #app .topbar, #app #bottom-nav, #app .page-panel,
+  #app .map-actions>button, #app #theme-toggle,
+  #app .map-quick-search-form, #app #dj-desktop-safety-rail >button{
+    transition:background-color .3s ease,color .3s ease,border-color .3s ease,box-shadow .3s ease!important;
+  }
+  /* The first-visit map guide opens with a restrained fade/scale. */
+  #app #map-gesture-guide:not([hidden]){animation:dj-v726-guide-in .27s cubic-bezier(.18,.74,.25,1) both!important;}
+}
+@keyframes dj-v726-guide-in{
+  from{opacity:0;scale:.97;}to{opacity:1;scale:1;}
+}
+@media(min-width:1080px) and (prefers-reduced-motion:reduce){
+  #app .topbar,#app #bottom-nav,#app .page-panel,#app .map-actions>button,#app #theme-toggle,#app .map-quick-search-form,#app #dj-desktop-safety-rail>button{transition:none!important;}
+  #app #map-gesture-guide:not([hidden]){animation:none!important;}
+}

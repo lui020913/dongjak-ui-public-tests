@@ -1,0 +1,817 @@
+/*
+ * v8.8.1 — Dedicated tablet workspace / PR #36.
+ * Independent map-first information architecture at 700–1079 CSS pixels.
+ * Unlike the old intermediate breakpoint (PC header + giant mobile tabs),
+ * tablet uses a left app rail, compact floating header, context toolbar,
+ * right map control stack and right-side contextual workspaces.
+ * DO NOT touch phone (<700px) or desktop (>=1080px).
+ */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app {
+    --dj-tablet-top:15px;
+    --dj-tablet-header:68px;
+    --dj-tablet-rail:90px;
+    --dj-tablet-gutter:16px;
+    --dj-tablet-accent:#07876e;
+    --dj-tablet-ink:#204a40;
+    --dj-tablet-muted:#67867b;
+    --dj-tablet-border:rgba(73,121,102,.18);
+    --dj-tablet-surface:rgba(255,255,255,.96);
+    --dj-tablet-shadow:0 7px 28px rgba(18,56,46,.11);
+    --dj-header-h:100px!important;
+    --dj-mobile-nav-h:0px!important;
+  }
+
+  /* Floating top workspace: primary search + compact utilities in ONE row. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar {
+    position:fixed!important;
+    inset:var(--dj-tablet-top) var(--dj-tablet-gutter) auto var(--dj-tablet-gutter)!important;
+    width:calc(100% - 2 * var(--dj-tablet-gutter))!important;
+    max-width:none!important;
+    height:var(--dj-tablet-header)!important;
+    min-height:var(--dj-tablet-header)!important;
+    max-height:var(--dj-tablet-header)!important;
+    display:grid!important;
+    grid-template-areas:"search tools"!important;
+    grid-template-columns:minmax(0,1fr) max-content!important;
+    grid-template-rows:1fr!important;
+    gap:11px!important;
+    align-items:center!important;
+    justify-items:stretch!important;
+    padding:8px 10px!important;
+    background:var(--dj-tablet-surface)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:20px!important;
+    box-shadow:var(--dj-tablet-shadow)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    backdrop-filter:blur(16px)!important;
+    isolation:isolate!important;
+    z-index:1700!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.brand {
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.map-quick-search{
+    grid-area:search!important;
+    position:relative!important;
+    display:block!important;
+    width:100%!important;max-width:none!important;
+    min-width:0!important;
+    inset:auto!important;
+    margin:0!important;padding:0!important;transform:none!important;
+    z-index:2!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form {
+    width:100%!important;min-width:0!important;
+    height:50px!important;min-height:50px!important;max-height:50px!important;
+    padding:4px 5px 4px 8px!important;gap:8px!important;
+    display:flex!important;align-items:center!important;flex-flow:row nowrap!important;
+    border-radius:14px!important;
+    box-sizing:border-box!important;
+    background:var(--dj881-subtle,#f2f8f5)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    box-shadow:none!important;
+    overflow:hidden!important;
+  }
+  /* Retain the existing logo INSIDE the search field, sized as tablet brand. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>.brand{
+    display:flex!important;flex:0 0 42px!important;
+    width:42px!important;max-width:42px!important;min-width:42px!important;
+    height:42px!important;margin:0!important;padding:0!important;
+    overflow:hidden!important;align-items:center!important;justify-content:center!important;
+    background:transparent!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>.brand :is(.eyebrow,.brand-name){
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>.brand .logo,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>.brand .logo img{
+    width:38px!important;min-width:38px!important;max-width:38px!important;
+    height:38px!important;min-height:38px!important;max-height:38px!important;
+    object-fit:contain!important;
+    margin:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>input {
+    display:block!important;min-width:0!important;width:0!important;
+    flex:1 1 0!important;font-size:15px!important;font-weight:620!important;
+    line-height:1.4!important;color:var(--dj-tablet-ink)!important;
+    text-overflow:ellipsis!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-submit {
+    display:grid!important;place-items:center!important;
+    min-width:66px!important;max-width:66px!important;width:66px!important;
+    min-height:40px!important;max-height:40px!important;height:40px!important;
+    flex:0 0 66px!important;
+    border-radius:11px!important;
+    padding:0!important;font-size:14px!important;font-weight:800!important;
+    background:#0b866d!important;color:white!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-submit::after{
+    display:none!important;content:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools {
+    grid-area:tools!important;
+    position:relative!important;
+    display:flex!important;flex-flow:row nowrap!important;
+    align-items:center!important;justify-content:flex-end!important;
+    justify-self:end!important;
+    height:50px!important;min-height:50px!important;
+    width:auto!important;max-width:300px!important;min-width:0!important;
+    margin:0!important;padding:0!important;gap:6px!important;
+    inset:auto!important;transform:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools .weather-widget {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-width:82px!important;max-width:104px!important;width:auto!important;
+    height:46px!important;min-height:46px!important;
+    background:var(--dj881-subtle,#f2f8f5)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:12px!important;
+    margin:0!important;padding:0 6px!important;
+    inset:auto!important;transform:none!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools #weather-title {
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools #theme-toggle,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #dj-settings-pc {
+    position:relative!important;
+    width:auto!important;min-width:62px!important;max-width:94px!important;
+    height:46px!important;min-height:46px!important;max-height:46px!important;
+    padding:0 12px!important;margin:0!important;
+    border-radius:12px!important;
+    background:var(--dj881-subtle,#f2f8f5)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    color:var(--dj-tablet-ink)!important;
+    font-size:12.5px!important;font-weight:760!important;
+    box-sizing:border-box!important;
+    white-space:nowrap!important;overflow:hidden!important;
+  }
+
+  /* The primary five actions become an independent LEFT TABLET RAIL. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav:not([hidden]){
+    position:fixed!important;
+    left:var(--dj-tablet-gutter)!important;right:auto!important;
+    top:calc(var(--dj-tablet-header) + var(--dj-tablet-top) + 20px)!important;
+    bottom:auto!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;justify-content:flex-start!important;
+    grid-template-columns:none!important;
+    gap:4px!important;
+    width:var(--dj-tablet-rail)!important;max-width:var(--dj-tablet-rail)!important;
+    height:auto!important;min-height:0!important;
+    max-height:calc(100dvh - 140px)!important;
+    padding:7px!important;
+    margin:0!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:19px!important;
+    background:var(--dj-tablet-surface)!important;
+    box-shadow:var(--dj-tablet-shadow)!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    scrollbar-width:none!important;
+    box-sizing:border-box!important;
+    transform:none!important;translate:none!important;
+    z-index:1550!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav::before {
+    content:'메뉴'!important;display:block!important;
+    text-align:center!important;
+    font-size:10px!important;letter-spacing:.08em!important;font-weight:850!important;
+    color:var(--dj-tablet-muted)!important;
+    margin:4px auto 2px!important;
+    flex:0 0 auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab {
+    position:relative!important;
+    display:flex!important;flex-flow:column nowrap!important;
+    align-items:center!important;justify-content:center!important;
+    grid-template-rows:none!important;
+    gap:3px!important;flex:0 0 63px!important;
+    width:100%!important;min-width:0!important;max-width:none!important;
+    height:63px!important;min-height:63px!important;max-height:63px!important;
+    padding:6px 2px!important;margin:0!important;
+    border:0!important;border-radius:13px!important;
+    background:transparent!important;
+    color:var(--dj-tablet-muted)!important;
+    font-size:11.5px!important;font-weight:750!important;
+    line-height:1.25!important;letter-spacing:-.02em!important;
+    box-shadow:none!important;
+    transform:none!important;translate:none!important;
+    box-sizing:border-box!important;
+    transition:background-color .19s ease,color .19s ease!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab:is(.active,[aria-current="page"]){
+    background:#e5f5ed!important;
+    color:#007e64!important;
+    box-shadow:inset 3px 0 #05896e!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab .nav-icon,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab .nav-icon-user{
+    display:grid!important;place-items:center!important;
+    grid-row:auto!important;
+    width:26px!important;min-width:26px!important;max-width:26px!important;
+    height:26px!important;min-height:26px!important;max-height:26px!important;
+    flex:0 0 26px!important;
+    padding:0!important;margin:0!important;
+    background:none!important;
+    transform:none!important;
+    color:inherit!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab .nav-icon svg{
+    width:22px!important;max-width:22px!important;height:22px!important;max-height:22px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab>span:last-child{
+    display:block!important;grid-row:auto!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    height:auto!important;max-height:none!important;min-height:0!important;
+    margin:0!important;padding:0!important;
+    font-size:11px!important;line-height:1.2!important;font-weight:760!important;
+    white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+    text-align:center!important;color:inherit!important;
+    transform:none!important;
+  }
+
+  /* The three high-use map features form a deliberate horizontal chip toolbar. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle
+  ){
+    position:fixed!important;
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 22px)!important;
+    bottom:auto!important;right:auto!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex-flow:row nowrap!important;gap:7px!important;
+    height:45px!important;min-height:45px!important;max-height:45px!important;
+    border-radius:13px!important;
+    background:var(--dj-tablet-surface)!important;
+    color:var(--dj-tablet-ink)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    padding:0 13px!important;margin:0!important;
+    white-space:nowrap!important;
+    font-size:12px!important;font-weight:750!important;
+    box-shadow:var(--dj-tablet-shadow)!important;
+    box-sizing:border-box!important;
+    transform:none!important;translate:none!important;
+    z-index:1520!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-tools-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 14px)!important;
+    width:111px!important;min-width:111px!important;max-width:111px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 133px)!important;
+    width:110px!important;min-width:110px!important;max-width:110px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 251px)!important;
+    width:112px!important;min-width:112px!important;max-width:112px!important;
+  }
+  /* Respect hidden until the actual night-vision app state activates it. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off[hidden]{
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-tools-toggle[aria-expanded="true"],
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle[aria-expanded="true"]{
+    color:#067c64!important;background:#e4f3ed!important;
+    border-color:#89c9b2!important;
+  }
+
+  /* Right-side map control palette: compact, single surface. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] .map-actions{
+    position:fixed!important;
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 22px)!important;
+    right:var(--dj-tablet-gutter)!important;
+    bottom:auto!important;left:auto!important;
+    display:flex!important;flex-flow:column nowrap!important;
+    align-items:center!important;gap:3px!important;
+    width:54px!important;min-width:54px!important;max-width:54px!important;
+    height:auto!important;min-height:0!important;max-height:calc(100dvh - 190px)!important;
+    overflow-y:auto!important;scrollbar-width:none!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:18px!important;
+    padding:5px!important;
+    background:var(--dj-tablet-surface)!important;
+    box-shadow:var(--dj-tablet-shadow)!important;
+    box-sizing:border-box!important;
+    transform:none!important;translate:none!important;
+    z-index:1540!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] .map-actions>button{
+    width:43px!important;min-width:43px!important;max-width:43px!important;
+    height:43px!important;min-height:43px!important;max-height:43px!important;
+    flex:0 0 43px!important;
+    border:0!important;border-radius:12px!important;
+    box-shadow:none!important;background:transparent!important;
+    transform:none!important;margin:0!important;padding:9px!important;
+    display:grid!important;place-items:center!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] .map-actions>button:active{
+    background:#e3f3ec!important;
+  }
+
+  /* MapLibregl scale is independent of the navigation rail; dock inside the
+     empty map canvas, not underneath the new primary navigation. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .maplibregl-ctrl-bottom-left{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 12px)!important;
+    bottom:20px!important;
+    right:auto!important;top:auto!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .maplibregl-ctrl-bottom-left>*{
+    pointer-events:auto!important;
+  }
+
+  /* Side dialogs are workspace panels, never full-screen phone overlays. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]){
+    position:fixed!important;
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 20px)!important;
+    left:auto!important;right:var(--dj-tablet-gutter)!important;
+    bottom:16px!important;
+    width:min(460px,calc(100vw - var(--dj-tablet-rail) - 55px))!important;
+    max-width:min(460px,calc(100vw - var(--dj-tablet-rail) - 55px))!important;
+    min-width:0!important;
+    height:auto!important;max-height:calc(100dvh - var(--dj-tablet-header) - 52px)!important;
+    display:flex!important;flex-flow:column nowrap!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:20px!important;
+    background:var(--dj-tablet-surface)!important;
+    box-shadow:0 14px 40px rgba(17,57,44,.17)!important;
+    padding:0!important;
+    transform:none!important;translate:none!important;
+    z-index:1600!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]) .dj-sheet-chrome{
+    flex:0 0 auto!important;position:sticky!important;top:0!important;z-index:2!important;
+    background:var(--dj-tablet-surface)!important;
+    border-bottom:1px solid var(--dj-tablet-border)!important;
+    padding:13px 15px!important;min-height:60px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]) .dj836-sheet-body{
+    flex:1 1 auto!important;min-height:0!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  /* Real subway, bus and map detail panels share one right-hand workspace. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+  #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging){
+    position:fixed!important;
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 20px)!important;
+    right:calc(var(--dj-tablet-gutter) + 0px)!important;
+    left:auto!important;bottom:auto!important;
+    width:min(435px,calc(100vw - var(--dj-tablet-rail) - 54px))!important;
+    min-width:0!important;
+    max-width:min(435px,calc(100vw - var(--dj-tablet-rail) - 54px))!important;
+    max-height:calc(100dvh - var(--dj-tablet-top) - var(--dj-tablet-header) - 38px)!important;
+    height:max-content!important;min-height:0!important;
+    padding:10px 15px 16px!important;
+    background:var(--dj-tablet-surface)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:21px!important;
+    box-shadow:0 14px 42px rgba(17,57,44,.17)!important;
+    box-sizing:border-box!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    transform:none!important;translate:none!important;
+    z-index:1590!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+  #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging) .transport-panel-head{
+    position:relative!important;
+    top:auto!important;
+    min-height:65px!important;
+    padding:8px 49px 12px!important;
+    margin:0 0 8px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border-bottom:1px solid var(--dj-tablet-border)!important;
+  }
+  /* Avoid competing map controls behind the contextual content panel. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(
+    #transport-sheet:not([hidden]),#detail-sheet:not([hidden]),#route-panel:not([hidden])
+  ) .map-actions{
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(
+    #transport-sheet:not([hidden]),#detail-sheet:not([hidden]),#route-panel:not([hidden])
+  ) :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle){
+    opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  /* Safety and map option explorers occupy the same right-hand workspace. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+  :is(#map-safety-controls,#map-advanced-controls){
+    max-width:min(455px,calc(100vw - var(--dj-tablet-rail) - 55px))!important;
+    width:min(455px,calc(100vw - var(--dj-tablet-rail) - 55px))!important;
+    left:auto!important;right:var(--dj-tablet-gutter)!important;
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 20px)!important;
+    bottom:auto!important;
+    max-height:calc(100dvh - var(--dj-tablet-top) - var(--dj-tablet-header) - 38px)!important;
+    border-radius:20px!important;
+    box-shadow:0 14px 42px rgba(17,57,44,.17)!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    transform:none!important;translate:none!important;
+  }
+  /* Search dropdown stays anchored to the search box. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .map-quick-search-dropdown:not([hidden]){
+    position:absolute!important;top:calc(100% + 8px)!important;
+    left:0!important;right:0!important;
+    width:100%!important;
+    min-width:0!important;
+    max-height:min(60dvh,500px)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:16px!important;
+    box-shadow:var(--dj-tablet-shadow)!important;
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab{
+      transition:background .18s ease,color .18s ease!important;
+    }
+  }
+}
+
+/* A narrow tablet keeps the same rail/workspace architecture but deliberately
+ * uses a two-row floating header, not a broken compressed desktop topbar.
+ */
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app {
+    --dj-tablet-header:112px;
+    --dj-header-h:145px!important;
+    --dj-tablet-rail:76px;
+    --dj-tablet-gutter:12px;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar{
+    grid-template-areas:"search" "tools"!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:49px 42px!important;
+    gap:3px!important;
+    padding:7px 9px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form{
+    height:48px!important;min-height:48px!important;max-height:48px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools{
+    justify-self:end!important;grid-area:tools!important;
+    height:41px!important;min-height:41px!important;max-height:41px!important;
+    max-width:100%!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools .weather-widget,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #theme-toggle,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #dj-settings-pc{
+    min-height:39px!important;height:39px!important;max-height:39px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav>.nav-tab{
+    height:59px!important;min-height:59px!important;max-height:59px!important;
+    flex-basis:59px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(#map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle){
+    padding:0 9px!important;font-size:11px!important;
+    height:42px!important;min-height:42px!important;max-height:42px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-tools-toggle{
+    width:98px!important;min-width:98px!important;max-width:98px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 117px)!important;
+    width:103px!important;min-width:103px!important;max-width:103px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 228px)!important;
+    width:103px!important;min-width:103px!important;max-width:103px!important;
+  }
+}
+
+/* Landscape tablet: left rail stays visible, informational side panels become
+ * height-bounded so map context remains available to the left.
+ */
+@media (min-width:700px) and (max-width:1079px) and (max-height:760px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) and (max-height:760px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav:not([hidden]){
+    max-height:calc(100dvh - var(--dj-tablet-top) - var(--dj-tablet-header) - 35px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]){
+    max-height:calc(100dvh - var(--dj-tablet-header) - 47px)!important;
+  }
+}
+
+/* Dark tablet should use exactly the same layout and color hierarchy. */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"]{
+    --dj-tablet-accent:#4acfa7;
+    --dj-tablet-ink:#e9f8f1;
+    --dj-tablet-muted:#a8c3b7;
+    --dj-tablet-border:rgba(159,207,184,.23);
+    --dj-tablet-surface:rgba(25,44,43,.96);
+    --dj-tablet-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav>.nav-tab:is(.active,[aria-current="page"]){
+    background:#21483c!important;color:#70e9bd!important;box-shadow:inset 3px 0 #42c79e!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-safety-toggle[aria-expanded="true"],
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-tools-toggle[aria-expanded="true"]{
+    background:#245346!important;color:#84f1c5!important;
+  }
+}
+
+/* Functional tablet brand slot: JS injects TWO separate about icons.
+ * Keep the desktop #dj-about-pc control (opens real app-info dialog)
+ * and hide the redundant mobile icon, preventing phantom grid rows.
+ */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar{
+    grid-template-areas:"logo search tools"!important;
+    grid-template-columns:46px minmax(0,1fr) max-content!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>#dj-settings-mobile{
+    display:none!important;
+    visibility:hidden!important;
+    position:absolute!important;
+    width:0!important;height:0!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>#dj-about-pc{
+    grid-area:logo!important;
+    position:relative!important;display:grid!important;place-items:center!important;
+    width:46px!important;min-width:46px!important;max-width:46px!important;
+    height:46px!important;min-height:46px!important;max-height:46px!important;
+    margin:0!important;padding:3px!important;
+    background:var(--dj881-subtle,#eff6f2)!important;
+    border:1px solid var(--dj-tablet-border)!important;
+    border-radius:13px!important;
+    box-shadow:none!important;
+    transform:none!important;translate:none!important;
+    inset:auto!important;
+    visibility:visible!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>#dj-about-pc img{
+    display:block!important;
+    width:39px!important;min-width:39px!important;max-width:39px!important;
+    height:39px!important;min-height:39px!important;max-height:39px!important;
+    object-fit:contain!important;margin:0!important;
+    transform:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form>.brand {
+    display:none!important;
+  }
+}
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar{
+    grid-template-areas:"logo search" "tools tools"!important;
+    grid-template-columns:46px minmax(0,1fr)!important;
+    grid-template-rows:49px 42px!important;
+    column-gap:8px!important;
+    row-gap:3px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools{
+    justify-self:end!important;
+    max-width:100%!important;
+  }
+}
+
+/* Tablet grid placement + minimum track size.
+ * The PC nav had an old min-width:164px!important and the tablet header
+ * had legacy grid-row placements. Explicit tracks prevent both collisions.
+ */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav:not([hidden]) {
+    width:var(--dj-tablet-rail)!important;
+    min-width:var(--dj-tablet-rail)!important;
+    max-width:var(--dj-tablet-rail)!important;
+    flex:0 0 var(--dj-tablet-rail)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>#dj-about-pc {
+    grid-column:1/2!important;grid-row:1/2!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.map-quick-search {
+    grid-area:search!important;
+    grid-column:2/3!important;
+    grid-row:1/2!important;
+    align-self:center!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools {
+    grid-area:tools!important;
+    grid-column:3/4!important;
+    grid-row:1/2!important;
+    align-self:center!important;
+  }
+}
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools {
+    grid-area:tools!important;
+    grid-row:2/3!important;
+    grid-column:1/-1!important;
+    align-self:center!important;
+    justify-self:end!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.map-quick-search {
+    grid-row:1/2!important;grid-column:2/3!important;
+  }
+}
+
+/* Compact tablet header has deliberately positioned first and second rows.
+ * Grid-row inherited from old PC UI still placed controls on row one despite
+ * important grid-area declarations; absolute coordinates eliminate that
+ * legacy placement ambiguity without covering the input.
+ */
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>#dj-about-pc {
+    position:absolute!important;grid-area:auto!important;
+    left:8px!important;right:auto!important;
+    top:9px!important;bottom:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.map-quick-search {
+    position:absolute!important;grid-area:auto!important;
+    top:7px!important;bottom:auto!important;
+    left:62px!important;right:10px!important;
+    width:calc(100% - 72px)!important;max-width:calc(100% - 72px)!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar>.header-tools {
+    position:absolute!important;grid-area:auto!important;
+    top:63px!important;bottom:auto!important;
+    right:10px!important;left:auto!important;
+    width:max-content!important;max-width:calc(100% - 20px)!important;
+    height:41px!important;min-height:41px!important;max-height:41px!important;
+    margin:0!important;transform:none!important;
+  }
+}
+
+/* Tablet quick tools are mounted inside the legacy transformed side-workspace.
+ * The fixed-position containing block begins at the LEFT RAIL's origin, not
+ * at the viewport origin. Position relative to that block to place the
+ * toolbar immediately below our floating header on portrait and landscape.
+ */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle
+  ){
+    top:2px!important;bottom:auto!important;
+    margin:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-tools-toggle {
+    left:calc(var(--dj-tablet-rail) + 14px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-rail) + 133px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle{
+    left:calc(var(--dj-tablet-rail) + 251px)!important;
+  }
+}
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-rail) + 117px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle {
+    left:calc(var(--dj-tablet-rail) + 228px)!important;
+  }
+}
+
+/* Tablet coordinate systems differ:
+ * 700–1079px buttons are fixed to the viewport; iPad landscape 1080–1366px
+ * inherits a transformed legacy sidebar as a fixed containing block.
+ * Use viewport header coordinates for the former and sidebar-local for latter.
+ */
+@media (min-width:700px) and (max-width:1079px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle
+  ){
+    top:calc(var(--dj-tablet-top) + var(--dj-tablet-header) + 22px)!important;
+  }
+}
+@media (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #map-tools-toggle,#night-visibility-quick-off,#map-safety-toggle
+  ){
+    top:2px!important;
+  }
+}
+
+/* In portrait responsive widths the feature tools are viewport-fixed, so
+ * their left offsets must include the viewport gutter as well as rail width.
+ * The wide touch-landscape branch above remains sidebar-local.
+ */
+@media (min-width:700px) and (max-width:1079px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-tools-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 14px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 133px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 251px)!important;
+  }
+}
+@media (min-width:700px) and (max-width:839px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #night-visibility-quick-off:not([hidden]){
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 117px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-safety-toggle{
+    left:calc(var(--dj-tablet-gutter) + var(--dj-tablet-rail) + 228px)!important;
+  }
+}
+
+/* Tablet visual QA follow-up (real Preview captures):
+ * 1. Only one app emblem belongs in the header.
+ * 2. Station names and action buttons must occupy DIFFERENT grid rows.
+ * 3. Page drawers must content-size instead of leaving a white full-height tail.
+ */
+@media (min-width:700px) and (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #dj-settings-mobile,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search .brand{
+    display:none!important;visibility:hidden!important;opacity:0!important;
+    width:0!important;height:0!important;min-width:0!important;min-height:0!important;
+    overflow:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]){
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--dj-tablet-header) - var(--dj-tablet-top) - 38px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]) .dj836-sheet-body{
+    flex:0 1 auto!important;
+    height:auto!important;min-height:0!important;max-height:none!important;
+    overflow-y:visible!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    .transport-panel-head{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 43px!important;
+    grid-template-rows:auto 43px!important;
+    align-items:center!important;align-content:start!important;
+    justify-items:stretch!important;justify-content:stretch!important;
+    column-gap:7px!important;row-gap:10px!important;
+    top:auto!important;
+    min-height:104px!important;height:auto!important;
+    padding:10px 4px 12px!important;margin:0 0 9px!important;
+    box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    .transport-panel-head > .dj857-transport-title-group{
+    position:relative!important;
+    grid-column:1/-1!important;grid-row:1/2!important;
+    display:flex!important;flex-flow:column nowrap!important;
+    align-items:flex-start!important;justify-content:center!important;
+    justify-self:stretch!important;align-self:center!important;
+    box-sizing:border-box!important;
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    padding:0!important;margin:0!important;
+    overflow:visible!important;
+    text-align:left!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    .transport-panel-head #transport-title{
+    position:relative!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:flex-start!important;justify-content:center!important;
+    box-sizing:border-box!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:0!important;
+    font-size:clamp(17px,2vw,19px)!important;
+    font-weight:800!important;line-height:1.25!important;
+    text-align:left!important;
+    overflow:visible!important;white-space:normal!important;
+    overflow-wrap:anywhere!important;transform:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    .transport-panel-head .dj-news-transport-actions{
+    position:relative!important;
+    grid-column:1/2!important;grid-row:2/3!important;
+    display:flex!important;flex-flow:row nowrap!important;
+    align-items:center!important;justify-content:flex-end!important;
+    justify-self:end!important;align-self:center!important;
+    height:43px!important;min-height:43px!important;
+    width:max-content!important;max-width:100%!important;min-width:0!important;
+    gap:5px!important;margin:0!important;padding:0!important;
+    transform:none!important;translate:none!important;
+    overflow:visible!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    .transport-panel-head #transport-close{
+    position:relative!important;
+    grid-column:2/3!important;grid-row:2/3!important;
+    justify-self:end!important;align-self:center!important;
+    top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;
+    margin:0!important;
+    transform:none!important;translate:none!important;
+    z-index:8!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet:not([hidden]):not(.dj871-sheet-expanded):not(.dj-float-user-positioned):not(.dj-sheet-dragging)
+    #transport-title .dj-metro-badge-row{
+    justify-content:flex-start!important;align-items:center!important;
+    align-self:flex-start!important;
+  }
+}

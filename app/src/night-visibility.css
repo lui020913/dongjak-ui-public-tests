@@ -1,0 +1,46 @@
+/* v5.11.0 Sangdo 1-dong light proximity overlay. Scoped to the map options. */
+#app .night-visibility-tool{display:grid;gap:9px;min-width:0;margin:4px 0;padding:12px;border:1px solid #bcd8cb;border-radius:13px;background:#f0f8f3;color:#244a3d;}
+#app .night-visibility-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+#app .night-visibility-heading strong{font-size:13px;font-weight:800;color:#174938;}
+#app .night-visibility-heading span{font-size:10px;color:#667c71;}
+#app #night-visibility-toggle{border-radius:9px;padding:10px 12px;border:1px solid #178168;background:#197b62;color:#fff;font-size:12px;font-weight:800;cursor:pointer;}
+#app #night-visibility-toggle[aria-pressed="true"]{background:#fff4e1;border-color:#c58a39;color:#70471d;}
+#app #night-visibility-controls[hidden],#app #night-visibility-quick-off[hidden]{display:none!important;}
+#app #night-visibility-controls{display:grid;gap:9px;min-width:0;}
+#app .night-visibility-radius-label{display:flex;align-items:center;justify-content:space-between;gap:10px;color:inherit;font-size:11px;font-weight:700;}
+#app #night-visibility-radius-value{font-variant-numeric:tabular-nums;color:#9b5d17;font-size:12px;font-weight:800;}
+#app #night-visibility-radius{box-sizing:border-box;width:100%;margin:1px 0;accent-color:#d4a237;cursor:pointer;}
+#app .night-visibility-checkbox{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:650;line-height:1.45;cursor:pointer;color:inherit;}
+#app .night-visibility-checkbox input{margin:0;accent-color:#1a8668;flex:none;}
+#app .night-line{display:inline-block;width:24px;height:0;border-top:4px solid #FF8A5B;flex:none;border-radius:4px;}
+#app .night-line.path{border-color:#5D9EFF;border-top-style:solid;}
+#app .night-line.lit{border-color:#79DEC1;}
+#app .night-visibility-legend{display:flex;align-items:center;gap:5px;margin:2px 0 0;color:#557464;font-size:10px;}
+#app .night-dot{display:inline-block;width:9px;height:9px;margin-left:5px;border-radius:50%;background:#ffd35f;border:1px solid #8b6d18;flex:none;}
+#app .night-dot.security{background:#81e4ff;border-color:#0b7285;}
+#app .night-visibility-status{font-size:11px;line-height:1.55;color:#527365;margin:3px 0;overflow-wrap:anywhere;}
+#app .night-visibility-stats{display:grid;gap:6px;padding:10px;background:#fff;border:1px solid #dbeadf;border-radius:11px;}
+#app .night-visibility-stat{display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.45;font-size:11px;}
+#app .night-visibility-stat span{color:#597567;}
+#app .night-visibility-stat strong{font-variant-numeric:tabular-nums;text-align:right;color:#294b3b;}
+#app .night-visibility-top{display:grid;gap:6px;}
+#app .night-visibility-top>strong{font-size:12px;color:#315e47;}
+#app .night-visibility-top ol{display:grid;gap:4px;padding-left:21px;margin:0;}
+#app .night-visibility-top li{font-size:11px;line-height:1.45;}
+#app .night-visibility-top li button{border:0;background:transparent;text-align:left;padding:3px 0;color:#356b55;font-size:11px;line-height:1.4;cursor:pointer;text-decoration:underline;text-underline-offset:2px;white-space:normal;overflow-wrap:anywhere;}
+#app .night-visibility-top p{font-size:11px;margin:0;color:#627c6c;}
+#app .night-visibility-disclaimer{font-size:10px;line-height:1.65;color:#6b786b;margin:4px 0 0;}
+#app .night-visibility-quick-off{position:absolute;z-index:1170;top:calc(var(--dj-header-h,68px) + 18px);left:calc(var(--dj-nav-width,88px) + 28px);border:1px solid #d39c52;border-radius:999px;background:#fff4d9;color:#724a1f;padding:9px 12px;font-size:11px;font-weight:800;cursor:pointer;box-shadow:0 3px 11px #513a2322;}
+#app.map-controls-open .night-visibility-quick-off{display:none!important;}
+#app[data-tab]:not([data-tab="map"]) .night-visibility-quick-off{display:none!important;}
+#app[data-theme="dark"] .night-visibility-tool{background:#253b39;color:#e3eee4;border-color:#4b6e61;}
+#app[data-theme="dark"] .night-visibility-heading strong{color:#e3f5e9;}
+#app[data-theme="dark"] .night-visibility-heading span,#app[data-theme="dark"] .night-visibility-disclaimer,#app[data-theme="dark"] .night-visibility-status{color:#c2d2cb;}
+#app[data-theme="dark"] .night-visibility-stats{background:#1c3331;border-color:#456a60;}
+#app[data-theme="dark"] .night-visibility-stat strong,#app[data-theme="dark"] .night-visibility-top>strong{color:#e8f5ed;}
+#app[data-theme="dark"] .night-visibility-stat span,#app[data-theme="dark"] .night-visibility-legend{color:#bed2c5;}
+#app[data-theme="dark"] .night-visibility-top li button{color:#a1e3ca;}
+#app[data-theme="dark"] .night-visibility-quick-off{background:#483925;color:#ffe3ab;border-color:#c29d60;}
+@media(max-width:1079px){#app .night-visibility-quick-off{top:calc(190px + env(safe-area-inset-top));left:12px;max-width:calc(100vw - 24px);}}
+@media(max-width:560px){#app .night-visibility-tool{padding:11px;}#app .night-visibility-quick-off{top:calc(195px + env(safe-area-inset-top));left:12px;}}
+#app #night-visibility-stats:empty{display:none!important;}

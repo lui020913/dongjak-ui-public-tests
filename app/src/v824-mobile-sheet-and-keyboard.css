@@ -1,0 +1,90 @@
+/* Legacy two-column headings: desktop-only. Mobile is owned exclusively by
+ * v829-mobile-layout-system.css; never reapply these grid rows on iOS. */
+@media (min-width:700px){
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading{
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 44px!important;
+  grid-template-rows:auto auto auto!important;
+  align-items:start!important;
+  column-gap:10px!important;
+  row-gap:3px!important;
+  width:100%!important;
+  padding-inline:0!important;
+  min-height:50px!important;
+}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > :is(.micro-label,h2,p){
+  grid-column:1!important;
+  min-width:0!important;
+  justify-self:start!important;
+}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > .micro-label{grid-row:1!important;}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > h2{grid-row:2!important;}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > p{grid-row:3!important;}
+/* News has no kicker, so its title starts in the first row. */
+html body #app#app#app#app#app #news-panel.page-panel > .page-heading > h2{grid-row:1!important;}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > button.page-dismiss{
+  position:static!important;
+  inset:auto!important;
+  inset-block:auto!important;
+  inset-inline:auto!important;
+  top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+  float:none!important;
+  grid-column:2!important;
+  grid-row:1 / span 3!important;
+  justify-self:end!important;
+  align-self:start!important;
+  order:0!important;
+  transform:none!important;
+  translate:none!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  display:grid!important;place-items:center!important;
+  width:44px!important;height:44px!important;
+  min-width:44px!important;min-height:44px!important;
+  max-width:44px!important;max-height:44px!important;
+  z-index:150!important;
+  touch-action:manipulation!important;
+}
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > button.page-dismiss::before,
+html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel > .page-heading > button.page-dismiss::after{
+  content:none!important;display:none!important;
+}
+}
+/* Mobile route sheet height is owned by the common 50dvh contract.
+ * This file only maintains scroll behavior and keyboard accessibility. */
+@media (max-width:699px){
+  html body #app#app#app#app#app[data-tab="route"] #route-panel.page-panel:not([hidden]){
+    min-height:0!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+  }
+  html body #app#app#app #route-panel .dj-mobile-page-content{
+    max-height:none!important;height:auto!important;
+    overflow:visible!important;
+  }
+  /* iOS Safari automatically zooms and pans when focusing inputs smaller than
+   * 16px.  Previous account styling forced font: 14px, including passwords. */
+  html body #app#app#app #dj824-account :is(input,textarea,select),
+  html body #app#app#app #dj824-account :is(.dj820-credentials-form input,.dj820-settings-form input,.dj824-cloud-setup input){
+    font-size:16px!important;
+    line-height:1.4!important;
+    -webkit-text-size-adjust:100%!important;
+    min-height:44px!important;
+  }
+  html body #app#app#app #mine-panel.page-panel:not([hidden]){
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-padding-bottom:24px;
+  }
+  html.dj824-auth-focused,html.dj824-auth-focused body{
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+}

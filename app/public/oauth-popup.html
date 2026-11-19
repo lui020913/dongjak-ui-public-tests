@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="referrer" content="no-referrer" />
+<title>동작하는 안전지도 · 카카오 인증</title>
+<style>
+  :root{font:16px/1.6 system-ui,-apple-system,'Pretendard',sans-serif;color-scheme:light dark;}
+  body{margin:0;padding:32px;background:#f4f8f5;color:#193c31;}
+  .card{max-width:400px;margin:18vh auto 0;padding:28px 24px;border:1px solid #d4e4da;border-radius:20px;background:#fff;}
+  h1{font-size:19px;margin:0 0 12px;}p{font-size:14px;margin:0;color:#52756a;}
+  button{margin-top:18px;border:0;border-radius:12px;background:#277c65;color:#fff;padding:12px 20px;font:inherit;cursor:pointer;}
+</style>
+</head>
+<body>
+<main class="card"><h1 id="heading">카카오 로그인 확인 중</h1><p id="status">인증 결과를 기존 지도 화면에 전달하고 있습니다.</p><button id="close" type="button" hidden>창 닫기</button></main>
+<script>
+(function(){
+  'use strict';
+  var heading=document.getElementById('heading');
+  var status=document.getElementById('status');
+  var close=document.getElementById('close');
+  close.addEventListener('click',function(){window.close();});
+  var fragment=new URLSearchParams(location.hash.slice(1));
+  var query=new URLSearchParams(location.search);
+  var error=fragment.get('error_description')||query.get('error_description')||fragment.get('error')||query.get('error');
+  var accessToken=fragment.get('access_token');
+  var refreshToken=fragment.get('refresh_token');
+  var code=query.get('code');
+  var result=error?{error:String(error).slice(0,180)}:
+    accessToken&&refreshToken?{accessToken:accessToken,refreshToken:refreshToken,providerToken:fragment.get('provider_token')||''}:
+    code?{code:code}:null;
+  // Remove credentials from the visible URL as early as possible. They are
+  // passed once, in-memory, to the existing origin-checked popup opener.
+  try{history.replaceState(null,'',location.pathname);}catch(_e){}
+  if(!result){
+    heading.textContent='인증 결과를 확인할 수 없습니다.';
+    status.textContent='창을 닫고 동작구 지도에서 다시 로그인해 주세요.';
+    close.hidden=false;return;
+  }
+  try{
+    if(!window.opener||window.opener===window||window.opener.location.origin!==location.origin)
+      throw new Error('기존 지도 창과 연결되지 않았습니다.');
+    window.opener.postMessage({type:'dongjak:kakao-popup-result:v831',result:result},location.origin);
+    heading.textContent=error?'카카오 로그인 중 오류가 발생했습니다.':'인증 결과 전달 완료';
+    status.textContent='원래 지도 화면으로 돌아가시면 됩니다. 이 창은 자동으로 닫힙니다.';
+    close.hidden=false;
+    // The original map window closes this popup after receiving the message.
+  }catch(_e){
+    heading.textContent='기존 지도 화면으로 돌아가 주세요.';
+    status.textContent='브라우저가 인증 창과 지도 창 사이의 연결을 제한했습니다. 지도로 돌아가 로그인 상태를 확인하거나 일반 로그인 방식으로 다시 시도해 주세요.';
+    close.hidden=false;
+  }
+})();
+</script>
+</body>
+</html>

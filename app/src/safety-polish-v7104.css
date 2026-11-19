@@ -1,0 +1,218 @@
+/* v7.10.4 safety readability and consistent markers — no map-canvas layout changes. */
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import]){
+  grid-template-columns:40px minmax(0,1fr) 46px!important;
+  gap:9px!important;
+  min-height:51px!important;
+}
+#app .dj-import-grid .dj-feature-state{
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:block!important;
+  justify-self:end!important;
+  flex:0 0 44px!important;
+  width:44px!important;min-width:44px!important;
+  height:27px!important;min-height:27px!important;
+  padding:0!important;margin:0!important;
+  border-radius:999px!important;
+  border:1px solid #acbfba!important;
+  background:#c8d4d1!important;
+  box-shadow:inset 0 1px 2px rgba(12,37,33,.10)!important;
+  text-indent:-9999px!important;font-size:0!important;line-height:0!important;
+  white-space:nowrap!important;overflow:hidden!important;
+  transition:background-color .16s ease,border-color .16s ease!important;
+}
+#app .dj-import-grid .dj-feature-state::before{
+  content:"";position:absolute;left:3px;top:2px;
+  width:21px;height:21px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.27);
+  transform:translateX(0);transition:transform .16s ease;
+}
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import])[aria-pressed="true"] .dj-feature-state{
+  background:var(--dj-safe-accent,#138a7f)!important;
+  border-color:var(--dj-safe-accent,#138a7f)!important;
+}
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import])[aria-pressed="true"] .dj-feature-state::before{
+  transform:translateX(17px);
+}
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import]):disabled .dj-feature-state{
+  opacity:.86!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.42)!important;
+}
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import]):disabled .dj-feature-mark{
+  animation:dj-layer-loading .72s ease-in-out infinite alternate;
+}
+@keyframes dj-layer-loading{from{opacity:.55}to{opacity:1}}
+#app .dj-feature-mark{box-shadow:0 2px 5px rgba(0,33,32,.20),0 0 0 1px rgba(0,0,0,.12)!important;}
+#app .dj-feature-mark svg{stroke-width:2.65!important;}
+#app .dj-import-grid button:is([data-dj-import],[data-bocha-import]):focus-visible{
+  border-radius:12px!important;outline:3px solid var(--dj-safe-accent,#138a7f)!important;outline-offset:3px;
+}
+/* Readability settings live in the same drawer; compact by default. */
+#app .dj-type-settings{
+  display:block;min-width:0;flex:0 0 auto;
+  padding:0;border-radius:13px;overflow:hidden;
+  border:1px solid var(--dj-safe-line,#dae5df);
+  background:var(--dj-safe-surface,#fff);
+}
+#app .dj-type-settings summary{
+  display:flex;gap:10px;align-items:center;cursor:pointer;
+  padding:11px 12px;list-style:none;color:var(--dj-safe-ink,#203e39);
+}
+#app .dj-type-settings summary::-webkit-details-marker{display:none;}
+#app .dj-type-settings-icon{
+  display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;
+  background:var(--dj-safe-soft,#f1f7f4);border:1px solid var(--dj-safe-line,#dae5df);
+  border-radius:10px;font-size:15px;font-weight:850;
+}
+#app .dj-type-settings summary>span:nth-child(2){display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+#app .dj-type-settings summary strong{font-size:12.5px;font-weight:800;line-height:1.3;}
+#app .dj-type-settings summary small{font-size:10.5px;color:var(--dj-safe-muted,#58726a);line-height:1.3;}
+#app .dj-type-settings-arrow{width:9px;height:9px;flex:0 0 9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:4px;}
+#app .dj-type-settings[open] .dj-type-settings-arrow{transform:rotate(225deg);}
+#app .dj-type-settings-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 10px;}
+#app .dj-type-settings-body label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;font-weight:750;color:var(--dj-safe-ink,#203e39);}
+#app .dj-type-settings-body select{
+  box-sizing:border-box;width:100%;min-width:0;min-height:39px;
+  border:1px solid var(--dj-safe-line,#dae5df);border-radius:10px;
+  background:var(--dj-safe-soft,#f1f7f4);color:var(--dj-safe-ink,#203e39);
+  font-size:13px;font-weight:700;padding:0 7px;
+}
+#app .dj-type-settings>p{margin:0;padding:0 12px 12px;color:var(--dj-safe-muted,#58726a);font-size:10px;line-height:1.45;}
+/* Scope text options to app chrome, preserving label sizes inside MapLibre canvas. */
+#app[data-dj-type-scale="large"] .map-safety-controls .dj-feature-copy b{font-size:14.5px!important;line-height:1.48!important;}
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .dj-feature-copy b{font-size:16px!important;line-height:1.48!important;}
+#app[data-dj-type-scale="large"] .map-safety-controls .dj-feature-copy small,
+#app[data-dj-type-scale="large"] .map-safety-controls .dj-safety-group-name small,
+#app[data-dj-type-scale="large"] .map-safety-controls .dj-feature-legend{font-size:11.5px!important;line-height:1.55!important;}
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .dj-feature-copy small,
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .dj-safety-group-name small,
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .dj-feature-legend{font-size:12.5px!important;line-height:1.55!important;}
+#app[data-dj-type-scale="large"] .map-safety-controls .dj-safety-group-name strong{font-size:15px!important;}
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .dj-safety-group-name strong{font-size:16.5px!important;}
+#app[data-dj-type-scale="large"] .map-safety-controls .map-safety-head strong{font-size:21px!important;}
+#app[data-dj-type-scale="xlarge"] .map-safety-controls .map-safety-head strong{font-size:23px!important;}
+#app[data-dj-type-scale="large"] :is(.map-advanced-controls,.transport-sheet,.page-panel) :is(p,label,small){font-size:max(12px,1em)!important;line-height:1.5!important;}
+#app[data-dj-type-scale="xlarge"] :is(.map-advanced-controls,.transport-sheet,.page-panel) :is(p,label,small){font-size:max(13px,1em)!important;line-height:1.52!important;}
+#app[data-dj-type-weight="bold"] .map-safety-controls :is(.dj-feature-copy b,.dj-feature-copy small,.dj-feature-legend,.dj-safety-group-name strong,.dj-safety-group-name small,.map-safety-head strong,.map-safety-head span){font-weight:850!important;}
+#app[data-dj-type-weight="bold"] :is(.map-advanced-controls,.transport-sheet,.page-panel) :is(p,label,small,strong){font-weight:750!important;}
+/* The search action remains a text button, 1.5x the observed 34px/38px widths.
+   Preserve the input's flex shrinking to avoid horizontal overflow. */
+@media(min-width:1080px){
+  html body #app .topbar .map-quick-search-form > .map-quick-search-submit{
+    box-sizing:border-box!important;width:57px!important;min-width:57px!important;max-width:57px!important;
+    flex:0 0 57px!important;
+  }
+}
+@media(min-width:700px) and (max-width:1079px){
+  html body #app .topbar .map-quick-search-form > .map-quick-search-submit{
+    width:57px!important;min-width:57px!important;
+    max-width:57px!important;flex:0 0 57px!important;
+  }
+}
+@media(max-width:699px){
+  html body #app .topbar .map-quick-search-form > .map-quick-search-submit{
+    width:51px!important;min-width:51px!important;max-width:51px!important;
+    flex:0 0 51px!important;height:40px!important;
+    font-size:13px!important;font-weight:850!important;
+    line-height:1!important;letter-spacing:-.02em!important;
+  }
+  html body #app .topbar .map-quick-search-form > .map-quick-search-submit::after{content:none!important;display:none!important;}
+  /* Match the 16px/15px/20px inner breathing room of bottom-tab sheets. */
+  html body #app.map-safety-open #map-safety-controls{
+    padding:16px 15px 20px!important;gap:12px!important;
+    border-radius:24px!important;
+  }
+  html body #app .map-safety-controls .map-safety-head{
+    box-sizing:border-box!important;
+    display:flex!important;align-items:center!important;
+    min-height:78px!important;
+    padding:12px 3px 16px!important;margin:0 0 4px!important;
+    gap:14px!important;
+  }
+  html body #app .map-safety-controls .map-safety-head>div{flex:1;min-width:0;gap:7px!important;}
+  html body #app .map-safety-controls .map-safety-head strong{font-size:20px!important;line-height:1.3!important;}
+  html body #app .map-safety-controls .map-safety-head span{font-size:11.5px!important;line-height:1.55!important;word-break:keep-all;}
+  html body #app .map-safety-controls #map-safety-close{
+    flex:0 0 42px!important;width:42px!important;min-width:42px!important;
+    height:42px!important;min-height:42px!important;max-width:42px!important;
+    border-radius:13px!important;align-self:flex-start;
+  }
+  html body #app.map-controls-open #map-advanced-controls{
+    padding:16px 15px 20px!important;border-radius:24px!important;
+  }
+  html body #app .map-advanced-controls .map-options-mobile-heading{
+    box-sizing:border-box!important;min-height:76px!important;
+    display:flex!important;align-items:center!important;
+    padding:9px 2px 15px!important;margin:0 0 10px!important;
+    gap:14px!important;
+  }
+  html body #app .map-advanced-controls .map-options-mobile-heading>strong{
+    font-size:20px!important;line-height:1.35!important;word-break:keep-all!important;
+  }
+  html body #app #night-visibility-float:not([hidden]){
+    border-radius:24px!important;
+  }
+  html body #app #night-visibility-float .night-visibility-float-head{
+    min-height:78px!important;box-sizing:border-box!important;
+    display:flex!important;align-items:center!important;
+    gap:12px!important;padding:15px 14px 17px!important;
+  }
+  html body #app #night-visibility-float .night-visibility-float-heading{
+    gap:7px!important;min-width:0!important;
+  }
+  html body #app #night-visibility-float .night-visibility-float-heading strong{
+    font-size:20px!important;line-height:1.32!important;
+  }
+  html body #app #night-visibility-float .night-visibility-float-heading span{
+    font-size:11px!important;line-height:1.5!important;
+  }
+  html body #app #pza-road-sheet .pza-sheet-head{
+    min-height:74px!important;box-sizing:border-box!important;
+    display:flex!important;align-items:center!important;
+    gap:12px!important;padding:12px 6px 16px!important;
+  }
+  #app .dj-import-grid button:is([data-dj-import],[data-bocha-import]){grid-template-columns:36px minmax(0,1fr) 46px!important;}
+  #app .dj-type-settings-body{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:359px){
+  html body #app .topbar .map-quick-search-form > .map-quick-search-submit{
+    width:51px!important;min-width:51px!important;max-width:51px!important;flex:0 0 51px!important;
+  }
+  #app .dj-import-grid button:is([data-dj-import],[data-bocha-import]){grid-template-columns:34px minmax(0,1fr) 44px!important;gap:6px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  #app .dj-import-grid .dj-feature-state,#app .dj-import-grid .dj-feature-state::before{transition:none!important;}
+  #app .dj-import-grid button:is([data-dj-import],[data-bocha-import]):disabled .dj-feature-mark{animation:none;}
+}
+
+/* v7.11.0 mobile-panel compatibility: later legacy rules carry a stronger
+   #app[data-tab] + #panel selector. Match their specificity so title padding
+   remains consistent with the bottom navigation sheet. */
+@media(max-width:699px){
+  html body #app#app[data-tab="map"].map-safety-open #map-safety-controls .map-safety-head{
+    box-sizing:border-box!important;
+    min-height:84px!important;
+    padding:14px 4px 17px!important;
+    margin:0 0 12px!important;
+    gap:14px!important;
+  }
+  html body #app#app[data-tab="map"].map-controls-open #map-advanced-controls .map-options-mobile-heading{
+    box-sizing:border-box!important;
+    min-height:82px!important;
+    padding:13px 4px 16px!important;
+    margin:0 0 12px!important;
+    gap:14px!important;
+  }
+  html body #app#app[data-tab="map"] #night-visibility-float .night-visibility-float-head{
+    box-sizing:border-box!important;
+    min-height:82px!important;
+    padding:15px 16px 18px!important;
+    gap:14px!important;
+  }
+  html body #app#app[data-tab="map"] #pza-road-sheet .pza-sheet-head{
+    box-sizing:border-box!important;
+    min-height:80px!important;
+    padding:13px 8px 16px!important;
+    gap:12px!important;
+  }
+}

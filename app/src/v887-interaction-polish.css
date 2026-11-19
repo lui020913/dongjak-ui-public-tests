@@ -1,0 +1,123 @@
+/* v887 — interaction audit, appended after the prior visual systems.
+ * Only enhance presentation: no map geometry, state, navigation or data changes.
+ * Palette: safety teal, map neutral dark, night muted indigo, info amber.
+ * Preserve subway route color semantics (line 1 blue, line 9 gold, etc.).
+ */
+#app{
+  --dj887-safety:#107c66;
+  --dj887-night:#526d98;
+  --dj887-ink:#24433a;
+  --dj887-focus:rgba(18,129,107,.16);
+}
+#app[data-theme="dark"]{
+  --dj887-safety:#6dd2ae;
+  --dj887-night:#a8bce7;
+  --dj887-ink:#e6f6ef;
+  --dj887-focus:rgba(112,213,180,.25);
+}
+#app :is(.dj-sheet-chrome-close,#transport-close,#map-options-mobile-close,
+  #map-options-desktop-close,#map-safety-close){
+  -webkit-tap-highlight-color:transparent;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+ .dj-sheet-chrome-title :is(svg,.dj-sheet-chrome-icon){
+  color:var(--dj881-accent,#12816b);
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+ .dj-sheet-chrome-close{
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+ .dj-sheet-chrome-close:is(:hover,:focus-visible){
+  background:var(--dj881-soft,#eaf5ee);
+  border-color:var(--dj881-accent,#12816b);
+}
+#app :is(#map-advanced-controls,#map-safety-controls,#dj-mobile-utilities)
+  :is(button,[role="button"]):focus-visible{
+  outline:3px solid var(--dj881-accent,#12816b);
+  outline-offset:2px;
+}
+/* Subview changes should feel like a quiet fade, not a second bottom sheet. */
+@keyframes dj887-subview-fade {
+  from{opacity:.55;}
+  to{opacity:1;}
+}
+#app #mine-panel .dj834-my-detail:not([hidden]),
+#app #mine-panel .dj877-type-settings:not([hidden]),
+#app #participation-panel .community-form:not([hidden]){
+  animation:dj887-subview-fade .18s ease-out both;
+}
+@media (max-width:699px){
+  /* Stable icon semantics without recoloring metro badges, warning symbols
+     or active route/transit line indicators. */
+  html body #app#app#app#app#app#app #dj-v794-toolbar
+     #dj-v794-safety:not([data-active="true"]){
+    color:var(--dj887-safety)!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar
+     #dj-v794-night:not([data-active="true"]){
+    color:var(--dj887-night)!important;
+  }
+  html body #app#app#app#app#app#app #dj-v794-toolbar
+     #dj-v794-night[data-active="true"]{
+    color:#345e9b!important;
+    background:#e5eefb!important;
+    border-color:#b3c8e6!important;
+  }
+  #app[data-theme="dark"] #dj-v794-toolbar
+     #dj-v794-night[data-active="true"]{
+    color:#d4e1fa!important;
+    background:#2c3d58!important;
+    border-color:#829ecb!important;
+  }
+  #app #bottom-nav>.nav-tab{
+    -webkit-tap-highlight-color:transparent;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title{
+    align-items:center!important;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close{
+    flex:0 0 44px!important;align-self:center!important;
+  }
+  #app #transport-sheet .transport-mode-tabs button{
+    transition:color .16s ease,background-color .16s ease;
+  }
+  /* Live arrival cards must not be padded into oversized blank blocks. */
+  #app #transport-sheet :is(.transport-arrival-row,.metro-info-line-card){
+    box-shadow:none;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #app #mine-panel .dj834-my-detail:not([hidden]),
+  #app #mine-panel .dj877-type-settings:not([hidden]),
+  #app #participation-panel .community-form:not([hidden]){
+    animation:none!important;
+  }
+  #app :is(.dj-sheet-chrome-close,#bottom-nav>.nav-tab){transition:none!important;}
+}
+
+/* Preserve semantics against historic high-specificity mobile toolbar CSS.
+ * This applies to the shortcut proxy icons only; map layers and subway
+ * line badges deliberately remain under their own color authorities. */
+@media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app
+    #dj-v794-toolbar  #dj-v794-safety {
+    color:var(--dj887-safety)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app
+    #dj-v794-toolbar  #dj-v794-night {
+    color:var(--dj887-night)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app
+    #dj-v794-toolbar  #dj-v794-night[data-active="true"]{
+    background:#e5eefb!important;
+    color:#345e9b!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"]
+    #dj-v794-toolbar  #dj-v794-night[data-active="true"] {
+    color:#d4e1fa!important;
+    background:#2c3d58!important;
+  }
+}

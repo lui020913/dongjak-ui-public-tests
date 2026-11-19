@@ -1,0 +1,318 @@
+/* v7.10.2 — applies to iOS PWA / Android only; PC styles are untouched.
+   Panel DOM is partitioned by mobile-panel-layout.js, preserving old handlers. */
+@media (max-width:699px) {
+  html body #app {
+    --dj-mobile-panel-bg:#ffffff;
+    --dj-mobile-panel-text:#1b3029;
+    --dj-mobile-panel-muted:#6b8077;
+    --dj-mobile-panel-field:#f2f7f4;
+    --dj-mobile-panel-border:#d8e8df;
+    --dj-mobile-panel-accent:#197d64;
+  }
+  html body #app[data-theme="dark"] {
+    --dj-mobile-panel-bg:#1c3035;
+    --dj-mobile-panel-text:#eaf5ef;
+    --dj-mobile-panel-muted:#b5cbc2;
+    --dj-mobile-panel-field:#294348;
+    --dj-mobile-panel-border:#46615e;
+    --dj-mobile-panel-accent:#8fe2c4;
+  }
+  html body #app #route-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #participation-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #news-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #mine-panel.dj-mobile-panel-split.page-panel:not([hidden]) {
+    display:flex!important;flex-direction:column!important;
+    box-sizing:border-box!important;
+    height:min(43dvh,480px)!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 170px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    overflow:hidden!important;
+    padding:0!important;
+    background:var(--dj-mobile-panel-bg)!important;
+    color:var(--dj-mobile-panel-text)!important;
+    border:1px solid var(--dj-mobile-panel-border)!important;
+    border-radius:24px!important;
+    overscroll-behavior:contain!important;
+  }
+  /* Admin picker is the sole visible sheet when selected; no stacked safety overview. */
+  html body #app:has(#admin-dong-picker:not([hidden])) #overview-sheet {
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-header {
+    box-sizing:border-box!important;
+    position:relative!important;display:flex!important;align-items:center!important;
+    flex:0 0 auto!important;min-height:80px!important;
+    padding:15px 66px 13px 20px!important;
+    border-bottom:1px solid var(--dj-mobile-panel-border)!important;
+    background:var(--dj-mobile-panel-bg)!important;
+    z-index:3!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-header .page-heading,
+  html body #app[data-tab="route"] #route-panel.dj-mobile-panel-split .dj-mobile-page-header .page-heading,
+  html body #app #news-panel.dj-mobile-panel-split .dj-mobile-page-header .page-heading {
+    position:static!important;top:auto!important;left:auto!important;right:auto!important;
+    display:block!important;min-width:0!important;
+    margin:0!important;padding:0!important;
+    border:0!important;box-shadow:none!important;
+    background:transparent!important;background-image:none!important;
+    filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-header .micro-label{display:none!important;}
+  html body #app .dj-mobile-panel-split .dj-mobile-page-title{
+    display:flex!important;align-items:center!important;gap:11px!important;
+    min-width:0!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-title .dj-mobile-title-icon {
+    flex:0 0 24px!important;width:24px!important;height:26px!important;
+    display:grid!important;place-items:center!important;
+    color:var(--dj-mobile-panel-accent)!important;
+    font-size:25px!important;line-height:1!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-title .dj-mobile-title-icon svg {
+    width:24px!important;height:24px!important;fill:none!important;
+    stroke:currentColor!important;stroke-width:1.8!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-title h2 {
+    margin:0!important;padding:0!important;white-space:nowrap!important;
+    font-size:clamp(20px,5.5vw,25px)!important;line-height:1.3!important;
+    color:var(--dj-mobile-panel-text)!important;
+    letter-spacing:-.04em!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-header .page-dismiss,
+  html body #app #news-panel.dj-mobile-panel-split .dj-mobile-page-header #news-close-to-map {
+    display:grid!important;place-items:center!important;
+    position:absolute!important;
+    right:18px!important;top:50%!important;left:auto!important;bottom:auto!important;
+    transform:translateY(-50%)!important;
+    width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+    border:1px solid var(--dj-mobile-panel-border)!important;
+    background:var(--dj-mobile-panel-field)!important;
+    color:var(--dj-mobile-panel-text)!important;
+    border-radius:13px!important;z-index:5!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-content {
+    display:block!important;flex:1 1 auto!important;min-height:0!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    box-sizing:border-box!important;
+    padding:17px 20px 25px!important;
+    background:var(--dj-mobile-panel-bg)!important;
+    color:var(--dj-mobile-panel-text)!important;
+    scrollbar-width:none!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-content::-webkit-scrollbar{display:none!important;}
+  html body #app .dj-mobile-panel-split .dj-mobile-page-content > .route-card {
+    margin-top:0!important;
+    border:1px solid var(--dj-mobile-panel-border)!important;
+    background:var(--dj-mobile-panel-field)!important;
+    color:var(--dj-mobile-panel-text)!important;
+    box-shadow:none!important;
+  }
+  html body #app .dj-mobile-panel-split .dj-mobile-page-content > p {
+    margin:0 0 15px!important;line-height:1.65!important;
+    color:var(--dj-mobile-panel-muted)!important;overflow-wrap:anywhere!important;
+  }
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-toolbar {
+    position:relative!important;top:auto!important;z-index:auto!important;
+    margin:0 0 12px!important;padding:0!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+  }
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-tabs,
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-tabs button:not(.active) {
+    background:var(--dj-mobile-panel-field)!important;
+    color:var(--dj-mobile-panel-text)!important;
+  }
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-tabs button.active {
+    background:#197d64!important;color:#fff!important;
+  }
+  html body #app #news-panel.dj-mobile-panel-split #dongjak-news-refresh,
+  html body #app #news-panel.dj-mobile-panel-split .news-empty,
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-item {
+    background:var(--dj-mobile-panel-field)!important;
+    color:var(--dj-mobile-panel-text)!important;
+    border-color:var(--dj-mobile-panel-border)!important;
+  }
+  html body #app #news-panel.dj-mobile-panel-split .dongjak-news-item strong{
+    color:var(--dj-mobile-panel-text)!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .stat-grid>div{
+    background:var(--dj-mobile-panel-field)!important;
+    border:1px solid var(--dj-mobile-panel-border)!important;
+    box-sizing:border-box!important;
+    color:var(--dj-mobile-panel-text)!important;
+    min-width:0!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .stat-grid>div strong{
+    display:block!important;visibility:visible!important;opacity:1!important;
+    color:var(--dj-mobile-panel-accent)!important;
+    font-size:25px!important;font-weight:850!important;
+    font-variant-numeric:tabular-nums!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .stat-grid>div small{
+    color:var(--dj-mobile-panel-muted)!important;text-align:center!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .page-section-title{
+    color:var(--dj-mobile-panel-text)!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .record-item,
+  html body #app #mine-panel.dj-mobile-panel-split .records-list,
+  html body #app #mine-panel.dj-mobile-panel-split .records-list>div{
+    border-color:var(--dj-mobile-panel-border)!important;
+    color:var(--dj-mobile-panel-text)!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .record-item{
+    background:var(--dj-mobile-panel-field)!important;
+  }
+  html body #app #mine-panel.dj-mobile-panel-split .record-text small,
+  html body #app #mine-panel.dj-mobile-panel-split .records-list p{
+    color:var(--dj-mobile-panel-muted)!important;
+  }
+  /* The status-bar seam follows the selected theme, not the tab's previous color. */
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"],
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] body,
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] body #app {
+    background-color:#e5ece8!important;
+  }
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"],
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] body,
+  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] body #app {
+    background-color:#192d32!important;
+  }
+}
+
+/* v7.10.2: mobile iOS/Android theme switch while map finishes rendering. */
+@media (max-width:699px) {
+  html[data-theme="light"], html[data-theme="light"] body,
+  html[data-theme="light"] body #app {color-scheme:light;}
+  html[data-theme="dark"], html[data-theme="dark"] body,
+  html[data-theme="dark"] body #app {color-scheme:dark;}
+  html body #app#app#app .dj-theme-switch-flash:not([hidden]) {
+    position:fixed!important;inset:0!important;z-index:3900!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    background:rgba(12,32,35,.30)!important;
+    -webkit-backdrop-filter:blur(14px) saturate(.72)!important;
+    backdrop-filter:blur(14px) saturate(.72)!important;
+    animation:none!important;opacity:1!important;pointer-events:none!important;
+  }
+  html body #app#app#app .dj-theme-switch-flash:not([hidden])::after {
+    content:"테마 전환 중…";
+    display:block;padding:14px 23px;border-radius:15px;
+    background:rgba(16,37,40,.85);color:#fff;font-size:16px;
+    font-weight:800;line-height:1.4;letter-spacing:-.02em;
+    border:1px solid rgba(240,255,249,.25);
+    box-shadow:0 12px 35px rgba(0,0,0,.25);
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce){
+  /* Keep progress readable without animated or background-blurring motion. */
+  html body #app#app#app .dj-theme-switch-flash:not([hidden]) {
+    display:flex!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}
+
+/* v7.10.3: district picker is one sheet, matching bottom-tab sheets exactly. */
+@media (max-width:699px){
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet:not([hidden]){
+    display:flex!important;flex-direction:column!important;
+    position:fixed!important;
+    top:auto!important;left:12px!important;right:12px!important;
+    bottom:calc(102px + env(safe-area-inset-bottom,0px))!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    height:min(43dvh,480px)!important;min-height:0!important;
+    max-height:calc(100dvh - 170px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    padding:0!important;margin:0!important;transform:none!important;
+    overflow:hidden!important;overscroll-behavior:contain!important;
+    background:var(--dj-mobile-panel-bg,#fff)!important;
+    color:var(--dj-mobile-panel-text,#1b3029)!important;
+    border:1px solid var(--dj-mobile-panel-border,#d8e8df)!important;
+    border-radius:24px!important;
+    z-index:2500!important;
+    box-shadow:0 10px 32px rgba(20,54,43,.16)!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-heading{
+    flex:0 0 auto!important;position:relative!important;
+    display:flex!important;align-items:center!important;
+    min-height:80px!important;margin:0!important;
+    padding:15px 66px 13px 20px!important;
+    background:var(--dj-mobile-panel-bg,#fff)!important;
+    border-bottom:1px solid var(--dj-mobile-panel-border,#d8e8df)!important;
+    z-index:3!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-heading > div{
+    display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-heading .dj-mobile-title-icon{
+    flex:0 0 24px!important;width:24px!important;height:26px!important;
+    display:grid!important;place-items:center!important;
+    color:var(--dj-mobile-panel-accent,#197d64)!important;
+    font-size:24px!important;line-height:1!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-heading strong{
+    font-size:clamp(20px,5.5vw,25px)!important;line-height:1.3!important;
+    white-space:nowrap!important;letter-spacing:-.04em!important;
+    color:var(--dj-mobile-panel-text,#1b3029)!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet #admin-dong-close{
+    position:absolute!important;top:50%!important;right:18px!important;
+    left:auto!important;bottom:auto!important;transform:translateY(-50%)!important;
+    display:grid!important;place-items:center!important;
+    width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+    background:var(--dj-mobile-panel-field,#f2f7f4)!important;
+    color:var(--dj-mobile-panel-text,#1b3029)!important;
+    border:1px solid var(--dj-mobile-panel-border,#d8e8df)!important;
+    border-radius:13px!important;z-index:4!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .dj-mobile-admin-content{
+    flex:1 1 auto!important;min-height:0!important;display:block!important;
+    box-sizing:border-box!important;padding:17px 20px 25px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    background:var(--dj-mobile-panel-bg,#fff)!important;
+    scrollbar-width:none!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .dj-mobile-admin-content::-webkit-scrollbar{display:none!important;}
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet #admin-dong-status{
+    margin:0 0 16px!important;font-size:12px!important;line-height:1.5!important;
+    color:var(--dj-mobile-panel-muted,#6b8077)!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet #admin-dong-list{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-choice{
+    min-width:0!important;padding:12px 5px!important;
+    background:var(--dj-mobile-panel-field,#f2f7f4)!important;
+    border:1px solid var(--dj-mobile-panel-border,#d8e8df)!important;
+    border-radius:12px!important;
+    color:var(--dj-mobile-panel-text,#1b3029)!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet .admin-dong-choice[aria-pressed="true"]{
+    background:#197d64!important;color:#fff!important;border-color:#197d64!important;
+  }
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet #admin-dong-clear{
+    display:block!important;width:100%!important;margin:12px 0 0!important;
+    min-height:42px!important;border-radius:12px!important;
+    background:var(--dj-mobile-panel-field,#f2f7f4)!important;
+    color:var(--dj-mobile-panel-accent,#197d64)!important;
+    border:1px solid var(--dj-mobile-panel-border,#d8e8df)!important;
+  }
+  /* A More popover never visually stacks on top of a second open sheet. */
+  html body #app#app.dj-mobile-more-open :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker,
+    #overview-sheet,#map-advanced-controls,#map-safety-controls,#night-visibility-float
+  ):not([hidden]){
+    visibility:hidden!important;pointer-events:none!important;
+  }
+}
+
+/* v7.10.4: one common baseline for all five bottom-tab sheets. */
+@media(max-width:699px){
+  html body #app #route-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #participation-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #news-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app #mine-panel.dj-mobile-panel-split.page-panel:not([hidden]),
+  html body #app#app #admin-dong-picker.dj-mobile-admin-sheet:not([hidden]){
+    bottom:var(--dj-v724-panel-bottom,calc(102px + env(safe-area-inset-bottom,0px)))!important;
+  }
+}

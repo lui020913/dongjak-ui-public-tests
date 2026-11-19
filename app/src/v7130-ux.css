@@ -1,0 +1,153 @@
+/* v7.13.0 – one common UX system; separate PC Chromium and handheld dimensions. */
+#app#app {
+  --dj-ux-bg:var(--dj-ui-bg,#fff);--dj-ux-field:var(--dj-ui-field,#f1f7f4);
+  --dj-ux-border:var(--dj-ui-border,#d9e8e1);--dj-ux-ink:var(--dj-ui-text,#1e4036);
+  --dj-ux-muted:var(--dj-ui-subtext,#708980);--dj-ux-accent:#11866e;
+}
+#app#app[data-theme="dark"]{
+  --dj-ux-bg:#1e3438;--dj-ux-field:#294449;--dj-ux-border:#4a6660;
+  --dj-ux-ink:#e7f6ee;--dj-ux-muted:#b4cbc2;--dj-ux-accent:#86e0bb;
+}
+/* The emblem is an independent image button, never a second logo inside search. */
+#app#app .topbar #dj-about-pc{
+  flex:none;box-sizing:border-box;display:grid;place-items:center;
+  width:42px;height:42px;min-width:42px;padding:0;border:0;background:transparent;
+  border-radius:12px;cursor:pointer;transition:transform .18s ease;
+}
+#app#app .topbar #dj-about-pc:hover{transform:translateY(-2px)}
+#app#app .topbar #dj-about-pc img{width:100%;height:100%;object-fit:contain;border-radius:12px}
+@media(min-width:700px){
+  #app#app .topbar .map-quick-search-form>.brand{display:none!important;}
+  #app#app .topbar #dj-settings-mobile{display:none!important;}
+  #app#app .topbar #dj-about-pc{display:grid!important;}
+  #app#app .topbar #map-quick-search{min-width:150px!important;flex:1 1 auto!important;}
+  #app#app .topbar .map-quick-search-form{padding-left:12px!important;}
+}
+@media(max-width:699px){
+  html body #app#app .topbar #dj-about-pc{display:none!important;}
+  html body #app#app .topbar #dj-settings-mobile{
+    width:50px!important;min-width:50px!important;max-width:50px!important;
+    flex:0 0 50px!important;height:50px!important;min-height:50px!important;
+    border-radius:15px!important;
+  }
+  html body #app#app .topbar #dj-settings-mobile img{width:50px!important;height:50px!important;}
+  html body #app#app .topbar #map-quick-search{flex:1 1 0!important;min-width:0!important;}
+  html body #app#app #dj-mobile-utilities{
+    width:210px!important;max-width:calc(100vw - 24px)!important;
+    padding:9px!important;gap:5px!important;
+    animation:dj-ux-pop .2s cubic-bezier(.16,.86,.35,1.12) both!important;
+  }
+  html body #app#app #dj-mobile-utilities .dj-mobile-utility-heading{display:none!important;}
+  html body #app#app #dj-mobile-utilities button{
+    min-height:42px!important;padding:9px 12px!important;
+    justify-content:flex-start!important;font-size:13px!important;font-weight:780!important;
+  }
+  html body #app#app .topbar #dj-settings-pc{display:none!important;}
+}
+/* Version/about sheet is distinct from preferences; light/dark use the same structure. */
+#app#app #dj-app-about[hidden]{display:none!important;}
+#app#app #dj-app-about{
+  position:fixed!important;inset:0!important;display:flex!important;
+  justify-content:center!important;align-items:center!important;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))!important;
+  z-index:21000!important;background:rgba(11,33,29,.34)!important;
+  backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;
+}
+#app#app #dj-app-about .dj-about-card{
+  position:relative;box-sizing:border-box;width:min(360px,100%);padding:28px 24px 23px;
+  display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;
+  border-radius:28px;border:1px solid var(--dj-ux-border);
+  color:var(--dj-ux-ink);background:var(--dj-ux-bg);
+  box-shadow:0 25px 65px rgba(0,22,18,.22);
+  animation:dj-ux-pop .3s cubic-bezier(.18,.85,.26,1.2) both;
+}
+#app#app .dj-about-card .dj-about-close{
+  position:absolute;right:14px;top:14px;width:36px;height:36px;display:grid;place-items:center;
+  border-radius:12px;font-size:25px;font-weight:650;line-height:1;border:1px solid var(--dj-ux-border);
+  background:var(--dj-ux-field);color:var(--dj-ux-ink);cursor:pointer;
+}
+#app#app .dj-about-icon{width:98px;height:98px;object-fit:contain;filter:drop-shadow(0 7px 14px rgba(0,36,24,.13))}
+#app#app .dj-about-kicker{font-size:10px;letter-spacing:.13em;font-weight:850;color:var(--dj-ux-accent)}
+#app#app .dj-about-card h2{font-size:23px;font-weight:850;line-height:1.28;margin:0}
+#app#app .dj-about-description{color:var(--dj-ux-muted);font-size:13px;line-height:1.55;max-width:270px;margin:0}
+#app#app .dj-about-version{width:100%;box-sizing:border-box;margin:6px 0 2px;padding:14px 16px;border:1px solid var(--dj-ux-border);border-radius:15px;background:var(--dj-ux-field);display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--dj-ux-muted)}
+#app#app .dj-about-version strong{font-size:17px;font-weight:850;color:var(--dj-ux-ink);font-variant-numeric:tabular-nums}
+#app#app .dj-about-card :is(.dj-about-updates,.dj-about-done){width:100%;min-height:44px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--dj-ux-border);font-size:14px;font-weight:800;cursor:pointer;background:var(--dj-ux-field);color:var(--dj-ux-ink)}
+#app#app .dj-about-card .dj-about-done{background:#167e69;border-color:#167e69;color:#fff}
+/* Shared palette, genuinely distinct type sizes for touch and desktop. */
+#app#app :is(#transport-mode-tabs,.transport-mode-tabs){display:flex!important;align-items:center!important;gap:4px!important;box-sizing:border-box!important;border-radius:15px!important;padding:4px!important;background:var(--dj-ux-field)!important;border:1px solid var(--dj-ux-border)!important;width:max-content!important;max-width:100%!important;min-height:46px!important;}
+#app#app :is(#transport-tab-live,#transport-tab-hours){flex:1 1 auto!important;display:grid!important;place-items:center!important;min-width:85px!important;min-height:37px!important;padding:8px 18px!important;background:transparent!important;color:var(--dj-ux-muted)!important;border:none!important;box-shadow:none!important;font-size:14px!important;font-weight:750!important;border-radius:11px!important;letter-spacing:-.02em!important;}
+#app#app :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:#16856d!important;color:#fff!important;box-shadow:0 3px 9px rgba(19,95,70,.16)!important;}
+#app#app[data-theme="dark"] :is(#transport-tab-live,#transport-tab-hours)[aria-pressed="true"]{background:#327e69!important;color:#fff!important;}
+#app#app #transport-sheet{color:var(--dj-ux-ink)!important;background:var(--dj-ux-bg)!important;border-color:var(--dj-ux-border)!important;}
+#app#app #transport-sheet .transport-panel-head{background:var(--dj-ux-bg)!important;}
+#app#app #transport-sheet .transport-panel-head #transport-description{color:var(--dj-ux-muted)!important;}
+#app#app #transport-sheet .transport-section-title{color:var(--dj-ux-ink)!important;}
+#app#app #transport-sheet :is(.transport-arrival-row,.metro-arrival-direction-group,.transport-official-time-card){border-color:var(--dj-ux-border)!important;}
+#app#app #transport-sheet :is(.transport-official-time-sources,.transport-arrival-row,.transport-official-time-card){background:var(--dj-ux-field)!important;color:var(--dj-ux-ink)!important;}
+#app#app #transport-sheet .transport-mode-tabs button:focus-visible{outline:3px solid #87c8b1!important;outline-offset:2px!important;}
+/* Dark preferences must not be covered by legacy mobile map backdrops. */
+#app#app #dj-map-settings[hidden]{display:none!important}
+#app#app #dj-map-settings{z-index:21500!important;}
+#app#app #dj-map-settings .dj-map-settings-card{background:var(--dj-ux-bg)!important;color:var(--dj-ux-ink)!important;border-color:var(--dj-ux-border)!important;}
+#app#app #dj-map-settings :is(.dj-map-settings-head,.dj-map-settings-footer,.dj-map-settings-group){border-color:var(--dj-ux-border)!important;}
+#app#app #dj-map-settings :is(.dj-map-settings-head p,.dj-map-settings-group p){color:var(--dj-ux-muted)!important;}
+#app#app #dj-map-settings :is(.dj-map-settings-group button,.dj-map-settings-footer button,#dj-settings-close){background:var(--dj-ux-field);border-color:var(--dj-ux-border);color:var(--dj-ux-ink)}
+#app#app #dj-map-settings .dj-settings-primary{background:#16856d!important;color:#fff!important;border-color:#16856d!important;}
+#app#app.dj-hide-weather :is(#dj-mobile-weather-trigger,#weather-widget){display:none!important;}
+#app#app[data-dj-settings-text="large"]{--dj-ux-text-delta:2px;}
+#app#app[data-dj-settings-text="small"]{--dj-ux-text-delta:-1px;}
+#app#app{--dj-ux-text-delta:0px;}
+@media(min-width:700px){
+ #app#app :is(#bottom-nav .nav-tab,.map-advanced-controls button,.map-safety-controls button,#dj-desktop-safety-rail button,.map-actions button){font-size:calc(14px + var(--dj-ux-text-delta))!important;font-weight:750!important;letter-spacing:-.025em!important;}
+ #app#app :is(.page-panel,.transport-sheet) :is(button,label,p,small,li){font-size:calc(14px + var(--dj-ux-text-delta))!important;line-height:1.5!important;}
+ #app#app :is(.page-panel,.transport-sheet) :is(h1,h2,h3){font-weight:830!important;letter-spacing:-.035em!important;}
+ #app#app #transport-sheet:not([hidden]){max-width:min(510px,calc(100vw - 210px))!important;}
+}
+@media(max-width:699px){
+ #app#app :is(#bottom-nav .nav-tab,.dj-mobile-tool-row button,.map-advanced-controls button,.map-safety-controls button){font-weight:760!important;letter-spacing:-.025em!important;}
+ #app#app #bottom-nav .nav-tab>span:last-child{font-size:calc(12px + var(--dj-ux-text-delta))!important;font-weight:780!important;}
+ #app#app :is(.page-panel,.transport-sheet) :is(button,label,p,small,li){font-size:calc(13px + var(--dj-ux-text-delta))!important;line-height:1.48!important;}
+ #app#app :is(.page-panel,.transport-sheet) :is(h1,h2,h3){font-weight:825!important;letter-spacing:-.035em!important;}
+ #app#app #transport-sheet:not([hidden]){
+    top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 90px)!important;
+    left:12px!important;right:12px!important;width:calc(100% - 24px)!important;
+    max-width:calc(100% - 24px)!important;max-height:min(53dvh,495px)!important;
+    padding:10px 13px 16px!important;border-radius:24px!important;
+    transform:none!important;overflow-x:hidden!important;overflow-y:auto!important;
+    z-index:3500!important;overscroll-behavior:contain!important;
+ }
+ #app#app #transport-sheet .transport-panel-head{position:sticky!important;top:-10px!important;z-index:5!important;padding:10px 3px 12px!important;border-bottom:1px solid var(--dj-ux-border)!important;margin-bottom:10px!important;}
+ #app#app #transport-sheet #transport-kind{font-size:11px!important;color:var(--dj-ux-accent)!important;}
+ #app#app #transport-sheet #transport-title{font-size:21px!important;line-height:1.24!important;letter-spacing:-.035em!important;}
+ #app#app #transport-sheet #transport-description{font-size:12px!important;}
+ #app#app #transport-mode-tabs{margin:12px auto!important;width:min(280px,100%)!important;}
+ #app#app #transport-mode-tabs button{font-size:14px!important;}
+ #app#app #transport-sheet .transport-arrivals-title{gap:8px!important;flex-wrap:wrap!important;}
+ #app#app #transport-sheet .transport-updated-actions{gap:5px!important;flex-wrap:wrap!important;}
+ #app#app #transport-sheet .metro-neighbor-row{width:100%!important;box-sizing:border-box!important;}
+ #app#app.transport-sheet-open #dj-mobile-map-actions,
+ #app#app:has(#transport-sheet:not([hidden])) #dj-mobile-map-actions {display:none!important;}
+}
+@keyframes dj-ux-pop{from{transform:translateY(16px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){#app#app #dj-app-about .dj-about-card,#app#app #dj-mobile-utilities{animation:none!important;}}
+@media(max-width:699px){
+ #app#app.dj-transport-interaction-open #dj-mobile-map-actions{display:none!important;}
+ #app#app .dj-ios-add-guide{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 91px);z-index:12000;max-width:480px;margin-inline:auto;padding:17px;box-sizing:border-box;border:1px solid var(--dj-ux-border);border-radius:18px;box-shadow:0 10px 32px #09271b2b;background:var(--dj-ux-bg);color:var(--dj-ux-ink);animation:dj-ux-pop .22s ease both;}
+ #app#app .dj-ios-add-guide strong{font-size:14px;font-weight:850;}
+ #app#app .dj-ios-add-guide p{font-size:12px;line-height:1.5;margin:5px 0 10px;color:var(--dj-ux-muted)}
+ #app#app .dj-ios-add-guide button{background:#16846b;color:white;border:0;border-radius:11px;padding:9px 18px;font-size:13px;font-weight:750;}
+}
+@media(max-width:699px){
+  /* The desktop map rail is still the event target, but its visible duplicate is
+     replaced by the existing mobile proxy with the same SVG artwork. */
+  html body #app#app .map-actions{display:none!important;}
+  /* Keep the transport bottom sheet inside the viewport even if a mode switch
+     reintroduces the desktop centering transform. */
+  html body #app#app #transport-sheet:not([hidden]){
+    margin:0!important;min-width:0!important;
+  }
+}
+#app#app.dj-reduced-animation #dj-app-about .dj-about-card,
+#app#app.dj-reduced-animation #dj-mobile-utilities,
+#app#app.dj-reduced-animation .dj-ios-add-guide{animation:none!important;transition:none!important;}

@@ -1,0 +1,433 @@
+/* v8.6.4 — floating onboarding, disclosure motion and transit header repair. */
+
+/* A floating overlay must still disappear when its hidden attribute is set. */
+html body #app#app#app#app .dj860-onboarding[hidden] {display:none!important;}
+
+/* The tour is a modal layer, but its card floats above the visible map on phones. */
+/* Keep the map visible behind the card without repeating the app wordmark. */
+html body #app#app#app[data-dj860-onboarding-open="true"] .topbar .map-quick-search-form>.brand {
+  visibility:hidden!important;
+}
+
+@media (max-width:699px) {
+  html body #app#app#app#app .dj860-onboarding {
+    position:fixed!important;inset:0!important;display:grid!important;place-items:center!important;
+    width:100vw!important;height:100dvh!important;min-height:100dvh!important;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important;
+    overflow:hidden!important;background:rgba(12,30,25,.48)!important;
+    -webkit-backdrop-filter:blur(5px)!important;backdrop-filter:blur(5px)!important;
+    touch-action:pan-y!important;
+  }
+  html body #app#app#app#app .dj860-card {
+    display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:42px minmax(150px,25dvh) minmax(0,1fr) auto!important;
+    width:min(560px,calc(100vw - 28px))!important;
+    height:min(770px,calc(100dvh - 48px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))!important;
+    min-width:0!important;min-height:0!important;max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    border:1px solid #d7e7de!important;border-radius:26px!important;overflow:hidden!important;
+    box-shadow:0 22px 72px rgba(8,34,25,.28)!important;
+    background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app#app#app .dj860-head {
+    grid-column:1!important;min-height:42px!important;height:42px!important;
+    justify-content:flex-end!important;padding:4px 12px!important;
+    border:0!important;background:transparent!important;
+  }
+  html body #app#app#app#app .dj860-brand,
+  html body #app#app#app#app .dj860-brand-mark,
+  html body #app#app#app#app .dj860-visual-foot,
+  html body #app#app#app#app .dj860-visual-label,
+  html body #app#app#app#app .dj860-swipe-hint,
+  html body #app#app#app#app .dj860-kicker {display:none!important;}
+  html body #app#app#app#app .dj860-skip {
+    min-height:34px!important;padding:6px 12px!important;font-size:12px!important;
+    border-radius:999px!important;
+  }
+  html body #app#app#app#app .dj860-visual-pane {
+    grid-column:1!important;min-height:0!important;padding:8px 12px 10px!important;
+    touch-action:pan-y!important;background:linear-gradient(145deg,#eef7f1,#e0eee6)!important;
+  }
+  html body #app#app#app#app .dj860-visual {
+    width:100%!important;height:100%!important;min-height:0!important;
+    border-radius:17px!important;border-color:rgba(255,255,255,.85)!important;
+  }
+  html body #app#app#app#app .dj860-content {
+    grid-column:1!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;
+    padding:17px 19px 12px!important;align-items:flex-start!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  }
+  html body #app#app#app#app .dj860-copy {max-width:520px!important;margin:auto!important;}
+  html body #app#app#app#app .dj860-copy h1 {
+    margin:0 0 10px!important;font-size:clamp(24px,6.7vw,30px)!important;
+    line-height:1.22!important;letter-spacing:-.045em!important;
+  }
+  html body #app#app#app#app .dj860-description {font-size:15.5px!important;line-height:1.62!important;}
+  html body #app#app#app#app .dj860-points {gap:8px!important;margin-top:14px!important;}
+  html body #app#app#app#app .dj860-points li {gap:9px!important;font-size:14px!important;line-height:1.48!important;}
+  html body #app#app#app#app .dj860-points li>span:first-child {
+    width:20px!important;height:20px!important;font-size:12px!important;flex:0 0 20px!important;
+  }
+  html body #app#app#app#app .dj860-note {
+    margin-top:13px!important;padding:9px 12px!important;font-size:13px!important;line-height:1.5!important;
+  }
+  html body #app#app#app#app .dj860-account-link {margin-top:12px!important;font-size:13px!important;}
+  html body #app#app#app#app .dj860-footer {
+    grid-column:1!important;grid-template-columns:minmax(0,1fr)!important;gap:9px!important;
+    padding:10px 15px calc(11px + env(safe-area-inset-bottom,0px))!important;
+    border-top:1px solid var(--dj800-border,#e0eae4)!important;
+  }
+  html body #app#app#app#app .dj860-progress-label,
+  html body #app#app#app#app .dj860-count {font-size:11.5px!important;}
+  html body #app#app#app#app .dj860-progress-track {height:4px!important;}
+  html body #app#app#app#app .dj860-dots {gap:7px!important;}
+  html body #app#app#app#app .dj860-dot {width:8px!important;height:8px!important;min-width:8px!important;min-height:8px!important;}
+  html body #app#app#app#app .dj860-dot.is-active {width:22px!important;}
+  html body #app#app#app#app .dj860-actions {display:flex!important;justify-content:flex-start!important;gap:8px!important;}
+  html body #app#app#app#app .dj860-actions button {
+    width:auto!important;min-width:84px!important;min-height:45px!important;
+    padding:10px 18px!important;font-size:14px!important;border-radius:14px!important;
+  }
+  html body #app#app#app#app .dj860-actions .dj860-next {min-width:104px!important;}
+}
+@media (max-width:380px) {
+  html body #app#app#app#app .dj860-card {
+    width:calc(100vw - 22px)!important;
+    grid-template-rows:40px minmax(138px,23dvh) minmax(0,1fr) auto!important;
+  }
+  html body #app#app#app#app .dj860-content {padding:14px 16px 10px!important;}
+  html body #app#app#app#app .dj860-description {font-size:14.5px!important;}
+  html body #app#app#app#app .dj860-points li {font-size:13.5px!important;}
+}
+@media (max-height:680px) and (max-width:699px) {
+  html body #app#app#app#app .dj860-card {
+    height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    grid-template-rows:38px minmax(120px,21dvh) minmax(0,1fr) auto!important;
+  }
+  html body #app#app#app#app .dj860-content {padding-top:12px!important;padding-bottom:8px!important;}
+  html body #app#app#app#app .dj860-points {margin-top:10px!important;}
+  html body #app#app#app#app .dj860-note {margin-top:9px!important;}
+}
+
+/* Compact, animated guide disclosures. Both controls use the same chevron. */
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help,
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips {
+  box-sizing:border-box!important;margin:6px 0!important;padding:5px 10px!important;
+  border:1px solid var(--dj800-border,#d9e7df)!important;border-radius:13px!important;
+  background:var(--dj800-elevated,#f2f8f4)!important;overflow:hidden!important;
+}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help>summary,
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips .dj852-tip-toggle {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  width:100%!important;min-height:38px!important;margin:0!important;padding:1px 0!important;
+  gap:8px!important;font-size:13px!important;line-height:1.3!important;font-weight:780!important;
+  list-style:none!important;cursor:pointer!important;
+}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help>summary::-webkit-details-marker {display:none!important;}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help>summary::after {content:none!important;display:none!important;}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help>summary .dj852-tip-chevron,
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips .dj852-tip-chevron {
+  display:grid!important;place-items:center!important;flex:0 0 24px!important;
+  width:24px!important;height:24px!important;margin:0!important;padding:0!important;
+  font-size:21px!important;font-weight:750!important;line-height:1!important;
+  transform:rotate(0deg)!important;transition:transform .22s ease!important;
+}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help[open]>summary .dj852-tip-chevron,
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips:not(.is-collapsed) .dj852-tip-chevron {
+  transform:rotate(180deg)!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj864-accordion-content {
+  display:block!important;max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .24s cubic-bezier(.2,.7,.25,1),opacity .18s ease;
+  will-change:max-height,opacity;
+}
+html body #app#app#app#app #map-gesture-guide details.dj803-ios-install-help[open] .dj864-accordion-content {
+  opacity:1;
+}
+html body #app#app#app#app #map-gesture-guide .dj864-accordion-content .dj856-ios-install-caption {
+  display:block!important;margin:3px 0 5px!important;font-size:11.5px!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj864-accordion-content .dj856-ios-install-steps {
+  display:grid!important;gap:5px!important;padding:0 0 6px!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj864-accordion-content .dj856-ios-install-steps>div {
+  font-size:12.5px!important;line-height:1.45!important;
+}
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul {
+  display:block!important;margin:4px 0 1px!important;padding:0 0 0 17px!important;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .24s cubic-bezier(.2,.7,.25,1),opacity .18s ease;
+}
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips:not(.is-collapsed) ul {opacity:1;}
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul[hidden] {display:none!important;}
+html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul li {
+  margin:0 0 5px!important;font-size:12.5px!important;line-height:1.46!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj-guide-release {
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;justify-content:space-between!important;gap:8px!important;
+  width:100%!important;min-width:0!important;margin:7px 0 0!important;padding:8px 10px!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj-guide-release-heading {
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  flex-wrap:nowrap!important;gap:7px!important;min-width:0!important;white-space:nowrap!important;
+  font-size:12px!important;
+}
+html body #app#app#app#app #map-gesture-guide #dj-guide-latest-version {
+  flex:none!important;margin:0!important;padding:5px 9px!important;border-radius:999px!important;
+  font-size:12px!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #map-gesture-guide #dj-guide-release-details {
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  justify-self:end!important;align-self:center!important;min-width:0!important;max-width:100%!important;
+  margin:0!important;padding:7px 9px!important;border-radius:10px!important;
+  font-size:11.5px!important;line-height:1.2!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #map-gesture-guide .dj-guide-release p {display:none!important;}
+@media(max-width:360px) {
+  html body #app#app#app#app #map-gesture-guide .dj-guide-release {gap:5px!important;padding:7px!important;}
+  html body #app#app#app#app #map-gesture-guide .dj-guide-release-heading {gap:5px!important;font-size:11px!important;}
+  html body #app#app#app#app #map-gesture-guide #dj-guide-latest-version {padding:4px 7px!important;font-size:11px!important;}
+  html body #app#app#app#app #map-gesture-guide #dj-guide-release-details {padding:6px 7px!important;font-size:10.5px!important;}
+}
+
+/* Map TIP pill: tighten the label gap but reserve a clear right-side inset. */
+@media(max-width:699px) {
+  html body #app#app#app#app #dj840-map-tip:not([hidden]) {
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    gap:4px!important;padding:7px 12px!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app #dj840-map-tip>strong {
+    flex:0 0 auto!important;margin:0!important;padding:0!important;white-space:nowrap!important;
+  }
+  html body #app#app#app#app #dj840-map-tip .dj840-tip-copy-viewport {
+    display:block!important;position:relative!important;flex:1 1 auto!important;
+    width:auto!important;min-width:0!important;max-width:100%!important;height:100%!important;
+    box-sizing:border-box!important;margin:0 8px 0 0!important;padding:0 14px 0 4px!important;
+    overflow:hidden!important;white-space:nowrap!important;animation:none!important;transform:none!important;
+  }
+  html body #app#app#app#app #dj840-map-tip .dj840-tip-copy {
+    display:block!important;position:relative!important;width:max-content!important;
+    min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;
+    overflow:visible!important;white-space:nowrap!important;text-overflow:clip!important;
+    transition:opacity .18s ease!important;will-change:transform;
+  }
+  html body #app#app#app#app #dj840-map-tip.dj854-tip-marquee .dj840-tip-copy {
+    animation:dj854-tip-marquee var(--dj854-tip-duration,9s) ease-in-out infinite alternate!important;
+  }
+}
+
+/* Mobile-only transit changes: preserve the independent desktop layout. */
+@media(max-width:699px){
+/* Subway identity: larger station name and breathing room before line badges. */
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-title.subway-title {
+  gap:12px!important;font-size:clamp(23px,5.8vw,29px)!important;
+  line-height:1.16!important;font-weight:830!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-title .dj-metro-station-name {
+  display:block!important;font-size:inherit!important;font-weight:850!important;
+  line-height:1.16!important;letter-spacing:-.045em!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-title .dj-metro-badge-row {
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:11px!important;margin-top:2px!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-title .dj-metro-line-selector {
+  display:grid!important;place-items:center!important;width:35px!important;height:35px!important;
+  min-width:35px!important;min-height:35px!important;margin:0!important;padding:0!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-title .metro-badge-number {
+  width:33px!important;height:33px!important;min-width:33px!important;min-height:33px!important;
+  font-size:17px!important;line-height:1!important;
+}
+
+/* Text actions have matching color/weight. Favorite glyph is optically centered. */
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-actions {
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;
+  flex-flow:row nowrap!important;gap:5px!important;min-width:0!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button {
+  display:grid!important;place-items:center!important;box-sizing:border-box!important;
+  flex:0 0 56px!important;width:56px!important;min-width:56px!important;max-width:56px!important;
+  height:42px!important;min-height:42px!important;max-height:42px!important;
+  margin:0!important;padding:0 5px!important;border:1px solid #d2e4da!important;
+  border-radius:12px!important;background:#edf6f1!important;color:#286c5b!important;
+  font-size:13px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-label {
+  display:block!important;width:100%!important;margin:0!important;padding:0!important;
+  color:inherit!important;font:inherit!important;line-height:1!important;text-align:center!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed #transport-use-start,
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed #transport-use-end {
+  background:#edf6f1!important;color:#286c5b!important;border-color:#d2e4da!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark {
+  position:relative!important;display:grid!important;place-items:center!important;
+  flex:0 0 42px!important;width:42px!important;min-width:42px!important;max-width:42px!important;
+  height:42px!important;min-height:42px!important;max-height:42px!important;
+  margin:0!important;padding:0!important;border:1px solid #d2e4da!important;
+  border-radius:12px!important;background:#edf6f1!important;color:transparent!important;
+  font-size:0!important;line-height:0!important;overflow:hidden!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark::before {
+  content:'☆'!important;position:absolute!important;inset:0!important;display:grid!important;
+  place-items:center!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;
+  transform:none!important;color:#286c5b!important;font:700 27px/1 system-ui,sans-serif!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark[aria-pressed="true"]::before {
+  content:'★'!important;color:#286c5b!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-share {
+  display:grid!important;place-items:center!important;flex:0 0 42px!important;
+  width:42px!important;min-width:42px!important;max-width:42px!important;
+  height:42px!important;min-height:42px!important;max-height:42px!important;
+  margin:0!important;padding:0!important;border:1px solid #d2e4da!important;
+  border-radius:12px!important;background:#edf6f1!important;color:#286c5b!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-share svg {
+  display:block!important;width:20px!important;height:20px!important;stroke:currentColor!important;
+}
+
+/* Remove the second divider between the station header and previous/next rail. */
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #transport-neighbors {
+  margin:8px 0 10px!important;padding:0!important;border-top:0!important;border-bottom:0!important;
+  box-shadow:none!important;
+}
+
+/* Bus stop identity receives the full width; action buttons sit on a second row. */
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head {
+  display:grid!important;grid-template-columns:minmax(0,1fr) 44px!important;
+  grid-template-rows:auto auto!important;column-gap:8px!important;row-gap:9px!important;
+  align-items:center!important;min-height:128px!important;padding:27px 0 10px!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj857-transport-title-group {
+  grid-column:1/-1!important;grid-row:1!important;display:flex!important;
+  flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;
+  gap:3px!important;width:100%!important;min-width:0!important;overflow:visible!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-kind {
+  display:block!important;width:100%!important;margin:0!important;font-size:13px!important;
+  font-weight:760!important;line-height:1.25!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-title {
+  display:block!important;width:100%!important;max-width:100%!important;margin:0!important;
+  font-size:clamp(20px,5.3vw,24px)!important;font-weight:850!important;line-height:1.16!important;
+  white-space:normal!important;overflow:visible!important;text-overflow:clip!important;
+  overflow-wrap:anywhere!important;word-break:keep-all!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-description {
+  display:block!important;width:100%!important;max-width:100%!important;margin:2px 0 0!important;
+  font-size:13px!important;font-weight:620!important;line-height:1.3!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .dj-news-transport-actions {
+  grid-column:1!important;grid-row:2!important;justify-self:end!important;align-self:center!important;
+  width:max-content!important;max-width:100%!important;gap:5px!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-close {
+  grid-column:2!important;grid-row:2!important;justify-self:end!important;align-self:center!important;
+}
+
+/* Bus arrivals: two cards per row, route/destination on the left and status on the right. */
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals:has(.transport-arrival-row) {
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;gap:9px!important;width:100%!important;min-width:0!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
+  box-sizing:border-box!important;display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;
+  justify-content:stretch!important;gap:6px!important;min-width:0!important;min-height:91px!important;
+  margin:0!important;padding:10px 9px!important;border:1px solid #d9e7e0!important;
+  border-radius:16px!important;background:#f7faf8!important;text-align:left!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-main {
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:center!important;gap:5px!important;width:100%!important;min-width:0!important;
+  margin:0!important;padding:0!important;text-align:left!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-main strong {
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  align-self:flex-start!important;width:max-content!important;max-width:100%!important;
+  margin:0!important;padding:4px 8px!important;border-radius:8px!important;
+  font-size:13px!important;line-height:1.15!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-main>strong {
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  align-self:flex-start!important;width:max-content!important;max-width:100%!important;
+  margin:0!important;padding:4px 8px!important;border-radius:8px!important;
+  background:#509b7c!important;color:#fff!important;font-size:13px!important;
+  font-weight:820!important;line-height:1.15!important;white-space:nowrap!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-main small {
+  display:block!important;width:100%!important;margin:0!important;padding:0!important;
+  font-size:12px!important;font-weight:650!important;line-height:1.25!important;
+  text-align:left!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-time {
+  display:block!important;width:auto!important;max-width:74px!important;min-width:0!important;
+  margin:0!important;padding:0!important;font-size:12px!important;font-weight:820!important;
+  line-height:1.3!important;text-align:right!important;white-space:normal!important;
+  overflow-wrap:anywhere!important;color:#387e68!important;
+}
+html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>p {
+  grid-column:1/-1!important;
+}
+}
+@media(max-width:380px) {
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-actions {gap:4px!important;}
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button {
+    flex-basis:52px!important;width:52px!important;min-width:52px!important;max-width:52px!important;
+  }
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark,
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed .dj-news-transport-share {
+    flex-basis:39px!important;width:39px!important;min-width:39px!important;max-width:39px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+  }
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] .transport-panel-head {
+    min-height:124px!important;column-gap:6px!important;
+  }
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals:has(.transport-arrival-row) {
+    gap:7px!important;
+  }
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
+    grid-template-columns:minmax(0,1fr) auto!important;gap:4px!important;padding:8px 7px!important;
+  }
+  html body #app#app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-time {
+    max-width:64px!important;font-size:11px!important;
+  }
+}
+@media(max-width:699px){
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-quick-button,
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-use-start,
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed #transport-use-end,
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark,
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-share {
+  background:#27473f!important;border-color:#45675c!important;color:#e2f4ea!important;
+}
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .dj-news-transport-bookmark::before {
+  color:#e2f4ea!important;
+}
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
+  background:#203a36!important;border-color:#45675c!important;
+}
+html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals .transport-arrival-time {
+  color:#9bd8bd!important;
+}
+}
+@media(prefers-reduced-motion:reduce) {
+  html body #app#app#app#app #map-gesture-guide .dj864-accordion-content,
+  html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul,
+  html body #app#app#app#app #map-gesture-guide .dj852-tip-chevron {transition:none!important;}
+}
+
+@media(max-width:699px){
+  html body #app#app[data-theme="dark"] .dj860-card {
+    background:#1d322b!important;border-color:#36594c!important;color:#e6f5ec!important;
+  }
+  html body #app#app[data-theme="dark"] .dj860-visual-pane {
+    background:linear-gradient(145deg,#244a3a,#172e29)!important;
+  }
+  html body #app#app[data-theme="dark"] .dj860-footer {
+    border-top-color:#36594c!important;
+  }
+}

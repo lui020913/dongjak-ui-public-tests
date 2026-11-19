@@ -1,0 +1,29 @@
+/* v7.10.4: iOS/Android only; original PC action handlers remain untouched. */
+@media(max-width:699px){
+  html body #app #dj-mobile-map-actions{
+    position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 150px);
+    display:flex;flex-direction:column;gap:8px;z-index:1750;
+  }
+  html body #app #dj-mobile-map-actions button{
+    height:39px;width:39px;min-height:39px;display:grid;place-items:center;
+    border-radius:13px;border:1px solid #d4e5dc;background:#ffffff;color:#245244;
+    font-size:20px;font-weight:800;line-height:1;box-shadow:0 3px 11px rgba(15,49,35,.10);
+  }
+  html body #app[data-theme="dark"] #dj-mobile-map-actions button{
+    background:#263d42;border-color:#506b63;color:#e0f2ea;
+  }
+  html body #app[data-tab]:not([data-tab="map"]) #dj-mobile-map-actions,
+  html body #app:is(.map-immersive,.route-picking,.route-guiding,.detail-open,.adding) #dj-mobile-map-actions{
+    display:none!important;
+  }
+  html body #app:is(.dj-mobile-more-open,.map-controls-open,.map-safety-open) #dj-mobile-map-actions,
+  html body #app:has(#admin-dong-picker:not([hidden])) #dj-mobile-map-actions{
+    visibility:hidden!important;pointer-events:none!important;
+  }
+}
+
+@media(max-width:699px){
+  html body #app.transport-sheet-open #dj-mobile-map-actions,
+  html body #app:has(#transport-sheet:not([hidden])) #dj-mobile-map-actions,
+  html body #app:has(#transport-sheet:not([hidden])) .map-actions {display:none!important;pointer-events:none!important;}
+}

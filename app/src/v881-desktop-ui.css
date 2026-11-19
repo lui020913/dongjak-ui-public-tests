@@ -1,0 +1,534 @@
+/* v8.8.0 desktop UI polish: 1280 / 1440 / 1920.
+ * Only presentation properties; leave fixed panel geometry, routing and
+ * the independent top-right help control placement untouched.
+ */
+@media (min-width:1080px) {
+  /* Desktop navigation is a rail, not a mobile tab strip. */
+  #app #bottom-nav > .nav-tab {
+    border-radius:13px;
+    color:var(--dj881-muted);
+    font-weight:700;
+    transition:background-color .18s,color .18s,box-shadow .18s;
+  }
+  #app #bottom-nav > .nav-tab.active,
+  #app #bottom-nav > .nav-tab[aria-current="page"] {
+    color:var(--dj881-accent);
+    background:var(--dj881-soft);
+    box-shadow:inset 3px 0 0 var(--dj881-accent);
+  }
+  #app #bottom-nav > .nav-tab .nav-icon {
+    color:inherit;
+  }
+
+  /* Clear but restrained floating-page silhouette above the map. */
+  html body #app#app :is(
+    #route-panel,#participation-panel,#news-panel,#mine-panel
+  ).page-panel:not([hidden]) {
+    background:var(--dj881-surface);
+    border:1px solid var(--dj881-line);
+    border-radius:22px;
+    box-shadow:0 15px 48px rgba(19,54,41,.16);
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title h2 {
+    font-size:21px;
+    line-height:1.35;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome {
+    border-bottom-color:var(--dj881-line);
+  }
+
+  /* Route form: reduce nesting visually and make the actions more legible. */
+  #app #route-panel .route-card {
+    background:var(--dj881-surface);
+    border:1px solid var(--dj881-line);
+    box-shadow:0 5px 20px rgba(11,49,33,.045);
+  }
+  #app #route-panel .route-location-row {
+    min-width:0;
+    gap:10px;
+  }
+  #app #route-panel .route-location-text {min-width:0;}
+  #app #route-panel .route-location-text strong {
+    font-weight:750;
+    font-size:13px;
+    line-height:1.45;
+    overflow-wrap:anywhere;
+  }
+  #app #route-panel .route-select-actions {
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  #app #route-panel .route-select-actions button {
+    min-height:40px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:700;
+  }
+  #app #route-panel :is(.route-calc,.route-restore) {
+    min-height:46px;
+    border-radius:12px;
+    font-weight:750;
+  }
+  #app #route-panel .route-gps-btn {
+    font-weight:650;
+    line-height:1.45;
+  }
+  #app #route-panel .route-clear {
+    color:var(--dj881-muted);
+    font-weight:600;
+  }
+  #app #route-panel .page-note {
+    margin-top:14px;
+    padding-top:13px;
+    border-top:1px solid var(--dj881-line);
+  }
+
+  /* Common button treatment without changing functional selected states. */
+  #app #participation-panel .community-compose-toggle,
+  #app #news-panel #dongjak-news-refresh,
+  #app #transport-sheet #transport-refresh {
+    min-height:40px;
+    border-radius:11px;
+    font-weight:700;
+  }
+  #app #participation-panel .community-category-tabs button {
+    border-radius:999px;
+    font-weight:650;
+  }
+  #app #mine-panel .stat-grid > div {
+    border-radius:15px;
+    border:1px solid var(--dj881-line);
+  }
+  #app #news-panel .dongjak-news-item {
+    padding-block:14px;
+    box-shadow:0 2px 12px rgba(12,47,35,.035);
+  }
+
+  /* Transit & feature pop-ups match the rest of the floating workspace. */
+  #app #transport-sheet:not([hidden]) {
+    border-color:var(--dj881-line);
+    box-shadow:var(--dj881-shadow);
+  }
+  #app #transport-sheet .transport-panel-head {
+    border-bottom-color:var(--dj881-line);
+  }
+  #app #transport-sheet .transport-panel-head h2 {
+    letter-spacing:-.035em;
+    font-weight:800;
+  }
+
+  /* Search and toolbar labels: predictable legibility, no width changes. */
+  #app .topbar .header-tools :is(
+    #theme-toggle,#version-history-trigger,#dj-settings-pc
+  ) {
+    font-weight:750;
+    letter-spacing:-.012em;
+    white-space:nowrap;
+  }
+  #app .topbar .map-quick-search-form > input {
+    font-weight:500;
+    letter-spacing:-.015em;
+  }
+  #app #map-safety-controls :is(.dj-safety-group, .dj-type-settings),
+  #app #map-advanced-controls :is(details,button) {
+    border-color:var(--dj881-line);
+  }
+}
+@media (hover:hover) and (pointer:fine) and (min-width:1080px){
+  #app #bottom-nav > .nav-tab:not(.active):hover {
+    color:var(--dj881-text);
+    background:var(--dj881-subtle);
+  }
+  #app #route-panel .route-select-actions button:not(:disabled):hover,
+  #app #participation-panel .community-category-tabs button:not([aria-pressed="true"]):hover {
+    border-color:var(--dj881-accent);
+  }
+}
+
+/* Compact PC 1280x800: bring action controls higher in the route window.
+ * Do not conceal the safety/data disclaimer; it remains reachable by scroll.
+ */
+@media (min-width:1080px) and (max-width:1359px) and (max-height:860px) {
+  #app #route-panel .dj-page-intro {
+    margin-block:7px 10px;
+    font-size:12px;
+    line-height:1.5;
+  }
+  #app #route-panel .route-card {
+    padding:12px 13px;
+  }
+  #app #route-panel .route-location-row {
+    padding-block:7px;
+  }
+  #app #route-panel :is(.route-gps-btn,.route-clear) {
+    margin-block:4px;
+  }
+  #app #route-panel .page-note {
+    margin-top:10px;
+    font-size:11.5px;
+  }
+  /* The optional subway + walking card and route-share box consumed nearly
+   * 220px at 1280x800. Keep all text, but reduce redundant nested gutters so
+   * the main route action enters the first visible fold. */
+  #app #route-panel .dj815-route-section {
+    margin:5px 0;
+    padding:8px 10px;
+    border-radius:12px;
+  }
+  #app #route-panel .dj815-route-section h3 {
+    margin:0 0 4px;
+  }
+  #app #route-panel .dj815-route-section .dj815-helper {
+    margin:3px 0;
+    line-height:1.42;
+  }
+  #app #route-panel .dj815-route-share {
+    margin:5px 0;
+    padding:6px;
+  }
+  #app #route-panel .route-location-divider {
+    margin-block:4px;
+  }
+}
+@media (min-width:1440px) {
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-page-intro {
+    font-size:13.5px;
+  }
+  #app #route-panel .route-location-text strong {
+    font-size:13.5px;
+  }
+}
+
+/* v889 PC-only refinement: verified 1280/1440/1920.
+ * The legacy controller moves .map-actions from y=80 to y=10 when a
+ * non-map tab opens, causing the help button to cover Settings at 1440/1920.
+ * Keep every PC view's map actions below the top header. No mobile rules,
+ * panel positions, map camera, z-index, gestures or data are changed.
+ */
+@media (min-width:1080px) {
+  #app {
+    --dj889-elevated-line:var(--dj881-line,#d9e7df);
+    --dj889-quiet-surface:var(--dj881-subtle,#f5f9f7);
+    --dj889-head:var(--dj881-text,#233e35);
+    --dj889-secondary:var(--dj881-muted,#657b70);
+  }
+
+  /* Critical: prevent top-right help/compass controls from overlapping
+     dark-mode, settings and version actions on non-map desktop tabs. */
+  html body #app#app .map-actions,
+  html body #app#app[data-tab] .map-actions,
+  html body #app#app.detail-open .map-actions,
+  html body #app#app.route-picking .map-actions,
+  html body #app#app.route-guiding .map-actions {
+    position:fixed!important;
+    top:80px!important;
+    right:12px!important;
+    bottom:auto!important;
+  }
+
+  /* Left rail: keep existing positions and selected-tab semantics, but make
+     its label/icon hierarchy unambiguous across all three PC widths. */
+  html body #app#app #bottom-nav > .nav-tab {
+    font-size:13.5px!important;
+    font-weight:740!important;
+    line-height:1.35!important;
+    letter-spacing:-.012em;
+    border-radius:12px!important;
+    color:var(--dj889-head)!important;
+  }
+  html body #app#app #bottom-nav > .nav-tab.active,
+  html body #app#app #bottom-nav > .nav-tab[aria-current="page"] {
+    color:var(--dj881-accent)!important;
+    background:var(--dj881-soft)!important;
+    box-shadow:inset 3px 0 0 var(--dj881-accent)!important;
+  }
+  #app #dj-desktop-safety-rail {
+    border-top-color:var(--dj889-elevated-line)!important;
+  }
+  #app #dj-desktop-safety-rail > :is(button,a),
+  #app #bottom-nav .dj-nav-section-label {
+    font-weight:720;
+    letter-spacing:-.01em;
+  }
+
+  /* Pane headers are functional landmarks, not oversized decoration. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-title h2 {
+    color:var(--dj889-head)!important;
+    font-size:21px!important;
+    font-weight:790!important;
+    letter-spacing:-.035em!important;
+    line-height:1.35!important;
+    text-wrap:balance;
+  }
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome {
+    border-bottom-color:var(--dj889-elevated-line)!important;
+  }
+  /* The route-reset label was 6px BELOW center because old CSS adds
+     padding-top:13px and padding-bottom:0 to a 32px-tall button. */
+  html body #app#app #route-panel .route-clear {
+    box-sizing:border-box!important;
+    min-height:32px!important;
+    height:32px!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+    align-items:center!important;
+    justify-content:center!important;
+    line-height:1.25!important;
+  }
+
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close {
+    display:grid!important;
+    place-items:center!important;
+    color:var(--dj889-head)!important;
+    background:var(--dj889-quiet-surface)!important;
+    border:1px solid var(--dj889-elevated-line)!important;
+    border-radius:12px!important;
+  }
+
+  /* Descriptions currently fade into the pale map. Use a readable neutral
+     while preserving the green primary-action color and all line badges. */
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-page-intro {
+    color:var(--dj889-secondary)!important;
+    font-size:13.5px!important;
+    line-height:1.62!important;
+    font-weight:540!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .page-note {
+    color:var(--dj889-secondary)!important;
+    line-height:1.6!important;
+    font-weight:520!important;
+  }
+  #app :is(#participation-panel,#news-panel,#mine-panel)
+    :is(.page-section-title,.community-heading-row h3) {
+    color:var(--dj889-head);
+    font-weight:760;
+  }
+
+  /* Route cards: distinguish inputs from optional subway and share actions
+     without altering their click targets or hiding safety disclosures. */
+  #app #route-panel .route-card {
+    border-color:var(--dj889-elevated-line);
+    background:var(--dj881-surface);
+    border-radius:15px;
+  }
+  #app #route-panel .route-location-text strong {
+    color:var(--dj889-head);
+    font-weight:760;
+  }
+  #app #route-panel .dj815-route-section {
+    border:1px solid var(--dj889-elevated-line);
+    background:var(--dj889-quiet-surface);
+    border-radius:14px;
+  }
+  #app #route-panel .dj815-route-section :is(h3,strong) {
+    color:var(--dj889-head);
+  }
+  #app #route-panel .dj815-route-section .dj815-helper {
+    color:var(--dj889-secondary);
+    font-size:12.5px;
+    line-height:1.54;
+  }
+
+  /* Equal-control visual weight: avoid mixing pale square and strong
+     circular affordances on the same desktop workspace. */
+  #app #news-panel #dongjak-news-refresh,
+  #app #participation-panel .community-compose-toggle,
+  #app #transport-sheet #transport-refresh {
+    border-radius:11px!important;
+    font-weight:730!important;
+    border-color:var(--dj889-elevated-line);
+  }
+  #app #news-panel .dongjak-news-item {
+    background:var(--dj881-surface);
+    border-color:var(--dj889-elevated-line);
+    border-radius:15px;
+  }
+  #app #news-panel .dongjak-news-item strong {
+    color:var(--dj889-head);
+    font-size:13.5px;
+    line-height:1.5;
+  }
+  #app #participation-panel .community-category-tabs button {
+    min-height:37px;
+    border-radius:999px!important;
+    font-weight:720;
+  }
+  #app #mine-panel :is(.stat-grid > div,.dj877-pref-group) {
+    border-color:var(--dj889-elevated-line);
+    border-radius:15px;
+  }
+
+  /* Options, safety and transit share the same border/palette without
+     touching check states or assigning safety severity colors. */
+  #app #map-safety-controls :is(.dj-safety-group,.dj-type-settings),
+  #app #map-advanced-controls :is(details,.dj-type-settings),
+  #app #transport-sheet .transport-selection-box {
+    border-color:var(--dj889-elevated-line)!important;
+  }
+  #app #map-safety-controls :is(.dj-safety-group > summary,.dj-type-settings > summary),
+  #app #map-advanced-controls details > summary {
+    color:var(--dj889-head)!important;
+    font-size:13px;
+    font-weight:720!important;
+    line-height:1.5;
+  }
+  #app #transport-sheet .transport-panel-head h2 {
+    color:var(--dj889-head)!important;
+    font-weight:790!important;
+  }
+  #app :is(#map-safety-controls,#map-advanced-controls,#transport-sheet)
+    :is(button,[role="button"]):focus-visible {
+    outline:3px solid var(--dj881-accent)!important;
+    outline-offset:2px;
+  }
+}
+
+@media (min-width:1080px) and (hover:hover) and (pointer:fine) {
+  html body #app#app #bottom-nav > .nav-tab:not(.active):not([aria-current="page"]):hover,
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close:hover {
+    background:var(--dj881-soft)!important;
+    color:var(--dj881-accent)!important;
+  }
+}
+
+@media (min-width:1080px) and (prefers-reduced-motion:reduce) {
+  #app #bottom-nav > .nav-tab,
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close {
+    transition:none!important;
+  }
+}
+
+/* v890 — PC button label alignment. The weather pill's displayed glyph comes
+ * from ::before; older styles leave it at the TOP of the 52px pill despite
+ * centering the outer weather button. Anchor the glyph to the button's actual
+ * geometric center, without rewriting weather JS or touching mobile UI.
+ */
+@media (min-width:1080px) {
+  html body #app#app#app#app#app .topbar .header-tools #weather-label {
+    position:relative!important;
+    display:grid!important;
+    place-items:center!important;
+    text-align:center!important;
+    align-self:center!important;
+    justify-self:center!important;
+    line-height:1!important;
+    vertical-align:middle!important;
+    padding:0!important;
+    margin:0!important;
+  }
+  html body #app#app#app#app#app .topbar .header-tools #weather-label::before {
+    position:absolute!important;
+    top:50%!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:translate(-50%,-50%)!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:max-content!important;
+    max-width:calc(100% - 4px)!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    line-height:1.2!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    pointer-events:none!important;
+  }
+
+  /* Keep adjacent single-line header labels on the same center line. */
+  html body #app#app .topbar .header-tools
+    > :is(#theme-toggle,#version-history-trigger,#dj-settings-pc),
+  html body #app#app .topbar :is(#dj-settings-pc,#dj-about-pc) {
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    vertical-align:middle!important;
+    line-height:1.2!important;
+  }
+
+  /* Icon and text occupy the same vertical center in the five PC rail tabs;
+     the existing leading icon/label order remains unchanged. */
+  html body #app#app #bottom-nav > .nav-tab {
+    align-items:center!important;
+    justify-content:flex-start!important;
+    text-align:left!important;
+  }
+  html body #app#app #bottom-nav > .nav-tab > .nav-icon {
+    display:grid!important;
+    place-items:center!important;
+    align-self:center!important;
+    line-height:1!important;
+  }
+  html body #app#app #bottom-nav > .nav-tab > .nav-icon > :is(svg,img) {
+    display:block!important;
+    margin:auto!important;
+    vertical-align:middle!important;
+  }
+  html body #app#app #bottom-nav > .nav-tab > span:last-child:not(.nav-icon) {
+    align-self:center!important;
+    line-height:1.3!important;
+    margin-block:0!important;
+    vertical-align:middle!important;
+  }
+
+  /* Compact map toolbar icon buttons should never inherit text baselines or
+     uneven native input padding; preserve click sizes and map functionality. */
+  html body #app#app .map-actions > button,
+  html body #app#app :is(#map-tools-toggle,#map-safety-toggle) {
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    vertical-align:middle!important;
+  }
+  html body #app#app .map-actions > button > :is(svg,.compass-direction) {
+    align-self:center!important;
+    vertical-align:middle!important;
+  }
+
+  /* In panels, only one-line ACTION buttons receive centering. Do not change
+     multi-line cards, choice rows, descriptions or text-entry components. */
+  html body #app#app #route-panel
+    :is(.route-gps-btn,.route-clear,.route-select-actions button,.dj815-route-share button),
+  html body #app#app #participation-panel
+    :is(.community-compose-toggle,.community-category-tabs button),
+  html body #app#app #news-panel #dongjak-news-refresh,
+  html body #app#app #transport-sheet
+    :is(#transport-refresh,.transport-line-choice button) {
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    line-height:1.25!important;
+    vertical-align:middle!important;
+  }
+  html body #app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)
+    .dj-sheet-chrome-close {
+    display:grid!important;
+    place-items:center!important;
+    line-height:1!important;
+    padding:0!important;
+  }
+
+  /* Help text in the desktop safety rail stays left-aligned to the icon
+     horizontally, but shares its vertical center. */
+  html body #app#app #dj-desktop-safety-rail > :is(button,a) {
+    align-items:center!important;
+    text-align:left!important;
+    line-height:1.3!important;
+  }
+}

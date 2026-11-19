@@ -1,0 +1,282 @@
+/*
+  v5.10.0 canonical UI geometry.
+  This is the ONLY authored placement policy for header/search/navigation/map controls
+  and the map overview sheet. Legacy UI patch files retain their non-spatial styles.
+  Map-scale-docking.js owns the dynamic pixel positions of the *scale* and desktop
+  overview card, because the MapLibre scale width and card height vary at runtime.
+*/
+#app{
+  --dj-header-h:68px;
+  --dj-header-pad:14px;
+  --dj-ui-gap:12px;
+  --dj-nav-width:88px;
+  --dj-mobile-nav-h:70px;
+}
+#app .topbar,#app[data-theme='dark'] .topbar{
+  position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:auto!important;
+  display:grid!important;
+  grid-template-areas:'brand search tools'!important;
+  grid-template-columns:minmax(215px,245px) minmax(230px,560px) minmax(0,1fr)!important;
+  align-items:center!important;justify-items:stretch!important;gap:12px!important;
+  box-sizing:border-box!important;width:100%!important;max-width:none!important;
+  height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
+  padding:9px 14px!important;margin:0!important;transform:none!important;
+  border-radius:0!important;z-index:1650!important;overflow:visible!important;
+}
+#app .topbar>.brand{grid-area:brand!important;display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important;width:100%!important;}
+#app .topbar>.map-quick-search{
+  grid-area:search!important;position:relative!important;
+  top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;inset:auto!important;
+  display:block!important;align-self:center!important;justify-self:stretch!important;
+  box-sizing:border-box!important;min-width:0!important;width:100%!important;max-width:100%!important;
+  margin:0!important;padding:0!important;transform:none!important;z-index:1!important;
+}
+#app .topbar .map-quick-search-form{
+  display:flex!important;align-items:center!important;gap:7px!important;
+  width:100%!important;min-width:0!important;max-width:100%!important;
+  box-sizing:border-box!important;height:43px!important;min-height:43px!important;
+  padding:4px 5px 4px 10px!important;overflow:hidden!important;
+  border-radius:12px!important;box-shadow:none!important;
+}
+#app .topbar .map-quick-search-form input{
+  flex:1 1 0!important;min-width:0!important;width:0!important;max-width:100%!important;
+  margin:0!important;padding:5px 2px!important;
+}
+#app .topbar .map-quick-search-submit{flex:0 0 auto!important;min-height:33px!important;height:33px!important;padding:0 13px!important;}
+#app .topbar>.header-tools{
+  grid-area:tools!important;position:relative!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;
+  justify-self:end!important;flex-wrap:nowrap!important;gap:7px!important;
+  min-width:0!important;width:auto!important;max-width:100%!important;margin:0!important;
+}
+#app .topbar .header-tools .weather-widget{
+  position:static!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;
+  max-width:220px!important;margin:0!important;transform:none!important;
+}
+#app #bottom-nav{
+  position:absolute!important;left:14px!important;right:auto!important;
+  top:calc(var(--dj-header-h) + 14px)!important;bottom:auto!important;
+  transform:none!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  gap:4px!important;width:var(--dj-nav-width)!important;max-width:var(--dj-nav-width)!important;
+  height:auto!important;max-height:calc(100dvh - var(--dj-header-h) - 130px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:9px 7px!important;box-sizing:border-box!important;
+  z-index:1450!important;border-radius:18px!important;
+}
+#app #bottom-nav .nav-tab{flex:0 0 auto!important;min-height:62px!important;height:62px!important;width:100%!important;min-width:0!important;}
+#app #map-tools-toggle{
+  position:absolute!important;left:14px!important;right:auto!important;
+  top:calc(var(--dj-header-h) + 366px)!important;bottom:auto!important;
+  max-width:var(--dj-nav-width)!important;width:var(--dj-nav-width)!important;
+  margin:0!important;transform:none!important;z-index:1450!important;
+}
+#app.map-controls-open .map-advanced-controls{
+  position:absolute!important;left:calc(var(--dj-nav-width) + 28px)!important;
+  right:auto!important;top:calc(var(--dj-header-h) + 14px)!important;bottom:auto!important;
+  width:min(360px,calc(100vw - var(--dj-nav-width) - 62px))!important;
+  max-height:min(74dvh,620px)!important;transform:none!important;
+}
+#app[data-tab='map'] .map-actions{
+  position:absolute!important;top:calc(var(--dj-header-h) + 16px)!important;
+  right:16px!important;bottom:auto!important;left:auto!important;
+  flex-direction:column!important;gap:8px!important;transform:none!important;
+}
+#app .sheet.overview-sheet{
+  z-index:1100!important;
+  left:calc(var(--dj-nav-width) + 28px)!important;right:auto!important;
+  top:calc(var(--dj-header-h) + 14px)!important;bottom:auto!important;
+  width:min(310px,calc(100vw - var(--dj-nav-width) - 170px))!important;
+  max-width:310px!important;max-height:calc(100dvh - var(--dj-header-h) - 30px)!important;
+  transform:none!important;border-radius:16px!important;
+}
+#app .sheet.overview-sheet[data-sheet-state='collapsed']{height:auto!important;min-height:0!important;}
+#app .sheet.overview-sheet[data-sheet-state='collapsed'] :is(.sheet-summary,.primary-btn,.footer-note,.section-label,#points-count){display:none!important;}
+#app .sheet.overview-sheet[data-sheet-state='collapsed'] h1{font-size:13px!important;line-height:1.35!important;margin:0!important;}
+#app #overview-sheet-handle{display:none!important;}
+#app .topbar>.map-quick-search .map-quick-search-dropdown{top:calc(100% + 6px)!important;left:0!important;right:0!important;}
+/* At tablet and phone widths navigation is bottom-aligned and info card becomes a bottom sheet. */
+@media(max-width:1079px){
+  #app{--dj-mobile-nav-h:calc(66px + env(safe-area-inset-bottom));}
+  #app #bottom-nav{
+    left:0!important;right:0!important;top:auto!important;bottom:0!important;
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    flex-direction:row!important;gap:2px!important;
+    width:100%!important;max-width:none!important;
+    height:var(--dj-mobile-nav-h)!important;max-height:var(--dj-mobile-nav-h)!important;
+    padding:6px 8px calc(7px + env(safe-area-inset-bottom))!important;
+    border-radius:15px 15px 0 0!important;overflow:visible!important;
+  }
+  #app #bottom-nav .nav-tab{width:100%!important;height:auto!important;min-height:48px!important;}
+  #app .sheet.overview-sheet{
+    position:absolute!important;left:0!important;right:0!important;top:auto!important;
+    bottom:var(--dj-mobile-nav-h)!important;width:100%!important;max-width:none!important;
+    border-radius:20px 20px 0 0!important;max-height:min(65dvh,480px)!important;
+    margin-bottom:0!important;box-shadow:0 -8px 22px rgba(20,48,42,.08)!important;
+    transform:none!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state='collapsed']{height:76px!important;min-height:76px!important;max-height:76px!important;}
+  #app #map-tools-toggle{left:12px!important;width:auto!important;max-width:180px!important;top:calc(var(--dj-header-h) + 12px)!important;}
+  #app.map-controls-open .map-advanced-controls{
+    left:12px!important;right:12px!important;
+    top:calc(var(--dj-header-h) + 62px)!important;bottom:auto!important;
+    width:calc(100% - 24px)!important;max-height:calc(100dvh - var(--dj-header-h) - var(--dj-mobile-nav-h) - 75px)!important;
+  }
+  #app[data-tab='map'] .map-actions{
+    top:calc(var(--dj-header-h) + 80px)!important;right:12px!important;
+    bottom:auto!important;left:auto!important;flex-direction:column!important;
+  }
+}
+@media(min-width:701px) and (max-width:1079px){
+  #app .topbar{grid-template-columns:minmax(155px,200px) minmax(0,1fr) auto!important;}
+  #app .topbar .header-tools .weather-widget{max-width:145px!important;}
+  #app .topbar .prototype.version-history-trigger{display:none!important;}
+}
+@media(max-width:700px){
+  #app{--dj-header-h:calc(64px + env(safe-area-inset-top));}
+  #app .topbar,#app[data-theme='dark'] .topbar{
+    grid-template-columns:clamp(144px,43vw,172px) minmax(0,1fr) 35px!important;
+    grid-template-areas:'brand search tools'!important;
+    gap:6px!important;row-gap:0!important;
+    height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
+    padding:calc(9px + env(safe-area-inset-top)) 10px 9px!important;
+  }
+  #app .topbar>.brand{gap:5px!important;}
+  #app .topbar>.brand .logo{width:32px!important;min-width:32px!important;height:32px!important;}
+  #app .topbar>.brand .eyebrow{display:none!important;}
+  #app .topbar>.brand .brand-name{font-size:clamp(10.5px,3.1vw,12.5px)!important;white-space:nowrap!important;}
+  #app .topbar .map-quick-search-form{height:40px!important;min-height:40px!important;padding:3px 3px 3px 8px!important;}
+  #app .topbar .map-quick-search-icon{display:none!important;}
+  #app .topbar .map-quick-search-form input{font-size:12px!important;}
+  #app .topbar .map-quick-search-submit{height:32px!important;min-height:32px!important;width:32px!important;min-width:32px!important;padding:0!important;font-size:0!important;}
+  #app .topbar .map-quick-search-submit::after{content:'⌕';font-size:22px;line-height:1;color:white;}
+  #app .topbar>.header-tools{width:35px!important;max-width:35px!important;}
+  #app .topbar .header-tools>.theme-toggle{width:35px!important;min-width:35px!important;height:35px!important;padding:0!important;}
+  #app .topbar .header-tools .weather-widget{
+    position:fixed!important;display:flex!important;visibility:visible!important;
+    top:calc(var(--dj-header-h) + 12px)!important;right:10px!important;
+    left:auto!important;bottom:auto!important;
+    width:auto!important;max-width:calc(100vw - 170px)!important;
+    transform:none!important;z-index:1510!important;
+  }
+  #app .topbar .prototype.version-history-trigger{display:none!important;}
+  #app #map-tools-toggle{top:calc(var(--dj-header-h) + 12px)!important;}
+  #app[data-tab='map'] .map-actions{top:calc(var(--dj-header-h) + 72px)!important;right:10px!important;}
+}
+@media(max-width:359px){
+  #app .topbar,#app[data-theme='dark'] .topbar{grid-template-columns:140px minmax(0,1fr) 32px!important;padding-inline:8px!important;gap:4px!important;}
+  #app .topbar>.header-tools,#app .topbar .header-tools>.theme-toggle{width:32px!important;min-width:32px!important;}
+}
+#app[data-tab]:not([data-tab='map']) .map-quick-search,
+#app[data-tab]:not([data-tab='map']) #map-tools-toggle{display:none!important;}
+#app[data-theme='dark'] .topbar,#app[data-theme='dark'] .sheet.overview-sheet{
+  background:var(--dj-ui-bg,#15282d)!important;
+  border-color:var(--dj-ui-border,#3d5658)!important;
+}
+
+/* 2026-11-08: header edge cleanup. The old elevated header shadow combined with
+   the map-edge vignette to make a white curved tab appear below the logo. */
+#app .topbar,#app[data-theme='dark'] .topbar{
+  box-shadow:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+}
+#app .topbar::before,#app .topbar::after{content:none!important;display:none!important;}
+#app .topbar>.brand .logo{
+  position:relative!important;display:flex!important;flex:0 0 auto!important;
+  align-items:center!important;justify-content:center!important;
+  overflow:hidden!important;box-shadow:none!important;
+}
+#app .topbar>.brand .logo img{
+  display:block!important;width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;margin:0!important;filter:none!important;
+}
+/* The status badge belongs to the advanced options panel. Never leave a
+   detached, rounded white badge protruding below the left header. */
+#app:not(.map-controls-open) .map-advanced-controls,
+#app:not(.map-controls-open) .map-advanced-controls .map-badge{display:none!important;}
+
+/* v5.10.3 - True screen-space perspective haze.
+   MapLibre's built-in fog has negligible effect below very high pitch.
+   The gradient affects ONLY the far/upper map, not the Dongjak district
+   foreground or the sidebar/header controls. The CSS is inert in plan view. */
+#app #map.dj-far-haze-active::before {
+  content:""!important;
+  position:absolute!important;inset:0 0 auto 0!important;
+  width:100%!important;height:58%!important;
+  z-index:25!important;
+  pointer-events:none!important;
+  opacity:var(--dj-far-haze-opacity,1)!important;
+  background:linear-gradient(to bottom,
+    rgba(245,249,247,.96) 0%,
+    rgba(245,249,247,.83) 22%,
+    rgba(245,249,247,.56) 47%,
+    rgba(245,249,247,.21) 72%,
+    rgba(245,249,247,0) 100%)!important;
+  -webkit-backdrop-filter:blur(2.2px) saturate(.78);
+  backdrop-filter:blur(2.2px) saturate(.78);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 23%,rgba(0,0,0,.72) 48%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 23%,rgba(0,0,0,.72) 48%,transparent 100%);
+}
+#app[data-theme='dark'] #map.dj-far-haze-active::before {
+  background:linear-gradient(to bottom,
+    rgba(22,37,39,.95) 0%,rgba(22,37,39,.83) 22%,
+    rgba(22,37,39,.56) 47%,rgba(22,37,39,.2) 72%,transparent 100%)!important;
+}
+/* In 2D and in other tabs there is no perspective haze at all. */
+#app #map:not(.dj-far-haze-active)::before,
+#app[data-tab]:not([data-tab='map']) #map::before {display:none!important;content:none!important;}
+@media(max-width:700px){
+  #app #map.dj-far-haze-active::before{
+    -webkit-backdrop-filter:blur(1.2px) saturate(.82);
+    backdrop-filter:blur(1.2px) saturate(.82);
+  }
+}
+/* Remove the obsolete full-canvas vignette: it creates a washed-out strip
+   directly beneath the left-hand header logo. */
+#app #map::after,#app[data-theme='dark'] #map::after{content:none!important;display:none!important;}
+/* The left-hand navigation is a standalone card. Its old outward shadow
+   could bleed above the card into the strip directly under the header logo. */
+#app #bottom-nav{box-shadow:none!important;}
+
+/* v5.12.3: keep university place names while removing floating white emblem tiles. */
+#app .dongjak-education-marker.university-name-only .dongjak-education-icon{display:none!important;}
+#app .dongjak-education-marker.university-name-only .dongjak-education-name{
+  display:block!important;max-width:128px;overflow:hidden;text-overflow:ellipsis;
+  padding:3px 7px;border-radius:7px;font-size:11px;line-height:1.3;
+}
+#app[data-theme='dark'] .dongjak-education-marker.university-name-only .dongjak-education-name{
+  background:rgba(24,43,49,.94);color:#dbe9e8;border-color:#4c6870;
+}
+#app .dongjak-landmark.no-image-tile .dongjak-landmark-icon{
+  width:25px;height:25px;border-radius:8px;background:#355f61;color:#f1f6f2;
+  border:1px solid #87a2a0;box-shadow:none!important;
+}
+#app .topbar .brand .logo img{display:block!important;}
+
+/* v5.12.4 — Theme-aware map options with legible status text. */
+#app.map-controls-open .map-advanced-controls .map-badge,
+#app[data-theme="dark"].map-controls-open .map-advanced-controls .map-badge{
+  background:var(--dj-ui-field,#f6faf8)!important;
+  color:var(--dj-ui-text,#19392f)!important;
+  border:1px solid var(--dj-ui-border,#dbe6e1)!important;
+  max-width:100%!important;white-space:normal!important;text-overflow:clip!important;
+  overflow-wrap:anywhere!important;line-height:1.5!important;
+}
+#app.map-controls-open .map-advanced-controls #map-status{color:var(--dj-ui-text,#19392f)!important;opacity:1!important;}
+#app .map-options-heading strong,
+#app .map-options-group>summary{color:var(--dj-ui-text,#19392f)!important;}
+#app .map-options-heading span,
+#app .map-options-group p,
+#app .base-layer-menu p,
+#app.map-controls-open .map-advanced-controls :is(#metro-access-status,#safety-layer-status,#filter-result){
+  color:var(--dj-ui-subtext,#698278)!important;
+  opacity:1!important;
+}
+#app.map-controls-open .map-advanced-controls .base-layer-menu,
+#app.map-controls-open .map-advanced-controls .map-options-group{
+  background:var(--dj-ui-field,#f6faf8)!important;
+  border-color:var(--dj-ui-border,#dbe6e1)!important;
+}
+#app.map-controls-open .map-advanced-controls .base-layer-menu button{color:var(--dj-ui-text,#19392f)!important;}
+#app.map-controls-open .map-advanced-controls .map-options-heading{border-bottom-color:var(--dj-ui-border,#dbe6e1)!important;}

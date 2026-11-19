@@ -1,0 +1,129 @@
+/* v8.7.1 — mobile search portal and consistent sheet handles. PC stays untouched. */
+@media(max-width:699px){
+  html body #app#app#app#app#app #map-quick-search-dropdown:not([hidden]){
+    position:fixed!important;
+    top:var(--dj871-search-top,165px)!important;
+    left:12px!important;right:auto!important;bottom:auto!important;
+    width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;
+    min-width:0!important;height:auto!important;
+    max-height:var(--dj871-search-max,min(55dvh,440px))!important;
+    margin:0!important;padding:16px 14px!important;
+    box-sizing:border-box!important;overflow-x:hidden!important;overflow-y:auto!important;
+    overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch;
+    z-index:6900!important;border-radius:22px!important;
+    background:var(--dj800-surface,#fff)!important;
+    box-shadow:0 20px 52px rgba(25,60,49,.22)!important;
+    transform:none!important;translate:none!important;filter:none!important;
+  }
+  html body #app#app#app#app #map-quick-search-dropdown.dj871-search-entering:not([hidden]){
+    animation:dj871-search-in .22s cubic-bezier(.2,.75,.25,1) both!important;
+  }
+  html body #app#app#app#app #map-quick-search-dropdown.dj871-search-leaving:not([hidden]){
+    pointer-events:none!important;animation:dj871-search-out .18s ease-in both!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .map-quick-search-dropdown-head{
+    position:sticky;top:-16px;z-index:4;display:flex!important;align-items:center!important;
+    gap:12px!important;min-height:44px!important;padding:3px 0 10px!important;
+    background:var(--dj800-surface,#fff)!important;
+    border-bottom:1px solid var(--dj800-border,#dce8e1)!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .map-quick-search-dropdown-head strong{
+    font-size:15px!important;line-height:1.4!important;font-weight:800!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown #map-quick-search-close{
+    flex:0 0 36px!important;width:36px!important;height:36px!important;
+    display:grid!important;place-items:center!important;margin-left:auto!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown #map-quick-search-status{
+    font-size:12px!important;line-height:1.5!important;padding:10px 2px 8px!important;
+    margin:0!important;color:var(--dj800-muted,#71877c)!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj815-search-filters:not([hidden]){
+    display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+    gap:7px!important;max-height:none!important;overflow:visible!important;
+    padding:10px 0 12px!important;border-bottom:1px solid var(--dj800-border,#dce8e1)!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj815-search-filters button,
+  html body #app#app#app #map-quick-search-dropdown .map-quick-search-suggestion,
+  html body #app#app#app #map-quick-search-dropdown .dj815-recent-list button{
+    border-radius:12px!important;min-height:36px!important;
+    padding:7px 11px!important;font-size:12px!important;font-weight:700!important;
+    border:1px solid var(--dj800-border,#dce8e1)!important;
+    background:var(--dj800-elevated,#f4faf6)!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown #map-quick-search-results{
+    display:block!important;min-height:0!important;max-height:none!important;overflow:visible!important;
+    padding:4px 0 0!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-defaults{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;max-height:none!important;overflow:visible!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-defaults button{
+    display:flex!important;justify-content:center!important;align-items:center!important;
+    text-align:center!important;min-width:0!important;white-space:normal!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-columns{
+    display:grid!important;grid-template-columns:1fr!important;gap:12px!important;
+    max-height:none!important;overflow:visible!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-column{
+    width:100%!important;min-width:0!important;max-height:none!important;
+    border-radius:15px!important;padding:10px!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-column-list{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;max-height:220px!important;overflow-y:auto!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj854-search-column-list .map-quick-search-result{
+    min-width:0!important;padding:10px!important;border-radius:12px!important;
+    font-size:12px!important;min-height:56px!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj815-recent{
+    margin:14px 0 2px!important;padding:12px 0 0!important;gap:9px!important;
+    border-top:1px solid var(--dj800-border,#dce8e1)!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown .dj815-recent-list{
+    display:flex!important;flex-wrap:wrap!important;gap:8px!important;max-height:102px!important;
+  }
+  /* The entire header is a gesture target unless the touch is on a control. */
+  html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #admin-dong-picker,#transport-sheet,#overview-sheet,#dj-mobile-utilities,
+    #map-gesture-guide) .dj-sheet-swipe-zone{
+    touch-action:none!important;cursor:grab!important;
+  }
+  html body #app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,
+    #admin-dong-picker,#transport-sheet,#dj-mobile-utilities,#map-gesture-guide).dj871-sheet-expanded:not([hidden]){
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - 24px)!important;
+    height:min(84dvh,900px)!important;
+    transition:height .22s ease,max-height .22s ease!important;
+  }
+  html body #app#app#app .dj871-sheet-expanded .dj836-sheet-body,
+  html body #app#app#app .dj871-sheet-expanded .dj-mobile-utilities-body{
+    flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
+  }
+  /* MapLibre facility popups use the same header-up/down gesture. */
+  html body #app#app#app #map .dj-place-detail-popup .dj-place-header{
+    touch-action:none!important;
+  }
+  html body #app#app#app #map .dj-place-detail-popup.dj871-place-expanded .maplibregl-popup-content{
+    max-height:min(76dvh,720px)!important;
+  }
+  html body #app#app#app #map .dj-place-detail-popup.dj871-place-expanded .dj-place-body{
+    max-height:calc(min(76dvh,720px) - 133px)!important;
+  }
+  /* Normalize decorative grip placement relative to the sheet header. */
+  html body #app#app#app :is(.dj-sheet-chrome-grip,.dj836-edge-drag,.dj856-transport-edge-drag,
+    .dj856-guide-edge-drag,.dj856-more-edge-drag){pointer-events:none!important;}
+  html body #app#app#app .dj-sheet-chrome-grip{
+    left:50%!important;transform:translateX(-50%)!important;
+  }
+}
+@keyframes dj871-search-in{from{opacity:0;translate:0 7px;scale:.985}to{opacity:1;translate:0 0;scale:1}}
+@keyframes dj871-search-out{from{opacity:1;translate:0 0}to{opacity:0;translate:0 6px}}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  html body #app#app#app #map-quick-search-dropdown.dj871-search-entering:not([hidden]),
+  html body #app#app#app #map-quick-search-dropdown.dj871-search-leaving:not([hidden]){
+    animation:none!important;
+  }
+}

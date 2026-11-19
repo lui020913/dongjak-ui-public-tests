@@ -1,0 +1,115 @@
+{
+  "source_crs": "EPSG:5186",
+  "geojson_crs": "EPSG:4326",
+  "total_count": 112095,
+  "height_rule": "층수×3m: 시각화용 추정 높이, 실측 높이가 아님",
+  "sheets": [
+    {
+      "file": "/buildings/tile_1.geojson",
+      "sheet": 1,
+      "bbox": [
+        126.9,
+        37.499981,
+        126.925,
+        37.525018
+      ],
+      "count": 18446,
+      "supplement": "/buildings/supplement_1.geojson",
+      "supplement_count": 12
+    },
+    {
+      "file": "/buildings/tile_2.geojson",
+      "sheet": 2,
+      "bbox": [
+        126.925,
+        37.499987,
+        126.949994,
+        37.525013
+      ],
+      "count": 10896,
+      "supplement": "/buildings/supplement_2.geojson",
+      "supplement_count": 1736
+    },
+    {
+      "file": "/buildings/tile_3.geojson",
+      "sheet": 3,
+      "bbox": [
+        126.950001,
+        37.499996,
+        126.974999,
+        37.525006
+      ],
+      "count": 7292,
+      "supplement": "/buildings/supplement_3.geojson",
+      "supplement_count": 1951
+    },
+    {
+      "file": "/buildings/tile_4.geojson",
+      "sheet": 4,
+      "bbox": [
+        126.975,
+        37.499997,
+        127.0,
+        37.525002
+      ],
+      "count": 3438,
+      "supplement": "/buildings/supplement_4.geojson",
+      "supplement_count": 15
+    },
+    {
+      "file": "/buildings/tile_5.geojson",
+      "sheet": 5,
+      "bbox": [
+        126.9,
+        37.474981,
+        126.925,
+        37.500019
+      ],
+      "count": 20530,
+      "supplement": "/buildings/supplement_5.geojson",
+      "supplement_count": 85
+    },
+    {
+      "file": "/buildings/tile_6.geojson",
+      "sheet": 6,
+      "bbox": [
+        126.925,
+        37.47499,
+        126.95,
+        37.500013
+      ],
+      "count": 21866,
+      "supplement": "/buildings/supplement_6.geojson",
+      "supplement_count": 843
+    },
+    {
+      "file": "/buildings/tile_7.geojson",
+      "sheet": 7,
+      "bbox": [
+        126.950001,
+        37.474992,
+        126.974998,
+        37.500008
+      ],
+      "count": 14660,
+      "supplement": "/buildings/supplement_7.geojson",
+      "supplement_count": 569
+    },
+    {
+      "file": "/buildings/tile_8.geojson",
+      "sheet": 8,
+      "bbox": [
+        126.975,
+        37.474997,
+        127.0,
+        37.500002
+      ],
+      "count": 14967,
+      "supplement": "/buildings/supplement_8.geojson",
+      "supplement_count": 508
+    }
+  ],
+  "supplement_source": "GIS건물통합정보 AL_D010_11_20261009 (EPSG:5186; Dongjak SIG_CD 11590)",
+  "supplement_rule": "Added buildings with <5% polygon area overlap with existing 3D outlines and >=4 sq.m area; heights approximated from A26 aboveground floors*3m.",
+  "supplement_total": 5719
+}

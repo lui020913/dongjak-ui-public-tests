@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {distanceMeters,makeRouteIndex,nearestOnRoute,pointAtProgress,splitRoute} from '../src/navigation-geometry.js';
+const coords=[[126.94,37.5],[126.941,37.5],[126.941,37.501]];
+const index=makeRouteIndex(coords);
+test('거리 계산이 정상이다',()=>{assert(index.total>150&&index.total<250);assert.equal(distanceMeters(coords[0],coords[0]),0);});
+test('경로 중간 지점을 가장 가까운 구간에 투영한다',()=>{const snapped=nearestOnRoute(index,[126.9405,37.50001]);assert.equal(snapped.segment,0);assert(snapped.offRouteMeters<2);assert(Math.abs(snapped.progressMeters-index.lengths[1]/2)<2);});
+test('진행한 경로와 남은 경로가 연결되며 전체 길이를 보존한다',()=>{const part=splitRoute(index,index.total*0.75);assert.deepEqual(part.traveled.at(-1),part.remaining[0]);assert(Math.abs(part.remainingMeters-index.total*0.25)<0.01);assert.deepEqual(part.remaining.at(-1),coords.at(-1));});
+test('처음과 끝에서 경로가 정확하게 분리된다',()=>{const a=splitRoute(index,0),b=splitRoute(index,index.total);assert.deepEqual(a.remaining[0],coords[0]);assert.deepEqual(b.traveled.at(-1),coords.at(-1));});
+test('범위 밖 진행 거리는 경로 내로 제한한다',()=>{assert.deepEqual(pointAtProgress(index,-100).point,coords[0]);assert.deepEqual(pointAtProgress(index,index.total+100).point,coords.at(-1));});

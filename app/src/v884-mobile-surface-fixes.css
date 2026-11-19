@@ -1,0 +1,155 @@
+/* v8.8.0 mobile screenshot findings, 2026-11-16.
+ * A terminal, mobile-only correction layer; PC, map, APIs and gesture owners
+ * remain unchanged. Keep the existing color tokens and five-tab geometry.
+ */
+@media (max-width:699px) {
+  /* Default sheets fit their content. Expansion remains an explicit gesture. */
+  html body #app#app#app#app#app#app#app#app#app
+  #participation-panel.page-panel:not([hidden]):not(.dj871-sheet-expanded) {
+    height:auto!important;min-height:0!important;
+    max-height:min(74dvh,660px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #participation-panel.page-panel:not(.dj871-sheet-expanded)>.dj836-sheet-body {
+    flex:0 1 auto!important;min-height:0!important;overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+  /* Expanded and default panels both keep the last action above the tab bar. */
+  html body #app#app#app#app #route-panel .dj836-sheet-body,
+  html body #app#app#app#app #participation-panel .dj836-sheet-body,
+  html body #app#app#app#app #mine-panel .dj836-sheet-body {
+    box-sizing:border-box!important;min-height:0!important;
+    padding-bottom:max(28px,env(safe-area-inset-bottom,0px))!important;
+    overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+  }
+  /* Consistent route actions; labels must not be squeezed by button sizes. */
+  html body #app#app#app #route-panel .route-location-row {
+    min-width:0!important;gap:9px!important;
+  }
+  html body #app#app#app #route-panel .route-location-text {
+    min-width:0!important;flex:1 1 auto!important;
+  }
+  html body #app#app#app #route-panel .route-select-actions {
+    flex:0 0 auto!important;gap:6px!important;
+  }
+  html body #app#app#app #route-panel .route-select-actions button {
+    min-height:42px!important;border-radius:11px!important;
+  }
+  /* Community information is content, not a full-height empty canvas. */
+  html body #app#app#app #participation-panel .community-heading-row {
+    align-items:center!important;gap:12px!important;
+  }
+  html body #app#app#app #participation-panel .community-heading-row>div {
+    flex:1 1 auto!important;min-width:0!important;
+  }
+  html body #app#app#app #participation-panel .community-compose-toggle {
+    flex:0 0 auto!important;min-height:44px!important;
+  }
+  html body #app#app#app #participation-panel .community-toolbar {
+    gap:10px!important;align-items:center!important;
+  }
+  html body #app#app#app #participation-panel .community-category-tabs {
+    flex:1 1 auto!important;min-width:0!important;
+  }
+  html body #app#app#app #participation-panel #community-sort {
+    flex:0 0 auto!important;max-width:100px!important;min-height:43px!important;
+  }
+  /* Transit: match sheet height to actual data instead of leaving empty white
+   * space, but preserve the scroll container for long route lists. */
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed:not([hidden]):not(.dj871-sheet-expanded) {
+    height:auto!important;min-height:0!important;
+    max-height:min(76dvh,700px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed:not(.dj871-sheet-expanded)>.dj875-transit-scroll {
+    flex:0 1 auto!important;min-height:0!important;
+    max-height:min(50dvh,495px)!important;
+    overflow-y:auto!important;padding-bottom:16px!important;
+  }
+  /* Both header utilities occupy mirrored corners. Never let the expand
+   * action wrap to an orphaned row below station buttons. */
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .transport-panel-head {
+    position:relative!important;grid-template-rows:auto auto!important;
+    padding:8px 5px 10px!important;max-height:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .transport-panel-head>div:first-child {
+    width:100%!important;padding:0 49px!important;gap:3px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .transport-panel-head>.dj877-expand-button {
+    position:absolute!important;left:4px!important;right:auto!important;top:7px!important;
+    grid-row:auto!important;grid-column:auto!important;
+    width:42px!important;min-width:42px!important;height:42px!important;
+    min-height:42px!important;margin:0!important;z-index:22!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .transport-panel-head #transport-close {
+    position:absolute!important;top:7px!important;right:4px!important;
+    width:42px!important;height:42px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .transport-panel-head #transport-title {
+    max-height:none!important;overflow:visible!important;
+    font-size:clamp(18px,4.9vw,21px)!important;line-height:1.22!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed .dj-news-transport-actions {
+    margin:5px 0 0!important;gap:8px!important;
+  }
+  /* Avoid half-width loading/empty rows inside the two-column bus grid. */
+  html body #app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals {
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;gap:8px!important;width:100%!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app
+  #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals>.transport-arrival-row {
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;justify-content:center!important;
+    min-width:0!important;width:100%!important;gap:6px!important;
+    padding:10px!important;min-height:70px!important;
+  }
+  html body #app#app#app #transport-sheet[data-kind="bus"]
+  #transport-arrivals>:not(.transport-arrival-row) {
+    grid-column:1 / -1!important;
+  }
+  html body #app#app#app #transport-sheet .transport-arrival-time {
+    line-height:1.3!important;overflow-wrap:break-word!important;
+  }
+  html body #app#app#app #transport-sheet .transport-hours-disclaimer {
+    line-height:1.55!important;margin-bottom:10px!important;
+  }
+  /* iPhone keyboard: the results box must scroll ABOVE the actual visible
+   * keyboard, not beneath the document viewport's nominal 100dvh. */
+  html body #app#app#app#app#app#app
+  #map-quick-search-dropdown:not([hidden]) {
+    max-height:min(55dvh,var(--dj884-search-room,420px))!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown
+  .map-quick-search-dropdown-head {
+    position:sticky!important;top:-16px!important;z-index:5!important;
+  }
+  html body #app#app#app #map-quick-search-dropdown
+  .dj854-search-column-list {
+    max-height:none!important;overflow-y:visible!important;
+  }
+  /* Avoid invisible controls when auxiliary dialogs are open. */
+  html body #app#app #mine-panel .dj877-type-settings select {
+    min-height:48px!important;font-size:16px!important;
+  }
+  html body #app#app #map-gesture-guide .dj856-guide-body {
+    overflow-y:auto!important;max-height:min(56dvh,480px)!important;
+  }
+}
+@media (max-width:374px) {
+  html body #app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"]
+  #transport-arrivals {grid-template-columns:minmax(0,1fr)!important;}
+  html body #app#app #participation-panel .community-toolbar {
+    flex-wrap:wrap!important;
+  }
+}
