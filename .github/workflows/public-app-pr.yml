@@ -50,9 +50,11 @@ jobs:
         run: npm run build
       - name: Verify generated app entrypoint
         run: test -s dist/index.html
-      - name: Install root Playwright test dependencies
+      - name: Install pinned root Playwright test dependencies
         working-directory: .
-        run: npm ci --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund
       - name: Install Chromium for the real-browser layout matrix
         working-directory: .
         run: npx playwright install --with-deps chromium
