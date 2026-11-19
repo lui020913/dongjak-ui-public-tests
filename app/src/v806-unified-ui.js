@@ -330,17 +330,32 @@ export function installUnifiedUI(doc=document, win=window){
   // hide it. Keep the suppression for this entire visible session, not just
   // the first observer callback. Keyboard and programmatic clicks use the
   // same window-capture fallback.
+  let primaryPointer=null;
   function markPrimaryReplacement(event){
     if(!phone())return;
     const tab=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-    if(!tab||tab.disabled)return;
+    if(!tab||tab.disabled){primaryPointer=null;return;}
     const next=tabPanels[tab.dataset.tab];
-    if(!next){if(tab.dataset.tab==='map')stationaryTabEntry.clear();return;}
-    const prior=tabPanels[app.dataset.tab];
-    const other=Object.values(tabPanels).some(id=>id!==next&&(visible(id)||previous.get(id)));
-    if((prior&&prior!==next)||other)stationaryTabEntry.add(next);
+    if(!next){primaryPointer=null;if(tab.dataset.tab==='map')stationaryTabEntry.clear();return;}
+    // A stale tab name or observer history alone does not imply an open page.
+    // In particular, X -> map -> new page must still animate.
+    const other=Object.values(tabPanels).some(id=>{
+      if(id===next)return false;
+      const node=element(id);
+      if(!node||node.hidden||content(node)?.dataset.dj810Animating==='closing')return false;
+      return visible(id)||previous.get(id)===true;
+    });
+    let replacement=other;
+    if(event.type==='pointerdown')primaryPointer={next,replacement,at:Date.now()};
+    else {
+      if(event.detail!==0&&primaryPointer?.next===next&&Date.now()-primaryPointer.at<1800)replacement=primaryPointer.replacement;
+      primaryPointer=null;
+    }
+    if(replacement)stationaryTabEntry.add(next);
+    else if(!visible(next))stationaryTabEntry.delete(next);
   }
   on(win,'pointerdown',markPrimaryReplacement,true);
+  on(win,'pointercancel',()=>{if(primaryPointer&&!visible(primaryPointer.next))stationaryTabEntry.delete(primaryPointer.next);primaryPointer=null;},true);
   on(win,'click',markPrimaryReplacement,true);
   function openingIntent(event){
     const node=event.target;

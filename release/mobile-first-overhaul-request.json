@@ -3,9 +3,9 @@
   "application_version": "9.1.2",
   "public_work_branch": "main",
   "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
-  "attempt": 53,
+  "attempt": 54,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Beta 2: 11/12 mobile shards passed; mobile390 primary replacement still recorded opening. Capture prior page at window pointerdown/click before legacy handlers, retain motion suppression for the visible session and guard actual animation entry. Keep browser regression unchanged.",
+  "last_retry_reason": "Beta 3 passed the stationary primary tab test but failed the fresh My Info opening after route X. Exclude already-hidden and closing pages from replacement detection, retain the early pointer snapshot until click, and add map-to-news reopening coverage without relaxing prior motion tests.",
   "release_kind": "patch",
-  "beta_number": 3
+  "beta_number": 4
 }

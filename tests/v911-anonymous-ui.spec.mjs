@@ -636,4 +636,6 @@ test('primary tabs replace content without replaying a rise and keep the pill do
  await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).not.toContain('opening');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
+ // Returning from the map is a fresh entrance, even for the previously selected tab.
+ await enter(page,'news-panel','news');
 });
