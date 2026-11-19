@@ -3,9 +3,9 @@
   "application_version": "9.2.14",
   "public_work_branch": "main",
   "purpose": "Show persistent selected state for install choices and restore clear Google Play external APK security warning",
-  "attempt": 73,
+  "attempt": 74,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Android option selection and off-Play-Store safety copy",
+  "last_retry_reason": "Run updated candidate pipeline with dedicated PC and tablet interaction QA before Production.",
   "release_kind": "patch",
   "beta_number": 1
 }
