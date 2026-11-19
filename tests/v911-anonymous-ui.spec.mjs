@@ -704,6 +704,10 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
  await expect(web).toContainText('모바일 전용');
  expect(await web.evaluate(n=>getComputedStyle(n).backgroundColor)).toBe(await android.evaluate(n=>getComputedStyle(n).backgroundColor));
  await expect(menu.locator('.dj-install-qr')).toBeVisible();
+ await expect.poll(()=>menu.locator('h2').evaluate(n=>parseFloat(getComputedStyle(n).fontSize))).toBeGreaterThanOrEqual(32);
+ await expect.poll(()=>web.locator('.dj-install-label').evaluate(n=>parseFloat(getComputedStyle(n).fontSize))).toBeGreaterThanOrEqual(19);
+ await expect.poll(()=>web.locator('.dj-install-status').evaluate(n=>parseFloat(getComputedStyle(n).fontSize))).toBeGreaterThanOrEqual(14);
+ await expect.poll(()=>menu.locator('.dj-install-subtitle').evaluate(n=>parseFloat(getComputedStyle(n).fontSize))).toBeGreaterThanOrEqual(18);
  const rect=await web.boundingBox();expect(rect).not.toBeNull();
  await page.mouse.move(rect.x+rect.width/2,rect.y-3);
  await page.mouse.move(rect.x+rect.width/2,rect.y+2);
