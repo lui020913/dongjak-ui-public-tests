@@ -443,8 +443,8 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     // The X dismisses this utility to the unobstructed map; it does not
     // resurrect a previously covered overview sheet. Other action flows
     // may still call restoreOverview() when returning to their parent.
-    panel.hidden=true;seq++;
-    if(overview)delete overview.dataset.pedToolsHidden;
+    const finish=()=>{panel.hidden=true;seq++;if(overview)delete overview.dataset.pedToolsHidden;};
+    if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();
   });
   return ()=>{
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
