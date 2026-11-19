@@ -9,7 +9,7 @@ export function installMobile832(doc=document,win=window){
   const prompt=doc.getElementById('dj-transit-signin-prompt');
   const transport=doc.getElementById('transport-sheet');
   const modal=doc.createElement('section');
-  modal.id='dj832-dongjak-boundary';modal.hidden=true;modal.setAttribute('role','alertdialog');
+  modal.id='dj832-dongjak-boundary';modal.dataset.djDialogFade='true';modal.hidden=true;modal.setAttribute('role','alertdialog');
   modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','dj832-boundary-title');
   modal.innerHTML=`<div class="dj832-boundary-backdrop"></div><div class="dj832-boundary-card">
     <button class="dj832-boundary-x" type="button" aria-label="안내 닫기">×</button>
@@ -19,11 +19,11 @@ export function installMobile832(doc=document,win=window){
     <button class="dj832-boundary-confirm" type="button">확인</button>
   </div>`;
   app.append(modal);
-  const close=()=>{modal.hidden=true;};
+  const close=()=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(modal,finish);else finish();};
   const onDenied=e=>{
     const msg=modal.querySelector('#dj832-boundary-body');
     msg.textContent=e?.detail?.unavailable?'동작구 경계정보를 불러오지 못했습니다. 경계가 준비된 뒤 동작구 내 영역을 다시 선택해주세요.':'동작구 밖은 길찾기 대상에 포함되지 않습니다. 동작구 내 영역을 다시 선택해주세요.';
-    modal.hidden=false;
+    if(modal.hidden){modal.hidden=false;win.DongjakWindowMotion?.open(modal);}
     modal.querySelector('.dj832-boundary-confirm')?.focus({preventScroll:true});
   };
   const onKey=e=>{if(e.key==='Escape'&&!modal.hidden)close();};

@@ -80,7 +80,7 @@ export function installTransitAuthBusSheet(doc=document,win=window){
   kindObserver?.observe(panel,{attributes:true,attributeFilter:['data-kind']});
   decorateRoutes();
   const modal=doc.createElement('section');
-  modal.id='dj-transit-signin-prompt';
+  modal.id='dj-transit-signin-prompt';modal.dataset.djDialogFade='true';
   modal.className='dj-transit-signin-prompt';
   modal.setAttribute('role','dialog');
   modal.setAttribute('aria-modal','true');
@@ -98,14 +98,14 @@ export function installTransitAuthBusSheet(doc=document,win=window){
       </div>
     </div>`;
   root.append(modal);
-  const open=()=>{modal.hidden=false;modal.classList.remove('closing');modal.querySelector('.dj-transit-signin-account')?.focus({preventScroll:true});};
-  const dismiss=()=>{if(modal.hidden)return;modal.hidden=true;};
+  const open=()=>{if(!modal.hidden)return;modal.hidden=false;modal.classList.remove('closing');win.DongjakWindowMotion?.open(modal);modal.querySelector('.dj-transit-signin-account')?.focus({preventScroll:true});};
+  const dismiss=(immediate=false)=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;};if(immediate===true){win.DongjakWindowMotion?.cancel(modal);finish();return;}if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(modal,finish);else finish();};
   const prompt=()=>open();
   const onKey=e=>{if(e.key==='Escape'&&!modal.hidden){dismiss();e.stopPropagation();}};
   modal.querySelector('.dj-transit-signin-x')?.addEventListener('click',dismiss);
   modal.querySelector('.dj-transit-signin-backdrop')?.addEventListener('click',dismiss);
   function showAccount(){
-    dismiss();
+    dismiss(true);
     doc.querySelector('#bottom-nav .nav-tab[data-tab="mine"]')?.click();
     // The existing 'My info > Profile' view owns all login and account flows.
     doc.querySelector('#mine-panel .dj834-profile-card')?.click();

@@ -112,7 +112,7 @@ export function installCoordinatedShell(doc=document,win=window){
  const search=doc.getElementById('map-quick-search');
  search?.addEventListener('focusin',sync);search?.addEventListener('focusout',()=>win.setTimeout(sync,0));
  // Confirm before triggering the actual theme button; no premature loading overlay.
- const dialog=doc.createElement('section');dialog.id='dj840-theme-confirm';dialog.hidden=true;
+ const dialog=doc.createElement('section');dialog.id='dj840-theme-confirm';dialog.dataset.djDialogFade='true';dialog.hidden=true;
  dialog.innerHTML='<div class="dj840-theme-card" role="dialog" aria-modal="true" aria-labelledby="dj840-theme-title"><h2 id="dj840-theme-title">화면 테마를 전환할까요?</h2><p>지도와 화면의 밝기를 변경합니다.</p><div><button type="button" data-decision="cancel">취소</button><button type="button" data-decision="confirm">전환</button></div></div>';
  app.append(dialog);
  const theme=doc.getElementById('theme-toggle');
@@ -120,17 +120,18 @@ export function installCoordinatedShell(doc=document,win=window){
    if(!event.target.closest?.('#theme-toggle')||!theme)return;
    if(theme.dataset.dj840ThemeConfirmed==='1')return;
    event.preventDefault();event.stopImmediatePropagation();
-   dialog.hidden=false;win.DongjakWindowMotion?.open(dialog.querySelector('.dj840-theme-card'));
+   if(!dialog.hidden)return;
+   dialog.hidden=false;win.DongjakWindowMotion?.open(dialog);
  };
  doc.addEventListener('click',onTheme,true);
  const decide=(event)=>{
    const choice=event.target.closest?.('[data-decision]')?.dataset.decision;
    if(!choice)return;
    const finish=()=>{dialog.hidden=true;if(choice==='confirm'&&theme){theme.dataset.dj840ThemeConfirmed='1';try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}}};
-   if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog.querySelector('.dj840-theme-card'),finish);else finish();
+   if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();
  };
  dialog.addEventListener('click',decide);
- const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog.querySelector('.dj840-theme-card'),finish);else finish();};
+ const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();};
  doc.addEventListener('keydown',escape);
  sync();
  return ()=>{disposed=true;if(hideTimer)win.clearTimeout(hideTimer);app.removeEventListener('transitionend',sync,true);app.removeEventListener('animationend',sync,true);observers.forEach(o=>o.disconnect());win.clearInterval(interval);doc.removeEventListener('click',afterClose);doc.removeEventListener('click',onTheme,true);doc.removeEventListener('keydown',escape);label.removeEventListener('click',openGuideFromTip);dialog.remove();label.remove();tipGuide.remove();delete app.dataset.dj840Installed;};

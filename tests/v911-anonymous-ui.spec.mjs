@@ -581,3 +581,16 @@ test('layer header follows a real pointer upward and downward; content and X sta
  await page.waitForTimeout(500);const before=await header.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await header.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  await drag(125);await expect(modal).toBeHidden();await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
 });
+
+
+test('theme confirmation fades in place with its backdrop, unlike bottom sheets',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ const dialog=page.locator('#dj840-theme-confirm'),card=dialog.locator('.dj840-theme-card');
+ await page.evaluate(()=>{const rows=[];window.__confirmFrames=rows;const until=performance.now()+35000;
+  function tick(){if(performance.now()>until||window.__confirmFrames!==rows)return;const n=document.getElementById('dj840-theme-confirm'),c=n?.querySelector('.dj840-theme-card');if(n?.dataset.dj810Animating&&c&&!n.hidden){const s=getComputedStyle(n),r=c.getBoundingClientRect();rows.push({phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,opacity:Number(s.opacity),duration:Number(n.dataset.djWindowMotionDuration),y:r.y,x:r.x,transform:getComputedStyle(c).transform});}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+ });
+ // Trigger the original guarded theme button; no theme change on Cancel.
+ const theme=page.locator('#theme-toggle');await theme.evaluate(n=>n.click());await expect(dialog).toBeVisible();await expect(card).toBeVisible();await expect.poll(()=>dialog.getAttribute('data-dj810-animating')).toBeNull();
+ await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();
+ const rows=await page.evaluate(()=>window.__confirmFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){const frames=rows.filter(r=>r.phase===phase);expect(frames.length).toBeGreaterThan(1);expect(frames.every(r=>r.kind==='fade'&&r.duration===duration&&Math.abs(r.x-frames[0].x)<1&&Math.abs(r.y-frames[0].y)<1)).toBe(true);expect(frames.some(r=>r.opacity>0&&r.opacity<1)).toBe(true);}
+});

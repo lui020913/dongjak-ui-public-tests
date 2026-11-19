@@ -2,7 +2,7 @@ import {fadePanelOut} from './v852-panel-transition.js';
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
-import {WINDOW_MOTION,windowMotionFrame} from './mobile-window-motion.js';
+import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,confirmMotionOpacity} from './mobile-window-motion.js';
 /** One coordinated motion/visibility owner, added after v8.0.3 UI modules.
  * Retains the original map, route, station and dialog click handlers.
  * CSS entrance animations and earlier JS coordinators opt out while enabled.
@@ -52,7 +52,7 @@ export function installUnifiedUI(doc=document, win=window){
     const style=win.getComputedStyle(node);
     return style.display!=='none'&&style.visibility!=='hidden';
   };
-  const content=node=>node?.id==='version-history-modal'?node.querySelector('.version-history-dialog')||node:
+  const content=node=>node?.dataset?.djDialogFade==='true'?node:node?.id==='version-history-modal'?node.querySelector('.version-history-dialog')||node:
     node?.id==='dj-map-settings'?node.querySelector('.dj-map-settings-card')||node:
     node?.id==='dj-app-about'?node.querySelector('.dj-about-card')||node:
     node?.id==='dj833-night-modal'?node.querySelector('.dj833-night-dialog')||node:
@@ -67,7 +67,9 @@ export function installUnifiedUI(doc=document, win=window){
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose){
     if(!phone()||!target?.style||reduced())return false;
-    const duration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
+    const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
+    const fade=target.dataset.djDialogFade==='true';
+    const duration=fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
     const beforeTranslate=target.style.getPropertyValue('translate');
@@ -106,6 +108,7 @@ export function installUnifiedUI(doc=document, win=window){
       finally{restore();}
     }
     function setMotion(progress){
+      if(fade){target.style.setProperty('opacity',String(confirmMotionOpacity(progress,opening)),'important');return;}
       const frame=windowMotionFrame(progress,opening,distance,rect.height,docked);
       target.style.setProperty('opacity','1','important');
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
@@ -114,6 +117,7 @@ export function installUnifiedUI(doc=document, win=window){
     target.style.setProperty('transition','none','important');
     target.setAttribute('data-dj810-animating',opening?'opening':'closing');
     target.dataset.djWindowMotionDuration=String(duration);
+    target.dataset.djWindowMotionKind=fade?'fade':'slide';
     setMotion(0);
     activeAnimation.set(target,record);
     // A busy map compositor can defer the first rAF. Do not let the old
@@ -554,7 +558,7 @@ export function installUnifiedUI(doc=document, win=window){
     const id=modal?.id||ids.filter(visible).at(-1);
     if(!id)return;
     // The owner handles Escape for these dialogs; never hide mid-slide.
-    if(['djNext-layer-panel','djNext-permissions','dj-map-settings','dj-app-about','version-history-modal','dj860-onboarding'].includes(id))return;
+    if(app.querySelector('[data-dj-dialog-fade="true"]:not([hidden])')||['djNext-layer-panel','djNext-permissions','dj-map-settings','dj-app-about','version-history-modal','dj860-onboarding'].includes(id))return;
     lifecycle.dismiss(id);
     (win.queueMicrotask||queueMicrotask)(()=>{
       if(ids.includes(id)&&visible(id))panelHide(id);

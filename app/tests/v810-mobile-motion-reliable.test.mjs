@@ -7,7 +7,7 @@ const css=read('src/v810-mobile-sheet-motion.css');
 
 test('mobile floating panels share enter motion and close without replaying X',()=>{
   assert.doesNotMatch(coordinator,/dj810-mobile-sheet-open/);
-  assert.match(coordinator,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
+  assert.match(coordinator,/const slideDuration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
   assert.match(coordinator,/target\.style\.setProperty\('opacity'/);
   assert.match(coordinator,/win\.requestAnimationFrame\(tick\)/);
   assert.match(coordinator,/if\(phone\(\)\)\{playMobileMotion\(target,true\);return;\}/);
