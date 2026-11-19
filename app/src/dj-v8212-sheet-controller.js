@@ -106,6 +106,10 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       if(!isMobile()||!isSheetOpen(panel,win)||event.isPrimary===false)return;
       if(event.button!=null&&event.button!==0&&event.pointerType==='mouse')return;
       if(event.target.closest?.(INTERACTIVE))return;
+      // Delegate on the persistent panel so regenerated headers remain draggable.
+      // Accept only the complete visible header (and any standalone grip), never the scroll body.
+      const surface=event.target.closest?.(headerSelector?`${headerSelector},${handles}${id==='transport-sheet'?',.handle':''}`:handles);
+      if(!surface||!panel.contains(surface))return;
       // A new finger gesture takes ownership immediately. Do not leave an
       // earlier expand/collapse transition competing with pointer movement.
       win.DongjakWindowMotion?.cancel(panel);
@@ -175,7 +179,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};
-    const unbind=handleNodes.map(handle=>bindHeaderDragInput(handle,win,{down,move,up,cancel}));
+    const unbind=[bindHeaderDragInput(panel,win,{down,move,up,cancel})];
     cleanups.push(()=>{
       cancel();
       if(suppressClickTimer!==null)win.clearTimeout(suppressClickTimer);

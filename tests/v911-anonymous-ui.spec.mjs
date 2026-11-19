@@ -219,6 +219,8 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  const rail=page.locator('#djNext-rail'),nav=page.locator('#bottom-nav'),panel=page.locator('#djNext-layer-panel');
  await expect(rail).toBeVisible();await expect(rail.locator(':scope>button')).toHaveCount(5);
  await expect(rail.locator('.djNext-empty')).toHaveCount(1);
+ const assertLayerRight=async()=>{await expect.poll(()=>rail.evaluate(n=>{const r=n.getBoundingClientRect(),b=n.querySelector('#djNext-layers').getBoundingClientRect();return Math.abs(r.right-b.right)})).toBeLessThanOrEqual(2);};
+ await assertLayerRight();
  for(const id of ['dj-v794-more','dj-v794-night','dj831-scrollport','dj-v794-safety'])await expect(page.locator('#'+id)).toBeHidden();
  await expect(page.locator('#dj-v794-toolbar [data-poi-group]:visible')).toHaveCount(0);
  await expect(page.locator('#djNext-mic')).toBeVisible();
@@ -239,6 +241,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await expect(panel.getByRole('button',{name:'보차혼용 바로가기 추가',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(1);
+ await assertLayerRight();
  const fit=await rail.evaluate(n=>{const r=n.getBoundingClientRect();const bs=[...n.children].map(x=>x.getBoundingClientRect());return bs.every((x,i)=>x.left>=r.left-1&&x.right<=r.right+1&&x.width>36&&Math.abs(x.top-bs[0].top)<1&&(i===0||x.left>=bs[i-1].right-1))});expect(fit).toBe(true);
  await page.evaluate(()=>{window.__railSamples=[];let n=0;const sample=()=>{const rail=document.getElementById('djNext-rail'),p=rail?.parentElement,c=p?getComputedStyle(p):null;window.__railSamples.push(!!rail&&!!c&&c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98);if(n++<60)requestAnimationFrame(sample)};requestAnimationFrame(sample)});
  await tap(page,tab(page,'map'));
@@ -303,6 +306,12 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await tap(page,tab(page,'mine'));
  const mine=page.locator('#mine-panel');await visuallyPresented(mine);
  await expect(mine.locator('.dj17-more-root')).toBeVisible();
+ const metrics=await mine.evaluate(n=>{const a=n.querySelector('[data-dj834-action="records"]'),b=n.querySelector('.dj17-more-root>summary'),c=a.querySelector('.dj834-setting-icon');const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(),rc=c.getBoundingClientRect(),sb=getComputedStyle(b),sa=getComputedStyle(a);return {height:Math.abs(ra.height-rb.height),inset:Math.abs(parseFloat(sa.paddingLeft)-parseFloat(sb.paddingLeft)),icon:Math.abs(rc.width-parseFloat(getComputedStyle(b,'::before').width))};});
+ expect(metrics.height).toBeLessThanOrEqual(2);expect(metrics.inset).toBeLessThanOrEqual(1);expect(metrics.icon).toBeLessThanOrEqual(1);
+ const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await expect(mineHeader).toHaveCSS('touch-action','none');
+ const dragMine=async(dy)=>{const h=await mineHeader.boundingBox();const x=h.x+h.width*.28,y=h.y+h.height*.66;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+dy,{steps:10});await page.mouse.up();};
+ await dragMine(-100);await expect(mine).toHaveClass(/dj871-sheet-expanded/);await expect(mine).not.toHaveClass(/dj889-sheet-transitioning/);
+ await dragMine(105);await expect(mine).not.toHaveClass(/dj871-sheet-expanded/);await expect(mine).not.toHaveClass(/dj889-sheet-transitioning/);
  await tap(page,mine.locator('.dj-sheet-chrome-close'));await expect(mine).toBeHidden();
  await tap(page,tab(page,'participate'));
  const community=page.locator('#participation-panel'),cb=community.locator(':scope > .dj836-sheet-body'),summary=cb.locator('.community-report-secondary > summary');
