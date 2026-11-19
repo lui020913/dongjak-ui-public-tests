@@ -53,8 +53,29 @@ for n in $(seq 1 12); do
   sleep 5
 done
 test "$verified" = 1
-curl -fsSL --max-time 30 "$PREVIEW_URL/version.json" | jq -e --arg version "$APP_VERSION" '.version==$version' >/dev/null
-curl -fsSL --max-time 30 "$PREVIEW_URL/api/transport/status" | jq -e '.bus==true and .subway==true' >/dev/null
+echo "Preview source identity verified."
+# A successful upload and static marker can precede edge propagation of
+# version metadata or Pages Functions. Retry readiness, never relax identity
+# or capability checks. Keep diagnostics restricted to fixed endpoint names.
+version_ready=0
+transport_ready=0
+for n in $(seq 1 12); do
+  if [ "$version_ready" = 0 ] && curl -fsSL --max-time 25 "$PREVIEW_URL/version.json?verify=$GITHUB_RUN_ID-$n" | jq -e --arg version "$APP_VERSION" '.version==$version' >/dev/null; then
+    version_ready=1
+    echo "Preview version metadata verified."
+  fi
+  if [ "$transport_ready" = 0 ] && curl -fsSL --max-time 25 "$PREVIEW_URL/api/transport/status?verify=$GITHUB_RUN_ID-$n" | jq -e '.bus==true and .subway==true' >/dev/null; then
+    transport_ready=1
+    echo "Preview transport capabilities verified."
+  fi
+  if [ "$version_ready" = 1 ] && [ "$transport_ready" = 1 ]; then break; fi
+  echo "Preview readiness retry $n/12: version=$version_ready transport=$transport_ready"
+  sleep 5
+done
+if [ "$version_ready" != 1 ] || [ "$transport_ready" != 1 ]; then
+  echo "::error::Preview readiness verification failed: version=$version_ready transport=$transport_ready"
+  exit 1
+fi
 current="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
 test "$current" = "$previous"
 echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
