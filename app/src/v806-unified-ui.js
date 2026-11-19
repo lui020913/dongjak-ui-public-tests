@@ -46,7 +46,7 @@ export function installUnifiedUI(doc=document, win=window){
     'map-quick-search-dropdown'];
   const visible=id=>{
     const node=element(id);
-    if(!node||node.hidden||node.dataset?.dj810Animating==='closing'||(id==='dj-mobile-utilities'&&node.getAttribute('aria-hidden')==='true'))return false;
+    if(!node||node.hidden||content(node)?.dataset?.dj810Animating==='closing'||(id==='dj-mobile-utilities'&&node.getAttribute('aria-hidden')==='true'))return false;
     if(id==='map-safety-controls'&&!app.classList.contains('map-safety-open'))return false;
     if(id==='map-advanced-controls'&&!app.classList.contains('map-controls-open'))return false;
     const style=win.getComputedStyle(node);
@@ -54,7 +54,9 @@ export function installUnifiedUI(doc=document, win=window){
   };
   const content=node=>node?.id==='version-history-modal'?node.querySelector('.version-history-dialog')||node:
     node?.id==='dj-map-settings'?node.querySelector('.dj-map-settings-card')||node:
-    node?.id==='dj-app-about'?node.querySelector('.dj-about-card')||node:node;
+    node?.id==='dj-app-about'?node.querySelector('.dj-about-card')||node:
+    node?.id==='dj833-night-modal'?node.querySelector('.dj833-night-dialog')||node:
+    node?.classList.contains('djNext-modal')?node.querySelector('.djNext-modal-body')||node:node;
   // v8 mobile motion repair: ONE Web Animations owner for both entrance and
   // explicit exit.  Older v803 clip-path and v805 click handlers opt out while
   // data-dj806-motion is enabled.  Animate CSS `translate`, not the `transform`
@@ -192,8 +194,8 @@ export function installUnifiedUI(doc=document, win=window){
     if(reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
     const target=content(element(id));if(!target)return;
     cancelActive(target);
-    // My Info and More fade in place; do not move their fixed layout.
-    if(playMobileMotion(target,true))return;
+    // On phones, only the common slide owner may animate the surface.
+    if(phone()){playMobileMotion(target,true);return;}
     if(typeof target.animate!=='function')return;
     const anim=target.animate(frames(true,id),{
       duration:phone()?410:260,easing:'cubic-bezier(.17,.84,.27,1)',fill:'both'
@@ -276,8 +278,9 @@ export function installUnifiedUI(doc=document, win=window){
     // A real close handler may restore the overview as a side effect, so do
     // one more synchronous sweep before allowing the new sheet to paint.
     for(let pass=0;pass<2;pass++)for(const id of ids){
-      if(id===winner||!visible(id))continue;
+      if(id===winner)continue;
       const target=content(element(id));
+      if(!visible(id)&&target?.dataset.dj810Animating!=='closing')continue;
       if(target)cancelActive(target);
       panelHide(id,{immediate:phone()});
     }
@@ -465,6 +468,7 @@ export function installUnifiedUI(doc=document, win=window){
         if(opened&&!lastVisible){
           const explicit=(explicitUntil.get(id)||0)>Date.now();
           if(!lifecycle.requestOpen(id,{explicit,origin:'automatic'}))node.hidden=true;
+          else if(phone()&&['dj833-night-modal','dj832-data-sheet','dj832-feature-sheet','dj832-info-sheet','dj-transit-signin-prompt','dj832-dongjak-boundary'].includes(id))win.DongjakWindowMotion.open(content(node));
         }else if(!opened&&lastVisible&&lifecycle.snapshot(id).phase!=='closed'){
           lifecycle.dismiss(id,{global:false});
         }
@@ -548,6 +552,8 @@ export function installUnifiedUI(doc=document, win=window){
     const modal=overlays.at(-1);
     const id=modal?.id||ids.filter(visible).at(-1);
     if(!id)return;
+    // The owner handles Escape for these dialogs; never hide mid-slide.
+    if(['djNext-layer-panel','djNext-permissions','dj-map-settings','dj-app-about','version-history-modal','dj860-onboarding'].includes(id))return;
     lifecycle.dismiss(id);
     (win.queueMicrotask||queueMicrotask)(()=>{
       if(ids.includes(id)&&visible(id))panelHide(id);
