@@ -29,6 +29,9 @@ jobs:
       github.event.workflow_run.actor.login == 'lui020913' &&
       github.event.workflow_run.event == 'push'))
     environment: public-source-build
+    outputs:
+      version: ${{ steps.prepare.outputs.version }}
+      public_debug: ${{ steps.package.outputs.public_debug }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
@@ -204,6 +207,9 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ inputs.variant == 'release' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
           ANDROID_KEY_ALIAS: ${{ inputs.variant == 'release' && secrets.ANDROID_KEY_ALIAS || '' }}
           ANDROID_KEY_PASSWORD: ${{ inputs.variant == 'release' && secrets.ANDROID_KEY_PASSWORD || '' }}
+          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ env.VARIANT == 'debug' && secrets.ANDROID_DEBUG_KEYSTORE_BASE64 || '' }}
+          ANDROID_DEBUG_KEYSTORE_PASSWORD: ${{ env.VARIANT == 'debug' && secrets.ANDROID_DEBUG_KEYSTORE_PASSWORD || '' }}
+          ANDROID_DEBUG_CERT_SHA256: ${{ env.VARIANT == 'debug' && secrets.ANDROID_DEBUG_CERT_SHA256 || '' }}
         run: |
           set -euo pipefail
           umask 077
@@ -221,12 +227,29 @@ jobs:
             unset ANDROID_KEYSTORE_BASE64
             "$tools/zipalign" -f -P 16 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
             "$tools/apksigner" sign --ks "$key" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$output" "$RUNNER_TEMP/aligned.apk"
+          elif [ -n "$ANDROID_DEBUG_KEYSTORE_BASE64$ANDROID_DEBUG_KEYSTORE_PASSWORD$ANDROID_DEBUG_CERT_SHA256" ]; then
+            : "${ANDROID_DEBUG_KEYSTORE_BASE64:?Configure persistent debug keystore}"
+            : "${ANDROID_DEBUG_KEYSTORE_PASSWORD:?Configure persistent debug password}"
+            [[ "$ANDROID_DEBUG_CERT_SHA256" =~ ^[A-Fa-f0-9]{64}$ ]]
+            key="$RUNNER_TEMP/dongjak-debug.p12"
+            trap 'rm -f "$key" "$RUNNER_TEMP/debug-aligned.apk"' EXIT
+            printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$key"
+            unset ANDROID_DEBUG_KEYSTORE_BASE64
+            "$tools/zipalign" -f -P 16 4 android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/debug-aligned.apk"
+            "$tools/apksigner" sign --ks "$key" --ks-key-alias dongjak-debug --ks-pass env:ANDROID_DEBUG_KEYSTORE_PASSWORD --key-pass env:ANDROID_DEBUG_KEYSTORE_PASSWORD --out "$output" "$RUNNER_TEMP/debug-aligned.apk"
+            "$tools/apksigner" verify --print-certs "$output" > "$RUNNER_TEMP/debug-cert.txt"
+            cert="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/debug-cert.txt")"
+            test "${cert,,}" = "${ANDROID_DEBUG_CERT_SHA256,,}"
+            echo 'public_debug=true' >> "$GITHUB_OUTPUT"
           else
             cp android/app/build/outputs/apk/debug/app-debug.apk "$output"
+            echo 'public_debug=false' >> "$GITHUB_OUTPUT"
+            echo 'Persistent signing key not configured; test artifact only.' >> "$GITHUB_STEP_SUMMARY"
           fi
           "$tools/apksigner" verify --verbose "$output"
           "$tools/aapt" dump badging "$output" > "$RUNNER_TEMP/apk-badging.txt"
           grep -F "package: name='kr.dongjak.safetyapp' versionCode='$VERSION_CODE' versionName='$VERSION'" "$RUNNER_TEMP/apk-badging.txt"
+          grep -F "application-label:'동작하는 안전지도'" "$RUNNER_TEMP/apk-badging.txt"
           unzip -p "$output" assets/public/index.html | wc -c | awk '$1>0{ok=1} END{exit !ok}'
           unzip -p "$output" assets/public/version.json | jq -e --arg v "$VERSION" '.version==$v' >/dev/null
           unzip -p "$output" assets/public/release-source.json | jq -e --slurpfile prod "$RUNNER_TEMP/production-marker.json" '.==$prod[0]' >/dev/null
@@ -254,3 +277,54 @@ jobs:
         if: always()
         working-directory: .
         run: rm -rf "$RUNNER_TEMP/apk-release.tar.gz" "$RUNNER_TEMP/apk-web" "$RUNNER_TEMP/apk-sealed"
+
+  publish-debug:
+    name: Publish fixed-signature debug APK for current Production
+    needs: apk
+    if: needs.apk.outputs.public_debug == 'true'
+    environment: android-distribution
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    concurrency:
+      group: android-public-distribution
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.apk.outputs.version }}
+      EXPECTED_CERT: ${{ secrets.ANDROID_DEBUG_CERT_SHA256 }}
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Dongjak-Safety-Map-v${{ needs.apk.outputs.version }}-debug
+          path: ${{ runner.temp }}/public-debug
+      - name: Verify and publish exact public download without overwriting
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ && "$EXPECTED_CERT" =~ ^[A-Fa-f0-9]{64}$ ]]
+          cd "$RUNNER_TEMP/public-debug"
+          apk="Dongjak-Safety-Map-v$VERSION-debug.apk"
+          test -s "$apk"
+          sha256sum -c SHA256SUMS.txt
+          jq -e --arg v "$VERSION" '.release_status=="DEPLOYED_PRODUCTION" and .application_version==$v and .source_commit==.public_ui_source_commit and (.source_commit|test("^[a-f0-9]{40}$"))' PRODUCTION.json >/dev/null
+          sha="$(jq -r .source_commit PRODUCTION.json)"
+          unzip -p "$apk" assets/public/release-source.json | jq -e --slurpfile prod PRODUCTION.json '.==$prod[0]' >/dev/null
+          unzip -p "$apk" assets/public/version.json | jq -e --arg v "$VERSION" '.version==$v' >/dev/null
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          if [ ! -x "$tools/apksigner" ]; then sdkmanager 'build-tools;36.0.0'; fi
+          "$tools/apksigner" verify --print-certs "$apk" > "$RUNNER_TEMP/public-cert.txt"
+          cert="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/public-cert.txt")"
+          test "${cert,,}" = "${EXPECTED_CERT,,}"
+          "$tools/aapt" dump badging "$apk" > "$RUNNER_TEMP/public-badging.txt"
+          grep -F "package: name='kr.dongjak.safetyapp'" "$RUNNER_TEMP/public-badging.txt"
+          grep -F "application-label:'동작하는 안전지도'" "$RUNNER_TEMP/public-badging.txt"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?android-debug-final=$GITHUB_RUN_ID" | jq -e --slurpfile prod PRODUCTION.json '.==$prod[0]' >/dev/null
+          tag="android-debug-v$VERSION"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'Version already published; refusing overwrite'; exit 1
+          fi
+          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --target "$sha" --title "Android v$VERSION (test APK)" --notes "Fixed-signature debug test APK from verified Production $sha. Not a Play Store release." --latest=false
+          echo "Public download: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$apk" >> "$GITHUB_STEP_SUMMARY"

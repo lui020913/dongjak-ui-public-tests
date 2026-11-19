@@ -1,6 +1,6 @@
 # Multiplatform distribution
 
-The release source is the exact current public Production bundle, not the 8.26.1 snapshot. Web and PWA share a build; Android and iOS consume verified assets. Debug APK is not public distribution.
+The release source is the exact current public Production bundle, not the 8.26.1 snapshot. Web and PWA share a build; Android and iOS consume verified assets. A fixed-signature debug APK may be publicly distributed as a test build only after secure one-time setup. Ephemeral debug artifacts are never public.
 
 Android: configure ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD for the existing signed build. Set ANDROID_RELEASE_CERT_SHA256 in android-distribution, allow main only; manually run signed build then Publish verified signed Android APK using its run ID.
 

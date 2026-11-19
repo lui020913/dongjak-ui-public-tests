@@ -14,10 +14,12 @@ export function safeDownloadUrl(value,platform){
  if(platform==='android'&&!(u.pathname.toLowerCase().endsWith('.apk')||u.hostname==='play.google.com'))return null;
  return u.href;}catch{return null;}
 }
-export function androidReleaseAsset(marker,release){
+export function androidReleaseAsset(marker,release,variant='release'){
+ if(!['debug','release'].includes(variant))return null;
+ const prefix=variant==='debug'?'android-debug-v':'android-v';
  const v=marker?.application_version,sha=marker?.source_commit;
- if(marker?.release_status!=='DEPLOYED_PRODUCTION'||!/^\d+\.\d+\.\d+$/.test(v||'')||! /^[a-f0-9]{40}$/.test(sha||'')||release?.draft||release?.prerelease||release?.tag_name!=='android-v'+v||release?.target_commitish!==sha)return null;
- const name='Dongjak-Safety-Map-v'+v+'-release.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/android-v'+v+'/'+name;
+ if(marker?.release_status!=='DEPLOYED_PRODUCTION'||!/^\d+\.\d+\.\d+$/.test(v||'')||! /^[a-f0-9]{40}$/.test(sha||'')||release?.draft||release?.prerelease||release?.tag_name!==prefix+v||release?.target_commitish!==sha)return null;
+ const name='Dongjak-Safety-Map-v'+v+'-'+variant+'.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+prefix+v+'/'+name;
  return release.assets?.some(a=>a.name===name&&a.browser_download_url===url&&a.state==='uploaded')?url:null;
 }
 export function installChoices(platform){const rest=['android','ios'];if(platform==='ios')rest.reverse();return ['web',...rest,'pwa'];}
@@ -46,7 +48,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  if(key==='ios')return;
  if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();return;}
  if(key==='pwa'){showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
- const url=safeDownloadUrl(links[key],key);if(url)win.location.assign(url);else showInfo(['일반 사용자용 서명된 APK 다운로드 링크는 준비 중입니다. 웹앱을 이용해 주세요.']);
+ const url=safeDownloadUrl(links[key],key);if(url)win.location.assign(url);else showInfo(['최신 Android APK 다운로드를 준비 중입니다. 웹앱을 이용해 주세요.']);
  });
  }
  if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);}
@@ -55,7 +57,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);
  Promise.resolve().then(()=>win.fetch('/download-links.json',{cache:'no-store'})).then(r=>r.ok?r.json():{}).then(async data=>{
  links={}; // iOS native distribution is paused; ignore any configured iOS download URL.
- if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok)links.android=androidReleaseAsset(marker,await response.json());}}}catch{}}
+ if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-debug-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok)links.android=androidReleaseAsset(marker,await response.json(),'debug');}}}catch{}}
  buttons.get('android').status.textContent=safeDownloadUrl(links.android,'android')?'':'준비 중';
  }).catch(()=>{buttons.get('android').status.textContent='준비 중';});
  return card;
