@@ -51,9 +51,12 @@ echo "CHECKPOINT: changed-file allowlist passed"
 # The public app snapshot is still 8.26.1. Reconstruct the released
 # 9.0.0 entry before issuing the new patch, rather than mislabelling it 8.26.2.
 release_kind="$(jq -er '.release_kind' "$REQUEST")"
-if [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; then
+if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.0" ] && [ "$release_kind" = "minor" ]; }; then
   node scripts/bump-app-version.mjs major "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
   node scripts/bump-app-version.mjs patch "모바일 창 공통 상승·하강 애니메이션 통합, 중복 페이드 제거 및 레이어 헤더 드래그 확장·축소" >/dev/null
+  if [ "$APP_VERSION" = "9.1.0" ]; then
+    node scripts/bump-app-version.mjs minor "모바일 통합 V11: 탭·시트·권한·주변정보·날씨·제보 UI 안정화" "선로 기반 실시간 지하철 위치 추정 및 방향별 아이콘·열차 정보창 추적" "지도 조작 안내 페이드·로딩 진행 표시·PC 및 태블릿 모바일 이용 안내 개선" >/dev/null
+  fi
 else
   node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
 fi

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.0.1",
-  "public_work_branch": "ci/isolate-mobile-rendering-workers-20261119",
-  "purpose": "Validate update history docked slide with isolated browsers, all 44 selected tests distributed across 12 single-worker runners.",
-  "attempt": 46,
+  "application_version": "9.1.0",
+  "public_work_branch": "fix/mobile-ui-v11-integrated-20261119",
+  "purpose": "Deploy cumulative V11 mobile UI and directional metro overlay after successful PR #66 source CI; require exact artifact Preview and all mobile browser shards before protected Production.",
+  "attempt": 47,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 45 returned 33 passed and 11 failed, concentrated in render-frame sampling and one unstable night consent click under four concurrent software WebGL browsers on one runner. Isolate each browser worker on its own runner, retain all coverage and assertion thresholds. Recheck whether failures persist before modifying app behavior.",
-  "release_kind": "patch",
-  "beta_number": 4
+  "last_retry_reason": "New integrated V11 source; public application CI run 44474439124 passed 1,572 regression tests and all three mobile viewport tests. Retain existing release safety gates.",
+  "release_kind": "minor",
+  "beta_number": 1
 }
