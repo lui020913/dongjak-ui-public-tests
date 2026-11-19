@@ -439,3 +439,20 @@ html body #app#app#app#app#app#app#app [data-dj810-animating]{animation:none!imp
 
 }
 }
+
+/* 9.2.5 shared phone surface polish; preserve keyboard focus indication. */
+@media(max-width:699px){
+html body #app #djNext-rail{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]){border-radius:999px!important;box-shadow:var(--dj-elev-low,0 2px 6px #0002)!important;outline-offset:2px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]):not(:focus-visible){outline:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(.community-toolbar,.community-category-tabs){margin-bottom:10px!important;gap:6px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(#community-sort,.community-report-secondary,.community-filter){border-radius:999px!important;box-shadow:var(--dj-elev-low,0 2px 5px #0002)!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body>header{padding-top:23px!important}
+#djNext-layer-panel .djNext-modal-body>header::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:99px;background:var(--djNext-muted);opacity:.45}
+#djNext-layer-panel header strong{display:flex;align-items:center;gap:8px}#djNext-layer-panel header strong svg{width:22px;height:22px;flex:none;color:var(--djNext-active)}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action[aria-pressed=true] .djNext-layer-tile{background:var(--djNext-active)!important;background-image:none!important;color:#fff!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-row{gap:2px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-pin{box-shadow:var(--dj-elev-low,0 2px 5px #0002)!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-group-title{margin-block:12px 8px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:28px!important}
+}

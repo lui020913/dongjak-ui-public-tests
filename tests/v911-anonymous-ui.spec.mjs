@@ -214,11 +214,11 @@ async function pinPhoneShortcut(page,label,key){
  await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
  const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();return shortcut;
 }
-test('phone toolbar has stable seven slots, three saved shortcuts maximum and no overlapping legacy controls',{tag:'@phone-layout'},async({page})=>{
+test('phone toolbar has compact adaptive slots, three saved shortcuts maximum and no overlapping legacy controls',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const rail=page.locator('#djNext-rail'),nav=page.locator('#bottom-nav'),panel=page.locator('#djNext-layer-panel');
- await expect(rail).toBeVisible();await expect(rail.locator(':scope>button')).toHaveCount(7);
- await expect(rail.locator('.djNext-empty')).toHaveCount(3);
+ await expect(rail).toBeVisible();await expect(rail.locator(':scope>button')).toHaveCount(5);
+ await expect(rail.locator('.djNext-empty')).toHaveCount(1);
  for(const id of ['dj-v794-more','dj-v794-night','dj831-scrollport','dj-v794-safety'])await expect(page.locator('#'+id)).toBeHidden();
  await expect(page.locator('#dj-v794-toolbar [data-poi-group]:visible')).toHaveCount(0);
  await expect(page.locator('#djNext-mic')).toBeVisible();
@@ -232,6 +232,7 @@ test('phone toolbar has stable seven slots, three saved shortcuts maximum and no
  await expect(panel.locator('.djNext-count')).toHaveText('등록 3/3');
  await expect(panel.getByRole('button',{name:'보차혼용 바로가기 추가',exact:true})).toBeDisabled();
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
+ await expect(rail.locator('.djNext-empty')).toHaveCount(0);
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dongjak-phone-shortcuts-v2')))).toEqual(['pilot','slope','night']);
  const remove=panel.getByRole('button',{name:'경사도 바로가기 제거',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();
  await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
