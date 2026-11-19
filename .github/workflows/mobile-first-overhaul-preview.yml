@@ -100,17 +100,12 @@ jobs:
   mobile-qa:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    name: Phone-only browser QA — ${{ matrix.phone }}
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        phone: [mobile375, mobile390, mobile430]
+    name: Mobile browser QA — Chromium + WebKit
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
       options: --ipc=host
-    timeout-minutes: 35
+    timeout-minutes: 50
     env:
       DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}/
       DONGJAK_EXPECTED_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
@@ -136,11 +131,11 @@ jobs:
           curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-qa=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/mobile-preview-provenance.json"
           node -e 'const fs=require("node:fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=d.source_commit===process.env.SOURCE_SHA&&d.public_ui_source_commit===process.env.PUBLIC_SHA&&d.public_ui_overlay_sha256===process.env.CSS_SHA&&d.application_version===process.env.APP_VERSION&&String(d.build_run)===process.env.BUILD_RUN&&d.release_status==="CANDIDATE_PREVIEW_NOT_PRODUCTION";if(!ok)throw new Error("Preview provenance mismatch")' "$RUNNER_TEMP/mobile-preview-provenance.json"
           node scripts/verify-release-source.mjs
-      - name: Verify WebKit mobile header gesture before Chromium matrix
-        if: matrix.phone == 'mobile390'
-        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile390-webkit-header
-      - name: Run this phone viewport
-        run: npx playwright test --config=playwright.v911-remote.config.mjs --project=${{ matrix.phone }}
+      - name: Run all mobile browser projects in parallel
+        run: >-
+          npx playwright test --config=playwright.v911-remote.config.mjs
+          --project=mobile375 --project=mobile390 --project=mobile430
+          --project=mobile390-webkit-header --workers=2
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
@@ -150,7 +145,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-only-phone-qa-${{ github.run_id }}-${{ matrix.phone }}
+          name: mobile-only-phone-qa-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
