@@ -45,7 +45,7 @@ export function installMapPreferences(doc=document,win=window){
   </section>`;
   app.append(about);
   let aboutFocus=null;
-  const closeAbout=()=>{if(about.hidden)return;about.hidden=true;aboutFocus?.focus?.();};
+  const closeAbout=()=>{if(about.hidden)return;const finish=()=>{about.hidden=true;aboutFocus?.focus?.();};if(document.defaultView?.DongjakWindowMotion)document.defaultView.DongjakWindowMotion.close(about.querySelector('.dj-about-card'),finish);else finish();};
   const openAbout=(event)=>{
     event?.preventDefault?.();
     if(!overlay.hidden)close();
@@ -140,7 +140,7 @@ export function installMapPreferences(doc=document,win=window){
     q('#dj-settings-text').querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.size===prefs.text)));
     syncTheme();safeSave();
   };
-  const close=()=>{if(overlay.hidden)return;overlay.hidden=true;app.classList.remove('dj-settings-open');previousFocus?.focus?.();};
+  const close=()=>{if(overlay.hidden)return;const finish=()=>{overlay.hidden=true;app.classList.remove('dj-settings-open');previousFocus?.focus?.();};if(document.defaultView?.DongjakWindowMotion)document.defaultView.DongjakWindowMotion.close(overlay.querySelector('.dj-map-settings-card'),finish);else finish();};
   const open=(event)=>{
     if(event)event.preventDefault();
     previousFocus=doc.activeElement;
