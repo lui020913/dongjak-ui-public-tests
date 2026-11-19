@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../src/v806-unified-ui.js',import.meta.url),'utf8');
 
 test('mobile sheet motion slides from below while overriding legacy important styles',()=>{
-  assert.match(source,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
+  assert.match(source,/const slideDuration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
   assert.match(source,/target\.style\.setProperty\('opacity','1','important'\)/);
   assert.match(source,/windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
   assert.match(source,/win\.requestAnimationFrame\(tick\)/);

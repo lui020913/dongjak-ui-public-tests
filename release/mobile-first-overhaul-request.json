@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/confirmation-fade-motion-20261119",
+  "public_work_branch": "fix/confirmation-release-test-contracts-20261119",
   "purpose": "Stationary fade for confirmation popups, preserve bottom sheet slide and native header gestures; repair touch adapter listener cleanup.",
-  "attempt": 40,
+  "attempt": 41,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "39 failed touch adapter dispose assertion; owner requested confirmation/alert popups use fade instead of bottom sheet slide. Retain mobile release gates.",
+  "last_retry_reason": "Attempt 40 source CI found two legacy assertions referencing renamed duration variable; retain all slide and fade behavior gates and update only the stale assertions.",
   "release_kind": "patch",
   "beta_number": 3
 }
