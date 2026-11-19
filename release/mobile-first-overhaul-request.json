@@ -3,9 +3,9 @@
   "application_version": "9.2.14",
   "public_work_branch": "main",
   "purpose": "Show persistent selected state for install choices and restore clear Google Play external APK security warning",
-  "attempt": 75,
+  "attempt": 76,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preserve exact legacy warning phrase required by the existing Android installation guidance regression.",
+  "last_retry_reason": "Update release workflow contract regression to require the new PC/tablet install selection QA gate.",
   "release_kind": "patch",
   "beta_number": 1
 }

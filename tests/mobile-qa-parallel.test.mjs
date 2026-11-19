@@ -12,8 +12,10 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/fail-fast: false\s+max-parallel: 12\s+matrix:\s+shard: \[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\]/);
  assert.match(workflow,/--project=mobile390-webkit-header --workers=1 --shard=\$\{\{ matrix\.shard \}\}\/12/);
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
- assert.match(workflow,/needs: \[build, preview, mobile-qa\]/);
- assert.match(workflow,/if: needs\.mobile-qa\.result == 'success'/);
+ assert.match(workflow,/desktop-tablet-qa:/);
+ assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
+ assert.match(workflow,/needs: \[build, preview, mobile-qa, desktop-tablet-qa\]/);
+ assert.match(workflow,/if: needs\.mobile-qa\.result == 'success' && needs\.desktop-tablet-qa\.result == 'success'/);
  assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\//);
 });
 
