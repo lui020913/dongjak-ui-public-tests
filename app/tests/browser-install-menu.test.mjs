@@ -50,3 +50,13 @@ test('installation choices expose one persistent selected state and Android alwa
  assert.match(guide.notice,/Play Protect/);
  assert.match(guide.notice,/설치하지 마세요/);
 });
+
+
+test('Android debug release accepts main target_commitish only when the actual tag points to the Production SHA',()=>{
+ const sha='d'.repeat(40),v='9.2.14',name='Dongjak-Safety-Map-v'+v+'-debug.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/android-debug-v'+v+'/'+name;
+ const marker={application_version:v,source_commit:sha,release_status:'DEPLOYED_PRODUCTION'};
+ const release={tag_name:'android-debug-v'+v,target_commitish:'main',draft:false,prerelease:false,assets:[{name,browser_download_url:url,state:'uploaded'}]};
+ assert.equal(androidReleaseAsset(marker,release,'debug',sha),url);
+ assert.equal(androidReleaseAsset(marker,release,'debug','e'.repeat(40)),null);
+ assert.equal(androidReleaseAsset(marker,release,'debug'),null);
+});

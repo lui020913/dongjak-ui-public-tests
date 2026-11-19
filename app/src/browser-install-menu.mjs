@@ -14,11 +14,11 @@ export function safeDownloadUrl(value,platform){
  if(platform==='android'&&!(u.pathname.toLowerCase().endsWith('.apk')||u.hostname==='play.google.com'))return null;
  return u.href;}catch{return null;}
 }
-export function androidReleaseAsset(marker,release,variant='release'){
+export function androidReleaseAsset(marker,release,variant='release',tagCommitSha=null){
  if(!['debug','release'].includes(variant))return null;
  const prefix=variant==='debug'?'android-debug-v':'android-v';
  const v=marker?.application_version,sha=marker?.source_commit;
- if(marker?.release_status!=='DEPLOYED_PRODUCTION'||!/^\d+\.\d+\.\d+$/.test(v||'')||! /^[a-f0-9]{40}$/.test(sha||'')||release?.draft||release?.prerelease||release?.tag_name!==prefix+v||release?.target_commitish!==sha)return null;
+ if(marker?.release_status!=='DEPLOYED_PRODUCTION'||!/^\d+\.\d+\.\d+$/.test(v||'')||! /^[a-f0-9]{40}$/.test(sha||'')||release?.draft||release?.prerelease||release?.tag_name!==prefix+v||(release?.target_commitish!==sha&&tagCommitSha!==sha))return null;
  const name='Dongjak-Safety-Map-v'+v+'-'+variant+'.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+prefix+v+'/'+name;
  return release.assets?.some(a=>a.name===name&&a.browser_download_url===url&&a.state==='uploaded')?url:null;
 }
@@ -75,7 +75,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);
  Promise.resolve().then(()=>win.fetch('/download-links.json',{cache:'no-store'})).then(r=>r.ok?r.json():{}).then(async data=>{
  links={}; // iOS native distribution is paused; ignore any configured iOS download URL.
- if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-debug-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok)links.android=androidReleaseAsset(marker,await response.json(),'debug');}}}catch{}}
+ if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-debug-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok){const tag='android-debug-v'+marker.application_version;const tagResponse=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/git/ref/tags/'+tag,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(tagResponse.ok){const [release,tagRef]=await Promise.all([response.json(),tagResponse.json()]);const tagSha=tagRef?.object?.type==='commit'?tagRef.object.sha:null;links.android=androidReleaseAsset(marker,release,'debug',tagSha);}}}}}catch{}}
  const androidUrl=safeDownloadUrl(links.android,'android');
  buttons.get('android').status.textContent=androidUrl?'':'준비 중';
  if(selectedKey==='android')showAndroidGuide(androidUrl);

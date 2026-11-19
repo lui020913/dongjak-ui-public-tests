@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.14",
+  "application_version": "9.2.15",
   "public_work_branch": "main",
-  "purpose": "Show persistent selected state for install choices and restore clear Google Play external APK security warning",
-  "attempt": 77,
+  "purpose": "Verify Android APK release tag commit SHA, retain selected install feedback, and restore external Play Store safety guidance",
+  "attempt": 78,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preserve the legacy empty Android status label when a verified APK is available; selected state remains shown by the new badge.",
+  "last_retry_reason": "Actual GitHub Release target_commitish is main; validate exact Git tag commit SHA instead.",
   "release_kind": "patch",
   "beta_number": 1
 }
