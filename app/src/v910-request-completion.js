@@ -27,7 +27,7 @@ export function installRequestCompletion(doc=document,win=window){
     const h=doc.documentElement.clientHeight||win.innerHeight;
     const n=nav?.getBoundingClientRect();
     variable('--dj910-dock-bottom',dockClearance(h,visible(nav)?n?.top:NaN)+'px');
-    const head=doc.querySelector('.topbar'),toolbar=doc.getElementById('dj-v794-toolbar');
+    const head=doc.querySelector('.topbar'),toolbar=doc.getElementById('djNext-toolbar')||doc.getElementById('dj-v794-toolbar');
     const headerBottom=visible(head)?head.getBoundingClientRect().bottom:56;
     const toolsBottom=visible(toolbar)?toolbar.getBoundingClientRect().bottom:headerBottom;
     const categories=doc.getElementById('dj912-poi-categories');
