@@ -31,6 +31,9 @@ test('mobile sheets have one shared header and admin sheet hides the map action 
   assert.match(css,/display:flex!important;flex-flow:row nowrap!important/);
   assert.match(css,/\[data-dj-active-sheet="admin-dong-picker"\] \.map-actions/);
   assert.match(core,/MOBILE_FLOATING_SHEETS/);
-  assert.match(core,/handle\.addEventListener\('pointerdown'/);
+  assert.match(core,/bindHeaderDragInput\(handle,win,\{down,move,up,cancel\}\)/);
+  const input=read('src/mobile-header-input.js');
+  assert.match(input,/header\.addEventListener\('pointerdown'/);
+  assert.match(input,/header\.addEventListener\('touchstart'/);
   assert.match(read('index.html'),/dj-v8212-sheet-controller\.js/);
 });

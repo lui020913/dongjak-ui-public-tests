@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/ios-header-native-touch-20261119",
-  "purpose": "9.0.1 full header finger-follow touch input fix for iOS Safari/PWA, plus separate mobile WebKit header regression.",
-  "attempt": 38,
+  "public_work_branch": "fix/mobile-touch-regression-and-place-close-20261119",
+  "purpose": "Native header touch, WebKit validation, facility popup close and shared drag, corrected implementation-specific test contracts.",
+  "attempt": 39,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner reported the header drag was not operating on their iPhone even though Chromium 375px accepted touch input. Native TouchEvent capture and WebKit rendered header regression are required before Production.",
+  "last_retry_reason": "38 failed stale direct-pointer listener assertions after shared adapter refactor; 37 mobile390 facility X close failed. Fix both without relaxing browser or release gates.",
   "release_kind": "patch",
   "beta_number": 3
 }

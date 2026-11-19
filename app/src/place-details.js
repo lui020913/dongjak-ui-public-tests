@@ -1,4 +1,5 @@
-import {setMobileSheetExpanded,dismissMobileSheet} from './v889-mobile-sheet-motion.js';
+import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
+import {bindHeaderDragInput} from './mobile-header-input.js';
 import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
 import {createSelectedLocationPin} from './selected-location-pin.js';
@@ -243,8 +244,10 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     if(element?.dataset.dj912ImmediateDismiss==='true'||!sharedSheet||!motion||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){popup?.remove();return;}
     if(element.dataset.dj870Closing==='true')return;
     element.dataset.dj870Closing='true';element.style.pointerEvents='none';
-    let closed=false;
-    const finish=()=>{if(closed)return;closed=true;popup?.remove();};
+    let closed=false,closeWatchdog=0;
+    const finish=()=>{if(closed)return;closed=true;window.clearTimeout(closeWatchdog);popup?.remove();};
+    // Native cleanup must run even if another surface cancels the motion.
+    closeWatchdog=window.setTimeout(finish,1000);
     if(window.DongjakWindowMotion){window.DongjakWindowMotion.close(motion,finish);return;}
     try{
       const animation=motion.animate([
@@ -294,45 +297,42 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     const popupElement=popup.getElement?.();
     const INTERACTIVE='button,a,input,textarea,select,label,summary,[role="button"]';
     let gesture=null;
-    const reset=()=>{
-      popupElement?.style.removeProperty('translate');
-      popupElement?.style.removeProperty('opacity');
-      popupElement?.style.removeProperty('transition');
-    };
+    const reset=()=>clearMobileSheetDrag(popupElement);
     const down=event=>{
+      if(!popupElement||popupElement.dataset.dj870Closing==='true'||gesture||event.isPrimary===false)return;
       if(event.button!==undefined&&event.button!==0)return;
       if(event.target?.closest?.(INTERACTIVE))return;
-      gesture={id:event.pointerId,y:event.clientY,lastY:event.clientY,lastTime:performance.now(),velocity:0,delta:0};
-      if(popupElement)popupElement.style.setProperty('transition','none');
-      try{header.setPointerCapture?.(event.pointerId);}catch{}
-      event.stopPropagation();
+      window.DongjakWindowMotion?.cancel(popupElement.querySelector('.maplibregl-popup-content'));
+      interruptMobileSheetMotion(popupElement);
+      gesture={id:event.pointerId,x:event.clientX,y:event.clientY,lastY:event.clientY,lastTime:performance.now(),velocity:0,delta:0,active:false,upLimit:Math.max(0,popupElement.getBoundingClientRect().top-16)};
+      if(typeof event.pointerId==='number')try{header.setPointerCapture?.(event.pointerId);}catch{}
+      event.stopPropagation();return true;
     };
     const move=event=>{
       if(!gesture||gesture.id!==event.pointerId)return;
       const now=performance.now();gesture.velocity=(event.clientY-gesture.lastY)/Math.max(1,now-gesture.lastTime);
       gesture.lastY=event.clientY;gesture.lastTime=now;gesture.delta=event.clientY-gesture.y;
-      if(popupElement){
-        popupElement.style.setProperty('translate',`0 ${Math.max(-55,gesture.delta)}px`);
-        popupElement.style.setProperty('opacity','1');
-      }
+      if(!gesture.active){if(Math.abs(gesture.delta)<7)return;if(Math.abs(event.clientX-gesture.x)>Math.abs(gesture.delta)){gesture=null;reset();return;}gesture.active=true;}
+      popupElement.classList.add('dj-sheet-dragging');
+      popupElement.style.setProperty('--dj-sheet-drag-y',`${Math.max(-gesture.upLimit,gesture.delta)}px`);
+      popupElement.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();event.stopPropagation();
     };
     const finish=event=>{
       if(!gesture||gesture.id!==event.pointerId)return;
-      const {delta,velocity}=gesture;gesture=null;
-      if(delta<-68){setMobileSheetExpanded(popupElement,true,document,window);}
+      const {delta,velocity,active}=gesture;gesture=null;
+      if(!active){reset();return;}
+      if(delta<-68&&!popupElement.classList.contains('dj871-sheet-expanded')){setMobileSheetExpanded(popupElement,true,document,window);}
       else if(delta>55&&popupElement?.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(popupElement,false,document,window);
       }else if((delta>88||(delta>48&&velocity>.8))&&popupElement){
         popupElement.style.setProperty('--dj-sheet-drag-y',String(delta));
         dismissMobileSheet(popupElement,document,window,()=>popup?.remove());
-      }else reset();
+      }else settleMobileSheetDrag(popupElement,window);
       event.stopPropagation();
     };
-    header.addEventListener('pointerdown',down,{passive:true});
-    header.addEventListener('pointermove',move,{passive:false});
-    header.addEventListener('pointerup',finish);
-    header.addEventListener('pointercancel',finish);
+    const disposeDrag=bindHeaderDragInput(header,window,{down,move,up:finish,cancel:()=>{gesture=null;settleMobileSheetDrag(popupElement,window);}});
+    popup.on('close',disposeDrag);
   }
   // The same header drag and edge-dismiss behavior is used on every viewport.
   enableAnchoredPopupDragging(popup,titleGroup);
