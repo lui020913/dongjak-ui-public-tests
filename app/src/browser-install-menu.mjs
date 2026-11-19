@@ -38,7 +38,8 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
- const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':'',b);
+ const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':'',b);
+ if(key==='pwa')status.classList.add('dj-install-platforms');
  if(key==='ios'){b.disabled=true;b.dataset.installPaused='true';}else add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');
  buttons.set(key,{b,status});
  b.addEventListener('click',async()=>{

@@ -653,7 +653,9 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  const rect=await menu.boundingBox();expect(rect.x).toBeCloseTo(0,0);expect(rect.y).toBeCloseTo(0,0);expect(Math.abs(rect.width-viewport.width)).toBeLessThanOrEqual(2);expect(Math.abs(rect.height-viewport.height)).toBeLessThanOrEqual(2);
  await expect(menu).toHaveCSS('border-top-left-radius','0px');
  await test.info().attach('fullscreen-browser-welcome',{body:await page.screenshot(),contentType:'image/png'});
- await menu.getByRole('button',{name:'홈 화면에 웹앱 추가'}).click();
+ const pwaChoice=menu.getByRole('button',{name:/홈 화면에 웹앱 추가/});
+ await expect(pwaChoice).toBeEnabled();await expect(pwaChoice).toContainText('iOS · Android 지원');
+ await pwaChoice.click();
  await expect(menu.locator('.dj-install-info')).toBeVisible();
  await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
  await expect(menu).toBeHidden();

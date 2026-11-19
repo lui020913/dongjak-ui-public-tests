@@ -43,3 +43,5 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 /* Temporarily unavailable native iOS; preserve visible label without a navigation affordance. */
 #dj-install-menu .dj-install-choice[data-install-paused]{cursor:default;opacity:.65;box-shadow:none}
 #dj-install-menu .dj-install-choice[data-install-paused] .dj-install-status{font-size:11px;white-space:normal;text-align:right;word-break:keep-all;max-width:88px}
+
+#dj-install-menu .dj-install-platforms{white-space:normal;text-align:right;max-width:90px;word-break:normal;line-height:1.35;flex-shrink:0}
