@@ -30,10 +30,10 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     const detail=sheet.querySelector('.dj854-weather-detail');
     if(place)place.textContent=title?.textContent?.trim()||'동작구';
     if(main)main.textContent=value||'날씨 정보를 불러오는 중입니다.';
-    if(detail)detail.textContent=label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.';
+    if(detail)detail.textContent=(label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.').replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})(?::\d{2})?/g,'$2.$3. $4 기준');
   }
   function close(){if(sheet)sheet.hidden=true;}
-  function open(){if(!sheet)return;sync();sheet.hidden=false;}
+  function open(){if(!sheet)return;sync();sheet.hidden=false;const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}
   function ensureSheet(){
     if(sheet)return;
     sheet=doc.createElement('section');sheet.id='dj854-weather-sheet';sheet.hidden=true;
