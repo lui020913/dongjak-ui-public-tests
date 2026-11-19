@@ -67,7 +67,7 @@ export function nearbyResults(center,candidates=[],radius=RADIUS_M,limit=LIMIT){
     const key=`${category}:${name}:${coords.map(x=>Number(x).toFixed(4)).join(',')}`;
     if(seen.has(key))return [];
     seen.add(key);
-    return [{category,name,coordinates:coords,distance:Math.round(distance),source:safeString(c.source)}];
+    return [{category,name,coordinates:coords,distance:Math.round(distance),source:safeString(c.source),detail:safeString(c.detail)}];
   }).sort((a,b)=>a.distance-b.distance).reduce((out,item)=>{
     if(out.filter(c=>c.category===item.category).length<limit)out.push(item);
     return out;
@@ -86,7 +86,7 @@ function candidatesFromSource(map,id,category,defaultName){
       const name=station&&!rawName.includes(station)?`${station.replace(/역$/,'')}역 ${rawName}`:rawName;
       if(!name||name==='이름 미등록')return [];
       const group=id==='dongjak-public-places' ? (p.kind==='school'?'학교':p.kind==='park'?'공원':'공공시설') : category;
-      return [{category:group,name,coordinates:coords,source:'현재 지도에 로드된 자료'}];
+      return [{category:group,name,coordinates:coords,detail:safeString(p.number?`${p.number}번 출구`:p.address||p.description||''),source:'현재 지도에 로드된 자료'}];
     });
   }catch{return [];}
 }
@@ -244,7 +244,13 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     }catch(error){console.warn('[보행접근성 레이어]',error);status.textContent='지도 레이어를 초기화하지 못했습니다.';}
   };
   if(map.loaded?.())addLayers();else map.once('load',addLayers);
+  let nearbyMarker=null;
+  const clearNearbyMarker=()=>{nearbyMarker?.remove();nearbyMarker=null;};
+  const resetNearby=()=>{clearNearbyMarker();delete panel.dataset.nearbyMode;status.hidden=false;};
+  const hiddenObserver=new MutationObserver(()=>{if(panel.hidden)resetNearby();});
+  hiddenObserver.observe(panel,{attributes:true,attributeFilter:['hidden']});
   const showPanel=title=>{
+    resetNearby();
     window.DongjakWindowLifecycle?.requestOpen(panel.id);
     header.textContent=title;panel.hidden=false;
     // The map options menu must not overlap this utility panel.
@@ -383,6 +389,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   nearButton.addEventListener('click',async()=>{
     seq++;const current=seq;
     showPanel('내 주변 보행정보');
+    panel.dataset.nearbyMode='list';
     width.hidden=true;
     showMessage('위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');
     try{
@@ -412,9 +419,31 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
         const path=document.createElementNS('http://www.w3.org/2000/svg','path');const paths={'학교':'M3 9l9-5 9 5-9 5-9-5zm4 3v5l5 3 5-3v-5','지하철':'M6 4h12v14H6zM6 10h12M9 18l-3 3m9-3 3 3','교통약자 시설':'M12 3v18M5 8h14M12 14l-5 7m5-7 5 7','버스정류장':'M5 4h14v15H5zM5 11h14M8 19v2m8-2v2','횡단보도':'M4 4v16m16-16v16M8 6h8m-8 6h8m-8 6h8'};path.setAttribute('d',paths[kind]||'M12 3a7 7 0 0 1 7 7c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 7-7z');glyph.append(path);heading.prepend(glyph);}section.append(heading);
         for(const item of found.filter(p=>p.category===kind)){
           const b=el('button','ped-nearby-item');b.type='button';
-          b.append(el('span','',item.name),el('strong','',`${item.distance}m`));
+          const duplicates=found.filter(p=>p.category===item.category&&p.name===item.name);
+          const displayName=duplicates.length>1?`${item.name} · ${item.detail||`위치 ${duplicates.indexOf(item)+1}`}`:item.name;
+          b.append(el('span','',displayName),el('strong','',`${item.distance}m`));
           b.title=`${item.source} · 지도에서 보기`;
-          b.addEventListener('click',()=>map.flyTo({center:item.coordinates,zoom:Math.max(16,map.getZoom()),duration:650}));
+          b.addEventListener('click',()=>{
+            clearNearbyMarker();
+            const marker=el('div','dj-nearby-selected-marker');
+            marker.append(el('span','dj-nearby-marker-name',displayName),el('span','dj-nearby-marker-dot',''));
+            nearbyMarker=new maplibregl.Marker({element:marker,anchor:'bottom'}).setLngLat(item.coordinates).addTo(map);
+            const saved=[...results.childNodes];
+            const scroll=results.closest('.dj836-sheet-body')||panel;
+            const listScroll=scroll.scrollTop;
+            const back=el('button','ped-nearby-item','목록으로 돌아가기');back.type='button';
+            back.addEventListener('click',()=>{clearNearbyMarker();panel.dataset.nearbyMode='list';results.replaceChildren(...saved);status.hidden=false;requestAnimationFrame(()=>{scroll.scrollTop=listScroll;});});
+            panel.dataset.nearbyMode='selected';status.hidden=true;
+            results.replaceChildren(el('strong','dj-nearby-selected-name',displayName),el('p','ped-tools-note',`현재 위치에서 직선거리 ${item.distance}m`),back);
+            const mobile=window.matchMedia?.('(max-width:699px)')?.matches;
+            requestAnimationFrame(()=>{
+              if(panel.hidden||panel.dataset.nearbyMode!=='selected')return;
+              const canvas=map.getCanvas().getBoundingClientRect();
+              const sheet=panel.getBoundingClientRect();
+              const offset=mobile?[0,Math.min(0,(sheet.top-canvas.bottom)/2)]:[0,0];
+              map.flyTo({center:item.coordinates,offset,zoom:Math.max(16,map.getZoom()),duration:650});
+            });
+          });
           section.append(b);
         }
         results.append(section);
@@ -457,6 +486,6 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     panel.removeEventListener('dongjak:ped-dismiss',dismissNearby);
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
     mapToolsToggle?.removeEventListener('click',onToggleMapTools);
-    disposePlacement();
+    hiddenObserver.disconnect();resetNearby();disposePlacement();
   };
 }

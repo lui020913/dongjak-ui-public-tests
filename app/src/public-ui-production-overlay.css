@@ -857,3 +857,24 @@ html body #app#app#app#app#app#app#app#app[data-tab="map"] #dj-v794-toolbar > .d
   }
 }
 }
+
+/* Nearby safety information: stable viewport and explicit selected-facility state. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode]:not([hidden]){
+   height:min(40dvh,340px)!important;max-height:40dvh!important;min-height:0!important;
+   overflow-y:auto!important;overscroll-behavior:contain!important;
+ }
+ html body #app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode="selected"]:not([hidden]){
+   height:min(25dvh,200px)!important;max-height:25dvh!important;
+ }
+ html body #app#app#app#app #ped-tools-panel[data-nearby-mode] .ped-nearby-item{
+   border-radius:999px!important;min-height:44px!important;padding:7px 12px!important;
+   box-shadow:0 2px 5px rgba(0,0,0,.10);
+ }
+ html body #app#app#app#app #ped-tools-panel[data-nearby-mode] .ped-nearby-group{margin:0!important;padding:4px 0!important;gap:5px!important;}
+ html body #app#app#app#app #ped-tools-panel[data-nearby-mode] .ped-nearby-group h4{margin:4px 0!important;}
+}
+.dj-nearby-selected-marker{display:flex;flex-direction:column;align-items:center;pointer-events:none;gap:4px;z-index:8;}
+.dj-nearby-marker-name{background:#fff;color:#17483c;border:1px solid #16856e;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;box-shadow:0 2px 8px #0003;max-width:220px;text-align:center;}
+.dj-nearby-marker-dot{width:20px;height:20px;border:3px solid white;border-radius:50%;background:#16856e;box-shadow:0 0 0 4px #16856e55,0 2px 7px #0004;}
+.dj-nearby-selected-name{font-size:15px;line-height:1.4;}
