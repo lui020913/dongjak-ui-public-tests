@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/history-browser-syntax-preflight-20261119",
+  "public_work_branch": "ci/deduplicate-mobile-qa-20261119",
   "purpose": "Repair update history docked slide geometry, prevent focus-induced overshoot, and validate actual render frames in Chromium and WebKit. Use consolidated four-worker mobile QA and warmed public tool caches.",
-  "attempt": 44,
+  "attempt": 45,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 43 browser spec contained an incorrectly escaped regular expression; replace with valid CSS inset parsing and perform syntax verification before Preview deployment. Preserve all browser and animation checks.",
+  "last_retry_reason": "Owner requested the optimized 44-case parallel mobile QA coverage for the current Beta 4 release, superseding attempt 44. Retain the same application code, responsive checks on three viewports, reference-phone common features, WebKit motion checks, and guarded Production promotion.",
   "release_kind": "patch",
   "beta_number": 4
 }
