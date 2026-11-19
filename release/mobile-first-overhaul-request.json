@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.0",
-  "public_work_branch": "fix/safety-map-9-beta-3-touch",
-  "purpose": "Mobile-only service generation 9.0: seven customizable controls, GPS and microphone onboarding, voice search, four route comparison, nearby safety and native locks, transport UI, full historical edition catalog and verified developer-beta/production labels.",
-  "attempt": 29,
+  "public_work_branch": "fix/safety-map-9-beta-4-mobile-surfaces",
+  "purpose": "Safety Map 9.0 mobile release including all previous requests, categorized four-column map layer tile sheet, stable independent toolbar, single weather sheet, dark mode, voice status, community and safety non-overlapping fixed headers, My Info road width and onboarding spacing, transit spacing and native lock retry.",
+  "attempt": 30,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "28th build regression all passed, Preview succeeded, mobile375/390 touch tests failed because legacy toolbar pointer-events:none was inherited by new buttons. Explicitly enable hit-testing for visible buttons only; keep hidden controls inert and all browser assertions intact.",
+  "last_retry_reason": "29th browser QA identified toolbar home flicker, overlapping night consent, and hidden-but-existing pilot layers on reopen. Fix native state and independent chrome; include ten additional owner-reported issues and layer design reference. Retain full regression, all phone viewport checks and gated production.",
   "release_kind": "major",
-  "beta_number": 3
+  "beta_number": 4
 }
