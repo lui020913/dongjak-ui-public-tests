@@ -11,10 +11,6 @@ on:
   workflow_run:
     workflows: ['Mobile-only release — Preview, phone QA and protected Production']
     types: [completed]
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/android-apk.yml'
 permissions:
   contents: read
   actions: read
@@ -67,6 +63,11 @@ jobs:
         with:
           ref: ${{ steps.production.outputs.sha }}
           persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned icon image generator dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -185,6 +186,7 @@ jobs:
           appendFileSync(process.env.GITHUB_OUTPUT,'version='+version+'\ncode='+code+'\n');
           NODE
           npx --no-install cap sync android
+          python scripts/generate-native-icons.py android
           wait "$sdk_pid"
           trap - EXIT
       - name: Compile selected APK with parallel Gradle workers
