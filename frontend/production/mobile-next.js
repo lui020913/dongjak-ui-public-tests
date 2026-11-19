@@ -1,4 +1,5 @@
 // Phone toolbar: independent of legacy scroller rebuilds; native controllers own all GIS state.
+import {bindHeaderDragInput} from './mobile-header-input.js';
 const KEY='dongjak-phone-shortcuts-v2';
 const icons={near:'<circle cx="12" cy="12" r="6"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',report:'<path d="M4 20l4-1 12-12-4-4L4 15zM13 6l4 4"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',cloud:'<path d="M6 18a4 4 0 1 1 .5-8A6 6 0 0 1 18 11a3.5 3.5 0 0 1 0 7Z"/>',plus:'<path d="M12 5v14M5 12h14"/>',layers:'<path d="m12 3 9 5-9 5-9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>',shield:'<path d="M12 2l8 4v6c0 5-4 8-8 10-4-2-8-5-8-10V6zM8 12l3 3 5-6"/>',moon:'<path d="M20 15A8 8 0 0 1 9 4a9 9 0 1 0 11 11Z"/>',mountain:'<path d="m2 20 8-14 5 8 3-4 4 10Z"/>',bus:'<rect x="5" y="3" width="14" height="17" rx="3"/><path d="M5 11h14M8 20v2m8-2v2M8 16h1m6 0h1"/>',mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15"/>',alert:'<path d="M12 3 2 21h20L12 3Z M12 9v5m0 3v1"/>'};
 export const PHONE_CHOICES=Object.freeze([
@@ -40,7 +41,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
  const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const put=(name,value)=>body.style.setProperty(name,value,'important');
  const clear=()=>{for(const name of ['height','translate','transition','max-height'])body.style.removeProperty(name)};
- const reset=()=>{gesture=null;expanded=false;closing=false;compactHeight=0;win.clearTimeout(settleTimer);clear();delete body.dataset.djLayerExpanded;};
+ const reset=()=>{gesture=null;expanded=false;closing=false;compactHeight=0;win.clearTimeout(settleTimer);clear();delete body.dataset.djLayerExpanded;delete body.dataset.djLayerDragInput;};
  reset.freeze=()=>{gesture=null;win.clearTimeout(settleTimer);const rect=body.getBoundingClientRect();put('height',rect.height+'px');put('transition','none');};
  const finish=(next,close=false)=>{
   const rect=body.getBoundingClientRect();expanded=next;closing=close;body.dataset.djLayerExpanded=String(next);
@@ -57,22 +58,24 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   put('height',height+'px');put('translate','0 '+(close?win.innerHeight+24:0)+'px');
   settleTimer=win.setTimeout(complete,duration+40);
  };
- header.addEventListener('pointerdown',e=>{
+ const down=e=>{
   if(closing||panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
   win.clearTimeout(settleTimer);win.DongjakWindowMotion?.cancel(body);
   const rect=body.getBoundingClientRect();if(!compactHeight)compactHeight=rect.height;
   put('max-height',Math.max(compactHeight,win.innerHeight-28)+'px');put('height',rect.height+'px');put('transition','none');
   gesture={id:e.pointerId,y:e.clientY,x:e.clientX,height:rect.height,expanded,dragging:false};
-  try{header.setPointerCapture?.(e.pointerId)}catch{}
- });
- header.addEventListener('pointermove',e=>{
+  body.dataset.djLayerDragInput=e.pointerType||'pointer';
+  if(typeof e.pointerId==='number')try{header.setPointerCapture?.(e.pointerId)}catch{}
+  return true;
+ };
+ const move=e=>{
   const g=gesture;if(!g||e.pointerId!==g.id)return;
   const dy=e.clientY-g.y,dx=e.clientX-g.x;
   if(!g.dragging){if(Math.abs(dy)<7)return;if(Math.abs(dx)>Math.abs(dy)){gesture=null;finish(g.expanded);return;}g.dragging=true;}
   const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-28));
   put('height',frame.height+'px');put('translate','0 '+frame.offset+'px');
   if(e.cancelable)e.preventDefault();
- },{passive:false});
+ };
  const end=(e,cancel=false)=>{
   const g=gesture;if(!g||e.pointerId!==g.id)return;gesture=null;
   if(g.dragging)blockedUntil=win.performance.now()+350;
@@ -82,8 +85,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   if(g.expanded){finish(false);return;}
   finish(false,dy>=90);
  };
- header.addEventListener('pointerup',e=>end(e));
- header.addEventListener('pointercancel',e=>end(e,true));
+ bindHeaderDragInput(header,win,{down,move,up:e=>end(e),cancel:e=>end(e,true)});
  header.addEventListener('click',e=>{if(win.performance.now()<blockedUntil&&!e.target.closest?.('button,a,input,select,textarea,[role="button"]')){e.preventDefault();e.stopImmediatePropagation();}},true);
  return reset;
 }

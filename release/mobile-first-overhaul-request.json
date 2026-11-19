@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/mobile-header-drag-20261119",
-  "purpose": "9.0.1 unified opaque window motion and full mobile layer header finger-follow drag, staged expand/collapse/dismiss, dynamic weather gesture and fixed header body scroll.",
-  "attempt": 37,
+  "public_work_branch": "fix/ios-header-native-touch-20261119",
+  "purpose": "9.0.1 full header finger-follow touch input fix for iOS Safari/PWA, plus separate mobile WebKit header regression.",
+  "attempt": 38,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner explicitly requested full header vertical drag. Test actual touch movement, not only X/open animation; preserve 3 phone and protected Production gates.",
+  "last_retry_reason": "Owner reported the header drag was not operating on their iPhone even though Chromium 375px accepted touch input. Native TouchEvent capture and WebKit rendered header regression are required before Production.",
   "release_kind": "patch",
   "beta_number": 3
 }
