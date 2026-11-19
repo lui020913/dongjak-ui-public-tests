@@ -27,7 +27,7 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-choice,html[data-theme=
 html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-subtitle,.dj-install-status,.dj-install-dismiss,.dj-install-chevron){color:#b4bfba}
 html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
 /* Desktop/tablet keep the phone-only gate; the selector belongs to the page, not a second card. */
-#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-devices,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
+#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
 #dj-mobile-only-screen .dj-install-menu{width:100%;padding:0;margin:0}
 #dj-mobile-only-screen .dj-install-content{min-height:0;width:min(100%,640px);padding:24px 16px}
 #dj-mobile-only-screen .dj-install-brand{margin-bottom:28px}
@@ -68,14 +68,36 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 
 /* The button itself never moves or shrinks: its hit area remains stable even
    when the pointer crosses an edge rapidly. Only paint changes on interaction. */
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:box-shadow 120ms ease-out;touch-action:manipulation}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:background-color 70ms ease-out,box-shadow 70ms ease-out;touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){
- #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{box-shadow:0 1px 4px #17221d20,inset 0 1px 4px #17221d16}
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{box-shadow:0 1px 4px #17221d20,inset 0 1px 4px #17221d16;background-color:#e8eeeb}
  #dj-install-menu .dj-install-dismiss:not(:disabled):hover{opacity:.8}
 }
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{box-shadow:0 1px 2px #17221d20,inset 0 2px 7px #17221d32;transition-duration:0ms}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{box-shadow:0 1px 2px #17221d20,inset 0 2px 7px #17221d32;background-color:#d6e2dc;transition-duration:0ms}
 #dj-install-menu .dj-install-dismiss:not(:disabled):active{opacity:.65}
 #dj-install-menu .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
  #dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:none!important}
 }
+
+/* Browser entry: preserve the original device illustration and explicit QR flow. */
+#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-devices{display:block!important;width:min(154px,48%);margin:0 auto 12px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-content{padding-top:8px}
+#dj-install-menu .dj-install-info{padding:18px 16px;text-align:left;color:#213b30;background:#edf3f0;box-sizing:border-box}
+#dj-install-menu .dj-install-info p{font-size:15px!important;line-height:1.7;margin:6px 0!important;color:inherit}
+#dj-install-menu .dj-install-guide-steps{list-style:decimal;display:grid;gap:12px;padding-inline-start:24px;margin:16px 0}
+#dj-install-menu .dj-install-guide-steps li{font-size:15px;line-height:1.65;padding-inline-start:4px;word-break:keep-all;overflow-wrap:anywhere}
+#dj-install-menu .dj-install-guide-steps li::marker{font-weight:750;color:inherit}
+#dj-install-menu .dj-install-guide-notice{padding:12px 14px;border:1px solid #bbd0c3;border-radius:12px;background:#fff;color:#243d31}
+#dj-install-menu .dj-install-guide-help{font-size:14px;margin:12px 0}
+#dj-install-menu .dj-install-qr{display:block;width:144px;height:144px;background:#fff;padding:8px;box-sizing:content-box;margin:16px auto}
+#dj-mobile-only-screen #dj-install-menu .dj-install-guide-steps li{font-size:clamp(16px,1.4vw,18px)}
+#dj-mobile-only-screen #dj-install-menu .dj-install-qr{width:168px;height:168px}
+@media (hover:hover) and (pointer:fine){
+ html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{background-color:#38443f}
+ #dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web):not(:disabled):hover{background-color:#10624f}
+}
+html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{background-color:#46564e}
+html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
+html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background:#202a25;color:#e2f0e7;border-color:#53665a}
+#dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web):not(:disabled):active{background-color:#0b5141}

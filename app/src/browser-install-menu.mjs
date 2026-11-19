@@ -24,12 +24,12 @@ export function androidReleaseAsset(marker,release,variant='release'){
 }
 export function androidInstallGuidance(){
  return {title:'Android 앱 설치 안내',
-  intro:'Google Play 스토어가 아닌 공식 프로젝트에서 제공하는 테스트용 APK입니다. Android에서 설치를 제한할 수 있습니다.',
+  intro:'공식 프로젝트에서 제공하는 테스트용 APK입니다. Google Play 외부 설치는 Android에서 제한될 수 있습니다.',
   steps:[
-   '1. APK 다운로드 후 다운로드 알림 또는 내 파일에서 설치 파일을 엽니다.',
-   '2. 설치가 차단되면 Android 설정에서 ‘출처를 알 수 없는 앱 설치’를 검색하세요. 파일을 연 브라우저 또는 내 파일에 대해서만 필요한 경우 설치를 허용할 수 있습니다.',
-   '3. Galaxy의 ‘보안 위험 자동 차단’이 켜져 있으면 설치가 제한될 수 있습니다. 보안 설정을 유지하려면 웹앱을 이용하세요.',
-   '4. 설치가 끝나면 외부 앱 설치 허용을 다시 해제하세요. Play Protect는 켜 두세요.'
+   '1. APK를 다운로드하고 다운로드 알림 또는 내 파일에서 엽니다.',
+   '2. 설치가 차단되면 설정에서 ‘출처를 알 수 없는 앱 설치’를 확인하세요. 필요한 경우 해당 브라우저 또는 내 파일만 허용하세요.',
+   '3. Galaxy의 ‘보안 위험 자동 차단’으로 설치가 제한되면 보안 설정을 유지하고 웹앱을 이용하세요.',
+   '4. 설치 후 외부 앱 설치 허용을 다시 해제하세요. Play Protect는 켜 두세요.'
   ],
   notice:'출처가 확실하지 않거나 보안 검사에서 위험 경고가 나오면 설치하지 마세요. 앱 설치 없이 웹 또는 웹앱으로 이용할 수 있습니다.',
   help:'https://www.samsungsvc.co.kr/solution/1711930'};
@@ -45,10 +45,11 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const add=(tag,cls,txt,parent=content)=>{const e=doc.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;parent.append(e);return e;};
  const brand=add('header','dj-install-brand');
  const logo=add('img','dj-install-logo',null,brand);logo.src='/icons/dongjak-light-512.png';logo.alt='';logo.width=76;logo.height=76;
- const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle',blocked?'스마트폰으로 QR코드를 스캔해 이용해 주세요.':'이용하실 방법을 선택해 주세요.',brand);
+ const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle',blocked?'스마트폰에서 이용하실 방법을 선택해 주세요.':'이용하실 방법을 선택해 주세요.',brand);
  const list=add('div','dj-install-list'),info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={};
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
+ const showPwaQr=()=>{showInfo(['스마트폰 카메라로 QR코드를 스캔해 접속한 뒤 홈 화면에 추가해 주세요.','iPhone: Safari 공유 메뉴 → 홈 화면에 추가','Android: Chrome 메뉴 → 홈 화면에 추가 또는 앱 설치']);const img=add('img','dj-install-qr',null,info);img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';info.scrollIntoView?.({block:'nearest',behavior:'instant'});};
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
@@ -58,16 +59,16 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  buttons.set(key,{b,status});
  b.addEventListener('click',async()=>{
  if(key==='ios')return;
- if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();return;}
- if(key==='pwa'){if(blocked){showInfo(['스마트폰에서 QR코드로 접속한 뒤 홈 화면에 추가해 주세요.']);return;}showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
+ if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. QR코드는 ‘홈 화면에 웹앱 추가’에서 확인할 수 있습니다.']);else finish();return;}
+ if(key==='pwa'){if(blocked){showPwaQr();return;}showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
  const url=safeDownloadUrl(links[key],key);
  if(!url){showInfo(['최신 Android APK 다운로드를 준비 중입니다. 웹앱을 이용해 주세요.']);return;}
  const guide=androidInstallGuidance();
  showInfo([]);info.dataset.androidGuide='true';
  add('h3','dj-install-guide-title',guide.title,info);
  add('p','',guide.intro,info);
- const instructions=add('div','dj-install-guide-steps',null,info);
- for(const line of guide.steps)add('p','',line,instructions);
+ const instructions=add('ol','dj-install-guide-steps',null,info);
+ for(const line of guide.steps)add('li','',line.replace(/^\d+\.\s*/,''),instructions);
  add('p','dj-install-guide-notice',guide.notice,info);
  const help=add('a','dj-install-guide-help','Galaxy 설치 제한 공식 안내',info);
  help.href=guide.help;help.target='_blank';help.rel='noopener noreferrer';
@@ -75,11 +76,11 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  download.type='button';
  download.addEventListener('click',()=>{if(safeDownloadUrl(links.android,'android')===url)win.location.assign(url);});
  const web=add('button','dj-install-prompt dj-install-guide-web','웹 또는 웹앱 이용하기',info);
- web.type='button';web.addEventListener('click',()=>{if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();});
+ web.type='button';web.addEventListener('click',()=>{if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. QR코드는 ‘홈 화면에 웹앱 추가’에서 확인할 수 있습니다.']);else finish();});
  if(typeof info.scrollIntoView==='function')info.scrollIntoView({block:'nearest',behavior:'instant'});
  });
  }
- if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
+ if(blocked){(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
  else{const close=add('button','dj-install-dismiss','나중에');close.type='button';close.addEventListener('click',finish);card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);
  let seen=false;try{seen=win.sessionStorage.getItem(INSTALL_SESSION_KEY)==='1';}catch{}if(!seen||new URLSearchParams(win.location.search).get('install')==='1'){if(typeof card.showModal==='function')card.showModal();else card.setAttribute('open','');}}
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);
