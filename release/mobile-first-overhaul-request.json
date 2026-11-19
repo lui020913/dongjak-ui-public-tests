@@ -1,9 +1,9 @@
 {
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
-  "public_work_branch": "fix/mobile-browser-qa-recovery-20261119",
+  "public_work_branch": "fix/mobile-night-regression-20261119",
   "purpose": "Phone-only follow-up for the seventeen requested UI, data display, pilot district and authentication-return changes; preserve PC/tablet gate and originals; run phone QA before guarded Production promotion",
-  "attempt": 24,
+  "attempt": 25,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Fix actual phone QA failures: legacy inline More display, accessible Safety expansion handle, visible Night category and existing consent integration. Separate viewport jobs and publish immediate anonymous assertion diagnostics."
+  "last_retry_reason": "Correct the single failing regression in run 44430282734 by preserving the original night confirmation capture handler and delegating Safety night clicks separately. Add a regression for both routes."
 }
