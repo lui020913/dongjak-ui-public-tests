@@ -61,7 +61,7 @@ test.afterEach(async({page},info)=>{
  try{
    const debug=await page.evaluate(()=>{
      const app=document.getElementById('app');
-     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities','dj-v794-more','dj-v794-safety','dj831-scrollport','map-safety-controls','night-visibility-toggle','dj833-night-modal'];
+     const ids=['djNext-toolbar','djNext-layer-panel','djNext-layers','dj854-weather-sheet','bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities','dj-v794-more','dj-v794-safety','dj831-scrollport','map-safety-controls','night-visibility-toggle','dj833-night-modal'];
      const describe=n=>{if(!n)return null;const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id,className:n.getAttribute('class'),hidden:n.hidden,ariaHidden:n.getAttribute('aria-hidden'),rect:[r.x,r.y,r.width,r.height],display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents};};
      return {viewport:[innerWidth,innerHeight],nightReady:app?.dataset.djNightReady,nightState:app?.dataset.sangdoNight,tourResolved:app?.dataset.dj860AutoResolved,routeBlocks:['route-picking','route-preview','route-guiding'].filter(c=>app?.classList.contains(c)),routeDialogs:['route-pick-hint','route-transit-confirm','route-place-search','route-search-confirm'].filter(id=>{const n=document.getElementById(id);return n&&!n.hidden&&n.getClientRects().length;}),tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,webappTipVisible:app?.dataset.djWebappTipVisible,runMode:document.documentElement.dataset.djRunMode,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
    });
@@ -491,6 +491,8 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await tap(page,tab(page,'map'));
  await tap(page,page.locator('#djNext-layers'));
  const modal=page.locator('#djNext-layer-panel'),scroll=modal.locator('.djNext-layer-scroll'),header=modal.locator('header');
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-next-last-action','djNext-layers');
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-next-layer-action','open');
  await expect(modal).toBeVisible();await expect(scroll).toBeVisible();await expect(header).toBeVisible();
  const bounds=async()=>await header.boundingBox();
  await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
