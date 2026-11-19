@@ -2276,6 +2276,7 @@ function clearTransitPreview(){
 function showRouteLine(coords) {
   const src=map.getSource('walking-route');
   if(src)src.setData(lineFeature(coords));
+  if(coords?.length>=2){for(const id of ['walking-route-alternate-line','walking-route-outline','walking-route-traveled-line','walking-route-line']){if(map.getLayer(id)){map.setLayoutProperty(id,'visibility','visible');map.moveLayer(id);}}}
   const other=selectedRouteVariant==='standard'?'gentle':'standard';
   const alternative=map.getSource('walking-route-alternative');
   if(alternative)alternative.setData(coords?.length?lineFeature(routeVariants[other]?.coords):emptyWalkingRoute());
@@ -2600,7 +2601,7 @@ function readRouteMetrics() {
 function fitWalkingRoute(coords) {
   if(!coords.length)return;
   const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
-  map.fitBounds(bounds,{padding:{top:190,bottom:185,left:45,right:45},maxZoom:16.3,duration:900,pitch:0,bearing:0});
+  const mobile=window.matchMedia('(max-width:699px)').matches;const card=document.getElementById('route-map-card');const bottom=mobile?Math.min(Math.round(window.innerHeight*.52),Math.max(185,(card?.getBoundingClientRect().height||0)+90)):185;map.fitBounds(bounds,{padding:{top:mobile?155:190,bottom,left:45,right:45},maxZoom:16.3,duration:750,pitch:0,bearing:0});
 }
 async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
   const useHills=profile==='gentle'?0:0.5;

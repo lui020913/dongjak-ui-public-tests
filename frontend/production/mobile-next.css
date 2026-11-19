@@ -515,3 +515,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel .ped-tools-panel-head{border-bottom:1px solid var(--djNext-border)!important;touch-action:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-sheet-swipe-zone{touch-action:none!important;pointer-events:auto!important}
 }
+
+@media(max-width:699px){
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel :is(.dj834-settings-group > button,.dj17-more-root > summary){min-height:54px!important;box-sizing:border-box!important;color:var(--djNext-text)!important;align-items:center!important;gap:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group{border-radius:16px!important;overflow:hidden!important}
+}
