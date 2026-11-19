@@ -117,7 +117,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         interruptMobileSheetMotion(panel);
       }
       gesture={pointer:event.pointerId,y:event.clientY,x:event.clientX,upLimit:Math.max(0,panel.getBoundingClientRect().top-16),lastY:event.clientY,lastTime:performance.now(),velocity:0,dragging:false};
-      if(typeof event.pointerId==='number')try{event.currentTarget?.setPointerCapture?.(event.pointerId);}catch{}
+      if(typeof event.pointerId==='number')try{surface.setPointerCapture?.(event.pointerId);}catch{}
       return true;
     };
     const move=event=>{

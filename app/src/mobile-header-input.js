@@ -39,7 +39,7 @@ export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
  };
  const te=e=>finish(e,false),tc=e=>finish(e,true);
  const opts={capture:true,passive:false};
- header.addEventListener('pointerdown',pd);
+ header.addEventListener('pointerdown',pd,opts);
  win.addEventListener('pointermove',pm,opts);
  win.addEventListener('pointerup',pu,opts);
  win.addEventListener('pointercancel',pc,opts);
@@ -51,7 +51,7 @@ export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
  }
  return ()=>{
   disposed=true;activeTouch=null;
-  header.removeEventListener('pointerdown',pd);
+  header.removeEventListener('pointerdown',pd,opts);
   win.removeEventListener('pointermove',pm,opts);
   win.removeEventListener('pointerup',pu,opts);
   win.removeEventListener('pointercancel',pc,opts);

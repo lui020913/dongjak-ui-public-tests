@@ -1,0 +1,39 @@
+name: Mobile release failure recovery
+on:
+  workflow_run:
+    workflows:
+      - "Mobile-only release — Preview, phone QA and protected Production"
+      - "Android APK - public build"
+    types: [completed]
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: mobile-failure-recovery-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: >-
+      github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.actor.login == 'lui020913' &&
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      FAILED_RUN: ${{ github.event.workflow_run.id }}
+      FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
+      ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+    steps:
+      - name: Retry eligible exact-source failure once, never bypass release gates
+        run: |
+          set -euo pipefail
+          [[ "$FAILED_RUN" =~ ^[0-9]+$ && "$FAILED_SHA" =~ ^[a-f0-9]{40}$ && "$ATTEMPT" =~ ^[0-9]+$ ]]
+          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          if [[ "$FAILED_SHA" != "$current" ]]; then echo 'Stale candidate; no retry.'; exit 0; fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN" | jq -e --arg sha "$FAILED_SHA" --argjson attempt "$ATTEMPT" '.head_sha==$sha and .run_attempt==$attempt and .status=="completed" and .conclusion=="failure"' >/dev/null || exit 0
+          if (( ATTEMPT >= 2 )); then echo 'Retry limit reached; source diagnosis required.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/rerun-failed-jobs"
+          echo 'Exact failed jobs requested again; existing tests, approvals and rollback remain required.' >> "$GITHUB_STEP_SUMMARY"
