@@ -1,0 +1,104 @@
+name: Android - retry verified debug APK publication
+run-name: 'Android APK · 검증된 설치 파일 공개 재시도'
+on:
+  push:
+    branches: [main]
+    paths: [release/android-debug-publish-retry.json]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: APK build run ID (verified current Production, debug only)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: android-public-distribution
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    name: APK 서명 재확인 및 공개
+    environment: android-distribution
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_CERT: ${{ secrets.ANDROID_DEBUG_CERT_SHA256 }}
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select the verified APK artifact (no rebuild)
+        id: source
+        env:
+          INPUT_RUN: ${{ inputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run="$INPUT_RUN"
+          if [[ "$GITHUB_EVENT_NAME" == push ]]; then
+            run="$(jq -er '.run_id | tostring' release/android-debug-publish-retry.json)"
+          fi
+          [[ "$run" =~ ^[1-9][0-9]*$ ]]
+          marker="$RUNNER_TEMP/current-production.json"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?retry=$GITHUB_RUN_ID" > "$marker"
+          jq -e '.release_status=="DEPLOYED_PRODUCTION" and .source_commit==.public_ui_source_commit and (.source_commit|test("^[a-f0-9]{40}$")) and (.application_version|test("^[0-9]+[.][0-9]+[.][0-9]+$"))' "$marker" >/dev/null
+          version="$(jq -r .application_version "$marker")"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e --arg repo "$GITHUB_REPOSITORY" '.head_branch=="main" and .head_repository.full_name==$repo and .path==".github/workflows/android-apk.yml" and .actor.login=="lui020913" and (.display_title|startswith("Android APK (debug)"))' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" | jq -e 'any(.jobs[]; .name=="apk" and .conclusion=="success")' >/dev/null
+          printf 'run=%s\nversion=%s\n' "$run" "$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: Dongjak-Safety-Map-v${{ steps.source.outputs.version }}-debug
+          run-id: ${{ steps.source.outputs.run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/public-debug
+      - name: Verify and publish exact public download without overwriting
+        env:
+          RELEASE_PUBLISH_TOKEN: ${{ secrets.ANDROID_RELEASE_PUBLISH_TOKEN }}
+          VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ && "$EXPECTED_CERT" =~ ^[A-Fa-f0-9]{64}$ ]]
+          cd "$RUNNER_TEMP/public-debug"
+          apk="Dongjak-Safety-Map-v$VERSION-debug.apk"
+          test -s "$apk"
+          sha256sum -c SHA256SUMS.txt
+          jq -e --arg v "$VERSION" '.release_status=="DEPLOYED_PRODUCTION" and .application_version==$v and .source_commit==.public_ui_source_commit and (.source_commit|test("^[a-f0-9]{40}$"))' PRODUCTION.json >/dev/null
+          sha="$(jq -r .source_commit PRODUCTION.json)"
+          unzip -p "$apk" assets/public/release-source.json | jq -e --slurpfile prod PRODUCTION.json '.==$prod[0]' >/dev/null
+          unzip -p "$apk" assets/public/version.json | jq -e --arg v "$VERSION" '.version==$v' >/dev/null
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          if [ ! -x "$tools/apksigner" ]; then sdkmanager 'build-tools;36.0.0'; fi
+          "$tools/apksigner" verify --print-certs "$apk" > "$RUNNER_TEMP/public-cert.txt"
+          cert="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/public-cert.txt")"
+          test "${cert,,}" = "${EXPECTED_CERT,,}"
+          "$tools/aapt" dump badging "$apk" > "$RUNNER_TEMP/public-badging.txt"
+          grep -F "package: name='kr.dongjak.safetyapp'" "$RUNNER_TEMP/public-badging.txt"
+          grep -F "application-label:'동작하는 안전지도'" "$RUNNER_TEMP/public-badging.txt"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?android-debug-final=$GITHUB_RUN_ID" | jq -e --slurpfile prod PRODUCTION.json '.==$prod[0]' >/dev/null
+          tag="android-debug-v$VERSION"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'Version already published; refusing overwrite'; exit 1
+          fi
+          # The default token can reject a tag on an earlier commit when workflow files differ.
+          # A dedicated, repository-scoped publishing credential is optional; never reuse unrelated secrets.
+          if [[ -n "$RELEASE_PUBLISH_TOKEN" ]]; then export GH_TOKEN="$RELEASE_PUBLISH_TOKEN"; fi
+          if ! ref="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" 2>"$RUNNER_TEMP/android-tag-error")"; then
+            if ! grep -q 'HTTP 404' "$RUNNER_TEMP/android-tag-error"; then
+              echo '::error::Unable to inspect existing Android tag; refusing publication.'; exit 1
+            fi
+            if ! ref="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$sha")"; then
+              echo "::error::Cannot create the exact Production tag. Add ANDROID_RELEASE_PUBLISH_TOKEN to android-distribution (Contents and Workflows write), or create the lightweight tag $tag at $sha using an authorized account."
+              exit 1
+            fi
+          fi
+          jq -e --arg sha "$sha" '.object.type=="commit" and .object.sha==$sha' <<< "$ref" >/dev/null
+          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --verify-tag --title "Android v$VERSION (test APK)" --notes "Fixed-signature debug test APK from verified Production $sha. Not a Play Store release." --latest=false
+          echo "Public download: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$apk" >> "$GITHUB_STEP_SUMMARY"
