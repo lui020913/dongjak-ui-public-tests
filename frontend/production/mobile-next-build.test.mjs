@@ -97,3 +97,15 @@ test('explicit layer, permission and weather opens are authorized before hidden 
  assert.match(weather,/sync\(\);win\.DongjakWindowLifecycle\?\.requestOpen\(sheet\.id\);sheet\.hidden=false/);
  assert.equal(lifecycle.requestOpen('unrequested-dialog',{origin:'automatic'}),false);
 });
+
+test('shared window motion has exact endpoints, gradual initial acceleration and no fade',async()=>{
+ const {WINDOW_MOTION,windowMotionProgress,windowMotionFrame}=await import('../src/mobile-window-motion.js');
+ assert.deepEqual(WINDOW_MOTION,{open:420,close:320,easing:'cubic-bezier(.42,0,.58,1)'});
+ assert.equal(windowMotionProgress(0),0);assert.equal(windowMotionProgress(1),1);
+ assert.ok(windowMotionProgress(.1)<.03);assert.ok(Math.abs(windowMotionProgress(.5)-.5)<.0001);
+ for(let i=0;i<=100;i++){const p=i/100,a=windowMotionFrame(p,true,200,200,true),b=windowMotionFrame(p,false,200,200,true);assert.equal(a.opacity,1);assert.equal(b.opacity,1);assert.ok(Math.abs(a.offset+b.offset-200)<.0001);assert.equal(a.clip,a.offset);}
+ const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8'),coordinator=readFileSync(new URL('../src/v806-unified-ui.js',import.meta.url),'utf8');
+ assert.match(js,/DongjakWindowMotion\?\.open\(body\)/);assert.match(js,/DongjakWindowMotion\.close\(body,finishClose\)/);
+ assert.match(coordinator,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
+ assert.doesNotMatch(coordinator,/fadeOnlyMobileIds/);
+});
