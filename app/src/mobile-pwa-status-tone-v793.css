@@ -85,7 +85,9 @@
 
 /* Fixed transition band: the OS strip itself cannot be moved or recolored reliably. */
 @media(max-width:699px){
-html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{position:fixed;inset:0 0 auto;height:46px;z-index:60000;pointer-events:none;background:linear-gradient(to bottom,var(--dj-pwa-land-tone),transparent);opacity:0;transition:opacity .18s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important}
+html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{position:fixed;inset:0 0 auto;height:12px;z-index:60000;pointer-events:none;background:linear-gradient(to bottom,var(--dj-pwa-status-color,var(--dj-pwa-land-tone)),transparent);opacity:0;transition:opacity .18s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important}
 html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app #dj-ios-pwa-status-bridge{opacity:1}
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{transition:none}}
 }
+
+@media(max-width:699px){html.dj-ios-home-pwa{background-color:var(--dj-pwa-status-color,var(--dj-pwa-land-tone))!important}html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam{height:calc(env(safe-area-inset-top,0px) + 38px)!important}}

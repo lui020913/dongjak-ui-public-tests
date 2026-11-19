@@ -99,9 +99,8 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
   if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);
   const status=utilities?.querySelector('.dj834-shortcut-status');if(status&&status.textContent!=='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.')status.textContent='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.';
-  // The drawer is presentation only. Selected data remain visible after dismissal.
-  const selected=Boolean(doc.querySelector('[data-dj-import][aria-pressed="true"],#toggle-safety-facilities[aria-pressed="true"]'));
-  const wanted=app.dataset.tab==='map'&&(app.classList.contains('map-safety-open')||selected);
+  // Pilot lock visuals are drawer decorations, not selected data layers.
+  const wanted=app.dataset.tab==='map'&&app.classList.contains('map-safety-open');
   if(wanted&&!pilot)void showPilot();
   if(!wanted&&pilot)hidePilot();
   if(!app.classList.contains('map-safety-open')){const panel=$('map-safety-controls');if(panel?.classList.contains('dj871-sheet-expanded')){panel.classList.remove('dj871-sheet-expanded');panel.querySelector('.dj17-expand')?.setAttribute('aria-expanded','false')}}

@@ -228,6 +228,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   choose('updates');
   let priorFocus=null;
   const card=modal.querySelector('.version-history-dialog');
+  if(card)card.dataset.djDialogFade='true';
   const syncDock=()=>{
     if(!window.matchMedia?.('(max-width:699px)').matches)return;
     const nav=document.getElementById('bottom-nav'),rect=nav?.getBoundingClientRect();

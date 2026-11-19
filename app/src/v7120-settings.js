@@ -33,7 +33,7 @@ export function installMapPreferences(doc=document,win=window){
   pcLogo.innerHTML='<img src="/icons/dongjak-light-192.png" alt="" aria-hidden="true">';
   header.insertBefore(pcLogo,header.querySelector('#map-quick-search'));
   const about=doc.createElement('div');about.id='dj-app-about';about.hidden=true;
-  about.innerHTML=`<section class="dj-about-card" role="dialog" aria-modal="true" aria-labelledby="dj-about-title">
+  about.innerHTML=`<section class="dj-about-card" data-dj-dialog-fade="true" role="dialog" aria-modal="true" aria-labelledby="dj-about-title">
     <button type="button" class="dj-about-close" aria-label="앱 정보 닫기">×</button>
     <img class="dj-about-icon" src="/icons/dongjak-light-192.png" alt="동작하는 안전지도 앱 아이콘">
     <span class="dj-about-kicker">DONGJAK WALK SAFETY</span>
@@ -52,7 +52,7 @@ export function installMapPreferences(doc=document,win=window){
     aboutFocus=doc.activeElement;
     const dark=isDark();
     about.querySelector('.dj-about-icon').src=dark?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';
-    about.querySelector('#dj-about-version-number').textContent=(doc.querySelector('#version-history-trigger')?.textContent||APP_VERSION.split('.').slice(0,2).join('.')).trim();
+    about.querySelector('#dj-about-version-number').textContent=(doc.querySelector('#version-history-trigger')?.textContent||APP_VERSION).trim();
     about.hidden=false;about.querySelector('.dj-about-close')?.focus();
   };
   about.querySelector('.dj-about-close').addEventListener('click',closeAbout);

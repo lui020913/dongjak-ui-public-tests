@@ -134,8 +134,8 @@ test('phone repair keeps the optional permission controls and their status in on
  assert.match(css,/#map-quick-search-dropdown\[hidden\]\{display:none!important\}/);
  assert.match(css,/#news-panel \[data-news-source\]\[aria-pressed="true"\]\{background:var\(--djNext-active\)/);
 });
-test('safety drawer dismissal cannot clear selected-data pilot visibility',()=>{
+test('pilot visuals follow drawer rather than selected overlays',()=>{
  const js=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
- assert.match(js,/const wanted=app\.dataset\.tab==='map'&&\(app\.classList\.contains\('map-safety-open'\)\|\|selected\)/);
+ assert.match(js,/const wanted=app\.dataset\.tab==='map'&&app\.classList\.contains\('map-safety-open'\)/);
  assert.match(js,/attributeFilter:\['class','aria-pressed','data-tab'\]/);
 });

@@ -285,3 +285,12 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
   }
   #dj-ai-search-modal .dj-ai-login[hidden] {display:none;}
 }
+
+@media(max-width:699px){
+#dj-ai-search-modal[open]{inset:auto 10px calc(82px + env(safe-area-inset-bottom,0px))!important;margin:0!important;width:auto!important;max-width:none!important;max-height:min(72dvh,680px)!important;border-radius:24px!important;border:1px solid var(--ai-line)!important;animation:none!important;opacity:1;box-shadow:0 7px 24px #0003!important;padding-bottom:0!important}
+#dj-ai-search-modal[open]::backdrop{background:rgba(15,31,32,calc(.43 * var(--dj-scrim-alpha,1)))!important;animation:none!important;backdrop-filter:none!important}
+#dj-ai-search-modal[open].dj887-ai-closing{animation:none!important}
+#dj-ai-search-modal .dj-ai-search-body{gap:10px!important;padding:13px 15px 16px!important}
+#dj-ai-search-modal .dj-ai-search-names h2:focus{outline:none}
+#dj-ai-search-modal :is(button,.dj-ai-query){border-radius:999px!important;box-shadow:0 2px 5px #0002}
+}

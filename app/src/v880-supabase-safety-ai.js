@@ -80,6 +80,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(!modal.open)return;
     if(reduce()){modal.close();return;}
     modal.classList.add('dj887-ai-closing');
+    if(window.matchMedia?.('(max-width:699px)')?.matches&&window.DongjakWindowMotion){window.DongjakWindowMotion.close(modal,()=>{if(modal.open)modal.close();modal.classList.remove('dj887-ai-closing');});return;}
     // Explicit bounded completion: never depend on Safari animationend
     // to release a dialog that owns the whole viewport's hit targets.
     closeTimer=window.setTimeout(()=>{
@@ -95,13 +96,12 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#map-safety-close')?.click();
     q('#map-quick-search-close')?.click();
     q('#map-quick-search-query')?.blur();
-    if(!modal.open)modal.showModal();
+    if(!modal.open){modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
     // iOS Safari: focusing the query immediately opens the keyboard before
     // the bottom sheet is laid out. Focus the title; the user taps the
     // query field when ready, at which point visualViewport handles the lift.
     if(window.matchMedia?.('(max-width:699px)')?.matches){
-      names.firstChild.setAttribute('tabindex','-1');
-      names.firstChild.focus({preventScroll:true});
+      close.focus({preventScroll:true});
     }else{
       input.focus({preventScroll:true});
     }

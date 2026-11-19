@@ -30,6 +30,7 @@ export function installUnifiedUI(doc=document, win=window){
   const desktop=()=>!phone()&&Boolean(win.matchMedia?.('(min-width:1080px)')?.matches);
   const lifecycle=createWindowLifecycle();
   const explicitUntil=new Map();
+  const stationaryTabEntry=new Set();
   // Track a real opening click separately from exclusive-surface arbitration.
   // A preceding resize or observer must not consume the entrance request.
   const entranceIntent=new Map();
@@ -76,6 +77,7 @@ export function installUnifiedUI(doc=document, win=window){
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const fade=isGuide||target.dataset.djDialogFade==='true';
+    const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=isGuide&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
     const duration=fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
@@ -95,6 +97,7 @@ export function installUnifiedUI(doc=document, win=window){
     const record={cancel:()=>finish(false)};
     const restore=()=>{
       if(isGuide)app.style.removeProperty('--dj-guide-fade');
+      scrim?.style.removeProperty('--dj-scrim-alpha');
       if(beforeOpacity)target.style.setProperty('opacity',beforeOpacity,beforeOpacityPriority);
       else target.style.removeProperty('opacity');
       if(beforeTranslate)target.style.setProperty('translate',beforeTranslate,beforeTranslatePriority);
@@ -117,6 +120,7 @@ export function installUnifiedUI(doc=document, win=window){
       finally{restore();}
     }
     function setMotion(progress){
+      if(scrim)scrim.style.setProperty('--dj-scrim-alpha',String(confirmMotionOpacity(progress,opening)));
       if(fade){
         const alpha=isGuide?guideFrom+((opening?1:0)-guideFrom)*confirmMotionOpacity(progress,true):confirmMotionOpacity(progress,opening);
         target.style.setProperty('opacity',String(alpha),'important');
@@ -387,6 +391,8 @@ export function installUnifiedUI(doc=document, win=window){
     if(!requested||visible(requested))return;
     if(phone()){
       replacingSurface=ids.some(id=>id!==requested&&visible(id))||popupNodes().length?requested:'';
+      const tabClick=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
+      if(tabClick&&Object.values(tabPanels).includes(requested)&&Object.values(tabPanels).some(id=>id!==requested&&visible(id)))stationaryTabEntry.add(requested);
       entranceIntent.set(requested,Date.now()+3000);
     }
     pendingIntent=requested;
@@ -430,11 +436,12 @@ export function installUnifiedUI(doc=document, win=window){
         const realOpen=now&&id===activeSurface;
         const requested=realOpen&&intent>Date.now();
         if(requested||(intent&&intent<=Date.now()))entranceIntent.delete(id);
-        if(!requested&&intent&&intent<=Date.now()&&id===replacingSurface)replacingSurface='';
+        if(!requested&&intent&&intent<=Date.now()){stationaryTabEntry.delete(id);if(id===replacingSurface)replacingSurface='';}
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          if(!activeAnimation.has(target))playOpen(id);
+          if(stationaryTabEntry.delete(id)){cancelActive(target);const scroll=element(id)?.querySelector('.dj836-sheet-body');if(scroll)scroll.scrollTop=0;}
+          else if(!activeAnimation.has(target))playOpen(id);
         }
         else if(!now&&was){
           if(lifecycle.snapshot(id).phase!=='closed')lifecycle.dismiss(id);

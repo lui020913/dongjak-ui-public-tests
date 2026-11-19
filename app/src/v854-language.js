@@ -133,7 +133,51 @@ const KO_TO_EN=Object.freeze({
   "보행안전 정보 레이어를 표현한 일러스트":"Illustration of pedestrian safety layers",
   "도보 경로 안내를 표현한 일러스트":"Illustration of walking route guidance",
   "대중교통과 생활정보를 표현한 일러스트":"Illustration of transit and local information",
-  "계정과 즐겨찾기 동기화를 표현한 일러스트":"Illustration of account and favorites sync",});
+  "계정과 즐겨찾기 동기화를 표현한 일러스트":"Illustration of account and favorites sync",
+  "위험제보":"Report",
+  "추가":"Add",
+  "레이어":"Layers",
+  "레이어 및 바로가기":"Layers & Shortcuts",
+  "레이어 설정 닫기":"Close Layers",
+  "기능 열기":"Open",
+  "표시 중":"Visible",
+  "바로가기":"Shortcut",
+  "보행안전 정보":"Safety Data",
+  "지도 기능":"Map Features",
+  "버스위치":"Live Bus",
+  "열차위치":"Live Train",
+  "실시간버스":"Live Bus",
+  "실시간지하철":"Live Metro",
+  "주정차":"Parking",
+  "기타CCTV":"Other CCTV",
+  "단속카메라":"Enforcement",
+  "음향신호":"Audio Signals",
+  "돌발정보":"Incidents",
+  "교통약자":"Accessibility",
+  "보차혼용도로":"Shared Streets",
+  "공원과 산책길을 검색해보세요":"Search parks and trails",
+  "우리 동네 장소를 찾아보세요":"Find local places",
+  "가까운 역이나 정류장을 찾아보세요":"Find nearby stations or stops",
+  "역이나 정류장을 누르면 대중교통 정보를 확인할 수 있습니다.":"Tap a station or stop to view transit information.",
+  "검색창에서 병원·약국·공원·일반 시설을 검색해 보세요.":"Search for hospitals, pharmacies, parks and other places.",
+  "지도의 표시 레이어는 더보기 메뉴에서 관리할 수 있습니다.":"Manage visible layers in More.",
+  "상단 레이어 버튼에서 행정동 등 원하는 기능을 추가할 수 있습니다.":"Use Layers to add shortcuts.",
+  "지도 레이어 버튼에서 표시 기능과 상단 바로가기를 설정할 수 있습니다.":"Choose map layers and shortcuts in Layers.",
+  "현재 위치 버튼으로 지도 중심을 내 위치에 맞출 수 있습니다.":"Tap Locate Me to center the map.",
+  "도보 길찾기에서 경유지를 최대 5곳까지 추가할 수 있습니다.":"Add up to five walking-route stops.",
+  "행정동 선택은 검색창 아래 지도 바로가기에서 열 수 있습니다.":"Open neighborhoods from map shortcuts.",
+  "동작구 소식":"Dongjak News",
+  "공감순":"Most Liked",
+  "AI 안전정보 검색":"AI Safety Search",
+  "상도1동 보행안전 시범구역 · 다른 행정동은 추후 공개 예정":"Sangdo 1-dong safety pilot · more areas coming later",
+  "선택 안 함":"Not selected",
+  "허용됨":"Allowed",
+  "거부됨":"Denied",
+  "계속하기":"Continue",
+  "위치 권한 허용":"Allow Location",
+  "마이크 권한 허용":"Allow Microphone",
+  "두 권한은 선택사항입니다.":"Both permissions are optional."
+});
 const EN_TO_KO=Object.freeze({
   'CURRENT WEATHER':'날씨 정보','MAP PREFERENCES':'지도 설정','NIGHT VISIBILITY':'야간 시야',
   'DONGJAK WALK SAFETY':'동작하는 안전지도','DONGJAK MAP':'동작 지도','UPDATE HISTORY':'업데이트 내역'
@@ -206,7 +250,7 @@ export function installLanguagePreference(doc=document,win=window){
     select.addEventListener('change',()=>setLanguage(select.value));
   }
   const select=section.querySelector('select');
-  let observer=null,queued=false;
+  let observer=null,queued=false;const pendingRecords=[];
   function apply(){
     doc.documentElement.lang=language==='en'?'en':'ko';
     app.dataset.djLanguage=language;select.value=language;
@@ -220,10 +264,10 @@ export function installLanguagePreference(doc=document,win=window){
   }
   function setLanguage(value){language=value==='en'?'en':'ko';try{win.localStorage.setItem(STORAGE_KEY,language);}catch{}apply();}
   observer=new MutationObserver(records=>{
-    if(queued)return;queued=true;
+    pendingRecords.push(...records);if(queued)return;queued=true;
     win.queueMicrotask(()=>{
       queued=false;
-      for(const record of records){
+      for(const record of pendingRecords.splice(0)){
         if(record.type==='characterData')translateTextNode(record.target,language);
         else if(record.type==='attributes')translateAttributes(record.target,language);
         else for(const node of record.addedNodes)walk(node,language);

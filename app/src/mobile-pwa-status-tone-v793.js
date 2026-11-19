@@ -41,9 +41,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       const dimmed=app.classList.contains('map-safety-open')||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
-      themeMeta.setAttribute('content',theme==='dark'?'#192d32':'#e5ece8');
+      const color=theme==='dark'?(dimmed?'#142428':'#192d32'):(dimmed?'#bfc6c2':'#e5ece8');
+      root.style.setProperty('--dj-pwa-status-color',color);
+      if(themeMeta.getAttribute('content')!==color)themeMeta.setAttribute('content',color);
     } else {
-      band?.remove();band=null;bridge?.remove();bridge=null;
+      band?.remove();band=null;bridge?.remove();bridge=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');
       themeMeta.setAttribute('content',baselineColor());
     }
   }
@@ -59,7 +61,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
     band?.remove();band=null;bridge?.remove();bridge=null;
-    root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;
+    root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');
     themeMeta.content=baselineColor();
   };
 }

@@ -19,10 +19,12 @@ test('all 202 baseline records retain their identity and every note',()=>{
 });
 test('deployment status only comes from matching verified release marker',()=>{
  const beta={application_version:'9.0.0',release_status:'CANDIDATE_PREVIEW_NOT_PRODUCTION',release_channel:'developer-beta',beta_number:1};
- assert.equal(deploymentVersionLabel('9.0.0',beta),'9.0 Developer Beta 1');
- assert.equal(deploymentVersionLabel('9.0.0',{...beta,release_channel:'rc',rc_number:2}),'9.0 RC 2');
- assert.equal(deploymentVersionLabel('9.0.0',{...beta,release_status:'DEPLOYED_PRODUCTION'}),'9.0');
- assert.equal(deploymentVersionLabel('9.0.0',{...beta,application_version:'8.27.0'}),'9.0 · 개발 빌드');
- assert.equal(deploymentVersionLabel('9.1.2',null),'9.1 · 개발 빌드');
+ assert.equal(deploymentVersionLabel('9.0.0',beta),'9.0.0 Developer Beta 1');
+ assert.equal(deploymentVersionLabel('9.0.0',{...beta,release_channel:'rc',rc_number:2}),'9.0.0 RC 2');
+ assert.equal(deploymentVersionLabel('9.0.0',{...beta,release_status:'DEPLOYED_PRODUCTION'}),'9.0.0');
+ assert.equal(deploymentVersionLabel('9.0.0',{...beta,application_version:'8.27.0'}),'9.0.0 · 개발 빌드');
+ assert.equal(deploymentVersionLabel('9.1.2',null),'9.1.2 · 개발 빌드');
  assert.equal(releaseEdition({version:'v8.26.1'}).label,'8.9');
 });
+
+test('current patch versions are distinct',()=>{assert.deepEqual(groupReleaseEditions([{version:'9.1.2'},{version:'9.1.1'},{version:'9.1.0'}]).map(g=>g.label),['9.1.2','9.1.1','9.1.0']);});

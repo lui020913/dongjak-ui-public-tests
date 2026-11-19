@@ -27,8 +27,7 @@ export function releaseEdition(release){
   const group=HISTORICAL_EDITIONS.findLast(g=>g[0]<=position);
   return {label:group[1],title:group[2],historical:true,position,scale:overrides[position]||release.scale||'patch'};
  }
- const match=/^(\d+)\.(\d+)\.\d+$/.exec(version);
- return {label:match?match[1]+'.'+match[2]:version,title:'정식·개발 버전',historical:false,position:null,scale:release.scale||'patch'};
+ return {label:version,title:'정식·개발 버전',historical:false,position:null,scale:release.scale||'patch'};
 }
 export function groupReleaseEditions(releases){
  const map=new Map();
