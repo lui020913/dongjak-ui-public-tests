@@ -31,7 +31,7 @@ export function androidInstallGuidance(){
    'Galaxy의 ‘보안 위험 자동 차단’이 설치를 막으면 보호 기능을 해제하지 말고 웹앱을 이용하세요.',
    '설치가 끝나면 외부 앱 설치 허용을 다시 해제하세요. Google Play Protect는 켜 두세요.'
   ],
-  notice:'주의: 이 APK는 Google Play 스토어 외부에서 배포됩니다. 설치 전에 다운로드 주소가 공식 프로젝트의 배포 링크인지 확인하세요. 출처가 불분명하거나 Android 보안 검사 또는 Play Protect에서 위험 경고가 표시되면 설치를 중단하고 설치하지 마세요. Google Play를 통한 설치와 동일한 심사·자동 업데이트 보호가 보장되지 않을 수 있습니다.',
+  notice:'주의: 이 APK는 Google Play 스토어 외부에서 배포됩니다. 설치 전에 다운로드 주소가 공식 프로젝트의 배포 링크인지 확인하세요. 출처가 불분명하거나 Android 보안 검사 또는 Play Protect에서 위험 경고가 나오면 설치하지 마세요. Google Play를 통한 설치와 동일한 심사·자동 업데이트 보호가 보장되지 않을 수 있습니다.',
   help:'https://www.samsungsvc.co.kr/solution/1711930'};
 }
 export function installChoices(platform){const rest=['android','ios'];if(platform==='ios')rest.reverse();return ['web',...rest,'pwa'];}
