@@ -70,10 +70,4 @@ if(ui&&exactCandidate&&attempt<MAX_ATTEMPTS&&hints.length&&hints[0]&&hints.every
  process.exit(0);
 }
 const detail=summary.map(d=>(d.viewport||'build')+' · '+d.category).join('\n')||'확인 가능한 실패 단계 없음';
-const text='@lui020913 자동 복구 중단 · 코드 또는 환경 확인 필요\n\n'+detail+'\n\n'+ADVICE[advice]+'\n검증을 생략하거나 Production을 배포하지 않았습니다.\n'+url;
-const marker='<!-- v911-recovery:'+run.id+':'+attempt+' -->';
-try{
- const comments=gh('repos/'+repo+'/issues/15/comments?per_page=100','--paginate');
- if(!comments.includes(marker))gh('repos/'+repo+'/issues/15/comments','--method','POST','-f','body='+text+'\n'+marker);
-}catch{console.log('Unable to post recovery notice.');}
-console.log('Recovery stopped; '+advice);
+console.log('Recovery stopped; '+advice+'\n'+detail+'\n'+ADVICE[advice]+'\n'+url);
