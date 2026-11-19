@@ -18,6 +18,7 @@ function fakeDoc(){return {createElement(){const n={className:'',textContent:'',
 class Popup{static created=[];constructor(options){this.options=options;this.opened=false;this.moves=[];Popup.created.push(this)}setLngLat(p){this.moves.push(p);return this}setDOMContent(n){this.node=n;return this}addTo(){this.opened=true;return this}on(_,fn){this.onClose=fn;return this}isOpen(){return this.opened}remove(){this.opened=false;this.onClose?.();return this}}
 const flatten=n=>[n.textContent,...n.children.flatMap(flatten)].join(' ');
 const wait=(ms=5)=>new Promise(r=>setTimeout(r,ms));
+async function waitUntil(predicate,timeout=3000){const end=Date.now()+timeout;while(!predicate()){if(Date.now()>=end)assert.fail('Expected render state was not reached');await wait(10);}}
 test('curved connected displayed geometry, not the fallback chord',()=>{const p=pointBetweenDisplayedStations(paths,A,C,.5);assert(ons(p));assert(haversineMeters(p,B)<2);for(let i=0;i<=20;i++)assert(ons(pointBetweenDisplayedStations(paths,A,C,i/20)))});
 test('reverse traversal and split reversed official segments',()=>{const rev=[[C,B],[B,A]];assert(haversineMeters(pointBetweenDisplayedStations(rev,C,A,.25),pointBetweenDisplayedStations(paths,A,C,.75))<1);});
 test('disconnected railway paths do not create invented connector',()=>{const broken=[[A,[126.942,37.512]],[[126.950,37.512],C]];assert.equal(pointBetweenDisplayedStations(broken,A,C,.5),null);assert.equal(pointBetweenDisplayedStations([],A,C,.5),null)});
@@ -69,5 +70,5 @@ test('stopped train uses outgoing tangent; terminal uses incoming tangent',()=>{
 test('rendered icon key flips with map orientation without moving train',async()=>{
  const map=mockMap();setDisplayedRailPaths(map,rendered);let sign=1;map.project=([x,y])=>({x:sign*x,y});
  const overlay=attachLiveTransitOverlay(map,{stationLines:routes,renderIntervalMs:100,getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]})});
- try{overlay.start();await wait();let f=map.getSource(LIVE_SOURCE).data.features[0];assert.equal(f.properties.trainIcon,'dj-live-train-9호선');const coords=f.geometry.coordinates;sign=-1;await wait(150);f=map.getSource(LIVE_SOURCE).data.features[0];assert.equal(f.properties.trainIcon,'dj-live-train-9호선-left');assert.deepEqual(f.geometry.coordinates,coords);}finally{overlay.destroy()}
+ try{overlay.start();const current=()=>map.getSource(LIVE_SOURCE)?.data.features[0];await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선');const coords=current().geometry.coordinates;sign=-1;await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선-left');assert.deepEqual(current().geometry.coordinates,coords);sign=1;await waitUntil(()=>current()?.properties.trainIcon==='dj-live-train-9호선');assert.deepEqual(current().geometry.coordinates,coords);}finally{overlay.destroy()}
 });

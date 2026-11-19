@@ -68,7 +68,7 @@ export function preserveMetroEvents(newItems,oldItems=[]){
 }
 export function attachLiveTransitOverlay(map,opts={}){
   if(!map||typeof map.addSource!=='function'||typeof map.getSource!=='function')throw new TypeError('MapLibre instance needed');
-  let payload=null,display=empty(),previous=new Map(),lastUpdate=0,lastRendered=0;
+  let payload=null,display=empty(),previous=new Map(),lastUpdate=0;
   let rendering=0,poll=0,started=false,destroyed=false,request=null;
   let visible={metro:true,bus:true};
   const minimumZoom=Number(opts.minZoom??13.2);
@@ -121,8 +121,7 @@ export function attachLiveTransitOverlay(map,opts={}){
   }
   function render(force=false){
     const now=Date.now();
-    if(!force && now-lastRendered<frameMs)return;
-    lastRendered=now;
+    // The interval itself provides throttling; avoid skipping a frame due to timer jitter.
     if(!force&&typeof document!=='undefined'&&document.visibilityState==='hidden')return;
     if(typeof map.getZoom==='function'&&map.getZoom()<minimumZoom){opts.onVehiclesRendered?.(empty());return;}
     display=calculate(now);
