@@ -27,7 +27,9 @@ test('bus stop names are requested for the visible viewport independent of OSM p
   assert.match(code,/busCoverageSamples\(map/);
   assert.match(text('src/bus-coverage-grid.js'),/map\.unproject\(/);
   assert.match(code,/bus\/stops-nearby\?/);
-  assert.match(code,/map\.on\('moveend',[^\n]*enrichViewportBusStops\(\)/);
+  assert.match(code,/const viewportEnrichment=coalesceViewportWork\(scan=>\{[\s\S]*?enrichViewportBusStops\(\)/);
+  assert.match(code,/map\.on\('moveend',\(\)=>viewportEnrichment\.request\(/);
+  assert.match(code,/map\.on\('zoomend',\(\)=>viewportEnrichment\.request\(/);
   assert.match(code,/transport-bus-names',type:'symbol',source:'transport-bus',minzoom:17\.75/);
 });
 test('TCP HTTP reader handles UTF-8 JSON with chunked transfer framing',()=>{

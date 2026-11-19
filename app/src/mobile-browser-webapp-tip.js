@@ -3,6 +3,7 @@
  * or open map sheets, and does not install anything without user action.
  */
 import {detectMobileRunMode} from './mobile-browser-layout.js';
+import {mountBrowserInstallMenu} from './browser-install-menu.mjs';
 import {MOBILE_SCALE_BLOCKERS,mobileScaleBlockerVisible} from './map-scale-docking.js';
 
 export const WEBAPP_TIP_STORAGE_KEY='dj-browser-webapp-hint-snooze-v1';
@@ -175,7 +176,7 @@ export function installBrowserWebAppTip(doc=document,win=window,{delayMs=8000}={
   };
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
-  const boot=()=>installBrowserWebAppTip(document,window);
+  const boot=()=>mountBrowserInstallMenu({doc:document,win:window,steps:webAppInstallSteps});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 }

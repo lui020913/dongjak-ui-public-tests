@@ -1,0 +1,7 @@
+/* Limit compositor work only during gestures on economy-profile phones. */
+@media (max-width:699px){
+  #app.dj-economy-moving :is(.topbar,#bottom-nav,#dj840-map-tip,.map-controls-float,.map-quick-search-form){
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
