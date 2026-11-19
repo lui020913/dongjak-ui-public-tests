@@ -8,6 +8,7 @@ export function buildDongjakMetroLines(){
   // Direction is an approximation, never a GPS claim. The Sillim line is intentionally
   // omitted here because Seoul's official realtimePosition feed does not list it.
   const forwardUp={1:true,2:true,4:false,7:true,9:false};
+  const terminalDirections={7:{석남:'down',온수:'down',부평구청:'down',장암:'up',도봉산:'up'},9:{중앙보훈병원:'down',개화:'up',김포공항:'up'}};
   for(const [code,names] of Object.entries(FIXED_RAIL_STATION_ORDER)){
     if(!Object.prototype.hasOwnProperty.call(forwardUp,code))continue;
     const name=`${code}호선`;
@@ -19,30 +20,74 @@ export function buildDongjakMetroLines(){
     });
     if(stations.some(x=>!x))continue;
     const upward=forwardUp[code]?stations:[...stations].reverse();
-    lines[name]={up:upward,down:[...upward].reverse(),geometry:line.geometry,
+    lines[name]={up:upward,down:[...upward].reverse(),geometry:line.geometry,terminalDirections:terminalDirections[code]||{},
       // Fixed segment time is a DISPLAY heuristic; never a published train location.
       segmentTimeSeconds:115};
   }
   return lines;
 }
 function safeText(el,value){el.textContent=String(value??'');}
-function vehiclePopup(map,maplibregl,info){
-  const root=document.createElement('div');root.className='dj-live-popup';
-  const heading=document.createElement('strong');
-  safeText(heading,info.mode==='metro'?`${info.line||'지하철'} · ${info.vehicleLabel||'열차'}호`:
-    `${info.name||'버스'} · 운행 차량`);
-  const desc=document.createElement('p');
-  safeText(desc,info.mode==='metro'?
-    `${info.station||'확인된 역'} 기준 · ${info.destination?info.destination+'행 · ':''}${info.accuracyText||'역간 위치 추정'}`:
-    info.accuracyText||'버스 위치정보 API 좌표');
-  const stamp=document.createElement('small');
-  const date=new Date(info.observedAt);
-  safeText(stamp,Number.isFinite(date.getTime())?`수신 기준 ${date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul'})} · ${info.mode==='metro'?'정확한 GPS 위치 아님':'위치 갱신 지연 가능'}`:'수신 시각 미확인');
-  root.append(heading,desc,stamp);
-  new maplibregl.Popup({closeButton:true,closeOnClick:true,maxWidth:'290px',offset:16})
-    .setLngLat(info.coordinates).setDOMContent(root).addTo(map);
+const textNode=(doc,tag,cls,text='')=>{const n=doc.createElement(tag);if(cls)n.className=cls;safeText(n,text);return n;};
+const stationLabel=s=>s?(String(s).endsWith('역')?String(s):String(s)+'역'):'확인 중';
+const destinationLabel=s=>s?(String(s).endsWith('행')?String(s):String(s)+'행'):'미제공';
+export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document){
+  let active=null;
+  const close=()=>{const item=active;active=null;item?.popup.remove();};
+  const labelStatus={0:'역 진입',1:'역 도착',2:'역 출발',3:'전역 출발'};
+  function open(info){
+    close();
+    if(!info||!Array.isArray(info.coordinates))return;
+    const metro=info.mode==='metro';
+    if(!metro){
+      // Keep the bus card's original presentation and map-click close semantics.
+      const root=textNode(doc,'div','dj-live-popup');
+      root.append(textNode(doc,'strong','',`${info.name||'버스'} · 운행 차량`),textNode(doc,'p','',info.accuracyText||'버스 위치정보 API 좌표'));
+      const date=new Date(info.observedAt);root.append(textNode(doc,'small','',Number.isFinite(date.getTime())?`수신 기준 ${date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul'})} · 위치 갱신 지연 가능`:'수신 시각 미확인'));
+      const popup=new maplibregl.Popup({closeButton:true,closeOnClick:true,maxWidth:'290px',offset:16}).setLngLat(info.coordinates).setDOMContent(root).addTo(map);
+      active={popup,id:info.id,mode:info.mode};popup.on?.('close',()=>{if(active?.popup===popup)active=null;});return;
+    }
+    const root=textNode(doc,'div','dj-live-popup dj-live-train-card');
+    const head=textNode(doc,'div','dj-live-train-head');
+    const badge=textNode(doc,'span','dj-live-train-badge');
+    const heading=textNode(doc,'strong','dj-live-train-title');head.append(badge,heading);
+    const body=textNode(doc,'dl','dj-live-train-details');const values={};
+    for(const [key,label] of [['destination','행선지'],['station','기준역'],['state','운행 상태'],['next','이동 방향']]){
+      const row=textNode(doc,'div','dj-live-train-row');const dt=textNode(doc,'dt','',label),dd=textNode(doc,'dd','');row.append(dt,dd);body.append(row);values[key]=dd;
+    }
+    const foot=textNode(doc,'div','dj-live-train-foot');const stamp=textNode(doc,'span','dj-live-train-time'),notice=textNode(doc,'span','dj-live-train-note','역 정보 기반 추정 · GPS 아님');foot.append(stamp,notice);
+    root.append(head,body,foot);
+    const update=data=>{
+      safeText(badge,data.line||'지하철');badge.style.backgroundColor=/^#[0-9a-f]{6}$/i.test(data.color||'')?data.color:'#526d64';
+      // White on dark badge colors; dark on the gold/bright cyan lines.
+      badge.style.color=['4호선','9호선','신림선'].includes(data.line)?'#112421':'#fff';
+      const number=String(data.vehicleLabel||'').replace(/호$/,'');safeText(heading,number?number+'호 열차':'열차 번호 미제공');
+      safeText(values.destination,destinationLabel(data.destination));safeText(values.station,stationLabel(data.station));
+      safeText(values.state,labelStatus[data.status]||'상태 미확인');safeText(values.next,data.nextStation?stationLabel(data.nextStation)+' 방면':'');
+      values.next.parentElement.hidden=!data.nextStation;
+      const date=new Date(data.observedAt);safeText(stamp,Number.isFinite(date.getTime())?'수신 '+date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hourCycle:'h23'}):'수신 시각 미확인');
+    };
+    update(info);
+    const popup=new maplibregl.Popup({className:'dj-live-vehicle-popup',closeButton:true,closeOnClick:false,maxWidth:'min(286px, calc(100vw - 36px))',offset:20})
+      .setLngLat(info.coordinates).setDOMContent(root).addTo(map);
+    active={popup,id:info.id,mode:info.mode,root,update,lastPosition:info.coordinates.join(','),lastText:null};
+    popup.on?.('close',()=>{if(active?.popup===popup)active=null;});
+  }
+  function render(collection){
+    const item=active;if(!item)return;
+    if(item.popup.isOpen?.()===false||item.root?.isConnected===false){close();return;}
+    const f=(collection?.features||[]).find(x=>x.properties.id===item.id&&x.properties.mode===item.mode);
+    if(!f){close();return;}
+    if(item.mode!=='metro')return;
+    const coord=f.geometry.coordinates,key=coord.join(',');
+    if(key!==item.lastPosition){item.popup.setLngLat(coord);item.lastPosition=key;map.fire?.('dongjak:live-vehicle-popup-move');}
+    const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.nextStation,p.observedAt]);
+    if(text!==item.lastText){item.update(p);item.lastText=text;}
+  }
+  return {open,render,close};
 }
+const installedLiveTransit=new WeakMap();
 export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
+  if(installedLiveTransit.has(map))return installedLiveTransit.get(map);
   const controls=document.getElementById('dj-live-vehicle-controls');
   if(!controls)return null;
   const btnMetro=controls.querySelector('[data-live-vehicle="metro"]');
@@ -54,10 +99,13 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   }catch{}
   const state={...saved};
   const setStatus=value=>safeText(message,value);
+  const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
     stationLines:buildDongjakMetroLines(),minZoom:13.2,intervalMs:25000,renderIntervalMs:260,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
-    onVehicleClick:info=>vehiclePopup(map,maplibregl,info),
+    onVehicleClick:info=>popupTracker.open(info),
+    onVehiclesRendered:collection=>popupTracker.render(collection),
+    onVehicleMiss:()=>popupTracker.close(),
     onStatus:info=>{
       if(info.status==='ok'){
         const line=[];
@@ -96,5 +144,6 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
   sync();
-  return {overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);overlay.destroy();}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);popupTracker.close();overlay.destroy();installedLiveTransit.delete(map);}};
+  installedLiveTransit.set(map,handle);return handle;
 }

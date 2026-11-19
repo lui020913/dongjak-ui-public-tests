@@ -14,8 +14,52 @@ export function installRequestCompletion(doc=document,win=window){
   const attr=(key,value)=>{if(app.getAttribute(key)!==value)app.setAttribute(key,value);};
   const resize=new win.ResizeObserver(()=>schedule());
   const seen=new WeakSet();
+  let communityViewportWidth=0,communityUnfocusedHeight=0;
+  function fitCommunityEditor(){
+    const panel=doc.getElementById('participation-panel'),form=doc.getElementById('community-form'),field=doc.activeElement,vv=win.visualViewport;
+    if(!panel||!form)return;
+    const phone=win.innerWidth<700;
+    const heading=panel.querySelector('.community-heading-row'),toolbar=panel.querySelector('.community-toolbar'),sort=doc.getElementById('community-sort');
+    if(sort&&heading&&toolbar){
+      const destination=phone?heading:toolbar;
+      if(sort.parentElement!==destination){if(phone)destination.prepend(sort);else destination.append(sort);}
+    }
+    const visibleEditor=phone&&!panel.hidden&&!form.hidden;
+    // A single native scroll area. Move existing nodes only; preserve handlers and draft data.
+    if(visibleEditor&&!form.querySelector(':scope > .djNext-form-scroll')){
+      const head=form.querySelector(':scope > .community-form-top');
+      if(head){const sc=doc.createElement('div');sc.className='djNext-form-scroll';
+        for(const node of [...form.childNodes])if(node!==head)sc.append(node);
+        form.append(sc);}
+    }
+    const full=doc.documentElement.clientHeight||win.innerHeight;
+    const w=doc.documentElement.clientWidth||win.innerWidth;
+    if(communityViewportWidth!==w){communityViewportWidth=w;communityUnfocusedHeight=full;}
+    const focused=visibleEditor&&form.contains(field)&&field.matches?.('input:not([type=file]),textarea,[contenteditable=true]');
+    const closing=form.dataset.dj810Animating==='closing';
+    if(visibleEditor&&closing)return; // preserve the viewport until the close callback hides the editor
+    if(!focused&&!panel.hasAttribute('data-dj-patch-keyboard'))communityUnfocusedHeight=full;
+    const viewportHeight=Number(vv?.height)||full;
+    const offset=Number(vv?.offsetTop)||0;
+    const scale=Number(vv?.scale)||1;
+    const keyboard=Boolean(visibleEditor&&(focused||panel.dataset.djPatchKeyboard==='true')&&Math.abs(scale-1)<.08&&Math.max(full,communityUnfocusedHeight)-viewportHeight>100);
+    if(!keyboard){if(panel.hasAttribute('data-dj-patch-keyboard'))panel.removeAttribute('data-dj-patch-keyboard');if(!focused)communityUnfocusedHeight=full;return;}
+    const top=Math.max(8,Math.round(offset+8)),bottom=Math.max(8,Math.round(full-offset-viewportHeight+8));
+    if(panel.style.getPropertyValue('--dj-patch-vv-top')!==top+'px')panel.style.setProperty('--dj-patch-vv-top',top+'px');
+    if(panel.style.getPropertyValue('--dj-patch-vv-bottom')!==bottom+'px')panel.style.setProperty('--dj-patch-vv-bottom',bottom+'px');
+    if(panel.dataset.djPatchKeyboard!=='true'){
+      // Do not let an unfinished sheet slide displace the keyboard viewport.
+      win.DongjakWindowMotion?.cancel?.(panel);win.DongjakWindowMotion?.cancel?.(form);
+      panel.dataset.djPatchKeyboard='true';
+    }
+    const scroll=form.querySelector('.djNext-form-scroll');
+    if(scroll&&focused){const r=field.getBoundingClientRect(),s=scroll.getBoundingClientRect();
+      if(r.height>s.height-24||r.top<s.top+12)scroll.scrollTop+=r.top-s.top-12;
+      else if(r.bottom>s.bottom-12)scroll.scrollTop+=r.bottom-s.bottom+12;}
+  }
   function sync(){
     frame=0;if(disposed)return;
+    fitCommunityEditor();
     const compact=win.innerWidth<1080||win.matchMedia?.('(min-width:1080px) and (max-width:1366px) and (pointer:coarse)')?.matches;
     const form=doc.querySelector('.topbar .map-quick-search-form');
     // Move the real logo buttons; retain their app-information click handlers.
@@ -74,6 +118,8 @@ export function installRequestCompletion(doc=document,win=window){
   app.addEventListener('transitionend',schedule,true);
   app.addEventListener('animationend',schedule,true);
   win.visualViewport?.addEventListener('resize',schedule,{passive:true});
+  win.visualViewport?.addEventListener('scroll',schedule,{passive:true});
+  app.addEventListener('focusin',schedule);app.addEventListener('focusout',schedule);
   schedule();
-  return ()=>{disposed=true;observer.disconnect();resize.disconnect();if(frame)win.cancelAnimationFrame(frame);win.removeEventListener('resize',schedule);app.removeEventListener('transitionend',schedule,true);app.removeEventListener('animationend',schedule,true);win.visualViewport?.removeEventListener('resize',schedule);};
+  return ()=>{disposed=true;observer.disconnect();resize.disconnect();if(frame)win.cancelAnimationFrame(frame);win.removeEventListener('resize',schedule);app.removeEventListener('transitionend',schedule,true);app.removeEventListener('animationend',schedule,true);win.visualViewport?.removeEventListener('resize',schedule);win.visualViewport?.removeEventListener('scroll',schedule);app.removeEventListener('focusin',schedule);app.removeEventListener('focusout',schedule);};
 }

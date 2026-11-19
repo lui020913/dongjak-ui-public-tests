@@ -36,7 +36,9 @@ export function installPwaStatusTone(doc=document,win=window) {
         band.setAttribute('aria-hidden','true');
         app.appendChild(band);
       }
-      themeMeta.setAttribute('content',theme==='dark'?'#192d32':'#e5ece8');
+      const guide=doc.getElementById('map-gesture-guide');
+      const dimmed=guide&&!guide.hidden;
+      themeMeta.setAttribute('content',dimmed?(theme==='dark'?'#14292b':'#98a5a1'):(theme==='dark'?'#192d32':'#e5ece8'));
     } else {
       band?.remove();band=null;
       themeMeta.setAttribute('content',baselineColor());
@@ -44,6 +46,8 @@ export function installPwaStatusTone(doc=document,win=window) {
   }
   const observer=new MutationObserver(sync);
   observer.observe(app,{attributes:true,attributeFilter:['data-theme']});
+  const guide=doc.getElementById('map-gesture-guide');
+  if(guide)observer.observe(guide,{attributes:true,attributeFilter:['hidden']});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);

@@ -81,7 +81,9 @@ function candidatesFromSource(map,id,category,defaultName){
       const coords=getCoords(feature);
       if(!finiteCoord(coords))return [];
       const p=feature.properties||{};
-      const name=safeString(p.name||p.label||p.stationName||p.title||defaultName);
+      const rawName=safeString(p.name||p.label||p.stationName||p.title||defaultName);
+      const station=id==='metro-accessibility-local'?safeString(p.station||p.stationName||''):'';
+      const name=station&&!rawName.includes(station)?`${station.replace(/역$/,'')}역 ${rawName}`:rawName;
       if(!name||name==='이름 미등록')return [];
       const group=id==='dongjak-public-places' ? (p.kind==='school'?'학교':p.kind==='park'?'공원':'공공시설') : category;
       return [{category:group,name,coordinates:coords,source:'현재 지도에 로드된 자료'}];
@@ -243,6 +245,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   };
   if(map.loaded?.())addLayers();else map.once('load',addLayers);
   const showPanel=title=>{
+    window.DongjakWindowLifecycle?.requestOpen(panel.id);
     header.textContent=title;panel.hidden=false;
     // The map options menu must not overlap this utility panel.
     const app=document.getElementById('app');app?.classList.remove('map-controls-open');
@@ -404,7 +407,9 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
       results.replaceChildren();
       if(!found.length)results.append(el('p','ped-tools-note','이 범위에서 지도에 로드된 시설 자료가 없습니다. 시설이 없다는 뜻은 아닙니다.'));
       for(const kind of groups){
-        const section=el('section','ped-nearby-group');section.append(el('h4','',kind));
+        const section=el('section','ped-nearby-group');const heading=el('h4','',kind);
+        if(window.matchMedia?.('(max-width:699px)')?.matches){const glyph=document.createElementNS('http://www.w3.org/2000/svg','svg');glyph.setAttribute('class','djNext-nearby-glyph');glyph.setAttribute('viewBox','0 0 24 24');glyph.setAttribute('fill','none');glyph.setAttribute('stroke','currentColor');glyph.setAttribute('stroke-width','1.8');glyph.setAttribute('aria-hidden','true');
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');const paths={'학교':'M3 9l9-5 9 5-9 5-9-5zm4 3v5l5 3 5-3v-5','지하철':'M6 4h12v14H6zM6 10h12M9 18l-3 3m9-3 3 3','교통약자 시설':'M12 3v18M5 8h14M12 14l-5 7m5-7 5 7','버스정류장':'M5 4h14v15H5zM5 11h14M8 19v2m8-2v2','횡단보도':'M4 4v16m16-16v16M8 6h8m-8 6h8m-8 6h8'};path.setAttribute('d',paths[kind]||'M12 3a7 7 0 0 1 7 7c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 7-7z');glyph.append(path);heading.prepend(glyph);}section.append(heading);
         for(const item of found.filter(p=>p.category===kind)){
           const b=el('button','ped-nearby-item');b.type='button';
           b.append(el('span','',item.name),el('strong','',`${item.distance}m`));
@@ -414,7 +419,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
         }
         results.append(section);
       }
-      status.textContent=`현재 위치 반경 ${RADIUS_M}m · 위치 정확도 약 ${Math.round(Number(position.coords.accuracy)||0)}m · 표시된 정보만 집계`;
+      status.textContent=`반경 ${RADIUS_M}m · 위치 정확도 약 ${Math.round(Number(position.coords.accuracy)||0)}m\n지도에 로드된 시설만 표시합니다.`;
       results.append(el('p','ped-tools-note','경사도·도로폭·시설의 실시간 상태는 원천 데이터가 부족한 곳에서 판단하지 않습니다.'));
     }catch(error){
       if(current!==seq)return;
@@ -439,6 +444,8 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     panel.hidden=true;seq++;restoreOverview();
   };
   mapToolsToggle?.addEventListener('click',onToggleMapTools);
+  const dismissNearby=()=>{seq++;panel.hidden=true;if(overview)delete overview.dataset.pedToolsHidden;};
+  panel.addEventListener('dongjak:ped-dismiss',dismissNearby);
   close?.addEventListener('click',()=>{
     // The X dismisses this utility to the unobstructed map; it does not
     // resurrect a previously covered overview sheet. Other action flows
@@ -447,6 +454,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();
   });
   return ()=>{
+    panel.removeEventListener('dongjak:ped-dismiss',dismissNearby);
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
     mapToolsToggle?.removeEventListener('click',onToggleMapTools);
     disposePlacement();
