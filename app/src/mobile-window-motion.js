@@ -10,3 +10,7 @@ export function windowMotionFrame(progress,opening,distance,height,docked=false)
   const p=windowMotionProgress(progress),offset=Math.max(0,distance)*(opening?1-p:p);
   return {offset,opacity:1,clip:docked?Math.min(Math.max(0,height),offset):0};
 }
+
+/** Confirmations are stationary; fade the entire overlay and backdrop together. */
+export const CONFIRM_MOTION=Object.freeze({open:200,close:180});
+export function confirmMotionOpacity(progress,opening){const p=windowMotionProgress(progress);return opening?p:1-p;}

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/mobile-touch-regression-and-place-close-20261119",
-  "purpose": "Native header touch, WebKit validation, facility popup close and shared drag, corrected implementation-specific test contracts.",
-  "attempt": 39,
+  "public_work_branch": "fix/confirmation-fade-motion-20261119",
+  "purpose": "Stationary fade for confirmation popups, preserve bottom sheet slide and native header gestures; repair touch adapter listener cleanup.",
+  "attempt": 40,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "38 failed stale direct-pointer listener assertions after shared adapter refactor; 37 mobile390 facility X close failed. Fix both without relaxing browser or release gates.",
+  "last_retry_reason": "39 failed touch adapter dispose assertion; owner requested confirmation/alert popups use fade instead of bottom sheet slide. Retain mobile release gates.",
   "release_kind": "patch",
   "beta_number": 3
 }

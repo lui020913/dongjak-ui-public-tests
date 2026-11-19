@@ -127,3 +127,9 @@
  html body #app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .dj-place-header{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none}
  html body #app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup.dj-sheet-dragging{translate:0 var(--dj-sheet-drag-y,0px)!important;opacity:1!important;transition:none!important}
 }
+
+/* Confirmation cards fade in place, never inherit the bottom-sheet rise. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app :is(#dj840-theme-confirm,#dj832-dongjak-boundary,#dj-transit-signin-prompt)[data-dj-dialog-fade="true"],
+ html body #app#app#app#app#app#app#app#app#app [data-dj-dialog-fade="true"] :is(.dj840-theme-card,.dj832-boundary-card,.dj-transit-signin-card){animation:none!important;transition:none!important}
+}

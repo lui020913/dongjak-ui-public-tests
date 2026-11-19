@@ -3,9 +3,9 @@
 // TouchEvents, explicitly prevent scrolling ONLY after a header start is
 // accepted, and keep mouse/pen fallback. No duplicate touch/pointer motion.
 export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
- let activeTouch=null;
+ let activeTouch=null,disposed=false;
  const touchCapable=typeof win.TouchEvent==='function'||'ontouchstart' in win;
- const pointerAllowed=e=>e.pointerType!=='touch'||!touchCapable;
+ const pointerAllowed=e=>!disposed&&(e.pointerType!=='touch'||!touchCapable);
  const pd=e=>{if(pointerAllowed(e))down(e)};
  const pm=e=>{if(pointerAllowed(e))move(e)};
  const pu=e=>{if(pointerAllowed(e))up(e)};
@@ -18,7 +18,7 @@ export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
  });
  const find=(list,id)=>Array.from(list||[]).find(t=>t.identifier===id);
  const ts=e=>{
-  if(activeTouch!==null||e.touches.length!==1)return;
+  if(disposed||activeTouch!==null||e.touches.length!==1)return;
   const t=e.changedTouches[0];if(!t)return;
   if(down(normalized(e,t))!==true)return;
   activeTouch=t.identifier;
@@ -50,14 +50,14 @@ export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
   win.addEventListener('touchcancel',tc,opts);
  }
  return ()=>{
-  activeTouch=null;
+  disposed=true;activeTouch=null;
   header.removeEventListener('pointerdown',pd);
-  win.removeEventListener('pointermove',pm,true);
-  win.removeEventListener('pointerup',pu,true);
-  win.removeEventListener('pointercancel',pc,true);
-  header.removeEventListener('touchstart',ts,true);
-  win.removeEventListener('touchmove',tm,true);
-  win.removeEventListener('touchend',te,true);
-  win.removeEventListener('touchcancel',tc,true);
+  win.removeEventListener('pointermove',pm,opts);
+  win.removeEventListener('pointerup',pu,opts);
+  win.removeEventListener('pointercancel',pc,opts);
+  header.removeEventListener('touchstart',ts,opts);
+  win.removeEventListener('touchmove',tm,opts);
+  win.removeEventListener('touchend',te,opts);
+  win.removeEventListener('touchcancel',tc,opts);
  };
 }
