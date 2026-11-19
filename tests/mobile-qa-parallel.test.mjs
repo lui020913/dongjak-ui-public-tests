@@ -14,7 +14,7 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
  assert.match(workflow,/needs: \[build, preview, mobile-qa\]/);
  assert.match(workflow,/if: needs\.mobile-qa\.result == 'success'/);
- assert.match(config,/grep:\/layer header follows a real pointer\|phone update history rises monotonically\//);
+ assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\//);
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{
@@ -28,7 +28,7 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  for(const prefix of ['phone pilot safety symbols','phone night shortcut waits','phone route comparison uses','phone windows share the opaque']){
   assert.equal(cases.find(c=>c.name.startsWith(prefix))?.tag,'@phone-common');
  }
- for(const prefix of ['compact HUD','transport cards','phone toolbar','phone onboarding copy','phone sheets','phone weather','phone report composer','layer header follows','theme confirmation fades','phone update history rises']){
+ for(const prefix of ['compact HUD','transport cards','phone toolbar','phone onboarding copy','phone sheets','phone weather','phone report composer','layer header follows','theme confirmation fades','phone update history fades']){
   assert.equal(cases.find(c=>c.name.startsWith(prefix))?.tag,'@phone-layout');
  }
  assert.equal(cases.find(c=>c.name.startsWith('phone first-run permission intro'))?.tag,'@phone-platform');

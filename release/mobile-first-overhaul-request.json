@@ -3,9 +3,9 @@
   "application_version": "9.1.2",
   "public_work_branch": "main",
   "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
-  "attempt": 51,
+  "attempt": 52,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Live 9.1.1 device review: pilot lock layer shown on base map, repeated tab rise, status seam, English labels, AI/about/history and charcoal UI. Preserve independent safety data and mobile-only release gates.",
+  "last_retry_reason": "Align unchanged WebKit coverage and test classifier with the new in-place history fade test; retain all functional checks.",
   "release_kind": "patch",
-  "beta_number": 1
+  "beta_number": 2
 }
