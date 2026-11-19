@@ -58,7 +58,7 @@ test('language selector remains accessible in the shared settings surface',()=>{
  assert.ok(read('src/v854-integrated-ui.css').includes('.dj854-language-section'));
  assert.ok(settings.includes('dj854-language-section'));
  assert.ok(settings.includes('select'));
- assert.ok(read('src/main.js').includes('v854-language.js'));
+ assert.match(html,/<script\s+type="module"\s+src="\/src\/v854-language\.js"><\/script>/);
  assert.ok(appSettings.includes("mobile.id='dj-settings-mobile'"));
 });
 

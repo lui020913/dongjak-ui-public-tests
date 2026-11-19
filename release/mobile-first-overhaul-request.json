@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/safety-map-9-0-1-motion-regression",
-  "purpose": "9.0.1 unified mobile window motion: shared opaque 420ms open and 320ms close, native cleanup preserved, swipe aligned, real frame sampling of layer, weather, route and My Info.",
-  "attempt": 36,
+  "public_work_branch": "fix/mobile-header-drag-20261119",
+  "purpose": "9.0.1 unified opaque window motion and full mobile layer header finger-follow drag, staged expand/collapse/dismiss, dynamic weather gesture and fixed header body scroll.",
+  "attempt": 37,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "35th unified window motion build detected two non-browser global access failures and three outdated fade-specific regression contracts. Fix runtime guards and enforce the new shared opaque slide, native cleanup and actual frame sampling. Retain every original functional browser scenario and protected Production.",
+  "last_retry_reason": "Owner explicitly requested full header vertical drag. Test actual touch movement, not only X/open animation; preserve 3 phone and protected Production gates.",
   "release_kind": "patch",
   "beta_number": 3
 }

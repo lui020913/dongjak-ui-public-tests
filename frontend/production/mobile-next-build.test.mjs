@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {PHONE_CHOICES,normalizePhoneShortcuts} from '../src/mobile-next.js';
+import {PHONE_CHOICES,normalizePhoneShortcuts,layerDragFrame} from '../src/mobile-next.js';
 import {DongjakWalkSlopeRouter} from '../src/lib/dongjakWalkSlopeRouter.mjs';
 import {computeMultiStopRoutes,railTransferOptions} from '../src/v815-route-planner.js';
 const load=p=>JSON.parse(readFileSync(new URL('../public/'+p,import.meta.url),'utf8'));
@@ -108,4 +108,12 @@ test('shared window motion has exact endpoints, gradual initial acceleration and
  assert.match(js,/DongjakWindowMotion\?\.open\(body\)/);assert.match(js,/DongjakWindowMotion\.close\(body,finishClose\)/);
  assert.match(coordinator,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
  assert.doesNotMatch(coordinator,/fadeOnlyMobileIds/);
+});
+
+
+test('layer header height follows the finger, then translates below compact',()=>{
+ assert.deepEqual(layerDragFrame(600,-80,600,780),{height:680,offset:0});
+ assert.deepEqual(layerDragFrame(780,100,600,780),{height:680,offset:0});
+ assert.deepEqual(layerDragFrame(600,120,600,780),{height:600,offset:120});
+ assert.deepEqual(layerDragFrame(600,-500,600,780),{height:780,offset:0});
 });

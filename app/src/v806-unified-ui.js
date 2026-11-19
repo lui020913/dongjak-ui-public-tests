@@ -182,6 +182,7 @@ export function installUnifiedUI(doc=document, win=window){
   // Native close functions call this directly, never replay a synthetic click.
   // A replacement or swipe retains its own native cleanup, avoiding duplicates.
   win.DongjakWindowMotion={
+    policy:WINDOW_MOTION,
     open(target){if(!target||target.dataset.dj810Animating==='opening')return;cancelActive(target);playMobileMotion(target,true);},
     close(target,finish){
       if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}

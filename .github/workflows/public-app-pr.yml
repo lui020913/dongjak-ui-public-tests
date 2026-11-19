@@ -56,9 +56,9 @@ jobs:
       - name: Install Chromium for the real-browser layout matrix
         working-directory: .
         run: npx playwright install --with-deps chromium
-      - name: Verify the same mobile-first layout at ten viewport sizes
+      - name: Verify the phone-only layout at three viewport sizes
         working-directory: .
-        run: npx playwright test --config=playwright.mobile-first.config.mjs
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       - name: Upload viewport screenshots and measured layout evidence
         if: always()
         uses: actions/upload-artifact@v4

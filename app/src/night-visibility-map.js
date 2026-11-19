@@ -837,7 +837,16 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   app.dataset.djNightReady='true';
   toggle.disabled=false;quickOff.disabled=false;
   floatingCollapse?.addEventListener('click',()=>setFloatingCollapsed(!floatingContent.hidden));
-  floatingStop?.addEventListener('click',()=>{const finish=()=>{void setMode(false);};if(globalThis.window?.DongjakWindowMotion)globalThis.window.DongjakWindowMotion.close(floating,finish);else finish();});
+  floatingStop?.addEventListener('click',()=>{
+    const win=globalThis.window;
+    if(!win?.DongjakWindowMotion){void setMode(false);return;}
+    // Night analysis owns map cleanup. A lifecycle replacement must not
+    // cancel the native stop action along with the presentation animation.
+    let completed=false;
+    const finish=()=>{if(completed)return;completed=true;win.clearTimeout(timer);void setMode(false);};
+    const timer=win.setTimeout(finish,600);
+    win.DongjakWindowMotion.close(floating,finish);
+  });
   // Swipe the mobile bottom-sheet header up to expand, down to collapse.
   // Gestures never hijack button clicks or map drags outside the sheet.
   if(floatingHead){

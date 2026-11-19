@@ -16,7 +16,7 @@ test('onboarding uses the same mobile-first presentation instead of a PC-only st
  assert.equal(html.includes('v872-pc-onboarding-weather.css'),false);
  assert.ok(main.includes("import './mobile-first-layout.css'"));
  assert.ok(css.includes('@media (min-width: 700px)'));
- assert.ok(main.includes('v860-onboarding.js'));
+ assert.match(html,/<script\s+type="module"\s+src="\/src\/v860-onboarding\.js"><\/script>/);
  assert.ok(read('src/v860-onboarding.js').includes('ONBOARDING_IMAGE_SLOTS'));
  assert.ok(css.includes('prefers-reduced-motion'));
 });
