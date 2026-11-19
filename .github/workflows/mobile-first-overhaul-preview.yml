@@ -113,7 +113,12 @@ jobs:
   mobile-qa:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    name: Mobile browser QA — Chromium + WebKit
+    name: Mobile browser QA — shard ${{ matrix.shard }}/4
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [1, 2, 3, 4]
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -149,11 +154,11 @@ jobs:
           curl -fsSL --max-time 30 "$DONGJAK_TARGET_URL/release-source.json?mobile-qa=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/mobile-preview-provenance.json"
           node -e 'const fs=require("node:fs");const d=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=d.source_commit===process.env.SOURCE_SHA&&d.public_ui_source_commit===process.env.PUBLIC_SHA&&d.public_ui_overlay_sha256===process.env.CSS_SHA&&d.application_version===process.env.APP_VERSION&&String(d.build_run)===process.env.BUILD_RUN&&d.release_status==="CANDIDATE_PREVIEW_NOT_PRODUCTION";if(!ok)throw new Error("Preview provenance mismatch")' "$RUNNER_TEMP/mobile-preview-provenance.json"
           node scripts/verify-release-source.mjs
-      - name: Run all mobile browser projects in parallel
+      - name: Run independent mobile browser test shard
         run: >-
           npx playwright test --config=playwright.v911-remote.config.mjs
           --project=mobile375 --project=mobile390 --project=mobile430
-          --project=mobile390-webkit-header --workers=4
+          --project=mobile390-webkit-header --workers=3 --shard=${{ matrix.shard }}/4
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
@@ -163,7 +168,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-only-phone-qa-${{ github.run_id }}
+          name: mobile-only-phone-qa-${{ github.run_id }}-shard-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/
