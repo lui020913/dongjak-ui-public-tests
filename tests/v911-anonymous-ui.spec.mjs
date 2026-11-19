@@ -210,7 +210,7 @@ test('all five onboarding illustrations remain uncropped on tablet and desktop',
 async function pinPhoneShortcut(page,label,key){
  const settings=page.locator('#djNext-layer-panel');
  await tap(page,page.locator('#djNext-layers'));await expect(settings).toBeVisible();
- const add=settings.getByRole('button',{name:label+' 바로가기 추가',exact:true});await add.scrollIntoViewIfNeeded();await add.click();
+ const add=settings.getByRole('switch',{name:label+' 바로가기',exact:true});await add.scrollIntoViewIfNeeded();await add.click();await expect(add).toHaveAttribute('aria-checked','true');
  await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
  const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();return shortcut;
 }
@@ -228,17 +228,20 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-layer-grid')).toHaveCount(2);
  await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px [0-9.]+px [0-9.]+px [0-9.]+px$/);
+ await expect(panel.locator('.djNext-pin')).toHaveCount(0);await expect(panel.getByText('기능 열기',{exact:true})).toHaveCount(0);
+ const slopeAction=panel.getByRole('button',{name:'경사도 지도 기능',exact:true});const slopeState=await slopeAction.getAttribute('aria-pressed');
  for(const label of ['보행안전','경사도','야간시야']){
-   const b=panel.getByRole('button',{name:label+' 바로가기 추가',exact:true});await b.scrollIntoViewIfNeeded();await b.click();
+   const b=panel.getByRole('switch',{name:label+' 바로가기',exact:true});await expect(b).toHaveAttribute('aria-checked','false');await b.scrollIntoViewIfNeeded();await b.click();await expect(b).toHaveAttribute('aria-checked','true');
  }
+ expect(await slopeAction.getAttribute('aria-pressed')).toBe(slopeState);await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-count')).toHaveText('등록 3/3');
- await expect(panel.getByRole('button',{name:'보차혼용 바로가기 추가',exact:true})).toBeDisabled();
+ await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeDisabled();
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dongjak-phone-shortcuts-v2')))).toEqual(['pilot','slope','night']);
- const remove=panel.getByRole('button',{name:'경사도 바로가기 제거',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();
+ const remove=panel.getByRole('switch',{name:'경사도 바로가기',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
  await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
- await expect(panel.getByRole('button',{name:'보차혼용 바로가기 추가',exact:true})).toBeEnabled();
+ await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(1);
  await assertLayerRight();
@@ -305,7 +308,7 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,tab(page,'mine'));
  const mine=page.locator('#mine-panel');await visuallyPresented(mine);
- await expect(mine.locator('.dj17-more-root')).toBeVisible();
+ await expect(mine.locator('.dj17-more-root')).toBeVisible();await expect(mine.locator('.dj834-settings-group > .dj17-more-root')).toHaveCount(1);
  const metrics=await mine.evaluate(n=>{const a=n.querySelector('[data-dj834-action="records"]'),b=n.querySelector('.dj17-more-root>summary'),c=a.querySelector('.dj834-setting-icon');const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(),rc=c.getBoundingClientRect(),sb=getComputedStyle(b),sa=getComputedStyle(a);return {height:Math.abs(ra.height-rb.height),inset:Math.abs(parseFloat(sa.paddingLeft)-parseFloat(sb.paddingLeft)),icon:Math.abs(rc.width-parseFloat(getComputedStyle(b,'::before').width))};});
  expect(metrics.height).toBeLessThanOrEqual(2);expect(metrics.inset).toBeLessThanOrEqual(1);expect(metrics.icon).toBeLessThanOrEqual(1);
  const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await expect(mineHeader).toHaveCSS('touch-action','none');
@@ -509,8 +512,8 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);
- const colors=await modal.locator('.djNext-pin').last().evaluate(n=>{const c=getComputedStyle(n);return [c.backgroundColor,c.color]});
- expect(colors[0]).toBe('rgb(39, 46, 50)');expect(colors[1]).toBe('rgb(230, 239, 235)');
+ const toggle=modal.getByRole('switch').last();await expect(toggle).toHaveAttribute('aria-checked','false');
+ await expect(toggle.locator('.djNext-switch-track')).toHaveCSS('background-color','rgb(83, 97, 93)');
  await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
 });
 test('phone report composer has non-overlapping independent header and input scroll',{tag:'@phone-layout'},async({page})=>{
@@ -541,7 +544,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
    await close();await expect(parent).toBeHidden();
    const frames=await page.evaluate(()=>window.__sharedMotion);
-   for(const [phase,duration] of [['opening',420],['closing',320]]){
+   for(const [phase,duration] of [['opening',360],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
      expect(motion.every(f=>f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
