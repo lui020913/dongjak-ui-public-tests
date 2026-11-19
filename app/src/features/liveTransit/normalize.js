@@ -1,6 +1,6 @@
-import { validLngLat, pointBetweenStations, projectOnLine } from './geometry.js';
+import { validLngLat, pointBetweenStations, projectOnLine, pointBetweenDisplayedStations, snapToDisplayedRail } from './geometry.js';
 
-export const LINE_COLORS={ '1호선':'#0052A4','2호선':'#00A84D','4호선':'#00A5DE','7호선':'#747F00','9호선':'#BDB092','신림선':'#6789CA' };
+export const LINE_COLORS={ '1호선':'#0052A4','2호선':'#00A84D','4호선':'#00A5DE','7호선':'#747F00','9호선':'#B89B2F','신림선':'#6789CA' };
 const clean = s=>String(s??'').replace(/\s/g,'').replace(/역$/,'').replace(/\([^)]*\)/g,'').trim();
 const asTime = value=>{ const n=Date.parse(value??''); return Number.isFinite(n)?n:NaN; };
 const isFresh = (value,now,maxAgeMs)=>{ const n=asTime(value); return Number.isFinite(n)&&n<=now+10000&&now-n<=maxAgeMs; };
@@ -11,48 +11,69 @@ function stationCoord(station){
   return null;
 }
 function findStationIndex(list,name){return list.findIndex(s=>clean(s.name)===clean(name)||(s.aliases??[]).some(x=>clean(x)===clean(name)));}
-function lineConfig(lines,line,direction){
+function lineConfig(lines,line,direction,station,destination){
   const c=lines?.[line]; if(!c) return null;
-  const stations=(String(direction)==='1' ? c.down : c.up)??(String(direction)==='1' ? [...(c.stations??[])].reverse() : c.stations);
-  return { stations, geometry:c.geometry??c.routeGeometry??(c.coordinates ? {coordinates:c.coordinates}:null), segmentTimeSeconds:c.segmentTimeSeconds??120};
+  const up=c.up??c.stations??[],down=c.down??[...up].reverse();
+  const dest=clean(String(destination??'').replace(/행$/,''));
+  const from=findStationIndex(up,station),to=dest?findStationIndex(up,dest):-1;
+  const terminal=c.terminalDirections?.[dest];
+  // Prefer an identifiable destination over the provider direction-code heuristic.
+  const dir=from>=0&&to>=0&&from!==to?(to>from?'up':'down'):
+    terminal??(String(direction)==='1'?'down':String(direction)==='0'?'up':null);
+  return {stations:dir==='down'?down:up,directionKnown:!!dir,
+    geometry:c.geometry??c.routeGeometry??(c.coordinates?{coordinates:c.coordinates}:null),segmentTimeSeconds:c.segmentTimeSeconds??120};
 }
 /** Build estimated train positions from arrival/departure events and actual track geometry.
  * Never infer a position if route geometry, station order, or observation time is absent.
  */
-export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000){
+export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000,renderedRailPaths=null){
   const features=[];
   for(const item of metro){
     if(!isFresh(item.observedAt,now,maxAgeMs))continue;
-    const conf=lineConfig(lines,item.line,item.direction);
+    const conf=lineConfig(lines,item.line,item.direction,item.station,item.destination);
     if(!conf||!Array.isArray(conf.stations)||!conf.stations.length||!conf.geometry)continue;
     const idx=findStationIndex(conf.stations,item.station);
     if(idx<0)continue;
     const here=stationCoord(conf.stations[idx]); if(!here)continue;
     const status=String(item.status??'');
-    let pos=here, description='역 위치 기준 추정';
-    const observedAt=asTime(item.eventAt || item.observedAt);
-    if(status==='2' && idx<conf.stations.length-1){
-      // Departed named station: interpolated only up to 85%, never pretends to know GPS.
+    const displayed=renderedRailPaths instanceof Map;
+    const paths=displayed?renderedRailPaths.get(item.line):null;
+    const between=(a,b,f)=>displayed?pointBetweenDisplayedStations(paths,a,b,f):pointBetweenStations(conf.geometry,a,b,f);
+    const stationPoint=()=>{if(displayed)return snapToDisplayedRail(paths,here);const snap=projectOnLine(conf.geometry.coordinates,here);return snap&&snap.errorMeters<=180?snap.point:null;};
+    let pos=null,description='역 위치 기준 추정',nextStation='',travelFrom=null,travelTo=null,travelFraction=0;
+    const selectTravel=(a,b,f)=>{travelFrom=a;travelTo=b;travelFraction=f;return a&&b?between(a,b,f):null;};
+    const eventTime=asTime(item.eventAt || item.observedAt);
+    const time=Number.isFinite(conf.segmentTimeSeconds)&&conf.segmentTimeSeconds>0?conf.segmentTimeSeconds:120;
+    const fraction=Math.max(0,Number.isFinite(eventTime)?(now-eventTime)/1000/time:0);
+    if(conf.directionKnown&&status==='2'&&idx<conf.stations.length-1){
       const next=stationCoord(conf.stations[idx+1]);
-      const time=Number.isFinite(conf.segmentTimeSeconds)&&conf.segmentTimeSeconds>0?conf.segmentTimeSeconds:120;
-      const fraction=Math.min(.88,Math.max(0,(now-observedAt)/1000/time));
-      pos=next ? pointBetweenStations(conf.geometry,here,next,fraction) : null;
-      description='역 출발정보·소요시간 기반 추정 (GPS 아님)';
-    } else if (status==='0' && idx>0){
+      pos=selectTravel(here,next,Math.min(.88,fraction));
+      nextStation=conf.stations[idx+1].name;description='역 출발정보·소요시간 기반 추정 (GPS 아님)';
+    }else if(conf.directionKnown&&(status==='0'||status==='3')&&idx>0){
       const prev=stationCoord(conf.stations[idx-1]);
-      pos=prev?pointBetweenStations(conf.geometry,prev,here,.93):null;
-      description='역 진입정보 기반 추정 (GPS 아님)';
-    } else if(status==='3'&&idx>0){
-      const prev=stationCoord(conf.stations[idx-1]);
-      pos=prev?pointBetweenStations(conf.geometry,prev,here,.55):null;
-      description='전역 출발정보 기반 추정 (GPS 아님)';
-    } else {
-      // Arrival or unknown status: show at known station, labeled as approximate.
-      const snap=projectOnLine(conf.geometry.coordinates,here);
-      pos=snap&&snap.errorMeters<=180?snap.point:null;
-    }
+      const progress=status==='0'?Math.min(.99,.93+fraction*.12):Math.min(.88,fraction);
+      pos=selectTravel(prev,here,progress);nextStation=conf.stations[idx].name;
+      description=status==='0'?'역 진입정보 기반 추정 (GPS 아님)':'전역 출발정보 기반 추정 (GPS 아님)';
+    }else pos=stationPoint();
+    // No displayed path or disconnected interval: do not synthesize a chord or place the marker off the line.
     if(!validLngLat(pos))continue;
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),status,accuracy:'estimated',accuracyText:description,color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
+    // Sample the same connected rail path, oriented in the inferred travel direction.
+    // At a stop, prefer the outgoing path; at the last station use the incoming path.
+    if(conf.directionKnown&&!travelFrom&&!travelTo){
+      const next=stationCoord(conf.stations[idx+1]),prev=stationCoord(conf.stations[idx-1]);
+      if(next){travelFrom=here;travelTo=next;travelFraction=0;}
+      else if(prev){travelFrom=prev;travelTo=here;travelFraction=1;}
+    }
+    let headingKnown=false,headingFromLng=0,headingFromLat=0,headingToLng=0,headingToLat=0;
+    if(travelFrom&&travelTo){
+      // A local tangent (not a station-to-station chord) follows curves in either direction.
+      const a=between(travelFrom,travelTo,Math.max(0,travelFraction-.0125));
+      const b=between(travelFrom,travelTo,Math.min(1,travelFraction+.0125));
+      if(validLngLat(a)&&validLngLat(b)&&(a[0]!==b[0]||a[1]!==b[1])){
+        headingKnown=true;[headingFromLng,headingFromLat]=a;[headingToLng,headingToLat]=b;
+      }
+    }
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
   }
   return features;
 }
@@ -76,7 +97,7 @@ export function busToFeatures(bus=[],routes={},now=Date.now(),maxAgeMs=90000){
   return features;
 }
 export function payloadToCollection(payload,opts={},now=Date.now()){
-  const raw=[...metroToFeatures(payload?.metro??[],opts.stationLines??{},now,opts.maxAgeMs??90000),...busToFeatures(payload?.bus??[],opts.busRoutes??{},now,opts.maxAgeMs??90000)];
+  const raw=[...metroToFeatures(payload?.metro??[],opts.stationLines??{},now,opts.maxAgeMs??90000,opts.renderedRailPaths),...busToFeatures(payload?.bus??[],opts.busRoutes??{},now,opts.maxAgeMs??90000)];
   const within=typeof opts.withinDistrict==='function'?opts.withinDistrict:()=>true;
   const seen=new Set();const features=[];
   for(const f of raw){if(!within(f.geometry.coordinates,f.properties)||seen.has(f.properties.id))continue;seen.add(f.properties.id);features.push(f);}

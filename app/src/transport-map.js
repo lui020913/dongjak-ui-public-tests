@@ -12,6 +12,7 @@ import {metroMarkerGeojson, METRO_MARKER_MIN_ZOOM, METRO_PLATFORM_SPLIT_ZOOM as 
 import {installResponsiveMetroVisibility} from './metro-overview-visibility.js';
 import {railGeojson,stationsGeojson} from './fixed-rail-data.js';
 import {fetchOfficialRailPaths,mergeOfficialRail} from './rail-official-shapes.js';
+import {setDisplayedRailPaths} from './features/liveTransit/geometry.js';
 import {isMedianBusStopName,medianStopBaseName,busStopDisplayName} from './median-bus-stops.js';
 import {busCoverageSamples} from './bus-coverage-grid.js';
 import {deduplicateBusStops,busTileFallbackFilter,busFilterInsideDistrict} from './bus-stop-dedup.js';
@@ -1421,6 +1422,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry});
+  setDisplayedRailPaths(map,renderedRailPaths);
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
   // 외부 자료를 기다리느라 기존 지도를 중단하지 않습니다.
@@ -1433,6 +1435,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       source.setData(result.collection);
       // Keep station badges anchored to the actual displayed official curves.
       renderedRailPaths=indexRenderedMetroRail(result.collection);
+      setDisplayedRailPaths(map,renderedRailPaths);
       if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);
       console.info('[지하철 노선] 공공 GIS 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '));
     }).catch(error=>{

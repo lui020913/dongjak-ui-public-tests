@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {createMapStartupLoader} from '../src/map-startup-loader.js';
+function fixture({reduced=false,noRaf=false,noMap=false,noOverlay=false,timeout=8500}={}){
+ let now=0,seq=0;const jobs=new Map();const callbacks=new Set();
+ function schedule(fn,delay){const id=++seq;jobs.set(id,{at:now+delay,fn});return id;}
+ function tick(ms){const until=now+ms;for(;;){const next=[...jobs.entries()].sort((a,b)=>a[1].at-b[1].at||a[0]-b[0])[0];if(!next||next[1].at>until)break;const [id,job]=next; jobs.delete(id);now=job.at;job.fn(now);}now=until;}
+ const win={setTimeout:schedule,clearTimeout:id=>jobs.delete(id),matchMedia:()=>({matches:reduced})};if(!noRaf){win.requestAnimationFrame=fn=>schedule(fn,16);win.cancelAnimationFrame=id=>jobs.delete(id);}
+ function node(hidden=false){const props=new Map(),classes=new Set(),handlers=new Map();return {hidden,textContent:'',props,classes,handlers,style:{setProperty:(k,v)=>props.set(k,v)},classList:{add:k=>classes.add(k),contains:k=>classes.has(k)},setAttribute:(k,v)=>props.set(k,v),addEventListener:(k,fn)=>handlers.set(k,fn),removeEventListener:(k,fn)=>{if(handlers.get(k)===fn)handlers.delete(k);},click:()=>handlers.get('click')?.()};}
+ const pane=node(),message=node(),note=node(),button=node(true),els={'map-startup-overlay':pane,'map-startup-message':message,'map-startup-note':note,'map-startup-continue':button};
+ const map={on:(n,f)=>callbacks.add(f),off:(n,f)=>callbacks.delete(f)};const loader=createMapStartupLoader({map:noMap?undefined:map,documentRef:{defaultView:win,getElementById:id=>noOverlay?null:els[id]},timeoutMs:timeout});
+ return {loader,pane,message,note,button,tick,progress:()=>Number(pane.props.get('--start-progress')||0),idle:()=>[...callbacks].forEach(f=>f()),callbacks,jobs};
+}
+test('normal milestone progression, fill hold, fade and cleanup',()=>{let f=fixture();assert.equal(f.progress(),.12);f.loader.baseReady();assert.equal(f.progress(),.58);f.loader.boundaryReady();assert.equal(f.progress(),.87);f.tick(31);assert.equal(f.progress(),.87);f.tick(1);assert.equal(f.progress(),1);f.tick(419);assert.equal(f.pane.classes.has('is-hidden'),false);f.tick(1);assert.equal(f.pane.classes.has('is-hidden'),true);assert.equal(f.pane.props.get('aria-busy'),'false');f.tick(350);assert.equal(f.pane.hidden,true);assert.equal(f.callbacks.size,0);assert.equal(f.jobs.size,0);});
+test('duplicate milestones and map idle cannot queue repeated finish',()=>{let f=fixture();for(let i=0;i<10;i++){f.loader.baseReady();f.loader.boundaryReady();f.idle();}assert.equal(f.jobs.size,2);f.tick(32);assert.equal(f.jobs.size,1);f.tick(770);assert.equal(f.jobs.size,0);assert.equal(f.pane.hidden,true);});
+test('boundary signal arriving before base remains monotonic',()=>{let f=fixture();f.loader.boundaryReady();assert.equal(f.progress(),.12);f.loader.baseReady();assert.equal(f.progress(),.87);f.tick(32);assert.equal(f.progress(),1);});
+test('optional transit before or after base does not alter initial gate',()=>{let f=fixture();f.loader.transportReady();assert.equal(f.progress(),.12);f.loader.baseReady();f.loader.transportReady();f.tick(1000);assert.equal(f.progress(),.58);assert.equal(f.pane.hidden,false);});
+test('base unavailable: timeout offers existing manual recovery, no fake completion',()=>{let f=fixture();f.tick(8500);assert.equal(f.button.hidden,false);assert.equal(f.progress(),.12);f.idle();assert.match(f.message.textContent,/지연/);f.button.click();f.tick(350);assert.equal(f.pane.hidden,true);assert.equal(f.progress(),.12);});
+test('base ready but boundary delayed: closes on timeout without full bar',()=>{let f=fixture();f.loader.baseReady();f.tick(8500);assert.equal(f.progress(),.58);f.tick(350);assert.equal(f.pane.hidden,true);});
+test('boundary error after base yields partial bar and recovery',()=>{let f=fixture();f.loader.baseReady();f.loader.error();f.loader.boundaryReady();f.tick(1000);assert.equal(f.progress(),.58);assert.equal(f.pane.hidden,true);});
+test('late successful data after recovery offer resumes genuine completion',()=>{let f=fixture();f.tick(8500);f.loader.baseReady();f.loader.boundaryReady();f.tick(32);assert.equal(f.progress(),1);assert.equal(f.button.hidden,true);f.tick(770);assert.equal(f.pane.hidden,true);});
+test('manual dismiss during queued render cancels stale callbacks',()=>{let f=fixture();f.loader.baseReady();f.loader.boundaryReady();f.loader.dismiss();f.loader.dismiss();f.tick(1000);assert.equal(f.progress(),.87);assert.equal(f.pane.hidden,true);assert.equal(f.jobs.size,0);});
+test('motion reduction preserves actual milestone values and immediate close',()=>{let f=fixture({reduced:true});f.loader.baseReady();f.loader.boundaryReady();f.tick(32);assert.equal(f.progress(),1);assert.equal(f.pane.hidden,true);});
+test('no requestAnimationFrame fallback works',()=>{let f=fixture({noRaf:true,noMap:true});f.loader.baseReady();f.loader.boundaryReady();f.tick(802);assert.equal(f.progress(),1);assert.equal(f.pane.hidden,true);});
+test('missing overlay yields harmless no-op public API',()=>{let f=fixture({noOverlay:true});for(const k of ['baseReady','boundaryReady','transportReady','error','dismiss'])f.loader[k]();assert.equal(f.jobs.size,0);});
+test('unpainted map timeout avoids false completion',()=>{let f=fixture({timeout:5});f.loader.baseReady();f.loader.boundaryReady();f.tick(400);assert.equal(f.progress(),.87);assert.equal(f.pane.hidden,true);});
+

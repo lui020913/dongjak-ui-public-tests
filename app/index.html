@@ -109,10 +109,10 @@
       .map-startup-title{font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.055em;margin:0;color:var(--start-fg);}
       .map-startup-subtitle{font-size:13px;line-height:1.55;color:var(--start-muted);margin:9px 0 29px;}
       .map-startup-progress{width:184px;height:3px;overflow:hidden;border-radius:99px;background:var(--start-track);position:relative;margin-bottom:19px;}
-      .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:38%;border-radius:99px;background:#0a9770;
-        animation:dj-start-progress 1.65s ease-in-out infinite;}
+      .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:100%;border-radius:99px;background:#0a9770;
+        transform:scaleX(var(--start-progress,0));transform-origin:left center;transition:transform .32s ease-out;animation:none;}
       .map-startup-spinner{display:none!important;}
-      @keyframes dj-start-progress{0%{transform:translateX(-110%)}55%{transform:translateX(155%)}100%{transform:translateX(370%)}}
+      /* Startup fill is controlled by the map readiness milestones. */
       .map-startup-inner #map-startup-message{font-size:13px;color:var(--start-fg);margin:0;line-height:1.55;font-weight:650;}
       .map-startup-inner #map-startup-note{font-size:11px;color:var(--start-muted);line-height:1.6;margin:6px 0 0;max-width:300px;}
       .map-startup-inner #map-startup-continue{margin-top:23px;padding:10px 15px;font-size:12px;font-weight:650;
@@ -121,7 +121,7 @@
       .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));
         left:0;right:0;text-align:center;color:var(--start-muted);font-size:11px;letter-spacing:-.01em;}
       @media(max-width:480px){.map-startup-inner{transform:translateY(-1.5vh)}html body #app .map-startup-logo{width:116px!important;height:116px!important;min-width:116px!important;min-height:116px!important;max-width:116px!important;max-height:116px!important}.map-startup-title{font-size:23px}}
-      @media(prefers-reduced-motion:reduce){.map-startup-progress::before{animation:none;transform:none;width:60%}.map-startup-logo img{transition:none}.map-startup-overlay{transition:none}}
+      @media(prefers-reduced-motion:reduce){.map-startup-progress::before{animation:none;transition:none}.map-startup-logo img{transition:none}.map-startup-overlay{transition:none}}
     </style>
     <link rel="preload" as="image" href="/icons/dongjak-light-512.png" />
     <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
@@ -601,7 +601,7 @@
       </div>
       <button type="button" id="map-chrome-restore" class="map-chrome-restore" aria-label="상단 메뉴와 하단 탭 다시 보이기" hidden>메뉴·정보 보기 ↑</button>
       <button id="night-visibility-quick-off" class="night-visibility-quick-off" type="button" disabled hidden aria-pressed="false" aria-label="야간 시야 켜기">☾ 야간 시야</button>
-      <section id="map-gesture-guide" class="map-gesture-guide" role="dialog" aria-modal="true" aria-labelledby="map-gesture-guide-title" hidden>
+      <section id="map-gesture-guide" class="map-gesture-guide" role="dialog" aria-modal="true" aria-labelledby="map-gesture-guide-title" data-dj-dialog-fade="true" hidden>
         <header class="map-gesture-guide-head dj856-guide-head">
           <span class="dj856-guide-edge-drag" aria-hidden="true"></span>
           <span class="dj856-guide-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9L12 3Z"/><path d="m8 15 2.3-6 5.7-2-2.3 6L8 15Z"/></svg></span>
@@ -613,7 +613,9 @@
           <dt>확대·축소</dt><dd><span class="dj807-guide-platform"><b>PC</b> 마우스 휠</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락 벌리기/오므리기</span></dd>
           <dt>회전</dt><dd><span class="dj807-guide-platform"><b>PC</b> 마우스 오른쪽 버튼 드래그</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락 회전</span></dd>
           <dt>기울기(3D)</dt><dd><span class="dj807-guide-platform"><b>PC</b> 오른쪽 버튼을 누른 채 위아래로 드래그</span><span class="dj807-guide-platform"><b>모바일</b> 두 손가락을 함께 위아래로 이동</span></dd>
-          <dt>원위치</dt><dd><span class="dj807-guide-platform">오른쪽 나침반을 누르면 북쪽으로 맞춥니다.</span><span class="dj807-guide-platform">집 모양은 동작구 전체 보기입니다.</span></dd></dl>
+          <dt class="dj-guide-action-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m12 2 6 18-6-4-6 4z"/></svg>북쪽 정렬</dt><dd>나침반을 눌러 북쪽으로 맞춥니다.</dd>
+           <dt class="dj-guide-action-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>전체 보기</dt><dd>동작구 전체 지도를 표시합니다.</dd>
+           <dt class="dj-guide-action-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>현재 위치</dt><dd>내 위치로 지도 중심을 이동합니다.</dd></dl>
           <details class="dj803-ios-install-help dj8212-ios-install-help" aria-label="iPhone 홈 화면 앱 안내">
             <summary aria-expanded="false"><span>iPhone에서 앱처럼 사용하기</span><span class="dj852-tip-chevron" aria-hidden="true">⌄</span></summary>
             <div class="dj864-accordion-content">
@@ -888,7 +890,7 @@
           <button type="button" class="dj-sheet-chrome-close page-dismiss" data-close-page="participate" aria-label="동네 참여 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
         </header>
         <div class="dj836-sheet-body">
-        <p class="dj-page-intro">보행 중 불편했던 곳을 지도에 남기거나, 개선 아이디어를 기록할 수 있습니다.</p>
+        <p class="dj-page-intro">보행 불편과 개선 의견을 이 브라우저에 기록합니다. 다른 사용자나 행정기관에 전송되지 않습니다.</p>
         <div class="community-heading-row">
           <div><span class="micro-label">게시글</span><h3>동네 커뮤니티</h3><p>보행환경에 관한 이야기와 개선 의견을 이 브라우저에 기록합니다.</p></div>
           <button type="button" id="community-compose-toggle" class="community-compose-toggle">＋ 글쓰기</button>
@@ -914,11 +916,11 @@
             <p>분류는 이용자가 선택한 기록입니다. 실제 안전등급이나 행정기관 처리상태가 아닙니다.</p>
           </div>
           <label for="community-nickname">표시 이름</label>
-          <input id="community-nickname" maxlength="20" placeholder="익명 주민 (선택)" autocomplete="off" />
+          <input id="community-nickname" type="text" maxlength="20" placeholder="익명 주민 (선택)" autocomplete="off" />
           <label for="community-title">제목</label>
-          <input id="community-title" maxlength="70" required placeholder="예: 골목길 보행공간에 대한 의견" />
+          <input id="community-title" autocomplete="off" maxlength="70" required placeholder="예: 골목길 보행공간에 대한 의견" />
           <label for="community-text">내용</label>
-          <textarea id="community-text" maxlength="1200" rows="4" required placeholder="어떤 상황인지, 무엇이 개선되면 좋을지 작성하세요."></textarea>
+          <textarea id="community-text" autocomplete="off" maxlength="1200" rows="4" required placeholder="어떤 상황인지, 무엇이 개선되면 좋을지 작성하세요."></textarea>
           <div class="community-attach-row"><label for="community-photo-input" class="community-attach-action">▧ 사진 첨부</label><button type="button" id="community-map-pick" class="community-attach-action">⌖ 지도 위치 선택</button></div>
           <input type="file" id="community-photo-input" accept="image/jpeg,image/png,image/webp" hidden />
           <div id="community-photo-preview" class="community-photo-preview" hidden><img id="community-photo-image" alt="첨부 사진 미리보기" /><button type="button" id="community-photo-remove">사진 제거</button></div>
@@ -1046,7 +1048,7 @@
       // must never be trapped behind a permanent loading screen.
       window.setTimeout(function(){
         var pane=document.getElementById('map-startup-overlay');
-        if(!pane||pane.hidden||pane.classList.contains('is-hidden'))return;
+        if(!pane||pane.hidden||pane.classList.contains('is-hidden')||pane.getAttribute('data-dj-startup-controller')==='true')return;
         var text=document.getElementById('map-startup-message');
         var note=document.getElementById('map-startup-note');
         var button=document.getElementById('map-startup-continue');

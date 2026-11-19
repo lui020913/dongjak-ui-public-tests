@@ -37,6 +37,8 @@ import {makeCommunityPost,updateCommunityLike,appendCommunityComment,formatCommu
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
+import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
+import './features/liveTransit/live-transit.css';
 import './dongjak-import-controls.css';
 import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor,searchCachedTransportPlaces,suppressNativeBusStopGlyphs} from './transport-map.js';
 import {initStationAccessibility} from './station-accessibility.js';
@@ -1759,7 +1761,8 @@ map.on('load',()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
     startupLoader.transportReady();
-  }).catch(error=>{console.warn('교통 지도 초기화 실패:',error);startupLoader.error();});
+    try{installDongjakLiveTransit({map,maplibregl,app,isDongjak});}catch(error){console.warn('실시간 차량 레이어 초기화 실패:',error);}
+  }).catch(error=>{console.warn('교통 지도 초기화 실패:',error);});
 });
 
 // 이번 버전은 저장 키를 따로 사용해 이전 버전 자료를 자동으로 가져오지 않습니다.
@@ -1929,10 +1932,43 @@ function renderMy() {
 // v15 · 위치 연결형 동네 커뮤니티 (현재 브라우저에만 저장)
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
-function openCommunityComposer(open) {
-  if(open){communityForm.hidden=false;communityForm.scrollIntoView({behavior:'instant',block:'start'});window.DongjakWindowMotion?.open(communityForm);return;}
-  if(communityForm.hidden)return;
-  const finish=()=>{communityForm.hidden=true;};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(communityForm,finish);else finish();
+function openCommunityComposer(open,{animate=true}={}) {
+  const motion=window.DongjakWindowMotion;
+  const phone=window.matchMedia('(max-width:699px)').matches;
+  if(!phone){
+    delete communityForm.dataset.djDialogFade;
+    if(open){communityForm.hidden=false;communityForm.scrollIntoView({behavior:'instant',block:'start'});motion?.open(communityForm);return;}
+    if(communityForm.hidden)return;
+    const finish=()=>{communityForm.hidden=true;};if(motion)motion.close(communityForm,finish);else finish();return;
+  }
+  // No second slide over the enclosing sheet. Keep the list hidden until the editor closes.
+  if(open){
+    const wasHidden=communityForm.hidden,wasClosing=communityForm.dataset.dj810Animating==='closing';
+    if(!wasHidden&&!wasClosing)return;
+    motion?.cancel?.(communityForm);
+    communityForm.dataset.djDialogFade='true';
+    if(!communityForm.querySelector(':scope > .djNext-form-scroll')){
+      const head=communityForm.querySelector(':scope > .community-form-top');
+      if(head){const sc=document.createElement('div');sc.className='djNext-form-scroll';
+        for(const node of [...communityForm.childNodes])if(node!==head)sc.append(node);
+        communityForm.append(sc);}
+    }
+    communityForm.hidden=false;
+    const sc=communityForm.querySelector('.djNext-form-scroll');if(sc&&wasHidden)sc.scrollTop=0;
+    // Parent sheet may be entering after the risk-report button: only animate one owner.
+    const panel=document.getElementById('participation-panel');
+    if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
+    return;
+  }
+  if(communityForm.hidden||communityForm.dataset.dj810Animating==='closing')return;
+  if(communityForm.contains(document.activeElement))document.activeElement.blur();
+  const finish=()=>{
+    communityForm.hidden=true;
+    const panel=document.getElementById('participation-panel');
+    if(panel)delete panel.dataset.djPatchKeyboard;
+    const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
+  };
+  if(motion)motion.close(communityForm,finish);else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
@@ -2030,8 +2066,8 @@ const pedestrianTools=initPedestrianTools({
     navigate('participate');
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
-    openCommunityComposer(true);
-    document.getElementById('community-title')?.focus({preventScroll:true});
+    openCommunityComposer(true,{animate:!window.matchMedia('(max-width:699px)').matches});
+    if(!window.matchMedia('(max-width:699px)').matches)document.getElementById('community-title')?.focus({preventScroll:true});
   }
 });
 
@@ -2172,9 +2208,17 @@ function syncRoutePresentation() {
 function presentRouteLabel(p) {
   return p ? p.label : '선택되지 않음';
 }
+function updateRouteCalcAvailability(){
+  const btn=document.getElementById('route-calc');if(!btn)return;
+  const mobile=window.matchMedia('(max-width:699px)').matches;
+  btn.disabled=routeRequestPending||Boolean(mobile&&(!routeStart||!routeEnd));
+  if(mobile&&(!routeStart||!routeEnd))btn.setAttribute('aria-label','출발지와 목적지를 먼저 지정해 주세요');
+  else btn.removeAttribute('aria-label');
+}
 function updateRouteLabels() {
   document.getElementById('route-start-label').textContent=presentRouteLabel(routeStart);
   document.getElementById('route-end-label').textContent=presentRouteLabel(routeEnd);
+  updateRouteCalcAvailability();
 }
 function makeRouteMarker(position, color) {
   return new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
@@ -2669,7 +2713,7 @@ async function calculateRoute() {
     document.getElementById('route-status').textContent=`길찾기 실패: ${message}`;
     toast('경로를 불러오지 못했습니다. 길찾기 메뉴의 메시지를 확인해 주세요.');
   } finally {
-    routeRequestPending=false;btn.disabled=false;
+    routeRequestPending=false;updateRouteCalcAvailability();
   }
 }
 document.getElementById('route-pick-start').addEventListener('click',()=>beginRoutePick('start'));
@@ -2690,6 +2734,8 @@ document.getElementById('route-gps-start').addEventListener('click',()=>{
   });
 });
 document.getElementById('route-calc').addEventListener('click',calculateRoute);
+updateRouteCalcAvailability();
+window.matchMedia('(max-width:699px)').addEventListener?.('change',updateRouteCalcAvailability);
 document.getElementById('route-clear').addEventListener('click',resetRoute);
 document.getElementById('route-return-map').addEventListener('click',()=>{
   if(!routeResult)return;

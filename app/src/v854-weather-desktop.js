@@ -29,8 +29,8 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     const main=sheet.querySelector('.dj854-weather-main');
     const detail=sheet.querySelector('.dj854-weather-detail');
     if(place)place.textContent=title?.textContent?.trim()||'동작구';
-    if(main)main.textContent=value||'날씨 정보를 불러오는 중입니다.';
-    if(detail)detail.textContent=(label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.').replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})(?::\d{2})?/g,'$2.$3. $4 기준');
+    if(main){main.textContent=value||'날씨 정보를 불러오는 중입니다.';main.dataset.weatherSymbol=iconFor(value);}
+    if(detail)detail.textContent=(label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.').replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})(?::\d{2})?/g,'$2.$3. $4 기준').replace(/\s*·\s*(?=\d{1,2}\.\d{1,2}\.|\d{1,2}:\d{2})/g,'\n');
   }
   function close(){if(!sheet||sheet.hidden)return;const target=sheet;const finish=()=>{target.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(target,finish);else finish();}
   function open(){if(!sheet)return;sync();win.DongjakWindowLifecycle?.requestOpen(sheet.id);sheet.hidden=false;win.DongjakWindowMotion?.open(sheet);const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}

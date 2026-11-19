@@ -35,7 +35,13 @@ export function installUnifiedUI(doc=document, win=window){
   const entranceIntent=new Map();
   win.DongjakWindowLifecycle={
     dismiss:(id,options)=>lifecycle.dismiss(id,options),
-    requestOpen:(id)=>{explicitUntil.set(id,Date.now()+1200);return lifecycle.requestOpen(id,{explicit:true});},
+    requestOpen:(id)=>{
+      explicitUntil.set(id,Date.now()+1200);
+      if(win.matchMedia?.('(max-width:699px)')?.matches&&['dj854-weather-sheet','djNext-layer-panel','ped-tools-panel','map-gesture-guide'].includes(id)){
+        pendingIntent=id;dismissOthers(id);activeSurface='';
+      }
+      return lifecycle.requestOpen(id,{explicit:true});
+    },
     snapshot:(id)=>lifecycle.snapshot(id)
   };
   const ids=['admin-dong-picker','overview-sheet','transport-sheet','route-panel',
@@ -43,7 +49,7 @@ export function installUnifiedUI(doc=document, win=window){
     'map-safety-controls','map-advanced-controls','dj800-type-panel','dj-map-settings',
     'dj-app-about','version-history-modal','pza-road-sheet','night-visibility-float',
     'detail-sheet','entry-sheet','ped-tools-panel','dj-mobile-utilities',
-    'map-quick-search-dropdown'];
+    'map-quick-search-dropdown',...(win.matchMedia?.('(max-width:699px)')?.matches?['dj854-weather-sheet','djNext-layer-panel']:[])];
   const visible=id=>{
     const node=element(id);
     if(!node||node.hidden||content(node)?.dataset?.dj810Animating==='closing'||(id==='dj-mobile-utilities'&&node.getAttribute('aria-hidden')==='true'))return false;
@@ -65,10 +71,12 @@ export function installUnifiedUI(doc=document, win=window){
   const animationTimers=new Set();
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
-  function playMobileMotion(target,opening,afterClose){
+  function playMobileMotion(target,opening,afterClose,fadeFrom){
     if(!phone()||!target?.style||reduced())return false;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
-    const fade=target.dataset.djDialogFade==='true';
+    const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
+    const fade=isGuide||target.dataset.djDialogFade==='true';
+    const guideFrom=isGuide&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
     const duration=fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
@@ -86,6 +94,7 @@ export function installUnifiedUI(doc=document, win=window){
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
     const record={cancel:()=>finish(false)};
     const restore=()=>{
+      if(isGuide)app.style.removeProperty('--dj-guide-fade');
       if(beforeOpacity)target.style.setProperty('opacity',beforeOpacity,beforeOpacityPriority);
       else target.style.removeProperty('opacity');
       if(beforeTranslate)target.style.setProperty('translate',beforeTranslate,beforeTranslatePriority);
@@ -108,7 +117,12 @@ export function installUnifiedUI(doc=document, win=window){
       finally{restore();}
     }
     function setMotion(progress){
-      if(fade){target.style.setProperty('opacity',String(confirmMotionOpacity(progress,opening)),'important');return;}
+      if(fade){
+        const alpha=isGuide?guideFrom+((opening?1:0)-guideFrom)*confirmMotionOpacity(progress,true):confirmMotionOpacity(progress,opening);
+        target.style.setProperty('opacity',String(alpha),'important');
+        if(isGuide)app.style.setProperty('--dj-guide-fade',String(alpha));
+        return;
+      }
       const frame=windowMotionFrame(progress,opening,distance,rect.height,docked);
       target.style.setProperty('opacity','1','important');
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
@@ -187,11 +201,16 @@ export function installUnifiedUI(doc=document, win=window){
   // A replacement or swipe retains its own native cleanup, avoiding duplicates.
   win.DongjakWindowMotion={
     policy:WINDOW_MOTION,
-    open(target){if(!target||target.dataset.dj810Animating==='opening')return;cancelActive(target);playMobileMotion(target,true);},
+    open(target){
+      if(!target||target.dataset.dj810Animating==='opening')return;
+      const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='closing'?Number(win.getComputedStyle(target).opacity):undefined;
+      cancelActive(target);playMobileMotion(target,true,undefined,from);
+    },
     close(target,finish){
       if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}
       if(target.dataset.dj810Animating==='closing')return;
-      cancelActive(target);if(!playMobileMotion(target,false,finish))finish();
+      const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
+      cancelActive(target);if(!playMobileMotion(target,false,finish,from))finish();
     },
     cancel:cancelActive
   };
@@ -231,6 +250,12 @@ export function installUnifiedUI(doc=document, win=window){
     lifecycle.dismiss(id,{global:false});
     if(id==='map-quick-search-dropdown'){
       dispatchLocalClick(element('map-quick-search-close'),win);
+      if(!node.hidden)node.hidden=true;
+      return;
+    }
+    if(win.matchMedia?.('(max-width:699px)')?.matches&&['ped-tools-panel','djNext-layer-panel'].includes(id)){
+      cancelActive(content(node));
+      node.dispatchEvent(new (win.Event||Event)(id==='ped-tools-panel'?'dongjak:ped-dismiss':'dj-next:layer-dismiss'));
       if(!node.hidden)node.hidden=true;
       return;
     }
@@ -355,6 +380,8 @@ export function installUnifiedUI(doc=document, win=window){
   },true);
   on(doc,'click',event=>{
     const requested=openingIntent(event);
+    const mobileMapTab=win.matchMedia?.('(max-width:699px)')?.matches&&event.target?.closest?.('#bottom-nav .nav-tab[data-tab="map"]');
+    if(mobileMapTab){dismissOthers('');activeSurface='';return;}
     if(!requested||visible(requested))return;
     if(phone()){
       replacingSurface=ids.some(id=>id!==requested&&visible(id))||popupNodes().length?requested:'';
@@ -527,7 +554,7 @@ export function installUnifiedUI(doc=document, win=window){
     // focus restoration and closing animation. Do not run the generic
     // close microtask for the same Skip button: that could hide the dialog
     // before its feature handler receives the user's native click.
-    if(id==='dj860-onboarding')return;
+    if(id==='dj860-onboarding'||(id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches))return;
     entranceIntent.delete(id);
     const animated=id==='maplibre-popup'?container.querySelector('.maplibregl-popup-content'):content(container);
     if(animated?.dataset.dj810Animating==='opening')cancelActive(animated);

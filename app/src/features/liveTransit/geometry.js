@@ -58,3 +58,87 @@ export function pointBetweenStations(route, from, to, fraction) {
   const f=Math.min(1,Math.max(0,Number(fraction)||0));
   return linePointAtMeters(coordinates,p0.meters+(p1.meters-p0.meters)*f);
 }
+// One shared snapshot of the exact colored geometry handed to MapLibre.
+// The base/official rail renderer publishes its own index; no extra API request.
+const displayedRailByMap=new WeakMap();
+const railGraphCache=new WeakMap();
+export function setDisplayedRailPaths(map,paths){if(map&&paths instanceof Map)displayedRailByMap.set(map,paths);}
+export function getDisplayedRailPaths(map){return displayedRailByMap.get(map);}
+function makeRailGraph(paths){
+  if(railGraphCache.has(paths))return railGraphCache.get(paths);
+  const nodes=[],edges=[],byKey=new Map(),plans=new Map(),snaps=new Map();
+  const node=p=>{
+    const key=p.slice(0,2).map(n=>Number(n).toFixed(7)).join(',');
+    if(!byKey.has(key)){byKey.set(key,nodes.length);nodes.push({point:p.slice(0,2).map(Number),links:[]});}
+    return byKey.get(key);
+  };
+  for(const path of paths||[]){
+    if(!Array.isArray(path))continue;
+    for(let i=1;i<path.length;i++){
+      if(!validLngLat(path[i-1])||!validLngLat(path[i]))continue;
+      const a=node(path[i-1]),b=node(path[i]);if(a===b)continue;
+      const meters=haversineMeters(nodes[a].point,nodes[b].point);if(!Number.isFinite(meters)||meters<=0)continue;
+      const edge={a,b,meters};edges.push(edge);nodes[a].links.push({id:b,meters});nodes[b].links.push({id:a,meters});
+    }
+  }
+  const graph={nodes,edges,plans,snaps};railGraphCache.set(paths,graph);return graph;
+}
+function railCandidates(graph,point){
+  if(!validLngLat(point))return [];
+  const key=point.slice(0,2).join(',');if(graph.snaps.has(key))return graph.snaps.get(key);
+  const hits=[];
+  for(const edge of graph.edges){
+    const hit=projectOnLine([graph.nodes[edge.a].point,graph.nodes[edge.b].point],point);
+    if(hit&&hit.errorMeters<=180)hits.push({...hit,edge});
+  }
+  hits.sort((a,b)=>a.errorMeters-b.errorMeters);
+  const candidates=hits.filter(h=>h.errorMeters<=(hits[0]?.errorMeters??0)+35).slice(0,8);
+  if(graph.snaps.size<512)graph.snaps.set(key,candidates);return candidates;
+}
+export function snapToDisplayedRail(paths,point){
+  if(!Array.isArray(paths))return null;
+  return railCandidates(makeRailGraph(paths),point)[0]?.point??null;
+}
+// Route through actual segments only. Separate line pieces join at shared
+// vertices (centimeter rounding for provider float noise), not by a chord.
+function connectedRailPlan(graph,from,to){
+  const key=from.slice(0,2).join(',')+'>'+to.slice(0,2).join(',');
+  if(graph.plans.has(key))return graph.plans.get(key);
+  const starts=railCandidates(graph,from),ends=railCandidates(graph,to);
+  let best=null;
+  const choose=(points,cost,length)=>{if(!best||cost<best.cost)best={points,cost,length};};
+  for(const s of starts)for(const e of ends){
+    if(s.edge===e.edge){const length=Math.abs(s.meters-e.meters);choose([s.point,e.point],length+4*(s.errorMeters+e.errorMeters),length);}
+  }
+  const n=graph.nodes.length,dist=new Float64Array(n).fill(Infinity),prev=new Int32Array(n).fill(-1),origins=new Map(),queue=[];
+  for(const s of starts)for(const [id,meters] of [[s.edge.a,s.meters],[s.edge.b,s.edge.meters-s.meters]]){
+    const cost=meters+4*s.errorMeters;if(cost<dist[id]){dist[id]=cost;origins.set(id,s);queue.push({id,cost});}
+  }
+  // Binary heap is unnecessary here: route plans are cached per station pair;
+  // the local corridor graph is small and only its reachable nodes are visited.
+  const goal=new Map();for(const e of ends)for(const [id,meters] of [[e.edge.a,e.meters],[e.edge.b,e.edge.meters-e.meters]]){
+    if(!goal.has(id))goal.set(id,[]);goal.get(id).push({e,meters});
+  }
+  while(queue.length){
+    let slot=0;for(let i=1;i<queue.length;i++)if(queue[i].cost<queue[slot].cost)slot=i;
+    const {id,cost}=queue[slot];queue[slot]=queue.at(-1);queue.pop();
+    if(cost!==dist[id])continue;if(best&&cost>=best.cost)break;
+    for(const {e,meters} of goal.get(id)||[]){
+      const path=[];let k=id;while(k>=0){path.push(graph.nodes[k].point);if(prev[k]<0)break;k=prev[k];}
+      const s=origins.get(k);if(!s)continue;
+      const points=[s.point,...path.reverse(),e.point];const length=lineLengthMeters(points);
+      choose(points,length+4*(s.errorMeters+e.errorMeters),length);
+    }
+    for(const link of graph.nodes[id].links){const d=cost+link.meters;if(d<dist[link.id]){dist[link.id]=d;prev[link.id]=id;queue.push({id:link.id,cost:d});}}
+  }
+  // Do not send a train around a loop or across a disconnected track when
+  // the two adjacent stations cannot be matched with reasonable confidence.
+  const direct=haversineMeters(from,to);
+  const result=best&&best.length<=Math.max(350,direct*3+250)?best:null;
+  graph.plans.set(key,result);return result;
+}
+export function pointBetweenDisplayedStations(paths,from,to,fraction){
+  if(!Array.isArray(paths)||!validLngLat(from)||!validLngLat(to))return null;
+  const plan=connectedRailPlan(makeRailGraph(paths),from,to);
+  return plan?linePointAtMeters(plan.points,plan.length*Math.min(1,Math.max(0,Number(fraction)||0))):null;
+}

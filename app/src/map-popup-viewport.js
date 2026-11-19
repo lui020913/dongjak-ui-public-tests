@@ -47,6 +47,17 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
           continue;
         }
         let viewportForPopup=viewport;
+        const liveTrainPopup=onPhone&&popup.classList?.contains('dj-live-vehicle-popup');
+        if(liveTrainPopup){
+          const shown=node=>node&&getComputedStyle(node).display!=='none'&&getComputedStyle(node).visibility!=='hidden'&&node.getBoundingClientRect().width>0;
+          const rail=[...document.querySelectorAll('#dj-mobile-map-actions,.map-actions')].find(shown);
+          const nav=document.getElementById('bottom-nav');
+          const topbar=document.querySelector('.topbar'),tools=document.getElementById('djNext-rail');
+          const right=shown(rail)?Math.min(viewport.right,rail.getBoundingClientRect().left-4):viewport.right;
+          const bottom=shown(nav)?Math.min(viewport.bottom,nav.getBoundingClientRect().top-5):viewport.bottom;
+          const top=Math.max(viewport.top,...[topbar,tools].filter(shown).map(n=>n.getBoundingClientRect().bottom+5));
+          if(right-viewport.left>=220&&bottom-top>=210)viewportForPopup={left:viewport.left,right,top,bottom};
+        }
         if(placePopup){
           const controls=[...document.querySelectorAll('#dj-mobile-map-actions, .map-actions')]
             .find(node=>getComputedStyle(node).display!=='none');
@@ -60,6 +71,11 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
             bottom:Math.max(viewport.top+240,Math.min(viewport.bottom-12,navTop-10))};
         }
         if(content){
+          if(liveTrainPopup){
+            const width=Math.max(150,Math.floor(viewportForPopup.right-viewportForPopup.left-2*margin));
+            popup.style.setProperty('max-width',width+'px','important');
+            popup.style.setProperty('width',Math.min(266,width)+'px','important');
+          }
           if(placePopup){
             const safeWidth=Math.max(175,Math.floor(viewportForPopup.right-viewportForPopup.left-2*margin));
             popup.style.setProperty('max-width',safeWidth+'px','important');
@@ -67,7 +83,7 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
           }
           content.style.maxHeight=placePopup
             ?`${Math.max(190,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-30))}px`
-            :'min(72dvh,calc(100dvh - 52px))';
+            :liveTrainPopup?`${Math.max(150,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-16))}px`:'min(72dvh,calc(100dvh - 52px))';
           content.style.overflowY='auto';
           content.style.overscrollBehavior='contain';
         }
@@ -87,6 +103,7 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
   map.on?.('move',schedule);
   map.on?.('resize',schedule);
   map.on?.('moveend',schedule);
+  map.on?.('dongjak:live-vehicle-popup-move',schedule);
   globalThis.addEventListener?.('resize',schedule,{passive:true});
   globalThis.addEventListener?.('orientationchange',schedule,{passive:true});
   schedule();
@@ -96,6 +113,7 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
     map.off?.('move',schedule);
     map.off?.('resize',schedule);
     map.off?.('moveend',schedule);
+    map.off?.('dongjak:live-vehicle-popup-move',schedule);
     globalThis.removeEventListener?.('resize',schedule);
     globalThis.removeEventListener?.('orientationchange',schedule);
   };

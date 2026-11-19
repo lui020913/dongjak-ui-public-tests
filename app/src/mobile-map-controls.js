@@ -25,23 +25,42 @@ export function installMobileMapControls({app,map}={}){
     guide.style.removeProperty('--dj-guide-y');
     guide.style.removeProperty('--dj-guide-height');
   };
+  const phoneGuide=()=>window.matchMedia?.('(max-width:699px)')?.matches;
+  let guideFocusReturn=null;
   const openGuide=(event)=>{
     event?.preventDefault?.();
     event?.stopPropagation?.();
     if(app?.dataset?.tab!=='map')return;
     markAutoShown();
     if(launchTimer){clearTimeout(launchTimer);launchTimer=null;}
-    guide.hidden=false;positionGuide();
+    if(phoneGuide()){
+      if(!guide.hidden&&guide.dataset.dj810Animating!=='closing')return;
+      if(guide.hidden)guideFocusReturn=document.activeElement;
+      window.DongjakWindowLifecycle?.requestOpen(guide.id);
+      guide.hidden=false;positionGuide();
+      window.DongjakWindowMotion?.open(guide);
+    }else{guide.hidden=false;positionGuide();}
     guide.querySelector('#map-gesture-guide-close')?.focus?.({preventScroll:true});
   };
   let guideDismissedThisSession=false;
   let launchTimer=null,launchAttempts=0;
-  const closeGuide=()=>{
-    guide.hidden=true;
+  const closeGuide=({immediate=false,restoreFocus=true}={})=>{
     guideDismissedThisSession=true;
     markAutoShown();
     if(launchTimer){clearTimeout(launchTimer);launchTimer=null;}
     if(hideNext?.checked){try{localStorage.setItem('dj-map-guide-dismissed-v1','1');}catch{}}
+    if(guide.hidden)return;
+    const finish=()=>{
+      guide.hidden=true;
+      if(phoneGuide()&&restoreFocus&&app?.dataset?.tab==='map'){
+        const target=guideFocusReturn?.isConnected&&!guideFocusReturn.closest?.('[hidden]')?guideFocusReturn:show;
+        target?.focus?.({preventScroll:true});
+      }
+      guideFocusReturn=null;
+    };
+    if(phoneGuide()&&!immediate&&app?.dataset?.tab==='map'&&window.DongjakWindowMotion){
+      window.DongjakWindowMotion.close(guide,finish);
+    }else{window.DongjakWindowMotion?.cancel(guide);finish();}
   };
   const isStandalone=()=>Boolean(window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true);
   const isIOS=()=>/iPhone|iPad|iPod/i.test(navigator.userAgent)||(/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
@@ -93,7 +112,7 @@ export function installMobileMapControls({app,map}={}){
   app?.addEventListener('click',onBackdropClick);
   const releaseDetails=document.getElementById('dj-guide-release-details');
   const onReleaseDetails=()=>{
-    closeGuide();
+    closeGuide({immediate:true,restoreFocus:false});
     document.getElementById('version-history-trigger')?.click();
   };
   releaseDetails?.addEventListener('click',onReleaseDetails);
@@ -112,7 +131,9 @@ export function installMobileMapControls({app,map}={}){
   button?.addEventListener('click',onPress);
   map?.getCanvas?.()?.addEventListener('pointerdown',onFirstMapTouch,{passive:true});
   window.addEventListener('resize',resize);window.addEventListener('orientationchange',resize);
-  const watchTab=new MutationObserver(()=>{if(app?.dataset?.tab!=='map')closeGuide();else positionGuide();});
+  const watchTab=new MutationObserver(()=>{if(app?.dataset?.tab!=='map'){if(phoneGuide())window.DongjakWindowMotion?.cancel(guide);closeGuide({immediate:true,restoreFocus:false});}else positionGuide();});
+  const watchGuide=new MutationObserver(()=>{if(guide.hidden&&guide.dataset.dj810Animating){window.DongjakWindowMotion?.cancel(guide);guideFocusReturn=null;}});
+  watchGuide.observe(guide,{attributes:true,attributeFilter:['hidden']});
   if(app)watchTab.observe(app,{attributes:true,attributeFilter:['data-tab']});
   document.addEventListener('fullscreenchange',resize);
   sync();
@@ -132,5 +153,5 @@ export function installMobileMapControls({app,map}={}){
   };
   if(!saved()&&!autoShown())launchTimer=setTimeout(showOnInitialMap,850);
 
-  return ()=>{document.removeEventListener('click',onModeSwitch,true);app?.removeEventListener('click',onBackdropClick);if(launchTimer)clearTimeout(launchTimer);window.removeEventListener('dongjak:open-map-guide',onOpenGuideEvent);releaseDetails?.removeEventListener('click',onReleaseDetails);watchTab.disconnect();window.removeEventListener('resize',resize);window.removeEventListener('orientationchange',resize);document.removeEventListener('fullscreenchange',resize);map?.getCanvas?.()?.removeEventListener('pointerdown',onFirstMapTouch);button?.removeEventListener('click',onPress);close?.removeEventListener('click',onGuideClose,{capture:true});show.removeEventListener('click',openGuide);dismissHelp?.removeEventListener('click',onDismissHelp);};
+  return ()=>{document.removeEventListener('click',onModeSwitch,true);app?.removeEventListener('click',onBackdropClick);if(launchTimer)clearTimeout(launchTimer);window.removeEventListener('dongjak:open-map-guide',onOpenGuideEvent);releaseDetails?.removeEventListener('click',onReleaseDetails);watchTab.disconnect();watchGuide.disconnect();if(phoneGuide())window.DongjakWindowMotion?.cancel(guide);window.removeEventListener('resize',resize);window.removeEventListener('orientationchange',resize);document.removeEventListener('fullscreenchange',resize);map?.getCanvas?.()?.removeEventListener('pointerdown',onFirstMapTouch);button?.removeEventListener('click',onPress);close?.removeEventListener('click',onGuideClose,{capture:true});show.removeEventListener('click',openGuide);dismissHelp?.removeEventListener('click',onDismissHelp);};
 }

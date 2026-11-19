@@ -15,7 +15,8 @@ test('onboarding controller owns native click before document-level sheet handle
 
 test('shared controller does not double-dismiss onboarding Skip',()=>{
   const code=src('v806-unified-ui.js');
-  assert.match(code,/if\(id==='dj860-onboarding'\)return;/);
+  assert.match(code,/if\(id==='dj860-onboarding'(?:\|\|[^\n]*)?\)return;/);
+  assert.match(code,/if\(id==='dj860-onboarding'\|\|\(id==='map-gesture-guide'&&win\.matchMedia\?\.\('\(max-width:699px\)'\)\?\.matches\)\)return;/);
   assert.match(code,/dismiss:\(id,options\)=>lifecycle\.dismiss\(id,options\)/);
 });
 
