@@ -38,8 +38,6 @@ jobs:
             fi
           done
           [[ "$dispatched" == true ]] || exit 0
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 복구 시작 · 미리보기 확인 재시도 $ATTEMPT/2" || true
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/rerun" || {
-            gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 자동 재실행 요청 실패 · 수동 확인 필요" || true
             exit 1
           }
