@@ -32,3 +32,21 @@ test('blocked gate has one heading and neutral equal choices; no false desktop P
 test('large-screen install typography is scoped to the blocked gate',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');assert.match(css,/#dj-mobile-only-screen #dj-install-menu h2\{font-size:clamp\(28px,3vw,38px\)/);assert.match(css,/#dj-mobile-only-screen #dj-install-menu \.dj-install-label\{font-size:clamp\(17px,1\.65vw,21px\)/);assert.match(css,/#dj-mobile-only-screen #dj-install-menu \.dj-install-status\{font-size:clamp\(13px,1\.25vw,16px\)/);});
 
 test('device illustration remains visible and QR belongs exclusively to the PWA choice',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.match(css,/\.dj-mobile-only-devices\{display:block!important/);assert.match(js,/if\(key==='pwa'\)\{if\(blocked\)\{showPwaQr\(\);return;/);assert.equal((js.match(/add\('img','dj-install-qr'/g)||[]).length,1);assert.match(css,/transition:background-color 70ms ease-out,box-shadow 70ms ease-out/);assert.match(js,/add\('ol','dj-install-guide-steps'/);});
+
+
+test('installation choices expose one persistent selected state and Android always explains external APK security',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');
+ const guide=androidInstallGuidance();
+ assert.match(js,/setSelected=key=>/);
+ assert.match(js,/aria-pressed/);
+ assert.match(js,/dj-install-selected/);
+ assert.match(js,/showAndroidGuide\(url\)/);
+ assert.match(css,/\.dj-install-choice\[aria-pressed="true"\]/);
+ assert.match(guide.intro,/Google Play 스토어 외부/);
+ assert.match(guide.intro,/테스트용 APK/);
+ assert.match(guide.notice,/Google Play 스토어 외부/);
+ assert.match(guide.notice,/Play Protect/);
+ assert.match(guide.notice,/설치하지 마세요/);
+});

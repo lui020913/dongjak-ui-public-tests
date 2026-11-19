@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.13",
+  "application_version": "9.2.14",
   "public_work_branch": "main",
-  "purpose": "Restore device illustration, instant hover feedback, on-demand QR, and accessible installation guide",
-  "attempt": 72,
+  "purpose": "Show persistent selected state for install choices and restore clear Google Play external APK security warning",
+  "attempt": 73,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Desktop and tablet entry-screen visual feedback",
+  "last_retry_reason": "Android option selection and off-Play-Store safety copy",
   "release_kind": "patch",
   "beta_number": 1
 }

@@ -101,3 +101,73 @@ html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-choice,.dj-install-
 html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
 html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background:#202a25;color:#e2f0e7;border-color:#53665a}
 #dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web):not(:disabled):active{background-color:#0b5141}
+
+
+/* Persistent, accessible selection feedback for the installation choices. */
+#dj-install-menu .dj-install-choice[aria-pressed="true"]{
+ border:2px solid #16836b;
+ background:#e8f3ed;
+ color:#16483b;
+ box-shadow:0 0 0 2px #16836b20,0 3px 12px #17221d12;
+ padding:11px 16px;
+}
+#dj-install-menu .dj-install-selected{
+ display:none;
+ flex:none;
+ align-items:center;
+ justify-content:center;
+ min-height:27px;
+ padding:0 9px;
+ border-radius:999px;
+ background:#16836b;
+ color:#fff;
+ font-size:12px;
+ font-weight:750;
+ white-space:nowrap;
+}
+#dj-install-menu .dj-install-choice[aria-pressed="true"] .dj-install-selected{display:inline-flex}
+#dj-install-menu .dj-install-choice[aria-pressed="true"] .dj-install-status{display:none}
+#dj-install-menu .dj-install-guide-intro{font-weight:650!important;line-height:1.7!important}
+#dj-install-menu .dj-install-guide-notice{
+ background:#fff5e5;
+ border:1px solid #e3c27d;
+ border-radius:12px;
+ color:#563f19;
+ padding:13px 14px;
+ font-weight:650;
+ line-height:1.7!important;
+}
+#dj-install-menu .dj-install-guide-unavailable{
+ margin-top:12px!important;
+ padding:12px 14px;
+ border:1px solid #d6e2dc;
+ border-radius:12px;
+ background:#f4f7f5;
+ color:#334c40;
+ font-weight:650;
+ line-height:1.65!important;
+}
+@media (hover:hover) and (pointer:fine){
+ #dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):hover{background:#dcebe3}
+}
+#dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):active{background:#d2e5da}
+html[data-theme=dark] #dj-install-menu .dj-install-choice[aria-pressed="true"]{
+ background:#1f493d;
+ border-color:#62c4a3;
+ color:#effaf5;
+}
+html[data-theme=dark] #dj-install-menu .dj-install-selected{background:#62c4a3;color:#102b22}
+html[data-theme=dark] #dj-install-menu .dj-install-guide-notice{
+ background:#3b3020;
+ border-color:#8d7442;
+ color:#f5e8cc;
+}
+html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
+ background:#222d28;
+ border-color:#53665a;
+ color:#e2f0e7;
+}
+@media(max-width:480px){
+ #dj-install-menu .dj-install-selected{font-size:11px;min-height:25px;padding:0 7px}
+ #dj-install-menu .dj-install-choice[aria-pressed="true"]{padding:11px 15px}
+}
