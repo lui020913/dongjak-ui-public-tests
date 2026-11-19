@@ -1,0 +1,56 @@
+name: PC and tablet install gate QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/install-gate-remote.spec.mjs'
+      - '.github/workflows/install-gate-desktop-tablet-qa.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: Verify PC and tablet install entry on Production
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 25
+    env:
+      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+      DONGJAK_EXPECTED_SOURCE_SHA: 503e8b57615ebae62fe3bb37ee92779cc032c049
+      DONGJAK_EXPECTED_VERSION: 9.2.13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for the exact v9.2.13 Production promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for n in $(seq 1 60); do
+            if curl -fsSL --max-time 20 "$DONGJAK_TARGET_URL/release-source.json?install-gate=$GITHUB_RUN_ID-$n" |
+              jq -e --arg source "$DONGJAK_EXPECTED_SOURCE_SHA" --arg version "$DONGJAK_EXPECTED_VERSION" \
+                '.source_commit==$source and .application_version==$version and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ready" = 1
+      - name: Install pinned Playwright test package
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund --prefer-offline
+      - name: Test PC and tablet install gate
+        run: npx playwright test --config=playwright.config.mjs tests/install-gate-remote.spec.mjs --project=desktop --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pc-tablet-install-gate-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
