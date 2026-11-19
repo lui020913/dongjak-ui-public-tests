@@ -1,0 +1,112 @@
+name: iOS simulator startup smoke
+run-name: iOS simulator smoke - ${{ github.sha }}
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ios-simulator-smoke.yml']
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['iOS - verified Production build']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ios-simulator-smoke
+  cancel-in-progress: true
+jobs:
+  startup:
+    if: >-
+      github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' &&
+      github.actor == 'lui020913' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.actor.login == 'lui020913' &&
+        startsWith(github.event.workflow_run.display_title, 'iOS (simulator)')))
+    runs-on: macos-26
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TRIGGER_RUN: ${{ github.event.workflow_run.id || '' }}
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+    steps:
+      - name: Resolve verified simulator artifact for current Production
+        id: source
+        run: |
+          set -euo pipefail
+          marker="$RUNNER_TEMP/smoke-production.json"
+          curl -fsSL --retry 2 --max-time 30 "$PRODUCTION_URL/release-source.json?ios-smoke=$GITHUB_RUN_ID" > "$marker"
+          jq -e '.release_status=="DEPLOYED_PRODUCTION" and .source_commit==.public_ui_source_commit and (.source_commit|test("^[a-f0-9]{40}$")) and (.application_version|test("^[0-9]+[.][0-9]+[.][0-9]+$"))' "$marker" >/dev/null
+          version="$(jq -r .application_version "$marker")"
+          if [ -n "$TRIGGER_RUN" ]; then
+            run="$TRIGGER_RUN"
+          else
+            run="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ios-build.yml/runs?branch=main&status=success&per_page=20" | jq -er '[.workflow_runs[]|select(.actor.login=="lui020913" and (.display_title|startswith("iOS (simulator)")))]|first|.id')"
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e --arg repo "$GITHUB_REPOSITORY" '.path==".github/workflows/ios-build.yml" and .conclusion=="success" and .head_branch=="main" and .head_repository.full_name==$repo and .actor.login=="lui020913" and (.display_title|startswith("iOS (simulator)"))' >/dev/null
+          printf 'run=%s\nversion=%s\n' "$run" "$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: Dongjak-iOS-v${{ steps.source.outputs.version }}-simulator
+          run-id: ${{ steps.source.outputs.run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/smoke-artifact
+      - name: Verify artifact provenance and boot iPhone simulator
+        id: simulator
+        env:
+          VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/smoke-artifact"
+          jq -e --slurpfile prod "$RUNNER_TEMP/smoke-production.json" '.==$prod[0]' PRODUCTION.json >/dev/null
+          shasum -a 256 -c SHA256SUMS.txt
+          mkdir -p "$RUNNER_TEMP/smoke-app" "$RUNNER_TEMP/smoke-evidence"
+          ditto -x -k "Dongjak-v$VERSION-iOS-Simulator.zip" "$RUNNER_TEMP/smoke-app"
+          app="$RUNNER_TEMP/smoke-app/App.app"
+          test -d "$app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist")" = kr.dongjak.safetyapp
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")" = "$VERSION"
+          jq -e --slurpfile prod "$RUNNER_TEMP/smoke-production.json" '.==$prod[0]' "$app/public/release-source.json" >/dev/null
+          udid="$(xcrun simctl list devices available -j | jq -er '[.devices|to_entries|sort_by(.key)|reverse|.[].value[]|select(.isAvailable==true and (.name|startswith("iPhone")))]|first|.udid')"
+          [[ "$udid" =~ ^[A-Fa-f0-9-]{36}$ ]]
+          printf 'udid=%s\n' "$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --batteryState unplugged --batteryLevel 100 || true
+      - name: Install launch verify process and capture screen
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
+          VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/smoke-app/App.app"
+          xcrun simctl install "$UDID" "$app"
+          launch="$(xcrun simctl launch --terminate-running-process "$UDID" kr.dongjak.safetyapp)"
+          printf '%s\n' "$launch"
+          pid="$(printf '%s\n' "$launch" | awk -F ': ' '/kr[.]dongjak[.]safetyapp: [0-9]+$/{print $2}')"
+          [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+          # Cold launch includes first-run onboarding; no login, permission bypass or fake API responses.
+          for i in $(seq 1 12); do kill -0 "$pid"; sleep 1; done
+          xcrun simctl io "$UDID" screenshot "$RUNNER_TEMP/smoke-evidence/ios-startup.png"
+          test -s "$RUNNER_TEMP/smoke-evidence/ios-startup.png"
+          kill -0 "$pid"
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?ios-smoke-final=$GITHUB_RUN_ID" | jq -e --slurpfile prod "$RUNNER_TEMP/smoke-production.json" '.==$prod[0]' >/dev/null
+          cp "$RUNNER_TEMP/smoke-production.json" "$RUNNER_TEMP/smoke-evidence/PRODUCTION.json"
+          printf 'iOS %s: simulator install / launch / process alive after 12s / screenshot captured. Map interaction, authentication and physical device FPS are not asserted.\n' "$VERSION" > "$RUNNER_TEMP/smoke-evidence/RESULT.txt"
+          cat "$RUNNER_TEMP/smoke-evidence/RESULT.txt" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iOS-startup-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/smoke-evidence/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Shut down simulator and remove extracted app
+        if: always()
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          if [ -n "$UDID" ]; then xcrun simctl shutdown "$UDID" || true; fi
+          rm -rf "$RUNNER_TEMP/smoke-app" "$RUNNER_TEMP/smoke-artifact"
