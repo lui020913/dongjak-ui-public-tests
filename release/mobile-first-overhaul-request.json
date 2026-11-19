@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/safety-map-9-0-1-slide-motion",
-  "purpose": "9.0.1 mobile layer-sheet motion correction: slower initial acceleration, 420ms slide in and 320ms slide out, no simultaneous backdrop or surface fade, actual frame-level browser regression.",
-  "attempt": 34,
+  "public_work_branch": "fix/safety-map-9-0-1-unified-window-motion",
+  "purpose": "9.0.1 unified mobile window motion: shared opaque 420ms open and 320ms close, native cleanup preserved, swipe aligned, real frame sampling of layer, weather, route and My Info.",
+  "attempt": 35,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.0.0 deployed and verified. Owner observed fast initial entrance and concurrent fading. Replace aggressive ease-out with symmetric ease-in-out, remove backdrop fade, keep surface opaque, retain all features and protected promotion.",
+  "last_retry_reason": "34th only the layer motion changed and browser motion regression failed. Owner explicitly asked to unify window motion. Shared policy replaces per-panel fade/slide, preserves existing data and visible-state owners, and tests real animated frames.",
   "release_kind": "patch",
-  "beta_number": 1
+  "beta_number": 2
 }
