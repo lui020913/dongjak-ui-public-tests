@@ -553,7 +553,8 @@ test('layer header follows a real pointer upward and downward; content and X sta
  await expect(modal).toBeVisible();await expect.poll(()=>body.getAttribute('data-dj810-animating')).toBeNull();
  await expect(header).toHaveCSS('touch-action','none');
  const compact=await body.boundingBox();
- async function drag(dy){const r=await header.boundingBox();const x=r.x+Math.min(65,r.width/3),y=r.y+r.height/2;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+dy,{steps:8});const mid=await body.boundingBox();await page.mouse.up();return mid;}
+ const client=await page.context().newCDPSession(page);
+ async function drag(dy){const r=await header.boundingBox();const x=r.x+Math.min(65,r.width/3),y=r.y+r.height/2;await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+dy*i/8}]});const mid=await body.boundingBox();await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});return mid;}
  const up=await drag(-95);expect(up.y).toBeLessThan(compact.y-20);await expect(body).toHaveAttribute('data-dj-layer-expanded','true');await expect.poll(async()=> (await body.boundingBox()).height).toBeGreaterThan(compact.height+25);
  await page.waitForTimeout(500);const large=await body.boundingBox();const down=await drag(100);expect(down.y).toBeGreaterThan(large.y+20);await expect(body).toHaveAttribute('data-dj-layer-expanded','false');await expect.poll(async()=>Math.abs((await body.boundingBox()).height-compact.height)).toBeLessThan(3);
  await page.waitForTimeout(500);const before=await header.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await header.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);

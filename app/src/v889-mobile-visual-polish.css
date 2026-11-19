@@ -16,7 +16,7 @@
     transform:none!important;
   }
   /* Late-created weather and secondary sheets follow the pointer as well. */
-  html body #app#app#app#app#app#app#app#app#app :is(#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#ped-tools-panel,#admin-dong-picker).dj-sheet-dragging:not([hidden]){
+  html body #app#app#app#app#app#app#app#app#app :is(#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#ped-tools-panel).dj-sheet-dragging:not([hidden]){
     translate:0 var(--dj-sheet-drag-y,0px)!important;opacity:1!important;transition:none!important;
   }
   /* All registered sheet headers own vertical gestures; their buttons remain tappable. */

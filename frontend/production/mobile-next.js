@@ -36,27 +36,29 @@ export function layerDragFrame(startHeight,dy,compact,expanded){
  return {height,offset:Math.max(0,dy-(startHeight-compact))};
 }
 export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
- let gesture=null,expanded=false,settleTimer=0,compactHeight=0,blockedUntil=0;
+ let gesture=null,expanded=false,settleTimer=0,compactHeight=0,blockedUntil=0,closing=false;
  const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const put=(name,value)=>body.style.setProperty(name,value,'important');
  const clear=()=>{for(const name of ['height','translate','transition','max-height'])body.style.removeProperty(name)};
- const reset=()=>{gesture=null;expanded=false;compactHeight=0;win.clearTimeout(settleTimer);clear();delete body.dataset.djLayerExpanded;};
+ const reset=()=>{gesture=null;expanded=false;closing=false;compactHeight=0;win.clearTimeout(settleTimer);clear();delete body.dataset.djLayerExpanded;};
+ reset.freeze=()=>{gesture=null;win.clearTimeout(settleTimer);const rect=body.getBoundingClientRect();put('height',rect.height+'px');put('transition','none');};
  const finish=(next,close=false)=>{
-  const rect=body.getBoundingClientRect();expanded=next;body.dataset.djLayerExpanded=String(next);
+  const rect=body.getBoundingClientRect();expanded=next;closing=close;body.dataset.djLayerExpanded=String(next);
   const max=Math.max(compactHeight,win.innerHeight-28);
   const height=next?max:compactHeight;
-  const duration=close?320:420;
+  const policy=win.DongjakWindowMotion?.policy||{open:420,close:320,easing:'cubic-bezier(.42,0,.58,1)'};
+  const duration=close?policy.close:policy.open;
   put('max-height',max+'px');put('height',rect.height+'px');
   const offset=parseFloat((win.getComputedStyle(body).translate||'0 0').split(' ')[1])||0;
   put('translate','0 '+offset+'px');put('transition','none');void body.offsetHeight;
   const complete=()=>{if(close){onDismiss();reset();}else{clear();if(next){put('max-height',max+'px');put('height',height+'px');}}};
   if(reduced()){complete();return;}
-  put('transition','height '+duration+'ms cubic-bezier(.42,0,.58,1), translate '+duration+'ms cubic-bezier(.42,0,.58,1)');
+  put('transition','height '+duration+'ms '+policy.easing+', translate '+duration+'ms '+policy.easing);
   put('height',height+'px');put('translate','0 '+(close?win.innerHeight+24:0)+'px');
   settleTimer=win.setTimeout(complete,duration+40);
  };
  header.addEventListener('pointerdown',e=>{
-  if(panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
+  if(closing||panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
   win.clearTimeout(settleTimer);win.DongjakWindowMotion?.cancel(body);
   const rect=body.getBoundingClientRect();if(!compactHeight)compactHeight=rect.height;
   put('max-height',Math.max(compactHeight,win.innerHeight-28)+'px');put('height',rect.height+'px');put('transition','none');
@@ -82,7 +84,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
  };
  header.addEventListener('pointerup',e=>end(e));
  header.addEventListener('pointercancel',e=>end(e,true));
- header.addEventListener('click',e=>{if(win.performance.now()<blockedUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
+ header.addEventListener('click',e=>{if(win.performance.now()<blockedUntil&&!e.target.closest?.('button,a,input,select,textarea,[role="button"]')){e.preventDefault();e.stopImmediatePropagation();}},true);
  return reset;
 }
 
@@ -104,6 +106,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){resetLayerDrag();win.clearTimeout(closeTimer);win.DongjakWindowMotion?.cancel(body);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
   if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
   win.clearTimeout(closeTimer);
+  resetLayerDrag.freeze();
   panel.classList.add('djNext-leaving');if(win.DongjakWindowMotion){win.DongjakWindowMotion.close(body,finishClose);return}closeTimer=win.setTimeout(finishClose,380)
  }
  function finishClose(){if(!panel.classList.contains('djNext-leaving'))return;win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})}
