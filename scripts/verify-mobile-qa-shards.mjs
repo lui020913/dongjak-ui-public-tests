@@ -12,7 +12,7 @@ function list(extra=[]){
 }
 const baseline=list(),shards=[];
 assert.ok(baseline.length>0,'no mobile tests selected');
-for(let i=1;i<=4;i++){const ids=list(['--shard='+i+'/4']);assert.ok(ids.length>0,'empty shard '+i);shards.push(ids);console.log('Shard '+i+': '+ids.length+' tests');}
+for(let i=1;i<=12;i++){const ids=list(['--shard='+i+'/12']);assert.ok(ids.length>0,'empty shard '+i);shards.push(ids);console.log('Shard '+i+': '+ids.length+' tests');}
 const combined=shards.flat();
 assert.equal(new Set(combined).size,combined.length,'shards overlap');
 assert.deepEqual(combined.sort(),baseline,'shards must exactly cover selected mobile tests');

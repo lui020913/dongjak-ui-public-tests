@@ -4,13 +4,13 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('release QA parallelizes independent tests in the same spec, with all phone projects',()=>{
  const config=read('playwright.v911-remote.config.mjs'),workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
- assert.match(config,/fullyParallel:true,workers:3,retries:0/);
+ assert.match(config,/fullyParallel:true,workers:1,retries:0/);
  for(const name of ['mobile375','mobile390','mobile430','mobile390-webkit-header']){
   assert.ok(config.includes(name));
   assert.ok(workflow.includes('--project='+name));
  }
- assert.match(workflow,/fail-fast: false\s+max-parallel: 4\s+matrix:\s+shard: \[1, 2, 3, 4\]/);
- assert.match(workflow,/--project=mobile390-webkit-header --workers=3 --shard=\$\{\{ matrix\.shard \}\}\/4/);
+ assert.match(workflow,/fail-fast: false\s+max-parallel: 12\s+matrix:\s+shard: \[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\]/);
+ assert.match(workflow,/--project=mobile390-webkit-header --workers=1 --shard=\$\{\{ matrix\.shard \}\}\/12/);
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
  assert.match(workflow,/needs: \[build, preview, mobile-qa\]/);
  assert.match(workflow,/if: needs\.mobile-qa\.result == 'success'/);

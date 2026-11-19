@@ -94,7 +94,7 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
-      - name: Verify all four mobile QA shards are disjoint and complete
+      - name: Verify all twelve mobile QA shards are disjoint and complete
         working-directory: .
         run: node scripts/verify-mobile-qa-shards.mjs
       - name: Verify preinstalled Chromium matches pinned Playwright
