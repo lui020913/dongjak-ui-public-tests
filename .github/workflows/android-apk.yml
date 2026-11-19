@@ -1,0 +1,141 @@
+name: Android APK - public build
+run-name: Android APK (${{ inputs.variant || 'debug' }}) - ${{ github.sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: APK type (debug for testing; release requires signing secrets)
+        type: choice
+        options: [debug, release]
+        default: debug
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-apk.yml'
+permissions:
+  contents: read
+concurrency:
+  group: android-apk-${{ github.ref }}-${{ inputs.variant || 'debug' }}
+  cancel-in-progress: true
+jobs:
+  apk:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+    env:
+      VARIANT: ${{ inputs.variant || 'debug' }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_TRANSPORT_API_BASE: https://dongjak-walk-safety-preview.pages.dev/api/transport
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+          cache-read-only: false
+      - name: Build Android web assets while provisioning SDK
+        id: prepare
+        run: |
+          set -euo pipefail
+          sdk="${ANDROID_HOME:?Missing Android SDK}"
+          (
+            set -euo pipefail
+            if [ ! -f "$sdk/platforms/android-36/android.jar" ] || [ ! -x "$sdk/build-tools/36.0.0/apksigner" ]; then
+              sdkmanager "platforms;android-36" "build-tools;36.0.0"
+            fi
+          ) &
+          sdk_pid=$!
+          trap 'kill "$sdk_pid" 2>/dev/null || true' EXIT
+          npm ci --no-audit --no-fund --prefer-offline
+          npm run check:release
+          npm run build:android
+          test -s build/android/index.html
+          npx --no-install cap sync android
+          wait "$sdk_pid"
+          trap - EXIT
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync,appendFileSync} from 'node:fs';
+          const {version}=JSON.parse(readFileSync('package.json','utf8'));
+          if(!/^\d+\.\d+\.\d+$/.test(version)) throw Error('Invalid app version');
+          const [major,minor,patch]=version.split('.').map(Number);
+          const code=major*1000000+minor*1000+patch;
+          if(minor>=1000||patch>=1000||code<1||code>2100000000) throw Error('Invalid Android versionCode');
+          const file='android/app/build.gradle';
+          const src=readFileSync(file,'utf8');
+          if(!/^\s*versionCode\s+\d+\s*$/m.test(src)||!/^\s*versionName\s+"[^"]+"\s*$/m.test(src)) throw Error('Android version fields missing');
+          writeFileSync(file,src.replace(/^(\s*versionCode\s+)\d+\s*$/m,(_,p)=>p+code).replace(/^(\s*versionName\s+)"[^"]+"\s*$/m,(_,p)=>p+JSON.stringify(version)));
+          appendFileSync(process.env.GITHUB_OUTPUT,'version='+version+'\ncode='+code+'\n');
+          NODE
+      - name: Compile selected APK with parallel Gradle workers
+        working-directory: app/android
+        run: |
+          set -euo pipefail
+          if [ "$VARIANT" = release ]; then task=assembleRelease; else task=assembleDebug; fi
+          gradle ":app:$task" --parallel --build-cache --max-workers=4 --console=plain -Dorg.gradle.jvmargs=-Xmx3g
+      - name: Create installable APK and verify signature and metadata
+        id: package
+        env:
+          VERSION: ${{ steps.prepare.outputs.version }}
+          VERSION_CODE: ${{ steps.prepare.outputs.code }}
+          ANDROID_KEYSTORE_BASE64: ${{ inputs.variant == 'release' && secrets.ANDROID_KEYSTORE_BASE64 || '' }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ inputs.variant == 'release' && secrets.ANDROID_KEYSTORE_PASSWORD || '' }}
+          ANDROID_KEY_ALIAS: ${{ inputs.variant == 'release' && secrets.ANDROID_KEY_ALIAS || '' }}
+          ANDROID_KEY_PASSWORD: ${{ inputs.variant == 'release' && secrets.ANDROID_KEY_PASSWORD || '' }}
+        run: |
+          set -euo pipefail
+          umask 077
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          mkdir -p "$RUNNER_TEMP/apk-output"
+          output="$RUNNER_TEMP/apk-output/Dongjak-Safety-Map-v$VERSION-$VARIANT.apk"
+          if [ "$VARIANT" = release ]; then
+            : "${ANDROID_KEYSTORE_BASE64:?Configure ANDROID_KEYSTORE_BASE64}"
+            : "${ANDROID_KEYSTORE_PASSWORD:?Configure ANDROID_KEYSTORE_PASSWORD}"
+            : "${ANDROID_KEY_ALIAS:?Configure ANDROID_KEY_ALIAS}"
+            : "${ANDROID_KEY_PASSWORD:?Configure ANDROID_KEY_PASSWORD}"
+            key="$RUNNER_TEMP/dongjak-release.keystore"
+            trap 'rm -f "$key" "$RUNNER_TEMP/aligned.apk"' EXIT
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$key"
+            unset ANDROID_KEYSTORE_BASE64
+            "$tools/zipalign" -f -P 16 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
+            "$tools/apksigner" sign --ks "$key" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_KEYSTORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out "$output" "$RUNNER_TEMP/aligned.apk"
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk "$output"
+          fi
+          "$tools/apksigner" verify --verbose "$output"
+          "$tools/aapt" dump badging "$output" > "$RUNNER_TEMP/apk-badging.txt"
+          grep -F "package: name='kr.dongjak.safetyapp' versionCode='$VERSION_CODE' versionName='$VERSION'" "$RUNNER_TEMP/apk-badging.txt"
+          unzip -p "$output" assets/public/index.html | wc -c | awk '$1>0{ok=1} END{exit !ok}'
+          (cd "$RUNNER_TEMP/apk-output"; sha256sum ./*.apk > SHA256SUMS.txt)
+          {
+            echo "### Android APK v$VERSION ($VARIANT)"
+            echo "- Public source: $GITHUB_SHA"
+            echo "- APK signature and version: verified"
+            echo "- Device smoke test: not run"
+            echo "- Download the APK from this run's Artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Dongjak-Safety-Map-v${{ steps.prepare.outputs.version }}-${{ env.VARIANT }}
+          path: ${{ runner.temp }}/apk-output/
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
