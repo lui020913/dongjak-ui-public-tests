@@ -626,7 +626,9 @@ export function installUnifiedUI(doc=document, win=window){
         popupQueued=false;
         if(!newest?.isConnected||reduced())return;
         const card=newest.querySelector('.maplibregl-popup-content');
-        if(card && !(phone()&&playMobileMotion(card,true))){
+        // The facility sheet owns its own slide; live and safety geo cards stay anchored.
+        if(phone())return;
+        if(card){
           card?.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
         }
       });

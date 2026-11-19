@@ -48,15 +48,18 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
         }
         let viewportForPopup=viewport;
         const liveTrainPopup=onPhone&&popup.classList?.contains('dj-live-vehicle-popup');
-        if(liveTrainPopup){
+        const boundedPhonePopup=onPhone&&!placePopup;
+        if(boundedPhonePopup){
           const shown=node=>node&&getComputedStyle(node).display!=='none'&&getComputedStyle(node).visibility!=='hidden'&&node.getBoundingClientRect().width>0;
-          const rail=[...document.querySelectorAll('#dj-mobile-map-actions,.map-actions')].find(shown);
+          const rail=[...document.querySelectorAll('#dj-mobile-map-actions button,.map-actions button')].filter(shown);
           const nav=document.getElementById('bottom-nav');
+          const tip=document.getElementById('dj840-map-tip');
           const topbar=document.querySelector('.topbar'),tools=document.getElementById('djNext-rail');
-          const right=shown(rail)?Math.min(viewport.right,rail.getBoundingClientRect().left-4):viewport.right;
-          const bottom=shown(nav)?Math.min(viewport.bottom,nav.getBoundingClientRect().top-5):viewport.bottom;
-          const top=Math.max(viewport.top,...[topbar,tools].filter(shown).map(n=>n.getBoundingClientRect().bottom+5));
-          if(right-viewport.left>=220&&bottom-top>=210)viewportForPopup={left:viewport.left,right,top,bottom};
+          const visual=globalThis.visualViewport;
+          const right=Math.min(viewport.right,...rail.map(n=>n.getBoundingClientRect().left-6));
+          const bottom=Math.min(viewport.bottom,visual?visual.offsetTop+visual.height:viewport.bottom,...[nav,tip].filter(shown).map(n=>n.getBoundingClientRect().top-6));
+          const top=Math.max(viewport.top,visual?.offsetTop||0,...[topbar,tools].filter(shown).map(n=>n.getBoundingClientRect().bottom+6));
+          if(right-viewport.left>=150&&bottom-top>=100)viewportForPopup={left:viewport.left,right,top,bottom};
         }
         if(placePopup){
           const controls=[...document.querySelectorAll('#dj-mobile-map-actions, .map-actions')]
@@ -71,10 +74,10 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
             bottom:Math.max(viewport.top+240,Math.min(viewport.bottom-12,navTop-10))};
         }
         if(content){
-          if(liveTrainPopup){
-            const width=Math.max(150,Math.floor(viewportForPopup.right-viewportForPopup.left-2*margin));
+          if(boundedPhonePopup){
+            const width=Math.max(110,Math.floor(viewportForPopup.right-viewportForPopup.left-2*margin));
             popup.style.setProperty('max-width',width+'px','important');
-            popup.style.setProperty('width',Math.min(266,width)+'px','important');
+            popup.style.setProperty('width',Math.min(liveTrainPopup?250:300,width)+'px','important');
           }
           if(placePopup){
             const safeWidth=Math.max(175,Math.floor(viewportForPopup.right-viewportForPopup.left-2*margin));
@@ -83,18 +86,19 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
           }
           content.style.maxHeight=placePopup
             ?`${Math.max(190,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-30))}px`
-            :liveTrainPopup?`${Math.max(150,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-16))}px`:'min(72dvh,calc(100dvh - 52px))';
+            :boundedPhonePopup?`${Math.max(60,Math.floor(viewportForPopup.bottom-viewportForPopup.top-2*margin-20))}px`:'min(72dvh,calc(100dvh - 52px))';
           content.style.overflowY='auto';
           content.style.overscrollBehavior='contain';
         }
-        popup.style.translate='0px 0px';
+        popup.style.setProperty('translate','0px 0px','important');
         const rect=popup.getBoundingClientRect?.();
         if(!rect)continue;
         // Reuse the existing tested offset function with the reserved
         // action/nav viewport, not with the covered whole-map rectangle.
         const viewport=viewportForPopup;
         const offset=popupViewportOffset(rect,viewport,margin);
-        popup.style.translate=`${offset.x}px ${offset.y}px`;
+        popup.style.setProperty('translate',`${offset.x}px ${offset.y}px`,'important');
+        popup.classList.toggle('dj-popup-shifted',Boolean(offset.x||offset.y));
       }
     });
   };
@@ -104,6 +108,8 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
   map.on?.('resize',schedule);
   map.on?.('moveend',schedule);
   map.on?.('dongjak:live-vehicle-popup-move',schedule);
+  globalThis.visualViewport?.addEventListener('resize',schedule,{passive:true});
+  globalThis.visualViewport?.addEventListener('scroll',schedule,{passive:true});
   globalThis.addEventListener?.('resize',schedule,{passive:true});
   globalThis.addEventListener?.('orientationchange',schedule,{passive:true});
   schedule();
@@ -114,6 +120,8 @@ export function installViewportSafeMapPopups({map,margin=12}={}){
     map.off?.('resize',schedule);
     map.off?.('moveend',schedule);
     map.off?.('dongjak:live-vehicle-popup-move',schedule);
+    globalThis.visualViewport?.removeEventListener('resize',schedule);
+    globalThis.visualViewport?.removeEventListener('scroll',schedule);
     globalThis.removeEventListener?.('resize',schedule);
     globalThis.removeEventListener?.('orientationchange',schedule);
   };

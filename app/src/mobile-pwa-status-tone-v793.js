@@ -36,18 +36,18 @@ export function installPwaStatusTone(doc=document,win=window) {
         band.setAttribute('aria-hidden','true');
         app.appendChild(band);
       }
-      const guide=doc.getElementById('map-gesture-guide');
-      const dimmed=guide&&!guide.hidden;
-      themeMeta.setAttribute('content',dimmed?(theme==='dark'?'#14292b':'#98a5a1'):(theme==='dark'?'#192d32':'#e5ece8'));
+      const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
+      const dimmed=app.classList.contains('map-safety-open')||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
+      if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
+      // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
+      themeMeta.setAttribute('content',theme==='dark'?'#192d32':'#e5ece8');
     } else {
       band?.remove();band=null;
       themeMeta.setAttribute('content',baselineColor());
     }
   }
   const observer=new MutationObserver(sync);
-  observer.observe(app,{attributes:true,attributeFilter:['data-theme']});
-  const guide=doc.getElementById('map-gesture-guide');
-  if(guide)observer.observe(guide,{attributes:true,attributeFilter:['hidden']});
+  observer.observe(app,{attributes:true,attributeFilter:['data-theme','class','hidden','aria-hidden'],childList:true,subtree:true});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);
@@ -58,7 +58,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
     band?.remove();band=null;
-    root.classList.remove('dj-ios-home-pwa');
+    root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;
     themeMeta.content=baselineColor();
   };
 }

@@ -63,11 +63,11 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
       const number=String(data.vehicleLabel||'').replace(/호$/,'');safeText(heading,number?number+'호 열차':'열차 번호 미제공');
       safeText(values.destination,destinationLabel(data.destination));safeText(values.station,stationLabel(data.station));
       safeText(values.state,labelStatus[data.status]||'상태 미확인');safeText(values.next,data.nextStation?stationLabel(data.nextStation)+' 방면':'');
-      values.next.parentElement.hidden=!data.nextStation;
-      const date=new Date(data.observedAt);safeText(stamp,Number.isFinite(date.getTime())?'수신 '+date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hourCycle:'h23'}):'수신 시각 미확인');
+      values.next.parentElement.hidden=!data.nextStation||stationLabel(data.nextStation)===stationLabel(data.station);
+      const date=new Date(data.observedAt);safeText(stamp,Number.isFinite(date.getTime())?'수신 '+date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}):'수신 시각 미확인');
     };
     update(info);
-    const popup=new maplibregl.Popup({className:'dj-live-vehicle-popup',closeButton:true,closeOnClick:false,maxWidth:'min(286px, calc(100vw - 36px))',offset:20})
+    const popup=new maplibregl.Popup({className:'dj-live-vehicle-popup',closeButton:true,closeOnClick:false,maxWidth:'min(286px, calc(100vw - 36px))',offset:12})
       .setLngLat(info.coordinates).setDOMContent(root).addTo(map);
     active={popup,id:info.id,mode:info.mode,root,update,lastPosition:info.coordinates.join(','),lastText:null};
     popup.on?.('close',()=>{if(active?.popup===popup)active=null;});

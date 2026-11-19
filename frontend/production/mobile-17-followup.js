@@ -41,7 +41,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   grip.addEventListener('pointerdown',e=>{start=e.clientY;swiped=false;grip.setPointerCapture?.(e.pointerId)});
   grip.addEventListener('pointerup',e=>{if(start===null)return;const dy=e.clientY-start;start=null;if(Math.abs(dy)>30){swiped=true;apply(dy<0)}});
   grip.addEventListener('click',()=>{if(swiped){swiped=false;return}apply(!panel.classList.contains('dj871-sheet-expanded'))});
-  const notice=doc.createElement('div');notice.className='dj17-pilot-notice';notice.textContent='상도1동 보행안전 시범구역 · 다른 행정동은 추후 공개될 예정입니다.';head.after(notice);
+  const notice=doc.createElement('div');notice.className='dj17-pilot-notice';notice.textContent='상도1동 보행안전 시범구역 · 다른 행정동은 추후 공개 예정';head.after(notice);
  }
  function message(name){let n=$('dj17-pilot-status');if(!n){n=doc.createElement('div');n.id='dj17-pilot-status';n.className='dj17-pilot-status';n.setAttribute('role','status');app.append(n)}n.textContent=name+'은 추후 공개될 예정입니다.';n.hidden=false;win.clearTimeout(statusTimer);statusTimer=win.setTimeout(()=>n.hidden=true,2600)}
  const source='dj17-pilot-dongs',fill='dj17-pilot-fill',line='dj17-pilot-line',lockSource='dj17-pilot-lock-points',lockLayer='dj17-pilot-locks',lockImage='dj17-pilot-lock-image';
@@ -99,12 +99,15 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
   if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);
   const status=utilities?.querySelector('.dj834-shortcut-status');if(status&&status.textContent!=='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.')status.textContent='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.';
-  if(app.classList.contains('map-safety-open')&&!pilot)void showPilot();
-  if(!app.classList.contains('map-safety-open')&&pilot)hidePilot();
+  // The drawer is presentation only. Selected data remain visible after dismissal.
+  const selected=Boolean(doc.querySelector('[data-dj-import][aria-pressed="true"],#toggle-safety-facilities[aria-pressed="true"]'));
+  const wanted=app.dataset.tab==='map'&&(app.classList.contains('map-safety-open')||selected);
+  if(wanted&&!pilot)void showPilot();
+  if(!wanted&&pilot)hidePilot();
   if(!app.classList.contains('map-safety-open')){const panel=$('map-safety-controls');if(panel?.classList.contains('dj871-sheet-expanded')){panel.classList.remove('dj871-sheet-expanded');panel.querySelector('.dj17-expand')?.setAttribute('aria-expanded','false')}}
  }
- const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});schedule();
- doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){hidePilot();delete app.dataset.djUserTipDismissed}},true);
+ const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-pressed','data-tab']});schedule();
+ doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){delete app.dataset.djUserTipDismissed;schedule()}},true);
  function snapshot(){
   try{const c=map.getCenter();const detail=doc.querySelector('#mine-panel .dj834-my-detail');const value={time:Date.now(),tab:app.dataset.tab||'mine',profile:!!detail&&!detail.hidden,center:[c.lng,c.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),phase:'pending'};win.sessionStorage.setItem(KEY,JSON.stringify(value))}catch{}
  }
