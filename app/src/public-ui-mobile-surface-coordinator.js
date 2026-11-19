@@ -111,7 +111,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     if(!positioned)scroller.insertBefore(mapOptionsButton,expectedNext);
   };
   const keepFieldVisible=()=>{
-    const input=doc.activeElement,form=doc.getElementById('community-form'),body=doc.querySelector('#participation-panel > .dj836-sheet-body');
+    const input=doc.activeElement,form=doc.getElementById('community-form'),body=form?.querySelector('.djNext-form-scroll')||doc.querySelector('#participation-panel > .dj836-sheet-body');
     if(!input||!body||!form?.contains(input)||!app.hasAttribute('data-dj-user-editor-keyboard'))return;
     const r=input.getBoundingClientRect(),b=body.getBoundingClientRect(),head=form.querySelector('.community-form-top');
     const min=Math.max(b.top,head?.getBoundingClientRect().bottom||b.top)+10,max=b.bottom-12;
