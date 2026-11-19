@@ -647,6 +647,8 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(menu).toBeVisible({timeout:20000});
  await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
+ const iosChoice=menu.getByRole('button',{name:/iPhone 앱 다운로드/});
+ await expect(iosChoice).toBeDisabled();await expect(iosChoice).toContainText('추후 업데이트 예정');
  const viewport=await page.evaluate(()=>({width:document.documentElement.clientWidth,height:innerHeight}));
  const rect=await menu.boundingBox();expect(rect.x).toBeCloseTo(0,0);expect(rect.y).toBeCloseTo(0,0);expect(Math.abs(rect.width-viewport.width)).toBeLessThanOrEqual(2);expect(Math.abs(rect.height-viewport.height)).toBeLessThanOrEqual(2);
  await expect(menu).toHaveCSS('border-top-left-radius','0px');
