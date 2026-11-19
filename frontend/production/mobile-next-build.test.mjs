@@ -48,3 +48,24 @@ test('visible custom phone buttons explicitly own pointer hit-testing; hidden ta
  assert.match(css,/\[data-tab="map"\]:not\(\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:auto!important;touch-action:manipulation!important\}/);
  assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
 });
+
+test('new rail is independent from the original toolbar; road width is still available in native My Info layers',()=>{
+ const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
+ assert.match(src,/host\.id='djNext-toolbar'/);
+ assert.match(src,/app\.append\(host\)/);
+ assert.doesNotMatch(src,/host=next;rail=/);
+ assert.ok(PHONE_CHOICES.every(c=>c[0]!=='width'));
+ assert.match(readFileSync(new URL('../src/v831-swipe-feature-toolbar.js',import.meta.url),'utf8'),/map-road-width.*toggle-road-width/);
+ assert.match(src,/invoke\('#weather-label'\)/);
+ assert.doesNotMatch(src,/invoke\('#dj-v794-weather'\)/);
+});
+test('photo-reference layout has four columns and separately clipped scroll content',()=>{
+ const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
+ assert.match(css,/\.djNext-layer-grid\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+ assert.match(css,/\.djNext-layer-scroll\{overflow:auto/);
+ assert.match(css,/djNextSheetIn 300ms cubic-bezier/);
+ assert.match(css,/\.djNext-form-scroll\{min-height:0;overflow:auto/);
+ assert.match(css,/\.djNext-safety-scroll\{flex:1 1 auto;min-height:0;overflow:auto/);
+ const pilot=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
+ assert.match(pilot,/map\.getLayer\(fill\)&&map\.getLayer\(line\)&&map\.getLayer\(lockLayer\)\)\{toggleLayers\(true\);return\}/);
+});
