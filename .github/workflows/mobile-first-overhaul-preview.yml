@@ -1,5 +1,5 @@
 name: Mobile-only release — Preview, phone QA and protected Production
-run-name: Mobile-only release source=${{ github.sha }}
+run-name: '모바일 배포 · ${{ github.event.head_commit.message }}'
 on:
   push:
     branches: [main]
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
-    name: Build exact source with mobile-only app gate
+    name: '1. 빌드 및 기본 테스트'
     runs-on: ubuntu-24.04
     environment: public-source-build
     timeout-minutes: 65
@@ -70,7 +70,7 @@ jobs:
   preview:
     needs: build
     if: needs.build.result == 'success'
-    name: Deploy isolated Preview
+    name: '2. Preview 배포'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-preview
     timeout-minutes: 30
@@ -113,7 +113,7 @@ jobs:
   mobile-qa:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    name: Mobile browser QA — shard ${{ matrix.shard }}/12
+    name: '3. 모바일 검증 (${{ matrix.shard }}/12)'
     strategy:
       fail-fast: false
       max-parallel: 12
@@ -178,7 +178,7 @@ jobs:
   production:
     needs: [build, preview, mobile-qa]
     if: needs.mobile-qa.result == 'success'
-    name: Promote the exact mobile-tested build to Production
+    name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
     timeout-minutes: 35
@@ -297,7 +297,7 @@ jobs:
   notify-preview:
     needs: [preview, mobile-qa]
     if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
-    name: Notify preview milestone
+    name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     permissions:
@@ -319,7 +319,7 @@ jobs:
   notify-production:
     needs: [production]
     if: ${{ needs.production.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
-    name: Notify production milestone
+    name: '알림 · Production 배포 완료'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     permissions:
@@ -340,7 +340,7 @@ jobs:
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
-    name: Publish release run link
+    name: '배포 실행 등록'
     runs-on: ubuntu-24.04
     permissions:
       statuses: write
@@ -355,7 +355,7 @@ jobs:
   report:
     needs: [announce, build, preview, mobile-qa, production]
     if: always() && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
-    name: Publish release result
+    name: '최종 결과 기록'
     runs-on: ubuntu-24.04
     permissions:
       statuses: write
