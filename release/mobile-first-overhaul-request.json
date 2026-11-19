@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.0",
-  "public_work_branch": "fix/safety-map-9-beta-2-regressions",
+  "public_work_branch": "fix/safety-map-9-beta-3-touch",
   "purpose": "Mobile-only service generation 9.0: seven customizable controls, GPS and microphone onboarding, voice search, four route comparison, nearby safety and native locks, transport UI, full historical edition catalog and verified developer-beta/production labels.",
-  "attempt": 28,
+  "attempt": 29,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "27th candidate passed source/version checks; four legacy regression files failed. Update assertions for retained standard/gentle routes, legacy toolbar exclusion of new rail, Korean release size labels with preserved history; guard missing layout APIs in transport focus. Keep all gates enabled.",
+  "last_retry_reason": "28th build regression all passed, Preview succeeded, mobile375/390 touch tests failed because legacy toolbar pointer-events:none was inherited by new buttons. Explicitly enable hit-testing for visible buttons only; keep hidden controls inert and all browser assertions intact.",
   "release_kind": "major",
-  "beta_number": 2
+  "beta_number": 3
 }
