@@ -78,3 +78,24 @@ test('a partially loaded bridge pair never creates competing reorder loops',()=>
   assert.equal(promoteReadable3DLabelLayers(f.map),false);
   assert.equal(f.moves,first);
 });
+
+test('metro exits, facilities, close bus stops and bridge labels converge on one order without reentrant redraw',()=>{
+ const f=makeMap();
+ for(const id of ['metro-access-exits','metro-access-exit-labels','metro-access-elevator','metro-access-escalator','metro-access-stairs','transport-bus-names-close'])f.layers.push({id,type:'symbol',layout:{}});
+ const original=f.map.moveLayer;
+ let reentrant=0;
+ f.map.moveLayer=(...args)=>{original(...args);assert.equal(promoteReadable3DLabelLayers(f.map),false);reentrant++;};
+ assert.equal(promoteReadable3DLabelLayers(f.map),true);
+ assert.ok(reentrant>0);
+ const ids=f.layers.map(l=>l.id);
+ assert.ok(ids.indexOf('metro-access-exits')>ids.indexOf('dongjak-featured-place-names'));
+ assert.ok(ids.indexOf('metro-access-exit-labels')<ids.indexOf('dj-hangang-bridge-geometry-labels'));
+ const count=f.moves;
+ for(let i=0;i<20;i++)assert.equal(promoteReadable3DLabelLayers(f.map),false);
+ assert.equal(f.moves,count);
+ for(const path of ['featured-place-labels.js','station-accessibility.js','hangang-bridge-labels.js']){
+  const code=readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
+  assert.match(code,/promoteReadable3DLabelLayers\(map\)/);
+  assert.doesNotMatch(code,/map\.moveLayer\(/);
+ }
+});
