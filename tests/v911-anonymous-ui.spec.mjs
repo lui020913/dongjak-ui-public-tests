@@ -544,7 +544,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
    await close();await expect(parent).toBeHidden();
    const frames=await page.evaluate(()=>window.__sharedMotion);
-   for(const [phase,duration] of [['opening',360],['closing',300]]){
+   for(const [phase,duration] of [['opening',350],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
      expect(motion.every(f=>f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);

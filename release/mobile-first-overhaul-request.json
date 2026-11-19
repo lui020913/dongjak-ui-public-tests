@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.17",
   "public_work_branch": "main",
-  "purpose": "Integrate revised layer switch patch, compact guide and TIP, grouped settings, map-coloured transfer badges, moderate faster window motion",
-  "attempt": 83,
+  "purpose": "Integrate layer switch and layout refinements with native-inspired 350ms sheet motion",
+  "attempt": 84,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Mobile UI screenshot follow-up",
+  "last_retry_reason": "Canonical TIP copy fix and iPhone-inspired easing; keep confirmation fade unchanged",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
