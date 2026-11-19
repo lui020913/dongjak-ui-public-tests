@@ -121,3 +121,9 @@
     transition:none!important;filter:none!important;
   }
 }
+
+/* Native touch and independent translation for the facility information sheet. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .dj-place-header{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none}
+ html body #app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup.dj-sheet-dragging{translate:0 var(--dj-sheet-drag-y,0px)!important;opacity:1!important;transition:none!important}
+}

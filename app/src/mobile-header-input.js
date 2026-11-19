@@ -13,7 +13,8 @@ export function bindHeaderDragInput(header,win,{down,move,up,cancel}){
  const normalized=(e,t)=>({
   pointerId:'touch:'+t.identifier,clientX:t.clientX,clientY:t.clientY,
   target:e.target,currentTarget:header,pointerType:'touch',isPrimary:true,
-  cancelable:e.cancelable,preventDefault:()=>{if(e.cancelable)e.preventDefault()}
+  cancelable:e.cancelable,preventDefault:()=>{if(e.cancelable)e.preventDefault()},
+  stopPropagation:()=>e.stopPropagation()
  });
  const find=(list,id)=>Array.from(list||[]).find(t=>t.identifier===id);
  const ts=e=>{

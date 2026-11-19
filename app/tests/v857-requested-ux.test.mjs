@@ -52,7 +52,8 @@ test('Bottom-tab panels use a dedicated top-edge drag handle and rise animation'
   const controller=read('src/dj-v8212-sheet-controller.js');
   assert.match(css,/dj857-sheet-rise/);
   assert.match(css,/dj836-edge-drag/);
-  assert.match(controller,/pointerdown/);
+  assert.match(controller,/bindHeaderDragInput\(handle,win,/);
+  assert.match(read('src/mobile-header-input.js'),/header\.addEventListener\('touchstart'/);
   assert.match(controller,/--dj-sheet-drag-y/);
 });
 
@@ -93,7 +94,8 @@ test('Facility popup exposes route, favorite, share and close actions in a swipe
   assert.match(details,/dj854-place-favorite/);
   assert.match(details,/dj856-place-share/);
   assert.match(details,/dj-place-header-close/);
-  assert.match(details,/pointerdown/);
+  assert.match(details,/bindHeaderDragInput\(header,window,/);
+  assert.match(read('src/mobile-header-input.js'),/header\.addEventListener\('touchstart'/);
   assert.match(css,/dj-place-edge-drag/);
 });
 
