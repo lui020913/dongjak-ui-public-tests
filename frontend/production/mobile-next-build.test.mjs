@@ -63,8 +63,8 @@ test('photo-reference layout has four columns and separately clipped scroll cont
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  assert.match(css,/\.djNext-layer-grid\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\.djNext-layer-scroll\{overflow:auto/);
- assert.match(css,/djNextSheetIn 420ms cubic-bezier\(\.42,0,\.58,1\)/);
- assert.match(css,/djNextSheetOut 320ms cubic-bezier\(\.42,0,\.58,1\)/);
+ assert.match(css,/djNextSheetIn 360ms cubic-bezier\(\.30,0,\.45,1\)/);
+ assert.match(css,/djNextSheetOut 300ms cubic-bezier\(\.30,0,\.45,1\)/);
  assert.doesNotMatch(css,/djNextBackdrop(?:In|Out)/);
  assert.match(css,/opacity:1!important;transition:none!important;animation:djNextSheetIn/);
  assert.match(css,/@keyframes djNextSheetIn\{from\{transform:translateY\(100%\)\}to\{transform:translateY\(0\)\}\}/);
@@ -100,9 +100,9 @@ test('explicit layer, permission and weather opens are authorized before hidden 
 
 test('shared bottom sheet motion has exact endpoints, gradual initial acceleration and no fade',async()=>{
  const {WINDOW_MOTION,windowMotionProgress,windowMotionFrame}=await import('../src/mobile-window-motion.js');
- assert.deepEqual(WINDOW_MOTION,{open:420,close:320,easing:'cubic-bezier(.42,0,.58,1)'});
+ assert.deepEqual(WINDOW_MOTION,{open:360,close:300,easing:'cubic-bezier(.30,0,.45,1)'});
  assert.equal(windowMotionProgress(0),0);assert.equal(windowMotionProgress(1),1);
- assert.ok(windowMotionProgress(.1)<.03);assert.ok(Math.abs(windowMotionProgress(.5)-.5)<.0001);
+ assert.ok(windowMotionProgress(.1)>.02&&windowMotionProgress(.1)<.08);assert.ok(windowMotionProgress(.5)>.5&&windowMotionProgress(.5)<.75);
  for(let i=0;i<=100;i++){const p=i/100,a=windowMotionFrame(p,true,200,200,true),b=windowMotionFrame(p,false,200,200,true);assert.equal(a.opacity,1);assert.equal(b.opacity,1);assert.ok(Math.abs(a.offset+b.offset-200)<.0001);assert.equal(a.clip,a.offset);}
  const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8'),coordinator=readFileSync(new URL('../src/v806-unified-ui.js',import.meta.url),'utf8');
  assert.match(js,/DongjakWindowMotion\?\.open\(body\)/);assert.match(js,/DongjakWindowMotion\.close\(body,finishClose\)/);

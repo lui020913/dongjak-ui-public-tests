@@ -2654,7 +2654,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       }
       if(!sameStationLineChange)for(const line of badgeLines){
         const button=document.createElement('button');button.type='button';
-        button.className='dj-metro-line-selector';button.dataset.djLine=normalizeLineName(line);
+        button.className='dj-metro-line-selector';button.dataset.djLine=normalizeLineName(line);button.style.setProperty('--dj-line-color',subwayLineColor(line));
         button.setAttribute('aria-label',`${line} 호선으로 전환`);
         button.setAttribute('aria-pressed',String(normalizeLineName(place.selectedLine||'')===line));
         button.title=`${line} 정보 보기`;

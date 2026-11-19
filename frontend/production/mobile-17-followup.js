@@ -19,7 +19,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   const body=doc.querySelector('#dj-mobile-utilities .dj-mobile-utilities-body');
   if(!home)return;
   let root=home.querySelector('.dj17-more-root');
-  if(!root){root=doc.createElement('details');root.className='dj17-more-root';const s=doc.createElement('summary');s.textContent='지도 기능 · 개인 설정';root.append(s);home.append(root)}
+  if(!root){root=doc.createElement('details');root.className='dj17-more-root';const s=doc.createElement('summary');s.textContent='지도 기능 · 개인 설정';root.append(s);(home.querySelector('[data-dj834-action="records"]')?.closest('.dj834-settings-group')||home).append(root)}
   if(body&&body.parentElement!==root){root.append(body)}
   const target=root.querySelector('.dj-mobile-utilities-body');
   if(!target)return;

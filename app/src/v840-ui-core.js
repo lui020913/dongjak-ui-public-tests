@@ -2,10 +2,10 @@
 export const MAP_TIP_MESSAGES=Object.freeze([
   '역이나 정류장을 누르면 대중교통 정보를 확인할 수 있습니다.',
   '검색창에서 병원·약국·공원·일반 시설을 검색해 보세요.',
-  '지도의 표시 레이어는 더보기 메뉴에서 관리할 수 있습니다.',
+  '상단 레이어에서 지도 기능을 관리하세요.',
   '현재 위치 버튼으로 지도 중심을 내 위치에 맞출 수 있습니다.',
   '도보 길찾기에서 경유지를 최대 5곳까지 추가할 수 있습니다.',
-  '행정동 선택은 검색창 아래 지도 바로가기에서 열 수 있습니다.'
+  '레이어에서 행정동을 선택하세요.'
 ]);
 export const PRIMARY_PANELS=['route-panel','participation-panel','news-panel','mine-panel','admin-dong-picker'];
 export const TRANSIENT_PANELS=['overview-sheet','transport-sheet','detail-sheet','entry-sheet','night-visibility-float','map-safety-controls','map-advanced-controls','dj-mobile-utilities','dj832-data-sheet','dj833-weather-sheet','dj833-night-modal','dj832-info-sheet','dj832-feature-sheet','dj-map-settings','dj-app-about','version-history-modal','route-map-card','nav-live-card','route-pick-hint','map-gesture-guide'];
