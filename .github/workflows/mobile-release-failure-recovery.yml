@@ -5,6 +5,11 @@ on:
       - "Mobile-only release — Preview, phone QA and protected Production"
       - "Android APK - public build"
     types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mobile-release-failure-recovery.yml'
+      - 'scripts/gemini-mobile-repair.mjs'
 permissions:
   contents: read
   actions: write
@@ -12,8 +17,23 @@ concurrency:
   group: mobile-failure-recovery-${{ github.event.workflow_run.id }}
   cancel-in-progress: false
 jobs:
+  validate:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate Gemini repair script syntax
+        run: node --check scripts/gemini-mobile-repair.mjs
   recover:
     if: >-
+      github.event_name == 'workflow_run' &&
       github.repository == 'lui020913/dongjak-ui-public-tests' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch == 'main' &&
@@ -28,7 +48,6 @@ jobs:
       FAILED_RUN: ${{ github.event.workflow_run.id }}
       FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
       ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
-      REPAIR_LOG_DIR: ${{ runner.temp }}/mobile-failure-logs
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +70,8 @@ jobs:
           fi
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN" | jq -e --arg sha "$FAILED_SHA" --argjson attempt "$ATTEMPT" '.head_sha==$sha and .run_attempt==$attempt and .status=="completed" and .conclusion=="failure"' >/dev/null || exit 0
           echo "base=$current" >> "$GITHUB_OUTPUT"
+          REPAIR_LOG_DIR="$RUNNER_TEMP/mobile-failure-logs"
+          printf 'REPAIR_LOG_DIR=%s\n' "$REPAIR_LOG_DIR" >> "$GITHUB_ENV"
           mkdir -p "$REPAIR_LOG_DIR"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/attempts/$ATTEMPT/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' | head -n 8 | while read -r id; do
             [[ "$id" =~ ^[0-9]+$ ]] || exit 1
