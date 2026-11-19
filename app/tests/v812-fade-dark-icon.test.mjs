@@ -17,7 +17,7 @@ test('Shared slide UI with preserved Reduce Motion option',()=>{
   assert.match(settings,/app\.dataset\.djMotionStyle='soft'/);
   assert.doesNotMatch(settings,/dj-settings-motion-style/);
   assert.match(settings,/id="dj-settings-motion"/);
-  assert.match(motion,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
+  assert.match(motion,/const slideDuration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
   assert.match(motion,/windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
   assert.doesNotMatch(motion,/dj810-mobile-sheet-open/);
   assert.match(css,/@keyframes dj811-mobile-soft-open/);
