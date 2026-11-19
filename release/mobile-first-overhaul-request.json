@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.1.1",
+  "application_version": "9.1.2",
   "public_work_branch": "main",
   "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
-  "attempt": 50,
+  "attempt": 51,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Restore one facility-only shared slide, keep anchored transit/safety popups stationary, and reconcile the failing facility animation regression with the explicit owner and guard. Add mobile search visibility and clear coverage.",
+  "last_retry_reason": "Live 9.1.1 device review: pilot lock layer shown on base map, repeated tab rise, status seam, English labels, AI/about/history and charcoal UI. Preserve independent safety data and mobile-only release gates.",
   "release_kind": "patch",
-  "beta_number": 2
+  "beta_number": 1
 }

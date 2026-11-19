@@ -536,7 +536,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      expect(motion.length).toBeGreaterThan(1);
      expect(motion.every(f=>f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
-     expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
+     if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
    }
  }
@@ -596,7 +596,7 @@ test('theme confirmation fades in place with its backdrop, unlike bottom sheets'
 });
 
 
-test('phone update history rises monotonically and never paints over bottom navigation',{tag:'@phone-layout'},async({page})=>{
+test('phone update history fades in place and never paints over bottom navigation',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();
  await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
@@ -610,9 +610,10 @@ test('phone update history rises monotonically and never paints over bottom navi
  });
  await tap(page,trigger);await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
  await tap(page,modal.locator('#version-history-close'));await expect(modal).toBeHidden();
- const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',420],['closing',320]]){
-  const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.opacity===1&&f.animation==='none'&&f.y>=final.y-3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
-  for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i].y-a[i-1].y:a[i-1].y-a[i].y).toBeLessThanOrEqual(3);
+ const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){
+  const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
+  expect(a.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);
+  for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i-1].opacity-a[i].opacity:a[i].opacity-a[i-1].opacity).toBeLessThanOrEqual(.03);
  }
 });
 
@@ -626,4 +627,13 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await page.locator('#dj-search-clear').click();await expect(input).toHaveValue('');
  await expect(results).toBeVisible();
  await page.locator('#map-quick-search-close').click();await expect(results).toBeHidden();
+});
+
+test('primary tabs replace content without replaying a rise and keep the pill dock',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
+ await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.dataset.dj810Animating)window.__tabMotions.push(panel.dataset.dj810Animating)}).observe(panel,{attributes:true,attributeFilter:['data-dj810-animating']});});
+ await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).not.toContain('opening');
+ await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
+ await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
 });
