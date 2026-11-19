@@ -38,11 +38,15 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
- const status=add('small','dj-install-status',key==='android'||key==='ios'?'확인 중':'',b);add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');buttons.set(key,{b,status});
+ const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':'',b);
+ if(key==='pwa')status.classList.add('dj-install-platforms');
+ if(key==='ios'){b.disabled=true;b.dataset.installPaused='true';}else add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');
+ buttons.set(key,{b,status});
  b.addEventListener('click',async()=>{
+ if(key==='ios')return;
  if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();return;}
  if(key==='pwa'){showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
- const url=safeDownloadUrl(links[key],key);if(url)win.location.assign(url);else showInfo([key==='ios'?'iPhone 앱은 현재 서명 및 Apple 배포 준비 중입니다. 웹앱을 이용해 주세요.':'일반 사용자용 서명된 APK 다운로드 링크는 준비 중입니다. 웹앱을 이용해 주세요.']);
+ const url=safeDownloadUrl(links[key],key);if(url)win.location.assign(url);else showInfo(['일반 사용자용 서명된 APK 다운로드 링크는 준비 중입니다. 웹앱을 이용해 주세요.']);
  });
  }
  if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);}
@@ -50,9 +54,9 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  let seen=false;try{seen=win.sessionStorage.getItem(INSTALL_SESSION_KEY)==='1';}catch{}if(!seen||new URLSearchParams(win.location.search).get('install')==='1'){if(typeof card.showModal==='function')card.showModal();else card.setAttribute('open','');}}
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);
  Promise.resolve().then(()=>win.fetch('/download-links.json',{cache:'no-store'})).then(r=>r.ok?r.json():{}).then(async data=>{
- links=data&&typeof data==='object'?{ios:data.ios}:{};
+ links={}; // iOS native distribution is paused; ignore any configured iOS download URL.
  if(data?.androidAutoRelease===true){try{const r=await win.fetch('/release-source.json',{cache:'no-store'});if(r.ok){const marker=await r.json();if(marker.release_status==='DEPLOYED_PRODUCTION'&&/^\d+\.\d+\.\d+$/.test(marker.application_version)){const response=await win.fetch('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/android-v'+marker.application_version,{headers:{Accept:'application/vnd.github+json'},credentials:'omit'});if(response.ok)links.android=androidReleaseAsset(marker,await response.json());}}}catch{}}
- for(const key of ['android','ios'])buttons.get(key).status.textContent=safeDownloadUrl(links[key],key)?'':'준비 중';
- }).catch(()=>{for(const key of ['android','ios'])buttons.get(key).status.textContent='준비 중';});
+ buttons.get('android').status.textContent=safeDownloadUrl(links.android,'android')?'':'준비 중';
+ }).catch(()=>{buttons.get('android').status.textContent='준비 중';});
  return card;
 }

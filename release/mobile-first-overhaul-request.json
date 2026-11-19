@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.2",
+  "application_version": "9.2.3",
   "public_work_branch": "main",
-  "purpose": "Use the original white Dongjak icon for browser welcome and native launcher assets; preserve the existing PWA artwork policy.",
-  "attempt": 59,
+  "purpose": "Pause native iOS distribution and macOS builds; keep iPhone browser and PWA access.",
+  "attempt": 60,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Replace native default icons and use invariant branded welcome icon.",
+  "last_retry_reason": "Disable iOS choice with future update label and retain manual-only opt-in workflows.",
   "release_kind": "patch",
   "beta_number": 1
 }
