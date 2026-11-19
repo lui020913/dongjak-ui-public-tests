@@ -20,20 +20,80 @@ jobs:
       github.event.workflow_run.actor.login == 'lui020913' &&
       github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: write
     env:
-      GH_TOKEN: ${{ github.token }}
       FAILED_RUN: ${{ github.event.workflow_run.id }}
       FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
       ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+      REPAIR_LOG_DIR: ${{ runner.temp }}/mobile-failure-logs
     steps:
-      - name: Retry eligible exact-source failure once, never bypass release gates
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inspect exact current failed candidate
+        id: inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$FAILED_RUN" =~ ^[0-9]+$ && "$FAILED_SHA" =~ ^[a-f0-9]{40}$ && "$ATTEMPT" =~ ^[0-9]+$ ]]
-          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
-          if [[ "$FAILED_SHA" != "$current" ]]; then echo 'Stale candidate; no retry.'; exit 0; fi
+          current="$(git rev-parse HEAD)"
+          test "$current" = "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          if [[ "$FAILED_SHA" != "$current" ]]; then
+            if ! gh api "repos/$GITHUB_REPOSITORY/compare/$FAILED_SHA...$current" | jq -e '.status=="ahead" and (.files|length)>0 and all(.files[]; .filename==".github/workflows/mobile-release-failure-recovery.yml" or .filename=="scripts/gemini-mobile-repair.mjs")' >/dev/null; then echo 'Stale candidate; no retry.'; exit 0; fi
+          fi
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN" | jq -e --arg sha "$FAILED_SHA" --argjson attempt "$ATTEMPT" '.head_sha==$sha and .run_attempt==$attempt and .status=="completed" and .conclusion=="failure"' >/dev/null || exit 0
-          if (( ATTEMPT >= 2 )); then echo 'Retry limit reached; source diagnosis required.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          echo "base=$current" >> "$GITHUB_OUTPUT"
+          mkdir -p "$REPAIR_LOG_DIR"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/attempts/$ATTEMPT/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' | head -n 8 | while read -r id; do
+            [[ "$id" =~ ^[0-9]+$ ]] || exit 1
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$id/logs" > "$REPAIR_LOG_DIR/$id.log" || true
+          done
+          count="$(jq -r '.gemini_repair_count // 0' release/mobile-first-overhaul-request.json)"
+          [[ "$count" =~ ^[0-9]+$ ]]
+          if (( count >= 3 )); then echo 'Gemini source repair limit reached.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          if grep -qEm1 'PHONE_TEST_FAILURE|Public regression file:|Public regression location:' "$REPAIR_LOG_DIR/"*.log 2>/dev/null || (( ATTEMPT >= 2 )); then
+            echo 'action=repair' >> "$GITHUB_OUTPUT"
+          else
+            echo 'action=retry' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Retry transient failed jobs once
+        if: steps.inspect.outputs.action == 'retry'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/rerun-failed-jobs"
-          echo 'Exact failed jobs requested again; existing tests, approvals and rollback remain required.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Gemini analyzes public UI failure and generates narrow source repair
+        if: steps.inspect.outputs.action == 'repair'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.5-flash-lite
+        run: node scripts/gemini-mobile-repair.mjs
+      - name: Save isolated candidate for independent validation and owner-authenticated bridge
+        if: steps.inspect.outputs.action == 'repair'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ steps.inspect.outputs.base }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then echo 'No source edit; preserve failure for diagnosis.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          git diff --check
+          test "$BASE" = "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          branch="automation/gemini-mobile-repair/$FAILED_RUN-$ATTEMPT"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then echo 'Candidate already exists.'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u -- app/src frontend/production
+          git commit -m "Gemini repair candidate for run $FAILED_RUN attempt $ATTEMPT"
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/$branch"
+          echo "Isolated Gemini repair candidate: $branch" >> "$GITHUB_STEP_SUMMARY"
+          echo 'No Production deployment or credential-bearing execution of generated code here.' >> "$GITHUB_STEP_SUMMARY"
