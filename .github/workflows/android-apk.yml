@@ -1,5 +1,5 @@
 name: Android APK - public build
-run-name: Android APK (${{ inputs.variant || 'debug' }}) - ${{ github.sha }}
+run-name: 'Android APK (${{ inputs.variant || ''debug'' }}) · Production 배포본 설치 파일 생성'
 on:
   workflow_dispatch:
     inputs:
