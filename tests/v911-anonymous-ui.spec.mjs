@@ -667,3 +667,22 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(page.locator('html')).toHaveAttribute('data-dj-run-mode','pwa');
  await expect(menu).toHaveCount(0);
 });
+
+test('Android verified download shows security instructions before navigation',{tag:'@phone-layout'},async({page})=>{
+ const sha='b'.repeat(40),version='9.2.8',tag='android-debug-v'+version,name='Dongjak-Safety-Map-v'+version+'-debug.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+tag+'/'+name;
+ await page.route('**/download-links.json',r=>r.fulfill({json:{androidAutoRelease:true,ios:null}}));
+ await page.route('**/release-source.json',r=>r.fulfill({json:{release_status:'DEPLOYED_PRODUCTION',source_commit:sha,application_version:version}}));
+ await page.route('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/'+tag,r=>r.fulfill({headers:{'access-control-allow-origin':'*'},json:{tag_name:tag,target_commitish:sha,draft:false,prerelease:false,assets:[{name,browser_download_url:url,state:'uploaded'}]}}));
+ let requested=false;await page.route(url,async r=>{requested=true;await r.abort();});
+ await page.goto('/',{waitUntil:'domcontentloaded'});
+ const menu=page.locator('#dj-install-menu'),choice=menu.getByRole('button',{name:/Android 앱 다운로드/});
+ await expect(choice.locator('.dj-install-status')).toHaveText('');
+ await choice.click();
+ const guide=menu.locator('[data-android-guide]');
+ await expect(guide).toBeVisible();await expect(guide).toContainText('출처를 알 수 없는 앱 설치');await expect(guide).toContainText('보안 위험 자동 차단');await expect(guide).toContainText('Play Protect는 켜 두세요');
+ expect(requested).toBe(false);
+ await expect(guide.getByRole('link',{name:'Galaxy 설치 제한 공식 안내'})).toHaveAttribute('href','https://www.samsungsvc.co.kr/solution/1711930');
+ await expect(guide.getByRole('button',{name:'웹 또는 웹앱 이용하기'})).toBeVisible();
+ await Promise.all([page.waitForRequest(url),guide.getByRole('button',{name:'APK 다운로드',exact:true}).click({noWaitAfter:true})]);
+ expect(requested).toBe(true);
+});

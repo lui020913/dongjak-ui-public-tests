@@ -45,3 +45,11 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 #dj-install-menu .dj-install-choice[data-install-paused] .dj-install-status{font-size:11px;white-space:normal;text-align:right;word-break:keep-all;max-width:88px}
 
 #dj-install-menu .dj-install-platforms{white-space:normal;text-align:right;max-width:90px;word-break:normal;line-height:1.35;flex-shrink:0}
+
+/* Android guidance appears only after the download choice; preserve the welcome design. */
+#dj-install-menu .dj-install-guide-title{font-size:16px;font-weight:750;line-height:1.5;margin:0 0 8px;word-break:keep-all}
+#dj-install-menu .dj-install-guide-steps{display:grid;gap:5px;margin:10px 0}
+#dj-install-menu .dj-install-guide-notice{font-weight:600;line-height:1.6}
+#dj-install-menu .dj-install-guide-help{display:inline-block;color:inherit;text-decoration:underline;text-underline-offset:3px;font-size:12px;margin:8px 0}
+#dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web){background:#167b65;color:#fff;border-color:#167b65}
+#dj-install-menu [data-android-guide] .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
