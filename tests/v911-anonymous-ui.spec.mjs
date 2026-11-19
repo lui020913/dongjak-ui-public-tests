@@ -511,3 +511,39 @@ test('phone report composer has non-overlapping independent header and input scr
  const before=await head.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await head.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  await form.locator('#community-compose-close').click();await expect(form).toBeHidden();
 });
+
+test('phone layer sheet opens and closes with gradual slide only without surface or backdrop fade',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ const modal=page.locator('#djNext-layer-panel'),body=modal.locator('.djNext-modal-body');
+ await page.evaluate(()=>{
+  const panel=document.getElementById('djNext-layer-panel'),body=panel.querySelector('.djNext-modal-body');
+  window.__layerMotion=[];
+  body.addEventListener('animationstart',e=>{
+   if(e.target!==body||!['djNextSheetIn','djNextSheetOut'].includes(e.animationName))return;
+   const anim=body.getAnimations().find(a=>a.animationName===e.animationName);
+   const timing=anim?.effect.getTiming(),keyframes=anim?.effect.getKeyframes()||[];
+   const item={name:e.animationName,duration:timing?.duration,easing:keyframes[0]?.easing,properties:keyframes.map(k=>Object.keys(k)),frames:[]};
+   window.__layerMotion.push(item);
+   const sample=()=>{
+    if(panel.hidden)return;
+    const c=getComputedStyle(body),p=getComputedStyle(panel);
+    const offset=c.transform==='none'?0:new DOMMatrixReadOnly(c.transform).m42;
+    item.frames.push({fraction:offset/Math.max(1,body.offsetHeight),opacity:Number(c.opacity),backOpacity:Number(p.opacity),background:p.backgroundColor,backAnimation:p.animationName});
+    if(anim?.playState==='running')requestAnimationFrame(sample);
+   };sample();
+  });
+ });
+ await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>window.__layerMotion.find(m=>m.name==='djNextSheetIn')?.frames.some(f=>f.fraction>.03&&f.fraction<.97)||false)).toBe(true);
+ await expect.poll(()=>body.evaluate(n=>n.getAnimations().every(a=>a.playState!=='running'))).toBe(true);
+ await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
+ const motions=await page.evaluate(()=>window.__layerMotion);
+ expect(motions.map(m=>m.name)).toEqual(['djNextSheetIn','djNextSheetOut']);
+ expect(motions.map(m=>m.duration)).toEqual([420,320]);
+ for(const m of motions){
+  expect(m.easing?.replace(/\s/g,'')).toBe('cubic-bezier(0.42,0,0.58,1)');
+  expect(m.properties.every(p=>p.includes('transform')&&!p.includes('opacity')&&!p.includes('clipPath'))).toBe(true);
+  expect(m.frames.some(f=>f.fraction>.03&&f.fraction<.97)).toBe(true);
+  expect(m.frames.every(f=>f.opacity===1&&f.backOpacity===1&&f.backAnimation==='none'&&f.background===m.frames[0].background)).toBe(true);
+ }
+});
