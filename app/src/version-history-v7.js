@@ -1,3 +1,4 @@
+import {groupReleaseEditions,syncPublicVersion} from './release-editions.js';
 /**
  * v7.0.7: visual presentation is release-first, newest to oldest.
  * The old classification model stays exported for data-integrity checks.
@@ -163,21 +164,37 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   const columns=el('div','v707-history-columns');columns.dataset.activeView='updates';
   const timeline=el('section','v707-history-timeline');timeline.id='history-version-timeline';
   timeline.setAttribute('aria-label','버전별 전체 업데이트 내역');
-  for(const release of releases){
+  let currentHeader=null;
+  for(const edition of groupReleaseEditions(releases)){
+    const archive=edition.historical?el('details','dj-edition-history'):null;
+    const parent=archive||timeline;
+    if(archive){
+      const heading=el('summary','dj-edition-summary');
+      heading.append(el('strong','','안전지도 '+edition.label),el('span','',edition.title),el('small','',edition.records.length+'개 기록'));
+      archive.append(heading);timeline.append(archive);
+    }
+    for(const {record:release,classification} of edition.records){
     const article=el('article','v707-release');
     const header=el('header','v707-release-head');
     article.dataset.releaseType=release.scale||'patch';
+    article.dataset.reviewedScale=classification;
     article.dataset.version=String(release.version||'').replace(/^v/,'');
     if(release.sourceVersion)article.dataset.previousVersion=release.sourceVersion;
-    const sizeLabel={major:'Major · 메이저',minor:'Minor · 마이너',patch:'Patch · 패치'}[release.scale]||'기록';
+    const sizeLabel={major:'주요 구조 개편',minor:'기능 추가·개선',patch:'수정·안정화'}[classification]||'기록';
     const badge=el('span','dj-semver-size',sizeLabel);
-    badge.setAttribute('aria-label',`${release.scale||'unknown'} 릴리스 유형`);
-    header.append(el('h4','',release.version),badge);
+    badge.setAttribute('aria-label',`${classification} 변경 유형`);
+    const versionHeading=el('h4','',edition.historical?release.version:edition.label);
+    if(release===currentRelease)currentHeader=versionHeading;
+    header.append(versionHeading,badge);
     article.append(header);
     const ul=el('ul','v707-release-items');
-    for(const description of release.items||[])ul.append(el('li','',description));
-    article.append(ul);timeline.append(article);
+    for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
+    if(edition.historical&&release.sourceVersion)article.append(el('p','dj-edition-original','원래 기록: '+release.sourceVersion));
+    if(edition.historical)article.append(el('p','dj-edition-original','개발 기록 · 운영 배포 여부 별도 확인'));
+    article.append(ul);parent.append(article);
+    }
   }
+  if(currentRelease)void syncPublicVersion({version:currentRelease.version,currentHeader});
   const sources=el('aside','v707-history-sources');sources.id='history-data-sources';
   sources.setAttribute('aria-label','데이터 출처 및 활용 범위');
   sources.append(el('h3','v7-history-sources-title','데이터 출처 및 활용 범위'));
@@ -218,6 +235,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       const focusRelease=()=>{
         const target=[...timeline.querySelectorAll('.v707-release')].find(item=>item.dataset.version===normalized);
         if(!target)return;
+        const archive=target.closest('.dj-edition-history');if(archive)archive.open=true;
         timeline.scrollTo?.({top:Math.max(0,target.offsetTop-timeline.offsetTop-8),behavior:'smooth'});
         target.classList.remove('dj856-release-focus');void target.offsetWidth;target.classList.add('dj856-release-focus');
         window.setTimeout(()=>target.classList.remove('dj856-release-focus'),1500);
