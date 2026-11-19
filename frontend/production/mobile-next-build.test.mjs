@@ -63,7 +63,11 @@ test('photo-reference layout has four columns and separately clipped scroll cont
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  assert.match(css,/\.djNext-layer-grid\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\.djNext-layer-scroll\{overflow:auto/);
- assert.match(css,/djNextSheetIn 300ms cubic-bezier/);
+ assert.match(css,/djNextSheetIn 420ms cubic-bezier\(\.42,0,\.58,1\)/);
+ assert.match(css,/djNextSheetOut 320ms cubic-bezier\(\.42,0,\.58,1\)/);
+ assert.doesNotMatch(css,/djNextBackdrop(?:In|Out)/);
+ assert.match(css,/opacity:1!important;transition:none!important;animation:djNextSheetIn/);
+ assert.match(css,/@keyframes djNextSheetIn\{from\{transform:translateY\(100%\)\}to\{transform:translateY\(0\)\}\}/);
  assert.match(css,/\.djNext-form-scroll\{min-height:0;overflow:auto/);
  assert.match(css,/\.djNext-safety-scroll\{flex:1 1 auto;min-height:0;overflow:auto/);
  const pilot=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
