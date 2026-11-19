@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 35
     defaults:
       run:
+        shell: bash
         working-directory: app
     env:
       VITE_SUPABASE_URL: https://placeholder.supabase.co
