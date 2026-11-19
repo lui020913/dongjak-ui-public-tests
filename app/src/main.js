@@ -164,7 +164,7 @@ function errorLocationCode(error) {
   return 2;
 }
 function getDevicePosition(options={}) {
-  if (Capacitor.isNativePlatform()) return Geolocation.getCurrentPosition(options);
+  if (Capacitor.isNativePlatform()) return Geolocation.requestPermissions().then(()=>Geolocation.getCurrentPosition(options));
   return new Promise((resolve,reject) => {
     if (!navigator.geolocation) return reject({code:2,message:'위치기능 미지원'});
     navigator.geolocation.getCurrentPosition(resolve,reject,options);
@@ -2318,6 +2318,9 @@ function requireDongjakRouteLocation(position){
   }
   return true;
 }
+async function resolveRouteAddress(position){
+  try{const q=new URLSearchParams({lat:String(position.lat),lon:String(position.lng)});const response=await fetch('/api/reverse-address?'+q,{signal:AbortSignal.timeout(6500)});if(!response.ok)return;const data=await response.json();if(typeof data.address==='string'&&data.address){position.label=data.address;position.name=data.address;if(position===routeStart||position===routeEnd)updateRouteLabels();if(routeWaypoints.includes(position))routeProductTools?.setWaypoints(routeWaypoints);}}catch{}
+}
 function setRouteLocation(which,position) {
   if(!requireDongjakRouteLocation(position))return false;
   if (which==='start') routeStart=position;
@@ -2325,6 +2328,7 @@ function setRouteLocation(which,position) {
   invalidateRoute();
   drawRouteMarkers();
   updateRouteLabels();
+  if(position.resolveAddress)void resolveRouteAddress(position);
   return true;
 }
 window.addEventListener('dongjak:route-select',event=>{
@@ -2389,7 +2393,7 @@ function showTransitRouteConfirmation(place) {
   document.getElementById('route-transit-confirm-desc').textContent=place.kind==='bus'
     ? (place.arsId?`버스정류장 · ARS ${place.arsId}. 정류장명과 번호를 확인해 주세요.`:'버스정류장 · 지도의 표시 위치가 맞는지 확인해 주세요.')
     : place.kind==='subway'?'지하철역 · 역명과 호선을 확인해 주세요.'
-    : `지도 위치 · ${place.address?`${place.address} · `:''}위도 ${place.lat.toFixed(5)}, 경도 ${place.lng.toFixed(5)} · 이곳이 맞습니까?`;
+    : `${place.address||'지도에서 선택한 위치'} · 이곳이 맞습니까?`;
   const tags=document.getElementById('route-transit-confirm-lines');
   tags.replaceChildren();
   for(const line of place.lines||[]){
@@ -2509,17 +2513,17 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
   closeTransitRouteConfirmation();
   routePickMode=null;
   const label=place.kind==='point'
-    ?(['search','facility'].includes(place.source) ? place.name : `지도 지정 · ${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`)
+    ?(['search','facility'].includes(place.source) ? place.name : (place.address||'지도에서 선택한 위치'))
     :describeTransitPlace(place);
   if(which==='waypoint'){
     if(navMode){toast('안내 중에는 경유지를 추가할 수 없습니다. 안내를 먼저 종료해 주세요.');navigate('route');return;}
     if(routeWaypoints.length>=5){toast('경유지는 최대 5곳입니다.');navigate('route');return;}
-    routeWaypoints.push({name:label,lng:place.lng,lat:place.lat,label});
+    const waypoint={name:label,lng:place.lng,lat:place.lat,label};routeWaypoints.push(waypoint);if(place.kind==='point'&&!['search','facility'].includes(place.source))void resolveRouteAddress(waypoint);
     invalidateRoute();
     routeProductTools?.setWaypoints(routeWaypoints);
     navigate('route');toast('경유지를 추가했습니다.');return;
   }
-  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label}))return;
+  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)}))return;
   navigate('route');
   toast(which==='start'?'선택한 위치를 출발지로 확정했습니다.':'선택한 위치를 목적지로 확정했습니다.');
 });
@@ -2762,7 +2766,7 @@ document.getElementById('route-gps-start').addEventListener('click',()=>{
   if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');return;}
   const b=document.getElementById('route-gps-start');b.disabled=true;b.textContent='위치 확인 중…';
   getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000}).then(({coords})=>{
-    const accepted=setRouteLocation('start',{lng:coords.longitude,lat:coords.latitude,label:`현재 위치 · 정확도 약 ${Math.round(coords.accuracy)}m`});
+    const accepted=setRouteLocation('start',{lng:coords.longitude,lat:coords.latitude,label:'현재 위치',resolveAddress:true});
     if(accepted){
       map.flyTo({center:[coords.longitude,coords.latitude],zoom:15.3,duration:600});
       toast('현재 위치를 출발지로 지정했습니다.');
