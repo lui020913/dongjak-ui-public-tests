@@ -3,6 +3,8 @@ set -euo pipefail
 REQUEST="$GITHUB_WORKSPACE/release/mobile-first-overhaul-request.json"
 SOURCE_SHA="$GITHUB_SHA"
 APP_VERSION="$(jq -er '.application_version' "$REQUEST")"
+RELEASE_KIND="$(jq -er '.release_kind' "$REQUEST")"
+case "$RELEASE_KIND" in major|minor|patch) ;; *) echo "Invalid release kind"; exit 1;; esac
 test "$(jq -er '.source' "$REQUEST")" = "public-app"
 test "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)" = "$SOURCE_SHA"
 test -n "$VITE_SUPABASE_URL"
@@ -48,7 +50,7 @@ echo "Expected changed files: $expected_changes"
 echo "Actual changed files: $actual_changes"
 if [ "$actual_changes" != "$expected_changes" ]; then echo "::error::Unexpected source change list"; exit 1; fi
 echo "CHECKPOINT: changed-file allowlist passed"
-node scripts/bump-app-version.mjs minor "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
+node scripts/bump-app-version.mjs "$RELEASE_KIND" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
 test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
 jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null
 echo "CHECKPOINT: version $APP_VERSION stamped"
