@@ -7,7 +7,12 @@ html body #app#app#app#app#app#app#app[data-search-open="true"] #dj-v794-toolbar
 html body #app#app#app#app#app#app#app:not([data-tab="map"]) #dj-v794-toolbar[data-dj-next-ready="1"]{visibility:hidden!important;pointer-events:none!important}
 #djNext-rail{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;align-items:stretch;min-width:0;box-sizing:border-box}
 html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{width:100%!important;min-width:0!important;height:48px!important;max-height:48px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;border:1px solid var(--dj800-border,#dce7df)!important;border-radius:12px!important;background:var(--dj800-surface,#fff)!important;color:var(--dj-ui-text,#203d32)!important;margin:0!important;padding:3px 0!important;box-sizing:border-box!important;animation:none!important;transition:none!important;white-space:nowrap!important;overflow:hidden!important}
-#djNext-rail button svg{width:20px;height:20px;flex:none}
+/* Legacy toolbar intentionally has pointer-events:none. New grid owns
+   hit-testing on visible interactive buttons only, never on map gaps. */
+html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="true"]) #dj-v794-toolbar[data-dj-next-ready="1"] #djNext-rail > button.djNext-tool{pointer-events:auto!important;touch-action:manipulation!important}
+html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #dj-v794-toolbar[data-dj-next-ready="1"] #djNext-rail > button.djNext-tool{pointer-events:none!important;visibility:hidden!important}
+#djNext-rail button svg{width:20px;height:20px;flex:none;pointer-events:none}
+#djNext-rail button span{pointer-events:none}
 #djNext-rail button span{font-size:10px;line-height:1.2;letter-spacing:-.055em;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 html body #app#app#app#app#app#app#app #djNext-rail button.djNext-empty{background:var(--dj800-surface-soft,#f5f8f6)!important;border-style:dashed!important;color:#80968a!important}
 html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:var(--dj800-surface-soft,#dceee5)!important;border-color:#65a38c!important;color:var(--dj800-accent,#0c7964)!important}
