@@ -226,13 +226,4 @@ jobs:
           done
           echo "::error::The exact tested Preview did not deploy before the verification timeout."
           exit 1
-      - name: Notify progress - 작업 완료 - Preview 확인 및 승인 대기
-        if: ${{ success() }}
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          title="Preview 완성"
-          message="작업 완료 - Preview 확인 및 승인 대기"
-          details="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s · [상세 보기](%s)' "$title" "$message" "$details")" || echo "::warning::GitHub progress comment failed"
+      # The private full-app gate already sends the single verified Preview approval notice.
