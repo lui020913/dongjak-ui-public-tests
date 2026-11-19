@@ -615,3 +615,15 @@ test('phone update history rises monotonically and never paints over bottom navi
   for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i].y-a[i-1].y:a[i-1].y-a[i].y).toBeLessThanOrEqual(3);
  }
 });
+
+test('phone search returns a visible local suggestion and clears input safely',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ const input=page.locator('#map-quick-search-query'),results=page.locator('#map-quick-search-dropdown');
+ await input.fill('노량진');
+ await expect(results).toBeVisible();
+ await expect(results.locator('.map-quick-search-result').filter({hasText:'노량진'}).first()).toBeVisible();
+ await expect(page.locator('#dj-search-clear')).toBeVisible();
+ await page.locator('#dj-search-clear').click();await expect(input).toHaveValue('');
+ await expect(results).toBeVisible();
+ await page.locator('#map-quick-search-close').click();await expect(results).toBeHidden();
+});

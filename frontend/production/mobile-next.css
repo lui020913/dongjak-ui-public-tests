@@ -388,6 +388,15 @@ html body #app#app#app#app#app#app#app#app#app#app #night-visibility-float{margi
 html body #app#app#app#app#app#app#app#app#app#app #night-visibility-float :is(#night-visibility-float-collapse,#night-visibility-float-stop){background:var(--djNext-raised)!important;color:var(--djNext-text)!important;border:1px solid var(--djNext-border)!important;border-radius:12px!important}
 html body #app#app#app#app#app#app#app#app#app#app :is(#map-safety-backdrop,#map-options-backdrop,.djNext-modal){transform:none!important;translate:none!important;animation:none!important;transition:background-color .18s ease!important}
 
+/* Keep the search portal inside the actual visual viewport and correct long line labels. */
+html body #app#app#app#app#app#app#app#app#app#app#app #map-quick-search-dropdown:not([hidden]){position:fixed!important;top:var(--dj871-search-top,112px)!important;left:10px!important;right:10px!important;bottom:auto!important;width:auto!important;max-width:none!important;max-height:var(--dj871-search-max,45dvh)!important;overflow:auto!important;box-sizing:border-box!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #map-quick-search-dropdown.dj871-search-leaving:not([hidden]){visibility:hidden!important;pointer-events:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #map-quick-search-dropdown .dj854-search-column-list{max-height:none!important;overflow:visible!important;grid-template-columns:minmax(0,1fr)!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #transport-title .metro-badge-shinlim{min-width:36px!important;width:auto!important;flex:none!important;padding-inline:5px!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;border-radius:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #transport-title .dj-metro-line-selector:has(.metro-badge-shinlim){width:auto!important;min-width:38px!important;flex:none!important;border-radius:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl{grid-template-columns:minmax(92px,auto) minmax(0,1fr)!important;gap:7px 8px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup:not(.dj-place-detail-popup) :is(.dj-live-popup,.safety-popup){min-width:0!important;max-width:100%!important;width:auto!important;overflow-wrap:anywhere!important}
+
 /* No older fade or CSS animation may compete with the shared JS motion owner. */
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal .djNext-modal-body,
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal.djNext-leaving .djNext-modal-body{animation:none!important;transform:none!important;opacity:1!important}

@@ -3,9 +3,9 @@
   "application_version": "9.1.1",
   "public_work_branch": "main",
   "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
-  "attempt": 49,
+  "attempt": 50,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.1.0 live-device observations: search results, popup viewport, safety state, duplicate facility animation, permission, dark palette and status strip; retain all deployment health checks.",
+  "last_retry_reason": "Restore one facility-only shared slide, keep anchored transit/safety popups stationary, and reconcile the failing facility animation regression with the explicit owner and guard. Add mobile search visibility and clear coverage.",
   "release_kind": "patch",
-  "beta_number": 1
+  "beta_number": 2
 }

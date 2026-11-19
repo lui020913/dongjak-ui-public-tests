@@ -26,7 +26,7 @@ test('mobile slide closes original panel only after transition, restores inline 
 
 test('facility popup keeps entrance and map X closes without transport route interception',()=>{
   assert.match(source,/if\(!phone\(\)\|\|!target\?\.style\|\|reduced\(\)\)return false/);
-  assert.match(source,/phone\(\)\&\&playMobileMotion\(card,true\)/);
+  assert.match(source,/if\(phone\(\)\)\{\s*if\(card&&newest\.classList\.contains\('dj-place-detail-popup'\)&&!activeAnimation\.has\(card\)\)playMobileMotion\(card,true\);\s*return;/);
   assert.match(source,/\.dj-place-header-close/);
   assert.match(source,/\.dj-place-route-button/);
   assert.match(source,/'#transport-close'/);

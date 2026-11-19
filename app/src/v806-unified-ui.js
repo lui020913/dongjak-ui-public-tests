@@ -215,6 +215,8 @@ export function installUnifiedUI(doc=document, win=window){
     cancel:cancelActive
   };
   function playOpen(id){
+    // Search is a keyboard-aware anchored portal, not a bottom sheet.
+    if(id==='map-quick-search-dropdown'&&phone())return;
     if(reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
     const target=content(element(id));if(!target)return;
     cancelActive(target);
@@ -626,8 +628,11 @@ export function installUnifiedUI(doc=document, win=window){
         popupQueued=false;
         if(!newest?.isConnected||reduced())return;
         const card=newest.querySelector('.maplibregl-popup-content');
-        // The facility sheet owns its own slide; live and safety geo cards stay anchored.
-        if(phone())return;
+        // Only the facility bottom sheet slides; geographic popups stay anchored.
+        if(phone()){
+          if(card&&newest.classList.contains('dj-place-detail-popup')&&!activeAnimation.has(card))playMobileMotion(card,true);
+          return;
+        }
         if(card){
           card?.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
         }
