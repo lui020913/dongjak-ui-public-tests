@@ -82,8 +82,9 @@ export function installV874UX(doc=document, win=window){
       button.setAttribute('aria-pressed',String(active));
     }
     // The panel stays on the same viewport position; only its inner content changes.
-    const panelTop=safety?.scrollTop||0;
-    if(panelTop>60)safety.scrollTo?.({top:0,behavior:'instant'});
+    const scroll=safety?.querySelector('.djNext-safety-scroll')||safety;
+    const panelTop=scroll?.scrollTop||0;
+    if(panelTop>60)scroll.scrollTo?.({top:0,behavior:'instant'});
   };
   if(safetyNav){
     listen(safetyNav,'click',e=>{
