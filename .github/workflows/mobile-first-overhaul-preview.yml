@@ -151,7 +151,7 @@ jobs:
         run: >-
           npx playwright test --config=playwright.v911-remote.config.mjs
           --project=mobile375 --project=mobile390 --project=mobile430
-          --project=mobile390-webkit-header --workers=2
+          --project=mobile390-webkit-header --workers=4
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
