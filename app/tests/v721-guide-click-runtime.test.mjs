@@ -18,7 +18,7 @@ test('help click opens and closes even when the optional fullscreen button is no
  const originals=Object.fromEntries(['document','window','navigator','localStorage','innerWidth','matchMedia','MutationObserver'].map(k=>[k,globalThis[k]]));
  const elements=Object.fromEntries(['map-gesture-guide','map-gesture-guide-open','map-gesture-guide-close','map-gesture-guide-hide-next'].map(n=>[n,el(n)]));
  const app=el('app');app.dataset.tab='map';
- let disconnectCount=0;
+ const observed=new Set(),disconnected=new Set();
  try{
   globalThis.innerWidth=390;
   globalThis.matchMedia=()=>({matches:true});
@@ -26,14 +26,14 @@ test('help click opens and closes even when the optional fullscreen button is no
   globalThis.localStorage={getItem:()=> '1',setItem(){}};
   globalThis.document={hidden:false,getElementById:(k)=>elements[k]||null,addEventListener(){},removeEventListener(){},documentElement:{requestFullscreen:undefined},fullscreenEnabled:false};
   globalThis.window={innerWidth:390,innerHeight:800,matchMedia:globalThis.matchMedia,addEventListener(){},removeEventListener(){}};
-  globalThis.MutationObserver=class {observe(){} disconnect(){disconnectCount++;}};
+  globalThis.MutationObserver=class {observe(node){this.node=node;observed.add(node);} disconnect(){disconnected.add(this.node);}};
   const canvas=el('canvas');const map={getCanvas:()=>canvas,resize(){}};
   const release=installMobileMapControls({app,map});
   elements['map-gesture-guide-open'].dispatch('click');
   assert.equal(elements['map-gesture-guide'].hidden,false);
   elements['map-gesture-guide-close'].dispatch('click');
   assert.equal(elements['map-gesture-guide'].hidden,true);
-  release();assert.equal(disconnectCount,1);
+  release();assert.deepEqual(observed,new Set([app,elements['map-gesture-guide']]));assert.deepEqual(disconnected,observed);
  }finally{
   for(const [key,value] of Object.entries(originals)){
    if(value===undefined)delete globalThis[key];else Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});

@@ -40,8 +40,19 @@ test('facility popup has an ephemeral pin at the exact selected facility coordin
 test('guide describes mouse and touch controls on distinct rows',()=>{
   assert.match(html,/<span class="dj807-guide-platform"><b>PC<\/b>/);
   assert.match(html,/<span class="dj807-guide-platform"><b>모바일<\/b>/);
-  assert.equal((html.match(/class="dj807-guide-platform"/g)||[]).length,10);
-  assert.match(html,/원위치<\/dt><dd><span class="dj807-guide-platform">오른쪽 나침반을/);
+  const guide=html.match(/<section id="map-gesture-guide"[\s\S]*?<\/dl>/)?.[0];
+  assert.ok(guide);
+  assert.equal((guide.match(/class="dj807-guide-platform"/g)||[]).length,8);
+  for(const row of ['지도 이동','확대·축소','회전','기울기(3D)']){
+    const pair=guide.split('<dt>'+row+'</dt><dd>')[1]?.split('</dd>')[0];
+    assert.ok(pair,row);
+    assert.match(pair,/<b>PC<\/b>/);
+    assert.match(pair,/<b>모바일<\/b>/);
+  }
+  for(const [label,desc] of [['북쪽 정렬','나침반을 눌러 북쪽으로 맞춥니다.'],['전체 보기','동작구 전체 지도를 표시합니다.'],['현재 위치','내 위치로 지도 중심을 이동합니다.']]){
+    assert.ok(guide.includes('>'+label+'</dt><dd>'+desc+'</dd>'),label);
+  }
+  assert.equal((guide.match(/class="dj-guide-action-label"/g)||[]).length,3);
 });
 
 test('desktop bus arrivals use a readable 2-column grid',()=>{

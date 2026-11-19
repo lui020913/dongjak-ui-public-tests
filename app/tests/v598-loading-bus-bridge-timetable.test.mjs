@@ -32,23 +32,32 @@ test('native basemap bus symbol suppression never alters rail or non-POI layers'
 });
 
 test('startup overlay is dismissed after map and boundary, without blocking on transit API',()=>{
-  const elements=new Map();
-  const overlay={hidden:false,states:new Set(),classList:{add(x){overlay.states.add(x);}},setAttribute(){}};
+  const elements=new Map(), progress=new Map(), timers=new Map();
+  let now=0,seq=0,idleListener=null;
+  const schedule=(fn,ms)=>{const id=++seq;timers.set(id,{fn,at:now+ms});return id;};
+  const tick=ms=>{const end=now+ms;for(;;){const next=[...timers].sort((a,b)=>a[1].at-b[1].at||a[0]-b[0])[0];if(!next||next[1].at>end)break;timers.delete(next[0]);now=next[1].at;next[1].fn(now);}now=end;};
+  const overlay={hidden:false,states:new Set(),style:{setProperty(k,v){progress.set(k,Number(v));}},classList:{add(x){overlay.states.add(x);}},setAttribute(){}};
   elements.set('map-startup-overlay',overlay);
   elements.set('map-startup-message',{textContent:''});
   elements.set('map-startup-note',{textContent:''});
-  elements.set('map-startup-continue',{hidden:true,addEventListener(){}});
-  const documentRef={getElementById:id=>elements.get(id)};
-  const original=globalThis.requestAnimationFrame;
-  globalThis.requestAnimationFrame=fn=>fn();
-  try{
-    const loader=createMapStartupLoader({documentRef,map:{on(){},areTilesLoaded:()=>true},timeoutMs:15000});
-    loader.baseReady();
-    assert.equal(overlay.states.has('is-hidden'),false);
-    loader.boundaryReady();
-    assert.equal(overlay.states.has('is-hidden'),true);
-    loader.transportReady();
-  }finally{globalThis.requestAnimationFrame=original;}
+  elements.set('map-startup-continue',{hidden:true,addEventListener(){},removeEventListener(){}});
+  const documentRef={getElementById:id=>elements.get(id),defaultView:{setTimeout:schedule,clearTimeout:id=>timers.delete(id),requestAnimationFrame:fn=>schedule(fn,16),cancelAnimationFrame:id=>timers.delete(id),matchMedia:()=>({matches:false})}};
+  const loader=createMapStartupLoader({documentRef,map:{on(n,fn){idleListener=fn;},off(n,fn){if(idleListener===fn)idleListener=null;},areTilesLoaded:()=>true},timeoutMs:15000});
+  loader.baseReady();
+  assert.equal(overlay.states.has('is-hidden'),false);
+  loader.boundaryReady();
+  assert.equal(overlay.states.has('is-hidden'),false);
+  tick(32);
+  assert.equal(progress.get('--start-progress'),1);
+  tick(419);
+  assert.equal(overlay.states.has('is-hidden'),false);
+  tick(1);
+  assert.equal(overlay.states.has('is-hidden'),true);
+  loader.transportReady();
+  tick(350);
+  assert.equal(overlay.hidden,true);
+  assert.equal(idleListener,null);
+  assert.equal(timers.size,0);
 });
 
 test('Cloudflare TCP fallback does not close writable half before reading response',async()=>{

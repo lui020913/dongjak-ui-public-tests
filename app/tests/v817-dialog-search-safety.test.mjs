@@ -34,7 +34,9 @@ test('v817: PC safety menu is category rail and one right-side detail pane',()=>
 test('v817: map suggestions participate in the one-window owner',()=>{
   const html=read('index.html');const owner=read('src/v806-unified-ui.js');
   assert.match(html,/id="map-quick-search-dropdown"/);
-  assert.match(owner,/'map-quick-search-dropdown'\];/);
+  const surfaceList=owner.slice(owner.indexOf('const ids=['),owner.indexOf('const visible=id=>'));
+  assert.match(surfaceList,/'map-quick-search-dropdown'(?=,|\])/);
+  assert.match(surfaceList,/'dj854-weather-sheet','djNext-layer-panel'/);
   assert.match(owner,/dispatchLocalClick\(element\('map-quick-search-close'\),win\)/);
   assert.match(owner,/'open-admin-dongs':'admin-dong-picker'/);
   assert.match(owner,/pendingIntent='map-quick-search-dropdown'/);
