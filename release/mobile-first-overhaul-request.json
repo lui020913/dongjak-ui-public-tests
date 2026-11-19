@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.4",
+  "application_version": "9.2.5",
   "public_work_branch": "main",
-  "purpose": "Publish fixed-signature debug APK only after secure key setup, retain Android day/night launcher artwork and exact app label.",
-  "attempt": 61,
+  "purpose": "Stop competing map symbol reorder handlers without changing map style, GIS layer visibility, or signed APK setup.",
+  "attempt": 62,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Public debug distribution with stable signing and version provenance checks.",
+  "last_retry_reason": "Android performance: shared reentrant-safe layer ordering.",
   "release_kind": "patch",
   "beta_number": 1
 }

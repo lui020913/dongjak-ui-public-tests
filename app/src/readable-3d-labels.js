@@ -40,6 +40,12 @@ export const FRONT_LABEL_ORDER = Object.freeze([
   'dongjak-featured-place-dots',
   'dongjak-featured-place-logos',
   'dongjak-featured-place-names',
+  // Exit badges remain above ordinary facilities; bridges retain their final slots.
+  'metro-access-elevator',
+  'metro-access-escalator',
+  'metro-access-stairs',
+  'metro-access-exits',
+  'metro-access-exit-labels',
   'dj-hangang-bridge-geometry-labels',
   'dj-hangang-bridge-osm-labels'
 ]);
@@ -55,8 +61,13 @@ function lastLayersMatch(actual,desired){
  * then lift a small set of verified user-facing names above other features.
  * These layer changes do NOT change symbol elevation or screen position.
  */
+const promotingMaps=new WeakSet();
 export function promoteReadable3DLabelLayers(map){
-  if(!map?.getStyle||!map?.moveLayer||nightOwnsLayerOrder(map))return false;
+  if(!map?.getStyle||!map?.moveLayer||nightOwnsLayerOrder(map)||promotingMaps.has(map))return false;
+  promotingMaps.add(map);
+  try {return applyReadableLayerOrder(map);}finally{promotingMaps.delete(map);}
+}
+function applyReadableLayerOrder(map){
   const style=map.getStyle();
   const layers=style?.layers||[];
   const firstTextOrIcon=layers.find(layer=>layer.type==='symbol')?.id;
