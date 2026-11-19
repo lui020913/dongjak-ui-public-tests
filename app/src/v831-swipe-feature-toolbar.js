@@ -295,7 +295,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
  }
  function schedule(){if(scheduled)return;scheduled=true;raf(()=>{scheduled=false;sync();});}
  function closeWeather(){if(weatherSheet)weatherSheet.hidden=true;const b=find('#dj-v794-weather');b?.classList.remove('dj832-expanded');}
- function closeNightConfirm(){if(nightConfirm)nightConfirm.hidden=true;}
+ function closeNightConfirm(animate=false){if(!nightConfirm||nightConfirm.hidden)return;const finish=()=>{nightConfirm.hidden=true;};const card=nightConfirm.querySelector('.dj833-night-dialog');if(animate&&win.DongjakWindowMotion)win.DongjakWindowMotion.close(card,finish);else{win.DongjakWindowMotion?.cancel(card);finish();}}
  function closeSheet(){
    if(!sheet||sheet.hidden)return;
    sheet.hidden=true;sheet.style.removeProperty('--dj832-drag');
@@ -437,7 +437,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    <p class="dj833-night-notice">조명 범위는 분석상 추정치이며 실제 밝기나 안전도를 의미하지 않습니다.</p>
    <div class="dj833-night-actions"><button type="button" data-choice="no">아니요</button><button type="button" data-choice="yes">예, 시작</button></div></div>`);
    nightConfirm.querySelector('[data-choice="no"]').addEventListener('click',()=>{
-     closeNightConfirm();
+     closeNightConfirm(true);
      // On desktop, declining consent must leave the persistent night shortcut
      // in its inactive "야간 시야" state, not a stale "야간 시야 해제" label.
      if(win.matchMedia?.('(min-width:1080px)')?.matches){
@@ -461,7 +461,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
      if(source&&!source.disabled&&app.dataset.sangdoNight!=='on')source.click();
      collapseNative();schedule();
    });
-   nightConfirm.addEventListener('click',e=>{if(e.target===nightConfirm)closeNightConfirm();});
+   nightConfirm.addEventListener('click',e=>{if(e.target===nightConfirm)closeNightConfirm(true);});
  }
  function requestNight(e){
    if(e.target.closest?.('#dj-v794-night')==null)return;
