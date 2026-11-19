@@ -1293,7 +1293,8 @@ function showOverview(){
 // X means dismiss the current surface and leave the map unobstructed.
 // It must not call showOverview(), because that function deliberately opens
 // the overview sheet for non-close workflows (delete/edit completion, etc.).
-function closeDetailToMap(){
+function closeDetailToMap(event){
+  if(event?.type==='click'&&window.DongjakWindowMotion){window.DongjakWindowMotion.close(detail,()=>closeDetailToMap());return;}
   ++detailAttachmentLoadSeq;
   revokeDetailAttachmentObjectURLs();
   closeTransportPanel(false);
@@ -1823,7 +1824,7 @@ function navigate(tab,{suppressOverview=false}={}) {
     if (active) b.setAttribute('aria-current','page');
     else b.removeAttribute('aria-current');
   }
-  for (const panel of pagePanels) panel.hidden = panel.dataset.page !== tab;
+  for (const panel of pagePanels){if(panel.dataset.page!==tab)window.DongjakWindowMotion?.cancel(panel);panel.hidden=panel.dataset.page!==tab;}
   if (tab === 'participate') renderCommunity();
   if (tab === 'news') dongjakNews.open();
   if (tab === 'mine') renderMy();
@@ -1851,10 +1852,9 @@ function navigate(tab,{suppressOverview=false}={}) {
 // Capture mobile HOME before any older tab, sheet or district listeners. Other
 // devices retain their dedicated desktop sidebar behaviour unchanged.
 installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
-  routePickMode=null;
-  closeTransitRouteConfirmation();
-  quickSearch.close();
-  navigate('map',{suppressOverview:true});
+  const finish=()=>{routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
+  const active=pagePanels.find(p=>!p.hidden);
+  if(active&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(active,finish);else finish();
 }});
 // The Safety Map bottom tab acts as HOME on both PC and mobile. No implicit
 // overview or district selection on return, first entry or repeated taps.
@@ -1877,10 +1877,9 @@ for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-
 }
 // Each auxiliary page has a persistent X that returns to the existing map tab.
 for(const button of document.querySelectorAll('[data-close-page]')){
-  button.addEventListener('click',()=>navigate('map',{suppressOverview:true}));
+  button.addEventListener('click',()=>{const panel=button.closest('.page-panel');const finish=()=>navigate('map',{suppressOverview:true});if(panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
 }
-document.getElementById('news-close-to-map')?.addEventListener('click',()=>
-  navigate('map',{suppressOverview:true}));
+document.getElementById('news-close-to-map')?.addEventListener('click',()=>{const panel=document.getElementById('news-panel');const finish=()=>navigate('map',{suppressOverview:true});if(panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
 // 경로 상세 결과는 아래 도보 길찾기 핸들러에서 연결합니다.
 document.getElementById('participate-register').addEventListener('click', () => {
   navigate('map');
