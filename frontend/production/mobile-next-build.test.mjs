@@ -69,3 +69,10 @@ test('photo-reference layout has four columns and separately clipped scroll cont
  const pilot=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
  assert.match(pilot,/map\.getLayer\(fill\)&&map\.getLayer\(line\)&&map\.getLayer\(lockLayer\)\)\{toggleLayers\(true\);return\}/);
 });
+
+test('phone rail owns its interaction before legacy document delegates',()=>{
+ const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
+ assert.match(src,/const railActions=new WeakMap\(\)/);
+ assert.match(src,/e\.target\.closest\?\.\('#djNext-rail > button\.djNext-tool'\)/);
+ assert.match(src,/const run=railActions\.get\(b\);if\(!run\)return;[\s\S]*?e\.stopImmediatePropagation\(\);[\s\S]*?run\(e\);return;/);
+});
