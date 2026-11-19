@@ -1,3 +1,4 @@
+import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Georeferenced metro entrances and verified accessibility equipment.
  * 1) local transport proxy -> 2) public ArcGIS exit points if proxy is absent.
@@ -222,16 +223,8 @@ export function initStationAccessibility({map,maplibregl,isInDistrict=()=>false,
   const exitLayers=['metro-access-exits','metro-access-exit-labels'];
   const equipmentLayers=['elevator','escalator','stairs'].map(type=>`metro-access-${type}`);
   const layers=[...exitLayers,...equipmentLayers];
-  // Exit badges remain topmost even after other layers are inserted.
-  map.on('idle',()=>{
-    const stack=map.getStyle?.()?.layers||[];
-    const labels=stack.map(layer=>layer.id);
-    const anchor=Math.max(0,labels.length-2);
-    if(labels.indexOf('metro-access-exits')<anchor||labels.indexOf('metro-access-exit-labels')<anchor){
-      for(const id of ['metro-access-exits','metro-access-exit-labels'])
-        if(map.getLayer(id)&&typeof map.moveLayer==='function')try{map.moveLayer(id);}catch{}
-    }
-  });
+  // Share one ordering policy; independent idle-time promotions caused style churn.
+  map.on('idle',()=>promoteReadable3DLabelLayers(map));
   let enabled=true,loaded=false,pending=false;
   let lastCollection=EMPTY,lastVia='',lastWarning='';
   function setStatus(message){if(status)status.textContent=message;}
@@ -328,7 +321,7 @@ export function initStationAccessibility({map,maplibregl,isInDistrict=()=>false,
     map.on('mouseleave',layer,()=>{map.getCanvas().style.cursor='';});
   }
   function bringToFront(){
-    for(const id of layers)if(map.getLayer(id))try{map.moveLayer(id);}catch{}
+    promoteReadable3DLabelLayers(map);
   }
   const cached=readCache();
   if(cached?.features?.length)display(cached,'이전 저장 좌표 · 다시 조회 가능');

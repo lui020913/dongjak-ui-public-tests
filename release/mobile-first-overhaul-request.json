@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.6",
+  "application_version": "9.2.7",
   "public_work_branch": "main",
-  "purpose": "Typography preview and AI exclusive opening, iOS dark theme bridge polish.",
-  "attempt": 63,
+  "purpose": "Unify competing map symbol order handlers; retain latest typography and AI UI changes.",
+  "attempt": 64,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Follow-up mobile screenshot fixes.",
+  "last_retry_reason": "Android repeated redraw mitigation; preserve prior UI and map geometry.",
   "release_kind": "patch",
   "beta_number": 1
 }

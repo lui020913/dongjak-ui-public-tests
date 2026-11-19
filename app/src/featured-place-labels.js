@@ -1,4 +1,5 @@
 import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
+import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Five trusted, named places drawn by MapLibre itself (not floating DOM labels).
  * They stay attached to the map while moving, rotating, and pitching.
@@ -154,22 +155,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
   function bringToFront(){
     if(nightOwnsLayerOrder(map))return;
     if(!map.getLayer?.(nameId))return;
-    const layers=map.getStyle?.()?.layers||[];
-    const ids=layers.map(layer=>layer.id);
-    // At detailed zoom, bus stop names must also sit above late 3D buildings.
-    // Bridge labels own the topmost two slots; keep one stable final order to
-    // avoid two separate idle/styledata prioritizers repeatedly fighting.
-    const bridge='dj-hangang-bridge-geometry-labels';
-    const otherBridge='dj-hangang-bridge-osm-labels';
-    const closenames=['dongjak-zoom-busstop-names','transport-bus-names-close']
-      .filter(id=>ids.includes(id));
-    const hasBridges=ids.includes(bridge)&&ids.includes(otherBridge);
-    const trailing=[...closenames,dotId,...(ids.includes(FEATURED_PLACES_LOGOS)?[FEATURED_PLACES_LOGOS]:[]),nameId,...(hasBridges?[bridge,otherBridge]:[])];
-    const stable=ids.slice(-trailing.length).join('|')===trailing.join('|');
-    if(!stable){
-      const before=hasBridges?bridge:undefined;
-      try{for(const id of [...closenames,dotId,...(ids.includes(FEATURED_PLACES_LOGOS)?[FEATURED_PLACES_LOGOS]:[]),nameId])map.moveLayer(id,before);}catch{}
-    }
+    promoteReadable3DLabelLayers(map);
     const theme=app?.dataset?.theme||'light';
     if(theme!==lastTheme){lastTheme=theme;applyTheme();}
   }
