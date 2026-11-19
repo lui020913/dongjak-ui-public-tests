@@ -131,7 +131,12 @@ APP_VERSION="$requested_version"
 if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
   target_patch="${BASH_REMATCH[1]}"
   for ((patch=18; patch<=target_patch; patch++)); do
-    node scripts/bump-app-version.mjs patch "모바일 공통 모션·헤더 제스처 및 시각 피드백 개선" >/dev/null
+    case "$patch" in
+      18) note="창 간 전환 복원 및 시설 정보창 중복 모션 정리";;
+      19) note="탄성 헤더 제스처와 전환 연속성, 탭 및 로딩 피드백 개선";;
+      *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
+    esac
+    node scripts/bump-app-version.mjs patch "$note" >/dev/null
   done
 fi
 test "$(node -p "require('./package.json').version")" = "$APP_VERSION"

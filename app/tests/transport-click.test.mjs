@@ -4,6 +4,9 @@ import {initTransportMap,normalizeStationQueryName} from '../src/transport-map.j
 
 class MockNode {
   constructor(){this.hidden=false;this.textContent='';this.children=[];this.listeners=new Map();this.dataset={};this.style={setProperty(){},removeProperty(){}};this.classList={toggle(){},add(){},remove(){}};}
+  setAttribute(name,value){(this.attrs??=new Map()).set(name,value);}
+  removeAttribute(name){this.attrs?.delete(name);}
+  getAttribute(name){return this.attrs?.get(name)??null;}
   addEventListener(name,fn){this.listeners.set(name,fn);}
   replaceChildren(...items){this.children=items;}
   append(...items){this.children.push(...items);}

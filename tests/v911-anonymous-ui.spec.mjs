@@ -648,6 +648,8 @@ test('primary tabs animate replacement and keep the pill dock',{tag:'@phone-comm
  await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.dataset.dj810Animating)window.__tabMotions.push(panel.dataset.dj810Animating)}).observe(panel,{attributes:true,attributeFilter:['data-dj810-animating']});});
  await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('opening');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
+ await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
+ await expect.poll(()=>page.evaluate(()=>{const nav=document.getElementById('bottom-nav'),pill=nav.querySelector('.dj-motion-indicator'),active=nav.querySelector('.nav-tab[aria-current=page]');if(!pill||!active)return 1000;const a=pill.getBoundingClientRect(),b=active.getBoundingClientRect();return Math.abs(a.left-b.left)+Math.abs(a.top-b.top)+Math.abs(a.width-b.width); })).toBeLessThan(4);
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh entrance, even for the previously selected tab.
  await enter(page,'news-panel','news');

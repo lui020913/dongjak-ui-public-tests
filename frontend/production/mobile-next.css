@@ -584,13 +584,13 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   #app #map-quick-search-results .map-quick-search-result{animation:djMotionResult 180ms ease-out both}
   #app #map-quick-search-results .map-quick-search-result:nth-child(2){animation-delay:25ms}
   #app #map-quick-search-results .map-quick-search-result:nth-child(3){animation-delay:50ms}
-  #app #map .dj-motion-gps-ring{position:absolute;inset:-6px;border:2px solid #1976d2;border-radius:50%;pointer-events:none;animation:djMotionPulse 1.4s ease-out 2}
+  #app #current-location .dj-motion-gps-ring{position:absolute;inset:-6px;border:2px solid #1976d2;border-radius:50%;pointer-events:none;animation:djMotionPulse 1.4s ease-out 2}
   @keyframes djMotionLoading{to{background-position:-220% 0}}
   @keyframes djMotionResult{from{opacity:0;translate:0 5px}to{opacity:1;translate:0 0}}
   @keyframes djMotionPulse{from{opacity:.65;scale:.7}to{opacity:0;scale:1.55}}
 }
 @media(prefers-reduced-motion:reduce){
   #app #bottom-nav>.dj-motion-indicator{transition:none!important}
-  #app :is(#transport-arrivals .transport-empty::after,#map-quick-search-results .map-quick-search-result,.dj-motion-gps-ring){animation:none!important}
+  #app #transport-arrivals .transport-empty::after,#app #map-quick-search-results .map-quick-search-result,#app .dj-motion-gps-ring{animation:none!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:none!important;scale:1!important}
 }
