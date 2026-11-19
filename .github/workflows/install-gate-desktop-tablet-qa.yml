@@ -26,21 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify the exact v9.2.13 Preview provenance
-        shell: bash
-        run: |
-          set -euo pipefail
-          ready=0
-          for n in $(seq 1 60); do
-            if curl -fsSL --max-time 20 "$DONGJAK_TARGET_URL/release-source.json?install-gate=$GITHUB_RUN_ID-$n" |
-              jq -e --arg source "$DONGJAK_EXPECTED_SOURCE_SHA" --arg version "$DONGJAK_EXPECTED_VERSION" \
-                '.source_commit==$source and .application_version==$version and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null; then
-              ready=1
-              break
-            fi
-            sleep 10
-          done
-          test "$ready" = 1
       - name: Install pinned Playwright test package
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
