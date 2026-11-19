@@ -41,8 +41,9 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
  const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
  let closeTimer=0;
- function dismiss(immediate=false){slot=null;win.clearTimeout(closeTimer);if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){panel.hidden=true;panel.classList.remove('djNext-leaving');return}
+ function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
   if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
+  win.clearTimeout(closeTimer);
   panel.classList.add('djNext-leaving');closeTimer=win.setTimeout(()=>{panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})},220)
  }
  close.addEventListener('click',()=>dismiss());panel.addEventListener('click',e=>{if(e.target===panel)dismiss()});
