@@ -98,7 +98,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#map-quick-search-query')?.blur();
     if(!modal.open){modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
     // iOS Safari: focusing the query immediately opens the keyboard before
-    // the bottom sheet is laid out. Focus the title; the user taps the
+    // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.
     if(window.matchMedia?.('(max-width:699px)')?.matches){
       close.focus({preventScroll:true});

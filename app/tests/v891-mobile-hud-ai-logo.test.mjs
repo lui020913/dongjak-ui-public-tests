@@ -21,8 +21,7 @@ test('map scale and TIP occupy separate rows, preserving true map distance',()=>
 test('native AI search remains one dialog, mobile opens without early keyboard',()=>{
   const ai=code('src/v880-supabase-safety-ai.js');
   const orb=code('src/v890-mobile-ai-orb.js');
-  assert.match(ai,/names\.firstChild\.focus\(\{preventScroll:true\}\)/);
-  assert.match(ai,/input\.focus\(\{preventScroll:true\}\)/);
+  assert.match(ai,/if\(window\.matchMedia\?\.\('\(max-width:699px\)'\)\?\.matches\)\{\s*close\.focus\(\{preventScroll:true\}\);\s*\}else\{\s*input\.focus\(\{preventScroll:true\}\)/);
   assert.match(orb,/native\.click\(\)/);
   assert.match(orb,/if\(!modal\?\.open&&modal\?\.showModal\)/);
   assert.match(code('src/v891-mobile-hud-ai-logo.css'),/--dj891-ai-keyboard-inset/);
