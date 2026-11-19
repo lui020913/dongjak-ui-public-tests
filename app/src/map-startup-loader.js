@@ -65,7 +65,7 @@ export function createMapStartupLoader({map,documentRef=globalThis.document,time
         advance(1);
         stage('지도 준비가 완료되었습니다');
         // Let the CSS fill reach its endpoint before starting the overlay fade.
-        finishTimer=win.setTimeout(dismiss,reduced()?0:500);
+        finishTimer=win.setTimeout(dismiss,reduced()?0:420);
       });
     });
   };
