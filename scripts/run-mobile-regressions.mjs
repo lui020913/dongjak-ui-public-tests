@@ -23,6 +23,19 @@ for(const file of files){
  if(result.status===0&&!result.error){passed++;continue;}
  failed++;
  const name=basename(file);
+ // For public app sources only, provide the failing test location and
+ // diagnostic type, never raw assertion operands, stderr or environment.
+ if(process.env.DONGJAK_UI_ONLY==='1'){
+   console.log('Public regression file: '+name);
+   for(const line of raw.split(/\r?\n/)){
+     if(/^\s+error:/.test(line)){
+       const type=line.trim().match(/^error:\s*['"]?([A-Za-z][A-Za-z ]{0,35}(?:Error|is not a function|is not defined))/);
+       if(type)console.log('Public regression diagnostic: '+type[1]);
+     }
+     const frame=line.match(/(?:^|\()([^()\s]*\/tests\/[^():\s]+\.test\.mjs):(\d+):(\d+)\)?\s*$/);
+     if(frame)console.log('Public regression location: '+basename(frame[1])+':'+frame[2]+':'+frame[3]);
+   }
+ }
  const ids=raw.split(/\r?\n/).flatMap(line=>{const m=line.match(/^\s*not ok \d+ - (.*)$/);return m?[hash(m[1].trim())]:[];});
  fingerprints.push('Safe regression failure: area='+classify(name)+' file='+hash(name)+' kind='+(result.error?'runner':'assertion'));
  for(const id of [...new Set(ids)].slice(0,15))fingerprints.push('Failed test fingerprint: '+id);

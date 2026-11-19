@@ -18,5 +18,6 @@ for (const fingerprint of [...new Set(failures)].slice(0,40))console.log('Failed
 for(const line of raw.split(/\r?\n/)){
  if(/^Safe regression summary: files=\d+ passed=\d+ failed=\d+ tests=\d+ test_passed=\d+ test_failed=\d+$/.test(line)||
  /^Safe regression failure: area=(?:building|geo-data|auth|ui-lifecycle|facility-search|other) file=[a-f0-9]{64} kind=(?:runner|assertion)$/.test(line)||
- /^Failed test fingerprint: [a-f0-9]{64}$/.test(line))console.log(line);
+ /^Failed test fingerprint: [a-f0-9]{64}$/.test(line)||
+ /^Public regression (?:file: [a-zA-Z0-9_.-]+\.test\.mjs|location: [a-zA-Z0-9_.-]+\.test\.mjs:\d+:\d+|diagnostic: [A-Za-z ]{1,70})$/.test(line))console.log(line);
 }

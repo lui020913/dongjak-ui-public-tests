@@ -25,7 +25,7 @@ test('보행 경로를 일반형과 경사 회피형으로 나누고 Valhalla pe
   assert.match(code,/costing:'pedestrian',costing_options:\{pedestrian:\{use_hills:useHills\}\}/);
   assert.match(code,/profile==='gentle'\?0:0\.5/);
   assert.match(code,/Promise\.allSettled\(\[/);
-  assert.match(code,/routeVariants=\{standard,gentle\}/);
+  assert.match(code,/routeVariants=\{standard,gentle(?:,balanced:balanced\|\|null)?\}/);
   const html=await source('index.html');
   assert.match(html,/data-route-variant="standard"/);
   assert.match(html,/data-route-variant="gentle"/);

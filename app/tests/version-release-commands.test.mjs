@@ -74,8 +74,9 @@ test('manual version changes cannot be silently published as patch releases',asy
 test('the update history labels release types explicitly and keeps archived records',async()=>{
   const renderer=await readFile(new URL('../src/version-history-v7.js',import.meta.url),'utf8');
   const history=await readFile(new URL('../src/version-history.js',import.meta.url),'utf8');
-  assert.match(renderer,/Major · 메이저/);
-  assert.match(renderer,/Minor · 마이너/);
-  assert.match(renderer,/Patch · 패치/);
+  assert.match(renderer,/주요 구조 개편/);
+  assert.match(renderer,/기능 추가·개선/);
+  assert.match(renderer,/수정·안정화/);
+  assert.match(renderer,/groupReleaseEditions\(releases\)/);
   assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
 });

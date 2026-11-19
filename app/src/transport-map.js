@@ -2609,9 +2609,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(phoneFocus){const settleFocus=()=>{
         if(selected!==place||panel.hidden)return;
         const bounds=map.getContainer?.()?.getBoundingClientRect?.();
-        const top=panel.getBoundingClientRect().top;
-        const header=document.querySelector('.topbar')?.getBoundingClientRect();
-        const tools=document.getElementById('dj-v794-toolbar')?.getBoundingClientRect();
+        const top=panel.getBoundingClientRect?.()?.top;
+        const header=document.querySelector?.('.topbar')?.getBoundingClientRect?.();
+        const tools=document.getElementById('dj-v794-toolbar')?.getBoundingClientRect?.();
         if(!bounds||!Number.isFinite(top))return;
         const visibleTop=Math.max(bounds.top,header?.bottom||0,tools?.bottom||0)+24;
         const target=(visibleTop+Math.max(visibleTop+40,top-40))/2;

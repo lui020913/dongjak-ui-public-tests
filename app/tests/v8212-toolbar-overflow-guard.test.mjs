@@ -22,7 +22,7 @@ test('the toolbar fallback enforces one horizontal row without overriding expand
 
 test('the More button stays outside the scrollport and shortcuts forward to original controls',()=>{
   assert.match(js,/row\.insertBefore\(scroller,more\)/);
-  assert.match(js,/if\(child!==scroller&&child!==more\)scroller\.appendChild\(child\)/);
+  assert.match(js,/if\(child!==scroller&&child!==more(?:&&child\.id!=='djNext-rail')?\)scroller\.appendChild\(child\)/);
   assert.match(js,/if\(valid\)source\.click\(\)/);
   assert.doesNotMatch(js,/\bfetch\(/);
 });
