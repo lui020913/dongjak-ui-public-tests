@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.0",
-  "public_work_branch": "fix/safety-map-9-beta-4-mobile-surfaces",
+  "public_work_branch": "fix/safety-map-9-beta-5-layer-reentry",
   "purpose": "Safety Map 9.0 mobile release including all previous requests, categorized four-column map layer tile sheet, stable independent toolbar, single weather sheet, dark mode, voice status, community and safety non-overlapping fixed headers, My Info road width and onboarding spacing, transit spacing and native lock retry.",
-  "attempt": 30,
+  "attempt": 31,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "29th browser QA identified toolbar home flicker, overlapping night consent, and hidden-but-existing pilot layers on reopen. Fix native state and independent chrome; include ten additional owner-reported issues and layer design reference. Retain full regression, all phone viewport checks and gated production.",
+  "last_retry_reason": "30th mobile375/390 each passed 12/13 browser cases; only dark-mode layer reopening after return to map failed. Delegate independent rail's actual click exclusively before legacy document listeners, add action receipt assertion and diagnostic layout, retain all original assertions. Preserve all previous changes.",
   "release_kind": "major",
-  "beta_number": 4
+  "beta_number": 5
 }
