@@ -1,4 +1,5 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
+import {bindHeaderDragInput} from './mobile-header-input.js';
 import {
   clearMobileSheetDrag,
   dismissMobileSheet,
@@ -112,7 +113,8 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         interruptMobileSheetMotion(panel);
       }
       gesture={pointer:event.pointerId,y:event.clientY,x:event.clientX,upLimit:Math.max(0,panel.getBoundingClientRect().top-16),lastY:event.clientY,lastTime:performance.now(),velocity:0,dragging:false};
-      try{event.currentTarget?.setPointerCapture?.(event.pointerId);}catch{}
+      if(typeof event.pointerId==='number')try{event.currentTarget?.setPointerCapture?.(event.pointerId);}catch{}
+      return true;
     };
     const move=event=>{
       const g=gesture;if(!g||event.pointerId!==g.pointer)return;
@@ -173,24 +175,14 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};
-    for(const handle of handleNodes){
-      handle.addEventListener('pointerdown',down,{passive:true});
-      handle.addEventListener('pointermove',move,{passive:false});
-      handle.addEventListener('pointerup',up);
-      handle.addEventListener('pointercancel',cancel);
-    }
+    const unbind=handleNodes.map(handle=>bindHeaderDragInput(handle,win,{down,move,up,cancel}));
     cleanups.push(()=>{
       cancel();
       if(suppressClickTimer!==null)win.clearTimeout(suppressClickTimer);
       doc.removeEventListener('click',suppressPostDragClick,true);
       panel.classList.remove('dj833-sheet-dismissing','dj871-sheet-expanded');
-      for(const handle of handleNodes){
-        handle.classList.remove('dj-sheet-swipe-zone');
-        handle.removeEventListener('pointerdown',down);
-        handle.removeEventListener('pointermove',move);
-        handle.removeEventListener('pointerup',up);
-        handle.removeEventListener('pointercancel',cancel);
-      }
+      for(const remove of unbind)remove();
+      for(const handle of handleNodes)handle.classList.remove('dj-sheet-swipe-zone');
     });
   }
   };

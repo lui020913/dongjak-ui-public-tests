@@ -547,14 +547,35 @@ test('phone windows share the opaque gradual slide on open and close',async({pag
 });
 
 
-test('layer header follows a real pointer upward and downward; content and X stay independent',async({page})=>{
+test('layer header follows a real pointer upward and downward; content and X stay independent',async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-layers'));
  const modal=page.locator('#djNext-layer-panel'),body=modal.locator('.djNext-modal-body'),header=modal.locator('header'),scroll=modal.locator('.djNext-layer-scroll');
  await expect(modal).toBeVisible();await expect.poll(()=>body.getAttribute('data-dj810-animating')).toBeNull();
  await expect(header).toHaveCSS('touch-action','none');
  const compact=await body.boundingBox();
- const client=await page.context().newCDPSession(page);
- async function drag(dy){const r=await header.boundingBox();const x=r.x+Math.min(65,r.width/3),y=r.y+r.height/2;await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+dy*i/8}]});const mid=await body.boundingBox();await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});return mid;}
+ const client=browserName==='chromium'?await page.context().newCDPSession(page):null;
+ // WebKit lacks a CDP touch-swipe API. Exercise the exact DOM touch event
+ // handlers on the real rendered header, including actual hit-testing.
+ // Chromium retains browser-injected real touch input as a separate gate.
+ async function dispatch(type,x,y){await page.evaluate(({type,x,y})=>{
+   if(type==='touchstart')window.__headerTouchTarget=document.elementFromPoint(x,y);
+   const target=window.__headerTouchTarget;
+   if(!target?.closest('#djNext-layer-panel .djNext-modal-body > header'))throw Error('Layer header is covered');
+   const point={identifier:71,target,clientX:x,clientY:y};
+   const touches=type==='touchend'?[]:[point];
+   let event;
+   try{const t=new Touch(point);event=new TouchEvent(type,{bubbles:true,cancelable:true,touches:type==='touchend'?[]:[t],changedTouches:[t],targetTouches:type==='touchend'?[]:[t]});}
+   catch{event=new Event(type,{bubbles:true,cancelable:true});Object.defineProperties(event,{touches:{value:touches},changedTouches:{value:[point]}});}
+   target.dispatchEvent(event);
+ },{type,x,y})}
+ async function drag(dy){const r=await header.boundingBox();const x=r.x+Math.min(65,r.width/3),y=r.y+r.height/2;
+   if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+dy*i/8}]});}
+   else{await dispatch('touchstart',x,y);for(let i=1;i<=8;i++)await dispatch('touchmove',x,y+dy*i/8);}
+   await expect(body).toHaveAttribute('data-dj-layer-drag-input','touch');
+   const mid=await body.boundingBox();
+   if(client)await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});else await dispatch('touchend',x,y+dy);
+   return mid;
+ }
  const up=await drag(-95);expect(up.y).toBeLessThan(compact.y-20);await expect(body).toHaveAttribute('data-dj-layer-expanded','true');await expect.poll(async()=> (await body.boundingBox()).height).toBeGreaterThan(compact.height+25);
  await page.waitForTimeout(500);const large=await body.boundingBox();const down=await drag(100);expect(down.y).toBeGreaterThan(large.y+20);await expect(body).toHaveAttribute('data-dj-layer-expanded','false');await expect.poll(async()=>Math.abs((await body.boundingBox()).height-compact.height)).toBeLessThan(3);
  await page.waitForTimeout(500);const before=await header.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await header.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
