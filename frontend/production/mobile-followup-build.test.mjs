@@ -15,3 +15,12 @@ test('Phone dark buildings use a stronger opaque surface while preserving the co
   assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.96);
  }finally{if(previous===undefined)delete globalThis.window;else globalThis.window=previous;}
 });
+
+test('Safety night consent extends the existing shortcut without replacing its capture lifecycle',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const src=readFileSync(new URL('../src/v831-swipe-feature-toolbar.js',import.meta.url),'utf8');
+ assert.match(src,/scroller\.addEventListener\('click',requestNight,true\)/);
+ assert.match(src,/doc\.addEventListener\('click',requestSafetyNight,true\)/);
+ assert.match(src,/doc\.removeEventListener\('click',requestSafetyNight,true\)/);
+ assert.match(src,/function requestSafetyNight\(e\)\{[\s\S]*?closest\?\.\('#night-visibility-toggle'\)[\s\S]*?requestNight\(e\);/);
+});
