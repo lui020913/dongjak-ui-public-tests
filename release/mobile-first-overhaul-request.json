@@ -3,9 +3,9 @@
   "application_version": "9.1.3",
   "public_work_branch": "main",
   "purpose": "Deploy nearby pedestrian information sheet stabilization and selected facility marker after exact mobile QA.",
-  "attempt": 55,
+  "attempt": 56,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New nearby sheet and facility selection patch 8125f709; preserve existing mobile QA and production rollback.",
+  "last_retry_reason": "Fix version history reconstruction for 9.1.3 after build version assertion failed.",
   "release_kind": "patch",
-  "beta_number": 1
+  "beta_number": 2
 }
