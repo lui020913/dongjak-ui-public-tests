@@ -38,7 +38,7 @@ export function installUnifiedUI(doc=document, win=window){
     dismiss:(id,options)=>lifecycle.dismiss(id,options),
     requestOpen:(id)=>{
       explicitUntil.set(id,Date.now()+1200);
-      if(win.matchMedia?.('(max-width:699px)')?.matches&&['dj854-weather-sheet','djNext-layer-panel','ped-tools-panel','map-gesture-guide'].includes(id)){
+      if(win.matchMedia?.('(max-width:699px)')?.matches&&['dj854-weather-sheet','djNext-layer-panel','ped-tools-panel','map-gesture-guide','dj-ai-search-modal'].includes(id)){
         pendingIntent=id;dismissOthers(id);activeSurface='';
       }
       return lifecycle.requestOpen(id,{explicit:true});

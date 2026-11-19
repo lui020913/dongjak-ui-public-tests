@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.5",
+  "application_version": "9.2.6",
   "public_work_branch": "main",
-  "purpose": "Shared mobile UI polish and adaptive single add shortcut, protected production after QA.",
-  "attempt": 62,
+  "purpose": "Typography preview and AI exclusive opening, iOS dark theme bridge polish.",
+  "attempt": 63,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New mobile UI patch from screenshot review.",
+  "last_retry_reason": "Follow-up mobile screenshot fixes.",
   "release_kind": "patch",
   "beta_number": 1
 }

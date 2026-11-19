@@ -40,8 +40,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const names=el('div','dj-ai-search-names');
   names.append(el('h2','', 'AI 안전정보 검색'),el('p','', '공식 보행안전 자료 · 지도에서 근거 확인'));
   names.firstChild.id='dj-ai-dialog-title';
+  const glyph=el('span','dj926-ai-glyph','✦');glyph.setAttribute('aria-hidden','true');
   const close=el('button','dj-ai-close','×');close.type='button';close.setAttribute('aria-label','AI 검색 닫기');
-  header.append(names,close);
+  header.append(glyph,names,close);
   const form=el('form','dj-ai-search-form');form.method='dialog';
   const label=el('label','dj-ai-search-label','보행안전정보 질문');
   const input=el('input','dj-ai-query');input.type='search';input.id='dj-ai-query';
@@ -96,7 +97,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#map-safety-close')?.click();
     q('#map-quick-search-close')?.click();
     q('#map-quick-search-query')?.blur();
-    if(!modal.open){modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
+    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
     // iOS Safari: focusing the query immediately opens the keyboard before
     // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.

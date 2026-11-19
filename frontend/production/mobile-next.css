@@ -456,3 +456,23 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-group-title{margin-block:12px 8px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:28px!important}
 }
+
+@media(max-width:699px){
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-detail-nav{padding:8px 0!important;margin:0!important;border-bottom:0!important;gap:8px!important;min-height:44px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-detail-content:has(.dj877-type-settings:not([hidden])){padding-top:0!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj877-type-settings:not([hidden]){padding:8px 0 12px!important;gap:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj877-type-settings>p{margin:0!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj885-type-choices,html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj885-type-choices button{border-radius:999px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj885-type-choices button[aria-pressed=true]{box-shadow:0 2px 5px #0002!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj926-type-preview{padding:10px 12px;border-radius:14px;background:var(--djNext-raised);text-align:center;color:var(--djNext-text)}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel [data-dj834-action=history]:not(:focus-visible):not(:active){background:transparent!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary{min-height:54px!important;padding:8px 12px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::before{width:34px!important;height:34px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app [data-theme=dark] .dj-sheet-chrome::before{background:#657069!important}
+html.dj-ios-home-pwa[data-theme=dark] body #app #dj-ios-pwa-map-seam{background:linear-gradient(to bottom,var(--dj-pwa-status-color,#192d32),transparent)!important}
+html body #dj-ai-search-modal .dj-ai-search-header{gap:8px;padding:20px 0 12px}
+html body #dj-ai-search-modal .dj-ai-search-names{flex:1}
+html body #dj-ai-search-modal .dj-ai-search-names h2{font-size:18px!important}
+html body #dj-ai-search-modal .dj926-ai-glyph{font-size:22px;color:var(--ai-accent,#11836e)}
+html body #dj-ai-search-modal .dj-ai-close:not(:focus-visible){outline:none!important;box-shadow:0 2px 5px #0003!important}
+}

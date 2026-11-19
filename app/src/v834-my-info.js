@@ -28,7 +28,7 @@ export function installMyInfo(doc=document){
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
  const detail=doc.createElement('section');detail.className='dj834-my-detail';detail.hidden=true;
- detail.innerHTML=`<div class="dj834-detail-nav"><button type="button" class="dj834-detail-back" aria-label="내 정보 설정으로 돌아가기">${symbol('back')} 내 정보</button><h3 class="dj834-detail-title"></h3></div><div class="dj834-detail-content"></div>`;
+ detail.innerHTML=`<div class="dj834-detail-nav"><button type="button" class="dj834-detail-back" aria-label="내 정보 설정으로 돌아가기">${symbol('back')}</button><h3 class="dj834-detail-title"></h3></div><div class="dj834-detail-content"></div>`;
  const accountBox=doc.createElement('div');accountBox.className='dj834-account-container';accountBox.append(account);
 
  // v8.7.7: local-device photo, never uploaded without an explicit cloud action.
@@ -67,13 +67,14 @@ export function installMyInfo(doc=document){
    finally{win.URL.revokeObjectURL(url);event.target.value='';}
  });
  const typography=doc.createElement('section');typography.className='dj877-type-settings';
- typography.innerHTML=`<p>메뉴와 창의 글씨 크기·굵기를 조절합니다. 지도 지명 자체는 변경되지 않습니다.</p>
+ typography.innerHTML=`<p>메뉴와 창의 글씨 크기·굵기를 조절합니다. 지도 지명 자체는 변경되지 않습니다.</p><div class="dj926-type-preview" aria-label="글자 설정 미리보기">동작하는 안전지도</div>
    <div class="dj885-type-field"><span class="dj885-type-label">글자 크기</span><div class="dj885-type-choices" role="group" aria-label="글자 크기 설정"><button type="button" data-dj885-type="scale" data-value="small">작게</button><button type="button" data-dj885-type="scale" data-value="normal">기본</button><button type="button" data-dj885-type="scale" data-value="large">크게</button><button type="button" data-dj885-type="scale" data-value="xlarge">더 크게</button></div></div>
    <div class="dj885-type-field"><span class="dj885-type-label">글자 굵기</span><div class="dj885-type-choices" role="group" aria-label="글자 굵기 설정"><button type="button" data-dj885-type="weight" data-value="normal">기본</button><button type="button" data-dj885-type="weight" data-value="bold">굵게</button></div></div>`;
  const syncTypography=()=>{
    for(const [part,id] of [['scale','dj-type-scale'],['weight','dj-type-weight']]){
      const native=doc.getElementById(id);
      const value=native?.value||'normal';
+     const preview=typography.querySelector('.dj926-type-preview');if(part==='scale')preview.style.fontSize=({small:13,normal:16,large:19,xlarge:22}[value]||16)+'px';else preview.style.fontWeight=value==='bold'?'750':'500';
      for(const button of typography.querySelectorAll(`[data-dj885-type="${part}"]`)){
        const active=button.dataset.value===value;
        button.setAttribute('aria-pressed',String(active));
