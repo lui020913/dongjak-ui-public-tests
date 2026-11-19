@@ -33,7 +33,8 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  app.dataset.djNextInstalled='1';
  const $=id=>doc.getElementById(id),q=s=>doc.querySelector(s);
  let selected=normalizePhoneShortcuts(read(win,KEY,[])),rail=null,host=null,scheduled=false,focusReturn=null,slot=null,weather=null;
- const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);node.addEventListener('click',fn);return node};
+ const railActions=new WeakMap();
+ const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);railActions.set(node,fn);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
  const body=doc.createElement('div');body.className='djNext-modal-body';const h=doc.createElement('header');const title=doc.createElement('strong');title.textContent='레이어 및 바로가기';const close=doc.createElement('button');close.type='button';close.className='djNext-close';close.textContent='×';close.setAttribute('aria-label','레이어 설정 닫기');h.append(title,close);body.append(h);
  const scroll=doc.createElement('div');scroll.className='djNext-layer-scroll';body.append(scroll);
@@ -50,7 +51,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
  function invoke(selector){const b=q(selector);if(!b||b.disabled){notify('현재 사용할 수 없는 기능입니다. 지도 로딩 후 다시 시도해 주세요.');return}b.click()}
- function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;panel.hidden=false;close.focus({preventScroll:true})}
+ function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;panel.hidden=false;app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='등록 '+selected.length+'/3';list.replaceChildren();
  const groups=[['지도 기능',['pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
@@ -81,7 +82,18 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  }
  const schedule=()=>{if(scheduled)return;scheduled=true;win.requestAnimationFrame(sync)};
  new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon']});
- win.addEventListener('click',e=>{if(!panel.hidden&&e.target.closest?.('#bottom-nav'))dismiss(true)},true);
+ // The independent phone rail owns its click before legacy document-level
+ // overlay/gesture delegates. Do not intercept native or map-surface events.
+ win.addEventListener('click',e=>{
+  const b=e.target.closest?.('#djNext-rail > button.djNext-tool');
+  if(b&&rail?.contains(b)&&app.dataset.tab==='map'&&app.dataset.searchOpen!=='true'&&!b.disabled){
+   const run=railActions.get(b);if(!run)return;
+   e.preventDefault();e.stopImmediatePropagation();
+   app.dataset.djNextLastAction=b.id||b.dataset.shortcut||'slot-'+b.dataset.slot;
+   run(e);return;
+  }
+  if(!panel.hidden&&e.target.closest?.('#bottom-nav'))dismiss(true);
+ },true);
  sync();
 }
 export function installPhonePermissions({app,doc=document,win=window}){
