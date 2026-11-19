@@ -127,7 +127,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         g.dragging=true;panel.classList.add('dj-sheet-dragging');
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
       panel.style.setProperty('--dj-sheet-drag-y',`${expandable?Math.max(-g.upLimit,dy):Math.max(0,dy)}px`);
       panel.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();
@@ -144,7 +144,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         },0);
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
       // Expansion and collapse are two distinct, deliberate stops. A downward
       // gesture from the expanded state first returns to compact; a second
       // downward gesture closes the sheet.
@@ -152,7 +152,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         setMobileSheetExpanded(panel,true,doc,win);
         return;
       }
-      if(expandable&&g.dragging&&delta>55&&panel.classList.contains('dj871-sheet-expanded')){
+      if(expandable&&g.dragging&&delta>30&&panel.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(panel,false,doc,win);
         return;
       }

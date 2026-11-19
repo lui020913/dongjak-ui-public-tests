@@ -1660,7 +1660,7 @@ html[data-theme="dark"] #app .map-startup-overlay,
 #app .map-startup-title{font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.055em;margin:0;color:#183b32;}
 #app .map-startup-subtitle{font-size:13px;line-height:1.55;color:#688177;margin:9px 0 29px;}
 #app .map-startup-progress{width:184px;height:3px;overflow:hidden;border-radius:99px;background:#dceae3;position:relative;margin-bottom:19px;}
-#app .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:38%;border-radius:99px;background:#0a9770;animation:dj-start-progress 1.65s ease-in-out infinite;}
+#app .map-startup-progress::before{content:'';display:block;position:absolute;inset:0;width:calc(var(--start-progress,0) * 100%);border-radius:99px;background:#0a9770;animation:none;transition:width .35s ease;}
 #app .map-startup-spinner{display:none!important;}
 #app .map-startup-inner #map-startup-message{color:#183b32;font-size:13px;font-weight:650;line-height:1.55;margin:0;}
 #app .map-startup-inner #map-startup-note{color:#688177;font-size:11px;line-height:1.6;margin:6px 0 0;}
@@ -1675,7 +1675,7 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-message,#app[data-t
 html[data-theme="dark"] #app .map-startup-progress,#app[data-theme="dark"] .map-startup-progress{background:#28443e!important;}
 html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-theme="dark"] .map-startup-inner #map-startup-continue{color:#edf7f2!important;border-color:#28443e!important;background:transparent!important;}
 @media(max-width:480px){#app .map-startup-inner{transform:translateY(-1.5vh);}#app .map-startup-logo{width:102px;height:75px;min-width:102px;min-height:75px;max-width:102px;max-height:75px}#app .map-startup-title{font-size:23px}}
-@media(prefers-reduced-motion:reduce){#app .map-startup-progress::before{animation:none!important;transform:none!important;width:60%}#app .map-startup-logo img{transition:none}}
+@media(prefers-reduced-motion:reduce){#app .map-startup-progress::before{animation:none!important;transform:none!important;transition:none!important}#app .map-startup-logo img{transition:none}}
 
 /* v5.12.5 — PC overview is open by default; selection clear is independent. */
 #app .overview-boundary-actions{display:flex;align-items:stretch;gap:8px;min-width:0;}
