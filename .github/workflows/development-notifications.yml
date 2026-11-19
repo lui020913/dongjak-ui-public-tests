@@ -2,7 +2,7 @@ name: Deployment milestone notifications
 on:
   workflow_run:
     workflows:
-      - Public runner - private source build and Preview
+      - v8.9.11 anonymous Preview UI gate
       - Sangdo1 bocha reference - isolated Preview
       - Public runner - approved exact Production deployment
       - Promote previously phone-tested mobile-only artifact to Production
@@ -30,7 +30,18 @@ jobs:
           jobs="$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" | jq -c '[.[].jobs[]]')"
           path="$(jq -r '.workflow_run.path' "$GITHUB_EVENT_PATH")"
           case "$path" in
-            .github/workflows/public-private-source-preview.yml|.github/workflows/sangdo1-bocha-preview.yml)
+            .github/workflows/v911-remote-ui-gate.yml)
+              title_run="$(jq -r '.workflow_run.display_title' "$GITHUB_EVENT_PATH")"
+              [[ "$title_run" =~ ^v911\ UI\ source=[a-f0-9]{40}\ build=([0-9]+)$ ]] || exit 0
+              build_id="${BASH_REMATCH[1]}"
+              jq -e '[.[] | select(.conclusion=="success" and any(.steps[]?; .name=="Verify exact Preview did not change while testing" and .conclusion=="success"))] | length == 3' <<< "$jobs" >/dev/null || exit 0
+              build="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$build_id")"
+              jq -e '.path==".github/workflows/public-private-source-preview.yml" and .head_branch=="main" and .conclusion=="success"' <<< "$build" >/dev/null || exit 0
+              step=""
+              stage=preview
+              title="Preview 완성 (모바일 검증 통과)"
+              ;;
+            .github/workflows/sangdo1-bocha-preview.yml)
               step='Deploy Preview without showing private build or API contents'
               stage=preview
               title='Preview 완성'
@@ -49,10 +60,10 @@ jobs:
           esac
           if [[ -n "$step" ]]; then
             jq -e --arg step "$step" 'any(.[]; .conclusion=="success" and any(.steps[]?; .name==$step and .conclusion=="success"))' <<< "$jobs" >/dev/null || exit 0
-          else
+          elif [[ "$stage" == production ]]; then
             jq -e 'any(.[]; .name=="Promote exact 24-pass phone-tested artifact" and .conclusion=="success")' <<< "$jobs" >/dev/null || exit 0
           fi
-          marker="<!-- deployment-milestone:$RUN_ID:$stage -->"
+          marker="<!-- deployment-milestone:${build_id:-$RUN_ID}:$stage -->"
           comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
