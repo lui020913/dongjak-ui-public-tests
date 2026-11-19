@@ -294,6 +294,50 @@ jobs:
         if: always()
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log"
 
+  notify-preview:
+    needs: [preview, mobile-qa]
+    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    name: Notify preview milestone
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Post one GitHub milestone notification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker="<!-- deployment-milestone:$GITHUB_RUN_ID:preview -->"
+          comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
+          if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일 검증 통과)\n\n[배포 상세 보기](%s)\n%s' "$url" "$marker")"
+
+  notify-production:
+    needs: [production]
+    if: ${{ needs.production.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    name: Notify production milestone
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Post one GitHub milestone notification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker="<!-- deployment-milestone:$GITHUB_RUN_ID:production -->"
+          comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
+          if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료\n\n[배포 상세 보기](%s)\n%s' "$url" "$marker")"
+
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
     name: Publish release run link
