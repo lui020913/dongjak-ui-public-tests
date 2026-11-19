@@ -10,7 +10,6 @@ export const PHONE_CHOICES=Object.freeze([
  ['livebus','실시간버스','bus','[data-live-vehicle="bus"]'],
  ['livemetro','실시간지하철','bus','[data-live-vehicle="metro"]'],
  ['dong','행정동','map','#open-admin-dongs-from-options'],
- ['width','도로폭','layers','#toggle-road-width'],
  ['cctv','CCTV','shield','[data-dj-import="cctv-security"]'],
  ['zone','보호구역','shield','#protection-zone-toggle'],
  ['access','교통약자','near','#ped-access-toggle'],
@@ -37,39 +36,51 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
  const body=doc.createElement('div');body.className='djNext-modal-body';const h=doc.createElement('header');const title=doc.createElement('strong');title.textContent='레이어 및 바로가기';const close=doc.createElement('button');close.type='button';close.className='djNext-close';close.textContent='×';close.setAttribute('aria-label','레이어 설정 닫기');h.append(title,close);body.append(h);
- const hint=doc.createElement('p');hint.textContent='상단에는 최대 3개를 추가할 수 있습니다. 지도 표시와 바로가기 등록은 별도로 관리됩니다.';body.append(hint);
- const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');body.append(count);
- const list=doc.createElement('div');list.className='djNext-list';body.append(list);panel.append(body);app.append(panel);
- function dismiss(){panel.hidden=true;slot=null;if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})}
- close.addEventListener('click',dismiss);panel.addEventListener('click',e=>{if(e.target===panel)dismiss()});
+ const scroll=doc.createElement('div');scroll.className='djNext-layer-scroll';body.append(scroll);
+ const hint=doc.createElement('p');hint.textContent='상단에는 최대 3개를 추가할 수 있습니다. 지도 표시와 바로가기 등록은 별도로 관리됩니다.';scroll.append(hint);
+ const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
+ const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
+ let closeTimer=0;
+ function dismiss(immediate=false){slot=null;win.clearTimeout(closeTimer);if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){panel.hidden=true;panel.classList.remove('djNext-leaving');return}
+  if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
+  panel.classList.add('djNext-leaving');closeTimer=win.setTimeout(()=>{panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})},220)
+ }
+ close.addEventListener('click',()=>dismiss());panel.addEventListener('click',e=>{if(e.target===panel)dismiss()});
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
  function invoke(selector){const b=q(selector);if(!b||b.disabled){notify('현재 사용할 수 없는 기능입니다. 지도 로딩 후 다시 시도해 주세요.');return}b.click()}
- function open(event,idx=null){focusReturn=event.currentTarget;slot=idx;renderList();panel.hidden=false;close.focus({preventScroll:true})}
+ function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;panel.hidden=false;close.focus({preventScroll:true})}
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
- function renderList(){count.textContent='등록 '+selected.length+'/3';list.replaceChildren();for(const [id,label,icon,selector] of PHONE_CHOICES){
-  const line=doc.createElement('div');line.className='djNext-layer-row';const action=button(label,icon,()=>{dismiss();invoke(selector)});action.className='djNext-layer-action';const source=q(selector);
-  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed');state.textContent=pressed==='true'?'지도 표시 중':pressed==='false'?'지도 표시 안 함':'기능 열기';if(!source||source.disabled)state.textContent='현재 준비 중';action.append(state);
-  const add=doc.createElement('button');add.type='button';add.className='djNext-pin';const current=selected.includes(id);add.textContent=current?'제거':'+ 추가';add.setAttribute('aria-label',label+' 바로가기 '+(current?'제거':'추가'));add.setAttribute('aria-pressed',String(current));add.disabled=!current&&selected.length>=3;
+ function renderList(){const prev=scroll.scrollTop;count.textContent='등록 '+selected.length+'/3';list.replaceChildren();
+ const groups=[['지도 기능',['pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
+ for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';list.append(heading);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
+ for(const [id,label,icon,selector] of ids.map(id=>PHONE_CHOICES.find(c=>c[0]===id)).filter(Boolean)){
+  const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;
+ const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');const tile=doc.createElement('span');tile.className='djNext-layer-tile';tile.append(glyph);action.prepend(tile);action.setAttribute('aria-label',label+' 지도 기능');
+  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed');state.textContent=pressed==='true'?'지도 표시 중':pressed==='false'?'지도 표시 안 함':'기능 열기';if(!source||source.disabled)state.textContent='준비 중';action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
+  const add=doc.createElement('button');add.type='button';add.className='djNext-pin';const current=selected.includes(id);add.textContent=current?'−':'+';add.setAttribute('aria-label',label+' 바로가기 '+(current?'제거':'추가'));add.setAttribute('aria-pressed',String(current));add.disabled=!current&&selected.length>=3;
   add.addEventListener('click',()=>{if(current){update(selected.filter(x=>x!==id));return}if(selected.length>=3)return;const next=selected.slice();next.splice(Math.min(slot??next.length,next.length),0,id);update(next);slot=null});
-  line.append(action,add);list.append(line);
- }}
+  line.append(action,add);grid.append(line);
+ }}scroll.scrollTop=prev;}
  function refresh(){if(!rail)return;for(const n of rail.querySelectorAll('[data-source]')){const b=q(n.dataset.source);const state=b?.getAttribute('aria-pressed')??b?.getAttribute('aria-expanded');if(state!==null&&state!==undefined&&n.getAttribute('aria-pressed')!==state)n.setAttribute('aria-pressed',state)}
   const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
   if(weather){const span=weather.querySelector('span');const value=caption?.textContent||'날씨';if(span.textContent!==value)span.textContent=value;const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
  }
  function renderRail(){if(!rail)return;rail.replaceChildren();
   const near=button('주변정보','near',()=>invoke('#ped-nearby-open'));near.id='djNext-near';near.setAttribute('aria-label','주변 안전정보');
-  weather=button('날씨','sun',()=>invoke('#dj-v794-weather'));weather.id='djNext-weather';
+  weather=button('날씨','sun',()=>invoke('#weather-label'));weather.id='djNext-weather';
   const report=button('위험제보','report',()=>invoke('#ped-report-open'));report.id='djNext-report';
   rail.append(near,weather,report);
   for(let i=0;i<3;i++){const choice=PHONE_CHOICES.find(c=>c[0]===selected[i]);const b=choice?button(choice[1],choice[2],()=>invoke(choice[3])):button('추가','plus',e=>open(e,i));b.dataset.slot=String(i);if(choice){b.dataset.shortcut=choice[0];b.dataset.source=choice[3];const compact={livebus:'버스위치',livemetro:'열차위치',cctvparking:'주정차',cctvother:'기타CCTV',camera:'단속카메라',signals:'음향신호',incidents:'돌발정보'};if(compact[choice[0]])b.querySelector('span').textContent=compact[choice[0]]}else{b.classList.add('djNext-empty');b.setAttribute('aria-label','바로가기 '+(i+1)+' 추가')}rail.append(b)}
   const layers=button('레이어','layers',e=>open(e));layers.id='djNext-layers';rail.append(layers);refresh();
  }
- function sync(){scheduled=false;const next=$('dj-v794-toolbar');const legacy=$('dj831-scrollport');if(legacy&&legacy.style.getPropertyValue('display')!=='none')legacy.style.setProperty('display','none','important');if(next&&next!==host){host=next;rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');host.append(rail);host.dataset.djNextReady='1';renderRail()}else refresh()}
+ function sync(){scheduled=false;const next=$('dj-v794-toolbar');const legacy=$('dj831-scrollport');if(legacy&&legacy.style.getPropertyValue('display')!=='none')legacy.style.setProperty('display','none','important');
+ if(next&&next.dataset.djNextReady!=='1')next.dataset.djNextReady='1';
+ if(!host){host=doc.createElement('nav');host.id='djNext-toolbar';host.setAttribute('aria-label','모바일 지도 주요 기능');rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');host.append(rail);app.append(host);renderRail()}else refresh()
+ }
  const schedule=()=>{if(scheduled)return;scheduled=true;win.requestAnimationFrame(sync)};
  new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon']});
- doc.addEventListener('click',e=>{if(!panel.hidden&&e.target.closest?.('#bottom-nav'))dismiss()},true);
+ win.addEventListener('click',e=>{if(!panel.hidden&&e.target.closest?.('#bottom-nav'))dismiss(true)},true);
  sync();
 }
 export function installPhonePermissions({app,doc=document,win=window}){
@@ -85,12 +96,12 @@ export function installPhonePermissions({app,doc=document,win=window}){
  body.querySelector('.djNext-continue').addEventListener('click',()=>{panel.hidden=true;save(win,key,true);const fn=after;after=null;fn?.()});
  const form=doc.querySelector('.map-quick-search-form'),input=$('map-quick-search-query');if(!form||!input)return;
  const mic=doc.createElement('button');mic.id='djNext-mic';mic.type='button';mic.setAttribute('aria-label','음성 장소 검색');mic.setAttribute('aria-pressed','false');mic.innerHTML=phoneIcon('mic');form.insertBefore(mic,form.querySelector('[type=submit]'));
- const feedback=doc.createElement('div');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');form.after(feedback);
+ const feedback=doc.createElement('div');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');app.append(feedback);
  let active=null,timer=0;
  const message=t=>{feedback.hidden=false;feedback.textContent=t;win.clearTimeout(timer);timer=win.setTimeout(()=>feedback.hidden=true,5000)};
- const reset=()=>{active=null;mic.setAttribute('aria-pressed','false')};
+ const reset=()=>{active=null;mic.setAttribute('aria-pressed','false');if(feedback.textContent.startsWith('듣는 중'))feedback.hidden=true};
  mic.addEventListener('click',()=>{if(active){active.stop?.();return}const API=win.SpeechRecognition||win.webkitSpeechRecognition;if(!API){message('이 브라우저에서는 음성 검색을 지원하지 않습니다. 검색창에 입력해 주세요.');input.focus();return}
-  const r=new API();active=r;r.lang='ko-KR';r.interimResults=false;r.continuous=false;mic.setAttribute('aria-pressed','true');message('듣는 중… 음성 인식은 브라우저에서 처리합니다.');
+  const r=new API();active=r;r.lang='ko-KR';r.interimResults=false;r.continuous=false;mic.setAttribute('aria-pressed','true');message('듣는 중… 말씀해 주세요.');
   r.onresult=e=>{const value=e.results?.[0]?.[0]?.transcript?.trim();if(!value)return;input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();feedback.hidden=true};
   r.onerror=()=>{message('음성을 인식하지 못했습니다. 마이크 권한 또는 네트워크를 확인해 주세요.');reset()};r.onend=reset;
   try{r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다. 직접 입력해 주세요.')}
