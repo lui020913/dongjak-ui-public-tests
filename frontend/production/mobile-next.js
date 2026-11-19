@@ -47,7 +47,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   const rect=body.getBoundingClientRect();expanded=next;closing=close;body.dataset.djLayerExpanded=String(next);
   const max=Math.max(compactHeight,win.innerHeight-28);
   const height=next?max:compactHeight;
-  const policy=win.DongjakWindowMotion?.policy||{open:360,close:300,easing:'cubic-bezier(.30,0,.45,1)'};
+  const policy=win.DongjakWindowMotion?.policy||{open:350,close:300,easing:'cubic-bezier(.25,.20,.40,1)'};
   const duration=close?policy.close:policy.open;
   put('max-height',max+'px');put('height',rect.height+'px');
   const offset=parseFloat((win.getComputedStyle(body).translate||'0 0').split(' ')[1])||0;

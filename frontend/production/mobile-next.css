@@ -65,7 +65,7 @@ html body #app#app#app#app#app#app#app #djNext-rail > button.djNext-tool{--djNex
 html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail > button.djNext-tool{--djNext-tool-shadow:0 3px 6px rgba(0,0,0,.64),0 1px 2px rgba(0,0,0,.38)}
 html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{border-color:var(--djNext-active)!important;box-shadow:inset 0 0 0 1px var(--djNext-active),var(--djNext-tool-shadow)!important}
 html body #app#app#app#app#app#app#app .djNext-modal{padding:0 8px max(8px,env(safe-area-inset-bottom))!important;background:#13282066!important;opacity:1!important;animation:none!important;transition:none!important;overflow:hidden!important}
-html body #app#app#app#app#app#app#app .djNext-modal-body{background:var(--djNext-surface)!important;color:var(--djNext-text)!important;border-color:var(--djNext-border)!important;opacity:1!important;transition:none!important;animation:djNextSheetIn 360ms cubic-bezier(.30,0,.45,1) both!important}
+html body #app#app#app#app#app#app#app .djNext-modal-body{background:var(--djNext-surface)!important;color:var(--djNext-text)!important;border-color:var(--djNext-border)!important;opacity:1!important;transition:none!important;animation:djNextSheetIn 350ms cubic-bezier(.25,.20,.40,1) both!important}
 html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body{display:flex!important;flex-direction:column!important;padding:0!important;max-height:min(78dvh,720px)!important;overflow:hidden!important;border-radius:24px!important}
 html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body>header{position:relative!important;top:auto!important;flex:0 0 auto!important;z-index:auto!important;min-height:56px!important;padding:12px 16px!important;margin:0!important;border-bottom:1px solid var(--djNext-border)!important;font-size:17px!important;background:var(--djNext-surface)!important}
 html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body>header{touch-action:none!important;pointer-events:auto!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none}
@@ -88,7 +88,7 @@ html body #app#app#app#app#app#app#app .djNext-pin[aria-pressed="true"]{backgrou
 html body #app#app#app#app#app#app#app :is(.djNext-close,.djNext-permission-row button){background:var(--djNext-raised)!important;color:var(--djNext-text)!important;border:1px solid var(--djNext-border)!important}
 html body #app#app#app#app#app#app#app .djNext-close{width:42px!important;height:42px!important;flex:0 0 42px!important;display:grid!important;place-items:center!important;font-size:28px!important;line-height:1!important}
 html body #app#app#app#app#app#app#app .djNext-modal.djNext-leaving{animation:none!important;pointer-events:none!important}
-html body #app#app#app#app#app#app#app .djNext-modal.djNext-leaving .djNext-modal-body{animation:djNextSheetOut 300ms cubic-bezier(.30,0,.45,1) both!important}
+html body #app#app#app#app#app#app#app .djNext-modal.djNext-leaving .djNext-modal-body{animation:djNextSheetOut 300ms cubic-bezier(.25,.20,.40,1) both!important}
 @keyframes djNextSheetIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes djNextSheetOut{from{transform:translateY(0)}to{transform:translateY(100%)}}
 @media(prefers-reduced-motion:reduce){html body #app#app#app#app#app#app#app .djNext-modal .djNext-modal-body,html body #app#app#app#app#app#app#app .djNext-modal.djNext-leaving .djNext-modal-body{animation:none!important}}

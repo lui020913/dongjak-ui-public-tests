@@ -14,8 +14,9 @@ replace(main,'installMobileFollowup({app,map,maplibregl});','installMobileFollow
 replace('src/v831-swipe-feature-toolbar.js',"  if(phone)important(more,'display','none');","  if(phone)important(more,'display','none');\n  if(phone&&row.dataset.djNextReady==='1')important(scrollport,'display','none');");
 replace('src/v860-onboarding.js',"      if(index===ONBOARDING_SLIDES.length-1)close({afterClose:showMapGuide});else move(1);","      if(index===ONBOARDING_SLIDES.length-1){\n        if(win.matchMedia?.('(max-width:699px)')?.matches&&doc.getElementById('djNext-permissions'))close({afterClose:()=>win.dispatchEvent(new CustomEvent('dj-next:permission-intro',{detail:{continue:showMapGuide}}))});\n        else close({afterClose:showMapGuide});\n      }else move(1);");
 const core='src/v840-ui-core.js';
-replace(core,'지도의 표시 레이어는 더보기 메뉴에서 관리할 수 있습니다.','지도 레이어 버튼에서 표시 기능과 상단 바로가기를 설정할 수 있습니다.');
-replace(core,'행정동 선택은 검색창 아래 지도 바로가기에서 열 수 있습니다.','상단 레이어 버튼에서 행정동 등 원하는 기능을 추가할 수 있습니다.');
+// TIP text now lives in the canonical core; don't overwrite shortened copy at build time.
+const tipCore=readFileSync(resolve(root,core),'utf8');
+for(const sentence of ['상단 레이어에서 지도 기능을 관리하세요.','레이어에서 행정동을 선택하세요.'])if(!tipCore.includes(sentence))throw Error('Canonical TIP copy missing: '+sentence);
 replace(core,"'nav-live-card','route-pick-hint','map-gesture-guide'];","'nav-live-card','route-pick-hint','map-gesture-guide','ped-tools-panel','djNext-layer-panel','djNext-permissions'];");
 replace('src/pedestrian-tools.js',"showPanel('내 주변 보행정보');","showPanel('주변 안전정보');");
 replace('src/transport-map.js',"if(title.dataset){if(place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId||'')))title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}","if(title.dataset){if(place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId||''))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}");
