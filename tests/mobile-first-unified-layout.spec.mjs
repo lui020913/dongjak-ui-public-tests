@@ -14,7 +14,12 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   await page.goto('/',{waitUntil:'domcontentloaded'});
   const menu=page.locator('dialog#dj-install-menu');
   await expect(menu).toBeAttached({timeout:15000});
-  if(await menu.isVisible())await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+  if(await menu.isVisible()){
+    const size=page.viewportSize(),rect=await menu.boundingBox();
+    expect(Math.abs(rect.x)).toBeLessThanOrEqual(1);expect(Math.abs(rect.y)).toBeLessThanOrEqual(1);expect(Math.abs(rect.width-size.width)).toBeLessThanOrEqual(2);expect(Math.abs(rect.height-size.height)).toBeLessThanOrEqual(2);
+    await testInfo.attach('fullscreen-install-menu',{body:await page.screenshot(),contentType:'image/png'});
+    await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+  }
   await page.waitForSelector('#app');
   await page.waitForSelector('#dj-v794-toolbar',{timeout:15000});
   await page.waitForTimeout(900);
