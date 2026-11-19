@@ -51,17 +51,20 @@ echo "CHECKPOINT: changed-file allowlist passed"
 # The public app snapshot is still 8.26.1. Reconstruct the released
 # 9.0.0 entry before issuing the new patch, rather than mislabelling it 8.26.2.
 release_kind="$(jq -er '.release_kind' "$REQUEST")"
-if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.1.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.2" ] && [ "$release_kind" = "patch" ]; }; then
+if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.1.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.2" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.3" ] && [ "$release_kind" = "patch" ]; }; then
   node scripts/bump-app-version.mjs major "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
   node scripts/bump-app-version.mjs patch "모바일 창 공통 상승·하강 애니메이션 통합, 중복 페이드 제거 및 레이어 헤더 드래그 확장·축소" >/dev/null
-  if [ "$APP_VERSION" = "9.1.0" ] || [ "$APP_VERSION" = "9.1.1" ] || [ "$APP_VERSION" = "9.1.2" ]; then
+  if [ "$APP_VERSION" = "9.1.0" ] || [ "$APP_VERSION" = "9.1.1" ] || [ "$APP_VERSION" = "9.1.2" ] || [ "$APP_VERSION" = "9.1.3" ]; then
     node scripts/bump-app-version.mjs minor "모바일 통합 V11: 탭·시트·권한·주변정보·날씨·제보 UI 안정화" "선로 기반 실시간 지하철 위치 추정 및 방향별 아이콘·열차 정보창 추적" "지도 조작 안내 페이드·로딩 진행 표시·PC 및 태블릿 모바일 이용 안내 개선" >/dev/null
   fi
-  if [ "$APP_VERSION" = "9.1.1" ] || [ "$APP_VERSION" = "9.1.2" ]; then
+  if [ "$APP_VERSION" = "9.1.1" ] || [ "$APP_VERSION" = "9.1.2" ] || [ "$APP_VERSION" = "9.1.3" ]; then
     node scripts/bump-app-version.mjs patch "모바일 정보창 안전영역 및 열차 위치 추적 보완" "보행안전 창 닫기와 선택 레이어 상태 분리" "권한·검색·길찾기·소식·내 정보 UI와 다크 테마 개선" "iOS 웹 상태 표시줄 경계 및 열차 아이콘 선명도 보완" >/dev/null
   fi
-  if [ "$APP_VERSION" = "9.1.2" ]; then
+  if [ "$APP_VERSION" = "9.1.2" ] || [ "$APP_VERSION" = "9.1.3" ]; then
     node scripts/bump-app-version.mjs patch "기본지도 행정동 잠금 숨김 및 하단탭 방향 전환 안정화" "알약형 하단탭과 공통 버튼 그림자·다크 테마 보완" "소개·업데이트 창 페이드와 3자리 버전 표시" "iOS 상태바 경계, 영어 UI, AI 검색창·설정 개선" >/dev/null
+  fi
+  if [ "$APP_VERSION" = "9.1.3" ]; then
+    node scripts/bump-app-version.mjs patch "주변 안전정보 높이 안정화 및 시설 선택 지도 위치 보정" "시설 위치핀·목록 복귀·동일 명칭 구분 개선" >/dev/null
   fi
 else
   node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
