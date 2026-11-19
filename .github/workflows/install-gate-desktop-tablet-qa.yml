@@ -9,14 +9,14 @@ permissions:
   contents: read
 jobs:
   verify:
-    name: Verify PC and tablet install entry on Production
+    name: Verify PC and tablet install entry on exact Preview
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
       options: --ipc=host
     timeout-minutes: 25
     env:
-      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev
+      DONGJAK_TARGET_URL: https://cdedff1d.dongjak-walk-safety-preview.pages.dev
       DONGJAK_EXPECTED_SOURCE_SHA: 503e8b57615ebae62fe3bb37ee92779cc032c049
       DONGJAK_EXPECTED_VERSION: 9.2.13
     steps:
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Wait for the exact v9.2.13 Production promotion
+      - name: Verify the exact v9.2.13 Preview provenance
         shell: bash
         run: |
           set -euo pipefail
@@ -34,7 +34,7 @@ jobs:
           for n in $(seq 1 60); do
             if curl -fsSL --max-time 20 "$DONGJAK_TARGET_URL/release-source.json?install-gate=$GITHUB_RUN_ID-$n" |
               jq -e --arg source "$DONGJAK_EXPECTED_SOURCE_SHA" --arg version "$DONGJAK_EXPECTED_VERSION" \
-                '.source_commit==$source and .application_version==$version and .release_status=="DEPLOYED_PRODUCTION"' >/dev/null; then
+                '.source_commit==$source and .application_version==$version and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' >/dev/null; then
               ready=1
               break
             fi

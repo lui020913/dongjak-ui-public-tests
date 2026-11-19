@@ -2,18 +2,18 @@ import {test,expect} from '@playwright/test';
 
 const productionUrl=process.env.DONGJAK_TARGET_URL||'https://dongjak-walk-safety-preview.pages.dev/';
 
-async function openProductionGate(page){
+async function openPreviewGate(page){
   await page.goto(productionUrl,{waitUntil:'domcontentloaded'});
   await expect(page.locator('#dj-mobile-only-screen')).toBeVisible({timeout:45000});
   await expect(page.locator('#dj-install-menu')).toBeVisible({timeout:45000});
   const marker=await page.evaluate(async()=>await (await fetch('/release-source.json',{cache:'no-store'})).json());
   expect(marker.source_commit).toBe(process.env.DONGJAK_EXPECTED_SOURCE_SHA);
   expect(marker.application_version).toBe(process.env.DONGJAK_EXPECTED_VERSION);
-  expect(marker.release_status).toBe('DEPLOYED_PRODUCTION');
+  expect(marker.release_status).toBe('CANDIDATE_PREVIEW_NOT_PRODUCTION');
 }
 
 test('PC install gate keeps device illustration, darkens buttons quickly and reveals QR only after PWA action',async({page})=>{
-  await openProductionGate(page);
+  await openPreviewGate(page);
   await expect(page.locator('#dj-mobile-only-screen .dj-mobile-only-devices')).toBeVisible();
   await expect(page.locator('#dj-install-menu .dj-install-choice')).toHaveCount(4);
   await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);
@@ -32,7 +32,7 @@ test('PC install gate keeps device illustration, darkens buttons quickly and rev
 });
 
 test('PC Android installation guidance is readable when the verified APK is available',async({page})=>{
-  await openProductionGate(page);
+  await openPreviewGate(page);
   await page.locator('#dj-install-menu .dj-install-choice').filter({hasText:'Android 앱 다운로드'}).click();
   const guide=page.locator('#dj-install-menu .dj-install-info[data-android-guide]');
   if(await guide.count()===0){
@@ -52,7 +52,7 @@ test('Android tablet gate keeps device illustration and defers QR until home-scr
   });
   const page=await context.newPage();
   try{
-    await openProductionGate(page);
+    await openPreviewGate(page);
     await expect(page.locator('#dj-mobile-only-screen .dj-mobile-only-devices')).toBeVisible();
     await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);
     await page.locator('#dj-install-menu .dj-install-choice').filter({hasText:'홈 화면에 웹앱 추가'}).click();
