@@ -42,3 +42,9 @@ test('rail connection remains a clearly indicative plan and requires real nearby
  assert.ok(options[0].railHeuristicMinutes>0);
  assert.deepEqual(railTransferOptions({lng:125,lat:35},{lng:128,lat:39}),[]);
 });
+
+test('visible custom phone buttons explicitly own pointer hit-testing; hidden tabs do not',()=>{
+ const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
+ assert.match(css,/\[data-tab="map"\]:not\(\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:auto!important;touch-action:manipulation!important\}/);
+ assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
+});
