@@ -228,7 +228,7 @@ html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action[
 
 /* v4: mobile route/community screenshots. One scroll owner and a neutral dark palette. */
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"]{
- --dj-v4-surface:#191b1e;--dj-v4-card:#25282c;--dj-v4-control:#303439;
+ --dj-v4-surface:var(--djNext-surface,#191b1f);--dj-v4-card:#25282c;--dj-v4-control:#303439;
  --dj-v4-border:#42474d;--dj-v4-text:#e6e9eb;--dj-v4-muted:#b8c0c7;
  --dj-v4-selected:#233d35;--dj-v4-accent:#68c6a5;
 }
@@ -315,7 +315,7 @@ html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .dj-guide-rele
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide #dj-guide-release-details{min-height:44px!important;padding:6px 10px!important;white-space:normal!important}
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .dj860-guide-launch{margin:0!important;min-height:44px!important}
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .map-gesture-guide-remember{margin:0!important;min-height:44px!important;padding:0!important;gap:8px!important;align-items:center!important}
-html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-gesture-guide{background:#191b1e!important;color:#e6efeb!important}
+html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-gesture-guide{background:var(--dj-v4-surface)!important;color:#e6efeb!important}
 
 /* No older fade or CSS animation may compete with the shared JS motion owner. */
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal .djNext-modal-body,
