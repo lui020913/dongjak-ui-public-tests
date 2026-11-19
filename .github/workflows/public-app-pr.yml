@@ -16,6 +16,9 @@ concurrency:
 jobs:
   app-build-and-tests:
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
     timeout-minutes: 35
     defaults:
       run:
@@ -55,9 +58,9 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: npm install --no-audit --no-fund
-      - name: Install Chromium for the real-browser layout matrix
+      - name: Verify preinstalled Chromium matches pinned Playwright
         working-directory: .
-        run: npx playwright install --with-deps chromium
+        run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
