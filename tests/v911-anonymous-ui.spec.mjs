@@ -225,9 +225,10 @@ test('phone pilot safety region and expandable sheet',async({page})=>{
  const panel=page.locator('#map-safety-controls');
  await expect(panel).toBeVisible();
  await expect(panel.locator('.dj17-pilot-notice')).toContainText('상도1동');
- const grip=panel.locator('.dj17-expand');await expect(grip).toBeVisible();await grip.click();
+ const grip=panel.locator('.dj17-expand');await expect(grip).toBeVisible();await tap(page,grip);
  await expect(panel).toHaveClass(/dj871-sheet-expanded/);
- await grip.click();await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);
+ await expect(panel).not.toHaveClass(/dj889-sheet-transitioning/);
+ await tap(page,grip);await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);
  await panel.locator('#map-safety-close').click();await expect(panel).toBeHidden();
  await expect(page.locator('.dj17-lock').first()).toBeAttached({timeout:45000});
  await expect(page.locator('#dj-v794-safety')).toBeVisible();
@@ -384,9 +385,13 @@ test('phone night shortcut waits for the map, honors consent and exits',async({p
  await tap(page,page.locator('#dj-v794-safety'));
  await expect(app).toHaveAttribute('data-dj-night-ready','true',{timeout:60000});
  await expect(shortcut).toBeEnabled();
- await shortcut.click();
+ const menu=page.locator('#map-safety-controls');
+ await menu.getByRole('button',{name:'야간시야',exact:true}).click({timeout:15000});
+ await expect(shortcut).toBeVisible();await shortcut.scrollIntoViewIfNeeded();await shortcut.click({timeout:15000});
  const consent=page.locator('#dj833-night-modal');
- if(await consent.getByRole('dialog').isVisible()){await expect(app).toHaveAttribute('data-sangdo-night','off');await consent.getByRole('button',{name:'예, 시작',exact:true}).click();}
+ await expect(consent.getByRole('dialog')).toBeVisible();
+ await expect(app).toHaveAttribute('data-sangdo-night','off');
+ await consent.getByRole('button',{name:'예, 시작',exact:true}).click({timeout:15000});
  const night=page.locator('#night-visibility-float');
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  await expect(night).toBeVisible();
