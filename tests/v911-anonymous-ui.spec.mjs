@@ -700,7 +700,7 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
  const gate=page.locator('#dj-mobile-only-screen'),menu=gate.locator('#dj-install-menu');
  await expect(menu).toBeVisible({timeout:20000});await expect(gate.locator('#dj-mobile-only-title')).toBeHidden();
  await expect(menu.locator('.dj-install-subtitle')).toContainText('QR코드');
- const web=menu.locator('.dj-install-choice').nth(0),android=menu.locator('.dj-install-choice').nth(1);
+ const web=menu.getByRole('button',{name:/웹에서 바로 이용하기/}),android=menu.getByRole('button',{name:/Android 앱 다운로드/});
  await expect(web).toContainText('모바일 전용');
  expect(await web.evaluate(n=>getComputedStyle(n).backgroundColor)).toBe(await android.evaluate(n=>getComputedStyle(n).backgroundColor));
  await expect(menu.locator('.dj-install-qr')).toBeVisible();
