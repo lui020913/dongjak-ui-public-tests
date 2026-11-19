@@ -45,8 +45,10 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
   if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
   win.clearTimeout(closeTimer);
-  panel.classList.add('djNext-leaving');closeTimer=win.setTimeout(()=>{panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})},220)
+  panel.classList.add('djNext-leaving');closeTimer=win.setTimeout(finishClose,380)
  }
+ function finishClose(){if(!panel.classList.contains('djNext-leaving'))return;win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})}
+ body.addEventListener('animationend',e=>{if(e.target===body&&e.animationName==='djNextSheetOut')finishClose()});
  close.addEventListener('click',()=>dismiss());panel.addEventListener('click',e=>{if(e.target===panel)dismiss()});
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
