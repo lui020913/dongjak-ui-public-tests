@@ -295,7 +295,7 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log"
 
   notify-preview:
-    needs: [preview, mobile-qa]
+    needs: [build, preview, mobile-qa]
     if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
@@ -307,6 +307,8 @@ jobs:
       - name: Post one GitHub milestone notification
         env:
           GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ needs.build.outputs.app_version }}
+          WORK_DESCRIPTION: ${{ github.event.head_commit.message }}
         shell: bash
         run: |
           set -euo pipefail
@@ -314,10 +316,11 @@ jobs:
           comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일 검증 통과)\n\n[배포 상세 보기](%s)\n%s' "$url" "$marker")"
+          description="$(printf '%s' "$WORK_DESCRIPTION" | head -n 1 | cut -c1-180)"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일 검증 통과) · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
 
   notify-production:
-    needs: [production]
+    needs: [build, production]
     if: ${{ needs.production.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Production 배포 완료'
     runs-on: ubuntu-24.04
@@ -329,6 +332,8 @@ jobs:
       - name: Post one GitHub milestone notification
         env:
           GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ needs.build.outputs.app_version }}
+          WORK_DESCRIPTION: ${{ github.event.head_commit.message }}
         shell: bash
         run: |
           set -euo pipefail
@@ -336,7 +341,8 @@ jobs:
           comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료\n\n[배포 상세 보기](%s)\n%s' "$url" "$marker")"
+          description="$(printf '%s' "$WORK_DESCRIPTION" | head -n 1 | cut -c1-180)"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
