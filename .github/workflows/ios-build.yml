@@ -8,6 +8,9 @@ on:
         type: choice
         options: [simulator, testflight]
         default: simulator
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ios-build.yml']
   workflow_run:
     workflows: ['Mobile-only release — Preview, phone QA and protected Production']
     types: [completed]
@@ -22,7 +25,8 @@ jobs:
     if: >-
       github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' &&
       github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' ||
-      (vars.IOS_AUTOMATIC_BUILD == 'true' && github.event.workflow_run.conclusion == 'success' &&
+      (github.event_name == 'push' && vars.IOS_AUTOMATIC_BUILD != 'false') ||
+      (github.event_name == 'workflow_run' && vars.IOS_AUTOMATIC_BUILD != 'false' && github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' &&
       github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.actor.login == 'lui020913'))
     environment: ${{ inputs.variant == 'testflight' && 'ios-signing' || 'public-source-build' }}
