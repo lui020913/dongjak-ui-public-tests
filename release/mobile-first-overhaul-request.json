@@ -1,9 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "8.27.0",
-  "public_work_branch": "fix/mobile-custom-rail-routing-20261119",
-  "purpose": "Seven mobile controls (3 fixed + 3 customizable + layers), first-run GPS and microphone permission guidance, voice search, four route comparisons, native pilot locks, nearby and transport sheet repairs, update history pill and tour button. Immutable public source; preserve existing device gate and Production approval.",
-  "attempt": 26,
+  "application_version": "9.0.0",
+  "public_work_branch": "docs/release-history-reclassification-20261119",
+  "purpose": "Mobile-only service generation 9.0: seven customizable controls, GPS and microphone onboarding, voice search, four route comparison, nearby safety and native locks, transport UI, full historical edition catalog and verified developer-beta/production labels.",
+  "attempt": 27,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New feature release after successful attempt 25; use public app source and mandatory feature and regression QA."
+  "last_retry_reason": "26th build stopped on known tracked mobile-first-overhaul.css missing from change manifest; add exact file, retain regression and production gates. Release 9.0 is a major mobile-focused transition with removed PC/tablet service compatibility.",
+  "release_kind": "major",
+  "beta_number": 1
 }

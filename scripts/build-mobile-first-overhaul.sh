@@ -42,13 +42,13 @@ cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobi
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
-expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-local-routing.js src/dongjak-verified-data-layers.js src/lib/dongjakWalkSlopeRouter.mjs src/main.js src/map-appearance.js src/pedestrian-tools.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/transport-map.js src/v815-map-product.js src/v815-route-planner.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js src/v840-ui-core.js src/v860-onboarding.js src/workers/dongjak-walk-worker.mjs | LC_ALL=C sort)"
+expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-local-routing.js src/dongjak-verified-data-layers.js src/lib/dongjakWalkSlopeRouter.mjs src/main.js src/map-appearance.js src/mobile-first-overhaul.css src/pedestrian-tools.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/transport-map.js src/v815-map-product.js src/v815-route-planner.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js src/v840-ui-core.js src/v860-onboarding.js src/workers/dongjak-walk-worker.mjs | LC_ALL=C sort)"
 actual_changes="$(git diff --name-only | LC_ALL=C sort)"
 echo "Expected changed files: $expected_changes"
 echo "Actual changed files: $actual_changes"
 if [ "$actual_changes" != "$expected_changes" ]; then echo "::error::Unexpected source change list"; exit 1; fi
 echo "CHECKPOINT: changed-file allowlist passed"
-node scripts/bump-app-version.mjs minor "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
+node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
 test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
 jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null
 echo "CHECKPOINT: version $APP_VERSION stamped"
@@ -79,12 +79,13 @@ else
   exit 1
 fi
 rm -f "$log"
+run_private "Public edition history and deployment-channel tests" node --test tests/release-editions.test.mjs
 run_private "Application build" npm run build
 run_private "Release consistency" npm run check:release
 test -s dist/index.html
 jq -e --arg version "$APP_VERSION" '.version==$version' dist/version.json >/dev/null
 CSS_SHA="$(cat "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" "$GITHUB_WORKSPACE/frontend/production/mobile-17-followup.css" "$GITHUB_WORKSPACE/frontend/production/mobile-next.css" | sha256sum | cut -d' ' -f1)"
-jq -n --arg source "$SOURCE_SHA" --arg public "$GITHUB_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$GITHUB_RUN_ID" '{source_commit:$source,public_ui_source_commit:$public,public_ui_overlay_sha256:$css,application_version:$version,build_run:$build,release_status:"CANDIDATE_PREVIEW_NOT_PRODUCTION"}' > dist/release-source.json
+jq -n --arg source "$SOURCE_SHA" --arg public "$GITHUB_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$GITHUB_RUN_ID" --argjson beta "$(jq -er '.beta_number' "$REQUEST")" '{release_channel:"developer-beta",beta_number:$beta,source_commit:$source,public_ui_source_commit:$public,public_ui_overlay_sha256:$css,application_version:$version,build_run:$build,release_status:"CANDIDATE_PREVIEW_NOT_PRODUCTION"}' > dist/release-source.json
 umask 077
 tar -C "$RUNNER_TEMP/public-application" -czf "$RUNNER_TEMP/mobile-overhaul.tar.gz" dist functions server src package.json package-lock.json wrangler.toml
 node "$GITHUB_WORKSPACE/scripts/seal-private-release.mjs" seal "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/mobile-overhaul.sealed" "$SOURCE_SHA"
