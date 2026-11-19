@@ -27,6 +27,7 @@ export const MOBILE_FLOATING_SHEETS=Object.freeze([
   ['map-safety-controls','.map-safety-head','#map-safety-close'],
   ['map-gesture-guide','.dj856-guide-edge-drag','#map-gesture-guide-close','.map-gesture-guide-head'],
   ['dj-mobile-utilities','.dj856-more-edge-drag','#dj-mobile-utilities-close','.dj854-more-head'],
+  ['dj854-weather-sheet','.dj-weather-edge-drag','.dj854-weather-close','.dj854-weather-head'],
 ]);
 const INTERACTIVE='button,a,input,textarea,select,label,summary,[role="button"],[contenteditable="true"]';
 export function isSheetOpen(el,win=window){
@@ -47,10 +48,9 @@ export function installMobileFloatingSheetController(doc=document,win=window){
     if(active)app.dataset.djActiveSheet=active;
     else delete app.dataset.djActiveSheet;
   };
-  for(const [id,handles,closeSelector,headerSelector] of MOBILE_FLOATING_SHEETS){
+  const registerSheets=()=>{for(const [id,handles,closeSelector,headerSelector] of MOBILE_FLOATING_SHEETS){
     const panel=doc.getElementById(id);
     if(!panel||installed.has(panel))continue;
-    installed.add(panel);
     let handleNodes=[...panel.querySelectorAll(handles)];
     // Transport gets the whole visible header as a drag surface. The pointer
     // handler still ignores buttons/links/inputs, so route actions and X taps
@@ -85,6 +85,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       if(grip&&!handleNodes.includes(grip))handleNodes.push(grip);
     }
     if(!handleNodes.length)continue;
+    installed.add(panel);
     // Every non-interactive part of the visible header is a swipe zone.
     // Body scrolling and form controls remain native and are never hijacked.
     for(const handle of handleNodes)handle.classList.add('dj-sheet-swipe-zone');
@@ -106,10 +107,11 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       if(event.target.closest?.(INTERACTIVE))return;
       // A new finger gesture takes ownership immediately. Do not leave an
       // earlier expand/collapse transition competing with pointer movement.
+      win.DongjakWindowMotion?.cancel(panel);
       if(panel.classList.contains('dj889-sheet-transitioning')){
         interruptMobileSheetMotion(panel);
       }
-      gesture={pointer:event.pointerId,y:event.clientY,x:event.clientX,lastY:event.clientY,lastTime:performance.now(),velocity:0,dragging:false};
+      gesture={pointer:event.pointerId,y:event.clientY,x:event.clientX,upLimit:Math.max(0,panel.getBoundingClientRect().top-16),lastY:event.clientY,lastTime:performance.now(),velocity:0,dragging:false};
       try{event.currentTarget?.setPointerCapture?.(event.pointerId);}catch{}
     };
     const move=event=>{
@@ -124,7 +126,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
         'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide'].includes(id);
-      panel.style.setProperty('--dj-sheet-drag-y',`${expandable?Math.max(-70,dy):Math.max(0,dy)}px`);
+      panel.style.setProperty('--dj-sheet-drag-y',`${expandable?Math.max(-g.upLimit,dy):Math.max(0,dy)}px`);
       panel.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();
     };
@@ -191,6 +193,12 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       }
     });
   }
+  };
+  registerSheets();
+  // Weather and other late-created sheets must receive the same header listener.
+  const registrationObserver=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1)))registerSheets();});
+  registrationObserver.observe(app,{childList:true,subtree:true});
+  cleanups.push(()=>registrationObserver.disconnect());
   const observer=new MutationObserver(sync);
   const admin=doc.getElementById('admin-dong-picker');
   if(admin)observer.observe(admin,{attributes:true,attributeFilter:['hidden','class']});

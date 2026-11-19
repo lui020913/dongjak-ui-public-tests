@@ -28,6 +28,64 @@ export function normalizePhoneShortcuts(value){return [...new Set(Array.isArray(
 const read=(w,k,f)=>{try{return JSON.parse(w.localStorage.getItem(k)||'null')??f}catch{return f}};
 const save=(w,k,v)=>{try{w.localStorage.setItem(k,JSON.stringify(v))}catch{}};
 export const phoneIcon=key=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[key]||icons.layers)+'</svg>';
+
+// The layer overlay stays fixed; only its inner card follows the finger.
+// Compact -> expanded -> compact -> dismiss. Header buttons and the list keep native input.
+export function layerDragFrame(startHeight,dy,compact,expanded){
+ const height=Math.min(expanded,Math.max(compact,startHeight-dy));
+ return {height,offset:Math.max(0,dy-(startHeight-compact))};
+}
+export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
+ let gesture=null,expanded=false,settleTimer=0,compactHeight=0,blockedUntil=0;
+ const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const put=(name,value)=>body.style.setProperty(name,value,'important');
+ const clear=()=>{for(const name of ['height','translate','transition','max-height'])body.style.removeProperty(name)};
+ const reset=()=>{gesture=null;expanded=false;compactHeight=0;win.clearTimeout(settleTimer);clear();delete body.dataset.djLayerExpanded;};
+ const finish=(next,close=false)=>{
+  const rect=body.getBoundingClientRect();expanded=next;body.dataset.djLayerExpanded=String(next);
+  const max=Math.max(compactHeight,win.innerHeight-28);
+  const height=next?max:compactHeight;
+  const duration=close?320:420;
+  put('max-height',max+'px');put('height',rect.height+'px');
+  const offset=parseFloat((win.getComputedStyle(body).translate||'0 0').split(' ')[1])||0;
+  put('translate','0 '+offset+'px');put('transition','none');void body.offsetHeight;
+  const complete=()=>{if(close){onDismiss();reset();}else{clear();if(next){put('max-height',max+'px');put('height',height+'px');}}};
+  if(reduced()){complete();return;}
+  put('transition','height '+duration+'ms cubic-bezier(.42,0,.58,1), translate '+duration+'ms cubic-bezier(.42,0,.58,1)');
+  put('height',height+'px');put('translate','0 '+(close?win.innerHeight+24:0)+'px');
+  settleTimer=win.setTimeout(complete,duration+40);
+ };
+ header.addEventListener('pointerdown',e=>{
+  if(panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
+  win.clearTimeout(settleTimer);win.DongjakWindowMotion?.cancel(body);
+  const rect=body.getBoundingClientRect();if(!compactHeight)compactHeight=rect.height;
+  put('max-height',Math.max(compactHeight,win.innerHeight-28)+'px');put('height',rect.height+'px');put('transition','none');
+  gesture={id:e.pointerId,y:e.clientY,x:e.clientX,height:rect.height,expanded,dragging:false};
+  try{header.setPointerCapture?.(e.pointerId)}catch{}
+ });
+ header.addEventListener('pointermove',e=>{
+  const g=gesture;if(!g||e.pointerId!==g.id)return;
+  const dy=e.clientY-g.y,dx=e.clientX-g.x;
+  if(!g.dragging){if(Math.abs(dy)<7)return;if(Math.abs(dx)>Math.abs(dy)){gesture=null;finish(g.expanded);return;}g.dragging=true;}
+  const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-28));
+  put('height',frame.height+'px');put('translate','0 '+frame.offset+'px');
+  if(e.cancelable)e.preventDefault();
+ },{passive:false});
+ const end=(e,cancel=false)=>{
+  const g=gesture;if(!g||e.pointerId!==g.id)return;gesture=null;
+  if(g.dragging)blockedUntil=win.performance.now()+350;
+  const dy=e.clientY-g.y;
+  if(cancel||!g.dragging||Math.abs(dy)<45){finish(g.expanded);return;}
+  if(dy<0){finish(true);return;}
+  if(g.expanded){finish(false);return;}
+  finish(false,dy>=90);
+ };
+ header.addEventListener('pointerup',e=>end(e));
+ header.addEventListener('pointercancel',e=>end(e,true));
+ header.addEventListener('click',e=>{if(win.performance.now()<blockedUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
+ return reset;
+}
+
 export function installPhoneToolbar({app,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches||app.dataset.djNextInstalled)return;
  app.dataset.djNextInstalled='1';
@@ -42,7 +100,8 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
  const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
  let closeTimer=0;
- function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){win.clearTimeout(closeTimer);win.DongjakWindowMotion?.cancel(body);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
+ const resetLayerDrag=installLayerHeaderDrag({panel,body,header:h,win,onDismiss:()=>{slot=null;panel.classList.add('djNext-leaving');finishClose();}});
+ function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){resetLayerDrag();win.clearTimeout(closeTimer);win.DongjakWindowMotion?.cancel(body);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
   if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
   win.clearTimeout(closeTimer);
   panel.classList.add('djNext-leaving');if(win.DongjakWindowMotion){win.DongjakWindowMotion.close(body,finishClose);return}closeTimer=win.setTimeout(finishClose,380)
@@ -53,7 +112,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
  function invoke(selector){const b=q(selector);if(!b||b.disabled){notify('현재 사용할 수 없는 기능입니다. 지도 로딩 후 다시 시도해 주세요.');return}b.click()}
- function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;win.DongjakWindowMotion?.open(body);app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
+ function open(event,idx=null){resetLayerDrag();win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;win.DongjakWindowMotion?.open(body);app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='등록 '+selected.length+'/3';list.replaceChildren();
  const groups=[['지도 기능',['pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];

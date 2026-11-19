@@ -545,3 +545,17 @@ test('phone windows share the opaque gradual slide on open and close',async({pag
  await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>tap(page,page.locator('#route-panel .dj-sheet-chrome-close')));
  await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')));
 });
+
+
+test('layer header follows a real pointer upward and downward; content and X stay independent',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-layers'));
+ const modal=page.locator('#djNext-layer-panel'),body=modal.locator('.djNext-modal-body'),header=modal.locator('header'),scroll=modal.locator('.djNext-layer-scroll');
+ await expect(modal).toBeVisible();await expect.poll(()=>body.getAttribute('data-dj810-animating')).toBeNull();
+ await expect(header).toHaveCSS('touch-action','none');
+ const compact=await body.boundingBox();
+ async function drag(dy){const r=await header.boundingBox();const x=r.x+Math.min(65,r.width/3),y=r.y+r.height/2;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+dy,{steps:8});const mid=await body.boundingBox();await page.mouse.up();return mid;}
+ const up=await drag(-95);expect(up.y).toBeLessThan(compact.y-20);await expect(body).toHaveAttribute('data-dj-layer-expanded','true');await expect.poll(async()=> (await body.boundingBox()).height).toBeGreaterThan(compact.height+25);
+ await page.waitForTimeout(500);const large=await body.boundingBox();const down=await drag(100);expect(down.y).toBeGreaterThan(large.y+20);await expect(body).toHaveAttribute('data-dj-layer-expanded','false');await expect.poll(async()=>Math.abs((await body.boundingBox()).height-compact.height)).toBeLessThan(3);
+ await page.waitForTimeout(500);const before=await header.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await header.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
+ await drag(125);await expect(modal).toBeHidden();await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
+});
