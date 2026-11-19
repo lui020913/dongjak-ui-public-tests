@@ -45,21 +45,21 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const add=(tag,cls,txt,parent=content)=>{const e=doc.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;parent.append(e);return e;};
  const brand=add('header','dj-install-brand');
  const logo=add('img','dj-install-logo',null,brand);logo.src='/icons/dongjak-light-512.png';logo.alt='';logo.width=76;logo.height=76;
- const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle','이용하실 방법을 선택해 주세요.',brand);
+ const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle',blocked?'스마트폰으로 QR코드를 스캔해 이용해 주세요.':'이용하실 방법을 선택해 주세요.',brand);
  const list=add('div','dj-install-list'),info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={};
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
- const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':'',b);
+ const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':key==='web'&&blocked?'모바일 전용':'',b);
  if(key==='pwa')status.classList.add('dj-install-platforms');
  if(key==='ios'){b.disabled=true;b.dataset.installPaused='true';}else add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');
  buttons.set(key,{b,status});
  b.addEventListener('click',async()=>{
  if(key==='ios')return;
  if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();return;}
- if(key==='pwa'){showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
+ if(key==='pwa'){if(blocked){showInfo(['스마트폰에서 QR코드로 접속한 뒤 홈 화면에 추가해 주세요.']);return;}showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
  const url=safeDownloadUrl(links[key],key);
  if(!url){showInfo(['최신 Android APK 다운로드를 준비 중입니다. 웹앱을 이용해 주세요.']);return;}
  const guide=androidInstallGuidance();
@@ -79,7 +79,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  if(typeof info.scrollIntoView==='function')info.scrollIntoView({block:'nearest',behavior:'instant'});
  });
  }
- if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);}
+ if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
  else{const close=add('button','dj-install-dismiss','나중에');close.type='button';close.addEventListener('click',finish);card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);
  let seen=false;try{seen=win.sessionStorage.getItem(INSTALL_SESSION_KEY)==='1';}catch{}if(!seen||new URLSearchParams(win.location.search).get('install')==='1'){if(typeof card.showModal==='function')card.showModal();else card.setAttribute('open','');}}
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);

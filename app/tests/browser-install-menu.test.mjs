@@ -11,7 +11,7 @@ test('welcome always uses the original white safety-map icon and iPhone uses a d
 
 test('paused iOS action is disabled, ignores configured download URLs and keeps the future-update label',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.match(js,/key==='ios'\?'추후 업데이트 예정'/);assert.match(js,/if\(key==='ios'\)\{b\.disabled=true;b\.dataset\.installPaused='true'/);assert.match(js,/if\(key==='ios'\)return;/);assert.doesNotMatch(js,/data\.ios/);assert.doesNotMatch(js,/for\(const key of \['android','ios'\]\)buttons\.get\(key\)/);});
 
-test('PWA home-screen action advertises both operating systems while native iOS stays paused',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.match(js,/key==='pwa'\?'iOS · Android 지원'/);assert.match(js,/if\(key==='pwa'\)status\.classList\.add\('dj-install-platforms'\)/);assert.match(js,/if\(key==='pwa'\)\{showInfo\(steps\(win\.navigator\.userAgent\)\)/);});
+test('PWA home-screen action advertises both operating systems while native iOS stays paused',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.match(js,/key==='pwa'\?'iOS · Android 지원'/);assert.match(js,/if\(key==='pwa'\)status\.classList\.add\('dj-install-platforms'\)/);assert.match(js,/if\(key==='pwa'\)\{if\(blocked\)\{[^}]*return;\}showInfo\(steps\(win\.navigator\.userAgent\)\)/);});
 
 test('public debug APK is exact current Production and a verified matching release asset',()=>{const sha='b'.repeat(40),v='9.2.4',name='Dongjak-Safety-Map-v'+v+'-debug.apk',tag='android-debug-v'+v,url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+tag+'/'+name;const m={application_version:v,source_commit:sha,release_status:'DEPLOYED_PRODUCTION'},r={tag_name:tag,target_commitish:sha,draft:false,prerelease:false,assets:[{name,browser_download_url:url,state:'uploaded'}]};assert.equal(androidReleaseAsset(m,r,'debug'),url);assert.equal(androidReleaseAsset(m,r),null);assert.equal(androidReleaseAsset({...m,source_commit:'c'.repeat(40)},r,'debug'),null);assert.equal(androidReleaseAsset(m,{...r,assets:[]},'debug'),null);});
 
@@ -20,8 +20,11 @@ test('external APK guide keeps security controls optional and offers web access'
 test('install actions have touch press and fine-pointer hover feedback without animating disabled choices or reduced motion',async()=>{
  const {readFileSync}=await import('node:fs');
  const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');
- assert.match(css,/@media \(hover:hover\) and \(pointer:fine\)\{[\s\S]*?:not\(:disabled\):hover\{transform:translateY\(1px\) scale\(\.99\)/);
- assert.match(css,/:not\(:disabled\):active\{transform:translateY\(2px\) scale\(\.975\);box-shadow:/);
- assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?transition:none!important[\s\S]*?transform:none!important/);
+ assert.match(css,/@media \(hover:hover\) and \(pointer:fine\)\{[\s\S]*?:not\(:disabled\):hover\{box-shadow:/);
+ assert.match(css,/:not\(:disabled\):active\{box-shadow:/);
+ assert.doesNotMatch(css,/:not\(:disabled\):(?:hover|active)\{[^}]*transform:/);
+ assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?transition:none!important/);
  assert.match(css,/\.dj-install-prompt:focus-visible\{outline:/);
 });
+
+test('blocked gate has one heading and neutral equal choices; no false desktop PWA prompt',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.doesNotMatch(css,/\.dj-install-choice:first-child/);assert.match(css,/\.dj-mobile-only-message>h1[^}]+display:none!important/);assert.match(js,/모바일 전용/);assert.match(js,/if\(key==='pwa'\)\{if\(blocked\)/);});

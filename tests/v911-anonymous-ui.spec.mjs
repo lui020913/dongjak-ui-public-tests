@@ -650,7 +650,7 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
  await page.emulateMedia({reducedMotion:'no-preference'});
  const webChoice=menu.getByRole('button',{name:'웹에서 바로 이용하기'});
- await expect(webChoice).toHaveCSS('transition-property','transform, box-shadow');
+ await expect(webChoice).toHaveCSS('transition-property','box-shadow');
  await page.emulateMedia({reducedMotion:'reduce'});
  await expect(webChoice).toHaveCSS('transition-duration','0s');
  await page.emulateMedia({reducedMotion:'no-preference'});
@@ -691,4 +691,25 @@ test('Android verified download shows security instructions before navigation',{
  await expect(guide.getByRole('button',{name:'웹 또는 웹앱 이용하기'})).toBeVisible();
  await Promise.all([page.waitForRequest(url),guide.getByRole('button',{name:'APK 다운로드',exact:true}).click({noWaitAfter:true})]);
  await expect.poll(()=>requested).toBe(true);
+});
+
+test('PC install notice has one heading, equal actions and stable edge clicks',{tag:'@phone-layout'},async({page})=>{
+ await page.setViewportSize({width:1200,height:950});
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await page.goto('/',{waitUntil:'domcontentloaded'});
+ const gate=page.locator('#dj-mobile-only-screen'),menu=gate.locator('#dj-install-menu');
+ await expect(menu).toBeVisible({timeout:20000});await expect(gate.locator('#dj-mobile-only-title')).toBeHidden();
+ await expect(menu.locator('.dj-install-subtitle')).toContainText('QR코드');
+ const web=menu.getByRole('button',{name:/웹에서 바로 이용하기/}),android=menu.getByRole('button',{name:/Android 앱 다운로드/});
+ await expect(web).toContainText('모바일 전용');
+ expect(await web.evaluate(n=>getComputedStyle(n).backgroundColor)).toBe(await android.evaluate(n=>getComputedStyle(n).backgroundColor));
+ await expect(menu.locator('.dj-install-qr')).toBeVisible();
+ const rect=await web.boundingBox();expect(rect).not.toBeNull();
+ await page.mouse.move(rect.x+rect.width/2,rect.y-3);
+ await page.mouse.move(rect.x+rect.width/2,rect.y+2);
+ await page.mouse.down();
+ expect(await web.boundingBox()).toEqual(rect);
+ await page.mouse.up();
+ await expect(menu.locator('.dj-install-info')).toContainText('스마트폰으로 이 사이트에 접속');
+ await expect(gate).toBeVisible();
 });

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.8",
+  "application_version": "9.2.9",
   "public_work_branch": "main",
-  "purpose": "Show explicit Android APK installation guidance and official Galaxy help before verified download. Add lightweight hover and touch press feedback to the browser install choices.",
-  "attempt": 65,
+  "purpose": "Stable install button hit areas, equal choices, and single mobile-only gate message.",
+  "attempt": 66,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "External installation restrictions; no OS settings changes; keep existing signing and map.",
+  "last_retry_reason": "Fast pointer clicks and duplicate PC notice.",
   "release_kind": "patch",
   "beta_number": 1
 }
