@@ -604,7 +604,7 @@ test('phone update history rises monotonically and never paints over bottom navi
  const modal=page.locator('#version-history-modal'),card=modal.locator('.version-history-dialog');
  await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
   function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
-   if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=parseFloat((s.clipPath.match(/^inset\\([^ ]+ [^ ]+ ([\\d.]+)px/)||[])[1])||0;
+   if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
     frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
    requestAnimationFrame(tick);}requestAnimationFrame(tick);
  });
