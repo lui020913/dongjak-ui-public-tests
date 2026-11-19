@@ -30,7 +30,7 @@ test('unified close never replays a user X via fake bubbling or non-bubbling cli
 
 test('closing a registered-place detail leaves the map unobstructed',()=>{
   const main=read('src/main.js');
-  const close=main.slice(main.indexOf('function closeDetailToMap()'),main.indexOf('function clearPending()'));
+  const close=main.slice(main.indexOf('function closeDetailToMap('),main.indexOf('function clearPending()'));
   assert.match(close,/detail\.hidden=true;editor\.hidden=true;overview\.hidden=true/);
   assert.doesNotMatch(close,/showOverview\(/);
   assert.match(main,/getElementById\('close-detail'\)\.addEventListener\('click',closeDetailToMap\)/);
@@ -41,7 +41,7 @@ test('closing an auxiliary page returns to the map without reopening the overvie
   const main=read('src/main.js');
   assert.match(main,/function navigate\(tab,\{suppressOverview=false\}=\{\}\)/);
   assert.match(main,/if\(suppressOverview\)\{\s*overview\.hidden=true;\s*overviewExplicitOpen=false;/);
-  assert.match(main,/for\(const button of document\.querySelectorAll\('\[data-close-page\]'\)\)\{\s*button\.addEventListener\('click',\(\)=>navigate\('map',\{suppressOverview:true\}\)\);/);
+  assert.match(main,/for\(const button of document\.querySelectorAll\('\[data-close-page\]'\)\)\{[\s\S]*?const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\);if\(panel&&window\.DongjakWindowMotion\)window\.DongjakWindowMotion\.close\(panel,finish\);else finish\(\);/);
   assert.match(main,/news-close-to-map[\s\S]*?navigate\('map',\{suppressOverview:true\}\)/);
 });
 
