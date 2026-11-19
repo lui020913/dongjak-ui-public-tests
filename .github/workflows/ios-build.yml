@@ -1,0 +1,205 @@
+name: iOS - verified Production build
+run-name: iOS (${{ inputs.variant || 'simulator' }}) - ${{ github.sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Simulator (unsigned) or TestFlight upload (Apple signing required)
+        type: choice
+        options: [simulator, testflight]
+        default: simulator
+  workflow_run:
+    workflows: ['Mobile-only release — Preview, phone QA and protected Production']
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ios-build-${{ github.ref }}-${{ inputs.variant || 'simulator' }}
+  cancel-in-progress: true
+jobs:
+  ios:
+    if: >-
+      github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' &&
+      github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' ||
+      (vars.IOS_AUTOMATIC_BUILD == 'true' && github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.actor.login == 'lui020913'))
+    environment: ${{ inputs.variant == 'testflight' && 'ios-signing' || 'public-source-build' }}
+    runs-on: macos-26
+    timeout-minutes: 40
+    env:
+      VARIANT: ${{ inputs.variant || 'simulator' }}
+      PRODUCTION_URL: https://dongjak-walk-safety-preview.pages.dev
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - name: Resolve current verified Production release (never fall back)
+        id: production
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_RUN: ${{ github.event.workflow_run.id || '' }}
+        run: |
+          set -euo pipefail
+          marker="$RUNNER_TEMP/ios-production.json"
+          curl -fsSL --retry 2 --max-time 30 "$PRODUCTION_URL/release-source.json?ios=$GITHUB_RUN_ID" > "$marker"
+          jq -e '.release_status=="DEPLOYED_PRODUCTION" and .source_commit==.public_ui_source_commit and (.source_commit|test("^[a-f0-9]{40}$")) and (.public_ui_overlay_sha256|test("^[a-f0-9]{64}$")) and (.application_version|test("^[0-9]+[.][0-9]+[.][0-9]+$")) and (.build_run|tostring|test("^[1-9][0-9]*$"))' "$marker" >/dev/null
+          sha="$(jq -r .source_commit "$marker")"
+          run="$(jq -r .build_run "$marker")"
+          version="$(jq -r .application_version "$marker")"
+          if [ -n "$TRIGGER_RUN" ]; then test "$TRIGGER_RUN" = "$run"; fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '.head_sha==$sha and .head_branch=="main" and .head_repository.full_name==$repo and .event=="push" and .conclusion=="success" and .path==".github/workflows/mobile-first-overhaul-preview.yml" and .actor.login=="lui020913"' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" | jq -e '[.jobs[]|select(.name=="Promote the exact mobile-tested build to Production" and .conclusion=="success")]|length==1' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json?ios=$GITHUB_RUN_ID" | jq -e --arg version "$version" '.version==$version' >/dev/null
+          printf 'sha=%s\nrun=%s\nversion=%s\n' "$sha" "$run" "$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.production.outputs.sha }}
+          path: production-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: production-source/app/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-${{ steps.production.outputs.sha }}
+          run-id: ${{ steps.production.outputs.run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/ios-sealed
+      - name: Extract only the web assets from the verified release artifact
+        working-directory: production-source
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+          SOURCE_SHA: ${{ steps.production.outputs.sha }}
+          VERSION: ${{ steps.production.outputs.version }}
+        run: |
+          set -euo pipefail
+          umask 077
+          tarball="$RUNNER_TEMP/ios-release.tar.gz"
+          trap 'rm -f "$tarball"' EXIT
+          node scripts/seal-private-release.mjs open "$RUNNER_TEMP/ios-sealed/mobile-overhaul.sealed" "$tarball" "$SOURCE_SHA"
+          mkdir -m 700 "$RUNNER_TEMP/ios-web"
+          tar -xzf "$tarball" -C "$RUNNER_TEMP/ios-web" dist
+          cd "$RUNNER_TEMP/ios-web/dist"
+          jq -e --slurpfile prod "$RUNNER_TEMP/ios-production.json" '.release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION" and .source_commit==$prod[0].source_commit and .public_ui_source_commit==$prod[0].public_ui_source_commit and .public_ui_overlay_sha256==$prod[0].public_ui_overlay_sha256 and .application_version==$prod[0].application_version and (.build_run|tostring)==($prod[0].build_run|tostring)' release-source.json >/dev/null
+          jq -e --arg version "$VERSION" '.version==$version' version.json >/dev/null
+          test -s index.html
+          test -z "$(find . -type l -print -quit)"
+          # The same public dist is shipped, not the encrypted bundle's server/source files.
+          rm -rf _worker.js functions server _routes.json _headers _redirects
+          find . -type f \( -name '*.map' -o -name '.env*' \) -delete
+          cp "$RUNNER_TEMP/ios-production.json" release-source.json
+      - name: Prepare native iOS from exact tested web assets
+        working-directory: production-source/app
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          mv "$RUNNER_TEMP/ios-web/dist" build/ios-native
+          cp "$GITHUB_WORKSPACE/scripts/native-api-bridge.js" build/ios-native/dongjak-native-api.js
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const path='build/ios-native/index.html',html=readFileSync(path,'utf8');
+          if(!html.includes('<head>')||html.includes('dongjak-native-api.js'))throw Error('Unexpected entrypoint');
+          writeFileSync(path,html.replace('<head>','<head>\n<script src="/dongjak-native-api.js"></script>'));
+          const c=JSON.parse(readFileSync('capacitor.config.json','utf8'));c.webDir='build/ios-native';writeFileSync('capacitor.config.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          npm ci --no-audit --no-fund --prefer-offline
+          CAP_VERSION="$(node -p "require('./node_modules/@capacitor/core/package.json').version")"
+          npm install --no-save --package-lock=false --no-audit --no-fund --prefer-offline "@capacitor/ios@$CAP_VERSION"
+          if [ ! -d ios ]; then npx --no-install cap add ios --packagemanager SPM; fi
+          npx --no-install cap sync ios
+          plist=ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c 'Add :NSLocationWhenInUseUsageDescription string 현재 위치와 주변 보행안전정보를 표시합니다.' "$plist" || /usr/libexec/PlistBuddy -c 'Set :NSLocationWhenInUseUsageDescription 현재 위치와 주변 보행안전정보를 표시합니다.' "$plist"
+          /usr/libexec/PlistBuddy -c 'Add :NSLocationAlwaysAndWhenInUseUsageDescription string 길찾기 중 현재 위치를 확인합니다.' "$plist" || /usr/libexec/PlistBuddy -c 'Set :NSLocationAlwaysAndWhenInUseUsageDescription 길찾기 중 현재 위치를 확인합니다.' "$plist"
+          xcodebuild -version
+      - name: Build unsigned iOS simulator app
+        if: env.VARIANT == 'simulator'
+        working-directory: production-source/app
+        env:
+          VERSION: ${{ steps.production.outputs.version }}
+        run: |
+          set -euo pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/ios-derived" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" CODE_SIGNING_ALLOWED=NO -parallelizeTargets build
+          app="$RUNNER_TEMP/ios-derived/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")" = "$VERSION"
+          jq -e --arg v "$VERSION" '.version==$v' "$app/public/version.json" >/dev/null
+          mkdir -p "$RUNNER_TEMP/ios-output"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "$RUNNER_TEMP/ios-output/Dongjak-v$VERSION-iOS-Simulator.zip"
+      - name: Sign and upload directly to App Store Connect
+        if: env.VARIANT == 'testflight'
+        working-directory: production-source/app
+        env:
+          VERSION: ${{ steps.production.outputs.version }}
+          IOS_CERTIFICATE_P12: ${{ secrets.IOS_CERTIFICATE_P12 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+          ASC_API_KEY_ID: ${{ vars.ASC_API_KEY_ID }}
+          ASC_API_ISSUER_ID: ${{ vars.ASC_API_ISSUER_ID }}
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+          IOS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${IOS_CERTIFICATE_P12:?Missing certificate}" "${IOS_CERTIFICATE_PASSWORD:?Missing password}" "${IOS_PROFILE_BASE64:?Missing profile}" "${IOS_TEAM_ID:?Missing team}" "${ASC_API_KEY_ID:?Missing key ID}" "${ASC_API_ISSUER_ID:?Missing issuer}" "${ASC_API_KEY_P8:?Missing ASC key}"
+          keychain="$RUNNER_TEMP/dj-ios.keychain-db"; password="$(openssl rand -hex 24)"
+          cert="$RUNNER_TEMP/dj-ios.p12"; profile="$RUNNER_TEMP/dj-ios.mobileprovision"
+          trap 'security delete-keychain "$keychain" >/dev/null 2>&1 || true; rm -f "$cert" "$profile" "$RUNNER_TEMP/dj-profile.plist"; rm -rf "$RUNNER_TEMP/asc-keys"' EXIT
+          printf '%s' "$IOS_CERTIFICATE_P12" | base64 -D > "$cert"
+          printf '%s' "$IOS_PROFILE_BASE64" | base64 -D > "$profile"
+          unset IOS_CERTIFICATE_P12 IOS_PROFILE_BASE64
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 1800 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$cert" -k "$keychain" -P "$IOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain"
+          security cms -D -i "$profile" > "$RUNNER_TEMP/dj-profile.plist"
+          uuid="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/dj-profile.plist")"
+          name="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/dj-profile.plist")"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/dj-profile.plist")" = "$IOS_TEAM_ID.kr.dongjak.safetyapp"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' "$RUNNER_TEMP/dj-profile.plist")" = false
+          if /usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices' "$RUNNER_TEMP/dj-profile.plist" >/dev/null 2>&1; then exit 1; fi
+          mkdir -p "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$profile" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$uuid.mobileprovision"
+          cp "$profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$uuid.mobileprovision"
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Dongjak.xcarchive" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$IOS_TEAM_ID" PROVISIONING_PROFILE_SPECIFIER="$name" CODE_SIGN_IDENTITY='Apple Distribution' -parallelizeTargets archive
+          python3 - "$RUNNER_TEMP/dj-export.plist" "$IOS_TEAM_ID" "$name" <<'PY'
+          import plistlib,sys
+          with open(sys.argv[1],'wb') as f: plistlib.dump({'method':'app-store-connect','signingStyle':'manual','teamID':sys.argv[2],'provisioningProfiles':{'kr.dongjak.safetyapp':sys.argv[3]},'signingCertificate':'Apple Distribution'},f)
+          PY
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Dongjak.xcarchive" -exportPath "$RUNNER_TEMP/ios-export" -exportOptionsPlist "$RUNNER_TEMP/dj-export.plist"
+          ipa="$(find "$RUNNER_TEMP/ios-export" -maxdepth 1 -name '*.ipa' -print -quit)"; test -n "$ipa"
+          mkdir -p "$RUNNER_TEMP/ipa-verify" "$RUNNER_TEMP/ios-output"
+          ditto -x -k "$ipa" "$RUNNER_TEMP/ipa-verify"
+          app="$(find "$RUNNER_TEMP/ipa-verify/Payload" -maxdepth 1 -name '*.app' -print -quit)"; test -n "$app"
+          codesign --verify --deep --strict "$app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")" = "$VERSION"
+          jq -e --slurpfile prod "$RUNNER_TEMP/ios-production.json" '.==$prod[0]' "$app/public/release-source.json" >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?ios-upload=$GITHUB_RUN_ID" | jq -e --slurpfile prod "$RUNNER_TEMP/ios-production.json" '.==$prod[0]' >/dev/null
+          mkdir -m 700 "$RUNNER_TEMP/asc-keys"; [[ "$ASC_API_KEY_ID" =~ ^[A-Za-z0-9]+$ ]]
+          printf '%s' "$ASC_API_KEY_P8" > "$RUNNER_TEMP/asc-keys/AuthKey_$ASC_API_KEY_ID.p8"
+          unset ASC_API_KEY_P8
+          export API_PRIVATE_KEYS_DIR="$RUNNER_TEMP/asc-keys"
+          xcrun altool --upload-app --type ios -f "$ipa" --apiKey "$ASC_API_KEY_ID" --apiIssuer "$ASC_API_ISSUER_ID"
+          printf 'iOS v%s uploaded to App Store Connect; Apple processing/review is separate.\n' "$VERSION" > "$RUNNER_TEMP/ios-output/UPLOAD.txt"
+      - name: Reject stale results and record provenance
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?ios-final=$GITHUB_RUN_ID" | jq -e --slurpfile prod "$RUNNER_TEMP/ios-production.json" '.==$prod[0]' >/dev/null
+          cp "$RUNNER_TEMP/ios-production.json" "$RUNNER_TEMP/ios-output/PRODUCTION.json"
+          (cd "$RUNNER_TEMP/ios-output"; find . -type f ! -name SHA256SUMS.txt -exec shasum -a 256 {} + > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Dongjak-iOS-v${{ steps.production.outputs.version }}-${{ env.VARIANT }}
+          path: ${{ runner.temp }}/ios-output/
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
+      - name: Remove temporary and signing files
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/ios-sealed" "$RUNNER_TEMP/ios-web" "$RUNNER_TEMP/ios-release.tar.gz" "$RUNNER_TEMP/Dongjak.xcarchive" "$RUNNER_TEMP/ios-export" "$RUNNER_TEMP/ipa-verify" "$RUNNER_TEMP/dj-ios.p12" "$RUNNER_TEMP/dj-ios.mobileprovision" "$RUNNER_TEMP/dj-profile.plist" "$RUNNER_TEMP/dj-export.plist" "$RUNNER_TEMP/asc-keys" "$GITHUB_WORKSPACE/production-source/app/build/ios-native" "$GITHUB_WORKSPACE/production-source/app/ios"
