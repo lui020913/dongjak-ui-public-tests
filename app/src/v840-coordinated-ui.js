@@ -120,20 +120,17 @@ export function installCoordinatedShell(doc=document,win=window){
    if(!event.target.closest?.('#theme-toggle')||!theme)return;
    if(theme.dataset.dj840ThemeConfirmed==='1')return;
    event.preventDefault();event.stopImmediatePropagation();
-   dialog.hidden=false;
+   dialog.hidden=false;win.DongjakWindowMotion?.open(dialog.querySelector('.dj840-theme-card'));
  };
  doc.addEventListener('click',onTheme,true);
  const decide=(event)=>{
    const choice=event.target.closest?.('[data-decision]')?.dataset.decision;
    if(!choice)return;
-   dialog.hidden=true;
-   if(choice==='confirm'&&theme){
-     theme.dataset.dj840ThemeConfirmed='1';
-     try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}
-   }
+   const finish=()=>{dialog.hidden=true;if(choice==='confirm'&&theme){theme.dataset.dj840ThemeConfirmed='1';try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}}};
+   if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog.querySelector('.dj840-theme-card'),finish);else finish();
  };
  dialog.addEventListener('click',decide);
- const escape=(event)=>{if(event.key==='Escape')dialog.hidden=true;};
+ const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog.querySelector('.dj840-theme-card'),finish);else finish();};
  doc.addEventListener('keydown',escape);
  sync();
  return ()=>{disposed=true;if(hideTimer)win.clearTimeout(hideTimer);app.removeEventListener('transitionend',sync,true);app.removeEventListener('animationend',sync,true);observers.forEach(o=>o.disconnect());win.clearInterval(interval);doc.removeEventListener('click',afterClose);doc.removeEventListener('click',onTheme,true);doc.removeEventListener('keydown',escape);label.removeEventListener('click',openGuideFromTip);dialog.remove();label.remove();tipGuide.remove();delete app.dataset.dj840Installed;};
