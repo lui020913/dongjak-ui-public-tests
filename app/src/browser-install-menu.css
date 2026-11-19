@@ -29,11 +29,24 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632
 /* Desktop/tablet keep the phone-only gate; the selector belongs to the page, not a second card. */
 #dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-devices,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
 #dj-mobile-only-screen .dj-install-menu{width:100%;padding:0;margin:0}
-#dj-mobile-only-screen .dj-install-content{min-height:0;padding:20px 16px}
-#dj-mobile-only-screen .dj-install-brand{margin-bottom:20px}
-#dj-mobile-only-screen .dj-install-menu h2{font-size:22px!important}
-#dj-mobile-only-screen .dj-install-menu .dj-install-subtitle{font-size:13px!important}
-#dj-mobile-only-screen .dj-install-menu .dj-install-choice{min-height:52px}
+#dj-mobile-only-screen .dj-install-content{min-height:0;width:min(100%,640px);padding:24px 16px}
+#dj-mobile-only-screen .dj-install-brand{margin-bottom:28px}
+#dj-mobile-only-screen #dj-install-menu h2{font-size:clamp(28px,3vw,38px)!important;line-height:1.35}
+#dj-mobile-only-screen #dj-install-menu .dj-install-subtitle{font-size:clamp(16px,1.65vw,21px)!important;color:#53645c}
+#dj-mobile-only-screen #dj-install-menu .dj-install-choice{min-height:68px;gap:14px;padding:14px 21px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-label{font-size:clamp(17px,1.65vw,21px);line-height:1.45}
+#dj-mobile-only-screen #dj-install-menu .dj-install-status{font-size:clamp(13px,1.25vw,16px);white-space:normal;text-align:right;line-height:1.35;flex-shrink:0;max-width:38%}
+#dj-mobile-only-screen #dj-install-menu .dj-install-choice svg{width:28px;height:28px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-chevron{font-size:26px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-info p{font-size:clamp(15px,1.4vw,18px)!important;line-height:1.65}
+#dj-mobile-only-screen #dj-install-menu .dj-install-guide-title{font-size:20px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-guide-help{font-size:15px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-prompt{font-size:18px}
+#dj-mobile-only-screen #dj-install-menu .dj-install-qr{width:144px;height:144px}
+@media(max-width:480px){
+ #dj-mobile-only-screen #dj-install-menu .dj-install-choice{gap:9px;padding:12px}
+ #dj-mobile-only-screen #dj-install-menu .dj-install-choice svg{width:24px;height:24px}
+}
 html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu){overflow-y:auto!important;display:flex!important;flex-direction:column;justify-content:flex-start;align-items:center;gap:18px;padding:24px!important}
 #dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message{margin:auto 0;flex:none;transform:none!important}
 #dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-credit{position:static!important;margin:0!important;flex:none}
