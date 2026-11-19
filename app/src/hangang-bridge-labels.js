@@ -1,4 +1,5 @@
 import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
+import {promoteReadable3DLabelLayers} from './readable-3d-labels.js';
 /**
  * Labels for five Han River crossings. An approximate reference is used only
  * until a named road/rail bridge is resolved from the rendered vector tiles or
@@ -209,14 +210,8 @@ export function installHangangBridgeLabels(map,{fetchImpl=globalThis.fetch}={}){
     if(movingLabels||nightOwnsLayerOrder(map))return;
     suppressNativeBridgeDuplicates();
     if(removed||typeof map.moveLayer!=='function'||typeof map.getStyle!=='function')return;
-    const layers=map.getStyle()?.layers||[];
-    const names=layers.map(layer=>layer.id);
-    if(!labelIds.every(id=>names.includes(id)))return;
-    const atEnd=labelIds.every((id,i)=>names[names.length-labelIds.length+i]===id);
-    if(atEnd)return;
     movingLabels=true;
-    try{for(const id of labelIds)map.moveLayer(id);}
-    catch(e){console.debug('[교량명] 레이어 우선순위 조정 보류',e?.message);}
+    try{promoteReadable3DLabelLayers(map);}
     finally{movingLabels=false;}
   }
   map.on?.('idle',prioritizeBridgeNames);
