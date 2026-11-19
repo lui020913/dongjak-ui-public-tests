@@ -31,6 +31,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Restore public app dependency downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
       - name: Validate mobile-only overlay and device gate
         run: |
           set -euo pipefail
@@ -90,6 +96,11 @@ jobs:
         with:
           name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
           path: ${{ runner.temp }}
+      - name: Restore public Wrangler package downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
       - name: Deploy exact candidate to isolated Preview only
         id: deploy
         run: bash scripts/deploy-mobile-first-overhaul-preview.sh
@@ -121,10 +132,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Restore pinned browser test package downloads
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dongjak-browser-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
       - name: Install pinned Playwright test package
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-        run: npm install --no-audit --no-fund
+          NPM_CONFIG_CACHE: ${{ runner.temp }}/dongjak-browser-npm
+        run: npm install --no-audit --no-fund --prefer-offline
       - name: Verify exact mobile Preview provenance
         run: |
           set -eu
@@ -181,6 +198,11 @@ jobs:
         with:
           name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
           path: ${{ runner.temp }}/encrypted
+      - name: Restore public Wrangler package downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
       - name: Decrypt the exact mobile-tested artifact
         run: |
           set -euo pipefail
