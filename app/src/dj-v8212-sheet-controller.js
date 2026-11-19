@@ -132,7 +132,10 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
         'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
-      panel.style.setProperty('--dj-sheet-drag-y',`${expandable?Math.max(-g.upLimit,dy):Math.max(0,dy)}px`);
+      const offset=expandable?Math.max(-g.upLimit,dy):Math.max(0,dy);
+      panel.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
+      panel.style.setProperty('translate',`0 ${offset}px`,'important');
+      panel.style.setProperty('transition','none','important');
       panel.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();
     };
@@ -156,7 +159,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         setMobileSheetExpanded(panel,true,doc,win);
         return;
       }
-      if(expandable&&g.dragging&&delta>30&&panel.classList.contains('dj871-sheet-expanded')){
+      if(expandable&&g.dragging&&delta>9&&panel.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(panel,false,doc,win);
         return;
       }

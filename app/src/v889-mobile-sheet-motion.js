@@ -24,6 +24,10 @@ function syncExpandedRoot(doc,app){
 }
 
 function clearDragStyles(panel){
+  if(panel.classList.contains(DRAGGING)){
+    panel.style.removeProperty('translate');
+    panel.style.removeProperty('transition');
+  }
   panel.classList.remove(DRAGGING);
   panel.style.removeProperty('--dj-sheet-drag-y');
   panel.style.removeProperty('--dj-sheet-drag-opacity');

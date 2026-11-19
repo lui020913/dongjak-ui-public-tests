@@ -1,4 +1,3 @@
-import {fadePanelOut} from './v852-panel-transition.js';
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
@@ -30,7 +29,7 @@ export function installUnifiedUI(doc=document, win=window){
   const desktop=()=>!phone()&&Boolean(win.matchMedia?.('(min-width:1080px)')?.matches);
   const lifecycle=createWindowLifecycle();
   const explicitUntil=new Map();
-  const stationaryTabEntry=new Set();
+  const tabReplacement=new Set();
   // Track a real opening click separately from exclusive-surface arbitration.
   // A preceding resize or observer must not consume the entrance request.
   const entranceIntent=new Map();
@@ -74,8 +73,6 @@ export function installUnifiedUI(doc=document, win=window){
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom){
     if(!phone()||!target?.style||reduced())return false;
-    // Guard the actual animation entry as well as the visibility observer.
-    if(opening&&stationaryTabEntry.has(target.id))return true;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const fade=isGuide||target.dataset.djDialogFade==='true';
@@ -92,7 +89,7 @@ export function installUnifiedUI(doc=document, win=window){
     if(rect.height<1||rect.width<1)return false;
     const nav=element('bottom-nav');
     const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content,.version-history-dialog')&&nav&&!nav.hidden)||false;
-    const distance=docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
+    const distance=opening&&tabReplacement.has(target.id)?Math.min(rect.height,36):docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
@@ -134,6 +131,7 @@ export function installUnifiedUI(doc=document, win=window){
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
       if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
     }
+    target.style.setProperty('animation','none','important');
     target.style.setProperty('transition','none','important');
     target.setAttribute('data-dj810-animating',opening?'opening':'closing');
     target.dataset.djWindowMotionDuration=String(duration);
@@ -326,37 +324,6 @@ export function installUnifiedUI(doc=document, win=window){
   }
   const tabPanels={route:'route-panel',participate:'participation-panel',
     news:'news-panel',mine:'mine-panel'};
-  // Capture the previous primary page before any legacy pointer/click handlers
-  // hide it. Keep the suppression for this entire visible session, not just
-  // the first observer callback. Keyboard and programmatic clicks use the
-  // same window-capture fallback.
-  let primaryPointer=null;
-  function markPrimaryReplacement(event){
-    if(!phone())return;
-    const tab=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-    if(!tab||tab.disabled){primaryPointer=null;return;}
-    const next=tabPanels[tab.dataset.tab];
-    if(!next){primaryPointer=null;if(tab.dataset.tab==='map')stationaryTabEntry.clear();return;}
-    // A stale tab name or observer history alone does not imply an open page.
-    // In particular, X -> map -> new page must still animate.
-    const other=Object.values(tabPanels).some(id=>{
-      if(id===next)return false;
-      const node=element(id);
-      if(!node||node.hidden||content(node)?.dataset.dj810Animating==='closing')return false;
-      return visible(id)||previous.get(id)===true;
-    });
-    let replacement=other;
-    if(event.type==='pointerdown')primaryPointer={next,replacement,at:Date.now()};
-    else {
-      if(event.detail!==0&&primaryPointer?.next===next&&Date.now()-primaryPointer.at<1800)replacement=primaryPointer.replacement;
-      primaryPointer=null;
-    }
-    if(replacement)stationaryTabEntry.add(next);
-    else if(!visible(next))stationaryTabEntry.delete(next);
-  }
-  on(win,'pointerdown',markPrimaryReplacement,true);
-  on(win,'pointercancel',()=>{if(primaryPointer&&!visible(primaryPointer.next))stationaryTabEntry.delete(primaryPointer.next);primaryPointer=null;},true);
-  on(win,'click',markPrimaryReplacement,true);
   function openingIntent(event){
     const node=event.target;
     if(!node?.closest)return '';
@@ -425,7 +392,7 @@ export function installUnifiedUI(doc=document, win=window){
     if(phone()){
       replacingSurface=ids.some(id=>id!==requested&&visible(id))||popupNodes().length?requested:'';
       const tabClick=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-      if(tabClick&&Object.values(tabPanels).includes(requested)&&Object.values(tabPanels).some(id=>id!==requested&&visible(id)))stationaryTabEntry.add(requested);
+      if(tabClick&&Object.values(tabPanels).includes(requested)&&Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
       entranceIntent.set(requested,Date.now()+3000);
     }
     pendingIntent=requested;
@@ -469,15 +436,15 @@ export function installUnifiedUI(doc=document, win=window){
         const realOpen=now&&id===activeSurface;
         const requested=realOpen&&intent>Date.now();
         if(requested||(intent&&intent<=Date.now()))entranceIntent.delete(id);
-        if(!requested&&intent&&intent<=Date.now()){if(!now)stationaryTabEntry.delete(id);if(id===replacingSurface)replacingSurface='';}
+        if(!requested&&intent&&intent<=Date.now()){if(!now)tabReplacement.delete(id);if(id===replacingSurface)replacingSurface='';}
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          if(stationaryTabEntry.has(id)){cancelActive(target);const panel=element(id);const scroll=panel?.querySelector('.dj836-sheet-body,.dj834-my-home');if(scroll)scroll.scrollTop=0;}
-          else if(!activeAnimation.has(target))playOpen(id);
+          if(!activeAnimation.has(target))playOpen(id);
+          tabReplacement.delete(id);
         }
         else if(!now&&was){
-          stationaryTabEntry.delete(id);
+          tabReplacement.delete(id);
           if(lifecycle.snapshot(id).phase!=='closed')lifecycle.dismiss(id);
           const target=content(element(id));if(target&&target.dataset.dj810Animating!=='closing')cancelActive(target);
         }
@@ -606,7 +573,7 @@ export function installUnifiedUI(doc=document, win=window){
     // that a racing old controller did not reopen the same closed window.
     (win.queueMicrotask||queueMicrotask)(()=>{
       if(id==='maplibre-popup'){
-        // The facility MapLibre Popup owns its own 250ms slide-out and must
+        // The facility popup uses the shared slide owner and must
         // call popup.remove(), not a raw DOM removal that leaks its listeners.
         if(!container.classList.contains('dj-place-detail-popup')&&container.isConnected)container.remove();
       }else if(ids.includes(id)&&visible(id)&&animated?.dataset.dj810Animating!=='closing'){
@@ -640,7 +607,6 @@ export function installUnifiedUI(doc=document, win=window){
   // own close button rather than removing DOM nodes (which leaks listeners).
   const mapElement=element('map');
   if(mapElement){
-    let popupQueued=false;
     const popObs=new MutationObserver(()=>{
       const visiblePopups=[...mapElement.querySelectorAll('.maplibregl-popup')].filter(n=>n.isConnected);
       const newlyAdded=visiblePopups.filter(popup=>!enteredPopups.has(popup));
@@ -663,21 +629,14 @@ export function installUnifiedUI(doc=document, win=window){
         dismissPopupNode(old);
       }
       activeSurface='';pendingIntent='';schedule();
-      if(popupQueued)return;
-      popupQueued=true;
-      (win.requestAnimationFrame||((fn)=>Promise.resolve().then(fn)))(()=>{
-        popupQueued=false;
-        if(!newest?.isConnected||reduced())return;
-        const card=newest.querySelector('.maplibregl-popup-content');
-        // Only the facility bottom sheet slides; geographic popups stay anchored.
-        if(phone()){
+      // Set the first mobile animation frame before the browser paints the inserted popup.
+      if(!newest?.isConnected||reduced())return;
+      const card=newest.querySelector('.maplibregl-popup-content');
+      if(phone()){
           if(card&&newest.classList.contains('dj-place-detail-popup')&&!activeAnimation.has(card))playMobileMotion(card,true);
           return;
-        }
-        if(card){
-          card?.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
-        }
-      });
+      }
+      if(card)card.animate?.([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
     });
     popObs.observe(mapElement,{childList:true,subtree:false});
     clean.push(()=>popObs.disconnect());

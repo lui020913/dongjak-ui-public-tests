@@ -249,13 +249,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     // Native cleanup must run even if another surface cancels the motion.
     closeWatchdog=window.setTimeout(finish,1000);
     if(window.DongjakWindowMotion){window.DongjakWindowMotion.close(motion,finish);return;}
-    try{
-      const animation=motion.animate([
-        {opacity:1,transform:'translate3d(0,0,0)',offset:0},
-        {opacity:1,transform:'translate3d(0,110%,0)',offset:1}
-      ],{duration:320,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
-      animation.finished.then(finish,finish);window.setTimeout(finish,400);
-    }catch{finish();}
+    finish();
   });
   headerActions.append(closeButton);
 
@@ -314,7 +308,10 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       gesture.lastY=event.clientY;gesture.lastTime=now;gesture.delta=event.clientY-gesture.y;
       if(!gesture.active){if(Math.abs(gesture.delta)<7)return;if(Math.abs(event.clientX-gesture.x)>Math.abs(gesture.delta)){gesture=null;reset();return;}gesture.active=true;}
       popupElement.classList.add('dj-sheet-dragging');
-      popupElement.style.setProperty('--dj-sheet-drag-y',`${Math.max(-gesture.upLimit,gesture.delta)}px`);
+      const offset=Math.max(-gesture.upLimit,gesture.delta);
+      popupElement.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
+      popupElement.style.setProperty('translate',`0 ${offset}px`,'important');
+      popupElement.style.setProperty('transition','none','important');
       popupElement.style.setProperty('--dj-sheet-drag-opacity','1');
       if(event.cancelable)event.preventDefault();event.stopPropagation();
     };
@@ -335,7 +332,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     popup.on('close',disposeDrag);
   }
   // The same header drag and edge-dismiss behavior is used on every viewport.
-  enableAnchoredPopupDragging(popup,titleGroup);
+  if(!sharedSheet)enableAnchoredPopupDragging(popup,titleGroup);
   // Ephemeral selection pin: same verified POI coordinate, not an invented location.
   const pin=createSelectedLocationPin(document);pin.setAttribute('aria-hidden','true');
   // Keep the selected pin offset consistent with the shared detail sheet.

@@ -642,11 +642,11 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await page.locator('#map-quick-search-close').click();await expect(results).toBeHidden();
 });
 
-test('primary tabs replace content without replaying a rise and keep the pill dock',{tag:'@phone-common'},async({page})=>{
+test('primary tabs animate replacement and keep the pill dock',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
  await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.dataset.dj810Animating)window.__tabMotions.push(panel.dataset.dj810Animating)}).observe(panel,{attributes:true,attributeFilter:['data-dj810-animating']});});
- await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).not.toContain('opening');
+ await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('opening');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh entrance, even for the previously selected tab.

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.17",
+  "application_version": "9.2.18",
   "public_work_branch": "main",
-  "purpose": "Integrate layer switch and layout refinements with native-inspired 350ms sheet motion",
-  "attempt": 84,
+  "purpose": "Restore short tab transitions and live header drag; remove duplicate facility motion; improve iOS scrim and controls",
+  "attempt": 85,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Canonical TIP copy fix and iPhone-inspired easing; keep confirmation fade unchanged",
+  "last_retry_reason": "iPhone screen recordings of tab transition and facility flicker",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
