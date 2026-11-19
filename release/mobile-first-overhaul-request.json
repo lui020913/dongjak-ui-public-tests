@@ -1,9 +1,10 @@
 {
   "source": "public-app",
-  "application_version": "8.27.0",
-  "public_work_branch": "fix/mobile-custom-rail-routing-20261119",
+  "application_version": "9.0.0",
+  "public_work_branch": "fix/v9-major-release-scale-20261119",
   "purpose": "Seven mobile controls (3 fixed + 3 customizable + layers), first-run GPS and microphone permission guidance, voice search, four route comparisons, native pilot locks, nearby and transport sheet repairs, update history pill and tour button. Immutable public source; preserve existing device gate and Production approval.",
-  "attempt": 26,
+  "attempt": 27,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New feature release after successful attempt 25; use public app source and mandatory feature and regression QA."
+  "last_retry_reason": "Classify the core product redesign as a major release; apply the new version scale and preserve mobile quality gates.",
+  "release_kind": "major"
 }
