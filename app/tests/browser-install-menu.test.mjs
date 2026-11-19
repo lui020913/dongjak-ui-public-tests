@@ -20,8 +20,11 @@ test('external APK guide keeps security controls optional and offers web access'
 test('install actions have touch press and fine-pointer hover feedback without animating disabled choices or reduced motion',async()=>{
  const {readFileSync}=await import('node:fs');
  const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');
- assert.match(css,/@media \(hover:hover\) and \(pointer:fine\)\{[\s\S]*?:not\(:disabled\):hover\{transform:translateY\(1px\) scale\(\.99\)/);
- assert.match(css,/:not\(:disabled\):active\{transform:translateY\(2px\) scale\(\.975\);box-shadow:/);
- assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?transition:none!important[\s\S]*?transform:none!important/);
+ assert.match(css,/@media \(hover:hover\) and \(pointer:fine\)\{[\s\S]*?:not\(:disabled\):hover\{box-shadow:/);
+ assert.match(css,/:not\(:disabled\):active\{box-shadow:/);
+ assert.doesNotMatch(css,/:not\(:disabled\):(?:hover|active)\{[^}]*transform:/);
+ assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?transition:none!important/);
  assert.match(css,/\.dj-install-prompt:focus-visible\{outline:/);
 });
+
+test('blocked gate has one heading and neutral equal choices; no false desktop PWA prompt',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');assert.doesNotMatch(css,/\.dj-install-choice:first-child/);assert.match(css,/\.dj-mobile-only-message>h1[^}]+display:none!important/);assert.match(js,/모바일 전용/);assert.match(js,/if\(key==='pwa'\)\{if\(blocked\)/);});

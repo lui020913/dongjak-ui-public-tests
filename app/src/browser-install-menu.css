@@ -10,12 +10,11 @@ dialog#dj-install-menu::backdrop{background:#fff}
 #dj-install-menu .dj-install-subtitle{font-size:14px;color:#64716d;margin:8px 0 0;line-height:1.5;text-align:center;white-space:normal!important;word-break:keep-all}
 .dj-install-list{display:grid;gap:12px}
 #dj-install-menu :is(.dj-install-choice,.dj-install-prompt){display:flex;align-items:center;min-height:60px;width:100%;gap:11px;padding:12px 17px;border:1px solid #e1e5e5;border-radius:999px;color:inherit;background:#fff;box-shadow:0 3px 12px #17221d10;text-align:left;cursor:pointer;font:inherit}
-#dj-install-menu .dj-install-choice:first-child{background:#167b65;color:white;border-color:#167b65;box-shadow:0 4px 14px #167b652b}
 .dj-install-choice:focus-visible,.dj-install-dismiss:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 .dj-install-choice svg{width:24px;height:24px;flex:none}
 .dj-install-label{flex:1;min-width:0;font-size:15px;font-weight:650;word-break:keep-all}
 .dj-install-status{font-size:11px;color:#687670;white-space:nowrap}
-.dj-install-chevron{font-size:22px;color:#687670}.dj-install-choice:first-child .dj-install-chevron{color:#fff}
+.dj-install-chevron{font-size:22px;color:#687670}
 .dj-install-info{margin-top:14px;background:#edf3f0;border-radius:14px;padding:12px;color:#30483d}
 .dj-install-info[hidden]{display:none!important}
 .dj-install-info p{font-size:13px!important;margin:4px 0!important;white-space:normal!important;word-break:keep-all}
@@ -24,11 +23,11 @@ dialog#dj-install-menu::backdrop{background:#fff}
 .dj-install-qr{display:block;width:112px;height:112px;margin:20px auto 0;image-rendering:pixelated}
 html[data-theme=dark] dialog#dj-install-menu{background:#191b1f;color:#f1f4f2}
 html[data-theme=dark] dialog#dj-install-menu::backdrop{background:#191b1f}
-html[data-theme=dark] dialog#dj-install-menu .dj-install-choice:not(:first-child),html[data-theme=dark] dialog#dj-install-menu .dj-install-prompt{background:#24282c;border-color:#414849}
+html[data-theme=dark] dialog#dj-install-menu .dj-install-choice,html[data-theme=dark] dialog#dj-install-menu .dj-install-prompt{background:#24282c;border-color:#414849}
 html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-subtitle,.dj-install-status,.dj-install-dismiss,.dj-install-chevron){color:#b4bfba}
 html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
 /* Desktop/tablet keep the phone-only gate; the selector belongs to the page, not a second card. */
-#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-devices{display:none}
+#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-devices,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
 #dj-mobile-only-screen .dj-install-menu{width:100%;padding:0;margin:0}
 #dj-mobile-only-screen .dj-install-content{min-height:0;padding:20px 16px}
 #dj-mobile-only-screen .dj-install-brand{margin-bottom:20px}
@@ -54,17 +53,16 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 #dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web){background:#167b65;color:#fff;border-color:#167b65}
 #dj-install-menu [data-android-guide] .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 
-/* Press feedback without shifting layout or adding JS listeners. Hover is only
-   for devices with a real hovering pointer, not sticky mobile touch hover. */
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:transform 150ms ease-out,box-shadow 150ms ease-out;transform-origin:center}
+/* The button itself never moves or shrinks: its hit area remains stable even
+   when the pointer crosses an edge rapidly. Only paint changes on interaction. */
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:box-shadow 120ms ease-out;touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){
- #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{transform:translateY(1px) scale(.99);box-shadow:0 1px 4px #17221d20,inset 0 0 0 1px #17221d0b}
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{box-shadow:0 1px 4px #17221d20,inset 0 1px 4px #17221d16}
  #dj-install-menu .dj-install-dismiss:not(:disabled):hover{opacity:.8}
 }
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{transform:translateY(2px) scale(.975);box-shadow:0 1px 2px #17221d20,inset 0 2px 5px #17221d19;transition-duration:90ms}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{box-shadow:0 1px 2px #17221d20,inset 0 2px 7px #17221d32;transition-duration:0ms}
 #dj-install-menu .dj-install-dismiss:not(:disabled):active{opacity:.65}
 #dj-install-menu .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
  #dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:none!important}
- #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):is(:hover,:active){transform:none!important}
 }
