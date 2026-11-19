@@ -115,7 +115,9 @@ test('phone More functions live in collapsible My Info groups',async({page})=>{
  const group=section.locator('.dj17-feature-details').first();
  await expect(group).toBeVisible();await group.locator('summary').click();
  await expect(group.locator('.dj832-more-feature').first()).toBeVisible();
- await section.locator('#dj-mobile-settings').click();
+ const tour=section.locator('.dj860-more-launch'),settings=section.locator('#dj-mobile-settings');
+ await expect(tour).toBeVisible();const boxes=await Promise.all([tour.boundingBox(),settings.boundingBox()]);expect(boxes[0].y>=boxes[1].y+boxes[1].height+3).toBe(true);
+ await settings.click();
  await expect(page.locator('#dj-map-settings')).toBeVisible();
 });
 
@@ -208,7 +210,7 @@ async function pinPhoneShortcut(page,label,key){
  const settings=page.locator('#djNext-layer-panel');
  await tap(page,page.locator('#djNext-layers'));await expect(settings).toBeVisible();
  const add=settings.getByRole('button',{name:label+' 바로가기 추가',exact:true});await add.scrollIntoViewIfNeeded();await add.click();
- await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();
+ await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
  const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();return shortcut;
 }
 test('phone toolbar has stable seven slots, three saved shortcuts maximum and no overlapping legacy controls',async({page})=>{
@@ -221,6 +223,8 @@ test('phone toolbar has stable seven slots, three saved shortcuts maximum and no
  await expect(page.locator('#djNext-mic')).toBeVisible();
  await tap(page,rail.locator('.djNext-empty').first());
  await expect(panel).toBeVisible();
+ await expect(panel.locator('.djNext-layer-grid')).toHaveCount(2);
+ await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px [0-9.]+px [0-9.]+px [0-9.]+px$/);
  for(const label of ['보행안전','경사도','야간시야']){
    const b=panel.getByRole('button',{name:label+' 바로가기 추가',exact:true});await b.scrollIntoViewIfNeeded();await b.click();
  }
@@ -231,13 +235,14 @@ test('phone toolbar has stable seven slots, three saved shortcuts maximum and no
  const remove=panel.getByRole('button',{name:'경사도 바로가기 제거',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();
  await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
  await expect(panel.getByRole('button',{name:'보차혼용 바로가기 추가',exact:true})).toBeEnabled();
- await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();
+ await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(1);
  const fit=await rail.evaluate(n=>{const r=n.getBoundingClientRect();const bs=[...n.children].map(x=>x.getBoundingClientRect());return bs.every((x,i)=>x.left>=r.left-1&&x.right<=r.right+1&&x.width>36&&Math.abs(x.top-bs[0].top)<1&&(i===0||x.left>=bs[i-1].right-1))});expect(fit).toBe(true);
  await page.evaluate(()=>{window.__railSamples=[];let n=0;const sample=()=>{const rail=document.getElementById('djNext-rail'),p=rail?.parentElement,c=p?getComputedStyle(p):null;window.__railSamples.push(!!rail&&!!c&&c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98);if(n++<60)requestAnimationFrame(sample)};requestAnimationFrame(sample)});
  await tap(page,tab(page,'map'));
  await expect.poll(()=>page.evaluate(()=>window.__railSamples.length)).toBeGreaterThan(20);
  expect(await page.evaluate(()=>window.__railSamples.every(Boolean))).toBe(true);
+ await expect(page.locator('#djNext-toolbar')).toBeVisible();
  await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
  await test.info().attach('phone-seven-slot-toolbar',{body:await page.screenshot(),contentType:'image/png'});
 });
@@ -248,6 +253,8 @@ test('phone pilot safety symbols are native and disappear when the mode closes',
  const app=page.locator('#app'),panel=page.locator('#map-safety-controls');
  await expect(panel).toBeVisible();
  await expect(panel.locator('.dj17-pilot-notice')).toContainText('상도1동');
+ await expect(panel.locator('.djNext-safety-scroll')).toBeVisible();
+ expect(await panel.evaluate(n=>{const h=n.querySelector('.map-safety-head').getBoundingClientRect(),b=n.querySelector('.djNext-safety-scroll').getBoundingClientRect();return b.top>=h.bottom-1})).toBe(true);
  await expect(app).toHaveAttribute('data-dj-pilot-active','true',{timeout:45000});
  await expect.poll(async()=>Number(await app.getAttribute('data-dj-pilot-lock-count'))).toBeGreaterThan(0);
  await expect(page.locator('.dj17-lock')).toHaveCount(0);
@@ -467,4 +474,38 @@ test('phone route comparison uses actual pedestrian graph and does not invent a 
  await expect(page.locator('#route-map-source')).toContainText('PRI 미반영');
  await cards.locator('[data-comparison="standard"]').click();await expect(cards.locator('[data-comparison="standard"]')).toHaveAttribute('aria-pressed','true');
  await test.info().attach('phone-real-route-comparison',{body:await page.screenshot(),contentType:'image/png'});
+});
+
+test('phone weather single window and layer grid dark surfaces, header stays fixed',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ await tap(page,page.locator('#djNext-weather'));
+ const weather=page.locator('#dj854-weather-sheet');
+ await expect(weather).toBeVisible();await expect(page.locator('#dj833-weather-sheet')).toBeHidden();
+ await expect(weather.locator('[data-weather-location]')).toBeVisible();
+ await weather.getByRole('button',{name:'날씨창 닫기'}).click();await expect(weather).toBeHidden();
+ await expect(page.locator('.map-actions > #toggle-road-width')).toBeHidden();
+ await tap(page,tab(page,'mine'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
+ await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
+ await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
+ await tap(page,tab(page,'map'));
+ await tap(page,page.locator('#djNext-layers'));
+ const modal=page.locator('#djNext-layer-panel'),scroll=modal.locator('.djNext-layer-scroll'),header=modal.locator('header');
+ await expect(modal).toBeVisible();await expect(scroll).toBeVisible();await expect(header).toBeVisible();
+ const bounds=async()=>await header.boundingBox();
+ await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
+ const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
+ expect(Math.abs(before.y-after.y)).toBeLessThan(2);
+ const colors=await modal.locator('.djNext-pin').last().evaluate(n=>{const c=getComputedStyle(n);return [c.backgroundColor,c.color]});
+ expect(colors[0]).toBe('rgb(39, 46, 50)');expect(colors[1]).toBe('rgb(230, 239, 235)');
+ await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
+});
+test('phone report composer has non-overlapping independent header and input scroll',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-report'));
+ const form=page.locator('#community-form'),scroll=form.locator('.djNext-form-scroll'),head=form.locator('.community-form-top');
+ await expect(form).toBeVisible();await expect(scroll).toBeVisible();
+ const title=form.locator('#community-title');await title.scrollIntoViewIfNeeded();await title.focus();
+ const h=await head.boundingBox(),b=await scroll.boundingBox();expect(b.y>=h.y+h.height-1).toBe(true);
+ const before=await head.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await head.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
+ await form.locator('#community-compose-close').click();await expect(form).toBeHidden();
 });

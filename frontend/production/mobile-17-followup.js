@@ -60,7 +60,9 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
  }
  function paint(){
   if(!pilot){toggleLayers(false);return}
-  if(!regions||!map.isStyleLoaded())return;
+  if(!regions)return;
+  if(map.getLayer(fill)&&map.getLayer(line)&&map.getLayer(lockLayer)){toggleLayers(true);return}
+  if(!map.isStyleLoaded())return;
   const data={type:'FeatureCollection',features:regions};const points={type:'FeatureCollection',features:regions.flatMap(f=>{const name=f.properties.dong_name,p=labelPointForFeature(f);return name!=='상도1동'&&p?[{type:'Feature',properties:{dong_name:name},geometry:{type:'Point',coordinates:p}}]:[]})};
   if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
   if(!map.getSource(lockSource))map.addSource(lockSource,{type:'geojson',data:points});
@@ -74,10 +76,29 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
  function hidePilot(){pilot=false;toggleLayers(false);const status=$('dj17-pilot-status');if(status)status.hidden=true}
  map.on('click',lockLayer,e=>{if(pilot){const name=e.features?.[0]?.properties?.dong_name;if(name)message(name)}});
  map.on('style.load',()=>{if(pilot)paint();else toggleLayers(false)});
- map.on('idle',()=>{if(pilot&&regions&&!map.getLayer(lockLayer))paint()});
+ map.on('idle',()=>{if(pilot&&regions&&(!map.getLayer(lockLayer)||app.dataset.djPilotActive!=='true'))paint()});
  function sync(){
   const current=$('dj831-scrollport');if(current!==port){if(port){port.removeEventListener('scroll',edges);resize.unobserve(port)}port=current;if(port){port.addEventListener('scroll',edges,{passive:true});resize.observe(port)}}
   edges();moveMore();expandSafety();
+  // Native controls stay in their original form and preserve selected map layers.
+  // Split fixed headers from scrolling content only when first presented,
+  // after legacy workbench initialization has bound its existing controls.
+  const safety=$('map-safety-controls'),head=safety?.querySelector('.map-safety-head');
+  if(app.classList.contains('map-safety-open')&&head&&!safety.querySelector('.djNext-safety-scroll')){
+   const scroll=doc.createElement('div');scroll.className='djNext-safety-scroll';
+   for(const child of [...safety.children])if(child!==head)scroll.append(child);
+   safety.append(scroll);
+  }
+  const form=$('community-form'),formHead=form?.querySelector('.community-form-top');
+  if(form&&!form.hidden&&formHead&&!form.querySelector('.djNext-form-scroll')){
+   const scroll=doc.createElement('div');scroll.className='djNext-form-scroll';
+   for(const child of [...form.childNodes])if(child!==formHead)scroll.append(child);
+   form.append(scroll);
+  }
+  const utilities=doc.querySelector('#mine-panel .dj17-more-root .dj-mobile-utilities-body');
+  const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
+  if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);
+  const status=utilities?.querySelector('.dj834-shortcut-status');if(status&&status.textContent!=='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.')status.textContent='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.';
   if(app.classList.contains('map-safety-open')&&!pilot)void showPilot();
   if(!app.classList.contains('map-safety-open')&&pilot)hidePilot();
   if(!app.classList.contains('map-safety-open')){const panel=$('map-safety-controls');if(panel?.classList.contains('dj871-sheet-expanded')){panel.classList.remove('dj871-sheet-expanded');panel.querySelector('.dj17-expand')?.setAttribute('aria-expanded','false')}}
