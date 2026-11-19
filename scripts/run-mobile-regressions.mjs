@@ -9,7 +9,12 @@ const crossDeviceContent=/\b(?:desktop|pc|tablet)\b/i;
 const candidates=readdirSync(dir,{withFileTypes:true})
   .filter(entry=>entry.isFile()&&entry.name.endsWith('.test.mjs')&&!excludedName.test(entry.name))
   .map(entry=>join(dir,entry.name)).sort();
-const files=candidates.filter(file=>!crossDeviceContent.test(readFileSync(file,'utf8')));
+const requiredPhoneTests=new Set(['mobile-next-build.test.mjs','mobile-followup-build.test.mjs']);
+// These explicitly phone-scoped release contracts may reference legacy filenames.
+// Do not accidentally skip them due to the generic cross-device text filter.
+const files=candidates.filter(file=>requiredPhoneTests.has(basename(file))||!crossDeviceContent.test(readFileSync(file,'utf8')));
+for(const name of requiredPhoneTests)if(!files.some(file=>basename(file)===name))throw new Error('Required phone regression missing: '+name);
+console.log('Required phone release regression files selected: '+requiredPhoneTests.size);
 if(!files.length)throw new Error('No mobile/shared Node regression tests were selected.');
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const classify=s=>/building|appearance|contrast|palette/.test(s)?'building':/sdot|incident|walk-data|boundary|bocha/.test(s)?'geo-data':/kakao|auth|oauth/.test(s)?'auth':/sheet|surface|motion|toolbar/.test(s)?'ui-lifecycle':/place|facility|search/.test(s)?'facility-search':'other';
