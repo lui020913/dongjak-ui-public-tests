@@ -47,6 +47,9 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const dropdown=shell.querySelector('.map-quick-search-dropdown');
   const closeBtn=shell.querySelector('#map-quick-search-close');
   const searchButton=form?.querySelector('.map-quick-search-submit');
+  const clearButton=document.createElement('button');clearButton.type='button';clearButton.id='dj-search-clear';clearButton.hidden=true;
+  clearButton.setAttribute('aria-label','검색어 지우기');clearButton.textContent='×';query.after(clearButton);
+  const syncClear=()=>{clearButton.hidden=!query.value||app.dataset.searchOpen!=='true';};
   // Additional discovery controls stay within the existing anchored dropdown.
   const filters=document.createElement('div');filters.className='dj815-search-filters';
   const filtersText=document.createElement('span');filtersText.textContent='빠른 검색';filters.append(filtersText);
@@ -97,6 +100,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const close=()=>{
     seq++;controller?.abort();controller=null;
     delete app.dataset.searchOpen;
+    syncClear();
     shell.style.removeProperty('--dj-search-results-max');
     if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
     if(dropdown.hidden)return;
@@ -112,7 +116,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
     const wasHidden=dropdown.hidden||dropdown.classList.contains('dj871-search-leaving');
     dropdown.classList.remove('dj871-search-leaving');
-    dropdown.hidden=false;app.dataset.searchOpen='true';fitDropdown();
+    if(wasHidden)window.DongjakWindowLifecycle?.requestOpen('map-quick-search-dropdown');
+    dropdown.hidden=false;app.dataset.searchOpen='true';syncClear();fitDropdown();
     if(wasHidden){
       dropdown.classList.remove('dj871-search-entering');
       void dropdown.offsetWidth;
@@ -132,7 +137,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
       marker?.remove();
       marker=null; // One marker belongs to the canonical place-detail popup.
       map.flyTo({center:[place.lng,place.lat],zoom:16,duration:700});
-      close();query.blur();
+      close();query.blur();query.value='';form.classList.remove('dj807-has-input');
       window.dispatchEvent(new CustomEvent('dongjak:map-place-selected',{detail:{place}}));
       onPick(place);
     });
@@ -210,9 +215,9 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     const term=normalizeKoreanSearch(rawTerm);
     form.classList.toggle('dj807-has-input',Boolean(term));
     filters.hidden=term.length>0;
+    controller?.abort();controller=null;const active=++seq;
     if(term.length<2){show();render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';return;}
-    controller?.abort();controller=new AbortController();
-    const active=++seq;
+    controller=new AbortController();const signal=controller.signal;
     show();
     const immediate=localResults(term);
     if(immediate.length){
@@ -220,14 +225,14 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
       feedback.textContent=`저장된 장소·교통시설 ${immediate.length}개 · 추가 검색 중`;
     }else feedback.textContent='장소를 검색하고 있습니다…';
     let remote=[],official=[],err='';
-    try{official=await queryOfficialPlaces(term,{signal:controller.signal});}catch(error){if(error.name==='AbortError')return;}
-    try{remote=await searchPlaces(term,{signal:controller.signal});}
+    try{official=await queryOfficialPlaces(term,{signal});}catch(error){if(error.name==='AbortError')return;}
+    try{remote=await searchPlaces(term,{signal});}
     catch(error){if(error.name==='AbortError')return;err='외부 장소 검색이 불안정하여 저장된 교통시설만 표시합니다.';}
     let osmNamed=[];
     // Named businesses such as Starbucks are often missing from Photon/Nominatim.
     // Only search real OpenStreetMap names after an EXPLICIT user submission.
     if([...official,...immediate,...remote].length<3){
-      try{osmNamed=await searchNamedOsm(rawTerm,{signal:controller.signal});}
+      try{osmNamed=await searchNamedOsm(rawTerm,{signal});}
       catch(error){if(error?.name==='AbortError')return;}
     }
     if(active!==seq)return;
@@ -252,12 +257,15 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     else {const matches=viewResults(mergeMapSearchResults(localResults(term)));render(matches.length?matches:[]);feedback.textContent=matches.length?'동작구 장소·교통시설 자동완성':'Enter 또는 검색 버튼으로 전체 장소 검색';}
   });
   query.addEventListener('input',()=>{
+    seq++;controller?.abort();controller=null;
     const term=normalizeKoreanSearch(query.value);show();filters.hidden=term.length>0;
     if(term.length<2){render([],true);feedback.textContent='추천 장소';return;}
     const matches=viewResults(mergeMapSearchResults(localResults(query.value)));render(matches);
     feedback.textContent=matches.length?`장소 추천 ${matches.length}건 · 더 찾으려면 검색`:'검색을 누르면 장소·주소를 조회합니다.';
   });
-  closeBtn?.addEventListener('click',close);
+  clearButton.addEventListener('pointerdown',e=>e.preventDefault());
+  clearButton.addEventListener('click',()=>{query.value='';query.focus();query.dispatchEvent(new Event('input',{bubbles:true}));});
+  closeBtn?.addEventListener('click',()=>{close();query.blur();query.value='';form.classList.remove('dj807-has-input');syncClear();});
   document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target))close();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
   return {close,search:performSearch};

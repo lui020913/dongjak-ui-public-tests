@@ -153,10 +153,10 @@ export function installFavoritesCloud({root,clientFactory=browserClientFactory,c
   const noticeSettings=make('section','dj829-notice-settings');
   const noticeTitle=make('strong','','카카오 로그인 알림');
   const noticeToggleLabel=make('label','dj829-notice-toggle');
-  const noticeCheckbox=make('input');noticeCheckbox.type='checkbox';noticeCheckbox.setAttribute('aria-label','카카오 로그인 시 내 카카오톡으로 알림 받기');
+  const noticeCheckbox=make('input');noticeCheckbox.type='checkbox';noticeCheckbox.setAttribute('role','switch');noticeCheckbox.setAttribute('aria-label','카카오 로그인 시 내 카카오톡으로 알림 받기');
   const noticeToggleText=make('span','','카카오 로그인 시 내 카카오톡으로 알림 받기');
   noticeToggleLabel.append(noticeCheckbox,noticeToggleText);
-  const noticeHelp=make('p','dj815-helper','알림을 켜면 다음 카카오 로그인 때 메시지 권한 동의 후 본인 카카오톡으로 알림을 보냅니다. 끄면 카카오 메시지 권한을 요청하지 않습니다.');
+  const noticeHelp=make('p','dj815-helper','다음 카카오 로그인부터 메시지 권한 동의 후 알림을 보냅니다.');
   const noticeStatus=make('p','dj829-notice-status');noticeStatus.setAttribute('role','status');noticeStatus.setAttribute('aria-live','polite');
   noticeSettings.append(noticeTitle,noticeToggleLabel,noticeHelp,noticeStatus);noticeSettings.hidden=true;
   const manageTabs=make('div','dj820-manage-tabs');manageTabs.setAttribute('role','group');manageTabs.setAttribute('aria-label','계정 관리 메뉴');

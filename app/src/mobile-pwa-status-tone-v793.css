@@ -82,3 +82,8 @@
       rgba(25,45,50,0) 100%)!important;
   }
 }
+
+/* Fixed transition band: the OS strip itself cannot be moved or recolored reliably. */
+@media(max-width:699px){
+html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app::before{content:"";position:fixed;inset:0 0 auto;height:46px;z-index:49999;pointer-events:none;background:linear-gradient(to bottom,var(--dj-pwa-land-tone),transparent);animation:none!important;transform:none!important;translate:none!important;filter:none!important}
+}
