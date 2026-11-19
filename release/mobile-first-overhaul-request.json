@@ -2,7 +2,7 @@
   "source": "public-app",
   "application_version": "9.2.8",
   "public_work_branch": "main",
-  "purpose": "Show explicit Android APK installation guidance and official Galaxy help before verified download.",
+  "purpose": "Show explicit Android APK installation guidance and official Galaxy help before verified download. Add lightweight hover and touch press feedback to the browser install choices.",
   "attempt": 65,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "last_retry_reason": "External installation restrictions; no OS settings changes; keep existing signing and map.",

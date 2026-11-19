@@ -16,3 +16,12 @@ test('PWA home-screen action advertises both operating systems while native iOS 
 test('public debug APK is exact current Production and a verified matching release asset',()=>{const sha='b'.repeat(40),v='9.2.4',name='Dongjak-Safety-Map-v'+v+'-debug.apk',tag='android-debug-v'+v,url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+tag+'/'+name;const m={application_version:v,source_commit:sha,release_status:'DEPLOYED_PRODUCTION'},r={tag_name:tag,target_commitish:sha,draft:false,prerelease:false,assets:[{name,browser_download_url:url,state:'uploaded'}]};assert.equal(androidReleaseAsset(m,r,'debug'),url);assert.equal(androidReleaseAsset(m,r),null);assert.equal(androidReleaseAsset({...m,source_commit:'c'.repeat(40)},r,'debug'),null);assert.equal(androidReleaseAsset(m,{...r,assets:[]},'debug'),null);});
 
 test('external APK guide keeps security controls optional and offers web access',()=>{const guide=androidInstallGuidance();assert.match(guide.intro,/Google Play/);assert.ok(guide.steps.some(s=>s.includes('출처를 알 수 없는 앱 설치')));assert.ok(guide.steps.some(s=>s.includes('보안 위험 자동 차단')));assert.ok(guide.steps.some(s=>s.includes('다시 해제')&&s.includes('Play Protect는 켜')));assert.match(guide.notice,/위험 경고가 나오면 설치하지 마세요/);assert.equal(new URL(guide.help).hostname,'www.samsungsvc.co.kr');});
+
+test('install actions have touch press and fine-pointer hover feedback without animating disabled choices or reduced motion',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');
+ assert.match(css,/@media \(hover:hover\) and \(pointer:fine\)\{[\s\S]*?:not\(:disabled\):hover\{transform:translateY\(1px\) scale\(\.99\)/);
+ assert.match(css,/:not\(:disabled\):active\{transform:translateY\(2px\) scale\(\.975\);box-shadow:/);
+ assert.match(css,/@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?transition:none!important[\s\S]*?transform:none!important/);
+ assert.match(css,/\.dj-install-prompt:focus-visible\{outline:/);
+});

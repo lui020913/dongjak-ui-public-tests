@@ -648,6 +648,12 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(menu).toBeVisible({timeout:20000});
  await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ const webChoice=menu.getByRole('button',{name:'웹에서 바로 이용하기'});
+ await expect(webChoice).toHaveCSS('transition-property','transform, box-shadow');
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await expect(webChoice).toHaveCSS('transition-duration','0s');
+ await page.emulateMedia({reducedMotion:'no-preference'});
  const iosChoice=menu.getByRole('button',{name:/iPhone 앱 다운로드/});
  await expect(iosChoice).toBeDisabled();await expect(iosChoice).toContainText('추후 업데이트 예정');
  const viewport=await page.evaluate(()=>({width:document.documentElement.clientWidth,height:innerHeight}));
@@ -684,5 +690,5 @@ test('Android verified download shows security instructions before navigation',{
  await expect(guide.getByRole('link',{name:'Galaxy 설치 제한 공식 안내'})).toHaveAttribute('href','https://www.samsungsvc.co.kr/solution/1711930');
  await expect(guide.getByRole('button',{name:'웹 또는 웹앱 이용하기'})).toBeVisible();
  await Promise.all([page.waitForRequest(url),guide.getByRole('button',{name:'APK 다운로드',exact:true}).click({noWaitAfter:true})]);
- expect(requested).toBe(true);
+ await expect.poll(()=>requested).toBe(true);
 });

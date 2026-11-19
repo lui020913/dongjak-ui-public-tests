@@ -91,7 +91,7 @@ if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$A
     node scripts/bump-app-version.mjs patch "지도 레이어 우선순위 통합 및 반복 렌더링 방지" >/dev/null
   fi
   if [ "$APP_VERSION" = "9.2.8" ]; then
-    node scripts/bump-app-version.mjs patch "Android 외부 APK 설치 제한 및 안전한 웹앱 대체 이용 안내" >/dev/null
+    node scripts/bump-app-version.mjs patch "Android 외부 APK 설치 제한 및 안전한 웹앱 대체 이용 안내" "이용 방식 선택 버튼 호버 및 터치 눌림 효과" >/dev/null
   fi
 else
   node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
