@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.0",
-  "public_work_branch": "fix/safety-map-9-beta-5-layer-reentry",
+  "public_work_branch": "fix/safety-map-9-beta-6-explicit-window",
   "purpose": "Safety Map 9.0 mobile release including all previous requests, categorized four-column map layer tile sheet, stable independent toolbar, single weather sheet, dark mode, voice status, community and safety non-overlapping fixed headers, My Info road width and onboarding spacing, transit spacing and native lock retry.",
-  "attempt": 31,
+  "attempt": 32,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "30th mobile375/390 each passed 12/13 browser cases; only dark-mode layer reopening after return to map failed. Delegate independent rail's actual click exclusively before legacy document listeners, add action receipt assertion and diagnostic layout, retain all original assertions. Preserve all previous changes.",
+  "last_retry_reason": "31st mobile390 confirmed real click and open handler both executed, but auxiliary dialog lifecycle rejected unregistered automatic opening during 680ms post-dismiss guard. Use existing DongjakWindowLifecycle.requestOpen before explicit layer/permission/weather opens. Test both allowed explicit and denied automatic paths without changing guard or phone assertions.",
   "release_kind": "major",
-  "beta_number": 5
+  "beta_number": 6
 }

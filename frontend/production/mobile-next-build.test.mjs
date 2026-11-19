@@ -76,3 +76,20 @@ test('phone rail owns its interaction before legacy document delegates',()=>{
  assert.match(src,/e\.target\.closest\?\.\('#djNext-rail > button\.djNext-tool'\)/);
  assert.match(src,/const run=railActions\.get\(b\);if\(!run\)return;[\s\S]*?e\.stopImmediatePropagation\(\);[\s\S]*?run\(e\);return;/);
 });
+
+test('explicit layer, permission and weather opens are authorized before hidden state changes',async()=>{
+ const {createWindowLifecycle}=await import('../src/window-lifecycle-state.js');
+ let now=1000;
+ const lifecycle=createWindowLifecycle({now:()=>now});
+ lifecycle.requestOpen('mine-panel',{explicit:true});
+ lifecycle.dismiss('mine-panel');
+ now+=40;
+ assert.equal(lifecycle.requestOpen('djNext-layer-panel',{origin:'automatic'}),false);
+ assert.equal(lifecycle.requestOpen('djNext-layer-panel',{explicit:true}),true);
+ const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
+ assert.match(src,/scroll\.scrollTop=0;win\.DongjakWindowLifecycle\?\.requestOpen\(panel\.id\);panel\.hidden=false/);
+ assert.match(src,/after=e\.detail\?\.continue\|\|null;win\.DongjakWindowLifecycle\?\.requestOpen\(panel\.id\);panel\.hidden=false/);
+ const weather=readFileSync(new URL('../src/v854-weather-desktop.js',import.meta.url),'utf8');
+ assert.match(weather,/sync\(\);win\.DongjakWindowLifecycle\?\.requestOpen\(sheet\.id\);sheet\.hidden=false/);
+ assert.equal(lifecycle.requestOpen('unrequested-dialog',{origin:'automatic'}),false);
+});
