@@ -1,30 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-PRIVATE_REPO="lui020913/dongjak-safety-map"
-SOURCE_PIN="$GITHUB_WORKSPACE/release/mobile-first-overhaul-source.json"
-SOURCE_SHA="$(jq -er '.source_sha' "$SOURCE_PIN")"
-SOURCE_REF="$(jq -er '.source_ref' "$SOURCE_PIN")"
-APP_VERSION="$(jq -er '.application_version' "$SOURCE_PIN")"
-REQUEST_SHA="$(jq -er '.source_sha' "$GITHUB_WORKSPACE/release/mobile-first-overhaul-request.json")"
-test "$REQUEST_SHA" = "$SOURCE_SHA"
-test "$APP_VERSION" = "8.26.1"
-test -n "$PRIVATE_SOURCE_READ_TOKEN"
+REQUEST="$GITHUB_WORKSPACE/release/mobile-first-overhaul-request.json"
+SOURCE_SHA="$GITHUB_SHA"
+APP_VERSION="$(jq -er '.application_version' "$REQUEST")"
+test "$(jq -er '.source' "$REQUEST")" = "public-app"
+test "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)" = "$SOURCE_SHA"
 test -n "$VITE_SUPABASE_URL"
 test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
-actual="$(gh api "repos/$PRIVATE_REPO/git/ref/heads/$SOURCE_REF" --jq .object.sha)"
-test "$actual" = "$SOURCE_SHA"
-work="$RUNNER_TEMP/private-application"
+work="$RUNNER_TEMP/public-application"
 mkdir -m 700 "$work"
+git -C "$GITHUB_WORKSPACE" archive "$SOURCE_SHA" app | tar -x -C "$work" --strip-components=1
 git -C "$work" init -q
-git -C "$work" remote add origin "https://github.com/$PRIVATE_REPO.git"
-auth="$(printf 'x-access-token:%s' "$PRIVATE_SOURCE_READ_TOKEN" | base64 -w0)"
-echo "::add-mask::$auth"
-GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.extraheader GIT_CONFIG_VALUE_0="Authorization: Basic $auth" git -C "$work" fetch -q --depth=1 origin "$SOURCE_SHA" >/dev/null 2>&1
-git -C "$work" checkout -q --detach FETCH_HEAD >/dev/null 2>&1
-test "$(git -C "$work" rev-parse HEAD)" = "$SOURCE_SHA"
+git -C "$work" add -A
 cd "$work"
-test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
-jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null
+test "$(node -p "require('./package.json').version")" = "8.26.1"
 test -f wrangler.toml
 grep -Fq "import './v914-mobile-ux-fixes.css';" src/main.js
 grep -Fq "import './public-ui-production-overlay.css';" src/main.js
@@ -44,15 +33,25 @@ NODE
 echo "CHECKPOINT: mobile CSS import injected"
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-17-followup.mjs" "$work"
 node --check src/mobile-17-followup.js
+node "$GITHUB_WORKSPACE/scripts/apply-mobile-next.mjs" "$work"
+node --check src/mobile-next.js
+node --check src/main.js
+node --check src/workers/dongjak-walk-worker.mjs
+node --check src/lib/dongjakWalkSlopeRouter.mjs
+cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
-expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-verified-data-layers.js src/main.js src/map-appearance.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js)"
+expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-local-routing.js src/dongjak-verified-data-layers.js src/lib/dongjakWalkSlopeRouter.mjs src/main.js src/map-appearance.js src/pedestrian-tools.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/transport-map.js src/v815-map-product.js src/v815-route-planner.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js src/v840-ui-core.js src/v860-onboarding.js src/workers/dongjak-walk-worker.mjs)"
 actual_changes="$(git diff --name-only | sort)"
 echo "Expected changed files: $expected_changes"
 echo "Actual changed files: $actual_changes"
 if [ "$actual_changes" != "$expected_changes" ]; then echo "::error::Unexpected source change list"; exit 1; fi
 echo "CHECKPOINT: changed-file allowlist passed"
+node scripts/bump-app-version.mjs minor "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
+test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
+jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null
+echo "CHECKPOINT: version $APP_VERSION stamped"
 test -s src/mobile-first-overhaul.css
 echo "CHECKPOINT: mobile stylesheet exists"
 safe=(env -i "PATH=$PATH" "HOME=$HOME" CI=true DONGJAK_UI_ONLY=1 "GITHUB_SHA=$SOURCE_SHA" "GITHUB_RUN_ID=$GITHUB_RUN_ID" "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY")
@@ -63,7 +62,7 @@ run_private(){
   if "${safe[@]}" "$@" >"$log" 2>&1; then
     echo "$title passed"
   else
-    echo "::error::$title failed; private diagnostic output withheld"
+    echo "::error::$title failed; diagnostic output withheld"
     rm -f "$log"
     exit 1
   fi
@@ -71,11 +70,12 @@ run_private(){
 }
 run_private "Dependency installation" npm ci --no-audit --no-fund --prefer-offline
 if "${safe[@]}" node "$GITHUB_WORKSPACE/scripts/run-mobile-regressions.mjs" "$work" >"$log" 2>&1; then
-  echo "Mobile/shared private Node regression suite passed"
+  node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
+  echo "Mobile/shared Node regression suite passed"
 else
   node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
   rm -f "$log"
-  echo "::error::Mobile/shared private Node regression suite failed; private diagnostics withheld"
+  echo "::error::Mobile/shared Node regression suite failed; diagnostics withheld"
   exit 1
 fi
 rm -f "$log"
@@ -86,12 +86,12 @@ jq -e --arg version "$APP_VERSION" '.version==$version' dist/version.json >/dev/
 CSS_SHA="$(sha256sum "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" | cut -d' ' -f1)"
 jq -n --arg source "$SOURCE_SHA" --arg public "$GITHUB_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$GITHUB_RUN_ID" '{source_commit:$source,public_ui_source_commit:$public,public_ui_overlay_sha256:$css,application_version:$version,build_run:$build,release_status:"CANDIDATE_PREVIEW_NOT_PRODUCTION"}' > dist/release-source.json
 umask 077
-tar -C "$RUNNER_TEMP/private-application" -czf "$RUNNER_TEMP/mobile-overhaul.tar.gz" dist functions server src package.json package-lock.json wrangler.toml
+tar -C "$RUNNER_TEMP/public-application" -czf "$RUNNER_TEMP/mobile-overhaul.tar.gz" dist functions server src package.json package-lock.json wrangler.toml
 node "$GITHUB_WORKSPACE/scripts/seal-private-release.mjs" seal "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/mobile-overhaul.sealed" "$SOURCE_SHA"
 rm -f "$RUNNER_TEMP/mobile-overhaul.tar.gz"
 echo "source_sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
 echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
 echo "public_sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
 echo "css_sha=$CSS_SHA" >> "$GITHUB_OUTPUT"
-rm -rf "$RUNNER_TEMP/private-application" "$RUNNER_TEMP/private-build.log"
-echo "Private source tested, CSS injected only in temporary build, encrypted artifact created."
+rm -rf "$RUNNER_TEMP/public-application" "$RUNNER_TEMP/private-build.log"
+echo "Public app source tested at exact commit; encrypted artifact created."
