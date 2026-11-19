@@ -79,7 +79,7 @@ export function installUnifiedUI(doc=document, win=window){
     const rect=target.getBoundingClientRect();
     if(rect.height<1||rect.width<1)return false;
     const nav=element('bottom-nav');
-    const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content')&&nav&&!nav.hidden)||false;
+    const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content,.version-history-dialog')&&nav&&!nav.hidden)||false;
     const distance=docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');

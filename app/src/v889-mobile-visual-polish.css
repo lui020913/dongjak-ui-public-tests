@@ -133,3 +133,22 @@
  html body #app#app#app#app#app#app#app#app#app :is(#dj840-theme-confirm,#dj832-dongjak-boundary,#dj-transit-signin-prompt)[data-dj-dialog-fade="true"],
  html body #app#app#app#app#app#app#app#app#app [data-dj-dialog-fade="true"] :is(.dj840-theme-card,.dj832-boundary-card,.dj-transit-signin-card){animation:none!important;transition:none!important}
 }
+
+/* Update history uses a stable nav-clipped dock, with one motion owner. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app #version-history-modal:not([hidden]){
+   position:fixed!important;inset:0 0 var(--dj-history-dock-bottom,calc(var(--dj800-panel-bottom,96px) + 8px)) 0!important;
+   display:flex!important;align-items:flex-end!important;justify-content:center!important;
+   padding:0 12px!important;box-sizing:border-box!important;overflow:hidden!important;
+   animation:none!important;transition:none!important;transform:none!important;translate:none!important;scale:1!important;
+ }
+ html body #app#app#app#app#app#app#app#app#app #version-history-modal:not([hidden])>.version-history-dialog{
+   position:relative!important;inset:auto!important;margin:0 auto!important;
+   flex:0 1 auto!important;max-height:100%!important;min-height:0!important;
+   overflow:hidden!important;display:flex!important;flex-direction:column!important;
+   animation:none!important;transition:none!important;transform:none!important;scale:1!important;
+ }
+ html body #app#app#app#app#app#app#app#app#app #version-history-modal .version-history-list{
+   flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+ }
+}
