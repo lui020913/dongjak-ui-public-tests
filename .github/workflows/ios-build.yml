@@ -1,5 +1,5 @@
 name: iOS - verified Production build
-run-name: iOS (${{ inputs.variant || 'simulator' }}) - ${{ github.sha }}
+run-name: 'iOS (${{ inputs.variant || ''simulator'' }}) · Production 배포본 앱 빌드'
 on:
   workflow_dispatch:
     inputs:
