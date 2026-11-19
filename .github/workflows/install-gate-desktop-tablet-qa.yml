@@ -16,7 +16,7 @@ jobs:
       options: --ipc=host
     timeout-minutes: 25
     env:
-      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev
       DONGJAK_EXPECTED_SOURCE_SHA: 503e8b57615ebae62fe3bb37ee92779cc032c049
       DONGJAK_EXPECTED_VERSION: 9.2.13
     steps:
