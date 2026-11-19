@@ -59,10 +59,12 @@
     border-radius:99px!important;padding:7px 12px!important;
     font-size:12.5px!important;white-space:nowrap!important;
   }
-  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety] :is(.djNext-safety-scroll > .dj-safety-group,#map-safety-controls > .dj-safety-group){
+  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety]>.dj-safety-group,
+  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety] .djNext-safety-scroll>.dj-safety-group{
     display:none!important;
   }
-  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety] :is(.djNext-safety-scroll > .dj-safety-group,#map-safety-controls > .dj-safety-group).dj874-current-safety{
+  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety]>.dj-safety-group.dj874-current-safety,
+  html body #app#app#app#app #map-safety-controls[data-dj874-active-safety] .djNext-safety-scroll>.dj-safety-group.dj874-current-safety{
     display:block!important;
   }
   /* Never overlay important controls or detail cards with cycling TIP text. */
