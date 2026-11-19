@@ -1,5 +1,5 @@
 {
   "run_id": "44560573128",
-  "reason": "Retry after repository-scoped Android Release publisher token was registered",
-  "attempt": 2
+  "reason": "Retry after confirming fine-grained token Contents read/write permission",
+  "attempt": 3
 }
