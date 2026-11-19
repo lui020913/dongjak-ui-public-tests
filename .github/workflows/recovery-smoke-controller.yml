@@ -20,5 +20,4 @@ jobs:
       RUN_ID: ${{ github.event.workflow_run.id }}
     steps:
       - run: |
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "@lui020913 복구 테스트 · 의도적 실패 감지"
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/rerun"
