@@ -16,7 +16,7 @@ export function installPwaStatusTone(doc=document,win=window) {
   const app=doc.getElementById('app');
   const themeMeta=doc.querySelector('meta[name="theme-color"]');
   if(!root || !app || !themeMeta)return ()=>{};
-  let band=null;
+  let band=null,bridge=null;
   let enabled=false;
   const baselineColor=()=>root.dataset.theme==='dark'?'#101f25':'#f3f7f5';
   function sync() {
@@ -36,13 +36,14 @@ export function installPwaStatusTone(doc=document,win=window) {
         band.setAttribute('aria-hidden','true');
         app.appendChild(band);
       }
+      if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
       const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
       const dimmed=app.classList.contains('map-safety-open')||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       themeMeta.setAttribute('content',theme==='dark'?'#192d32':'#e5ece8');
     } else {
-      band?.remove();band=null;
+      band?.remove();band=null;bridge?.remove();bridge=null;
       themeMeta.setAttribute('content',baselineColor());
     }
   }
@@ -57,7 +58,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     observer.disconnect();
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
-    band?.remove();band=null;
+    band?.remove();band=null;bridge?.remove();bridge=null;
     root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;
     themeMeta.content=baselineColor();
   };

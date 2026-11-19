@@ -317,6 +317,77 @@ html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .dj860-guide-l
 html body #app#app#app#app#app#app#app#app#app #map-gesture-guide .map-gesture-guide-remember{margin:0!important;min-height:44px!important;padding:0!important;gap:8px!important;align-items:center!important}
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #map-gesture-guide{background:var(--dj-v4-surface)!important;color:#e6efeb!important}
 
+/* 9.1.1 — final mobile visual contracts. Scope to phone; keep the seven top slots unchanged. */
+html body #app#app#app#app#app#app#app#app#app#app {--dj-elev-low:0 1px 2px #17392b12;--dj-elev-map:0 2px 5px #172c2440;--dj-elev-panel:0 7px 22px #172c2438}
+html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"]{--dj-elev-low:0 1px 2px #0003;--dj-elev-map:0 2px 5px #0006;--dj-elev-panel:0 7px 22px #0007}
+html body #app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#transport-close,#map-safety-close,.maplibregl-popup-close-button):not(:focus-visible){box-shadow:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row{display:block!important;margin:7px 0!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row button{width:100%!important;min-height:46px!important;box-shadow:none!important;display:flex!important;align-items:center!important;gap:8px!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row small{margin-left:auto!important;font-size:11px!important;white-space:nowrap!important;color:var(--djNext-muted)!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-permission-row small[data-granted="true"]{color:var(--djNext-active)!important;font-weight:800!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-modal-body>header{position:relative!important;top:auto!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-permissions .djNext-modal-body>p{margin:5px 0 10px!important;line-height:1.5!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt{position:relative!important;display:flex!important;align-items:center!important;gap:5px!important;min-width:0!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt:nth-of-type(-n+4)::before{content:"";width:14px;height:14px;flex:0 0 14px;background:currentColor;mask:var(--dj-guide-glyph) center/contain no-repeat;-webkit-mask:var(--dj-guide-glyph) center/contain no-repeat}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt:nth-of-type(1){--dj-guide-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M12 2v20M2 12h20M9 5l3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3'/%3E%3C/svg%3E")}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt:nth-of-type(2){--dj-guide-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6M3 3l6 6M21 3l-6 6M21 21l-6-6M3 21l6-6'/%3E%3C/svg%3E")}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt:nth-of-type(3){--dj-guide-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M20 8a9 9 0 1 0 1 6M20 2v6h-6'/%3E%3C/svg%3E")}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide dl dt:nth-of-type(4){--dj-guide-glyph:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='m2 8 10-5 10 5-10 5zM2 12l10 5 10-5M2 16l10 5 10-5'/%3E%3C/svg%3E")}
+html body #app#app#app#app#app#app#app#app#app#app #map-gesture-guide .dj-guide-release{border-top:1px solid var(--djNext-border)!important;padding-top:9px!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-row{gap:3px!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-pin{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:50%!important;box-shadow:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action:not(:focus-visible) .djNext-layer-tile{box-shadow:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action[aria-pressed="true"] .djNext-layer-tile{background:var(--djNext-active)!important;color:white!important;box-shadow:inset 0 0 0 1px var(--djNext-active)!important}
+html body #app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-state{margin-top:2px!important}
+html body #app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup:not(.dj-place-detail-popup) .maplibregl-popup-content{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow-wrap:anywhere!important;animation:none!important;transition:none!important;opacity:1!important}
+html body #app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup.dj-popup-shifted:not(.dj-place-detail-popup) .maplibregl-popup-tip{visibility:hidden!important}
+html body #app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup:not(.dj-place-detail-popup) .safety-popup{min-width:0!important;max-width:100%!important;padding-right:26px!important;overflow-wrap:anywhere!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-quick-search-dropdown:not([hidden]){visibility:visible!important;opacity:1!important;pointer-events:auto!important;display:block!important;animation:none!important;transition:none!important;transform:none!important;translate:none!important;z-index:6900!important;background:var(--djNext-surface)!important;color:var(--djNext-text)!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-quick-search-dropdown[hidden]{display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app[data-search-open="true"] .topbar .header-tools:has(#dj890-ai-orb){display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app[data-search-open="true"] .topbar #map-quick-search{flex:1 1 auto!important;width:100%!important;max-width:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #dj-search-clear:not([hidden]){display:grid!important;place-items:center!important;flex:0 0 36px!important;width:36px!important;height:36px!important;font-size:22px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--djNext-muted)!important}
+html body #app#app#app#app#app#app#app#app#app#app #dj-search-clear[hidden]{display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-quick-search-query::-webkit-search-cancel-button{display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #transport-title .metro-badge-shinlim{display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:9px!important;font-weight:800!important;letter-spacing:-.06em!important;color:white!important;opacity:1!important;background:#6789ca!important}
+html body #app#app#app#app#app#app#app#app#app#app #transport-title .dj-metro-line-selector{align-self:center!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel .route-card{padding:8px!important;gap:4px!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel .route-location-row{padding:4px 2px!important;min-height:46px!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel #route-gps-start{padding:7px 8px!important;min-height:42px!important;margin:0!important;text-align:center!important;justify-content:center!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel #dj832-waypoint-toggle{min-height:40px!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel #route-calc{justify-content:center!important;text-align:center!important;position:relative!important}
+html body #app#app#app#app#app#app#app#app#app#app #route-panel #route-calc>:last-child{margin-left:0!important}
+html body #app#app#app#app#app#app#app#app#app#app #news-panel [data-news-source][aria-pressed="true"]{background:var(--djNext-active)!important;color:white!important;border-color:var(--djNext-active)!important}
+html body #app#app#app#app#app#app#app#app#app#app #news-panel .dongjak-news-item{padding:10px 12px!important;gap:6px!important}
+html body #app#app#app#app#app#app#app#app#app#app #news-panel .dongjak-news-open{padding:5px 10px!important;min-height:40px!important;box-shadow:none!important}
+html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-open{background:var(--dj-v4-control)!important;color:var(--dj-v4-accent)!important;border-color:var(--dj-v4-border)!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel #dj824-account{padding:10px!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){padding:10px!important;margin:8px 0!important;border:0!important;box-shadow:none!important;background:var(--djNext-raised)!important;color:var(--djNext-text)!important}
+html body #app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #mine-panel #dj824-account :is(.dj829-signed-summary,.dj829-notice-settings){background:var(--dj-v4-card)!important;color:var(--dj-v4-text)!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle{display:flex!important;flex-direction:row-reverse!important;justify-content:space-between!important;align-items:center!important;gap:8px!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input{appearance:none!important;-webkit-appearance:none!important;position:relative!important;display:block!important;flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:26px!important;min-height:26px!important;border:0!important;border-radius:999px!important;background:#919d96!important;box-shadow:none!important;margin:0!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input::before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;background:white;border-radius:50%}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input:checked{background:var(--djNext-active)!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input:checked::before{transform:translateX(18px)}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj829-notice-toggle input:focus-visible{outline:2px solid var(--djNext-active)!important;outline-offset:3px}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel #dj824-account :is(.dj815-helper,.dj829-notice-status){margin:0!important;line-height:1.5!important;color:var(--djNext-text)!important;font-size:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary{list-style:none!important;display:flex!important;align-items:center!important;gap:10px!important;min-height:54px!important;padding:8px 12px!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::-webkit-details-marker{display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::before{content:"";width:24px;height:24px;flex:none;background:currentColor;mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' stroke-width='2' fill='none'%3E%3Cpath d='M4 6h16M4 12h16M4 18h16'/%3E%3Ccircle cx='9' cy='6' r='2' fill='white'/%3E%3Ccircle cx='15' cy='12' r='2' fill='white'/%3E%3Ccircle cx='9' cy='18' r='2' fill='white'/%3E%3C/svg%3E") center/contain no-repeat}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::after{content:"›";margin-left:auto;font-size:22px}
+html body #app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root[open]>summary::after{transform:rotate(90deg)}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .djNext-safety-scroll{padding:8px 12px 16px!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-safety-nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;overflow:visible!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-safety-nav button{white-space:normal!important;min-width:0!important;min-height:40px!important;padding:5px 4px!important;font-size:11px!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-safety-nav button.is-current{background:var(--djNext-active)!important;color:white!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj17-pilot-notice{padding:8px 10px!important;line-height:1.45!important;word-break:keep-all!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-safety-overview{margin:6px 0!important;padding:9px!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-safety-overview p{margin:2px 0!important}
+html body #app#app#app#app#app#app#app#app#app#app #map-safety-controls .dj-ai-search-entry::before{content:"✦"!important;border:0!important;border-radius:0!important;font-size:18px!important;line-height:17px!important}
+html body #app#app#app#app#app#app#app#app#app#app #night-visibility-float{margin-bottom:6px!important;background:var(--djNext-surface)!important;color:var(--djNext-text)!important;border-color:var(--djNext-border)!important}
+html body #app#app#app#app#app#app#app#app#app#app #night-visibility-float :is(#night-visibility-float-collapse,#night-visibility-float-stop){background:var(--djNext-raised)!important;color:var(--djNext-text)!important;border:1px solid var(--djNext-border)!important;border-radius:12px!important}
+html body #app#app#app#app#app#app#app#app#app#app :is(#map-safety-backdrop,#map-options-backdrop,.djNext-modal){transform:none!important;translate:none!important;animation:none!important;transition:background-color .18s ease!important}
+
 /* No older fade or CSS animation may compete with the shared JS motion owner. */
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal .djNext-modal-body,
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal.djNext-leaving .djNext-modal-body{animation:none!important;transform:none!important;opacity:1!important}

@@ -25,8 +25,8 @@ export function trainFacing(map,props,previous=null){
 }
 export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const canvas=doc?.createElement?.('canvas');if(!canvas)return null;
-  canvas.width=64;canvas.height=64;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
-  ctx.scale(2,2);ctx.clearRect(0,0,32,32);
+  canvas.width=96;canvas.height=96;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
+  ctx.scale(3,3);ctx.clearRect(0,0,32,32);
   const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
   // Side train only: transparent canvas, no backing plate, keyline or track.
   // Filled shapes rather than strokes; line color belongs to the vehicle itself.
@@ -38,7 +38,7 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   for(const x of [4,8.8,13.6]){rounded(x,10,3.8,6.4,.8);ctx.fillStyle='#f1f7f8';ctx.fill();}
   ctx.beginPath();ctx.moveTo(19.5,10);ctx.lineTo(21.3,10);ctx.quadraticCurveTo(22.2,10,23.4,11.6);ctx.lineTo(27,16.4);ctx.lineTo(19.5,16.4);ctx.quadraticCurveTo(18.6,16.4,18.6,15.5);ctx.lineTo(18.6,10.9);ctx.quadraticCurveTo(18.6,10,19.5,10);ctx.closePath();ctx.fillStyle='#f1f7f8';ctx.fill();
   rounded(26,18.3,2.2,1.7,.65);ctx.fillStyle='#f1f7f8';ctx.fill();
-  const image=ctx.getImageData(0,0,64,64);const data=new Uint8Array(image.data);
+  const image=ctx.getImageData(0,0,96,96);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);
     for(let y=0;y<64;y++)for(let x=0;x<64;x++){
@@ -53,7 +53,7 @@ function ensureTrainImages(map){
   try{for(const [line,color] of Object.entries({...LINE_COLORS,unknown:'#596c75'})){
     for(const facing of ['right','left']){
       const id=trainImageId(line,facing);if(map.hasImage(id))continue;
-      const image=trainIconImage(color,globalThis.document,facing);if(!image)return false;map.addImage(id,image,{pixelRatio:2});
+      const image=trainIconImage(color,globalThis.document,facing);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
     }
   }return true;}catch{return false;}
 }
