@@ -99,11 +99,11 @@ jobs:
       - name: Restore public Wrangler package downloads
         uses: actions/cache@v4
         with:
-          path: ~/.npm/_cacache
+          path: ~/.cache/dongjak/wrangler-npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
       - name: Deploy exact candidate to isolated Preview only
         id: deploy
-        run: bash scripts/deploy-mobile-first-overhaul-preview.sh
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/wrangler-npm" bash scripts/deploy-mobile-first-overhaul-preview.sh
       - name: Remove sealed artifact
         if: always()
         run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed"
@@ -135,13 +135,12 @@ jobs:
       - name: Restore pinned browser test package downloads
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/dongjak-browser-npm/_cacache
+          path: ~/.cache/dongjak/browser-npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
       - name: Install pinned Playwright test package
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-          NPM_CONFIG_CACHE: ${{ runner.temp }}/dongjak-browser-npm
-        run: npm install --no-audit --no-fund --prefer-offline
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
       - name: Verify exact mobile Preview provenance
         run: |
           set -eu
@@ -201,7 +200,7 @@ jobs:
       - name: Restore public Wrangler package downloads
         uses: actions/cache@v4
         with:
-          path: ~/.npm/_cacache
+          path: ~/.cache/dongjak/wrangler-npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
       - name: Decrypt the exact mobile-tested artifact
         run: |
@@ -265,7 +264,7 @@ jobs:
             exit "$code"
           }
           trap rollback EXIT
-          npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" > "$RUNNER_TEMP/production-deploy.log" 2>&1
+          NPM_CONFIG_CACHE="$HOME/.cache/dongjak/wrangler-npm" npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch=main --commit-hash="$SOURCE_SHA" --commit-message="$message" > "$RUNNER_TEMP/production-deploy.log" 2>&1
           verified=0
           for n in $(seq 1 15); do
             if curl -fsSL --max-time 25 "$PRODUCTION_URL/release-source.json?after=$GITHUB_RUN_ID-$n" |

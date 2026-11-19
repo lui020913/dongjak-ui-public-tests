@@ -45,23 +45,25 @@ jobs:
       - name: Restore versioned security scanner archive
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/gitleaks.tgz
+          path: ~/.cache/dongjak/gitleaks-v8.24.2/gitleaks.tgz
           key: ${{ runner.os }}-${{ runner.arch }}-gitleaks-v8.24.2-archive-v1
       - name: Scan app source for accidentally committed secrets
         working-directory: .
         run: |
           set -euo pipefail
+          mkdir -p "$HOME/.cache/dongjak/gitleaks-v8.24.2"
+          archive_path="$HOME/.cache/dongjak/gitleaks-v8.24.2/gitleaks.tgz"
           base=https://github.com/gitleaks/gitleaks/releases/download/v8.24.2
           archive=gitleaks_8.24.2_linux_x64.tar.gz
           curl -fsSL "$base/gitleaks_8.24.2_checksums.txt" -o "$RUNNER_TEMP/gitleaks-checksums.txt"
           expected="$(awk -v name="$archive" '$2==name || $2=="*"name {print $1}' "$RUNNER_TEMP/gitleaks-checksums.txt")"
           [[ "$expected" =~ ^[a-f0-9]{64}$ ]]
-          if ! printf '%s  %s\n' "$expected" "$RUNNER_TEMP/gitleaks.tgz" | sha256sum --check --status; then
-            curl -fsSL "$base/$archive" -o "$RUNNER_TEMP/gitleaks.tgz"
+          if ! printf '%s  %s\n' "$expected" "$archive_path" | sha256sum --check --status; then
+            curl -fsSL "$base/$archive" -o "$archive_path"
           fi
-          printf '%s  %s\n' "$expected" "$RUNNER_TEMP/gitleaks.tgz" | sha256sum --check --status
+          printf '%s  %s\n' "$expected" "$archive_path" | sha256sum --check --status
           mkdir -p "$RUNNER_TEMP/gitleaks"
-          tar -xzf "$RUNNER_TEMP/gitleaks.tgz" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          tar -xzf "$archive_path" -C "$RUNNER_TEMP/gitleaks" gitleaks
           "$RUNNER_TEMP/gitleaks/gitleaks" detect --source app --config app/.gitleaks.toml --no-git --redact --exit-code 23
       - name: Run full application regression suite
         run: npm test
@@ -74,14 +76,13 @@ jobs:
       - name: Restore pinned browser test package downloads
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/dongjak-browser-npm/_cacache
+          path: ~/.cache/dongjak/browser-npm/_cacache
           key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
       - name: Install pinned root Playwright test dependencies
         working-directory: .
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-          NPM_CONFIG_CACHE: ${{ runner.temp }}/dongjak-browser-npm
-        run: npm install --no-audit --no-fund --prefer-offline
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
       - name: Verify preinstalled Chromium matches pinned Playwright
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
