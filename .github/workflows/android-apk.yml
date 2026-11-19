@@ -59,7 +59,7 @@ jobs:
           version="$(jq -r .application_version "$marker")"
           if [ -n "$TRIGGER_RUN" ]; then test "$TRIGGER_RUN" = "$run"; fi
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e --arg sha "$sha" --arg repo "$GITHUB_REPOSITORY" '.head_sha==$sha and .head_branch=="main" and .head_repository.full_name==$repo and .event=="push" and .conclusion=="success" and .path==".github/workflows/mobile-first-overhaul-preview.yml" and .actor.login=="lui020913"' >/dev/null
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" | jq -e '[.jobs[]|select(.name=="Promote the exact mobile-tested build to Production" and .conclusion=="success")]|length==1' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" | jq -e '[.jobs[]|select((.name=="Promote the exact mobile-tested build to Production" or .name=="4. Production 배포 및 확인") and .conclusion=="success")]|length==1' >/dev/null
           curl -fsSL --max-time 30 "$PRODUCTION_URL/version.json?apk=$GITHUB_RUN_ID" | jq -e --arg version "$version" '.version==$version' >/dev/null
           printf 'sha=%s\nrun=%s\nversion=%s\n' "$sha" "$run" "$version" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
