@@ -837,7 +837,7 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   app.dataset.djNightReady='true';
   toggle.disabled=false;quickOff.disabled=false;
   floatingCollapse?.addEventListener('click',()=>setFloatingCollapsed(!floatingContent.hidden));
-  floatingStop?.addEventListener('click',()=>{void setMode(false);});
+  floatingStop?.addEventListener('click',()=>{const finish=()=>{void setMode(false);};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(floating,finish);else finish();});
   // Swipe the mobile bottom-sheet header up to expand, down to collapse.
   // Gestures never hijack button clicks or map drags outside the sheet.
   if(floatingHead){
