@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/update-history-docked-slide-20261119",
+  "public_work_branch": "fix/history-browser-syntax-preflight-20261119",
   "purpose": "Repair update history docked slide geometry, prevent focus-induced overshoot, and validate actual render frames in Chromium and WebKit. Use consolidated four-worker mobile QA and warmed public tool caches.",
-  "attempt": 43,
+  "attempt": 44,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 42 deployed successfully; new owner-reported update-history animation defect; start a new beta after the production candidate.",
+  "last_retry_reason": "Attempt 43 browser spec contained an incorrectly escaped regular expression; replace with valid CSS inset parsing and perform syntax verification before Preview deployment. Preserve all browser and animation checks.",
   "release_kind": "patch",
   "beta_number": 4
 }

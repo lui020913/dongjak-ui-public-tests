@@ -47,6 +47,8 @@ jobs:
           node --check frontend/production/mobile-next.js
           node --check frontend/production/mobile-17-followup.js
           node --check scripts/run-mobile-regressions.mjs
+          node --check playwright.v911-remote.config.mjs
+          node --check tests/v911-anonymous-ui.spec.mjs
       - name: Test and build exact public app source
         id: build
         env:
