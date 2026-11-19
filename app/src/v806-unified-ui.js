@@ -74,6 +74,8 @@ export function installUnifiedUI(doc=document, win=window){
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom){
     if(!phone()||!target?.style||reduced())return false;
+    // Guard the actual animation entry as well as the visibility observer.
+    if(opening&&stationaryTabEntry.has(target.id))return true;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const fade=isGuide||target.dataset.djDialogFade==='true';
@@ -324,6 +326,22 @@ export function installUnifiedUI(doc=document, win=window){
   }
   const tabPanels={route:'route-panel',participate:'participation-panel',
     news:'news-panel',mine:'mine-panel'};
+  // Capture the previous primary page before any legacy pointer/click handlers
+  // hide it. Keep the suppression for this entire visible session, not just
+  // the first observer callback. Keyboard and programmatic clicks use the
+  // same window-capture fallback.
+  function markPrimaryReplacement(event){
+    if(!phone())return;
+    const tab=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
+    if(!tab||tab.disabled)return;
+    const next=tabPanels[tab.dataset.tab];
+    if(!next){if(tab.dataset.tab==='map')stationaryTabEntry.clear();return;}
+    const prior=tabPanels[app.dataset.tab];
+    const other=Object.values(tabPanels).some(id=>id!==next&&(visible(id)||previous.get(id)));
+    if((prior&&prior!==next)||other)stationaryTabEntry.add(next);
+  }
+  on(win,'pointerdown',markPrimaryReplacement,true);
+  on(win,'click',markPrimaryReplacement,true);
   function openingIntent(event){
     const node=event.target;
     if(!node?.closest)return '';
@@ -436,14 +454,15 @@ export function installUnifiedUI(doc=document, win=window){
         const realOpen=now&&id===activeSurface;
         const requested=realOpen&&intent>Date.now();
         if(requested||(intent&&intent<=Date.now()))entranceIntent.delete(id);
-        if(!requested&&intent&&intent<=Date.now()){stationaryTabEntry.delete(id);if(id===replacingSurface)replacingSurface='';}
+        if(!requested&&intent&&intent<=Date.now()){if(!now)stationaryTabEntry.delete(id);if(id===replacingSurface)replacingSurface='';}
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          if(stationaryTabEntry.delete(id)){cancelActive(target);const scroll=element(id)?.querySelector('.dj836-sheet-body');if(scroll)scroll.scrollTop=0;}
+          if(stationaryTabEntry.has(id)){cancelActive(target);const panel=element(id);const scroll=panel?.querySelector('.dj836-sheet-body,.dj834-my-home');if(scroll)scroll.scrollTop=0;}
           else if(!activeAnimation.has(target))playOpen(id);
         }
         else if(!now&&was){
+          stationaryTabEntry.delete(id);
           if(lifecycle.snapshot(id).phase!=='closed')lifecycle.dismiss(id);
           const target=content(element(id));if(target&&target.dataset.dj810Animating!=='closing')cancelActive(target);
         }

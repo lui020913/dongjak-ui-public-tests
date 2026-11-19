@@ -3,9 +3,9 @@
   "application_version": "9.1.2",
   "public_work_branch": "main",
   "purpose": "Validate integrated phone usability fixes and selected safety layer retention; promote only exact preview after all mobile shards pass.",
-  "attempt": 52,
+  "attempt": 53,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Align unchanged WebKit coverage and test classifier with the new in-place history fade test; retain all functional checks.",
+  "last_retry_reason": "Beta 2: 11/12 mobile shards passed; mobile390 primary replacement still recorded opening. Capture prior page at window pointerdown/click before legacy handlers, retain motion suppression for the visible session and guard actual animation entry. Keep browser regression unchanged.",
   "release_kind": "patch",
-  "beta_number": 2
+  "beta_number": 3
 }
