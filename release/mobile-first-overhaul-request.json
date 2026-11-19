@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.12",
+  "application_version": "9.2.13",
   "public_work_branch": "main",
-  "purpose": "Mobile patch integration, route addresses, permissions, startup and sheet layout repairs",
-  "attempt": 71,
+  "purpose": "Restore device illustration, instant hover feedback, on-demand QR, and accessible installation guide",
+  "attempt": 72,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Restore tested 420ms startup hold; CSS width transition completes in 350ms.",
+  "last_retry_reason": "Desktop and tablet entry-screen visual feedback",
   "release_kind": "patch",
   "beta_number": 1
 }
