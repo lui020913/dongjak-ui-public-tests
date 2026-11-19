@@ -45,3 +45,26 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
 #dj-install-menu .dj-install-choice[data-install-paused] .dj-install-status{font-size:11px;white-space:normal;text-align:right;word-break:keep-all;max-width:88px}
 
 #dj-install-menu .dj-install-platforms{white-space:normal;text-align:right;max-width:90px;word-break:normal;line-height:1.35;flex-shrink:0}
+
+/* Android guidance appears only after the download choice; preserve the welcome design. */
+#dj-install-menu .dj-install-guide-title{font-size:16px;font-weight:750;line-height:1.5;margin:0 0 8px;word-break:keep-all}
+#dj-install-menu .dj-install-guide-steps{display:grid;gap:5px;margin:10px 0}
+#dj-install-menu .dj-install-guide-notice{font-weight:600;line-height:1.6}
+#dj-install-menu .dj-install-guide-help{display:inline-block;color:inherit;text-decoration:underline;text-underline-offset:3px;font-size:12px;margin:8px 0}
+#dj-install-menu [data-android-guide] .dj-install-prompt:not(.dj-install-guide-web){background:#167b65;color:#fff;border-color:#167b65}
+#dj-install-menu [data-android-guide] .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
+
+/* Press feedback without shifting layout or adding JS listeners. Hover is only
+   for devices with a real hovering pointer, not sticky mobile touch hover. */
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:transform 150ms ease-out,box-shadow 150ms ease-out;transform-origin:center}
+@media (hover:hover) and (pointer:fine){
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{transform:translateY(1px) scale(.99);box-shadow:0 1px 4px #17221d20,inset 0 0 0 1px #17221d0b}
+ #dj-install-menu .dj-install-dismiss:not(:disabled):hover{opacity:.8}
+}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{transform:translateY(2px) scale(.975);box-shadow:0 1px 2px #17221d20,inset 0 2px 5px #17221d19;transition-duration:90ms}
+#dj-install-menu .dj-install-dismiss:not(:disabled):active{opacity:.65}
+#dj-install-menu .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:none!important}
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):is(:hover,:active){transform:none!important}
+}

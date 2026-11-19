@@ -22,6 +22,18 @@ export function androidReleaseAsset(marker,release,variant='release'){
  const name='Dongjak-Safety-Map-v'+v+'-'+variant+'.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+prefix+v+'/'+name;
  return release.assets?.some(a=>a.name===name&&a.browser_download_url===url&&a.state==='uploaded')?url:null;
 }
+export function androidInstallGuidance(){
+ return {title:'Android 앱 설치 안내',
+  intro:'Google Play 스토어가 아닌 공식 프로젝트에서 제공하는 테스트용 APK입니다. Android에서 설치를 제한할 수 있습니다.',
+  steps:[
+   '1. APK 다운로드 후 다운로드 알림 또는 내 파일에서 설치 파일을 엽니다.',
+   '2. 설치가 차단되면 Android 설정에서 ‘출처를 알 수 없는 앱 설치’를 검색하세요. 파일을 연 브라우저 또는 내 파일에 대해서만 필요한 경우 설치를 허용할 수 있습니다.',
+   '3. Galaxy의 ‘보안 위험 자동 차단’이 켜져 있으면 설치가 제한될 수 있습니다. 보안 설정을 유지하려면 웹앱을 이용하세요.',
+   '4. 설치가 끝나면 외부 앱 설치 허용을 다시 해제하세요. Play Protect는 켜 두세요.'
+  ],
+  notice:'출처가 확실하지 않거나 보안 검사에서 위험 경고가 나오면 설치하지 마세요. 앱 설치 없이 웹 또는 웹앱으로 이용할 수 있습니다.',
+  help:'https://www.samsungsvc.co.kr/solution/1711930'};
+}
 export function installChoices(platform){const rest=['android','ios'];if(platform==='ios')rest.reverse();return ['web',...rest,'pwa'];}
 const labels={web:'웹에서 바로 이용하기',android:'Android 앱 다운로드',ios:'iPhone 앱 다운로드',pwa:'홈 화면에 웹앱 추가'};
 const paths={web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18"/>',android:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',ios:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4"/>',pwa:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/>'};
@@ -36,7 +48,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle','이용하실 방법을 선택해 주세요.',brand);
  const list=add('div','dj-install-list'),info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={};
- const showInfo=texts=>{info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
+ const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
@@ -48,7 +60,23 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  if(key==='ios')return;
  if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();return;}
  if(key==='pwa'){showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
- const url=safeDownloadUrl(links[key],key);if(url)win.location.assign(url);else showInfo(['최신 Android APK 다운로드를 준비 중입니다. 웹앱을 이용해 주세요.']);
+ const url=safeDownloadUrl(links[key],key);
+ if(!url){showInfo(['최신 Android APK 다운로드를 준비 중입니다. 웹앱을 이용해 주세요.']);return;}
+ const guide=androidInstallGuidance();
+ showInfo([]);info.dataset.androidGuide='true';
+ add('h3','dj-install-guide-title',guide.title,info);
+ add('p','',guide.intro,info);
+ const instructions=add('div','dj-install-guide-steps',null,info);
+ for(const line of guide.steps)add('p','',line,instructions);
+ add('p','dj-install-guide-notice',guide.notice,info);
+ const help=add('a','dj-install-guide-help','Galaxy 설치 제한 공식 안내',info);
+ help.href=guide.help;help.target='_blank';help.rel='noopener noreferrer';
+ const download=add('button','dj-install-prompt','APK 다운로드',info);
+ download.type='button';
+ download.addEventListener('click',()=>{if(safeDownloadUrl(links.android,'android')===url)win.location.assign(url);});
+ const web=add('button','dj-install-prompt dj-install-guide-web','웹 또는 웹앱 이용하기',info);
+ web.type='button';web.addEventListener('click',()=>{if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. 아래 QR코드를 사용할 수 있습니다.']);else finish();});
+ if(typeof info.scrollIntoView==='function')info.scrollIntoView({block:'nearest',behavior:'instant'});
  });
  }
  if(blocked){const img=add('img','dj-install-qr');img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);}
