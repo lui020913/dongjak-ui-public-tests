@@ -679,6 +679,7 @@ test('Android verified download shows security instructions before navigation',{
  await page.route('**/download-links.json',r=>r.fulfill({json:{androidAutoRelease:true,ios:null}}));
  await page.route('**/release-source.json',r=>r.fulfill({json:{release_status:'DEPLOYED_PRODUCTION',source_commit:sha,application_version:version}}));
  await page.route('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/releases/tags/'+tag,r=>r.fulfill({headers:{'access-control-allow-origin':'*'},json:{tag_name:tag,target_commitish:sha,draft:false,prerelease:false,assets:[{name,browser_download_url:url,state:'uploaded'}]}}));
+ await page.route('https://api.github.com/repos/lui020913/dongjak-ui-public-tests/git/ref/tags/'+tag,r=>r.fulfill({headers:{'access-control-allow-origin':'*'},json:{ref:'refs/tags/'+tag,object:{type:'commit',sha}}}));
  let requested=false;await page.route(url,async r=>{requested=true;await r.abort();});
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('#dj-install-menu'),choice=menu.getByRole('button',{name:/Android 앱 다운로드/});
