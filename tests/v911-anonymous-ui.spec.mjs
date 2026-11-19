@@ -542,6 +542,6 @@ test('phone windows share the opaque gradual slide on open and close',async({pag
  }
  await audit('#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel',()=>tap(page,page.locator('#djNext-layers')),()=>page.getByRole('button',{name:'레이어 설정 닫기'}).click());
  await audit('#dj854-weather-sheet','#dj854-weather-sheet',()=>tap(page,page.locator('#djNext-weather')),()=>page.getByRole('button',{name:'날씨창 닫기'}).click());
- await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>page.locator('[data-close-page="route"]').click());
- await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>page.locator('[data-close-page="mine"]').click());
+ await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>tap(page,page.locator('#route-panel .dj-sheet-chrome-close')));
+ await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')));
 });
