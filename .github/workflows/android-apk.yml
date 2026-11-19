@@ -336,7 +336,7 @@ jobs:
               echo '::error::Unable to inspect existing Android tag; refusing publication.'; exit 1
             fi
             if ! ref="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$sha")"; then
-              echo "::error::Cannot create the exact Production tag. Add ANDROID_RELEASE_PUBLISH_TOKEN to android-distribution (Contents and Workflows write), or create the lightweight tag $tag at $sha using an authorized account."
+              echo "::error::GitHub accepted ANDROID_RELEASE_PUBLISH_TOKEN but denied tag creation. Edit the fine-grained token: select repository lui020913/dongjak-ui-public-tests and set Repository permissions > Contents = Read and write. Then update the android-distribution environment secret if a new token was generated."
               exit 1
             fi
           fi
