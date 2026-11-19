@@ -2,6 +2,7 @@ import {fadePanelOut} from './v852-panel-transition.js';
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
+import {WINDOW_MOTION,windowMotionFrame} from './mobile-window-motion.js';
 /** One coordinated motion/visibility owner, added after v8.0.3 UI modules.
  * Retains the original map, route, station and dialog click handlers.
  * CSS entrance animations and earlier JS coordinators opt out while enabled.
@@ -60,21 +61,11 @@ export function installUnifiedUI(doc=document, win=window){
   // that legacy fixed-position sheets use to establish their screen position.
   const activeAnimation=new WeakMap();
   const animationTimers=new Set();
-  // v887 interaction audit: fixed dialogs and compact tool windows should
-  // fade in place. Sliding them by 100% of their own height creates visual
-  // jumps and can leave them offscreen in iOS Safari. Do not change the
-  // existing staged bottom-sheet motion for route, transit, news or community.
-  const fadeOnlyMobileIds=new Set([
-    'map-gesture-guide','admin-dong-picker','dj-map-settings','dj-app-about',
-    'version-history-modal','map-safety-controls','map-advanced-controls','mine-panel','dj-mobile-utilities',
-    'road-width-legend','pza-road-sheet','night-visibility-float','dj800-type-panel'
-  ]);
-  // Mobile bottom sheets use one frame-driven slide/opacity transition.
-  // Individual CSS `translate` composes with fixed-position `transform`, so
-  // MapLibre anchors and the existing panel docking coordinates remain intact.
-  function playMobileMotion(target,opening,afterClose,fadeOnly=false){
+  // Every mobile window uses the same opaque slide. The existing feature
+  // remains the owner of visibility, data, route, focus and cleanup.
+  function playMobileMotion(target,opening,afterClose){
     if(!phone()||!target?.style||reduced())return false;
-    const duration=fadeOnly?(opening?190:160):(opening?340:250);
+    const duration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
     const beforeTranslate=target.style.getPropertyValue('translate');
@@ -82,13 +73,10 @@ export function installUnifiedUI(doc=document, win=window){
     const beforeTransition=target.style.getPropertyValue('transition');
     const beforeTransitionPriority=target.style.getPropertyPriority('transition');
     const rect=target.getBoundingClientRect();
-    const distance=Math.max(80,win.innerHeight-rect.top+24);
+    if(rect.height<1||rect.width<1)return false;
     const nav=element('bottom-nav');
-    const docked=target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities')&&nav&&!nav.hidden;
-    // The panel has an 8px dock clearance at rest. Never translate its
-    // outer edge across the navigation. Use a top-edge reveal for the
-    // remainder of the entrance instead of sacrificing safe hit targets.
-    const entranceDistance=docked?Math.max(0,Math.min(30,distance,nav.getBoundingClientRect().top-rect.bottom-5.25)):Math.min(30,distance);
+    const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content')&&nav&&!nav.hidden)||false;
+    const distance=docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
@@ -116,18 +104,14 @@ export function installUnifiedUI(doc=document, win=window){
       finally{restore();}
     }
     function setMotion(progress){
-      const eased=progress*progress*(3-2*progress);
-      // Keep a small visible starting opacity for iOS, but restore a
-      // perceptible fade and a short, stable entrance. Measure exit before
-      // translating: using a moving bounding rect changes the distance.
-      const opacity=opening?.18+.82*eased:1-eased;
-      const offset=opening?entranceDistance*(1-eased):(docked?entranceDistance:distance)*eased;
-      target.style.setProperty('opacity',String(Math.max(0,Math.min(1,opacity))),'important');
-      if(!fadeOnly)target.style.setProperty('translate',`0 ${offset}px`,'important');
-      if(!fadeOnly&&docked)target.style.setProperty('clip-path',`inset(${24*(opening?1-eased:eased)}px 0 0 0 round 24px)`,'important');
+      const frame=windowMotionFrame(progress,opening,distance,rect.height,docked);
+      target.style.setProperty('opacity','1','important');
+      target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
+      if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
     }
     target.style.setProperty('transition','none','important');
     target.setAttribute('data-dj810-animating',opening?'opening':'closing');
+    target.dataset.djWindowMotionDuration=String(duration);
     setMotion(0);
     activeAnimation.set(target,record);
     // A busy map compositor can defer the first rAF. Do not let the old
@@ -193,12 +177,23 @@ export function installUnifiedUI(doc=document, win=window){
     activeAnimation.delete(target);
     try{current.cancel();}catch{}
   };
+  // Native close functions call this directly, never replay a synthetic click.
+  // A replacement or swipe retains its own native cleanup, avoiding duplicates.
+  win.DongjakWindowMotion={
+    open(target){if(!target||target.dataset.dj810Animating==='opening')return;cancelActive(target);playMobileMotion(target,true);},
+    close(target,finish){
+      if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}
+      if(target.dataset.dj810Animating==='closing')return;
+      cancelActive(target);if(!playMobileMotion(target,false,finish))finish();
+    },
+    cancel:cancelActive
+  };
   function playOpen(id){
     if(reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
     const target=content(element(id));if(!target)return;
     cancelActive(target);
     // My Info and More fade in place; do not move their fixed layout.
-    if(playMobileMotion(target,true,undefined,fadeOnlyMobileIds.has(id)))return;
+    if(playMobileMotion(target,true))return;
     if(typeof target.animate!=='function')return;
     const anim=target.animate(frames(true,id),{
       duration:phone()?410:260,easing:'cubic-bezier(.17,.84,.27,1)',fill:'both'
@@ -251,7 +246,7 @@ export function installUnifiedUI(doc=document, win=window){
       if(immediate){cancelActive(target);finish();return;}
       if(target?.dataset.dj810Animating==='closing')return;
       cancelActive(target);
-      if(!playMobileMotion(target,false,finish,fadeOnlyMobileIds.has(id)))finish();
+      if(!playMobileMotion(target,false,finish))finish();
     }
   };
   // One actual modal owner for ALL application surfaces, including legacy
@@ -402,11 +397,11 @@ export function installUnifiedUI(doc=document, win=window){
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          else if(!activeAnimation.has(target))playOpen(id);
+          if(!activeAnimation.has(target))playOpen(id);
         }
         else if(!now&&was){
           if(lifecycle.snapshot(id).phase!=='closed')lifecycle.dismiss(id);
-          const target=content(element(id));if(target)cancelActive(target);
+          const target=content(element(id));if(target&&target.dataset.dj810Animating!=='closing')cancelActive(target);
         }
         previous.set(id,now);
       }
@@ -535,9 +530,9 @@ export function installUnifiedUI(doc=document, win=window){
         // The facility MapLibre Popup owns its own 250ms slide-out and must
         // call popup.remove(), not a raw DOM removal that leaks its listeners.
         if(!container.classList.contains('dj-place-detail-popup')&&container.isConnected)container.remove();
-      }else if(ids.includes(id)&&visible(id)){
+      }else if(ids.includes(id)&&visible(id)&&animated?.dataset.dj810Animating!=='closing'){
         panelHide(id);
-      }else if(otherIds.includes(id)&&container.isConnected && !container.hidden){
+      }else if(otherIds.includes(id)&&container.isConnected && !container.hidden&&animated?.dataset.dj810Animating!=='closing'){
         container.hidden=true;
       }
       schedule();
@@ -608,7 +603,7 @@ export function installUnifiedUI(doc=document, win=window){
     for(const id of ids){const target=content(element(id));if(target)cancelActive(target);}
     for(const fn of clean)fn();delete app.dataset.dj806Motion;
     delete app.dataset.dj806Exclusive;delete app.dataset.dj806ActiveSurface;
-    delete win.DongjakWindowLifecycle;
+    delete win.DongjakWindowLifecycle;delete win.DongjakWindowMotion;
   };
 }
 if(typeof document!=='undefined'){
