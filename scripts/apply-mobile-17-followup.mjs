@@ -58,4 +58,11 @@ replace(controller,"if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;",
 // Restore the tip only on a deliberate map-tab interaction.
 replace('src/v840-coordinated-ui.js',' const selectedMap=()=>{'," const selectedMap=()=>{\n   if(win.matchMedia('(max-width:699px)').matches){delete app.dataset.djUserTipDismissed;label.classList.remove('is-visible');label.hidden=true;}");
 
+// Legacy single-row fallback writes inline !important, so CSS cannot hide the More button.
+replace('src/v831-swipe-feature-toolbar.js','  })) important(more,name,value);',"  })) important(more,name,value);\n  if(phone)important(more,'display','none');");
+// Reuse the existing consent modal for the original night control inside Safety.
+replace('src/v831-swipe-feature-toolbar.js',"   if(e.target.closest?.('#dj-v794-night')==null)return;","   const inSafety=win.matchMedia?.('(max-width:699px)')?.matches&&e.target.closest?.('#night-visibility-toggle');\n   if(e.target.closest?.('#dj-v794-night')==null&&!inSafety)return;\n   if(inSafety&&app.dataset.sangdoNight==='on')return;");
+replace('src/v831-swipe-feature-toolbar.js',"   scroller.addEventListener('click',requestNight,true);","   doc.addEventListener('click',requestNight,true);");
+replace('src/v831-swipe-feature-toolbar.js',"   scroller?.removeEventListener('click',requestNight,true);","   doc.removeEventListener('click',requestNight,true);");
+
 console.log('Mobile follow-up anchors verified and applied.');

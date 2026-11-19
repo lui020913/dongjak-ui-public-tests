@@ -57,10 +57,11 @@ async function enter(page,id,key){
 }
 test.afterEach(async({page},info)=>{
  if(info.status===info.expectedStatus)return;
+ for(const e of info.errors)console.log('PHONE_TEST_FAILURE',info.project.name,info.title,String(e.message||'').slice(0,5000));
  try{
    const debug=await page.evaluate(()=>{
      const app=document.getElementById('app');
-     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities'];
+     const ids=['bottom-nav','dj840-map-tip','dj-user-tip-close','dj-browser-webapp-tip','transport-sheet','route-panel','mine-panel','map-startup-overlay','overview-sheet','dj-mobile-utilities','dj-v794-more','dj-v794-safety','dj831-scrollport','map-safety-controls','night-visibility-toggle','dj833-night-modal'];
      const describe=n=>{if(!n)return null;const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id,className:n.getAttribute('class'),hidden:n.hidden,ariaHidden:n.getAttribute('aria-hidden'),rect:[r.x,r.y,r.width,r.height],display:s.display,visibility:s.visibility,opacity:s.opacity,pointerEvents:s.pointerEvents};};
      return {viewport:[innerWidth,innerHeight],nightReady:app?.dataset.djNightReady,nightState:app?.dataset.sangdoNight,tourResolved:app?.dataset.dj860AutoResolved,routeBlocks:['route-picking','route-preview','route-guiding'].filter(c=>app?.classList.contains(c)),routeDialogs:['route-pick-hint','route-transit-confirm','route-place-search','route-search-confirm'].filter(id=>{const n=document.getElementById(id);return n&&!n.hidden&&n.getClientRects().length;}),tab:app?.dataset.tab,sheetOpen:app?.dataset.dj910SheetOpen,tipDismissed:app?.dataset.djUserTipDismissed,webappTipVisible:app?.dataset.djWebappTipVisible,runMode:document.documentElement.dataset.djRunMode,controls:ids.map(id=>describe(document.getElementById(id))),scale:describe(document.querySelector('#map .maplibregl-ctrl-scale')),scaleParent:describe(document.querySelector('#map .maplibregl-ctrl-bottom-left'))};
    });
@@ -225,9 +226,10 @@ test('phone pilot safety region and expandable sheet',async({page})=>{
  const panel=page.locator('#map-safety-controls');
  await expect(panel).toBeVisible();
  await expect(panel.locator('.dj17-pilot-notice')).toContainText('상도1동');
- const grip=panel.locator('.dj17-expand');await expect(grip).toBeVisible();await grip.click();
+ const grip=panel.locator('.dj17-expand');await expect(grip).toBeVisible();await tap(page,grip);
  await expect(panel).toHaveClass(/dj871-sheet-expanded/);
- await grip.click();await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);
+ await expect(panel).not.toHaveClass(/dj889-sheet-transitioning/);
+ await tap(page,grip);await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);
  await panel.locator('#map-safety-close').click();await expect(panel).toBeHidden();
  await expect(page.locator('.dj17-lock').first()).toBeAttached({timeout:45000});
  await expect(page.locator('#dj-v794-safety')).toBeVisible();
@@ -384,9 +386,13 @@ test('phone night shortcut waits for the map, honors consent and exits',async({p
  await tap(page,page.locator('#dj-v794-safety'));
  await expect(app).toHaveAttribute('data-dj-night-ready','true',{timeout:60000});
  await expect(shortcut).toBeEnabled();
- await shortcut.click();
+ const menu=page.locator('#map-safety-controls');
+ await menu.getByRole('button',{name:'야간시야',exact:true}).click({timeout:15000});
+ await expect(shortcut).toBeVisible();await shortcut.scrollIntoViewIfNeeded();await shortcut.click({timeout:15000});
  const consent=page.locator('#dj833-night-modal');
- if(await consent.getByRole('dialog').isVisible()){await expect(app).toHaveAttribute('data-sangdo-night','off');await consent.getByRole('button',{name:'예, 시작',exact:true}).click();}
+ await expect(consent.getByRole('dialog')).toBeVisible();
+ await expect(app).toHaveAttribute('data-sangdo-night','off');
+ await consent.getByRole('button',{name:'예, 시작',exact:true}).click({timeout:15000});
  const night=page.locator('#night-visibility-float');
  await expect(app).toHaveAttribute('data-sangdo-night','on',{timeout:45000});
  await expect(night).toBeVisible();

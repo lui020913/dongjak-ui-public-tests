@@ -1,9 +1,9 @@
 {
   "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
   "application_version": "8.26.1",
-  "public_work_branch": "fix/mobile-regression-recovery-20261119",
+  "public_work_branch": "fix/mobile-browser-qa-recovery-20261119",
   "purpose": "Phone-only follow-up for the seventeen requested UI, data display, pilot district and authentication-return changes; preserve PC/tablet gate and originals; run phone QA before guarded Production promotion",
-  "attempt": 23,
+  "attempt": 24,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Fix legacy building palette contract via a phone-only variant; preserve verified district filtering and add Sangdo1 display clipping. Report sanitized test fingerprints and release stage status."
+  "last_retry_reason": "Fix actual phone QA failures: legacy inline More display, accessible Safety expansion handle, visible Night category and existing consent integration. Separate viewport jobs and publish immediate anonymous assertion diagnostics."
 }
