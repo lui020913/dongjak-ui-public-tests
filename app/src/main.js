@@ -1930,8 +1930,9 @@ function renderMy() {
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
 function openCommunityComposer(open) {
-  communityForm.hidden = !open;
-  if (open) communityForm.scrollIntoView({behavior:'smooth',block:'start'});
+  if(open){communityForm.hidden=false;communityForm.scrollIntoView({behavior:'instant',block:'start'});window.DongjakWindowMotion?.open(communityForm);return;}
+  if(communityForm.hidden)return;
+  const finish=()=>{communityForm.hidden=true;};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(communityForm,finish);else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
