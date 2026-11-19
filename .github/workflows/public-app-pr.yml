@@ -7,6 +7,7 @@ on:
       - 'tests/mobile-first-layout-contract.test.mjs'
       - 'tests/v911-anonymous-ui.spec.mjs'
       - 'tests/mobile-qa-parallel.test.mjs'
+      - 'scripts/verify-mobile-qa-shards.mjs'
       - 'playwright.v911-remote.config.mjs'
       - '.github/workflows/mobile-first-overhaul-preview.yml'
       - 'playwright.mobile-first.config.mjs'
@@ -93,6 +94,9 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
+      - name: Verify all four mobile QA shards are disjoint and complete
+        working-directory: .
+        run: node scripts/verify-mobile-qa-shards.mjs
       - name: Verify preinstalled Chromium matches pinned Playwright
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
