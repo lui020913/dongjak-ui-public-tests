@@ -3,9 +3,9 @@
   "application_version": "9.2.16",
   "public_work_branch": "main",
   "purpose": "Fixed layer at rightmost slot; aligned settings rows; delegate full sheet-header dragging",
-  "attempt": 80,
+  "attempt": 81,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Mobile screenshot regressions: anchored rail, consistent row metrics, entire header gesture",
+  "last_retry_reason": "Update legacy listener-location assertion to require persistent panel delegation, full header filtering and protection of interactive controls.",
   "release_kind": "patch",
   "beta_number": 1
 }
