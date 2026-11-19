@@ -70,4 +70,5 @@ replace(main,'    navigate(\'map\');fitWalkingRoute(coords);',"    transitPrevie
 replace(main,'async function startNavigation() {','async function startNavigation() {\n  if(transitPreview){toast(\'대중교통은 참고 이동안입니다. 도보 경로를 선택해 주세요.\');return;}');
 replace('index.html','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>','<button type="button" data-route-variant="balanced" aria-pressed="false" disabled>종합 최적 (잠정)</button>\n              <button type="button" id="djNext-transit-option" disabled>대중교통 경로</button>');
 
+replace('src/v831-swipe-feature-toolbar.js','for(const child of [...row.children])if(child!==scroller&&child!==more)scroller.appendChild(child);','for(const child of [...row.children])if(child!==scroller&&child!==more&&child.id!==\'djNext-rail\')scroller.appendChild(child);');
 console.log('Mobile next integration anchors verified.');
