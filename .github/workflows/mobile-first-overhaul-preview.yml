@@ -37,12 +37,13 @@ jobs:
           node frontend/scripts/verify-mobile-first-overhaul.mjs
           node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs
           node --check scripts/apply-mobile-only-gate.mjs
+          node --check scripts/apply-mobile-next.mjs
+          node --check frontend/production/mobile-next.js
+          node --check frontend/production/mobile-17-followup.js
           node --check scripts/run-mobile-regressions.mjs
-      - name: Fetch, mobile-test, build and seal exact source
+      - name: Test and build exact public app source
         id: build
         env:
-          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
-          PRIVATE_SOURCE_READ_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
           RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
@@ -171,7 +172,6 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
-      PRIVATE_SOURCE_READ_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -194,14 +194,12 @@ jobs:
           jq -e --arg source "$SOURCE_SHA" --arg public "$PUBLIC_SHA" --arg css "$CSS_SHA" --arg version "$APP_VERSION" --arg build "$BUILD_RUN" \
             '.source_commit==$source and .public_ui_source_commit==$public and .public_ui_overlay_sha256==$css and .application_version==$version and (.build_run|tostring)==$build and .release_status=="CANDIDATE_PREVIEW_NOT_PRODUCTION"' \
             "$RUNNER_TEMP/release/dist/release-source.json" >/dev/null
-      - name: Reconfirm archived source ref and exact source SHA
-        env:
-          GH_TOKEN: ${{ secrets.PRIVATE_SOURCE_READ_TOKEN }}
+      - name: Reconfirm exact public source commit
         run: |
           set -euo pipefail
-          source_ref="$(jq -er '.source_ref' release/mobile-first-overhaul-source.json)"
-          actual="$(gh api "repos/lui020913/dongjak-safety-map/git/ref/heads/$source_ref" --jq .object.sha)"
-          test "$actual" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$SOURCE_SHA" = "$PUBLIC_SHA"
+          test "$(jq -er '.source' release/mobile-first-overhaul-request.json)" = "public-app"
       - name: Deploy exact tested artifact to Production with guarded rollback
         run: |
           set -euo pipefail

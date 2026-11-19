@@ -1,9 +1,9 @@
 {
-  "source_sha": "0c4be7f51a4052b13315294229a044cc65d175d1",
-  "application_version": "8.26.1",
-  "public_work_branch": "fix/mobile-night-regression-20261119",
-  "purpose": "Phone-only follow-up for the seventeen requested UI, data display, pilot district and authentication-return changes; preserve PC/tablet gate and originals; run phone QA before guarded Production promotion",
-  "attempt": 25,
+  "source": "public-app",
+  "application_version": "8.27.0",
+  "public_work_branch": "fix/mobile-custom-rail-routing-20261119",
+  "purpose": "Seven mobile controls (3 fixed + 3 customizable + layers), first-run GPS and microphone permission guidance, voice search, four route comparisons, native pilot locks, nearby and transport sheet repairs, update history pill and tour button. Immutable public source; preserve existing device gate and Production approval.",
+  "attempt": 26,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Correct the single failing regression in run 44430282734 by preserving the original night confirmation capture handler and delegating Safety night clicks separately. Add a regression for both routes."
+  "last_retry_reason": "New feature release after successful attempt 25; use public app source and mandatory feature and regression QA."
 }
