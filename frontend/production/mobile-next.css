@@ -96,7 +96,7 @@ html body #app#app#app#app#app#app#app #dj833-weather-sheet{display:none!importa
 html body #app#app#app#app#app#app#app #djNext-voice-status:not([hidden]){position:fixed!important;top:auto!important;left:50%!important;right:auto!important;bottom:calc(var(--dj910-dock-bottom,76px) + 16px)!important;transform:translateX(-50%)!important;max-width:calc(100% - 32px)!important;width:max-content!important;z-index:4300!important;pointer-events:none!important;background:var(--djNext-surface)!important;color:var(--djNext-text)!important}
 html body #app#app#app#app#app#app#app .map-actions > #toggle-road-width{display:none!important}
 html body #app#app#app#app#app#app#app #participation-panel #community-form :is(input,textarea,select):focus{outline:0!important;box-shadow:none!important;border-color:var(--djNext-active)!important}
-html body #app#app#app#app#app#app#app #participation-panel #community-form :is(input,textarea,select):focus-visible{outline:2px solid var(--djNext-active)!important;outline-offset:1px!important}
+html body #app#app#app#app#app#app#app #participation-panel #community-form :is(input,textarea,select):focus-visible{outline:1px solid var(--djNext-border)!important;outline-offset:1px!important}
 html body #app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden]))>.dj836-sheet-body{overflow:hidden!important;padding:0!important;display:flex!important;flex-direction:column!important;min-height:0!important}
 html body #app#app#app#app#app#app#app #participation-panel #community-form:not([hidden]){display:flex!important;flex-direction:column!important;min-height:0!important;flex:1 1 auto!important;overflow:hidden!important;padding:0!important;margin:0!important}
 html body #app#app#app#app#app#app#app #participation-panel #community-form .community-form-top{position:relative!important;top:auto!important;flex:0 0 auto!important;padding:12px 14px!important;margin:0!important;min-height:56px!important;background:var(--djNext-surface)!important;border-bottom:1px solid var(--djNext-border)!important}
@@ -113,6 +113,19 @@ html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] :is(
 html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .transport-arrivals-title{position:relative!important;top:auto!important;gap:8px!important;min-height:40px!important}
 html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail button{color:var(--djNext-text)!important;background:var(--djNext-surface)!important;border-color:var(--djNext-border)!important}
 html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail :is(.djNext-empty,#djNext-layers,button[aria-pressed="true"]){background:var(--djNext-raised)!important}
+
+
+/* Give icon tiles their own schematic map cues, without implying unavailable map styles. */
+.djNext-layer-row[data-layer-key="night"] .djNext-layer-tile{background:linear-gradient(135deg,#293c48,#49616b);color:#e5df9d}
+.djNext-layer-row[data-layer-key="slope"] .djNext-layer-tile{background:repeating-linear-gradient(155deg,#dbe9c9 0 7px,#afc992 8px 9px,#dbe9c9 10px 16px);color:#41674a}
+.djNext-layer-row[data-layer-key="bocha"] .djNext-layer-tile{background:linear-gradient(46deg,#e9e8dd 35%,#c2b3a4 36% 45%,#ece8d7 46% 58%,#c2b3a4 59% 65%,#e9e8dd 66%);color:#6d5040}
+.djNext-layer-row:is([data-layer-key="livebus"],[data-layer-key="livemetro"]) .djNext-layer-tile{background:linear-gradient(140deg,#d9ebe1,#b5dacf);color:#347960}
+.djNext-layer-row:is([data-layer-key="accident"],[data-layer-key="incidents"],[data-layer-key="camera"],[data-layer-key="speed"]) .djNext-layer-tile{background:linear-gradient(140deg,#f5e7c9,#eed6a7);color:#965328}
+.djNext-layer-row:is([data-layer-key="cctv"],[data-layer-key="cctvparking"],[data-layer-key="cctvother"]) .djNext-layer-tile{background:linear-gradient(140deg,#dbe7e6,#c4d3d9);color:#3c5964}
+html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-layer-tile{filter:brightness(.82) saturate(.85)}
+html body #app#app#app#app#app#app#app #dj854-weather-sheet:not([hidden]){background:var(--djNext-surface)!important;color:var(--djNext-text)!important;border-color:var(--djNext-border)!important;z-index:4500!important}
+html body #app#app#app#app#app#app#app #dj854-weather-sheet :is(.dj854-weather-close,.dj854-weather-actions button){color:var(--djNext-text)!important;background:var(--djNext-raised)!important;border-color:var(--djNext-border)!important}
+html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-close{display:grid!important;place-items:center!important;width:42px!important;height:42px!important;font-size:28px!important;line-height:1!important}
 
 }
 }
