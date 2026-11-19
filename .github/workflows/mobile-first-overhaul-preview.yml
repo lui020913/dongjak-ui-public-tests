@@ -231,7 +231,7 @@ jobs:
           const block=verified.slice(at,end<0?verified.length:end);
           if(!/^\s*mode\s*=\s*"off"\s*$/m.test(block)) throw new Error('Production placement mode is not explicitly off');
           NODE
-          jq '.release_status="DEPLOYED_PRODUCTION"' dist/release-source.json > "$RUNNER_TEMP/release-marker.json"
+          jq '.release_status="DEPLOYED_PRODUCTION" | .release_channel="production"' dist/release-source.json > "$RUNNER_TEMP/release-marker.json"
           cp "$RUNNER_TEMP/release-marker.json" dist/release-source.json
           message="Mobile-only $APP_VERSION source=$SOURCE_SHA public=$PUBLIC_SHA run=$GITHUB_RUN_ID"
           rollback(){
