@@ -19,10 +19,10 @@ test('logout asks for confirmation, saves pending favorites first and preserves 
 test('bottom tabs and transit facility keep animations with independent route labels',()=>{
   const motion=read('src/v806-unified-ui.js');
   const transportHeader=read('src/v8215-news-metro-compact-header.js');
-  assert.match(motion,/const offset=opening\?entranceDistance\*\(1-eased\):\(docked\?entranceDistance:distance\)\*eased/);
-  assert.match(motion,/if\(!fadeOnly&&docked\)target\.style\.setProperty\('clip-path'/);
-  assert.match(motion,/target\.style\.setProperty\('translate',`0 \$\{offset\}px`,'important'\)/);
-  assert.match(motion,/if\(!playMobileMotion\(target,false,finish,fadeOnlyMobileIds\.has\(id\)\)\)finish\(\)/);
+  assert.match(motion,/const frame=windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
+  assert.match(motion,/if\(docked\)target\.style\.setProperty\('clip-path'/);
+  assert.match(motion,/target\.style\.setProperty\('translate',`0 \$\{frame\.offset\}px`,'important'\)/);
+  assert.match(motion,/if\(!playMobileMotion\(target,false,finish\)\)finish\(\)/);
   assert.match(motion,/\.dj-place-header-close/);
   assert.match(motion,/\.dj-place-route-button/);
   assert.match(transportHeader,/dj-news-transport-label.*출발/);

@@ -10,15 +10,15 @@ for(const size of [180,192,512,1024]){
     assert.equal(b[25],6);
   });
 }
-test('Fade-only UI with preserved Reduce Motion option',()=>{
+test('Shared slide UI with preserved Reduce Motion option',()=>{
   const settings=read('src/v7120-settings.js').toString();
   const motion=read('src/v806-unified-ui.js').toString();
   const css=read('src/v811-mobile-experience.css').toString();
   assert.match(settings,/app\.dataset\.djMotionStyle='soft'/);
   assert.doesNotMatch(settings,/dj-settings-motion-style/);
   assert.match(settings,/id="dj-settings-motion"/);
-  assert.match(motion,/const duration=fadeOnly\?\(opening\?190:160\):\(opening\?340:250\)/);
-  assert.match(motion,/const eased=progress\*progress\*\(3-2\*progress\)/);
+  assert.match(motion,/const duration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
+  assert.match(motion,/windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
   assert.doesNotMatch(motion,/dj810-mobile-sheet-open/);
   assert.match(css,/@keyframes dj811-mobile-soft-open/);
   assert.match(css,/gap:2px!important/);
