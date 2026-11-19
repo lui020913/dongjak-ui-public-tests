@@ -2,7 +2,7 @@
 @layer request-completion {
 @media(max-width:699px){
 html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]>:not(#djNext-rail){display:none!important}
-html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]{display:flex!important;visibility:visible!important;opacity:1!important;transition:none!important;animation:none!important;overflow:visible!important;gap:0!important;padding-inline:8px!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important}
+html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]{display:flex!important;visibility:visible!important;opacity:1!important;transition:none!important;animation:none!important;overflow:visible!important;gap:0!important;left:10px!important;right:10px!important;padding-inline:0!important;max-width:calc(100% - 20px)!important;width:auto!important;box-sizing:border-box!important}
 html body #app#app#app#app#app#app#app[data-search-open="true"] #dj-v794-toolbar[data-dj-next-ready="1"],
 html body #app#app#app#app#app#app#app:not([data-tab="map"]) #dj-v794-toolbar[data-dj-next-ready="1"]{visibility:hidden!important;pointer-events:none!important}
 #djNext-rail{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;align-items:stretch;min-width:0;box-sizing:border-box}
@@ -50,6 +50,6 @@ html body #app#app#app#app#app#app#app #route-map-card:not([hidden]){display:fle
 .djNext-route-compare button[aria-pressed="true"]{outline:1px solid var(--route-accent);background:var(--dj800-surface-soft,#e7f1eb)}
 .djNext-route-compare button:disabled{opacity:.55}.djNext-route-compare button strong{font-size:12px}.djNext-route-compare button span{font-size:10px;line-height:1.25;overflow-wrap:anywhere}
 #route-variants .route-variant-choice{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
-#route-variants [data-route-variant]{min-height:44px!important}
+#route-variants :is([data-route-variant],#djNext-transit-option){min-height:44px!important}
 }
 }
