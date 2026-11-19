@@ -125,5 +125,10 @@ html body #app#app#app#app#app#app#app #dj854-weather-sheet:not([hidden]){backgr
 html body #app#app#app#app#app#app#app #dj854-weather-sheet :is(.dj854-weather-close,.dj854-weather-actions button){color:var(--djNext-text)!important;background:var(--djNext-raised)!important;border-color:var(--djNext-border)!important}
 html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-close{display:grid!important;place-items:center!important;width:42px!important;height:42px!important;font-size:28px!important;line-height:1!important}
 
+/* No older fade or CSS animation may compete with the shared JS motion owner. */
+html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal .djNext-modal-body,
+html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal.djNext-leaving .djNext-modal-body{animation:none!important;transform:none!important;opacity:1!important}
+html body #app#app#app#app#app#app#app [data-dj810-animating]{animation:none!important;transition:none!important;opacity:1!important}
+
 }
 }
