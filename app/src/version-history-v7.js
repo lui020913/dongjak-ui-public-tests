@@ -227,9 +227,32 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   sourcesButton.addEventListener('click',()=>choose('sources'));
   choose('updates');
   let priorFocus=null;
-  const hide=()=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;(priorFocus?.isConnected?priorFocus:trigger).focus();};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(modal.querySelector('.version-history-dialog'),finish);else finish();};
+  const card=modal.querySelector('.version-history-dialog');
+  const syncDock=()=>{
+    if(!window.matchMedia?.('(max-width:699px)').matches)return;
+    const nav=document.getElementById('bottom-nav'),rect=nav?.getBoundingClientRect();
+    if(rect&&rect.height>0&&!nav.hidden){
+      modal.style.setProperty('--dj-history-dock-bottom',Math.max(8,window.innerHeight-rect.top+8)+'px');
+    }
+  };
+  // Measure the final dock before the first paint; do not scroll a translated
+  // focus target into view (iOS otherwise shifts the fixed dialog mid-flight).
+  const hide=()=>{
+    if(modal.hidden)return;
+    const finish=()=>{modal.hidden=true;(priorFocus?.isConnected?priorFocus:trigger).focus({preventScroll:true});};
+    if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(card,finish);else finish();
+  };
   const show=({version=''}={})=>{
-    priorFocus=document.activeElement;modal.hidden=false;list.scrollTop=0;choose('updates');close.focus();
+    const opening=modal.hidden;
+    if(opening){
+      priorFocus=document.activeElement;
+      syncDock();
+      window.DongjakWindowLifecycle?.requestOpen(modal.id);
+      modal.hidden=false;
+    }
+    list.scrollTop=0;choose('updates');
+    if(opening)window.DongjakWindowMotion?.open(card);
+    close.focus({preventScroll:true});
     const normalized=String(version||'').trim().replace(/^v/,'');
     if(normalized){
       const focusRelease=()=>{
@@ -244,6 +267,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     }
   };
   const onOpenSpecific=event=>show({version:event.detail?.version||''});
+  window.addEventListener('resize',()=>{if(!modal.hidden)syncDock();},{passive:true});
   document.addEventListener('dongjak:open-release-history',onOpenSpecific);
   trigger.addEventListener('click',()=>show());
   document.getElementById('version-history-mobile-trigger')?.addEventListener('click',()=>show());

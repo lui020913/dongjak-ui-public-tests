@@ -1,11 +1,11 @@
 {
   "source": "public-app",
   "application_version": "9.0.1",
-  "public_work_branch": "fix/mobile-overlay-motion-contract-20261119",
-  "purpose": "Stationary fade for confirmation popups, preserve bottom sheet slide and native header gestures; repair touch adapter listener cleanup.",
-  "attempt": 42,
+  "public_work_branch": "fix/update-history-docked-slide-20261119",
+  "purpose": "Repair update history docked slide geometry, prevent focus-induced overshoot, and validate actual render frames in Chromium and WebKit. Use consolidated four-worker mobile QA and warmed public tool caches.",
+  "attempt": 43,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 41 exact overlay build failed only mobile-next-build.test.mjs: stale duration-variable assertion. Preserve all behavioral slide/fade checks.",
+  "last_retry_reason": "Attempt 42 deployed successfully; new owner-reported update-history animation defect; start a new beta after the production candidate.",
   "release_kind": "patch",
-  "beta_number": 3
+  "beta_number": 4
 }

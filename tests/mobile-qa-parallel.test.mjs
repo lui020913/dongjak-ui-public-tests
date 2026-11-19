@@ -11,5 +11,5 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  }
  assert.match(workflow,/--project=mobile390-webkit-header --workers=4/);
  assert.match(workflow,/if: needs\.mobile-qa\.result == 'success'/);
- assert.match(config,/grep:\/layer header follows a real pointer\//);
+ assert.match(config,/grep:\/layer header follows a real pointer\|phone update history rises monotonically\//);
 });

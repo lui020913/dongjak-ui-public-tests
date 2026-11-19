@@ -594,3 +594,24 @@ test('theme confirmation fades in place with its backdrop, unlike bottom sheets'
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();
  const rows=await page.evaluate(()=>window.__confirmFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){const frames=rows.filter(r=>r.phase===phase);expect(frames.length).toBeGreaterThan(1);expect(frames.every(r=>r.kind==='fade'&&r.duration===duration&&Math.abs(r.x-frames[0].x)<1&&Math.abs(r.y-frames[0].y)<1)).toBe(true);expect(frames.some(r=>r.opacity>0&&r.opacity<1)).toBe(true);}
 });
+
+
+test('phone update history rises monotonically and never paints over bottom navigation',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();
+ await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
+ const trigger=page.locator('#mine-panel [data-dj834-action="history"]');await trigger.scrollIntoViewIfNeeded();
+ const modal=page.locator('#version-history-modal'),card=modal.locator('.version-history-dialog');
+ await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
+  function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
+   if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=parseFloat((s.clipPath.match(/^inset\\([^ ]+ [^ ]+ ([\\d.]+)px/)||[])[1])||0;
+    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
+   requestAnimationFrame(tick);}requestAnimationFrame(tick);
+ });
+ await tap(page,trigger);await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
+ await tap(page,modal.locator('#version-history-close'));await expect(modal).toBeHidden();
+ const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',420],['closing',320]]){
+  const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.opacity===1&&f.animation==='none'&&f.y>=final.y-3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
+  for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i].y-a[i-1].y:a[i-1].y-a[i].y).toBeLessThanOrEqual(3);
+ }
+});
