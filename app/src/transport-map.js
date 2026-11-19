@@ -1,3 +1,4 @@
+import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 import {createInFlightRequests} from './arrival-request-coordinator.js';
 import {createTransportWindowLifecycle} from './transport-window-lifecycle.js';
 import {toggleSavedPlace,setSavedPlaceFolder,savedPlaces,getPlaceFolders,placeKey,recordRecentPlace,placeShareUrl,shareMapUrl} from './v815-place-store.js';
@@ -1179,7 +1180,8 @@ function syncNearbyBusStopNameFilters(map){
     ? ['within',circlePolygonAround(center.lng,center.lat,radius)] : null;
   for(const [layerId,base] of Object.entries(BUS_NAME_FILTERS)){
     if(!map.getLayer?.(layerId))continue;
-    try{map.setFilter(layerId,nearby?['all',base,nearby]:base);}catch(error){console.debug('[버스정류장명] 근접 필터 조정 실패',layerId,error?.message);}
+    const next=nearby?['all',base,nearby]:base;
+    try{if(JSON.stringify(map.getFilter?.(layerId))!==JSON.stringify(next))map.setFilter(layerId,next);}catch(error){console.debug('[버스정류장명] 근접 필터 조정 실패',layerId,error?.message);}
   }
 }
 
@@ -1508,11 +1510,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   bringRailToForeground();
   const refreshNearbyBusStopNames=()=>syncNearbyBusStopNameFilters(map);
   refreshNearbyBusStopNames();
-  map.on('moveend',refreshNearbyBusStopNames);
-  map.on('moveend',updateTileBusFallbackFilter);
-  map.on('zoomend',refreshNearbyBusStopNames);
-  map.on('zoomend',updateTileBusFallbackFilter);
-  map.on('styledata',refreshNearbyBusStopNames);
+  const viewportLabels=coalesceViewportWork(full=>{refreshNearbyBusStopNames();if(full)updateTileBusFallbackFilter();},{delay:100,isMoving:()=>map.isMoving?.()===true});
+  map.on('moveend',()=>viewportLabels.request(true));
+  map.on('zoomend',()=>viewportLabels.request(true));
+  map.on('styledata',()=>viewportLabels.request());
   const originalTransitFilter=map.getLayer('poi_transit')?map.getFilter?.('poi_transit'):null;
   let suppressNativeRail=true;
   function updateBaseTransitFilter(){
@@ -1994,9 +1995,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   let fallbackScans=0;
-  map.on('idle',()=>{if(fallbackScans++<8)augmentWithBasemapStations();enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();});
-  map.on('moveend',()=>{if(fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();});
-  map.on('zoomend',()=>{enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();});
+  const viewportEnrichment=coalesceViewportWork(scan=>{
+    if(scan&&fallbackScans<20){fallbackScans++;augmentWithBasemapStations();}
+    enrichNearbyBusStops();enrichMedianStops();enrichViewportBusStops();void fillHighZoomOSMBusStops();
+  },{delay:200,isMoving:()=>map.isMoving?.()===true});
+  map.on('idle',()=>viewportEnrichment.request(fallbackScans<8));
+  map.on('moveend',()=>viewportEnrichment.request(fallbackScans<20));
+  map.on('zoomend',()=>viewportEnrichment.request());
   function fetchAndShow(){
     // 철도/정류장 위치는 저장된 좌표 + 현재 배경지도 POI로 표시합니다.
     // 실시간 도착 및 버스 경유노선만 5178 교통정보 서버에 요청합니다.

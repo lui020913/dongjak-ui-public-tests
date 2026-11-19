@@ -9,7 +9,7 @@ const crossDeviceContent=/\b(?:desktop|pc|tablet)\b/i;
 const candidates=readdirSync(dir,{withFileTypes:true})
   .filter(entry=>entry.isFile()&&entry.name.endsWith('.test.mjs')&&!excludedName.test(entry.name))
   .map(entry=>join(dir,entry.name)).sort();
-const requiredPhoneTests=new Set(['mobile-next-build.test.mjs','mobile-followup-build.test.mjs','mobile-ui-v11-live-transit.test.mjs','mobile-ui-v11-startup.test.mjs']);
+const requiredPhoneTests=new Set(['mobile-next-build.test.mjs','mobile-followup-build.test.mjs','mobile-ui-v11-live-transit.test.mjs','mobile-ui-v11-startup.test.mjs','adaptive-phone-map-budget.test.mjs','browser-install-menu.test.mjs']);
 // These explicitly phone-scoped release contracts may reference legacy filenames.
 // Do not accidentally skip them due to the generic cross-device text filter.
 const files=candidates.filter(file=>requiredPhoneTests.has(basename(file))||!crossDeviceContent.test(readFileSync(file,'utf8')));

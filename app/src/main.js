@@ -3,6 +3,9 @@ import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
 import {installReadable3DLabels} from './readable-3d-labels.js';
 import {installMobileMapControls} from './mobile-map-controls.js';
+import {phoneProfile,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
+import './adaptive-phone-map-budget.css';
+import './browser-install-menu.css';
 import {installMobileLayoutCoordinator} from './mobile-ui-coordinator.js';
 import {createMapStartupLoader} from './map-startup-loader.js';
 import {installLandmarks} from './landmark-layer.js';
@@ -588,6 +591,9 @@ new MutationObserver(()=>{
 }).observe(app,{attributes:true,attributeFilter:['data-tab']});
 
 // 이전에 실제 3D 렌더링이 성공했던 OpenFreeMap Bright 스타일을 사용합니다.
+const djPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
+const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency});
+const djNormalPixelRatio=Math.min(1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
 const map = new maplibregl.Map({
   container: 'map',
   attributionControl:false,
@@ -603,12 +609,13 @@ const map = new maplibregl.Map({
   renderWorldCopies: false,
   maxPitch: 70,
   // Cap GPU raster size on high-DPI displays (2x DPR costs 4x pixels).
-  pixelRatio: Math.min(1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1)),
-  canvasContextAttributes: { antialias: true }
+  pixelRatio: djInitialBudget==='economy'?1:djNormalPixelRatio,
+  canvasContextAttributes: { antialias: djInitialBudget!=='economy' }
 });
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
+const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
 installMapResumeRecovery({map,app});
 installViewportSafeMapPopups({map});
@@ -671,6 +678,7 @@ let terrainErrorNotified = false;
 let lastBuildingOpacity = -1;
 let lastPitchStatus = '';
 let movementIsSlow=false;
+let djBuildingBatchBusy=false;
 let lastFootprintPaintKey='';
 function syncAutomaticTerrain(_pitch) {
   if(!mapReady || !terrainAvailable || terrainEnabled)return;
@@ -764,7 +772,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (!visibleBuilding2D()) return;
+  if (!visibleBuilding2D() || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
 }
@@ -852,7 +860,7 @@ async function loadOneBuildingSheet(sheet){
 // hitch without delaying the 2D basemap or exhausting mobile memory.
 let initialBuildingWarmupScheduled=false;
 function scheduleInitialBuildingWarmup(){
-  if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||!baseBuildingsVisible)return;
+  if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||!baseBuildingsVisible||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
     if(!boundaryGeometry||!baseBuildingsVisible)return;
@@ -877,21 +885,44 @@ function scheduleInitialBuildingWarmup(){
   if(typeof requestIdleCallback==='function')requestIdleCallback(()=>void run(),{timeout:1800});
   else setTimeout(()=>void run(),900);
 }
-async function loadVisibleBuildingSheets(){
-  if(!visibleBuilding2D())return;
-  const manifest=await ensureBuildingManifest();
-  if(!visibleBuilding2D())return;
-  const bbox=getVisibleBBox();
-  // 화면에 들어오는 도엽만 내려받아 스마트폰 메모리와 통신량을 절약합니다.
-  const sheets=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
-  // 동시에 너무 많은 GeoJSON 파일을 파싱하지 않도록 순서대로 읽습니다.
-  for(const sheet of sheets){
-    if(!visibleBuilding2D())break;
-    await loadOneBuildingSheet(sheet);
+function djTrimOffscreenBuildings(sheets){
+  if(!djRenderBudget.isEconomy()||app.dataset.sangdoNight==='on'||map.isMoving?.())return;
+  const visible=sheets.map(s=>s.sheet);
+  for(const id of offscreenEvictionIds([...loadedBuildingTiles.keys()],visible,2)){
+    const info=loadedBuildingTiles.get(id),sourceId='dongjak-buildings-data-'+id;
+    if(!info||buildingLoading.has(id))continue;
+    const owned=[info.footprintFillId,info.footprintLineId,info.layerId];
+    if(map.getStyle().layers.some(l=>l.source===sourceId&&!owned.includes(l.id)))continue;
+    try{for(const layerId of owned)if(map.getLayer(layerId))map.removeLayer(layerId);
+      if(map.getSource(sourceId))map.removeSource(sourceId);
+      loadedBuildingTiles.delete(id);
+    }catch(error){console.debug('[건물 캐시 정리]',error?.message);}
   }
+  lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
+}
+async function loadVisibleBuildingSheets(){
+  if(!visibleBuilding2D()||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
+  djBuildingBatchBusy=true;
+  let interrupted=false;
+  try{
+    const manifest=await ensureBuildingManifest();
+    if(!visibleBuilding2D())return;
+    const bbox=getVisibleBBox();
+    const sheets=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
+    djTrimOffscreenBuildings(sheets);
+    for(const sheet of sheets){
+      if(!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
+      if(loadedBuildingTiles.has(sheet.sheet)){
+        const old=loadedBuildingTiles.get(sheet.sheet);loadedBuildingTiles.delete(sheet.sheet);loadedBuildingTiles.set(sheet.sheet,old);continue;
+      }
+      await loadOneBuildingSheet(sheet);
+      if(djPhone&&getVisibleBBox().some((v,i)=>Math.abs(v-bbox[i])>0.000001)){interrupted=true;break;}
+      if(djRenderBudget.isEconomy())await new Promise(r=>setTimeout(r,0));
+    }
+  }finally{djBuildingBatchBusy=false;if(interrupted)scheduleBuildingLoad();}
 }
 map.on('moveend',scheduleBuildingLoad);
-map.on('zoomend',()=>{syncTiltWithBuildings();scheduleBuildingLoad();});
+map.on('zoomend',()=>{syncTiltWithBuildings();});
 // Do not delete 3D globally. If sustained frame intervals exceed 45ms during
 // a mouse drag, temporarily draw the lightweight 2D footprints and restore
 // 3D immediately at moveend. Normal-speed moves retain full buildings.
@@ -902,9 +933,9 @@ map.on('render',()=>{
   const now=performance.now();
   if(lastFrameStamp){
     const interval=now-lastFrameStamp;
-    if(interval>45 && interval<320)slowSamples++;
+    if(interval>(djRenderBudget.isEconomy()?28:45) && interval<320)slowSamples++;
     else if(interval<=40)slowSamples=Math.max(0,slowSamples-1);
-    if(slowSamples>=7){
+    if(slowSamples>=(djRenderBudget.isEconomy()?3:7)){
       // Preserve desktop 3D while dragging; only phones may trade 3D for FPS.
       if(window.matchMedia?.('(max-width:699px)')?.matches){movementIsSlow=true;syncTiltWithBuildings();}
       else slowSamples=0;

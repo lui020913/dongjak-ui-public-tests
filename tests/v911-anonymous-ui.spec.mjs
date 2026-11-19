@@ -13,6 +13,15 @@ async function tap(page,locator){
 }
 async function ready(page,{keepTour=false}={}){
  await page.goto('/',{waitUntil:'domcontentloaded'});
+ if(page.viewportSize().width<700){
+   const menu=page.locator('#dj-install-menu');
+   await expect(menu).toBeAttached({timeout:20000});
+   if(await menu.isVisible()){
+     await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
+     await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+     await expect(menu).toBeHidden();
+   }
+ }
  await expect(page.locator('#map')).toBeVisible({timeout:45000});
  const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
  await expect.poll(async()=>!await startup.isVisible()||await next.isVisible(),{timeout:60000}).toBe(true);
@@ -80,16 +89,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
    await expect(header.locator('.map-quick-search-form #dj-about-pc')).toBeHidden();
    const nav=page.locator('#bottom-nav'),tip=page.locator('#dj840-map-tip'),scale=page.locator('#map .maplibregl-ctrl-scale');
    await expect(nav).toBeVisible();
-   // The browser-only install advice intentionally replaces the map TIP.
-   // Exercise the real snooze button before checking the ordinary HUD;
-   // do not suppress the advice by injecting storage or modifying app state.
-   const installAdvice=page.locator('#dj-browser-webapp-tip');
-   if(page.viewportSize().width<700&&await page.locator('html').getAttribute('data-dj-run-mode')==='browser'){
-     await expect(installAdvice).toBeVisible({timeout:30000});
-     await expect(tip).toBeHidden();
-     await tap(page,installAdvice.locator('.dj-webapp-tip-later'));
-     await expect(installAdvice).toBeHidden();
-   }
+   await expect(page.locator('#dj-install-menu')).toBeHidden();
    await expect(tip).toBeVisible();await expect(scale).toBeVisible();
    await expect(scale).toHaveCSS('border-top-left-radius','999px');
    const query=page.locator('#map-quick-search-query'),first=await query.getAttribute('placeholder');
@@ -638,4 +638,22 @@ test('primary tabs replace content without replaying a rise and keep the pill do
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh entrance, even for the previously selected tab.
  await enter(page,'news-panel','news');
+});
+
+
+test('phone browser install choices are visible and PWA hides them',{tag:'@phone-layout'},async({page})=>{
+ await page.goto('/',{waitUntil:'domcontentloaded'});
+ const menu=page.locator('#dj-install-menu');
+ await expect(menu).toBeVisible({timeout:20000});
+ await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
+ await menu.getByRole('button',{name:'홈 화면에 웹앱 추가'}).click();
+ await expect(menu.locator('.dj-install-info')).toBeVisible();
+ await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+ await expect(menu).toBeHidden();
+ await page.reload({waitUntil:'domcontentloaded'});
+ await expect(menu).toBeAttached();await expect(menu).toBeHidden();
+ await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
+ await page.goto('/?install=1',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('html')).toHaveAttribute('data-dj-run-mode','pwa');
+ await expect(menu).toHaveCount(0);
 });
