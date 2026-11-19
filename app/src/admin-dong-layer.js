@@ -74,7 +74,7 @@ export async function installAdminDongLayer({map, openButton, picker, onError=co
     const state=visible?'visible':'none';
     for(const id of boundaryLayers) if(map.getLayer?.(id)) try{ map.setLayoutProperty(id,'visibility',state); }catch{}
   }
-  closeButton?.addEventListener('click',()=>{picker.hidden=true; setBoundaryVisibility(false);});
+  closeButton?.addEventListener('click',()=>{const finish=()=>{picker.hidden=true;setBoundaryVisibility(false);};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(picker,finish);else finish();});
   openButton.addEventListener('click',()=>{picker.hidden=!picker.hidden; setBoundaryVisibility(!picker.hidden);});
   let features=[];
   const sourceId='dongjak-admin-dongs',labelSource='dongjak-admin-dong-labels';

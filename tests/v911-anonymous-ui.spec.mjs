@@ -49,10 +49,11 @@ async function enter(page,id,key){
  },id);
  await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__auditFrames.length)).toBeGreaterThan(1);
+ await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
  await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
  const frames=await page.evaluate(()=>window.__auditFrames);
- expect(frames.some(f=>f.o>.05&&f.o<.75)).toBe(true);
- if(key==='route')expect(frames.some(f=>(f.t!=='none'&&f.t.split(' ').some(v=>parseFloat(v)>2))||(f.p!=='none'&&parseFloat(f.p.replace('inset(',''))>4))).toBe(true);
+ expect(frames.every(f=>f.o===1)).toBe(true);
+ expect(frames.some(f=>f.t!=='none'&&f.t.split(' ').some(v=>parseFloat(v)>2))).toBe(true);
  await geometry(page,'#'+id);
 }
 test.afterEach(async({page},info)=>{
@@ -512,38 +513,35 @@ test('phone report composer has non-overlapping independent header and input scr
  await form.locator('#community-compose-close').click();await expect(form).toBeHidden();
 });
 
-test('phone layer sheet opens and closes with gradual slide only without surface or backdrop fade',async({page})=>{
+
+test('phone windows share the opaque gradual slide on open and close',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- const modal=page.locator('#djNext-layer-panel'),body=modal.locator('.djNext-modal-body');
- await page.evaluate(()=>{
-  const panel=document.getElementById('djNext-layer-panel'),body=panel.querySelector('.djNext-modal-body');
-  window.__layerMotion=[];
-  body.addEventListener('animationstart',e=>{
-   if(e.target!==body||!['djNextSheetIn','djNextSheetOut'].includes(e.animationName))return;
-   const anim=body.getAnimations().find(a=>a.animationName===e.animationName);
-   const timing=anim?.effect.getTiming(),keyframes=anim?.effect.getKeyframes()||[];
-   const item={name:e.animationName,duration:timing?.duration,easing:keyframes[0]?.easing,properties:keyframes.map(k=>Object.keys(k)),frames:[]};
-   window.__layerMotion.push(item);
-   const sample=()=>{
-    if(panel.hidden)return;
-    const c=getComputedStyle(body),p=getComputedStyle(panel);
-    const offset=c.transform==='none'?0:new DOMMatrixReadOnly(c.transform).m42;
-    item.frames.push({fraction:offset/Math.max(1,body.offsetHeight),opacity:Number(c.opacity),backOpacity:Number(p.opacity),background:p.backgroundColor,backAnimation:p.animationName});
-    if(anim?.playState==='running')requestAnimationFrame(sample);
-   };sample();
-  });
- });
- await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();
- await expect.poll(()=>page.evaluate(()=>window.__layerMotion.find(m=>m.name==='djNextSheetIn')?.frames.some(f=>f.fraction>.03&&f.fraction<.97)||false)).toBe(true);
- await expect.poll(()=>body.evaluate(n=>n.getAnimations().every(a=>a.playState!=='running'))).toBe(true);
- await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
- const motions=await page.evaluate(()=>window.__layerMotion);
- expect(motions.map(m=>m.name)).toEqual(['djNextSheetIn','djNextSheetOut']);
- expect(motions.map(m=>m.duration)).toEqual([420,320]);
- for(const m of motions){
-  expect(m.easing?.replace(/\s/g,'')).toBe('cubic-bezier(0.42,0,0.58,1)');
-  expect(m.properties.every(p=>p.includes('transform')&&!p.includes('opacity')&&!p.includes('clipPath'))).toBe(true);
-  expect(m.frames.some(f=>f.fraction>.03&&f.fraction<.97)).toBe(true);
-  expect(m.frames.every(f=>f.opacity===1&&f.backOpacity===1&&f.backAnimation==='none'&&f.background===m.frames[0].background)).toBe(true);
+ async function audit(selector,parentSelector,trigger,close){
+   const target=page.locator(selector);const parent=page.locator(parentSelector);
+   await page.evaluate(({selector,parentSelector})=>{
+    const frames=[];window.__sharedMotion=frames;const until=performance.now()+40000;
+    function sample(){if(window.__sharedMotion!==frames||performance.now()>until)return;const n=document.querySelector(selector),p=document.querySelector(parentSelector),phase=n?.dataset.dj810Animating;
+      if(phase&&p&&!p.hidden){const c=getComputedStyle(n),back=getComputedStyle(p);
+       frames.push({phase,duration:Number(n.dataset.djWindowMotionDuration),opacity:Number(c.opacity),backOpacity:Number(back.opacity),background:back.backgroundColor,cssAnimation:c.animationName,offset:parseFloat((c.translate||'0 0').split(' ')[1])||0});}
+      requestAnimationFrame(sample);}
+    requestAnimationFrame(sample);
+   },{selector,parentSelector});
+   await trigger();await expect(parent).toBeVisible();
+   await expect.poll(()=>page.evaluate(()=>window.__sharedMotion.filter(f=>f.phase==='opening'&&f.offset>2).length)).toBeGreaterThan(1);
+   await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
+   await close();await expect(parent).toBeHidden();
+   const frames=await page.evaluate(()=>window.__sharedMotion);
+   for(const [phase,duration] of [['opening',420],['closing',320]]){
+     const motion=frames.filter(f=>f.phase===phase);
+     expect(motion.length).toBeGreaterThan(1);
+     expect(motion.every(f=>f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
+     expect(motion.some(f=>f.offset>2)).toBe(true);
+     expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
+     expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
+   }
  }
+ await audit('#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel',()=>tap(page,page.locator('#djNext-layers')),()=>page.getByRole('button',{name:'레이어 설정 닫기'}).click());
+ await audit('#dj854-weather-sheet','#dj854-weather-sheet',()=>tap(page,page.locator('#djNext-weather')),()=>page.getByRole('button',{name:'날씨창 닫기'}).click());
+ await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>page.locator('[data-close-page="route"]').click());
+ await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>page.locator('[data-close-page="mine"]').click());
 });

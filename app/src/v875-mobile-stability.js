@@ -29,6 +29,8 @@ export function installV875MobileStability(doc=document,win=window){
     e.preventDefault();e.stopImmediatePropagation();
     const safety=doc.getElementById('map-safety-controls');
     if(!app.classList.contains('map-safety-open')||safetyTimer)return;
+    const finish=()=>{safetyTimer=0;app.classList.remove('map-safety-open');const backdrop=doc.getElementById('map-safety-backdrop');if(backdrop)backdrop.hidden=true;doc.getElementById('map-safety-toggle')?.setAttribute('aria-expanded','false');safety?.classList.remove('dj875-map-safety-exiting');};
+    if(win.DongjakWindowMotion){win.DongjakWindowMotion.close(safety,finish);return;}
     safety?.classList.add('dj875-map-safety-exiting');
     safetyTimer=win.setTimeout(()=>{
       safetyTimer=0;app.classList.remove('map-safety-open');
@@ -95,6 +97,7 @@ export function installV875MobileStability(doc=document,win=window){
       options?.classList.remove('dj875-map-options-exiting');
     };
     if(!animate||win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){finish();return;}
+    if(win.DongjakWindowMotion){win.DongjakWindowMotion.close(options,finish);return;}
     options?.classList.add('dj875-map-options-exiting');
     optionsClosing=win.setTimeout(finish,240);
   };

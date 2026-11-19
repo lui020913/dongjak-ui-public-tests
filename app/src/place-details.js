@@ -245,13 +245,13 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     element.dataset.dj870Closing='true';element.style.pointerEvents='none';
     let closed=false;
     const finish=()=>{if(closed)return;closed=true;popup?.remove();};
+    if(window.DongjakWindowMotion){window.DongjakWindowMotion.close(motion,finish);return;}
     try{
       const animation=motion.animate([
         {opacity:1,transform:'translate3d(0,0,0)',offset:0},
-        {opacity:1,transform:'translate3d(0,78%,0)',offset:.78},
-        {opacity:0,transform:'translate3d(0,110%,0)',offset:1}
-      ],{duration:250,easing:'cubic-bezier(.35,0,1,1)',fill:'forwards'});
-      animation.finished.then(finish,finish);window.setTimeout(finish,320);
+        {opacity:1,transform:'translate3d(0,110%,0)',offset:1}
+      ],{duration:320,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
+      animation.finished.then(finish,finish);window.setTimeout(finish,400);
     }catch{finish();}
   });
   headerActions.append(closeButton);

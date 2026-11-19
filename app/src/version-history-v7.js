@@ -227,7 +227,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   sourcesButton.addEventListener('click',()=>choose('sources'));
   choose('updates');
   let priorFocus=null;
-  const hide=()=>{modal.hidden=true;(priorFocus?.isConnected?priorFocus:trigger).focus();};
+  const hide=()=>{if(modal.hidden)return;const finish=()=>{modal.hidden=true;(priorFocus?.isConnected?priorFocus:trigger).focus();};if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(modal.querySelector('.version-history-dialog'),finish);else finish();};
   const show=({version=''}={})=>{
     priorFocus=document.activeElement;modal.hidden=false;list.scrollTop=0;choose('updates');close.focus();
     const normalized=String(version||'').trim().replace(/^v/,'');

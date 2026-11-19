@@ -68,7 +68,7 @@ export function installMobile870Repairs(doc=document,win=window){
       if(visible){
         if(timers.has(element)){win.clearTimeout(timers.get(element));timers.delete(element);}
         element.classList.remove('dj870-sheet-exit');
-      }else if(previousVisible&&phone()&&!win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+      }else if(previousVisible&&phone()&&!win.DongjakWindowMotion&&!win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
         element.classList.add('dj870-sheet-exit');
         const old=timers.get(element);if(old)win.clearTimeout(old);
         timers.set(element,win.setTimeout(()=>{

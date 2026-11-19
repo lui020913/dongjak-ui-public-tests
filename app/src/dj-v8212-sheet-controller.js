@@ -166,7 +166,8 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         const btn=panel.querySelector(closeSelector)||doc.querySelector(closeSelector);
         // Share the exact same lifecycle as button X and automatic closure.
         win.DongjakWindowLifecycle?.dismiss(id);
-        if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;
+        panel.dataset.djSwipeDismissed='true';
+        try{if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;}finally{delete panel.dataset.djSwipeDismissed;}
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};

@@ -1,3 +1,4 @@
+import {WINDOW_MOTION} from './mobile-window-motion.js';
 /**
  * v8.8.9 — staged, compositor-friendly mobile sheet motion.
  * FLIP uses the independent CSS translate property so legacy centering
@@ -8,8 +9,8 @@ const activeSettles=new WeakMap();
 const EXPANDED='dj871-sheet-expanded';
 const DRAGGING='dj-sheet-dragging';
 const TRANSITIONING='dj889-sheet-transitioning';
-const DURATION=280;
-const EASING='cubic-bezier(.22,1,.36,1)';
+const DURATION=WINDOW_MOTION.open;
+const EASING=WINDOW_MOTION.easing;
 
 function syncExpandedRoot(doc,app){
   if(!app)return;
@@ -190,10 +191,10 @@ export function settleMobileSheetDrag(panel,win=window){
     if(started||finished||panel.dataset.dj889SettleToken!==String(token))return;
     started=true;
     if(startFallback!==null)win.clearTimeout(startFallback);
-    panel.style.setProperty('transition',`translate 280ms ${EASING}, opacity 220ms ease-out`,'important');
+    panel.style.setProperty('transition',`translate ${WINDOW_MOTION.close}ms ${EASING}`,'important');
     panel.style.setProperty('translate','0px 0px','important');
     panel.style.setProperty('opacity','1','important');
-    timer=win.setTimeout(finish,430);
+    timer=win.setTimeout(finish,WINDOW_MOTION.close+180);
   };
   if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(begin);
   startFallback=win.setTimeout(begin,80);
@@ -240,19 +241,19 @@ export function dismissMobileSheet(panel,doc=document,win=window,onComplete=()=>
     const distance=Math.max(100,win.innerHeight-startRect.top+24);
     panel.style.setProperty(
       'transition',
-      'translate 240ms cubic-bezier(.4,0,1,1), opacity 240ms ease-in',
+      `translate ${WINDOW_MOTION.close}ms ${EASING}`,
       'important'
     );
     panel.style.setProperty('translate',`0px ${dragY+distance}px`,'important');
-    panel.style.setProperty('opacity','0','important');
-    timer=win.setTimeout(finish,420);
+    panel.style.setProperty('opacity','1','important');
+    timer=win.setTimeout(finish,WINDOW_MOTION.close+180);
   };
 
   panel.classList.add(TRANSITIONING);
   panel.style.setProperty('will-change','translate,opacity','important');
   panel.style.setProperty('transition','none','important');
   panel.style.setProperty('translate',`0px ${dragY}px`,'important');
-  panel.style.setProperty('opacity',String(dragOpacity),'important');
+  panel.style.setProperty('opacity','1','important');
   void panel.offsetHeight;
   panel.addEventListener('transitionend',onEnd);
   activeTransitions.set(panel,{finish});

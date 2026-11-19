@@ -42,10 +42,10 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
  const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
  let closeTimer=0;
- function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
+ function dismiss(immediate=false){slot=null;if(immediate||win.matchMedia('(prefers-reduced-motion:reduce)').matches){win.clearTimeout(closeTimer);win.DongjakWindowMotion?.cancel(body);panel.hidden=true;panel.classList.remove('djNext-leaving');return}
   if(panel.hidden||panel.classList.contains('djNext-leaving'))return;
   win.clearTimeout(closeTimer);
-  panel.classList.add('djNext-leaving');closeTimer=win.setTimeout(finishClose,380)
+  panel.classList.add('djNext-leaving');if(win.DongjakWindowMotion){win.DongjakWindowMotion.close(body,finishClose);return}closeTimer=win.setTimeout(finishClose,380)
  }
  function finishClose(){if(!panel.classList.contains('djNext-leaving'))return;win.clearTimeout(closeTimer);panel.hidden=true;panel.classList.remove('djNext-leaving');if(focusReturn?.isConnected)focusReturn.focus({preventScroll:true})}
  body.addEventListener('animationend',e=>{if(e.target===body&&e.animationName==='djNextSheetOut')finishClose()});
@@ -53,7 +53,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
  function invoke(selector){const b=q(selector);if(!b||b.disabled){notify('현재 사용할 수 없는 기능입니다. 지도 로딩 후 다시 시도해 주세요.');return}b.click()}
- function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
+ function open(event,idx=null){win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;win.DongjakWindowMotion?.open(body);app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='등록 '+selected.length+'/3';list.replaceChildren();
  const groups=[['지도 기능',['pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
@@ -105,10 +105,10 @@ export function installPhonePermissions({app,doc=document,win=window}){
  const body=doc.createElement('div');body.className='djNext-modal-body';
  body.innerHTML='<header><strong>권한을 허용해 주세요</strong></header><p>내 주변 안전정보와 길찾기에 위치 권한을, 음성 장소 검색에 마이크 권한을 사용합니다. 허용하지 않아도 직접 검색하고 지도를 볼 수 있습니다.</p><div class="djNext-permission-row"><button type="button" data-permission="location">위치 권한 허용</button><small role="status" data-status="location">확인 전</small></div><div class="djNext-permission-row"><button type="button" data-permission="microphone">마이크 권한 허용</button><small role="status" data-status="microphone">확인 전</small></div><button type="button" class="djNext-continue">계속하기</button>';panel.append(body);app.append(panel);
  let after=null;
- win.addEventListener('dj-next:permission-intro',e=>{if(read(win,key,false)){e.detail?.continue?.();return}after=e.detail?.continue||null;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;body.querySelector('button').focus()});
+ win.addEventListener('dj-next:permission-intro',e=>{if(read(win,key,false)){e.detail?.continue?.();return}after=e.detail?.continue||null;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;win.DongjakWindowMotion?.open(body);body.querySelector('button').focus()});
  const state=(kind,result)=>{body.querySelector('[data-status="'+kind+'"]').textContent=result};
  for(const b of body.querySelectorAll('[data-permission]'))b.addEventListener('click',async()=>{const kind=b.dataset.permission;b.disabled=true;state(kind,'요청 중…');try{if(kind==='location'){if(!win.navigator.geolocation)throw Error('unsupported');await new Promise((res,rej)=>win.navigator.geolocation.getCurrentPosition(res,rej,{timeout:12000,maximumAge:0}));}else{if(!win.navigator.mediaDevices?.getUserMedia)throw Error('unsupported');const stream=await win.navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop())}state(kind,'허용됨')}catch{state(kind,'거부됨 또는 사용 불가')}finally{b.disabled=false}});
- body.querySelector('.djNext-continue').addEventListener('click',()=>{panel.hidden=true;save(win,key,true);const fn=after;after=null;fn?.()});
+ body.querySelector('.djNext-continue').addEventListener('click',()=>{const finish=()=>{panel.hidden=true;save(win,key,true);const fn=after;after=null;fn?.()};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(body,finish);else finish()});
  const form=doc.querySelector('.map-quick-search-form'),input=$('map-quick-search-query');if(!form||!input)return;
  const mic=doc.createElement('button');mic.id='djNext-mic';mic.type='button';mic.setAttribute('aria-label','음성 장소 검색');mic.setAttribute('aria-pressed','false');mic.innerHTML=phoneIcon('mic');form.insertBefore(mic,form.querySelector('[type=submit]'));
  const feedback=doc.createElement('div');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');app.append(feedback);
