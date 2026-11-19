@@ -16,7 +16,7 @@ test('tablet and desktop contexts are blocked regardless of narrow viewport widt
   assert.equal(isMobilePhoneContext({userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 Safari/537.36',width:390}),false);
 });
 
-test('build patch adds only a blank white visual gate and preserves desktop/tablet source and startup',()=>{
+test('build patch adds accessible mobile-only device notice and preserves desktop/tablet source and startup',()=>{
   const indexHtml=`<!doctype html>
 <html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,12 +35,18 @@ test('build patch adds only a blank white visual gate and preserves desktop/tabl
   const result=applyMobileOnlyGate({indexHtml,mainJs,platformEntry});
   assert.match(result.indexHtml,/dj-mobile-only-gate-bootstrap/);
   assert.match(result.indexHtml,/dj-mobile-only-screen/);
-  assert.ok(result.indexHtml.includes('<main id="dj-mobile-only-screen" role="main" aria-labelledby="dj-mobile-only-title"><div class="dj-mobile-only-message"><h1 id="dj-mobile-only-title">모바일로 접속해 주세요</h1><p>동작하는 안전지도는 모바일 웹사이트와 모바일 앱에서 이용할 수 있습니다.</p></div></main>'));
+  assert.match(result.indexHtml,/<main id="dj-mobile-only-screen" role="main" aria-labelledby="dj-mobile-only-title">/);
+  assert.match(result.indexHtml,/<svg class="dj-mobile-only-devices"[^>]*aria-hidden="true"/);
+  assert.match(result.indexHtml,/<h1 id="dj-mobile-only-title">모바일로 접속해 주세요<\/h1>/);
+  assert.match(result.indexHtml,/<p>동작하는 안전지도는 모바일 웹사이트와 모바일 앱에서 이용할 수 있습니다\.<\/p>/);
+  assert.match(result.indexHtml,/<footer class="dj-mobile-only-credit">동작구 아이디어리그 안전팀<\/footer>/);
+  assert.ok(result.indexHtml.includes('@media(min-width:600px){#dj-mobile-only-screen p{white-space:nowrap}}'));
+  assert.ok(result.indexHtml.includes('width:min(920px,100%)'));
   assert.match(result.indexHtml,/모바일로 접속해 주세요/);
   assert.match(result.indexHtml,/모바일 웹사이트와 모바일 앱/);
   assert.match(result.indexHtml,/background:#fff!important/);
-  assert.ok(result.indexHtml.includes('font-size:22px;font-weight:800'));
-  assert.ok(result.indexHtml.includes('font-size:14px;line-height:1.65'));
+  assert.ok(result.indexHtml.includes('font-size:clamp(22px,2.45vw,32px);font-weight:800'));
+  assert.ok(result.indexHtml.includes('font-size:clamp(14px,1.65vw,21px);line-height:1.65'));
   assert.ok(result.indexHtml.includes('body>:not(#dj-mobile-only-screen){display:none!important}'));
   assert.equal(result.indexHtml.includes('\\n'),false);
   assert.match(result.indexHtml,/v815-pc-visual-fixes\.css/);
