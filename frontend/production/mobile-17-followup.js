@@ -4,7 +4,7 @@ import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
 const KEY='dj17-kakao-ui-v1';
 export function installMobileFollowup({app,map,maplibregl,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
- let raf=0,port=null,pilot=false,regions=null,markers=[],statusTimer=0;
+ let raf=0,port=null,pilot=false,regions=null,statusTimer=0;
  const $=id=>doc.getElementById(id);
  const schedule=()=>{if(!raf)raf=win.requestAnimationFrame(()=>{raf=0;sync()})};
  function edges(){
@@ -44,28 +44,36 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   const notice=doc.createElement('div');notice.className='dj17-pilot-notice';notice.textContent='상도1동 보행안전 시범구역 · 다른 행정동은 추후 공개될 예정입니다.';head.after(notice);
  }
  function message(name){let n=$('dj17-pilot-status');if(!n){n=doc.createElement('div');n.id='dj17-pilot-status';n.className='dj17-pilot-status';n.setAttribute('role','status');app.append(n)}n.textContent=name+'은 추후 공개될 예정입니다.';n.hidden=false;win.clearTimeout(statusTimer);statusTimer=win.setTimeout(()=>n.hidden=true,2600)}
+ const pilotIds=['dj17-pilot-fill','dj17-pilot-line','dj17-pilot-locks'];
  function paint(){
+  if(!pilot){for(const id of pilotIds)if(map.getLayer(id))map.setLayoutProperty(id,'visibility','none');app.dataset.djPilotActive='false';return}
   if(!regions||!map.isStyleLoaded())return;
-  const source='dj17-pilot-dongs',fill='dj17-pilot-fill',line='dj17-pilot-line';
-  const data={type:'FeatureCollection',features:regions};
-  if(!map.getSource(source))map.addSource(source,{type:'geojson',data});
-  if(!map.getLayer(fill))map.addLayer({id:fill,type:'fill',source,filter:['!=',['get','dong_name'],'상도1동'],paint:{'fill-color':'#151c1a','fill-opacity':.23}});
-  if(!map.getLayer(line))map.addLayer({id:line,type:'line',source,paint:{'line-color':'#768d83','line-width':1.3,'line-opacity':.85}});
-  for(const id of [fill,line])map.setLayoutProperty(id,'visibility',pilot?'visible':'none');
-  for(const marker of markers)marker.remove();markers=[];
-  if(pilot)for(const feature of regions){const name=feature.properties.dong_name;if(name==='상도1동')continue;const point=labelPointForFeature(feature);if(!point)continue;const el=doc.createElement('button');el.type='button';el.className='dj17-lock';el.textContent='🔒';el.setAttribute('aria-label',name+' 잠금 · 추후 공개');el.addEventListener('click',e=>{e.stopPropagation();message(name)});markers.push(new maplibregl.Marker({element:el,anchor:'center'}).setLngLat(point).addTo(map))}
+  const source='dj17-pilot-dongs',points='dj17-pilot-lock-points',image='dj26-lock-glyph';
+  if(!map.getSource(source))map.addSource(source,{type:'geojson',data:{type:'FeatureCollection',features:regions}});
+  if(!map.getSource(points))map.addSource(points,{type:'geojson',data:{type:'FeatureCollection',features:regions.filter(f=>f.properties.dong_name!=='상도1동').flatMap(f=>{const p=labelPointForFeature(f);return p?[{type:'Feature',properties:{dong_name:f.properties.dong_name},geometry:{type:'Point',coordinates:p}}]:[]})}});
+  if(!map.hasImage(image)){
+   const canvas=doc.createElement('canvas');canvas.width=48;canvas.height=48;const ctx=canvas.getContext('2d');ctx.scale(2,2);
+   const draw=(color,width)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();ctx.roundRect(5,10,14,11,2);ctx.stroke();ctx.beginPath();ctx.moveTo(8,10);ctx.lineTo(8,6);ctx.arc(12,6,4,Math.PI,0);ctx.lineTo(16,10);ctx.stroke();ctx.beginPath();ctx.moveTo(12,14);ctx.lineTo(12,17);ctx.stroke()};
+   draw('#f7faf8',4.5);draw('#304a42',2.1);map.addImage(image,ctx.getImageData(0,0,48,48),{pixelRatio:2});
+  }
+  if(!map.getLayer(pilotIds[0]))map.addLayer({id:pilotIds[0],type:'fill',source,filter:['!=',['get','dong_name'],'상도1동'],paint:{'fill-color':'#151c1a','fill-opacity':.23}});
+  if(!map.getLayer(pilotIds[1]))map.addLayer({id:pilotIds[1],type:'line',source,paint:{'line-color':'#768d83','line-width':1.3,'line-opacity':.85}});
+  if(!map.getLayer(pilotIds[2]))map.addLayer({id:pilotIds[2],type:'symbol',source:points,layout:{'icon-image':image,'icon-size':1,'icon-anchor':'center','icon-allow-overlap':true,'icon-ignore-placement':true,'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'}});
+  for(const id of pilotIds)map.setLayoutProperty(id,'visibility','visible');
+  app.dataset.djPilotActive='true';
  }
- async function showPilot(){pilot=true;try{regions??=await getDongjakAdminFeatures();paint()}catch(error){console.warn('[pilot boundary]',error)}}
+ async function setPilot(next){pilot=Boolean(next);app.dataset.djPilotRequested=String(pilot);if(!pilot){paint();return}try{regions??=await getDongjakAdminFeatures();paint()}catch(error){pilot=false;app.dataset.djPilotRequested='false';paint();console.warn('[pilot boundary]',error)}}
+ win.addEventListener('dj:pilot-toggle',e=>void setPilot(e.detail?.enabled));
  map.on('style.load',()=>{if(pilot)paint()});
- map.on('idle',()=>{if(pilot&&regions&&!map.getLayer('dj17-pilot-fill'))paint()});
+ map.on('idle',()=>{if(pilot&&regions&&!map.getLayer(pilotIds[2]))paint()});
+ map.on('click',e=>{if(!pilot||!map.getLayer(pilotIds[2]))return;const feature=map.queryRenderedFeatures(e.point,{layers:[pilotIds[2]]})[0];if(feature)message(feature.properties.dong_name)});
  function sync(){
   const current=$('dj831-scrollport');if(current!==port){if(port){port.removeEventListener('scroll',edges);resize.unobserve(port)}port=current;if(port){port.addEventListener('scroll',edges,{passive:true});resize.observe(port)}}
   edges();moveMore();expandSafety();
-  if(app.classList.contains('map-safety-open')&&!pilot)void showPilot();
   if(!app.classList.contains('map-safety-open')){const panel=$('map-safety-controls');if(panel?.classList.contains('dj871-sheet-expanded')){panel.classList.remove('dj871-sheet-expanded');panel.querySelector('.dj17-expand')?.setAttribute('aria-expanded','false')}}
  }
  const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});schedule();
- doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){pilot=false;paint();delete app.dataset.djUserTipDismissed}},true);
+ doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){void setPilot(false);delete app.dataset.djUserTipDismissed}},true);
  function snapshot(){
   try{const c=map.getCenter();const detail=doc.querySelector('#mine-panel .dj834-my-detail');const value={time:Date.now(),tab:app.dataset.tab||'mine',profile:!!detail&&!detail.hidden,center:[c.lng,c.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),phase:'pending'};win.sessionStorage.setItem(KEY,JSON.stringify(value))}catch{}
  }
