@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.1",
+  "application_version": "9.2.2",
   "public_work_branch": "main",
-  "purpose": "Full viewport browser welcome page, preserving PWA/native direct entry and existing map; verified before production.",
-  "attempt": 58,
+  "purpose": "Use the original white Dongjak icon for browser welcome and native launcher assets; preserve the existing PWA artwork policy.",
+  "attempt": 59,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Full-screen browser-only installation selector; retain platform instructions and signed release checks.",
+  "last_retry_reason": "Replace native default icons and use invariant branded welcome icon.",
   "release_kind": "patch",
   "beta_number": 1
 }

@@ -8,9 +8,6 @@ on:
         type: choice
         options: [simulator, testflight]
         default: simulator
-  push:
-    branches: [main]
-    paths: ['.github/workflows/ios-build.yml']
   workflow_run:
     workflows: ['Mobile-only release — Preview, phone QA and protected Production']
     types: [completed]
@@ -25,7 +22,6 @@ jobs:
     if: >-
       github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' &&
       github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && vars.IOS_AUTOMATIC_BUILD != 'false') ||
       (github.event_name == 'workflow_run' && vars.IOS_AUTOMATIC_BUILD != 'false' && github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' &&
       github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.actor.login == 'lui020913'))
@@ -63,6 +59,11 @@ jobs:
           ref: ${{ steps.production.outputs.sha }}
           path: production-source
           persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned icon image generator dependency
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -116,6 +117,7 @@ jobs:
           npm install --no-save --package-lock=false --no-audit --no-fund --prefer-offline "@capacitor/ios@$CAP_VERSION"
           if [ ! -d ios ]; then npx --no-install cap add ios --packagemanager SPM; fi
           npx --no-install cap sync ios
+          python scripts/generate-native-icons.py ios
           plist=ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c 'Add :NSLocationWhenInUseUsageDescription string 현재 위치와 주변 보행안전정보를 표시합니다.' "$plist" || /usr/libexec/PlistBuddy -c 'Set :NSLocationWhenInUseUsageDescription 현재 위치와 주변 보행안전정보를 표시합니다.' "$plist"
           /usr/libexec/PlistBuddy -c 'Add :NSLocationAlwaysAndWhenInUseUsageDescription string 길찾기 중 현재 위치를 확인합니다.' "$plist" || /usr/libexec/PlistBuddy -c 'Set :NSLocationAlwaysAndWhenInUseUsageDescription 길찾기 중 현재 위치를 확인합니다.' "$plist"
