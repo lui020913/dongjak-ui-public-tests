@@ -1,119 +1,59 @@
-name: Development progress notifications
+name: Deployment milestone notifications
 on:
-  repository_dispatch:
-    types: [private-development-status]
-  schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
-  issue_comment:
-    types: [created]
   workflow_run:
-    workflows: ['*']
+    workflows:
+      - Public runner - private source build and Preview
+      - Sangdo1 bocha reference - isolated Preview
+      - Public runner - approved exact Production deployment
+      - Promote previously phone-tested mobile-only artifact to Production
     types: [completed]
-concurrency:
-  group: combined-development-status
-  cancel-in-progress: false
 permissions:
-  issues: write
   contents: read
   actions: read
+  issues: write
+concurrency:
+  group: deployment-notify-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
 jobs:
   notify:
-    if: (github.event_name != 'issue_comment' || (github.event.issue.number == 15 && github.event.comment.user.login == 'lui020913' && github.event.comment.body == '통합 알림 테스트')) && github.repository == 'lui020913/dongjak-ui-public-tests' && (github.event_name != 'workflow_run' || (github.event.workflow_run.name != 'Development progress notifications' && github.event.workflow_run.name != 'Gemini UI improvement after approved Production' && github.event.workflow_run.name != 'AI UI checkpoint recovery' && github.event.workflow_run.name != 'Recovery smoke test' && github.event.workflow_run.name != 'Recovery smoke controller' && github.event.workflow_run.name != 'v911 exact Preview failure recovery'))
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 3
     env:
       GH_TOKEN: ${{ github.token }}
-      PRIVATE_TOKEN: ${{ secrets.PRIVATE_PREVIEW_DISPATCH_TOKEN }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
     steps:
-      - name: Notify owner of development event
+      - name: Announce only a verified deployment
+        shell: bash
         run: |
           set -euo pipefail
-          case "$GITHUB_EVENT_NAME" in
-            schedule|repository_dispatch|workflow_dispatch|issue_comment)
-              title="전체 개발 현황"
-              detail="공개·비공개 저장소 상태 갱신"
-              url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions"
+          jobs="$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" | jq -c '[.[].jobs[]]')"
+          path="$(jq -r '.workflow_run.path' "$GITHUB_EVENT_PATH")"
+          case "$path" in
+            .github/workflows/public-private-source-preview.yml|.github/workflows/sangdo1-bocha-preview.yml)
+              step='Deploy Preview without showing private build or API contents'
+              stage=preview
+              title='Preview 완성'
               ;;
-            push)
-              title="코드 수정 저장"
-              detail="$(jq -r '.ref + " · " + (.after[0:7])' "$GITHUB_EVENT_PATH")"
-              url="$(jq -r '.compare' "$GITHUB_EVENT_PATH")"
+            .github/workflows/public-exact-production.yml)
+              step='Publish and verify; rollback only our own deployment on failure'
+              stage=production
+              title='Production 배포 완료'
               ;;
-            pull_request)
-              if jq -e '.action=="closed" and .pull_request.merged==true' "$GITHUB_EVENT_PATH" >/dev/null; then title="PR 병합 완료"
-              elif jq -e '.action=="opened"' "$GITHUB_EVENT_PATH" >/dev/null; then title="PR 검토 시작"
-              else exit 0; fi
-              detail="$(jq -r '"#" + (.number|tostring) + " · " + .pull_request.title' "$GITHUB_EVENT_PATH")"
-              url="$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")"
-              ;;
-            workflow_run)
-              if [[ "$(jq -r '.workflow_run.conclusion' "$GITHUB_EVENT_PATH")" == skipped ]]; then exit 0; fi
-              if [[ "$(jq -r '.workflow_run.event' "$GITHUB_EVENT_PATH")" == schedule ]]; then exit 0; fi
-              if [[ "$(jq -r .action "$GITHUB_EVENT_PATH")" == in_progress ]]; then title="개발 작업 시작"; else title="개발 작업 결과"; fi
-              detail="$(jq -r '.workflow_run.name + " · " + (.workflow_run.conclusion // .workflow_run.status)' "$GITHUB_EVENT_PATH")"
-              url="$(jq -r '.workflow_run.html_url' "$GITHUB_EVENT_PATH")"
-              run="$(jq -r .workflow_run.id "$GITHUB_EVENT_PATH")"
-              jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs" --jq '[.jobs[] | (.name + " · " + (.conclusion // .status))] | join("\n")' 2>/dev/null || true)"
-              if [[ -n "$jobs" ]]; then detail="$(printf '%s\n%s' "$detail" "$jobs")"; fi
+            .github/workflows/mobile-only-production-retry.yml)
+              step=''
+              stage=production
+              title='Production 배포 완료'
               ;;
             *) exit 0 ;;
           esac
-          count_active() {
-            local repo="$1" token="$2" status total=0 n
-            for status in queued in_progress waiting requested pending; do
-              n="$(GH_TOKEN="$token" gh api --paginate --method GET "repos/$repo/actions/runs" -f status="$status" -f per_page=100 --jq '.workflow_runs[] | select(.name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="v911 exact Preview failure recovery" and .name!="Notification test") | .id' | wc -l)" || return 1
-              total=$((total+n))
-            done
-            echo "$total"
-          }
-          public="$(count_active "$GITHUB_REPOSITORY" "$GH_TOKEN")" || public="?"
-          private="$(count_active lui020913/dongjak-safety-map "$PRIVATE_TOKEN" 2>/dev/null)" || private="?"
-          if [[ "$public" =~ ^[0-9]+$ && "$private" =~ ^[0-9]+$ ]]; then
-            total=$((public+private))
-            title="$title · 진행·대기 ${total}건"
-            if [[ "$total" == 0 && "$GITHUB_EVENT_NAME" =~ ^(schedule|workflow_run|repository_dispatch|workflow_dispatch|issue_comment)$ ]]; then
-              title="전체 개발 실행 종료 · 0건"
-              detail="$(printf '%s\n실행 중인 작업 없음. 성공·실패 및 승인 대기는 별도 확인.' "$detail")"
-            fi
+          if [[ -n "$step" ]]; then
+            jq -e --arg step "$step" 'any(.[]; .conclusion=="success" and any(.steps[]?; .name==$step and .conclusion=="success"))' <<< "$jobs" >/dev/null || exit 0
           else
-            title="$title · 통합 집계 확인 불가"
+            jq -e 'any(.[]; .name=="Promote exact 24-pass phone-tested artifact" and .conclusion=="success")' <<< "$jobs" >/dev/null || exit 0
           fi
-          # Polls never post progress or unverified completion messages.
-          if [[ "$GITHUB_EVENT_NAME" == schedule && "${total:-unknown}" != 0 ]]; then exit 0; fi
-          if [[ "${total:-unknown}" == 0 ]]; then
-            sleep 12
-            public="$(count_active "$GITHUB_REPOSITORY" "$GH_TOKEN")" || exit 1
-            private="$(count_active lui020913/dongjak-safety-map "$PRIVATE_TOKEN" 2>/dev/null)" || exit 1
-            [[ "$public" == 0 && "$private" == 0 ]] || exit 0
-            # Select recent real work, not notification, maintenance or scheduled monitoring runs.
-            latest_work() {
-              local repo="$1" token="$2"
-              GH_TOKEN="$token" gh api --method GET "repos/$repo/actions/runs" -f per_page=100 --jq '[.workflow_runs[] | select(.status=="completed" and .conclusion!="skipped" and .event!="schedule" and .name!="Development progress notifications" and .name!="Private development status relay" and .name!="AI UI checkpoint recovery" and .name!="Recovery smoke test" and .name!="Recovery smoke controller" and .name!="v911 exact Preview failure recovery" and .name!="Safety map notification test" and .name!="Notification test")] | sort_by(.updated_at) | last | if .==null then "" else ((.id|tostring)+":"+(.run_attempt|tostring)+":"+.conclusion) end'
-            }
-            public_key="$(latest_work "$GITHUB_REPOSITORY" "$GH_TOKEN")" || exit 1
-            private_key="$(latest_work lui020913/dongjak-safety-map "$PRIVATE_TOKEN" 2>/dev/null)" || exit 1
-            # Only hashes leave the runner; private run metadata is never posted publicly.
-            public_hash="$(printf "%s" "$public_key" | sha256sum | cut -d" " -f1)"
-            private_hash="$(printf "%s" "$private_key" | sha256sum | cut -d" " -f1)"
-            marker="<!-- combined-idle-v2:$public_hash:$private_hash -->"
-            comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[] | select(.user.login=="github-actions[bot]") | .body')" || exit 1
-            if [[ "$GITHUB_EVENT_NAME" != issue_comment ]]; then
-              if grep -F "$marker" <<< "$comments" >/dev/null; then exit 0; fi
-              # If scheduled housekeeping displaced one side from the recent list, do not
-              # send a duplicate for the other unchanged side.
-              if [[ "$GITHUB_EVENT_NAME" == schedule ]]; then
-                if [[ -z "$public_key" && -z "$private_key" ]]; then exit 0; fi
-                if [[ -z "$public_key" ]] && grep -E "combined-idle-v2:[0-9a-f]{64}:$private_hash" <<< "$comments" >/dev/null; then exit 0; fi
-                if [[ -z "$private_key" ]] && grep -F "combined-idle-v2:$public_hash:" <<< "$comments" >/dev/null; then exit 0; fi
-              fi
-            fi
-            detail="$(printf '%s\n%s' "$detail" "$marker")"
-          fi
-          if [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
-            conclusion="$(jq -r .workflow_run.conclusion "$GITHUB_EVENT_PATH")"
-            if [[ ( "$conclusion" == success || "$conclusion" == null ) && "${total:-unknown}" != 0 ]]; then exit 0; fi
-          elif [[ "$GITHUB_EVENT_NAME" == repository_dispatch && "${total:-unknown}" != 0 ]]; then
-            exit 0
-          fi
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n%s\n공개 %s건 · 비공개 %s건\n%s' "$title" "$detail" "$public" "$private" "$url")"
+          marker="<!-- deployment-milestone:$RUN_ID:$stage -->"
+          comments="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body')"
+          if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 %s\n\n[배포 상세 보기](%s)\n%s' "$title" "$url" "$marker")"
