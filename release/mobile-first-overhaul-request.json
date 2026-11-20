@@ -3,9 +3,9 @@
   "application_version": "9.2.21",
   "public_work_branch": "main",
   "purpose": "Safety drawer peek, frame-driven transit follow, Seoul official news and authenticated shared community",
-  "attempt": 93,
+  "attempt": 94,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Add shared community data and bus timestamp diagnostics",
+  "last_retry_reason": "Match safety peek backdrop regression and settle from actual drag geometry; keep live transit idle without payload",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -154,12 +154,13 @@ export function setMobileSheetExpanded(panel,expanded,doc=document,win=window){
   });
 }
 
-export function settleMobileSheetDrag(panel,win=window){
+export function settleMobileSheetDrag(panel,win=window,changeLayout=()=>{}){
   if(!panel||!panel.classList.contains(DRAGGING))return;
   cancelActive(panel);
   const fromRect=panel.getBoundingClientRect();
   const fromOpacity=1;
   clearDragStyles(panel);
+  changeLayout();
   const toRect=panel.getBoundingClientRect();
   const delta=rectDelta(fromRect,toRect);
   const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;

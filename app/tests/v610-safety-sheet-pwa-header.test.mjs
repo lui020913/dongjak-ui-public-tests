@@ -22,7 +22,7 @@ test('mobile safety menu state stays synchronized with independent close actions
   assert.match(js, /safetyStateObserver\.observe\(app,\{attributes:true,attributeFilter:\['class','data-tab'\]\}\)/);
   assert.match(js, /safetyMobileView\.addEventListener\?\.\('change',syncSafetyPresentation\)/);
   assert.match(js, /mapSafetyBackdrop\?\.addEventListener\('click',\(\)=>syncSafetyMenu\(false\)\)/);
-  assert.match(js, /mapSafetyBackdrop\.hidden=!\(open&&safetyMobileView\.matches\)/);
+  assert.match(js, /mapSafetyBackdrop\.hidden=!\(open&&safetyMobileView\.matches&&!app\.classList\.contains\('dj-safety-peek'\)\)/);
   assert.match(js, /mapSafetyControls\?\.setAttribute\('aria-hidden',String\(!open\)\)/);
   assert.match(js, /import '\.\/v610-mobile-safety\.css';/);
 });
