@@ -175,7 +175,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       archive.append(heading);timeline.append(archive);
     }
     const minorGroups=new Map();
-    const editionOf=version=>String(version).replace(/^v?(\\d+)\\.(\\d+)(?:\\.\\d+)?$/,'v$1.$2');
+    const editionOf=version=>String(version).replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
     const minorCounts=new Map();
     for(const entry of edition.records){
       const label=editionOf(entry.displayVersion);
