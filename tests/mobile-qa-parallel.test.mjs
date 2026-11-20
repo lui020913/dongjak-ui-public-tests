@@ -14,8 +14,8 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
  assert.match(workflow,/desktop-tablet-qa:/);
  assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
- assert.match(workflow,/needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa\]/);
- assert.match(workflow,/if: needs\.mobile-qa\.result == 'success' && needs\.desktop-tablet-qa\.result == 'success' && needs\.visual-qa\.result == 'success' && needs\.explore-qa\.result == 'success'/);
+ assert.match(workflow,/needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa\]/);
+ assert.match(workflow,/if: needs\.mobile-qa\.result == 'success' && needs\.desktop-tablet-qa\.result == 'success' && needs\.visual-capture\.result == 'success' && needs\.visual-qa\.result == 'success' && needs\.explore-qa\.result == 'success'/);
  assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\|iOS PWA dimmed status edge\//);
 });
 
@@ -43,14 +43,18 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
 
 test('exact design evidence is a required Production and Preview notification condition',()=>{
  const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
- assert.match(workflow,/visual-qa:\s*\n\s*needs: \[build, preview\]/);
+ assert.match(workflow,/visual-capture:\s*\n\s*needs: \[build, preview\]/);
+ assert.match(workflow,/visual-qa:\s*\n\s*needs: \[build, preview, visual-capture\]/);
  assert.match(workflow,/max-parallel: 6\s+matrix:\s+lane: \[1, 2, 3, 4, 5, 6\]/);
  const visual=workflow.slice(workflow.indexOf('  visual-qa:'),workflow.indexOf('  explore-qa:'));
  const explore=workflow.slice(workflow.indexOf('  explore-qa:'),workflow.indexOf('  production:'));
- for(const job of [visual,explore])assert.equal((job.match(/run: node scripts\/live-qa-verify-candidate\.mjs/g)||[]).length,2);
+ const capture=workflow.slice(workflow.indexOf('  visual-capture:'),workflow.indexOf('  visual-qa:'));
+ for(const job of [capture,visual,explore])assert.equal((job.match(/run: node scripts\/live-qa-verify-candidate\.mjs/g)||[]).length,2);
  assert.match(workflow,/run: node scripts\/live-qa-release-gate\.mjs qa-artifacts/);
- assert.match(workflow,/production:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa\]/);
- assert.match(workflow,/notify-preview:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa\]/);
+ assert.match(workflow,/production:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa\]/);
+ assert.match(workflow,/notify-preview:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa\]/);
 });
 
-test('autonomous exploration is required on exact Preview',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');assert.match(w,/explore-qa:\s*\n\s*needs: \[build, preview\]/);assert.match(w,/playwright\.live-qa-explore\.config\.mjs/);assert.match(w,/needs\.explore-qa\.result == 'success'/);});
+test('autonomous exploration is required on exact Preview',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');assert.match(w,/explore-qa:\s*\n\s*needs: \[build, preview, visual-qa\]/);assert.match(w,/playwright\.live-qa-explore\.config\.mjs/);assert.match(w,/needs\.explore-qa\.result == 'success'/);});
+
+test('keep six browser captures parallel, cap Gemini review to two, and explore only after reviews',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml'),capture=w.slice(w.indexOf('  visual-capture:'),w.indexOf('  visual-qa:')),review=w.slice(w.indexOf('  visual-qa:'),w.indexOf('  explore-qa:')),explore=w.slice(w.indexOf('  explore-qa:'),w.indexOf('  production:'));assert.match(capture,/max-parallel: 6/);assert.doesNotMatch(capture,/GEMINI_API_KEY|--vision/);assert.match(capture,/verify-capture\.mjs qa-artifacts --seal/);assert.match(review,/max-parallel: 2/);assert.match(review,/uses: actions\/download-artifact@v4/);assert.match(review,/verify-capture\.mjs qa-artifacts\n/);assert.match(review,/--vision/);assert.match(explore,/needs\.visual-qa\.result == 'success'/);});
