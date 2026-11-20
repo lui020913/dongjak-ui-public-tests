@@ -185,21 +185,27 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     const sizeLabel={major:'주요 구조 개편',minor:'기능 추가·개선',patch:'수정·안정화'}[classification]||'기록';
     const badge=el('span','dj-semver-size',sizeLabel);
     badge.setAttribute('aria-label',`${classification} 변경 유형`);
-    const versionHeading=el('h4','',displayVersion);
+    // Show readable major.minor editions in the timeline, not the patch
+    // counter as a giant primary heading. Keep exact builds in data attributes.
+    const publicEdition=String(displayVersion).replace(/^v?(\\d+)\\.(\\d+)(?:\\.\\d+)?$/,'v$1.$2');
+    const versionHeading=el('h4','',publicEdition);
     header.append(versionHeading,badge);
     article.append(header);
     const ul=el('ul','v707-release-items');
     for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
     const isOperational=/^v?9\.\d+\.\d+$/.test(String(release.version||''))&&!release.sourceVersion;
     if(isOperational){
-      // Display the exact deployed SemVer once; never print a second conflicting
-      // "original version" or imply that a prior production build was unshipped.
-      if(release===currentRelease)article.dataset.currentBuild='true';
+      // The original precise build remains searchable and available in metadata.
+      // Only the currently deployed build is spelled out as a small secondary line.
+      if(release===currentRelease){
+        article.dataset.currentBuild='true';
+        article.append(el('p','dj-edition-original','현재 빌드: '+String(release.version).replace(/^v?/,'v')));
+      }
     }else{
-      const original=el('p','dj-edition-original','당시 기록: '+(release.sourceVersion||release.version));
-      if(release.sourceVersion&&release.version!==release.sourceVersion)original.title='보존된 원본 기록';
-      article.append(original);
-      if(release!==currentRelease)article.append(el('p','dj-edition-original','이전 개발 이력 · 실제 배포 여부는 별도 확인'));
+      // Historical source labels are archived in HTML metadata, not repeated in
+      // every prominent card. A two-part edition is the visible release label.
+      article.dataset.archivedVersion=String(release.sourceVersion||release.version||'');
+      if(release===currentRelease)article.append(el('p','dj-edition-original','현재 빌드: '+String(release.version).replace(/^v?/,'v')));
     }
     article.append(ul);parent.append(article);
     }
