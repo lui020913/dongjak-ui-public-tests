@@ -11,8 +11,8 @@ async function select(table,fields,params={}){
  const res=await fetch(url,{headers:{apikey:cfg.key},signal:AbortSignal.timeout(10000)});if(!res.ok)throw new Error('공유 게시판 HTTP '+res.status);return await res.json();
 }
 async function user(){const client=getActiveCloudClient();if(!client)return null;const {data,error}=await client.auth.getSession();if(error)throw error;const u=data.session?.user;return u&&!u.is_anonymous?u:null;}
-export async function readSharedCommunity(){
- const u=await user().catch(()=>null);let rows=await select('community_posts',POST_FIELDS,{order:'created_at',limit:50});const bookmarks=u?await select('community_bookmarks','post_id',{owner:u.id,order:'created_at',limit:200}):[];const initialIds=new Set(rows.map(x=>x.id));const missing=bookmarks.map(x=>x.post_id).filter(id=>!initialIds.has(id));if(missing.length)rows=rows.concat(await select('community_posts',POST_FIELDS,{postIds:missing,limit:200}));const ids=rows.map(x=>x.id);if(!ids.length)return {posts:[],authenticated:!!u};
+export async function readSharedCommunity(requestedPostId=null){
+ const u=await user().catch(()=>null);let rows=await select('community_posts',POST_FIELDS,{order:'created_at',limit:50});const bookmarks=u?await select('community_bookmarks','post_id',{owner:u.id,order:'created_at',limit:200}):[];const initialIds=new Set(rows.map(x=>x.id));const missing=[...new Set([...bookmarks.map(x=>x.post_id),...(requestedPostId?[requestedPostId]:[])])].filter(id=>!initialIds.has(id));if(missing.length)rows=rows.concat(await select('community_posts',POST_FIELDS,{postIds:missing,limit:201}));const ids=rows.map(x=>x.id);if(!ids.length)return {posts:[],authenticated:!!u};
  const [comments,counts,mine,liked]=await Promise.all([
  select('community_comments',COMMENT_FIELDS,{ids,order:'created_at',limit:500}),
  select('community_like_counts','post_id,likes',{ids}),
