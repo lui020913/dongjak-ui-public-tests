@@ -1,5 +1,10 @@
 name: QA approval bot notifications
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/qa-approval-bot-notify.yml'
+      - 'scripts/qa-approval-notify.mjs'
+      - 'tests/qa-approval-notify.test.mjs'
   issue_comment:
     types: [created]
   schedule:
@@ -7,13 +12,26 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  issues: write
 concurrency:
-  group: qa-approval-bot-notify
+  group: qa-approval-bot-notify-${{ github.event_name == 'pull_request' && github.run_id || 'active' }}
   cancel-in-progress: false
 jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/qa-approval-notify.test.mjs
   notify:
-    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || (github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' || (github.event.issue.number == 15 && !github.event.issue.pull_request))))
+    needs: check
+    permissions:
+      contents: read
+      issues: write
+    if: github.event_name != 'pull_request' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || (github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' || (github.event.issue.number == 15 && !github.event.issue.pull_request))))
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
