@@ -1,5 +1,6 @@
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
+import {bindReliablePopupClose} from './popup-close-input.js';
 import {sheetDragOffset,sheetStageAction} from './mobile-window-motion.js';
 import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
@@ -239,8 +240,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='dj-place-header-close';
   closeButton.setAttribute('aria-label','시설 정보 닫기');closeButton.title='닫기';
   closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>';
-  closeButton.addEventListener('click',event=>{
-    event.stopPropagation();
+  const disposeCloseInput=bindReliablePopupClose(closeButton,()=>{
     const element=popup?.getElement?.();
     const motion=element?.querySelector?.('.maplibregl-popup-content');
     if(element?.dataset.dj912ImmediateDismiss==='true'||!sharedSheet||!motion||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){popup?.remove();return;}
@@ -254,6 +254,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     finish();
   });
   headerActions.append(closeButton);
+  // Dispose the tap fallback with the native MapLibre popup lifecycle.
 
   folderSelect.addEventListener('change',()=>{
     if(!isPlaceSaved(p))return;
@@ -282,6 +283,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const controllerAI=new AbortController();
   popup=new maplibregl.Popup({offset:22,maxWidth:'min(520px, calc(100vw - 24px))',closeButton:false,anchor:'top',className:'dj-place-detail-popup'})
     .setLngLat([p.lng,p.lat]).setDOMContent(root).addTo(map);
+  popup.on('close',disposeCloseInput);
 
   // Shared mobile-first detail sheet: the non-interactive part of the header is the gesture
   // surface at every viewport. Swipe up to expand; down to collapse or dismiss. Actions retain
