@@ -58,7 +58,9 @@ test('nearby sheet shares drag owner, expands and keeps search header visible',(
  const controller=read('src/dj-v8212-sheet-controller.js');
  assert.match(controller,/\['ped-tools-panel','\.ped-tools-panel-head','#ped-tools-close'\]/);
  const nearby=read('src/pedestrian-tools.js');
- assert.match(nearby,/bindHeaderDragInput\(nearbyHeader,window/);
+ assert.match(nearby,/bindHeaderDragInput\\(document,window/);
+ assert.match(nearby,/nearbyHeader\\.getBoundingClientRect\\(\\)/);
+ assert.match(nearby,/event\\.clientX<rect\\.left\\+4/);
  assert.match(nearby,/setMobileSheetExpanded\(panel,true,document,window\)/);
  assert.match(mobileCss,/#ped-tools-panel\.dj871-sheet-expanded:not\(\[hidden\]\)/);
  assert.match(mobileCss,/#ped-tools-panel\[data-nearby-mode="empty"\]:not\(\.dj871-sheet-expanded\)/);
