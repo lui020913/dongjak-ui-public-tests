@@ -225,7 +225,11 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};
-    const unbind=[bindHeaderDragInput(panel,win,{down,move,up,cancel})];
+    // Nearby sheet uses the same single gesture owner, but binds directly
+    // to the actual visible header: a delegated pointerdown from the entire
+    // panel can be lost under Safari/MapLibre's nested scroll compositor.
+    const inputSurface=id==='ped-tools-panel'?handleNodes[0]:panel;
+    const unbind=[bindHeaderDragInput(inputSurface,win,{down,move,up,cancel})];
     cleanups.push(()=>{
       cancel();
       if(suppressClickTimer!==null)win.clearTimeout(suppressClickTimer);
