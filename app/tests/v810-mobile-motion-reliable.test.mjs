@@ -39,5 +39,5 @@ test('mobile sheet animation remains loaded while legacy PC precision assets sta
 test('mobile compact dialogs no longer fade independently',()=>{
   assert.doesNotMatch(coordinator,/fadeOnlyMobileIds/);
   assert.match(coordinator,/windowMotionFrame/);
-  assert.match(coordinator,/sheetFadeOpacity\\(progress,opening,slideFrom\\)/);
+  assert.match(coordinator,/sheetFadeOpacity\(progress,opening,slideFrom\)/);
 });
