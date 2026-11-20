@@ -5,7 +5,7 @@ const icon=(name)=>({
  walk:'<circle cx="12" cy="4" r="2"/><path d="m8 10 4 2 4-2m-4 2v4m-5 6 5-6 5 6"/>',
  bus:'<rect x="4" y="3" width="16" height="17" rx="3"/><path d="M4 11h16m-12 9v2m8-2v2M8 16h.1M16 16h.1"/>',
  theme:'<path d="M19 14.5A8.5 8.5 0 0 1 9.5 5a8.6 8.6 0 1 0 9.5 9.5Z"/>',
- type:'<path d="M4 20 10 4l6 16M6 15h8M17 9h5m-2.5-3v9"/>',
+ type:'<path d="M2 5h7v3c0 4-2.5 7.5-7 10M13 3v18m0-10h3M16 12h4v2c0 2-1.5 4-4 5M22 11v10"/>',
  heart:'<path d="M20 6a5 5 0 0 0-7 0l-1 1-1-1a5 5 0 0 0-7 7l8 8 8-8a5 5 0 0 0 0-7Z"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
  back:'<path d="m15 19-7-7 7-7"/>'

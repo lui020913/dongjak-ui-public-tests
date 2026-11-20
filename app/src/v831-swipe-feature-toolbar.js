@@ -87,11 +87,11 @@ const ICON = {
   layers:'<path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/>',
   footprints:'<path d="M8 3c-2 2-2 6 1 9 2 2 1 5-1 6-2 1-5-1-5-3s3-3 2-6c-.5-2-1-4 3-6Zm9 4c2 2 3 5 1 8-2 3-1 5 1 5 3 0 4-2 2-4-1-1-1-3 0-4 1-3-1-5-4-5Z"/>',
   traffic:'<rect x="9" y="2" width="6" height="19" rx="3"/><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/>',
-  lightbulb:'<path d="M9 18h6m-5 3h4m-2-19a8 8 0 0 0-5 14c1 1 2 2 2 3h6c0-1 1-2 2-3a8 8 0 0 0-5-14Z"/>',
+  lightbulb:'<path d="M6 21V7a4 4 0 0 1 4-4h7M3 21h6M14 3h5l2 4h-9l2-4ZM16.5 10v3m-5-2-1.5 2m11-2 1.5 2"/>',
   ellipsis:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
   scan:'<path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/><circle cx="12" cy="12" r="3"/>',
   upload:'<path d="M12 16V3m-5 5 5-5 5 5M3 17v4h18v-4"/>',
-  refresh:'<path d="M20 11a8 8 0 0 0-15-3L3 11V5m0 6h6m-5 2a8 8 0 0 0 15 3l2-3v6m0-6h-6"/>',
+  refresh:'<path d="M19.5 8.5A8 8 0 1 0 20 15M19.5 3.5v5h-5"/>',
   'eye-off':'<path d="M3 3 21 21M10.5 5a11 11 0 0 1 11 7 13 13 0 0 1-3 3.7M6 6.8A13 13 0 0 0 2.5 12a11 11 0 0 0 15 5.6M10 10a3 3 0 0 0 4 4"/>'
 };
 const drawIcon=type=>`<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round">${ICON[type]||ICON.layers}</svg>`;
@@ -542,7 +542,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    sheet=doc.createElement('section');sheet.id='dj832-data-sheet';sheet.hidden=true;
    sheet.setAttribute('role','region');sheet.setAttribute('aria-label','지도 데이터 안내');
    sheet.innerHTML=`<div class="dj832-handle-area" aria-label="아래로 밀어서 닫기"><span class="dj832-grab-bar" aria-hidden="true"></span></div>
-     <header class="dj832-sheet-header"><h2 class="dj832-sheet-title"></h2><button type="button" class="dj832-sheet-close" aria-label="데이터 안내 닫기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14M19 5 5 19"/></svg></button></header>
+     <header class="dj832-sheet-header"><h2 class="dj832-sheet-title"></h2><button type="button" class="dj832-sheet-close" aria-label="데이터 안내 닫기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></header>
      <div class="dj832-sheet-body"><div class="dj832-state-row"><span>현재 설정</span><strong class="dj832-state-text"></strong></div><h3>데이터 설명</h3><p class="dj832-sheet-summary"></p><h3>이용 시 참고</h3><p class="dj832-sheet-note"></p></div>`;
    sheet.querySelector('.dj832-sheet-close').addEventListener('click',closeSheet);
    const handle=sheet.querySelector('.dj832-handle-area');

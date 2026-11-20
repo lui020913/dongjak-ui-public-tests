@@ -2,33 +2,34 @@
 import {bindHeaderDragInput} from './mobile-header-input.js';
 const KEY='dongjak-phone-shortcuts-v2';
 const icons={building:'<path d="M3 21V9l9-6 9 6v12H3zm9-18v18M6 12l3-2m-3 6 3-2m6-4 3 2m-3 2 3 2"/>',near:'<circle cx="12" cy="12" r="6"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',report:'<path d="M4 20l4-1 12-12-4-4L4 15zM13 6l4 4"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',cloud:'<path d="M6 18a4 4 0 1 1 .5-8A6 6 0 0 1 18 11a3.5 3.5 0 0 1 0 7Z"/>',plus:'<path d="M12 5v14M5 12h14"/>',layers:'<path d="m12 3 9 5-9 5-9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>',shield:'<path d="M12 2l8 4v6c0 5-4 8-8 10-4-2-8-5-8-10V6zM8 12l3 3 5-6"/>',moon:'<path d="M20 15A8 8 0 0 1 9 4a9 9 0 1 0 11 11Z"/>',mountain:'<path d="m2 20 8-14 5 8 3-4 4 10Z"/>',bus:'<rect x="5" y="3" width="14" height="17" rx="3"/><path d="M5 11h14M8 20v2m8-2v2M8 16h1m6 0h1"/>',mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15"/>',alert:'<path d="M12 3 2 21h20L12 3Z M12 9v5m0 3v1"/>'};
+const layerPaths={zone:'<path d="M3 20h18M5 16V8l7-5 7 5v8M9 16v-5h6v5"/>',bocha:'<path d="M5 3v18M19 3v18M12 3v4m0 3v4m0 3v4"/>',livemetro:'<rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 10h12M9 18l-3 4m9-4 3 4M9 14h1m4 0h1"/>',access:'<circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 6v8m0 0-4 7m4-7 4 7"/>',sdot:'<path d="M3 18h18M5 18V9h5v9m4 0V5h5v13M8 12h0m9-3h0"/>',signals:'<path d="M4 10v4h4l5 4V6l-5 4H4zm12-1a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/>',elevator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M7 10l2-2 2 2m2 4 2 2 2-2"/>',crossing:'<path d="M4 4v16m16-16v16M8 5h8m-8 5h8m-8 5h8m-8 5h8"/>',cctv:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvparking:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvother:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',speed:'<path d="M4 19a10 10 0 1 1 16 0H4ZM12 15l4-6"/>',camera:'<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="4"/><path d="M8 6l2-3h4l2 3"/>'};
 export const PHONE_CHOICES=Object.freeze([
  ['pilot','보행안전','shield','#map-safety-toggle'],
  ['night','야간시야','moon','#night-visibility-toggle'],
  ['slope','경사도','mountain','[data-dj-import="slope"]'],
- ['bocha','보차혼용','layers','#sangdo-bocha-toggle'],
+ ['bocha','보차혼용','bocha','#sangdo-bocha-toggle'],
  ['accident','사고다발','alert','[data-dj-import="accidents"]'],
  ['livebus','실시간 버스','bus','[data-live-vehicle="bus"]'],
- ['livemetro','실시간 지하철','bus','[data-live-vehicle="metro"]'],
+ ['livemetro','실시간 지하철','livemetro','[data-live-vehicle="metro"]'],
  ['dong','행정동','map','#open-admin-dongs-from-options'],
- ['cctv','CCTV','shield','[data-dj-import="cctv-security"]'],
- ['zone','보호구역','shield','#protection-zone-toggle'],
- ['access','교통약자','near','#ped-access-toggle'],
+ ['cctv','CCTV','cctv','[data-dj-import="cctv-security"]'],
+ ['zone','보호구역','zone','#protection-zone-toggle'],
+ ['access','교통약자','access','#ped-access-toggle'],
  ['buildings','3D 건물','building','[data-base-layer="buildings"]'],
- ['sdot','도시환경','near','[data-dj-import="sdot-environment"]'],
+ ['sdot','도시환경','sdot','[data-dj-import="sdot-environment"]'],
  ['incidents','돌발정보','alert','[data-dj-import="road-incidents"]'],
- ['cctvparking','주정차 CCTV','shield','[data-dj-import="cctv-parking"]'],
- ['cctvother','기타 CCTV','shield','[data-dj-import="cctv-other"]'],
- ['crossing','횡단지점','map','[data-dj-import="survey-crosswalk"]'],
- ['signals','음향신호기','near','[data-dj-import="audio-signals"]'],
- ['elevator','승강기','near','[data-dj-import="metro-elevator"]'],
- ['speed','제한속도','alert','#sangdo-speed-toggle'],
- ['camera','단속카메라','alert','#sangdo-camera-toggle']
+ ['cctvparking','주정차 CCTV','cctvparking','[data-dj-import="cctv-parking"]'],
+ ['cctvother','기타 CCTV','cctvother','[data-dj-import="cctv-other"]'],
+ ['crossing','횡단지점','crossing','[data-dj-import="survey-crosswalk"]'],
+ ['signals','음향신호기','signals','[data-dj-import="audio-signals"]'],
+ ['elevator','승강기','elevator','[data-dj-import="metro-elevator"]'],
+ ['speed','제한속도','speed','#sangdo-speed-toggle'],
+ ['camera','단속카메라','camera','#sangdo-camera-toggle']
 ]);
 export function normalizePhoneShortcuts(value){return [...new Set(Array.isArray(value)?value.filter(id=>PHONE_CHOICES.some(c=>c[0]===id)):[])].slice(0,3)}
 const read=(w,k,f)=>{try{return JSON.parse(w.localStorage.getItem(k)||'null')??f}catch{return f}};
 const save=(w,k,v)=>{try{w.localStorage.setItem(k,JSON.stringify(v))}catch{}};
-export const phoneIcon=key=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[key]||icons.layers)+'</svg>';
+export const phoneIcon=key=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(layerPaths[key]||icons[key]||icons.layers)+'</svg>';
 
 // The layer overlay stays fixed; only its inner card follows the finger.
 // Compact -> expanded -> compact -> dismiss. Header buttons and the list keep native input.
@@ -98,9 +99,9 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const railActions=new WeakMap();
  const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);railActions.set(node,fn);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
- const body=doc.createElement('div');body.className='djNext-modal-body';const h=doc.createElement('header');const title=doc.createElement('strong');title.textContent='레이어 및 바로가기';const close=doc.createElement('button');close.type='button';close.className='djNext-close';close.textContent='×';close.setAttribute('aria-label','레이어 설정 닫기');title.insertAdjacentHTML('afterbegin',phoneIcon('layers'));h.append(title,close);body.append(h);
+ const body=doc.createElement('div');body.className='djNext-modal-body';const h=doc.createElement('header');const title=doc.createElement('strong');title.textContent='레이어 설정';const close=doc.createElement('button');close.type='button';close.className='djNext-close';close.innerHTML='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>';close.setAttribute('aria-label','레이어 설정 닫기');title.insertAdjacentHTML('afterbegin',phoneIcon('layers'));h.append(title,close);body.append(h);
  const scroll=doc.createElement('div');scroll.className='djNext-layer-scroll';body.append(scroll);
- const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='아이콘을 눌러 지도 기능을 실행하고, 아래 스위치로 상단 바로가기를 등록하세요.';scroll.append(hint);
+ const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='기능 버튼으로 지도를 설정하고, 오른쪽 스위치로 바로가기를 등록하세요.';scroll.append(hint);
  const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
  const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
  let closeTimer=0;
@@ -122,14 +123,14 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='등록 '+selected.length+'/3';list.replaceChildren();
  const groups=[['지도 기능',['pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
- for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';list.append(heading);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
+ for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';const column=doc.createElement('div');column.className='djNext-layer-columns';const pinHeading=doc.createElement('span');pinHeading.textContent='바로가기';pinHeading.className='djNext-layer-column-label';column.append(heading,pinHeading);list.append(column);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
  for(const [id,label,icon,selector] of ids.map(id=>PHONE_CHOICES.find(c=>c[0]===id)).filter(Boolean)){
   const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;
- const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');const layerPaths={zone:'<path d="M3 20h18M5 16V8l7-5 7 5v8M9 16v-5h6v5"/>',bocha:'<path d="M5 3v18M19 3v18M12 3v4m0 3v4m0 3v4"/>',livemetro:'<rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 10h12M9 18l-3 4m9-4 3 4M9 14h1m4 0h1"/>',access:'<circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 6v8m0 0-4 7m4-7 4 7"/>',sdot:'<path d="M3 18h18M5 18V9h5v9m4 0V5h5v13M8 12h0m9-3h0"/>',signals:'<path d="M4 10v4h4l5 4V6l-5 4H4zm12-1a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/>',elevator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M7 10l2-2 2 2m2 4 2 2 2-2"/>',crossing:'<path d="M4 4v16m16-16v16M8 5h8m-8 5h8m-8 5h8m-8 5h8"/>'};if(layerPaths[id])glyph.innerHTML=layerPaths[id];const tile=doc.createElement('span');tile.className='djNext-layer-tile';tile.append(glyph);action.prepend(tile);action.setAttribute('aria-label',label+' 지도 기능');
-  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(!source||source.disabled)state.textContent='준비 중';action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
+ const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');glyph.classList.add('djNext-layer-glyph');action.querySelector('span').className='djNext-layer-label';action.setAttribute('aria-label',label+' 지도 기능');
+  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(!source||source.disabled){state.textContent='준비 중';action.disabled=true;}action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
   const add=doc.createElement('button');add.type='button';add.className='djNext-shortcut-switch';const current=selected.includes(id);
   add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 바로가기');add.setAttribute('aria-checked',String(current));add.disabled=!current&&selected.length>=3;
-  const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);const shortcutLabel=doc.createElement('small');shortcutLabel.className='djNext-shortcut-caption';shortcutLabel.textContent=current?'등록됨':'바로가기';add.append(shortcutLabel);
+  const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);
   add.addEventListener('click',()=>{
    const restoreFocus=doc.activeElement===add;
    if(current){update(selected.filter(x=>x!==id));}else{
