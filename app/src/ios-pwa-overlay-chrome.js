@@ -1,6 +1,7 @@
 const LIGHT_SURFACE = '#eaf0ec';
 const DARK_SURFACE = '#192d32';
 const BROWSER_SURFACE = '#f3f7f5';
+const BROWSER_DARK_SURFACE = '#101f25';
 const DEFAULT_SCRIM = Object.freeze({r:0,g:0,b:0,a:0.4});
 
 const SCRIM_SELECTOR = [
@@ -126,16 +127,16 @@ function colorFromStyle(style) {
   return match?parseCssColor(match[0]):null;
 }
 
-function styleColors(element,win) {
-  const colors=[];
-  for(const pseudo of [undefined,'::before','::after','::backdrop']) {
-    try {
-      const style=win.getComputedStyle(element,pseudo);
-      const color=colorFromStyle(style);
-      if(color&&color.a>0.02)colors.push({color,zIndex:Number.parseInt(style.zIndex,10)||0});
-    } catch(_error) {}
+function readElementColor(element,win,pseudo) {
+  try {
+    const style=win.getComputedStyle(element,pseudo);
+    const color=colorFromStyle(style);
+    return color&&color.a>0.02
+      ? {color,zIndex:Number.parseInt(win.getComputedStyle(element).zIndex,10)||0}
+      : null;
+  } catch(_error) {
+    return null;
   }
-  return colors;
 }
 
 /** Read the actual visible scrim color instead of assuming every modal is identical. */
@@ -147,11 +148,15 @@ export function findActiveScrim(doc,win=window) {
     if(!isVisible(element,win))continue;
     const rect=element.getBoundingClientRect();
     const coversViewport=rect.width>=width*0.8&&rect.height>=height*0.55&&rect.bottom>=height*0.75;
-    const pseudoBackdrop=styleColors(element,win).find(item=>item.color.a>0.02);
-    const computed=win.getComputedStyle(element);
     const candidates=[];
-    if(pseudoBackdrop)candidates.push(pseudoBackdrop);
-    if(coversViewport)candidates.push(...styleColors(element,win));
+    const nativeBackdrop=readElementColor(element,win,'::backdrop');
+    if(nativeBackdrop)candidates.push(nativeBackdrop);
+    if(coversViewport) {
+      for(const pseudo of [undefined,'::before','::after']) {
+        const color=readElementColor(element,win,pseudo);
+        if(color)candidates.push(color);
+      }
+    }
     for(const candidate of candidates) {
       if(!best||candidate.zIndex>=best.zIndex)best=candidate;
     }
@@ -165,7 +170,7 @@ function hasActiveOverlay(doc,app,win) {
   if(LEGACY_OVERLAY_IDS.some(id=>isVisible(doc.getElementById(id),win)))return true;
   if(isVisible(doc.getElementById('map-safety-backdrop'),win))return true;
   if(isVisible(doc.getElementById('map-options-backdrop'),win))return true;
-  return !!doc.querySelector('dialog[open], [aria-modal="true"]:not([hidden]), [data-dj-overlay-open="true"]');
+  return [...doc.querySelectorAll('dialog[open], [aria-modal="true"]:not([hidden]), [data-dj-overlay-open="true"]')].some(element=>isVisible(element,win));
 }
 
 export function installPwaOverlayChrome(doc=document,win=window) {
@@ -180,7 +185,7 @@ export function installPwaOverlayChrome(doc=document,win=window) {
   let frame=0;
   let enabled=false;
 
-  const baselineColor=()=>app.dataset.theme==='dark'?DARK_SURFACE:BROWSER_SURFACE;
+  const baselineColor=()=>app.dataset.theme==='dark'?BROWSER_DARK_SURFACE:BROWSER_SURFACE;
 
   function ensureSeam() {
     if(seam&&seam.isConnected)return;
