@@ -24,9 +24,12 @@
         }
         // Every cold app start is light. Only an intentional in-flight iOS PWA
         // theme/night reload may keep its saved selection for restoration.
-        var displayTheme=pending ? (pending.night==='on'?'dark':chosen) : 'light';
+        var themeReload=null;
+        try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
+        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
+        var displayTheme=themeReload ? themeReload.theme : pending ? (pending.night==='on'?'dark':chosen) : 'light';
         document.documentElement.dataset.theme=displayTheme;
-        if(!pending){try{localStorage.setItem('dongjak_safety_color_theme_v1','light');}catch(_e){}}
+        if(!pending&&!themeReload){try{localStorage.setItem('dongjak_safety_color_theme_v1','light');}catch(_e){}}
         if(pending){
           document.documentElement.dataset.djReloadSplash='true';
           document.documentElement.dataset.djReloadMode=pending.night==='on'?'night':'theme';
@@ -48,6 +51,7 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#e5ece8';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
           ? (displayTheme==='dark'?'#192d32':'#e5ece8')

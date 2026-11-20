@@ -134,6 +134,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
     case "$patch" in
       18) note="창 간 전환 복원 및 시설 정보창 중복 모션 정리";;
       19) note="탄성 헤더 제스처와 전환 연속성, 탭 및 로딩 피드백 개선";;
+      20) note="다크 지하철 색상과 환승 배지 가독성, iOS 테마 재동기화 및 날씨창 개선";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null

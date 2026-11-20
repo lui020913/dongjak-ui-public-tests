@@ -250,6 +250,7 @@ export function initTheme({map,app}){
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
     if(!suppressPreferenceSave)safeStorageSet(THEME_KEY,themeState.value);
     applyTheme();
+    if(!suppressPreferenceSave&&typeof window.CustomEvent==='function')window.dispatchEvent(new CustomEvent('dongjak:manual-theme-change',{detail:{theme:themeState.value}}));
   });
   // Night vision uses the normal theme toggle pipeline (including listeners
   // installed by other map layers) but never overwrites the user preference.

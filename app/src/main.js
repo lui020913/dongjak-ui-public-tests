@@ -150,6 +150,7 @@ import './mobile-first-layout.css';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
+import {readManualThemeReload,installManualThemeReload} from './manual-pwa-theme-reload.js';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -594,14 +595,15 @@ new MutationObserver(()=>{
 const djPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
 const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency});
 const djNormalPixelRatio=Math.min(1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
+const themeReloadState=readManualThemeReload(window.sessionStorage);
 const map = new maplibregl.Map({
   container: 'map',
   attributionControl:false,
   style: 'https://tiles.openfreemap.org/styles/bright',
-  center: DONGJAK_CENTER,
-  zoom: 12.5,
-  pitch: 0,
-  bearing: 0,
+  center: themeReloadState?.camera?.center||DONGJAK_CENTER,
+  zoom: themeReloadState?.camera?.zoom??12.5,
+  pitch: themeReloadState?.camera?.pitch??0,
+  bearing: themeReloadState?.camera?.bearing??0,
   minZoom: 10,
   maxZoom: 19,
   // 동작구 경계 바깥 약 10km까지 카메라 이동을 제한합니다.
@@ -654,6 +656,7 @@ const immersiveChrome=installMapImmersive({
   onRestore:()=>requestAnimationFrame(syncOverviewSheetForViewport)
 });
 const visualTheme = initTheme({map,app});
+installManualThemeReload({map,app,canReload:()=>mapReady&&!navMode&&!routeStart&&!routeEnd&&!routeRequestPending&&!addMode&&!communityPickMode&&!routePickMode&&app.dataset.sangdoNight!=='on'&&app.dataset.tab==='mine'});
 
 initWeatherWidget({
   getPosition: () => getDevicePosition({enableHighAccuracy:false,timeout:12000,maximumAge:120000}),
@@ -2204,6 +2207,7 @@ bookmarkButton.addEventListener('click',() => {
   toast(p.favorite?'관심 지점에 추가했습니다.':'관심 지점에서 제외했습니다.');
 });
 navigate('map');
+if(themeReloadState?.tab==='mine')map.once('load',()=>requestAnimationFrame(()=>navigate('mine')));
 
 
 

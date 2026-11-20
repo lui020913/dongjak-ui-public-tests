@@ -38,7 +38,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     if(sheet)return;
     sheet=doc.createElement('section');sheet.id='dj854-weather-sheet';sheet.hidden=true;
     sheet.setAttribute('role','dialog');sheet.setAttribute('aria-label','현재 날씨');
-    sheet.innerHTML=`<header class="dj854-weather-head"><h2>현재 날씨</h2><button type="button" class="dj854-weather-close" aria-label="날씨창 닫기">×</button></header>
+    sheet.innerHTML=`<header class="dj854-weather-head"><span class="dj-weather-edge-drag" aria-hidden="true"></span><h2>현재 날씨</h2><button type="button" class="dj854-weather-close" aria-label="날씨창 닫기">×</button></header>
       <p class="dj854-weather-place">동작구</p><strong class="dj854-weather-main">날씨 조회 중</strong>
       <p class="dj854-weather-detail">상세 기상 정보를 불러오는 중입니다.</p>
       <div class="dj854-weather-actions"><button type="button" data-weather-refresh>날씨 다시 조회</button><button type="button" data-weather-location>내 위치 날씨</button></div>`;

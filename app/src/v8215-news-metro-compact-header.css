@@ -164,19 +164,19 @@ html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-n
   background:#234438!important;border-color:#497261!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up{
-  background:#193c52!important;border-color:#497892!important;
+  background:#24272c!important;border-color:#3a4147!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down{
-  background:#493a26!important;border-color:#876a42!important;
+  background:#24272c!important;border-color:#3a4147!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.up{
-  background:#244d66!important;color:#d3edff!important;border-color:#4f7b92!important;
+  background:#2d333a!important;color:#9bcdf4!important;border-color:#3a4147!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
-  background:#634d2e!important;color:#ffe6b8!important;border-color:#896e42!important;
+  background:#2d333a!important;color:#e8c68d!important;border-color:#3a4147!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
-  background:#233b3c!important;color:#eaf6ee!important;
+  background:#24272c!important;color:#eef1f3!important;
 }
 @media(max-width:359px){
   html body #app#app #transport-sheet[data-kind="subway"] .transport-panel-head{
@@ -202,8 +202,8 @@ html body #app#app #transport-sheet[data-kind="subway"] .transport-timetable-pan
   border-color:#f0d49b!important;background:#fff9ec!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-timetable-pane--up{
-  background:#193c52!important;border-color:#497892!important;
+  background:#24272c!important;border-color:#3a4147!important;
 }
 html body #app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-timetable-pane--down{
-  background:#493a26!important;border-color:#876a42!important;
+  background:#24272c!important;border-color:#3a4147!important;
 }

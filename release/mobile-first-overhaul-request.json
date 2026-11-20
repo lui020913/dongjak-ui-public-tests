@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.19",
+  "application_version": "9.2.20",
   "public_work_branch": "main",
-  "purpose": "Shared iOS-inspired interaction feedback, spring detents, reversal continuity and version reconstruction fix",
-  "attempt": 87,
+  "purpose": "Improve dark subway colors, readable transfer badges, safe one-shot iOS theme recovery and weather sheet",
+  "attempt": 88,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Fix duplicate historical release note and transit test mock; retain protected deployment gate",
+  "last_retry_reason": "Production 9.2.19 real iPhone screenshots",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

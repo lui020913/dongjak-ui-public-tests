@@ -43,9 +43,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const color=theme==='dark'?(dimmed?'#142428':'#192d32'):(dimmed?'#bfc6c2':'#e5ece8');
       root.style.setProperty('--dj-pwa-status-color',color);
+      root.style.setProperty('background-color',color,'important');
+      if(band.style.backgroundColor!==color)band.style.backgroundColor=color;
       if(themeMeta.getAttribute('content')!==color)themeMeta.setAttribute('content',color);
     } else {
-      band?.remove();band=null;bridge?.remove();bridge=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');
+      band?.remove();band=null;bridge?.remove();bridge=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');
       themeMeta.setAttribute('content',baselineColor());
     }
   }
