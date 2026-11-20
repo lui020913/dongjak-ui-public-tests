@@ -42,7 +42,7 @@ for(const run of dirs){
    }
   }
   flags.push(...[...layout.values()].filter(x=>x.count>=3).map(x=>({...x,px:Math.round(x.px*10)/10})));
-  const scene={...meta,metrics:{samples:count,p95Ms:p95,over34Ms:intervals.filter(n=>n>34).length,over50Ms:intervals.filter(n=>n>50).length},flags:flags.slice(0,200)};
+  const scene={...meta,stages:rows(join(dir,'stages.ndjson')),metrics:{samples:count,p95Ms:p95,over34Ms:intervals.filter(n=>n>34).length,over50Ms:intervals.filter(n=>n>50).length},flags:flags.slice(0,200)};
   if(process.argv.includes('--vision')&&(flags.length||meta.status==='failed')&&times.length&&report.scenes.filter(s=>s.vision).length<5){
    // Explicit opt-in only, anonymous test captures. No credentials, code or logs in request.
    const key=process.env.GEMINI_API_KEY, model=process.env.GEMINI_MODEL||'gemini-3.5-flash-lite';

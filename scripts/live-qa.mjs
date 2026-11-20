@@ -13,15 +13,18 @@ const target=new URL(process.env.DONGJAK_TARGET_URL||'https://dongjak-walk-safet
 if(target.protocol!=='https:'||target.username||target.password||target.search||target.hash||!/^([a-z0-9-]+\.)?dongjak-walk-safety-preview\.pages\.dev$/.test(target.hostname))throw Error('Only anonymous Dongjak Pages targets allowed');
 const token=randomUUID(), port=Number(process.env.QA_PORT||8765);
 let result=null;
+const journey=process.argv.includes('--journey');
 const projects=process.argv.includes('--full')?['mobile375','mobile390','mobile430','mobile390-webkit-header']:['mobile390'];
 const args=['exec','--','playwright','test','--config=playwright.v911-remote.config.mjs','--workers=1',...projects.map(p=>'--project='+p)];
 const lane=Number(process.env.QA_LANE||0), total=Number(process.env.QA_SHARD_TOTAL||0);
-if(lane||total){if(!Number.isInteger(lane)||!Number.isInteger(total)||lane<1||lane>total||total>20)throw Error('Invalid QA shard');args.push('--shard='+lane+'/'+total);}
+if(lane||total){if(!Number.isInteger(lane)||!Number.isInteger(total)||lane<1||lane>total||total>20)throw Error('Invalid QA shard');if(journey){if(total!==6)throw Error('Continuous QA requires six lanes');args.push('--grep','@journey-'+lane+'$');}else args.push('--shard='+lane+'/'+total);}
+const grepCase=process.argv.find(a=>a.startsWith('--grep-case='));if(grepCase){if(journey||lane||process.argv.includes('--full'))throw Error('Targeted regression requires independent local run');const value=grepCase.slice(12);if(!value||!/^[-a-zA-Z0-9 ,]+$/.test(value))throw Error('Invalid regression case');args.push('--grep',value);}
+if(journey&&process.argv.includes('--full'))throw Error('Choose continuous or independent QA, not both');
 if(process.argv.includes('--smoke-target'))args.push('--grep','phone weather single window and layer grid dark surfaces');
 const safeId=/^[a-f0-9-]{36}$/;
-const scenes=()=>readdirSync(root).filter(n=>safeId.test(n)).flatMap(id=>{try{return [JSON.parse(readFileSync(join(root,id,'meta.json'),'utf8'))]}catch{return []}}).sort((a,b)=>a.start-b.start);
+const scenes=()=>readdirSync(root).filter(n=>safeId.test(n)).flatMap(id=>{try{const meta=JSON.parse(readFileSync(join(root,id,'meta.json'),'utf8'));try{meta.stage=JSON.parse(readFileSync(join(root,id,'stage.json'),'utf8'));}catch{}return [meta]}catch{return []}}).sort((a,b)=>a.start-b.start);
 const remote=(lane?startLiveStream:startRemoteRelay)({root,scenes,result:()=>result,lane});
-const childEnv={...process.env,DONGJAK_TARGET_URL:target.href,DONGJAK_LIVE_QA_DIR:root,DONGJAK_FULL_MOBILE_QA:process.argv.includes('--full')?'1':'0'};
+const childEnv={...process.env,DONGJAK_TARGET_URL:target.href,DONGJAK_LIVE_QA_DIR:root,DONGJAK_FULL_MOBILE_QA:process.argv.includes('--full')?'1':'0',DONGJAK_QA_JOURNEY:journey?'1':'0'};
 for(const k of ['QA_WRITER_KEY','QA_VIEWER_KEY','QA_RELAY_URL','GEMINI_API_KEY','CLOUDFLARE_API_TOKEN','QA_CF_API_TOKEN'])delete childEnv[k];
 const child=spawn(process.platform==='win32'?'npm.cmd':'npm',args,{stdio:['ignore','pipe','pipe'],env:childEnv,shell:process.platform==='win32'});
 for(const [stream,dst] of [[child.stdout,process.stdout],[child.stderr,process.stderr]])stream.on('data',b=>{dst.write(b);appendFileSync(join(root,'runner.log'),b);});

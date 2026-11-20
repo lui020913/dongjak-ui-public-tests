@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const put=(path,data)=>{const tmp=path+'.tmp';writeFileSync(tmp,JSON.stringify(data));renameSync(tmp,path);};
 const root=process.env.DONGJAK_LIVE_QA_DIR;
-const targets=['#bottom-nav','.topbar','#djNext-toolbar','#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel header','#djNext-layer-panel .djNext-layer-scroll','#dj854-weather-sheet','#transport-sheet','#route-panel','#participation-panel','#news-panel','#mine-panel','.dj-place-detail-popup','#version-history-modal'];
+const targets=['#bottom-nav','.topbar','#djNext-toolbar','#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel header','#djNext-layer-panel .djNext-layer-scroll','#dj854-weather-sheet','#transport-sheet','#route-panel','#participation-panel','#news-panel','#mine-panel','.dj-place-detail-popup','#version-history-modal','#dj-ai-search-modal','#dj-ai-search-modal .dj-ai-transcript','#dj-ai-search-modal .dj-ai-composer','#ped-tools-panel','#community-form','#community-form .community-form-top','#route-map-card','#dj840-theme-confirm','#dj860-onboarding'];
 export {expect};
 export const test=base.extend({
   liveAudit:[async({page},use,info)=>{
@@ -60,7 +60,7 @@ export const test=base.extend({
             streamLast=now;const path=join(dir,'latest.jpg');
             writeFileSync(path+'.tmp',Buffer.from(data,'base64'));renameSync(path+'.tmp',path);
           }
-          if(now-last<90||count>=2200)return;
+          if(now-last<90||count>= (process.env.DONGJAK_QA_JOURNEY==='1'?4200:2200))return;
           last=Date.now();const file=String(++count).padStart(6,'0')+'.jpg';
           writeFileSync(join(dir,'frames',file),Buffer.from(data,'base64'));
           appendFileSync(join(dir,'frame-times.ndjson'),JSON.stringify({file,t:last})+'\n');
