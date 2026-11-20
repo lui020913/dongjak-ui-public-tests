@@ -1,3 +1,4 @@
+import {liveRole,liveMessage,liveDashboard} from './live-stream.mjs';
 // Optional isolated Cloudflare Durable Object relay. No app routes or app bindings.
 const MAX=450_000, LOCK='live-qa-single-operator';
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -14,7 +15,15 @@ $('login').onclick=()=>{clearTimeout(timer);key=$('key').value;$('key').value=''
 export default {
  async fetch(req,env){
   const u=new URL(req.url), p=u.pathname;
-  if(req.method==='GET'&&p==='/')return new Response(dashboard,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self'; frame-ancestors 'none'"}});
+  if(req.method==='GET'&&(p==='/'||p==='/legacy'))return new Response(p==='/'?liveDashboard:dashboard,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self' wss:; frame-ancestors 'none'"}});
+  if(p==='/api/live'){
+   const auth=liveRole(req);
+   if(!auth)return json({error:'invalid websocket'},400);
+   if(!env.QA_WRITER_KEY||!env.QA_VIEWER_KEY||env.QA_WRITER_KEY.length<32||env.QA_VIEWER_KEY.length<32||env.QA_WRITER_KEY===env.QA_VIEWER_KEY)return json({error:'not configured'},503);
+   if(!await equals(auth.key,auth.role==='writer'?env.QA_WRITER_KEY:env.QA_VIEWER_KEY))return json({error:'unauthorized'},401);
+   const internal=new Request(req.url,{headers:{Upgrade:'websocket','Sec-WebSocket-Protocol':auth.protocol,'X-QA-Role':auth.role}});
+   return env.QA_SESSION.get(env.QA_SESSION.idFromName('live-lane-'+auth.lane)).fetch(internal);
+  }
   const writer=p==='/api/publish'||p==='/api/runner';
   const viewer=p==='/api/watch'||p==='/api/control';
   if(!writer&&!viewer)return json({error:'not found'},404);
@@ -34,9 +43,19 @@ export default {
  }
 };
 export class QASession{
- constructor(ctx){this.storage=ctx.storage;}
+ constructor(ctx){this.ctx=ctx;this.storage=ctx.storage;this.paused=false;}
  async fetch(req){
   const p=new URL(req.url).pathname;
+  if(p==='/api/live'){
+   const role=req.headers.get('X-QA-Role'),protocol=req.headers.get('Sec-WebSocket-Protocol');
+   if(!['writer','viewer'].includes(role)||protocol!=='qa-v2.'+role)return json({error:'invalid role'},400);
+   if(role==='writer'&&this.ctx.getWebSockets('writer').length)return json({error:'lane busy'},409);
+   const pair=new WebSocketPair(),[client,server]=Object.values(pair);
+   this.ctx.acceptWebSocket(server,[role]);server.serializeAttachment({role,paused:false});
+   this.liveControl();
+   if(role==='viewer')this.emit(server,JSON.stringify({type:'availability',online:this.ctx.getWebSockets('writer').length>0}));
+   return new Response(null,{status:101,webSocket:client,headers:{'Sec-WebSocket-Protocol':protocol}});
+  }
   const control=await this.storage.get('control')||{paused:false};
   if(p==='/api/runner')return json(control);
   if(p==='/api/control'){
@@ -62,5 +81,36 @@ export class QASession{
   }
   return json({error:'not found'},404);
  }
+ emit(ws,message){try{ws.send(message);}catch{try{ws.close(1011,'send failed');}catch{}}}
+ liveControl(exclude){
+  const viewers=this.ctx.getWebSockets('viewer').filter(w=>w!==exclude);
+  const writers=this.ctx.getWebSockets('writer').filter(w=>w!==exclude);
+  for(const w of writers){
+   const a=w.deserializeAttachment()||{role:'writer',paused:false};
+   this.emit(w,JSON.stringify({type:'control',watching:viewers.length>0,paused:a.paused===true}));
+  }
+ }
+ webSocketMessage(ws,message){
+  const role=ws.deserializeAttachment()?.role,m=liveMessage(role,message);if(!m)return;
+  if(role==='writer'){
+   for(const v of this.ctx.getWebSockets('viewer'))this.emit(v,m.data);
+  }else if(m.type==='pause'){
+   for(const w of this.ctx.getWebSockets('writer'))w.serializeAttachment({role:'writer',paused:m.paused});
+   this.liveControl();
+  }
+ }
+ webSocketClose(ws,code){
+  const role=ws.deserializeAttachment()?.role;
+  try{ws.close(code===1006?1011:code,'closed');}catch{}
+  if(role==='viewer'){
+   if(!this.ctx.getWebSockets('viewer').some(v=>v!==ws)){
+    for(const w of this.ctx.getWebSockets('writer'))w.serializeAttachment({role:'writer',paused:false});
+   }
+   this.liveControl(ws);
+  }else if(role==='writer'){
+   for(const v of this.ctx.getWebSockets('viewer'))this.emit(v,JSON.stringify({type:'availability',online:false}));
+  }
+ }
+ webSocketError(ws){this.webSocketClose(ws,1011);}
  async alarm(){await this.storage.deleteAll();}
 }
