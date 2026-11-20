@@ -80,7 +80,7 @@ test('Switching to installed PWA removes every browser-only geometry variable',(
   assert.equal(d.documentElement.dataset.djBrowserKeyboard,undefined);
   dispose();
 });
-test('Source binds only scoped CSS after v885 and preserves PWA adjustment module',()=>{
+test('Source binds only scoped CSS after v885 and preserves iOS PWA overlay chrome controller',()=>{
   const source=fs.readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
   const styles=fs.readFileSync(new URL('../src/mobile-browser-layout.css',import.meta.url),'utf8');
   const anchor=source.indexOf("import './v885-mobile-unified-layout.css';");
@@ -91,5 +91,5 @@ test('Source binds only scoped CSS after v885 and preserves PWA adjustment modul
   assert.doesNotMatch(styles,/\)\s+:not\(\[hidden\]\)/,'Sheet state guards must target the sheet, not descendants');
   assert.doesNotMatch(styles,/@media\s*\(min-width:/);
   assert.doesNotMatch(styles,/maplibre-canvas|#map(?=[\\s>.:,{])/);
-  assert.match(fs.readFileSync(new URL('../src/mobile-pwa-status-tone-v793.js',import.meta.url),'utf8'),/isIosHomeScreenPhone/);
+  assert.match(fs.readFileSync(new URL('../src/ios-pwa-overlay-chrome.js',import.meta.url),'utf8'),/isIosHomeScreenPhone/);
 });
