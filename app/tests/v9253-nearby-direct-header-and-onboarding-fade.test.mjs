@@ -5,8 +5,9 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 test('nearby safety sheet uses the existing single sheet gesture owner on the visible header',()=>{
  const source=read('src/dj-v8212-sheet-controller.js');
- assert.match(source,/inputSurface=id==='ped-tools-panel'\?handleNodes\[0\]:panel/);
- assert.match(source,/bindHeaderDragInput\(inputSurface,win,\{down,move,up,cancel\}\)/);
+ assert.match(source,/id==='ped-tools-panel'/);
+ assert.match(source,/bindHeaderDragInput\(handleNodes\[0\],win,\{down,move,up,cancel\}\)/);
+ assert.match(source,/bindHeaderDragInput\(panel,win,\{down,move,up,cancel\}\)/);
  assert.match(source,/setMobileSheetExpanded\(panel,true,doc,win\)/);
  assert.match(source,/sheetStageAction\(delta,g.velocity/);
 });
