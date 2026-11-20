@@ -340,6 +340,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
     timeout-minutes: 35
+    outputs:
+      previous_public_sha: ${{ steps.promote.outputs.previous_public_sha }}
     env:
       SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
       PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
@@ -385,6 +387,7 @@ jobs:
           test "$SOURCE_SHA" = "$PUBLIC_SHA"
           test "$(jq -er '.source' release/mobile-first-overhaul-request.json)" = "public-app"
       - name: Deploy exact tested artifact to Production with guarded rollback
+        id: promote
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
@@ -394,8 +397,10 @@ jobs:
           jq -e '.success==true and .result.production_branch=="main" and (.result.deployment_configs.production.d1_databases.SEOUL_FACILITIES_DB.id|type=="string") and (.result.deployment_configs.production.ai_bindings.AI!=null)' "$RUNNER_TEMP/project-before.json" >/dev/null
           jq -S -c '.result.deployment_configs.production|{d1_databases,ai_bindings,env_vars:(.env_vars|with_entries(.value={type:.value.type}))}' "$RUNNER_TEMP/project-before.json" > "$RUNNER_TEMP/bindings-before"
           previous="$(cf "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
-          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?before=$GITHUB_RUN_ID" |
-            jq -e '.release_status=="DEPLOYED_PRODUCTION" and (.source_commit|test("^[a-f0-9]{40}$"))' >/dev/null
+          curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?before=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/production-before-marker.json"
+          jq -e '.release_status=="DEPLOYED_PRODUCTION" and (.source_commit|test("^[a-f0-9]{40}$"))' "$RUNNER_TEMP/production-before-marker.json" >/dev/null
+          prior_public="$(jq -r '.public_ui_source_commit // ""' "$RUNNER_TEMP/production-before-marker.json")"
+          if [[ "$prior_public" =~ ^[a-f0-9]{40}$ ]]; then echo "previous_public_sha=$prior_public" >> "$GITHUB_OUTPUT"; fi
           cd "$RUNNER_TEMP/release"
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
@@ -450,7 +455,7 @@ jobs:
           echo "Mobile-only Production promotion verified for $SOURCE_SHA." >> "$GITHUB_STEP_SUMMARY"
       - name: Remove decrypted release and private diagnostics
         if: always()
-        run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log"
+        run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log" "$RUNNER_TEMP/production-before-marker.json"
 
   notify-preview:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa]
@@ -492,6 +497,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           APP_VERSION: ${{ needs.build.outputs.app_version }}
           WORK_DESCRIPTION: ${{ github.event.head_commit.message }}
+          PREVIOUS_PUBLIC_SHA: ${{ needs.production.outputs.previous_public_sha }}
+          DEPLOYED_SHA: ${{ needs.build.outputs.public_sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -500,7 +507,14 @@ jobs:
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           description="$(printf '%s' "$WORK_DESCRIPTION" | head -n 1 | cut -c1-180)"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
+          purpose="$(gh api "repos/$GITHUB_REPOSITORY/contents/release/mobile-first-overhaul-request.json?ref=$DEPLOYED_SHA" --jq .content | base64 -d | jq -r '.purpose // ""' | head -c 1000 || true)"
+          comparison=""; files=""
+          if [[ "$PREVIOUS_PUBLIC_SHA" =~ ^[a-f0-9]{40}$ && "$DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            comparison="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/$PREVIOUS_PUBLIC_SHA...$DEPLOYED_SHA"
+            files="$(gh api "repos/$GITHUB_REPOSITORY/compare/$PREVIOUS_PUBLIC_SHA...$DEPLOYED_SHA" --jq '.files[]|select(.filename|startswith("app/src/") or startswith("frontend/production/"))|.filename' | head -n 15 || true)"
+          fi
+          if [ -z "$files" ]; then files="비교 내역에서 직접 확인 (파일 목록 미확인 또는 앱 소스 변경 없음)"; fi
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 기존 모바일 12개 병렬, 디자인 6개 연속 검증, Gemini 자율 탐색 및 Production 상태 확인 통과\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
