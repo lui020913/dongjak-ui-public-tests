@@ -345,3 +345,27 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  #dj-ai-search-modal .dj-ai-disclaimer{margin:0;text-align:center;border:0;padding:0!important}
 }
 @media(prefers-reduced-motion:reduce){#dj-ai-search-modal button{transition:none!important}}
+
+/* The iOS native dialog and its opaque status-bar sampling surface MUST remain
+ * stationary and opaque. Only its inner content fades, never the backdrop. */
+@media (max-width:699px) {
+  @keyframes dj9251-ai-content-enter {
+    from {opacity:.08}
+    to {opacity:1}
+  }
+  @keyframes dj9251-ai-content-leave {
+    from {opacity:1}
+    to {opacity:0}
+  }
+  html body #dj-ai-search-modal[open]:not(.dj887-ai-closing) > .dj-ai-search-body {
+    animation:dj9251-ai-content-enter 230ms cubic-bezier(.24,.72,.34,1) both!important;
+  }
+  html body #dj-ai-search-modal[open].dj887-ai-closing > .dj-ai-search-body {
+    animation:dj9251-ai-content-leave 165ms ease-in both!important;
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce) {
+  html body #dj-ai-search-modal[open] > .dj-ai-search-body {
+    animation:none!important;
+  }
+}
