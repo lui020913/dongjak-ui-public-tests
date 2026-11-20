@@ -907,13 +907,19 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
  await expect(feed.getByRole('button',{name:'전체 게시글 보기'})).toBeVisible();
  await search.blur();
- await tap(page,feed.getByRole('button',{name:'전체 게시글 보기'}));
+ const reset=feed.getByRole('button',{name:'전체 게시글 보기'});
+ // Empty-state actions intentionally live inside a vertically scrollable sheet.
+ // Model the real finger-scroll before asserting the button is hit-testable.
+ await reset.scrollIntoViewIfNeeded();
+ await tap(page,reset);
  await expect(search).toHaveValue('');
  // On a genuinely empty public database, the first-run home must include
  // useful actions. Existing real posts remain visible instead of sample data.
  if(await feed.locator('.dj-community-empty-state').isVisible()){
-   await expect(feed.getByRole('button',{name:'첫 글 작성하기'})).toBeVisible();
-   await tap(page,feed.getByRole('button',{name:'첫 글 작성하기'}));
+   const compose=feed.getByRole('button',{name:'첫 글 작성하기'});
+   await expect(compose).toBeVisible();
+   await compose.scrollIntoViewIfNeeded();
+   await tap(page,compose);
    await expect(panel.locator('#community-form')).toBeVisible();
    await tap(page,panel.locator('#community-compose-close'));
    await expect(panel.locator('#community-form')).toBeHidden();
