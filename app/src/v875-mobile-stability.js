@@ -18,6 +18,7 @@ export function installV875MobileStability(doc=document,win=window){
       scrollArea.appendChild(child);
     }
     panel.appendChild(scrollArea);
+    panel.dataset.djTransportLayout='compact-v2';
   }
   // The transport sheet's top grip and header are both handled by
   // dj-v8212-sheet-controller. A second pointer owner bypassed the staged

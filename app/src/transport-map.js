@@ -2174,8 +2174,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       group.append(notice);
     }
     if(liveTab)liveTab.textContent='도착예정';
-    if(result?.sourceStatus==='quota')container.replaceChildren(el('p','metro-quota-notice',result.message),group);
-    else container.replaceChildren(group);
+    if(result?.sourceStatus==='quota'){
+      cards.querySelector('.metro-planned-notice')?.remove();
+      const notice=el('p','metro-quota-notice','실시간 API 조회 한도 초과 · 시간표 기준 예상 도착 (실시간 지연 미반영)');
+      container.replaceChildren(notice,group);
+    }else container.replaceChildren(group);
   }
   let visibleServiceHours=null;
   let timetableExpanded=false,timetableDay=null,timetableLine='all',timetableDirection='all';
@@ -2716,7 +2719,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           const line=btn.dataset.djLine;
           const active=normalizeLineName(place.selectedLine||'')===line;
           btn.setAttribute('aria-pressed',String(active));
-          btn.style.setProperty('border-color',active?subwayLineColor(line):'transparent','important');
+          btn.style.removeProperty('border-color');
           btn.querySelector('.metro-panel-badge')?.classList.toggle('dj-active-transfer-line',active);
         }
       }
@@ -2730,7 +2733,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         badge.style.setProperty('background-color',subwayLineColor(line),'important');
         badge.style.setProperty('color','#fff','important');
         button.style.setProperty('background-color','transparent','important');
-        button.style.setProperty('border-color',normalizeLineName(place.selectedLine||'')===line?subwayLineColor(line):'transparent','important');
+        // Selection is rendered by the compact header material, not an inline outer border.
         if(normalizeLineName(place.selectedLine||'')===line)badge.classList.add('dj-active-transfer-line');
         button.append(badge);
         button.addEventListener('click',()=>{

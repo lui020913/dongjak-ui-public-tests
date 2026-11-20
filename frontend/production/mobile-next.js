@@ -188,11 +188,15 @@ export function installPhonePermissions({app,doc=document,win=window}){
  body.querySelector('.djNext-continue').addEventListener('click',continueIntro);body.querySelector('.djNext-permission-skip').addEventListener('click',continueIntro);
  const form=doc.querySelector('.map-quick-search-form'),input=$('map-quick-search-query');if(!form||!input)return;
  const mic=doc.createElement('button');mic.id='djNext-mic';mic.type='button';mic.setAttribute('aria-label','음성 장소 검색');mic.setAttribute('aria-pressed','false');mic.innerHTML=phoneIcon('mic');form.insertBefore(mic,form.querySelector('[type=submit]'));
- const feedback=doc.createElement('span');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');mic.before(feedback);
+ const voicePanel=doc.createElement('div');voicePanel.id='djNext-voice-panel';voicePanel.setAttribute('aria-hidden','true');
+ const wave=doc.createElement('div');wave.className='djNext-voice-wave';wave.setAttribute('aria-hidden','true');
+ for(const h of [10,20,34,46,26,38,18,30,12]){const bar=doc.createElement('i');bar.style.setProperty('--voice-bar',h+'px');wave.append(bar);}
+ const feedback=doc.createElement('span');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');
+ voicePanel.append(wave,feedback);form.append(voicePanel);
  let active=null,timer=0;
- const clearMessage=()=>{win.clearTimeout(timer);feedback.hidden=true;delete app.dataset.djVoiceFeedback;};
- const message=(t,sticky=false)=>{win.clearTimeout(timer);feedback.hidden=false;feedback.textContent=t;app.dataset.djVoiceFeedback='true';if(!sticky)timer=win.setTimeout(clearMessage,5000);};
- const reset=()=>{active=null;delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');};
+ const clearMessage=()=>{win.clearTimeout(timer);feedback.hidden=true;voicePanel.setAttribute('aria-hidden','true');delete app.dataset.djVoiceFeedback;};
+ const message=(t,sticky=false)=>{win.clearTimeout(timer);feedback.hidden=false;feedback.textContent=t;voicePanel.setAttribute('aria-hidden','false');app.dataset.djVoiceFeedback='true';if(!sticky)timer=win.setTimeout(clearMessage,5000);};
+ const reset=()=>{active=null;delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');mic.innerHTML=phoneIcon('mic');};
  const stop=()=>{if(!active)return;const r=active;reset();clearMessage();try{r.abort?.();}catch{}};
  mic.addEventListener('click',()=>{
   if(active){stop();return;}
@@ -201,7 +205,7 @@ export function installPhonePermissions({app,doc=document,win=window}){
   if(doc.activeElement===input)input.blur();
   $('map-quick-search-close')?.click();
   const r=new API();active=r;r.lang='ko-KR';r.interimResults=true;r.continuous=false;
-  app.dataset.djVoiceListening='true';mic.setAttribute('aria-pressed','true');mic.setAttribute('aria-label','음성 인식 종료');message('음성 인식 준비 중…',true);
+  app.dataset.djVoiceListening='true';mic.setAttribute('aria-pressed','true');mic.setAttribute('aria-label','음성 인식 종료');mic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';message('음성 인식 준비 중…',true);
   r.onstart=()=>{if(active===r)message('듣는 중… 말씀해 주세요.',true);};
   r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;if(!result.isFinal){message(value,true);return;}reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();};
   r.onerror=e=>{if(active!==r)return;reset();const messages={'not-allowed':'마이크 권한을 허용해 주세요.','service-not-allowed':'음성 검색을 이용할 수 없습니다.','no-speech':'음성이 감지되지 않았습니다.','audio-capture':'마이크를 사용할 수 없습니다.','network':'네트워크 연결을 확인해 주세요.','language-not-supported':'한국어 음성 검색을 지원하지 않습니다.'};if(e.error==='aborted')clearMessage();else message(messages[e.error]||'음성 검색을 다시 시도해 주세요.');};

@@ -839,7 +839,18 @@ test('AI full-screen conversation and inline voice state keep the map task separ
  await expect(ai.locator('.dj-ai-transcript')).toBeVisible();await expect(ai.locator('.dj-ai-composer')).toBeVisible();
  await ai.getByRole('button',{name:'AI 검색 닫기'}).click();await expect(ai).toBeHidden();
  const mic=page.locator('#djNext-mic'),shell=page.locator('#map-quick-search'),status=page.locator('#djNext-voice-status');
- const before=await shell.boundingBox();await tap(page,mic);await expect(mic).toHaveAttribute('aria-pressed','true');await expect(status).toContainText('듣는 중');await expect(status).toHaveCSS('position','static');
- await expect.poll(async()=>{const b=await shell.boundingBox();return b&&before?b.width-before.width:0}).toBeGreaterThan(30);
- await tap(page,mic);await expect(status).toBeHidden();await expect(mic).toHaveAttribute('aria-pressed','false');
+ const form=page.locator('.map-quick-search-form');const before=await form.boundingBox();await tap(page,mic);await expect(mic).toHaveAttribute('aria-pressed','true');await expect(status).toContainText('듣는 중');await expect(status).toHaveCSS('position','static');
+ await expect.poll(async()=>{const b=await form.boundingBox();return b&&before?b.height-before.height:0}).toBeGreaterThan(70);await expect(page.locator('#djNext-voice-panel .djNext-voice-wave')).toBeVisible();await expect.poll(async()=>{const a=await mic.boundingBox(),b=await status.boundingBox();return !!a&&!!b&&b.y>a.y+a.height;}).toBe(true);
+ await tap(page,mic);await expect(status).toBeHidden();await expect(mic).toHaveAttribute('aria-pressed','false');await expect.poll(async()=>Math.abs((await form.boundingBox()).height-before.height)).toBeLessThanOrEqual(2);
+});
+
+test('compact subway sheet keeps identity, actions, neighbors and arrival controls in order',{tag:'@phone-layout'},async({page})=>{
+ test.skip(!compact(page),'phone only');await ready(page);
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'노량진',lng:126.9411,lat:37.5142,lines:['1호선','9호선'],selectedLine:'1호선'}}})));
+ const sheet=page.locator('#transport-sheet');await expect(sheet).toBeVisible();await visuallyPresented(sheet);await expect(sheet).toHaveAttribute('data-dj-transport-layout','compact-v2');
+ const buttons=sheet.locator('.dj-news-transport-actions>button');await expect(buttons).toHaveCount(4);
+ await expect.poll(async()=>{const b=await buttons.evaluateAll(ns=>ns.map(n=>({r:n.getBoundingClientRect().toJSON(),s:getComputedStyle(n).boxShadow})));return b.length===4&&b.every(x=>Math.abs(x.r.top-b[0].r.top)<1&&Math.abs(x.r.width-b[0].r.width)<2&&x.s!=='none');}).toBe(true);
+ await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
+ await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
+ await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
