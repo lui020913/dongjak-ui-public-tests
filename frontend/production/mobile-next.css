@@ -862,3 +862,22 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 }
 #app #transport-title .metro-panel-badge{box-shadow:none!important;outline:none!important;border:0!important;}
 }}
+
+/* Onboarding exit/entry share the existing frame; the mobile presentation
+ * owner must beat legacy opacity/animation overrides on both panes. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app #dj860-onboarding .dj860-visual-pane,
+ html body #app#app#app#app#app#app #dj860-onboarding .dj860-copy{
+   transition:opacity 165ms cubic-bezier(.3,0,.65,1)!important;
+ }
+ html body #app#app#app#app#app#app #dj860-onboarding.dj860-swapping .dj860-visual-pane,
+ html body #app#app#app#app#app#app #dj860-onboarding.dj860-swapping .dj860-copy{
+   opacity:0!important;animation:none!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html body #app#app#app#app#app#app #dj860-onboarding .dj860-visual-pane,
+ html body #app#app#app#app#app#app #dj860-onboarding .dj860-copy{
+   transition:none!important;
+ }
+}
