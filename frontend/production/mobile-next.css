@@ -6,9 +6,9 @@
 html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html body #app#app#app#app#app#app#app #djNext-toolbar{position:fixed!important;top:var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px))!important;left:10px!important;right:10px!important;display:flex!important;align-items:center!important;height:54px!important;z-index:3120!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;animation:none!important;transition:opacity 220ms ease-out,visibility 0s linear!important;transform:none!important;translate:none!important}
 html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar{visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important}
-#djNext-toolbar{--djNext-tool-size:clamp(40px,calc((100vw - 50px)/6),54px)}
-#djNext-rail{display:grid!important;grid-template-columns:minmax(0,1fr) var(--djNext-tool-size)!important;gap:6px!important;width:100%!important;align-items:center!important;min-width:0!important;box-sizing:border-box;overflow:visible!important}
-#djNext-scroll{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;box-sizing:border-box;padding:6px 4px;margin-inline:-4px}
+#djNext-toolbar{--djNext-tool-size:clamp(40px,calc((100vw - 50px)/6),54px);--djNext-tool-gap:max(6px,calc((100vw - 20px - 6 * var(--djNext-tool-size))/5))}
+#djNext-rail{display:grid!important;grid-template-columns:minmax(0,1fr) var(--djNext-tool-size)!important;gap:var(--djNext-tool-gap)!important;width:100%!important;align-items:center!important;min-width:0!important;box-sizing:border-box;overflow:visible!important}
+#djNext-scroll{display:flex;flex-direction:row;align-items:center;gap:var(--djNext-tool-gap);min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;box-sizing:border-box;padding:6px 4px;margin-inline:-4px}
 #djNext-scroll::-webkit-scrollbar{display:none}
 #djNext-scroll[data-overflow-right="true"]{mask-image:linear-gradient(to right,#000 calc(100% - 12px),transparent)}
 #djNext-scroll[data-overflow-left="true"]{mask-image:linear-gradient(to right,transparent,#000 12px)}

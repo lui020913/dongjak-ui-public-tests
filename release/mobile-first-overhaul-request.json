@@ -3,9 +3,9 @@
   "application_version": "9.2.37",
   "public_work_branch": "main",
   "purpose": "Six-column mobile toolbar with 54px tactile buttons, pinned layer control, overflow fade and horizontal scrolling only for three registered shortcuts",
-  "attempt": 125,
+  "attempt": 126,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User approved six-column 54px button design in place of 60px experiment. Retain 9.2.36 tab fade, swipes and install detail toggle.",
+  "last_retry_reason": "Distribute six slots evenly on wider phones without enlarging buttons; ensure the seventh control really overflows.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
