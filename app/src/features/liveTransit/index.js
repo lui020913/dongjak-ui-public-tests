@@ -8,9 +8,9 @@ const empty=()=>({type:'FeatureCollection',features:[]});
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 // Local vector artwork rasterized at 2x, no remote sprite or icon dependency.
 const trainImageId=(line,facing='right')=>'dj-live-train-'+line+(facing==='left'?'-left':'');
-// Preserve the horizontal side profile, but choose its nose from the screen-space
-// tangent. Near-vertical intervals keep a stable orientation to avoid flicker.
-export function trainFacing(map,props,previous=null){
+// A fixed-size top-view vehicle follows the local screen-space track tangent.
+// Mirrored rasters keep the existing stable facing contract at vertical bends.
+function screenTangent(map,props){
   if(!props?.headingKnown)return null;
   const a=[props.headingFromLng,props.headingFromLat],b=[props.headingToLng,props.headingToLat];
   if(![...a,...b].every(Number.isFinite))return null;
@@ -19,25 +19,42 @@ export function trainFacing(map,props,previous=null){
     const p=map.project(a),q=map.project(b);
     if([p?.x,p?.y,q?.x,q?.y].every(Number.isFinite)){dx=q.x-p.x;dy=q.y-p.y;}
   }}catch{}
-  const length=Math.hypot(dx,dy);if(!(length>0))return null;
-  if(Math.abs(dx)<=length*.08){if(previous==='left'||previous==='right')return previous;return dy>0?'left':'right';}
-  return dx<0?'left':'right';
+  return Math.hypot(dx,dy)>0?{dx,dy}:null;
+}
+export function trainFacing(map,props,previous=null){
+  const v=screenTangent(map,props);if(!v)return null;
+  if(Math.abs(v.dx)<=Math.hypot(v.dx,v.dy)*.08){
+    if(previous==='left'||previous==='right')return previous;
+    return v.dy>0?'left':'right';
+  }
+  return v.dx<0?'left':'right';
+}
+export function trainRotation(map,props,facing='right',previous=0){
+  const v=screenTangent(map,props);if(!v)return Number.isFinite(previous)?previous:0;
+  const angle=Math.atan2(v.dy,v.dx)*180/Math.PI-(facing==='left'?180:0);
+  return ((angle+180)%360+360)%360-180;
 }
 export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const canvas=doc?.createElement?.('canvas');if(!canvas)return null;
   const size=96;canvas.width=size;canvas.height=size;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
   ctx.scale(3,3);ctx.clearRect(0,0,32,32);
   const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
-  // Side train only: transparent canvas, no backing plate, keyline or track.
-  // Filled shapes rather than strokes; line color belongs to the vehicle itself.
-  const wheelColor='#344650';
-  for(const x of [7.5,13.5,24]){ctx.beginPath();ctx.arc(x,23,2.45,0,Math.PI*2);ctx.fillStyle=wheelColor;ctx.fill();}
-  ctx.beginPath();ctx.moveTo(3,7.5);ctx.lineTo(18.6,7.5);ctx.quadraticCurveTo(22.5,7.5,25,10.8);ctx.lineTo(29.2,16.1);ctx.quadraticCurveTo(30.5,17.9,29.8,20.1);ctx.quadraticCurveTo(29,23,25.9,23);ctx.lineTo(3,23);ctx.quadraticCurveTo(1.5,23,1.5,21.5);ctx.lineTo(1.5,9);ctx.quadraticCurveTo(1.5,7.5,3,7.5);ctx.closePath();
-  ctx.fillStyle=color;ctx.fill();
-  // Contrasting windows and cab glass remain fully inside the train silhouette.
-  for(const x of [4,8.8,13.6]){rounded(x,10,3.8,6.4,.8);ctx.fillStyle='#f1f7f8';ctx.fill();}
-  ctx.beginPath();ctx.moveTo(19.5,10);ctx.lineTo(21.3,10);ctx.quadraticCurveTo(22.2,10,23.4,11.6);ctx.lineTo(27,16.4);ctx.lineTo(19.5,16.4);ctx.quadraticCurveTo(18.6,16.4,18.6,15.5);ctx.lineTo(18.6,10.9);ctx.quadraticCurveTo(18.6,10,19.5,10);ctx.closePath();ctx.fillStyle='#f1f7f8';ctx.fill();
-  rounded(26,18.3,2.2,1.7,.65);ctx.fillStyle='#f1f7f8';ctx.fill();
+  // White roof, rounded cab and dark windscreen. Route color is a belt,
+  // never a number badge. Keep the transparent outside and crisp 3x raster.
+  ctx.save();ctx.shadowColor='#17282e55';ctx.shadowBlur=1.4;ctx.shadowOffsetY=.7;
+  rounded(1.1,9.0,29.8,14,4.8);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
+  rounded(1.1,9.0,29.8,14,4.8);ctx.save();ctx.clip();
+  rounded(1.0,9.0,29.9,2.2,1.1);ctx.fillStyle='#e0e5e8';ctx.fill();
+  rounded(1.0,20.8,29.9,2.2,1.1);ctx.fillStyle='#d2dce2';ctx.fill();
+  rounded(13.0,8.8,5.0,14.4,1.0);ctx.fillStyle=color;ctx.fill();
+  // A dark rounded front windscreen identifies the direction of travel.
+  rounded(26.0,11.2,3.1,9.6,1.7);ctx.fillStyle='#222d35';ctx.fill();
+  for(const xx of [3.7,8.1,19.5,23.0]){
+    rounded(xx,11.0,2.7,1.7,.6);ctx.fillStyle='#354650';ctx.fill();
+    rounded(xx,19.4,2.7,1.7,.6);ctx.fillStyle='#354650';ctx.fill();
+  }
+  ctx.restore();
+  rounded(1.1,9.0,29.8,14,4.8);ctx.strokeStyle='#aab8be';ctx.lineWidth=.45;ctx.stroke();
   const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);
@@ -87,8 +104,8 @@ export function attachLiveTransitOverlay(map,opts={}){
     const trainImages=ensureTrainImages(map);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],13.2,.70,15.5,.85,18,1],
-        'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport'}}:
+        'icon-size':['interpolate',['linear'],['zoom'],13.2,.76,15.5,1.05,18,1.28],
+        'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
@@ -108,6 +125,7 @@ export function attachLiveTransitOverlay(map,opts={}){
         const prior=priorById.get(f.properties.id);
         const facing=trainFacing(map,f.properties,prior?.trainFacing);
         f.properties.trainFacing=facing||'unknown';
+        f.properties.trainRotation=trainRotation(map,f.properties,facing||'right',prior?.trainRotation);
         f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right');
       }
       // Straight-line smoothing stays bus-only; metro coordinates are on the displayed track already.
@@ -129,7 +147,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(!force&&!payload)return;
     const next=calculate(now);
     if(!force&&next.features.length===display.features.length&&next.features.every((f,i)=>{
-      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.observedAt===f.properties.observedAt;
+      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.observedAt===f.properties.observedAt;
     }))return;
     display=next;
     try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}

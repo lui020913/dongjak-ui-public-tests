@@ -497,7 +497,13 @@ export function installUnifiedUI(doc=document, win=window){
   const attach=()=>{
     for(const id of ids){
       const node=element(id);if(!node||surfaceObservers.has(id))continue;
-      const obs=new MutationObserver(schedule);
+      const obs=new MutationObserver(records=>{
+        // Ignore known animation-only style writes; a full visibility sweep on
+        // every rendered frame forces synchronous style reads on mobile.
+        const moving=node.dataset.dj810Animating||node.classList.contains('dj889-sheet-transitioning')||node.classList.contains('dj-sheet-dragging');
+        if(moving&&records.every(record=>record.attributeName==='style'))return;
+        schedule();
+      });
       obs.observe(node,{attributes:true,attributeFilter:['hidden','class','style']});
       surfaceObservers.set(id,obs);
     }

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.21",
+  "application_version": "9.2.22",
   "public_work_branch": "main",
-  "purpose": "Safety drawer peek, frame-driven transit follow, Seoul official news and authenticated shared community",
-  "attempt": 95,
+  "purpose": "Top-view train sprite and tangent rotation, continuous mobile detents and iOS map edge blending",
+  "attempt": 96,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Integrate concurrent safety-peek fix with route sampling, three-tab news layout, guest publication guard and bus receipt tests",
+  "last_retry_reason": "Real iPhone recording and supplied icon/status strip references",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

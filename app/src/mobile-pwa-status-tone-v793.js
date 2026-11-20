@@ -24,7 +24,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     // The installed PWA's page root may retain a previous theme through page
     // restoration. The app state is authoritative for both background and bar.
     const theme=app.dataset.theme==='dark'?'dark':'light';
-    root.dataset.theme=theme;
+    if(root.dataset.theme!==theme)root.dataset.theme=theme;
     // Native chrome is managed by iOS. Update web-exposed theme hints on
     // every manual toggle, in addition to CSS safe-area colors.
     root.style.colorScheme=theme;
@@ -41,7 +41,7 @@ export function installPwaStatusTone(doc=document,win=window) {
       const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
-      const color=theme==='dark'?(dimmed?'#142428':'#192d32'):(dimmed?'#bfc6c2':'#e5ece8');
+      const color=theme==='dark'?'#192d32':'#e5ece8';
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       if(!sample){sample=doc.createElement('div');sample.id='dj-ios-pwa-status-sample';sample.setAttribute('aria-hidden','true');app.appendChild(sample);}
@@ -52,7 +52,14 @@ export function installPwaStatusTone(doc=document,win=window) {
       themeMeta.setAttribute('content',baselineColor());
     }
   }
-  const observer=new MutationObserver(sync);
+  let frame=0;
+  const dimIds=new Set(['dj-ai-search-modal','map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm']);
+  const relevant=node=>node&& (node===app||dimIds.has(node.id));
+  const observer=new MutationObserver(records=>{
+    if(!records.some(record=>record.type==='attributes'?relevant(record.target):[...record.addedNodes,...record.removedNodes].some(node=>relevant(node)||node.querySelector?.([...dimIds].map(id=>'#'+id).join(',')))))return;
+    if(frame)return;
+    if(typeof win.requestAnimationFrame==='function')frame=win.requestAnimationFrame(()=>{frame=0;sync();});else sync();
+  });
   observer.observe(app,{attributes:true,attributeFilter:['data-theme','class','hidden','aria-hidden','open'],childList:true,subtree:true});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
@@ -60,7 +67,7 @@ export function installPwaStatusTone(doc=document,win=window) {
   win.addEventListener?.('pageshow',sync);
   sync();
   return ()=>{
-    observer.disconnect();
+    observer.disconnect();if(frame)win.cancelAnimationFrame?.(frame);
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
     band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;

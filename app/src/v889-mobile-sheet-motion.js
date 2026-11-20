@@ -1,4 +1,4 @@
-import {WINDOW_MOTION,INTERACTION_MOTION} from './mobile-window-motion.js';
+import {WINDOW_MOTION} from './mobile-window-motion.js';
 /**
  * v8.8.9 — staged, compositor-friendly mobile sheet motion.
  * FLIP uses the independent CSS translate property so legacy centering
@@ -27,6 +27,7 @@ function clearDragStyles(panel){
   if(panel.classList.contains(DRAGGING)){
     panel.style.removeProperty('translate');
     panel.style.removeProperty('transition');
+    panel.style.removeProperty('clip-path');
   }
   panel.classList.remove(DRAGGING);
   panel.style.removeProperty('--dj-sheet-drag-y');
@@ -66,7 +67,10 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   const endDelta=collapsing?compactDelta:{x:0,y:0};
   const startOpacity=1;
   const clipped=Math.max(0,expandedRect.height-compactRect.height);
-  const startClip=collapsing?0:Math.min(clipped,Math.max(0,startDelta.y));
+  // Both edges must begin at the finger's last visible position, not at
+  // the unshifted expanded rectangle. Keep the lower edge docked.
+  const dockBottom=collapsing?expandedRect.bottom:compactRect.bottom;
+  const startClip=clamp(expandedRect.bottom+startDelta.y-dockBottom,0,expandedRect.height);
   const endClip=collapsing?clipped:0;
   const token=(Number(panel.dataset.dj889MotionToken)||0)+1;
   panel.dataset.dj889MotionToken=String(token);
@@ -90,7 +94,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
     if(started||finished||panel.dataset.dj889MotionToken!==String(token))return;
     started=true;
     if(rafTimer!==null){win.clearTimeout(rafTimer);rafTimer=null;}
-    panel.style.setProperty('transition',`translate ${DURATION}ms ${INTERACTION_MOTION.spring}, clip-path ${DURATION}ms ${EASING}`,'important');
+    panel.style.setProperty('transition',`translate ${DURATION}ms ${EASING}, clip-path ${DURATION}ms ${EASING}`,'important');
     panel.style.setProperty('translate',`${endDelta.x}px ${endDelta.y}px`,'important');
     panel.style.setProperty('clip-path',`inset(0 0 ${endClip}px 0 round 24px)`,'important');
     panel.style.setProperty('opacity','1','important');
@@ -98,7 +102,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   };
 
   panel.classList.add(TRANSITIONING);
-  panel.style.setProperty('will-change','translate,opacity','important');
+  panel.style.setProperty('will-change','translate,clip-path','important');
   panel.style.setProperty('transition','none','important');
   panel.style.setProperty('translate',`${startDelta.x}px ${startDelta.y}px`,'important');
   panel.style.setProperty('clip-path',`inset(0 0 ${startClip}px 0 round 24px)`,'important');
@@ -129,10 +133,10 @@ export function setMobileSheetExpanded(panel,expanded,doc=document,win=window){
     for(const sibling of doc.querySelectorAll(`.${EXPANDED}`)){
       if(sibling!==panel)sibling.classList.remove(EXPANDED);
     }
+    compactRect=panel.getBoundingClientRect();
     panel.classList.add(EXPANDED);
     syncExpandedRoot(doc,app);
     expandedRect=panel.getBoundingClientRect();
-    compactRect=fromRect;
   }else{
     panel.classList.remove(EXPANDED);
     syncExpandedRoot(doc,app);

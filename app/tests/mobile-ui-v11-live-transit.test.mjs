@@ -81,3 +81,12 @@ test('high-DPI train icons retain full raster and mirror all pixels',async()=>{
  assert.equal(right.width,96);assert.equal(left.height,96);assert.equal(right.data.length,96*96*4);assert.equal(left.data.length,right.data.length);
  for(let y=0;y<96;y++)for(let x=0;x<96;x++)assert.equal(left.data[(y*96+x)*4],right.data[(y*96+95-x)*4]);
 });
+
+test('top-view train rotation follows the exact local tangent, including vertical paths and mirrored raster',async()=>{
+ const {trainRotation}=await import('../src/features/liveTransit/index.js');
+ const m={project:([x,y])=>({x,y})};
+ for(const [a,b,facing,angle] of [[[0,0],[1,0],'right',0],[[0,0],[0,1],'right',90],[[0,0],[-1,0],'left',0],[[0,0],[0,-1],'left',90]]){
+  assert.equal(trainRotation(m,heading(a,b),facing),angle);
+ }
+ assert.equal(trainRotation(m,{headingKnown:false},'right',38),38);
+});
