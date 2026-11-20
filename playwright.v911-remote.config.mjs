@@ -16,7 +16,7 @@ const phoneCoverage={
   mobile390:/@phone-(?:layout|common|platform|ios)/,
   mobile430:/@phone-(?:layout|platform)/
 };
-const allPhoneCases=/@phone-(?:layout|common|platform)/;
+const allPhoneCases=/@phone-(?:layout|common|platform|ios)/;
 export default defineConfig({
   testDir:'tests',testMatch:['v911-anonymous-ui.spec.mjs','mobile-first-unified-layout.spec.mjs'],timeout:180000,expect:{timeout:20000},
   // Each test has a fresh anonymous Playwright browser context. Permit tests
