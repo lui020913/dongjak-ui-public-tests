@@ -32,6 +32,37 @@ export const MOBILE_FLOATING_SHEETS=Object.freeze([
   ['dj854-weather-sheet','.dj-weather-edge-drag','.dj854-weather-close','.dj854-weather-head'],
 ]);
 const INTERACTIVE='button,a,input,textarea,select,label,summary,[role="button"],[contenteditable="true"]';
+const NESTED_HEADERS=[
+ ['#version-history-modal .version-history-dialog','.version-history-head','#version-history-close'],
+ ['#dj-map-settings .dj-map-settings-card','.dj-map-settings-head','#dj-settings-close'],
+ ['#community-form','.community-form-top','#community-compose-close'],
+ ['#dj-ai-search-modal','.dj-ai-search-header','.dj-ai-close']
+];
+export function installNestedHeaderDismiss(doc=document,win=window){
+ const attached=new WeakSet(),cleanups=[];
+ const connect=()=>{for(const [surfaceSelector,headerSelector,closeSelector] of NESTED_HEADERS){
+  const panel=doc.querySelector(surfaceSelector),head=panel?.querySelector(headerSelector);
+  if(!head||attached.has(head))continue;
+  attached.add(head);head.classList.add('dj-full-header-drag');
+  let drag=null;
+  const reset=()=>{drag=null;if(panel.dataset.djHeaderDragging){delete panel.dataset.djHeaderDragging;panel.style.removeProperty('translate');panel.style.removeProperty('transition');}};
+  cleanups.push(bindHeaderDragInput(head,win,{
+   down(e){if(!win.matchMedia('(max-width:699px)').matches||e.isPrimary===false||e.button>0||e.target?.closest?.(INTERACTIVE)||!isSheetOpen(panel,win)||panel.closest('[hidden]'))return false;
+     drag={id:e.pointerId,x:e.clientX,y:e.clientY,offset:0,active:false};
+     if(typeof e.pointerId==='number')try{head.setPointerCapture?.(e.pointerId)}catch{}return true;},
+   move(e){if(!drag||drag.id!==e.pointerId)return;const dy=e.clientY-drag.y,dx=e.clientX-drag.x;if(!drag.active&&Math.abs(dy)<5)return;if(!drag.active&&Math.abs(dx)>Math.abs(dy)){reset();return;}
+     drag.active=true;drag.offset=Math.max(0,dy);panel.dataset.djHeaderDragging='true';panel.style.setProperty('transition','none','important');panel.style.setProperty('translate','0 '+drag.offset+'px','important');e.preventDefault?.();},
+   up(e){if(!drag||drag.id!==e.pointerId)return;const close=drag.active&&drag.offset>100;const shifted=drag.active;drag=null;
+     if(!shifted){reset();return;}
+     // The established close handler owns the actual exit; no second dismissal.
+     if(close){reset();panel.querySelector(closeSelector)?.click();return;}
+     panel.style.setProperty('transition','translate 220ms ease-out','important');panel.style.setProperty('translate','0 0','important');win.setTimeout(reset,240);},
+   cancel:reset
+  }));
+ }};
+ connect();const observer=new MutationObserver(connect);observer.observe(doc.body,{subtree:true,childList:true});
+ return ()=>{observer.disconnect();for(const fn of cleanups)fn();};
+}
 export function isSheetOpen(el,win=window){
   if(!el||el.hidden)return false;
   const css=win.getComputedStyle(el);
@@ -206,6 +237,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
   }
   };
   registerSheets();
+  cleanups.push(installNestedHeaderDismiss(doc,win));
   // Weather and other late-created sheets must receive the same header listener.
   const registrationObserver=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1)))registerSheets();});
   registrationObserver.observe(app,{childList:true,subtree:true});

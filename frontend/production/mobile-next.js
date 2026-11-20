@@ -8,8 +8,8 @@ export const PHONE_CHOICES=Object.freeze([
  ['slope','경사도','mountain','[data-dj-import="slope"]'],
  ['bocha','보차혼용','layers','#sangdo-bocha-toggle'],
  ['accident','사고다발','alert','[data-dj-import="accidents"]'],
- ['livebus','실시간버스','bus','[data-live-vehicle="bus"]'],
- ['livemetro','실시간지하철','bus','[data-live-vehicle="metro"]'],
+ ['livebus','실시간 버스','bus','[data-live-vehicle="bus"]'],
+ ['livemetro','실시간 지하철','bus','[data-live-vehicle="metro"]'],
  ['dong','행정동','map','#open-admin-dongs-from-options'],
  ['cctv','CCTV','shield','[data-dj-import="cctv-security"]'],
  ['zone','보호구역','shield','#protection-zone-toggle'],
@@ -100,7 +100,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
  const body=doc.createElement('div');body.className='djNext-modal-body';const h=doc.createElement('header');const title=doc.createElement('strong');title.textContent='레이어 및 바로가기';const close=doc.createElement('button');close.type='button';close.className='djNext-close';close.textContent='×';close.setAttribute('aria-label','레이어 설정 닫기');title.insertAdjacentHTML('afterbegin',phoneIcon('layers'));h.append(title,close);body.append(h);
  const scroll=doc.createElement('div');scroll.className='djNext-layer-scroll';body.append(scroll);
- const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='아이콘: 지도 기능 · 스위치: 상단 바로가기';scroll.append(hint);
+ const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='아이콘을 눌러 지도 기능을 실행하고, 아래 스위치로 상단 바로가기를 등록하세요.';scroll.append(hint);
  const count=doc.createElement('p');count.className='djNext-count';count.setAttribute('aria-live','polite');scroll.append(count);
  const list=doc.createElement('div');list.className='djNext-list';scroll.append(list);panel.append(body);app.append(panel);
  let closeTimer=0;
@@ -126,10 +126,10 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  for(const [id,label,icon,selector] of ids.map(id=>PHONE_CHOICES.find(c=>c[0]===id)).filter(Boolean)){
   const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;
  const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');const layerPaths={zone:'<path d="M3 20h18M5 16V8l7-5 7 5v8M9 16v-5h6v5"/>',bocha:'<path d="M5 3v18M19 3v18M12 3v4m0 3v4m0 3v4"/>',livemetro:'<rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 10h12M9 18l-3 4m9-4 3 4M9 14h1m4 0h1"/>',access:'<circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 6v8m0 0-4 7m4-7 4 7"/>',sdot:'<path d="M3 18h18M5 18V9h5v9m4 0V5h5v13M8 12h0m9-3h0"/>',signals:'<path d="M4 10v4h4l5 4V6l-5 4H4zm12-1a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/>',elevator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M7 10l2-2 2 2m2 4 2 2 2-2"/>',crossing:'<path d="M4 4v16m16-16v16M8 5h8m-8 5h8m-8 5h8m-8 5h8"/>'};if(layerPaths[id])glyph.innerHTML=layerPaths[id];const tile=doc.createElement('span');tile.className='djNext-layer-tile';tile.append(glyph);action.prepend(tile);action.setAttribute('aria-label',label+' 지도 기능');
-  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed');state.textContent=pressed==='true'?'표시 중':pressed==='false'?'꺼짐':'';if(!source||source.disabled)state.textContent='준비 중';if(!state.textContent)state.setAttribute('aria-hidden','true');action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
+  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(!source||source.disabled)state.textContent='준비 중';action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
   const add=doc.createElement('button');add.type='button';add.className='djNext-shortcut-switch';const current=selected.includes(id);
   add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 바로가기');add.setAttribute('aria-checked',String(current));add.disabled=!current&&selected.length>=3;
-  const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);
+  const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);const shortcutLabel=doc.createElement('small');shortcutLabel.className='djNext-shortcut-caption';shortcutLabel.textContent=current?'등록됨':'바로가기';add.append(shortcutLabel);
   add.addEventListener('click',()=>{
    const restoreFocus=doc.activeElement===add;
    if(current){update(selected.filter(x=>x!==id));}else{

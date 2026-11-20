@@ -62,7 +62,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const status=el('p','dj-ai-status','공식 보행안전 자료에서 검색합니다.');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const results=el('div','dj-ai-search-results');results.setAttribute('aria-live','polite');
-  const foot=el('p','dj-ai-disclaimer','사고다발지역은 개별 사고점이 아닙니다. 지도에 표시되는 위치는 원본 통계 또는 시설 대표점입니다. AI가 안전등급·경사도·안전한 길을 임의로 평가하지 않습니다.');
+  const foot=el('p','dj-ai-disclaimer','지도 위치는 통계·시설 대표점이며 개별 사고점이 아닙니다. 안전등급·경사·안전 경로를 임의 평가하지 않습니다.');
   layout.append(header,login,form,chips,status,results,foot);modal.append(layout);document.body.append(modal);
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
   const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;

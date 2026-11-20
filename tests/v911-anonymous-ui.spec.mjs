@@ -787,3 +787,18 @@ test('live subway source artwork decodes and markers render at initial phone map
   console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'));
   await test.info().attach('live-train-artwork-visible',{body:await page.screenshot(),contentType:'image/png'});
 });
+
+test('route title is a full header drag surface; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,tab(page,'route'));
+ const panel=page.locator('#route-panel'),header=panel.locator(':scope > .dj-sheet-chrome');await visuallyPresented(panel);
+ await expect(header).toHaveCSS('touch-action','none');await expect(panel.locator(':scope > .dj836-sheet-body')).toHaveCSS('touch-action','pan-y');
+ const title=header.locator('h2'),box=await title.boundingBox();const x=Math.round(box.x+box.width/2),y=Math.round(box.y+box.height/2);
+ await expect.poll(()=>panel.getAttribute('data-dj810-animating')).toBeNull();
+ const client=browserName==='chromium'?await page.context().newCDPSession(page):null;
+ try{if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+Math.round(i*18)}]});await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}else{await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+145,{steps:8});await page.mouse.up();}await expect(panel).toBeHidden();}finally{await client?.detach();}
+ await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
+ const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
+ expect(await form.evaluate(n=>Boolean(n.querySelector('#community-share-publicly').compareDocumentPosition(n.querySelector('[type=submit]'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+ await tap(page,form.locator('#community-compose-close'));await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await tap(page,tab(page,'participate'));await tap(page,page.locator('#community-compose-toggle'));await expect(form).toBeVisible();await tap(page,form.locator('#community-compose-close'));await expect(form).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();
+});

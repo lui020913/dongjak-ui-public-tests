@@ -1829,6 +1829,7 @@ const dongjakNews=initDongjakNews({app,onToast:toast});
 void dongjakNews.prefetch();
 let communityFilter = '전체';
 let communityPickMode = false;
+let communityComposerOrigin='community';
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
@@ -2010,6 +2011,12 @@ function openCommunityComposer(open,{animate=true}={}) {
   }
   if(communityForm.hidden||communityForm.dataset.dj810Animating==='closing')return;
   if(communityForm.contains(document.activeElement))document.activeElement.blur();
+  if(communityComposerOrigin==='map'){
+    const parent=document.getElementById('participation-panel');
+    const done=()=>{communityForm.hidden=true;communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    // Keep the editor intact through the parent exit, never flash the list.
+    if(parent&&motion)motion.close(parent,done);else done();return;
+  }
   const finish=()=>{
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
@@ -2018,7 +2025,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   };
   if(motion)motion.close(communityForm,finish);else finish();
 }
-document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
+document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
 for (const chip of document.querySelectorAll('.community-filter')) {
   chip.addEventListener('click',()=>{
@@ -2117,6 +2124,7 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
+    communityComposerOrigin=app.dataset.tab==='map'?'map':'community';
     navigate('participate');
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
@@ -2161,7 +2169,7 @@ async function submitCommunityComment(postId,formEl) {
 }
 function renderCommunity() {
   const root=document.getElementById('community-list');root.replaceChildren();
-  const status=makeCEl('p','community-form-note',communityCloudStatus);root.append(status,communityButton('공개 게시글 새로고침','community-filter',()=>refreshSharedCommunity()));
+  const bar=makeCEl('div','dj-community-feed-status');const status=makeCEl('p','dj-community-status-label',communityCloudStatus);status.setAttribute('role','status');const refresh=communityButton('새로고침','community-filter dj-community-refresh',()=>refreshSharedCommunity());refresh.setAttribute('aria-label','공개 게시글 새로고침');bar.append(status,refresh);root.append(bar);
   const all=[...sharedCommunityPosts,...communityPosts];
   let shown=all.filter(p=>communityFilter==='전체'||p.category===communityFilter);
   if(document.getElementById('community-sort').value==='popular')

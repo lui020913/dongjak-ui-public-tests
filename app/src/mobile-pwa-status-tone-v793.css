@@ -84,7 +84,7 @@
 @media(max-width:699px){
 html.dj-ios-home-pwa,
 html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
-  --dj-pwa-bridge-height:calc(env(safe-area-inset-top,0px) + 112px);
+  --dj-pwa-bridge-height:calc(env(safe-area-inset-top,0px) + 24px);
   --dj-pwa-bridge-gradient:linear-gradient(to bottom,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0px,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 10px,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 84%,transparent) 22%,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 40%,transparent) 55%,transparent 100%);
 }
 html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{

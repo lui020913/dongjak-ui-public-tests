@@ -398,7 +398,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
       const latitude=Number(position?.coords?.latitude),longitude=Number(position?.coords?.longitude);
       if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표를 확인하지 못했습니다.');
       const inside=isDongjak(longitude,latitude);if(inside!==true){
-        panel.dataset.nearbyMode='empty';showMessage(inside===false?'현재 위치는 동작구 밖입니다.':'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
+        panel.dataset.nearbyMode='empty';showMessage(inside===false?'현재 위치는 동작구 밖입니다. 동작구 안에서 다시 조회해 주세요.':'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
         return;
       }
       map.flyTo({center:[longitude,latitude],zoom:Math.max(map.getZoom(),15.3),duration:600});

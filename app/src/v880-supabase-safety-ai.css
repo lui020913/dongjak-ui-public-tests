@@ -268,8 +268,8 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 @media (max-width:699px) {
   body:has(#app[data-theme="dark"]) #dj-ai-search-modal {
     --ai-bg:#191b1f;--ai-card:#25282d;--ai-text:#e5e7eb;
-    --ai-muted:#bfc7d0;--ai-line:#454a52;--ai-accent:#375e51;
-    --ai-accent-hover:#426e60;--ai-ring:#a1d3c1;
+    --ai-muted:#cad2d9;--ai-line:#454a52;--ai-accent:#10836e;
+    --ai-accent-hover:#0b705d;--ai-ring:#a1d3c1;
   }
   #dj-ai-search-modal .dj-ai-examples {flex-wrap:wrap;overflow:visible;}
   #dj-ai-search-modal .dj-ai-example {

@@ -1,6 +1,6 @@
 /* v8.2.15 – stable phone sheet/chrome contract.
    Only the sheet BODY scrolls. The header is a genuine non-scrolling sibling;
-   the gray grip is decoration, while the entire top 24px edge is the gesture target. */
+   the gray grip is decoration; the full header is the gesture target. */
 @media (max-width:699px){
   html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker):not([hidden]){
     display:flex!important;
@@ -22,7 +22,10 @@
     overflow:visible!important;
     margin:0!important;padding:20px 16px 10px!important;
     z-index:3!important;
-    touch-action:auto!important;
+    touch-action:none!important;
+    pointer-events:auto!important;
+    user-select:none!important;-webkit-user-select:none!important;
+    -webkit-touch-callout:none;cursor:grab!important;
   }
   html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > .dj836-sheet-body{
     display:block!important;
@@ -51,12 +54,15 @@
     width:100%!important;height:25px!important;
     display:block!important;
     z-index:7!important;
+    pointer-events:none!important;
     touch-action:none!important;
     user-select:none!important;-webkit-user-select:none!important;
-    cursor:grab!important;
     background:transparent!important;
   }
-  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome > .dj836-edge-drag:active{cursor:grabbing!important;}
+  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome:active{cursor:grabbing!important;}
+  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome > .dj-sheet-chrome-title,
+  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome > .dj-sheet-chrome-title *{pointer-events:none!important;}
+  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome > .dj-sheet-chrome-close{pointer-events:auto!important;cursor:pointer!important;}
   html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel,#admin-dong-picker) > header.dj-sheet-chrome > .dj-sheet-chrome-grip{
     pointer-events:none!important;
     top:7px!important;

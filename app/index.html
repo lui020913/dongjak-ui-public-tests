@@ -627,7 +627,7 @@
               <small class="dj856-ios-install-caption">Safari · 홈 화면 추가</small>
               <div class="dj856-ios-install-steps">
                 <div><b>1</b><span>Safari에서 동작하는 안전지도를 엽니다.</span></div>
-                <div><b>2</b><span>화면 아래의 공유 버튼을 누릅니다.</span></div>
+                <div><b>2</b><span>Safari의 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M8 9H5v12h14V9h-3"/></svg> 공유 버튼을 누릅니다.</span></div>
                 <div><b>3</b><span><strong>홈 화면에 추가</strong>를 선택합니다.</span></div>
               </div>
             </div>
@@ -895,7 +895,7 @@
           <button type="button" class="dj-sheet-chrome-close page-dismiss" data-close-page="participate" aria-label="동네 참여 닫고 지도 보기"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg></button>
         </header>
         <div class="dj836-sheet-body">
-        <p class="dj-page-intro">보행 불편과 개선 의견을 이 브라우저에 기록합니다. 다른 사용자나 행정기관에 전송되지 않습니다.</p>
+        <p class="dj-page-intro">보행 불편과 개선 의견을 나누세요. 공개 등록은 로그인과 동의가 필요하며, 기기 저장은 나만 볼 수 있습니다.</p>
         <div class="community-heading-row">
           <div><span class="micro-label">게시글</span><h3>동네 커뮤니티</h3><p>보행환경에 관한 이야기와 개선 의견을 주민들과 나누세요.</p></div>
           <button type="button" id="community-compose-toggle" class="community-compose-toggle">＋ 글쓰기</button>
@@ -926,12 +926,13 @@
           <input id="community-title" autocomplete="off" maxlength="70" required placeholder="예: 골목길 보행공간에 대한 의견" />
           <label for="community-text">내용</label>
           <textarea id="community-text" autocomplete="off" maxlength="1200" rows="4" required placeholder="어떤 상황인지, 무엇이 개선되면 좋을지 작성하세요."></textarea>
-          <div class="community-attach-row"><label for="community-photo-input" class="community-attach-action">▧ 사진 첨부</label><button type="button" id="community-map-pick" class="community-attach-action">⌖ 지도 위치 선택</button></div>
+          <div class="community-attach-row"><label for="community-photo-input" class="community-attach-action"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m3 17 6-5 4 3 4-4 4 4"/></svg><span>사진 첨부</span></label><button type="button" id="community-map-pick" class="community-attach-action"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg><span>지도 위치 선택</span></button></div>
           <input type="file" id="community-photo-input" accept="image/jpeg,image/png,image/webp" hidden />
           <div id="community-photo-preview" class="community-photo-preview" hidden><img id="community-photo-image" alt="첨부 사진 미리보기" /><button type="button" id="community-photo-remove">사진 제거</button></div>
           <p id="community-location-label" class="community-location-label">위치 지정 없음 · 선택사항</p>
+          <label class="community-form-note dj-community-consent"><input type="checkbox" id="community-share-publicly"><span>공개 게시판에 등록<small>선택한 사진·위치·닉네임도 공개됩니다.</small></span></label>
+          <p class="community-form-note dj-community-privacy">로그인 및 공개 동의가 필요합니다. 미선택 시 이 기기에만 저장되며 행정기관에 접수되지 않습니다.</p>
           <button type="submit" class="primary-btn"><span>게시글 저장</span><span>✓</span></button>
-          <label class="community-form-note"><input type="checkbox" id="community-share-publicly"> 로그인 계정으로 공개 게시판에 등록 (선택한 사진·위치·닉네임도 공개)</label><p class="community-form-note">공개는 로그인과 위 체크가 모두 필요합니다. 체크하지 않으면 내 기기에만 저장됩니다. 행정기관에 접수되지는 않습니다.</p>
         </form>
         <div id="community-list" class="community-feed" aria-live="polite"></div>
         <details class="community-report-secondary"><summary>지도에서 보행환경 제보하기</summary>

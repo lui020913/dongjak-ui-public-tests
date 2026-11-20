@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.34",
+  "application_version": "9.2.35",
   "public_work_branch": "main",
-  "purpose": "Recover real metro feed with strict official arrival station-event fallback, distinguish upstream errors, verify actual Preview feed before Production",
-  "attempt": 117,
+  "purpose": "Unify mobile header drag, dark modal styling, community composer navigation and consent, layer status and shortcuts, weather glyphs, installation guide and safe-area scrim",
+  "attempt": 118,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Real Preview returned METRO_FEED_UNAVAILABLE for five lines and zero fallback; decode explicit XML and safe supported JSON wrappers; record response shape and raw rows without exposing keys/data",
+  "last_retry_reason": "Apply prior full-header patch and address 10 reported phone screens; preserve actual train feed requirement",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
