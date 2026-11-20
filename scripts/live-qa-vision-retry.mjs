@@ -1,0 +1,31 @@
+// Retry only unavailable or invalid review responses; do not retry valid findings.
+const severity=['critical','major','minor','suggestion'];
+export function evidenceSchema(ids){
+ if(!ids.length||new Set(ids).size!==ids.length||!ids.every(x=>/^E\d{2}$/.test(x)))throw Error('Invalid evidence catalog');
+ return {type:'OBJECT',properties:{findings:{type:'ARRAY',maxItems:30,items:{type:'OBJECT',properties:{severity:{type:'STRING',enum:severity},evidence:{type:'ARRAY',minItems:1,maxItems:ids.length,items:{type:'STRING',enum:ids}},summary:{type:'STRING'}},required:['severity','evidence','summary']}}},required:['findings']};
+}
+export function validateReview(parsed,ids){
+ if(!Array.isArray(parsed?.findings)||parsed.findings.length>30||!parsed.findings.every(x=>severity.includes(x.severity)&&typeof x.summary==='string'&&x.summary.trim().length>0&&x.summary.length<=1200&&Array.isArray(x.evidence)&&x.evidence.length>0&&x.evidence.length<=ids.length&&x.evidence.every(id=>ids.includes(id))))throw Error('Unverifiable review evidence');
+ return {findings:parsed.findings.map(f=>({severity:f.severity,summary:f.summary,evidence:[...new Set(f.evidence)]}))};
+}
+export async function reviewWithRetry({send,ids,wait=ms=>new Promise(r=>setTimeout(r,ms)),maxAttempts=3}){
+ const failures=[];
+ const schema=evidenceSchema(ids);
+ for(let attempt=1;attempt<=maxAttempts;attempt++){
+  let reason,retryable=true;
+  try{
+   const res=await send({schema,attempt,previousFailure:failures.at(-1)||null});
+   if(!res.ok){reason='Provider HTTP '+res.status;retryable=[408,429,500,502,503,504].includes(res.status);}
+   else {
+    const candidate=(await res.json()).candidates?.[0];
+    if(candidate?.finishReason!=='STOP')throw Error('Incomplete provider response');
+    const parsed=JSON.parse(candidate.content.parts.filter(p=>!p.thought).map(p=>p.text||'').join(''));
+    return {status:'reviewed',review:validateReview(parsed,ids),attempts:attempt,failures};
+   }
+  }catch(e){reason=e instanceof SyntaxError?'Invalid JSON response':String(e?.message||'Vision request failed').slice(0,150);}
+  failures.push(reason);
+  if(!retryable||attempt===maxAttempts)break;
+  await wait(attempt===1?3000:9000);
+ }
+ return {status:'unavailable',reason:failures.at(-1),attempts:failures.length,failures};
+}
