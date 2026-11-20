@@ -21,9 +21,10 @@ Deno.serve(async(req:Request)=>{
  if(authError||!auth.user||auth.user.is_anonymous)return send({error:"로그인이 필요합니다."},401);
  const configured=Boolean(key&&model&&/^gemini-[a-z0-9.-]+$/.test(model));
  const {data:active,error:activeError}=await client.rpc("community_moderation_active");
- if(!configured||activeError||active!==true)return send({error:"AI 검사 서비스 준비 중입니다. 작성 내용을 보존해주세요."},503);
  let raw:string;let p:any;
  try{if(Number(req.headers.get("content-length")||0)>620000)throw 0;raw=await req.text();if(raw.length>620000)throw 0;p=JSON.parse(raw);}catch{return send({error:"입력 형식을 확인해주세요."},400);}
+ if(p?.kind==="status")return send({ready:configured&&!activeError&&active===true,configured,enforced:!activeError&&active===true});
+ if(!configured||activeError||active!==true)return send({error:"AI 검사 서비스 준비 중입니다. 작성 내용을 보존해주세요."},503);
  const kind=p?.kind,body=clip(p?.body,kind==="post"?1200:300),nickname=clip(p?.nickname||"익명 주민",20);
  if(!["post","comment"].includes(kind)||!body||!nickname)return send({error:"내용을 확인해주세요."},400);
  const photo=p.photo??null;
@@ -33,9 +34,11 @@ Deno.serve(async(req:Request)=>{
   const title=clip(p.title,70);if(!title||!categories.has(p.category))return send({error:"제목 및 유형을 확인해주세요."},400);
   Object.assign(payload,{title,category:p.category,lng:null,lat:null});
   if(p.lng!=null||p.lat!=null){if(!Number.isFinite(p.lng)||!Number.isFinite(p.lat)||p.lng<126||p.lng>128||p.lat<37||p.lat>38)return send({error:"위치 범위를 확인해주세요."},400);payload.lng=p.lng;payload.lat=p.lat;}
- }else{if(typeof p.post_id!=="string"||!uuid.test(p.post_id))return send({error:"게시글을 확인해주세요."},400);payload.post_id=p.post_id;const {data,error}=await client.from("community_posts").select("id").eq("id",p.post_id).maybeSingle();if(error||!data)return send({error:"게시글이 존재하지 않습니다."},404);}
+ }else{if(typeof p.post_id!=="string"||!uuid.test(p.post_id))return send({error:"게시글을 확인해주세요."},400);payload.post_id=p.post_id;const {data,error}=await client.from("community_posts").select("id").eq("id",p.post_id).maybeSingle();if(error||!data)return send({error:"게시글이 존재하지 않습니다."},404);
+  if(p.parent_id!=null){if(typeof p.parent_id!=="string"||!uuid.test(p.parent_id))return send({error:"답글 대상을 확인해주세요."},400);const {data:parent,error:parentError}=await client.from("community_comments").select("id,parent_id").eq("id",p.parent_id).eq("post_id",p.post_id).maybeSingle();if(parentError||!parent||parent.parent_id)return send({error:"답글 대상 댓글이 존재하지 않거나 이미 답글입니다."},400);payload.parent_id=parent.id;}}
+
  const norm=(s:string)=>s.normalize("NFKC").toLowerCase().replace(/[\p{P}\p{Z}\s\u200b-\u200d]/gu,"");
- const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",norm(payload.title||""),norm(body)].join("\n"));
+ const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",payload.parent_id||"",norm(payload.title||""),norm(body)].join("\n"));
  const imageFingerprint=photo?await digest(photo):null;
  const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_image_fingerprint:imageFingerprint,p_payload:payload});
  if(claimError)return send({error:"검사 서버 연결에 실패했습니다."},503);
@@ -48,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   if(!response.ok)throw Error("upstream");
   const out=await response.json();const candidate=out.candidates?.[0];
   if(candidate?.finishReason!=="STOP")throw Error("incomplete");
-  const result=JSON.parse(candidate.content.parts.map((v:any)=>v.text||"").join(""));
+  const result=JSON.parse(candidate.content.parts.filter((v:any)=>!v.thought).map((v:any)=>v.text||"").join(""));
   if(!["published","removed","review"].includes(result.decision)||!codes.has(result.reason))throw Error("invalid");
   if((result.decision==="published")!==(result.reason==="clean")||result.decision==="removed"&&result.reason==="uncertain")throw Error("inconsistent");
   decision=result.decision;reason=result.reason;

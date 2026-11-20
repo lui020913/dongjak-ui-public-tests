@@ -907,8 +907,9 @@
             <button type="button" class="community-filter" data-community-filter="개선 제안" aria-pressed="false">개선 제안</button>
             <button type="button" class="community-filter" data-community-filter="동네 질문" aria-pressed="false">동네 질문</button><button type="button" class="community-filter" data-community-filter="동네생활" aria-pressed="false">동네생활</button><button type="button" class="community-filter" data-community-filter="생활정보" aria-pressed="false">생활정보</button><button type="button" class="community-filter" data-community-filter="교통정보" aria-pressed="false">교통정보</button><button type="button" class="community-filter" data-community-filter="자유게시판" aria-pressed="false">자유게시판</button>
           </div>
-          <select id="community-sort" aria-label="게시글 정렬"><option value="new">최신순</option><option value="popular">공감순</option></select>
+          <button type="button" id="community-saved-toggle" class="community-notice-toggle" aria-pressed="false">저장한 글</button><select id="community-sort" aria-label="게시글 정렬"><option value="new">최신순</option><option value="popular">공감순</option></select>
         </div>
+        <p id="community-moderation-status" class="community-form-note" hidden></p>
         <form id="community-form" class="community-form" hidden>
           <div class="community-form-top"><strong>새 게시글</strong><button type="button" id="community-compose-close" aria-label="글쓰기 닫기"></button></div>
           <label for="community-category">게시글 유형</label>
@@ -930,7 +931,7 @@
           <input type="file" id="community-photo-input" accept="image/jpeg,image/png,image/webp" hidden />
           <div id="community-photo-preview" class="community-photo-preview" hidden><img id="community-photo-image" alt="첨부 사진 미리보기" /><button type="button" id="community-photo-remove">사진 제거</button></div>
           <p id="community-location-label" class="community-location-label">위치 지정 없음 · 선택사항</p>
-          <label class="community-form-note dj-community-consent"><input type="checkbox" id="community-share-publicly"><span>공개 게시판에 등록<small>선택한 사진·위치·닉네임도 공개됩니다. 게시글·사진은 공개 전 외부 AI 서비스에서 검사됩니다.</small></span></label>
+          <label class="community-form-note dj-community-consent"><input type="checkbox" id="community-share-publicly"><span>공개 게시판에 등록<small>선택한 사진·위치·닉네임도 공개됩니다. 공개할 글·닉네임·사진은 게시 전 Google Gemini AI로 전송해 운영정책 위반 여부를 검사합니다. 계정 ID와 지도 좌표는 AI로 보내지 않습니다.</small></span></label>
           <p class="community-form-note dj-community-privacy">로그인 및 공개 동의가 필요합니다. 미선택 시 이 기기에만 저장되며 행정기관에 접수되지 않습니다.</p>
           <button type="submit" class="primary-btn"><span>게시글 저장</span><span>✓</span></button>
         </form>
