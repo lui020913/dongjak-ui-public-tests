@@ -1,8 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const read=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
+// Source CI has frontend/production; the protected build only archives app
+// and copies the exact same stylesheet into src/mobile-next.css.
+const mobileNextCss=()=>{
+ const archive=new URL('../src/mobile-next.css',import.meta.url);
+ const repository=new URL('../../frontend/production/mobile-next.css',import.meta.url);
+ return readFileSync(existsSync(archive)?archive:repository,'utf8');
+};
 
 test('nearby sheet keeps exactly one gesture owner and supports fallback tap',()=>{
   const owner=read('src/dj-v8212-sheet-controller.js');
@@ -26,7 +33,7 @@ test('distant subway vehicle AND beam remain hidden, while bus visibility is unc
 
 test('mobile Safari moves map tools beneath actual header rather than fixed guess',()=>{
   const script=read('src/mobile-browser-layout.js');
-  const css=read('../frontend/production/mobile-next.css');
+  const css=mobileNextCss();
   assert.match(script,/getBoundingClientRect\?\.\(\)/);
   assert.match(script,/--dj829-tools-top/);
   assert.match(script,/ResizeObserver/);
