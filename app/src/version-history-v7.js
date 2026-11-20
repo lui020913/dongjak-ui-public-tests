@@ -174,7 +174,14 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       heading.append(el('strong','','안전지도 '+edition.label),el('span','',edition.title),el('small','',edition.records.length+'개 기록'));
       archive.append(heading);timeline.append(archive);
     }
-    for(const {record:release,classification,sourceScale,displayVersion} of edition.records){
+    // The user-facing timeline is organized by two-part feature editions.
+    const combined=[];
+    for(const row of edition.records){
+      const last=combined.at(-1);
+      if(last?.displayVersion===row.displayVersion)last.entries.push(row);
+      else combined.push({...row,entries:[row]});
+    }
+    for(const {record:release,classification,sourceScale,displayVersion,entries} of combined){
     const article=el('article','v707-release');
     const header=el('header','v707-release-head');
     article.dataset.releaseType=release.scale||'patch';
@@ -189,19 +196,31 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     header.append(versionHeading,badge);
     article.append(header);
     const ul=el('ul','v707-release-items');
-    for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
-    const isOperational=/^v?9\.\d+\.\d+$/.test(String(release.version||''))&&!release.sourceVersion;
+    const allNotes=entries.flatMap(({record})=>record.sourceItems||record.items||[]);
+    for(const description of allNotes.slice(0,6))ul.append(el('li','',description));
+    const isOperational=/^v?9\\.\\d+\\.\\d+$/.test(String(release.version||''))&&!release.sourceVersion;
+    const current=entries.some(({record})=>record===currentRelease);
+    article.dataset.recordCount=String(entries.length);
+    article.dataset.actualVersions=JSON.stringify(entries.map(({record})=>record.version));
     if(isOperational){
-      // Display the exact deployed SemVer once; never print a second conflicting
-      // "original version" or imply that a prior production build was unshipped.
-      if(release===currentRelease)article.dataset.currentBuild='true';
+      // Exact operational version remains as build metadata, not the update title.
+      if(current)article.dataset.currentBuild='true';
+      article.append(el('p','dj-edition-original',(current?'현재 운영 빌드: ':'기록된 빌드: ')+
+        (String(release.version).startsWith('v')?'':'v')+release.version));
     }else{
-      const original=el('p','dj-edition-original','당시 기록: '+(release.sourceVersion||release.version));
-      if(release.sourceVersion&&release.version!==release.sourceVersion)original.title='보존된 원본 기록';
+      const original=el('p','dj-edition-original','이전 개발 기록 '+entries.length+'건 · 실제 배포 여부 별도 확인');
+      original.title='보존된 기록: '+entries.map(({record})=>record.sourceVersion||record.version).join(', ');
       article.append(original);
-      if(release!==currentRelease)article.append(el('p','dj-edition-original','이전 개발 이력 · 실제 배포 여부는 별도 확인'));
     }
-    article.append(ul);parent.append(article);
+    article.append(ul);
+    if(allNotes.length>6){
+      const details=el('details','dj-edition-more');
+      details.append(el('summary','','나머지 변경 사항 '+(allNotes.length-6)+'건 보기'));
+      const more=el('ul','v707-release-items');
+      for(const description of allNotes.slice(6))more.append(el('li','',description));
+      details.append(more);article.append(details);
+    }
+    parent.append(article);
     }
   }
   if(currentRelease)void syncPublicVersion({version:currentRelease.version});
