@@ -97,11 +97,15 @@ export function installCompactFacilityPopups(doc=globalThis.document,win=globalT
   const map=doc?.getElementById?.('map');
   if(!map||!win)return ()=>{};
   let scheduled=0,disposed=false;
+  // A bottom-docked popup must not resize under the user's finger.
+  // Measure each newly mounted card before its first paint; later AI/content
+  // changes scroll inside its body instead of moving the close button.
+  const measured=new WeakSet();
   function sync(){
     scheduled=0;
     if(disposed||!win.matchMedia?.('(max-width:699px)')?.matches)return;
     for(const popup of map.querySelectorAll('.dj-place-detail-popup')){
-      if(popup.classList.contains('dj871-place-expanded')||popup.classList.contains('dj871-sheet-expanded'))continue;
+      if(popup.classList.contains('dj871-place-expanded')||popup.classList.contains('dj871-sheet-expanded')||measured.has(popup))continue;
       const head=popup.querySelector('.dj-place-header');
       const body=popup.querySelector('.dj-place-body');
       if(!head||!body)continue;
@@ -117,24 +121,36 @@ export function installCompactFacilityPopups(doc=globalThis.document,win=globalT
       })+'px';
       if(popup.style.getPropertyValue('--dj9251-facility-content-height')!==height)
         popup.style.setProperty('--dj9251-facility-content-height',height);
+      measured.add(popup);
     }
   }
   const request=()=>{
     if(disposed||scheduled)return;
     scheduled=win.requestAnimationFrame?win.requestAnimationFrame(sync):win.setTimeout(sync,0);
   };
-  const observer=typeof MutationObserver==='function'?new MutationObserver(request):null;
+  const containsPopup=node=>node?.nodeType===1&&
+    (node.matches?.('.dj-place-detail-popup')||node.querySelector?.('.dj-place-detail-popup'));
+  const observer=typeof MutationObserver==='function'?new MutationObserver(records=>{
+    // MutationObserver fires before paint, unlike rAF: new sheets do not jump
+    // between 52dvh fallback and their measured compact height during a tap.
+    if(records.some(record=>record.type==='childList'&&[...record.addedNodes].some(containsPopup)))sync();
+    else request();
+  }):null;
   observer?.observe(map,{subtree:true,childList:true,characterData:true,
     attributes:true,attributeFilter:['class','hidden']});
-  win.addEventListener?.('resize',request,{passive:true});
-  win.visualViewport?.addEventListener?.('resize',request,{passive:true});
+  const resize=()=>{
+    for(const popup of map.querySelectorAll('.dj-place-detail-popup'))measured.delete(popup);
+    request();
+  };
+  win.addEventListener?.('resize',resize,{passive:true});
+  win.visualViewport?.addEventListener?.('resize',resize,{passive:true});
   request();
   return ()=>{
     disposed=true;
     if(scheduled){win.cancelAnimationFrame?.(scheduled);win.clearTimeout?.(scheduled);}
     observer?.disconnect();
-    win.removeEventListener?.('resize',request);
-    win.visualViewport?.removeEventListener?.('resize',request);
+    win.removeEventListener?.('resize',resize);
+    win.visualViewport?.removeEventListener?.('resize',resize);
   };
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
