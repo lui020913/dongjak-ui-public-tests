@@ -32,7 +32,7 @@ export const test=base.extend({
           const n=document.querySelector(selector);if(!n||!n.getClientRects().length)return [];
           const s=getComputedStyle(n),r=n.getBoundingClientRect();
           if(s.display==='none'||s.visibility==='hidden')return [];
-          return [{selector,x:r.x,y:r.y,w:r.width,h:r.height,opacity:Number(s.opacity),transform:s.transform,scroll:n.scrollTop,radius:s.borderRadius}];
+          return [{selector,x:r.x,y:r.y,w:r.width,h:r.height,opacity:Number(s.opacity),motion:n.dataset.dj810Animating||n.closest('[data-dj810-animating]')?.dataset.dj810Animating||'',transform:s.transform,scroll:n.scrollTop,radius:s.borderRadius}];
         });
         const groups=sample%6===0?['#bottom-nav .nav-tab','#djNext-scroll .djNext-tool','#djNext-layer-panel .djNext-layer-action'].map(selector=>{
           const items=[...document.querySelectorAll(selector)].filter(n=>n.getClientRects().length&&getComputedStyle(n).visibility==='visible').map(n=>{const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id||n.getAttribute('data-tab')||null,x:r.x,y:r.y,w:r.width,h:r.height,radius:s.borderRadius,fontSize:s.fontSize,shadow:s.boxShadow,background:s.backgroundColor,overflowX:n.scrollWidth-n.clientWidth};});
