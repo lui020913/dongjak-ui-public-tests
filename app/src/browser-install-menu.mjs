@@ -62,6 +62,10 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  buttons.set(key,{b,status,selectedBadge});
  b.addEventListener('click',async()=>{
  if(key==='ios')return;
+ if(blocked&&selectedKey===key&&!info.hidden){
+  // A repeated desktop/tablet choice collapses its own details and selection.
+  setSelected(null);info.hidden=true;delete info.dataset.androidGuide;info.replaceChildren();return;
+ }
  setSelected(key);
  if(key==='web'){if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. QR코드는 ‘홈 화면에 웹앱 추가’에서 확인할 수 있습니다.']);else finish();return;}
  if(key==='pwa'){if(blocked){showPwaQr();return;}showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}

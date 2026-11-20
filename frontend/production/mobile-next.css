@@ -674,3 +674,11 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
  html body:has(#app[data-theme="dark"]) #dj-ai-search-modal .dj926-ai-glyph{color:#7bd3b9!important}
  html body:has(#app[data-theme="dark"]) #dj-ai-search-modal .dj-ai-submit{background:#10836e!important;color:#fff!important}
 }
+
+/* The dock accepts horizontal swipes but never steals vertical page scrolling. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app #bottom-nav[data-dj-tab-navigation="ready"],
+  html body #app #bottom-nav[data-dj-tab-navigation="ready"] > .nav-tab {touch-action:pan-y!important;}
+ }
+}

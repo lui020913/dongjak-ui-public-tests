@@ -42,6 +42,8 @@ test('PC install gate marks the selected option and always shows Google Play ext
   await expect(pwa).toHaveAttribute('aria-pressed','true');
   await expect(android).toHaveAttribute('aria-pressed','false');
   await expect(page.locator('#dj-install-menu .dj-install-qr')).toBeVisible();
+  await pwa.click();await expect(pwa).toHaveAttribute('aria-pressed','false');await expect(page.locator('#dj-install-menu .dj-install-info')).toBeHidden();await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);
+  const web=choices.filter({hasText:'웹에서 바로 이용하기'});await web.click();await expect(page.locator('#dj-install-menu .dj-install-info')).toBeVisible();await web.click();await expect(web).toHaveAttribute('aria-pressed','false');await expect(page.locator('#dj-install-menu .dj-install-info')).toBeHidden();
 });
 
 test('Android tablet install gate keeps selected state and the same external-download warning',async({browser})=>{
@@ -61,6 +63,7 @@ test('Android tablet install gate keeps selected state and the same external-dow
     await expect(guide).toBeVisible();
     await expect(guide.locator('.dj-install-guide-intro')).toContainText('Google Play 스토어 외부');
     await expect(guide.locator('.dj-install-guide-notice')).toContainText('Play Protect');
+    await android.click();await expect(android).toHaveAttribute('aria-pressed','false');await expect(page.locator('#dj-install-menu .dj-install-info')).toBeHidden();await expect(page.locator('#dj-install-menu [data-android-guide]')).toHaveCount(0);
   }finally{
     await context.close();
   }

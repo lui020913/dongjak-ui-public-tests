@@ -150,6 +150,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       33) note="확대·축소 및 테마 변경 시 열차 위치 표시 안정화";;
       34) note="실시간 열차 정보 연결 안정화 및 호출 제한 안내";;
       35) note="모바일 창 헤더 드래그·다크 테마·커뮤니티·날씨·레이어 화면 개선";;
+      36) note="PC·태블릿 이용 안내 재선택 접기 및 모바일 하단탭 좌우 스와이프·페이드 전환";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null

@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {adjacentTabIndex} from '../src/bottom-tab-navigation.js';
+test('horizontal dock swipes select one adjacent tab, without wrapping or responding to vertical drag',()=>{assert.equal(adjacentTabIndex(2,5,-85,5),3);assert.equal(adjacentTabIndex(2,5,85,5),1);assert.equal(adjacentTabIndex(0,5,80,0),-1);assert.equal(adjacentTabIndex(4,5,-80,0),-1);assert.equal(adjacentTabIndex(2,5,-25,0),-1);assert.equal(adjacentTabIndex(2,5,-60,65),-1);});

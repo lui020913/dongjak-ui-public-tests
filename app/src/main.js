@@ -66,6 +66,7 @@ import {preferKoreanBaseMapLabels} from './korean-labels.js';
 import {installAdaptiveMapActions} from './adaptive-map-actions.js';
 import {installScaleDocking} from './map-scale-docking.js';
 import {installSafetyHomeGuard} from './safety-home-guard.js';
+import {installBottomTabNavigation} from './bottom-tab-navigation.js';
 import {installViewportSafeMapPopups} from './map-popup-viewport.js';
 import {installMapResumeRecovery} from './v875-map-resume.js';
 import {createOutsideDistrictNotifier} from './dongjak-location-alert.js';
@@ -1914,6 +1915,8 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
 }
 // Capture mobile HOME before any older tab, sheet or district listeners. Other
 // devices retain their dedicated desktop sidebar behaviour unchanged.
+// Intercept only actual bottom-tab changes before the legacy HOME guard.
+installBottomTabNavigation({doc:document,win:window,app});
 installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
   const finish=()=>{routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
   const active=pagePanels.find(p=>!p.hidden);

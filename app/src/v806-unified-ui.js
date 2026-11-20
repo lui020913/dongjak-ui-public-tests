@@ -30,6 +30,7 @@ export function installUnifiedUI(doc=document, win=window){
   const lifecycle=createWindowLifecycle();
   const explicitUntil=new Map();
   const tabReplacement=new Set();
+  const tabFadeUntil=new Map();
   // Track a real opening click separately from exclusive-surface arbitration.
   // A preceding resize or observer must not consume the entrance request.
   const entranceIntent=new Map();
@@ -71,13 +72,15 @@ export function installUnifiedUI(doc=document, win=window){
   const animationTimers=new Set();
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
-  function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom){
+  function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
     if(!phone()||!target?.style||reduced())return false;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
-    const fade=isGuide||target.dataset.djDialogFade==='true';
+    const tabFade=forceTabFade||(opening&&(tabFadeUntil.get(target.id)||0)>Date.now());
+    if(opening)tabFadeUntil.delete(target.id);
+    const fade=isGuide||tabFade||target.dataset.djDialogFade==='true';
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
-    const guideFrom=isGuide&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
+    const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
     const duration=fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
@@ -129,7 +132,7 @@ export function installUnifiedUI(doc=document, win=window){
     function setMotion(progress){
       if(scrim)scrim.style.setProperty('--dj-scrim-alpha',String(confirmMotionOpacity(progress,opening)));
       if(fade){
-        const alpha=isGuide?guideFrom+((opening?1:0)-guideFrom)*confirmMotionOpacity(progress,true):confirmMotionOpacity(progress,opening);
+        const alpha=guideFrom+((opening?1:0)-guideFrom)*confirmMotionOpacity(progress,true);
         target.style.setProperty('opacity',String(alpha),'important');
         if(isGuide)app.style.setProperty('--dj-guide-fade',String(alpha));
         return;
@@ -228,6 +231,12 @@ export function installUnifiedUI(doc=document, win=window){
       const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
       const offset=activeAnimation.get(target)?.offset?.();
       cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset))finish();
+    },
+    closeTab(target,finish){
+      if(!target||target.hidden||!phone()||reduced()){finish();return;}
+      const from=target.dataset.dj810Animating?Number(win.getComputedStyle(target).opacity):undefined;
+      cancelActive(target);
+      if(!playMobileMotion(target,false,finish,from,undefined,true))finish();
     },
     cancel:cancelActive
   };
@@ -405,7 +414,10 @@ export function installUnifiedUI(doc=document, win=window){
     if(phone()){
       replacingSurface=ids.some(id=>id!==requested&&visible(id))||popupNodes().length?requested:'';
       const tabClick=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-      if(tabClick&&Object.values(tabPanels).includes(requested)&&Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
+      if(tabClick&&Object.values(tabPanels).includes(requested)){
+        if(win.matchMedia?.('(max-width:699px)')?.matches)tabFadeUntil.set(requested,Date.now()+3000);
+        else if(Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
+      }
       entranceIntent.set(requested,Date.now()+3000);
     }
     pendingIntent=requested;
