@@ -32,13 +32,14 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,onSt
     const seq=sequence;
     active={id,route,status:'loading'};onState(active);
     const ac=new AbortController();controller=ac;
-    const timer=setTimeout(()=>ac.abort(),10000);
+    const timer=setTimeout(()=>ac.abort(),18000);
     try{
       let coordinates=cache.get(id)?.coordinates;
       if(!coordinates||Date.now()-cache.get(id).at>3600000){
         const response=await fetcher(apiBase+'/bus/route-path?'+new URLSearchParams({routeId:id}),{signal:ac.signal});
         const data=await response.json();
-        if(!response.ok||data.routeId!==id||!Array.isArray(data.coordinates)||data.coordinates.length<2||
+        if(!response.ok){const error=new Error('route unavailable');error.code=data.code;throw error;}
+        if(data.routeId!==id||!Array.isArray(data.coordinates)||data.coordinates.length<2||
           data.coordinates.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)))throw new Error('invalid route');
         coordinates=data.coordinates;
         if(cache.size>=40)cache.delete(cache.keys().next().value);
@@ -47,9 +48,9 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,onSt
       if(seq!==sequence)return;
       geometry={type:'FeatureCollection',features:[{type:'Feature',properties:{routeId:id,color:busRouteColor(routeType)},geometry:{type:'LineString',coordinates}}]};
       draw();active={id,route,status:'shown'};onState(active);
-    }catch{
+    }catch(error){
       if(seq!==sequence)return;
-      active=null;onState({id,route,status:'error'});
+      active=null;onState({id,route,status:'error',code:error?.code||'ROUTE_PATH_UPSTREAM'});
     }finally{clearTimeout(timer);if(controller===ac)controller=null;}
   }
   return {select,clear,getActive:()=>active,destroy(){clear();map.off?.('style.load',draw);}};

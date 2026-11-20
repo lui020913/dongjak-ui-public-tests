@@ -199,6 +199,8 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         run: npm install --no-audit --no-fund --prefer-offline
+      - name: Verify actual Seoul bus route geometry on deployed Preview
+        run: node scripts/check-live-bus-route.mjs "$DONGJAK_TARGET_URL"
       - name: Verify selection state, external APK warning and QR interaction on PC and tablet
         run: npx playwright test --config=playwright.config.mjs tests/install-gate-selection.spec.mjs --project=desktop --workers=1
       - uses: actions/upload-artifact@v4

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseBusRoutePath,busRoutePathUrl} from '../server/bus-route-path.mjs';
+import {parseBusRoutePath,busRoutePathUrl,decodeBusRouteResponse,fetchBusRouteGeometry} from '../server/bus-route-path.mjs';
 import {parseSeoulBusArrival} from '../src/transport-data.js';
 import {createBusRouteOverlay,BUS_ROUTE_SOURCE} from '../src/bus-route-overlay.js';
 const id='100100112';
@@ -28,4 +28,15 @@ test('route selection toggles, rejects stale response and restores shape after s
   assert.ok(sources.has(BUS_ROUTE_SOURCE));
   await overlay.select({routeId:id,route:'150',routeType:3});
   assert.equal(result.features.length,0);overlay.destroy();
+});
+
+test('official PathList and XML decode while auth and rate-limit errors stay distinct',async()=>{
+ const rows=[row(1,126.9,37.5),row(2,126.91,37.51)],coordinates=[[126.9,37.5],[126.91,37.51]];
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify({MsgBody:{PathList:rows}}),id),{coordinates});
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgBody:{pathList:{itemList:rows}}}),id),{coordinates});
+ const xml='<ServiceResult><msgHeader><headerCd>0</headerCd></msgHeader><msgBody>'+rows.map(p=>'<itemList><no>'+p.no+'</no><gpsX>'+p.gpsX+'</gpsX><gpsY>'+p.gpsY+'</gpsY></itemList>').join('')+'</msgBody></ServiceResult>';
+ assert.deepEqual(decodeBusRouteResponse(xml,id),{coordinates});
+ assert.deepEqual(decodeBusRouteResponse('<OpenAPI_ServiceResponse><cmmMsgHeader><returnReasonCode>20</returnReasonCode><returnAuthMsg>SERVICE_ACCESS_DENIED_ERROR</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>',id),{code:'ROUTE_PATH_AUTH'});
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgHeader:{headerCd:8}}),id),{code:'ROUTE_PATH_RATE_LIMIT'});
+ assert.deepEqual(await fetchBusRouteGeometry('test-key',id,{fetcher:async()=>({ok:true,text:async()=>xml})}),{coordinates});
 });

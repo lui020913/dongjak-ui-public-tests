@@ -6,7 +6,7 @@ import {normalizeBusServiceKey as normalizeSharedBusServiceKey} from '../../../s
  */
 import {parseSeoulBusArrival,parseSeoulSubwayArrival,resolveSeoulBusStation,parseSeoulBusStopsNearby,inspectSeoulApiResponse,isSeoulBusNoResult} from '../../../src/transport-data.js';
 import {parseBusRouteList} from '../../../server/bus-route-list.mjs';
-import {parseBusRoutePath,busRoutePathUrl} from '../../../server/bus-route-path.mjs';
+import {fetchBusRouteGeometry,routePathFailure} from '../../../server/bus-route-path.mjs';
 import {validateSeoulSubwayFeed} from '../../../src/transport-freshness.js';
 import {permitsSubwayBulkRecovery,filterBulkArrivalsForStation,seoulSubwayIdForLine} from '../../../src/subway-source-recovery.js';
 import {parseBusServiceTime,seoulDayTag} from '../../../server/service-hours.mjs';
@@ -316,12 +316,11 @@ export async function onRequestGet({request,env}){
   if(route==='bus/route-path'){
     const id=url.searchParams.get('routeId')||'';
     if(!/^\d{5,15}$/.test(id))return fail('유효한 버스 노선 ID가 필요합니다.',400,'INVALID_ROUTE_ID');
-    if(!busKey)return fail('버스 API 인증키가 설정되지 않았습니다.',503,'MISSING_BUS_KEY');
-    try{
-      const coordinates=parseBusRoutePath(await officialJson(busRoutePathUrl(busKey,id),{allowEmptyResult:true}),id);
-      if(!coordinates.length)return fail('공식 노선 경로를 확인하지 못했습니다.',404,'ROUTE_PATH_UNAVAILABLE');
-      return respond({routeId:id,coordinates,source:'서울시 노선정보조회 서비스'},200,3600);
-    }catch{return fail('공식 버스 노선 경로 조회에 실패했습니다.',502,'ROUTE_PATH_UPSTREAM');}
+    const routeKey=normalizeBusServiceKey(env.SEOUL_BUS_ROUTE_SERVICE_KEY)||busKey;
+    if(!routeKey)return fail('버스 노선 API 인증키가 설정되지 않았습니다.',503,'MISSING_BUS_KEY');
+    const result=await fetchBusRouteGeometry(routeKey,id);
+    if(result.code){const error=routePathFailure(result.code);return fail(error.error,error.status,error.code);}
+    return respond({routeId:id,coordinates:result.coordinates,source:'서울시 노선정보조회 서비스'},200,3600);
   }
   if(route==='bus/median-nearby')return medianNearby(url.searchParams,busKey);
   if(route==='bus/stops-nearby')return nearbyBusStops(url.searchParams,busKey,env,request);

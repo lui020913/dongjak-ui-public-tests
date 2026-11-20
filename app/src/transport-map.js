@@ -1364,7 +1364,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,onState:state=>{
     routeStatus.hidden=!state;
     clearRouteButton.hidden=!state||state.status==='error';
-    routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · 지도 표시 중`:`${state.route}번 공식 노선 경로를 불러오지 못했습니다.`;
+    routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · 지도 표시 중`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
     syncRouteRows();
   }});
   clearRouteButton.addEventListener('click',()=>busRouteOverlay.clear());
