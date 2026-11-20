@@ -1363,7 +1363,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
   let routePresentation=null;
-  function syncRoutePresentation(){const state=routePresentation;const busSheet=selected?.kind==='bus'&&!panel.hidden;routeStatus.hidden=!state||!busSheet;clearRouteButton.hidden=!state||state.status==='error'||!busSheet;mapClearRouteButton.hidden=!state||state.status==='error';if(state&&state.status!=='error'){mapClearRouteButton.textContent=`${state.route}번 · 해제`;mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';mapClearRouteButton.setAttribute('aria-label',`${state.route}번 버스 노선 표시 해제`);}}
+  function syncRoutePresentation(){const state=routePresentation;const busSheet=selected?.kind==='bus'&&!panel.hidden;routeStatus.hidden=!state||!busSheet;clearRouteButton.hidden=!state||state.status==='error'||!busSheet;mapClearRouteButton.hidden=!state||state.status==='error';if(state&&state.status!=='error'){mapClearRouteButton.textContent=`${state.route}번 · ${state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':''}해제 ×`;mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';mapClearRouteButton.setAttribute('aria-label',`${state.route}번 버스 노선 표시 해제`);}}
   function syncRouteRows(){
     const active=busRouteOverlay.getActive();
     for(const row of (arrivalsEl.querySelectorAll?.('[data-bus-route-id]')||[])){
@@ -1373,7 +1373,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       row.style.setProperty('--dj-bus-selected-color',busRouteColor(row.dataset.busRouteType));
     }
   }
-  const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,onState:state=>{
+  const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,vehicleFetcher:globalThis.fetch,onState:state=>{
     routePresentation=state;syncRoutePresentation();
     routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · ${state.stopCount?`경유 정류소 ${state.stopCount}개 · 확대하면 표시`:'지도 표시 중 · 경유 정류소 조회 불가'}`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
     syncRouteRows();

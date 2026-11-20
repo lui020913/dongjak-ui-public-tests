@@ -2,6 +2,7 @@ import {isMetroDailyQuota,isMixedMetroQuota,metroQuotaRetryMs,METRO_QUOTA_NOTICE
 /** MapLibre real-time vehicle overlay. Isolated GeoJSON sources and layers; no GPS permission. */
 import {payloadToCollection,LINE_COLORS} from './normalize.js';
 import {loadTrainAtlas} from './train-atlas.js';
+import {selectedBusVehicleRoute} from '../../bus-route-overlay.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
 export const LIVE_SOURCE='dongjak-live-vehicles-v827';
 export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
@@ -142,6 +143,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     const filtered=[],priorById=new Map(display.features.map(f=>[f.properties.id,f.properties]));
     for(const f of collection.features){
       if(!visible[f.properties.mode])continue;
+      if(f.properties.mode==='bus'&&f.properties.routeId&&f.properties.routeId===selectedBusVehicleRoute(map))continue;
       let coords=f.geometry.coordinates;
       const earlier=previous.get(f.properties.id);
       if(f.properties.mode==='metro'){
