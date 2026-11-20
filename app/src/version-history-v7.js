@@ -187,7 +187,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     badge.setAttribute('aria-label',`${classification} 변경 유형`);
     // Show readable major.minor editions in the timeline, not the patch
     // counter as a giant primary heading. Keep exact builds in data attributes.
-    const publicEdition=String(displayVersion).replace(/^v?(\\d+)\\.(\\d+)(?:\\.\\d+)?$/,'v$1.$2');
+    const publicEdition=String(displayVersion).replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
     const versionHeading=el('h4','',publicEdition);
     header.append(versionHeading,badge);
     article.append(header);
