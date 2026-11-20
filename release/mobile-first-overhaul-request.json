@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.39",
+  "application_version": "9.2.40",
   "public_work_branch": "main",
-  "purpose": "Unify mobile action-button depth and stable pressed feedback using the six-slot toolbar material; preserve semantic colors, compact layout, accessible focus, switches and tab indicator; align entry choices",
-  "attempt": 129,
+  "purpose": "Official route stops at detailed zoom, fullscreen evidence chat, inline voice recognition with native permission, animated search expansion and smoother 250ms dock fade",
+  "attempt": 130,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner approved tactile 54px top toolbar and requested matching appearance for other actual buttons. No Liquid Glass.",
+  "last_retry_reason": "Owner requested route stops and mobile interface enhancements; retain actual microphone permission requests and eliminate duplicate preflight capture.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

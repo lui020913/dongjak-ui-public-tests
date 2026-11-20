@@ -558,7 +558,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    for(const [phase,duration] of [['opening',350],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
-     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===95&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
+     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
      expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
      if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
@@ -823,7 +823,23 @@ test('bottom dock swipes between adjacent tabs with a stationary exit and entran
  const dock=page.locator('#bottom-nav');await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
  async function swipe(dx){const r=await dock.boundingBox();expect(r).toBeTruthy();const x=r.x+r.width*.5,y=r.y+r.height*.5;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();}
  await swipe(-85);await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');await expect(page.locator('#route-panel')).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();await expect.poll(()=>page.locator('#participation-panel').getAttribute('data-dj810-animating')).toBeNull();
- const frames=await page.evaluate(()=>window.__dockFade);for(const [id,phase] of [['route-panel','closing'],['participation-panel','opening']]){const f=frames.filter(r=>r.id===id&&r.phase===phase);expect(f.length).toBeGreaterThan(1);expect(f.every(r=>r.kind==='fade'&&r.duration===(phase==='closing'?65:95)&&Math.abs(r.y-f[0].y)<1)).toBe(true);expect(f.some(r=>r.o>0&&r.o<1)).toBe(true);}
+ const frames=await page.evaluate(()=>window.__dockFade);for(const [id,phase] of [['route-panel','closing'],['participation-panel','opening']]){const f=frames.filter(r=>r.id===id&&r.phase===phase);expect(f.length).toBeGreaterThan(1);expect(f.every(r=>r.kind==='fade'&&r.duration===(phase==='closing'?105:145)&&Math.abs(r.y-f[0].y)<1)).toBe(true);expect(f.some(r=>r.o>0&&r.o<1)).toBe(true);}
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#route-panel')).toBeVisible();await expect.poll(()=>page.locator('#route-panel').getAttribute('data-dj810-animating')).toBeNull();
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+});
+
+test('AI full-screen conversation and inline voice state keep the map task separate',{tag:'@phone-common'},async({page})=>{
+ await page.addInitScript(()=>{
+  class MockRecognition{start(){this.onstart?.();}abort(){this.onend?.();}}
+  Object.defineProperty(window,'SpeechRecognition',{value:MockRecognition,configurable:true});
+ });
+ await ready(page);
+ const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();
+ await tap(page,page.locator('#dj890-ai-orb'));await expect(ai).toBeVisible();await expect.poll(async()=>{const b=await ai.boundingBox(),v=page.viewportSize();return b?Math.abs(b.x)+Math.abs(b.y)+Math.abs(b.width-v.width)+Math.abs(b.height-v.height):999}).toBeLessThanOrEqual(5);
+ await expect(ai.locator('.dj-ai-transcript')).toBeVisible();await expect(ai.locator('.dj-ai-composer')).toBeVisible();
+ await ai.getByRole('button',{name:'AI 검색 닫기'}).click();await expect(ai).toBeHidden();
+ const mic=page.locator('#djNext-mic'),shell=page.locator('#map-quick-search'),status=page.locator('#djNext-voice-status');
+ const before=await shell.boundingBox();await tap(page,mic);await expect(mic).toHaveAttribute('aria-pressed','true');await expect(status).toContainText('듣는 중');await expect(status).toHaveCSS('position','static');
+ await expect.poll(async()=>{const b=await shell.boundingBox();return b&&before?b.width-before.width:0}).toBeGreaterThan(30);
+ await tap(page,mic);await expect(status).toBeHidden();await expect(mic).toHaveAttribute('aria-pressed','false');
 });

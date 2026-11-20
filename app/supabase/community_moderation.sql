@@ -1,4 +1,4 @@
--- Stage together with the matching client and Edge Function; do not apply alone.
+-- Additive preparation; existing direct write compatibility is unchanged. Enforce separately at coordinated cutover.
 begin;
 alter table public.community_comments add column if not exists photo text check (photo is null or (char_length(photo)<=600000 and photo like 'data:image/jpeg;base64,%'));
 alter table public.community_posts drop constraint if exists community_posts_category_check;
@@ -35,21 +35,18 @@ grant select,update(read_at) on public.community_notifications to authenticated;
 grant select,insert,update,delete on public.community_notifications to service_role;
 create policy community_notifications_owner_read on public.community_notifications for select to authenticated using ((select auth.uid())=user_id);
 create policy community_notifications_owner_update on public.community_notifications for update to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
--- Existing permissive insert policies must not permit bypassing moderation.
-create policy community_posts_moderation_required on public.community_posts as restrictive for insert to anon,authenticated with check(false);
-create policy community_comments_moderation_required on public.community_comments as restrictive for insert to anon,authenticated with check(false);
-create policy community_posts_edit_moderation_required on public.community_posts as restrictive for update to anon,authenticated using(false) with check(false);
-create policy community_comments_edit_moderation_required on public.community_comments as restrictive for update to anon,authenticated using(false) with check(false);
 create function public.community_moderation_reserve(p_user uuid,p_kind text,p_fingerprint text,p_image_fingerprint text,p_payload jsonb)
 returns jsonb language plpgsql security invoker set search_path='' as $$
-declare v_id uuid; v_count bigint; v_duplicate boolean;
+declare v_id uuid; v_count bigint; v_duplicate boolean; v_pending uuid;
 begin
  perform pg_advisory_xact_lock(hashtextextended(p_user::text,0));
  select count(*) into v_count from public.community_moderation_queue where user_id=p_user and created_at>now()-interval '1 minute';
  if v_count>=8 then return jsonb_build_object('state','limited'); end if;
+ select id into v_pending from public.community_moderation_queue where user_id=p_user and kind=p_kind and fingerprint=p_fingerprint and state in ('processing','review') and created_at>now()-interval '10 minutes' order by created_at desc limit 1;
+ if v_pending is not null then return jsonb_build_object('id',v_pending,'state','review','reason','uncertain'); end if;
  select exists(select 1 from public.community_moderation_queue where user_id=p_user and kind=p_kind and fingerprint=p_fingerprint and state='published' and created_at>now()-interval '10 minutes') into v_duplicate;
  if not v_duplicate and p_image_fingerprint is not null then
- select count(*)>=3 into v_duplicate from public.community_moderation_queue where user_id=p_user and image_fingerprint=p_image_fingerprint and state='published' and created_at>now()-interval '10 minutes';
+ select count(*)>=3 into v_duplicate from public.community_moderation_queue where user_id=p_user and image_fingerprint=p_image_fingerprint and state in ('published','processing','review') and created_at>now()-interval '10 minutes';
  end if;
  insert into public.community_moderation_queue(user_id,kind,fingerprint,image_fingerprint,payload,state,reason,finished_at)
  values(p_user,p_kind,p_fingerprint,p_image_fingerprint,p_payload,case when v_duplicate then 'removed' else 'processing' end,case when v_duplicate then 'spam' end,case when v_duplicate then now() end) returning id into v_id;
@@ -64,7 +61,8 @@ create function public.community_moderation_finish(p_id uuid,p_decision text,p_r
 returns jsonb language plpgsql security invoker set search_path='' as $$
 declare q public.community_moderation_queue%rowtype; target uuid;
 begin
- if p_decision not in ('published','removed','review') or p_reason not in ('clean','profanity','harassment','spam','sexual','graphic','privacy','illegal_ad','uncertain','unavailable') then raise exception 'invalid moderation result'; end if;
+ if p_decision is null or p_reason is null or p_decision not in ('published','removed','review') or p_reason not in ('clean','profanity','harassment','spam','sexual','graphic','privacy','illegal_ad','uncertain','unavailable') then raise exception 'invalid moderation result'; end if;
+ if ((p_decision='published') is distinct from (p_reason='clean')) or (p_decision='removed' and p_reason in ('uncertain','unavailable')) then raise exception 'inconsistent moderation result'; end if;
  select * into q from public.community_moderation_queue where id=p_id for update;
  if not found or q.state not in ('processing','review') then raise exception 'submission already finalized or missing'; end if;
  if p_decision='published' then
@@ -83,4 +81,43 @@ begin
 end;$$;
 revoke all on function public.community_moderation_finish(uuid,text,text) from public,anon,authenticated;
 grant execute on function public.community_moderation_finish(uuid,text,text) to service_role;
+create table public.community_moderation_appeals (
+ id uuid primary key default gen_random_uuid(),
+ notification_id uuid not null unique references public.community_notifications(id) on delete cascade,
+ user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+ message text not null check(char_length(btrim(message)) between 1 and 500),
+ state text not null default 'pending' check(state in ('pending','approved','declined')),
+ created_at timestamptz not null default now(),
+ reviewed_at timestamptz
+);
+alter table public.community_moderation_appeals enable row level security;
+revoke all on public.community_moderation_appeals from public,anon,authenticated;
+grant select,insert(notification_id,message) on public.community_moderation_appeals to authenticated;
+grant select,insert,update,delete on public.community_moderation_appeals to service_role;
+create policy community_appeals_owner_read on public.community_moderation_appeals for select to authenticated using ((select auth.uid())=user_id);
+create policy community_appeals_owner_create on public.community_moderation_appeals for insert to authenticated with check ((select auth.uid())=user_id and exists(select 1 from public.community_notifications n where n.id=notification_id and n.user_id=(select auth.uid())));
+create function public.community_moderation_review_appeal(p_id uuid,p_approve boolean)
+returns jsonb language plpgsql security invoker set search_path='' as $
+declare a public.community_moderation_appeals%rowtype; qid uuid; result jsonb;
+begin
+ if p_approve is null then raise exception 'decision required'; end if;
+ select * into a from public.community_moderation_appeals where id=p_id for update;
+ if not found or a.state<>'pending' then raise exception 'appeal not pending'; end if;
+ if p_approve then
+  select submission_id into qid from public.community_notifications where id=a.notification_id and user_id=a.user_id;
+  update public.community_moderation_queue set state='review' where id=qid and state='removed' and payload<>'{}'::jsonb;
+  if not found then raise exception 'content unavailable for restoration'; end if;
+  select public.community_moderation_finish(qid,'published','clean') into result;
+ end if;
+ update public.community_moderation_appeals set state=case when p_approve then 'approved' else 'declined' end,reviewed_at=now() where id=p_id;
+ return jsonb_build_object('state',case when p_approve then 'approved' else 'declined' end,'restored',result);
+end;$;
+revoke all on function public.community_moderation_review_appeal(uuid,boolean) from public,anon,authenticated;
+grant execute on function public.community_moderation_review_appeal(uuid,boolean) to service_role;
+create function public.community_moderation_active()
+returns boolean language sql stable security invoker set search_path='' as $
+ select count(*)=4 from pg_catalog.pg_policies where schemaname='public' and policyname in ('community_posts_moderation_required','community_comments_moderation_required','community_posts_edit_moderation_required','community_comments_edit_moderation_required');
+$;
+revoke all on function public.community_moderation_active() from public,anon,authenticated;
+grant execute on function public.community_moderation_active() to service_role;
 commit;

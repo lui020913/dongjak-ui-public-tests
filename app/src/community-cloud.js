@@ -40,7 +40,14 @@ async function submitModerated(payload){
 }
 export async function readCommunityNotifications(){
  const client=getActiveCloudClient();if(!client||!await user())return [];
- const {data,error}=await client.from('community_notifications').select('id,kind,reason,created_at,read_at').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[];
+ const {data,error}=await client.from('community_notifications').select('id,kind,reason,created_at,read_at').order('created_at',{ascending:false}).limit(50);if(error)throw error;const notices=data||[];if(!notices.length)return [];
+ const {data:appeals,error:appealError}=await client.from('community_moderation_appeals').select('id,notification_id,state').in('notification_id',notices.map(n=>n.id));if(appealError)throw appealError;
+ return notices.map(n=>({...n,appeal:(appeals||[]).find(a=>a.notification_id===n.id)||null}));
+}
+export async function appealCommunityNotice(notificationId,message){
+ const client=getActiveCloudClient();if(!client||!await user())throw new Error('로그인 후 이용해 주세요.');
+ const body=String(message||'').trim();if(!body||body.length>500)throw new Error('이의제기 사유는 1~500자입니다.');
+ const {error}=await client.from('community_moderation_appeals').insert({notification_id:notificationId,message:body});if(error)throw new Error('이의제기를 접수하지 못했습니다. 이미 접수했는지 확인해 주세요.');
 }
 export async function markCommunityNoticeRead(id){
  const client=getActiveCloudClient();if(!client||!await user())return;

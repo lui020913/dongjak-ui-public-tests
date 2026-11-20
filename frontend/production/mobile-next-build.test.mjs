@@ -145,3 +145,14 @@ test('six-slot phone toolbar retains the fixed layer button and a separate scrol
 
 
 test('actual action buttons share tactile material while selection and accessibility are retained',()=>{const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');assert.ok(css.includes('--djNext-tool-pressed:'));assert.ok(css.includes('box-shadow:var(--djNext-tool-pressed)!important'));assert.ok(css.includes('.map-actions>button,.map-chrome-restore'));assert.ok(css.includes(':not([role="switch"]):not([role="tab"]):not(:focus-visible)'));assert.ok(css.includes('inset 0 0 0 1px var(--djNext-active),var(--djNext-tool-pressed)'));assert.ok(css.includes('#bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important'));});
+
+test('voice search has an inline status, native permission request and no duplicate capture',()=>{
+ const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
+ const voice=js.slice(js.indexOf("const feedback=doc.createElement('span');feedback.id='djNext-voice-status'"),js.indexOf('export function installPhoneRouteComparison'));
+ assert.ok(voice.includes('mic.before(feedback)'));assert.ok(voice.includes('r.start()'));assert.ok(voice.includes("app.dataset.djVoiceListening='true'"));assert.ok(voice.includes('r.interimResults=true'));assert.ok(!voice.includes('await win.navigator.mediaDevices.getUserMedia'));
+ assert.ok(css.includes('flex-basis:0!important;width:0!important;max-width:0!important'));assert.ok(css.includes('flex-basis 250ms'));assert.ok(css.includes('position:static!important;display:block!important;background:none!important'));
+});
+test('AI dialogue preserves evidence per turn and occupies the viewport',()=>{
+ const js=readFileSync(new URL('../src/v880-supabase-safety-ai.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/v880-supabase-safety-ai.css',import.meta.url),'utf8');
+ assert.ok(js.includes('transcript.append(user,turn)'));assert.ok(js.includes("client.functions.invoke('dongjak-safety-ai',{body:{query}})"));assert.ok(js.includes('composer.append(form,foot)'));assert.ok(css.includes('height:var(--dj891-ai-visible-height,100dvh)!important'));assert.ok(css.includes('.dj-ai-transcript{flex:1 1 0'));
+});

@@ -14,22 +14,25 @@ Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response(null,{status:trusted?204:403,headers:{...headers,"access-control-allow-methods":"POST,OPTIONS","access-control-allow-headers":"authorization,apikey,content-type,x-client-info"}});
  if(!trusted||req.method!=="POST")return send({error:"허용되지 않은 요청"},403);
  const url=Deno.env.get("SUPABASE_URL"),secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),key=Deno.env.get("GEMINI_API_KEY"),model=Deno.env.get("COMMUNITY_MODERATION_MODEL");
- if(!url||!secret||!key||!model||!/^gemini-[a-z0-9.-]+$/.test(model))return send({error:"AI 검사 서비스 준비 중입니다. 작성 내용을 보존해주세요."},503);
+ if(!url||!secret)return send({error:"AI 검사 서비스 준비 중입니다. 작성 내용을 보존해주세요."},503);
  const client=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
  const token=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");
  const {data:auth,error:authError}=await client.auth.getUser(token);
  if(authError||!auth.user||auth.user.is_anonymous)return send({error:"로그인이 필요합니다."},401);
+ const configured=Boolean(key&&model&&/^gemini-[a-z0-9.-]+$/.test(model));
+ const {data:active,error:activeError}=await client.rpc("community_moderation_active");
+ if(!configured||activeError||active!==true)return send({error:"AI 검사 서비스 준비 중입니다. 작성 내용을 보존해주세요."},503);
  let raw:string;let p:any;
  try{if(Number(req.headers.get("content-length")||0)>620000)throw 0;raw=await req.text();if(raw.length>620000)throw 0;p=JSON.parse(raw);}catch{return send({error:"입력 형식을 확인해주세요."},400);}
  const kind=p?.kind,body=clip(p?.body,kind==="post"?1200:300),nickname=clip(p?.nickname||"익명 주민",20);
  if(!["post","comment"].includes(kind)||!body||!nickname)return send({error:"내용을 확인해주세요."},400);
  const photo=p.photo??null;
- if(photo!==null&&(typeof photo!=="string"||photo.length>600000||!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(photo)))return send({error:"사진 형식 또는 크기를 확인해주세요."},400);
+ if(photo!==null&&(typeof photo!=="string"||photo.length>600000||!/^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(photo)))return send({error:"사진 형식 또는 크기를 확인해주세요."},400);
  const payload:any={body,nickname,photo};
  if(kind==="post"){
   const title=clip(p.title,70);if(!title||!categories.has(p.category))return send({error:"제목 및 유형을 확인해주세요."},400);
   Object.assign(payload,{title,category:p.category,lng:null,lat:null});
-  if(p.lng!=null||p.lat!=null){if(!Number.isFinite(p.lng)||!Number.isFinite(p.lat)||p.lng<124||p.lng>132||p.lat<33||p.lat>39)return send({error:"위치 범위를 확인해주세요."},400);payload.lng=p.lng;payload.lat=p.lat;}
+  if(p.lng!=null||p.lat!=null){if(!Number.isFinite(p.lng)||!Number.isFinite(p.lat)||p.lng<126||p.lng>128||p.lat<37||p.lat>38)return send({error:"위치 범위를 확인해주세요."},400);payload.lng=p.lng;payload.lat=p.lat;}
  }else{if(typeof p.post_id!=="string"||!uuid.test(p.post_id))return send({error:"게시글을 확인해주세요."},400);payload.post_id=p.post_id;const {data,error}=await client.from("community_posts").select("id").eq("id",p.post_id).maybeSingle();if(error||!data)return send({error:"게시글이 존재하지 않습니다."},404);}
  const norm=(s:string)=>s.normalize("NFKC").toLowerCase().replace(/[\p{P}\p{Z}\s\u200b-\u200d]/gu,"");
  const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",norm(payload.title||""),norm(body)].join("\n"));
@@ -37,7 +40,7 @@ Deno.serve(async(req:Request)=>{
  const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_image_fingerprint:imageFingerprint,p_payload:payload});
  if(claimError)return send({error:"검사 서버 연결에 실패했습니다."},503);
  if(claim.state==="limited")return send({error:"작성 빈도가 높습니다. 잠시 후 다시 시도해주세요."},429);
- if(claim.state==="removed")return send(claim);
+ if(claim.state==="removed"||claim.state==="review")return send({state:claim.state,reason:claim.reason});
  let decision="review",reason="unavailable";
  try{
   const parts:any[]=[{text:JSON.stringify({title:payload.title||"",body,nickname,category:payload.category||"",kind})}];if(photo)parts.push({inlineData:{mimeType:"image/jpeg",data:photo.slice("data:image/jpeg;base64,".length)}});
