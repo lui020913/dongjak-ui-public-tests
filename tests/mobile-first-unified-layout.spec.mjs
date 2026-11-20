@@ -81,7 +81,7 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
 });
 
-test('installed iOS PWA status color follows a visible scrim and restores on close',async({page})=>{
+test('installed iOS PWA status color follows scrims, native dialogs, and both themes',async({page})=>{
   await page.addInitScript(()=>{
     Object.defineProperty(navigator,'standalone',{configurable:true,value:true});
     Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'});
@@ -89,18 +89,59 @@ test('installed iOS PWA status color follows a visible scrim and restores on clo
   await page.route('**/*',route=>{const url=new URL(route.request().url());return ['127.0.0.1','localhost'].includes(url.hostname)||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(page.locator('html')).toHaveClass(/dj-ios-home-pwa/);
-  const baseline=await page.evaluate(()=>{
-    const root=document.documentElement;return root.style.getPropertyValue('--dj-ios-pwa-base-color').trim();
-  });
-  expect(baseline).toMatch(/^#[0-9a-f]{6}$/i);
   const meta=page.locator('meta[name="theme-color"]');
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='light';});
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  const expectedBlend=async(rgb,alpha)=>page.evaluate(({rgb,alpha})=>{
+    const base=document.documentElement.style.getPropertyValue('--dj-ios-pwa-base-color').trim();
+    const channels=base.slice(1).match(/../g).map(x=>parseInt(x,16));
+    return '#'+channels.map((value,index)=>Math.round(value*(1-alpha)+rgb[index]*alpha).toString(16).padStart(2,'0')).join('');
+  },{rgb,alpha});
+
   await page.evaluate(()=>{
     const scrim=document.createElement('div');scrim.id='dj-ci-status-scrim';scrim.dataset.djOverlayScrim='true';
     scrim.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.4);pointer-events:none';
     document.body.append(scrim);
   });
-  const dimmed='#'+baseline.slice(1).match(/../g).map(x=>Math.round(parseInt(x,16)*.6).toString(16).padStart(2,'0')).join('');
-  await expect(meta).toHaveAttribute('content',dimmed);
+  const genericDim=await expectedBlend([0,0,0],0.4);
+  await expect(meta).toHaveAttribute('content',genericDim);
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.style.getPropertyValue('--dj-ios-pwa-status-color'))).toBe(genericDim);
   await page.evaluate(()=>document.getElementById('dj-ci-status-scrim').remove());
-  await expect(meta).toHaveAttribute('content',baseline);
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  await page.evaluate(()=>{
+    for(const open of document.querySelectorAll('dialog[open]'))open.close();
+    const style=document.createElement('style');
+    style.id='dj-ci-native-dialog-style';
+    style.textContent='#dj-ci-native-dialog::backdrop{background:rgba(15,31,32,.43)!important}';
+    document.head.append(style);
+    const dialog=document.createElement('dialog');
+    dialog.id='dj-ci-native-dialog';
+    dialog.textContent='Status-bar regression check';
+    dialog.style.cssText='width:220px;height:120px;border:0;background:#fff';
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+  const dialogDim=await expectedBlend([15,31,32],0.43);
+  await expect(meta).toHaveAttribute('content',dialogDim);
+  await page.evaluate(()=>document.getElementById('dj-ci-native-dialog').close());
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='dark';});
+  await expect(meta).toHaveAttribute('content','#192d32');
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.evaluate(()=>{
+    document.getElementById('dj-mobile-header-dim')?.remove();
+    const dim=document.createElement('div');
+    dim.id='dj-mobile-header-dim';
+    dim.style.cssText='position:fixed;top:0;left:0;right:0;height:132px;z-index:3110;background:rgba(9,25,24,.36);pointer-events:none';
+    document.body.append(dim);
+  });
+  const darkHeaderDim=await expectedBlend([9,25,24],0.36);
+  await expect(meta).toHaveAttribute('content',darkHeaderDim);
+  await page.evaluate(()=>document.getElementById('dj-mobile-header-dim').remove());
+  await expect(meta).toHaveAttribute('content','#192d32');
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='light';});
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
 });
