@@ -2035,6 +2035,10 @@ function renderMy() {
   }
 }
 // v15 · 위치 연결형 동네 커뮤니티 (현재 브라우저에만 저장)
+// Community category navigation is the first item under the sheet title.
+const communityTabs=document.querySelector('#participation-panel .community-category-tabs');
+const communitySheetBody=document.querySelector('#participation-panel > .dj836-sheet-body');
+if(communityTabs&&communitySheetBody)communitySheetBody.prepend(communityTabs);
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
 function openCommunityComposer(open,{animate=true}={}) {

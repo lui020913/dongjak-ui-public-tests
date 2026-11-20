@@ -850,3 +850,54 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 }
 #app #transport-title .metro-panel-badge{box-shadow:none!important;outline:none!important;border:0!important;}
 }}
+
+/* v9.2.53 — fixes live in the owning mobile layout layer, not in a new
+ * high-specificity patch stylesheet. */
+@layer request-completion {
+@media(max-width:699px){
+  /* Category identity must be visible immediately below the community title. */
+  html body #app#app#app#app#app#app#app #participation-panel>.dj836-sheet-body>.community-category-tabs{
+    position:sticky!important;top:0!important;z-index:3!important;
+    flex:0 0 auto!important;width:100%!important;max-width:100%!important;
+    padding:6px 0 11px!important;margin:0 0 8px!important;
+    background:var(--djNext-surface,#fff)!important;
+    scrollbar-width:none!important;scroll-snap-type:x proximity;
+    border-bottom:1px solid var(--djNext-border,#deebe2)!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel>.dj836-sheet-body>.community-category-tabs>.community-filter{
+    flex-shrink:0!important;scroll-snap-align:start;
+  }
+  /* Browser toolbar must follow the measured bottom edge of the real search
+     row rather than guessing the height of Safari's changing address bar. */
+  html[data-dj-run-mode="browser"] body #app#app#app#app#app#app#app .topbar{
+    display:flex!important;flex-wrap:nowrap!important;align-items:center!important;
+    width:auto!important;min-width:0!important;gap:8px!important;
+  }
+  html[data-dj-run-mode="browser"] body #app#app#app#app#app#app#app .topbar #map-quick-search{
+    flex:1 1 0%!important;min-width:0!important;max-width:calc(100% - 66px)!important;
+  }
+  html[data-dj-run-mode="browser"] body #app#app#app#app#app#app#app .topbar .header-tools{
+    flex:0 0 58px!important;min-width:58px!important;width:58px!important;
+  }
+  html[data-dj-run-mode="browser"] body #app#app#app#app#app#app#app #djNext-toolbar{
+    top:var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px))!important;
+  }
+  /* A nearby safety card is NOT a full-screen navigation page.
+     The search remains accessible while the result list is open or expanded. */
+  html body #app#app#app#app#app#app#app[data-tab="map"]:has(#ped-tools-panel:not([hidden]))>.topbar{
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app #ped-tools-panel.dj-ped-expanded:not([hidden]){
+    max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;
+  }
+  html body #app#app#app#app#app#app#app #ped-tools-panel>.ped-tools-panel-head{
+    touch-action:none!important;cursor:grab!important;user-select:none!important;
+    -webkit-user-select:none!important;min-height:42px!important;
+  }
+  html body #app#app#app#app#app#app#app #ped-tools-panel.dj-sheet-dragging>.ped-tools-panel-head{
+    cursor:grabbing!important;
+  }
+}
+}

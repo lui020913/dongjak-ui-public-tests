@@ -244,3 +244,31 @@ html body #app#app#app .dj860-onboarding .dj860-actions {
     justify-content:flex-end!important;
   }
 }
+
+/* v9.2.52: two-phase onboarding crossfade. Respect the established layout;
+ * only opacity is animated, never reflow or a second moving card. */
+#app .dj860-onboarding{
+  transition:opacity 280ms cubic-bezier(.25,.55,.3,1)!important;
+}
+#app .dj860-onboarding.dj9252-opening,
+#app .dj860-onboarding.is-closing{
+  opacity:0!important;pointer-events:none!important;
+}
+#app .dj860-onboarding :is(.dj860-visual-pane,.dj860-copy){
+  transition:opacity 135ms ease-out!important;
+}
+#app .dj860-onboarding.dj9252-changing :is(.dj860-visual-pane,.dj860-copy){
+  opacity:0!important;
+}
+@keyframes dj9252-onboarding-fade-in{
+  from{opacity:0}to{opacity:1}
+}
+#app .dj860-onboarding .dj860-entering[data-direction="next"],
+#app .dj860-onboarding .dj860-entering[data-direction="prev"]{
+  animation:dj9252-onboarding-fade-in 200ms cubic-bezier(.25,.55,.3,1) both!important;
+}
+@media(prefers-reduced-motion:reduce){
+  #app .dj860-onboarding,
+  #app .dj860-onboarding :is(.dj860-visual-pane,.dj860-copy){transition:none!important}
+  #app .dj860-onboarding .dj860-entering{animation:none!important}
+}
