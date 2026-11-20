@@ -24,7 +24,13 @@ test('native AI search remains one dialog, mobile opens without early keyboard',
   assert.match(ai,/if\(window\.matchMedia\?\.\('\(max-width:699px\)'\)\?\.matches\)\{\s*names\.firstChild\.setAttribute\('tabindex','-1'\);names\.firstChild\.focus\(\{preventScroll:true\}\);\s*\}else\{\s*input\.focus\(\{preventScroll:true\}\)/);
   assert.match(orb,/native\.click\(\)/);
   assert.match(orb,/if\(!modal\?\.open&&modal\?\.showModal\)/);
-  assert.match(code('src/v891-mobile-hud-ai-logo.css'),/--dj891-ai-keyboard-inset/);
+  const css=code('src/v891-mobile-hud-ai-logo.css'),js=code('src/v891-mobile-hud-ai-logo.js');
+  assert.match(css,/inset:var\(--dj891-ai-visible-top,0px\) 0 auto 0!important/);
+  assert.match(css,/max-height:var\(--dj891-ai-visible-height,100dvh\)!important/);
+  assert.match(js,/modal\.style\.setProperty\('--dj891-ai-visible-top'/);
+  assert.match(js,/modal\.style\.setProperty\('--dj891-ai-visible-height'/);
+  assert.match(js,/visualViewport,'resize'/);
+  assert.match(js,/visualViewport,'scroll'/);
 });
 test('header image has alpha-specific asset and responsive circular shell',()=>{
   const css=code('src/v891-mobile-hud-ai-logo.css');
