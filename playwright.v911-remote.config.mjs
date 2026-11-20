@@ -10,6 +10,7 @@ const screens=[
 // Run shared feature journeys once on the reference phone. The narrow/wide
 // screens still exercise dimension-sensitive UI; Android also checks permission flow.
 // Set the full-coverage override for exceptional cross-device audits.
+const journeyQA=process.env.DONGJAK_QA_JOURNEY==='1';
 const fullMobileQA=process.env.DONGJAK_FULL_MOBILE_QA==='1';
 const phoneCoverage={
   mobile375:/@phone-layout/,
@@ -18,11 +19,11 @@ const phoneCoverage={
 };
 const allPhoneCases=/@phone-(?:layout|common|platform)/;
 export default defineConfig({
-  outputDir:process.env.DONGJAK_LIVE_QA_DIR?process.env.DONGJAK_LIVE_QA_DIR+'/playwright-results':'test-results',testDir:'tests',testMatch:'v911-anonymous-ui.spec.mjs',timeout:180000,expect:{timeout:20000},
+  outputDir:process.env.DONGJAK_LIVE_QA_DIR?process.env.DONGJAK_LIVE_QA_DIR+'/playwright-results':'test-results',testDir:'tests',testMatch:journeyQA?'live-qa-journeys.spec.mjs':'v911-anonymous-ui.spec.mjs',timeout:journeyQA?360000:180000,expect:{timeout:20000},
   // Each test has a fresh anonymous Playwright browser context. Permit tests
   // from the same spec to be sharded across isolated runners. One browser
   // worker per runner avoids software-WebGL contention during frame sampling.
   fullyParallel:true,workers:1,retries:0,reporter:[['list'],['html',{open:'never'}],...(process.env.DONGJAK_LIVE_QA_DIR?[['./scripts/live-qa-reporter.mjs']]:[])],
   use:{baseURL:process.env.DONGJAK_TARGET_URL,browserName:'chromium',screenshot:'only-on-failure',trace:'off',video:process.env.DONGJAK_LIVE_QA_DIR?'on':'off',launchOptions:{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}},
-  projects:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:phoneCoverage[name],use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:/layer header follows a real pointer|phone update history fades in place|iOS PWA dimmed status edge/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
+  projects:journeyQA?[{name:'mobile390',grep:/@journey-[1-6]$/,use:{viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone}}]:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:phoneCoverage[name],use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:/layer header follows a real pointer|phone update history fades in place|iOS PWA dimmed status edge/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
 });
