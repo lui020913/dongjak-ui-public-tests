@@ -129,7 +129,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     }
   };
   if(!readSeen(win))preloadOnboardingImages();
-  let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0;
+  let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0,moveTimer=0,moveEpoch=0;
   const markGuideAutoShown=()=>{try{win.sessionStorage.setItem('dj-map-guide-initial-shown-v7121','1');}catch{}};
   const make=(tag,className,text)=>{const node=doc.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;};
   const overlay=make('section','dj860-onboarding');
@@ -224,6 +224,8 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   function close({complete=true,focus=true,afterClose=null}={}){
     if(!opened)return;
     opened=false;
+    ++moveEpoch;if(moveTimer){win.clearTimeout(moveTimer);moveTimer=0;}
+    overlay.classList.remove('dj9252-changing','dj9252-opening');
     // This modal owns its close transition. Inform the shared lifecycle once
     // without closing unrelated map/guide surfaces in the global cooldown.
     win.DongjakWindowLifecycle?.dismiss?.('dj860-onboarding',{global:false});
@@ -238,7 +240,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
         overlay.hidden=true;overlay.classList.remove('is-closing');
         if(typeof afterClose==='function')afterClose();
       }
-    },220);
+    },300);
     if(focus){
       const target=returnFocus?.isConnected&&!returnFocus.closest?.('[hidden]')?returnFocus:doc.getElementById('map-gesture-guide-open');
       target?.focus?.({preventScroll:true});
@@ -254,7 +256,8 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     // Otherwise the shared observer can incorrectly classify it as a stale
     // automatic reopen while some other surface is finishing its close.
     win.DongjakWindowLifecycle?.requestOpen?.('dj860-onboarding');
-    overlay.hidden=false;overlay.classList.remove('is-closing');overlay.removeAttribute('aria-hidden');
+    overlay.hidden=false;overlay.classList.remove('is-closing','dj9252-changing');overlay.classList.add('dj9252-opening');overlay.removeAttribute('aria-hidden');
+    win.requestAnimationFrame?.(()=>win.requestAnimationFrame?.(()=>{if(opened)overlay.classList.remove('dj9252-opening');}));
     returnFocus=doc.activeElement;
     const more=doc.getElementById('dj-mobile-utilities');
     if(more&&!more.hidden){more.hidden=true;doc.getElementById('dj-mobile-more-trigger')?.setAttribute('aria-expanded','false');doc.getElementById('dj-v794-more')?.setAttribute('aria-expanded','false');app.classList.remove('dj-mobile-more-open');}
@@ -264,11 +267,24 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!auto)overlay.dataset.dj860Manual='true';else delete overlay.dataset.dj860Manual;
     win.requestAnimationFrame?.(()=>overlay.querySelector('#dj860-title')?.focus?.({preventScroll:true}));
   }
-  function move(delta){
-    if(!opened)return;
-    const target=index+delta;if(target<0||target>=ONBOARDING_SLIDES.length)return;
-    render(target,delta>0?'next':'prev');
+  function goToSlide(target){
+    if(!opened||!Number.isInteger(target)||target<0||target>=ONBOARDING_SLIDES.length||target===index)return;
+    const direction=target>index?'next':'prev';
+    const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+    ++moveEpoch;const epoch=moveEpoch;
+    if(moveTimer){win.clearTimeout(moveTimer);moveTimer=0;}
+    if(reduced){overlay.classList.remove('dj9252-changing');render(target,direction);return;}
+    // First fade OUT the previous page, then render the next one with an
+    // independent fade IN. Avoid replacing artwork during its exit frame.
+    overlay.classList.add('dj9252-changing');
+    moveTimer=win.setTimeout(()=>{
+      moveTimer=0;
+      if(!opened||epoch!==moveEpoch)return;
+      render(target,direction);
+      overlay.classList.remove('dj9252-changing');
+    },135);
   }
+  function move(delta){goToSlide(index+delta);}
   function showMapGuide(){
     markGuideAutoShown();
     // Desktop users enter the map directly. The ? button can reopen this guide.
@@ -295,7 +311,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       if(index===ONBOARDING_SLIDES.length-1)close({afterClose:showMapGuide});else move(1);
       return;
     }
-    if(type==='dot'){const target=Number(action.dataset.index);if(Number.isInteger(target))render(target,target>=index?'next':'prev');return;}
+    if(type==='dot'){goToSlide(Number(action.dataset.index));return;}
     if(type==='account'){
       close();
       win.requestAnimationFrame?.(()=>doc.querySelector('#bottom-nav .nav-tab[data-tab="mine"]')?.click());
@@ -424,7 +440,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     startupObserver.observe(startup,{attributes:true,attributeFilter:['hidden']});
   }else maybeAutoOpen();
   cleanups.push(()=>startupObserver?.disconnect());
-  cleanups.push(()=>{if(closeTimer)win.clearTimeout(closeTimer);overlay.remove();delete app.dataset.dj860OnboardingInstalled;delete app.dataset.dj860OnboardingOpen;});
+  cleanups.push(()=>{if(closeTimer)win.clearTimeout(closeTimer);if(moveTimer)win.clearTimeout(moveTimer);overlay.remove();delete app.dataset.dj860OnboardingInstalled;delete app.dataset.dj860OnboardingOpen;});
   return ()=>cleanups.forEach(fn=>fn());
 }
 
