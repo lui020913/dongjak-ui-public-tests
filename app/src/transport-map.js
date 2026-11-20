@@ -1348,13 +1348,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let selected=null;
   const routeStatus=el('div','transport-empty');
   routeStatus.hidden=true;routeStatus.setAttribute('role','status');
-  arrivalsEl.before(routeStatus);
+  arrivalsEl.before?.(routeStatus);
   const clearRouteButton=el('button','metro-open-schedule','노선 표시 해제');
   clearRouteButton.type='button';
-  arrivalsEl.before(clearRouteButton);clearRouteButton.hidden=true;
+  arrivalsEl.before?.(clearRouteButton);clearRouteButton.hidden=true;
   function syncRouteRows(){
     const active=busRouteOverlay.getActive();
-    for(const row of arrivalsEl.querySelectorAll('[data-bus-route-id]')){
+    for(const row of (arrivalsEl.querySelectorAll?.('[data-bus-route-id]')||[])){
       const chosen=active?.id===row.dataset.busRouteId;
       row.setAttribute('aria-pressed',String(chosen));
       row.style.outline=chosen?'2px solid currentColor':'';
@@ -1377,7 +1377,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   arrivalsEl.addEventListener('click',activateBusRoute);
   arrivalsEl.addEventListener('keydown',activateBusRoute);
-  new MutationObserver(syncRouteRows).observe(arrivalsEl,{childList:true,subtree:true});
+  if(typeof MutationObserver==='function')new MutationObserver(syncRouteRows).observe(arrivalsEl,{childList:true,subtree:true});
   let selectionMarker=null;
   let seq=0;
   const favoritePlace=raw=>raw?{
