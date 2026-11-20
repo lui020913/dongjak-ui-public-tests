@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.47",
+  "application_version": "9.2.48",
   "public_work_branch": "main",
-  "purpose": "Unify mobile sheet gestures, personalized evidence-only safety search, compact community, transit panel, selected bus route position and subdued controls.",
-  "attempt": 139,
+  "purpose": "Preserve v9.2.47 mobile UX and validate the requested reduced single-layer shadow in deployed browser tests.",
+  "attempt": 140,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New mobile UX changes with existing live QA infrastructure preserved.",
+  "last_retry_reason": "Previous tests required obsolete inset shadow after intentional design reduction. Assert exact computed 1px offset, 3px blur and common token, preserving interaction checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
