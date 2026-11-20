@@ -37,6 +37,14 @@ test('official PathList and XML decode while auth and rate-limit errors stay dis
  const xml='<ServiceResult><msgHeader><headerCd>0</headerCd></msgHeader><msgBody>'+rows.map(p=>'<itemList><no>'+p.no+'</no><gpsX>'+p.gpsX+'</gpsX><gpsY>'+p.gpsY+'</gpsY></itemList>').join('')+'</msgBody></ServiceResult>';
  assert.deepEqual(decodeBusRouteResponse(xml,id),{coordinates});
  assert.deepEqual(decodeBusRouteResponse('<OpenAPI_ServiceResponse><cmmMsgHeader><returnReasonCode>20</returnReasonCode><returnAuthMsg>SERVICE_ACCESS_DENIED_ERROR</returnAuthMsg></cmmMsgHeader></OpenAPI_ServiceResponse>',id),{code:'ROUTE_PATH_AUTH'});
- assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgHeader:{headerCd:8}}),id),{code:'ROUTE_PATH_RATE_LIMIT'});
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgHeader:{headerCd:8}}),id),{code:'ROUTE_PATH_UNAVAILABLE'});
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify({cmmMsgHeader:{returnReasonCode:'22'}}),id),{code:'ROUTE_PATH_RATE_LIMIT'});
  assert.deepEqual(await fetchBusRouteGeometry('test-key',id,{fetcher:async()=>({ok:true,text:async()=>xml})}),{coordinates});
 });
+
+ test('2023 Seoul route guide pp. 10–12 and 22: example path and header codes',()=>{
+ const rows=[{no:1,gpsX:126.909074,gpsY:37.582225,posX:191969.68329141868,posY:453638.95118162734},{no:2,gpsX:126.909116,gpsY:37.582202,posX:191973.39013920765,posY:453636.395127221}];
+ const example={ServiceResult:{msgHeader:{headerCd:0,itemCount:0},msgBody:{itemList:rows}}};
+ assert.deepEqual(decodeBusRouteResponse(JSON.stringify(example),id),{coordinates:[[126.909074,37.582225],[126.909116,37.582202]]});
+ for(const [headerCd,code] of [[1,'ROUTE_PATH_UPSTREAM'],[2,'ROUTE_PATH_FORMAT'],[3,'ROUTE_PATH_UNAVAILABLE'],[4,'ROUTE_PATH_UNAVAILABLE'],[5,'ROUTE_PATH_FORMAT'],[6,'ROUTE_PATH_UPSTREAM'],[7,'ROUTE_PATH_UNAVAILABLE'],[8,'ROUTE_PATH_UNAVAILABLE']])assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgHeader:{headerCd}}),id),{code});
+ });

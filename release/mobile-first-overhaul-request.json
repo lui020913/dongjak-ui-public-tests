@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.31",
   "public_work_branch": "main",
-  "purpose": "Decode official bus route JSON and XML, expose specific errors and verify live Preview route",
-  "attempt": 110,
+  "purpose": "Revalidate live Seoul route geometry after user service application; align parser error codes and sample with official 2023 guide",
+  "attempt": 111,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User reported bus route path unavailable",
+  "last_retry_reason": "User completed route API application; guide confirms request and WGS84 fields and corrects Seoul service error namespace",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

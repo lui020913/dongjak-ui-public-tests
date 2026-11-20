@@ -1,6 +1,7 @@
 /** Official Seoul bus route geometry: never substitute straight stop-to-stop lines. */
 export function parseBusRoutePath(body,routeId){
-  const box=body?.msgBody??body?.MsgBody??body?.response?.body??body?.body??body;
+  const root=body?.ServiceResult??body;
+  const box=root?.msgBody??root?.MsgBody??root?.response?.body??root?.body??root;
   const list=box?.itemList??box?.item??box?.PathList??box?.pathList??box?.items;
   const raw=list?.itemList??list?.item??list?.PathList??list?.pathList??list??[];
   const rows=Array.isArray(raw)?raw:[raw];
@@ -20,8 +21,11 @@ function tagged(xml,name){return xml.match(new RegExp('<'+name+'\\b[^>]*>\\s*([^
 function failure(code,message='',gateway=false){
   const n=String(code??'').trim();
   if(!n||['0','00','INFO-000'].includes(n))return null;
-  if((gateway&&['20','21','30','31','32','33'].includes(n))||(!gateway&&['5','6','7'].includes(n))||/SERVICE_ACCESS_DENIED|SERVICE_KEY_IS_NOT_REGISTERED|등록되지 않은 서비스키|인증키|접근 권한/i.test(message))return 'ROUTE_PATH_AUTH';
-  if((gateway&&n==='22')||(!gateway&&n==='8')||/LIMITED_NUMBER|요청 제한|호출 한도/i.test(message))return 'ROUTE_PATH_RATE_LIMIT';
+  if((gateway&&['20','21','30','31','32','33'].includes(n))||/SERVICE_ACCESS_DENIED|SERVICE_KEY_IS_NOT_REGISTERED|등록되지 않은 서비스키|인증키|접근 권한/i.test(message))return 'ROUTE_PATH_AUTH';
+  if((gateway&&n==='22')||/LIMITED_NUMBER|요청 제한|호출 한도/i.test(message))return 'ROUTE_PATH_RATE_LIMIT';
+  if(!gateway&&['2','5'].includes(n))return 'ROUTE_PATH_FORMAT';
+  // Seoul route service guide (2023-03-08), p.22: 3/4/7 = no result; 8 = operation ended, not quota.
+  if(!gateway&&['3','4','7','8'].includes(n))return 'ROUTE_PATH_UNAVAILABLE';
   if((gateway&&n==='03')||/조회\s*결과가\s*없|결과가\s*없습니다|데이터가\s*없습니다/i.test(message))return 'ROUTE_PATH_UNAVAILABLE';
   return 'ROUTE_PATH_UPSTREAM';
 }
@@ -30,7 +34,7 @@ export function decodeBusRouteResponse(raw,id){
   let data;
   if(text.startsWith('{')){
     try{data=JSON.parse(text);}catch{return {code:'ROUTE_PATH_FORMAT'};}
-    const g=data?.OpenAPI_ServiceResponse?.cmmMsgHeader??data?.cmmMsgHeader??data?.response?.header,h=data?.msgHeader??data?.MsgHeader;
+    const g=data?.OpenAPI_ServiceResponse?.cmmMsgHeader??data?.cmmMsgHeader??data?.response?.header,h=(data?.ServiceResult??data)?.msgHeader??(data?.ServiceResult??data)?.MsgHeader;
     const code=g?failure(g.returnReasonCode??g.returnCode??g.resultCode??g.errCode,g.returnAuthMsg??g.resultMsg??g.errMsg,true):failure(h?.headerCd,h?.headerMsg);
     if(code)return {code};
   }else if(text.startsWith('<')){
