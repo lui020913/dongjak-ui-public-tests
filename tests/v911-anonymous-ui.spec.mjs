@@ -228,7 +228,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await tap(page,rail.locator('.djNext-empty').first());
  await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-layer-grid')).toHaveCount(2);
- const layerAction=panel.locator('.djNext-layer-action').first();await expect(layerAction).toHaveCSS('box-shadow',/inset/);await expect(layerAction).toHaveCSS('border-top-left-radius','999px');await expect(panel.locator('.djNext-layer-tile')).toHaveCount(0);
+ const layerAction=panel.locator('.djNext-layer-action').first();await expect(layerAction).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);await expect(layerAction).toHaveCSS('border-top-left-radius','999px');await expect(panel.locator('.djNext-layer-tile')).toHaveCount(0);
  await expect(panel.locator('.djNext-shortcut-switch').first()).toHaveCSS('box-shadow','none');
  await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px$/);await expect.poll(()=>panel.locator('.djNext-layer-row').first().evaluate(n=>{const a=n.querySelector('.djNext-layer-action').getBoundingClientRect(),b=n.querySelector('.djNext-shortcut-switch').getBoundingClientRect();return Math.abs(a.top-b.top)<=2&&b.left>=a.right+4;})).toBe(true);
  await expect(panel.locator('.djNext-pin')).toHaveCount(0);await expect(panel.getByText('기능 열기',{exact:true})).toHaveCount(0);
@@ -854,7 +854,7 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
  await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
  await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','999px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
- await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image',/linear-gradient/);await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/inset/);
- const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toContain('0 1px 0');await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
+ await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image',/linear-gradient/);await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
+ const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
