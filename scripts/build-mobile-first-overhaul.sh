@@ -161,6 +161,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       44) note="동네 커뮤니티 목록·상세 개편, AI 게시글·사진 검열과 신고·이의제기·알림 기반";;
       45) note="PRI 6개 지표 연동 기반 및 상도1동 실제 조명 취약도 도로 시각화";;
       46) note="확대된 모바일 정보창 헤더 드래그 입력 충돌 및 오류 진단 개선";;
+      47) note="AI 안전검색·버스 노선·커뮤니티·정보창 개선";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null

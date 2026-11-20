@@ -1,0 +1,150 @@
+name: Live QA visual audit
+on:
+  pull_request:
+    paths:
+      - 'scripts/live-qa*'
+      - 'qa-relay/**'
+      - 'playwright.live-qa-smoke.config.mjs'
+      - 'tests/live-qa*.mjs'
+      - '.github/workflows/live-qa.yml'
+      - 'playwright.v911-remote.config.mjs'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Exact anonymous Pages candidate URL'
+        required: true
+        type: string
+      full:
+        description: 'All phone sizes and supported WebKit journeys'
+        type: boolean
+        default: false
+      remote:
+        description: 'Stream to configured authenticated QA relay'
+        type: boolean
+        default: false
+      vision:
+        description: 'Send selected anonymous anomaly images to Gemini'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: |
+          node --check scripts/live-qa.mjs
+          node --check scripts/live-qa-analyze.mjs
+          node --check scripts/live-qa-pixels.mjs
+          node --check scripts/live-qa-reporter.mjs
+          node --check scripts/live-qa-relay.mjs
+          node --check qa-relay/worker.mjs
+          node --test tests/live-qa-relay.test.mjs
+          node --check tests/live-qa-fixture.mjs
+          node --check playwright.v911-remote.config.mjs
+          node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
+          node --check /tmp/live-qa-dashboard.js
+  smoke:
+    needs: check
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Exercise real capture and assert nonempty frames and metrics
+        env:
+          DONGJAK_LIVE_QA_DIR: /tmp/live-qa-smoke
+        run: |
+          mkdir -p "$DONGJAK_LIVE_QA_DIR"
+          npx playwright test tests/live-qa-smoke.spec.mjs --config=playwright.live-qa-smoke.config.mjs
+          node --input-type=module -e "import fs from 'node:fs'; const root=process.env.DONGJAK_LIVE_QA_DIR; const dir=root+'/'+fs.readdirSync(root).find(x=>/^[a-f0-9-]{36}$/.test(x)); const m=JSON.parse(fs.readFileSync(dir+'/meta.json','utf8')); const rows=fs.readFileSync(dir+'/metrics.ndjson','utf8').trim().split('\n').map(JSON.parse); if(m.frames<3||rows.length<10||!rows.some(x=>x.nodes.length)||m.status!=='passed')throw Error('Missing capture evidence'); console.log('Verified '+m.frames+' image samples and '+rows.length+' browser samples');"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-qa-smoke-evidence
+          path: /tmp/live-qa-smoke/
+          retention-days: 3
+  app-smoke:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: smoke
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Capture one actual mobile journey on approved anonymous Preview
+        env:
+          DONGJAK_TARGET_URL: https://9d136975.dongjak-walk-safety-preview.pages.dev/
+        run: node scripts/live-qa.mjs --ci --smoke-target
+      - name: Summarize real capture
+        if: always()
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - name: Decode original recording and flag transient pixel changes
+        if: always()
+        run: |
+          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
+          node scripts/live-qa-pixels.mjs qa-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-app-live-qa-smoke
+          path: qa-artifacts/
+          retention-days: 3
+  capture:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    needs: smoke
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Capture real anonymous journeys (no account or secrets)
+        env:
+          DONGJAK_TARGET_URL: ${{ inputs.target }}
+          FULL: ${{ inputs.full }}
+          REMOTE: ${{ inputs.remote }}
+          QA_RELAY_URL: ${{ inputs.remote && vars.QA_RELAY_URL || '' }}
+          QA_WRITER_KEY: ${{ inputs.remote && secrets.QA_WRITER_KEY || '' }}
+        run: |
+          if [ "$REMOTE" = true ]; then test -n "$QA_RELAY_URL" && test -n "$QA_WRITER_KEY" || { echo "Configure the dedicated relay first"; exit 1; }; fi
+          if [ "$FULL" = true ]; then node scripts/live-qa.mjs --ci --full; else node scripts/live-qa.mjs --ci; fi
+      - name: Analyze captured measurements
+        if: always()
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - name: Optional Gemini anomaly review
+        if: always() && inputs.vision
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/live-qa-analyze.mjs qa-artifacts --vision
+      - name: Decode original recording and flag transient pixel changes
+        if: always()
+        run: |
+          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
+          node scripts/live-qa-pixels.mjs qa-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: anonymous-visual-audit-${{ github.run_id }}
+          path: qa-artifacts/
+          retention-days: 7
