@@ -14,7 +14,8 @@ export function startLiveStream({root,scenes,result,lane}){
   const all=scenes();scene=all.findLast(s=>s.status==='running')||all.at(-1);
   let metrics={};if(scene){try{const rows=readFileSync(join(root,scene.id,'metrics.ndjson'),'utf8').trim().split('\n').slice(-60).map(JSON.parse);const dt=rows.map(x=>x.dt).filter(v=>Number.isFinite(v)&&v>0);metrics={samples:dt.length,over34Ms:dt.filter(v=>v>34).length,last:dt.at(-1)||null};}catch{}}
   let total=null;try{const n=Number(readFileSync(join(root,'expected-tests'),'utf8'));if(Number.isInteger(n)&&n>=0)total=n;}catch{} const completed=all.filter(s=>s.status!=='running').length;
-  ws.send(JSON.stringify({type:'state',run:basename(root),auditRun:process.env.GITHUB_RUN_ID?process.env.GITHUB_RUN_ID+':'+(process.env.GITHUB_RUN_ATTEMPT||'1'):basename(root),shards:Number(process.env.QA_SHARD_TOTAL||1),lane,scene:scene?{id:scene.id,title:scene.title,project:scene.project,status:scene.status}:null,metrics,result:result(),total,completed,passed:all.filter(s=>s.status==='passed').length,failed:all.filter(s=>['failed','timedOut','interrupted'].includes(s.status)).length}));
+  const stage=scene?.stage;const progress=stage?{index:stage.index,total:stage.total,label:stage.label,status:stage.status,error:stage.error}:null;
+  ws.send(JSON.stringify({type:'state',run:basename(root),auditRun:process.env.GITHUB_RUN_ID?process.env.GITHUB_RUN_ID+':'+(process.env.GITHUB_RUN_ATTEMPT||'1'):basename(root),shards:Number(process.env.QA_SHARD_TOTAL||1),lane,scene:scene?{id:scene.id,title:scene.title,project:scene.project,status:scene.status}:null,metrics,progress,result:result(),total,completed,passed:all.filter(s=>s.status==='passed').length,failed:all.filter(s=>['failed','timedOut','interrupted'].includes(s.status)).length}));
  }
  function tick(){
   if(done||ws?.readyState!==1)return;
