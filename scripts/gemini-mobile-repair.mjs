@@ -12,12 +12,19 @@ const allowed=[
  'frontend/production/mobile-17-followup.js','frontend/production/mobile-17-followup.css',
  'frontend/production/mobile-first-overhaul.css'
 ];
+// PR recovery is deliberately narrower than arbitrary code generation. Do not add auth, SQL, edge functions, tests, workflows, or secrets here.
+if(process.env.REPAIR_CONTEXT==='pr')allowed.push('app/src/community-store.js','app/src/place-details.js');
 const dir=process.env.REPAIR_LOG_DIR;
 const log=readdirSync(dir).filter(n=>/^\d+\.log$/.test(n)).map(n=>readFileSync(join(dir,n),'utf8')).join('\n').replace(/\x1b\[[0-9;]*m/g,'');
 const spec=readFileSync('tests/v911-anonymous-ui.spec.mjs','utf8');
 const titles=[...spec.matchAll(/\btest\('([^'\n]+)'/g)].map(m=>m[1]);
 const failures=titles.filter(t=>log.split('\n').some(l=>l.includes('PHONE_TEST_FAILURE')&&l.includes(t)));
 const locations=[...new Set([...log.matchAll(/Public regression (?:file|location): ([a-zA-Z0-9_.-]+\.test\.mjs(?::\d+:\d+)?)/g)].map(m=>m[1]))].slice(0,20);
+// Node's normal reporter prints a failing-test block, unlike the release wrappers.
+const nodeFailureBlock=log.includes('failing tests:')?log.split('failing tests:').at(-1):'';
+for(const m of nodeFailureBlock.matchAll(/app\/tests\/([A-Za-z0-9_.-]+\.test\.mjs):(\d+):(\d+)/g)){
+ const location=m[1]+':'+m[2]+':'+m[3];if(!locations.includes(location)&&locations.length<20)locations.push(location);
+}
 const specLines=[...new Set([...log.matchAll(/tests\/v911-anonymous-ui\.spec\.mjs:(\d+):(\d+)/g)].map(m=>Number(m[1])))].slice(0,20);
 const assertions=specLines.map(n=>({line:n,source:spec.split('\n').slice(Math.max(0,n-4),n+3).join('\n')}));
 if(!failures.length&&!locations.length&&!specLines.length){console.log('No recognized public UI failure; no Gemini source edit.');process.exit(0);}
@@ -25,7 +32,7 @@ const key=process.env.GEMINI_API_KEY;
 if(!key)throw Error('Missing configured Gemini API key');
 const model=process.env.GEMINI_MODEL||'gemini-3.5-flash-lite';
 if(!/^gemini-[a-z0-9.-]+$/.test(model))throw Error('Invalid Gemini model');
-const files=Object.fromEntries(allowed.map(p=>[p,readFileSync(p,'utf8')]));
+const files=Object.fromEntries(allowed.flatMap(p=>{try{return [[p,readFileSync(p,'utf8') ]]}catch{return []}}));
 const testNames=locations.map(l=>l.split(':')[0]).filter((v,i,a)=>a.indexOf(v)===i);
 const regressionSources={};
 for(const name of testNames){try{regressionSources[name]=readFileSync('app/tests/'+name,'utf8').slice(0,16000);}catch{}}
@@ -45,7 +52,7 @@ if(!Array.isArray(edits)||edits.length>6)throw Error('Invalid edit count');
 if(!edits.length){console.log('Gemini returned no defensible source repair.');process.exit(0);}
 const changed=new Map();
 for(const e of edits){
- if(!allowed.includes(e.file)||typeof e.before!=='string'||typeof e.after!=='string'||!e.before||e.before===e.after||e.before.length>4000||e.after.length>5000)throw Error('Invalid repair edit');
+ if(!Object.hasOwn(files,e.file)||typeof e.before!=='string'||typeof e.after!=='string'||!e.before||e.before===e.after||e.before.length>4000||e.after.length>5000)throw Error('Invalid repair edit');
  const prior=changed.get(e.file)||files[e.file];
  if(prior.split(e.before).length!==2)throw Error('Repair anchor is not unique');
  // Reject new access to storage, requests, execution, credentials or external URLs.
