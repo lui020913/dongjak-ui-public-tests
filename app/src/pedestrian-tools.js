@@ -281,6 +281,36 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     cancel(){nearbySwipe=null;}
   }):()=>{};
 
+  // A mobile Safari web view and Playwright's mobile-mouse emulation may
+  // dispatch mouseup after pointer capture has been moved to the map canvas.
+  // Detect an upward drag from the *visible header geometry* at capture phase.
+  // The common sheet controller still owns the only layout/animation change;
+  // this fallback runs only if that owner did not already expand the card.
+  let nearbyMouseStart=null,nearbyMouseCommit=0;
+  const onNearbyMouseDown=event=>{
+    if(!nearbyHeader||panel.hidden||event.button!==0||
+       !window.matchMedia('(max-width:699px)').matches)return;
+    if(event.target?.closest?.('button,a,input,textarea,select,label,[role="button"]'))return;
+    const rect=nearbyHeader.getBoundingClientRect();
+    if(event.clientX<rect.left||event.clientX>rect.right||
+       event.clientY<rect.top||event.clientY>rect.bottom)return;
+    nearbyMouseStart={x:event.clientX,y:event.clientY};
+  };
+  const onNearbyMouseUp=event=>{
+    const start=nearbyMouseStart;nearbyMouseStart=null;
+    if(!start||panel.hidden)return;
+    const dx=event.clientX-start.x,dy=event.clientY-start.y;
+    if(dy>-42||Math.abs(dx)>Math.abs(dy)*.8)return;
+    if(nearbyMouseCommit)window.clearTimeout(nearbyMouseCommit);
+    nearbyMouseCommit=window.setTimeout(()=>{
+      nearbyMouseCommit=0;
+      if(!panel.hidden&&!panel.classList.contains('dj871-sheet-expanded'))
+        setMobileSheetExpanded(panel,true,document,window);
+    },0);
+  };
+  document.addEventListener('mousedown',onNearbyMouseDown,true);
+  window.addEventListener('mouseup',onNearbyMouseUp,true);
+
   const showPanel=title=>{
     resetNearby();
     window.DongjakWindowLifecycle?.requestOpen(panel.id);
@@ -526,5 +556,6 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
     mapToolsToggle?.removeEventListener('click',onToggleMapTools);
     hiddenObserver.disconnect();resetNearby();disposePlacement();disposeNearbySwipe();if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
+    document.removeEventListener('mousedown',onNearbyMouseDown,true);window.removeEventListener('mouseup',onNearbyMouseUp,true);if(nearbyMouseCommit)window.clearTimeout(nearbyMouseCommit);
   };
 }
