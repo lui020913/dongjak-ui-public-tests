@@ -233,7 +233,11 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};
-    const unbind=[bindHeaderDragInput(panel,win,{down,move,up,cancel})];
+    // Nearby safety uses only its visible header as the start surface.
+    // Binding there avoids a transparent parent overlay swallowing Safari
+    // pointerdown; move/up still track through the shared window owner.
+    const inputSurface=id==='ped-tools-panel'?(handleNodes[0]||panel):panel;
+    const unbind=[bindHeaderDragInput(inputSurface,win,{down,move,up,cancel})];
     cleanups.push(()=>{
       cancel();
       if(suppressClickTimer!==null)win.clearTimeout(suppressClickTimer);
