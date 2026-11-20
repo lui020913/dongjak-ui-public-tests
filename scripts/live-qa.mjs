@@ -18,6 +18,7 @@ const projects=process.argv.includes('--full')?['mobile375','mobile390','mobile4
 const args=['exec','--','playwright','test','--config=playwright.v911-remote.config.mjs','--workers=1',...projects.map(p=>'--project='+p)];
 const lane=Number(process.env.QA_LANE||0), total=Number(process.env.QA_SHARD_TOTAL||0);
 if(lane||total){if(!Number.isInteger(lane)||!Number.isInteger(total)||lane<1||lane>total||total>20)throw Error('Invalid QA shard');if(journey){if(total!==6)throw Error('Continuous QA requires six lanes');args.push('--grep','@journey-'+lane+'}
+const grepCase=process.argv.find(a=>a.startsWith('--grep-case='));if(grepCase){if(journey||lane||process.argv.includes('--full'))throw Error('Targeted regression requires independent local run');const value=grepCase.slice(12);if(!value||!/^[-a-zA-Z0-9 ,]+$/.test(value))throw Error('Invalid regression case');args.push('--grep',value);}
 if(process.argv.includes('--smoke-target'))args.push('--grep','phone weather single window and layer grid dark surfaces');
 if(journey&&process.argv.includes('--full'))throw Error('Choose continuous or independent QA, not both');
 const safeId=/^[a-f0-9-]{36}$/;
