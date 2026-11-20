@@ -236,9 +236,8 @@ export function dismissMobileSheet(panel,doc=document,win=window,onComplete=()=>
     panel.removeEventListener('transitionend',onEnd);
     if(timer!==null)win.clearTimeout(timer);
     if(rafTimer!==null)win.clearTimeout(rafTimer);
-    clearMotionStyles(panel);
     activeTransitions.delete(panel);
-    onComplete?.();
+    try{onComplete?.();}finally{clearMotionStyles(panel);}
   };
   const onEnd=event=>{
     if(event.target===panel&&event.propertyName==='translate')finish();

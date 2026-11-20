@@ -1,6 +1,6 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
-import {sheetDragOffset,projectedDrag} from './mobile-window-motion.js';
+import {sheetDragOffset,projectedDrag,sheetStageAction} from './mobile-window-motion.js';
 import {
   clearMobileSheetDrag,
   dismissMobileSheet,
@@ -194,11 +194,12 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       // Expansion and collapse are two distinct, deliberate stops. A downward
       // gesture from the expanded state first returns to compact; a second
       // downward gesture closes the sheet.
-      if(expandable&&g.dragging&&projected<-65&&!panel.classList.contains('dj871-sheet-expanded')){
+      const action=g.dragging?sheetStageAction(delta,g.velocity,panel.classList.contains('dj871-sheet-expanded'),expandable):'settle';
+      if(action==='expand'){
         setMobileSheetExpanded(panel,true,doc,win);
         return;
       }
-      if(expandable&&g.dragging&&delta>9&&panel.classList.contains('dj871-sheet-expanded')){
+      if(action==='collapse'){
         setMobileSheetExpanded(panel,false,doc,win);
         return;
       }
@@ -206,7 +207,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       if(id==='map-safety-controls'&&g.dragging){
         settleMobileSheetDrag(panel,win,()=>{if(projected>65||delta>45)app.classList.add('dj-safety-peek');});return;
       }
-      const close=g.dragging&&(delta>105||(delta>45&&projected>105));
+      const close=action==='dismiss';
       if(!close){settleMobileSheetDrag(panel,win);return;}
       if(closing)return;
       closing=true;
@@ -216,7 +217,6 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       dismissMobileSheet(panel,doc,win,()=>{
         closing=false;
         panel.classList.remove('dj833-sheet-dismissing');
-        reset();
         const btn=panel.querySelector(closeSelector)||doc.querySelector(closeSelector);
         // Share the exact same lifecycle as button X and automatic closure.
         win.DongjakWindowLifecycle?.dismiss(id);
