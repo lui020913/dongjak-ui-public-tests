@@ -1,8 +1,7 @@
 import {test,expect} from './live-qa-fixture.mjs';
 import {tap,ready,geometry,visuallyPresented,tab} from './live-qa-journey-helpers.mjs';
-import {readFileSync,writeFileSync,renameSync,appendFileSync,existsSync} from 'node:fs';
+import {writeFileSync,renameSync,appendFileSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
-const failures=['failed','timedOut','interrupted'];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const root=process.env.DONGJAK_LIVE_QA_DIR;
 async function stage(page,info,n,total,label,retry,fn){
@@ -21,10 +20,6 @@ async function journey(page,info,steps,{setup=async()=>{},keepTour=false}={}){
  for(let i=0;i<all.length;i++){const a=all[i];await stage(page,info,i+1,all.length,a.label,a.retry,()=>a.fn(page));}
 }
 async function map(page){await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');}
-async function panel(page,id,trigger,close){
- await tap(page,page.locator(trigger));const el=page.locator(id);await expect(el).toBeVisible();await visuallyPresented(el);
- await tap(page,el.locator(close));await expect(el).toBeHidden();
-}
 async function pin(page,label,key){
  const modal=page.locator('#djNext-layer-panel');await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();
  const b=modal.getByRole('switch',{name:label+' 바로가기',exact:true});await b.scrollIntoViewIfNeeded();if(await b.getAttribute('aria-checked')!=='true')await b.click();await expect(b).toHaveAttribute('aria-checked','true');
