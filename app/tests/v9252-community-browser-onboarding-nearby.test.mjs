@@ -38,7 +38,7 @@ test('community categories become the first item below the sheet title',()=>{
  const source=read('src/main.js');
  assert.match(source,/communitySheetBody\.prepend\(communityTabs\)/);
  assert.match(source,/communitySheetBody=document\.querySelector/);
- const css=read('src/mobile-next.css');
+ const css=read('../frontend/production/mobile-next.css');
  assert.match(css,/\.dj836-sheet-body>\.community-category-tabs/);
  assert.match(css,/dj-ped-expanded/);
 });
