@@ -221,10 +221,17 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     });
     overlay.setAttribute('aria-label',`${index+1} / ${ONBOARDING_SLIDES.length} 앱 시작 안내`);
   }
+  // Opacity is temporarily owned by JS because older high-specificity visual
+  // rules can override the low-specificity crossfade class on Safari.
+  const clearSlideOpacity=()=>{
+    visualPane.style.removeProperty('opacity');
+    copy.style.removeProperty('opacity');
+  };
   function close({complete=true,focus=true,afterClose=null}={}){
     if(!opened)return;
     swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     overlay.classList.remove('dj860-swapping');
+    clearSlideOpacity();
     opened=false;
     // This modal owns its close transition. Inform the shared lifecycle once
     // without closing unrelated map/guide surfaces in the global cooldown.
@@ -250,6 +257,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(opened)return;
     swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     overlay.classList.remove('dj860-swapping');
+    clearSlideOpacity();
     if(auto&&(seenInMemory||readSeen(win))&&!force)return;
     preloadOnboardingImages();
     if(closeTimer){win.clearTimeout(closeTimer);closeTimer=0;}
@@ -273,18 +281,23 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     swapEpoch++;const epoch=swapEpoch;
     if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
+    if(reduced){overlay.classList.remove('dj860-swapping');clearSlideOpacity();render(target,direction);return;}
     // Exit the old artwork/copy first, then enter the new slide. Avoid the
     // pre-existing enter animation showing the next slide before exit finishes.
     visualPane.classList.remove('dj860-entering');
     copy.classList.remove('dj860-entering');
+    // Inline important wins over legacy CSS !important and guarantees that
+    // the outgoing visual is actually faded before its DOM is replaced.
+    visualPane.style.setProperty('opacity','0','important');
+    copy.style.setProperty('opacity','0','important');
     overlay.classList.add('dj860-swapping');
     swapTimer=win.setTimeout(()=>{
       swapTimer=0;
       if(epoch!==swapEpoch||!opened)return;
       overlay.classList.remove('dj860-swapping');
       render(target,direction);
-    },125);
+      clearSlideOpacity();
+    },140);
   }
   function move(delta){
     if(!opened)return;
