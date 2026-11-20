@@ -45,7 +45,6 @@ jobs:
     permissions:
       contents: write
       actions: write
-      issues: write
     env:
       FAILED_RUN: ${{ github.event.workflow_run.id }}
       FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -117,18 +116,6 @@ jobs:
         run: |
           set -euo pipefail
           gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/rerun-failed-jobs"
-      - name: Notify repair analysis before source generation
-        if: steps.inspect.outputs.action == 'repair'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          marker="<!-- qa-repair:$FAILED_RUN:$ATTEMPT:plan -->"
-          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body' | grep -F "$marker" > /dev/null; then exit 0; fi
-          area="모바일 기능 검증 오류"
-          if grep -q 'QA_DESIGN_FAILURE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then area="디자인 오류"; fi
-          if grep -q 'QA_EXPLORE_FAILURE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then area="$area / 자율 탐색 오류"; fi
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 자동 수정 시작\n\n대상: %s\n계획: 실패 증거와 UI 소스를 대조하여 원인에 필요한 부분만 수정하고 전체 검증을 다시 실행합니다. 실제 수정 대상 파일은 후보 생성 후 기록됩니다.\n[실패 검증](%s/%s/actions/runs/%s)\n%s' "$area" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$FAILED_RUN" "$marker")"
       - name: Gemini analyzes public UI failure and generates narrow source repair
         if: steps.inspect.outputs.action == 'repair'
         env:
@@ -155,8 +142,4 @@ jobs:
           git push origin "HEAD:refs/heads/$branch"
           echo "Isolated Gemini repair candidate: $branch" >> "$GITHUB_STEP_SUMMARY"
           echo 'No Production deployment or credential-bearing execution of generated code here.' >> "$GITHUB_STEP_SUMMARY"
-          marker="<!-- qa-repair:$FAILED_RUN:$ATTEMPT:candidate -->"
-          if ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/15/comments" --jq '.[].body' | grep -F "$marker" > /dev/null; then
-            files="$(git diff --name-only HEAD^ HEAD | head -n 6)"
-            gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 수정 후보 생성 · 아직 배포 전\n\n수정 예정 파일:\n%s\n\n[실제 수정 후보](%s/%s/commit/%s)\n독립 안전성 검토 후에만 main 반영 및 재검증합니다.\n%s' "$files" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$(git rev-parse HEAD)" "$marker")"
-          fi
+          echo 'Await owner approval of the independently reviewed Korean repair plan before applying any candidate to main.' >> "$GITHUB_STEP_SUMMARY"
