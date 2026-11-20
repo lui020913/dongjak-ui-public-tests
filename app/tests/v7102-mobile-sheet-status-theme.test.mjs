@@ -25,7 +25,7 @@ test('all four mobile panels remain scrollable with pinned header and compact sh
 test('theme switch has clearly visible progress and iOS PWA theme roots are in sync',()=>{
   const css=read('platforms/shared/mobile-panel-layout.css');
   const ios=read('platforms/ios-pwa/ios-pwa.css');
-  const pwa=read('src/mobile-pwa-status-tone-v793.js');
+  const pwa=read('src/ios-pwa-overlay-chrome.js');
   assert.match(css,/blur\(14px\)/);
   assert.match(css,/테마 전환 중…/);
   assert.match(css,/#app#app#app \.dj-theme-switch-flash/);

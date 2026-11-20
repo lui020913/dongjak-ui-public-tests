@@ -5,8 +5,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#e5ece8",
-  "theme_color": "#e5ece8",
+  "background_color": "#eaf0ec",
+  "theme_color": "#eaf0ec",
   "icons": [
     {
       "src": "/icons/dongjak-light-192.png",

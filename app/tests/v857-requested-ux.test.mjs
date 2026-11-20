@@ -54,6 +54,7 @@ test('Bottom-tab panels use a dedicated top-edge drag handle and rise animation'
   assert.match(css,/dj836-edge-drag/);
   assert.match(controller,/bindHeaderDragInput\(panel,win,/);
   assert.match(read('src/mobile-header-input.js'),/header\.addEventListener\('touchstart'/);
+  assert.match(controller,/if\(!surface\|\|!panel\.contains\(surface\)\)return/);
   assert.match(controller,/--dj-sheet-drag-y/);
 });
 

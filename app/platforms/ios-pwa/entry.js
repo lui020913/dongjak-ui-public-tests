@@ -1,5 +1,5 @@
 import './ios-pwa.css';
-// Existing iOS PWA status/tone behavior is retained in src/mobile-pwa-status-tone-v793.js.
+// Existing iOS PWA status/tone behavior is retained in src/ios-pwa-overlay-chrome.js.
 // This module owns new iOS-only presentation from v7.10 onward.
 
 // iOS Home Screen PWA: save a small transition token before an intentional

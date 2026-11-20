@@ -15,7 +15,7 @@ test('v8.0.0 preserves the mobile patch history',()=>{
 test('iOS standalone header retains v792 fixes while deprecated mode is removed',()=>{
   const html=read('index.html'),css=read('src/mobile-ui-v792-fixes.css');
   assert.doesNotMatch(html,/apple-mobile-web-app-status-bar-style/);
-  assert.match(html,/src\/mobile-pwa-status-tone-v793.css/);
+  assert.match(html,/src\/ios-pwa-overlay-chrome.css/);
   assert.match(html,/src\/mobile-ui-v792-fixes.css/);
   assert.match(css,/@media \(max-width:699px\)/);
   assert.match(css,/#dj-mobile-safe-top/);

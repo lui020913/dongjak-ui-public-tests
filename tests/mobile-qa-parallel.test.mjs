@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+
 test('release QA parallelizes independent tests in the same spec, with all phone projects',()=>{
  const config=read('playwright.v911-remote.config.mjs'),workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
  assert.match(config,/fullyParallel:true,workers:1,retries:0/);
@@ -16,11 +17,12 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
  assert.match(workflow,/needs: \[build, preview, mobile-qa, desktop-tablet-qa\]/);
  assert.match(workflow,/if: needs\.mobile-qa\.result == 'success' && needs\.desktop-tablet-qa\.result == 'success'/);
- assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\//);
+ assert.match(config,/testMatch:\['v911-anonymous-ui\.spec\.mjs','mobile-first-unified-layout\.spec\.mjs'\]/);
+ assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\|installed iOS PWA status color follows scrims\//);
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{
- const config=read('playwright.v911-remote.config.mjs'),spec=read('tests/v911-anonymous-ui.spec.mjs');
+ const config=read('playwright.v911-remote.config.mjs'),spec=read('tests/v911-anonymous-ui.spec.mjs'),layout=read('tests/mobile-first-unified-layout.spec.mjs');
  const cases=[...spec.matchAll(/^test\('([^']+)',\{tag:'(@[\w-]+)'\},async\(/gm)].map(m=>({name:m[1],tag:m[2]}));
  assert.equal(cases.length,[...spec.matchAll(/^test\(/gm)].length,'new tests must declare a coverage tag');
  assert.equal(new Set(cases.map(c=>c.name)).size,cases.length);
@@ -35,8 +37,10 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  }
  assert.equal(cases.find(c=>c.name.startsWith('phone first-run permission intro'))?.tag,'@phone-platform');
  assert.match(config,/mobile375:\/@phone-layout\//);
- assert.match(config,/mobile390:\/@phone-\(\?:layout\|common\|platform\)\//);
+ assert.match(config,/mobile390:\/@phone-\(\?:layout\|common\|platform\|ios\)\//);
  assert.match(config,/mobile430:\/@phone-\(\?:layout\|platform\)\//);
+ assert.match(config,/allPhoneCases=\/@phone-\(\?:layout\|common\|platform\|ios\)\//);
+ assert.match(layout,/installed iOS PWA status color follows scrims, native dialogs, and both themes @phone-ios/);
  assert.match(config,/grep:fullMobileQA\?allPhoneCases:phoneCoverage\[name\]/);
  assert.match(config,/DONGJAK_FULL_MOBILE_QA==='1'/);
 });

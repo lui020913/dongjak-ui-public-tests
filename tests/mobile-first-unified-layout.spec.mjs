@@ -35,7 +35,7 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
       viewport:{width:innerWidth,height:innerHeight},
       topbar:topbar?{...rect(topbar),...style(topbar)}:null,
       toolbar:toolbar?{...rect(toolbar),...style(toolbar)}:null,
-      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length,items:[...nav.children].map(el=>({id:el.id,tab:el.dataset.tab||null,display:getComputedStyle(el).display,gridColumn:getComputedStyle(el).gridColumn,...rect(el)})),pseudo:['::before','::after'].map(p=>({pseudo:p,display:getComputedStyle(nav,p).display,content:getComputedStyle(nav,p).content}))}:null,
+      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length,items:[...nav.children].map(el=>({id:el.id,classes:el.className,position:getComputedStyle(el).position,tab:el.dataset.tab||null,display:getComputedStyle(el).display,gridColumn:getComputedStyle(el).gridColumn,...rect(el)})),pseudo:['::before','::after'].map(p=>({pseudo:p,display:getComputedStyle(nav,p).display,content:getComputedStyle(nav,p).content}))}:null,
       actions:actions?{...rect(actions),...style(actions)}:null,
       desktopRail:document.querySelectorAll('#dj-desktop-safety-rail').length,
       tabletRail:document.querySelectorAll('#dj-tablet-utility-group').length
@@ -55,6 +55,10 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   expect(metrics.nav.children).toBe(5);
   expect(metrics.nav.gridTemplateColumns.trim().split(/\s+/),JSON.stringify(metrics.nav)).toHaveLength(5);
   const tabs=metrics.nav.items.filter(item=>item.tab);
+  const indicator=metrics.nav.items.find(item=>String(item.classes).includes('dj-motion-indicator'));
+  expect(indicator).toBeTruthy();
+  expect(indicator.position).toBe('absolute');
+  expect(indicator.display).not.toBe('none');
   expect(tabs.map(item=>item.tab)).toEqual(['route','participate','map','news','mine']);
   expect(Math.max(...tabs.map(item=>item.width))-Math.min(...tabs.map(item=>item.width))).toBeLessThanOrEqual(2);
   expect(tabs.every(item=>item.width>0&&item.height>0&&item.right<=metrics.nav.right+1)).toBe(true);
@@ -75,4 +79,88 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   expect(metrics.tabletRail).toBe(0);
 
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
+});
+
+test('installed iOS PWA status color follows scrims, native dialogs, and both themes @phone-ios',async({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'standalone',{configurable:true,value:true});
+    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'});
+  });
+  const allowedOrigin=new URL(process.env.DONGJAK_TARGET_URL||'http://127.0.0.1:4173').origin;
+  await page.route('**/*',route=>{const url=new URL(route.request().url());return url.origin===allowedOrigin||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('html')).toHaveClass(/dj-ios-home-pwa/);
+  const meta=page.locator('meta[name="theme-color"]');
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='light';});
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  const expectedBlend=async(rgb,alpha)=>page.evaluate(({rgb,alpha})=>{
+    const base=document.documentElement.style.getPropertyValue('--dj-ios-pwa-base-color').trim();
+    const channels=base.slice(1).match(/../g).map(x=>parseInt(x,16));
+    return '#'+channels.map((value,index)=>Math.round(value*(1-alpha)+rgb[index]*alpha).toString(16).padStart(2,'0')).join('');
+  },{rgb,alpha});
+
+  await page.evaluate(()=>{
+    const scrim=document.createElement('div');scrim.id='dj-ci-status-scrim';scrim.dataset.djOverlayScrim='true';
+    scrim.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.4);pointer-events:none';
+    document.body.append(scrim);
+  });
+  const genericDim=await expectedBlend([0,0,0],0.4);
+  await expect(meta).toHaveAttribute('content',genericDim);
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.style.getPropertyValue('--dj-ios-pwa-status-color'))).toBe(genericDim);
+  await page.evaluate(()=>document.getElementById('dj-ci-status-scrim').remove());
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  await page.evaluate(()=>{
+    for(const open of document.querySelectorAll('dialog[open]'))open.close();
+    const style=document.createElement('style');
+    style.id='dj-ci-native-dialog-style';
+    style.textContent='#dj-ci-native-dialog::backdrop{background:rgba(15,31,32,.43)!important}';
+    document.head.append(style);
+    const dialog=document.createElement('dialog');
+    dialog.id='dj-ci-native-dialog';
+    dialog.textContent='Status-bar regression check';
+    dialog.style.cssText='width:220px;height:120px;border:0;background:#fff';
+    document.body.append(dialog);
+    dialog.showModal();
+  });
+  const dialogDim=await expectedBlend([15,31,32],0.43);
+  await expect(meta).toHaveAttribute('content',dialogDim);
+  await page.evaluate(()=>document.getElementById('dj-ci-native-dialog').close());
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
+
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='dark';});
+  await expect(meta).toHaveAttribute('content','#192d32');
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.evaluate(()=>{
+    document.getElementById('dj-mobile-header-dim')?.remove();
+    const dim=document.createElement('div');
+    dim.id='dj-mobile-header-dim';
+    dim.style.cssText='position:fixed;top:0;left:0;right:0;height:132px;z-index:3110;background:rgba(9,25,24,.36);pointer-events:none';
+    document.body.append(dim);
+  });
+  const darkHeaderDim=await expectedBlend([9,25,24],0.36);
+  await expect(meta).toHaveAttribute('content',darkHeaderDim);
+  await page.addStyleTag({content:`
+    html body #app#app#app#app#app .topbar{z-index:3300!important}
+    html body #app#app#app#app#app#app#app #djNext-toolbar{z-index:3120!important}
+  `});
+  const stacking=await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    app.querySelector('#djNext-toolbar')?.remove();
+    const toolbar=document.createElement('div');toolbar.id='djNext-toolbar';
+    toolbar.style.cssText='position:fixed;top:60px;left:8px;width:20px;height:20px';
+    app.append(toolbar);
+    const z=el=>Number.parseInt(getComputedStyle(el).zIndex,10);
+    return {topbar:z(app.querySelector('.topbar')||document.querySelector('.topbar')),dim:z(document.getElementById('dj-mobile-header-dim')),toolbar:z(toolbar)};
+  });
+  expect(stacking.topbar).toBeLessThan(stacking.dim);
+  expect(stacking.toolbar).toBeLessThan(stacking.dim);
+  await page.evaluate(()=>{
+    document.getElementById('dj-mobile-header-dim').remove();
+    document.getElementById('djNext-toolbar')?.remove();
+  });
+  await expect(meta).toHaveAttribute('content','#192d32');
+  await page.evaluate(()=>{document.getElementById('app').dataset.theme='light';});
+  await expect(meta).toHaveAttribute('content','#eaf0ec');
 });

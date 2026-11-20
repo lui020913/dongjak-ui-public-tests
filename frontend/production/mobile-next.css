@@ -568,9 +568,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 
 /* Shared interaction feedback; visual-only, preserving native click and scroll. */
 @media(max-width:699px){
-  #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:var(--mf-accent-soft,#e1efe9);box-shadow:0 1px 3px #0001;transition:transform 240ms cubic-bezier(.22,.80,.32,1.04),width 240ms ease,height 240ms ease;will-change:transform}
-  #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{background:#24483f}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important;z-index:1}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button:active:not(:disabled){scale:.96!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:scale 100ms ease-out!important}
   #app #transport-arrivals[aria-busy=true] .transport-empty::after{content:"";display:block;height:44px;margin-top:10px;border-radius:12px;background:linear-gradient(100deg,var(--djNext-raised,#e5f1eb) 28%,var(--djNext-surface,#fff) 50%,var(--djNext-raised,#e5f1eb) 72%);background-size:220% 100%;animation:djMotionLoading 1.3s linear infinite}
@@ -583,7 +580,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   @keyframes djMotionPulse{from{opacity:.65;scale:.7}to{opacity:0;scale:1.55}}
 }
 @media(prefers-reduced-motion:reduce){
-  #app #bottom-nav>.dj-motion-indicator{transition:none!important}
   #app #transport-arrivals .transport-empty::after,#app #map-quick-search-results .map-quick-search-result,#app .dj-motion-gps-ring{animation:none!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:none!important;scale:1!important}
 }

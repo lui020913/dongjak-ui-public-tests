@@ -125,6 +125,8 @@ export function initTheme({map,app}){
   app.dataset.theme=themeState.value;
   document.documentElement.dataset.theme=themeState.value;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
+  // The standalone iOS overlay controller is the only runtime writer here.
+  const syncBrowserThemeColor=()=>{if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#151619':'#f3f7f5';};
   const themeFlash=document.createElement('div');
   themeFlash.className='dj-theme-switch-flash';
   themeFlash.setAttribute('aria-hidden','true');
@@ -161,7 +163,7 @@ export function initTheme({map,app}){
       themeFlash.style.removeProperty('animation');
     },180);
   };
-  if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#151619':'#f3f7f5';
+  syncBrowserThemeColor();
   if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
   // background base style only; dynamically added route, road width and safety layers are not modified.
@@ -245,7 +247,7 @@ export function initTheme({map,app}){
     themeState.value=themeState.value==='dark'?'light':'dark';
     app.dataset.theme=themeState.value;
     document.documentElement.dataset.theme=themeState.value;
-    if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#151619':'#f3f7f5';
+    syncBrowserThemeColor();
     toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
     if(!suppressPreferenceSave)safeStorageSet(THEME_KEY,themeState.value);

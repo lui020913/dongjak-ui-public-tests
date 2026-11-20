@@ -1,23 +1,15 @@
 /* iPhone home-screen PWA only; no PC or Android rendering changes. */
 @media(max-width:699px){
-  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"]{
-    background-color:#192d32;
-  }
-  html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"]{
-    background-color:#e5ece8;
-  }
-}
-
-/* v7.10.2: match installed PWA page root and safe-area paint to manual theme. */
-@media(max-width:699px){
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"],
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] body,
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="dark"] #app {
-    background-color:#192d32!important;color-scheme:dark!important;
+    background-color:var(--dj-ios-pwa-status-color,#192d32)!important;
+    color-scheme:dark!important;
   }
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"],
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] body,
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] #app {
-    background-color:#e5ece8!important;color-scheme:light!important;
+    background-color:var(--dj-ios-pwa-status-color,#eaf0ec)!important;
+    color-scheme:light!important;
   }
 }

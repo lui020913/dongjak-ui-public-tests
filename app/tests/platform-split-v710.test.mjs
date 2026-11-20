@@ -15,20 +15,20 @@ test('PC built HTML does not load mobile-only CSS or scripts',()=>{
   const html=platformHtml(read('index.html'),'pc-chromium');
   assert.doesNotMatch(html,/href="\/src\/mobile-chrome-v790.css"/);
   assert.doesNotMatch(html,/src="\/src\/mobile-toolbar-v794.js"/);
-  assert.doesNotMatch(html,/mobile-pwa-status-tone-v793/);
+  assert.doesNotMatch(html,/ios-pwa-overlay-chrome/);
   assert.match(html,/src="\/src\/main.js"/);
   assert.match(html,/src="\/platforms\/entry.js"/);
 });
 test('Android built HTML removes iOS-specific status extension but retains mobile toolbar',()=>{
   const html=platformHtml(read('index.html'),'android');
-  assert.doesNotMatch(html,/src="\/src\/mobile-pwa-status-tone-v793.js"/);
-  assert.doesNotMatch(html,/href="\/src\/mobile-pwa-status-tone-v793.css"/);
+  assert.doesNotMatch(html,/src="\/src\/ios-pwa-overlay-chrome.js"/);
+  assert.doesNotMatch(html,/href="\/src\/ios-pwa-overlay-chrome.css"/);
   assert.match(html,/src="\/src\/mobile-toolbar-v794.js"/);
 });
 test('iOS PWA and universal include PWA status code',()=>{
   for(const target of ['ios-pwa','universal']){
     const html=platformHtml(read('index.html'),target);
-    assert.match(html,/src="\/src\/mobile-pwa-status-tone-v793.js"/);
+    assert.match(html,/src="\/src\/ios-pwa-overlay-chrome.js"/);
   }
 });
 test('platform output directories and Capacitor webDir are independent',()=>{

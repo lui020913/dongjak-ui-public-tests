@@ -47,7 +47,7 @@
   #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#c3ded2!important;background:#303e39!important;}
   #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:#b4c1bb!important;}
   #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:#35574c!important;color:#fff!important;box-shadow:none!important;}
-  html[data-theme="dark"],html[data-theme="dark"] body {background:#151619!important;}
+  html[data-theme="dark"]:not(.dj-ios-home-pwa),html[data-theme="dark"]:not(.dj-ios-home-pwa) body {background:#151619!important;}
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;left:12px!important;right:12px!important;width:auto!important;height:50px!important;min-height:50px!important;padding:0!important;gap:8px!important;background:transparent!important;backdrop-filter:none!important;}
     #app .topbar #map-quick-search {display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;max-width:none!important;}
@@ -80,8 +80,11 @@
     /* Only the five native tabs may participate in the phone dock grid. A legacy auxiliary control must never create an implicit sixth track. */
     @media (max-width:699px) {
       #app #bottom-nav {grid-auto-flow:row!important;grid-auto-columns:minmax(0,0px)!important;}
-      #app #bottom-nav > :not(.nav-tab,.dj-motion-indicator) {display:none!important;}
-      #app #bottom-nav > .dj-motion-indicator {position:absolute!important;grid-column:auto!important;grid-row:auto!important;pointer-events:none!important;}
+      #app #bottom-nav > :not(.nav-tab):not(.dj-motion-indicator) {display:none!important;}
+      #app #bottom-nav > .dj-motion-indicator {display:block!important;position:absolute!important;inset:0 auto auto 0!important;z-index:0!important;pointer-events:none!important;border-radius:999px!important;background:var(--mf-accent-soft,#e1efe9)!important;box-shadow:0 1px 3px #0001!important;transition:transform 240ms cubic-bezier(.22,.80,.32,1.04),width 240ms ease,height 240ms ease;will-change:transform;}
+      #app[data-theme="dark"] #bottom-nav > .dj-motion-indicator {background:#24483f!important;}
+      #app #bottom-nav[data-dj-motion-indicator="ready"] > .nav-tab,#app[data-theme="dark"] #bottom-nav[data-dj-motion-indicator="ready"] > .nav-tab:is(.active,[aria-current="page"]) {background:transparent!important;box-shadow:none!important;z-index:1!important;}
+      @media (prefers-reduced-motion:reduce) {#app #bottom-nav > .dj-motion-indicator {transition:none!important;}}
       #app #bottom-nav > .nav-tab {grid-row:1!important;grid-column:auto!important;}
       #app #bottom-nav > .nav-tab[data-tab="route"] {grid-column:1!important;}
       #app #bottom-nav > .nav-tab[data-tab="participate"] {grid-column:2!important;}
