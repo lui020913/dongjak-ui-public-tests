@@ -97,7 +97,7 @@ grant select,insert,update,delete on public.community_moderation_appeals to serv
 create policy community_appeals_owner_read on public.community_moderation_appeals for select to authenticated using ((select auth.uid())=user_id);
 create policy community_appeals_owner_create on public.community_moderation_appeals for insert to authenticated with check ((select auth.uid())=user_id and exists(select 1 from public.community_notifications n where n.id=notification_id and n.user_id=(select auth.uid())));
 create function public.community_moderation_review_appeal(p_id uuid,p_approve boolean)
-returns jsonb language plpgsql security invoker set search_path='' as $
+returns jsonb language plpgsql security invoker set search_path='' as $$
 declare a public.community_moderation_appeals%rowtype; qid uuid; result jsonb;
 begin
  if p_approve is null then raise exception 'decision required'; end if;
@@ -111,13 +111,13 @@ begin
  end if;
  update public.community_moderation_appeals set state=case when p_approve then 'approved' else 'declined' end,reviewed_at=now() where id=p_id;
  return jsonb_build_object('state',case when p_approve then 'approved' else 'declined' end,'restored',result);
-end;$;
+end;$$;
 revoke all on function public.community_moderation_review_appeal(uuid,boolean) from public,anon,authenticated;
 grant execute on function public.community_moderation_review_appeal(uuid,boolean) to service_role;
 create function public.community_moderation_active()
-returns boolean language sql stable security invoker set search_path='' as $
+returns boolean language sql stable security invoker set search_path='' as $$
  select count(*)=4 from pg_catalog.pg_policies where schemaname='public' and policyname in ('community_posts_moderation_required','community_comments_moderation_required','community_posts_edit_moderation_required','community_comments_edit_moderation_required');
-$;
+$$;
 revoke all on function public.community_moderation_active() from public,anon,authenticated;
 grant execute on function public.community_moderation_active() to service_role;
 commit;
