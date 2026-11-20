@@ -35,6 +35,7 @@ jobs:
       - run: |
           node --check scripts/live-qa.mjs
           node --check scripts/live-qa-analyze.mjs
+          node --check scripts/live-qa-pixels.mjs
           node --check tests/live-qa-fixture.mjs
           node --check playwright.v911-remote.config.mjs
           node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
@@ -84,6 +85,11 @@ jobs:
       - name: Summarize real capture
         if: always()
         run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - name: Decode original recording and flag transient pixel changes
+        if: always()
+        run: |
+          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
+          node scripts/live-qa-pixels.mjs qa-artifacts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -117,6 +123,11 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/live-qa-analyze.mjs qa-artifacts --vision
+      - name: Decode original recording and flag transient pixel changes
+        if: always()
+        run: |
+          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
+          node scripts/live-qa-pixels.mjs qa-artifacts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
