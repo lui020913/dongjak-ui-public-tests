@@ -1,6 +1,7 @@
 import {copyFileSync,existsSync,readFileSync,writeFileSync,renameSync} from 'node:fs';
 import {join} from 'node:path';
 export default class AuditReporter {
+ onBegin(_config,suite){const root=process.env.DONGJAK_LIVE_QA_DIR;if(root)writeFileSync(join(root,'expected-tests'),String(suite.allTests().length));}
  onTestEnd(test,result){
   const root=process.env.DONGJAK_LIVE_QA_DIR;if(!root)return;
   const id=[...(result.annotations||[]),...(test.annotations||[])].find(a=>a.type==='live-qa-scene')?.description;
