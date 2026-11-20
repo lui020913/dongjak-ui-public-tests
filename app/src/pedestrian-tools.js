@@ -258,10 +258,19 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   // It does not animate the panel, dismiss it, or interfere with X/buttons.
   const nearbyHeader=panel.querySelector('.ped-tools-panel-head');
   let nearbySwipe=null,nearbyRetry=0;
-  const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(nearbyHeader,window,{
+  // Capture the initial pointer at document level, then accept it ONLY if
+  // its coordinates lie inside this panel's visible, non-interactive header.
+  // A competing compositor layer can become the event target in Safari/Chrome
+  // even while the finger starts visually inside the header; binding only to
+  // the header misses that gesture. This fallback does not claim body drags.
+  const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(document,window,{
     down(event){
       if(panel.hidden||!window.matchMedia('(max-width:1079px)').matches||
           event.isPrimary===false||event.target?.closest?.('button,a,input,textarea,select,[role="button"]'))return false;
+      const rect=nearbyHeader.getBoundingClientRect();
+      if(rect.width<36||rect.height<24||
+          event.clientX<rect.left+4||event.clientX>rect.right-4||
+          event.clientY<rect.top+4||event.clientY>rect.bottom-4)return false;
       nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY};
       return true;
     },
