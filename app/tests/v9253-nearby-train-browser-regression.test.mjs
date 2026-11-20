@@ -26,7 +26,15 @@ test('distant subway vehicle AND beam remain hidden, while bus visibility is unc
 
 test('mobile Safari moves map tools beneath actual header rather than fixed guess',()=>{
   const script=read('src/mobile-browser-layout.js');
-  const css=read('../frontend/production/mobile-next.css');
+  // The release builder runs this same suite in an isolated app/ copy.
+  // It generates src/mobile-next.css there, but intentionally excludes the
+  // repository's frontend/ directory. Source CI uses the canonical file.
+  let css;
+  try { css=read('src/mobile-next.css'); }
+  catch (error) {
+    if(error?.code!=='ENOENT')throw error;
+    css=read('../frontend/production/mobile-next.css');
+  }
   assert.match(script,/getBoundingClientRect\?\.\(\)/);
   assert.match(script,/--dj829-tools-top/);
   assert.match(script,/ResizeObserver/);
