@@ -49,6 +49,8 @@ jobs:
           node --check scripts/run-mobile-regressions.mjs
           node --check playwright.v911-remote.config.mjs
           node --check tests/v911-anonymous-ui.spec.mjs
+          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs
+          node --check scripts/live-qa-analyze.mjs
       - name: Test and build exact public app source
         id: build
         env:
@@ -215,9 +217,81 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  visual-qa:
+    needs: [build, preview]
+    if: needs.preview.result == 'success'
+    name: '3. 디자인 연속 검증 (${{ matrix.lane }}/6)'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        lane: [1, 2, 3, 4, 5, 6]
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 18
+    env:
+      DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}/
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      APP_VERSION: ${{ needs.build.outputs.app_version }}
+      BUILD_RUN: ${{ github.run_id }}
+      QA_LANE: ${{ matrix.lane }}
+      QA_SHARD_TOTAL: '6'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/browser-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
+      - name: Install pinned browser test dependencies
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
+      - name: Verify exact visual candidate before capture
+        run: node scripts/live-qa-verify-candidate.mjs
+      - name: Capture continuous anonymous UI journey
+        id: capture
+        run: node scripts/live-qa.mjs --ci --journey
+      - name: Analyze measured geometry and motion
+        if: always() && steps.capture.outcome != 'skipped'
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - name: Review actual design with Gemini
+        if: always() && steps.capture.outcome == 'success'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "QA_DESIGN_UNAVAILABLE missing configured Gemini key"; exit 1; fi
+          node scripts/live-qa-analyze.mjs qa-artifacts --vision
+      - name: Enforce visual evidence and serious design review
+        if: always() && steps.capture.outcome != 'skipped'
+        run: node scripts/live-qa-release-gate.mjs qa-artifacts
+      - name: Decode original recording for motion evidence
+        if: always() && steps.capture.outcome != 'skipped'
+        run: |
+          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
+          node scripts/live-qa-pixels.mjs qa-artifacts
+      - name: Confirm visual candidate unchanged
+        if: always() && steps.capture.outcome != 'skipped'
+        run: node scripts/live-qa-verify-candidate.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-design-qa-${{ github.run_id }}-lane-${{ matrix.lane }}
+          path: qa-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
+
   production:
-    needs: [build, preview, mobile-qa, desktop-tablet-qa]
-    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success'
+    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-qa]
+    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-qa.result == 'success'
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -335,8 +409,8 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log"
 
   notify-preview:
-    needs: [build, preview, mobile-qa, desktop-tablet-qa]
-    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-qa]
+    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -357,7 +431,7 @@ jobs:
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           description="$(printf '%s' "$WORK_DESCRIPTION" | head -n 1 | cut -c1-180)"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일 검증 통과) · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일·디자인 검증 통과) · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
 
   notify-production:
     needs: [build, production]
@@ -399,7 +473,7 @@ jobs:
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state=pending -f context=mobile-release -f description="Mobile release validation started" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
   report:
-    needs: [announce, build, preview, mobile-qa, desktop-tablet-qa, production]
+    needs: [announce, build, preview, mobile-qa, desktop-tablet-qa, visual-qa, production]
     if: always() && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
     name: '최종 결과 기록'
     runs-on: ubuntu-24.04
@@ -414,8 +488,9 @@ jobs:
           PREVIEW: ${{ needs.preview.result }}
           QA: ${{ needs.mobile-qa.result }}
           DESKTOP_QA: ${{ needs.desktop-tablet-qa.result }}
+          VISUAL_QA: ${{ needs.visual-qa.result }}
           PROD: ${{ needs.production.result }}
         run: |
           state=failure
           if [ "$PROD" = success ]; then state=success; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context=mobile-release -f description="Build $BUILD; Preview $PREVIEW; mobile QA $QA; PC/tablet QA $DESKTOP_QA; Production $PROD" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context=mobile-release -f description="Build $BUILD; Preview $PREVIEW; mobile QA $QA; PC/tablet QA $DESKTOP_QA; design QA $VISUAL_QA; Production $PROD" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
