@@ -129,7 +129,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     }
   };
   if(!readSeen(win))preloadOnboardingImages();
-  let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0;
+  let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0,swapTimer=0,swapEpoch=0;
   const markGuideAutoShown=()=>{try{win.sessionStorage.setItem('dj-map-guide-initial-shown-v7121','1');}catch{}};
   const make=(tag,className,text)=>{const node=doc.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;};
   const overlay=make('section','dj860-onboarding');
@@ -223,6 +223,8 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   }
   function close({complete=true,focus=true,afterClose=null}={}){
     if(!opened)return;
+    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    overlay.classList.remove('dj860-swapping');
     opened=false;
     // This modal owns its close transition. Inform the shared lifecycle once
     // without closing unrelated map/guide surfaces in the global cooldown.
@@ -246,6 +248,8 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   }
   function open({auto=false,force=false}={}){
     if(opened)return;
+    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    overlay.classList.remove('dj860-swapping');
     if(auto&&(seenInMemory||readSeen(win))&&!force)return;
     preloadOnboardingImages();
     if(closeTimer){win.clearTimeout(closeTimer);closeTimer=0;}
@@ -264,10 +268,28 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!auto)overlay.dataset.dj860Manual='true';else delete overlay.dataset.dj860Manual;
     win.requestAnimationFrame?.(()=>overlay.querySelector('#dj860-title')?.focus?.({preventScroll:true}));
   }
+  function transitionSlide(target,direction='next'){
+    if(!opened||target<0||target>=ONBOARDING_SLIDES.length||target===index)return;
+    swapEpoch++;const epoch=swapEpoch;
+    if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
+    // Exit the old artwork/copy first, then enter the new slide. Avoid the
+    // pre-existing enter animation showing the next slide before exit finishes.
+    visualPane.classList.remove('dj860-entering');
+    copy.classList.remove('dj860-entering');
+    overlay.classList.add('dj860-swapping');
+    swapTimer=win.setTimeout(()=>{
+      swapTimer=0;
+      if(epoch!==swapEpoch||!opened)return;
+      overlay.classList.remove('dj860-swapping');
+      render(target,direction);
+    },125);
+  }
   function move(delta){
     if(!opened)return;
     const target=index+delta;if(target<0||target>=ONBOARDING_SLIDES.length)return;
-    render(target,delta>0?'next':'prev');
+    transitionSlide(target,delta>0?'next':'prev');
   }
   function showMapGuide(){
     markGuideAutoShown();
@@ -295,7 +317,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       if(index===ONBOARDING_SLIDES.length-1)close({afterClose:showMapGuide});else move(1);
       return;
     }
-    if(type==='dot'){const target=Number(action.dataset.index);if(Number.isInteger(target))render(target,target>=index?'next':'prev');return;}
+    if(type==='dot'){const target=Number(action.dataset.index);if(Number.isInteger(target))transitionSlide(target,target>=index?'next':'prev');return;}
     if(type==='account'){
       close();
       win.requestAnimationFrame?.(()=>doc.querySelector('#bottom-nav .nav-tab[data-tab="mine"]')?.click());
@@ -424,7 +446,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     startupObserver.observe(startup,{attributes:true,attributeFilter:['hidden']});
   }else maybeAutoOpen();
   cleanups.push(()=>startupObserver?.disconnect());
-  cleanups.push(()=>{if(closeTimer)win.clearTimeout(closeTimer);overlay.remove();delete app.dataset.dj860OnboardingInstalled;delete app.dataset.dj860OnboardingOpen;});
+  cleanups.push(()=>{if(closeTimer)win.clearTimeout(closeTimer);if(swapTimer)win.clearTimeout(swapTimer);overlay.remove();delete app.dataset.dj860OnboardingInstalled;delete app.dataset.dj860OnboardingOpen;});
   return ()=>cleanups.forEach(fn=>fn());
 }
 
