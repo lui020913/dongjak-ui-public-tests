@@ -1,0 +1,21 @@
+name: Live metro Production diagnostic
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/live-metro-production-diagnostic.yml','scripts/check-live-metro.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inspect real Production metro feed and map geometry
+        run: node scripts/check-live-metro.mjs https://dongjak-walk-safety-preview.pages.dev
