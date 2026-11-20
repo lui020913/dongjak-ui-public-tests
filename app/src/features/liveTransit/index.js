@@ -38,36 +38,34 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const canvas=doc?.createElement?.('canvas');if(!canvas)return null;
   const size=96;canvas.width=size;canvas.height=size;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
   ctx.scale(3,3);ctx.clearRect(0,0,32,32);
-  const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
-  // Three-quarter SIDE view: one visible passenger side and the roof above it.
-  // Front cab is on the right. No top-facing badge or second row of windows.
-  const contour=()=>{ctx.beginPath();ctx.moveTo(4.0,8.8);ctx.lineTo(22.4,8.8);ctx.bezierCurveTo(27.3,8.8,30.0,11.4,30.0,15.1);ctx.lineTo(30.0,17.2);ctx.bezierCurveTo(29.8,20.1,27.3,22.7,23.0,22.7);ctx.lineTo(4.0,22.7);ctx.quadraticCurveTo(1.4,22.7,1.4,20.0);ctx.lineTo(1.4,11.5);ctx.quadraticCurveTo(1.4,8.8,4.0,8.8);ctx.closePath();};
-  ctx.save();ctx.shadowColor='rgba(20,35,45,.27)';ctx.shadowBlur=1.25;ctx.shadowOffsetY=.85;contour();ctx.fillStyle='#65717b';ctx.fill();ctx.restore();
+  // Reference-inspired three-quarter side view: long carriage, shallow roof,
+  // a single row of side glazing, and a compact transverse front windshield.
+  const contour=()=>{ctx.beginPath();ctx.moveTo(4.2,10.3);ctx.lineTo(24.2,10.3);ctx.bezierCurveTo(28.4,10.3,30.0,12.2,30.0,15.7);ctx.bezierCurveTo(30.0,19.4,27.8,21.7,24.0,21.7);ctx.lineTo(4.2,21.7);ctx.quadraticCurveTo(1.5,21.7,1.5,18.9);ctx.lineTo(1.5,13.0);ctx.quadraticCurveTo(1.5,10.3,4.2,10.3);ctx.closePath();};
+  ctx.save();ctx.shadowColor='rgba(30,45,55,.25)';ctx.shadowBlur=1.1;ctx.shadowOffsetY=.65;contour();ctx.fillStyle='#65717b';ctx.fill();ctx.restore();
   contour();ctx.fillStyle='#fafcfd';ctx.fill();
   ctx.save();contour();ctx.clip();
-  // Continuous single passenger side, separated from the white roof by a crease.
-  ctx.beginPath();ctx.moveTo(1.0,15.9);ctx.lineTo(22.5,15.9);ctx.quadraticCurveTo(27.7,15.9,30.3,14.0);ctx.lineTo(30.3,23.0);ctx.lineTo(1.0,23.0);ctx.closePath();ctx.fillStyle='#e4e9ed';ctx.fill();
-  ctx.fillStyle=color;ctx.fillRect(1,21.25,30,1.6);
-  // Painted band crosses the roof and the visible side, not a badge.
-  ctx.beginPath();ctx.moveTo(13.4,8.5);ctx.lineTo(16.8,8.5);ctx.quadraticCurveTo(16.5,12.3,16.8,15.9);ctx.lineTo(16.8,22.8);ctx.lineTo(13.4,22.8);ctx.lineTo(13.4,15.9);ctx.quadraticCurveTo(13.0,12.3,13.4,8.5);ctx.closePath();ctx.fillStyle=color;ctx.fill();
-  // Rectangular side glazing reads as train windows at actual map size.
-  for(const [x,w] of [[3.5,3.8],[8.0,3.8],[17.9,3.7],[22.3,2.5]]){
-    rounded(x,16.8,w,2.85,.55);ctx.fillStyle='#28343c';ctx.fill();
-    ctx.fillStyle='#65747e';ctx.fillRect(x+.45,17.1,w-.9,.35);
+  // The visible side is narrow, as in the supplied perspective, with a soft crease.
+  ctx.beginPath();ctx.moveTo(1.5,17.1);ctx.lineTo(24.0,17.1);ctx.quadraticCurveTo(27.5,17.1,30.0,15.8);ctx.lineTo(30.0,22.0);ctx.lineTo(1.5,22.0);ctx.closePath();ctx.fillStyle='#e7ebee';ctx.fill();
+  // One clean route stripe wraps around the carriage, without a route badge.
+  ctx.beginPath();ctx.moveTo(13.5,10.1);ctx.lineTo(17.1,10.1);ctx.quadraticCurveTo(17.8,14.0,17.2,17.1);ctx.lineTo(16.8,22.0);ctx.lineTo(13.2,22.0);ctx.lineTo(13.6,17.1);ctx.quadraticCurveTo(14.1,14.0,13.5,10.1);ctx.closePath();ctx.fillStyle=color;ctx.fill();
+  // Side-window quadrilaterals follow the actual side plane, not the roof.
+  for(const [x,w] of [[3.5,4.0],[8.3,3.9],[18.5,3.8],[23.0,2.7]]){
+    ctx.beginPath();ctx.moveTo(x+.55,17.8);ctx.lineTo(x+w,17.8);
+    ctx.quadraticCurveTo(x+w+.15,17.8,x+w-.1,18.3);
+    ctx.lineTo(x+w-.65,19.9);ctx.lineTo(x,19.9);
+    ctx.quadraticCurveTo(x-.2,19.9,x,19.5);ctx.lineTo(x+.55,17.8);ctx.closePath();
+    ctx.fillStyle='#28343c';ctx.fill();
   }
-  // Rounded trapezoid on the cab's transverse front plane, as in the reference.
-  // The straight sloped rear edge and two rounded outer corners replace the crescent.
-  ctx.beginPath();ctx.moveTo(25.2,11.7);ctx.quadraticCurveTo(25.6,11.45,26.3,11.9);
-  ctx.lineTo(27.9,12.6);ctx.quadraticCurveTo(29.0,13.15,29.0,14.6);
-  ctx.lineTo(28.85,16.9);ctx.quadraticCurveTo(28.75,17.9,27.7,18.5);
-  ctx.lineTo(26.3,19.05);ctx.quadraticCurveTo(25.6,19.2,25.45,18.45);
-  ctx.lineTo(24.9,12.6);ctx.quadraticCurveTo(24.8,11.95,25.2,11.7);
-  ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
-  ctx.beginPath();ctx.moveTo(26.2,12.35);ctx.lineTo(27.65,13.0);
-  ctx.quadraticCurveTo(28.3,13.4,28.35,14.35);ctx.strokeStyle='#65747e';ctx.lineWidth=.42;ctx.stroke();
-  rounded(26.5,19.1,1.75,.85,.35);ctx.fillStyle='#ffffff';ctx.fill();
+  // Short transverse glass tucked into the tapered end cap; a thin white
+  // perimeter separates it from both the roof and the passenger windows.
+  ctx.beginPath();ctx.moveTo(26.0,11.9);
+  ctx.bezierCurveTo(27.35,12.15,28.45,13.3,28.65,14.6);
+  ctx.quadraticCurveTo(29.0,16.25,28.15,17.7);
+  ctx.lineTo(26.65,18.25);ctx.quadraticCurveTo(26.1,18.4,26.25,17.65);
+  ctx.quadraticCurveTo(26.9,15.0,25.45,12.55);
+  ctx.quadraticCurveTo(25.2,11.9,26.0,11.9);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
   ctx.restore();
-  contour();ctx.strokeStyle='#aebac2';ctx.lineWidth=.38;ctx.stroke();
+  contour();ctx.strokeStyle='#b6c1c7';ctx.lineWidth=.30;ctx.stroke();
   const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);

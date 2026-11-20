@@ -93,16 +93,13 @@ test('top-view train rotation follows the exact local tangent, including vertica
 
 test('train artwork uses white roof and route belt without any number or text drawing',async()=>{const {trainIconImage}=await import('../src/features/liveTransit/index.js');const colors=[],methods=[];const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}}},{get(t,k){return k in t?t[k]:(...args)=>methods.push(k)},set(t,k,v){if(k==='fillStyle')colors.push(v);t[k]=v;return true;}});const sprite=trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});assert.equal(sprite.width,96);assert.ok(colors.includes('#fafcfd'));assert.ok(colors.includes('#3253a2'));assert.ok(colors.includes('#202b33'));assert.ok(methods.includes('bezierCurveTo'));assert.ok(!methods.includes('fillText')&&!methods.includes('strokeText'));});
 
-test('side-view sprite has one passenger-side window row and a broad cab face',async()=>{const {trainIconImage}=await import('../src/features/liveTransit/index.js');const windows=[];let path=[];const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...args){path.push(args)},fill(){if(this.fillStyle==='#28343c')windows.push(path[0])}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});assert.equal(windows.length,4);assert.ok(windows.every(x=>x[1]===16.8));});
-
-test('front windshield has a convex rounded trapezoid with straight edges while preserving the passenger window row',async()=>{
+test('reference side-view sprite has four perspective windows and a compact end-cap windshield',async()=>{
  const {trainIconImage}=await import('../src/features/liveTransit/index.js');
  let path=[],cab=[],windows=[];
- const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...a){path.push(['M',...a])},lineTo(...a){path.push(['L',...a])},quadraticCurveTo(...a){path.push(['Q',...a])},fill(){if(this.fillStyle==='#202b33')cab=path.slice();if(this.fillStyle==='#28343c')windows.push(path[0])}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});
+ const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...a){path.push(['M',...a])},lineTo(...a){path.push(['L',...a])},quadraticCurveTo(...a){path.push(['Q',...a])},bezierCurveTo(...a){path.push(['C',...a])},fill(){if(this.fillStyle==='#202b33')cab=path.slice();if(this.fillStyle==='#28343c')windows.push(path.slice())}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});
  trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});
- assert.deepEqual(cab[0],['M',25.2,11.7]);
- assert.ok(cab.filter(x=>x[0]==='L').length>=4);
- assert.ok(cab.some(x=>x[0]==='L'&&x[1]===24.9&&x[2]===12.6));
- assert.ok(cab.some(x=>x[0]==='L'&&x[1]===26.3&&x[2]===19.05));
- assert.equal(windows.length,4);assert.ok(windows.every(x=>x[2]===16.8));
+ assert.deepEqual(cab[0],['M',26,11.9]);
+ assert.ok(cab.flatMap(x=>x.slice(1).filter((_,i)=>i%2===0)).every(x=>x>=25.2&&x<=29));
+ assert.equal(windows.length,4);assert.ok(windows.every(x=>x[0][2]===17.8));
+ assert.ok(windows.every(x=>x.filter(y=>y[0]==='L').length>=3));
 });
