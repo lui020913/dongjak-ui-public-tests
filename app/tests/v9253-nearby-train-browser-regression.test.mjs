@@ -13,6 +13,12 @@ test('nearby sheet keeps exactly one gesture owner and supports fallback tap',()
   assert.match(owner,/sheetStageAction\(/);
   assert.match(controller,/function setMobileSheetExpanded\(/);
   assert(!read('src/pedestrian-tools.js').includes('installNearbySheetDrag'));
+  const nearby=read('src/pedestrian-tools.js');
+  assert.match(nearby,/const scheduleNearbyExpand=\(\)=>/);
+  assert.match(nearby,/move\(event\)\{/);
+  assert.match(nearby,/dy<=-65&&Math\.abs\(dx\)<Math\.abs\(dy\)\*\.8/);
+  assert.match(nearby,/scheduleNearbyExpand\(\)/);
+  assert.match(nearby,/if\(!panel\.hidden&&!panel\.classList\.contains\('dj871-sheet-expanded'\)\)/);
 });
 
 test('distant subway vehicle AND beam remain hidden, while bus visibility is unchanged',()=>{
