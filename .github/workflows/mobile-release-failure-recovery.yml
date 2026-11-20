@@ -4,6 +4,7 @@ on:
     workflows:
       - "Mobile-only release — Preview, phone QA and protected Production"
       - "Android APK - public build"
+      - "Autonomous production read-only audit"
     types: [completed]
   push:
     branches: [main]
@@ -49,6 +50,7 @@ jobs:
       FAILED_RUN: ${{ github.event.workflow_run.id }}
       FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
       ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+      FAILED_WORKFLOW: ${{ github.event.workflow_run.name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,6 +88,14 @@ jobs:
             echo 'Official Seoul daily metro quota exhausted; do not rerun or generate code repairs for the provider limit.' >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
+          if grep -qE 'QA_EXPLORE_STALE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then
+            echo 'Production changed during exploration; no code repair.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ "$FAILED_WORKFLOW" == "Autonomous production read-only audit" ]]; then
+            curl -fsS --max-time 30 "https://dongjak-walk-safety-preview.pages.dev/release-source.json?repair=$FAILED_RUN" |
+              jq -e --arg sha "$current" '.release_status=="DEPLOYED_PRODUCTION" and .source_commit==$sha and .public_ui_source_commit==$sha' >/dev/null || exit 0
+          fi
           # Provider outages and missing design evidence are not source bugs.
           if grep -qE 'QA_DESIGN_UNAVAILABLE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null && ! grep -qE 'PHONE_TEST_FAILURE|Public regression (file|location):|QA_DESIGN_FAILURE|QA_JOURNEY_FAILURE|QA_EXPLORE_FAILURE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then
             if (( ATTEMPT < 2 )); then echo 'action=retry' >> "$GITHUB_OUTPUT"; else echo 'Design reviewer/evidence unavailable after one retry; hold Production without source edits.' >> "$GITHUB_STEP_SUMMARY"; fi
@@ -93,6 +103,7 @@ jobs:
           fi
           count="$(jq -r '.gemini_repair_count // 0' release/mobile-first-overhaul-request.json)"
           [[ "$count" =~ ^[0-9]+$ ]]
+          if [[ "$FAILED_WORKFLOW" == "Autonomous production read-only audit" ]]; then count=0; fi
           if (( count >= 3 )); then echo 'Gemini source repair limit reached.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
           if grep -qEm1 'PHONE_TEST_FAILURE|Public regression file:|Public regression location:|QA_DESIGN_FAILURE|QA_JOURNEY_FAILURE|QA_EXPLORE_FAILURE' "$REPAIR_LOG_DIR/"*.log 2>/dev/null || (( ATTEMPT >= 2 )); then
             echo 'action=repair' >> "$GITHUB_OUTPUT"
