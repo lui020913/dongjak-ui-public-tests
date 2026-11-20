@@ -142,8 +142,10 @@ export function findActiveScrim(doc,win=window) {
     const rect=element.getBoundingClientRect();
     const coversViewport=rect.width>=width*0.8&&rect.height>=height*0.55&&rect.bottom>=height*0.75;
     const candidates=[];
-    const nativeBackdrop=readElementColor(element,win,'::backdrop');
-    if(nativeBackdrop)candidates.push(nativeBackdrop);
+    if(element.matches?.('dialog[open]')) {
+      const nativeBackdrop=readElementColor(element,win,'::backdrop');
+      if(nativeBackdrop)candidates.push(nativeBackdrop);
+    }
     if(coversViewport) {
       for(const pseudo of [undefined,'::before','::after']) {
         const color=readElementColor(element,win,pseudo);
