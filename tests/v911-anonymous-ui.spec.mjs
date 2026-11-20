@@ -213,12 +213,12 @@ async function pinPhoneShortcut(page,label,key){
  await tap(page,page.locator('#djNext-layers'));await expect(settings).toBeVisible();
  const add=settings.getByRole('switch',{name:label+' 바로가기',exact:true});await add.scrollIntoViewIfNeeded();await add.click();await expect(add).toHaveAttribute('aria-checked','true');
  await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
- const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();return shortcut;
+ const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();await shortcut.scrollIntoViewIfNeeded();return shortcut;
 }
 test('phone toolbar has compact adaptive slots, three saved shortcuts maximum and no overlapping legacy controls',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  const rail=page.locator('#djNext-rail'),nav=page.locator('#bottom-nav'),panel=page.locator('#djNext-layer-panel');
- await expect(rail).toBeVisible();await expect(rail.locator(':scope>button')).toHaveCount(5);
+ await expect(rail).toBeVisible();await expect(rail.locator('button.djNext-tool')).toHaveCount(5);await expect(rail.locator('button.djNext-tool').first()).toHaveCSS('height','54px');
  await expect(rail.locator('.djNext-empty')).toHaveCount(1);
  const assertLayerRight=async()=>{await expect.poll(()=>rail.evaluate(n=>{const r=n.getBoundingClientRect(),b=n.querySelector('#djNext-layers').getBoundingClientRect();return Math.abs(r.right-b.right)})).toBeLessThanOrEqual(2);};
  await assertLayerRight();
@@ -240,20 +240,26 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dongjak-phone-shortcuts-v2')))).toEqual(['pilot','slope','night']);
+ await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
+ await assertLayerRight();
+ const scroll=rail.locator('#djNext-scroll');await expect.poll(()=>scroll.evaluate(n=>n.scrollWidth-n.clientWidth)).toBeGreaterThan(8);await expect(scroll).toHaveAttribute('data-overflow-right','true');
+ await scroll.evaluate(n=>{n.scrollLeft=n.scrollWidth;});await expect(scroll).toHaveAttribute('data-overflow-left','true');await assertLayerRight();
+ await scroll.evaluate(n=>{n.scrollLeft=0;});await tap(page,page.locator('#djNext-layers'));await expect(panel).toBeVisible();
  const remove=panel.getByRole('switch',{name:'경사도 바로가기',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
  await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
  await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
- await expect(rail.locator('.djNext-empty')).toHaveCount(1);
+ await expect(rail.locator('.djNext-empty')).toHaveCount(0);
+ await expect(rail.locator('button.djNext-tool')).toHaveCount(6);
  await assertLayerRight();
- const fit=await rail.evaluate(n=>{const r=n.getBoundingClientRect();const bs=[...n.children].map(x=>x.getBoundingClientRect());return bs.every((x,i)=>x.left>=r.left-1&&x.right<=r.right+1&&x.width>36&&Math.abs(x.top-bs[0].top)<1&&(i===0||x.left>=bs[i-1].right-1))});expect(fit).toBe(true);
+ const fit=await rail.evaluate(n=>{const r=n.getBoundingClientRect();const bs=[...n.querySelectorAll('button.djNext-tool')].map(x=>x.getBoundingClientRect());return bs.every((x,i)=>x.left>=r.left-1&&x.right<=r.right+1&&x.width>=40&&Math.abs(x.height-54)<1&&Math.abs(x.top-bs[0].top)<1&&(i===0||x.left>=bs[i-1].right-1))});expect(fit).toBe(true);
  await page.evaluate(()=>{window.__railSamples=[];let n=0;const sample=()=>{const rail=document.getElementById('djNext-rail'),p=rail?.parentElement,c=p?getComputedStyle(p):null;window.__railSamples.push(!!rail&&!!c&&c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98);if(n++<60)requestAnimationFrame(sample)};requestAnimationFrame(sample)});
  await tap(page,tab(page,'map'));
  await expect.poll(()=>page.evaluate(()=>window.__railSamples.length)).toBeGreaterThan(20);
  expect(await page.evaluate(()=>window.__railSamples.every(Boolean))).toBe(true);
  await expect(page.locator('#djNext-toolbar')).toBeVisible();
  await expect.poll(()=>nav.evaluate(n=>Math.round(innerHeight-n.getBoundingClientRect().bottom))).toBeLessThanOrEqual(4);
- await test.info().attach('phone-seven-slot-toolbar',{body:await page.screenshot(),contentType:'image/png'});
+ await test.info().attach('phone-six-slot-toolbar',{body:await page.screenshot(),contentType:'image/png'});
 });
 test('phone pilot safety symbols are native and disappear when the mode closes',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);

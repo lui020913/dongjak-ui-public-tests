@@ -94,7 +94,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches||app.dataset.djNextInstalled)return;
  app.dataset.djNextInstalled='1';
  const $=id=>doc.getElementById(id),q=s=>doc.querySelector(s);
- let selected=normalizePhoneShortcuts(read(win,KEY,[])),rail=null,host=null,scheduled=false,focusReturn=null,slot=null,weather=null;
+ let selected=normalizePhoneShortcuts(read(win,KEY,[])),rail=null,toolScroll=null,host=null,scheduled=false,focusReturn=null,slot=null,weather=null;
  const railActions=new WeakMap();
  const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);railActions.set(node,fn);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
@@ -144,24 +144,25 @@ export function installPhoneToolbar({app,doc=document,win=window}){
   const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
   if(weather){const span=weather.querySelector('span');const value=caption?.textContent||'날씨';if(span.textContent!==value)span.textContent=value;const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
  }
- function renderRail(){if(!rail)return;rail.replaceChildren();
+ function refreshRailEdges(){if(!toolScroll)return;const max=Math.max(0,toolScroll.scrollWidth-toolScroll.clientWidth);const x=Math.max(0,toolScroll.scrollLeft);toolScroll.dataset.scrollable=String(max>1);toolScroll.dataset.overflowLeft=String(x>1);toolScroll.dataset.overflowRight=String(max-x>1);}
+ function renderRail(){if(!rail||!toolScroll)return;const previousX=toolScroll.scrollLeft;toolScroll.replaceChildren();rail.querySelector('#djNext-layers')?.remove();
   const near=button('주변정보','near',()=>invoke('#ped-nearby-open'));near.id='djNext-near';near.setAttribute('aria-label','주변 안전정보');
   weather=button('날씨','sun',()=>invoke('#weather-label'));weather.id='djNext-weather';
   const report=button('위험제보','report',()=>invoke('#ped-report-open'));report.id='djNext-report';
-  rail.append(near,weather,report);
-  for(let i=0;i<Math.min(3,selected.length+1);i++){const choice=PHONE_CHOICES.find(c=>c[0]===selected[i]);const b=choice?button(choice[1],choice[2],()=>invoke(choice[3])):button('추가','plus',e=>open(e,i));b.dataset.slot=String(i);if(choice){b.dataset.shortcut=choice[0];b.dataset.source=choice[3];const compact={livebus:'버스위치',livemetro:'열차위치',cctvparking:'주정차',cctvother:'기타CCTV',camera:'단속카메라',signals:'음향신호',incidents:'돌발정보'};if(compact[choice[0]])b.querySelector('span').textContent=compact[choice[0]]}else{b.classList.add('djNext-empty');b.setAttribute('aria-label','바로가기 '+(i+1)+' 추가')}rail.append(b)}
-  const layers=button('레이어','layers',e=>open(e));layers.id='djNext-layers';rail.append(layers);refresh();
+  toolScroll.append(near,weather,report);
+  for(let i=0;i<(selected.length<2?selected.length+1:selected.length);i++){const choice=PHONE_CHOICES.find(c=>c[0]===selected[i]);const b=choice?button(choice[1],choice[2],()=>invoke(choice[3])):button('추가','plus',e=>open(e,i));b.dataset.slot=String(i);if(choice){b.dataset.shortcut=choice[0];b.dataset.source=choice[3];const compact={livebus:'버스위치',livemetro:'열차위치',cctvparking:'주정차',cctvother:'기타CCTV',camera:'단속카메라',signals:'음향신호',incidents:'돌발정보'};if(compact[choice[0]])b.querySelector('span').textContent=compact[choice[0]]}else{b.classList.add('djNext-empty');b.setAttribute('aria-label','바로가기 '+(i+1)+' 추가')}toolScroll.append(b)}
+  const layers=button('레이어','layers',e=>open(e));layers.id='djNext-layers';rail.append(layers);toolScroll.scrollLeft=previousX;refreshRailEdges();refresh();win.requestAnimationFrame(refreshRailEdges);
  }
  function sync(){scheduled=false;const next=$('dj-v794-toolbar');const legacy=$('dj831-scrollport');if(legacy&&legacy.style.getPropertyValue('display')!=='none')legacy.style.setProperty('display','none','important');
  if(next&&next.dataset.djNextReady!=='1')next.dataset.djNextReady='1';
- if(!host){host=doc.createElement('nav');host.id='djNext-toolbar';host.setAttribute('aria-label','모바일 지도 주요 기능');rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');host.append(rail);app.append(host);renderRail()}else refresh()
+ if(!host){host=doc.createElement('nav');host.id='djNext-toolbar';host.setAttribute('aria-label','모바일 지도 주요 기능');rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');toolScroll=doc.createElement('div');toolScroll.id='djNext-scroll';toolScroll.setAttribute('role','group');toolScroll.setAttribute('aria-label','지도 기능 및 바로가기');toolScroll.addEventListener('scroll',refreshRailEdges,{passive:true});rail.append(toolScroll);host.append(rail);app.append(host);if(typeof win.ResizeObserver==='function')new win.ResizeObserver(refreshRailEdges).observe(toolScroll);win.addEventListener('resize',refreshRailEdges,{passive:true});renderRail()}else refresh()
  }
  const schedule=()=>{if(scheduled)return;scheduled=true;win.requestAnimationFrame(sync)};
  new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota']});
  // The independent phone rail owns its click before legacy document-level
  // overlay/gesture delegates. Do not intercept native or map-surface events.
  win.addEventListener('click',e=>{
-  const b=e.target.closest?.('#djNext-rail > button.djNext-tool');
+  const b=e.target.closest?.('#djNext-rail button.djNext-tool');
   if(b&&rail?.contains(b)&&app.dataset.tab==='map'&&app.dataset.searchOpen!=='true'&&!b.disabled){
    const run=railActions.get(b);if(!run)return;
    e.preventDefault();e.stopImmediatePropagation();

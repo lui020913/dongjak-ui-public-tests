@@ -1,21 +1,26 @@
-/* Phone-only: use one stable grid (3 fixed, 3 optional, 1 settings) rather than the old expanding rail. */
+/* Phone-only: six visible slots with a separately scrollable rail and fixed layer button. */
 @layer request-completion {
 @media(max-width:699px){
 /* Native toolbar stays mounted only as the source of existing actions.
    The dedicated phone rail is never moved or hidden by legacy sheet logic. */
 html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
-html body #app#app#app#app#app#app#app #djNext-toolbar{position:fixed!important;top:var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px))!important;left:10px!important;right:10px!important;display:flex!important;align-items:center!important;height:48px!important;z-index:3120!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;animation:none!important;transition:opacity 220ms ease-out,visibility 0s linear!important;transform:none!important;translate:none!important}
+html body #app#app#app#app#app#app#app #djNext-toolbar{position:fixed!important;top:var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px))!important;left:10px!important;right:10px!important;display:flex!important;align-items:center!important;height:54px!important;z-index:3120!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;animation:none!important;transition:opacity 220ms ease-out,visibility 0s linear!important;transform:none!important;translate:none!important}
 html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar{visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important}
-#djNext-rail{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;align-items:stretch;min-width:0;box-sizing:border-box}
-html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{width:100%!important;min-width:0!important;height:48px!important;max-height:48px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;border:1px solid var(--djNext-border,#dce7df)!important;border-radius:12px!important;background:var(--djNext-surface,#fff)!important;color:var(--djNext-text,#203d32)!important;margin:0!important;padding:3px 0!important;box-sizing:border-box!important;animation:none!important;transition:none!important;white-space:nowrap!important;overflow:hidden!important}
-html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="true"]) #djNext-toolbar #djNext-rail > button.djNext-tool{pointer-events:auto!important;touch-action:manipulation!important}
-html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar #djNext-rail > button.djNext-tool{pointer-events:none!important;visibility:hidden!important}
-#djNext-rail button svg{width:20px;height:20px;flex:none;pointer-events:none}
+#djNext-toolbar{--djNext-tool-size:clamp(40px,calc((100vw - 50px)/6),54px)}
+#djNext-rail{display:grid!important;grid-template-columns:minmax(0,1fr) var(--djNext-tool-size)!important;gap:6px!important;width:100%!important;align-items:center!important;min-width:0!important;box-sizing:border-box;overflow:visible!important}
+#djNext-scroll{display:flex;flex-direction:row;align-items:center;gap:6px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;box-sizing:border-box;padding:6px 4px;margin-inline:-4px}
+#djNext-scroll::-webkit-scrollbar{display:none}
+#djNext-scroll[data-overflow-right="true"]{mask-image:linear-gradient(to right,#000 calc(100% - 12px),transparent)}
+#djNext-scroll[data-overflow-left="true"]{mask-image:linear-gradient(to right,transparent,#000 12px)}
+#djNext-scroll[data-overflow-left="true"][data-overflow-right="true"]{mask-image:linear-gradient(to right,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
+html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="true"]) #djNext-scroll[data-scrollable="true"]{pointer-events:auto!important}
+html body #app#app#app#app#app#app#app #djNext-rail #djNext-layers{justify-self:end!important}
+html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{width:var(--djNext-tool-size)!important;min-width:var(--djNext-tool-size)!important;max-width:var(--djNext-tool-size)!important;flex:0 0 var(--djNext-tool-size)!important;height:54px!important;max-height:54px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;border:1px solid var(--djNext-tool-edge)!important;border-radius:17px!important;background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base))!important;box-shadow:var(--djNext-tool-shadow)!important;cursor:pointer;color:var(--djNext-text,#203d32)!important;margin:0!important;padding:3px 0!important;box-sizing:border-box!important;animation:none!important;transition:box-shadow 100ms ease-out,background-color 100ms ease-out!important;white-space:nowrap!important;overflow:hidden!important}
+html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="true"]) #djNext-toolbar #djNext-rail button.djNext-tool{pointer-events:auto!important;touch-action:manipulation!important}
+html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar #djNext-rail button.djNext-tool{pointer-events:none!important;visibility:hidden!important}
+#djNext-rail button svg{width:22px;height:22px;flex:none;pointer-events:none}
 #djNext-rail button span{pointer-events:none}
-#djNext-rail button span{font-size:10px;line-height:1.2;letter-spacing:-.055em;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-html body #app#app#app#app#app#app#app #djNext-rail button.djNext-empty{background:var(--dj800-surface-soft,#f5f8f6)!important;border-style:dashed!important;color:#80968a!important}
-html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:var(--dj800-surface-soft,#dceee5)!important;border-color:#65a38c!important;color:var(--dj800-accent,#0c7964)!important}
-html body #app#app#app#app#app#app#app #djNext-rail #djNext-layers{background:var(--dj800-surface-soft,#e5f1e9)!important}
+#djNext-rail button span{font-size:11px;font-weight:650;line-height:1.2;letter-spacing:-.055em;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 #djNext-mic{display:grid!important;place-items:center!important;flex:0 0 36px!important;width:36px!important;height:36px!important;border:0!important;background:transparent!important;color:var(--dj-ui-text,#203d32)!important;margin:0!important;padding:6px!important;border-radius:50%!important}
 #djNext-mic svg{width:21px;height:21px}#djNext-mic[aria-pressed="true"]{color:#ba4545!important;background:#f8e3e3!important}
 #djNext-voice-status{position:absolute;top:100%;inset-inline:8px;z-index:90;padding:9px 12px;border-radius:12px;background:var(--dj800-surface,#fff);color:var(--dj-ui-text,#203d32);box-shadow:0 4px 20px #0002;font-size:12px}
@@ -59,11 +64,15 @@ html body #app#app#app#app#app#app#app #route-map-card:not([hidden]){display:fle
 /* Shared mobile surface tokens: do not inherit pale light-mode controls. */
 #app{--djNext-surface:#fff;--djNext-raised:#e5f1eb;--djNext-text:#203d32;--djNext-muted:#62786e;--djNext-border:#d6e4dc;--djNext-active:#087c65;--djNext-tile:#e4efdf;--djNext-tile-ink:#376b57}
 #app[data-theme="dark"]{--djNext-surface:#191b1f;--djNext-raised:#272e32;--djNext-text:#e6efeb;--djNext-muted:#aabdb5;--djNext-border:#414a48;--djNext-active:#167f6e;--djNext-tile:#293d38;--djNext-tile-ink:#a2ddc9}
-html body #app#app#app#app#app#app#app #djNext-rail :is(button.djNext-empty,#djNext-layers,button[aria-pressed="true"]){background:var(--djNext-raised)!important;border-color:var(--djNext-border)!important;color:var(--djNext-text)!important}
-/* Visible elevation: preserve every existing toolbar metric and the selected inset ring. */
-html body #app#app#app#app#app#app#app #djNext-rail > button.djNext-tool{--djNext-tool-shadow:0 3px 6px rgba(15,42,33,.30),0 1px 2px rgba(15,42,33,.18);box-shadow:var(--djNext-tool-shadow)!important}
-html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail > button.djNext-tool{--djNext-tool-shadow:0 3px 6px rgba(0,0,0,.64),0 1px 2px rgba(0,0,0,.38)}
-html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{border-color:var(--djNext-active)!important;box-shadow:inset 0 0 0 1px var(--djNext-active),var(--djNext-tool-shadow)!important}
+/* Raised, opaque buttons: one material owner, no glass or duplicate legacy shadows. */
+#app{--djNext-tool-face:#fff;--djNext-tool-base:#f1f6f3;--djNext-tool-edge:#c2d4c9;--djNext-tool-foot:#a4bbae;--djNext-tool-soft-face:#edf6f0;--djNext-tool-soft-base:#e0eee6;--djNext-tool-selected-face:#dcf3e8;--djNext-tool-selected-base:#c6e6d7;--djNext-tool-selected-ink:#075a47;--djNext-tool-highlight:#ffffffd9;--djNext-tool-drop:#142c263d;--djNext-tool-contact:#142c2624}
+#app[data-theme="dark"]{--djNext-tool-face:#30373b;--djNext-tool-base:#242b2e;--djNext-tool-edge:#536460;--djNext-tool-foot:#141e1c;--djNext-tool-soft-face:#354a43;--djNext-tool-soft-base:#283c35;--djNext-tool-selected-face:#366451;--djNext-tool-selected-base:#234b3d;--djNext-tool-selected-ink:#baf4d9;--djNext-tool-highlight:#ffffff26;--djNext-tool-drop:#0008;--djNext-tool-contact:#0005}
+html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{--djNext-tool-shadow:0 2px 0 var(--djNext-tool-foot),0 4px 7px var(--djNext-tool-drop),0 1px 2px var(--djNext-tool-contact),inset 0 1px 0 var(--djNext-tool-highlight)}
+html body #app#app#app#app#app#app#app #djNext-rail :is(button.djNext-empty,#djNext-layers){background:linear-gradient(180deg,var(--djNext-tool-soft-face),var(--djNext-tool-soft-base))!important;border-style:solid!important}
+html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:linear-gradient(180deg,var(--djNext-tool-selected-face),var(--djNext-tool-selected-base))!important;color:var(--djNext-tool-selected-ink)!important;border-color:var(--djNext-active)!important}
+html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool:active:not(:disabled){box-shadow:0 1px 2px var(--djNext-tool-contact),inset 0 2px 4px var(--djNext-tool-drop)!important}
+html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool:focus-visible{outline:2px solid var(--djNext-active)!important;outline-offset:2px!important}
+@media(prefers-reduced-motion:reduce){html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{transition:none!important}}
 html body #app#app#app#app#app#app#app .djNext-modal{padding:0 8px max(8px,env(safe-area-inset-bottom))!important;background:#13282066!important;opacity:1!important;animation:none!important;transition:none!important;overflow:hidden!important}
 html body #app#app#app#app#app#app#app .djNext-modal-body{background:var(--djNext-surface)!important;color:var(--djNext-text)!important;border-color:var(--djNext-border)!important;opacity:1!important;transition:none!important;animation:djNextSheetIn 350ms cubic-bezier(.25,.20,.40,1) both!important}
 html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body{display:flex!important;flex-direction:column!important;padding:0!important;max-height:min(78dvh,720px)!important;overflow:hidden!important;border-radius:24px!important}
@@ -115,8 +124,6 @@ html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .dj8
 html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .dj875-transit-scroll>*{margin-block:0!important;flex-shrink:0!important}
 html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] :is(#transport-neighbors,.transport-selection-box,.transport-arrivals-title,#transport-arrivals){padding-block:0!important;margin-block:0!important}
 html body #app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .transport-arrivals-title{position:relative!important;top:auto!important;gap:8px!important;min-height:40px!important}
-html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail button{color:var(--djNext-text)!important;background:var(--djNext-surface)!important;border-color:var(--djNext-border)!important}
-html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-rail :is(.djNext-empty,#djNext-layers,button[aria-pressed="true"]){background:var(--djNext-raised)!important}
 
 
 /* Give icon tiles their own schematic map cues, without implying unavailable map styles. */
@@ -399,10 +406,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app #map .maplibregl-popup:no
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav{border-radius:999px!important;box-shadow:var(--dj-elev-dock)!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab{border-radius:999px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #bottom-nav > .nav-tab:is(.active,[aria-current=page]){background:#24483f!important;color:#79dec5!important;box-shadow:0 1px 3px #0005!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail > button.djNext-tool{border-radius:18px!important;box-shadow:0 2px 5px #142c2638,0 1px 2px #142c261a!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail > button.djNext-empty{border-style:dashed!important;border-color:#a4bbb0!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #djNext-rail > button.djNext-tool{box-shadow:0 2px 5px #0008,0 1px 2px #0005!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] #djNext-rail > button.djNext-empty{border-color:#697d76!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(.page-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-gesture-guide,#map-safety-controls,#map-advanced-controls,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.maplibregl-popup-content) :is(button.primary-btn,button[type=submit],.dj-sheet-chrome-close,.dj-place-header-close,.djNext-close,.djNext-pin,.djNext-continue,.djNext-permission-row button,.community-compose-toggle,.community-filter,.community-attach-action,.route-mini-btn,.route-gps-btn,.dj832-waypoint-toggle,.dongjak-news-open,.v707-history-switch-button,[data-news-source],#transport-close,#map-safety-close,#map-gesture-guide-close,#version-history-close,#dj-settings-close,#dj-settings-reset,#dj-settings-done,#dj-settings-theme,#dj-settings-text button,#community-sort,#dongjak-news-refresh,.dj-about-close,.dj-about-done,.dj877-pref-row button):not(:disabled){border-radius:999px!important;box-shadow:0 2px 5px #17392b24!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme=dark] :is(.page-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-gesture-guide,#map-safety-controls,#map-advanced-controls,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.maplibregl-popup-content) :is(button.primary-btn,button[type=submit],.dj-sheet-chrome-close,.dj-place-header-close,.djNext-close,.djNext-pin,.djNext-continue,.djNext-permission-row button,.community-compose-toggle,.community-filter,.community-attach-action,.route-mini-btn,.route-gps-btn,.dj832-waypoint-toggle,.dongjak-news-open,.v707-history-switch-button,[data-news-source],#transport-close,#map-safety-close,#map-gesture-guide-close,#version-history-close,#dj-settings-close,#dj-settings-reset,#dj-settings-done,#dj-settings-theme,#dj-settings-text button,#community-sort,#dongjak-news-refresh,.dj-about-close,.dj-about-done,.dj877-pref-row button):not(:disabled){box-shadow:0 2px 5px #0006!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(#community-sort,#community-compose-toggle){min-height:44px!important;height:44px!important;border-radius:999px!important}
@@ -428,7 +431,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app #version-history-
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #version-history-modal .dj856-release-focus{outline:none!important;box-shadow:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #version-history-modal .dj856-release-focus .v707-release-head{border-left:3px solid var(--djNext-active)!important;padding-left:8px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel:not([hidden]){background:rgba(19,40,32,calc(.4 * var(--dj-scrim-alpha,1)))!important;transition:none!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-dj-language=en] #djNext-rail > button.djNext-tool span{font-size:clamp(9px,2.6vw,11px)!important;white-space:normal!important;overflow-wrap:normal!important;text-align:center!important;line-height:1.05!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app[data-dj-language=en] #djNext-rail button.djNext-tool span{font-size:clamp(9px,2.6vw,11px)!important;white-space:normal!important;overflow-wrap:normal!important;text-align:center!important;line-height:1.05!important}
 
 /* No older fade or CSS animation may compete with the shared JS motion owner. */
 html body #app#app#app#app#app#app#app[data-dj806-motion="on"] .djNext-modal .djNext-modal-body,
@@ -440,7 +443,6 @@ html body #app#app#app#app#app#app#app [data-dj810-animating]{animation:none!imp
 
 /* 9.2.5 shared phone surface polish; preserve keyboard focus indication. */
 @media(max-width:699px){
-html body #app #djNext-rail{grid-template-columns:repeat(7,minmax(0,1fr))}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]){border-radius:999px!important;box-shadow:var(--dj-elev-low,0 2px 6px #0002)!important;outline-offset:2px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj-sheet-chrome-close,.djNext-close,#map-gesture-guide-close,#dj800-ai-search-close,[aria-label="닫기"]):not(:focus-visible){outline:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel :is(.community-toolbar,.community-category-tabs){margin-bottom:10px!important;gap:6px!important}
@@ -475,8 +477,6 @@ html body #dj-ai-search-modal .dj-ai-close:not(:focus-visible){outline:none!impo
 }
 
 @media(max-width:699px){
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-flow:row!important;justify-content:stretch!important;gap:4px!important;overflow:visible!important;width:100%!important;scrollbar-width:none}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>button{min-width:0!important;width:100%!important;grid-row:1!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide-close:focus-visible{outline:0!important;box-shadow:0 0 0 2px var(--djNext-active) inset,0 2px 5px #0002!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(button,summary):not(#map-gesture-guide-close){border-radius:999px!important;box-shadow:0 2px 5px #0002!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide{padding-top:12px!important}
@@ -498,8 +498,6 @@ html body #dj-ai-search-modal .dj-ai-close{border-radius:50%!important;backgroun
 }
 
 @media(max-width:699px){
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>#djNext-layers{grid-column:7!important;grid-row:1!important;margin:0!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>button.djNext-tool{box-shadow:0 3px 6px #142c2638,0 1px 2px #142c262e!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(.dj8212-ios-install-help,#dj841-guide-tips) :is(ol,ul){padding-inline-start:20px!important;margin:8px 0 0!important;line-height:1.55!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map-gesture-guide :is(.dj8212-ios-install-help,#dj841-guide-tips):not([open]):not(:has([aria-expanded="true"])){padding-bottom:0!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card:not([hidden]){position:fixed!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;top:auto!important;bottom:calc(var(--dj910-dock-bottom,76px) + 12px)!important;transform:none!important;translate:none!important;box-sizing:border-box!important}
@@ -520,9 +518,6 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj83
 
 /* Phone geometry contract: stable rightmost tool and identical settings rows. */
 @layer request-completion{@media(max-width:699px){
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-flow:row!important;width:100%!important;gap:4px!important;overflow:visible!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>button{grid-row:1!important;min-width:0!important;width:100%!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-rail>#djNext-layers{grid-column:7!important;grid-row:1!important;margin:0!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root{box-sizing:border-box!important;padding:0!important;margin:10px 0 0!important;width:100%!important;border-radius:16px!important;overflow:hidden!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel :is(.dj834-settings-group>button,.dj17-more-root>summary){display:flex!important;align-items:center!important;gap:12px!important;min-height:56px!important;height:auto!important;padding:10px 14px!important;margin:0!important;width:100%!important;box-sizing:border-box!important;line-height:1.4!important;text-align:left!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-setting-icon,html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root>summary::before{width:34px!important;height:34px!important;flex:0 0 34px!important}
@@ -571,8 +566,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:var(--mf-accent-soft,#e1efe9);box-shadow:0 1px 3px #0001;transition:transform 240ms cubic-bezier(.22,.80,.32,1.04),width 240ms ease,height 240ms ease;will-change:transform}
   #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{background:#24483f}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important;z-index:1}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button:active:not(:disabled){scale:.96!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:scale 100ms ease-out!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button:active:not(:disabled){scale:.96!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:scale 100ms ease-out!important}
   #app #transport-arrivals[aria-busy=true] .transport-empty::after{content:"";display:block;height:44px;margin-top:10px;border-radius:12px;background:linear-gradient(100deg,var(--djNext-raised,#e5f1eb) 28%,var(--djNext-surface,#fff) 50%,var(--djNext-raised,#e5f1eb) 72%);background-size:220% 100%;animation:djMotionLoading 1.3s linear infinite}
   #app #map-quick-search-results .map-quick-search-result{animation:djMotionResult 180ms ease-out both}
   #app #map-quick-search-results .map-quick-search-result:nth-child(2){animation-delay:25ms}
@@ -585,7 +580,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @media(prefers-reduced-motion:reduce){
   #app #bottom-nav>.dj-motion-indicator{transition:none!important}
   #app #transport-arrivals .transport-empty::after,#app #map-quick-search-results .map-quick-search-result,#app .dj-motion-gps-ring{animation:none!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(#djNext-rail,.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:none!important;scale:1!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app :is(.map-actions,#bottom-nav,.transport-selection-actions,.dj-place-header-actions,.dj-place-personal-actions,.djNext-modal-body) button{transition:none!important;scale:1!important}
 }
 
 /* Canonical phone subway palette and transfer badge geometry. */

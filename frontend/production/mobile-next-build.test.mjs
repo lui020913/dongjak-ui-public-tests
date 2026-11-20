@@ -45,8 +45,8 @@ test('rail connection remains a clearly indicative plan and requires real nearby
 
 test('visible custom phone buttons explicitly own pointer hit-testing; hidden tabs do not',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
- assert.match(css,/\[data-tab="map"\]:not\(\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:auto!important;touch-action:manipulation!important\}/);
- assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\]\)[^{]+#djNext-rail > button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
+ assert.match(css,/\[data-tab="map"\]:not\(\[data-search-open="true"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:auto!important;touch-action:manipulation!important\}/);
+ assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
 });
 
 test('new rail is independent from the original toolbar; road width is still available in native My Info layers',()=>{
@@ -77,7 +77,7 @@ test('photo-reference layout has four columns and separately clipped scroll cont
 test('phone rail owns its interaction before legacy document delegates',()=>{
  const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
  assert.match(src,/const railActions=new WeakMap\(\)/);
- assert.match(src,/e\.target\.closest\?\.\('#djNext-rail > button\.djNext-tool'\)/);
+ assert.match(src,/e\.target\.closest\?\.\('#djNext-rail button\.djNext-tool'\)/);
  assert.match(src,/const run=railActions\.get\(b\);if\(!run\)return;[\s\S]*?e\.stopImmediatePropagation\(\);[\s\S]*?run\(e\);return;/);
 });
 
@@ -139,3 +139,6 @@ test('pilot visuals follow drawer rather than selected overlays',()=>{
  assert.match(js,/const wanted=app\.dataset\.tab==='map'&&app\.classList\.contains\('map-safety-open'\)/);
  assert.match(js,/attributeFilter:\['class','aria-pressed','data-tab'\]/);
 });
+
+
+test('six-slot phone toolbar retains the fixed layer button and a separate scrollable five-slot rail',()=>{const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');assert.ok(css.includes('grid-template-columns:minmax(0,1fr) var(--djNext-tool-size)'));assert.ok(css.includes('height:54px!important;max-height:54px!important'));assert.ok(css.includes('touch-action:pan-x'));assert.ok(css.includes('mask-image:linear-gradient'));assert.ok(src.includes('selected.length<2?selected.length+1:selected.length'));assert.ok(src.includes('toolScroll.append(b)'));assert.ok(src.includes('rail.append(layers)'));});
