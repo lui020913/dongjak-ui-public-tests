@@ -1,0 +1,74 @@
+name: Live QA visual audit
+on:
+  pull_request:
+    paths:
+      - 'scripts/live-qa*'
+      - 'tests/live-qa-fixture.mjs'
+      - '.github/workflows/live-qa.yml'
+      - 'playwright.v911-remote.config.mjs'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Exact anonymous Pages candidate URL'
+        required: true
+        type: string
+      full:
+        description: 'All phone sizes and supported WebKit journeys'
+        type: boolean
+        default: false
+      vision:
+        description: 'Send selected anonymous anomaly images to Gemini'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: |
+          node --check scripts/live-qa.mjs
+          node --check scripts/live-qa-analyze.mjs
+          node --check tests/live-qa-fixture.mjs
+          node --check playwright.v911-remote.config.mjs
+          node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
+          node --check /tmp/live-qa-dashboard.js
+  capture:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    needs: check
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Capture real anonymous journeys (no account or secrets)
+        env:
+          DONGJAK_TARGET_URL: ${{ inputs.target }}
+          FULL: ${{ inputs.full }}
+        run: |
+          if [ "$FULL" = true ]; then node scripts/live-qa.mjs --ci --full; else node scripts/live-qa.mjs --ci; fi
+      - name: Analyze captured measurements
+        if: always()
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - name: Optional Gemini anomaly review
+        if: always() && inputs.vision
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/live-qa-analyze.mjs qa-artifacts --vision
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: anonymous-visual-audit-${{ github.run_id }}
+          path: qa-artifacts/
+          retention-days: 7
