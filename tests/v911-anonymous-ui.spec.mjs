@@ -496,6 +496,8 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  const weather=page.locator('#dj854-weather-sheet');
  await expect(weather).toBeVisible();await expect(page.locator('#dj833-weather-sheet')).toBeHidden();
  await expect(weather.locator('[data-weather-location]')).toBeVisible();
+ await expect(page.locator('#dj840-map-tip')).toBeHidden();
+ await expect(weather.locator('.dj-weather-edge-drag')).toBeVisible();
  await weather.getByRole('button',{name:'날씨창 닫기'}).click();await expect(weather).toBeHidden();
  await expect(page.locator('.map-actions > #toggle-road-width')).toBeHidden();
  await tap(page,tab(page,'mine'));
