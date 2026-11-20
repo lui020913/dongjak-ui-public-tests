@@ -100,6 +100,15 @@
     box-sizing: border-box !important;
   }
 
+  /* Installed iOS PWA: the header scrim must cover both the search shell
+     and the quick-action rail, including the release-only request layer. */
+  html.dj-ios-home-pwa body #app#app#app#app#app > .topbar {
+    z-index: 3101 !important;
+  }
+  html.dj-ios-home-pwa body #app#app#app#app#app#app#app#app #djNext-toolbar {
+    z-index: 3105 !important;
+  }
+
   html body #app#app#app#app#app > .topbar > #map-quick-search {
     position: relative !important;
     inset: auto !important;
