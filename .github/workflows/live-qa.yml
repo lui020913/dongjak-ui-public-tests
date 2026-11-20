@@ -48,6 +48,7 @@ jobs:
           node --check scripts/live-qa-reporter.mjs
           node --check scripts/live-qa-relay.mjs
           node --check scripts/live-qa-stream.mjs
+          node --check scripts/live-qa-retry-stage.mjs
           node --check qa-relay/live-stream.mjs
           node --input-type=module -e "import {liveDashboard} from './qa-relay/live-stream.mjs'; import fs from 'node:fs'; fs.writeFileSync('/tmp/qa-wall.js',liveDashboard.split('<script>')[1].split('</script>')[0]);"
           node --check /tmp/qa-wall.js
@@ -113,6 +114,43 @@ jobs:
         if: always()
         with:
           name: real-app-live-qa-smoke
+          path: qa-artifacts/
+          retention-days: 3
+  journey-smoke:
+    name: Continuous journey ${{ matrix.lane }}
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: check
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        lane: [1, 2, 3, 4, 5, 6]
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Exercise one continuous journey against public anonymous app
+        env:
+          DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+          QA_LANE: ${{ matrix.lane }}
+          QA_SHARD_TOTAL: '6'
+        run: node scripts/live-qa.mjs --ci --journey
+      - name: Verify all stages were captured in a single scene
+        run: |
+          node --input-type=module -e "import fs from 'node:fs';const root='qa-artifacts/'+fs.readdirSync('qa-artifacts').find(n=>fs.existsSync('qa-artifacts/'+n+'/result.json'));const dirs=fs.readdirSync(root).filter(n=>/^[a-f0-9-]{36}$/.test(n));if(dirs.length!==1)throw Error('Expected exactly one browser scene');const p=root+'/'+dirs[0];const s=JSON.parse(fs.readFileSync(p+'/stage.json'));const m=JSON.parse(fs.readFileSync(p+'/meta.json'));if(s.status!=='passed'||s.index!==s.total||m.status!=='passed'||m.frames<3)throw Error('Incomplete journey');console.log('Captured one continuous scene with '+s.total+' stages');"
+      - name: Collect measurement report
+        if: always()
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-journey-${{ matrix.lane }}
           path: qa-artifacts/
           retention-days: 3
   capture:
