@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.25",
+  "application_version": "9.2.26",
   "public_work_branch": "main",
-  "purpose": "Lower only the subway front windshield; preserve side-view body and previous dimmed status edge changes",
-  "attempt": 99,
+  "purpose": "Redraw front cab glazing as a rounded trapezoid, not a shifted crescent",
+  "attempt": 100,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User requested a lower front window",
+  "last_retry_reason": "User requested shape change based on original side-view reference",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

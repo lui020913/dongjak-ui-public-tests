@@ -55,12 +55,16 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
     rounded(x,16.8,w,2.85,.55);ctx.fillStyle='#28343c';ctx.fill();
     ctx.fillStyle='#65747e';ctx.fillRect(x+.45,17.1,w-.9,.35);
   }
-  // Wide dark windshield follows the rounded front face; its visible plane
-  // is transverse to the train, not a narrow vertical slit in the roof.
-  // Lower only the cab glazing so it sits on the front face, not the roof.
-  ctx.beginPath();ctx.moveTo(24.4,12.0);ctx.bezierCurveTo(27.4,12.0,29.5,14.4,29.2,17.2);
-  ctx.quadraticCurveTo(27.8,19.0,25.7,18.9);ctx.quadraticCurveTo(26.1,15.4,24.4,12.0);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
-  ctx.beginPath();ctx.moveTo(25.6,12.6);ctx.quadraticCurveTo(27.5,13.2,28.0,14.9);ctx.strokeStyle='#65747e';ctx.lineWidth=.45;ctx.stroke();
+  // Rounded trapezoid on the cab's transverse front plane, as in the reference.
+  // The straight sloped rear edge and two rounded outer corners replace the crescent.
+  ctx.beginPath();ctx.moveTo(25.2,11.7);ctx.quadraticCurveTo(25.6,11.45,26.3,11.9);
+  ctx.lineTo(27.9,12.6);ctx.quadraticCurveTo(29.0,13.15,29.0,14.6);
+  ctx.lineTo(28.85,16.9);ctx.quadraticCurveTo(28.75,17.9,27.7,18.5);
+  ctx.lineTo(26.3,19.05);ctx.quadraticCurveTo(25.6,19.2,25.45,18.45);
+  ctx.lineTo(24.9,12.6);ctx.quadraticCurveTo(24.8,11.95,25.2,11.7);
+  ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
+  ctx.beginPath();ctx.moveTo(26.2,12.35);ctx.lineTo(27.65,13.0);
+  ctx.quadraticCurveTo(28.3,13.4,28.35,14.35);ctx.strokeStyle='#65747e';ctx.lineWidth=.42;ctx.stroke();
   rounded(26.5,19.1,1.75,.85,.35);ctx.fillStyle='#ffffff';ctx.fill();
   ctx.restore();
   contour();ctx.strokeStyle='#aebac2';ctx.lineWidth=.38;ctx.stroke();

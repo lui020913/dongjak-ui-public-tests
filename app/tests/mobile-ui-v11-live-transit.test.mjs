@@ -95,4 +95,14 @@ test('train artwork uses white roof and route belt without any number or text dr
 
 test('side-view sprite has one passenger-side window row and a broad cab face',async()=>{const {trainIconImage}=await import('../src/features/liveTransit/index.js');const windows=[];let path=[];const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...args){path.push(args)},fill(){if(this.fillStyle==='#28343c')windows.push(path[0])}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});assert.equal(windows.length,4);assert.ok(windows.every(x=>x[1]===16.8));});
 
-test('front cab windshield is lowered onto the front face while keeping the passenger window row',async()=>{const {trainIconImage}=await import('../src/features/liveTransit/index.js');let path=[],cab=null;const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...a){path.push(a)},fill(){if(this.fillStyle==='#202b33')cab=path[0]}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});assert.deepEqual(cab,[24.4,12.0]);});
+test('front windshield has a convex rounded trapezoid with straight edges while preserving the passenger window row',async()=>{
+ const {trainIconImage}=await import('../src/features/liveTransit/index.js');
+ let path=[],cab=[],windows=[];
+ const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}},beginPath(){path=[]},moveTo(...a){path.push(['M',...a])},lineTo(...a){path.push(['L',...a])},quadraticCurveTo(...a){path.push(['Q',...a])},fill(){if(this.fillStyle==='#202b33')cab=path.slice();if(this.fillStyle==='#28343c')windows.push(path[0])}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});
+ trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});
+ assert.deepEqual(cab[0],['M',25.2,11.7]);
+ assert.ok(cab.filter(x=>x[0]==='L').length>=4);
+ assert.ok(cab.some(x=>x[0]==='L'&&x[1]===24.9&&x[2]===12.6));
+ assert.ok(cab.some(x=>x[0]==='L'&&x[1]===26.3&&x[2]===19.05));
+ assert.equal(windows.length,4);assert.ok(windows.every(x=>x[2]===16.8));
+});
