@@ -35,7 +35,17 @@ export function installMobileBrowserLayout(doc,win){
       root.style.removeProperty('--dj-browser-vvh');
       root.style.removeProperty('--dj-browser-keyboard-lift');
       delete root.dataset.djBrowserKeyboard;
+      doc.getElementById?.('app')?.style.removeProperty('--dj829-tools-top');
       return;
+    }
+    // Safari's visible address bar changes the actual header bottom.
+    // Position the shortcut rail after the current search and AI controls,
+    // rather than relying on a fixed offset derived for standalone PWA.
+    const app=doc.getElementById?.('app');
+    const topbar=app?.querySelector?.('.topbar');
+    const headerRect=topbar?.getBoundingClientRect?.();
+    if(headerRect?.height>30&&headerRect.bottom>30){
+      app.style.setProperty('--dj829-tools-top',Math.ceil(headerRect.bottom+8)+'px');
     }
     const vv=win.visualViewport;
     const height=Number(vv?.height??win.innerHeight);
@@ -71,12 +81,17 @@ export function installMobileBrowserLayout(doc,win){
   ];
   for(const [target,event,fn] of listeners)target?.addEventListener?.(event,fn,{passive:true});
   for(const q of queries)q.addEventListener?.('change',schedule);
+  const topbar=doc.querySelector?.('#app .topbar');
+  const observer=topbar&&typeof win.ResizeObserver==='function'?new win.ResizeObserver(schedule):null;
+  observer?.observe(topbar);
   update();
   return ()=>{
     disposed=true;
     if(frame)win.cancelAnimationFrame?.(frame);
     for(const [target,event,fn] of listeners)target?.removeEventListener?.(event,fn);
     for(const q of queries)q.removeEventListener?.('change',schedule);
+    observer?.disconnect();
+    doc.getElementById?.('app')?.style.removeProperty('--dj829-tools-top');
     delete root.dataset.djRunMode;
     delete root.dataset.djBrowserKeyboard;
     delete root.dataset.djBrowserLayoutInstalled;
