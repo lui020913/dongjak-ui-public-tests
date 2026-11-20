@@ -772,7 +772,8 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  // Verify native dialog top-layer separately without a network request or login.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
- const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);expect(native).toContain('linear-gradient');
+ const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);expect(native).toBe('none');
+ await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)'); // A single opaque native status surface, without a second gradient.
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
  await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#192d32');
