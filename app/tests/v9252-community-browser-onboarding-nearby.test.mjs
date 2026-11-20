@@ -42,3 +42,12 @@ test('community categories become the first item below the sheet title',()=>{
  assert.match(css,/\.dj836-sheet-body>\.community-category-tabs/);
  assert.match(css,/dj-ped-expanded/);
 });
+
+test('moving subway train and its headlight beams are hidden at wide map zoom',()=>{
+ const control=read('src/features/liveTransit/integrate.js');
+ const layers=read('src/features/liveTransit/index.js');
+ assert.match(control,/minZoom:13\\.2,metroMinZoom:16\\.4,intervalMs:60000/);
+ assert.match(layers,/LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom/);
+ assert.match(layers,/TRAIN_BEAM_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom/);
+ assert.match(layers,/LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom/);
+});
