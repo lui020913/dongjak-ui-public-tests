@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.45",
+  "application_version": "9.2.46",
   "public_work_branch": "main",
-  "purpose": "Restore expanded mobile page header hit testing; preserve existing community release and improve failed-run log discovery",
-  "attempt": 136,
+  "purpose": "Preserve real PRI lighting data and community integration; isolate expanded mobile header from map chrome and improve automatic repair logs",
+  "attempt": 137,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "All three phone sizes failed the second expanded My Info header drag; repair candidate with precise hit-test diagnostics; no QA assertions removed.",
+  "last_retry_reason": "Repeatable expanded header collapse failure on all phones, with original gestures and diagnostics preserved.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
