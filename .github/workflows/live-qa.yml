@@ -64,6 +64,32 @@ jobs:
           name: live-qa-smoke-evidence
           path: /tmp/live-qa-smoke/
           retention-days: 3
+  app-smoke:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: smoke
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Capture one actual mobile journey on approved anonymous Preview
+        env:
+          DONGJAK_TARGET_URL: https://9d136975.dongjak-walk-safety-preview.pages.dev/
+        run: node scripts/live-qa.mjs --ci --smoke-target
+      - name: Summarize real capture
+        if: always()
+        run: node scripts/live-qa-analyze.mjs qa-artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-app-live-qa-smoke
+          path: qa-artifacts/
+          retention-days: 3
   capture:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
     needs: check
