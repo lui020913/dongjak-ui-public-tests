@@ -49,7 +49,7 @@ jobs:
           node --check scripts/run-mobile-regressions.mjs
           node --check playwright.v911-remote.config.mjs
           node --check tests/v911-anonymous-ui.spec.mjs
-          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs
+          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-vision-retry.test.mjs
           node --check scripts/live-qa-analyze.mjs
       - name: Test and build exact public app source
         id: build
