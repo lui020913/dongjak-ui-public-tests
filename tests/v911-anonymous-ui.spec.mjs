@@ -933,7 +933,10 @@ test('the rendered history keeps the real production SemVer instead of catalog r
  const latest=page.locator('#history-version-timeline .v707-release').first();
  await expect(latest).toHaveAttribute('data-version',version);
  await expect(latest).toHaveAttribute('data-display-version','v'+version);
- expect((await latest.locator('h4').textContent()).trim()).toBe('v'+version);
+ const edition=latest.locator('xpath=ancestor::details[contains(@class,"dj-edition-minor")]');
+ await expect(edition.locator(':scope > summary strong')).toHaveText('v'+version.split('.').slice(0,2).join('.'));
+ await expect(latest.locator('h4')).toHaveText('최신 업데이트');
+ await expect(latest.locator('.dj-edition-original')).toContainText('현재 빌드: v'+version);
 });
 
 
