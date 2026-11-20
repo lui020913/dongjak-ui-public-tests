@@ -981,9 +981,13 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2-135,{steps:10});
  await page.mouse.up();
  await expect(panel).toHaveClass(/dj871-sheet-expanded/,{timeout:7000});
+ // The expanded class is set before its FLIP motion settles. Assert the final
+ // geometry after transition—not a transient translated interpolation frame.
+ await expect.poll(async()=>{
+   const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
+   return expanded&&searchBox?expanded.y-(searchBox.y+searchBox.height):Number.NEGATIVE_INFINITY;
+ },{timeout:3500,intervals:[90,120,180]}).toBeGreaterThanOrEqual(-3);
  await expect(search).toBeVisible();
- const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
- expect(expanded.y).toBeGreaterThanOrEqual(searchBox.y+searchBox.height-3);
 });
 
 test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async({page})=>{
@@ -994,13 +998,19 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
  await page.evaluate(()=>{
    const samples=[];window.__dj9253OnboardFade=samples;
-   const start=performance.now();
-   const tick=()=>{
-     const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
-     if(pane)samples.push(Number(getComputedStyle(pane).opacity));
-     if(performance.now()-start<650)requestAnimationFrame(tick);
-   };
-   requestAnimationFrame(tick);
+   // A polling timer plus the transition-state observer captures the actual
+   // alpha even when headless WebKit/Chromium throttles requestAnimationFrame.
+   const tour=document.getElementById('dj860-onboarding');
+   const pane=tour.querySelector('.dj860-visual-pane');
+   const record=()=>samples.push(Number(getComputedStyle(pane).opacity));
+   record();
+   const timer=setInterval(record,15);
+   const observer=new MutationObserver(()=>{
+     record();
+     if(tour.classList.contains('dj860-swapping'))setTimeout(record,75);
+   });
+   observer.observe(tour,{attributes:true,attributeFilter:['class']});
+   setTimeout(()=>{clearInterval(timer);observer.disconnect();record();},700);
  });
  await tour.locator('[data-dj860-action="next"]').click();
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
