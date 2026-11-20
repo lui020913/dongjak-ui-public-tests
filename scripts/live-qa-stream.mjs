@@ -20,7 +20,7 @@ export function startLiveStream({root,scenes,result,lane}){
   try{
    const now=performance.now();
    if(now-lastMeta>=500){sendMeta();lastMeta=now;}
-   if(!watching||!scene||ws.bufferedAmount>500000||now-lastSend<1000/60)return;
+   if(!watching||!scene||ws.bufferedAmount>500000||now-lastSend<15.8)return;
    const p=join(root,scene.id,'latest.jpg');
    let st;try{st=statSync(p);}catch{return;}
    const id=p+':'+st.mtimeMs+':'+st.size;
@@ -32,7 +32,7 @@ export function startLiveStream({root,scenes,result,lane}){
  function connect(){
   if(done)return;
   const socket=new WebSocket(url,['qa-v2.writer',key]);ws=socket;
-  socket.addEventListener('open',()=>{if(ws!==socket)return;lastMeta=0;lastFrame='';console.log('Live QA lane '+lane+' connected');sendMeta();});
+  socket.addEventListener('open',()=>{if(ws!==socket)return;lastMeta=0;lastFrame='';console.log('Live QA lane '+lane+' connected');try{sendMeta();}catch{}});
   socket.addEventListener('message',e=>{if(ws!==socket||typeof e.data!=='string')return;try{const d=JSON.parse(e.data);if(d.type==='control')control(d.watching===true,d.paused);}catch{}});
   socket.addEventListener('error',()=>{if(++failures===1||failures%10===0)console.error('Live QA lane '+lane+' connection unavailable; reconnecting');});
   socket.addEventListener('close',()=>{if(ws!==socket)return;control(false,false);if(!done)reconnect=setTimeout(connect,1500);});
