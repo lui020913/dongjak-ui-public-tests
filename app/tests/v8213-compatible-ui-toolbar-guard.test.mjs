@@ -32,8 +32,9 @@ test('mobile sheets have one shared header and admin sheet hides the map action 
   assert.match(css,/\[data-dj-active-sheet="admin-dong-picker"\] \.map-actions/);
   assert.match(core,/MOBILE_FLOATING_SHEETS/);
   // A persistent panel delegates to the full header even after header DOM replacement.
-  assert.match(core,/inputSurface=id==='ped-tools-panel'\?handleNodes\[0\]:panel/);
-   assert.match(core,/bindHeaderDragInput\(inputSurface,win,\{down,move,up,cancel\}\)/);
+  assert.match(core,/id==='ped-tools-panel'/);
+   assert.match(core,/bindHeaderDragInput\(handleNodes\[0\],win,\{down,move,up,cancel\}\)/);
+   assert.match(core,/bindHeaderDragInput\(panel,win,\{down,move,up,cancel\}\)/);
   assert.match(core,/event\.target\.closest\?\.\(INTERACTIVE\)/);
   assert.match(core,/const surface=event\.target\.closest\?\.\(headerSelector\?/);
   assert.match(core,/if\(!surface\|\|!panel\.contains\(surface\)\)return;/);
