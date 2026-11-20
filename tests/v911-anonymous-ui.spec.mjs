@@ -786,7 +786,7 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
 });
 
 
-test('live subway source artwork decodes and markers render at initial phone map zoom',{tag:'@phone-common'},async({page})=>{
+test('live subway source artwork decodes, hides trains at far zoom and renders them close',{tag:'@phone-common'},async({page})=>{
   await page.addInitScript(()=>{
     localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
     localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
@@ -802,6 +802,19 @@ test('live subway source artwork decodes and markers render at initial phone map
   const map=page.locator('#map');
   await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
   await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
+  // Vehicle feed continues updating when zoomed out, but its symbols and
+  // beams are intentionally hidden until zoom 16.4. Verify both directions.
+  const initially=await map.getAttribute('data-dj-live-train-diagnostics');
+  const initialData=JSON.parse(initially||'{}');
+  expect(initialData.zoom).toBeLessThan(16.4);
+  expect(Number(await map.getAttribute('data-dj-live-train-rendered')||0)).toBe(0);
+  const box=await map.boundingBox();
+  await page.mouse.move(box.x+box.width*.5,box.y+box.height*.58);
+  for(let i=0;i<12;i++)await page.mouse.wheel(0,-330);
+  await expect.poll(async()=>{
+    const d=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics')||'{}');
+    return Number(d.zoom||0);
+  },{timeout:30000}).toBeGreaterThanOrEqual(16.4);
   try{await expect.poll(async()=>Number(await map.getAttribute('data-dj-live-train-rendered')||0),{timeout:90000}).toBeGreaterThan(0);}catch(error){console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'),await page.locator('#dj-live-vehicle-status').textContent());throw error;}
   console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'));
   await test.info().attach('live-train-artwork-visible',{body:await page.screenshot(),contentType:'image/png'});
@@ -982,8 +995,15 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  await page.mouse.up();
  await expect(panel).toHaveClass(/dj871-sheet-expanded/,{timeout:7000});
  await expect(search).toBeVisible();
- const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
- expect(expanded.y).toBeGreaterThanOrEqual(searchBox.y+searchBox.height-3);
+ // The expanded CSS class is applied at the START of the FLIP transition.
+ // Measure the actual landed position after the sheet has settled, not the
+ // transient translate/clip-path midpoint under the finger.
+ await expect.poll(async()=>{
+   const bounds=await Promise.all([panel.boundingBox(),search.boundingBox()]);
+   const [expanded,searchBox]=bounds;
+   return expanded&&searchBox?expanded.y-searchBox.y-searchBox.height:-1000;
+ },{timeout:9000}).toBeGreaterThanOrEqual(-3);
+ await expect(panel).not.toHaveClass(/dj889-sheet-transitioning/);
 });
 
 test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async({page})=>{
@@ -992,21 +1012,30 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
- await page.evaluate(()=>{
-   const samples=[];window.__dj9253OnboardFade=samples;
-   const start=performance.now();
-   const tick=()=>{
-     const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
-     if(pane)samples.push(Number(getComputedStyle(pane).opacity));
-     if(performance.now()-start<650)requestAnimationFrame(tick);
-   };
-   requestAnimationFrame(tick);
+ // Start sampling and invoke the verified button atomically in the same
+ // browser task. Playwright's actionability wait can otherwise finish the
+ // entire 650ms sampling window before dispatching its click.
+ const fade=await page.evaluate(async()=>{
+   const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
+   const next=document.querySelector('#dj860-onboarding [data-dj860-action="next"]');
+   const samples=[],classes=[];
+   const done=new Promise(resolve=>{
+     const start=performance.now();
+     function tick(){
+       samples.push(Number(getComputedStyle(pane).opacity));
+       classes.push(document.getElementById('dj860-onboarding').classList.contains('dj860-swapping'));
+       if(performance.now()-start<750)requestAnimationFrame(tick);else resolve();
+     }
+     requestAnimationFrame(tick);
+   });
+   next.click();
+   await done;
+   return {samples,classes};
  });
- await tour.locator('[data-dj860-action="next"]').click();
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
- await page.waitForTimeout(350);
- const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
- expect(samples.some(x=>x<.75)).toBe(true);
+ expect(fade.classes.some(Boolean)).toBe(true);
+ expect(fade.samples.some(x=>x<.75)).toBe(true);
+ expect(fade.samples.some(x=>x>.95)).toBe(true);
  await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 });
