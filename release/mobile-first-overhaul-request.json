@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.27",
+  "application_version": "9.2.28",
   "public_work_branch": "main",
-  "purpose": "Rebuild reference-inspired carriage nose and side perspective with compact windshield",
-  "attempt": 101,
+  "purpose": "Official Seoul bus route path selection and five-track mobile navigation dock",
+  "attempt": 102,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User approved rebuilding front silhouette and emphasizing side windows",
+  "last_retry_reason": "PR #79 full CI and all three phone viewports passed; user requested continuing deployment",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
