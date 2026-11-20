@@ -18,4 +18,6 @@ jobs:
         with:
           node-version: '24'
       - name: Inspect real Production metro feed and map geometry
+        env:
+          METRO_DEEP_DIAGNOSTIC: '1'
         run: node scripts/check-live-metro.mjs https://dongjak-walk-safety-preview.pages.dev
