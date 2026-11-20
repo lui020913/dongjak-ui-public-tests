@@ -541,7 +541,7 @@ test('phone report composer has non-overlapping independent header and input scr
 });
 
 
-test('phone windows share the opaque gradual slide on open and close',{tag:'@phone-common'},async({page})=>{
+test('phone windows combine gradual slide with stable-color fade on open and close',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  async function audit(selector,parentSelector,trigger,close,tabEntrance=false){
    const target=page.locator(selector);const parent=page.locator(parentSelector);
@@ -562,7 +562,16 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
      if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
-     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
+     // The visual surface fades, but the slide geometry and the fixed parent
+     // layer stay owned by the existing window coordinator.
+     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.cssAnimation==='none'&&
+       f.opacity>=0&&f.opacity<=1&&(
+         selector===parentSelector?Math.abs(f.backOpacity-f.opacity)<.02:f.backOpacity===1
+       ))).toBe(true);
+     expect(motion.some(f=>f.opacity>.1&&f.opacity<.99)).toBe(true);
+     expect(phase==='opening'
+       ?motion[0].opacity<motion.at(-1).opacity
+       :motion[0].opacity>motion.at(-1).opacity).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
      if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
