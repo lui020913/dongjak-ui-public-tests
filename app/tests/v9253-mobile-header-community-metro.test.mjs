@@ -48,12 +48,17 @@ test('onboarding crossfades on slide navigation and cancels stale transitions',(
  assert.match(js,/classList\.remove\('dj860-swapping'\)/);
  assert.match(js,/swapEpoch\+\+/);
  assert.match(css,/\.dj860-onboarding\.dj860-swapping/);
+ assert.match(js,/node\.style\.setProperty\('opacity','0','important'\)/);
+ assert.match(js,/node\.style\.setProperty\('opacity','1','important'\)/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
 
 test('nearby sheet shares drag owner, expands and keeps search header visible',()=>{
  const controller=read('src/dj-v8212-sheet-controller.js');
  assert.match(controller,/\['ped-tools-panel','\.ped-tools-panel-head','#ped-tools-close'\]/);
+ const nearby=read('src/pedestrian-tools.js');
+ assert.match(nearby,/bindHeaderDragInput\(nearbyHeader,window/);
+ assert.match(nearby,/setMobileSheetExpanded\(panel,true,document,window\)/);
  assert.match(mobileCss,/#ped-tools-panel\.dj871-sheet-expanded:not\(\[hidden\]\)/);
  assert.match(mobileCss,/#ped-tools-panel\[data-nearby-mode="empty"\]:not\(\.dj871-sheet-expanded\)/);
  assert.match(mobileCss,/:has\(#ped-tools-panel:not\(\[hidden\]\)\) > \.topbar/);
