@@ -284,7 +284,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       if(epoch!==swapEpoch||!opened)return;
       overlay.classList.remove('dj860-swapping');
       render(target,direction);
-    },125);
+    },190);
   }
   function move(delta){
     if(!opened)return;
