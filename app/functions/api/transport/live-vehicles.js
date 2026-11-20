@@ -4,6 +4,7 @@
  */
 import {normalizeBusServiceKey} from '../../../src/bus-service-key.js';
 const METRO_LINES=['1호선','2호선','4호선','7호선','9호선'];
+const METRO_LINE_IDS={'1001':'1호선','1002':'2호선','1004':'4호선','1007':'7호선','1009':'9호선'};
 const DEFAULT_STATIONS=['20011','20151','20160','20125'];
 let discoveredRoutesCache={until:0,keyTag:'',routes:[]}; // Official Seoul stop ARS IDs within Dongjak
 const asCsv=v=>String(v??'').split(',').map(x=>x.trim()).filter(Boolean);
@@ -24,7 +25,7 @@ export function parseMetroResponse(json,line,now=new Date()){
     id:`metro:${r.subwayId||r.subwayNm||line}:${r.trainNo}:${r.updnLine??''}`,
     trainNo:String(r.trainNo),line:String(r.subwayNm||line),station:String(r.statnNm),
     destination:String(r.statnTnm??''),direction:String(r.updnLine??''),status:String(r.trainSttus??''),
-    observedAt:normalizeKST(r.recptnDt || (String(r.lastRecptnDt||'').length>=14?r.lastRecptnDt:''),now)
+    observedAt:normalizeKST(r.recptnDt || (String(r.lastRecptnDt||'').length>=14?r.lastRecptnDt:''),now),positionSource:'position'
   })).filter(x=>x.observedAt);
 }
 function xmlTag(block,tag){return block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'))?.[1]?.trim()||'';}
@@ -48,18 +49,42 @@ async function load(url,format='json'){
   try{return JSON.parse(text);}catch{throw new Error('PROVIDER_INVALID_JSON');}
 }
 function validProviderJson(json){
-  const result=json?.RESULT||json?.result;
-  const code=String(result?.CODE||result?.code||'');
+  const result=json?.errorMessage||json?.RESULT||json?.result;
+  const code=String(result?.CODE||result?.code||'').trim();
   if(code&&!['INFO-000','INFO-200'].includes(code))throw new Error('PROVIDER_'+code.replace(/[^A-Z0-9-]/g,''));
 }
 async function metroLine(key,line){
   const url=`http://swopenapi.seoul.go.kr/api/subway/${encodeURIComponent(key)}/json/realtimePosition/0/250/${encodeURIComponent(line)}`;
   const json=await load(url);validProviderJson(json);
   if(!Array.isArray(json.realtimePositionList)){
-    if(json?.RESULT?.CODE==='INFO-200')return [];
+    if(String(json?.errorMessage?.code??json?.RESULT?.CODE)==='INFO-200')return [];
     throw new Error('METRO_FEED_UNAVAILABLE');
   }
   return parseMetroResponse(json,line);
+}
+// Real arrival observations are a fallback only when the positions service is unavailable.
+// 0/1/2 identify an actual observed station event. Never infer a train from ETA-only rows.
+export function parseMetroArrivalPositions(json,lines=METRO_LINES,now=new Date()){
+ const rows=Array.isArray(json?.realtimeArrivalList)?json.realtimeArrivalList:[],byTrain=new Map();
+ for(const r of rows){
+   const line=METRO_LINE_IDS[String(r.subwayId)],status=String(r.arvlCd??''),station=String(r.statnNm??'').trim(),trainNo=String(r.btrainNo??'').trim();
+   if(!lines.includes(line)||!['0','1','2'].includes(status)||!station||!trainNo)continue;
+   const observedAt=normalizeKST(r.recptnDt,now),age=now.getTime()-Date.parse(observedAt);
+   if(!Number.isFinite(age)||age< -10000||age>180000)continue;
+   const direction=/상행|내선/.test(r.updnLine||'')?'0':/하행|외선/.test(r.updnLine||'')?'1':'';
+   const candidate={id:'metro:arrival:'+line+':'+trainNo+':'+direction,line,station,trainNo,destination:String(r.bstatnNm??''),direction,status,observedAt,positionSource:'arrival'};
+   const previous=byTrain.get(candidate.id);
+   if(!previous||Date.parse(observedAt)>Date.parse(previous.observedAt))byTrain.set(candidate.id,candidate);
+ }
+ return [...byTrain.values()];
+}
+async function arrivalPositionFallback(key,lines){
+ const url='http://swopenapi.seoul.go.kr/api/subway/'+encodeURIComponent(key)+'/json/realtimeStationArrival/ALL';
+ const json=await load(url);validProviderJson(json);return parseMetroArrivalPositions(json,lines);
+}
+function safeMetroError(err){
+ const m=String(err?.message??'');
+ return /^(?:PROVIDER_(?:HTTP_[0-9]{3}|INFO-[0-9]{3}|ERROR-[0-9]{3}|INVALID_JSON|RESPONSE_TOO_LARGE)|METRO_FEED_UNAVAILABLE)$/.test(m)?m:'FEED_UNAVAILABLE';
 }
 async function busRouteAtStop(key,arsId){
   const url=`http://ws.bus.go.kr/api/rest/stationinfo/getRouteByStation?ServiceKey=${encodeURIComponent(key)}&arsId=${arsId}&resultType=json`;
@@ -95,7 +120,8 @@ async function busRoute(key,route){
 export async function onRequestGet({request,env={}}){
   const headers={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'public, max-age=0, s-maxage=20'};
   const result=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{...headers,...(status>=400?{'Cache-Control':'no-store'}:{})}});
-  const metroKey=pick(env,'SEOUL_SUBWAY_API_KEY','SEOUL_METRO_API_KEY');
+  const arrivalKey=pick(env,'SEOUL_SUBWAY_API_KEY','SEOUL_METRO_API_KEY');
+  const metroKey=pick(env,'SEOUL_SUBWAY_POSITION_API_KEY')||arrivalKey;
   const busKey=normalizeBusServiceKey(pick(env,'SEOUL_BUS_SERVICE_KEY','SEOUL_BUS_API_KEY','BUS_API_KEY'));
   if(!metroKey&&!busKey)return result({ok:false,code:'MISSING_KEYS',error:'교통 위치 API 키가 설정되지 않았습니다.',metro:[],bus:[]},503);
   const store=typeof caches!=='undefined'?caches.default:null;
@@ -110,8 +136,8 @@ export async function onRequestGet({request,env={}}){
   const lines=METRO_LINES.filter(line=>requestedLines.includes(line));
   const manual=asCsv(env?.LIVE_TRANSIT_BUS_ROUTE_IDS).filter(id=>/^\d{6,12}$/.test(id)).slice(0,8);
   const stopIds=asCsv(env?.LIVE_TRANSIT_BUS_STATION_IDS||DEFAULT_STATIONS.join(',')).filter(id=>/^\d{5}$/.test(id)).slice(0,4);
-  const warningCodes=[],metro=[],bus=[];
-  const metroTasks=wantMetro&&metroKey?lines.map(async line=>({mode:'metro',list:await metroLine(metroKey,line)})):[];
+  const warningCodes=[],metro=[],bus=[],metroDiagnostics={};
+  const metroTasks=wantMetro&&metroKey?lines.map(async line=>{try{const list=await metroLine(metroKey,line);metroDiagnostics[line]={state:'ok',rows:list.length};return {mode:'metro',list};}catch(e){metroDiagnostics[line]={state:'error',code:safeMetroError(e)};throw e;}}):[];
   let busRoutes=manual.map(id=>({id,name:id}));
   if(wantBus&&busKey&&!busRoutes.length){
     const tag=stopIds.join(',');
@@ -129,11 +155,19 @@ export async function onRequestGet({request,env={}}){
   for(const r of results){if(r.status==='fulfilled'){
     fulfilled++;if(r.value.mode==='metro')metro.push(...r.value.list);else bus.push(...r.value.list);
   }else warningCodes.push(r.reason?.message?.startsWith('PROVIDER_')?'PROVIDER_UNAVAILABLE':r.reason?.message==='BUS_POSITION_UNAVAILABLE'?'BUS_POSITION_UNAVAILABLE':'FEED_UNAVAILABLE');}
+  const missingLines=lines.filter(line=>metroDiagnostics[line]?.state==='error');
+  if(wantMetro&&arrivalKey&&missingLines.length){
+    try{
+      const fallback=await arrivalPositionFallback(arrivalKey,missingLines);
+      if(fallback.length){metro.push(...fallback);fulfilled++;warningCodes.push('METRO_ARRIVAL_FALLBACK');}
+      metroDiagnostics.arrivalFallback={state:fallback.length?'ok':'empty',rows:fallback.length};
+    }catch(e){metroDiagnostics.arrivalFallback={state:'error',code:safeMetroError(e)};}
+  }
   const errors=[...new Set(warningCodes)].slice(0,5);
   const data={ok:fulfilled>0,updatedAt:new Date().toISOString(),metro,bus,
-    availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,
-    source:{metro:'서울시 realtimePosition (역 위치 기반 추정)',bus:'서울시 getBusPosByRtid (실측 좌표)'}};
-  if(!data.ok)return result({...data,error:'실시간 위치 API 응답을 확인하지 못했습니다.'},502);
+    availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,metroDiagnostics,
+    source:{metro:'서울시 realtimePosition / 실패 시 realtimeStationArrival 실제 역 상태 (추정)',bus:'서울시 getBusPosByRtid (실측 좌표)'}};
+  if(!data.ok){const codes=Object.values(metroDiagnostics).map(x=>x.code).filter(Boolean);return result({...data,error:codes.length?'서울시 열차 위치정보 조회 실패 · '+[...new Set(codes)].join(', '):'실시간 위치 API 응답을 확인하지 못했습니다.'},502);}
   const response=result(data);
   if(store)try{await store.put(requestKey,response.clone());}catch{}
   return response;

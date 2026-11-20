@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.33",
+  "application_version": "9.2.34",
   "public_work_branch": "main",
-  "purpose": "Restore synchronous live metro markers while original train atlas loads; recover stationary icons after style load and display at default zoom",
-  "attempt": 115,
+  "purpose": "Recover real metro feed with strict official arrival station-event fallback, distinguish upstream errors, verify actual Preview feed before Production",
+  "attempt": 116,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Phone browser decoded atlas but zero rendered symbols; remove data suppression at low zoom, support district overview from zoom 11 and sample actual render events",
+  "last_retry_reason": "Production diagnostic 44691546498 confirmed HTTP 502 and zero trains on all five lines",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

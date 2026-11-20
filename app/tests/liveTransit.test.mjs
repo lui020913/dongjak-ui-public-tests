@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {haversineMeters,linePointAtMeters,projectOnLine,pointBetweenStations} from '../src/features/liveTransit/geometry.js';
 import {busToFeatures,metroToFeatures,payloadToCollection} from '../src/features/liveTransit/normalize.js';
-import {normalizeKST,parseBusResponse,parseMetroResponse,selectBusRoutes,onRequestGet} from '../functions/api/transport/live-vehicles.js';
+import {normalizeKST,parseBusResponse,parseMetroResponse,parseMetroArrivalPositions,selectBusRoutes,onRequestGet} from '../functions/api/transport/live-vehicles.js';
 const NOW=Date.parse('2026-11-13T13:00:00.000Z');
 const line={coordinates:[[126.95,37.51],[126.96,37.51],[126.97,37.52]]};
 const routes={'9호선':{stations:[{name:'A',lngLat:[126.95,37.51]},{name:'B',lngLat:[126.96,37.51]},{name:'C',lngLat:[126.97,37.52]}],geometry:line,segmentTimeSeconds:100}};
@@ -152,3 +152,6 @@ test('API mode bus parses real provider coordinates and does not call metro',asy
 });
 
 test('bus coordinates with absent provider timestamp retain separate receipt provenance',()=>{const now=new Date('2026-11-13T13:00:00Z');const rows=parseBusResponse({msgBody:{item:{vehId:'900',gpsX:'126.95',gpsY:'37.51'}}},'100100001',now);assert.equal(rows.length,1);assert.equal(rows[0].observedAt,'');assert.equal(rows[0].receivedAt,now.toISOString());});
+
+test('real arrival fallback keeps only verified station events and source times',()=>{const now=new Date('2026-11-13T13:00:00Z');const r={subwayId:'1007',statnNm:'상도',btrainNo:'77',updnLine:'상행',arvlCd:'1',recptnDt:'2026-11-13 21:59:30'};const list=parseMetroArrivalPositions({realtimeArrivalList:[r,{...r,btrainNo:'78',arvlCd:'99'},{...r,btrainNo:'79',recptnDt:'2026-11-13 21:50:00'}]},['7호선'],now);assert.equal(list.length,1);assert.equal(list[0].positionSource,'arrival');assert.equal(list[0].station,'상도');assert.equal(list[0].status,'1');});
+test('position failure reports official errorMessage and uses real arrival fallback',async()=>{const original=globalThis.fetch;globalThis.fetch=async url=>new Response(JSON.stringify(String(url).includes('realtimePosition')?{errorMessage:{code:'INFO-100'}}:{realtimeArrivalList:[{subwayId:'1007',statnNm:'상도',btrainNo:'77',updnLine:'상행',arvlCd:'1',recptnDt:new Date().toISOString()}]}));try{const res=await onRequestGet({request:new Request('https://example.org/api/transport/live-vehicles?modes=metro'),env:{SEOUL_SUBWAY_API_KEY:'PRIVATEKEY'}});const data=await res.json();assert.equal(res.status,200);assert.equal(data.metroDiagnostics['7호선'].code,'PROVIDER_INFO-100');assert.equal(data.metro[0].positionSource,'arrival');assert(!JSON.stringify(data).includes('PRIVATEKEY'));}finally{globalThis.fetch=original;}});

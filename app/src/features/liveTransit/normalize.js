@@ -57,6 +57,7 @@ export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000,
     }else pos=stationPoint();
     // No displayed path or disconnected interval: do not synthesize a chord or place the marker off the line.
     if(!validLngLat(pos))continue;
+    if(item.positionSource==='arrival')description='실시간 도착정보의 실제 역 상태 기반 추정 (GPS 아님)';
     // Sample the same connected rail path, oriented in the inferred travel direction.
     // At a stop, prefer the outgoing path; at the last station use the incoming path.
     if(conf.directionKnown&&!travelFrom&&!travelTo){
@@ -73,7 +74,7 @@ export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000,
         headingKnown=true;[headingFromLng,headingFromLat]=a;[headingToLng,headingToLat]=b;
       }
     }
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,positionSource:item.positionSource||'position',color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
   }
   return features;
 }

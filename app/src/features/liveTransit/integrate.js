@@ -63,6 +63,7 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
       // White on dark badge colors; dark on the gold/bright cyan lines.
       badge.style.color=['4호선','9호선','신림선'].includes(data.line)?'#112421':'#fff';
       const number=String(data.vehicleLabel||'').replace(/호$/,'');safeText(heading,number?number+'호 열차':'열차 번호 미제공');
+      safeText(notice,data.positionSource==='arrival'?'실시간 도착정보 기반 추정 · GPS 아님':'역 정보 기반 추정 · GPS 아님');
       safeText(values.destination,destinationLabel(data.destination));safeText(values.station,stationLabel(data.station));
       safeText(values.state,labelStatus[data.status]||'상태 미확인');safeText(values.next,data.nextStation?stationLabel(data.nextStation)+' 방면':'');
       values.next.parentElement.hidden=!data.nextStation||stationLabel(data.nextStation)===stationLabel(data.station);
@@ -104,7 +105,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   const setStatus=value=>safeText(message,value);
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:11,intervalMs:25000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:11,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
@@ -134,7 +135,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
     overlay.setVisible('metro',allowMetro);
     overlay.setVisible('bus',allowBus);
     if(active&&(allowMetro||allowBus))overlay.start();else overlay.stop();
-    if(!state.metro&&!state.bus)setStatus('기본 OFF · 켜면 약 25초마다 공식 API 조회');
+    if(!state.metro&&!state.bus)setStatus('기본 OFF · 켜면 약 60초마다 공식 API 조회');
     else if(!isMap)setStatus('안전지도 탭에서 차량 위치를 조회합니다.');
     else if(!allowMetro&&!allowBus)setStatus('기본 지도·교통 레이어가 숨겨져 있습니다.');
     else if(!overlay.getStatus().lastUpdate)setStatus('실시간 위치정보 조회 중 · 역간 위치는 추정');

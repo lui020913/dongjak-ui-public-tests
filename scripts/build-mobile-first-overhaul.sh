@@ -148,6 +148,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       31) note="서울시 버스 공식 노선 응답 호환 및 실제 경로 API 검증 강화";;
       32) note="사용자 제공 지하철 열차 이미지 기반 호선별 좌우 실시간 마커 교체";;
       33) note="실시간 열차 아이콘 지연 로딩·테마 재설정 시 표시 누락 수정";;
+      34) note="열차 위치 API 오류 진단 및 실제 도착정보 기반 위치 복구";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null
