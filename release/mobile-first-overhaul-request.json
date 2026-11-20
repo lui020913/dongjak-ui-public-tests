@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.30",
   "public_work_branch": "main",
-  "purpose": "Blend iOS installed PWA status strip into active dimmed map, including native AI dialog backdrop",
-  "attempt": 107,
+  "purpose": "Restore phone-only gate in browsers and installed PWAs, including iPad; retain iOS dim gradient and bus paths",
+  "attempt": 108,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Use explicit native dialog backdrop variables for WebKit and verify browser-serialized transparent color",
+  "last_retry_reason": "User clarified iPad PWA must be blocked just like tablet web browsers",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

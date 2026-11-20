@@ -67,7 +67,7 @@ test('Android tablet install gate keeps selected state and the same external-dow
 });
 
 
-test('installed iPad PWA opens the app while ordinary iPad Safari remains restricted',async({browser})=>{
+test('installed iPad PWA and ordinary iPad Safari both remain restricted',async({browser})=>{
   for(const standalone of [false,true]){
     const context=await browser.newContext({viewport:{width:1024,height:1366},hasTouch:true,deviceScaleFactor:2,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15'});
     try{
@@ -79,13 +79,18 @@ test('installed iPad PWA opens the app while ordinary iPad Safari remains restri
       const page=await context.newPage();
       if(standalone){
         await page.goto(target,{waitUntil:'domcontentloaded'});
-        await expect(page.locator('html')).toHaveAttribute('data-dj-mobile-only','allowed');
-        await expect(page.locator('#dj-mobile-only-screen')).toBeHidden();
-        await expect(page.locator('#app')).toBeVisible({timeout:45000});
         await expect(page.locator('#dj-install-menu')).toHaveCount(0);
       }else{
         await openGate(page);
+        await page.locator('#dj-install-menu').getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+      }
+      await expect(page.locator('html')).toHaveAttribute('data-dj-mobile-only','blocked');
+      await expect(page.locator('#dj-mobile-only-screen')).toBeVisible({timeout:45000});
+      await expect(page.locator('#app')).toBeHidden();
+      for(const viewport of [{width:1366,height:1024},{width:390,height:844}]){
+        await page.setViewportSize(viewport);
         await expect(page.locator('html')).toHaveAttribute('data-dj-mobile-only','blocked');
+        await expect(page.locator('#app')).toBeHidden();
       }
     }finally{await context.close();}
   }

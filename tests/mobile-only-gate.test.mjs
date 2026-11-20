@@ -57,16 +57,21 @@ test('build patch adds accessible mobile-only device notice and preserves deskto
 });
 
 
-test('iPad standalone web app is allowed at portrait and landscape sizes; browsers and Mac desktops remain blocked',()=>{
+test('iPad standalone and browser are both blocked at all viewport sizes; phones remain allowed',()=>{
   const desktopUA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15';
   const cases=[
-    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:820,standalone:true},true],
-    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:1366,standalone:true},true],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:820,standalone:true},false],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:1366,standalone:true},false],
     [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:820,standalone:false},false],
     [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:0,width:820,standalone:true},false],
-    [{userAgent:'iPad',platform:'iPad',width:1024,standalone:true},true],
+    [{userAgent:'iPad',platform:'iPad',width:1024,standalone:true},false],
     [{userAgent:'iPad',platform:'iPad',width:1024,standalone:false},false],
     [{userAgent:'Android tablet',width:820,standalone:true},false],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:390,standalone:true},false],
+    [{userAgent:'iPad',platform:'iPad',width:390,standalone:true},false],
+    [{userAgent:'iPhone',platform:'iPhone',width:390,standalone:true},true],
+    [{userAgent:'iPhone',platform:'iPhone',width:390,standalone:false},true],
+    [{userAgent:'Android Mobile',width:430,standalone:true},true],
   ];
   const {indexHtml}=applyMobileOnlyGate({indexHtml:'<html><head><meta name="viewport" content="width=device-width" /></head><body></body></html>',mainJs:'',platformEntry:''});
   const code=indexHtml.split('<script id="dj-mobile-only-gate-bootstrap">')[1].split('</script>')[0];

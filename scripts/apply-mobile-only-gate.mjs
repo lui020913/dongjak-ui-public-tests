@@ -7,8 +7,8 @@ export function isMobilePhoneContext({userAgent='',platform='',userAgentDataMobi
   const androidPhone=/Android/i.test(ua)&&(/Mobile/i.test(ua)||userAgentDataMobile===true);
   const legacyPhone=/Windows Phone|IEMobile|BlackBerry|Opera Mini/i.test(ua);
   const appleTablet=/iPad/i.test(ua)||/iPad/i.test(String(platform))||(String(platform)==='MacIntel'&&Number(maxTouchPoints)>1);
-  // Only installed iPad web apps are exempt from the tablet browser restriction.
-  return Number(width)>0&&((appleTablet&&standalone===true)||((applePhone||androidPhone||legacyPhone)&&!appleTablet&&Number(width)<=1024));
+  // Installed web apps follow exactly the same phone-only device policy as browsers.
+  return !appleTablet&&(applePhone||androidPhone||legacyPhone)&&Number(width)>0&&Number(width)<=1024;
 }
 
 function replaceExactly(source,search,replacement,label) {
@@ -82,5 +82,5 @@ if(root){
   writeFileSync(indexPath,patched.indexHtml);
   writeFileSync(mainPath,patched.mainJs);
   writeFileSync(platformPath,patched.platformEntry);
-  console.log('Applied access gate: phone browsers and installed iPad PWAs allowed; desktop and tablet browsers remain restricted.');
+  console.log('Applied phone-only access gate: PC and tablets remain restricted in both browser and installed PWA modes.');
 }
