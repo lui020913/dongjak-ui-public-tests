@@ -21,7 +21,10 @@ test('v8.7.1: headers drag up to expand, down to collapse or dismiss while keepi
  const js=read('src/dj-v8212-sheet-controller.js');
  assert.match(js,/const INTERACTIVE=/);
  assert.match(js,/event\.target\.closest\?\.\(INTERACTIVE\)/);
- assert.match(js,/delta<-65/);assert.match(js,/delta>55/);
+ assert.match(js,/projected<-65/);assert.match(js,/delta>9&&panel\.classList\.contains\('dj871-sheet-expanded'\)/);
+ assert.match(js,/delta>105\|\|\(delta>45&&projected>105\)/);
+ assert.match(js,/setMobileSheetExpanded\(panel,true,doc,win\)/);
+ assert.match(js,/setMobileSheetExpanded\(panel,false,doc,win\)/);
  assert.match(js,/dj871-sheet-expanded/);
 });
 test('v8.7.1: Nodeulseom has a fallback geographic marker and verified facility popup on click',()=>{
