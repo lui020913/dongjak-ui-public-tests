@@ -272,6 +272,8 @@ jobs:
       - name: Confirm visual candidate unchanged
         if: always() && steps.capture.outcome != 'skipped'
         run: node scripts/live-qa-verify-candidate.mjs
+      - name: Seal exact capture identity
+        run: node scripts/live-qa-verify-capture.mjs qa-artifacts --seal
       - uses: actions/upload-artifact@v4
         if: always()
         with:
