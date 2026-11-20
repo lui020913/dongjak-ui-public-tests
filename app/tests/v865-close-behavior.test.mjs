@@ -39,7 +39,7 @@ test('closing a registered-place detail leaves the map unobstructed',()=>{
 
 test('closing an auxiliary page returns to the map without reopening the overview sheet',()=>{
   const main=read('src/main.js');
-  assert.match(main,/function navigate\(tab,\{suppressOverview=false\}=\{\}\)/);
+  assert.match(main,/function navigate\(tab,\{suppressOverview=false,resumeCommunityDraft=false\}=\{\}\)/);
   assert.match(main,/if\(suppressOverview\)\{\s*overview\.hidden=true;\s*overviewExplicitOpen=false;/);
   assert.match(main,/for\(const button of document\.querySelectorAll\('\[data-close-page\]'\)\)\{[\s\S]*?const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\);if\(panel&&window\.DongjakWindowMotion\)window\.DongjakWindowMotion\.close\(panel,finish\);else finish\(\);/);
   assert.match(main,/news-close-to-map[\s\S]*?navigate\('map',\{suppressOverview:true\}\)/);

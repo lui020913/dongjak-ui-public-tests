@@ -3,9 +3,9 @@
   "application_version": "9.2.36",
   "public_work_branch": "main",
   "purpose": "Collapse repeated desktop/tablet installation selections and enable adjacent bottom-tab swipe with stationary fade-out/fade-in",
-  "attempt": 122,
+  "attempt": 123,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User requested to discard Liquid Glass experiment, retain prior design, toggle installation details, and replace only bottom-tab navigation motion with fade.",
+  "last_retry_reason": "Repair stale close-behavior regression signature for already-added community draft resume option; preserve all close behavior assertions and bottom-tab fade checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
