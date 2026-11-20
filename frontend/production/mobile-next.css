@@ -425,7 +425,60 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-category-tabs{margin-top:4px!important;margin-bottom:6px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-sort{color:var(--djNext-text)!important;}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-report-secondary:not([open]){border-radius:999px!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-list .empty-hint):not(.dj871-sheet-expanded):not(:has(#community-form:not([hidden]))){height:min(52dvh,calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom)))!important;min-height:0!important;max-height:calc(100dvh - var(--dj910-dock-bottom) - var(--dj910-header-bottom))!important}
+/* Community is a real, useful home even when the public feed is empty.
+   Keep the established sheet sizing and scroll owner; do not force a 52dvh
+   blank card or introduce a second full-screen compositor. */
+html body #app #participation-panel #community-list .dj-community-empty-state{
+  display:flex;flex-direction:column;gap:12px;min-width:0;padding:20px 16px 18px;
+  background:var(--djNext-surface,#fff);color:var(--djNext-text,#254238);
+  border:1px solid var(--djNext-border,#dce9e0);border-radius:20px;
+}
+html body #app #participation-panel #community-list .dj-community-empty-icon{
+  display:grid;place-items:center;width:45px;height:45px;border-radius:15px;
+  background:var(--djNext-accent-soft,#e8f5ef);color:var(--djNext-active,#07856e);
+  font-size:29px;line-height:1;
+}
+html body #app #participation-panel #community-list .dj-community-empty-title{
+  font-size:18px;font-weight:750;letter-spacing:-.035em;line-height:1.4;margin:0;
+  word-break:keep-all;color:inherit;
+}
+html body #app #participation-panel #community-list .dj-community-empty-copy{
+  font-size:14px;line-height:1.6;margin:0;color:var(--djNext-muted,#647f72);word-break:keep-all;
+}
+html body #app #participation-panel #community-list .dj-community-empty-actions{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;
+}
+html body #app #participation-panel #community-list :is(.dj-community-empty-primary,.dj-community-empty-secondary){
+  min-height:46px;padding:10px 12px;border-radius:999px;font-size:13px;font-weight:700;
+  cursor:pointer;white-space:normal;word-break:keep-all;box-shadow:0 3px 8px #0c49301a;
+}
+html body #app #participation-panel #community-list .dj-community-empty-primary{
+  color:#fff;background:var(--djNext-active,#07856e);border:1px solid transparent;
+}
+html body #app #participation-panel #community-list .dj-community-empty-secondary{
+  color:var(--djNext-text,#254238);background:transparent;border:1px solid var(--djNext-border,#cbdcd2);
+}
+html body #app #participation-panel #community-list .dj-community-starter-topics{
+  display:grid;gap:7px;border-top:1px solid var(--djNext-border,#dce9e0);padding-top:14px;
+}
+html body #app #participation-panel #community-list .dj-community-topics-heading{
+  margin:0 0 3px;font-size:13px;font-weight:700;color:var(--djNext-muted,#617b6d);
+}
+html body #app #participation-panel #community-list .dj-community-topic{
+  min-height:55px;padding:10px 14px;border-radius:14px;text-align:left;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;
+  border:1px solid var(--djNext-border,#dce9e0);background:var(--djNext-card,#f5faf7);
+  color:var(--djNext-text,#254238);font-size:14px;font-weight:700;
+}
+html body #app #participation-panel #community-list .dj-community-topic small{
+  font-size:12px;font-weight:400;color:var(--djNext-muted,#647f72);line-height:1.45;
+}
+html body #app #participation-panel #community-list .dj-community-empty-footnote{
+  font-size:11px;line-height:1.55;margin:0;color:var(--djNext-muted,#647f72);word-break:keep-all;
+}
+@media(max-width:350px){
+  html body #app #participation-panel #community-list .dj-community-empty-actions{grid-template-columns:1fr;}
+}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body{margin-inline:2px!important;max-height:calc(100dvh - 36px)!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:18px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-pin{width:32px!important;height:32px!important;min-height:32px!important}
