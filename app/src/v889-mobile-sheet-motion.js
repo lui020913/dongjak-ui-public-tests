@@ -9,6 +9,26 @@ const activeSettles=new WeakMap();
 const EXPANDED='dj871-sheet-expanded';
 const DRAGGING='dj-sheet-dragging';
 const TRANSITIONING='dj889-sheet-transitioning';
+const PEDESTRIAN_INLINE_BOUNDS=['top','height','max-height','bottom'];
+function syncPedestrianExpandedBounds(panel,doc,win){
+  if(panel?.id!=='ped-tools-panel')return;
+  const search=doc.getElementById('map-quick-search')?.getBoundingClientRect();
+  const toolbar=doc.getElementById('djNext-toolbar')?.getBoundingClientRect();
+  const top=Math.ceil(Math.max(96,Number(search?.bottom||0)+12,Number(toolbar?.bottom||0)+10));
+  const nav=doc.getElementById('bottom-nav')?.getBoundingClientRect();
+  const dock=Math.max(72,Math.ceil((Number(win.innerHeight)||700)-Number(nav?.top||0)+10));
+  panel.dataset.djSafeExpandedTop=String(top);
+  panel.style.setProperty('top',top+'px','important');
+  panel.style.setProperty('bottom',dock+'px','important');
+  panel.style.setProperty('height','auto','important');
+  panel.style.setProperty('max-height',`calc(100dvh - ${top+dock}px)`,'important');
+}
+function clearPedestrianExpandedBounds(panel){
+  if(panel?.id!=='ped-tools-panel')return;
+  delete panel.dataset.djSafeExpandedTop;
+  for(const property of PEDESTRIAN_INLINE_BOUNDS)panel.style.removeProperty(property);
+}
+
 const DURATION=WINDOW_MOTION.open;
 const EASING=WINDOW_MOTION.easing;
 
@@ -56,7 +76,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   const app=doc.getElementById('app');
   const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   if(reduced||!rectHasArea(fromRect)||!rectHasArea(compactRect)||!rectHasArea(expandedRect)){
-    if(collapsing)panel.classList.remove(EXPANDED);
+    if(collapsing){panel.classList.remove(EXPANDED);clearPedestrianExpandedBounds(panel);}
     clearMotionStyles(panel);
     syncExpandedRoot(doc,app);
     return true;
@@ -82,7 +102,7 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
     panel.removeEventListener('transitionend',onEnd);
     if(timer!==null)win.clearTimeout(timer);
     if(rafTimer!==null)win.clearTimeout(rafTimer);
-    if(collapsing)panel.classList.remove(EXPANDED);
+    if(collapsing){panel.classList.remove(EXPANDED);clearPedestrianExpandedBounds(panel);}
     syncExpandedRoot(doc,app);
     clearMotionStyles(panel);
     activeTransitions.delete(panel);
@@ -135,19 +155,22 @@ export function setMobileSheetExpanded(panel,expanded,doc=document,win=window){
     }
     compactRect=panel.getBoundingClientRect();
     panel.classList.add(EXPANDED);
+    syncPedestrianExpandedBounds(panel,doc,win);
     syncExpandedRoot(doc,app);
     expandedRect=panel.getBoundingClientRect();
   }else{
     panel.classList.remove(EXPANDED);
+    clearPedestrianExpandedBounds(panel);
     syncExpandedRoot(doc,app);
     compactRect=panel.getBoundingClientRect();
     panel.classList.add(EXPANDED);
+    syncPedestrianExpandedBounds(panel,doc,win);
     syncExpandedRoot(doc,app);
     expandedRect=panel.getBoundingClientRect();
   }
 
   if(!rectHasArea(compactRect)||!rectHasArea(expandedRect)){
-    if(!next)panel.classList.remove(EXPANDED);
+    if(!next){panel.classList.remove(EXPANDED);clearPedestrianExpandedBounds(panel);}
     syncExpandedRoot(doc,app);
     clearMotionStyles(panel);
     return true;
