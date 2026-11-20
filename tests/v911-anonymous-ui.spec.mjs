@@ -962,11 +962,37 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  const hb=await search.boundingBox(),pb=await panel.boundingBox();
  expect(hb.y+hb.height).toBeLessThanOrEqual(pb.y+2);
  const header=panel.locator('.ped-tools-panel-head');await expect(header).toBeVisible();
+ // A stable, hit-testable header is required before beginning a REAL gesture.
+ // The previous test pressed coordinates sampled mid-opening, after which the
+ // entire sheet could slide out from beneath the pointer before pointerdown.
+ await expect.poll(()=>page.evaluate(()=>{
+   const head=document.querySelector('#ped-tools-panel .ped-tools-panel-head');
+   const panel=document.getElementById('ped-tools-panel');
+   const r=head?.getBoundingClientRect();
+   if(!r||r.height<24||r.bottom>innerHeight||panel?.dataset.dj810Animating==='opening')return false;
+   const hit=document.elementFromPoint(r.x+Math.min(64,r.width/4),r.y+r.height/2);
+   return hit===head||head.contains(hit);
+ }),{timeout:10000}).toBe(true);
+ await page.waitForTimeout(400);
+ await page.evaluate(()=>{
+   const samples=[];
+   window.__dj9253NearbyPointer=samples;
+   for(const type of ['pointerdown','pointermove','pointerup','pointercancel']){
+     window.addEventListener(type,e=>{
+       if(samples.length>=30)return;
+       samples.push({type,target:e.target?.id||e.target?.className||e.target?.tagName,
+         y:Math.round(e.clientY),pointerType:e.pointerType,buttons:e.buttons,
+         expanded:document.getElementById('ped-tools-panel')?.classList.contains('dj871-sheet-expanded')});
+     },true);
+   }
+ });
  const r=await header.boundingBox();
  await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2);
  await page.mouse.down();
  await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2-135,{steps:10});
  await page.mouse.up();
+ const diagnostic=await page.evaluate(()=>window.__dj9253NearbyPointer||[]);
+ console.log('NEARBY_POINTER_DIAGNOSTIC',JSON.stringify(diagnostic));
  await expect(panel).toHaveClass(/dj871-sheet-expanded/,{timeout:7000});
  await expect(search).toBeVisible();
  const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
