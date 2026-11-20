@@ -74,6 +74,8 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   ctx.lineTo(26.65,18.25);ctx.quadraticCurveTo(26.1,18.4,26.25,17.65);
   ctx.quadraticCurveTo(26.9,15.0,25.45,12.55);
   ctx.quadraticCurveTo(25.2,11.9,26.0,11.9);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
+  // Warm headlamps are mirrored together with the entire fallback sprite.
+  ctx.fillStyle='#fffacd';for(const y of [14.2,18.2]){ctx.beginPath();ctx.arc(28.7,y,.65,0,Math.PI*2);ctx.fill();}
   ctx.restore();
   contour();ctx.strokeStyle='#b6c1c7';ctx.lineWidth=.30;ctx.stroke();
   const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
