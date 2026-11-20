@@ -45,6 +45,9 @@ jobs:
           node --check scripts/live-qa.mjs
           node --check scripts/live-qa-analyze.mjs
           node --check scripts/live-qa-design.mjs
+          node --check scripts/live-qa-explore-policy.mjs
+          node --check tests/live-qa-explore.spec.mjs
+          node --check playwright.live-qa-explore.config.mjs
           node --check scripts/live-qa-verify-candidate.mjs
           node --check scripts/gemini-mobile-repair.mjs
           node --check scripts/live-qa-pixels.mjs
@@ -56,7 +59,7 @@ jobs:
           node --input-type=module -e "import {liveDashboard} from './qa-relay/live-stream.mjs'; import fs from 'node:fs'; fs.writeFileSync('/tmp/qa-wall.js',liveDashboard.split('<script>')[1].split('</script>')[0]);"
           node --check /tmp/qa-wall.js
           node --check qa-relay/worker.mjs
-          node --test tests/live-qa-relay.test.mjs tests/live-qa-stream.test.mjs tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/mobile-qa-parallel.test.mjs
+          node --test tests/live-qa-relay.test.mjs tests/live-qa-stream.test.mjs tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-explore-policy.test.mjs tests/mobile-qa-parallel.test.mjs
           node --check tests/live-qa-fixture.mjs
           node --check tests/live-qa-journeys.spec.mjs
           node --check tests/live-qa-journey-helpers.mjs
