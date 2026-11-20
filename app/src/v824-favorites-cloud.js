@@ -511,6 +511,8 @@ export function installFavoritesCloud({root,clientFactory=browserClientFactory,c
           return;
         }
       }
+      // Revoke any browser push subscription before this account signs out.
+      await import('./community-push-client.js').then(m=>m.disableCommunityPush(client)).catch(()=>{});
       const {error}=await client.auth.signOut();if(error)throw error;
       user=null;needsSave=false;setValue(ID_KEY,'');setValue(DIRTY_KEY,'');
       // Keep account-owned favorites in Supabase, but hide the previous
