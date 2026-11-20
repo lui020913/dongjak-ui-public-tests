@@ -3,9 +3,9 @@
   "application_version": "9.2.20",
   "public_work_branch": "main",
   "purpose": "Improve dark subway colors, readable transfer badges, safe one-shot iOS theme recovery and weather sheet",
-  "attempt": 89,
+  "attempt": 90,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Include final transparent status seam and phone visual regression assertions",
+  "last_retry_reason": "Repair real TIP lifecycle for canonical weather sheet; keep existing full phone assertions",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

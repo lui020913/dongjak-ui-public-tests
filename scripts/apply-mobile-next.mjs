@@ -17,7 +17,7 @@ const core='src/v840-ui-core.js';
 // TIP text now lives in the canonical core; don't overwrite shortened copy at build time.
 const tipCore=readFileSync(resolve(root,core),'utf8');
 for(const sentence of ['상단 레이어에서 지도 기능을 관리하세요.','레이어에서 행정동을 선택하세요.'])if(!tipCore.includes(sentence))throw Error('Canonical TIP copy missing: '+sentence);
-replace(core,"'nav-live-card','route-pick-hint','map-gesture-guide'];","'nav-live-card','route-pick-hint','map-gesture-guide','ped-tools-panel','djNext-layer-panel','djNext-permissions'];");
+for(const id of ['ped-tools-panel','djNext-layer-panel','djNext-permissions','dj854-weather-sheet'])if(!tipCore.includes("'"+id+"'"))throw Error('Canonical TIP surface missing: '+id);
 replace('src/pedestrian-tools.js',"showPanel('내 주변 보행정보');","showPanel('주변 안전정보');");
 replace('src/transport-map.js',"if(title.dataset){if(place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId||'')))title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}","if(title.dataset){if(place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId||''))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);else delete title.dataset.dj912Ars;}");
 replace('src/transport-map.js',"if(title.dataset&&place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId)))title.dataset.dj912Ars=String(place.arsId);","if(title.dataset&&place.kind==='bus'&&/^\\d{5}$/.test(String(place.arsId))&&!globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)title.dataset.dj912Ars=String(place.arsId);");

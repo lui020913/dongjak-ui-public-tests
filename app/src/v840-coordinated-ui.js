@@ -46,6 +46,11 @@ export function installCoordinatedShell(doc=document,win=window){
    }else label.classList.add('is-visible');
  };
  const hideTip=()=>{
+   // A sheet owns the screen immediately; do not leave a floating hint under its edge.
+   if(hasOpenMapWindow(doc,app)){
+     if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
+     label.classList.remove('is-visible');label.hidden=true;return;
+   }
    if(label.hidden||hideTimer)return;
    label.classList.remove('is-visible');
    hideTimer=win.setTimeout(()=>{hideTimer=0;if(!label.classList.contains('is-visible'))label.hidden=true;},240);
