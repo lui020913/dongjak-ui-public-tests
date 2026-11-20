@@ -26,6 +26,7 @@ await write('public/version.json',metadata);
 await write('src/build-info.json',metadata);
 let html=await read('index.html');
 const replacements=[
+  [/(id="map-startup-version"[^>]*>)v\d+\.\d+\.\d+(<\/span>)/,`$1v${version}$2`],
   [/(<title>동작하는 안전지도 · 보행안전 지도 )v\d+\.\d+\.\d+(<\/title>)/,`$1v${version}$2`],
   [/(id="version-history-trigger"[^>]*>)v\d+\.\d+\.\d+(<\/button>)/,`$1v${version}$2`],
   [/(id="dj-guide-latest-version">)v\d+\.\d+\.\d+(<\/strong>)/,`$1v${version}$2`],
