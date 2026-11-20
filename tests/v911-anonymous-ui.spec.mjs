@@ -759,7 +759,7 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  const ua=await page.evaluate(()=>navigator.userAgent);test.skip(!/iPhone/.test(ua),'iOS PWA only');
  await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
  await ready(page);
- const root=page.locator('html'),bridge=page.locator('body > #dj-ios-pwa-status-bridge');
+ const root=page.locator('html'),bridge=page.locator('#app > #dj-ios-pwa-status-bridge');
  await expect(root).toHaveClass(/dj-ios-home-pwa/);
  await expect(bridge).toHaveCount(1);await expect(bridge).toHaveCSS('opacity','0');
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
@@ -819,14 +819,24 @@ test('route title is a full header drag surface; composer report returns directl
  test('official daily train quota is communicated and does not repeatedly query the feed',{tag:'@phone-common'},async({page})=>{let calls=0;await page.addInitScript(()=>{localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));});await page.route('**/api/transport/live-vehicles**',async route=>{calls++;await route.fulfill({status:429,json:{ok:false,code:'ERROR-337',retryAfterSeconds:3600,error:'일일 조회량 초과'}});});await ready(page);await expect(page.locator('[data-live-vehicle="metro"]')).toHaveAttribute('data-live-quota','true',{timeout:60000});await expect(page.locator('#dj-live-vehicle-status')).toContainText('일일 조회량을 초과');await tap(page,page.locator('#djNext-layers'));await expect(page.locator('[data-layer-key="livemetro"] .djNext-layer-state')).toHaveText('조회 한도 초과');expect(calls).toBe(1);});
 
 
-test('bottom dock swipes between adjacent tabs with a stationary exit and entrance fade',{tag:'@phone-common'},async({page})=>{
+test('bottom dock switches adjacent tabs promptly without old-panel bounce or a blank page',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await enter(page,'route-panel','route');
  await page.evaluate(()=>{window.__dockFade=[];const until=performance.now()+45000;function sample(){for(const id of ['route-panel','participation-panel']){const n=document.getElementById(id);if(n?.dataset.dj810Animating){const s=getComputedStyle(n);window.__dockFade.push({id,phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),o:Number(s.opacity),y:n.getBoundingClientRect().y});}}if(performance.now()<until)requestAnimationFrame(sample);}requestAnimationFrame(sample);});
  const dock=page.locator('#bottom-nav');await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
  async function swipe(dx){const r=await dock.boundingBox();expect(r).toBeTruthy();const x=r.x+r.width*.5,y=r.y+r.height*.5;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();}
  await swipe(-85);await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');await expect(page.locator('#route-panel')).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();await expect.poll(()=>page.locator('#participation-panel').getAttribute('data-dj810-animating')).toBeNull();
- const frames=await page.evaluate(()=>window.__dockFade);for(const [id,phase] of [['route-panel','closing'],['participation-panel','opening']]){const f=frames.filter(r=>r.id===id&&r.phase===phase);expect(f.length).toBeGreaterThan(1);expect(f.every(r=>r.kind==='fade'&&r.duration===(phase==='closing'?105:145)&&Math.abs(r.y-f[0].y)<1)).toBe(true);expect(f.some(r=>r.o>0&&r.o<1)).toBe(true);}
+ const frames=await page.evaluate(()=>window.__dockFade);
+  // The current mobile design switches visible tab panels without waiting for
+  // the previous closing fade. If any entrance frames are painted, their
+  // bounding position must remain fixed; no slide/bounce is permitted.
+  for(const id of ['route-panel','participation-panel']){
+    const f=frames.filter(r=>r.id===id);
+    if(f.length>1)expect(Math.max(...f.map(r=>r.y))-Math.min(...f.map(r=>r.y))).toBeLessThan(1);
+  }
+  await expect(page.locator('#route-panel')).toBeHidden();
+  await expect(page.locator('#participation-panel')).toBeVisible();
+  expect(await page.locator('#participation-panel').evaluate(n=>n.getBoundingClientRect().height)).toBeGreaterThan(80);
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#route-panel')).toBeVisible();await expect.poll(()=>page.locator('#route-panel').getAttribute('data-dj810-animating')).toBeNull();
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
 });
