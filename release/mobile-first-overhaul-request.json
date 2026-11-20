@@ -3,9 +3,9 @@
   "application_version": "9.2.51",
   "public_work_branch": "main",
   "purpose": "Unified iPhone-like fades for mobile bottom sheets, AI content entrance/exit and view transitions; content-sized bus, subway and facility cards without whitespace; forward radiating subway headlights drawn separately from existing front lamps; preserve previous community, route and quick-tab fixes.",
-  "attempt": 148,
+  "attempt": 149,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.51 Preview from attempt 147 passed build and 6/6 captures, 6/6 Gemini design reviews and 11/12 phone shards; shard 5 blocked solely on obsolete opacity=1 contract despite intentionally blended fades. PR #105 updates actual opacity and backdrop assertions; its full source CI 44828264920 passed. All protected gates must rerun, no bypass.",
+  "last_retry_reason": "Attempt 148: all 6 design captures and 6 Gemini design reviews passed; 11/12 phone QA passed, shard 9 reported a real lost facility-close tap at 430px. PR #107 added primary pointerup fallback without double close or bypass, app source CI 44829714990 passed. Rerun all protected Preview / phone QA / Gemini / Production gates. No legacy bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
