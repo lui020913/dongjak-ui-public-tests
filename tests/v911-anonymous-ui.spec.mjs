@@ -562,7 +562,12 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
      if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
-     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
+     // v9.2.51 fades the sliding card; the overlay/backdrop must remain solid.
+     // When target===parent (weather/route), the same computed alpha is expected.
+     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity>=0&&f.opacity<=1&&f.cssAnimation==='none')).toBe(true);
+     expect(motion.some(f=>f.opacity>.08&&f.opacity<.98)).toBe(true);
+     if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
+     else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
      if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
