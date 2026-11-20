@@ -99,9 +99,9 @@ export function displayFeatures(bundle,mode){
  return {type:'FeatureCollection',features};
 }
 export function summarize(bundle,mode){
- let totalM=0,observedM=0,lineM=0,pointCount=0;
- for(const s of bundle.segments){totalM+=s.lengthM;if(s.geometry.type==='Point')pointCount++;else lineM+=s.lengthM;if(segmentScore(bundle,s,mode)!==null)observedM+=s.lengthM;}
- return {totalM,observedM,lineM,pointCount};
+ let totalM=0,observedM=0,lineM=0,pointCount=0,geometryM=0;
+ for(const s of bundle.segments){totalM+=s.lengthM;if(s.geometry.type==='Point')pointCount++;else{lineM+=s.lengthM;const cs=s.geometry.coordinates;for(let i=1;i<cs.length;i++)geometryM+=meters(cs[i-1],cs[i]);}if(segmentScore(bundle,s,mode)!==null)observedM+=s.lengthM;}
+ return {totalM,observedM,lineM,pointCount,geometryM};
 }
 export function routeExposure(bundle,matchedSegments){
  // Future router supplies its own verified edge-to-segment coverage. No spatial guessing.
