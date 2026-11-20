@@ -1829,7 +1829,30 @@ const pagePanels = [...document.querySelectorAll('.page-panel')];
 const communityStorageKey = 'dongjak_safety_community_v15_posts';
 let communityPosts = readCommunityPosts(localStorage.getItem(communityStorageKey));
 let sharedCommunityPosts=[],communityCloudStatus='공유 게시글 조회 전',communityRefreshSequence=0;
-async function refreshSharedCommunity(){const seq=++communityRefreshSequence;try{const requested=communityDeepLink;const result=await readSharedCommunity(requested);if(seq!==communityRefreshSequence)return;sharedCommunityPosts=result.posts;if(requested){communityDeepLink=null;if(app.dataset.tab==='participate'){communityDetail=result.posts.some(p=>p.id===requested)?requested:null;if(!communityDetail)toast('게시글을 찾을 수 없습니다.');}}communityCloudStatus='공개 게시판 · '+(result.authenticated?'로그인됨':'읽기 전용 · 로그인 후 작성 가능');}catch{if(seq!==communityRefreshSequence)return;sharedCommunityPosts=[];communityCloudStatus='공유 게시판 연결 실패 · 기기 기록은 유지됩니다.';}if(app.dataset.tab==='participate'){renderCommunity();void refreshCommunityNotices();void refreshCommunityModerationStatus();}}
+async function refreshSharedCommunity(){
+  const seq=++communityRefreshSequence;
+  communityCloudStatus='공개 게시판 확인 중…';
+  if(app.dataset.tab==='participate')renderCommunity();
+  try{
+    const requested=communityDeepLink;
+    const result=await readSharedCommunity(requested);
+    if(seq!==communityRefreshSequence)return;
+    sharedCommunityPosts=result.posts;
+    if(requested){
+      communityDeepLink=null;
+      if(app.dataset.tab==='participate'){
+        communityDetail=result.posts.some(p=>p.id===requested)?requested:null;
+        if(!communityDetail)toast('게시글을 찾을 수 없습니다.');
+      }
+    }
+    communityCloudStatus='공개 게시판 · '+(result.authenticated?'로그인됨':'읽기 전용 · 로그인 후 작성 가능');
+  }catch{
+    if(seq!==communityRefreshSequence)return;
+    // Connectivity failure must never erase a previously loaded feed.
+    communityCloudStatus='공유 게시판 연결 실패 · 기존 기록은 유지됩니다.';
+  }
+  if(app.dataset.tab==='participate'){renderCommunity();void refreshCommunityNotices();void refreshCommunityModerationStatus();}
+}
 window.addEventListener('dongjak:auth-state',()=>{resetCommunityNotices();communitySavedOnly=false;communityReplyTo=null;communityModerationStatus=null;const status=document.getElementById('community-moderation-status');if(status)status.hidden=true;document.getElementById('community-saved-toggle')?.setAttribute('aria-pressed','false');if(app.dataset.tab==='participate')void refreshSharedCommunity();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void refreshCommunityNotices();});
 const dongjakNews=initDongjakNews({app,onToast:toast});
@@ -2224,9 +2247,53 @@ function renderCommunity() {
     shown=shown.sort((a,b)=>(b.likes||0)-(a.likes||0)||b.created-a.created);
   else shown=shown.sort((a,b)=>b.created-a.created);
   if(!shown.length){
-    root.append(makeCEl('p','empty-hint',all.length
-      ?'선택하신 유형의 게시글이 없습니다.'
-      :'아직 등록된 게시글이 없습니다. 보행 불편이나 개선 의견을 남겨 주세요.'));
+    const loading=communityCloudStatus.includes('확인 중');
+    const offline=communityCloudStatus.includes('연결 실패');
+    const filtered=Boolean(all.length||communitySavedOnly||query||communityFilter!=='전체');
+    const empty=makeCEl('section','dj-community-empty-state');
+    empty.setAttribute('aria-label','커뮤니티 게시판 상태');
+    empty.append(makeCEl('span','dj-community-empty-icon','✎'));
+    empty.append(makeCEl('h3','dj-community-empty-title',loading?'동네 이야기를 불러오는 중입니다':offline?'공유 게시판 연결을 확인해 주세요':filtered?'조건에 맞는 게시글이 없습니다':'첫 번째 동네 이야기를 기다리고 있습니다'));
+    empty.append(makeCEl('p','dj-community-empty-copy',loading?'공개 게시글을 확인하고 있습니다.':offline?'공개 게시판에 연결하지 못했습니다. 이 기기의 글은 그대로 보관됩니다.':filtered?'검색어·분류를 변경하거나 전체 글을 확인해 주세요.':'아직 공개된 글이 없습니다. 동네의 보행 불편, 개선 아이디어, 생활 질문을 직접 남길 수 있습니다.'));
+    const actions=makeCEl('div','dj-community-empty-actions');
+    if(filtered&&!loading){
+      actions.append(communityButton('전체 게시글 보기','dj-community-empty-primary',()=>{
+        communityFilter='전체';communitySearch='';communitySavedOnly=false;communityDetail=null;
+        document.getElementById('community-search').value='';
+        document.getElementById('community-saved-toggle').setAttribute('aria-pressed','false');
+        for(const chip of document.querySelectorAll('.community-filter[data-community-filter]')){
+          const selected=chip.dataset.communityFilter==='전체';
+          chip.classList.toggle('active',selected);chip.setAttribute('aria-pressed',String(selected));
+        }
+        renderCommunity();
+      }));
+    }else if(!loading){
+      actions.append(communityButton('첫 글 작성하기','dj-community-empty-primary',()=>{
+        communityComposerOrigin='community';openCommunityComposer(true);
+      }));
+    }
+    actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
+    empty.append(actions);
+    if(!filtered&&!loading&&!offline){
+      const topics=makeCEl('div','dj-community-starter-topics');
+      topics.append(makeCEl('p','dj-community-topics-heading','이런 이야기로 시작할 수 있습니다'));
+      for(const [category,label,detail] of [
+        ['보행 불편','보행 불편 공유','보도 단차·통행 방해·어두운 길'],
+        ['개선 제안','우리 동네 개선 제안','보행환경을 개선할 아이디어'],
+        ['동네 질문','동네 질문 남기기','교통·시설·동네생활 질문']
+      ]){
+        const button=communityButton(label,'dj-community-topic',()=>{
+          communityComposerOrigin='community';
+          document.getElementById('community-category').value=category;
+          document.getElementById('community-category').dispatchEvent(new Event('change',{bubbles:true}));
+          openCommunityComposer(true);
+        });
+        button.append(makeCEl('small','',detail));topics.append(button);
+      }
+      empty.append(topics);
+    }
+    empty.append(makeCEl('p','dj-community-empty-footnote','로그인 없이 작성하면 이 기기에만 저장됩니다. 공개 등록에는 로그인과 AI 검사가 필요합니다.'));
+    root.append(empty);
     return;
   }
   for (const post of shown) {

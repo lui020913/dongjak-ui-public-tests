@@ -894,3 +894,40 @@ test('facility close remains actionable when WebKit drops the synthetic click',{
   await expect(popup).toBeHidden({timeout:5000});
   await expect(page.locator('.dj-place-detail-popup')).toHaveCount(0);
 });
+
+test('community tab opens a usable feed and searchable empty state, without fabricated posts',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ await tap(page,tab(page,'participate'));
+ const panel=page.locator('#participation-panel'),feed=panel.locator('#community-list');
+ await expect(panel).toBeVisible();
+ await expect(feed).toBeVisible();
+ const search=panel.locator('#community-search');
+ await search.fill('특별히일치할수없는검색어__20261121__');
+ await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
+ await expect(feed.getByRole('button',{name:'전체 게시글 보기'})).toBeVisible();
+ await search.blur();
+ await tap(page,feed.getByRole('button',{name:'전체 게시글 보기'}));
+ await expect(search).toHaveValue('');
+ // On a genuinely empty public database, the first-run home must include
+ // useful actions. Existing real posts remain visible instead of sample data.
+ if(await feed.locator('.dj-community-empty-state').isVisible()){
+   await expect(feed.getByRole('button',{name:'첫 글 작성하기'})).toBeVisible();
+   await tap(page,feed.getByRole('button',{name:'첫 글 작성하기'}));
+   await expect(panel.locator('#community-form')).toBeVisible();
+   await tap(page,panel.locator('#community-compose-close'));
+   await expect(panel.locator('#community-form')).toBeHidden();
+ }
+});
+
+test('the rendered history keeps the real production SemVer instead of catalog renumbering',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ const response=await page.request.get('/version.json');
+ expect(response.ok()).toBe(true);
+ const version=String((await response.json()).version);
+ const latest=page.locator('#history-version-timeline .v707-release').first();
+ await expect(latest).toHaveAttribute('data-version',version);
+ await expect(latest).toHaveAttribute('data-display-version','v'+version);
+ expect((await latest.locator('h4').textContent()).trim()).toBe('v'+version);
+});
