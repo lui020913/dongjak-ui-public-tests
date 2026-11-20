@@ -25,6 +25,7 @@ test('history uses two-part headings while retaining exact build metadata',()=>{
  const label=v=>v.replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
  assert.equal(label('v9.2.53'),'v9.2');assert.equal(label('v1.0.0'),'v1.0');
  assert(ui.includes('const editionOf=version=>String(version).replace('));
+ assert(ui.includes('const editionFor=entry=>'));
  assert(ui.includes('dj-edition-minor'));
  assert(ui.includes('dj-edition-patch'));
  assert.match(ui,/dataset\.version=String\(release\.version/);
@@ -35,7 +36,7 @@ test('history uses two-part headings while retaining exact build metadata',()=>{
 test('metro trains and beams require close zoom; bus retains its own threshold',()=>{
  const source=read('src/features/liveTransit/integrate.js');
  const layer=read('src/features/liveTransit/index.js');
- assert.match(source,/minZoom:13\.2,metroMinZoom:15\.2,intervalMs:60000/);
+ assert.match(source,/minZoom:13\.2,metroMinZoom:16\.4,intervalMs:60000/);
  assert.match(layer,/minzoom:metroMinZoom/);
  assert.match(layer,/TRAIN_BEAM_LAYER/);
  assert.match(layer,/minzoom:minimumZoom/);

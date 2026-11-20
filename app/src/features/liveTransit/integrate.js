@@ -113,7 +113,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   function showQuota(until,announce=true){const active=state.metro&&until>Date.now();if(btnMetro){if(active)btnMetro.dataset.liveQuota='true';else delete btnMetro.dataset.liveQuota;}if(active){if(announce&&!quotaNotified){quotaNotified=true;onNotice(METRO_QUOTA_NOTICE);}return true;}quotaNotified=false;return false;}
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:15.2,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:16.4,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
