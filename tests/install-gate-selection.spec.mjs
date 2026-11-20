@@ -65,3 +65,28 @@ test('Android tablet install gate keeps selected state and the same external-dow
     await context.close();
   }
 });
+
+
+test('installed iPad PWA opens the app while ordinary iPad Safari remains restricted',async({browser})=>{
+  for(const standalone of [false,true]){
+    const context=await browser.newContext({viewport:{width:1024,height:1366},hasTouch:true,deviceScaleFactor:2,userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15'});
+    try{
+      await context.addInitScript(({standalone})=>{
+        Object.defineProperty(navigator,'platform',{configurable:true,get:()=> 'MacIntel'});
+        Object.defineProperty(navigator,'maxTouchPoints',{configurable:true,get:()=>5});
+        Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>standalone});
+      },{standalone});
+      const page=await context.newPage();
+      if(standalone){
+        await page.goto(target,{waitUntil:'domcontentloaded'});
+        await expect(page.locator('html')).toHaveAttribute('data-dj-mobile-only','allowed');
+        await expect(page.locator('#dj-mobile-only-screen')).toBeHidden();
+        await expect(page.locator('#app')).toBeVisible({timeout:45000});
+        await expect(page.locator('#dj-install-menu')).toHaveCount(0);
+      }else{
+        await openGate(page);
+        await expect(page.locator('html')).toHaveAttribute('data-dj-mobile-only','blocked');
+      }
+    }finally{await context.close();}
+  }
+});

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {runInNewContext} from 'node:vm';
 import {applyMobileOnlyGate,isMobilePhoneContext} from '../scripts/apply-mobile-only-gate.mjs';
 
 test('phone-only detector allows iPhone and Android phone browsers, including landscape',()=>{
@@ -53,4 +54,31 @@ test('build patch adds accessible mobile-only device notice and preserves deskto
   assert.match(result.indexHtml,/v854-weather-desktop\.js/);
   assert.equal(result.mainJs,mainJs);
   assert.equal(result.platformEntry,platformEntry);
+});
+
+
+test('iPad standalone web app is allowed at portrait and landscape sizes; browsers and Mac desktops remain blocked',()=>{
+  const desktopUA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15';
+  const cases=[
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:820,standalone:true},true],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:1366,standalone:true},true],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:5,width:820,standalone:false},false],
+    [{userAgent:desktopUA,platform:'MacIntel',maxTouchPoints:0,width:820,standalone:true},false],
+    [{userAgent:'iPad',platform:'iPad',width:1024,standalone:true},true],
+    [{userAgent:'iPad',platform:'iPad',width:1024,standalone:false},false],
+    [{userAgent:'Android tablet',width:820,standalone:true},false],
+  ];
+  const {indexHtml}=applyMobileOnlyGate({indexHtml:'<html><head><meta name="viewport" content="width=device-width" /></head><body></body></html>',mainJs:'',platformEntry:''});
+  const code=indexHtml.match(/<script id="dj-mobile-only-gate-bootstrap">([\\s\\S]*?)<\\/script>/)[1];
+  for(const [context,expected] of cases){
+    assert.equal(isMobilePhoneContext(context),expected);
+    const document={documentElement:{dataset:{},clientWidth:context.width},readyState:'loading'};
+    const window={navigator:{userAgent:context.userAgent,platform:context.platform,maxTouchPoints:context.maxTouchPoints,standalone:context.standalone},innerWidth:context.width,matchMedia:()=>({matches:false}),addEventListener(){}};
+    runInNewContext(code,{document,window});
+    assert.equal(document.documentElement.dataset.djMobileOnly,expected?'allowed':'blocked');
+    window.navigator.standalone=false;
+    window.matchMedia=()=>({matches:context.standalone});
+    runInNewContext(code,{document,window});
+    assert.equal(document.documentElement.dataset.djMobileOnly,expected?'allowed':'blocked');
+  }
 });

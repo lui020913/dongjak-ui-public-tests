@@ -1,12 +1,14 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
-export function isMobilePhoneContext({userAgent='',platform='',userAgentDataMobile=false,width=390}={}) {
+export function isMobilePhoneContext({userAgent='',platform='',userAgentDataMobile=false,width=390,maxTouchPoints=0,standalone=false}={}) {
   const ua=String(userAgent);
   const applePhone=/iPhone|iPod/i.test(ua)||/iPhone|iPod/i.test(String(platform));
   const androidPhone=/Android/i.test(ua)&&(/Mobile/i.test(ua)||userAgentDataMobile===true);
   const legacyPhone=/Windows Phone|IEMobile|BlackBerry|Opera Mini/i.test(ua);
-  return (applePhone||androidPhone||legacyPhone)&&Number(width)>0&&Number(width)<=1024;
+  const appleTablet=/iPad/i.test(ua)||/iPad/i.test(String(platform))||(String(platform)==='MacIntel'&&Number(maxTouchPoints)>1);
+  // Only installed iPad web apps are exempt from the tablet browser restriction.
+  return Number(width)>0&&((appleTablet&&standalone===true)||((applePhone||androidPhone||legacyPhone)&&!appleTablet&&Number(width)<=1024));
 }
 
 function replaceExactly(source,search,replacement,label) {
@@ -19,15 +21,12 @@ export function applyMobileOnlyGate({indexHtml,mainJs,platformEntry}) {
   const bootstrap='<script id="dj-mobile-only-gate-bootstrap">\n'+
 '(function(){\n'+
 '  var nav=window.navigator||{};\n'+
-'  var ua=String(nav.userAgent||\'\');\n'+
-'  var platform=String(nav.platform||\'\');\n'+
-'  var applePhone=/iPhone|iPod/i.test(ua)||/iPhone|iPod/i.test(platform);\n'+
-'  var androidPhone=/Android/i.test(ua)&&(/Mobile/i.test(ua)||(nav.userAgentData&&nav.userAgentData.mobile===true));\n'+
-'  var legacyPhone=/Windows Phone|IEMobile|BlackBerry|Opera Mini/i.test(ua);\n'+
+'  var allowedContext='+isMobilePhoneContext.toString()+';\n'+
 '  var root=document.documentElement;\n'+
 '  function update(){\n'+
 '    var width=Number(window.innerWidth||root.clientWidth||0);\n'+
-'    var next=((applePhone||androidPhone||legacyPhone)&&width>0&&width<=1024)?\'allowed\':\'blocked\';\n'+
+'    var standalone=nav.standalone===true||Boolean(window.matchMedia&&window.matchMedia(\'(display-mode: standalone)\').matches);\n'+
+'    var next=allowedContext({userAgent:nav.userAgent,platform:nav.platform,userAgentDataMobile:nav.userAgentData&&nav.userAgentData.mobile===true,width:width,maxTouchPoints:nav.maxTouchPoints,standalone:standalone})?\'allowed\':\'blocked\';\n'+
 '    var previous=root.dataset.djMobileOnly;\n'+
 '    root.dataset.djMobileOnly=next;\n'+
 '    if(previous===\'blocked\'&&next===\'allowed\'&&document.readyState!==\'loading\')window.location.reload();\n'+
@@ -83,5 +82,5 @@ if(root){
   writeFileSync(indexPath,patched.indexHtml);
   writeFileSync(mainPath,patched.mainJs);
   writeFileSync(platformPath,patched.platformEntry);
-  console.log('Applied phone-only visual gate; PC/tablet show a blank white screen without changing app startup or platform code.');
+  console.log('Applied access gate: phone browsers and installed iPad PWAs allowed; desktop and tablet browsers remain restricted.');
 }
