@@ -907,13 +907,17 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
  await expect(feed.getByRole('button',{name:'전체 게시글 보기'})).toBeVisible();
  await search.blur();
- await tap(page,feed.getByRole('button',{name:'전체 게시글 보기'}));
+ const showAll=feed.getByRole('button',{name:'전체 게시글 보기'});
+ await showAll.scrollIntoViewIfNeeded();
+ await tap(page,showAll);
  await expect(search).toHaveValue('');
  // On a genuinely empty public database, the first-run home must include
  // useful actions. Existing real posts remain visible instead of sample data.
  if(await feed.locator('.dj-community-empty-state').isVisible()){
    await expect(feed.getByRole('button',{name:'첫 글 작성하기'})).toBeVisible();
-   await tap(page,feed.getByRole('button',{name:'첫 글 작성하기'}));
+   const firstPost=feed.getByRole('button',{name:'첫 글 작성하기'});
+   await firstPost.scrollIntoViewIfNeeded();
+   await tap(page,firstPost);
    await expect(panel.locator('#community-form')).toBeVisible();
    await tap(page,panel.locator('#community-compose-close'));
    await expect(panel.locator('#community-form')).toBeHidden();
