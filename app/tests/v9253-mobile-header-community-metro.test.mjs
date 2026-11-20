@@ -1,0 +1,55 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
+const mobileCss=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+
+test('community categories lead the page before sort/search controls',()=>{
+ const panel=read('index.html').split('<main id="participation-panel"')[1]?.split('</main>')[0];
+ assert(panel,'community panel exists');
+ const idx=panel.indexOf('class="community-category-tabs"');
+ assert(idx>0);
+ assert(idx<panel.indexOf('class="dj-page-intro"'));
+ assert(idx<panel.indexOf('id="community-search"'));
+ assert(idx<panel.indexOf('class="community-heading-row"'));
+ assert.equal((panel.match(/class="community-category-tabs"/g)||[]).length,1);
+ for(const type of ['전체','보행 불편','개선 제안','동네 질문','동네생활'])assert(panel.includes('data-community-filter="'+type+'"'));
+});
+
+test('history uses two-part headings while retaining exact build metadata',()=>{
+ const ui=read('src/version-history-v7.js');
+ const label=v=>v.replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
+ assert.equal(label('v9.2.53'),'v9.2');assert.equal(label('v1.0.0'),'v1.0');
+ assert(ui.includes('const publicEdition=String(displayVersion).replace('));
+ assert.match(ui,/dataset\.version=String\(release\.version/);
+ assert.match(ui,/현재 빌드: /);
+ assert(!ui.includes("const versionHeading=el('h4','',displayVersion)"));
+});
+
+test('metro trains and beams require close zoom; bus retains its own threshold',()=>{
+ const source=read('src/features/liveTransit/integrate.js');
+ const layer=read('src/features/liveTransit/index.js');
+ assert.match(source,/minZoom:13\.2,metroMinZoom:15\.2,intervalMs:60000/);
+ assert.match(layer,/minzoom:metroMinZoom/);
+ assert.match(layer,/TRAIN_BEAM_LAYER/);
+ assert.match(layer,/minzoom:minimumZoom/);
+});
+
+test('onboarding crossfades on slide navigation and cancels stale transitions',()=>{
+ const js=read('src/v860-onboarding.js'),css=read('src/v860-onboarding.css');
+ assert.match(js,/function transitionSlide\(/);
+ assert.match(js,/classList\.add\('dj860-swapping'\)/);
+ assert.match(js,/classList\.remove\('dj860-swapping'\)/);
+ assert.match(js,/swapEpoch\+\+/);
+ assert.match(css,/\.dj860-onboarding\.dj860-swapping/);
+ assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test('nearby sheet shares drag owner, expands and keeps search header visible',()=>{
+ const controller=read('src/dj-v8212-sheet-controller.js');
+ assert.match(controller,/\['ped-tools-panel','\.ped-tools-panel-head','#ped-tools-close'\]/);
+ assert.match(mobileCss,/#ped-tools-panel\.dj871-sheet-expanded:not\(\[hidden\]\)/);
+ assert.match(mobileCss,/#ped-tools-panel\[data-nearby-mode="empty"\]:not\(\.dj871-sheet-expanded\)/);
+ assert.match(mobileCss,/:has\(#ped-tools-panel:not\(\[hidden\]\)\) > \.topbar/);
+ assert.match(mobileCss,/grid-template-columns:minmax\(0,1fr\) 62px!important/);
+});
