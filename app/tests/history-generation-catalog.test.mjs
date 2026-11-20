@@ -9,7 +9,11 @@ test('1.x to 9.x uses chronological feature milestones; source identities and no
  assert.deepEqual(result.map(g=>g.label),['9.x','8.x','7.x','6.x','5.x','4.x','3.x','2.x','1.x']);
  const entries=result.flatMap(g=>g.records);assert.deepEqual(entries.map(e=>e.record),source);
  assert.equal(new Set(entries.map(e=>e.displayVersion)).size,source.length);
- assert.equal(entries[0].displayVersion,'v9.1.1');assert.equal(entries[0].record.version,'9.2.50');
+ assert.equal(entries[0].displayVersion,'v9.2.50');assert.equal(entries[0].record.version,'9.2.50');
+ assert.equal(entries[1].displayVersion,'v9.2.44');
+ assert.equal(entries[2].displayVersion,'v9.2.28');
+ assert.equal(entries[0].operational,true);
+ assert.equal(entries.at(-1).operational,false);
  assert.equal(entries.at(-1).displayVersion,'v1.0.0');
  assert.equal(source[0].items[0],'UI');
 });
@@ -17,4 +21,13 @@ test('existing operational positions take priority over historically inconsisten
  assert.equal(historyGeneration({version:'v9.2.40'},{position:168}).major,7);
  assert.equal(historyGeneration({version:'v9.2.27'},{}).major,8);
  assert.equal(historyGeneration({version:'v9.2.28'},{}).major,9);
+});
+
+test('actual v9.2.51 production version is never relabeled as an imaginary 9.0.23',()=>{
+ const entries=[{version:'9.2.50',scale:'patch',items:['before']},{version:'9.2.51',scale:'patch',items:['deployed']}].reverse();
+ const result=buildGenerationCatalog(entries,()=>({scale:'patch'}));
+ assert.equal(result[0].label,'9.x');
+ assert.deepEqual(result[0].records.map(x=>x.displayVersion),['v9.2.51','v9.2.50']);
+ assert.equal(result[0].records[0].classification,'patch');
+ assert(!result[0].records.some(x=>x.displayVersion==='v9.0.23'));
 });
