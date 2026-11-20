@@ -122,8 +122,11 @@
       .map-startup-inner #map-startup-continue{margin-top:23px;padding:10px 15px;font-size:12px;font-weight:650;
         border-radius:9px;background:transparent;color:var(--start-fg);border:1px solid var(--start-track);cursor:pointer;}
       .map-startup-inner #map-startup-continue[hidden]{display:none!important;}
-      .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));
-        left:0;right:0;text-align:center;color:var(--start-muted);font-size:11px;letter-spacing:-.01em;}
+      .map-startup-footer{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));
+        left:0;right:0;text-align:center;color:var(--start-muted);font-size:11px;letter-spacing:-.01em;
+        display:grid;justify-items:center;gap:5px;line-height:1.45;pointer-events:none;}
+      .map-startup-version{font-size:12px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:var(--start-muted);}
+      @media(max-height:480px){.map-startup-footer{bottom:calc(8px + env(safe-area-inset-bottom,0px));gap:2px;}}
       @media(max-width:480px){.map-startup-inner{transform:translateY(-1.5vh)}html body #app .map-startup-logo{width:116px!important;height:116px!important;min-width:116px!important;min-height:116px!important;max-width:116px!important;max-height:116px!important}.map-startup-title{font-size:23px}}
       @media(prefers-reduced-motion:reduce){.map-startup-progress::before{animation:none;transition:none}.map-startup-logo img{transition:none}.map-startup-overlay{transition:none}}
     </style>
@@ -234,7 +237,7 @@
           <p id="map-startup-note">도로와 보행안전 정보를 불러오는 중입니다.</p>
           <button id="map-startup-continue" type="button" hidden>기본 지도 먼저 보기</button>
         </div>
-        <div class="map-startup-footer" aria-hidden="true">동작구 보행안전 지도 서비스</div>
+        <div class="map-startup-footer"><span aria-hidden="true">동작구 보행안전 지도 서비스</span><span class="map-startup-version" id="map-startup-version" aria-label="앱 버전">v8.26.1</span></div>
       </div>
       <header class="topbar">
 

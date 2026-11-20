@@ -59,7 +59,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   preferences.append(choices);
   function chooseProfile(value){if(!Object.hasOwn(profileLabels,value))return;profile=value;try{localStorage.setItem(profileKey,value)}catch{};syncProfile();preferences.hidden=true;names.firstChild.focus({preventScroll:true});}
   function syncProfile(){modal.dataset.explanation=profile||'unset';profileButton.textContent=profileLabels[profile]||'설명 방식';preferences.hidden=!!profile;for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.profile===profile));input.disabled=!profile;submit.disabled=!profile||pending;}
-  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;if(!preferences.hidden)preferences.scrollIntoView({block:'start',behavior:'instant'});});
+  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;if(!preferences.hidden){const bounds=transcript.getBoundingClientRect();transcript.scrollTop+=preferences.getBoundingClientRect().top-bounds.top;}});
   const form=el('form','dj-ai-search-form');form.method='dialog';
   const label=el('label','dj-ai-search-label','보행안전정보 질문');
   const input=el('input','dj-ai-query');input.type='search';input.id='dj-ai-query';
@@ -103,9 +103,12 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     abort?.abort();abort=null;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     if(!modal.open)return;
-    if(reduce()){modal.close();return;}
+    // Full-screen AI is not a bottom sheet. Never translate its native top layer
+    // out of the changing keyboard viewport.
+    if(window.matchMedia?.('(max-width:699px)')?.matches||reduce()){
+      input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;
+    }
     modal.classList.add('dj887-ai-closing');
-    if(window.matchMedia?.('(max-width:699px)')?.matches&&window.DongjakWindowMotion){window.DongjakWindowMotion.close(modal,()=>{if(modal.open)modal.close();modal.classList.remove('dj887-ai-closing');});return;}
     // Explicit bounded completion: never depend on Safari animationend
     // to release a dialog that owns the whole viewport's hit targets.
     closeTimer=window.setTimeout(()=>{
@@ -121,7 +124,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#map-safety-close')?.click();
     q('#map-quick-search-close')?.click();
     q('#map-quick-search-query')?.blur();
-    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
+    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();}
     // iOS Safari: focusing the query immediately opens the keyboard before
     // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.

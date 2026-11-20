@@ -36,7 +36,11 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!closing&&button.dataset.tab===current)return;
   const motion=win.DongjakWindowMotion;
   const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
-  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: the normal click opens with fade
+  // Non-map pages use the existing navigator synchronously. No blank map frame.
+  if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
+   motion?.cancel?.(panel);return;
+  }
+  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: normal opener
   event.preventDefault();event.stopImmediatePropagation();
   pending=button;
   if(closing)return; // latest tap wins while the old panel fades away

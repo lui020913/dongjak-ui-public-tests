@@ -21,7 +21,7 @@ async function fixture(){
     {version:'2.3.4',scale:'patch',date:'2026-11-13',items:['previous fix']},
     {version:'2.3.3',scale:'patch',date:'2026-11-12',items:['older fix']}
   ]});
-  await write('index.html','<title>동작하는 안전지도 · 보행안전 지도 v2.3.4</title><button id="version-history-trigger">v2.3.4</button><strong id="dj-guide-latest-version">v2.3.4</strong>');
+  await write('index.html','<title>동작하는 안전지도 · 보행안전 지도 v2.3.4</title><button id="version-history-trigger">v2.3.4</button><strong id="dj-guide-latest-version">v2.3.4</strong><span id="map-startup-version">v2.3.4</span>');
   await write('src/v7120-settings.js','<strong id="dj-about-version-number">v2.3.4</strong>');
   return root;
 }
@@ -41,6 +41,7 @@ for(const [kind,expected] of [['major','3.0.0'],['minor','2.4.0'],['patch','2.3.
       assert.equal((await read(join(root,'public/version.json'))).version,expected);
       assert.equal((await read(join(root,'src/build-info.json'))).version,expected);
       assert.match(await readFile(join(root,'index.html'),'utf8'),new RegExp(`version-history-trigger">v${expected.replaceAll('.','\\.')}`));
+      assert.ok((await readFile(join(root,'index.html'),'utf8')).includes(`id="map-startup-version">v${expected}</span>`));
       assert.match(await readFile(join(root,'src/v7120-settings.js'),'utf8'),new RegExp(`number">v${expected.replaceAll('.','\\.')}`));
       assert.ok((await readFile(join(root,'src/app-version.js'),'utf8')).includes(`APP_VERSION="${expected}"`));
     }finally{await rm(root,{recursive:true,force:true});}
@@ -77,6 +78,8 @@ test('the update history labels release types explicitly and keeps archived reco
   assert.match(renderer,/주요 구조 개편/);
   assert.match(renderer,/기능 추가·개선/);
   assert.match(renderer,/수정·안정화/);
-  assert.match(renderer,/groupReleaseEditions\(releases\)/);
+  assert.match(renderer,/buildGenerationCatalog\(releases,\s*releaseEdition\)/);
+  assert.match(renderer,/displayVersion/);
+  assert.match(renderer,/원래 기록|실제 빌드/);
   assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
 });

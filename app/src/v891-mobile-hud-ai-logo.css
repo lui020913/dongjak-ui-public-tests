@@ -84,12 +84,10 @@
     background:transparent!important;
     box-shadow:none!important;
   }
-  /* iOS keyboard changes the visual viewport, not the fixed modal's layout
-     viewport. JS supplies the measured keyboard inset while the dialog opens. */
+  /* The AI top-layer surface is sized to the visual, not layout, viewport. */
   html body .dj-ai-search-modal[open] {
     position:fixed!important;
-    inset:0 0 var(--dj891-ai-keyboard-inset,0px) 0!important;
-    bottom:var(--dj891-ai-keyboard-inset,0px)!important;
+    inset:var(--dj891-ai-visible-top,0px) 0 auto 0!important;
     max-height:var(--dj891-ai-visible-height,100dvh)!important;
     overscroll-behavior:contain!important;
     overflow:hidden!important;
