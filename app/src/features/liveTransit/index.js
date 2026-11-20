@@ -207,7 +207,13 @@ export function attachLiveTransitOverlay(map,opts={}){
   }
   const onStyle=()=>{try{attachLayers();}catch(e){emit({status:'render_error',error:String(e.message||e)});}};
   const onStyleReload=()=>{atlasApplied=false;onStyle();};
-  const onIdle=()=>{if(started&&(!map.getLayer(LIVE_METRO_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();};
+  const onIdle=()=>{
+    if(started&&(!map.getLayer(LIVE_METRO_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();
+    // Browser QA and runtime diagnostics measure the actual rendered MapLibre layer.
+    const node=map.getContainer?.();
+    if(!started||!node?.dataset||!map.getLayer(LIVE_METRO_LAYER)||typeof map.queryRenderedFeatures!=='function')return;
+    try{node.dataset.djLiveTrainRendered=String(new Set(map.queryRenderedFeatures({layers:[LIVE_METRO_LAYER]}).map(f=>f.properties.id)).size);}catch{}
+  };
   const onVisible=()=>{if(document.visibilityState==='visible')refresh();};
   function start(){
     if(started||destroyed)return;started=true;

@@ -765,3 +765,24 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#192d32');
  await expect(sample).toHaveCSS('background-color','rgb(25, 45, 50)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(25, 45, 50)');
 });
+
+
+test('live subway source artwork decodes and markers render at initial phone map zoom',{tag:'@phone-common'},async({page})=>{
+  await page.addInitScript(()=>{
+    localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
+    localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
+  });
+  let calls=0;
+  await page.route('**/api/transport/live-vehicles**',async route=>{
+    calls++;
+    const observedAt=new Date().toISOString();
+    const metro=[['7호선','장승배기','석남'],['7호선','상도','장암'],['9호선','노량진','중앙보훈병원'],['9호선','노들','개화']].map(([line,station,destination],i)=>({line,station,destination,id:'qa-train-'+i,trainNo:'QA'+i,direction:String(i%2),status:'1',observedAt}));
+    await route.fulfill({json:{ok:true,metro,bus:[],warnings:[],availability:{metro:true,bus:false}}});
+  });
+  await ready(page);
+  const map=page.locator('#map');
+  await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
+  await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
+  await expect.poll(async()=>Number(await map.getAttribute('data-dj-live-train-rendered')||0),{timeout:90000}).toBeGreaterThan(0);
+  await test.info().attach('live-train-artwork-visible',{body:await page.screenshot(),contentType:'image/png'});
+});
