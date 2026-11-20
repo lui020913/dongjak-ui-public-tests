@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.24",
+  "application_version": "9.2.25",
   "public_work_branch": "main",
-  "purpose": "Three-quarter side-view subway windows and naturally faded iOS dimmed status edge",
-  "attempt": 98,
+  "purpose": "Lower only the subway front windshield; preserve side-view body and previous dimmed status edge changes",
+  "attempt": 99,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User clarified side perspective and approved smooth upper blur",
+  "last_retry_reason": "User requested a lower front window",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -57,9 +57,10 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   }
   // Wide dark windshield follows the rounded front face; its visible plane
   // is transverse to the train, not a narrow vertical slit in the roof.
-  ctx.beginPath();ctx.moveTo(24.4,10.1);ctx.bezierCurveTo(27.4,10.1,29.5,12.5,29.2,15.3);
-  ctx.quadraticCurveTo(27.8,17.1,25.7,17.0);ctx.quadraticCurveTo(26.1,13.5,24.4,10.1);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
-  ctx.beginPath();ctx.moveTo(25.6,10.7);ctx.quadraticCurveTo(27.5,11.3,28.0,13.0);ctx.strokeStyle='#65747e';ctx.lineWidth=.45;ctx.stroke();
+  // Lower only the cab glazing so it sits on the front face, not the roof.
+  ctx.beginPath();ctx.moveTo(24.4,12.0);ctx.bezierCurveTo(27.4,12.0,29.5,14.4,29.2,17.2);
+  ctx.quadraticCurveTo(27.8,19.0,25.7,18.9);ctx.quadraticCurveTo(26.1,15.4,24.4,12.0);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
+  ctx.beginPath();ctx.moveTo(25.6,12.6);ctx.quadraticCurveTo(27.5,13.2,28.0,14.9);ctx.strokeStyle='#65747e';ctx.lineWidth=.45;ctx.stroke();
   rounded(26.5,19.1,1.75,.85,.35);ctx.fillStyle='#ffffff';ctx.fill();
   ctx.restore();
   contour();ctx.strokeStyle='#aebac2';ctx.lineWidth=.38;ctx.stroke();
