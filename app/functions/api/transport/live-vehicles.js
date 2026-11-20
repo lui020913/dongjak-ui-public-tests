@@ -19,13 +19,33 @@ export function normalizeKST(value,now=new Date()){
   const epoch=Date.parse(s);return Number.isFinite(epoch)?new Date(epoch).toISOString():'';
 }
 const xy=(lng,lat)=>Number.isFinite(lng)&&Number.isFinite(lat)&&lng>125&&lng<129&&lat>36&&lat<39;
+// Decode only known provider row containers and validate their actual field names.
+export function metroRows(body,kind='position'){
+  const list=kind==='position'?'realtimePositionList':'realtimeArrivalList';
+  const service=kind==='position'?'realtimePosition':'realtimeStationArrival';
+  const train=kind==='position'?'trainNo':'btrainNo';
+  const asRows=x=>Array.isArray(x)?x:x&&typeof x==='object'?[x]:null;
+  for(const box of [body,body?.[service],body?.response?.body,body?.body,body?.data,body?.data?.[service]]){
+    if(!box||typeof box!=='object')continue;
+    const candidate=Array.isArray(box)?box:box[list]??box.row??box.rows??box.itemList??box.items;
+    const rows=asRows(candidate?.row??candidate?.item??candidate);
+    if(rows&&(rows.length===0||rows.some(r=>r?.[train]!=null&&r?.statnNm!=null)))return rows;
+  }
+  return null;
+}
+function metroSourceTime(row,now){
+  const day=String(row.lastRecptnDt??'').trim().replace(/[-./]/g,'');
+  const time=String(row.recptnDt??'').trim();
+  if(/^\d{8}$/.test(day)&&/^\d{2}:?\d{2}:?\d{2}$/.test(time))return normalizeKST(day+time.replace(/:/g,''),now);
+  return normalizeKST(time||(/^\d{14}$/.test(day)?day:''),now);
+}
 export function parseMetroResponse(json,line,now=new Date()){
-  if(!Array.isArray(json?.realtimePositionList))return [];
-  return json.realtimePositionList.filter(r=>r.trainNo&&r.statnNm).map(r=>({
+  const rows=metroRows(json)??[];
+  return rows.filter(r=>r.trainNo&&r.statnNm).map(r=>({
     id:`metro:${r.subwayId||r.subwayNm||line}:${r.trainNo}:${r.updnLine??''}`,
     trainNo:String(r.trainNo),line:String(r.subwayNm||line),station:String(r.statnNm),
     destination:String(r.statnTnm??''),direction:String(r.updnLine??''),status:String(r.trainSttus??''),
-    observedAt:normalizeKST(r.recptnDt || (String(r.lastRecptnDt||'').length>=14?r.lastRecptnDt:''),now),positionSource:'position'
+    observedAt:metroSourceTime(r,now),positionSource:'position'
   })).filter(x=>x.observedAt);
 }
 function xmlTag(block,tag){return block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'))?.[1]?.trim()||'';}
@@ -41,11 +61,11 @@ export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
   }).filter(b=>b.id&&xy(b.longitude,b.latitude));
 }
 async function load(url,format='json'){
-  const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':'application/xml','User-Agent':'DongjakSafetyMap-Beta/1.0'}});
+  const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':format==='raw'?'application/json, application/xml, text/xml':'application/xml','User-Agent':'DongjakSafetyMap-Beta/1.0'}});
   if(!response.ok)throw new Error('PROVIDER_HTTP_'+response.status);
   const text=await response.text();
   if(text.length>1500000)throw new Error('PROVIDER_RESPONSE_TOO_LARGE');
-  if(format==='text')return text;
+  if(format==='text'||format==='raw')return text;
   try{return JSON.parse(text);}catch{throw new Error('PROVIDER_INVALID_JSON');}
 }
 function validProviderJson(json){
@@ -53,19 +73,54 @@ function validProviderJson(json){
   const code=String(result?.CODE||result?.code||'').trim();
   if(code&&!['INFO-000','INFO-200'].includes(code))throw new Error('PROVIDER_'+code.replace(/[^A-Z0-9-]/g,''));
 }
-async function metroLine(key,line){
-  const url=`http://swopenapi.seoul.go.kr/api/subway/${encodeURIComponent(key)}/json/realtimePosition/0/250/${encodeURIComponent(line)}`;
-  const json=await load(url);validProviderJson(json);
-  if(!Array.isArray(json.realtimePositionList)){
-    if(String(json?.errorMessage?.code??json?.RESULT?.CODE)==='INFO-200')return [];
-    throw new Error('METRO_FEED_UNAVAILABLE');
+export function decodeMetroPayload(raw,kind='position'){
+  const source=String(raw??'').replace(/^\uFEFF/,'').trim();
+  const list=kind==='position'?'realtimePositionList':'realtimeArrivalList';
+  let body,format='json';
+  if(source.startsWith('<')){
+    format='xml';
+    const code=xmlTag(source,'CODE')||xmlTag(source,'code');
+    const fields=kind==='position'?['subwayId','subwayNm','statnId','statnNm','trainNo','lastRecptnDt','recptnDt','updnLine','statnTid','statnTnm','trainSttus']:['subwayId','statnNm','btrainNo','updnLine','arvlCd','recptnDt','bstatnNm'];
+    // Prefer leaf records; an outer list wrapper may contain multiple row nodes.
+    let blocks=[...source.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/gi)];
+    if(!blocks.length)blocks=[...source.matchAll(/<itemList\b[^>]*>([\s\S]*?)<\/itemList>/gi)];
+    if(!blocks.length)blocks=[...source.matchAll(new RegExp('<'+list+'\\b[^>]*>([\\s\\S]*?)<\\/'+list+'>','gi'))];
+    const rows=blocks.map(m=>Object.fromEntries(fields.map(k=>[k,xmlTag(m[1],k)]))).filter(r=>r.statnNm&&(r.trainNo||r.btrainNo));
+    body={RESULT:{CODE:code},...(rows.length||code==='INFO-200'?{[list]:rows}:{})};
+  }else{
+    try{body=JSON.parse(source);}catch{const e=new Error('PROVIDER_INVALID_JSON');e.details={format:'unknown'};throw e;}
   }
-  return parseMetroResponse(json,line);
+  const wrapper=body?.[kind==='position'?'realtimePosition':'realtimeStationArrival'];
+  const header=body?.errorMessage??body?.RESULT??wrapper?.RESULT??body?.response?.header;
+  const rawCode=String(header?.code??header?.CODE??header?.resultCode??'').trim();
+  const code=/^(?:INFO|ERROR)-\d{3}$/.test(rawCode)?rawCode:'';
+  // Only report allowlisted field names, never raw upstream data or arbitrary keys.
+  const known=['realtimePositionList','realtimeArrivalList','realtimePosition','realtimeStationArrival','errorMessage','RESULT','result','response','body','data','row','rows','items','itemList','list_total_count'];
+  const shape=known.filter(key=>Object.hasOwn(body??{},key));
+  const rows=metroRows(body,kind);
+  const details={format,shape,code:code||null,rawRows:rows?.length??null};
+  if(code&&!['INFO-000','INFO-200'].includes(code)){const e=new Error('PROVIDER_'+code);e.details=details;throw e;}
+  if(!rows&&code!=='INFO-200'){const e=new Error('METRO_FEED_UNAVAILABLE');e.details=details;throw e;}
+  return {body:{[list]:rows??[]},details};
+}
+async function loadMetroPayload(url,kind){
+  try{return decodeMetroPayload(await load(url,'raw'),kind);}catch(e){
+    // Explicit provider rejection or lack of service is not an invitation to retry.
+    if(!['METRO_FEED_UNAVAILABLE','PROVIDER_INVALID_JSON'].includes(e.message))throw e;
+    const first=e.details;
+    try{return decodeMetroPayload(await load(url.replace('/json/','/xml/'),'text'),kind);}catch(second){second.details={json:first??null,xml:second.details??null};throw second;}
+  }
+}
+async function metroLine(key,line){
+  const url='http://swopenapi.seoul.go.kr/api/subway/'+encodeURIComponent(key)+'/json/realtimePosition/0/250/'+encodeURIComponent(line);
+  const {body,details}=await loadMetroPayload(url,'position');
+  const list=parseMetroResponse(body,line);
+  return {list,details};
 }
 // Real arrival observations are a fallback only when the positions service is unavailable.
 // 0/1/2 identify an actual observed station event. Never infer a train from ETA-only rows.
 export function parseMetroArrivalPositions(json,lines=METRO_LINES,now=new Date()){
- const rows=Array.isArray(json?.realtimeArrivalList)?json.realtimeArrivalList:[],byTrain=new Map();
+ const rows=metroRows(json,'arrival')??[],byTrain=new Map();
  for(const r of rows){
    const line=METRO_LINE_IDS[String(r.subwayId)],status=String(r.arvlCd??''),station=String(r.statnNm??'').trim(),trainNo=String(r.btrainNo??'').trim();
    if(!lines.includes(line)||!['0','1','2'].includes(status)||!station||!trainNo)continue;
@@ -80,7 +135,7 @@ export function parseMetroArrivalPositions(json,lines=METRO_LINES,now=new Date()
 }
 async function arrivalPositionFallback(key,lines){
  const url='http://swopenapi.seoul.go.kr/api/subway/'+encodeURIComponent(key)+'/json/realtimeStationArrival/ALL';
- const json=await load(url);validProviderJson(json);return parseMetroArrivalPositions(json,lines);
+ const {body,details}=await loadMetroPayload(url,'arrival');return {list:parseMetroArrivalPositions(body,lines),details};
 }
 function safeMetroError(err){
  const m=String(err?.message??'');
@@ -137,7 +192,7 @@ export async function onRequestGet({request,env={}}){
   const manual=asCsv(env?.LIVE_TRANSIT_BUS_ROUTE_IDS).filter(id=>/^\d{6,12}$/.test(id)).slice(0,8);
   const stopIds=asCsv(env?.LIVE_TRANSIT_BUS_STATION_IDS||DEFAULT_STATIONS.join(',')).filter(id=>/^\d{5}$/.test(id)).slice(0,4);
   const warningCodes=[],metro=[],bus=[],metroDiagnostics={};
-  const metroTasks=wantMetro&&metroKey?lines.map(async line=>{try{const list=await metroLine(metroKey,line);metroDiagnostics[line]={state:'ok',rows:list.length};return {mode:'metro',list};}catch(e){metroDiagnostics[line]={state:'error',code:safeMetroError(e)};throw e;}}):[];
+  const metroTasks=wantMetro&&metroKey?lines.map(async line=>{try{const {list,details}=await metroLine(metroKey,line);metroDiagnostics[line]={state:'ok',rows:list.length,...details};return {mode:'metro',list};}catch(e){metroDiagnostics[line]={state:'error',code:safeMetroError(e),response:e.details??null};throw e;}}):[];
   let busRoutes=manual.map(id=>({id,name:id}));
   if(wantBus&&busKey&&!busRoutes.length){
     const tag=stopIds.join(',');
@@ -158,10 +213,10 @@ export async function onRequestGet({request,env={}}){
   const missingLines=lines.filter(line=>metroDiagnostics[line]?.state==='error');
   if(wantMetro&&arrivalKey&&missingLines.length){
     try{
-      const fallback=await arrivalPositionFallback(arrivalKey,missingLines);
+      const {list:fallback,details}=await arrivalPositionFallback(arrivalKey,missingLines);
       if(fallback.length){metro.push(...fallback);fulfilled++;warningCodes.push('METRO_ARRIVAL_FALLBACK');}
-      metroDiagnostics.arrivalFallback={state:fallback.length?'ok':'empty',rows:fallback.length};
-    }catch(e){metroDiagnostics.arrivalFallback={state:'error',code:safeMetroError(e)};}
+      metroDiagnostics.arrivalFallback={state:fallback.length?'ok':'empty',rows:fallback.length,...details};
+    }catch(e){metroDiagnostics.arrivalFallback={state:'error',code:safeMetroError(e),response:e.details??null};}
   }
   const errors=[...new Set(warningCodes)].slice(0,5);
   const data={ok:fulfilled>0,updatedAt:new Date().toISOString(),metro,bus,
