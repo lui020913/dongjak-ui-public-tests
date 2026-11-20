@@ -21,7 +21,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const summary=()=>String(label.textContent||'').replace(/\s+/g,' ').trim();
   function sync(){
     const value=summary();
-    label.dataset.djTemperature=temperature(value)||(/실패/.test(value)?'조회 실패':'조회 중');
+    label.dataset.djTemperature=label.dataset.djWeatherTemperature||temperature(value)||(/실패/.test(value)?'조회 실패':'조회 중');
     label.dataset.djWeatherIcon=iconFor(value);
     widget.setAttribute('aria-label',[title?.textContent,value].filter(Boolean).join(' · '));
     if(!sheet)return;

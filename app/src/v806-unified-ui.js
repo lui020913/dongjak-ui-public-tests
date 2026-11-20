@@ -243,7 +243,7 @@ export function installUnifiedUI(doc=document, win=window){
   function playOpen(id){
     // Search is a keyboard-aware anchored portal, not a bottom sheet.
     if(id==='map-quick-search-dropdown'&&phone())return;
-    if(reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
+    if((phone()&&id==='dj-ai-search-modal')||reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
     const target=content(element(id));if(!target)return;
     cancelActive(target);
     // On phones, only the common slide owner may animate the surface.
@@ -415,8 +415,8 @@ export function installUnifiedUI(doc=document, win=window){
       replacingSurface=ids.some(id=>id!==requested&&visible(id))||popupNodes().length?requested:'';
       const tabClick=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
       if(tabClick&&Object.values(tabPanels).includes(requested)){
-        if(win.matchMedia?.('(max-width:699px)')?.matches)tabFadeUntil.set(requested,Date.now()+3000);
-        else if(Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
+        if(Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
+        else if(phone())tabFadeUntil.set(requested,Date.now()+3000);
       }
       entranceIntent.set(requested,Date.now()+3000);
     }
@@ -434,9 +434,9 @@ export function installUnifiedUI(doc=document, win=window){
       for(const id of ids.filter(visible)){
         const explicit=id===pendingIntent || (explicitUntil.get(id)||0)>Date.now();
         const state=lifecycle.snapshot(id);
-        if(state.phase==='closed' && previous.get(id) &&
+        if(!explicit && state.phase==='closed' && previous.get(id) &&
            Date.now()-state.lastDismissedAt<680){panelHide(id);continue;}
-        if(!previous.get(id) && !lifecycle.requestOpen(id,{explicit,origin:'automatic'})){
+        if((!previous.get(id)||(explicit&&state.phase==='closed')) && !lifecycle.requestOpen(id,{explicit,origin:'automatic'})){
           panelHide(id);
         }
       }
@@ -465,7 +465,12 @@ export function installUnifiedUI(doc=document, win=window){
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          if(!activeAnimation.has(target))playOpen(id);
+          if(phone()&&tabReplacement.has(id)){
+            // The page frame remains opaque. Only the incoming body fades in.
+            cancelActive(target);
+            const body=target?.querySelector('.dj836-sheet-body');
+            if(!reduced()&&body?.animate)body.animate([{opacity:.72},{opacity:1}],{duration:140,easing:'ease-out'});
+          }else if(!activeAnimation.has(target))playOpen(id);
           tabReplacement.delete(id);
         }
         else if(!now&&was){

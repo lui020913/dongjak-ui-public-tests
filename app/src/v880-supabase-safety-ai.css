@@ -317,8 +317,9 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 .dj-ai-composer{display:grid;gap:8px;min-width:0;background:var(--ai-bg)}
 .dj-ai-visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 @media(max-width:699px){
- html body #dj-ai-search-modal[open]{inset:0 0 var(--dj891-ai-keyboard-inset,0px) 0!important;margin:0!important;width:100%!important;max-width:none!important;height:var(--dj891-ai-visible-height,100dvh)!important;max-height:var(--dj891-ai-visible-height,100dvh)!important;border:0!important;border-radius:0!important;animation:none!important;overflow:hidden!important;box-shadow:none!important;padding:0!important}
- #dj-ai-search-modal[open]::backdrop{background:rgba(15,31,32,calc(.43 * var(--dj-scrim-alpha,1)))!important;animation:none!important;backdrop-filter:none!important}
+ html body #dj-ai-search-modal[open]{position:fixed!important;inset:var(--dj891-ai-visible-top,0px) 0 auto 0!important;margin:0!important;width:100%!important;max-width:none!important;height:var(--dj891-ai-visible-height,100dvh)!important;max-height:var(--dj891-ai-visible-height,100dvh)!important;border:0!important;border-radius:0!important;animation:none!important;overflow:hidden!important;box-shadow:none!important;padding:0!important;transform:none!important;translate:none!important;opacity:1!important}
+ #dj-ai-search-modal[open]::backdrop{background:var(--ai-bg)!important;background-image:none!important;animation:none!important;backdrop-filter:none!important}
+ html:has(#dj-ai-search-modal[open]),body:has(#dj-ai-search-modal[open]){overscroll-behavior:none;overflow:hidden}
  #dj-ai-search-modal[open].dj887-ai-closing{animation:none!important}
  html body #dj-ai-search-modal .dj-ai-search-body{display:flex!important;flex-direction:column!important;box-sizing:border-box;height:100%;min-height:0;padding:env(safe-area-inset-top,0px) 16px max(12px,env(safe-area-inset-bottom,0px))!important;gap:8px!important}
  html body #dj-ai-search-modal .dj-ai-search-header{flex:none;touch-action:auto!important;padding:8px 0 12px;gap:8px;background:var(--ai-bg)}
@@ -330,8 +331,8 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal .dj-ai-disclaimer{font-size:10px;line-height:1.35}
  html body #dj-ai-search-modal .dj-ai-query,html body #dj-ai-search-modal .dj-ai-submit{min-height:44px}
  html body #dj-ai-search-modal .dj-ai-query::-webkit-search-cancel-button{appearance:none}
- body:has(#dj-ai-search-modal[open]){background:var(--djNext-surface,#fff)}
- body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#191b1f}
+ body:has(#dj-ai-search-modal[open]){background:#fff}
+ body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#192d32}
  #dj-ai-search-modal .dj-ai-search-header::before{display:none!important}
  #dj-ai-search-modal .dj-ai-transcript{flex:1 1 0;min-height:0}
  #dj-ai-search-modal .dj-ai-composer{flex:none;padding-top:8px;border-top:1px solid var(--ai-line)}

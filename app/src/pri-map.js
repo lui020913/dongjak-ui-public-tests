@@ -47,7 +47,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
    if(!map.getLayer(LINE)){
     // Keep street names readable: insert below the first symbol layer.
     const before=map.getStyle()?.layers?.find(l=>l.type==='symbol')?.id;
-    map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:12,filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':colors,'line-opacity':.88,'line-width':['interpolate',['linear'],['zoom'],12,1.2,15,3.4,18,8,19,12]}},before);
+    map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:12,filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':colors,'line-opacity':.96,'line-width':['interpolate',['linear'],['zoom'],12,1.5,15,3.6,18,7,19,10]}},before);
    }
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:17,filter:['==',['geometry-type'],'Point'],paint:{'circle-radius':3,'circle-color':colors,'circle-stroke-color':'#fff','circle-stroke-width':1}});
    map.getSource(SOURCE).setData(display);
@@ -59,7 +59,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;
-  if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='원본 평가연장 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km · 회색: 미평가'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+  if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 회색: 미평가';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   render();
  }
  function inspect(e){

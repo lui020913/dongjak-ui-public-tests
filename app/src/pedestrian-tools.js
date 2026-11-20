@@ -386,19 +386,25 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     renderAccessSummary('loading');
     void runAccessQuery(current);
   });
-  nearButton.addEventListener('click',async()=>{
+  function offerMapCenter(message){
+    panel.dataset.nearbyMode='empty';showMessage(message);
+    const button=el('button','ped-nearby-item dj-nearby-map-center','지도 중심으로 조회');button.type='button';
+    button.addEventListener('click',()=>void showNearby(true));results.append(button);
+  }
+  async function showNearby(useMapCenter=false){
     seq++;const current=seq;
     showPanel('내 주변 보행정보');
     panel.dataset.nearbyMode='list';
     width.hidden=true;
-    showMessage('위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');
+    showMessage(useMapCenter?'지도 중심 시설 자료 확인 중…':'위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');
     try{
-      const position=await requestPosition({enableHighAccuracy:false,timeout:12000,maximumAge:60000});
+      const position=useMapCenter?null:await requestPosition({enableHighAccuracy:false,timeout:12000,maximumAge:60000});
       if(current!==seq)return;
-      const latitude=Number(position?.coords?.latitude),longitude=Number(position?.coords?.longitude);
+      const center=useMapCenter?map.getCenter():null;
+      const latitude=Number(useMapCenter?center?.lat:position?.coords?.latitude),longitude=Number(useMapCenter?center?.lng:position?.coords?.longitude);
       if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표를 확인하지 못했습니다.');
       const inside=isDongjak(longitude,latitude);if(inside!==true){
-        panel.dataset.nearbyMode='empty';showMessage(inside===false?'현재 위치는 동작구 밖입니다. 동작구 안에서 다시 조회해 주세요.':'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
+        offerMapCenter(inside===false?(useMapCenter?'지도 중심이 동작구 밖입니다. 지도를 동작구 안으로 옮긴 후 다시 조회해 주세요.':'현재 위치는 동작구 밖입니다. 지도 중심을 기준으로 조회할 수 있습니다.'):'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
         return;
       }
       map.flyTo({center:[longitude,latitude],zoom:Math.max(map.getZoom(),15.3),duration:600});
@@ -434,7 +440,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
             const back=el('button','ped-nearby-item','목록으로 돌아가기');back.type='button';
             back.addEventListener('click',()=>{clearNearbyMarker();panel.dataset.nearbyMode='list';results.replaceChildren(...saved);status.hidden=false;requestAnimationFrame(()=>{scroll.scrollTop=listScroll;});});
             panel.dataset.nearbyMode='selected';status.hidden=true;
-            results.replaceChildren(el('strong','dj-nearby-selected-name',displayName),el('p','ped-tools-note',`현재 위치에서 직선거리 ${item.distance}m`),back);
+            results.replaceChildren(el('strong','dj-nearby-selected-name',displayName),el('p','ped-tools-note',`${useMapCenter?'지도 중심':'현재 위치'}에서 직선거리 ${item.distance}m`),back);
             const mobile=window.matchMedia?.('(max-width:699px)')?.matches;
             requestAnimationFrame(()=>{
               if(panel.hidden||panel.dataset.nearbyMode!=='selected')return;
@@ -448,15 +454,16 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
         }
         results.append(section);
       }
-      status.textContent=`반경 ${RADIUS_M}m · 위치 정확도 약 ${Math.round(Number(position.coords.accuracy)||0)}m\n지도에 로드된 시설만 표시합니다.`;
+      const accuracy=Number(position?.coords?.accuracy);
+      status.textContent=`${useMapCenter?'지도 중심 기준':'현재 위치 기준'} · 반경 ${RADIUS_M}m${!useMapCenter&&Number.isFinite(accuracy)?' · 위치 정확도 약 '+Math.round(accuracy)+'m':''}\n지도에 로드된 시설만 표시합니다.`;
       results.append(el('p','ped-tools-note','경사도·도로폭·시설의 실시간 상태는 원천 데이터가 부족한 곳에서 판단하지 않습니다.'));
     }catch(error){
       if(current!==seq)return;
       const code=Number(error?.code);
-      showMessage(code===1?'위치 접근이 거부되었습니다. 기기 설정에서 위치 권한을 허용해 주세요.':'위치를 확인하지 못했습니다. GPS와 브라우저 위치 권한을 확인해 주세요.');
-      onToast('내 주변 보행정보를 가져오지 못했습니다.');
+      offerMapCenter(useMapCenter?'지도 중심 시설 정보를 가져오지 못했습니다. 다시 시도해 주세요.':code===1?'위치 접근이 거부되었습니다. 지도 중심으로 조회할 수 있습니다.':'현재 위치를 확인하지 못했습니다. 지도 중심으로 조회할 수 있습니다.');
     }
-  });
+  }
+  nearButton.addEventListener('click',()=>void showNearby());
   reportButton.addEventListener('click',()=>{
     panel.hidden=true;
     restoreOverview();
