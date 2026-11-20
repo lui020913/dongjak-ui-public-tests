@@ -752,3 +752,13 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
   @media(prefers-reduced-motion:reduce){html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action{transition:none!important}}
  }
 }
+
+/* Community feed: horizontal categories; detail view and composer use the same scroll owner. */
+@layer request-completion{ @media(max-width:699px){
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-category-tabs{display:flex!important;grid-template-columns:none!important;flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-category-tabs>.community-filter{flex:0 0 auto!important;padding-inline:13px!important;min-width:max-content!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-post-preview{background:transparent!important;box-shadow:none!important;border-radius:0!important;border-width:0 0 1px!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-feed-thumb{width:72px!important;height:72px!important;object-fit:cover!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(#community-search,#community-notifications){display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel[data-community-detail=true] :is(.community-heading-row,.community-toolbar,#community-search,#community-notifications,.community-report-secondary,.dj-page-intro){display:none!important}
+} }

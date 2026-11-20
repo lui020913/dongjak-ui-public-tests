@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.43",
+  "application_version": "9.2.44",
   "public_work_branch": "main",
-  "purpose": "Approved pill-shaped layer list, common button material, revised close, refresh, streetlight and Korean type icons, consistent shortcut glyphs",
-  "attempt": 134,
+  "purpose": "Community moderation, private notices, appeals, replies, reporting, saved posts and PWA notification foundation; preserve approved pill controls",
+  "attempt": 135,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Implement approved design; remove retired layer tiles and repeated shortcut captions.",
+  "last_retry_reason": "Integrate validated Gemini provider and community UI, preserve approved icons and layer pill selection semantics; mobile QA before protected production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
