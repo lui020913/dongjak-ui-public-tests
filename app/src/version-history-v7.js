@@ -171,7 +171,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     const parent=archive||timeline;
     if(archive){
       const heading=el('summary','dj-edition-summary');
-      heading.append(el('strong','','안전지도 '+edition.label),el('span','',edition.title),el('small','',edition.records.length+'개 기록'));
+      heading.append(el('strong','','안전지도 '+edition.label),el('span','',edition.title),el('small','',new Set(edition.records.map(x=>x.displayVersion)).size+'개 단계'));
       archive.append(heading);timeline.append(archive);
     }
     // The user-facing timeline is organized by two-part feature editions.
