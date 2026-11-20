@@ -5,7 +5,7 @@ const source=readFileSync(new URL('../src/v806-unified-ui.js',import.meta.url),'
 
 test('mobile sheet motion slides from below while overriding legacy important styles',()=>{
   assert.match(source,/const slideDuration=opening\?WINDOW_MOTION\.open:WINDOW_MOTION\.close/);
-  assert.match(source,/sheetFadeOpacity\\(progress,opening,slideFrom\\)/);
+  assert.match(source,/sheetFadeOpacity\(progress,opening,slideFrom\)/);
   assert.match(source,/windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
   assert.match(source,/win\.requestAnimationFrame\(tick\)/);
   const fade=source.slice(source.indexOf('function playMobileMotion('),source.indexOf('const motionSupported='));
