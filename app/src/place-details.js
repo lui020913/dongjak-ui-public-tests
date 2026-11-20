@@ -1,6 +1,6 @@
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
-import {sheetDragOffset,projectedDrag} from './mobile-window-motion.js';
+import {sheetDragOffset,sheetStageAction} from './mobile-window-motion.js';
 import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
 import {createSelectedLocationPin} from './selected-location-pin.js';
@@ -320,10 +320,11 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       if(!gesture||gesture.id!==event.pointerId)return;
       const {delta,velocity,active}=gesture;gesture=null;
       if(!active){reset();return;}
-      if(projectedDrag(delta,velocity)<-68&&!popupElement.classList.contains('dj871-sheet-expanded')){setMobileSheetExpanded(popupElement,true,document,window);}
-      else if(delta>55&&popupElement?.classList.contains('dj871-sheet-expanded')){
+      const action=sheetStageAction(delta,velocity,popupElement.classList.contains('dj871-sheet-expanded'));
+      if(action==='expand'){setMobileSheetExpanded(popupElement,true,document,window);}
+      else if(action==='collapse'){
         setMobileSheetExpanded(popupElement,false,document,window);
-      }else if((delta>88||(delta>48&&velocity>.8))&&popupElement){
+      }else if(action==='dismiss'&&popupElement){
         popupElement.style.setProperty('--dj-sheet-drag-y',`${delta}px`);
         dismissMobileSheet(popupElement,document,window,()=>popup?.remove());
       }else settleMobileSheetDrag(popupElement,window);

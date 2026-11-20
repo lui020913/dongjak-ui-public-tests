@@ -12,10 +12,10 @@ export function routeVehicleFeatures(rows,routeId,route,color,previous=new Map()
  for(const b of Array.isArray(rows)?rows:[]){
   const coord=[b.longitude,b.latitude],at=Date.parse(b.observedAt||b.receivedAt||'');
   if(String(b.routeId)!==routeId||!b.id||seen.has(b.id)||!coord.every(Number.isFinite)||coord[0]<125||coord[0]>129||coord[1]<36||coord[1]>39||!Number.isFinite(at)||at>now+10000||now-at>150000)continue;
-  seen.add(b.id);const prior=previous.get(b.id);let heading=prior?.heading||0;
-  if(prior&&at>prior.at){const dx=(coord[0]-prior.coord[0])*Math.cos(coord[1]*Math.PI/180),dy=coord[1]-prior.coord[1],distance=Math.hypot(dx,dy)*111000;if(distance>=8&&distance<3000)heading=(Math.atan2(dx,dy)*180/Math.PI+360)%360;}
-  previous.set(b.id,{coord,at,heading});
-  features.push({type:'Feature',properties:{id:String(b.id),routeId,route,color,heading,observedAt:b.observedAt||'',receivedAt:b.receivedAt||''},geometry:{type:'Point',coordinates:coord}});
+  seen.add(b.id);const prior=previous.get(b.id);let heading=prior?.heading||0,headingKnown=prior?.headingKnown===true;
+  if(prior&&at>prior.at){const dx=(coord[0]-prior.coord[0])*Math.cos(coord[1]*Math.PI/180),dy=coord[1]-prior.coord[1],distance=Math.hypot(dx,dy)*111000;if(distance>=8&&distance<3000){heading=(Math.atan2(dx,dy)*180/Math.PI+360)%360;headingKnown=true;}}
+  previous.set(b.id,{coord,at,heading,headingKnown});
+  features.push({type:'Feature',properties:{id:String(b.id),routeId,route,color,heading,headingKnown,observedAt:b.observedAt||'',receivedAt:b.receivedAt||''},geometry:{type:'Point',coordinates:coord}});
  }
  for(const id of previous.keys())if(!seen.has(id))previous.delete(id);
  return {type:'FeatureCollection',features};
@@ -23,7 +23,7 @@ export function routeVehicleFeatures(rows,routeId,route,color,previous=new Map()
 function vehicleArt(map){
  if(map.hasImage?.(VEHICLE_IMAGE))return true;
  if(!map.addImage||!globalThis.document?.createElement)return false;
- const c=document.createElement('canvas');c.width=48;c.height=72;const g=c.getContext('2d');if(!g)return false;
+ const c=document.createElement('canvas');c.width=48;c.height=72;const g=c.getContext('2d');if(!g||typeof g.roundRect!=='function')return false;
  g.fillStyle='#fff';g.beginPath();g.roundRect(6,2,36,68,11);g.fill();
  g.fillStyle='#2672bc';g.beginPath();g.roundRect(9,5,30,62,9);g.fill();
  g.fillStyle='#d7eaf8';g.beginPath();g.roundRect(12,10,24,14,4);g.fill();
@@ -72,9 +72,11 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
     try{
       if(!map.getSource(VEHICLES)){if(!vehicles.features.length)return;map.addSource(VEHICLES,{type:'geojson',data:vehicles});}
       if(!map.getLayer(VEHICLE_LAYER)){
-        const icon=vehicleArt(map);
-        map.addLayer(icon?{id:VEHICLE_LAYER,type:'symbol',source:VEHICLES,minzoom:11,layout:{'icon-image':VEHICLE_IMAGE,'icon-size':['interpolate',['linear'],['zoom'],11,.68,16,1,19,1.24],'icon-rotate':['get','heading'],'icon-rotation-alignment':'map','icon-pitch-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true}}:{id:VEHICLE_LAYER,type:'circle',source:VEHICLES,minzoom:11,paint:{'circle-color':['get','color'],'circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
+        let icon=false;try{icon=vehicleArt(map);}catch{}
+        map.addLayer(icon?{id:VEHICLE_LAYER,type:'symbol',source:VEHICLES,minzoom:11,filter:['==',['get','headingKnown'],true],layout:{'icon-image':VEHICLE_IMAGE,'icon-size':['interpolate',['linear'],['zoom'],11,.68,16,1,19,1.24],'icon-rotate':['get','heading'],'icon-rotation-alignment':'map','icon-pitch-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true}}:{id:VEHICLE_LAYER,type:'circle',source:VEHICLES,minzoom:11,paint:{'circle-color':['get','color'],'circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
       }
+      if(!map.getLayer(VEHICLE_LAYER+'-unknown'))map.addLayer({id:VEHICLE_LAYER+'-unknown',type:'circle',source:VEHICLES,minzoom:11,filter:['!=',['get','headingKnown'],true],paint:{'circle-color':['get','color'],'circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
+      if(map.getLayer(VEHICLE_LAYER)?.type==='circle')map.setFilter?.(VEHICLE_LAYER,['==',['get','headingKnown'],true]);
       map.getSource(VEHICLES).setData(vehicles);
     }catch{}
   }
@@ -86,7 +88,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
     try{
       const res=await vehicleFetcher(apiBase+'/live-vehicles?'+new URLSearchParams({modes:'bus',routeId:id}),{signal:ac.signal});
       const body=await res.json();
-      if(seq!==sequence||ac.signal.aborted)return;
+      if(seq!==sequence)return;if(ac.signal.aborted)throw Error('vehicle request timeout');
       if(!res.ok||body.ok!==true||!Array.isArray(body.bus))throw Error('vehicle feed unavailable');
       vehicles=routeVehicleFeatures(body.bus,id,active.route,active.color,previousVehicles);
       if(vehicles.features.length)selectedVehicles.set(map,id);else selectedVehicles.delete(map);
@@ -99,7 +101,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
     void refreshVehicles();vehicleTimer=setInterval(()=>void refreshVehicles(),60000);
   }
   const onVisibility=()=>{if(!globalThis.document?.hidden)void refreshVehicles();};
-  globalThis.document?.addEventListener('visibilitychange',onVisibility);
+  globalThis.document?.addEventListener?.('visibilitychange',onVisibility);
   const onStyle=()=>{baseFilters.clear();draw();drawVehicles();};
   map.on?.('style.load',onStyle);
   function clear(){
@@ -137,5 +139,5 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
       active=null;onState({id,route,status:'error',code:error?.code||'ROUTE_PATH_UPSTREAM'});
     }finally{clearTimeout(timer);if(controller===ac)controller=null;}
   }
-  return {select,clear,refreshVehicles,getActive:()=>active,destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener('visibilitychange',onVisibility);}};
+  return {select,clear,refreshVehicles,getActive:()=>active,destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
 }
