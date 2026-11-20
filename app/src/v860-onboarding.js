@@ -225,6 +225,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!opened)return;
     swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     overlay.classList.remove('dj860-swapping');
+    for(const node of [visualPane,copy]){node.style.removeProperty('opacity');node.style.removeProperty('transition');}
     opened=false;
     // This modal owns its close transition. Inform the shared lifecycle once
     // without closing unrelated map/guide surfaces in the global cooldown.
@@ -250,6 +251,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(opened)return;
     swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     overlay.classList.remove('dj860-swapping');
+    for(const node of [visualPane,copy]){node.style.removeProperty('opacity');node.style.removeProperty('transition');}
     if(auto&&(seenInMemory||readSeen(win))&&!force)return;
     preloadOnboardingImages();
     if(closeTimer){win.clearTimeout(closeTimer);closeTimer=0;}
@@ -278,13 +280,27 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     // pre-existing enter animation showing the next slide before exit finishes.
     visualPane.classList.remove('dj860-entering');
     copy.classList.remove('dj860-entering');
+    // Inline important opacity is needed: production's later high-specificity
+    // motion overrides were swallowing the stylesheet-only fade on iOS.
+    for(const node of [visualPane,copy]){
+      node.style.setProperty('transition','opacity 135ms ease-in','important');
+      node.style.setProperty('opacity','1','important');
+    }
+    void visualPane.offsetWidth;
     overlay.classList.add('dj860-swapping');
+    for(const node of [visualPane,copy])node.style.setProperty('opacity','0','important');
     swapTimer=win.setTimeout(()=>{
       swapTimer=0;
       if(epoch!==swapEpoch||!opened)return;
       overlay.classList.remove('dj860-swapping');
       render(target,direction);
-    },125);
+      for(const node of [visualPane,copy]){
+        node.style.setProperty('transition','opacity 190ms cubic-bezier(.22,1,.36,1)','important');
+        node.style.setProperty('opacity','0','important');
+      }
+      void visualPane.offsetWidth;
+      for(const node of [visualPane,copy])node.style.setProperty('opacity','1','important');
+    },150);
   }
   function move(delta){
     if(!opened)return;
