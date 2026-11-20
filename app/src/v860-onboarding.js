@@ -276,31 +276,46 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
     const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
-    // Exit the old artwork/copy first, then enter the new slide. Avoid the
-    // pre-existing enter animation showing the next slide before exit finishes.
+    // A real painted frame must separate opacity=1 from opacity=0:
+    // setting both in one task can coalesce away the whole fade on Safari.
     visualPane.classList.remove('dj860-entering');
     copy.classList.remove('dj860-entering');
-    // Inline important opacity is needed: production's later high-specificity
-    // motion overrides were swallowing the stylesheet-only fade on iOS.
-    for(const node of [visualPane,copy]){
-      node.style.setProperty('transition','opacity 135ms ease-in','important');
+    const panes=[visualPane,copy];
+    for(const node of panes){
+      node.style.setProperty('transition','none','important');
       node.style.setProperty('opacity','1','important');
     }
     void visualPane.offsetWidth;
     overlay.classList.add('dj860-swapping');
-    for(const node of [visualPane,copy])node.style.setProperty('opacity','0','important');
+    const fadeOut=()=>{
+      if(epoch!==swapEpoch||!opened)return;
+      for(const node of panes){
+        node.style.setProperty('transition','opacity 170ms ease-in','important');
+        node.style.setProperty('opacity','0','important');
+      }
+    };
+    if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut);
+    else win.setTimeout(fadeOut,16);
     swapTimer=win.setTimeout(()=>{
       swapTimer=0;
       if(epoch!==swapEpoch||!opened)return;
       overlay.classList.remove('dj860-swapping');
       render(target,direction);
-      for(const node of [visualPane,copy]){
-        node.style.setProperty('transition','opacity 190ms cubic-bezier(.22,1,.36,1)','important');
+      for(const node of panes){
+        node.style.setProperty('transition','none','important');
         node.style.setProperty('opacity','0','important');
       }
       void visualPane.offsetWidth;
-      for(const node of [visualPane,copy])node.style.setProperty('opacity','1','important');
-    },150);
+      const fadeIn=()=>{
+        if(epoch!==swapEpoch||!opened)return;
+        for(const node of panes){
+          node.style.setProperty('transition','opacity 200ms cubic-bezier(.22,1,.36,1)','important');
+          node.style.setProperty('opacity','1','important');
+        }
+      };
+      if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeIn);
+      else win.setTimeout(fadeIn,16);
+    },205);
   }
   function move(delta){
     if(!opened)return;
