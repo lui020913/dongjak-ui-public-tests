@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.49",
+  "application_version": "9.2.50",
   "public_work_branch": "main",
-  "purpose": "Fix verified mobile route result clipping by resetting the legacy horizontal transform in the authoritative cascade layer; enforce visible centred route result geometry in deployed mobile QA.",
-  "attempt": 143,
+  "purpose": "Candidate: mobile community, iOS AI keyboard, tab transition, layer and PRI HUD, nearby safety and weather stabilization; chronological display history; larger rail icons and direction-separated lane visualization; directional headlights and stamped startup version.",
+  "attempt": 144,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Retry the approved route-card-only release after real six-lane Gemini preflight on the preceding immutable Preview; simplify provider schema after HTTP 400 while retaining exact local evidence validation. No app source changes.",
+  "last_retry_reason": "Apply original approved patches 01, 02, 04, 05 and rebased 03 on stable main bd5ff7b; require all Source CI, exact Preview capture, Gemini review, and protected Production checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
