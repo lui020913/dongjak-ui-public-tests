@@ -80,7 +80,8 @@
     /* Only the five native tabs may participate in the phone dock grid. A legacy auxiliary control must never create an implicit sixth track. */
     @media (max-width:699px) {
       #app #bottom-nav {grid-auto-flow:row!important;grid-auto-columns:minmax(0,0px)!important;}
-      #app #bottom-nav > :not(.nav-tab) {display:none!important;}
+      #app #bottom-nav > :not(.nav-tab,.dj-motion-indicator) {display:none!important;}
+      #app #bottom-nav > .dj-motion-indicator {position:absolute!important;grid-column:auto!important;grid-row:auto!important;pointer-events:none!important;}
       #app #bottom-nav > .nav-tab {grid-row:1!important;grid-column:auto!important;}
       #app #bottom-nav > .nav-tab[data-tab="route"] {grid-column:1!important;}
       #app #bottom-nav > .nav-tab[data-tab="participate"] {grid-column:2!important;}
