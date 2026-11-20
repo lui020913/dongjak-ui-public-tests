@@ -153,6 +153,7 @@ import './public-ui-production-overlay.css';
 import './v910-request-completion.css';
 import './v914-mobile-ux-fixes.css';
 import './mobile-first-layout.css';
+import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';

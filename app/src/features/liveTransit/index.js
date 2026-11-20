@@ -6,6 +6,7 @@ import {selectedBusVehicleRoute} from '../../bus-route-overlay.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
 import {TRAIN_ICON_SIZE_STOPS,trainLaneOffset,trainLaneOffsetExpression} from './train-lanes.js';
 import {withTrainHeadlights} from './train-headlights.js';
+import {TRAIN_BEAM_LAYER,trainBeamImageId,ensureTrainBeamImages} from './train-beams.js';
 export const LIVE_SOURCE='dongjak-live-vehicles-v827';
 export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
 export const LIVE_BUS_LAYER='dongjak-live-bus-v827';
@@ -130,6 +131,8 @@ export function attachLiveTransitOverlay(map,opts={}){
     // Never delay the layer while the artwork downloads. Install recognizable fallback icons first.
     let trainImages=ensureTrainImages(map,trainAtlas,!!trainAtlas&&!atlasApplied,opts.trainIconDocument??globalThis.document);
     if(trainImages&&trainAtlas)atlasApplied=true;
+    let beamImages=false;
+    try{beamImages=trainImages&&ensureTrainBeamImages(map);}catch{beamImages=false;}
     if(!trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='symbol')trainImages=true;
     if(trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='circle')map.removeLayer(LIVE_METRO_LAYER);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
@@ -139,6 +142,20 @@ export function attachLiveTransitOverlay(map,opts={}){
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],11,6,13.2,7.5,15.5,10,18,12.8]}});
+    // Put translucent light BELOW the original atlas symbols, never paint over the headlights.
+    // The shared icon offset and heading keep the cones on the correct track side.
+    if(beamImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='symbol'&&!map.getLayer(TRAIN_BEAM_LAYER)){
+      map.addLayer({id:TRAIN_BEAM_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
+        filter:['all',['==',['get','mode'],'metro'],['==',['get','headingKnown'],true]],
+        layout:{'icon-image':['get','trainBeam'],
+          'icon-size':['interpolate',['linear'],['zoom'],...TRAIN_ICON_SIZE_STOPS],
+          'icon-offset':trainLaneOffsetExpression(),
+          'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center',
+          'icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport',
+          'icon-rotate':['coalesce',['get','trainRotation'],0]},
+        paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.38,13.2,.66,15.5,.82,18,.9]}
+      },LIVE_METRO_LAYER);
+    }
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'bus'],paint:{...common,'circle-color':'#0785ef',
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,5.7,15.5,7.7,18,9.8]}});
@@ -158,6 +175,7 @@ export function attachLiveTransitOverlay(map,opts={}){
         const prior=priorById.get(f.properties.id);
         const facing=trainFacing(map,f.properties,prior?.trainFacing);
         f.properties.trainFacing=facing||'unknown';
+        f.properties.trainBeam=facing&&f.properties.headingKnown?trainBeamImageId(facing):'';
         f.properties.trainRotation=trainRotation(map,f.properties,facing||'right',prior?.trainRotation);
         f.properties.trainLaneOffset=trainLaneOffset(f.properties.line,facing,f.properties.headingKnown);
         f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right',Boolean(facing&&f.properties.headingKnown));

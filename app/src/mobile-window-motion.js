@@ -12,6 +12,19 @@ export function windowMotionFrame(progress,opening,distance,height,docked=false)
   return {offset,opacity:1,clip:docked?Math.min(Math.max(0,height),offset):0};
 }
 
+/**
+ * Unified visible fade layered onto the existing sheet translation.
+ * The slide's geometry remains the sole movement owner; tab replacements
+ * still use their faster stationary transition and dialogs stay in place.
+ */
+export function sheetFadeOpacity(progress,opening,startOpacity){
+  const input=Math.max(0,Math.min(1,Number(progress)||0));
+  const p=windowMotionProgress(Math.max(0,Math.min(1,(input-.06)/.88)));
+  const from=Number.isFinite(startOpacity)?Math.max(0,Math.min(1,startOpacity)):(opening?.12:1);
+  const to=opening?1:.07;
+  return from+(to-from)*p;
+}
+
 /** Confirmations are stationary; fade the entire overlay and backdrop together. */
 export const CONFIRM_MOTION=Object.freeze({open:200,close:180});
 export const TAB_MOTION=Object.freeze({open:145,close:105});
