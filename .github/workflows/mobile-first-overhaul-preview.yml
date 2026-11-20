@@ -176,7 +176,7 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 2
 
   desktop-tablet-qa:
     needs: [build, preview]
@@ -216,7 +216,7 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2
 
   visual-capture:
     needs: [build, preview]
@@ -281,7 +281,7 @@ jobs:
           path: qa-artifacts/
           if-no-files-found: error
           overwrite: true
-          retention-days: 7
+          retention-days: 2
 
   visual-qa:
     needs: [build, preview, visual-capture]
@@ -339,7 +339,7 @@ jobs:
             qa-artifacts/**/design-gate.json
           if-no-files-found: ignore
           overwrite: true
-          retention-days: 7
+          retention-days: 2
 
   explore-qa:
     needs: [build, preview, visual-qa]
@@ -383,7 +383,7 @@ jobs:
           name: mobile-exploration-${{ github.run_id }}
           path: qa-explore/
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 2
 
   production:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
