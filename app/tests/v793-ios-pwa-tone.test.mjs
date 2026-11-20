@@ -27,7 +27,7 @@ test('only iOS Home Screen phone gets status bar treatment',()=>{
 test('no deprecated meta; iOS PWA map tone and opaque search are isolated from desktop',()=>{
   const html=read('index.html'); const css=read('src/ios-pwa-overlay-chrome.css');
   const js=read('src/ios-pwa-overlay-chrome.js');
-  const manifest=JSON.parse(read('public/manifest.webmanifest'));
+  const manifest=JSON.parse(read('public/manifest-light.webmanifest'));
   assert.doesNotMatch(html,/name="apple-mobile-web-app-status-bar-style"/);
   assert.match(html,/viewport-fit=cover/);
   assert.match(html,/ios-pwa-overlay-chrome.css/);
