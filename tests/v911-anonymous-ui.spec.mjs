@@ -924,14 +924,17 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  }
 });
 
-test('the rendered history keeps the real production SemVer instead of catalog renumbering',{tag:'@phone-layout'},async({page})=>{
+test('the release history shows concise two-part editions without changing real production metadata',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await ready(page);
  const response=await page.request.get('/version.json');
  expect(response.ok()).toBe(true);
  const version=String((await response.json()).version);
+ const edition='v'+version.split('.').slice(0,2).join('.');
  const latest=page.locator('#history-version-timeline .v707-release').first();
  await expect(latest).toHaveAttribute('data-version',version);
- await expect(latest).toHaveAttribute('data-display-version','v'+version);
- expect((await latest.locator('h4').textContent()).trim()).toBe('v'+version);
+ await expect(latest).toHaveAttribute('data-display-version',edition);
+ await expect(latest.locator('h4')).toHaveText(edition);
+ await expect(latest).toHaveAttribute('data-current-build','true');
+ await expect(latest.locator('.dj-edition-original')).toContainText('v'+version);
 });
