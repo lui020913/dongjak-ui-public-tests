@@ -151,7 +151,7 @@ test('installed iOS PWA status color follows scrims, native dialogs, and both th
     toolbar.style.cssText='position:fixed;top:60px;left:8px;width:20px;height:20px';
     app.append(toolbar);
     const z=el=>Number.parseInt(getComputedStyle(el).zIndex,10);
-    return {topbar:z(app.querySelector('.topbar')),dim:z(app.querySelector('#dj-mobile-header-dim')),toolbar:z(toolbar)};
+    return {topbar:z(app.querySelector('.topbar')||document.querySelector('.topbar')),dim:z(document.getElementById('dj-mobile-header-dim')),toolbar:z(toolbar)};
   });
   expect(stacking.topbar).toBeLessThan(stacking.dim);
   expect(stacking.toolbar).toBeLessThan(stacking.dim);
