@@ -33,7 +33,11 @@ export const test=base.extend({
           if(s.display==='none'||s.visibility==='hidden')return [];
           return [{selector,x:r.x,y:r.y,w:r.width,h:r.height,opacity:Number(s.opacity),transform:s.transform,scroll:n.scrollTop,radius:s.borderRadius}];
         });
-        batch.push({t:Math.round(started+t),dt:Math.round(dt*10)/10,viewport:[innerWidth,innerHeight],nodes});
+        const groups=sample%6===0?['#bottom-nav .nav-tab','#djNext-scroll .djNext-tool','#djNext-layer-panel .djNext-layer-action'].map(selector=>{
+          const items=[...document.querySelectorAll(selector)].filter(n=>n.getClientRects().length&&getComputedStyle(n).visibility==='visible').map(n=>{const r=n.getBoundingClientRect(),s=getComputedStyle(n);return {id:n.id||n.getAttribute('data-tab')||null,x:r.x,y:r.y,w:r.width,h:r.height,radius:s.borderRadius,fontSize:s.fontSize,shadow:s.boxShadow,background:s.backgroundColor,overflowX:n.scrollWidth-n.clientWidth};});
+          return {selector,items};
+        }):null;
+        batch.push({t:Math.round(started+t),dt:Math.round(dt*10)/10,viewport:[innerWidth,innerHeight],nodes,groups});
         if(++sample%30===0){const send=batch;batch=[];window.__djAuditBatch(send).catch(()=>{});}
         requestAnimationFrame(capture);
       }
