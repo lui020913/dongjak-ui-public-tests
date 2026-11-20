@@ -35,12 +35,12 @@ export function installMobileBrowserLayout(doc,win){
       root.style.removeProperty('--dj-browser-vvh');
       root.style.removeProperty('--dj-browser-keyboard-lift');
       delete root.dataset.djBrowserKeyboard;
-      doc.getElementById('app')?.style.removeProperty('--dj829-tools-top');
+      doc.getElementById?.('app')?.style.removeProperty('--dj829-tools-top');
       return;
     }
     // Mobile browser chrome changes the visual viewport dynamically. The
     // shortcut rail follows the REAL bottom edge of the search/AI row.
-    const app=doc.getElementById('app');
+    const app=doc.getElementById?.('app');
     const topbar=app?.querySelector('.topbar');
     const headerRect=topbar?.getBoundingClientRect?.();
     if(headerRect?.height>30&&headerRect.bottom>30){
@@ -96,7 +96,7 @@ export function installMobileBrowserLayout(doc,win){
     delete root.dataset.djBrowserLayoutInstalled;
     root.style.removeProperty('--dj-browser-vvh');
     root.style.removeProperty('--dj-browser-keyboard-lift');
-    doc.getElementById('app')?.style.removeProperty('--dj829-tools-top');
+    doc.getElementById?.('app')?.style.removeProperty('--dj829-tools-top');
   };
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
