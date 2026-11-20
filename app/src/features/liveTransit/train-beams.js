@@ -14,7 +14,7 @@ export function createTrainBeamSprite(facing){
   const width=TRAIN_BEAM_WIDTH,height=TRAIN_BEAM_HEIGHT;
   const data=new Uint8Array(width*height*4);
   const direction=facing==='right'?1:-1;
-  const originX=width/2+direction*41;
+  const originX=(width-1)/2+direction*41;
   // Match the two lamp heights of the existing 96px atlas crop.
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     const depth=(x-originX)*direction;
