@@ -81,12 +81,13 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
 });
 
-test('installed iOS PWA status color follows scrims, native dialogs, and both themes',async({page})=>{
+test('installed iOS PWA status color follows scrims, native dialogs, and both themes @phone-ios',async({page})=>{
   await page.addInitScript(()=>{
     Object.defineProperty(navigator,'standalone',{configurable:true,value:true});
     Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'});
   });
-  await page.route('**/*',route=>{const url=new URL(route.request().url());return ['127.0.0.1','localhost'].includes(url.hostname)||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
+  const allowedOrigin=new URL(process.env.DONGJAK_TARGET_URL||'http://127.0.0.1:4173').origin;
+  await page.route('**/*',route=>{const url=new URL(route.request().url());return url.origin===allowedOrigin||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
   await page.goto('/',{waitUntil:'domcontentloaded'});
   await expect(page.locator('html')).toHaveClass(/dj-ios-home-pwa/);
   const meta=page.locator('meta[name="theme-color"]');
