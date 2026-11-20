@@ -247,7 +247,13 @@ export function installPwaOverlayChrome(doc=document,win=window) {
     observer=new Observer(records=>{
       const changed=records.some(record=>{
         if(record.target===themeMeta)return enabled&&themeMeta.content!==root.style.getPropertyValue('--dj-ios-pwa-status-color');
-        if(record.type==='attributes')return relevantNode(record.target);
+        if(record.type==='attributes') {
+          if(relevantNode(record.target))return true;
+          if(record.attributeName==='open'&&record.target?.tagName==='DIALOG'&&record.oldValue!==null)return true;
+          if(record.attributeName==='class'&&/backdrop|scrim|djNext-modal/i.test(record.oldValue||''))return true;
+          if(['aria-modal','data-dj-overlay-open','data-dj-overlay-scrim','data-dj-scrim'].includes(record.attributeName)&&record.oldValue!==null)return true;
+          return false;
+        }
         return [...record.addedNodes,...record.removedNodes].some(relevantNode);
       });
       if(changed)schedule();
@@ -255,7 +261,8 @@ export function installPwaOverlayChrome(doc=document,win=window) {
     observer.observe(themeMeta,{attributes:true,attributeFilter:['content']});
     observer.observe(body,{
       attributes:true,
-      attributeFilter:['class','hidden','open','aria-hidden','aria-modal','style','data-state','data-open','data-theme'],
+      attributeOldValue:true,
+      attributeFilter:['class','hidden','open','aria-hidden','aria-modal','style','data-state','data-open','data-theme','data-dj-overlay-open','data-dj-overlay-scrim','data-dj-scrim'],
       childList:true,
       subtree:true
     });
@@ -263,7 +270,14 @@ export function installPwaOverlayChrome(doc=document,win=window) {
 
   // CSS-driven fades do not mutate DOM at their final frame; reconcile after
   // transitions/animations and native dialog closure as well as DOM changes.
-  const onMotionEnd=event=>{if(enabled&&relevantNode(event.target))schedule();};
+  const onMotionEnd=event=>{
+    if(!enabled)return;
+    if(event.type==='close'&&event.target?.tagName==='DIALOG') {
+      schedule();
+      return;
+    }
+    if(relevantNode(event.target))schedule();
+  };
   const motionEvents=['transitionend','transitioncancel','animationend','animationcancel','close'];
   for(const name of motionEvents)doc.addEventListener?.(name,onMotionEnd,true);
 
