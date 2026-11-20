@@ -51,6 +51,7 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-vision-retry.test.mjs
           node --check scripts/live-qa-analyze.mjs
+          node --test tests/live-qa-verify-capture.test.mjs
       - name: Test and build exact public app source
         id: build
         env:
@@ -217,10 +218,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  visual-qa:
+  visual-capture:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    name: '3. 디자인 연속 검증 (${{ matrix.lane }}/6)'
+    name: '3. 디자인 화면 촬영 (${{ matrix.lane }}/6)'
     strategy:
       fail-fast: false
       max-parallel: 6
@@ -263,16 +264,6 @@ jobs:
       - name: Analyze measured geometry and motion
         if: always() && steps.capture.outcome != 'skipped'
         run: node scripts/live-qa-analyze.mjs qa-artifacts
-      - name: Review actual design with Gemini
-        if: always() && steps.capture.outcome == 'success'
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then echo "QA_DESIGN_UNAVAILABLE missing configured Gemini key"; exit 1; fi
-          node scripts/live-qa-analyze.mjs qa-artifacts --vision
-      - name: Enforce visual evidence and serious design review
-        if: always() && steps.capture.outcome != 'skipped'
-        run: node scripts/live-qa-release-gate.mjs qa-artifacts
       - name: Decode original recording for motion evidence
         if: always() && steps.capture.outcome != 'skipped'
         run: |
@@ -284,14 +275,73 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mobile-design-qa-${{ github.run_id }}-lane-${{ matrix.lane }}
+          name: mobile-design-capture-${{ github.run_id }}-lane-${{ matrix.lane }}
           path: qa-artifacts/
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  visual-qa:
+    needs: [build, preview, visual-capture]
+    if: needs.preview.result == 'success' && needs.visual-capture.result == 'success'
+    name: '3. Gemini 디자인 분석 (${{ matrix.lane }}/6)'
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        lane: [1, 2, 3, 4, 5, 6]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}/
+      SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      APP_VERSION: ${{ needs.build.outputs.app_version }}
+      BUILD_RUN: ${{ github.run_id }}
+      QA_LANE: ${{ matrix.lane }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify exact visual candidate before review
+        run: node scripts/live-qa-verify-candidate.mjs
+      - name: Download exact lane capture from this release run
+        uses: actions/download-artifact@v4
+        with:
+          name: mobile-design-capture-${{ github.run_id }}-lane-${{ matrix.lane }}
+          path: qa-artifacts/
+      - name: Verify captured target and complete lane result
+        run: node scripts/live-qa-verify-capture.mjs qa-artifacts
+      - name: Review actual design with Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "QA_DESIGN_UNAVAILABLE missing configured Gemini key"; exit 1; fi
+          node scripts/live-qa-analyze.mjs qa-artifacts --vision
+      - name: Enforce visual evidence and serious design review
+        if: always()
+        run: node scripts/live-qa-release-gate.mjs qa-artifacts
+      - name: Confirm visual candidate unchanged
+        if: always()
+        run: node scripts/live-qa-verify-candidate.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-design-qa-${{ github.run_id }}-lane-${{ matrix.lane }}
+          path: |
+            qa-artifacts/**/audit-report.json
+            qa-artifacts/**/design-gate.json
           if-no-files-found: ignore
+          overwrite: true
           retention-days: 7
 
   explore-qa:
-    needs: [build, preview]
-    if: needs.preview.result == 'success'
+    needs: [build, preview, visual-qa]
+    if: needs.preview.result == 'success' && needs.visual-qa.result == 'success'
     name: '3. Gemini 자율 탐색'
     runs-on: ubuntu-24.04
     container:
@@ -334,8 +384,8 @@ jobs:
           retention-days: 7
 
   production:
-    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa]
-    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success'
+    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
+    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success'
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -458,8 +508,8 @@ jobs:
         run: rm -rf "$RUNNER_TEMP/encrypted" "$RUNNER_TEMP/release" "$RUNNER_TEMP/mobile-overhaul.tar.gz" "$RUNNER_TEMP/release-marker.json" "$RUNNER_TEMP/project-before.json" "$RUNNER_TEMP/bindings-before" "$RUNNER_TEMP/bindings-after" "$RUNNER_TEMP/production-deploy.log" "$RUNNER_TEMP/production-before-marker.json"
 
   notify-preview:
-    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa]
-    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
+    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -531,7 +581,7 @@ jobs:
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state=pending -f context=mobile-release -f description="Mobile release validation started" -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
   report:
-    needs: [announce, build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa, production]
+    needs: [announce, build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, production]
     if: always() && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
     name: '최종 결과 기록'
     runs-on: ubuntu-24.04
