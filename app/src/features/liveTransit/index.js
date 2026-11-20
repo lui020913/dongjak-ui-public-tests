@@ -32,6 +32,13 @@ export function trainFacing(map,props,previous=null){
   }
   return v.dx<0?'left':'right';
 }
+// Icon offsets are rotated with the icon, not geographic positions.
+// Southbound and northbound use opposite sides of a shared track centerline.
+export function trainTrackOffset(props,facing){
+  if(!props?.headingKnown||!Object.hasOwn(LINE_COLORS,props.line)||!['left','right'].includes(facing))return 0;
+  const traffic=props.line==='1호선'?-1:1;
+  return traffic*(facing==='left'?-1:1)*4.5;
+}
 export function trainRotation(map,props,facing='right',previous=0){
   const v=screenTangent(map,props);if(!v)return Number.isFinite(previous)?previous:0;
   const angle=Math.atan2(v.dy,v.dx)*180/Math.PI-(facing==='left'?180:0);
@@ -127,7 +134,8 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='circle')map.removeLayer(LIVE_METRO_LAYER);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],11,.66,12.5,.74,13.2,.84,15.5,1.13,18,1.42],
+        'icon-size':['interpolate',['linear'],['zoom'],11,.8052,12.5,.9028,13.2,1.0248,15.5,1.3786,18,1.7324],
+        'icon-offset':['match',['get','trainTrackOffset'],-4.5,['literal',[0,-4.5]],4.5,['literal',[0,4.5]],['literal',[0,0]]],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
@@ -150,6 +158,7 @@ export function attachLiveTransitOverlay(map,opts={}){
         const prior=priorById.get(f.properties.id);
         const facing=trainFacing(map,f.properties,prior?.trainFacing);
         f.properties.trainFacing=facing||'unknown';
+        f.properties.trainTrackOffset=trainTrackOffset(f.properties,facing);
         f.properties.trainRotation=trainRotation(map,f.properties,facing||'right',prior?.trainRotation);
         f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right');
       }
@@ -176,7 +185,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(!force&&!payload)return;
     const next=calculate(now);
     if(!force&&next.features.length===display.features.length&&next.features.every((f,i)=>{
-      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.observedAt===f.properties.observedAt;
+      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.trainTrackOffset===f.properties.trainTrackOffset&&old.properties.observedAt===f.properties.observedAt;
     }))return;
     display=next;
     try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;if(!belowVisibleZoom)opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
