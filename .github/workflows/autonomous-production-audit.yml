@@ -1,0 +1,55 @@
+name: Autonomous production read-only audit
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: autonomous-production-audit
+  cancel-in-progress: false
+jobs:
+  explore:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 18
+    env:
+      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check current live source is exactly main
+        id: live
+        run: |
+          set -eu
+          curl -fsS --max-time 30 "${DONGJAK_TARGET_URL}release-source.json?audit=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/qa-live.json"
+          node --input-type=module -e 'import fs from "node:fs";const d=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/qa-live.json"));const yes=d.release_status==="DEPLOYED_PRODUCTION"&&d.source_commit===process.env.GITHUB_SHA&&d.public_ui_source_commit===process.env.GITHUB_SHA;fs.appendFileSync(process.env.GITHUB_OUTPUT,"current="+yes+"\n");if(!yes)console.log("Production not identical to current main; skip scheduled source recovery audit.");'
+      - if: steps.live.outputs.current == 'true'
+        run: npm install --no-audit --no-fund --prefer-offline
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Explore anonymous live UI
+        if: steps.live.outputs.current == 'true'
+        id: explore
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "QA_DESIGN_UNAVAILABLE missing configured Gemini key"; exit 1; fi
+          npx playwright test --config=playwright.live-qa-explore.config.mjs
+      - name: Recheck exact live source
+        if: always() && steps.live.outputs.current == 'true'
+        run: |
+          curl -fsS --max-time 30 "${DONGJAK_TARGET_URL}release-source.json?post=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/qa-live-post.json"
+          node --input-type=module -e 'import fs from "node:fs";const a=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/qa-live.json")),b=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/qa-live-post.json"));if(a.build_run!==b.build_run||a.source_commit!==b.source_commit||b.release_status!=="DEPLOYED_PRODUCTION")throw Error("QA_EXPLORE_STALE live release changed");'
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.live.outputs.current == 'true'
+        with:
+          name: scheduled-exploration-${{ github.run_id }}
+          path: qa-explore/
+          if-no-files-found: ignore
+          retention-days: 7
