@@ -602,6 +602,19 @@
     content: none !important;
   }
 
+  /* A decorative selection marker must not become a sixth grid track. */
+  html body #app#app#app#app#app > #bottom-nav > .dj-motion-indicator {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: block !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
   html body #app#app#app#app#app > #bottom-nav > .nav-tab {
     display: flex !important;
     position: relative !important;
