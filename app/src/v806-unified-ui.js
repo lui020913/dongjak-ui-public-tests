@@ -1,7 +1,7 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
-import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,TAB_MOTION,tabMotionFrameDelta,confirmMotionOpacity,continuationOffset} from './mobile-window-motion.js';
+import {WINDOW_MOTION,windowMotionFrame,sheetFadeOpacity,CONFIRM_MOTION,TAB_MOTION,tabMotionFrameDelta,confirmMotionOpacity,continuationOffset} from './mobile-window-motion.js';
 /** One coordinated motion/visibility owner, added after v8.0.3 UI modules.
  * Retains the original map, route, station and dialog click handlers.
  * CSS entrance animations and earlier JS coordinators opt out while enabled.
@@ -81,6 +81,7 @@ export function installUnifiedUI(doc=document, win=window){
     const fade=isGuide||tabFade||target.dataset.djDialogFade==='true';
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
+    const slideFrom=Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?.12:1);
     const duration=tabFade?(opening?TAB_MOTION.open:TAB_MOTION.close):fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
@@ -140,7 +141,7 @@ export function installUnifiedUI(doc=document, win=window){
       const frame=windowMotionFrame(progress,opening,distance,rect.height,docked);
       if(Number.isFinite(offsetFrom)){frame.offset=continuationOffset(offsetFrom,progress,opening,distance);frame.clip=docked?Math.min(rect.height,Math.max(0,frame.offset)):0;}
       liveOffset=frame.offset;
-      target.style.setProperty('opacity','1','important');
+      target.style.setProperty('opacity',String(sheetFadeOpacity(progress,opening,slideFrom)),'important');
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
       if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
     }
@@ -221,14 +222,14 @@ export function installUnifiedUI(doc=document, win=window){
     policy:WINDOW_MOTION,
     open(target){
       if(!target||target.dataset.dj810Animating==='opening')return;
-      const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='closing'?Number(win.getComputedStyle(target).opacity):undefined;
+      const from=target.dataset.dj810Animating==='closing'?Number(win.getComputedStyle(target).opacity):undefined;
       const offset=activeAnimation.get(target)?.offset?.();
       cancelActive(target);playMobileMotion(target,true,undefined,from,offset);
     },
     close(target,finish){
       if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}
       if(target.dataset.dj810Animating==='closing')return;
-      const from=target.id==='map-gesture-guide'&&target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
+      const from=target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
       const offset=activeAnimation.get(target)?.offset?.();
       cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset))finish();
     },
