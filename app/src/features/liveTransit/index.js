@@ -124,7 +124,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='circle')map.removeLayer(LIVE_METRO_LAYER);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],12.5,.74,13.2,.84,15.5,1.13,18,1.42],
+        'icon-size':['interpolate',['linear'],['zoom'],11,.66,12.5,.74,13.2,.84,15.5,1.13,18,1.42],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
@@ -165,7 +165,9 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(!force&&typeof document!=='undefined'&&document.visibilityState==='hidden')return;
     // Recover missing layers even for stationary trains / unchanged data, before the equality shortcut.
     if(started&&now-lastAttachAttempt>=300&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();
-    if(typeof map.getZoom==='function'&&map.getZoom()<Math.min(visible.metro?metroMinZoom:Infinity,visible.bus?minimumZoom:Infinity)){opts.onVehiclesRendered?.(empty());return;}
+    const belowVisibleZoom=typeof map.getZoom==='function'&&map.getZoom()<Math.min(visible.metro?metroMinZoom:Infinity,visible.bus?minimumZoom:Infinity);
+    // Keep source data current even below the symbol minzoom (fitBounds and orientation can change zoom without moving a train).
+    if(belowVisibleZoom)opts.onVehiclesRendered?.(empty());
     if(renderPending&&!force)return;
     if(!force&&!payload)return;
     const next=calculate(now);
@@ -173,7 +175,7 @@ export function attachLiveTransitOverlay(map,opts={}){
       const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.observedAt===f.properties.observedAt;
     }))return;
     display=next;
-    try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
+    try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;if(!belowVisibleZoom)opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
   }
   async function refresh(){
     if(!started||destroyed||request||(typeof document!=='undefined'&&document.visibilityState==='hidden'))return;
@@ -207,17 +209,25 @@ export function attachLiveTransitOverlay(map,opts={}){
   }
   const onStyle=()=>{try{attachLayers();}catch(e){emit({status:'render_error',error:String(e.message||e)});}};
   const onStyleReload=()=>{atlasApplied=false;onStyle();};
+  let lastMeasure=0;
+  function measureRenderedTrains(){
+    const node=map.getContainer?.(),now=Date.now();
+    if(!started||!node?.dataset||now-lastMeasure<500||!map.getLayer(LIVE_METRO_LAYER)||typeof map.queryRenderedFeatures!=='function')return;
+    lastMeasure=now;
+    try{
+      const rendered=map.queryRenderedFeatures({layers:[LIVE_METRO_LAYER]});
+      node.dataset.djLiveTrainRendered=String(new Set(rendered.map(f=>f.properties.id)).size);
+      node.dataset.djLiveTrainDiagnostics=JSON.stringify({zoom:map.getZoom?.(),minimum:metroMinZoom,feed:payload?.metro?.length??0,features:display.features.filter(f=>f.properties.mode==='metro').length,rendered:node.dataset.djLiveTrainRendered,railLines:[...(getDisplayedRailPaths(map)?.keys()??[])],visible:visible.metro,layer:map.getLayer(LIVE_METRO_LAYER)?.type});
+    }catch{}
+  }
   const onIdle=()=>{
     if(started&&(!map.getLayer(LIVE_METRO_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();
-    // Browser QA and runtime diagnostics measure the actual rendered MapLibre layer.
-    const node=map.getContainer?.();
-    if(!started||!node?.dataset||!map.getLayer(LIVE_METRO_LAYER)||typeof map.queryRenderedFeatures!=='function')return;
-    try{node.dataset.djLiveTrainRendered=String(new Set(map.queryRenderedFeatures({layers:[LIVE_METRO_LAYER]}).map(f=>f.properties.id)).size);}catch{}
+    measureRenderedTrains();
   };
   const onVisible=()=>{if(document.visibilityState==='visible')refresh();};
   function start(){
     if(started||destroyed)return;started=true;
-    onStyle();map.on?.('style.load',onStyleReload);map.on?.('idle',onIdle);map.on?.('click',handleMapClick);
+    onStyle();map.on?.('style.load',onStyleReload);map.on?.('idle',onIdle);map.on?.('render',measureRenderedTrains);map.on?.('click',handleMapClick);
     if(atlasState==='pending'&&!atlasRequested){atlasRequested=true;void Promise.resolve().then(()=> (opts.loadTrainAtlas??loadTrainAtlas)()).catch(()=>null).then(atlas=>{trainAtlas=atlas;atlasState=atlas?'ready':'unavailable';if(started&&!destroyed)onStyle();});}
     if(typeof document!=='undefined')document.addEventListener('visibilitychange',onVisible);
     if(raf){const frame=t=>{if(!started||destroyed)return;if(t-lastRenderAt>=frameMs-.9){lastRenderAt=t;render(false);}rendering=globalThis.requestAnimationFrame(frame);};rendering=globalThis.requestAnimationFrame(frame);}
@@ -225,7 +235,8 @@ export function attachLiveTransitOverlay(map,opts={}){
     poll=setInterval(refresh,pollMs);void refresh();
   }
   function stop(){started=false;request?.abort();request=null;if(raf)globalThis.cancelAnimationFrame?.(rendering);else clearInterval(rendering);clearInterval(poll);lastRenderAt=0;renderGeneration++;renderPending=false;
-    map.off?.('style.load',onStyleReload);map.off?.('idle',onIdle);map.off?.('click',handleMapClick);
+    map.off?.('style.load',onStyleReload);map.off?.('idle',onIdle);map.off?.('render',measureRenderedTrains);map.off?.('click',handleMapClick);
+    const node=map.getContainer?.();if(node?.dataset){node.dataset.djLiveTrainRendered='0';delete node.dataset.djLiveTrainDiagnostics;}
     if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisible);
     payload=null;previous.clear();display=empty();lastUpdate=0;
     try{map.getSource(LIVE_SOURCE)?.setData(display);}catch{}

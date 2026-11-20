@@ -783,6 +783,7 @@ test('live subway source artwork decodes and markers render at initial phone map
   const map=page.locator('#map');
   await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
   await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
-  await expect.poll(async()=>Number(await map.getAttribute('data-dj-live-train-rendered')||0),{timeout:90000}).toBeGreaterThan(0);
+  try{await expect.poll(async()=>Number(await map.getAttribute('data-dj-live-train-rendered')||0),{timeout:90000}).toBeGreaterThan(0);}catch(error){console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'),await page.locator('#dj-live-vehicle-status').textContent());throw error;}
+  console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'));
   await test.info().attach('live-train-artwork-visible',{body:await page.screenshot(),contentType:'image/png'});
 });

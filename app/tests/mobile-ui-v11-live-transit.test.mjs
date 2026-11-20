@@ -138,3 +138,9 @@ test('delayed atlas never hides train layer; stationary train recovers and new a
   assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.images.get('dj-live-train-9호선-left'),atlas.get('9호선:left'));assert.equal(map.getSource(LIVE_SOURCE).data.features.length,1);
  }finally{overlay.destroy()}
 });
+
+ test('district overview keeps stationary train source current below symbol minzoom',async()=>{
+ const map=mockMap();map.zoom=10.8;setDisplayedRailPaths(map,rendered);const frames=[];
+ const overlay=attachLiveTransitOverlay(map,{stationLines:routes,metroMinZoom:11,getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]}),onVehiclesRendered:f=>frames.push(f)});
+ try{overlay.start();await waitUntil(()=>map.getSource(LIVE_SOURCE)?.data?.features?.length===1);assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,11);assert.equal(frames.at(-1).features.length,0);map.zoom=12.1;assert.equal(map.getSource(LIVE_SOURCE).data.features.length,1);}finally{overlay.destroy()}
+ });

@@ -104,7 +104,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   const setStatus=value=>safeText(message,value);
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:12.5,intervalMs:25000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:11,intervalMs:25000,renderIntervalMs:8,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
