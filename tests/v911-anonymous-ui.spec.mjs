@@ -635,13 +635,29 @@ test('phone update history fades in place and never paints over bottom navigatio
  await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
  const trigger=page.locator('#mine-panel [data-dj834-action="history"]');await trigger.scrollIntoViewIfNeeded();
  const modal=page.locator('#version-history-modal'),card=modal.locator('.version-history-dialog');
- await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
-  function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
-   if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
-    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
-   requestAnimationFrame(tick);}requestAnimationFrame(tick);
- });
- await tap(page,trigger);await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
+ // Start the visual-frame recorder and the real native trigger click in
+ // the same browser task. A Playwright hit-test can otherwise consume the
+ // full 200ms opening interval before clicking the trigger.
+ await expect(trigger).toBeVisible();
+ await page.evaluate(()=>{
+   const frames=[];window.__historyMotionFrames=frames;
+   const until=performance.now()+5000;
+   const tick=()=>{
+     if(performance.now()>until||window.__historyMotionFrames!==frames)return;
+     const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
+     if(n?.dataset.dj810Animating&&nav&&!m.hidden){
+       const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n);
+       const clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
+       frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,
+         visibleBottom:Math.min(d.bottom,r.bottom-clipped),
+         navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),
+         animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});
+     }
+     requestAnimationFrame(tick);
+   };
+   requestAnimationFrame(tick);
+   document.querySelector('#mine-panel [data-dj834-action="history"]').click();
+ });await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
  await tap(page,modal.locator('#version-history-close'));await expect(modal).toBeHidden();
  const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){
   const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
