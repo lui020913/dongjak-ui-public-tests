@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.44",
+  "application_version": "9.2.45",
   "public_work_branch": "main",
-  "purpose": "Community moderation, private notices, appeals, replies, reporting, saved posts and PWA notification foundation; preserve approved pill controls",
-  "attempt": 135,
+  "purpose": "PRI data foundation: six owner-confirmed team categories, real Sangdo 1-dong lighting survey only, other factors and combined PRI unassessed, opt-in road color layer",
+  "attempt": 136,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Integrate validated Gemini provider and community UI, preserve approved icons and layer pill selection semantics; mobile QA before protected production.",
+  "last_retry_reason": "Owner explicitly approved first real lighting visualization; preserve original source scores and grades, no synthetic app data.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

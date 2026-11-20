@@ -76,6 +76,7 @@ import {createOutsideDistrictNotifier} from './dongjak-location-alert.js';
 import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
+import {installPriMap} from './pri-map.js';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
@@ -626,6 +627,7 @@ const map = new maplibregl.Map({
 
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
+installPriMap({map,maplibregl,app});
 installMapResumeRecovery({map,app});
 installViewportSafeMapPopups({map});
 installMobileLayoutCoordinator({app,map});

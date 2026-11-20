@@ -1,0 +1,18 @@
+# PRI 데이터 기반 — 상도1동 조명 실증
+
+- 레이어 설정 → 보행취약도 → JSON 자료 불러오기: 팀원의 lighting_segments.json 원본 형식을 지원합니다. 업로드는 로컬 브라우저에서만 처리하며, 원본 자료는 공개 저장소에 넣지 않습니다. 현재 페이지 세션에만 유지됩니다.
+- 기본 비활성 상태입니다. 지도 색상은 점수 0~100 연속 팔레트(초록→빨강), 미평가 구간 회색. 연속된 같은 OSM way의 관측선 안에서만 색을 보간하고 데이터 없는 도로 사이를 연결하지 않습니다. 점 좌표만 있는 원본 구간은 확대한 경우 점입니다.
+- 내보낸 PRI 네트워크 JSON은 schemaVersion:1, networkVersion, area, factors, segments, config를 포함합니다. geometry는 WGS84 [경도,위도]. scores는 0~100 또는 null, 0은 유효하다. 지표마다 id,label,source,method,date,estimated. 실제 공동 도로망과 구간 ID 확정 전까지 조명 조사 구간은 임시 기준이다.
+- 추가 지표 파일: { "type":"pri-factor-scores", "schemaVersion":1, "networkVersion":"내보낸 버전", "factor":{"id":"width","label":"도로폭","source":"출처","method":"방법"}, "scores":[{"id":"실제 공통 구간 ID","score":45}] }. 같은 버전과 ID만 추가 가능. 누락은 null, 기존 해당 지표의 전체 관측 집합을 교체. 다른 공간 형식의 자료는 먼저 GIS에서 공통 구간에 매핑해야 한다.
+- 승인 후 전체 bundle의 config를 {"status":"approved","version":"pri-v1","weights":{"lighting":0.5,"width":0.5}}와 같이 설정(수치는 형식 예시일 뿐). 양의 가중치 합 1, 두 개 이상 지표. 필수 점수 중 하나라도 결측이면 종합 PRI 미평가. 지표 갱신은 다시 draft로 변경해 재승인 요구. 실제 가중치·등급 경계 미확정.
+- 배포할 공통 bundle은 app/public/data/pri/에 두고 manifest.json의 bundle을 "/data/pri/파일.json"으로 지정. 초기 배포는 사용자 제공 원본 lighting_segments.json을 지정하며, 다른 5개 지표와 종합 PRI는 미평가.
+- routeExposure는 검증된 경로-구간 대응을 받는 향후 연동 함수. 현재 실제 경로 추천은 변경하지 않는다. 사고 확률 아님. 독립적인 기존 야간시야 및 다른 레이어는 유지.
+
+## 확정된 팀 담당 항목
+1. 교통사고 이력 및 위험 지수 (accidents) — 미제출, null
+2. 신호등·횡단보도 단절 구간 (crossing) — 미제출, null
+3. 보차혼용 및 보행 공간 위험 (sharedRoad) — 미제출, null
+4. 통행제한속도 및 감속 구간 (speed) — 미제출, null
+5. 제도적 사각지대 (protectionGap) — 미제출, null
+6. 가로등·CCTV 야간 안전 취약점 (lighting) — 원본 조명 취약도 점수만 제공됨; CCTV 미제출
+원본 JSON 1,686개 구간, 419개 조명 지점, 총 40,131.5m. 좌표 한 개뿐인 10개 구간(그중 길이 0m 4개) 점 형상 유지. 테스트 데이터는 테스트에만 존재. 도로망 ID는 조명 조사 기준 임시 버전이며 다른 지표의 공간 매핑은 팀원 자료 도착 후 수행. 사용자 명시 요청으로 공개 앱 저장소에 원본 조명 파일을 실증용으로 포함한다. 지도 레이어는 기본 off이며, 레이어 > 보행취약도 > 야간 안전 취약점(조명만)을 선택한다.

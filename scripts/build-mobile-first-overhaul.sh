@@ -159,6 +159,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       42) note="공통 버튼 재질·부드러운 그림자·눌림 효과 통일";;
       43) note="레이어 알약바 재구성·닫기/가로등/글자 설정/새로고침 아이콘 개선";;
       44) note="동네 커뮤니티 목록·상세 개편, AI 게시글·사진 검열과 신고·이의제기·알림 기반";;
+      45) note="PRI 6개 지표 연동 기반 및 상도1동 실제 조명 취약도 도로 시각화";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null
