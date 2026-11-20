@@ -9,6 +9,14 @@ const SCRIM_SELECTOR = [
   '#map-safety-backdrop:not([hidden])',
   '#map-options-backdrop:not([hidden])',
   '#djNext-layer-panel:not([hidden])',
+  '#djNext-permissions:not([hidden])',
+  '#dj860-onboarding:not([hidden])',
+  '#dj854-weather-sheet:not([hidden])',
+  '#dj-map-settings:not([hidden])',
+  '#dj-app-about:not([hidden])',
+  '#dj833-night-modal:not([hidden])',
+  '#dj840-theme-confirm:not([hidden])',
+  '[aria-modal="true"]:not([hidden])',
   '[data-dj-overlay-scrim="true"]:not([hidden])',
   '[data-dj-scrim="true"]:not([hidden])',
   '.dj-modal-backdrop:not([hidden])',
@@ -17,22 +25,7 @@ const SCRIM_SELECTOR = [
   'dialog[open]'
 ].join(',');
 
-const LEGACY_OVERLAY_IDS = [
-  'dj-ai-search-modal',
-  'map-gesture-guide',
-  'djNext-layer-panel',
-  'djNext-permissions',
-  'dj860-onboarding',
-  'dj854-weather-sheet',
-  'dj-map-settings',
-  'dj-app-about',
-  'version-history-modal',
-  'dj833-night-modal',
-  'dj840-theme-confirm'
-];
-
 const RELEVANT_IDS = new Set([
-  ...LEGACY_OVERLAY_IDS,
   'map-safety-backdrop',
   'map-options-backdrop',
   'dj-mobile-safe-top',
@@ -167,10 +160,9 @@ export function findActiveScrim(doc,win=window) {
 function hasActiveOverlay(doc,app,win) {
   if(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))return true;
   if(app.classList.contains('map-controls-open'))return true;
-  if(LEGACY_OVERLAY_IDS.some(id=>isVisible(doc.getElementById(id),win)))return true;
-  if(isVisible(doc.getElementById('map-safety-backdrop'),win))return true;
-  if(isVisible(doc.getElementById('map-options-backdrop'),win))return true;
-  return [...doc.querySelectorAll('dialog[open], [aria-modal="true"]:not([hidden]), [data-dj-overlay-open="true"]')].some(element=>isVisible(element,win));
+  /* A visible card with role=dialog is not enough: only a real viewport
+     scrim or native dialog backdrop should darken the native status strip. */
+  return !!findActiveScrim(doc,win);
 }
 
 export function installPwaOverlayChrome(doc=document,win=window) {
