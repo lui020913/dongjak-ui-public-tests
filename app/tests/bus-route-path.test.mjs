@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseBusRoutePath,busRoutePathUrl,decodeBusRouteResponse,fetchBusRouteGeometry} from '../server/bus-route-path.mjs';
+import {parseBusRoutePath,busRoutePathUrl,decodeBusRouteResponse,fetchBusRouteGeometry,parseBusRouteStops,decodeBusRouteStops,fetchBusRouteStops} from '../server/bus-route-path.mjs';
 import {parseSeoulBusArrival} from '../src/transport-data.js';
-import {createBusRouteOverlay,BUS_ROUTE_SOURCE} from '../src/bus-route-overlay.js';
+import {createBusRouteOverlay,BUS_ROUTE_SOURCE,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES} from '../src/bus-route-overlay.js';
 const id='100100112';
 const row=(no,gpsX,gpsY)=>({busRouteId:id,no,gpsX,gpsY});
 const body=rows=>({msgBody:{itemList:rows}});
@@ -48,3 +48,16 @@ test('official PathList and XML decode while auth and rate-limit errors stay dis
  assert.deepEqual(decodeBusRouteResponse(JSON.stringify(example),id),{coordinates:[[126.909074,37.582225],[126.909116,37.582202]]});
  for(const [headerCd,code] of [[1,'ROUTE_PATH_UPSTREAM'],[2,'ROUTE_PATH_FORMAT'],[3,'ROUTE_PATH_UNAVAILABLE'],[4,'ROUTE_PATH_UNAVAILABLE'],[5,'ROUTE_PATH_FORMAT'],[6,'ROUTE_PATH_UPSTREAM'],[7,'ROUTE_PATH_UNAVAILABLE'],[8,'ROUTE_PATH_UNAVAILABLE']])assert.deepEqual(decodeBusRouteResponse(JSON.stringify({msgHeader:{headerCd}}),id),{code});
  });
+
+test('official stop coordinates and names only; zoom-gated map layers survive theme changes',async()=>{
+ const stops=[{busRouteId:id,seq:2,stationNm:'정류소 B',gpsX:'126.91',gpsY:'37.51',arsId:'12345'},{busRouteId:id,seq:1,stationNm:'정류소 A',gpsX:126.9,gpsY:37.5,arsId:'12344'},{busRouteId:'other',seq:3,stationNm:'다른 노선',gpsX:126.9,gpsY:37.5}];
+ const official=parseBusRouteStops(body(stops),id);assert.deepEqual(official.map(s=>s.name),['정류소 A','정류소 B']);
+ assert.deepEqual(decodeBusRouteStops(JSON.stringify(body(stops)),id),official);
+ assert.deepEqual(await fetchBusRouteStops('key',id,{fetcher:async url=>{assert.ok(url.includes('/getStaionByRoute?'));return {ok:true,text:async()=>JSON.stringify(body(stops))}}}),official);
+ const layers=new Map(),sources=new Map(),events=new Map();let data;
+ const map={getLayer:k=>layers.get(k),getSource:k=>sources.get(k),addSource:(k,v)=>sources.set(k,{setData:d=>{data=d}}),addLayer:l=>layers.set(l.id,l),on:(k,v)=>events.set(k,v),off:()=>{}};
+ const overlay=createBusRouteOverlay({map,apiBase:'/api/transport',fetcher:async()=>({ok:true,json:async()=>({routeId:id,coordinates:[[126.9,37.5],[126.91,37.51]],stops:official})})});
+ await overlay.select({routeId:id,route:'150',routeType:3});
+ assert.equal(data.features.filter(f=>f.geometry.type==='Point').length,2);assert.equal(layers.get(BUS_ROUTE_STOPS).minzoom,14.5);assert.equal(layers.get(BUS_ROUTE_STOP_NAMES).minzoom,16);
+ sources.clear();layers.clear();events.get('style.load')();assert.equal(data.features.length,3);overlay.clear();assert.equal(data.features.length,0);
+});

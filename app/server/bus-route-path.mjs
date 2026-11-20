@@ -65,3 +65,33 @@ export async function fetchBusRouteGeometry(key,id,{fetcher=globalThis.fetch}={}
     return res.ok||['ROUTE_PATH_AUTH','ROUTE_PATH_RATE_LIMIT'].includes(decoded.code)?decoded:{code:'ROUTE_PATH_UPSTREAM'};
   }catch{return {code:'ROUTE_PATH_UPSTREAM'};}finally{clearTimeout(timer);}
 }
+
+export function parseBusRouteStops(body,routeId){
+ const root=body?.ServiceResult??body,box=root?.msgBody??root?.MsgBody??root?.response?.body??root?.body??root;
+ const list=box?.itemList??box?.item??box?.StationList??box?.stationList??[],raw=list?.itemList??list?.item??list;
+ const seen=new Set();
+ return (Array.isArray(raw)?raw:[raw]).flatMap(row=>{
+  const id=String(row?.busRouteId??routeId),seq=Number(row?.seq),name=String(row?.stationNm??'').trim(),lng=Number(row?.gpsX),lat=Number(row?.gpsY),arsId=String(row?.arsId??'');
+  if(id!==String(routeId)||!Number.isInteger(seq)||seq<1||!name||!Number.isFinite(lng)||!Number.isFinite(lat)||lng<124||lng>132||lat<33||lat>39||seen.has(seq))return [];
+  seen.add(seq);return [{seq,name,lng,lat,arsId}];
+ }).sort((a,b)=>a.seq-b.seq);
+}
+export function decodeBusRouteStops(raw,id){
+ const text=String(raw??'').replace(/^\uFEFF/,'').trim();let data;
+ if(text.startsWith('{')){try{data=JSON.parse(text);}catch{return [];}}
+ else if(text.startsWith('<')){
+  const h=tagged(text,'headerCd');if(h!=null&&!['0','00'].includes(h))return [];
+  let blocks=[...text.matchAll(/<itemList\b[^>]*>([\s\S]*?)<\/itemList>/gi)];
+  if(!blocks.length)blocks=[...text.matchAll(/<StationList\b[^>]*>([\s\S]*?)<\/StationList>/gi)];
+  data={msgBody:{itemList:blocks.map(m=>Object.fromEntries(['busRouteId','seq','stationNm','gpsX','gpsY','arsId'].map(k=>[k,tagged(m[1],k)])))}};
+ }else return [];
+ return parseBusRouteStops(data,id);
+}
+export async function fetchBusRouteStops(key,id,{fetcher=globalThis.fetch}={}){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),10000);
+ try{
+  const url='http://ws.bus.go.kr/api/rest/busRouteInfo/getStaionByRoute?'+new URLSearchParams({ServiceKey:key,busRouteId:id,resultType:'json'});
+  const res=await fetcher(url,{signal:ctrl.signal,headers:{Accept:'application/json, application/xml, text/xml'}});
+  if(!res.ok)return [];const text=await res.text();return text.length<=3000000?decodeBusRouteStops(text,id):[];
+ }catch{return [];}finally{clearTimeout(timer);}
+}
