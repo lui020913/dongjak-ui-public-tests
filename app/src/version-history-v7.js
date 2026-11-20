@@ -176,18 +176,26 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     }
     const minorGroups=new Map();
     const editionOf=version=>String(version).replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
+    // Operational builds belong to their REAL major.minor edition, not a
+    // provisional number from the retrospective archive (e.g. v9.0.23).
+    const editionFor=entry=>{
+      const record=entry.record;
+      const exact=String(record?.version||'');
+      return /^v?9\.\d+\.\d+$/.test(exact)&&!record?.sourceVersion
+        ?editionOf(exact):editionOf(entry.displayVersion);
+    };
     const minorCounts=new Map();
     for(const entry of edition.records){
-      const label=editionOf(entry.displayVersion);
+      const label=editionFor(entry);
       minorCounts.set(label,(minorCounts.get(label)||0)+1);
     }
     for(const {record:release,classification,sourceScale,displayVersion} of edition.records){
-    const publicEdition=editionOf(displayVersion);
+    const publicEdition=editionFor({record:release,displayVersion});
     let minorGroup=minorGroups.get(publicEdition);
     if(!minorGroup){
       minorGroup=el('details','dj-edition-minor');
       minorGroup.dataset.edition=publicEdition;
-      minorGroup.open=edition.records.some(x=>x.record===currentRelease&&editionOf(x.displayVersion)===publicEdition);
+      minorGroup.open=edition.records.some(x=>x.record===currentRelease&&editionFor(x)===publicEdition);
       const subhead=el('summary','dj-edition-minor-summary');
       subhead.append(el('strong','',publicEdition),el('span','','업데이트 기록'),el('small','',(minorCounts.get(publicEdition)||0)+'개'));
       minorGroup.append(subhead);parent.append(minorGroup);minorGroups.set(publicEdition,minorGroup);
@@ -206,7 +214,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     article.dataset.releaseType=release.scale||'patch';
     article.dataset.reviewedScale=classification;
     article.dataset.version=String(release.version||'').replace(/^v/,'');
-    article.dataset.displayVersion=displayVersion;article.dataset.originalScale=sourceScale;
+    article.dataset.displayVersion=publicEdition;article.dataset.originalScale=sourceScale;
     if(release.sourceVersion)article.dataset.previousVersion=release.sourceVersion;
     const sizeLabel={major:'주요 구조 개편',minor:'기능 추가·개선',patch:'수정·안정화'}[classification]||'기록';
     const badge=el('span','dj-semver-size',sizeLabel);
