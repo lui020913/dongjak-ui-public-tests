@@ -1,6 +1,6 @@
 import {cloudConfiguration,getActiveCloudClient} from './v824-favorites-cloud.js';
 const POST_FIELDS='id,title,body,nickname,category,photo,lng,lat,created_at';
-const COMMENT_FIELDS='id,post_id,body,nickname,created_at';
+const COMMENT_FIELDS='id,post_id,body,nickname,photo,created_at';
 async function select(table,fields,params={}){
  const client=getActiveCloudClient();
  if(client){let q=client.from(table).select(fields);if(params.order)q=q.order(params.order,{ascending:false});if(params.limit)q=q.limit(params.limit);if(params.ids)q=q.in('post_id',params.ids);if(params.owner)q=q.eq('author_id',params.owner);const {data,error}=await q;if(error)throw error;return data||[];}
@@ -20,15 +20,30 @@ export async function readSharedCommunity(){
  u?select('community_posts','id',{owner:u.id}):[],
  u?select('community_likes','post_id',{owner:u.id,ids}):[]
  ]);
- return {authenticated:!!u,posts:rows.map(row=>({id:row.id,title:row.title,body:row.body,nickname:row.nickname,category:row.category,photo:row.photo,location:Number.isFinite(row.lng)&&Number.isFinite(row.lat)?{lng:row.lng,lat:row.lat}:null,created:Date.parse(row.created_at),shared:true,mine:mine.some(x=>x.id===row.id),likes:counts.find(x=>x.post_id===row.id)?.likes||0,liked:liked.some(x=>x.post_id===row.id),comments:comments.filter(x=>x.post_id===row.id).reverse().map(x=>({id:x.id,body:x.body,nickname:x.nickname,created:Date.parse(x.created_at)}))}))};
+ return {authenticated:!!u,posts:rows.map(row=>({id:row.id,title:row.title,body:row.body,nickname:row.nickname,category:row.category,photo:row.photo,location:Number.isFinite(row.lng)&&Number.isFinite(row.lat)?{lng:row.lng,lat:row.lat}:null,created:Date.parse(row.created_at),shared:true,mine:mine.some(x=>x.id===row.id),likes:counts.find(x=>x.post_id===row.id)?.likes||0,liked:liked.some(x=>x.post_id===row.id),comments:comments.filter(x=>x.post_id===row.id).reverse().map(x=>({id:x.id,body:x.body,nickname:x.nickname,photo:x.photo,created:Date.parse(x.created_at)}))}))};
 }
 async function mutate(table,action,values,id){
  const u=await user(),client=getActiveCloudClient();if(!u||!client)throw new Error('로그인 후 이용해 주세요.');
  let q=client.from(table);if(action==='insert')q=q.insert(values);else q=q.delete().eq(table==='community_posts'?'id':'post_id',id).eq('author_id',u.id);
  const {error}=await q;if(error)throw error;
 }
-export async function publishCommunityPost(p){if(p.photo&&p.photo.length>600000)throw new Error('사진 크기가 큽니다. 사진을 다시 선택해 주세요.');return mutate('community_posts','insert',{title:p.title,body:p.body,nickname:p.nickname,category:p.category,photo:p.photo,lng:p.location?.lng??null,lat:p.location?.lat??null});}
+export async function publishCommunityPost(p){if(p.photo&&p.photo.length>600000)throw new Error('사진 크기가 큽니다. 사진을 다시 선택해 주세요.');return submitModerated({kind:'post',title:p.title,body:p.body,nickname:p.nickname,category:p.category,photo:p.photo,lng:p.location?.lng??null,lat:p.location?.lat??null});}
 export const deleteSharedCommunityPost=id=>mutate('community_posts','delete',null,id);
 export const setSharedCommunityLike=(id,liked)=>mutate('community_likes',liked?'insert':'delete',{post_id:id},id);
-export const addSharedCommunityComment=(id,body)=>mutate('community_comments','insert',{post_id:id,body,nickname:'익명 주민'});
+export const addSharedCommunityComment=(id,body,photo=null)=>submitModerated({kind:'comment',post_id:id,body,photo,nickname:'익명 주민'});
+async function submitModerated(payload){
+ const client=getActiveCloudClient();if(!client||!await user())throw new Error('로그인 후 이용해 주세요.');
+ const {data,error}=await client.functions.invoke('community-moderation',{body:payload});
+ if(error){let message;try{message=(await error.context?.json())?.error;}catch{}throw new Error(message||'AI 검사에 실패했습니다. 작성 내용을 다시 확인해주세요.');}
+ if(!['published','removed','review'].includes(data?.state))throw new Error('검사 결과를 확인하지 못했습니다.');
+ return data;
+}
+export async function readCommunityNotifications(){
+ const client=getActiveCloudClient();if(!client||!await user())return [];
+ const {data,error}=await client.from('community_notifications').select('id,kind,reason,created_at,read_at').order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[];
+}
+export async function markCommunityNoticeRead(id){
+ const client=getActiveCloudClient();if(!client||!await user())return;
+ const {error}=await client.from('community_notifications').update({read_at:new Date().toISOString()}).eq('id',id);if(error)throw error;
+}
 export const isCommunitySignedIn=async()=>Boolean(await user().catch(()=>null));

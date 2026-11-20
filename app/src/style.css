@@ -1815,3 +1815,19 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 .transport-hours-inline-credit{margin:8px 2px 12px;padding:11px 13px;border:1px solid #b9daca;border-radius:12px;background:#eff9f3;color:#1e654f;font-size:12px;font-weight:680;line-height:1.6;}
 #app[data-theme="dark"] .transport-hours-inline-credit{background:#254139;border-color:#426e5e;color:#d8f5e8;}
 @media (max-width:600px){.transport-timetable-direction-grid{grid-template-columns:minmax(0,1fr);}.transport-timetable-pane{max-height:315px;}.transport-timetable-controls{gap:8px;}}
+
+/* Community mobile list + details: scoped, no shared map/dock changes. */
+#community-search{width:100%;box-sizing:border-box;border:1px solid currentColor;border-radius:999px;padding:11px 15px;font:inherit;background:transparent;color:inherit;margin:0 0 12px}
+#community-list .community-post-preview{border:0;border-bottom:1px solid color-mix(in srgb,currentColor 15%,transparent);border-radius:0;background:transparent;box-shadow:none;padding:16px 2px}
+#community-list .community-post-title.community-open-detail{display:block;text-align:left;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;font-weight:750;font-size:17px;margin:10px 0 5px}
+#community-list .community-post-preview .community-post-body{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+#community-list .community-summary-count{font-size:12px;opacity:.72;margin:2px 0}
+#community-list .community-post-detail{border:0;box-shadow:none;border-radius:0;background:transparent;color:inherit}
+#community-list .community-post-detail .community-post-title{font-size:21px;color:inherit}
+#community-list .community-post-detail .community-post-body{font-size:15px;color:inherit}
+#community-list .community-back{width:max-content;background:transparent;border:0;color:inherit;font:inherit;padding:9px}
+#community-notifications:not([hidden]){padding:10px 0;max-height:45vh;overflow:auto}
+.community-notice{border-bottom:1px solid color-mix(in srgb,currentColor 15%,transparent);padding:12px 3px}
+.community-notice p{margin:6px 0}
+.community-notice small{opacity:.7}
+#community-list .community-comment-form .community-comment-photo{flex:0 0 auto}

@@ -1,4 +1,4 @@
-export const COMMUNITY_CATEGORIES = ['보행 불편','개선 제안','동네 질문'];
+export const COMMUNITY_CATEGORIES = ['보행 불편','개선 제안','동네 질문','동네생활','생활정보','교통정보','자유게시판'];
 export function makeCommunityPost({title,body,nickname,category,photo=null,location=null}, now=Date.now()) {
   const cleanCategory=COMMUNITY_CATEGORIES.includes(category)?category:'동네 질문';
   return {
