@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.31",
+  "application_version": "9.2.32",
   "public_work_branch": "main",
-  "purpose": "Revalidate live Seoul route geometry after user service application; align parser error codes and sample with official 2023 guide",
-  "attempt": 111,
+  "purpose": "Replace live metro markers with twelve transparent crops from user's six-line source, preserve directional geometry and fallback",
+  "attempt": 112,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User completed route API application; guide confirms request and WGS84 fields and corrects Seoul service error namespace",
+  "last_retry_reason": "User requested exact train artwork for live subway icons",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

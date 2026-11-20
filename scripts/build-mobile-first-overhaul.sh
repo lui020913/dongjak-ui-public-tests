@@ -146,6 +146,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       29) note="아이패드 홈 화면 웹앱 접속 제한 오류 및 하단바 선택 표시 애니메이션 수정";;
       30) note="iOS 웹앱 상태바 색상 동기화·딤 그라데이션 경계 개선 및 아이패드 접속 제한 복원";;
       31) note="서울시 버스 공식 노선 응답 호환 및 실제 경로 API 검증 강화";;
+      32) note="사용자 제공 지하철 열차 이미지 기반 호선별 좌우 실시간 마커 교체";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null

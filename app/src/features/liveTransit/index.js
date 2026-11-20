@@ -1,12 +1,13 @@
 /** MapLibre real-time vehicle overlay. Isolated GeoJSON sources and layers; no GPS permission. */
 import {payloadToCollection,LINE_COLORS} from './normalize.js';
+import {loadTrainAtlas} from './train-atlas.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
 export const LIVE_SOURCE='dongjak-live-vehicles-v827';
 export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
 export const LIVE_BUS_LAYER='dongjak-live-bus-v827';
 const empty=()=>({type:'FeatureCollection',features:[]});
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
-// Local vector artwork rasterized at 2x, no remote sprite or icon dependency.
+// Local user-supplied train atlas, preserving the established directional image keys.
 const trainImageId=(line,facing='right')=>'dj-live-train-'+line+(facing==='left'?'-left':'');
 // A fixed-size top-view vehicle follows the local screen-space track tangent.
 // Mirrored rasters keep the existing stable facing contract at vertical bends.
@@ -76,12 +77,12 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   }
   return {width:size,height:size,data};
 }
-function ensureTrainImages(map){
-  if(typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;
+export function ensureTrainImages(map,atlas){
+  if(!atlas||typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;
   try{for(const [line,color] of Object.entries({...LINE_COLORS,unknown:'#596c75'})){
     for(const facing of ['right','left']){
       const id=trainImageId(line,facing);if(map.hasImage(id))continue;
-      const image=trainIconImage(color,globalThis.document,facing);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
+      const image=atlas.get(line+':'+facing)??(line==='unknown'?trainIconImage(color,globalThis.document,facing):null);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
     }
   }return true;}catch{return false;}
 }
@@ -100,6 +101,7 @@ export function attachLiveTransitOverlay(map,opts={}){
   let rendering=0,poll=0,started=false,destroyed=false,request=null,renderPending=false,lastRenderAt=0,renderGeneration=0;
   const raf=typeof globalThis.requestAnimationFrame==='function';
   let visible={metro:true,bus:true};
+  let trainAtlas=null,atlasState=typeof map.addImage==='function'&&typeof map.hasImage==='function'?'pending':'unavailable',atlasRequested=false;
   const minimumZoom=Number(opts.minZoom??13.2);
   const pollMs=clamp(Number(opts.intervalMs??25000),20000,120000);
   const frameMs=clamp(Number(opts.renderIntervalMs??16),8,2000);
@@ -112,8 +114,8 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(destroyed||!map.isStyleLoaded?.())return;
     if(!map.getSource(LIVE_SOURCE))map.addSource(LIVE_SOURCE,{type:'geojson',data:empty()});
     const common={'circle-stroke-color':'#ffffff','circle-stroke-width':2.1,'circle-opacity':0.98};
-    const trainImages=ensureTrainImages(map);
-    if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
+    const trainImages=atlasState==='ready'&&ensureTrainImages(map,trainAtlas);
+    if(atlasState!=='pending'&&!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
         'icon-size':['interpolate',['linear'],['zoom'],13.2,.84,15.5,1.13,18,1.42],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
@@ -198,6 +200,7 @@ export function attachLiveTransitOverlay(map,opts={}){
   function start(){
     if(started||destroyed)return;started=true;
     onStyle();map.on?.('style.load',onStyle);map.on?.('click',handleMapClick);
+    if(atlasState==='pending'&&!atlasRequested){atlasRequested=true;void loadTrainAtlas().then(atlas=>{trainAtlas=atlas;atlasState=atlas?'ready':'unavailable';if(started&&!destroyed)onStyle();});}
     if(typeof document!=='undefined')document.addEventListener('visibilitychange',onVisible);
     if(raf){const frame=t=>{if(!started||destroyed)return;if(t-lastRenderAt>=frameMs-.9){lastRenderAt=t;render(false);}rendering=globalThis.requestAnimationFrame(frame);};rendering=globalThis.requestAnimationFrame(frame);}
     else rendering=setInterval(()=>render(false),frameMs);

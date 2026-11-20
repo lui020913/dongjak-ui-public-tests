@@ -103,3 +103,17 @@ test('reference side-view sprite has four perspective windows and a compact end-
  assert.equal(windows.length,4);assert.ok(windows.every(x=>x[0][2]===17.8));
  assert.ok(windows.every(x=>x.filter(y=>y[0]==='L').length>=3));
 });
+
+test('user train atlas contains all 12 unique transparent source crops in the correct facing order',async()=>{
+ const {TRAIN_ATLAS_CELLS,extractTrainAtlas}=await import('../src/features/liveTransit/train-atlas.js');
+ const {readFileSync}=await import('node:fs');const bytes=readFileSync(new URL('../src/features/liveTransit/train-atlas.webp',import.meta.url));
+ assert.equal(bytes.toString('ascii',0,4),'RIFF');assert.equal(bytes.toString('ascii',8,12),'WEBP');assert.equal(bytes.length,6320);
+ assert.equal(bytes.readUIntLE(24,3)+1,288);assert.equal(bytes.readUIntLE(27,3)+1,96);
+ assert.deepEqual(Object.keys(TRAIN_ATLAS_CELLS).sort(),Object.keys(LINE_COLORS).sort());
+ assert.deepEqual(TRAIN_ATLAS_CELLS['9호선'],{left:[2,0],right:[3,0]});
+ const calls=[];const image={width:288,height:96};const ctx={clearRect(){},drawImage(...args){calls.push(args.slice(1));},getImageData(){return {data:new Uint8ClampedArray(96*96*4)}}};
+ const atlas=extractTrainAtlas(image,{createElement:()=>({getContext:()=>ctx})});
+ assert.equal(atlas.size,12);assert.equal(new Set(calls.map(c=>c.slice(0,2).join(','))).size,12);
+ assert.deepEqual(calls[0],[0,0,72,32,3,28,90,40]);assert.equal(atlas.get('7호선:right').data.length,96*96*4);
+ assert.throws(()=>extractTrainAtlas({width:1,height:1}),/dimensions/);
+});
