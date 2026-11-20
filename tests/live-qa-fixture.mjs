@@ -1,6 +1,6 @@
 import {test as base, expect} from '@playwright/test';
 import {mkdirSync, writeFileSync, renameSync, existsSync, appendFileSync} from 'node:fs';
-import {join,relative} from 'node:path';
+import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -15,6 +15,7 @@ export const test=base.extend({
     while(existsSync(join(root,'pause'))){await sleep(250);}
     const id=randomUUID(), dir=join(root,id);
     mkdirSync(join(dir,'frames'),{recursive:true});
+    info.annotations.push({type:'live-qa-scene',description:id});
     const start=Date.now(), meta={id,title:info.title,project:info.project.name,start,status:'running',frames:0};
     put(join(dir,'meta.json'),meta);
     let count=0,last=0,cdp,closed=false;
@@ -66,8 +67,6 @@ export const test=base.extend({
       closed=true;
       if(cdp){await cdp.send('Page.stopScreencast').catch(()=>{});await cdp.detach().catch(()=>{});}
       meta.frames=count;meta.status=info.status;meta.expected=info.expectedStatus;meta.end=Date.now();
-      const video=page.video();
-      if(video){try{const file=relative(root,await video.path());if(!file.startsWith('..'))meta.video=file;}catch{}}
       meta.errors=info.errors.map(e=>String(e.message||'').slice(0,3000));
       put(join(dir,'meta.json'),meta);
     }
