@@ -26,7 +26,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  function render(){
    actions.replaceChildren();exportButton.disabled=!dataset;
    if(!dataset){status.textContent='등록된 자료가 없습니다. JSON 자료를 불러와 주세요.';return;}
-   const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(typeof s.scores[f.id]==='number')available.add(f.id);status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종';
+   const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(typeof s.scores[f.id]==='number')available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km';
    const options=dataset.factors.map(f=>[f.id,f.label]);options.unshift(['pri','종합 PRI']);
    for(const [id,name] of options){
      const unavailable=id==='pri'?dataset.config.status!=='approved':!available.has(id);const suffix=id==='pri'&&unavailable?' · 기준 미확정':unavailable?' · 미제출':id==='lighting'?' · 조명만':'';
@@ -59,14 +59,14 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;
-  if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 회색: 미평가'+(s.pointCount?' · 좌표 부족 '+s.pointCount+'개':'');}
+  if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='원본 평가연장 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km · 회색: 미평가'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   render();
  }
  function inspect(e){
   if(!mode||app.dataset.tab!=='map'||dialog.open||!map.getLayer(LINE))return;
   const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[LINE,POINT].filter(l=>map.getLayer(l))});
   const s=lookup.get(candidates[0]?.properties?.segmentId);if(!s)return;
-  const v=segmentScore(dataset,s,mode),node=el('div','dj-pri-detail');node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 약 '+s.lengthM.toFixed(1)+'m'));
+  const v=segmentScore(dataset,s,mode),node=el('div','dj-pri-detail');node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
   const fs=mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):dataset.factors.filter(f=>f.id===mode);
   for(const f of fs){const val=s.scores[f.id],ev=s.evidence[f.id];node.append(el('p','',f.label+': '+(typeof val==='number'?val+'점':'미평가')+(ev?.darkM!==null&&ev?.darkM!==undefined?' · 평균 암부 '+ev.darkM+'m':'')+(ev?.sourceGrade?' · 원본 '+ev.sourceGrade+'등급':'')),el('small','',f.source+' · '+f.method));}
   if(s.geometry.type==='Point')node.append(el('small','','선형 좌표 부족: 점으로만 표시'));

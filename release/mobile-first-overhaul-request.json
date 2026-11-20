@@ -3,9 +3,9 @@
   "application_version": "9.2.45",
   "public_work_branch": "main",
   "purpose": "PRI data foundation: six owner-confirmed team categories, real Sangdo 1-dong lighting survey only, other factors and combined PRI unassessed, opt-in road color layer",
-  "attempt": 136,
+  "attempt": 137,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner explicitly approved first real lighting visualization; preserve original source scores and grades, no synthetic app data.",
+  "last_retry_reason": "Clarify source survey length vs coordinate geometry length without modifying or extending original road geometry or scores; preserve the six team categories.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
