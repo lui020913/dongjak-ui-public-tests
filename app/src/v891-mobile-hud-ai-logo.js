@@ -48,15 +48,18 @@ export function installV891HeaderAndAi(doc=document,win=window){
   const syncModal=()=>{
     frame=0;
     if(!modal||!modal.open||!mq.matches){
-      modal?.style.removeProperty('--dj891-ai-keyboard-inset');
-      modal?.style.removeProperty('--dj891-ai-visible-height');
+      for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
       return;
     }
-    const v=win.visualViewport;
-    const height=v?.height||win.innerHeight;
-    const inset=mobileKeyboardInset({innerHeight:win.innerHeight,visualHeight:height,offsetTop:v?.offsetTop||0});
+    // A focused iOS input can pan the visual viewport as well as resize it.
+    // Use one coordinate system; do not combine top/bottom constraints with a height.
+    const view=win.visualViewport;
+    const height=Math.max(1,Math.floor(view?.height||win.innerHeight));
+    const top=Math.max(0,Math.round(view?.offsetTop||0));
+    const inset=mobileKeyboardInset({innerHeight:win.innerHeight,visualHeight:height,offsetTop:top});
     modal.style.setProperty('--dj891-ai-keyboard-inset',inset+'px');
-    modal.style.setProperty('--dj891-ai-visible-height',Math.max(120,Math.floor(height))+'px');
+    modal.style.setProperty('--dj891-ai-visible-top',top+'px');
+    modal.style.setProperty('--dj891-ai-visible-height',height+'px');
   };
   const schedule=()=>{
     if(frame)return;
@@ -92,8 +95,7 @@ export function installV891HeaderAndAi(doc=document,win=window){
     logoObserver?.disconnect();modalObserver?.disconnect();modalWatcher?.disconnect();
     if(frame)cancel(frame);
     for(const fn of cleanups)fn();
-    modal?.style.removeProperty('--dj891-ai-keyboard-inset');
-    modal?.style.removeProperty('--dj891-ai-visible-height');
+    for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
   };
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){

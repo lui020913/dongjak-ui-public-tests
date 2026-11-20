@@ -1873,7 +1873,9 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
-  if(previousTab!==tab&&(previousTab==='participate'||tab==='participate')&&!communityPickMode&&!resumeCommunityDraft){
+  const communityPanel=document.getElementById('participation-panel');
+  const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
+  if((reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
@@ -2210,14 +2212,14 @@ async function submitCommunityComment(postId,formEl) {
 }
 function showCommunityReport(postId,commentId,anchor){if(anchor.querySelector('.community-report-form'))return;const form=makeCEl('form','community-report-form');const select=document.createElement('select');select.setAttribute('aria-label','신고 사유');for(const [value,label] of [...Object.entries(moderationReasons).filter(([k])=>!['uncertain','unavailable'].includes(k)),['other','기타']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}const send=makeCEl('button','community-filter','신고 접수');send.type='submit';const close=communityButton('취소','community-filter',()=>form.remove());form.append(select,send,close);form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,select.value);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});anchor.append(form);}
 function renderCommunity() {
-  const root=document.getElementById('community-list');root.replaceChildren();
+  const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
   const bar=makeCEl('div','dj-community-feed-status');const status=makeCEl('p','dj-community-status-label',communityCloudStatus);status.setAttribute('role','status');const refresh=communityButton('새로고침','community-filter dj-community-refresh',()=>refreshSharedCommunity());refresh.setAttribute('aria-label','공개 게시글 새로고침');bar.append(status,refresh);root.append(bar);
   const all=[...sharedCommunityPosts,...communityPosts];
   if(communityDetail&&!all.some(p=>p.id===communityDetail))communityDetail=null;
   const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail)root.append(communityButton('‹ 목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();if(panel)panel.querySelector('.dj836-sheet-body').scrollTop=communityListScroll;}));
   const query=communitySearch.trim().toLowerCase();
   let shown=all.filter(p=>detail?p.id===communityDetail:(communitySavedOnly?Boolean(p.bookmarked):!p.bookmarkOnly)&&(communityFilter==='전체'||p.category===communityFilter)&&(!query||(p.title+' '+p.body).toLowerCase().includes(query)));
-  if(document.getElementById('community-sort').value==='popular')
+  if(document.getElementById('community-sort')?.value==='popular')
     shown=shown.sort((a,b)=>(b.likes||0)-(a.likes||0)||b.created-a.created);
   else shown=shown.sort((a,b)=>b.created-a.created);
   if(!shown.length){
