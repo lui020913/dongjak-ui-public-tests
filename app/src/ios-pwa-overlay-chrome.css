@@ -93,4 +93,12 @@
     background-image:none!important;
     border-color:#526e66!important;
   }
+  /* The release overlay raises the search bar above the dimmer. On iOS PWA,
+     put the top chrome beneath the header scrim so it dims with the status area. */
+  html.dj-ios-home-pwa body #app#app#app#app#app .topbar {
+    z-index:3101!important;
+  }
+  html.dj-ios-home-pwa body #app#app#app#app#app#app#app#app #djNext-toolbar {
+    z-index:3105!important;
+  }
 }
