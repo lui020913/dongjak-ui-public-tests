@@ -101,6 +101,7 @@ export function inspectSeoulApiResponse(data){
       'ERROR-310':'서울시 API 서비스 이름이 올바르지 않습니다.',
       'ERROR-331':'서울시 API 조회 시작 위치가 올바르지 않습니다.',
       'ERROR-332':'서울시 API 조회 종료 위치가 올바르지 않습니다.',
+      'ERROR-337':'서울시 실시간 지하철 API의 일일 호출 한도에 도달했습니다.',
       'ERROR-500':'서울시 API 서버에서 오류가 발생했습니다.',
       'ERROR-600':'서울시 API 데이터베이스 연결 오류입니다.'
     };

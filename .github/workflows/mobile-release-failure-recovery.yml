@@ -77,6 +77,10 @@ jobs:
             [[ "$id" =~ ^[0-9]+$ ]] || exit 1
             gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$id/logs" > "$REPAIR_LOG_DIR/$id.log" || true
           done
+          if grep -qE 'LIVE_METRO_DIAGNOSTIC.*(ERROR-337|METRO_DAILY_QUOTA)' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then
+            echo 'Official Seoul daily metro quota exhausted; do not rerun or generate code repairs for the provider limit.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           count="$(jq -r '.gemini_repair_count // 0' release/mobile-first-overhaul-request.json)"
           [[ "$count" =~ ^[0-9]+$ ]]
           if (( count >= 3 )); then echo 'Gemini source repair limit reached.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi

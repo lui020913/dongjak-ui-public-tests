@@ -13,6 +13,7 @@ import {parseBusServiceTime,seoulDayTag} from '../../../server/service-hours.mjs
 import {fetchStationTimetables} from '../../../server/metro-timetable-common.mjs';
 import {sillimStationUrl,parseSillimPublishedHtml} from '../../../server/sillim-published-timetable.mjs';
 import {fetchSeoulJsonOverTcp} from '../../../server/seoul-openapi-tcp.mjs';
+import {metroQuotaUntil,markMetroQuota,metroQuotaResponse} from '../../../server/metro-quota.mjs';
 import {fetchDongjakNews} from '../../../server/dongjak-news.mjs';
 import {normalizeMedianBusStops,isMedianBusStopName} from '../../../src/median-bus-stops.js';
 import {nearbyOfficialStaticStops} from '../../../src/static-bus-stops.js';
@@ -333,6 +334,7 @@ export async function onRequestGet({request,env}){
   if(isBus&&!/^\d{5}$/.test(id||'')&&!validLocation(lat,lng))return fail('ARS 5자리 또는 정류소 좌표가 필요합니다.',400,'INVALID_STATION');
   if(!isBus&&(!id||id.length>60||/[<>/]/.test(id)))return fail('역 이름이 올바르지 않습니다.',400,'INVALID_STATION');
   try{
+    if(!isBus){const until=await metroQuotaUntil(request,subwayKey);if(until)return metroQuotaResponse(until);}
     if(isBus&&!/^\d{5}$/.test(id||'')){
       const locate=`http://ws.bus.go.kr/api/rest/stationinfo/getStationByPos?ServiceKey=${encodeURIComponent(busKey)}&tmX=${lng}&tmY=${lat}&radius=70&resultType=json`;
       id=resolveSeoulBusStation(await officialJson(locate),lat,lng,url.searchParams.get('name')||'');
@@ -383,6 +385,7 @@ export async function onRequestGet({request,env}){
       const classified=classifyBusStopsError(e);
       if(classified.code==='BUS_API_AUTH'||classified.code==='BUS_API_RATE_LIMIT')return busStopsFailure(e);
     }
+    if(!isBus&&e.apiCode==='ERROR-337')return metroQuotaResponse(await markMetroQuota(request,subwayKey));
     const message=e.publicMessage||'서울시 공식 교통정보 서버에 연결하지 못했습니다. 인증키와 공식 API 접근 상태를 확인해 주세요.';
     const code=e.apiCode||String(e.message||'UPSTREAM_ERROR').match(/^(UPSTREAM_[A-Z_]+(?:\d{3})?|BUS_API_\d+)$/)?.[0]||'UPSTREAM_ERROR';
     // Never expose URL, ServiceKey, or upstream response in public API error payloads.

@@ -3,6 +3,7 @@
  * Seoul metro: realtimePosition; Seoul bus: getBusPosByRtid.
  */
 import {normalizeBusServiceKey} from '../../../src/bus-service-key.js';
+import {metroQuotaUntil,markMetroQuota,metroQuotaResponse} from '../../../server/metro-quota.mjs';
 const METRO_LINES=['1호선','2호선','4호선','7호선','9호선'];
 const METRO_LINE_IDS={'1001':'1호선','1002':'2호선','1004':'4호선','1007':'7호선','1009':'9호선'};
 const DEFAULT_STATIONS=['20011','20151','20160','20125'];
@@ -92,10 +93,10 @@ export function decodeMetroPayload(raw,kind='position'){
   }
   const wrapper=body?.[kind==='position'?'realtimePosition':'realtimeStationArrival'];
   const header=body?.errorMessage??body?.RESULT??wrapper?.RESULT??body?.response?.header;
-  const rawCode=String(header?.code??header?.CODE??header?.resultCode??'').trim();
+  const rawCode=String(header?.code??header?.CODE??header?.resultCode??body?.code??body?.CODE??'').trim();
   const code=/^(?:INFO|ERROR)-\d{3}$/.test(rawCode)?rawCode:'';
   // Only report allowlisted field names, never raw upstream data or arbitrary keys.
-  const known=['realtimePositionList','realtimeArrivalList','realtimePosition','realtimeStationArrival','errorMessage','RESULT','result','response','body','data','row','rows','items','itemList','list_total_count'];
+  const known=['realtimePositionList','realtimeArrivalList','realtimePosition','realtimeStationArrival','errorMessage','RESULT','result','response','body','data','row','rows','items','itemList','list_total_count','code','status','message','error'];
   const shape=known.filter(key=>Object.hasOwn(body??{},key));
   const rows=metroRows(body,kind);
   const details={format,shape,code:code||null,rawRows:rows?.length??null};
@@ -192,7 +193,15 @@ export async function onRequestGet({request,env={}}){
   const manual=asCsv(env?.LIVE_TRANSIT_BUS_ROUTE_IDS).filter(id=>/^\d{6,12}$/.test(id)).slice(0,8);
   const stopIds=asCsv(env?.LIVE_TRANSIT_BUS_STATION_IDS||DEFAULT_STATIONS.join(',')).filter(id=>/^\d{5}$/.test(id)).slice(0,4);
   const warningCodes=[],metro=[],bus=[],metroDiagnostics={};
-  const metroTasks=wantMetro&&metroKey?lines.map(async line=>{try{const {list,details}=await metroLine(metroKey,line);metroDiagnostics[line]={state:'ok',rows:list.length,...details};return {mode:'metro',list};}catch(e){metroDiagnostics[line]={state:'error',code:safeMetroError(e),response:e.details??null};throw e;}}):[];
+  let quotaUntil=wantMetro?await metroQuotaUntil(request,metroKey):0;
+  if(quotaUntil&&!wantBus)return metroQuotaResponse(quotaUntil,{metro:[],bus:[],warnings:['METRO_DAILY_QUOTA'],availability:{metro:!!metroKey,bus:!!busKey,busRoutes:0},metroDiagnostics:{quota:{state:'error',code:'PROVIDER_ERROR-337'}}});
+  // A single probe before the remaining lines avoids five simultaneous rejects on an exhausted key.
+  const loadLine=async line=>{
+    if(quotaUntil){metroDiagnostics[line]={state:'error',code:'PROVIDER_ERROR-337'};return {mode:'metro',list:[]};}
+    try{const {list,details}=await metroLine(metroKey,line);metroDiagnostics[line]={state:'ok',rows:list.length,...details};return {mode:'metro',list};}
+    catch(e){const code=safeMetroError(e);metroDiagnostics[line]={state:'error',code,response:e.details??null};if(code==='PROVIDER_ERROR-337')quotaUntil=await markMetroQuota(request,metroKey);return {mode:'metro',list:[],failed:true};}
+  };
+  const metroTasks=wantMetro&&metroKey&&lines.length?[ (async()=>{const first=await loadLine(lines[0]);const rest=quotaUntil?[]:await Promise.all(lines.slice(1).map(loadLine));if(quotaUntil)for(const line of lines)if(!metroDiagnostics[line])metroDiagnostics[line]={state:'error',code:'PROVIDER_ERROR-337'};return {mode:'metro',list:[first,...rest].flatMap(x=>x.list),failed:[first,...rest].every(x=>x.failed||!x.list.length)&&Object.values(metroDiagnostics).every(x=>x.state==='error')};})() ]:[];
   let busRoutes=manual.map(id=>({id,name:id}));
   if(wantBus&&busKey&&!busRoutes.length){
     const tag=stopIds.join(',');
@@ -208,20 +217,22 @@ export async function onRequestGet({request,env={}}){
   const results=await Promise.allSettled(tasks);
   let fulfilled=0;
   for(const r of results){if(r.status==='fulfilled'){
-    fulfilled++;if(r.value.mode==='metro')metro.push(...r.value.list);else bus.push(...r.value.list);
+    if(!r.value.failed)fulfilled++;else warningCodes.push('FEED_UNAVAILABLE');if(r.value.mode==='metro')metro.push(...r.value.list);else bus.push(...r.value.list);
   }else warningCodes.push(r.reason?.message?.startsWith('PROVIDER_')?'PROVIDER_UNAVAILABLE':r.reason?.message==='BUS_POSITION_UNAVAILABLE'?'BUS_POSITION_UNAVAILABLE':'FEED_UNAVAILABLE');}
   const missingLines=lines.filter(line=>metroDiagnostics[line]?.state==='error');
-  if(wantMetro&&arrivalKey&&missingLines.length){
+  if(wantMetro&&arrivalKey&&missingLines.length&&!(arrivalKey===metroKey&&quotaUntil)&&!await metroQuotaUntil(request,arrivalKey)){
     try{
       const {list:fallback,details}=await arrivalPositionFallback(arrivalKey,missingLines);
       if(fallback.length){metro.push(...fallback);fulfilled++;warningCodes.push('METRO_ARRIVAL_FALLBACK');}
       metroDiagnostics.arrivalFallback={state:fallback.length?'ok':'empty',rows:fallback.length,...details};
-    }catch(e){metroDiagnostics.arrivalFallback={state:'error',code:safeMetroError(e),response:e.details??null};}
+    }catch(e){const code=safeMetroError(e);metroDiagnostics.arrivalFallback={state:'error',code,response:e.details??null};if(code==='PROVIDER_ERROR-337'){const until=await markMetroQuota(request,arrivalKey);quotaUntil=Math.max(quotaUntil,until);}}
   }
+  if(quotaUntil)warningCodes.unshift('METRO_DAILY_QUOTA');
   const errors=[...new Set(warningCodes)].slice(0,5);
   const data={ok:fulfilled>0,updatedAt:new Date().toISOString(),metro,bus,
     availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,metroDiagnostics,
     source:{metro:'서울시 realtimePosition / 실패 시 realtimeStationArrival 실제 역 상태 (추정)',bus:'서울시 getBusPosByRtid (실측 좌표)'}};
+  if(quotaUntil&&!metro.length&&!wantBus)return metroQuotaResponse(quotaUntil,data);
   if(!data.ok){const codes=Object.values(metroDiagnostics).map(x=>x.code).filter(Boolean);return result({...data,error:codes.length?'서울시 열차 위치정보 조회 실패 · '+[...new Set(codes)].join(', '):'실시간 위치 API 응답을 확인하지 못했습니다.'},502);}
   const response=result(data);
   if(store)try{await store.put(requestKey,response.clone());}catch{}
