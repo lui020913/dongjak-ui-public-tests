@@ -87,6 +87,20 @@
 #app[data-theme="dark"] .dj860-dot{background:#4b655b;}
 #app[data-theme="dark"] .dj860-dot.is-active{background:#69cba7;}
 #app[data-theme="dark"] #dj-mobile-utilities .dj860-more-launch{background:#243e3d!important;border-color:#49665b!important;color:#d9eee4!important;}
+/* The outgoing slide fades before any incoming artwork/text is swapped.
+   Keep the longstanding directional enter keyframes as the second phase. */
+#app .dj860-onboarding .dj860-visual-pane,
+#app .dj860-onboarding .dj860-copy{
+  transition:opacity 120ms ease-in,transform 120ms ease-in;
+}
+#app .dj860-onboarding.dj860-swapping .dj860-visual-pane,
+#app .dj860-onboarding.dj860-swapping .dj860-copy{
+  animation:none!important;opacity:0!important;transform:translateY(6px)!important;
+}
+@media(prefers-reduced-motion:reduce){
+  #app .dj860-onboarding .dj860-visual-pane,
+  #app .dj860-onboarding .dj860-copy{transition:none!important;}
+}
 @keyframes dj860-card-in{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes dj860-slide-next{from{opacity:0;transform:translate3d(24px,0,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 @keyframes dj860-slide-prev{from{opacity:0;transform:translate3d(-24px,0,0)}to{opacity:1;transform:translate3d(0,0,0)}}

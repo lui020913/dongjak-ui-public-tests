@@ -80,7 +80,10 @@ test('the update history labels release types explicitly and keeps archived reco
   assert.match(renderer,/수정·안정화/);
   assert.match(renderer,/buildGenerationCatalog\(releases,\s*releaseEdition\)/);
   assert.match(renderer,/displayVersion/);
-  assert.match(renderer,/당시 기록/);
+  // Archived notes are preserved as collapsed two-part edition records.
+  assert.match(renderer,/dataset\.archivedVersion/);
+  assert.match(renderer,/dj-edition-minor/);
+  assert.match(renderer,/dj-edition-patch/);
   assert.match(renderer,/isOperational/);
   assert.doesNotMatch(renderer,/release===currentRelease\?'현재 빌드: '/);
   assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);

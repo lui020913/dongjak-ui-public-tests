@@ -127,6 +127,18 @@ html body #app#app#app#app#app#app#app:has(#djNext-permissions:not([hidden])) :i
 /* Prevent the map controls from obscuring utility headers. */
 html body #app#app#app#app#app#app#app:has(:is(#ped-tools-panel,#dj854-weather-sheet).dj871-sheet-expanded:not([hidden])) .map-actions{visibility:hidden!important;pointer-events:none!important}
 html body #app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){z-index:4400!important;overflow:auto!important;overscroll-behavior:contain}
+/* A nearby sheet uses the SAME expanded class as route/transport, leaving the
+   global search header above it. The compact sheet may be content-sized. */
+html body #app#app#app#app#app#app#app #ped-tools-panel.dj871-sheet-expanded:not([hidden]){
+  top:var(--dj910-map-top,136px)!important;
+  bottom:var(--dj910-dock-bottom,88px)!important;
+  height:auto!important;min-height:0!important;
+  max-height:calc(100dvh - var(--dj910-map-top,136px) - var(--dj910-dock-bottom,88px))!important;
+  overflow-y:auto!important;
+}
+html body #app#app#app#app#app#app#app:has(#ped-tools-panel:not([hidden])) > .topbar{
+  visibility:visible!important;opacity:1!important;pointer-events:auto!important;z-index:5200!important;
+}
 html body #app#app#app#app#app#app#app #ped-tools-panel .ped-tools-panel-head{position:sticky!important;top:0!important;z-index:1!important;background:var(--djNext-surface)!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;padding:0 0 8px!important}
 html body #app#app#app#app#app#app#app #ped-tools-panel #ped-tools-close{width:42px!important;height:42px!important;flex:0 0 42px!important}
 html body #app#app#app#app#app#app#app #ped-tools-status{font-size:12px!important;white-space:pre-line!important;word-break:keep-all!important;overflow-wrap:anywhere!important}
@@ -500,7 +512,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj815-waypoint-row .dj815-actions{display:flex!important;flex-direction:row!important;align-items:center!important;gap:4px!important;width:auto!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj815-waypoint-row button{width:auto!important;min-width:30px!important;height:34px!important;min-height:34px!important;padding:0 7px!important;white-space:nowrap!important;border-radius:999px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj815-waypoint-title{overflow-wrap:anywhere!important;min-width:0!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode="empty"]{height:auto!important;min-height:0!important;max-height:40dvh!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode="empty"]:not(.dj871-sheet-expanded){height:auto!important;min-height:0!important;max-height:40dvh!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-close{border-radius:50%!important;}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel .ped-tools-panel-head{border-bottom:1px solid var(--djNext-border)!important;touch-action:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-sheet-swipe-zone{touch-action:none!important;pointer-events:auto!important}
@@ -636,7 +648,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-main svg{width:25px!important;height:25px!important;color:var(--djNext-active,#0d806a)!important;flex:none!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj-weather-observed{font-size:12px!important;color:inherit!important;opacity:.8;margin:0 0 8px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet:not([hidden]){margin-bottom:10px!important}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode="empty"]{min-height:0!important;height:auto!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #ped-tools-panel[data-nearby-mode="empty"]:not(.dj871-sheet-expanded){min-height:0!important;height:auto!important}
  /* Preserve the established dock-safe overlay geometry; dim the independently floated dock without moving it. */
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(#version-history-modal:not([hidden])) #bottom-nav,
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(#dj-map-settings:not([hidden])) #bottom-nav{filter:brightness(.66)!important;transition:filter 180ms ease!important}
@@ -690,8 +702,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
 /* Search header has one animated flex rail, not a display:none width jump. */
 @layer request-completion{
  @media(max-width:699px){
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar{gap:0!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #map-quick-search{flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:none!important;align-self:flex-start!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar{display:grid!important;grid-template-columns:minmax(0,1fr) 62px!important;align-items:center!important;column-gap:8px!important;min-width:0!important;max-width:calc(100vw - 24px)!important;box-sizing:border-box!important;overflow:visible!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar #map-quick-search{grid-column:1!important;flex:1 1 0!important;width:100%!important;min-width:0!important;max-width:100%!important;align-self:center!important;box-sizing:border-box!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form{--dj-voice-extra:0px;position:relative!important;box-sizing:border-box!important;height:calc(54px + var(--dj-voice-extra))!important;min-height:calc(54px + var(--dj-voice-extra))!important;max-height:none!important;padding-bottom:calc(4px + var(--dj-voice-extra))!important;transition:height 250ms cubic-bezier(.25,.65,.25,1),min-height 250ms cubic-bezier(.25,.65,.25,1),padding-bottom 250ms cubic-bezier(.25,.65,.25,1),border-radius 250ms ease!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-dj-voice-feedback="true"] .topbar .map-quick-search-form{--dj-voice-extra:82px;border-radius:24px!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-voice-panel{position:absolute;inset:54px 12px 7px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;min-width:0;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 150ms ease,visibility 0s linear 250ms}
