@@ -14,9 +14,9 @@ export function windowMotionFrame(progress,opening,distance,height,docked=false)
 
 /** Confirmations are stationary; fade the entire overlay and backdrop together. */
 export const CONFIRM_MOTION=Object.freeze({open:200,close:180});
-export const TAB_MOTION=Object.freeze({open:95,close:65});
+export const TAB_MOTION=Object.freeze({open:145,close:105});
 // Keep at least two intermediate samples even when the map drops frames.
-// At normal 60/120Hz the original 160ms combined target is unchanged.
+// At normal 60/120Hz the combined 250ms target retains smooth intermediate frames.
 export function tabMotionFrameDelta(delta){return Math.max(0,Math.min(32,Number(delta)||0));}
 export function confirmMotionOpacity(progress,opening){const p=cubicProgress(progress,.42,.58);return opening?p:1-p;}
 

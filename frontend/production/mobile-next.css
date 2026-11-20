@@ -545,7 +545,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 
 /* Shared interaction feedback; visual-only, preserving native click and scroll. */
 @media(max-width:699px){
-  #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:var(--mf-accent-soft,#e1efe9);box-shadow:0 1px 0 var(--djNext-tool-foot),0 2px 4px var(--djNext-tool-contact),inset 0 1px 0 var(--djNext-tool-highlight);transition:transform 240ms cubic-bezier(.22,.80,.32,1.04),width 240ms ease,height 240ms ease;will-change:transform}
+  #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:var(--mf-accent-soft,#e1efe9);box-shadow:0 1px 0 var(--djNext-tool-foot),0 2px 4px var(--djNext-tool-contact),inset 0 1px 0 var(--djNext-tool-highlight);transition:transform 280ms cubic-bezier(.25,.70,.30,1),width 280ms ease,height 280ms ease;will-change:transform}
   #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{background:#24483f}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important;z-index:1}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab:active:not(:disabled){scale:.96!important}
