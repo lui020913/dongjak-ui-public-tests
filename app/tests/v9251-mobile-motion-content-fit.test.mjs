@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {sheetFadeOpacity} from '../src/mobile-window-motion.js';
-import {compactTransportHeight} from '../src/mobile-compact-transport-sheet.js';
+import {compactTransportHeight,compactFacilityHeight} from '../src/mobile-compact-transport-sheet.js';
 const source=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
 
 test('all sliding sheets have a visible, monotonic fade; closing dims before removal',()=>{
@@ -32,4 +32,16 @@ test('transit sheet content size removes empty space but allows full expansion',
   const js=source('mobile-compact-transport-sheet.js');
   assert.match(js,/MutationObserver/);assert.match(js,/ResizeObserver/);
   assert.match(js,/if\(panel.hidden\|\|panel.classList.contains\('dj871-sheet-expanded'\)\)return;/);
+});
+
+test('facility compact height and AI fade maintain expansion and solid modal backdrop',()=>{
+  assert(compactFacilityHeight({header:96,body:74,viewport:860})<250);
+  assert.equal(compactFacilityHeight({header:100,body:900,viewport:900}),468);
+  const css=source('v910-request-completion.css');
+  assert.match(css,/--dj9251-facility-content-height/);
+  const ai=source('v880-supabase-safety-ai.css');
+  assert.match(ai,/dj9251-ai-content-enter/);
+  assert.match(ai,/dj9251-ai-content-leave/);
+  assert.match(ai,/#dj-ai-search-modal\[open\]::backdrop\{background:var\(--ai-bg\)!important/);
+  assert.match(ai,/prefers-reduced-motion:reduce/);
 });
