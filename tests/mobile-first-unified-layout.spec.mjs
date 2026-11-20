@@ -35,13 +35,16 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
       viewport:{width:innerWidth,height:innerHeight},
       topbar:topbar?{...rect(topbar),...style(topbar)}:null,
       toolbar:toolbar?{...rect(toolbar),...style(toolbar)}:null,
-      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length}:null,
+      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length,
+        gridItems:[...nav.children].map(el=>{const s=getComputedStyle(el);return {id:el.id,classes:el.className,tag:el.tagName,hidden:el.hidden,display:s.display,position:s.position,gridColumn:s.gridColumn,gridRow:s.gridRow,width:el.getBoundingClientRect().width};}),
+        pseudo:['::before','::after'].map(p=>{const s=getComputedStyle(nav,p);return {p,content:s.content,display:s.display,position:s.position,gridColumn:s.gridColumn};})}:null,
       actions:actions?{...rect(actions),...style(actions)}:null,
       desktopRail:document.querySelectorAll('#dj-desktop-safety-rail').length,
       tabletRail:document.querySelectorAll('#dj-tablet-utility-group').length
     };
   });
 
+  console.log('Mobile dock geometry: '+JSON.stringify(metrics.nav));
   expect(metrics.topbar,'search header must exist').not.toBeNull();
   expect(metrics.toolbar,'shared feature toolbar must mount').not.toBeNull();
   expect(metrics.nav,'shared five-tab navigation must exist').not.toBeNull();
@@ -71,4 +74,29 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
 
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
   await testInfo.attach('layout-metrics.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
+});
+
+
+test('installed iOS PWA status color follows a visible scrim and restores on close',async({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'standalone',{configurable:true,value:true});
+    Object.defineProperty(navigator,'userAgent',{configurable:true,value:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148'});
+  });
+  await page.route('**/*',route=>{const url=new URL(route.request().url());return ['127.0.0.1','localhost'].includes(url.hostname)||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('html')).toHaveClass(/dj-ios-home-pwa/);
+  const baseline=await page.evaluate(()=>{
+    const root=document.documentElement;return root.style.getPropertyValue('--dj-ios-pwa-base-color').trim();
+  });
+  expect(baseline).toMatch(/^#[0-9a-f]{6}$/i);
+  const meta=page.locator('meta[name="theme-color"]');
+  await page.evaluate(()=>{
+    const scrim=document.createElement('div');scrim.id='dj-ci-status-scrim';scrim.dataset.djOverlayScrim='true';
+    scrim.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.4);pointer-events:none';
+    document.body.append(scrim);
+  });
+  const dimmed='#'+baseline.slice(1).match(/../g).map(x=>Math.round(parseInt(x,16)*.6).toString(16).padStart(2,'0')).join('');
+  await expect(meta).toHaveAttribute('content',dimmed);
+  await page.evaluate(()=>document.getElementById('dj-ci-status-scrim').remove());
+  await expect(meta).toHaveAttribute('content',baseline);
 });

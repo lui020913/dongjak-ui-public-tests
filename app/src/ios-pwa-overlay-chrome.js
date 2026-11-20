@@ -261,6 +261,12 @@ export function installPwaOverlayChrome(doc=document,win=window) {
     });
   }
 
+  // CSS-driven fades do not mutate DOM at their final frame; reconcile after
+  // transitions/animations and native dialog closure as well as DOM changes.
+  const onMotionEnd=event=>{if(enabled&&relevantNode(event.target))schedule();};
+  const motionEvents=['transitionend','transitioncancel','animationend','animationcancel','close'];
+  for(const name of motionEvents)doc.addEventListener?.(name,onMotionEnd,true);
+
   const width=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const media of [width,standalone])media?.addEventListener?.('change',sync);
@@ -270,6 +276,7 @@ export function installPwaOverlayChrome(doc=document,win=window) {
 
   return ()=>{
     observer?.disconnect();
+    for(const name of motionEvents)doc.removeEventListener?.(name,onMotionEnd,true);
     if(frame)win.cancelAnimationFrame?.(frame);
     for(const media of [width,standalone])media?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
