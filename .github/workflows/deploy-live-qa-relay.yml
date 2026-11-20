@@ -1,0 +1,45 @@
+name: Deploy dedicated Live QA relay
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type dongjak-live-qa-relay to deploy ONLY the dedicated QA Worker'
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: dedicated-live-qa-relay-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && github.actor == 'lui020913' && inputs.confirm == 'dongjak-live-qa-relay'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify relay and install pinned Wrangler
+        run: |
+          node --test tests/live-qa-relay.test.mjs
+          npm install --prefix "$RUNNER_TEMP/qa-wrangler" --no-audit --no-fund --ignore-scripts wrangler@4.160.1
+      - name: Deploy dedicated Worker and secrets without exposing credentials
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.QA_CF_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.QA_CF_API_TOKEN }}
+          QA_WRITER_KEY: ${{ secrets.QA_WRITER_KEY }}
+          QA_VIEWER_KEY: ${{ secrets.QA_VIEWER_KEY }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          umask 077
+          secret_file="$(mktemp "$RUNNER_TEMP/qa-secrets.XXXXXX.json")"
+          trap 'rm -f "$secret_file"' EXIT
+          node --input-type=module -e 'import fs from "node:fs"; const {QA_WRITER_KEY:w,QA_VIEWER_KEY:v,CLOUDFLARE_ACCOUNT_ID:a,CLOUDFLARE_API_TOKEN:t}=process.env; if(!a||!t||!w||!v||w.length<32||v.length<32||w===v)throw Error("Missing dedicated QA deployment secrets or invalid keys"); fs.writeFileSync(process.argv[1],JSON.stringify({QA_WRITER_KEY:w,QA_VIEWER_KEY:v}),{mode:0o600})' "$secret_file"
+          unset QA_WRITER_KEY QA_VIEWER_KEY
+          "$RUNNER_TEMP/qa-wrangler/node_modules/.bin/wrangler" deploy --config qa-relay/wrangler.toml --secrets-file "$secret_file"
+          echo 'Dedicated QA Worker deployed. Copy the exact workers.dev URL printed by Wrangler to Actions variable QA_RELAY_URL.' >> "$GITHUB_STEP_SUMMARY"
