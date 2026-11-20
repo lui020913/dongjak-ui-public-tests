@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './live-qa-fixture.mjs';
 const compact=page=>page.viewportSize().width<1080||page.viewportSize().width===1180;
 const tab=(page,key)=>page.locator('#bottom-nav .nav-tab[data-tab="'+key+'"]');
 async function tap(page,locator){
