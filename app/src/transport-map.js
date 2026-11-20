@@ -1023,6 +1023,7 @@ async function fetchArrival(place,memoKey){
         if(isBus && error.code==='MISSING_BUS_KEY')error.message='버스 실시간 정보를 제공할 인증키가 없습니다. 로컬 .env 또는 Cloudflare Pages의 SEOUL_BUS_SERVICE_KEY를 확인하세요.';
         if(isBus && error.code==='BUS_API_AUTH')error.message='버스 정보 API 인증 또는 서비스 사용 승인을 확인해야 합니다. 인증키·서비스 권한을 점검하세요.';
         if(isBus && error.code==='BUS_API_RATE_LIMIT')error.message='버스 도착 API 요청 제한에 도달했습니다. 잠시 후 다시 조회해 주세요.';
+        if(!isBus&&response.status===429&&error.code==='ERROR-337'){error.message='서울시 지하철 API 일일 조회량을 초과했습니다. 이용 가능해지면 다시 조회됩니다.';arrivalMemo.set(memoKey,{at:Date.now(),value:error});return error;}
         if(!firstError)firstError=error;
         // 인증키/네트워크 오류는 역명 변경으로 해결되지 않으므로 추가 호출을 하지 않습니다.
         if(response.status>=500 || response.status===401 || response.status===403)break;

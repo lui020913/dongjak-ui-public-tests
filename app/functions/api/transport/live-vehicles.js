@@ -231,6 +231,7 @@ export async function onRequestGet({request,env={}}){
   const errors=[...new Set(warningCodes)].slice(0,5);
   const data={ok:fulfilled>0,updatedAt:new Date().toISOString(),metro,bus,
     availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,metroDiagnostics,
+    ...(quotaUntil?{metroQuota:{code:'ERROR-337',retryAfterSeconds:Math.max(1,Math.ceil((quotaUntil-Date.now())/1000))}}:{ }),
     source:{metro:'서울시 realtimePosition / 실패 시 realtimeStationArrival 실제 역 상태 (추정)',bus:'서울시 getBusPosByRtid (실측 좌표)'}};
   if(quotaUntil&&!metro.length&&!wantBus)return metroQuotaResponse(quotaUntil,data);
   if(!data.ok){const codes=Object.values(metroDiagnostics).map(x=>x.code).filter(Boolean);return result({...data,error:codes.length?'서울시 열차 위치정보 조회 실패 · '+[...new Set(codes)].join(', '):'실시간 위치 API 응답을 확인하지 못했습니다.'},502);}

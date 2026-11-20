@@ -1,3 +1,4 @@
+import {METRO_QUOTA_NOTICE} from './quota-state.js';
 /** v8.2.7 integration with the EXISTING Dongjak MapLibre map and verified station geometry. */
 import {railGeojson,stationsGeojson,FIXED_RAIL_STATION_ORDER} from '../../fixed-rail-data.js';
 import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.js';
@@ -90,7 +91,7 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
   return {open,render,close,destroy(){close();for(const event of ['dragstart','zoomstart','rotatestart','pitchstart'])map.off?.(event,stopFollowing);}};
 }
 const installedLiveTransit=new WeakMap();
-export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
+export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice=()=>{}}){
   if(installedLiveTransit.has(map))return installedLiveTransit.get(map);
   const controls=document.getElementById('dj-live-vehicle-controls');
   if(!controls)return null;
@@ -103,6 +104,8 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   }catch{}
   const state={...saved};
   const setStatus=value=>safeText(message,value);
+  let quotaNotified=false;
+  function showQuota(until,announce=true){const active=state.metro&&until>Date.now();if(btnMetro){if(active)btnMetro.dataset.liveQuota='true';else delete btnMetro.dataset.liveQuota;}if(active){if(announce&&!quotaNotified){quotaNotified=true;onNotice(METRO_QUOTA_NOTICE);}return true;}quotaNotified=false;return false;}
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
     stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:11,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
@@ -111,6 +114,8 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
     onVehiclesRendered:collection=>popupTracker.render(collection),
     onVehicleMiss:()=>popupTracker.close(),
     onStatus:info=>{
+      const limited=showQuota(info.quotaUntil||overlay.getStatus().metroQuotaUntil);
+      if(limited){setStatus(METRO_QUOTA_NOTICE+(state.bus&&info.status==='ok'?` · 버스 ${info.bus}대`:state.bus&&info.status==='error'?' · 버스 위치 조회 실패':''));return;}
       if(info.status==='ok'){
         const line=[];
         if(state.metro)line.push(`지하철 ${info.metro}대`);
@@ -138,12 +143,14 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
     if(!state.metro&&!state.bus)setStatus('기본 OFF · 켜면 약 60초마다 공식 API 조회');
     else if(!isMap)setStatus('안전지도 탭에서 차량 위치를 조회합니다.');
     else if(!allowMetro&&!allowBus)setStatus('기본 지도·교통 레이어가 숨겨져 있습니다.');
+    else if(showQuota(overlay.getStatus().metroQuotaUntil))setStatus(METRO_QUOTA_NOTICE);
     else if(!overlay.getStatus().lastUpdate)setStatus('실시간 위치정보 조회 중 · 역간 위치는 추정');
+    if(!state.metro)showQuota(0,false);
   }
   for(const [button,mode] of [[btnMetro,'metro'],[btnBus,'bus']])button?.addEventListener('click',()=>{
     state[mode]=!state[mode];
     try{localStorage.setItem(LIVE_PREF_KEY,JSON.stringify(state));}catch{}
-    sync();
+    sync();void overlay.refresh();
   });
   const observer=new MutationObserver(sync);
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});

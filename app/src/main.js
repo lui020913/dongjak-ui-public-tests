@@ -1806,7 +1806,7 @@ map.on('load',()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
     startupLoader.transportReady();
-    try{installDongjakLiveTransit({map,maplibregl,app,isDongjak});}catch(error){console.warn('실시간 차량 레이어 초기화 실패:',error);}
+    try{installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice:toast});}catch(error){console.warn('실시간 차량 레이어 초기화 실패:',error);}
   }).catch(error=>{console.warn('교통 지도 초기화 실패:',error);});
 });
 

@@ -1,3 +1,4 @@
+import {isMetroDailyQuota,isMixedMetroQuota,metroQuotaRetryMs,METRO_QUOTA_NOTICE} from './quota-state.js';
 /** MapLibre real-time vehicle overlay. Isolated GeoJSON sources and layers; no GPS permission. */
 import {payloadToCollection,LINE_COLORS} from './normalize.js';
 import {loadTrainAtlas} from './train-atlas.js';
@@ -101,7 +102,8 @@ export function attachLiveTransitOverlay(map,opts={}){
   let payload=null,display=empty(),previous=new Map(),lastUpdate=0;
   let rendering=0,poll=0,started=false,destroyed=false,request=null,renderPending=false,lastRenderAt=0,renderGeneration=0;
   const raf=typeof globalThis.requestAnimationFrame==='function';
-  let visible={metro:true,bus:true};
+  let visible={metro:true,bus:true},metroQuotaUntil=0;
+  const quotaActive=()=>metroQuotaUntil>Date.now();
   let trainAtlas=null,atlasState=typeof map.addImage==='function'&&typeof map.hasImage==='function'?'pending':'unavailable',atlasRequested=false,atlasApplied=false,lastAttachAttempt=0;
   const minimumZoom=Number(opts.minZoom??13.2),metroMinZoom=Number(opts.metroMinZoom??minimumZoom);
   function reportArtwork(value){const node=map.getContainer?.();if(node?.dataset)node.dataset.djLiveTrainArtwork=value;}
@@ -180,24 +182,30 @@ export function attachLiveTransitOverlay(map,opts={}){
   async function refresh(){
     if(!started||destroyed||request||(typeof document!=='undefined'&&document.visibilityState==='hidden'))return;
     if(!visible.metro&&!visible.bus)return;
+    const modes=Object.keys(visible).filter(k=>visible[k]&&(k!=='metro'||!quotaActive()));
+    if(!modes.length){if(visible.metro&&quotaActive())emit({status:'quota',error:METRO_QUOTA_NOTICE,quotaUntil:metroQuotaUntil});return;}
     const ac=new AbortController();request=ac;const timeout=setTimeout(()=>ac.abort(),19000);
     try{
       let next;
-      if(typeof opts.getVehicles==='function')next=await opts.getVehicles({signal:ac.signal});
+      if(typeof opts.getVehicles==='function')next=await opts.getVehicles({signal:ac.signal,modes});
       else {const path=opts.endpoint??'/api/transport/live-vehicles';
         const separator=path.includes('?')?'&':'?';
-        const target=path+separator+'modes='+encodeURIComponent(Object.keys(visible).filter(k=>visible[k]).join(','));
-        const res=await fetch(target,{signal:ac.signal,cache:'no-store'});
-        if(!res.ok){const body=await res.json().catch(()=>({}));throw new Error(body.error||`실시간 차량 API HTTP ${res.status}`);}next=await res.json();}
+        const target=path+separator+'modes='+encodeURIComponent(modes.join(','));
+        const res=await fetch(target,{signal:ac.signal,cache:'no-store'});const body=await res.json().catch(()=>({}));
+        if(!started||destroyed||request!==ac||ac.signal.aborted)return;
+        if(isMetroDailyQuota(res.status,body)||isMixedMetroQuota(body))metroQuotaUntil=Date.now()+metroQuotaRetryMs(body.metroQuota??body,res.headers.get('Retry-After'));
+        if(!res.ok){if(isMetroDailyQuota(res.status,body)){payload={...payload,metro:[]};render(true);emit({status:'quota',error:METRO_QUOTA_NOTICE,quotaUntil:metroQuotaUntil});return;}throw new Error(body.error||`실시간 차량 API HTTP ${res.status}`);}next=body;}
       if(!started||destroyed||request!==ac||ac.signal.aborted)return;
       if(!next||next.ok===false)throw new Error(next?.error||'실시간 차량 응답 오류');
+      if(isMixedMetroQuota(next))metroQuotaUntil=Date.now()+metroQuotaRetryMs(next.metroQuota);
+      if(quotaActive())next.metro=[];else if(modes.includes('metro'))metroQuotaUntil=0;
       next.metro=preserveMetroEvents(next.metro||[],payload?.metro||[]);
       previous=new Map(display.features.map(f=>[f.properties.id,f.geometry.coordinates]));
       payload=next;lastUpdate=Date.now();render(true);
       const items=calculate(Date.now()).features;
       emit({status:'ok',metro:items.filter(f=>f.properties.mode==='metro').length,
-        bus:items.filter(f=>f.properties.mode==='bus').length,warnings:next.warnings||[],availability:next.availability||{}});
-    }catch(e){if(request===ac&&started&&!destroyed)emit({status:'error',error:String(e?.message||e)});}finally{clearTimeout(timeout);if(request===ac)request=null;}
+        bus:items.filter(f=>f.properties.mode==='bus').length,warnings:next.warnings||[],availability:next.availability||{},quotaUntil:quotaActive()?metroQuotaUntil:0});
+    }catch(e){if(request===ac&&started&&!destroyed)emit({status:'error',error:String(e?.message||e),quotaUntil:quotaActive()?metroQuotaUntil:0});}finally{clearTimeout(timeout);if(request===ac)request=null;}
   }
   function handleMapClick(e){
     if(!visible.metro&&!visible.bus)return;
@@ -248,5 +256,5 @@ export function attachLiveTransitOverlay(map,opts={}){
     for(const line of [...Object.keys(LINE_COLORS),'unknown'])for(const facing of ['right','left'])if(map.hasImage?.(trainImageId(line,facing)))map.removeImage?.(trainImageId(line,facing));
   }
   function setVisible(mode,on){if(!(mode in visible))throw new Error('Unknown mode');visible[mode]=Boolean(on);render(true);}
-  return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};
+  return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,metroQuotaUntil:quotaActive()?metroQuotaUntil:0,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};
 }
