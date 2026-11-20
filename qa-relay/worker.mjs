@@ -15,7 +15,7 @@ $('login').onclick=()=>{clearTimeout(timer);key=$('key').value;$('key').value=''
 export default {
  async fetch(req,env){
   const u=new URL(req.url), p=u.pathname;
-  if(req.method==='GET'&&(p==='/'||p==='/legacy'))return new Response(p==='/'?liveDashboard:dashboard,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self' wss:; frame-ancestors 'none'"}});
+  if(req.method==='GET'&&(p==='/'||p==='/legacy'))return new Response(p==='/'?liveDashboard:dashboard,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src blob:; connect-src 'self' wss:; frame-ancestors 'none'"}});
   if(p==='/api/live'){
    const auth=liveRole(req);
    if(!auth)return json({error:'invalid websocket'},400);
@@ -43,7 +43,7 @@ export default {
  }
 };
 export class QASession{
- constructor(ctx){this.ctx=ctx;this.storage=ctx.storage;this.paused=false;}
+ constructor(ctx){this.ctx=ctx;this.storage=ctx.storage;this.paused=false;this.liveRates=new WeakMap();}
  async fetch(req){
   const p=new URL(req.url).pathname;
   if(p==='/api/live'){
@@ -51,7 +51,7 @@ export class QASession{
    if(!['writer','viewer'].includes(role)||protocol!=='qa-v2.'+role)return json({error:'invalid role'},400);
    if(role==='writer'&&this.ctx.getWebSockets('writer').length)return json({error:'lane busy'},409);
    const pair=new WebSocketPair(),[client,server]=Object.values(pair);
-   this.ctx.acceptWebSocket(server,[role]);server.serializeAttachment({role,paused:false});
+   this.ctx.acceptWebSocket(server,[role]);server.serializeAttachment({role,paused:false,...(role==='viewer'?{fps:60}:{})});
    this.liveControl();
    if(role==='viewer')this.emit(server,JSON.stringify({type:'availability',online:this.ctx.getWebSockets('writer').length>0}));
    return new Response(null,{status:101,webSocket:client,headers:{'Sec-WebSocket-Protocol':protocol}});
@@ -85,15 +85,25 @@ export class QASession{
  liveControl(exclude){
   const viewers=this.ctx.getWebSockets('viewer').filter(w=>w!==exclude);
   const writers=this.ctx.getWebSockets('writer').filter(w=>w!==exclude);
+  const fps=Math.max(0,...viewers.map(v=>v.deserializeAttachment()?.fps??60));
   for(const w of writers){
    const a=w.deserializeAttachment()||{role:'writer',paused:false};
-   this.emit(w,JSON.stringify({type:'control',watching:viewers.length>0,paused:a.paused===true}));
+   this.emit(w,JSON.stringify({type:'control',watching:fps>0,fps,paused:a.paused===true}));
   }
  }
  webSocketMessage(ws,message){
   const role=ws.deserializeAttachment()?.role,m=liveMessage(role,message);if(!m)return;
   if(role==='writer'){
-   for(const v of this.ctx.getWebSockets('viewer'))this.emit(v,m.data);
+   for(const v of this.ctx.getWebSockets('viewer')){
+    if(m.type==='frame'){
+     const fps=v.deserializeAttachment()?.fps??60,now=Date.now();
+     if(!fps||(fps<60&&now-(this.liveRates.get(v)||0)<1000/fps))continue;
+     this.liveRates.set(v,now);
+    }
+    this.emit(v,m.data);
+   }
+  }else if(m.type==='rate'){
+   ws.serializeAttachment({...ws.deserializeAttachment(),role:'viewer',fps:m.fps});this.liveControl();
   }else if(m.type==='pause'){
    for(const w of this.ctx.getWebSockets('writer'))w.serializeAttachment({role:'writer',paused:m.paused});
    this.liveControl();
