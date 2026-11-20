@@ -122,6 +122,7 @@
       .map-startup-inner #map-startup-continue{margin-top:23px;padding:10px 15px;font-size:12px;font-weight:650;
         border-radius:9px;background:transparent;color:var(--start-fg);border:1px solid var(--start-track);cursor:pointer;}
       .map-startup-inner #map-startup-continue[hidden]{display:none!important;}
+      .map-startup-version{display:block;margin-top:5px;text-align:center;font-size:11px;font-variant-numeric:tabular-nums;color:var(--start-muted);}
       .map-startup-footer{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));
         left:0;right:0;text-align:center;color:var(--start-muted);font-size:11px;letter-spacing:-.01em;}
       @media(max-width:480px){.map-startup-inner{transform:translateY(-1.5vh)}html body #app .map-startup-logo{width:116px!important;height:116px!important;min-width:116px!important;min-height:116px!important;max-width:116px!important;max-height:116px!important}.map-startup-title{font-size:23px}}
@@ -234,7 +235,7 @@
           <p id="map-startup-note">도로와 보행안전 정보를 불러오는 중입니다.</p>
           <button id="map-startup-continue" type="button" hidden>기본 지도 먼저 보기</button>
         </div>
-        <div class="map-startup-footer" aria-hidden="true">동작구 보행안전 지도 서비스</div>
+        <div class="map-startup-footer">동작구 보행안전 지도 서비스 <span id="map-startup-version" class="map-startup-version">v8.26.1</span></div>
       </div>
       <header class="topbar">
 
