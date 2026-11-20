@@ -277,10 +277,17 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     nearbyRetry=window.requestAnimationFrame?.(commitNearbyExpand)||0;
     if(!nearbyRetry)commitNearbyExpand();
   };
-  const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(nearbyHeader,window,{
+  // Start capture at document level only for the measured *visible* header.
+  // A late map compositor overlay can intercept the target, but the bounding
+  // guard prevents hijacking taps elsewhere on the map or on X/actions.
+  const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(document,window,{
     down(event){
       if(panel.hidden||!window.matchMedia('(max-width:1079px)').matches||
-          event.isPrimary===false||event.target?.closest?.('button,a,input,textarea,select,[role="button"]'))return false;
+          event.isPrimary===false||event.target?.closest?.('button,a,input,textarea,select,label,[role="button"]'))return false;
+      const rect=nearbyHeader.getBoundingClientRect();
+      if(rect.width<36||rect.height<24||
+         event.clientX<rect.left+4||event.clientX>rect.right-4||
+         event.clientY<rect.top+4||event.clientY>rect.bottom-4)return false;
       nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY,expanded:false};
       return true;
     },
