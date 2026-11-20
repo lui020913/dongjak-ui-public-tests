@@ -258,25 +258,40 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   // It does not animate the panel, dismiss it, or interfere with X/buttons.
   const nearbyHeader=panel.querySelector('.ped-tools-panel-head');
   let nearbySwipe=null,nearbyRetry=0;
+  const scheduleNearbyExpand=()=>{
+    if(nearbyRetry||panel.hidden||panel.classList.contains('dj871-sheet-expanded'))return;
+    // The shared controller remains responsible for all movement and dismissal.
+    // A one-frame safety net commits only the requested expanded state when
+    // mobile Safari loses pointerup after a genuine upward gesture.
+    const commit=()=>{
+      nearbyRetry=0;
+      if(!panel.hidden&&!panel.classList.contains('dj871-sheet-expanded'))
+        setMobileSheetExpanded(panel,true,document,window);
+    };
+    nearbyRetry=window.requestAnimationFrame?.(commit)||0;
+    if(!nearbyRetry)commit();
+  };
   const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(nearbyHeader,window,{
     down(event){
       if(panel.hidden||!window.matchMedia('(max-width:1079px)').matches||
           event.isPrimary===false||event.target?.closest?.('button,a,input,textarea,select,[role="button"]'))return false;
-      nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY};
+      nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY,committed:false};
       return true;
     },
-    move(){},
+    move(event){
+      const s=nearbySwipe;
+      if(!s||s.pointerId!==event.pointerId||s.committed)return;
+      const dx=event.clientX-s.x,dy=event.clientY-s.y;
+      if(dy<=-65&&Math.abs(dx)<Math.abs(dy)*.8){
+        s.committed=true;
+        scheduleNearbyExpand();
+      }
+    },
     up(event){
       const s=nearbySwipe;nearbySwipe=null;
-      if(!s||s.pointerId!==event.pointerId)return;
+      if(!s||s.pointerId!==event.pointerId||s.committed)return;
       const dx=event.clientX-s.x,dy=event.clientY-s.y;
-      if(dy>-42||Math.abs(dx)>Math.abs(dy)*.8)return;
-      if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
-      nearbyRetry=window.requestAnimationFrame?.(()=>{
-        nearbyRetry=0;
-        if(!panel.hidden&&!panel.classList.contains('dj871-sheet-expanded'))
-          setMobileSheetExpanded(panel,true,document,window);
-      })||0;
+      if(dy<=-42&&Math.abs(dx)<Math.abs(dy)*.8)scheduleNearbyExpand();
     },
     cancel(){nearbySwipe=null;}
   }):()=>{};
