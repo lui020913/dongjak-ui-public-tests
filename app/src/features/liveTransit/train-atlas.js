@@ -6,6 +6,18 @@ export const TRAIN_ATLAS_CELLS=Object.freeze({
  '4호선':{left:[0,2],right:[1,2]},'7호선':{left:[2,2],right:[3,2]}
 });
 const W=72,H=32,SIZE=96;
+// Preserve the supplied artwork: light only opaque pixels on the nose, never draw an arrow.
+export function lightTrainNose(data,facing){
+ const w=96,x=facing==='left'?9:86;
+ for(const y of [49,57]) for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+  const d=Math.hypot(dx,dy);if(d>2.1)continue;
+  const p=((y+dy)*w+x+dx)*4;
+  if(data[p+3]<128)continue;
+  const a=d<1.25?.92:.40;
+  for(let k=0;k<3;k++)data[p+k]=Math.round(data[p+k]*(1-a)+[255,250,207][k]*a);
+ }
+ return data;
+}
 export function extractTrainAtlas(image,doc=globalThis.document){
  if((image.naturalWidth??image.width)!==W*4||(image.naturalHeight??image.height)!==H*3)throw Error('Unexpected train atlas dimensions');
  const canvas=doc.createElement('canvas');canvas.width=SIZE;canvas.height=SIZE;const ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -17,7 +29,7 @@ export function extractTrainAtlas(image,doc=globalThis.document){
   const data=new Uint8Array(ctx.getImageData(0,0,SIZE,SIZE).data);
   let opaque=0,transparent=0;for(let i=3;i<data.length;i+=4){if(data[i]>=128)opaque++;if(data[i]===0)transparent++;}
   if(opaque<200||transparent<200)throw Error('Train crop missing opaque artwork or transparency: '+line+':'+facing);
-  sprites.set(line+':'+facing,{width:SIZE,height:SIZE,data});
+  sprites.set(line+':'+facing,{width:SIZE,height:SIZE,data:lightTrainNose(data,facing)});
  }
  return sprites;
 }
