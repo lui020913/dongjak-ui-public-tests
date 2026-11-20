@@ -556,7 +556,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    for(const [phase,duration] of [['opening',350],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
-     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===200&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
+     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===95&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
      expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
      if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
@@ -817,11 +817,11 @@ test('route title is a full header drag surface; composer report returns directl
 test('bottom dock swipes between adjacent tabs with a stationary exit and entrance fade',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await enter(page,'route-panel','route');
- await page.evaluate(()=>{window.__dockFade=[];const until=performance.now()+45000;function sample(){for(const id of ['route-panel','participation-panel']){const n=document.getElementById(id);if(n?.dataset.dj810Animating){const s=getComputedStyle(n);window.__dockFade.push({id,phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,o:Number(s.opacity),y:n.getBoundingClientRect().y});}}if(performance.now()<until)requestAnimationFrame(sample);}requestAnimationFrame(sample);});
+ await page.evaluate(()=>{window.__dockFade=[];const until=performance.now()+45000;function sample(){for(const id of ['route-panel','participation-panel']){const n=document.getElementById(id);if(n?.dataset.dj810Animating){const s=getComputedStyle(n);window.__dockFade.push({id,phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),o:Number(s.opacity),y:n.getBoundingClientRect().y});}}if(performance.now()<until)requestAnimationFrame(sample);}requestAnimationFrame(sample);});
  const dock=page.locator('#bottom-nav');await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
  async function swipe(dx){const r=await dock.boundingBox();expect(r).toBeTruthy();const x=r.x+r.width*.5,y=r.y+r.height*.5;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();}
  await swipe(-85);await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');await expect(page.locator('#route-panel')).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();await expect.poll(()=>page.locator('#participation-panel').getAttribute('data-dj810-animating')).toBeNull();
- const frames=await page.evaluate(()=>window.__dockFade);for(const [id,phase] of [['route-panel','closing'],['participation-panel','opening']]){const f=frames.filter(r=>r.id===id&&r.phase===phase);expect(f.length).toBeGreaterThan(1);expect(f.every(r=>r.kind==='fade'&&Math.abs(r.y-f[0].y)<1)).toBe(true);expect(f.some(r=>r.o>0&&r.o<1)).toBe(true);}
+ const frames=await page.evaluate(()=>window.__dockFade);for(const [id,phase] of [['route-panel','closing'],['participation-panel','opening']]){const f=frames.filter(r=>r.id===id&&r.phase===phase);expect(f.length).toBeGreaterThan(1);expect(f.every(r=>r.kind==='fade'&&r.duration===(phase==='closing'?65:95)&&Math.abs(r.y-f[0].y)<1)).toBe(true);expect(f.some(r=>r.o>0&&r.o<1)).toBe(true);}
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#route-panel')).toBeVisible();await expect.poll(()=>page.locator('#route-panel').getAttribute('data-dj810-animating')).toBeNull();
  await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
 });

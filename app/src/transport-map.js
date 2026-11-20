@@ -1,4 +1,5 @@
-import {createBusRouteOverlay} from './bus-route-overlay.js';
+import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
+import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
 import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 import {createInFlightRequests} from './arrival-request-coordinator.js';
 import {createTransportWindowLifecycle} from './transport-window-lifecycle.js';
@@ -109,6 +110,8 @@ async function loadStationMaster(timeout=9000){
   throw lastError||new Error('역사 좌표 자료 조회 실패');
 }
 const arrivalMemo = new Map();
+let stationMetroQuotaUntil=0,stationMetroQuotaResult=null;
+function rememberStationMetroQuota(body,response){stationMetroQuotaUntil=Date.now()+metroQuotaRetryMs(body,response.headers?.get('Retry-After'));stationMetroQuotaResult={state:'error',code:'ERROR-337',items:[],sourceStatus:'quota',message:'서울시 지하철 API 일일 조회량을 초과했습니다. 이용 가능해지면 다시 조회됩니다.',quotaUntil:stationMetroQuotaUntil};return stationMetroQuotaResult;}
 const arrivalInFlight = createInFlightRequests();
 // 환승역은 OSM 태그에 노선명이 없을 수 있어 안정적인 기초 호선 정보를 보완합니다.
 // 신규 역 개통이나 명칭 변경 시 갱신이 필요합니다.
@@ -991,6 +994,7 @@ function arrivalRequestKey(place){
 }
 async function requestArrival(place,{forceRefresh=false}={}){
   const memoKey=arrivalRequestKey(place);
+  if(place.kind==='subway'&&stationMetroQuotaUntil>Date.now()&&stationMetroQuotaResult)return stationMetroQuotaResult;
   const saved=arrivalMemo.get(memoKey);
   if(!forceRefresh && saved && Date.now()-saved.at<12000)return saved.value;
   // A repeated tap or polling tick shares the same provider request; force
@@ -1023,7 +1027,7 @@ async function fetchArrival(place,memoKey){
         if(isBus && error.code==='MISSING_BUS_KEY')error.message='버스 실시간 정보를 제공할 인증키가 없습니다. 로컬 .env 또는 Cloudflare Pages의 SEOUL_BUS_SERVICE_KEY를 확인하세요.';
         if(isBus && error.code==='BUS_API_AUTH')error.message='버스 정보 API 인증 또는 서비스 사용 승인을 확인해야 합니다. 인증키·서비스 권한을 점검하세요.';
         if(isBus && error.code==='BUS_API_RATE_LIMIT')error.message='버스 도착 API 요청 제한에 도달했습니다. 잠시 후 다시 조회해 주세요.';
-        if(!isBus&&response.status===429&&error.code==='ERROR-337'){error.message='서울시 지하철 API 일일 조회량을 초과했습니다. 이용 가능해지면 다시 조회됩니다.';arrivalMemo.set(memoKey,{at:Date.now(),value:error});return error;}
+        if(!isBus&&isMetroDailyQuota(response.status,body))return rememberStationMetroQuota(body,response);
         if(!firstError)firstError=error;
         // 인증키/네트워크 오류는 역명 변경으로 해결되지 않으므로 추가 호출을 하지 않습니다.
         if(response.status>=500 || response.status===401 || response.status===403)break;
@@ -1059,8 +1063,10 @@ async function fetchArrival(place,memoKey){
     try{
       const q=new URLSearchParams({station:normalizeStationQueryName(place.name),mode:'bulk',line:selectedMetroLine||'7호선'});
       const response=await fetch(`${TRANSPORT_API_BASE}/subway?${q}`,{signal:controller.signal,cache:'no-store'});
+      const body=await response.json().catch(()=>({}));
+      if(isMetroDailyQuota(response.status,body))return rememberStationMetroQuota(body,response);
       if(response.ok){
-        const value=guardSubwayProxyArrival(await response.json());
+        const value=guardSubwayProxyArrival(body);
         if(asArray(value.items).length){
           const result={state:'ok',items:value.items,routes:[],updatedAt:value.updatedAt||'',
             checkedAt:value.checkedAt||'',sourceStatus:value.sourceStatus||'unverified',
@@ -1350,25 +1356,30 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const routeStatus=el('div','transport-empty');
   routeStatus.hidden=true;routeStatus.setAttribute('role','status');
   arrivalsEl.before?.(routeStatus);
-  const clearRouteButton=el('button','metro-open-schedule','노선 표시 해제');
+  const clearRouteButton=el('button','metro-open-schedule dj-bus-route-clear','노선 표시 해제');
   clearRouteButton.type='button';
   arrivalsEl.before?.(clearRouteButton);clearRouteButton.hidden=true;
+  const mapClearRouteButton=el('button','dj-bus-route-clear dj-bus-route-map-clear','노선 표시 해제');
+  mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
+  document.getElementById('app')?.append(mapClearRouteButton);
+  let routePresentation=null;
+  function syncRoutePresentation(){const state=routePresentation;const busSheet=selected?.kind==='bus'&&!panel.hidden;routeStatus.hidden=!state||!busSheet;clearRouteButton.hidden=!state||state.status==='error'||!busSheet;mapClearRouteButton.hidden=!state||state.status==='error';if(state&&state.status!=='error'){mapClearRouteButton.textContent=`${state.route}번 노선 표시 해제`;mapClearRouteButton.setAttribute('aria-label',`${state.route}번 버스 노선 표시 해제`);}}
   function syncRouteRows(){
     const active=busRouteOverlay.getActive();
     for(const row of (arrivalsEl.querySelectorAll?.('[data-bus-route-id]')||[])){
       const chosen=active?.id===row.dataset.busRouteId;
       row.setAttribute('aria-pressed',String(chosen));
-      row.style.outline=chosen?'2px solid currentColor':'';
-      row.style.outlineOffset=chosen?'-2px':'';
+      row.style.removeProperty('outline');row.style.removeProperty('outline-offset');
+      row.style.setProperty('--dj-bus-selected-color',busRouteColor(row.dataset.busRouteType));
     }
   }
   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,onState:state=>{
-    routeStatus.hidden=!state;
-    clearRouteButton.hidden=!state||state.status==='error';
+    routePresentation=state;syncRoutePresentation();
     routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · 지도 표시 중`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
     syncRouteRows();
   }});
   clearRouteButton.addEventListener('click',()=>busRouteOverlay.clear());
+  mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();busRouteOverlay.clear();});
   function activateBusRoute(event){
     const row=event.target?.closest?.('[data-bus-route-id]');
     if(!row||!arrivalsEl.contains(row)||panel.hidden||selected?.kind!=='bus')return;
@@ -1428,7 +1439,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const close=(restore=true)=>{
     const wasVisible=!panel.hidden;
     windowState.dismiss();
-    panel.hidden=true;selected=null;seq++;busRouteOverlay.clear();
+    panel.hidden=true;selected=null;seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2119,9 +2130,18 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
     return result;
   }
+  function syncArrivalAvailability(place,result){
+    const limited=place?.kind==='subway'&&result?.sourceStatus==='quota';
+    const refresh=document.getElementById('transport-refresh');
+    if(refresh){refresh.disabled=limited;refresh.title=limited?'서울시 지하철 API 일일 조회량 초과':'';}
+    if(limited){updatedEl.textContent='조회 한도 초과';if(liveTab)liveTab.textContent='도착예정';}
+    else if(liveTab)liveTab.textContent='실시간';
+    if(panel.dataset)panel.dataset.metroQuota=String(limited);
+  }
   async function showArrivalOrPlannedCountdown(container,place,result,activeSeq){
     // Always show current source status immediately; use an official timetable
     // only to identify the end of service or show clearly labelled planned ETAs.
+    syncArrivalAvailability(place,result);
     showArrivalsWithProviderStatus(container,place,result);
     if(place?.kind!=='subway')return;
     const hasSelectedLive=result?.sourceStatus==='ok' &&
@@ -2138,7 +2158,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const notice=el('div','metro-last-train-passed');
       notice.append(el('strong','','계획 막차 시각 경과'));
       notice.append(el('span','',`${passed.join('·')} 방향 · 시간표 기준, 실제 운행 종료 여부 미확인`));
-      container.replaceChildren(notice);
+      if(result?.sourceStatus==='quota')container.replaceChildren(el('p','metro-quota-notice',result.message),notice);
+      else container.replaceChildren(notice);
       return;
     }
     if(!['1호선','신림선'].includes(line))return;
@@ -2152,7 +2173,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const notice=el('small','metro-plan-direction-ended',`${passed.join('·')} 방향은 계획 막차 시각 경과 · 실시간 운행 종료 확인 아님`);
       group.append(notice);
     }
-    container.replaceChildren(group);
+    if(liveTab)liveTab.textContent='도착예정';
+    if(result?.sourceStatus==='quota')container.replaceChildren(el('p','metro-quota-notice',result.message),group);
+    else container.replaceChildren(group);
   }
   let visibleServiceHours=null;
   let timetableExpanded=false,timetableDay=null,timetableLine='all',timetableDirection='all';
@@ -2623,7 +2646,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // validated new selection through the shared window's recent-close guard.
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
     const thisSeq=++seq;
-    busRouteOverlay.clear();
     selected=place;
     updateTransportFavorite();
     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));
@@ -2631,6 +2653,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     timetableExpanded=false;timetableDay=null;timetableLine='all';timetableDirection='all';
     // Switching a transfer-line tab MUST NOT dismiss/reopen the same sheet.
     if(!sameStationLineChange){onOpen();panel.hidden=false;}
+    syncRoutePresentation();
     panel.classList.toggle('dj874-line-switching',sameStationLineChange);
     document.getElementById('app')?.classList?.add?.('transport-sheet-open');
     // One selected coordinate pin. Reuse on line changes and remove on close.
@@ -2693,6 +2716,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           const line=btn.dataset.djLine;
           const active=normalizeLineName(place.selectedLine||'')===line;
           btn.setAttribute('aria-pressed',String(active));
+          btn.style.setProperty('border-color',active?subwayLineColor(line):'transparent','important');
           btn.querySelector('.metro-panel-badge')?.classList.toggle('dj-active-transfer-line',active);
         }
       }
@@ -2703,6 +2727,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         button.setAttribute('aria-pressed',String(normalizeLineName(place.selectedLine||'')===line));
         button.title=`${line} 정보 보기`;
         const badge=makeLineBadge(line,'metro-panel-badge');
+        badge.style.setProperty('background-color',subwayLineColor(line),'important');
+        badge.style.setProperty('color','#fff','important');
+        button.style.setProperty('background-color','transparent','important');
+        button.style.setProperty('border-color',normalizeLineName(place.selectedLine||'')===line?subwayLineColor(line):'transparent','important');
         if(normalizeLineName(place.selectedLine||'')===line)badge.classList.add('dj-active-transfer-line');
         button.append(badge);
         button.addEventListener('click',()=>{
@@ -2798,6 +2826,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(arrivalsEl.dataset)arrivalsEl.dataset.loadingLine=place.selectedLine||'';
     }
     updatedEl.textContent='';
+    syncArrivalAvailability(place,place.kind==='subway'&&stationMetroQuotaUntil>Date.now()?stationMetroQuotaResult:null);
     void refreshServiceHours(place,thisSeq);
     const arrival=await requestArrival(place,{forceRefresh:refresh&&!sameStationLineChange});
     if(thisSeq!==seq)return;
@@ -2826,6 +2855,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let arrivalPolling=false;
   async function autoRefreshSelectedArrival(){
     if(!selected||panel.hidden||document.hidden||arrivalPolling||arrivalInFlight.has(arrivalRequestKey(selected)))return;
+    if(selected.kind==='subway'&&stationMetroQuotaUntil>Date.now())return;
     const active=selected,activeSeq=seq;
     arrivalPolling=true;
     try{
@@ -2841,7 +2871,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         await showArrivalOrPlannedCountdown(arrivalsEl,active,
           {...next,sourceStatus:next.sourceStatus||'unverified',emptyMessage:next.message||'실시간 정보를 갱신하지 못했습니다.'},activeSeq);
         if(activeSeq!==seq||selected!==active||panel.hidden)return;
-        updatedEl.textContent='연결 확인 필요';
+        updatedEl.textContent=next.sourceStatus==='quota'?'조회 한도 초과':'연결 확인 필요';
       }
     }catch(error){console.warn('[실시간 도착정보 갱신]',error);}
     finally{arrivalPolling=false;}

@@ -27,7 +27,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,onSt
   async function select({routeId,route,routeType}){
     const id=String(routeId||'');
     if(!/^\d{5,15}$/.test(id))return;
-    if(active?.id===id){clear();return;}
+    if(active?.id===id)return; // Explicit clear or another route changes the selection.
     clear();
     const seq=sequence;
     active={id,route,status:'loading'};onState(active);

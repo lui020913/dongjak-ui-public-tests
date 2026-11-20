@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.37",
+  "application_version": "9.2.38",
   "public_work_branch": "main",
-  "purpose": "Six-column mobile toolbar with 54px tactile buttons, pinned layer control, overflow fade and horizontal scrolling only for three registered shortcuts",
-  "attempt": 126,
+  "purpose": "Preserve six-column toolbar; fast stationary dock fades, route-colored subway badges and quota notice, persistent bus routes, opaque facility motion and saved-only folders",
+  "attempt": 127,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Distribute six slots evenly on wider phones without enlarging buttons; ensure the seventh control really overflows.",
+  "last_retry_reason": "Owner phone recordings and station screenshot after 9.2.36; fix authoritative state and timing; integrate current 9.2.37 toolbar.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

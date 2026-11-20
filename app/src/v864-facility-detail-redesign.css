@@ -79,7 +79,7 @@
     box-sizing:border-box!important;display:grid!important;place-items:center!important;
     flex:0 0 auto!important;min-width:0!important;max-width:none!important;
     height:40px!important;min-height:40px!important;max-height:40px!important;
-    margin:0!important;padding:0!important;border-radius:12px!important;
+    margin:0!important;padding:0!important;border-radius:999px!important;
     font-size:13px!important;font-weight:780!important;line-height:1!important;
     white-space:nowrap!important;overflow:hidden!important;
   }
@@ -88,7 +88,7 @@
     display:grid!important;place-items:center!important;
     flex:0 0 58px!important;width:58px!important;min-width:58px!important;max-width:58px!important;
     height:40px!important;min-height:40px!important;padding:0 5px!important;
-    border-radius:12px!important;font-size:13px!important;font-weight:800!important;
+    border-radius:999px!important;font-size:13px!important;font-weight:800!important;
   }
   html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions button:is(.dj854-place-favorite,.dj856-place-share,.dj-place-header-close){
     display:grid!important;place-items:center!important;
@@ -97,8 +97,8 @@
     padding:0!important;color:var(--dj800-text,#24483c)!important;
     background:var(--dj800-elevated,#edf6f0)!important;
     border:1px solid var(--dj800-border,#d5e6dd)!important;
-    border-radius:12px!important;font-size:0!important;line-height:0!important;
-    box-shadow:none!important;
+    border-radius:999px!important;font-size:0!important;line-height:0!important;
+    box-shadow:0 2px 5px #0002!important;
   }
   html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-actions button:is(.dj854-place-favorite,.dj856-place-share,.dj-place-header-close) svg{
     display:block!important;width:20px!important;height:20px!important;
@@ -127,7 +127,7 @@
   }
   html body #app#app#app#app #map .dj-place-detail-popup .dj-place-body::-webkit-scrollbar{display:none!important;}
   html body #app#app#app#app #map .dj-place-detail-popup .dj-place-info-card,
-  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-favorites-section,
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-favorites-section:not([hidden]),
   html body #app#app#app#app #map .dj-place-detail-popup .dj834-reviews,
   html body #app#app#app#app #map .dj-place-detail-popup .dj-place-ai-section{
     display:grid!important;grid-auto-rows:max-content!important;gap:8px!important;

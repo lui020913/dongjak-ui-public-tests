@@ -13,7 +13,7 @@ test('official sequence preserves road shape and rejects missing sections or wro
   assert.equal(new URL(busRoutePathUrl('a+b',id)).searchParams.get('ServiceKey'),'a+b');
   assert.equal(parseSeoulBusArrival(body([{busRouteId:id,rtNm:'150',routeType:3}]))[0].routeId,id);
 });
-test('route selection toggles, rejects stale response and restores shape after style reload',async()=>{
+test('route selection persists until explicit clear, rejects stale response and restores shape after style reload',async()=>{
   const sources=new Map(),layers=new Map(),events=new Map();let result;
   const map={getSource:k=>sources.get(k),addSource:(k,v)=>sources.set(k,{setData:d=>{result=d;}}),getLayer:k=>layers.get(k),addLayer:v=>layers.set(v.id,v),on:(k,v)=>events.set(k,v),off:k=>events.delete(k)};
   let resolve;
@@ -27,7 +27,7 @@ test('route selection toggles, rejects stale response and restores shape after s
   sources.clear();layers.clear();events.get('style.load')();
   assert.ok(sources.has(BUS_ROUTE_SOURCE));
   await overlay.select({routeId:id,route:'150',routeType:3});
-  assert.equal(result.features.length,0);overlay.destroy();
+  assert.equal(result.features.length,1);assert.equal(overlay.getActive().id,id);overlay.clear();assert.equal(result.features.length,0);overlay.destroy();
 });
 
 test('official PathList and XML decode while auth and rate-limit errors stay distinct',async()=>{

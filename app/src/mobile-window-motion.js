@@ -14,6 +14,7 @@ export function windowMotionFrame(progress,opening,distance,height,docked=false)
 
 /** Confirmations are stationary; fade the entire overlay and backdrop together. */
 export const CONFIRM_MOTION=Object.freeze({open:200,close:180});
+export const TAB_MOTION=Object.freeze({open:95,close:65});
 export function confirmMotionOpacity(progress,opening){const p=cubicProgress(progress,.42,.58);return opening?p:1-p;}
 
 // Apple HIG / WWDC fluid motion principles; web-specific tuning, not UIKit constants.

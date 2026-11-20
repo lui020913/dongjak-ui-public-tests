@@ -1,7 +1,7 @@
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
-import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,confirmMotionOpacity,continuationOffset} from './mobile-window-motion.js';
+import {WINDOW_MOTION,windowMotionFrame,CONFIRM_MOTION,TAB_MOTION,confirmMotionOpacity,continuationOffset} from './mobile-window-motion.js';
 /** One coordinated motion/visibility owner, added after v8.0.3 UI modules.
  * Retains the original map, route, station and dialog click handlers.
  * CSS entrance animations and earlier JS coordinators opt out while enabled.
@@ -81,7 +81,7 @@ export function installUnifiedUI(doc=document, win=window){
     const fade=isGuide||tabFade||target.dataset.djDialogFade==='true';
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
-    const duration=fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
+    const duration=tabFade?(opening?TAB_MOTION.open:TAB_MOTION.close):fade?(opening?CONFIRM_MOTION.open:CONFIRM_MOTION.close):slideDuration;
     const beforeOpacity=target.style.getPropertyValue('opacity');
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
     const beforeTranslate=target.style.getPropertyValue('translate');
@@ -160,12 +160,12 @@ export function installUnifiedUI(doc=document, win=window){
       // A compositor-starved foreground tab may miss the first frame for
       // longer than the normal inactivity budget, including after one frame.
       // Keep a bounded foreground entrance budget; background tabs release sooner.
-      timeout=win.setTimeout(()=>finish(true),opening&&!doc.hidden?4500:1600);
+      timeout=win.setTimeout(()=>finish(true),tabFade?250:opening&&!doc.hidden?4500:1600);
       animationTimers.add(timeout);
     };
     const tick=timestamp=>{
       if(finished)return;
-      if(start!==null)elapsed+=Math.max(0,Math.min(64,timestamp-start));
+      if(start!==null)elapsed+=Math.max(0,(tabFade?timestamp-start:Math.min(64,timestamp-start)));
       start=timestamp;
       const progress=Math.max(0,Math.min(1,elapsed/duration));
       setMotion(progress);

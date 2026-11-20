@@ -50,7 +50,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    replay(next);
   };
   // A secondary feature can cancel the shared animation; never strand a tab tap.
-  watchdog=win.setTimeout(()=>{if(closing===state){motion.cancel?.(panel);finish();}},1500);
+  watchdog=win.setTimeout(()=>{if(closing===state){motion.cancel?.(panel);finish();}},300);
   motion.closeTab(panel,finish);
  }
  function down(event){
