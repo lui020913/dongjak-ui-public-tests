@@ -1,0 +1,65 @@
+/* iOS Home Screen PWA chrome: one owner for the safe-area surface.
+   The native status strip follows the theme-color meta; the in-page safe-top
+   backing uses the same computed color. No blur layer sits above the search UI. */
+@media (max-width:699px) {
+  html.dj-ios-home-pwa {
+    --dj-ios-pwa-base-color:#eaf0ec;
+    --dj-ios-pwa-status-color:var(--dj-ios-pwa-base-color);
+    background-color:var(--dj-ios-pwa-status-color)!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"] {
+    --dj-ios-pwa-base-color:#192d32;
+  }
+  html.dj-ios-home-pwa body,
+  html.dj-ios-home-pwa body #app {
+    background-color:var(--dj-ios-pwa-status-color)!important;
+  }
+  /* This is the actual web safe-area backing used by the mobile chrome. */
+  html.dj-ios-home-pwa body #app #dj-mobile-safe-top {
+    background:var(--dj-ios-pwa-status-color)!important;
+    background-image:none!important;
+    transition:background-color .18s ease-out!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  /* Normal state: softly join the native status surface to the map.
+     The existing search bar stays above this seam and remains fully opaque. */
+  html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam {
+    display:block!important;
+    position:fixed!important;
+    top:0!important;
+    left:0!important;
+    right:0!important;
+    width:100%!important;
+    height:calc(env(safe-area-inset-top,0px) + 94px)!important;
+    border:0!important;
+    background:linear-gradient(to bottom,
+      var(--dj-ios-pwa-status-color) 0%,
+      var(--dj-ios-pwa-status-color) 7%,
+      color-mix(in srgb,var(--dj-ios-pwa-status-color) 88%,transparent) 23%,
+      color-mix(in srgb,var(--dj-ios-pwa-status-color) 43%,transparent) 62%,
+      transparent 100%)!important;
+    box-shadow:none!important;
+    opacity:1!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    pointer-events:none!important;
+    z-index:2900!important;
+    transition:opacity .18s ease-out!important;
+  }
+  /* When a real scrim is open, it owns the map edge. Do not stack a second
+     gradient over it; the native status color is blended by the JS controller. */
+  html.dj-ios-home-pwa[data-dj-ios-overlay-open="true"] body #app #dj-ios-pwa-map-seam {
+    opacity:0!important;
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce) {
+  html.dj-ios-home-pwa body #app #dj-mobile-safe-top,
+  html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam {
+    transition:none!important;
+  }
+}
