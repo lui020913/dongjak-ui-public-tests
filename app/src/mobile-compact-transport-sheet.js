@@ -9,6 +9,29 @@ export function compactTransportHeight({header=0,grip=0,body=0,viewport=0}={}){
   return Math.round(Math.max(196,Math.min(Math.floor(v*.52),natural)));
 }
 
+/**
+ * A scroll container's scrollHeight includes its *forced flex height* when
+ * there are few rows. Measuring visible children avoids a self-locking 52dvh
+ * sheet that never shrinks even though the actual content is short.
+ */
+export function measureFlowContent(node,win=globalThis.window){
+  if(!node)return 0;
+  const base=win?.getComputedStyle?.(node);
+  const pad=(parseFloat(base?.paddingTop)||0)+(parseFloat(base?.paddingBottom)||0);
+  const children=[...node.children].filter(el=>{
+    if(el.hidden)return false;
+    const cs=win?.getComputedStyle?.(el);
+    return cs?.display!=='none'&&cs?.position!=='absolute'&&cs?.position!=='fixed';
+  });
+  const gap=(parseFloat(base?.rowGap)||0)*Math.max(0,children.length-1);
+  const content=children.reduce((sum,el)=>{
+    const cs=win?.getComputedStyle?.(el);
+    const margin=(parseFloat(cs?.marginTop)||0)+(parseFloat(cs?.marginBottom)||0);
+    return sum+Math.max(el.getBoundingClientRect?.().height||0,el.scrollHeight||0)+margin;
+  },0);
+  return Math.ceil(pad+gap+content);
+}
+
 export function installCompactTransportSheet(doc=globalThis.document,win=globalThis.window){
   const panel=doc?.getElementById?.('transport-sheet');
   if(!panel||!win||panel.dataset.djCompactSizing==='active')return ()=>{};
@@ -25,7 +48,7 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
     const size=compactTransportHeight({
       viewport,header:header?.getBoundingClientRect().height||0,
       grip:grip?.getBoundingClientRect().height||0,
-      body:body?.scrollHeight||0
+      body:measureFlowContent(body,win)
     });
     const value=size+'px';
     if(panel.style.getPropertyValue('--dj9251-transport-content-height')!==value)
