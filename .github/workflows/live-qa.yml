@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/live-qa*'
-      - 'tests/live-qa-fixture.mjs'
+      - 'tests/live-qa*.mjs'
       - '.github/workflows/live-qa.yml'
       - 'playwright.v911-remote.config.mjs'
   workflow_dispatch:
@@ -39,6 +39,31 @@ jobs:
           node --check playwright.v911-remote.config.mjs
           node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
           node --check /tmp/live-qa-dashboard.js
+  smoke:
+    needs: check
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: npm install --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Exercise real capture and assert nonempty frames and metrics
+        env:
+          DONGJAK_LIVE_QA_DIR: /tmp/live-qa-smoke
+        run: |
+          mkdir -p "$DONGJAK_LIVE_QA_DIR"
+          npx playwright test tests/live-qa-smoke.spec.mjs --config=playwright.live-qa-smoke.config.mjs
+          node --input-type=module -e "import fs from 'node:fs'; const root=process.env.DONGJAK_LIVE_QA_DIR; const dir=root+'/'+fs.readdirSync(root).find(x=>/^[a-f0-9-]{36}$/.test(x)); const m=JSON.parse(fs.readFileSync(dir+'/meta.json','utf8')); const rows=fs.readFileSync(dir+'/metrics.ndjson','utf8').trim().split('\n').map(JSON.parse); if(m.frames<3||rows.length<10||!rows.some(x=>x.nodes.length)||m.status!=='passed')throw Error('Missing capture evidence'); console.log('Verified '+m.frames+' image samples and '+rows.length+' browser samples');"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-qa-smoke-evidence
+          path: /tmp/live-qa-smoke/
+          retention-days: 3
   capture:
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
     needs: check
