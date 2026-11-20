@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.22",
+  "application_version": "9.2.23",
   "public_work_branch": "main",
-  "purpose": "Top-view train sprite and tangent rotation, continuous mobile detents and iOS map edge blending",
-  "attempt": 96,
+  "purpose": "Refine subway vehicle artwork to elongated white roof and molded cab without badges; preserve sheet and status changes",
+  "attempt": 97,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Real iPhone recording and supplied icon/status strip references",
+  "last_retry_reason": "User rejected first top-view train sprite",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

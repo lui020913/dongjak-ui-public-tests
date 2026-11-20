@@ -90,3 +90,5 @@ test('top-view train rotation follows the exact local tangent, including vertica
  }
  assert.equal(trainRotation(m,{headingKnown:false},'right',38),38);
 });
+
+test('train artwork uses white roof and route belt without any number or text drawing',async()=>{const {trainIconImage}=await import('../src/features/liveTransit/index.js');const colors=[],methods=[];const ctx=new Proxy({getImageData(){return {data:new Uint8ClampedArray(96*96*4)}}},{get(t,k){return k in t?t[k]:(...args)=>methods.push(k)},set(t,k,v){if(k==='fillStyle')colors.push(v);t[k]=v;return true;}});const sprite=trainIconImage('#3253a2',{createElement:()=>({getContext:()=>ctx})});assert.equal(sprite.width,96);assert.ok(colors.includes('#fafcfd'));assert.ok(colors.includes('#3253a2'));assert.ok(colors.includes('#202b33'));assert.ok(methods.includes('bezierCurveTo'));assert.ok(!methods.includes('fillText')&&!methods.includes('strokeText'));});

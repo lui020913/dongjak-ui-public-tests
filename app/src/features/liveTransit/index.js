@@ -39,22 +39,37 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const size=96;canvas.width=size;canvas.height=size;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
   ctx.scale(3,3);ctx.clearRect(0,0,32,32);
   const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
-  // White roof, rounded cab and dark windscreen. Route color is a belt,
-  // never a number badge. Keep the transparent outside and crisp 3x raster.
-  ctx.save();ctx.shadowColor='#17282e55';ctx.shadowBlur=1.4;ctx.shadowOffsetY=.7;
-  rounded(1.1,9.0,29.8,14,4.8);ctx.fillStyle='#ffffff';ctx.fill();ctx.restore();
-  rounded(1.1,9.0,29.8,14,4.8);ctx.save();ctx.clip();
-  rounded(1.0,9.0,29.9,2.2,1.1);ctx.fillStyle='#e0e5e8';ctx.fill();
-  rounded(1.0,20.8,29.9,2.2,1.1);ctx.fillStyle='#d2dce2';ctx.fill();
-  rounded(13.0,8.8,5.0,14.4,1.0);ctx.fillStyle=color;ctx.fill();
-  // A dark rounded front windscreen identifies the direction of travel.
-  rounded(26.0,11.2,3.1,9.6,1.7);ctx.fillStyle='#222d35';ctx.fill();
-  for(const xx of [3.7,8.1,19.5,23.0]){
-    rounded(xx,11.0,2.7,1.7,.6);ctx.fillStyle='#354650';ctx.fill();
-    rounded(xx,19.4,2.7,1.7,.6);ctx.fillStyle='#354650';ctx.fill();
+  // Long, slightly elevated top view: asymmetric rounded cab, molded white
+  // roof and dark inset glass. No circular badge, letters or route number.
+  const shell=(dy=0)=>{
+    ctx.beginPath();ctx.moveTo(4.0,9.9+dy);
+    ctx.quadraticCurveTo(1.3,9.9+dy,1.3,12.5+dy);
+    ctx.lineTo(1.3,19.5+dy);ctx.quadraticCurveTo(1.3,22.1+dy,4.0,22.1+dy);
+    ctx.lineTo(24.2,22.1+dy);ctx.bezierCurveTo(29.0,22.1+dy,30.7,19.3+dy,30.7,16.0+dy);
+    ctx.bezierCurveTo(30.7,12.7+dy,29.0,9.9+dy,24.2,9.9+dy);
+    ctx.closePath();
+  };
+  ctx.save();ctx.shadowColor='rgba(22,35,43,.28)';ctx.shadowBlur=1.3;ctx.shadowOffsetY=.7;
+  shell(.65);ctx.fillStyle='#687e8c';ctx.fill();ctx.restore();
+  shell(.35);ctx.fillStyle=color;ctx.fill();
+  shell(-.45);ctx.fillStyle='#fafcfd';ctx.fill();
+  ctx.save();shell(-.45);ctx.clip();
+  // A slim lower sill creates depth without a heavy outline.
+  ctx.fillStyle='#d8e0e5';ctx.fillRect(1,19.8,30,2.7);
+  ctx.fillStyle='#f1f4f6';ctx.fillRect(1,9.3,30,1.3);
+  // The single uninterrupted waist band gives the vehicle its route identity.
+  ctx.beginPath();ctx.moveTo(12.3,9.4);ctx.lineTo(16.8,9.4);ctx.quadraticCurveTo(16.1,15.5,16.8,21.8);ctx.lineTo(12.3,21.8);ctx.quadraticCurveTo(11.5,15.5,12.3,9.4);ctx.closePath();ctx.fillStyle=color;ctx.fill();
+  // Dark side windows, inset along the sides of the white roof.
+  for(const x of [3.5,7.4,19.0,22.1]){
+    rounded(x,10.7,2.9,1.45,.5);ctx.fillStyle='#28343c';ctx.fill();
+    rounded(x,19.3,2.9,1.4,.5);ctx.fillStyle='#28343c';ctx.fill();
   }
+  // Curved front glazing, follows the nose rather than reading as a badge.
+  ctx.beginPath();ctx.moveTo(26.4,11.8);ctx.quadraticCurveTo(29.4,12.3,29.4,15.55);
+  ctx.quadraticCurveTo(29.4,18.8,26.4,19.3);ctx.quadraticCurveTo(25.2,15.55,26.4,11.8);
+  ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
+  ctx.beginPath();ctx.moveTo(27.1,12.4);ctx.quadraticCurveTo(28.6,13.1,28.6,15.0);ctx.strokeStyle='#53636c';ctx.lineWidth=.48;ctx.stroke();
   ctx.restore();
-  rounded(1.1,9.0,29.8,14,4.8);ctx.strokeStyle='#aab8be';ctx.lineWidth=.45;ctx.stroke();
   const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);
@@ -104,7 +119,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     const trainImages=ensureTrainImages(map);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],13.2,.76,15.5,1.05,18,1.28],
+        'icon-size':['interpolate',['linear'],['zoom'],13.2,.84,15.5,1.13,18,1.42],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
