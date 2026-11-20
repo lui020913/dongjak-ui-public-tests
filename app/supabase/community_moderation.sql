@@ -8,6 +8,7 @@ create table public.community_moderation_queue (
  user_id uuid not null references auth.users(id) on delete cascade,
  kind text not null check(kind in ('post','comment')),
  fingerprint text not null,
+ image_fingerprint text,
  payload jsonb not null,
  state text not null default 'processing' check(state in ('processing','published','removed','review')),
  reason text,
@@ -37,23 +38,28 @@ create policy community_notifications_owner_update on public.community_notificat
 -- Existing permissive insert policies must not permit bypassing moderation.
 create policy community_posts_moderation_required on public.community_posts as restrictive for insert to anon,authenticated with check(false);
 create policy community_comments_moderation_required on public.community_comments as restrictive for insert to anon,authenticated with check(false);
-create function public.community_moderation_reserve(p_user uuid,p_kind text,p_fingerprint text,p_payload jsonb)
+create policy community_posts_edit_moderation_required on public.community_posts as restrictive for update to anon,authenticated using(false) with check(false);
+create policy community_comments_edit_moderation_required on public.community_comments as restrictive for update to anon,authenticated using(false) with check(false);
+create function public.community_moderation_reserve(p_user uuid,p_kind text,p_fingerprint text,p_image_fingerprint text,p_payload jsonb)
 returns jsonb language plpgsql security invoker set search_path='' as $$
 declare v_id uuid; v_count bigint; v_duplicate boolean;
 begin
  perform pg_advisory_xact_lock(hashtextextended(p_user::text,0));
  select count(*) into v_count from public.community_moderation_queue where user_id=p_user and created_at>now()-interval '1 minute';
  if v_count>=8 then return jsonb_build_object('state','limited'); end if;
- select exists(select 1 from public.community_moderation_queue where user_id=p_user and kind=p_kind and fingerprint=p_fingerprint and created_at>now()-interval '10 minutes') into v_duplicate;
- insert into public.community_moderation_queue(user_id,kind,fingerprint,payload,state,reason,finished_at)
- values(p_user,p_kind,p_fingerprint,p_payload,case when v_duplicate then 'removed' else 'processing' end,case when v_duplicate then 'spam' end,case when v_duplicate then now() end) returning id into v_id;
+ select exists(select 1 from public.community_moderation_queue where user_id=p_user and kind=p_kind and fingerprint=p_fingerprint and state='published' and created_at>now()-interval '10 minutes') into v_duplicate;
+ if not v_duplicate and p_image_fingerprint is not null then
+ select count(*)>=3 into v_duplicate from public.community_moderation_queue where user_id=p_user and image_fingerprint=p_image_fingerprint and state='published' and created_at>now()-interval '10 minutes';
+ end if;
+ insert into public.community_moderation_queue(user_id,kind,fingerprint,image_fingerprint,payload,state,reason,finished_at)
+ values(p_user,p_kind,p_fingerprint,p_image_fingerprint,p_payload,case when v_duplicate then 'removed' else 'processing' end,case when v_duplicate then 'spam' end,case when v_duplicate then now() end) returning id into v_id;
  if v_duplicate then
  insert into public.community_notifications(user_id,submission_id,kind,reason) values(p_user,v_id,p_kind,'spam');
  end if;
  return jsonb_build_object('id',v_id,'state',case when v_duplicate then 'removed' else 'processing' end,'reason',case when v_duplicate then 'spam' end);
 end;$$;
-revoke all on function public.community_moderation_reserve(uuid,text,text,jsonb) from public,anon,authenticated;
-grant execute on function public.community_moderation_reserve(uuid,text,text,jsonb) to service_role;
+revoke all on function public.community_moderation_reserve(uuid,text,text,text,jsonb) from public,anon,authenticated;
+grant execute on function public.community_moderation_reserve(uuid,text,text,text,jsonb) to service_role;
 create function public.community_moderation_finish(p_id uuid,p_decision text,p_reason text)
 returns jsonb language plpgsql security invoker set search_path='' as $$
 declare q public.community_moderation_queue%rowtype; target uuid;

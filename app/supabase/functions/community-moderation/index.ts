@@ -32,8 +32,9 @@ Deno.serve(async(req:Request)=>{
   if(p.lng!=null||p.lat!=null){if(!Number.isFinite(p.lng)||!Number.isFinite(p.lat)||p.lng<124||p.lng>132||p.lat<33||p.lat>39)return send({error:"위치 범위를 확인해주세요."},400);payload.lng=p.lng;payload.lat=p.lat;}
  }else{if(typeof p.post_id!=="string"||!uuid.test(p.post_id))return send({error:"게시글을 확인해주세요."},400);payload.post_id=p.post_id;const {data,error}=await client.from("community_posts").select("id").eq("id",p.post_id).maybeSingle();if(error||!data)return send({error:"게시글이 존재하지 않습니다."},404);}
  const norm=(s:string)=>s.normalize("NFKC").toLowerCase().replace(/[\p{P}\p{Z}\s\u200b-\u200d]/gu,"");
- const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",norm(payload.title||""),norm(body),photo||""].join("\n"));
- const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_payload:payload});
+ const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",norm(payload.title||""),norm(body)].join("\n"));
+ const imageFingerprint=photo?await digest(photo):null;
+ const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_image_fingerprint:imageFingerprint,p_payload:payload});
  if(claimError)return send({error:"검사 서버 연결에 실패했습니다."},503);
  if(claim.state==="limited")return send({error:"작성 빈도가 높습니다. 잠시 후 다시 시도해주세요."},429);
  if(claim.state==="removed")return send(claim);
