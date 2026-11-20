@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {differenceHash} from '../supabase/functions/community-moderation/image-hash.mjs';
+function sample(w,h,shift=0){const data=new Uint8Array(w*h*4);for(let y=0;y<h;y++)for(let x=0;x<w;x++){let v=120+Math.round(70*Math.sin(x/w*6*Math.PI)*Math.cos(y/h*4*Math.PI))+shift;const i=(y*w+x)*4;data.set([v,v,v,255],i);}return data;}
+test('hash is 64 bits and stable under moderate brightness changes',()=>{const a=differenceHash(sample(90,80),90,80);assert.match(a,/^[01]{64}$/);assert.equal(a,differenceHash(sample(90,80,10),90,80));});
+test('similar rescaled image has small Hamming distance',()=>{const a=differenceHash(sample(90,80),90,80);const b=differenceHash(sample(180,160),180,160);assert.ok([...a].filter((x,i)=>x!==b[i]).length<=5);});
+test('flat or malformed data does not participate in near duplicate checks',()=>{assert.equal(differenceHash(new Uint8Array(90*80*4),90,80),null);assert.equal(differenceHash(new Uint8Array(8),90,80),null);});

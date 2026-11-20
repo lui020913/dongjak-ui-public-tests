@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.40",
+  "application_version": "9.2.41",
   "public_work_branch": "main",
-  "purpose": "Official route stops at detailed zoom, fullscreen evidence chat, inline voice recognition with native permission, animated search expansion and smoother 250ms dock fade",
-  "attempt": 130,
+  "purpose": "Expand voice search vertically with listening animation and native permission; reorganize compact metro sheet with measured header, consistent four actions, compact route strip and readable directional arrivals",
+  "attempt": 131,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner requested route stops and mobile interface enhancements; retain actual microphone permission requests and eliminate duplicate preflight capture.",
+  "last_retry_reason": "Owner requested a downward expansion rather than inline recognition only, and true subway layout redesign.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

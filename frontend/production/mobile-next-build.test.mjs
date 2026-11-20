@@ -148,11 +148,13 @@ test('actual action buttons share tactile material while selection and accessibi
 
 test('voice search has an inline status, native permission request and no duplicate capture',()=>{
  const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
- const voice=js.slice(js.indexOf("const feedback=doc.createElement('span');feedback.id='djNext-voice-status'"),js.indexOf('export function installPhoneRouteComparison'));
- assert.ok(voice.includes('mic.before(feedback)'));assert.ok(voice.includes('r.start()'));assert.ok(voice.includes("app.dataset.djVoiceListening='true'"));assert.ok(voice.includes('r.interimResults=true'));assert.ok(!voice.includes('await win.navigator.mediaDevices.getUserMedia'));
- assert.ok(css.includes('flex-basis:0!important;width:0!important;max-width:0!important'));assert.ok(css.includes('flex-basis 250ms'));assert.ok(css.includes('position:static!important;display:block!important;background:none!important'));
+ const voice=js.slice(js.indexOf("const voicePanel=doc.createElement('div');voicePanel.id='djNext-voice-panel'"),js.indexOf('export function installPhoneRouteComparison'));
+ assert.ok(voice.includes('voicePanel.append(wave,feedback);form.append(voicePanel)'));assert.ok(voice.includes('djNext-voice-wave'));assert.ok(voice.includes('r.start()'));assert.ok(voice.includes("app.dataset.djVoiceListening='true'"));assert.ok(voice.includes('r.interimResults=true'));assert.ok(!voice.includes('await win.navigator.mediaDevices.getUserMedia'));
+ assert.ok(css.includes('flex-basis:0!important;width:0!important;max-width:0!important'));assert.ok(css.includes('flex-basis 250ms'));assert.ok(css.includes('position:static!important;display:block!important;background:none!important'));assert.ok(css.includes('--dj-voice-extra:82px'));assert.ok(css.includes('height:calc(54px + var(--dj-voice-extra))'));
 });
 test('AI dialogue preserves evidence per turn and occupies the viewport',()=>{
  const js=readFileSync(new URL('../src/v880-supabase-safety-ai.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/v880-supabase-safety-ai.css',import.meta.url),'utf8');
  assert.ok(js.includes('transcript.append(user,turn)'));assert.ok(js.includes("client.functions.invoke('dongjak-safety-ai',{body:{query}})"));assert.ok(js.includes('composer.append(form,foot)'));assert.ok(css.includes('height:var(--dj891-ai-visible-height,100dvh)!important'));assert.ok(css.includes('.dj-ai-transcript{flex:1 1 0'));
 });
+
+test('compact metro has one layout owner and a single content scroll',()=>{const js=readFileSync(new URL('../src/v875-mobile-stability.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');assert.ok(js.includes("panel.dataset.djTransportLayout='compact-v2'"));assert.ok(css.includes('[data-dj-transport-layout="compact-v2"][data-kind="subway"]'));assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));assert.ok(css.includes('font-size:14px!important;line-height:1.35!important'));});

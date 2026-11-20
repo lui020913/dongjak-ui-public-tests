@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "npm:@supabase/supabase-js@2.57.0";
+import {decode} from "npm:jpeg-js@0.4.4";
+import {differenceHash} from "./image-hash.mjs";
 const categories=new Set(["보행 불편","개선 제안","동네 질문","동네생활","생활정보","교통정보","자유게시판"]);
 const codes=new Set(["clean","profanity","harassment","spam","sexual","graphic","privacy","illegal_ad","uncertain"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -40,8 +42,11 @@ Deno.serve(async(req:Request)=>{
  const norm=(s:string)=>s.normalize("NFKC").toLowerCase().replace(/[\p{P}\p{Z}\s\u200b-\u200d]/gu,"");
  const fingerprint=await digest([kind,kind==="comment"?payload.post_id:"",payload.parent_id||"",norm(payload.title||""),norm(body)].join("\n"));
  const imageFingerprint=photo?await digest(photo):null;
- const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_image_fingerprint:imageFingerprint,p_payload:payload});
+ let perceptualHash:string|null=null;
+ if(photo){try{const bytes=Uint8Array.from(atob(photo.slice("data:image/jpeg;base64,".length)),v=>v.charCodeAt(0));const image=decode(bytes,{useTArray:true,formatAsRGBA:true,tolerantDecoding:false,maxResolutionInMP:2,maxMemoryUsageInMB:32});perceptualHash=differenceHash(image.data,image.width,image.height);}catch{return send({error:"사진을 읽을 수 없거나 크기가 너무 큽니다. 다시 첨부해주세요."},400);}}
+ const {data:claim,error:claimError}=await client.rpc("community_moderation_reserve_v3",{p_user:auth.user.id,p_kind:kind,p_fingerprint:fingerprint,p_image_fingerprint:imageFingerprint,p_payload:payload,p_perceptual_hash:perceptualHash});
  if(claimError)return send({error:"검사 서버 연결에 실패했습니다."},503);
+ if(claim.state==="restricted")return send({error:"반복된 운영정책 위반으로 공개 글과 댓글 등록이 일시 제한되었습니다. 최근 삭제 시점부터 30분 후 다시 이용할 수 있습니다.",retry_at:claim.retry_at},429);
  if(claim.state==="limited")return send({error:"작성 빈도가 높습니다. 잠시 후 다시 시도해주세요."},429);
  if(claim.state==="removed"||claim.state==="review")return send({state:claim.state,reason:claim.reason});
  let decision="review",reason="unavailable";
