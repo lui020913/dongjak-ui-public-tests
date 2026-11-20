@@ -42,7 +42,7 @@ export function buildGenerationCatalog(releases,reviewRelease){
   const operational=/^9\.\d+\.\d+$/.test(actualVersion);
   // The update HISTORY has two components: v1.0 … v9.2.
   // The underlying SemVer (e.g. 9.2.51) is kept unchanged on record.version.
-  const editorialLabel=review?.historical&&/^\\d+\\.\\d+$/.test(String(review.label||''))
+  const editorialLabel=review?.historical&&/^\d+\.\d+$/.test(String(review.label||''))
     ?String(review.label)
     :operational?actualVersion.split('.').slice(0,2).join('.'):`${major}.${minor}`;
   const displayVersion='v'+editorialLabel;
