@@ -11,14 +11,14 @@ export {expect};
 export const test=base.extend({
   liveAudit:[async({page},use,info)=>{
     if(!root){await use();return;}
-    // One audit worker per local console. Pause only between journeys, never inside an animation.
+    // One audit worker per isolated shard. Pause only between journeys, never inside an animation.
     while(existsSync(join(root,'pause'))){await sleep(250);}
     const id=randomUUID(), dir=join(root,id);
     mkdirSync(join(dir,'frames'),{recursive:true});
     info.annotations.push({type:'live-qa-scene',description:id});
     const start=Date.now(), meta={id,title:info.title,project:info.project.name,start,status:'running',frames:0};
     put(join(dir,'meta.json'),meta);
-    let count=0,last=0,cdp,closed=false;
+    let count=0,last=0,cdp,closed=false,streamLast=0,watchChecked=0,watching=false;
     await page.exposeBinding('__djAuditBatch',(_source,batch)=>{
       if(closed||!Array.isArray(batch)||batch.length>90)return;
       appendFileSync(join(dir,'metrics.ndjson'),batch.map(x=>JSON.stringify(x)).join('\n')+'\n');
@@ -53,7 +53,14 @@ export const test=base.extend({
         cdp=await page.context().newCDPSession(page);
         cdp.on('Page.screencastFrame',({data,sessionId})=>{
           void cdp.send('Page.screencastFrameAck',{sessionId}).catch(()=>{});
-          if(closed||Date.now()-last<90||count>=2200)return;
+          if(closed)return;
+          const now=Date.now();
+          if(now-watchChecked>=250){watchChecked=now;watching=existsSync(join(root,'watching'));}
+          if(watching&&now-streamLast>=16){
+            streamLast=now;const path=join(dir,'latest.jpg');
+            writeFileSync(path+'.tmp',Buffer.from(data,'base64'));renameSync(path+'.tmp',path);
+          }
+          if(now-last<90||count>=2200)return;
           last=Date.now();const file=String(++count).padStart(6,'0')+'.jpg';
           writeFileSync(join(dir,'frames',file),Buffer.from(data,'base64'));
           appendFileSync(join(dir,'frame-times.ndjson'),JSON.stringify({file,t:last})+'\n');
