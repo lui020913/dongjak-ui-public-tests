@@ -80,6 +80,8 @@ test('the update history labels release types explicitly and keeps archived reco
   assert.match(renderer,/수정·안정화/);
   assert.match(renderer,/buildGenerationCatalog\(releases,\s*releaseEdition\)/);
   assert.match(renderer,/displayVersion/);
-  assert.match(renderer,/원래 기록|실제 빌드/);
+  assert.match(renderer,/당시 기록/);
+  assert.match(renderer,/isOperational/);
+  assert.doesNotMatch(renderer,/release===currentRelease\?'현재 빌드: '/);
   assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
 });
