@@ -41,7 +41,8 @@ export function installPwaStatusTone(doc=document,win=window) {
       const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal'].some(id=>id!=='dj-ai-search-modal'&&visible(id));
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
-      const color=theme==='dark'?'#192d32':'#eef3ef';
+      const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
+      const color=aiOpen?(theme==='dark'?'#191b1f':'#ffffff'):(theme==='dark'?'#192d32':'#eef3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');

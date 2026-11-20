@@ -21,7 +21,8 @@ export function installRequestCompletion(doc=document,win=window){
     const phone=win.innerWidth<700;
     const heading=panel.querySelector('.community-heading-row'),toolbar=panel.querySelector('.community-toolbar'),sort=doc.getElementById('community-sort');
     if(sort&&heading&&toolbar){
-      const destination=phone?heading:toolbar;
+      const destination=phone?heading:toolbar;const saved=doc.getElementById('community-saved-toggle');
+      if(saved&&saved.parentElement!==destination){if(phone)heading.insertBefore(saved,doc.getElementById('community-compose-toggle'));else toolbar.append(saved);}
       if(sort.parentElement!==destination){if(phone)destination.prepend(sort);else destination.append(sort);}
     }
     const visibleEditor=phone&&!panel.hidden&&!form.hidden;

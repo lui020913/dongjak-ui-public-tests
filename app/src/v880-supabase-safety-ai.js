@@ -59,7 +59,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   preferences.append(choices);
   function chooseProfile(value){if(!Object.hasOwn(profileLabels,value))return;profile=value;try{localStorage.setItem(profileKey,value)}catch{};syncProfile();preferences.hidden=true;names.firstChild.focus({preventScroll:true});}
   function syncProfile(){modal.dataset.explanation=profile||'unset';profileButton.textContent=profileLabels[profile]||'설명 방식';preferences.hidden=!!profile;for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.profile===profile));input.disabled=!profile;submit.disabled=!profile||pending;}
-  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;});
+  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;if(!preferences.hidden)preferences.scrollIntoView({block:'start',behavior:'instant'});});
   const form=el('form','dj-ai-search-form');form.method='dialog';
   const label=el('label','dj-ai-search-label','보행안전정보 질문');
   const input=el('input','dj-ai-query');input.type='search';input.id='dj-ai-query';

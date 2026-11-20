@@ -298,7 +298,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 .dj-ai-profile-choice{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;padding:12px;border:1px solid var(--ai-line);border-radius:14px;background:var(--ai-bg);color:var(--ai-text);min-height:70px;font:inherit}
 .dj-ai-profile-choice[aria-pressed=true]{border-color:var(--ai-accent);color:var(--ai-accent)}
 .dj-ai-profile-choice small{font-size:12px;color:var(--ai-muted)}
-.dj-ai-profile-button{flex:none;max-width:100px;border:1px solid var(--ai-line);border-radius:999px;color:var(--ai-text);background:var(--ai-card);padding:8px 10px;font:650 11px/1.25 inherit;min-height:36px}
+.dj-ai-profile-button{flex:none;max-width:100px;border:1px solid var(--ai-line);border-radius:999px;color:var(--ai-text);background:var(--ai-card);padding:8px 10px;font:inherit;font-weight:650;font-size:11px;line-height:1.25;min-height:36px}
 .dj-ai-evidence summary{cursor:pointer;font-size:12px;color:var(--ai-muted);padding:7px 0;min-height:32px;box-sizing:border-box}
 .dj-ai-evidence[open]>p{margin:6px 0}
 .dj-ai-result .dj-ai-location-note{font-size:12px;color:var(--ai-muted)}
