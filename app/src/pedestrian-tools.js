@@ -5,6 +5,8 @@
 import {queryOverpass} from './safety-layers.js';
 import {fixedMetroStations} from './fixed-rail-lines.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
+import {bindHeaderDragInput} from './mobile-header-input.js';
+import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
 
 const EMPTY={type:'FeatureCollection',features:[]};
 const RADIUS_M=850;
@@ -249,6 +251,36 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   const resetNearby=()=>{clearNearbyMarker();delete panel.dataset.nearbyMode;status.hidden=false;};
   const hiddenObserver=new MutationObserver(()=>{if(panel.hidden)resetNearby();});
   hiddenObserver.observe(panel,{attributes:true,attributeFilter:['hidden']});
+  // The common sheet controller owns motion. On WebKit and compositor-heavy
+  // mobile canvases it can miss the end of a header swipe, leaving a compact
+  // nearby sheet stuck in place. This secondary gesture recognizer only
+  // completes a verified upward header swipe if the common owner did NOT.
+  // It does not animate the panel, dismiss it, or interfere with X/buttons.
+  const nearbyHeader=panel.querySelector('.ped-tools-panel-head');
+  let nearbySwipe=null,nearbyRetry=0;
+  const disposeNearbySwipe=nearbyHeader?bindHeaderDragInput(nearbyHeader,window,{
+    down(event){
+      if(panel.hidden||!window.matchMedia('(max-width:1079px)').matches||
+          event.isPrimary===false||event.target?.closest?.('button,a,input,textarea,select,[role="button"]'))return false;
+      nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY};
+      return true;
+    },
+    move(){},
+    up(event){
+      const s=nearbySwipe;nearbySwipe=null;
+      if(!s||s.pointerId!==event.pointerId)return;
+      const dx=event.clientX-s.x,dy=event.clientY-s.y;
+      if(dy>-42||Math.abs(dx)>Math.abs(dy)*.8)return;
+      if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
+      nearbyRetry=window.requestAnimationFrame?.(()=>{
+        nearbyRetry=0;
+        if(!panel.hidden&&!panel.classList.contains('dj871-sheet-expanded'))
+          setMobileSheetExpanded(panel,true,document,window);
+      })||0;
+    },
+    cancel(){nearbySwipe=null;}
+  }):()=>{};
+
   const showPanel=title=>{
     resetNearby();
     window.DongjakWindowLifecycle?.requestOpen(panel.id);
@@ -493,6 +525,6 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     panel.removeEventListener('dongjak:ped-dismiss',dismissNearby);
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
     mapToolsToggle?.removeEventListener('click',onToggleMapTools);
-    hiddenObserver.disconnect();resetNearby();disposePlacement();
+    hiddenObserver.disconnect();resetNearby();disposePlacement();disposeNearbySwipe();if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
   };
 }
