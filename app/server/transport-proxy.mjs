@@ -7,6 +7,7 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {parseSeoulBusArrival,parseSeoulSubwayArrival,resolveSeoulBusStation,parseSeoulBusStopsNearby,inspectSeoulApiResponse,isSeoulBusNoResult} from '../src/transport-data.js';
 import {parseBusRouteList} from './bus-route-list.mjs';
+import {parseBusRoutePath,busRoutePathUrl} from './bus-route-path.mjs';
 import {validateSeoulSubwayFeed} from '../src/transport-freshness.js';
 import {permitsSubwayBulkRecovery,filterBulkArrivalsForStation,seoulSubwayIdForLine} from '../src/subway-source-recovery.js';
 import {fetchDongjakNews} from './dongjak-news.mjs';
@@ -284,6 +285,20 @@ const server=http.createServer(async(req,res)=>{
       const data={items,source:'서울특별시 정류소정보조회 서비스',verified:true,lookupStatus:items.length?'found':'empty'};
       cache.set(memoKey,{at:Date.now(),data});
       return reply(res,200,data);
+    }
+    if(url.pathname==='/api/transport/bus/route-path'){
+      const id=url.searchParams.get('routeId')||'';
+      if(!/^\d{5,15}$/.test(id))return reply(res,400,{error:'유효한 버스 노선 ID가 필요합니다.'});
+      if(!BUS_KEY)return reply(res,503,{error:'버스 API 인증키 미설정'});
+      const memoKey='bus-route-path:'+id;
+      const memo=cache.get(memoKey);
+      if(memo&&Date.now()-memo.at<3600000)return reply(res,200,memo.data);
+      try{
+        const coordinates=parseBusRoutePath(await fetchOfficial(busRoutePathUrl(BUS_KEY,id),{allowEmptyResult:true}),id);
+        if(!coordinates.length)return reply(res,404,{error:'공식 노선 경로를 확인하지 못했습니다.'});
+        const data={routeId:id,coordinates,source:'서울시 노선정보조회 서비스'};
+        cache.set(memoKey,{at:Date.now(),data});return reply(res,200,data);
+      }catch{return reply(res,502,{error:'공식 버스 노선 경로 조회에 실패했습니다.'});}
     }
     const routeList=url.pathname==='/api/transport/bus/routes';
     if(url.pathname!=='/api/transport/bus'&&url.pathname!=='/api/transport/subway'&&!routeList)return reply(res,404,{error:'경로가 없습니다.'});

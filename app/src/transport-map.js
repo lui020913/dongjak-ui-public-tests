@@ -1,3 +1,4 @@
+import {createBusRouteOverlay} from './bus-route-overlay.js';
 import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 import {createInFlightRequests} from './arrival-request-coordinator.js';
 import {createTransportWindowLifecycle} from './transport-window-lifecycle.js';
@@ -901,6 +902,15 @@ function displayArrivals(container,kind,items){
       const item=el('div','transport-arrival-row');
       if(/운행\s*종료|운행\s*중단|막차\s*종료/.test(String(row.message||'')))item.dataset.dj912Ended='true';
       const left=el('div','transport-arrival-main');
+      if(/^\d{5,15}$/.test(String(row.routeId||''))){
+        item.dataset.busRouteId=String(row.routeId);
+        item.dataset.busRouteName=String(row.route||'버스');
+        item.dataset.busRouteType=String(row.routeType||'');
+        item.setAttribute('role','button');item.setAttribute('tabindex','0');
+        item.setAttribute('aria-label',`${row.route||'버스'}번 노선 지도에 표시`);
+        item.setAttribute('aria-pressed','false');
+        item.style.cursor='pointer';
+      }
       const routeBadge=el('strong','',row.route||row.line||row.direction||'버스');
       routeBadge.dataset.routeType=String(row.routeType||row.routeTy||row.busType||'');
       left.append(routeBadge);
@@ -1336,6 +1346,38 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const allStationByName=new Map();
   let stops=new Map();
   let selected=null;
+  const routeStatus=el('div','transport-empty');
+  routeStatus.hidden=true;routeStatus.setAttribute('role','status');
+  arrivalsEl.before(routeStatus);
+  const clearRouteButton=el('button','metro-open-schedule','노선 표시 해제');
+  clearRouteButton.type='button';
+  arrivalsEl.before(clearRouteButton);clearRouteButton.hidden=true;
+  function syncRouteRows(){
+    const active=busRouteOverlay.getActive();
+    for(const row of arrivalsEl.querySelectorAll('[data-bus-route-id]')){
+      const chosen=active?.id===row.dataset.busRouteId;
+      row.setAttribute('aria-pressed',String(chosen));
+      row.style.outline=chosen?'2px solid currentColor':'';
+      row.style.outlineOffset=chosen?'-2px':'';
+    }
+  }
+  const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,onState:state=>{
+    routeStatus.hidden=!state;
+    clearRouteButton.hidden=!state||state.status==='error';
+    routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · 지도 표시 중`:`${state.route}번 공식 노선 경로를 불러오지 못했습니다.`;
+    syncRouteRows();
+  }});
+  clearRouteButton.addEventListener('click',()=>busRouteOverlay.clear());
+  function activateBusRoute(event){
+    const row=event.target?.closest?.('[data-bus-route-id]');
+    if(!row||!arrivalsEl.contains(row)||panel.hidden||selected?.kind!=='bus')return;
+    if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+    event.preventDefault();event.stopPropagation();
+    void busRouteOverlay.select({routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType});
+  }
+  arrivalsEl.addEventListener('click',activateBusRoute);
+  arrivalsEl.addEventListener('keydown',activateBusRoute);
+  new MutationObserver(syncRouteRows).observe(arrivalsEl,{childList:true,subtree:true});
   let selectionMarker=null;
   let seq=0;
   const favoritePlace=raw=>raw?{
@@ -1385,7 +1427,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const close=(restore=true)=>{
     const wasVisible=!panel.hidden;
     windowState.dismiss();
-    panel.hidden=true;selected=null;seq++;
+    panel.hidden=true;selected=null;seq++;busRouteOverlay.clear();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2580,6 +2622,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // validated new selection through the shared window's recent-close guard.
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
     const thisSeq=++seq;
+    busRouteOverlay.clear();
     selected=place;
     updateTransportFavorite();
     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));

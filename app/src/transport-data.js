@@ -18,6 +18,8 @@ export function parseSeoulBusArrival(body){
   const rows=Array.isArray(raw)?raw:raw?[raw]:[];
   return rows.map(x=>({
     route:String(x.rtNm??x.busRouteAbrv??x.busRouteId??'노선 정보 없음'),
+    ...( /^\d{5,15}$/.test(String(x.busRouteId??'')) ? {routeId:String(x.busRouteId)} : {}),
+    ...(x.routeType!=null ? {routeType:String(x.routeType)} : {}),
     destination:String(x.adirection??x.stNm??''),
     message:String(x.arrmsg1??x.arrmsg2??'도착정보 없음'),
     nextMessage:String(x.arrmsg2??'').trim()

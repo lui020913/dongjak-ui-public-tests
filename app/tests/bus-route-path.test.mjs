@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {parseBusRoutePath,busRoutePathUrl} from '../server/bus-route-path.mjs';
+import {parseSeoulBusArrival} from '../src/transport-data.js';
+import {createBusRouteOverlay,BUS_ROUTE_SOURCE} from '../src/bus-route-overlay.js';
+const id='100100112';
+const row=(no,gpsX,gpsY)=>({busRouteId:id,no,gpsX,gpsY});
+const body=rows=>({msgBody:{itemList:rows}});
+test('official sequence preserves road shape and rejects missing sections or wrong route',()=>{
+  assert.deepEqual(parseBusRoutePath(body([row(2,126.91,37.51),row(1,126.9,37.5)]),id),[[126.9,37.5],[126.91,37.51]]);
+  assert.deepEqual(parseBusRoutePath(body([row(1,126.9,37.5),row(3,126.91,37.51)]),id),[]);
+  assert.deepEqual(parseBusRoutePath(body([row(1,126.9,37.5),row(2,126.91,37.51)]),'100100113'),[]);
+  assert.equal(new URL(busRoutePathUrl('a+b',id)).searchParams.get('ServiceKey'),'a+b');
+  assert.equal(parseSeoulBusArrival(body([{busRouteId:id,rtNm:'150',routeType:3}]))[0].routeId,id);
+});
+test('route selection toggles, rejects stale response and restores shape after style reload',async()=>{
+  const sources=new Map(),layers=new Map(),events=new Map();let result;
+  const map={getSource:k=>sources.get(k),addSource:(k,v)=>sources.set(k,{setData:d=>{result=d;}}),getLayer:k=>layers.get(k),addLayer:v=>layers.set(v.id,v),on:(k,v)=>events.set(k,v),off:k=>events.delete(k)};
+  let resolve;
+  const overlay=createBusRouteOverlay({map,apiBase:'/api/transport',fetcher:()=>new Promise(r=>{resolve=r;})});
+  const pending=overlay.select({routeId:id,route:'150',routeType:3});
+  overlay.clear();
+  resolve({ok:true,json:async()=>({routeId:id,coordinates:[[126.9,37.5],[126.91,37.51]]})});
+  await pending;assert.equal(overlay.getActive(),null);assert.equal(result,undefined);
+  await overlay.select({routeId:id,route:'150',routeType:3});
+  assert.equal(result.features.length,1);
+  sources.clear();layers.clear();events.get('style.load')();
+  assert.ok(sources.has(BUS_ROUTE_SOURCE));
+  await overlay.select({routeId:id,route:'150',routeType:3});
+  assert.equal(result.features.length,0);overlay.destroy();
+});
