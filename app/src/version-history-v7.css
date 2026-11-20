@@ -125,4 +125,22 @@
 .dj-edition-summary::-webkit-details-marker{display:none}
 .dj-edition-summary strong{font-size:15px}.dj-edition-summary span{grid-column:1;grid-row:2;font-size:12px;opacity:.85}.dj-edition-summary small{grid-column:2;grid-row:1/3;font-size:11px;opacity:.75}
 .dj-edition-summary small::after{content:'  ▾'}.dj-edition-history[open]>.dj-edition-summary small::after{content:'  ▴'}
-.dj-edition-history .v707-release{margin-top:8px}.dj-edition-original{font-size:11px;opacity:.7;margin:4px 0}
+.dj-edition-history .v707-release{margin-top:8px}
+/* Two-part public update editions; patch-build notes stay available behind
+   disclosure rather than occupying the first screen as 9.0.23, 9.0.22, ... */
+#app .dj-edition-minor{margin:9px 0;border:1px solid var(--dj800-border,#dae8df);border-radius:14px;padding:0 9px;background:var(--dj800-elevated,#f7faf8);color:inherit}
+#app .dj-edition-minor-summary{display:flex;align-items:center;gap:8px;min-height:46px;padding:10px 3px;cursor:pointer;list-style:none}
+#app .dj-edition-minor-summary::-webkit-details-marker{display:none}
+#app .dj-edition-minor-summary strong{font-size:16px;font-weight:800;letter-spacing:-.025em;color:var(--dj800-accent,#0d806a)}
+#app .dj-edition-minor-summary span{font-size:12px;flex:1 1 auto;min-width:0;opacity:.85}
+#app .dj-edition-minor-summary small{font-size:11px;opacity:.75}
+#app .dj-edition-minor-summary small::after{content:' ▾'}
+#app .dj-edition-minor[open]>.dj-edition-minor-summary small::after{content:' ▴'}
+#app .dj-edition-minor>.v707-release{margin:4px 0 12px!important;background:var(--dj800-surface,#fff)}
+#app .dj-edition-patch{margin:6px 0;border-top:1px solid var(--dj800-border,#dbe6df)}
+#app .dj-edition-patch-summary{cursor:pointer;list-style:none;font-size:12px;line-height:1.45;padding:11px 3px;word-break:keep-all;color:var(--dj800-muted,#678176)}
+#app .dj-edition-patch-summary::-webkit-details-marker{display:none}
+#app .dj-edition-patch-summary::before{content:'＋';margin-right:8px;font-weight:800;color:var(--dj800-accent,#0d806a)}
+#app .dj-edition-patch[open]>.dj-edition-patch-summary::before{content:'−'}
+#app .dj-edition-patch .v707-release{margin:4px 0 10px!important}
+.dj-edition-original{font-size:11px;opacity:.7;margin:4px 0}
