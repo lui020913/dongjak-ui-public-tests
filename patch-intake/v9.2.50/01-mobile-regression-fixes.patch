@@ -1,0 +1,400 @@
+diff --git a/app/src/v891-mobile-hud-ai-logo.js b/app/src/v891-mobile-hud-ai-logo.js
+--- a/app/src/v891-mobile-hud-ai-logo.js
++++ b/app/src/v891-mobile-hud-ai-logo.js
+@@ -50,10 +50,13 @@
+-    if(!modal||!modal.open||!mq.matches){
+-      modal?.style.removeProperty('--dj891-ai-keyboard-inset');
+-      modal?.style.removeProperty('--dj891-ai-visible-height');
+-      return;
+-    }
+-    const v=win.visualViewport;
+-    const height=v?.height||win.innerHeight;
+-    const inset=mobileKeyboardInset({innerHeight:win.innerHeight,visualHeight:height,offsetTop:v?.offsetTop||0});
+-    modal.style.setProperty('--dj891-ai-keyboard-inset',inset+'px');
+-    modal.style.setProperty('--dj891-ai-visible-height',Math.max(120,Math.floor(height))+'px');
++    if(!modal||!modal.open||!mq.matches){
++      for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
++      return;
++    }
++    // A focused iOS input can pan the visual viewport as well as resize it.
++    // Use one coordinate system; do not combine top/bottom constraints with a height.
++    const view=win.visualViewport;
++    const height=Math.max(1,Math.floor(view?.height||win.innerHeight));
++    const top=Math.max(0,Math.round(view?.offsetTop||0));
++    const inset=mobileKeyboardInset({innerHeight:win.innerHeight,visualHeight:height,offsetTop:top});
++    modal.style.setProperty('--dj891-ai-keyboard-inset',inset+'px');
++    modal.style.setProperty('--dj891-ai-visible-top',top+'px');
++    modal.style.setProperty('--dj891-ai-visible-height',height+'px');
+@@ -95,2 +98,1 @@
+-    modal?.style.removeProperty('--dj891-ai-keyboard-inset');
+-    modal?.style.removeProperty('--dj891-ai-visible-height');
++    for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
+diff --git a/app/src/v891-mobile-hud-ai-logo.css b/app/src/v891-mobile-hud-ai-logo.css
+--- a/app/src/v891-mobile-hud-ai-logo.css
++++ b/app/src/v891-mobile-hud-ai-logo.css
+@@ -87,7 +87,5 @@
+-  /* iOS keyboard changes the visual viewport, not the fixed modal's layout
+-     viewport. JS supplies the measured keyboard inset while the dialog opens. */
+-  html body .dj-ai-search-modal[open] {
+-    position:fixed!important;
+-    inset:0 0 var(--dj891-ai-keyboard-inset,0px) 0!important;
+-    bottom:var(--dj891-ai-keyboard-inset,0px)!important;
+-    max-height:var(--dj891-ai-visible-height,100dvh)!important;
++  /* The AI top-layer surface is sized to the visual, not layout, viewport. */
++  html body .dj-ai-search-modal[open] {
++    position:fixed!important;
++    inset:var(--dj891-ai-visible-top,0px) 0 auto 0!important;
++    max-height:var(--dj891-ai-visible-height,100dvh)!important;
+diff --git a/app/src/v880-supabase-safety-ai.css b/app/src/v880-supabase-safety-ai.css
+--- a/app/src/v880-supabase-safety-ai.css
++++ b/app/src/v880-supabase-safety-ai.css
+@@ -320,2 +320,3 @@
+- html body #dj-ai-search-modal[open]{inset:0 0 var(--dj891-ai-keyboard-inset,0px) 0!important;margin:0!important;width:100%!important;max-width:none!important;height:var(--dj891-ai-visible-height,100dvh)!important;max-height:var(--dj891-ai-visible-height,100dvh)!important;border:0!important;border-radius:0!important;animation:none!important;overflow:hidden!important;box-shadow:none!important;padding:0!important}
+- #dj-ai-search-modal[open]::backdrop{background:rgba(15,31,32,calc(.43 * var(--dj-scrim-alpha,1)))!important;animation:none!important;backdrop-filter:none!important}
++ html body #dj-ai-search-modal[open]{position:fixed!important;inset:var(--dj891-ai-visible-top,0px) 0 auto 0!important;margin:0!important;width:100%!important;max-width:none!important;height:var(--dj891-ai-visible-height,100dvh)!important;max-height:var(--dj891-ai-visible-height,100dvh)!important;border:0!important;border-radius:0!important;animation:none!important;overflow:hidden!important;box-shadow:none!important;padding:0!important;transform:none!important;translate:none!important;opacity:1!important}
++ #dj-ai-search-modal[open]::backdrop{background:var(--ai-bg)!important;background-image:none!important;animation:none!important;backdrop-filter:none!important}
++ html:has(#dj-ai-search-modal[open]),body:has(#dj-ai-search-modal[open]){overscroll-behavior:none;overflow:hidden}
+@@ -333,2 +334,2 @@
+- body:has(#dj-ai-search-modal[open]){background:var(--djNext-surface,#fff)}
+- body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#191b1f}
++ body:has(#dj-ai-search-modal[open]){background:#fff}
++ body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#192d32}
+diff --git a/app/src/v880-supabase-safety-ai.js b/app/src/v880-supabase-safety-ai.js
+--- a/app/src/v880-supabase-safety-ai.js
++++ b/app/src/v880-supabase-safety-ai.js
+@@ -62,1 +62,1 @@
+-  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;if(!preferences.hidden)preferences.scrollIntoView({block:'start',behavior:'instant'});});
++  profileButton.addEventListener('click',()=>{preferences.hidden=!preferences.hidden;if(!preferences.hidden){const bounds=transcript.getBoundingClientRect();transcript.scrollTop+=preferences.getBoundingClientRect().top-bounds.top;}});
+@@ -101,8 +101,11 @@
+-  function exit(){
+-    if(modal.classList.contains('dj887-ai-closing'))return;
+-    abort?.abort();abort=null;
+-    if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
+-    if(!modal.open)return;
+-    if(reduce()){modal.close();return;}
+-    modal.classList.add('dj887-ai-closing');
+-    if(window.matchMedia?.('(max-width:699px)')?.matches&&window.DongjakWindowMotion){window.DongjakWindowMotion.close(modal,()=>{if(modal.open)modal.close();modal.classList.remove('dj887-ai-closing');});return;}
++  function exit(){
++    if(modal.classList.contains('dj887-ai-closing'))return;
++    abort?.abort();abort=null;
++    if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
++    if(!modal.open)return;
++    // Full-screen AI is not a bottom sheet. Never translate its native top layer
++    // out of the changing keyboard viewport.
++    if(window.matchMedia?.('(max-width:699px)')?.matches||reduce()){
++      input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;
++    }
++    modal.classList.add('dj887-ai-closing');
+@@ -124,1 +127,1 @@
+-    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();if(window.matchMedia?.('(max-width:699px)')?.matches)window.DongjakWindowMotion?.open(modal);}
++    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();}
+diff --git a/app/src/bottom-tab-navigation.js b/app/src/bottom-tab-navigation.js
+--- a/app/src/bottom-tab-navigation.js
++++ b/app/src/bottom-tab-navigation.js
+@@ -38,2 +38,6 @@
+-  const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
+-  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: the normal click opens with fade
++  const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
++  // Non-map pages use the existing navigator synchronously. No blank map frame.
++  if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
++   motion?.cancel?.(panel);return;
++  }
++  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: normal opener
+diff --git a/app/src/v806-unified-ui.js b/app/src/v806-unified-ui.js
+--- a/app/src/v806-unified-ui.js
++++ b/app/src/v806-unified-ui.js
+@@ -246,1 +246,1 @@
+-    if(reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
++    if((phone()&&id==='dj-ai-search-modal')||reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
+@@ -418,2 +418,2 @@
+-        if(win.matchMedia?.('(max-width:699px)')?.matches)tabFadeUntil.set(requested,Date.now()+3000);
+-        else if(Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
++        if(Object.values(tabPanels).some(id=>id!==requested&&visible(id)))tabReplacement.add(requested);
++        else if(phone())tabFadeUntil.set(requested,Date.now()+3000);
+@@ -437,3 +437,3 @@
+-        if(state.phase==='closed' && previous.get(id) &&
+-           Date.now()-state.lastDismissedAt<680){panelHide(id);continue;}
+-        if(!previous.get(id) && !lifecycle.requestOpen(id,{explicit,origin:'automatic'})){
++        if(!explicit && state.phase==='closed' && previous.get(id) &&
++           Date.now()-state.lastDismissedAt<680){panelHide(id);continue;}
++        if((!previous.get(id)||(explicit&&state.phase==='closed')) && !lifecycle.requestOpen(id,{explicit,origin:'automatic'})){
+@@ -465,6 +465,11 @@
+-        if(realOpen&&(!was||requested)){
+-          const target=content(element(id));
+-          if(id===replacingSurface)replacingSurface='';
+-          if(!activeAnimation.has(target))playOpen(id);
+-          tabReplacement.delete(id);
+-        }
++        if(realOpen&&(!was||requested)){
++          const target=content(element(id));
++          if(id===replacingSurface)replacingSurface='';
++          if(phone()&&tabReplacement.has(id)){
++            // The page frame remains opaque. Only the incoming body fades in.
++            cancelActive(target);
++            const body=target?.querySelector('.dj836-sheet-body');
++            if(!reduced()&&body?.animate)body.animate([{opacity:.72},{opacity:1}],{duration:140,easing:'ease-out'});
++          }else if(!activeAnimation.has(target))playOpen(id);
++          tabReplacement.delete(id);
++        }
+diff --git a/app/src/main.js b/app/src/main.js
+--- a/app/src/main.js
++++ b/app/src/main.js
+@@ -1875,2 +1875,4 @@
+-  const previousTab=app.dataset.tab;
+-  if(previousTab!==tab&&(previousTab==='participate'||tab==='participate')&&!communityPickMode&&!resumeCommunityDraft){
++  const previousTab=app.dataset.tab;
++  const communityPanel=document.getElementById('participation-panel');
++  const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
++  if((reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
+@@ -2213,1 +2215,1 @@
+-  const root=document.getElementById('community-list');root.replaceChildren();
++  const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
+@@ -2220,1 +2222,1 @@
+-  if(document.getElementById('community-sort').value==='popular')
++  if(document.getElementById('community-sort')?.value==='popular')
+diff --git a/app/src/public-ui-mobile-surface-coordinator.js b/app/src/public-ui-mobile-surface-coordinator.js
+--- a/app/src/public-ui-mobile-surface-coordinator.js
++++ b/app/src/public-ui-mobile-surface-coordinator.js
+@@ -171,2 +171,7 @@
+-    const tip=doc.getElementById('dj840-map-tip');
+-    if(tip&&app.dataset.djUserTipDismissed!=='true'&&app.dataset.dj910SheetOpen!=='true'&&visible(tip)&&dock!==null){
++    const tip=doc.getElementById('dj840-map-tip');
++    const legend=doc.getElementById('dj-pri-legend');
++    if(legend){
++      const occupied=[scale,tip,nav].filter(visible).map(node=>node.getBoundingClientRect().top).filter(y=>y>0&&y<h);
++      set('--dj-pri-legend-bottom',occupied.length?Math.max(8,Math.ceil(h-Math.min(...occupied)+8))+'px':null);
++    }
++    if(tip&&app.dataset.djUserTipDismissed!=='true'&&app.dataset.dj910SheetOpen!=='true'&&visible(tip)&&dock!==null){
+diff --git a/app/src/pri-map.css b/app/src/pri-map.css
+--- a/app/src/pri-map.css
++++ b/app/src/pri-map.css
+@@ -3,1 +3,2 @@
+-.dj-pri-legend{position:absolute;z-index:12;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 91px);width:min(220px,calc(100vw - 84px));box-sizing:border-box;padding:10px 12px;border:1px solid var(--djNext-tool-edge,#cedbd3);border-radius:17px;background:var(--djNext-tool-face,#fff);color:var(--djNext-text,#203d32);box-shadow:0 2px 8px #0002;display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center}
++.dj-pri-legend{position:absolute;z-index:12;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 91px);width:min(220px,calc(100vw - 84px));box-sizing:border-box;padding:10px 12px;border:1px solid var(--djNext-tool-edge,#cedbd3);border-radius:17px;background:var(--djNext-tool-face,#fff);color:var(--djNext-text,#203d32);box-shadow:0 1px 3px #0002;display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center}
++@media(max-width:699px){#app #dj-pri-legend{bottom:var(--dj-pri-legend-bottom,calc(env(safe-area-inset-bottom,0px) + 130px))!important;max-width:calc(100vw - 84px);width:220px}#app:has(.page-panel:not([hidden]),#djNext-layer-panel:not([hidden]),#ped-tools-panel:not([hidden]),#dj854-weather-sheet:not([hidden]),#transport-sheet:not([hidden])) #dj-pri-legend{visibility:hidden;pointer-events:none}}
+diff --git a/app/src/pri-map.js b/app/src/pri-map.js
+--- a/app/src/pri-map.js
++++ b/app/src/pri-map.js
+@@ -50,1 +50,1 @@
+-    map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:12,filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':colors,'line-opacity':.88,'line-width':['interpolate',['linear'],['zoom'],12,1.2,15,3.4,18,8,19,12]}},before);
++    map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:12,filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':colors,'line-opacity':.96,'line-width':['interpolate',['linear'],['zoom'],12,1.5,15,3.6,18,7,19,10]}},before);
+@@ -62,1 +62,1 @@
+-   if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='원본 평가연장 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km · 회색: 미평가'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
++   if(id){label.textContent=id==='pri'?'종합 PRI':id==='lighting'?'야간 조명 취약도 (추정)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · 회색: 미평가';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+diff --git a/app/src/mobile-pwa-status-tone-v793.js b/app/src/mobile-pwa-status-tone-v793.js
+--- a/app/src/mobile-pwa-status-tone-v793.js
++++ b/app/src/mobile-pwa-status-tone-v793.js
+@@ -39,1 +39,1 @@
+-      if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');doc.body.appendChild(bridge);}
++      if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
+@@ -45,1 +45,1 @@
+-      const color=aiOpen?(theme==='dark'?'#191b1f':'#ffffff'):(theme==='dark'?'#192d32':'#eef3ef');
++      const color=aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#eef3ef');
+diff --git a/app/src/mobile-pwa-status-tone-v793.css b/app/src/mobile-pwa-status-tone-v793.css
+--- a/app/src/mobile-pwa-status-tone-v793.css
++++ b/app/src/mobile-pwa-status-tone-v793.css
+@@ -91,2 +91,2 @@
+-html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{
+-  display:block!important;position:fixed!important;inset:0 0 auto!important;width:100%!important;height:var(--dj-pwa-bridge-height)!important;z-index:2147483000!important;pointer-events:none!important;
++html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{
++  display:block!important;position:fixed!important;inset:0 0 auto!important;width:100%!important;height:var(--dj-pwa-bridge-height)!important;z-index:2901!important;pointer-events:none!important;
+@@ -96,1 +96,1 @@
+-html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body > #dj-ios-pwa-status-bridge{opacity:1}
++html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app > #dj-ios-pwa-status-bridge{opacity:1}
+@@ -101,1 +101,1 @@
+-html.dj-ios-home-pwa:has(#dj-ai-search-modal[open]) body > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
++html.dj-ios-home-pwa:has(#dj-ai-search-modal[open],#djNext-layer-panel:not([hidden])) body #app > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
+@@ -104,1 +104,1 @@
+-  background-image:var(--dj-pwa-bridge-gradient)!important;
++  background-image:none!important;
+@@ -110,1 +110,1 @@
+-html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#191b1f}
++html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32;background-image:none!important}
+@@ -111,1 +111,1 @@
+-@media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{transition:none!important}}
++@media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{transition:none!important}}
+diff --git a/frontend/production/mobile-next.js b/frontend/production/mobile-next.js
+--- a/frontend/production/mobile-next.js
++++ b/frontend/production/mobile-next.js
+@@ -107,1 +107,1 @@
+- const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='기능 버튼으로 지도를 설정하고, 오른쪽 스위치로 바로가기를 등록하세요.';scroll.append(hint);
++ const hint=doc.createElement('p');hint.className='djNext-layer-legend';hint.textContent='왼쪽 버튼: 지도 표시·해제 또는 기능 열기. 오른쪽 스위치: 상단 바로가기 등록.';scroll.append(hint);
+@@ -148,2 +148,3 @@
+-  const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
+-  if(weather){const span=weather.querySelector('span');const value=caption?.textContent||'날씨';if(span.textContent!==value)span.textContent=value;const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
++  const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
++  const label=$('weather-label');
++  if(weather){const span=weather.querySelector('span');const state=label?.dataset.djWeatherState;const temperature=label?.dataset.djWeatherTemperature;const value=temperature||(state==='error'?'조회 실패':state==='loading'?'조회 중':caption?.textContent||'날씨');if(span.textContent!==value)span.textContent=value;weather.setAttribute('aria-label','날씨 '+value+(temperature&&state==='loading'?' · 이전 값, 갱신 중':temperature&&state==='error'?' · 이전 값, 갱신 실패':''));weather.dataset.weatherState=state||'idle';const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
+@@ -165,1 +166,1 @@
+- new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota']});
++ new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota','data-dj-weather-state','data-dj-weather-temperature']});
+diff --git a/frontend/production/mobile-next.css b/frontend/production/mobile-next.css
+--- a/frontend/production/mobile-next.css
++++ b/frontend/production/mobile-next.css
+@@ -128,1 +128,1 @@
+-html body #app#app#app#app#app#app#app:has(:is(#ped-tools-panel,#dj854-weather-sheet):not([hidden])) .map-actions{visibility:hidden!important;pointer-events:none!important}
++html body #app#app#app#app#app#app#app:has(:is(#ped-tools-panel,#dj854-weather-sheet).dj871-sheet-expanded:not([hidden])) .map-actions{visibility:hidden!important;pointer-events:none!important}
+@@ -227,1 +227,1 @@
+-html body #app#app#app#app#app#app#app#app#app:has(:is(.page-panel,#djNext-layer-panel,#djNext-permissions,#dj860-onboarding,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,.dj-place-detail-popup):not([hidden])) .map-actions{visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important}
++html body #app#app#app#app#app#app#app#app#app:has(:is(.page-panel,#djNext-layer-panel,#djNext-permissions,#dj860-onboarding,#transport-sheet,.dj-place-detail-popup):not([hidden]),:is(#ped-tools-panel,#dj854-weather-sheet).dj871-sheet-expanded:not([hidden])) .map-actions{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+@@ -397,1 +397,1 @@
+-#djNext-layer-panel .djNext-modal-body>header::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:40px;height:4px;border-radius:99px;background:var(--djNext-muted);opacity:.45}
++#djNext-layer-panel .djNext-modal-body>header::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:99px;background:var(--djNext-muted);opacity:.8;pointer-events:none}
+@@ -430,1 +430,1 @@
+-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:36px!important}
++html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important;scroll-padding-bottom:18px!important}
+@@ -736,1 +736,1 @@
+-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action{display:grid!important;grid-template-columns:22px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;text-align:left!important;min-width:0!important;width:100%!important;min-height:48px!important;height:auto!important;box-sizing:border-box!important;padding:9px 12px!important;margin:0!important;line-height:1.3!important;font-size:13px!important;border-radius:var(--djNext-tool-pill)!important;border:1px solid var(--djNext-tool-edge)!important;background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base))!important;color:var(--djNext-text)!important;box-shadow:var(--djNext-tool-shadow)!important;transform:none!important;scale:1!important;transition:box-shadow var(--djNext-tool-motion)!important}
++  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-action{display:grid!important;grid-template-columns:22px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;text-align:left!important;min-width:0!important;width:100%!important;min-height:48px!important;height:auto!important;box-sizing:border-box!important;padding:9px 12px!important;margin:0!important;line-height:1.3!important;font-size:13px!important;border-radius:var(--djNext-tool-pill)!important;border:1px solid color-mix(in srgb,var(--djNext-tool-edge) 65%,transparent)!important;background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base))!important;color:var(--djNext-text)!important;box-shadow:0 1px 3px rgba(18,63,47,.07)!important;transform:none!important;scale:1!important;transition:box-shadow var(--djNext-tool-motion)!important}
+@@ -783,1 +783,12 @@
+-#app #djNext-layer-panel .djNext-layer-scroll::-webkit-scrollbar{display:none;}
++#app #djNext-layer-panel .djNext-layer-scroll::-webkit-scrollbar{display:none;}
++/* Native weather and nearby controllers own state; this section only gives
++   their current content shared detents and predictable geometry. */
++@media(max-width:699px){
++ #app #dj854-weather-sheet:not([hidden]):not(.dj871-sheet-expanded){height:min(46dvh,340px)!important;max-height:46dvh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
++ #app #dj854-weather-sheet .dj854-weather-head{position:sticky!important;top:0!important;z-index:1!important;background:var(--djNext-surface,#fff)!important}
++ #app #dj854-weather-sheet .dj854-weather-main{min-height:44px!important}
++ #app #dj854-weather-sheet .dj854-weather-detail{min-height:36px!important}
++ #app #dj854-weather-sheet.dj871-sheet-expanded:not([hidden]),#app #ped-tools-panel.dj871-sheet-expanded:not([hidden]){overflow-y:auto!important;overscroll-behavior:contain!important}
++ #app #ped-tools-panel .dj-nearby-map-center{min-height:44px;border-radius:999px;display:block;margin:8px 0;width:100%}
++ #app #djNext-layer-panel .djNext-layer-scroll{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
++}
+diff --git a/app/src/pedestrian-tools.js b/app/src/pedestrian-tools.js
+--- a/app/src/pedestrian-tools.js
++++ b/app/src/pedestrian-tools.js
+@@ -389,15 +389,21 @@
+-  nearButton.addEventListener('click',async()=>{
+-    seq++;const current=seq;
+-    showPanel('내 주변 보행정보');
+-    panel.dataset.nearbyMode='list';
+-    width.hidden=true;
+-    showMessage('위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');
+-    try{
+-      const position=await requestPosition({enableHighAccuracy:false,timeout:12000,maximumAge:60000});
+-      if(current!==seq)return;
+-      const latitude=Number(position?.coords?.latitude),longitude=Number(position?.coords?.longitude);
+-      if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표를 확인하지 못했습니다.');
+-      const inside=isDongjak(longitude,latitude);if(inside!==true){
+-        panel.dataset.nearbyMode='empty';showMessage(inside===false?'현재 위치는 동작구 밖입니다. 동작구 안에서 다시 조회해 주세요.':'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
+-        return;
+-      }
++  function offerMapCenter(message){
++    panel.dataset.nearbyMode='empty';showMessage(message);
++    const button=el('button','ped-nearby-item dj-nearby-map-center','지도 중심으로 조회');button.type='button';
++    button.addEventListener('click',()=>void showNearby(true));results.append(button);
++  }
++  async function showNearby(useMapCenter=false){
++    seq++;const current=seq;
++    showPanel('내 주변 보행정보');
++    panel.dataset.nearbyMode='list';
++    width.hidden=true;
++    showMessage(useMapCenter?'지도 중심 시설 자료 확인 중…':'위치 권한 확인 중… 내 위치는 서버에 저장하지 않습니다.');
++    try{
++      const position=useMapCenter?null:await requestPosition({enableHighAccuracy:false,timeout:12000,maximumAge:60000});
++      if(current!==seq)return;
++      const center=useMapCenter?map.getCenter():null;
++      const latitude=Number(useMapCenter?center?.lat:position?.coords?.latitude),longitude=Number(useMapCenter?center?.lng:position?.coords?.longitude);
++      if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표를 확인하지 못했습니다.');
++      const inside=isDongjak(longitude,latitude);if(inside!==true){
++        offerMapCenter(inside===false?(useMapCenter?'지도 중심이 동작구 밖입니다. 지도를 동작구 안으로 옮긴 후 다시 조회해 주세요.':'현재 위치는 동작구 밖입니다. 지도 중심을 기준으로 조회할 수 있습니다.'):'동작구 경계 정보를 확인 중입니다. 잠시 후 다시 시도해 주세요.');
++        return;
++      }
+@@ -437,1 +443,1 @@
+-            results.replaceChildren(el('strong','dj-nearby-selected-name',displayName),el('p','ped-tools-note',`현재 위치에서 직선거리 ${item.distance}m`),back);
++            results.replaceChildren(el('strong','dj-nearby-selected-name',displayName),el('p','ped-tools-note',`${useMapCenter?'지도 중심':'현재 위치'}에서 직선거리 ${item.distance}m`),back);
+@@ -451,9 +457,10 @@
+-      status.textContent=`반경 ${RADIUS_M}m · 위치 정확도 약 ${Math.round(Number(position.coords.accuracy)||0)}m\n지도에 로드된 시설만 표시합니다.`;
+-      results.append(el('p','ped-tools-note','경사도·도로폭·시설의 실시간 상태는 원천 데이터가 부족한 곳에서 판단하지 않습니다.'));
+-    }catch(error){
+-      if(current!==seq)return;
+-      const code=Number(error?.code);
+-      showMessage(code===1?'위치 접근이 거부되었습니다. 기기 설정에서 위치 권한을 허용해 주세요.':'위치를 확인하지 못했습니다. GPS와 브라우저 위치 권한을 확인해 주세요.');
+-      onToast('내 주변 보행정보를 가져오지 못했습니다.');
+-    }
+-  });
++      const accuracy=Number(position?.coords?.accuracy);
++      status.textContent=`${useMapCenter?'지도 중심 기준':'현재 위치 기준'} · 반경 ${RADIUS_M}m${!useMapCenter&&Number.isFinite(accuracy)?' · 위치 정확도 약 '+Math.round(accuracy)+'m':''}\n지도에 로드된 시설만 표시합니다.`;
++      results.append(el('p','ped-tools-note','경사도·도로폭·시설의 실시간 상태는 원천 데이터가 부족한 곳에서 판단하지 않습니다.'));
++    }catch(error){
++      if(current!==seq)return;
++      const code=Number(error?.code);
++      offerMapCenter(useMapCenter?'지도 중심 시설 정보를 가져오지 못했습니다. 다시 시도해 주세요.':code===1?'위치 접근이 거부되었습니다. 지도 중심으로 조회할 수 있습니다.':'현재 위치를 확인하지 못했습니다. 지도 중심으로 조회할 수 있습니다.');
++    }
++  }
++  nearButton.addEventListener('click',()=>void showNearby());
+diff --git a/app/src/ui-environment.js b/app/src/ui-environment.js
+--- a/app/src/ui-environment.js
++++ b/app/src/ui-environment.js
+@@ -33,19 +33,29 @@
+-  let controller=null;
+-  let lastFetchedAt=0;
+-  const CACHE_MS=10*60*1000;
+-  async function refresh({force=false}={}){
+-    if(!force && lastFetchedAt && Date.now()-lastFetchedAt<CACHE_MS)return;
+-    controller?.abort();controller=new AbortController();
+-    label.textContent='날씨 조회 중';
+-    try{
+-      const w=await fetchCurrentWeather({...current,signal:controller.signal});
+-      lastFetchedAt=Date.now();
+-      label.textContent=`${w.temperature.toFixed(0)}° · ${w.weather}`;
+-      if(title)title.textContent=current.name;
+-      label.title=`체감 ${w.apparentTemperature.toFixed(0)}° · 강수 ${w.precipitation}mm · 풍속 ${w.wind}km/h · ${w.time||'조회'}`;
+-    }catch(error){
+-      if(error?.name==='AbortError')return;
+-      label.textContent='날씨 조회 실패';
+-      label.title='인터넷 연결 후 다시 시도하세요.';
+-    }
+-  }
++  let controller=null;
++  let lastFetchedAt=0,lastReading=null;
++  const CACHE_MS=10*60*1000;
++  function showWeather(state,reading,message=''){
++    const samePlace=reading&&reading.latitude===current.latitude&&reading.longitude===current.longitude;
++    const usable=samePlace?reading:null;
++    label.dataset.djWeatherState=state;
++    label.dataset.djWeatherTemperature=usable?.temperature||'';
++    if(title)title.textContent=current.name;
++    const suffix=state==='loading'?' · 갱신 중':state==='error'?' · 갱신 실패 (이전 값)':'';
++    label.textContent=usable?usable.summary+suffix:state==='error'?'날씨 조회 실패':'날씨 조회 중';
++    label.title=message||(usable?.detail||'상세 기상 정보를 불러오는 중입니다.');
++  }
++  async function refresh({force=false}={}){
++    if(!force && lastFetchedAt && Date.now()-lastFetchedAt<CACHE_MS)return;
++    controller?.abort();const request=new AbortController();controller=request;
++    const place={...current};
++    showWeather('loading',lastReading);
++    try{
++      const w=await fetchCurrentWeather({...place,signal:request.signal});
++      if(controller!==request||request.signal.aborted)return;
++      lastFetchedAt=Date.now();
++      lastReading={...place,temperature:`${w.temperature.toFixed(0)}°`,summary:`${w.temperature.toFixed(0)}° · ${w.weather}`,detail:`체감 ${w.apparentTemperature.toFixed(0)}° · 강수 ${w.precipitation}mm · 풍속 ${w.wind}km/h · ${w.time||'관측시각 미확인'}`};
++      showWeather('ready',lastReading);
++    }catch(error){
++      if(controller!==request||request.signal.aborted||error?.name==='AbortError')return;
++      showWeather('error',lastReading,'인터넷 연결 후 다시 시도하세요.'+(lastReading?.latitude===place.latitude&&lastReading?.longitude===place.longitude?' 표시된 온도는 이전 조회값입니다.':''));
++    }
++  }
+@@ -61,5 +71,5 @@
+-      onMessage('현재 위치를 기준으로 날씨를 조회합니다.');
+-      await refresh({force:true});
+-    }catch(error){
+-      onMessage(error?.code===1?'위치 권한이 거부되었습니다. 동작구 날씨를 유지합니다.':'현재 위치를 확인하지 못했습니다. 동작구 날씨를 유지합니다.');
+-      await refresh({force:true});
++      await refresh({force:true});
++    }catch(error){
++      const message=error?.code===1?'위치 권한이 거부되었습니다. 기존 지역 날씨를 유지합니다.':'현재 위치를 확인하지 못했습니다. 기존 지역 날씨를 유지합니다.';
++      if(document.getElementById('dj854-weather-sheet')?.hidden!==false)onMessage(message);
++      else label.title=message;
+diff --git a/app/src/v854-weather-desktop.js b/app/src/v854-weather-desktop.js
+--- a/app/src/v854-weather-desktop.js
++++ b/app/src/v854-weather-desktop.js
+@@ -24,1 +24,1 @@
+-    label.dataset.djTemperature=temperature(value)||(/실패/.test(value)?'조회 실패':'조회 중');
++    label.dataset.djTemperature=label.dataset.djWeatherTemperature||temperature(value)||(/실패/.test(value)?'조회 실패':'조회 중');
+diff --git a/scripts/apply-mobile-17-followup.mjs b/scripts/apply-mobile-17-followup.mjs
+--- a/scripts/apply-mobile-17-followup.mjs
++++ b/scripts/apply-mobile-17-followup.mjs
+@@ -54,1 +54,1 @@
+- controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel'].includes(id)");
++ controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id)");

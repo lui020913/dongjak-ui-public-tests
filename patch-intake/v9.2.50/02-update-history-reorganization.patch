@@ -1,0 +1,106 @@
+diff --git a/app/src/version-history-v7.js b/app/src/version-history-v7.js
+--- a/app/src/version-history-v7.js
++++ b/app/src/version-history-v7.js
+@@ -1,1 +1,2 @@
+-import {groupReleaseEditions,syncPublicVersion} from './release-editions.js';
++import {releaseEdition,syncPublicVersion} from './release-editions.js';
++import {buildGenerationCatalog} from './history-generation-catalog.js';
+@@ -167,3 +168,3 @@
+-  let currentHeader=null;
+-  for(const edition of groupReleaseEditions(releases)){
+-    const archive=edition.historical?el('details','dj-edition-history'):null;
++  for(const edition of buildGenerationCatalog(releases,releaseEdition)){
++    const archive=el('details','dj-edition-history');
++    archive.open=edition.records.some(({record})=>record===currentRelease);
+@@ -176,1 +177,1 @@
+-    for(const {record:release,classification} of edition.records){
++    for(const {record:release,classification,sourceScale,displayVersion} of edition.records){
+@@ -181,1 +182,2 @@
+-    article.dataset.version=String(release.version||'').replace(/^v/,'');
++    article.dataset.version=String(release.version||'').replace(/^v/,'');
++    article.dataset.displayVersion=displayVersion;article.dataset.originalScale=sourceScale;
+@@ -186,2 +188,1 @@
+-    const versionHeading=el('h4','',edition.historical?release.version:edition.label);
+-    if(release===currentRelease)currentHeader=versionHeading;
++    const versionHeading=el('h4','',displayVersion);
+@@ -192,2 +193,4 @@
+-    if(edition.historical&&release.sourceVersion)article.append(el('p','dj-edition-original','원래 기록: '+release.sourceVersion));
+-    if(edition.historical)article.append(el('p','dj-edition-original','개발 기록 · 운영 배포 여부 별도 확인'));
++    const original=el('p','dj-edition-original',(release===currentRelease?'현재 빌드: ':'원래 기록: ')+(release.sourceVersion||release.version));
++    if(release.sourceVersion&&release.version!==release.sourceVersion)original.title='기존 정리 번호 '+release.version;
++    article.append(original);
++    if(release!==currentRelease)article.append(el('p','dj-edition-original','개발 기록 · 운영 배포 여부 별도 확인'));
+@@ -197,1 +200,1 @@
+-  if(currentRelease)void syncPublicVersion({version:currentRelease.version,currentHeader});
++  if(currentRelease)void syncPublicVersion({version:currentRelease.version});
+diff --git a/app/src/history-generation-catalog.js b/app/src/history-generation-catalog.js
+new file mode 100644
+--- /dev/null
++++ b/app/src/history-generation-catalog.js
+@@ -0,0 +1,41 @@
++/** User-facing historical release catalog; does not alter a build or deployment version.
++ * Boundaries refer to audited source positions or actual operational versions.
++ * Chronology is the supplied catalog order (not estimated dates).
++ */
++export const HISTORY_GENERATIONS=Object.freeze([
++ {major:1,firstPosition:1,title:'지도 기반 구축·실시간 교통·보행 경로'},
++ {major:2,firstPosition:23,title:'좌표 기반 교통·시설·지역 서비스'},
++ {major:3,firstPosition:42,title:'통합 지도·야간 시야·건물 차폐 분석'},
++ {major:4,firstPosition:63,title:'홈 화면 웹앱·공식 데이터·GPS 안내'},
++ {major:5,firstPosition:93,title:'내비게이션·플랫폼 UI·공통 디자인 체계'},
++ {major:6,firstPosition:140,title:'계정·즐겨찾기·개인화·경로 비교'},
++ {major:7,firstPosition:168,title:'시설 데이터·온보딩·검색·모바일 안정화'},
++ {major:8,firstVersion:'9.0.0',title:'모바일 중심 운영·공통 창·APK'},
++ {major:9,firstVersion:'9.2.28',title:'실시간 버스·열차·AI 검색·커뮤니티·PRI'}
++]);
++const tuple=value=>{const m=String(value||'').match(/^v?(\d+)\.(\d+)\.(\d+)$/);return m?m.slice(1).map(Number):null};
++const atLeast=(value,threshold)=>{const a=tuple(value),b=tuple(threshold);if(!a||!b)return false;for(let i=0;i<3;i++){if(a[i]!==b[i])return a[i]>b[i]}return true};
++export function historyGeneration(record,review){
++ const position=review?.position;
++ if(Number.isInteger(position))return HISTORY_GENERATIONS.filter(g=>g.firstPosition!==undefined&&g.firstPosition<=position).at(-1)||HISTORY_GENERATIONS[0];
++ const version=record?.version;
++ return HISTORY_GENERATIONS.filter(g=>g.firstVersion&&atLeast(version,g.firstVersion)).at(-1)||HISTORY_GENERATIONS[6];
++}
++/** Returns grouped, newest-first records. Maintains identities, notes, source
++ * order and original release numbers while assigning a catalog-only SemVer. */
++export function buildGenerationCatalog(releases,reviewRelease){
++ if(!Array.isArray(releases)||typeof reviewRelease!=='function')throw new TypeError('release catalog and review function required');
++ const groups=new Map();let active=0,minor=0,patch=0;
++ for(const record of [...releases].reverse()){
++  const review=reviewRelease(record),phase=historyGeneration(record,review);
++  const major=Math.max(active,phase.major); // never renumber backwards on an old label
++  const sourceScale=review?.scale||record.scale||'patch';
++  let classification;
++  if(major!==active){active=major;minor=0;patch=0;classification='major';}
++  else if(sourceScale==='minor'||sourceScale==='major'){minor++;patch=0;classification='minor';}
++  else{patch++;classification='patch';}
++  const group=groups.get(major)||{label:`${major}.x`,title:HISTORY_GENERATIONS[major-1].title,historical:true,records:[]};
++  group.records.push({record,classification,sourceScale,displayVersion:`v${major}.${minor}.${patch}`});groups.set(major,group);
++ }
++ return [...groups.values()].reverse().map(group=>({...group,records:group.records.reverse()}));
++}
+diff --git a/app/tests/history-generation-catalog.test.mjs b/app/tests/history-generation-catalog.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/app/tests/history-generation-catalog.test.mjs
+@@ -0,0 +1,20 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {buildGenerationCatalog,historyGeneration} from '../src/history-generation-catalog.js';
++const review=r=>({position:r.sourcePosition,scale:r.scale});
++test('1.x to 9.x uses chronological feature milestones; source identities and notes survive',()=>{
++ const old=[1,2,23,42,63,93,140,168,202].map(sourcePosition=>({version:'v8.0.1',sourcePosition,scale:'patch',items:['source '+sourcePosition]}));
++ const current=[{version:'9.0.0',scale:'major',items:['mobile']},{version:'9.2.28',scale:'patch',items:['bus']},{version:'9.2.44',scale:'minor',items:['community']},{version:'9.2.50',scale:'patch',items:['UI']}];
++ const source=[...old,...current].reverse();const result=buildGenerationCatalog(source,review);
++ assert.deepEqual(result.map(g=>g.label),['9.x','8.x','7.x','6.x','5.x','4.x','3.x','2.x','1.x']);
++ const entries=result.flatMap(g=>g.records);assert.deepEqual(entries.map(e=>e.record),source);
++ assert.equal(new Set(entries.map(e=>e.displayVersion)).size,source.length);
++ assert.equal(entries[0].displayVersion,'v9.1.1');assert.equal(entries[0].record.version,'9.2.50');
++ assert.equal(entries.at(-1).displayVersion,'v1.0.0');
++ assert.equal(source[0].items[0],'UI');
++});
++test('existing operational positions take priority over historically inconsistent labels',()=>{
++ assert.equal(historyGeneration({version:'v9.2.40'},{position:168}).major,7);
++ assert.equal(historyGeneration({version:'v9.2.27'},{}).major,8);
++ assert.equal(historyGeneration({version:'v9.2.28'},{}).major,9);
++});

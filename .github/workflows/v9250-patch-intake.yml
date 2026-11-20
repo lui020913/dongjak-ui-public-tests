@@ -1,0 +1,72 @@
+name: Original v9.2.50 patch intake
+on:
+  push:
+    branches: [fix/v9250-original-patch-bundle-20261121]
+    paths:
+      - 'patch-intake/v9.2.50/**'
+      - '.github/workflows/v9250-patch-intake.yml'
+permissions:
+  contents: write
+concurrency:
+  group: v9250-patch-intake
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913' && github.ref == 'refs/heads/fix/v9250-original-patch-bundle-20261121'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify original uploaded patch digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd patch-intake/v9.2.50
+          sha256sum -c <<'CHECK'
+          aa810b78b5e14f483bacf34da3d3f89e74c73d46d499c47ea09a3d1e2d989390  01-mobile-regression-fixes.patch
+          66d6222fba90b9d8f62d5855e8bcf8e475bd9e13012d9a6ce45a82b0af7a8b6f  02-update-history-reorganization.patch
+          d6d7946f1934d6cb3694f8343c793bbbd8550b0d5a499e3525439a27b76b2b38  03-optional-release-v9.2.50.patch
+          edb20f5d2a5cf45df78b0fba848045603d6a664dd839e058cbf7b4d5c955b2cb  04-live-subway-direction-and-size.patch
+          289f1d11512c02c1aee4353f1a497f874b2dc8835cdb13efde0615fc5c498e43  05-train-headlights-and-startup-version.patch
+          CHECK
+      - name: Check original hunks and apply in required order
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 'bd5ff7b9e915d3dfcfc6fa154fae4ef2ff6473ea'
+          test "$(git rev-parse origin/main)" = 'bd5ff7b9e915d3dfcfc6fa154fae4ef2ff6473ea'
+          P=patch-intake/v9.2.50
+          for n in 01-mobile-regression-fixes 02-update-history-reorganization 04-live-subway-direction-and-size 05-train-headlights-and-startup-version; do
+            echo "Checking $n"
+            git apply --check --unidiff-zero "$P/$n.patch"
+            git apply --unidiff-zero "$P/$n.patch"
+          done
+          # The version request is the only intentionally stale hunk: attempt 142
+          # became 143 during v9.2.49 recovery. Preserve the latest base fields.
+          git apply --check --unidiff-zero --include=scripts/build-mobile-first-overhaul.sh "$P/03-optional-release-v9.2.50.patch"
+          git apply --unidiff-zero --include=scripts/build-mobile-first-overhaul.sh "$P/03-optional-release-v9.2.50.patch"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('release/mobile-first-overhaul-request.json')
+          d=json.loads(p.read_text())
+          assert d['application_version']=='9.2.49' and d['attempt']==143
+          d.update(application_version='9.2.50',attempt=144,purpose='Candidate: mobile community, iOS AI keyboard, tab transition, layer and PRI HUD, nearby safety and weather stabilization; chronological display history; larger rail icons and direction-separated lane visualization; directional headlights and stamped startup version.',last_retry_reason='New candidate from bd5ff7b; original uploaded patches checked against latest main. Source CI and exact deployed phone regression required before production.')
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+          PY
+          git diff --check
+          git add app frontend scripts release
+          git diff --cached --check
+          git diff --cached --stat
+          # This one-time workflow and original patches remain in this branch's
+          # intake commit, but not in the eventual application diff on main.
+          git rm -r patch-intake/v9.2.50 .github/workflows/v9250-patch-intake.yml
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -c core.hooksPath=/dev/null commit -m 'Apply complete original v9.2.50 patch bundle to verified latest main'
+          git push origin HEAD:refs/heads/fix/v9250-original-patch-bundle-20261121
+          git rev-parse HEAD

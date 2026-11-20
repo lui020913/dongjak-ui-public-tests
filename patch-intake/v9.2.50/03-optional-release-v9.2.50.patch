@@ -1,0 +1,24 @@
+diff --git a/release/mobile-first-overhaul-request.json b/release/mobile-first-overhaul-request.json
+--- a/release/mobile-first-overhaul-request.json
++++ b/release/mobile-first-overhaul-request.json
+@@ -3,6 +3,6 @@
+-  "application_version": "9.2.49",
+-  "public_work_branch": "main",
+-  "purpose": "Fix verified mobile route result clipping by resetting the legacy horizontal transform in the authoritative cascade layer; enforce visible centred route result geometry in deployed mobile QA.",
+-  "attempt": 142,
+-  "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
+-  "last_retry_reason": "Retry the same approved route-card fix using bounded Gemini review retries and an explicit evidence catalog; the previous vision response failed with HTTP 503 and unverifiable evidence. No app source change.",
++  "application_version": "9.2.50",
++  "public_work_branch": "main",
++  "purpose": "Candidate: mobile community, iOS AI keyboard, tab transition, layer and PRI HUD, nearby safety and weather stabilization; chronological display history; larger rail icons and direction-separated lane visualization; directional headlights and stamped startup version.",
++  "attempt": 143,
++  "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
++  "last_retry_reason": "New candidate from 8785237. Requires source CI and deployed phone regression before production.",
+diff --git a/scripts/build-mobile-first-overhaul.sh b/scripts/build-mobile-first-overhaul.sh
+--- a/scripts/build-mobile-first-overhaul.sh
++++ b/scripts/build-mobile-first-overhaul.sh
+@@ -165,1 +165,3 @@
+-      48) note="버튼 경량 그림자 디자인 기준 모바일 검증 정합성 개선";;
++      48) note="버튼 경량 그림자 디자인 기준 모바일 검증 정합성 개선";;
++      49) note="모바일 경로 결과 카드 잘림 및 검증 인프라 개선";;
++      50) note="커뮤니티 목록·AI 키보드·탭 전환·레이어·PRI 범례·주변정보·날씨 안정화, 업데이트 기록 재분류, 실시간 열차 아이콘 확대·진행 방향별 선로 표시·전조등·로딩 버전 표기";;

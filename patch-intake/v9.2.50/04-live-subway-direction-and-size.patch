@@ -1,0 +1,210 @@
+diff --git a/app/src/features/liveTransit/train-lanes.js b/app/src/features/liveTransit/train-lanes.js
+new file mode 100644
+--- /dev/null
++++ b/app/src/features/liveTransit/train-lanes.js
+@@ -0,0 +1,34 @@
++// Visual separation only: keep the estimated rail centreline coordinate unchanged.
++// MapLibre rotates icon-offset together with icon-rotate and scales it by icon-size.
++export const TRAIN_ICON_SIZE_STOPS=Object.freeze([11,.81,12.5,.90,13.2,1.03,15.5,1.38,18,1.73]);
++export const TRAIN_LANE_GAP=8; // unscaled logical pixels from the shared centreline
++const LEFT_TRAFFIC=new Set(['1호선']);
++const RIGHT_TRAFFIC=new Set(['2호선','4호선','7호선','9호선','신림선']);
++export function providerRailDirection(value){
++  const code=String(value??'').trim();
++  if(['0','상행','내선','내선순환'].includes(code))return 'up';
++  if(['1','하행','외선','외선순환'].includes(code))return 'down';
++  return null;
++}
++export function resolveRailDirection(line,providerDirection,from,to,terminal){
++  const supplied=providerRailDirection(providerDirection);
++  // On the circular 2 line a destination can be reached from either direction.
++  if(line==='2호선')return supplied;
++  if(from>=0&&to>=0&&from!==to)return to>from?'up':'down';
++  return terminal==='up'||terminal==='down'?terminal:supplied;
++}
++export function railDirectionLabel(line,direction){
++  if(direction==='up')return line==='2호선'?'내선순환':'상행';
++  if(direction==='down')return line==='2호선'?'외선순환':'하행';
++  return '';
++}
++export function trainLaneOffset(line,facing,headingKnown){
++  if(!headingKnown||(facing!=='right'&&facing!=='left'))return 0;
++  const side=LEFT_TRAFFIC.has(line)?-1:RIGHT_TRAFFIC.has(line)?1:0;
++  // A right-facing raster points along +X; its right normal is +Y.
++  // A mirrored raster points along -X; its right normal is -Y.
++  return side*(facing==='left'?-1:1)*TRAIN_LANE_GAP;
++}
++export function trainLaneOffsetExpression(){
++  return ['match',['get','trainLaneOffset'],TRAIN_LANE_GAP,['literal',[0,TRAIN_LANE_GAP]],-TRAIN_LANE_GAP,['literal',[0,-TRAIN_LANE_GAP]],['literal',[0,0]]];
++}
+diff --git a/app/src/features/liveTransit/index.js b/app/src/features/liveTransit/index.js
+--- a/app/src/features/liveTransit/index.js
++++ b/app/src/features/liveTransit/index.js
+@@ -6,3 +6,4 @@
+ import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
++import {TRAIN_ICON_SIZE_STOPS,trainLaneOffset,trainLaneOffsetExpression} from './train-lanes.js';
+ export const LIVE_SOURCE='dongjak-live-vehicles-v827';
+ export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
+@@ -128,6 +129,7 @@
+     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
+       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
+-        'icon-size':['interpolate',['linear'],['zoom'],11,.66,12.5,.74,13.2,.84,15.5,1.13,18,1.42],
++        'icon-size':['interpolate',['linear'],['zoom'],...TRAIN_ICON_SIZE_STOPS],
++        'icon-offset':trainLaneOffsetExpression(),
+         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
+       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
+-        'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
++        'circle-radius':['interpolate',['linear'],['zoom'],11,6,13.2,7.5,15.5,10,18,12.8]}});
+@@ -151,5 +153,6 @@
+         const facing=trainFacing(map,f.properties,prior?.trainFacing);
+         f.properties.trainFacing=facing||'unknown';
+         f.properties.trainRotation=trainRotation(map,f.properties,facing||'right',prior?.trainRotation);
++        f.properties.trainLaneOffset=trainLaneOffset(f.properties.line,facing,f.properties.headingKnown);
+         f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right');
+       }
+@@ -178,3 +181,3 @@
+     if(!force&&next.features.length===display.features.length&&next.features.every((f,i)=>{
+-      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.observedAt===f.properties.observedAt;
++      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.trainLaneOffset===f.properties.trainLaneOffset&&old.properties.travelDirection===f.properties.travelDirection&&old.properties.observedAt===f.properties.observedAt;
+     }))return;
+diff --git a/app/src/features/liveTransit/normalize.js b/app/src/features/liveTransit/normalize.js
+--- a/app/src/features/liveTransit/normalize.js
++++ b/app/src/features/liveTransit/normalize.js
+@@ -1,3 +1,4 @@
+ import { validLngLat, pointBetweenStations, projectOnLine, pointBetweenDisplayedStations, snapToDisplayedRail } from './geometry.js';
++import {resolveRailDirection} from './train-lanes.js';
+ 
+ export const LINE_COLORS={ '1호선':'#0052A4','2호선':'#00A84D','4호선':'#00A5DE','7호선':'#747F00','9호선':'#B89B2F','신림선':'#6789CA' };
+@@ -19,6 +20,5 @@
+   const terminal=c.terminalDirections?.[dest];
+-  // Prefer an identifiable destination over the provider direction-code heuristic.
+-  const dir=from>=0&&to>=0&&from!==to?(to>from?'up':'down'):
+-    terminal??(String(direction)==='1'?'down':String(direction)==='0'?'up':null);
+-  return {stations:dir==='down'?down:up,directionKnown:!!dir,
++  // Preserve destination correction on linear routes; on 2호선 trust the circular direction code.
++  const dir=resolveRailDirection(line,direction,from,to,terminal);
++  return {stations:dir==='down'?down:up,directionKnown:!!dir,travelDirection:dir||'',
+     geometry:c.geometry??c.routeGeometry??(c.coordinates?{coordinates:c.coordinates}:null),segmentTimeSeconds:c.segmentTimeSeconds??120};
+@@ -77,3 +77,3 @@
+-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,positionSource:item.positionSource||'position',color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
++    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),travelDirection:conf.travelDirection,nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,positionSource:item.positionSource||'position',color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
+   }
+   return features;
+diff --git a/app/src/features/liveTransit/integrate.js b/app/src/features/liveTransit/integrate.js
+--- a/app/src/features/liveTransit/integrate.js
++++ b/app/src/features/liveTransit/integrate.js
+@@ -4,2 +4,3 @@
+ import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.js';
++import {railDirectionLabel} from './train-lanes.js';
+ export const LIVE_PREF_KEY='dongjak_live_vehicle_options_v827';
+@@ -10,3 +11,4 @@
+   // omitted here because Seoul's official realtimePosition feed does not list it.
+-  const forwardUp={1:true,2:true,4:false,7:true,9:false};
++  // 2호선 local order 대림→방배 is outer; inner travels 방배→대림.
++  const forwardUp={1:true,2:false,4:false,7:true,9:false};
+   const terminalDirections={7:{석남:'down',온수:'down',부평구청:'down',장암:'up',도봉산:'up'},9:{중앙보훈병원:'down',개화:'up',김포공항:'up'}};
+@@ -69,3 +71,6 @@
+-      safeText(values.state,labelStatus[data.status]||'상태 미확인');safeText(values.next,data.nextStation?stationLabel(data.nextStation)+' 방면':'');
+-      values.next.parentElement.hidden=!data.nextStation||stationLabel(data.nextStation)===stationLabel(data.station);
++      safeText(values.state,labelStatus[data.status]||'상태 미확인');
++      const direction=railDirectionLabel(data.line,data.travelDirection);
++      const next=data.nextStation&&stationLabel(data.nextStation)!==stationLabel(data.station)?stationLabel(data.nextStation)+' 방면':'';
++      safeText(values.next,[direction,next].filter(Boolean).join(' · ')||'미확인');
++      values.next.parentElement.hidden=false;
+       const date=new Date(data.observedAt);safeText(stamp,Number.isFinite(date.getTime())?'수신 '+date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}):'수신 시각 미확인');
+@@ -88,2 +93,2 @@
+-    const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.nextStation,p.observedAt]);
++    const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.travelDirection,p.nextStation,p.observedAt]);
+     if(text!==item.lastText){item.update(p);item.lastText=text;}
+diff --git a/app/tests/live-transit-lanes.test.mjs b/app/tests/live-transit-lanes.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/app/tests/live-transit-lanes.test.mjs
+@@ -0,0 +1,50 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {TRAIN_ICON_SIZE_STOPS,TRAIN_LANE_GAP,trainLaneOffset,trainLaneOffsetExpression,providerRailDirection,resolveRailDirection,railDirectionLabel} from '../src/features/liveTransit/train-lanes.js';
++const rad=Math.PI/180;
++// MapLibre icon-offset is rotated in local sprite coordinates.
++function screenOffset(line,angle,facing){
++  const rotation=(angle-(facing==='left'?180:0))*rad;
++  const y=trainLaneOffset(line,facing,true);
++  return [-Math.sin(rotation)*y,Math.cos(rotation)*y];
++}
++test('icon growth is about 22% at all original zoom stops',()=>{
++  const old=[.66,.74,.84,1.13,1.42];
++  assert.deepEqual(TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===0),[11,12.5,13.2,15.5,18]);
++  TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===1).forEach((size,i)=>assert(size/old[i]>=1.20&&size/old[i]<=1.24));
++});
++test('opposing trains remain on correct sides through arbitrary screen rotations and sprite mirroring',()=>{
++  for(const angle of [0,32,90,120,179,225,270,340])for(const facing of ['left','right']){
++    const travel=[Math.cos(angle*rad),Math.sin(angle*rad)];
++    for(const line of ['1호선','2호선','4호선','7호선','9호선','신림선']){
++      const [x,y]=screenOffset(line,angle,facing);
++      const cross=travel[0]*y-travel[1]*x;
++      const expected=(line==='1호선'?-1:1)*TRAIN_LANE_GAP;
++      assert(Math.abs(cross-expected)<1e-8);
++      const [rx,ry]=screenOffset(line,angle+180,facing);
++      assert(Math.abs(rx+x)<1e-8&&Math.abs(ry+y)<1e-8);
++    }
++  }
++});
++test('unknown heading, unrecognized line and unavailable data are not assigned an invented lane',()=>{
++  assert.equal(trainLaneOffset('1호선','right',false),0);
++  assert.equal(trainLaneOffset('7호선',null,true),0);
++  assert.equal(trainLaneOffset('unknown','right',true),0);
++  assert.deepEqual(trainLaneOffsetExpression().at(-1),['literal',[0,0]]);
++});
++test('official direction codes and Korean labels are supported',()=>{
++  for(const value of [0,'0','상행','내선','내선순환'])assert.equal(providerRailDirection(value),'up');
++  for(const value of [1,'1','하행','외선','외선순환'])assert.equal(providerRailDirection(value),'down');
++  assert.equal(providerRailDirection(''),null);
++  assert.equal(railDirectionLabel('1호선','up'),'상행');
++  assert.equal(railDirectionLabel('9호선','down'),'하행');
++  assert.equal(railDirectionLabel('2호선','up'),'내선순환');
++  assert.equal(railDirectionLabel('2호선','down'),'외선순환');
++});
++test('loop direction takes precedence; linear routes retain destination correction',()=>{
++  assert.equal(resolveRailDirection('2호선','0',2,0,null),'up');
++  assert.equal(resolveRailDirection('2호선','1',0,2,null),'down');
++  assert.equal(resolveRailDirection('2호선','',0,2,null),null);
++  assert.equal(resolveRailDirection('9호선','0',2,0,null),'down');
++  assert.equal(resolveRailDirection('7호선','',-1,-1,'up'),'up');
++});
+diff --git a/app/tests/live-transit-lanes-integration.test.mjs b/app/tests/live-transit-lanes-integration.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/app/tests/live-transit-lanes-integration.test.mjs
+@@ -0,0 +1,32 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {buildDongjakMetroLines} from '../src/features/liveTransit/integrate.js';
++import {metroToFeatures} from '../src/features/liveTransit/normalize.js';
++import {trainFacing,trainRotation} from '../src/features/liveTransit/index.js';
++import {trainLaneOffset} from '../src/features/liveTransit/train-lanes.js';
++const now=Date.parse('2026-11-20T14:00:00Z');
++const row=(over={})=>({id:'test',line:'2호선',trainNo:'123',station:'신림',status:'2',observedAt:new Date(now-30000).toISOString(),...over});
++test('2호선 inner next stop is 신대방, outer is 봉천',()=>{
++  const lines=buildDongjakMetroLines();
++  const [inner]=metroToFeatures([row({direction:'0',destination:'봉천'})],lines,now);
++  const [outer]=metroToFeatures([row({direction:'1',destination:'신대방'})],lines,now);
++  assert.equal(inner.properties.nextStation,'신대방');
++  assert.equal(outer.properties.nextStation,'봉천');
++  assert.equal(inner.properties.travelDirection,'up');assert.equal(outer.properties.travelDirection,'down');
++  assert(inner.properties.headingKnown&&outer.properties.headingKnown);
++  const [unknown]=metroToFeatures([row({direction:'',destination:'봉천'})],lines,now);
++  assert.equal(unknown.properties.headingKnown,false);
++});
++test('opposite train directions have distinct lanes without changing geometry',()=>{
++  for(const line of ['1호선','7호선']){
++    const a=[126.94,37.5],b=[126.95,37.5];
++    const cfg={[line]:{stations:[{name:'A',lngLat:a},{name:'B',lngLat:b}],geometry:{coordinates:[a,b]},segmentTimeSeconds:60}};
++    const [up,down]=metroToFeatures([row({line,station:'A',direction:'0',id:'up'}),row({line,station:'B',direction:'1',id:'down'})],cfg,now);
++    assert(Math.abs(up.geometry.coordinates[0]-down.geometry.coordinates[0])<1e-8);
++    assert.equal(up.geometry.coordinates[1],down.geometry.coordinates[1]);
++    for(const f of [up,down])assert.equal(trainRotation({},f.properties,trainFacing({},f.properties)),0);
++    const u=trainLaneOffset(line,trainFacing({},up.properties),up.properties.headingKnown);
++    const d=trainLaneOffset(line,trainFacing({},down.properties),down.properties.headingKnown);
++    assert.equal(u,line==='1호선'?-8:8);assert.equal(d,-u);
++  }
++});
