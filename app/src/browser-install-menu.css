@@ -1,5 +1,5 @@
 /* Full-viewport browser welcome page; native and standalone sessions never mount it. */
-#dj-install-menu{box-sizing:border-box;background:#fff;color:#18211e;font:inherit;text-align:left;border:0;border-radius:0;box-shadow:none}
+#dj-install-menu{--dj-entry-foot:#a4bbae;--dj-entry-highlight:#ffffffd9;--dj-entry-drop:#142c263d;--dj-entry-contact:#142c2624;--dj-entry-raised:0 2px 0 var(--dj-entry-foot),0 4px 7px var(--dj-entry-drop),0 1px 2px var(--dj-entry-contact),inset 0 1px 0 var(--dj-entry-highlight);--dj-entry-pressed:0 1px 2px var(--dj-entry-contact),inset 0 2px 4px var(--dj-entry-drop);box-sizing:border-box;background:#fff;color:#18211e;font:inherit;text-align:left;border:0;border-radius:0;box-shadow:none}
 dialog#dj-install-menu{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;overflow:auto;overscroll-behavior:contain;z-index:2147483646;opacity:1;transform:none}
 dialog#dj-install-menu:not([open]){display:none!important}
 dialog#dj-install-menu::backdrop{background:#fff}
@@ -9,7 +9,7 @@ dialog#dj-install-menu::backdrop{background:#fff}
 #dj-install-menu h2{font-size:clamp(23px,6.1vw,28px);line-height:1.35;font-weight:800;letter-spacing:-.045em;margin:0;text-align:center;word-break:keep-all}
 #dj-install-menu .dj-install-subtitle{font-size:14px;color:#64716d;margin:8px 0 0;line-height:1.5;text-align:center;white-space:normal!important;word-break:keep-all}
 .dj-install-list{display:grid;gap:12px}
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){display:flex;align-items:center;min-height:60px;width:100%;gap:11px;padding:12px 17px;border:1px solid #e1e5e5;border-radius:999px;color:inherit;background:#fff;box-shadow:0 3px 12px #17221d10;text-align:left;cursor:pointer;font:inherit}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){display:flex;align-items:center;min-height:60px;width:100%;gap:11px;padding:12px 17px;border:1px solid #e1e5e5;border-radius:999px;color:inherit;background:#fff;box-shadow:var(--dj-entry-raised);text-align:left;cursor:pointer;font:inherit}
 .dj-install-choice:focus-visible,.dj-install-dismiss:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 .dj-install-choice svg{width:24px;height:24px;flex:none}
 .dj-install-label{flex:1;min-width:0;font-size:15px;font-weight:650;word-break:keep-all}
@@ -21,6 +21,7 @@ dialog#dj-install-menu::backdrop{background:#fff}
 #dj-install-menu .dj-install-prompt{justify-content:center;margin-top:10px}
 .dj-install-dismiss{display:block;margin:24px auto 0;background:none;border:0;color:#64716d;padding:10px 20px;cursor:pointer;font:inherit;font-size:14px}
 .dj-install-qr{display:block;width:112px;height:112px;margin:20px auto 0;image-rendering:pixelated}
+html[data-theme=dark] #dj-install-menu{--dj-entry-foot:#141e1c;--dj-entry-highlight:#ffffff26;--dj-entry-drop:#0008;--dj-entry-contact:#0005}
 html[data-theme=dark] dialog#dj-install-menu{background:#191b1f;color:#f1f4f2}
 html[data-theme=dark] dialog#dj-install-menu::backdrop{background:#191b1f}
 html[data-theme=dark] dialog#dj-install-menu .dj-install-choice,html[data-theme=dark] dialog#dj-install-menu .dj-install-prompt{background:#24282c;border-color:#414849}
@@ -70,10 +71,10 @@ html[data-dj-mobile-only="blocked"] #dj-mobile-only-screen:has(.dj-install-menu)
    when the pointer crosses an edge rapidly. Only paint changes on interaction. */
 #dj-install-menu :is(.dj-install-choice,.dj-install-prompt){transition:background-color 70ms ease-out,box-shadow 70ms ease-out;touch-action:manipulation}
 @media (hover:hover) and (pointer:fine){
- #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{box-shadow:0 1px 4px #17221d20,inset 0 1px 4px #17221d16;background-color:#e8eeeb}
+ #dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):hover{box-shadow:var(--dj-entry-raised);background-color:#e8eeeb}
  #dj-install-menu .dj-install-dismiss:not(:disabled):hover{opacity:.8}
 }
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{box-shadow:0 1px 2px #17221d20,inset 0 2px 7px #17221d32;background-color:#d6e2dc;transition-duration:0ms}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt):not(:disabled):active{box-shadow:var(--dj-entry-pressed);background-color:#d6e2dc;transition-duration:0ms}
 #dj-install-menu .dj-install-dismiss:not(:disabled):active{opacity:.65}
 #dj-install-menu .dj-install-prompt:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
@@ -108,7 +109,7 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background
  border:2px solid #16836b;
  background:#e8f3ed;
  color:#16483b;
- box-shadow:0 0 0 2px #16836b20,0 3px 12px #17221d12;
+ box-shadow:0 0 0 2px #16836b20,var(--dj-entry-raised);
  padding:11px 16px;
 }
 #dj-install-menu .dj-install-selected{
@@ -150,7 +151,7 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background
 @media (hover:hover) and (pointer:fine){
  #dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):hover{background:#dcebe3}
 }
-#dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):active{background:#d2e5da}
+#dj-install-menu .dj-install-choice[aria-pressed="true"]:not(:disabled):active{background:#d2e5da;box-shadow:0 0 0 2px #16836b20,var(--dj-entry-pressed)}
 html[data-theme=dark] #dj-install-menu .dj-install-choice[aria-pressed="true"]{
  background:#1f493d;
  border-color:#62c4a3;

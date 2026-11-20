@@ -228,6 +228,8 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await tap(page,rail.locator('.djNext-empty').first());
  await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-layer-grid')).toHaveCount(2);
+ const layerTile=panel.locator('.djNext-layer-tile').first();await expect(layerTile).toHaveCSS('box-shadow',/inset/);
+ await expect(panel.locator('.djNext-shortcut-switch').first()).toHaveCSS('box-shadow','none');
  await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px [0-9.]+px [0-9.]+px [0-9.]+px$/);
  await expect(panel.locator('.djNext-pin')).toHaveCount(0);await expect(panel.getByText('기능 열기',{exact:true})).toHaveCount(0);
  const slopeAction=panel.getByRole('button',{name:'경사도 지도 기능',exact:true});const slopeState=await slopeAction.getAttribute('aria-pressed');
