@@ -1,5 +1,5 @@
 import {test as base, expect} from '@playwright/test';
-import {mkdirSync, writeFileSync, renameSync, existsSync, appendFileSync} from 'node:fs';
+import {mkdirSync, writeFileSync, renameSync, existsSync, appendFileSync, readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 
@@ -18,7 +18,7 @@ export const test=base.extend({
     info.annotations.push({type:'live-qa-scene',description:id});
     const start=Date.now(), meta={id,title:info.title,project:info.project.name,start,status:'running',frames:0};
     put(join(dir,'meta.json'),meta);
-    let count=0,last=0,cdp,closed=false,streamLast=0,watchChecked=0,watching=false;
+    let count=0,last=0,cdp,closed=false,streamLast=0,watchChecked=0,watchFps=0;
     await page.exposeBinding('__djAuditBatch',(_source,batch)=>{
       if(closed||!Array.isArray(batch)||batch.length>90)return;
       appendFileSync(join(dir,'metrics.ndjson'),batch.map(x=>JSON.stringify(x)).join('\n')+'\n');
@@ -55,8 +55,8 @@ export const test=base.extend({
           void cdp.send('Page.screencastFrameAck',{sessionId}).catch(()=>{});
           if(closed)return;
           const now=Date.now();
-          if(now-watchChecked>=250){watchChecked=now;watching=existsSync(join(root,'watching'));}
-          if(watching&&now-streamLast>=16){
+          if(now-watchChecked>=250){watchChecked=now;try{watchFps=Number(readFileSync(join(root,'watching'),'utf8'))||60;}catch{watchFps=0;}}
+          if(watchFps>0&&now-streamLast>=(watchFps===60?16:1000/watchFps)){
             streamLast=now;const path=join(dir,'latest.jpg');
             writeFileSync(path+'.tmp',Buffer.from(data,'base64'));renameSync(path+'.tmp',path);
           }
