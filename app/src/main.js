@@ -1829,7 +1829,7 @@ const dongjakNews=initDongjakNews({app,onToast:toast});
 void dongjakNews.prefetch();
 let communityFilter = '전체';
 let communityPickMode = false;
-let communityComposerOrigin='community';
+let communityComposerOrigin='community',communityComposerEpoch=0;
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
@@ -1848,11 +1848,22 @@ function saveCommunity(next) {
 // The first mobile frame is a map, not an automatically opened information sheet.
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
-function navigate(tab,{suppressOverview=false}={}) {
+function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   const initialMapEntry = tab === 'map' && firstMapEntryPending;
   if (tab === 'map') firstMapEntryPending = false;
   closeTransportPanel(false);
   if (!['map','route','participate','news','mine'].includes(tab)) return;
+  // A fresh tab entry always starts with the community list. Do not retain
+  // the editor's visible state when a parent close animation is interrupted.
+  // Selecting or cancelling a map location is the explicit draft-resume path.
+  const previousTab=app.dataset.tab;
+  if(previousTab!==tab&&(previousTab==='participate'||tab==='participate')&&!communityPickMode&&!resumeCommunityDraft){
+    communityComposerEpoch++;
+    const form=document.getElementById('community-form');
+    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;}
+    const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
+    communityComposerOrigin='community';
+  }
   immersiveChrome.restore();
   if (addMode) setAddMode(false);
   if (editingPointId) { editingPointId = null; showOverview(); }
@@ -1994,6 +2005,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(open){
     const wasHidden=communityForm.hidden,wasClosing=communityForm.dataset.dj810Animating==='closing';
     if(!wasHidden&&!wasClosing)return;
+    communityComposerEpoch++;
     motion?.cancel?.(communityForm);
     communityForm.dataset.djDialogFade='true';
     if(!communityForm.querySelector(':scope > .djNext-form-scroll')){
@@ -2013,11 +2025,14 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(communityForm.contains(document.activeElement))document.activeElement.blur();
   if(communityComposerOrigin==='map'){
     const parent=document.getElementById('participation-panel');
-    const done=()=>{communityForm.hidden=true;communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    const epoch=++communityComposerEpoch;
+    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
     // Keep the editor intact through the parent exit, never flash the list.
     if(parent&&motion)motion.close(parent,done);else done();return;
   }
+  const epoch=++communityComposerEpoch;
   const finish=()=>{
+    if(epoch!==communityComposerEpoch)return;
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
     if(panel)delete panel.dataset.djPatchKeyboard;
@@ -2059,7 +2074,7 @@ function selectCommunityLocation(lngLat) {
   communityPickMode=false;
   document.getElementById('community-map-hint').hidden=true;
   document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  navigate('participate');
+  navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
   toast('위치를 연결했습니다.');
 }
@@ -2073,7 +2088,7 @@ document.getElementById('community-map-pick').addEventListener('click',()=>{
 document.getElementById('community-map-cancel').addEventListener('click',()=>{
   communityPickMode=false;
   document.getElementById('community-map-hint').hidden=true;
-  navigate('participate');
+  navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
 });
 // Structured issue fields are relevant to '보행 불편' posts, not general discussion.
@@ -2124,8 +2139,8 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
-    communityComposerOrigin=app.dataset.tab==='map'?'map':'community';
-    navigate('participate');
+    const origin=app.dataset.tab==='map'?'map':'community';
+    navigate('participate');communityComposerOrigin=origin;
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:!window.matchMedia('(max-width:699px)').matches});

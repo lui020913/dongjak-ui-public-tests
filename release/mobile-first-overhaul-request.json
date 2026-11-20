@@ -3,9 +3,9 @@
   "application_version": "9.2.35",
   "public_work_branch": "main",
   "purpose": "Unify mobile header drag, dark modal styling, community composer navigation and consent, layer status and shortcuts, weather glyphs, installation guide and safe-area scrim",
-  "attempt": 120,
+  "attempt": 121,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User approved managed daily metro quota as non-blocking: only explicit HTTP 429 ERROR-337, keep live failures strict, add UI notice and independent bus polling regression",
+  "last_retry_reason": "First deployed QA accepted official metro daily quota and passed PC/tablet, 11 of 12 phone shards after retry; direct report editor sometimes remained visible on community reentry. Reset visibility on fresh navigation, invalidate stale editor close callback, preserve explicit map-pick draft resume.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
