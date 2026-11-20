@@ -33,7 +33,7 @@ test('admin picker is opened by original action and overview test-text is remove
   assert.ok(html.includes('id="admin-dong-picker"'));
   assert.ok(html.includes('id="open-admin-dongs"'));
   assert.ok(!html.includes('현재 자료는 시범 데이터이며 이 기기에만 저장됩니다.'));
-  const pwa=read('src/mobile-pwa-status-tone-v793.js');
+  const pwa=read('src/ios-pwa-overlay-chrome.js');
   assert.match(pwa,/root\.dataset\.theme=theme/);
   assert.match(pwa,/themeMeta\.setAttribute\('content'/);
 });
