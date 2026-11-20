@@ -140,7 +140,25 @@ test('installed iOS PWA status color follows scrims, native dialogs, and both th
   });
   const darkHeaderDim=await expectedBlend([9,25,24],0.36);
   await expect(meta).toHaveAttribute('content',darkHeaderDim);
-  await page.evaluate(()=>document.getElementById('dj-mobile-header-dim').remove());
+  await page.addStyleTag({content:`
+    html body #app#app#app#app#app .topbar{z-index:3300!important}
+    html body #app#app#app#app#app#app#app #djNext-toolbar{z-index:3120!important}
+  `});
+  const stacking=await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    app.querySelector('#djNext-toolbar')?.remove();
+    const toolbar=document.createElement('div');toolbar.id='djNext-toolbar';
+    toolbar.style.cssText='position:fixed;top:60px;left:8px;width:20px;height:20px';
+    app.append(toolbar);
+    const z=el=>Number.parseInt(getComputedStyle(el).zIndex,10);
+    return {topbar:z(app.querySelector('.topbar')),dim:z(app.querySelector('#dj-mobile-header-dim')),toolbar:z(toolbar)};
+  });
+  expect(stacking.topbar).toBeLessThan(stacking.dim);
+  expect(stacking.toolbar).toBeLessThan(stacking.dim);
+  await page.evaluate(()=>{
+    document.getElementById('dj-mobile-header-dim').remove();
+    document.getElementById('djNext-toolbar')?.remove();
+  });
   await expect(meta).toHaveAttribute('content','#192d32');
   await page.evaluate(()=>{document.getElementById('app').dataset.theme='light';});
   await expect(meta).toHaveAttribute('content','#eaf0ec');
