@@ -4,7 +4,7 @@
     background-color:#192d32;
   }
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"]{
-    background-color:#e5ece8;
+    background-color:#eef3ef;
   }
 }
 
@@ -18,6 +18,6 @@
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"],
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] body,
   html[data-dj-platform="ios-pwa"].dj-ios-home-pwa[data-theme="light"] #app {
-    background-color:#e5ece8!important;color-scheme:light!important;
+    background-color:#eef3ef!important;color-scheme:light!important;
   }
 }

@@ -51,10 +51,10 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#eaf0ec';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#eef3ef';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#192d32':'#eaf0ec')
+          ? (displayTheme==='dark'?'#192d32':'#eef3ef')
           : (displayTheme==='dark'?'#101f25':'#f3f7f5');
       })();
     </script>
@@ -211,6 +211,7 @@
     <link rel="stylesheet" href="/src/v891-mobile-hud-ai-logo.css" />
 </head>
   <body>
+    <div id="dj-ios-pwa-status-sample" aria-hidden="true"></div>
     <div id="dj-full-transition" role="status" aria-live="polite" aria-atomic="true" hidden>
       <div class="dj-transition-card">
         <div class="dj-progress-spinner" aria-hidden="true"></div>

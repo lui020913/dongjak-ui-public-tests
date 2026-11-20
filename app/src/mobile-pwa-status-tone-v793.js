@@ -41,14 +41,16 @@ export function installPwaStatusTone(doc=document,win=window) {
       const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal'].some(id=>id!=='dj-ai-search-modal'&&visible(id));
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
-      const color=theme==='dark'?'#192d32':'#eaf0ec';
+      const color=theme==='dark'?'#192d32':'#eef3ef';
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
-      if(!sample){sample=doc.createElement('div');sample.id='dj-ios-pwa-status-sample';sample.setAttribute('aria-hidden','true');app.appendChild(sample);}
-      if(sample.style.backgroundColor!==color)sample.style.backgroundColor=color;
+      doc.body.style.setProperty('background-color',color,'important');
+      doc.body.style.setProperty('color-scheme',theme,'important');
+      if(!sample){sample=doc.getElementById('dj-ios-pwa-status-sample')||doc.createElement('div');sample.id='dj-ios-pwa-status-sample';sample.setAttribute('aria-hidden','true');if(sample.parentElement!==doc.body)doc.body.appendChild(sample);}
+      sample.style.setProperty('background-color',color,'important');
       if(themeMeta.getAttribute('content')!==color)themeMeta.setAttribute('content',color);
     } else {
-      band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');
+      band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');doc.body.style.removeProperty('background-color');doc.body.style.removeProperty('color-scheme');
       themeMeta.setAttribute('content',baselineColor());
     }
   }
@@ -66,13 +68,15 @@ export function installPwaStatusTone(doc=document,win=window) {
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);
   win.addEventListener?.('pageshow',sync);
+  win.addEventListener?.('dongjak:manual-theme-change',sync);
   sync();
   return ()=>{
     observer.disconnect();if(frame)win.cancelAnimationFrame?.(frame);
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
+    win.removeEventListener?.('dongjak:manual-theme-change',sync);
     band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;
-    root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');
+    root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');doc.body.style.removeProperty('background-color');doc.body.style.removeProperty('color-scheme');
     themeMeta.content=baselineColor();
   };
 }

@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.30",
   "public_work_branch": "main",
-  "purpose": "Restore phone-only gate in browsers and installed PWAs, including iPad; retain iOS dim gradient and bus paths",
-  "attempt": 108,
+  "purpose": "Align iOS status sampling surface with the actual screenshot palette, synchronize dark theme and retain phone-only access",
+  "attempt": 109,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User clarified iPad PWA must be blocked just like tablet web browsers",
+  "last_retry_reason": "User reported faint light boundary and white native status bar in dark theme; adopt real opaque full-width 8px color sampler",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
