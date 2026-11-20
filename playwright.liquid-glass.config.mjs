@@ -1,0 +1,2 @@
+import {defineConfig,devices} from '@playwright/test';
+export default defineConfig({testDir:'tests',testMatch:'liquid-glass-preview.spec.mjs',timeout:180000,expect:{timeout:20000},retries:0,workers:1,use:{baseURL:process.env.DONGJAK_TARGET_URL,screenshot:'only-on-failure'},projects:[{name:'android-chromium',use:{...devices['Pixel 7'],browserName:'chromium',launchOptions:{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}}},{name:'ios-webkit',use:{...devices['iPhone 13'],browserName:'webkit'}}]});

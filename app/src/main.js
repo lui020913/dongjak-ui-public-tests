@@ -1,3 +1,4 @@
+import './v910-cascade-order.css';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -18,7 +19,6 @@ import {initVersionHistory} from './version-history.js';
 import * as maplibregl from 'maplibre-gl';
 import {Capacitor, CapacitorHttp} from '@capacitor/core';
 import {Geolocation} from '@capacitor/geolocation';
-import './v910-cascade-order.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import './style.css';

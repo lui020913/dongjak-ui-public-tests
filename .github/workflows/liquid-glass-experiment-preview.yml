@@ -113,3 +113,33 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed"
 
+  glass-qa:
+    needs: preview
+    name: '3. Liquid Glass 창 색상 검증 (${{ matrix.browser }})'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [android-chromium, ios-webkit]
+    timeout-minutes: 15
+    env:
+      DONGJAK_TARGET_URL: ${{ needs.preview.outputs.preview_url }}
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund --prefer-offline
+      - run: npx playwright test --config=playwright.liquid-glass.config.mjs --project=${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: liquid-glass-${{ matrix.browser }}-${{ github.run_id }}
+          path: test-results/
+          if-no-files-found: ignore

@@ -624,71 +624,58 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
 }
 @media(prefers-reduced-motion:reduce){#app #map-quick-search-query::placeholder{transition:none!important}}
 
-
-/* Liquid Glass experiment — isolated preview; visual properties only.
-   Keep the established layout, pointer routing, motion, and safety information intact. */
-@layer request-completion {
-  @media (max-width:699px) {
-    #app {
-      --lg-fill: rgba(250,255,252,.72);
-      --lg-highlight: rgba(255,255,255,.64);
-      --lg-rim: rgba(255,255,255,.88);
-      --lg-edge: rgba(33,62,53,.12);
-      --lg-depth: 0 6px 18px rgba(16,49,39,.16), 0 1px 3px rgba(16,49,39,.12), inset 0 1px 1px rgba(255,255,255,.92), inset 0 -1px 1px rgba(255,255,255,.45);
-      --lg-active: rgba(196,232,219,.80);
-      --lg-ink: #17392f;
-      --lg-sheet: rgba(250,252,251,.96);
-      --lg-flat: #f5f9f7;
-    }
-    #app[data-theme="dark"] {
-      --lg-fill: rgba(29,37,40,.78);
-      --lg-highlight: rgba(255,255,255,.09);
-      --lg-rim: rgba(220,247,238,.24);
-      --lg-edge: rgba(0,0,0,.42);
-      --lg-depth: 0 6px 18px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.32), inset 0 1px 1px rgba(255,255,255,.20), inset 0 -1px 1px rgba(255,255,255,.08);
-      --lg-active: rgba(34,90,76,.90);
-      --lg-ink: #edf8f3;
-      --lg-sheet: rgba(27,32,35,.97);
-      --lg-flat: #242c30;
-    }
-    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled)) {
-      background: var(--lg-flat) !important;
-      border-color: var(--lg-edge) !important;
-      box-shadow: var(--lg-depth) !important;
-      color: var(--lg-ink) !important;
-    }
-    @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled)) {
-        background: linear-gradient(155deg,var(--lg-highlight),transparent 62%),var(--lg-fill) !important;
-        border-color: var(--lg-rim) !important;
-        -webkit-backdrop-filter: blur(12px) saturate(145%) !important;
-        backdrop-filter: blur(12px) saturate(145%) !important;
-      }
-      html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] #djNext-rail > button.djNext-tool[aria-pressed="true"] {
-        background: linear-gradient(160deg,var(--lg-highlight),transparent),var(--lg-active) !important;
-        border-color: var(--djNext-active) !important;
-        box-shadow: inset 0 0 0 1px var(--djNext-active),var(--lg-depth) !important;
-      }
-    }
-    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .dj-motion-indicator {
-      background: linear-gradient(155deg,var(--lg-highlight),transparent),var(--lg-active) !important;
-      box-shadow: inset 0 1px 1px var(--lg-rim),0 2px 5px var(--lg-edge) !important;
-    }
-    /* Large reading surfaces stay nearly opaque; no expensive sheet-wide blur. */
-    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] :is(#djNext-layer-panel .djNext-modal-body,#dj854-weather-sheet,#transport-sheet) {
-      background: var(--lg-sheet) !important;
-      border-color: var(--lg-edge) !important;
-      box-shadow: var(--lg-depth) !important;
-    }
-    @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-      html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled)) {
-        background: var(--lg-flat) !important;
-        border-color: var(--lg-edge) !important;
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-      }
-      html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] #djNext-rail > button.djNext-tool[aria-pressed="true"] { background: var(--lg-active) !important; }
-      html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] :is(#djNext-layer-panel .djNext-modal-body,#dj854-weather-sheet,#transport-sheet) { background:var(--lg-flat) !important; }
-    }
+/* Liquid Glass experiment: one visual owner across phone tabs and windows.
+   First named important layer; replaces the prior experiment rules.
+   Retains established geometry, motion, visibility and semantic accents. */
+@layer liquid-glass-experiment {
+ @media (max-width:699px) {
+  :root,#app[data-theme="light"] {
+   --lg-fill:rgba(248,253,251,.68);--lg-sheet:rgba(248,252,250,.84);--lg-header:rgba(249,253,251,.81);--lg-card:rgba(255,255,255,.58);
+   --lg-highlight:rgba(255,255,255,.54);--lg-rim:rgba(255,255,255,.92);--lg-edge:rgba(33,62,53,.15);
+   --lg-depth:0 6px 18px rgba(16,49,39,.17),0 1px 3px rgba(16,49,39,.12),inset 0 1px 1px rgba(255,255,255,.92),inset 0 -1px 1px rgba(255,255,255,.44);
+   --lg-active:rgba(195,232,218,.87);--lg-active-ink:#075740;--lg-ink:#17392f;
+   --lg-flat:#f5f9f7;--lg-flat-active:#c7e9dc;--lg-flat-card:#edf4f1;
   }
+  :root[data-theme="dark"],#app[data-theme="dark"] {
+   --lg-fill:rgba(28,36,40,.73);--lg-sheet:rgba(25,33,36,.87);--lg-header:rgba(31,39,42,.86);--lg-card:rgba(53,66,67,.68);
+   --lg-highlight:rgba(255,255,255,.10);--lg-rim:rgba(220,247,238,.25);--lg-edge:rgba(0,0,0,.43);
+   --lg-depth:0 6px 18px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.32),inset 0 1px 1px rgba(255,255,255,.20),inset 0 -1px 1px rgba(255,255,255,.08);
+   --lg-active:rgba(34,90,76,.90);--lg-active-ink:#aaf4dc;--lg-ink:#edf8f3;
+   --lg-flat:#242c30;--lg-flat-active:#225a4c;--lg-flat-card:#303d40;
+  }
+  :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled),.topbar #dj890-ai-orb,.topbar #dj800-ai-search-trigger,.page-panel,#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#overview-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#dj-mobile-utilities,#route-map-card,#route-place-search,#route-transit-confirm,#map-quick-search-dropdown,#map-gesture-guide,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.dj860-card,.dj-place-detail-popup .maplibregl-popup-content) {
+   background:var(--lg-flat)!important;border-color:var(--lg-edge)!important;box-shadow:var(--lg-depth)!important;
+  }
+  :is(.page-panel,#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#overview-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#dj-mobile-utilities,#route-map-card,#route-place-search,#route-transit-confirm,#map-quick-search-dropdown,#map-gesture-guide,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.dj860-card,.dj-place-detail-popup .maplibregl-popup-content) {color:var(--lg-ink)!important;}
+  :is(.page-panel > .dj836-sheet-body,.dj-place-detail,.dj-place-body,.dj-mobile-utilities-body,.djNext-form-scroll,.transport-sheet .dj875-transit-scroll,#community-form,.dj860-content) {
+   background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  :is(.page-panel > .dj-sheet-chrome,.dj-place-header,.transport-panel-head,.dj854-weather-head,.ped-tools-panel-head,.map-safety-head,#djNext-layer-panel .djNext-modal-body > header,.dj854-more-head,#dj910-route-footer,.community-form-top,.dj860-head,.dj860-footer) {
+   background:var(--lg-flat)!important;border-color:var(--lg-edge)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  :is(.dj-sheet-chrome-close,.djNext-close,.dj-place-header-close,#transport-close,#ped-tools-close,.dj854-weather-close,#map-safety-close,#dj-mobile-utilities-close,#mine-panel .dj834-settings-group,#mine-panel .dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj-map-settings-group,.route-card,.metro-arrival-direction-group,.transport-arrival-row,.dongjak-news-item) {background:var(--lg-flat-card)!important;border-color:var(--lg-edge)!important;}
+  :is(.dj-sheet-chrome-close,.djNext-close,.dj-place-header-close,#transport-close,#ped-tools-close,.dj854-weather-close,#map-safety-close,#dj-mobile-utilities-close) {color:var(--lg-ink)!important;}
+  #bottom-nav > .nav-tab {background:transparent!important;box-shadow:none!important;}
+  #bottom-nav > .nav-tab:is(.active,[aria-current="page"]) {color:var(--lg-active-ink)!important;-webkit-text-fill-color:currentColor!important;}
+  #bottom-nav:not([data-dj-motion-indicator="ready"]) > .nav-tab:is(.active,[aria-current="page"]),#bottom-nav > .dj-motion-indicator,#djNext-rail > button.djNext-tool[aria-pressed="true"] {background:var(--lg-flat-active)!important;}
+  #djNext-rail > button.djNext-tool[aria-pressed="true"] {border-color:var(--djNext-active,#087c65)!important;box-shadow:inset 0 0 0 1px var(--djNext-active,#087c65),var(--lg-depth)!important;}
+  @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+   :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled),.topbar #dj890-ai-orb,.topbar #dj800-ai-search-trigger) {
+    background:linear-gradient(155deg,var(--lg-highlight),transparent 64%),var(--lg-fill)!important;border-color:var(--lg-rim)!important;
+    -webkit-backdrop-filter:blur(12px) saturate(145%)!important;backdrop-filter:blur(12px) saturate(145%)!important;
+   }
+   :is(.page-panel,#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#overview-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#dj-mobile-utilities,#route-map-card,#route-place-search,#route-transit-confirm,#map-quick-search-dropdown,#map-gesture-guide,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.dj860-card,.dj-place-detail-popup .maplibregl-popup-content) {
+    background:linear-gradient(155deg,var(--lg-highlight),transparent 42%),var(--lg-sheet)!important;border-color:var(--lg-rim)!important;
+    -webkit-backdrop-filter:blur(14px) saturate(120%)!important;backdrop-filter:blur(14px) saturate(120%)!important;
+   }
+   :is(.page-panel > .dj-sheet-chrome,.dj-place-header,.transport-panel-head,.dj854-weather-head,.ped-tools-panel-head,.map-safety-head,#djNext-layer-panel .djNext-modal-body > header,.dj854-more-head,#dj910-route-footer,.community-form-top,.dj860-head,.dj860-footer) {background:linear-gradient(160deg,var(--lg-highlight),transparent 72%),var(--lg-header)!important;}
+   :is(.dj-sheet-chrome-close,.djNext-close,.dj-place-header-close,#transport-close,#ped-tools-close,.dj854-weather-close,#map-safety-close,#dj-mobile-utilities-close,#mine-panel .dj834-settings-group,#mine-panel .dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj-map-settings-group,.route-card,.metro-arrival-direction-group,.transport-arrival-row,.dongjak-news-item) {background:var(--lg-card)!important;}
+   #bottom-nav:not([data-dj-motion-indicator="ready"]) > .nav-tab:is(.active,[aria-current="page"]),#bottom-nav > .dj-motion-indicator,#djNext-rail > button.djNext-tool[aria-pressed="true"] {background:linear-gradient(155deg,var(--lg-highlight),transparent),var(--lg-active)!important;}
+  }
+  @media (prefers-reduced-transparency:reduce),(prefers-contrast:more) {
+   :is(.topbar .map-quick-search-form,#bottom-nav,#djNext-rail > button.djNext-tool,.map-actions > button:not(:disabled),.topbar #dj890-ai-orb,.topbar #dj800-ai-search-trigger,.page-panel,#route-panel,#participation-panel,#news-panel,#mine-panel,#transport-sheet,#ped-tools-panel,#dj854-weather-sheet,#map-safety-controls,#map-advanced-controls,#detail-sheet,#entry-sheet,#overview-sheet,#pza-road-sheet,#night-visibility-float,#road-width-legend,#dj-mobile-utilities,#route-map-card,#route-place-search,#route-transit-confirm,#map-quick-search-dropdown,#map-gesture-guide,.djNext-modal-body,.dj-map-settings-card,.dj-about-card,.version-history-dialog,.dj860-card,.dj-place-detail-popup .maplibregl-popup-content) {background:var(--lg-flat)!important;border-color:var(--lg-edge)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+   :is(.page-panel > .dj-sheet-chrome,.dj-place-header,.transport-panel-head,.dj854-weather-head,.ped-tools-panel-head,.map-safety-head,#djNext-layer-panel .djNext-modal-body > header,.dj854-more-head,#dj910-route-footer,.community-form-top,.dj860-head,.dj860-footer) {background:var(--lg-flat)!important;}
+   #bottom-nav:not([data-dj-motion-indicator="ready"]) > .nav-tab:is(.active,[aria-current="page"]),#bottom-nav > .dj-motion-indicator,#djNext-rail > button.djNext-tool[aria-pressed="true"] {background:var(--lg-flat-active)!important;}
+  }
+ }
 }
