@@ -45,7 +45,9 @@ test('exact design evidence is a required Production and Preview notification co
  const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
  assert.match(workflow,/visual-qa:\s*\n\s*needs: \[build, preview\]/);
  assert.match(workflow,/max-parallel: 6\s+matrix:\s+lane: \[1, 2, 3, 4, 5, 6\]/);
- assert.equal((workflow.match(/run: node scripts\/live-qa-verify-candidate\.mjs/g)||[]).length,2);
+ const visual=workflow.slice(workflow.indexOf('  visual-qa:'),workflow.indexOf('  explore-qa:'));
+ const explore=workflow.slice(workflow.indexOf('  explore-qa:'),workflow.indexOf('  production:'));
+ for(const job of [visual,explore])assert.equal((job.match(/run: node scripts\/live-qa-verify-candidate\.mjs/g)||[]).length,2);
  assert.match(workflow,/run: node scripts\/live-qa-release-gate\.mjs qa-artifacts/);
  assert.match(workflow,/production:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa\]/);
  assert.match(workflow,/notify-preview:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-qa, explore-qa\]/);
