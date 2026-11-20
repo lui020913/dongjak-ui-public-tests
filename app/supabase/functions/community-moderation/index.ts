@@ -45,7 +45,11 @@ Deno.serve(async(req:Request)=>{
  try{if(Number(req.headers.get("content-length")||0)>620000)throw 0;raw=await req.text();if(raw.length>620000)throw 0;p=JSON.parse(raw);}catch{return send({error:"입력 형식을 확인해주세요."},400);}
  const configured=Boolean(key&&model&&/^gemini-[a-z0-9.-]+$/.test(model));
  if(p?.kind==="admin-probe"){
-  if(!equalSecret(token,secret))return send({error:"관리자 권한이 필요합니다."},403);
+  if(!equalSecret(token,secret)){
+   if(typeof p.probe_token!=="string"||!/^[0-9a-f-]{72}$/.test(p.probe_token))return send({error:"관리자 권한이 필요합니다."},403);
+   const {data:redeemed,error:redeemError}=await client.rpc("community_model_probe_redeem",{p_token:p.probe_token});
+   if(redeemError||redeemed!==true)return send({error:"관리자 권한이 필요합니다."},403);
+  }
   if(!configured)return send({configured:false,model_ok:false},503);
   const result=await probeProvider(key!,model!);
   const {data:enforced}=await client.rpc("community_moderation_active");
