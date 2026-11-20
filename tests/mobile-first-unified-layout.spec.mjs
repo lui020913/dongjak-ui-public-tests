@@ -35,13 +35,14 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
       viewport:{width:innerWidth,height:innerHeight},
       topbar:topbar?{...rect(topbar),...style(topbar)}:null,
       toolbar:toolbar?{...rect(toolbar),...style(toolbar)}:null,
-      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length}:null,
+      nav:nav?{...rect(nav),...style(nav),children:nav.querySelectorAll(':scope > .nav-tab').length,items:[...nav.children].map(el=>({id:el.id,tab:el.dataset.tab||null,display:getComputedStyle(el).display,gridColumn:getComputedStyle(el).gridColumn,...rect(el)})),pseudo:['::before','::after'].map(p=>({pseudo:p,display:getComputedStyle(nav,p).display,content:getComputedStyle(nav,p).content}))}:null,
       actions:actions?{...rect(actions),...style(actions)}:null,
       desktopRail:document.querySelectorAll('#dj-desktop-safety-rail').length,
       tabletRail:document.querySelectorAll('#dj-tablet-utility-group').length
     };
   });
 
+  await testInfo.attach('layout-metrics.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
   expect(metrics.topbar,'search header must exist').not.toBeNull();
   expect(metrics.toolbar,'shared feature toolbar must mount').not.toBeNull();
   expect(metrics.nav,'shared five-tab navigation must exist').not.toBeNull();
@@ -52,7 +53,11 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   expect(metrics.nav.position).toBe('fixed');
   expect(metrics.nav.display).toBe('grid');
   expect(metrics.nav.children).toBe(5);
-  expect(metrics.nav.gridTemplateColumns.trim().split(/\s+/)).toHaveLength(5);
+  expect(metrics.nav.gridTemplateColumns.trim().split(/\s+/),JSON.stringify(metrics.nav)).toHaveLength(5);
+  const tabs=metrics.nav.items.filter(item=>item.tab);
+  expect(tabs.map(item=>item.tab)).toEqual(['route','participate','map','news','mine']);
+  expect(Math.max(...tabs.map(item=>item.width))-Math.min(...tabs.map(item=>item.width))).toBeLessThanOrEqual(2);
+  expect(tabs.every(item=>item.width>0&&item.height>0&&item.right<=metrics.nav.right+1)).toBe(true);
 
   expect(metrics.nav.x).toBeGreaterThanOrEqual(-1);
   expect(metrics.nav.right).toBeLessThanOrEqual(metrics.viewport.width+1);
@@ -70,5 +75,4 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   expect(metrics.tabletRail).toBe(0);
 
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
-  await testInfo.attach('layout-metrics.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
 });

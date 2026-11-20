@@ -77,6 +77,17 @@
     #app #dj-v794-more > svg {display:block!important;width:25px!important;height:25px!important;min-width:25px!important;min-height:25px!important;margin:0!important;}
     #app #bottom-nav {position:fixed!important;top:auto!important;left:12px!important;right:12px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 3px)!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important;grid-auto-flow:column!important;align-items:stretch!important;width:auto!important;min-width:0!important;max-width:none!important;height:70px!important;min-height:70px!important;max-height:70px!important;padding:4px 6px!important;margin:0!important;box-sizing:border-box!important;transform:none!important;translate:none!important;border-radius:32px!important;background:var(--dj800-surface,#fff)!important;backdrop-filter:none!important;z-index:4800!important;}
     #app #bottom-nav::before,#app #bottom-nav::after {content:none!important;display:none!important;}
+    /* Only the five native tabs may participate in the phone dock grid. A legacy auxiliary control must never create an implicit sixth track. */
+    @media (max-width:699px) {
+      #app #bottom-nav {grid-auto-flow:row!important;grid-auto-columns:minmax(0,0px)!important;}
+      #app #bottom-nav > :not(.nav-tab) {display:none!important;}
+      #app #bottom-nav > .nav-tab {grid-row:1!important;grid-column:auto!important;}
+      #app #bottom-nav > .nav-tab[data-tab="route"] {grid-column:1!important;}
+      #app #bottom-nav > .nav-tab[data-tab="participate"] {grid-column:2!important;}
+      #app #bottom-nav > .nav-tab[data-tab="map"] {grid-column:3!important;}
+      #app #bottom-nav > .nav-tab[data-tab="news"] {grid-column:4!important;}
+      #app #bottom-nav > .nav-tab[data-tab="mine"] {grid-column:5!important;}
+    }
     #app #bottom-nav .nav-tab {grid-column:auto!important;grid-row:1!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;min-width:0!important;width:auto!important;height:100%!important;gap:3px!important;padding:3px 2px!important;border-radius:28px!important;line-height:1.15!important;}
     #app #bottom-nav .nav-tab .nav-icon {display:grid!important;place-items:center!important;width:24px!important;height:24px!important;font-size:0!important;line-height:0!important;color:inherit!important;-webkit-text-fill-color:currentColor!important;}
     #app #bottom-nav .nav-tab .nav-icon::before,#app #bottom-nav .nav-tab .nav-icon::after {content:none!important;display:none!important;}
