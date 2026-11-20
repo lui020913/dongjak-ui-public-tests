@@ -3,9 +3,9 @@
   "application_version": "9.2.38",
   "public_work_branch": "main",
   "purpose": "Preserve six-column toolbar; fast stationary dock fades, route-colored subway badges and quota notice, persistent bus routes, opaque facility motion and saved-only folders",
-  "attempt": 127,
+  "attempt": 128,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner phone recordings and station screenshot after 9.2.36; fix authoritative state and timing; integrate current 9.2.37 toolbar.",
+  "last_retry_reason": "Five phone shards failed because 65/95ms fade skipped intermediate frames during compositor stalls. Keep nominal 160ms, cap tab frame advance at 32ms and restore bounded inactivity recovery; no regression checks removed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
