@@ -4,13 +4,15 @@ import {payloadToCollection,LINE_COLORS} from './normalize.js';
 import {loadTrainAtlas} from './train-atlas.js';
 import {selectedBusVehicleRoute} from '../../bus-route-overlay.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
+import {TRAIN_ICON_SIZE_STOPS,trainLaneOffset,trainLaneOffsetExpression} from './train-lanes.js';
+import {withTrainHeadlights} from './train-headlights.js';
 export const LIVE_SOURCE='dongjak-live-vehicles-v827';
 export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
 export const LIVE_BUS_LAYER='dongjak-live-bus-v827';
 const empty=()=>({type:'FeatureCollection',features:[]});
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 // Local user-supplied train atlas, preserving the established directional image keys.
-const trainImageId=(line,facing='right')=>'dj-live-train-'+line+(facing==='left'?'-left':'');
+const trainImageId=(line,facing='right',lit=true)=>'dj-live-train-'+line+(facing==='left'?'-left':'')+(lit?'':'-unlit');
 // A fixed-size top-view vehicle follows the local screen-space track tangent.
 // Mirrored rasters keep the existing stable facing contract at vertical bends.
 function screenTangent(map,props){
@@ -83,9 +85,14 @@ export function ensureTrainImages(map,atlas=null,replace=false,doc=globalThis.do
   if(typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;
   try{for(const [line,color] of Object.entries({...LINE_COLORS,unknown:'#596c75'})){
     for(const facing of ['right','left']){
-      const id=trainImageId(line,facing),sprite=atlas?.get(line+':'+facing);
-      if(map.hasImage(id)){if(replace&&sprite){if(typeof map.updateImage!=='function')return false;map.updateImage(id,sprite);}continue;}
-      const image=sprite??trainIconImage(color,doc,facing);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
+      const sprite=atlas?.get(line+':'+facing);
+      if([true,false].every(lit=>map.hasImage(trainImageId(line,facing,lit)))&&!(replace&&sprite))continue;
+      const base=sprite??trainIconImage(color,doc,facing);if(!base)return false;
+      for(const lit of [true,false]){
+        const id=trainImageId(line,facing,lit),image=lit?withTrainHeadlights(base,facing):base;
+        if(map.hasImage(id)){if(replace&&sprite){if(typeof map.updateImage!=='function')return false;map.updateImage(id,image);}continue;}
+        map.addImage(id,image,{pixelRatio:3});
+      }
     }
   }return true;}catch{return false;}
 }
@@ -126,11 +133,12 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(!trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='symbol')trainImages=true;
     if(trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='circle')map.removeLayer(LIVE_METRO_LAYER);
     if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
-      filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],11,.66,12.5,.74,13.2,.84,15.5,1.13,18,1.42],
+      filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown','right',false)],
+        'icon-size':['interpolate',['linear'],['zoom'],...TRAIN_ICON_SIZE_STOPS],
+        'icon-offset':trainLaneOffsetExpression(),
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
-        'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
+        'circle-radius':['interpolate',['linear'],['zoom'],11,6,13.2,7.5,15.5,10,18,12.8]}});
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'bus'],paint:{...common,'circle-color':'#0785ef',
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,5.7,15.5,7.7,18,9.8]}});
@@ -151,7 +159,8 @@ export function attachLiveTransitOverlay(map,opts={}){
         const facing=trainFacing(map,f.properties,prior?.trainFacing);
         f.properties.trainFacing=facing||'unknown';
         f.properties.trainRotation=trainRotation(map,f.properties,facing||'right',prior?.trainRotation);
-        f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right');
+        f.properties.trainLaneOffset=trainLaneOffset(f.properties.line,facing,f.properties.headingKnown);
+        f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right',Boolean(facing&&f.properties.headingKnown));
       }
       // Straight-line smoothing stays bus-only; metro coordinates are on the displayed track already.
       if(f.properties.mode==='bus'&&earlier&&transitionMs>0&&now-lastUpdate<transitionMs&&haversineMeters(earlier,coords)<250){
@@ -176,7 +185,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(!force&&!payload)return;
     const next=calculate(now);
     if(!force&&next.features.length===display.features.length&&next.features.every((f,i)=>{
-      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.observedAt===f.properties.observedAt;
+      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.trainRotation===f.properties.trainRotation&&old.properties.trainLaneOffset===f.properties.trainLaneOffset&&old.properties.travelDirection===f.properties.travelDirection&&old.properties.observedAt===f.properties.observedAt;
     }))return;
     display=next;
     try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;if(!belowVisibleZoom)opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
@@ -255,7 +264,7 @@ export function attachLiveTransitOverlay(map,opts={}){
   function destroy(){if(destroyed)return;stop();destroyed=true;
     for(const id of [LIVE_METRO_LAYER,LIVE_BUS_LAYER])if(map.getLayer(id))map.removeLayer(id);
     if(map.getSource(LIVE_SOURCE))map.removeSource(LIVE_SOURCE);
-    for(const line of [...Object.keys(LINE_COLORS),'unknown'])for(const facing of ['right','left'])if(map.hasImage?.(trainImageId(line,facing)))map.removeImage?.(trainImageId(line,facing));
+    for(const line of [...Object.keys(LINE_COLORS),'unknown'])for(const facing of ['right','left'])for(const lit of [true,false])if(map.hasImage?.(trainImageId(line,facing,lit)))map.removeImage?.(trainImageId(line,facing,lit));
   }
   function setVisible(mode,on){if(!(mode in visible))throw new Error('Unknown mode');visible[mode]=Boolean(on);render(true);}
   return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,metroQuotaUntil:quotaActive()?metroQuotaUntil:0,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};

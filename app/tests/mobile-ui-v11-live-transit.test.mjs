@@ -129,7 +129,8 @@ test('delayed atlas never hides train layer; stationary train recovers and new a
  const overlay=attachLiveTransitOverlay(map,{stationLines:routes,metroMinZoom:12.5,trainIconDocument:doc,loadTrainAtlas:()=>new Promise(r=>{resolveAtlas=r}),getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]})});
  try{
   overlay.start();await waitUntil(()=>typeof resolveAtlas==='function');
-  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal(map.images.size,14);
+  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal(map.images.size,28);
+  assert(map.images.has('dj-live-train-9호선-unlit'));assert(map.images.has('dj-live-train-9호선-left-unlit'));
   const marker=map.getSource(LIVE_SOURCE);await waitUntil(()=>marker.data?.features?.length===1);
   const before=marker.data.features[0].geometry.coordinates;
   styleReady=false;resolveAtlas(atlas);await wait();assert.notEqual(map.images.get('dj-live-train-9호선'),atlas.get('9호선:right'));
