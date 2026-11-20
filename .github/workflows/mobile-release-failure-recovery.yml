@@ -77,6 +77,10 @@ jobs:
             [[ "$id" =~ ^[0-9]+$ ]] || exit 1
             gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$id/logs" > "$REPAIR_LOG_DIR/$id.log" || true
           done
+          # Some Actions job log downloads are empty or incomplete. Obtain the failed run log as a fallback.
+          if ! grep -qE 'PHONE_TEST_FAILURE|Public regression file:|Public regression location:' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then
+            gh run view "$FAILED_RUN" --attempt "$ATTEMPT" --log-failed > "$REPAIR_LOG_DIR/failed-run.log" || true
+          fi
           if grep -qE 'LIVE_METRO_DIAGNOSTIC.*(ERROR-337|METRO_DAILY_QUOTA)' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then
             echo 'Official Seoul daily metro quota exhausted; do not rerun or generate code repairs for the provider limit.' >> "$GITHUB_STEP_SUMMARY"
             exit 0
