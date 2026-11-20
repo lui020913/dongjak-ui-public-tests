@@ -36,7 +36,7 @@ test('night flag switches off BEFORE restoring light theme',()=>{
 
 test('news fetches media and official on initial map load, caches in memory',()=>{
   const news=source('src/dongjak-news.js'),main=source('src/main.js');
-  assert.match(news,/Promise\.allSettled\(\['media','official'\]/);
+  assert.match(news,/Promise\.allSettled\(\['media','official','seoul'\]/);
   assert.match(news,/latest\.set\(type,\{at:Date\.now\(\)/);
   assert.match(main,/dongjakNews\.prefetch\(\)/);
 });

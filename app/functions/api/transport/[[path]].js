@@ -6,6 +6,7 @@ import {normalizeBusServiceKey as normalizeSharedBusServiceKey} from '../../../s
  */
 import {parseSeoulBusArrival,parseSeoulSubwayArrival,resolveSeoulBusStation,parseSeoulBusStopsNearby,inspectSeoulApiResponse,isSeoulBusNoResult} from '../../../src/transport-data.js';
 import {parseBusRouteList} from '../../../server/bus-route-list.mjs';
+import {parseBusRoutePath,busRoutePathUrl} from '../../../server/bus-route-path.mjs';
 import {validateSeoulSubwayFeed} from '../../../src/transport-freshness.js';
 import {permitsSubwayBulkRecovery,filterBulkArrivalsForStation,seoulSubwayIdForLine} from '../../../src/subway-source-recovery.js';
 import {parseBusServiceTime,seoulDayTag} from '../../../server/service-hours.mjs';
@@ -17,7 +18,7 @@ import {normalizeMedianBusStops,isMedianBusStopName} from '../../../src/median-b
 import {nearbyOfficialStaticStops} from '../../../src/static-bus-stops.js';
 import {ACCESS_BBOX,parseMetroExits,parseSeoulElevators,mergeAccessibilityCollections} from '../../../server/station-accessibility-data.mjs';
 
-const ROUTES=new Set(['status','bus','bus/routes','bus/median-nearby','bus/stops-nearby','subway','accessibility','service-hours','operator-timetable','news']);
+const ROUTES=new Set(['status','bus','bus/routes','bus/route-path','bus/median-nearby','bus/stops-nearby','subway','accessibility','service-hours','operator-timetable','news']);
 const EXIT_API='https://portal.esrikr.com/arcgis/rest/services/Hosted/MOIS_KR_Subway/FeatureServer/0/query';
 let busStopsAuthBlockedUntil=0; // per-isolate cooldown for upstream credential/quota failures
 let busStopsLastFailure=''; // sanitized upstream failure category; never store the key
@@ -311,6 +312,16 @@ export async function onRequestGet({request,env}){
     }catch(error){
       return respond({status:'unavailable',kind:'subway',notice:'신림선 운영기관 시간표 원본을 가져오지 못했습니다. 임의 시각은 표시하지 않습니다.'},200,0);
     }
+  }
+  if(route==='bus/route-path'){
+    const id=url.searchParams.get('routeId')||'';
+    if(!/^\d{5,15}$/.test(id))return fail('유효한 버스 노선 ID가 필요합니다.',400,'INVALID_ROUTE_ID');
+    if(!busKey)return fail('버스 API 인증키가 설정되지 않았습니다.',503,'MISSING_BUS_KEY');
+    try{
+      const coordinates=parseBusRoutePath(await officialJson(busRoutePathUrl(busKey,id),{allowEmptyResult:true}),id);
+      if(!coordinates.length)return fail('공식 노선 경로를 확인하지 못했습니다.',404,'ROUTE_PATH_UNAVAILABLE');
+      return respond({routeId:id,coordinates,source:'서울시 노선정보조회 서비스'},200,3600);
+    }catch{return fail('공식 버스 노선 경로 조회에 실패했습니다.',502,'ROUTE_PATH_UPSTREAM');}
   }
   if(route==='bus/median-nearby')return medianNearby(url.searchParams,busKey);
   if(route==='bus/stops-nearby')return nearbyBusStops(url.searchParams,busKey,env,request);

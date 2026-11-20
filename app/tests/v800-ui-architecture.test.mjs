@@ -34,7 +34,7 @@ test('early PWA reload uses a theme-matched fade and never a startup icon image'
   const block=h.slice(h.indexOf('/* Critical PWA pre-paint.'),h.indexOf('/* Critical first paint:'));
   assert.ok(block.includes('backdrop-filter:blur(14px)'));
   assert.doesNotMatch(block,/url\(/);
-  assert.match(h,/displayTheme=pending \? \(pending\.night==='on'\?'dark':chosen\) : 'light'/);
+  assert.match(h,/displayTheme=themeReload \? themeReload\.theme : pending \? \(pending\.night==='on'\?'dark':chosen\) : 'light'/);
 });
 test('mobile and desktop get separate layout, colors and animations',()=>{
   const c=read('src/v800-ui-architecture.css');
