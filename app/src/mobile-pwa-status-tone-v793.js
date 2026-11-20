@@ -41,7 +41,7 @@ export function installPwaStatusTone(doc=document,win=window) {
       const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
-      const color=theme==='dark'?'#192d32':'#e5ece8';
+      const color=theme==='dark'?'#192d32':'#eaf0ec';
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       if(!sample){sample=doc.createElement('div');sample.id='dj-ios-pwa-status-sample';sample.setAttribute('aria-hidden','true');app.appendChild(sample);}

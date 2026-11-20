@@ -7,7 +7,7 @@
     --dj-pwa-land-tone:#e5ece8;
     --dj-pwa-land-tone-rgb:229,236,232;
     /* Native light strip sampled from the supplied iPhone screenshot. */
-    --dj-pwa-native-edge:#eef3ef;
+    --dj-pwa-native-edge:#eaf0ec;
     background-color:var(--dj-pwa-land-tone)!important;
   }
   html.dj-ios-home-pwa[data-theme="dark"] {
@@ -77,9 +77,15 @@
 }
 
 
-/* Fixed transition band: the OS strip itself cannot be moved or recolored reliably. */
+/* Dimmed state: blend the native strip into the existing scrim with a bounded local blur. */
 @media(max-width:699px){
-html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 94px);z-index:60000;pointer-events:none;background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,var(--dj-pwa-native-edge) 7%,color-mix(in srgb,var(--dj-pwa-native-edge) 72%,transparent) 34%,transparent 100%);opacity:0;transition:opacity .30s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{
+  position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 144px);z-index:60000;pointer-events:none;
+  background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,var(--dj-pwa-native-edge) 7%,color-mix(in srgb,var(--dj-pwa-native-edge) 92%,transparent) 18%,color-mix(in srgb,var(--dj-pwa-native-edge) 55%,transparent) 48%,transparent 100%);
+  opacity:0;transition:opacity .30s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important;
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 32%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 32%,transparent 100%);
+}
 html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app #dj-ios-pwa-status-bridge{opacity:1}
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{transition:none}}
 }

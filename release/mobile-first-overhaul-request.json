@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.23",
+  "application_version": "9.2.24",
   "public_work_branch": "main",
-  "purpose": "Refine subway vehicle artwork to elongated white roof and molded cab without badges; preserve sheet and status changes",
-  "attempt": 97,
+  "purpose": "Three-quarter side-view subway windows and naturally faded iOS dimmed status edge",
+  "attempt": 98,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User rejected first top-view train sprite",
+  "last_retry_reason": "User clarified side perspective and approved smooth upper blur",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

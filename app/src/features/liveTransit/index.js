@@ -39,37 +39,30 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   const size=96;canvas.width=size;canvas.height=size;const ctx=canvas.getContext?.('2d');if(!ctx)return null;
   ctx.scale(3,3);ctx.clearRect(0,0,32,32);
   const rounded=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
-  // Long, slightly elevated top view: asymmetric rounded cab, molded white
-  // roof and dark inset glass. No circular badge, letters or route number.
-  const shell=(dy=0)=>{
-    ctx.beginPath();ctx.moveTo(4.0,9.9+dy);
-    ctx.quadraticCurveTo(1.3,9.9+dy,1.3,12.5+dy);
-    ctx.lineTo(1.3,19.5+dy);ctx.quadraticCurveTo(1.3,22.1+dy,4.0,22.1+dy);
-    ctx.lineTo(24.2,22.1+dy);ctx.bezierCurveTo(29.0,22.1+dy,30.7,19.3+dy,30.7,16.0+dy);
-    ctx.bezierCurveTo(30.7,12.7+dy,29.0,9.9+dy,24.2,9.9+dy);
-    ctx.closePath();
-  };
-  ctx.save();ctx.shadowColor='rgba(22,35,43,.28)';ctx.shadowBlur=1.3;ctx.shadowOffsetY=.7;
-  shell(.65);ctx.fillStyle='#687e8c';ctx.fill();ctx.restore();
-  shell(.35);ctx.fillStyle=color;ctx.fill();
-  shell(-.45);ctx.fillStyle='#fafcfd';ctx.fill();
-  ctx.save();shell(-.45);ctx.clip();
-  // A slim lower sill creates depth without a heavy outline.
-  ctx.fillStyle='#d8e0e5';ctx.fillRect(1,19.8,30,2.7);
-  ctx.fillStyle='#f1f4f6';ctx.fillRect(1,9.3,30,1.3);
-  // The single uninterrupted waist band gives the vehicle its route identity.
-  ctx.beginPath();ctx.moveTo(12.3,9.4);ctx.lineTo(16.8,9.4);ctx.quadraticCurveTo(16.1,15.5,16.8,21.8);ctx.lineTo(12.3,21.8);ctx.quadraticCurveTo(11.5,15.5,12.3,9.4);ctx.closePath();ctx.fillStyle=color;ctx.fill();
-  // Dark side windows, inset along the sides of the white roof.
-  for(const x of [3.5,7.4,19.0,22.1]){
-    rounded(x,10.7,2.9,1.45,.5);ctx.fillStyle='#28343c';ctx.fill();
-    rounded(x,19.3,2.9,1.4,.5);ctx.fillStyle='#28343c';ctx.fill();
+  // Three-quarter SIDE view: one visible passenger side and the roof above it.
+  // Front cab is on the right. No top-facing badge or second row of windows.
+  const contour=()=>{ctx.beginPath();ctx.moveTo(4.0,8.8);ctx.lineTo(22.4,8.8);ctx.bezierCurveTo(27.3,8.8,30.0,11.4,30.0,15.1);ctx.lineTo(30.0,17.2);ctx.bezierCurveTo(29.8,20.1,27.3,22.7,23.0,22.7);ctx.lineTo(4.0,22.7);ctx.quadraticCurveTo(1.4,22.7,1.4,20.0);ctx.lineTo(1.4,11.5);ctx.quadraticCurveTo(1.4,8.8,4.0,8.8);ctx.closePath();};
+  ctx.save();ctx.shadowColor='rgba(20,35,45,.27)';ctx.shadowBlur=1.25;ctx.shadowOffsetY=.85;contour();ctx.fillStyle='#65717b';ctx.fill();ctx.restore();
+  contour();ctx.fillStyle='#fafcfd';ctx.fill();
+  ctx.save();contour();ctx.clip();
+  // Continuous single passenger side, separated from the white roof by a crease.
+  ctx.beginPath();ctx.moveTo(1.0,15.9);ctx.lineTo(22.5,15.9);ctx.quadraticCurveTo(27.7,15.9,30.3,14.0);ctx.lineTo(30.3,23.0);ctx.lineTo(1.0,23.0);ctx.closePath();ctx.fillStyle='#e4e9ed';ctx.fill();
+  ctx.fillStyle=color;ctx.fillRect(1,21.25,30,1.6);
+  // Painted band crosses the roof and the visible side, not a badge.
+  ctx.beginPath();ctx.moveTo(13.4,8.5);ctx.lineTo(16.8,8.5);ctx.quadraticCurveTo(16.5,12.3,16.8,15.9);ctx.lineTo(16.8,22.8);ctx.lineTo(13.4,22.8);ctx.lineTo(13.4,15.9);ctx.quadraticCurveTo(13.0,12.3,13.4,8.5);ctx.closePath();ctx.fillStyle=color;ctx.fill();
+  // Rectangular side glazing reads as train windows at actual map size.
+  for(const [x,w] of [[3.5,3.8],[8.0,3.8],[17.9,3.7],[22.3,2.5]]){
+    rounded(x,16.8,w,2.85,.55);ctx.fillStyle='#28343c';ctx.fill();
+    ctx.fillStyle='#65747e';ctx.fillRect(x+.45,17.1,w-.9,.35);
   }
-  // Curved front glazing, follows the nose rather than reading as a badge.
-  ctx.beginPath();ctx.moveTo(26.4,11.8);ctx.quadraticCurveTo(29.4,12.3,29.4,15.55);
-  ctx.quadraticCurveTo(29.4,18.8,26.4,19.3);ctx.quadraticCurveTo(25.2,15.55,26.4,11.8);
-  ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
-  ctx.beginPath();ctx.moveTo(27.1,12.4);ctx.quadraticCurveTo(28.6,13.1,28.6,15.0);ctx.strokeStyle='#53636c';ctx.lineWidth=.48;ctx.stroke();
+  // Wide dark windshield follows the rounded front face; its visible plane
+  // is transverse to the train, not a narrow vertical slit in the roof.
+  ctx.beginPath();ctx.moveTo(24.4,10.1);ctx.bezierCurveTo(27.4,10.1,29.5,12.5,29.2,15.3);
+  ctx.quadraticCurveTo(27.8,17.1,25.7,17.0);ctx.quadraticCurveTo(26.1,13.5,24.4,10.1);ctx.closePath();ctx.fillStyle='#202b33';ctx.fill();
+  ctx.beginPath();ctx.moveTo(25.6,10.7);ctx.quadraticCurveTo(27.5,11.3,28.0,13.0);ctx.strokeStyle='#65747e';ctx.lineWidth=.45;ctx.stroke();
+  rounded(26.5,19.1,1.75,.85,.35);ctx.fillStyle='#ffffff';ctx.fill();
   ctx.restore();
+  contour();ctx.strokeStyle='#aebac2';ctx.lineWidth=.38;ctx.stroke();
   const image=ctx.getImageData(0,0,size,size);const data=new Uint8Array(image.data);
   if(facing==='left'){
     const mirrored=new Uint8Array(data.length);

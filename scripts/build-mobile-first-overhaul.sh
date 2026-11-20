@@ -138,6 +138,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       21) note="보행안전 창 축소·열차 추적 및 프레임 기반 렌더링·서울시 공식 소식과 공개 커뮤니티";;
       22) note="상부 시점 열차 아이콘·선로 방향 회전·창 확대 축소 및 iOS 상단 연결 개선";;
       23) note="지하철 흰색 차체·곡면 전면 유리 및 호선 색 띠 형태 개선";;
+      24) note="측면 시점 열차 창문 및 iOS 딤 처리 상단 블러 개선";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null

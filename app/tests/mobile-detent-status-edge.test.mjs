@@ -8,7 +8,9 @@ test('detent movement and clipping use the same timing and natural compact geome
 });
 test('normal and dimmed map edge use the same native-edge palette without blurring the search surface',()=>{
  const s=read('src/mobile-pwa-status-tone-v793.css');
- assert.match(s,/--dj-pwa-native-edge:#eef3ef/);assert.match(s,/--dj-pwa-native-edge:#192d32/);
+ assert.match(s,/--dj-pwa-native-edge:#eaf0ec/);assert.match(s,/--dj-pwa-native-edge:#192d32/);
  assert.match(s,/var\(--dj-pwa-native-edge\) 7%/);
  assert.match(s,/background:#ffffff!important/);
 });
+
+test('dimmed status bridge applies a bounded fade-out blur without covering the whole map',()=>{const s=read('src/mobile-pwa-status-tone-v793.css');assert.match(s,/backdrop-filter:blur\(9px\)/);assert.match(s,/mask-image:linear-gradient\(to bottom,#000 0%,#000 32%,transparent 100%\)/);assert.match(s,/pointer-events:none/);});
