@@ -3,9 +3,9 @@
   "application_version": "9.2.53",
   "public_work_branch": "main",
   "purpose": "Community categories at the top of the feed, mobile web search/AI columns without overlap, sequential onboarding slide fade-out/in, nearby sheet full-header drag and expanded layout while preserving global search, metro car and headlight lightcones only at map zoom 15.2+, and concise two-part vX.Y update-history editions while preserving real full SemVer build labels. Production protections unchanged.",
-  "attempt": 152,
+  "attempt": 153,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #114 exact source CI 44835904040 fully passed. Protected v9.2.53 Preview, 12/12 mobile QA including new live drag/onboarding/header checks, design captures and Gemini reviews, then guarded Production only on verified success; no bypass.",
+  "last_retry_reason": "Protected attempt 152 Preview passed, 6/6 screenshots and design inspection; mobile QA found a real nearby swipe expansion miss and onboarding opacity under production CSS rules, plus stale history heading test. PRs #115 (two-part edition browser QA), #118 (shared header touch input), #121 (fallback upward swipe + compositor-visible fade) are merged; exact source CI for #121 44837529569 passed. Rerun all 12 phone shards, screenshots, Gemini and guarded Production, no bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
