@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.51",
+  "application_version": "9.2.52",
   "public_work_branch": "main",
-  "purpose": "Unified iPhone-like fades for mobile bottom sheets, AI content entrance/exit and view transitions; content-sized bus, subway and facility cards without whitespace; forward radiating subway headlights drawn separately from existing front lamps; preserve previous community, route and quick-tab fixes.",
-  "attempt": 149,
+  "purpose": "Restore actionable no-post community homepage (loading/offline/empty, compose starter topics, retry), preserve remote/community browser records on failed fetch, remove forced 52dvh empty panel; preserve real 9.x deployed SemVer in chronological update history with truthful historical source labels. Maintain all mobile and production protections.",
+  "attempt": 150,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 148: all 6 design captures and 6 Gemini design reviews passed; 11/12 phone QA passed, shard 9 reported a real lost facility-close tap at 430px. PR #107 added primary pointerup fallback without double close or bypass, app source CI 44829714990 passed. Rerun all protected Preview / phone QA / Gemini / Production gates. No legacy bypass.",
+  "last_retry_reason": "PR #108 fully passed source CI run 44832640649 and merged into main at 179f023f7dd2ed256dee9bd59c14acee53b2454c. Start a fresh protected v9.2.52 Preview → 12 phone QA shards → 6 visual captures and Gemini review → production identity and API checks. Never bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
