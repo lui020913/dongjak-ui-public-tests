@@ -142,6 +142,7 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
       25) note="열차 전면 유리 위치 조정";;
       26) note="열차 전면 유리 사다리꼴 윤곽 개선";;
       27) note="열차 측면 원근과 전면부 실루엣 재설계";;
+      28) note="버스 노선 선택 시 서울시 공식 운행 경로 표시 및 모바일 하단바 5열 안정화";;
       *) note="모바일 안정성 및 상호작용 개선 (9.2.$patch)";;
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null
