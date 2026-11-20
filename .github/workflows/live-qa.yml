@@ -15,7 +15,7 @@ on:
         required: true
         type: string
       full:
-        description: 'All phone sizes and supported WebKit journeys'
+        description: 'Independent exhaustive regression (20 shards); off = six continuous journeys'
         type: boolean
         default: false
       remote:
@@ -54,6 +54,8 @@ jobs:
           node --check qa-relay/worker.mjs
           node --test tests/live-qa-relay.test.mjs tests/live-qa-stream.test.mjs
           node --check tests/live-qa-fixture.mjs
+          node --check tests/live-qa-journeys.spec.mjs
+          node --check tests/live-qa-journey-helpers.mjs
           node --check playwright.v911-remote.config.mjs
           node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
           node --check /tmp/live-qa-dashboard.js
@@ -119,7 +121,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        lane: ${{ fromJSON(inputs.full && '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]' || '[1,2,3,4,5,6,7,8]') }}
+        lane: ${{ fromJSON(inputs.full && '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]' || '[1,2,3,4,5,6]') }}
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
     needs: smoke
     runs-on: ubuntu-24.04
@@ -137,13 +139,18 @@ jobs:
           DONGJAK_TARGET_URL: ${{ inputs.target }}
           FULL: ${{ inputs.full }}
           QA_LANE: ${{ matrix.lane }}
-          QA_SHARD_TOTAL: ${{ inputs.full && '20' || '8' }}
+          QA_SHARD_TOTAL: ${{ inputs.full && '20' || '6' }}
           REMOTE: ${{ inputs.remote }}
           QA_RELAY_URL: ${{ inputs.remote && vars.QA_RELAY_URL || '' }}
           QA_WRITER_KEY: ${{ inputs.remote && secrets.QA_WRITER_KEY || '' }}
         run: |
           if [ "$REMOTE" = true ]; then test -n "$QA_RELAY_URL" && test -n "$QA_WRITER_KEY" || { echo "Configure the dedicated relay first"; exit 1; }; fi
-          if [ "$FULL" = true ]; then node scripts/live-qa.mjs --ci --full; else node scripts/live-qa.mjs --ci; fi
+          if [ "$FULL" = true ]; then node scripts/live-qa.mjs --ci --full; else node scripts/live-qa.mjs --ci --journey; fi
+      - name: Diagnose only the failed continuous stage in a fresh anonymous context
+        if: failure() && !inputs.full
+        env:
+          DONGJAK_TARGET_URL: ${{ inputs.target }}
+        run: node scripts/live-qa-retry-stage.mjs qa-artifacts
       - name: Analyze captured measurements
         if: always()
         run: node scripts/live-qa-analyze.mjs qa-artifacts
