@@ -3,9 +3,9 @@
   "application_version": "9.2.29",
   "public_work_branch": "main",
   "purpose": "Allow installed iPad PWA without reopening tablet or desktop browser access; retain v9.2.28 bus paths",
-  "attempt": 103,
+  "attempt": 104,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User reported installed iPad web app incorrectly showing mobile-only notice",
+  "last_retry_reason": "Correct gate bootstrap test extraction before iPad PWA validation",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -69,7 +69,7 @@ test('iPad standalone web app is allowed at portrait and landscape sizes; browse
     [{userAgent:'Android tablet',width:820,standalone:true},false],
   ];
   const {indexHtml}=applyMobileOnlyGate({indexHtml:'<html><head><meta name="viewport" content="width=device-width" /></head><body></body></html>',mainJs:'',platformEntry:''});
-  const code=indexHtml.match(/<script id="dj-mobile-only-gate-bootstrap">([\\s\\S]*?)<\\/script>/)[1];
+  const code=indexHtml.split('<script id="dj-mobile-only-gate-bootstrap">')[1].split('</script>')[0];
   for(const [context,expected] of cases){
     assert.equal(isMobilePhoneContext(context),expected);
     const document={documentElement:{dataset:{},clientWidth:context.width},readyState:'loading'};
