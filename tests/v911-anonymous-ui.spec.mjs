@@ -837,6 +837,7 @@ test('AI full-screen conversation and inline voice state keep the map task separ
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();
  await tap(page,page.locator('#dj890-ai-orb'));await expect(ai).toBeVisible();await expect.poll(async()=>{const b=await ai.boundingBox(),v=page.viewportSize();return b?Math.abs(b.x)+Math.abs(b.y)+Math.abs(b.width-v.width)+Math.abs(b.height-v.height):999}).toBeLessThanOrEqual(5);
  await expect(ai.locator('.dj-ai-transcript')).toBeVisible();await expect(ai.locator('.dj-ai-composer')).toBeVisible();
+ await expect(ai.locator('.dj-ai-preferences')).toBeVisible();await expect(ai.locator('#dj-ai-query')).toBeDisabled();await tap(page,ai.locator('[data-profile="senior"]'));await expect(ai.locator('#dj-ai-query')).toBeEnabled();await expect(ai).toHaveAttribute('data-explanation','senior');await expect(ai.locator('.dj-ai-preferences')).toBeHidden();
  await ai.getByRole('button',{name:'AI 검색 닫기'}).click();await expect(ai).toBeHidden();
  const mic=page.locator('#djNext-mic'),shell=page.locator('#map-quick-search'),status=page.locator('#djNext-voice-status');
  const form=page.locator('.map-quick-search-form');const before=await form.boundingBox();await tap(page,mic);await expect(mic).toHaveAttribute('aria-pressed','true');await expect(status).toContainText('듣는 중');await expect(status).toHaveCSS('position','static');

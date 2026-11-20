@@ -1,5 +1,6 @@
 // Phone toolbar: independent of legacy scroller rebuilds; native controllers own all GIS state.
 import {bindHeaderDragInput} from './mobile-header-input.js';
+import {sheetStageAction} from './mobile-window-motion.js';
 const KEY='dongjak-phone-shortcuts-v2';
 const icons={road:'<path d="M7 3 4 21M17 3l3 18M12 3v4m0 3v4m0 3v4"/>',building:'<path d="M3 21V9l9-6 9 6v12H3zm9-18v18M6 12l3-2m-3 6 3-2m6-4 3 2m-3 2 3 2"/>',near:'<circle cx="12" cy="12" r="6"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>',report:'<path d="M4 20l4-1 12-12-4-4L4 15zM13 6l4 4"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',cloud:'<path d="M6 18a4 4 0 1 1 .5-8A6 6 0 0 1 18 11a3.5 3.5 0 0 1 0 7Z"/>',plus:'<path d="M12 5v14M5 12h14"/>',layers:'<path d="m12 3 9 5-9 5-9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/>',shield:'<path d="M12 2l8 4v6c0 5-4 8-8 10-4-2-8-5-8-10V6zM8 12l3 3 5-6"/>',moon:'<path d="M20 15A8 8 0 0 1 9 4a9 9 0 1 0 11 11Z"/>',mountain:'<path d="m2 20 8-14 5 8 3-4 4 10Z"/>',bus:'<rect x="5" y="3" width="14" height="17" rx="3"/><path d="M5 11h14M8 20v2m8-2v2M8 16h1m6 0h1"/>',mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15"/>',alert:'<path d="M12 3 2 21h20L12 3Z M12 9v5m0 3v1"/>'};
 const layerPaths={zone:'<path d="M3 20h18M5 16V8l7-5 7 5v8M9 16v-5h6v5"/>',bocha:'<path d="M5 3v18M19 3v18M12 3v4m0 3v4m0 3v4"/>',livemetro:'<rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 10h12M9 18l-3 4m9-4 3 4M9 14h1m4 0h1"/>',access:'<circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 6v8m0 0-4 7m4-7 4 7"/>',sdot:'<path d="M3 18h18M5 18V9h5v9m4 0V5h5v13M8 12h0m9-3h0"/>',signals:'<path d="M4 10v4h4l5 4V6l-5 4H4zm12-1a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/>',elevator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M7 10l2-2 2 2m2 4 2 2 2-2"/>',crossing:'<path d="M4 4v16m16-16v16M8 5h8m-8 5h8m-8 5h8m-8 5h8"/>',cctv:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvparking:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvother:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',speed:'<path d="M4 19a10 10 0 1 1 16 0H4ZM12 15l4-6"/>',camera:'<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="4"/><path d="M8 6l2-3h4l2 3"/>'};
@@ -82,10 +83,11 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   const g=gesture;if(!g||e.pointerId!==g.id)return;gesture=null;
   if(g.dragging)blockedUntil=win.performance.now()+350;
   const dy=e.clientY-g.y;
-  if(cancel||!g.dragging||Math.abs(dy)<45){finish(g.expanded);return;}
-  if(dy<0){finish(true);return;}
-  if(g.expanded){finish(false);return;}
-  finish(false,dy>=90);
+  const action=cancel||!g.dragging?'settle':sheetStageAction(dy,0,g.expanded);
+  if(action==='expand'){finish(true);return;}
+  if(action==='collapse'){finish(false);return;}
+  if(action==='dismiss'){finish(false,true);return;}
+  finish(g.expanded);
  };
  bindHeaderDragInput(header,win,{down,move,up:e=>end(e),cancel:e=>end(e,true)});
  header.addEventListener('click',e=>{if(win.performance.now()<blockedUntil&&!e.target.closest?.('button,a,input,select,textarea,[role="button"]')){e.preventDefault();e.stopImmediatePropagation();}},true);

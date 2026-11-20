@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseBusRoutePath,busRoutePathUrl,decodeBusRouteResponse,fetchBusRouteGeometry,parseBusRouteStops,decodeBusRouteStops,fetchBusRouteStops} from '../server/bus-route-path.mjs';
 import {parseSeoulBusArrival} from '../src/transport-data.js';
-import {createBusRouteOverlay,BUS_ROUTE_SOURCE,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES} from '../src/bus-route-overlay.js';
+import {createBusRouteOverlay,BUS_ROUTE_SOURCE,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,routeVehicleFeatures,BUS_ROUTE_LINE_WIDTH} from '../src/bus-route-overlay.js';
 const id='100100112';
 const row=(no,gpsX,gpsY)=>({busRouteId:id,no,gpsX,gpsY});
 const body=rows=>({msgBody:{itemList:rows}});
@@ -61,3 +61,5 @@ test('official stop coordinates and names only; zoom-gated map layers survive th
  assert.equal(data.features.filter(f=>f.geometry.type==='Point').length,2);assert.equal(layers.get(BUS_ROUTE_STOPS).minzoom,14.5);assert.equal(layers.get(BUS_ROUTE_STOP_NAMES).minzoom,16);
  sources.clear();layers.clear();events.get('style.load')();assert.equal(data.features.length,3);overlay.clear();assert.equal(data.features.length,0);
 });
+
+test('selected route live positions reject stale or different routes and do not fabricate a heading',()=>{const now=Date.now(),at=new Date(now).toISOString(),rows=[{id:'bus:1',routeId:id,longitude:126.9,latitude:37.5,observedAt:at},{id:'bus:2',routeId:'100100113',longitude:126.9,latitude:37.5,observedAt:at},{id:'bus:3',routeId:id,longitude:126.9,latitude:37.5,observedAt:new Date(now-200000).toISOString()}];const previous=new Map();const collection=routeVehicleFeatures(rows,id,'150','#3566c1',previous,now);assert.equal(collection.features.length,1);assert.deepEqual(collection.features[0].geometry.coordinates,[126.9,37.5]);assert.equal(collection.features[0].properties.headingKnown,false);assert.deepEqual(BUS_ROUTE_LINE_WIDTH.slice(0,3),['interpolate',['linear'],['zoom']]);});

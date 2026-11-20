@@ -21,7 +21,7 @@ export function createMobileSheetCoordinator({app,doc,win,panels,nav}={}) {
       panel.classList.remove('dj871-sheet-expanded');
     }
     // Last visible panel wins; two expanded sheets must never overlap.
-    const expanded=list.filter(p=>phone&&!p.hidden&&p.classList.contains('dj871-sheet-expanded'));
+    const expanded=[...new Set([...list,...(doc.querySelectorAll?.('.dj871-sheet-expanded:not([hidden])')||[])])].filter(p=>phone&&!p.hidden&&p.classList.contains('dj871-sheet-expanded'));
     const active=expanded.at(-1)||null;
     for(const panel of expanded){if(panel!==active)panel.classList.remove('dj871-sheet-expanded');}
     app.classList.toggle('dj877-any-expanded',Boolean(active));

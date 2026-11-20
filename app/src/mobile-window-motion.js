@@ -37,3 +37,6 @@ export function continuationOffset(offset,progress,opening,distance){
   const p=windowMotionProgress(progress),to=opening?0:Math.max(0,distance);
   return offset+(to-offset)*p;
 }
+
+/** A downward drag in an expanded sheet must first collapse it. */
+export function sheetStageAction(delta,velocity,expanded,expandable=true){const d=Number(delta)||0,p=projectedDrag(d,velocity);if(expandable&&expanded)return d>=28?'collapse':'settle';if(expandable&&d<-25&&p<-65)return 'expand';return d>90||(d>45&&p>105)?'dismiss':'settle';}

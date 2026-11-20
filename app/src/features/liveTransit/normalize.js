@@ -93,7 +93,7 @@ export function busToFeatures(bus=[],routes={},now=Date.now(),maxAgeMs=90000){
       const snapped=projectOnLine(geom,pos);
       if(snapped&&snapped.errorMeters<=60){pos=snapped.point;accuracy='map-matched';description='버스 위치 API 좌표를 노선에 보정';}
     }
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'bus',name:String(item.routeName??item.routeId??''),vehicleLabel:String(item.vehicleNumber??''),destination:String(item.destination??''),accuracy,accuracyText:description,color:'#278CE2',observedAt:item.observedAt,receivedAt:item.receivedAt}});
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'bus',routeId:String(item.routeId??''),name:String(item.routeName??item.routeId??''),vehicleLabel:String(item.vehicleNumber??''),destination:String(item.destination??''),accuracy,accuracyText:description,color:'#278CE2',observedAt:item.observedAt,receivedAt:item.receivedAt}});
   }
   return features;
 }

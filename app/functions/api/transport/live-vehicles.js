@@ -185,7 +185,9 @@ export async function onRequestGet({request,env={}}){
   const modes=String(query.get('modes')||'metro,bus').split(',').filter(x=>['metro','bus'].includes(x));
   if(!modes.length)return result({ok:false,code:'INVALID_MODES',error:'지원하지 않는 교통수단 요청입니다.',metro:[],bus:[]},400);
   const wantMetro=modes.includes('metro'),wantBus=modes.includes('bus');
-  const cacheUrl=new URL('/api/transport/live-vehicles',request.url);cacheUrl.searchParams.set('modes',modes.sort().join(','));
+  const selectedRoute=query.get('routeId');
+  if(selectedRoute!==null&&(!/^\d{5,15}$/.test(selectedRoute)||!wantBus||wantMetro))return result({ok:false,code:'INVALID_ROUTE_ID',metro:[],bus:[]},400);
+  const cacheUrl=new URL('/api/transport/live-vehicles',request.url);cacheUrl.searchParams.set('modes',modes.sort().join(','));if(selectedRoute)cacheUrl.searchParams.set('routeId',selectedRoute);
   const requestKey=new Request(cacheUrl.toString(),{method:'GET'});
   if(store)try{const cached=await store.match(requestKey);if(cached)return cached;}catch{}
   const requestedLines=env?.LIVE_TRANSIT_METRO_LINES?asCsv(env.LIVE_TRANSIT_METRO_LINES):METRO_LINES;
@@ -202,7 +204,7 @@ export async function onRequestGet({request,env={}}){
     catch(e){const code=safeMetroError(e);metroDiagnostics[line]={state:'error',code,response:e.details??null};if(code==='PROVIDER_ERROR-337')quotaUntil=await markMetroQuota(request,metroKey);return {mode:'metro',list:[],failed:true};}
   };
   const metroTasks=wantMetro&&metroKey&&lines.length?[ (async()=>{const first=await loadLine(lines[0]);const rest=quotaUntil?[]:await Promise.all(lines.slice(1).map(loadLine));if(quotaUntil)for(const line of lines)if(!metroDiagnostics[line])metroDiagnostics[line]={state:'error',code:'PROVIDER_ERROR-337'};return {mode:'metro',list:[first,...rest].flatMap(x=>x.list),failed:[first,...rest].every(x=>x.failed||!x.list.length)&&Object.values(metroDiagnostics).every(x=>x.state==='error')};})() ]:[];
-  let busRoutes=manual.map(id=>({id,name:id}));
+  let busRoutes=(selectedRoute?[selectedRoute]:manual).map(id=>({id,name:id}));
   if(wantBus&&busKey&&!busRoutes.length){
     const tag=stopIds.join(',');
     if(discoveredRoutesCache.keyTag===tag&&discoveredRoutesCache.until>Date.now())busRoutes=discoveredRoutesCache.routes;
