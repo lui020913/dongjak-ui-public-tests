@@ -1,0 +1,120 @@
+name: Public PR failure recovery
+on:
+  workflow_run:
+    workflows: ["Public app source CI"]
+    types: [completed]
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/public-pr-failure-recovery.yml'
+      - 'scripts/gemini-mobile-repair.mjs'
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check scripts/gemini-mobile-repair.mjs
+  recover:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.repository == 'lui020913/dongjak-ui-public-tests' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch != 'main' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      (github.event.workflow_run.actor.login == 'lui020913' ||
+      github.event.workflow_run.actor.login == 'github-actions[bot]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      actions: write
+      pull-requests: read
+    concurrency:
+      group: public-pr-recovery-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: false
+    env:
+      FAILED_RUN: ${{ github.event.workflow_run.id }}
+      FAILED_SHA: ${{ github.event.workflow_run.head_sha }}
+      ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+      FAILED_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      REPAIR_CONTEXT: pr
+    steps:
+      # Only trusted default-branch automation is executed with secrets.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate exact owner PR and collect failed logs
+        id: inspect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$FAILED_RUN" =~ ^[0-9]+$ && "$FAILED_SHA" =~ ^[a-f0-9]{40}$ && "$ATTEMPT" =~ ^[0-9]+$ ]]
+          [[ "$FAILED_BRANCH" =~ ^feature/[A-Za-z0-9._/-]+$ && "$FAILED_BRANCH" != *..* ]]
+          gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f "head=lui020913:$FAILED_BRANCH" | jq -e --arg sha "$FAILED_SHA" 'any(.[]; .user.login=="lui020913" and .base.ref=="main" and .head.sha==$sha and .head.repo.full_name=="lui020913/dongjak-ui-public-tests")' >/dev/null || exit 0
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN" | jq -e --arg sha "$FAILED_SHA" --arg branch "$FAILED_BRANCH" --argjson attempt "$ATTEMPT" '.head_sha==$sha and .head_branch==$branch and .run_attempt==$attempt and .conclusion=="failure" and .status=="completed"' >/dev/null || exit 0
+          cp scripts/gemini-mobile-repair.mjs "$RUNNER_TEMP/trusted-pr-repair.mjs"
+          git fetch --no-tags origin "refs/heads/$FAILED_BRANCH"
+          test "$(git rev-parse FETCH_HEAD)" = "$FAILED_SHA" || exit 0
+          count="$(git log --first-parent -n 4 --format=%s "$FAILED_SHA" | awk '/^Gemini PR repair for run /{n++;next}{exit}END{print n+0}')"
+          if (( count >= 3 )); then echo 'PR repair limit reached; retain failure for owner review.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          REPAIR_LOG_DIR="$RUNNER_TEMP/pr-failure-logs"
+          printf 'REPAIR_LOG_DIR=%s\n' "$REPAIR_LOG_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$REPAIR_LOG_DIR"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/attempts/$ATTEMPT/jobs?per_page=100" --jq '.jobs[]|select(.conclusion=="failure")|.id' | head -n 8 | while read -r id; do
+            [[ "$id" =~ ^[0-9]+$ ]] || exit 1
+            gh api "repos/$GITHUB_REPOSITORY/actions/jobs/$id/logs" > "$REPAIR_LOG_DIR/$id.log" || true
+          done
+          if grep -qE 'LIVE_METRO_DIAGNOSTIC.*(ERROR-337|METRO_DAILY_QUOTA)' "$REPAIR_LOG_DIR/"*.log 2>/dev/null; then echo 'Provider quota; no source changes.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          if ! grep -qE 'failing tests:|PHONE_TEST_FAILURE|Public regression (file|location):|v911-anonymous-ui\.spec\.mjs:[0-9]+' "$REPAIR_LOG_DIR/"*.log 2>/dev/null && (( ATTEMPT < 2 )); then
+            echo 'action=retry' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Refuse symlinks in all source inputs to the trusted worker.
+          if git ls-tree -r "$FAILED_SHA" -- app/src app/tests tests frontend/production | grep '^120000 ' >/dev/null; then echo 'Unsafe symlink; no repair.'; exit 0; fi
+          git switch --detach "$FAILED_SHA"
+          echo 'action=repair' >> "$GITHUB_OUTPUT"
+      - name: Retry transient failure only once
+        if: steps.inspect.outputs.action == 'retry'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$FAILED_RUN/rerun-failed-jobs"
+      - name: Generate narrowly scoped source repair
+        if: steps.inspect.outputs.action == 'repair'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.5-flash-lite
+        run: node "$RUNNER_TEMP/trusted-pr-repair.mjs"
+      - name: Update feature branch and explicitly rerun unprivileged CI
+        if: steps.inspect.outputs.action == 'repair'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then echo 'No defensible repair; preserve failure for review.' >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
+          git diff --check
+          test "$FAILED_SHA" = "$(git rev-parse HEAD)"
+          while IFS= read -r path; do
+            case "$path" in app/src/*|frontend/production/*) ;; *) echo 'Out of scope'; exit 1;; esac
+          done < <(git diff --name-only)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u -- app/src frontend/production
+          git commit -m "Gemini PR repair for run $FAILED_RUN attempt $ATTEMPT"
+          gh auth setup-git
+          # No force-push and never merge/deploy. A concurrent developer commit wins.
+          git push origin "HEAD:refs/heads/$FAILED_BRANCH"
+          gh workflow run public-app-pr.yml --ref "$FAILED_BRANCH"
+          echo "Repair submitted to feature branch; independent CI dispatched." >> "$GITHUB_STEP_SUMMARY"
