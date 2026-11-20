@@ -20,6 +20,28 @@ for(const run of dirs){
    const sa=node(a,scroll),sb=node(b,scroll),ha=node(a,header),hb=node(b,header),pa=node(a,panel),pb=node(b,panel);
    if(sa&&sb&&ha&&hb&&pa&&pb&&Math.abs(sa.scroll-sb.scroll)>3&&Math.abs(pa.y-pb.y)<2&&Math.abs(ha.y-hb.y)>2)flags.push({t:b.t,kind:'layer-header-drift',px:Math.round(Math.abs(ha.y-hb.y)*10)/10});
   }
+  // Only flag repeated layout evidence, not a single transition frame.
+  const layout=new Map();
+  for(const f of frames){
+   for(const g of f.groups||[]){
+    const items=g.items;
+    const horizontal=g.selector.includes('nav-tab')||g.selector.includes('djNext-scroll');
+    const ordered=[...items].sort((a,b)=>horizontal?a.x-b.x:a.y-b.y);
+    const note=(kind,pair,px)=>{const key=g.selector+':'+kind+':'+pair;const z=layout.get(key)||{kind,selector:g.selector,pair,px:0,count:0,t:f.t};z.count++;z.px=Math.max(z.px,px);layout.set(key,z);};
+    for(let i=1;i<ordered.length;i++){
+     const a=ordered[i-1],b=ordered[i],gap=horizontal?b.x-a.x-a.w:b.y-a.y-a.h;
+     const cross=horizontal?Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y):Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x);
+     if(gap< -2&&cross>2)note('control-overlap',String(i),-gap);
+    }
+    for(let i=0;i<items.length;i++){if(items[i].overflowX>3)note('horizontal-overflow',String(i),items[i].overflowX);}
+    if(horizontal&&ordered.length>=3){
+     const gaps=ordered.slice(1).map((b,i)=>b.x-ordered[i].x-ordered[i].w);
+     const spread=Math.max(...gaps)-Math.min(...gaps);
+     if(spread>4&&gaps.every(n=>n>=0))note('uneven-horizontal-gap','group',spread);
+    }
+   }
+  }
+  flags.push(...[...layout.values()].filter(x=>x.count>=3).map(x=>({...x,px:Math.round(x.px*10)/10})));
   const scene={...meta,metrics:{samples:count,p95Ms:p95,over34Ms:intervals.filter(n=>n>34).length,over50Ms:intervals.filter(n=>n>50).length},flags:flags.slice(0,200)};
   if(process.argv.includes('--vision')&&(flags.length||meta.status==='failed')&&times.length&&report.scenes.filter(s=>s.vision).length<5){
    // Explicit opt-in only, anonymous test captures. No credentials, code or logs in request.
@@ -38,3 +60,12 @@ for(const run of dirs){
  reports.push({run,scenes:report.scenes.length,failed:report.scenes.filter(s=>s.status==='failed').length,flags:report.scenes.reduce((n,s)=>n+s.flags.length,0)});
 }
 console.log(JSON.stringify(reports,null,2));
+
+const baselineArg=process.argv.find(a=>a.startsWith('--baseline='));
+if(baselineArg&&reports.length){
+ const old=read(resolve(baselineArg.slice(11)));
+ const newest=reports.at(-1).run, current=read(join(newest,'audit-report.json'));
+ const prior=new Map(old.scenes.map(s=>[s.project+'|'+s.title,s]));
+ const comparison=current.scenes.flatMap(s=>{const b=prior.get(s.project+'|'+s.title);if(!b)return [];const p=s.metrics.p95Ms,q=b.metrics.p95Ms;return [{project:s.project,title:s.title,before:b.id,after:s.id,beforeStatus:b.status,afterStatus:s.status,flagDelta:s.flags.length-b.flags.length,p95DeltaMs:p!==null&&q!==null?Math.round((p-q)*10)/10:null}]});
+ writeFileSync(join(newest,'comparison.json'),JSON.stringify(comparison,null,2));
+}
