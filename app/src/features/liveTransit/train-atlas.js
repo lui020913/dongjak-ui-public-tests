@@ -14,7 +14,10 @@ export function extractTrainAtlas(image,doc=globalThis.document){
  for(const [line,facings] of Object.entries(TRAIN_ATLAS_CELLS))for(const [facing,[x,y]] of Object.entries(facings)){
   ctx.clearRect(0,0,SIZE,SIZE);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(image,x*W,y*H,W,H,3,28,90,40);
-  sprites.set(line+':'+facing,{width:SIZE,height:SIZE,data:new Uint8Array(ctx.getImageData(0,0,SIZE,SIZE).data)});
+  const data=new Uint8Array(ctx.getImageData(0,0,SIZE,SIZE).data);
+  let opaque=0,transparent=0;for(let i=3;i<data.length;i+=4){if(data[i]>=128)opaque++;if(data[i]===0)transparent++;}
+  if(opaque<200||transparent<200)throw Error('Train crop missing opaque artwork or transparency: '+line+':'+facing);
+  sprites.set(line+':'+facing,{width:SIZE,height:SIZE,data});
  }
  return sprites;
 }
@@ -22,8 +25,9 @@ let pending;
 export function loadTrainAtlas(doc=globalThis.document,ImageClass=globalThis.Image){
  if(!doc||!ImageClass)return Promise.resolve(null);
  if(!pending)pending=new Promise((resolve,reject)=>{
-  const image=new ImageClass();image.onload=()=>{try{resolve(extractTrainAtlas(image,doc));}catch(e){reject(e);}};
-  image.onerror=()=>reject(Error('Train atlas failed to load'));
+  const image=new ImageClass();const timer=setTimeout(()=>reject(Error('Train atlas decode timeout')),8000);
+  image.onload=()=>{clearTimeout(timer);try{resolve(extractTrainAtlas(image,doc));}catch(e){reject(e);}};
+  image.onerror=()=>{clearTimeout(timer);reject(Error('Train atlas failed to load'));};
   image.src=new URL('./train-atlas.webp',import.meta.url).href;
  }).catch(()=>{pending=null;return null;});
  return pending;

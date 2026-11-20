@@ -77,12 +77,13 @@ export function trainIconImage(color,doc=globalThis.document,facing='right'){
   }
   return {width:size,height:size,data};
 }
-export function ensureTrainImages(map,atlas){
-  if(!atlas||typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;
+export function ensureTrainImages(map,atlas=null,replace=false,doc=globalThis.document){
+  if(typeof map.addImage!=='function'||typeof map.hasImage!=='function')return false;
   try{for(const [line,color] of Object.entries({...LINE_COLORS,unknown:'#596c75'})){
     for(const facing of ['right','left']){
-      const id=trainImageId(line,facing);if(map.hasImage(id))continue;
-      const image=atlas.get(line+':'+facing)??(line==='unknown'?trainIconImage(color,globalThis.document,facing):null);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
+      const id=trainImageId(line,facing),sprite=atlas?.get(line+':'+facing);
+      if(map.hasImage(id)){if(replace&&sprite){if(typeof map.updateImage!=='function')return false;map.updateImage(id,sprite);}continue;}
+      const image=sprite??trainIconImage(color,doc,facing);if(!image)return false;map.addImage(id,image,{pixelRatio:3});
     }
   }return true;}catch{return false;}
 }
@@ -101,8 +102,9 @@ export function attachLiveTransitOverlay(map,opts={}){
   let rendering=0,poll=0,started=false,destroyed=false,request=null,renderPending=false,lastRenderAt=0,renderGeneration=0;
   const raf=typeof globalThis.requestAnimationFrame==='function';
   let visible={metro:true,bus:true};
-  let trainAtlas=null,atlasState=typeof map.addImage==='function'&&typeof map.hasImage==='function'?'pending':'unavailable',atlasRequested=false;
-  const minimumZoom=Number(opts.minZoom??13.2);
+  let trainAtlas=null,atlasState=typeof map.addImage==='function'&&typeof map.hasImage==='function'?'pending':'unavailable',atlasRequested=false,atlasApplied=false,lastAttachAttempt=0;
+  const minimumZoom=Number(opts.minZoom??13.2),metroMinZoom=Number(opts.metroMinZoom??minimumZoom);
+  function reportArtwork(value){const node=map.getContainer?.();if(node?.dataset)node.dataset.djLiveTrainArtwork=value;}
   const pollMs=clamp(Number(opts.intervalMs??25000),20000,120000);
   const frameMs=clamp(Number(opts.renderIntervalMs??16),8,2000);
   const transitionMs=clamp(Number(opts.transitionMs??2200),0,6000);
@@ -111,19 +113,25 @@ export function attachLiveTransitOverlay(map,opts={}){
   const safeWithin=(p,prop)=>typeof opts.withinDistrict!=='function'||opts.withinDistrict(p,prop);
   const normOpts={...opts,withinDistrict:safeWithin,maxAgeMs:staleMs};
   function attachLayers(){
-    if(destroyed||!map.isStyleLoaded?.())return;
+    if(destroyed||!started||!map.isStyleLoaded?.())return;
+    lastAttachAttempt=Date.now();
     if(!map.getSource(LIVE_SOURCE))map.addSource(LIVE_SOURCE,{type:'geojson',data:empty()});
     const common={'circle-stroke-color':'#ffffff','circle-stroke-width':2.1,'circle-opacity':0.98};
-    const trainImages=atlasState==='ready'&&ensureTrainImages(map,trainAtlas);
-    if(atlasState!=='pending'&&!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:minimumZoom,
+    // Never delay the layer while the artwork downloads. Install recognizable fallback icons first.
+    let trainImages=ensureTrainImages(map,trainAtlas,!!trainAtlas&&!atlasApplied,opts.trainIconDocument??globalThis.document);
+    if(trainImages&&trainAtlas)atlasApplied=true;
+    if(!trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='symbol')trainImages=true;
+    if(trainImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='circle')map.removeLayer(LIVE_METRO_LAYER);
+    if(!map.getLayer(LIVE_METRO_LAYER))map.addLayer(trainImages?{id:LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
       filter:['==',['get','mode'],'metro'],layout:{'icon-image':['coalesce',['get','trainIcon'],trainImageId('unknown')],
-        'icon-size':['interpolate',['linear'],['zoom'],13.2,.84,15.5,1.13,18,1.42],
+        'icon-size':['interpolate',['linear'],['zoom'],12.5,.74,13.2,.84,15.5,1.13,18,1.42],
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
-      {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
+      {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,6.2,15.5,8.3,18,10.5]}});
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
       filter:['==',['get','mode'],'bus'],paint:{...common,'circle-color':'#0785ef',
         'circle-radius':['interpolate',['linear'],['zoom'],13.2,5.7,15.5,7.7,18,9.8]}});
+    reportArtwork(atlasApplied?'atlas':trainImages?'fallback':'circle');
     map.getSource(LIVE_SOURCE)?.setData?.(display);
   }
   function calculate(now){
@@ -155,7 +163,9 @@ export function attachLiveTransitOverlay(map,opts={}){
     const now=Date.now();
     // The interval itself provides throttling; avoid skipping a frame due to timer jitter.
     if(!force&&typeof document!=='undefined'&&document.visibilityState==='hidden')return;
-    if(typeof map.getZoom==='function'&&map.getZoom()<minimumZoom){opts.onVehiclesRendered?.(empty());return;}
+    // Recover missing layers even for stationary trains / unchanged data, before the equality shortcut.
+    if(started&&now-lastAttachAttempt>=300&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();
+    if(typeof map.getZoom==='function'&&map.getZoom()<Math.min(visible.metro?metroMinZoom:Infinity,visible.bus?minimumZoom:Infinity)){opts.onVehiclesRendered?.(empty());return;}
     if(renderPending&&!force)return;
     if(!force&&!payload)return;
     const next=calculate(now);
@@ -196,18 +206,20 @@ export function attachLiveTransitOverlay(map,opts={}){
     else opts.onVehicleMiss?.();
   }
   const onStyle=()=>{try{attachLayers();}catch(e){emit({status:'render_error',error:String(e.message||e)});}};
+  const onStyleReload=()=>{atlasApplied=false;onStyle();};
+  const onIdle=()=>{if(started&&(!map.getLayer(LIVE_METRO_LAYER)||(trainAtlas&&!atlasApplied)))onStyle();};
   const onVisible=()=>{if(document.visibilityState==='visible')refresh();};
   function start(){
     if(started||destroyed)return;started=true;
-    onStyle();map.on?.('style.load',onStyle);map.on?.('click',handleMapClick);
-    if(atlasState==='pending'&&!atlasRequested){atlasRequested=true;void loadTrainAtlas().then(atlas=>{trainAtlas=atlas;atlasState=atlas?'ready':'unavailable';if(started&&!destroyed)onStyle();});}
+    onStyle();map.on?.('style.load',onStyleReload);map.on?.('idle',onIdle);map.on?.('click',handleMapClick);
+    if(atlasState==='pending'&&!atlasRequested){atlasRequested=true;void Promise.resolve().then(()=> (opts.loadTrainAtlas??loadTrainAtlas)()).catch(()=>null).then(atlas=>{trainAtlas=atlas;atlasState=atlas?'ready':'unavailable';if(started&&!destroyed)onStyle();});}
     if(typeof document!=='undefined')document.addEventListener('visibilitychange',onVisible);
     if(raf){const frame=t=>{if(!started||destroyed)return;if(t-lastRenderAt>=frameMs-.9){lastRenderAt=t;render(false);}rendering=globalThis.requestAnimationFrame(frame);};rendering=globalThis.requestAnimationFrame(frame);}
     else rendering=setInterval(()=>render(false),frameMs);
     poll=setInterval(refresh,pollMs);void refresh();
   }
   function stop(){started=false;request?.abort();request=null;if(raf)globalThis.cancelAnimationFrame?.(rendering);else clearInterval(rendering);clearInterval(poll);lastRenderAt=0;renderGeneration++;renderPending=false;
-    map.off?.('style.load',onStyle);map.off?.('click',handleMapClick);
+    map.off?.('style.load',onStyleReload);map.off?.('idle',onIdle);map.off?.('click',handleMapClick);
     if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisible);
     payload=null;previous.clear();display=empty();lastUpdate=0;
     try{map.getSource(LIVE_SOURCE)?.setData(display);}catch{}
@@ -219,5 +231,5 @@ export function attachLiveTransitOverlay(map,opts={}){
     for(const line of [...Object.keys(LINE_COLORS),'unknown'])for(const facing of ['right','left'])if(map.hasImage?.(trainImageId(line,facing)))map.removeImage?.(trainImageId(line,facing));
   }
   function setVisible(mode,on){if(!(mode in visible))throw new Error('Unknown mode');visible[mode]=Boolean(on);render(true);}
-  return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,features:display.features.length,vehicles:display.features.length}),sourceId:LIVE_SOURCE};
+  return {start,stop,destroy,refresh,setVisible,getStatus:()=>({started,visible:{...visible},lastUpdate,features:display.features.length,vehicles:display.features.length,trainArtwork:atlasApplied?'atlas':atlasState}),sourceId:LIVE_SOURCE};
 }

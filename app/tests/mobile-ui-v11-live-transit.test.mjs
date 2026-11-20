@@ -111,9 +111,30 @@ test('user train atlas contains all 12 unique transparent source crops in the co
  assert.equal(bytes.readUIntLE(24,3)+1,288);assert.equal(bytes.readUIntLE(27,3)+1,96);
  assert.deepEqual(Object.keys(TRAIN_ATLAS_CELLS).sort(),Object.keys(LINE_COLORS).sort());
  assert.deepEqual(TRAIN_ATLAS_CELLS['9호선'],{left:[2,0],right:[3,0]});
- const calls=[];const image={width:288,height:96};const ctx={clearRect(){},drawImage(...args){calls.push(args.slice(1));},getImageData(){return {data:new Uint8ClampedArray(96*96*4)}}};
+ const calls=[];const image={width:288,height:96};const ctx={clearRect(){},drawImage(...args){calls.push(args.slice(1));},getImageData(){const data=new Uint8ClampedArray(96*96*4);for(let i=3;i<1600;i+=4)data[i]=255;return {data}}};
  const atlas=extractTrainAtlas(image,{createElement:()=>({getContext:()=>ctx})});
  assert.equal(atlas.size,12);assert.equal(new Set(calls.map(c=>c.slice(0,2).join(','))).size,12);
  assert.deepEqual(calls[0],[0,0,72,32,3,28,90,40]);assert.equal(atlas.get('7호선:right').data.length,96*96*4);
  assert.throws(()=>extractTrainAtlas({width:1,height:1}),/dimensions/);
+});
+
+test('delayed atlas never hides train layer; stationary train recovers and new art survives style reload',async()=>{
+ const {TRAIN_ATLAS_CELLS}=await import('../src/features/liveTransit/train-atlas.js');
+ const map=mockMap();let styleReady=true,resolveAtlas;map.isStyleLoaded=()=>styleReady;
+ map.images=new Map();map.hasImage=id=>map.images.has(id);map.addImage=(id,image)=>map.images.set(id,image);map.updateImage=(id,image)=>{assert(map.images.has(id));map.images.set(id,image);};map.removeImage=id=>map.images.delete(id);
+ const ctx=new Proxy({getImageData(){const data=new Uint8ClampedArray(96*96*4);data[3]=255;return {data}}},{get(t,k){return k in t?t[k]:()=>{}},set(t,k,v){t[k]=v;return true}});
+ const doc={createElement:()=>({getContext:()=>ctx})};
+ const atlas=new Map(Object.keys(TRAIN_ATLAS_CELLS).flatMap(line=>['left','right'].map(facing=>[line+':'+facing,{width:96,height:96,data:new Uint8Array(96*96*4).fill(127)}])));
+ setDisplayedRailPaths(map,rendered);map.zoom=12.5;
+ const overlay=attachLiveTransitOverlay(map,{stationLines:routes,metroMinZoom:12.5,trainIconDocument:doc,loadTrainAtlas:()=>new Promise(r=>{resolveAtlas=r}),getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]})});
+ try{
+  overlay.start();await waitUntil(()=>typeof resolveAtlas==='function');
+  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal(map.images.size,14);
+  const marker=map.getSource(LIVE_SOURCE);await waitUntil(()=>marker.data?.features?.length===1);
+  const before=marker.data.features[0].geometry.coordinates;
+  styleReady=false;resolveAtlas(atlas);await wait();assert.notEqual(map.images.get('dj-live-train-9호선'),atlas.get('9호선:right'));
+  styleReady=true;map.events.get('idle')();await waitUntil(()=>map.images.get('dj-live-train-9호선')===atlas.get('9호선:right'));assert.deepEqual(marker.data.features[0].geometry.coordinates,before);
+  map.images.clear();map.layers.clear();map.sources.clear();map.events.get('style.load')();
+  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.images.get('dj-live-train-9호선-left'),atlas.get('9호선:left'));assert.equal(map.getSource(LIVE_SOURCE).data.features.length,1);
+ }finally{overlay.destroy()}
 });
