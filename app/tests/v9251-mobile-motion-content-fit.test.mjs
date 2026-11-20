@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {sheetFadeOpacity} from '../src/mobile-window-motion.js';
-import {compactTransportHeight,compactFacilityHeight} from '../src/mobile-compact-transport-sheet.js';
+import {compactTransportHeight,compactFacilityHeight,measureFlowContent} from '../src/mobile-compact-transport-sheet.js';
 const source=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
 
 test('all sliding sheets have a visible, monotonic fade; closing dims before removal',()=>{
@@ -44,4 +44,14 @@ test('facility compact height and AI fade maintain expansion and solid modal bac
   assert.match(ai,/dj9251-ai-content-leave/);
   assert.match(ai,/#dj-ai-search-modal\[open\]::backdrop\{background:var\(--ai-bg\)!important/);
   assert.match(ai,/prefers-reduced-motion:reduce/);
+});
+
+test('natural transit measurement ignores stretched scroll viewport and hidden rows',()=>{
+  const node=(height,hidden=false)=>({hidden,scrollHeight:height,getBoundingClientRect:()=>({height})});
+  const style=el=>el.style||{display:'block',position:'static',paddingTop:'8px',paddingBottom:'12px',rowGap:'7px'};
+  const body={style:{paddingTop:'8px',paddingBottom:'12px',rowGap:'7px'},
+    scrollHeight:470,children:[node(60),node(40),node(120,true)]};
+  const actual=measureFlowContent(body,{getComputedStyle:style});
+  assert.equal(actual,127);
+  assert.notEqual(actual,body.scrollHeight);
 });
