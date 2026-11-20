@@ -1,0 +1,30 @@
+name: QA approval bot notifications
+on:
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: qa-approval-bot-notify
+  cancel-in-progress: false
+jobs:
+  notify:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || (github.actor == 'lui020913' && (github.event_name == 'workflow_dispatch' || (github.event.issue.number == 15 && !github.event.issue.pull_request))))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/qa-approval-notify.test.mjs
+      - name: Send deduplicated GitHub bot notification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/qa-approval-notify.mjs
