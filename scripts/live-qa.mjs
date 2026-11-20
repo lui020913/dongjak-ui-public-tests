@@ -5,6 +5,7 @@ import {join,resolve} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {startRemoteRelay} from './live-qa-relay.mjs';
+import {startLiveStream} from './live-qa-stream.mjs';
 
 const ci=process.argv.includes('--ci'), root=resolve('qa-artifacts',new Date().toISOString().replace(/[:.]/g,'-'));
 mkdirSync(root,{recursive:true});
@@ -14,10 +15,12 @@ const token=randomUUID(), port=Number(process.env.QA_PORT||8765);
 let result=null;
 const projects=process.argv.includes('--full')?['mobile375','mobile390','mobile430','mobile390-webkit-header']:['mobile390'];
 const args=['exec','--','playwright','test','--config=playwright.v911-remote.config.mjs','--workers=1',...projects.map(p=>'--project='+p)];
+const lane=Number(process.env.QA_LANE||0), total=Number(process.env.QA_SHARD_TOTAL||0);
+if(lane||total){if(!Number.isInteger(lane)||!Number.isInteger(total)||lane<1||lane>total||total>20)throw Error('Invalid QA shard');args.push('--shard='+lane+'/'+total);}
 if(process.argv.includes('--smoke-target'))args.push('--grep','phone weather single window and layer grid dark surfaces');
 const safeId=/^[a-f0-9-]{36}$/;
 const scenes=()=>readdirSync(root).filter(n=>safeId.test(n)).flatMap(id=>{try{return [JSON.parse(readFileSync(join(root,id,'meta.json'),'utf8'))]}catch{return []}}).sort((a,b)=>a.start-b.start);
-const remote=startRemoteRelay({root,scenes,result:()=>result});
+const remote=(lane?startLiveStream:startRemoteRelay)({root,scenes,result:()=>result,lane});
 const childEnv={...process.env,DONGJAK_TARGET_URL:target.href,DONGJAK_LIVE_QA_DIR:root,DONGJAK_FULL_MOBILE_QA:process.argv.includes('--full')?'1':'0'};
 for(const k of ['QA_WRITER_KEY','QA_VIEWER_KEY','QA_RELAY_URL','GEMINI_API_KEY','CLOUDFLARE_API_TOKEN','QA_CF_API_TOKEN'])delete childEnv[k];
 const child=spawn(process.platform==='win32'?'npm.cmd':'npm',args,{stdio:['ignore','pipe','pipe'],env:childEnv,shell:process.platform==='win32'});
