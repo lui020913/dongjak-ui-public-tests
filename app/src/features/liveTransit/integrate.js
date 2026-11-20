@@ -2,13 +2,15 @@ import {METRO_QUOTA_NOTICE} from './quota-state.js';
 /** v8.2.7 integration with the EXISTING Dongjak MapLibre map and verified station geometry. */
 import {railGeojson,stationsGeojson,FIXED_RAIL_STATION_ORDER} from '../../fixed-rail-data.js';
 import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.js';
+import {railDirectionLabel} from './train-lanes.js';
 export const LIVE_PREF_KEY='dongjak_live_vehicle_options_v827';
 export function buildDongjakMetroLines(){
   const lines={};
   // The published rail order is geographical, not a guaranteed API direction.
   // Direction is an approximation, never a GPS claim. The Sillim line is intentionally
   // omitted here because Seoul's official realtimePosition feed does not list it.
-  const forwardUp={1:true,2:true,4:false,7:true,9:false};
+  // 2호선 local order 대림→방배 is outer; inner travels 방배→대림.
+  const forwardUp={1:true,2:false,4:false,7:true,9:false};
   const terminalDirections={7:{석남:'down',온수:'down',부평구청:'down',장암:'up',도봉산:'up'},9:{중앙보훈병원:'down',개화:'up',김포공항:'up'}};
   for(const [code,names] of Object.entries(FIXED_RAIL_STATION_ORDER)){
     if(!Object.prototype.hasOwnProperty.call(forwardUp,code))continue;
@@ -66,8 +68,11 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
       const number=String(data.vehicleLabel||'').replace(/호$/,'');safeText(heading,number?number+'호 열차':'열차 번호 미제공');
       safeText(notice,data.positionSource==='arrival'?'실시간 도착정보 기반 추정 · GPS 아님':'역 정보 기반 추정 · GPS 아님');
       safeText(values.destination,destinationLabel(data.destination));safeText(values.station,stationLabel(data.station));
-      safeText(values.state,labelStatus[data.status]||'상태 미확인');safeText(values.next,data.nextStation?stationLabel(data.nextStation)+' 방면':'');
-      values.next.parentElement.hidden=!data.nextStation||stationLabel(data.nextStation)===stationLabel(data.station);
+      safeText(values.state,labelStatus[data.status]||'상태 미확인');
+      const direction=railDirectionLabel(data.line,data.travelDirection);
+      const next=data.nextStation&&stationLabel(data.nextStation)!==stationLabel(data.station)?stationLabel(data.nextStation)+' 방면':'';
+      safeText(values.next,[direction,next].filter(Boolean).join(' · ')||'미확인');
+      values.next.parentElement.hidden=false;
       const date=new Date(data.observedAt);safeText(stamp,Number.isFinite(date.getTime())?'수신 '+date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}):'수신 시각 미확인');
     };
     update(info);
@@ -85,7 +90,7 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
     if(item.mode!=='metro')return;
     const coord=f.geometry.coordinates,key=coord.join(',');
     if(key!==item.lastPosition){item.popup.setLngLat(coord);if(item.follow)map.jumpTo?.({center:coord});item.lastPosition=key;map.fire?.('dongjak:live-vehicle-popup-move');}
-    const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.nextStation,p.observedAt]);
+    const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.travelDirection,p.nextStation,p.observedAt]);
     if(text!==item.lastText){item.update(p);item.lastText=text;}
   }
   return {open,render,close,destroy(){close();for(const event of ['dragstart','zoomstart','rotatestart','pitchstart'])map.off?.(event,stopFollowing);}};

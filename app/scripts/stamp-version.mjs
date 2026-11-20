@@ -29,6 +29,7 @@ const replacements=[
   [/(<title>동작하는 안전지도 · 보행안전 지도 )v\d+\.\d+\.\d+(<\/title>)/,`$1v${version}$2`],
   [/(id="version-history-trigger"[^>]*>)v\d+\.\d+\.\d+(<\/button>)/,`$1v${version}$2`],
   [/(id="dj-guide-latest-version">)v\d+\.\d+\.\d+(<\/strong>)/,`$1v${version}$2`],
+  [/(id="map-startup-version"[^>]*>)v\d+\.\d+\.\d+(<\/span>)/,`$1v${version}$2`],
 ];
 for(const [pattern,replacement] of replacements){
   if(!pattern.test(html))throw new Error('HTML version slot missing: '+pattern);

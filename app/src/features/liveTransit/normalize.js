@@ -1,4 +1,5 @@
 import { validLngLat, pointBetweenStations, projectOnLine, pointBetweenDisplayedStations, snapToDisplayedRail } from './geometry.js';
+import {resolveRailDirection} from './train-lanes.js';
 
 export const LINE_COLORS={ '1호선':'#0052A4','2호선':'#00A84D','4호선':'#00A5DE','7호선':'#747F00','9호선':'#B89B2F','신림선':'#6789CA' };
 const clean = s=>String(s??'').replace(/\s/g,'').replace(/역$/,'').replace(/\([^)]*\)/g,'').trim();
@@ -17,10 +18,9 @@ function lineConfig(lines,line,direction,station,destination){
   const dest=clean(String(destination??'').replace(/행$/,''));
   const from=findStationIndex(up,station),to=dest?findStationIndex(up,dest):-1;
   const terminal=c.terminalDirections?.[dest];
-  // Prefer an identifiable destination over the provider direction-code heuristic.
-  const dir=from>=0&&to>=0&&from!==to?(to>from?'up':'down'):
-    terminal??(String(direction)==='1'?'down':String(direction)==='0'?'up':null);
-  return {stations:dir==='down'?down:up,directionKnown:!!dir,
+  // Preserve destination correction on linear routes; on 2호선 trust the circular direction code.
+  const dir=resolveRailDirection(line,direction,from,to,terminal);
+  return {stations:dir==='down'?down:up,directionKnown:!!dir,travelDirection:dir||'',
     geometry:c.geometry??c.routeGeometry??(c.coordinates?{coordinates:c.coordinates}:null),segmentTimeSeconds:c.segmentTimeSeconds??120};
 }
 /** Build estimated train positions from arrival/departure events and actual track geometry.
@@ -74,7 +74,7 @@ export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000,
         headingKnown=true;[headingFromLng,headingFromLat]=a;[headingToLng,headingToLat]=b;
       }
     }
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,positionSource:item.positionSource||'position',color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'metro',line:String(item.line),name:String(item.line),vehicleLabel:String(item.trainNo??''),station:String(item.station),destination:String(item.destination??''),direction:String(item.direction??''),travelDirection:conf.travelDirection,nextStation,status,headingKnown,headingFromLng,headingFromLat,headingToLng,headingToLat,accuracy:'estimated',accuracyText:description,positionSource:item.positionSource||'position',color:LINE_COLORS[item.line]??'#64748b',observedAt:item.observedAt}});
   }
   return features;
 }
