@@ -24,7 +24,9 @@ test('history uses two-part headings while retaining exact build metadata',()=>{
  const ui=read('src/version-history-v7.js');
  const label=v=>v.replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
  assert.equal(label('v9.2.53'),'v9.2');assert.equal(label('v1.0.0'),'v1.0');
- assert(ui.includes('const publicEdition=String(displayVersion).replace('));
+ assert(ui.includes('const editionOf=version=>String(version).replace('));
+ assert(ui.includes('dj-edition-minor'));
+ assert(ui.includes('dj-edition-patch'));
  assert.match(ui,/dataset\.version=String\(release\.version/);
  assert.match(ui,/현재 빌드: /);
  assert(!ui.includes("const versionHeading=el('h4','',displayVersion)"));
