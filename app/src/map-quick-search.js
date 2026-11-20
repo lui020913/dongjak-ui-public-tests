@@ -78,7 +78,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   let controller=null,seq=0,marker=null;
   let placeholderIndex=Math.floor(Math.random()*FRIENDLY_SEARCH_PLACEHOLDERS.length);
   let placeholderTimer=0;
-  const canRotate=()=>!(document.hidden||query.value||document.activeElement===query);
+  const canRotate=()=>!(document.hidden||query.value||document.activeElement===query||app.dataset.djVoiceFeedback==='true');
   const updatePlaceholder=()=>{query.placeholder=app.dataset.djLanguage==='en'?'Where are you going?':FRIENDLY_SEARCH_PLACEHOLDERS[placeholderIndex];placeholderIndex=(placeholderIndex+1)%FRIENDLY_SEARCH_PLACEHOLDERS.length;};
   const cancelPlaceholder=()=>{window.clearTimeout(placeholderTimer);query.classList.remove('dj-placeholder-fading');};
   const setFriendlyPlaceholder=()=>{
@@ -113,10 +113,10 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     const mobile=window.matchMedia?.('(max-width:699px)')?.matches;
     const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(!mobile||reduced){dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');return;}
-    dropdown.classList.add('dj871-search-leaving');
+    dropdown.classList.remove('dj871-search-entering');dropdown.classList.add('dj871-search-leaving');
     closeTimer=window.setTimeout(()=>{
       dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');closeTimer=null;
-    },185);
+    },200);
   };
   const show=()=>{
     if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}

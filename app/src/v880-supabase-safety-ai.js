@@ -47,9 +47,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const label=el('label','dj-ai-search-label','보행안전정보 질문');
   const input=el('input','dj-ai-query');input.type='search';input.id='dj-ai-query';
   input.maxLength=220;input.required=true;
-  input.autocomplete='off';input.placeholder='예: 상도1동 어린이 보호구역 알려줘';
-  label.htmlFor=input.id;
-  const submit=el('button','dj-ai-submit','검색');submit.type='submit';
+  input.autocomplete='off';input.placeholder='보행안전정보를 질문해 주세요';
+  label.htmlFor=input.id;label.classList.add('dj-ai-visually-hidden');
+  const submit=el('button','dj-ai-submit','전송');submit.type='submit';
   const bar=el('div','dj-ai-search-input-row');bar.append(input,submit);
   form.append(label,bar);
   const chips=el('div','dj-ai-examples');
@@ -59,14 +59,20 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     chips.append(b);
   }
   const login=el('button','dj-ai-login','로그인·회원가입');login.type='button';login.hidden=true;
-  const status=el('p','dj-ai-status','공식 보행안전 자료에서 검색합니다.');
+  let status=el('p','dj-ai-status','공식 보행안전 자료에서 검색합니다.');
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  const results=el('div','dj-ai-search-results');results.setAttribute('aria-live','polite');
-  const foot=el('p','dj-ai-disclaimer','지도 위치는 통계·시설 대표점이며 개별 사고점이 아닙니다. 안전등급·경사·안전 경로를 임의 평가하지 않습니다.');
-  layout.append(header,login,form,chips,status,results,foot);modal.append(layout);document.body.append(modal);
+  let results=el('div','dj-ai-search-results');results.setAttribute('aria-live','polite');
+  const foot=el('p','dj-ai-disclaimer','공식 자료 기반 · 질문마다 검색하며 안전등급·안전경로를 임의 평가하지 않습니다.');
+  const transcript=el('div','dj-ai-transcript');transcript.setAttribute('role','log');transcript.setAttribute('aria-label','AI 대화');
+  const welcome=el('div','dj-ai-welcome');welcome.append(el('p','dj-ai-welcome-text','안녕하세요. 공식 보행안전 자료에서 궁금한 정보를 찾아보세요.'),chips);
+  transcript.append(welcome);
+  const composer=el('div','dj-ai-composer');composer.append(form,foot);
+  modal.dataset.djDialogFade='true';
+  layout.append(header,login,transcript,composer);modal.append(layout);document.body.append(modal);
+  const scrollEnd=()=>{transcript.scrollTop=transcript.scrollHeight;};
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
   const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-  function setStatus(message){status.textContent=message;}
+  function setStatus(message){status.textContent=message;scrollEnd();}
   login.addEventListener('click',()=>{
     exit();
     if(modal.open)modal.close();
@@ -141,27 +147,31 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   }
   async function search(raw){
     const query=String(raw||'').trim();
-    if(query.length<2){setStatus('검색어를 2자 이상 입력해 주세요.');return;}
-    if(pending)return;
-    const client=getActiveCloudClient();
-    if(!client){setStatus('Supabase 연결이 필요합니다. 내 정보에서 계정을 연결해 주세요.');return;}
-    const {data:{session},error:sessionError}=await client.auth.getSession();
-    if(sessionError||!session?.access_token){login.hidden=false;setStatus('로그인 후 AI 검색을 이용할 수 있습니다.');return;}
-    pending=true;submit.disabled=true;results.replaceChildren();setStatus('검증된 보행안전 근거를 검색하고 있습니다…');
+    if(query.length<2||pending)return;
+    pending=true;submit.disabled=true;input.value='';
+    welcome.hidden=true;
+    const user=el('div','dj-ai-user-message',query);
+    const turn=el('section','dj-ai-assistant-message');turn.append(el('strong','dj-ai-speaker','AI 안전정보'));
+    status=el('p','dj-ai-status','공식 자료를 확인하고 있습니다…');status.setAttribute('role','status');
+    results=el('div','dj-ai-search-results');
+    turn.append(status,results);transcript.append(user,turn);scrollEnd();
     try{
+      const client=getActiveCloudClient();
+      if(!client){setStatus('계정 연결 후 AI 검색을 이용할 수 있습니다.');login.hidden=false;return;}
+      const {data:{session},error:sessionError}=await client.auth.getSession();
+      if(sessionError||!session?.access_token){login.hidden=false;setStatus('로그인 후 AI 검색을 이용할 수 있습니다.');return;}
+      login.hidden=true;
+      // Each submitted question retains its own answer and verified sources.
       const response=await client.functions.invoke('dongjak-safety-ai',{body:{query}});
-      if(response.error){
-        const code=Number(response.error?.context?.status||0);
-        if(code===401)throw new Error('로그인 정보가 만료됐습니다. 다시 로그인해 주세요.');
-        throw new Error('Supabase AI 서비스 응답을 확인할 수 없습니다.');
-      }
+      if(response.error){const code=Number(response.error?.context?.status||0);throw new Error(code===401?'로그인 정보가 만료됐습니다. 다시 로그인해 주세요.':'AI 서비스 응답을 확인할 수 없습니다.');}
       const data=response.data;
       if(!data||!Array.isArray(data.results))throw new Error('검색 응답 형식이 올바르지 않습니다.');
       setStatus(data.answer||'검색 결과가 없습니다.');
       for(const item of data.results)results.append(put(item));
-      if(data.results.length===0)results.append(el('p','dj-ai-empty','근거 자료를 찾지 못했습니다. 검색 결과가 없다고 안전한 지역이라는 뜻은 아닙니다.'));
+      if(!data.results.length)results.append(el('p','dj-ai-empty','근거 자료가 없다고 안전한 지역이라는 뜻은 아닙니다.'));
+      scrollEnd();
     }catch(error){setStatus(error?.message||'검색에 실패했습니다. 다시 시도해 주세요.');}
-    finally{pending=false;submit.disabled=false;}
+    finally{pending=false;submit.disabled=false;scrollEnd();}
   }
   trigger?.addEventListener('click',open);
   quickEntry?.addEventListener('click',open);

@@ -88,11 +88,11 @@
      viewport. JS supplies the measured keyboard inset while the dialog opens. */
   html body .dj-ai-search-modal[open] {
     position:fixed!important;
-    inset:auto 0 var(--dj891-ai-keyboard-inset,0px) 0!important;
+    inset:0 0 var(--dj891-ai-keyboard-inset,0px) 0!important;
     bottom:var(--dj891-ai-keyboard-inset,0px)!important;
-    max-height:min(calc(var(--dj891-ai-visible-height,100dvh) - 12px),calc(100dvh - 12px))!important;
+    max-height:var(--dj891-ai-visible-height,100dvh)!important;
     overscroll-behavior:contain!important;
-    overflow-y:auto!important;
+    overflow:hidden!important;
     -webkit-overflow-scrolling:touch!important;
   }
   html body .dj-ai-search-modal[open] .dj-ai-search-input-row {

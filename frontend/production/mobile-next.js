@@ -188,17 +188,32 @@ export function installPhonePermissions({app,doc=document,win=window}){
  body.querySelector('.djNext-continue').addEventListener('click',continueIntro);body.querySelector('.djNext-permission-skip').addEventListener('click',continueIntro);
  const form=doc.querySelector('.map-quick-search-form'),input=$('map-quick-search-query');if(!form||!input)return;
  const mic=doc.createElement('button');mic.id='djNext-mic';mic.type='button';mic.setAttribute('aria-label','음성 장소 검색');mic.setAttribute('aria-pressed','false');mic.innerHTML=phoneIcon('mic');form.insertBefore(mic,form.querySelector('[type=submit]'));
- const feedback=doc.createElement('div');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');app.append(feedback);
+ const feedback=doc.createElement('span');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');mic.before(feedback);
  let active=null,timer=0;
- const message=t=>{feedback.hidden=false;feedback.textContent=t;win.clearTimeout(timer);timer=win.setTimeout(()=>feedback.hidden=true,5000)};
- const reset=()=>{active=null;mic.setAttribute('aria-pressed','false');if(feedback.textContent.startsWith('듣는 중'))feedback.hidden=true};
- mic.addEventListener('click',async()=>{if(active){active.stop?.();return}const API=win.SpeechRecognition||win.webkitSpeechRecognition;if(!API){message('이 브라우저에서는 음성 검색을 지원하지 않습니다. 검색창에 입력해 주세요.');input.focus();return}
-  if(win.navigator.mediaDevices?.getUserMedia){try{const stream=await win.navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop())}catch{message('마이크 권한이 필요합니다. 웹앱 또는 기기 설정에서 허용한 뒤 다시 눌러 주세요.');return}}
-  const r=new API();active=r;r.lang='ko-KR';r.interimResults=false;r.continuous=false;mic.setAttribute('aria-pressed','true');message('듣는 중… 말씀해 주세요.');
-  r.onresult=e=>{if(active!==r)return;const value=e.results?.[0]?.[0]?.transcript?.trim();if(!value)return;input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();feedback.hidden=true};
-  r.onerror=e=>{if(active!==r)return;const messages={'not-allowed':'마이크 사용 권한을 확인해 주세요.','service-not-allowed':'이 환경에서 음성 검색을 사용할 수 없습니다.','no-speech':'음성을 듣지 못했습니다. 마이크를 눌러 다시 시도해 주세요.','audio-capture':'사용할 수 있는 마이크가 없습니다.','network':'네트워크 연결을 확인해 주세요.','language-not-supported':'한국어 음성 검색을 지원하지 않는 환경입니다.'};if(e.error==='aborted')feedback.hidden=true;else message(messages[e.error]||'음성 검색에 실패했습니다. 다시 시도해 주세요.');reset()};r.onend=()=>{if(active===r)reset()};
-  try{r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다. 직접 입력해 주세요.')}
+ const clearMessage=()=>{win.clearTimeout(timer);feedback.hidden=true;delete app.dataset.djVoiceFeedback;};
+ const message=(t,sticky=false)=>{win.clearTimeout(timer);feedback.hidden=false;feedback.textContent=t;app.dataset.djVoiceFeedback='true';if(!sticky)timer=win.setTimeout(clearMessage,5000);};
+ const reset=()=>{active=null;delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');};
+ const stop=()=>{if(!active)return;const r=active;reset();clearMessage();try{r.abort?.();}catch{}};
+ mic.addEventListener('click',()=>{
+  if(active){stop();return;}
+  const API=win.SpeechRecognition||win.webkitSpeechRecognition;
+  if(!API){message('음성 검색을 지원하지 않는 브라우저입니다.');return;}
+  if(doc.activeElement===input)input.blur();
+  $('map-quick-search-close')?.click();
+  const r=new API();active=r;r.lang='ko-KR';r.interimResults=true;r.continuous=false;
+  app.dataset.djVoiceListening='true';mic.setAttribute('aria-pressed','true');mic.setAttribute('aria-label','음성 인식 종료');message('음성 인식 준비 중…',true);
+  r.onstart=()=>{if(active===r)message('듣는 중… 말씀해 주세요.',true);};
+  r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;if(!result.isFinal){message(value,true);return;}reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();};
+  r.onerror=e=>{if(active!==r)return;reset();const messages={'not-allowed':'마이크 권한을 허용해 주세요.','service-not-allowed':'음성 검색을 이용할 수 없습니다.','no-speech':'음성이 감지되지 않았습니다.','audio-capture':'마이크를 사용할 수 없습니다.','network':'네트워크 연결을 확인해 주세요.','language-not-supported':'한국어 음성 검색을 지원하지 않습니다.'};if(e.error==='aborted')clearMessage();else message(messages[e.error]||'음성 검색을 다시 시도해 주세요.');};
+  r.onend=()=>{if(active===r){reset();clearMessage();}};
+  // SpeechRecognition.start owns its native microphone permission request.
+  // The optional onboarding permission request stays available. Do not open a
+  // second getUserMedia capture on each tap before starting recognition.
+  try{r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다.');}
  });
+ doc.addEventListener('visibilitychange',()=>{if(doc.hidden)stop();});
+ input.addEventListener('focus',()=>{stop();clearMessage();});
+
 }
 export function installPhoneRouteComparison({app,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
