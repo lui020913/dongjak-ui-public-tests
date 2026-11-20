@@ -172,7 +172,7 @@
     #app #dj840-map-tip {min-height:44px!important;height:44px!important;max-height:44px!important;padding:0 42px 0 10px!important;border-radius:999px!important;font-size:12px!important;}
     #app #map .maplibregl-ctrl-scale {height:24px!important;min-height:24px!important;max-height:24px!important;padding:0 6px!important;font-size:10px!important;border-radius:999px!important;}
     #app #route-transit-confirm {left:12px!important;right:12px!important;width:auto!important;max-height:calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom))!important;overflow-y:auto!important;}
-    #app #route-map-card {left:12px!important;right:12px!important;width:auto!important;max-height:min(44dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;overflow-y:auto!important;padding:12px!important;}
+    #app #route-map-card {position:fixed!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;box-sizing:border-box!important;margin:0!important;transform:none!important;translate:none!important;max-height:min(44dvh,calc(100dvh - var(--dj910-map-top) - var(--dj910-dock-bottom)))!important;overflow-y:auto!important;padding:12px!important;}
     #app #route-map-card .dj804-compare-grid {gap:8px!important;}
     #app #route-map-card .dj804-compare-title {font-size:13px!important;}
     #app #route-map-card .dj804-compare-action {display:none!important;}
