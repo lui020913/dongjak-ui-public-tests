@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.42",
+  "application_version": "9.2.43",
   "public_work_branch": "main",
-  "purpose": "Unified button material for map, transit, route, safety, community, AI, settings and entry gate; thin lip and softer shadow, preserved semantic colors and geometry",
-  "attempt": 133,
+  "purpose": "Approved pill-shaped layer list, common button material, revised close, refresh, streetlight and Korean type icons, consistent shortcut glyphs",
+  "attempt": 134,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner requested one coherent button system across all screens, rather than localized subway appearance changes.",
+  "last_retry_reason": "Implement approved design; remove retired layer tiles and repeated shortcut captions.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

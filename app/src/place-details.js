@@ -238,7 +238,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
 
   const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='dj-place-header-close';
   closeButton.setAttribute('aria-label','시설 정보 닫기');closeButton.title='닫기';
-  closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></svg>';
+  closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>';
   closeButton.addEventListener('click',event=>{
     event.stopPropagation();
     const element=popup?.getElement?.();

@@ -41,7 +41,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   names.append(el('h2','', 'AI 안전정보 검색'),el('p','', '공식 보행안전 자료 · 지도에서 근거 확인'));
   names.firstChild.id='dj-ai-dialog-title';
   const glyph=el('span','dj926-ai-glyph','✦');glyph.setAttribute('aria-hidden','true');
-  const close=el('button','dj-ai-close','×');close.type='button';close.setAttribute('aria-label','AI 검색 닫기');
+  const close=el('button','dj-ai-close');close.innerHTML='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>';close.type='button';close.setAttribute('aria-label','AI 검색 닫기');
   header.append(glyph,names,close);
   const form=el('form','dj-ai-search-form');form.method='dialog';
   const label=el('label','dj-ai-search-label','보행안전정보 질문');

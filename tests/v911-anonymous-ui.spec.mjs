@@ -228,9 +228,9 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await tap(page,rail.locator('.djNext-empty').first());
  await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-layer-grid')).toHaveCount(2);
- const layerTile=panel.locator('.djNext-layer-tile').first();await expect(layerTile).toHaveCSS('box-shadow',/inset/);
+ const layerAction=panel.locator('.djNext-layer-action').first();await expect(layerAction).toHaveCSS('box-shadow',/inset/);await expect(layerAction).toHaveCSS('border-top-left-radius','999px');await expect(panel.locator('.djNext-layer-tile')).toHaveCount(0);
  await expect(panel.locator('.djNext-shortcut-switch').first()).toHaveCSS('box-shadow','none');
- await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px [0-9.]+px [0-9.]+px [0-9.]+px$/);
+ await expect(panel.locator('.djNext-layer-grid').first()).toHaveCSS('grid-template-columns',/^[0-9.]+px$/);await expect.poll(()=>panel.locator('.djNext-layer-row').first().evaluate(n=>{const a=n.querySelector('.djNext-layer-action').getBoundingClientRect(),b=n.querySelector('.djNext-shortcut-switch').getBoundingClientRect();return Math.abs(a.top-b.top)<=2&&b.left>=a.right+4;})).toBe(true);
  await expect(panel.locator('.djNext-pin')).toHaveCount(0);await expect(panel.getByText('기능 열기',{exact:true})).toHaveCount(0);
  const slopeAction=panel.getByRole('button',{name:'경사도 지도 기능',exact:true});const slopeState=await slopeAction.getAttribute('aria-pressed');
  for(const label of ['보행안전','경사도','야간시야']){
