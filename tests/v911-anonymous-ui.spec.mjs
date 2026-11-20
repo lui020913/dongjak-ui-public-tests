@@ -907,13 +907,24 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
  await expect(feed.getByRole('button',{name:'전체 게시글 보기'})).toBeVisible();
  await search.blur();
- await tap(page,feed.getByRole('button',{name:'전체 게시글 보기'}));
+ // Empty-state CTAs may be below the first viewport on smaller phones.
+ // Scroll only the sheet's native content owner, then require a real hit-tested
+ // pointer target (the map canvas must never receive the tap).
+ const resetFeed=feed.getByRole('button',{name:'전체 게시글 보기'});
+ await resetFeed.scrollIntoViewIfNeeded();
+ await expect.poll(()=>resetFeed.evaluate(n=>{
+   const card=n.getBoundingClientRect(),viewport=n.closest('.dj836-sheet-body')?.getBoundingClientRect();
+   return Boolean(viewport&&card.top>=viewport.top-1&&card.bottom<=viewport.bottom+1);
+ })).toBe(true);
+ await tap(page,resetFeed);
  await expect(search).toHaveValue('');
  // On a genuinely empty public database, the first-run home must include
  // useful actions. Existing real posts remain visible instead of sample data.
  if(await feed.locator('.dj-community-empty-state').isVisible()){
    await expect(feed.getByRole('button',{name:'첫 글 작성하기'})).toBeVisible();
-   await tap(page,feed.getByRole('button',{name:'첫 글 작성하기'}));
+   const composeFromEmpty=feed.getByRole('button',{name:'첫 글 작성하기'});
+   await composeFromEmpty.scrollIntoViewIfNeeded();
+   await tap(page,composeFromEmpty);
    await expect(panel.locator('#community-form')).toBeVisible();
    await tap(page,panel.locator('#community-compose-close'));
    await expect(panel.locator('#community-form')).toBeHidden();
