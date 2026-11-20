@@ -82,7 +82,8 @@
    The first pixels match the native theme hint exactly; the gradient fades
    to zero alpha over the existing dimmer (no second dark overlay). */
 @media(max-width:699px){
-html.dj-ios-home-pwa{
+html.dj-ios-home-pwa,
+html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
   --dj-pwa-bridge-height:calc(env(safe-area-inset-top,0px) + 112px);
   --dj-pwa-bridge-gradient:linear-gradient(to bottom,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0px,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 2px,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 84%,transparent) 22%,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 40%,transparent) 55%,transparent 100%);
 }
@@ -98,11 +99,13 @@ html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body > #dj-ios-pwa-status-bridge
 @media(max-width:699px){
 html.dj-ios-home-pwa:has(#dj-ai-search-modal[open]) body > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
 html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
+  --dj-pwa-status-color:#eaf0ec;
   background-image:var(--dj-pwa-bridge-gradient)!important;
   background-size:100% var(--dj-pwa-bridge-height)!important;
   background-repeat:no-repeat!important;
   background-position:top center!important;
 }
+html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32}
 }
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{transition:none!important}}
 

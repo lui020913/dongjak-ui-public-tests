@@ -15,7 +15,7 @@ async function ready(page,{keepTour=false}={}){
  await page.goto('/',{waitUntil:'domcontentloaded'});
  if(page.viewportSize().width<700){
    const menu=page.locator('#dj-install-menu');
-   if(await page.locator('html').getAttribute('data-dj-run-mode')!=='pwa')await expect(menu).toBeAttached({timeout:20000});
+   if(!await page.evaluate(()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches))await expect(menu).toBeAttached({timeout:20000});
    if(await menu.isVisible()){
      await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
      await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
@@ -752,7 +752,7 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','1');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
- expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toContain('transparent');expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#eaf0ec');
+ expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#eaf0ec');
  await test.info().attach('ios-pwa-light-gradient',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
  // Verify native dialog top-layer separately without a network request or login.
