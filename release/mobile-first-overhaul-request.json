@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.44",
+  "application_version": "9.2.45",
   "public_work_branch": "main",
-  "purpose": "Community moderation, private notices, appeals, replies, reporting, saved posts and PWA notification foundation; preserve approved pill controls",
-  "attempt": 135,
+  "purpose": "Restore expanded mobile page header hit testing; preserve existing community release and improve failed-run log discovery",
+  "attempt": 136,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Integrate validated Gemini provider and community UI, preserve approved icons and layer pill selection semantics; mobile QA before protected production.",
+  "last_retry_reason": "All three phone sizes failed the second expanded My Info header drag; repair candidate with precise hit-test diagnostics; no QA assertions removed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
