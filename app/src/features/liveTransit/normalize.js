@@ -82,17 +82,17 @@ export function metroToFeatures(metro=[],lines={},now=Date.now(),maxAgeMs=90000,
 export function busToFeatures(bus=[],routes={},now=Date.now(),maxAgeMs=90000){
   const features=[];
   for(const item of bus){
-    if(!isFresh(item.observedAt,now,maxAgeMs))continue;
+    if(!isFresh(item.observedAt||item.receivedAt,now,maxAgeMs))continue;
     const lng=Number(item.longitude), lat=Number(item.latitude);
     if(!validLngLat([lng,lat])||lng<124||lng>132||lat<32||lat>40)continue;
     const line=routes?.[String(item.routeId)];
-    let pos=[lng,lat], accuracy='reported', description='버스 위치 API 수신 좌표';
+    let pos=[lng,lat], accuracy='reported', description=item.observedAt?'버스 위치 API 수신 좌표':'버스 위치 API 좌표 · 측정 시각 미제공';
     const geom=line?.geometry?.coordinates??line?.coordinates;
     if(Array.isArray(geom)&&geom.length>1){
       const snapped=projectOnLine(geom,pos);
       if(snapped&&snapped.errorMeters<=60){pos=snapped.point;accuracy='map-matched';description='버스 위치 API 좌표를 노선에 보정';}
     }
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'bus',name:String(item.routeName??item.routeId??''),vehicleLabel:String(item.vehicleNumber??''),destination:String(item.destination??''),accuracy,accuracyText:description,color:'#278CE2',observedAt:item.observedAt}});
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:pos},properties:{id:String(item.id),mode:'bus',name:String(item.routeName??item.routeId??''),vehicleLabel:String(item.vehicleNumber??''),destination:String(item.destination??''),accuracy,accuracyText:description,color:'#278CE2',observedAt:item.observedAt,receivedAt:item.receivedAt}});
   }
   return features;
 }

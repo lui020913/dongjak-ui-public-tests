@@ -37,6 +37,7 @@ import {distanceMeters,makeRouteIndex,nearestOnRoute,splitRoute} from './navigat
 import {bearingDegrees,headingForCamera,shouldAutoReroute,voiceCueKey} from './navigation-experience.js';
 import {installNavVoicePicker,applySelectedNavVoice} from './nav-voice-picker.js';
 import {makeCommunityPost,updateCommunityLike,appendCommunityComment,formatCommunityDate,readCommunityPosts} from './community-store.js';
+import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSharedCommunityLike,addSharedCommunityComment,isCommunitySignedIn} from './community-cloud.js';
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
@@ -1820,6 +1821,9 @@ const navButtons = [...document.querySelectorAll('.nav-tab')];
 const pagePanels = [...document.querySelectorAll('.page-panel')];
 const communityStorageKey = 'dongjak_safety_community_v15_posts';
 let communityPosts = readCommunityPosts(localStorage.getItem(communityStorageKey));
+let sharedCommunityPosts=[],communityCloudStatus='공유 게시글 조회 전',communityRefreshSequence=0;
+async function refreshSharedCommunity(){const seq=++communityRefreshSequence;try{const result=await readSharedCommunity();if(seq!==communityRefreshSequence)return;sharedCommunityPosts=result.posts;communityCloudStatus='공개 게시판 · '+(result.authenticated?'로그인됨':'읽기 전용 · 로그인 후 작성 가능');}catch{if(seq!==communityRefreshSequence)return;sharedCommunityPosts=[];communityCloudStatus='공유 게시판 연결 실패 · 기기 기록은 유지됩니다.';}if(app.dataset.tab==='participate')renderCommunity();}
+window.addEventListener('dongjak:auth-state',()=>{if(app.dataset.tab==='participate')void refreshSharedCommunity();});
 const dongjakNews=initDongjakNews({app,onToast:toast});
 // Warm both headline feeds on map startup; opening 동작 소식 reads their cache.
 void dongjakNews.prefetch();
@@ -1872,7 +1876,7 @@ function navigate(tab,{suppressOverview=false}={}) {
     else b.removeAttribute('aria-current');
   }
   for (const panel of pagePanels){if(panel.dataset.page!==tab)window.DongjakWindowMotion?.cancel(panel);panel.hidden=panel.dataset.page!==tab;}
-  if (tab === 'participate') renderCommunity();
+  if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}
   if (tab === 'news') dongjakNews.open();
   if (tab === 'mine') renderMy();
   if (tab !== 'map' && routePickMode) {routePickMode=null;closeTransitRouteConfirmation();}
@@ -2070,7 +2074,7 @@ const issueDetails=document.getElementById('community-issue-details');
 const syncIssueDetails=()=>{issueDetails.hidden=document.getElementById('community-category').value!=='보행 불편';};
 document.getElementById('community-category').addEventListener('change',syncIssueDetails);
 syncIssueDetails();
-communityForm.addEventListener('submit',(event)=>{
+communityForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
   const title=document.getElementById('community-title').value.trim();
   const plainBody=document.getElementById('community-text').value.trim();
@@ -2080,12 +2084,16 @@ communityForm.addEventListener('submit',(event)=>{
   const body=isIssue?`[보행불편 유형: ${kind}] [현장 확인: ${priority}]\n${plainBody}`.slice(0,1200):plainBody;
   const nickname=document.getElementById('community-nickname').value.trim()||'익명 주민';
   if(!title||!body){toast('제목과 내용을 입력해 주세요.');return;}
-  if(communityPosts.length>=35){toast('게시글은 최대 35개까지 저장할 수 있습니다. 오래된 게시글을 삭제해 주세요.');return;}
+  if(communityForm.dataset.djPublishing==='true')return;
+  const signedIn=await isCommunitySignedIn();
+  if(!signedIn&&communityPosts.length>=35){toast('기기 기록은 최대 35개까지 저장할 수 있습니다.');return;}
   const post=makeCommunityPost({
     title,body,nickname,category:document.getElementById('community-category').value,
     photo:communityDraftPhoto,location:communityPickedLocation
   });
-  if(!saveCommunity([post,...communityPosts]))return;
+  const publish=Boolean(signedIn&&document.getElementById('community-share-publicly')?.checked);
+  if(publish){communityForm.dataset.djPublishing='true';try{await publishCommunityPost(post);}catch(error){toast(error?.message||'게시글 등록 실패');return;}finally{delete communityForm.dataset.djPublishing;}void refreshSharedCommunity();}
+  else if(!saveCommunity([post,...communityPosts]))return;
   communityForm.reset();
   communityDraftPhoto=null;communityPickedLocation=null;
   document.getElementById('community-photo-preview').hidden=true;
@@ -2098,7 +2106,7 @@ communityForm.addEventListener('submit',(event)=>{
     btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
   }
   document.getElementById('community-sort').value='new';
-  renderCommunity();toast('게시글을 이 기기에 저장했습니다.');
+  renderCommunity();toast(publish?'공개 게시판에 등록했습니다.':'게시글을 이 기기에 저장했습니다.');
 });
 // Shared controls are located in 지도 옵션 to avoid cluttering the main map.
 const pedestrianTools=initPedestrianTools({
@@ -2135,26 +2143,30 @@ function showCommunityLocation(post) {
     .addTo(map);
   communityLocationMarker.togglePopup();
 }
-function updateLike(postId) {
+async function updateLike(postId) {
+  const shared=sharedCommunityPosts.find(p=>p.id===postId);if(shared){try{await setSharedCommunityLike(postId,!shared.liked);await refreshSharedCommunity();}catch(error){toast(error.message||'공감 등록 실패');}return;}
   const next=updateCommunityLike(communityPosts,postId);
   if(saveCommunity(next))renderCommunity();
 }
-function submitCommunityComment(postId,formEl) {
+async function submitCommunityComment(postId,formEl) {
   const input=formEl.querySelector('input');
   const body=input.value.trim();
   if(!body){toast('댓글을 입력해 주세요.');return;}
+  if(sharedCommunityPosts.some(p=>p.id===postId)){try{await addSharedCommunityComment(postId,body);await refreshSharedCommunity();}catch(error){toast(error.message||'댓글 등록 실패');}return;}
   const next=appendCommunityComment(communityPosts,postId,body);
   if(!next){toast('댓글은 게시글당 40개까지 등록할 수 있습니다.');return;}
   if(saveCommunity(next))renderCommunity();
 }
 function renderCommunity() {
   const root=document.getElementById('community-list');root.replaceChildren();
-  let shown=communityPosts.filter(p=>communityFilter==='전체'||p.category===communityFilter);
+  const status=makeCEl('p','community-form-note',communityCloudStatus);root.append(status,communityButton('공개 게시글 새로고침','community-filter',()=>refreshSharedCommunity()));
+  const all=[...sharedCommunityPosts,...communityPosts];
+  let shown=all.filter(p=>communityFilter==='전체'||p.category===communityFilter);
   if(document.getElementById('community-sort').value==='popular')
     shown=shown.sort((a,b)=>(b.likes||0)-(a.likes||0)||b.created-a.created);
   else shown=shown.sort((a,b)=>b.created-a.created);
   if(!shown.length){
-    root.append(makeCEl('p','empty-hint',communityPosts.length
+    root.append(makeCEl('p','empty-hint',all.length
       ?'선택하신 유형의 게시글이 없습니다.'
       :'아직 등록된 게시글이 없습니다. 보행 불편이나 개선 의견을 남겨 주세요.'));
     return;
@@ -2163,7 +2175,7 @@ function renderCommunity() {
     const card=makeCEl('article','community-post');
     const header=makeCEl('div','community-post-head');
     const cat=makeCEl('span','community-post-category',post.category);
-    const meta=makeCEl('span','community-post-meta',`${post.nickname} · ${formatCommunityDate(post.created)}`);
+    const meta=makeCEl('span','community-post-meta',`${post.nickname} · ${formatCommunityDate(post.created)}${post.shared?' · 공개':' · 내 기기'}`);
     header.append(cat,meta);
     card.append(header,makeCEl('h4','community-post-title',post.title),makeCEl('p','community-post-body',post.body));
     if(post.photo){
@@ -2179,8 +2191,10 @@ function renderCommunity() {
     const commentButton=communityButton(`댓글 ${post.comments?.length||0}`,'community-comment-toggle',()=>{
       commentsArea.hidden=!commentsArea.hidden;
     });
-    actions.append(commentButton,communityButton('삭제','community-post-delete',()=>{
-      if(!window.confirm('이 기기에 저장된 게시글과 댓글을 삭제하시겠습니까?'))return;
+    actions.append(commentButton);
+    if(!post.shared||post.mine)actions.append(communityButton('삭제','community-post-delete',async()=>{
+      if(!window.confirm(post.shared?'공개 게시글과 댓글을 삭제하시겠습니까?':'이 기기에 저장된 게시글과 댓글을 삭제하시겠습니까?'))return;
+      if(post.shared){try{await deleteSharedCommunityPost(post.id);await refreshSharedCommunity();toast('게시글을 삭제했습니다.');}catch(error){toast(error.message||'삭제 실패');}return;}
       const next=communityPosts.filter(p=>p.id!==post.id);
       if(saveCommunity(next)){renderCommunity();toast('게시글을 삭제했습니다.');}
     }));

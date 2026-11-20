@@ -125,7 +125,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     // The interval itself provides throttling; avoid skipping a frame due to timer jitter.
     if(!force&&typeof document!=='undefined'&&document.visibilityState==='hidden')return;
     if(typeof map.getZoom==='function'&&map.getZoom()<minimumZoom){opts.onVehiclesRendered?.(empty());return;}
-    if(!force&&renderPending)return;
+    if(renderPending&&!force)return;
     display=calculate(now);
     try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{renderPending=false;});}opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
   }

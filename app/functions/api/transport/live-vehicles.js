@@ -33,11 +33,11 @@ export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
     (Array.isArray(xml?.msgBody?.itemList)?xml.msgBody.itemList:xml?.msgBody?.itemList?[xml.msgBody.itemList]:[]);
   return blocks.map(block=>{
     const field=key=>typeof block==='string'?xmlTag(block,key):String(block?.[key]??'');
-    const lng=Number(field('gpsX')),lat=Number(field('gpsY'));
+    const lng=Number(field('gpsX')||field('posX')||field('longitude')),lat=Number(field('gpsY')||field('posY')||field('latitude'));
     const id=field('vehId')||field('plainNo');
     return {id:id?`bus:${id}`:'',routeId:String(field('routeId')||routeId),routeName:routeName||String(routeId),
-      vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm'),now)};
-  }).filter(b=>b.id&&xy(b.longitude,b.latitude)&&b.observedAt);
+      vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm')||field('gpsTime')||field('tm'),now),receivedAt:now.toISOString()};
+  }).filter(b=>b.id&&xy(b.longitude,b.latitude));
 }
 async function load(url,format='json'){
   const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':'application/xml'}});

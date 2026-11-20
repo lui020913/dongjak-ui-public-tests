@@ -44,7 +44,7 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
       // Keep the bus card's original presentation and map-click close semantics.
       const root=textNode(doc,'div','dj-live-popup');
       root.append(textNode(doc,'strong','',`${info.name||'버스'} · 운행 차량`),textNode(doc,'p','',info.accuracyText||'버스 위치정보 API 좌표'));
-      const date=new Date(info.observedAt);root.append(textNode(doc,'small','',Number.isFinite(date.getTime())?`수신 기준 ${date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul'})} · 위치 갱신 지연 가능`:'수신 시각 미확인'));
+      const date=new Date(info.observedAt||info.receivedAt);root.append(textNode(doc,'small','',Number.isFinite(date.getTime())?`${info.observedAt?'측정':'수신'} 기준 ${date.toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul'})} · 위치 갱신 지연 가능`:'수신 시각 미확인'));
       const popup=new maplibregl.Popup({closeButton:true,closeOnClick:true,maxWidth:'290px',offset:16}).setLngLat(info.coordinates).setDOMContent(root).addTo(map);
       active={popup,id:info.id,mode:info.mode};popup.on?.('close',()=>{if(active?.popup===popup)active=null;});return;
     }
@@ -119,6 +119,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
         if(state.bus&&!info.availability?.bus)setStatus('버스 위치 API 키가 등록되지 않았습니다. · 지하철 위치는 추정');
         else if(state.bus&&info.availability?.bus&&info.availability.busRoutes===0)
           setStatus('버스 노선 조회 불가 · API 인증/노선 설정 확인');
+        else if(state.bus&&!info.bus)setStatus('현재 동작구 내 수신된 버스 좌표 없음 · 위치 API 및 노선 확인');
       }else if(info.status==='error')setStatus(`위치정보 조회 실패: ${info.error||'API 상태 확인 필요'}`);
       else if(info.status==='render_error')setStatus('지도 차량 레이어 렌더링 오류');
     }

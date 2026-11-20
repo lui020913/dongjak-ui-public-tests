@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.21",
   "public_work_branch": "main",
-  "purpose": "Safety drawer peek, frame-driven transit follow and Seoul public news",
-  "attempt": 92,
+  "purpose": "Safety drawer peek, frame-driven transit follow, Seoul official news and authenticated shared community",
+  "attempt": 93,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Real device feedback after 9.2.20",
+  "last_retry_reason": "Add shared community data and bus timestamp diagnostics",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
