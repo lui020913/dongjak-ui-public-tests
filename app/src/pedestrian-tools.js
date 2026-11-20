@@ -5,6 +5,7 @@
 import {queryOverpass} from './safety-layers.js';
 import {fixedMetroStations} from './fixed-rail-lines.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
+import {installNearbyHeaderFallback} from './nearby-sheet-input-fallback.js';
 
 const EMPTY={type:'FeatureCollection',features:[]};
 const RADIUS_M=850;
@@ -204,6 +205,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   const results=document.getElementById('ped-tools-results');
   const overview=document.getElementById('overview-sheet');
   const close=document.getElementById('ped-tools-close');
+  const disposeNearbyHeader=installNearbyHeaderFallback({panel,header:panel?.querySelector('.ped-tools-panel-head'),close});
   const width=document.getElementById('ped-tools-width');
   if(!accessButton||!nearButton||!reportButton||!panel||!header||!status||!results)return ()=>{};
   const app=document.getElementById('app');
@@ -493,6 +495,6 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     panel.removeEventListener('dongjak:ped-dismiss',dismissNearby);
     seq++;panel.hidden=true;restoreOverview();active=false;applyVisibility();
     mapToolsToggle?.removeEventListener('click',onToggleMapTools);
-    hiddenObserver.disconnect();resetNearby();disposePlacement();
+    hiddenObserver.disconnect();resetNearby();disposePlacement();disposeNearbyHeader();
   };
 }
