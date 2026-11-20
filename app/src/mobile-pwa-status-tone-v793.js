@@ -16,7 +16,7 @@ export function installPwaStatusTone(doc=document,win=window) {
   const app=doc.getElementById('app');
   const themeMeta=doc.querySelector('meta[name="theme-color"]');
   if(!root || !app || !themeMeta)return ()=>{};
-  let band=null,bridge=null;
+  let band=null,bridge=null,sample=null;
   let enabled=false;
   const baselineColor=()=>root.dataset.theme==='dark'?'#101f25':'#f3f7f5';
   function sync() {
@@ -44,10 +44,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       const color=theme==='dark'?(dimmed?'#142428':'#192d32'):(dimmed?'#bfc6c2':'#e5ece8');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
-      if(band.style.backgroundColor!==color)band.style.backgroundColor=color;
+      if(!sample){sample=doc.createElement('div');sample.id='dj-ios-pwa-status-sample';sample.setAttribute('aria-hidden','true');app.appendChild(sample);}
+      if(sample.style.backgroundColor!==color)sample.style.backgroundColor=color;
       if(themeMeta.getAttribute('content')!==color)themeMeta.setAttribute('content',color);
     } else {
-      band?.remove();band=null;bridge?.remove();bridge=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');
+      band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');root.style.removeProperty('background-color');
       themeMeta.setAttribute('content',baselineColor());
     }
   }
@@ -62,7 +63,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     observer.disconnect();
     for(const mq of [size,standalone])mq?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
-    band?.remove();band=null;bridge?.remove();bridge=null;
+    band?.remove();band=null;bridge?.remove();bridge=null;sample?.remove();sample=null;
     root.classList.remove('dj-ios-home-pwa');delete root.dataset.djPwaDimmed;root.style.removeProperty('--dj-pwa-status-color');
     themeMeta.content=baselineColor();
   };

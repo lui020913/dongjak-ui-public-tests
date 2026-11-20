@@ -79,4 +79,6 @@ html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app #dj-ios-pwa-status-bri
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{transition:none}}
 }
 
-@media(max-width:699px){html.dj-ios-home-pwa{background-color:var(--dj-pwa-status-color,var(--dj-pwa-land-tone))!important}html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam{height:calc(env(safe-area-inset-top,0px) + 38px)!important}}
+@media(max-width:699px){html.dj-ios-home-pwa{background-color:var(--dj-pwa-status-color,var(--dj-pwa-land-tone))!important}html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam{height:calc(env(safe-area-inset-top,0px) + 48px)!important}}
+
+@media(max-width:699px){html.dj-ios-home-pwa body #app #dj-ios-pwa-status-sample{position:fixed;top:0;left:0;right:0;height:1px;pointer-events:none;z-index:59999}}
