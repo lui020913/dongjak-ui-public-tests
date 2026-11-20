@@ -1,33 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildGenerationCatalog,historyGeneration} from '../src/history-generation-catalog.js';
-const review=r=>({position:r.sourcePosition,scale:r.scale});
-test('1.x to 9.x uses chronological feature milestones; source identities and notes survive',()=>{
- const old=[1,2,23,42,63,93,140,168,202].map(sourcePosition=>({version:'v8.0.1',sourcePosition,scale:'patch',items:['source '+sourcePosition]}));
- const current=[{version:'9.0.0',scale:'major',items:['mobile']},{version:'9.2.28',scale:'patch',items:['bus']},{version:'9.2.44',scale:'minor',items:['community']},{version:'9.2.50',scale:'patch',items:['UI']}];
- const source=[...old,...current].reverse();const result=buildGenerationCatalog(source,review);
+import {releaseEdition} from '../src/release-editions.js';
+
+test('two-part 1.0–9.2 editorial history groups real notes without inventing patch releases',()=>{
+ const milestones=[1,8,23,42,46,49,86,133];
+ const old=milestones.map(sourcePosition=>({
+   version:'v7.0.29',sourcePosition,scale:'patch',items:['source '+sourcePosition]
+ }));
+ const current=[
+   {version:'9.0.0',scale:'major',items:['mobile']},
+   {version:'9.2.28',scale:'patch',items:['metro']},
+   {version:'9.2.44',scale:'minor',items:['community']},
+   {version:'9.2.50',scale:'patch',items:['UI']}
+ ];
+ const source=[...old,...current].reverse();
+ const result=buildGenerationCatalog(source,releaseEdition);
  assert.deepEqual(result.map(g=>g.label),['9.x','8.x','7.x','6.x','5.x','4.x','3.x','2.x','1.x']);
- const entries=result.flatMap(g=>g.records);assert.deepEqual(entries.map(e=>e.record),source);
- assert.equal(new Set(entries.map(e=>e.displayVersion)).size,source.length);
- assert.equal(entries[0].displayVersion,'v9.2.50');assert.equal(entries[0].record.version,'9.2.50');
- assert.equal(entries[1].displayVersion,'v9.2.44');
- assert.equal(entries[2].displayVersion,'v9.2.28');
- assert.equal(entries[0].operational,true);
+ const entries=result.flatMap(g=>g.records);
+ assert.deepEqual(entries.map(e=>e.record),source);
+ assert.deepEqual(result[0].records.map(e=>e.displayVersion),['v9.2','v9.2','v9.2','v9.0']);
+ assert.equal(result[0].records[0].actualVersion,'9.2.50');
+ assert.deepEqual(result.slice(1).map(g=>g.records[0].displayVersion),
+   ['v8.0','v7.0','v6.0','v5.0','v4.0','v3.0','v2.0','v1.0']);
  assert.equal(entries.at(-1).operational,false);
- assert.equal(entries.at(-1).displayVersion,'v1.0.0');
- assert.equal(source[0].items[0],'UI');
-});
-test('existing operational positions take priority over historically inconsistent labels',()=>{
- assert.equal(historyGeneration({version:'v9.2.40'},{position:168}).major,7);
- assert.equal(historyGeneration({version:'v9.2.27'},{}).major,8);
- assert.equal(historyGeneration({version:'v9.2.28'},{}).major,9);
+ assert.equal(result[0].records[0].operational,true);
 });
 
-test('actual v9.2.51 production version is never relabeled as an imaginary 9.0.23',()=>{
- const entries=[{version:'9.2.50',scale:'patch',items:['before']},{version:'9.2.51',scale:'patch',items:['deployed']}].reverse();
- const result=buildGenerationCatalog(entries,()=>({scale:'patch'}));
- assert.equal(result[0].label,'9.x');
- assert.deepEqual(result[0].records.map(x=>x.displayVersion),['v9.2.51','v9.2.50']);
- assert.equal(result[0].records[0].classification,'patch');
- assert(!result[0].records.some(x=>x.displayVersion==='v9.0.23'));
+test('audited historical positions align with 1.x through 8.x categories',()=>{
+ for(const [position,major] of [[1,1],[8,2],[23,3],[42,4],[46,5],[49,6],[86,7],[133,8]]){
+   assert.equal(historyGeneration({version:'v7.0.29'},{position}).major,major);
+ }
+ assert.equal(historyGeneration({version:'v9.0.0'},{}).major,9);
+ assert.equal(historyGeneration({version:'v9.2.40'},{}).major,9);
+});
+
+test('v9.2.51 and v9.2.50 share update edition 9.2 but keep exact builds',()=>{
+ const releases=[{version:'9.2.50',scale:'patch',items:['before']},
+   {version:'9.2.51',scale:'patch',items:['deployed']}].reverse();
+ const group=buildGenerationCatalog(releases,releaseEdition);
+ assert.deepEqual(group.map(g=>g.label),['9.x']);
+ assert.deepEqual(group[0].records.map(x=>x.displayVersion),['v9.2','v9.2']);
+ assert.deepEqual(group[0].records.map(x=>x.actualVersion),['9.2.51','9.2.50']);
+ assert(!group[0].records.some(x=>x.displayVersion==='v9.0.23'));
 });
