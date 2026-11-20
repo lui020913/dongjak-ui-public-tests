@@ -178,6 +178,14 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       const g=gesture;if(!g||event.pointerId!==g.pointer)return;
       gesture=null;
       const delta=event.clientY-g.y;
+      // Nearby safety information supports both the existing full-header swipe
+      // and a tap on the non-interactive grip/title. This makes expansion usable
+      // in mobile Safari even when the OS drops a touchmove before touchend.
+      // Action buttons are filtered in down(), so their click behavior is kept.
+      if(id==='ped-tools-panel'&&!g.dragging){
+        setMobileSheetExpanded(panel,!panel.classList.contains('dj871-sheet-expanded'),doc,win);
+        return;
+      }
       const projected=projectedDrag(delta,g.velocity);
       if(g.dragging){
         suppressNextClick=true;
