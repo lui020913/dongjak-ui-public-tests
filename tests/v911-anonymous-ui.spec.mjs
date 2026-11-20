@@ -982,8 +982,13 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  await page.mouse.up();
  await expect(panel).toHaveClass(/dj871-sheet-expanded/,{timeout:7000});
  await expect(search).toBeVisible();
- const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
- expect(expanded.y).toBeGreaterThanOrEqual(searchBox.y+searchBox.height-3);
+ // The expanded class is applied at the START of its geometry animation.
+ // Require the final non-overlapping geometry, not an intermediate animation
+ // frame, while retaining the actual swipe and the strict visibility check.
+ await expect.poll(async()=>{
+   const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
+   return expanded&&searchBox?expanded.y-(searchBox.y+searchBox.height):-1000;
+ },{timeout:7000}).toBeGreaterThanOrEqual(-3);
 });
 
 test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async({page})=>{
@@ -992,17 +997,23 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
+ await tour.locator('[data-dj860-action="next"]').scrollIntoViewIfNeeded();
  await page.evaluate(()=>{
    const samples=[];window.__dj9253OnboardFade=samples;
+   const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
+   samples.push(Number(getComputedStyle(pane).opacity));
    const start=performance.now();
    const tick=()=>{
      const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
      if(pane)samples.push(Number(getComputedStyle(pane).opacity));
      if(performance.now()-start<650)requestAnimationFrame(tick);
    };
+   // Begin collecting on the same browser task that dispatches the action.
+   // A cross-process Playwright click can otherwise wait for layout and start
+   // *after* the finite sampling window, producing a false-positive fade miss.
+   document.querySelector('#dj860-onboarding [data-dj860-action="next"]').click();
    requestAnimationFrame(tick);
  });
- await tour.locator('[data-dj860-action="next"]').click();
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
  await page.waitForTimeout(350);
  const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
