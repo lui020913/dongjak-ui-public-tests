@@ -40,8 +40,21 @@ export function buildGenerationCatalog(releases,reviewRelease){
   // Only archival pre-9.x records retain their documented retrospective labels.
   const actualVersion=String(record?.version||'').replace(/^v/,'');
   const operational=/^9\.\d+\.\d+$/.test(actualVersion);
-  const displayVersion=operational?'v'+actualVersion:`v${major}.${minor}.${patch}`;
-  group.records.push({record,classification:operational?sourceScale:classification,sourceScale,displayVersion,operational});groups.set(major,group);
+  // The update HISTORY has two components: v1.0 … v9.2.
+  // The underlying SemVer (e.g. 9.2.51) is kept unchanged on record.version.
+  const editorialLabel=review?.historical&&/^\\d+\\.\\d+$/.test(String(review.label||''))
+    ?String(review.label)
+    :operational?actualVersion.split('.').slice(0,2).join('.'):`${major}.${minor}`;
+  const displayVersion='v'+editorialLabel;
+  const displayMajor=Number(editorialLabel.split('.')[0]);
+  const category=groups.get(displayMajor)||{label:`${displayMajor}.x`,
+    title:HISTORY_GENERATIONS[displayMajor-1]?.title||'업데이트 기록',historical:true,records:[]};
+  category.records.push({record,classification:operational?sourceScale:classification,
+    sourceScale,displayVersion,operational,actualVersion});
+  groups.set(displayMajor,category);
+  // Drop the provisional category created above when the review-defined
+  // historical phase belongs to a different, audited feature generation.
+  if(displayMajor!==major&&!groups.get(major)?.records.length)groups.delete(major);
  }
  return [...groups.values()].reverse().map(group=>({...group,records:group.records.reverse()}));
 }
