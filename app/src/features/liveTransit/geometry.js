@@ -16,19 +16,18 @@ export function lineLengthMeters(line) {
   for (let i=1;i<line.length;i++) sum+=haversineMeters(line[i-1],line[i]);
   return sum;
 }
+// Compile route distances once; per-frame sampling is logarithmic instead of rescanning geometry.
+const cumulativeDistances=new WeakMap();
 export function linePointAtMeters(coords, meters) {
-  if (!Array.isArray(coords) || !coords.length) return null;
-  if (coords.length === 1) return [...coords[0]];
-  let d = Math.max(0, Number.isFinite(meters) ? meters : 0);
-  for (let i=1;i<coords.length;i++) {
-    const a=coords[i-1], b=coords[i], length=haversineMeters(a,b);
-    if (d <= length || i === coords.length-1) {
-      const ratio=length>0 ? Math.min(1,Math.max(0,d/length)) : 0;
-      return [a[0]+(b[0]-a[0])*ratio, a[1]+(b[1]-a[1])*ratio];
-    }
-    d-=length;
-  }
-  return [...coords[coords.length-1]];
+  if(!Array.isArray(coords)||!coords.length)return null;
+  if(coords.length===1)return [...coords[0]];
+  let sums=cumulativeDistances.get(coords);
+  if(!sums||sums.length!==coords.length){sums=new Float64Array(coords.length);for(let i=1;i<coords.length;i++)sums[i]=sums[i-1]+haversineMeters(coords[i-1],coords[i]);cumulativeDistances.set(coords,sums);}
+  const d=Math.min(sums[sums.length-1],Math.max(0,Number.isFinite(meters)?meters:0));
+  let lo=1,hi=sums.length-1;
+  while(lo<hi){const mid=(lo+hi)>>>1;if(sums[mid]<d)lo=mid+1;else hi=mid;}
+  const i=lo,a=coords[i-1],b=coords[i],length=sums[i]-sums[i-1],ratio=length>0?(d-sums[i-1])/length:0;
+  return [a[0]+(b[0]-a[0])*ratio,a[1]+(b[1]-a[1])*ratio];
 }
 // Approximate local tangent-plane projection is adequate over a single route segment.
 export function projectOnLine(coords, point) {

@@ -2086,7 +2086,9 @@ communityForm.addEventListener('submit',async(event)=>{
   if(!title||!body){toast('제목과 내용을 입력해 주세요.');return;}
   if(communityForm.dataset.djPublishing==='true')return;
   const signedIn=await isCommunitySignedIn();
-  if(!signedIn&&communityPosts.length>=35){toast('기기 기록은 최대 35개까지 저장할 수 있습니다.');return;}
+  const wantsPublic=Boolean(document.getElementById('community-share-publicly')?.checked);
+  if(wantsPublic&&!signedIn){toast('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');return;}
+  if(!wantsPublic&&communityPosts.length>=35){toast('기기 기록은 최대 35개까지 저장할 수 있습니다.');return;}
   const post=makeCommunityPost({
     title,body,nickname,category:document.getElementById('community-category').value,
     photo:communityDraftPhoto,location:communityPickedLocation

@@ -78,7 +78,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   let controller=null,seq=0,marker=null;
   let placeholderIndex=Math.floor(Math.random()*FRIENDLY_SEARCH_PLACEHOLDERS.length);
   let placeholderTimer=0;
-  const canRotate=()=>!document.hidden&&!query.value&&document.activeElement!==query;
+  const canRotate=()=>!(document.hidden||query.value||document.activeElement===query);
   const updatePlaceholder=()=>{query.placeholder=app.dataset.djLanguage==='en'?'Where are you going?':FRIENDLY_SEARCH_PLACEHOLDERS[placeholderIndex];placeholderIndex=(placeholderIndex+1)%FRIENDLY_SEARCH_PLACEHOLDERS.length;};
   const cancelPlaceholder=()=>{window.clearTimeout(placeholderTimer);query.classList.remove('dj-placeholder-fading');};
   const setFriendlyPlaceholder=()=>{

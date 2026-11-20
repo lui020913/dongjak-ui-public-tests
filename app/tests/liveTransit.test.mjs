@@ -150,3 +150,5 @@ test('API mode bus parses real provider coordinates and does not call metro',asy
     assert(!JSON.stringify(payload).includes('SECRET'));
   }finally{globalThis.fetch=original;}
 });
+
+test('bus coordinates with absent provider timestamp retain separate receipt provenance',()=>{const now=new Date('2026-11-13T13:00:00Z');const rows=parseBusResponse({msgBody:{item:{vehId:'900',gpsX:'126.95',gpsY:'37.51'}}},'100100001',now);assert.equal(rows.length,1);assert.equal(rows[0].observedAt,'');assert.equal(rows[0].receivedAt,now.toISOString());});

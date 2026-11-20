@@ -30,7 +30,7 @@ export function parseMetroResponse(json,line,now=new Date()){
 function xmlTag(block,tag){return block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'))?.[1]?.trim()||'';}
 export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
   const blocks=typeof xml==='string'?(xml.match(/<itemList(?:\s[^>]*)?>[\s\S]*?<\/itemList>/gi)||[]):
-    (Array.isArray(xml?.msgBody?.itemList)?xml.msgBody.itemList:xml?.msgBody?.itemList?[xml.msgBody.itemList]:[]);
+    (Array.isArray(xml?.msgBody?.itemList??xml?.msgBody?.item)?(xml.msgBody.itemList??xml.msgBody.item):(xml?.msgBody?.itemList??xml?.msgBody?.item)?[xml.msgBody.itemList??xml.msgBody.item]:[]);
   return blocks.map(block=>{
     const field=key=>typeof block==='string'?xmlTag(block,key):String(block?.[key]??'');
     const lng=Number(field('gpsX')||field('posX')||field('longitude')),lat=Number(field('gpsY')||field('posY')||field('latitude'));
@@ -40,7 +40,7 @@ export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
   }).filter(b=>b.id&&xy(b.longitude,b.latitude));
 }
 async function load(url,format='json'){
-  const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':'application/xml'}});
+  const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':'application/xml','User-Agent':'DongjakSafetyMap-Beta/1.0'}});
   if(!response.ok)throw new Error('PROVIDER_HTTP_'+response.status);
   const text=await response.text();
   if(text.length>1500000)throw new Error('PROVIDER_RESPONSE_TOO_LARGE');

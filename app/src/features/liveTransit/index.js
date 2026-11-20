@@ -69,7 +69,7 @@ export function preserveMetroEvents(newItems,oldItems=[]){
 export function attachLiveTransitOverlay(map,opts={}){
   if(!map||typeof map.addSource!=='function'||typeof map.getSource!=='function')throw new TypeError('MapLibre instance needed');
   let payload=null,display=empty(),previous=new Map(),lastUpdate=0;
-  let rendering=0,poll=0,started=false,destroyed=false,request=null,renderPending=false,lastRenderAt=0;
+  let rendering=0,poll=0,started=false,destroyed=false,request=null,renderPending=false,lastRenderAt=0,renderGeneration=0;
   const raf=typeof globalThis.requestAnimationFrame==='function';
   let visible={metro:true,bus:true};
   const minimumZoom=Number(opts.minZoom??13.2);
@@ -99,13 +99,13 @@ export function attachLiveTransitOverlay(map,opts={}){
   function calculate(now){
     if(!payload||now-lastUpdate>staleMs)return empty();
     const collection=payloadToCollection(payload,{...normOpts,renderedRailPaths:getDisplayedRailPaths(map)},now);
-    const filtered=[];
+    const filtered=[],priorById=new Map(display.features.map(f=>[f.properties.id,f.properties]));
     for(const f of collection.features){
       if(!visible[f.properties.mode])continue;
       let coords=f.geometry.coordinates;
       const earlier=previous.get(f.properties.id);
       if(f.properties.mode==='metro'){
-        const prior=display.features.find(x=>x.properties.id===f.properties.id)?.properties;
+        const prior=priorById.get(f.properties.id);
         const facing=trainFacing(map,f.properties,prior?.trainFacing);
         f.properties.trainFacing=facing||'unknown';
         f.properties.trainIcon=trainImageId(Object.hasOwn(LINE_COLORS,f.properties.line)?f.properties.line:'unknown',facing||'right');
@@ -127,8 +127,12 @@ export function attachLiveTransitOverlay(map,opts={}){
     if(typeof map.getZoom==='function'&&map.getZoom()<minimumZoom){opts.onVehiclesRendered?.(empty());return;}
     if(renderPending&&!force)return;
     if(!force&&!payload)return;
-    display=calculate(now);
-    try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{renderPending=false;});}opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
+    const next=calculate(now);
+    if(!force&&next.features.length===display.features.length&&next.features.every((f,i)=>{
+      const old=display.features[i];return old.properties.id===f.properties.id&&old.geometry.coordinates[0]===f.geometry.coordinates[0]&&old.geometry.coordinates[1]===f.geometry.coordinates[1]&&old.properties.trainIcon===f.properties.trainIcon&&old.properties.observedAt===f.properties.observedAt;
+    }))return;
+    display=next;
+    try{if(started&&(!map.getSource(LIVE_SOURCE)||!map.getLayer(LIVE_METRO_LAYER)||!map.getLayer(LIVE_BUS_LAYER)))attachLayers();const source=map.getSource(LIVE_SOURCE);if(!source)return;const result=source.setData(display);const generation=++renderGeneration;if(result&&typeof result.then==='function'){renderPending=true;Promise.resolve(result).catch(()=>{}).finally(()=>{if(generation===renderGeneration)renderPending=false;});}else renderPending=false;opts.onVehiclesRendered?.(display);}catch(e){emit({status:'render_error',error:String(e.message||e)});}
   }
   async function refresh(){
     if(!started||destroyed||request||(typeof document!=='undefined'&&document.visibilityState==='hidden'))return;
@@ -170,7 +174,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     else rendering=setInterval(()=>render(false),frameMs);
     poll=setInterval(refresh,pollMs);void refresh();
   }
-  function stop(){started=false;request?.abort();request=null;if(raf)globalThis.cancelAnimationFrame?.(rendering);else clearInterval(rendering);clearInterval(poll);lastRenderAt=0;
+  function stop(){started=false;request?.abort();request=null;if(raf)globalThis.cancelAnimationFrame?.(rendering);else clearInterval(rendering);clearInterval(poll);lastRenderAt=0;renderGeneration++;renderPending=false;
     map.off?.('style.load',onStyle);map.off?.('click',handleMapClick);
     if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisible);
     payload=null;previous.clear();display=empty();lastUpdate=0;
