@@ -532,25 +532,26 @@ test('phone report composer has non-overlapping independent header and input scr
 
 test('phone windows share the opaque gradual slide on open and close',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- async function audit(selector,parentSelector,trigger,close){
+ async function audit(selector,parentSelector,trigger,close,tabEntrance=false){
    const target=page.locator(selector);const parent=page.locator(parentSelector);
    await page.evaluate(({selector,parentSelector})=>{
     const frames=[];window.__sharedMotion=frames;const until=performance.now()+40000;
     function sample(){if(window.__sharedMotion!==frames||performance.now()>until)return;const n=document.querySelector(selector),p=document.querySelector(parentSelector),phase=n?.dataset.dj810Animating;
       if(phase&&p&&!p.hidden){const c=getComputedStyle(n),back=getComputedStyle(p);
-       frames.push({phase,duration:Number(n.dataset.djWindowMotionDuration),opacity:Number(c.opacity),backOpacity:Number(back.opacity),background:back.backgroundColor,cssAnimation:c.animationName,offset:parseFloat((c.translate||'0 0').split(' ')[1])||0});}
+       frames.push({phase,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),opacity:Number(c.opacity),backOpacity:Number(back.opacity),background:back.backgroundColor,cssAnimation:c.animationName,offset:parseFloat((c.translate||'0 0').split(' ')[1])||0,y:n.getBoundingClientRect().y});}
       requestAnimationFrame(sample);}
     requestAnimationFrame(sample);
    },{selector,parentSelector});
    await trigger();await expect(parent).toBeVisible();
-   await expect.poll(()=>page.evaluate(()=>window.__sharedMotion.filter(f=>f.phase==='opening'&&f.offset>2).length)).toBeGreaterThan(1);
+   await expect.poll(()=>page.evaluate(tabEntrance=>window.__sharedMotion.filter(f=>f.phase==='opening'&&(tabEntrance?f.kind==='fade':f.offset>2)).length,tabEntrance)).toBeGreaterThan(1);
    await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
    await close();await expect(parent).toBeHidden();
    const frames=await page.evaluate(()=>window.__sharedMotion);
    for(const [phase,duration] of [['opening',350],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
      expect(motion.length).toBeGreaterThan(1);
-     expect(motion.every(f=>f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
+     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===200&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
+     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity===1&&f.backOpacity===1&&f.cssAnimation==='none')).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
      if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
@@ -558,8 +559,8 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
  }
  await audit('#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel',()=>tap(page,page.locator('#djNext-layers')),()=>page.getByRole('button',{name:'레이어 설정 닫기'}).click());
  await audit('#dj854-weather-sheet','#dj854-weather-sheet',()=>tap(page,page.locator('#djNext-weather')),()=>page.getByRole('button',{name:'날씨창 닫기'}).click());
- await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>tap(page,page.locator('#route-panel .dj-sheet-chrome-close')));
- await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')));
+ await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>tap(page,page.locator('#route-panel .dj-sheet-chrome-close')),true);
+ await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')),true);
 });
 
 

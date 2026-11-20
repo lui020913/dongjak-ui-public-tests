@@ -24,12 +24,14 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  function select(event){
   if(!phone()||replaying)return;
+  // A swipe across two buttons may synthesize a click on their common nav
+  // ancestor rather than either button. Consume it before outside-click cleanup.
+  if(suppressClick&&event.isTrusted&&event.target?.closest?.('#bottom-nav')){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;}
   const button=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
   if(!button){
    if(closing&&event.isTrusted){const current=closing.panel;clear();win.DongjakWindowMotion?.cancel?.(current);}
    return;
   }
-  if(suppressClick&&event.isTrusted){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;}
   const current=app.dataset.tab;
   if(!closing&&button.dataset.tab===current)return;
   const motion=win.DongjakWindowMotion;
@@ -52,7 +54,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   motion.closeTab(panel,finish);
  }
  function down(event){
-  if(!phone()||!event.isPrimary||event.button!==0)return;
+  if(!phone()||event.isPrimary===false||event.button!==0)return;
   suppressClick=false;gesture={id:event.pointerId,x:event.clientX,y:event.clientY};
  }
  function up(event){

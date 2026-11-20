@@ -3,9 +3,9 @@
   "application_version": "9.2.36",
   "public_work_branch": "main",
   "purpose": "Collapse repeated desktop/tablet installation selections and enable adjacent bottom-tab swipe with stationary fade-out/fade-in",
-  "attempt": 123,
+  "attempt": 124,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Repair stale close-behavior regression signature for already-added community draft resume option; preserve all close behavior assertions and bottom-tab fade checks.",
+  "last_retry_reason": "Fix dock swipe synthetic common-ancestor click cancelling pending fade. Preserve normal slide audits on overlays and X; assert stationary fade on deliberate bottom-tab opening. No change to quota gate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
