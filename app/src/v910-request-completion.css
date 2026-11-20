@@ -373,7 +373,7 @@
     #app #transport-sheet .dj875-transit-scroll,#app .dj-place-body {flex:0 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;padding:12px 20px 20px!important;box-sizing:border-box!important;}
     #app #transport-sheet .transport-arrivals-title {gap:8px!important;margin:0 0 10px!important;}
     #app #transport-arrivals .metro-direction-grid {gap:10px!important;}
-    #app #transport-sheet[data-kind="bus"] #transport-arrivals {display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr))!important;gap:10px!important;}
+    #app #transport-sheet[data-kind="bus"] #transport-arrivals {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;}
     #app #transport-sheet[data-kind="bus"] #transport-arrivals .transport-arrival-row {padding:10px 12px!important;min-height:68px!important;}
     #app .dj-place-detail-popup .maplibregl-popup-content {width:100%!important;height:auto!important;max-height:inherit!important;min-height:0!important;padding:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;border-radius:24px!important;background:var(--dj800-surface,#fff)!important;}
     #app .dj-place-detail {display:flex!important;flex-direction:column!important;min-height:0!important;max-height:inherit!important;width:100%!important;padding:0!important;margin:0!important;}
