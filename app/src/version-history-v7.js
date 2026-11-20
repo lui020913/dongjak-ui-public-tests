@@ -190,10 +190,17 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     article.append(header);
     const ul=el('ul','v707-release-items');
     for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
-    const original=el('p','dj-edition-original',(release===currentRelease?'현재 빌드: ':'원래 기록: ')+(release.sourceVersion||release.version));
-    if(release.sourceVersion&&release.version!==release.sourceVersion)original.title='기존 정리 번호 '+release.version;
-    article.append(original);
-    if(release!==currentRelease)article.append(el('p','dj-edition-original','개발 기록 · 운영 배포 여부 별도 확인'));
+    const isOperational=/^v?9\\.\\d+\\.\\d+$/.test(String(release.version||''))&&!release.sourceVersion;
+    if(isOperational){
+      // Display the exact deployed SemVer once; never print a second conflicting
+      // "original version" or imply that a prior production build was unshipped.
+      if(release===currentRelease)article.dataset.currentBuild='true';
+    }else{
+      const original=el('p','dj-edition-original','당시 기록: '+(release.sourceVersion||release.version));
+      if(release.sourceVersion&&release.version!==release.sourceVersion)original.title='보존된 원본 기록';
+      article.append(original);
+      if(release!==currentRelease)article.append(el('p','dj-edition-original','이전 개발 이력 · 실제 배포 여부는 별도 확인'));
+    }
     article.append(ul);parent.append(article);
     }
   }
