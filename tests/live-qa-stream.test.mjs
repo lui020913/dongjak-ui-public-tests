@@ -32,8 +32,19 @@ test('viewer triggers stream demand, pause and resume; closing viewer clears pau
  function s(role){return {data:{role,paused:false},messages:[],send(m){this.messages.push(m)},serializeAttachment(d){this.data=d},deserializeAttachment(){return this.data},close(){}}}
  const w=s('writer'),v=s('viewer'),ctx={storage:{},getWebSockets:role=>role==='writer'?[w]:[v]};
  const relay=new QASession(ctx);
- relay.liveControl();assert.deepEqual(JSON.parse(w.messages.at(-1)),{type:'control',watching:true,paused:false});
+ relay.liveControl();assert.deepEqual(JSON.parse(w.messages.at(-1)),{type:'control',watching:true,fps:60,paused:false});
  relay.webSocketMessage(v,'{"type":"pause","paused":true}');assert.equal(JSON.parse(w.messages.at(-1)).paused,true);
  const frame=new ArrayBuffer(22);relay.webSocketMessage(w,frame);assert.equal(v.messages.at(-1),frame);
- relay.webSocketClose(v,1000);assert.deepEqual(JSON.parse(w.messages.at(-1)),{type:'control',watching:false,paused:false});
+ relay.webSocketClose(v,1000);assert.deepEqual(JSON.parse(w.messages.at(-1)),{type:'control',watching:false,fps:0,paused:false});
+});
+
+test('thumbnail, focus and hidden channels negotiate rates and filter individual viewers',()=>{
+ function socket(role,fps){return {data:{role,paused:false,fps},messages:[],send(m){this.messages.push(m)},serializeAttachment(d){this.data=d},deserializeAttachment(){return this.data},close(){}}}
+ const w=socket('writer'),a=socket('viewer',3),b=socket('viewer',0),ctx={storage:{},getWebSockets:role=>role==='writer'?[w]:[a,b]};
+ const relay=new QASession(ctx);relay.liveControl();assert.equal(JSON.parse(w.messages.at(-1)).fps,3);
+ const frame=new ArrayBuffer(10);relay.webSocketMessage(w,frame);relay.webSocketMessage(w,frame);assert.equal(a.messages.length,1);assert.equal(b.messages.length,0);
+ relay.webSocketMessage(b,'{"type":"rate","fps":60}');assert.equal(JSON.parse(w.messages.at(-1)).fps,60);
+ relay.webSocketMessage(w,frame);assert.equal(b.messages.at(-1),frame);
+ relay.webSocketMessage(b,'{"type":"rate","fps":0}');relay.webSocketMessage(a,'{"type":"rate","fps":0}');assert.equal(JSON.parse(w.messages.at(-1)).fps,0);
+ assert.equal(liveMessage('viewer','{"type":"rate","fps":1000}'),null);
 });
