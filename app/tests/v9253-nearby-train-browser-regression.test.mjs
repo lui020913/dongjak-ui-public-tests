@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const read=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
 
@@ -26,7 +26,11 @@ test('distant subway vehicle AND beam remain hidden, while bus visibility is unc
 
 test('mobile Safari moves map tools beneath actual header rather than fixed guess',()=>{
   const script=read('src/mobile-browser-layout.js');
-  const css=read('../frontend/production/mobile-next.css');
+  // Public CI runs against canonical frontend sources. Protected releases
+  // copy this exact stylesheet into the isolated application as src/mobile-next.css.
+  const archived=new URL('../src/mobile-next.css',import.meta.url);
+  const canonical=new URL('../../frontend/production/mobile-next.css',import.meta.url);
+  const css=readFileSync(existsSync(archived)?archived:canonical,'utf8');
   assert.match(script,/getBoundingClientRect\?\.\(\)/);
   assert.match(script,/--dj829-tools-top/);
   assert.match(script,/ResizeObserver/);
