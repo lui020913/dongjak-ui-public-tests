@@ -5,6 +5,7 @@ import {installReadable3DLabels} from './readable-3d-labels.js';
 import {installMobileMapControls} from './mobile-map-controls.js';
 import {phoneProfile,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import './adaptive-phone-map-budget.css';
+import './button-material.css';
 import './browser-install-menu.css';
 import {installMobileLayoutCoordinator} from './mobile-ui-coordinator.js';
 import {createMapStartupLoader} from './map-startup-loader.js';

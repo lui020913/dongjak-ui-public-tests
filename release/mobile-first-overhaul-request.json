@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.41",
+  "application_version": "9.2.42",
   "public_work_branch": "main",
-  "purpose": "Expand voice search vertically with listening animation and native permission; reorganize compact metro sheet with measured header, consistent four actions, compact route strip and readable directional arrivals",
-  "attempt": 132,
+  "purpose": "Unified button material for map, transit, route, safety, community, AI, settings and entry gate; thin lip and softer shadow, preserved semantic colors and geometry",
+  "attempt": 133,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preserve approved tactile button material on all subway actions and restore the continuous rounded station-neighbor pill bar; no change to compact layout or voice panel.",
+  "last_retry_reason": "Owner requested one coherent button system across all screens, rather than localized subway appearance changes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
