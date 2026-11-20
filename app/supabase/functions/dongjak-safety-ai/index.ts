@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "npm:@supabase/supabase-js@2.57.0";
+import {explanationMode,protectionSubtype,matchesProtectionSubtype,evidenceAnswer} from "./answer-policy.mjs";
 
 const headers={"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"};
 
@@ -55,7 +56,7 @@ Deno.serve(async(req:Request)=>{
   if(origin&&!trusted)return send({message:"허용되지 않은 출처입니다."},403);
   if(!/application\/json/i.test(req.headers.get("content-type")||""))return send({message:"JSON만 지원합니다."},415);
   if(Number(req.headers.get("content-length")||0)>1500)return send({message:"요청이 너무 깁니다."},413);
-  let body:{query?:unknown};
+  let body:{query?:unknown;explanation?:unknown};
   try{const raw=await req.text();if(raw.length>1500)return send({message:"요청 크기 초과"},413);body=JSON.parse(raw);}catch{return send({message:"질문 형식을 확인해 주세요."},400);}
   const query=typeof body?.query==="string"?body.query.trim().replace(/[\u0000-\u001f]/g," "):"";
   if(query.length<2||query.length>220)return send({message:"2~220자 질문을 입력해 주세요."},400);
@@ -69,13 +70,14 @@ Deno.serve(async(req:Request)=>{
   const disclaimer="공식 자료의 보호구역 지정 기록과 사고다발지역 통계만 조회합니다. 안전등급·실제 도로 경사도·보행 접근성은 추정하지 않습니다.";
   if(UNSUPPORTED.test(query))return send({query,results:[],limited:true,semanticMode:"not_applicable",disclaimer,
     answer:"현재 자료로는 안전한 도보 경로·경사도·휠체어 접근성·결빙 위험을 검증할 수 없습니다. 실제 보행면 조사 자료가 필요합니다."});
-  const terms=extract(query);
+  const mode=explanationMode(body.explanation);
+  const category=intent(query),subtype=category==='protection_zone'?protectionSubtype(query):null;
+  const terms=subtype?[subtype,...extract(query).filter(t=>t!=='보호구역'&&t!==subtype)]:extract(query);
   if(!terms.length)return send({query,results:[],limited:true,semanticMode:"no_matches",disclaimer,
     answer:"보호구역·사고다발지역 관련 시설명이나 장소를 포함해 질문해 주세요."});
   const {data,error}=await client.rpc("dj_safety_ai_find",{p_terms:terms,p_limit:10});
   if(error){console.warn("[dj-safety-ai] lookup failed",error.code);return send({message:"검색 자료를 불러오지 못했습니다."},503);}
-  const category=intent(query);
-  const candidates=(Array.isArray(data)?data:[]).filter((r:any)=>!category||r.category===category);
+  const candidates=(Array.isArray(data)?data:[]).filter((r:any)=>(!category||r.category===category)&&matchesProtectionSubtype(r,subtype));
   let semanticMode="verified_korean_keyword_search",sim:Record<string,number>={};
   // gte-small only supports English. Use it only on *fixed English category
   // descriptions*, not Korean strings; keyword matching remains authoritative.
@@ -99,8 +101,6 @@ Deno.serve(async(req:Request)=>{
     limitations:r.limitations,longitude:r.longitude,latitude:r.latitude,
     keywordScore:r.score,semanticScore:sim[CONCEPT[r.category]]??null
   })).sort((a:any,b:any)=>b.keywordScore-a.keywordScore||(b.semanticScore??0)-(a.semanticScore??0)).slice(0,7);
-  const answer=results.length?
-    "근거 자료 "+results.length+"건이 검색됐습니다. "+results[0].description+" 아래 자료의 출처 및 측정 한계를 확인해 주세요.":
-    "일치하는 근거 자료가 없습니다. 검색 결과가 없다는 사실은 해당 지역이 안전하다는 의미가 아닙니다.";
-  return send({query,answer,results,sourceCount:18,limited:true,semanticMode,disclaimer});
+  const answer=evidenceAnswer(results,mode,category,subtype);
+  return send({query,answer,results,explanation:mode,sourceCount:18,limited:true,semanticMode,disclaimer});
 });

@@ -154,7 +154,7 @@ test('voice search has an inline status, native permission request and no duplic
 });
 test('AI dialogue preserves evidence per turn and occupies the viewport',()=>{
  const js=readFileSync(new URL('../src/v880-supabase-safety-ai.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/v880-supabase-safety-ai.css',import.meta.url),'utf8');
- assert.ok(js.includes('transcript.append(user,turn)'));assert.ok(js.includes("client.functions.invoke('dongjak-safety-ai',{body:{query}})"));assert.ok(js.includes('composer.append(form,foot)'));assert.ok(css.includes('height:var(--dj891-ai-visible-height,100dvh)!important'));assert.ok(css.includes('.dj-ai-transcript{flex:1 1 0'));
+ assert.ok(js.includes('transcript.append(user,turn)'));assert.ok(js.includes("client.functions.invoke('dongjak-safety-ai',{body:{query,explanation:profile}})"));assert.ok(js.includes('composer.append(form,foot)'));assert.ok(css.includes('height:var(--dj891-ai-visible-height,100dvh)!important'));assert.ok(css.includes('.dj-ai-transcript{flex:1 1 0'));
 });
 
 test('compact metro has one layout owner and a single content scroll',()=>{const js=readFileSync(new URL('../src/v875-mobile-stability.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');assert.ok(js.includes("panel.dataset.djTransportLayout='compact-v2'"));assert.ok(css.includes('[data-dj-transport-layout="compact-v2"][data-kind="subway"]'));assert.ok(css.includes('grid-template-columns:repeat(4,minmax(0,1fr))'));assert.ok(css.includes('font-size:14px!important;line-height:1.35!important'));});
