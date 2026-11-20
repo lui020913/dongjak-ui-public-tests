@@ -62,8 +62,60 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
     delete panel.dataset.djCompactSizing;
   };
 }
+
+/** Facility popups use the same content-first compact sizing policy. */
+export function compactFacilityHeight({header=0,body=0,viewport=0}={}){
+  const v=Math.max(320,Number(viewport)||320);
+  return Math.round(Math.max(210,Math.min(Math.floor(v*.52),
+    Math.ceil(Math.max(0,header)+Math.max(0,body)+12))));
+}
+
+export function installCompactFacilityPopups(doc=globalThis.document,win=globalThis.window){
+  const map=doc?.getElementById?.('map');
+  if(!map||!win)return ()=>{};
+  let scheduled=0,disposed=false;
+  function sync(){
+    scheduled=0;
+    if(disposed||!win.matchMedia?.('(max-width:699px)')?.matches)return;
+    for(const popup of map.querySelectorAll('.dj-place-detail-popup')){
+      if(popup.classList.contains('dj871-place-expanded')||popup.classList.contains('dj871-sheet-expanded'))continue;
+      const head=popup.querySelector('.dj-place-header');
+      const body=popup.querySelector('.dj-place-body');
+      if(!head||!body)continue;
+      const style=win.getComputedStyle?.(body);
+      const visible=[...body.children].filter(node=>!node.hidden&&win.getComputedStyle(node).display!=='none');
+      const gap=parseFloat(style?.rowGap)||0;
+      const padding=(parseFloat(style?.paddingTop)||0)+(parseFloat(style?.paddingBottom)||0);
+      const naturalBody=visible.reduce((total,node)=>total+node.getBoundingClientRect().height,0)
+        +Math.max(0,visible.length-1)*gap+padding;
+      const viewport=win.visualViewport?.height||win.innerHeight;
+      const height=compactFacilityHeight({
+        header:head.getBoundingClientRect().height,body:naturalBody,viewport
+      })+'px';
+      if(popup.style.getPropertyValue('--dj9251-facility-content-height')!==height)
+        popup.style.setProperty('--dj9251-facility-content-height',height);
+    }
+  }
+  const request=()=>{
+    if(disposed||scheduled)return;
+    scheduled=win.requestAnimationFrame?win.requestAnimationFrame(sync):win.setTimeout(sync,0);
+  };
+  const observer=typeof MutationObserver==='function'?new MutationObserver(request):null;
+  observer?.observe(map,{subtree:true,childList:true,characterData:true,
+    attributes:true,attributeFilter:['class','hidden']});
+  win.addEventListener?.('resize',request,{passive:true});
+  win.visualViewport?.addEventListener?.('resize',request,{passive:true});
+  request();
+  return ()=>{
+    disposed=true;
+    if(scheduled){win.cancelAnimationFrame?.(scheduled);win.clearTimeout?.(scheduled);}
+    observer?.disconnect();
+    win.removeEventListener?.('resize',request);
+    win.visualViewport?.removeEventListener?.('resize',request);
+  };
+}
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
-  const boot=()=>installCompactTransportSheet(document,window);
+  const boot=()=>{installCompactTransportSheet(document,window);installCompactFacilityPopups(document,window);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 }
