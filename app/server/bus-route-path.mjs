@@ -11,5 +11,5 @@ export function parseBusRoutePath(body,routeId){
   return coordinates.length>=2?coordinates:[];
 }
 export function busRoutePathUrl(key,id){
-  return 'http://ws.bus.go.kr/api/rest/busRouteInfo/getRoutePathList?'+new URLSearchParams({ServiceKey:key,busRouteId:id,resultType:'json'});
+  return 'http://ws.bus.go.kr/api/rest/busRouteInfo/getRoutePath?'+new URLSearchParams({ServiceKey:key,busRouteId:id,resultType:'json'});
 }
