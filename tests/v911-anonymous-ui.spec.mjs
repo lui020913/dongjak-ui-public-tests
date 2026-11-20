@@ -641,8 +641,10 @@ test('phone update history fades in place and never paints over bottom navigatio
     frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
    requestAnimationFrame(tick);}requestAnimationFrame(tick);
  });
- await tap(page,trigger);await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
- await tap(page,modal.locator('#version-history-close'));await expect(modal).toBeHidden();
+ // Click synchronously after starting the in-page sampler: mobile automation
+ // can postpone a high-level tap until the entrance has already finished.
+ await trigger.evaluate(button=>button.click());await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
+ await page.evaluate(()=>document.getElementById('version-history-close').click());await expect(modal).toBeHidden();
  const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){
   const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
   expect(a.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);
@@ -786,7 +788,7 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
 });
 
 
-test('live subway source artwork decodes and markers render at initial phone map zoom',{tag:'@phone-common'},async({page})=>{
+test('live train atlas and positions remain loaded but vehicle symbols are hidden at distant map zoom',{tag:'@phone-common'},async({page})=>{
   await page.addInitScript(()=>{
     localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
     localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
@@ -802,9 +804,22 @@ test('live subway source artwork decodes and markers render at initial phone map
   const map=page.locator('#map');
   await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
   await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
-  try{await expect.poll(async()=>Number(await map.getAttribute('data-dj-live-train-rendered')||0),{timeout:90000}).toBeGreaterThan(0);}catch(error){console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'),await page.locator('#dj-live-vehicle-status').textContent());throw error;}
-  console.log('TRAIN_RENDER_DIAGNOSTIC',await map.getAttribute('data-dj-live-train-diagnostics'));
-  await test.info().attach('live-train-artwork-visible',{body:await page.screenshot(),contentType:'image/png'});
+  // The intended behavior changed: user explicitly requested distant map
+  // views to hide the trains. The API feed/atlas still need to be healthy.
+  // Confirm the feed and four projected source features were received while
+  // map-rendered symbols stay at zero below the 16.4 zoom threshold.
+  await expect.poll(async()=>{
+    const value=await map.getAttribute('data-dj-live-train-diagnostics');
+    if(!value)return 0;
+    try{return Number(JSON.parse(value).features||0);}catch{return 0;}
+  },{timeout:60000}).toBeGreaterThan(0);
+  const diagnostics=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
+  expect(diagnostics.minimum).toBe(16.4);
+  expect(diagnostics.zoom).toBeLessThan(16.4);
+  expect(diagnostics.feed).toBeGreaterThan(0);
+  expect(diagnostics.rendered).toBe('0');
+  expect(Number(await map.getAttribute('data-dj-live-train-rendered')||0)).toBe(0);
+  await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
 });
 
 test('route title is a full header drag surface; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
@@ -992,6 +1007,9 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
+ // Start the RAF measurement and the click inside the same browser task.
+ // Playwright's actionability waiting can otherwise consume the 650ms
+ // sampling window before it dispatches the actual click.
  await page.evaluate(()=>{
    const samples=[];window.__dj9253OnboardFade=samples;
    const start=performance.now();
@@ -1001,8 +1019,8 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
      if(performance.now()-start<650)requestAnimationFrame(tick);
    };
    requestAnimationFrame(tick);
+   document.querySelector('#dj860-onboarding [data-dj860-action="next"]').click();
  });
- await tour.locator('[data-dj860-action="next"]').click();
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
  await page.waitForTimeout(350);
  const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
