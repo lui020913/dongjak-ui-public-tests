@@ -190,7 +190,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     article.append(header);
     const ul=el('ul','v707-release-items');
     for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
-    const isOperational=/^v?9\\.\\d+\\.\\d+$/.test(String(release.version||''))&&!release.sourceVersion;
+    const isOperational=/^v?9\.\d+\.\d+$/.test(String(release.version||''))&&!release.sourceVersion;
     if(isOperational){
       // Display the exact deployed SemVer once; never print a second conflicting
       // "original version" or imply that a prior production build was unshipped.
