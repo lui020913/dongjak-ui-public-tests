@@ -877,3 +877,20 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
+
+test('facility close remains actionable when WebKit drops the synthetic click',{tag:'@phone-common'},async({page})=>{
+  test.skip(page.viewportSize().width>=700,'phone only');
+  await ready(page);
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:map-place-selected',{
+    detail:{place:{name:'동작도서관',category:'공공기관',address:'서울특별시 동작구 장승배기로 94',lng:126.9304,lat:37.5059}}
+  })));
+  const popup=page.locator('.dj-place-detail-popup');
+  await expect(popup).toBeVisible();
+  const close=popup.locator('.dj-place-header-close');
+  await expect(close).toBeVisible();
+  // Simulate the real pointerup but deliberately omit click, as on a
+  // compositor-reparented popup header. Cleanup must still happen exactly once.
+  await close.dispatchEvent('pointerup',{isPrimary:true,button:0,pointerType:'touch'});
+  await expect(popup).toBeHidden({timeout:5000});
+  await expect(page.locator('.dj-place-detail-popup')).toHaveCount(0);
+});
