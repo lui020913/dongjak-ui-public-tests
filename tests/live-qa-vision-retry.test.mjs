@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evidenceSchema,validateReview,reviewWithRetry} from '../scripts/live-qa-vision-retry.mjs';
+const ids=['E01','E02'];
+const good={findings:[{severity:'critical',summary:'화면 잘림',evidence:ids}]};
+const ok=value=>({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(value)}]}}]})});
+const noWait=async()=>{};
+test('schema restricts evidence to exactly captured IDs',()=>{assert.deepEqual(evidenceSchema(ids).properties.findings.items.properties.evidence.items.enum,ids);assert.throws(()=>validateReview({findings:[{severity:'major',summary:'문제',evidence:['fake']}]},ids));assert.throws(()=>evidenceSchema(['E01','E01']));});
+test('HTTP 503 then invalid evidence both retry; valid defect returned unchanged',async()=>{let n=0;const r=await reviewWithRetry({ids,wait:noWait,send:async()=>++n===1?{ok:false,status:503}:n===2?ok({findings:[{severity:'critical',summary:'문제',evidence:['fake']}]}):ok(good)});assert.equal(r.status,'reviewed');assert.equal(r.attempts,3);assert.deepEqual(r.review,good);assert.deepEqual(r.failures,['Provider HTTP 503','Unverifiable review evidence']);});
+test('valid finding is never rerolled; permanent HTTP and repeated invalid output fail closed',async()=>{let n=0;const r=await reviewWithRetry({ids,wait:noWait,send:async()=>{n++;return ok(good)}});assert.equal(n,1);assert.equal(r.review.findings[0].severity,'critical');const p=await reviewWithRetry({ids,wait:noWait,send:async()=>({ok:false,status:403})});assert.equal(p.attempts,1);assert.equal(p.status,'unavailable');const b=await reviewWithRetry({ids,wait:noWait,send:async()=>ok({findings:[{severity:'major',summary:'문제',evidence:['bad']}]})});assert.equal(b.attempts,3);assert.equal(b.status,'unavailable');assert.equal(b.review,undefined);});
