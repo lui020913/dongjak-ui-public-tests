@@ -73,7 +73,9 @@ test('all primary sheets, transit and detail sheets use a dedicated top-edge swi
   }
   const css=read('src/v852-mobile-ux.css');
   assert.match(js,/panel\.querySelectorAll\(handles\)/);
-  assert.match(js,/event\.currentTarget\?\.setPointerCapture/);
+  assert.match(js,/surface\.setPointerCapture\?\.\(event\.pointerId\)/);
+  assert.match(js,/event\.target\.closest\?\.\(headerSelector\?/);
+  assert.match(js,/bindHeaderDragInput\(panel,win,/);
   assert.match(css,/\.dj-sheet-swipe-zone\s*\{\s*touch-action:pan-x/);
 });
 

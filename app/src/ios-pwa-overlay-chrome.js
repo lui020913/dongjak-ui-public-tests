@@ -2,10 +2,14 @@ const LIGHT_SURFACE = '#eaf0ec';
 const DARK_SURFACE = '#192d32';
 const BROWSER_SURFACE = '#f3f7f5';
 const BROWSER_DARK_SURFACE = '#101f25';
-const DEFAULT_SCRIM = Object.freeze({r:0,g:0,b:0,a:0.4});
 
 const SCRIM_SELECTOR = [
   '.version-history-backdrop:not([hidden])',
+  '#version-history-modal:not([hidden])',
+  '.djNext-modal:not([hidden])',
+  '#dj-mobile-header-dim',
+  '#dj-transit-signin-prompt:not([hidden])',
+  '#dj832-dongjak-boundary:not([hidden])',
   '#map-safety-backdrop:not([hidden])',
   '#map-options-backdrop:not([hidden])',
   '#djNext-layer-panel:not([hidden])',
@@ -36,7 +40,7 @@ const RELEVANT_IDS = new Set([
 ]);
 
 const RELEVANT_SELECTOR = [
-  SCRIM_SELECTOR,
+  SCRIM_SELECTOR.replaceAll(':not([hidden])',''),
   '[aria-modal="true"]',
   '[role="dialog"]',
   '[data-dj-overlay-open="true"]'
@@ -107,7 +111,7 @@ export function isIosHomeScreenPhone(win=window) {
 }
 
 function isVisible(element,win) {
-  if(!element||element.hidden||element.getAttribute?.('aria-hidden')==='true')return false;
+  if(!element||element.hidden||element.closest?.('[hidden]'))return false;
   const style=win.getComputedStyle(element);
   if(style.display==='none'||style.visibility==='hidden')return false;
   const rect=element.getBoundingClientRect();
@@ -127,15 +131,23 @@ function readElementColor(element,win,pseudo) {
   try {
     const style=win.getComputedStyle(element,pseudo);
     const color=colorFromStyle(style);
-    return color&&color.a>0.02
-      ? {color,zIndex:Number.parseInt(win.getComputedStyle(element).zIndex,10)||0}
-      : null;
+    if(!color||color.a<=0)return null;
+    const opacity=Number.parseFloat(style.opacity);
+    let alpha=color.a*(Number.isFinite(opacity)?clamp(opacity,0,1):1);
+    // Normal elements inherit the composite opacity of their ancestors.
+    // The native ::backdrop is a separate top-layer box.
+    if(!pseudo)for(let parent=element.parentElement;parent;parent=parent.parentElement) {
+      const value=Number.parseFloat(win.getComputedStyle(parent).opacity);
+      if(Number.isFinite(value))alpha*=clamp(value,0,1);
+    }
+    if(alpha<=0.001)return null;
+    return {color:{...color,a:alpha},zIndex:Number.parseInt(win.getComputedStyle(element).zIndex,10)||0};
   } catch(_error) {
     return null;
   }
 }
 
-/** Read the actual visible scrim color instead of assuming every modal is identical. */
+/** Sample real viewport scrims only; never treat an opaque bottom sheet as a dimmer. */
 export function findActiveScrim(doc,win=window) {
   let best=null;
   const width=win.innerWidth||doc.documentElement.clientWidth||1;
@@ -143,31 +155,19 @@ export function findActiveScrim(doc,win=window) {
   for(const element of doc.querySelectorAll(SCRIM_SELECTOR)) {
     if(!isVisible(element,win))continue;
     const rect=element.getBoundingClientRect();
-    const coversViewport=rect.width>=width*0.8&&rect.height>=height*0.55&&rect.bottom>=height*0.75;
-    const candidates=[];
     if(element.matches?.('dialog[open]')) {
       const nativeBackdrop=readElementColor(element,win,'::backdrop');
-      if(nativeBackdrop)candidates.push(nativeBackdrop);
+      if(nativeBackdrop)return nativeBackdrop.color;
+      continue;
     }
-    if(coversViewport) {
-      for(const pseudo of [undefined,'::before','::after']) {
-        const color=readElementColor(element,win,pseudo);
-        if(color)candidates.push(color);
-      }
-    }
-    for(const candidate of candidates) {
-      if(!best||candidate.zIndex>=best.zIndex)best=candidate;
-    }
+    const headerDim=element.id==='dj-mobile-header-dim'&&rect.top<=2;
+    const fullScrim=rect.width>=width*0.8&&rect.height>=height*0.55&&rect.bottom>=height*0.75;
+    if(!headerDim&&!fullScrim)continue;
+    const candidate=readElementColor(element,win);
+    if(!candidate||candidate.color.a>=0.995)continue;
+    if(!best||candidate.zIndex>=best.zIndex)best=candidate;
   }
   return best?.color||null;
-}
-
-function hasActiveOverlay(doc,app,win) {
-  if(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))return true;
-  if(app.classList.contains('map-controls-open'))return true;
-  /* A visible card with role=dialog is not enough: only a real viewport
-     scrim or native dialog backdrop should darken the native status strip. */
-  return !!findActiveScrim(doc,win);
 }
 
 export function installPwaOverlayChrome(doc=document,win=window) {
@@ -207,19 +207,19 @@ export function installPwaOverlayChrome(doc=document,win=window) {
   function sync() {
     enabled=isIosHomeScreenPhone(win);
     if(!enabled) {
-      restoreBrowserSurface();
+      if(root.classList.contains('dj-ios-home-pwa'))restoreBrowserSurface();
       return;
     }
 
     const theme=app.dataset.theme==='dark'?'dark':'light';
     const baseColor=theme==='dark'?DARK_SURFACE:LIGHT_SURFACE;
-    const overlayOpen=hasActiveOverlay(doc,app,win);
-    const scrimColor=overlayOpen?(findActiveScrim(doc,win)||DEFAULT_SCRIM):null;
+    const scrimColor=findActiveScrim(doc,win);
+    const overlayOpen=!!scrimColor;
     const statusColor=overlayOpen?blendHexColor(baseColor,scrimColor):baseColor;
 
     if(root.dataset.theme!==theme)root.dataset.theme=theme;
     root.classList.add('dj-ios-home-pwa');
-    root.dataset.djIosOverlayOpen=String(overlayOpen);
+    if(root.dataset.djIosOverlayOpen!==String(overlayOpen))root.dataset.djIosOverlayOpen=String(overlayOpen);
     root.style.colorScheme=theme;
     root.style.setProperty('--dj-ios-pwa-base-color',baseColor);
     root.style.setProperty('--dj-ios-pwa-status-color',statusColor);
@@ -246,11 +246,13 @@ export function installPwaOverlayChrome(doc=document,win=window) {
   if(Observer) {
     observer=new Observer(records=>{
       const changed=records.some(record=>{
+        if(record.target===themeMeta)return enabled&&themeMeta.content!==root.style.getPropertyValue('--dj-ios-pwa-status-color');
         if(record.type==='attributes')return relevantNode(record.target);
         return [...record.addedNodes,...record.removedNodes].some(relevantNode);
       });
       if(changed)schedule();
     });
+    observer.observe(themeMeta,{attributes:true,attributeFilter:['content']});
     observer.observe(body,{
       attributes:true,
       attributeFilter:['class','hidden','open','aria-hidden','aria-modal','style','data-state','data-open','data-theme'],
@@ -272,7 +274,7 @@ export function installPwaOverlayChrome(doc=document,win=window) {
     for(const media of [width,standalone])media?.removeEventListener?.('change',sync);
     win.removeEventListener?.('pageshow',sync);
     win.removeEventListener?.('resize',schedule);
-    restoreBrowserSurface();
+    if(enabled)restoreBrowserSurface();
   };
 }
 

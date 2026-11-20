@@ -51,11 +51,15 @@ test('mobile type icon separates the two syllables and mobile sheets have a real
   assert.doesNotMatch(js,/maplibregl|fetch\(|XMLHttpRequest/);
 });
 
-test('new CSS and module are loaded last without disturbing the core map entry point',()=>{
+test('shared window motion replaces the old v802 runtime without disturbing the core map entry point',()=>{
   const html=read('index.html');
   assert.match(html,/href="\/src\/v802-ui-polish\.css"/);
-  assert.match(html,/src="\/src\/v802-panel-motion\.js"/);
+  assert.doesNotMatch(html,/src="\/src\/v802-panel-motion\.js"/);
+  assert.match(html,/src="\/src\/v806-unified-ui\.js"/);
+  const motion=read('src/v806-unified-ui.js');
+  assert.match(motion,/win\.DongjakWindowMotion=\{/);
+  assert.match(motion,/windowMotionFrame\(progress,opening,distance,rect\.height,docked\)/);
   assert.ok(html.indexOf('v802-ui-polish.css')>html.indexOf('v800-ui-architecture.css'));
-  assert.ok(html.indexOf('v802-panel-motion.js')>html.indexOf('v800-ui-architecture.js'));
+  assert.ok(html.indexOf('v806-unified-ui.js')>html.indexOf('v800-ui-architecture.js'));
   assert.match(html,/src="\/src\/main\.js"/);
 });
