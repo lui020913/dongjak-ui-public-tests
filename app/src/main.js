@@ -530,10 +530,12 @@ const syncSafetyPresentation=()=>{
   const open=app.dataset.tab==='map'&&app.classList.contains('map-safety-open');
   mapSafetyToggle?.setAttribute('aria-expanded',String(open));
   if(mapSafetyToggle)mapSafetyToggle.textContent=open?'보행안전 닫기':'보행안전';
-  if(mapSafetyBackdrop)mapSafetyBackdrop.hidden=!(open&&safetyMobileView.matches);
+  if(!open&&app.classList.contains('dj-safety-peek'))app.classList.remove('dj-safety-peek');
+  if(mapSafetyBackdrop)mapSafetyBackdrop.hidden=!(open&&safetyMobileView.matches&&!app.classList.contains('dj-safety-peek'));
   mapSafetyControls?.setAttribute('aria-hidden',String(!open));
 };
 const syncSafetyMenu=opened=>{
+  if(!opened)app.classList.remove('dj-safety-peek');
   if(opened)app.classList.remove('map-controls-open');
   app.classList.toggle('map-safety-open',Boolean(opened));
   if(opened)document.getElementById('map-gesture-guide')?.setAttribute('hidden','');
@@ -1492,7 +1494,7 @@ document.getElementById('delete-point').addEventListener('click',()=>{
 map.on('click',(event)=>{
   // One-tap dismissal: tool drawers must not remain over the map after a map tap.
   if(app.classList.contains('map-controls-open'))closeMapOptions();
-  if(app.classList.contains('map-safety-open'))syncSafetyMenu(false);
+  if(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))syncSafetyMenu(false);
   if(document.getElementById('map-gesture-guide')?.hidden===false)
     document.getElementById('map-gesture-guide-close')?.click();
   const floating=document.getElementById('night-visibility-float');

@@ -77,13 +77,19 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   let closeTimer=null;
   let controller=null,seq=0,marker=null;
   let placeholderIndex=Math.floor(Math.random()*FRIENDLY_SEARCH_PLACEHOLDERS.length);
+  let placeholderTimer=0;
+  const canRotate=()=>!document.hidden&&!query.value&&document.activeElement!==query;
+  const updatePlaceholder=()=>{query.placeholder=app.dataset.djLanguage==='en'?'Where are you going?':FRIENDLY_SEARCH_PLACEHOLDERS[placeholderIndex];placeholderIndex=(placeholderIndex+1)%FRIENDLY_SEARCH_PLACEHOLDERS.length;};
+  const cancelPlaceholder=()=>{window.clearTimeout(placeholderTimer);query.classList.remove('dj-placeholder-fading');};
   const setFriendlyPlaceholder=()=>{
-    if(document.hidden||query.value||document.activeElement===query)return;
-    query.placeholder=app.dataset.djLanguage==='en'?'Where are you going?':FRIENDLY_SEARCH_PLACEHOLDERS[placeholderIndex];
-    placeholderIndex=(placeholderIndex+1)%FRIENDLY_SEARCH_PLACEHOLDERS.length;
+    if(!canRotate())return;
+    cancelPlaceholder();
+    if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){updatePlaceholder();return;}
+    query.classList.add('dj-placeholder-fading');
+    placeholderTimer=window.setTimeout(()=>{if(canRotate())updatePlaceholder();query.classList.remove('dj-placeholder-fading');},180);
   };
-  setFriendlyPlaceholder();
-  // A 10-second cycle; typing/focus is never interrupted.
+  if(canRotate())updatePlaceholder();
+  query.addEventListener('focus',cancelPlaceholder);query.addEventListener('input',cancelPlaceholder);
   window.setInterval(setFriendlyPlaceholder,10_000);
   // Search is a higher-priority overlay while the keyboard is open. Mobile
   // weather and map controls must not cover the suggestions.

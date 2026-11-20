@@ -38,7 +38,7 @@ export function installPwaStatusTone(doc=document,win=window) {
       }
       if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
       const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
-      const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||app.classList.contains('map-safety-open')||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
+      const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const color=theme==='dark'?(dimmed?'#142428':'#192d32'):(dimmed?'#bfc6c2':'#e5ece8');

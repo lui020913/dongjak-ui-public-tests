@@ -273,7 +273,7 @@ async function medianNearby(query,busKey){
 }
 async function news(query,openKey){
   const type=String(query.get('type')||'media');
-  if(!['official','media'].includes(type))return fail('유효하지 않은 뉴스 분류입니다.',400,'INVALID_NEWS_TYPE');
+  if(!['official','media','seoul'].includes(type))return fail('유효하지 않은 뉴스 분류입니다.',400,'INVALID_NEWS_TYPE');
   try{
     const result=await fetchDongjakNews({type,openApiKey:openKey,force:query.get('refresh')==='1',
       fetchOfficialApi:(service,parts)=>seoulOpenJson(openKey,service,parts)});

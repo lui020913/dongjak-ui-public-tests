@@ -83,6 +83,8 @@ export function installUnifiedUI(doc=document, win=window){
     const beforeOpacityPriority=target.style.getPropertyPriority('opacity');
     const beforeTranslate=target.style.getPropertyValue('translate');
     const beforeTranslatePriority=target.style.getPropertyPriority('translate');
+    const beforeWillChange=target.style.getPropertyValue('will-change');
+    const beforeWillChangePriority=target.style.getPropertyPriority('will-change');
     const beforeAnimation=target.style.getPropertyValue('animation');
     const beforeAnimationPriority=target.style.getPropertyPriority('animation');
     const beforeTransition=target.style.getPropertyValue('transition');
@@ -106,6 +108,7 @@ export function installUnifiedUI(doc=document, win=window){
       else target.style.removeProperty('translate');
       if(beforeClip)target.style.setProperty('clip-path',beforeClip,beforeClipPriority);
       else target.style.removeProperty('clip-path');
+      if(beforeWillChange)target.style.setProperty('will-change',beforeWillChange,beforeWillChangePriority);else target.style.removeProperty('will-change');
       if(beforeAnimation)target.style.setProperty('animation',beforeAnimation,beforeAnimationPriority);
       else target.style.removeProperty('animation');
       if(beforeTransition)target.style.setProperty('transition',beforeTransition,beforeTransitionPriority);
@@ -138,6 +141,7 @@ export function installUnifiedUI(doc=document, win=window){
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
       if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
     }
+    target.style.setProperty('will-change',fade?'opacity':docked?'translate,clip-path':'translate','important');
     target.style.setProperty('animation','none','important');
     target.style.setProperty('transition','none','important');
     target.setAttribute('data-dj810-animating',opening?'opening':'closing');

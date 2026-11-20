@@ -316,12 +316,14 @@ async function fetchOfficialApiFallback(fetchImpl,openApiKey,fetchOfficialApi){
 }
 
 export async function fetchDongjakNews({type='media',openApiKey='',fetchImpl=fetch,fetchOfficialApi,force=false,now=Date.now()}={}){
-  if(!['official','media'].includes(type))throw Object.assign(new Error('지원하지 않는 소식 유형입니다.'),{status:400});
+  if(!['official','media','seoul'].includes(type))throw Object.assign(new Error('지원하지 않는 소식 유형입니다.'),{status:400});
   const cached=cache.get(type);
   if(!force && cached && now-cached.at<TTL_MS)return cached.payload;
 
   let items=[],source='',failures=[];
-  if(type==='official'){
+  if(type==='seoul'){
+    try{const xml=await fetchText(fetchImpl,'https://mediahub.seoul.go.kr/news/rss/',{timeout:6500,accept:'application/rss+xml,application/xml,text/xml,*/*'});items=parseDongjakNewsRss(xml).map(row=>({...row,source:'서울특별시 · 내 손안에 서울'}));source='서울특별시 공식 RSS';}catch(error){failures.push('서울시 RSS 조회 실패');}
+  }else if(type==='official'){
     // A slow Seoul Open Data Plaza request must never delay an already working
     // official publisher. First usable, verified source wins within ~5 seconds.
     const sources=[
@@ -385,7 +387,7 @@ export async function fetchDongjakNews({type='media',openApiKey='',fetchImpl=fet
 
   if(!items.length){
     if(cached?.payload)return {...cached.payload,stale:true};
-    const message=type==='official'
+    const message=type==='seoul'?'서울시 공식 RSS에서 소식을 가져오지 못했습니다.':type==='official'
       ?'동작구청 공식 게시판과 서울 열린데이터광장 API에서 소식을 가져오지 못했습니다.'
       :'지역 뉴스 RSS 및 공식 보도자료에서 소식을 가져오지 못했습니다.';
     throw Object.assign(new Error(message),{status:502,detail:failures.slice(0,3)});

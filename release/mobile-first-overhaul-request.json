@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.20",
+  "application_version": "9.2.21",
   "public_work_branch": "main",
-  "purpose": "Improve dark subway colors, readable transfer badges, safe one-shot iOS theme recovery and weather sheet",
-  "attempt": 91,
+  "purpose": "Safety drawer peek, frame-driven transit follow and Seoul public news",
+  "attempt": 92,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Align exact generated-file allowlist with TIP source canonicalization; no validation bypass",
+  "last_retry_reason": "Real device feedback after 9.2.20",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -32,6 +32,8 @@ const stationLabel=s=>s?(String(s).endsWith('역')?String(s):String(s)+'역'):'�
 const destinationLabel=s=>s?(String(s).endsWith('행')?String(s):String(s)+'행'):'미제공';
 export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document){
   let active=null;
+  const stopFollowing=e=>{if(e?.originalEvent&&active){active.follow=false;}};
+  for(const event of ['dragstart','zoomstart','rotatestart','pitchstart'])map.on?.(event,stopFollowing);
   const close=()=>{const item=active;active=null;item?.popup.remove();};
   const labelStatus={0:'역 진입',1:'역 도착',2:'역 출발',3:'전역 출발'};
   function open(info){
@@ -69,7 +71,8 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
     update(info);
     const popup=new maplibregl.Popup({className:'dj-live-vehicle-popup',closeButton:true,closeOnClick:false,maxWidth:'min(286px, calc(100vw - 36px))',offset:12})
       .setLngLat(info.coordinates).setDOMContent(root).addTo(map);
-    active={popup,id:info.id,mode:info.mode,root,update,lastPosition:info.coordinates.join(','),lastText:null};
+    active={popup,id:info.id,mode:info.mode,root,update,lastPosition:info.coordinates.join(','),lastText:null,follow:true};
+    map.stop?.();map.jumpTo?.({center:info.coordinates});
     popup.on?.('close',()=>{if(active?.popup===popup)active=null;});
   }
   function render(collection){
@@ -79,11 +82,11 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
     if(!f){close();return;}
     if(item.mode!=='metro')return;
     const coord=f.geometry.coordinates,key=coord.join(',');
-    if(key!==item.lastPosition){item.popup.setLngLat(coord);item.lastPosition=key;map.fire?.('dongjak:live-vehicle-popup-move');}
+    if(key!==item.lastPosition){item.popup.setLngLat(coord);if(item.follow)map.jumpTo?.({center:coord});item.lastPosition=key;map.fire?.('dongjak:live-vehicle-popup-move');}
     const p=f.properties,text=JSON.stringify([p.line,p.color,p.vehicleLabel,p.destination,p.station,p.status,p.nextStation,p.observedAt]);
     if(text!==item.lastText){item.update(p);item.lastText=text;}
   }
-  return {open,render,close};
+  return {open,render,close,destroy(){close();for(const event of ['dragstart','zoomstart','rotatestart','pitchstart'])map.off?.(event,stopFollowing);}};
 }
 const installedLiveTransit=new WeakMap();
 export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
@@ -101,7 +104,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   const setStatus=value=>safeText(message,value);
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,intervalMs:25000,renderIntervalMs:260,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,intervalMs:25000,renderIntervalMs:8,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
@@ -144,6 +147,6 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak}){
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
   sync();
-  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);popupTracker.close();overlay.destroy();installedLiveTransit.delete(map);}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
   installedLiveTransit.set(map,handle);return handle;
 }

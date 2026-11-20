@@ -54,7 +54,7 @@ export function initDongjakNews({app,onToast=()=>{}}={}){
   const notice=document.getElementById('dongjak-news-status');
   const refreshButton=document.getElementById('dongjak-news-refresh');
   const buttons=[...document.querySelectorAll('[data-news-source]')];
-  const sources={media:'지역 뉴스',official:'동작구청 소식'};
+  const sources={media:'동작구 뉴스',official:'동작구청 소식',seoul:'서울시 소식'};
   let category='media';let busy=false;let activeController=null;let loadSequence=0;
   const latest=new Map();
   const storageKey='dongjak-news-verified-cache-v728';
@@ -64,7 +64,7 @@ export function initDongjakNews({app,onToast=()=>{}}={}){
   };
   try{
     const archived=JSON.parse(localStorage.getItem(storageKey)||'{}');
-    for(const type of ['media','official']){
+    for(const type of ['media','official','seoul']){
       const row=archived?.[type];
       if(row && Number.isFinite(row.at) && Date.now()-row.at<maxStoredAge && Array.isArray(row.items) && row.items.length){
         latest.set(type,{...row,notice:`이전 수집 자료 · ${row.notice||'업데이트 확인 중'}`});
@@ -76,7 +76,7 @@ export function initDongjakNews({app,onToast=()=>{}}={}){
     // Start both requests as soon as the map opens. Do not mutate the visible
     // news tab while another page/category is selected.
     if(preloadPromise)return preloadPromise;
-    preloadPromise=Promise.allSettled(['media','official'].map(async type=>{
+    preloadPromise=Promise.allSettled(['media','official','seoul'].map(async type=>{
       const ctrl=new AbortController();const timeout=setTimeout(()=>ctrl.abort(),13000);
       try{
         const response=await fetch(`/api/transport/news?type=${type}`,{signal:ctrl.signal});
@@ -134,11 +134,11 @@ export function initDongjakNews({app,onToast=()=>{}}={}){
       notice.textContent=`소식 조회 실패: ${errorLabel}`;
       root.replaceChildren();
       const hint=document.createElement('p');hint.className='news-empty';
-      hint.textContent=type==='official'
+      hint.textContent=type==='seoul'?'서울시 소식을 불러오지 못했습니다. 공식 뉴스룸에서 확인해 주세요.':type==='official'
         ? '구청 소식을 불러오지 못했습니다. 아래 공식 게시판에서 최신 소식을 확인할 수 있습니다.'
         : '지역 뉴스를 불러오지 못했습니다. 아래 링크에서 최신 지역 뉴스를 확인해 주세요.';
       root.append(hint);
-      {const a=document.createElement('a');a.href=type==='official'?'https://www.dongjak.go.kr/portal/bbs/B0000022/list.do?menuNo=200638':'https://news.google.com/search?q=%EB%8F%99%EC%9E%91%EA%B5%AC&hl=ko&gl=KR&ceid=KR%3Ako';a.target='_blank';a.rel='noopener noreferrer';a.textContent=type==='official'?'공식 공지사항 게시판 열기':'지역 뉴스 원문 검색 열기';root.append(a);}
+      {const a=document.createElement('a');a.href=type==='seoul'?'https://mediahub.seoul.go.kr/news/newsMain.do':type==='official'?'https://www.dongjak.go.kr/portal/bbs/B0000022/list.do?menuNo=200638':'https://news.google.com/search?q=%EB%8F%99%EC%9E%91%EA%B5%AC&hl=ko&gl=KR&ceid=KR%3Ako';a.target='_blank';a.rel='noopener noreferrer';a.textContent=type==='seoul'?'서울시 뉴스룸 열기':type==='official'?'공식 공지사항 게시판 열기':'지역 뉴스 원문 검색 열기';root.append(a);}
       if(force)onToast('소식 조회에 실패했습니다. 연결 상태를 확인해 주세요.');
     }finally{clearTimeout(timer);if(seq===loadSequence){busy=false;activeController=null;refreshButton.disabled=false;}}
   }

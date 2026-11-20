@@ -154,6 +154,10 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
         'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
+      if(id==='map-safety-controls'&&app.classList.contains('dj-safety-peek')&&g.dragging){
+        if(projected<-30||delta<-25)app.classList.remove('dj-safety-peek');
+        settleMobileSheetDrag(panel,win);return;
+      }
       // Expansion and collapse are two distinct, deliberate stops. A downward
       // gesture from the expanded state first returns to compact; a second
       // downward gesture closes the sheet.
@@ -164,6 +168,12 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       if(expandable&&g.dragging&&delta>9&&panel.classList.contains('dj871-sheet-expanded')){
         setMobileSheetExpanded(panel,false,doc,win);
         return;
+      }
+      // Safety layers remain active while the tool drawer is lowered for map inspection.
+      if(id==='map-safety-controls'&&g.dragging){
+        if(projected>65||delta>45)app.classList.add('dj-safety-peek');
+        else if(projected<-45||delta<-35)app.classList.remove('dj-safety-peek');
+        settleMobileSheetDrag(panel,win);return;
       }
       const close=g.dragging&&(delta>105||(delta>45&&projected>105));
       if(!close){settleMobileSheetDrag(panel,win);return;}

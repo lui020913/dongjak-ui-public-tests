@@ -613,3 +613,13 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-head{position:relative!important;padding-top:20px!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj854-weather-sheet .dj-weather-edge-drag{position:absolute!important;top:6px!important;left:50%!important;translate:-50% 0!important;width:38px!important;height:4px!important;border-radius:999px!important;background:#9ba9a4!important;pointer-events:none!important}
 }
+
+/* Safety drawer peek: keep active layers, expose interactive map, retain header/X. */
+@media(max-width:699px){
+html body #app#app#app#app#app#app#app#app#app#app#app#app.map-safety-open.dj-safety-peek #map-safety-controls{height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app.map-safety-open.dj-safety-peek #map-safety-controls>:not(.map-safety-head){display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app.map-safety-open.dj-safety-peek #map-safety-backdrop{display:none!important;pointer-events:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-query::placeholder{opacity:1;transition:opacity 180ms ease}
+html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-query.dj-placeholder-fading::placeholder{opacity:0!important}
+}
+@media(prefers-reduced-motion:reduce){#app #map-quick-search-query::placeholder{transition:none!important}}

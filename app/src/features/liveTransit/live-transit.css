@@ -36,7 +36,7 @@ html body #app#app#app#app#app#app#app#app#app .dj-live-vehicle-popup .dj-live-t
 html body #app#app#app#app#app#app#app#app#app .dj-live-vehicle-popup .maplibregl-popup-close-button{
   position:absolute!important;top:9px!important;right:9px!important;left:auto!important;bottom:auto!important;
   box-sizing:border-box!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
-  max-width:40px!important;max-height:40px!important;border-radius:11px!important;margin:0!important;
+  max-width:40px!important;max-height:40px!important;border-radius:999px!important;margin:0!important;
 }
 html body #app#app#app#app#app#app#app#app#app .dj-live-vehicle-popup .dj-live-train-details{
   display:grid!important;gap:5px!important;margin:5px 0 9px!important;padding:6px 0 8px!important;border-top:1px solid #829b8e48!important;
