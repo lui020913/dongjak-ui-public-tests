@@ -25,7 +25,7 @@ jobs:
           node-version: '24'
       - name: Verify relay and install pinned Wrangler
         run: |
-          node --test tests/live-qa-relay.test.mjs
+          node --test tests/live-qa-relay.test.mjs tests/live-qa-stream.test.mjs
           npm install --prefix "$RUNNER_TEMP/qa-wrangler" --no-audit --no-fund --ignore-scripts wrangler@4.160.1
       - name: Deploy dedicated Worker and secrets without exposing credentials
         env:
