@@ -77,18 +77,34 @@
 }
 
 
-/* Dimmed state: blend the native strip into the existing scrim with a bounded local blur. */
+/* The iOS-owned strip cannot be painted by the web app. Paint one fixed,
+   non-interactive transition ABOVE the isolated app scrim, not behind it.
+   The first pixels match the native theme hint exactly; the gradient fades
+   to zero alpha over the existing dimmer (no second dark overlay). */
 @media(max-width:699px){
-html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{
-  position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 144px);z-index:60000;pointer-events:none;
-  background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,var(--dj-pwa-native-edge) 7%,color-mix(in srgb,var(--dj-pwa-native-edge) 92%,transparent) 18%,color-mix(in srgb,var(--dj-pwa-native-edge) 55%,transparent) 48%,transparent 100%);
-  opacity:0;transition:opacity .30s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important;
-  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
-  mask-image:linear-gradient(to bottom,#000 0%,#000 32%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 32%,transparent 100%);
+html.dj-ios-home-pwa{
+  --dj-pwa-bridge-height:calc(env(safe-area-inset-top,0px) + 112px);
+  --dj-pwa-bridge-gradient:linear-gradient(to bottom,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0px,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 2px,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 84%,transparent) 22%,color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 40%,transparent) 55%,transparent 100%);
 }
-html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app #dj-ios-pwa-status-bridge{opacity:1}
-@media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app #dj-ios-pwa-status-bridge{transition:none}}
+html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{
+  display:block!important;position:fixed!important;inset:0 0 auto!important;width:100%!important;height:var(--dj-pwa-bridge-height)!important;z-index:2147483000!important;pointer-events:none!important;
+  background:var(--dj-pwa-bridge-gradient)!important;
+  opacity:0;transition:opacity .18s ease;animation:none!important;transform:none!important;translate:none!important;filter:none!important;
 }
+html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body > #dj-ios-pwa-status-bridge{opacity:1}
+}
+/* Native dialog backdrops are in the top layer above any ordinary DOM node.
+   Use their own existing scrim, and suppress the ordinary bridge while open. */
+@media(max-width:699px){
+html.dj-ios-home-pwa:has(#dj-ai-search-modal[open]) body > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
+html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
+  background-image:var(--dj-pwa-bridge-gradient)!important;
+  background-size:100% var(--dj-pwa-bridge-height)!important;
+  background-repeat:no-repeat!important;
+  background-position:top center!important;
+}
+}
+@media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body > #dj-ios-pwa-status-bridge{transition:none!important}}
 
 @media(max-width:699px){html.dj-ios-home-pwa{background-color:var(--dj-pwa-status-color,var(--dj-pwa-land-tone))!important}}
 

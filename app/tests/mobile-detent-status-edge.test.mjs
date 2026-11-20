@@ -13,4 +13,4 @@ test('normal and dimmed map edge use the same native-edge palette without blurri
  assert.match(s,/background:#ffffff!important/);
 });
 
-test('dimmed status bridge applies a bounded fade-out blur without covering the whole map',()=>{const s=read('src/mobile-pwa-status-tone-v793.css');assert.match(s,/backdrop-filter:blur\(9px\)/);assert.match(s,/mask-image:linear-gradient\(to bottom,#000 0%,#000 32%,transparent 100%\)/);assert.match(s,/pointer-events:none/);});
+test('dimmed status bridge matches the native edge and stays above the isolated app without blocking taps',()=>{const s=read('src/mobile-pwa-status-tone-v793.css'),js=read('src/mobile-pwa-status-tone-v793.js');assert.ok(s.includes('body > #dj-ios-pwa-status-bridge'));assert.ok(s.includes('var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0px'));assert.ok(s.includes('transparent 100%'));assert.ok(s.includes('pointer-events:none!important'));assert.ok(s.includes('z-index:2147483000!important'));assert.ok(s.includes('#dj-ai-search-modal[open]::backdrop'));assert.ok(js.includes('doc.body.appendChild(bridge)'));assert.ok(js.includes('observer.observe(doc.body'));});

@@ -16,7 +16,7 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
  assert.match(workflow,/needs: \[build, preview, mobile-qa, desktop-tablet-qa\]/);
  assert.match(workflow,/if: needs\.mobile-qa\.result == 'success' && needs\.desktop-tablet-qa\.result == 'success'/);
- assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\//);
+ assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\|iOS PWA dimmed status edge\//);
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{

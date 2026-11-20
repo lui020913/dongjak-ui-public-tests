@@ -51,10 +51,10 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#e5ece8';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#eaf0ec';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#192d32':'#e5ece8')
+          ? (displayTheme==='dark'?'#192d32':'#eaf0ec')
           : (displayTheme==='dark'?'#101f25':'#f3f7f5');
       })();
     </script>

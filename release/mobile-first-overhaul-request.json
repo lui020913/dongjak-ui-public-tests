@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.29",
+  "application_version": "9.2.30",
   "public_work_branch": "main",
-  "purpose": "Allow installed iPad PWA and restore moving pill dock indicator while retaining official bus route paths",
-  "attempt": 105,
+  "purpose": "Blend iOS installed PWA status strip into active dimmed map, including native AI dialog backdrop",
+  "attempt": 106,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Mobile shard 7 exposed dock selection indicator hidden by five-track rule; preserve out-of-flow indicator and test visible alignment",
+  "last_retry_reason": "User requested smooth gradient at iOS status bar and dimmed content boundary",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

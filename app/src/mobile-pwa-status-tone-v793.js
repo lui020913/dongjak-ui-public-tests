@@ -36,9 +36,9 @@ export function installPwaStatusTone(doc=document,win=window) {
         band.setAttribute('aria-hidden','true');
         app.appendChild(band);
       }
-      if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
+      if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');doc.body.appendChild(bridge);}
       const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
-      const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm'].some(visible);
+      const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal'].some(id=>id!=='dj-ai-search-modal'&&visible(id));
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const color=theme==='dark'?'#192d32':'#eaf0ec';
@@ -53,14 +53,15 @@ export function installPwaStatusTone(doc=document,win=window) {
     }
   }
   let frame=0;
-  const dimIds=new Set(['dj-ai-search-modal','map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm']);
+  const dimIds=new Set(['map-gesture-guide','djNext-layer-panel','djNext-permissions','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal']);
   const relevant=node=>node&& (node===app||dimIds.has(node.id));
   const observer=new MutationObserver(records=>{
     if(!records.some(record=>record.type==='attributes'?relevant(record.target):[...record.addedNodes,...record.removedNodes].some(node=>relevant(node)||node.querySelector?.([...dimIds].map(id=>'#'+id).join(',')))))return;
     if(frame)return;
     if(typeof win.requestAnimationFrame==='function')frame=win.requestAnimationFrame(()=>{frame=0;sync();});else sync();
   });
-  observer.observe(app,{attributes:true,attributeFilter:['data-theme','class','hidden','aria-hidden','open'],childList:true,subtree:true});
+  // AI uses a native dialog attached to body, not to the isolated application.
+  observer.observe(doc.body,{attributes:true,attributeFilter:['data-theme','class','hidden','aria-hidden','open'],childList:true,subtree:true});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);

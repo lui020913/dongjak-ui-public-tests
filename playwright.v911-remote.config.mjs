@@ -24,5 +24,5 @@ export default defineConfig({
   // worker per runner avoids software-WebGL contention during frame sampling.
   fullyParallel:true,workers:1,retries:0,reporter:[['list'],['html',{open:'never'}]],
   use:{baseURL:process.env.DONGJAK_TARGET_URL,browserName:'chromium',screenshot:'only-on-failure',trace:'off',video:'off',launchOptions:{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}},
-  projects:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:phoneCoverage[name],use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:/layer header follows a real pointer|phone update history fades in place/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
+  projects:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:phoneCoverage[name],use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:/layer header follows a real pointer|phone update history fades in place|iOS PWA dimmed status edge/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
 });
