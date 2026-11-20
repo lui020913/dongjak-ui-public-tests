@@ -35,7 +35,13 @@ export function buildGenerationCatalog(releases,reviewRelease){
   else if(sourceScale==='minor'||sourceScale==='major'){minor++;patch=0;classification='minor';}
   else{patch++;classification='patch';}
   const group=groups.get(major)||{label:`${major}.x`,title:HISTORY_GENERATIONS[major-1].title,historical:true,records:[]};
-  group.records.push({record,classification,sourceScale,displayVersion:`v${major}.${minor}.${patch}`});groups.set(major,group);
+  // Catalog stages are editorial groupings, not real application versions.
+  // Every 9.x operational release MUST retain the exact shipped SemVer.
+  // Only archival pre-9.x records retain their documented retrospective labels.
+  const actualVersion=String(record?.version||'').replace(/^v/,'');
+  const operational=/^9\\.\\d+\\.\\d+$/.test(actualVersion);
+  const displayVersion=operational?'v'+actualVersion:`v${major}.${minor}.${patch}`;
+  group.records.push({record,classification:operational?sourceScale:classification,sourceScale,displayVersion,operational});groups.set(major,group);
  }
  return [...groups.values()].reverse().map(group=>({...group,records:group.records.reverse()}));
 }
