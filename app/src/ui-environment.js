@@ -31,22 +31,32 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
   if(!label||!button)return;
   let current={latitude:37.4987,longitude:126.9494,name:'동작구'};
   let controller=null;
-  let lastFetchedAt=0;
+  let lastFetchedAt=0,lastReading=null;
   const CACHE_MS=10*60*1000;
+  function showWeather(state,reading,message=''){
+    const samePlace=reading&&reading.latitude===current.latitude&&reading.longitude===current.longitude;
+    const usable=samePlace?reading:null;
+    label.dataset.djWeatherState=state;
+    label.dataset.djWeatherTemperature=usable?.temperature||'';
+    if(title)title.textContent=current.name;
+    const suffix=state==='loading'?' · 갱신 중':state==='error'?' · 갱신 실패 (이전 값)':'';
+    label.textContent=usable?usable.summary+suffix:state==='error'?'날씨 조회 실패':'날씨 조회 중';
+    label.title=message||(usable?.detail||'상세 기상 정보를 불러오는 중입니다.');
+  }
   async function refresh({force=false}={}){
     if(!force && lastFetchedAt && Date.now()-lastFetchedAt<CACHE_MS)return;
-    controller?.abort();controller=new AbortController();
-    label.textContent='날씨 조회 중';
+    controller?.abort();const request=new AbortController();controller=request;
+    const place={...current};
+    showWeather('loading',lastReading);
     try{
-      const w=await fetchCurrentWeather({...current,signal:controller.signal});
+      const w=await fetchCurrentWeather({...place,signal:request.signal});
+      if(controller!==request||request.signal.aborted)return;
       lastFetchedAt=Date.now();
-      label.textContent=`${w.temperature.toFixed(0)}° · ${w.weather}`;
-      if(title)title.textContent=current.name;
-      label.title=`체감 ${w.apparentTemperature.toFixed(0)}° · 강수 ${w.precipitation}mm · 풍속 ${w.wind}km/h · ${w.time||'조회'}`;
+      lastReading={...place,temperature:`${w.temperature.toFixed(0)}°`,summary:`${w.temperature.toFixed(0)}° · ${w.weather}`,detail:`체감 ${w.apparentTemperature.toFixed(0)}° · 강수 ${w.precipitation}mm · 풍속 ${w.wind}km/h · ${w.time||'관측시각 미확인'}`};
+      showWeather('ready',lastReading);
     }catch(error){
-      if(error?.name==='AbortError')return;
-      label.textContent='날씨 조회 실패';
-      label.title='인터넷 연결 후 다시 시도하세요.';
+      if(controller!==request||request.signal.aborted||error?.name==='AbortError')return;
+      showWeather('error',lastReading,'인터넷 연결 후 다시 시도하세요.'+(lastReading?.latitude===place.latitude&&lastReading?.longitude===place.longitude?' 표시된 온도는 이전 조회값입니다.':''));
     }
   }
   button.addEventListener('click',async()=>{
@@ -58,11 +68,11 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
       const {latitude,longitude}=pos.coords||{};
       if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표 없음');
       current={latitude,longitude,name:'내 위치'};
-      onMessage('현재 위치를 기준으로 날씨를 조회합니다.');
       await refresh({force:true});
     }catch(error){
-      onMessage(error?.code===1?'위치 권한이 거부되었습니다. 동작구 날씨를 유지합니다.':'현재 위치를 확인하지 못했습니다. 동작구 날씨를 유지합니다.');
-      await refresh({force:true});
+      const message=error?.code===1?'위치 권한이 거부되었습니다. 기존 지역 날씨를 유지합니다.':'현재 위치를 확인하지 못했습니다. 기존 지역 날씨를 유지합니다.';
+      if(document.getElementById('dj854-weather-sheet')?.hidden!==false)onMessage(message);
+      else label.title=message;
     }finally{button.disabled=false;button.textContent='내 위치';}
   });
   // Details opens on click; fetching is never the implicit effect of opening.

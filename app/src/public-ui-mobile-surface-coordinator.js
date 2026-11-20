@@ -169,6 +169,11 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
       if(win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
     }else if(scale&&!scaleObserver&&win.MutationObserver){scaleObserver=new win.MutationObserver(schedule);scaleObserver.observe(scale,{attributes:true,attributeFilter:['style']});if(scale.parentElement)scaleObserver.observe(scale.parentElement,{attributes:true,attributeFilter:['style']});}
     const tip=doc.getElementById('dj840-map-tip');
+    const legend=doc.getElementById('dj-pri-legend');
+    if(legend){
+      const occupied=[scale,tip,nav].filter(visible).map(node=>node.getBoundingClientRect().top).filter(y=>y>0&&y<h);
+      set('--dj-pri-legend-bottom',occupied.length?Math.max(8,Math.ceil(h-Math.min(...occupied)+8))+'px':null);
+    }
     if(tip&&app.dataset.djUserTipDismissed!=='true'&&app.dataset.dj910SheetOpen!=='true'&&visible(tip)&&dock!==null){
       const tipRect=tip.getBoundingClientRect();
       if(tipRect.height>0){

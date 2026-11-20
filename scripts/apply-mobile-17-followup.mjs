@@ -51,7 +51,7 @@ const controllerFile=resolve(root,controller);
 let controllerSource=readFileSync(controllerFile,'utf8');
 const oldExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id)";
 if(controllerSource.split(oldExpandable).length!==3)throw Error('Shared sheet expansion anchors changed');
-controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel'].includes(id)");
+ controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id)");
 writeFileSync(controllerFile,controllerSource);
 // A gesture has already animated the panel; do not replay the More exit.
 replace(controller,"if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;","if(id==='dj-mobile-utilities')panel.dispatchEvent(new CustomEvent('dongjak:close-more',{detail:{immediate:true}}));\n        else if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;");
