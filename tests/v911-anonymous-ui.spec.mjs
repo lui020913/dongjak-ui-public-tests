@@ -962,6 +962,19 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  const hb=await search.boundingBox(),pb=await panel.boundingBox();
  expect(hb.y+hb.height).toBeLessThanOrEqual(pb.y+2);
  const header=panel.locator('.ped-tools-panel-head');await expect(header).toBeVisible();
+ // The touch must begin on the *settled* visible header. Previously this
+ // browser check pressed coordinates while the sheet was still sliding upward;
+ // the header moved from under the pointer, so it never tested a real swipe.
+ await expect.poll(()=>page.evaluate(()=>{
+   const head=document.querySelector('#ped-tools-panel .ped-tools-panel-head');
+   const pane=document.getElementById('ped-tools-panel');
+   const rect=head?.getBoundingClientRect();
+   if(!rect||rect.height<24||rect.bottom>innerHeight||
+      pane?.dataset.dj810Animating==='opening')return false;
+   const hit=document.elementFromPoint(rect.x+Math.min(64,rect.width/4),rect.y+rect.height/2);
+   return hit===head||head.contains(hit);
+ }),{timeout:10000}).toBe(true);
+ await page.waitForTimeout(380);
  const r=await header.boundingBox();
  await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2);
  await page.mouse.down();
