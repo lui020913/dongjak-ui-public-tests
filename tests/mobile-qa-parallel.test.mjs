@@ -20,7 +20,7 @@ test('release QA parallelizes independent tests in the same spec, with all phone
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{
- const config=read('playwright.v911-remote.config.mjs'),spec=read('tests/v911-anonymous-ui.spec.mjs');
+ const config=read('playwright.v911-remote.config.mjs'),spec=read('tests/v911-anonymous-ui.spec.mjs'),layout=read('tests/mobile-first-unified-layout.spec.mjs');
  const cases=[...spec.matchAll(/^test\('([^']+)',\{tag:'(@[\w-]+)'\},async\(/gm)].map(m=>({name:m[1],tag:m[2]}));
  assert.equal(cases.length,[...spec.matchAll(/^test\(/gm)].length,'new tests must declare a coverage tag');
  assert.equal(new Set(cases.map(c=>c.name)).size,cases.length);
@@ -37,6 +37,6 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  assert.match(config,/mobile375:\/@phone-layout\//);
  assert.match(config,/mobile390:\/@phone-\(\?:layout\|common\|platform\)\//);
  assert.match(config,/mobile430:\/@phone-\(\?:layout\|platform\)\//);
- assert.match(config,/grep:fullMobileQA\?allPhoneCases:phoneCoverage\[name\]/);
+ assert.match(config,/allPhoneCases=\/@phone-\(\?:layout\\|common\\|platform\\|ios\)\//);\n assert.match(config,/testMatch:\['v911-anonymous-ui\.spec\.mjs','mobile-first-unified-layout\.spec\.mjs'\]/);\n assert.match(layout,/installed iOS PWA status color follows scrims, native dialogs, and both themes @phone-ios/);\n assert.match(config,/grep:fullMobileQA\?allPhoneCases:phoneCoverage\[name\]/);
  assert.match(config,/DONGJAK_FULL_MOBILE_QA==='1'/);
 });
