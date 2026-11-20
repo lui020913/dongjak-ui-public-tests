@@ -63,3 +63,37 @@
     transition:none!important;
   }
 }
+
+/* Preserve the opaque, sharp search surface while the native status strip
+   follows the active scrim. These controls remain above the map seam. */
+@media (max-width:699px) {
+  html.dj-ios-home-pwa body #app .topbar {
+    background:transparent!important;
+    background-image:none!important;
+    opacity:1!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    z-index:3101!important;
+  }
+  html.dj-ios-home-pwa body #app .topbar>.map-quick-search,
+  html.dj-ios-home-pwa body #app .topbar>.map-quick-search .map-quick-search-form,
+  html.dj-ios-home-pwa body #app .topbar #map-quick-search-query {
+    opacity:1!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  html.dj-ios-home-pwa body #app:not([data-theme="dark"]) .topbar>.map-quick-search .map-quick-search-form {
+    background:#ffffff!important;
+    background-image:none!important;
+    border-color:#d7e6de!important;
+  }
+  html.dj-ios-home-pwa body #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form {
+    background:#20383d!important;
+    background-image:none!important;
+    border-color:#526e66!important;
+  }
+}
