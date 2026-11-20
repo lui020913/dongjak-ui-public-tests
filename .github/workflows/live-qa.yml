@@ -28,6 +28,9 @@ on:
         default: false
 permissions:
   contents: read
+concurrency:
+  group: live-qa-${{ github.event_name == 'workflow_dispatch' && inputs.remote && 'remote' || github.run_id }}
+  cancel-in-progress: false
 jobs:
   check:
     runs-on: ubuntu-24.04
@@ -44,8 +47,10 @@ jobs:
           node --check scripts/live-qa-pixels.mjs
           node --check scripts/live-qa-reporter.mjs
           node --check scripts/live-qa-relay.mjs
+          node --check scripts/live-qa-stream.mjs
+          node --check qa-relay/live-stream.mjs
           node --check qa-relay/worker.mjs
-          node --test tests/live-qa-relay.test.mjs
+          node --test tests/live-qa-relay.test.mjs tests/live-qa-stream.test.mjs
           node --check tests/live-qa-fixture.mjs
           node --check playwright.v911-remote.config.mjs
           node --input-type=module -e "import fs from 'node:fs'; fs.writeFileSync('/tmp/live-qa-dashboard.js',fs.readFileSync('scripts/live-qa.html','utf8').split('<script>')[1].split('</script>')[0])"
@@ -107,6 +112,12 @@ jobs:
           path: qa-artifacts/
           retention-days: 3
   capture:
+    name: Capture lane ${{ matrix.lane }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        lane: ${{ fromJSON(inputs.full && '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]' || '[1,2,3,4,5,6,7,8]') }}
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.actor == 'lui020913'
     needs: smoke
     runs-on: ubuntu-24.04
@@ -123,6 +134,8 @@ jobs:
         env:
           DONGJAK_TARGET_URL: ${{ inputs.target }}
           FULL: ${{ inputs.full }}
+          QA_LANE: ${{ matrix.lane }}
+          QA_SHARD_TOTAL: ${{ inputs.full && '20' || '8' }}
           REMOTE: ${{ inputs.remote }}
           QA_RELAY_URL: ${{ inputs.remote && vars.QA_RELAY_URL || '' }}
           QA_WRITER_KEY: ${{ inputs.remote && secrets.QA_WRITER_KEY || '' }}
@@ -145,6 +158,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: anonymous-visual-audit-${{ github.run_id }}
+          name: anonymous-visual-audit-${{ github.run_id }}-lane-${{ matrix.lane }}
           path: qa-artifacts/
           retention-days: 7
