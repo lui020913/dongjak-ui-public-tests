@@ -39,7 +39,7 @@ export function buildGenerationCatalog(releases,reviewRelease){
   // Every 9.x operational release MUST retain the exact shipped SemVer.
   // Only archival pre-9.x records retain their documented retrospective labels.
   const actualVersion=String(record?.version||'').replace(/^v/,'');
-  const operational=/^9\\.\\d+\\.\\d+$/.test(actualVersion);
+  const operational=/^9\.\d+\.\d+$/.test(actualVersion);
   const displayVersion=operational?'v'+actualVersion:`v${major}.${minor}.${patch}`;
   group.records.push({record,classification:operational?sourceScale:classification,sourceScale,displayVersion,operational});groups.set(major,group);
  }
