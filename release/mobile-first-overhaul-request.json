@@ -3,9 +3,9 @@
   "application_version": "9.2.51",
   "public_work_branch": "main",
   "purpose": "Unified iPhone-like fades for mobile bottom sheets, AI content entrance/exit and view transitions; content-sized bus, subway and facility cards without whitespace; forward radiating subway headlights drawn separately from existing front lamps; preserve previous community, route and quick-tab fixes.",
-  "attempt": 147,
+  "attempt": 148,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New source patch #104 merged and public source CI 44826992492 fully passed. Previous 9.2.50 protected production 44824314477 succeeded. Start fresh v9.2.51 Preview, full phone QA, visual and Gemini gates and protected Production; no bypass.",
+  "last_retry_reason": "Retry v9.2.51 with updated phone-only browser regression contract: preserve full slide direction/duration, fixed backdrop, alpha ramp and interrupted-motion behavior; obsolete opacity===1 assertion conflicted with requested fade. PR #104 source and visual design are unchanged; require complete protected QA again.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
