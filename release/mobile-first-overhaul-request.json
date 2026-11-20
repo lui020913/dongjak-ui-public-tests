@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.50",
+  "application_version": "9.2.51",
   "public_work_branch": "main",
-  "purpose": "Mobile community, iOS AI keyboard, tab and sheet transitions, layer and PRI HUD, nearby safety and weather stabilization; chronological display history; live subway icon size, lane direction and headlights; startup build version.",
-  "attempt": 146,
+  "purpose": "Mobile unified slide/fade and interrupted-motion continuity, compact bus/subway/facility information cards, iOS AI content fade with opaque backdrop, dual forward radial beams preserving original train headlights.",
+  "attempt": 1,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Retry v9.2.50 after approved PR #103 corrected final native iOS status edge verification mismatch; #102 resolved swift tab QA and shortened disposable artifact retention. All protected mobile and Gemini gates remain enforced.",
+  "last_retry_reason": "New v9.2.51 patch after successful v9.2.50 protected release and PR #104 public-app CI. Never bypass Preview, phone QA or protected Production gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
