@@ -852,5 +852,7 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  await expect.poll(async()=>{const b=await buttons.evaluateAll(ns=>ns.map(n=>({r:n.getBoundingClientRect().toJSON(),s:getComputedStyle(n).boxShadow})));return b.length===4&&b.every(x=>Math.abs(x.r.top-b[0].r.top)<1&&Math.abs(x.r.width-b[0].r.width)<2&&x.s!=='none');}).toBe(true);
  await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
  await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
+ await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','999px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
+ await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image',/linear-gradient/);await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/inset/);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
