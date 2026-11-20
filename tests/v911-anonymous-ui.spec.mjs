@@ -935,3 +935,62 @@ test('the rendered history keeps the real production SemVer instead of catalog r
  await expect(latest).toHaveAttribute('data-display-version','v'+version);
  expect((await latest.locator('h4').textContent()).trim()).toBe('v'+version);
 });
+
+
+test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ const search=page.locator('#map-quick-search'),ai=page.locator('#dj890-ai-orb');
+ await expect(search).toBeVisible();await expect(ai).toBeVisible();
+ const sb=await search.boundingBox(),ab=await ai.boundingBox();
+ expect(sb.x+sb.width).toBeLessThanOrEqual(ab.x+1);
+ await tap(page,tab(page,'participate'));
+ const categories=page.locator('#participation-panel .community-category-tabs');
+ await expect(categories).toBeVisible();
+ const intro=page.locator('#participation-panel .dj-page-intro');
+ const cb=await categories.boundingBox(),ib=await intro.boundingBox();
+ expect(cb.y+cb.height).toBeLessThanOrEqual(ib.y+2);
+ await categories.locator('[data-community-filter="보행 불편"]').click();
+ await expect(categories.locator('[data-community-filter="보행 불편"]')).toHaveAttribute('aria-pressed','true');
+ await tap(page,tab(page,'map'));
+ await page.evaluate(()=>document.getElementById('ped-nearby-open')?.click());
+ const panel=page.locator('#ped-tools-panel');await expect(panel).toBeVisible();
+ await expect(search).toBeVisible();
+ const hb=await search.boundingBox(),pb=await panel.boundingBox();
+ expect(hb.y+hb.height).toBeLessThanOrEqual(pb.y+2);
+ const header=panel.locator('.ped-tools-panel-head');await expect(header).toBeVisible();
+ const r=await header.boundingBox();
+ await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2);
+ await page.mouse.down();
+ await page.mouse.move(r.x+Math.min(64,r.width/4),r.y+r.height/2-135,{steps:10});
+ await page.mouse.up();
+ await expect(panel).toHaveClass(/dj871-sheet-expanded/,{timeout:7000});
+ await expect(search).toBeVisible();
+ const expanded=await panel.boundingBox(),searchBox=await search.boundingBox();
+ expect(expanded.y).toBeGreaterThanOrEqual(searchBox.y+searchBox.height-3);
+});
+
+test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await ready(page,{keepTour:true});
+ const tour=page.locator('#dj860-onboarding');
+ await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
+ await page.evaluate(()=>{
+   const samples=[];window.__dj9253OnboardFade=samples;
+   const start=performance.now();
+   const tick=()=>{
+     const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
+     if(pane)samples.push(Number(getComputedStyle(pane).opacity));
+     if(performance.now()-start<650)requestAnimationFrame(tick);
+   };
+   requestAnimationFrame(tick);
+ });
+ await tour.locator('[data-dj860-action="next"]').click();
+ await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
+ await page.waitForTimeout(350);
+ const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
+ expect(samples.some(x=>x<.75)).toBe(true);
+ await tour.locator('[data-dj860-action="skip"]').click();
+ await expect(tour).toBeHidden();
+});
