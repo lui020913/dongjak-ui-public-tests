@@ -25,9 +25,9 @@ test('저장된 안전정보가 없으면 빈 안내창은 다시 열지 않고 
 });
 
 test('시설 상세 레이아웃은 주소·연락처 두 열 정렬이고 지도 출처는 지도 옵션에서 확인하고 우하단 독립 아이콘은 없앤다',()=>{
-  assert.match(read('src/v718-facts-empty.css'),/grid-template-columns:minmax\(64px,75px\) minmax\(0,1fr\)/);
+  assert.match(read('src/mobile-ui-baseline.css'),/grid-template-columns:minmax\(64px,75px\) minmax\(0,1fr\)/);
   assert.match(read('src/main.js'),/attributionControl:false/);
   assert.doesNotMatch(read('src/main.js'),/new maplibregl\.AttributionControl/);
   assert.match(read('index.html'),/dj-map-attribution-details/);
-  assert.match(read('src/main.js'),/import '\.\/v718-facts-empty\.css'/);
+  assert.match(read('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
 });
