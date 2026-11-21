@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.72",
+  "application_version": "9.2.73",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 unified mobile UI overhaul from PR #218: full-viewport appropriately sized onboarding; redesigned route form/cards, real start/end labels, selectable full route fit, explicit data uncertainty; native full-page enter/exit fades with opaque map guard; coherent shared buttons/icons, My Info background and language relocation; safe area bounded layer expansion; AI modal crossfade; selected transfer-line ring only for interchange and transit panel controls; Strict Preview→12 phone QA→6 visual capture/analysis→explore QA→protected Production.",
-  "attempt": 202,
+  "purpose": "v9.2.73 release retry with v9.2.72 full mobile UI redesign preserved; regression suite test path fixed for sealed app-source build; Preview → phone QA → visual QA → exploratory QA → protected Production.",
+  "attempt": 203,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User screenshots 21:08–21:17 document onboarding overlay not fullscreen, map flashes during tab swaps, poor route comparison and toast wrapping, mismatched My Info surfaces/icons, clipped expanded layer, metro line button outlines and empty metro information; source PR #218 merged after CI 44904177986 succeeded.",
+  "last_retry_reason": "Release 9.2.72 run #44904357181 failed because app/tests/v9269-flat-surfaces.test.mjs assumed repository-root scripts existed inside sealed app-source payload; PR #220 fixes the path-dependent test while retaining source integration checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
