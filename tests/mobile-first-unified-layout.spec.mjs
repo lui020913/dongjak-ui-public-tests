@@ -76,3 +76,52 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
 
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
 });
+
+/* A genuine mobile-browser check: the four native content tabs now open as
+ * complete pages, but the map-linked layers retain their bottom-sheet owner. */
+test('phone route, community, news and account fill the viewport without swallowing the pill navigation',async({page},testInfo)=>{
+  test.setTimeout(115000);
+  if(page.viewportSize().width>=700)test.skip();
+  await page.route('**/*',route=>{
+    const u=new URL(route.request().url());
+    return ['127.0.0.1','localhost'].includes(u.hostname)||['data:','blob:'].includes(u.protocol)
+      ? route.continue() : route.abort();
+  });
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  const menu=page.locator('dialog#dj-install-menu');
+  await expect(menu).toBeAttached({timeout:15000});
+  if(await menu.isVisible())await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+  const startup=page.locator('#map-startup-overlay');
+  const continueButton=page.locator('#map-startup-continue');
+  await expect.poll(async()=>!(await startup.isVisible())||(await continueButton.isVisible()),{timeout:60000}).toBe(true);
+  if(await startup.isVisible())await continueButton.click();
+  const onboarding=page.locator('#dj860-onboarding');
+  await expect(onboarding).toBeAttached({timeout:15000});
+  if(await onboarding.isVisible())await onboarding.locator('.dj860-skip').click({noWaitAfter:true});
+  await expect(onboarding).toBeHidden({timeout:15000});
+  const dock=page.locator('#bottom-nav');
+  await expect(dock).toBeVisible();
+  for(const [tab,id] of [['route','route-panel'],['participate','participation-panel'],['news','news-panel'],['mine','mine-panel']]){
+    await page.locator(`#bottom-nav .nav-tab[data-tab="${tab}"]`).click({noWaitAfter:true});
+    await expect(page.locator('#app')).toHaveAttribute('data-tab',tab);
+    const panel=page.locator('#'+id);
+    await expect(panel).toBeVisible();
+    await expect.poll(async()=>{
+      const b=await panel.boundingBox(),h=await page.evaluate(()=>document.documentElement.clientHeight);
+      return Boolean(b&&Math.abs(b.x)<3&&Math.abs(b.y)<3&&Math.abs(b.height-h)<5);
+    },{timeout:10000}).toBe(true);
+    await expect(page.locator('#app > .topbar')).toBeHidden();
+    await expect(dock).toBeVisible();
+    await expect(panel.locator('.dj-sheet-chrome-grip')).toBeHidden();
+    const dims=await page.evaluate(id=>{
+      const panel=document.getElementById(id),nav=document.getElementById('bottom-nav');
+      const a=panel.getBoundingClientRect(),b=nav.getBoundingClientRect();
+      return {pageHeight:a.height,navTop:b.top,navLayer:parseInt(getComputedStyle(nav).zIndex,10),panelLayer:parseInt(getComputedStyle(panel).zIndex,10)};
+    },id);
+    expect(dims.navLayer,'pill must be above the page').toBeGreaterThan(dims.panelLayer);
+    await testInfo.attach(tab+'-geometry.json',{body:Buffer.from(JSON.stringify(dims)),contentType:'application/json'});
+  }
+  await page.locator('#bottom-nav .nav-tab[data-tab="map"]').click({noWaitAfter:true});
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+  await expect(page.locator('#app > .topbar')).toBeVisible();
+});
