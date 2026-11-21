@@ -80,7 +80,10 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(next===-1)return;
   suppressClick=true;
   if(swipeGuard)win.clearTimeout(swipeGuard);
-  swipeGuard=win.setTimeout(()=>{suppressClick=false;swipeGuard=0;},260);
+  // A pointerup can precede its native click by >260ms on loaded phones.
+  // Suppress that one release click, otherwise it re-selects the old tab.
+  // A new pointerdown resets the guard immediately for the next real tap.
+  swipeGuard=win.setTimeout(()=>{suppressClick=false;swipeGuard=0;},2200);
   if(event.cancelable)event.preventDefault();
   buttons[next].click();
  }
