@@ -158,7 +158,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
      width:'100vw',height:'auto','max-height':'none','min-height':'0',
      margin:'0',padding:'0 0 calc(92px + env(safe-area-inset-bottom,0px))',
      'box-sizing':'border-box',border:'0','border-radius':'0',
-     background:'var(--mf-surface-solid,#fff)',color:'var(--mf-ink,#203e34)',
+     background:'var(--dj-primary-page-bg,#edf3ef)',color:'var(--mf-ink,#203e34)',
      'z-index':'7000',opacity:'1',visibility:'visible',display:'flex',
      'flex-direction':'column','align-items':'stretch',overflow:'hidden',
      transform:'none',translate:'none'
@@ -177,14 +177,14 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
      flex:'0 0 auto',order:'0','min-height':'calc(64px + env(safe-area-inset-top,0px))',
      height:'auto','max-height':'calc(94px + env(safe-area-inset-top,0px))',
      padding:'calc(10px + env(safe-area-inset-top,0px)) 16px 12px',
-     margin:'0','box-sizing':'border-box',background:'var(--mf-surface-solid,#fff)',
+     margin:'0','box-sizing':'border-box',background:'var(--dj-primary-page-bg,#edf3ef)',
      transform:'none',translate:'none','touch-action':'auto'
     });
     ownComposerStyle(form.querySelector(':scope > .djNext-form-scroll'),{
      position:'relative',top:'auto',bottom:'auto',order:'1',
      display:'flex','flex-direction':'column',flex:'1 1 0%',
      'min-height':'0',height:'auto',margin:'0','box-sizing':'border-box',
-     overflow:'auto','overflow-y':'auto',transform:'none',translate:'none'
+     background:'var(--dj-primary-page-bg,#edf3ef)',overflow:'auto','overflow-y':'auto',transform:'none',translate:'none'
     });
     community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
     form.querySelector('.djNext-form-scroll')?.scrollTo?.(0,0);
@@ -198,7 +198,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
     width:'100vw',height:'auto','max-height':'none','min-height':'0',
     margin:'0',padding:'0 0 calc(92px + env(safe-area-inset-bottom,0px))',
     'box-sizing':'border-box',border:'0','border-radius':'0',
-    background:'var(--mf-surface-solid,#fff)',color:'var(--mf-ink,#203e34)',
+    background:'var(--dj-primary-page-bg,#edf3ef)',color:'var(--mf-ink,#203e34)',
     'z-index':'7000',visibility:'visible',display:'flex',
     'flex-direction':'column','align-items':'stretch',overflow:'hidden',
     transform:'none',translate:'none'
