@@ -4,8 +4,8 @@ import {railGeojson,stationsGeojson,FIXED_RAIL_STATION_ORDER} from '../../fixed-
 import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.js';
 import {railDirectionLabel} from './train-lanes.js';
 export const LIVE_PREF_KEY='dongjak_live_vehicle_options_v827';
-// Start live train rendering at neighborhood scale rather than requiring street-level zoom.
-export const LIVE_METRO_MIN_ZOOM=14.15;
+// Start showing vehicles at a neighborhood zoom, rather than only at street level.
+export const METRO_LIVE_MIN_ZOOM=13.0;
 export function buildDongjakMetroLines(){
   const lines={};
   // The published rail order is geographical, not a guaranteed API direction.
@@ -100,42 +100,30 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
 const installedLiveTransit=new WeakMap();
 export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice=()=>{}}){
   if(installedLiveTransit.has(map))return installedLiveTransit.get(map);
-  // The supplementary OSM overview doubles the colored metro line in the
-  // same viewport and creates parallel/misaligned segments. Keep its source
-  // available but render one subway corridor per line.
-  const hideDuplicateRail=()=>{
+  // Preserve the official/fallback subway source, but render only one
+  // colored corridor. The secondary overview's geometry remains queryable.
+  const synchronizeRailStyle=()=>{
     for(const id of ['transport-real-rail-overview-casing','transport-real-rail-overview']){
       if(!map.getLayer?.(id))continue;
       try{
         if(map.getLayoutProperty?.(id,'visibility')!=='none')
           map.setLayoutProperty(id,'visibility','none');
-      }catch{ /* map style may be reloading */ }
+      }catch{ /* MapLibre style swap can still be in progress */ }
     }
-  };
-  map.on?.('style.load',hideDuplicateRail);
-  // Narrow route strokes at district zoom so river/roads remain legible.
-  // The paint update is repeatable after a MapLibre style reload.
-  const applyRailStrokes=()=>{
     for(const [id,stops] of [
       ['transport-schematic-subway',[12.2,2.1,13.5,3.0,16,3.2,18,3.7]],
       ['transport-schematic-subway-casing',[12.2,3.3,13.5,4.1,16,4.4,18,4.9]]
     ]){
       if(!map.getLayer?.(id))continue;
       try{
-        const key='dj9257RailStrokeApplied';
-        const marker=map.getContainer?.();
-        const stored=marker?.dataset?.[key];
-        // Avoid continuously invalidating the style on unchanged maps.
-        if(stored==='1'&&map.getPaintProperty?.(id,'line-width')?.[0]==='interpolate')continue;
-        map.setPaintProperty(id,'line-width',['interpolate',['linear'],['zoom'],...stops]);
-      }catch{ /* original line remains as fallback if style is not ready */ }
+        const desired=['interpolate',['linear'],['zoom'],...stops];
+        if(JSON.stringify(map.getPaintProperty?.(id,'line-width'))!==JSON.stringify(desired))
+          map.setPaintProperty(id,'line-width',desired);
+      }catch{ /* retain existing style as fallback */ }
     }
-    const marker=map.getContainer?.();if(marker?.dataset)marker.dataset.dj9257RailStrokeApplied='1';
   };
-  hideDuplicateRail();
-  applyRailStrokes();
-  map.on?.('style.load',applyRailStrokes);
-
+  map.on?.('style.load',synchronizeRailStyle);
+  synchronizeRailStyle();
   const controls=document.getElementById('dj-live-vehicle-controls');
   if(!controls)return null;
   const btnMetro=controls.querySelector('[data-live-vehicle="metro"]');
@@ -153,7 +141,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   function showQuota(until,announce=true){const active=state.metro&&until>Date.now();if(btnMetro){if(active)btnMetro.dataset.liveQuota='true';else delete btnMetro.dataset.liveQuota;}if(active){if(announce&&!quotaNotified){quotaNotified=true;onNotice(METRO_QUOTA_NOTICE);}return true;}quotaNotified=false;return false;}
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:LIVE_METRO_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
@@ -163,7 +151,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
       if(limited){setStatus(METRO_QUOTA_NOTICE+(state.bus&&info.status==='ok'?` · 버스 ${info.bus}대`:state.bus&&info.status==='error'?' · 버스 위치 조회 실패':''));return;}
       if(info.status==='ok'){
         const line=[];
-        if(state.metro)line.push(map.getZoom?.()<LIVE_METRO_MIN_ZOOM?'열차: 지도 확대 시 표시':`지하철 ${info.metro}대`);
+        if(state.metro)line.push(map.getZoom?.()<METRO_LIVE_MIN_ZOOM?'열차: 지도 확대 시 표시':`지하철 ${info.metro}대`);
         if(state.bus)line.push(`버스 ${info.bus}대`);
         const warnings=(info.warnings||[]).length;
         setStatus(`${line.join(' · ')||'차량 없음'} · 역간 이동은 추정${warnings?' · 일부 API 제한':''}`);
@@ -190,7 +178,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
     else if(!isMap)setStatus('안전지도 탭에서 차량 위치를 조회합니다.');
     else if(!allowMetro&&!allowBus)setStatus('기본 지도·교통 레이어가 숨겨져 있습니다.');
     else if(showQuota(overlay.getStatus().metroQuotaUntil))setStatus(METRO_QUOTA_NOTICE);
-    else if(state.metro&&map.getZoom?.()<LIVE_METRO_MIN_ZOOM&&!state.bus)setStatus('실시간 지하철 ON · 지도를 가까이 확대하면 열차가 표시됩니다.');
+    else if(state.metro&&map.getZoom?.()<METRO_LIVE_MIN_ZOOM&&!state.bus)setStatus('실시간 지하철 ON · 지도를 가까이 확대하면 열차가 표시됩니다.');
     else if(!overlay.getStatus().lastUpdate)setStatus('실시간 위치정보 조회 중 · 역간 위치는 추정');
     if(!state.metro)showQuota(0,false);
   }
@@ -203,6 +191,6 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
   sync();
-  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);map.off?.('style.load',hideDuplicateRail);map.off?.('style.load',applyRailStrokes);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);map.off?.('style.load',synchronizeRailStyle);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
   installedLiveTransit.set(map,handle);return handle;
 }

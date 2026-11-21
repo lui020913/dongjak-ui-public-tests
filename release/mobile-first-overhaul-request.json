@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.56",
+  "application_version": "9.2.57",
   "public_work_branch": "main",
-  "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
-  "attempt": 177,
+  "purpose": "Fix iOS AI dialog click-through after closing sheets, reveal live metro vehicles at neighborhood zoom 13.0 instead of 16.4, validate official rail path proximity and smooth fallback rail curves, and blend native iPhone status/map header colors. Preserve mobile-only gate and existing quota handling.",
+  "attempt": 178,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Phone shard 2 in runs 44871872902 and 44872375618 repeatedly measured layer modal header shifting by exactly 109.7px when scrolling list, even after awaited animation end. Fix real layout: anchor the layer modal body to fixed viewport bottom, prevent scroll anchoring, retain independent inner overflow scroll and header gesture controls. Keep all actual mobile browser geometry checks; retry full guarded v9.2.56 release.",
+  "last_retry_reason": "PR #173 merged with successful public app CI (commit 458d0b1). Video review reported unexpected AI screen reopening, inaccurate metro line geometry, trains invisible without extreme zoom, and visible iPhone status-bar seam. Promote only after exact-source Preview and all protected phone/visual QA gates pass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

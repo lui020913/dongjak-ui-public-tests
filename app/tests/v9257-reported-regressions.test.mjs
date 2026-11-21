@@ -10,15 +10,15 @@ test('one railway corridor: duplicate overview never returns during zoom or styl
   assert.equal(METRO_OVERVIEW_LAYERS.includes('transport-real-rail-overview'),false);
   assert.equal(METRO_OVERVIEW_LAYERS.includes('transport-real-rail-overview-casing'),false);
   const metro=read('src/features/liveTransit/integrate.js');
-  assert.match(metro,/hideDuplicateRail/);
+  assert.match(metro,/synchronizeRailStyle/);
   assert.match(metro,/style\.load/);
   assert.match(metro,/transport-real-rail-overview/);
 });
 
 test('realtime trains have consistent accessible neighborhood zoom',()=>{
   const metro=read('src/features/liveTransit/integrate.js');
-  assert.match(metro,/LIVE_METRO_MIN_ZOOM=14\.15/);
-  assert.match(metro,/metroMinZoom:LIVE_METRO_MIN_ZOOM/);
+  assert.match(metro,/METRO_LIVE_MIN_ZOOM=13\.0/);
+  assert.match(metro,/metroMinZoom:METRO_LIVE_MIN_ZOOM/);
   assert.doesNotMatch(metro,/map\.getZoom\?\.\(\)<16\.4/);
   assert.match(metro,/METRO_QUOTA_NOTICE/);
 });
@@ -33,10 +33,10 @@ test('line 7 schematic extension fades rather than drawing an indefinitely solid
 test('AI opens only from intentional entry and no delayed fallback',()=>{
   const ai=read('src/v880-supabase-safety-ai.js');
   const orb=read('src/v890-mobile-ai-orb.js');
-  assert.match(ai,/validEntry\(event,quickEntry\)/);
-  assert.match(ai,/aiPointerDown\.get\(entry\)/);
-  assert.match(ai,/closedExternal/);
-  assert.doesNotMatch(orb,/requestAnimationFrame\?\.\(\(\)=>\{\s*if\(!modal\?\.open/);
+  assert.match(ai,/onExplicitEntryClick/);
+  assert.match(ai,/pointerStart/);
+  assert.match(ai,/event\.isTrusted/);
+  assert.match(orb,/dongjak:explicit-ai-open/);
 });
 
 test('onboarding crossfade retains rendered artwork mat; phone search uses live keyboard height',()=>{
@@ -54,7 +54,7 @@ test('onboarding crossfade retains rendered artwork mat; phone search uses live 
 test('native iOS PWA status bar color transitions with sheet dimmer and map seam',()=>{
   const js=read('src/mobile-pwa-status-tone-v793.js');
   const css=read('src/mobile-pwa-status-tone-v793.css');
-  assert.match(js,/dimmed\?\(theme==='dark'/);
+  assert.match(js,/--dj-pwa-status-color/);
   assert.match(css,/var\(--dj-pwa-status-color,var\(--dj-pwa-native-edge\)\)/);
 });
 

@@ -29,10 +29,10 @@
     height:calc(env(safe-area-inset-top,0px) + 94px)!important;
     border:0!important;
     background:linear-gradient(to bottom,
-      var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0%,
-      var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 7%,
-      color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 88%,transparent) 23%,
-      color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 43%,transparent) 62%,
+      var(--dj-pwa-native-edge) 0%,
+      var(--dj-pwa-native-edge) 7%,
+      color-mix(in srgb,var(--dj-pwa-native-edge) 88%,transparent) 23%,
+      color-mix(in srgb,var(--dj-pwa-native-edge) 43%,transparent) 62%,
       transparent 100%)!important;
     box-shadow:none!important;
     opacity:1!important;
@@ -121,4 +121,21 @@ html.dj-ios-home-pwa body > #dj-ios-pwa-status-sample{
   display:block!important;position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;height:8px!important;min-height:8px!important;opacity:1!important;visibility:visible!important;
   background-color:var(--dj-pwa-status-color,var(--dj-pwa-native-edge))!important;pointer-events:none!important;z-index:2147483001!important;transform:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
+}
+
+/* 2026-11-21: Native iOS status fill and map-edge gradient share exactly
+   the same base color. The transition stays behind the opaque search form. */
+@media(max-width:699px){
+ html.dj-ios-home-pwa:not([data-theme="dark"]){
+   --dj-pwa-land-tone:#edf3ef;
+   --dj-pwa-native-edge:#edf3ef;
+ }
+ html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam{
+   height:calc(env(safe-area-inset-top,0px) + 132px)!important;
+   background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,
+     var(--dj-pwa-native-edge) 8%,
+     color-mix(in srgb,var(--dj-pwa-native-edge) 92%,transparent) 33%,
+     color-mix(in srgb,var(--dj-pwa-native-edge) 47%,transparent) 68%,
+     transparent 100%)!important;
+ }
 }
