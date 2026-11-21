@@ -1,0 +1,39 @@
+/* 2026-11-21 mobile regression corrections.
+   Loaded after legacy styles; only explicitly affected surfaces are touched. */
+@media (max-width:699px) {
+  /* Keep the colored artwork mat visible while the image and copy crossfade.
+     The blank white frame was caused by fading .dj860-visual-pane itself. */
+  #app .dj860-onboarding.dj860-swapping .dj860-visual-pane {
+    opacity:1!important;
+    transform:none!important;
+    animation:none!important;
+  }
+  #app .dj860-onboarding .dj860-visual-pane {
+    background-color:#e8f4ed!important;
+  }
+  #app[data-theme="dark"] .dj860-onboarding .dj860-visual-pane {
+    background-color:#1c3634!important;
+  }
+
+  /* Keep route descriptions readable while reducing unnecessary vertical
+     consumption on small phones. The fixed action footer remains untouched. */
+  #app #route-panel:not([hidden]) > .dj836-sheet-body > .dj-page-intro {
+    margin:0 0 10px!important;
+    font-size:13px!important;
+    line-height:1.48!important;
+  }
+  #app #route-panel:not([hidden]) .route-card {
+    row-gap:6px!important;
+  }
+  #app #route-panel:not([hidden]) .page-note {
+    font-size:11px!important;
+    line-height:1.5!important;
+    overflow-wrap:anywhere!important;
+  }
+  /* The page body scrolls; the bottom tab/pill is never part of it. */
+  #app #route-panel:not([hidden]) > .dj836-sheet-body {
+    min-height:0!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
