@@ -48,4 +48,7 @@ test('map-origin full-screen report composer hides the map header and AI orb abo
  // During report composition data-tab can remain map; the composer selector
  // must not depend on the bottom tab reflecting participate.
  assert.ok(css.includes(':has(#participation-panel.dj9256-composing:not([hidden]))'));
+ const legacyHeader=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ assert.ok(legacyHeader.includes('#app:not(:has(#participation-panel.dj9256-composing:not([hidden]))) .topbar{display:grid!important'),
+   'a historical 38-ID header selector must not re-display the search/AI bar above a report composer');
 });
