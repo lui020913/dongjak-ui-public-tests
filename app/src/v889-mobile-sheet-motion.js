@@ -85,6 +85,17 @@ function animateGeometry(panel,{fromRect,compactRect,expandedRect,fromOpacity,co
   const compactDelta=rectDelta(compactRect,expandedRect);
   const startDelta=rectDelta(fromRect,expandedRect);
   const endDelta=collapsing?compactDelta:{x:0,y:0};
+  // During an upward drag the old frame may already be translated above the
+  // phone's search field. FLIP must NEVER reproduce that offscreen y-position:
+  // clamp both its initial and terminal visual frames to the measured safe top.
+  if(panel.id==='ped-tools-panel'){
+    const safeTop=Number(panel.dataset.djSafeExpandedTop);
+    if(Number.isFinite(safeTop)&&safeTop>0){
+      const minDelta=safeTop-expandedRect.top;
+      startDelta.y=Math.max(startDelta.y,minDelta);
+      endDelta.y=Math.max(endDelta.y,minDelta);
+    }
+  }
   const startOpacity=1;
   const clipped=Math.max(0,expandedRect.height-compactRect.height);
   // Both edges must begin at the finger's last visible position, not at
