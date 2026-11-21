@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.57",
+  "application_version": "9.2.58",
   "public_work_branch": "main",
-  "purpose": "Fix iOS AI dialog click-through after closing sheets, reveal live metro vehicles at neighborhood zoom 13.0 instead of 16.4, validate official rail path proximity and smooth fallback rail curves, and blend native iPhone status/map header colors. Preserve mobile-only gate and existing quota handling.",
-  "attempt": 178,
+  "purpose": "Fix mobile search opening an oversized rectangular result panel and hiding the AI orb; keep the AI entry visible and anchor the rounded suggestions panel exactly to the search pill. Include PR #173 rail/train/iOS fixes and PR #175 updated iOS/metro QA expectations and community close fallback.",
+  "attempt": 179,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #173 merged with successful public app CI (commit 458d0b1). Video review reported unexpected AI screen reopening, inaccurate metro line geometry, trains invisible without extreme zoom, and visible iPhone status-bar seam. Promote only after exact-source Preview and all protected phone/visual QA gates pass.",
+  "last_retry_reason": "Previous v9.2.57 run 44880038208 blocked by obsolete WebKit expected iPhone status tone (#eef3ef vs new #edf3ef), obsolete train zoom threshold (16.4 vs 13.0) and iOS composer close race. PR #175 changes runtime and test expectations, CI passed. Execute all protected mobile/visual checks before Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
