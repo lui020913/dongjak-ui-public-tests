@@ -203,7 +203,7 @@ html body #app#app#app#app#app#app#app #djNext-toast:not([hidden]){box-shadow:va
 
 /* v4: mobile route/community screenshots. One scroll owner and a neutral dark palette. */
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"]{
- --dj-v4-surface:var(--djNext-surface,#191b1f);--dj-v4-card:#25282c;--dj-v4-control:#303439;
+ --dj-v4-surface:var(--djNext-surface,#23262c);--dj-v4-card:#25282c;--dj-v4-control:#303439;
  --dj-v4-border:#42474d;--dj-v4-text:#e6e9eb;--dj-v4-muted:#b8c0c7;
  --dj-v4-selected:var(--dj-theme-selected,#39434e);--dj-v4-accent:var(--dj-theme-accent,#b4c8da);
 }
@@ -625,7 +625,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
 @media(max-width:699px){
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(#ped-tools-close,.dj854-weather-close,#community-compose-close,#version-history-close,#dj-settings-close,.dj832-boundary-x){border-radius:50%!important;aspect-ratio:1!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj832-boundary-confirm,.dj854-weather-actions button,#dj-settings-theme,.dj-community-refresh){border-radius:999px!important;}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:var(--dj-v4-surface,#191b1f)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:var(--dj-v4-surface,#23262c)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary :is(.dj832-boundary-x){background:var(--dj-v4-control,#303338)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-boundary-body{color:var(--dj-v4-muted,#c3ccd0)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.version-history-head,.dj-map-settings-head,.ped-tools-panel-head){position:relative!important;touch-action:none!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;padding-top:22px!important}

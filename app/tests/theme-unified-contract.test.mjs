@@ -41,7 +41,8 @@ test('first-run onboarding completion prevents guest reappearance',()=>{
 
 test('shared color tokens protect legacy dark selectors and leave safety semantics',()=>{
   const css=read('src/theme-contract.css');
-  const prod=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const isolated=new URL('../src/mobile-next.css',import.meta.url);
+  const prod=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
   const layout=read('src/mobile-first-layout.css');
   const material=read('src/button-material.css');
   for(const c of ['#17191d','#23262c','#2b3037','#f2f4f7','#b6bec8'])assert.ok(css.includes(c),c);

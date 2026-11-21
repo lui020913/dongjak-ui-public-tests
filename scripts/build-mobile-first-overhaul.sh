@@ -198,6 +198,16 @@ run_private(){
   fi
   rm -f "$log"
 }
+# Isolated app archive intentionally excludes repository-level research scripts.
+# Mount a READ-ONLY SOURCE QA mirror outside the distributable app tree so
+# reproducibility tests still validate all published GIS outputs (never skip).
+# The final sealed deployment archive contains only the verified app artifacts.
+test ! -e "$RUNNER_TEMP/app"
+ln -s "$work" "$RUNNER_TEMP/app"
+mkdir -p "$RUNNER_TEMP/scripts"
+cp -R "$GITHUB_WORKSPACE/scripts/research" "$RUNNER_TEMP/scripts/research"
+test -s "$RUNNER_TEMP/scripts/research/sangdo1_policy_gap_300m_verify.mjs"
+test -f "$RUNNER_TEMP/app/public/data/protection-zone/sangdo1_policy_gap_3source_300m_20261122.geojson"
 run_private "Dependency installation" npm ci --no-audit --no-fund --prefer-offline
 if "${safe[@]}" node "$GITHUB_WORKSPACE/scripts/run-mobile-regressions.mjs" "$work" >"$log" 2>&1; then
   node "$GITHUB_WORKSPACE/scripts/private-test-fingerprint.mjs" "$log"
