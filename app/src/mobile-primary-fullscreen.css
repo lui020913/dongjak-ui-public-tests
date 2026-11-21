@@ -143,6 +143,26 @@
       padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
     }
 
+    /* Empty community feed remains compact until users open the examples. */
+    #app #participation-panel .dj-community-starter-topics{
+      margin-top:12px!important;padding:8px 10px!important;
+      border:1px solid var(--mf-line,#d7e6dd)!important;border-radius:14px!important;
+      background:var(--mf-surface-muted,#f1f7f4)!important;
+    }
+    #app #participation-panel .dj-community-starter-topics > summary{
+      cursor:pointer!important;min-height:42px!important;
+      display:flex!important;align-items:center!important;
+      font-size:13px!important;font-weight:750!important;line-height:1.4!important;
+      padding:8px 10px!important;list-style:none!important;
+    }
+    #app #participation-panel .dj-community-starter-topics > summary::-webkit-details-marker{display:none!important}
+    #app #news-panel .dongjak-news-excerpt{
+      margin:8px 0!important;color:var(--mf-muted,#71877c)!important;
+      font-size:13px!important;line-height:1.5!important;
+      overflow-wrap:anywhere!important;display:-webkit-box!important;
+      -webkit-line-clamp:3!important;-webkit-box-orient:vertical!important;overflow:hidden!important;
+    }
+
     /* Preserve existing native five-button pill above the independent page. */
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > #bottom-nav:not([hidden]) {
       display:grid!important;
