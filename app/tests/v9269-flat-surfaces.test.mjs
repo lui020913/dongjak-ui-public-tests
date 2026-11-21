@@ -105,3 +105,11 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(nav.includes("protectPageTransition(nextTab)"));
  assert.ok(!block.includes('filter:brightness(.66)'));
 });
+
+test('selected route keeps the alternate route controls reachable while map fits the entire leg',()=>{
+ const css=productionStyle('mobile-next.css');
+ const focus=css.match(/#route-map-card\[data-dj9272-route-focus="true"\] #djNext-route-compare\{([^}]+)\}/);
+ assert.ok(focus,'selected-route comparison style missing');
+ assert.ok(focus[1].includes('display:grid!important'),'selected-route mode must not hide choice buttons');
+ assert.ok(css.includes('max-height:min(38dvh,calc(100dvh - 245px))!important'));
+});
