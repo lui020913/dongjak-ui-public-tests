@@ -34,7 +34,7 @@ test('seven-day source-normalizer validates dates, numbers and does not fabricat
 test('PRI keeps two score modes and default risk/caution/safe scale, with one disclosure',()=>{
  const js=source('src/pri-map.js'),css=source('src/pri-map.css');
  assert.match(js,/PRI ①·② 평균/);
- for(const t of ['위험','주의','양호','평가 기준 보기','dj-pri-detail-wrap','aria-expanded','data-dj-pri-visible'])assert.ok(js.includes(t)||css.includes(t),t);
+ for(const t of ['위험','주의','안전','평가 기준 보기','dj-pri-detail-wrap','aria-expanded','data-dj-pri-visible'])assert.ok(js.includes(t)||css.includes(t),t);
  assert.match(css,/grid-template-rows:0fr/);assert.match(css,/grid-template-rows:1fr/);
  assert.match(css,/maplibregl-ctrl-bottom-left/);
  assert.match(js,/delete app\.dataset\.djPriVisible/);
