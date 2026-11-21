@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 const css=readFileSync(new URL('../production/mobile-first-overhaul.css',import.meta.url),'utf8');
 const pin=JSON.parse(readFileSync(new URL('../../release/mobile-first-overhaul-source.json',import.meta.url),'utf8'));
 
-assert.ok(css.length>8000 && css.length<40000,'Overhaul stylesheet size is outside the reviewed range');
+// v9.2.75: reviewed phone weather, 7-day forecast, PRI disclosure and iOS state CSS increased the exact
+// local stylesheet to ~43.4KB. Retain a strict finite upper bound plus the import/script/braces audits below.
+assert.ok(css.length>8000 && css.length<48000,'Overhaul stylesheet size is outside the reviewed range');
 assert.ok(!/@import\b|url\s*\(|expression\s*\(|javascript:|(?:^|[;{]\s*)behavior\s*:/i.test(css),'External imports or executable CSS are forbidden');
 assert.ok(!/\u0000|<\/?script/i.test(css),'Unexpected control or executable markup');
 const stripped=css.replace(/\/\*[\s\S]*?\*\//g,'');
