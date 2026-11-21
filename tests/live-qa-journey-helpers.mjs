@@ -7,6 +7,15 @@ export async function tap(page,locator){
    await expect.poll(()=>locator.evaluate(n=>{const r=n.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return hit===n||n.contains(hit)})).toBe(true);
  }catch(error){
    const hit=await locator.evaluate(n=>{const r=n.getBoundingClientRect();return {target:{id:n.id,className:n.getAttribute('class'),rect:[r.x,r.y,r.width,r.height]},layers:document.elementsFromPoint(r.left+r.width/2,r.top+r.height/2).slice(0,8).map(e=>({tag:e.tagName,id:e.id,className:e.getAttribute('class'),pointerEvents:getComputedStyle(e).pointerEvents}))};});
+   const layout=await page.evaluate(()=>{
+     const selectors=['#app','#participation-panel','#participation-panel>.dj-sheet-chrome','#participation-panel>.dj836-sheet-body','#participation-panel .community-category-tabs','#participation-panel .dj-page-intro','#participation-panel .community-heading-row','#community-compose-toggle','#community-form','#bottom-nav'];
+     const nodes=Object.fromEntries(selectors.map(sel=>{
+       const el=document.querySelector(sel),s=el?getComputedStyle(el):null,r=el?.getBoundingClientRect();
+       return [sel,el?{r:[r.x,r.y,r.width,r.height],display:s.display,position:s.position,top:s.top,bottom:s.bottom,marginTop:s.marginTop,height:s.height,minHeight:s.minHeight,overflowY:s.overflowY,transform:s.transform,translate:s.translate,opacity:s.opacity,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,inline:el.getAttribute('style'),hidden:el.hidden,classes:el.className}:null];
+     }));
+     return {viewport:[innerWidth,innerHeight],scroll:[scrollX,scrollY,document.documentElement.scrollTop,document.body.scrollTop],activeTab:document.querySelector('#app')?.dataset.tab,nodes};
+   });
+   console.log('COMMUNITY_TRANSITION_BOUNDS',JSON.stringify(layout));
    console.log('UI_HIT_DIAGNOSTIC',JSON.stringify(hit));throw error;
  }
  const r=await locator.boundingBox();await page.mouse.click(r.x+r.width/2,r.y+r.height/2);
