@@ -614,7 +614,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
      else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
-     if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
+     expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
    }
  }
@@ -821,6 +821,7 @@ test('iPhone first-loading splash shares the native status-strip tone',{tag:'@ph
     const status=getComputedStyle(document.getElementById('dj-ios-pwa-status-sample'));
     return {start:style.getPropertyValue('--start-bg').trim(),
       gradient:style.backgroundImage,
+      surface:style.backgroundColor,
       status:status.backgroundColor,
       runtime:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim(),
       meta:document.querySelector('meta[name="theme-color"]').content};
@@ -829,12 +830,12 @@ test('iPhone first-loading splash shares the native status-strip tone',{tag:'@ph
   expect(colors.runtime).toBe(colors.start);
   expect(colors.meta).toBe(colors.start);
   expect(colors.status).toBe('rgb(237, 243, 239)');
-  expect(colors.gradient).toContain('linear-gradient');
-  expect(colors.gradient).toContain('rgb(237, 243, 239) 0%');
+  expect(colors.gradient).toBe('none');
+  expect(colors.surface).toBe(colors.status);
   await test.info().attach('iphone-startup-status-continuity',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-common'},async({page})=>{
+test('iOS PWA status strip stays flat under dialogs without obstructing controls',{tag:'@phone-common'},async({page})=>{
  const ua=await page.evaluate(()=>navigator.userAgent);test.skip(!/iPhone/.test(ua),'iOS PWA only');
  await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
  await ready(page);
@@ -842,19 +843,17 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  await expect(root).toHaveClass(/dj-ios-home-pwa/);
  await expect(bridge).toHaveCount(1);await expect(bridge).toHaveCSS('opacity','0');
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
- await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','1');
+ await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('display','none');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
- expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#edf3ef');
+ expect(style.gradient).toBe('none');expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBe(0);expect(style.color).toBe('#edf3ef');
  const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
- await test.info().attach('ios-pwa-light-gradient',{body:await page.screenshot(),contentType:'image/png'});
+ await test.info().attach('ios-pwa-flat-status-edge',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
  // Verify native dialog top-layer separately without a network request or login.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
- expect(native).toContain('linear-gradient'); // A top-layer modal owns its own native-status transition.
- expect(native).toMatch(/rgb\(255,\s*255,\s*255\) 0px/); // Same white first pixels as the modal's native status-bar sampling.
- expect(native).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);
+ expect(native).toBe('none'); // Flat native backdrop: the separate iOS status sampler stays solid white.
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
@@ -996,7 +995,7 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
  await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
  await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','999px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
- await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image',/linear-gradient/);await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
+ await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image','none');await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
