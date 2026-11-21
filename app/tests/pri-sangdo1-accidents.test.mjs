@@ -17,17 +17,22 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  assert.equal(patch.sourceRecords.length,3,'only the three Sangdo1 records may be included');
  assert.deepEqual(new Set(patch.sourceRecords.map(r=>r.source_fid)),new Set(['6931875','6838434','6778949']));
  assert.deepEqual(new Set(patch.sourceRecords.map(r=>r.score)),new Set([40,50]));
- const integrated=parseImport(patch,base),observed=integrated.segments.filter(s=>typeof s.scores.accidents==='number');
+ assert.equal(patch.factor.scoreDirection,'risk');
+ assert.equal(patch.unmatchedScore,100);
+ const integrated=parseImport(patch,base),observed=integrated.segments.filter(s=>s.evidence.accidents?.note?.startsWith('원본 위험점수'));
+ const notSelected=integrated.segments.filter(s=>!s.evidence.accidents?.note?.startsWith('원본 위험점수'));
  assert.equal(observed.length,76,'site polygons must overlap 76 of the existing 25 m survey segments');
- assert.equal(observed.filter(s=>s.scores.accidents===40).length,30);
- assert.equal(observed.filter(s=>s.scores.accidents===50).length,46);
+ assert.equal(observed.filter(s=>s.scores.accidents===60).length,30,'source risk 40 -> safety 60');
+ assert.equal(observed.filter(s=>s.scores.accidents===50).length,46,'source risk 50 -> safety 50');
+ assert.equal(notSelected.length,1610,'all other 25m lighting segments receive an explicitly provisional baseline');
+ assert.ok(notSelected.every(s=>s.scores.accidents===100&&/실제 사고 0건/.test(s.evidence.accidents.note)));
+ assert.ok(integrated.segments.every(s=>s.scores.lighting>=0&&s.scores.lighting<=100));
  assert.ok(observed.every(s=>s.scores.lighting!==null),'light and accident factors are joined by the same segment ID');
  for(const s of integrated.segments){
   const value=segmentScore(integrated,s,'pri12');
-  if(s.scores.accidents===null)assert.equal(value,null,'unselected roads must not be scored as accident-free');
-  else assert.equal(value,(s.scores.lighting+s.scores.accidents)/2,'the preliminary mean must use both observed factors');
+  assert.equal(value,(s.scores.lighting+s.scores.accidents)/2,'2/6 preliminary mean must use two safety-direction scores');
   assert.equal(segmentScore(integrated,s,'pri'),null,'a 2/6 mean is not an approved 6-factor PRI');
  }
  assert.ok(summarize(integrated,'pri12').observedM>0);
- assert.ok(summarize(integrated,'pri12').observedM<summarize(integrated,'lighting').observedM);
+ assert.equal(summarize(integrated,'pri12').observedM,summarize(integrated,'lighting').observedM,'all lighting segments now have a provisional 2-factor mean');
 });
