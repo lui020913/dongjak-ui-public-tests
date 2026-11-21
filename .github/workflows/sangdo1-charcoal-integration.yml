@@ -129,6 +129,7 @@ jobs:
           set -euo pipefail
           git add -A app docs/research scripts/research frontend/production patches .github/workflows/sangdo1-school-catchment-source-audit.yml
           git rm -f .github/workflows/sangdo1-charcoal-integration.yml
-          git diff --cached --check
+          # Preserve quoted source CSV cells verbatim; check all code/docs for whitespace.
+          git diff --cached --check -- . ':(exclude)app/public/data/protection-zone/*.csv'
           git commit -m 'feat(map): integrate 300m Sangdo1 three-source policy-gap overlay with charcoal theme'
           git push origin HEAD:feature/charcoal-theme-unified-20261122
