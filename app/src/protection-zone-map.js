@@ -99,7 +99,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       ? `<p><strong>제도적 보호 공백 시범점수 (0점 공백 큼 · 100점 모형 내 공백 작음)</strong></p>
          ${hasPreview19?`<p>어린이·노인 시설 19곳 기준: <b>${esc(previewScore19.toFixed(1))}점</b></p>`:''}
          ${hasPreviewSchool5?`<p>초등학교 5곳만 기준: <b>${esc(previewScoreSchool5.toFixed(1))}점</b></p>`:''}
-         <p class="pza-evidence-note">공식 지정범위와 시설 대표점으로 추산한 잠정 연구값입니다. 출입문·고시·통학 동선 확인 전이므로 법적 누락, 실제 위험도 또는 안전 등급이 아닙니다.</p>`
+         <p class="pza-evidence-note">기존 경찰청 등록 지정 도형과 시설 대표점으로 추산한 잠정 연구값입니다. 출입문·고시·통학 동선 확인 전이므로 법적 누락, 실제 위험도 또는 안전 등급이 아닙니다.</p>`
       :'';
     const evidence=document.getElementById('pza-road-evidence');
     if(evidence)evidence.innerHTML=`${scoreExplanation}<p>후보 구간 길이: <b>${formatM(p.segment_length_m)}</b></p>
@@ -416,7 +416,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
     const facilityPopup=p=>`<strong>${esc(p.facility_name)}</strong><p>시설 대표 POINT (주 출입문 확인 전)</p>`;
     bind('pza-child-point',facilityPopup);bind('pza-senior-point',facilityPopup);
     const schoolGapPopup=p=>`<strong>${esc(p.road_name||'이름 미확인 도로')}</strong>
-      <p>앱에 등록된 <b>초등학교 5개교의 시설 대표점</b> 300·500m 범위 중 지정 폴리곤 외부인 선형의 시범 결과입니다. 타 자치구 시설은 아직 미반영됐으며 대표점은 출입문과 다를 수 있습니다.</p>
+      <p>연구에 포함된 <b>초등학교 5개교의 시설 대표점</b> 300·500m 범위 중 지정 폴리곤 외부인 선형의 시범 결과입니다. 타 자치구 시설은 아직 미반영됐으며 대표점은 출입문과 다를 수 있습니다.</p>
       <dl><dt>제도적 보호 적정성 시범점수</dt><dd>${esc(p.school_coverage_preview_score)} / 100점</dd>
       <dt>300m 미지정 비율</dt><dd>${esc(p.unprotected_within_300_pct)}%</dd>
       <dt>300~500m 미지정 비율</dt><dd>${esc(p.unprotected_300_to_500_pct)}%</dd>
