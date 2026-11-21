@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.66",
+  "application_version": "9.2.67",
   "public_work_branch": "main",
-  "purpose": "Owner-directed v9.2.66 combined phone UI repair: retain color-continuous iPhone status edge and onboarding compositor crossfade (merged PR #190/#193/#194/#198); remove white news filter slab and make layer drawer fully scrollable above iOS safe area (merged PR #197); correct full-width search suggestions, microphone/AI anchor, solid fullscreen tab transitions and dock labels, iOS night-visibility status/pill/theme toggle and persisted map camera (merged PR #195). Preserve mobile-only production gate and transport integrity; require fresh 12 phone QA shards, six visual screenshots and Gemini design checks, autonomous exploration, protected Production with rollback and provenance verification.",
-  "attempt": 192,
+  "purpose": "PR #195 merged after public app CI run 44889900397 (3 mobile viewport checks passed). Fix 2026-11-21 iPhone: expand search recommendation result width; keep AI pill fixed while speech recognition grows; make fullscreen bottom safe-area tone continuous and avoid double footer gap; mask underlying map during fullscreen tab crossfade; update My Info settings icons and cards; center night-visibility consent, maintain active pill, and harmonize native iOS PWA status tone; reload standalone PWA for manual dark/light theme changes while restoring map camera center/zoom/pitch/bearing. Use only consolidated v9267 phone regression stylesheet. Preserve other mobile functions, guard Production with exact source/Preview evidence, 12 phone QA shards, six visual reviews, exploration and rollback.",
+  "attempt": 193,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Combined merged public main 721d9a281002180da71b07afacde7c6920f0b627 includes PR #195 (phone surfaces/search, CI 44889900397 success) and PR #197 (news toolbar tone and layer scroll safe area, root test); PR #198 compositor onboarding. Prior 44889824648 Preview is sourced before #195/#197, so superseded, do not promote. Run a new full sealed build with exact combined source and all required QA/Production gates, no old artifacts reused.",
+  "last_retry_reason": "New distinct release source includes merged PR #195 at 721d9a281002180da71b07afacde7c6920f0b627 after CI #44889900397 success. Existing v9.2.66 release #44889824648 built the PREVIOUS source and cannot certify these fixes. Run a fresh exact-source build, Preview, twelve phone QA shards, visual reviews and protected Production. Do not reuse earlier artifacts.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
