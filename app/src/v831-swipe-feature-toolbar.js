@@ -1,6 +1,6 @@
 import {fadePanelOut} from './v852-panel-transition.js';
-import './v831-swipe-feature-toolbar.css';
-import './v832-priority-feature-toolbar.css';
+// The two toolbar styles are linked once in index.html before the first paint.
+// Do not import them again into Vite's JS CSS chunk.
 
 /** v8.2.11 · Mobile swipe shortcuts for existing map-options/safety controls.
  * This layer does not clone or override any map/API controller. Each shortcut

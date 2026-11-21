@@ -1,7 +1,6 @@
 /** Supplemental no-duplicate DOM controller for the five rebuilt sheets.
  * The sheet close logic remains owned by dj-v8212-sheet-controller.js.
- * This file imports the final CSS after legacy styles for the Vite build. */
-import './v836-sheet-toolbar-controls.css';
+ * Its stylesheet is already linked once from index.html, so no duplicate JS CSS import is needed. */
 
 /** Accessibility: identify the top edge as draggable; the gray grip itself is
  * decorative and does not need to receive a pointer gesture. */
