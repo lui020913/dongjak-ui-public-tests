@@ -359,6 +359,11 @@ export function installUnifiedUI(doc=document, win=window){
     if(!node?.closest)return '';
     const search=node.closest('#map-quick-search');
     if(search)return 'map-quick-search-dropdown';
+    // Map-origin risk reporting opens the real participation page through a
+    // delegated, otherwise hidden button. It is an explicit user intent, not
+    // a ghost modal; without this allowance the lifecycle can dismiss the
+    // editor after the topbar and hit-layer have already been updated.
+    if(node.closest('#djNext-report,#ped-report-open'))return 'participation-panel';
     const tab=node.closest('#bottom-nav .nav-tab[data-tab]');
     if(tab)return tabPanels[tab.dataset.tab]||'';
     const opener=node.closest('#map-tools-toggle,#map-safety-toggle,#toggle-road-width,'+
