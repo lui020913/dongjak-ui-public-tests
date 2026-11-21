@@ -13,6 +13,32 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia('(max-width:699px)').matches;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
  let pending=null,replaying=false,closing=null,watchdog=0,gesture=null,suppressClick=false;
+ let curtain=null,curtainFade=0,curtainHide=0;
+ // Mask the map *below* fullscreen pages during page-to-page replacement.
+ // Do not own navigation or block touch events; those remain native.
+ function dismissCurtain(){
+  if(curtainFade)win.clearTimeout(curtainFade);
+  if(curtainHide)win.clearTimeout(curtainHide);
+  curtainFade=0;curtainHide=0;
+  if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
+ }
+ function protectPageTransition(next){
+  if(!phone()||!['route','participate','news','mine'].includes(next)){
+   dismissCurtain();return;
+  }
+  if(!curtain){
+   curtain=doc.createElement('div');
+   curtain.id='dj-tab-surface-curtain';
+   curtain.setAttribute('aria-hidden','true');
+   curtain.hidden=true;
+   app.appendChild(curtain);
+  }
+  dismissCurtain();
+  curtain.hidden=false;
+  // Stay opaque until the next page has installed its nontransparent base.
+  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},90);
+  curtainHide=win.setTimeout(()=>{curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}},270);
+ }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return;
   replaying=true;
@@ -34,6 +60,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   }
   const current=app.dataset.tab;
   if(!closing&&button.dataset.tab===current)return;
+  protectPageTransition(button.dataset.tab);
   const motion=win.DongjakWindowMotion;
   const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
   // Fullscreen tabs return directly to HOME; do not run the 300ms sheet exit.
@@ -84,7 +111,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
  return ()=>{
-  const panel=closing?.panel;clear();if(panel)win.DongjakWindowMotion?.cancel?.(panel);
+  const panel=closing?.panel;clear();dismissCurtain();curtain?.remove();curtain=null;if(panel)win.DongjakWindowMotion?.cancel?.(panel);
   win.removeEventListener('click',select,true);nav.removeEventListener('pointerdown',down);
   win.removeEventListener('pointerup',up,true);win.removeEventListener('pointercancel',cancel,true);
   delete nav.dataset.djTabNavigation;
