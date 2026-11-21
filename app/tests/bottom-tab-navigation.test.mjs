@@ -58,3 +58,34 @@ test('clicking a phone tab renders the destination in the same event with no roo
  assert.deepEqual(TAB_TRANSITION,{contentReveal:140});
  destroy();
 });
+
+
+test('swiping the dock is handled at window capture even when a tab intercepts bubbling pointer events',()=>{
+ const handlers=new Map(),registered=[];
+ const app={dataset:{tab:'route'}};
+ const buttons=['map','route','participate','news','mine'].map(name=>({
+  dataset:{tab:name},disabled:false,isConnected:true,
+  click(){app.dataset.tab=name;}
+ }));
+ const nav={dataset:{},querySelectorAll:()=>buttons,querySelector:()=>buttons[0],
+  addEventListener(){throw Error('do not depend on bubbling pointerdown');},
+  removeEventListener(){}};
+ const doc={getElementById:key=>key==='bottom-nav'?nav:null,querySelector:()=>null};
+ const win={
+  matchMedia:()=>({matches:true}),
+  addEventListener:(type,fn,options)=>{handlers.set(type,fn);registered.push({type,options});},
+  removeEventListener:(type)=>handlers.delete(type),
+  setTimeout:()=>1,clearTimeout:()=>{}
+ };
+ const dispose=installBottomTabNavigation({doc,win,app});
+ assert.ok(registered.some(x=>x.type==='pointerdown'&&x.options===true),
+  'gesture starts must be received before child handlers can stop propagation');
+ const target={closest:selector=>selector==='#bottom-nav'?nav:null};
+ handlers.get('pointerdown')({target,pointerId:3,button:0,isPrimary:true,clientX:210,clientY:800});
+ handlers.get('pointerup')({pointerId:3,clientX:125,clientY:802,cancelable:true,preventDefault(){}});
+ assert.equal(app.dataset.tab,'participate');
+ handlers.get('pointerdown')({target:{closest:()=>null},pointerId:4,button:0,isPrimary:true,clientX:300,clientY:400});
+ handlers.get('pointerup')({pointerId:4,clientX:200,clientY:400,cancelable:true,preventDefault(){}});
+ assert.equal(app.dataset.tab,'participate','swipes outside the dock cannot change tabs');
+ dispose();
+});
