@@ -100,6 +100,20 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
 const installedLiveTransit=new WeakMap();
 export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice=()=>{}}){
   if(installedLiveTransit.has(map))return installedLiveTransit.get(map);
+  // The supplementary OSM overview doubles the colored metro line in the
+  // same viewport and creates parallel/misaligned segments. Keep its source
+  // available but render one subway corridor per line.
+  const hideDuplicateRail=()=>{
+    for(const id of ['transport-real-rail-overview-casing','transport-real-rail-overview']){
+      if(!map.getLayer?.(id))continue;
+      try{
+        if(map.getLayoutProperty?.(id,'visibility')!=='none')
+          map.setLayoutProperty(id,'visibility','none');
+      }catch{ /* map style may be reloading */ }
+    }
+  };
+  map.on?.('style.load',hideDuplicateRail);
+  hideDuplicateRail();
   const controls=document.getElementById('dj-live-vehicle-controls');
   if(!controls)return null;
   const btnMetro=controls.querySelector('[data-live-vehicle="metro"]');
@@ -167,6 +181,6 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
   sync();
-  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);map.off?.('style.load',hideDuplicateRail);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
   installedLiveTransit.set(map,handle);return handle;
 }
