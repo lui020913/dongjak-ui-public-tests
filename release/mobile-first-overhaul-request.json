@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.71",
+  "application_version": "9.2.72",
   "public_work_branch": "main",
-  "purpose": "v9.2.71 phone header-only soft material: light/dark search pill and AI button get scoped 9px translucent glass and gentle shadow; iOS PWA status/map edge receives only 68px fade. Preserve all other flat surfaces (onboarding, bottom tab, full-screen sheets, modal), functionality and voice geometry. PR #217 merged and public CI 44900947359 passed. Strict Preview, 12 mobile QA, 6 visual QA, protected Production promotion.",
-  "attempt": 201,
+  "purpose": "v9.2.72 unified mobile UI overhaul from PR #218: full-viewport appropriately sized onboarding; redesigned route form/cards, real start/end labels, selectable full route fit, explicit data uncertainty; native full-page enter/exit fades with opaque map guard; coherent shared buttons/icons, My Info background and language relocation; safe area bounded layer expansion; AI modal crossfade; selected transfer-line ring only for interchange and transit panel controls; Strict Preview→12 phone QA→6 visual capture/analysis→explore QA→protected Production.",
+  "attempt": 202,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User requested only top header softness in screenshot, including dark theme. Prior global flat baseline v9.2.70 is production; PR #217 isolates header exceptions without restoring global dim/blur or unrelated gradients. New version 9.2.71 release after PR CI succeeded.",
+  "last_retry_reason": "User screenshots 21:08–21:17 document onboarding overlay not fullscreen, map flashes during tab swaps, poor route comparison and toast wrapping, mismatched My Info surfaces/icons, clipped expanded layer, metro line button outlines and empty metro information; source PR #218 merged after CI 44904177986 succeeded.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
