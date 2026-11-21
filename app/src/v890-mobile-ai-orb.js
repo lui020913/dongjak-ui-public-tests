@@ -11,20 +11,14 @@ export function installMobileAiOrb(doc=document,win=window){
   const host=theme?.closest('.header-tools');
   if(!media||!app||!host||!theme)return ()=>{};
   let orb=null;
+  let lastOrbPointer=0;
   const openExistingAi=()=>{
     const native=doc.getElementById('dj887-ai-quick-entry')||
       doc.getElementById('dj-ai-search-entry');
     const modal=doc.getElementById('dj-ai-search-modal');
     if(native){
+      // Delegate exactly once. A deferred fallback could reopen AI after another sheet closes.
       native.click();
-      // The search module may still be attaching its click listener while
-      // the map initializes. One frame later, recover an unopened dialog.
-      win.requestAnimationFrame?.(()=>{
-        if(!modal?.open&&modal?.showModal){
-          try{modal.showModal();modal.querySelector('.dj-ai-close')?.focus({preventScroll:true});}
-          catch{ /* the normal AI entry retains ownership of further opens */ }
-        }
-      });
       return;
     }
     if(modal?.showModal){
@@ -54,7 +48,13 @@ export function installMobileAiOrb(doc=document,win=window){
     txt.className='dj890-ai-orb-text';
     txt.textContent='AI';
     orb.append(txt);
-    orb.addEventListener('click',openExistingAi);
+    // Require a pointer that actually began on this button. This blocks iOS
+    // pointer retargeting after an unrelated sheet's close button disappears.
+    orb.addEventListener('pointerdown',()=>{lastOrbPointer=Date.now();});
+    orb.addEventListener('click',event=>{
+      if(event.detail>0&&Date.now()-lastOrbPointer>1400)return;
+      openExistingAi();
+    });
     host.insertBefore(orb,theme);
   }
   media.addEventListener?.('change',sync);
