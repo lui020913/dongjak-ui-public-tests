@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
-const css=read('src/v722-bottom-panels-ios-header.css');
+const css=read('src/mobile-ui-baseline.css');
 
 test('all three non-news auxiliary menus anchor to the same bottom baseline',()=>{
   for(const id of ['route-panel','participation-panel','mine-panel']){
@@ -24,7 +24,7 @@ test('standalone-status safe-area cover is opaque, noninteractive, theme aware a
 });
 test('new final CSS is appended after v7.0.21 and version metadata remains consistent',()=>{
   const main=read('src/main.js');
-  assert.ok(main.indexOf('v722-bottom-panels-ios-header.css')>main.indexOf('v721-overlay-interactions.css'));
+  assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('mobile-ui-baseline.css'));
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
   assert.equal(JSON.parse(read('public/version.json')).version,APP_VERSION);
   assert.match(read('src/version-history.js'),/version:'v7\.0\.29'/);
