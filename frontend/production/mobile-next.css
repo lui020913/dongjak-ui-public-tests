@@ -952,15 +952,16 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-footer{grid-row:4!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;padding:14px 23px calc(env(safe-area-inset-bottom,0px) + 18px)!important;background:var(--dj9272-surface)!important;border-top:1px solid var(--dj9272-line)!important;min-height:84px!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding :is(.dj860-skip,.dj860-next,.dj860-prev){border-radius:999px!important;min-height:46px!important;font-size:14px!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-next{min-width:118px!important;box-shadow:var(--dj9272-shadow)!important}
-  /* Native browser crossfade blends snapshots of the REAL old/new pages.
-     No opaque in-between surface, no blank white frame, and no map flash.
-     Browsers without View Transitions switch pages immediately in JS. */
+  /* The page itself changes in one paint: never animate the root/html,
+     WebGL map canvas, or full-screen panel opacity. iOS GPU snapshots can
+     render white before a View Transition completes. Only the new page's
+     content becomes gently clearer; its full-height background is solid. */
   @media(max-width:699px) and (prefers-reduced-motion:no-preference){
-    html:has(#app[data-dj-tab-transition="active"])::view-transition-old(root){animation:170ms ease-in-out both djTabSnapshotOut!important}
-    html:has(#app[data-dj-tab-transition="active"])::view-transition-new(root){animation:170ms ease-in-out both djTabSnapshotIn!important}
+    html body #app#app#app .page-panel.dj-tab-content-enter:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body){
+      animation:djTabContentReveal 140ms ease-out both!important;
+    }
   }
-  @keyframes djTabSnapshotOut{from{opacity:1}to{opacity:0}}
-  @keyframes djTabSnapshotIn{from{opacity:0}to{opacity:1}}
+  @keyframes djTabContentReveal{from{opacity:.88}to{opacity:1}}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav{z-index:7000!important}
   /* Route editor: a unified location selector and legible type rhythm. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body{background:var(--dj9272-page)!important;padding:14px 14px 28px!important}
