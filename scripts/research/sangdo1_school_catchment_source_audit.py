@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 PAGES = [
     "https://schoolzone.emac.kr/publicData/publicDataList.do",
     "https://www.data.go.kr/data/15159265/fileData.do",
+    "https://schoolzone.emac.kr/resources/js/publicData/publicDataList.js",
 ]
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; research-catchment-data-audit/1.0)",
@@ -31,6 +32,8 @@ def main():
             status, actual, mime, b = get(url)
             print("status", status, "url", actual, "type", mime, "bytes", len(b))
             text = b.decode("utf-8", errors="replace")
+            if url.endswith("publicDataList.js"):
+                print("OFFICIAL_DOWNLOAD_SCRIPT", text[:26000])
             for term in ["2026.09.20", "20260920", "초등학교 통학구역", "15159265", "fileDownload", "downloadFile", "fnFile"]:
                 hits=list(re.finditer(re.escape(term),text,re.I))
                 print("TERM",repr(term),"matches",len(hits))
