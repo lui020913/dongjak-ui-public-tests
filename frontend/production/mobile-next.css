@@ -976,7 +976,12 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    background:var(--dj-primary-page-bg,#edf3ef)!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-actions .dj860-next{min-width:120px!important;min-height:49px!important;font-size:15px!important;border-radius:17px!important;box-shadow:0 3px 11px rgba(16,85,66,.14)!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding, .dj860-onboarding .dj860-card, .dj860-onboarding .dj860-head, .dj860-onboarding .dj860-visual-pane, .dj860-onboarding .dj860-content, .dj860-onboarding .dj860-footer{background:#192d32!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding,
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-card,
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-head,
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-visual-pane,
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-content,
+    html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-footer{background:#192d32!important}
   /* Opaque curtain is below fullscreen pages but above the map. Fade the
      curtain AFTER the incoming page has painted; this prevents a map flash. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-tab-surface-curtain:not([hidden]){
