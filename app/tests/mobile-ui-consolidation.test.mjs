@@ -26,7 +26,7 @@ test('one JS module entry exposes UI coordinators without duplicate lifecycle co
 
 test('future version-stamped CSS hotfixes cannot bypass the canonical current patch',()=>{
  const allowed=JSON.parse(read('src/mobile-ui/legacy-css-baseline.json')).files;
- const actual=readdirSync(new URL('../src/',import.meta.url)).filter(name=>/^v\\d{3,}[^/]*\\.css$/.test(name));
+ const actual=readdirSync(new URL('../src/',import.meta.url)).filter(name=>/^v\d{3,}[^/]*\.css$/.test(name));
  const unreviewed=actual.filter(name=>!allowed.includes(name));
  assert.deepEqual(unreviewed,[],'Add current UI changes to mobile-ui/current.css instead of creating a versioned hotfix');
 });
