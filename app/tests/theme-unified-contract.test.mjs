@@ -62,3 +62,11 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
   assert.equal(JSON.parse(read('public/manifest-dark.webmanifest')).theme_color,'#17191d');
   assert.equal(JSON.parse(read('public/manifest-light.webmanifest')).theme_color,'#edf3ef');
 });
+
+test('mobile full-height primary pages retain the charcoal status-edge base',()=>{
+  const css=read('src/mobile-primary-fullscreen.css');
+  const contract=read('src/theme-contract.css');
+  assert.match(css,/--dj-primary-page-bg:#17191d/);
+  assert.match(contract,/--dj-theme-bg:#17191d/);
+  assert.match(contract,/--dj-primary-page-bg:#17191d!important/);
+});
