@@ -1,0 +1,625 @@
+{
+  "type": "FeatureAttributeJoinTable",
+  "schema": "sangdo1_tong_to_elementary_catchment_20250317_v1",
+  "generated": "2026-11-21",
+  "metadata": {
+    "tong_count": 45,
+    "single_school_tongs": 43,
+    "split_tongs": [
+      20,
+      22
+    ],
+    "schools": [
+      {
+        "school": "강남초",
+        "included_tong_count": 24
+      },
+      {
+        "school": "상현초",
+        "included_tong_count": 14
+      },
+      {
+        "school": "은로초",
+        "included_tong_count": 1
+      },
+      {
+        "school": "봉현초",
+        "included_tong_count": 8
+      }
+    ],
+    "source": "user-provided 2025 Dongjak/Gwanak education office XLSX",
+    "official_polygon_status": "not downloaded; no shapes present",
+    "official_2026_shape_link": "https://www.data.go.kr/data/15159265/fileData.do",
+    "spatial_join_available": false,
+    "disclaimer": "NOT an official tong/ban boundary shapefile. School catchment is address assignment, not student route; 2025 rules may change."
+  },
+  "tong_assignments": [
+    {
+      "tong": 1,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 2,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 3,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 4,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 5,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 6,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 7,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 8,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 9,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 10,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 11,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 12,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 13,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 14,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 15,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 16,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 17,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 18,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 19,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 20,
+      "school_assignment": [
+        "상현초",
+        "봉현초"
+      ],
+      "school_count": 2,
+      "partial_tong": true,
+      "assignment_rule": "상현초: 20통(2반 제외); 봉현초: 20통2반",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "반별·단지별 예외 확인 필요"
+    },
+    {
+      "tong": 21,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 22,
+      "school_assignment": [
+        "강남초",
+        "은로초"
+      ],
+      "school_count": 2,
+      "partial_tong": true,
+      "assignment_rule": "강남초: 22통11반(래미안2차 제외); 은로초: 22통(11반 제외, 삼성래미안2차아파트)",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "반별·단지별 예외 확인 필요"
+    },
+    {
+      "tong": 23,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 24,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 25,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 26,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 27,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 28,
+      "school_assignment": [
+        "강남초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 29,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 30,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 31,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 32,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 33,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 34,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 35,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 36,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 37,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 38,
+      "school_assignment": [
+        "봉현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 39,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 40,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 41,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 42,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 43,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 44,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    },
+    {
+      "tong": 45,
+      "school_assignment": [
+        "상현초"
+      ],
+      "school_count": 1,
+      "partial_tong": false,
+      "assignment_rule": "",
+      "source_asof": "2025-03-17",
+      "protection_score": null,
+      "geometry_status": "통·반 공간경계 없음; 도로 할당 불가",
+      "status": "단일 학교 배정(2025 통학구역표 기준)"
+    }
+  ]
+}
