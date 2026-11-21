@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.65",
+  "application_version": "9.2.66",
   "public_work_branch": "main",
-  "purpose": "iOS Home Screen PWA startup overlay CSS cascade repair after legacy style.css hydration (PR #189). Keep the status strip and loader's topmost light #edf3ef / dark #192d32 tones consistent from first paint until map readiness. Preserve all v9.2.64 map, metro/rail, AI search, weather dock, scale, community composer fixes; mobile-only gate and protected Preview, 12 phone QA, 6 visual/Gemini QA, autonomous exploration, Production approval and rollback remain mandatory.",
-  "attempt": 186,
+  "purpose": "PR #190 merged after full public app CI. Repair iPhone onboarding blank-frame pauses by retaining opaque outgoing artwork/text until decoded crossfade, remove 15%-opacity fullscreen primary-page entry which exposed map instead of card/text, preserve bottom-tab labels, harmonize iOS native status strip across tour/guide/dialog overlays and community composer, and correct weather text clipping and button margins. Keep mobile-only gate, rail and transit sources, protected Preview, 12 phone QA, six visual/Gemini design reviews, Gemini autonomous exploration, verified Production and rollback protections.",
+  "attempt": 187,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.64 guarded Preview, phone 12/12, visual Gemini 6/6, autonomous exploration and Production verified successful. Follow-up PR #189 merged on main after complete public source CI (including iPhone startup cascade test and 375/390/430px Playwright). Run a NEW exact-source v9.2.65 protected release; do not reuse the previous Preview or QA.",
+  "last_retry_reason": "v9.2.65 guarded release and Android debug APK succeeded. User iPhone recordings/photos 2026-11-21 17:48–17:49 KST exposed distinct onset animation/transparent panel and native status-edge defects. PR #190 successfully merged after public source CI, full regression suite, build, phone viewport QA. Require NEW exact-source v9.2.66 guarded release; do not reuse v9.2.65 evidence.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
