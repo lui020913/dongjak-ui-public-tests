@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -80,4 +81,12 @@ test('exact official 2026 school road lengths and the protected overlap interval
     assert.equal(focusById[id].school_catchments[0].name,'서울상현초통학구역');
     assert.match(focusById[id].official_zone_status,/not confirmed/);
   }
+});
+
+
+test('read-only official-SHP and registered-zone 2m GIS crosscheck reproduces study data',()=>{
+  const script=path.resolve(dir,'../../../../scripts/research/sangdo1_2025_zones_2026_school_crosscheck.mjs');
+  const outcome=JSON.parse(execFileSync(process.execPath,[script],{encoding:'utf8',timeout:30000}));
+  assert.equal(outcome.status,'PASS');
+  assert.equal(outcome.valid,1676);
 });
