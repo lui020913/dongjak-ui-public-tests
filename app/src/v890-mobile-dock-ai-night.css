@@ -57,12 +57,12 @@
     font:850 16px/1 "Pretendard Variable",Pretendard,system-ui,sans-serif!important;
     letter-spacing:-.045em;
     color:#13866c;
-    background:linear-gradient(105deg,#087755 0%,#39c993 25%,#0b7357 49%,#73d8a5 75%,#087755 100%);
+    background:none;
     background-size:300% 100%;
-    -webkit-background-clip:text;
-    background-clip:text;
-    -webkit-text-fill-color:transparent;
-    animation:dj890-ai-green-cycle 3s linear infinite;
+    -webkit-background-clip:initial;
+    background-clip:initial;
+    -webkit-text-fill-color:currentColor;
+    animation:none;
   }
   #app #dj890-ai-orb:focus-visible {
     outline:3px solid #36b38b!important;outline-offset:3px!important;
@@ -97,7 +97,7 @@ html body #app#app#app#app #night-visibility-float::after {
 }
 html body #app#app#app#app #dj833-night-modal {
   filter:none!important;
-  background:rgba(12,34,27,.36)!important;
+  background:transparent!important;
 }
 /* PWA reload splash used by the night switch also blurred the entire map. */
 html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::before {

@@ -46,7 +46,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 }
 .dj-ai-search-modal[open]{animation:djAiModalAppear .24s cubic-bezier(.2,.75,.3,1) both;}
 .dj-ai-search-modal::backdrop{
-  background:rgba(15,31,32,.43);backdrop-filter:blur(3px);
+  background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
   animation:djAiBackdropAppear .22s ease-out both;
 }
 .dj-ai-search-body{display:grid;gap:17px;padding:27px 29px 25px;min-width:0;}
@@ -318,7 +318,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 .dj-ai-visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 @media(max-width:699px){
  html body #dj-ai-search-modal[open]{position:fixed!important;inset:var(--dj891-ai-visible-top,0px) 0 auto 0!important;margin:0!important;width:100%!important;max-width:none!important;height:var(--dj891-ai-visible-height,100dvh)!important;max-height:var(--dj891-ai-visible-height,100dvh)!important;border:0!important;border-radius:0!important;animation:none!important;overflow:hidden!important;box-shadow:none!important;padding:0!important;transform:none!important;translate:none!important;opacity:1!important}
- #dj-ai-search-modal[open]::backdrop{background:var(--ai-bg)!important;background-image:none!important;animation:none!important;backdrop-filter:none!important}
+ #dj-ai-search-modal[open]::backdrop{background:transparent!important;background-image:none!important;animation:none!important;backdrop-filter:none!important}
  html:has(#dj-ai-search-modal[open]),body:has(#dj-ai-search-modal[open]){overscroll-behavior:none;overflow:hidden}
  #dj-ai-search-modal[open].dj887-ai-closing{animation:none!important}
  html body #dj-ai-search-modal .dj-ai-search-body{display:flex!important;flex-direction:column!important;box-sizing:border-box;height:100%;min-height:0;padding:env(safe-area-inset-top,0px) 16px max(12px,env(safe-area-inset-bottom,0px))!important;gap:8px!important}
@@ -340,7 +340,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  #dj-ai-search-modal .dj-ai-query{font-size:16px!important;border-radius:999px!important;box-shadow:none}
  #dj-ai-search-modal :is(.dj-ai-close,.dj-ai-login,.dj-ai-submit,.dj-ai-map-btn,.dj-ai-example):not(:disabled){border-radius:var(--djNext-tool-pill)!important;box-shadow:var(--djNext-tool-shadow)!important;background-image:var(--djNext-tool-sheen)!important;transition:box-shadow var(--djNext-tool-motion)!important}
  #dj-ai-search-modal :is(.dj-ai-submit,.dj-ai-map-btn):not(:disabled){background:var(--djNext-tool-primary)!important;border-color:var(--djNext-tool-primary-edge)!important}
- #dj-ai-search-modal :is(.dj-ai-close,.dj-ai-login,.dj-ai-example):not(:disabled){background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base))!important;border-color:var(--djNext-tool-edge)!important}
+ #dj-ai-search-modal :is(.dj-ai-close,.dj-ai-login,.dj-ai-example):not(:disabled){background:var(--djNext-tool-face)!important;border-color:var(--djNext-tool-edge)!important}
  #dj-ai-search-modal :is(.dj-ai-close,.dj-ai-login,.dj-ai-submit,.dj-ai-map-btn,.dj-ai-example):active:not(:disabled){transform:none;box-shadow:var(--djNext-tool-pressed)!important}
  #dj-ai-search-modal .dj-ai-disclaimer{margin:0;text-align:center;border:0;padding:0!important}
 }
