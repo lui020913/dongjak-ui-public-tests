@@ -47,3 +47,35 @@ test('client uses same-origin proxy and falls back to public Esri when unavailab
 test('client never declares success for missing or invalid geometry',async()=>{
  await assert.rejects(fetchOfficialRailPaths(async()=>response({features:[]}),500),/인식 가능한 노선/);
 });
+
+test('OpenStreetMap ODbL fallback preserves genuine track vertices and discloses source',async()=>{
+ const coords=[[126.94,37.51],[126.941,37.511],[126.942,37.512]];
+ const file={type:'FeatureCollection',features:[{geometry:{type:'MultiLineString',coordinates:[coords]}}]};
+ const request=new Request('https://example.com/api/rail-geometry');
+ const urls=[];
+ const served=await onRequestGet({request,fetchImpl:async url=>{
+  urls.push(url);
+  if(url.startsWith('https://portal.esrikr.com'))return response({},502);
+  return response(file);
+ }});
+ assert.equal(served.status,200);
+ const data=await served.json();
+ assert.equal(data.source,'OpenStreetMap_ODbL');
+ assert.equal(data.license,'https://www.openstreetmap.org/copyright');
+ assert.equal(data.features.length,6);
+ assert.equal(data.available_lines.length,6);
+ assert.ok(urls.every(url=>url.startsWith('https://portal.esrikr.com')||url.startsWith('https://raw.githubusercontent.com/jebowe3/seoul_transportation/main/')));
+ assert.deepEqual(data.features[0].geometry.paths[0],coords);
+ const extracted=(await import('../src/rail-official-shapes.js')).extractOfficialPaths(data);
+ assert.equal(extracted.length,6);
+ assert.ok(extracted.some(x=>x.line==='신림'&&x.origin==='OpenStreetMap_ODbL'));
+});
+test('OSM-derived routes reject malformed coordinates and no provider means schematic 502',async()=>{
+ const {osmRailFeatures}=await import('../functions/api/rail-geometry.js');
+ const bad={type:'FeatureCollection',features:[{geometry:{type:'LineString',coordinates:[[0,0],[1,1],[2,2]]}}]};
+ assert.deepEqual(osmRailFeatures(bad,'서울9호선'),[]);
+ assert.deepEqual(osmRailFeatures(bad,'사용자 지정 노선'),[]);
+ const failed=await onRequestGet({request:new Request('https://example.com/api/rail-geometry'),fetchImpl:async()=>response({},503)});
+ assert.equal(failed.status,502);
+ assert.match((await failed.json()).error.message,/안내 선형/);
+});
