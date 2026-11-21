@@ -346,10 +346,13 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await expect(mine.locator('.dj17-more-root')).toBeVisible();await expect(mine.locator('.dj834-settings-group > .dj17-more-root')).toHaveCount(1);
  const metrics=await mine.evaluate(n=>{const a=n.querySelector('[data-dj834-action="records"]'),b=n.querySelector('.dj17-more-root>summary'),c=a.querySelector('.dj834-setting-icon');const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(),rc=c.getBoundingClientRect(),sb=getComputedStyle(b),sa=getComputedStyle(a);return {height:Math.abs(ra.height-rb.height),inset:Math.abs(parseFloat(sa.paddingLeft)-parseFloat(sb.paddingLeft)),icon:Math.abs(rc.width-parseFloat(getComputedStyle(b,'::before').width))};});
  expect(metrics.height).toBeLessThanOrEqual(2);expect(metrics.inset).toBeLessThanOrEqual(1);expect(metrics.icon).toBeLessThanOrEqual(1);
- const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await expect(mineHeader).toHaveCSS('touch-action','none');
+ const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await expect(mineHeader).toHaveCSS('touch-action','auto');
  const dragMine=async(dy)=>{await expect.poll(()=>mineHeader.evaluate(n=>{const panel=n.closest('#mine-panel'),r=n.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width*.28,r.top+r.height*.66);return !panel?.dataset.dj810Animating&&!panel?.classList.contains('dj889-sheet-transitioning')&&!!hit&&n.contains(hit)&&!hit.closest('button,a,input,select,textarea,label,summary,[role="button"]')})).toBe(true).catch(async error=>{console.log('HEADER_HIT_DIAGNOSTIC',JSON.stringify(await mineHeader.evaluate(n=>{const r=n.getBoundingClientRect(),x=r.left+r.width*.28,y=r.top+r.height*.66,p=n.closest('#mine-panel');return {rect:[r.x,r.y,r.width,r.height],point:[x,y],motion:p?.dataset.dj810Animating||null,transition:p?.classList.contains('dj889-sheet-transitioning'),stack:document.elementsFromPoint(x,y).slice(0,8).map(e=>({tag:e.tagName,id:e.id,className:typeof e.className==='string'?e.className:'svg',z:getComputedStyle(e).zIndex,pointer:getComputedStyle(e).pointerEvents,visibility:getComputedStyle(e).visibility}))};})));throw error;});const h=await mineHeader.boundingBox();const x=h.x+h.width*.28,y=h.y+h.height*.66;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+dy,{steps:10});await page.mouse.up();};
- await dragMine(-100);await expect(mine).toHaveClass(/dj871-sheet-expanded/);await expect(mine).not.toHaveClass(/dj889-sheet-transitioning/);
- await dragMine(105);await expect(mine).not.toHaveClass(/dj871-sheet-expanded/);await expect(mine).not.toHaveClass(/dj889-sheet-transitioning/);
+ // A full-screen tab does not expand, collapse or dismiss on header swipes.
+ const fixedMine=await mine.boundingBox();
+ await dragMine(-100);await expect(mine).toBeVisible();await expect(mine).not.toHaveClass(/dj871-sheet-expanded/);
+ await dragMine(105);await expect(mine).toBeVisible();await expect(mine).not.toHaveClass(/dj889-sheet-transitioning/);
+ const afterMine=await mine.boundingBox();expect(Math.abs(afterMine.y-fixedMine.y)).toBeLessThan(3);
  await tap(page,mine.locator('.dj-sheet-chrome-close'));await expect(mine).toBeHidden();
  await tap(page,tab(page,'participate'));
  const community=page.locator('#participation-panel'),cb=community.locator(':scope > .dj836-sheet-body'),summary=cb.locator('.community-report-secondary > summary');
@@ -586,6 +589,13 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    const frames=await page.evaluate(()=>window.__sharedMotion);
    for(const [phase,duration] of [['opening',350],['closing',300]]){
      const motion=frames.filter(f=>f.phase===phase);
+     // Native fullscreen tabs close directly to HOME without a slide-dismiss phase.
+     // Still require the original fade on entry and forbid any tab slide on exit.
+     if(tabEntrance&&phase==='closing'){
+       expect(motion.every(f=>f.kind!=='slide')).toBe(true);
+       await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+       continue;
+     }
      expect(motion.length).toBeGreaterThan(1);
      if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
      // v9.2.51 fades the sliding card; the overlay/backdrop must remain solid.
@@ -848,14 +858,15 @@ test('live train atlas and positions remain loaded but vehicle symbols are hidde
   await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('route title is a full header drag surface; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
+test('route fullscreen header resists sheet dismissal; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,tab(page,'route'));
  const panel=page.locator('#route-panel'),header=panel.locator(':scope > .dj-sheet-chrome');await visuallyPresented(panel);
- await expect(header).toHaveCSS('touch-action','none');await expect(panel.locator(':scope > .dj836-sheet-body')).toHaveCSS('touch-action','pan-y');
+ await expect(header).toHaveCSS('touch-action','auto');await expect(panel.locator(':scope > .dj836-sheet-body')).toHaveCSS('touch-action','pan-y');
  const title=header.locator('h2'),box=await title.boundingBox();const x=Math.round(box.x+box.width/2),y=Math.round(box.y+box.height/2);
  await expect.poll(()=>panel.getAttribute('data-dj810-animating')).toBeNull();
  const client=browserName==='chromium'?await page.context().newCDPSession(page):null;
- try{if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+Math.round(i*18)}]});await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}else{await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+145,{steps:8});await page.mouse.up();}await expect(panel).toBeHidden();}finally{await client?.detach();}
+ try{if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+Math.round(i*18)}]});await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}else{await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+145,{steps:8});await page.mouse.up();}await expect(panel).toBeVisible();await expect(panel).not.toHaveClass(/dj871-sheet-expanded/);}finally{await client?.detach();}
+ await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
  const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
  expect(await form.evaluate(n=>Boolean(n.querySelector('#community-share-publicly').compareDocumentPosition(n.querySelector('[type=submit]'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
