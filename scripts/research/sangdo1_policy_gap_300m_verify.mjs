@@ -111,7 +111,8 @@ for(const r of roads.segments){
    continue;
   }
   counts[type].scored++;
-  const mean=Math.round(s.weighted/s.eligible*10)/10;
+  const roundedMean=Math.round(s.weighted/s.eligible*10)/10;
+  const mean=s.unprotected>1e-5?Math.min(99.9,roundedMean):roundedMean; // Preserve 100 exclusively for fully registered polygons.
   roughly(v.score,mean,.001,r.id+'/'+type+' score');
   roughly(v.evaluated_length_m,s.eligible,.011,r.id+'/'+type+' evaluated m');
   roughly(v.unprotected_length_m,s.unprotected,.011,r.id+'/'+type+' uncovered m');
