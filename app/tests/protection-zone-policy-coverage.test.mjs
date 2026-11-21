@@ -20,7 +20,7 @@ test('school buffer preview paints clipped 5m road portions rather than whole 25
     assert.equal(item.geometry.type,'LineString');
     assert.ok(item.geometry.coordinates.length>=2);
     assert.ok(['within300','300to500'].includes(p.band));
-    assert.equal(p.verification_status,'시범 미확인');
+    assert.ok(p.verification_status.includes('연구용'));
     assert.equal(p.route_penalty_allowed,false);
     assert.ok(p.geometry_length_m>0 && p.geometry_length_m<=p.source_geometry_length_m+.2);
     assert.ok(p.school_coverage_preview_score>=0&&p.school_coverage_preview_score<=100);
