@@ -46,7 +46,7 @@ test('onboarding crossfade retains rendered artwork mat; phone search uses live 
   const onboarding=read('src/v860-onboarding.js');
   const css=read('src/v9257-mobile-regressions.css');
   const html=read('index.html');
-  assert.match(onboarding,/const panes=\[visual,copy\]/);
+  assert.match(onboarding,/const ghosts=reduced\?\[\]:holdOutgoingSlide\(\)/);
   assert.match(css,/dj860-swapping \.dj860-visual-pane/);
   assert.match(css,/--dj884-search-room/);
   assert.match(css,/community-category-tabs/);
