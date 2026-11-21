@@ -14,6 +14,7 @@ async function fixture(){
   for(const filename of ['bump-app-version.mjs','stamp-version.mjs'])
     await copyFile(new URL(filename,scriptRoot),join(root,'scripts',filename));
   await copyFile(new URL('lib/semver-release.mjs',scriptRoot),join(root,'scripts/lib/semver-release.mjs'));
+  await copyFile(new URL('../src/public-release-display.js',import.meta.url),join(root,'src/public-release-display.js'));
   const write=(name,data)=>writeFile(join(root,name),typeof data==='string'?data:JSON.stringify(data,null,2)+'\n');
   await write('package.json',{name:'fixture',version:'2.3.4',type:'module'});
   await write('package-lock.json',{version:'2.3.4',packages:{'':{version:'2.3.4'}}});
@@ -40,9 +41,9 @@ for(const [kind,expected] of [['major','3.0.0'],['minor','2.4.0'],['patch','2.3.
       assert.equal(log.length,3);
       assert.equal((await read(join(root,'public/version.json'))).version,expected);
       assert.equal((await read(join(root,'src/build-info.json'))).version,expected);
-      assert.match(await readFile(join(root,'index.html'),'utf8'),new RegExp(`version-history-trigger">v${expected.replaceAll('.','\\.')}`));
-      assert.ok((await readFile(join(root,'index.html'),'utf8')).includes(`id="map-startup-version">v${expected}</span>`));
-      assert.match(await readFile(join(root,'src/v7120-settings.js'),'utf8'),new RegExp(`number">v${expected.replaceAll('.','\\.')}`));
+      assert.match(await readFile(join(root,'index.html'),'utf8'),/version-history-trigger">업데이트<\/button>/);
+      assert.ok((await readFile(join(root,'index.html'),'utf8')).includes('id="map-startup-version">버전 1.0</span>'));
+      assert.match(await readFile(join(root,'src/v7120-settings.js'),'utf8'),/number">1\.0<\/strong>/);
       assert.ok((await readFile(join(root,'src/app-version.js'),'utf8')).includes(`APP_VERSION="${expected}"`));
     }finally{await rm(root,{recursive:true,force:true});}
   });
@@ -72,19 +73,15 @@ test('manual version changes cannot be silently published as patch releases',asy
   }finally{await rm(root,{recursive:true,force:true});}
 });
 
-test('the update history labels release types explicitly and keeps archived records',async()=>{
-  const renderer=await readFile(new URL('../src/version-history-v7.js',import.meta.url),'utf8');
-  const history=await readFile(new URL('../src/version-history.js',import.meta.url),'utf8');
-  assert.match(renderer,/주요 구조 개편/);
-  assert.match(renderer,/기능 추가·개선/);
-  assert.match(renderer,/수정·안정화/);
-  assert.match(renderer,/buildGenerationCatalog\(releases,\s*releaseEdition\)/);
-  assert.match(renderer,/displayVersion/);
-  // Archived notes are preserved as collapsed two-part edition records.
-  assert.match(renderer,/dataset\.archivedVersion/);
-  assert.match(renderer,/dj-edition-minor/);
-  assert.match(renderer,/dj-edition-patch/);
-  assert.match(renderer,/isOperational/);
-  assert.doesNotMatch(renderer,/release===currentRelease\?'현재 빌드: '/);
-  assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
+test('visible release history is categorized and internal records remain available',async()=>{
+ const renderer=await readFile(new URL('../src/version-history-v7.js',import.meta.url),'utf8');
+ const history=await readFile(new URL('../src/version-history.js',import.meta.url),'utf8');
+ assert.match(renderer,/CHANGE_TYPE_GROUPS/);
+ assert.match(renderer,/classifyReleaseNote/);
+ assert.match(renderer,/categorized\.get/);
+ assert.match(renderer,/dataset\.version/);
+ assert.match(renderer,/dataset\.archivedVersion/);
+ assert.match(renderer,/변경 종류별 전체 업데이트 내역/);
+ assert.doesNotMatch(renderer,/현재 빌드: /);
+ assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
 });
