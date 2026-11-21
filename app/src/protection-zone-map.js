@@ -9,11 +9,11 @@ import {createFieldworkStore,FIELDWORK_OPTIONS} from './protection-zone-fieldwor
 const BASE='/data/protection-zone/';
 const SOURCE_NAMES={
   zones:'pza-zones-source', candidates:'pza-candidates-source',hotspots:'pza-hotspots-source',
-  facilities:'pza-facilities-source',radii:'pza-radii-source',boundary:'pza-boundary-source',focuspoints:'pza-focus-points-source',schoolgap:'pza-school-gap-source'
+  facilities:'pza-facilities-source',radii:'pza-radii-source',boundary:'pza-boundary-source',focuspoints:'pza-focus-points-source',schoolgap:'pza-school-gap-source',catchments:'pza-catchments-source'
 };
 const SOURCE_FILES={
   zones:'zones.geojson',candidates:'candidates.geojson',hotspots:'accident_hotspots.geojson',
-  facilities:'facilities.geojson',radii:'distance_rings_reference.geojson',boundary:'boundary_reference.geojson',schoolgap:'school_300_500m_unprotected_preview.geojson'
+  facilities:'facilities.geojson',radii:'distance_rings_reference.geojson',boundary:'boundary_reference.geojson',schoolgap:'school_300_500m_unprotected_preview.geojson',catchments:'sangdo1_school_catchment_polygons_20260920.geojson'
 };
 const childFilter=['==',['get','facility_type'],'어린이'];
 const seniorFilter=['==',['get','facility_type'],'노인'];
@@ -23,6 +23,7 @@ const layerIds={
   child:['pza-child-fill','pza-child-border','pza-child-point'],
   senior:['pza-senior-fill','pza-senior-border','pza-senior-point'],
   schoolgap:['pza-school-gap-casing','pza-school-gap-500','pza-school-gap-300'],
+  catchments:['pza-catchment-fill','pza-catchment-outline'],
   candidates:['pza-candidates-casing','pza-candidates-line'],
   focus:['pza-focus-halo','pza-focus-line','pza-focus-marker','pza-focus-marker-label'],
   accidents:['pza-hotspots-fill','pza-hotspots-outline'],
@@ -48,7 +49,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
   const toggle=document.getElementById('protection-zone-toggle');
   const status=document.getElementById('protection-zone-status');
   const checkboxNames={child:'protection-zone-child',senior:'protection-zone-senior',
-    candidates:'protection-zone-candidates',accidents:'protection-zone-accidents',radii:'protection-zone-radii',schoolgap:'protection-zone-schoolgap'};
+    candidates:'protection-zone-candidates',accidents:'protection-zone-accidents',radii:'protection-zone-radii',schoolgap:'protection-zone-schoolgap',catchments:'protection-zone-catchments'};
   const inputs=Object.fromEntries(Object.entries(checkboxNames).map(([key,id])=>[key,document.getElementById(id)]));
   const simpleButton=document.getElementById('protection-zone-mode-simple');
   const detailButton=document.getElementById('protection-zone-mode-detail');
@@ -198,6 +199,14 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       filter:['==',['get','radius_m'],radius],
       paint:{'line-color':radius===300?'#54a3c9':'#8ea6c4','line-width':radius===300?1.5:1.2,
         'line-opacity':0.7,'line-dasharray':[3,3]}});
+    // Official *school attendance catchments* are distinct from legally designated
+    // police protection zones and not observations of routes actually used by pupils.
+    // Keep muted and opt-in, with no link to navigation safety costs or PRI.
+    add({id:'pza-catchment-fill',type:'fill',source:SOURCE_NAMES.catchments,
+      paint:{'fill-color':'#5d9c88','fill-opacity':0.065}});
+    add({id:'pza-catchment-outline',type:'line',source:SOURCE_NAMES.catchments,
+      paint:{'line-color':'#338b79','line-width':['interpolate',['linear'],['zoom'],11,1.1,17,2.4],
+        'line-opacity':0.82,'line-dasharray':[2.5,1.5]}});
     // Exploratory school-adjacent *undesignated* road segments (not certified hazards).
     // Full 25m segments can straddle the 300/500m rings; percentages retain overlap.
     add({id:'pza-school-gap-casing',type:'line',source:SOURCE_NAMES.schoolgap,minzoom:13,
@@ -314,7 +323,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
     if(advancedTools)advancedTools.hidden=mode!=='detail';
     if(modeGuide)modeGuide.textContent=mode==='simple'
       ? '빨간색 도로를 누르면 보행 시 참고할 사항과 아직 검증되지 않은 항목을 볼 수 있습니다.'
-      : '초등학교 300·500m 미지정 검토 도로도 볼 수 있습니다. 사고다발지역은 개별 사고 위치가 아닙니다.';
+      : '2026년 학교 배정구역과 300·500m 참고 도로를 구분해 볼 수 있습니다. 학구는 실제 통학로나 보호구역이 아닙니다.';
   }
   function syncVisibility(){
     const detailed=mode==='detail';
@@ -424,6 +433,12 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       <dt>인접 학교 대표점</dt><dd>${esc(p.nearest_school)}</dd></dl>
       <p class="pza-popup-note">시설 대표점은 주 출입문이 아니며, 반경 내부의 미지정은 법적 누락·위법 또는 사고 위험 확정을 뜻하지 않습니다. 진짜 보행 경로와 지정 고시 확인이 필요합니다.</p>`;
     bind('pza-school-gap-300',schoolGapPopup);bind('pza-school-gap-500',schoolGapPopup);
+    bind('pza-catchment-outline',p=>`<strong>${esc(p.catchment_name||'초등학교 통학구역')}</strong>
+      <p>2026년 9월 20일 기준 한국교육시설안전원 공식 통학구역 공간자료입니다.</p>
+      <p>상도1동 참고경계와 교차한 영역: <b>${esc(
+        Number.isFinite(Number(p.overlap_sangdo1_m2))?(Number(p.overlap_sangdo1_m2)/10000).toFixed(2):'확인 필요'
+      )}ha</b></p>
+      <p class="pza-popup-note">학생의 학교 배정구역입니다. 실제 통학 동선이나 경찰청 지정 어린이보호구역을 의미하지 않으며, 이 자료만으로 위험도를 판정하지 않습니다.</p>`);
     bind('pza-candidates-line',roadPopupHtml);
     bind('pza-focus-line',roadPopupHtml);
     bind('pza-focus-marker',roadPopupHtml);
