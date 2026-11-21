@@ -1131,8 +1131,10 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-group-title{font-size:13px!important;font-weight:780!important;margin:23px 4px 10px!important;color:var(--djNext-text,#294c40)!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root > summary::before{
    content:""!important;background:var(--djNext-active,#0f826d)!important;
-   width:32px!important;height:32px!important;mask:none!important;-webkit-mask:none!important;
-   border-radius:11px!important;
+   width:32px!important;height:32px!important;
+   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/g%3E%3C/svg%3E") center/24px 24px no-repeat!important;
+   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round'%3E%3Cpath d='M4 7h16M4 12h16M4 17h16'/%3E%3C/g%3E%3C/svg%3E") center/24px 24px no-repeat!important;
+   border-radius:0!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj854-language-section{
    display:flex!important;align-items:center!important;justify-content:space-between!important;
