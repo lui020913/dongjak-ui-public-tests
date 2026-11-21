@@ -36,6 +36,7 @@ const FEATURES = [
   ['safe-speed','도로별 제한속도','[id="sangdo-speed-toggle"]','gauge'],
   ['safe-speed-camera','무인교통단속카메라','[id="sangdo-camera-toggle"]','camera'],
   ['safe-night-analysis','야간 시야 분석','[id="night-visibility-toggle"]','moon'],
+  ['safe-pri','상도1동 PRI 위험도 (야간·사고)','[id="dj-pri-toggle"]','layers'],
   ['safe-accessibility','교통약자 모드','[id="ped-access-toggle"]','access'],
   ['safe-nearby','내 주변 보행정보','[id="ped-nearby-open"]','locate'],
   ['safe-report','보행불편 제보','[id="ped-report-open"]','pencil'],
@@ -149,6 +150,7 @@ const EXPLANATIONS={
  'safe-speed':['등록된 도로 제한속도 구간을 표시합니다.','실제 도로의 교통표지와 최신 법정 제한속도를 우선하십시오.'],
  'safe-speed-camera':['무인교통단속카메라 등록 위치를 표시합니다.','가동 상태와 단속 조건은 제공되지 않습니다.'],
  'safe-night-analysis':['조명 및 지형·건물 자료를 바탕으로 야간 시야를 분석합니다.','계산 결과는 시뮬레이션이며 실제 현장 조도·시인거리 측정값이 아닙니다.'],
+ 'safe-pri':['상도1동 25m 도로구간의 야간 조명 취약도와 사고다발지 위험도, 두 지수의 임시 평균을 선택해 볼 수 있습니다.','사고자료가 없는 구간은 미평가이며, 두 지수의 평균은 최종 6개 PRI 등급이 아닙니다.'],
  'safe-accessibility':['교통약자 보행 관련 정보를 강조합니다.','현장의 모든 단차·장애물·엘리베이터 가동 상태를 보증하지 않습니다.'],
  'safe-report':['보행불편 제보 화면을 엽니다.','제보 접수와 처리상태는 해당 기능이 제공하는 확인 화면을 참고하십시오.'],
  'map-dong':['행정동별 지도 범위를 선택하고 경계를 강조합니다.','경계는 등록된 공간자료를 기준으로 표시됩니다.'],
@@ -354,6 +356,11 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    },330);}
  }
  function select(feature,button=null){
+   // Open the existing PRI modal directly, not another bottom sheet behind its top-layer dialog.
+   if(feature[0]==='safe-pri'){
+     closeSheet();closeWeather();closeNightConfirm();hideMore();collapseNative();
+     const source=find(feature[2]);if(source&&!source.disabled)source.click();schedule();return;
+   }
    // A second night-analysis shortcut cannot bypass the same consent dialog.
    if(feature[0]==='safe-night-analysis'){
      closeSheet();closeWeather();hideMore();
