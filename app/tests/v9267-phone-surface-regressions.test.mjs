@@ -25,10 +25,10 @@ test('fullscreen tab transitions mask the underlying map without intercepting to
   assert.match(css,/#dj-tab-surface-curtain/);
   assert.match(css,/pointer-events:none!important/);
   for(const key of ['route','participate','news','mine'])assert(css.includes('data-tab="'+key+'"'));
-  assert.match(tab,/function protectPageTransition\(next\)/);
-  assert.match(tab,/protectPageTransition\(nextTab\)/);
+  assert.match(tab,/function ensureCurtain\(\)/);
+  assert.match(tab,/ensureCurtain\(\)/);
   assert.match(tab,/curtain\.hidden=false/);
-  assert.match(tab,/dismissCurtain\(\);curtain\?\.remove/);
+  assert.match(tab,/finishVisual\(\);curtain\?\.remove/);
 });
 test('fullscreen footer and My Info icons use the shared theme card surface',()=>{
   assert.match(css,/#mine-panel \.dj834-setting-icon/);

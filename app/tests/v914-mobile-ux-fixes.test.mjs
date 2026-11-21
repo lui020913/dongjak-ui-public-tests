@@ -49,7 +49,8 @@ test('Subway line badge removes the duplicate pointer ring but preserves keyboar
   const css=compact(readV914());
   assert.match(css,/\.dj-metro-line-selector:focus:not\(:focus-visible\)\{[^}]*outline:none!important/);
   assert.match(css,/\.dj-metro-line-selector:focus-visible\{[^}]*outline:2pxsolid#16856d!important/);
-  assert.match(css,/\.dj-metro-line-selector\[aria-pressed="true"\]\{[^}]*outline:2pxsolidvar\(--dj800-accent,#16856d\)!important[^}]*box-shadow:none!important/);
+  assert.doesNotMatch(css,/\.dj-metro-line-selector\[aria-pressed="true"\]\{/);
+  assert.match(css,/\.dj-metro-line-selector:focus-visible\{[^}]*outline:2pxsolid#16856d!important/);
 });
 
 test('Subway compact header targets the actual four live controls',()=>{
