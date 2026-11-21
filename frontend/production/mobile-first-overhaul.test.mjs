@@ -43,3 +43,23 @@ test('all main app surfaces receive the common sheet system',()=>{
   }
   assert.match(css,/prefers-reduced-motion: reduce/);
 });
+
+test('mobile news source toolbar uses one opaque page tone instead of a white slab',()=>{
+  const css=readFileSync(new URL('./mobile-next.css',import.meta.url),'utf8');
+  const news=css.split('#news-panel .dongjak-news-toolbar{').at(-1)?.split('}')[0]||'';
+  assert.match(news,/background:var\(--dj-primary-page-bg,#edf3ef\)!important/);
+  assert.match(news,/border:0!important/);
+  assert.match(news,/box-shadow:none!important/);
+  const tabs=css.split('#news-panel .dongjak-news-tabs{').at(-1)?.split('}')[0]||'';
+  assert.match(tabs,/background:var\(--djNext-raised,#e6f1e9\)!important/);
+  assert.match(tabs,/border-radius:999px!important/);
+});
+
+test('mobile layer drawer stays scrollable and clears the final shortcut above the iOS inset',()=>{
+  const css=readFileSync(new URL('./mobile-next.css',import.meta.url),'utf8');
+  const lastScroll=css.split('#djNext-layer-panel .djNext-layer-scroll{').at(-1)?.split('}')[0]||'';
+  assert.match(lastScroll,/padding-bottom:calc\(52px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
+  assert.match(lastScroll,/scroll-padding-bottom:52px!important/);
+  const lastBody=css.split('#djNext-layer-panel .djNext-modal-body{').at(-1)?.split('}')[0]||'';
+  assert.match(lastBody,/height:min\(56dvh,calc\(100dvh - env\(safe-area-inset-top,0px\)/);
+});
