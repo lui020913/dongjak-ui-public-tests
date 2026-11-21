@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "9.2.75 user-requested mobile UX repair for screenshots/videos 2026-11-21: iOS onboarding/status bar color seam; transparent permission/consent no duplicate motion; centered compact Dongjak weather with honest sourced seven-day forecast and modern close; persistent bottom pill during layer sheet and synchronized scale/TIP; nearby safety sheet spacing and single motion; compact PRI danger/caution/safe legend with animated disclosure, no scale/TIP. Includes merged PR #231 and preserves prior routes, backend, privacy, data and existing v9.2.74 app. Require build > Preview > 12 phone QA > six captures/visual analysis > explore QA > protected Production with no bypass.",
-  "attempt": 211,
+  "purpose": "9.2.75 full protected reattempt from latest public main: Issue #235 UI remediation PR #237 (single tab transition, liquid glass icon buttons, metro compact arrivals first, obsolete rings/SVG removed), history-category QA repair PR #239 and earlier iOS/nearby/weather/PRI v9.2.75 fixes. Keep user-visible pre-release version 1.0 and type-classified updates while retaining internal build/Git identifiers. Run exact full build → isolated Preview → all twelve mobile QA shards → visual/exploratory approvals → protected Production. Never bypass gates.",
+  "attempt": 212,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run #44911568115 failed on an outdated hard-coded internal v8 prefix in public-release-display.test.mjs during staged 9.2.75 build; PR #238 merged after full Public app CI #44911800971 success. Correct test now verifies numeric SemVer equality with APP_VERSION independently of the fixed user-facing 1.0 label. Prior iOS startup overlap fix PR #236 also included. Retry all gates, do not bypass.",
+  "last_retry_reason": "Last protected run #44911949290 failed in mobile QA shards 3/8/12/10 due outdated first-entry v9.2.75 release-number assertion. PR #239 corrected that exact test and Public source CI #44912532802 succeeded. Issue #235 PR #237 Public CI #44912148741 succeeded and merged. Re-run from latest main; do not promote old failing build.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
