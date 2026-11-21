@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "Protected Mobile-only candidate after approved Issue #235 changes: PR #245 physically retires 26 old v700-v728 CSS files into one ordered historical baseline while current mobile presentation patches remain in mobile-ui/current.css; PR #249 captures dock pointerdown before nested handlers and samples at least two actual compositor frames for each full-screen destination to detect white/transparent screens. Preserve Liquid Glass buttons, public startup version 1.0, grouped unnumbered release history, original map/transit/auth APIs, internal source identity and full no-bypass quality gates. Build latest main, Preview, 12 phone QA shards, six visual capture journeys, PC/tablet gate, then protected Production and Android APK only if all checks pass.",
-  "attempt": 218,
+  "purpose": "Protected mobile-only retest from the latest public main after Issue #235 PR #250: permanently prevent legacy v806 sheet motion from applying inline opacity 0 to four full-screen primary tabs (route, participate, news, mine); only bottom-tab-navigation owns the 140ms content reveal over immediately opaque page surfaces. Prevent delayed native post-swipe click from reselecting the original tab without blocking a subsequent deliberate pointerdown/tap. PR #245 historical CSS consolidation and PR #249 compositor-frame QA remain preserved. Keep Liquid Glass control materials, public loading version 1.0 and unnumbered change groups, internal provenance, transit and auth logic. Require full build, isolated Preview, 12 mobile QA shards, six visual journeys and analysis, PC/tablet checks, exploratory QA, then protected Production and APK only on green gates.",
+  "attempt": 219,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #217 run 44923029697 built and Preview deployed but phone QA shards 7 and 8 failed: fixed 100ms sample observed only 1 compositor frame, and dock swipe left tab unchanged. PR #249 CI 44924418931 passed; all affected UI navigation now merged into main. PR #245 consolidated 26 patch files separately with passing source CI.",
+  "last_retry_reason": "Attempt #218 run 44924610662: build, isolated Preview, PC/tablet and all six design capture jobs succeeded; phone shard 7 saw real fullscreen root opacity 0→0.1→0.4 under old v806 coordinator; shard 8 stayed on route after swipe. PR #250 removes primary-tab sheet fade and duplicate body animation, adds delayed native-click guard and regressions. Public source CI #44925406718 completed success. Never promote the failed #218 artifact.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
