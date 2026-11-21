@@ -80,7 +80,8 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const css=productionStyle('mobile-next.css');
  const js=productionStyle('mobile-next.js');
  const nav=read('src/bottom-tab-navigation.js');
- const apply=readFileSync(new URL('../../scripts/apply-mobile-next.mjs',import.meta.url),'utf8');
+ const applyPath=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
+ const apply=existsSync(applyPath)?readFileSync(applyPath,'utf8'):null;
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
@@ -91,7 +92,10 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
  assert.ok(js.includes("transport.dataset.dj9272Transfer"));
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
- assert.ok(apply.includes('installV9272PhoneExperience({app});'));
+ // Release's sealed app-source payload intentionally omits repository-root scripts.
+ // Check the applicator only in the full checkout; in the sealed build the
+ // generated app/source and main integration remain verified below.
+ if(apply!==null)assert.ok(apply.includes('installV9272PhoneExperience({app});'));
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
  assert.ok(nav.includes("previous.classList.add('dj9272-tab-leave')")||nav.includes("previous)previous.classList.add('dj9272-tab-leave')"));
  assert.ok(nav.includes("protectPageTransition(nextTab)"));
