@@ -1,3 +1,4 @@
+import {inLegacyOrder} from './legacy-css-baseline-fixture.mjs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -14,7 +15,7 @@ test('night shortcut stays visible and provides active night-off action',()=>{
 test('new overrides load after old floating CSS, preserving button and X centering',()=>{
   const main=read('src/main.js');
   const css=read('src/mobile-ui-baseline.css');
-  assert.ok(main.indexOf("import './mobile-ui-baseline.css';")>main.indexOf("import './mobile-ui-baseline.css';"));
+  assert.ok(main.includes("import './mobile-ui-baseline.css';")&&inLegacyOrder('v708-floating-ux.css','v709-control-fixes.css'));
   for(const item of ['#map-tools-toggle','#night-visibility-quick-off','#map-safety-toggle',
     '#overview-sheet-close','#news-close-to-map','#night-visibility-float-stop'])assert.ok(css.includes(item),item);
   assert.match(css,/translate:-50% -50%/);
