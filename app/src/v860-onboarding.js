@@ -130,6 +130,32 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   };
   if(!readSeen(win))preloadOnboardingImages();
   let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0,swapTimer=0,swapEpoch=0;
+  // Preserve the outgoing fully painted frame until the replacement is ready.
+  let slideGhosts=[];
+  function clearSlideGhosts(){
+    for(const ghost of slideGhosts)ghost.remove();
+    slideGhosts=[];
+  }
+  function holdOutgoingSlide(){
+    const sources=[visualPane,overlay.querySelector('.dj860-content')];
+    for(const source of sources){
+      const rect=source?.getBoundingClientRect?.();
+      if(!rect||rect.width<=0||rect.height<=0)continue;
+      const ghost=source.cloneNode(true);
+      ghost.classList.remove('dj860-entering');
+      ghost.classList.add('dj860-slide-ghost');
+      ghost.setAttribute('aria-hidden','true');
+      ghost.querySelectorAll('[id]').forEach(child=>child.removeAttribute('id'));
+      for(const [property,value] of Object.entries({
+        position:'fixed',top:`${rect.top}px`,left:`${rect.left}px`,
+        width:`${rect.width}px`,height:`${rect.height}px`,
+        margin:'0',transform:'none',translate:'none',pointerEvents:'none'
+      }))ghost.style.setProperty(property.replace(/[A-Z]/g,ch=>'-'+ch.toLowerCase()),value,'important');
+      overlay.append(ghost);
+      slideGhosts.push(ghost);
+    }
+    return [...slideGhosts];
+  }
   const markGuideAutoShown=()=>{try{win.sessionStorage.setItem('dj-map-guide-initial-shown-v7121','1');}catch{}};
   const make=(tag,className,text)=>{const node=doc.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;};
   const overlay=make('section','dj860-onboarding');
@@ -175,7 +201,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     });
     overlay.setAttribute('aria-label',`${step+1} / ${ONBOARDING_SLIDES.length} 앱 시작 안내`);
   }
-  function render(nextIndex,direction='next'){
+  function render(nextIndex,direction='next',animate=true){
     index=Math.max(0,Math.min(ONBOARDING_SLIDES.length-1,nextIndex));
     const slide=ONBOARDING_SLIDES[index];
     visual.dataset.imageSlot=slide.slot;
@@ -218,19 +244,19 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       visual.innerHTML=ARTWORK[slide.key]||'';
     }
     visualPane.dataset.direction=direction;
-    visualPane.classList.remove('dj860-entering');void visualPane.offsetWidth;visualPane.classList.add('dj860-entering');
+    visualPane.classList.remove('dj860-entering');if(animate){void visualPane.offsetWidth;visualPane.classList.add('dj860-entering');}
     copy.dataset.direction=direction;
     copy.innerHTML=`<h1 id="dj860-title" tabindex="-1">${escapeHtml(slide.title)}</h1>
       <p class="dj860-description" id="dj860-description">${escapeHtml(slide.description)}</p>
       <ul class="dj860-points">${slide.points.map(point=>`<li><span aria-hidden="true">✓</span><span>${escapeHtml(point)}</span></li>`).join('')}</ul>
       <p class="dj860-note">${escapeHtml(slide.note)}</p>
       ${slide.key==='account'?'<button type="button" class="dj860-account-link" data-dj860-action="account">내 정보에서 로그인 관리 <span aria-hidden="true">↗</span></button>':''}`;
-    copy.classList.remove('dj860-entering');void copy.offsetWidth;copy.classList.add('dj860-entering');
+    copy.classList.remove('dj860-entering');if(animate){void copy.offsetWidth;copy.classList.add('dj860-entering');}
     syncStepIndicator(index);
   }
   function close({complete=true,focus=true,afterClose=null}={}){
     if(!opened)return;
-    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}clearSlideGhosts();
     overlay.classList.remove('dj860-swapping');
     for(const node of [visualPane,copy]){node.style.removeProperty('opacity');node.style.removeProperty('transition');}
     opened=false;
@@ -256,7 +282,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   }
   function open({auto=false,force=false}={}){
     if(opened)return;
-    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    swapEpoch++;if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}clearSlideGhosts();
     overlay.classList.remove('dj860-swapping');
     for(const node of [visualPane,copy]){node.style.removeProperty('opacity');node.style.removeProperty('transition');}
     if(auto&&(seenInMemory||readSeen(win))&&!force)return;
@@ -281,65 +307,34 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!opened||target<0||target>=ONBOARDING_SLIDES.length||target===index)return;
     swapEpoch++;const epoch=swapEpoch;
     if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
-    // Accept navigation as state immediately, not only after the delayed
-    // content swap. Fast consecutive Next taps must advance 1→2→3→4→5
-    // instead of repeatedly targeting a stale page until animation ends.
-    index=target;
-    syncStepIndicator(target); // actual imagery still crossfades below
-    const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
-    // A real painted frame must separate opacity=1 from opacity=0:
-    // setting both in one task can coalesce away the whole fade on Safari.
-    visualPane.classList.remove('dj860-entering');
-    copy.classList.remove('dj860-entering');
-    // Fade the artwork, not its entire colored frame. The frame remains
-    // painted while iOS decodes the next illustration, preventing a white flash.
-    const panes=[visual,copy];
-    for(const node of panes){
-      node.style.setProperty('transition','none','important');
-      node.style.setProperty('opacity','1','important');
-    }
-    void visualPane.offsetWidth;
-    overlay.classList.add('dj860-swapping');
-    // rAF may be delayed for hundreds of milliseconds by headless/low-power
-    // phones even while regular timers continue. Start from whichever frame or
-    // short timer runs first, never twice, so a visible fade is not skipped.
-    let fadeStarted=false;
-    const fadeOut=()=>{
-      if(fadeStarted||epoch!==swapEpoch||!opened)return;
-      fadeStarted=true;
-      for(const node of panes){
-        node.style.setProperty('transition','opacity 170ms ease-in','important');
-        node.style.setProperty('opacity','0','important');
+    // Immediately accept fast successive taps while retaining the old image.
+    index=target;syncStepIndicator(target);
+    const commit=()=>{
+      if(epoch!==swapEpoch||!opened)return;
+      clearSlideGhosts();
+      const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      const ghosts=reduced?[]:holdOutgoingSlide();
+      overlay.classList.remove('dj860-swapping');
+      for(const node of [visualPane,copy]){
+        node.style.removeProperty('opacity');node.style.removeProperty('transition');
       }
-      // Do not start the slide replacement clock before a real animation frame
-      // has begun the outgoing fade. On slower mobile GPUs/headless Chromium,
-      // a pre-scheduled timer could swap content before any faded frame paints.
-      swapTimer=win.setTimeout(()=>{
-        swapTimer=0;
-        if(epoch!==swapEpoch||!opened)return;
-        overlay.classList.remove('dj860-swapping');
-        render(target,direction);
-        for(const node of panes){
-          node.style.setProperty('transition','none','important');
-          node.style.setProperty('opacity','0','important');
-        }
-        void visualPane.offsetWidth;
-        const fadeIn=()=>{
-          if(epoch!==swapEpoch||!opened)return;
-          for(const node of panes){
-            node.style.setProperty('transition','opacity 200ms cubic-bezier(.22,1,.36,1)','important');
-            node.style.setProperty('opacity','1','important');
-          }
-        };
-        if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeIn);
-        else win.setTimeout(fadeIn,16);
-      },205);
+      // Old full-color surfaces sit above new fully opaque content. Never
+      // pass through opacity:0 or a blank illustration decoding frame.
+      render(target,direction,false);
+      for(const ghost of ghosts){
+        const remove=()=>{ghost.remove();slideGhosts=slideGhosts.filter(node=>node!==ghost);};
+        ghost.addEventListener('animationend',remove,{once:true});
+        win.setTimeout(remove,380);
+      }
     };
-    if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut);
-    // This is an actual fade trigger, not a QA bypass. Both schedulers call
-    // the same one-shot fadeOut; the later invocation is a no-op.
-    win.setTimeout(fadeOut,32);
+    const imageSlot=IMAGE_SLOT_BY_KEY[ONBOARDING_SLIDES[target].key];
+    const preload=imageSlot?.src?preloadedImages.get(imageSlot.src):null;
+    if(preload?.decode&&!(preload.complete&&preload.naturalWidth>0)){
+      Promise.race([
+        preload.decode().catch(()=>{}),
+        new Promise(resolve=>win.setTimeout(resolve,620))
+      ]).then(commit);
+    }else commit();
   }
 
   function move(delta){

@@ -43,23 +43,17 @@ test('metro trains and beams require close zoom; bus retains its own threshold',
  assert.match(layer,/minzoom:minimumZoom/);
 });
 
-test('onboarding crossfades on slide navigation and cancels stale transitions',()=>{
+test('onboarding crossfades retained painted slides and cancels stale transitions',()=>{
  const js=read('src/v860-onboarding.js'),css=read('src/v860-onboarding.css');
  assert.match(js,/function transitionSlide\(/);
- assert.match(js,/classList\.add\('dj860-swapping'\)/);
- assert.match(js,/classList\.remove\('dj860-swapping'\)/);
+ assert.match(js,/holdOutgoingSlide\(\)/);
+ assert.match(js,/clearSlideGhosts\(\)/);
  assert.match(js,/swapEpoch\+\+/);
- assert.match(js,/node\.style\.setProperty\('opacity','0','important'\)/);
- assert.match(js,/node\.style\.setProperty\('opacity','1','important'\)/);
- // The outgoing fade must actually start before the 205ms slide swap timer.
- // Otherwise under load a timeout can replace both slides without a painted fade.
- const fadeBlock=js.split('const fadeOut=()=>{')[1]?.split("if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut)")[0];
- assert(fadeBlock?.includes('swapTimer=win.setTimeout('));
- assert(fadeBlock?.includes("node.style.setProperty('opacity','0','important')"));
- assert.match(js,/let fadeStarted=false;/);
- assert.match(js,/if\(fadeStarted\|\|epoch!==swapEpoch\|\|!opened\)return;/);
- assert.match(js,/win\.setTimeout\(fadeOut,32\)/);
- assert.match(css,/\.dj860-onboarding\.dj860-swapping/);
+ assert.match(js,/if\(epoch!==swapEpoch\|\|!opened\)return/);
+ assert.match(js,/preload\.decode\(\)/);
+ assert.match(js,/render\(target,direction,false\)/);
+ assert.match(css,/dj9266-retained-slide-out/);
+ assert.doesNotMatch(js,/node\.style\.setProperty\('opacity','0','important'\)/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
 

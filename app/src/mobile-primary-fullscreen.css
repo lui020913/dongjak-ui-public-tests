@@ -63,13 +63,11 @@
     }
 
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]) {
-      animation:dj-primary-page-enter 150ms cubic-bezier(.2,.7,.2,1) both!important;
+      /* The page is an opaque surface. Fading the entire page reveals map
+         tiles and makes cards/text/dock appear missing mid-transition. */
+      animation:none!important;
+      opacity:1!important;
     }
-    @keyframes dj-primary-page-enter {
-      from {opacity:.15}
-      to {opacity:1}
-    }
-
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj-sheet-chrome {
       position:relative!important;
       top:auto!important;
@@ -185,6 +183,14 @@
       visibility:visible!important;
       pointer-events:auto!important;
       z-index:8500!important;
+    }
+    /* All five dock labels remain legible throughout synchronous page swaps;
+       no inherited opacity or fade may hide text while icons remain. */
+    html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > #bottom-nav:not([hidden]) .nav-tab:not([hidden]) :is(.nav-icon,span:last-child){
+      opacity:1!important;
+      visibility:visible!important;
+      filter:none!important;
+      -webkit-filter:none!important;
     }
   }
 

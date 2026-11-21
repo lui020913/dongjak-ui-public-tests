@@ -100,13 +100,15 @@ html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app > #dj-ios-pwa-status-b
 @media(max-width:699px){
 html.dj-ios-home-pwa:has(#dj-ai-search-modal[open],#djNext-layer-panel:not([hidden])) body #app > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
 html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
-  --dj-pwa-status-color:#ffffff;
-  background-image:none!important;
+  --dj-pwa-status-color:var(--dj-pwa-native-edge,#edf3ef);
+  /* Native dialog backdrops enter the top layer; the ordinary bridge is
+     underneath them. Restore an opaque-to-transparent edge in this backdrop. */
+  background-image:var(--dj-pwa-bridge-gradient)!important;
   background-size:100% var(--dj-pwa-bridge-height)!important;
   background-repeat:no-repeat!important;
   background-position:top center!important;
 }
-html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32;background-image:none!important}
+html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32;background-image:var(--dj-pwa-bridge-gradient)!important}
 }
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{transition:none!important}}
 
@@ -138,4 +140,21 @@ html.dj-ios-home-pwa body > #dj-ios-pwa-status-sample{
      color-mix(in srgb,var(--dj-pwa-native-edge) 47%,transparent) 68%,
      transparent 100%)!important;
  }
+}
+
+/* A DOM modal is above the 2901 bridge. Raise the non-interactive status
+   wash only while that modal is open so the OS-owned strip does not form a
+   hard horizontal edge against the darkened map. */
+@media(max-width:699px){
+  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden]))
+    body #app > #dj-ios-pwa-status-bridge{
+    z-index:25000!important;
+    opacity:1!important;
+  }
+  html.dj-ios-home-pwa body #djNext-layer-panel:not([hidden])::backdrop{
+    background-image:var(--dj-pwa-bridge-gradient)!important;
+    background-size:100% var(--dj-pwa-bridge-height)!important;
+    background-repeat:no-repeat!important;
+    background-position:top center!important;
+  }
 }
