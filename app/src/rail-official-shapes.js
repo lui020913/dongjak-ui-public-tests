@@ -164,12 +164,23 @@ export function makeOfficialRailQueryUrl(){
   });
   return `${OFFICIAL_RAIL_SOURCE}?${params.toString()}`;
 }
+/** First prefer our same-origin read-only cache, avoiding mobile browser
+ * cross-origin restrictions. Fall back to the canonical Esri endpoint in dev
+ * or if the optional Pages Function is unavailable. Never invent geometry. */
+export const OFFICIAL_RAIL_PROXY_URL='/api/rail-geometry';
 export async function fetchOfficialRailPaths(fetchFn=fetch,timeoutMs=12000){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),timeoutMs);
-  try{
-    const response=await fetchFn(makeOfficialRailQueryUrl(),{method:'GET',signal:controller.signal,cache:'default'});
-    if(!response.ok)throw new Error(`공식 철도선형 HTTP ${response.status}`);
-    return extractOfficialPaths(await response.json());
-  }finally{clearTimeout(timer);}
+  let lastError=null;
+  for(const url of [OFFICIAL_RAIL_PROXY_URL,makeOfficialRailQueryUrl()]){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetchFn(url,{method:'GET',signal:controller.signal,cache:'default'});
+      if(!response.ok)throw new Error(`공식 철도선형 HTTP ${response.status}`);
+      const paths=extractOfficialPaths(await response.json());
+      if(!paths.length)throw new Error('공식 철도선형 응답에 인식 가능한 노선이 없습니다.');
+      return paths;
+    }catch(error){lastError=error;}
+    finally{clearTimeout(timer);}
+  }
+  throw lastError||new Error('공식 철도선형 조회 실패');
 }
