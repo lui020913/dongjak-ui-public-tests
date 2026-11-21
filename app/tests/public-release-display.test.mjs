@@ -2,13 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote} from '../src/public-release-display.js';
-import {APP_RELEASES} from '../src/app-version.js';
+import {APP_RELEASES,APP_VERSION} from '../src/app-version.js';
 import {RENUMBERED_VERSION_HISTORY} from '../src/version-history.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('pre-release version is fixed, but operational provenance stays independent',()=>{
  assert.equal(PUBLIC_APP_VERSION,'1.0');
  assert.equal(PUBLIC_LOADING_VERSION,'버전 1.0');
- assert.ok(APP_RELEASES[0].version.startsWith('v8.'));
+ // Operational versions use SemVer (e.g. 8.26.1 at rest, 9.2.75 in a staged release).
+ // They must not be conflated with the fixed user-visible pre-release label 1.0.
+ assert.match(APP_RELEASES[0].version,/^v?\d+\.\d+\.\d+$/);
+ assert.equal(APP_RELEASES[0].version.replace(/^v/,''),APP_VERSION);
  assert.match(read('index.html'),/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
  assert.match(read('src/v7120-settings.js'),/id="dj-about-version-number">1\.0<\/strong>/);
  assert.doesNotMatch(read('index.html'),/id="version-history-trigger"[^>]*>v\d/);
