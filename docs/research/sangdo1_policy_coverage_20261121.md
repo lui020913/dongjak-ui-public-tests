@@ -62,6 +62,18 @@
 3. `app/public/data/protection-zone/school_300_500m_unprotected_preview.geojson` — 학교 전용 검토 구간 지도 레이어(1,119개 도로 세그먼트; 각 세그먼트의 비율 포함)
 4. `app/src/protection-zone-map.js`, `app/index.html` — 상세 보기 토글, 레이어, 설명 팝업
 
+## 2026년 보호구역 원천 갱신 경로 확인
+**기존 UTIC(도시교통정보센터) 개방데이터 보호구역 API는 2026-01-05 공개가 중단되었다.** 현재 연구 저장소에 들어 있는 9개 지정 폴리곤은 재현용 기존 스냅샷이며 최신 지정 고시와 일치하는지 아직 증명되지 않았다. 최신 확정값으로 주장하지 않는다.
+
+- 공식 변경 공지: https://www.utic.go.kr/center/newNoticeRead.do?id=10783&pg=1 (2026-01-05)
+- 우선 대체: 경찰청 전국 보호구역 현황 **geometry API** https://www.data.go.kr/data/15142010/openapi.do (요청 필수 `serviceKey`, `sggCd=11590`; 현재 키 미확보로 신규 자료 호출·검증 미완료)
+- 어린이 표준데이터: https://www.data.go.kr/data/15012891/standard.do (2026-09-22 수정)
+- 노인·장애인 표준데이터: https://www.data.go.kr/data/15034532/standard.do (2026-11-16 수정)
+- 교육지원청 학구 문서: https://dgedu.sen.go.kr/CMS/introduction/introduction06/introduction0604/introduction060402/index.html (표시 기준 2025-03)
+- 추가된 은로초 잠정 위치: `adjacent_school_catchment_verification.geojson`; 500m에서 약 125.1m(7개 세그먼트) 영향 가능. 300m 기준 0m은 **임시 대표점**에 한정되며 진짜 주출입문 기준 판단은 보류.
+
+공식 데이터의 현행성·주출입문·도로 시종점·통학 동선이 확인되기 전에는 `preview` 파일의 점수를 실제 보호의 적절성이나 위험도 확정값으로 사용하지 않는다.
+
 ## 검증/해석 한계 및 다음 단계
 1. **대표 POINT ≠ 주 출입문.** 공식 출입문과 지정 고시의 시·종점을 확인해야 한다.
 2. **법적 미지정 ≠ 지정 의무 위반.** 보호구역은 300m/500m 원 전체가 아니라 조사·협의에 따라 도로 중 일정 구간을 지정한다.
