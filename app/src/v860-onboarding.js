@@ -281,7 +281,11 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!opened||target<0||target>=ONBOARDING_SLIDES.length||target===index)return;
     swapEpoch++;const epoch=swapEpoch;
     if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
-    syncStepIndicator(target); // immediate semantic step; visual crossfade still runs normally
+    // Accept navigation as state immediately, not only after the delayed
+    // content swap. Fast consecutive Next taps must advance 1→2→3→4→5
+    // instead of repeatedly targeting a stale page until animation ends.
+    index=target;
+    syncStepIndicator(target); // actual imagery still crossfades below
     const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
     // A real painted frame must separate opacity=1 from opacity=0:
