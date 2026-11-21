@@ -149,7 +149,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     const started=clock(),duration=280;
     ghost.style.setProperty('animation','none','important');
     ghost.style.setProperty('transition','none','important');
-    ghost.style.setProperty('opacity','1','important');
+    ghost.style.setProperty('opacity','0.72','important');
     const finish=()=>{
       const timer=ghostFadeTimers.get(ghost);
       if(timer)win.clearTimeout(timer);
@@ -161,7 +161,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       if(epoch!==swapEpoch||!opened||!ghost.isConnected){finish();return;}
       const phase=Math.min(1,Math.max(0,(clock()-started)/duration));
       const eased=phase*phase*(3-2*phase);
-      ghost.style.setProperty('opacity',String(Math.max(0,1-eased)),'important');
+      ghost.style.setProperty('opacity',String(Math.max(0,0.72*(1-eased))),'important');
       if(phase>=1){finish();return;}
       ghostFadeTimers.set(ghost,win.setTimeout(tick,16));
     };
