@@ -43,7 +43,10 @@ export function installPwaStatusTone(doc=document,win=window) {
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
       const nightActive=app.dataset.sangdoNight==='on';
-      const color=nightActive?'#192d32':aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
+      const nightPrompt=visible('dj833-night-modal');
+      // Before consent, blend the light iOS status surface with the modal
+      // scrim; after activation use the actual night-map tone.
+      const color=nightActive?'#192d32':nightPrompt?(theme==='dark'?'#192d32':'#aab8af'):aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
