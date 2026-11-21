@@ -465,16 +465,17 @@
           </div>
           <div id="pza-advanced-tools" class="pza-advanced-tools" hidden>
             <strong class="pza-subhead">분석자료 선택하기</strong>
-            <p class="pza-intro">초등학교 반경의 지정 외 도로를 별도 표시합니다. 사고자료와 반경 참고선은 처음엔 꺼져 있습니다.</p>
+            <p class="pza-intro">공식 학교 배정구역과 시설 반경의 지정 외 도로를 별도 표시합니다. 학구 경계는 기본적으로 꺼져 있습니다.</p>
             <div class="pza-options" aria-label="보호구역 분석 레이어 표시">
               <label><input type="checkbox" id="protection-zone-child" checked /> <span>어린이 보호구역 <small>공식 지정 범위</small></span></label>
               <label><input type="checkbox" id="protection-zone-senior" checked /> <span>노인 보호구역 <small>공식 지정 범위</small></span></label>
               <label><input type="checkbox" id="protection-zone-candidates" /> <span>검토 후보 125구간 <small>공식 위험등급 아님</small></span></label>
               <label><input type="checkbox" id="protection-zone-accidents" /> <span>사고다발지역 <small>과거 연도 포함</small></span></label>
+              <label class="pza-full-row"><input type="checkbox" id="protection-zone-catchments" /> <span>2026년 공식 초등학교 통학구역 <small>배정 학구 · 보호구역 또는 실제 통학로 아님</small></span></label>
               <label class="pza-full-row"><input type="checkbox" id="protection-zone-schoolgap" checked /> <span>초등학교 5개교 300·500m 미지정 검토 <small>19개 시설 대표 좌표 사용 · 다른 자치구 시설 미반영</small></span></label>
               <label class="pza-full-row"><input type="checkbox" id="protection-zone-radii" /> <span>시설 대표점 300m·500m 참고선 <small>실제 지정 경계가 아닌 거리 분석용</small></span></label>
             </div>
-            <div class="pza-research-notice"><strong>해석할 때 주의하세요</strong><p>색이 있는 검토 도로는 실제 사고 발생 지점이나 공식 위험도로가 아닙니다. 사고다발지역은 통계 범위이며, 거리 참고선은 법정 보호구역 경계가 아닙니다. 초등학교 미지정 검토 도로는 주 출입문·통학 동선을 확인하기 전의 연구용 표시입니다.</p></div>
+            <div class="pza-research-notice"><strong>해석할 때 주의하세요</strong><p>색이 있는 검토 도로는 실제 사고 발생 지점이나 공식 위험도로가 아닙니다. 사고다발지역은 통계 범위이며, 거리 참고선은 법정 보호구역 경계가 아닙니다. 초등학교 미지정 검토 도로는 시설 대표점 기반 연구용 표시이며, 공식 통학구역은 학생의 실제 통행 경로가 아닙니다.</p></div>
           </div>
           <span id="protection-zone-status" role="status" aria-live="polite">대기 중 · ‘지도에 표시하기’를 누르면 보호구역을 볼 수 있습니다.</span>
           <div class="pza-public-notice"><strong>지도를 어떻게 이용하나요?</strong><p>파란색·보라색은 기존 보호구역의 공개 지정 범위입니다. 빨간색 도로를 누르면 보행 중 참고할 사항을 볼 수 있습니다. 빨간색은 사고 위험이 확정된 구간이라는 의미가 아닙니다.</p></div>
