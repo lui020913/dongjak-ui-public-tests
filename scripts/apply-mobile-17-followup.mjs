@@ -49,9 +49,16 @@ replace('src/v824-favorites-cloud.js','      try{popup?.close();}catch{}',"     
 const controller='src/dj-v8212-sheet-controller.js';
 const controllerFile=resolve(root,controller);
 let controllerSource=readFileSync(controllerFile,'utf8');
-const oldExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id)";
-if(controllerSource.split(oldExpandable).length!==3)throw Error('Shared sheet expansion anchors changed');
- controllerSource=controllerSource.replaceAll(oldExpandable,"'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id)");
+const legacyExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id)";
+const weatherExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel','dj854-weather-sheet'].includes(id)";
+const fullExpandable="'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id)";
+// The shared weather detent already belongs to the source controller in newer
+// app snapshots. Accept exactly two old or weather-aware instances, but do not
+// silently skip mismatches or apply the overlay to an unexpected controller.
+const sourceExpandable=[legacyExpandable,weatherExpandable].find(anchor=>controllerSource.split(anchor).length===3);
+if(!sourceExpandable)throw Error('Shared sheet expansion anchors changed');
+controllerSource=controllerSource.replaceAll(sourceExpandable,fullExpandable);
+if(controllerSource.split(fullExpandable).length!==3)throw Error('Shared sheet expansion did not patch both stages');
 writeFileSync(controllerFile,controllerSource);
 // A gesture has already animated the panel; do not replay the More exit.
 replace(controller,"if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;","if(id==='dj-mobile-utilities')panel.dispatchEvent(new CustomEvent('dongjak:close-more',{detail:{immediate:true}}));\n        else if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;");
