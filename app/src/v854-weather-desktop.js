@@ -13,11 +13,11 @@ export function weeklyWeatherRows(data){
  const weekdays=['일','월','화','수','목','금','토'];
  return d.time.slice(0,7).map((day,i)=>{
   if(!/^\d{4}-\d{2}-\d{2}$/.test(day))throw Error('예보 날짜 오류');
-  const max=Number(d.temperature_2m_max[i]),min=Number(d.temperature_2m_min[i]),code=Number(d.weather_code[i]);
-  if(!Number.isFinite(max)||!Number.isFinite(min)||!Number.isFinite(code))throw Error('예보 기온/날씨 누락');
-  const prob=Number(d.precipitation_probability_max?.[i]);
+  const max=d.temperature_2m_max[i],min=d.temperature_2m_min[i],code=d.weather_code[i];
+  if(![max,min,code].every(v=>typeof v==='number'&&Number.isFinite(v)))throw Error('예보 기온/날씨 누락');
+  const prob=d.precipitation_probability_max?.[i];
   const dt=new Date(day+'T12:00:00+09:00');
-  return {date:day,dayLabel:i===0?'오늘':weekdays[dt.getUTCDay()]+'요일',condition:weatherCodeLabel(code),max:Math.round(max),min:Math.round(min),precipitation:Number.isFinite(prob)?Math.max(0,Math.min(100,Math.round(prob))):null};
+  return {date:day,dayLabel:i===0?'오늘':weekdays[dt.getUTCDay()]+'요일',condition:weatherCodeLabel(code),max:Math.round(max),min:Math.round(min),precipitation:typeof prob==='number'&&Number.isFinite(prob)?Math.max(0,Math.min(100,Math.round(prob))):null};
  });
 }
 
