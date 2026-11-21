@@ -996,15 +996,26 @@ test('AI full-screen conversation and inline voice state keep the map task separ
  await tap(page,mic);await expect(status).toBeHidden();await expect(mic).toHaveAttribute('aria-pressed','false');await expect.poll(async()=>Math.abs((await form.boundingBox()).height-before.height)).toBeLessThanOrEqual(2);
 });
 
-test('compact subway sheet keeps identity, actions, neighbors and arrival controls in order',{tag:'@phone-layout'},async({page})=>{
+test('compact subway sheet shows arrivals before neighbors and has no duplicate selected-line ring',{tag:'@phone-layout'},async({page})=>{
  test.skip(!compact(page),'phone only');await ready(page);
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'노량진',lng:126.9411,lat:37.5142,lines:['1호선','9호선'],selectedLine:'1호선'}}})));
  const sheet=page.locator('#transport-sheet');await expect(sheet).toBeVisible();await visuallyPresented(sheet);await expect(sheet).toHaveAttribute('data-dj-transport-layout','compact-v2');
  const buttons=sheet.locator('.dj-news-transport-actions>button');await expect(buttons).toHaveCount(4);
  await expect.poll(async()=>{const b=await buttons.evaluateAll(ns=>ns.map(n=>({r:n.getBoundingClientRect().toJSON(),s:getComputedStyle(n).boxShadow})));return b.length===4&&b.every(x=>Math.abs(x.r.top-b[0].r.top)<1&&Math.abs(x.r.width-b[0].r.width)<2&&x.s!=='none');}).toBe(true);
- await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
+  await expect.poll(async()=>{
+    const h=await sheet.locator('.transport-panel-head').boundingBox();
+    const bar=await sheet.locator('.transport-arrivals-title').boundingBox();
+    const arrival=await sheet.locator('#transport-arrivals').boundingBox();
+    const neighbor=await sheet.locator('#transport-neighbors').boundingBox();
+    return !!h&&!!bar&&!!arrival&&!!neighbor
+      && bar.y>=h.y+h.height-1
+      && neighbor.y>=arrival.y+arrival.height-1;
+  }).toBe(true);
  await expect(sheet.locator('#transport-title .dj-metro-line-selector')).toHaveCount(2);
- await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','2px'); // Only the selected transfer line is ringed.
+  await expect.poll(async()=>{
+    const chosen=sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]');
+    return Number.parseFloat(await chosen.evaluate(el=>getComputedStyle(el).borderTopWidth))<2;
+  }).toBe(true); // Selection uses the line accent; no redundant 2px dark ring.
  await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','18px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
  await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image','none');await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
