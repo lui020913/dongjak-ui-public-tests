@@ -176,6 +176,25 @@ export function installPhoneToolbar({app,doc=document,win=window}){
   }
   if(!panel.hidden&&e.target.closest?.('#bottom-nav'))dismiss(true);
  },true);
+ // The native community close owner animates this composer, but an in-flight
+ // opening animation can cancel its close callback on Safari. Bound the
+ // finish without changing the native handler or reopening other sheets.
+ const communityForm=doc.getElementById('community-form');
+ const communityClose=doc.getElementById('community-compose-close');
+ const communityOpen=doc.getElementById('community-compose-toggle');
+ let communityCloseRevision=0;
+ communityOpen?.addEventListener('click',()=>{communityCloseRevision++;});
+ communityClose?.addEventListener('click',()=>{
+   const revision=++communityCloseRevision;
+   win.setTimeout(()=>{
+     if(revision!==communityCloseRevision||app.dataset.tab!=='participate'||!communityForm||communityForm.hidden)return;
+     win.DongjakWindowMotion?.cancel?.(communityForm);
+     communityForm.hidden=true;
+     delete communityForm.dataset.dj810Animating;
+     const panel=doc.getElementById('participation-panel');
+     if(panel)delete panel.dataset.djPatchKeyboard;
+   },440);
+ });
  sync();
 }
 export function installPhonePermissions({app,doc=document,win=window}){

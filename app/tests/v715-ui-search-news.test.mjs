@@ -19,7 +19,8 @@ test('mobile search prevents Safari zoom and keeps results above weather',()=>{
   assert.match(css,/weather-widget\{visibility:hidden!important/);
   assert.match(css,/-webkit-backdrop-filter:none!important/);
   assert.match(search,/window\.visualViewport/);
-  assert.match(search,/getBoundingClientRect\(\)\.bottom/);
+  assert.match(search,/const anchor=shell\.getBoundingClientRect\(\)/);
+  assert.match(search,/const top=Math\.ceil\(anchor\.bottom\+7\)/);
   assert.match(search,/app\.dataset\.searchOpen='true'/);
   assert.match(search,/delete app\.dataset\.searchOpen/);
 });

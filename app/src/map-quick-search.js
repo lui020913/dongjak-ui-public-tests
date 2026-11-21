@@ -97,7 +97,14 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     if(dropdown.hidden)return;
     const viewport=window.visualViewport;
     const visibleBottom=viewport?viewport.offsetTop+viewport.height:window.innerHeight;
-    const top=Math.ceil(shell.getBoundingClientRect().bottom+7);
+    const anchor=shell.getBoundingClientRect();
+    const top=Math.ceil(anchor.bottom+7);
+    // Search suggestions follow the visible pill (not the full phone width).
+    // The adjacent AI orb remains visible and does not overlap the results.
+    const left=Math.max(10,Math.floor(anchor.left));
+    const width=Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
+    dropdown.style.setProperty('--dj871-search-left',left+'px');
+    dropdown.style.setProperty('--dj871-search-width',width+'px');
     const available=Math.max(90,Math.floor(visibleBottom-top-12));
     shell.style.setProperty('--dj-search-results-max',`${Math.max(92,Math.min(520,available))}px`);
     dropdown.style.setProperty('--dj871-search-top',`${top}px`);
@@ -260,8 +267,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
   query.addEventListener('focus',()=>{
     const term=query.value.trim();filters.hidden=term.length>0;
-    // A tap into an empty search field should only focus the input on phone.
-    // No empty recommendation rectangle and no unnecessary overlay transition.
+    // On phone, focusing an empty field must not create a large blank dropdown.
     if(phoneSearch()&&term.length<2){close();return;}
     show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';}
@@ -270,7 +276,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   query.addEventListener('input',()=>{
     seq++;controller?.abort();controller=null;
     const term=normalizeKoreanSearch(query.value);filters.hidden=term.length>0;
-    // Show results only for an actual query; voice/form submission still works.
+    // Suggestions appear once a query is meaningful, not on input focus alone.
     if(phoneSearch()&&term.length<2){close();return;}
     show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소';return;}
