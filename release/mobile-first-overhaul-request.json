@@ -3,9 +3,9 @@
   "application_version": "9.2.56",
   "public_work_branch": "main",
   "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
-  "attempt": 176,
+  "attempt": 177,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 44871872902 failed phone shard 10 on rapid onboarding Next 04→05 because semantic index only changed after a 205ms crossfade timer; update index on accepted navigation immediately so fast taps advance reliably while crossfade still paints. Shard 2 measured layer-sheet header movement during intentional 350ms entry animation; await the real CSS/WAAPI animation finish before asserting the header stays fixed on internal scroll. Retain all original visual and interaction checks; full protected exact-source QA required.",
+  "last_retry_reason": "Phone shard 2 in runs 44871872902 and 44872375618 repeatedly measured layer modal header shifting by exactly 109.7px when scrolling list, even after awaited animation end. Fix real layout: anchor the layer modal body to fixed viewport bottom, prevent scroll anchoring, retain independent inner overflow scroll and header gesture controls. Keep all actual mobile browser geometry checks; retry full guarded v9.2.56 release.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
