@@ -132,9 +132,40 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0,swapTimer=0,swapEpoch=0;
   // Preserve the outgoing fully painted frame until the replacement is ready.
   let slideGhosts=[];
+  const ghostFadeTimers=new Map();
   function clearSlideGhosts(){
-    for(const ghost of slideGhosts)ghost.remove();
+    for(const ghost of slideGhosts){
+      const timer=ghostFadeTimers.get(ghost);
+      if(timer)win.clearTimeout(timer);
+      ghostFadeTimers.delete(ghost);
+      ghost.remove();
+    }
     slideGhosts=[];
+  }
+  // An outgoing image must fade despite legacy !important CSS and throttled
+  // compositor animations. The next slide below it stays fully painted.
+  function animateOutgoingSlide(ghost,epoch){
+    const clock=()=>win.performance?.now?.()??Date.now();
+    const started=clock(),duration=280;
+    ghost.style.setProperty('animation','none','important');
+    ghost.style.setProperty('transition','none','important');
+    ghost.style.setProperty('opacity','1','important');
+    const finish=()=>{
+      const timer=ghostFadeTimers.get(ghost);
+      if(timer)win.clearTimeout(timer);
+      ghostFadeTimers.delete(ghost);
+      ghost.remove();
+      slideGhosts=slideGhosts.filter(node=>node!==ghost);
+    };
+    const tick=()=>{
+      if(epoch!==swapEpoch||!opened||!ghost.isConnected){finish();return;}
+      const phase=Math.min(1,Math.max(0,(clock()-started)/duration));
+      const eased=phase*phase*(3-2*phase);
+      ghost.style.setProperty('opacity',String(Math.max(0,1-eased)),'important');
+      if(phase>=1){finish();return;}
+      ghostFadeTimers.set(ghost,win.setTimeout(tick,16));
+    };
+    ghostFadeTimers.set(ghost,win.setTimeout(tick,16));
   }
   function holdOutgoingSlide(){
     const sources=[visualPane,overlay.querySelector('.dj860-content')];
@@ -321,11 +352,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       // Old full-color surfaces sit above new fully opaque content. Never
       // pass through opacity:0 or a blank illustration decoding frame.
       render(target,direction,false);
-      for(const ghost of ghosts){
-        const remove=()=>{ghost.remove();slideGhosts=slideGhosts.filter(node=>node!==ghost);};
-        ghost.addEventListener('animationend',remove,{once:true});
-        win.setTimeout(remove,380);
-      }
+      for(const ghost of ghosts)animateOutgoingSlide(ghost,epoch);
     };
     const imageSlot=IMAGE_SLOT_BY_KEY[ONBOARDING_SLIDES[target].key];
     const preload=imageSlot?.src?preloadedImages.get(imageSlot.src):null;
