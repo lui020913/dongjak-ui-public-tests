@@ -1052,12 +1052,12 @@ html[data-theme="dark"] #app#app#app#app#app,
 @layer request-completion {
 @media (max-width:699px) {
   /* The opaque iOS status sample and first-run top header must share one color. */
-  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])) {
+  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) {
     --dj-pwa-native-edge:#f5faf7!important;
     --dj-pwa-land-tone:#f5faf7!important;
     --dj-pwa-bridge-gradient:none!important;
   }
-  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])) {
+  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) {
     --dj-pwa-native-edge:#192e31!important;
     --dj-pwa-land-tone:#192e31!important;
   }
@@ -1068,10 +1068,10 @@ html[data-theme="dark"] #app#app#app#app#app,
   html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-head {
     background:#192e31!important;border-color:#385650!important;
   }
-  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
+  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
     background:#f5faf7!important;background-image:none!important;transition:none!important;
   }
-  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
+  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])):not(:has(#map-startup-overlay:not([hidden]))) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
     background:#192e31!important;
   }
   /* Permission choice is not an app-blocking dim overlay. The shared window
