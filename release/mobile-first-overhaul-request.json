@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.62",
+  "application_version": "9.2.63",
   "public_work_branch": "main",
-  "purpose": "Protected mobile-only delivery of fixed iPhone PWA startup status/splash first-paint and post-hydration continuity, phone search without empty rectangle, persistent AI and mic, pill-width location suggestions, metro line geometry and earlier train zoom, community/sheet fixes, and valid current search clear/history fade QA including autonomous journey.",
-  "attempt": 183,
+  "purpose": "Fix mobile map distance scale still visible in the gap between the active current weather detail sheet (#dj854-weather-sheet) and bottom navigation: add current weather sheet to central map scale blocker detection and observe visibility/animation changes; restore scale only after weather sheet closes. Include v9.2.62 validated startup/status seam, AI search and transit fixes unchanged.",
+  "attempt": 184,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.60 and v9.2.61 preview tests identified outdated mobile browser expectations after intentional UI changes: empty focus, shortcut label, clear-to-dismiss search, and under-sampled 200/180ms history fade. PR #183 fixed startup CSS precedence and existing UI contract, PR #185 fixed actual test expectations and autonomous search journey, all with successful source CI. Perform full protected Preview, all mobile shards, 6 captures, 6 Gemini design reviews and Gemini autonomous exploration. Keep fail-closed guards.",
+  "last_retry_reason": "v9.2.62 protected pipeline 44883084977 passed all 12 phone QA shards, 6 visual capture lanes, 6 Gemini design lanes, autonomous exploration and Production. User reported a remaining map scale chip beneath current weather sheet: PR #187 adds missing blocker selector, unit tests and browser open/close visual assertion; public app source CI passed. Run new exact-source Preview + all protected QA gates prior to Promotion.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
