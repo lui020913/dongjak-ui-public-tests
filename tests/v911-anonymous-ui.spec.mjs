@@ -614,7 +614,8 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
      else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
-     if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
+     // Flat mobile surfaces keep the scrim color stable during every window animation.
+     expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
    }
  }
