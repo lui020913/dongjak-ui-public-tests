@@ -29,10 +29,14 @@ test('primary tabs have independent full viewport phone surfaces',()=>{
 test('primary pages bypass draggable sheets and delayed map closing',()=>{
  assert.match(controller,/\['route-panel','participation-panel','news-panel','mine-panel'\]\.includes\(id\)/);
  assert.match(controller,/win\.matchMedia\('\(max-width:699px\)'\)/);
- assert.match(navigation,/button\.dataset\.tab==='map'/);
- assert.match(navigation,/motion\?\.cancel\?\.\(panel\);return;/);
+ assert.match(navigation,/\['map','route','participate','news','mine'\]\.includes\(next\)/);
+ assert.match(navigation,/event\.preventDefault\(\);event\.stopImmediatePropagation\(\)/);
+ assert.match(navigation,/replay\(next\)/);
+ assert.match(navigation,/animation=panel\.animate\(/);
+ assert.match(navigation,/duration:215/);
  assert.match(main,/function closePrimaryPageToMap\(panel\)/);
- assert.match(main,/window\.DongjakWindowMotion\?\.cancel\?\.\(active\);finish\(\)/);
+ assert.match(main,/fadePrimaryPageToMap\(active,finish\)/);
+ assert.match(main,/function fadePrimaryPageToMap\(panel,done\)/);
  const html=read('index.html');
  for(const key of ['route','participate','news','mine'])
    assert(html.includes('data-page="'+key+'"'));
