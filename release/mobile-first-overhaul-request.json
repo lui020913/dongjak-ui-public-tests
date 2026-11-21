@@ -3,9 +3,9 @@
   "application_version": "9.2.75",
   "public_work_branch": "main",
   "purpose": "9.2.75 user-requested mobile UX repair for screenshots/videos 2026-11-21: iOS onboarding/status bar color seam; transparent permission/consent no duplicate motion; centered compact Dongjak weather with honest sourced seven-day forecast and modern close; persistent bottom pill during layer sheet and synchronized scale/TIP; nearby safety sheet spacing and single motion; compact PRI danger/caution/safe legend with animated disclosure, no scale/TIP. Includes merged PR #231 and preserves prior routes, backend, privacy, data and existing v9.2.74 app. Require build > Preview > 12 phone QA > six captures/visual analysis > explore QA > protected Production with no bypass.",
-  "attempt": 208,
+  "attempt": 209,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User supplied three iPhone screenshots and three mobile recordings highlighting six remaining UI inconsistencies. PR #231 CI passed and was merged as ad62ee2e77a4889ae5ce70fa41c604ee67ad65f9; perform exact-source guarded release.",
+  "last_retry_reason": "Retry prior gated 9.2.75 run #44910556651, which failed only in mobile stylesheet 40KB cap preflight. Reviewed CSS now checks under 48KB with original executable CSS ban and bracket/token audits retained, merged PR #233 (d1ba1ac). User's six mobile fixes remain identical and full QA/production approval unchanged.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
