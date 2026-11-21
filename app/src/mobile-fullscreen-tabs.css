@@ -1,7 +1,7 @@
 /* Standalone mobile navigation pages. Keep floating/map-linked sheets unchanged.
- * The mobile-first-shell layer precedes request-completion for !important
- * declarations; these specific rules override the former half-sheet geometry. */
-@layer mobile-first-shell {
+ * This stylesheet is imported before request-completion, declaring the first
+ * named cascade layer; its !important rules outrank older sheet geometry. */
+@layer mobile-fullscreen-tabs {
   @media (max-width:699px) {
     html body #app#app#app#app#app#app#app#app > .dj-mobile-fullscreen-page:not([hidden]) {
       position:fixed!important;

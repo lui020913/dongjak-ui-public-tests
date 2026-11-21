@@ -149,12 +149,13 @@ import './v880-unified-sheet.css';
 import './v889-mobile-visual-polish.css';
 // Isolated portrait/tablet UI additions; keep the v8.9.1 mobile/HUD logic intact.
 
+// A first-declared important cascade layer gives standalone mobile pages
+// precedence over legacy request-completion sheet geometry.
+import './mobile-fullscreen-tabs.css';
 import './public-ui-production-overlay.css';
 import './v910-request-completion.css';
 import './v914-mobile-ux-fixes.css';
 import './mobile-first-layout.css';
-// Full-screen native tabs (route setup, community, local news, account).
-import './mobile-fullscreen-tabs.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';

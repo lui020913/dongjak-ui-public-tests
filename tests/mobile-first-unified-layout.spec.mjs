@@ -96,8 +96,8 @@ test('phone route, community, news and account fill the viewport without swallow
   await expect.poll(async()=>!(await startup.isVisible())||(await continueButton.isVisible()),{timeout:60000}).toBe(true);
   if(await startup.isVisible())await continueButton.click();
   const onboarding=page.locator('#dj860-onboarding');
-  await expect(onboarding).toBeAttached({timeout:15000});
-  if(await onboarding.isVisible())await onboarding.locator('.dj860-skip').click({noWaitAfter:true});
+  await expect(onboarding).toBeVisible({timeout:30000});
+  await onboarding.locator('.dj860-skip').click({noWaitAfter:true});
   await expect(onboarding).toBeHidden({timeout:15000});
   const dock=page.locator('#bottom-nav');
   await expect(dock).toBeVisible();
