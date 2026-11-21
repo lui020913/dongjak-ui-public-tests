@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.72",
+  "application_version": "9.2.73",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 user-requested 12-part mobile overhaul, follow-up route-choice repair: when a calculated standard/gentle/balanced route is selected, fit its full path but keep all alternatives available, preserving previous PR #225 phone/dark/metro fixes. Require full Preview → 12 mobile QA → 6 visual capture/analysis → explore QA → protected Production.",
-  "attempt": 205,
+  "purpose": "v9.2.73 user-requested deploy of Sangdo1 PRI ① night-light visibility and PRI ② accident hotspots to the actual mobile map application: source risk→safety normalization (100 safer), provisional 100 non-hotspot baseline, 1,686 road segments, separate factor layers and provisional 2-factor mean in mobile More menu. Preserve all prior v9.2.72 mobile route/UI fixes, app backend and runtime baseline. Use full Preview → phone and visual QA → protected Production; never bypass gates.",
+  "attempt": 206,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.72 design journey #44904708991 step 03 was blocked for 6 minutes: route option balanced.click() called focus() which hid the entire route comparison, preventing subsequent standard.click(). PR #226 decouples full map fit from panel collapse so users may repeatedly select alternatives and inspect their entire routes.",
+  "last_retry_reason": "Explicit user request on 2026-11-21: prior PR #228 changed public main app code but has not deployed to the live mobile site. Rebuild exact public main with those PRI updates and release via existing protected pipeline.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
