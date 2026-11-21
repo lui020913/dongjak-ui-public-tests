@@ -36,7 +36,8 @@ test('history uses two-part headings while retaining exact build metadata',()=>{
 test('metro trains and beams require close zoom; bus retains its own threshold',()=>{
  const source=read('src/features/liveTransit/integrate.js');
  const layer=read('src/features/liveTransit/index.js');
- assert.match(source,/minZoom:13\.2,metroMinZoom:16\.4,intervalMs:60000/);
+ assert.match(source,/METRO_LIVE_MIN_ZOOM=13\.0/);
+ assert.match(source,/minZoom:13\.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000/);
  assert.match(layer,/minzoom:metroMinZoom/);
  assert.match(layer,/TRAIN_BEAM_LAYER/);
  assert.match(layer,/minzoom:minimumZoom/);

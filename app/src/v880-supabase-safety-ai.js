@@ -200,8 +200,23 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     }catch(error){setStatus(error?.message||'검색에 실패했습니다. 다시 시도해 주세요.');}
     finally{pending=false;submit.disabled=!profile;}
   }
-  trigger?.addEventListener('click',open);
-  quickEntry?.addEventListener('click',open);
+  // iOS may dispatch a delayed click to the element UNDER a dismissed
+  // station/sheet window. The pointer must have started on the AI entry itself.
+  let pointerStart=null;
+  const capturePointer=event=>{pointerStart={target:event.target,at:Date.now()};};
+  document.addEventListener('pointerdown',capturePointer,true);
+  function onExplicitEntryClick(event){
+    if(!event.isTrusted)return;
+    if(event.detail!==0){
+      if(!pointerStart || Date.now()-pointerStart.at>1400 ||
+         !event.currentTarget.contains(pointerStart.target))return;
+    }
+    open();
+  }
+  const onOrbOpen=()=>open();
+  document.addEventListener('dongjak:explicit-ai-open',onOrbOpen);
+  trigger?.addEventListener('click',onExplicitEntryClick);
+  quickEntry?.addEventListener('click',onExplicitEntryClick);
   close.addEventListener('click',exit);
   form.addEventListener('submit',event=>{event.preventDefault();void search(input.value);});
   modal.addEventListener('cancel',event=>{event.preventDefault();exit();});
@@ -219,6 +234,8 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   });
   return ()=>{
     if(closeTimer)clearTimeout(closeTimer);
+    document.removeEventListener('pointerdown',capturePointer,true);
+    document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);
     trigger?.remove();quickEntry?.remove();modal.remove();marker?.remove();
   };
 }

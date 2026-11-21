@@ -124,7 +124,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
           const mid=interp((k+0.5)/slices);
           if(mid[0]<EXTENT[0]||mid[0]>EXTENT[2]||mid[1]<EXTENT[1]||mid[1]>EXTENT[3]){flush();continue;}
           const along=ref.nearest(mid);
-          if(along.distance>850){flush();continue;} // exclude unrelated branches and parallel distant routes
+          if(along.distance>420){flush();continue;} // reject misleading parallel branches, track detours and disconnected segments
           const alpha=opacityAt(along.along,ref);
           if(alpha<0.008){flush();continue;}
           const opacity=Number(alpha.toFixed(3));
@@ -144,7 +144,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
       flush();
     }
     // A truncated/malformed API response must not erase an entire locally displayed line.
-    if(length>=1300 && stationNear.size>=Math.max(2,Math.ceil(ref.stations.length*0.65)) && features.length>=2){
+    if(length>=1300 && stationNear.size>=Math.max(2,Math.ceil(ref.stations.length*0.75)) && features.length>=2){
       replacements.set(line,features);
     }
   }

@@ -122,3 +122,20 @@ html.dj-ios-home-pwa body > #dj-ios-pwa-status-sample{
   background-color:var(--dj-pwa-status-color,var(--dj-pwa-native-edge))!important;pointer-events:none!important;z-index:2147483001!important;transform:none!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
 }
+
+/* 2026-11-21: Native iOS status fill and map-edge gradient share exactly
+   the same base color. The transition stays behind the opaque search form. */
+@media(max-width:699px){
+ html.dj-ios-home-pwa:not([data-theme="dark"]){
+   --dj-pwa-land-tone:#edf3ef;
+   --dj-pwa-native-edge:#edf3ef;
+ }
+ html.dj-ios-home-pwa body #app #dj-ios-pwa-map-seam{
+   height:calc(env(safe-area-inset-top,0px) + 132px)!important;
+   background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,
+     var(--dj-pwa-native-edge) 8%,
+     color-mix(in srgb,var(--dj-pwa-native-edge) 92%,transparent) 33%,
+     color-mix(in srgb,var(--dj-pwa-native-edge) 47%,transparent) 68%,
+     transparent 100%)!important;
+ }
+}

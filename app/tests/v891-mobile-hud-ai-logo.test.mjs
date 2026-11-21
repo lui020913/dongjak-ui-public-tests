@@ -22,8 +22,8 @@ test('native AI search remains one dialog, mobile opens without early keyboard',
   const ai=code('src/v880-supabase-safety-ai.js');
   const orb=code('src/v890-mobile-ai-orb.js');
   assert.match(ai,/if\(window\.matchMedia\?\.\('\(max-width:699px\)'\)\?\.matches\)\{\s*names\.firstChild\.setAttribute\('tabindex','-1'\);names\.firstChild\.focus\(\{preventScroll:true\}\);\s*\}else\{\s*input\.focus\(\{preventScroll:true\}\)/);
-  assert.match(orb,/native\.click\(\)/);
-  assert.match(orb,/if\(!modal\?\.open&&modal\?\.showModal\)/);
+  assert.match(orb,/dongjak:explicit-ai-open/);
+  assert.doesNotMatch(orb,/\.showModal\(/);
   const css=code('src/v891-mobile-hud-ai-logo.css'),js=code('src/v891-mobile-hud-ai-logo.js');
   assert.match(css,/inset:var\(--dj891-ai-visible-top,0px\) 0 auto 0!important/);
   assert.match(css,/max-height:var\(--dj891-ai-visible-height,100dvh\)!important/);
