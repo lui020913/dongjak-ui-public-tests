@@ -243,16 +243,64 @@ export function installPhonePermissions({app,doc=document,win=window}){
  input.addEventListener('focus',()=>{stop();clearMessage();});
 
 }
+/** Phone result presentation: only calculated alternatives, never fake scores. */
 export function installPhoneRouteComparison({app,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
- const host=doc.getElementById('route-map-card'),route=doc.getElementById('route-variants');if(!host||!route)return;
- const transitOption=doc.getElementById('djNext-transit-option');transitOption?.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
- const cards=doc.createElement('div');cards.id='djNext-route-compare';cards.className='djNext-route-compare';host.append(cards);
+ const host=doc.getElementById('route-map-card'),route=doc.getElementById('route-variants');
+ if(!host||!route)return;
+ const transitOption=doc.getElementById('djNext-transit-option');
+ transitOption?.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
+ const summary=doc.createElement('div');summary.id='dj9272-route-endpoints';summary.className='dj9272-route-endpoints';
+ const cards=doc.createElement('div');cards.id='djNext-route-compare';cards.className='djNext-route-compare';
+ const focus=doc.createElement('button');focus.type='button';focus.id='dj9272-route-focus';focus.textContent='선택한 경로 전체 보기';
+ const variants=[['standard','일반 최단','#3978c8'],['gentle','경사 회피','#a4742e'],['balanced','종합 최적','#087e68']];
+ host.append(summary,cards,focus);
  let data=null;
- const variants=[['standard','일반 최단','#3978c8'],['transit','대중교통','#7963b3'],['gentle','경사 회피','#a4742e'],['balanced','종합 최적','#087e68']];
- const format=r=>r&&Number.isFinite(r.seconds)&&Number.isFinite(r.kilometers)?'약 '+Math.max(1,Math.ceil(r.seconds/60))+'분 · '+r.kilometers.toFixed(2)+'km':'계산 불가';
- function render(){cards.replaceChildren();if(transitOption)transitOption.disabled=!data?.transit;if(!data)return;for(const [id,label,color] of variants){const b=doc.createElement('button');b.type='button';b.dataset.comparison=id;b.style.setProperty('--route-accent',color);const h=doc.createElement('strong');h.textContent=label;const small=doc.createElement('span');const r=data[id];small.textContent=id==='transit'?(r?'지하철 연계 약 '+Math.ceil(r.indicativeMinutes)+'분 (참고)':'연결 후보 없음'):format(r);if(id==='balanced'&&r)small.textContent+=' · 잠정';b.append(h,small);b.disabled=!r;b.setAttribute('aria-pressed',String(id===data.selected));b.addEventListener('click',()=>{if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return}const target=route.querySelector('[data-route-variant="'+id+'"]');if(target&&!target.disabled)target.click()});cards.append(b)}}
- win.addEventListener('dj-next:route-comparison',e=>{data=e.detail;render()});
- win.addEventListener('dj-next:route-selected',e=>{if(!data)return;data={...data,selected:e.detail};for(const b of cards.children)b.setAttribute('aria-pressed',String(b.dataset.comparison===data.selected))});
- win.addEventListener('dj-next:route-clear',()=>{data=null;render()});
+ const safeLabel=id=>doc.getElementById(id)?.textContent?.trim()||'미지정';
+ const format=r=>r&&Number.isFinite(r.seconds)&&Number.isFinite(r.kilometers)
+  ?'약 '+Math.max(1,Math.ceil(r.seconds/60))+'분 · '+(r.kilometers<1?Math.round(r.kilometers*1000)+'m':r.kilometers.toFixed(2)+'km')
+  :'자료 없음';
+ function render(){
+   cards.replaceChildren();summary.replaceChildren();
+   if(transitOption)transitOption.disabled=!data?.transit;
+   if(!data){summary.hidden=true;focus.hidden=true;return;}
+   summary.hidden=false;focus.hidden=false;
+   const start=doc.createElement('div'),end=doc.createElement('div');
+   for(const [node,label,value] of [[start,'출발',safeLabel('route-start-label')],[end,'도착',safeLabel('route-end-label')]]){
+     node.className='dj9272-route-place';node.dataset.point=label==='출발'?'start':'end';
+     const tag=doc.createElement('small');tag.textContent=label;
+     const name=doc.createElement('strong');name.textContent=value;
+     node.append(tag,name);summary.append(node);
+   }
+   for(const [id,label,color] of variants){
+     const result=data[id];if(!result?.coords?.length)continue;
+     const button=doc.createElement('button');button.type='button';button.dataset.comparison=id;button.style.setProperty('--route-accent',color);
+     button.setAttribute('aria-pressed',String(id===data.selected));
+     button.setAttribute('aria-label',label+' 경로 전체를 지도에 표시');
+     const title=doc.createElement('strong');title.textContent=label;
+     const detail=doc.createElement('span');detail.textContent=format(result)+(id==='balanced'?' · 잠정':'');
+     button.append(title,detail);
+     button.addEventListener('click',()=>{
+       const native=route.querySelector('[data-route-variant="'+id+'"]');
+       if(native&&!native.disabled)native.click();
+       else return;
+       data={...data,selected:id};
+       for(const item of cards.children)item.setAttribute('aria-pressed',String(item.dataset.comparison===id));
+       doc.getElementById('route-return-map')?.click();
+     });
+     cards.append(button);
+   }
+   if(data.transit){
+     const button=doc.createElement('button');button.type='button';button.className='dj9272-transit-choice';
+     button.innerHTML='<strong>대중교통 연계</strong><span>지하철 연결 정보 · 실제 환승시간 미포함</span>';
+     button.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
+     cards.append(button);
+   }
+ }
+ focus.addEventListener('click',()=>doc.getElementById('route-return-map')?.click());
+ win.addEventListener('dj-next:route-comparison',e=>{data=e.detail;render();});
+ win.addEventListener('dj-next:route-selected',e=>{if(!data)return;data={...data,selected:e.detail};
+  for(const button of cards.querySelectorAll('[data-comparison]'))button.setAttribute('aria-pressed',String(button.dataset.comparison===data.selected));
+ });
+ win.addEventListener('dj-next:route-clear',()=>{data=null;render();});
 }
