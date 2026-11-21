@@ -97,13 +97,14 @@
          pixels of the loader share the SAME tone. Start with a flat edge,
          then blend gently toward the centered light wash below the header.
          This is inline so there is no color seam before Vite CSS loads. */
-      html.dj-ios-home-pwa:not([data-theme="dark"]) .map-startup-overlay{
+      html.dj-ios-home-pwa:not([data-theme="dark"]) body #app #map-startup-overlay.map-startup-overlay{
         --start-bg:#edf3ef;
-        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#f9fbfa 44%,var(--start-bg) 100%);
+        /* Override legacy #app .map-startup-overlay background !important. */
+        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#f9fbfa 44%,var(--start-bg) 100%)!important;
       }
-      html.dj-ios-home-pwa[data-theme="dark"] .map-startup-overlay{
+      html.dj-ios-home-pwa[data-theme="dark"] body #app #map-startup-overlay.map-startup-overlay{
         --start-bg:#192d32;
-        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#1a3334 44%,var(--start-bg) 100%);
+        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#1a3334 44%,var(--start-bg) 100%)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
       .map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}
