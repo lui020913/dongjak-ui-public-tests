@@ -13,7 +13,7 @@ const rows=csv.map(line=>{
  assert.equal(values.length,headers.length,'CSV row has the right number of values');
  return Object.fromEntries(headers.map((h,i)=>[h,values[i]]));
 });
-const n=v=>v===''?null:Number(v);
+const n=v=>v===null||v===undefined||v===''?null:Number(v);
 const score=(base,width,school,protectedFully)=>{
  if(base===null)return null;
  if(protectedFully)return 100;
