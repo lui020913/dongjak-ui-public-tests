@@ -228,6 +228,13 @@
   #app #dj833-night-modal:not([hidden]),
   #app #dj833-night-modal:not([hidden]) .dj833-night-dialog {animation:none!important;}
 }
+/* The permission/consent scrim is visible before night mode activates.
+   Sample a midtone in the OS status region rather than leaving a bright strip
+   abruptly adjacent to the dimmed map; black status icons remain legible. */
+html.dj-ios-home-pwa:has(#dj833-night-modal:not([hidden])) {
+  --dj-pwa-native-edge:#aab8af!important;
+  --dj-pwa-land-tone:#aab8af!important;
+}
 html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
   --dj-pwa-native-edge:#192d32!important;
   --dj-pwa-land-tone:#192d32!important;
