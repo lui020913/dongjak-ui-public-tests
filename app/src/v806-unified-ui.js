@@ -74,6 +74,13 @@ export function installUnifiedUI(doc=document, win=window){
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
     if(!phone()||!target?.style||reduced())return false;
+    // Phone primary tabs are independent, opaque full-viewport screens.
+    // Their only entrance owner is bottom-tab-navigation.js (content-only
+    // reveal). The old 806 surface transition wrote inline opacity:0 and
+    // exposed the WebGL map/white compositor frame on every tab change.
+    // Keep sheet/modal animation for all other surfaces.
+    if(win.matchMedia?.('(max-width:699px)')?.matches&&
+      target.matches?.('#route-panel.page-panel,#participation-panel.page-panel,#news-panel.page-panel,#mine-panel.page-panel'))return false;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const tabFade=forceTabFade||(opening&&(tabFadeUntil.get(target.id)||0)>Date.now());
@@ -467,10 +474,9 @@ export function installUnifiedUI(doc=document, win=window){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
           if(phone()&&tabReplacement.has(id)){
-            // The page frame remains opaque. Only the incoming body fades in.
+            // The dedicated bottom-tab controller already reveals the body.
+            // Never start a second Web Animation on the same content.
             cancelActive(target);
-            const body=target?.querySelector('.dj836-sheet-body');
-            if(!reduced()&&body?.animate)body.animate([{opacity:.72},{opacity:1}],{duration:140,easing:'ease-out'});
           }else if(!activeAnimation.has(target))playOpen(id);
           tabReplacement.delete(id);
         }
