@@ -194,12 +194,11 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#ffffff','line-opacity':0.58,
         'line-width':['interpolate',['linear'],['zoom'],13,3,17,7]}});
     add({id:'pza-school-gap-500',type:'line',source:SOURCE_NAMES.schoolgap,minzoom:13,
-      filter:['all',['<=',['to-number',['get','unprotected_within_300_pct']],0],
-        ['>',['to-number',['get','unprotected_300_to_500_pct']],0]],
+      filter:['==',['get','band'],'300to500'],
       layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#c39b58',
         'line-width':['interpolate',['linear'],['zoom'],13,2.0,17,4.5],'line-opacity':0.88}});
     add({id:'pza-school-gap-300',type:'line',source:SOURCE_NAMES.schoolgap,minzoom:13,
-      filter:['>',['to-number',['get','unprotected_within_300_pct']],0],
+      filter:['==',['get','band'],'within300'],
       layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#d27e42',
         'line-width':['interpolate',['linear'],['zoom'],13,2.5,17,5.5],'line-opacity':0.92}});
     // TAAS statistical hotspots: year is record label, not proof of accident at click point.
@@ -408,6 +407,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       <dl><dt>제도적 보호 적정성 시범점수</dt><dd>${esc(p.school_coverage_preview_score)} / 100점</dd>
       <dt>300m 미지정 비율</dt><dd>${esc(p.unprotected_within_300_pct)}%</dd>
       <dt>300~500m 미지정 비율</dt><dd>${esc(p.unprotected_300_to_500_pct)}%</dd>
+      <dt>지도에 표시한 해당 범위 선형</dt><dd>${formatM(p.geometry_length_m)}</dd>
       <dt>인접 학교 대표점</dt><dd>${esc(p.nearest_school)}</dd></dl>
       <p class="pza-popup-note">시설 대표점은 주 출입문이 아니며, 반경 내부의 미지정은 법적 누락·위법 또는 사고 위험 확정을 뜻하지 않습니다. 진짜 보행 경로와 지정 고시 확인이 필요합니다.</p>`;
     bind('pza-school-gap-300',schoolGapPopup);bind('pza-school-gap-500',schoolGapPopup);
