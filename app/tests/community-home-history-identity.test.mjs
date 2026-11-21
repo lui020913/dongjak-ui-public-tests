@@ -18,8 +18,9 @@ test('empty community feed is an actual interactive home, not a blank list or fa
   assert.match(main,/공유 게시판 연결 실패 · 기존 기록은 유지됩니다/);
 });
 
-test('operational release renderer does not duplicate real SemVer as a fake former build',()=>{
-  assert.match(history,/const isOperational=\/\^v\?9/);
-  assert.match(history,/if\(isOperational\)/);
-  assert.doesNotMatch(history,/release===currentRelease\?'현재 빌드: '/);
+test('release renderer groups unchanged notes by category without visible build numbers',()=>{
+ assert.match(history,/CHANGE_TYPE_GROUPS/);
+ assert.match(history,/classifyReleaseNote/);
+ assert.match(history,/dataset\.version/);
+ assert.doesNotMatch(history,/현재 빌드: /);
 });
