@@ -27,10 +27,10 @@ await write('public/version.json',metadata);
 await write('src/build-info.json',metadata);
 let html=await read('index.html');
 const replacements=[
-  [/(<title>동작하는 안전지도 · 보행안전 지도)(?: v\\d+\\.\\d+\\.\\d+)?(<\\/title>)/,'$1$2'],
-  [/(id="version-history-trigger"[^>]*>)(?:v\\d+\\.\\d+\\.\\d+|업데이트)(<\\/button>)/,'$1업데이트$2'],
-  [/(id="dj-guide-latest-version">)(?:v\\d+\\.\\d+\\.\\d+|분류별 내역)(<\\/strong>)/,'$1분류별 내역$2'],
-  [/(id="map-startup-version"[^>]*>)(?:v\\d+\\.\\d+\\.\\d+|버전 1\\.0)(<\\/span>)/,`$1${PUBLIC_LOADING_VERSION}$2`],
+  [/(<title>동작하는 안전지도 · 보행안전 지도)(?: v\d+\.\d+\.\d+)?(<\/title>)/,'$1$2'],
+  [/(id="version-history-trigger"[^>]*>)(?:v\d+\.\d+\.\d+|업데이트)(<\/button>)/,'$1업데이트$2'],
+  [/(id="dj-guide-latest-version">)(?:v\d+\.\d+\.\d+|분류별 내역)(<\/strong>)/,'$1분류별 내역$2'],
+  [/(id="map-startup-version"[^>]*>)(?:v\d+\.\d+\.\d+|버전 1\.0)(<\/span>)/,`$1${PUBLIC_LOADING_VERSION}$2`],
 ];
 for(const [pattern,replacement] of replacements){
   if(!pattern.test(html))throw new Error('HTML version slot missing: '+pattern);
