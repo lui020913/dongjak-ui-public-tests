@@ -48,14 +48,14 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
  reset.freeze=()=>{gesture=null;win.clearTimeout(settleTimer);const rect=body.getBoundingClientRect();put('height',rect.height+'px');put('transition','none');};
  const finish=(next,close=false)=>{
   const rect=body.getBoundingClientRect();expanded=next;closing=close;body.dataset.djLayerExpanded=String(next);
-  const max=Math.max(compactHeight,win.innerHeight-28);
+  const max=Math.max(compactHeight,win.innerHeight-Math.max(95,Math.round(win.innerHeight*.12)));
   const height=next?max:compactHeight;
   const policy=win.DongjakWindowMotion?.policy||{open:350,close:300,easing:'cubic-bezier(.25,.20,.40,1)'};
   const duration=close?policy.close:policy.open;
   put('max-height',max+'px');put('height',rect.height+'px');
   const offset=parseFloat((win.getComputedStyle(body).translate||'0 0').split(' ')[1])||0;
   put('translate','0 '+offset+'px');put('transition','none');void body.offsetHeight;
-  const complete=()=>{if(close){onDismiss();reset();}else{clear();if(next){put('max-height',max+'px');put('height',height+'px');}}};
+  const complete=()=>{if(close){onDismiss();reset();}else{clear();/* CSS safely anchors expanded height below native status bar. */}};
   if(reduced()){complete();return;}
   put('transition','height '+duration+'ms '+policy.easing+', translate '+duration+'ms '+policy.easing);
   put('height',height+'px');put('translate','0 '+(close?win.innerHeight+24:0)+'px');
@@ -65,7 +65,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   if(closing||panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
   win.clearTimeout(settleTimer);win.DongjakWindowMotion?.cancel(body);
   const rect=body.getBoundingClientRect();if(!compactHeight)compactHeight=rect.height;
-  put('max-height',Math.max(compactHeight,win.innerHeight-28)+'px');put('height',rect.height+'px');put('transition','none');
+  put('max-height',Math.max(compactHeight,win.innerHeight-Math.max(95,Math.round(win.innerHeight*.12)))+'px');put('height',rect.height+'px');put('transition','none');
   gesture={id:e.pointerId,y:e.clientY,x:e.clientX,height:rect.height,expanded,dragging:false};
   body.dataset.djLayerDragInput=e.pointerType||'pointer';
   if(typeof e.pointerId==='number')try{header.setPointerCapture?.(e.pointerId)}catch{}
@@ -75,7 +75,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   const g=gesture;if(!g||e.pointerId!==g.id)return;
   const dy=e.clientY-g.y,dx=e.clientX-g.x;
   if(!g.dragging){if(Math.abs(dy)<7)return;if(Math.abs(dx)>Math.abs(dy)){gesture=null;finish(g.expanded);return;}g.dragging=true;}
-  const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-28));
+  const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-Math.max(95,Math.round(win.innerHeight*.12))));
   put('height',frame.height+'px');put('translate','0 '+frame.offset+'px');
   if(e.cancelable)e.preventDefault();
  };
