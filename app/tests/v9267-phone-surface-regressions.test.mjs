@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const css=read('src/v9267-phone-surface-regressions.css');
@@ -22,7 +22,8 @@ test('recording mode cannot push the independent AI action down',()=>{
   assert.match(css,/#dj890-ai-orb/);
 });
 test('fullscreen tab transitions use real page snapshots and never show an opaque white curtain',()=>{
- const material=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ const local=new URL('../src/mobile-next.css',import.meta.url);
+ const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
  assert.match(tab,/doc\.startViewTransition\(\(\)=>\{replay\(button\);\}\)/);
  assert.match(tab,/if\(reduced\(\)\|\|typeof doc\.startViewTransition!=='function'\)/);
  assert.doesNotMatch(tab,/ensureCurtain|curtain\.hidden=false/);
