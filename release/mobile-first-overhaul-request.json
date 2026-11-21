@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.53",
+  "application_version": "9.2.54",
   "public_work_branch": "main",
-  "purpose": "Community categories at the top of the feed, mobile web search/AI columns without overlap, sequential onboarding slide fade-out/in, nearby sheet full-header drag and expanded layout while preserving global search, metro car and headlight lightcones only at map zoom 15.2+, and concise two-part vX.Y update-history editions while preserving real full SemVer build labels. Production protections unchanged.",
-  "attempt": 160,
+  "purpose": "Convert mobile route setup, community, local news and My Info to independent full-viewport native tab screens. Keep the fixed 5-button pill navigation and safe-area, non-map scrolling, route-search form, news API, account/favorites and 150ms page fade. Exempt these tabs from sheet drag/expand/collapse; retain all map-linked bus/subway/facility/nearby sheets. Preserve desktop/tablet mobile-access gate and protected Preview phone QA Production deployment.",
+  "attempt": 161,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 159 source build and Preview passed, 12 phone QA 9 passed and 3 onboarding fade checks failed at 375/390/430px; nearby sheet formerly failing y=-1 now passed. All 6 visual captures and Gemini design analyses passed. Merged PR #144 11382a1a5088a90e8681932025f3ef533c47fb8e retains real computed opacity (<0.75) and measures both RAF and 12ms timer ticks across 700ms for overloaded headless phone runners, with timestamped diagnostics. Source CI run 44845618835 passed. Re-run protected Preview and all 12 actual phone QA shards; no QA bypass, and Production remains gated.",
+  "last_retry_reason": "Feature PR #147 merged at source SHA 31b4c15f9641609d6a7aef58a5077308337d9fcd. Public app source CI run 44849087816 passed all Node regression, bundle build and 375/390/430 phone browser tests. New v9.2.54 release notes stamped in scripts/build-mobile-first-overhaul.sh; revalidate independent full screens, real phone navigation hit targets, map-linked sheets and protected Cloudflare integrations. Production must remain gated on exact sealed Preview build, all mobile QA and visual review.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
