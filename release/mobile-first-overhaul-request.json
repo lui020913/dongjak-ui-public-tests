@@ -3,9 +3,9 @@
   "application_version": "9.2.53",
   "public_work_branch": "main",
   "purpose": "Community categories at the top of the feed, mobile web search/AI columns without overlap, sequential onboarding slide fade-out/in, nearby sheet full-header drag and expanded layout while preserving global search, metro car and headlight lightcones only at map zoom 15.2+, and concise two-part vX.Y update-history editions while preserving real full SemVer build labels. Production protections unchanged.",
-  "attempt": 157,
+  "attempt": 158,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 155 Preview QA found real mobile issues: nearby expanded sheet at y=-3 overlapped global search (phone 430), remaining gestures failed at 375/390, onboard visual opacity did not visibly fade, and bus arrival cards stacked. Latest main merged #135 coordinate-based nearby pointer capture, #136 two-column bus layout, #137 mobile zoom/fade QA synchronization, and #141 measured safe expanded top plus frame-separated onboarding fade. PR #141 source CI run 44840491896 succeeded. Rerun complete protected Preview, 12 phone shards, 6 captures, Gemini review and guarded Production; no gate bypass.",
+  "last_retry_reason": "Protected attempt 157 passed onboarding fade & six design captures but phone QA 8/12 and 12/12 revealed nearbysheet FLIP initial translate briefly at y=-1, overlapping search. PR #142 clamps FLIP animation start/end y to measured expanded safeTop and full public source CI run 44841549316 passed. Retain already merged #135 document pointer-capture, #136 bus cards and #141 frame-separated onboarding fade. Re-run full protected Preview, all 12 phone shards, 6 captures, Gemini and guarded Production; no bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
