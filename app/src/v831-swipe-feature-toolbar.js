@@ -295,6 +295,14 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
  }
  function schedule(){if(scheduled)return;scheduled=true;raf(()=>{scheduled=false;sync();});}
  function closeWeather(){if(weatherSheet)weatherSheet.hidden=true;const b=find('#dj-v794-weather');b?.classList.remove('dj832-expanded');}
+ function openNightConfirm(){
+   if(!nightConfirm)return;
+   const card=nightConfirm.querySelector('.dj833-night-dialog');
+   // Cancelling a previous exit is essential when tapping the pill quickly.
+   // A retained WAAPI transform moved the next consent card sideways.
+   if(card){win.DongjakWindowMotion?.cancel?.(card);card.style.removeProperty('transform');card.style.removeProperty('translate');card.style.removeProperty('opacity');}
+   nightConfirm.hidden=false;
+ }
  function closeNightConfirm(animate=false){if(!nightConfirm||nightConfirm.hidden)return;const finish=()=>{nightConfirm.hidden=true;};const card=nightConfirm.querySelector('.dj833-night-dialog');if(animate&&win.DongjakWindowMotion)win.DongjakWindowMotion.close(card,finish);else{win.DongjakWindowMotion?.cancel(card);finish();}}
  function closeSheet(){
    if(!sheet||sheet.hidden)return;
@@ -358,7 +366,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    if(feature[0]==='safe-night-analysis'){
      closeSheet();closeWeather();hideMore();
      if(app.dataset.sangdoNight==='on')find('#night-visibility-quick-off')?.click();
-     else {collapseNative();nightConfirm.hidden=false;}
+     else {collapseNative();openNightConfirm();}
      return;
    }
    collapseNative();closeWeather();closeNightConfirm();
@@ -471,7 +479,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    if(app.dataset.sangdoNight==='on'){
      find('#night-visibility-quick-off')?.click();schedule();return;
    }
-   nightConfirm.hidden=false;
+   openNightConfirm();
  }
  function rebuildFeatureLocations(){
    if(!row||!scroller||!extra)return;
