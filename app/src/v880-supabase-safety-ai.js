@@ -88,6 +88,31 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   layout.append(header,login,transcript,composer);modal.append(layout);document.body.append(modal);
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
+  // Only a click that begins on an actual AI entry may open the native dialog.
+  // This blocks touch release retargeting from a disappearing subway close button.
+  const aiPointerDown=new WeakMap();
+  let dismissedExternalAt=0;
+  const aiEntryTargets=[trigger,quickEntry].filter(Boolean);
+  const captureIntent=(entry)=>{
+    const record=()=>aiPointerDown.set(entry,Date.now());
+    entry.addEventListener('pointerdown',record,{passive:true});
+    return ()=>entry.removeEventListener('pointerdown',record);
+  };
+  const intentCleanups=aiEntryTargets.map(captureIntent);
+  const closedExternal=event=>{
+    const target=event.target?.closest?.(
+      '[data-close-page],.dj-sheet-chrome-close,.transport-sheet-close,.dj-transport-close,.dj-place-detail-popup-close,'+
+      '.djNext-sheet-close,#transport-close,#detail-sheet-close,#ped-tools-close,.dj-ai-close'
+    );
+    if(target)dismissedExternalAt=Date.now();
+  };
+  document.addEventListener('pointerdown',closedExternal,true);
+  const validEntry=(event,entry)=>{
+    if(!event || event.detail===0)return true; // Keyboard activation or explicit mobile orb delegation.
+    const began=aiPointerDown.get(entry)||0;
+    return Date.now()-began<=1200 && Date.now()-dismissedExternalAt>350;
+  };
+
   const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   function setStatus(message){status.textContent=message;}
   syncProfile();
@@ -200,8 +225,8 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     }catch(error){setStatus(error?.message||'검색에 실패했습니다. 다시 시도해 주세요.');}
     finally{pending=false;submit.disabled=!profile;}
   }
-  trigger?.addEventListener('click',open);
-  quickEntry?.addEventListener('click',open);
+  trigger?.addEventListener('click',event=>{if(validEntry(event,trigger))open();});
+  quickEntry?.addEventListener('click',event=>{if(validEntry(event,quickEntry))open();});
   close.addEventListener('click',exit);
   form.addEventListener('submit',event=>{event.preventDefault();void search(input.value);});
   modal.addEventListener('cancel',event=>{event.preventDefault();exit();});
@@ -219,6 +244,8 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   });
   return ()=>{
     if(closeTimer)clearTimeout(closeTimer);
+    document.removeEventListener('pointerdown',closedExternal,true);
+    for(const clear of intentCleanups)clear();
     trigger?.remove();quickEntry?.remove();modal.remove();marker?.remove();
   };
 }
