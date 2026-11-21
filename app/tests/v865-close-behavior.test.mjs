@@ -46,7 +46,8 @@ test('closing an auxiliary page returns to the map without reopening the overvie
   assert.match(main,/for\(const button of document\.querySelectorAll\('\[data-close-page\]'\)\)/);
   assert.match(main,/closePrimaryPageToMap\(button\.closest\('\.page-panel'\)\)/);
   assert.match(main,/news-close-to-map[\s\S]*?closePrimaryPageToMap\(document\.getElementById\('news-panel'\)\)/);
-  assert.match(main,/window\.DongjakWindowMotion\?\.cancel\?\.\(panel\);finish\(\)/);
+  assert.match(main,/fadePrimaryPageToMap\(panel,finish\)/);
+  assert.match(main,/const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\)/);
 });
 
 test('canceling a new point registration does not call the overview-opening path twice',()=>{
