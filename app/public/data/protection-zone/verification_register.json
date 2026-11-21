@@ -11,12 +11,23 @@
   },
   "education": {
     "catchment_reference": "https://dgedu.sen.go.kr/CMS/introduction/introduction06/introduction0604/introduction060402/index.html",
-    "status": "교육지원청 공개 학교별 통학구역표(2025.3 기준)에서 상도1동에 강남초·상현초·은로초 학구가 확인됨; 통학구역은 실제 통행 경로와 다르며 2026 최신 구획/출입문은 별도 확인",
+    "status": "2025-03-17 교육지원청 동작·관악구 공개 표에서 상도1동 학구 4개교(강남초·상현초·은로초·봉현초) 확인. 2026-09-20 한국교육시설안전원 공식 SHP에서 기존 상도1동 참고경계와 8개 학구 교차. 학교 학구와 실제 통학동선·보호구역은 별개. 통·반별 GIS 경계 미확보.",
     "catchment_reference_asof": "2025-03",
     "verified_catchment_names_in_sangdo1": [
       "서울강남초등학교",
       "서울상현초등학교",
-      "서울은로초등학교"
+      "서울은로초등학교",
+      "서울봉현초등학교"
+    ],
+    "verified_official_2026_polygon_count": 8,
+    "verified_official_2026_polygon_source": "https://www.data.go.kr/data/15159265/fileData.do",
+    "verified_official_2026_polygon_source_asof": "2026-09-20",
+    "tong_ban_geometry_available": false,
+    "legal_student_route_verified": false,
+    "official_reference_boundary_verified": false,
+    "known_exception_tongs": [
+      20,
+      22
     ]
   },
   "external_facility_gap": {
@@ -366,5 +377,22 @@
     ],
     "point_only_facility": "예일어린이집; 지정폴리곤 미확인",
     "out_of_scope": "동작구 밖 관악구·서초구 자료, 개인 학생 통학경로"
+  },
+  "official_data_audit_20261122": {
+    "contact_or_public_information_request_performed": false,
+    "existing_police_polygon_source_asof": "2025-05-27",
+    "police_api_current_request_performed": false,
+    "utic_legacy_data_stale_since": "2025-01-06",
+    "utic_discontinuation_notice": "https://www.utic.go.kr/guide/utisSafe.do",
+    "replacement_police_geometry_api": "https://www.data.go.kr/data/15142010/openapi.do",
+    "nationwide_child_zone_dataset_portal_last_modified": "2026-09-22",
+    "nationwide_child_zone_dataset_url": "https://www.data.go.kr/data/15012891/standard.do",
+    "seoul_city_2026_06_roster_listed_not_individually_matched": true,
+    "study_only_police_x_catchment_file": "sangdo1_2025_police_x_2026_catchment_preview.json",
+    "study_only_summary_csv": "sangdo1_school_2025_zone_comparison_preview.csv",
+    "legal_notice_road_start_end_verified": false,
+    "latest_legal_zone_polygons_verified": false,
+    "use_in_navigation_risk_penalty": false,
+    "use_as_final_legal_coverage": false
   }
 }
