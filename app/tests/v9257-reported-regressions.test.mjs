@@ -1,10 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {fixedRailCollection} from '../src/fixed-rail-lines.js';
 import {METRO_OVERVIEW_LAYERS} from '../src/metro-overview-visibility.js';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const readPhoneSource=name=>{
+  // Source PR tests read the public overlay; sealed release tests use
+  // its exact copied runtime file in src, not an unavailable sibling checkout.
+  const built=new URL('../src/'+name,import.meta.url);
+  const publicOverlay=new URL('../../frontend/production/'+name,import.meta.url);
+  return readFileSync(existsSync(built)?built:publicOverlay,'utf8');
+};
 
 test('one railway corridor: duplicate overview never returns during zoom or style update',()=>{
   assert.equal(METRO_OVERVIEW_LAYERS.includes('transport-real-rail-overview'),false);
@@ -58,7 +65,7 @@ test('native iOS PWA status bar color transitions with sheet dimmer and map seam
 });
 
 test('layer shortcut counter describes the 3 configurable toolbar slots',()=>{
-  const script=read('../frontend/production/mobile-next.js');
+  const script=readPhoneSource('mobile-next.js');
   assert.match(script,/상단 바로가기 '\+selected\.length\+'\/3/);
   assert.doesNotMatch(script,/count\.textContent='등록 '/);
 });
