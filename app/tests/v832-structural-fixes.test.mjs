@@ -16,7 +16,7 @@ test('five rebuilt news-style headers share one semantic structure and right-han
  const rebuilt=read('src/v835-news-style-drawer.css');
  for(const id of ['route-panel','participation-panel','news-panel','mine-panel','admin-dong-picker']){
   const fragment=html.slice(html.indexOf(`id="${id}"`));
-  const header=fragment.slice(fragment.indexOf('<header class="dj-sheet-chrome"'),fragment.indexOf('</header>'));
+  const header=fragment.slice(fragment.indexOf('<header class="dj-sheet-chrome'),fragment.indexOf('</header>'));
   const keys=['dj-sheet-chrome-grip','dj-sheet-chrome-title','dj-sheet-chrome-icon','<h2>','dj-sheet-chrome-close'];
   const positions=keys.map(key=>header.indexOf(key));
   assert.ok(positions.every(x=>x>=0),id);

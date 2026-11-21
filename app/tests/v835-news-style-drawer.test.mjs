@@ -12,7 +12,7 @@ test('new shared header replaces legacy header classes in all five floating page
   assert.ok(start>0,id);
   const end=html.indexOf('</header>',start);
   const header=html.slice(start,end);
-  assert.match(header,/<header class="dj-sheet-chrome"/);
+  assert.match(header,/<header class="dj-sheet-chrome(?: dj-primary-fullscreen-header)?"/);
   assert.match(header,/<span class="dj-sheet-chrome-grip"/);
   assert.match(header,/<div class="dj-sheet-chrome-title"/);
   assert.match(header,/<h2>/);
