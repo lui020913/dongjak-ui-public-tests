@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.68",
+  "application_version": "9.2.69",
   "public_work_branch": "main",
-  "purpose": "2026-11-21 current-source maintenance release: remove 22 unused legacy stylesheet entries from active app/src (7 earlier unreachable styles + 15 retired styles, with PC/tablet originals preserved under app/archive/pc-tablet-legacy-css). PR #207 removed redundant Vite JS CSS imports of v831-swipe-feature-toolbar.css, v832-priority-feature-toolbar.css and v836-sheet-toolbar-controls.css while retaining their HTML first-paint links, and updated/added CI regression tests. Preserve mobile UI behavior, map layers, Supabase authentication, transport APIs, and iOS/Android support. Release only through exact source SHA, Preview, phone QA, visual QA, and protected Production with rollback; no private project dependency.",
-  "attempt": 196,
+  "purpose": "Owner-requested v9.2.69 mobile flat surfaces. PR #209 merged after public app source CI 44896431899 passed full unit suite, release consistency, Vite production build and 3 phone viewport Playwright checks. Remove cosmetic UI gradient fills, blurred backdrops, map-edge vignettes, excessive scrim/dimming of ordinary windows and dock-brightness filters; replace with opaque theme-aware surfaces, fine borders and subtle shadows. Retain minimal permission-only consent backdrop, iOS native status color sampler, existing sheet animations, geometry, transit, safety layers and Supabase Auth. Exact-source Preview, 12 phone QA shards, 6 visual analysis lanes, exploratory QA, guarded Production, rollback on failure.",
+  "attempt": 197,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Release run 44893694348 failed before Preview because archiving old app/src/mobile-first-overhaul.css left the copied build-time overlay untracked, causing exact changed-file allowlist mismatch. PR #208 merged at 4efdcafeaaf0edfe89097c714d304ff129eb9dd2: git add -N src/mobile-first-overhaul.css restores correct diff detection without staging or weakening the allowlist. Rebuild exact v9.2.68 from latest main; gate Preview, 12 mobile shards, six visual reviews and guarded Production.",
+  "last_retry_reason": "PR #209 reviewed and merged as fbe6aa72cac2e8d13074594bf756712252f24e68. Build exact v9.2.69 artifact from current public main source; verify updated flat-surface tests and iOS PWA status seam, then deploy only after all gates pass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
