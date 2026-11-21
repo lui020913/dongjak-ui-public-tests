@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.64",
+  "application_version": "9.2.65",
   "public_work_branch": "main",
-  "purpose": "Fix current weather sheet covering map scale (PR #187), dock weather panel exactly 8px above the measured bottom tab, remove header/city label overlap, and ensure community composer form can scroll all the way to Save without duplicated 110px footer padding (PR #188). Includes startup iPhone status tone continuity, search AI button stability, subway alignment and live train visibility fixes. Keep PC/tablet mobile-only gate, preserve all protected tests and rate-limit handling.",
-  "attempt": 185,
+  "purpose": "iOS Home Screen PWA startup overlay CSS cascade repair after legacy style.css hydration (PR #189). Keep the status strip and loader's topmost light #edf3ef / dark #192d32 tones consistent from first paint until map readiness. Preserve all v9.2.64 map, metro/rail, AI search, weather dock, scale, community composer fixes; mobile-only gate and protected Preview, 12 phone QA, 6 visual/Gemini QA, autonomous exploration, Production approval and rollback remain mandatory.",
+  "attempt": 186,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.63 source QA, 12 phone shards, 6 visual/Gemini analysis lanes and Gemini autonomous exploration passed; production approval was still waiting. Newly reported weather card/footer gap and clipped community editor fixed in PR #188, merged with full CI and 375/390/430px Playwright. Consolidate into v9.2.64 sealed Preview and run protected QA before Production (no bypass).",
+  "last_retry_reason": "v9.2.64 guarded Preview, phone 12/12, visual Gemini 6/6, autonomous exploration and Production verified successful. Follow-up PR #189 merged on main after complete public source CI (including iPhone startup cascade test and 375/390/430px Playwright). Run a NEW exact-source v9.2.65 protected release; do not reuse the previous Preview or QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
