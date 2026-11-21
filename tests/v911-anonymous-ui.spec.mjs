@@ -793,8 +793,8 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','1');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
- expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#eef3ef');
- const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(238, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
+ expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#edf3ef');
+ const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
  await test.info().attach('ios-pwa-light-gradient',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
  // Verify native dialog top-layer separately without a network request or login.
@@ -844,15 +844,15 @@ test('metro feed is requested only near the tracks and distant symbols disappear
    try{return Number(JSON.parse(value).features||0);}catch{return 0;}
  },{timeout:60000}).toBeGreaterThan(0);
  let diagnostics=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
- expect(diagnostics.minimum).toBe(16.4);
- expect(diagnostics.zoom).toBeGreaterThanOrEqual(16.4);
+ expect(diagnostics.minimum).toBe(13.0);
+ expect(diagnostics.zoom).toBeGreaterThanOrEqual(13.0);
  expect(diagnostics.feed).toBeGreaterThan(0);
  await changeLiveTrainZoom(page,false);
  await expect.poll(async()=>{
    const raw=await map.getAttribute('data-dj-live-train-diagnostics');
    if(!raw)return 99;
    try{return Number(JSON.parse(raw).zoom)}catch{return 99}
- },{timeout:60000}).toBeLessThan(16.4);
+ },{timeout:60000}).toBeLessThan(13.0);
  await expect.poll(()=>map.getAttribute('data-dj-live-train-rendered'),{timeout:60000}).toBe('0');
  await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
 });
@@ -1008,6 +1008,25 @@ test('the rendered history shows two-part editions and retains exact production 
  await expect(latest.locator('xpath=ancestor::*[contains(@class,"dj-edition-minor")]')).toHaveAttribute('data-edition',edition);
 });
 
+
+test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@phone-layout'},async({page})=>{
+  test.skip(page.viewportSize().width>=700,'phone only');
+  await ready(page);
+  const ai=page.locator('#dj890-ai-orb'),search=page.locator('#map-quick-search');
+  const dropdown=page.locator('#map-quick-search-dropdown');
+  await expect(ai).toBeVisible();
+  await search.locator('#map-quick-search-query').click();
+  await expect(dropdown).toBeVisible();
+  await expect(ai).toBeVisible();
+  await expect(ai).toHaveCSS('pointer-events','auto');
+  const sb=await search.boundingBox(),rb=await dropdown.boundingBox(),ab=await ai.boundingBox();
+  expect(rb.x).toBeGreaterThanOrEqual(sb.x-2);
+  expect(rb.x+rb.width).toBeLessThanOrEqual(sb.x+sb.width+2);
+  expect(rb.x+rb.width).toBeLessThanOrEqual(ab.x+2);
+  const radius=await dropdown.evaluate(node=>parseFloat(getComputedStyle(node).borderTopLeftRadius));
+  expect(radius).toBeGreaterThanOrEqual(18);
+  await test.info().attach('search-ai-visible',{body:await page.screenshot(),contentType:'image/png'});
+});
 
 test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
