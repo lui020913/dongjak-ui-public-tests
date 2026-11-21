@@ -17,10 +17,11 @@ test('iPhone cold-start HTML and runtime status controller use the same light ed
 });
 test('critical splash CSS paints the iPhone top edge before external CSS loads',()=>{
   const head=html.slice(0,html.indexOf('</style>'));
-  assert.match(head,/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) \.map-startup-overlay\{/);
+  assert.match(head,/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) body #app \.map-startup-overlay\{/);
   assert.match(head,/--start-bg:#edf3ef/);
   assert.match(head,/linear-gradient\(180deg,var\(--start-bg\) 0%,var\(--start-bg\) 16%,#f9fbfa 44%,var\(--start-bg\) 100%\)/);
-  assert.match(head,/html\.dj-ios-home-pwa\[data-theme="dark"\] \.map-startup-overlay\{/);
+  assert.match(head,/html\.dj-ios-home-pwa\[data-theme="dark"\] body #app \.map-startup-overlay\{/);
   assert.match(head,/--start-bg:#192d32/);
-  assert.ok(head.indexOf('html.dj-ios-home-pwa:not([data-theme="dark"]) .map-startup-overlay')<head.indexOf('.map-startup-overlay[hidden]'));
+  assert.ok(head.indexOf('html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay')<head.indexOf('.map-startup-overlay[hidden]'));
+  assert.match(head,/background:linear-gradient\(180deg,var\(--start-bg\) 0%,var\(--start-bg\) 16%,#f9fbfa 44%,var\(--start-bg\) 100%\)!important/);
 });
