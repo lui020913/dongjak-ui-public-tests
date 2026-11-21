@@ -262,10 +262,7 @@ html body #app#app#app .dj860-onboarding .dj860-actions {
 /* iOS phone: keep an opaque outgoing slide as a composited layer while the
    next slide is mounted. No white-frame phase and no double invisible panes. */
 @keyframes dj9266-retained-slide-out{
-  /* Incoming content is already fully painted underneath. Begin the blend
-     before the first compositor frame so low-power iPhones do not hold a fully
-     opaque outgoing slide while decoding the next card. */
-  0%{opacity:.72}
+  0%{opacity:1}
   100%{opacity:0}
 }
 @media(max-width:699px){
