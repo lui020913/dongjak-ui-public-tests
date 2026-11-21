@@ -322,9 +322,27 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       // pass through opacity:0 or a blank illustration decoding frame.
       render(target,direction,false);
       for(const ghost of ghosts){
-        const remove=()=>{ghost.remove();slideGhosts=slideGhosts.filter(node=>node!==ghost);};
-        ghost.addEventListener('animationend',remove,{once:true});
-        win.setTimeout(remove,380);
+        const remove=()=>{
+          if(!ghost.isConnected)return;
+          ghost.remove();slideGhosts=slideGhosts.filter(node=>node!==ghost);
+        };
+        // Web Animations delegates this opacity-only fade to the compositor.
+        // Its explicitly-timed effect is less susceptible than a stylesheet
+        // keyframe to contention from MapLibre, image decode and WebKit style
+        // recalculation on the first iPhone frame. Retain CSS as a fallback.
+        if(typeof ghost.animate==='function'){
+          ghost.style.setProperty('animation','none','important');
+          ghost.dataset.dj9266FadeEngine='waapi';
+          const effect=ghost.animate(
+            [{opacity:1,offset:0},{opacity:0,offset:1}],
+            {duration:280,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}
+          );
+          effect.finished.then(remove,()=>{});
+        }else{
+          ghost.dataset.dj9266FadeEngine='css';
+          ghost.addEventListener('animationend',remove,{once:true});
+        }
+        win.setTimeout(remove,420);
       }
     };
     const imageSlot=IMAGE_SLOT_BY_KEY[ONBOARDING_SLIDES[target].key];
