@@ -940,6 +940,7 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
   await expect(page.locator('#participation-panel')).toHaveClass(/dj9256-composing/);
   await expect(page.locator('#app > .topbar')).toBeHidden();
+  await expect(page.locator('#app > .topbar')).toHaveCSS('display','none');
  const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
  expect(await form.evaluate(n=>Boolean(n.querySelector('#community-share-publicly').compareDocumentPosition(n.querySelector('[type=submit]'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
  await tap(page,form.locator('#community-compose-close'));await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');

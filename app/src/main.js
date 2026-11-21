@@ -1859,6 +1859,25 @@ const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
 let communityComposerOrigin='community',communityComposerEpoch=0;
+// A full-screen mobile report must out-rank legacy !important header styles.
+// Store and restore the prior inline display declaration exactly.
+let communityTopbarDisplayRestore=null;
+function setCommunityTopbarBlocked(blocked){
+  const header=document.querySelector('#app > .topbar');
+  if(!header)return;
+  if(blocked){
+    if(!communityTopbarDisplayRestore)communityTopbarDisplayRestore={
+      value:header.style.getPropertyValue('display'),
+      priority:header.style.getPropertyPriority('display')
+    };
+    header.style.setProperty('display','none','important');
+  }else if(communityTopbarDisplayRestore){
+    const {value,priority}=communityTopbarDisplayRestore;
+    if(value)header.style.setProperty('display',value,priority);
+    else header.style.removeProperty('display');
+    communityTopbarDisplayRestore=null;
+  }
+}
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
@@ -1892,7 +1911,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');}
+    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2065,6 +2084,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     // Full-screen editor must own the phone viewport, including the area
     // beneath the AI toolbar. Existing CSS excludes map chrome on this state.
     panel?.classList.add('dj9256-composing');
+    setCommunityTopbarBlocked(true);
     if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
     return;
   }
@@ -2073,7 +2093,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(communityComposerOrigin==='map'){
     const parent=document.getElementById('participation-panel');
     const epoch=++communityComposerEpoch;
-    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
     // A map-origin report must return directly to the map on phone. A legacy
     // sheet-exit animation can remain in "closing" when the independent full
     // page takes over its geometry, leaving an invisible form and visible page.
@@ -2089,6 +2109,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
     panel?.classList.remove('dj9256-composing');
+    setCommunityTopbarBlocked(false);
     if(panel)delete panel.dataset.djPatchKeyboard;
     const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
   };
