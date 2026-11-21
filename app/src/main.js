@@ -7,7 +7,7 @@ import {phoneProfile,installPhoneRenderBudget,offscreenEvictionIds} from './adap
 import './adaptive-phone-map-budget.css';
 import './button-material.css';
 import './browser-install-menu.css';
-import {installMobileLayoutCoordinator} from './mobile-ui-coordinator.js';
+import {installMobileLayoutCoordinator,installBottomTabNavigation} from './mobile-ui/index.js';
 import {createMapStartupLoader} from './map-startup-loader.js';
 import {installLandmarks} from './landmark-layer.js';
 import {installNearbyPlaceLabels} from './nearby-place-labels.js';
@@ -69,7 +69,6 @@ import {preferKoreanBaseMapLabels} from './korean-labels.js';
 import {installAdaptiveMapActions} from './adaptive-map-actions.js';
 import {installScaleDocking} from './map-scale-docking.js';
 import {installSafetyHomeGuard} from './safety-home-guard.js';
-import {installBottomTabNavigation} from './bottom-tab-navigation.js';
 import {installViewportSafeMapPopups} from './map-popup-viewport.js';
 import {installMapResumeRecovery} from './v875-map-resume.js';
 import {createOutsideDistrictNotifier} from './dongjak-location-alert.js';
@@ -150,8 +149,7 @@ import './v889-mobile-visual-polish.css';
 // Isolated portrait/tablet UI additions; keep the v8.9.1 mobile/HUD logic intact.
 
 import './public-ui-production-overlay.css';
-import './v910-request-completion.css';
-import './v914-mobile-ux-fixes.css';
+import './mobile-ui/current.css';
 import './mobile-first-layout.css';
 import './mobile-primary-fullscreen.css';
 import './mobile-compact-transport-sheet.js';

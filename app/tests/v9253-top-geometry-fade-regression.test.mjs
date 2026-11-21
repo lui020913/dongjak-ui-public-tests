@@ -27,7 +27,7 @@ test('onboarding retains the outgoing surface until the incoming image is decode
  assert.doesNotMatch(src,/opacity 170ms ease-in/);
 });
 test('paired bus arrival cards remain same-row after phone layout migrations',()=>{
- const src=read('src/v910-request-completion.css');
+ const src=read('src/mobile-ui/current.css');
  assert(src.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;'));
  assert(!src.includes('grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr))'));
 });

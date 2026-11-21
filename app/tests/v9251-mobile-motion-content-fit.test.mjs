@@ -26,7 +26,7 @@ test('transit sheet content size removes empty space but allows full expansion',
   const long=compactTransportHeight({header:90,grip:16,body:800,viewport:900});
   assert(short<300);assert.equal(long,540);assert(long<=900*.60);
   assert(compactTransportHeight({header:0,grip:0,body:0,viewport:900})>=196);
-  const css=source('v910-request-completion.css');
+  const css=source('mobile-ui/current.css');
   assert.match(css,/--dj9251-transport-content-height/);
   assert.match(css,/#transport-sheet:not\(\[hidden\]\):not\(\.dj871-sheet-expanded\)/);
   const js=source('mobile-compact-transport-sheet.js');
@@ -37,7 +37,7 @@ test('transit sheet content size removes empty space but allows full expansion',
 test('facility compact height and AI fade maintain expansion with a transparent modal backdrop',()=>{
   assert(compactFacilityHeight({header:96,body:74,viewport:860})<250);
   assert.equal(compactFacilityHeight({header:100,body:900,viewport:900}),504);
-  const css=source('v910-request-completion.css');
+  const css=source('mobile-ui/current.css');
   assert.match(css,/--dj9251-facility-content-height/);
   const ai=source('v880-supabase-safety-ai.css');
   assert.match(ai,/dj9251-ai-content-enter/);

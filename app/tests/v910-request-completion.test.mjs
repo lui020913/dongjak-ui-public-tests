@@ -8,7 +8,7 @@ test('dock clearance uses the actual navigation edge in a resized viewport',()=>
 test('transport decorative edge cannot intercept controls and real drag owners remain',async()=>{
  const {readFileSync}=await import('node:fs');
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
- const css=read('src/v910-request-completion.css'),controller=read('src/dj-v8212-sheet-controller.js');
+ const css=read('src/mobile-ui/current.css'),controller=read('src/dj-v8212-sheet-controller.js');
  const assert=(await import('node:assert/strict')).default;
  assert.match(css,/#app #transport-sheet \.dj856-transport-edge-drag\s*\{pointer-events:none!important/);
  assert.match(controller,/handleNodes=\[header\]/);
@@ -18,7 +18,7 @@ test('transport decorative edge cannot intercept controls and real drag owners r
 
 test('compact transport grip stays centered despite legacy oversize minimum width',async()=>{
  const {readFileSync}=await import('node:fs');
- const css=readFileSync(new URL('../src/v910-request-completion.css',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/mobile-ui/current.css',import.meta.url),'utf8');
  assert.match(css,/#app #transport-sheet > \.handle \{[^}]*width:100%!important;min-width:0!important;max-width:100%!important;[^}]*align-self:center!important/);
  assert.match(css,/#app #transport-sheet > \.handle::after \{[^}]*left:50%!important;[^}]*translate:-50% 0!important/);
 });
@@ -34,7 +34,7 @@ test('explicit compact entrance is consumed only by an actual visible winner, ne
 
 test('wide coarse-pointer tablets inherit the compact shell geometry and webapp advice hides the legacy tip',async()=>{
  const {readFileSync}=await import('node:fs');
- const css=readFileSync(new URL('../src/v910-request-completion.css',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/mobile-ui/current.css',import.meta.url),'utf8');
  const compactMedia='@media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)';
  assert.ok(css.split(compactMedia).length>=5);
  assert.match(css,/data-dj-webapp-tip-visible="true"\] :is\(#dj840-map-tip,#dj-user-tip-close\) \{display:none!important/);
@@ -49,7 +49,7 @@ test('explicit place selection may open after a transport close without allowing
 
 test('phone toolbar has equal compact sizes, a real scroll cue and the unchanged full accessible district label',async()=>{
  const {readFileSync}=await import('node:fs');const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
- const css=read('src/v910-request-completion.css'),toolbar=read('src/v831-swipe-feature-toolbar.js');
+ const css=read('src/mobile-ui/current.css'),toolbar=read('src/v831-swipe-feature-toolbar.js');
  assert.match(css,/--dj910-tool-width:52px/);
  assert.match(css,/#dj-v794-toolbar > #dj-v794-more \{flex:0 0 52px!important;width:52px!important/);
  assert.match(toolbar,/scrollCue\.addEventListener\('click'/);
@@ -59,7 +59,7 @@ test('phone toolbar has equal compact sizes, a real scroll cue and the unchanged
 });
 test('mobile HUD follows the actual dock and stays hidden throughout the outgoing More animation',async()=>{
  const {readFileSync}=await import('node:fs');const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
- assert.match(read('src/v910-request-completion.css'),/bottom:max\(3px,calc\(env\(safe-area-inset-bottom,0px\) - 16px\)\)!important/);
+ assert.match(read('src/mobile-ui/current.css'),/bottom:max\(3px,calc\(env\(safe-area-inset-bottom,0px\) - 16px\)\)!important/);
  assert.match(read('src/map-scale-docking.js'),/const hudHeight=window\.innerWidth<700\?38:44/);
  assert.match(read('src/v910-request-completion.js'),/classList\.contains\('dj870-more-leaving'\)/);
  assert.match(read('src/map-scale-docking.js'),/app\.dataset\.dj910SheetOpen==='true'/);
