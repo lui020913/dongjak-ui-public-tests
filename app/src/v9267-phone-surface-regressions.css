@@ -153,6 +153,28 @@
     background:#294c49!important;color:#a6dfce!important;
   }
 
+  /* The original fullscreen shim reserved ~100 px on the outer panel even
+     though the floating dock already has its own safe-area clearance. That
+     left an unnecessary empty band. Let content scroll under the dock instead,
+     with an end-of-scroll gutter so the final card remains reachable. */
+  html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
+    padding:0!important;
+  }
+  html body #app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:16px!important;scroll-padding-bottom:16px!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+    flex:0 0 auto!important;
+    margin:0 0 calc(78px + env(safe-area-inset-bottom,0px))!important;
+    padding:8px 16px!important;
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    border-color:var(--dj-primary-page-edge,rgba(47,104,82,.16))!important;
+  }
+
   /* Keep the five-label dock above the stationary page-to-page mask. */
   html body #app#app#app#app#app > #bottom-nav:not([hidden]) {
     z-index:8500!important;
