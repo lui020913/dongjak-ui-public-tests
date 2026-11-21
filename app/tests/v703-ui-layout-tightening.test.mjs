@@ -16,7 +16,7 @@ test('Dongjak full logo is used and fitted smaller inside the circular featured 
 });
 
 test('route, news, community and activity panels align to the left navigation and shrink to content',()=>{
-  const css=read('src/v703-ui-layout-tightening.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/#app #route-panel\.page-panel,[\s\S]*#app #news-panel\.page-panel/);
   assert.match(css,/top:calc\(88px \+ env\(safe-area-inset-top\)\)!important/);
   assert.match(css,/bottom:auto!important/);
@@ -27,7 +27,7 @@ test('route, news, community and activity panels align to the left navigation an
 test('map options owns its close X and launcher keeps a stable label',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
-  const css=read('src/v703-ui-layout-tightening.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(html,/id="map-options-desktop-close"[^>]*>/);
   assert.match(html,/id="map-options-mobile-close"[^>]*>/);
   assert.match(main,/map-options-desktop-close'\)\?\.addEventListener\('click',closeMapOptions\)/);
@@ -37,7 +37,7 @@ test('map options owns its close X and launcher keeps a stable label',()=>{
 });
 
 test('map options and pedestrian safety launchers share desktop tab dimensions',()=>{
-  const css=read('src/v703-ui-layout-tightening.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/#app #map-tools-toggle,[\s\S]*#app #map-safety-toggle/);
   assert.match(css,/height:60px!important;min-height:60px!important;max-height:60px!important/);
 });
