@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "Mobile UI Issue #235 white-frame regression fix, approved PR #246: completely remove opaque #dj-tab-surface-curtain CSS/DOM, remove legacy extra foreground animations from v9267 and mobile-next; one native View Transitions API crossfade of actual previous and next page snapshots (170ms), with immediate no-mask fallback for unsupported browsers or reduced motion. Preserve previous production six-line attributed OSM railway fallback and all maps, data, login, 1.0 public UI version. Build latest verified public main. Enforce full protected isolated build, Preview, 12 phone QA, visual audit, exploratory QA and Production identity gate. No bypass.",
-  "attempt": 215,
+  "purpose": "Issue #235 phone UI white-frame fix: PR #247 replaces whole-root WebGL ViewTransition screenshots with immediate tab DOM changes and ONLY 140ms incoming header/body content reveal on an opaque theme-owned full-screen panel, preserving swipe, rapid tabs, X/map return and prefers-reduced-motion. No white curtain/root opacity fade and no MapLibre flicker. Keep 1.0 public display, internal release identity and six-line ODbL rail fallback unchanged. Build exact latest main then run isolated Preview, 12 phone QA, six visual captures, exploratory analysis, protected Production identity verification; never skip failure gates.",
+  "attempt": 216,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User reported an actual white flash between bottom tabs. Investigation found former v9.2.72 CSS opaque curtain bg var(--dj9272-page) plus overlapping v9267 CSS white surface and foreground fade. PR #246 deleted both legacy curtain layers and adopted native snapshot crossfade; Public app CI #44918431335 succeeded. Production #44915639381 precedes this change. Protected rebuild/QA needed before declaring fix deployed.",
+  "last_retry_reason": "Actual user report: white flash persists under previous PR #246 native root snapshots. PR #247 deletes document.startViewTransition root fading, rewrites old tests and adds frame-by-frame phone browser audit. Public app source CI #44921909082 passed. Previous protected attempt #215 #44918753786 failed 1/6 design capture on community entry; full QA must rerun rather than promote failing candidate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
