@@ -1,10 +1,12 @@
-// PRI dataset contract. Null denotes missing; zero is a valid observation.
-export const PALETTE=Object.freeze([[0,'#279b80'],[25,'#9bc777'],[50,'#efd05a'],[75,'#ed9045'],[100,'#d74648']]);
+// PRI normalized safety scores: 100 = safer, 0 = more vulnerable. Original source risk scores remain unchanged in source files.
+// Null denotes genuinely unobserved data; a documented modeled baseline is an explicit score rather than null.
+export const PALETTE=Object.freeze([[0,'#d74648'],[25,'#ed9045'],[50,'#efd05a'],[75,'#9bc777'],[100,'#279b80']]);
 export const TEAM_FACTORS=Object.freeze([["accidents","교통사고 이력 및 위험 지수"],["crossing","신호등·횡단보도 단절 구간"],["sharedRoad","보차혼용 및 보행 공간 위험"],["speed","통행제한속도 및 감속 구간"],["protectionGap","제도적 사각지대"],["lighting","가로등·CCTV 야간 안전 취약점"]].map(([id,label])=>Object.freeze({id,label})));
 const fail=m=>{throw Error(m)};
 const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const number=x=>typeof x==='number'&&Number.isFinite(x);
 const score=x=>x===null||number(x)&&x>=0&&x<=100;
+export const riskToSafety=x=>number(x)&&x>=0&&x<=100?100-x:null;
 const key=x=>typeof x==='string'&&/^[a-zA-Z0-9_.:-]{1,120}$/.test(x)&&!['__proto__','constructor','prototype'].includes(x);
 const coord=p=>Array.isArray(p)&&p.length===2&&number(p[0])&&number(p[1])&&p[0]>=124&&p[0]<=132&&p[1]>=33&&p[1]<=39;
 const meters=(a,b)=>Math.hypot((a[0]-b[0])*111195*Math.cos((a[1]+b[1])*Math.PI/360),(a[1]-b[1])*111195);
@@ -41,20 +43,31 @@ export function adaptLighting(raw){
  // Include geometry in the version, so a differently segmented survey cannot silently join.
  let h=2166136261;for(const c of JSON.stringify(raw.segments.map(s=>[s.id,s.pts])))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
  const date=text(raw.meta['기준일'],30).replace(/[^0-9-]/g,'')||'unknown';
- return validateBundle({schemaVersion:1,networkVersion:'sangdo1-lighting-'+date+'-'+h.toString(16),area:'상도1동 (조명 조사 범위)',factors:TEAM_FACTORS.map(f=>f.id==='lighting'?{...f,source:raw.meta['자료'],date,estimated:true,method:'조명 자료만 반영(CCTV 미제출). 약 25m 구간 평균 암부 거리 / 50m × 100 (최대 100). 실제 측정 조도 아님. '+text(raw.meta['가정'])}:{...f,source:'미제출',method:'미확정',estimated:true}),config:{status:'draft'},segments:raw.segments.map(s=>{
+ return validateBundle({schemaVersion:1,networkVersion:'sangdo1-lighting-'+date+'-'+h.toString(16),area:'상도1동 (조명 조사 범위)',factors:TEAM_FACTORS.map(f=>f.id==='lighting'?{...f,source:raw.meta['자료'],date,estimated:true,method:'조명 자료만 반영(CCTV 미제출). 원본 위험점수=평균 암부 거리 / 50m × 100 (최대 100), PRI 안전점수=100-원본 위험점수. 실제 측정 조도 아님. '+text(raw.meta['가정'])}:{...f,source:'미제출',method:'미확정',estimated:true}),config:{status:'draft'},segments:raw.segments.map(s=>{
   if(!Array.isArray(s.pts)||!s.pts.length||!s.pts.every(p=>Array.isArray(p)&&p.length===2))fail('조명 구간 좌표 오류');
   if(!number(s.dark)||s.dark<0||!number(s.score)||Math.abs(s.score-Math.min(100,s.dark*2))>1)fail('조명 원본 점수 불일치: '+s.id);
   const coords=s.pts.map(([lat,lon])=>[lon,lat]),linear=s.len>0&&coords.length>1&&coords.some(p=>meters(p,coords[0])>.01);
   const match=/^(\d+)_(\d+)$/.exec(s.id);
-  return {id:s.id,wayId:match?.[1],sequence:match?Number(match[2]):null,name:s.name,roadType:s.hw,lengthM:s.len,geometry:linear?{type:'LineString',coordinates:coords}:{type:'Point',coordinates:coords[0]},scores:{lighting:s.score},evidence:{lighting:{darkM:s.dark,sourceGrade:s.grade,note:linear?'원본 등급 보존':'선형 좌표 부족 또는 길이 0m: 점으로만 표시'}}};
+  return {id:s.id,wayId:match?.[1],sequence:match?Number(match[2]):null,name:s.name,roadType:s.hw,lengthM:s.len,geometry:linear?{type:'LineString',coordinates:coords}:{type:'Point',coordinates:coords[0]},scores:{lighting:riskToSafety(s.score)},evidence:{lighting:{darkM:s.dark,sourceGrade:s.grade,note:'원본 조명 위험점수 '+s.score+'점 → PRI 안전점수 '+riskToSafety(s.score)+'점. '+(linear?'원본 등급 보존':'선형 좌표 부족 또는 길이 0m: 점으로만 표시')}}};
  })});
 }
 export function mergeFactor(bundle,patch){
  if(!bundle||patch?.schemaVersion!==1||patch.type!=='pri-factor-scores'||patch.networkVersion!==bundle.networkVersion||!Array.isArray(patch.scores))fail('동일한 도로망 버전의 지표 파일만 추가할 수 있습니다.');
  const factor=cleanFactor(patch.factor),known=new Set(bundle.segments.map(s=>s.id)),rows=new Map();
- for(const row of patch.scores){if(!obj(row)||!known.has(row.id)||rows.has(row.id)||!score(row.score))fail('미등록·중복 구간 또는 점수 오류');rows.set(row.id,row);}
- // Replace this factor observation set atomically; absent rows remain unknown.
- const segments=bundle.segments.map(s=>{const row=rows.get(s.id),scores={...s.scores,[factor.id]:row?row.score:null},evidence={...s.evidence};delete evidence[factor.id];if(obj(row?.evidence))evidence[factor.id]=row.evidence;return {...s,scores,evidence};});
+ const sourceDirection=patch.factor?.scoreDirection||'safety';
+ if(!['safety','risk'].includes(sourceDirection))fail('지표 점수 방향이 올바르지 않습니다.');
+ // Documented spatial non-selection defaults are explicit modeled scores, not evidence of zero incidents.
+ const hasBaseline=Object.prototype.hasOwnProperty.call(patch,'unmatchedScore');
+ if(hasBaseline&&(!number(patch.unmatchedScore)||patch.unmatchedScore<0||patch.unmatchedScore>100||!text(patch.unmatchedReason,200).trim()))fail('미선정 기본점수에는 0~100점과 산정 근거가 필요합니다.');
+ for(const row of patch.scores){if(!obj(row)||!known.has(row.id)||rows.has(row.id)||!score(row.score)||row.score===null)fail('미등록·중복 구간 또는 점수 오류');rows.set(row.id,row);}
+ // Raw observations remain in the original patch; the shared PRI bundle uses safety-direction scores.
+ const segments=bundle.segments.map(s=>{
+  const row=rows.get(s.id),observed=row?sourceDirection==='risk'?riskToSafety(row.score):row.score:hasBaseline?patch.unmatchedScore:null;
+  const scores={...s.scores,[factor.id]:observed},evidence={...s.evidence};delete evidence[factor.id];
+  if(row){const note=text(row.evidence?.note);evidence[factor.id]={...row.evidence,note:(sourceDirection==='risk'?'원본 위험점수 '+row.score+'점 → PRI 안전점수 '+observed+'점. ':'')+note};}
+  else if(hasBaseline)evidence[factor.id]={note:'임시 기본점수 '+observed+'점 · '+text(patch.unmatchedReason)};
+  return {...s,scores,evidence};
+ });
  return validateBundle({...bundle,factors:[...bundle.factors.filter(f=>f.id!==factor.id),factor],segments,config:{status:'draft'}});
 }
 export function parseImport(raw,current=null){
@@ -63,7 +76,7 @@ export function parseImport(raw,current=null){
  return validateBundle(raw);
 }
 export function segmentScore(bundle,s,mode){
- // Two of six survey factors: display an explicit preliminary mean only where both are observed.
+ // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
  if(mode==='pri12'){const lighting=s.scores.lighting,accidents=s.scores.accidents;return number(lighting)&&number(accidents)?(lighting+accidents)/2:null;}
  if(mode!=='pri')return number(s.scores[mode])?s.scores[mode]:null;
  if(bundle.config.status!=='approved')return null;
