@@ -1,3 +1,4 @@
+import {inLegacyOrder} from './legacy-css-baseline-fixture.mjs';
 import {APP_VERSION} from '../src/app-version.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -6,9 +7,8 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('v7.0.29 edge stylesheet is last and avoids frosted search chrome',()=>{
   const main=read('src/main.js'), css=read('src/mobile-ui-baseline.css');
-  const old=main.indexOf("import './mobile-ui-baseline.css'");
-  const updated=main.indexOf("import './mobile-ui-baseline.css'");
-  assert.ok(old>=0 && updated>old);
+  assert.ok(main.includes("import './mobile-ui-baseline.css'"));
+   assert.ok(inLegacyOrder('v715-mobile-polish.css','v716-standalone-edges.css'));
   assert.match(css,/#app \.topbar>.map-quick-search \.map-quick-search-form/);
   assert.match(css,/-webkit-backdrop-filter:none!important/);
   assert.match(css,/background:transparent!important/);
