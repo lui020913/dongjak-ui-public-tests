@@ -59,7 +59,7 @@ test('ordinary sheets do not dim navigation; permission consent remains isolated
 
 test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status-edge color fade',()=>{
  const next=productionStyle('mobile-next.css');
- const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1];
+ const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1]?.split('/* v9.2.72 — one mobile visual system')[0];
  assert.ok(block,'v9.2.71 scoped header treatment missing from the shipped build source');
  assert.ok(block.includes('@media(max-width:699px)'));
  assert.ok(block.includes('.topbar .map-quick-search-form'));
@@ -74,4 +74,26 @@ test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status
  for(const forbidden of ['.dj860-onboarding','.page-panel','.bottom-nav','.djNext-modal-body','background:rgba(12,30,25,.48)']){
   assert.equal(block.includes(forbidden),false,'unintended soft/scrim surface '+forbidden);
  }
+});
+
+test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers are installed',()=>{
+ const css=productionStyle('mobile-next.css');
+ const js=productionStyle('mobile-next.js');
+ const nav=read('src/bottom-tab-navigation.js');
+ const apply=readFileSync(new URL('../../scripts/apply-mobile-next.mjs',import.meta.url),'utf8');
+ const main=read('src/main.js');
+ const block=css.split('/* v9.2.72 — one mobile visual system')[1];
+ assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
+ for(const expected of ['.dj860-onboarding:not([hidden])','.dj860-card','height:100dvh!important','--dj9272-page','#dj-tab-surface-curtain','.dj9272-tab-leave','.dj9272-tab-enter','#route-map-card #dj804-route-compare{display:none','#route-map-card .dj9272-route-points','#djNext-route-compare','#mine-panel .dj854-language-section','#djNext-layer-panel .djNext-layer-scroll','dj-metro-line-selector + .dj-metro-line-selector','dj9272AiIn','dj9272AiOut']){
+  assert.ok(block.includes(expected)||css.includes(expected),expected);
+ }
+ assert.ok(js.includes("export function installV9272PhoneExperience"));
+ assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
+ assert.ok(js.includes("transport.dataset.dj9272Transfer"));
+ assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
+ assert.ok(apply.includes('installV9272PhoneExperience({app});'));
+ assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
+ assert.ok(nav.includes("previous.classList.add('dj9272-tab-leave')")||nav.includes("previous)previous.classList.add('dj9272-tab-leave')"));
+ assert.ok(nav.includes("protectPageTransition(nextTab)"));
+ assert.ok(!block.includes('filter:brightness(.66)'));
 });

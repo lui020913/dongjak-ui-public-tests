@@ -2768,10 +2768,20 @@ function readRouteMetrics() {
   return {duration:`약 ${Math.max(1,Math.ceil(seconds/60))}분`,distance:kilometers<1?`${Math.round(kilometers*1000)}m`:`${kilometers.toFixed(2)}km`};
 }
 function fitWalkingRoute(coords) {
-  if(!coords.length)return;
+  if(!Array.isArray(coords)||coords.length<2)return;
   const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
-  const mobile=window.matchMedia('(max-width:699px)').matches;const card=document.getElementById('route-map-card');const bottom=mobile?Math.min(Math.round(window.innerHeight*.52),Math.max(185,(card?.getBoundingClientRect().height||0)+90)):185;map.fitBounds(bounds,{padding:{top:mobile?155:190,bottom,left:45,right:45},maxZoom:16.3,duration:750,pitch:0,bearing:0});
+  const mobile=window.matchMedia('(max-width:699px)').matches;
+  const card=document.getElementById('route-map-card');
+  const occupied=mobile&&!card?.hidden?Math.ceil(card?.getBoundingClientRect().height||0):0;
+  // Route selection can compact its result card. Re-measure the actual
+  // unobstructed viewport; do not use a stale fixed 52% bottom inset.
+  const bottom=mobile?Math.min(Math.floor(window.innerHeight*.61),Math.max(124,occupied+26)):185;
+  const top=mobile?Math.max(112,Math.min(166,Math.floor(window.innerHeight-bottom-100))):190;
+  map.fitBounds(bounds,{padding:{top,bottom,left:35,right:35},maxZoom:16.0,duration:780,pitch:0,bearing:0});
 }
+window.addEventListener('dj-next:fit-route',()=>{
+  if(app.dataset.tab==='map'&&routeResult?.coords?.length>=2)fitWalkingRoute(routeResult.coords);
+});
 async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
   const useHills=profile==='gentle'?0:0.5;
   const payload={locations:[{lat:from.lat,lon:from.lng},{lat:to.lat,lon:to.lng}],

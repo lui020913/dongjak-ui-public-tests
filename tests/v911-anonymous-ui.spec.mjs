@@ -301,14 +301,15 @@ test('phone onboarding copy is top aligned and artwork is not cropped',{tag:'@ph
    const style=getComputedStyle(n);
    return {background:style.backgroundColor,blur:style.backdropFilter,webkitBlur:style.webkitBackdropFilter};
  });
- expect(backdrop.background).toMatch(/^(?:transparent|rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\))$/);
+ expect(backdrop.background).toBe('rgb(237, 243, 239)'); // Full-screen tour has an opaque theme surface.
  expect(backdrop.blur||'none').toBe('none');
  expect(backdrop.webkitBlur||'none').toBe('none');
  await visuallyPresented(image);
  await expect.poll(async()=>{
    const p=await content.boundingBox(),c=await copy.boundingBox();
    return p&&c?c.y-p.y:1000;
- }).toBeLessThanOrEqual(24);
+ }).toBeLessThanOrEqual(30);
+ await expect.poll(async()=>{const p=await overlay.boundingBox(),v=page.viewportSize();return p?Math.abs(p.x)+Math.abs(p.y)+Math.abs(p.width-v.width)+Math.abs(p.height-v.height):999;}).toBeLessThanOrEqual(2);
  await test.info().attach('phone-onboarding-top-aligned',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,overlay.locator('[data-dj860-action="skip"]'));await expect(overlay).toBeHidden();
 });
