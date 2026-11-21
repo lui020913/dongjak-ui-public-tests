@@ -1862,6 +1862,32 @@ let communityComposerOrigin='community',communityComposerEpoch=0;
 // A full-screen mobile report must out-rank legacy !important header styles.
 // Store and restore the prior inline display declaration exactly.
 let communityTopbarDisplayRestore=null;
+// Map-origin editor overlays the active MapLibre canvas, not a selected tab.
+// Keep this short-lived hit layer above WebGL and restore all inline styles.
+let mapReportHitRestore=null;
+function setMapReportHitLayer(active){
+  if(active){
+    if(mapReportHitRestore)return;
+    const targets=[
+      [document.getElementById('participation-panel'),['z-index','pointer-events']],
+      [document.getElementById('community-form'),['pointer-events']],
+      [document.getElementById('community-compose-close'),['pointer-events']]
+    ];
+    mapReportHitRestore=targets.filter(([node])=>node).map(([node,props])=>({
+      node,styles:props.map(key=>({
+        key,value:node.style.getPropertyValue(key),priority:node.style.getPropertyPriority(key)
+      }))
+    }));
+    for(const {node,styles} of mapReportHitRestore)for(const {key} of styles)
+      node.style.setProperty(key,key==='z-index'?'12000':'auto','important');
+  }else if(mapReportHitRestore){
+    for(const {node,styles} of mapReportHitRestore)for(const {key,value,priority} of styles){
+      if(value)node.style.setProperty(key,value,priority);
+      else node.style.removeProperty(key);
+    }
+    mapReportHitRestore=null;
+  }
+}
 function setCommunityTopbarBlocked(blocked){
   const header=document.querySelector('#app > .topbar');
   if(!header)return;
@@ -1911,7 +1937,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);}
+    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2084,6 +2110,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     // Full-screen editor must own the phone viewport, including the area
     // beneath the AI toolbar. Existing CSS excludes map chrome on this state.
     panel?.classList.add('dj9256-composing');
+    if(communityComposerOrigin==='map')setMapReportHitLayer(true);
     setCommunityTopbarBlocked(true);
     if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
     return;
@@ -2093,7 +2120,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(communityComposerOrigin==='map'){
     const parent=document.getElementById('participation-panel');
     const epoch=++communityComposerEpoch;
-    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
     // A map-origin report must return directly to the map on phone. A legacy
     // sheet-exit animation can remain in "closing" when the independent full
     // page takes over its geometry, leaving an invisible form and visible page.
@@ -2109,6 +2136,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
     panel?.classList.remove('dj9256-composing');
+    setMapReportHitLayer(false);
     setCommunityTopbarBlocked(false);
     if(panel)delete panel.dataset.djPatchKeyboard;
     const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
