@@ -52,7 +52,7 @@ export function installMapPreferences(doc=document,win=window){
     aboutFocus=doc.activeElement;
     const dark=isDark();
     about.querySelector('.dj-about-icon').src=dark?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';
-    about.querySelector('#dj-about-version-number').textContent=(doc.querySelector('#version-history-trigger')?.textContent||PUBLIC_APP_VERSION).trim();
+    about.querySelector('#dj-about-version-number').textContent=PUBLIC_APP_VERSION;
     about.hidden=false;about.querySelector('.dj-about-close')?.focus();
   };
   about.querySelector('.dj-about-close').addEventListener('click',closeAbout);
