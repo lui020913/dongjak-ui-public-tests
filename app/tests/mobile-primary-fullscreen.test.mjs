@@ -29,10 +29,10 @@ test('primary tabs have independent full viewport phone surfaces',()=>{
 test('primary pages bypass draggable sheets but use a brief native safe fade when returning to map',()=>{
  assert.match(controller,/\['route-panel','participation-panel','news-panel','mine-panel'\]\.includes\(id\)/);
  assert.match(controller,/win\.matchMedia\('\(max-width:699px\)'\)/);
- assert.match(navigation,/button=nav\\.querySelector\\('.nav-tab\\[data-tab="map"\\]'\\)/);
- assert.match(navigation,/previous\\.classList\\.add\\('dj9272-tab-leave'\\)/);
- assert.match(navigation,/protectPageTransition\\(next\\.dataset\\.tab\\)/);
- assert.match(navigation,/replay\\(next\\)/);
+ assert.ok(navigation.includes("button=nav.querySelector('.nav-tab[data-tab=\"map\"]')"));
+ assert.ok(navigation.includes("if(previous)previous.classList.add('dj9272-tab-leave')"));
+ assert.ok(navigation.includes("protectPageTransition(next.dataset.tab)"));
+ assert.ok(navigation.includes("replay(next)"));
  assert.match(main,/function closePrimaryPageToMap\(panel\)/);
  assert.match(main,/window\.DongjakWindowMotion\?\.cancel\?\.\(active\);finish\(\)/);
  const html=read('index.html');
