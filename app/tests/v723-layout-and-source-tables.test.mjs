@@ -8,12 +8,12 @@ test('v7.0.29 PC dock persists on all tabs and includes road-width control',()=>
   const src=read('src/v713-desktop-rail.js');
   assert.match(src,/const enabled=desktopActive\(\);/);
   for(const id of ['map-tools-toggle','night-visibility-quick-off','map-safety-toggle','toggle-road-width'])assert.ok(src.includes(id));
-  const style=read('src/v723-navigation-and-panels.css');
+  const style=read('src/mobile-ui-baseline.css');
   assert.match(style,/\[data-tab\]:not\(\[data-tab="map"\]\) #dj-desktop-safety-rail/);
 });
 
 test('v7.0.29 right map actions remain fixed while transport sheet is left docked on PC',()=>{
-  const src=read('src/v723-navigation-and-panels.css');
+  const src=read('src/mobile-ui-baseline.css');
   assert.match(src,/transport-sheet:not\(\[hidden\]\).*\{/);
   assert.match(src,/right:14px!important/);
   assert.match(src,/left:calc\(var\(--dj-nav-width/);
@@ -34,7 +34,7 @@ test('v7.0.29 facility popup provides source-friendly manual verification',()=>{
 });
 
 test('v7.0.29 mobile safety/transport/option sheet cannot hide nav or trap close button',()=>{
-  const src=read('src/v723-navigation-and-panels.css');
+  const src=read('src/mobile-ui-baseline.css');
   assert.match(src,/#app\[data-tab="map"\] #bottom-nav\{display:flex!important/);
   assert.match(src,/#map-options-mobile-close\{position:static!important/);
   assert.match(src,/#version-history-mobile-trigger\{display:block!important/);
@@ -45,7 +45,7 @@ test('v7.0.29 metadata is consistent and CSS appended last',()=>{
   const html=read('index.html'),main=read('src/main.js'),packageJson=JSON.parse(read('package.json'));
   assert.equal(packageJson.version,APP_VERSION);
    assert.match(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
-  assert.match(main,/v723-navigation-and-panels\.css/);
+  assert.match(main,/mobile-ui-baseline\.css/);
   assert.match(read('src/version-history.js'),/version:'v7\.0\.29'/);
 });
 
