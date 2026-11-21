@@ -55,3 +55,19 @@ test('facility entrance, official notice and actual commute routes are never fab
   assert.ok(register.records.every(r=>r.zone_notice_road_start===null&&r.zone_notice_road_end===null&&!r.zone_notice_current_verified));
   assert.ok(register.records.every(r=>r.school_commute_route_geometry===null&&!r.school_commute_route_verified));
 });
+
+test('the two focus road sheets have separately labelled, non-final school and all-facility scores',async()=>{
+  const roads=await load('candidates.geojson');
+  const focus=roads.features.filter(f=>['R0248','R0288'].includes(f.properties?.road_id));
+  assert.equal(focus.length,2);
+  for(const f of focus){
+    const p=f.properties;
+    assert.ok(Number.isFinite(p.policy_coverage_all9_preview_score));
+    assert.ok(Number.isFinite(p.policy_coverage_school2_preview_score));
+    assert.ok(p.policy_coverage_verification.includes('미검증'));
+  }
+  const road54=focus.find(f=>f.properties.road_id==='R0248').properties;
+  const road62=focus.find(f=>f.properties.road_id==='R0288').properties;
+  assert.equal(road54.policy_coverage_school2_preview_score,32.1);
+  assert.equal(road62.policy_coverage_school2_preview_score,66.3);
+});
