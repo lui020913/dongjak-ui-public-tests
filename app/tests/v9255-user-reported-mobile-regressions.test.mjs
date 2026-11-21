@@ -10,7 +10,17 @@ test('community classification remains one fixed-height horizontal scroll lane',
 });
 test('weather panel shares expansion stages and safe map header bounds',()=>{
  const drag=read('src/dj-v8212-sheet-controller.js');
- assert.equal((drag.match(/'map-gesture-guide','ped-tools-panel','dj854-weather-sheet'\]\.includes\(id\)/g)||[]).length,2);
+ // Build-time follow-up extends both baseline stage lists; the raw source
+ // retains its exact anchors so the release reconstruction can apply safely.
+ const baseline="'map-gesture-guide','ped-tools-panel'].includes(id)";
+ const expanded="'map-gesture-guide','map-safety-controls','map-advanced-controls','detail-sheet','entry-sheet','pza-road-sheet','night-visibility-float','road-width-legend','ped-tools-panel','dj854-weather-sheet'].includes(id)";
+ const generated=(drag.split(expanded).length-1);
+ if(generated===0){
+   assert.equal(drag.split(baseline).length-1,2);
+   const patch=read('../scripts/apply-mobile-17-followup.mjs');
+   assert(patch.includes('const oldExpandable='));
+   assert(patch.includes(expanded));
+ }else assert.equal(generated,2);
  assert.match(css,/#dj854-weather-sheet\.dj871-sheet-expanded:not\(\[hidden\]\)\{position:fixed!important;top:var\(--dj910-map-top/);
 });
 test('live metro is initially enabled but never fetched while hidden by the zoom cutoff',()=>{
