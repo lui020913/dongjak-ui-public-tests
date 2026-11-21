@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Unified charcoal no-reload theme and Sangdo1 300m institutional policy-gap research-map overlay: merged PR #254 ffedc878cfdd850f18fca65e83d4f19d02fc9457, full public app CI 44929773427 passed. Preserve user theme, camera, layers, route state, onboarding and unrelated map features. Render research score 0–100 (lower=larger policy gap), 1676 roads, 590 gray NULL; team five/six average; independent PRI/routing. Protected Preview + all mobile viewport QA + design evidence + guarded Production; never bypass failed gates.",
-  "attempt": 224,
+  "purpose": "Release verified Sangdo1 300m policy gap map plus charcoal theme after 6 targeted mobile QA recoveries. Main PR #254, #256, #257; CI #44929773427, #44931120197, #44931487425 all passed. UI map-origin community composer no longer obstructed by AI topbar; one-step dock swipes have mouse fallback, iOS PWA theme color contract #17191d. Keep full protected Preview, 12 phone QA shards, six design captures/reviews, guarded Production; no waived gates.",
+  "attempt": 225,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #223 run 44930071711 failed isolated Node regressions before Preview: six research/charcoal contract test files expected repository-root GIS scripts or obsolete dark CSS, which are absent or changed in app-only release archives. Main 4b60eeb470163ac414960dd9993d100b9433dfeb provides a public, disposable read-only GIS script fixture mirror outside deployment artifact and aligns tests to the injected neutral charcoal styles. All tests remain mandatory; no skip.",
+  "last_retry_reason": "Attempt 224 (#44930314280) built/deployed isolated Preview but failed 6 phone QA jobs: 375/390/430px stale dark green expectations, iOS PWA status old color, dock swipe on central HOME icon, community composer close in normal and map-origin. PR #256 (CI 44931120197) fixes swipe/close/primary charcoal test, PR #257 (CI 44931487425) fixes map-origin hit region and iOS PWA test. Proceed protected release only if all QA pass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
