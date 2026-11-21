@@ -15,8 +15,8 @@
   #app .map-quick-search-form input {flex:1 1 0%!important;min-width:0!important;width:0!important;padding:0 4px!important;text-align:start!important;}
   #app :is(.dj-sheet-chrome-close,#transport-close,.dj-place-header-close,#dj-mobile-utilities-close,#dj-settings-close) {display:grid!important;place-items:center!important;position:relative!important;inset:auto!important;width:40px!important;min-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;line-height:1!important;flex:0 0 40px!important;}
   #app :is(.dj-sheet-chrome-close,#transport-close,.dj-place-header-close,#dj-mobile-utilities-close) svg {position:static!important;inset:auto!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;margin:0!important;transform:none!important;translate:none!important;display:block!important;}
-  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) {display:grid!important;place-items:center!important;color:var(--dj800-text,#263a32)!important;padding:0!important;}
-  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) svg {position:static!important;inset:auto!important;width:21px!important;height:21px!important;margin:0!important;transform:none!important;translate:none!important;stroke:currentColor!important;}
+  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) {display:grid!important;place-items:center!important;color:var(--dj800-text,#263a32)!important;padding:0!important;min-width:44px!important;min-height:44px!important;}
+  #app :is(#transport-save-place,#transport-share-place,.dj854-place-favorite,.dj856-place-share) svg {position:static!important;inset:auto!important;width:25px!important;height:25px!important;margin:0!important;transform:none!important;translate:none!important;stroke:currentColor!important;}
   #app :is(#transport-save-place,.dj854-place-favorite)::before,#app :is(#transport-save-place,.dj854-place-favorite)::after {content:none!important;display:none!important;}
   #app :is(#transport-save-place,.dj854-place-favorite)[aria-pressed="true"] svg {fill:currentColor!important;}
   #app :is(.news-tab,.dj-news-tab,[data-news-source],#dongjak-news-refresh,.route-transit-confirm-actions button,.route-map-card-actions button,.route-mini-btn,.dj-place-route-button) {border-radius:999px!important;min-height:40px!important;}
@@ -617,8 +617,7 @@
     border:solid currentColor!important;border-width:0 1px 2px!important;
   }
   #app #transport-title .dj-metro-line-selector {border-radius:50%!important;padding:0!important;}
-  #app #transport-title .dj-metro-line-selector[aria-pressed="true"] {outline:2px solid currentColor!important;outline-offset:2px!important;background:transparent!important;box-shadow:none!important;}
-  #app .metro-planned-notice {
+#app .metro-planned-notice {
     grid-column:1/-1;margin:0;padding:8px 10px;border-radius:8px;
     color:var(--dj800-text,#263a32);background:var(--dj800-elevated,#e8f3ed);
     font-weight:700;font-size:12px;line-height:1.4;
@@ -691,10 +690,7 @@
     background:var(--dj800-elevated,#e4f3ec)!important;border:1px solid var(--dj800-border,#d7e6de)!important;
     color:var(--dj800-text,#203e34)!important;box-shadow:none!important;
   }
-  #app#app #transport-title .dj-metro-line-selector[aria-pressed="true"] {
-    outline:none!important;box-shadow:0 0 0 2px var(--dj800-text,#203e34)!important;
-  }
-  #app#app #transport-title .dj-metro-line-selector:focus:not(:focus-visible) {outline:none!important;}
+#app#app #transport-title .dj-metro-line-selector:focus:not(:focus-visible) {outline:none!important;}
   #app#app #transport-title .dj-metro-line-selector:focus-visible {
     outline:2px solid var(--dj800-accent,#12856c)!important;outline-offset:3px!important;
   }
@@ -846,8 +842,7 @@
     box-shadow: none !important;
     background: transparent !important;
   }
-  html body #app#app#app #transport-sheet[data-kind="subway"] #transport-title .dj-metro-line-selector[aria-pressed="true"] {outline:2px solid var(--dj800-accent,#16856d)!important;outline-offset:1px!important;box-shadow:none!important;}
-  html body #app#app#app #transport-sheet[data-kind="subway"] #transport-title .dj-metro-line-selector:focus:not(:focus-visible) {
+html body #app#app#app #transport-sheet[data-kind="subway"] #transport-title .dj-metro-line-selector:focus:not(:focus-visible) {
     outline: none !important;
     box-shadow: none !important;
   }
