@@ -127,3 +127,20 @@ test('delayed native click from swipe does not return to the original tab; a new
  assert.equal(app.dataset.tab,'news','a new deliberate press must still change tabs');
  dispose();
 });
+
+
+test('mouse-backed HOME icon swipe recovers even when pointerdown was cancelled by an iOS-style overlay',()=>{
+ const handlers=new Map();
+ const app={dataset:{tab:'route'}};
+ const buttons=['route','participate','map','news','mine'].map(name=>({dataset:{tab:name},isConnected:true,disabled:false,click(){app.dataset.tab=name;}}));
+ const nav={dataset:{},querySelectorAll:()=>buttons,querySelector:()=>null,addEventListener(){},removeEventListener(){}};
+ const doc={getElementById:key=>key==='bottom-nav'?nav:null,querySelector:()=>null};
+ const win={matchMedia:()=>({matches:true}),addEventListener:(type,fn)=>handlers.set(type,fn),
+  removeEventListener:type=>handlers.delete(type),setTimeout:()=>1,clearTimeout(){}};
+ const dispose=installBottomTabNavigation({doc,win,app});
+ const icon={closest:selector=>selector==='#bottom-nav'?nav:null};
+ handlers.get('mousedown')({target:icon,button:0,clientX:200,clientY:805});
+ handlers.get('mouseup')({target:icon,button:0,clientX:115,clientY:805,cancelable:true,preventDefault(){}});
+ assert.equal(app.dataset.tab,'participate');
+ dispose();
+});

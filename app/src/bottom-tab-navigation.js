@@ -20,7 +20,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,replaying=false,gesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
@@ -61,7 +61,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   start(button);
  }
  function down(event){
-  if(!phone()||event.isPrimary===false||event.button!==0)return;
+  if(!phone()||(event.pointerType==='mouse'&&event.button!==0))return;
   // Capture at window level: buttons and their SVG descendants may stop
   // bubbling pointerdown before the dock's own listener receives it.
   // Restrict recognition to gestures starting inside the visible dock.
@@ -70,36 +70,60 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!inDock)return;
   suppressClick=false;gesture={id:event.pointerId,x:event.clientX,y:event.clientY};
  }
- function up(event){
-  const initial=gesture;if(!initial||event.pointerId!==initial.id)return;gesture=null;
-  const dx=event.clientX-initial.x,dy=event.clientY-initial.y;
-  if(Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return;
-  const buttons=tabs(),current=app.dataset.tab;
-  const index=buttons.findIndex(b=>b.dataset.tab===current);
+ function isInsideDock(event){
+  return event.target?.closest?.('#bottom-nav')===nav
+    ||event.composedPath?.().includes(nav);
+ }
+ function mouseDown(event){
+  if(!phone()||event.button!==0||!isInsideDock(event))return;
+  mouseGesture={x:event.clientX,y:event.clientY};
+ }
+ function switchAdjacent(dx,dy,event){
+  if(Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return false;
+  const buttons=tabs(),index=buttons.findIndex(b=>b.dataset.tab===app.dataset.tab);
   const next=adjacentTabIndex(index,buttons.length,dx,dy);
-  if(next===-1)return;
+  if(next===-1)return false;
+  // Select through the same owner as a tap. The transient click event is
+  // synthetic and does not interfere with the next real user gesture.
   suppressClick=true;
   if(swipeGuard)win.clearTimeout(swipeGuard);
-  // A pointerup can precede its native click by >260ms on loaded phones.
-  // Suppress that one release click, otherwise it re-selects the old tab.
-  // A new pointerdown resets the guard immediately for the next real tap.
   swipeGuard=win.setTimeout(()=>{suppressClick=false;swipeGuard=0;},2200);
   if(event.cancelable)event.preventDefault();
-  buttons[next].click();
+  start(buttons[next]);
+  mouseGesture=null;
+  return true;
+ }
+ function up(event){
+  const initial=gesture;
+  if(!initial||event.pointerId!==initial.id)return;
+  gesture=null;
+  switchAdjacent(event.clientX-initial.x,event.clientY-initial.y,event);
+ }
+ function mouseUp(event){
+  const initial=mouseGesture;
+  if(!initial||event.button!==0)return;
+  mouseGesture=null;
+  // Some phone emulations swallow pointer gestures starting on HOME SVGs.
+  // Only use mouseup as a fallback if pointerup did not already switch tabs.
+  switchAdjacent(event.clientX-initial.x,event.clientY-initial.y,event);
  }
  const cancel=()=>{gesture=null;};
  win.addEventListener('click',select,true);
  win.addEventListener('pointerdown',down,true);
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
+ win.addEventListener('mousedown',mouseDown,true);
+ win.addEventListener('mouseup',mouseUp,true);
  return ()=>{
   clearEntrance();
   if(swipeGuard)win.clearTimeout(swipeGuard);
-  swipeGuard=0;gesture=null;suppressClick=false;
+  swipeGuard=0;gesture=null;mouseGesture=null;suppressClick=false;
   win.removeEventListener('click',select,true);
   win.removeEventListener('pointerdown',down,true);
   win.removeEventListener('pointerup',up,true);
   win.removeEventListener('pointercancel',cancel,true);
+  win.removeEventListener('mousedown',mouseDown,true);
+  win.removeEventListener('mouseup',mouseUp,true);
   delete nav.dataset.djTabNavigation;
  };
 }

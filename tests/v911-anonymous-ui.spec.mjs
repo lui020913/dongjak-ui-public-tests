@@ -119,7 +119,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
- await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(25, 45, 50)'); // Match full-page dark UI instead of the old grey card.
+ await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(23, 25, 29)'); // Unified charcoal primary page and status edge.
 });
 test('phone More functions live in collapsible My Info groups',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
