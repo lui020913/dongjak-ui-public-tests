@@ -20,8 +20,14 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  const local=el('small','','직접 불러온 자료는 현재 페이지에서만 사용되며 서버에 전송하지 않습니다.');
  const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);dialog.append(head,intro,status,actions,clear,dataTools);doc.body.append(dialog);
  const legend=el('aside','dj-pri-legend');legend.id='dj-pri-legend';legend.hidden=true;
- const label=el('strong'),ramp=el('div','dj-pri-ramp'),ends=el('div','dj-pri-ends');ends.append(el('span','','0 · 위험'),el('span','','100 · 양호'));
- const coverage=el('small'),dismiss=button('끄기',()=>activate(null));legend.append(label,dismiss,ramp,ends,coverage);app.append(legend);
+ const label=el('strong'),ramp=el('div','dj-pri-ramp'),ends=el('div','dj-pri-ends');
+ ends.append(el('span','','위험'),el('span','','주의'),el('span','','안전'));
+ const coverage=el('small'),dismiss=button('끄기',()=>activate(null));
+ const detailToggle=button('평가 기준 보기',()=>{const expanded=detailToggle.getAttribute('aria-expanded')!=='true';detailToggle.setAttribute('aria-expanded',String(expanded));detailBody.setAttribute('aria-hidden',String(!expanded));});
+ detailToggle.classList.add('dj-pri-detail-toggle');detailToggle.setAttribute('aria-expanded','false');detailToggle.setAttribute('aria-controls','dj-pri-legend-detail-body');
+ detailToggle.innerHTML='<span>평가 기준 보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+ const detailWrap=el('div','dj-pri-detail-wrap'),detailBody=el('div','dj-pri-detail-body');detailBody.id='dj-pri-legend-detail-body';detailBody.setAttribute('aria-hidden','true');detailBody.append(coverage,el('small','dj-pri-model-note','사고다발지 미선정 도로는 임시 안전점수 100점입니다. 실제 무사고 증명이 아닙니다.'));detailWrap.append(detailBody);
+ legend.append(label,dismiss,ramp,ends,detailToggle,detailWrap);app.append(legend);
  function acceptDataset(next){dataset=next;lookup=new Map(next.segments.map(s=>[s.id,s]));revision++;activate(null);render();}
  function setDataset(raw){acceptDataset(parseImport(raw,dataset));}
  function render(){
@@ -55,7 +61,8 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
    if(revision===before){acceptDataset(next);if(failed.length)status.textContent+=' · 일부 추가 지표를 불러오지 못했습니다.';}
   }catch(e){if(revision===before)status.textContent='서버 PRI 자료를 불러오지 못했습니다. JSON 자료를 직접 불러올 수 있습니다.';}
  }
- toggle.addEventListener('click',()=>{render();if(!dialog.open)dialog.showModal();void loadDefault();});
+ toggle.addEventListener('click',()=>{render();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';void loadDefault();});
+ dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
  function draw(){
   if(!map.isStyleLoaded?.()&&!map.getSource(SOURCE))return;
@@ -72,11 +79,11 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  }
  function activate(id){
   if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>typeof s.scores.lighting==='number'&&typeof s.scores.accidents==='number'):!dataset.factors.some(f=>f.id===id))))return;
-  mode=id;popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
+  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
-  toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;
-   if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI ① 야간·② 사고 안전 평균 (시범)':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 100점)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'사고다발지 미선정 구간은 임시 100점 (무사고 뜻 아님)':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+  toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
+   if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 100점)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'사고다발지 미선정 구간은 임시 100점 (무사고 뜻 아님)':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   render();
  }
  function inspect(e){

@@ -1046,3 +1046,163 @@ html[data-theme="dark"] #app#app#app#app#app,
 }
 
 }
+
+
+/* v9.2.74 phone: unify onboarding/native status, permission, weather, layer/nav, and nearby motion. */
+@layer request-completion {
+@media (max-width:699px) {
+  /* The opaque iOS status sample and first-run top header must share one color. */
+  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])) {
+    --dj-pwa-native-edge:#f5faf7!important;
+    --dj-pwa-land-tone:#f5faf7!important;
+    --dj-pwa-bridge-gradient:none!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])) {
+    --dj-pwa-native-edge:#192e31!important;
+    --dj-pwa-land-tone:#192e31!important;
+  }
+  html body #app#app#app#app#app#app#app .dj860-onboarding .dj860-head {
+    background:#f5faf7!important;
+    border-color:#e0ebe5!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding .dj860-head {
+    background:#192e31!important;border-color:#385650!important;
+  }
+  html.dj-ios-home-pwa:has(#dj860-onboarding:not([hidden])) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
+    background:#f5faf7!important;background-image:none!important;transition:none!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"]:has(#dj860-onboarding:not([hidden])) body #app > :is(#dj-ios-pwa-map-seam,#dj-ios-pwa-status-bridge){
+    background:#192e31!important;
+  }
+  /* Permission choice is not an app-blocking dim overlay. The shared window
+     motion owns its single enter/exit animation; disable duplicate keyframes. */
+  html body #app#app#app#app#app#app#app #djNext-permissions:not([hidden]){
+    background:transparent!important;background-image:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    animation:none!important;transition:none!important;
+  }
+  html body #app#app#app#app#app#app#app #djNext-permissions:not([hidden])::before,
+  html body #app#app#app#app#app#app#app #djNext-permissions:not([hidden])::after {
+    content:none!important;display:none!important;
+  }
+  html body #app#app#app#app#app#app#app #djNext-permissions .djNext-modal-body,
+  html body #app#app#app#app#app#app#app #djNext-permissions.djNext-leaving .djNext-modal-body{
+    animation:none!important;transition:none!important;will-change:transform,opacity!important;
+  }
+  /* The layer sheet ends ABOVE the persistent bottom pill instead of covering
+     it during its final slide-out frame. */
+  html body #app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body{
+    bottom:calc(var(--dj910-dock-bottom,76px) + 4px)!important;
+    max-height:min(52dvh,calc(100dvh - var(--dj910-map-top,160px) - var(--dj910-dock-bottom,76px) - 12px))!important;
+  }
+  html body #app#app#app#app#app#app#app[data-tab="map"] > #bottom-nav:not([hidden]){
+    visibility:visible!important;opacity:1!important;
+    animation:none!important;
+    transition:background-color .16s ease,border-color .16s ease,color .16s ease!important;
+  }
+  /* Scale and TIP have one visibility gate, with no staggered entrance. */
+  html body #app#app#app#app#app#app#app:has(#djNext-layer-panel:not([hidden])) :is(#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-bottom-left),
+  html body #app#app#app#app#app#app#app:has(#dj-pri-dialog[open]) :is(#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-bottom-left){
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app :is(#dj840-map-tip,.maplibregl-ctrl-bottom-left){
+    transition:none!important;animation-duration:0s!important;
+  }
+  /* Use the native nearby sheet only. Shared motion handles opening/closing;
+     the offset matches the pill dock and leaves no tall blank corridor. */
+  html body #app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){
+    bottom:calc(var(--dj910-dock-bottom,76px) + 4px)!important;
+    animation:none!important;
+    min-height:0!important;
+  }
+  /* Current weather: headline centered, seven-day strip below, no tall gap. */
+  html body #app#app#app#app#app#app#app #dj854-weather-sheet:not([hidden]){
+    height:auto!important;min-height:0!important;
+    max-height:min(76dvh,calc(100dvh - env(safe-area-inset-top,0px) - var(--dj-weather-panel-bottom,88px) - 18px))!important;
+    width:min(440px,calc(100vw - 20px))!important;
+    border-radius:22px!important;overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-head{
+    min-height:52px!important;margin:0!important;padding:9px 14px!important;
+    border-bottom:1px solid var(--djNext-border,#d6e4dc)!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-head h2{
+    font-size:17px!important;font-weight:800!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-close{
+    display:grid!important;place-items:center!important;
+    width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+    border:1px solid var(--djNext-border,#d6e4dc)!important;
+    border-radius:14px!important;background:var(--djNext-raised,#e5f1eb)!important;
+    padding:8px!important;box-shadow:none!important;font-size:0!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-close svg{
+    display:block;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-place{
+    text-align:center!important;margin:10px 14px 2px!important;
+    font-size:17px!important;font-weight:850!important;color:var(--djNext-text,#203d32)!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-main{
+    display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:wrap!important;
+    gap:10px!important;margin:0 12px!important;text-align:center!important;
+    font-size:27px!important;font-weight:850!important;line-height:1.3!important;min-height:46px!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-main svg{
+    flex:none;width:32px!important;height:32px!important;stroke:var(--djNext-active,#087c65)!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-detail{
+    margin:3px 14px 5px!important;text-align:center!important;
+    color:var(--djNext-muted,#667a70)!important;font-size:12px!important;line-height:1.5!important;
+  }
+  html body #app#app#app#app#app#app#app .dj-weather-observed{
+    margin:2px 14px 7px!important;text-align:center!important;font-size:11px!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-actions{
+    margin:6px 13px 13px!important;gap:8px!important;
+  }
+  html body #app#app#app#app#app#app#app .dj854-weather-actions button{
+    min-height:38px!important;font-size:12px!important;
+    border-radius:12px!important;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-weather-week{
+    padding:9px 0 6px;margin:8px 0 0;border-top:1px solid var(--djNext-border,#d6e4dc);
+    min-width:0;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-week-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:10px;padding:0 14px 8px;min-width:0;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-week-head h3{
+    font-size:14px!important;font-weight:800!important;margin:0!important;
+    color:var(--djNext-text,#203d32)!important;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-week-head small{
+    font-size:10px!important;color:var(--djNext-muted,#667a70)!important;white-space:nowrap;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-weather-week ul{
+    display:flex!important;gap:7px;margin:0!important;padding:2px 12px 9px!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+    list-style:none!important;scroll-snap-type:x proximity;overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-weather-week ul::-webkit-scrollbar{display:none}
+  html body #app#app#app#app#app#app#app .dj9274-weather-day{
+    flex:0 0 92px!important;min-width:92px!important;
+    scroll-snap-align:start;padding:9px 6px!important;
+    display:grid!important;justify-items:center!important;gap:5px!important;
+    background:var(--djNext-raised,#e5f1eb)!important;border-radius:13px!important;
+    text-align:center;line-height:1.35;
+  }
+  html body #app#app#app#app#app#app#app .dj9274-weather-day strong{font-size:12px!important;}
+  html body #app#app#app#app#app#app#app .dj9274-day-condition{font-size:11px!important;white-space:nowrap;}
+  html body #app#app#app#app#app#app#app .dj9274-day-temp{font-size:12px!important;font-weight:800!important;white-space:nowrap;}
+  html body #app#app#app#app#app#app#app .dj9274-weather-day small{font-size:10px!important;color:var(--djNext-muted,#667a70)!important;}
+  html body #app#app#app#app#app#app#app .dj9274-weather-week [role=status]:not([hidden]){
+    padding:4px 14px 8px;margin:0;font-size:11px;line-height:1.6;color:var(--djNext-muted,#667a70);
+  }
+}
+}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  #app .dj-pri-detail-wrap,#app .dj-pri-detail-toggle svg{transition:none!important;}
+}

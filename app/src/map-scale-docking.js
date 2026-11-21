@@ -121,6 +121,7 @@ export const MOBILE_SCALE_BLOCKERS=Object.freeze([
   '#road-width-legend', '#ped-tools-panel', '#map-safety-controls',
   '#map-advanced-controls', '#night-visibility-float',
   '#dj-mobile-utilities', '#dj832-data-sheet', '#dj833-weather-sheet',
+  '#djNext-layer-panel', '#djNext-permissions', '#dj-pri-legend', '#dj-pri-dialog',
   '#dj854-weather-sheet',
   '#dj833-night-modal', '#dj832-info-sheet', '#dj832-feature-sheet',
   '#dj-map-settings', '#dj-app-about', '#version-history-modal',
