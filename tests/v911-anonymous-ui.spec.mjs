@@ -1040,7 +1040,13 @@ test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@pho
   const ai=page.locator('#dj890-ai-orb'),search=page.locator('#map-quick-search');
   const dropdown=page.locator('#map-quick-search-dropdown');
   await expect(ai).toBeVisible();
-  await search.locator('#map-quick-search-query').click();
+  const input=search.locator('#map-quick-search-query');
+  await input.click();
+  // Empty focus must NOT open a large blank rectangle over the map.
+  await expect(dropdown).toBeHidden();
+  await expect(ai).toBeVisible();
+  // Suggestions open only for meaningful input, aligned to the search pill.
+  await input.fill('노량진');
   await expect(dropdown).toBeVisible();
   await expect(ai).toBeVisible();
   await expect(ai).toHaveCSS('pointer-events','auto');
