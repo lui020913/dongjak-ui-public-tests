@@ -39,6 +39,17 @@ def main():
                     segment=re.sub(r"\s+"," ",segment)
                     print("SNIP",html.unescape(segment[:2200]))
             print("POSSIBLE_DOWNLOAD_LINKS",re.findall(r'<(?:a|form)[^>]{0,1000}(?:download|down|file)[^>]{0,1000}>',text,re.I)[:8])
+            if "schoolzone.emac.kr" in url:
+                print("SCRIPTS",re.findall(r'<script[^>]+src=["\\\']([^"\\\']+)["\\\']',text,re.I)[-24:])
+                for term in ["attached_file", "data-atchFileId", "fn_download", "fn_down", "download", "atchFileId", "fileSn", "fn_view_detail"]:
+                    found=list(re.finditer(re.escape(term),text,re.I))
+                    print("EVENT_FIND",term,len(found))
+                    for h in found[-3:]:
+                        snippet=html.unescape(text[max(0,h.start()-400):h.end()+850])
+                        print("EVENT_SNIP",re.sub(r"\\s+"," ",snippet)[:1200])
+                if "/publicData/publicDataView.do" in text:
+                    print("VIEW URL candidate /publicData/publicDataView.do?nttId=2966")
+
         except Exception as exc:
             print("FAILED",type(exc).__name__,str(exc)[:450])
 
