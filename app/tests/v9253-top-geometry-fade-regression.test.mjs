@@ -11,6 +11,9 @@ test('expanded nearby utility card measures search/toolbar and stores its real s
  assert.match(src,/getElementById\('bottom-nav'\)/);
  assert.match(src,/panel\.style\.setProperty\('top',top\+'px','important'\)/);
  assert.match(src,/clearPedestrianExpandedBounds\(panel\)/);
+ assert.match(src,/const minDelta=safeTop-expandedRect\\.top/);
+ assert.match(src,/startDelta\\.y=Math\\.max\\(startDelta\\.y,minDelta\\)/);
+ assert.match(src,/endDelta\\.y=Math\\.max\\(endDelta\\.y,minDelta\\)/);
 });
 test('onboarding fades render on distinct frames rather than coalescing same-task opacities',()=>{
  const src=read('src/v860-onboarding.js');
