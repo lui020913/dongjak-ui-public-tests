@@ -1,2 +1,3 @@
-/* Important declarations in the request layer must precede older tablet layers. */
-@layer request-completion, dj-tablet-unified;
+/* Standalone phone page rules must precede legacy request layer when using
+ * !important; map-linked sheets keep their existing layer priorities. */
+@layer mobile-fullscreen-tabs, request-completion, dj-tablet-unified;
