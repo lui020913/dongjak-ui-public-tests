@@ -853,8 +853,9 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
  expect(native).toContain('linear-gradient'); // A top-layer modal owns its own native-status transition.
- expect(native).toContain('rgb(237, 243, 239)'); // Same first pixels as iOS status-bar sampling.
- await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');
+ expect(native).toMatch(/rgb\(255,\s*255,\s*255\) 0px/); // Same white first pixels as the modal's native status-bar sampling.
+ expect(native).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);
+ await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
  await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#192d32');
