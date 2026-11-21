@@ -438,6 +438,9 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       <p>상도1동 참고경계와 교차한 영역: <b>${esc(
         Number.isFinite(Number(p.overlap_sangdo1_m2))?(Number(p.overlap_sangdo1_m2)/10000).toFixed(2):'확인 필요'
       )}ha</b></p>
+      <p class="pza-popup-note">${String(p.name_match_2025||'[]').includes('초')
+        ? '2025년 상도1동 통·반 배정표의 학교명과 일치합니다. 다만 2026년 통학구역 경계와 완전히 일치한다는 뜻은 아닙니다.'
+        : '2025년 상도1동 통·반 배정표 4개교에는 없는 학구입니다. 참고경계 교차만으로 상도1동 거주지의 배정학교라고 단정할 수 없습니다.'}</p>
       <p class="pza-popup-note">학생의 학교 배정구역입니다. 실제 통학 동선이나 경찰청 지정 어린이보호구역을 의미하지 않으며, 이 자료만으로 위험도를 판정하지 않습니다.</p>`);
     bind('pza-candidates-line',roadPopupHtml);
     bind('pza-focus-line',roadPopupHtml);
