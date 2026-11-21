@@ -13,7 +13,7 @@ test('v6.0.2: desktop overview never overlays news or other non-map content',()=
 });
 test('v7.0.29: first-run instruction card is centered and does not follow the ? button',()=>{
   const js=read('src/mobile-map-controls.js');
-  const css=read('src/v720-ui-consistency.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.doesNotMatch(js,/show.getBoundingClientRect\(\)/);
   assert.match(js,/guide.classList.add\('dj-guide-centered'\)/);
   assert.match(js,/watchTab.disconnect\(\)/);
