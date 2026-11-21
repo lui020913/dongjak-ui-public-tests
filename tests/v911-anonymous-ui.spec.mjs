@@ -1075,7 +1075,7 @@ test('category-first release history preserves the actual deployment version in 
  // Historical records still carry unchanged operational SemVer in data-version;
  // the public button and user-visible pre-release name remain simplified.
  await expect(page.locator('#version-history-trigger')).toContainText('업데이트');
- await expect(timeline.locator('.v707-release').first()).toHaveAttribute('data-version',/^v?\\d+\\.\\d+\\.\\d+$/);
+ await expect(timeline.locator('.v707-release').first()).toHaveAttribute('data-version',/^v?\d+\.\d+\.\d+$/);
 });
 
 
