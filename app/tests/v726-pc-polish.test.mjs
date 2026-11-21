@@ -18,7 +18,7 @@ test('the unified mobile-first shell is the final layout layer and release metad
 });
 
 test('map actions, toolbar and navigation use the same light/dark surface system',()=>{
- assert.ok(css.includes('--mf-surface: rgba(255,255,255,.96)'));
+ assert.ok(css.includes('--mf-surface: #ffffff'));
  assert.ok(css.includes('--mf-accent: #13866c'));
  assert.ok(css.includes('#app#app#app#app#app[data-theme="dark"]'));
  assert.ok(css.includes('.map-actions'));
