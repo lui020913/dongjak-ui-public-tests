@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const css=(()=>{try{return read('src/mobile-next.css')}catch(e){if(e?.code!=='ENOENT')throw e;return read('../../frontend/production/mobile-next.css')}})();
+const css=(()=>{try{return read('src/mobile-next.css')}catch(e){if(e?.code!=='ENOENT')throw e;return read('../frontend/production/mobile-next.css')}})();
 test('community classification remains one fixed-height horizontal scroll lane',()=>{
  assert.match(css,/community-category-tabs\{[^}]*flex:0 0 auto!important;height:52px!important/);
  assert.match(css,/community-category-tabs>\.community-filter\{[^}]*height:42px!important/);
