@@ -1007,24 +1007,50 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
- // Start the RAF measurement and the click inside the same browser task.
- // Playwright's actionability waiting can otherwise consume the 650ms
- // sampling window before it dispatches the actual click.
- await page.evaluate(()=>{
-   const samples=[];window.__dj9253OnboardFade=samples;
+ // Run the click and visual sampling in a single browser task, and await
+ // the observation window INSIDE the page. When 12 Playwright shards run on
+ // separate Chromium containers, a test-side 350ms wait can complete before
+ // the first browser animation frame is painted. Do not weaken the alpha gate.
+ const fade=await page.evaluate(async()=>{
+   const tour=document.getElementById('dj860-onboarding');
+   const pane=tour.querySelector('.dj860-visual-pane');
+   const next=tour.querySelector('[data-dj860-action="next"]');
+   const samples=[];
+   let stopped=false;
    const start=performance.now();
-   const tick=()=>{
-     const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
-     if(pane)samples.push(Number(getComputedStyle(pane).opacity));
-     if(performance.now()-start<650)requestAnimationFrame(tick);
+   const capture=from=>{
+     if(stopped)return;
+     const css=getComputedStyle(pane);
+     samples.push({
+       time:Math.round(performance.now()-start),from,
+       opacity:Number(css.opacity),inline:pane.style.opacity,
+       transition:css.transitionDuration,
+       swapping:tour.classList.contains('dj860-swapping')
+     });
    };
-   requestAnimationFrame(tick);
-   document.querySelector('#dj860-onboarding [data-dj860-action="next"]').click();
+   const observer=new MutationObserver(()=>capture('mutation'));
+   observer.observe(pane,{attributes:true,attributeFilter:['style','class']});
+   observer.observe(tour,{attributes:true,attributeFilter:['class']});
+   const tick=()=>{if(stopped)return;capture('frame');requestAnimationFrame(tick);};
+   const interval=setInterval(()=>capture('timer'),25);
+   capture('before');requestAnimationFrame(tick);
+   next.click();capture('click');
+   await new Promise(resolve=>setTimeout(resolve,1200));
+   stopped=true;clearInterval(interval);observer.disconnect();
+   return {samples,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches};
  });
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
- await page.waitForTimeout(350);
- const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
- expect(samples.some(x=>x<.75)).toBe(true);
+ const values=fade.samples.map(x=>x.opacity);
+ const min=Math.min(...values),max=Math.max(...values);
+ console.log('ONBOARDING_FADE_DIAGNOSTIC',JSON.stringify({
+   reducedMotion:fade.reducedMotion,frames:fade.samples.filter(x=>x.from==='frame').length,
+   min,max,swapFrames:fade.samples.filter(x=>x.swapping).length,
+   first:fade.samples.slice(0,12),middle:fade.samples.filter(x=>x.opacity<.9).slice(0,12),last:fade.samples.slice(-7)
+ }));
+ expect(fade.reducedMotion).toBe(false);
+ expect(fade.samples.some(x=>x.swapping)).toBe(true);
+ expect(values.some(x=>x>.95)).toBe(true);
+ expect(values.some(x=>x<.75)).toBe(true);
  await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 });
