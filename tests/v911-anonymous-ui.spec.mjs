@@ -1057,19 +1057,26 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  }
 });
 
-test('the rendered history shows two-part editions and retains exact production SemVer',{tag:'@phone-layout'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');
- await ready(page);
- const response=await page.request.get('/version.json');
- expect(response.ok()).toBe(true);
- const version=String((await response.json()).version);
- const edition='v'+version.split('.').slice(0,2).join('.');
- const latest=page.locator('#history-version-timeline .v707-release').first();
- await expect(latest).toHaveAttribute('data-version',version);
- await expect(latest).toHaveAttribute('data-display-version',edition);
- await expect(latest.locator('h4')).toHaveText('최신 업데이트');
- await expect(latest.locator('.dj-edition-original')).toContainText('v'+version);
- await expect(latest.locator('xpath=ancestor::*[contains(@class,"dj-edition-minor")]')).toHaveAttribute('data-edition',edition);
+test('the rendered history uses change categories and retains build provenance privately',{tag:'@phone-layout'},async({page})=>{
+  test.skip(page.viewportSize().width>=700,'phone only');
+  await ready(page);
+  const response=await page.request.get('/version.json');
+  expect(response.ok()).toBe(true);
+  const version=String((await response.json()).version);
+  expect(version).toMatch(/^\d+\.\d+\.\d+$/);
+  await expect(page.locator('#map-startup-version')).toHaveText('버전 1.0');
+  await expect(page.locator('#version-history-trigger')).toHaveText('업데이트');
+  await expect(page.locator('#dj-guide-latest-version')).toHaveText('분류별 내역');
+  const entries=page.locator('#history-version-timeline .v707-release');
+  await expect(entries.first()).toBeAttached();
+  // Category grouping changes DOM order. Keep provenance in data attributes,
+  // without exposing the internal build number in a visible heading.
+  const current=page.locator('#history-version-timeline .v707-release[data-version="'+version+'"]');
+  await expect(current.first()).toBeAttached();
+  await expect(current.first()).toHaveAttribute('data-current-build','true');
+  await expect(current.first().locator('h4')).toHaveText('최근 변경사항');
+  await expect(current.first().locator('xpath=ancestor::*[contains(@class,"dj-edition-history")]')).toHaveAttribute('data-change-type',/^(major|feature|design|fix)$/);
+  await expect(page.locator('#history-version-timeline .dj-edition-original')).toHaveCount(0);
 });
 
 
