@@ -939,6 +939,8 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
   await expect(page.locator('#participation-panel')).toHaveClass(/dj9256-composing/);
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
+  await expect(page.locator('#app')).toHaveAttribute('data-dj806-active-surface','participation-panel');
   await expect(page.locator('#app > .topbar')).toBeHidden();
   await expect(page.locator('#app > .topbar')).toHaveCSS('display','none');
   const reportPanel=page.locator('#participation-panel');
