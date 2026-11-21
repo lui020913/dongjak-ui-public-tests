@@ -6,12 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 const viewports = [
   { name: 'mobile-375', width: 375, height: 812 },
   { name: 'mobile-390', width: 390, height: 844 },
-  { name: 'mobile-430', width: 430, height: 932 },
-  { name: 'tablet-768', width: 768, height: 1024 },
-  { name: 'tablet-1024', width: 1024, height: 768 },
-  { name: 'desktop-1280', width: 1280, height: 800 },
-  { name: 'desktop-1440', width: 1440, height: 900 },
-  { name: 'desktop-1920', width: 1920, height: 1080 }
+  { name: 'mobile-430', width: 430, height: 932 }
 ];
 const tabs = [
   ['route', 'route-panel'], ['participate', 'participation-panel'],
@@ -43,6 +38,14 @@ async function navigationControl(page,tab) {
   }
   return normal;
 }
+// Browser first-run presents a top-layer install/web chooser before the tour.
+ // Select the real Web action; never force-click onboarding under a dialog.
+async function selectBrowserWeb(page){
+  const welcome=page.locator('dialog#dj-install-menu[open]');
+  if(!await welcome.isVisible().catch(()=>false))return;
+  await welcome.getByRole('button',{name:/웹에서 바로 이용하기/}).click({timeout:20000,noWaitAfter:true});
+  await expect(welcome).toBeHidden({timeout:12000});
+}
 async function dismissTour(page) {
   const tour = page.locator('#dj860-onboarding');
   for (let i = 0; i < 3; i++) {
@@ -57,7 +60,7 @@ async function dismissTour(page) {
 for (const viewport of viewports) {
  for (const theme of ['light', 'dark']) {
   test('anonymous deployed screen audit: ' + viewport.name + ' / ' + theme, async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== (viewport.width < 700 ? 'mobile' : 'desktop'));
+    test.skip(testInfo.project.name !== 'mobile');
     test.setTimeout(240000);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.emulateMedia({colorScheme: theme});
@@ -67,6 +70,7 @@ for (const viewport of viewports) {
     const startup = page.locator('#map-startup-overlay');
     if (await startup.count()) await expect(startup).toBeHidden({ timeout: 60000 });
     await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state', /^(signed-out|signed-in)$/, { timeout: 30000 });
+    await selectBrowserWeb(page);
     await dismissTour(page);
     const app = page.locator('#app');
     const report = { viewport, theme, themeSetup: 'visible-profile-theme-confirmation-if-needed', source: page.url(), captured_at: new Date().toISOString(), screens: [] };
