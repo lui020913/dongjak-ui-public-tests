@@ -1,6 +1,9 @@
-/** Bottom navigation: one gesture path and one native click path.
- * The existing navigator remains the owner of data, history, and the map.
- * Only bottom-tab transitions request the shared stationary fade. */
+/**
+ * One mobile bottom-tab transition controller. The existing native navigator
+ * remains the authority for app state, map data, and page lifecycles.
+ * An opaque temporary surface prevents any intermediate map frame.
+ */
+export const TAB_TRANSITION=Object.freeze({exit:90,enter:145});
 export function adjacentTabIndex(index,count,dx,dy){
  if(count<2||index<0||index>=count||Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return -1;
  const next=index+(dx<0?1:-1);
@@ -10,93 +13,84 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const nav=doc.getElementById('bottom-nav');
  if(!nav||!app||nav.dataset.djTabNavigation==='ready')return ()=>{};
  nav.dataset.djTabNavigation='ready';
- const phone=()=>win.matchMedia('(max-width:699px)').matches;
+ const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
+ const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let pending=null,replaying=false,closing=null,watchdog=0,gesture=null,suppressClick=false;
- let curtain=null,curtainFade=0,curtainHide=0;
- // Mask the map *below* fullscreen pages during page-to-page replacement.
- // Do not own navigation or block touch events; those remain native.
- function dismissCurtain(){
-  if(curtainFade)win.clearTimeout(curtainFade);
-  if(curtainHide)win.clearTimeout(curtainHide);
-  curtainFade=0;curtainHide=0;
-  if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
- }
- function protectPageTransition(next){
-  if(!phone()){dismissCurtain();return;}
+ const page=tab=>doc.querySelector('.page-panel[data-page="'+tab+'"]:not([hidden])');
+ let pending=null,replaying=false,exitTimer=0,settleTimer=0;
+ let outgoing=null,incoming=null,curtain=null,gesture=null,suppressClick=false;
+ function ensureCurtain(){
   if(!curtain){
-   curtain=doc.createElement('div');curtain.id='dj-tab-surface-curtain';
-   curtain.setAttribute('aria-hidden','true');curtain.hidden=true;app.appendChild(curtain);
+   curtain=doc.createElement('div');
+   curtain.id='dj-tab-surface-curtain';
+   curtain.setAttribute('aria-hidden','true');
+   curtain.hidden=true;app.appendChild(curtain);
   }
-  dismissCurtain();
-  // This stays BEHIND the outgoing page yet ABOVE the map. The old page's
-  // alpha can reach zero without disclosing a map frame.
+  curtain.classList.remove('dj-tab-curtain-out');
   curtain.hidden=false;
  }
- function revealPageTransition(next){
-  if(!curtain)return;
-  const delay=next==='map'?35:220;
-  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},delay);
-  curtainHide=win.setTimeout(()=>{
-   curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
-  },delay+245);
+ function finishVisual(){
+  if(settleTimer)win.clearTimeout(settleTimer);
+  settleTimer=0;
+  outgoing?.classList.remove('dj-mobile-tab-exit');
+  incoming?.classList.remove('dj-mobile-tab-enter');
+  outgoing=null;incoming=null;
+  if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
+  delete app.dataset.djTabTransition;
  }
  function replay(button){
-  if(!button||button.disabled||!button.isConnected)return;
+  if(!button||button.disabled||!button.isConnected)return false;
   replaying=true;
-  try{button.click();}finally{replaying=false;}
+  try{button.click();return true;}finally{replaying=false;}
  }
- function clear(){
-  if(watchdog)win.clearTimeout(watchdog);
-  watchdog=0;pending=null;closing=null;
+ function commit(){
+  exitTimer=0;
+  const target=pending;pending=null;
+  outgoing?.classList.remove('dj-mobile-tab-exit');outgoing=null;
+  if(!replay(target)){finishVisual();return;}
+  incoming=page(target.dataset.tab);
+  if(incoming&&!reduced())incoming.classList.add('dj-mobile-tab-enter');
+  if(reduced()){finishVisual();return;}
+  curtain?.classList.add('dj-tab-curtain-out');
+  app.dataset.djTabTransition='enter';
+  settleTimer=win.setTimeout(finishVisual,TAB_TRANSITION.enter+22);
  }
- let exitTimer=0;
+ function start(button){
+  // Rapid taps coalesce into the final requested page, not parallel motions.
+  if(exitTimer){pending=button;return;}
+  if(settleTimer)finishVisual();
+  pending=button;
+  if(reduced()){const target=pending;pending=null;replay(target);return;}
+  ensureCurtain();
+  outgoing=page(app.dataset.tab);
+  app.dataset.djTabTransition='exit';
+  if(outgoing)outgoing.classList.add('dj-mobile-tab-exit');
+  exitTimer=win.setTimeout(commit,outgoing?TAB_TRANSITION.exit:0);
+ }
  function select(event){
   if(!phone()||replaying)return;
   if(suppressClick&&event.isTrusted&&event.target?.closest?.('#bottom-nav')){
    suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;
   }
   let button=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-  if(!button&&event.target?.closest?.('.page-panel [data-close-page]')){
+  if(!button&&event.target?.closest?.('.page-panel [data-close-page],#news-close-to-map')){
    if(app.dataset.tab==='map')return;
    button=nav.querySelector('.nav-tab[data-tab="map"]');
   }
   if(!button||button.disabled)return;
-  const current=app.dataset.tab,nextTab=button.dataset.tab;
-  if(nextTab===current&&!exitTimer)return;
-  // Cancel the legacy instantaneous handler. The existing buttons still own
-  // navigation once replayed, after the outgoing surface fades away.
+  if(button.dataset.tab===app.dataset.tab&&!exitTimer)return;
   event.preventDefault();event.stopImmediatePropagation();
-  pending=button;
-  if(exitTimer)return;
-  protectPageTransition(nextTab);
-  const previous=doc.querySelector('.page-panel[data-page="'+current+'"]:not([hidden])');
-  if(previous)previous.classList.add('dj9272-tab-leave');
-  exitTimer=win.setTimeout(()=>{
-   exitTimer=0;
-   const next=pending;pending=null;
-   previous?.classList.remove('dj9272-tab-leave');
-   if(!next?.isConnected)return;
-   replay(next);
-   revealPageTransition(next.dataset.tab);
-   const entered=doc.querySelector('.page-panel[data-page="'+next.dataset.tab+'"]:not([hidden])');
-   if(entered){
-    entered.classList.add('dj9272-tab-enter');
-    win.setTimeout(()=>entered.classList.remove('dj9272-tab-enter'),240);
-   }
-  },previous?190:0);
+  start(button);
  }
  function down(event){
   if(!phone()||event.isPrimary===false||event.button!==0)return;
   suppressClick=false;gesture={id:event.pointerId,x:event.clientX,y:event.clientY};
  }
  function up(event){
-  const start=gesture;if(!start||event.pointerId!==start.id)return;gesture=null;
-  const dx=event.clientX-start.x,dy=event.clientY-start.y;
+  const initial=gesture;if(!initial||event.pointerId!==initial.id)return;gesture=null;
+  const dx=event.clientX-initial.x,dy=event.clientY-initial.y;
   if(Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return;
-  suppressClick=true;
-  // Stop only the click generated by this swipe, not the next tap.
-  if(event.cancelable)event.preventDefault();
+  suppressClick=true;if(event.cancelable)event.preventDefault();
   const buttons=tabs(),current=pending?.dataset.tab||app.dataset.tab;
   const index=buttons.findIndex(b=>b.dataset.tab===current);
   const next=adjacentTabIndex(index,buttons.length,dx,dy);
@@ -108,9 +102,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
  return ()=>{
-  const panel=closing?.panel;if(exitTimer)win.clearTimeout(exitTimer);clear();dismissCurtain();curtain?.remove();curtain=null;if(panel)win.DongjakWindowMotion?.cancel?.(panel);
-  win.removeEventListener('click',select,true);nav.removeEventListener('pointerdown',down);
-  win.removeEventListener('pointerup',up,true);win.removeEventListener('pointercancel',cancel,true);
+  if(exitTimer)win.clearTimeout(exitTimer);exitTimer=0;pending=null;
+  finishVisual();curtain?.remove();curtain=null;
+  win.removeEventListener('click',select,true);
+  nav.removeEventListener('pointerdown',down);
+  win.removeEventListener('pointerup',up,true);
+  win.removeEventListener('pointercancel',cancel,true);
   delete nav.dataset.djTabNavigation;
  };
 }
