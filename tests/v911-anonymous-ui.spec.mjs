@@ -803,38 +803,52 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
 });
 
 
-test('live train atlas and positions remain loaded but vehicle symbols are hidden at distant map zoom',{tag:'@phone-common'},async({page})=>{
-  await page.addInitScript(()=>{
-    localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
-    localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
-  });
-  let calls=0;
-  await page.route('**/api/transport/live-vehicles**',async route=>{
-    calls++;
-    const observedAt=new Date().toISOString();
-    const metro=[['7호선','장승배기','석남'],['7호선','상도','장암'],['9호선','노량진','중앙보훈병원'],['9호선','노들','개화']].map(([line,station,destination],i)=>({line,station,destination,id:'qa-train-'+i,trainNo:'QA'+i,direction:String(i%2),status:'1',observedAt}));
-    await route.fulfill({json:{ok:true,metro,bus:[],warnings:[],availability:{metro:true,bus:false}}});
-  });
-  await ready(page);
-  const map=page.locator('#map');
-  await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
-  await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
-  // The intended behavior changed: user explicitly requested distant map
-  // views to hide the trains. The API feed/atlas still need to be healthy.
-  // Confirm the feed and four projected source features were received while
-  // map-rendered symbols stay at zero below the 16.4 zoom threshold.
-  await expect.poll(async()=>{
-    const value=await map.getAttribute('data-dj-live-train-diagnostics');
-    if(!value)return 0;
-    try{return Number(JSON.parse(value).features||0);}catch{return 0;}
-  },{timeout:60000}).toBeGreaterThan(0);
-  const diagnostics=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
-  expect(diagnostics.minimum).toBe(16.4);
-  expect(diagnostics.zoom).toBeLessThan(16.4);
-  expect(diagnostics.feed).toBeGreaterThan(0);
-  expect(diagnostics.rendered).toBe('0');
-  expect(Number(await map.getAttribute('data-dj-live-train-rendered')||0)).toBe(0);
-  await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
+// On a phone the train feed is intentionally zoom-gated to protect the Seoul daily quota.
+// Drive real MapLibre input instead of forcing internal map state.
+async function changeLiveTrainZoom(page,near){
+ const canvas=page.locator('#map canvas.maplibregl-canvas').first();
+ await expect(canvas).toBeVisible();
+ const box=await canvas.boundingBox();
+ expect(box).toBeTruthy();
+ await page.mouse.move(box.x+box.width*.5,box.y+box.height*.46);
+ for(let i=0;i<9;i++){await page.mouse.wheel(0,near?-700:700);await page.waitForTimeout(110);}
+ await page.waitForTimeout(1400);
+}
+test('metro feed is requested only near the tracks and distant symbols disappear',{tag:'@phone-common'},async({page})=>{
+ await page.addInitScript(()=>{
+   localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
+   localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
+ });
+ let calls=0;
+ await page.route('**/api/transport/live-vehicles**',async route=>{
+   calls++;
+   const observedAt=new Date().toISOString();
+   const metro=[['7호선','장승배기','석남'],['7호선','상도','장암'],['9호선','노량진','중앙보훈병원'],['9호선','노들','개화']].map(([line,station,destination],i)=>({line,station,destination,id:'qa-train-'+i,trainNo:'QA'+i,direction:String(i%2),status:'1',observedAt}));
+   await route.fulfill({json:{ok:true,metro,bus:[],warnings:[],availability:{metro:true,bus:false}}});
+ });
+ await ready(page);
+ const map=page.locator('#map');
+ expect(calls,'do not spend subway API calls below metroMinZoom').toBe(0);
+ await changeLiveTrainZoom(page,true);
+ await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
+ await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
+ await expect.poll(async()=>{
+   const value=await map.getAttribute('data-dj-live-train-diagnostics');
+   if(!value)return 0;
+   try{return Number(JSON.parse(value).features||0);}catch{return 0;}
+ },{timeout:60000}).toBeGreaterThan(0);
+ let diagnostics=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
+ expect(diagnostics.minimum).toBe(16.4);
+ expect(diagnostics.zoom).toBeGreaterThanOrEqual(16.4);
+ expect(diagnostics.feed).toBeGreaterThan(0);
+ await changeLiveTrainZoom(page,false);
+ await expect.poll(async()=>{
+   const raw=await map.getAttribute('data-dj-live-train-diagnostics');
+   if(!raw)return 99;
+   try{return Number(JSON.parse(raw).zoom)}catch{return 99}
+ },{timeout:60000}).toBeLessThan(16.4);
+ await expect.poll(()=>map.getAttribute('data-dj-live-train-rendered'),{timeout:60000}).toBe('0');
+ await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
 });
 
 test('route title cannot swipe-dismiss the full page; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
@@ -853,7 +867,25 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  await tap(page,tab(page,'participate'));await expect(form).toHaveAttribute('hidden','');await expect(page.locator('#community-compose-toggle')).toBeVisible();await tap(page,page.locator('#community-compose-toggle'));await expect(form).toBeVisible();await tap(page,form.locator('#community-compose-close'));await expect(form).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();
 });
 
- test('official daily train quota is communicated and does not repeatedly query the feed',{tag:'@phone-common'},async({page})=>{let calls=0;await page.addInitScript(()=>{localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));});await page.route('**/api/transport/live-vehicles**',async route=>{calls++;await route.fulfill({status:429,json:{ok:false,code:'ERROR-337',retryAfterSeconds:3600,error:'일일 조회량 초과'}});});await ready(page);await expect(page.locator('[data-live-vehicle="metro"]')).toHaveAttribute('data-live-quota','true',{timeout:60000});await expect(page.locator('#dj-live-vehicle-status')).toContainText('일일 조회량을 초과');await tap(page,page.locator('#djNext-layers'));await expect(page.locator('[data-layer-key="livemetro"] .djNext-layer-state')).toHaveText('조회 한도 초과');expect(calls).toBe(1);});
+ test('official daily train quota is communicated and does not repeatedly query the feed',{tag:'@phone-common'},async({page})=>{
+ let calls=0;
+ await page.addInitScript(()=>{
+   localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
+   localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
+ });
+ await page.route('**/api/transport/live-vehicles**',async route=>{
+   calls++;
+   await route.fulfill({status:429,json:{ok:false,code:'ERROR-337',retryAfterSeconds:3600,error:'일일 조회량 초과'}});
+ });
+ await ready(page);
+ expect(calls,'distant zoom must not consume a quota request').toBe(0);
+ await changeLiveTrainZoom(page,true);
+ await expect(page.locator('[data-live-vehicle="metro"]')).toHaveAttribute('data-live-quota','true',{timeout:60000});
+ await expect(page.locator('#dj-live-vehicle-status')).toContainText('일일 조회량을 초과');
+ await tap(page,page.locator('#djNext-layers'));
+ await expect(page.locator('[data-layer-key="livemetro"] .djNext-layer-state')).toHaveText('조회 한도 초과');
+ expect(calls).toBe(1);
+});
 
 
 test('bottom dock switches adjacent tabs promptly without old-panel bounce or a blank page',{tag:'@phone-common'},async({page})=>{
