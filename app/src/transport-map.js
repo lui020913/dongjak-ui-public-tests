@@ -2713,6 +2713,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(place.kind==='subway'){
       const badgeLines=metroTransferBadgeLines(place.name,
         [...(place.lines||[]),...(place.selectedLine?[place.selectedLine]:[])]);
+      panel.dataset.djMetroTransfer=badgeLines.length>1?'true':'false';
       if(!sameStationLineChange)title.append(document.createTextNode(stationTitle));
       if(sameStationLineChange){
         for(const btn of title.querySelectorAll('.dj-metro-line-selector')){
@@ -2772,6 +2773,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(place.median && place.direction)chips.append(el('span','transport-chip muted',`${place.direction} 방면`));
     neighborsEl?.replaceChildren(...(place.kind==='subway'&&place.selectedLine && Object.hasOwn(SUBWAY_LINE_COLORS,normalizeLineName(place.selectedLine))
       ?[createMetroLineCard(place.selectedLine,place.name)]:[]));
+    if(place.kind==='subway'&&neighborsEl&&!neighborsEl.firstElementChild){
+      neighborsEl.append(el('p','metro-neighbor-status','인접역 정보가 확인되지 않았습니다. 호선 및 역 위치는 상단에서 확인할 수 있습니다.'));
+    }
     // v7.0.25: previous/next station controls select that station and recenter
     // the real map. Only resolve names present in our validated local station
     // set; an unverified/terminal station remains descriptive text.
