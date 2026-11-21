@@ -41,3 +41,17 @@ test('mobile compact dialogs no longer fade independently',()=>{
   assert.match(coordinator,/windowMotionFrame/);
   assert.match(coordinator,/sheetFadeOpacity\(progress,opening,slideFrom\)/);
 });
+
+test('phone full-screen tabs never receive legacy sheet fade or duplicate content animation',()=>{
+  const tabs='route-panel.page-panel,#participation-panel.page-panel,#news-panel.page-panel,#mine-panel.page-panel';
+  assert.ok(coordinator.includes("target.matches?.('#"+tabs+"')"),
+    'all four independent primary screens must bypass legacy sheet motion');
+  assert.match(coordinator,/target\.matches\?\.\('#route-panel\.page-panel,[^']+'\)\)return false;/);
+  assert.ok(coordinator.includes("win.matchMedia?.('(max-width:699px)')?.matches"),
+    'the exception must apply only to the mobile full-screen layout');
+  assert.equal(coordinator.includes("body.animate([{opacity:.72},{opacity:1}]"),false,
+    'the bottom-tab controller alone owns incoming content reveal');
+  const nav=read('src/bottom-tab-navigation.js');
+  assert.ok(nav.includes("panel.classList.add('dj-tab-content-enter')"));
+  assert.ok(coordinator.includes('cancelActive(target);'));
+});

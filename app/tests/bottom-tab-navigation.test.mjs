@@ -89,3 +89,41 @@ test('swiping the dock is handled at window capture even when a tab intercepts b
  assert.equal(app.dataset.tab,'participate','swipes outside the dock cannot change tabs');
  dispose();
 });
+
+test('delayed native click from swipe does not return to the original tab; a new press remains usable',()=>{
+ const handlers=new Map();
+ const app={dataset:{tab:'route'}};
+ const buttons=['map','route','participate','news','mine'].map(name=>({
+  dataset:{tab:name},isConnected:true,disabled:false,
+  click(){app.dataset.tab=name;}
+ }));
+ const nav={dataset:{},querySelectorAll:()=>buttons,
+  querySelector:selector=>buttons.find(b=>selector.includes('data-tab="'+b.dataset.tab+'"'))||null,
+  addEventListener(){},removeEventListener(){}};
+ const doc={getElementById:key=>key==='bottom-nav'?nav:null,querySelector:()=>null};
+ let lastGuard=0;
+ const win={matchMedia:()=>({matches:true}),
+  addEventListener:(name,fn)=>handlers.set(name,fn),
+  removeEventListener:name=>handlers.delete(name),
+  setTimeout:(_fn,ms)=>{if(ms===2200)lastGuard=ms;return 1;},clearTimeout:()=>{}};
+ const dispose=installBottomTabNavigation({doc,win,app});
+ const navTarget={closest:selector=>selector==='#bottom-nav'?nav:null};
+ handlers.get('pointerdown')({target:navTarget,pointerId:1,button:0,isPrimary:true,clientX:220,clientY:795});
+ handlers.get('pointerup')({pointerId:1,clientX:125,clientY:795,cancelable:true,preventDefault(){}});
+ assert.equal(app.dataset.tab,'participate');
+ assert.equal(lastGuard,2200);
+ let blocked=false;
+ handlers.get('click')({
+  target:{closest:selector=>selector==='#bottom-nav'?nav:selector==='#bottom-nav .nav-tab[data-tab]'?buttons[1]:null},
+  isTrusted:true,preventDefault(){blocked=true;},stopImmediatePropagation(){}
+ });
+ assert.equal(blocked,true,'the release click cannot undo the swipe navigation');
+ assert.equal(app.dataset.tab,'participate');
+ handlers.get('pointerdown')({target:navTarget,pointerId:2,button:0,isPrimary:true,clientX:130,clientY:795});
+ handlers.get('click')({
+  target:{closest:selector=>selector==='#bottom-nav .nav-tab[data-tab]'?buttons[3]:nav},
+  isTrusted:true,preventDefault(){},stopImmediatePropagation(){}
+ });
+ assert.equal(app.dataset.tab,'news','a new deliberate press must still change tabs');
+ dispose();
+});
