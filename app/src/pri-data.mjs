@@ -59,12 +59,13 @@ export function mergeFactor(bundle,patch){
  // Documented spatial non-selection defaults are explicit modeled scores, not evidence of zero incidents.
  const hasBaseline=Object.prototype.hasOwnProperty.call(patch,'unmatchedScore');
  if(hasBaseline&&(!number(patch.unmatchedScore)||patch.unmatchedScore<0||patch.unmatchedScore>100||!text(patch.unmatchedReason,200).trim()))fail('미선정 기본점수에는 0~100점과 산정 근거가 필요합니다.');
- for(const row of patch.scores){if(!obj(row)||!known.has(row.id)||rows.has(row.id)||!score(row.score)||row.score===null)fail('미등록·중복 구간 또는 점수 오류');rows.set(row.id,row);}
+ for(const row of patch.scores){if(!obj(row)||!known.has(row.id)||rows.has(row.id)||!score(row.score))fail('미등록·중복 구간 또는 점수 오류');rows.set(row.id,row);}
  // Raw observations remain in the original patch; the shared PRI bundle uses safety-direction scores.
  const segments=bundle.segments.map(s=>{
   const row=rows.get(s.id),observed=row?sourceDirection==='risk'?riskToSafety(row.score):row.score:hasBaseline?patch.unmatchedScore:null;
   const scores={...s.scores,[factor.id]:observed},evidence={...s.evidence};delete evidence[factor.id];
-  if(row){const note=text(row.evidence?.note);evidence[factor.id]={...row.evidence,note:(sourceDirection==='risk'?'원본 위험점수 '+row.score+'점 → PRI 안전점수 '+observed+'점. ':'')+note};}
+  if(row&&row.score!==null){const note=text(row.evidence?.note);evidence[factor.id]={...row.evidence,note:(sourceDirection==='risk'?'원본 위험점수 '+row.score+'점 → PRI 안전점수 '+observed+'점. ':'')+note};}
+  else if(row&&row.score===null)evidence[factor.id]={note:'이 도로구간은 명시적으로 미평가 처리되었습니다.'};
   else if(hasBaseline)evidence[factor.id]={note:'임시 기본점수 '+observed+'점 · '+text(patch.unmatchedReason)};
   return {...s,scores,evidence};
  });
