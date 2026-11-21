@@ -3,9 +3,9 @@
   "application_version": "9.2.66",
   "public_work_branch": "main",
   "purpose": "PR #190 merged after full public app CI. Repair iPhone onboarding blank-frame pauses by retaining opaque outgoing artwork/text until decoded crossfade, remove 15%-opacity fullscreen primary-page entry which exposed map instead of card/text, preserve bottom-tab labels, harmonize iOS native status strip across tour/guide/dialog overlays and community composer, and correct weather text clipping and button margins. Keep mobile-only gate, rail and transit sources, protected Preview, 12 phone QA, six visual/Gemini design reviews, Gemini autonomous exploration, verified Production and rollback protections.",
-  "attempt": 187,
+  "attempt": 188,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.65 guarded release and Android debug APK succeeded. User iPhone recordings/photos 2026-11-21 17:48–17:49 KST exposed distinct onset animation/transparent panel and native status-edge defects. PR #190 successfully merged after public source CI, full regression suite, build, phone viewport QA. Require NEW exact-source v9.2.66 guarded release; do not reuse v9.2.65 evidence.",
+  "last_retry_reason": "First guarded v9.2.66 release run 44887722236 correctly blocked Production at packaged regression: new v9266 test used unavailable repository-relative frontend path in sealed app directory; PR #191 rewrites test with assembled src fallback, passed full source CI, and merged (18796f96). Retry exact-source v9.2.66 with full fresh Preview / phone QA / six design reviews / Gemini exploration / protected Production gates; previous failed run's artifacts must not be reused.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
