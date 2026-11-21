@@ -37,15 +37,14 @@ test('v8.6.4 facility body is divided into readable information, favorites, revi
   assert.match(css,/\.dj-place-body\{[\s\S]*?overflow-y:auto/);
 });
 
-test('v8.6.4 temporary night theme bypasses consent and dismisses the full-screen transition',()=>{
+test('temporary night theme avoids consent and reload UI',()=>{
   const night=read('src/night-visibility-map.js');
   assert.match(night,/const applyTemporaryTheme=next=>/);
-  assert.match(night,/themeToggle\.dataset\.dj840ThemeConfirmed='1'/);
-  assert.match(night,/transition\.hidden=true/);
-  assert.match(night,/remove\('dj-v711-transition-active'\)/);
+  assert.ok(night.includes('theme?.setTemporaryTheme?.(next)'));
+  assert.doesNotMatch(night,/themeToggle\.dataset\.dj840ThemeConfirmed='1'/);
   assert.match(night,/applyTemporaryTheme\('dark'\)/);
+  assert.match(night,/applyTemporaryTheme\(null\)/);
 });
-
 test('v8.6.4 night-analysis map view does not apply the perspective screen blur',()=>{
   const css=read('src/v864-facility-detail-redesign.css');
   assert.match(css,/#app\[data-sangdo-night="on"\] #map\.dj-far-haze-active::before/);

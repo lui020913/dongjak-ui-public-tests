@@ -33,6 +33,6 @@ test('unverified distant official rail segments do not replace local known-stati
 test('iOS status and gradient share a consistent light appearance',()=>{
   const js=read('src/mobile-pwa-status-tone-v793.js');
   const css=read('src/mobile-pwa-status-tone-v793.css');
-  assert.match(js,/'#192d32':'#edf3ef'/);
+  assert.match(js,/'#17191d':'#edf3ef'/);
   assert.match(css,/--dj-pwa-native-edge:#edf3ef/);
 });

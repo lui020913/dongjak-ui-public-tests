@@ -16,10 +16,11 @@ function firstPaint(saved='dark',pending=null){
   vm.runInNewContext(boot,{document,localStorage:storage,sessionStorage:session,Date,Number},{timeout:1000});
   return {theme:document.documentElement.dataset.theme,meta:meta.content};
 }
-test('every cold open starts light, while a valid intentional reload may continue the dark theme',()=>{
-  assert.deepEqual(firstPaint('dark'),{theme:'light',meta:'#f3f7f5'});
+test('cold start respects saved manual theme and ignores stale night tokens',()=>{
+  assert.deepEqual(firstPaint('dark'),{theme:'dark',meta:'#17191d'});
+  assert.deepEqual(firstPaint('light'),{theme:'light',meta:'#f3f7f5'});
   const pending={expires:Date.now()+5000,night:null};
-  assert.deepEqual(firstPaint('dark',pending),{theme:'dark',meta:'#101f25'});
+  assert.deepEqual(firstPaint('dark',pending),{theme:'dark',meta:'#17191d'});
 });
 test('new release follows v8.0.2 and preserves original sources',()=>{
   assert.equal(RENUMBERED_VERSION_HISTORY[0].version,'v8.0.3');
