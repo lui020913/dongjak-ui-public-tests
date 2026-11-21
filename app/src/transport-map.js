@@ -2769,6 +2769,19 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         chips.append(chip);
       }
     }
+    if(place.kind==='subway'){
+      // Match the existing app's outline icon family for start/destination.
+      for(const [id,path] of [['transport-use-start','M5 19 19 5M8 5h11v11'],['transport-use-end','M12 21s7-5.3 7-12a7 7 0 0 0-14 0c0 6.7 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z']]){
+        const action=panel.querySelector('#'+id);
+        if(action&&!action.querySelector('.dj9272-transport-icon')){
+          const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+          svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');
+          svg.setAttribute('stroke-width','1.9');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+          svg.setAttribute('aria-hidden','true');svg.classList.add('dj9272-transport-icon');
+          const glyph=document.createElementNS('http://www.w3.org/2000/svg','path');glyph.setAttribute('d',path);svg.append(glyph);action.prepend(svg);
+        }
+      }
+    }
     if(place.arsId)chips.append(el('span','transport-chip muted',`ARS ${place.arsId}`));
     if(place.median && place.direction)chips.append(el('span','transport-chip muted',`${place.direction} 방면`));
     neighborsEl?.replaceChildren(...(place.kind==='subway'&&place.selectedLine && Object.hasOwn(SUBWAY_LINE_COLORS,normalizeLineName(place.selectedLine))
