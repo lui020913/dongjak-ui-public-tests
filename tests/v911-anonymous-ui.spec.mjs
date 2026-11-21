@@ -783,6 +783,31 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
 });
 
 
+test('iPhone first-loading splash shares the native status-strip tone',{tag:'@phone-common'},async({page})=>{
+  const ua=await page.evaluate(()=>navigator.userAgent);
+  test.skip(!/iPhone/.test(ua),'iOS PWA only');
+  await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
+  await ready(page);
+  const colors=await page.evaluate(()=>{
+    const overlay=document.getElementById('map-startup-overlay');
+    overlay.hidden=false;overlay.classList.remove('is-hidden');
+    const style=getComputedStyle(overlay);
+    const status=getComputedStyle(document.getElementById('dj-ios-pwa-status-sample'));
+    return {start:style.getPropertyValue('--start-bg').trim(),
+      gradient:style.backgroundImage,
+      status:status.backgroundColor,
+      runtime:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim(),
+      meta:document.querySelector('meta[name="theme-color"]').content};
+  });
+  expect(colors.start).toBe('#edf3ef');
+  expect(colors.runtime).toBe(colors.start);
+  expect(colors.meta).toBe(colors.start);
+  expect(colors.status).toBe('rgb(237, 243, 239)');
+  expect(colors.gradient).toContain('linear-gradient');
+  expect(colors.gradient).toContain('rgb(237, 243, 239) 0%');
+  await test.info().attach('iphone-startup-status-continuity',{body:await page.screenshot(),contentType:'image/png'});
+});
+
 test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-common'},async({page})=>{
  const ua=await page.evaluate(()=>navigator.userAgent);test.skip(!/iPhone/.test(ua),'iOS PWA only');
  await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));

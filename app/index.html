@@ -51,10 +51,10 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#eef3ef';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#192d32':'#eef3ef')
+          ? (displayTheme==='dark'?'#192d32':'#edf3ef')
           : (displayTheme==='dark'?'#101f25':'#f3f7f5');
       })();
     </script>
@@ -92,6 +92,18 @@
       html[data-theme="dark"] .map-startup-overlay{
         --start-bg:#101f25;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
         background:radial-gradient(ellipse at 50% 39%,#1a3334 0%,var(--start-bg) 78%);
+      }
+      /* Standalone iPhone pre-paint: the native status strip and the first
+         pixels of the loader share the SAME tone. Start with a flat edge,
+         then blend gently toward the centered light wash below the header.
+         This is inline so there is no color seam before Vite CSS loads. */
+      html.dj-ios-home-pwa:not([data-theme="dark"]) .map-startup-overlay{
+        --start-bg:#edf3ef;
+        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#f9fbfa 44%,var(--start-bg) 100%);
+      }
+      html.dj-ios-home-pwa[data-theme="dark"] .map-startup-overlay{
+        --start-bg:#192d32;
+        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#1a3334 44%,var(--start-bg) 100%);
       }
       .map-startup-overlay[hidden]{display:none!important;}
       .map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}
