@@ -15,15 +15,16 @@ test('expanded nearby utility card measures search/toolbar and stores its real s
  assert.match(src,/startDelta\.y=Math\.max\(startDelta\.y,minDelta\)/);
  assert.match(src,/endDelta\.y=Math\.max\(endDelta\.y,minDelta\)/);
 });
-test('onboarding fades render on distinct frames rather than coalescing same-task opacities',()=>{
+test('onboarding retains the outgoing surface until the incoming image is decoded',()=>{
  const src=read('src/v860-onboarding.js');
+ const css=read('src/v860-onboarding.css');
  assert.match(src,/function transitionSlide\(target,direction='next'\)/);
- assert.match(src,/const fadeOut=\(\)=>/);
- assert.match(src,/requestAnimationFrame\(fadeOut\)/);
- assert.match(src,/const fadeIn=\(\)=>/);
- assert.match(src,/requestAnimationFrame\(fadeIn\)/);
- assert.match(src,/opacity 170ms ease-in/);
- assert.match(src,/opacity 200ms cubic-bezier/);
+ assert.match(src,/holdOutgoingSlide\(\)/);
+ assert.match(src,/preload\.decode\(\)/);
+ assert.match(src,/render\(target,direction,false\)/);
+ assert.match(css,/dj9266-retained-slide-out/);
+ assert.doesNotMatch(src,/const fadeOut=\(\)=>/);
+ assert.doesNotMatch(src,/opacity 170ms ease-in/);
 });
 test('paired bus arrival cards remain same-row after phone layout migrations',()=>{
  const src=read('src/v910-request-completion.css');
