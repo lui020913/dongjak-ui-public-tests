@@ -3,15 +3,9 @@ import {mkdirSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {ready} from './live-qa-journey-helpers.mjs';
 import {ACTIONS,selectAction,classifyReview,allowedRequest} from '../scripts/live-qa-explore-policy.mjs';
+import {askGeminiModel} from '../scripts/live-qa-explore-model.mjs';
 const dir='qa-explore',key=process.env.GEMINI_API_KEY,model=process.env.GEMINI_MODEL||'gemini-3.5-flash-lite';
-async function ask(parts,schema){
- if(!key||!/^gemini-[a-z0-9.-]+$/.test(model))throw Error('Model configuration unavailable');
- for(let i=0;i<2;i++){
-  let res;try{res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:{responseMimeType:'application/json',responseSchema:schema,maxOutputTokens:2048}}),signal:AbortSignal.timeout(40000)});}catch{}
-  if(res?.ok){const c=(await res.json()).candidates?.[0];if(c?.finishReason!=='STOP')throw Error('Incomplete model answer');return JSON.parse(c.content.parts.filter(p=>!p.thought).map(p=>p.text||'').join(''));}
-  if(res&&![429,500,502,503,504].includes(res.status))throw Error('Model HTTP '+res.status);
- }throw Error('Model unavailable');
-}
+const ask=(parts,schema)=>askGeminiModel({parts,schema,key,model});
 const image=f=>({inlineData:{mimeType:'image/png',data:f.bytes.toString('base64')}});
 async function visible(page,a){
  const l=page.locator(a.selector);if(await l.count()!==1)return false;

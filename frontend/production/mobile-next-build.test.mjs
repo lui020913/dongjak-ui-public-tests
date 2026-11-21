@@ -150,7 +150,9 @@ test('voice search has an inline status, native permission request and no duplic
  const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  const voice=js.slice(js.indexOf("const voicePanel=doc.createElement('div');voicePanel.id='djNext-voice-panel'"),js.indexOf('export function installPhoneRouteComparison'));
  assert.ok(voice.includes('voicePanel.append(wave,feedback);form.append(voicePanel)'));assert.ok(voice.includes('djNext-voice-wave'));assert.ok(voice.includes('r.start()'));assert.ok(voice.includes("app.dataset.djVoiceListening='true'"));assert.ok(voice.includes('r.interimResults=true'));assert.ok(!voice.includes('await win.navigator.mediaDevices.getUserMedia'));
- assert.ok(css.includes('flex-basis:0!important;width:0!important;max-width:0!important'));assert.ok(css.includes('flex-basis 250ms'));assert.ok(css.includes('position:static!important;display:block!important;background:none!important'));assert.ok(css.includes('--dj-voice-extra:82px'));assert.ok(css.includes('height:calc(54px + var(--dj-voice-extra))'));
+ assert.ok(css.includes('.topbar>.header-tools:has(#dj890-ai-orb){'));
+  assert.ok(!css.includes(':is([data-search-open="true"],[data-dj-voice-feedback="true"]) .topbar>.header-tools:has(#dj890-ai-orb)'));
+  assert.ok(css.includes('flex-basis 250ms'));assert.ok(css.includes('position:static!important;display:block!important;background:none!important'));assert.ok(css.includes('--dj-voice-extra:82px'));assert.ok(css.includes('height:calc(54px + var(--dj-voice-extra))'));
 });
 test('AI dialogue preserves evidence per turn and occupies the viewport',()=>{
  const js=readFileSync(new URL('../src/v880-supabase-safety-ai.js',import.meta.url),'utf8'),css=readFileSync(new URL('../src/v880-supabase-safety-ai.css',import.meta.url),'utf8');

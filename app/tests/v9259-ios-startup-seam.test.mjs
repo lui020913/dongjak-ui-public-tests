@@ -5,7 +5,11 @@ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const tone=readFileSync(new URL('../src/mobile-pwa-status-tone-v793.js',import.meta.url),'utf8');
 const css=readFileSync(new URL('../src/mobile-pwa-status-tone-v793.css',import.meta.url),'utf8');
 test('iPhone cold-start HTML and runtime status controller use the same light edge tone',()=>{
-  const startup=html.slice(html.indexOf('var iosHome='),html.indexOf('</script>'));
+  const start=html.indexOf('var iosHome=');
+  // The protected mobile-only builder prepends its own <script> bootstrap.
+  // Search for the closing tag AFTER the theme script, not the first tag in HTML.
+  assert.ok(start>=0);
+  const startup=html.slice(start,html.indexOf('</script>',start));
   assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor=displayTheme==='dark'\?'#192d32':'#edf3ef'/);
   assert.match(startup,/\? \(displayTheme==='dark'\?'#192d32':'#edf3ef'\)/);
   assert.match(tone,/theme==='dark'\?'#192d32':'#edf3ef'/);
