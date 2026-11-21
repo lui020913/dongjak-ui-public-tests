@@ -23,7 +23,7 @@
     "original_dongjak_facility_records_reported": 64,
     "facility_points_available_in_current_public_app": 9,
     "neighboring_facility_record_count_verified": null,
-    "status": "상도1동 경계 밖 인접 시설 포함 재분석 미완료; 이전 64건 파일과 자료정합 필요",
+    "status": "동작구 64개 구버전(2025-05-27) 시설점의 상도1동 경계 밖 500m GIS 전처리 완료: 12곳, 기존 9곳과 중복 2곳, 신규 후보 10곳. 관악구/서초구 등의 인접 자치구 공식 시설 미포함; 주 출입문·현행 지정 확인 미완료.",
     "source": "2026-11-16 phase9 README (64 child/senior/disabled registered facilities in whole Dongjak, not just Sangdo1)",
     "additional_school_catchment_candidate": {
       "name": "서울은로초등학교",
@@ -45,6 +45,83 @@
       "score_status": "미산정; 공식 폴리곤 및 주 출입문 확인 전 점수 합산 금지",
       "catchment_source": "https://dgedu.sen.go.kr/CMS/introduction/introduction06/introduction0604/introduction060402/index.html",
       "catchment_asof": "2025-03"
+    },
+    "preprocessed_from_original_64": {
+      "performed_at": "2026-11-21",
+      "origin": "response_1794184313730.json; 64 active police zone facility records; raw lastMdfcnDt 20250527",
+      "boundary": "app/public/data/protection-zone/boundary_reference.geojson (reference boundary 2026-10)",
+      "distance": "facility representative POINT to reference administrative boundary shortest planar distance; EPSG:5181; strictly exterior <=500m",
+      "total_outside_500m": 12,
+      "already_in_public_app_9": 2,
+      "additional_external_500m": 10,
+      "additional_external_300m": 8,
+      "additional_external_facilities": [
+        {
+          "id": "115902010618",
+          "name": "한마음경로당",
+          "type": "노인",
+          "dist_m": 19.82
+        },
+        {
+          "id": "115901023700",
+          "name": "행복한숲유치원",
+          "type": "어린이",
+          "dist_m": 60.23
+        },
+        {
+          "id": "115901023698",
+          "name": "구립흑석어린이집",
+          "type": "어린이",
+          "dist_m": 157.5
+        },
+        {
+          "id": "115901010619",
+          "name": "시현유치원",
+          "type": "어린이",
+          "dist_m": 186.31
+        },
+        {
+          "id": "115901010644",
+          "name": "서울삼성학교",
+          "type": "어린이",
+          "dist_m": 186.62
+        },
+        {
+          "id": "115902010652",
+          "name": "낙원경로당",
+          "type": "노인",
+          "dist_m": 220.29
+        },
+        {
+          "id": "115901010621",
+          "name": "서울영본초등학교",
+          "type": "어린이",
+          "dist_m": 249.5
+        },
+        {
+          "id": "115901029264",
+          "name": "예일어린이집",
+          "type": "어린이",
+          "dist_m": 254.29
+        },
+        {
+          "id": "115901010620",
+          "name": "서울본동초등학교",
+          "type": "어린이",
+          "dist_m": 308.94
+        },
+        {
+          "id": "115901010640",
+          "name": "서울신상도초등학교",
+          "type": "어린이",
+          "dist_m": 373.05
+        }
+      ],
+      "candidate_not_final": true,
+      "files": [
+        "app/public/data/protection-zone/sangdo1_exterior500_facilities.geojson",
+        "app/public/data/protection-zone/sangdo1_exterior500_facilities.csv"
+      ]
     }
   },
   "records": [
