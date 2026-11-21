@@ -12,7 +12,7 @@ function proceduralGrass(isDark){
   const canvas=document.createElement('canvas');
   canvas.width=64;canvas.height=64;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle=isDark?'#274333':'#b4cea3';
+  ctx.fillStyle=isDark?'#34383c':'#b4cea3';
   ctx.fillRect(0,0,64,64);
   let seed=1789127;
   const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
@@ -20,13 +20,13 @@ function proceduralGrass(isDark){
   for(let i=0;i<100;i++){
     const x=rand()*64,y=rand()*64;
     const alpha=.10+rand()*.24;
-    ctx.strokeStyle=isDark?`rgba(113,173,113,${alpha})`:`rgba(96,151,80,${alpha})`;
+    ctx.strokeStyle=isDark?`rgba(120,127,137,${alpha})`:`rgba(96,151,80,${alpha})`;
     ctx.lineWidth=.6+rand()*.75;
     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+rand()*1.7-.85,y-1.0-rand()*3.4);ctx.stroke();
   }
   for(let i=0;i<9;i++){
     const x=rand()*64,y=rand()*64;
-    ctx.fillStyle=isDark?'rgba(58,112,66,.28)':'rgba(65,139,76,.28)';
+    ctx.fillStyle=isDark?'rgba(108,115,125,.20)':'rgba(65,139,76,.28)';
     ctx.beginPath();ctx.ellipse(x,y,1.2+rand()*1.7,1.2+rand()*1.7,0,0,Math.PI*2);ctx.fill();
   }
   return ctx.getImageData(0,0,64,64);
@@ -37,7 +37,7 @@ function proceduralGrass(isDark){
  */
 export const GREEN_PALETTE={
   light:{park:'#a5ca92',forest:'#92bd86'},
-  dark:{park:'#34583e',forest:'#305442'}
+  dark:{park:'#373c40',forest:'#32373b'}
 };
 const forestId=(id='')=>/forest|wood|woodland|treecover|scrub/.test(String(id).toLowerCase());
 const forestTypes=['forest','wood','woodland','trees','wooded','tree','scrub','natural_wood'];
@@ -103,7 +103,7 @@ export function installForestShade({map,app}){
 /** v5.12.6 — Opaque overhead footprints prevent double-shading where native and GIS buildings overlap. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
-  dark:Object.freeze({footprint:'#40575d',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#30464d',nearOpacity:0.88,farOpacity:0.82})
+  dark:Object.freeze({footprint:'#42474f',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#30343b',nearOpacity:0.88,farOpacity:0.82})
 });
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill')return false;

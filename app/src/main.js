@@ -131,7 +131,7 @@ import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
-import {readManualThemeReload,installManualThemeReload} from './manual-pwa-theme-reload.js';
+import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -640,7 +640,7 @@ const immersiveChrome=installMapImmersive({
   onRestore:()=>requestAnimationFrame(syncOverviewSheetForViewport)
 });
 const visualTheme = initTheme({map,app});
-installManualThemeReload({map,app,canReload:()=>mapReady&&!navMode&&!routeStart&&!routeEnd&&!routeRequestPending&&!addMode&&!communityPickMode&&!routePickMode&&app.dataset.sangdoNight!=='on'&&app.dataset.tab==='mine'});
+// Theme changes now update MapLibre + UI in place. Do not reload the PWA.
 
 initWeatherWidget({
   getPosition: () => getDevicePosition({enableHighAccuracy:false,timeout:12000,maximumAge:120000}),

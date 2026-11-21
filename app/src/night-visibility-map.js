@@ -245,22 +245,14 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   const poiIsolation=createNightPoiIsolation(map);
   let enabled=false,lights=[],lines=null,scope=null,scopeIsOfficial=false;
   let visibility=null,occlusionPromise=null,roadSource='online',offlineOcclusionReady=false;
-  let themeBeforeNight=null;
   const applyTemporaryTheme=next=>{
-    const themeToggle=document.getElementById('theme-toggle');
-    const previousConfirmed=themeToggle?.dataset?.dj840ThemeConfirmed;
-    if(themeToggle)themeToggle.dataset.dj840ThemeConfirmed='1';
-    try{theme?.setTemporaryTheme?.(next);}finally{
-      if(themeToggle){
-        if(previousConfirmed===undefined)delete themeToggle.dataset.dj840ThemeConfirmed;
-        else themeToggle.dataset.dj840ThemeConfirmed=previousConfirmed;
-      }
-      const transition=document.getElementById('dj-full-transition');
-      if(transition)transition.hidden=true;
-      document.documentElement?.classList?.remove('dj-v711-transition-active');
-      const consent=document.getElementById('dj840-theme-confirm');
-      if(consent)consent.hidden=true;
-    }
+    // Direct state update. Never synthesize a theme-toggle click or confirmation.
+    theme?.setTemporaryTheme?.(next);
+    const transition=document.getElementById('dj-full-transition');
+    if(transition)transition.hidden=true;
+    document.documentElement?.classList?.remove('dj-v711-transition-active');
+    const consent=document.getElementById('dj840-theme-confirm');
+    if(consent)consent.hidden=true;
   };
   let lightsPromise=null,roadsPromise=null,boundaryLookup=null,segments=[];
   let popup=null,clickEventsAttached=false;
@@ -766,13 +758,9 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
     // v7.0.25: set the analysis flag FIRST. The theme renderer uses this flag
     // to paint 3D buildings, so restoring the map before clearing it left some
     // buildings artificially dark even after night mode was switched off.
-    if(enabled)themeBeforeNight=theme?.currentTheme?.()??null;
     app.dataset.sangdoNight=enabled?'on':'off';
     if(enabled){poiIsolation.set(true);applyTemporaryTheme('dark');}
-    else{
-      if(themeBeforeNight)applyTemporaryTheme(themeBeforeNight);
-      themeBeforeNight=null;
-    }
+    else applyTemporaryTheme(null);
     theme?.refresh?.();
     if(!enabled)poiIsolation.set(false);else poiIsolation.reconcile();
     // A tile/style update can finish after the mode changes: re-paint on idle.

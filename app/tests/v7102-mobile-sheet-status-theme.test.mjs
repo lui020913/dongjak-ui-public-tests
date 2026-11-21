@@ -22,16 +22,14 @@ test('all four mobile panels remain scrollable with pinned header and compact sh
   assert.match(js,/panel\.replaceChildren\(header,content\)/);
 });
 
-test('theme switch has clearly visible progress and iOS PWA theme roots are in sync',()=>{
-  const css=read('platforms/shared/mobile-panel-layout.css');
+test('iOS theme roots stay in sync without a fullscreen theme mask',()=>{
   const ios=read('platforms/ios-pwa/ios-pwa.css');
   const pwa=read('src/mobile-pwa-status-tone-v793.js');
-  assert.match(css,/blur\(14px\)/);
-  assert.match(css,/테마 전환 중…/);
-  assert.match(css,/#app#app#app \.dj-theme-switch-flash/);
+  const env=read('src/ui-environment.js');
   assert.match(ios,/color-scheme:dark!important/);
   assert.match(ios,/color-scheme:light!important/);
   assert.match(pwa,/root\.style\.colorScheme=theme/);
+  assert.doesNotMatch(env,/themeFlash|showThemeTransition/);
   assert.equal(RENUMBERED_VERSION_HISTORY[0].version,'v8.0.3');
   assert.equal(RENUMBERED_VERSION_HISTORY[0].scale,'patch');
 });

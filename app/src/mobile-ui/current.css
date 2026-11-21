@@ -43,17 +43,14 @@
   #app .dj-transit-bus-route[data-bus-class="unknown"] {background:#62676b!important;color:#fff!important;}
   #app[data-dj910-sheet-open="true"] #dj-browser-webapp-tip {display:none!important;}
   #app .dj-theme-switch-flash {backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none!important;animation-duration:180ms!important;}
-  #app[data-theme="dark"] {
-    --dj800-surface:#191b1f!important;--dj800-elevated:#25282d!important;--dj800-text:#e5e7eb!important;--dj800-muted:#a5acb5!important;--dj800-border:#3a3e45!important;--dj800-accent:#527f72!important;
-    --surface:#191b1f!important;--card:#191b1f!important;--panel:#191b1f!important;--text:#e5e7eb!important;--muted:#a5acb5!important;--border:#3a3e45!important;
-  }
-  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:#191b1f!important;color:#e5e7eb!important;border-color:#3a3e45!important;box-shadow:0 8px 28px #0003!important;}
-  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:#25282d!important;color:#d7dde3!important;border-color:#3a3e45!important;}
-  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.nav-tab,.dj-v794-tool,.dj832-feature) {color:#c5cec9!important;}
-  #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#c3ded2!important;background:#303e39!important;}
-  #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:#b4c1bb!important;}
-  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:#35574c!important;color:#fff!important;box-shadow:none!important;}
-  html[data-theme="dark"],html[data-theme="dark"] body {background:#151619!important;}
+  /* Theme tokens are owned by theme-contract.css; no local dark palette. */
+  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:var(--dj-theme-surface,#23262c)!important;color:var(--dj-theme-ink,#f2f4f7)!important;border-color:var(--dj-theme-line,#424952)!important;box-shadow:0 8px 28px #0003!important;}
+  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:var(--dj-theme-raised,#2b3037)!important;color:var(--dj-theme-ink,#f2f4f7)!important;border-color:var(--dj-theme-line,#424952)!important;}
+  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.nav-tab,.dj-v794-tool,.dj832-feature) {color:var(--dj-theme-muted,#b6bec8)!important;}
+  #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#e4efff!important;background:#39434e!important;}
+  #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#b6bec8)!important;}
+  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:var(--dj-theme-raised,#2b3037)!important;color:#fff!important;box-shadow:none!important;}
+  html[data-theme="dark"],html[data-theme="dark"] body {background:var(--dj-theme-bg,#17191d)!important;}
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;left:12px!important;right:12px!important;width:auto!important;height:50px!important;min-height:50px!important;padding:0!important;gap:8px!important;background:transparent!important;backdrop-filter:none!important;}
     #app .topbar #map-quick-search {display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;max-width:none!important;}
@@ -216,13 +213,13 @@
     /* Keep desktop motion on geometric/opacity properties, never the theme
        background. CSS transitions outrank even important theme colors. */
     #app #mine-panel {transition-property:opacity,transform,translate,clip-path!important;}
-    #app[data-theme="dark"] #mine-panel {background:#191b1f!important;background-color:#191b1f!important;color:#e5e7eb!important;}
+    #app[data-theme="dark"] #mine-panel {background:var(--dj-theme-surface,#23262c)!important;background-color:var(--dj-theme-surface,#23262c)!important;color:var(--dj-theme-ink,#f2f4f7)!important;}
     #app[data-theme="light"] #mine-panel {background:#fff!important;background-color:#fff!important;}
   }
   #app :is(.dj-place-header-close,#transport-close) {background:var(--dj800-elevated,#e8f3ed)!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;color:var(--dj800-text,#263a32)!important;box-sizing:border-box!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:#25282d!important;color:#e5e7eb!important;transition:none!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-name,.dj834-settings-group>button>span) {color:#e5e7eb!important;-webkit-text-fill-color:#e5e7eb!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-meta small,.dj834-current-theme,.dj834-chevron) {color:#a5acb5!important;-webkit-text-fill-color:#a5acb5!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:var(--dj-theme-raised,#2b3037)!important;color:var(--dj-theme-ink,#f2f4f7)!important;transition:none!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-name,.dj834-settings-group>button>span) {color:var(--dj-theme-ink,#f2f4f7)!important;-webkit-text-fill-color:var(--dj-theme-ink,#f2f4f7)!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-meta small,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#b6bec8)!important;-webkit-text-fill-color:var(--dj-theme-muted,#b6bec8)!important;}
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app #dj-tablet-utility-group {display:none!important;}
     #app #dj-v794-toolbar .dj832-feature::after,#app #dj-v794-toolbar .dj832-feature::before {content:none!important;display:none!important;}
@@ -243,8 +240,8 @@
     #app #transport-sheet > .handle::before {content:none!important;display:none!important;}
     #app #bottom-nav .nav-tab {border:0!important;box-shadow:none!important;background-image:none!important;}
     #app #bottom-nav .nav-tab::before,#app #bottom-nav .nav-tab::after {content:none!important;display:none!important;}
-    #app[data-theme="dark"] #bottom-nav .nav-tab {background:transparent!important;color:#c5cec9!important;-webkit-text-fill-color:#c5cec9!important;}
-    #app[data-theme="dark"] #bottom-nav .nav-tab.active {background:#303e39!important;color:#c3ded2!important;-webkit-text-fill-color:#c3ded2!important;}
+    #app[data-theme="dark"] #bottom-nav .nav-tab {background:transparent!important;color:var(--dj-theme-muted,#b6bec8)!important;-webkit-text-fill-color:var(--dj-theme-muted,#b6bec8)!important;}
+    #app[data-theme="dark"] #bottom-nav .nav-tab.active {background:#39434e!important;color:#e4efff!important;-webkit-text-fill-color:#e4efff!important;}
     #app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {color:inherit!important;-webkit-text-fill-color:currentColor!important;}
     #app #dj-v794-weather .dj910-weather-icon {display:grid!important;place-items:center!important;width:25px!important;height:25px!important;min-height:25px!important;flex:0 0 25px!important;font-size:23px!important;line-height:1!important;}
   }

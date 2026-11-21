@@ -16,25 +16,11 @@
         try{selected=localStorage.getItem('dongjak_safety_color_theme_v1');}catch(_e){}
         var chosen=selected==='light'||selected==='dark'?selected:null;
         if(!chosen)chosen='light';
-        var pending=null;
-        try {pending=JSON.parse(sessionStorage.getItem('dj-pwa-transition-v7104')||'null');}catch(_e){}
-        if(pending && pending.expires && pending.expires<Date.now()) {
-          try{sessionStorage.removeItem('dj-pwa-transition-v7104');}catch(_e){}
-          pending=null;
-        }
-        // Every cold app start is light. Only an intentional in-flight iOS PWA
-        // theme/night reload may keep its saved selection for restoration.
         var themeReload=null;
         try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
         if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
-        var displayTheme=themeReload ? themeReload.theme : pending ? (pending.night==='on'?'dark':chosen) : 'light';
+        var displayTheme=themeReload ? themeReload.theme : chosen;
         document.documentElement.dataset.theme=displayTheme;
-        if(!pending&&!themeReload){try{localStorage.setItem('dongjak_safety_color_theme_v1','light');}catch(_e){}}
-        if(pending){
-          document.documentElement.dataset.djReloadSplash='true';
-          document.documentElement.dataset.djReloadMode=pending.night==='on'?'night':'theme';
-          document.documentElement.dataset.djReloadLabel=pending.night?'야간 시야 전환 중…':'테마 전환 중…';
-        }
         var iconSuffix=displayTheme==='dark'?'dark':'light';
         // iOS Home Screen art is independent of the application's light/dark theme.
         // Never rewrite #dj-apple-touch-icon here; Safari caches it at installation.
@@ -51,35 +37,14 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#192d32':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#17191d':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#192d32':'#edf3ef')
-          : (displayTheme==='dark'?'#101f25':'#f3f7f5');
+          ? (displayTheme==='dark'?'#17191d':'#edf3ef')
+          : (displayTheme==='dark'?'#17191d':'#f3f7f5');
       })();
     </script>
     <style>
-      /* Critical PWA pre-paint. NEVER show the normal app-startup logo during
-         a theme/night reload; the main transition UI takes over once loaded. */
-      html[data-dj-reload-splash="true"] body::before {
-        content:"";position:fixed;inset:0;z-index:29000;
-        background:#edf3ef;
-        -webkit-backdrop-filter:none;backdrop-filter:none;
-        pointer-events:all;
-      }
-      html[data-theme="dark"][data-dj-reload-splash="true"] body::before,
-      html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::before{
-        background:#192d32;
-      }
-      html[data-dj-reload-splash="true"] body::after{
-        content:attr(data-dj-reload-label);position:fixed;top:50%;left:0;right:0;
-        transform:translateY(-50%);z-index:29001;color:#19493b;text-align:center;
-        font-weight:750;font-size:17px;letter-spacing:.02em;
-        font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
-        pointer-events:none;
-      }
-      html[data-theme="dark"][data-dj-reload-splash="true"] body::after,
-      html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::after{color:#e1f4eb;}
       /* Critical first paint: no unstyled logo or white-theme flash. */
       html,body{margin:0;min-height:100%;}
       .map-startup-overlay{
@@ -90,7 +55,7 @@
         opacity:1;transition:opacity .3s ease;overflow:hidden;
       }
       html[data-theme="dark"] .map-startup-overlay{
-        --start-bg:#101f25;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
+        --start-bg:#17191d;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
         background:var(--start-bg);
       }
       /* Standalone iPhone pre-paint: the native status strip and the first
@@ -102,7 +67,7 @@
         background:var(--start-bg)!important;
       }
       html.dj-ios-home-pwa[data-theme="dark"] body #app .map-startup-overlay{
-        --start-bg:#192d32;
+        --start-bg:#17191d;
         background:var(--start-bg)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
@@ -1144,5 +1109,6 @@
     <script type="module" src="/src/v877-mobile-settings.js"></script>
     <script type="module" src="/src/v890-mobile-ai-orb.js"></script>
     <script type="module" src="/src/v891-mobile-hud-ai-logo.js"></script>
+    <script type="module" src="/src/theme-contract.js"></script>
   </body>
 </html>

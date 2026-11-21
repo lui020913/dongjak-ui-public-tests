@@ -57,7 +57,7 @@ html body #app#app#app#app#app#app#app #route-map-card:not([hidden]){display:fle
 
 /* Shared mobile surface tokens: do not inherit pale light-mode controls. */
 #app{--djNext-surface:#fff;--djNext-raised:#e5f1eb;--djNext-text:#203d32;--djNext-muted:#62786e;--djNext-border:#d6e4dc;--djNext-active:#087c65;--djNext-tile:#e4efdf;--djNext-tile-ink:#376b57}
-#app[data-theme="dark"]{--djNext-surface:#191b1f;--djNext-raised:#272e32;--djNext-text:#e6efeb;--djNext-muted:#aabdb5;--djNext-border:#414a48;--djNext-active:#167f6e;--djNext-tile:#293d38;--djNext-tile-ink:#a2ddc9}
+#app[data-theme="dark"]{--djNext-surface:#23262c;--djNext-raised:#30353c;--djNext-text:#f2f4f7;--djNext-muted:#b6bec8;--djNext-border:#424952;--djNext-active:#b4c8da;--djNext-tile:#343a43;--djNext-tile-ink:#e0e8f0}
 /* Material comes from app/src/button-material.css (shared with dialogs and install gate). */
 html body #app#app#app#app#app#app#app #djNext-rail :is(button.djNext-empty,#djNext-layers){background:var(--djNext-tool-soft-face)!important;border-style:solid!important}
 html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:color-mix(in srgb,var(--djNext-tool-selected-face) 86%,transparent)!important;color:var(--djNext-tool-selected-ink)!important;border-color:var(--djNext-active)!important}
@@ -205,7 +205,7 @@ html body #app#app#app#app#app#app#app #djNext-toast:not([hidden]){box-shadow:va
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"]{
  --dj-v4-surface:var(--djNext-surface,#191b1f);--dj-v4-card:#25282c;--dj-v4-control:#303439;
  --dj-v4-border:#42474d;--dj-v4-text:#e6e9eb;--dj-v4-muted:#b8c0c7;
- --dj-v4-selected:#233d35;--dj-v4-accent:#68c6a5;
+ --dj-v4-selected:var(--dj-theme-selected,#39434e);--dj-v4-accent:var(--dj-theme-accent,#b4c8da);
 }
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel,#ped-tools-panel,#dj854-weather-sheet,#transport-sheet,#dj-mobile-utilities,.djNext-modal-body,.dj860-card,.dj-map-settings-card,.dj-about-card,.version-history-dialog){background:var(--dj-v4-surface)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel > .dj-sheet-chrome,.page-panel > .dj836-sheet-body,#dj910-route-footer,#community-form,.community-form-top,.djNext-form-scroll,.dj854-weather-head,.ped-tools-panel-head,#djNext-layer-panel .djNext-modal-body>header,.dj860-head,.dj860-content,.dj860-footer){background:var(--dj-v4-surface)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
@@ -899,7 +899,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    backdrop-filter:blur(9px) saturate(1.25)!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .map-quick-search-form {
-   background:rgba(29,48,48,.82)!important;
+   background:rgba(35,38,44,.90)!important;
    background-image:none!important;
    border-color:rgba(208,230,219,.18)!important;
    box-shadow:0 5px 16px rgba(0,0,0,.22)!important;
@@ -913,7 +913,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    backdrop-filter:blur(9px) saturate(1.25)!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .header-tools > #dj890-ai-orb {
-   background:rgba(35,94,78,.88)!important;
+   background:rgba(51,57,67,.94)!important;
    background-image:none!important;
    border-color:rgba(207,240,223,.20)!important;
    box-shadow:0 5px 16px rgba(0,0,0,.25)!important;
@@ -934,7 +934,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @layer request-completion{
  @media(max-width:699px){
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app {--dj9272-surface:#f5faf7;--dj9272-page:#edf3ef;--dj9272-ink:#193c32;--dj9272-muted:#647c73;--dj9272-line:#d2e2da;--dj9272-tint:#e5f3ed;--dj9272-shadow:0 3px 12px rgba(24,58,46,.075)}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] {--dj9272-surface:#24342f;--dj9272-page:#192d32;--dj9272-ink:#ecf7f1;--dj9272-muted:#b1c8bd;--dj9272-line:#436158;--dj9272-tint:#294a42;--dj9272-shadow:0 3px 13px rgba(0,0,0,.25)}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] {--dj9272-surface:var(--dj-theme-surface,#23262c);--dj9272-page:var(--dj-theme-bg,#17191d);--dj9272-ink:var(--dj-theme-ink,#f2f4f7);--dj9272-muted:var(--dj-theme-muted,#b6bec8);--dj9272-line:var(--dj-theme-line,#424952);--dj9272-tint:var(--dj-theme-raised,#2b3037);--dj9272-shadow:0 3px 13px rgba(0,0,0,.25)}
   /* Tour occupies the phone from the native status edge to its home indicator.
      The illustration keeps a bounded aspect ratio and text retains a scroll area. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding:not([hidden]){position:fixed!important;inset:0!important;display:grid!important;place-items:stretch!important;box-sizing:border-box!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--dj9272-page)!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;z-index:24000!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:opacity 270ms ease!important}

@@ -1,0 +1,390 @@
+/* Single palette owner shared by the application and native-root controls.
+   Light/dark tokens change in one style recalculation, with no page mask. */
+:root[data-theme="light"] {
+    --dj-theme-bg:#edf3ef;
+    --dj-theme-surface:#ffffff;
+    --dj-theme-raised:#e9f2ed;
+    --dj-theme-ink:#20312e;
+    --dj-theme-muted:#53675e;
+    --dj-theme-line:#d3e0d8;
+    --dj-theme-selected:#dfeae5;
+    --dj-theme-accent:#285b4f;
+}
+:root[data-theme="dark"] {
+    --dj-theme-bg:#17191d;
+    --dj-theme-surface:#23262c;
+    --dj-theme-raised:#2b3037;
+    --dj-theme-ink:#f2f4f7;
+    --dj-theme-muted:#b6bec8;
+    --dj-theme-line:#424952;
+    --dj-theme-selected:#39434e;
+    --dj-theme-accent:#b4c8da;
+}
+
+/* Theme contract 2026-11-22: visual surfaces only. Do NOT recolor safety
+   severity badges, transit line colors, map API symbols or route geometry. */
+@layer request-completion {
+  html body #app#app#app#app#app#app#app[data-theme="light"] {
+    --dj9272-page:#edf3ef!important;
+    --dj9272-surface:#ffffff!important;
+    --dj9272-ink:#20312e!important;
+    --dj9272-muted:#53675e!important;
+    --dj9272-line:#d3e0d8!important;
+    --dj9272-tint:#e9f2ed!important;
+    --dj-primary-page-bg:#edf3ef!important;
+    --dj-primary-page-ink:#20312e!important;
+    --dj-primary-page-edge:#cedbd4!important;
+    --dj800-surface:#ffffff!important;
+    --dj800-text:#20312e!important;
+    --dj800-muted:#53675e!important;
+    --dj800-border:#d3e0d8!important;
+    --dj800-elevated:#e9f2ed!important;
+    --mf-ink:#20312e!important;
+    --mf-muted:#53675e!important;
+    --mf-line:#d3e0d8!important;
+    color-scheme:light!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] {
+    /* Stable charcoal hierarchy, not the old green/teal design system. */
+    --dj9272-page:#17191d!important;
+    --dj9272-surface:#23262c!important;
+    --dj9272-ink:#f2f4f7!important;
+    --dj9272-muted:#b6bec8!important;
+    --dj9272-line:#424952!important;
+    --dj9272-tint:#30353c!important;
+    --dj-v4-selected:#39434e!important;
+    --dj-v4-accent:#c0d5e7!important;
+    --djNext-surface:#23262c!important;
+    --djNext-raised:#30353c!important;
+    --djNext-text:#f2f4f7!important;
+    --djNext-muted:#b6bec8!important;
+    --djNext-border:#424952!important;
+    --djNext-active:#b4c8da!important;
+    --djNext-tile:#343a43!important;
+    --djNext-tile-ink:#e0e8f0!important;
+    --djNext-tool-face:#2b3037!important;
+    --djNext-tool-edge:#525a64!important;
+    --djNext-tool-soft-face:#353b44!important;
+    --djNext-tool-selected-face:#404b59!important;
+    --djNext-tool-selected-ink:#f2f4f7!important;
+    --dj-primary-page-bg:#17191d!important;
+    --dj-primary-page-ink:#f2f4f7!important;
+    --dj-primary-page-edge:#373c44!important;
+    --dj800-surface:#23262c!important;
+    --dj800-elevated:#2b3037!important;
+    --dj800-text:#f2f4f7!important;
+    --dj800-muted:#b6bec8!important;
+    --dj800-border:#424952!important;
+    --dj800-accent:#b4c8da!important;
+    --surface:#202329!important;
+    --card:#25292f!important;
+    --panel:#202329!important;
+    --text:#f2f4f7!important;
+    --muted:#b6bec8!important;
+    --border:#424952!important;
+    --mf-bg:#17191d!important;
+    --mf-surface:#23262c!important;
+    --mf-surface-muted:#292d34!important;
+    --mf-surface-raised:#30353c!important;
+    --mf-ink:#f2f4f7!important;
+    --mf-muted:#b6bec8!important;
+    --mf-line:#424952!important;
+    --mf-accent:#b4c8da!important;
+    --mf-accent-soft:#343e4a!important;
+    color:#f2f4f7!important;
+    background-color:#17191d!important;
+    color-scheme:dark!important;
+  }
+  html[data-theme="dark"],html[data-theme="dark"] body {
+    color-scheme:dark!important;
+    background-color:#17191d!important;
+  }
+  html[data-theme="light"],html[data-theme="light"] body {
+    color-scheme:light!important;
+  }
+  /* Fixed page roots, full-height tab pages and safe-area footer surfaces. */
+  html body #app#app#app#app#app#app#app[data-theme="dark"]:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]),
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]),
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj836-sheet-body,.dj-sheet-chrome),
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])::after,
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #dj910-route-footer {
+    background:#17191d!important;
+    background-color:#17191d!important;
+    background-image:none!important;
+    border-color:#373c44!important;
+    color:#f2f4f7!important;
+  }
+  /* My info / settings / route cards / list sheets / community / news. */
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    #mine-panel .dj834-profile-card,#mine-panel .dj834-settings-group,
+    .dj834-records-container,.dj877-pref-group,.dj877-pref-row,
+    .dj-map-settings-card,.dj-map-settings-group,.dj-map-settings-footer,
+    #dj-mobile-utilities,.dj-mobile-utilities-body,.dj854-more-head,
+    .dj-place-detail,.dj-place-header,.dj-place-info-card,.dj-place-favorites-section,
+    .route-card,.transport-sheet,#transport-sheet,.transport-arrival-row,
+    .dj-place-detail-popup .maplibregl-popup-content,
+    .dj833-night-dialog,#dj840-theme-confirm .dj840-dialog,
+    #dj854-weather-sheet,.dj860-onboarding .dj860-content
+  ) {
+    background:#23262c!important;
+    background-color:#23262c!important;
+    background-image:none!important;
+    border-color:#424952!important;
+    color:#f2f4f7!important;
+    box-shadow:0 4px 15px rgba(0,0,0,.14)!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
+    .dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button
+  ) {
+    background:#23262c!important;
+    border-color:#424952!important;
+    color:#f2f4f7!important;
+    -webkit-text-fill-color:#f2f4f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
+    .dj834-setting-icon,.dj834-user-avatar,.dj834-profile-symbol
+  ) {
+    background:#353b44!important;
+    color:#bdcbd9!important;
+    -webkit-text-fill-color:#bdcbd9!important;
+    border-color:#49515c!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    #mine-panel .dj834-profile-name,#mine-panel .dj834-detail-title,
+    #mine-panel .dj834-settings-group>button>span,
+    #route-panel .dj-sheet-chrome,#news-panel .dj-sheet-chrome,
+    #participation-panel .dj-sheet-chrome,.dj-map-settings-head h2,
+    .dj-map-settings-group h3,.dj877-pref-group strong
+  ) {
+    color:#f2f4f7!important;
+    -webkit-text-fill-color:#f2f4f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    #mine-panel .dj834-profile-meta small,#mine-panel .dj834-group-title,
+    #mine-panel .dj834-current-theme,#mine-panel .dj834-chevron,
+    #mine-panel .dj834-help,.dj-map-settings-group p,
+    .dj-map-settings-head p,.dj877-pref-row small,
+    .dj-place-kicker,.dj834-detail-back
+  ) {
+    color:#b6bec8!important;
+    -webkit-text-fill-color:#b6bec8!important;
+  }
+  /* Opaque, neutral map header; preserve topbar geometry and AI position. */
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    .topbar .map-quick-search-form,#map-quick-search .map-quick-search-form,
+    #map-quick-search-dropdown:not([hidden]),.map-quick-search-results,
+    #dj890-ai-orb,#dj800-ai-search-trigger
+  ) {
+    background:#252a30!important;
+    background-color:#252a30!important;
+    background-image:none!important;
+    border-color:#505761!important;
+    color:#f2f4f7!important;
+    box-shadow:0 4px 13px rgba(0,0,0,.18)!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    #map-quick-search-query,.map-quick-search-form input,
+    #dj890-ai-orb .dj890-ai-orb-text
+  ) {
+    color:#f2f4f7!important;
+    -webkit-text-fill-color:#f2f4f7!important;
+    caret-color:#eef1f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #map-quick-search-query::placeholder {
+    color:#b6bec8!important;
+    -webkit-text-fill-color:#b6bec8!important;
+    opacity:1!important;
+  }
+  /* Toolbar, floating map controls, weather tiles, layer controls. */
+  @media(max-width:699px){
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #dj-v794-toolbar .dj832-native,#dj-v794-toolbar .dj832-feature,
+      #dj-v794-toolbar #dj-v794-weather,#dj-v794-more,
+      #dj-v794-toolbar .dj-v794-tool,.map-controls button,
+      .maplibregl-ctrl button,#dj-v794-night,#dj-v794-toolbar .dj832-feature-label
+    ) {
+      background-color:#292e35!important;
+      background-image:none!important;
+      border-color:#525a64!important;
+      color:#f2f4f7!important;
+      -webkit-text-fill-color:#f2f4f7!important;
+    }
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
+    background:#252a30!important;
+    background-color:#252a30!important;
+    background-image:none!important;
+    border-color:#525a64!important;
+    box-shadow:0 3px 15px rgba(0,0,0,.25)!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab {
+    background:transparent!important;
+    color:#b8c0ca!important;
+    -webkit-text-fill-color:#b8c0ca!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active {
+    background:#39434e!important;
+    color:#e4efff!important;
+    -webkit-text-fill-color:#e4efff!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {
+    color:inherit!important;
+    -webkit-text-fill-color:currentColor!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    .dj-map-settings-card input:not([type="checkbox"]),
+    .dj-map-settings-card select,#mine-panel input,#mine-panel select,
+    #dj-mobile-utilities input,#dj-mobile-utilities select
+  ) {
+    background:#2b3037!important;
+    border-color:#525a64!important;
+    color:#f2f4f7!important;
+    -webkit-text-fill-color:#f2f4f7!important;
+    color-scheme:dark!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    #dj-map-settings button,#mine-panel button,.dj-map-settings-card button
+  ):focus-visible {
+    outline:2px solid #b4c8da!important;
+    outline-offset:2px!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding {
+    --dj860-bg:#17191d!important;
+    --dj860-fg:#f2f4f7!important;
+    --dj860-muted:#b6bec8!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] .map-startup-overlay {
+    --start-bg:#17191d!important;
+    --start-fg:#f2f4f7!important;
+    --start-muted:#b6bec8!important;
+    --start-track:#424952!important;
+    background:#17191d!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"] {
+    --dj-pwa-land-tone:#17191d!important;
+    --dj-pwa-land-tone-rgb:23,25,29!important;
+    --dj-pwa-native-edge:#17191d!important;
+    --dj-pwa-status-color:#17191d!important;
+    background-color:#17191d!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"] body #app #dj-ios-pwa-map-seam,
+  html.dj-ios-home-pwa[data-theme="dark"] body #dj-ios-pwa-status-sample {
+    background-color:#17191d!important;
+    background:#17191d!important;
+  }
+  html.dj-ios-home-pwa[data-theme="dark"] body #app .topbar .map-quick-search-form {
+    background:#252a30!important;
+    border-color:#505761!important;
+  }
+}
+/* No extra full-screen mask is introduced by theme changes. */
+@media(prefers-reduced-motion:reduce){
+  #app .dj-theme-switch-flash{animation:none!important;transition:none!important;}
+}
+
+/* AI dialog belongs to <body>, outside #app's inherited variables. */
+@layer request-completion {
+  @media(max-width:699px) {
+    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal {
+      --djNext-surface:#23262c!important;
+      --djNext-text:#f2f4f7!important;
+      --djNext-muted:#b6bec8!important;
+      --djNext-border:#424952!important;
+      --dj800-surface:#23262c!important;
+      --dj800-surface-soft:#2b3037!important;
+      --dj800-text:#f2f4f7!important;
+      color-scheme:dark!important;
+      background:#23262c!important;
+      color:#f2f4f7!important;
+      border-color:#424952!important;
+    }
+    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
+      .dj-ai-search-content,.dj-ai-search-header,.dj-ai-search-body,
+      .dj-ai-search-history,.dj-ai-search-input,.dj-ai-answer,
+      textarea,input:not([type="checkbox"]),select
+    ) {
+      background-color:#23262c!important;
+      color:#f2f4f7!important;
+      border-color:#424952!important;
+    }
+    html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
+      .dj-ai-muted,.dj-ai-message-meta,small
+    ) {color:#b6bec8!important;}
+  }
+}
+
+/* Keep production mobile controls and secondary windows in the same neutral
+   semantic tokens; positioning, ARIA, animations and gesture styles untouched. */
+@layer request-completion {
+  @media(max-width:699px) {
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #djNext-toolbar #djNext-rail button.djNext-tool,
+      #djNext-toolbar #djNext-layers,
+      #djNext-toolbar #djNext-scroll .djNext-tool,
+      .map-actions > button,#dj840-map-tip,#dj-browser-webapp-tip
+    ) {
+      --djNext-tool-face:#2b3037!important;
+      --djNext-tool-soft-face:#343a43!important;
+      --djNext-tool-edge:#525a64!important;
+      --djNext-text:#f2f4f7!important;
+      color:#f2f4f7!important;
+      -webkit-text-fill-color:#f2f4f7!important;
+      border-color:#525a64!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #dj854-weather-sheet,#djNext-layer-panel .djNext-modal-body,
+      #dj-mobile-utilities,#map-gesture-guide,#route-map-card,
+      #dj834-map-settings,#version-history-modal .version-history-dialog,
+      #djNext-permissions .djNext-modal-body
+    ) {
+      --djNext-surface:#23262c!important;
+      --djNext-text:#f2f4f7!important;
+      --djNext-muted:#b6bec8!important;
+      --djNext-border:#424952!important;
+      --dj9272-page:#17191d!important;
+      --dj9272-surface:#23262c!important;
+      --dj9272-ink:#f2f4f7!important;
+      --dj9272-muted:#b6bec8!important;
+      --dj9272-line:#424952!important;
+      color:#f2f4f7!important;
+      border-color:#424952!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #route-panel,#participation-panel,#news-panel,#mine-panel,
+      #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
+    ) :is(input:not([type="checkbox"]),textarea,select) {
+      background-color:#2b3037!important;
+      color:#f2f4f7!important;
+      caret-color:#f2f4f7!important;
+      border-color:#525a64!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #route-panel,#participation-panel,#news-panel,#mine-panel,
+      #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
+    ) :is(input,textarea)::placeholder {
+      color:#b6bec8!important;opacity:1!important;
+    }
+    /* Explicit state only: never paint route-line, warning, PRI or transport
+       colors with the general monochrome UI palette. */
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      .dj-sheet-chrome-close,.djNext-close,#transport-close,
+      #dj-mobile-utilities-close,#dj-settings-close
+    ) {
+      background-color:#30353c!important;
+      color:#f2f4f7!important;
+      border-color:#424952!important;
+    }
+  }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+  /* Never animate the map, full-screen pages, or sheet geometry. */
+  #app :is(.map-quick-search-form,#bottom-nav .nav-tab,
+    #dj890-ai-orb,#djNext-rail button.djNext-tool,
+    #mine-panel .dj834-profile-card,#mine-panel .dj834-settings-group) {
+    transition-property:background-color,color,border-color,box-shadow!important;
+    transition-duration:150ms!important;
+    transition-timing-function:ease-out!important;
+  }
+}

@@ -486,7 +486,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     const authState=app.dataset.djAuthState||'checking';
     if(authState==='checking')return;
     app.dataset.dj860AutoResolved='true';
-    if(authState==='signed-out'||pendingGuestOnboarding){
+    if((authState==='signed-out'||pendingGuestOnboarding)&&!readSeen(win)){
       pendingGuestOnboarding=false;open({auto:true,force:true});return;
     }
     // Signed-in first-time visitors still receive the ordinary first-run tour.

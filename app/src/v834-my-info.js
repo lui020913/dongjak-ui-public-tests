@@ -121,12 +121,12 @@ export function installMyInfo(doc=document){
    const loggedIn=account.querySelector('.dj820-account-panel')?.hidden===false;
    if(name&&loggedIn){profileName.textContent=name;profileSub.textContent='내 프로필 설정';}
    else{profileName.textContent='로그인 또는 회원가입';profileSub.textContent='카카오 · 이메일 계정 관리';}
-   landing.querySelector('.dj834-current-theme').textContent=doc.getElementById('app')?.dataset.theme==='dark'?'다크':'라이트';
+   landing.querySelector('.dj834-current-theme').textContent=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'다크':'라이트';
  };
  const observer=new MutationObserver(updateProfile);
  observer.observe(account,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
  const app=doc.getElementById('app');
- if(app)observer.observe(app,{attributes:true,attributeFilter:['data-theme']});
+ if(app)observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-dj-preferred-theme']});
  // iOS PWA may suspend Web Animations when a sheet is being resized or
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
