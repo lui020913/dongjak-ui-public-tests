@@ -22,7 +22,7 @@ test('모바일 상행 하행은 좁은 화면에서도 두 열로 렌더링',()
   const css=source('src/mobile-ui-baseline.css');
   assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
   assert.match(css,/\.metro-arrival-direction-group \.transport-arrival-row\{[\s\S]*?flex-direction:column!important/);
-  assert.match(source('src/main.js'),/import '\.\/v700-mobile-cleanup\.css'/);
+  assert.match(source('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
 });
 
 test('제한속도와 단속카메라는 초기 화면에서 꺼진 상태',()=>{
