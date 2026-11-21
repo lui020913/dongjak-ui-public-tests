@@ -14,6 +14,11 @@ test('composer hides list-only sections using stable state and keeps body indepe
  assert.match(follows,/editing!==composing/);
  assert.match(follows,/node\.style\.setProperty\('display','none','important'\)/);
  assert.match(follows,/community\.classList\.toggle\('dj9256-composing',editing\)/);
+ assert.match(follows,/ownComposerStyle\(community,\{/);
+ assert.match(follows,/ownComposerStyle\(formHead,\{/);
+ assert.match(follows,/restoreComposerStyle\(\)/);
+ assert.match(follows,/background:'var\(--mf-surface-solid,#fff\)'/);
+ assert.doesNotMatch(css,/:is\(\.version-history-head,\.dj-map-settings-head,\.community-form-top,\.ped-tools-panel-head\)/);
  const fullscreen=read('src/mobile-primary-fullscreen.css');
  assert.match(fullscreen,/\.dj9256-composing #community-form > \.djNext-form-scroll/);
  assert.match(fullscreen,/padding-bottom:calc\(110px \+ env\(safe-area-inset-bottom/);
