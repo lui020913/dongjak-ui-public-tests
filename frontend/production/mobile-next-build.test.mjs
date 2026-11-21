@@ -137,7 +137,7 @@ test('phone repair keeps the optional permission controls and their status in on
 test('pilot visuals follow drawer rather than selected overlays',()=>{
  const js=readFileSync(new URL('../src/mobile-17-followup.js',import.meta.url),'utf8');
  assert.match(js,/const wanted=app\.dataset\.tab==='map'&&app\.classList\.contains\('map-safety-open'\)/);
- assert.match(js,/attributeFilter:\['class','aria-pressed','data-tab'\]/);
+ assert.match(js,/attributeFilter:\['class','aria-pressed','data-tab','hidden'\]/);
 });
 
 
