@@ -160,6 +160,21 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     dot.setAttribute('aria-label',`${i+1}페이지 보기`);dot.setAttribute('aria-pressed','false');dots.append(dot);
   });
 
+  // The navigation indicator is updated when a transition is accepted,
+  // independently of frame/timer delivery. On low-power phones the image
+  // crossfade may paint later, but pressing Next must immediately acknowledge
+  // the page request rather than appearing stuck at "01 / 05".
+  function syncStepIndicator(step){
+    count.textContent=`${String(step+1).padStart(2,'0')} / ${String(ONBOARDING_SLIDES.length).padStart(2,'0')}`;
+    progress.setAttribute('aria-valuenow',String(step+1));
+    progressValue.style.width=`${((step+1)/ONBOARDING_SLIDES.length)*100}%`;
+    previous.hidden=step===0;
+    next.textContent=step===ONBOARDING_SLIDES.length-1?'시작하기':'다음';
+    dots.querySelectorAll('.dj860-dot').forEach((dot,i)=>{
+      const active=i===step;dot.classList.toggle('is-active',active);dot.setAttribute('aria-pressed',String(active));
+    });
+    overlay.setAttribute('aria-label',`${step+1} / ${ONBOARDING_SLIDES.length} 앱 시작 안내`);
+  }
   function render(nextIndex,direction='next'){
     index=Math.max(0,Math.min(ONBOARDING_SLIDES.length-1,nextIndex));
     const slide=ONBOARDING_SLIDES[index];
@@ -211,15 +226,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       <p class="dj860-note">${escapeHtml(slide.note)}</p>
       ${slide.key==='account'?'<button type="button" class="dj860-account-link" data-dj860-action="account">내 정보에서 로그인 관리 <span aria-hidden="true">↗</span></button>':''}`;
     copy.classList.remove('dj860-entering');void copy.offsetWidth;copy.classList.add('dj860-entering');
-    count.textContent=`${String(index+1).padStart(2,'0')} / ${String(ONBOARDING_SLIDES.length).padStart(2,'0')}`;
-    progress.setAttribute('aria-valuenow',String(index+1));
-    progressValue.style.width=`${((index+1)/ONBOARDING_SLIDES.length)*100}%`;
-    previous.hidden=index===0;
-    next.textContent=index===ONBOARDING_SLIDES.length-1?'시작하기':'다음';
-    dots.querySelectorAll('.dj860-dot').forEach((dot,i)=>{
-      const active=i===index;dot.classList.toggle('is-active',active);dot.setAttribute('aria-pressed',String(active));
-    });
-    overlay.setAttribute('aria-label',`${index+1} / ${ONBOARDING_SLIDES.length} 앱 시작 안내`);
+    syncStepIndicator(index);
   }
   function close({complete=true,focus=true,afterClose=null}={}){
     if(!opened)return;
@@ -274,6 +281,7 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(!opened||target<0||target>=ONBOARDING_SLIDES.length||target===index)return;
     swapEpoch++;const epoch=swapEpoch;
     if(swapTimer){win.clearTimeout(swapTimer);swapTimer=0;}
+    syncStepIndicator(target); // immediate semantic step; visual crossfade still runs normally
     const reduced=win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
     if(reduced){overlay.classList.remove('dj860-swapping');render(target,direction);return;}
     // A real painted frame must separate opacity=1 from opacity=0:
