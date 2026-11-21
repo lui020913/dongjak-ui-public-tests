@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.69",
+  "application_version": "9.2.70",
   "public_work_branch": "main",
-  "purpose": "v9.2.69 flat mobile surfaces: remove UI gradient, backdrop blur, map-edge vignette, ordinary modal dark scrim and dock dimming. Maintain subtle shadows, single-color iOS PWA native status matching, and light consent-only backdrop. Includes PR #209 code and PR #211 isolated-build test compatibility plus previously merged public-source work. Deploy only after exact SHA Preview, all phone/visual/exploratory gates, and Production rollback guard.",
-  "attempt": 199,
+  "purpose": "v9.2.70 iPhone onboarding hotfix: remove the surviving higher-specificity v864 dark scrim rgba(.48), 5px backdrop blur, strong 22/72px shadow and visual gradient, keeping transparent backdrop, solid artwork mat and mild card shadow. PR #216 source and both static and rendered-style Playwright regressions included. Strict Preview → 12 phone QA → visual/exploratory QA → protected Production only after green checks.",
+  "attempt": 200,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Mobile run 44896866666 Preview passed, but six Playwright mobile QA shards asserted obsolete gradients / variable backdrop dimming. PR #213 merged into main at 2ab2901e69e1eca77d69e9f65aa85623a23db525 after full source CI success 44897564374; webkit iOS native sampler, opaque sheets, metro share-button flat materials and preserved slide transitions now tested against v9.2.69 flat surfaces. Rebuild exact source, Preview, 12 phone shards, six design reviews, protected Production only on all green. No restoration of legacy gradients.",
+  "last_retry_reason": "Actual iPhone 2026-11-21 20:24 screenshot revealed v9.2.69 still blurred/dimmed onboarding background. Found app/src/v864-refinements.css higher-specificity !important override untouched by PR #209, corrected via merged PR #216 (CI 44899392637 success), updated legacy v864 test, and added Playwright computed-style assertion. Deploy exact new main as v9.2.70, no fallback to the old scrim.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
