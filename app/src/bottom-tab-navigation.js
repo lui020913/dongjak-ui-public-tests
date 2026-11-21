@@ -29,14 +29,17 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    curtain.setAttribute('aria-hidden','true');curtain.hidden=true;app.appendChild(curtain);
   }
   dismissCurtain();
+  // This stays BEHIND the outgoing page yet ABOVE the map. The old page's
+  // alpha can reach zero without disclosing a map frame.
   curtain.hidden=false;
-  // Cover the underlying map during the synchronous native tab replacement.
-  curtainFade=win.setTimeout(()=>{
-   curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');
-  },65);
+ }
+ function revealPageTransition(next){
+  if(!curtain)return;
+  const delay=next==='map'?35:220;
+  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},delay);
   curtainHide=win.setTimeout(()=>{
    curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
-  },405);
+  },delay+245);
  }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return;
@@ -66,6 +69,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   event.preventDefault();event.stopImmediatePropagation();
   pending=button;
   if(exitTimer)return;
+  protectPageTransition(nextTab);
   const previous=doc.querySelector('.page-panel[data-page="'+current+'"]:not([hidden])');
   if(previous)previous.classList.add('dj9272-tab-leave');
   exitTimer=win.setTimeout(()=>{
@@ -73,14 +77,14 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    const next=pending;pending=null;
    previous?.classList.remove('dj9272-tab-leave');
    if(!next?.isConnected)return;
-   protectPageTransition(next.dataset.tab);
    replay(next);
+   revealPageTransition(next.dataset.tab);
    const entered=doc.querySelector('.page-panel[data-page="'+next.dataset.tab+'"]:not([hidden])');
    if(entered){
     entered.classList.add('dj9272-tab-enter');
-    win.setTimeout(()=>entered.classList.remove('dj9272-tab-enter'),305);
+    win.setTimeout(()=>entered.classList.remove('dj9272-tab-enter'),240);
    }
-  },previous?235:0);
+  },previous?190:0);
  }
  function down(event){
   if(!phone()||event.isPrimary===false||event.button!==0)return;
