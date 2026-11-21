@@ -225,7 +225,14 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     header.append(versionHeading,badge);
     article.append(header);
     const ul=el('ul','v707-release-items');
-    for(const description of release.sourceItems||release.items||[])ul.append(el('li','',description));
+    // Keep original release records intact; only split verbose display text
+    // into independently readable bullets on the latest build.
+    const items=release.sourceItems||release.items||[];
+    const readable=release===currentRelease?items.flatMap(item=>{
+      const parts=String(item).split(/,\s*(?=\S)/).map(x=>x.trim()).filter(Boolean);
+      return parts.length>=3?parts:[item];
+    }):items;
+    for(const description of readable)ul.append(el('li','',description));
     const isOperational=/^v?9\.\d+\.\d+$/.test(String(release.version||''))&&!release.sourceVersion;
     if(isOperational){
       // The original precise build remains searchable and available in metadata.

@@ -115,6 +115,9 @@ export function attachLiveTransitOverlay(map,opts={}){
   const quotaActive=()=>metroQuotaUntil>Date.now();
   let trainAtlas=null,atlasState=typeof map.addImage==='function'&&typeof map.hasImage==='function'?'pending':'unavailable',atlasRequested=false,atlasApplied=false,lastAttachAttempt=0;
   const minimumZoom=Number(opts.minZoom??13.2),metroMinZoom=Number(opts.metroMinZoom??minimumZoom);
+  // Avoid spending the limited public metro quota on invisible trains.
+  const metroZoomReady=()=>typeof map.getZoom!=='function'||map.getZoom()>=metroMinZoom;
+  let lastMetroZoomReady=metroZoomReady();
   function reportArtwork(value){const node=map.getContainer?.();if(node?.dataset)node.dataset.djLiveTrainArtwork=value;}
   const pollMs=clamp(Number(opts.intervalMs??25000),20000,120000);
   const frameMs=clamp(Number(opts.renderIntervalMs??16),8,2000);
@@ -211,8 +214,12 @@ export function attachLiveTransitOverlay(map,opts={}){
   async function refresh(){
     if(!started||destroyed||request||(typeof document!=='undefined'&&document.visibilityState==='hidden'))return;
     if(!visible.metro&&!visible.bus)return;
-    const modes=Object.keys(visible).filter(k=>visible[k]&&(k!=='metro'||!quotaActive()));
-    if(!modes.length){if(visible.metro&&quotaActive())emit({status:'quota',error:METRO_QUOTA_NOTICE,quotaUntil:metroQuotaUntil});return;}
+    const modes=Object.keys(visible).filter(k=>visible[k]&&(k!=='metro'||(!quotaActive()&&metroZoomReady())));
+    if(!modes.length){
+      if(visible.metro&&quotaActive())emit({status:'quota',error:METRO_QUOTA_NOTICE,quotaUntil:metroQuotaUntil});
+      else if(visible.metro&&!metroZoomReady())emit({status:'zoom',minimum:metroMinZoom});
+      return;
+    }
     const ac=new AbortController();request=ac;const timeout=setTimeout(()=>ac.abort(),19000);
     try{
       let next;
@@ -262,9 +269,14 @@ export function attachLiveTransitOverlay(map,opts={}){
     measureRenderedTrains();
   };
   const onVisible=()=>{if(document.visibilityState==='visible')refresh();};
+  const onZoomEnd=()=>{
+    const current=metroZoomReady();
+    if(current&&!lastMetroZoomReady&&visible.metro)void refresh();
+    lastMetroZoomReady=current;
+  };
   function start(){
     if(started||destroyed)return;started=true;
-    onStyle();map.on?.('style.load',onStyleReload);map.on?.('idle',onIdle);map.on?.('render',measureRenderedTrains);map.on?.('click',handleMapClick);
+    onStyle();lastMetroZoomReady=metroZoomReady();map.on?.('style.load',onStyleReload);map.on?.('idle',onIdle);map.on?.('render',measureRenderedTrains);map.on?.('click',handleMapClick);map.on?.('zoomend',onZoomEnd);
     if(atlasState==='pending'&&!atlasRequested){atlasRequested=true;void Promise.resolve().then(()=> (opts.loadTrainAtlas??loadTrainAtlas)()).catch(()=>null).then(atlas=>{trainAtlas=atlas;atlasState=atlas?'ready':'unavailable';if(started&&!destroyed)onStyle();});}
     if(typeof document!=='undefined')document.addEventListener('visibilitychange',onVisible);
     if(raf){const frame=t=>{if(!started||destroyed)return;if(t-lastRenderAt>=frameMs-.9){lastRenderAt=t;render(false);}rendering=globalThis.requestAnimationFrame(frame);};rendering=globalThis.requestAnimationFrame(frame);}
@@ -272,7 +284,7 @@ export function attachLiveTransitOverlay(map,opts={}){
     poll=setInterval(refresh,pollMs);void refresh();
   }
   function stop(){started=false;request?.abort();request=null;if(raf)globalThis.cancelAnimationFrame?.(rendering);else clearInterval(rendering);clearInterval(poll);lastRenderAt=0;renderGeneration++;renderPending=false;
-    map.off?.('style.load',onStyleReload);map.off?.('idle',onIdle);map.off?.('render',measureRenderedTrains);map.off?.('click',handleMapClick);
+    map.off?.('style.load',onStyleReload);map.off?.('idle',onIdle);map.off?.('render',measureRenderedTrains);map.off?.('click',handleMapClick);map.off?.('zoomend',onZoomEnd);
     const node=map.getContainer?.();if(node?.dataset){node.dataset.djLiveTrainRendered='0';delete node.dataset.djLiveTrainDiagnostics;}
     if(typeof document!=='undefined')document.removeEventListener('visibilitychange',onVisible);
     payload=null;previous.clear();display=empty();lastUpdate=0;

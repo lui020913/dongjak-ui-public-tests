@@ -103,7 +103,9 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   const btnMetro=controls.querySelector('[data-live-vehicle="metro"]');
   const btnBus=controls.querySelector('[data-live-vehicle="bus"]');
   const message=controls.querySelector('#dj-live-vehicle-status');
-  let saved={metro:false,bus:false};
+  // Default to visible trains for new users. Explicit saved OFF remains respected.
+  // The overlay itself only requests metro data at close map zoom.
+  let saved={metro:true,bus:false};
   try{const v=JSON.parse(localStorage.getItem(LIVE_PREF_KEY)||'null');
     for(const mode of ['metro','bus'])if(typeof v?.[mode]==='boolean')saved[mode]=v[mode];
   }catch{}
@@ -123,7 +125,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
       if(limited){setStatus(METRO_QUOTA_NOTICE+(state.bus&&info.status==='ok'?` · 버스 ${info.bus}대`:state.bus&&info.status==='error'?' · 버스 위치 조회 실패':''));return;}
       if(info.status==='ok'){
         const line=[];
-        if(state.metro)line.push(`지하철 ${info.metro}대`);
+        if(state.metro)line.push(map.getZoom?.()<16.4?'열차: 지도 확대 시 표시':`지하철 ${info.metro}대`);
         if(state.bus)line.push(`버스 ${info.bus}대`);
         const warnings=(info.warnings||[]).length;
         setStatus(`${line.join(' · ')||'차량 없음'} · 역간 이동은 추정${warnings?' · 일부 API 제한':''}`);
@@ -131,7 +133,8 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
         else if(state.bus&&info.availability?.bus&&info.availability.busRoutes===0)
           setStatus('버스 노선 조회 불가 · API 인증/노선 설정 확인');
         else if(state.bus&&!info.bus)setStatus('현재 동작구 내 수신된 버스 좌표 없음 · 위치 API 및 노선 확인');
-      }else if(info.status==='error')setStatus(`위치정보 조회 실패: ${info.error||'API 상태 확인 필요'}`);
+      }else if(info.status==='zoom')setStatus('지하철 열차는 지도를 가까이 확대하면 표시됩니다.');
+      else if(info.status==='error')setStatus(`위치정보 조회 실패: ${info.error||'API 상태 확인 필요'}`);
       else if(info.status==='render_error')setStatus('지도 차량 레이어 렌더링 오류');
     }
   });
@@ -149,6 +152,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
     else if(!isMap)setStatus('안전지도 탭에서 차량 위치를 조회합니다.');
     else if(!allowMetro&&!allowBus)setStatus('기본 지도·교통 레이어가 숨겨져 있습니다.');
     else if(showQuota(overlay.getStatus().metroQuotaUntil))setStatus(METRO_QUOTA_NOTICE);
+    else if(state.metro&&map.getZoom?.()<16.4&&!state.bus)setStatus('실시간 지하철 ON · 지도를 가까이 확대하면 열차가 표시됩니다.');
     else if(!overlay.getStatus().lastUpdate)setStatus('실시간 위치정보 조회 중 · 역간 위치는 추정');
     if(!state.metro)showQuota(0,false);
   }

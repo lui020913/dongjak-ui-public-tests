@@ -172,7 +172,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         g.dragging=true;panel.classList.add('dj-sheet-dragging');
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel','dj854-weather-sheet'].includes(id);
       const offset=sheetDragOffset(dy,g.upLimit,expandable);
       panel.style.setProperty('--dj-sheet-drag-y',`${offset}px`);
       panel.style.setProperty('translate',`0 ${offset}px`,'important');
@@ -191,7 +191,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       // and a tap on the non-interactive grip/title. This makes expansion usable
       // in mobile Safari even when the OS drops a touchmove before touchend.
       // Action buttons are filtered in down(), so their click behavior is kept.
-      if(id==='ped-tools-panel'&&!g.dragging){
+      if((id==='ped-tools-panel'||id==='dj854-weather-sheet')&&!g.dragging){
         setMobileSheetExpanded(panel,!panel.classList.contains('dj871-sheet-expanded'),doc,win);
         return;
       }
@@ -204,7 +204,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         },0);
       }
       const expandable=['route-panel','participation-panel','news-panel','mine-panel',
-        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel'].includes(id);
+        'admin-dong-picker','transport-sheet','dj-mobile-utilities','map-gesture-guide','ped-tools-panel','dj854-weather-sheet'].includes(id);
       if(id==='map-safety-controls'&&app.classList.contains('dj-safety-peek')&&g.dragging){
         settleMobileSheetDrag(panel,win,()=>{if(projected<-30||delta<-25)app.classList.remove('dj-safety-peek');});return;
       }
