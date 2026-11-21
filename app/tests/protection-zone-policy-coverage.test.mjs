@@ -11,7 +11,7 @@ test('school buffer preview paints clipped 5m road portions rather than whole 25
   const result=await load('school_300_500m_unprotected_preview.geojson');
   assert.equal(result.type,'FeatureCollection');
   assert.ok(result.features.length>1000);
-  assert.equal(result.metadata.school_count,2);
+  assert.equal(result.metadata.school_count,5);
   assert.ok(result.metadata.segments_within300>2);
   const sums={within300:0,'300to500':0};
   const groups={within300:new Set(),'300to500':new Set()};
@@ -37,8 +37,8 @@ test('policy coverage has explicit null for geometry gaps and non-final scores',
   const result=await load('policy_coverage_25m_preview.json');
   assert.equal(result.segments.length,1686);
   assert.equal(result.segments.filter(s=>s.score===null).length,10);
-  assert.equal(result.meta.facilityCount,9);
-  assert.equal(result.meta.polygonCount,9);
+  assert.equal(result.meta.facilityCount,19);
+  assert.equal(result.meta.polygonCount,18);
   assert.ok(result.segments.every(s=>s.score===null||(s.score>=0&&s.score<=100)));
   const focus=result.meta.focus;
   assert.deepEqual(focus.map(x=>x.road_id),['R0248','R0288']);
@@ -62,12 +62,12 @@ test('the two focus road sheets have separately labelled, non-final school and a
   assert.equal(focus.length,2);
   for(const f of focus){
     const p=f.properties;
-    assert.ok(Number.isFinite(p.policy_coverage_all9_preview_score));
-    assert.ok(Number.isFinite(p.policy_coverage_school2_preview_score));
+    assert.ok(Number.isFinite(p.policy_coverage_all19_preview_score));
+    assert.ok(Number.isFinite(p.policy_coverage_school5_preview_score));
     assert.ok(p.policy_coverage_verification.includes('미검증'));
   }
   const road54=focus.find(f=>f.properties.road_id==='R0248').properties;
   const road62=focus.find(f=>f.properties.road_id==='R0288').properties;
-  assert.equal(road54.policy_coverage_school2_preview_score,32.1);
-  assert.equal(road62.policy_coverage_school2_preview_score,66.3);
+  assert.equal(road54.policy_coverage_school5_preview_score,32.1);
+  assert.equal(road62.policy_coverage_school5_preview_score,66.3);
 });
