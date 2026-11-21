@@ -53,3 +53,10 @@ test('weather detail, observation and action row have consistent horizontal padd
   assert.match(css,/\.dj854-weather-actions\s*\{\s*margin: 0 18px 18px !important/);
   assert.match(css,/\.dj854-weather-observed\s*\{\s*margin: 10px 18px !important/);
 });
+
+test('first onboarding frame keeps content fully opaque before compositor slide transitions',()=>{
+  const js=read('src/v860-onboarding.js');
+  assert.match(js,/opened=true;render\(0,'next',false\);app\.dataset\.dj860OnboardingOpen='true'/);
+  assert.match(js,/if\(animate\)\{void visualPane\.offsetWidth;visualPane\.classList\.add\('dj860-entering'\);\}/);
+  assert.match(js,/if\(animate\)\{void copy\.offsetWidth;copy\.classList\.add\('dj860-entering'\);\}/);
+});
