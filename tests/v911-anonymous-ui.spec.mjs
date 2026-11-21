@@ -111,7 +111,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
- await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(25, 27, 31)');
+ await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(25, 45, 50)'); // Match full-page dark UI instead of the old grey card.
 });
 test('phone More functions live in collapsible My Info groups',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
@@ -1000,8 +1000,9 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  const buttons=sheet.locator('.dj-news-transport-actions>button');await expect(buttons).toHaveCount(4);
  await expect.poll(async()=>{const b=await buttons.evaluateAll(ns=>ns.map(n=>({r:n.getBoundingClientRect().toJSON(),s:getComputedStyle(n).boxShadow})));return b.length===4&&b.every(x=>Math.abs(x.r.top-b[0].r.top)<1&&Math.abs(x.r.width-b[0].r.width)<2&&x.s!=='none');}).toBe(true);
  await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
- await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
- await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','999px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
+ await expect(sheet.locator('#transport-title .dj-metro-line-selector')).toHaveCount(2);
+ await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','2px'); // Only the selected transfer line is ringed.
+ await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','18px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
  await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image','none');await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
