@@ -59,17 +59,25 @@ async function visuallyPresented(locator){
 }
 async function enter(page,id,key){
  await page.evaluate(id=>{
-   const frames=[];window.__auditFrames=frames;const until=performance.now()+60000;
-   function sample(){const n=document.getElementById(id);if(n?.dataset.dj810Animating==='opening'){const c=getComputedStyle(n);frames.push({o:Number(c.opacity),t:c.translate,p:c.clipPath,kind:n.dataset.djWindowMotionKind,y:n.getBoundingClientRect().y});}if(performance.now()<until&&window.__auditFrames===frames)requestAnimationFrame(sample);}
-   requestAnimationFrame(sample);
+   const panel=document.getElementById(id),frames=[];
+   window.__auditFrames=frames;
+   window.__auditObserver?.disconnect?.();
+   const capture=()=>{
+     if(!panel?.classList.contains('dj-tab-content-enter'))return;
+     const c=getComputedStyle(panel),body=panel.querySelector(':scope > .dj836-sheet-body');
+     frames.push({rootOpacity:Number(c.opacity),contentAnimation:body?getComputedStyle(body).animationName:'',y:panel.getBoundingClientRect().y});
+   };
+   const observer=new MutationObserver(capture);
+   observer.observe(panel,{attributes:true,attributeFilter:['class']});
+   window.__auditObserver=observer;
  },id);
  await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
- await expect.poll(()=>page.evaluate(()=>window.__auditFrames.length)).toBeGreaterThan(1);
+ await expect.poll(()=>page.evaluate(()=>window.__auditFrames.length)).toBeGreaterThan(0);
  await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
  await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
- const frames=await page.evaluate(()=>window.__auditFrames);
- expect(frames.every(f=>f.kind==='fade')).toBe(true);
- expect(frames.some(f=>f.o>0&&f.o<1)).toBe(true);
+ const frames=await page.evaluate(()=>{window.__auditObserver?.disconnect?.();return window.__auditFrames;});
+ expect(frames.every(f=>f.rootOpacity===1)).toBe(true);
+ expect(frames.some(f=>f.contentAnimation.includes('djTabContentReveal'))).toBe(true);
  expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
  await geometry(page,'#'+id);
 }
@@ -720,11 +728,11 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await expect(results).toBeHidden();
 });
 
-test('primary tabs animate replacement and keep the pill dock',{tag:'@phone-common'},async({page})=>{
+test('primary tabs reveal content without fading the opaque page and keep the pill dock',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
- await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.dataset.dj810Animating)window.__tabMotions.push(panel.dataset.dj810Animating)}).observe(panel,{attributes:true,attributeFilter:['data-dj810-animating']});});
- await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('opening');
+ await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.classList.contains('dj-tab-content-enter'))window.__tabMotions.push('content-only')}).observe(panel,{attributes:true,attributeFilter:['class']});});
+ await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect(page.locator('#news-panel')).toHaveCSS('opacity','1');await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('content-only');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
  await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toBeVisible();
@@ -1007,6 +1015,20 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
  await expect(page.locator('#route-panel')).toBeVisible();
  const dock=page.locator('#bottom-nav');
  await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
+ // Diagnostic-only event capture to isolate interception by a modal or the
+ // centered HOME button. Does not alter gesture dispatch or test assertions.
+ await page.evaluate(()=>{
+  const nav=document.getElementById('bottom-nav');
+  window.__dockGestureSamples=[];
+  for(const type of ['pointerdown','pointerup','pointercancel','click']){
+   window.addEventListener(type,event=>{
+    if(window.__dockGestureSamples.length>80)return;
+    window.__dockGestureSamples.push({type,target:event.target?.id||event.target?.getAttribute?.('class')||event.target?.tagName,
+      button:event.button,pointerId:event.pointerId,x:event.clientX,y:event.clientY,
+      inDock:event.composedPath?.().includes(nav),trusted:event.isTrusted,tab:document.getElementById('app')?.dataset.tab});
+   },true);
+  }
+ });
  const before=await dock.boundingBox();
  async function swipe(dx){
   const r=await dock.boundingBox();expect(r).toBeTruthy();
@@ -1015,6 +1037,11 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
   await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();
  }
  await swipe(-85);
+ console.log('DOCK_GESTURE_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{
+  const nav=document.getElementById('bottom-nav'),r=nav.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;
+  const layers=document.elementsFromPoint(x,y).slice(0,8).map(n=>({id:n.id,tag:n.tagName,className:n.getAttribute('class'),pointerEvents:getComputedStyle(n).pointerEvents,zIndex:getComputedStyle(n).zIndex}));
+  return {tab:document.getElementById('app')?.dataset.tab,events:window.__dockGestureSamples,layers};
+ })));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
  await expect(page.locator('#route-panel')).toBeHidden();
  await expect(page.locator('#participation-panel')).toBeVisible();
