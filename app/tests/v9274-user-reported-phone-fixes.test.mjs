@@ -25,6 +25,10 @@ test('seven-day source-normalizer validates dates, numbers and does not fabricat
  assert.throws(()=>weeklyWeatherRows({...data,daily:{...data.daily,time:days.slice(0,6)}}),/7일 예보/);
  assert.throws(()=>weeklyWeatherRows({...data,daily:{...data.daily,time:['날짜 오류',...days.slice(1)]}}),/예보 날짜 오류/);
  assert.throws(()=>weeklyWeatherRows({...data,daily:{...data.daily,temperature_2m_max:[NaN,...data.daily.temperature_2m_max.slice(1)]}}),/예보 기온/);
+ const missing={...data,daily:{...data.daily,weather_code:[null,...data.daily.weather_code.slice(1)]}};
+ assert.throws(()=>weeklyWeatherRows(missing),/예보 기온/);
+ const missingRain=weeklyWeatherRows({...data,daily:{...data.daily,precipitation_probability_max:[null,...data.daily.precipitation_probability_max.slice(1)]}});
+ assert.equal(missingRain[0].precipitation,null,'missing source precipitation must not appear as 0%');
 });
 
 test('PRI keeps two score modes and default risk/caution/safe scale, with one disclosure',()=>{
