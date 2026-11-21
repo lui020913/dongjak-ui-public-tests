@@ -3,11 +3,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const css=read('src/v727-ios-edge-and-safety-buttons.css');
+const css=read('src/mobile-ui-baseline.css');
 const main=read('src/main.js');
 
 test('shared mobile-first shell loads after iOS edge and safety interaction fixes',()=>{
-  assert.ok(main.indexOf("import './v727-ios-edge-and-safety-buttons.css';")<main.indexOf("import './mobile-first-layout.css';"));
+  assert.ok(main.indexOf("import './mobile-ui-baseline.css';")<main.indexOf("import './mobile-first-layout.css';"));
   assert.equal(main.includes("import './v726-desktop-polish.css';"),false);
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
 });
