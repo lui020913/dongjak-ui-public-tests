@@ -923,3 +923,303 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   }
  }
 }
+
+/* v9.2.72 — single-owner phone redesign. Keep global map and normal panels
+   opaque, no app-wide dim or blur; interactive pills use quiet elevation. */
+@layer request-completion {
+ @media(max-width:699px) {
+  /* Onboarding is now an actual fullscreen page, sized by device proportions,
+     not a magnified floating card. Safe areas belong to its own header/footer. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding:not([hidden]){
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+   padding:0!important;display:grid!important;place-items:stretch!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+   -webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-card{
+   width:100vw!important;min-width:0!important;max-width:100vw!important;
+   height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;
+   display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+   grid-template-rows:calc(56px + env(safe-area-inset-top,0px)) minmax(164px,26dvh) minmax(0,1fr) auto!important;
+   border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-head{
+   min-height:0!important;height:auto!important;padding:env(safe-area-inset-top,0px) 22px 0!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;justify-content:flex-end!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-skip{min-height:40px!important;font-size:14px!important;padding:7px 16px!important;border-radius:999px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-visual-pane{
+   grid-column:1!important;min-height:0!important;padding:7px 18px 12px!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-visual{
+   width:100%!important;height:100%!important;min-height:0!important;
+   border:0!important;border-radius:19px!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-content{
+   grid-column:1!important;min-height:0!important;height:auto!important;overflow-y:auto!important;
+   padding:clamp(16px,3vh,27px) 24px 16px!important;align-items:flex-start!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-copy{max-width:600px!important;width:100%!important;margin:0 auto!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-copy h1{font-size:clamp(25px,7vw,33px)!important;line-height:1.25!important;margin:0 0 16px!important;letter-spacing:-.045em!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-description{font-size:15.5px!important;line-height:1.7!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-points{margin-top:19px!important;gap:12px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-points li{font-size:14px!important;line-height:1.48!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-note{margin-top:20px!important;font-size:13px!important;line-height:1.5!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-footer{
+   grid-column:1!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+   gap:12px!important;align-items:center!important;min-height:85px!important;
+   padding:12px 23px calc(13px + env(safe-area-inset-bottom,0px))!important;
+   border-top:1px solid var(--dj-primary-page-edge,#d6e5dc)!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-actions .dj860-next{min-width:120px!important;min-height:49px!important;font-size:15px!important;border-radius:17px!important;box-shadow:0 3px 11px rgba(16,85,66,.14)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding, .dj860-onboarding .dj860-card, .dj860-onboarding .dj860-head, .dj860-onboarding .dj860-visual-pane, .dj860-onboarding .dj860-content, .dj860-onboarding .dj860-footer{background:#192d32!important}
+  /* Opaque curtain is below fullscreen pages but above the map. Fade the
+     curtain AFTER the incoming page has painted; this prevents a map flash. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-tab-surface-curtain:not([hidden]){
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+   display:block!important;background:var(--dj-primary-page-bg,#edf3ef)!important;
+   z-index:6450!important;opacity:1!important;pointer-events:none!important;
+   transition:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-tab-surface-curtain.dj-tab-curtain-out:not([hidden]){
+   opacity:0!important;transition:opacity 235ms cubic-bezier(.22,.72,.3,1)!important;
+  }
+  /* Route editor: one legible card, full-width labels and consistent touch
+     targets. The calculation CTA remains inside its normal scroll owner. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body{
+   background:var(--dj-primary-page-bg,#edf3ef)!important;min-height:0!important;
+   overflow-y:auto!important;padding:16px 16px calc(116px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj-page-intro{
+   font-size:14px!important;line-height:1.58!important;letter-spacing:-.01em!important;
+   color:var(--djNext-muted,#60796d)!important;margin:0 0 16px!important;padding:0 3px!important;
+   overflow-wrap:anywhere!important;word-break:keep-all!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-card{
+   display:flex!important;flex-direction:column!important;gap:12px!important;
+   padding:17px 15px!important;margin:0!important;max-width:none!important;
+   background:var(--djNext-raised,#f9fbf9)!important;border:1px solid var(--djNext-border,#d5e5db)!important;
+   border-radius:24px!important;box-shadow:0 4px 14px rgba(16,51,40,.045)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-row{
+   display:grid!important;grid-template-columns:16px minmax(0,1fr) auto!important;
+   gap:10px!important;align-items:center!important;min-height:66px!important;
+   padding:7px 0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text{
+   min-width:0!important;display:flex!important;flex-direction:column!important;gap:4px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text > span{font-size:12px!important;font-weight:700!important;color:var(--djNext-muted,#6b8074)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text strong{font-size:16px!important;line-height:1.35!important;white-space:normal!important;overflow-wrap:anywhere!important;font-weight:750!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-select-actions{display:flex!important;align-items:center!important;gap:6px!important;min-width:0!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-mini-btn, #route-panel .route-gps-btn{
+   min-height:43px!important;border-radius:999px!important;
+   background:var(--djNext-tool-face,#f6faf7)!important;border:1px solid var(--djNext-tool-edge,#d5e5dc)!important;
+   color:var(--djNext-text,#1c3e33)!important;box-shadow:0 2px 5px rgba(15,42,32,.07)!important;font-size:13px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-mini-btn{min-width:48px!important;padding:9px 11px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-gps-btn{width:100%!important;font-size:13.5px!important;line-height:1.4!important;padding:10px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-calc{
+   width:100%!important;min-height:52px!important;border-radius:17px!important;
+   font-size:16px!important;font-weight:760!important;letter-spacing:-.02em!important;
+   box-shadow:0 5px 12px rgba(12,112,91,.13)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-calc:disabled{opacity:.56!important;box-shadow:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-status, #route-panel .page-note, #route-panel .route-data-note{
+   font-size:12.5px!important;line-height:1.58!important;word-break:keep-all!important;
+   overflow-wrap:anywhere!important;color:var(--djNext-muted,#667d71)!important;white-space:normal!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-variants .route-variant-choice{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-variants [data-route-variant]{
+   min-width:0!important;min-height:44px!important;font-size:13px!important;border-radius:14px!important;
+   overflow-wrap:anywhere!important;white-space:normal!important;
+  }
+  /* One result selector instead of two competing card grids. Start and
+     destination are always visible, in different colors. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card:not([hidden]){
+   display:flex!important;flex-direction:column!important;gap:11px!important;
+   max-height:min(49dvh,calc(100dvh - var(--dj910-map-top,160px) - var(--dj910-dock-bottom,76px) - 12px))!important;
+   padding:14px!important;border-radius:24px!important;overflow-x:hidden!important;overflow-y:auto!important;
+   box-shadow:0 8px 26px rgba(18,47,38,.13)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card #dj804-route-compare{display:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card > div:first-child{align-items:center!important;gap:10px!important;flex-wrap:wrap!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card #route-map-source{font-size:11.5px!important;line-height:1.4!important;white-space:normal!important;word-break:keep-all!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card #route-map-metrics{font-size:18px!important;line-height:1.3!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-endpoints{
+   display:grid!important;grid-template-columns:1fr!important;gap:3px!important;
+   padding:10px 12px!important;border:1px solid var(--djNext-border,#d4e3da)!important;
+   border-radius:16px!important;background:var(--djNext-raised,#f7faf8)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-place{
+   display:grid!important;grid-template-columns:48px minmax(0,1fr)!important;
+   gap:10px!important;align-items:center!important;min-height:29px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-place small{font-size:12px!important;font-weight:800!important;color:#3978c8!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-place[data-point="end"] small{color:#0d8a6e!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-place strong{font-size:13.5px!important;font-weight:750!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare:not(:empty){
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+   gap:8px!important;order:2!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare button{
+   display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+   gap:5px!important;min-width:0!important;min-height:61px!important;
+   padding:11px 12px!important;text-align:left!important;border-radius:16px!important;
+   background:var(--djNext-tool-face,#f9fbfa)!important;
+   border:1px solid var(--djNext-border,#d7e6df)!important;
+   box-shadow:0 2px 5px rgba(16,46,35,.065)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare button[aria-pressed="true"]{
+   background:var(--djNext-tool-selected-face,#e5f5ed)!important;
+   border:2px solid var(--route-accent,#10846b)!important;padding:10px 11px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare button strong{font-size:14px!important;line-height:1.25!important;font-weight:800!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare button span{font-size:12px!important;line-height:1.35!important;white-space:normal!important;word-break:keep-all!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .djNext-route-compare .dj9272-transit-choice{grid-column:1/-1!important;min-height:48px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card #dj9272-route-focus{
+   order:3!important;width:100%!important;min-height:42px!important;
+   padding:8px 12px!important;border-radius:14px!important;
+   background:var(--djNext-tool-selected-face,#e5f4ec)!important;color:var(--djNext-text,#163d30)!important;
+   font-size:13px!important;font-weight:750!important;border:1px solid var(--djNext-active,#0c806a)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .route-map-card-actions{
+   order:4!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+   gap:8px!important;padding:0!important;width:100%!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .route-map-card-actions button{
+   min-width:0!important;min-height:43px!important;padding:9px 4px!important;
+   border-radius:15px!important;font-size:13px!important;line-height:1.25!important;
+   box-shadow:0 2px 5px rgba(17,47,35,.06)!important;
+  }
+  /* Notices must wrap at word boundaries; never cover the entire middle map. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #toast.show, #djNext-toast:not([hidden]){
+   width:max-content!important;max-width:min(318px,calc(100vw - 44px))!important;
+   padding:12px 17px!important;font-size:13.5px!important;line-height:1.55!important;
+   text-align:center!important;white-space:normal!important;word-break:keep-all!important;
+   overflow-wrap:anywhere!important;border-radius:18px!important;letter-spacing:-.01em!important;
+   box-shadow:0 6px 16px rgba(16,38,31,.15)!important;
+  }
+  /* My Info: no giant white rectangle behind card groups, one visual icon
+     family, and language naturally follows the activity section. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel.page-panel:not([hidden]), #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body{
+   background:var(--dj-primary-page-bg,#edf3ef)!important;color:var(--dj-primary-page-ink,#183f33)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-my-home, #mine-panel .dj834-my-detail{
+   background:transparent!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-profile-card, #mine-panel .dj834-settings-group{
+   background:var(--djNext-raised,#f8fbf9)!important;
+   border:1px solid var(--djNext-border,#d5e6db)!important;border-radius:21px!important;
+   box-shadow:0 3px 12px rgba(17,48,36,.045)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-settings-group > button{
+   min-height:59px!important;padding:11px 14px!important;gap:12px!important;
+   background:transparent!important;color:var(--djNext-text,#173d32)!important;
+   font-size:15px!important;font-weight:700!important;line-height:1.4!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-setting-icon, #mine-panel .dj834-user-avatar{
+   display:grid!important;place-items:center!important;border-radius:13px!important;
+   background:var(--djNext-tool-selected-face,#e3f1e9)!important;color:var(--djNext-active,#0f826d)!important;
+   box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-setting-icon svg, #mine-panel .dj834-user-avatar svg{width:23px!important;height:23px!important;stroke-width:1.9!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj834-group-title{font-size:13px!important;font-weight:780!important;margin:23px 4px 10px!important;color:var(--djNext-text,#294c40)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj17-more-root > summary::before{
+   content:""!important;background:var(--djNext-active,#0f826d)!important;
+   width:32px!important;height:32px!important;mask:none!important;-webkit-mask:none!important;
+   border-radius:11px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj854-language-section{
+   display:flex!important;align-items:center!important;justify-content:space-between!important;
+   min-height:64px!important;margin:22px 0 6px!important;padding:11px 15px!important;
+   border:1px solid var(--djNext-border,#d5e6db)!important;border-radius:19px!important;
+   background:var(--djNext-raised,#f8fbf9)!important;box-shadow:0 2px 7px rgba(17,48,36,.035)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj854-language-section label{font-size:15px!important;font-weight:750!important;color:var(--djNext-text,#234539)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #mine-panel .dj854-language-section select{
+   width:auto!important;max-width:57%!important;min-height:41px!important;padding:8px 14px!important;
+   border-radius:13px!important;border:1px solid var(--djNext-border,#d5e6db)!important;
+   color:var(--djNext-text,#234539)!important;background:var(--djNext-tool-face,#fff)!important;
+   font-size:14px!important;font-weight:710!important;
+  }
+  /* Expanded layer must remain between the actual iOS status bar and home
+     indicator. List is its only scrolling owner; last row never gets clipped. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-modal-body[data-dj-layer-expanded="true"]{
+   position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;
+   bottom:calc(env(safe-area-inset-bottom,0px) + 8px)!important;
+   left:10px!important;right:10px!important;
+   width:auto!important;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px)!important;
+   max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 20px)!important;
+   border-radius:22px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #djNext-layer-panel .djNext-layer-scroll{
+   flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
+   overscroll-behavior:contain!important;
+   padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))!important;
+   scroll-padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))!important;
+  }
+  /* Phone AI open and close use the same stationary page fade, 235/215ms.
+     Outer dialog is always opaque (no map through-fade). */
+  html body #dj-ai-search-modal[open]:not(.dj887-ai-closing) > .dj-ai-search-body{
+   animation:dj9272-ai-enter 235ms cubic-bezier(.22,.72,.3,1) both!important;
+  }
+  html body #dj-ai-search-modal[open].dj887-ai-closing > .dj-ai-search-body{
+   animation:dj9272-ai-leave 215ms ease-in both!important;
+  }
+  @keyframes dj9272-ai-enter{from{opacity:.03}to{opacity:1}}
+  @keyframes dj9272-ai-leave{from{opacity:1}to{opacity:0}}
+  /* Station sheet: modern grouped rail strip. Focus outline applies ONLY to
+     selected line at confirmed interchange stations. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .transport-panel-head{
+   border-radius:18px 18px 0 0!important;gap:9px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-title.subway-title{
+   font-size:21px!important;line-height:1.3!important;letter-spacing:-.035em!important;
+   font-weight:790!important;row-gap:8px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-title .dj-metro-badge-row{
+   gap:7px!important;flex-wrap:wrap!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-metro-transfer="false"] #transport-title .dj-metro-line-selector::after{content:none!important;display:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-metro-transfer="false"] #transport-title .dj-metro-line-selector .metro-panel-badge{
+   outline:none!important;box-shadow:none!important;border:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-metro-transfer="true"] #transport-title .dj-metro-line-selector[aria-pressed="true"] .metro-panel-badge{
+   outline:2px solid var(--dj-line-color,#12816c)!important;outline-offset:3px!important;
+   border:2px solid var(--djNext-surface,#fff)!important;
+   box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .dj-news-transport-actions > button{
+   min-height:44px!important;border-radius:15px!important;
+   font-size:13px!important;font-weight:750!important;
+   display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet .dj9272-transport-icon{
+   display:inline-block!important;flex:0 0 17px!important;width:17px!important;height:17px!important;stroke-width:1.9!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row{
+   border-radius:16px!important;overflow:hidden!important;min-height:49px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .transport-empty{
+   line-height:1.55!important;font-size:13px!important;word-break:keep-all!important;overflow-wrap:anywhere!important;
+  }
+ }
+ @media(max-width:699px) and (max-height:680px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-card{
+   grid-template-rows:calc(48px + env(safe-area-inset-top,0px)) minmax(125px,23dvh) minmax(0,1fr) auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-content{padding:13px 20px 8px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-copy h1{font-size:24px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-description{font-size:14px!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding .dj860-footer{min-height:70px!important;padding:8px 17px calc(7px + env(safe-area-inset-bottom,0px))!important}
+ }
+ @media(max-width:699px) and (prefers-reduced-motion:reduce) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-tab-surface-curtain, #dj-tab-surface-curtain.dj-tab-curtain-out{transition:none!important}
+  html body #dj-ai-search-modal[open] > .dj-ai-search-body{animation:none!important}
+ }
+}
