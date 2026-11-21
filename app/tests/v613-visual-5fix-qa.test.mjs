@@ -56,7 +56,7 @@ test('subway panel has route rail, paired direction cards, real time and timetab
   assert.match(css,/\.metro-rail-current/);
   assert.match(css,/\.metro-direction-grid\{\s*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(js,/metro-rail-previous/);
-  assert.match(js,/liveHeading\.parentNode\.insertBefore\(neighborsEl,liveHeading\)/);
+  assert.match(js,/arrivalsEl\.parentNode\.insertBefore\(neighborsEl,arrivalsEl\.nextSibling\)/);
   assert.match(js,/selectionBox\.parentNode\.insertBefore\(neighborsEl,selectionBox\)/);
   assert.match(js,/transport-tab-hours/);
 });
