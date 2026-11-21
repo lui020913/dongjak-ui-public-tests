@@ -14,8 +14,8 @@ html body #app#app#app[data-dj860-onboarding-open="true"] .topbar .map-quick-sea
     position:fixed!important;inset:0!important;display:grid!important;place-items:center!important;
     width:100vw!important;height:100dvh!important;min-height:100dvh!important;
     padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))!important;
-    overflow:hidden!important;background:rgba(12,30,25,.48)!important;
-    -webkit-backdrop-filter:blur(5px)!important;backdrop-filter:blur(5px)!important;
+    overflow:hidden!important;background:transparent!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
     touch-action:pan-y!important;
   }
   html body #app#app#app#app .dj860-card {
@@ -25,7 +25,7 @@ html body #app#app#app[data-dj860-onboarding-open="true"] .topbar .map-quick-sea
     height:min(770px,calc(100dvh - 48px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))!important;
     min-width:0!important;min-height:0!important;max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
     border:1px solid #d7e7de!important;border-radius:26px!important;overflow:hidden!important;
-    box-shadow:0 22px 72px rgba(8,34,25,.28)!important;
+    box-shadow:0 7px 22px rgba(8,34,25,.12)!important;
     background:var(--dj800-surface,#fff)!important;
   }
   html body #app#app#app#app .dj860-head {
@@ -45,7 +45,10 @@ html body #app#app#app[data-dj860-onboarding-open="true"] .topbar .map-quick-sea
   }
   html body #app#app#app#app .dj860-visual-pane {
     grid-column:1!important;min-height:0!important;padding:8px 12px 10px!important;
-    touch-action:pan-y!important;background:linear-gradient(145deg,#eef7f1,#e0eee6)!important;
+    touch-action:pan-y!important;background:#e9f3ed!important;
+  }
+  html body #app#app#app#app[data-theme="dark"] .dj860-visual-pane {
+    background:#263d39!important;
   }
   html body #app#app#app#app .dj860-visual {
     width:100%!important;height:100%!important;min-height:0!important;
