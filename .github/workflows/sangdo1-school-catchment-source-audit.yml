@@ -1,0 +1,31 @@
+name: Research – Verify official 2026 school catchment import
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-source-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned geospatial libraries
+        run: python -m pip install --disable-pip-version-check --quiet pyshp==2.3.1 pyproj==3.7.2 shapely==2.1.2
+      - name: Read official metadata and verified published ZIP
+        run: python scripts/research/sangdo1_school_catchment_source_audit.py
+      - name: Recompute polygon/road intersections for audit
+        run: python scripts/research/sangdo1_official_school_catchment_overlay.py
+      - name: Export reproducible study files (never auto-push)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sangdo1-official-catchment-20260920
+          path: |
+            app/public/data/protection-zone/sangdo1_school_catchment_polygons_20260920.geojson
+            app/public/data/protection-zone/sangdo1_road_catchment_overlay_20260920.csv
+            app/public/data/protection-zone/sangdo1_road_catchment_overlay_20260920.json
+            app/public/data/protection-zone/sangdo1_school_catchment_analysis_20260920_summary.json
+          retention-days: 7
+          if-no-files-found: error

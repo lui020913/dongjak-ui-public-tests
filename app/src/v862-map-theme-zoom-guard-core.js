@@ -18,7 +18,7 @@ export function applyBaseLandPalette(map,app){
     const id=String(layer.id||'').toLowerCase();
     if(/^(?:dongjak|dj-|transport-|night-|sangdo|route-|gps-|walk-)/.test(id))continue;
     if(layer.type==='background'){
-      const color=theme==='dark'?'#142128':'#e2e4dc';
+      const color=theme==='dark'?'#17191d':'#e2e4dc';
       try{
         if(map.getLayer?.(layer.id)&&map.getPaintProperty?.(layer.id,'background-color')!==color){
           map.setPaintProperty(layer.id,'background-color',color);changed++;
@@ -30,8 +30,8 @@ export function applyBaseLandPalette(map,app){
     const role=lightMapLandRole(layer);
     if(role!=='ground'&&role!=='vegetation')continue;
     const color=role==='ground'
-      ?(theme==='dark'?'#253137':'#e1e4dc')
-      :(theme==='dark'?'#34583e':'#a5ca92');
+      ?(theme==='dark'?'#22262b':'#e1e4dc')
+      :(theme==='dark'?'#34393e':'#a5ca92');
     try{
       if(!map.getLayer?.(layer.id))continue;
       if(map.getPaintProperty?.(layer.id,'fill-color')!==color){

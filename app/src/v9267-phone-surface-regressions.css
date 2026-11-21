@@ -117,12 +117,12 @@
     stroke-width:1.9!important;
   }
   html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group) {
-    background:#203a3b!important;
-    border-color:#41605c!important;
-    color:#ebf5f0!important;
+    background:var(--dj-theme-surface,#23262c)!important;
+    border-color:var(--dj-theme-line,#424952)!important;
+    color:var(--dj-theme-ink,#f2f4f7)!important;
   }
   html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-setting-icon,.dj834-user-avatar) {
-    background:#294c49!important;color:#a6dfce!important;
+    background:var(--dj-theme-selected,#39434e)!important;color:#bdcbd9!important;
   }
 
   /* The original fullscreen shim reserved ~100 px on the outer panel even
@@ -167,7 +167,7 @@
     transition:background-color .18s ease,border-color .18s ease,color .18s ease!important;
   }
   html body #app#app#app#app#app[data-theme="dark"] #dj-v794-night[aria-pressed="true"] {
-    background:#234c46!important;border-color:#679c87!important;color:#d9f3e7!important;
+    background:#353b44!important;border-color:#8797a9!important;color:#f2f4f7!important;
   }
 }
 }

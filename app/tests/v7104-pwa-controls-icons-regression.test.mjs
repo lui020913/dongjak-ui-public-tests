@@ -12,19 +12,15 @@ test('v8.0.0 retains the original release timeline and all prior releases',()=>{
   assert.equal(RENUMBERED_VERSION_HISTORY.at(-1).version,'v1.0.0');
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
 });
-test('PWA boot splash persists through iOS reload and night restoration without reloading PC or Android',()=>{
-  const head=read('index.html');const ios=read('platforms/ios-pwa/entry.js');
-  const android=read('platforms/android/entry.js');const pc=read('platforms/pc-chromium/entry.js');
-  assert.match(head,/dj-pwa-transition-v7104/);
-  assert.match(head,/data-dj-reload-splash/);
-  assert.match(head,/야간 시야 전환 중/);
-  assert.match(ios,/sessionStorage.setItem/);
-  assert.match(ios,/data-sangdo-night/);
-  assert.match(ios,/restoreAttempted/);
-  assert.match(ios,/night.click\(\)/);
-  assert.match(ios,/win.location.reload\(\)/);
-  assert.doesNotMatch(android,/location.reload/);
-  assert.doesNotMatch(pc,/location.reload/);
+test('PWA theme preference changes without reloading or old splash',()=>{
+  const head=read('index.html'),theme=read('src/manual-pwa-theme-reload.js');
+  const android=read('platforms/android/entry.js'),pc=read('platforms/pc-chromium/entry.js');
+  assert.match(head,/displayTheme=themeReload \? themeReload\.theme : chosen/);
+  assert.doesNotMatch(head,/dj-pwa-transition-v7104|data-dj-reload-splash/);
+  assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
+  assert.doesNotMatch(theme,/location\.reload\(\)/);
+  assert.doesNotMatch(android,/location\.reload/);
+  assert.doesNotMatch(pc,/location\.reload/);
 });
 test('more menu and map options omit duplicated controls but the history remains accessible',()=>{
   const more=read('src/mobile-chrome-v790.js');const html=read('index.html');

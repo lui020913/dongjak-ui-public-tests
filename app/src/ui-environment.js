@@ -85,6 +85,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
+import {createThemeState} from './theme-state-core.mjs';
 
 function safeStorageGet(k){try{return localStorage.getItem(k);}catch{return null;}}
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
@@ -123,55 +124,20 @@ export function lightMapLandRole(layer = {}) {
 
 export function districtExteriorThemePaint(theme='light'){
   return theme==='dark'
-    ? {'fill-color':'#08171e','fill-opacity':0.76}
+    ? {'fill-color':'#111419','fill-opacity':0.76}
     : {'fill-color':'#d8e0e3','fill-opacity':0.65};
 }
 
 export function initTheme({map,app}){
   const toggle=document.getElementById('theme-toggle');
   const baseline=new Map();
-  const themeState={value:getInitialTheme()};
-  let suppressPreferenceSave=false;
+  const themeState=createThemeState(getInitialTheme());
   app.dataset.theme=themeState.value;
+  app.dataset.djPreferredTheme=themeState.preference;
   document.documentElement.dataset.theme=themeState.value;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
-  const themeFlash=document.createElement('div');
-  themeFlash.className='dj-theme-switch-flash';
-  themeFlash.setAttribute('aria-hidden','true');
-  themeFlash.hidden=true;
-  app.append(themeFlash);
-  let themeFlashTimer=null;
-  let mobileThemeMinimumTimer=null;
-  let mobileThemeIdleListener=null;
-  let themeFlashSequence=0;
-  const stopMobileThemeTimers=()=>{
-    if(themeFlashTimer)clearTimeout(themeFlashTimer);
-    if(mobileThemeMinimumTimer)clearTimeout(mobileThemeMinimumTimer);
-    if(mobileThemeIdleListener){map.off?.('idle',mobileThemeIdleListener);mobileThemeIdleListener=null;}
-    themeFlashTimer=null;mobileThemeMinimumTimer=null;
-  };
-  const showThemeTransition=()=>{
-    if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)return;
-    stopMobileThemeTimers();
-    const sequence=++themeFlashSequence;
-    const isPhone=Boolean(window.matchMedia?.('(max-width: 699px)')?.matches);
-    themeFlash.hidden=false;
-    themeFlash.style.animation='none';
-    if(!isPhone){
-      void themeFlash.offsetWidth; // original desktop transition behavior
-      themeFlash.style.removeProperty('animation');
-      themeFlashTimer=setTimeout(()=>{if(sequence===themeFlashSequence){themeFlash.hidden=true;themeFlashTimer=null;}},180);
-      return;
-    }
-    // UI changes immediately; a brief fade covers the next rendered frame.
-    // Tile downloads must never keep the interface behind a transition mask.
-    themeFlashTimer=setTimeout(()=>{
-      if(sequence!==themeFlashSequence)return;
-      stopMobileThemeTimers();themeFlash.hidden=true;
-      themeFlash.style.removeProperty('animation');
-    },180);
-  };
-  if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#151619':'#f3f7f5';
+  // Theme updates are repaint-only. Never create a full-screen transition mask.
+  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#17191d':'#f3f7f5';
   if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
   // background base style only; dynamically added route, road width and safety layers are not modified.
@@ -210,7 +176,7 @@ export function initTheme({map,app}){
         const green=/park|grass|wood|landcover|forest|green|garden/.test(id);
         const road=/road|motorway|street|transportation|bridge|tunnel|highway/.test(id);
         if(entry.type==='background')set('background-color','#131416');
-        if(entry.type==='fill')set('fill-color',water?'#1c242a':green?'#282e29':entry.roadRole?'#3d4145':road?'#303438':'#24272b');
+        if(entry.type==='fill')set('fill-color',water?'#1c242a':green?'#34383d':entry.roadRole?'#3d4145':road?'#303438':'#24272b');
         if(entry.type==='line')set('line-color',water?'#36444d':entry.roadRole?(entry.roadRole==='edge'?'#303438':'#61666b'):road?'#4b5056':'#3d4442');
         if(entry.type==='symbol'){
           set('text-color','#e5e7eb');set('text-halo-color','#181a1e');
@@ -230,8 +196,8 @@ export function initTheme({map,app}){
     for(const id of ['dj-metro-summary-name','dj-metro-detail-name','dj-metro-detail-name-very-close','dj-nearby-place-names','dongjak-zoom-commercial-names']){
       if(!map.getLayer(id))continue;
       try{
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e6f3ed':id==='dj-nearby-place-names'?'#536e74':'#21483c');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(13,31,37,0.96)':'rgba(255,255,255,0.97)');
+        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e6e9ef':id==='dj-nearby-place-names'?'#536e74':'#21483c');
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(22,24,27,0.96)':'rgba(255,255,255,0.97)');
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
@@ -250,28 +216,42 @@ export function initTheme({map,app}){
     }
   }
   map.on('load',()=>{saveBaseLayers();applyTheme();});
-  toggle?.addEventListener('click',()=>{
-    if(!suppressPreferenceSave)showThemeTransition();
-    themeState.value=themeState.value==='dark'?'light':'dark';
-    app.dataset.theme=themeState.value;
-    document.documentElement.dataset.theme=themeState.value;
-    if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#151619':'#f3f7f5';
-    toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
-  toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
-    if(!suppressPreferenceSave)safeStorageSet(THEME_KEY,themeState.value);
-    applyTheme();
-    if(!suppressPreferenceSave&&typeof window.CustomEvent==='function')window.dispatchEvent(new CustomEvent('dongjak:manual-theme-change',{detail:{theme:themeState.value}}));
-  });
-  // Night vision uses the normal theme toggle pipeline (including listeners
-  // installed by other map layers) but never overwrites the user preference.
-  const setTemporaryTheme=next=>{
-    if(next!=='light'&&next!=='dark')return;
-    if(next===themeState.value)return;
-    if(!toggle)return;
-    suppressPreferenceSave=true;
-    try{toggle.click();}finally{suppressPreferenceSave=false;}
+  const displayTheme=({notify=false}={})=>{
+    const next=themeState.value;
+    const changed=app.dataset.theme!==next;
+    app.dataset.theme=next;
+    app.dataset.djPreferredTheme=themeState.preference;
+    app.dataset.djThemeSource=themeState.temporary?'night':'user';
+    document.documentElement.dataset.theme=next;
+    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#17191d':'#edf3ef';
+    if(toggle){
+      if(themeState.temporary){
+        toggle.textContent='야간 시야 중 · 종료 후 '+(themeState.preference==='dark'?'다크':'라이트');
+        toggle.setAttribute('aria-label','야간 시야 종료 후 '+(themeState.preference==='dark'?'다크':'라이트')+' 테마 적용');
+      }else{
+        toggle.textContent=next==='dark'?'라이트 모드':'다크 모드';
+        toggle.setAttribute('aria-label',next==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
+      }
+    }
+    if(changed)applyTheme();
+    if(notify&&typeof window.CustomEvent==='function'){
+      window.dispatchEvent(new CustomEvent('dongjak:manual-theme-change',
+        {detail:{theme:next,preference:themeState.preference}}));
+    }
   };
-  return {currentTheme:()=>themeState.value,refresh:applyTheme,setTemporaryTheme};
+  toggle?.addEventListener('click',()=>{
+    // Night analysis changes only the EFFECTIVE style, never the saved choice.
+    themeState.toggle();
+    safeStorageSet(THEME_KEY,themeState.preference);
+    displayTheme({notify:true});
+  });
+  const setTemporaryTheme=next=>{
+    if(!themeState.override(next))return;
+    displayTheme();
+  };
+  return {currentTheme:()=>themeState.value,
+    preferredTheme:()=>themeState.preference,
+    refresh:applyTheme,setTemporaryTheme};
 }
 
 export function keepRegularMapText(map){

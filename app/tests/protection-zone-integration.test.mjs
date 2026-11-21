@@ -33,7 +33,7 @@ test('safety menu hook and feature activation toggles map layers',async()=>{
  for(const id of ['protection-zone-controls','protection-zone-toggle','protection-zone-status',
   'protection-zone-zoom','protection-zone-focus54','protection-zone-focus62',
   'protection-zone-mode-simple','protection-zone-mode-detail','pza-advanced-tools','pza-mode-guide'])element(id);
- for(const key of ['child','senior','candidates','accidents','radii'])element(`protection-zone-${key}`,['child','senior'].includes(key));
+ for(const key of ['child','senior','candidates','accidents','radii','schoolgap','catchments'])element(`protection-zone-${key}`,['child','senior'].includes(key));
  globalThis.document={getElementById:id=>controls[id]||null};
  globalThis.fetch=async url=>({ok:true,json:async()=>readJson(String(url).split('/').pop())});
  const sources=new Map(),layers=new Map(),events={};let lastZoom=null;
@@ -52,7 +52,7 @@ test('safety menu hook and feature activation toggles map layers',async()=>{
  assert.equal(ui.isActive(),false);
  await ui.enable();
  assert.equal(ui.isActive(),true);
- assert.equal(sources.size,7);
+ assert.equal(sources.size,9);
  assert.equal(layers.get('pza-child-fill').layout.visibility,'visible');
  assert.equal(layers.get('pza-child-point').layout.visibility,'none');
  assert.equal(layers.get('pza-senior-fill').layout.visibility,'visible');
@@ -60,6 +60,8 @@ test('safety menu hook and feature activation toggles map layers',async()=>{
  assert.equal(layers.get('pza-focus-line').layout.visibility,'visible');
  assert.equal(layers.get('pza-focus-halo').layout.visibility,'visible');
  assert.equal(layers.get('pza-radius-300').layout.visibility,'none');
+ assert.equal(layers.get('pza-school-gap-300').layout.visibility,'none');
+ assert.equal(layers.get('pza-catchment-fill').layout.visibility,'none');
  assert.equal(ui.getMode(),'simple');
  controls['protection-zone-mode-detail'].events.click();
  assert.equal(ui.getMode(),'detail');
@@ -67,11 +69,19 @@ test('safety menu hook and feature activation toggles map layers',async()=>{
  controls['protection-zone-candidates'].checked=true;
  controls['protection-zone-candidates'].events.change();
  assert.equal(layers.get('pza-candidates-line').layout.visibility,'visible');
+ controls['protection-zone-schoolgap'].checked=true;
+ controls['protection-zone-schoolgap'].events.change();
+ assert.equal(layers.get('pza-school-gap-300').layout.visibility,'visible');
+ controls['protection-zone-catchments'].checked=true;
+ controls['protection-zone-catchments'].events.change();
+ assert.equal(layers.get('pza-catchment-fill').layout.visibility,'visible');
  assert.equal(layers.get('pza-focus-line').layout.visibility,'visible');
  controls['protection-zone-mode-simple'].events.click();
  assert.equal(layers.get('pza-candidates-line').layout.visibility,'none');
  assert.equal(layers.get('pza-focus-line').layout.visibility,'visible');
  assert.equal(controls['pza-advanced-tools'].hidden,true);
+ assert.equal(layers.get('pza-school-gap-300').layout.visibility,'none');
+ assert.equal(layers.get('pza-catchment-fill').layout.visibility,'none');
  controls['protection-zone-focus54'].events.click();
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(lastZoom.zoom,16.8);

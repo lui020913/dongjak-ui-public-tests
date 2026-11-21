@@ -11,10 +11,10 @@ const marquee=read('src/v854-tip-marquee.js');
 const flowCss=read('src/v863-onboarding-flow.css');
 const html=read('index.html');
 
-test('logged-out state always opens the first onboarding slide, even after a previous completion',()=>{
+test('guest onboarding respects completed-tour persistence on sign-out',()=>{
   assert.match(auth,/djAuthState='checking'/);
   assert.match(auth,/authApp\.dataset\.djAuthState=authenticated\?'signed-in':'signed-out'/);
-  assert.match(onboarding,/if\(authState==='signed-out'\|\|pendingGuestOnboarding\)/);
+  assert.ok(onboarding.includes("if((authState==='signed-out'||pendingGuestOnboarding)&&!readSeen(win))"));
   assert.match(onboarding,/open\(\{auto:true,force:true\}\)/);
   assert.match(onboarding,/if\(auto&&\(seenInMemory\|\|readSeen\(win\)\)&&!force\)return/);
 });

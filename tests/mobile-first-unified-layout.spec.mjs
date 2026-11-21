@@ -84,7 +84,7 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
       const priorTab=app.dataset.tab,priorTheme=app.dataset.theme;
       const samples=[];
       try {
-        for(const [theme,expected] of [['light','rgb(237, 243, 239)'],['dark','rgb(25, 45, 50)']]){
+        for(const [theme,expected] of [['light','rgb(237, 243, 239)'],['dark','rgb(23, 25, 29)']]){
           app.dataset.theme=theme;
           for(const [tab,id] of [['route','route-panel'],['participate','participation-panel'],['news','news-panel'],['mine','mine-panel']]){
             const panel=document.getElementById(id),hadHidden=panel.hasAttribute('hidden');

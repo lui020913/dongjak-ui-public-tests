@@ -18,7 +18,7 @@ export function installPwaStatusTone(doc=document,win=window) {
   if(!root || !app || !themeMeta)return ()=>{};
   let band=null,bridge=null,sample=null;
   let enabled=false;
-  const baselineColor=()=>root.dataset.theme==='dark'?'#101f25':'#edf3ef';
+  const baselineColor=()=>root.dataset.theme==='dark'?'#17191d':'#edf3ef';
   function sync() {
     enabled=isIosHomeScreenPhone(win);
     // The installed PWA's page root may retain a previous theme through page
@@ -50,7 +50,7 @@ export function installPwaStatusTone(doc=document,win=window) {
       const onboarding=visible('dj860-onboarding');
       // The loading surface takes precedence if it briefly overlaps onboarding.
       // Once loading ends, the first-run shell owns exactly its own native status tone.
-      const color=startup?(theme==='dark'?'#192d32':'#edf3ef'):onboarding?(theme==='dark'?'#192e31':'#f5faf7'):nightActive?'#192d32':nightPrompt?(theme==='dark'?'#192d32':'#aab8af'):aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
+      const color=startup?(theme==='dark'?'#17191d':'#edf3ef'):onboarding?(theme==='dark'?'#17191d':'#f5faf7'):nightActive?'#17191d':nightPrompt?(theme==='dark'?'#17191d':'#aab8af'):aiOpen?(theme==='dark'?'#17191d':'#ffffff'):(theme==='dark'?'#17191d':'#edf3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');

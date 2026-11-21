@@ -78,6 +78,7 @@ import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibil
 import {installPriMap} from './pri-map.js';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
+import {installPolicyGapThreeSourceMap} from './policy-gap-3source-map-patch.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import {installSangdoSpeedMap} from './sangdo-speed-map.js';
 import {installBochaRoadLayer} from './bocha-road-layer.js';
@@ -131,7 +132,7 @@ import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
-import {readManualThemeReload,installManualThemeReload} from './manual-pwa-theme-reload.js';
+import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -640,7 +641,7 @@ const immersiveChrome=installMapImmersive({
   onRestore:()=>requestAnimationFrame(syncOverviewSheetForViewport)
 });
 const visualTheme = initTheme({map,app});
-installManualThemeReload({map,app,canReload:()=>mapReady&&!navMode&&!routeStart&&!routeEnd&&!routeRequestPending&&!addMode&&!communityPickMode&&!routePickMode&&app.dataset.sangdoNight!=='on'&&app.dataset.tab==='mine'});
+// Theme changes now update MapLibre + UI in place. Do not reload the PWA.
 
 initWeatherWidget({
   getPosition: () => getDevicePosition({enableHighAccuracy:false,timeout:12000,maximumAge:120000}),
@@ -1596,6 +1597,7 @@ map.on('load',()=>{
   const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,
     onActivate:()=>protectionOverlay?.disable({restoreNight:false})});
   protectionOverlay=installProtectionZoneMap({map,maplibregl,app,nightMode});
+  installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay});
   installSangdoSpeedMap({map,maplibregl,app});
   installBochaRoadLayer({map,maplibregl,app});
   installNearbyPlaceLabels(map,{maplibregl});

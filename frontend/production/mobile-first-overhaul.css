@@ -31,15 +31,15 @@
 }
 
 #app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: #192c24;
-  --mf-surface-raised: #20372d;
-  --mf-surface-soft: #294638;
-  --mf-text: #edf6f0;
-  --mf-muted: #aec5b7;
-  --mf-border: #3b5949;
-  --mf-brand: #65d2a8;
-  --mf-brand-strong: #83e0ba;
-  --mf-brand-soft: #294b3b;
+  --mf-surface: var(--dj-theme-surface,#23262c);
+  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
+  --mf-surface-soft: var(--dj-theme-selected,#39434e);
+  --mf-text: var(--dj-theme-ink,#f2f4f7);
+  --mf-muted: var(--dj-theme-muted,#b6bec8);
+  --mf-border: var(--dj-theme-line,#424952);
+  --mf-brand: var(--dj-theme-accent,#b4c8da);
+  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
+  --mf-brand-soft: var(--dj-theme-selected,#39434e);
   --mf-shadow: 0 8px 26px rgba(0, 0, 0, .22);
   --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .32);
   color-scheme: dark;
@@ -649,15 +649,15 @@
    contains weather/theme/version controls rather than a standalone AI orb. */
 html[data-theme="dark"] #app#app#app#app#app,
 #app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: #192c24;
-  --mf-surface-raised: #20372d;
-  --mf-surface-soft: #294638;
-  --mf-text: #edf6f0;
-  --mf-muted: #aec5b7;
-  --mf-border: #3b5949;
-  --mf-brand: #65d2a8;
-  --mf-brand-strong: #83e0ba;
-  --mf-brand-soft: #294b3b;
+  --mf-surface: var(--dj-theme-surface,#23262c);
+  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
+  --mf-surface-soft: var(--dj-theme-selected,#39434e);
+  --mf-text: var(--dj-theme-ink,#f2f4f7);
+  --mf-muted: var(--dj-theme-muted,#b6bec8);
+  --mf-border: var(--dj-theme-line,#424952);
+  --mf-brand: var(--dj-theme-accent,#b4c8da);
+  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
+  --mf-brand-soft: var(--dj-theme-selected,#39434e);
   --mf-shadow: 0 8px 26px rgba(0, 0, 0, .22);
   --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .32);
   color-scheme: dark;
@@ -850,15 +850,15 @@ html[data-theme="dark"] #app#app#app#app#app,
    interaction contract used by the full nine-viewport regression gate. */
 html[data-theme="dark"] #app#app#app#app#app,
 #app#app#app#app#app[data-theme="dark"] {
-  --mf-surface: #191b1f;
-  --mf-surface-raised: #23262d;
-  --mf-surface-soft: #2c3038;
-  --mf-text: #f0f2f5;
-  --mf-muted: #aeb6c2;
-  --mf-border: #3a3f49;
-  --mf-brand: #65d2a8;
-  --mf-brand-strong: #83e0ba;
-  --mf-brand-soft: #263e35;
+  --mf-surface: var(--dj-theme-surface,#23262c);
+  --mf-surface-raised: var(--dj-theme-raised,#2b3037);
+  --mf-surface-soft: var(--dj-theme-selected,#39434e);
+  --mf-text: var(--dj-theme-ink,#f2f4f7);
+  --mf-muted: var(--dj-theme-muted,#b6bec8);
+  --mf-border: var(--dj-theme-line,#424952);
+  --mf-brand: var(--dj-theme-accent,#b4c8da);
+  --mf-brand-strong: var(--dj-theme-ink,#f2f4f7);
+  --mf-brand-soft: var(--dj-theme-selected,#39434e);
   --mf-shadow: 0 8px 26px rgba(0, 0, 0, .24);
   --mf-shadow-raised: 0 14px 38px rgba(0, 0, 0, .34);
   color-scheme: dark;

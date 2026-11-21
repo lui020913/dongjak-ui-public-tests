@@ -14,9 +14,10 @@ historicalSnapshotTest('original v8.0.0 map engine is unchanged',()=>{
 });
 test('v8.0.0 iOS artwork and theme transition survive safety drawer UI',()=>{
   const html=read('index.html');
-  for(const fragment of ['manifest-light.webmanifest','dj-apple-touch-icon','dj-pwa-transition-v7104','dongjak-light-512.png','src/app-artwork-v7104.js','src/safety-workbench-entry-v7104.js']){
+  for(const fragment of ['manifest-light.webmanifest','dj-apple-touch-icon','dongjak-light-512.png','src/app-artwork-v7104.js','src/safety-workbench-entry-v7104.js']){
     assert.ok(html.includes(fragment),`missing ${fragment}`);
   }
+  assert.doesNotMatch(html,/dj-pwa-transition-v7104/);
   assert.ok(!html.includes('보행안전 지도 v7.10.3'));
    assert.ok(html.includes('<title>동작하는 안전지도 · 보행안전 지도</title>'));
 });

@@ -69,9 +69,9 @@ test('phone search, AI and small action controls use restrained glass without pa
  assert.ok(block.includes('.topbar .map-quick-search-form'));
  assert.ok(block.includes('.topbar .header-tools > #dj890-ai-orb'));
  assert.ok(block.includes('background:rgba(255,255,255,.84)!important;'));
- assert.ok(block.includes('background:rgba(29,48,48,.82)!important;'));
+ assert.ok(block.includes('background:rgba(35,38,44,.90)!important;'));
  assert.ok(block.includes('background:rgba(12,130,107,.91)!important;'));
- assert.ok(block.includes('background:rgba(35,94,78,.88)!important;'));
+ assert.ok(block.includes('background:rgba(51,57,67,.94)!important;'));
  assert.equal((block.match(/backdrop-filter:blur\(9px\)/g)||[]).length,4);
  assert.ok(block.includes('#dj-ios-pwa-map-seam'));
  assert.ok(block.includes('var(--dj-pwa-native-edge)'));

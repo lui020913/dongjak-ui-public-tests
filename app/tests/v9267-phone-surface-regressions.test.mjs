@@ -47,10 +47,9 @@ test('night consent is centered, stale exit motion is cancelled and pill remains
   assert.match(night,/function openNightConfirm\(\)/);
   assert.match(night,/DongjakWindowMotion\?\.cancel\?\.\(card\)/);
 });
-test('iPhone theme reload retains camera even if the basemap never became idle',()=>{
-  assert.match(theme,/map\.getCenter\(\)/);
-  assert.match(theme,/win\.sessionStorage\.setItem/);
-  assert.doesNotMatch(theme,/baseline===null\|\|baseline!==layerSnapshot/);
+test('iPhone manual theme switch does not reload or replace map camera',()=>{
+  assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
+  assert.doesNotMatch(theme,/location\.reload\(\)|map\.getCenter\(\)/);
   assert.match(pwa,/nightActive=app\.dataset\.sangdoNight==='on'/);
   assert.match(pwa,/data-sangdo-night/);
 });

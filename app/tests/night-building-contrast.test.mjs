@@ -40,5 +40,5 @@ test('기존 건물에만 스타일 적용하고 안전 레이어는 보존',()=
   globalThis.document={getElementById:()=>null};
   try{installBaseBuildingPalette({map,app:{dataset:{theme:'dark'}}});}
   finally{globalThis.document=previous;}
-  assert.deepEqual(changed,[['native-building','fill-color','#40575d'],['native-building','fill-opacity',1],['native-building','fill-antialias',false]]);
+  assert.deepEqual(changed,[['native-building','fill-color','#42474f'],['native-building','fill-opacity',1],['native-building','fill-antialias',false]]);
 });

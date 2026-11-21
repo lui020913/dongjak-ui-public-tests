@@ -20,12 +20,11 @@ test('mobile search displays suggestions without toolbar overlap and preserves l
   assert.match(css,/gap:12px!important/);
   assert.ok(!css.includes('@media (min-width:'));
 });
-test('night icon changes and theme flash ends promptly without waiting for network idle',()=>{
+test('night icon and theme state switch without a fullscreen reload mask',()=>{
   const js=read('src/mobile-toolbar-v794.js');
   const env=read('src/ui-environment.js');
   assert.match(js,/M18 2v5M15\.5/);
-  assert.doesNotMatch(env,/map\.on\?\.\('idle',mobileThemeIdleListener/);
-  assert.match(env,/stopMobileThemeTimers/);
-  assert.match(env,/},180\)/);
+  assert.doesNotMatch(env,/themeFlash|stopMobileThemeTimers|showThemeTransition/);
+  assert.match(env,/themeState\.override\(next\)/);
   assert.match(read('index.html'),/mobile-ui-v795.css/);
 });
