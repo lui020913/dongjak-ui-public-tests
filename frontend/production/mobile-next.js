@@ -302,7 +302,9 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
    b.addEventListener('click',()=>{
     if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return;}
     const target=route.querySelector('[data-route-variant="'+id+'"]');
-    if(target&&!target.disabled){target.click();focus();}
+    // Switching variants must keep the other cards clickable so users can compare
+    // again. Fit the selected *full* route without collapsing the picker.
+    if(target&&!target.disabled){target.click();win.dispatchEvent(new Event('dj-next:fit-route'));}
    });
    cards.append(b);
   }
