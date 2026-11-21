@@ -37,6 +37,7 @@ test('PC 드래그 프레임 저하 시 3D만 임시 정지하고 이동 종료 
 });
 test('모바일 커뮤니티 연필은 SVG로 통일, 전환효과는 움직임 줄이기를 존중',()=>{
   assert.match(read('index.html'),/data-tab="participate"[^\n]*<svg viewBox="0 0 24 24"/);
-  assert.match(read('src/v7122-smooth-interactions.css'),/prefers-reduced-motion:reduce/);
+  assert.match(read('src/v889-mobile-visual-polish.css'),/prefers-reduced-motion:reduce/);
+  assert.match(read('src/v910-request-completion.css'),/prefers-reduced-motion:reduce/);
   assert.match(read('vite.config.js'),/dongjak-local-place-ai/);
 });

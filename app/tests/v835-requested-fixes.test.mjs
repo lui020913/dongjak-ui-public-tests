@@ -6,14 +6,19 @@ const toolbar=read('src/v831-swipe-feature-toolbar.js');
 const mobile=read('src/mobile-toolbar-v794.js');
 const search=read('src/map-quick-search.js');
 const route=read('src/route-search.js');
-const css=read('src/v835-requested-ui-fixes.css');
-const metro=read('src/v835-metro-user-icons.css');
+const currentMetroCss=read('src/v914-mobile-ux-fixes.css');
+const currentTransport=read('src/transport-map.js');
+const currentIndex=read('index.html');
+const currentMapControls=read('src/mobile-map-controls.js');
+const currentBaseCss=read('src/style.css');
 
-test('six supplied line images are packaged and mapped to real badge selectors',()=>{
- for(const [line,title] of [['1','1호선'],['7','7호선'],['9','9호선'],['신림','신림선'],['2','2호선'],['4','4호선']]){
+test('six supplied metro assets are archived while the current live badges use official line colors',()=>{
+ for(const line of ['1','7','9','신림','2','4']){
   assert.ok(statSync(new URL(`../public/icons/metro-user-20261114/line-${line}.png`,import.meta.url)).size>100);
-  assert.ok(metro.includes(`title="${title}"`));
  }
+ assert.match(currentTransport,/function makeLineBadge\(line,extraClass/);
+ assert.match(currentTransport,/badge\.style\.backgroundColor=subwayLineColor\(normalized\)/);
+ assert.match(currentMetroCss,/\.metro-badge-number/);
 });
 
 test('primary shortcut preferences persist while base layers and live vehicles remain More-only',()=>{
@@ -51,9 +56,10 @@ test('map search uses loaded vector POIs and verified local/official sources, th
  assert.match(route,/\[\.\.\.IMPORTANT_PLACES,\.\.\.DONGJAK_UNIVERSITIES\]/);
 });
 
-test('help and GPS buttons are circular with theme-colored help icon',()=>{
- assert.match(css,/#map-gesture-guide-open,#map-compass,#center-dongjak,#current-location/);
- assert.match(css,/border-radius:50%!important/);
- assert.match(css,/#map-gesture-guide-open\{/);
- assert.match(css,/var\(--dj800-accent/);
+test('active help and GPS controls remain wired after unreachable historic CSS is removed',()=>{
+ assert.match(currentIndex,/id="map-gesture-guide-open"/);
+ assert.match(currentIndex,/id="current-location"/);
+ assert.match(currentMapControls,/document\.getElementById\('map-gesture-guide-open'\)/);
+ assert.match(currentBaseCss,/#map-gesture-guide-open/);
+ assert.match(currentBaseCss,/\.map-actions #current-location/);
 });
