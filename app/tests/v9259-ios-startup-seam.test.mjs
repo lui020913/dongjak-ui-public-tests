@@ -23,4 +23,9 @@ test('critical splash CSS paints the iPhone top edge before external CSS loads',
   assert.match(head,/html\.dj-ios-home-pwa\[data-theme="dark"\] \.map-startup-overlay\{/);
   assert.match(head,/--start-bg:#192d32/);
   assert.ok(head.indexOf('html.dj-ios-home-pwa:not([data-theme="dark"]) .map-startup-overlay')<head.indexOf('.map-startup-overlay[hidden]'));
+  // After hydration, protected src/style.css contains an important radial
+  // gradient. The PWA-only override must also be important and more specific.
+  assert.match(css,/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) body #app \.map-startup-overlay:not\(\[hidden\]\)/);
+  assert.match(css,/background:linear-gradient\(180deg,#edf3ef 0%,#edf3ef 16%,#f9fbfa 44%,#edf3ef 100%\)!important/);
+  assert.match(css,/background:linear-gradient\(180deg,#192d32 0%,#192d32 16%,#1a3334 44%,#192d32 100%\)!important/);
 });

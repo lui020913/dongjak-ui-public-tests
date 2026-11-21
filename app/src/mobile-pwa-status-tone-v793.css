@@ -139,3 +139,17 @@ html.dj-ios-home-pwa body > #dj-ios-pwa-status-sample{
      transparent 100%)!important;
  }
 }
+
+/* Keep iOS splash continuous AFTER src/style.css is hydrated.
+ * Legacy #app .map-startup-overlay has background:radial-gradient(... )!important.
+ * Override that protected legacy rule without modifying desktop map files. */
+@media(max-width:699px){
+ html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay:not([hidden]){
+   --start-bg:#edf3ef;
+   background:linear-gradient(180deg,#edf3ef 0%,#edf3ef 16%,#f9fbfa 44%,#edf3ef 100%)!important;
+ }
+ html.dj-ios-home-pwa[data-theme="dark"] body #app .map-startup-overlay:not([hidden]){
+   --start-bg:#192d32;
+   background:linear-gradient(180deg,#192d32 0%,#192d32 16%,#1a3334 44%,#192d32 100%)!important;
+ }
+}
