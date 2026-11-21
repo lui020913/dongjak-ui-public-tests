@@ -136,6 +136,9 @@ export function installMobileFloatingSheetController(doc=document,win=window){
     };
     doc.addEventListener('click',suppressPostDragClick,true);
     const down=event=>{
+      // These are independent fullscreen tabs on phones, not floating sheets.
+      // Never start staged expand/collapse/dismiss gestures on their headers.
+      if(win.matchMedia('(max-width:699px)').matches&&['route-panel','participation-panel','news-panel','mine-panel'].includes(id))return;
       if(closing||panel.classList.contains('dj833-sheet-dismissing'))return;
       if(!isMobile()||!isSheetOpen(panel,win)||event.isPrimary===false)return;
       if(event.button!=null&&event.button!==0&&event.pointerType==='mouse')return;
