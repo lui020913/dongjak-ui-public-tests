@@ -15,7 +15,7 @@ git -C "$work" add -f .
 cd "$work"
 test "$(node -p "require('./package.json').version")" = "8.26.1"
 test -f wrangler.toml
-grep -Fq "import './v914-mobile-ux-fixes.css';" src/main.js
+grep -Fq "import './mobile-ui/current.css';" src/main.js
 grep -Fq "import './public-ui-production-overlay.css';" src/main.js
 grep -Fq "public-ui-mobile-surface-coordinator.js" src/main.js
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
@@ -30,7 +30,7 @@ node --input-type=module <<'NODE'
 import {readFileSync,writeFileSync} from 'node:fs';
 const path='src/main.js';
 const source=readFileSync(path,'utf8');
-const anchor="import './v914-mobile-ux-fixes.css';";
+const anchor="import './mobile-ui/current.css';";
 if(source.split(anchor).length!==2) throw new Error('Expected exactly one final mobile CSS import anchor');
 if(source.includes("import './mobile-first-overhaul.css';")) throw new Error('Mobile overhaul already injected');
 writeFileSync(path,source.replace(anchor,anchor+String.fromCharCode(10)+"import './mobile-first-overhaul.css';"));
