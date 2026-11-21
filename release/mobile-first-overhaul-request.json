@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.72",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 retry after PR #221 sealed app harness correction; PR #218 full-screen tour, smooth covered bottom tab transitions, 4-choice real route comparison with start/destination and full-route fit, My Info consistent native theme and latest icons, layer expansion safe area, AI modal fade and interchange-only station badge ring. Require Preview + 12 mobile QA shards + design capture/analysis + exploratory QA + protected Production promotion. No artificial metro arrivals on quota.",
-  "attempt": 203,
+  "purpose": "v9.2.72 release QA retry: real device source from PR #218 plus transfer-station selected inner line badge outline, no outline/border on the outer selector, and retained fully pill-shaped metro neighboring station bar. Re-run Preview, 12 mobile QA shards, 6 visual QA, exploration, protected Production.",
+  "attempt": 204,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "First v9.2.72 release #44904357181 stopped before Preview because the new v9269 Node regression test attempted to read parent scripts/ in an isolated app-only build. PR #221 fixes test to inspect injected initializer inside sealed app and passes full public CI #44904546557. Retry exact new main with no feature rollback.",
+  "last_retry_reason": "Release run #44904708991 failed phone QA shards 3/12 and 11/12 (375px and 430px) due to compact transfer station outer selector border-top-width 2px, while required 0px; late CSS also changed neighboring rail row from 999px pill to 18px card. Preserve app UI request with ring only on inner badge and native pill rail UI.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
