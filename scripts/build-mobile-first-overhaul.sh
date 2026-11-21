@@ -19,6 +19,11 @@ grep -Fq "import './v914-mobile-ux-fixes.css';" src/main.js
 grep -Fq "import './public-ui-production-overlay.css';" src/main.js
 grep -Fq "public-ui-mobile-surface-coordinator.js" src/main.js
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+# The old app/src/mobile-first-overhaul.css was archived as unused runtime CSS.
+# The production overlay remains generated on demand from frontend/production.
+# Mark this new build-time asset intent-to-add so the strict changed-file allowlist
+# still sees it in git diff --name-only (without staging its contents).
+git add -N src/mobile-first-overhaul.css
 node "$GITHUB_WORKSPACE/scripts/apply-mobile-only-gate.mjs" "$work"
 echo "CHECKPOINT: mobile-only visual gate applied"
 node --input-type=module <<'NODE'
