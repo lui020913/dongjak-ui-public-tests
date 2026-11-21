@@ -144,7 +144,9 @@
     }
     #app #participation-panel.dj9256-composing #community-form > .djNext-form-scroll{
       flex:1 1 0%!important;overflow-y:auto!important;min-height:0!important;
-      padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important;
+      padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
+      scroll-padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;
+      -webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;
       overscroll-behavior-y:contain!important;
     }
     #app #participation-panel #community-compose-close{border-radius:999px!important}
