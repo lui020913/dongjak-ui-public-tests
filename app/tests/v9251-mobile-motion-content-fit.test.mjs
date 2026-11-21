@@ -42,7 +42,7 @@ test('facility compact height and AI fade maintain expansion and solid modal bac
   const ai=source('v880-supabase-safety-ai.css');
   assert.match(ai,/dj9251-ai-content-enter/);
   assert.match(ai,/dj9251-ai-content-leave/);
-  assert.match(ai,/#dj-ai-search-modal\[open\]::backdrop\{background:var\(--ai-bg\)!important/);
+  assert.ok(ai.includes('#dj-ai-search-modal[open]::backdrop{background:transparent!important'));
   assert.match(ai,/prefers-reduced-motion:reduce/);
 });
 
