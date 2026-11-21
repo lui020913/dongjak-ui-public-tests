@@ -2083,8 +2083,14 @@ function openCommunityComposer(open,{animate=true}={}) {
     const parent=document.getElementById('participation-panel');
     const epoch=++communityComposerEpoch;
     const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
-    // Keep the editor intact through the parent exit, never flash the list.
-    if(parent&&motion)motion.close(parent,done);else done();return;
+    // A map-origin report must return directly to the map on phone. A legacy
+    // sheet-exit animation can remain in "closing" when the independent full
+    // page takes over its geometry, leaving an invisible form and visible page.
+    // Cancel both owners synchronously before navigating, without flashing the feed.
+    motion?.cancel?.(communityForm);
+    if(parent)motion?.cancel?.(parent);
+    done();
+    return;
   }
   const epoch=++communityComposerEpoch;
   const finish=()=>{
