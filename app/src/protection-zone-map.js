@@ -99,7 +99,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
       ? `<p><strong>제도적 보호 공백 시범점수 (0점 공백 큼 · 100점 모형 내 공백 작음)</strong></p>
          ${hasPreview19?`<p>어린이·노인 시설 19곳 기준: <b>${esc(previewScore19.toFixed(1))}점</b></p>`:''}
          ${hasPreviewSchool5?`<p>초등학교 5곳만 기준: <b>${esc(previewScoreSchool5.toFixed(1))}점</b></p>`:''}
-         <p class="pza-evidence-note">기존 경찰청 등록 지정 도형과 시설 대표점으로 추산한 잠정 연구값입니다. 출입문·고시·통학 동선 확인 전이므로 법적 누락, 실제 위험도 또는 안전 등급이 아닙니다.</p>`
+         <p class="pza-evidence-note">기존 경찰청 등록 보호구역 경계와 시설 대표점으로 추산한 잠정 연구값입니다. 출입문·고시·통학 동선 확인 전이므로 법적 누락, 실제 위험도 또는 안전 등급이 아닙니다.</p>`
       :'';
     const evidence=document.getElementById('pza-road-evidence');
     if(evidence)evidence.innerHTML=`${scoreExplanation}<p>후보 구간 길이: <b>${formatM(p.segment_length_m)}</b></p>
