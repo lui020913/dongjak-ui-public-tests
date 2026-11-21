@@ -7,7 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('v7.0.29 mobile starts with map while retaining an accessible safety overview',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
-  const css=read('src/v714-map-first-layout.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(html,/<section id="overview-sheet"[^>]*hidden>/);
   assert.match(main,/let firstMapEntryPending = true;/);
   assert.match(main,/overview\.hidden = !hasSafetyOverviewContent\(\) \|\| \(initialMapEntry && window\.innerWidth < 1080\);/);
@@ -17,7 +17,7 @@ test('v7.0.29 mobile starts with map while retaining an accessible safety overvi
 
 test('v7.0.29 desktop controls use a coherent rail without invading tablet navigation',()=>{
   const rail=read('src/v713-desktop-rail.js');
-  const css=read('src/v714-map-first-layout.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(rail,/minWidth=1080/);
   assert.match(css,/@media\(min-width:1080px\)/);
   assert.match(css,/#dj-desktop-safety-rail::before/);
@@ -27,7 +27,7 @@ test('v7.0.29 desktop controls use a coherent rail without invading tablet navig
 });
 
 test('v7.0.29 mobile bottom navigation remains floating, sources remain accessible',()=>{
-  const css=read('src/v714-map-first-layout.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/bottom:calc\(10px \+ env\(safe-area-inset-bottom\)\)!important/);
   assert.match(css,/border-radius:24px!important/);
   assert.match(css,/\.maplibregl-ctrl-bottom-right/);
