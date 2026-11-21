@@ -3,9 +3,9 @@
   "application_version": "9.2.54",
   "public_work_branch": "main",
   "purpose": "Convert mobile route setup, community, local news and My Info to independent full-viewport native tab screens. Keep the fixed 5-button pill navigation and safe-area, non-map scrolling, route-search form, news API, account/favorites and 150ms page fade. Exempt these tabs from sheet drag/expand/collapse; retain all map-linked bus/subway/facility/nearby sheets. Preserve desktop/tablet mobile-access gate and protected Preview phone QA Production deployment.",
-  "attempt": 162,
+  "attempt": 163,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 161 Preview, source build and visual capture succeeded, but seven protected phone QA shards failed on obsolete half-sheet geometry and swipe-to-close assertions for the newly independent route/community/news/My Info full-page tabs. PR #148 merged as a41addd762f052a6505c9105edb441a7b102c6d8; protected browser tests now assert 100dvh page bounds, pill z-index, non-draggable headers, explicit close and map resume while retaining map-linked sheet assertions. Re-run exact sealed Preview, all 12 mobile QA shards, 6 visual reviews and guarded Production. Preserve v9.2.54 version identity.",
+  "last_retry_reason": "Attempt 162 exact Preview build and visual validation succeeded, 7/12 phone QA shards passed; five shards failed only because the QA expected the independent page header computed touch-action:auto while Chromium correctly reports none, despite fullscreen rect [0,0,390,844], fixed pill and non-dismissive physical swipe. PR #150 ead42ff89a71345b2f2a8f61affd4c9499cbd6bb merged; protected mobile QA now validates observable swipe/non-dismissal and native viewport bounds without CSS touch-action implementation overfitting. Re-run full 12 mobile shards and 6 Gemini visual reviews, protected Production only on green checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
