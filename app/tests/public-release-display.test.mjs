@@ -10,7 +10,7 @@ test('pre-release version is fixed, but operational provenance stays independent
  assert.equal(PUBLIC_LOADING_VERSION,'버전 1.0');
  // Operational versions use SemVer (e.g. 8.26.1 at rest, 9.2.75 in a staged release).
  // They must not be conflated with the fixed user-visible pre-release label 1.0.
- assert.match(APP_RELEASES[0].version,/^v?\\d+\\.\\d+\\.\\d+$/);
+ assert.match(APP_RELEASES[0].version,/^v?\d+\.\d+\.\d+$/);
  assert.equal(APP_RELEASES[0].version.replace(/^v/,''),APP_VERSION);
  assert.match(read('index.html'),/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
  assert.match(read('src/v7120-settings.js'),/id="dj-about-version-number">1\.0<\/strong>/);
