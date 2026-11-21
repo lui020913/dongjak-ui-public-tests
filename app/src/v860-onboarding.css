@@ -259,16 +259,12 @@ html body #app#app#app .dj860-onboarding .dj860-actions {
   }
 }
 
-/* iOS phone: keep an opaque outgoing slide as a composited layer while the
-   next slide is mounted. No white-frame phase and no double invisible panes. */
-@keyframes dj9266-retained-slide-out{
-  0%{opacity:1}
-  100%{opacity:0}
-}
+/* Keep the outgoing, non-interactive frame above the fully painted
+   incoming slide. JS drives opacity to avoid frozen CSS keyframe timelines. */
 @media(max-width:699px){
   #app .dj860-onboarding .dj860-slide-ghost{
     box-sizing:border-box!important;
-    animation:dj9266-retained-slide-out 280ms cubic-bezier(.4,0,.2,1) forwards!important;
+    animation:none!important;
     transition:none!important;
     pointer-events:none!important;
     will-change:opacity;
@@ -276,7 +272,4 @@ html body #app#app#app .dj860-onboarding .dj860-actions {
     contain:paint;
   }
   #app .dj860-onboarding .dj860-slide-ghost *{pointer-events:none!important}
-}
-@media(prefers-reduced-motion:reduce){
-  #app .dj860-onboarding .dj860-slide-ghost{animation:none!important}
 }
