@@ -3,6 +3,10 @@
 Never supplies credentials, visits only official hosts, and never pushes data.
 """
 import html
+import io
+import zipfile
+import hashlib
+from http.cookiejar import CookieJar
 import re
 import urllib.error
 import urllib.request
@@ -56,5 +60,39 @@ def main():
         except Exception as exc:
             print("FAILED",type(exc).__name__,str(exc)[:450])
 
+
+def verify_public_zip():
+    base="https://schoolzone.emac.kr"
+    download=base+"/publicData/publicDataFileDownload.do?nttId=2966&atchFileId=FILE_000000100002996&fileSn=0"
+    import urllib.request
+    opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CookieJar()))
+    try:
+        opener.open(urllib.request.Request(base+"/publicData/publicDataList.do",headers=HEADERS),timeout=20).close()
+        headers={**HEADERS,"Referer":base+"/publicData/publicDataList.do"}
+        with opener.open(urllib.request.Request(download,headers=headers),timeout=40) as resp:
+            mime=resp.headers.get("Content-Type","")
+            size=0
+            parts=[]
+            while True:
+                block=resp.read(1024*1024)
+                if not block: break
+                size+=len(block)
+                if size>200_000_000: raise ValueError("Official file exceeds research safety cap")
+                parts.append(block)
+            buf=b"".join(parts)
+            print("OFFICIAL_ZIP_STATUS",resp.status,"CONTENT_TYPE",mime,"BYTES",size,
+                  "SHA256",hashlib.sha256(buf).hexdigest(),"MAGIC",buf[:8].hex())
+            if zipfile.is_zipfile(io.BytesIO(buf)):
+                with zipfile.ZipFile(io.BytesIO(buf)) as z:
+                    print("OFFICIAL_ZIP_COUNT",len(z.infolist()))
+                    print("OFFICIAL_ZIP_FILES",[(x.filename,x.file_size) for x in z.infolist()[:45]])
+                with open("school_catchment_20260920_official.zip","wb") as outf:outf.write(buf)
+                print("OFFICIAL_ZIP_WRITTEN", "school_catchment_20260920_official.zip")
+            else:
+                print("OFFICIAL_ZIP_NOT_ZIP",buf[:300].decode("utf-8",errors="replace"))
+    except Exception as err:
+        print("OFFICIAL_ZIP_FETCH_ERROR",type(err).__name__,str(err)[:350])
+
 if __name__=="__main__":
     main()
+    verify_public_zip()
