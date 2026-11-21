@@ -100,6 +100,30 @@ export function createVehiclePopupTracker(map,maplibregl,doc=globalThis.document
 const installedLiveTransit=new WeakMap();
 export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice=()=>{}}){
   if(installedLiveTransit.has(map))return installedLiveTransit.get(map);
+  // Preserve the official/fallback subway source, but render only one
+  // colored corridor. The secondary overview's geometry remains queryable.
+  const synchronizeRailStyle=()=>{
+    for(const id of ['transport-real-rail-overview-casing','transport-real-rail-overview']){
+      if(!map.getLayer?.(id))continue;
+      try{
+        if(map.getLayoutProperty?.(id,'visibility')!=='none')
+          map.setLayoutProperty(id,'visibility','none');
+      }catch{ /* MapLibre style swap can still be in progress */ }
+    }
+    for(const [id,stops] of [
+      ['transport-schematic-subway',[12.2,2.1,13.5,3.0,16,3.2,18,3.7]],
+      ['transport-schematic-subway-casing',[12.2,3.3,13.5,4.1,16,4.4,18,4.9]]
+    ]){
+      if(!map.getLayer?.(id))continue;
+      try{
+        const desired=['interpolate',['linear'],['zoom'],...stops];
+        if(JSON.stringify(map.getPaintProperty?.(id,'line-width'))!==JSON.stringify(desired))
+          map.setPaintProperty(id,'line-width',desired);
+      }catch{ /* retain existing style as fallback */ }
+    }
+  };
+  map.on?.('style.load',synchronizeRailStyle);
+  synchronizeRailStyle();
   const controls=document.getElementById('dj-live-vehicle-controls');
   if(!controls)return null;
   const btnMetro=controls.querySelector('[data-live-vehicle="metro"]');
@@ -167,6 +191,6 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
   sync();
-  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);map.off?.('style.load',synchronizeRailStyle);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
   installedLiveTransit.set(map,handle);return handle;
 }

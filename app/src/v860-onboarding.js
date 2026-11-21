@@ -292,7 +292,9 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     // setting both in one task can coalesce away the whole fade on Safari.
     visualPane.classList.remove('dj860-entering');
     copy.classList.remove('dj860-entering');
-    const panes=[visualPane,copy];
+    // Fade the artwork, not its entire colored frame. The frame remains
+    // painted while iOS decodes the next illustration, preventing a white flash.
+    const panes=[visual,copy];
     for(const node of panes){
       node.style.setProperty('transition','none','important');
       node.style.setProperty('opacity','1','important');

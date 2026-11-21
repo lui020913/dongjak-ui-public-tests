@@ -264,14 +264,21 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   // Some mobile PWA shells intercept native form submissions. Explicit button
   // activation must still execute the same search, exactly once.
   searchButton?.addEventListener('click',event=>{event.preventDefault();submitSearch();});
+  const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
   query.addEventListener('focus',()=>{
-    show();const term=query.value.trim();filters.hidden=term.length>0;
+    const term=query.value.trim();filters.hidden=term.length>0;
+    // On phone, focusing an empty field must not create a large blank dropdown.
+    if(phoneSearch()&&term.length<2){close();return;}
+    show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';}
     else {const matches=viewResults(mergeMapSearchResults(localResults(term)));render(matches.length?matches:[]);feedback.textContent=matches.length?'동작구 장소·교통시설 자동완성':'Enter 또는 검색 버튼으로 전체 장소 검색';}
   });
   query.addEventListener('input',()=>{
     seq++;controller?.abort();controller=null;
-    const term=normalizeKoreanSearch(query.value);show();filters.hidden=term.length>0;
+    const term=normalizeKoreanSearch(query.value);filters.hidden=term.length>0;
+    // Suggestions appear once a query is meaningful, not on input focus alone.
+    if(phoneSearch()&&term.length<2){close();return;}
+    show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소';return;}
     const matches=viewResults(mergeMapSearchResults(localResults(query.value)));render(matches);
     feedback.textContent=matches.length?`장소 추천 ${matches.length}건 · 더 찾으려면 검색`:'검색을 누르면 장소·주소를 조회합니다.';

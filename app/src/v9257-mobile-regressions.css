@@ -1,0 +1,139 @@
+/* 2026-11-21 mobile regression corrections.
+   Loaded after legacy styles; only explicitly affected surfaces are touched. */
+@media (max-width:699px) {
+  /* Keep the colored artwork mat visible while the image and copy crossfade.
+     The blank white frame was caused by fading .dj860-visual-pane itself. */
+  #app .dj860-onboarding.dj860-swapping .dj860-visual-pane {
+    opacity:1!important;
+    transform:none!important;
+    animation:none!important;
+  }
+  #app .dj860-onboarding .dj860-visual-pane {
+    background-color:#e8f4ed!important;
+  }
+  #app[data-theme="dark"] .dj860-onboarding .dj860-visual-pane {
+    background-color:#1c3634!important;
+  }
+
+  /* Keep route descriptions readable while reducing unnecessary vertical
+     consumption on small phones. The fixed action footer remains untouched. */
+  #app #route-panel:not([hidden]) > .dj836-sheet-body > .dj-page-intro {
+    margin:0 0 10px!important;
+    font-size:13px!important;
+    line-height:1.48!important;
+  }
+  #app #route-panel:not([hidden]) .route-card {
+    row-gap:6px!important;
+  }
+  #app #route-panel:not([hidden]) .page-note {
+    font-size:11px!important;
+    line-height:1.5!important;
+    overflow-wrap:anywhere!important;
+  }
+  /* The page body scrolls; the bottom tab/pill is never part of it. */
+  #app #route-panel:not([hidden]) > .dj836-sheet-body {
+    min-height:0!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
+
+/* iOS visualViewport measured by the already installed v884 controller.
+   Previously the variable was written, but no display rule consumed it. */
+@media(max-width:699px){
+  html body #app #map-quick-search-dropdown:not([hidden]){
+    box-sizing:border-box!important;
+    max-height:var(--dj884-search-room,min(58dvh,430px))!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  html body #app #map-quick-search-dropdown:not([hidden]) .map-quick-search-results{
+    min-height:0!important;
+    max-height:calc(var(--dj884-search-room,430px) - 145px)!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+
+  /* The layered controls use one fixed body and an independently scrolling list.
+     Preserve native header dragging instead of scrolling the whole sheet. */
+  html body #app #djNext-layer-panel:not([hidden]) .djNext-modal-body {
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  html body #app #djNext-layer-panel:not([hidden]) .djNext-modal-body > header{
+    position:relative!important;
+    flex:0 0 auto!important;
+    touch-action:pan-x!important;
+    z-index:2!important;
+  }
+  html body #app #djNext-layer-panel:not([hidden]) .djNext-modal-body > header button{
+    touch-action:manipulation!important;
+  }
+  html body #app #djNext-layer-panel:not([hidden]) .djNext-layer-scroll{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  html body #app #djNext-layer-panel .djNext-layer-legend{
+    font-size:12px!important;
+    line-height:1.4!important;
+    margin-bottom:6px!important;
+  }
+  html body #app #djNext-layer-panel .djNext-count{
+    font-size:12px!important;
+    line-height:1.4!important;
+    margin-bottom:8px!important;
+  }
+
+  /* One scroll lane for community categories, not a wrapping second header. */
+  html body #app #participation-panel:not([hidden]):not(.dj9256-composing) .community-category-tabs{
+    display:flex!important;
+    flex:0 0 auto!important;
+    flex-flow:row nowrap!important;
+    min-height:48px!important;
+    max-height:52px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  html body #app #participation-panel .community-category-tabs::-webkit-scrollbar{
+    display:none!important;
+  }
+  html body #app #participation-panel.dj9256-composing .community-category-tabs,
+  html body #app #participation-panel.dj9256-composing > .dj836-sheet-body > .dj-page-intro {
+    display:none!important;
+  }
+
+  /* Details and sheets always keep a scrolling content area below the header,
+     while full-screen primary pages retain the fixed pill navigation. */
+  html body #app #ped-tools-panel:not([hidden]){
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain!important;
+  }
+  html body #app #route-panel:not([hidden]) #route-calc:disabled{
+    color:#355c50!important;
+    background:#a4d5c9!important;
+    opacity:1!important;
+    cursor:not-allowed!important;
+  }
+  html body #app #transport-sheet:not([hidden]) .dj875-transit-scroll{
+    min-height:0!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
+/* Match native status sampling without blurring/covering the opaque search. */
+html.dj-ios-home-pwa body #app > #dj-ios-pwa-map-seam{
+  pointer-events:none!important;
+}

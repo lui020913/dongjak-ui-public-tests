@@ -13,8 +13,8 @@ export const METRO_OVERVIEW_MIN_ZOOM_BUFFER=0.46;
 export const METRO_OVERVIEW_LAYERS=Object.freeze([
   'transport-schematic-subway-casing',
   'transport-schematic-subway',
-  'transport-real-rail-overview-casing',
-  'transport-real-rail-overview',
+  // The duplicate OSM overview is intentionally hidden by liveTransit/integrate.js.
+  // Do not turn it back on during zoom or layer-preference changes.
   'dj-metro-summary-mobile-hubs-icon',
   'dj-metro-summary-icon',
   'dj-metro-summary-name',

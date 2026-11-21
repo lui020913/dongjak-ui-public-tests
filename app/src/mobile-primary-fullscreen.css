@@ -2,6 +2,18 @@
    Original route, news, community and account nodes retain their live handlers. */
 @layer request-completion {
   @media (max-width:699px) {
+    /* One theme-owned page surface from the OS status area to the footer.
+       Existing cards and interactive fields retain their contrasting surfaces. */
+    html body #app#app#app#app#app {
+      --dj-primary-page-bg:#edf3ef;
+      --dj-primary-page-ink:#203e34;
+      --dj-primary-page-edge:rgba(47,104,82,.16);
+    }
+    html body #app#app#app#app#app[data-theme="dark"] {
+      --dj-primary-page-bg:#192d32;
+      --dj-primary-page-ink:#edf6f1;
+      --dj-primary-page-edge:rgba(197,225,211,.18);
+    }
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > .topbar,
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) :is(#dj-v794-toolbar,#djNext-toolbar) {
       display:none!important;
@@ -29,8 +41,8 @@
       padding:0 0 calc(92px + env(safe-area-inset-bottom,0px))!important;
       border:0!important;
       border-radius:0!important;
-      background:var(--mf-surface-solid,#fff)!important;
-      color:var(--mf-ink,#203e34)!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
+      color:var(--dj-primary-page-ink,#203e34)!important;
       box-shadow:none!important;
       transform:none!important;
       translate:0 0!important;
@@ -46,8 +58,8 @@
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body,
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
-      background:#191b1f!important;
-      color:#e5e7eb!important;
+      background:var(--dj-primary-page-bg,#192d32)!important;
+      color:var(--dj-primary-page-ink,#edf6f1)!important;
     }
 
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]) {
@@ -72,9 +84,9 @@
       max-height:none!important;
       padding:calc(10px + env(safe-area-inset-top,0px)) 16px 12px!important;
       border:0!important;
-      border-bottom:1px solid var(--mf-line,rgba(47,104,82,.16))!important;
+      border-bottom:1px solid var(--dj-primary-page-edge,rgba(47,104,82,.16))!important;
       border-radius:0!important;
-      background:var(--mf-surface-solid,#fff)!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
       box-shadow:none!important;
       touch-action:auto!important;
       cursor:default!important;
@@ -103,6 +115,8 @@
       padding:14px 16px 20px!important;
       scroll-padding-top:12px!important;
       scroll-padding-bottom:24px!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
+      color:var(--dj-primary-page-ink,#203e34)!important;
     }
 
     /* Route submit action remains visible above the pill navigation dock. */
@@ -113,9 +127,9 @@
       width:100%!important;
       padding:9px 16px 10px!important;
       margin:0!important;
-      border-top:1px solid var(--mf-line,rgba(47,104,82,.16))!important;
+      border-top:1px solid var(--dj-primary-page-edge,rgba(47,104,82,.16))!important;
       box-sizing:border-box!important;
-      background:var(--mf-surface-solid,#fff)!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
       z-index:3!important;
     }
 
