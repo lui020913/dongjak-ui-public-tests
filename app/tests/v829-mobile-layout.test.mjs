@@ -39,5 +39,6 @@ test('new CSS link loads after previous layout and release is consistent',()=>{
   const prior=html.indexOf('/src/v824-mobile-sheet-and-keyboard.css');
   const latest=html.indexOf('/src/v829-mobile-layout-system.css');
   assert.ok(prior>0 && latest>prior);assert.ok(pkg.version.localeCompare('8.2.9',undefined,{numeric:true})>=0);
-  assert.ok(html.includes(`v${pkg.version}`));
+   assert.ok(html.includes('id="map-startup-version" aria-label="앱 버전">버전 1.0'));
+   assert.equal(JSON.parse(readFileSync(new URL('../public/version.json',import.meta.url),'utf8')).version,pkg.version);
 });
