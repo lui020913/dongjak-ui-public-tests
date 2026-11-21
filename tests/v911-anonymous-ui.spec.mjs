@@ -244,7 +244,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
    const b=panel.getByRole('switch',{name:label+' 바로가기',exact:true});await expect(b).toHaveAttribute('aria-checked','false');await b.scrollIntoViewIfNeeded();await b.click();await expect(b).toHaveAttribute('aria-checked','true');
  }
  expect(await slopeAction.getAttribute('aria-pressed')).toBe(slopeState);await expect(panel).toBeVisible();
- await expect(panel.locator('.djNext-count')).toHaveText('등록 3/3');
+ await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 3/3');
  await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeDisabled();
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
@@ -255,7 +255,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await scroll.evaluate(n=>{n.scrollLeft=n.scrollWidth;});await expect(scroll).toHaveAttribute('data-overflow-left','true');await assertLayerRight();
  await scroll.evaluate(n=>{n.scrollLeft=0;});await tap(page,page.locator('#djNext-layers'));await expect(panel).toBeVisible();
  const remove=panel.getByRole('switch',{name:'경사도 바로가기',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
- await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
+ await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 2/3');
  await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
