@@ -26,6 +26,10 @@ export function installUnifiedUI(doc=document, win=window){
   const reduced=()=>app.classList.contains('dj-reduced-animation')||
     win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const phone=()=>Boolean(win.matchMedia?.('(max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)')?.matches);
+  // Phone primary tabs are full viewport pages, not sliding bottom sheets.
+  const primaryPhonePage=target=>Boolean(target&&
+    win.matchMedia?.('(max-width:699px)')?.matches&&
+    ['route-panel','participation-panel','news-panel','mine-panel'].includes(target.id));
   const desktop=()=>!phone()&&Boolean(win.matchMedia?.('(min-width:1080px)')?.matches);
   const lifecycle=createWindowLifecycle();
   const explicitUntil=new Map();
@@ -73,6 +77,9 @@ export function installUnifiedUI(doc=document, win=window){
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
+    // This was causing a verified 844px downward translate and opacity .12
+    // on full-screen Community after native bottom-tab navigation.
+    if(primaryPhonePage(target))return false;
     if(!phone()||!target?.style||reduced())return false;
     const slideDuration=opening?WINDOW_MOTION.open:WINDOW_MOTION.close;
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
@@ -216,17 +223,33 @@ export function installUnifiedUI(doc=document, win=window){
     activeAnimation.delete(target);
     try{current.cancel();}catch{}
   };
+  const releasePrimaryPage=target=>{
+    if(!primaryPhonePage(target))return false;
+    cancelActive(target);
+    // Remove stale motion-owned inline !important styles ONLY on actual
+    // primary phone pages, retaining panel position, size, scroll and inputs.
+    const props=['translate','opacity','clip-path','transition','animation','will-change'];
+    if(props.some(property=>target.style.getPropertyValue(property))){
+      for(const property of props)target.style.removeProperty(property);
+    }
+    if(target.hasAttribute('data-dj810-animating'))target.removeAttribute('data-dj810-animating');
+    delete target.dataset.djWindowMotionDuration;
+    delete target.dataset.djWindowMotionKind;
+    return true;
+  };
   // Native close functions call this directly, never replay a synthetic click.
   // A replacement or swipe retains its own native cleanup, avoiding duplicates.
   win.DongjakWindowMotion={
     policy:WINDOW_MOTION,
     open(target){
+      if(releasePrimaryPage(target))return;
       if(!target||target.dataset.dj810Animating==='opening')return;
       const from=target.dataset.dj810Animating==='closing'?Number(win.getComputedStyle(target).opacity):undefined;
       const offset=activeAnimation.get(target)?.offset?.();
       cancelActive(target);playMobileMotion(target,true,undefined,from,offset);
     },
     close(target,finish){
+      if(releasePrimaryPage(target)){finish?.();return;}
       if(!target||!phone()||reduced()||target.hidden||target.classList.contains('dj889-sheet-transitioning')||target.dataset.djSwipeDismissed==='true'){finish();return;}
       if(target.dataset.dj810Animating==='closing')return;
       const from=target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
@@ -234,6 +257,7 @@ export function installUnifiedUI(doc=document, win=window){
       cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset))finish();
     },
     closeTab(target,finish){
+      if(releasePrimaryPage(target)){finish?.();return;}
       if(!target||target.hidden||!phone()||reduced()){finish();return;}
       const from=target.dataset.dj810Animating?Number(win.getComputedStyle(target).opacity):undefined;
       cancelActive(target);
@@ -246,6 +270,7 @@ export function installUnifiedUI(doc=document, win=window){
     if(id==='map-quick-search-dropdown'&&phone())return;
     if((phone()&&id==='dj-ai-search-modal')||reduced() || (id==='transport-sheet'&&element(id)?.dataset.dj807Switching==='true'))return;
     const target=content(element(id));if(!target)return;
+    if(releasePrimaryPage(target))return;
     cancelActive(target);
     // On phones, only the common slide owner may animate the surface.
     if(phone()){playMobileMotion(target,true);return;}
@@ -466,7 +491,10 @@ export function installUnifiedUI(doc=document, win=window){
         if(realOpen&&(!was||requested)){
           const target=content(element(id));
           if(id===replacingSurface)replacingSurface='';
-          if(phone()&&tabReplacement.has(id)){
+          if(releasePrimaryPage(target)){
+            // The native bottom-tab transition owns both page snapshots.
+            // Do not animate sheet body or leave stale inline opacity.
+          }else if(phone()&&tabReplacement.has(id)){
             // The page frame remains opaque. Only the incoming body fades in.
             cancelActive(target);
             const body=target?.querySelector('.dj836-sheet-body');
