@@ -298,7 +298,10 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     const more=doc.getElementById('dj-mobile-utilities');
     if(more&&!more.hidden){more.hidden=true;doc.getElementById('dj-mobile-more-trigger')?.setAttribute('aria-expanded','false');doc.getElementById('dj-v794-more')?.setAttribute('aria-expanded','false');app.classList.remove('dj-mobile-more-open');}
     const guide=doc.getElementById('map-gesture-guide');if(guide)guide.hidden=true;
-    opened=true;render(0,'next');app.dataset.dj860OnboardingOpen='true';
+    // First entry paints its artwork and copy fully opaque. The card itself
+    // already owns the initial entry animation; a second slide-enter fade
+    // caused the first painted iPhone frame to briefly report opacity 0.
+    opened=true;render(0,'next',false);app.dataset.dj860OnboardingOpen='true';
     markGuideAutoShown();
     if(!auto)overlay.dataset.dj860Manual='true';else delete overlay.dataset.dj860Manual;
     win.requestAnimationFrame?.(()=>overlay.querySelector('#dj860-title')?.focus?.({preventScroll:true}));
