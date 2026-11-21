@@ -853,6 +853,7 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
  expect(native,'Native dialog top layer must blend from status tone into the modal scrim').toContain('linear-gradient');
+ expect(native,'The gradient top must exactly match the OS-owned white status pixels').toMatch(/rgb\(255,\s*255,\s*255\) 0px/);
  expect(native).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)'); // Opaque native status pixels fade naturally into a single dialog backdrop.
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
