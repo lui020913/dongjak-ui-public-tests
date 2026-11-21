@@ -40,3 +40,12 @@ test('primary pages bypass draggable sheets and reveal content without a full-sc
  for(const key of ['route','participate','news','mine'])
    assert(html.includes('data-page="'+key+'"'));
 });
+
+test('map-origin full-screen report composer hides the map header and AI orb above its close button',()=>{
+ assert.ok(css.includes(':has(#participation-panel.dj9256-composing:not([hidden])) > .topbar'));
+ assert.ok(css.includes(':has(#participation-panel.dj9256-composing:not([hidden])) :is(#dj-v794-toolbar,#djNext-toolbar)'));
+ assert.ok(css.includes('pointer-events:none!important'));
+ // During report composition data-tab can remain map; the composer selector
+ // must not depend on the bottom tab reflecting participate.
+ assert.ok(css.includes(':has(#participation-panel.dj9256-composing:not([hidden]))'));
+});
