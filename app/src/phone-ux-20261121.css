@@ -156,3 +156,58 @@
   html body #app#app#app#app#app > #dj-phone-tab-shield{transition:none!important;}
 }
 }
+
+/* The consent dialog must not inherit bottom-sheet translation or lateral
+   animations. The provided iPhone recording showed it shifting horizontally
+   between repeated openings. Fade in place at the centre of the viewport. */
+@layer request-completion {
+@media (max-width:699px) {
+  html body #app#app#app#app#app #dj833-night-modal:not([hidden]) {
+    display:grid!important;
+    place-items:center!important;
+    position:fixed!important;
+    inset:0!important;
+    top:0!important;bottom:0!important;left:0!important;right:0!important;
+    width:100vw!important;height:100dvh!important;
+    min-width:0!important;max-width:none!important;
+    margin:0!important;padding:16px!important;
+    transform:none!important;translate:none!important;
+    border:0!important;border-radius:0!important;
+    overflow:hidden!important;
+    box-sizing:border-box!important;
+    background:rgba(12,34,27,.40)!important;
+    animation:dj9267-night-overlay-in .18s ease-out both!important;
+    z-index:9200!important;
+  }
+  html body #app#app#app#app#app #dj833-night-modal:not([hidden]) .dj833-night-dialog {
+    position:relative!important;
+    inset:auto!important;
+    left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+    width:min(100%,410px)!important;max-width:410px!important;
+    max-height:calc(100dvh - 36px)!important;
+    margin:auto!important;
+    transform:none!important;translate:none!important;
+    animation:dj9267-night-dialog-in .20s ease-out both!important;
+    overflow-y:auto!important;
+    box-sizing:border-box!important;
+  }
+}
+}
+@keyframes dj9267-night-overlay-in {from{opacity:0}to{opacity:1}}
+@keyframes dj9267-night-dialog-in {from{opacity:.35}to{opacity:1}}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  #app #dj833-night-modal:not([hidden]),
+  #app #dj833-night-modal:not([hidden]) .dj833-night-dialog {animation:none!important;}
+}
+/* The permission/consent scrim is visible before night mode activates.
+   Sample a midtone in the OS status region rather than leaving a bright strip
+   abruptly adjacent to the dimmed map; black status icons remain legible. */
+html.dj-ios-home-pwa:has(#dj833-night-modal:not([hidden])) {
+  --dj-pwa-native-edge:#aab8af!important;
+  --dj-pwa-land-tone:#aab8af!important;
+}
+html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
+  --dj-pwa-native-edge:#192d32!important;
+  --dj-pwa-land-tone:#192d32!important;
+}
+
