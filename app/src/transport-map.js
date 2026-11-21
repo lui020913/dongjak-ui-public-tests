@@ -2808,16 +2808,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         }
       }
     }
-    // Subway navigation strip belongs directly below the station title, like
-    // a compact rail route schematic. Restore the original order for bus stops.
-    const liveHeading=panel.querySelector?.('.transport-arrivals-title');
+    // Subway compact preview prioritizes live arrivals, not adjacent stations.
+    // Reposition the ORIGINAL node after the real ETA content, preserving its
+    // event handlers and allowing the wrapper to remain the scroll owner.
     const selectionBox=panel.querySelector?.('.transport-selection-box');
-    // In the mobile layout, the existing transport nodes are moved into
-    // .dj875-transit-scroll. Insert relative to the anchor's ACTUAL parent,
-    // not #transport-sheet, or insertBefore throws NotFoundError on iOS.
-    // The DOM nodes and all attached handlers remain intact.
-    if(place.kind==='subway'&&liveHeading?.parentNode)
-      liveHeading.parentNode.insertBefore(neighborsEl,liveHeading);
+    if(place.kind==='subway'&&arrivalsEl?.parentNode)
+      arrivalsEl.parentNode.insertBefore(neighborsEl,arrivalsEl.nextSibling);
     else if(place.kind==='bus'&&selectionBox?.parentNode)
       selectionBox.parentNode.insertBefore(neighborsEl,selectionBox);
     arrivalsEl.setAttribute?.('aria-busy','true');
