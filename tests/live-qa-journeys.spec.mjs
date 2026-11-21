@@ -12,15 +12,13 @@ async function checkpoint(page,label){
  // Capture the currently open panel rather than only the screen after closing it.
  const image=await page.screenshot({timeout:15000});
  writeFileSync(join(dir,file),image);
- appendFileSync(join(dir,'design-checkpoints.ndjson'),JSON.stringify({label,file,t:Date.now()})+'
-');
+ appendFileSync(join(dir,'design-checkpoints.ndjson'),JSON.stringify({label,file,t:Date.now()})+'\n');
 }
 
 async function stage(page,info,n,total,label,retry,fn){
  const id=info.annotations.find(a=>a.type==='live-qa-scene')?.description;
  const file=root&&id?join(root,id,'stage.json'):null;
- const update=(status,error)=>{if(!file)return;const data={index:n,total,label,status,retry,error,t:Date.now()};writeFileSync(file+'.tmp',JSON.stringify(data));renameSync(file+'.tmp',file);appendFileSync(join(root,id,'stages.ndjson'),JSON.stringify(data)+'
-');};
+ const update=(status,error)=>{if(!file)return;const data={index:n,total,label,status,retry,error,t:Date.now()};writeFileSync(file+'.tmp',JSON.stringify(data));renameSync(file+'.tmp',file);appendFileSync(join(root,id,'stages.ndjson'),JSON.stringify(data)+'\n');};
  if(root)while(existsSync(join(root,'pause')))await sleep(250);
  update('running');
  try {await test.step(label,fn);await info.attach('stage-'+n,{body:await page.screenshot(),contentType:'image/png'});update('passed');}
