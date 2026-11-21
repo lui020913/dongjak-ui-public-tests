@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "9.2.75 internal traceable release (user-visible pre-release version 1.0): Issue #235 PR #244 fixes actual Production `/api/rail-geometry` HTTP 502 by preferring MOIS GIS and falling back only on outage to labeled OpenStreetMap ODbL track geometry for lines 1,2,4,7,9,Sillim. Live integration diagnostic #44915553809 verified status 200, 38 real paths, all 6 line replacements and 495 actual geometry features; full Public source CI #44915408338 succeeded. Preserve all previously approved liquid-glass UI, station ETA first, tab transition, map/GPS/API. Full isolated candidate build, Preview, all 12 mobile QA shards, visual analysis, protected Production, and post-deploy rail geometry endpoint check. No bypass.",
-  "attempt": 214,
+  "purpose": "Mobile UI Issue #235 white-frame regression fix, approved PR #246: completely remove opaque #dj-tab-surface-curtain CSS/DOM, remove legacy extra foreground animations from v9267 and mobile-next; one native View Transitions API crossfade of actual previous and next page snapshots (170ms), with immediate no-mask fallback for unsupported browsers or reduced motion. Preserve previous production six-line attributed OSM railway fallback and all maps, data, login, 1.0 public UI version. Build latest verified public main. Enforce full protected isolated build, Preview, 12 phone QA, visual audit, exploratory QA and Production identity gate. No bypass.",
+  "attempt": 215,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Roll-forward necessary because protected Production #44913478678 succeeded overall but independent live endpoint diagnostics #44914509632 and #44914965165 proved MOIS source unreachable and rail API HTTP 502, leaving schematic track geometry. PR #244 is validated with live OSM-derived fixed-bounds geometry (#44915553809) and source attribution. Deploy latest main, do not reuse old build.",
+  "last_retry_reason": "User reported an actual white flash between bottom tabs. Investigation found former v9.2.72 CSS opaque curtain bg var(--dj9272-page) plus overlapping v9267 CSS white surface and foreground fade. PR #246 deleted both legacy curtain layers and adopted native snapshot crossfade; Public app CI #44918431335 succeeded. Production #44915639381 precedes this change. Protected rebuild/QA needed before declaring fix deployed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
