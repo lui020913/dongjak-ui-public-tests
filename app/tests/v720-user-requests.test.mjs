@@ -11,7 +11,7 @@ const help=read('src/mobile-map-controls.js');
 test('v7.0.29 keeps the full v7.0.19 feature chain and applies one final stylesheet',()=>{
  assert.match(main,/import '\.\/mobile-ui-baseline\.css'/);
  assert.match(main,/import '\.\/mobile-ui-baseline\.css'/);
- assert.ok(main.indexOf("mobile-ui-baseline.css")>main.indexOf("mobile-ui-baseline.css"));
+ assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('v614-transport-compact.css') && main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
  assert.match(main,/installNightVisibility/);
  assert.match(main,/initDongjakNews/);
  assert.match(main,/initMapQuickSearch/);
