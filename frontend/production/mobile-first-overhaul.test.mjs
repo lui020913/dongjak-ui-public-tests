@@ -10,7 +10,9 @@ test('mobile-first design tokens and dark theme are defined',()=>{
   }
   assert.match(css,/#app(?:#app){0,4}\[data-theme="dark"\]/);
   assert.match(css,/html\[data-theme="dark"\] #app/);
-  assert.ok(css.includes('--mf-surface: #191b1f'));
+  assert.ok(css.includes('--mf-surface: var(--dj-theme-surface,#23262c)'));
+  assert.ok(css.includes('--mf-brand: var(--dj-theme-accent,#b4c8da)'));
+  assert.doesNotMatch(css,/--mf-surface: #192c24|--mf-brand: #65d2a8/);
 });
 
 test('phone layout uses safe areas and map-first navigation',()=>{
