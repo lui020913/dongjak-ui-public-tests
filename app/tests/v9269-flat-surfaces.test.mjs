@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const productionStyle=name=>{
+ const generated=new URL('../src/'+name,import.meta.url);
+ const original=new URL('../../frontend/production/'+name,import.meta.url);
+ return readFileSync(existsSync(generated)?generated:original,'utf8');
+};
 
 test('phone startup and iOS PWA status edge use flat native-matched fills',()=>{
  const html=read('index.html'),status=read('src/mobile-pwa-status-tone-v793.css');
@@ -20,8 +25,8 @@ test('onboarding no longer blurs, dims or gradients its backdrop',()=>{
 });
 
 test('dock toolbar and controls have solid flat backgrounds',()=>{
- const shell=read('src/mobile-first-layout.css'),overlay=read('../frontend/production/mobile-first-overhaul.css');
- const next=read('../frontend/production/mobile-next.css'),material=read('src/button-material.css');
+ const shell=read('src/mobile-first-layout.css'),overlay=productionStyle('mobile-first-overhaul.css');
+ const next=productionStyle('mobile-next.css'),material=read('src/button-material.css');
  assert.ok(shell.includes('--mf-surface: #ffffff'));
  for(const old of ['backdrop-filter: blur(18px)','backdrop-filter: blur(3px)','backdrop-filter: blur(2px)'])assert.equal(shell.includes(old),false,old);
  for(const old of ['backdrop-filter: blur(16px)','backdrop-filter: blur(5px)'])assert.equal(overlay.includes(old),false,old);
@@ -32,7 +37,7 @@ test('dock toolbar and controls have solid flat backgrounds',()=>{
 });
 
 test('ordinary sheets do not dim navigation; permission consent remains isolated',()=>{
- const css=read('../frontend/production/mobile-next.css');
+ const css=productionStyle('mobile-next.css');
  assert.equal(css.includes('filter:brightness(.66)'),false);
  assert.equal(css.includes('background:rgba(19,40,32,calc(.4'),false);
  assert.ok(css.includes('#djNext-permissions:not([hidden])'));
