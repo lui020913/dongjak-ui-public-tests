@@ -97,7 +97,14 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     if(dropdown.hidden)return;
     const viewport=window.visualViewport;
     const visibleBottom=viewport?viewport.offsetTop+viewport.height:window.innerHeight;
-    const top=Math.ceil(shell.getBoundingClientRect().bottom+7);
+    const anchor=shell.getBoundingClientRect();
+    const top=Math.ceil(anchor.bottom+7);
+    // Search suggestions follow the visible pill (not the full phone width).
+    // The adjacent AI orb remains visible and does not overlap the results.
+    const left=Math.max(10,Math.floor(anchor.left));
+    const width=Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
+    dropdown.style.setProperty('--dj871-search-left',left+'px');
+    dropdown.style.setProperty('--dj871-search-width',width+'px');
     const available=Math.max(90,Math.floor(visibleBottom-top-12));
     shell.style.setProperty('--dj-search-results-max',`${Math.max(92,Math.min(520,available))}px`);
     dropdown.style.setProperty('--dj871-search-top',`${top}px`);
