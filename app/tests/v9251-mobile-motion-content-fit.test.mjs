@@ -34,7 +34,7 @@ test('transit sheet content size removes empty space but allows full expansion',
   assert.match(js,/if\(panel.hidden\|\|panel.classList.contains\('dj871-sheet-expanded'\)\)return;/);
 });
 
-test('facility compact height and AI fade maintain expansion and solid modal backdrop',()=>{
+test('facility compact height and AI fade maintain expansion with a transparent modal backdrop',()=>{
   assert(compactFacilityHeight({header:96,body:74,viewport:860})<250);
   assert.equal(compactFacilityHeight({header:100,body:900,viewport:900}),504);
   const css=source('v910-request-completion.css');
@@ -42,7 +42,8 @@ test('facility compact height and AI fade maintain expansion and solid modal bac
   const ai=source('v880-supabase-safety-ai.css');
   assert.match(ai,/dj9251-ai-content-enter/);
   assert.match(ai,/dj9251-ai-content-leave/);
-  assert.ok(ai.includes('#dj-ai-search-modal[open]::backdrop{background:transparent!important'));
+  assert.match(ai,/#dj-ai-search-modal\[open\]::backdrop\{background:transparent!important/);
+  assert.doesNotMatch(ai,/backdrop-filter:blur\(3px\)/);
   assert.match(ai,/prefers-reduced-motion:reduce/);
 });
 

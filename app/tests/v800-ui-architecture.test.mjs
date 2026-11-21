@@ -29,10 +29,11 @@ test('canonical compass bearing and artwork are mirrored onto the mobile proxy',
   assert.match(js,/mobile\.style\.transform=bearingTransform/);
   assert.match(js,/compassObserver\.observe/);
 });
-test('early PWA reload uses a solid theme-matched surface and never a startup icon image',()=>{
+test('early PWA reload uses a solid theme-matched background and no startup icon image',()=>{
   const h=read('index.html');
   const block=h.slice(h.indexOf('/* Critical PWA pre-paint.'),h.indexOf('/* Critical first paint:'));
-  assert.ok(block.includes('-webkit-backdrop-filter:none;backdrop-filter:none;'));assert.equal(block.includes('linear-gradient('),false);
+  assert.ok(block.includes('backdrop-filter:none'));
+  assert.doesNotMatch(block,/linear-gradient/);
   assert.doesNotMatch(block,/url\(/);
   assert.match(h,/displayTheme=themeReload \? themeReload\.theme : pending \? \(pending\.night==='on'\?'dark':chosen\) : 'light'/);
 });
