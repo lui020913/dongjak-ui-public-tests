@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.73",
+  "application_version": "9.2.74",
   "public_work_branch": "main",
-  "purpose": "v9.2.73 user-requested deploy of Sangdo1 PRI ① night-light visibility and PRI ② accident hotspots to the actual mobile map application: source risk→safety normalization (100 safer), provisional 100 non-hotspot baseline, 1,686 road segments, separate factor layers and provisional 2-factor mean in mobile More menu. Preserve all prior v9.2.72 mobile route/UI fixes, app backend and runtime baseline. Use full Preview → phone and visual QA → protected Production; never bypass gates.",
-  "attempt": 206,
+  "purpose": "v9.2.74 mobile UI patch source consolidation: PR #230 merges legacy v910 and v914 CSS into canonical mobile-ui/current.css, deletes both retired runtime files/imports, centralizes mobile UI controller entrypoints, protects against new version-stamped CSS patches, and updates the full protected-release build injection anchor. Preserve existing v9.2.73 Sangdo1 PRI factors, map services, data, and mobile UI. Run the entire Preview → phone and visual QA → protected Production gate without bypass.",
+  "attempt": 207,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Explicit user request on 2026-11-21: prior PR #228 changed public main app code but has not deployed to the live mobile site. Rebuild exact public main with those PRI updates and release via existing protected pipeline.",
+  "last_retry_reason": "Explicit 2026-11-21 user request to consolidate patch files, replace/remove superseded patches and deploy tested latest public main. PR #230 validated in Public app source CI #44908778955.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
