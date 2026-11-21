@@ -17,8 +17,7 @@ export function officialRailUpstreamUrl(){
 }
 const json=(body,status)=>Response.json(body,{status,headers:{
  'Cache-Control':status===200?'public, max-age=43200, s-maxage=43200, stale-while-revalidate=3600':'no-store',
- 'X-Content-Type-Options':'nosniff',
- 'Access-Control-Allow-Origin':'same-origin'
+ 'X-Content-Type-Options':'nosniff'
 }});
 function validFeature(item){
  if(!item||typeof item!=='object'||!ALLOWED.has(String(item.attributes?.sub_nm||'')))return false;
