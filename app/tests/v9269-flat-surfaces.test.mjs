@@ -36,7 +36,7 @@ test('onboarding no longer blurs, dims or gradients its backdrop',()=>{
  }
 });
 
-test('dock toolbar and controls have solid flat backgrounds',()=>{
+test('base canvas remains flat while compact action controls use restrained glass',()=>{
  const shell=read('src/mobile-first-layout.css'),overlay=productionStyle('mobile-first-overhaul.css');
  const next=productionStyle('mobile-next.css'),material=read('src/button-material.css');
  assert.ok(shell.includes('--mf-surface: #ffffff'));
@@ -45,7 +45,11 @@ test('dock toolbar and controls have solid flat backgrounds',()=>{
  assert.equal(next.includes('background:linear-gradient(180deg,var(--djNext-tool'),false);
  assert.equal(next.includes('mask-image:linear-gradient(to right'),false);
  assert.equal(material.includes('--djNext-tool-primary:linear-gradient'),false);
- assert.ok(next.includes('background:var(--djNext-tool-selected-face)!important'));
+ assert.ok(next.includes('background:color-mix(in srgb,var(--djNext-tool-selected-face) 86%,transparent)!important'));
+ assert.ok(next.includes('backdrop-filter:blur(11px) saturate(1.18)!important'));
+ assert.ok(next.includes('backdrop-filter:blur(13px) saturate(1.15)!important'));
+ assert.ok(next.includes('background:color-mix(in srgb,var(--djNext-tool-face) 82%,transparent)!important'));
+ assert.doesNotMatch(next,/#transport-title:has\([^}]*border:2px solid var\(--dj9272-ink\)/);
 });
 
 test('ordinary sheets do not dim navigation; permission consent remains isolated',()=>{
@@ -57,9 +61,9 @@ test('ordinary sheets do not dim navigation; permission consent remains isolated
 });
 
 
-test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status-edge color fade',()=>{
+test('phone search, AI and small action controls use restrained glass without panel scrims',()=>{
  const next=productionStyle('mobile-next.css');
- const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1]?.split('/* v9.2.72 — one mobile visual system')[0];
+ const block=next.split('/* Map search and AI keep their soft phone surfaces')[1]?.split('/* v9.2.72 — one mobile visual system')[0];
  assert.ok(block,'v9.2.71 scoped header treatment missing from the shipped build source');
  assert.ok(block.includes('@media(max-width:699px)'));
  assert.ok(block.includes('.topbar .map-quick-search-form'));
@@ -71,7 +75,7 @@ test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status
  assert.equal((block.match(/backdrop-filter:blur\(9px\)/g)||[]).length,4);
  assert.ok(block.includes('#dj-ios-pwa-map-seam'));
  assert.ok(block.includes('var(--dj-pwa-native-edge)'));
- for(const forbidden of ['.dj860-onboarding','.page-panel','.bottom-nav','.djNext-modal-body','background:rgba(12,30,25,.48)']){
+ for(const forbidden of ['.dj860-onboarding','.page-panel','.djNext-modal-body','background:rgba(12,30,25,.48)']){
   assert.equal(block.includes(forbidden),false,'unintended soft/scrim surface '+forbidden);
  }
 });
@@ -87,12 +91,12 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
- for(const expected of ['.dj860-onboarding:not([hidden])','.dj860-card','height:100dvh!important','--dj9272-page','#dj-tab-surface-curtain','.dj9272-tab-leave','.dj9272-tab-enter','#route-map-card #dj804-route-compare{display:none','#route-map-card .dj9272-route-points','#djNext-route-compare','#mine-panel .dj854-language-section','#djNext-layer-panel .djNext-layer-scroll','dj-metro-line-selector + .dj-metro-line-selector','dj9272AiIn','dj9272AiOut']){
+ for(const expected of ['.dj860-onboarding:not([hidden])','.dj860-card','height:100dvh!important','--dj9272-page','#dj-tab-surface-curtain','.dj-mobile-tab-exit','.dj-mobile-tab-enter','#route-map-card #dj804-route-compare{display:none','#route-map-card .dj9272-route-points','#djNext-route-compare','#mine-panel .dj854-language-section','#djNext-layer-panel .djNext-layer-scroll','.metro-arrival-countdown','dj9272AiIn','dj9272AiOut']){
   assert.ok(block.includes(expected)||css.includes(expected),expected);
  }
  assert.ok(js.includes("export function installV9272PhoneExperience"));
  assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
- assert.ok(js.includes("transport.dataset.dj9272Transfer"));
+ assert.equal(js.includes("button.insertAdjacentHTML('afterbegin',phoneIcon(key))"),false);
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
  if(hasSourceScript){
   const apply=readFileSync(buildApply,'utf8');
@@ -101,8 +105,8 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
   assert.ok(main.includes('installV9272PhoneExperience({app});'),'sealed app must contain the injected phone initializer');
  }
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
- assert.ok(nav.includes("previous.classList.add('dj9272-tab-leave')")||nav.includes("previous)previous.classList.add('dj9272-tab-leave')"));
- assert.ok(nav.includes("protectPageTransition(nextTab)"));
+ assert.ok(nav.includes("outgoing.classList.add('dj-mobile-tab-exit')"));
+ assert.ok(nav.includes("ensureCurtain()"));
  assert.ok(!block.includes('filter:brightness(.66)'));
 });
 
