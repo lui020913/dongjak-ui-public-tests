@@ -42,3 +42,23 @@ jobs:
           const official=await check('OFFICIAL_RAIL_DISTINCT',upstream.toString());
           if(!prod.ok || !official.ok)process.exitCode=1;
           NODE
+
+
+      - name: Identify accessible rail geometry fallback providers without modifying Production
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const urls={
+           OSM_OVERPASS_KUMI:'https://overpass.kumi.systems/api/interpreter?data='+encodeURIComponent('[out:json][timeout:15];way(167732855);out geom;'),
+           OSM_OVERPASS_DE:'https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:15];way(167732855);out geom;'),
+           OSM_CORE_WAY:'https://api.openstreetmap.org/api/0.6/way/167732855/full',
+           OSM_GEOMETRY_GITHUB:'https://raw.githubusercontent.com/jebowe3/seoul_transportation/main/line_9.geojson'
+          };
+          await Promise.all(Object.entries(urls).map(async([name,url])=>{
+           try{
+            const resp=await fetch(url,{signal:AbortSignal.timeout(19000),headers:{Accept:'application/json'}});
+            const body=await resp.text();
+            console.log(name,JSON.stringify({status:resp.status,bytes:body.length,looksLikeGeometry:/coordinates|<node|<way|"geometry"|"elements"/.test(body),mime:resp.headers.get('content-type')}));
+           }catch(e){console.log(name,'failed',String(e?.message||e).slice(0,100));}
+          }));
+          NODE
