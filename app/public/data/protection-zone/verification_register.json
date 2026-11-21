@@ -350,5 +350,21 @@
       "verification_result": "미검증",
       "source_note": "경찰청 API에서 동작구로 받은 등록 시설의 상도1동 교차 도형 중 시설 대표점"
     }
-  ]
+  ],
+  "research_distance_policy": {
+    "effective_date": "2026-11-21",
+    "base_position": "경찰청 API 시설 대표 POINT(EPSG:5181→4326)",
+    "target": "25m 도로 구간을 5m 간격 표본화하여 시설까지 직선거리",
+    "reference_facilities": 19,
+    "elementary_schools": 5,
+    "zone_polygons": 18,
+    "main_entrance_coordinate_required": false,
+    "main_entrance_coordinate_status": "선택적 현장검증 / 법적 지정 적정성 확정 목적에만 추가 검토",
+    "radius_m": [
+      300,
+      500
+    ],
+    "point_only_facility": "예일어린이집; 지정폴리곤 미확인",
+    "out_of_scope": "동작구 밖 관악구·서초구 자료, 개인 학생 통학경로"
+  }
 }
