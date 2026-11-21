@@ -3,9 +3,9 @@
   "application_version": "9.2.56",
   "public_work_branch": "main",
   "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
-  "attempt": 171,
+  "attempt": 172,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 44863189345 passed Preview and 11/12 phone QA, but visual lane 5 captured a real risk-report composer geometry defect: when opening from map and focusing a title, the editor stayed transparent at half-screen over the map; scroll content began above its header. Claim full opaque phone page on composer entry, assign a single independent header and scroll owner and remove old draggable-header CSS, restoring original styles on close. Keep all 6 capture lanes and 12 phone QA as required.",
+  "last_retry_reason": "Visual QA v9.2.56 run 44863988666 now passes map->risk-report composer header/focus check, but the next journey reenters the Community tab and finds compose button at y=1007 (outside a 844px viewport) with map visible behind it. The previous map report's native close left stale page-panel geometry. Add distinct feed-page full-viewport ownership and reset list scroll when returning to Community; restore styles on tab exit/editor entry; do not weaken the live browser assertions.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
