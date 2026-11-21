@@ -287,8 +287,13 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     }
     void visualPane.offsetWidth;
     overlay.classList.add('dj860-swapping');
+    // rAF may be delayed for hundreds of milliseconds by headless/low-power
+    // phones even while regular timers continue. Start from whichever frame or
+    // short timer runs first, never twice, so a visible fade is not skipped.
+    let fadeStarted=false;
     const fadeOut=()=>{
-      if(epoch!==swapEpoch||!opened)return;
+      if(fadeStarted||epoch!==swapEpoch||!opened)return;
+      fadeStarted=true;
       for(const node of panes){
         node.style.setProperty('transition','opacity 170ms ease-in','important');
         node.style.setProperty('opacity','0','important');
@@ -318,7 +323,9 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
       },205);
     };
     if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut);
-    else win.setTimeout(fadeOut,16);
+    // This is an actual fade trigger, not a QA bypass. Both schedulers call
+    // the same one-shot fadeOut; the later invocation is a no-op.
+    win.setTimeout(fadeOut,32);
   }
 
   function move(delta){
