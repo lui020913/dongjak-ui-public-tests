@@ -18,7 +18,8 @@ const findings=s=>{
  return [...(m.documentWidth>m.viewportWidth+1?['horizontal overflow']:[]),...(!p?['panel not visible']:p.x< -1||p.x+p.width>m.viewportWidth+1?['panel outside viewport']:[])];
 };
 const esc=x=>String(x).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-const keys=['mobile-375','mobile-390','mobile-430','tablet-768','tablet-1024','desktop-1280','desktop-1440','desktop-1920'].flatMap(v=>['light','dark'].flatMap(t=>['initial-map','route','participate','news','mine','map'].map(tab=>[v,t,tab].join(' / '))));
+// Production is mobile-only; tablet/desktop deliberately hide the map.
+const keys=['mobile-375','mobile-390','mobile-430'].flatMap(v=>['light','dark'].flatMap(t=>['initial-map','route','participate','news','mine','map'].map(tab=>[v,t,tab].join(' / '))));
 const verified=(side,s)=>s?.status==='captured'&&typeof s.file==='string'&&s.file===basename(s.file)&&s.file.endsWith('.png')&&existsSync(root+'/'+side+'/'+s.file);
 const rows=keys.map(key=>({key,production:a.get(key)||null,candidate:b.get(key)||null,before:findings(a.get(key)),after:findings(b.get(key))}));
 for(const r of rows)r.regressions=r.after.filter(x=>!r.before.includes(x));
