@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.72",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 retry after PR #221 sealed app harness correction; PR #218 full-screen tour, smooth covered bottom tab transitions, 4-choice real route comparison with start/destination and full-route fit, My Info consistent native theme and latest icons, layer expansion safe area, AI modal fade and interchange-only station badge ring. Require Preview + 12 mobile QA shards + design capture/analysis + exploratory QA + protected Production promotion. No artificial metro arrivals on quota.",
-  "attempt": 203,
+  "purpose": "v9.2.72 QA-corrected re-release from PRs #218 #221 #225; phone full-screen onboarding, consistent UI/buttons/icons, route origin/destination and map full-fit, nonflashing page transition fade, dark My Info surface & language, screen-safe expanded layers, consistent AI fade, selected interchange-only rail ring. Require 12 mobile QA, 6 design capture, 6 Gemini analysis, exploration, protected Cloudflare Production.",
+  "attempt": 204,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "First v9.2.72 release #44904357181 stopped before Preview because the new v9269 Node regression test attempted to read parent scripts/ in an isolated app-only build. PR #221 fixes test to inspect injected initializer inside sealed app and passes full public CI #44904546557. Retry exact new main with no feature rollback.",
+  "last_retry_reason": "v9.2.72 mobile QA #44904708991 detected a 2px selected transfer-line ring, cohesive My Info dark background #192d32 and 7000 bottom tab z-index vs previous test expectation. PR #225 raised actual pill depth to 8600, aligned metro and My Info tests with requested design, passed public CI #44905312375. Retry all protected gates with newly merged main; do not bypass mobile QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
