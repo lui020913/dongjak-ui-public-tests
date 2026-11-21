@@ -25,11 +25,11 @@ function curveBetween(prev,a,b,next,steps=16){
   const delta=Math.hypot(P2[0]-P1[0],P2[1]-P1[1]);
   const clamp=(v)=>{
     const n=Math.hypot(...v)||1;
-    const lim=delta*0.85;
+    const lim=delta*0.48;
     return n>lim?[v[0]*lim/n,v[1]*lim/n]:v;
   };
-  const t1=clamp([(P2[0]-P0[0])*0.48,(P2[1]-P0[1])*0.48]);
-  const t2=clamp([(P3[0]-P1[0])*0.48,(P3[1]-P1[1])*0.48]);
+  const t1=clamp([(P2[0]-P0[0])*0.34,(P2[1]-P0[1])*0.34]);
+  const t2=clamp([(P3[0]-P1[0])*0.34,(P3[1]-P1[1])*0.34]);
   const out=[];
   for(let j=0;j<=steps;j++){
     const t=j/steps, t2n=t*t,t3=t2n*t;

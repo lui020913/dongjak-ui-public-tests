@@ -12,31 +12,11 @@ export function installMobileAiOrb(doc=document,win=window){
   if(!media||!app||!host||!theme)return ()=>{};
   let orb=null;
   const openExistingAi=()=>{
-    const native=doc.getElementById('dj887-ai-quick-entry')||
-      doc.getElementById('dj-ai-search-entry');
-    const modal=doc.getElementById('dj-ai-search-modal');
-    if(native){
-      native.click();
-      // The search module may still be attaching its click listener while
-      // the map initializes. One frame later, recover an unopened dialog.
-      win.requestAnimationFrame?.(()=>{
-        if(!modal?.open&&modal?.showModal){
-          try{modal.showModal();modal.querySelector('.dj-ai-close')?.focus({preventScroll:true});}
-          catch{ /* the normal AI entry retains ownership of further opens */ }
-        }
-      });
-      return;
-    }
-    if(modal?.showModal){
-      if(!modal.open)modal.showModal();
-      modal.querySelector('.dj-ai-close')?.focus({preventScroll:true});
-      return;
-    }
-    // The AI modal is map-dependent. Never route to an unrelated search.
-    if(orb){
-      orb.title='AI 검색 기능을 준비하고 있습니다';
-      orb.setAttribute('aria-label','AI 검색 기능을 준비하고 있습니다');
-    }
+    // Never proxy a synthetic .click() and then force showModal() in the next
+    // animation frame: that can reopen AI after a transport sheet is dismissed.
+    const native=doc.getElementById('dj887-ai-quick-entry')||doc.getElementById('dj-ai-search-entry');
+    if(native)doc.dispatchEvent(new CustomEvent('dongjak:explicit-ai-open'));
+    else if(orb){orb.title='AI 검색 기능을 준비하고 있습니다';}
   };
   function sync(){
     if(!media.matches){
@@ -54,7 +34,14 @@ export function installMobileAiOrb(doc=document,win=window){
     txt.className='dj890-ai-orb-text';
     txt.textContent='AI';
     orb.append(txt);
-    orb.addEventListener('click',openExistingAi);
+    let startedOnOrb=false,pointerAt=0;
+    orb.addEventListener('pointerdown',event=>{startedOnOrb=orb.contains(event.target);pointerAt=Date.now();},true);
+    orb.addEventListener('click',event=>{
+      if(!event.isTrusted)return;
+      // Click-through after closing a modal must NOT open the underlying AI orb.
+      if(event.detail!==0&&(!startedOnOrb||Date.now()-pointerAt>1400))return;
+      startedOnOrb=false;openExistingAi();
+    });
     host.insertBefore(orb,theme);
   }
   media.addEventListener?.('change',sync);
