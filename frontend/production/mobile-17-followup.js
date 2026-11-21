@@ -128,7 +128,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
     hint.textContent='출발지와 목적지를 선택하면 경로를 계산할 수 있습니다.';routeCalc.before(hint);}
    const ready=[$('route-start-label'),$('route-end-label')].every(node=>
     node&&node.textContent.trim()&&!/선택되지 않음|지정되지 않음/.test(node.textContent));
-   hint.hidden=ready;
+   if(hint.hidden!==ready)hint.hidden=ready;
   }
   const utilities=doc.querySelector('#mine-panel .dj17-more-root .dj-mobile-utilities-body');
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');

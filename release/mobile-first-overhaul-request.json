@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.55",
+  "application_version": "9.2.56",
   "public_work_branch": "main",
-  "purpose": "Resolve iPhone community category height expansion, restore shared weather sheet expand/collapse, default live subway ON for first-time users with close-zoom quota protection, and make latest update notes readable. Preserve v9.2.54 fullscreen tabs, native phone dock, historical versions, on-device settings and protected Preview QA / Production gate.",
-  "attempt": 168,
+  "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
+  "attempt": 169,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "The exact Preview 44852161204 passed build, 11/12 phone shards and all 6 screen captures and Gemini reviews. Shard 7 had two stale metro acceptance tests expecting distant API polls. The app now intentionally avoids quota use below zoom 16.4 and requests on user zoom-in. Rework these two browser tests to verify zero distant requests, actual near-zoom mocked train data, hidden distant symbols and ERROR-337 after near-zoom API call; preserve all other gates.",
+  "last_retry_reason": "User screenshots and video 2026-11-21 12:29–12:30: author form under visible categories, weather title/body collision, blank facility popup, overlapping train icons, bus arrivals below fold and crowded controls. v9.2.56 requires exact-source Preview, 12 mobile QA shards, 6 visual captures, design review, protected Production verification.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -37,6 +37,10 @@ export function renderDongjakNewsItems(root,items,{openExternal=(url)=>window.op
     meta.append(source,date);
     const heading=document.createElement('strong');heading.textContent=String(item.title);
     article.append(meta,heading);
+    // Never invent an article summary. Only expose text supplied upstream.
+    const summary=String(item.summary||item.description||item.excerpt||'').replace(/\s+/g,' ').trim();
+    if(summary){const excerpt=document.createElement('p');excerpt.className='dongjak-news-excerpt';
+      excerpt.textContent=summary.slice(0,170)+(summary.length>170?'…':'');article.append(excerpt);}
     // The Dongjak office API supplies no verified per-article link. Link to its official portal only.
     const url=item.url;
     if(typeof url==='string'&&/^https:\/\//i.test(url)){
@@ -108,7 +112,7 @@ export function initDongjakNews({app,onToast=()=>{}}={}){
     // Do not blank the verified feed while a refresh is pending or failing.
     if(stored?.items?.length){
       renderDongjakNewsItems(root,stored.items);
-      notice.textContent=`${stored.notice} · 새 소식 확인 중`;
+      notice.textContent=`이전 기사 표시 · 최신 소식 확인 중 (${stored.notice})`;
     }else notice.textContent=`${sources[type]}를 조회하고 있습니다…`;
     const ctrl=new AbortController();activeController=ctrl;
     const timer=setTimeout(()=>ctrl.abort(),14500);
