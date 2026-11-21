@@ -1,3 +1,4 @@
+import {inLegacyOrder} from './legacy-css-baseline-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -42,7 +43,7 @@ test('selected Dongjak bus stops center the real map and bus status uses officia
 test('mobile search/top clarity, night emphasis, safety-last and bottom-seam changes are last CSS layer',()=>{
   const css=read('src/mobile-ui-baseline.css');
   const main=read('src/main.js');
-  assert.ok(main.indexOf("import './mobile-ui-baseline.css'")>main.indexOf("import './mobile-ui-baseline.css'"));
+  assert.ok(main.includes("import './mobile-ui-baseline.css'")&&inLegacyOrder('v704-user-request-fixes.css','v705-integrated-ui.css'));
   assert.match(css,/\.dj-night-action-symbol/);
   assert.match(css,/#ffd24d/i);
   assert.match(css,/#app #map-safety-toggle\{top:calc\(var\(--dj-controls-under-nav,438px\) \+ 144px\)/);
