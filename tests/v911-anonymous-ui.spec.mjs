@@ -985,10 +985,16 @@ test('iPhone tabs never expose white or transparent full-screen panels during sw
   await tap(page,tab(page,key));
   await expect(page.locator('#app')).toHaveAttribute('data-tab',key);
   await expect(page.locator('.page-panel[data-page="'+key+'"]')).toBeVisible();
+  // The CI browser may have only one compositor frame during several quick
+  // taps. Verify actual painted frames for EACH destination rather than
+  // treating a fixed 100ms wall-clock sleep as six display frames.
+  await expect.poll(async()=>page.evaluate(selected=>
+    (window.__phoneTabFrameAudit||[]).filter(f=>f.selected===selected).length,key),
+    {message:'compositor frames for '+key,timeout:15000,intervals:[100,250,500]}
+  ).toBeGreaterThan(1);
  }
- await page.waitForTimeout(100); // sample real painted frames, not merely synchronous DOM updates
  const samples=await page.evaluate(()=>{window.__phoneTabAuditActive=false;return window.__phoneTabFrameAudit;});
- expect(samples.length,'the frame sampler must observe painted non-map screens').toBeGreaterThan(5);
+ expect(samples.length,'the sampler must observe painted frames on all three destinations').toBeGreaterThan(5);
  const bad=samples.filter(f=>!f.shown||f.opacity<.95||f.background==='rgba(0, 0, 0, 0)'||f.background==='rgb(255, 255, 255)');
  expect(bad,'Missing/white/transparent panel during tab switch: '+JSON.stringify(bad.slice(0,10))).toHaveLength(0);
  await expect(page.locator('#dj-tab-surface-curtain')).toHaveCount(0);

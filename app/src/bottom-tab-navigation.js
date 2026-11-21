@@ -62,6 +62,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  function down(event){
   if(!phone()||event.isPrimary===false||event.button!==0)return;
+  // Capture at window level: buttons and their SVG descendants may stop
+  // bubbling pointerdown before the dock's own listener receives it.
+  // Restrict recognition to gestures starting inside the visible dock.
+  const inDock=event.target?.closest?.('#bottom-nav')===nav
+    ||event.composedPath?.().includes(nav);
+  if(!inDock)return;
   suppressClick=false;gesture={id:event.pointerId,x:event.clientX,y:event.clientY};
  }
  function up(event){
@@ -80,7 +86,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  const cancel=()=>{gesture=null;};
  win.addEventListener('click',select,true);
- nav.addEventListener('pointerdown',down,{passive:true});
+ win.addEventListener('pointerdown',down,true);
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
  return ()=>{
@@ -88,7 +94,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(swipeGuard)win.clearTimeout(swipeGuard);
   swipeGuard=0;gesture=null;suppressClick=false;
   win.removeEventListener('click',select,true);
-  nav.removeEventListener('pointerdown',down);
+  win.removeEventListener('pointerdown',down,true);
   win.removeEventListener('pointerup',up,true);
   win.removeEventListener('pointercancel',cancel,true);
   delete nav.dataset.djTabNavigation;
