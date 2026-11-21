@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.72",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 unified mobile UI overhaul from PR #218: full-viewport appropriately sized onboarding; redesigned route form/cards, real start/end labels, selectable full route fit, explicit data uncertainty; native full-page enter/exit fades with opaque map guard; coherent shared buttons/icons, My Info background and language relocation; safe area bounded layer expansion; AI modal crossfade; selected transfer-line ring only for interchange and transit panel controls; Strict Preview→12 phone QA→6 visual capture/analysis→explore QA→protected Production.",
-  "attempt": 202,
+  "purpose": "v9.2.72 retry after PR #221 sealed app harness correction; PR #218 full-screen tour, smooth covered bottom tab transitions, 4-choice real route comparison with start/destination and full-route fit, My Info consistent native theme and latest icons, layer expansion safe area, AI modal fade and interchange-only station badge ring. Require Preview + 12 mobile QA shards + design capture/analysis + exploratory QA + protected Production promotion. No artificial metro arrivals on quota.",
+  "attempt": 203,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "User screenshots 21:08–21:17 document onboarding overlay not fullscreen, map flashes during tab swaps, poor route comparison and toast wrapping, mismatched My Info surfaces/icons, clipped expanded layer, metro line button outlines and empty metro information; source PR #218 merged after CI 44904177986 succeeded.",
+  "last_retry_reason": "First v9.2.72 release #44904357181 stopped before Preview because the new v9269 Node regression test attempted to read parent scripts/ in an isolated app-only build. PR #221 fixes test to inspect injected initializer inside sealed app and passes full public CI #44904546557. Retry exact new main with no feature rollback.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
