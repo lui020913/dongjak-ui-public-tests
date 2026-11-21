@@ -823,9 +823,12 @@ test('iPhone flat loading surface shares the native status-strip tone',{tag:'@ph
   test.skip(!/iPhone/.test(ua),'iOS PWA only');
   await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
   await ready(page);
-  const colors=await page.evaluate(()=>{
+  const colors=await page.evaluate(async()=>{
     const overlay=document.getElementById('map-startup-overlay');
     overlay.hidden=false;overlay.classList.remove('is-hidden');
+    // iOS native status sampling is frame-synchronized by a MutationObserver.
+    // Assert AFTER the real UI has reconciled the loading/onboarding priority.
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     const style=getComputedStyle(overlay);
     const status=getComputedStyle(document.getElementById('dj-ios-pwa-status-sample'));
     return {start:style.getPropertyValue('--start-bg').trim(),
