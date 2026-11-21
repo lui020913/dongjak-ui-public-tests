@@ -63,6 +63,8 @@ export function parseImport(raw,current=null){
  return validateBundle(raw);
 }
 export function segmentScore(bundle,s,mode){
+ // Two of six survey factors: display an explicit preliminary mean only where both are observed.
+ if(mode==='pri12'){const lighting=s.scores.lighting,accidents=s.scores.accidents;return number(lighting)&&number(accidents)?(lighting+accidents)/2:null;}
  if(mode!=='pri')return number(s.scores[mode])?s.scores[mode]:null;
  if(bundle.config.status!=='approved')return null;
  let total=0;for(const [k,w] of Object.entries(bundle.config.weights)){const v=s.scores[k];if(!number(v))return null;total+=v*w;}return total;
