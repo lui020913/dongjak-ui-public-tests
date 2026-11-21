@@ -94,3 +94,25 @@ jobs:
           if(response.status!==200||payload.source!=='OpenStreetMap_ODbL'
              ||actual.length!==6||paths.length<6||verified.length!==6)process.exitCode=1;
           NODE
+
+
+      - name: Confirm the protected Preview actually serves six attributed rail lines
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint='https://fb5b3541.dongjak-walk-safety-preview.pages.dev/api/rail-geometry';
+          const response=await fetch(endpoint,{signal:AbortSignal.timeout(26000),headers:{Accept:'application/json'}});
+          let payload={};
+          try{payload=await response.json()}catch{}
+          const lines=[...new Set((payload.features||[]).map(f=>f?.attributes?.sub_nm).filter(Boolean))].sort();
+          const paths=(payload.features||[]).reduce((n,f)=>n+(f.geometry?.paths?.length||0),0);
+          console.log('PREVIEW_RAIL_GEOMETRY',JSON.stringify({
+            status:response.status,origin:payload.source||null,
+            lines,features:payload.features?.length||0,paths,
+            missing:payload.missing_lines||null,
+            attribution:payload.attribution||null,
+            error:payload.error||null
+          }));
+          if(response.status!==200||payload.source!=='OpenStreetMap_ODbL'
+             ||lines.length!==6||paths<10)process.exitCode=1;
+          NODE
