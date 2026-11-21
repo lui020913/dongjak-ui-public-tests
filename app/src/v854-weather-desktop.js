@@ -4,7 +4,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const label=doc.getElementById('weather-label'),title=doc.getElementById('weather-title');
   if(!app||!widget||!label||!win.matchMedia)return ()=>{};
   const media=win.matchMedia('(min-width: 0px)');
-  let sheet=null,observer=null,attached=false,refreshing=false;
+  let sheet=null,observer=null,dockObserver=null,attached=false,refreshing=false;
   const temperature=text=>{
     const match=String(text||'').match(/-?\d+(?:\.\d+)?\s*(?:°|℃|도|C)?/);
     const number=match?.[0]?.match(/-?\d+(?:\.\d+)?/)?.[0];
@@ -33,7 +33,21 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     if(detail){const text=(label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.').replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})(?::\d{2})?/g,'$2.$3. $4 기준');const match=text.match(/(?:\s*·\s*|\s+)(\d{1,2}\.\d{1,2}\.\s*\d{2}:\d{2}\s*기준)\s*$/);detail.textContent=match?text.slice(0,match.index).trim():text;const stamp=sheet.querySelector('.dj-weather-observed');if(stamp){stamp.hidden=!match;stamp.textContent=match?.[1]||'';}}
   }
   function close(){if(!sheet||sheet.hidden)return;const target=sheet;const finish=()=>{target.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(target,finish);else finish();}
-  function open(){if(!sheet)return;sync();win.DongjakWindowLifecycle?.requestOpen(sheet.id);sheet.hidden=false;win.DongjakWindowMotion?.open(sheet);const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}
+  // Use the ACTUAL shared bottom-tab bounding box. Hardcoded viewport / safe-
+  // area offsets caused a large gap under weather on installed iPhone PWAs.
+  function syncWeatherDock(){
+    if(!sheet || sheet.hidden)return;
+    if(!win.matchMedia?.('(max-width:699px)')?.matches){
+      sheet.style.removeProperty('--dj-weather-panel-bottom');return;
+    }
+    const nav=doc.getElementById('bottom-nav');
+    if(!nav || nav.hidden)return;
+    const rect=nav.getBoundingClientRect();
+    if(!Number.isFinite(rect.top)||rect.height<20)return;
+    const bottom=Math.max(0,Math.ceil(win.innerHeight-rect.top+8));
+    sheet.style.setProperty('--dj-weather-panel-bottom',bottom+'px');
+  }
+  function open(){if(!sheet)return;sync();win.DongjakWindowLifecycle?.requestOpen(sheet.id);sheet.hidden=false;syncWeatherDock();win.DongjakWindowMotion?.open(sheet);win.requestAnimationFrame?.(syncWeatherDock);const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}
   function ensureSheet(){
     if(sheet)return;
     sheet=doc.createElement('section');sheet.id='dj854-weather-sheet';sheet.hidden=true;
@@ -65,10 +79,16 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     observer.observe(label,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['title']});
     if(title)observer.observe(title,{childList:true,characterData:true,subtree:true});
     sync();
+    win.addEventListener?.('resize',syncWeatherDock);
+    win.visualViewport?.addEventListener?.('resize',syncWeatherDock);
+    const nav=doc.getElementById('bottom-nav');
+    if(nav && typeof ResizeObserver!=='undefined'){dockObserver=new ResizeObserver(syncWeatherDock);dockObserver.observe(nav);}
   }
   function detach(){
     if(!attached)return;
-    attached=false;observer?.disconnect();observer=null;
+    attached=false;observer?.disconnect();observer=null;dockObserver?.disconnect();dockObserver=null;
+    win.removeEventListener?.('resize',syncWeatherDock);
+    win.visualViewport?.removeEventListener?.('resize',syncWeatherDock);
     label.removeEventListener('click',onLabelClick,true);close();sheet?.remove();sheet=null;
     delete label.dataset.djTemperature;delete label.dataset.djWeatherIcon;
     widget.removeAttribute('aria-label');
