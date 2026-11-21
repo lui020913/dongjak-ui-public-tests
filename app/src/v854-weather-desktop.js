@@ -12,7 +12,7 @@ export function weeklyWeatherRows(data){
  if(!d||!Array.isArray(d.time)||d.time.length<7||!['weather_code','temperature_2m_max','temperature_2m_min'].every(k=>Array.isArray(d[k])&&d[k].length>=7))throw Error('7일 예보 항목이 부족합니다.');
  const weekdays=['일','월','화','수','목','금','토'];
  return d.time.slice(0,7).map((day,i)=>{
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(day))throw Error('예보 날짜 오류');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day))throw Error('예보 날짜 오류');
   const max=Number(d.temperature_2m_max[i]),min=Number(d.temperature_2m_min[i]),code=Number(d.weather_code[i]);
   if(!Number.isFinite(max)||!Number.isFinite(min)||!Number.isFinite(code))throw Error('예보 기온/날씨 누락');
   const prob=Number(d.precipitation_probability_max?.[i]);
