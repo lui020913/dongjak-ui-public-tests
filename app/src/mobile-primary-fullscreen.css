@@ -184,6 +184,14 @@
       pointer-events:auto!important;
       z-index:8500!important;
     }
+    /* All five dock labels remain legible throughout synchronous page swaps;
+       no inherited opacity or fade may hide text while icons remain. */
+    html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > #bottom-nav:not([hidden]) .nav-tab:not([hidden]) :is(.nav-icon,span:last-child){
+      opacity:1!important;
+      visibility:visible!important;
+      filter:none!important;
+      -webkit-filter:none!important;
+    }
   }
 
   @media (max-width:699px) and (prefers-reduced-motion:reduce) {
