@@ -4,15 +4,27 @@ import {readFileSync} from 'node:fs';
 
 const read=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
 
-test('nearby sheet keeps exactly one gesture owner and supports fallback tap',()=>{
-  const owner=read('src/dj-v8212-sheet-controller.js');
-  const controller=read('src/v889-mobile-sheet-motion.js');
-  assert.match(owner,/\['ped-tools-panel','\.ped-tools-panel-head','#ped-tools-close'\]/);
-  assert.match(owner,/if\(id==='ped-tools-panel'&&!g\.dragging\)/);
-  assert.match(owner,/setMobileSheetExpanded\(panel,!panel\.classList\.contains\('dj871-sheet-expanded'\),doc,win\)/);
-  assert.match(owner,/sheetStageAction\(/);
-  assert.match(controller,/function setMobileSheetExpanded\(/);
-  assert(!read('src/pedestrian-tools.js').includes('installNearbySheetDrag'));
+test('nearby sheet has exactly one captured header gesture owner and retains all three stages',()=>{
+  const globalController=read('src/dj-v8212-sheet-controller.js');
+  const nearby=read('src/pedestrian-tools.js');
+  const motion=read('src/v889-mobile-sheet-motion.js');
+  // The global controller must not register nearby; document-captured gestures
+  // were fighting the global pointer drag and lifting the sheet over search.
+  assert.doesNotMatch(globalController,/\['ped-tools-panel','\.ped-tools-panel-head','#ped-tools-close'\]/);
+  assert.match(nearby,/bindHeaderDragInput\(document,window/);
+  assert.match(nearby,/nearbyHeader\.getBoundingClientRect\(\)/);
+  assert.match(nearby,/event\.clientX<rect\.left\+4/);
+  assert.match(nearby,/event\.target\?\.closest\?\.\('button,a,input,textarea,select,label,\[role="button"\]'\)/);
+  assert.match(nearby,/checkNearbyUpward\(event\)/);
+  assert.match(nearby,/setMobileSheetExpanded\(panel,true,document,window\)/);
+  assert.match(nearby,/setMobileSheetExpanded\(panel,false,document,window\)/);
+  assert.match(nearby,/panel\.querySelector\('#ped-tools-close'\)\?\.click\(\)/);
+  assert.match(nearby,/Math\.abs\(dy\)<8/); // tap expands compact card
+  assert.match(nearby,/panel\.classList\.remove\('dj871-sheet-expanded'\)/);
+  assert.match(motion,/export function setMobileSheetExpanded\(/);
+  assert.match(motion,/syncPedestrianExpandedBounds\(panel,doc,win\)/);
+  assert.match(motion,/startDelta\.y=Math\.max\(startDelta\.y,minDelta\)/);
+  assert(!nearby.includes('installNearbySheetDrag'));
 });
 
 test('distant subway vehicle AND beam remain hidden, while bus visibility is unchanged',()=>{

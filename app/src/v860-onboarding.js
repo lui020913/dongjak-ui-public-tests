@@ -293,30 +293,34 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
         node.style.setProperty('transition','opacity 170ms ease-in','important');
         node.style.setProperty('opacity','0','important');
       }
+      // Do not start the slide replacement clock before a real animation frame
+      // has begun the outgoing fade. On slower mobile GPUs/headless Chromium,
+      // a pre-scheduled timer could swap content before any faded frame paints.
+      swapTimer=win.setTimeout(()=>{
+        swapTimer=0;
+        if(epoch!==swapEpoch||!opened)return;
+        overlay.classList.remove('dj860-swapping');
+        render(target,direction);
+        for(const node of panes){
+          node.style.setProperty('transition','none','important');
+          node.style.setProperty('opacity','0','important');
+        }
+        void visualPane.offsetWidth;
+        const fadeIn=()=>{
+          if(epoch!==swapEpoch||!opened)return;
+          for(const node of panes){
+            node.style.setProperty('transition','opacity 200ms cubic-bezier(.22,1,.36,1)','important');
+            node.style.setProperty('opacity','1','important');
+          }
+        };
+        if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeIn);
+        else win.setTimeout(fadeIn,16);
+      },205);
     };
     if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut);
     else win.setTimeout(fadeOut,16);
-    swapTimer=win.setTimeout(()=>{
-      swapTimer=0;
-      if(epoch!==swapEpoch||!opened)return;
-      overlay.classList.remove('dj860-swapping');
-      render(target,direction);
-      for(const node of panes){
-        node.style.setProperty('transition','none','important');
-        node.style.setProperty('opacity','0','important');
-      }
-      void visualPane.offsetWidth;
-      const fadeIn=()=>{
-        if(epoch!==swapEpoch||!opened)return;
-        for(const node of panes){
-          node.style.setProperty('transition','opacity 200ms cubic-bezier(.22,1,.36,1)','important');
-          node.style.setProperty('opacity','1','important');
-        }
-      };
-      if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeIn);
-      else win.setTimeout(fadeIn,16);
-    },205);
   }
+
   function move(delta){
     if(!opened)return;
     const target=index+delta;if(target<0||target>=ONBOARDING_SLIDES.length)return;

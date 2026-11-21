@@ -249,13 +249,20 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   let nearbyMarker=null;
   const clearNearbyMarker=()=>{nearbyMarker?.remove();nearbyMarker=null;};
   const resetNearby=()=>{clearNearbyMarker();delete panel.dataset.nearbyMode;status.hidden=false;};
-  const hiddenObserver=new MutationObserver(()=>{if(panel.hidden)resetNearby();});
+  const hiddenObserver=new MutationObserver(()=>{
+    if(!panel.hidden)return;
+    resetNearby();
+    // Hiding is not a drag settle. Drop old expanded geometry so the next
+    // open starts compact rather than inheriting a previous inline top.
+    panel.classList.remove('dj871-sheet-expanded');
+    for(const property of ['top','height','max-height','bottom','translate','transform','clip-path'])
+      panel.style.removeProperty(property);
+    delete panel.dataset.djSafeExpandedTop;
+  });
   hiddenObserver.observe(panel,{attributes:true,attributeFilter:['hidden']});
-  // The common sheet controller owns motion. On WebKit and compositor-heavy
-  // mobile canvases it can miss the end of a header swipe, leaving a compact
-  // nearby sheet stuck in place. This secondary gesture recognizer only
-  // completes a verified upward header swipe if the common owner did NOT.
-  // It does not animate the panel, dismiss it, or interfere with X/buttons.
+  // One owner for nearby-header gestures. The global floating-sheet controller
+  // intentionally excludes this sheet; two controllers were competing to set
+  // translate and drawing the expanded sheet above the global search field.
   const nearbyHeader=panel.querySelector('.ped-tools-panel-head');
   let nearbySwipe=null,nearbyRetry=0;
   // Recognize the upward gesture before pointerup. On iOS WebKit a MapLibre
@@ -269,10 +276,10 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   };
   const checkNearbyUpward=event=>{
     const s=nearbySwipe;
-    if(!s||s.pointerId!==event.pointerId||s.expanded)return;
+    if(!s||s.pointerId!==event.pointerId||s.committed||s.wasExpanded)return;
     const dx=event.clientX-s.x,dy=event.clientY-s.y;
     if(dy>=-52||Math.abs(dx)>Math.abs(dy)*.8)return;
-    s.expanded=true;
+    s.committed=true;
     if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
     nearbyRetry=window.requestAnimationFrame?.(commitNearbyExpand)||0;
     if(!nearbyRetry)commitNearbyExpand();
@@ -288,20 +295,35 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
       if(rect.width<36||rect.height<24||
          event.clientX<rect.left+4||event.clientX>rect.right-4||
          event.clientY<rect.top+4||event.clientY>rect.bottom-4)return false;
-      nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY,expanded:false};
+      nearbySwipe={pointerId:event.pointerId,x:event.clientX,y:event.clientY,
+        wasExpanded:panel.classList.contains('dj871-sheet-expanded'),committed:false};
       return true;
     },
-    move(event){checkNearbyUpward(event);},
+    move(event){
+      checkNearbyUpward(event);
+      const s=nearbySwipe;
+      if(!s||s.pointerId!==event.pointerId||s.committed||!s.wasExpanded)return;
+      const dx=event.clientX-s.x,dy=event.clientY-s.y;
+      if(dy>52&&Math.abs(dx)<Math.abs(dy)*.8){
+        s.committed=true;
+        setMobileSheetExpanded(panel,false,document,window);
+      }
+    },
     up(event){
       checkNearbyUpward(event);
       const s=nearbySwipe;nearbySwipe=null;
-      if(s?.expanded)return;
-      if(!s||s.pointerId!==event.pointerId)return;
+      if(!s||s.pointerId!==event.pointerId||s.committed)return;
       const dx=event.clientX-s.x,dy=event.clientY-s.y;
-      if(dy>-42||Math.abs(dx)>Math.abs(dy)*.8)return;
-      if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
-      nearbyRetry=window.requestAnimationFrame?.(commitNearbyExpand)||0;
-      if(!nearbyRetry)commitNearbyExpand();
+      if(Math.abs(dx)>Math.abs(dy)*.8&&Math.abs(dx)>12)return;
+      if(s.wasExpanded){
+        if(dy>28)setMobileSheetExpanded(panel,false,document,window);
+      }else if(dy>105){
+        panel.querySelector('#ped-tools-close')?.click();
+      }else if(dy<-35||Math.abs(dy)<8){
+        if(nearbyRetry)window.cancelAnimationFrame?.(nearbyRetry);
+        nearbyRetry=window.requestAnimationFrame?.(commitNearbyExpand)||0;
+        if(!nearbyRetry)commitNearbyExpand();
+      }
     },
     cancel(){nearbySwipe=null;}
   }):()=>{};
