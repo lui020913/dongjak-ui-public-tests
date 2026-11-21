@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.60",
+  "application_version": "9.2.61",
   "public_work_branch": "main",
-  "purpose": "Consolidated mobile-only release: fix iPhone startup status/splash first-paint seam in light and dark, retain AI orb and microphone on focus, keep pill-aligned search suggestions, repair metro route display and show live train symbols at neighborhood zoom, prevent ghost AI dialog, normalize onboarding/community/route/sheet. Also repair isolated release test paths and make Gemini autonomous QA host-based with bounded retries. Fail closed on real functional/design defects.",
-  "attempt": 181,
+  "purpose": "Consolidated mobile-only UI release with PR #174 and PR #183: same light/dark top-header/primary-page-body/footer colors; stable rounded search results only after query input; AI and voice buttons stay visible during search; iPhone native status and loading splash seam fixed with effective CSS precedence; train marker/rail visual fixes, community/route/onboarding/sheet regressions.",
+  "attempt": 182,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.59 build 44881515907 blocked on 5 obsolete/incorrect isolated QA assertions: public frontend assets inaccessible in sealed application, bootstrap-prepended iOS test, and obsolete AI hide contract. PR #177 source CI passed; also v9.2.58 mobile QA 12/12 and six Gemini design lanes passed, while Docker-container Gemini autonomous fetch timed out. Run new exact-source guarded Preview + all phone/design/agent checks before Production.",
+  "last_retry_reason": "v9.2.60 Preview (run 44881929202) passed build/deploy and PC/tablet gate but phone QA failed due obsolete assertions expecting popup for empty focus and '등록 3/3', plus an actual iPhone startup gradient overridden by legacy CSS. PR #183 fixed the user-requested search test, shortcut labels, and iOS gradient CSS; public source CI passed including mobile375/390/430. Rebuild and rerun all protected checks, fail closed on real defects.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
