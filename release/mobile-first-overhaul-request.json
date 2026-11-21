@@ -3,9 +3,9 @@
   "application_version": "9.2.76",
   "public_work_branch": "main",
   "purpose": "Unified charcoal no-reload theme and Sangdo1 300m institutional policy-gap research-map overlay: merged PR #254 ffedc878cfdd850f18fca65e83d4f19d02fc9457, full public app CI 44929773427 passed. Preserve user theme, camera, layers, route state, onboarding and unrelated map features. Render research score 0–100 (lower=larger policy gap), 1676 roads, 590 gray NULL; team five/six average; independent PRI/routing. Protected Preview + all mobile viewport QA + design evidence + guarded Production; never bypass failed gates.",
-  "attempt": 222,
+  "attempt": 223,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous attempt #221 was for baseline PR #252. This new attempt uses merged verified source #254, replaces stale reload and palette expectations, and must fail closed if any sealed mobile tests or visual checks do not pass.",
+  "last_retry_reason": "Attempt #222 run 44929991771 failed at protected preflight before Preview because frontend/production/mobile-first-overhaul.test.mjs required legacy --mf-surface: #191b1f. Updated test to assert the shared charcoal theme token --mf-surface: var(--dj-theme-surface,#23262c) on main a23e7bd22b4e3b8d957da3cea32651f5158da48a. All other validation gates remain unchanged; fail closed on further errors.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
