@@ -26,11 +26,12 @@ test('primary tabs have independent full viewport phone surfaces',()=>{
  assert.match(main,/import '\.\/mobile-primary-fullscreen\.css'/);
 });
 
-test('primary pages bypass draggable sheets but use a brief native safe fade when returning to map',()=>{
+test('primary pages bypass draggable sheets and reveal content without a full-screen root fade',()=>{
  assert.match(controller,/\['route-panel','participation-panel','news-panel','mine-panel'\]\.includes\(id\)/);
  assert.match(controller,/win\.matchMedia\('\(max-width:699px\)'\)/);
  assert.ok(navigation.includes("button=nav.querySelector('.nav-tab[data-tab=\"map\"]')"));
- assert.ok(navigation.includes("doc.startViewTransition(()=>{replay(button);})"));
+ assert.equal(navigation.includes('doc.startViewTransition'),false);
+ assert.ok(navigation.includes("panel.classList.add('dj-tab-content-enter')"));
  assert.equal(navigation.includes("ensureCurtain()"),false);
  assert.ok(navigation.includes("replay(button)"));
  assert.match(main,/function closePrimaryPageToMap\(panel\)/);
