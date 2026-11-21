@@ -46,7 +46,7 @@ test('phone priority rail initializes once only after onboarding and never after
   assert.match(css,/overflow-anchor:none!important/);
 });
 test('phone panel follow-up keeps scroll body, fixed route footer and onboarding copy separated',()=>{
-  const ui=read('src/v910-request-completion.css');
+  const ui=read('src/mobile-ui/current.css');
   assert.match(ui,/#app#app \.page-panel > \.dj836-sheet-body/);
   assert.match(ui,/#app#app #route-panel > #dj910-route-footer/);
   assert.match(ui,/\.dj860-copy \{margin:0 auto auto!important/);
