@@ -1,0 +1,44 @@
+name: Verify official rail geometry on deployed mobile map
+on:
+  push:
+    branches:
+      - diagnostics/official-rail-geometry-20261121
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-rail-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read-only check of production proxy and upstream line identifiers
+        shell: bash
+        env:
+          PRODUCTION: https://dongjak-walk-safety-preview.pages.dev
+        run: |
+          node --input-type=module <<'NODE'
+          const upstream=new URL('https://portal.esrikr.com/arcgis/rest/services/Hosted/MOIS_KR_Subway/FeatureServer/2/query');
+          for(const [k,v] of Object.entries({
+            where:'1=1',geometry:'126.855,37.438,127.055,37.562',
+            geometryType:'esriGeometryEnvelope',inSR:'4326',
+            spatialRel:'esriSpatialRelIntersects',outFields:'sub_nm',
+            returnGeometry:'false',returnDistinctValues:'true',f:'json'
+          }))upstream.searchParams.set(k,v);
+          const check=async(label,url)=>{
+            try {
+              const response=await fetch(url,{signal:AbortSignal.timeout(22000),headers:{Accept:'application/json'}});
+              const raw=await response.text();const body=JSON.parse(raw);
+              const names=[...new Set((body.features||[]).map(f=>String(f?.attributes?.sub_nm||'')).filter(Boolean))];
+              console.log(label,JSON.stringify({
+                status:response.status,features:body.features?.length||0,
+                sampleNames:names.filter(x=>/1|2|4|7|9|신림/.test(x)).slice(0,35),
+                hasLineGeometry:Boolean((body.features||[]).some(f=>Array.isArray(f?.geometry?.paths)&&f.geometry.paths.length>0)),
+                apiError:Boolean(body.error),source:body.source||null
+              }));
+              return {ok:response.ok&&Array.isArray(body.features)&&body.features.length>0,names};
+            }catch(error){console.log(label,'request failed:',String(error?.message||error).slice(0,120));return {ok:false,names:[]};}
+          };
+          const prod=await check('PRODUCTION_RAIL_PROXY',process.env.PRODUCTION+'/api/rail-geometry');
+          const official=await check('OFFICIAL_RAIL_DISTINCT',upstream.toString());
+          if(!prod.ok || !official.ok)process.exitCode=1;
+          NODE
