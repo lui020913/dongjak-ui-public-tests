@@ -144,10 +144,10 @@ html.dj-ios-home-pwa body #app > #dj-ios-pwa-map-seam{
 @media (max-width:699px) {
   html.dj-ios-home-pwa:not([data-theme="dark"]) body #app #map-startup-overlay:not([hidden]) {
     --start-bg:#edf3ef;
-    background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#f9fbfa 44%,var(--start-bg) 100%)!important;
+    background:var(--start-bg)!important;
   }
   html.dj-ios-home-pwa[data-theme="dark"] body #app #map-startup-overlay:not([hidden]) {
     --start-bg:#192d32;
-    background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#1a3334 44%,var(--start-bg) 100%)!important;
+    background:var(--start-bg)!important;
   }
 }
