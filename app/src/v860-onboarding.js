@@ -298,7 +298,9 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     const more=doc.getElementById('dj-mobile-utilities');
     if(more&&!more.hidden){more.hidden=true;doc.getElementById('dj-mobile-more-trigger')?.setAttribute('aria-expanded','false');doc.getElementById('dj-v794-more')?.setAttribute('aria-expanded','false');app.classList.remove('dj-mobile-more-open');}
     const guide=doc.getElementById('map-gesture-guide');if(guide)guide.hidden=true;
-    opened=true;render(0,'next');app.dataset.dj860OnboardingOpen='true';
+    // The modal card owns first-open motion. Per-slide entrance on page 1
+    // started the original artwork at opacity:0 and exposed a blank frame.
+    opened=true;render(0,'next',false);app.dataset.dj860OnboardingOpen='true';
     markGuideAutoShown();
     if(!auto)overlay.dataset.dj860Manual='true';else delete overlay.dataset.dj860Manual;
     win.requestAnimationFrame?.(()=>overlay.querySelector('#dj860-title')?.focus?.({preventScroll:true}));
