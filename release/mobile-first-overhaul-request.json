@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.54",
+  "application_version": "9.2.55",
   "public_work_branch": "main",
-  "purpose": "Convert mobile route setup, community, local news and My Info to independent full-viewport native tab screens. Keep the fixed 5-button pill navigation and safe-area, non-map scrolling, route-search form, news API, account/favorites and 150ms page fade. Exempt these tabs from sheet drag/expand/collapse; retain all map-linked bus/subway/facility/nearby sheets. Preserve desktop/tablet mobile-access gate and protected Preview phone QA Production deployment.",
-  "attempt": 163,
+  "purpose": "Resolve iPhone community category height expansion, restore shared weather sheet expand/collapse, default live subway ON for first-time users with close-zoom quota protection, and make latest update notes readable. Preserve v9.2.54 fullscreen tabs, native phone dock, historical versions, on-device settings and protected Preview QA / Production gate.",
+  "attempt": 164,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 162 exact Preview build and visual validation succeeded, 7/12 phone QA shards passed; five shards failed only because the QA expected the independent page header computed touch-action:auto while Chromium correctly reports none, despite fullscreen rect [0,0,390,844], fixed pill and non-dismissive physical swipe. PR #150 ead42ff89a71345b2f2a8f61affd4c9499cbd6bb merged; protected mobile QA now validates observable swipe/non-dismissal and native viewport bounds without CSS touch-action implementation overfitting. Re-run full 12 mobile shards and 6 Gemini visual reviews, protected Production only on green checks.",
+  "last_retry_reason": "v9.2.53 user screenshots and recordings show stretched category pills, unresponsive weather sheet and missing moving metro. Current v9.2.54 fullscreen tabs are preserved; new fixes scoped to shared live-transit overlay, weather gesture owner, production CSS and release-history presentation.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
