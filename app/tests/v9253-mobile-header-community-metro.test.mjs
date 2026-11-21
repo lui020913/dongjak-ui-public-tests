@@ -52,10 +52,10 @@ test('onboarding crossfades retained painted slides and cancels stale transition
  assert.match(js,/if\(epoch!==swapEpoch\|\|!opened\)return/);
  assert.match(js,/preload\.decode\(\)/);
  assert.match(js,/render\(target,direction,false\)/);
- assert.match(css,/\\.dj860-slide-ghost/);
- assert.match(js,/function animateOutgoingSlide\\(ghost,epoch\\)/);
- assert.match(js,/ghost\\.style\\.setProperty\\('opacity'/);
- assert.match(js,/ghostFadeTimers\\.set\\(ghost,win\\.setTimeout\\(tick,16\\)\\)/);
+ assert.match(css,/\.dj860-slide-ghost/);
+ assert.match(js,/function animateOutgoingSlide\(ghost,epoch\)/);
+ assert.match(js,/ghost\.style\.setProperty\('opacity'/);
+ assert.match(js,/ghostFadeTimers\.set\(ghost,win\.setTimeout\(tick,16\)\)/);
  assert.doesNotMatch(js,/node\.style\.setProperty\('opacity','0','important'\)/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
