@@ -3,9 +3,9 @@
   "application_version": "9.2.69",
   "public_work_branch": "main",
   "purpose": "v9.2.69 flat mobile surfaces: remove UI gradient, backdrop blur, map-edge vignette, ordinary modal dark scrim and dock dimming. Maintain subtle shadows, single-color iOS PWA native status matching, and light consent-only backdrop. Includes PR #209 code and PR #211 isolated-build test compatibility plus previously merged public-source work. Deploy only after exact SHA Preview, all phone/visual/exploratory gates, and Production rollback guard.",
-  "attempt": 198,
+  "attempt": 199,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.69 run 44896595727 build succeeded through exact-source checks and version stamping, but isolated Node regressions failed 3 assertions: generated frontend CSS path absent from isolated app and obsolete gradient mask expectation. PR #211 merged at 94d5ac2b3e7b77a06d3d56adfca205f875c8c2ad, fixing only tests to target generated CSS and flat toolbar. Rebuild exact latest public main, verify 12 phone QA shards, six visual lanes, Gemini exploration, and protected Production.",
+  "last_retry_reason": "Mobile run 44896866666 Preview passed, but six Playwright mobile QA shards asserted obsolete gradients / variable backdrop dimming. PR #213 merged into main at 2ab2901e69e1eca77d69e9f65aa85623a23db525 after full source CI success 44897564374; webkit iOS native sampler, opaque sheets, metro share-button flat materials and preserved slide transitions now tested against v9.2.69 flat surfaces. Rebuild exact source, Preview, 12 phone shards, six design reviews, protected Production only on all green. No restoration of legacy gradients.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
