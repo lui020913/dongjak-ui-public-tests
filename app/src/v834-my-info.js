@@ -1,12 +1,12 @@
 /** v8.2.15: My Info settings hub; existing account controller remains authoritative. */
 const icon=(name)=>({
- profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/>',
- map:'<path d="M3 6 9 3l6 3 6-3v15l-6 3-6-3-6 3V6Z"/><path d="M9 3v15m6-12v15"/>',
- walk:'<circle cx="12" cy="4" r="2"/><path d="m8 10 4 2 4-2m-4 2v4m-5 6 5-6 5 6"/>',
- bus:'<rect x="4" y="3" width="16" height="17" rx="3"/><path d="M4 11h16m-12 9v2m8-2v2M8 16h.1M16 16h.1"/>',
- theme:'<path d="M19 14.5A8.5 8.5 0 0 1 9.5 5a8.6 8.6 0 1 0 9.5 9.5Z"/>',
- type:'<path d="M2 5h7v3c0 4-2.5 7.5-7 10M13 3v18m0-10h3M16 12h4v2c0 2-1.5 4-4 5M22 11v10"/>',
- heart:'<path d="M20 6a5 5 0 0 0-7 0l-1 1-1-1a5 5 0 0 0-7 7l8 8 8-8a5 5 0 0 0 0-7Z"/>',
+ profile:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.3-3.7 3-6.1 7-6.1s6.7 2.4 7 6.1"/>',
+ map:'<path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Z"/><path d="M9 3v16M15 5v16"/>',
+ walk:'<path d="M5 19 19 5M8 5h11v11"/>',
+ bus:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+ theme:'<path d="M20.9 13.1A9 9 0 0 1 10.9 3.1 9 9 0 1 0 20.9 13.1Z"/><path d="M19 3v4M17 5h4"/>',
+ type:'<path d="M3 19 9.2 5l6.2 14M5.4 14h7.4M16 10h5M18.5 10v9"/>',
+ heart:'<path d="M20.8 5.6a5.3 5.3 0 0 0-7.5 0L12 6.9l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 22l8.8-8.9a5.3 5.3 0 0 0 0-7.5Z"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
  back:'<path d="m15 19-7-7 7-7"/>'
 })[name]||'';

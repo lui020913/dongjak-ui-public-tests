@@ -7,15 +7,17 @@ export function isInstalledIosPhone(win){const n=win.navigator||{};return Boolea
 export function installManualThemeReload({map,app,canReload,win=window,doc=document}){
  if(!isInstalledIosPhone(win))return ()=>{};
  let timer=0;
- const layerSnapshot=()=>[...doc.querySelectorAll('button[id][aria-pressed]')].filter(b=>/^(toggle-|sangdo-|protection-zone-toggle|ped-access-toggle|night-visibility-toggle)/.test(b.id)).map(b=>b.id+':'+b.getAttribute('aria-pressed')).sort().join('|');
- let baseline=null;const capture=()=>{baseline=layerSnapshot();};map.once('idle',capture);
+ // A stable map camera is sufficient for a one-shot iOS PWA relaunch.
+ // The previous 'idle' and layer-snapshot gate skipped real theme changes on
+ // slow networks or when an unrelated overlay was toggled.
+ // canReload() still protects active route/edit and night-analysis sessions.
  const onChange=e=>{
   const theme=e.detail?.theme;if(!['light','dark'].includes(theme))return;
   win.clearTimeout(timer);
   // Avoid losing route, editing, or nondefault layer state. Reload only a settled settings session.
-  if(!canReload()||baseline===null||baseline!==layerSnapshot())return;
+  if(!canReload())return;
   timer=win.setTimeout(()=>{
-   if(!canReload()||baseline!==layerSnapshot()||app.dataset.theme!==theme)return;
+   if(!canReload()||app.dataset.theme!==theme)return;
    try{
     const center=map.getCenter();const camera={center:[center.lng,center.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
     const state={theme,camera,tab:'mine',expires:Date.now()+30000};
@@ -25,5 +27,5 @@ export function installManualThemeReload({map,app,canReload,win=window,doc=docum
   },280);
  };
  win.addEventListener('dongjak:manual-theme-change',onChange);
- return ()=>{win.clearTimeout(timer);win.removeEventListener('dongjak:manual-theme-change',onChange);map.off?.('idle',capture);};
+ return ()=>{win.clearTimeout(timer);win.removeEventListener('dongjak:manual-theme-change',onChange);};
 }

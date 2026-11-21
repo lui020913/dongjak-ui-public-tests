@@ -358,7 +358,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    if(feature[0]==='safe-night-analysis'){
      closeSheet();closeWeather();hideMore();
      if(app.dataset.sangdoNight==='on')find('#night-visibility-quick-off')?.click();
-     else {collapseNative();nightConfirm.hidden=false;}
+     else {collapseNative();openNightConfirm();}
      return;
    }
    collapseNative();closeWeather();closeNightConfirm();
@@ -471,6 +471,14 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    if(app.dataset.sangdoNight==='on'){
      find('#night-visibility-quick-off')?.click();schedule();return;
    }
+   openNightConfirm();
+ }
+ function openNightConfirm(){
+   if(!nightConfirm)return;
+   const card=nightConfirm.querySelector('.dj833-night-dialog');
+   // Cancelling a previous exit is essential when tapping the pill quickly.
+   // A retained WAAPI transform moved the next consent card sideways.
+   if(card){win.DongjakWindowMotion?.cancel?.(card);card.style.removeProperty('transform');card.style.removeProperty('translate');card.style.removeProperty('opacity');}
    nightConfirm.hidden=false;
  }
  function rebuildFeatureLocations(){

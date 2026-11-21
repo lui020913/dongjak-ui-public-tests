@@ -42,7 +42,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
-      const color=aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
+      const nightActive=app.dataset.sangdoNight==='on';
+      const nightPrompt=visible('dj833-night-modal');
+      // Before consent, blend the light iOS status surface with the modal
+      // scrim; after activation use the actual night-map tone.
+      const color=nightActive?'#192d32':nightPrompt?(theme==='dark'?'#192d32':'#aab8af'):aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
@@ -64,7 +68,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     if(typeof win.requestAnimationFrame==='function')frame=win.requestAnimationFrame(()=>{frame=0;sync();});else sync();
   });
   // AI uses a native dialog attached to body, not to the isolated application.
-  observer.observe(doc.body,{attributes:true,attributeFilter:['data-theme','class','hidden','aria-hidden','open'],childList:true,subtree:true});
+  observer.observe(doc.body,{attributes:true,attributeFilter:['data-theme','data-sangdo-night','data-tab','class','hidden','aria-hidden','open'],childList:true,subtree:true});
   const size=win.matchMedia?.('(max-width: 699px)');
   const standalone=win.matchMedia?.('(display-mode: standalone)');
   for(const mq of [size,standalone])mq?.addEventListener?.('change',sync);
