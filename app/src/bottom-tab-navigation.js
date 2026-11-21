@@ -1,11 +1,13 @@
 /**
- * The bottom-tab navigation changes its real DOM only once per destination.
- * Use browser View Transitions to crossfade actual old/new page snapshots.
- * Do NOT render a white/opaque mask: it produces a visible blank flash and
- * hides the map even when the active screen itself is already usable.
- * If View Transitions are unsupported, switch immediately with no white frame.
+ * The tab bar updates the real destination synchronously. A browser-level
+ * root View Transition is forbidden here: WebGL-backed map snapshots can
+ * temporarily paint as white on iOS during the two-snapshot dissolve.
+ *
+ * All full-screen panel backgrounds appear immediately in the same JS tick.
+ * Only the contents of the incoming non-map page receive a light opacity
+ * reveal. No curtain, duplicate page, root fade, or delayed map exposure.
  */
-export const TAB_TRANSITION=Object.freeze({crossfade:170});
+export const TAB_TRANSITION=Object.freeze({contentReveal:140});
 export function adjacentTabIndex(index,count,dx,dy){
  if(count<2||index<0||index>=count||Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return -1;
  const next=index+(dx<0?1:-1);
@@ -18,7 +20,13 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let activeTransition=null,queued=null,replaying=false,gesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,replaying=false,gesture=null,suppressClick=false,swipeGuard=0;
+ function clearEntrance(){
+  if(enterTimer)win.clearTimeout(enterTimer);
+  enterTimer=0;
+  entering?.classList.remove('dj-tab-content-enter');
+  entering=null;
+ }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return false;
   replaying=true;
@@ -26,37 +34,19 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  function start(button){
   if(!button||button.disabled||!button.isConnected)return;
-  if(activeTransition){
-   // The last requested destination wins; never stack animations.
-   queued=button;
-   activeTransition.skipTransition?.();
-   return;
-  }
-  if(reduced()||typeof doc.startViewTransition!=='function'){
-   replay(button);
-   return;
-  }
-  app.dataset.djTabTransition='active';
-  try{
-   const transition=doc.startViewTransition(()=>{replay(button);});
-   activeTransition=transition;
-   Promise.resolve(transition.finished).catch(()=>{}).finally(()=>{
-    if(activeTransition!==transition)return;
-    activeTransition=null;
-    delete app.dataset.djTabTransition;
-    const next=queued;queued=null;
-    if(next&&next.dataset.tab!==app.dataset.tab)start(next);
-   });
-  }catch{
-   delete app.dataset.djTabTransition;
-   activeTransition=null;
-   replay(button);
-  }
+  // A new click cancels only the prior CONTENT animation; never defer the
+  // destination itself. Rapid taps always resolve to the latest real page.
+  clearEntrance();
+  if(!replay(button))return;
+  if(reduced()||app.dataset.tab==='map')return;
+  const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
+  if(!panel)return;
+  entering=panel;
+  panel.classList.add('dj-tab-content-enter');
+  enterTimer=win.setTimeout(clearEntrance,TAB_TRANSITION.contentReveal+30);
  }
  function select(event){
   if(!phone()||replaying)return;
-  // A swipe may create a native click after the synthetic adjacent-tab click.
-  // Block that one incidental click, but reset the guard on a short timeout.
   if(suppressClick&&event.isTrusted&&event.target?.closest?.('#bottom-nav')){
    suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;
   }
@@ -66,7 +56,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    button=nav.querySelector('.nav-tab[data-tab="map"]');
   }
   if(!button||button.disabled)return;
-  if(button.dataset.tab===app.dataset.tab&&!activeTransition)return;
+  if(button.dataset.tab===app.dataset.tab)return;
   event.preventDefault();event.stopImmediatePropagation();
   start(button);
  }
@@ -78,7 +68,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const initial=gesture;if(!initial||event.pointerId!==initial.id)return;gesture=null;
   const dx=event.clientX-initial.x,dy=event.clientY-initial.y;
   if(Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return;
-  const buttons=tabs(),current=queued?.dataset.tab||app.dataset.tab;
+  const buttons=tabs(),current=app.dataset.tab;
   const index=buttons.findIndex(b=>b.dataset.tab===current);
   const next=adjacentTabIndex(index,buttons.length,dx,dy);
   if(next===-1)return;
@@ -94,11 +84,9 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
  return ()=>{
-  activeTransition?.skipTransition?.();
-  activeTransition=null;queued=null;
+  clearEntrance();
   if(swipeGuard)win.clearTimeout(swipeGuard);
   swipeGuard=0;gesture=null;suppressClick=false;
-  delete app.dataset.djTabTransition;
   win.removeEventListener('click',select,true);
   nav.removeEventListener('pointerdown',down);
   win.removeEventListener('pointerup',up,true);
