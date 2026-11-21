@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.70",
+  "application_version": "9.2.71",
   "public_work_branch": "main",
-  "purpose": "v9.2.70 iPhone onboarding hotfix: remove the surviving higher-specificity v864 dark scrim rgba(.48), 5px backdrop blur, strong 22/72px shadow and visual gradient, keeping transparent backdrop, solid artwork mat and mild card shadow. PR #216 source and both static and rendered-style Playwright regressions included. Strict Preview → 12 phone QA → visual/exploratory QA → protected Production only after green checks.",
-  "attempt": 200,
+  "purpose": "v9.2.71 phone header-only soft material: light/dark search pill and AI button get scoped 9px translucent glass and gentle shadow; iOS PWA status/map edge receives only 68px fade. Preserve all other flat surfaces (onboarding, bottom tab, full-screen sheets, modal), functionality and voice geometry. PR #217 merged and public CI 44900947359 passed. Strict Preview, 12 mobile QA, 6 visual QA, protected Production promotion.",
+  "attempt": 201,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Actual iPhone 2026-11-21 20:24 screenshot revealed v9.2.69 still blurred/dimmed onboarding background. Found app/src/v864-refinements.css higher-specificity !important override untouched by PR #209, corrected via merged PR #216 (CI 44899392637 success), updated legacy v864 test, and added Playwright computed-style assertion. Deploy exact new main as v9.2.70, no fallback to the old scrim.",
+  "last_retry_reason": "User requested only top header softness in screenshot, including dark theme. Prior global flat baseline v9.2.70 is production; PR #217 isolates header exceptions without restoring global dim/blur or unrelated gradients. New version 9.2.71 release after PR CI succeeded.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
