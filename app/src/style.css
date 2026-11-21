@@ -495,7 +495,7 @@
 /* 다크 테마: CSS 패널과 기존 맵 타일의 색을 함께 전환합니다. */
 #app[data-theme="dark"]{--ui-surface:#172831;--ui-ink:#e8f2ef;--ui-muted:#b2c9bf;--ui-stroke:#3b5455;color:#e8f2ef;background:#102129;}
 #app[data-theme="dark"] #map{background:#11222c;}
-#app[data-theme="dark"] .topbar{background:linear-gradient(180deg,#152730 60%,#152730e8 85%,transparent);}
+#app[data-theme="dark"] .topbar{background:transparent;}
 #app[data-theme="dark"] .brand-name,#app[data-theme="dark"] .sheet h1,#app[data-theme="dark"] .page-panel h2,#app[data-theme="dark"] .page-panel h3{color:#eff8f3;}
 #app[data-theme="dark"] .eyebrow,#app[data-theme="dark"] .sheet p,#app[data-theme="dark"] .page-heading p{color:#c2d4cc;}
 #app[data-theme="dark"] .sheet,#app[data-theme="dark"] .detail-sheet,#app[data-theme="dark"] .entry-sheet,#app[data-theme="dark"] .transport-sheet,#app[data-theme="dark"] .page-panel,#app[data-theme="dark"] .bottom-nav{background:#172831;border-color:#344f52;color:#ecf6ef;}
@@ -1191,11 +1191,11 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 .metro-station-marker.metro-overview .metro-station-name{max-width:145px;overflow:visible;text-overflow:clip;}
 .dongjak-news-item{display:grid;grid-template-columns:108px minmax(0,1fr);align-items:start;column-gap:14px;row-gap:6px;}
 .dongjak-news-thumb{grid-row:1/4;width:108px;aspect-ratio:4/3;border-radius:12px;object-fit:cover;background:#edf3ef;border:1px solid #e3ede7;display:block;}
-.dongjak-news-thumb-placeholder{display:grid;place-items:center;gap:3px;align-content:center;background:linear-gradient(135deg,#e4f0ea,#f3f8f5);color:#729285;text-align:center;font-size:11px;font-weight:800;}
+.dongjak-news-thumb-placeholder{display:grid;place-items:center;gap:3px;align-content:center;background:#eaf4ee;color:#729285;text-align:center;font-size:11px;font-weight:800;}
 .dongjak-news-thumb-placeholder span:first-child{font-size:19px;line-height:1;}
 .dongjak-news-item-meta,.dongjak-news-item>strong,.dongjak-news-open{min-width:0;}
 .dongjak-news-item>strong{line-height:1.5;overflow-wrap:anywhere;}
-#app[data-theme="dark"] .dongjak-news-thumb-placeholder{background:linear-gradient(135deg,#294740,#1f3437);color:#cee4da;border-color:#405b55;}
+#app[data-theme="dark"] .dongjak-news-thumb-placeholder{background:#294740;color:#cee4da;border-color:#405b55;}
 @media (min-width:1000px){
   /* Desktop uses a compact left rail; map stays tappable on the right. */
   .page-panel{left:18px!important;right:auto!important;top:calc(80px + env(safe-area-inset-top));bottom:calc(81px + env(safe-area-inset-bottom));width:clamp(430px,36vw,610px)!important;max-width:calc(100vw - 48px)!important;transform:none!important;border:1px solid #dce9e3;border-radius:20px;box-shadow:0 14px 44px #102e2529;}
@@ -1595,14 +1595,10 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 #map{position:absolute;inset:0;overflow:hidden;}
 #map::after{
   content:'';position:absolute;inset:0;pointer-events:none;z-index:22;
-  background:
-    linear-gradient(180deg,rgba(244,248,246,.72) 0%,rgba(244,248,246,0) 9%,rgba(244,248,246,0) 91%,rgba(244,248,246,.62) 100%),
-    linear-gradient(90deg,rgba(244,248,246,.72) 0%,rgba(244,248,246,0) 7%,rgba(244,248,246,0) 93%,rgba(244,248,246,.72) 100%);
+  background:none;
 }
 #app[data-theme='dark'] #map::after{
-  background:
-    linear-gradient(180deg,rgba(26,38,35,.6) 0%,rgba(26,38,35,0) 9%,rgba(26,38,35,0) 91%,rgba(26,38,35,.55) 100%),
-    linear-gradient(90deg,rgba(26,38,35,.6) 0%,rgba(26,38,35,0) 7%,rgba(26,38,35,0) 93%,rgba(26,38,35,.6) 100%);
+  background:none;
 }
 
 /* v5.9.7 school building pictogram (university PNG emblems remain unchanged). */
@@ -1641,12 +1637,12 @@ html,body,button,input,select,textarea{font-family:'Pretendard Variable',Pretend
 
 /* v5.9.11: first-paint loader polish — keep identical colors before/after Vite CSS. */
 #app .map-startup-overlay{
-  background:radial-gradient(ellipse at 50% 39%,#ffffff 0%,#f3f7f5 75%)!important;
+  background:#f3f7f5!important;
   color:#183b32!important;
 }
 html[data-theme="dark"] #app .map-startup-overlay,
 #app[data-theme="dark"] .map-startup-overlay{
-  background:radial-gradient(ellipse at 50% 39%,#1a3334 0%,#101f25 78%)!important;
+  background:#101f25!important;
   color:#edf7f2!important;
 }
 #app .map-startup-inner{width:min(340px,calc(100vw - 44px));gap:0;transform:translateY(-3vh);}
