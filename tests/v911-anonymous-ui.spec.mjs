@@ -1192,8 +1192,14 @@ test('v9.2.66 onboarding uses compositor crossfade without blank painted surface
  expect(compositor.frames.some(f=>f.opacity===1&&f.offset===0)).toBe(true);
  expect(compositor.frames.some(f=>f.opacity===0&&f.offset===1)).toBe(true);
  expect(['running','finished']).toContain(compositor.state);
- expect(samples.every(x=>x.mat>=.99),
-   'The colored artwork mat became transparent during the transition: '+JSON.stringify(samples.filter(x=>x.mat<.99))).toBe(true);
+ // Initial onboarding appearance deliberately starts at opacity 0. Only
+ // evaluate the crossfade after its first retained frame is mounted; an
+ // t=0 intro sample must not be misclassified as a slide-to-slide flash.
+ const swapStart=samples.findIndex(x=>x.ghost!==null);
+ expect(swapStart).toBeGreaterThanOrEqual(0);
+ const swapSamples=samples.slice(swapStart);
+ expect(swapSamples.every(x=>x.mat>=.99),
+   'The colored artwork mat became transparent DURING the slide swap: '+JSON.stringify(swapSamples.filter(x=>x.mat<.99))).toBe(true);
  expect(samples.every(x=>x.title.trim().length>0),
    'The incoming copy disappeared entirely during the transition').toBe(true);
  await expect(tour.locator('.dj860-slide-ghost')).toHaveCount(0);
