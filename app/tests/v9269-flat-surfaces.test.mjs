@@ -94,6 +94,6 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(apply.includes('installV9272PhoneExperience({app});'));
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
  assert.ok(nav.includes("previous.classList.add('dj9272-tab-leave')")||nav.includes("previous)previous.classList.add('dj9272-tab-leave')"));
- assert.ok(nav.includes("protectPageTransition(next.dataset.tab)"));
+ assert.ok(nav.includes("protectPageTransition(nextTab)"));
  assert.ok(!block.includes('filter:brightness(.66)'));
 });
