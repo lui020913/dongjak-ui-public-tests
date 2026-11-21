@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('v7.0.29 short weather/theme/version chips retain larger search surface',()=>{
- const css=read('src/v712-interaction-layout.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/--dj-header-mini-h:40px/);
  assert.match(css,/\.weather-widget/);
  assert.match(css,/\.version-history-trigger/);
- assert.match(read('src/main.js'),/import '\.\/v712-interaction-layout\.css'/);
+ assert.match(read('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
 });
 test('guide close is captured and prevents the opening timer from reopening the dialog',()=>{
  const source=read('src/mobile-map-controls.js');
@@ -16,7 +16,7 @@ test('guide close is captured and prevents the opening timer from reopening the 
  assert.match(source,/close\?\.addEventListener\('click',onGuideClose,\{capture:true\}\)/);
 });
 test('map option launchers stay visible; their width tracks navigation rail',()=>{
- const css=read('src/v712-interaction-layout.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/\.map-controls-open #map-safety-toggle/);
  assert.match(css,/\.map-controls-open #night-visibility-quick-off:not\(\[hidden\]\)/);
  assert.match(css,/--dj-rail-btn-w/);
@@ -36,7 +36,7 @@ test('station popup left on desktop and map centers Jangseungbaegi',()=>{
  assert.match(source,/normalizeStationQueryName\(place.name\)==='장승배기'/);
  assert.match(source,/panel\.dataset\.stationFocus/);
  assert.match(source,/map\.easeTo\?\.\(\{center:\[Number\(place.lng\),Number\(place.lat\)\]/);
- const css=read('src/v712-interaction-layout.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/data-station-focus="left"/);
 });
 test('home restores north and level, overview opens expanded',()=>{
