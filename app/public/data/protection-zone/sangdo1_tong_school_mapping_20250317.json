@@ -28,10 +28,15 @@
       }
     ],
     "source": "user-provided 2025 Dongjak/Gwanak education office XLSX",
-    "official_polygon_status": "not downloaded; no shapes present",
+    "official_polygon_status": "2026-09-20 공식 초등학교 통학구역 SHP 확보·상도1동 8개 교차 폴리곤 별도 보관; 2025 통·반 개별 경계 미확보",
     "official_2026_shape_link": "https://www.data.go.kr/data/15159265/fileData.do",
     "spatial_join_available": false,
-    "disclaimer": "NOT an official tong/ban boundary shapefile. School catchment is address assignment, not student route; 2025 rules may change."
+    "disclaimer": "2025년 통·반 배정표와 2026년 공식 통학구역 폴리곤은 서로 다른 기준일 자료. 통·반 경계가 없어 20통 2반, 22통 11반 및 아파트 예외를 도로별로 역추정하거나 배정하면 안 됨. 통학구역은 통학경로·법정 어린이보호구역이 아님.",
+    "official_catchment_geometry_available": true,
+    "tong_ban_geometry_available": false,
+    "spatial_join_scope": "2026년 공식 통학구역-도로 1,686개 공간중첩은 별도 파일에서 가능; 2025 통·반-도로 직접 공간중첩은 불가능",
+    "official_2026_catchment_polygon_file": "sangdo1_school_catchment_polygons_20260920.geojson",
+    "official_2026_road_overlay_file": "sangdo1_road_catchment_overlay_20260920.json"
   },
   "tong_assignments": [
     {
