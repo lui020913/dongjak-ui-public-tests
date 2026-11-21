@@ -100,15 +100,20 @@ html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app > #dj-ios-pwa-status-b
 @media(max-width:699px){
 html.dj-ios-home-pwa:has(#dj-ai-search-modal[open],#djNext-layer-panel:not([hidden])) body #app > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
 html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
-  --dj-pwa-status-color:var(--dj-pwa-native-edge,#edf3ef);
-  /* Native dialog backdrops enter the top layer; the ordinary bridge is
-     underneath them. Restore an opaque-to-transparent edge in this backdrop. */
-  background-image:var(--dj-pwa-bridge-gradient)!important;
+  --dj-pwa-status-color:#ffffff;
+  /* Native dialog top-layer: start with the same opaque white as the iOS
+     status sample, not the already-computed map-green root gradient. */
+  background-image:linear-gradient(to bottom,
+    var(--dj-pwa-status-color) 0px,
+    var(--dj-pwa-status-color) 10px,
+    color-mix(in srgb,var(--dj-pwa-status-color) 60%,transparent) calc(env(safe-area-inset-top,0px) + 16px),
+    transparent calc(env(safe-area-inset-top,0px) + 40px),
+    transparent 100%)!important;
   background-size:100% var(--dj-pwa-bridge-height)!important;
   background-repeat:no-repeat!important;
   background-position:top center!important;
 }
-html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32;background-image:var(--dj-pwa-bridge-gradient)!important}
+html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#192d32}
 }
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{transition:none!important}}
 
