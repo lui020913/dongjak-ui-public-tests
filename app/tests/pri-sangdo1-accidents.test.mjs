@@ -25,7 +25,7 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  assert.equal(observed.filter(s=>s.scores.accidents===60).length,30,'source risk 40 -> safety 60');
  assert.equal(observed.filter(s=>s.scores.accidents===50).length,46,'source risk 50 -> safety 50');
  assert.equal(notSelected.length,1610,'all other 25m lighting segments receive an explicitly provisional baseline');
- assert.ok(notSelected.every(s=>s.scores.accidents===100&&/무사고/.test(s.evidence.accidents.note)));
+ assert.ok(notSelected.every(s=>s.scores.accidents===100&&/실제 사고 0건/.test(s.evidence.accidents.note)));
  assert.ok(integrated.segments.every(s=>s.scores.lighting>=0&&s.scores.lighting<=100));
  assert.ok(observed.every(s=>s.scores.lighting!==null),'light and accident factors are joined by the same segment ID');
  for(const s of integrated.segments){
