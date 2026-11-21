@@ -8,7 +8,9 @@ const css=read('src/mobile-ui-baseline.css');
 
 test('v728 applies one last stylesheet while retaining 5-tab mobile controls',()=>{
   const main=read('src/main.js');
-  assert.match(main,/mobile-ui-baseline\.css';\s*import '\.\/mobile-ui-baseline\.css'/);
+  assert.match(main,/import '\.\/mobile-ui-baseline\.css'/);
+  assert.equal((main.match(/mobile-ui-baseline\.css/g)||[]).length,1);
+  assert.ok(main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
   assert.match(css,/#app\[data-tab\] #map-tools-toggle/);
   assert.match(css,/#app\[data-tab\] #night-visibility-quick-off/);
   assert.match(css,/#app\[data-tab\] #map-safety-toggle/);
