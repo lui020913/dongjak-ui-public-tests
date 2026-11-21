@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const read=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
 
@@ -30,7 +30,9 @@ test('primary pages never fade out their own opaque background on tab entry',()=
 
 test('community composer and feed use one native-status-matched primary surface',()=>{
   const css=read('src/mobile-primary-fullscreen.css');
-  const controller=read('../frontend/production/mobile-17-followup.js');
+  const controller=existsSync(new URL('../src/mobile-17-followup.js',import.meta.url))
+    ?read('src/mobile-17-followup.js')
+    :read('../frontend/production/mobile-17-followup.js');
   assert.match(css,/--dj-primary-page-bg:#edf3ef/);
   assert.match(controller,/background:'var\(--dj-primary-page-bg,#edf3ef\)'/);
   assert.doesNotMatch(controller,/background:'var\(--mf-surface-solid,#fff\)'/);
