@@ -22,6 +22,18 @@ test('onboarding no longer blurs, dims or gradients its backdrop',()=>{
  assert.ok(css.includes('background:transparent!important;'));
  for(const old of ['backdrop-filter:blur(12px)','background:linear-gradient(145deg'])assert.equal(css.includes(old),false,old);
  assert.ok(css.includes('box-shadow:0 7px 22px rgba(0,0,0,.12)'));
+ // The later-loaded v8.6.4 stylesheet has a higher-specificity !important
+ // selector; checking only the original v8.6.0 file misses iPhone regressions.
+ const legacy=read('src/v864-refinements.css');
+ assert.ok(legacy.includes('html body #app#app#app#app .dj860-onboarding'));
+ assert.ok(legacy.includes('overflow:hidden!important;background:transparent!important;'));
+ assert.ok(legacy.includes('-webkit-backdrop-filter:none!important;backdrop-filter:none!important;'));
+ assert.ok(legacy.includes('box-shadow:0 7px 22px rgba(8,34,25,.12)!important;'));
+ assert.ok(legacy.includes('touch-action:pan-y!important;background:#e9f3ed!important;'));
+ assert.ok(legacy.includes('background:#263d39!important;'));
+ for(const old of ['background:rgba(12,30,25,.48)','backdrop-filter:blur(5px)','linear-gradient(145deg,#eef7f1,#e0eee6)','0 22px 72px rgba(8,34,25,.28)']){
+  assert.equal(legacy.includes(old),false,'legacy onboarding effect still active: '+old);
+ }
 });
 
 test('dock toolbar and controls have solid flat backgrounds',()=>{
