@@ -1007,24 +1007,32 @@ test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async(
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
- // Start the RAF measurement and the click inside the same browser task.
- // Playwright's actionability waiting can otherwise consume the 650ms
- // sampling window before it dispatches the actual click.
+ // Observe actual computed opacity in both paint frames and short browser
+ // timer ticks. In overloaded phone runners, RAF can be deferred for an entire
+ // 650ms window even though the CSS transition and next-slide event occurred.
+ // Keep the real <0.75 opacity requirement; do not accept only a class change.
  await page.evaluate(()=>{
    const samples=[];window.__dj9253OnboardFade=samples;
    const start=performance.now();
-   const tick=()=>{
+   const sample=()=>{
      const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
-     if(pane)samples.push(Number(getComputedStyle(pane).opacity));
-     if(performance.now()-start<650)requestAnimationFrame(tick);
+     if(pane)samples.push({t:Math.round(performance.now()-start),
+       alpha:Number(getComputedStyle(pane).opacity)});
    };
-   requestAnimationFrame(tick);
+   let live=true;
+   const frame=()=>{if(!live)return;sample();requestAnimationFrame(frame);};
+   requestAnimationFrame(frame);
+   const interval=setInterval(sample,12);
+   sample();
+   setTimeout(()=>{live=false;clearInterval(interval);sample();},700);
    document.querySelector('#dj860-onboarding [data-dj860-action="next"]').click();
  });
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
- await page.waitForTimeout(350);
+ await page.waitForTimeout(720);
  const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
- expect(samples.some(x=>x<.75)).toBe(true);
+ expect(samples.some(x=>x.alpha<.75),
+   'No real outgoing/incoming fade observed; opacity samples: '+JSON.stringify(samples.slice(0,70)))
+   .toBe(true);
  await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 });
