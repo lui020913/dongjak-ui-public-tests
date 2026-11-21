@@ -3,9 +3,9 @@
   "application_version": "9.2.67",
   "public_work_branch": "main",
   "purpose": "PR #195 merged after public app CI run 44889900397 (3 mobile viewport checks passed). Fix 2026-11-21 iPhone: expand search recommendation result width; keep AI pill fixed while speech recognition grows; make fullscreen bottom safe-area tone continuous and avoid double footer gap; mask underlying map during fullscreen tab crossfade; update My Info settings icons and cards; center night-visibility consent, maintain active pill, and harmonize native iOS PWA status tone; reload standalone PWA for manual dark/light theme changes while restoring map camera center/zoom/pitch/bearing. Use only consolidated v9267 phone regression stylesheet. Preserve other mobile functions, guard Production with exact source/Preview evidence, 12 phone QA shards, six visual reviews, exploration and rollback.",
-  "attempt": 193,
+  "attempt": 194,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New distinct release source includes merged PR #195 at 721d9a281002180da71b07afacde7c6920f0b627 after CI #44889900397 success. Existing v9.2.66 release #44889824648 built the PREVIOUS source and cannot certify these fixes. Run a fresh exact-source build, Preview, twelve phone QA shards, visual reviews and protected Production. Do not reuse earlier artifacts.",
+  "last_retry_reason": "Preview run 44890099630 caught a genuine first-onboarding-frame white flash: t=0 art opacity 0 before next button. PR #201 merged at 430e577ca64fd82c2154b27971446692621c6e7a after source CI 44890629588 success; first onboarding render now skips inner slide-enter opacity 0 while retaining modal entrance and compositor transitions for next/previous. Rebuild exact v9.2.67 source and repeat Preview, all 12 phone QA shards (including 9/12 and 12/12), six design reviews, Gemini exploration and protected Production. Never reuse old artifacts.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
