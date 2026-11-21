@@ -1050,3 +1050,11 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .dj9272-station-route-button svg{width:18px!important;height:18px!important;flex:0 0 18px!important;margin-right:6px!important;vertical-align:middle!important}
  }
 }
+
+/* v9.2.72 QA: preserve the independent 8500+ full-screen page/dock
+   stacking contract, so route and profile pages never occlude the bottom bar. */
+@layer request-completion {
+ @media(max-width:699px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav:not([hidden]){z-index:8600!important;}
+ }
+}
