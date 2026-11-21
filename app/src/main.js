@@ -1956,6 +1956,16 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     const picker=document.getElementById('admin-dong-picker');if(picker)picker.hidden=true;
   }
 }
+// Fullscreen X closures share the phone-tab stationary fade.
+function fadePrimaryPageToMap(panel,done){
+ window.DongjakWindowMotion?.cancel?.(panel);
+ if(!panel?.animate||window.matchMedia('(prefers-reduced-motion:reduce)').matches){done();return;}
+ let finished=false;
+ const complete=()=>{if(finished)return;finished=true;done();};
+ try{const animation=panel.animate([{opacity:1},{opacity:0}],{duration:215,easing:'ease-in'});
+   animation.addEventListener('finish',complete,{once:true});setTimeout(complete,400);
+ }catch{complete();}
+}
 // Capture mobile HOME before any older tab, sheet or district listeners. Other
 // devices retain their dedicated desktop sidebar behaviour unchanged.
 // Intercept only actual bottom-tab changes before the legacy HOME guard.
@@ -1965,7 +1975,7 @@ installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
   const active=pagePanels.find(p=>!p.hidden);
   // Primary phone tabs are real screens. Do not slide them down as map sheets.
   if(active&&window.matchMedia('(max-width:699px)').matches&&['route','participate','news','mine'].includes(app.dataset.tab)){
-    window.DongjakWindowMotion?.cancel?.(active);finish();
+    fadePrimaryPageToMap(active,finish);
   }else if(active&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(active,finish);else finish();
 }});
 // The Safety Map bottom tab acts as HOME on both PC and mobile. No implicit
@@ -1991,7 +2001,7 @@ for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-
 function closePrimaryPageToMap(panel){
   const finish=()=>navigate('map',{suppressOverview:true});
   if(panel&&window.matchMedia('(max-width:699px)').matches){
-    window.DongjakWindowMotion?.cancel?.(panel);finish();
+    fadePrimaryPageToMap(panel,finish);
   }else if(panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);
   else finish();
 }
