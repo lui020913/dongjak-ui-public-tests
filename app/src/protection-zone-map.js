@@ -91,8 +91,18 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
     if(verificationNode)verificationNode.innerHTML=renderEvidenceStatus(p);
     setText('pza-road-width',formatM(p.width_est_m));
     setText('pza-road-distance',formatM(p.protection_dist_m));
+    const previewScore9=Number(p.policy_coverage_all9_preview_score);
+    const previewScoreSchool=Number(p.policy_coverage_school2_preview_score);
+    const hasPreview9=p.policy_coverage_all9_preview_score!==null&&p.policy_coverage_all9_preview_score!==undefined&&Number.isFinite(previewScore9);
+    const hasPreviewSchool=p.policy_coverage_school2_preview_score!==null&&p.policy_coverage_school2_preview_score!==undefined&&Number.isFinite(previewScoreSchool);
+    const scoreExplanation=(hasPreview9||hasPreviewSchool)
+      ? `<p><strong>제도적 보호 공백 시범점수 (0점 공백 큼 · 100점 모형 내 공백 작음)</strong></p>
+         ${hasPreview9?`<p>어린이·노인 시설 9곳 기준: <b>${esc(previewScore9.toFixed(1))}점</b></p>`:''}
+         ${hasPreviewSchool?`<p>초등학교 2곳만 기준: <b>${esc(previewScoreSchool.toFixed(1))}점</b></p>`:''}
+         <p class="pza-evidence-note">공식 지정범위와 시설 대표점으로 추산한 잠정 연구값입니다. 출입문·고시·통학 동선 확인 전이므로 법적 누락, 실제 위험도 또는 안전 등급이 아닙니다.</p>`
+      :'';
     const evidence=document.getElementById('pza-road-evidence');
-    if(evidence)evidence.innerHTML=`<p>후보 구간 길이: <b>${formatM(p.segment_length_m)}</b></p>
+    if(evidence)evidence.innerHTML=`${scoreExplanation}<p>후보 구간 길이: <b>${formatM(p.segment_length_m)}</b></p>
       <p>조명 시설(등록 데이터)까지 추정거리: <b>${formatM(p.light_dist_min_m)}</b></p>
       <p>2023~24 표기 사고다발지역과 교차: <b>${formatM(p.overlap_2023_24_m)}</b></p>
       <p>2015~22 표기 사고다발지역과 교차: <b>${formatM(p.overlap_2015_22_m)}</b></p>
@@ -349,8 +359,11 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
     const tier=String(p.evidence_tier||'').slice(0,1);
     const recent=Number(p.overlap_2023_24_m||0);
     const historical=Number(p.overlap_2015_22_m||0);
+    const scoreSummary=p.policy_coverage_all9_preview_score!==undefined
+      ?`<p>제도적 보호 공백 시범점수: 9개 시설 <b>${esc(p.policy_coverage_all9_preview_score)}점</b> / 초등학교 2개교 <b>${esc(p.policy_coverage_school2_preview_score)}점</b></p>`
+      :'';
     return `<strong>${esc(p.road_name||'이름 미확인 도로')}</strong>
-      <p class="pza-popup-summary">${esc(explainRoad(p))}</p>
+      <p class="pza-popup-summary">${esc(explainRoad(p))}</p>${scoreSummary}
       <div class="pza-popup-facts"><span>도로폭(추정) <b>${formatM(p.width_est_m)}</b></span>
       <span>공식 구역과 거리 <b>${formatM(p.protection_dist_m)}</b></span></div>
       <details><summary>분석 근거 자세히</summary>
