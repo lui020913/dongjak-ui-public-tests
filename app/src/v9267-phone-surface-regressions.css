@@ -1,0 +1,241 @@
+/* Phone-only regression consolidation, 2026-11-21.
+ * Restore coherent full-screen page surfaces without changing map/data owners.
+ * In the same cascade layer as mobile-primary-fullscreen so legacy !important
+ * declarations cannot resurface during an iOS PWA tab/theme transition. */
+@layer request-completion {
+@media (max-width:699px) {
+  /* The search overlay belongs visually to the entire phone, not to the
+     shortened search input left of the independent AI action. */
+  html body #app#app#app#app#app #map-quick-search {
+    overflow:visible!important;
+  }
+  html body #app#app#app#app#app #map-quick-search-dropdown:not([hidden]) {
+    position:absolute!important;
+    left:0!important;
+    right:auto!important;
+    top:calc(100% + 9px)!important;
+    width:calc(100vw - 24px)!important;
+    min-width:0!important;
+    max-width:calc(100vw - 24px)!important;
+    box-sizing:border-box!important;
+    max-height:min(var(--dj884-search-room,58dvh),calc(100dvh - env(safe-area-inset-top,0px) - 100px))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    border-radius:22px!important;
+    transform:none!important;
+    translate:none!important;
+    z-index:5600!important;
+  }
+  html body #app#app#app#app#app #map-quick-search-dropdown .map-quick-search-results {
+    width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Speech-recognition grows its own listening card. The AI action must not
+     become a flex item in that growing search/header row. */
+  html body #app#app#app#app#app > .topbar .header-tools {
+    position:fixed!important;
+    top:calc(env(safe-area-inset-top,0px) + 8px)!important;
+    right:12px!important;
+    left:auto!important;
+    bottom:auto!important;
+    width:62px!important;
+    min-width:62px!important;
+    max-width:62px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 62px!important;
+    z-index:5601!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app > .topbar .header-tools > #dj890-ai-orb {
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    translate:none!important;
+    margin:0!important;
+    flex:0 0 62px!important;
+    max-width:62px!important;
+  }
+
+  /* All four primary screens own the bottom safe-area background. A legacy
+     white app/footer surface must never show between content and pill dock. */
+  html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) {
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    background-color:var(--dj-primary-page-bg,#edf3ef)!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
+    background-color:var(--dj-primary-page-bg,#edf3ef)!important;
+    background-image:none!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])::after {
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:calc(98px + env(safe-area-inset-bottom,0px));
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    pointer-events:none;
+    z-index:0;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer) {
+    position:relative;
+    z-index:1;
+  }
+  /* Only foreground content fades. The opaque page surface never fades and
+     consequently cannot reveal the underlying map while tabs are switched. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body) {
+    animation:dj9267-page-foreground-in .16s ease-out both!important;
+  }
+
+  /* A short opaque transition layer sits under the new page but above map
+     tiles. The JS controller removes it after the page has appeared. */
+  html body #app#app#app#app#app > #dj-tab-surface-curtain:not([hidden]) {
+    display:block!important;
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100dvh!important;
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    border:0!important;
+    border-radius:0!important;
+    opacity:1!important;
+    transform:none!important;
+    pointer-events:none!important;
+    z-index:6450!important;
+    transition:opacity .14s ease!important;
+  }
+  html body #app#app#app#app#app > #dj-tab-surface-curtain.dj-tab-curtain-out:not([hidden]) {
+    opacity:0!important;
+  }
+  html body #app#app#app#app#app > #dj-tab-surface-curtain[hidden] {display:none!important;}
+
+  /* The My Info hub uses one understated card/icon system in both themes.
+     Do not reinstate the legacy saturated square icon tiles. */
+  html body #app#app#app#app#app #mine-panel .dj834-profile-card,
+  html body #app#app#app#app#app #mine-panel .dj834-settings-group {
+    background:#f8fbf9!important;
+    border:1px solid #d5e5dd!important;
+    border-radius:20px!important;
+    box-shadow:0 2px 9px rgba(30,70,51,.035)!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-settings-group > button {
+    background:transparent!important;
+    color:var(--dj-primary-page-ink,#203e34)!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-setting-icon,
+  html body #app#app#app#app#app #mine-panel .dj834-user-avatar {
+    width:40px!important;height:40px!important;
+    flex:0 0 40px!important;
+    border-radius:14px!important;
+    background:#e5f3ed!important;
+    color:#0a856d!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-setting-icon svg {
+    width:22px!important;height:22px!important;
+    stroke-width:1.9!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group) {
+    background:#203a3b!important;
+    border-color:#41605c!important;
+    color:#ebf5f0!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #mine-panel :is(.dj834-setting-icon,.dj834-user-avatar) {
+    background:#294c49!important;color:#a6dfce!important;
+  }
+
+  /* Keep the five-label dock above the stationary page-to-page mask. */
+  html body #app#app#app#app#app > #bottom-nav:not([hidden]) {
+    z-index:8500!important;
+  }
+
+  /* Night mode does not change the pill geometry, only its active state.
+     Native original click/consent handlers remain the event owners. */
+  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-night,
+  html body #app#app#app#app#app #dj-v794-night[aria-pressed="true"] {
+    background:var(--mf-accent-soft,#deefe8)!important;
+    border-color:var(--mf-accent,#0d8670)!important;
+    color:var(--mf-accent,#0d8670)!important;
+  }
+  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-toolbar {
+    opacity:1!important;visibility:visible!important;
+  }
+  html body #app#app#app#app#app #dj-v794-night {
+    transition:background-color .18s ease,border-color .18s ease,color .18s ease!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #dj-v794-night[aria-pressed="true"] {
+    background:#234c46!important;border-color:#679c87!important;color:#d9f3e7!important;
+  }
+}
+}
+@keyframes dj9267-page-foreground-in {
+  from {opacity:.32}
+  to {opacity:1}
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce) {
+  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body) {animation:none!important;}
+  #app > #dj-tab-surface-curtain {transition:none!important;}
+}
+
+/* The consent dialog must not inherit bottom-sheet translation or lateral
+   animations. The provided iPhone recording showed it shifting horizontally
+   between repeated openings. Fade in place at the centre of the viewport. */
+@layer request-completion {
+@media (max-width:699px) {
+  html body #app#app#app#app#app #dj833-night-modal:not([hidden]) {
+    display:grid!important;
+    place-items:center!important;
+    position:fixed!important;
+    inset:0!important;
+    top:0!important;bottom:0!important;left:0!important;right:0!important;
+    width:100vw!important;height:100dvh!important;
+    min-width:0!important;max-width:none!important;
+    margin:0!important;padding:16px!important;
+    transform:none!important;translate:none!important;
+    border:0!important;border-radius:0!important;
+    overflow:hidden!important;
+    box-sizing:border-box!important;
+    background:rgba(12,34,27,.40)!important;
+    animation:dj9267-night-overlay-in .18s ease-out both!important;
+    z-index:9200!important;
+  }
+  html body #app#app#app#app#app #dj833-night-modal:not([hidden]) .dj833-night-dialog {
+    position:relative!important;
+    inset:auto!important;
+    left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+    width:min(100%,410px)!important;max-width:410px!important;
+    max-height:calc(100dvh - 36px)!important;
+    margin:auto!important;
+    transform:none!important;translate:none!important;
+    animation:dj9267-night-dialog-in .20s ease-out both!important;
+    overflow-y:auto!important;
+    box-sizing:border-box!important;
+  }
+}
+}
+@keyframes dj9267-night-overlay-in {from{opacity:0}to{opacity:1}}
+@keyframes dj9267-night-dialog-in {from{opacity:.35}to{opacity:1}}
+@media(max-width:699px) and (prefers-reduced-motion:reduce){
+  #app #dj833-night-modal:not([hidden]),
+  #app #dj833-night-modal:not([hidden]) .dj833-night-dialog {animation:none!important;}
+}
+/* The permission/consent scrim is visible before night mode activates.
+   Sample a midtone in the OS status region rather than leaving a bright strip
+   abruptly adjacent to the dimmed map; black status icons remain legible. */
+html.dj-ios-home-pwa:has(#dj833-night-modal:not([hidden])) {
+  --dj-pwa-native-edge:#aab8af!important;
+  --dj-pwa-land-tone:#aab8af!important;
+}
+html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
+  --dj-pwa-native-edge:#192d32!important;
+  --dj-pwa-land-tone:#192d32!important;
+}
