@@ -18,7 +18,7 @@ test('flat status edge is noninteractive and native modal backdrops have no grad
  const s=read('src/mobile-pwa-status-tone-v793.css'),js=read('src/mobile-pwa-status-tone-v793.js');
  assert.ok(s.includes('body #app > #dj-ios-pwa-status-bridge'));
  assert.match(s,/--dj-pwa-bridge-gradient:none/);
- assert.match(s,/#dj-ios-pwa-status-bridge\\{[\\s\\S]*?display:none!important/);
+ assert.ok(s.includes('display:none!important;position:fixed!important;inset:0 0 auto!important'));
  assert.ok(s.includes('pointer-events:none!important'));
  assert.ok(s.includes('z-index:2901!important'));
  assert.ok(s.includes('#dj-ai-search-modal[open]::backdrop'));
