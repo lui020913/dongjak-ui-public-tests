@@ -58,7 +58,7 @@ test('Sillim in-app timetable shows all published rows for its verified local st
 
 test('station title carries the selected line badge and route strip centers all three stations',()=>{
   const source=read('src/transport-map.js');
-  const css=read('src/v704-user-request-fixes.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(source,/button\.append\(badge\)/);
   assert.match(source,/dj-metro-line-selector/);
   assert.match(source,/metroTransferBadgeLines\(place\.name/);
@@ -70,7 +70,7 @@ test('station title carries the selected line badge and route strip centers all 
 });
 
 test('clicked menus and map popups are viewport-bounded and scroll internally',()=>{
-  const css=read('src/v704-user-request-fixes.css');
+  const css=read('src/mobile-ui-baseline.css');
   const main=read('src/main.js');
   const popup=read('src/map-popup-viewport.js');
   assert.match(main,/installViewportSafeMapPopups\(\{map\}\)/);
@@ -83,7 +83,7 @@ test('clicked menus and map popups are viewport-bounded and scroll internally',(
 });
 
 test('the pedestrian-safety launcher stays on one line and user-facing zone text avoids "도형"',()=>{
-  const css=read('src/v704-user-request-fixes.css');
+  const css=read('src/mobile-ui-baseline.css');
   const html=read('index.html');
   const zone=read('src/protection-zone-map.js')+read('src/protection-zone-guidance.js');
   assert.match(css,/white-space:nowrap!important/);
