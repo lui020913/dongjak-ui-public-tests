@@ -302,7 +302,10 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
    b.addEventListener('click',()=>{
     if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return;}
     const target=route.querySelector('[data-route-variant="'+id+'"]');
-    if(target&&!target.disabled){target.click();focus();}
+    // Keep all choices visible after selecting a route. The map still fits
+    // the complete selected geometry, and the explicit Full Route button
+    // remains available to collapse the choice list on demand.
+    if(target&&!target.disabled){target.click();win.dispatchEvent(new Event('dj-next:fit-route'));}
    });
    cards.append(b);
   }

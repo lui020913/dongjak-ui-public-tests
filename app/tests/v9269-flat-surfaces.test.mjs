@@ -105,3 +105,11 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(nav.includes("protectPageTransition(nextTab)"));
  assert.ok(!block.includes('filter:brightness(.66)'));
 });
+
+
+test('v9.2.72 selecting a route fits the full geometry without hiding other choices',()=>{
+ const js=productionStyle('mobile-next.js');
+ assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
+ assert.ok(js.includes("target.click();win.dispatchEvent(new Event('dj-next:fit-route'));"));
+ assert.equal(js.includes('target.click();focus();'),false,'a route click must not collapse other alternatives');
+});

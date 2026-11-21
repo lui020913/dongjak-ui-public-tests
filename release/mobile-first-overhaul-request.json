@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.72",
   "public_work_branch": "main",
-  "purpose": "v9.2.72 QA-corrected re-release from PRs #218 #221 #225; phone full-screen onboarding, consistent UI/buttons/icons, route origin/destination and map full-fit, nonflashing page transition fade, dark My Info surface & language, screen-safe expanded layers, consistent AI fade, selected interchange-only rail ring. Require 12 mobile QA, 6 design capture, 6 Gemini analysis, exploration, protected Cloudflare Production.",
-  "attempt": 204,
+  "purpose": "v9.2.72 user-requested 12-part mobile overhaul, follow-up route-choice repair: when a calculated standard/gentle/balanced route is selected, fit its full path but keep all alternatives available, preserving previous PR #225 phone/dark/metro fixes. Require full Preview → 12 mobile QA → 6 visual capture/analysis → explore QA → protected Production.",
+  "attempt": 205,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.72 mobile QA #44904708991 detected a 2px selected transfer-line ring, cohesive My Info dark background #192d32 and 7000 bottom tab z-index vs previous test expectation. PR #225 raised actual pill depth to 8600, aligned metro and My Info tests with requested design, passed public CI #44905312375. Retry all protected gates with newly merged main; do not bypass mobile QA.",
+  "last_retry_reason": "v9.2.72 design journey #44904708991 step 03 was blocked for 6 minutes: route option balanced.click() called focus() which hid the entire route comparison, preventing subsequent standard.click(). PR #226 decouples full map fit from panel collapse so users may repeatedly select alternatives and inspect their entire routes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
