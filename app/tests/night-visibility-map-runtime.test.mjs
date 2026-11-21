@@ -84,7 +84,7 @@ test('지도 켜기→도로 분석→반경 조정→끔의 레이어 생명주
     }]})};
     let currentTheme='light';
     const themes=[];
-    const theme={currentTheme:()=>currentTheme,setTemporaryTheme(value){currentTheme=value;themes.push(value);}};
+    const theme={currentTheme:()=>currentTheme,setTemporaryTheme(value){currentTheme=value??'light';themes.push(value);}};
     const view=installNightVisibility({map,maplibregl:{Popup},app,theme});
     assert.equal(view.isEnabled(),false);
     assert.equal(nodes['night-visibility-quick-off'].hidden,false);
@@ -136,7 +136,7 @@ test('지도 켜기→도로 분석→반경 조정→끔의 레이어 생명주
     assert.equal(nodes['night-visibility-quick-off'].hidden,false);
     assert.equal(nodes['night-visibility-float'].hidden,true);
     assert.equal(nodes['night-visibility-controls'].parentElement,origin);
-    assert.deepEqual(themes,['dark','light']);
+    assert.deepEqual(themes,['dark',null]);
     assert.equal(currentTheme,'light');
     assert.equal(map.layers['dj-night-light-point'].layout.visibility,'none');
     assert.equal(map.layers['dj-night-light-glow'].layout.visibility,'none');
