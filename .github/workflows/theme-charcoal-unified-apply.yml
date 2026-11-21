@@ -41,6 +41,18 @@ jobs:
         run: python3 "$RUNNER_TEMP/theme-apply/apply_patch.py" "$GITHUB_WORKSPACE" --check
       - name: Apply full integrated patch (not individual hotfixes)
         run: python3 "$RUNNER_TEMP/theme-apply/apply_patch.py" "$GITHUB_WORKSPACE"
+      - name: Migrate legacy iPhone loader expectation to canonical charcoal
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          target=Path('app/tests/v9259-ios-startup-seam.test.mjs')
+          text=target.read_text()
+          old='/--start-bg:#(?:edf3ef|192d32);/'
+          new='/--start-bg:#(?:edf3ef|17191d);/'
+          assert text.count(old)==1,'Unexpected old test expectation: refusing blind update'
+          target.write_text(text.replace(old,new,1))
+          PY
       - name: Stage exactly app/front-end patch outputs before build stamping
         shell: bash
         run: |
