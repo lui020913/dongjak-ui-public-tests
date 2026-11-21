@@ -23,21 +23,20 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
  }
  function protectPageTransition(next){
-  if(!phone()||!['route','participate','news','mine'].includes(next)){
-   dismissCurtain();return;
-  }
+  if(!phone()){dismissCurtain();return;}
   if(!curtain){
-   curtain=doc.createElement('div');
-   curtain.id='dj-tab-surface-curtain';
-   curtain.setAttribute('aria-hidden','true');
-   curtain.hidden=true;
-   app.appendChild(curtain);
+   curtain=doc.createElement('div');curtain.id='dj-tab-surface-curtain';
+   curtain.setAttribute('aria-hidden','true');curtain.hidden=true;app.appendChild(curtain);
   }
   dismissCurtain();
   curtain.hidden=false;
-  // Stay opaque until the next page has installed its nontransparent base.
-  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},90);
-  curtainHide=win.setTimeout(()=>{curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}},270);
+  // Cover the underlying map during the synchronous native tab replacement.
+  curtainFade=win.setTimeout(()=>{
+   curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');
+  },65);
+  curtainHide=win.setTimeout(()=>{
+   curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
+  },405);
  }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return;
@@ -48,46 +47,40 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(watchdog)win.clearTimeout(watchdog);
   watchdog=0;pending=null;closing=null;
  }
+ let exitTimer=0;
  function select(event){
   if(!phone()||replaying)return;
-  // A swipe across two buttons may synthesize a click on their common nav
-  // ancestor rather than either button. Consume it before outside-click cleanup.
-  if(suppressClick&&event.isTrusted&&event.target?.closest?.('#bottom-nav')){suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;}
-  const button=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
-  if(!button){
-   if(closing&&event.isTrusted){const current=closing.panel;clear();win.DongjakWindowMotion?.cancel?.(current);}
-   return;
+  if(suppressClick&&event.isTrusted&&event.target?.closest?.('#bottom-nav')){
+   suppressClick=false;event.preventDefault();event.stopImmediatePropagation();return;
   }
-  const current=app.dataset.tab;
-  if(!closing&&button.dataset.tab===current)return;
-  protectPageTransition(button.dataset.tab);
-  const motion=win.DongjakWindowMotion;
-  const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
-  // Fullscreen tabs return directly to HOME; do not run the 300ms sheet exit.
-  // The existing safety-home guard remains the sole map-return owner.
-  if(!closing&&panel&&['route','participate','news','mine'].includes(current)&&button.dataset.tab==='map'){
-    motion?.cancel?.(panel);return;
+  let button=event.target?.closest?.('#bottom-nav .nav-tab[data-tab]');
+  if(!button&&event.target?.closest?.('.page-panel [data-close-page]')){
+   if(app.dataset.tab==='map')return;
+   button=nav.querySelector('.nav-tab[data-tab="map"]');
   }
-  // Non-map pages use the existing navigator synchronously. No blank map frame.
-  if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
-   motion?.cancel?.(panel);return;
-  }
-  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: normal opener
+  if(!button||button.disabled)return;
+  const current=app.dataset.tab,nextTab=button.dataset.tab;
+  if(nextTab===current&&!exitTimer)return;
+  // Cancel the legacy instantaneous handler. The existing buttons still own
+  // navigation once replayed, after the outgoing surface fades away.
   event.preventDefault();event.stopImmediatePropagation();
   pending=button;
-  if(closing)return; // latest tap wins while the old panel fades away
-  const state={panel,tab:current};closing=state;
-  const finish=()=>{
-   if(closing!==state)return;
-   const next=pending;clear();
-   if(app.dataset.tab!==state.tab)return;
-   if(next?.dataset.tab===state.tab)return; // a quick return cancels the switch
-   if(state.panel.isConnected)state.panel.hidden=true;
+  if(exitTimer)return;
+  const previous=doc.querySelector('.page-panel[data-page="'+current+'"]:not([hidden])');
+  if(previous)previous.classList.add('dj9272-tab-leave');
+  exitTimer=win.setTimeout(()=>{
+   exitTimer=0;
+   const next=pending;pending=null;
+   previous?.classList.remove('dj9272-tab-leave');
+   if(!next?.isConnected)return;
+   protectPageTransition(next.dataset.tab);
    replay(next);
-  };
-  // A secondary feature can cancel the shared animation; never strand a tab tap.
-  watchdog=win.setTimeout(()=>{if(closing===state){motion.cancel?.(panel);finish();}},1600);
-  motion.closeTab(panel,finish);
+   const entered=doc.querySelector('.page-panel[data-page="'+next.dataset.tab+'"]:not([hidden])');
+   if(entered){
+    entered.classList.add('dj9272-tab-enter');
+    win.setTimeout(()=>entered.classList.remove('dj9272-tab-enter'),305);
+   }
+  },previous?235:0);
  }
  function down(event){
   if(!phone()||event.isPrimary===false||event.button!==0)return;
@@ -111,7 +104,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  win.addEventListener('pointerup',up,{capture:true});
  win.addEventListener('pointercancel',cancel,true);
  return ()=>{
-  const panel=closing?.panel;clear();dismissCurtain();curtain?.remove();curtain=null;if(panel)win.DongjakWindowMotion?.cancel?.(panel);
+  const panel=closing?.panel;if(exitTimer)win.clearTimeout(exitTimer);clear();dismissCurtain();curtain?.remove();curtain=null;if(panel)win.DongjakWindowMotion?.cancel?.(panel);
   win.removeEventListener('click',select,true);nav.removeEventListener('pointerdown',down);
   win.removeEventListener('pointerup',up,true);win.removeEventListener('pointercancel',cancel,true);
   delete nav.dataset.djTabNavigation;
