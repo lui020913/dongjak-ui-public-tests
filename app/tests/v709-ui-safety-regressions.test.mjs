@@ -13,8 +13,8 @@ test('night shortcut stays visible and provides active night-off action',()=>{
 
 test('new overrides load after old floating CSS, preserving button and X centering',()=>{
   const main=read('src/main.js');
-  const css=read('src/v709-control-fixes.css');
-  assert.ok(main.indexOf("import './v709-control-fixes.css';")>main.indexOf("import './v708-floating-ux.css';"));
+  const css=read('src/mobile-ui-baseline.css');
+  assert.ok(main.indexOf("import './mobile-ui-baseline.css';")>main.indexOf("import './mobile-ui-baseline.css';"));
   for(const item of ['#map-tools-toggle','#night-visibility-quick-off','#map-safety-toggle',
     '#overview-sheet-close','#news-close-to-map','#night-visibility-float-stop'])assert.ok(css.includes(item),item);
   assert.match(css,/translate:-50% -50%/);
