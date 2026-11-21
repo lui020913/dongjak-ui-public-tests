@@ -30,7 +30,7 @@ test('nearby sheet has exactly one captured header gesture owner and retains all
 test('distant subway vehicle AND beam remain hidden, while bus visibility is unchanged',()=>{
   const script=read('src/features/liveTransit/integrate.js');
   const engine=read('src/features/liveTransit/index.js');
-  assert.match(script,/METRO_LIVE_MIN_ZOOM=13\.8/);
+  assert.match(script,/METRO_LIVE_MIN_ZOOM=13\.0/);
   assert.match(script,/minZoom:13\.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000/);
   assert.match(engine,/LIVE_METRO_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom/);
   assert.match(engine,/TRAIN_BEAM_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom/);

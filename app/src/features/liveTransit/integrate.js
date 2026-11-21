@@ -5,7 +5,7 @@ import {attachLiveTransitOverlay,LIVE_METRO_LAYER,LIVE_BUS_LAYER} from './index.
 import {railDirectionLabel} from './train-lanes.js';
 export const LIVE_PREF_KEY='dongjak_live_vehicle_options_v827';
 // Start showing vehicles at a neighborhood zoom, rather than only at street level.
-export const METRO_LIVE_MIN_ZOOM=13.8;
+export const METRO_LIVE_MIN_ZOOM=13.0;
 export function buildDongjakMetroLines(){
   const lines={};
   // The published rail order is geographical, not a guaranteed API direction.

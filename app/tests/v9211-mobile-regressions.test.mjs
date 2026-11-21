@@ -8,7 +8,7 @@ import {fixedRailCollection} from '../src/fixed-rail-lines.js';
 
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 test('vehicle zoom is less restrictive than street-only 16.4 and reused for render/status',()=>{
-  assert.equal(METRO_LIVE_MIN_ZOOM,13.8);
+  assert.equal(METRO_LIVE_MIN_ZOOM,13.0);
   const src=read('src/features/liveTransit/integrate.js');
   assert.equal((src.match(/map.getZoom\?\.\(\)<METRO_LIVE_MIN_ZOOM/g)||[]).length,2);
   assert.doesNotMatch(src,/metroMinZoom:16\.4/);
