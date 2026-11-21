@@ -244,7 +244,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
    const b=panel.getByRole('switch',{name:label+' 바로가기',exact:true});await expect(b).toHaveAttribute('aria-checked','false');await b.scrollIntoViewIfNeeded();await b.click();await expect(b).toHaveAttribute('aria-checked','true');
  }
  expect(await slopeAction.getAttribute('aria-pressed')).toBe(slopeState);await expect(panel).toBeVisible();
- await expect(panel.locator('.djNext-count')).toHaveText('등록 3/3');
+ await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 3/3');
  await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeDisabled();
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
@@ -255,7 +255,7 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await scroll.evaluate(n=>{n.scrollLeft=n.scrollWidth;});await expect(scroll).toHaveAttribute('data-overflow-left','true');await assertLayerRight();
  await scroll.evaluate(n=>{n.scrollLeft=0;});await tap(page,page.locator('#djNext-layers'));await expect(panel).toBeVisible();
  const remove=panel.getByRole('switch',{name:'경사도 바로가기',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
- await expect(panel.locator('.djNext-count')).toHaveText('등록 2/3');
+ await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 2/3');
  await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
@@ -1039,10 +1039,19 @@ test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@pho
   await ready(page);
   const ai=page.locator('#dj890-ai-orb'),search=page.locator('#map-quick-search');
   const dropdown=page.locator('#map-quick-search-dropdown');
+  const mic=page.locator('#djNext-mic'),query=search.locator('#map-quick-search-query');
   await expect(ai).toBeVisible();
-  await search.locator('#map-quick-search-query').click();
+  await expect(mic).toBeVisible();
+  await query.click();
+  // An empty focus must NOT create a rectangular suggestion box.
+  await expect(dropdown).toBeHidden();
+  await expect(ai).toBeVisible();
+  await expect(mic).toBeVisible();
+  // The rounded, pill-aligned panel appears only after meaningful input.
+  await query.fill('노량진');
   await expect(dropdown).toBeVisible();
   await expect(ai).toBeVisible();
+  await expect(mic).toBeVisible();
   await expect(ai).toHaveCSS('pointer-events','auto');
   const sb=await search.boundingBox(),rb=await dropdown.boundingBox(),ab=await ai.boundingBox();
   expect(rb.x).toBeGreaterThanOrEqual(sb.x-2);
