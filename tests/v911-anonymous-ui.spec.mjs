@@ -38,6 +38,32 @@ async function ready(page,{keepTour=false}={}){
  await expect(tour).toBeHidden();
 }
 async function geometry(page,sel){
+ // Independent phone tabs deliberately occupy the viewport behind the dock.
+ // Validate full-page bounds and the real selected dock hit target, rather
+ // than applying the floating sheet's 5px clearance rule to a page.
+ const isPrimary=page.viewportSize().width<700&&
+   ['#route-panel','#participation-panel','#news-panel','#mine-panel'].includes(sel);
+ if(isPrimary){
+   await expect.poll(()=>page.locator(sel).evaluate(panel=>{
+     const pageRect=panel.getBoundingClientRect();
+     const nav=document.getElementById('bottom-nav');
+     const dock=nav?.getBoundingClientRect();
+     const selected=nav?.querySelector('.nav-tab[aria-current="page"]');
+     const rect=selected?.getBoundingClientRect();
+     const hit=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+     const body=panel.querySelector(':scope > .dj836-sheet-body');
+     const viewportHeight=document.documentElement.clientHeight;
+     return Boolean(dock&&selected&&body&&rect&&
+       Math.abs(pageRect.x)<3&&Math.abs(pageRect.y)<3&&
+       Math.abs(pageRect.width-document.documentElement.clientWidth)<3&&
+       Math.abs(pageRect.height-viewportHeight)<5&&
+       dock.top>pageRect.top&&dock.bottom<=pageRect.bottom+3&&
+       selected.contains(hit)&&
+       getComputedStyle(body).overflowY==='auto');
+   }),{timeout:20000}).toBe(true);
+   return;
+ }
+ // Map-linked bus, subway, facility and utility sheets must still clear the pill.
  await expect.poll(async()=>{const p=await page.locator(sel).boundingBox(),n=await page.locator('#bottom-nav').boundingBox();return p&&n?n.y-p.y-p.height:-1000}).toBeGreaterThanOrEqual(5);
 }
 async function visuallyPresented(locator){
