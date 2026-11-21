@@ -41,7 +41,12 @@ test('closing an auxiliary page returns to the map without reopening the overvie
   const main=read('src/main.js');
   assert.match(main,/function navigate\(tab,\{suppressOverview=false,resumeCommunityDraft=false\}=\{\}\)/);
   assert.match(main,/if\(suppressOverview\)\{\s*overview\.hidden=true;\s*overviewExplicitOpen=false;/);
-  assert.match(main,/for\(const button of document\.querySelectorAll\('\[data-close-page\]'\)\)\{[\s\S]*?const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\);if\(panel&&window\.DongjakWindowMotion\)window\.DongjakWindowMotion\.close\(panel,finish\);else finish\(\);/);
+  const close=main.split("for(const button of document.querySelectorAll('[data-close-page]')){")[1]?.split("document.getElementById('news-close-to-map')")[0];
+  assert(close,'page X handler exists');
+  assert.match(close,/const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\)/);
+  assert.match(close,/const full=panel\?\.classList\.contains\('dj-mobile-fullscreen-page'\)/);
+  assert.match(close,/if\(full\)window\.DongjakWindowMotion\?\.cancel\?\.\(panel\)/);
+  assert.match(close,/if\(!full&&panel&&window\.DongjakWindowMotion\)window\.DongjakWindowMotion\.close\(panel,finish\);else finish\(\)/);
   assert.match(main,/news-close-to-map[\s\S]*?navigate\('map',\{suppressOverview:true\}\)/);
 });
 
