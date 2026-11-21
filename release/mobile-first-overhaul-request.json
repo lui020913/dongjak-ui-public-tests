@@ -3,9 +3,9 @@
   "application_version": "9.2.55",
   "public_work_branch": "main",
   "purpose": "Resolve iPhone community category height expansion, restore shared weather sheet expand/collapse, default live subway ON for first-time users with close-zoom quota protection, and make latest update notes readable. Preserve v9.2.54 fullscreen tabs, native phone dock, historical versions, on-device settings and protected Preview QA / Production gate.",
-  "attempt": 165,
+  "attempt": 166,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.55 Attempt 164 source build failed at deterministic baseline expandability anchor check after weather sheet source changed. Main 09104842134b42148fdfdcd00bb3be0517ff600e restored two pre-build anchors and added a regression guard; the secure release overlay reintroduces map/weather expandability. Revalidate source build, full sealed Preview, 12 independent phone QA, visual review and protected Production. Preserve four fullscreen mobile tabs.",
+  "last_retry_reason": "The previous v9.2.55 release build (44851494876) failed before Preview because the mobile follow-up script required two untouched expansion anchors. PR #153 restored those baseline anchors while preserving weather expansion at build time. Retry exact-source build, full 12 mobile shards and 6 visual checks before protected Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
