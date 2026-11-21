@@ -29,7 +29,7 @@ test('map help button is question mark and first-run guide is centered',()=>{
  assert.match(help,/showOnInitialMap/);
 });
 test('the guide includes a recent update and a working release-history action',()=>{
- assert.match(html,new RegExp('id="dj-guide-latest-version">v'+APP_VERSION.replaceAll('.','\\.')));
+  assert.match(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
  assert.match(html,/id="dj-guide-release-details"/);
  assert.match(help,/version-history-trigger'\)\?\.click\(\)/);
  assert.match(css,/\.dj-guide-release/);

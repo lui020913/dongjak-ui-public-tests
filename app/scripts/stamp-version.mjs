@@ -2,6 +2,7 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
+import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION} from '../src/public-release-display.js';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>readFile(resolve(root,p),'utf8');
 const write=(p,value)=>writeFile(resolve(root,p),value,'utf8');
@@ -26,10 +27,10 @@ await write('public/version.json',metadata);
 await write('src/build-info.json',metadata);
 let html=await read('index.html');
 const replacements=[
-  [/(<title>동작하는 안전지도 · 보행안전 지도 )v\d+\.\d+\.\d+(<\/title>)/,`$1v${version}$2`],
-  [/(id="version-history-trigger"[^>]*>)v\d+\.\d+\.\d+(<\/button>)/,`$1v${version}$2`],
-  [/(id="dj-guide-latest-version">)v\d+\.\d+\.\d+(<\/strong>)/,`$1v${version}$2`],
-  [/(id="map-startup-version"[^>]*>)v\d+\.\d+\.\d+(<\/span>)/,`$1v${version}$2`],
+  [/(<title>동작하는 안전지도 · 보행안전 지도)(?: v\d+\.\d+\.\d+)?(<\/title>)/,'$1$2'],
+  [/(id="version-history-trigger"[^>]*>)(?:v\d+\.\d+\.\d+|업데이트)(<\/button>)/,'$1업데이트$2'],
+  [/(id="dj-guide-latest-version">)(?:v\d+\.\d+\.\d+|분류별 내역)(<\/strong>)/,'$1분류별 내역$2'],
+  [/(id="map-startup-version"[^>]*>)(?:v\d+\.\d+\.\d+|버전 1\.0)(<\/span>)/,`$1${PUBLIC_LOADING_VERSION}$2`],
 ];
 for(const [pattern,replacement] of replacements){
   if(!pattern.test(html))throw new Error('HTML version slot missing: '+pattern);
@@ -37,8 +38,8 @@ for(const [pattern,replacement] of replacements){
 }
 await write('index.html',html);
 let about=await read('src/v7120-settings.js');
-const aboutVersion=/(id="dj-about-version-number">)v\d+\.\d+\.\d+(<\/strong>)/;
+const aboutVersion=/(id="dj-about-version-number">)(?:v\d+\.\d+\.\d+|1\.0)(<\/strong>)/;
 if(!aboutVersion.test(about))throw new Error('About modal version slot missing');
-about=about.replace(aboutVersion,`$1v${version}$2`);
+about=about.replace(aboutVersion,`$1${PUBLIC_APP_VERSION}$2`);
 await write('src/v7120-settings.js',about);
 console.log(`[동작하는 안전지도] v${version}: HTML·앱 소개·버전 이력·빌드 정보 동기화`);

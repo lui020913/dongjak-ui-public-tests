@@ -58,7 +58,7 @@ test('v7.0.4 변경사항과 데이터 출처를 업데이트 내역에서 함�
   const html=read('index.html');
   const history=read('src/version-history-v7.js');
   const releases=read('src/version-history.js');
-  assert.match(html,new RegExp('v'+APP_VERSION.replaceAll('.','\\.')));
+   assert.match(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
   assert.match(history,/데이터 출처 및 활용 범위/);
   assert.match(history,/DATA_SOURCE_GROUPS/);
   assert.match(history,/sourcesButton/);

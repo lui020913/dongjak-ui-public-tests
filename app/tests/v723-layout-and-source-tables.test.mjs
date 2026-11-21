@@ -44,7 +44,7 @@ test('v7.0.29 mobile safety/transport/option sheet cannot hide nav or trap close
 test('v7.0.29 metadata is consistent and CSS appended last',()=>{
   const html=read('index.html'),main=read('src/main.js'),packageJson=JSON.parse(read('package.json'));
   assert.equal(packageJson.version,APP_VERSION);
-  assert.match(html,new RegExp('v'+APP_VERSION.replaceAll('.','\\.')));
+   assert.match(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
   assert.match(main,/v723-navigation-and-panels\.css/);
   assert.match(read('src/version-history.js'),/version:'v7\.0\.29'/);
 });

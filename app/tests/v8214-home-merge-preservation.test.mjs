@@ -6,7 +6,8 @@ const read=(p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('v8.2.14 home integration preserves the new personalized shortcuts and metadata',()=>{
   const html=read('index.html');
   const currentVersion=JSON.parse(read('package.json')).version;
-  assert.ok(html.includes(`v${currentVersion}`),'the HTML must show the current release, not a frozen v8.2.15 label');
+   assert.equal(JSON.parse(read('public/version.json')).version,currentVersion);
+   assert.ok(html.includes('id="map-startup-version" aria-label="앱 버전">버전 1.0'));
   assert.match(html,/v833-toolbar-personalization\.css/);
   assert.match(html,/v833-home-sheet-layout\.css/);
   assert.ok(html.indexOf('v833-toolbar-personalization.css')<html.indexOf('v833-home-sheet-layout.css'),

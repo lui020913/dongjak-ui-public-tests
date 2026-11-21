@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {VERSION_HISTORY,RENUMBERED_VERSION_HISTORY} from '../src/version-history.js';
 import {LEGACY_VERSION_HISTORY} from '../src/version-history-legacy.js';
 import {APP_RELEASES} from '../src/app-version.js';
-import {releaseEdition,groupReleaseEditions,deploymentVersionLabel,HISTORICAL_EDITIONS} from '../src/release-editions.js';
+import {releaseEdition,groupReleaseEditions,deploymentVersionLabel,syncPublicVersion,HISTORICAL_EDITIONS} from '../src/release-editions.js';
 test('all 202 baseline records retain their identity and every note',()=>{
  const operational=APP_RELEASES.filter(r=>/^v8\./.test(r.version));
  assert.equal(operational.length,66);
@@ -28,3 +28,13 @@ test('deployment status only comes from matching verified release marker',()=>{
 });
 
 test('current patch versions are distinct',()=>{assert.deepEqual(groupReleaseEditions([{version:'9.1.2'},{version:'9.1.1'},{version:'9.1.0'}]).map(g=>g.label),['9.1.2','9.1.1','9.1.0']);});
+
+test('pre-release screens stay 1.0 and unnumbered regardless of internal build',async()=>{
+ const values=new Map(['version-history-trigger','dj-guide-latest-version','dj-about-version-number'].map(id=>[id,{textContent:'',dataset:{}}]));
+ const doc={title:'동작하는 안전지도 · 9.2.74',getElementById:id=>values.get(id)||null};
+ const result=await syncPublicVersion({version:'9.2.74',doc,win:{}});
+ assert.deepEqual([...values.values()].map(x=>x.textContent),['업데이트','분류별 내역','1.0']);
+ assert.equal(doc.title,'동작하는 안전지도 · 보행안전 지도');
+ assert.equal(result.internalVersion,'9.2.74');
+ assert.equal(result.publicVersion,'1.0');
+});

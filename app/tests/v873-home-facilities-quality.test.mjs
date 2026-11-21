@@ -75,7 +75,8 @@ test('PC/mobile separation and release history remain coherent',()=>{
  assert.match(main,/installSafetyHomeGuard\(/);
  assert.match(main,/navigate\('map',\{suppressOverview:true\}\)/);
  assert.match(html,/refresh-general-facilities/);
- assert.ok(html.includes('v'+JSON.parse(text('package.json')).version),'HTML must show current package release version');
+  assert.ok(html.includes('id="map-startup-version" aria-label="앱 버전">버전 1.0'),'the pre-release UI must keep its public 1.0 label');
+  assert.equal(JSON.parse(text('public/version.json')).version,JSON.parse(text('package.json')).version);
  assert.match(text('src/v873-mobile-performance.css'),/@media \(max-width:699px\)/);
 });
 

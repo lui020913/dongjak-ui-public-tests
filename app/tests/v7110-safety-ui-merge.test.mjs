@@ -10,7 +10,7 @@ test('v8.0.0 mobile and PC experience remains alongside the optional safety UI',
  assert.match(html,/id="dj-full-transition"/);
  assert.match(html,/id="dj-type-settings"/);
  assert.match(html,/id="dj-type-scale"/);
- assert.match(html,new RegExp('v'+APP_VERSION.replaceAll('.','\\.')));
+  assert.match(html,/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
  const entry=read('src/safety-workbench-entry-v7104.js');
  assert.match(entry,/safety-polish-v7104\.css/);
 });

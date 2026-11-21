@@ -1,0 +1,31 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote} from '../src/public-release-display.js';
+import {APP_RELEASES} from '../src/app-version.js';
+import {RENUMBERED_VERSION_HISTORY} from '../src/version-history.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('pre-release version is fixed, but operational provenance stays independent',()=>{
+ assert.equal(PUBLIC_APP_VERSION,'1.0');
+ assert.equal(PUBLIC_LOADING_VERSION,'버전 1.0');
+ assert.ok(APP_RELEASES[0].version.startsWith('v8.'));
+ assert.match(read('index.html'),/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
+ assert.match(read('src/v7120-settings.js'),/id="dj-about-version-number">1\.0<\/strong>/);
+ assert.doesNotMatch(read('index.html'),/id="version-history-trigger"[^>]*>v\d/);
+});
+test('notes are categorized deterministically and archived text is preserved',()=>{
+ assert.deepEqual(CHANGE_TYPE_GROUPS.map(x=>x.id),['major','feature','design','fix']);
+ assert.equal(classifyReleaseNote('핵심 구조 개편','major'),'major');
+ assert.equal(classifyReleaseNote('신규 기능 추가','minor'),'feature');
+ assert.equal(classifyReleaseNote('아이콘 및 헤더 디자인 개선','patch'),'design');
+ assert.equal(classifyReleaseNote('오류 수정 및 안정화','patch'),'fix');
+ const original=APP_RELEASES.concat(RENUMBERED_VERSION_HISTORY);
+ const total=original.reduce((count,r)=>count+(r.sourceItems||r.items||[]).length,0);
+ const classified=original.reduce((count,r)=>count+(r.sourceItems||r.items||[]).filter(note=>CHANGE_TYPE_GROUPS.some(group=>group.id===classifyReleaseNote(note,r.scale))).length,0);
+ assert.equal(classified,total);
+ const history=read('src/version-history-v7.js');
+ assert.ok(history.includes('buildGenerationCatalog(releases,releaseEdition)'));
+ assert.ok(history.includes('CHANGE_TYPE_GROUPS'));
+ assert.ok(history.includes('classifyReleaseNote'));
+ assert.equal(history.includes('현재 빌드: '),false);
+});

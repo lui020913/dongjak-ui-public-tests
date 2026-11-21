@@ -85,5 +85,6 @@ test('onboarding copy remains in the v8.6.0 release history while public version
   const currentVersion=JSON.parse(read('package.json')).version;
   assert.ok(appVersion.includes(`APP_VERSION="${currentVersion}"`));
   assert.ok(appVersion.includes('"version": "8.6.0"'));
-  assert.ok(html.includes(`<title>동작하는 안전지도 · 보행안전 지도 v${currentVersion}</title>`));
+   assert.ok(html.includes('<title>동작하는 안전지도 · 보행안전 지도</title>'));
+   assert.ok(html.includes('id="map-startup-version" aria-label="앱 버전">버전 1.0'));
 });

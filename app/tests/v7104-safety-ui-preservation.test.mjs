@@ -18,5 +18,5 @@ test('v8.0.0 iOS artwork and theme transition survive safety drawer UI',()=>{
     assert.ok(html.includes(fragment),`missing ${fragment}`);
   }
   assert.ok(!html.includes('보행안전 지도 v7.10.3'));
-  assert.ok(html.includes('보행안전 지도 v'+APP_VERSION));
+   assert.ok(html.includes('<title>동작하는 안전지도 · 보행안전 지도</title>'));
 });

@@ -1,4 +1,5 @@
-// Public editions are two-part labels; package/build versions remain SemVer.
+import {PUBLIC_APP_VERSION} from './public-release-display.js';
+// Historical editions are retained for internal provenance; user-facing UI is unnumbered.
 export const HISTORICAL_EDITIONS=Object.freeze([
  [1,'1.0','지도 기본 구조'],[3,'1.1','실시간 대중교통 연동'],[5,'1.2','검색·도로폭·공간정보'],
  [8,'2.0','보행안전시설 및 반응형 지도'],[9,'2.1','지도 조작·교통·생활시설'],[15,'2.2','행정동 선택 및 GPS'],[18,'2.3','랜드마크와 교통 데이터 확장'],[20,'2.4','환승역·도착정보 통합'],[22,'2.5','일반·경사 회피 보행경로'],
@@ -52,19 +53,19 @@ export function deploymentVersionLabel(version,marker){
  return edition+' · 개발 빌드';
 }
 export async function syncPublicVersion({version,doc=document,win=window,currentHeader=null}){
- const clean=String(version).replace(/^v/,'');
- const apply=label=>{
-  for(const id of ['version-history-trigger','dj-guide-latest-version','dj-about-version-number']){
-   const n=doc.getElementById(id);if(n){n.textContent=label;n.title='내부 버전 '+clean;}
-  }
-  if(currentHeader)currentHeader.textContent=label;
-  if(doc.title.includes('동작하는 안전지도'))doc.title='동작하는 안전지도 · '+label;
+ const clean=String(version||'').replace(/^v/,'');
+ const labels={
+  'version-history-trigger':'업데이트',
+  'dj-guide-latest-version':'분류별 내역',
+  'dj-about-version-number':PUBLIC_APP_VERSION
  };
- apply(deploymentVersionLabel(clean,null));
- try{
-  const response=await win.fetch('/release-source.json',{cache:'no-store'});
-  if(!response.ok)return;
-  const marker=await response.json();
-  apply(deploymentVersionLabel(clean,marker));
- }catch{}
+ for(const [id,label] of Object.entries(labels)){
+  const node=doc.getElementById(id);
+  if(node){node.textContent=label;node.dataset.buildVersion=clean;}
+ }
+ if(currentHeader)currentHeader.textContent='최근 업데이트';
+ if(doc.title.includes('동작하는 안전지도'))doc.title='동작하는 안전지도 · 보행안전 지도';
+ // Exact deployment/build identifiers remain available in release-source.json,
+ // but are never converted into prominent user-visible version labels.
+ return {publicVersion:PUBLIC_APP_VERSION,internalVersion:clean};
 }

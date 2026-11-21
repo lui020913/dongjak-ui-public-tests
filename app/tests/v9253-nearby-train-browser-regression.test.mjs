@@ -59,7 +59,7 @@ test('category-first community, two-part update editions, onboarding fade remain
   const html=read('index.html'),history=read('src/version-history-v7.js');
   const onboarding=read('src/v860-onboarding.js');
   assert(html.indexOf('class="community-category-tabs"')<html.indexOf('class="community-heading-row"'));
-  assert.match(history,/dj-edition-minor/);
-  assert.match(history,/publicEdition/);
+   assert.match(history,/CHANGE_TYPE_GROUPS/);
+   assert.match(history,/classifyReleaseNote/);
   assert.match(onboarding,/dj860-swapping/);
 });

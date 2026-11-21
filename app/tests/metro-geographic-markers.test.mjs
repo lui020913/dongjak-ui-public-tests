@@ -93,7 +93,7 @@ test('메트로 지도 표시·메인 클릭 경로·버전 메타데이터가 �
   assert.match(code,/icon-offset':\['get','iconOffset'\]/);
   assert.doesNotMatch(code,/new maplibregl.Marker\(\{element:markerEl/);
   assert.match(main,/dj-metro-detail-icon/);
-  assert.match(html,new RegExp('>v'+APP_VERSION.replaceAll('.','\\.')+'<\/button>'));
+  assert.match(html,/>업데이트<\/button>/);
   assert.equal(pkg.version,APP_VERSION);
   assert.equal(info.version,pkg.version);
 });
