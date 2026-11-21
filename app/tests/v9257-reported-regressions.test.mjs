@@ -23,11 +23,10 @@ test('realtime trains have consistent accessible neighborhood zoom',()=>{
   assert.match(metro,/METRO_QUOTA_NOTICE/);
 });
 
-test('line 7 schematic extension fades rather than drawing an indefinitely solid line',()=>{
+test('line 7 remains opaque through the district while duplicate OSM tracks stay hidden',()=>{
   const features=fixedRailCollection().features.filter(f=>f.properties.line==='7호선');
   assert.ok(features.length>4);
-  assert.ok(features.some(f=>f.properties.opacity>0.9));
-  assert.ok(features.some(f=>f.properties.opacity>0.1&&f.properties.opacity<0.8));
+  assert.ok(features.every(f=>f.properties.opacity>=0.9));
 });
 
 test('AI opens only from intentional entry and no delayed fallback',()=>{
