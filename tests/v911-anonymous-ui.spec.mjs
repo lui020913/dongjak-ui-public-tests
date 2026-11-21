@@ -520,7 +520,13 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await expect(weather.locator('[data-weather-location]')).toBeVisible();
  await expect(page.locator('#dj840-map-tip')).toBeHidden();
  await expect(weather.locator('.dj-weather-edge-drag')).toBeVisible();
+ // Keep the measured scale on the map only; a weather sheet above the
+ // bottom nav must suppress both the MapLibre corner and its scale chip.
+ const mapScale=page.locator('#map .maplibregl-ctrl-scale');
+ await expect(mapScale).toBeHidden();
  await weather.getByRole('button',{name:'날씨창 닫기'}).click();await expect(weather).toBeHidden();
+ // The existing scale returns when the weather overlay has fully closed.
+ await expect(mapScale).toBeVisible();
  await expect(page.locator('.map-actions > #toggle-road-width')).toBeHidden();
  await tap(page,tab(page,'mine'));
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));

@@ -15,10 +15,13 @@ test('scale is visible on the map alone, hidden for floating map UI, and indepen
  assert.equal(shouldHideMobileScale(app({tab:'news'}),docWith(),win),true);
  assert.equal(shouldHideMobileScale(app({search:'true'}),docWith(),win),true);
  assert.equal(shouldHideMobileScale(app({classes:['map-controls-open']}),docWith(),win),true);
- for(const selector of ['#transport-sheet','#map-quick-search-dropdown','#road-width-legend','.maplibregl-popup','#dj-transit-signin-prompt']){
+ for(const selector of ['#transport-sheet','#map-quick-search-dropdown','#road-width-legend','.maplibregl-popup','#dj-transit-signin-prompt','#dj854-weather-sheet']){
   assert.equal(shouldHideMobileScale(app(),docWith({[selector]:[element()]}),win),true,selector);
  }
  assert.equal(shouldHideMobileScale(app(),docWith({'#transport-sheet':[element({hidden:true})]}),win),false);
+ assert.equal(shouldHideMobileScale(app(),docWith({'#dj854-weather-sheet':[element({id:'dj854-weather-sheet',hidden:true})]}),win),false,'closing weather restores map-only scale');
+ assert.ok(MOBILE_SCALE_BLOCKERS.includes('#dj854-weather-sheet'));
+ assert.match(contents('../src/map-scale-docking.js'),/for\(const selector of \[\.\.\.MOBILE_SCALE_BLOCKERS,tipSelector\]\)/,'weather sheet state is included in the scale observer');
  assert.equal(shouldHideMobileScale(app(),docWith({'#dj840-map-tip':[element()]}),win),false,'TIP is a separate HUD lane');
  assert.ok(!MOBILE_SCALE_BLOCKERS.includes('#dj840-map-tip'));
  assert.equal(shouldHideMobileScale(app(),docWith({'#toast':[element({id:'toast'})]}),win),false);
