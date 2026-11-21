@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "Issue #235 phone UI white-frame fix: PR #247 replaces whole-root WebGL ViewTransition screenshots with immediate tab DOM changes and ONLY 140ms incoming header/body content reveal on an opaque theme-owned full-screen panel, preserving swipe, rapid tabs, X/map return and prefers-reduced-motion. No white curtain/root opacity fade and no MapLibre flicker. Keep 1.0 public display, internal release identity and six-line ODbL rail fallback unchanged. Build exact latest main then run isolated Preview, 12 phone QA, six visual captures, exploratory analysis, protected Production identity verification; never skip failure gates.",
-  "attempt": 216,
+  "purpose": "Retest complete no-white-flash mobile tab UX: PR #247 removes native WebGL/root ViewTransitions, changes destination in the same click event and reveals only content over fully opaque page surface; PR #248 updates protected phone QA with continuous real-frame monitoring after first page enters and current navigation contract (no old full-panel fade). Use latest verified main, keep public version 1.0 and internal version/Git identity unchanged. Execute full 12-shard mobile browser QA, 6 visual journeys, exploratory QA, PC/tablet choice and protected Production verification. No gate bypass.",
+  "attempt": 217,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Actual user report: white flash persists under previous PR #246 native root snapshots. PR #247 deletes document.startViewTransition root fading, rewrites old tests and adds frame-by-frame phone browser audit. Public app source CI #44921909082 passed. Previous protected attempt #215 #44918753786 failed 1/6 design capture on community entry; full QA must rerun rather than promote failing candidate.",
+  "last_retry_reason": "Protected attempt #216 (#44922121730) failed only phone test shards 7/12 and 8/12, caused by a 4.5s sampler time window expiring before first tab and legacy test requiring removed full-page dj810 fade; PR #248 source CI #44922867186 passed and rechecks opaque actual frames and swipe navigation. Never promote #216 artifact.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
