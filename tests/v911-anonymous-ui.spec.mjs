@@ -657,17 +657,22 @@ test('phone update history fades in place and never paints over bottom navigatio
  const trigger=page.locator('#mine-panel [data-dj834-action="history"]');await trigger.scrollIntoViewIfNeeded();
  const modal=page.locator('#version-history-modal'),card=modal.locator('.version-history-dialog');
  await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
-  function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
+  const sample=()=>{const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
    if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
-    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
-   requestAnimationFrame(tick);}requestAnimationFrame(tick);
+    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}};
+  // Observe actual animator style writes rather than depending on a second
+  // rAF observer receiving every frame during busy parallel browser runs.
+  const dialog=document.querySelector('#version-history-modal .version-history-dialog');
+  if(dialog)new MutationObserver(sample).observe(dialog,{attributes:true,attributeFilter:['style','data-dj810-animating']});
+  function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;sample();requestAnimationFrame(tick);}
+  requestAnimationFrame(tick);
  });
  // Click synchronously after starting the in-page sampler: mobile automation
  // can postpone a high-level tap until the entrance has already finished.
  await trigger.evaluate(button=>button.click());await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
  await page.evaluate(()=>document.getElementById('version-history-close').click());await expect(modal).toBeHidden();
  const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){
-  const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
+  const a=frames.filter(f=>f.phase===phase);expect(new Set(a.map(f=>f.opacity.toFixed(3))).size).toBeGreaterThan(1);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
   expect(a.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);
   for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i-1].opacity-a[i].opacity:a[i].opacity-a[i-1].opacity).toBeLessThanOrEqual(.03);
  }
@@ -681,6 +686,10 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await expect(results.locator('.map-quick-search-result').filter({hasText:'노량진'}).first()).toBeVisible();
  await expect(page.locator('#dj-search-clear')).toBeVisible();
  await page.locator('#dj-search-clear').click();await expect(input).toHaveValue('');
+ // Clearing the query on mobile hides suggestions rather than reopening an empty panel.
+ await expect(results).toBeHidden();
+ await expect(page.locator('#dj890-ai-orb')).toBeVisible();
+ await input.fill('노량진');
  await expect(results).toBeVisible();
  await page.locator('#map-quick-search-close').click();await expect(results).toBeHidden();
 });
