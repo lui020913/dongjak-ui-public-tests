@@ -105,7 +105,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     if(sheet)return;
     sheet=doc.createElement('section');sheet.id='dj854-weather-sheet';sheet.hidden=true;
     sheet.setAttribute('role','dialog');sheet.setAttribute('aria-label','현재 날씨');
-    sheet.innerHTML=`<header class="dj854-weather-head"><span class="dj-weather-edge-drag" aria-hidden="true"></span><h2>동작구 날씨</h2><button type="button" class="dj854-weather-close" aria-label="날씨창 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    sheet.innerHTML=`<header class="dj854-weather-head"><span class="dj-weather-edge-drag" aria-hidden="true"></span><h2>현재 날씨</h2><button type="button" class="dj854-weather-close" aria-label="날씨창 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
       <p class="dj854-weather-place">동작구</p><strong class="dj854-weather-main">날씨 조회 중</strong>
       <p class="dj854-weather-detail">상세 기상 정보를 불러오는 중입니다.</p><p class="dj-weather-observed" hidden></p><section class="dj9274-weather-week" aria-label="동작구 7일 날씨 예보"><div class="dj9274-week-head"><h3>7일 예보</h3><small>동작구 기준 · Open-Meteo</small></div><ul></ul><p role="status">예보 준비 중</p></section>
       <div class="dj854-weather-actions"><button type="button" data-weather-refresh>날씨 다시 조회</button><button type="button" data-weather-location>내 위치 날씨</button></div>`;
