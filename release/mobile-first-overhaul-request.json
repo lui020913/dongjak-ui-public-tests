@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.75",
+  "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Protected latest public main retest after PR #252: test report-composer header isolation using the actual injected src/mobile-next.css in the sealed source build (fallback to frontend only in full source checkout). Validate new content-only tab reveal and opaque primary screens, preserve map/transit/auth, and capture strict real pointer event paths for still-unresolved dock swipe behavior. Run full build, Preview, 12 phone QA shards, six design captures and reviews, PC/tablet, exploratory QA; promote to Production/APK only if all protected gates succeed.",
-  "attempt": 221,
+  "purpose": "Unified charcoal no-reload theme and Sangdo1 300m institutional policy-gap research-map overlay: merged PR #254 ffedc878cfdd850f18fca65e83d4f19d02fc9457, full public app CI 44929773427 passed. Preserve user theme, camera, layers, route state, onboarding and unrelated map features. Render research score 0–100 (lower=larger policy gap), 1676 roads, 590 gray NULL; team five/six average; independent PRI/routing. Protected Preview + all mobile viewport QA + design evidence + guarded Production; never bypass failed gates.",
+  "attempt": 222,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #220 run 44926652540 failed before Preview: exactly 1 protected mobile/shared Node regression file failed. Hashed filename fa4a6033... matched mobile-primary-fullscreen.test.mjs and failing test fingerprint 78a8ffc9... matched the new map-origin composer header contract. In the isolated build only app/ is archived; '../../frontend/production/mobile-next.css' does not exist there even though it exists for public source CI. PR #252 reads injected app/src/mobile-next.css in isolated build, with frontend fallback for dev tree, and source CI #44926956986 succeeded. Never promote failed #220.",
+  "last_retry_reason": "Previous attempt #221 was for baseline PR #252. This new attempt uses merged verified source #254, replaces stale reload and palette expectations, and must fail closed if any sealed mobile tests or visual checks do not pass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
