@@ -371,27 +371,8 @@ export function installV9272PhoneExperience({app,doc=document,win=window}){
   const observer=new MutationObserver(()=>{if(!schedule)schedule=win.requestAnimationFrame(normalizeMine)});
   observer.observe(mine,{childList:true,subtree:true});normalizeMine();
  }
- // Restore the shared train-route SVG line icons for departure/arrival actions.
- const transport=doc.getElementById('transport-sheet');
- if(transport){
-  const enhance=()=>{
-   if(transport.hidden||transport.dataset.kind!=='subway')return;
-   for(const [id,key] of [['transport-use-start','near'],['transport-use-end','map']]){
-    const button=doc.getElementById(id);
-    if(button&&!button.querySelector('svg')){
-     button.insertAdjacentHTML('afterbegin',phoneIcon(key));
-     button.classList.add('dj9272-station-route-button');
-    }
-   }
-   const title=doc.getElementById('transport-title');
-   const lines=title?.querySelectorAll('.dj-metro-line-selector')||[];
-   transport.dataset.dj9272Transfer=String(lines.length>1);
-  };
-  const observer=new MutationObserver(enhance);
-  observer.observe(transport,{attributes:true,attributeFilter:['hidden','data-kind'],subtree:false,childList:true});
-  const title=doc.getElementById('transport-title');if(title)observer.observe(title,{subtree:true,childList:true});
-  enhance();
- }
+ // Subway line selection is owned by transport-map.js. Legacy patches must
+ // never reinsert icons into the text-only origin/destination buttons.
  const gps=doc.getElementById('route-gps-start');
  if(gps&&!gps.querySelector('svg')){
   gps.textContent='';gps.insertAdjacentHTML('afterbegin',phoneIcon('near'));
