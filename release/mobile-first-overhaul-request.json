@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Guarded integrated release of the no-reload charcoal theme, Sangdo1 300m institutional protection gap overlay, and all phone corrections PR #254/#256/#257/#258/#259. Repair map-origin community form pointer targeting over WebGL by scoped inline-important panel z-index/pointer-events, restoring exact previous values after close; CI #44933510008 passed. Preserve research NULL gray & 5/6 average, PRI/routing isolation, original map camera and permissions. Do not bypass build, 12 phone QA, 6 design journeys/reviews, Preview provenance, or protected Production gates.",
-  "attempt": 227,
+  "purpose": "Protected integrated release: charcoal theme no reload, 300m Sangdo1 policy-gap GIS overlay with 590 gray excluded segments / team 5/6 average, and mobile fixes PR #256–#260. Specifically authorize delegated risk report controls (#djNext-report,#ped-report-open) as real participation-panel openings in v806 exclusive window lifecycle, preventing ghost dismissal/invalid hit target after map-origin composing. Full app CI #44934457861 passed. Keep Preview provenance, 12 mobile browser shards, 6 visual journeys and design reviews, protected Production conditional gate; do not waive.",
+  "attempt": 228,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #226 run #44932600078: build and Preview successful, all six design capture journeys passed and 11/12 phone shards passed, but mobile shard 7 again failed: community-compose-close visually visible yet elementFromPoint hit MapLibre canvas instead of button even after topbar was hidden. PR #259 merged 63bb118efcd5329695bcff346b5e2687078b4c5c; scoped full-screen map-report pointer-events:auto and z-index:12000 plus exact restoration for panel/form/close, with QA CSS asserts. Full app CI #44933510008 passed; all required release gates remain.",
+  "last_retry_reason": "Attempt #227 run #44933686842 reached Preview and 12 mobile QA, but shard 7 still failed: after opening community report from map, panel computed z-index dropped to 7000 despite scoped inline 12000, indicating competing lifecycle state transition after render. PR #260 merged b56e2335b1349770404a37a50b45ac718fd29633: v806 lifecycle now recognizes both delegated report controls as explicit participation-panel opening intent, with tests asserting data-tab participate and active surface. Full CI #44934457861 passed; no gates bypassed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
