@@ -5,11 +5,11 @@
 - 내보낸 PRI 네트워크 JSON은 schemaVersion:1, networkVersion, area, factors, segments, config를 포함합니다. geometry는 WGS84 [경도,위도]. scores는 0~100 또는 null, 0은 유효하다. 지표마다 id,label,source,method,date,estimated. 실제 공동 도로망과 구간 ID 확정 전까지 조명 조사 구간은 임시 기준이다.
 - 추가 지표 파일: { "type":"pri-factor-scores", "schemaVersion":1, "networkVersion":"내보낸 버전", "factor":{"id":"width","label":"도로폭","source":"출처","method":"방법"}, "scores":[{"id":"실제 공통 구간 ID","score":45}] }. 같은 버전과 ID만 추가 가능. 누락은 null, 기존 해당 지표의 전체 관측 집합을 교체. 다른 공간 형식의 자료는 먼저 GIS에서 공통 구간에 매핑해야 한다.
 - 승인 후 전체 bundle의 config를 {"status":"approved","version":"pri-v1","weights":{"lighting":0.5,"width":0.5}}와 같이 설정(수치는 형식 예시일 뿐). 양의 가중치 합 1, 두 개 이상 지표. 필수 점수 중 하나라도 결측이면 종합 PRI 미평가. 지표 갱신은 다시 draft로 변경해 재승인 요구. 실제 가중치·등급 경계 미확정.
-- 배포할 공통 bundle은 app/public/data/pri/에 두고 manifest.json의 bundle을 "/data/pri/파일.json"으로 지정. 초기 배포는 사용자 제공 원본 lighting_segments.json을 지정하며, 다른 5개 지표와 종합 PRI는 미평가.
+- 배포할 공통 bundle은 app/public/data/pri/에 두고 manifest.json의 bundle로 기본 조명 파일을 로드한 뒤 patches에서 상도1동 사고 지수를 결합합니다. 다른 4개 지표와 승인된 전체 종합 PRI는 아직 미평가입니다.
 - routeExposure는 검증된 경로-구간 대응을 받는 향후 연동 함수. 현재 실제 경로 추천은 변경하지 않는다. 사고 확률 아님. 독립적인 기존 야간시야 및 다른 레이어는 유지.
 
 ## 확정된 팀 담당 항목
-1. 교통사고 이력 및 위험 지수 (accidents) — 미제출, null
+1. 교통사고 이력 및 위험 지수 (accidents) — 상도1동 경계 내 보행자 사고다발지 3건 → 76개 조명 도로구간에 반영, 나머지는 null
 2. 신호등·횡단보도 단절 구간 (crossing) — 미제출, null
 3. 보차혼용 및 보행 공간 위험 (sharedRoad) — 미제출, null
 4. 통행제한속도 및 감속 구간 (speed) — 미제출, null
