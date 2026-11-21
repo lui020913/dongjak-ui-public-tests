@@ -1,0 +1,80 @@
+{
+  "type": "SchoolCatchmentReference",
+  "schema": "sangdo1_elementary_catchment_20250317_v1",
+  "source_as_of": "2025-03-17",
+  "imported_on": "2026-11-21",
+  "source_files": [
+    {
+      "id": "dongjak",
+      "uploaded_filename": "동작관악교육지원청 공립초 통학구역 현황(동작구)_20250317.xlsx",
+      "sheet": "2025학년도 통학구역(동작구)"
+    },
+    {
+      "id": "gwanak",
+      "uploaded_filename": "동작관악교육지원청 공립초 통학구역 현황(관악구)_20250317.xlsx",
+      "sheet": "2025학년도 통학구역(관악구)"
+    }
+  ],
+  "selection": "학구 소재 행정동 정확히 상도1동; 파일 2종의 학교명과 해당학구(통, 반) 원문 보존",
+  "schools": [
+    {
+      "school_name_source": "강남초",
+      "school_location": "동작구",
+      "school_address_source": "강남초등길 15",
+      "catchment_residence": "동작구 상도1동",
+      "catchment_tong_ban": "1~6통, 8~16통, 18~19통, 22통11반(래미안2차제외), 23~28통",
+      "source_id": "dongjak",
+      "sheet_row": 5
+    },
+    {
+      "school_name_source": "상현초",
+      "school_location": "동작구",
+      "school_address_source": "상도로58길 21",
+      "catchment_residence": "동작구 상도1동",
+      "catchment_tong_ban": "7통, 17통, 20통(2반 제외), 30~31통, 34통, 36통, 39~42통, 43~45통",
+      "source_id": "dongjak",
+      "sheet_row": 30
+    },
+    {
+      "school_name_source": "은로초",
+      "school_location": "동작구",
+      "school_address_source": "서달로 115",
+      "catchment_residence": "동작구 상도1동",
+      "catchment_tong_ban": "22통(11반 제외, 삼성래미안2차아파트)",
+      "source_id": "dongjak",
+      "sheet_row": 44
+    },
+    {
+      "school_name_source": "봉현초",
+      "school_location": "관악구",
+      "school_address_source": "성현로 117",
+      "catchment_residence": "동작구 상도1동",
+      "catchment_tong_ban": "20통2반, 21통, 29통, 32~33통, 35통, 37~38통",
+      "source_id": "gwanak",
+      "sheet_row": 28
+    }
+  ],
+  "school_count": 4,
+  "match_with_registered_proximity_schools": {
+    "matches": [
+      "강남초",
+      "상현초"
+    ],
+    "additional_catchment_schools": [
+      "은로초",
+      "봉현초"
+    ],
+    "registered_proximity_only": [
+      "영본초",
+      "본동초",
+      "신상도초"
+    ]
+  },
+  "clarification": "학구와 시설점 300m/500m 근접권은 다른 정의이며, 2025 학구표에서 2026 현행성·실통학경로·보호구역 지정 범위는 확정할 수 없음.",
+  "unresolved": [
+    "통·반 지도화에는 별도의 공식 통·반 행정경계 도형 필요",
+    "동작구 소속 학교/관악구 소속 학교 데이터 중복 확인",
+    "학생 개인 동선 추적 불필요",
+    "22통 11반 및 삼성래미안2차아파트 예외를 통 단위로 단순화 금지"
+  ]
+}
