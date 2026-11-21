@@ -14,7 +14,9 @@ const html=read('index.html');
 test('mobile onboarding card floats above the map instead of occupying the whole screen',()=>{
   assert.match(css,/\.dj860-card[\s\S]*?width:min\(560px,calc\(100vw - 28px\)\)/);
   assert.match(css,/border-radius:26px!important/);
-  assert.match(css,/background:rgba\(12,30,25,\.48\)!important/);
+  assert.match(css,/overflow:hidden!important;background:transparent!important/);
+  assert.match(css,/-webkit-backdrop-filter:none!important;backdrop-filter:none!important/);
+  assert.doesNotMatch(css,/background:rgba\(12,30,25,\.48\)!important|backdrop-filter:blur\(5px\)!important/);
   assert.match(css,/\.dj860-brand[\s\S]*?display:none!important/);
 });
 

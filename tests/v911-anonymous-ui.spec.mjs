@@ -296,6 +296,14 @@ test('phone onboarding copy is top aligned and artwork is not cropped',{tag:'@ph
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page,{keepTour:true});
  const overlay=page.locator('#dj860-onboarding'),content=overlay.locator('.dj860-content'),copy=content.locator('.dj860-copy'),image=overlay.locator('.dj860-screen-image');
  await expect(image).toBeVisible();await expect.poll(()=>image.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
+ // Verify the rendered CSS cascade: legacy v864 had a higher-specificity 48% scrim and 5px blur.
+ const backdrop=await overlay.evaluate(n=>{
+   const style=getComputedStyle(n);
+   return {background:style.backgroundColor,blur:style.backdropFilter,webkitBlur:style.webkitBackdropFilter};
+ });
+ expect(backdrop.background).toMatch(/^(?:transparent|rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\))$/);
+ expect(backdrop.blur||'none').toBe('none');
+ expect(backdrop.webkitBlur||'none').toBe('none');
  await visuallyPresented(image);
  await expect.poll(async()=>{
    const p=await content.boundingBox(),c=await copy.boundingBox();
