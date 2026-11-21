@@ -11,14 +11,41 @@
   },
   "education": {
     "catchment_reference": "https://dgedu.sen.go.kr/CMS/introduction/introduction06/introduction0604/introduction060402/index.html",
-    "status": "학교별 학구 정보가 공개돼 있으나 실제 도로 이용 동선은 별도 현장·교육청 자료 필요"
+    "status": "교육지원청 공개 학교별 통학구역표(2025.3 기준)에서 상도1동에 강남초·상현초·은로초 학구가 확인됨; 통학구역은 실제 통행 경로와 다르며 2026 최신 구획/출입문은 별도 확인",
+    "catchment_reference_asof": "2025-03",
+    "verified_catchment_names_in_sangdo1": [
+      "서울강남초등학교",
+      "서울상현초등학교",
+      "서울은로초등학교"
+    ]
   },
   "external_facility_gap": {
     "original_dongjak_facility_records_reported": 64,
     "facility_points_available_in_current_public_app": 9,
     "neighboring_facility_record_count_verified": null,
     "status": "상도1동 경계 밖 인접 시설 포함 재분석 미완료; 이전 64건 파일과 자료정합 필요",
-    "source": "2026-11-16 phase9 README (64 child/senior/disabled registered facilities in whole Dongjak, not just Sangdo1)"
+    "source": "2026-11-16 phase9 README (64 child/senior/disabled registered facilities in whole Dongjak, not just Sangdo1)",
+    "additional_school_catchment_candidate": {
+      "name": "서울은로초등학교",
+      "school_district": "상도1동 22통(11반 제외, 삼성래미안2차아파트)",
+      "approximate_school_reference_point": [
+        126.959778,
+        37.503393
+      ],
+      "coordinate_source": "https://gprbank.com/서울은로초등학교-15380",
+      "coordinate_verification": "민간 사이트 학교 대표점(주 출입문 아님). 국가·교육청 좌표 미대조",
+      "radius_sensitivity_straight_line": {
+        "road_source": "lighting 25m preview polyline 1,686개",
+        "within300_m": 0,
+        "within300_segments": 0,
+        "within500_m": 125.1,
+        "within500_segments": 7
+      },
+      "zone_polygon_status": "상도1동 앱 등록 9개 폴리곤에 은로초 도형 없음; 실제 법정 지정 범위 부존재 의미 아님",
+      "score_status": "미산정; 공식 폴리곤 및 주 출입문 확인 전 점수 합산 금지",
+      "catchment_source": "https://dgedu.sen.go.kr/CMS/introduction/introduction06/introduction0604/introduction060402/index.html",
+      "catchment_asof": "2025-03"
+    }
   },
   "records": [
     {
