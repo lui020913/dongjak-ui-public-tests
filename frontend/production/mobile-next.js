@@ -48,7 +48,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
  reset.freeze=()=>{gesture=null;win.clearTimeout(settleTimer);const rect=body.getBoundingClientRect();put('height',rect.height+'px');put('transition','none');};
  const finish=(next,close=false)=>{
   const rect=body.getBoundingClientRect();expanded=next;closing=close;body.dataset.djLayerExpanded=String(next);
-  const max=Math.max(compactHeight,win.innerHeight-28);
+  const max=Math.max(compactHeight,win.innerHeight-Math.max(96,Math.round(win.innerHeight*.12)));
   const height=next?max:compactHeight;
   const policy=win.DongjakWindowMotion?.policy||{open:350,close:300,easing:'cubic-bezier(.25,.20,.40,1)'};
   const duration=close?policy.close:policy.open;
@@ -65,7 +65,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   if(closing||panel.hidden||panel.classList.contains('djNext-leaving')||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)||e.target.closest?.('button,a,input,select,textarea,label,[role="button"]'))return;
   win.clearTimeout(settleTimer);win.DongjakWindowMotion?.cancel(body);
   const rect=body.getBoundingClientRect();if(!compactHeight)compactHeight=rect.height;
-  put('max-height',Math.max(compactHeight,win.innerHeight-28)+'px');put('height',rect.height+'px');put('transition','none');
+  put('max-height',Math.max(compactHeight,win.innerHeight-Math.max(96,Math.round(win.innerHeight*.12)))+'px');put('height',rect.height+'px');put('transition','none');
   gesture={id:e.pointerId,y:e.clientY,x:e.clientX,height:rect.height,expanded,dragging:false};
   body.dataset.djLayerDragInput=e.pointerType||'pointer';
   if(typeof e.pointerId==='number')try{header.setPointerCapture?.(e.pointerId)}catch{}
@@ -75,7 +75,7 @@ export function installLayerHeaderDrag({panel,body,header,win,onDismiss}){
   const g=gesture;if(!g||e.pointerId!==g.id)return;
   const dy=e.clientY-g.y,dx=e.clientX-g.x;
   if(!g.dragging){if(Math.abs(dy)<7)return;if(Math.abs(dx)>Math.abs(dy)){gesture=null;finish(g.expanded);return;}g.dragging=true;}
-  const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-28));
+  const frame=layerDragFrame(g.height,dy,compactHeight,Math.max(compactHeight,win.innerHeight-Math.max(96,Math.round(win.innerHeight*.12))));
   put('height',frame.height+'px');put('translate','0 '+frame.offset+'px');
   if(e.cancelable)e.preventDefault();
  };
@@ -243,16 +243,155 @@ export function installPhonePermissions({app,doc=document,win=window}){
  input.addEventListener('focus',()=>{stop();clearMessage();});
 
 }
+
+/* v9.2.72: one accurate route-choice surface; no duplicate map comparison UI.
+   The real route controller remains the only owner of geometry and selection. */
 export function installPhoneRouteComparison({app,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
- const host=doc.getElementById('route-map-card'),route=doc.getElementById('route-variants');if(!host||!route)return;
- const transitOption=doc.getElementById('djNext-transit-option');transitOption?.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
- const cards=doc.createElement('div');cards.id='djNext-route-compare';cards.className='djNext-route-compare';host.append(cards);
+ const host=doc.getElementById('route-map-card'),route=doc.getElementById('route-variants');
+ if(!host||!route)return;
+ const transitOption=doc.getElementById('djNext-transit-option');
+ transitOption?.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
+ const points=doc.createElement('div');points.className='dj9272-route-points';points.setAttribute('aria-label','선택한 출발지와 목적지');
+ const heading=doc.createElement('div');heading.className='dj9272-compare-heading';heading.textContent='경로 선택';
+ const cards=doc.createElement('div');cards.id='djNext-route-compare';cards.className='djNext-route-compare';
+ const controls=doc.createElement('div');controls.className='dj9272-route-controls';
+ const expand=doc.createElement('button'),fit=doc.createElement('button');
+ expand.type='button';expand.textContent='경로 옵션';expand.setAttribute('aria-expanded','true');
+ fit.type='button';fit.textContent='전체 경로 보기';fit.setAttribute('aria-label','출발지부터 목적지까지 전체 경로 지도에 맞추기');
+ controls.append(expand,fit);
+ host.append(points,heading,cards,controls);
  let data=null;
  const variants=[['standard','일반 최단','#3978c8'],['transit','대중교통','#7963b3'],['gentle','경사 회피','#a4742e'],['balanced','종합 최적','#087e68']];
- const format=r=>r&&Number.isFinite(r.seconds)&&Number.isFinite(r.kilometers)?'약 '+Math.max(1,Math.ceil(r.seconds/60))+'분 · '+r.kilometers.toFixed(2)+'km':'계산 불가';
- function render(){cards.replaceChildren();if(transitOption)transitOption.disabled=!data?.transit;if(!data)return;for(const [id,label,color] of variants){const b=doc.createElement('button');b.type='button';b.dataset.comparison=id;b.style.setProperty('--route-accent',color);const h=doc.createElement('strong');h.textContent=label;const small=doc.createElement('span');const r=data[id];small.textContent=id==='transit'?(r?'지하철 연계 약 '+Math.ceil(r.indicativeMinutes)+'분 (참고)':'연결 후보 없음'):format(r);if(id==='balanced'&&r)small.textContent+=' · 잠정';b.append(h,small);b.disabled=!r;b.setAttribute('aria-pressed',String(id===data.selected));b.addEventListener('click',()=>{if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return}const target=route.querySelector('[data-route-variant="'+id+'"]');if(target&&!target.disabled)target.click()});cards.append(b)}}
+ const fmt=r=>r&&Number.isFinite(r.seconds)&&Number.isFinite(r.kilometers)
+  ? '약 '+Math.max(1,Math.ceil(r.seconds/60))+'분 · '+r.kilometers.toFixed(2)+'km' : '계산 불가';
+ const label=id=>String(doc.getElementById(id)?.textContent||'선택되지 않음').trim();
+ const syncPoints=()=>{
+  points.replaceChildren();
+  for(const [kind,id] of [['출발','route-start-label'],['도착','route-end-label']]){
+   const item=doc.createElement('div');item.className='dj9272-route-point';
+   const dot=doc.createElement('i');dot.className='dj9272-route-dot';dot.setAttribute('aria-hidden','true');
+   const text=doc.createElement('div'),small=doc.createElement('small'),name=doc.createElement('strong');
+   small.textContent=kind;name.textContent=label(id);text.append(small,name);item.append(dot,text);points.append(item);
+  }
+ };
+ const focus=()=>{
+  host.dataset.dj9272RouteFocus='true';
+  expand.setAttribute('aria-expanded','false');expand.textContent='경로 옵션';
+  win.setTimeout(()=>win.dispatchEvent(new Event('dj-next:fit-route')),70);
+ };
+ const expandOptions=()=>{
+  const open=host.dataset.dj9272RouteFocus==='true';
+  host.dataset.dj9272RouteFocus=String(!open);
+  expand.setAttribute('aria-expanded',String(open));
+  expand.textContent=open?'옵션 접기':'경로 옵션';
+ };
+ fit.addEventListener('click',focus);
+ expand.addEventListener('click',expandOptions);
+ function render(){
+  cards.replaceChildren();syncPoints();
+  if(transitOption)transitOption.disabled=!data?.transit;
+  if(!data){delete host.dataset.dj9272RouteFocus;return;}
+  host.dataset.dj9272RouteFocus='false';expand.setAttribute('aria-expanded','true');expand.textContent='옵션 접기';
+  for(const [id,title,color] of variants){
+   const b=doc.createElement('button');b.type='button';b.dataset.comparison=id;b.style.setProperty('--route-accent',color);
+   const heading=doc.createElement('strong'),metric=doc.createElement('span');heading.textContent=title;
+   const r=data[id];metric.textContent=id==='transit'?(r?'지하철 연계 · 약 '+Math.ceil(r.indicativeMinutes)+'분 (참고)':'연결 후보 없음'):fmt(r);
+   if(id==='balanced'&&r)metric.textContent+=' · 잠정';
+   b.append(heading,metric);b.disabled=!r;b.setAttribute('aria-pressed',String(id===data.selected));
+   b.addEventListener('click',()=>{
+    if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return;}
+    const target=route.querySelector('[data-route-variant="'+id+'"]');
+    if(target&&!target.disabled){target.click();focus();}
+   });
+   cards.append(b);
+  }
+ }
+ const observer=new MutationObserver(syncPoints);
+ for(const id of ['route-start-label','route-end-label']){
+  const el=doc.getElementById(id);if(el)observer.observe(el,{subtree:true,childList:true,characterData:true});
+ }
  win.addEventListener('dj-next:route-comparison',e=>{data=e.detail;render()});
- win.addEventListener('dj-next:route-selected',e=>{if(!data)return;data={...data,selected:e.detail};for(const b of cards.children)b.setAttribute('aria-pressed',String(b.dataset.comparison===data.selected))});
+ win.addEventListener('dj-next:route-selected',e=>{
+  if(!data)return;data={...data,selected:e.detail};
+  for(const b of cards.children)b.setAttribute('aria-pressed',String(b.dataset.comparison===data.selected));
+  syncPoints();
+ });
  win.addEventListener('dj-next:route-clear',()=>{data=null;render()});
+ syncPoints();
+}
+
+/* Page-level lifecycle affordances shared by information, route and AI surfaces.
+   No new state model: this decorates original functional DOM nodes. */
+export function installV9272PhoneExperience({app,doc=document,win=window}){
+ if(!app||!win.matchMedia('(max-width:699px)').matches||app.dataset.dj9272Ready==='1')return;
+ app.dataset.dj9272Ready='1';
+ const modal=doc.getElementById('dj-ai-search-modal');
+ const reduced=()=>win.matchMedia('(prefers-reduced-motion:reduce)').matches;
+ let closing=false,closeTimer=0;
+ const closeAi=()=>{
+  if(!modal?.open||closing)return;
+  closing=true;modal.classList.add('dj9272-ai-leave');
+  win.clearTimeout(closeTimer);
+  closeTimer=win.setTimeout(()=>{
+   modal.classList.remove('dj9272-ai-leave');closing=false;
+   if(modal.open)modal.close();
+  },reduced()?0:255);
+ };
+ doc.addEventListener('click',e=>{
+  if(!modal?.open)return;
+  const closeButton=e.target.closest?.('#dj-ai-search-modal :is(.dj-ai-close,#dj-ai-close,#dj800-ai-search-close,[data-dj-ai-close])');
+  if(!closeButton)return;
+  e.preventDefault();e.stopImmediatePropagation();closeAi();
+ },true);
+ modal?.addEventListener('cancel',e=>{e.preventDefault();closeAi()});
+ modal?.addEventListener('close',()=>{win.clearTimeout(closeTimer);closing=false;modal.classList.remove('dj9272-ai-leave')});
+ const mine=doc.getElementById('mine-panel');
+ let schedule=0;
+ const normalizeMine=()=>{
+  schedule=0;
+  if(!mine)return;
+  const language=mine.querySelector('.dj854-language-section');
+  const home=mine.querySelector('.dj834-my-home');
+  const host=home||mine.querySelector(':scope > .dj836-sheet-body');
+  if(language&&host&&(language.parentElement!==host||language.nextElementSibling))host.append(language);
+  // Legacy menu glyph was a text character. The current line-icon language
+  // remains on original buttons; preserve their events and semantic labels.
+  for(const node of mine.querySelectorAll('.dj834-setting-icon')){
+   if(node.querySelector('svg'))continue;
+   const title=node.closest('button')?.textContent||'';
+   const glyph=/테마|화면/.test(title)?'moon':/지도/.test(title)?'map':/즐겨/.test(title)?'shield':/업데이트/.test(title)?'alert':'layers';
+   node.innerHTML=phoneIcon(glyph);
+  }
+ };
+ if(mine){
+  const observer=new MutationObserver(()=>{if(!schedule)schedule=win.requestAnimationFrame(normalizeMine)});
+  observer.observe(mine,{childList:true,subtree:true});normalizeMine();
+ }
+ // Restore the shared train-route SVG line icons for departure/arrival actions.
+ const transport=doc.getElementById('transport-sheet');
+ if(transport){
+  const enhance=()=>{
+   if(transport.hidden||transport.dataset.kind!=='subway')return;
+   for(const [id,key] of [['transport-use-start','near'],['transport-use-end','map']]){
+    const button=doc.getElementById(id);
+    if(button&&!button.querySelector('svg')){
+     button.insertAdjacentHTML('afterbegin',phoneIcon(key));
+     button.classList.add('dj9272-station-route-button');
+    }
+   }
+   const title=doc.getElementById('transport-title');
+   const lines=title?.querySelectorAll('.dj-metro-line-selector')||[];
+   transport.dataset.dj9272Transfer=String(lines.length>1);
+  };
+  const observer=new MutationObserver(enhance);
+  observer.observe(transport,{attributes:true,attributeFilter:['hidden','data-kind'],subtree:false,childList:true});
+  const title=doc.getElementById('transport-title');if(title)observer.observe(title,{subtree:true,childList:true});
+  enhance();
+ }
+ const gps=doc.getElementById('route-gps-start');
+ if(gps&&!gps.querySelector('svg')){
+  gps.textContent='';gps.insertAdjacentHTML('afterbegin',phoneIcon('near'));
+  gps.append(doc.createTextNode('현재 위치를 출발지로 지정'));
+ }
 }
