@@ -42,7 +42,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   try{
    const r=await win.fetch('/data/pri/manifest.json',{cache:'no-cache'});if(!r.ok)return;
    const manifest=await r.json();
-   const isPriPath=p=>typeof p==='string'&&/^\\/data\\/pri\\/[a-zA-Z0-9_.-]+\\.json$/.test(p);
+   const isPriPath=p=>typeof p==='string'&&/^\/data\/pri\/[a-zA-Z0-9_.-]+\.json$/.test(p);
    if(!isPriPath(manifest.bundle))return;
    const response=await win.fetch(manifest.bundle,{cache:'no-cache'});if(!response.ok)throw Error('서버 자료를 불러오지 못했습니다.');
    let next=parseImport(await response.json(),dataset);
