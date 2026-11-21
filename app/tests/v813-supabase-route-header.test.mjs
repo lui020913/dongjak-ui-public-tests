@@ -26,7 +26,7 @@ test('v8.1.3: account can be configured from browser without pretending to be se
 });
 test('v8.1.3: route dismiss is a header child, not a left-hand flex item',()=>{
   const html=read('index.html');
-  assert.match(html,/<main id="route-panel"[\s\S]*?<header class="dj-sheet-chrome" data-dj-sheet-header="route">[\s\S]*?<button type="button" class="dj-sheet-chrome-close page-dismiss"/);
+  assert.match(html,/<main id="route-panel"[\s\S]*?<header class="dj-sheet-chrome(?: dj-primary-fullscreen-header)?" data-dj-sheet-header="route">[\s\S]*?<button type="button" class="dj-sheet-chrome-close page-dismiss"/);
   assert.match(html,/href="\/src\/v813-route-account-fix\.css"/);
   const css=read('src/v813-route-account-fix.css');
   assert.match(css,/\.dj813-route-heading > \.page-dismiss\{/);

@@ -30,7 +30,7 @@ test('v8.2.0 mobile panels own their close control within their heading',()=>{
   for(const type of ['participation-panel','mine-panel']){
     const start=html.indexOf(`<main id="${type}"`);const rest=html.slice(start,start+1200);
     assert.ok(start>=0,type);
-    assert.match(rest,/<header class="dj-sheet-chrome"[\s\S]*?<button type="button" class="dj-sheet-chrome-close page-dismiss"/);
+    assert.match(rest,/<header class="dj-sheet-chrome(?: dj-primary-fullscreen-header)?"[\s\S]*?<button type="button" class="dj-sheet-chrome-close page-dismiss"/);
   }
   assert.match(css,/#route-panel,#participation-panel,#news-panel,#mine-panel/);
   assert.match(css,/right:0!important;left:auto!important/);
