@@ -105,9 +105,12 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(!modal.open)return;
     // Full-screen AI is not a bottom sheet. Never translate its native top layer
     // out of the changing keyboard viewport.
-    if(window.matchMedia?.('(max-width:699px)')?.matches||reduce()){
+    if(reduce()){
       input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;
     }
+    // AI is a full-screen page, not a slide-away sheet. Fade its content
+    // before closing the native dialog on both mobile and desktop.
+    input.blur();window.DongjakWindowMotion?.cancel?.(modal);
     modal.classList.add('dj887-ai-closing');
     // Explicit bounded completion: never depend on Safari animationend
     // to release a dialog that owns the whole viewport's hit targets.
@@ -115,7 +118,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
       closeTimer=0;
       if(modal.open)modal.close();
       modal.classList.remove('dj887-ai-closing');
-    },175);
+    },235);
   }
   function open(){
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
