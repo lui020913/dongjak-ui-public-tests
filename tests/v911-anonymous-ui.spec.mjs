@@ -557,7 +557,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    const target=page.locator(selector);const parent=page.locator(parentSelector);
    if(tabEntrance){
      await trigger();await expect(parent).toBeVisible();await geometry(page,parentSelector);
-     await expect.poll(()=>parent.evaluate(n=>getComputedStyle(n).animationName)).toContain('dj-primary-page-enter');
+     await expect.poll(()=>parent.getAttribute('data-dj810-animating')).toBeNull();
      await close();await expect(parent).toBeHidden();return;
    }
    await page.evaluate(({selector,parentSelector})=>{
