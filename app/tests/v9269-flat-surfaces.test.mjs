@@ -55,3 +55,23 @@ test('ordinary sheets do not dim navigation; permission consent remains isolated
  assert.ok(css.includes('#djNext-permissions:not([hidden])'));
  assert.ok(css.includes('box-shadow:0 5px 18px rgba(18,42,34,.12)'));
 });
+
+
+test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status-edge color fade',()=>{
+ const next=productionStyle('mobile-next.css');
+ const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1];
+ assert.ok(block,'v9.2.71 scoped header treatment missing from the shipped build source');
+ assert.ok(block.includes('@media(max-width:699px)'));
+ assert.ok(block.includes('.topbar .map-quick-search-form'));
+ assert.ok(block.includes('.topbar .header-tools > #dj890-ai-orb'));
+ assert.ok(block.includes('background:rgba(255,255,255,.84)!important;'));
+ assert.ok(block.includes('background:rgba(29,48,48,.82)!important;'));
+ assert.ok(block.includes('background:rgba(12,130,107,.91)!important;'));
+ assert.ok(block.includes('background:rgba(35,94,78,.88)!important;'));
+ assert.equal((block.match(/backdrop-filter:blur\(9px\)/g)||[]).length,4);
+ assert.ok(block.includes('#dj-ios-pwa-map-seam'));
+ assert.ok(block.includes('var(--dj-pwa-native-edge)'));
+ for(const forbidden of ['.dj860-onboarding','.page-panel','.bottom-nav','.djNext-modal-body','background:rgba(12,30,25,.48)']){
+  assert.equal(block.includes(forbidden),false,'unintended soft/scrim surface '+forbidden);
+ }
+});

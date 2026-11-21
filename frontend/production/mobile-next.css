@@ -879,3 +879,47 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   #app :is(#djNext-layer-panel,#version-history-modal,#dj-app-about,#map-safety-backdrop,#map-options-backdrop){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
  }
 }
+
+/* v9.2.71 — the ONLY translucent/soft phone surfaces are the map search
+   pill and the AI action. The tiny iOS top-edge wash blends the native
+   status color into map tiles, without any page scrim or background blur.
+   No width, height, position, transform or voice-card transition changes. */
+@layer request-completion {
+ @media(max-width:699px) {
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .map-quick-search-form {
+   background:rgba(255,255,255,.84)!important;
+   background-image:none!important;
+   border-color:rgba(234,244,238,.82)!important;
+   box-shadow:0 5px 16px rgba(17,40,32,.10)!important;
+   -webkit-backdrop-filter:blur(9px) saturate(1.25)!important;
+   backdrop-filter:blur(9px) saturate(1.25)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .map-quick-search-form {
+   background:rgba(29,48,48,.82)!important;
+   background-image:none!important;
+   border-color:rgba(208,230,219,.18)!important;
+   box-shadow:0 5px 16px rgba(0,0,0,.22)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .topbar .header-tools > #dj890-ai-orb {
+   background:rgba(12,130,107,.91)!important;
+   background-image:none!important;
+   border-color:rgba(205,238,224,.48)!important;
+   box-shadow:0 5px 14px rgba(14,74,59,.15)!important;
+   -webkit-backdrop-filter:blur(9px) saturate(1.25)!important;
+   backdrop-filter:blur(9px) saturate(1.25)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] .topbar .header-tools > #dj890-ai-orb {
+   background:rgba(35,94,78,.88)!important;
+   background-image:none!important;
+   border-color:rgba(207,240,223,.20)!important;
+   box-shadow:0 5px 16px rgba(0,0,0,.25)!important;
+  }
+  html.dj-ios-home-pwa body #app#app#app#app#app#app#app#app #dj-ios-pwa-map-seam {
+   height:calc(env(safe-area-inset-top,0px) + 68px)!important;
+   background:linear-gradient(to bottom,var(--dj-pwa-native-edge) 0%,var(--dj-pwa-native-edge) 54%,transparent 100%)!important;
+   pointer-events:none!important;
+   -webkit-backdrop-filter:none!important;
+   backdrop-filter:none!important;
+  }
+ }
+}
