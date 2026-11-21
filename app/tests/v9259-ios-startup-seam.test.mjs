@@ -30,7 +30,8 @@ test('critical splash CSS paints the iPhone top edge before external CSS loads',
 test('standalone iPhone loader wins the legacy !important background after CSS hydration',()=>{
   const head=html.slice(0,html.indexOf('</style>'));
   assert.match(legacyCss,/#app \.map-startup-overlay\{/);
-  assert.match(legacyCss,/background:radial-gradient\(ellipse at 50% 39%,#ffffff 0%,#f3f7f5 75%\)!important/);
+  assert.ok(legacyCss.includes('background:#f3f7f5!important;'));
+  assert.equal(legacyCss.includes('background:radial-gradient(ellipse at 50% 39%'),false);
   const light=head.match(/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) body #app \.map-startup-overlay\{[^}]*\}/)?.[0];
   const dark=head.match(/html\.dj-ios-home-pwa\[data-theme="dark"\] body #app \.map-startup-overlay\{[^}]*\}/)?.[0];
   assert.ok(light&&dark,'iPhone loader overrides must target the hydrated DOM inside #app');
