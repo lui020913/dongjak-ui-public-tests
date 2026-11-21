@@ -5,7 +5,22 @@ const KEY='dj17-kakao-ui-v1';
 export function installMobileFollowup({app,map,maplibregl,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
  let raf=0,port=null,pilot=false,regions=null,statusTimer=0;
- let composing=false;const composerDisplay=new Map(),composerOwnedStyle=[];
+ let composing=false,communityFeedOwned=false;
+ const composerDisplay=new Map(),composerOwnedStyle=[],communityFeedStyles=[];
+ function ownCommunityFeedStyle(node,styles){
+  if(!node)return;
+  for(const [property,value] of Object.entries(styles)){
+   communityFeedStyles.push({node,property,old:node.style.getPropertyValue(property),priority:node.style.getPropertyPriority(property)});
+   node.style.setProperty(property,value,'important');
+  }
+ }
+ function restoreCommunityFeedStyle(){
+  for(const {node,property,old,priority} of communityFeedStyles.splice(0).reverse()){
+   if(old)node.style.setProperty(property,old,priority);else node.style.removeProperty(property);
+  }
+  communityFeedOwned=false;
+ }
+
  function ownComposerStyle(node,styles){
   if(!node)return;
   for(const [property,value] of Object.entries(styles)){
@@ -112,6 +127,9 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   // Composer is its own screen: hide feed controls with inline ownership so
   // legacy highly-specific sheet rules cannot leak category tabs into editing.
   const community=$('participation-panel'),editing=!!form&&!form.hidden;
+  // Closing the map's risk report goes back to Map. A later Community-tab
+  // click must not resurrect an off-screen half-sheet from the old controller.
+  if(editing&&communityFeedOwned)restoreCommunityFeedStyle();
   if(community&&editing!==composing){
    composing=editing;
    const listOnly=[':scope > .dj-sheet-chrome','.community-category-tabs','.dj-page-intro',
@@ -172,6 +190,28 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
     form.querySelector('.djNext-form-scroll')?.scrollTo?.(0,0);
    }else restoreComposerStyle();
   }
+  const feedActive=!!community&&!community.hidden&&!editing&&app.dataset.tab==='participate';
+  if(feedActive&&!communityFeedOwned){
+   communityFeedOwned=true;
+   ownCommunityFeedStyle(community,{
+    position:'fixed',top:'0',bottom:'0',left:'0',right:'0',
+    width:'100vw',height:'auto','max-height':'none','min-height':'0',
+    margin:'0',padding:'0 0 calc(92px + env(safe-area-inset-bottom,0px))',
+    'box-sizing':'border-box',border:'0','border-radius':'0',
+    background:'var(--mf-surface-solid,#fff)',color:'var(--mf-ink,#203e34)',
+    'z-index':'7000',visibility:'visible',display:'flex',
+    'flex-direction':'column','align-items':'stretch',overflow:'hidden',
+    transform:'none',translate:'none'
+   });
+   ownCommunityFeedStyle(community.querySelector(':scope > .dj836-sheet-body'),{
+    display:'block',flex:'1 1 0%','min-height':'0',
+    width:'100%',overflow:'auto','overflow-y':'auto',
+    'overflow-x':'hidden',padding:'14px 16px 20px','box-sizing':'border-box',
+    position:'relative',top:'auto',bottom:'auto',
+    transform:'none',translate:'none'
+   });
+   community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
+  }else if(!feedActive&&communityFeedOwned)restoreCommunityFeedStyle();
   const routeCalc=$('route-calc');
   if(routeCalc){
    let hint=$('dj9256-route-selection-hint');

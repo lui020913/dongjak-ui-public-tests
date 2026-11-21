@@ -17,6 +17,10 @@ test('composer hides list-only sections using stable state and keeps body indepe
  assert.match(follows,/ownComposerStyle\(community,\{/);
  assert.match(follows,/ownComposerStyle\(formHead,\{/);
  assert.match(follows,/restoreComposerStyle\(\)/);
+ assert.match(follows,/ownCommunityFeedStyle\(community,\{/);
+ assert.match(follows,/restoreCommunityFeedStyle\(\)/);
+ assert.match(follows,/feedActive=!!community&&!community.hidden&&!editing&&app.dataset.tab==='participate'/);
+ assert.match(follows,/community\.querySelector\(':scope > \.dj836-sheet-body'\)\?\.scrollTo\?\.\(0,0\)/);
  assert.match(follows,/background:'var\(--mf-surface-solid,#fff\)'/);
  assert.doesNotMatch(css,/:is\(\.version-history-head,\.dj-map-settings-head,\.community-form-top,\.ped-tools-panel-head\)/);
  const fullscreen=read('src/mobile-primary-fullscreen.css');
