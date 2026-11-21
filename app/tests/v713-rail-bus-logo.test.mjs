@@ -15,12 +15,12 @@ test('v7.0.29 the desktop rail moves real controls, not cloned buttons',()=>{
  assert.match(module,/minWidth=1080/);
  assert.match(module,/section\.append\(el\)/);
  assert.match(module,/slots\[i\]\.parentNode\.insertBefore/);
- const css=read('src/v713-rail-scale.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/#dj-desktop-safety-rail/);
  assert.match(css,/@media \(max-width:699px\)/);
 });
 test('v7.0.29 scale paints in the desktop bottom-left corner and keeps the MapLibre control margin zero',()=>{
- const js=read('src/map-scale-docking.js'),css=read('src/v713-rail-scale.css');
+ const js=read('src/map-scale-docking.js'),css=read('src/mobile-ui-baseline.css');
  assert.match(js,/const desktopBottomInset=14/);
  assert.match(js,/const desktopLeftInset=14/);
  assert.match(js,/applyImportant\(scale,'bottom',`\$\{desktopBottomInset\}px`\)/);
