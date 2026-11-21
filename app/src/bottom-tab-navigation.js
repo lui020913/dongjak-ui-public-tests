@@ -23,7 +23,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}
  }
  function protectPageTransition(next){
-  if(!phone()||!['route','participate','news','mine'].includes(next)){
+  if(!phone()||!['map','route','participate','news','mine'].includes(next)){
    dismissCurtain();return;
   }
   if(!curtain){
@@ -36,8 +36,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   dismissCurtain();
   curtain.hidden=false;
   // Stay opaque until the next page has installed its nontransparent base.
-  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},90);
-  curtainHide=win.setTimeout(()=>{curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}},270);
+  curtainFade=win.setTimeout(()=>{curtainFade=0;curtain?.classList.add('dj-tab-curtain-out');},270);
+  curtainHide=win.setTimeout(()=>{curtainHide=0;if(curtain){curtain.hidden=true;curtain.classList.remove('dj-tab-curtain-out');}},525);
  }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return;
@@ -63,31 +63,39 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   protectPageTransition(button.dataset.tab);
   const motion=win.DongjakWindowMotion;
   const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
-  // Fullscreen tabs return directly to HOME; do not run the 300ms sheet exit.
-  // The existing safety-home guard remains the sole map-return owner.
-  if(!closing&&panel&&['route','participate','news','mine'].includes(current)&&button.dataset.tab==='map'){
-    motion?.cancel?.(panel);return;
-  }
-  // Non-map pages use the existing navigator synchronously. No blank map frame.
-  if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
-   motion?.cancel?.(panel);return;
-  }
-  if(!closing&&(!panel||!motion?.closeTab))return; // map -> page: normal opener
+
+  const reduced=win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches;
+  const animateIncoming=target=>{
+   if(reduced||target==='map')return;
+   win.requestAnimationFrame?.(()=>{
+    const page=doc.querySelector('.page-panel[data-page="'+target+'"]:not([hidden])');
+    try{page?.animate?.([{opacity:.04},{opacity:1}],{duration:235,easing:'cubic-bezier(.22,.72,.3,1)'});}catch{}
+   });
+  };
+  if(!panel){animateIncoming(button.dataset.tab);return;}
+  // Intercept page -> page AND page -> map. A separate opaque bridge
+  // stays over the map until the next screen is fully painted.
   event.preventDefault();event.stopImmediatePropagation();
   pending=button;
-  if(closing)return; // latest tap wins while the old panel fades away
+  if(closing)return;
+  motion?.cancel?.(panel);
   const state={panel,tab:current};closing=state;
+  let done=false,animation=null;
   const finish=()=>{
-   if(closing!==state)return;
+   if(done||closing!==state)return;done=true;
    const next=pending;clear();
-   if(app.dataset.tab!==state.tab)return;
-   if(next?.dataset.tab===state.tab)return; // a quick return cancels the switch
+   if(app.dataset.tab!==state.tab||next?.dataset.tab===state.tab)return;
    if(state.panel.isConnected)state.panel.hidden=true;
    replay(next);
+   animateIncoming(next?.dataset.tab);
   };
-  // A secondary feature can cancel the shared animation; never strand a tab tap.
-  watchdog=win.setTimeout(()=>{if(closing===state){motion.cancel?.(panel);finish();}},1600);
-  motion.closeTab(panel,finish);
+  watchdog=win.setTimeout(()=>{try{animation?.cancel();}catch{}finish();},850);
+  if(reduced||!panel.animate){finish();return;}
+  try{
+   animation=panel.animate([{opacity:1},{opacity:0}],{duration:215,easing:'cubic-bezier(.4,0,.8,1)'});
+   animation.addEventListener('finish',finish,{once:true});
+  }catch{finish();}
+
  }
  function down(event){
   if(!phone()||event.isPrimary===false||event.button!==0)return;
