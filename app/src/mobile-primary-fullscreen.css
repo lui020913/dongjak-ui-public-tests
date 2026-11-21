@@ -14,6 +14,11 @@
       --dj-primary-page-ink:#edf6f1;
       --dj-primary-page-edge:rgba(197,225,211,.18);
     }
+    /* Map-origin report composition keeps data-tab="map", but opens the
+       community panel full-screen. Apply the same chrome exclusion while
+       composing so the map AI orb never intercepts its top-right close. */
+    html body #app#app#app#app#app:has(#participation-panel.dj9256-composing:not([hidden])) > .topbar,
+    html body #app#app#app#app#app:has(#participation-panel.dj9256-composing:not([hidden])) :is(#dj-v794-toolbar,#djNext-toolbar),
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > .topbar,
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) :is(#dj-v794-toolbar,#djNext-toolbar) {
       display:none!important;
