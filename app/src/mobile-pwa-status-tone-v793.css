@@ -29,10 +29,10 @@
     height:calc(env(safe-area-inset-top,0px) + 94px)!important;
     border:0!important;
     background:linear-gradient(to bottom,
-      var(--dj-pwa-native-edge) 0%,
-      var(--dj-pwa-native-edge) 7%,
-      color-mix(in srgb,var(--dj-pwa-native-edge) 88%,transparent) 23%,
-      color-mix(in srgb,var(--dj-pwa-native-edge) 43%,transparent) 62%,
+      var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 0%,
+      var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 7%,
+      color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 88%,transparent) 23%,
+      color-mix(in srgb,var(--dj-pwa-status-color,var(--dj-pwa-native-edge)) 43%,transparent) 62%,
       transparent 100%)!important;
     box-shadow:none!important;
     opacity:1!important;
