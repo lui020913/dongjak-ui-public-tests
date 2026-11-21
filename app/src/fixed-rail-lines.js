@@ -90,7 +90,7 @@ export function fixedRailCollection(boundary){
       const a=coordinates[i-1],b=coordinates[i];
       const along=(lengths[i-1]+lengths[i])/2;
       let fade=1;
-      if(code!=='신림' && code!=='7'){
+      if(code!=='신림'){
         if(along<firstAt)fade=1-railEndpointFadeMeters(firstAt-along,1400);
         else if(along>lastAt)fade=1-railEndpointFadeMeters(along-lastAt,1400);
       }
