@@ -1,4 +1,4 @@
-﻿id,name,source_length_m,geometry_length_m,score,protected_pct,outside_300_pct,outside_300_500_pct,outside_500plus_pct,near_facility,near_facility_point_m,status
+﻿id,name,source_length_m,geometry_length_m,score,protected_pct,unprotected_within_300_pct,unprotected_300_to_500_pct,unprotected_beyond_500_pct,near_facility,near_facility_point_m,status
 "45027298_0","흑석로","24.5","24.54","22.9","0","100","0","0","강남유치원","111.3","시범: 주출입문·인접지역 미검증"
 "45027298_1","흑석로","23.3","20.28","21.2","0","100","0","0","청남노인요양공동생활가정","96.1","시범: 주출입문·인접지역 미검증"
 "45027298_2","흑석로","31.8","28.95","57.1","48.2","51.8","0","0","청남노인요양공동생활가정","68.2","시범: 주출입문·인접지역 미검증"
