@@ -1057,19 +1057,25 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  }
 });
 
-test('the rendered history shows two-part editions and retains exact production SemVer',{tag:'@phone-layout'},async({page})=>{
+test('category-first release history preserves the actual deployment version in the current record',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await ready(page);
  const response=await page.request.get('/version.json');
  expect(response.ok()).toBe(true);
  const version=String((await response.json()).version);
- const edition='v'+version.split('.').slice(0,2).join('.');
- const latest=page.locator('#history-version-timeline .v707-release').first();
- await expect(latest).toHaveAttribute('data-version',version);
- await expect(latest).toHaveAttribute('data-display-version',edition);
- await expect(latest.locator('h4')).toHaveText('최신 업데이트');
- await expect(latest.locator('.dj-edition-original')).toContainText('v'+version);
- await expect(latest.locator('xpath=ancestor::*[contains(@class,"dj-edition-minor")]')).toHaveAttribute('data-edition',edition);
+ // The public release screen intentionally groups changes by type, rather than
+ // by major/minor/patch editions. The first timeline item can be an archived
+ // release; only the explicit current-build marker identifies this deployment.
+ const timeline=page.locator('#history-version-timeline');
+ const current=timeline.locator('.v707-release[data-current-build="true"]');
+ await expect(current.first()).toHaveAttribute('data-version',version);
+ await expect(current.first().locator('h4')).toHaveText('최근 변경사항');
+ const group=current.first().locator('xpath=ancestor::details[contains(@class,"dj-edition-history")]');
+ await expect(group).toHaveAttribute('data-change-type',/^(major|feature|design|fix)$/);
+ // Historical records still carry unchanged operational SemVer in data-version;
+ // the public button and user-visible pre-release name remain simplified.
+ await expect(page.locator('#version-history-trigger')).toContainText('업데이트');
+ await expect(timeline.locator('.v707-release').first()).toHaveAttribute('data-version',/^v?\d+\.\d+\.\d+$/);
 });
 
 
