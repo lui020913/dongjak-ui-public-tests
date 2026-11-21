@@ -24,7 +24,9 @@ export const MOBILE_FLOATING_SHEETS=Object.freeze([
   ['pza-road-sheet','.pza-sheet-head','#pza-road-close'],
   ['night-visibility-float','.night-visibility-float-head','#night-visibility-float-stop'],
   ['road-width-legend','.road-width-legend-head','#road-width-legend-close'],
-  ['ped-tools-panel','.ped-tools-panel-head','#ped-tools-close'],
+  // Nearby has its own document-captured header gesture owner in pedestrian-tools.js.
+  // Registering it here as well caused two simultaneous translations and a
+  // transient negative sheet y-position above the global search field.
   ['map-advanced-controls','.map-options-heading','#map-options-mobile-close'],
   ['map-safety-controls','.map-safety-head','#map-safety-close'],
   ['map-gesture-guide','.dj856-guide-edge-drag','#map-gesture-guide-close','.map-gesture-guide-head'],
