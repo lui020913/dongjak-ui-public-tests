@@ -38,6 +38,9 @@ test('risk-to-safety scoring reverses the palette without altering original sour
  assert.equal(segmentScore(integrated,integrated.segments[1],'pri12'),30);
  assert.equal(segmentScore(integrated,integrated.segments[2],'pri12'),80);
  assert.equal(segmentScore(integrated,integrated.segments[0],'pri'),null,'full six-factor PRI still requires approval');
+ const explicitUnknown=parseImport({...source,scores:[{id:'1_0',score:null}]},base);
+ assert.equal(explicitUnknown.segments[0].scores.accidents,null,'a submitted null must remain unknown, not a modeled 100');
+ assert.equal(explicitUnknown.segments[1].scores.accidents,100,'only absent rows get a modeled baseline');
  assert.throws(()=>parseImport({...source,unmatchedReason:''},base),/미선정 기본점수/);
  assert.throws(()=>parseImport({...source,factor:{...source.factor,scoreDirection:'wrong'}},base),/지표 점수 방향/);
 });
