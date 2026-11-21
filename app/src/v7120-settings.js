@@ -1,4 +1,4 @@
-import {APP_VERSION} from './app-version.js';
+import {PUBLIC_APP_VERSION} from './public-release-display.js';
 /** v7.12.0 – shared UI preferences and independent mobile app emblem.
  * Only presentation preferences are persisted: no map source or transport changes.
  */
@@ -39,7 +39,7 @@ export function installMapPreferences(doc=document,win=window){
     <span class="dj-about-kicker">DONGJAK WALK SAFETY</span>
     <h2 id="dj-about-title">동작하는 안전지도</h2>
     <p class="dj-about-description">동작구의 보행 환경과 교통정보를 한눈에 확인하세요.</p>
-    <div class="dj-about-version"><span>현재 앱 버전</span><strong id="dj-about-version-number">v8.26.1</strong></div>
+    <div class="dj-about-version"><span>현재 앱 버전</span><strong id="dj-about-version-number">1.0</strong></div>
     <p class="dj803-about-credit">동작구 아이디어 리그 안전팀 시범 운영 프로그램</p>
     <button type="button" class="dj-about-done">닫기</button>
   </section>`;
@@ -52,7 +52,7 @@ export function installMapPreferences(doc=document,win=window){
     aboutFocus=doc.activeElement;
     const dark=isDark();
     about.querySelector('.dj-about-icon').src=dark?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';
-    about.querySelector('#dj-about-version-number').textContent=(doc.querySelector('#version-history-trigger')?.textContent||APP_VERSION).trim();
+    about.querySelector('#dj-about-version-number').textContent=(doc.querySelector('#version-history-trigger')?.textContent||PUBLIC_APP_VERSION).trim();
     about.hidden=false;about.querySelector('.dj-about-close')?.focus();
   };
   about.querySelector('.dj-about-close').addEventListener('click',closeAbout);

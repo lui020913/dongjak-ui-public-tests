@@ -1,5 +1,6 @@
 import {releaseEdition,syncPublicVersion} from './release-editions.js';
 import {buildGenerationCatalog} from './history-generation-catalog.js';
+import {CHANGE_TYPE_GROUPS,classifyReleaseNote} from './public-release-display.js';
 /**
  * v7.0.7: visual presentation is release-first, newest to oldest.
  * The old classification model stays exported for data-integrity checks.
@@ -164,90 +165,51 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   controls.append(updatesButton,sourcesButton);controls.classList.add('dj-mobile-history-switch');summary.append(controls);
   const columns=el('div','v707-history-columns');columns.dataset.activeView='updates';
   const timeline=el('section','v707-history-timeline');timeline.id='history-version-timeline';
-  timeline.setAttribute('aria-label','버전별 전체 업데이트 내역');
-  for(const edition of buildGenerationCatalog(releases,releaseEdition)){
+  timeline.setAttribute('aria-label','변경 종류별 전체 업데이트 내역');
+  // Group the actual, preserved release notes by user-facing change type.
+  // Internal build numbers and archived identities remain in DOM metadata only.
+  const categorized=new Map(CHANGE_TYPE_GROUPS.map(type=>[type.id,new Map()]));
+  const audited=buildGenerationCatalog(releases,releaseEdition).flatMap(group=>group.records);
+  for(const {record,classification,sourceScale} of audited){
+    const notes=record.sourceItems||record.items||[];
+    for(const note of notes){
+      const group=categorized.get(classifyReleaseNote(note,classification));
+      if(!group.has(record))group.set(record,{record,classification,sourceScale,notes:[]});
+      group.get(record).notes.push(note);
+    }
+  }
+  for(const type of CHANGE_TYPE_GROUPS){
+    const records=[...categorized.get(type.id).values()];
+    if(!records.length)continue;
     const archive=el('details','dj-edition-history');
-    archive.open=edition.records.some(({record})=>record===currentRelease);
-    const parent=archive||timeline;
-    if(archive){
-      const heading=el('summary','dj-edition-summary');
-      heading.append(el('strong','','안전지도 '+edition.label),el('span','',edition.title),el('small','',edition.records.length+'개 기록'));
-      archive.append(heading);timeline.append(archive);
-    }
-    const minorGroups=new Map();
-    const editionOf=version=>String(version).replace(/^v?(\d+)\.(\d+)(?:\.\d+)?$/,'v$1.$2');
-    // Operational builds belong to their REAL major.minor edition, not a
-    // provisional number from the retrospective archive (e.g. v9.0.23).
-    const editionFor=entry=>{
-      const record=entry.record;
-      const exact=String(record?.version||'');
-      return /^v?9\.\d+\.\d+$/.test(exact)&&!record?.sourceVersion
-        ?editionOf(exact):editionOf(entry.displayVersion);
-    };
-    const minorCounts=new Map();
-    for(const entry of edition.records){
-      const label=editionFor(entry);
-      minorCounts.set(label,(minorCounts.get(label)||0)+1);
-    }
-    for(const {record:release,classification,sourceScale,displayVersion} of edition.records){
-    const publicEdition=editionFor({record:release,displayVersion});
-    let minorGroup=minorGroups.get(publicEdition);
-    if(!minorGroup){
-      minorGroup=el('details','dj-edition-minor');
-      minorGroup.dataset.edition=publicEdition;
-      minorGroup.open=edition.records.some(x=>x.record===currentRelease&&editionFor(x)===publicEdition);
-      const subhead=el('summary','dj-edition-minor-summary');
-      subhead.append(el('strong','',publicEdition),el('span','','업데이트 기록'),el('small','',(minorCounts.get(publicEdition)||0)+'개'));
-      minorGroup.append(subhead);parent.append(minorGroup);minorGroups.set(publicEdition,minorGroup);
-    }
-    // The current build's notes are immediately readable. Earlier patch-level
-    // records remain complete but collapsed under this same two-part edition.
-    let recordParent=minorGroup;
-    if(release!==currentRelease){
-      const history=el('details','dj-edition-patch');
-      const first=(release.sourceItems||release.items||[])[0]||'변경 내역';
-      const heading=el('summary','dj-edition-patch-summary',String(first).slice(0,46)+(String(first).length>46?'…':''));
-      history.append(heading);minorGroup.append(history);recordParent=history;
-    }
-    const article=el('article','v707-release');
-    const header=el('header','v707-release-head');
-    article.dataset.releaseType=release.scale||'patch';
-    article.dataset.reviewedScale=classification;
-    article.dataset.version=String(release.version||'').replace(/^v/,'');
-    article.dataset.displayVersion=publicEdition;article.dataset.originalScale=sourceScale;
-    if(release.sourceVersion)article.dataset.previousVersion=release.sourceVersion;
-    const sizeLabel={major:'주요 구조 개편',minor:'기능 추가·개선',patch:'수정·안정화'}[classification]||'기록';
-    const badge=el('span','dj-semver-size',sizeLabel);
-    badge.setAttribute('aria-label',`${classification} 변경 유형`);
-    // Show readable major.minor editions in the timeline, not the patch
-    // counter as a giant primary heading. Keep exact builds in data attributes.
-    const versionHeading=el('h4','',release===currentRelease?'최신 업데이트':publicEdition);
-    header.append(versionHeading,badge);
-    article.append(header);
-    const ul=el('ul','v707-release-items');
-    // Keep original release records intact; only split verbose display text
-    // into independently readable bullets on the latest build.
-    const items=release.sourceItems||release.items||[];
-    const readable=release===currentRelease?items.flatMap(item=>{
-      const parts=String(item).split(/,\s*(?=\S)/).map(x=>x.trim()).filter(Boolean);
-      return parts.length>=3?parts:[item];
-    }):items;
-    for(const description of readable)ul.append(el('li','',description));
-    const isOperational=/^v?9\.\d+\.\d+$/.test(String(release.version||''))&&!release.sourceVersion;
-    if(isOperational){
-      // The original precise build remains searchable and available in metadata.
-      // Only the currently deployed build is spelled out as a small secondary line.
-      if(release===currentRelease){
-        article.dataset.currentBuild='true';
-        article.append(el('p','dj-edition-original','현재 빌드: '+String(release.version).replace(/^v?/,'v')));
+    archive.dataset.changeType=type.id;
+    archive.open=records.some(({record})=>record===currentRelease);
+    const heading=el('summary','dj-edition-summary');
+    heading.append(el('strong','',type.title),el('span','',type.description),el('small','',records.length+'개 기록'));
+    archive.append(heading);timeline.append(archive);
+    for(const {record,classification,sourceScale,notes} of records){
+      const isCurrent=record===currentRelease;
+      let parent=archive;
+      if(!isCurrent){
+        const disclosure=el('details','dj-edition-patch');
+        const first=String(notes[0]||'이전 변경사항');
+        disclosure.append(el('summary','dj-edition-patch-summary',first.slice(0,46)+(first.length>46?'…':'')));
+        archive.append(disclosure);parent=disclosure;
       }
-    }else{
-      // Historical source labels are archived in HTML metadata, not repeated in
-      // every prominent card. A two-part edition is the visible release label.
-      article.dataset.archivedVersion=String(release.sourceVersion||release.version||'');
-      if(release===currentRelease)article.append(el('p','dj-edition-original','현재 빌드: '+String(release.version).replace(/^v?/,'v')));
-    }
-    article.append(ul);recordParent.append(article);
+      const article=el('article','v707-release');
+      article.dataset.version=String(record.version||'').replace(/^v/,'');
+      article.dataset.changeType=type.id;
+      article.dataset.releaseType=record.scale||'patch';
+      article.dataset.reviewedScale=classification;
+      article.dataset.originalScale=sourceScale;
+      if(record.sourceVersion)article.dataset.archivedVersion=String(record.sourceVersion);
+      if(isCurrent)article.dataset.currentBuild='true';
+      const head=el('header','v707-release-head');
+      head.append(el('h4','',isCurrent?'최근 변경사항':'이전 변경사항'),el('span','dj-semver-size',type.title));
+      article.append(head);
+      const ul=el('ul','v707-release-items');
+      for(const description of notes)ul.append(el('li','',description));
+      article.append(ul);parent.append(article);
     }
   }
   if(currentRelease)void syncPublicVersion({version:currentRelease.version});
@@ -316,6 +278,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
         const target=[...timeline.querySelectorAll('.v707-release')].find(item=>item.dataset.version===normalized);
         if(!target)return;
         const archive=target.closest('.dj-edition-history');if(archive)archive.open=true;
+         const disclosure=target.closest('.dj-edition-patch');if(disclosure)disclosure.open=true;
         timeline.scrollTo?.({top:Math.max(0,target.offsetTop-timeline.offsetTop-8),behavior:'smooth'});
         target.classList.remove('dj856-release-focus');void target.offsetWidth;target.classList.add('dj856-release-focus');
         window.setTimeout(()=>target.classList.remove('dj856-release-focus'),1500);

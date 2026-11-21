@@ -5,6 +5,7 @@ import {VERSION_HISTORY,RENUMBERED_VERSION_HISTORY,LATEST_APP_RELEASE} from '../
 import {LEGACY_VERSION_HISTORY} from '../src/version-history-legacy.js';
 import {REBUILT_RELEASES} from '../src/release-semver.js';
 import {releaseKindBetween,RELEASE_KINDS} from './lib/semver-release.mjs';
+import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION} from '../src/public-release-display.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const version=JSON.parse(read('package.json')).version;
 const expected=LATEST_APP_RELEASE.version.slice(1);
@@ -25,10 +26,11 @@ const checks=[
   ['Build info',JSON.parse(read('src/build-info.json')).version===expected],
   ['Generated app version',APP_VERSION===version],
   ['Generated release notes',isDeepStrictEqual(APP_RELEASES,releaseLog.map(entry=>({...entry,version:'v'+entry.version})))],
-  ['HTML document title',html.includes(`<title>동작하는 안전지도 · 보행안전 지도 v${expected}</title>`)],
-  ['HTML version chip',html.match(/<button[^>]*id="version-history-trigger"[^>]*>([^<]+)<\/button>/)?.[1]===`v${expected}`],
-  ['HTML latest change',html.includes(`id="dj-guide-latest-version">v${expected}</strong>`)],
-  ['Settings version',settings.includes(`id="dj-about-version-number">v${expected}</strong>`)],
+  ['HTML document title',html.includes('<title>동작하는 안전지도 · 보행안전 지도</title>')],
+  ['HTML version chip',html.match(/<button[^>]*id="version-history-trigger"[^>]*>([^<]+)<\/button>/)?.[1]==='업데이트'],
+  ['HTML latest change',html.includes('id="dj-guide-latest-version">분류별 내역</strong>')],
+  ['Startup public version',html.includes(`id="map-startup-version" aria-label="앱 버전">${PUBLIC_LOADING_VERSION}</span>`)],
+  ['Settings version',settings.includes(`id="dj-about-version-number">${PUBLIC_APP_VERSION}</strong>`)],
   ['New history rendered',read('src/version-history.js').includes('...RENUMBERED_VERSION_HISTORY')],
   ['Latest operational release comes first',LATEST_APP_RELEASE.version===`v${version}`],
   ['First release is v1.0.0',RENUMBERED_VERSION_HISTORY.at(-1).version==='v1.0.0'],
