@@ -21,8 +21,9 @@ test('403 is a permanent configuration issue and does not reroll',async()=>{
 });
 test('invalid model JSON retries but unavailable provider remains a hard failure',async()=>{
  let calls=0;
- const r=await askGeminiModel({key,parts,schema,send:async()=>++calls===1?good({action:'map'}):good({action:'route'}),wait:async()=>{}});
- assert.deepEqual(r,{action:'map'});assert.equal(calls,1);
+ const malformed={ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:'not-json'}]}}]})};
+ const r=await askGeminiModel({key,parts,schema,send:async()=>++calls===1?malformed:good({action:'route'}),wait:async()=>{}});
+ assert.deepEqual(r,{action:'route'});assert.equal(calls,2);
  const delays=[];
  await assert.rejects(askGeminiModel({key,parts,schema,send:async()=>{throw Error('private network detail');},wait:async ms=>delays.push(ms)}),/Model unavailable after 3 attempt\(s\): Model network or response unavailable/);
  assert.deepEqual(delays,[2500,7000]);
