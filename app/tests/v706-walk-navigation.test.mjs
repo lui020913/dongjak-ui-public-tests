@@ -31,7 +31,7 @@ test('navigation DOM controls, source hooks and error fix are integrated',()=>{
   for(const symbol of ['autoRerouteFromGps','navRerouteController?.abort()','updateNavState([coords.longitude,coords.latitude],coords.accuracy,coords.heading)',"map.on('dragstart'"])
     assert.ok(main.includes(symbol));
   assert.match(main,/fitWalkingRoute\(routeResult\.coords\);\s*syncRoutePresentation\(\);\s*toast\('도보 경로가 지도에 표시됐습니다/);
-  assert.match(main,/import '\.\/v706-walk-navigation\.css';/);
+  assert.match(main,/import '\.\/mobile-ui-baseline\.css';/);
   assert.match(read('src/version-history.js'),/version:'v7\.0\.6'/);
 });
 import {validateWalkingRouteRequest} from '../functions/routing/route.js';
