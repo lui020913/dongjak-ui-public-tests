@@ -246,9 +246,12 @@ export function installLanguagePreference(doc=document,win=window){
     const label=doc.createElement('label');label.htmlFor='dj854-language-select';label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
-    section.append(label,select);body.prepend(section);
+    section.append(label,select);body.append(section);
     select.addEventListener('change',()=>setLanguage(select.value));
   }
+  // Put language at the bottom of the main settings, never before the profile.
+  const home=mine.querySelector('.dj834-my-home');
+  if(home&&section.parentNode!==home)home.append(section);
   const select=section.querySelector('select');
   let observer=null,queued=false;const pendingRecords=[];
   function apply(){
