@@ -50,6 +50,11 @@ test('onboarding crossfades on slide navigation and cancels stale transitions',(
  assert.match(js,/swapEpoch\+\+/);
  assert.match(js,/node\.style\.setProperty\('opacity','0','important'\)/);
  assert.match(js,/node\.style\.setProperty\('opacity','1','important'\)/);
+ // The outgoing fade must actually start before the 205ms slide swap timer.
+ // Otherwise under load a timeout can replace both slides without a painted fade.
+ const fadeBlock=js.split('const fadeOut=()=>{')[1]?.split("if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut)")[0];
+ assert(fadeBlock?.includes('swapTimer=win.setTimeout('));
+ assert(fadeBlock?.includes("node.style.setProperty('opacity','0','important')"));
  assert.match(css,/\.dj860-onboarding\.dj860-swapping/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
