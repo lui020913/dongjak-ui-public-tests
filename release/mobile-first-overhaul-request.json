@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.59",
+  "application_version": "9.2.60",
   "public_work_branch": "main",
-  "purpose": "PR #174 consolidated mobile fixes: retain AI orb and microphone during search, replace blank rectangular suggestions with rounded pill-anchored results, correct overlapping metro corridors and wider realtime train visibility, prevent AI ghost opening, fix onboarding transition, improve layer/community/route scroll, and unify full-screen route/community/news/account header/body/footer backgrounds with iOS native status tone in light (#edf3ef) and dark (#192d32).",
-  "attempt": 180,
+  "purpose": "Consolidated mobile-only release: fix iPhone startup status/splash first-paint seam in light and dark, retain AI orb and microphone on focus, keep pill-aligned search suggestions, repair metro route display and show live train symbols at neighborhood zoom, prevent ghost AI dialog, normalize onboarding/community/route/sheet. Also repair isolated release test paths and make Gemini autonomous QA host-based with bounded retries. Fail closed on real functional/design defects.",
+  "attempt": 181,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Source PR #174 merged on main after full public app regression, Vite build, and 375/390/430px phone Playwright passed. Start a fresh protected Preview and rerun exact release mobile, visual, railway and theme tests before Production.",
+  "last_retry_reason": "v9.2.59 build 44881515907 blocked on 5 obsolete/incorrect isolated QA assertions: public frontend assets inaccessible in sealed application, bootstrap-prepended iOS test, and obsolete AI hide contract. PR #177 source CI passed; also v9.2.58 mobile QA 12/12 and six Gemini design lanes passed, while Docker-container Gemini autonomous fetch timed out. Run new exact-source guarded Preview + all phone/design/agent checks before Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
