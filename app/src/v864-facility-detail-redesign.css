@@ -17,6 +17,7 @@
     box-sizing:border-box!important;width:100%!important;max-width:100%!important;
     max-height:min(60dvh,calc(100dvh - var(--dj829-panel-bottom,100px) - env(safe-area-inset-top,0px) - 56px))!important;
     min-height:0!important;padding:0!important;margin:0!important;
+    height:var(--dj9251-facility-content-height,auto)!important;
     overflow:hidden!important;border-radius:22px!important;
     background:var(--dj800-surface,#fff)!important;
     box-shadow:0 14px 34px rgba(18,48,38,.18)!important;

@@ -5,6 +5,7 @@ const KEY='dj17-kakao-ui-v1';
 export function installMobileFollowup({app,map,maplibregl,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
  let raf=0,port=null,pilot=false,regions=null,statusTimer=0;
+ let composing=false;const composerDisplay=new Map();
  const $=id=>doc.getElementById(id);
  const schedule=()=>{if(!raf)raf=win.requestAnimationFrame(()=>{raf=0;sync()})};
  function edges(){
@@ -95,6 +96,40 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
    for(const child of [...form.childNodes])if(child!==formHead)scroll.append(child);
    form.append(scroll);
   }
+  // Composer is its own screen: hide feed controls with inline ownership so
+  // legacy highly-specific sheet rules cannot leak category tabs into editing.
+  const community=$('participation-panel'),editing=!!form&&!form.hidden;
+  if(community&&editing!==composing){
+   composing=editing;
+   const listOnly=[':scope > .dj-sheet-chrome','.community-category-tabs','.dj-page-intro',
+    '.community-heading-row','.community-toolbar','#community-sort','#community-search',
+    '#community-notifications','#community-list','.community-report-secondary'];
+   for(const selector of listOnly)for(const node of community.querySelectorAll(selector)){
+    if(editing){
+     if(!composerDisplay.has(node))composerDisplay.set(node,{
+      value:node.style.getPropertyValue('display'),priority:node.style.getPropertyPriority('display')});
+     node.style.setProperty('display','none','important');
+    }else if(composerDisplay.has(node)){
+     const prior=composerDisplay.get(node);
+     if(prior.value)node.style.setProperty('display',prior.value,prior.priority);
+     else node.style.removeProperty('display');
+     composerDisplay.delete(node);
+    }
+   }
+   community.classList.toggle('dj9256-composing',editing);
+   if(editing){community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
+    form.querySelector('.djNext-form-scroll')?.scrollTo?.(0,0);}
+  }
+  const routeCalc=$('route-calc');
+  if(routeCalc){
+   let hint=$('dj9256-route-selection-hint');
+   if(!hint){hint=doc.createElement('p');hint.id='dj9256-route-selection-hint';
+    hint.className='dj9256-route-selection-hint';hint.setAttribute('role','status');
+    hint.textContent='출발지와 목적지를 선택하면 경로를 계산할 수 있습니다.';routeCalc.before(hint);}
+   const ready=[$('route-start-label'),$('route-end-label')].every(node=>
+    node&&node.textContent.trim()&&!/선택되지 않음|지정되지 않음/.test(node.textContent));
+   hint.hidden=ready;
+  }
   const utilities=doc.querySelector('#mine-panel .dj17-more-root .dj-mobile-utilities-body');
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
   if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);
@@ -105,7 +140,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   if(!wanted&&pilot)hidePilot();
   if(!app.classList.contains('map-safety-open')){const panel=$('map-safety-controls');if(panel?.classList.contains('dj871-sheet-expanded')){panel.classList.remove('dj871-sheet-expanded');panel.querySelector('.dj17-expand')?.setAttribute('aria-expanded','false')}}
  }
- const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-pressed','data-tab']});schedule();
+ const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-pressed','data-tab','hidden']});schedule();
  doc.addEventListener('click',e=>{if(e.target.closest?.('#bottom-nav [data-tab="map"]')){delete app.dataset.djUserTipDismissed;schedule()}},true);
  function snapshot(){
   try{const c=map.getCenter();const detail=doc.querySelector('#mine-panel .dj834-my-detail');const value={time:Date.now(),tab:app.dataset.tab||'mine',profile:!!detail&&!detail.hidden,center:[c.lng,c.lat],zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing(),phase:'pending'};win.sessionStorage.setItem(KEY,JSON.stringify(value))}catch{}
