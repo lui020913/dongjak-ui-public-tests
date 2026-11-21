@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.61",
+  "application_version": "9.2.62",
   "public_work_branch": "main",
-  "purpose": "Consolidated mobile-only UI release with PR #174 and PR #183: same light/dark top-header/primary-page-body/footer colors; stable rounded search results only after query input; AI and voice buttons stay visible during search; iPhone native status and loading splash seam fixed with effective CSS precedence; train marker/rail visual fixes, community/route/onboarding/sheet regressions.",
-  "attempt": 182,
+  "purpose": "Protected mobile-only delivery of fixed iPhone PWA startup status/splash first-paint and post-hydration continuity, phone search without empty rectangle, persistent AI and mic, pill-width location suggestions, metro line geometry and earlier train zoom, community/sheet fixes, and valid current search clear/history fade QA including autonomous journey.",
+  "attempt": 183,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.60 Preview (run 44881929202) passed build/deploy and PC/tablet gate but phone QA failed due obsolete assertions expecting popup for empty focus and '등록 3/3', plus an actual iPhone startup gradient overridden by legacy CSS. PR #183 fixed the user-requested search test, shortcut labels, and iOS gradient CSS; public source CI passed including mobile375/390/430. Rebuild and rerun all protected checks, fail closed on real defects.",
+  "last_retry_reason": "v9.2.60 and v9.2.61 preview tests identified outdated mobile browser expectations after intentional UI changes: empty focus, shortcut label, clear-to-dismiss search, and under-sampled 200/180ms history fade. PR #183 fixed startup CSS precedence and existing UI contract, PR #185 fixed actual test expectations and autonomous search journey, all with successful source CI. Perform full protected Preview, all mobile shards, 6 captures, 6 Gemini design reviews and Gemini autonomous exploration. Keep fail-closed guards.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
