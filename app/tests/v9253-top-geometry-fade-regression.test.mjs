@@ -23,9 +23,9 @@ test('onboarding retains the outgoing surface until the incoming image is decode
  assert.match(src,/preload\.decode\(\)/);
  assert.match(src,/render\(target,direction,false\)/);
  assert.match(css,/\.dj860-slide-ghost/);
- assert.match(js,/function animateOutgoingSlide\(ghost,epoch\)/);
- assert.match(js,/ghost\.style\.setProperty\('opacity'/);
- assert.match(js,/ghostFadeTimers\.set\(ghost,win\.setTimeout\(tick,16\)\)/);
+ assert.match(src,/function animateOutgoingSlide\(ghost,epoch\)/);
+ assert.match(src,/ghost\.style\.setProperty\('opacity'/);
+ assert.match(src,/ghostFadeTimers\.set\(ghost,win\.setTimeout\(tick,16\)\)/);
  assert.doesNotMatch(src,/const fadeOut=\(\)=>/);
  assert.doesNotMatch(src,/opacity 170ms ease-in/);
 });
