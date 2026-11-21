@@ -154,9 +154,6 @@ import './v910-request-completion.css';
 import './v914-mobile-ux-fixes.css';
 import './mobile-first-layout.css';
 import './mobile-primary-fullscreen.css';
-// Mobile-only integration: single viewport background, search, AI, theme and night polish.
-import './phone-ux-20261121.css';
-import './phone-ux-20261121.js';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
