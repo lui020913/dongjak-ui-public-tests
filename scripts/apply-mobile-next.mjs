@@ -9,8 +9,8 @@ function replace(path,from,to){
 }
 for(const ext of ['js','css'])copyFileSync(resolve(publicRoot,'frontend/production/mobile-next.'+ext),resolve(root,'src/mobile-next.'+ext));
 const main='src/main.js';
-replace(main,"import {installMobileFollowup} from './mobile-17-followup.js';","import {installMobileFollowup} from './mobile-17-followup.js';\nimport './mobile-next.css';\nimport {installPhoneToolbar,installPhonePermissions,installPhoneRouteComparison} from './mobile-next.js';");
-replace(main,'installMobileFollowup({app,map,maplibregl});','installMobileFollowup({app,map,maplibregl});\ninstallPhoneToolbar({app});\ninstallPhonePermissions({app});\ninstallPhoneRouteComparison({app});');
+replace(main,"import {installMobileFollowup} from './mobile-17-followup.js';","import {installMobileFollowup} from './mobile-17-followup.js';\nimport './mobile-next.css';\nimport {installPhoneToolbar,installPhonePermissions,installPhoneRouteComparison,installV9272PhoneExperience} from './mobile-next.js';");
+replace(main,'installMobileFollowup({app,map,maplibregl});','installMobileFollowup({app,map,maplibregl});\ninstallPhoneToolbar({app});\ninstallPhonePermissions({app});\ninstallPhoneRouteComparison({app});\ninstallV9272PhoneExperience({app});');
 replace('src/v831-swipe-feature-toolbar.js',"  if(phone)important(more,'display','none');","  if(phone)important(more,'display','none');\n  if(phone&&row.dataset.djNextReady==='1')important(scrollport,'display','none');");
 replace('src/v860-onboarding.js',"      if(index===ONBOARDING_SLIDES.length-1)close({afterClose:showMapGuide});else move(1);","      if(index===ONBOARDING_SLIDES.length-1){\n        if(win.matchMedia?.('(max-width:699px)')?.matches&&doc.getElementById('djNext-permissions'))close({afterClose:()=>win.dispatchEvent(new CustomEvent('dj-next:permission-intro',{detail:{continue:showMapGuide}}))});\n        else close({afterClose:showMapGuide});\n      }else move(1);");
 const core='src/v840-ui-core.js';
