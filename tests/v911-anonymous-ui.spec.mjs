@@ -517,6 +517,19 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await tap(page,page.locator('#djNext-weather'));
  const weather=page.locator('#dj854-weather-sheet');
  await expect(weather).toBeVisible();await expect(page.locator('#dj833-weather-sheet')).toBeHidden();
+ // The weather sheet bottom follows the REAL navigation top on iOS PWAs.
+ await expect.poll(async()=>{
+   const panel=await weather.boundingBox(),dock=await page.locator('#bottom-nav').boundingBox();
+   return panel&&dock?Math.round(dock.y-(panel.y+panel.height)):-100;
+ }).toBeGreaterThanOrEqual(4);
+ await expect.poll(async()=>{
+   const panel=await weather.boundingBox(),dock=await page.locator('#bottom-nav').boundingBox();
+   return panel&&dock?Math.round(dock.y-(panel.y+panel.height)):100;
+ }).toBeLessThanOrEqual(16);
+ // Weather location must be fully BELOW the heading separator, never on it.
+ const head=await weather.locator('.dj854-weather-head').boundingBox();
+ const place=await weather.locator('.dj854-weather-place').boundingBox();
+ expect(place.y).toBeGreaterThanOrEqual(head.y+head.height+3);
  await expect(weather.locator('[data-weather-location]')).toBeVisible();
  await expect(page.locator('#dj840-map-tip')).toBeHidden();
  await expect(weather.locator('.dj-weather-edge-drag')).toBeVisible();
@@ -559,6 +572,11 @@ test('phone report composer has non-overlapping independent header and input scr
  const title=form.locator('#community-title');await title.scrollIntoViewIfNeeded();await title.focus();
  const h=await head.boundingBox(),b=await scroll.boundingBox();expect(b.y>=h.y+h.height-1).toBe(true);
  const before=await head.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await head.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
+ const submit=form.locator('button[type=submit]');await expect(submit).toBeVisible();
+ await expect.poll(async()=>{
+   const btn=await submit.boundingBox(),lane=await scroll.boundingBox(),dock=await page.locator('#bottom-nav').boundingBox();
+   return !!btn&&!!lane&&!!dock&&btn.y>=lane.y&&btn.y+btn.height<=lane.y+lane.height+2&&btn.y+btn.height<dock.y-2;
+ }).toBe(true);
  await form.locator('#community-compose-close').click();await expect(form).toBeHidden();
 });
 
