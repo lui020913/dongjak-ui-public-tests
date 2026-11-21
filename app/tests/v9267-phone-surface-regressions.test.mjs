@@ -26,7 +26,7 @@ test('fullscreen tab transitions mask the underlying map without intercepting to
   assert.match(css,/pointer-events:none!important/);
   for(const key of ['route','participate','news','mine'])assert(css.includes('data-tab="'+key+'"'));
   assert.match(tab,/function protectPageTransition\(next\)/);
-  assert.match(tab,/protectPageTransition\(button\.dataset\.tab\)/);
+  assert.match(tab,/protectPageTransition\(next\.dataset\.tab\)/);
   assert.match(tab,/curtain\.hidden=false/);
   assert.match(tab,/dismissCurtain\(\);curtain\?\.remove/);
 });
