@@ -6,3 +6,26 @@
 @media(prefers-reduced-motion:reduce){.dj-pri-button{transition:none}}
 
 .dj-pri-data-tools{margin-top:12px;font-size:12px}.dj-pri-data-tools summary{cursor:pointer;font-weight:650;padding:7px 0}.dj-pri-data-tools>.dj-pri-button{display:block;width:100%;margin:8px 0}.dj-pri-actions .dj-pri-button{text-align:left;white-space:normal}.dj-pri-dialog .dj-pri-actions .dj-pri-button:not(:disabled){min-height:48px}
+
+/* v9.2.74: safety legend stays compact; evidence is a single animated disclosure. */
+#app .dj-pri-legend{width:min(305px,calc(100vw - 28px));max-width:calc(100vw - 28px);}
+#app .dj-pri-legend>strong{min-width:0;font-size:12px;line-height:1.4;word-break:keep-all;}
+#app .dj-pri-ramp{height:10px;grid-column:1/-1;}
+#app .dj-pri-ends{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;}
+#app .dj-pri-detail-toggle{grid-column:1/-1;justify-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:35px;margin:1px 0 0;padding:5px 10px;text-align:left;border-radius:11px;font-size:12px;}
+#app .dj-pri-detail-toggle svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .24s cubic-bezier(.2,.8,.2,1);}
+#app .dj-pri-detail-toggle[aria-expanded="true"] svg{transform:rotate(180deg);}
+#app .dj-pri-detail-wrap{grid-column:1/-1;display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease;pointer-events:none;}
+#app .dj-pri-detail-toggle[aria-expanded="true"]+.dj-pri-detail-wrap{grid-template-rows:1fr;opacity:1;pointer-events:auto;}
+#app .dj-pri-detail-body{min-height:0;overflow:hidden;display:grid;gap:7px;}
+#app .dj-pri-detail-body>small{margin-top:0;font-size:11px;line-height:1.5;}
+#app .dj-pri-detail-body>small:first-child{padding-top:8px;}
+#app .dj-pri-model-note{color:var(--djNext-muted,#667b71);}
+@media(max-width:699px){
+  html body #app#app#app[data-dj-pri-visible="true"] :is(#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-bottom-left),
+  html body #app#app#app[data-dj-pri-dialog="true"] :is(#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-bottom-left){display:none!important;visibility:hidden!important;pointer-events:none!important;}
+  #app .dj-pri-legend{padding:12px 14px;gap:8px;box-shadow:0 6px 20px rgba(25,53,41,.12);}
+}
+@media(prefers-reduced-motion:reduce){
+  #app .dj-pri-detail-wrap,#app .dj-pri-detail-toggle svg{transition:none!important;}
+}
