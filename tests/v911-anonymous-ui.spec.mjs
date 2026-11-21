@@ -809,7 +809,7 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
 });
 
 
-test('iPhone first-loading splash shares the native status-strip tone',{tag:'@phone-common'},async({page})=>{
+test('iPhone flat loading surface shares the native status-strip tone',{tag:'@phone-common'},async({page})=>{
   const ua=await page.evaluate(()=>navigator.userAgent);
   test.skip(!/iPhone/.test(ua),'iOS PWA only');
   await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
@@ -829,12 +829,11 @@ test('iPhone first-loading splash shares the native status-strip tone',{tag:'@ph
   expect(colors.runtime).toBe(colors.start);
   expect(colors.meta).toBe(colors.start);
   expect(colors.status).toBe('rgb(237, 243, 239)');
-  expect(colors.gradient).toContain('linear-gradient');
-  expect(colors.gradient).toContain('rgb(237, 243, 239) 0%');
+  expect(colors.gradient).toBe('none');
   await test.info().attach('iphone-startup-status-continuity',{body:await page.screenshot(),contentType:'image/png'});
 });
 
-test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-common'},async({page})=>{
+test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},async({page})=>{
  const ua=await page.evaluate(()=>navigator.userAgent);test.skip(!/iPhone/.test(ua),'iOS PWA only');
  await page.addInitScript(()=>Object.defineProperty(navigator,'standalone',{configurable:true,value:true}));
  await ready(page);
@@ -842,19 +841,17 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  await expect(root).toHaveClass(/dj-ios-home-pwa/);
  await expect(bridge).toHaveCount(1);await expect(bridge).toHaveCSS('opacity','0');
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
- await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','1');
+ await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('display','none');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
- expect(style.gradient).toContain('linear-gradient');expect(style.gradient).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);expect(style.pointer).toBe('none');expect(style.top).toBe(0);expect(style.height).toBeGreaterThanOrEqual(112);expect(style.color).toBe('#edf3ef');
+ expect(style.gradient).toBe('none');expect(style.pointer).toBe('none');expect(style.height).toBe(0);expect(style.color).toBe('#edf3ef');
  const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
- await test.info().attach('ios-pwa-light-gradient',{body:await page.screenshot(),contentType:'image/png'});
+ await test.info().attach('ios-pwa-flat-status',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
  // Verify native dialog top-layer separately without a network request or login.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
- expect(native).toContain('linear-gradient'); // A top-layer modal owns its own native-status transition.
- expect(native).toMatch(/rgb\(255,\s*255,\s*255\) 0px/); // Same white first pixels as the modal's native status-bar sampling.
- expect(native).toMatch(/transparent|rgba\(0,\s*0,\s*0,\s*0\)|color\(srgb 0 0 0 \/ 0\)/);
+ expect(native).toBe('none'); // The top-layer dialog has no backdrop gradient.
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
