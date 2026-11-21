@@ -1,0 +1,28 @@
+name: Diagnose community tab positioning after map report composer
+on:
+  push:
+    branches: [diagnostics/community-compose-bounds-20261122]
+permissions:
+  contents: read
+jobs:
+  measure-visible-community-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    env:
+      CI: '1'
+      DONGJAK_TARGET_URL: https://31e45197.dongjak-walk-safety-preview.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Probe exact journey-5 button geometry without changing Preview
+        run: |
+          set +e
+          npx playwright test tests/live-qa-journeys.spec.mjs --project=mobile --grep "05 커뮤니티" --reporter=line
+          status=$?
+          echo "JOURNEY_5_EXPECTED_DIAGNOSTIC_EXIT=$status"
+          exit 0
