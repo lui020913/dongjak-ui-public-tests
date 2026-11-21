@@ -34,7 +34,7 @@ test('mobile search is opaque and bottom panels have usable scroll height',()=>{
 });
 test('new stylesheet last, release metadata synchronized',()=>{
  const main=read('src/main.js'),pkg=JSON.parse(read('package.json'));
- assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('mobile-ui-baseline.css'));
+ assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('v614-transport-compact.css') && main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
  assert.equal(pkg.version,APP_VERSION);
  assert.match(read('src/version-history.js'),/version:'v7\.0\.29'/);
 });
