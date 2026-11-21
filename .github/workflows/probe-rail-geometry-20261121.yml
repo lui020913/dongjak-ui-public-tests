@@ -74,18 +74,23 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import {onRequestGet} from './app/functions/api/rail-geometry.js';
-          import {extractOfficialPaths} from './app/src/rail-official-shapes.js';
+          import {extractOfficialPaths,mergeOfficialRail} from './app/src/rail-official-shapes.js';
+          import {fixedRailCollection} from './app/src/fixed-rail-lines.js';
           const response=await onRequestGet({request:new Request('https://example.invalid/api/rail-geometry')});
           const payload=await response.json();
           const paths=payload.features?extractOfficialPaths(payload):[];
           const actual=[...new Set(paths.map(p=>p.line))].sort();
+          const merged=mergeOfficialRail(fixedRailCollection(),paths);
+          const verified=merged.lines.slice().sort();
           console.log('LIVE_OSM_RAIL_FALLBACK',JSON.stringify({
             httpStatus:response.status,source:payload.source||null,
             originLicense:payload.license||null,
             availableLines:actual,
             geometricPaths:paths.length,
+            mergedRealRailLines:verified,
+            actualGeometryFeatures:merged.collection.features.filter(f=>!f.properties?.schematic).length,
             missing:payload.missing_lines||null
           }));
           if(response.status!==200||payload.source!=='OpenStreetMap_ODbL'
-             ||actual.length<5||paths.length<5)process.exitCode=1;
+             ||actual.length!==6||paths.length<6||verified.length!==6)process.exitCode=1;
           NODE
