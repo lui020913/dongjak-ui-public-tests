@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "9.2.75 full protected reattempt from latest public main: Issue #235 UI remediation PR #237 (single tab transition, liquid glass icon buttons, metro compact arrivals first, obsolete rings/SVG removed), history-category QA repair PR #239 and earlier iOS/nearby/weather/PRI v9.2.75 fixes. Keep user-visible pre-release version 1.0 and type-classified updates while retaining internal build/Git identifiers. Run exact full build → isolated Preview → all twelve mobile QA shards → visual/exploratory approvals → protected Production. Never bypass gates.",
-  "attempt": 212,
+  "purpose": "9.2.75 exact latest main protected release for Issue #235 remediation: PR #237 (legacy CSS/JS removed, Liquid Glass action controls, compact subway ETA before neighbors, single tab transition), PR #239 (categorized release history QA), PR #241 (MOIS official GIS same-origin server cache and direct fallback), PR #242 (phone compact ETA-first and no duplicate subway badge ring visual QA), plus v9.2.75 iOS/nearby/weather/PRI corrections. Keep user-visible version 1.0 and category-based update history; internal SemVer and Git SHA for release integrity. Full isolated build > Preview > all 12 mobile QA shards and six visual captures > exploratory QA > protected Production, never bypass.",
+  "attempt": 213,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Last protected run #44911949290 failed in mobile QA shards 3/8/12/10 due outdated first-entry v9.2.75 release-number assertion. PR #239 corrected that exact test and Public source CI #44912532802 succeeded. Issue #235 PR #237 Public CI #44912148741 succeeded and merged. Re-run from latest main; do not promote old failing build.",
+  "last_retry_reason": "Run #44912735690 failed in mobile QA 3/8/11 etc because protected test expected the *old* railway neighbor-before-arrival placement and a 2px selected-line ring; both contradict user-approved Issue #235 UI. PR #242 replaced assertions with actual arrival-first DOM geometry and border thickness. Public CI #44913276956 success. PR #241 public CI #44912965319 success. Rebuild from latest main including both changes and complete all protection gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
