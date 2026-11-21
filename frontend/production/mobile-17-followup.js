@@ -5,7 +5,20 @@ const KEY='dj17-kakao-ui-v1';
 export function installMobileFollowup({app,map,maplibregl,doc=document,win=window}){
  if(!win.matchMedia('(max-width:699px)').matches)return;
  let raf=0,port=null,pilot=false,regions=null,statusTimer=0;
- let composing=false;const composerDisplay=new Map();
+ let composing=false;const composerDisplay=new Map(),composerOwnedStyle=[];
+ function ownComposerStyle(node,styles){
+  if(!node)return;
+  for(const [property,value] of Object.entries(styles)){
+   const old=node.style.getPropertyValue(property),priority=node.style.getPropertyPriority(property);
+   composerOwnedStyle.push({node,property,old,priority});
+   node.style.setProperty(property,value,'important');
+  }
+ }
+ function restoreComposerStyle(){
+  for(const {node,property,old,priority} of composerOwnedStyle.splice(0).reverse()){
+   if(old)node.style.setProperty(property,old,priority);else node.style.removeProperty(property);
+  }
+ }
  const $=id=>doc.getElementById(id);
  const schedule=()=>{if(!raf)raf=win.requestAnimationFrame(()=>{raf=0;sync()})};
  function edges(){
@@ -117,8 +130,47 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
     }
    }
    community.classList.toggle('dj9256-composing',editing);
-   if(editing){community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
-    form.querySelector('.djNext-form-scroll')?.scrollTo?.(0,0);}
+   if(editing){
+    // The map risk-report shortcut can open the composer from a half-height
+    // legacy sheet. Claim the entire independent phone page before focus or
+    // keyboard adjustments; inline !important beats the stacked old sheet CSS.
+    ownComposerStyle(community,{
+     position:'fixed',top:'var(--dj-patch-vv-top,0px)',
+     bottom:'var(--dj-patch-vv-bottom,0px)',left:'0',right:'0',
+     width:'100vw',height:'auto','max-height':'none','min-height':'0',
+     margin:'0',padding:'0 0 calc(92px + env(safe-area-inset-bottom,0px))',
+     'box-sizing':'border-box',border:'0','border-radius':'0',
+     background:'var(--mf-surface-solid,#fff)',color:'var(--mf-ink,#203e34)',
+     'z-index':'7000',opacity:'1',visibility:'visible',display:'flex',
+     'flex-direction':'column','align-items':'stretch',overflow:'hidden',
+     transform:'none',translate:'none'
+    });
+    ownComposerStyle(community.querySelector(':scope > .dj836-sheet-body'),{
+     display:'flex','flex-direction':'column',flex:'1 1 0%',
+     'min-height':'0',height:'auto',overflow:'hidden',padding:'0',margin:'0'
+    });
+    ownComposerStyle(form,{
+     display:'flex','flex-direction':'column',flex:'1 1 0%',
+     'min-height':'0',height:'auto',margin:'0',padding:'0',overflow:'hidden'
+    });
+    ownComposerStyle(formHead,{
+     position:'relative',top:'auto',bottom:'auto',
+     display:'flex','align-items':'center','justify-content':'space-between',
+     flex:'0 0 auto',order:'0','min-height':'calc(64px + env(safe-area-inset-top,0px))',
+     height:'auto','max-height':'calc(94px + env(safe-area-inset-top,0px))',
+     padding:'calc(10px + env(safe-area-inset-top,0px)) 16px 12px',
+     margin:'0','box-sizing':'border-box',background:'var(--mf-surface-solid,#fff)',
+     transform:'none',translate:'none','touch-action':'auto'
+    });
+    ownComposerStyle(form.querySelector(':scope > .djNext-form-scroll'),{
+     position:'relative',top:'auto',bottom:'auto',order:'1',
+     display:'flex','flex-direction':'column',flex:'1 1 0%',
+     'min-height':'0',height:'auto',margin:'0','box-sizing':'border-box',
+     overflow:'auto','overflow-y':'auto',transform:'none',translate:'none'
+    });
+    community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
+    form.querySelector('.djNext-form-scroll')?.scrollTo?.(0,0);
+   }else restoreComposerStyle();
   }
   const routeCalc=$('route-calc');
   if(routeCalc){

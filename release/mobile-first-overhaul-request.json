@@ -3,9 +3,9 @@
   "application_version": "9.2.56",
   "public_work_branch": "main",
   "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
-  "attempt": 170,
+  "attempt": 171,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "v9.2.56 run 44862972807 compiled and ran 267/268 Node regression files successfully. The sole failure was outdated static mobile-next-build.test expecting the old MutationObserver attributeFilter without hidden; composer isolation now intentionally observes hidden transitions. Update the existing assertion to require all four attributes; re-run protected Preview, 12 phone shards, 6 visual captures and Production gate.",
+  "last_retry_reason": "Run 44863189345 passed Preview and 11/12 phone QA, but visual lane 5 captured a real risk-report composer geometry defect: when opening from map and focusing a title, the editor stayed transparent at half-screen over the map; scroll content began above its header. Claim full opaque phone page on composer entry, assign a single independent header and scroll owner and remove old draggable-header CSS, restoring original styles on close. Keep all 6 capture lanes and 12 phone QA as required.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
