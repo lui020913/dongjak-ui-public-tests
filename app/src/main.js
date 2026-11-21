@@ -175,7 +175,8 @@ function stopDeviceWatch(id) {
 
 const DONGJAK_CENTER = [126.9494, 37.4987]; // [경도, 위도]
 const PILOT_CENTER = [126.9530, 37.4960]; // 시범지역 개략 중심, 실제 조사 위치 아님
-const BOUNDARY_URL = 'https://raw.githubusercontent.com/KnellBalm/kr-admin-geojson/main/sig.geojson';
+const BOUNDARY_URL = '/data/dongjak_sig_reference.geojson';
+const BOUNDARY_UPSTREAM_FALLBACK_URL = 'https://raw.githubusercontent.com/KnellBalm/kr-admin-geojson/main/sig.geojson';
 const STORAGE_KEY = 'dongjak_safety_navigation_v3'; // 이전 버전 자료와 분리
 const CATEGORIES = ['전체','보행공간','교차로·시야','횡단시설','조명·시설물','기타'];
 const COLORS = {'보행공간':'#e88737','교차로·시야':'#c35a73','횡단시설':'#3477c9','조명·시설물':'#8065bd','기타':'#798d83'};
@@ -1060,13 +1061,24 @@ async function loadDongjakBoundary(){
     const controller = new AbortController();
     const timer = setTimeout(()=>controller.abort(),12000);
     let response;
-    try {response=await fetch(BOUNDARY_URL,{signal:controller.signal});}
+    try {
+      try {
+        response=await fetch(BOUNDARY_URL,{signal:controller.signal});
+        if(!response.ok)throw new Error('Cached Dongjak boundary HTTP '+response.status);
+      }catch(localError){
+        // A missing local asset must never turn into an unbounded reload.
+        // Recover from the same upstream source that shipped before this fix.
+        console.warn('동작구 경계 로컬 자료 확인 실패, 원본 조회:',localError?.message);
+        response=await fetch(BOUNDARY_UPSTREAM_FALLBACK_URL,{signal:controller.signal});
+      }
+    }
     finally {clearTimeout(timer);}
     if(!response.ok) throw new Error(`HTTP ${response.status}`);
     const features=(await response.json()).features;
     const feature=features.find(f=>f?.properties?.SIG_KOR_NM==='동작구' || f?.properties?.FULL_NM==='서울특별시 동작구');
     if(!feature?.geometry)throw new Error('동작구 행정경계가 없습니다.');
     boundaryGeometry=feature.geometry;
+    app.dataset.djBoundaryReady='true';
     boundaryBounds=computeBounds(boundaryGeometry);
     if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
     // 다운로드한 실제 경계 기준 + 10km까지 지도 이동 범위 갱신.
@@ -1112,6 +1124,7 @@ async function loadDongjakBoundary(){
       sessionStorage.setItem('dongjak_integrated_seen','1');
     }
   }catch(error){
+    app.dataset.djBoundaryReady='error';
     console.warn('경계 로드 실패:',error);
     status('지도 사용 가능 · 동작구 경계 연결 실패');
     toast('행정경계를 받지 못했습니다. 인터넷 연결을 확인해 주세요.');
