@@ -9,6 +9,8 @@ test('route setup, community, news, and my info are mobile standalone tab pages'
   assert.match(html,new RegExp('<main id="[^"]+-panel" class="page-panel dj-mobile-fullscreen-page" data-page="'+name+'"'));
  }
  const css=read('src/mobile-fullscreen-tabs.css');
+ assert.match(read('src/v910-cascade-order.css'),/@layer mobile-fullscreen-tabs, request-completion/);
+ assert.match(css,/@layer mobile-fullscreen-tabs/);
  assert.match(css,/max-width:699px/);
  assert.match(css,/height:100dvh!important/);
  assert.match(css,/z-index:7300!important/);
