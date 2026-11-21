@@ -851,8 +851,10 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
  // Verify native dialog top-layer separately without a network request or login.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
- const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);expect(native).toBe('none');
- await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)'); // A single opaque native status surface, without a second gradient.
+ const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
+ expect(native).toContain('linear-gradient'); // A top-layer modal owns its own native-status transition.
+ expect(native).toContain('rgb(237, 243, 239)'); // Same first pixels as iOS status-bar sampling.
+ await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
  await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#192d32');
@@ -1134,38 +1136,47 @@ test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'
  expect(expanded.y).toBeGreaterThanOrEqual(searchBox.y+searchBox.height-3);
 });
 
-test('v9.2.53 onboarding crossfades between slides',{tag:'@phone-layout'},async({page})=>{
+test('v9.2.66 onboarding retains colored surfaces while the outgoing frame fades',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});
  await ready(page,{keepTour:true});
  const tour=page.locator('#dj860-onboarding');
  await expect(tour.locator('#dj860-count')).toHaveText('01 / 05');
- // Observe actual computed opacity in both paint frames and short browser
- // timer ticks. In overloaded phone runners, RAF can be deferred for an entire
- // 650ms window even though the CSS transition and next-slide event occurred.
- // Keep the real <0.75 opacity requirement; do not accept only a class change.
+ // Unlike the obsolete v9.2.53 test, the colored artwork mat must NEVER fade.
+ // The separate outgoing composited clone fades above the fully opaque next slide.
  await page.evaluate(()=>{
-   const samples=[];window.__dj9253OnboardFade=samples;
+   const samples=[];window.__dj9266OnboardFade=samples;
    const start=performance.now();
    const sample=()=>{
-     const pane=document.querySelector('#dj860-onboarding .dj860-visual-pane');
-     if(pane)samples.push({t:Math.round(performance.now()-start),
-       alpha:Number(getComputedStyle(pane).opacity)});
+     const root=document.getElementById('dj860-onboarding');
+     const pane=root?.querySelector('.dj860-visual-pane:not(.dj860-slide-ghost)');
+     const ghost=root?.querySelector('.dj860-visual-pane.dj860-slide-ghost');
+     const copy=root?.querySelector('.dj860-copy:not(.dj860-slide-ghost)');
+     if(pane)samples.push({
+       t:Math.round(performance.now()-start),
+       mat:Number(getComputedStyle(pane).opacity),
+       ghost:ghost?Number(getComputedStyle(ghost).opacity):null,
+       title:copy?.querySelector('h1')?.textContent||''
+     });
    };
-   let live=true;
-   const frame=()=>{if(!live)return;sample();requestAnimationFrame(frame);};
-   requestAnimationFrame(frame);
-   const interval=setInterval(sample,12);
-   sample();
-   setTimeout(()=>{live=false;clearInterval(interval);sample();},700);
+   let live=true;const frame=()=>{if(!live)return;sample();requestAnimationFrame(frame);};
+   requestAnimationFrame(frame);const interval=setInterval(sample,12);sample();
+   setTimeout(()=>{live=false;clearInterval(interval);sample();},1500);
    document.querySelector('#dj860-onboarding [data-dj860-action="next"]').click();
  });
  await expect(tour.locator('#dj860-count')).toHaveText('02 / 05',{timeout:5000});
- await page.waitForTimeout(720);
- const samples=await page.evaluate(()=>window.__dj9253OnboardFade);
- expect(samples.some(x=>x.alpha<.75),
-   'No real outgoing/incoming fade observed; opacity samples: '+JSON.stringify(samples.slice(0,70)))
-   .toBe(true);
+ await expect(tour.locator('#dj860-title')).toHaveText('필요한 안전정보만 지도에',{timeout:6500});
+ await page.waitForTimeout(1540);
+ const samples=await page.evaluate(()=>window.__dj9266OnboardFade);
+ expect(samples.some(x=>x.ghost!==null),
+   'No outgoing retained frame was ever rendered: '+JSON.stringify(samples.slice(0,90))).toBe(true);
+ expect(samples.some(x=>x.ghost!==null&&x.ghost<.8),
+   'No actual outgoing fade observed: '+JSON.stringify(samples.filter(x=>x.ghost!==null).slice(0,90))).toBe(true);
+ expect(samples.every(x=>x.mat>=.99),
+   'The colored artwork mat became transparent during the transition: '+JSON.stringify(samples.filter(x=>x.mat<.99))).toBe(true);
+ expect(samples.every(x=>x.title.trim().length>0),
+   'The incoming copy disappeared entirely during the transition').toBe(true);
+ await expect(tour.locator('.dj860-slide-ghost')).toHaveCount(0);
  await tour.locator('[data-dj860-action="skip"]').click();
  await expect(tour).toBeHidden();
 });
