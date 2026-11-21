@@ -614,7 +614,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
      if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
      else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
      expect(motion.some(f=>f.offset>2)).toBe(true);
-     if(parentSelector==='#djNext-layer-panel'){expect(new Set(motion.map(f=>f.background)).size).toBeGreaterThan(1);}else expect(motion.every(f=>f.background===motion[0].background)).toBe(true);
+     expect(motion.every(f=>f.background===motion[0].background)).toBe(true); // All phone sheets keep a flat, un-dimmed backdrop.
      expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
    }
  }
@@ -993,7 +993,7 @@ test('compact subway sheet keeps identity, actions, neighbors and arrival contro
  await expect.poll(async()=>{const h=await sheet.locator('.transport-panel-head').boundingBox(),n=await sheet.locator('#transport-neighbors').boundingBox(),bar=await sheet.locator('.transport-arrivals-title').boundingBox();return !!h&&!!n&&!!bar&&n.y>=h.y+h.height-1&&bar.y>=n.y+n.height-1;}).toBe(true);
  await expect(sheet.locator('#transport-title .dj-metro-line-selector[aria-pressed=true]')).toHaveCSS('border-top-width','0px');
  await expect(sheet.locator('.metro-neighbor-row').first()).toHaveCSS('border-top-left-radius','999px');await expect(sheet.locator('.metro-rail-current').first()).toHaveCSS('border-top-left-radius','999px');
- await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image',/linear-gradient/);await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
+ await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image','none');await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
 });
