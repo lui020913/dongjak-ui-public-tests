@@ -2075,7 +2075,11 @@ function openCommunityComposer(open,{animate=true}={}) {
     if(panel)delete panel.dataset.djPatchKeyboard;
     const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
   };
-  if(motion)motion.close(communityForm,finish);else finish();
+  // This editor belongs to an already-visible full-screen page. An old
+  // 300ms sheet-close owner can be cancelled by the parent and leave the
+  // compose view visible indefinitely. End the editor state synchronously.
+  motion?.cancel?.(communityForm);
+  finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
