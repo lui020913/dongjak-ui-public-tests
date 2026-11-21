@@ -175,7 +175,8 @@ function stopDeviceWatch(id) {
 
 const DONGJAK_CENTER = [126.9494, 37.4987]; // [경도, 위도]
 const PILOT_CENTER = [126.9530, 37.4960]; // 시범지역 개략 중심, 실제 조사 위치 아님
-const BOUNDARY_URL = 'https://raw.githubusercontent.com/KnellBalm/kr-admin-geojson/main/sig.geojson';
+const BOUNDARY_URL = '/data/dongjak_sig_reference.geojson';
+const BOUNDARY_UPSTREAM_FALLBACK_URL = 'https://raw.githubusercontent.com/KnellBalm/kr-admin-geojson/main/sig.geojson';
 const STORAGE_KEY = 'dongjak_safety_navigation_v3'; // 이전 버전 자료와 분리
 const CATEGORIES = ['전체','보행공간','교차로·시야','횡단시설','조명·시설물','기타'];
 const COLORS = {'보행공간':'#e88737','교차로·시야':'#c35a73','횡단시설':'#3477c9','조명·시설물':'#8065bd','기타':'#798d83'};
@@ -1060,13 +1061,24 @@ async function loadDongjakBoundary(){
     const controller = new AbortController();
     const timer = setTimeout(()=>controller.abort(),12000);
     let response;
-    try {response=await fetch(BOUNDARY_URL,{signal:controller.signal});}
+    try {
+      try {
+        response=await fetch(BOUNDARY_URL,{signal:controller.signal});
+        if(!response.ok)throw new Error('Cached Dongjak boundary HTTP '+response.status);
+      }catch(localError){
+        // A missing local asset must never turn into an unbounded reload.
+        // Recover from the same upstream source that shipped before this fix.
+        console.warn('동작구 경계 로컬 자료 확인 실패, 원본 조회:',localError?.message);
+        response=await fetch(BOUNDARY_UPSTREAM_FALLBACK_URL,{signal:controller.signal});
+      }
+    }
     finally {clearTimeout(timer);}
     if(!response.ok) throw new Error(`HTTP ${response.status}`);
     const features=(await response.json()).features;
     const feature=features.find(f=>f?.properties?.SIG_KOR_NM==='동작구' || f?.properties?.FULL_NM==='서울특별시 동작구');
     if(!feature?.geometry)throw new Error('동작구 행정경계가 없습니다.');
     boundaryGeometry=feature.geometry;
+    app.dataset.djBoundaryReady='true';
     boundaryBounds=computeBounds(boundaryGeometry);
     if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
     // 다운로드한 실제 경계 기준 + 10km까지 지도 이동 범위 갱신.
@@ -1112,6 +1124,7 @@ async function loadDongjakBoundary(){
       sessionStorage.setItem('dongjak_integrated_seen','1');
     }
   }catch(error){
+    app.dataset.djBoundaryReady='error';
     console.warn('경계 로드 실패:',error);
     status('지도 사용 가능 · 동작구 경계 연결 실패');
     toast('행정경계를 받지 못했습니다. 인터넷 연결을 확인해 주세요.');
@@ -1846,6 +1859,25 @@ const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
 let communityComposerOrigin='community',communityComposerEpoch=0;
+// A full-screen mobile report must out-rank legacy !important header styles.
+// Store and restore the prior inline display declaration exactly.
+let communityTopbarDisplayRestore=null;
+function setCommunityTopbarBlocked(blocked){
+  const header=document.querySelector('#app > .topbar');
+  if(!header)return;
+  if(blocked){
+    if(!communityTopbarDisplayRestore)communityTopbarDisplayRestore={
+      value:header.style.getPropertyValue('display'),
+      priority:header.style.getPropertyPriority('display')
+    };
+    header.style.setProperty('display','none','important');
+  }else if(communityTopbarDisplayRestore){
+    const {value,priority}=communityTopbarDisplayRestore;
+    if(value)header.style.setProperty('display',value,priority);
+    else header.style.removeProperty('display');
+    communityTopbarDisplayRestore=null;
+  }
+}
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
@@ -1879,7 +1911,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');}
+    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2052,6 +2084,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     // Full-screen editor must own the phone viewport, including the area
     // beneath the AI toolbar. Existing CSS excludes map chrome on this state.
     panel?.classList.add('dj9256-composing');
+    setCommunityTopbarBlocked(true);
     if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
     return;
   }
@@ -2060,7 +2093,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(communityComposerOrigin==='map'){
     const parent=document.getElementById('participation-panel');
     const epoch=++communityComposerEpoch;
-    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');setCommunityTopbarBlocked(false);communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
     // A map-origin report must return directly to the map on phone. A legacy
     // sheet-exit animation can remain in "closing" when the independent full
     // page takes over its geometry, leaving an invisible form and visible page.
@@ -2076,6 +2109,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
     panel?.classList.remove('dj9256-composing');
+    setCommunityTopbarBlocked(false);
     if(panel)delete panel.dataset.djPatchKeyboard;
     const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
   };
