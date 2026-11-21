@@ -6,7 +6,7 @@
 export function compactTransportHeight({header=0,grip=0,body=0,viewport=0}={}){
   const v=Math.max(320,Number(viewport)||320);
   const natural=Math.ceil(Math.max(0,header)+Math.max(0,grip)+Math.max(0,body)+12);
-  return Math.round(Math.max(196,Math.min(Math.floor(v*.52),natural)));
+  return Math.round(Math.max(196,Math.min(Math.floor(v*.60),natural)));
 }
 
 /**
@@ -89,7 +89,7 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
 /** Facility popups use the same content-first compact sizing policy. */
 export function compactFacilityHeight({header=0,body=0,viewport=0}={}){
   const v=Math.max(320,Number(viewport)||320);
-  return Math.round(Math.max(210,Math.min(Math.floor(v*.52),
+  return Math.round(Math.max(210,Math.min(Math.floor(v*.56),
     Math.ceil(Math.max(0,header)+Math.max(0,body)+12))));
 }
 

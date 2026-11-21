@@ -27,6 +27,6 @@ test('opposite train directions have distinct lanes without changing geometry',(
     for(const f of [up,down])assert.equal(trainRotation({},f.properties,trainFacing({},f.properties)),0);
     const u=trainLaneOffset(line,trainFacing({},up.properties),up.properties.headingKnown);
     const d=trainLaneOffset(line,trainFacing({},down.properties),down.properties.headingKnown);
-    assert.equal(u,line==='1호선'?-8:8);assert.equal(d,-u);
+    assert.equal(u,line==='1호선'?-12:12);assert.equal(d,-u);
   }
 });

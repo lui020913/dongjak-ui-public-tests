@@ -384,3 +384,17 @@ html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] #t
     font-size:calc(12px + var(--dj803-text-delta,0px))!important;
   }
 }
+
+/* v9.2.56 bus stop cards reveal the live arrival rows above the phone pill. */
+@media(max-width:699px){
+  html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"]:not([hidden]):not(.dj871-sheet-expanded){
+    height:var(--dj9251-transport-content-height,min(60dvh,510px))!important;
+    min-height:min(55dvh,calc(100dvh - 190px))!important;
+    max-height:calc(100dvh - 190px)!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  html body #app#app #transport-sheet.dj-news-transit-fixed[data-kind="bus"] #transport-arrivals{
+    scroll-margin-top:12px!important;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;
+  }
+}

@@ -8,10 +8,12 @@ function screenOffset(line,angle,facing){
   const y=trainLaneOffset(line,facing,true);
   return [-Math.sin(rotation)*y,Math.cos(rotation)*y];
 }
-test('icon growth is about 22% at all original zoom stops',()=>{
-  const old=[.66,.74,.84,1.13,1.42];
+test('nearby train icons preserve clear sightlines and opposing lane separation',()=>{
   assert.deepEqual(TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===0),[11,12.5,13.2,15.5,18]);
-  TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===1).forEach((size,i)=>assert(size/old[i]>=1.20&&size/old[i]<=1.24));
+  const sizes=TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===1);
+  assert(sizes.every((v,i)=>v>0&&(i===0||v>=sizes[i-1])));
+  assert(sizes[3]<=1.20&&sizes[4]<=1.45);
+  assert(TRAIN_LANE_GAP>=10&&TRAIN_LANE_GAP<=14);
 });
 test('opposing trains remain on correct sides through arbitrary screen rotations and sprite mirroring',()=>{
   for(const angle of [0,32,90,120,179,225,270,340])for(const facing of ['left','right']){

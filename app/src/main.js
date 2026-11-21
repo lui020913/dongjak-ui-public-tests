@@ -2286,8 +2286,8 @@ function renderCommunity() {
     actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
     empty.append(actions);
     if(!filtered&&!loading&&!offline){
-      const topics=makeCEl('div','dj-community-starter-topics');
-      topics.append(makeCEl('p','dj-community-topics-heading','이런 이야기로 시작할 수 있습니다'));
+      const topics=makeCEl('details','dj-community-starter-topics');
+      topics.append(makeCEl('summary','dj-community-topics-heading','이런 이야기로 시작할 수 있습니다'));
       for(const [category,label,detail] of [
         ['보행 불편','보행 불편 공유','보도 단차·통행 방해·어두운 길'],
         ['개선 제안','우리 동네 개선 제안','보행환경을 개선할 아이디어'],

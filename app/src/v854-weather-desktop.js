@@ -8,7 +8,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const temperature=text=>{
     const match=String(text||'').match(/-?\d+(?:\.\d+)?\s*(?:°|℃|도|C)?/);
     const number=match?.[0]?.match(/-?\d+(?:\.\d+)?/)?.[0];
-    return number?`${number}°`:'';
+    return number?`${Number(number)===0?'0':number}°`:'';
   };
   const iconFor=text=>{
     const value=String(text||'');
@@ -18,7 +18,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     if(/흐림|구름/.test(value))return '☁';
     return /실패/.test(value)?'!':'☁';
   };
-  const summary=()=>String(label.textContent||'').replace(/\s+/g,' ').trim();
+  const summary=()=>String(label.textContent||'').replace(/\s+/g,' ').replace(/-0(?=°|℃|도)/g,'0').trim();
   function sync(){
     const value=summary();
     label.dataset.djTemperature=label.dataset.djWeatherTemperature||temperature(value)||(/실패/.test(value)?'조회 실패':'조회 중');

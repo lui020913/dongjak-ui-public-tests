@@ -24,7 +24,7 @@ test('all sliding sheets have a visible, monotonic fade; closing dims before rem
 test('transit sheet content size removes empty space but allows full expansion',()=>{
   const short=compactTransportHeight({header:90,grip:16,body:85,viewport:900});
   const long=compactTransportHeight({header:90,grip:16,body:800,viewport:900});
-  assert(short<300);assert.equal(long,468);
+  assert(short<300);assert.equal(long,540);assert(long<=900*.60);
   assert(compactTransportHeight({header:0,grip:0,body:0,viewport:900})>=196);
   const css=source('v910-request-completion.css');
   assert.match(css,/--dj9251-transport-content-height/);
@@ -36,7 +36,7 @@ test('transit sheet content size removes empty space but allows full expansion',
 
 test('facility compact height and AI fade maintain expansion and solid modal backdrop',()=>{
   assert(compactFacilityHeight({header:96,body:74,viewport:860})<250);
-  assert.equal(compactFacilityHeight({header:100,body:900,viewport:900}),468);
+  assert.equal(compactFacilityHeight({header:100,body:900,viewport:900}),504);
   const css=source('v910-request-completion.css');
   assert.match(css,/--dj9251-facility-content-height/);
   const ai=source('v880-supabase-safety-ai.css');
