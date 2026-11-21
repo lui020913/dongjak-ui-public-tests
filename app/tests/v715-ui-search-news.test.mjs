@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 const read=(p)=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 
 test('v7.0.29 final overrides remove filled safety buttons while retaining pressed state',()=>{
-  const css=read('src/v715-mobile-polish.css');
-  assert.match(read('src/main.js'),/import '\.\/v715-mobile-polish\.css'/);
+  const css=read('src/mobile-ui-baseline.css');
+  assert.match(read('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
   assert.match(css,/#dj-desktop-safety-rail/);
   assert.match(css,/#night-visibility-quick-off\[aria-pressed="true"\]/);
   assert.match(css,/background:#fbfdfc!important/);
@@ -13,7 +13,7 @@ test('v7.0.29 final overrides remove filled safety buttons while retaining press
 });
 
 test('mobile search prevents Safari zoom and keeps results above weather',()=>{
-  const css=read('src/v715-mobile-polish.css'),search=read('src/map-quick-search.js');
+  const css=read('src/mobile-ui-baseline.css'),search=read('src/map-quick-search.js');
   assert.match(css,/font-size:16px!important/);
   assert.match(css,/data-search-open="true"/);
   assert.match(css,/weather-widget\{visibility:hidden!important/);
@@ -26,7 +26,7 @@ test('mobile search prevents Safari zoom and keeps results above weather',()=>{
 });
 
 test('mobile safety buttons move higher and lower nav retains safe-area clearance',()=>{
-  const css=read('src/v715-mobile-polish.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/--dj-header-h,60px\) \+ 25px/);
   assert.match(css,/--dj-header-h,60px\) \+ 76px/);
   assert.match(css,/--dj-header-h,60px\) \+ 127px/);

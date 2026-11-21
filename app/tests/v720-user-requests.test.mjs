@@ -5,13 +5,13 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 const main=read('src/main.js');
 const html=read('index.html');
-const css=read('src/v720-ui-consistency.css');
+const css=read('src/mobile-ui-baseline.css');
 const help=read('src/mobile-map-controls.js');
 
 test('v7.0.29 keeps the full v7.0.19 feature chain and applies one final stylesheet',()=>{
- assert.match(main,/import '\.\/v719-repair-ui\.css'/);
- assert.match(main,/import '\.\/v720-ui-consistency\.css'/);
- assert.ok(main.indexOf("v720-ui-consistency.css")>main.indexOf("v719-repair-ui.css"));
+ assert.match(main,/import '\.\/mobile-ui-baseline\.css'/);
+ assert.match(main,/import '\.\/mobile-ui-baseline\.css'/);
+ assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('v614-transport-compact.css') && main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
  assert.match(main,/installNightVisibility/);
  assert.match(main,/initDongjakNews/);
  assert.match(main,/initMapQuickSearch/);

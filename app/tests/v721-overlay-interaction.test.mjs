@@ -12,7 +12,7 @@ test('v7.0.29 help button is not dependent on the optional fullscreen button',()
  assert.match(js,/guide\.hidden=false;positionGuide\(\)/);
 });
 test('desktop map actions move to the left of a visible transit drawer',()=>{
- const css=read('src/v721-overlay-interactions.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/#app:has\(#transport-sheet:not\(\[hidden\]\)\)\[data-tab="map"\] \.map-actions/);
  assert.match(css,/right:calc\(min\(460px,calc\(100vw - 165px\)\) \+ 30px\)!important/);
  assert.match(css,/z-index:2750!important/);
@@ -25,7 +25,7 @@ test('attribution credit remains available in map options without extra compact 
  assert.match(html,/www\.openstreetmap\.org\/copyright/);
 });
 test('mobile search is opaque and bottom panels have usable scroll height',()=>{
- const css=read('src/v721-overlay-interactions.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/background:#fff!important/);
  assert.match(css,/backdrop-filter:none!important/);
  assert.match(css,/max-height:min\(51dvh/);
@@ -34,7 +34,7 @@ test('mobile search is opaque and bottom panels have usable scroll height',()=>{
 });
 test('new stylesheet last, release metadata synchronized',()=>{
  const main=read('src/main.js'),pkg=JSON.parse(read('package.json'));
- assert.ok(main.indexOf('v721-overlay-interactions.css')>main.indexOf('v720-ui-consistency.css'));
+ assert.ok(main.indexOf('mobile-ui-baseline.css')>main.indexOf('v614-transport-compact.css') && main.indexOf('mobile-ui-baseline.css')<main.indexOf('v815-map-product.css'));
  assert.equal(pkg.version,APP_VERSION);
  assert.match(read('src/version-history.js'),/version:'v7\.0\.29'/);
 });

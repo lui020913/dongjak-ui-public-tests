@@ -5,3 +5,7 @@
 - Do not create additional `vNNN-*.css` patch files. Change `current.css` or the relevant owned component and delete the superseded rules in the same change.
 - The application still has historical baseline style modules, map-specific CSS, HTML-linked first-paint toolbar CSS, and the protected release's `frontend/production/mobile-next.css` bundle. They are **not** yet merged into this file. Deleting those without migrating dependencies, build injection, and browser tests would risk release regressions.
 - Before merging another source: verify cascade order, relative asset URLs, test fixture references, `@layer` precedence, CSS class ownership, and the resulting mobile render in Preview. If multiple owners overlap, remove the obsolete rules rather than merely appending overrides.
+
+## Consolidated historical baseline
+
+The former 26 adjacent `v700`–`v728` mobile CSS imports now live **verbatim in original cascade order** in `app/src/mobile-ui-baseline.css` (same directory as the originals, preserving asset URL resolution). The original 26 files and runtime imports were deleted together. This is a fixed **historical baseline, not a new patch destination**. All newly approved UI changes are applied by editing `app/src/mobile-ui/current.css` or their owned component source, removing superseded rules in the same PR. Avoid future versioned CSS imports.

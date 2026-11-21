@@ -19,10 +19,10 @@ test('9호선 급행 분리는 명시적으로 확인된 정보만 사용',()=>{
 });
 
 test('모바일 상행 하행은 좁은 화면에서도 두 열로 렌더링',()=>{
-  const css=source('src/v700-mobile-cleanup.css');
+  const css=source('src/mobile-ui-baseline.css');
   assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
   assert.match(css,/\.metro-arrival-direction-group \.transport-arrival-row\{[\s\S]*?flex-direction:column!important/);
-  assert.match(source('src/main.js'),/import '\.\/v700-mobile-cleanup\.css'/);
+  assert.match(source('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
 });
 
 test('제한속도와 단속카메라는 초기 화면에서 꺼진 상태',()=>{
@@ -44,7 +44,7 @@ test('시간표 기반 카드의 출처는 유지하고 중복 상단 배너는 
 });
 
 test('모바일 역 정보창을 열 때 지도 버튼 겹침을 방지',()=>{
-  const css=source('src/v700-mobile-cleanup.css'),js=source('src/transport-map.js');
+  const css=source('src/mobile-ui-baseline.css'),js=source('src/transport-map.js');
   assert.match(css,/#app\.transport-sheet-open :is\(#map-tools-toggle,#map-safety-toggle/);
   assert.match(js,/classList\?\.add\?\.\('transport-sheet-open'\)/);
   assert.match(js,/classList\?\.remove\?\.\('transport-sheet-open'\)/);
@@ -59,7 +59,7 @@ test('지역 뉴스 RSS 실패 시 공식 보도자료 대체 표시를 분명�
 });
 
 test('상단 검색 및 주요 버튼 스타일 일원화',()=>{
-  const css=source('src/v700-mobile-cleanup.css');
+  const css=source('src/mobile-ui-baseline.css');
   assert.match(css,/\.topbar>.map-quick-search \.map-quick-search-form/);
   assert.match(css,/-webkit-backdrop-filter:none!important/);
   assert.match(css,/#app #map-safety-toggle::before/);

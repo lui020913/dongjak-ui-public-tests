@@ -33,7 +33,7 @@ test('v7.0.29 bus history saves observations but never fabricates a past arrival
 });
 
 test('v7.0.29 mobile always renders five nav targets while every floating panel shares the nav baseline',()=>{
-  const css=src('src/v724-final-layout.css'),html=src('index.html');
+  const css=src('src/mobile-ui-baseline.css'),html=src('index.html');
   assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)!important/);
   assert.match(css,/#app #bottom-nav>\.nav-tab/);
   assert.match(css,/--dj-v724-panel-bottom/);
@@ -43,7 +43,7 @@ test('v7.0.29 mobile always renders five nav targets while every floating panel 
 });
 
 test('v7.0.29 road width gets a true icon and consistent floating legend',()=>{
-  const html=src('index.html'),css=src('src/v724-final-layout.css'),script=src('src/road-width-layer.js');
+  const html=src('index.html'),css=src('src/mobile-ui-baseline.css'),script=src('src/road-width-layer.js');
   assert.match(html,/id="toggle-road-width"[^>]*>\s*<svg class="dj-road-width-icon"/);
   assert.match(html,/class="dj-road-width-label">도로폭/);
   assert.match(css,/#app #road-width-legend:not\(\[hidden\]\)/);
@@ -51,7 +51,7 @@ test('v7.0.29 road width gets a true icon and consistent floating legend',()=>{
 });
 
 test('v7.0.29 theme icons stay centered and desktop cards track measured left navigation',()=>{
-  const css=src('src/v724-final-layout.css'),rail=src('src/v713-desktop-rail.js');
+  const css=src('src/mobile-ui-baseline.css'),rail=src('src/v713-desktop-rail.js');
   assert.match(css,/#app #theme-toggle::after/);
   assert.match(css,/background:#fff!important/);
   assert.match(css,/--dj-v724-rail-right/);

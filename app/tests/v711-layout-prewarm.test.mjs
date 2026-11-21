@@ -20,7 +20,7 @@ test('v7.0.29 X buttons use accessible labels but no raw × glyph competing with
    else assert.equal(m[1].trim(),'');
    assert.match(m[0],/aria-label=/);
  }
- const css=read('src/v711-map-layout.css');assert.match(css,/::after\{content:none!important/);
+ const css=read('src/mobile-ui-baseline.css');assert.match(css,/::after\{content:none!important/);
 });
 test('initial building prewarm prioritizes closest tile, only requested count',()=>{
  const sheets=[
@@ -36,7 +36,7 @@ test('initial building prewarm prioritizes closest tile, only requested count',(
  assert.match(main,/narrow\?2:4/);
 });
 test('side panels, right controls, top search helpers and scale are coherently aligned',()=>{
- const css=read('src/v711-map-layout.css');
+ const css=read('src/mobile-ui-baseline.css');
  for(const s of ['--dj-side-panel-w:430px','--dj-search-h:56px','--dj-left-dock-x:148px','#map-advanced-controls','.map-actions','#app .topbar .header-tools .weather-widget'])assert.ok(css.includes(s),s);
  const dock=read('src/map-scale-docking.js');assert.match(dock,/toolsRect\.top-mapRect\.top/);
  assert.match(dock,/cardWidth=430/);

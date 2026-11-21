@@ -27,7 +27,7 @@ test('last-train notice is derived from direction-specific official timetable ro
 test('facility details omit the popup arrow and set either route endpoint',()=>{
   const details=read('src/place-details.js');
   const main=read('src/main.js');
-  const css=read('src/v702-ui-alignment.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(details,/className:'dj-place-detail-popup'/);
   assert.match(details,/dj-place-route-actions/);
   assert.match(details,/dongjak:route-select/);
@@ -45,7 +45,7 @@ test('demo and export controls are removed without deleting local record editing
 });
 
 test('panels share the desktop surface, route height, invisible scrollbars and map controls spacing',()=>{
-  const css=read('src/v702-ui-alignment.css');
+  const css=read('src/mobile-ui-baseline.css');
   assert.match(css,/#app #bottom-nav,[\s\S]*#app \.page-panel/);
   assert.match(css,/height:auto!important/);
   assert.match(css,/#app #route-panel\.page-panel/);
