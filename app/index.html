@@ -63,13 +63,13 @@
          a theme/night reload; the main transition UI takes over once loaded. */
       html[data-dj-reload-splash="true"] body::before {
         content:"";position:fixed;inset:0;z-index:29000;
-        background:linear-gradient(150deg,#e5ece8,#dce9e3);
-        -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+        background:#edf3ef;
+        -webkit-backdrop-filter:none;backdrop-filter:none;
         pointer-events:all;
       }
       html[data-theme="dark"][data-dj-reload-splash="true"] body::before,
       html[data-dj-reload-mode="night"][data-dj-reload-splash="true"] body::before{
-        background:linear-gradient(150deg,#192d32,#0e2025);
+        background:#192d32;
       }
       html[data-dj-reload-splash="true"] body::after{
         content:attr(data-dj-reload-label);position:fixed;top:50%;left:0;right:0;
@@ -85,13 +85,13 @@
       .map-startup-overlay{
         --start-bg:#f3f7f5;--start-fg:#183b32;--start-muted:#688177;--start-track:#dceae3;
         position:fixed;inset:0;z-index:16000;display:grid;place-items:center;
-        background:radial-gradient(ellipse at 50% 39%,#ffffff 0%,var(--start-bg) 75%);
+        background:var(--start-bg);
         color:var(--start-fg);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;
         opacity:1;transition:opacity .3s ease;overflow:hidden;
       }
       html[data-theme="dark"] .map-startup-overlay{
         --start-bg:#101f25;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
-        background:radial-gradient(ellipse at 50% 39%,#1a3334 0%,var(--start-bg) 78%);
+        background:var(--start-bg);
       }
       /* Standalone iPhone pre-paint: the native status strip and the first
          pixels of the loader share the SAME tone. Start with a flat edge,
@@ -99,11 +99,11 @@
          This is inline so there is no color seam before Vite CSS loads. */
       html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay{
         --start-bg:#edf3ef;
-        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#f9fbfa 44%,var(--start-bg) 100%)!important;
+        background:var(--start-bg)!important;
       }
       html.dj-ios-home-pwa[data-theme="dark"] body #app .map-startup-overlay{
         --start-bg:#192d32;
-        background:linear-gradient(180deg,var(--start-bg) 0%,var(--start-bg) 16%,#1a3334 44%,var(--start-bg) 100%)!important;
+        background:var(--start-bg)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
       .map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}

@@ -38,12 +38,13 @@ test('community composer and feed use one native-status-matched primary surface'
   assert.doesNotMatch(controller,/background:'var\(--mf-surface-solid,#fff\)'/);
 });
 
-test('iOS modal top edge blends into the native color, including native dialog backdrops',()=>{
+test('iOS modal top edge uses the same flat native color without dim gradients',()=>{
   const css=read('src/mobile-pwa-status-tone-v793.css');
   assert.match(css,/:has\(#dj860-onboarding:not\(\[hidden\]\),#map-gesture-guide:not\(\[hidden\]\)\)/);
   assert.match(css,/z-index:25000!important/);
   assert.match(css,/#dj-ai-search-modal\[open\]::backdrop/);
-  assert.match(css,/background-image:var\(--dj-pwa-bridge-gradient\)!important/);
+  assert.match(css,/background-image:none!important/);
+  assert.doesNotMatch(css,/--dj-pwa-bridge-gradient:linear-gradient/);
   assert.match(css,/#djNext-layer-panel:not\(\[hidden\]\)::backdrop/);
 });
 

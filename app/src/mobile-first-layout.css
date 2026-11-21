@@ -12,7 +12,7 @@
     --mf-toolbar-height: 46px;
     --mf-nav-height: 68px;
     --mf-nav-gap: 14px;
-    --mf-surface: rgba(255,255,255,.96);
+    --mf-surface: #ffffff;
     --mf-surface-solid: #fff;
     --mf-ink: #203e34;
     --mf-muted: #678176;
@@ -47,7 +47,7 @@
   }
 
   html body #app#app#app#app#app[data-theme="dark"] {
-    --mf-surface: rgba(25,39,38,.96);
+    --mf-surface: #192725;
     --mf-surface-solid: #192725;
     --mf-ink: #edf6f1;
     --mf-muted: #afc4bb;
@@ -91,8 +91,8 @@
     background: var(--mf-surface) !important;
     color: var(--mf-ink) !important;
     box-shadow: var(--mf-shadow) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(1.25) !important;
-    backdrop-filter: blur(18px) saturate(1.25) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     overflow: visible !important;
     transform: none !important;
     translate: none !important;
@@ -483,24 +483,24 @@
     opacity: .82 !important;
     pointer-events: none !important;
     z-index: 3 !important;
-    backdrop-filter: blur(2px) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   html body #app#app#app#app#app #dj-v794-toolbar .dj831-edge-blur-left {
-    background: linear-gradient(90deg, rgba(255,255,255,.9), rgba(255,255,255,0)) !important;
+    background: none !important;
   }
 
   html body #app#app#app#app#app #dj-v794-toolbar .dj831-edge-blur-right {
-    background: linear-gradient(270deg, rgba(255,255,255,.9), rgba(255,255,255,0)) !important;
+    background: none !important;
   }
 
   html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-left {
-    background: linear-gradient(90deg, rgba(25,39,38,.95), rgba(25,39,38,0)) !important;
+    background: none !important;
   }
 
   html body #app#app#app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-right {
-    background: linear-gradient(270deg, rgba(25,39,38,.95), rgba(25,39,38,0)) !important;
+    background: none !important;
   }
 
   /* Map-only controls remain a compact floating stack on the right. */
@@ -586,8 +586,8 @@
     background: var(--mf-surface) !important;
     color: var(--mf-ink) !important;
     box-shadow: var(--mf-shadow) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(1.2) !important;
-    backdrop-filter: blur(18px) saturate(1.2) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     overflow: hidden !important;
     scrollbar-width: none !important;
     transform: translateX(-50%) !important;
@@ -710,7 +710,7 @@
     position: fixed !important;
     inset: 0 !important;
     display: block !important;
-    background: rgba(8,22,18,.24) !important;
+    background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     z-index: 5600 !important;
@@ -1417,7 +1417,7 @@
     padding: 0 !important;
     border: 1px solid rgba(255,255,255,.8) !important;
     border-radius: 16px !important;
-    background: linear-gradient(145deg,#167d61,#28a17b) !important;
+    background: #127b61 !important;
     color: #fff !important;
     box-shadow: 0 5px 16px rgba(18,110,79,.2) !important;
   }
@@ -1551,8 +1551,8 @@
     min-width: 15px !important;
     max-width: 15px !important;
     opacity: .9 !important;
-    backdrop-filter: blur(3px) !important;
-    -webkit-backdrop-filter: blur(3px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   html body #app#app#app#app#app .map-actions {

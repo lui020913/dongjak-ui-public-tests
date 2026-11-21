@@ -243,7 +243,7 @@
     padding: 0 !important;
     border: 1px solid rgba(255,255,255,.8) !important;
     border-radius: 16px !important;
-    background: linear-gradient(145deg, #167d61, #28a17b) !important;
+    background: #127b61 !important;
     box-shadow: 0 5px 16px rgba(18, 110, 79, .2) !important;
     color: #fff !important;
   }
@@ -281,8 +281,8 @@
     scroll-snap-type: x proximity !important;
     scrollbar-width: none !important;
     -webkit-overflow-scrolling: touch !important;
-    mask-image: linear-gradient(90deg, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9px, #000 calc(100% - 9px), transparent 100%) !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
   }
 
   html body #app#app#app#app#app #dj-v794-toolbar > .dj831-scrollport::-webkit-scrollbar {
@@ -395,8 +395,8 @@
     border-radius: 22px !important;
     background: var(--mf-surface) !important;
     box-shadow: var(--mf-shadow-raised) !important;
-    backdrop-filter: blur(16px) saturate(1.2) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     z-index: 3600 !important;
   }
 
@@ -1007,8 +1007,8 @@ html[data-theme="dark"] #app#app#app#app#app,
   }
 
   html body #app#app#app#app#app #dj-v794-toolbar > .dj831-edge-blur {
-    -webkit-backdrop-filter: blur(5px) !important;
-    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }
 
@@ -1018,8 +1018,8 @@ html[data-theme="dark"] #app#app#app#app#app,
 @layer request-completion {
   @media (max-width: 699px) {
     html body #app#app#app#app#app #dj-v794-toolbar .dj831-edge-blur {
-      -webkit-backdrop-filter: blur(5px) !important;
-      backdrop-filter: blur(5px) !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
     }
   }
 }

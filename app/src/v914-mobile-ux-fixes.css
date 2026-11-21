@@ -12,22 +12,22 @@
     min-width:12px !important; max-width:12px !important;
     opacity: .68 !important;
     pointer-events: none !important;
-    -webkit-backdrop-filter: blur(2px) !important;
-    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     border-radius: 8px !important;
     background-color:transparent !important;
   }
   html body #app#app#app #dj-v794-toolbar .dj831-edge-blur-left {
-    background: linear-gradient(90deg, rgba(242,248,244,.62) 0%, rgba(242,248,244,.24) 58%, rgba(242,248,244,0) 100%) !important;
+    background: none !important;
   }
   html body #app#app#app #dj-v794-toolbar .dj831-edge-blur-right {
-    background: linear-gradient(270deg, rgba(242,248,244,.62) 0%, rgba(242,248,244,.24) 58%, rgba(242,248,244,0) 100%) !important;
+    background: none !important;
   }
   html body #app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-left {
-    background: linear-gradient(90deg, rgba(27,47,48,.76) 0%, rgba(27,47,48,.30) 58%, rgba(27,47,48,0) 100%) !important;
+    background: none !important;
   }
   html body #app#app#app[data-theme="dark"] #dj-v794-toolbar .dj831-edge-blur-right {
-    background: linear-gradient(270deg, rgba(27,47,48,.76) 0%, rgba(27,47,48,.30) 58%, rgba(27,47,48,0) 100%) !important;
+    background: none !important;
   }
   html body #app#app#app #dj-v794-toolbar .dj912-toolbar-next {
     flex: 0 0 40px !important;
@@ -48,13 +48,13 @@
     border-right: 1px solid #315c50 !important;
     padding: 1px 5px 2px !important;
     border-radius: 0 0 3px 3px !important;
-    background: rgba(255,255,255,.82) !important;
+    background: #fff !important;
     color: #23483d !important;
     box-shadow: none !important;
     font: 650 10px/1.15 'Pretendard Variable', sans-serif !important;
   }
   html body #app#app#app[data-theme="dark"] #map .maplibregl-ctrl-scale {
-    background: rgba(31,51,53,.88) !important;
+    background: #1f3335 !important;
     color: #e8f5ee !important;
     border-color: #d2e8dc !important;
   }

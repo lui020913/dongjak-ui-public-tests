@@ -14,13 +14,15 @@ test('the shared mobile-first shell loads after the preserved mobile interaction
   assert.equal(main.includes('v881-tablet-workspace.css'),false);
 });
 
-test('POI edge fades are narrow, translucent and never block category-chip taps',()=>{
+test('POI toolbar edges have no gradient or blur and never block category-chip taps',()=>{
   const css=compact(read('src/v914-mobile-ux-fixes.css'));
   assert.match(css,/\.dj831-edge-blur\{[^}]*width:12px!important/);
   assert.match(css,/\.dj831-edge-blur\{[^}]*pointer-events:none!important/);
   assert.match(css,/scroll-padding-inline:12px!important/);
-  assert.ok(css.includes('rgba(242,248,244,0)'));
-  assert.ok(css.includes('rgba(27,47,48,0)'));
+  assert.equal(css.includes('linear-gradient('),false);
+  assert.equal(css.includes('backdrop-filter:blur('),false);
+  assert.ok(css.includes('background:none!important'));
+  assert.ok(css.includes('pointer-events:none!important'));
   assert.ok(css.includes('.dj831-edge-blur-left'));
   assert.ok(css.includes('.dj831-edge-blur-right'));
 });

@@ -20,13 +20,15 @@ test('phone layout uses safe areas and map-first navigation',()=>{
   assert.match(css,/#dj-v794-toolbar/);
   assert.match(css,/#app#app#app#app#app#app \.topbar > #dj-settings-mobile/);
   assert.match(css,/#bottom-nav/);
-  assert.match(css,/mask-image: linear-gradient/);
+  assert.ok(css.includes('mask-image: none !important;'));
+  assert.equal(css.includes('mask-image: linear-gradient'),false);
   assert.match(css,/#weather-label/);
   assert.match(css,/#theme-toggle/);
   assert.match(css,/#version-history-trigger/);
   assert.match(css,/flex-basis: 52px/);
   assert.match(css,/bottom: max\(0px, env\(safe-area-inset-bottom/);
-  assert.match(css,/backdrop-filter: blur\(5px\)/);
+  assert.ok(css.includes('backdrop-filter: none !important;'));
+  assert.equal(css.includes('backdrop-filter: blur(5px)'),false);
   assert.match(css,/@layer request-completion/);
 });
 
