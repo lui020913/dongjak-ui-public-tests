@@ -30,7 +30,8 @@ test('2·7호선은 직선 역 연결 대신 도로·하천 참고 굴곡점을 
 
 test('공식 GIS 조회는 호선별 LineString 경로를 읽고 신림선을 잘못 분류하지 않는다',()=>{
   for(const code of ['1','2','4','7','9'])assert.equal(resolveOfficialLine({sub_nm:`서울 지하철 ${code}호선`}),code);
-  assert.equal(resolveOfficialLine({sub_nm:'신림선'}),null);
+  // MOIS omits Sillim, but the explicitly attributed OSM fallback can supply it.
+  assert.equal(resolveOfficialLine({sub_nm:'신림선'}),'신림');
   assert.equal(resolveOfficialLine({sub_nm:'11호선'}),null);
   const official=line('7');
   const raw=extractOfficialPaths({features:[{attributes:{sub_nm:'7호선'},geometry:{paths:[official]}}]});

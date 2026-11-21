@@ -1493,7 +1493,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       renderedRailPaths=indexRenderedMetroRail(result.collection);
       setDisplayedRailPaths(map,renderedRailPaths);
       if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);
-      console.info('[지하철 노선] 공공 GIS 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '));
+      const dataSources=[...new Set(result.collection.features.filter(f=>!f.properties?.schematic).map(f=>f.properties?.source).filter(Boolean))];
+       console.info('[지하철 노선] 실제 지형 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '),'출처:',dataSources.join(', '));
+       window.dispatchEvent(new CustomEvent('dj:rail-geometry-loaded',{detail:{lines:result.lines,sources:dataSources}}));
     }).catch(error=>{
       console.info('[지하철 노선] 공공 GIS 조회 실패, 기존 안내선형 유지:',error?.message||error);
     });

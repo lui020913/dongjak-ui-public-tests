@@ -1,7 +1,7 @@
 /**
  * Seoul metro track geometry (progressive enhancement).
  * MOIS / Esri Korea: 2026.04.30 nationwide subway lines, FeatureServer layer 2.
- * The service excludes the Sillim Line. Keep local Sillim coordinates.
+ * MOIS excludes Sillim; a separately attributed OpenStreetMap fallback may cover it.
  * A failing or incomplete remote service must NEVER remove the local rail overlay.
  */
 import {railGeojson, VERIFIED_STATIONS, FIXED_RAIL_STATION_ORDER} from './fixed-rail-data.js';
@@ -9,7 +9,7 @@ import {FIXED_RAIL_COLORS, FIXED_RAIL_NAMES} from './fixed-rail-lines.js';
 
 export const OFFICIAL_RAIL_SOURCE = 'https://portal.esrikr.com/arcgis/rest/services/Hosted/MOIS_KR_Subway/FeatureServer/2/query';
 const EXTENT=[126.855,37.438,127.055,37.562];
-const VALID_LINES=new Set(['1','2','4','7','9']);
+const VALID_LINES=new Set(['1','2','4','7','9','신림']);
 const RAD=Math.PI/180;
 const METERS=111320;
 const fc=features=>({type:'FeatureCollection',features});
@@ -31,7 +31,7 @@ export function resolveOfficialLine(attributes={}){
   const names=fields.map(k=>attributes?.[k]).filter(Boolean).map(String);
   for(const name of names){
     const normalized=name.replace(/\s/g,'');
-    if(/신림선|Sillim/i.test(normalized))return null; // dataset contains no verified Sillim geometry
+    if(/신림선|Sillim/i.test(normalized))return '신림'; // only the OSM fallback currently covers Sillim
     for(const code of VALID_LINES){
       if(new RegExp(`(?:^|[^0-9])0?${code}(?:호선|선|호|線|號線|line|$|[^0-9])`,'i').test(normalized))return code;
     }
@@ -52,7 +52,7 @@ export function extractOfficialPaths(payload){
     for(const arr of raw){
       if(!Array.isArray(arr)||arr.length<2)continue;
       const coordinates=arr.map(geometryAsWgs).filter(validPoint);
-      if(coordinates.length>=2)paths.push({line:code,coordinates});
+      if(coordinates.length>=2)paths.push({line:code,coordinates,origin:props.data_origin==='OpenStreetMap_ODbL'||payload.source==='OpenStreetMap_ODbL'?'OpenStreetMap_ODbL':'MOIS_KR_Subway_2026'});
     }
   }
   return paths;
@@ -99,7 +99,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
   for(const path of rawPaths||[]){
     if(!VALID_LINES.has(path.line))continue;
     if(!grouped.has(path.line))grouped.set(path.line,[]);
-    grouped.get(path.line).push(path.coordinates);
+    grouped.get(path.line).push(path);
   }
   const replacements=new Map();
   for(const [line,paths] of grouped){
@@ -108,8 +108,9 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
     const features=[];
     const stationNear=new Set();
     let length=0;
-    for(const path of paths){
-      // Keep the original vertices of the official line; never replace with station chords.
+    for(const railPath of paths){
+      const path=railPath.coordinates;
+      // Keep original surveyed/mapped vertices; never replace with station chords.
       let run=null;
       const flush=()=>{if(run?.geometry.coordinates.length>=2)features.push(run);run=null;};
       for(let i=1;i<path.length;i++){
@@ -137,7 +138,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
           }else{
             flush();
             run={type:'Feature',properties:{line:FIXED_RAIL_NAMES[line],color:FIXED_RAIL_COLORS[line],opacity,
-              source:'MOIS_KR_Subway_2026',schematic:false},geometry:{type:'LineString',coordinates:[start,end]}};
+              source:railPath.origin||'MOIS_KR_Subway_2026',schematic:false},geometry:{type:'LineString',coordinates:[start,end]}};
           }
         }
       }
