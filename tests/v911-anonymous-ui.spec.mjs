@@ -533,6 +533,12 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await expect(page.locator('#app')).toHaveAttribute('data-dj-next-layer-action','open');
  await expect(modal).toBeVisible();await expect(scroll).toBeVisible();await expect(header).toBeVisible();
  const bounds=async()=>await header.boundingBox();
+ // The sheet moves vertically during its intentional entry animation.
+ // Scroll-lock geometry is meaningful only after that movement settles.
+ // Await actual browser animation completion (not a guessed sleep).
+ await modal.locator('.djNext-modal-body').evaluate(async node=>{
+   await Promise.all(node.getAnimations({subtree:false}).map(animation=>animation.finished.catch(()=>{})));
+ });
  await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);

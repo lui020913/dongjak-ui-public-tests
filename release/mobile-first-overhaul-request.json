@@ -3,9 +3,9 @@
   "application_version": "9.2.56",
   "public_work_branch": "main",
   "purpose": "Fix phone composer isolation, weather header overlap and negative zero, facility blank sheet, route selection hint, bus arrivals visible area, close-range metro icon crowding, community empty-state density, and news data status. Preserve independent fullscreen tabs and native phone pill.",
-  "attempt": 175,
+  "attempt": 176,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 44871223562 phone shard 3 intermittently missed the onboarding page-number transition under mobile runner frame/timer lag (still '01 / 05' at 5 seconds). Preserve the true opacity-based outgoing/incoming crossfade and implement immediate visible semantic progress/count acknowledgement on accepted Next/Previous/Dot events; actual slide content remains swapped by the existing one-shot paint-synchronized crossfade. Keep full mobile/design QA and guarded Production.",
+  "last_retry_reason": "Run 44871872902 failed phone shard 10 on rapid onboarding Next 04→05 because semantic index only changed after a 205ms crossfade timer; update index on accepted navigation immediately so fast taps advance reliably while crossfade still paints. Shard 2 measured layer-sheet header movement during intentional 350ms entry animation; await the real CSS/WAAPI animation finish before asserting the header stays fixed on internal scroll. Retain all original visual and interaction checks; full protected exact-source QA required.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
