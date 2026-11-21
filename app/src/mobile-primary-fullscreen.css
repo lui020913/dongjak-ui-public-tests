@@ -1,6 +1,6 @@
 /* Primary phone tabs are independent screens, never draggable map sheets.
    Original route, news, community and account nodes retain their live handlers. */
-@layer mobile-first-shell {
+@layer request-completion {
   @media (max-width:699px) {
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > .topbar,
     html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) :is(#dj-v794-toolbar,#djNext-toolbar) {
