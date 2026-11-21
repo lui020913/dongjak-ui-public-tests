@@ -957,6 +957,42 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
 });
 
 
+test('iPhone primary tab switch keeps an opaque screen at every animation frame',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await page.evaluate(()=>{
+  const until=performance.now()+4500;
+  const samples=[];window.__phoneTabFrameAudit=samples;
+  function frame(){
+   const root=document.getElementById('app');
+   const selected=root.dataset.tab;
+   if(['route','participate','news','mine'].includes(selected)){
+    const panel=document.querySelector('.page-panel[data-page="'+selected+'"]');
+    const css=panel?getComputedStyle(panel):null;
+    samples.push({
+     selected,
+     shown:!!panel&&!panel.hidden&&css?.display!=='none'&&css?.visibility!=='hidden',
+     opacity:Number(css?.opacity),
+     background:css?.backgroundColor||''
+    });
+   }
+   if(performance.now()<until)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+ });
+ for(const key of ['route','news','mine','participate']){
+  await tap(page,tab(page,key));
+  await expect(page.locator('#app')).toHaveAttribute('data-tab',key);
+  await expect(page.locator('.page-panel[data-page="'+key+'"]')).toBeVisible();
+ }
+ const samples=await page.evaluate(()=>window.__phoneTabFrameAudit);
+ expect(samples.length).toBeGreaterThan(5);
+ const bad=samples.filter(f=>!f.shown||f.opacity<.95||f.background==='rgba(0, 0, 0, 0)'||f.background==='rgb(255, 255, 255)');
+ expect(bad,'No root snapshot white flash or transparent full-screen panel: '+JSON.stringify(bad.slice(0,8))).toHaveLength(0);
+ await expect(page.locator('#dj-tab-surface-curtain')).toHaveCount(0);
+ await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+});
+
 test('bottom dock switches adjacent tabs promptly without old-panel bounce or a blank page',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await enter(page,'route-panel','route');

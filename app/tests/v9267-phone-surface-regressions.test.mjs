@@ -21,15 +21,16 @@ test('recording mode cannot push the independent AI action down',()=>{
   assert.match(css,/position:fixed!important/);
   assert.match(css,/#dj890-ai-orb/);
 });
-test('fullscreen tab transitions use real page snapshots and never show an opaque white curtain',()=>{
+test('full-screen tabs switch immediately without a white WebGL snapshot or opaque curtain',()=>{
  const local=new URL('../src/mobile-next.css',import.meta.url);
  const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
- assert.match(tab,/doc\.startViewTransition\(\(\)=>\{replay\(button\);\}\)/);
- assert.match(tab,/if\(reduced\(\)\|\|typeof doc\.startViewTransition!=='function'\)/);
- assert.doesNotMatch(tab,/ensureCurtain|curtain\.hidden=false/);
- assert.doesNotMatch(material,/#dj-tab-surface-curtain/);
- assert.match(material,/::view-transition-old\(root\)/);
- assert.match(material,/::view-transition-new\(root\)/);
+ assert.match(tab,/if\(!replay\(button\)\)return/);
+ assert.match(tab,/clearEntrance\(\)/);
+ assert.match(tab,/panel\.classList\.add\('dj-tab-content-enter'\)/);
+ assert.doesNotMatch(tab,/doc\.startViewTransition|skipTransition|queued=button/);
+ assert.doesNotMatch(material,/#dj-tab-surface-curtain|::view-transition-(old|new)\(root\)/);
+ assert.match(material,/\.page-panel\.dj-tab-content-enter:not\(\[hidden\]\)/);
+ assert.match(material,/@keyframes djTabContentReveal/);
  for(const key of ['route','participate','news','mine'])assert(css.includes('data-tab="'+key+'"'));
 });
 
