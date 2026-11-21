@@ -10,6 +10,18 @@ async function assertAboveDock(page,selector){
  expect(box,'visible sheet '+selector).toBeTruthy();expect(nav).toBeTruthy();
  expect(box.y+box.height,'sheet must leave navigation unobscured').toBeLessThanOrEqual(nav.y-5);
 }
+async function assertFullPageOrAboveDock(page,selector){
+ if(page.viewportSize().width>=700)return assertAboveDock(page,selector);
+ const rect=await page.locator(selector).boundingBox();
+ const dock=await page.locator('#bottom-nav').boundingBox();
+ expect(rect,'full-screen '+selector).toBeTruthy();
+ expect(Math.abs(rect.x)).toBeLessThan(2);
+ expect(Math.abs(rect.y)).toBeLessThan(2);
+ expect(Math.abs(rect.width-page.viewportSize().width)).toBeLessThan(2);
+ expect(Math.abs(rect.height-page.viewportSize().height)).toBeLessThan(2);
+ expect(dock.y).toBeGreaterThan(rect.y);
+ expect(dock.y+dock.height).toBeLessThanOrEqual(rect.y+rect.height+2);
+}
 test('header, theme, language, settings, news and navigation retain usable hit targets',async({page},info)=>{
  await openMapPage(page);await expect(page.locator('#app')).toHaveAttribute('data-dj910-ready','1');
  const logo=page.locator(compact(page)?'#dj-settings-mobile':'#dj-about-pc');
@@ -43,7 +55,7 @@ test('header, theme, language, settings, news and navigation retain usable hit t
  await clickRealPointer(page,page.locator('#dj-settings-done'),'settings done');
  await clickRealPointer(page,navTab(page,'news'),'news');
  const radius=await page.locator('#dongjak-news-refresh').evaluate(n=>getComputedStyle(n).borderRadius);expect(parseFloat(radius)).toBeGreaterThan(20);
- if(compact(page))await assertAboveDock(page,'#news-panel');
+ if(compact(page))await assertFullPageOrAboveDock(page,'#news-panel');
  await page.screenshot({path:`visual-v910/${info.project.name}-news.png`});
  await clickRealPointer(page,navTab(page,'route'),'directions');
  await expect(page.locator('#route-panel')).toBeVisible();
@@ -51,7 +63,7 @@ test('header, theme, language, settings, news and navigation retain usable hit t
  if(compact(page))await expect(page.locator('#route-calc')).toBeInViewport();
  const primary=await page.locator('#route-calc').evaluate(n=>getComputedStyle(n).backgroundColor);
  const multimodal=await page.locator('#dj815-rail-planner > button').evaluate(n=>getComputedStyle(n).backgroundColor);expect(primary).toBe(multimodal);
- if(compact(page))await assertAboveDock(page,'#route-panel');
+ if(compact(page))await assertFullPageOrAboveDock(page,'#route-panel');
  await page.screenshot({path:`visual-v910/${info.project.name}-route.png`});
 });
 test('actual transit controller: compact station and bus header, marker focus and route colors',async({page},info)=>{
