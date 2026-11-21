@@ -3,9 +3,9 @@
   "application_version": "9.2.55",
   "public_work_branch": "main",
   "purpose": "Resolve iPhone community category height expansion, restore shared weather sheet expand/collapse, default live subway ON for first-time users with close-zoom quota protection, and make latest update notes readable. Preserve v9.2.54 fullscreen tabs, native phone dock, historical versions, on-device settings and protected Preview QA / Production gate.",
-  "attempt": 167,
+  "attempt": 168,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 44851884185 passed v9.2.55 source reconstruction, baseline anchor patch and dependency installation, then 1/268 regression files failed because the v9.2.54 fullscreen header test referenced the public frontend path, absent in isolated production build. Test now reads the identical copied production CSS from src/mobile-next.css with source CI fallback; no behavior or visual contract weakened. Re-run all gates.",
+  "last_retry_reason": "The exact Preview 44852161204 passed build, 11/12 phone shards and all 6 screen captures and Gemini reviews. Shard 7 had two stale metro acceptance tests expecting distant API polls. The app now intentionally avoids quota use below zoom 16.4 and requests on user zoom-in. Rework these two browser tests to verify zero distant requests, actual near-zoom mocked train data, hidden distant symbols and ERROR-337 after near-zoom API call; preserve all other gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
