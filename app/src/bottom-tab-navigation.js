@@ -36,6 +36,11 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!closing&&button.dataset.tab===current)return;
   const motion=win.DongjakWindowMotion;
   const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
+  // Fullscreen tabs return directly to HOME; do not run the 300ms sheet exit.
+  // The existing safety-home guard remains the sole map-return owner.
+  if(!closing&&panel&&['route','participate','news','mine'].includes(current)&&button.dataset.tab==='map'){
+    motion?.cancel?.(panel);return;
+  }
   // Non-map pages use the existing navigator synchronously. No blank map frame.
   if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
    motion?.cancel?.(panel);return;
