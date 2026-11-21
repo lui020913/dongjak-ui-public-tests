@@ -90,34 +90,6 @@
     position:relative;
     z-index:1;
   }
-  /* Only foreground content fades. The opaque page surface never fades and
-     consequently cannot reveal the underlying map while tabs are switched. */
-  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body) {
-    animation:dj9267-page-foreground-in .16s ease-out both!important;
-  }
-
-  /* A short opaque transition layer sits under the new page but above map
-     tiles. The JS controller removes it after the page has appeared. */
-  html body #app#app#app#app#app > #dj-tab-surface-curtain:not([hidden]) {
-    display:block!important;
-    position:fixed!important;
-    inset:0!important;
-    width:100vw!important;
-    height:100dvh!important;
-    background:var(--dj-primary-page-bg,#edf3ef)!important;
-    border:0!important;
-    border-radius:0!important;
-    opacity:1!important;
-    transform:none!important;
-    pointer-events:none!important;
-    z-index:6450!important;
-    transition:opacity .14s ease!important;
-  }
-  html body #app#app#app#app#app > #dj-tab-surface-curtain.dj-tab-curtain-out:not([hidden]) {
-    opacity:0!important;
-  }
-  html body #app#app#app#app#app > #dj-tab-surface-curtain[hidden] {display:none!important;}
-
   /* The My Info hub uses one understated card/icon system in both themes.
      Do not reinstate the legacy saturated square icon tiles. */
   html body #app#app#app#app#app #mine-panel .dj834-profile-card,
@@ -199,15 +171,6 @@
   }
 }
 }
-@keyframes dj9267-page-foreground-in {
-  from {opacity:.32}
-  to {opacity:1}
-}
-@media (max-width:699px) and (prefers-reduced-motion:reduce) {
-  #app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body) {animation:none!important;}
-  #app > #dj-tab-surface-curtain {transition:none!important;}
-}
-
 /* The consent dialog must not inherit bottom-sheet translation or lateral
    animations. The provided iPhone recording showed it shifting horizontally
    between repeated openings. Fade in place at the centre of the viewport. */

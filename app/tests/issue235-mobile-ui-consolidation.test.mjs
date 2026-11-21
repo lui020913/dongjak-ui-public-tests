@@ -31,25 +31,27 @@ test('compact subway displays arrival data before optional rail neighbor control
  assert.ok(metro.includes('stationMetroQuotaUntil>Date.now()'));
 });
 
-test('bottom-tab dissolve has one controller with coalesced selection and no old patch animations',()=>{
+test('bottom-tab crossfade uses one real-page transition without an opaque intermediate curtain',()=>{
  const source=read('src/bottom-tab-navigation.js');
  const css=frontend('mobile-next.css');
- assert.deepEqual(TAB_TRANSITION,{exit:90,enter:145});
+ assert.deepEqual(TAB_TRANSITION,{crossfade:170});
  assert.equal(adjacentTabIndex(2,5,-70,0),3);
- assert.ok(TAB_TRANSITION.exit+TAB_TRANSITION.enter<260);
- assert.match(source,/if\(exitTimer\)\{pending=button;return;\}/);
- assert.match(source,/if\(settleTimer\)finishVisual\(\)/);
- assert.match(source,/if\(reduced\(\)\)\{const target=pending;pending=null;replay\(target\);return;\}/);
- assert.match(source,/outgoing\.classList\.add\('dj-mobile-tab-exit'\)/);
- assert.match(source,/incoming\.classList\.add\('dj-mobile-tab-enter'\)/);
- assert.match(source,/curtain\?\.classList\.add\('dj-tab-curtain-out'\)/);
- assert.ok(css.includes('.dj-mobile-tab-exit:not([hidden])'));
- assert.ok(css.includes('.dj-mobile-tab-enter:not([hidden])'));
- for(const retired of ['dj9272-tab-leave','dj9272-tab-enter','dj9272PageEnter','curtainFade','curtainHide']){
-  assert.equal(source.includes(retired),false,retired);
+ assert.match(source,/doc\.startViewTransition\(\(\)=>\{replay\(button\);\}\)/);
+ assert.match(source,/if\(activeTransition\)\{/);
+ assert.match(source,/queued=button/);
+ assert.match(source,/activeTransition\.skipTransition\?\.\(\)/);
+ assert.match(source,/if\(reduced\(\)\|\|typeof doc\.startViewTransition!=='function'\)/);
+ assert.match(source,/transition\.finished/);
+ assert.ok(css.includes('::view-transition-old(root)'));
+ assert.ok(css.includes('::view-transition-new(root)'));
+ assert.ok(css.includes('djTabSnapshotOut'));
+ assert.ok(css.includes('djTabSnapshotIn'));
+ for(const legacy of ['#dj-tab-surface-curtain','.dj-mobile-tab-exit','.dj-mobile-tab-enter',
+                     'dj9272-tab-leave','dj9272-tab-enter','dj9272PageEnter']){
+  assert.equal(css.includes(legacy),false,'Retired opaque curtain/independent fade CSS: '+legacy);
  }
- for(const retired of ['.dj9272-tab-leave','.dj9272-tab-enter','dj9272PageEnter']){
-  assert.equal(css.includes(retired),false,retired);
+ for(const legacy of ['ensureCurtain','curtain.hidden','finishVisual','dj9272-tab-leave','dj9272-tab-enter']){
+  assert.equal(source.includes(legacy),false,'Retired JS owner: '+legacy);
  }
 });
 

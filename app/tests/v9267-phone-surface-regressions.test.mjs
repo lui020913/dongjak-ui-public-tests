@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const css=read('src/v9267-phone-surface-regressions.css');
@@ -21,15 +21,18 @@ test('recording mode cannot push the independent AI action down',()=>{
   assert.match(css,/position:fixed!important/);
   assert.match(css,/#dj890-ai-orb/);
 });
-test('fullscreen tab transitions mask the underlying map without intercepting touches',()=>{
-  assert.match(css,/#dj-tab-surface-curtain/);
-  assert.match(css,/pointer-events:none!important/);
-  for(const key of ['route','participate','news','mine'])assert(css.includes('data-tab="'+key+'"'));
-  assert.match(tab,/function ensureCurtain\(\)/);
-  assert.match(tab,/ensureCurtain\(\)/);
-  assert.match(tab,/curtain\.hidden=false/);
-  assert.match(tab,/finishVisual\(\);curtain\?\.remove/);
+test('fullscreen tab transitions use real page snapshots and never show an opaque white curtain',()=>{
+ const local=new URL('../src/mobile-next.css',import.meta.url);
+ const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+ assert.match(tab,/doc\.startViewTransition\(\(\)=>\{replay\(button\);\}\)/);
+ assert.match(tab,/if\(reduced\(\)\|\|typeof doc\.startViewTransition!=='function'\)/);
+ assert.doesNotMatch(tab,/ensureCurtain|curtain\.hidden=false/);
+ assert.doesNotMatch(material,/#dj-tab-surface-curtain/);
+ assert.match(material,/::view-transition-old\(root\)/);
+ assert.match(material,/::view-transition-new\(root\)/);
+ for(const key of ['route','participate','news','mine'])assert(css.includes('data-tab="'+key+'"'));
 });
+
 test('fullscreen footer and My Info icons use the shared theme card surface',()=>{
   assert.match(css,/#mine-panel \.dj834-setting-icon/);
   assert.match(css,/#mine-panel \.dj834-profile-card/);
