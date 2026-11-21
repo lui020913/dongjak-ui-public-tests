@@ -109,6 +109,10 @@ export function installMyInfo(doc=document){
  // Account always belongs to profile view. Move the old activity DOM without
  // recreating it so favorite buttons and existing event handlers keep working.
  body.prepend(landing);landing.insertAdjacentElement('afterend',detail);
+ // Language may initialize before this settings hub. Keep the existing live
+ // select/listeners and place it after "내 활동" rather than inside hidden records.
+ const existingLanguage=body.querySelector('.dj854-language-section');
+ if(existingLanguage)landing.append(existingLanguage);
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
