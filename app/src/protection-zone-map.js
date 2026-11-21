@@ -403,7 +403,7 @@ export function installProtectionZoneMap({map,maplibregl,app,nightMode=null}){
     const facilityPopup=p=>`<strong>${esc(p.facility_name)}</strong><p>시설 대표 POINT (주 출입문 확인 전)</p>`;
     bind('pza-child-point',facilityPopup);bind('pza-senior-point',facilityPopup);
     const schoolGapPopup=p=>`<strong>${esc(p.road_name||'이름 미확인 도로')}</strong>
-      <p>초등학교 시설 대표점 300·500m 범위 중 현재 지정 폴리곤 밖에 있는 도로의 <b>시범 검토</b> 결과입니다.</p>
+      <p>앱에 등록된 <b>초등학교 2개교의 시설 대표점</b> 300·500m 범위 중 지정 폴리곤 외부인 선형의 시범 결과입니다. 인접한 은로초 등 추가 시설은 아직 미반영입니다.</p>
       <dl><dt>제도적 보호 적정성 시범점수</dt><dd>${esc(p.school_coverage_preview_score)} / 100점</dd>
       <dt>300m 미지정 비율</dt><dd>${esc(p.unprotected_within_300_pct)}%</dd>
       <dt>300~500m 미지정 비율</dt><dd>${esc(p.unprotected_300_to_500_pct)}%</dd>
