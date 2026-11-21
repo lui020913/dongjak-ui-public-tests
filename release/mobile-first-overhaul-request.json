@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.75",
   "public_work_branch": "main",
-  "purpose": "9.2.75 exact latest main protected release for Issue #235 remediation: PR #237 (legacy CSS/JS removed, Liquid Glass action controls, compact subway ETA before neighbors, single tab transition), PR #239 (categorized release history QA), PR #241 (MOIS official GIS same-origin server cache and direct fallback), PR #242 (phone compact ETA-first and no duplicate subway badge ring visual QA), plus v9.2.75 iOS/nearby/weather/PRI corrections. Keep user-visible version 1.0 and category-based update history; internal SemVer and Git SHA for release integrity. Full isolated build > Preview > all 12 mobile QA shards and six visual captures > exploratory QA > protected Production, never bypass.",
-  "attempt": 213,
+  "purpose": "9.2.75 internal traceable release (user-visible pre-release version 1.0): Issue #235 PR #244 fixes actual Production `/api/rail-geometry` HTTP 502 by preferring MOIS GIS and falling back only on outage to labeled OpenStreetMap ODbL track geometry for lines 1,2,4,7,9,Sillim. Live integration diagnostic #44915553809 verified status 200, 38 real paths, all 6 line replacements and 495 actual geometry features; full Public source CI #44915408338 succeeded. Preserve all previously approved liquid-glass UI, station ETA first, tab transition, map/GPS/API. Full isolated candidate build, Preview, all 12 mobile QA shards, visual analysis, protected Production, and post-deploy rail geometry endpoint check. No bypass.",
+  "attempt": 214,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run #44912735690 failed in mobile QA 3/8/11 etc because protected test expected the *old* railway neighbor-before-arrival placement and a 2px selected-line ring; both contradict user-approved Issue #235 UI. PR #242 replaced assertions with actual arrival-first DOM geometry and border thickness. Public CI #44913276956 success. PR #241 public CI #44912965319 success. Rebuild from latest main including both changes and complete all protection gates.",
+  "last_retry_reason": "Roll-forward necessary because protected Production #44913478678 succeeded overall but independent live endpoint diagnostics #44914509632 and #44914965165 proved MOIS source unreachable and rail API HTTP 502, leaving schematic track geometry. PR #244 is validated with live OSM-derived fixed-bounds geometry (#44915553809) and source attribution. Deploy latest main, do not reuse old build.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
