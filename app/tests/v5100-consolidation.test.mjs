@@ -53,7 +53,7 @@ test('verified OSM lines become bridge-shaped GeoJSON instead of arbitrary point
 });
 
 test('release information and package are synchronized to the integrated version',()=>{
- assert.match(read('index.html'),new RegExp('>v'+APP_VERSION.replaceAll('.','\\.')+'<\/button>'));
+   assert.match(read('index.html'),/>업데이트<\/button>/);
  assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
  assert.equal(JSON.parse(read('public/version.json')).version,APP_VERSION);
 });

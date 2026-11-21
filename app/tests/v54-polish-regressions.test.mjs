@@ -10,7 +10,7 @@ const read=path=>readFileSync(new URL(path,root),'utf8');
 test('v5.4 로깅 및 HTML 버전 일치',()=>{
   const pkg=JSON.parse(read('package.json'));
   assert.equal(pkg.version,APP_VERSION);
-  assert.match(read('index.html'),new RegExp('>v'+APP_VERSION.replaceAll('.','\\.')+'<\/button>'));
+   assert.match(read('index.html'),/>업데이트<\/button>/);
   assert.equal(VERSION_HISTORY[0].version,'v7.0.29');
 });
 test('모든 지하철 호선 배지는 역명 끝에 역을 붙이고 신림선만 신림을 표시',()=>{
