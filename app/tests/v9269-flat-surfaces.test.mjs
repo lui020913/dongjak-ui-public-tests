@@ -80,7 +80,8 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const css=productionStyle('mobile-next.css');
  const js=productionStyle('mobile-next.js');
  const nav=read('src/bottom-tab-navigation.js');
- const apply=readFileSync(new URL('../../scripts/apply-mobile-next.mjs',import.meta.url),'utf8');
+ const integration=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
+ const apply=existsSync(integration)?readFileSync(integration,'utf8'):null;
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
@@ -91,7 +92,11 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
  assert.ok(js.includes("transport.dataset.dj9272Transfer"));
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
- assert.ok(apply.includes('installV9272PhoneExperience({app});'));
+ // The public PR checkout contains the integration script; the sealed mobile
+ // release bundle contains its already-patched main.js but not root scripts/.
+ assert.ok(apply
+  ? apply.includes('installV9272PhoneExperience({app});')
+  : main.includes('installV9272PhoneExperience({app});'));
  assert.ok(main.includes("window.addEventListener('dj-next:fit-route'"));
  assert.ok(nav.includes("previous.classList.add('dj9272-tab-leave')")||nav.includes("previous)previous.classList.add('dj9272-tab-leave')"));
  assert.ok(nav.includes("protectPageTransition(nextTab)"));
