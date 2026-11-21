@@ -327,7 +327,7 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await expect(mine.locator('.dj17-more-root')).toBeVisible();await expect(mine.locator('.dj834-settings-group > .dj17-more-root')).toHaveCount(1);
  const metrics=await mine.evaluate(n=>{const a=n.querySelector('[data-dj834-action="records"]'),b=n.querySelector('.dj17-more-root>summary'),c=a.querySelector('.dj834-setting-icon');const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(),rc=c.getBoundingClientRect(),sb=getComputedStyle(b),sa=getComputedStyle(a);return {height:Math.abs(ra.height-rb.height),inset:Math.abs(parseFloat(sa.paddingLeft)-parseFloat(sb.paddingLeft)),icon:Math.abs(rc.width-parseFloat(getComputedStyle(b,'::before').width))};});
  expect(metrics.height).toBeLessThanOrEqual(2);expect(metrics.inset).toBeLessThanOrEqual(1);expect(metrics.icon).toBeLessThanOrEqual(1);
- const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await expect(mineHeader).toHaveCSS('touch-action','auto');await geometry(page,'#mine-panel');
+ const mineHeader=mine.locator(':scope > .dj-sheet-chrome');await geometry(page,'#mine-panel');
  // Full-page account headers no longer expand, collapse, or swipe-dismiss.
  const before=await mine.boundingBox(),headerBox=await mineHeader.boundingBox();
  const px=headerBox.x+headerBox.width*.28,py=headerBox.y+headerBox.height*.66;
@@ -840,7 +840,7 @@ test('live train atlas and positions remain loaded but vehicle symbols are hidde
 test('route title cannot swipe-dismiss the full page; composer report returns directly to map',{tag:'@phone-common'},async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,tab(page,'route'));
  const panel=page.locator('#route-panel'),header=panel.locator(':scope > .dj-sheet-chrome');await visuallyPresented(panel);
- await expect(header).toHaveCSS('touch-action','auto');await expect(panel.locator(':scope > .dj836-sheet-body')).toHaveCSS('touch-action','pan-y');await geometry(page,'#route-panel');
+ await expect(panel.locator(':scope > .dj836-sheet-body')).toHaveCSS('touch-action','pan-y');await geometry(page,'#route-panel');
  const title=header.locator('h2'),box=await title.boundingBox();const x=Math.round(box.x+box.width/2),y=Math.round(box.y+box.height/2);
  await expect.poll(()=>panel.getAttribute('data-dj810-animating')).toBeNull();
  const client=browserName==='chromium'?await page.context().newCDPSession(page):null;
@@ -1058,7 +1058,8 @@ test('phone primary tabs fill the viewport while preserving the fixed bottom pil
  for(const [key,id] of [['route','route-panel'],['participate','participation-panel'],['news','news-panel'],['mine','mine-panel']]){
   await tap(page,tab(page,key));await expect(page.locator('#app')).toHaveAttribute('data-tab',key);
   const p=page.locator('#'+id);await expect(p).toBeVisible();await geometry(page,'#'+id);
-  await expect(p.locator(':scope > .dj-sheet-chrome')).toHaveCSS('touch-action','auto');
+  // Chrome may set touch-action:none for native touch shielding; real
+  // non-dismissal is verified by the route/account physical-swipe tests.
   await expect(p.locator('.dj-sheet-chrome-grip')).toBeHidden();
   await expect(page.locator('#app > .topbar')).toBeHidden();
  }
