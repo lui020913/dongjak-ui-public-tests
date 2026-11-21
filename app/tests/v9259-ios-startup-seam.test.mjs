@@ -20,7 +20,7 @@ test('critical splash CSS paints the iPhone top edge before external CSS loads',
   const head=html.slice(0,html.indexOf('</style>'));
   assert.match(head,/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) body #app \.map-startup-overlay\{/);
   assert.match(head,/--start-bg:#edf3ef/);
-  assert.match(head,/linear-gradient\(180deg,var\(--start-bg\) 0%,var\(--start-bg\) 16%,#f9fbfa 44%,var\(--start-bg\) 100%\)/);
+  assert.ok(head.includes('background:var(--start-bg)!important;'));assert.equal(head.includes('linear-gradient(180deg,var(--start-bg)'),false);
   assert.match(head,/html\.dj-ios-home-pwa\[data-theme="dark"\] body #app \.map-startup-overlay\{/);
   assert.match(head,/--start-bg:#192d32/);
   assert.ok(head.indexOf('html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay')<head.indexOf('.map-startup-overlay[hidden]'));
@@ -29,12 +29,12 @@ test('critical splash CSS paints the iPhone top edge before external CSS loads',
 test('standalone iPhone loader wins the legacy !important background after CSS hydration',()=>{
   const head=html.slice(0,html.indexOf('</style>'));
   assert.match(legacyCss,/#app \.map-startup-overlay\{/);
-  assert.match(legacyCss,/background:radial-gradient\(ellipse at 50% 39%,#ffffff 0%,#f3f7f5 75%\)!important/);
+  assert.ok(legacyCss.includes('background:#f3f7f5!important;'));
   const light=head.match(/html\.dj-ios-home-pwa:not\(\[data-theme="dark"\]\) body #app \.map-startup-overlay\{[^}]*\}/)?.[0];
   const dark=head.match(/html\.dj-ios-home-pwa\[data-theme="dark"\] body #app \.map-startup-overlay\{[^}]*\}/)?.[0];
   assert.ok(light&&dark,'iPhone loader overrides must target the hydrated DOM inside #app');
   for(const rule of [light,dark]){
-    assert.match(rule,/background:linear-gradient\(180deg,[^;]+\)!important;/);
+    assert.ok(rule.includes('background:var(--start-bg)!important;'));
     assert.match(rule,/--start-bg:#(?:edf3ef|192d32);/);
   }
 });
