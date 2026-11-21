@@ -1879,7 +1879,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;}
+    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2049,6 +2049,9 @@ function openCommunityComposer(open,{animate=true}={}) {
     const sc=communityForm.querySelector('.djNext-form-scroll');if(sc&&wasHidden)sc.scrollTop=0;
     // Parent sheet may be entering after the risk-report button: only animate one owner.
     const panel=document.getElementById('participation-panel');
+    // Full-screen editor must own the phone viewport, including the area
+    // beneath the AI toolbar. Existing CSS excludes map chrome on this state.
+    panel?.classList.add('dj9256-composing');
     if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
     return;
   }
@@ -2057,7 +2060,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(communityComposerOrigin==='map'){
     const parent=document.getElementById('participation-panel');
     const epoch=++communityComposerEpoch;
-    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
+    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
     // A map-origin report must return directly to the map on phone. A legacy
     // sheet-exit animation can remain in "closing" when the independent full
     // page takes over its geometry, leaving an invisible form and visible page.
@@ -2072,6 +2075,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     if(epoch!==communityComposerEpoch)return;
     communityForm.hidden=true;
     const panel=document.getElementById('participation-panel');
+    panel?.classList.remove('dj9256-composing');
     if(panel)delete panel.dataset.djPatchKeyboard;
     const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
   };

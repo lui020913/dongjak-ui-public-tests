@@ -875,8 +875,8 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
- await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#192d32');
- await expect(sample).toHaveCSS('background-color','rgb(25, 45, 50)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(25, 45, 50)');
+ await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#17191d');
+ await expect(sample).toHaveCSS('background-color','rgb(23, 25, 29)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(23, 25, 29)');
 });
 
 
@@ -938,6 +938,8 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  try{if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+Math.round(i*18)}]});await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}else{await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+145,{steps:8});await page.mouse.up();}await expect(panel).toBeVisible();await geometry(page,'#route-panel');}finally{await client?.detach();}
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
+  await expect(page.locator('#participation-panel')).toHaveClass(/dj9256-composing/);
+  await expect(page.locator('#app > .topbar')).toBeHidden();
  const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
  expect(await form.evaluate(n=>Boolean(n.querySelector('#community-share-publicly').compareDocumentPosition(n.querySelector('[type=submit]'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
  await tap(page,form.locator('#community-compose-close'));await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
