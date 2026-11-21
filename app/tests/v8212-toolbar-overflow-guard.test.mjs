@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const js=readFileSync(new URL('../src/v831-swipe-feature-toolbar.js',import.meta.url),'utf8');
 
-test('mobile shortcut styles are imported into the Vite module graph',()=>{
-  assert.ok(js.includes("import './v831-swipe-feature-toolbar.css';"));
-  assert.ok(js.includes("import './v832-priority-feature-toolbar.css';"));
+test('mobile shortcut styles are linked for first paint, with no duplicate JS CSS import',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  for(const filename of ['v831-swipe-feature-toolbar.css','v832-priority-feature-toolbar.css']){
+    assert.ok(html.includes('href="/src/'+filename+'"'),filename);
+    assert.equal(js.includes("import './"+filename+"';"),false,filename);
+  }
 });
 
 test('the toolbar fallback enforces one horizontal row without overriding expanded pill widths',()=>{
