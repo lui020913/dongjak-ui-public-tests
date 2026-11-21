@@ -25,7 +25,8 @@ test('composer hides list-only sections using stable state and keeps body indepe
  assert.doesNotMatch(css,/:is\(\.version-history-head,\.dj-map-settings-head,\.community-form-top,\.ped-tools-panel-head\)/);
  const fullscreen=read('src/mobile-primary-fullscreen.css');
  assert.match(fullscreen,/\.dj9256-composing #community-form > \.djNext-form-scroll/);
- assert.match(fullscreen,/padding-bottom:calc\(110px \+ env\(safe-area-inset-bottom/);
+ assert.match(fullscreen,/padding-bottom:calc\(24px \+ env\(safe-area-inset-bottom/);
+ assert.match(fullscreen,/scroll-padding-bottom:calc\(28px \+ env\(safe-area-inset-bottom/);
 });
 test('weather info has independent header, place and data rows; 0 degrees is never negative zero',()=>{
  const weather=read('src/v854-weather-desktop.js');
