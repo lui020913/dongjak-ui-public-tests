@@ -15,7 +15,10 @@ test('tour retains opaque old artwork and text until the next decoded image exis
   assert.match(js,/preload\.decode\(\)/);
   assert.match(js,/render\(target,direction,false\)/);
   assert.match(js,/clearSlideGhosts\(\)/);
-  assert.match(css,/@keyframes dj9266-retained-slide-out/);
+  assert.match(css,/\\.dj860-slide-ghost/);
+ assert.match(js,/function animateOutgoingSlide\\(ghost,epoch\\)/);
+ assert.match(js,/ghost\\.style\\.setProperty\\('opacity'/);
+ assert.match(js,/ghostFadeTimers\\.set\\(ghost,win\\.setTimeout\\(tick,16\\)\\)/);
   assert.doesNotMatch(js,/node\.style\.setProperty\('opacity','0','important'\)/);
 });
 
