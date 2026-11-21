@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Release verified Sangdo1 300m policy gap map plus charcoal theme after 6 targeted mobile QA recoveries. Main PR #254, #256, #257; CI #44929773427, #44931120197, #44931487425 all passed. UI map-origin community composer no longer obstructed by AI topbar; one-step dock swipes have mouse fallback, iOS PWA theme color contract #17191d. Keep full protected Preview, 12 phone QA shards, six design captures/reviews, guarded Production; no waived gates.",
-  "attempt": 225,
+  "purpose": "Protected release: unified charcoal no-reload theme and 300m Sangdo1 institutional policy-gap research overlay, plus phone UI QA fixes PR #256/#257/#258. Full app CI succeeded: #44931120197, #44931487425, #44932435587. The 2026-11-22 final fixes ensure map-origin report composer hides high-priority AI topbar and route selections await locally served verified Dongjak boundary with upstream fallback. Keep all 12 mobile QA shards, six design capture and reviews, provenance verification, and protected Production gate.",
+  "attempt": 226,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 224 (#44930314280) built/deployed isolated Preview but failed 6 phone QA jobs: 375/390/430px stale dark green expectations, iOS PWA status old color, dock swipe on central HOME icon, community composer close in normal and map-origin. PR #256 (CI 44931120197) fixes swipe/close/primary charcoal test, PR #257 (CI 44931487425) fixes map-origin hit region and iOS PWA test. Proceed protected release only if all QA pass.",
+  "last_retry_reason": "Attempt #225 run #44931638648: build/Preview successful; 11/12 phone QA passed, 1 failed because map-origin report composer topbar was still visible under high-specificity CSS. Design journey 3/6 failed because route selection ran before remote Dongjak boundary loaded (start label remained unselected). PR #258 merged 877b090a5a2a9079be7cd0674e838cc5d3584a5d: scoped inline-important topbar override and precise restore, local Dongjak boundary geometry from existing upstream plus readiness marker, and journey waits on real boundary. Full CI green. No gates waived.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
