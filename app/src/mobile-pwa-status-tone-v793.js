@@ -46,9 +46,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       const nightPrompt=visible('dj833-night-modal');
       // Before consent, blend the light iOS status surface with the modal
       // scrim; after activation use the actual night-map tone.
+      const startup=visible('map-startup-overlay');
       const onboarding=visible('dj860-onboarding');
-      // The first-run artwork shell and iOS native status sampler must be the same opaque color.
-      const color=onboarding?(theme==='dark'?'#192e31':'#f5faf7'):nightActive?'#192d32':nightPrompt?(theme==='dark'?'#192d32':'#aab8af'):aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
+      // The loading surface takes precedence if it briefly overlaps onboarding.
+      // Once loading ends, the first-run shell owns exactly its own native status tone.
+      const color=startup?(theme==='dark'?'#192d32':'#edf3ef'):onboarding?(theme==='dark'?'#192e31':'#f5faf7'):nightActive?'#192d32':nightPrompt?(theme==='dark'?'#192d32':'#aab8af'):aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#edf3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
@@ -62,7 +64,7 @@ export function installPwaStatusTone(doc=document,win=window) {
     }
   }
   let frame=0;
-  const dimIds=new Set(['map-gesture-guide','djNext-layer-panel','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal']);
+  const dimIds=new Set(['map-startup-overlay','map-gesture-guide','djNext-layer-panel','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal']);
   const relevant=node=>node&& (node===app||dimIds.has(node.id));
   const observer=new MutationObserver(records=>{
     if(!records.some(record=>record.type==='attributes'?relevant(record.target):[...record.addedNodes,...record.removedNodes].some(node=>relevant(node)||node.querySelector?.([...dimIds].map(id=>'#'+id).join(',')))))return;
