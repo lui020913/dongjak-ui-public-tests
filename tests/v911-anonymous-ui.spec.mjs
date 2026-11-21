@@ -803,7 +803,21 @@ test('iOS PWA dimmed status edge blends into the modal scrim',{tag:'@phone-commo
 });
 
 
-test('live train atlas and positions remain loaded but vehicle symbols are hidden at distant map zoom',{tag:'@phone-common'},async({page})=>{
+// Real MapLibre input: deliberately reach the close-zoom live feed threshold.
+// No test hook or API bypass; mobile users zoom in the same way.
+async function zoomMapByDoubleClick(page,steps,{out=false}={}){
+ const size=page.viewportSize(),x=Math.round(size.width*.51),y=Math.round(size.height*.46);
+ await page.mouse.move(x,y);
+ if(out)await page.keyboard.down('Shift');
+ try{
+   for(let i=0;i<steps;i++){
+     await page.mouse.dblclick(x,y,{delay:25});
+     await page.waitForTimeout(320);
+   }
+ }finally{if(out)await page.keyboard.up('Shift');}
+}
+
+test('live train atlas and positions load only at close zoom and disappear on distant map',{tag:'@phone-common'},async({page})=>{
   await page.addInitScript(()=>{
     localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));
     localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));
@@ -817,22 +831,29 @@ test('live train atlas and positions remain loaded but vehicle symbols are hidde
   });
   await ready(page);
   const map=page.locator('#map');
-  await expect.poll(()=>calls,{timeout:60000}).toBeGreaterThan(0);
+  // The public daily-quota feed is never requested at the distant default zoom.
+  expect(calls).toBe(0);
+  await zoomMapByDoubleClick(page,7);
+  await expect.poll(()=>calls,{timeout:30000}).toBeGreaterThan(0);
   await expect(map).toHaveAttribute('data-dj-live-train-artwork','atlas',{timeout:60000});
-  // The intended behavior changed: user explicitly requested distant map
-  // views to hide the trains. The API feed/atlas still need to be healthy.
-  // Confirm the feed and four projected source features were received while
-  // map-rendered symbols stay at zero below the 16.4 zoom threshold.
   await expect.poll(async()=>{
-    const value=await map.getAttribute('data-dj-live-train-diagnostics');
-    if(!value)return 0;
-    try{return Number(JSON.parse(value).features||0);}catch{return 0;}
-  },{timeout:60000}).toBeGreaterThan(0);
-  const diagnostics=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
-  expect(diagnostics.minimum).toBe(16.4);
-  expect(diagnostics.zoom).toBeLessThan(16.4);
-  expect(diagnostics.feed).toBeGreaterThan(0);
-  expect(diagnostics.rendered).toBe('0');
+    const raw=await map.getAttribute('data-dj-live-train-diagnostics');
+    if(!raw)return 0;
+    try{return Number(JSON.parse(raw).features||0);}catch{return 0;}
+  },{timeout:30000}).toBeGreaterThan(0);
+  const close=JSON.parse(await map.getAttribute('data-dj-live-train-diagnostics'));
+  expect(close.minimum).toBe(16.4);
+  expect(close.zoom).toBeGreaterThanOrEqual(16.4);
+  expect(close.feed).toBeGreaterThan(0);
+  await zoomMapByDoubleClick(page,9,{out:true});
+  await expect.poll(async()=>{
+    const raw=await map.getAttribute('data-dj-live-train-diagnostics');
+    try{return JSON.parse(raw).zoom;}catch{return Infinity;}
+  },{timeout:20000}).toBeLessThan(16.4);
+  await expect.poll(async()=>{
+    const raw=await map.getAttribute('data-dj-live-train-diagnostics');
+    try{return String(JSON.parse(raw).rendered);}catch{return '';}
+  },{timeout:20000}).toBe('0');
   expect(Number(await map.getAttribute('data-dj-live-train-rendered')||0)).toBe(0);
   await test.info().attach('distant-train-icons-hidden',{body:await page.screenshot(),contentType:'image/png'});
 });
@@ -853,7 +874,7 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  await tap(page,tab(page,'participate'));await expect(form).toHaveAttribute('hidden','');await expect(page.locator('#community-compose-toggle')).toBeVisible();await tap(page,page.locator('#community-compose-toggle'));await expect(form).toBeVisible();await tap(page,form.locator('#community-compose-close'));await expect(form).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();
 });
 
- test('official daily train quota is communicated and does not repeatedly query the feed',{tag:'@phone-common'},async({page})=>{let calls=0;await page.addInitScript(()=>{localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));});await page.route('**/api/transport/live-vehicles**',async route=>{calls++;await route.fulfill({status:429,json:{ok:false,code:'ERROR-337',retryAfterSeconds:3600,error:'일일 조회량 초과'}});});await ready(page);await expect(page.locator('[data-live-vehicle="metro"]')).toHaveAttribute('data-live-quota','true',{timeout:60000});await expect(page.locator('#dj-live-vehicle-status')).toContainText('일일 조회량을 초과');await tap(page,page.locator('#djNext-layers'));await expect(page.locator('[data-layer-key="livemetro"] .djNext-layer-state')).toHaveText('조회 한도 초과');expect(calls).toBe(1);});
+ test('official daily train quota is communicated and does not repeatedly query the feed',{tag:'@phone-common'},async({page})=>{let calls=0;await page.addInitScript(()=>{localStorage.setItem('dongjak_live_vehicle_options_v827',JSON.stringify({metro:true,bus:false}));localStorage.setItem('dongjak_basemap_layers_v1',JSON.stringify({metro:true,bus:true,buildings:true,boundary:true}));});await page.route('**/api/transport/live-vehicles**',async route=>{calls++;await route.fulfill({status:429,json:{ok:false,code:'ERROR-337',retryAfterSeconds:3600,error:'일일 조회량 초과'}});});await ready(page);expect(calls).toBe(0);await zoomMapByDoubleClick(page,7);await expect.poll(()=>calls,{timeout:30000}).toBeGreaterThan(0);await expect(page.locator('[data-live-vehicle="metro"]')).toHaveAttribute('data-live-quota','true',{timeout:60000});await expect(page.locator('#dj-live-vehicle-status')).toContainText('일일 조회량을 초과');await tap(page,page.locator('#djNext-layers'));await expect(page.locator('[data-layer-key="livemetro"] .djNext-layer-state')).toHaveText('조회 한도 초과');expect(calls).toBe(1);});
 
 
 test('bottom dock switches adjacent tabs promptly without old-panel bounce or a blank page',{tag:'@phone-common'},async({page})=>{
