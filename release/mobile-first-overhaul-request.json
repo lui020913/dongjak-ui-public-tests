@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.58",
+  "application_version": "9.2.59",
   "public_work_branch": "main",
-  "purpose": "Fix mobile search opening an oversized rectangular result panel and hiding the AI orb; keep the AI entry visible and anchor the rounded suggestions panel exactly to the search pill. Include PR #173 rail/train/iOS fixes and PR #175 updated iOS/metro QA expectations and community close fallback.",
-  "attempt": 179,
+  "purpose": "PR #174 consolidated mobile fixes: retain AI orb and microphone during search, replace blank rectangular suggestions with rounded pill-anchored results, correct overlapping metro corridors and wider realtime train visibility, prevent AI ghost opening, fix onboarding transition, improve layer/community/route scroll, and unify full-screen route/community/news/account header/body/footer backgrounds with iOS native status tone in light (#edf3ef) and dark (#192d32).",
+  "attempt": 180,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous v9.2.57 run 44880038208 blocked by obsolete WebKit expected iPhone status tone (#eef3ef vs new #edf3ef), obsolete train zoom threshold (16.4 vs 13.0) and iOS composer close race. PR #175 changes runtime and test expectations, CI passed. Execute all protected mobile/visual checks before Production.",
+  "last_retry_reason": "Source PR #174 merged on main after full public app regression, Vite build, and 375/390/430px phone Playwright passed. Start a fresh protected Preview and rerun exact release mobile, visual, railway and theme tests before Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
