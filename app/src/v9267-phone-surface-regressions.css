@@ -153,6 +153,11 @@
     background:#294c49!important;color:#a6dfce!important;
   }
 
+  /* Keep the five-label dock above the stationary page-to-page mask. */
+  html body #app#app#app#app#app > #bottom-nav:not([hidden]) {
+    z-index:8500!important;
+  }
+
   /* Night mode does not change the pill geometry, only its active state.
      Native original click/consent handlers remain the event owners. */
   html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-night,
