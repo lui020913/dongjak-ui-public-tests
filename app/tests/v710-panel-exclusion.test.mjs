@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const at=f=>readFileSync(new URL('../'+f,import.meta.url),'utf8');
 const html=at('index.html');
-const css=at('src/v710-exclusive-panels.css');
+const css=at('src/mobile-ui-baseline.css');
 const main=at('src/main.js');
 const night=at('src/night-visibility-map.js');
 test('overview uses a short title and only one close control',()=>{
