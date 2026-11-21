@@ -1,0 +1,2068 @@
+/* HISTORICAL MOBILE CSS BASELINE — DO NOT APPEND NEW PATCHES HERE.
+ * Exactly preserves the prior v700-v728 import cascade, concatenated at the
+ * same app/src directory to preserve all relative url() asset resolution.
+ * New or changed phone UI rules belong in mobile-ui/current.css instead.
+ * Each original file must be removed from runtime imports after consolidation.
+ */
+/* BEGIN LEGACY v700-mobile-cleanup.css */
+/* v7.0.1 - Mobile transit, map chrome, and consistent controls.
+   LAST import: overrides the v613/v614 one-column metro regression.
+   Does not modify MapLibre map, markers or API responses. */
+@media(max-width:699px){
+  /* Route direction has priority over large cards: two compact columns. */
+  #app #transport-sheet[data-kind="subway"] .metro-direction-grid,
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-direction-grid,
+  #app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-direction-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    gap:8px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group{
+    min-width:0!important;margin:0!important;align-self:stretch!important;
+    border-radius:14px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-direction-heading{
+    min-height:38px!important;padding:7px 9px!important;gap:6px!important;
+    font-size:12px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-direction-arrow{
+    flex:0 0 23px!important;width:23px!important;height:23px!important;font-size:13px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
+    display:flex!important;flex-direction:column!important;
+    align-items:stretch!important;justify-content:space-between!important;
+    min-height:88px!important;gap:5px!important;
+    padding:9px 9px 10px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-detail strong{
+    font-size:12px!important;line-height:1.32!important;
+    overflow-wrap:anywhere!important;word-break:keep-all!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-route{
+    font-size:10px!important;line-height:1.35!important;overflow-wrap:anywhere!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-time-block{
+    display:flex!important;align-items:flex-end!important;justify-content:center!important;
+    text-align:right!important;margin-top:auto!important;min-width:0!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-countdown{
+    font-size:clamp(12px,3.4vw,16px)!important;
+    line-height:1.35!important;overflow-wrap:anywhere!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-planned-time-meta,
+  #app #transport-sheet[data-kind="subway"] .metro-arrival-position{font-size:10px!important;line-height:1.35!important;}
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-arrival-direction-group .transport-arrival-row{
+    min-height:70px!important;padding:8px!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-status-only .metro-arrival-time-block{
+    align-items:flex-start!important;text-align:left!important;
+  }
+  /* A map-tool launch button must never appear above an opened station sheet. */
+  #app.transport-sheet-open :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off),
+  #app:has(#transport-sheet:not([hidden])) :is(#map-tools-toggle,#map-safety-toggle,#night-visibility-quick-off){
+    visibility:hidden!important;pointer-events:none!important;
+  }
+  /* The top search must be opaque and sharp, including the upper border on iOS. */
+  #app .topbar,#app[data-theme="dark"] .topbar{
+    background:#ffffff!important;background-image:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    -webkit-mask-image:none!important;mask-image:none!important;
+    opacity:1!important;filter:none!important;
+    border-bottom:1px solid #dce8e3!important;
+  }
+  #app[data-theme="dark"] .topbar{background:#192d31!important;border-bottom-color:#435e5f!important;}
+  #app .topbar>.map-quick-search,
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background-image:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    filter:none!important;opacity:1!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    background:#fff!important;border:1px solid #bdcfc8!important;
+    border-radius:12px!important;box-shadow:none!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+    background:#223a40!important;border-color:#557574!important;
+  }
+  #app .topbar .map-quick-search-submit{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border-radius:9px!important;background:#118874!important;
+    box-shadow:none!important;
+  }
+  #app .topbar .map-quick-search-submit::after{
+    content:""!important;display:block!important;flex:0 0 18px!important;
+    width:18px!important;height:18px!important;
+    background:center/contain no-repeat url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"%3E%3Ccircle cx="10.5" cy="10.5" r="6"/%3E%3Cpath d="m15 15 5 5"/%3E%3C/svg%3E')!important;
+  }
+  #app .topbar .map-quick-search-form input{
+    font-size:13px!important;line-height:1.35!important;letter-spacing:-.15px!important;
+  }
+}
+/* 9호선: direction cards remain two columns; each direction independently
+   separates only confirmed 일반 / 급행 / unknown service types. */
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading{
+  font-size:11px;font-weight:800;line-height:1.3;
+  color:#476078;background:#f1f6fa;
+  padding:7px 10px;border-top:1px solid #e1eaf0;
+}
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  background:#fff4df;color:#8c5810;border-color:#f0dfbd;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading{
+  background:#29404b;color:#d3e8ed;border-color:#3d5661;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  background:#483b29;color:#f4d399;border-color:#766041;
+}
+/* Make the secondary '계획 시간표' banner disappear; source is kept on cards. */
+#app #transport-sheet[data-kind="subway"] .metro-scheduled-banner{display:none!important;}
+/* Unified map-action visual rhythm. Text labels are controlled by JS. */
+#app #map-tools-toggle,#app #map-safety-toggle,#app #night-visibility-quick-off{
+  align-items:center!important;justify-content:center!important;
+  gap:7px!important;font-size:12px!important;
+  line-height:1.2!important;letter-spacing:-.22px!important;
+  font-weight:750!important;white-space:nowrap!important;
+  padding:7px 8px!important;
+}
+#app #map-tools-toggle::before,#app #map-safety-toggle::before{
+  content:""!important;display:inline-block!important;flex:0 0 16px!important;
+  width:16px!important;height:16px!important;
+  background-color:currentColor!important;
+  -webkit-mask-repeat:no-repeat!important;mask-repeat:no-repeat!important;
+  -webkit-mask-size:contain!important;mask-size:contain!important;
+}
+#app #map-tools-toggle::before{
+  -webkit-mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M4 6h16M4 12h16M4 18h16"/%3E%3Cpath d="M8 4v4M16 10v4M10 16v4"/%3E%3C/svg%3E')!important;
+  mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M4 6h16M4 12h16M4 18h16"/%3E%3Cpath d="M8 4v4M16 10v4M10 16v4"/%3E%3C/svg%3E')!important;
+}
+#app #map-safety-toggle::before{
+  -webkit-mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M12 2 4 5v6c0 5.1 3.5 8.7 8 11 4.5-2.3 8-5.9 8-11V5l-8-3Z"/%3E%3Cpath d="m8.5 11.8 2.2 2.2 4.7-4.7"/%3E%3C/svg%3E')!important;
+  mask-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M12 2 4 5v6c0 5.1 3.5 8.7 8 11 4.5-2.3 8-5.9 8-11V5l-8-3Z"/%3E%3Cpath d="m8.5 11.8 2.2 2.2 4.7-4.7"/%3E%3C/svg%3E')!important;
+}
+/* Consistent bottom navigation size and text spacing. */
+@media(max-width:1079px){
+  #app #bottom-nav .nav-tab{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:5px!important;
+    padding:6px 2px!important;line-height:1.22!important;
+    font-weight:720!important;letter-spacing:-.25px!important;
+  }
+  #app #bottom-nav .nav-tab .nav-icon{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    font-size:19px!important;line-height:1!important;
+    width:24px!important;height:24px!important;
+  }
+  #app .topbar .theme-toggle{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border:1px solid #c9d9d2!important;border-radius:11px!important;
+    box-shadow:none!important;line-height:1!important;
+  }
+  #app .topbar .theme-toggle::after{font-size:18px!important;line-height:1!important;}
+  #app[data-theme="dark"] .topbar .theme-toggle{border-color:#4a6968!important;}
+}
+@media(max-width:699px){
+  #app #map-tools-toggle,#app #map-safety-toggle,#app #night-visibility-quick-off{
+    width:112px!important;min-width:112px!important;max-width:112px!important;
+    height:44px!important;min-height:44px!important;max-height:44px!important;
+  }
+}
+
+/* END LEGACY v700-mobile-cleanup.css */
+
+/* BEGIN LEGACY v701-compact-info-panels.css */
+/* v7.0.1 — remove passive metadata and redundant panel chrome.
+   Functional controls and live arrival data remain available. */
+
+/* Transit panels: station name + useful line navigation + arrivals only. */
+#app #transport-sheet[data-kind="subway"] #transport-kind,
+#app #transport-sheet[data-kind="subway"] #transport-description,
+#app #transport-sheet #transport-chips,
+#app #transport-sheet #transport-line-section-heading,
+#app #transport-sheet #transport-lines,
+#app #transport-sheet .transport-note,
+#app #transport-sheet .transport-hours-inline-credit,
+#app #transport-sheet .metro-reports-collapsible {
+  display:none!important;
+}
+#app #transport-sheet .transport-panel-head{padding-bottom:7px!important;}
+#app #transport-sheet .transport-selection-box{
+  margin:12px 0 4px!important;padding:0!important;
+  border:0!important;background:transparent!important;
+}
+#app #transport-sheet .transport-selection-box>strong,
+#app #transport-sheet .transport-selection-box>p{display:none!important;}
+#app #transport-sheet .transport-selection-actions{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:9px!important;margin:0!important;
+}
+#app #transport-sheet .transport-selection-actions button{
+  min-height:43px!important;border-radius:11px!important;
+}
+
+/* The overview card keeps its title and actions, not its repeated explanation. */
+#app #overview-sheet .sheet-top>.section-label,
+#app #overview-sheet .sheet-summary{display:none!important;}
+
+/* News and route panels should wrap their content instead of reserving a blank screen. */
+#app #news-panel .page-heading .micro-label,
+#app #news-panel .page-heading>p,
+#app #news-panel>.page-note{display:none!important;}
+#app #news-panel .page-heading{margin-bottom:13px!important;padding-right:92px!important;}
+#app #route-panel .route-status:empty{display:none!important;}
+
+/* No building-count/status badge inside the map-options drawer. */
+#app.map-controls-open .map-advanced-controls .map-badge{display:none!important;}
+
+#app #admin-dong-picker>small{display:none!important;}
+
+@media(max-width:640px){
+  #app #route-panel.page-panel,
+  #app #news-panel.page-panel{
+    top:auto!important;
+    bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    height:auto!important;min-height:0!important;
+    max-height:calc(100dvh - 145px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    padding:17px 15px 20px!important;
+    overflow-y:auto!important;
+  }
+  #app #route-panel.page-panel{border-radius:21px 21px 0 0!important;}
+  #app #news-panel.page-panel{border-radius:21px 21px 0 0!important;}
+}
+@media(min-width:641px){
+  #app #route-panel.page-panel,
+  #app #news-panel.page-panel{
+    top:auto!important;bottom:20px!important;
+    height:auto!important;min-height:0!important;
+    max-height:calc(100dvh - 115px)!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* Passive source metadata is collected in the update-history source register. */
+#app #sangdo-speed-controls .sangdo-speed-head>span{display:none!important;}
+
+/* END LEGACY v701-compact-info-panels.css */
+
+/* BEGIN LEGACY v702-ui-alignment.css */
+/* v7.0.2 — transport, facility actions, panels, and Dongjak visual consistency. */
+:root{
+  --dj-v702-green:#13836b;
+  --dj-v702-green-dark:#0e6655;
+  --dj-v702-green-soft:#eaf5ef;
+  --dj-v702-border:#d7e7df;
+  --dj-v702-surface:#fbfdfb;
+}
+
+/* Subway mode tabs follow the selected route's actual line color. */
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs{
+  background:color-mix(in srgb,var(--transport-line-color,#13836b) 12%,#f7faf8)!important;
+  border:1px solid color-mix(in srgb,var(--transport-line-color,#13836b) 28%,#dce8e3)!important;
+}
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs button{
+  color:var(--transport-line-color,#13836b)!important;
+  border:1px solid transparent!important;
+  transition:background-color .15s ease,color .15s ease,box-shadow .15s ease;
+}
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
+  background:var(--transport-line-color,#13836b)!important;
+  color:#fff!important;
+  border-color:var(--transport-line-color,#13836b)!important;
+  box-shadow:0 2px 7px color-mix(in srgb,var(--transport-line-color,#13836b) 24%,transparent)!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs{
+  background:color-mix(in srgb,var(--transport-line-color,#13836b) 20%,#1b3035)!important;
+  border-color:color-mix(in srgb,var(--transport-line-color,#13836b) 45%,#405b58)!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
+  color:#fff!important;
+}
+
+/* Keep the two origin/destination actions centered instead of right aligned. */
+#app #transport-sheet .transport-selection-box{
+  display:block!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+#app #transport-sheet .transport-selection-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  width:min(440px,100%)!important;
+  margin:0 auto!important;
+  justify-content:center!important;
+}
+#app #transport-sheet .transport-selection-actions button{
+  min-width:0!important;
+  white-space:nowrap!important;
+}
+
+/* A clear, factual end-of-service state when the published final departure has passed. */
+#app #transport-sheet .metro-last-train-passed{
+  display:grid;gap:5px;margin:8px 0 2px;padding:15px 16px;
+  border:1px solid #b8d9ca;border-radius:14px;
+  background:#edf7f1;color:#165b48;
+}
+#app #transport-sheet .metro-last-train-passed strong{font-size:16px;font-weight:850;color:#126b54;}
+#app #transport-sheet .metro-last-train-passed span{font-size:12px;line-height:1.55;color:#52766a;}
+#app[data-theme="dark"] #transport-sheet .metro-last-train-passed{
+  background:#203d37;border-color:#4a7667;color:#e5f6ee;
+}
+#app[data-theme="dark"] #transport-sheet .metro-last-train-passed :is(strong,span){color:#e5f6ee;}
+
+/* Facility popups are draggable without a map-pin pointer; route actions are available in every facility detail. */
+#app .dj-place-detail-popup .maplibregl-popup-tip{display:none!important;}
+#app .dj-place-detail-popup .maplibregl-popup-content{padding:13px!important;}
+#app .dj-place-route-actions{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  margin:12px 0 14px;min-width:0;
+}
+#app .dj-place-route-button{
+  min-width:0;min-height:42px;padding:9px 8px;border-radius:11px;
+  border:1px solid #b8d9ca;background:#f5faf7;color:#176c56;
+  font:inherit;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer;
+}
+#app .dj-place-route-button.dj-place-route-end{
+  background:#13836b;border-color:#13836b;color:#fff;
+}
+#app .dj-place-route-button:focus-visible{outline:3px solid #d8b45b;outline-offset:2px;}
+#app[data-theme="dark"] .dj-place-route-button{
+  background:#243f3c;border-color:#4b7568;color:#dff5eb;
+}
+#app[data-theme="dark"] .dj-place-route-button.dj-place-route-end{
+  background:#14765f;border-color:#48a88b;color:#fff;
+}
+
+/* Overview card: add breathing room between title, status, boundary selector and note. */
+#app #overview-sheet .sheet-top{gap:15px!important;margin-bottom:13px!important;}
+#app #overview-sheet .sheet-top-actions{gap:10px!important;margin-left:5px!important;}
+#app #overview-sheet .overview-boundary-actions{gap:11px!important;margin-top:12px!important;}
+#app #overview-sheet .overview-boundary-actions #open-admin-dongs{min-height:44px!important;}
+#app #overview-sheet .footer-note{margin-top:13px!important;line-height:1.55!important;}
+
+/* The route page uses the same panel position and height model as the other pages. */
+@media(max-width:640px){
+  #app #route-panel.page-panel,#app #news-panel.page-panel{
+    top:auto!important;bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    height:min(69dvh,calc(100dvh - 145px - env(safe-area-inset-top)))!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 145px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  }
+}
+@media(min-width:641px) and (max-width:1079px){
+  #app #route-panel.page-panel,#app #news-panel.page-panel{
+    top:auto!important;bottom:calc(65px + env(safe-area-inset-bottom))!important;
+    height:min(69dvh,calc(100dvh - 145px - env(safe-area-inset-top)))!important;
+    max-height:calc(100dvh - 145px - env(safe-area-inset-top))!important;
+  }
+}
+
+/* Desktop left navigation and all right-side pages share a top edge, surface and border.
+   Panels shrink to their content and scroll internally only when genuinely long. */
+@media(min-width:1080px){
+  #app #bottom-nav,
+  #app .page-panel{
+    top:calc(88px + env(safe-area-inset-top))!important;
+    background:var(--dj-v702-surface)!important;
+    border-color:var(--dj-v702-border)!important;
+  }
+  #app #bottom-nav{
+    box-shadow:0 8px 26px rgba(23,44,34,.12)!important;
+  }
+  #app .page-panel,#app #news-panel.page-panel{
+    bottom:auto!important;
+    height:auto!important;
+    max-height:calc(100dvh - 108px - env(safe-area-inset-top))!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    padding-bottom:21px!important;
+    box-shadow:0 8px 26px rgba(23,44,34,.12)!important;
+  }
+}
+#app[data-theme="dark"] #bottom-nav,
+#app[data-theme="dark"] .page-panel{
+  background:#1b3034!important;border-color:#3d5a57!important;
+}
+
+/* Give the map-options close action room on the right edge and between controls. */
+@media(max-width:1079px){
+  #app .map-options-mobile-heading{padding:9px 7px 11px!important;gap:12px!important;}
+  #app .map-options-mobile-actions{gap:9px!important;padding-right:4px!important;}
+  #app .map-options-mobile-actions #map-options-mobile-close{
+    min-width:76px!important;min-height:36px!important;height:36px!important;
+    padding:7px 14px!important;margin-right:2px!important;border-radius:11px!important;
+  }
+}
+
+/* Compass uses Dongjak green; pressing it while already north-up confirms with a brief shake. */
+#app #map-compass .compass-direction svg{fill:#13836b!important;stroke:#165b4c!important;}
+#app #map-compass .compass-n{color:#13836b!important;}
+#app[data-theme="dark"] #map-compass .compass-direction svg{fill:#52b99a!important;stroke:#d4f2e6!important;}
+#app[data-theme="dark"] #map-compass .compass-n{color:#70d1b0!important;}
+#app #map-compass.north-up-feedback .compass-direction{animation:dj-compass-north-feedback .46s ease-in-out;}
+@keyframes dj-compass-north-feedback{
+  0%,100%{transform:rotate(0)}
+  16%{transform:rotate(-13deg)}
+  32%{transform:rotate(11deg)}
+  48%{transform:rotate(-8deg)}
+  64%{transform:rotate(6deg)}
+  80%{transform:rotate(-3deg)}
+}
+
+/* Keep scroll behavior while hiding every visual scrollbar in panels and nested lists. */
+#app :is(.page-panel,.overview-sheet,.transport-sheet,.detail-sheet,.entry-sheet,
+  .map-safety-controls,.map-advanced-controls,.pza-road-sheet,.night-visibility-float,
+  .night-visibility-float-content,.night-visibility-panel,.pza-advanced-tools,
+  .route-search-results,.transport-timetable-pane-list,.community-feed,.records-list){
+  scrollbar-width:none!important;-ms-overflow-style:none!important;
+}
+#app :is(.page-panel,.overview-sheet,.transport-sheet,.detail-sheet,.entry-sheet,
+  .map-safety-controls,.map-advanced-controls,.pza-road-sheet,.night-visibility-float,
+  .night-visibility-float-content,.night-visibility-panel,.pza-advanced-tools,
+  .route-search-results,.transport-timetable-pane-list,.community-feed,.records-list)::-webkit-scrollbar{
+  display:none!important;width:0!important;height:0!important;background:transparent!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  #app #map-compass.north-up-feedback .compass-direction{animation:none!important;}
+}
+
+/* END LEGACY v702-ui-alignment.css */
+
+/* BEGIN LEGACY v703-ui-layout-tightening.css */
+/* v7.0.3 — Dongjak logo fit, aligned page panels, consistent map controls, compact empty states. */
+:root{
+  --dj-v703-green:#13836b;
+  --dj-v703-green-dark:#0e6655;
+  --dj-v703-surface:#fbfdfb;
+  --dj-v703-border:#d7e7df;
+}
+
+/* Restore the actual Dongjak brand artwork; a legacy hamburger mask was clipping the logo. */
+#app .topbar>.brand .logo,
+#app .topbar>.brand .logo img{
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+#app .topbar>.brand .logo{
+  background:transparent!important;
+  overflow:visible!important;
+  border-radius:0!important;
+}
+#app .topbar>.brand .logo img{
+  display:block!important;
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;
+}
+#app .map-startup-logo{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+#app .map-startup-logo img{object-fit:contain!important;padding:2px!important;}
+
+/* Desktop page panels share the exact top edge of the left navigation. */
+@media(min-width:1080px){
+  #app #route-panel.page-panel,
+  #app #news-panel.page-panel,
+  #app #participation-panel.page-panel,
+  #app #mine-panel.page-panel{
+    top:calc(88px + env(safe-area-inset-top))!important;
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 112px - env(safe-area-inset-top))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* On phones and tablets, bottom sheets wrap their content and grow only when needed. */
+@media(max-width:1079px){
+  #app .page-panel,
+  #app #news-panel.page-panel{
+    top:auto!important;
+    bottom:var(--dj-mobile-nav-h,70px)!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,70px) - 12px)!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* Any information drawer uses content height; max-height and internal scrolling remain in force. */
+#app :is(.map-advanced-controls,.map-safety-controls,.transport-sheet,.detail-sheet,.entry-sheet,
+  .night-visibility-float,.night-visibility-panel){
+  height:max-content!important;
+  min-height:0!important;
+}
+@media(min-width:700px){
+  #app #transport-sheet:not([hidden]){
+    bottom:auto!important;
+    height:max-content!important;
+    min-height:0!important;
+    max-height:calc(100dvh - 104px - env(safe-area-inset-top))!important;
+  }
+}
+
+/* Map Options and Pedestrian Safety launchers use the same geometry as a desktop nav tab. */
+@media(min-width:1080px){
+  #app #map-tools-toggle,
+  #app #map-safety-toggle{
+    box-sizing:border-box!important;
+    width:88px!important;min-width:88px!important;max-width:88px!important;
+    height:60px!important;min-height:60px!important;max-height:60px!important;
+    padding:8px 6px!important;
+    border-radius:15px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    gap:5px!important;white-space:normal!important;text-align:center!important;
+  }
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 72px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 144px)!important;}
+}
+
+/* The drawer closes from its own heading; the floating launcher keeps one stable label. */
+@media(min-width:1080px){
+  #app .map-options-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;}
+}
+#app .map-options-heading-copy{display:grid;gap:4px;min-width:0;}
+#app .map-options-desktop-close{
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;border:1px solid var(--dj-v703-border)!important;border-radius:11px!important;
+  background:#edf5f0!important;color:#31584a!important;font-size:25px!important;line-height:1!important;font-weight:500!important;
+  cursor:pointer!important;
+}
+#app .map-options-desktop-close:hover{background:#e0f0e8!important;border-color:#9ccbb8!important;}
+#app #map-options-mobile-close{
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;
+  padding:0!important;border-radius:11px!important;font-size:25px!important;line-height:1!important;font-weight:500!important;
+}
+#app #map-tools-toggle{white-space:nowrap!important;}
+#app.map-controls-open #map-tools-toggle{color:inherit!important;}
+#app[data-theme="dark"] .map-options-desktop-close{
+  background:#263f3d!important;border-color:#49665d!important;color:#e3f4eb!important;
+}
+#app[data-theme="dark"] .map-options-desktop-close:hover{background:#31544a!important;}
+
+@media(prefers-reduced-motion:reduce){
+  #app .map-options-desktop-close{transition:none!important;}
+}
+
+/* END LEGACY v703-ui-layout-tightening.css */
+
+/* BEGIN LEGACY v704-user-request-fixes.css */
+/* v7.0.4 — viewport-safe menus, centered rail identity and fixed night mode. */
+
+/* Any content drawer is allowed to scroll internally, never beyond the viewport. */
+#app :is(.page-panel,.overview-sheet,.transport-sheet,.detail-sheet,.entry-sheet,
+  .map-safety-controls,.map-advanced-controls,.admin-dong-picker,.night-visibility-float,
+  .night-visibility-float-content,.night-visibility-panel,.pza-road-sheet,.pza-advanced-tools,
+  .route-search-results,.version-history-dialog) {
+  box-sizing:border-box!important;
+  min-height:0!important;
+  overscroll-behavior:contain!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+#app :is(.page-panel,.overview-sheet,.transport-sheet,.detail-sheet,.entry-sheet,
+  .map-safety-controls,.map-advanced-controls,.admin-dong-picker,.night-visibility-float,
+  .night-visibility-float-content,.night-visibility-panel,.pza-road-sheet,.pza-advanced-tools,
+  .route-search-results,.version-history-dialog)::-webkit-scrollbar {
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}
+
+/* A map marker's popup is bounded and scrolls within its own surface. */
+#app #map .maplibregl-popup {
+  box-sizing:border-box!important;
+  max-width:min(92vw,420px)!important;
+  z-index:2500!important;
+}
+#app #map .maplibregl-popup-content {
+  box-sizing:border-box!important;
+  max-width:100%!important;
+  max-height:min(72dvh,calc(100dvh - 52px))!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  overflow-wrap:anywhere!important;
+  scrollbar-width:none!important;
+}
+#app #map .maplibregl-popup-content::-webkit-scrollbar {
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}
+
+/* Search suggestions stay below the search field but never run off-screen. */
+#app .map-quick-search-dropdown:not([hidden]) {
+  box-sizing:border-box!important;
+  max-height:min(58dvh,calc(100dvh - var(--dj-header-h,68px) - 20px))!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+}
+
+/* Desktop/tablet drawers use a viewport-relative top edge and a real height cap. */
+@media (min-width:700px) {
+  #app .map-safety-controls {
+    position:fixed!important;
+    top:max(calc(env(safe-area-inset-top) + 8px),min(calc(env(safe-area-inset-top) + 88px),20dvh))!important;
+    max-height:calc(100dvh - 112px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app .page-panel:not([hidden]) {
+    max-height:calc(100dvh - 108px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app #transport-sheet:not([hidden]) {
+    position:fixed!important;
+    top:calc(84px + env(safe-area-inset-top))!important;
+    bottom:auto!important;
+    height:max-content!important;
+    max-height:calc(100dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app .detail-sheet:not([hidden]),#app .entry-sheet:not([hidden]) {
+    max-height:calc(100dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app .admin-dong-picker:not([hidden]),
+  #app .night-visibility-float:not([hidden]),
+  #app .pza-road-sheet:not([hidden]) {
+    max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+@media (min-width:1080px) {
+  #app.map-controls-open .map-advanced-controls {
+    position:fixed!important;
+    top:max(calc(env(safe-area-inset-top) + 8px),min(calc(env(safe-area-inset-top) + 206px),24dvh))!important;
+    max-height:min(67dvh,calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app #transport-sheet:not([hidden]) {
+    bottom:auto!important;
+    height:max-content!important;
+    max-height:calc(100dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media (min-width:700px) and (max-width:1079px) {
+  #app #transport-sheet:not([hidden]) {
+    top:calc(84px + env(safe-area-inset-top))!important;
+    bottom:calc(16px + env(safe-area-inset-bottom))!important;
+    height:auto!important;
+    max-height:calc(100dvh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  }
+}
+
+/* Mobile drawers remain above the bottom navigation and below the top header. */
+@media (max-width:1079px) {
+  #app .page-panel:not([hidden]) {
+    top:auto!important;
+    bottom:calc(var(--dj-mobile-nav-h,65px) + env(safe-area-inset-bottom))!important;
+    height:auto!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 14px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app .detail-sheet:not([hidden]),
+  #app .entry-sheet:not([hidden]) {
+    top:auto!important;
+    bottom:calc(var(--dj-mobile-nav-h,65px) + env(safe-area-inset-bottom))!important;
+    height:auto!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 14px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  #app[data-tab="map"].map-safety-open #map-safety-controls {
+    top:auto!important;
+    bottom:var(--dj-mobile-nav-h,65px)!important;
+    max-height:min(66dvh,calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 14px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+  }
+  #app.map-controls-open .map-advanced-controls {
+    top:auto!important;
+    bottom:var(--dj-mobile-nav-h,65px)!important;
+    max-height:min(64dvh,calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 14px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+  }
+  #app .admin-dong-picker:not([hidden]),
+  #app .night-visibility-float:not([hidden]),
+  #app .pza-road-sheet:not([hidden]) {
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 18px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+@media (max-width:699px) {
+  #app #transport-sheet:not([hidden]) {
+    top:auto!important;
+    bottom:calc(var(--dj-mobile-nav-h,65px) + env(safe-area-inset-bottom))!important;
+    height:auto!important;
+    max-height:calc(100dvh - var(--dj-header-h,68px) - var(--dj-mobile-nav-h,65px) - 14px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* Short landscape viewports need side drawers, not oversized bottom sheets. */
+@media (max-width:1079px) and (max-height:600px) and (orientation:landscape) {
+  #app[data-tab="map"].map-safety-open #map-safety-controls,
+  #app.map-controls-open .map-advanced-controls {
+    position:fixed!important;
+    top:calc(var(--dj-header-h,64px) + 8px)!important;
+    bottom:calc(var(--dj-mobile-nav-h,58px) + 8px)!important;
+    left:calc(8px + env(safe-area-inset-left))!important;
+    right:auto!important;
+    width:min(380px,53vw)!important;
+    max-width:min(380px,53vw)!important;
+    height:auto!important;
+    max-height:calc(100dvh - var(--dj-header-h,64px) - var(--dj-mobile-nav-h,58px) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    border-radius:15px!important;
+  }
+}
+
+/* The safety launcher is a single-line label at every breakpoint. */
+#app #map-safety-toggle {
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  overflow-wrap:normal!important;
+  flex-wrap:nowrap!important;
+  line-height:1.2!important;
+  min-width:88px!important;
+}
+
+/* Subway title: route badge and station name are centered as one unit. */
+#app #transport-sheet[data-kind="subway"] .transport-panel-head {
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:42px!important;
+  padding:2px 44px 8px!important;
+}
+#app #transport-sheet[data-kind="subway"] .transport-panel-head>div {
+  display:flex!important;
+  flex:1 1 100%!important;
+  justify-content:center!important;
+  align-items:center!important;
+  min-width:0!important;
+  text-align:center!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-title {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:wrap!important;
+  gap:8px!important;
+  width:100%!important;
+  margin:3px 0!important;
+  text-align:center!important;
+  line-height:1.3!important;
+  word-break:keep-all!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-title.subway-title::before {
+  content:none!important;
+  display:none!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-title .metro-panel-badge {
+  width:28px!important;
+  height:28px!important;
+  min-width:28px!important;
+  flex:0 0 28px!important;
+  font-size:12px!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-close {
+  position:absolute!important;
+  top:50%!important;
+  right:0!important;
+  transform:translateY(-50%)!important;
+  flex:0 0 32px!important;
+}
+
+/* Previous/current/next station boxes use a centered three-column route strip. */
+#app #transport-sheet[data-kind="subway"] .metro-info-line-card {
+  box-sizing:border-box!important;
+  min-width:0!important;
+  padding:6px!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(70px,1.05fr) minmax(0,1fr)!important;
+  align-items:stretch!important;
+  justify-items:stretch!important;
+  gap:6px!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:5px!important;
+  border:1px solid color-mix(in srgb,var(--dj-metro-route-color,#425766) 42%,#dce8e3)!important;
+  border-radius:12px!important;
+  background:color-mix(in srgb,var(--dj-metro-route-color,#425766) 11%,#f8faf8)!important;
+  color:var(--dj-metro-route-color,#425766)!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-current,.metro-rail-next) {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:34px!important;
+  margin:0!important;
+  padding:5px 4px!important;
+  border:1px solid color-mix(in srgb,var(--dj-metro-route-color,#425766) 35%,#dce8e3)!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:var(--dj-metro-route-color,#425766)!important;
+  font-size:clamp(9px,1.1vw,11px)!important;
+  font-weight:800!important;
+  line-height:1.3!important;
+  text-align:center!important;
+  white-space:normal!important;
+  word-break:keep-all!important;
+  overflow-wrap:anywhere!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current {
+  border-color:var(--dj-metro-route-color,#425766)!important;
+  background:var(--dj-metro-route-color,#425766)!important;
+  color:#fff!important;
+  font-size:clamp(10px,1.2vw,12px)!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row {
+  background:color-mix(in srgb,var(--dj-metro-route-color,#425766) 20%,#1b3035)!important;
+  border-color:color-mix(in srgb,var(--dj-metro-route-color,#425766) 58%,#405b58)!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next) {
+  background:#20383d!important;
+  border-color:#4b6660!important;
+  color:#e6f4ed!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current {
+  background:var(--dj-metro-route-color,#425766)!important;
+  border-color:var(--dj-metro-route-color,#425766)!important;
+  color:#fff!important;
+}
+
+/* END LEGACY v704-user-request-fixes.css */
+
+/* BEGIN LEGACY v705-integrated-ui.css */
+/* v7.0.5 integrated patch: complete named controls, not generic z-index overrides. */
+
+/* Explicit X control for every bottom/side page. Leaves the existing nav semantics unchanged. */
+#app .page-panel{position:absolute;}
+#app .page-panel>.page-dismiss,
+#app #news-panel #news-close-to-map{
+  position:absolute!important;top:11px!important;right:13px!important;left:auto!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  z-index:15!important;box-sizing:border-box!important;
+  flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;
+  min-height:36px!important;padding:0!important;margin:0!important;
+  border-radius:11px!important;border:1px solid #c9dfd3!important;
+  background:#ecf6f0!important;color:#235644!important;
+  font:600 23px/1 system-ui,sans-serif!important;box-shadow:none!important;cursor:pointer!important;
+}
+#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)>.page-heading{
+  box-sizing:border-box!important;padding-right:48px!important;
+}
+#app #news-panel>.page-heading{position:relative;}
+#app #news-panel #news-close-to-map{top:11px!important;right:13px!important;}
+#app .page-dismiss:hover,#app #news-close-to-map:hover{background:#dcefe4!important;}
+#app .page-dismiss:focus-visible,#app #news-close-to-map:focus-visible{
+  outline:3px solid #e8bd47!important;outline-offset:2px!important;
+}
+#app[data-theme="dark"] .page-dismiss,
+#app[data-theme="dark"] #news-close-to-map{
+  background:#284640!important;color:#e0f4e8!important;border-color:#507a68!important;
+}
+/* Existing X close controls remain usable at narrow sizes. */
+#app :is(#transport-close,#close-detail,#cancel-add,#ped-tools-close,#map-safety-close,
+  #map-options-mobile-close,#map-options-desktop-close,#version-history-close){
+  min-width:34px!important;min-height:34px!important;touch-action:manipulation;
+}
+
+/* Compact mobile search, below the sharp header; do not reintroduce top haze. */
+@media(max-width:699px){
+  #app .topbar>.map-quick-search{
+    position:absolute!important;top:calc(100% + 5px)!important;
+    left:12px!important;right:auto!important;
+    width:min(340px,calc(100vw - 24px))!important;
+    max-width:calc(100vw - 24px)!important;
+    transform:none!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    box-sizing:border-box!important;min-height:40px!important;height:40px!important;
+    padding:3px 4px 3px 9px!important;border-radius:11px!important;
+    background:#fff!important;box-shadow:0 2px 9px rgba(12,39,31,.1)!important;
+  }
+  #app .topbar>.map-quick-search input{font-size:12px!important;padding:7px 0!important;}
+  #app .topbar>.map-quick-search .map-quick-search-submit{
+    min-height:32px!important;padding:6px 9px!important;
+  }
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{background:#213b3f!important;}
+}
+@media(max-width:1079px){
+  #app .topbar,#app[data-theme="dark"] .topbar{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    -webkit-mask-image:none!important;mask-image:none!important;
+    filter:none!important;opacity:1!important;
+  }
+  /* The vignette stays at the bottom/side, not under the search field. */
+  #app #map::after{background:linear-gradient(0deg,rgba(244,248,246,.35),transparent 9%)!important;}
+  #app[data-theme="dark"] #map::after{background:linear-gradient(0deg,rgba(26,38,35,.40),transparent 9%)!important;}
+  /* Flush lower navigation to all map/page surfaces without transparent rounded gaps. */
+  #app #bottom-nav{border-radius:0!important;border-top:0!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;}
+  #app #overview-sheet:not([hidden]){border-bottom-left-radius:0!important;
+    border-bottom-right-radius:0!important;margin-bottom:0!important;}
+}
+
+/* Map actions: options, night, then safety. Pedestrian safety is always last. */
+@media(min-width:1080px){
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 72px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 144px)!important;}
+}
+@media(min-width:700px) and (max-width:1079px){
+  #app #map-tools-toggle{top:calc(80px + env(safe-area-inset-top))!important;}
+  #app #night-visibility-quick-off{top:calc(132px + env(safe-area-inset-top))!important;}
+  #app #map-safety-toggle{top:calc(184px + env(safe-area-inset-top))!important;}
+}
+@media(max-width:699px){
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,68px) + 10px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,68px) + 62px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,68px) + 114px)!important;}
+}
+@media(max-height:600px) and (orientation:landscape){
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,46px) + 7px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,46px) + 51px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,46px) + 95px)!important;}
+}
+#app #night-visibility-quick-off:not([hidden]){
+  gap:5px!important;background:#183e39!important;border:1px solid #587364!important;
+  color:#fff!important;white-space:nowrap!important;overflow:hidden!important;
+}
+#app #night-visibility-quick-off .dj-night-action-symbol{
+  flex:0 0 25px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  color:#ffd24d!important;font-size:27px!important;font-weight:800!important;line-height:1!important;
+}
+#app #night-visibility-quick-off .dj-night-action-text{
+  color:#f8fff9!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;
+}
+
+/* A pair of consistent navigation entries inside the update history modal. */
+#app .v705-history-top-links{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:9px!important;width:100%!important;margin:0 0 19px!important;
+}
+#app .v705-history-top-link{
+  min-width:0!important;min-height:42px!important;padding:10px!important;
+  background:#e9f5ef!important;border:1px solid #a9d2bf!important;border-radius:11px!important;
+  color:#165f4c!important;font:800 13px/1.3 system-ui,sans-serif!important;cursor:pointer!important;
+}
+#app .v705-history-top-link:hover{background:#d5efdf!important;}
+#app[data-theme="dark"] .v705-history-top-link{
+  background:#2a4843!important;border-color:#527c6a!important;color:#daf8e9!important;
+}
+#app .bus-service-status{font-weight:750;line-height:1.45;}
+@media(max-width:430px){
+  #app .v705-history-top-links{gap:6px!important;}
+  #app .v705-history-top-link{font-size:12px!important;}
+}
+
+/* The introductory safety summary may also be dismissed rather than only collapsed. */
+#app #overview-sheet-close.sheet-dismiss{
+  flex:0 0 34px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;
+  border:1px solid #c9dfd3!important;border-radius:10px!important;background:#ecf6f0!important;
+  color:#235644!important;font:600 23px/1 system-ui,sans-serif!important;cursor:pointer!important;
+}
+#app[data-theme="dark"] #overview-sheet-close{background:#284640!important;color:#e0f4e8!important;border-color:#507a68!important;}
+
+/* END LEGACY v705-integrated-ui.css */
+
+/* BEGIN LEGACY v706-walk-navigation.css */
+/* v7.0.6: compact walking navigation controls; do not obstruct map gestures. */
+#app #nav-live-card .nav-live-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 10px;}
+#app #nav-live-card .nav-live-options button{border:1px solid #cdded8;background:#f4f8f6;color:#365e53;border-radius:10px;padding:10px 7px;font-size:12px;line-height:1.3;font-weight:750;min-height:38px;}
+#app #nav-live-card .nav-live-options button[aria-pressed="true"]{background:#e0f4e9;border-color:#62a98f;color:#0c7155;}
+#app #nav-live-card #nav-mode-tag{font-size:12px;letter-spacing:-.01em;}
+#app #nav-live-card #nav-warning{min-height:18px;}
+#app[data-theme="dark"] #nav-live-card .nav-live-options button{background:#263b3a;color:#d3e7de;border-color:#4a6962;}
+#app[data-theme="dark"] #nav-live-card .nav-live-options button[aria-pressed="true"]{background:#135342;color:#f0fff8;border-color:#2b9376;}
+@media(max-width:390px){#app #nav-live-card .nav-live-options button{font-size:11px;min-height:35px;padding:8px 5px;}}
+
+/* More room for voice/direction buttons so map controls stay accessible. */
+#app.route-guiding .map-actions{bottom:calc(75px + env(safe-area-inset-bottom) + 288px)!important;}
+
+/* END LEGACY v706-walk-navigation.css */
+
+/* BEGIN LEGACY v707-responsive-metro-history.css */
+/* v7.0.7: maintainable final overrides for subway sheet, floating mobile UI and version log.
+   Source/provider data, route geometry, and application state are unchanged. */
+
+/* Align both route identity and the realtime/timetable switch to the visual center. */
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs{
+  box-sizing:border-box!important;
+  margin:8px auto 15px!important;
+  width:max-content!important;
+  max-width:calc(100% - 16px)!important;
+  display:flex!important;justify-content:center!important;
+  padding:4px!important;gap:3px!important;
+  border:1px solid #d9e6de!important;
+  background:#edf4f0!important;
+  border-radius:999px!important;
+  box-shadow:none!important;
+}
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs button{
+  min-width:94px!important;min-height:38px!important;
+  padding:9px 15px!important;background:transparent!important;
+  color:#4b695d!important;border-radius:999px!important;
+  font-size:13px!important;font-weight:800!important;
+}
+#app #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
+  background:#19775e!important;color:#fff!important;
+  box-shadow:0 2px 5px rgba(10,56,41,.14)!important;
+}
+#app #transport-sheet[data-kind="subway"] .transport-neighbors{
+  width:100%!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;
+  margin:5px auto 16px!important;padding:0!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-info-line-card{
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  width:100%!important;max-width:540px!important;
+  padding:9px!important;margin:0 auto!important;
+  background:#f6f9f7!important;border:1px solid #dbe7e0!important;
+  border-radius:15px!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row{
+  box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(92px,1.18fr) minmax(0,1fr)!important;
+  gap:4px!important;align-items:center!important;
+  width:100%!important;max-width:510px!important;
+  min-height:48px!important;margin:0 auto!important;
+  padding:4px!important;border-radius:12px!important;
+  background:transparent!important;color:#2d6654!important;
+  overflow:visible!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-previous,
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-next{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-height:39px!important;padding:6px 4px!important;
+  background:#fff!important;color:#456b5c!important;
+  border:1px solid #d3e3d9!important;border-radius:9px!important;
+  font-size:clamp(10px,2.6vw,13px)!important;
+  font-weight:750!important;text-align:center!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  align-self:stretch!important;border:0!important;border-radius:9px!important;
+  background:var(--transport-line-color,#13836b)!important;color:#fff!important;
+  font-size:clamp(11px,2.8vw,14px)!important;
+  font-weight:850!important;text-align:center!important;word-break:keep-all!important;
+}
+/* Direction information should look like two compact lists, not two unrelated advertisements. */
+#app #transport-sheet[data-kind="subway"] .metro-direction-grid,
+#app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-direction-grid{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:start!important;gap:9px!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group,
+#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.up,
+#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group.down{
+  min-width:0!important;border:1px solid #dce7e2!important;border-radius:13px!important;
+  background:#fff!important;box-shadow:none!important;overflow:hidden!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-direction-heading,
+#app #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  min-height:38px!important;padding:7px 10px!important;gap:7px!important;
+  background:#eff5f2!important;color:#2b5e4e!important;
+  border:0!important;border-bottom:1px solid #e0eae4!important;border-radius:0!important;
+  font-size:12px!important;box-shadow:none!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
+  background:#f2f5f6!important;color:#45636d!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-direction-arrow{
+  flex:0 0 22px!important;display:grid!important;place-items:center!important;
+  width:22px!important;height:22px!important;
+  background:#fff!important;border-radius:50%!important;
+  color:inherit!important;font-size:15px!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
+  min-height:77px!important;padding:9px 11px!important;gap:5px!important;
+  background:#fff!important;border-color:#e5eeea!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .metro-arrival-next{
+  background:#f6faf8!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading,
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  background:#f2f6f4!important;border-color:#e0e8e3!important;
+  color:#516b61!important;font-size:11px!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-nine-service-heading.express{
+  color:#856d22!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-arrival-countdown,
+#app #transport-sheet[data-kind="subway"] .metro-arrival-next .metro-arrival-countdown{
+  color:#137962!important;font-weight:850!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-scheduled-arrival-cards .metro-arrival-time-block{
+  align-items:flex-end!important;text-align:right!important;
+}
+#app #transport-sheet[data-kind="subway"] .metro-plan-direction-ended{
+  display:block;padding:6px 2px;font-size:11px;color:#667a70;line-height:1.4;
+}
+/* Night contrast */
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs{
+  background:#28453f!important;border-color:#436c5d!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button{
+  color:#b1d2c5!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .transport-mode-tabs button[aria-pressed="true"]{
+  background:#1f886d!important;color:#fff!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-info-line-card,
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading,
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-direction-heading.down{
+  background:#233a39!important;color:#daf1e6!important;border-color:#405e56!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-previous,
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-next{
+  background:#2e4645!important;color:#d3e9df!important;border-color:#4a6961!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group,
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .transport-arrival-row{
+  background:#1f3538!important;border-color:#415b59!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-direction-group .metro-arrival-next{
+  background:#28433e!important;
+}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-countdown,
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-arrival-next .metro-arrival-countdown{color:#8ae4c1!important;}
+
+/* Version timeline and actual provenance side by side on roomy screens. */
+#app .version-history-dialog{width:min(1040px,calc(100vw - 34px))!important;max-height:min(94dvh,950px)!important;}
+#app .version-history-list{overflow-y:auto!important;min-height:0!important;padding:0 22px 20px!important;}
+#app .v707-history-summary{padding:15px 0 5px;}
+#app .v707-history-summary .v7-history-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:380px;margin:12px 0;}
+#app .v707-history-switch{display:flex;gap:8px;margin:12px 0;}
+#app .v707-history-switch-button{
+  flex:1;min-height:42px;border-radius:10px;border:1px solid #b9d7c9;
+  background:#f3f9f6;color:#266b56;font-size:13px;font-weight:800;
+}
+#app .v707-history-switch-button[aria-pressed="true"]{background:#dcefe5;border-color:#83bfa3;color:#126a51;}
+#app .v707-history-columns{display:grid;grid-template-columns:minmax(0,1.22fr) minmax(270px,.9fr);gap:15px;align-items:start;}
+#app .v707-history-timeline,#app .v707-history-sources{
+  box-sizing:border-box;min-width:0;height:min(59dvh,570px);overflow-y:auto;
+  border:1px solid #dce9e1;border-radius:13px;padding:12px;background:#fff;
+  overscroll-behavior:contain;scrollbar-width:thin;
+}
+#app .v707-history-sources{background:#f9fbfa;}
+#app .v707-release{margin:0 0 11px;padding:0 0 10px;border-bottom:1px solid #e0e9e3;}
+#app .v707-release:last-child{border:0;margin-bottom:0;}
+#app .v707-release-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+#app .v707-release-head h4{margin:0;font-size:16px;color:#15684f;}
+#app .v707-release-head>span{flex:none;color:#697d73;font-size:11px;}
+#app .v707-release-items{padding:0 0 0 19px;margin:0;font-size:12px;line-height:1.65;color:#355148;word-break:keep-all;}
+#app .v707-release-items li{margin:0 0 7px;}
+#app .v707-history-sources .v7-history-sources-title{margin:3px 0 6px;}
+#app .v707-history-sources .v7-history-source-group{margin:10px 0;}
+#app[data-theme="dark"] .v707-history-timeline,
+#app[data-theme="dark"] .v707-history-sources{background:#203738;border-color:#426055;}
+#app[data-theme="dark"] .v707-release{border-color:#426055;}
+#app[data-theme="dark"] .v707-release-head h4{color:#a4e8c8;}
+#app[data-theme="dark"] .v707-release-items{color:#d9ebe2;}
+#app[data-theme="dark"] .v707-history-switch-button{background:#284842;color:#d7f5e4;border-color:#426e5e;}
+#app[data-theme="dark"] .v707-history-switch-button[aria-pressed="true"]{background:#186b57;color:white;}
+
+/* Universal option/night/safety button geometry; preserve established stacking order. */
+#app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+  box-sizing:border-box!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  margin:0!important;transform:none!important;
+  border-radius:14px!important;
+  white-space:nowrap!important;text-align:center!important;
+  box-shadow:0 3px 12px rgba(19,51,39,.10)!important;
+}
+#app #night-visibility-quick-off[hidden]{display:none!important;}
+@media(min-width:1080px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:14px!important;right:auto!important;width:88px!important;min-width:88px!important;max-width:88px!important;
+    height:60px!important;min-height:60px!important;max-height:60px!important;
+  }
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 72px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 144px)!important;}
+}
+@media(min-width:700px) and (max-width:1079px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:12px!important;right:auto!important;width:124px!important;min-width:124px!important;max-width:124px!important;
+    height:44px!important;min-height:44px!important;max-height:44px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h) + 12px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h) + 64px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h) + 116px)!important;}
+}
+@media(max-width:699px){
+  /* Compact two-line chrome: brand & theme in header, search below, controls below search.
+     The device status bar / home-indicator safe area is preserved, never cropped. */
+  #app{--dj-header-h:calc(46px + env(safe-area-inset-top))!important;--dj-mobile-nav-h:64px!important;}
+  #app .topbar,#app[data-theme="dark"] .topbar{
+    grid-template-areas:'brand tools'!important;
+    grid-template-columns:minmax(0,1fr) 38px!important;
+    height:var(--dj-header-h)!important;min-height:var(--dj-header-h)!important;
+    padding:calc(4px + env(safe-area-inset-top)) 12px 4px!important;
+    gap:8px!important;
+  }
+  #app .topbar>.brand{min-width:0!important;}
+  #app .topbar>.brand .brand-name{font-size:13px!important;letter-spacing:-.35px!important;}
+  #app .topbar>.brand .logo{width:33px!important;min-width:33px!important;height:33px!important;}
+  #app .topbar>.header-tools{grid-area:tools!important;max-width:38px!important;width:38px!important;}
+  #app .topbar .header-tools>.theme-toggle{width:37px!important;min-width:37px!important;height:37px!important;}
+  #app .topbar>.map-quick-search{
+    grid-area:auto!important;position:absolute!important;
+    top:calc(100% + 6px)!important;left:12px!important;right:12px!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    transform:none!important;margin:0!important;z-index:2!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form{
+    height:42px!important;min-height:42px!important;
+    border-radius:13px!important;
+    box-shadow:0 3px 11px rgba(19,45,33,.14)!important;
+  }
+  #app .topbar .header-tools .weather-widget{
+    position:fixed!important;
+    top:calc(var(--dj-header-h) + 62px)!important;right:12px!important;left:auto!important;
+    max-width:min(210px,calc(100vw - 156px))!important;
+    z-index:1510!important;
+  }
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    position:absolute!important;left:12px!important;right:auto!important;
+    width:128px!important;min-width:128px!important;max-width:128px!important;
+    height:44px!important;min-height:44px!important;max-height:44px!important;
+    padding:7px 9px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h) + 62px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h) + 114px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h) + 166px)!important;}
+  /* The phone map stays visible behind the floating tab bar. */
+  #app #bottom-nav{
+    left:12px!important;right:12px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    top:auto!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    height:64px!important;max-height:64px!important;
+    padding:5px 8px!important;
+    border:1px solid #e1eae5!important;border-radius:21px!important;
+    background:rgba(255,255,255,.97)!important;
+    box-shadow:0 7px 28px rgba(11,42,30,.16)!important;
+    -webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important;
+    overflow:visible!important;
+  }
+  #app #bottom-nav .nav-tab{min-height:51px!important;height:51px!important;border-radius:15px!important;}
+  #app[data-theme="dark"] #bottom-nav{background:rgba(27,48,51,.96)!important;border-color:#44605a!important;}
+  #app .sheet.overview-sheet{
+    position:absolute!important;
+    left:12px!important;right:12px!important;bottom:calc(80px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    padding:9px 13px 12px!important;
+    border-radius:18px!important;
+    max-height:min(35dvh,300px)!important;
+    margin:0!important;box-shadow:0 5px 23px rgba(11,42,30,.13)!important;
+    transform:none!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"]{
+    height:62px!important;min-height:62px!important;max-height:62px!important;
+    overflow:hidden!important;
+  }
+  #app .sheet.overview-sheet .sheet h1,#app .sheet.overview-sheet h1{font-size:14px!important;}
+  #app #overview-sheet-handle{display:block!important;width:38px!important;height:4px!important;margin:0 auto 7px!important;}
+  #app .page-panel:not([hidden]),#app .detail-sheet:not([hidden]),#app .entry-sheet:not([hidden]){
+    bottom:calc(80px + env(safe-area-inset-bottom))!important;
+    max-height:calc(100dvh - var(--dj-header-h) - 103px - env(safe-area-inset-bottom))!important;
+  }
+  #app #transport-sheet:not([hidden]){
+    top:calc(10px + env(safe-area-inset-top))!important;
+    bottom:auto!important;
+    max-height:calc(100dvh - 22px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+  }
+  /* The menu occupies the scale's viewport; hide the map-only scale until it closes. */
+  #app:has(#transport-sheet:not([hidden])) .maplibregl-ctrl-bottom-left{visibility:hidden!important;pointer-events:none!important;}
+  #app #transport-sheet[data-kind="subway"] .metro-neighbor-row{
+    grid-template-columns:minmax(0,1fr) minmax(79px,1.1fr) minmax(0,1fr)!important;
+  }
+  #app .v707-history-columns{display:block;}
+  #app .v707-history-timeline,#app .v707-history-sources{
+    height:min(54dvh,520px);padding:10px;
+  }
+  #app .v707-history-columns[data-active-view="updates"] .v707-history-sources{display:none;}
+  #app .v707-history-columns[data-active-view="sources"] .v707-history-timeline{display:none;}
+  #app .version-history-list{padding:0 13px 15px!important;}
+  #app .v707-history-summary{padding-top:10px;}
+  #app .v707-history-summary .v7-history-stats{margin:7px 0;}
+}
+@media(max-width:375px){
+  #app #transport-sheet[data-kind="subway"] .metro-neighbor-row{
+    grid-template-columns:minmax(0,1fr) minmax(68px,1.1fr) minmax(0,1fr)!important;
+  }
+  #app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current{font-size:10px!important;}
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{width:116px!important;min-width:116px!important;max-width:116px!important;}
+}
+@media(max-height:600px) and (orientation:landscape) and (max-width:699px){
+  #app #map-tools-toggle{top:calc(var(--dj-header-h) + 56px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h) + 103px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h) + 150px)!important;}
+  #app .sheet.overview-sheet{max-height:33dvh!important;}
+}
+
+/* END LEGACY v707-responsive-metro-history.css */
+
+/* BEGIN LEGACY v708-floating-ux.css */
+/* v7.0.8: One floating search/identity control; every page retains search access.
+   This file follows v7.0.7 in main.js so old flush-edge rules cannot undo it. */
+#app .topbar,
+#app[data-tab]:not([data-tab="map"]) .topbar,
+#app[data-theme="dark"] .topbar{
+  box-sizing:border-box!important;position:absolute!important;
+  top:calc(10px + env(safe-area-inset-top))!important;left:14px!important;right:14px!important;bottom:auto!important;
+  width:calc(100% - 28px)!important;max-width:none!important;
+  height:56px!important;min-height:56px!important;
+  padding:0!important;margin:0!important;transform:none!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;
+  gap:10px!important;background:transparent!important;border:0!important;
+  border-radius:0!important;box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  overflow:visible!important;pointer-events:none!important;z-index:2410!important;
+}
+#app[data-tab] .topbar>.map-quick-search{
+  box-sizing:border-box!important;position:relative!important;display:block!important;
+  top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;inset:auto!important;
+  flex:1 1 530px!important;width:min(100%,640px)!important;max-width:640px!important;min-width:0!important;
+  margin:0!important;padding:0!important;transform:none!important;pointer-events:auto!important;
+  z-index:2!important;
+}
+#app .topbar>.map-quick-search .map-quick-search-form,
+#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+  display:flex!important;align-items:center!important;box-sizing:border-box!important;
+  gap:9px!important;width:100%!important;height:56px!important;min-height:56px!important;
+  padding:6px 7px 6px 9px!important;border:1px solid #cfe3d9!important;
+  border-radius:24px!important;background:rgba(255,255,255,.97)!important;
+  box-shadow:0 7px 24px rgba(12,50,37,.14)!important;overflow:hidden!important;
+  -webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important;
+}
+#app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+  background:rgba(29,51,52,.96)!important;border-color:#507267!important;
+}
+#app .topbar .map-quick-search-form>.brand{
+  flex:0 0 auto!important;display:flex!important;align-items:center!important;
+  gap:8px!important;margin:0!important;padding:0 11px 0 0!important;min-width:0!important;
+  width:auto!important;max-width:50%!important;border-right:1px solid #dceae3!important;
+  pointer-events:none!important;white-space:nowrap!important;
+}
+#app[data-theme="dark"] .topbar .map-quick-search-form>.brand{border-right-color:#4a6a62!important;}
+#app .topbar .map-quick-search-form>.brand .eyebrow{display:none!important;}
+#app .topbar .map-quick-search-form>.brand .brand-name{
+  font-size:14px!important;font-weight:850!important;line-height:1.25!important;
+  letter-spacing:-.45px!important;white-space:nowrap!important;
+}
+#app .topbar .map-quick-search-form>.brand .logo{
+  display:grid!important;place-items:center!important;box-sizing:border-box!important;
+  flex:0 0 38px!important;width:38px!important;min-width:38px!important;
+  height:38px!important;min-height:38px!important;
+  padding:3px!important;border-radius:50%!important;background:#f5faf7!important;
+  border:1px solid #d2e6dc!important;overflow:hidden!important;box-shadow:none!important;
+}
+#app .topbar .map-quick-search-form>.brand .logo img{
+  display:block!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;border-radius:50%!important;
+}
+#app .topbar .map-quick-search-form>.map-quick-search-icon{display:none!important;}
+#app .topbar .map-quick-search-form>input{
+  display:block!important;flex:1 1 0!important;min-width:0!important;width:0!important;
+  max-width:100%!important;padding:8px 0!important;
+  background:transparent!important;font-size:13px!important;line-height:1.2!important;
+}
+#app .topbar .map-quick-search-form>.map-quick-search-submit{
+  flex:0 0 38px!important;min-width:38px!important;width:38px!important;
+  min-height:38px!important;height:38px!important;padding:0!important;
+  border-radius:13px!important;
+}
+#app .topbar>.header-tools{
+  position:relative!important;grid-area:auto!important;display:flex!important;
+  flex:0 0 43px!important;width:43px!important;min-width:43px!important;max-width:43px!important;
+  justify-content:center!important;align-items:center!important;margin:0!important;
+  pointer-events:auto!important;
+}
+#app .topbar .header-tools>.theme-toggle{
+  width:43px!important;min-width:43px!important;height:43px!important;min-height:43px!important;
+  border-radius:18px!important;box-shadow:0 6px 20px rgba(12,50,37,.12)!important;
+}
+#app .topbar .map-quick-search-dropdown{
+  top:calc(100% + 9px)!important;left:0!important;right:0!important;
+  border-radius:18px!important;box-shadow:0 10px 26px rgba(15,52,40,.15)!important;
+}
+/* A closed sheet must truly disappear, even if older CSS styles its container. */
+#app #overview-sheet[hidden],#app .page-panel[hidden],#app .transport-sheet[hidden],
+#app .detail-sheet[hidden],#app .entry-sheet[hidden]{display:none!important;}
+#app .page-panel>.page-dismiss,#app #news-panel #news-close-to-map,
+#app #overview-sheet #overview-sheet-close{
+  display:grid!important;place-items:center!important;box-sizing:border-box!important;
+  width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+  border:1px solid #c7dfd3!important;border-radius:14px!important;
+  color:#265a49!important;background:#edf6f1!important;
+  font-size:26px!important;line-height:1!important;
+  cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;z-index:30!important;
+}
+#app .page-panel>.page-dismiss,
+#app #news-panel #news-close-to-map{top:14px!important;right:14px!important;left:auto!important;}
+#app .page-panel>.page-heading,#app #news-panel>.page-heading{padding-right:54px!important;min-height:48px!important;}
+#app #overview-sheet .sheet-top{display:flex!important;align-items:flex-start!important;gap:12px!important;justify-content:space-between!important;}
+#app #overview-sheet .sheet-top>div:first-child{flex:1 1 auto!important;min-width:0!important;}
+#app #overview-sheet .sheet-top h1{
+  font-size:clamp(13px,3.4vw,19px)!important;line-height:1.4!important;
+  margin:9px 0 0!important;letter-spacing:-.65px!important;word-break:keep-all!important;
+}
+#app #overview-sheet .sheet-top-actions{
+  display:grid!important;grid-template-columns:auto 42px!important;grid-template-rows:42px auto!important;
+  align-items:center!important;justify-items:end!important;gap:7px!important;
+  flex:0 0 auto!important;margin:0!important;min-width:0!important;z-index:5!important;
+}
+#app #overview-sheet #points-count{grid-column:1!important;grid-row:1!important;}
+#app #overview-sheet #overview-sheet-close{grid-column:2!important;grid-row:1!important;position:relative!important;top:auto!important;right:auto!important;}
+#app #overview-sheet #overview-sheet-toggle{grid-column:1 / 3!important;grid-row:2!important;justify-self:end!important;margin:0!important;}
+#app #overview-sheet[data-sheet-state="collapsed"] .sheet-top h1{margin-top:2px!important;}
+
+/* The mobile shell floats ON the map. Nothing is clipped against an edge. */
+@media(max-width:1079px){
+  #app .topbar,#app[data-tab]:not([data-tab="map"]) .topbar,#app[data-theme="dark"] .topbar{
+    top:calc(8px + env(safe-area-inset-top))!important;
+    left:12px!important;right:12px!important;width:calc(100% - 24px)!important;
+    height:52px!important;min-height:52px!important;gap:8px!important;
+  }
+  #app[data-tab] .topbar>.map-quick-search{
+    position:relative!important;left:auto!important;right:auto!important;top:auto!important;
+    width:auto!important;max-width:none!important;flex:1 1 auto!important;
+    margin:0!important;transform:none!important;
+  }
+  #app .topbar>.map-quick-search .map-quick-search-form,
+  #app[data-theme="dark"] .topbar>.map-quick-search .map-quick-search-form{
+    height:52px!important;min-height:52px!important;padding:5px 6px!important;
+    border-radius:22px!important;
+  }
+  #app .topbar .map-quick-search-form>.brand{gap:5px!important;padding-right:8px!important;max-width:none!important;}
+  #app .topbar .map-quick-search-form>.brand .logo{
+    flex-basis:33px!important;min-width:33px!important;width:33px!important;
+    min-height:33px!important;height:33px!important;padding:2px!important;
+  }
+  #app .topbar .map-quick-search-form>.brand .brand-name{font-size:11px!important;letter-spacing:-.5px!important;}
+  #app .topbar .map-quick-search-form>input{font-size:12px!important;}
+  #app .topbar .map-quick-search-form>.map-quick-search-submit{
+    flex-basis:34px!important;min-width:34px!important;width:34px!important;
+    min-height:34px!important;height:34px!important;border-radius:12px!important;
+  }
+  #app .topbar>.header-tools{
+    flex:0 0 39px!important;width:39px!important;min-width:39px!important;max-width:39px!important;
+  }
+  #app .topbar .header-tools>.theme-toggle{
+    width:39px!important;min-width:39px!important;height:39px!important;min-height:39px!important;
+    border-radius:15px!important;
+  }
+  #app .topbar .header-tools .weather-widget{
+    position:fixed!important;top:calc(71px + env(safe-area-inset-top))!important;
+    right:12px!important;left:auto!important;max-width:min(210px,calc(100vw - 155px))!important;
+  }
+  #app #bottom-nav{
+    box-sizing:border-box!important;position:absolute!important;
+    top:auto!important;bottom:calc(16px + env(safe-area-inset-bottom))!important;
+    left:12px!important;right:12px!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    height:70px!important;min-height:70px!important;max-height:70px!important;
+    padding:7px 8px!important;gap:3px!important;
+    border:1px solid #d9e7e0!important;border-radius:25px!important;
+    background:rgba(255,255,255,.97)!important;
+    box-shadow:0 8px 27px rgba(20,54,43,.17)!important;
+    -webkit-backdrop-filter:blur(13px)!important;backdrop-filter:blur(13px)!important;
+    overflow:hidden!important;background-clip:padding-box!important;
+  }
+  #app #bottom-nav .nav-tab{
+    box-sizing:border-box!important;height:54px!important;min-height:54px!important;
+    padding:3px 2px!important;border-radius:18px!important;
+  }
+  #app .sheet.overview-sheet,#app #overview-sheet:not([hidden]){
+    position:absolute!important;top:auto!important;left:12px!important;right:12px!important;
+    bottom:calc(102px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    border-radius:23px!important;border:1px solid #dce9e3!important;
+    box-shadow:0 8px 28px rgba(20,54,43,.16)!important;
+    background-clip:padding-box!important;
+    padding:10px 13px 14px!important;
+    max-height:min(42dvh,330px)!important;overflow:auto!important;
+  }
+  #app #overview-sheet[data-sheet-state="collapsed"]{
+    box-sizing:border-box!important;min-height:65px!important;max-height:70px!important;
+    height:70px!important;overflow:hidden!important;
+  }
+  #app .page-panel:not([hidden]),#app #route-panel.page-panel:not([hidden]),
+  #app #news-panel.page-panel:not([hidden]),#app #participation-panel.page-panel:not([hidden]),
+  #app #mine-panel.page-panel:not([hidden]),
+  #app .detail-sheet:not([hidden]),#app .entry-sheet:not([hidden]){
+    box-sizing:border-box!important;position:absolute!important;
+    top:auto!important;left:12px!important;right:12px!important;
+    bottom:calc(102px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 24px)!important;max-width:none!important;
+    height:max-content!important;min-height:0!important;
+    max-height:calc(100dvh - 185px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    margin:0!important;padding-bottom:16px!important;
+    border-radius:23px!important;overflow-y:auto!important;overflow-x:hidden!important;
+    background-clip:padding-box!important;box-shadow:0 10px 32px rgba(20,54,43,.16)!important;
+  }
+  #app #overview-sheet .sheet-top h1{font-size:clamp(13px,3vw,16px)!important;}
+  #app #overview-sheet .sheet-top-actions{grid-template-columns:auto 38px!important;grid-template-rows:38px auto!important;gap:5px!important;}
+  #app #overview-sheet #overview-sheet-close{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;}
+  #app #overview-sheet #points-count{font-size:10px!important;padding:6px!important;}
+  #app #overview-sheet #overview-sheet-toggle{font-size:10px!important;padding:7px 9px!important;}
+  #app #transport-sheet:not([hidden]){border-radius:23px!important;}
+}
+@media(max-width:370px){
+  #app .topbar .map-quick-search-form>.brand .brand-name{font-size:10px!important;}
+  #app .topbar .map-quick-search-form>.brand .logo{flex-basis:28px!important;min-width:28px!important;width:28px!important;min-height:28px!important;height:28px!important;}
+  #app .topbar .map-quick-search-form>.brand{gap:4px!important;padding-right:5px!important;}
+  #app .topbar .map-quick-search-form>input{font-size:11px!important;}
+}
+/* Keep page transitions, but never force animations on accessibility reduced-motion users. */
+@keyframes dj-v708-sheet-rise{
+  from{opacity:.15;translate:0 24px;scale:.985;}
+  to{opacity:1;translate:0 0;scale:1;}
+}
+@keyframes dj-v708-drawer-appear{
+  from{opacity:.2;translate:0 12px;scale:.992;}
+  to{opacity:1;translate:0 0;scale:1;}
+}
+@media(prefers-reduced-motion:no-preference){
+  #app #bottom-nav{animation:dj-v708-drawer-appear .35s cubic-bezier(.2,.8,.25,1) both!important;}
+  #app #overview-sheet:not([hidden]),#app .page-panel:not([hidden]),
+  #app .detail-sheet:not([hidden]),#app .entry-sheet:not([hidden]),
+  #app #transport-sheet:not([hidden]){
+    animation:dj-v708-sheet-rise .32s cubic-bezier(.2,.8,.25,1) both!important;
+  }
+  #app.map-controls-open .map-advanced-controls,
+  #app.map-safety-open .map-safety-controls,
+  #app .admin-dong-picker:not([hidden]),
+  #app .version-history-dialog[open]{
+    animation:dj-v708-drawer-appear .26s cubic-bezier(.2,.8,.25,1) both!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #app #bottom-nav,#app .page-panel,#app #overview-sheet,#app .transport-sheet,
+  #app .detail-sheet,#app .entry-sheet,#app .map-advanced-controls,
+  #app .map-safety-controls{animation:none!important;transition-duration:.01ms!important;}
+}
+
+/* Stronger than legacy [data-tab] and route styles that flattened the corners. */
+@media(max-width:1079px){
+  #app[data-tab] #bottom-nav{
+    border-radius:25px!important;overflow:hidden!important;
+    background-clip:padding-box!important;
+  }
+}
+@media(min-width:1080px){
+  /* Weather, theme and update controls must not overlap the new combined search. */
+  #app .topbar>.header-tools{
+    flex:0 0 auto!important;min-width:0!important;
+    width:auto!important;max-width:calc(100% - 665px)!important;
+    justify-content:flex-start!important;gap:9px!important;
+  }
+  #app .topbar .header-tools .weather-widget{
+    position:relative!important;flex:0 1 auto!important;
+    width:auto!important;max-width:220px!important;min-width:0!important;
+  }
+}
+
+/* END LEGACY v708-floating-ux.css */
+
+/* BEGIN LEGACY v709-control-fixes.css */
+/* v7.0.9: Consolidated, final-order corrections for floating map chrome.
+   Keep component handlers and all existing data/analysis layers unchanged. */
+
+/* Draw the X instead of using the typographic × glyph (whose font baseline
+   renders lower than its actual hit box on iOS and Windows). */
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+){
+  box-sizing:border-box!important;
+  display:grid!important;place-items:center!important;
+  padding:0!important;
+  font-size:0!important;line-height:0!important;
+  text-indent:0!important;
+  overflow:visible!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  isolation:isolate!important;
+}
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+)::before,
+#app :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss
+)::after{
+  content:""!important;position:absolute!important;
+  top:50%!important;left:50%!important;
+  width:17px!important;height:2.6px!important;
+  border:0!important;border-radius:4px!important;
+  background:currentColor!important;pointer-events:none!important;
+  transform-origin:center!important;translate:-50% -50%!important;
+  margin:0!important;
+}
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::before{
+  rotate:45deg!important;
+}
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::after{
+  rotate:-45deg!important;
+}
+/* Buttons with normal flow need their own containing block for the
+   centered cross strokes. Absolute-positioned sheet dismissers stay absolute. */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#admin-dong-close,#close-detail,#cancel-add,
+  #route-search-close,#community-compose-close,#pza-road-close){
+  position:relative!important;
+}
+#app #transport-sheet[data-kind="subway"] #transport-close{
+  position:absolute!important;
+}
+/* Unified color in the active dark theme, including on-map night summary. */
+#app[data-theme="dark"] :is(
+  #map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,
+  #close-detail,#cancel-add,#route-search-close,
+  #community-compose-close,#pza-road-close,.page-dismiss){
+  background:#284741!important;border:1px solid #50786d!important;
+  color:#e4f4ec!important;box-shadow:none!important;
+}
+#app[data-theme="dark"] #night-visibility-float .night-visibility-float-actions #night-visibility-float-stop{
+  background:#284741!important;border-color:#668c7c!important;color:#effff5!important;
+}
+#app #night-visibility-float-stop{
+  flex:none!important;position:relative!important;
+  width:34px!important;height:34px!important;min-width:34px!important;
+  min-height:34px!important;border-radius:11px!important;
+}
+/* Anchor dismiss controls to the card, not to the heading's line box. */
+#app #news-panel:not([hidden]){position:absolute!important;}
+#app #news-panel>.page-heading{position:static!important;padding-right:55px!important;}
+#app #news-panel #news-close-to-map,
+#app .page-panel>.page-dismiss{
+  position:absolute!important;top:14px!important;right:14px!important;left:auto!important;
+  width:38px!important;min-width:38px!important;max-width:38px!important;
+  height:38px!important;min-height:38px!important;max-height:38px!important;
+  margin:0!important;z-index:40!important;
+}
+#app #overview-sheet .sheet-top{position:static!important;}
+#app #overview-sheet #overview-sheet-close{
+  position:absolute!important;top:14px!important;right:14px!important;
+  left:auto!important;grid-column:auto!important;grid-row:auto!important;
+  width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;
+  margin:0!important;z-index:40!important;
+}
+#app #overview-sheet .sheet-top>div:first-child{padding-right:45px!important;}
+#app #overview-sheet .sheet-top-actions{padding-right:45px!important;}
+#app #overview-sheet[data-sheet-state="collapsed"] #overview-sheet-close{
+  top:50%!important;transform:translateY(-50%)!important;
+}
+
+/* Each action is the same footprint and 10px apart; compact, not tall tiles. */
+#app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+  box-sizing:border-box!important;position:absolute!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:5px!important;white-space:nowrap!important;
+  padding:6px 9px!important;line-height:1.1!important;
+  height:44px!important;min-height:44px!important;max-height:44px!important;
+  border-radius:13px!important;margin:0!important;
+  font-size:12px!important;font-weight:800!important;
+}
+#app #night-visibility-quick-off[hidden]{display:none!important;}
+#app #night-visibility-quick-off[aria-pressed="true"]:not([hidden]){
+  background:#574325!important;border-color:#c39a4f!important;color:#fff5db!important;
+}
+#app #night-visibility-quick-off[aria-pressed="true"] .dj-night-action-text{color:#fff5db!important;}
+#app #night-visibility-quick-off .dj-night-action-symbol{
+  flex:0 0 22px!important;font-size:23px!important;
+}
+@media(min-width:1080px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:14px!important;right:auto!important;width:102px!important;
+    min-width:102px!important;max-width:102px!important;
+  }
+  #app #map-tools-toggle{top:var(--dj-controls-under-nav,438px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-controls-under-nav,438px) + 54px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-controls-under-nav,438px) + 108px)!important;}
+  /* The floating night analysis moves from right to left of the map, beside
+     the nav rail rather than over the right-hand map controls. */
+  #app #night-visibility-float:not(.dj-float-user-positioned){
+    left:132px!important;right:auto!important;top:calc(102px + env(safe-area-inset-top))!important;
+    width:min(378px,calc(100vw - 164px))!important;
+  }
+}
+@media(min-width:700px) and (max-width:1079px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:12px!important;right:auto!important;width:116px!important;min-width:116px!important;max-width:116px!important;
+    height:42px!important;min-height:42px!important;max-height:42px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,60px) + 56px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,60px) + 107px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,60px) + 158px)!important;}
+  #app #night-visibility-float:not(.dj-float-user-positioned){
+    left:140px!important;right:auto!important;top:calc(125px + env(safe-area-inset-top))!important;
+    width:min(355px,calc(100vw - 160px))!important;
+  }
+}
+@media(max-width:699px){
+  #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+    left:12px!important;right:auto!important;
+    width:112px!important;min-width:112px!important;max-width:112px!important;
+    height:40px!important;min-height:40px!important;max-height:40px!important;
+    padding:5px 7px!important;font-size:11px!important;border-radius:12px!important;
+  }
+  #app #map-tools-toggle{top:calc(var(--dj-header-h,60px) + 54px)!important;}
+  #app #night-visibility-quick-off{top:calc(var(--dj-header-h,60px) + 101px)!important;}
+  #app #map-safety-toggle{top:calc(var(--dj-header-h,60px) + 148px)!important;}
+  #app[data-tab] #night-visibility-float:not(.dj-float-user-positioned){
+    left:12px!important;right:auto!important;top:auto!important;
+    bottom:calc(102px + env(safe-area-inset-bottom))!important;
+    width:calc(100% - 24px)!important;
+  }
+}
+
+/* END LEGACY v709-control-fixes.css */
+
+/* BEGIN LEGACY v710-exclusive-panels.css */
+/* v7.0.10: one open sheet at a time, consistent card geometry and one X icon.
+   Deliberately imported after v7.0.9 rules to remove older contradictory overrides. */
+#app[data-sangdo-night="on"] #overview-sheet,
+#app[data-sangdo-night="on"] #overview-sheet:not([hidden]),
+#app #overview-sheet[hidden] {display:none!important;visibility:hidden!important;pointer-events:none!important;}
+
+/* Draw ONE cross, and stop the v7.0.9 double-pseudo cross from stacking.
+   Do not change the native button or its event handler. */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::before {
+  content:""!important;display:block!important;position:absolute!important;
+  width:17px!important;height:17px!important;top:50%!important;left:50%!important;
+  transform:translate(-50%,-50%)!important;translate:none!important;rotate:0deg!important;
+  background:linear-gradient(45deg,transparent 43%,currentColor 43% 56%,transparent 56%),
+             linear-gradient(-45deg,transparent 43%,currentColor 43% 56%,transparent 56%)!important;
+  border:none!important;border-radius:0!important;pointer-events:none!important;
+}
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+  #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+  #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+  #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+  #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,.page-dismiss)::after {
+  content:none!important;display:none!important;
+}
+
+/* One predictable size for panel close controls; support dark mode too. */
+#app :is(#overview-sheet-close,#news-close-to-map,.page-panel>.page-dismiss,
+  #night-visibility-float-stop,#map-safety-close,#map-options-mobile-close){
+  width:36px!important;min-width:36px!important;max-width:36px!important;
+  height:36px!important;min-height:36px!important;max-height:36px!important;
+  border-radius:12px!important;box-sizing:border-box!important;
+}
+
+/* Compact disclosure heading. The words never break into four rows. */
+#app #overview-sheet .sheet-top{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;justify-content:space-between!important;
+  position:relative!important;min-height:40px!important;gap:8px!important;
+  margin:0 0 10px!important;padding:0!important;
+}
+#app #overview-sheet .sheet-top>div:first-child{
+  min-width:0!important;padding:0!important;flex:auto!important;
+}
+#app #overview-sheet .sheet-top h1,
+#app #overview-sheet[data-sheet-state="collapsed"] .sheet-top h1{
+  display:block!important;margin:0!important;padding:0!important;
+  font-size:17px!important;line-height:1.25!important;white-space:nowrap!important;
+  word-break:keep-all!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  letter-spacing:-.035em!important;
+}
+#app #overview-sheet .sheet-top-actions{
+  display:flex!important;position:static!important;flex-flow:row nowrap!important;
+  align-items:center!important;justify-content:flex-end!important;gap:6px!important;
+  padding:0!important;margin:0!important;width:auto!important;min-width:0!important;
+  height:40px!important;grid-template-columns:none!important;grid-template-rows:none!important;
+}
+#app #overview-sheet .sheet-top-actions #points-count{
+  position:static!important;grid-column:auto!important;grid-row:auto!important;
+  white-space:nowrap!important;padding:5px 7px!important;font-size:11px!important;
+}
+#app #overview-sheet #overview-sheet-toggle{
+  display:inline-flex!important;position:static!important;grid-column:auto!important;grid-row:auto!important;
+  align-items:center!important;justify-content:center!important;white-space:nowrap!important;
+  width:auto!important;min-width:0!important;height:32px!important;min-height:32px!important;
+  padding:5px 9px!important;font-size:11px!important;margin:0!important;
+}
+#app #overview-sheet #overview-sheet-close,
+#app #overview-sheet[data-sheet-state="collapsed"] #overview-sheet-close{
+  display:grid!important;position:relative!important;top:auto!important;right:auto!important;
+  left:auto!important;bottom:auto!important;transform:none!important;
+  grid-column:auto!important;grid-row:auto!important;margin:0!important;
+  width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;
+}
+#app #overview-sheet[data-sheet-state="collapsed"] .sheet-top-actions #points-count{
+  display:none!important;
+}
+#app #overview-sheet[data-sheet-state="collapsed"] .sheet-top-actions #overview-sheet-toggle{
+  display:inline-flex!important;
+}
+
+/* Shared width and top/bottom limits across secondary panels. Let content
+   determine height: forcing an empty, fixed-height card wastes map space. */
+@media(min-width:1080px){
+  #app .sheet.overview-sheet:not([hidden]),
+  #app .page-panel:not([hidden]){
+    box-sizing:border-box!important;
+    width:min(430px,calc(100vw - 290px))!important;
+    max-width:min(430px,calc(100vw - 290px))!important;
+    max-height:calc(100dvh - 120px)!important;
+    overflow-y:auto!important;
+  }
+  #app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+    box-sizing:border-box!important;
+    left:136px!important;
+    right:auto!important;top:90px!important;
+    width:min(430px,calc(100vw - 165px))!important;
+    max-width:min(430px,calc(100vw - 165px))!important;
+    max-height:calc(100dvh - 120px)!important;
+  }
+}
+@media(max-width:1079px){
+  #app .topbar,#app[data-theme="dark"] .topbar,
+  #app[data-tab]:not([data-tab="map"]) .topbar{
+    top:calc(3px + env(safe-area-inset-top))!important;
+  }
+  #app .sheet.overview-sheet:not([hidden]),
+  #app .page-panel:not([hidden]){
+    box-sizing:border-box!important;
+    left:12px!important;right:12px!important;
+    width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;
+    max-height:calc(100dvh - 174px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    border-radius:23px!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"]:not([hidden]){
+    height:62px!important;min-height:62px!important;max-height:62px!important;
+    padding:9px 12px!important;overflow:hidden!important;
+  }
+  #app .sheet.overview-sheet[data-sheet-state="collapsed"] .sheet-top{
+    min-height:40px!important;height:40px!important;margin:0!important;
+  }
+  #app #overview-sheet .sheet-top h1{font-size:15px!important;}
+  #app #overview-sheet .sheet-top-actions #points-count{display:none!important;}
+  #app #overview-sheet #overview-sheet-toggle{font-size:11px!important;}
+  #app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+    box-sizing:border-box!important;
+    left:12px!important;right:12px!important;width:calc(100% - 24px)!important;
+    max-width:calc(100% - 24px)!important;
+    max-height:calc(100dvh - 174px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+    border-radius:23px!important;
+  }
+}
+@media(max-width:360px){
+  #app #overview-sheet .sheet-top h1{font-size:14px!important;}
+  #app #overview-sheet #overview-sheet-toggle{padding:4px 7px!important;}
+}
+@media(prefers-reduced-motion:no-preference){
+  #app #overview-sheet:not([hidden]),
+  #app #night-visibility-float:not([hidden]){
+    animation:dj-v708-sheet-rise .26s cubic-bezier(.2,.8,.25,1) both!important;
+  }
+}
+/* Keep the sole close control at the far right, not between information chips. */
+#app #overview-sheet .sheet-top-actions #points-count{order:1!important;}
+#app #overview-sheet .sheet-top-actions #overview-sheet-toggle{order:2!important;}
+#app #overview-sheet .sheet-top-actions #overview-sheet-close{order:3!important;}
+
+/* END LEGACY v710-exclusive-panels.css */
+
+/* BEGIN LEGACY v711-map-layout.css */
+/* v7.0.11 — one coherent layout spec after all legacy overrides. */
+:root{--dj-side-panel-w:430px;--dj-search-h:56px;--dj-left-dock-x:148px;--dj-rail-top:88px;}
+/* Always one button icon. The underlying textual × is removed from markup. */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+ #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+ #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+ #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+ #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,
+ #news-close-to-map,.page-dismiss){font-size:0!important;line-height:0!important;}
+/* A single cross (do not permit the older ::after stroke to duplicate it). */
+#app :is(#map-quick-search-close,#version-history-close,#map-safety-close,
+ #night-visibility-float-stop,#map-options-mobile-close,#map-options-desktop-close,
+ #map-gesture-guide-close,#ped-tools-close,#road-width-legend-close,
+ #transport-close,#overview-sheet-close,#admin-dong-close,#close-detail,
+ #cancel-add,#route-search-close,#community-compose-close,#pza-road-close,
+ #news-close-to-map,.page-dismiss)::after{content:none!important;display:none!important;}
+#app #news-close-to-map{position:absolute!important;right:14px!important;top:14px!important;}
+#app #news-close-to-map::before{content:""!important;position:absolute;top:50%;left:50%;
+ width:16px;height:16px;transform:translate(-50%,-50%);
+ background:linear-gradient(45deg,transparent 43%,currentColor 43% 56%,transparent 56%),
+ linear-gradient(-45deg,transparent 43%,currentColor 43% 56%,transparent 56%);}
+/* A useful standard panel width without forcing all content to a tall empty box. */
+@media(min-width:1080px){
+ #app #overview-sheet:not([hidden]),#app .page-panel:not([hidden]),
+ #app.map-controls-open #map-advanced-controls,
+ #app.map-safety-open #map-safety-controls,
+ #app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+  box-sizing:border-box!important;width:min(var(--dj-side-panel-w),calc(100vw - 174px))!important;
+  max-width:min(var(--dj-side-panel-w),calc(100vw - 174px))!important;
+ }
+ #app.map-controls-open #map-advanced-controls,#app.map-safety-open #map-safety-controls,
+ #app .page-panel:not([hidden]),#app #night-visibility-float:not(.dj-float-user-positioned):not([hidden]){
+  left:var(--dj-left-dock-x)!important;right:auto!important;
+  top:var(--dj-rail-top)!important;
+  transform:none!important;
+ }
+ /* Right-side map buttons begin just under the search rather than drifting mid-map. */
+ #app .map-actions{top:calc(92px + env(safe-area-inset-top))!important;
+  bottom:auto!important;right:16px!important;left:auto!important;
+  display:flex!important;flex-direction:column!important;gap:8px!important;}
+ /* Match the height of weather, theme and version chips to the search box. */
+ #app .topbar>.header-tools{flex:0 0 auto!important;width:auto!important;max-width:none!important;
+  min-width:0!important;height:var(--dj-search-h)!important;gap:9px!important;}
+ #app .topbar .header-tools .weather-widget{
+  position:static!important;box-sizing:border-box!important;height:var(--dj-search-h)!important;
+  min-height:var(--dj-search-h)!important;max-height:var(--dj-search-h)!important;
+  display:flex!important;align-items:center!important;gap:6px!important;
+ }
+ #app .topbar .header-tools>.theme-toggle,#app .topbar .header-tools>.version-history-trigger{
+  height:var(--dj-search-h)!important;min-height:var(--dj-search-h)!important;
+  max-height:var(--dj-search-h)!important;align-self:center!important;
+  box-sizing:border-box!important;
+ }
+}
+/* Phones retain the floating weather chip position; only align panel widths. */
+@media(max-width:1079px){
+ #app .map-actions{right:12px!important;left:auto!important;}
+ #app .sheet.overview-sheet:not([hidden]),#app .page-panel:not([hidden]),
+ #app.map-controls-open #map-advanced-controls,#app.map-safety-open #map-safety-controls,
+ #app #night-visibility-float:not([hidden]):not(.dj-float-user-positioned){
+  box-sizing:border-box!important;max-width:calc(100vw - 24px)!important;
+ }
+}
+
+/* END LEGACY v711-map-layout.css */
+
+/* BEGIN LEGACY v712-interaction-layout.css */
+/* v7.0.12: shared layout contract; imported LAST to supersede historical rules. */
+:root{--dj-header-mini-h:40px;--dj-rail-btn-w:102px;--dj-rail-left:14px;--dj-rail-gap:9px}
+@media (min-width:1080px){
+ /* Three helper chips are deliberately shorter than the 56px search field. */
+ #app .topbar>.header-tools{height:56px!important;min-height:0!important;align-items:center!important;gap:8px!important;}
+ #app .topbar .header-tools .weather-widget,
+ #app .topbar .header-tools>.theme-toggle,
+ #app .topbar .header-tools>.version-history-trigger{
+   box-sizing:border-box!important;height:var(--dj-header-mini-h)!important;
+   min-height:var(--dj-header-mini-h)!important;max-height:var(--dj-header-mini-h)!important;
+   align-self:center!important;border-radius:14px!important;
+ }
+ #app[data-tab="map"] .map-actions{top:calc(16px + env(safe-area-inset-top))!important;bottom:auto!important;right:14px!important;left:auto!important;}
+ #app #map-tools-toggle,#app #night-visibility-quick-off,#app #map-safety-toggle{
+   left:var(--dj-rail-left)!important;right:auto!important;
+   width:var(--dj-rail-btn-w)!important;min-width:var(--dj-rail-btn-w)!important;
+   max-width:var(--dj-rail-btn-w)!important;
+ }
+}
+@media (min-width:700px) and (max-width:1079px){
+ #app[data-tab="map"] .map-actions{top:calc(12px + env(safe-area-inset-top))!important;bottom:auto!important;right:10px!important;}
+}
+/* Map options must never hide the adjacent safety/night launchers. */
+#app[data-tab="map"].map-controls-open #map-tools-toggle,
+#app[data-tab="map"].map-controls-open #map-safety-toggle,
+#app[data-tab="map"].map-controls-open #night-visibility-quick-off:not([hidden]){
+ display:flex!important;visibility:visible!important;pointer-events:auto!important;
+ opacity:1!important;z-index:2402!important;
+}
+#app[data-tab="map"].map-controls-open #map-options-backdrop:not([hidden]){
+ pointer-events:auto!important;
+}
+/* The options sheet stays offset from the rail; controls remain tappable. */
+@media (min-width:700px){
+ #app.map-controls-open #map-advanced-controls{
+ left:var(--dj-left-dock-x,148px)!important;right:auto!important;
+ top:var(--dj-rail-top,88px)!important;
+ }
+}
+@media (max-width:699px){
+ #app[data-tab="map"].map-controls-open #map-advanced-controls{
+   z-index:2000!important;pointer-events:auto!important;
+   top:calc(var(--dj-header-h,60px) + 192px)!important;
+   bottom:calc(var(--dj-mobile-nav-h,88px) + 12px)!important;
+   max-height:calc(100dvh - var(--dj-header-h,60px) - var(--dj-mobile-nav-h,88px) - 210px)!important;
+ }
+}
+/* Guide is a true actionable surface; clicking X does not hit the canvas behind it. */
+#app #map-gesture-guide.map-gesture-guide{pointer-events:auto!important;z-index:3500!important;}
+#app #map-gesture-guide-close{
+ position:relative!important;z-index:2!important;pointer-events:auto!important;
+ display:grid!important;place-items:center!important;width:36px!important;height:36px!important;
+ border-radius:11px!important;cursor:pointer!important;
+}
+/* Station-specific side panel: center map on selected station, info on the left. */
+@media (min-width:700px){
+ #app #transport-sheet[data-station-focus="left"]:not([hidden]){
+   left:var(--dj-left-dock-x,148px)!important;right:auto!important;
+   width:min(460px,calc(100vw - 190px))!important;
+   max-width:min(460px,calc(100vw - 190px))!important;
+   transform:none!important;
+ }
+}
+/* On phones, the right-hand tools begin directly below the floating weather
+   chip, instead of drifting down when another panel has been expanded. */
+@media (max-width:699px){
+ #app[data-tab="map"] .map-actions{
+   top:calc(122px + env(safe-area-inset-top))!important;
+   bottom:auto!important;right:10px!important;left:auto!important;
+ }
+}
+
+/* END LEGACY v712-interaction-layout.css */
