@@ -388,3 +388,49 @@
     transition-timing-function:ease-out!important;
   }
 }
+
+/* Institutional protection-gap research layer: neutral UI in both modes.
+   Semantic 0..100 road-score gradient and gray NULL remain unchanged. */
+@layer request-completion {
+  html body #app[data-theme="light"] #pza3-panel,
+  html body #app[data-theme="dark"] #pza3-panel {
+    background:var(--dj-theme-surface)!important;
+    color:var(--dj-theme-ink)!important;
+    border-color:var(--dj-theme-line)!important;
+  }
+  html body #app[data-theme="light"] #pza3-panel :is(p,#pza3-status,#pza3-ticks),
+  html body #app[data-theme="dark"] #pza3-panel :is(p,#pza3-status,#pza3-ticks) {
+    color:var(--dj-theme-muted)!important;
+  }
+  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button){
+    color:var(--dj-theme-ink)!important;
+    background:var(--dj-theme-raised)!important;
+    border:1px solid var(--dj-theme-line)!important;
+  }
+  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button)[aria-pressed="true"]{
+    color:#f2f4f7!important;
+    background:var(--dj-theme-selected)!important;
+    border-color:#677583!important;
+  }
+  html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button):focus-visible {
+    outline:2px solid var(--dj-theme-accent)!important;
+    outline-offset:2px!important;
+  }
+  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-content {
+    background:var(--dj-theme-surface)!important;
+    color:var(--dj-theme-ink)!important;
+    border:1px solid var(--dj-theme-line)!important;
+  }
+  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-tip {
+    border-top-color:var(--dj-theme-surface)!important;
+  }
+  html body #app[data-theme="dark"] .maplibregl-popup:has(.pza3-popup) .maplibregl-popup-close-button {
+    color:var(--dj-theme-ink)!important;
+  }
+  html body #app[data-theme="dark"] .pza3-popup {
+    color:var(--dj-theme-ink)!important;
+  }
+  html body #app[data-theme="dark"] .pza3-popup :is(dt,p){
+    color:var(--dj-theme-muted)!important;
+  }
+}

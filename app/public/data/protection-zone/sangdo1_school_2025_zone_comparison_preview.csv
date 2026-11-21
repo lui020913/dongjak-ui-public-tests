@@ -1,0 +1,9 @@
+school,school_match_2025,school_road_exact_m,registered_zone_lower_bound_m,registered_zone_upper_bound_m,coverage_lower_pct,coverage_upper_pct,ambiguous_segments
+서울상현초통학구역,true,16673.4,260.88,263.71,1.56,1.58,1
+서울강남초통학구역,true,15772.37,920.87,920.87,5.84,5.84,0
+서울봉현초통학구역,true,1930.25,0,2.83,0,0.15,1
+서울신상도초통학구역,false,424.06,0,0,0,0,0
+서울은로초통학구역,true,379.56,0,0,0,0,0
+서울본동초통학구역,false,16.7,0,0,0,0,0
+서울신남성초통학구역,false,13.94,0,0,0,0,0
+서울구암초통학구역,false,0,0,0,,,0
