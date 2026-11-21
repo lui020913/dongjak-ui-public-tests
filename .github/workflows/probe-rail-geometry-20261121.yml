@@ -62,3 +62,30 @@ jobs:
            }catch(e){console.log(name,'failed',String(e?.message||e).slice(0,100));}
           }));
           NODE
+
+
+      - name: Check out the candidate rail-fallback code for a full live-provider integration test
+        uses: actions/checkout@v4
+        with:
+          ref: fix/issue235-osm-rail-fallback-20261121
+          persist-credentials: false
+      - name: Verify exact API response from live OSM data mirror without touching Production
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {onRequestGet} from './app/functions/api/rail-geometry.js';
+          import {extractOfficialPaths} from './app/src/rail-official-shapes.js';
+          const response=await onRequestGet({request:new Request('https://example.invalid/api/rail-geometry')});
+          const payload=await response.json();
+          const paths=payload.features?extractOfficialPaths(payload):[];
+          const actual=[...new Set(paths.map(p=>p.line))].sort();
+          console.log('LIVE_OSM_RAIL_FALLBACK',JSON.stringify({
+            httpStatus:response.status,source:payload.source||null,
+            originLicense:payload.license||null,
+            availableLines:actual,
+            geometricPaths:paths.length,
+            missing:payload.missing_lines||null
+          }));
+          if(response.status!==200||payload.source!=='OpenStreetMap_ODbL'
+             ||actual.length<5||paths.length<5)process.exitCode=1;
+          NODE
