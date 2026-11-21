@@ -18,7 +18,7 @@ function setup(){
    'protection-zone-zoom','protection-zone-focus54','protection-zone-focus62','protection-zone-mode-simple',
    'protection-zone-mode-detail','pza-advanced-tools','pza-mode-guide','pza-road-sheet',
    'pza-fieldwork-form','pza-road-guidance','pza-road-verification','pza-fieldwork-count'])element(id);
-  for(const key of ['child','senior','candidates','accidents','radii'])element(`protection-zone-${key}`,key==='child'||key==='senior');
+  for(const key of ['child','senior','candidates','accidents','radii','schoolgap'])element(`protection-zone-${key}`,key==='child'||key==='senior');
   const events={};const sources=new Map();let layers=[];let ready=false;
   const map={
     isStyleLoaded:()=>ready, getStyle:()=>({layers,glyphs:'https://example.com/{fontstack}/{range}.pbf'}),
@@ -58,8 +58,9 @@ test('overlay automatically recovers from temporarily unloaded style, after buil
   state.map.fire('style.load');
   await pending;
   assert.equal(ui.isActive(),true);
-  assert.equal(state.sources.size,7);
+  assert.equal(state.sources.size,8);
   assert.ok(state.map.getLayer('pza-focus-marker'));
+  assert.ok(state.map.getLayer('pza-school-gap-300'));
   const ids=state.layers().map(x=>x.id);
   assert.ok(ids.indexOf('pza-focus-line')>ids.indexOf('buildings-3d'));
   assert.ok(ids.indexOf('pza-focus-line')<ids.indexOf('transport-bus-stop'));
@@ -71,6 +72,7 @@ test('overlay automatically recovers from temporarily unloaded style, after buil
   assert.equal(state.map.getLayer('pza-focus-marker'),undefined);
   state.setReady(true);state.map.fire('idle');
   assert.ok(state.map.getLayer('pza-focus-marker'));
+  assert.ok(state.map.getLayer('pza-school-gap-300'));
   assert.equal(state.map.getLayer('pza-focus-line').layout.visibility,'visible');
  }finally{globalThis.document=oldDocument;globalThis.fetch=oldFetch}
 });
