@@ -4,11 +4,11 @@ import {readFileSync} from 'node:fs';
 import {FRIENDLY_SEARCH_PLACEHOLDERS} from '../src/map-quick-search.js';
 import {VERSION_HISTORY} from '../src/version-history.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-const css=read('src/v728-exclusive-responsive.css');
+const css=read('src/mobile-ui-baseline.css');
 
 test('v728 applies one last stylesheet while retaining 5-tab mobile controls',()=>{
   const main=read('src/main.js');
-  assert.match(main,/v727-ios-edge-and-safety-buttons\.css';\s*import '\.\/v728-exclusive-responsive\.css'/);
+  assert.match(main,/mobile-ui-baseline\.css';\s*import '\.\/mobile-ui-baseline\.css'/);
   assert.match(css,/#app\[data-tab\] #map-tools-toggle/);
   assert.match(css,/#app\[data-tab\] #night-visibility-quick-off/);
   assert.match(css,/#app\[data-tab\] #map-safety-toggle/);
