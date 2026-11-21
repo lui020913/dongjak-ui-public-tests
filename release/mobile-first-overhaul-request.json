@@ -3,9 +3,9 @@
   "application_version": "9.2.66",
   "public_work_branch": "main",
   "purpose": "PR #190 merged after full public app CI. Repair iPhone onboarding blank-frame pauses by retaining opaque outgoing artwork/text until decoded crossfade, remove 15%-opacity fullscreen primary-page entry which exposed map instead of card/text, preserve bottom-tab labels, harmonize iOS native status strip across tour/guide/dialog overlays and community composer, and correct weather text clipping and button margins. Keep mobile-only gate, rail and transit sources, protected Preview, 12 phone QA, six visual/Gemini design reviews, Gemini autonomous exploration, verified Production and rollback protections.",
-  "attempt": 188,
+  "attempt": 189,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "First guarded v9.2.66 release run 44887722236 correctly blocked Production at packaged regression: new v9266 test used unavailable repository-relative frontend path in sealed app directory; PR #191 rewrites test with assembled src fallback, passed full source CI, and merged (18796f96). Retry exact-source v9.2.66 with full fresh Preview / phone QA / six design reviews / Gemini exploration / protected Production gates; previous failed run's artifacts must not be reused.",
+  "last_retry_reason": "Guarded v9.2.66 release run 44887996175 blocked Production because Playwright v9.2.53 assertions mistakenly required the permanent artwork mat to fade and native iOS dialog to have no status bridge. PR #193 (main 10ce66739f2a01f8291e7ba50705f942114683d6) replaces them with real retained-ghost-frame fade, nonblank original content and native-status #edf3ef gradient assertions; source CI 44888526028 passed. Retry exact-source v9.2.66 from fresh packaged build with full 12-shard mobile QA and protected Production, not reusing failed candidate artifacts.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
