@@ -1,0 +1,64 @@
+name: Apply unified charcoal theme patch (one-shot)
+on:
+  push:
+    branches:
+      - feature/charcoal-theme-unified-20261122
+    paths:
+      - .github/workflows/theme-charcoal-unified-apply.yml
+permissions:
+  contents: write
+jobs:
+  validate-apply-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Verify original patch payload and extract
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat patches/charcoal-20261122.part{1,2,3,4}.b64 | base64 --decode > "$RUNNER_TEMP/theme-payload.tar.xz"
+          echo "f24d7b0020c71f965661d58390e0a00980bf1a69e56ec234b6cf75f30d85848a  $RUNNER_TEMP/theme-payload.tar.xz" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/theme-apply"
+          tar -xJf "$RUNNER_TEMP/theme-payload.tar.xz" -C "$RUNNER_TEMP/theme-apply"
+          python3 -m py_compile "$RUNNER_TEMP/theme-apply/apply_patch.py"
+      - name: Validate original source anchors before changes
+        run: python3 "$RUNNER_TEMP/theme-apply/apply_patch.py" "$GITHUB_WORKSPACE" --check
+      - name: Apply full integrated patch (not individual hotfixes)
+        run: python3 "$RUNNER_TEMP/theme-apply/apply_patch.py" "$GITHUB_WORKSPACE"
+      - name: Stage exactly app/front-end patch outputs before build stamping
+        shell: bash
+        run: |
+          git add -u app frontend
+          git add app/src/theme-contract.js app/src/theme-contract.css app/src/theme-state-core.mjs app/tests/theme-unified-contract.test.mjs app/tests/theme-state-core.test.mjs
+          git diff --cached --check
+          git diff --cached --stat
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci --no-audit --no-fund
+      - name: Theme-state and integrated-contract tests
+        working-directory: app
+        run: node --test tests/theme-state-core.test.mjs tests/theme-unified-contract.test.mjs
+      - name: Existing startup, mobile and dark contrast regression tests
+        working-directory: app
+        run: node --test tests/v9259-ios-startup-seam.test.mjs tests/v9259-primary-page-theme-contract.test.mjs tests/v9269-flat-surfaces.test.mjs tests/v795-mobile-search-theme.test.mjs tests/v7102-mobile-sheet-status-theme.test.mjs
+      - name: Production build
+        working-directory: app
+        run: npm run build
+      - name: Commit verified patch and remove temporary staging workflow/payload
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -f .github/workflows/theme-charcoal-unified-apply.yml patches/charcoal-20261122.part{1,2,3,4}.b64
+          git diff --cached --check
+          git commit -m "fix(theme): unified charcoal mode without PWA reload or onboarding reset"
+          git push origin "HEAD:feature/charcoal-theme-unified-20261122"
