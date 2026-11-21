@@ -58,7 +58,8 @@ test('native iOS PWA status bar color transitions with sheet dimmer and map seam
 });
 
 test('layer shortcut counter describes the 3 configurable toolbar slots',()=>{
-  const script=read('../frontend/production/mobile-next.js');
+  let script;try{script=read('src/mobile-next.js');}
+  catch(error){if(error?.code!=='ENOENT')throw error;script=read('../frontend/production/mobile-next.js');}
   assert.match(script,/상단 바로가기 '\+selected\.length\+'\/3/);
   assert.doesNotMatch(script,/count\.textContent='등록 '/);
 });
