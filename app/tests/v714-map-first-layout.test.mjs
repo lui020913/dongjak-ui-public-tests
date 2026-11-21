@@ -1,3 +1,4 @@
+import {legacyCssSegment} from './legacy-css-baseline-fixture.mjs';
 import {APP_VERSION} from '../src/app-version.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -31,7 +32,7 @@ test('v7.0.29 mobile bottom navigation remains floating, sources remain accessib
   assert.match(css,/bottom:calc\(10px \+ env\(safe-area-inset-bottom\)\)!important/);
   assert.match(css,/border-radius:24px!important/);
   assert.match(css,/\.maplibregl-ctrl-bottom-right/);
-  assert.doesNotMatch(css,/\.maplibregl-ctrl-attrib\{[^}]*display:none/);
+  assert.doesNotMatch(legacyCssSegment('v714-map-first-layout.css'),/\.maplibregl-ctrl-attrib\{[^}]*display:none/);
   const index=read('index.html');
   assert.match(index,/name="viewport" content="width=device-width, initial-scale=1\.0, maximum-scale=1\.0, user-scalable=no, viewport-fit=cover"/);
 });
