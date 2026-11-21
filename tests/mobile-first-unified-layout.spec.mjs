@@ -75,4 +75,42 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   expect(metrics.tabletRail).toBe(0);
 
   await page.screenshot({path:testInfo.outputPath('unified-layout.png'),fullPage:false});
+
+  if(page.viewportSize().width<700){
+    // Compare computed (not authored) surfaces after temporarily revealing each
+    // existing page without triggering a navigation or theme UI side effect.
+    const palette=await page.evaluate(()=>{
+      const app=document.getElementById('app');
+      const priorTab=app.dataset.tab,priorTheme=app.dataset.theme;
+      const samples=[];
+      try {
+        for(const [theme,expected] of [['light','rgb(237, 243, 239)'],['dark','rgb(25, 45, 50)']]){
+          app.dataset.theme=theme;
+          for(const [tab,id] of [['route','route-panel'],['participate','participation-panel'],['news','news-panel'],['mine','mine-panel']]){
+            const panel=document.getElementById(id),hadHidden=panel.hasAttribute('hidden');
+            app.dataset.tab=tab;
+            panel.removeAttribute('hidden');
+            try{
+              const chrome=panel.querySelector(':scope > .dj-sheet-chrome');
+              const body=panel.querySelector(':scope > .dj836-sheet-body');
+              const footer=tab==='route'?panel.querySelector(':scope > #dj910-route-footer'):null;
+              const color=node=>node?getComputedStyle(node).backgroundColor:null;
+              samples.push({theme,tab,expected,panel:color(panel),header:color(chrome),body:color(body),footer:footer?color(footer):null});
+            }finally{if(hadHidden)panel.setAttribute('hidden','');}
+          }
+        }
+      }finally{
+        if(priorTab===undefined)delete app.dataset.tab;else app.dataset.tab=priorTab;
+        if(priorTheme===undefined)delete app.dataset.theme;else app.dataset.theme=priorTheme;
+      }
+      return samples;
+    });
+    await testInfo.attach('mobile-theme-surfaces.json',{body:Buffer.from(JSON.stringify(palette,null,2)),contentType:'application/json'});
+    for(const item of palette){
+      for(const zone of ['panel','header','body',...(item.tab==='route'?['footer']:[])]){
+        expect(item[zone],item.theme+' '+item.tab+' '+zone+' must match the status header').toBe(item.expected);
+      }
+    }
+  }
+
 });
