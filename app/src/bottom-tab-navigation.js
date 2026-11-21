@@ -36,6 +36,11 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!closing&&button.dataset.tab===current)return;
   const motion=win.DongjakWindowMotion;
   const panel=[...doc.querySelectorAll('.page-panel[data-page]:not([hidden])')].find(n=>n.dataset.page===current);
+  // Full-screen tab pages switch immediately; never slide them down as sheets.
+  if(panel?.classList.contains('dj-mobile-fullscreen-page')){
+   motion?.cancel?.(panel);
+   return;
+  }
   // Non-map pages use the existing navigator synchronously. No blank map frame.
   if(!closing&&panel&&current!=='map'&&button.dataset.tab!=='map'){
    motion?.cancel?.(panel);return;

@@ -83,7 +83,8 @@ export function installV877SettingsAndSheets(doc=document,win=window){
     sync();
     cleanup.push(()=>container.remove());
   }
-  const panels=PANELS.map(id=>el(doc,id)).filter(Boolean);
+  // A permanent tab page does not participate in the optional sheet detents.
+  const panels=PANELS.map(id=>el(doc,id)).filter(panel=>panel&&!panel.classList.contains('dj-mobile-fullscreen-page'));
   const nav=el(doc,'bottom-nav');
   const coordinator=createMobileSheetCoordinator({app,doc,win,panels,nav});
   // v885: the user has explicitly removed the fullscreen buttons.

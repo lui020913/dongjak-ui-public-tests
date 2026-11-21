@@ -153,6 +153,8 @@ import './public-ui-production-overlay.css';
 import './v910-request-completion.css';
 import './v914-mobile-ux-fixes.css';
 import './mobile-first-layout.css';
+// Full-screen native tabs (route setup, community, local news, account).
+import './mobile-fullscreen-tabs.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
@@ -1962,7 +1964,9 @@ installBottomTabNavigation({doc:document,win:window,app});
 installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
   const finish=()=>{routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
   const active=pagePanels.find(p=>!p.hidden);
-  if(active&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(active,finish);else finish();
+  if(active?.classList.contains('dj-mobile-fullscreen-page')&&window.matchMedia('(max-width:699px)').matches){
+    window.DongjakWindowMotion?.cancel?.(active);finish();
+  }else if(active&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(active,finish);else finish();
 }});
 // The Safety Map bottom tab acts as HOME on both PC and mobile. No implicit
 // overview or district selection on return, first entry or repeated taps.
@@ -1985,9 +1989,9 @@ for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-
 }
 // Each auxiliary page has a persistent X that returns to the existing map tab.
 for(const button of document.querySelectorAll('[data-close-page]')){
-  button.addEventListener('click',()=>{const panel=button.closest('.page-panel');const finish=()=>navigate('map',{suppressOverview:true});if(panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
+  button.addEventListener('click',()=>{const panel=button.closest('.page-panel');const finish=()=>navigate('map',{suppressOverview:true});const full=panel?.classList.contains('dj-mobile-fullscreen-page')&&window.matchMedia('(max-width:699px)').matches;if(full)window.DongjakWindowMotion?.cancel?.(panel);if(!full&&panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
 }
-document.getElementById('news-close-to-map')?.addEventListener('click',()=>{const panel=document.getElementById('news-panel');const finish=()=>navigate('map',{suppressOverview:true});if(panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
+document.getElementById('news-close-to-map')?.addEventListener('click',()=>{const panel=document.getElementById('news-panel');const finish=()=>navigate('map',{suppressOverview:true});const full=panel?.classList.contains('dj-mobile-fullscreen-page')&&window.matchMedia('(max-width:699px)').matches;if(full)window.DongjakWindowMotion?.cancel?.(panel);if(!full&&panel&&window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();});
 // 경로 상세 결과는 아래 도보 길찾기 핸들러에서 연결합니다.
 document.getElementById('participate-register').addEventListener('click', () => {
   navigate('map');

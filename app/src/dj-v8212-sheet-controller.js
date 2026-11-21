@@ -85,7 +85,9 @@ export function installMobileFloatingSheetController(doc=document,win=window){
   };
   const registerSheets=()=>{for(const [id,handles,closeSelector,headerSelector] of MOBILE_FLOATING_SHEETS){
     const panel=doc.getElementById(id);
-    if(!panel||installed.has(panel)||(id==='map-gesture-guide'&&win.matchMedia('(max-width:699px)').matches))continue;
+    // Full-page tabs are not draggable sheets; their headers and content must
+    // never trigger staged expand/collapse/dismiss gestures on phones.
+    if(!panel||installed.has(panel)||panel.classList.contains('dj-mobile-fullscreen-page')||(id==='map-gesture-guide'&&win.matchMedia('(max-width:699px)').matches))continue;
     let handleNodes=[...panel.querySelectorAll(handles)];
     // Transport gets the whole visible header as a drag surface. The pointer
     // handler still ignores buttons/links/inputs, so route actions and X taps
