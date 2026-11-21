@@ -104,6 +104,6 @@ test('map button sizing is specific, 3 control sizes are consistent and all old 
 test('v6.0.21 published version and release notes match',()=>{
   assert.equal(VERSION_HISTORY[0]?.version,'v7.0.29');
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
-  assert.match(read('index.html'),new RegExp('v'+APP_VERSION.replaceAll('.','\\.')));
+  assert.match(read('index.html'),/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
   assert.ok(read('src/main.js').includes("import './v613-map-ux.css';"));
 });

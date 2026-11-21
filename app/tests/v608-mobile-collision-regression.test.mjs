@@ -29,5 +29,5 @@ test('map options state is synchronized even when another feature closes it dire
   assert.match(main,/if\(expanded\)document\.getElementById\('map-gesture-guide'\)/);
   assert.match(main,/import '\.\/v608-mobile-coordination\.css';/);
   assert.match(html,/id="map-options-mobile-close"/);
-  assert.match(html,new RegExp('>v'+APP_VERSION.replaceAll('.','\\.')+'<\/button>'));
+   assert.match(html,/>업데이트<\/button>/);
 });

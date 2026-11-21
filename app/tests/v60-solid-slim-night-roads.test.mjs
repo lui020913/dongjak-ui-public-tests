@@ -12,7 +12,7 @@ test('v6.0 preserves earlier history and uses valid internal semver',()=>{
   assert.equal(JSON.parse(read('public/version.json')).version,APP_VERSION);
   assert.ok(VERSION_HISTORY.some(entry=>entry.version==='v6.0'));
   assert.ok(VERSION_HISTORY.some(entry=>entry.version==='v1.0.0'));
-  assert.match(read('index.html'),new RegExp('>v'+APP_VERSION.replaceAll('.','\\.')+'<\/button>'));
+   assert.match(read('index.html'),/>업데이트<\/button>/);
 });
 
 test('MapLibre flat view uses narrower and solid road category lines',()=>{

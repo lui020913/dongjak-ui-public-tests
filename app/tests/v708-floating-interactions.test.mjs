@@ -48,5 +48,5 @@ test('build version and release history remain synchronized',()=>{
  assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
  assert.equal(JSON.parse(read('src/build-info.json')).version,APP_VERSION);
  assert.equal(VERSION_HISTORY[0].version,'v7.0.29');
- assert.ok(read('index.html').includes('v'+APP_VERSION));
+  assert.ok(read('index.html').includes('id="map-startup-version" aria-label="앱 버전">버전 1.0'));
 });
