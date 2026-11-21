@@ -85,6 +85,10 @@ export function installMobileFloatingSheetController(doc=document,win=window){
   };
   const registerSheets=()=>{for(const [id,handles,closeSelector,headerSelector] of MOBILE_FLOATING_SHEETS){
     const panel=doc.getElementById(id);
+    // Primary phone pages own tab navigation, never sheet header gestures.
+    // Do not even attach the legacy swipe-zone class: its global touch-action
+    // styles would override native page-header scrolling/tap semantics.
+    if(panel?.classList.contains('page-panel')&&win.matchMedia('(max-width:699px)').matches)continue;
     if(!panel||installed.has(panel)||(id==='map-gesture-guide'&&win.matchMedia('(max-width:699px)').matches))continue;
     let handleNodes=[...panel.querySelectorAll(handles)];
     // Transport gets the whole visible header as a drag surface. The pointer
