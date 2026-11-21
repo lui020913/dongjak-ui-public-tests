@@ -42,6 +42,14 @@
       scale:1!important;
     }
 
+    /* Preserve the established My Info dark palette and existing theme QA. */
+    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
+    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body,
+    html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
+      background:#191b1f!important;
+      color:#e5e7eb!important;
+    }
+
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]) {
       animation:dj-primary-page-enter 150ms cubic-bezier(.2,.7,.2,1) both!important;
     }
