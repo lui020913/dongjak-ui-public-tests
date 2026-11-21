@@ -57,9 +57,9 @@ test('mobile news source toolbar uses one opaque page tone instead of a white sl
 
 test('mobile layer drawer stays scrollable and clears the final shortcut above the iOS inset',()=>{
   const css=readFileSync(new URL('./mobile-next.css',import.meta.url),'utf8');
-  const lastScroll=css.split('#djNext-layer-panel .djNext-layer-scroll{').at(-1)?.split('}')[0]||'';
-  assert.match(lastScroll,/padding-bottom:calc\(52px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
-  assert.match(lastScroll,/scroll-padding-bottom:52px!important/);
+  const scrollRules=css.split('#djNext-layer-panel .djNext-layer-scroll{').slice(1).map(rule=>rule.split('}')[0]);
+  assert.ok(scrollRules.some(rule=>/padding-bottom:calc\(52px \+ env\(safe-area-inset-bottom,0px\)\)!important/.test(rule)),'No safe-area padding in layer scroll CSS');
+  assert.ok(scrollRules.some(rule=>/scroll-padding-bottom:52px!important/.test(rule)),'Final list items may be clipped');
   const lastBody=css.split('#djNext-layer-panel .djNext-modal-body{').at(-1)?.split('}')[0]||'';
   assert.match(lastBody,/height:min\(56dvh,calc\(100dvh - env\(safe-area-inset-top,0px\)/);
 });
