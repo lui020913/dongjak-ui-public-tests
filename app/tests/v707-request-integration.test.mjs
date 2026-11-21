@@ -31,7 +31,7 @@ test('no countdown is fabricated from a last-report-only realtime feed',()=>{
  assert.match(js,/plannedArrivalsFromTimetable\(data\?\.timetable,line,clock\)/);
 });
 test('metro tabs, neighbor rails, direction list and mobile device controls have unified centering',()=>{
- const css=read('src/v707-responsive-metro-history.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/\.transport-mode-tabs\{/);
  assert.match(css,/margin:8px auto 15px!important/);
  assert.match(css,/\.metro-neighbor-row\{/);
@@ -41,7 +41,7 @@ test('metro tabs, neighbor rails, direction list and mobile device controls have
  assert.match(css,/#app:has\(#transport-sheet:not\(\[hidden\]\)\) \.maplibregl-ctrl-bottom-left/);
 });
 test('mobile floating tabs and search respect iOS notch and home indicator',()=>{
- const css=read('src/v707-responsive-metro-history.css');
+ const css=read('src/mobile-ui-baseline.css');
  assert.match(css,/env\(safe-area-inset-top\)/);
  assert.match(css,/env\(safe-area-inset-bottom\)/);
  assert.match(css,/#app #bottom-nav\{/);
@@ -53,7 +53,7 @@ test('mobile floating tabs and search respect iOS notch and home indicator',()=>
 });
 test('history renders all original notes by version, with sources adjacent and both kept in mobile switch',()=>{
  const renderer=read('src/version-history-v7.js');
- const css=read('src/v707-responsive-metro-history.css');
+ const css=read('src/mobile-ui-baseline.css');
  const versions=[...VERSION_HISTORY,...LEGACY_VERSION_HISTORY];
  const count=versions.reduce((n,release)=>n+release.items.length,0);
  assert.ok(count>=400);
