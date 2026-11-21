@@ -59,7 +59,7 @@ test('ordinary sheets do not dim navigation; permission consent remains isolated
 
 test('v9.2.71 permits soft glass ONLY on phone search and AI, plus native status-edge color fade',()=>{
  const next=productionStyle('mobile-next.css');
- const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1];
+ const block=next.split('/* v9.2.71 — the ONLY translucent/soft phone surfaces')[1]?.split('/* v9.2.72 — one mobile visual system')[0];
  assert.ok(block,'v9.2.71 scoped header treatment missing from the shipped build source');
  assert.ok(block.includes('@media(max-width:699px)'));
  assert.ok(block.includes('.topbar .map-quick-search-form'));
