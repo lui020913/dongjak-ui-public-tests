@@ -1040,7 +1040,13 @@ test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@pho
   const ai=page.locator('#dj890-ai-orb'),search=page.locator('#map-quick-search');
   const dropdown=page.locator('#map-quick-search-dropdown');
   await expect(ai).toBeVisible();
-  await search.locator('#map-quick-search-query').click();
+  const input=search.locator('#map-quick-search-query');
+  await input.click();
+  // An empty phone search should NOT open the old blank rectangle.
+  await expect(dropdown).toBeHidden();
+  await expect(ai).toBeVisible();
+  // Suggestions become visible only once a meaningful query is entered.
+  await input.fill('노량진');
   await expect(dropdown).toBeVisible();
   await expect(ai).toBeVisible();
   await expect(ai).toHaveCSS('pointer-events','auto');
