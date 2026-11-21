@@ -42,7 +42,11 @@ export function installPwaStatusTone(doc=document,win=window) {
       if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
       // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
       const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
-      const color=aiOpen?(theme==='dark'?'#192d32':'#ffffff'):(theme==='dark'?'#192d32':'#eef3ef');
+      // The OS-owned status strip must follow the active scrim, not remain bright
+      // while the map underneath is dimmed by a sheet.
+      const color=aiOpen?(theme==='dark'?'#192d32':'#ffffff'):
+        dimmed?(theme==='dark'?'#142429':'#a5b7af'):
+        (theme==='dark'?'#192d32':'#eef3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
