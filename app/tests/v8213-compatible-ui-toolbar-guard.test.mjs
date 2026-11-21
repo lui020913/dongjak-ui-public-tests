@@ -7,9 +7,12 @@ const core=read('src/dj-v8212-sheet-controller.js');
 const css=read('src/v829-mobile-layout-system.css');
 const sheetCss=read('src/v832-priority-feature-toolbar.css');
 
-test('v8.2.13 imports both shortcut style layers and enforces one horizontal row even if CSS is stale',()=>{
-  assert.match(toolbar,/import '\.\/v831-swipe-feature-toolbar\.css'/);
-  assert.match(toolbar,/import '\.\/v832-priority-feature-toolbar\.css'/);
+test('v8.2.13 retains first-paint shortcut styles and enforces one horizontal row',()=>{
+  const html=read('index.html');
+  for(const filename of ['v831-swipe-feature-toolbar.css','v832-priority-feature-toolbar.css']){
+    assert.ok(html.includes('href="/src/'+filename+'"'),filename);
+    assert.equal(toolbar.includes("import './"+filename+"';"),false,filename);
+  }
   assert.match(toolbar,/export function enforcePriorityToolbarSingleRow/);
   assert.match(toolbar,/['"]flex-wrap['"]:'nowrap'/);
   assert.match(toolbar,/['"]overflow-y['"]:'hidden'/);
