@@ -55,6 +55,9 @@ test('onboarding crossfades on slide navigation and cancels stale transitions',(
  const fadeBlock=js.split('const fadeOut=()=>{')[1]?.split("if(typeof win.requestAnimationFrame==='function')win.requestAnimationFrame(fadeOut)")[0];
  assert(fadeBlock?.includes('swapTimer=win.setTimeout('));
  assert(fadeBlock?.includes("node.style.setProperty('opacity','0','important')"));
+ assert.match(js,/let fadeStarted=false;/);
+ assert.match(js,/if\(fadeStarted\|\|epoch!==swapEpoch\|\|!opened\)return;/);
+ assert.match(js,/win\.setTimeout\(fadeOut,32\)/);
  assert.match(css,/\.dj860-onboarding\.dj860-swapping/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
 });
