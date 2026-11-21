@@ -1,0 +1,158 @@
+/* 2026-11-21 · phone-only follow-up to v9.2.66.
+   The primary tabs own a full viewport, never a remnant bottom sheet.
+   Keep these overrides in the same named layer as the primary phone layout. */
+@layer request-completion {
+@media (max-width:699px) {
+  html body #app#app#app#app#app {
+    --dj-phone-screen-bg:#edf3ef;
+    --dj-phone-screen-ink:#203e34;
+    --dj-phone-card-bg:#ffffff;
+    --dj-phone-card-border:#d6e6de;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] {
+    --dj-phone-screen-bg:#192d32;
+    --dj-phone-screen-ink:#e9f5f0;
+    --dj-phone-card-bg:#223b3e;
+    --dj-phone-card-border:#496762;
+  }
+
+  /* A solid background under full-screen pages and during navigation.
+     This is necessary even if an older window owner hides a page for a frame. */
+  html body #app#app#app#app#app > #dj-phone-tab-background {
+    position:fixed!important;inset:0!important;display:none!important;
+    width:100vw!important;height:100dvh!important;pointer-events:none!important;
+    background:var(--dj-phone-screen-bg)!important;z-index:6399!important;
+  }
+  html body #app#app#app#app#app:is([data-tab="route"],[data-tab="participate"],[data-tab="news"],[data-tab="mine"]) > #dj-phone-tab-background {
+    display:block!important;
+  }
+  html body #app#app#app#app#app > #dj-phone-tab-shield {
+    position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+    background:var(--dj-phone-screen-bg)!important;pointer-events:none!important;
+    z-index:6499!important;opacity:0!important;visibility:hidden!important;
+    transition:opacity 165ms ease,visibility 0s linear 165ms!important;
+  }
+  html body #app#app#app#app#app[data-dj-phone-tab-shield="true"] > #dj-phone-tab-shield {
+    visibility:visible!important;opacity:1!important;transition:none!important;
+  }
+
+  /* The panels fill the whole screen. Only their scroll bodies reserve space
+     for the pill, so no unrelated white footer or double safe-area remains. */
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
+    inset:0!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;
+    padding:0!important;margin:0!important;background:var(--dj-phone-screen-bg)!important;
+    border:0!important;border-radius:0!important;box-shadow:none!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj-sheet-chrome {
+    background:var(--dj-phone-screen-bg)!important;color:var(--dj-phone-screen-ink)!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj836-sheet-body {
+    flex:1 1 0%!important;min-height:0!important;max-height:none!important;
+    padding:14px 16px calc(102px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+    background:var(--dj-phone-screen-bg)!important;
+    color:var(--dj-phone-screen-ink)!important;
+  }
+  html body #app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:16px!important;scroll-padding-bottom:18px!important;
+  }
+  html body #app#app#app#app#app #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+    position:relative!important;flex:0 0 auto!important;
+    margin:0 0 calc(80px + env(safe-area-inset-bottom,0px))!important;
+    padding:8px 16px!important;min-height:0!important;
+    background:var(--dj-phone-screen-bg)!important;
+    color:var(--dj-phone-screen-ink)!important;
+  }
+  html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel) :is(.dj834-my-home,.dj834-my-detail) {
+    box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+  }
+  html body #app#app#app#app#app #mine-panel :is(.dj834-profile-card,.dj834-settings-group) {
+    box-sizing:border-box!important;width:100%!important;max-width:100%!important;
+    background:var(--dj-phone-card-bg)!important;
+    border-color:var(--dj-phone-card-border)!important;color:var(--dj-phone-screen-ink)!important;
+  }
+  html body #app#app#app#app#app #mine-panel :is(.dj834-profile-card,.dj834-settings-group) svg {
+    stroke:currentColor!important;fill:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-setting-icon {
+    border-radius:13px!important;background:#10866e!important;
+    color:#fff!important;
+  }
+  html body #app#app#app#app#app[data-theme="dark"] #mine-panel .dj834-setting-icon {
+    background:#2e7567!important;color:#e7fff5!important;
+  }
+  /* Screen headers and dock never inherit the old page fade/opacity. */
+  html body #app#app#app#app#app > #bottom-nav:not([hidden]) {
+    background:var(--dj-phone-card-bg)!important;
+    border-color:var(--dj-phone-card-border)!important;opacity:1!important;
+  }
+  html body #app#app#app#app#app > #bottom-nav:not([hidden]) .nav-tab:not([hidden]) > span {
+    visibility:visible!important;opacity:1!important;
+  }
+  html body #app#app#app#app#app[data-dj-phone-tab-entering="true"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer) {
+    animation:dj-phone-page-enter 170ms cubic-bezier(.2,.75,.32,1) both!important;
+  }
+  @keyframes dj-phone-page-enter {
+    from{opacity:.18;filter:none;} to{opacity:1;filter:none;}
+  }
+
+  /* Results span the usable phone width, not just the search pill before AI. */
+  html body #app#app#app#app#app #map-quick-search-dropdown:not([hidden]) {
+    position:fixed!important;box-sizing:border-box!important;
+    top:var(--dj-phone-search-results-top,calc(env(safe-area-inset-top,0px) + 76px))!important;
+    left:max(12px,env(safe-area-inset-left,0px))!important;
+    right:max(12px,env(safe-area-inset-right,0px))!important;
+    width:auto!important;min-width:0!important;max-width:none!important;
+    max-height:var(--dj884-search-room, min(60dvh,520px))!important;
+    margin:0!important;transform:none!important;translate:none!important;
+    background:var(--dj-phone-card-bg)!important;
+    color:var(--dj-phone-screen-ink)!important;
+    border-color:var(--dj-phone-card-border)!important;
+    z-index:5500!important;overflow-x:hidden!important;overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app #map-quick-search-dropdown .map-quick-search-results {
+    width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  }
+  /* The voice panel may get taller, but must not shift the independent AI pill. */
+  html body #app#app#app#app#app > .topbar {
+    align-items:flex-start!important;overflow:visible!important;
+  }
+  html body #app#app#app#app#app > .topbar .header-tools {
+    align-self:flex-start!important;flex-shrink:0!important;margin:0!important;
+    transform:none!important;translate:none!important;
+  }
+  html body #app#app#app#app#app > .topbar .header-tools #dj890-ai-orb {
+    position:fixed!important;
+    top:calc(env(safe-area-inset-top,0px) + 8px)!important;
+    right:max(12px,env(safe-area-inset-right,0px))!important;
+    bottom:auto!important;left:auto!important;
+    margin:0!important;translate:none!important;transform:none!important;
+    align-self:flex-start!important;z-index:6200!important;
+  }
+
+  /* Night mode uses the existing active pill (and native original handler).
+     It must not look unselected merely because the original quick-off is hidden. */
+  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-night,
+  html body #app#app#app#app#app #dj-v794-night[data-active="true"] {
+    color:#e8fff4!important;background:#155e55!important;
+    border-color:#5ba79b!important;box-shadow:0 2px 10px #0002!important;
+    opacity:1!important;visibility:visible!important;
+  }
+  html body #app#app#app#app#app #dj-v794-night[data-active="true"] :is(.dj-v794-caption,.dj-v794-icon) {
+    color:#e8fff4!important;opacity:1!important;
+  }
+  html body #app#app#app#app#app[data-sangdo-night="on"] > .topbar,
+  html body #app#app#app#app#app[data-sangdo-night="on"] #dj-v794-toolbar {
+    transition:background-color 170ms ease,border-color 170ms ease!important;
+    filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  html body #app#app#app#app#app #dj833-night-modal {
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+}
+@media (max-width:699px) and (prefers-reduced-motion:reduce){
+  html body #app#app#app#app#app[data-dj-phone-tab-entering="true"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer){animation:none!important;}
+  html body #app#app#app#app#app > #dj-phone-tab-shield{transition:none!important;}
+}
+}
