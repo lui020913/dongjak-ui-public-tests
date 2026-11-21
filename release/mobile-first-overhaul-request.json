@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.67",
+  "application_version": "9.2.68",
   "public_work_branch": "main",
-  "purpose": "PR #195 merged after public app CI run 44889900397 (3 mobile viewport checks passed). Fix 2026-11-21 iPhone: expand search recommendation result width; keep AI pill fixed while speech recognition grows; make fullscreen bottom safe-area tone continuous and avoid double footer gap; mask underlying map during fullscreen tab crossfade; update My Info settings icons and cards; center night-visibility consent, maintain active pill, and harmonize native iOS PWA status tone; reload standalone PWA for manual dark/light theme changes while restoring map camera center/zoom/pitch/bearing. Use only consolidated v9267 phone regression stylesheet. Preserve other mobile functions, guard Production with exact source/Preview evidence, 12 phone QA shards, six visual reviews, exploration and rollback.",
-  "attempt": 194,
+  "purpose": "2026-11-21 current-source maintenance release: remove 22 unused legacy stylesheet entries from active app/src (7 earlier unreachable styles + 15 retired styles, with PC/tablet originals preserved under app/archive/pc-tablet-legacy-css). PR #207 removed redundant Vite JS CSS imports of v831-swipe-feature-toolbar.css, v832-priority-feature-toolbar.css and v836-sheet-toolbar-controls.css while retaining their HTML first-paint links, and updated/added CI regression tests. Preserve mobile UI behavior, map layers, Supabase authentication, transport APIs, and iOS/Android support. Release only through exact source SHA, Preview, phone QA, visual QA, and protected Production with rollback; no private project dependency.",
+  "attempt": 195,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preview run 44890099630 caught a genuine first-onboarding-frame white flash: t=0 art opacity 0 before next button. PR #201 merged at 430e577ca64fd82c2154b27971446692621c6e7a after source CI 44890629588 success; first onboarding render now skips inner slide-enter opacity 0 while retaining modal entrance and compositor transitions for next/previous. Rebuild exact v9.2.67 source and repeat Preview, all 12 phone QA shards (including 9/12 and 12/12), six design reviews, Gemini exploration and protected Production. Never reuse old artifacts.",
+  "last_retry_reason": "PR #207 CI 44893479467 succeeded including full app unit tests, release check, Vite build and 3 mobile viewport browser QA. Squash merged into main commit a0b753930b7651b0907c61e9476340ab66d7ef74. Build a fresh public-app v9.2.68 candidate from main and verify Preview and all release QA before promoting the same artifact to Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
