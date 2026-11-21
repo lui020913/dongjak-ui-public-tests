@@ -30,9 +30,9 @@ test('primary pages bypass draggable sheets but use a brief native safe fade whe
  assert.match(controller,/\['route-panel','participation-panel','news-panel','mine-panel'\]\.includes\(id\)/);
  assert.match(controller,/win\.matchMedia\('\(max-width:699px\)'\)/);
  assert.ok(navigation.includes("button=nav.querySelector('.nav-tab[data-tab=\"map\"]')"));
- assert.ok(navigation.includes("outgoing.classList.add('dj-mobile-tab-exit')"));
- assert.ok(navigation.includes("ensureCurtain()"));
- assert.ok(navigation.includes("replay(target)"));
+ assert.ok(navigation.includes("doc.startViewTransition(()=>{replay(button);})"));
+ assert.equal(navigation.includes("ensureCurtain()"),false);
+ assert.ok(navigation.includes("replay(button)"));
  assert.match(main,/function closePrimaryPageToMap\(panel\)/);
  assert.match(main,/window\.DongjakWindowMotion\?\.cancel\?\.\(active\);finish\(\)/);
  const html=read('index.html');
