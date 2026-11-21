@@ -957,62 +957,79 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
 });
 
 
-test('iPhone primary tab switch keeps an opaque screen at every animation frame',{tag:'@phone-common'},async({page})=>{
+test('iPhone tabs never expose white or transparent full-screen panels during switching',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await tap(page,tab(page,'route'));await expect(page.locator('#route-panel')).toBeVisible();
+ // Begin the ongoing compositor sampler AFTER entering the first non-map tab.
+ // The old bounded timer expired during tap() hit-testing and recorded 0 frames.
  await page.evaluate(()=>{
-  const until=performance.now()+4500;
-  const samples=[];window.__phoneTabFrameAudit=samples;
+  window.__phoneTabFrameAudit=[];
+  window.__phoneTabAuditActive=true;
+  const frames=window.__phoneTabFrameAudit;
   function frame(){
-   const root=document.getElementById('app');
-   const selected=root.dataset.tab;
+   if(!window.__phoneTabAuditActive)return;
+   const root=document.getElementById('app'),selected=root.dataset.tab;
    if(['route','participate','news','mine'].includes(selected)){
     const panel=document.querySelector('.page-panel[data-page="'+selected+'"]');
     const css=panel?getComputedStyle(panel):null;
-    samples.push({
-     selected,
-     shown:!!panel&&!panel.hidden&&css?.display!=='none'&&css?.visibility!=='hidden',
-     opacity:Number(css?.opacity),
-     background:css?.backgroundColor||''
-    });
+    frames.push({selected,
+      shown:!!panel&&!panel.hidden&&css?.display!=='none'&&css?.visibility!=='hidden',
+      opacity:Number(css?.opacity||0),background:css?.backgroundColor||''});
    }
-   if(performance.now()<until)requestAnimationFrame(frame);
+   requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  frame();
  });
- for(const key of ['route','news','mine','participate']){
+ for(const key of ['news','mine','participate']){
   await tap(page,tab(page,key));
   await expect(page.locator('#app')).toHaveAttribute('data-tab',key);
   await expect(page.locator('.page-panel[data-page="'+key+'"]')).toBeVisible();
  }
- const samples=await page.evaluate(()=>window.__phoneTabFrameAudit);
- expect(samples.length).toBeGreaterThan(5);
+ await page.waitForTimeout(100); // sample real painted frames, not merely synchronous DOM updates
+ const samples=await page.evaluate(()=>{window.__phoneTabAuditActive=false;return window.__phoneTabFrameAudit;});
+ expect(samples.length,'the frame sampler must observe painted non-map screens').toBeGreaterThan(5);
  const bad=samples.filter(f=>!f.shown||f.opacity<.95||f.background==='rgba(0, 0, 0, 0)'||f.background==='rgb(255, 255, 255)');
- expect(bad,'No root snapshot white flash or transparent full-screen panel: '+JSON.stringify(bad.slice(0,8))).toHaveLength(0);
+ expect(bad,'Missing/white/transparent panel during tab switch: '+JSON.stringify(bad.slice(0,10))).toHaveLength(0);
  await expect(page.locator('#dj-tab-surface-curtain')).toHaveCount(0);
  await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
 });
 
-test('bottom dock switches adjacent tabs promptly without old-panel bounce or a blank page',{tag:'@phone-common'},async({page})=>{
+test('bottom dock swipes change full-screen tabs immediately without an intermediate empty panel',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- await enter(page,'route-panel','route');
- await page.evaluate(()=>{window.__dockFade=[];const until=performance.now()+45000;function sample(){for(const id of ['route-panel','participation-panel']){const n=document.getElementById(id);if(n?.dataset.dj810Animating){const s=getComputedStyle(n);window.__dockFade.push({id,phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),o:Number(s.opacity),y:n.getBoundingClientRect().y});}}if(performance.now()<until)requestAnimationFrame(sample);}requestAnimationFrame(sample);});
- const dock=page.locator('#bottom-nav');await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
- async function swipe(dx){const r=await dock.boundingBox();expect(r).toBeTruthy();const x=r.x+r.width*.5,y=r.y+r.height*.5;await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();}
- await swipe(-85);await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');await expect(page.locator('#route-panel')).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();await expect.poll(()=>page.locator('#participation-panel').getAttribute('data-dj810-animating')).toBeNull();
- const frames=await page.evaluate(()=>window.__dockFade);
-  // The current mobile design switches visible tab panels without waiting for
-  // the previous closing fade. If any entrance frames are painted, their
-  // bounding position must remain fixed; no slide/bounce is permitted.
-  for(const id of ['route-panel','participation-panel']){
-    const f=frames.filter(r=>r.id===id);
-    if(f.length>1)expect(Math.max(...f.map(r=>r.y))-Math.min(...f.map(r=>r.y))).toBeLessThan(1);
-  }
-  await expect(page.locator('#route-panel')).toBeHidden();
-  await expect(page.locator('#participation-panel')).toBeVisible();
-  expect(await page.locator('#participation-panel').evaluate(n=>n.getBoundingClientRect().height)).toBeGreaterThan(80);
- await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#route-panel')).toBeVisible();await expect.poll(()=>page.locator('#route-panel').getAttribute('data-dj810-animating')).toBeNull();
- await swipe(85);await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await tap(page,tab(page,'route'));
+ await expect(page.locator('#route-panel')).toBeVisible();
+ const dock=page.locator('#bottom-nav');
+ await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
+ const before=await dock.boundingBox();
+ async function swipe(dx){
+  const r=await dock.boundingBox();expect(r).toBeTruthy();
+  const x=r.x+r.width*.5,y=r.y+r.height*.5;
+  await page.mouse.move(x,y);await page.mouse.down();
+  await page.mouse.move(x+dx,y,{steps:8});await page.mouse.up();
+ }
+ await swipe(-85);
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
+ await expect(page.locator('#route-panel')).toBeHidden();
+ await expect(page.locator('#participation-panel')).toBeVisible();
+ await expect(page.locator('#participation-panel')).toHaveCSS('opacity','1');
+ const result=await page.locator('#participation-panel').evaluate(el=>{
+  const cs=getComputedStyle(el);
+  return {background:cs.backgroundColor,animation:cs.animationName,height:el.getBoundingClientRect().height};
+ });
+ expect(result.background).not.toBe('rgba(0, 0, 0, 0)');
+ expect(result.background).not.toBe('rgb(255, 255, 255)');
+ expect(result.height).toBeGreaterThan(80);
+ await swipe(85);
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await expect(page.locator('#participation-panel')).toBeHidden();
+ await expect(page.locator('#route-panel')).toBeVisible();
+ await tap(page,tab(page,'map'));
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#route-panel')).toBeHidden();
+ const after=await dock.boundingBox();
+ expect(Math.abs(before.y-after.y)).toBeLessThan(3);
+ await expect(page.locator('#dj-tab-surface-curtain')).toHaveCount(0);
 });
 
 test('AI full-screen conversation and inline voice state keep the map task separate',{tag:'@phone-common'},async({page})=>{
