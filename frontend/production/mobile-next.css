@@ -1036,3 +1036,17 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
  html body #dj-ai-search-modal[open]::backdrop{animation:dj9272PageEnter 285ms ease-out both!important}
  html body:has(#app[data-theme="dark"]) #dj-ai-search-modal{color-scheme:dark}
 }
+
+/* Visual order is explicit; the path points and the comparison are both
+   available before entering focused map mode, while action buttons remain last. */
+@layer request-completion{
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card > div:first-child{order:0!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-points{order:1!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-compare-heading{order:2!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card #djNext-route-compare{order:3!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .dj9272-route-controls{order:4!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-map-card .route-map-card-actions{order:5!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] .dj9272-station-route-button svg{width:18px!important;height:18px!important;flex:0 0 18px!important;margin-right:6px!important;vertical-align:middle!important}
+ }
+}
