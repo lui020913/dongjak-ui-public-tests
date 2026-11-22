@@ -4,7 +4,7 @@ import './pri-map.css';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point';
 const EMPTY={type:'FeatureCollection',features:[]};
 const colors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],...PALETTE.flat()], '#9ba4aa'];
-const protectionGapColors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],0,'#D64550',25,'#F18C4A',50,'#E5BC52',75,'#7EAF83',100,'#338D80'],'#A3AAB4'];
+const protectionGapColors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],0,'#CB6563',25,'#DDA263',50,'#DBC576',75,'#82AB94',100,'#4C948B'],'#8D969F'];
 export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  if(doc.getElementById('dj-pri-toggle'))return;
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
@@ -76,11 +76,11 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
    // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
    if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
     filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':colors,'line-opacity':.98,'line-width':['interpolate',['linear'],['zoom'],11.5,2.5,13,3.5,15,5,17,8,19,11]}},
+    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.80,.36],'line-width':['interpolate',['linear'],['zoom'],11.5,1.2,13,1.65,15,2.5,17,4,19,6]}},
     priOverlayAnchor(map.getStyle()?.layers));
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
     filter:['==',['geometry-type'],'Point'],
-    paint:{'circle-radius':4,'circle-color':colors,'circle-stroke-color':'#fff','circle-stroke-width':1.5}},
+    paint:{'circle-radius':3,'circle-opacity':.8,'circle-color':colors,'circle-stroke-color':'#34434d','circle-stroke-width':.8}},
     priOverlayAnchor(map.getStyle()?.layers));
    // Reposition layers if a late building/district overlay was appended above
    // them, including when the basemap changes its style without a full reset.
@@ -98,12 +98,12 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  }
  function activate(id){
   if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>typeof s.scores.lighting==='number'&&typeof s.scores.accidents==='number'):!dataset.factors.some(f=>f.id===id))))return;
-  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
+  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;doc.documentElement.dataset.djPriActive=id?'true':'false';popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
    if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 100점)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'사고다발지 미선정 구간은 임시 100점 (무사고 뜻 아님)':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
-  ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#D64550,#F18C4A 25%,#E5BC52 50%,#7EAF83 75%,#338D80)':'linear-gradient(90deg,#d74648,#ed9045 25%,#efd05a 50%,#9bc777 75%,#279b80)';
+  ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#CB6563,#DDA263 25%,#DBC576 50%,#82AB94 75%,#4C948B)':'linear-gradient(90deg,#d74648,#ed9045 25%,#efd05a 50%,#9bc777 75%,#279b80)';
   modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 반경·기존 지정 경계·추정 도로폭·학구도를 결합한 연구용 점수. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'사고다발지 미선정 도로는 임시 안전점수 100점입니다. 실제 무사고 증명이 아닙니다.';
   render();
  }
