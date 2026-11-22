@@ -29,7 +29,7 @@ test('AI orb is functional and native night theme pipeline stays in place',()=>{
   assert.match(js,/insertBefore\(orb,theme\)/);
   assert.match(js,/media\.addEventListener/);
   assert.match(js,/media\.removeEventListener/);
-  assert.match(html,/id="theme-toggle"/); // kept for night-mode programmatic calls
+  assert.doesNotMatch(html,/id="theme-toggle"/); // ordinary theme control retired; separate temporary night mode remains
 });
 
 test('night analysis only removes blur from its own backdrop and reload splash',()=>{
