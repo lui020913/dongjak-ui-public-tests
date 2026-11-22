@@ -63,7 +63,7 @@ test('original 1,003 risk values and 603 map gray segments are unchanged by post
  }
 });
 test('the actual PRI map reads the audited overlaps, not a synthetic middle-school factor',async()=>{
- const ui=await readFile(resolve(root,'../../src/pri-map.js'),'utf8');
+ const ui=await readFile(resolve(root,'../../../src/pri-map.js'),'utf8');
  assert.ok(ui.includes("sangdo1_22_clipped_official_catchment_audit_20261122.json"));
  assert.ok(ui.includes('기존 보호 공백 점수 변동 없음'));
  assert.ok(ui.includes('app.dataset.djPriMode=id'));
