@@ -4,6 +4,7 @@
  * be replaced later without changing the navigation or persistence logic.
  */
 import './v860-onboarding.css';
+import {syncOnboardingStatusSurface} from './onboarding-status-surface.js';
 
 export const ONBOARDING_STORAGE_KEY='dongjak_onboarding_seen_v860';
 /** Approved 2:1 AI illustrations for the five existing onboarding pages.
@@ -183,6 +184,16 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   const previous=overlay.querySelector('[data-dj860-action="prev"]');
   const next=overlay.querySelector('[data-dj860-action="next"]');
   const skip=overlay.querySelector('[data-dj860-action="skip"]');
+  // Explicitly paint the five shell surfaces, not the illustration.
+  // An inline important declaration wins over older layered CSS that was
+  // still painting the onboarding header/content/footer white on iPhone.
+  const syncSurface=()=>syncOnboardingStatusSurface({app,doc,win,overlay});
+  const surfaceObserver=new MutationObserver(syncSurface);
+  surfaceObserver.observe(app,{attributes:true,attributeFilter:['data-theme']});
+  if(doc.documentElement)surfaceObserver.observe(doc.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  win.addEventListener?.('dongjak:manual-theme-change',syncSurface);
+  cleanups.push(()=>{surfaceObserver.disconnect();win.removeEventListener?.('dongjak:manual-theme-change',syncSurface);});
+
 
   ONBOARDING_SLIDES.forEach((slide,i)=>{
     const dot=make('button','dj860-dot');dot.type='button';dot.dataset.dj860Action='dot';dot.dataset.index=String(i);
@@ -296,6 +307,9 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     // Otherwise the shared observer can incorrectly classify it as a stale
     // automatic reopen while some other surface is finishing its close.
     win.DongjakWindowLifecycle?.requestOpen?.('dj860-onboarding');
+    // Set the paint before removing hidden: first visible frame MUST already
+    // match the native iOS status bar, rather than flashing the old white.
+    syncSurface();
     overlay.hidden=false;overlay.classList.remove('is-closing');overlay.removeAttribute('aria-hidden');
     returnFocus=doc.activeElement;
     const more=doc.getElementById('dj-mobile-utilities');
