@@ -35,16 +35,16 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   const main=read('src/main.js');
   const appearance=read('src/map-appearance.js');
   assert.ok(guard.includes("role!=='ground'&&role!=='vegetation'"));
-  assert.ok(guard.includes("theme==='dark'?'#22262b':'#e1e4dc'"));
+  assert.ok(guard.includes("theme==='dark'?'#2b3138':'#e1e4dc'"));
   assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.88);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.82);
-  assert.equal(buildingExtrusionAppearance('dark',30).color,'#30343b');
+  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.58);
+  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.50);
+  assert.equal(buildingExtrusionAppearance('dark',30).color,'#525d66');
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'base-building','source-layer':'building'}),true);
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'dongjak-buildings-3d-01','source-layer':'building'}),false);
-  assert.ok(appearance.includes('nearOpacity:0.88,farOpacity:0.82'));
+  assert.ok(appearance.includes('nearOpacity:0.58,farOpacity:0.50'));
 });
 
 test('MapLibre zoom guard restores only base-map ground and vegetation and preserves the map instance',()=>{
@@ -78,9 +78,9 @@ test('MapLibre zoom guard restores only base-map ground and vegetation and prese
   try{
     assert.equal(map.fire('zoomend'),map);
     assert.equal(getLatestMapInstance(),map);
-    assert.equal(map.paints['background/background-color'],'#17191d');
-    assert.equal(map.paints['landuse_residential/fill-color'],'#22262b');
-    assert.equal(map.paints['park/fill-color'],'#34393e');
+    assert.equal(map.paints['background/background-color'],'#22272d');
+    assert.equal(map.paints['landuse_residential/fill-color'],'#2b3138');
+    assert.equal(map.paints['park/fill-color'],'#303c34');
     assert.equal(map.paints['road-primary/fill-color'],undefined);
     assert.equal(map.paints['water/fill-color'],undefined);
     assert.equal(map.paints['building/fill-color'],undefined);
