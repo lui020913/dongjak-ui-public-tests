@@ -3,9 +3,9 @@
   "application_version": "9.2.91",
   "public_work_branch": "main",
   "purpose": "Exact main source after merged PR330 (0dc722ea8a2d459e88bf842eade239b973aacfcc), including merged PR328 and PR329: fix real iPhone My Info vertical blank space and hidden subviews, native language row reparent/card bug, community four-control toolbar and post cards, compact nearby sheet; integrate Sangdo1 1003 scored/603 grey policy-gap road segments, 172 unscored Sanghyeon Middle School 300m subview (NULL, never counted), official school catchment SHP 22 audited clipped roads with unchanged scores and map detail. CI 45032081208 and 3 separate GIS, official source and Live QA checks green. Require SHA-bound isolated Preview, all 12 mobile QA shards including visual layout geometry, desktop/tablet gate, then protected Production with rollback if and only if all gates pass.",
-  "attempt": 275,
+  "attempt": 276,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous 9.2.90 production #45029364548 successful but user iPhone screenshots exposed actual production override and wrong duplicated CSS/DOM; PR330 removes ownership conflicts and adds real layout/official GIS tests. Production only after new Preview verification.",
+  "last_retry_reason": "9.2.91 release #45032309600 correctly blocked at sealed source test stage because a new test referenced ../../frontend/production outside sealed app-only folder. main abc566f108fb3711ad0b911c43ce1660076c87a2 fixes the test to check exact copied src/mobile-next assets in sealed build (source CI continues checking frontend template). No functional GIS/UI data changed. Re-run Preview + all 12 phone QA + protected Production from exact main.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
