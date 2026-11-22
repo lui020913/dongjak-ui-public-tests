@@ -91,15 +91,12 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
-import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
 
-function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
 export function getInitialTheme(){
-  // The first-paint script owns cold-start light mode and one-shot iOS manual
-  // refreshes. Do not resurrect an older dark preference during app startup.
-  const firstPaint=typeof document!=='undefined'?document.documentElement?.dataset?.theme:null;
-  return firstPaint==='dark'?'dark':'light';
+  // The public app is light-only. Night visibility can still apply a temporary
+  // dark map theme through setTemporaryTheme; no saved theme is restored.
+  return 'light';
 }
 export function roadColorRole(layer={}){
   if(!['line','fill'].includes(layer.type))return null;
@@ -133,6 +130,8 @@ export function districtExteriorThemePaint(theme='light'){
 
 export function initTheme({map,app}){
   const toggle=document.getElementById('theme-toggle');
+  if(toggle){toggle.hidden=true;toggle.disabled=true;toggle.style.setProperty('display','none','important');}
+  try{localStorage.removeItem(THEME_KEY);}catch{}
   const baseline=new Map();
   // Dynamically injected labels arrive after initial MapLibre load (park names,
   // nearby POIs, bus/rail stops). Preserve original paint for light restoration.
@@ -297,17 +296,7 @@ export function initTheme({map,app}){
         {detail:{theme:next,preference:themeState.preference}}));
     }
   };
-  toggle?.addEventListener('click',()=>{
-    // Night analysis changes only the EFFECTIVE style, never the saved choice.
-    themeState.toggle();
-    safeStorageSet(THEME_KEY,themeState.preference);
-    displayTheme({notify:true});
-    // A live meta/theme-color update cannot reliably recolor native iOS PWA
-    // status chrome. Only a manual theme choice on installed iPhones performs
-    // one guarded refresh; its camera/tab and onboarding suppression are saved.
-    // Ordinary browser and temporary night-visibility changes remain in-place.
-    if(!themeState.temporary)requestIosThemeRefresh({win:window,app,map,theme:themeState.preference});
-  });
+  // Only the night-visibility controller may request a temporary theme.
   const setTemporaryTheme=next=>{
     if(!themeState.override(next))return;
     displayTheme();
