@@ -3,9 +3,9 @@
   "application_version": "9.2.76",
   "public_work_branch": "main",
   "purpose": "Deploy merged PR #281: consistent bright MapLibre map labels with dark text halos (including dynamically added place, road, and transit labels), readable charcoal PRI dialog, muted narrower 300m walking-vulnerability graded/gray road overlay and no TIP while active, compact centered walking-route submit dock, smooth status/header theme continuity, light mode on cold launch and onboarding for each signed-out launch or logout. Preserve 1086 scored/600 gray PRI segments, data and transit semantics, mobile QA 12, design captures/Gemini 6, autonomous exploration, protected Production.",
-  "attempt": 243,
+  "attempt": 244,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #281 passed exact public app source CI #44982914333 following update of eight obsolete dark first-paint / palette tests and final remaining first-paint assertion. Rerun all protected mobile gates on merged source a58bf50f463b6e812cd5ab510c09d4d55f721f0e. No functional QA bypass.",
+  "last_retry_reason": "Attempt #243 passed source CI and release prelim checks, but isolated sealed regression failed only at theme-unified-contract.test.mjs:92 due to reading ../../frontend/production/mobile-next.css outside sealed app (302 test files, 301 passed). PR #282 fixed resolver to prefer isolated app/src/mobile-next.css when present, falling back to original frontend public repo file. PR #282 source CI passed and was merged e398859d486167be61122ef4d799fa5e88b3c02e; rerun all real mobile/design/explore/Production gates with no bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
