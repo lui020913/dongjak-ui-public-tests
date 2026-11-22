@@ -66,15 +66,15 @@
    No second modal, scrim, or body scroll lock is introduced. */
 @media(max-width:699px){
  html body #dj-pri-dialog.dj-pri-dialog{
-  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,100px) 12px!important;
+  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,calc(env(safe-area-inset-bottom,0px) + 82px)) 12px!important;
   margin:0!important;width:auto!important;min-width:0!important;max-width:none!important;
-  max-height:calc(100dvh - var(--dj-pri-dock-clearance,100px) - max(100px,env(safe-area-inset-top,0px) + 76px))!important;
+  max-height:calc(100dvh - var(--dj-pri-dock-clearance,calc(env(safe-area-inset-bottom,0px) + 82px)) - max(100px,env(safe-area-inset-top,0px) + 76px))!important;
   box-sizing:border-box!important;overflow-y:auto!important;overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;padding:16px!important;border-radius:22px!important;
  }
  #app #dj-pri-legend{
   position:absolute!important;left:12px!important;right:12px!important;
-  bottom:var(--dj-pri-dock-clearance,100px)!important;
+  bottom:var(--dj-pri-dock-clearance,calc(env(safe-area-inset-bottom,0px) + 82px))!important;
   width:auto!important;max-width:none!important;margin:0!important;
   box-sizing:border-box!important;padding:12px 14px!important;border-radius:20px!important;
  }
@@ -91,7 +91,7 @@
    assessment chooser/legend. The desktop MapLibre anchored popup is unchanged. */
 @media(max-width:699px){
  #map .dj-pri-map-popup.maplibregl-popup{
-  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,100px) 12px!important;
+  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,calc(env(safe-area-inset-bottom,0px) + 82px)) 12px!important;
   margin:0!important;transform:none!important;width:auto!important;max-width:none!important;
   min-width:0!important;z-index:2600!important;
  }

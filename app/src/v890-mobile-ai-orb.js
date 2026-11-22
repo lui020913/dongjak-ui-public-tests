@@ -8,9 +8,11 @@ import {installAiSurfaceDismissGuard,isAiBlockedAfterDismiss,isMapDetailVisible}
 export function installMobileAiOrb(doc=document,win=window){
   const media=win.matchMedia?.('(max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)');
   const app=doc.getElementById('app');
+  // The light-only release removes #theme-toggle entirely. That button was
+  // only a historical insertion anchor, NEVER a prerequisite for AI entry.
   const theme=doc.getElementById('theme-toggle');
-  const host=theme?.closest('.header-tools');
-  if(!media||!app||!host||!theme)return ()=>{};
+  const host=theme?.closest('.header-tools')||doc.querySelector?.('#app .topbar .header-tools');
+  if(!media||!app||!host)return ()=>{};
   const releaseDismissGuard=installAiSurfaceDismissGuard(doc);
   let orb=null;
   const openExistingAi=()=>{
@@ -59,7 +61,7 @@ export function installMobileAiOrb(doc=document,win=window){
       if(!pointerIntent&&!keyboardIntent&&!accessibilityIntent)return;
       openExistingAi();
     });
-    host.insertBefore(orb,theme);
+    host.insertBefore(orb,theme?.parentElement===host?theme:null);
   }
   media.addEventListener?.('change',sync);
   sync();

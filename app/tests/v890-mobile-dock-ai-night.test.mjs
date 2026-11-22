@@ -26,7 +26,8 @@ test('AI orb is functional and native night theme pipeline stays in place',()=>{
   assert.match(js,/dongjak:explicit-ai-open/);
   assert.match(js,/startedOnOrb/);
   assert.doesNotMatch(js,/modal\.showModal\(/);
-  assert.match(js,/insertBefore\(orb,theme\)/);
+  assert.match(js,/host\.insertBefore\(orb,theme\?\.parentElement===host\?theme:null\)/);
+  assert.match(js,/host=theme\?\.closest\('\.header-tools'\)\|\|doc\.querySelector/);
   assert.match(js,/media\.addEventListener/);
   assert.match(js,/media\.removeEventListener/);
   assert.doesNotMatch(html,/id="theme-toggle"/); // ordinary theme control retired; separate temporary night mode remains

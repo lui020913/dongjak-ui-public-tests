@@ -574,10 +574,8 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await expect(mapScale).toBeVisible();
  await expect(page.locator('.map-actions > #toggle-road-width')).toBeHidden();
  await tap(page,tab(page,'mine'));
- await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
- await tap(page,page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]'));
- await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
- await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
+ await expect(page.locator('#mine-panel [data-dj834-action=theme]')).toHaveCount(0);
+ await expect(page.locator('#app')).toHaveAttribute('data-theme','light');
  await tap(page,tab(page,'map'));
  await tap(page,page.locator('#djNext-layers'));
  const modal=page.locator('#djNext-layer-panel'),scroll=modal.locator('.djNext-layer-scroll'),header=modal.locator('header');
