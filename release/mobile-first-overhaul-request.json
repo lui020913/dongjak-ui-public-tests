@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Exact public-main mobile gated release after PR #269: correct 375/390/430px Playwright accessible names to current '상단 바로가기 고정' switches; protect subway 1호선/9호선 badge selection from external pointer/click dismissal. Preserve merged Gemini randomized design/function focus PR #264, weather-scale lifecycle PR #267, current PRI vulnerability GIS, route/transit and theme behavior. Full build & anonymous Preview provenance, 12 phone Playwright shards, six continuous visual captures, six Gemini design reviews, safe autonomous function exploration, guarded Production rollback. No gates waived; block Production on timeout/failures.",
-  "attempt": 235,
+  "purpose": "Release native Walking Vulnerability (보행 취약도) MapLibre PRI layer visibility fix from merged PR #273, source fe84ca11cce533171c57bbb4a03687416848b90e: never skip layer creation just because map.isStyleLoaded is false while vector tiles are busy; reorder PRI graded roads above late district/building opaque fills and below transit icons; retry missing GeoJSON layers on style.load/styledata/idle; keep 300m three-source protection-gap gradient, 600 gray NULLs and 1,086 evaluated segments as well as lighting and accidents. Full public app CI #44975151525 successful; require isolated Preview, phone-only 12-shard QA, visual QA, and guarded Production, preserving all existing features.",
+  "attempt": 236,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #234 build+Preview succeeded but mobile phone shards 1,4,9 failed due stale accessible switch selector; 430px shard 9 also lost 9호선 selection and opened route tab; shards 4 and 5 recorded safety/night QA timeouts. PR #269 merged fixes exact label and contains transfer badge interaction, retains real checks. Re-run all gates; investigate any remaining timeouts instead of bypassing.",
+  "last_retry_reason": "Previous Production #235 was confirmed successful but did not contain this newly diagnosed post-deploy MapLibre PRI road rendering fix. PR #273 merged clean and CI passed. Rebuild exact main and verify the graded lines are not occluded or lost during style updates; do not bypass QA or reuse prior artifact.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
