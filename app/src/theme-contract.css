@@ -39,6 +39,34 @@
     --dj800-muted:#53675e!important;
     --dj800-border:#d3e0d8!important;
     --dj800-elevated:#e9f2ed!important;
+    --dj800-accent:#35676c!important;
+    --dj-v4-selected:#e1ecec!important;
+    --dj-v4-accent:#35676c!important;
+    --djNext-surface:#ffffff!important;
+    --djNext-raised:#e9f2ed!important;
+    --djNext-text:#20312e!important;
+    --djNext-muted:#53675e!important;
+    --djNext-border:#d3e0d8!important;
+    --djNext-active:#35676c!important;
+    --djNext-tile:#f6faf8!important;
+    --djNext-tile-ink:#20312e!important;
+    --djNext-tool-face:#ffffff!important;
+    --djNext-tool-edge:#d3e0d8!important;
+    --djNext-tool-soft-face:#e9f2ed!important;
+    --djNext-tool-selected-face:#e1ecec!important;
+    --djNext-tool-selected-ink:#20312e!important;
+    --surface:#ffffff!important;
+    --card:#ffffff!important;
+    --panel:#ffffff!important;
+    --text:#20312e!important;
+    --muted:#53675e!important;
+    --border:#d3e0d8!important;
+    --mf-bg:#edf3ef!important;
+    --mf-surface:#ffffff!important;
+    --mf-surface-muted:#e9f2ed!important;
+    --mf-surface-raised:#e9f2ed!important;
+    --mf-accent:#35676c!important;
+    --mf-accent-soft:#e1ecec!important;
     --mf-ink:#20312e!important;
     --mf-muted:#53675e!important;
     --mf-line:#d3e0d8!important;
@@ -646,5 +674,78 @@
   }
   html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.djNext-continue,button.primary-btn:not(:disabled),#route-panel .route-gps-btn:focus-visible){
     border-color:#4d6d75!important;
+  }
+}
+
+
+/* Unified undimmed-window and weather-card policy.
+   The map remains visible behind floating cards; only the top status/header
+   can use its existing blur treatment. Safety-severity map paints are intact. */
+@layer request-completion {
+  /* Outer click-away surfaces are transparent. Their inner content keeps an
+     opaque theme-specific card and a soft elevation shadow. */
+  html body #app#app#app#app#app#app#app :is(
+    #dj833-night-modal,#dj840-theme-confirm,#djNext-permissions,
+    #djNext-layer-panel,#map-safety-backdrop,#map-options-backdrop,
+    #map-gesture-guide,#dj-app-about,#version-history-modal
+  ):not([hidden]) {
+    background-color:transparent!important;
+    background-image:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  html body #app#app#app#app#app#app#app :is(
+    .dj833-night-dialog,.dj840-dialog,.djNext-modal-body,
+    #overview-sheet,#dj832-data-sheet,#dj854-weather-sheet,
+    #transport-sheet,.dj-place-detail-popup .maplibregl-popup-content
+  ):not([hidden]) {
+    box-shadow:0 8px 22px rgba(12,30,27,.13)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+    .dj833-night-dialog,.dj840-dialog,.djNext-modal-body,
+    #overview-sheet,#dj832-data-sheet,#dj854-weather-sheet,
+    #transport-sheet,.dj-place-detail-popup .maplibregl-popup-content
+  ):not([hidden]) {
+    box-shadow:0 8px 22px rgba(0,0,0,.28)!important;
+  }
+  /* Seven-day tiles get symmetric inset space at both scroll boundaries. */
+  html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj9274-weather-week {
+    box-sizing:border-box!important;
+    width:calc(100% - 28px)!important;
+    max-width:calc(100% - 28px)!important;
+    margin:12px 14px 16px!important;
+    padding:8px 0!important;
+    overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj9274-weather-week ul {
+    width:100%!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:4px 12px 12px!important;
+    scroll-padding-inline:12px!important;
+    overflow-x:auto!important;
+    overscroll-behavior-x:contain!important;
+  }
+  html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj-weather-edge-drag {
+    display:none!important;
+  }
+  /* A light-theme dialog must not inherit the charcoal palette after switching. */
+  html[data-theme="light"] body > :is(#dj-pri-dialog,.dj-pri-dialog,#dj-ai-search-modal) {
+    --djNext-surface:#ffffff!important;
+    --djNext-raised:#e9f2ed!important;
+    --djNext-text:#20312e!important;
+    --djNext-muted:#53675e!important;
+    --djNext-border:#d3e0d8!important;
+    --dj800-surface:#ffffff!important;
+    --dj800-text:#20312e!important;
+    color-scheme:light!important;
+  }
+  html[data-theme="light"] body > :is(#dj-pri-dialog,.dj-pri-dialog) {
+    background:#ffffff!important;
+    color:#20312e!important;
+    border-color:#d3e0d8!important;
+    box-shadow:0 8px 24px rgba(12,30,27,.13)!important;
   }
 }
