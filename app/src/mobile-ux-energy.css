@@ -1,6 +1,10 @@
 /* Mobile screens must never reveal the live map or prior tab while switching.
  * Keep their backplates opaque; animate child content only (existing controller).
  * No backdrop blur / full-root opacity transition: avoids extra iOS GPU passes. */
+/* A named cascade layer makes the safety invariant outrank legacy unlayered
+ * `!important` selectors (some production overlays repeat #app dozens of times).
+ * The page stays opaque, even when the legacy transition controller is active. */
+@layer request-completion {
 @media (max-width:699px) {
   html body #app#app[data-tab]:not([data-tab="map"]) #map {
     visibility:hidden!important;
@@ -9,7 +13,7 @@
   html body #app#app .page-panel[data-page]:not([hidden]) {
     opacity:1!important;
     visibility:visible!important;
-    background-color:#edf3ef!important;
+    background-color:var(--dj-primary-page-bg,#edf3ef)!important;
     -webkit-backdrop-filter:none!important;
     backdrop-filter:none!important;
   }
@@ -22,7 +26,7 @@
   }
   html body #app#app[data-theme="dark"] #bottom-nav .nav-tab.active,
   html body #app#app[data-theme="dark"] #bottom-nav .nav-tab[aria-current="page"] {
-    background:#285b50!important;color:#f1f4f6!important;
+    background:var(--djNext-tool-selected-face,#31535b)!important;color:#f1f4f6!important;
   }
   html body #app#app[data-theme="dark"] :is(#dj-pri-dialog,.dj-pri-dialog) .dj-pri-button:disabled {
     background:#35404a!important;color:#bec8d2!important;
@@ -34,3 +38,5 @@
     animation:none!important;
   }
 }
+
+} /* @layer request-completion */
