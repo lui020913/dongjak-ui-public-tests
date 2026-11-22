@@ -64,7 +64,8 @@ const checks=[
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');
-   contains(s,'--dj-brand-mint-selected:#285b50','--dj-brand-mint:#79dec5','#route-panel #route-calc:disabled','.dj-pri-button:disabled');
+   contains(s,'--dj-brand-mint-selected:#285b50','--dj-brand-mint:#79dec5','#route-panel #route-calc:disabled');
+   contains(src('src/mobile-ux-energy.css'),'.dj-pri-button:disabled');
  }],
  ['B04','icon-only close controls receive full-size 44px touch and focus targets',()=>{
    const s=src('src/theme-contract.css').split('Shared accessible glass-like icon controls')[1]||'';
