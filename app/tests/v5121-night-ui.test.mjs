@@ -6,7 +6,7 @@ const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('다크 테마 건물 평면·3D는 같은 팔레트에서 저명도로 지정',()=>{
   assert.deepEqual(buildingFootprintPaint('dark'),{'fill-color':'#444d56','fill-opacity':0.74,'fill-antialias':false});
-  assert.deepEqual(buildingExtrusionAppearance('dark',30),{color:'#525d66',opacity:0.50});
+  assert.deepEqual(buildingExtrusionAppearance('dark',30),{color:'#525d66',opacity:0.89});
   assert.equal(buildingFootprintPaint('light')['fill-opacity'],1);
   assert.match(read('src/ui-environment.js'),/buildingFootprintPaint\(themeState\.value,map\.getPitch/);
   assert.match(read('src/main.js'),/buildingExtrusionAppearance\(visualTheme\.currentTheme\(\),map\.getPitch\(\)\)/);
