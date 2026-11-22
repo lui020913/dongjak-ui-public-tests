@@ -62,6 +62,43 @@ test('OSM 정류소 목록이 실패해도 배경 파란 버스 아이콘을 눌
   await Promise.resolve();
 });
 
+test('rapid transport replacement cancels the outgoing fade and stale close completion',async()=>{
+  const previousWindow=globalThis.window;
+  const handlers=new Map();
+  let pendingClose=null,cancelled=0;
+  globalThis.window={
+    addEventListener(type,fn){handlers.set(type,fn);},
+    DongjakWindowMotion:{
+      close(_panel,finish){pendingClose=finish;},
+      cancel(){cancelled++;}
+    }
+  };
+  try{
+    const h=createHarness();
+    globalThis.fetch=async()=>{throw new Error('overpass offline')};
+    initTransportMap({map:h.map,isDongjak:()=>true,
+      onOpen:()=>{},onClose:()=>{},canOpen:()=>true});
+    const openSaved=handlers.get('dongjak:open-saved-transport');
+    assert.equal(typeof openSaved,'function');
+    const first={kind:'bus',name:'첫 번째 정류장',lng:126.951,lat:37.502,arsId:'20240'};
+    const second={kind:'subway',name:'두 번째 역',lng:126.947,lat:37.509,lines:['7호선'],selectedLine:'7호선'};
+    openSaved({detail:{place:first}});
+    assert.equal(h.elements.get('transport-sheet').hidden,false);
+    h.elements.get('transport-close').click();
+    assert.equal(typeof pendingClose,'function');
+    openSaved({detail:{place:second}});
+    assert.equal(h.elements.get('transport-sheet').hidden,false);
+    const closedBefore=pendingClose;
+    closedBefore(); // A cancelled animation races a newly opened sheet.
+    assert.equal(h.elements.get('transport-sheet').hidden,false,'stale close must not dismiss the new station');
+    assert.ok(cancelled>=2,'both new selections clear any old animation owner');
+    await Promise.resolve();
+  }finally{
+    if(previousWindow===undefined)delete globalThis.window;
+    else globalThis.window=previousWindow;
+  }
+});
+
 test('지하철 역명은 공식 API에서 사용하는 역명으로 정규화',()=>{
   assert.equal(normalizeStationQueryName('노량진역'),'노량진');
   assert.equal(normalizeStationQueryName('사당역 (2호선)'),'사당');
