@@ -18,8 +18,11 @@ export function requestIosThemeRefresh({win=window,app,map,theme}={}){
   if(![...camera.center,camera.zoom,camera.pitch,camera.bearing].every(Number.isFinite))return false;
   const allowed=['map','route','participate','news','mine'];
   const tab=allowed.includes(app?.dataset?.tab)?app.dataset.tab:'map';
+  const activePri=app?.dataset?.djPriVisible==='true'&&typeof app?.dataset?.djPriMode==='string'
+   ?app.dataset.djPriMode:null;
+  const priMode=activePri&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(activePri)?activePri:null;
   win.sessionStorage.setItem(MANUAL_THEME_RELOAD_KEY,JSON.stringify({
-   theme,tab,camera,expires:Date.now()+30000
+   theme,tab,camera,priMode,expires:Date.now()+30000
   }));
   win.location.reload();
   return true;
