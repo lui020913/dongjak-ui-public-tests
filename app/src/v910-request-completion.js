@@ -5,6 +5,14 @@ export function dockClearance(viewportHeight, navTop, gap=8){
   return Number.isFinite(navTop)&&navTop>0&&navTop<viewportHeight
     ?Math.ceil(viewportHeight-navTop+gap):88;
 }
+/**
+ * Positive upward translation required for a real route CTA to clear
+ * the FIXED navigation hitbox after all CSS cascade and page transforms.
+ */
+export function routeFooterLift(navTop,buttonBottom,gap=12){
+ if(!Number.isFinite(navTop)||!Number.isFinite(buttonBottom)||navTop<=0)return 0;
+ return Math.max(0,Math.ceil(buttonBottom-navTop+gap));
+}
 export function installRequestCompletion(doc=document,win=window){
   const app=doc.getElementById('app');if(!app||app.dataset.dj910Ready)return ()=>{};
   app.dataset.dj910Ready='1';
@@ -102,6 +110,22 @@ export function installRequestCompletion(doc=document,win=window){
       const footer=doc.createElement('div');footer.id='dj910-route-footer';
       const panel=doc.getElementById('route-panel');
       panel.append(footer);footer.append(calc);
+    }
+    // The compiled mobile CSS layers can alter the footer's containing block
+    // even when bottom: calc(--dock) is correct. Correct the ACTUAL button hitbox,
+    // not a guessed CSS offset. This prevents the pill navigation intercepting
+    // route-calc pointer input on 375/390/430px phones.
+    const footer=doc.getElementById('dj910-route-footer');
+    const routePanel=doc.getElementById('route-panel');
+    if(footer&&calc&&routePanel&&!routePanel.hidden&&visible(nav)){
+      // Always measure unshifted geometry to avoid cumulative oscillation.
+      footer.style.setProperty('translate','none','important');
+      const lift=routeFooterLift(n?.top,calc.getBoundingClientRect().bottom);
+      footer.style.setProperty('translate',lift?'0 -'+lift+'px':'none','important');
+      footer.dataset.dj910RouteDockLift=String(lift);
+    }else if(footer){
+      footer.style.removeProperty('translate');
+      delete footer.dataset.dj910RouteDockLift;
     }
     const safety=doc.querySelector('#bottom-nav [data-tab="map"] .nav-icon');
     if(safety&&!safety.querySelector('.dj910-map-glyph')){
