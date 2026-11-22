@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {featuredPlaceStyle} from '../src/featured-place-labels.js';
+import {weeklyWeatherUrl} from '../src/v854-weather-desktop.js';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('one map/walking settings screen replaces duplicate layer toggles and fills phone',()=>{
@@ -65,4 +66,32 @@ test('safety sheet uses measured navigation clearance and language row lives ins
   assert.match(language,/dj854-language-icon/);
   assert.match(language,/querySelector\('\.dj834-my-home \.dj834-settings-group'\)/);
   assert.match(langCss,/grid-template-columns:33px minmax\(0,1fr\) minmax\(0,118px\)/);
+});
+
+test('current location weather updates both current conditions and all seven forecast days without stale caching',()=>{
+ const env=read('src/ui-environment.js');
+ const weather=read('src/v854-weather-desktop.js');
+ const url=new URL(weeklyWeatherUrl(37.501,127.023));
+ assert.equal(url.searchParams.get('latitude'),'37.501');
+ assert.equal(url.searchParams.get('longitude'),'127.023');
+ assert.equal(url.searchParams.get('forecast_days'),'7');
+ assert.ok(env.includes("new CustomEvent('dongjak:weather-place-change'"));
+ assert.ok(weather.includes("addEventListener?.('dongjak:weather-place-change',onWeatherPlaceChange)"));
+ assert.ok(weather.includes("removeEventListener?.('dongjak:weather-place-change',onWeatherPlaceChange)"));
+ assert.ok(weather.includes("weekController?.abort();weekCache=null;weekCacheKey='';weekUpdated=0"));
+ assert.ok(weather.includes("weeklyWeatherUrl(requestedPlace.latitude,requestedPlace.longitude)"));
+ assert.ok(weather.includes("requestedKey!==keyForPlace(weekPlace)"));
+ assert.ok(weather.includes("weekCacheKey===requestedKey"));
+ assert.ok(weather.includes("requestedPlace.name+' 기준 · Open-Meteo'"));
+});
+
+test('iOS native status bridge never dims behind open sheets or night consent',()=>{
+ const status=read('src/mobile-pwa-status-tone-v793.js');
+ const css=read('src/mobile-pwa-status-tone-v793.css');
+ assert.ok(status.includes("root.dataset.djPwaDimmed='false'"));
+ assert.ok(!status.includes("const dimmed=!!doc.getElementById"));
+ assert.ok(!status.includes("nightPrompt?(theme"));
+ assert.ok(!status.includes("#aab8af"));
+ assert.ok(css.includes('data-dj-pwa-dimmed="true"'));
+ assert.ok(read('src/v831-swipe-feature-toolbar.css').includes('backdrop-filter:blur(5px)'));
 });

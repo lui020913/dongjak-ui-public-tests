@@ -68,6 +68,11 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
       const {latitude,longitude}=pos.coords||{};
       if(!Number.isFinite(latitude)||!Number.isFinite(longitude))throw new Error('위치 좌표 없음');
       current={latitude,longitude,name:'내 위치'};
+      // Keep the visible 7-day forecast tied to the same chosen place as
+      // the current-temperature widget; otherwise it silently stays in Dongjak.
+      window.dispatchEvent(new CustomEvent('dongjak:weather-place-change',{
+        detail:{latitude,longitude,name:current.name}
+      }));
       await refresh({force:true});
     }catch(error){
       const message=error?.code===1?'위치 권한이 거부되었습니다. 기존 지역 날씨를 유지합니다.':'현재 위치를 확인하지 못했습니다. 기존 지역 날씨를 유지합니다.';
