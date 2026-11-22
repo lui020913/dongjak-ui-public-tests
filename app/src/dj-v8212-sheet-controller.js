@@ -238,7 +238,16 @@ export function installMobileFloatingSheetController(doc=document,win=window){
         // Share the exact same lifecycle as button X and automatic closure.
         win.DongjakWindowLifecycle?.dismiss(id);
         panel.dataset.djSwipeDismissed='true';
-        try{if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;}finally{delete panel.dataset.djSwipeDismissed;}
+        try{
+          // The drag controller has ALREADY played the exit motion. Dispatch
+          // to the transport domain owner directly, not a synthetic X click
+          // that would start a second exit motion and flash the bus sheet.
+          if(id==='transport-sheet'){
+            panel.dispatchEvent(new CustomEvent('dongjak:transport-dismiss'));
+            return;
+          }
+          if(btn)dispatchLocalClick(btn,win);else panel.hidden=true;
+        }finally{delete panel.dataset.djSwipeDismissed;}
       });
     };
     const cancel=()=>{if(closing)return;gesture=null;settleMobileSheetDrag(panel,win);};

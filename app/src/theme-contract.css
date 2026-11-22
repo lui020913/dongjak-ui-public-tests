@@ -39,15 +39,15 @@
     --dj800-muted:#53675e!important;
     --dj800-border:#d3e0d8!important;
     --dj800-elevated:#e9f2ed!important;
-    --dj800-accent:#35676c!important;
+    --dj800-accent:#0d8875!important;
     --dj-v4-selected:#e1ecec!important;
-    --dj-v4-accent:#35676c!important;
+    --dj-v4-accent:#0d8875!important;
     --djNext-surface:#ffffff!important;
     --djNext-raised:#e9f2ed!important;
     --djNext-text:#20312e!important;
     --djNext-muted:#53675e!important;
     --djNext-border:#d3e0d8!important;
-    --djNext-active:#35676c!important;
+    --djNext-active:#0d8875!important;
     --djNext-tile:#f6faf8!important;
     --djNext-tile-ink:#20312e!important;
     --djNext-tool-face:#ffffff!important;
@@ -65,7 +65,7 @@
     --mf-surface:#ffffff!important;
     --mf-surface-muted:#e9f2ed!important;
     --mf-surface-raised:#e9f2ed!important;
-    --mf-accent:#35676c!important;
+    --mf-accent:#0d8875!important;
     --mf-accent-soft:#e1ecec!important;
     --mf-ink:#20312e!important;
     --mf-muted:#53675e!important;
@@ -603,7 +603,7 @@
 
 /* 2026-11-22 screenshot follow-up: readable body-level PRI dialog and restrained slate-teal accent. */
 :root[data-theme="light"] {
-  --dj-theme-accent:#35676c;
+  --dj-theme-accent:#0d8875;
   --dj-theme-selected:#e1ecec;
 }
 :root[data-theme="dark"] {
@@ -662,8 +662,8 @@
     --djNext-tool-selected-ink:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app#app#app[data-theme="light"]{
-    --djNext-active:#35676c!important;
-    --djNext-tool-primary:#35676c!important;
+    --djNext-active:#0d8875!important;
+    --djNext-tool-primary:#0d8875!important;
   }
   html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active{
     background:#31535b!important;background-color:#31535b!important;
@@ -808,6 +808,44 @@
     ):focus-visible{
       outline:2px solid var(--dj-theme-accent,#285b50)!important;
       outline-offset:2px!important;
+    }
+  }
+}
+
+/* One uninterrupted iOS Home Screen color plane for all full-screen pages.
+   White remains reserved for inset cards, never the OS status-area backdrop. */
+@layer request-completion {
+  @media(max-width:699px) {
+    html[data-theme="light"],
+    html[data-theme="light"] body,
+    html.dj-ios-home-pwa[data-theme="light"] body {
+      background-color:#edf3ef!important;
+    }
+    html body #app#app#app#app[data-theme="light"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]),
+    html body #app#app#app#app[data-theme="light"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body) {
+      background-color:#edf3ef!important;
+      background:#edf3ef!important;
+    }
+    html body #app#app#app#app[data-theme="light"] .dj860-onboarding,
+    html body #app#app#app#app[data-theme="light"] .dj860-onboarding :is(.dj860-card,.dj860-head,.dj860-content,.dj860-footer) {
+      background-color:#edf3ef!important;
+      background:#edf3ef!important;
+    }
+    html body #app#app#app#app[data-theme="light"] #mine-panel .dj834-my-detail {
+      background:transparent!important;
+      background-color:transparent!important;
+    }
+    html[data-theme="light"] body:has(#dj-ai-search-modal[open]),
+    html[data-theme="light"] body > #dj-ai-search-modal,
+    html[data-theme="light"] body > #dj-ai-search-modal :is(.dj-ai-search-body,.dj-ai-search-header,.dj-ai-composer) {
+      background-color:#edf3ef!important;
+      background:#edf3ef!important;
+    }
+    html[data-theme="light"] body > #dj-ai-search-modal {
+      --ai-bg:#edf3ef!important;
+      --ai-card:#ffffff!important;
+      --ai-accent:#0d8875!important;
+      color-scheme:light!important;
     }
   }
 }

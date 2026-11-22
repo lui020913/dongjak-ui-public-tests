@@ -93,6 +93,48 @@ function opacityAt(along,ref){
   return 0.97;
 }
 
+/**
+ * Choose one cartographic path for each covered portion of a metro line.
+ * The MOIS relation can contain the up/down physical tracks as two parallel
+ * geometries. A route map must draw one line, while keeping surveyed curves.
+ * Disjoint parts of the same line are preserved to avoid gaps.
+ */
+export function selectRepresentativeRailPaths(paths,reference){
+  if(!reference||!Array.isArray(paths)||paths.length<2)return paths||[];
+  const candidates=paths.map((path,index)=>{
+    const bins=new Set();let near=0,samples=0;
+    const coords=path.coordinates||[];
+    for(let i=1;i<coords.length;i++){
+      const a=coords[i-1],b=coords[i];
+      if(!validPoint(a)||!validPoint(b))continue;
+      const length=distance(a,b);
+      if(!Number.isFinite(length)||length>3000)continue;
+      const n=Math.max(1,Math.ceil(length/85));
+      for(let step=0;step<n;step++){
+        const t=(step+0.5)/n;
+        const p=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+        const projected=reference.nearest(p);
+        if(projected.distance>420)continue;
+        bins.add(Math.floor(projected.along/60));
+        near+=projected.distance;samples++;
+      }
+    }
+    return {path,index,bins,average:samples?near/samples:Infinity};
+  }).sort((a,b)=>b.bins.size-a.bins.size||a.average-b.average||a.index-b.index);
+  const occupied=new Set(),chosen=[];
+  for(const candidate of candidates){
+    const count=candidate.bins.size;
+    let overlaps=0;
+    for(const bin of candidate.bins)if(occupied.has(bin))overlaps++;
+    // Physical up/down tracks cover the same chainage bins. Keep the
+    // representative nearest to the reference, not both tracks.
+    if(count>=4 && overlaps/count>=0.62)continue;
+    chosen.push(candidate);
+    for(const bin of candidate.bins)occupied.add(bin);
+  }
+  return chosen.sort((a,b)=>a.index-b.index).map(c=>c.path);
+}
+
 /** Return official line features, retaining the schematic fallback for uncovered routes. */
 export function mergeOfficialRail(schematicCollection,rawPaths){
   const grouped=new Map();
@@ -108,7 +150,7 @@ export function mergeOfficialRail(schematicCollection,rawPaths){
     const features=[];
     const stationNear=new Set();
     let length=0;
-    for(const railPath of paths){
+    for(const railPath of selectRepresentativeRailPaths(paths,ref)){
       const path=railPath.coordinates;
       // Keep original surveyed/mapped vertices; never replace with station chords.
       let run=null;

@@ -52,7 +52,7 @@ test('weather forecast is inset and cannot be dragged to an expanded view',()=>{
 test('light theme resets formerly dark-only UI variables',()=>{
   const css=read('src/theme-contract.css');
   const light=css.split('html body #app#app#app#app#app#app#app[data-theme="light"]')[1].split('html body #app#app#app#app#app#app#app[data-theme="dark"]')[0];
-  for(const token of ['--djNext-surface:#ffffff','--djNext-raised:#e9f2ed','--dj800-accent:#35676c','--mf-surface:#ffffff']) {
+  for(const token of ['--djNext-surface:#ffffff','--djNext-raised:#e9f2ed','--dj800-accent:#0d8875','--mf-surface:#ffffff']) {
     assert.ok(light.includes(token),token);
   }
 });

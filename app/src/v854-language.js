@@ -252,14 +252,23 @@ export function installLanguagePreference(doc=document,win=window){
     icon.setAttribute('aria-hidden','true');
     icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>';
     section.append(icon,label,select);
-    const group=body.querySelector('.dj834-my-home .dj834-settings-group');
-    const history=group?.querySelector('[data-dj834-action="history"]');
-    if(history)history.before(section);
-    else if(group)group.append(section);
-    else body.prepend(section);
+    // Expose the control immediately even before My Info's async list exists.
+    // ensurePlacement() moves this very node into the settings group later.
+    body.prepend(section);
     select.addEventListener('change',()=>setLanguage(select.value));
   }
   const select=section.querySelector('select');
+  // My Info can initialize after this module. Keep language in the actual
+  // App & Display group instead of leaving an orphan below My Activity.
+  const ensurePlacement=()=>{
+    const group=mine.querySelector('.dj834-my-home .dj834-settings-group');
+    if(!group)return;
+    const history=group.querySelector('[data-dj834-action="history"]');
+    if(section.parentElement!==group || (history && section.nextElementSibling!==history)){
+      group.insertBefore(section,history||null);
+    }
+  };
+  ensurePlacement();
   let observer=null,queued=false;const pendingRecords=[];
   function apply(){
     doc.documentElement.lang=language==='en'?'en':'ko';
@@ -282,6 +291,7 @@ export function installLanguagePreference(doc=document,win=window){
         else if(record.type==='attributes')translateAttributes(record.target,language);
         else for(const node of record.addedNodes)walk(node,language);
       }
+      ensurePlacement();
       // Do not write unchanged preference controls from inside this observer.
       // Assigning label.textContent unconditionally creates another childList
       // mutation and can starve the browser's rendering/event loop forever.
