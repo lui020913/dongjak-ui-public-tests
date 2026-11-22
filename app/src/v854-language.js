@@ -246,7 +246,17 @@ export function installLanguagePreference(doc=document,win=window){
     const label=doc.createElement('label');label.htmlFor='dj854-language-select';label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
-    section.append(label,select);body.prepend(section);
+    // Keep the language control inside the existing App & Display settings group.
+    // It must not float above the profile card or overlap an unrelated selector.
+    const icon=doc.createElement('span');icon.className='dj834-setting-icon dj854-language-icon';
+    icon.setAttribute('aria-hidden','true');
+    icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>';
+    section.append(icon,label,select);
+    const group=body.querySelector('.dj834-my-home .dj834-settings-group');
+    const history=group?.querySelector('[data-dj834-action="history"]');
+    if(history)history.before(section);
+    else if(group)group.append(section);
+    else body.prepend(section);
     select.addEventListener('change',()=>setLanguage(select.value));
   }
   const select=section.querySelector('select');
