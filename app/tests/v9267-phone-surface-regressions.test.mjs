@@ -49,7 +49,9 @@ test('night consent is centered, stale exit motion is cancelled and pill remains
 });
 test('iPhone manual theme switch stores camera before a single native-color refresh',()=>{
   assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
-  assert.doesNotMatch(theme,/location\.reload\(\)|map\.getCenter\(\)/);
+  assert.match(theme,/requestIosThemeRefresh/);
+  assert.match(theme,/sessionStorage\.setItem\(MANUAL_THEME_RELOAD_KEY/);
+  assert.match(theme,/win\.location\.reload\(\)/);
   assert.match(pwa,/nightActive=app\.dataset\.sangdoNight==='on'/);
   assert.match(pwa,/data-sangdo-night/);
 });
