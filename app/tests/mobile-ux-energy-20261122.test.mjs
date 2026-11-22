@@ -32,6 +32,15 @@ test('PRI map safely hides legacy TIP even with inline important styles and soft
   assert.match(css,/min-height:44px/);
 });
 
+test('the original 10-second map TIP owner never resurrects a TIP over active PRI',()=>{
+ const shell=readFileSync(new URL('../src/v840-coordinated-ui.js',import.meta.url),'utf8');
+ const scale=readFileSync(new URL('../src/map-scale-docking.js',import.meta.url),'utf8');
+ assert.match(shell,/app\.dataset\.djPriVisible!=='true'/);
+ assert.match(shell,/app\.dataset\.djPriVisible==='true'\|\|hasOpenMapWindow/);
+ assert.match(shell,/data-dj-pri-visible/);
+ assert.match(scale,/app\.dataset\.djPriVisible==='true'/);
+});
+
 test('opaque phone tab surfaces have a priority cascade owner over legacy production styles',()=>{
   const css=readFileSync(new URL('../src/mobile-ux-energy.css',import.meta.url),'utf8');
   assert.match(css,/@layer request-completion/);

@@ -30,7 +30,7 @@ test('native PRI vulnerability menu replaces duplicate map-options overlay',asyn
   readFile(path.resolve(here,'../public/data/pri/manifest.json'),'utf8')
  ]);
  const manifest=JSON.parse(manifestText);
- assert.ok(main.includes('installPriMap({map,maplibregl,app})'));
+ assert.ok(main.includes('installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode})'));
  assert.ok(!main.includes('installPolicyGapThreeSourceMap'));
  assert.ok(main.includes('installProtectionZoneMap({map,maplibregl,app,nightMode})'));
  assert.ok(main.includes('installBochaRoadLayer({map,maplibregl,app})'));

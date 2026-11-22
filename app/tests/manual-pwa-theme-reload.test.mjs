@@ -13,10 +13,10 @@ test('iOS manual theme refresh preserves the active tab and full map camera',()=
   location:{reload:()=>{reloads++;}}
  };
  const map={getCenter:()=>({lng:126.95,lat:37.5}),getZoom:()=>14.5,getPitch:()=>25,getBearing:()=>35};
- assert.equal(requestIosThemeRefresh({win,app:{dataset:{tab:'news'}},map,theme:'light'}),true);
+ assert.equal(requestIosThemeRefresh({win,app:{dataset:{tab:'news',djPriVisible:'true',djPriMode:'protectionGap'}},map,theme:'light'}),true);
  assert.equal(reloads,1);
  const snapshot=readManualThemeReload(win.sessionStorage,Date.now());
- assert.equal(snapshot.theme,'light');assert.equal(snapshot.tab,'news');
+ assert.equal(snapshot.theme,'light');assert.equal(snapshot.tab,'news');assert.equal(snapshot.priMode,'protectionGap');
  assert.deepEqual(snapshot.camera,{center:[126.95,37.5],zoom:14.5,pitch:25,bearing:35});
  assert.equal(readManualThemeReload(win.sessionStorage,Date.now()),null);
 });
@@ -30,4 +30,15 @@ test('browser tabs and temporary or malformed camera cannot request a native the
  win.navigator.userAgent='iPhone';
  assert.equal(requestIosThemeRefresh({win,map:{getCenter:()=>null},theme:'dark'}),false);
  assert.equal(reloads,0);assert.equal(data.size,0);
+});
+
+test('PRI active layer restoration is deferred until verified data loads',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const source=readFileSync(new URL('../src/pri-map.js',import.meta.url),'utf8');
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.ok(source.includes('let pendingRestore='));
+ assert.ok(source.includes('if(pendingRestore)void loadDefault();'));
+ assert.ok(source.includes('app.dataset.djPriMode=id'));
+ assert.ok(source.includes('const requested=pendingRestore;pendingRestore=null;activate(requested);'));
+ assert.ok(main.includes('restoreMode:themeReloadState?.priMode'));
 });

@@ -87,6 +87,7 @@ import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprin
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
+import {scaleMapLabelSize} from './map-label-text-scale.mjs';
 
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
 export function getInitialTheme(){
@@ -152,7 +153,8 @@ export function initTheme({map,app}){
         line:layer.type==='line'?read('line-color'):undefined,
         text:layer.type==='symbol'?read('text-color'):undefined,
         halo:layer.type==='symbol'?read('text-halo-color'):undefined,
-        haloWidth:layer.type==='symbol'?read('text-halo-width'):undefined
+        haloWidth:layer.type==='symbol'?read('text-halo-width'):undefined,
+        size:layer.type==='symbol'?map.getLayoutProperty?.(layer.id,'text-size'):undefined
       });
     }
   }
@@ -171,7 +173,8 @@ export function initTheme({map,app}){
           supplementalLabelBaseline.set(id,{
             text:baseline.get(id)?.text??read('text-color'),
             halo:baseline.get(id)?.halo??read('text-halo-color'),
-            width:baseline.get(id)?.haloWidth??read('text-halo-width')
+            width:baseline.get(id)?.haloWidth??read('text-halo-width'),
+            size:baseline.get(id)?.size??map.getLayoutProperty?.(id,'text-size')
           });
         }
         const original=supplementalLabelBaseline.get(id);
@@ -181,6 +184,10 @@ export function initTheme({map,app}){
         for(const [key,value] of Object.entries(desired)){
           const current=read(key);
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
+        }
+        if(typeof map.getLayoutProperty==='function'&&typeof map.setLayoutProperty==='function'&&original.size!=null){
+          const textSize=scaleMapLabelSize(original.size,app.dataset.djSettingsText||'normal');
+          if(JSON.stringify(map.getLayoutProperty(id,'text-size'))!==JSON.stringify(textSize))map.setLayoutProperty(id,'text-size',textSize);
         }
       }catch{/* A style reload can temporarily remove an individual label layer. */}
     }
@@ -194,6 +201,7 @@ export function initTheme({map,app}){
     else Promise.resolve().then(run);
   }
   map.on('styledata',scheduleMapLabelContrast);
+  window.addEventListener?.('dongjak:map-text-scale-change',scheduleMapLabelContrast);
   function applyTheme(){
     if(!map.isStyleLoaded()){map.once?.('idle',applyTheme);return;}
     for(const entry of baseline.values()){

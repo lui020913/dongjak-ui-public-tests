@@ -32,15 +32,37 @@ test('risk-to-safety scoring reverses the palette without altering original sour
  const integrated=parseImport(source,base);
  assert.equal(source.scores[0].score,40,'source risk score must remain untouched');
  assert.equal(integrated.segments[1].scores.accidents,60,'risk 40 becomes safety 60');
- assert.equal(integrated.segments[0].scores.accidents,100,'nonselected segment gets a modeled baseline');
+ assert.equal(integrated.segments[0].scores.accidents,100,'raw modeled baseline remains traceable but not scored');
+ assert.equal(segmentScore(integrated,integrated.segments[0],'accidents'),null);
+ assert.equal(displayFeatures(integrated,'accidents').features.find(f=>f.properties.segmentId==='1_0').properties.evaluated,false);
+ assert.equal(summarize(integrated,'accidents').observedM,25);
  assert.match(integrated.segments[0].evidence.accidents.note,/무사고를 뜻하지 않음/);
- assert.equal(segmentScore(integrated,integrated.segments[0],'pri12'),100);
+ assert.equal(segmentScore(integrated,integrated.segments[0],'pri12'),null,'modeled 100 must not contribute to preview');
  assert.equal(segmentScore(integrated,integrated.segments[1],'pri12'),30);
- assert.equal(segmentScore(integrated,integrated.segments[2],'pri12'),80);
+ assert.equal(segmentScore(integrated,integrated.segments[2],'pri12'),null,'unselected road is unassessed, not safe');
  assert.equal(segmentScore(integrated,integrated.segments[0],'pri'),null,'full six-factor PRI still requires approval');
  const explicitUnknown=parseImport({...source,scores:[{id:'1_0',score:null}]},base);
  assert.equal(explicitUnknown.segments[0].scores.accidents,null,'a submitted null must remain unknown, not a modeled 100');
  assert.equal(explicitUnknown.segments[1].scores.accidents,100,'only absent rows get a modeled baseline');
  assert.throws(()=>parseImport({...source,unmatchedReason:''},base),/미선정 기본점수/);
  assert.throws(()=>parseImport({...source,factor:{...source.factor,scoreDirection:'wrong'}},base),/지표 점수 방향/);
+});
+
+test('modeled accidents never inflate six-factor PRI; only a missing protectionGap may use verified five',()=>{
+ const lighting=adaptLighting(sample);
+ const p={schemaVersion:1,type:'pri-factor-scores',networkVersion:lighting.networkVersion,
+  factor:{id:'accidents',label:'사고 위험',source:'시험 자료',method:'실제 지정 위치',scoreDirection:'risk'},
+  unmatchedScore:100,unmatchedReason:'미선정 시범값으로 무사고를 보증하지 않음',scores:[{id:'1_1',score:40}]};
+ const integrated=parseImport(p,lighting);
+ const approved=validateBundle({...integrated,
+  segments:integrated.segments.map((seg,i)=>({...seg,
+   scores:{...seg.scores,crossing:80,sharedRoad:60,speed:70,protectionGap:i===1?null:50}})),
+  config:{status:'approved',version:'validated-six-factors',
+   weights:{accidents:1/6,crossing:1/6,sharedRoad:1/6,speed:1/6,protectionGap:1/6,lighting:1/6}}
+ });
+ assert.equal(segmentScore(approved,approved.segments[0],'pri'),null,'modeled accident plus actual protection score is still incomplete');
+ assert.ok(Math.abs(segmentScore(approved,approved.segments[1],'pri')-54)<1e-9,'only the missing protectionGap is excluded from verified five-score mean');
+ assert.equal(segmentScore(approved,approved.segments[2],'pri'),null,'unassessed accident cannot be auto-renormalized');
+ assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_0').properties.evaluated,false);
+ assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_1').properties.evaluated,true);
 });

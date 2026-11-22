@@ -123,7 +123,12 @@ export function installMapPreferences(doc=document,win=window){
   };
   const apply=({animateWeather=false}={})=>{
     if(!['small','normal','large'].includes(prefs.text))prefs.text='normal';
+    const previousTextSize=app.dataset.djSettingsText;
     app.dataset.djSettingsText=prefs.text;
+    // HTML font-size alone cannot resize text painted inside MapLibre's canvas.
+    if(previousTextSize!==prefs.text){
+      win.dispatchEvent?.(new CustomEvent('dongjak:map-text-scale-change',{detail:{size:prefs.text}}));
+    }
     // Migration: ignore any old rise/none preference; fade is now the only style.
     delete prefs.motionStyle;
     app.dataset.djMotionStyle='soft';
