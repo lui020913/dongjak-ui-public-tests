@@ -58,3 +58,15 @@ test('exact design evidence is a required Production and Preview notification co
 test('autonomous exploration is required on exact Preview',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');assert.match(w,/explore-qa:\s*\n\s*needs: \[build, preview, visual-qa\]/);assert.match(w,/playwright\.live-qa-explore\.config\.mjs/);assert.match(w,/needs\.explore-qa\.result == 'success'/);});
 
 test('keep six browser captures parallel, cap Gemini review to two, and explore only after reviews',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml'),capture=w.slice(w.indexOf('  visual-capture:'),w.indexOf('  visual-qa:')),review=w.slice(w.indexOf('  visual-qa:'),w.indexOf('  explore-qa:')),explore=w.slice(w.indexOf('  explore-qa:'),w.indexOf('  production:'));assert.match(capture,/max-parallel: 6/);assert.doesNotMatch(capture,/GEMINI_API_KEY|--vision/);assert.match(capture,/verify-capture\.mjs qa-artifacts --seal/);assert.match(review,/max-parallel: 2/);assert.match(review,/uses: actions\/download-artifact@v4/);assert.match(review,/verify-capture\.mjs qa-artifacts\n/);assert.match(review,/--vision/);assert.match(explore,/needs\.visual-qa\.result == 'success'/);});
+
+test('debug APK releases are immutable by source SHA even when Android versionName stays unchanged',()=>{
+ for(const path of ['.github/workflows/android-apk.yml','.github/workflows/android-debug-publish-retry.yml']){
+  const workflow=read(path);
+  assert.match(workflow,/tag="android-debug-v\$\{VERSION\}-src-\$\{sha:0:12\}"/,'Missing exact Production source in debug release tag: '+path);
+  assert.match(workflow,/\[\[ "\$sha" =~ \^\[a-f0-9\]\{40\}\$ \]\]/,'Unverified commit digest: '+path);
+  assert.match(workflow,/gh release view "\$tag"/,'Must not replace existing immutable release: '+path);
+  assert.match(workflow,/gh release create "\$tag"/,'Must publish that exact source tag: '+path);
+  assert.match(workflow,/unzip -p "\$apk" assets\/public\/release-source\.json/,'Missing embedded provenance comparison: '+path);
+  assert.match(workflow,/apksigner" verify --print-certs/,'APK certificate verification is mandatory: '+path);
+ }
+});
