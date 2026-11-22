@@ -1,13 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {buildSanghyeonMiddleSchoolReview} from '../src/sangdo1-middle-school-review.mjs';
 import {scopedPolicyFeatures} from '../src/pri-scope-data.mjs';
 
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const json=p=>JSON.parse(read(p));
-const phoneCss=read('../../frontend/production/mobile-next.css');
-const phoneJs=read('../../frontend/production/mobile-next.js');
+// Source CI has the public production template; the protected release
+// assembles a sealed app-only candidate and places the exact copied files
+// in src/. Test the same content in both independently validated contexts.
+const productionFile=extension=>{
+  const template='../../frontend/production/mobile-next.'+extension;
+  const copied='../src/mobile-next.'+extension;
+  if(existsSync(new URL(template,import.meta.url)))return read(template);
+  if(existsSync(new URL(copied,import.meta.url)))return read(copied);
+  throw Error('No verified mobile-next.'+extension+' in source or sealed build');
+};
+const phoneCss=productionFile('css');
+const phoneJs=productionFile('js');
 const myInfo=read('../src/v834-my-info.js');
 const pri=read('../src/pri-map.js');
 
