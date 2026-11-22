@@ -324,9 +324,13 @@ jobs:
           grep -F "package: name='kr.dongjak.safetyapp'" "$RUNNER_TEMP/public-badging.txt"
           grep -F "application-label:'동작하는 안전지도'" "$RUNNER_TEMP/public-badging.txt"
           curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?android-debug-final=$GITHUB_RUN_ID" | jq -e --slurpfile prod PRODUCTION.json '.==$prod[0]' >/dev/null
-          tag="android-debug-v$VERSION"
+          # Keep the numeric Android version unchanged while publishing an immutable
+          # debug build for each verified Production source commit.
+          # Never overwrite an older APK issued under the same visible version.
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]]
+          tag="android-debug-v${VERSION}-src-${sha:0:12}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo 'Version already published; refusing overwrite'; exit 1
+            echo 'This exact Production source APK was already published; refusing overwrite'; exit 1
           fi
           # The default token can reject a tag on an earlier commit when workflow files differ.
           # A dedicated, repository-scoped publishing credential is optional; never reuse unrelated secrets.
@@ -341,5 +345,5 @@ jobs:
             fi
           fi
           jq -e --arg sha "$sha" '.object.type=="commit" and .object.sha==$sha' <<< "$ref" >/dev/null
-          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --verify-tag --title "Android v$VERSION (test APK)" --notes "Fixed-signature debug test APK from verified Production $sha. Not a Play Store release." --latest=false
+          gh release create "$tag" "$apk" SHA256SUMS.txt PRODUCTION.json --repo "$GITHUB_REPOSITORY" --verify-tag --title "Android v$VERSION (test APK · ${sha:0:12})" --notes "Fixed-signature debug test APK for exact Production source $sha. This is not a Play Store release; the source-qualified tag prevents replacing an earlier APK with the same versionName." --latest=false
           echo "Public download: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/$apk" >> "$GITHUB_STEP_SUMMARY"
