@@ -71,6 +71,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     const target=sheet?.querySelector('.dj9274-weather-week');if(!target)return;
     const list=target.querySelector('ul'),status=target.querySelector('[role="status"]');
     const requestedPlace={...weekPlace},requestedKey=keyForPlace(requestedPlace);
+    const source=target.querySelector('.dj9274-week-head small');if(source)source.textContent=requestedPlace.name+' 기준 · Open-Meteo';
     if(!force&&weekCache&&weekCacheKey===requestedKey&&Date.now()-weekUpdated<20*60*1000){renderWeek(weekCache);return;}
     weekController?.abort();const controller=new AbortController();weekController=controller;
     list.replaceChildren();status.hidden=false;status.textContent='7일 예보를 불러오는 중입니다.';
