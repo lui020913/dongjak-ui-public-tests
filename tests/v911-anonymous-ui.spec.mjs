@@ -1468,9 +1468,16 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  const nearby=page.locator('#ped-tools-panel');
  await expect(nearby).toBeVisible();
  await expect(nearby.locator('#ped-tools-status')).toBeVisible();
+ // The nearby sheet intentionally animates upward from beneath the dock.
+ // Assert its SETTLED geometry, not the first partially visible animation
+ // frame: the latter can extend 25px beyond the screen for 100-350ms.
+ await expect.poll(()=>nearby.evaluate(n=>{
+   const r=n.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect();
+   return r.height<310 && r.bottom<=nav.top+4;
+ }),{timeout:10000,intervals:[100,150,250,400]}).toBe(true);
  const box=await nearby.evaluate(n=>{const r=n.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect(),s=getComputedStyle(n);return{height:r.height,bottom:r.bottom,navTop:nav.top,display:s.display}});
  expect(box.height,'nearby sheet should be content-sized').toBeLessThan(310);
- expect(box.bottom,'nearby sheet must clear the dock').toBeLessThanOrEqual(box.navTop+4);
+ expect(box.bottom,'settled nearby sheet must clear the dock').toBeLessThanOrEqual(box.navTop+4);
  if(page.viewportSize().width===390)await test.info().attach('nearby-compact.png',{body:await page.screenshot(),contentType:'image/png'});
 });
 
