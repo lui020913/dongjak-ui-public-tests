@@ -875,8 +875,8 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
- await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#17191d');
- await expect(sample).toHaveCSS('background-color','rgb(23, 25, 29)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(23, 25, 29)');
+ await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#22282e');
+ await expect(sample).toHaveCSS('background-color','rgb(34, 40, 46)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(34, 40, 46)');
 });
 
 
