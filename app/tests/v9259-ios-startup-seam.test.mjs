@@ -11,9 +11,9 @@ test('iPhone cold-start HTML and runtime status controller use the same light ed
   // Search for the closing tag AFTER the theme script, not the first tag in HTML.
   assert.ok(start>=0);
   const startup=html.slice(start,html.indexOf('</script>',start));
-  assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor=displayTheme==='dark'\?'#17191d':'#edf3ef'/);
-  assert.match(startup,/\? \(displayTheme==='dark'\?'#17191d':'#edf3ef'\)/);
-  assert.match(tone,/theme==='dark'\?'#17191d':'#edf3ef'/);
+  assert.match(startup,/if\(iosHome\)\{document\.documentElement\.style\.backgroundColor=displayTheme==='dark'\?'#22282e':'#edf3ef'/);
+  assert.match(startup,/\? \(displayTheme==='dark'\?'#22282e':'#edf3ef'\)/);
+  assert.match(tone,/theme==='dark'\?'#22282e':'#edf3ef'/);
   assert.match(css,/--dj-pwa-land-tone:#edf3ef/);
 });
 test('critical splash CSS paints the iPhone top edge before external CSS loads',()=>{
@@ -23,7 +23,7 @@ test('critical splash CSS paints the iPhone top edge before external CSS loads',
   assert.match(head,/background:var\(--start-bg\)!important/);
   assert.doesNotMatch(head,/linear-gradient\(180deg,var\(--start-bg/);
   assert.match(head,/html\.dj-ios-home-pwa\[data-theme="dark"\] body #app \.map-startup-overlay\{/);
-  assert.match(head,/--start-bg:#17191d/);
+  assert.match(head,/--start-bg:#22282e/);
   assert.ok(head.indexOf('html.dj-ios-home-pwa:not([data-theme="dark"]) body #app .map-startup-overlay')<head.indexOf('.map-startup-overlay[hidden]'));
 });
 
