@@ -390,22 +390,38 @@
       color:var(--dj800-muted,#53675e)!important;
       font-size:26px!important;
     }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj854-language-value {
+      display:none!important;
+    }
     html body #app#app#app#app#app #mine-panel .dj834-language-row > select {
-      position:absolute!important;
-      inset:0!important;
+      /* A visible native control keeps its touch target inside its own row.
+         Never stretch an invisible select over the My Info list. */
+      position:static!important;
+      inset:auto!important;
+      flex:0 0 104px!important;
       display:block!important;
-      width:100%!important;
-      max-width:none!important;
-      height:100%!important;
-      min-height:0!important;
+      width:104px!important;
+      max-width:104px!important;
+      min-width:0!important;
+      height:42px!important;
+      min-height:42px!important;
       margin:0!important;
-      padding:0!important;
-      opacity:0!important;
+      padding:3px 0!important;
+      opacity:1!important;
+      overflow:hidden!important;
       border:0!important;
       border-radius:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
       appearance:none!important;
       -webkit-appearance:none!important;
-      z-index:2!important;
+      color:var(--dj800-muted,#53675e)!important;
+      font:inherit!important;
+      font-size:14px!important;
+      font-weight:550!important;
+      text-align:right!important;
+      text-align-last:right!important;
+      z-index:auto!important;
       cursor:pointer!important;
       pointer-events:auto!important;
     }
