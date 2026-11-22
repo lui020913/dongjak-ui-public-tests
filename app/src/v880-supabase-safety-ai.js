@@ -1,6 +1,7 @@
 /** Progressive enhancement: authenticated, evidence-only Supabase AI search.
  * Existing map, GIS layers, routing and login implementations are unchanged. */
 import { getActiveCloudClient } from './v824-favorites-cloud.js';
+import {installAiSurfaceDismissGuard,isAiBlockedAfterDismiss,isMapDetailVisible,markAiSurfaceDismissal,isAiSurfaceDismissControl} from './ai-surface-dismiss-guard.js';
 import './v880-supabase-safety-ai.css';
 
 const q=(selector,root=document)=>root.querySelector(selector);
@@ -32,6 +33,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(nativeSearch)nativeSearch.before(quickEntry);
     else headerForm.append(quickEntry);
   }
+  const releaseDismissGuard=installAiSurfaceDismissGuard(document);
   const modal=el('dialog','dj-ai-search-modal');
   modal.id='dj-ai-search-modal';
   modal.setAttribute('aria-labelledby','dj-ai-dialog-title');
@@ -132,7 +134,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   function open(){
     // A transport X tap cannot become an AI open through the fading layer.
     // An ordinary AI click remains available after this short gesture guard.
-    if(modal.open||Date.now()-transportDismissedAt<1600)return;
+    if(modal.open||Date.now()-transportDismissedAt<1600||isAiBlockedAfterDismiss()||isMapDetailVisible(document))return;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     modal.classList.remove('dj887-ai-closing');
     syncProfile();previousFocus=document.activeElement;
@@ -222,8 +224,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     pointerStart={target:event.target,at:Date.now()};
     // This same pointer sequence may dismiss a sheet that briefly exposes
     // the AI orb below it. Never reinterpret it as an AI-open gesture.
-    if(event.target?.closest?.('#transport-close,.dj-sheet-chrome-close,.page-dismiss,.dj-place-header-close,#dj-mobile-utilities-close,#djNext-layer-panel .djNext-close,[data-close-page],[aria-label*="닫기"],.maplibregl-popup-close-button,[data-dismiss],.dj-place-close')){
+    if(isAiSurfaceDismissControl(event.target)){
       transportDismissedAt=Date.now();
+      markAiSurfaceDismissal();
     }
   };
   document.addEventListener('pointerdown',capturePointer,true);
@@ -274,6 +277,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     document.removeEventListener('keydown',captureOrbKeyboard,true);
     document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);
     document.removeEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
+    releaseDismissGuard();
     trigger?.remove();quickEntry?.remove();modal.remove();marker?.remove();
   };
 }
