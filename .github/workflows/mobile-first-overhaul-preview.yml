@@ -49,9 +49,30 @@ jobs:
           node --check scripts/run-mobile-regressions.mjs
           node --check playwright.v911-remote.config.mjs
           node --check tests/v911-anonymous-ui.spec.mjs
-          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-vision-retry.test.mjs tests/live-qa-explore-model.test.mjs
+          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-vision-retry.test.mjs tests/live-qa-explore-model.test.mjs tests/live-qa-adaptive-plan.test.mjs
           node --check scripts/live-qa-analyze.mjs
           node --test tests/live-qa-verify-capture.test.mjs
+      - name: Restore previous adaptive Gemini focus history
+        uses: actions/cache/restore@v4
+        with:
+          path: qa-state/history.json
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}
+          restore-keys: |
+            adaptive-gemini-qa-v1-
+      - name: Choose reproducible random design and function focuses
+        run: node scripts/live-qa-adaptive-plan.mjs
+      - name: Save focus cooldown history (best effort)
+        uses: actions/cache/save@v4
+        with:
+          path: qa-state/history.json
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}
+      - name: Attach focus plan to the exact release run
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-qa-plan-${{ github.run_id }}
+          path: qa-adaptive-plan.json
+          if-no-files-found: error
+          retention-days: 3
       - name: Test and build exact public app source
         id: build
         env:
@@ -311,6 +332,11 @@ jobs:
           node-version: '24'
       - name: Verify exact visual candidate before review
         run: node scripts/live-qa-verify-candidate.mjs
+      - name: Download this release's randomized focus plan
+        uses: actions/download-artifact@v4
+        with:
+          name: adaptive-qa-plan-${{ github.run_id }}
+          path: .
       - name: Download exact lane capture from this release run
         uses: actions/download-artifact@v4
         with:
@@ -374,6 +400,11 @@ jobs:
       - name: Install matching Playwright Chromium and system dependencies
         run: npx playwright install --with-deps chromium
       - run: node scripts/live-qa-verify-candidate.mjs
+      - name: Download this release's randomized focus plan
+        uses: actions/download-artifact@v4
+        with:
+          name: adaptive-qa-plan-${{ github.run_id }}
+          path: .
       - name: Model chooses safe UI interactions and reviews evidence
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
