@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {adaptLighting,validateBundle,parseImport,segmentScore,displayFeatures,summarize,routeExposure,TEAM_FACTORS,PALETTE,riskToSafety} from '../src/pri-data.mjs';
+import {adaptLighting,validateBundle,parseImport,segmentScore,displayFeatures,summarize,routeExposure,TEAM_FACTORS,PALETTE,riskToSafety,currentVulnerabilityScore,currentVulnerabilityCoverage} from '../src/pri-data.mjs';
 const sample={meta:{factor:'가로등·보안등 암부 거리',segment_m:25,full_score_dark_m:50,기준일:'2026-11-20',자료:'시험 출처',가정:'시험 가정'},segments:[
 {id:'1_0',name:'시험로',len:25,dark:0,score:0,grade:2,pts:[[37.5,126.95],[37.5002,126.95]]},
 {id:'1_1',name:'시험로',len:25,dark:50,score:100,grade:5,pts:[[37.50022,126.95],[37.50042,126.95]]},
@@ -65,4 +65,28 @@ test('modeled accidents never inflate six-factor PRI; only a missing protectionG
  assert.equal(segmentScore(approved,approved.segments[2],'pri'),null,'unassessed accident cannot be auto-renormalized');
  assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_0').properties.evaluated,false);
  assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_1').properties.evaluated,true);
+});
+
+test('three supplied vulnerability factors average observations only, without modeled accident safety',()=>{
+ const base=adaptLighting(sample);
+ const accidents=parseImport({
+  schemaVersion:1,type:'pri-factor-scores',networkVersion:base.networkVersion,
+  factor:{id:'accidents',label:'사고',source:'시험 자료',method:'폴리곤',scoreDirection:'risk'},
+  unmatchedScore:100,unmatchedReason:'미선정은 안전 판정 아님',
+  scores:[{id:'1_1',score:40,evidence:{note:'사고다발지 선정'}}]
+ },base);
+ const complete=parseImport({
+  schemaVersion:1,type:'pri-factor-scores',networkVersion:base.networkVersion,
+  factor:{id:'protectionGap',label:'제도적 사각지대',source:'300m 시험자료',method:'보호구역+학구',scoreDirection:'risk'},
+  scores:[{id:'1_0',score:30},{id:'1_1',score:90},{id:'1_2',score:null}]
+ },accidents);
+ assert.deepEqual(complete.segments.slice(0,3).map(currentVulnerabilityCoverage),[2,3,1]);
+ assert.equal(currentVulnerabilityScore(complete.segments[0]),85,
+  'no incident polygon is not awarded a fake 100-point safety score');
+ assert.ok(Math.abs(currentVulnerabilityScore(complete.segments[1])-70/3)<1e-9);
+ assert.equal(segmentScore(complete,complete.segments[2],'current3'),null,
+  'a single observed factor cannot masquerade as a multi-factor composite');
+ const colored=displayFeatures(complete,'current3').features;
+ assert.equal(colored.find(f=>f.properties.segmentId==='1_0').properties.evaluated,true);
+ assert.equal(colored.find(f=>f.properties.segmentId==='1_2').properties.evaluated,false);
 });

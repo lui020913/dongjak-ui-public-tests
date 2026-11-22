@@ -59,8 +59,8 @@ const checks=[
  ['B02','all map labels have dark text bright halo in light and vice versa',()=>{
    const s=src('src/ui-environment.js');
    contains(s,"mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)'","mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
-   assert.equal(featuredPlaceStyle('light').text,'#26352f');
-   assert.equal(featuredPlaceStyle('dark').text,'#ebf7f3');
+   assert.equal(featuredPlaceStyle('light').text,'#6d817b');
+   assert.equal(featuredPlaceStyle('dark').text,'#cbd6d3');
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');

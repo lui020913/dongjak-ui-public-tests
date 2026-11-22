@@ -1,0 +1,172 @@
+/* 2026-11-22: unified mobile surface corrections.
+   One final request-completion owner; never animate the WebGL map or dock root. */
+@layer request-completion {
+ @media(max-width:699px) {
+  /* No HUD is allowed before the tour/guide lifecycle is fully resolved.
+     This includes the one-frame handoff between the two overlays. */
+  html body #app#app#app#app:is(:not([data-dj860-auto-resolved="true"]),[data-dj-hud-guide-handoff="true"],:has(#map-startup-overlay:not([hidden])),:has(#dj860-onboarding:not([hidden])),:has(#map-gesture-guide:not([hidden])))
+   :is(#dj840-map-tip,#dj-user-tip-close,.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-scale) {
+    visibility:hidden!important;display:none!important;pointer-events:none!important;
+  }
+  /* The bottom navigation is a stationary HUD. Only page content can fade. */
+  html body #app#app#app#app > #bottom-nav:not([hidden]) {
+    opacity:1!important;visibility:visible!important;
+    filter:none!important;transform:none!important;translate:none!important;
+    animation:none!important;transition:background-color .18s ease,border-color .18s ease,color .18s ease!important;
+    will-change:auto!important;
+  }
+  html body #app#app#app#app > #bottom-nav:not([hidden]) :is(.nav-tab,.nav-icon) {
+    filter:none!important;animation:none!important;
+  }
+  html body #app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel)[data-dj-tab-outgoing="true"] {
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    pointer-events:none!important;isolation:isolate!important;
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+  }
+  html body #app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).dj-tab-content-enter:not([hidden]) > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer) {
+    animation:dj-six-page-content-in 190ms cubic-bezier(.2,.65,.3,1) both!important;
+  }
+  /* Route action belongs immediately above the dock, not in the middle
+     of a reserved full-screen block. Keep scroll content accessible. */
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+    position:fixed!important;top:auto!important;
+    left:16px!important;right:16px!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;
+    width:auto!important;min-width:0!important;
+    flex:0 0 auto!important;margin:0!important;padding:0!important;
+    border:0!important;box-shadow:none!important;
+    background:#edf3ef!important;z-index:4!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:calc(196px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(200px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app#app #route-panel #route-calc {
+    width:100%!important;min-height:49px!important;margin:0!important;
+    border-radius:26px!important;
+  }
+  /* News: restrained category separation rather than identical flat cards. */
+  html body #app#app#app#app #news-panel .dongjak-news-item{
+    background:#fafdfb!important;border:1px solid #d7e5df!important;
+    border-left:3px solid #70a997!important;
+    color:#254239!important;box-shadow:0 2px 8px rgba(25,51,42,.035)!important;
+  }
+  html body #app#app#app#app #news-panel .dongjak-news-item:nth-child(3n+2){
+    background:#f3f8f7!important;border-left-color:#7f9ea4!important;
+  }
+  html body #app#app#app#app #news-panel .dongjak-news-item:nth-child(3n+3){
+    background:#f7f8f0!important;border-left-color:#a5aa77!important;
+  }
+  html body #app#app#app#app #news-panel .dongjak-news-item > strong{color:#254239!important;}
+  /* Community: one token set across chips, status, empty cards and editor. */
+  html body #app#app#app#app #participation-panel {
+    --dj-six-community-card:#f8fbf9;--dj-six-community-ink:#253f36;
+    --dj-six-community-edge:#d5e5dd;--dj-six-community-active:#e4f2ec;
+  }
+  html body #app#app#app#app #participation-panel :is(.community-filter,.dj-community-topic,.dj-community-empty-state,.dj-community-starter-topics,.community-post,.community-notice,.dj-community-feed-status) {
+    background:var(--dj-six-community-card)!important;
+    color:var(--dj-six-community-ink)!important;
+    border-color:var(--dj-six-community-edge)!important;
+  }
+  html body #app#app#app#app #participation-panel .community-filter:is(.active,[aria-pressed="true"]) {
+    background:var(--dj-six-community-active)!important;color:#147d68!important;
+    border-color:#a6d0bc!important;
+  }
+  /* The language row is a navigation row, never a native picker on the home list. */
+  html body #app#app#app#app#app #mine-panel .dj834-settings-group > .dj854-language-row:not([hidden]){
+    display:flex!important;grid-template-columns:none!important;flex-flow:row nowrap!important;
+    align-items:center!important;gap:12px!important;min-height:62px!important;
+    padding:11px 14px!important;background:transparent!important;border-radius:0!important;
+    cursor:pointer!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj854-language-row > select {
+    position:absolute!important;visibility:hidden!important;pointer-events:none!important;
+    width:1px!important;max-width:1px!important;min-width:1px!important;height:1px!important;
+    padding:0!important;margin:0!important;border:0!important;opacity:0!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj854-language-row .dj854-language-value {
+    display:block!important;flex:0 0 auto!important;margin-left:auto!important;
+    color:var(--dj800-muted,#61766b)!important;font-size:14px!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj854-language-row .dj834-chevron{
+    display:block!important;order:4!important;flex:0 0 auto!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj854-language-row:focus-visible{
+    outline:2px solid #168e79!important;outline-offset:-3px!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings {
+    display:grid;gap:10px;padding:14px 0 28px;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings[hidden]{display:none!important;}
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings > p{
+    color:var(--dj800-muted,#60756b)!important;font-size:14px;line-height:1.6;margin:0 0 8px;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings > button {
+    display:flex;justify-content:space-between;align-items:center;
+    width:100%;min-height:55px;padding:13px 18px;
+    border:1px solid var(--dj800-border,#d6e5dc)!important;border-radius:15px;
+    color:var(--dj-primary-page-ink,#203e34)!important;
+    background:var(--dj800-elevated,#f9fcfa)!important;
+    font:inherit;font-weight:650;text-align:left;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings > button[aria-pressed="true"] {
+    border-color:#78b6a5!important;background:#e8f5ee!important;color:#0d7b65!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-choice-settings > button[aria-pressed="false"] > span {visibility:hidden;}
+  /* The nearby sheet must dock a consistent short gap above the pill bar. */
+  html body #app#app#app#app #ped-tools-panel:not([hidden]):not(.dj871-sheet-expanded){
+    bottom:calc(95px + env(safe-area-inset-bottom,0px))!important;
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    color:var(--dj-primary-page-ink,#203e34)!important;
+    border-color:var(--dj-primary-page-edge,rgba(47,104,82,.16))!important;
+    box-shadow:0 6px 18px rgba(22,51,39,.11)!important;
+  }
+  html body #app#app#app#app #ped-tools-panel:not([hidden]) :is(.ped-tools-panel-head,.ped-tools-status,.ped-tools-results){
+    color:var(--dj-primary-page-ink,#203e34)!important;
+  }
+  /* PRI dialog must remain above the navigation dock and in its own scroll
+     area; the X inherits a thematic keyboard-only focus ring, not iOS blue. */
+  html body .dj-pri-dialog[open]{
+    box-sizing:border-box!important;
+    max-height:calc(100dvh - 202px - env(safe-area-inset-top,0px))!important;
+    max-width:calc(100vw - 30px)!important;
+    margin:auto auto calc(112px + env(safe-area-inset-bottom,0px))!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  html body .dj-pri-head .dj-pri-close:focus:not(:focus-visible){
+    outline:0!important;border-color:var(--djNext-tool-edge,#ccdcd4)!important;
+    box-shadow:0 2px 6px rgba(18,54,40,.08)!important;
+  }
+  html body .dj-pri-head .dj-pri-close:focus-visible{
+    outline:2px solid #147e70!important;outline-offset:2px!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app #dj-pri-legend {
+    bottom:calc(100px + env(safe-area-inset-bottom,0px))!important;
+    max-height:calc(100dvh - 230px)!important;overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app#app[data-theme="dark"] #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+    background:#22282e!important;
+  }
+  html body #app#app#app#app[data-theme="dark"] #participation-panel {
+    --dj-six-community-card:#2a3438;--dj-six-community-ink:#e9f0ed;
+    --dj-six-community-edge:#48585a;--dj-six-community-active:#304c49;
+  }
+  html body #app#app#app#app[data-theme="dark"] #participation-panel .community-filter:is(.active,[aria-pressed="true"]){
+    color:#b6edda!important;border-color:#638a82!important;
+  }
+  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item,
+  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item:nth-child(3n+2),
+  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item:nth-child(3n+3){
+    background:var(--dj-theme-surface,#293237)!important;
+    color:#e9f0ed!important;border-color:#435459!important;
+  }
+  html body #app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item > strong{color:#eef3f0!important;}
+  html body #app#app#app#app[data-theme="dark"] #mine-panel .dj834-choice-settings > button[aria-pressed="true"]{
+    background:#304d46!important;color:#c4ecde!important;border-color:#64867b!important;
+  }
+ }
+}
+@keyframes dj-six-page-content-in{from{opacity:.28;translate:0 5px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){
+ #app .dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer){animation:none!important;}
+}

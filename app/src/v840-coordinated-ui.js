@@ -38,7 +38,8 @@ export function installCoordinatedShell(doc=document,win=window){
  let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,tipFadeTimer=0,searchFocusTimer=0,disposed=false;
  label.hidden=true;
  const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
-   &&!doc.querySelector('#map-startup-overlay:not([hidden])');
+   &&app.dataset.dj860AutoResolved==='true'&&app.dataset.djHudGuideHandoff!=='true'
+   &&!doc.querySelector('#map-startup-overlay:not([hidden]),#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden])');
  const showTip=()=>{
    if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
    if(app.dataset.djUserTipDismissed==='true'||app.dataset.djPriVisible==='true')return;
