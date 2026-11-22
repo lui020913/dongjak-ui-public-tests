@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #281: consistent bright MapLibre map labels with dark text halos (including dynamically added place, road, and transit labels), readable charcoal PRI dialog, muted narrower 300m walking-vulnerability graded/gray road overlay and no TIP while active, compact centered walking-route submit dock, smooth status/header theme continuity, light mode on cold launch and onboarding for each signed-out launch or logout. Preserve 1086 scored/600 gray PRI segments, data and transit semantics, mobile QA 12, design captures/Gemini 6, autonomous exploration, protected Production.",
-  "attempt": 244,
+  "purpose": "Deploy merged PR #283 (e393db408a1c50db5093bb16e303fc909a3ae2e9): complete A01–E07 mobile UX implementation coverage, live theme without restart, opaque fixed phone tabs, persistent map state, quota-safe realtime transit, gray unevaluated PRI and explicit 300m five-of-six rule, 44px PRI controls, real seven-day weather, route and onboarding regressions, and mobile render/GPS/polling energy guards. Run exact Preview, all mobile/design/exploration gates and protected Production with no bypass. Physical-device battery/thermal measurement remains manual post-deploy evidence.",
+  "attempt": 245,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #243 passed source CI and release prelim checks, but isolated sealed regression failed only at theme-unified-contract.test.mjs:92 due to reading ../../frontend/production/mobile-next.css outside sealed app (302 test files, 301 passed). PR #282 fixed resolver to prefer isolated app/src/mobile-next.css when present, falling back to original frontend public repo file. PR #282 source CI passed and was merged e398859d486167be61122ef4d799fa5e88b3c02e; rerun all real mobile/design/explore/Production gates with no bypass.",
+  "last_retry_reason": "PR #283 source CI run 44986703349 passed the full app regression suite, release metadata check, exact app/ production build, generated entrypoint, twelve mobile shard contract and three phone viewport checks. Request the normal protected release pipeline for the exact merged main source.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
