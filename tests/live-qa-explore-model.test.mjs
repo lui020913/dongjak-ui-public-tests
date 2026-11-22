@@ -34,3 +34,13 @@ test('missing key and arbitrary model IDs fail before outbound requests',async()
  await assert.rejects(askGeminiModel({parts,schema,key,model:'https://invalid',send}),/Model configuration unavailable/);
  assert.equal(n,0);
 });
+
+test('HTTP 429 quota stops autonomous requests immediately for human-review fallback',async()=>{
+ for(const kind of ['per day','per minute']){
+  let calls=0,delays=[];
+  await assert.rejects(askGeminiModel({key,parts,schema,maxAttempts:3,wait:async ms=>delays.push(ms),send:async()=>{
+   calls++;return {ok:false,status:429,json:async()=>({error:{message:'Quota exceeded '+kind}})};
+  }}),kind==='per day'?/Model HTTP 429 \(daily-quota\)/:/Model HTTP 429 \(minute-request-quota\)/);
+  assert.equal(calls,1);assert.deepEqual(delays,[]);
+ }
+});

@@ -8,6 +8,10 @@ export function evaluateDesign(report,lane){
  if((scene.metrics?.samples||0)<10||scene.frames<3||!Array.isArray(scene.checkpoints)||scene.checkpoints.length<2)return {status:'evidence-unavailable',findings:[]};
  const blocked=(scene.flags||[]).filter(f=>f.kind==='surface-horizontal-clipping'&&f.selector==='#route-map-card'&&f.count>=3&&f.end-f.t>=250&&f.px>4).map(f=>({kind:'measured-clipping',selector:f.selector,px:f.px,t:f.t,end:f.end,x:f.x,width:f.width,viewportWidth:f.viewportWidth}));
  if(blocked.length)return {status:'defect',findings:blocked};
+ // A confirmed provider 429 is not a product defect. Preserve the complete
+ // capture and require human visual review; do not present this as AI approval.
+ if(scene.designReview?.status==='unavailable'&&/^Provider HTTP 429 \((?:daily-quota|minute-request-quota|minute-token-quota|quota-type-unknown)\)$/.test(scene.designReview.reason||''))
+  return {status:'quota-skipped',findings:[],manualReviewRequired:true,reason:scene.designReview.reason};
  if(scene.designReview?.status!=='reviewed'||!Array.isArray(scene.vision?.findings))return {status:'vision-unavailable',findings:[]};
  const critical=scene.vision.findings.filter(f=>f.severity==='critical'&&new Set(f.evidence).size>=2).map(f=>({kind:'vision-critical-candidate',summary:f.summary,evidence:f.evidence}));
  return {status:critical.length?'defect':'pass',findings:critical,review:scene.vision.findings,diagnostics:scene.flags||[]};
@@ -24,6 +28,7 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const msg=JSON.stringify({lane,status:result.status,findings:result.findings});
  if(result.status==='defect'){console.log('QA_DESIGN_FAILURE '+msg);process.exitCode=1;}
  else if(result.status==='functional-failure'){console.log('QA_JOURNEY_FAILURE '+msg);process.exitCode=1;}
+ else if(result.status==='quota-skipped'){console.log('::warning::QA_DESIGN_QUOTA_SKIPPED '+msg+' — complete capture retained; human review required');}
  else if(result.status!=='pass'){console.log('QA_DESIGN_UNAVAILABLE '+msg);process.exitCode=1;}
  else console.log('QA_DESIGN_PASS '+msg);
 }
