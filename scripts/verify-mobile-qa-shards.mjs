@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 const cli='node_modules/@playwright/test/cli.js';
 const args=['test','--config=playwright.v911-remote.config.mjs','--project=mobile375','--project=mobile390','--project=mobile430','--project=mobile390-webkit-header','--list','--reporter=json'];
 function list(extra=[],full=false){
- const out=JSON.parse(execFileSync(process.execPath,[cli,...args,...extra],{encoding:'utf8',env:{...process.env,DONGJAK_FULL_MOBILE_QA:full?'1':'0'}}));
+ const out=JSON.parse(execFileSync(process.execPath,[cli,...args,...extra],{encoding:'utf8',env:{...process.env,DONGJAK_FULL_MOBILE_QA:full?'1':'0',DONGJAK_FAST_MOBILE_QA:full?'0':'1'}}));
  const ids=[];
  function visit(s){for(const spec of s.specs??[])for(const t of spec.tests??[])ids.push(JSON.stringify([t.projectName,spec.id,spec.title]));for(const child of s.suites??[])visit(child);}
  for(const s of out.suites)visit(s);
@@ -13,7 +13,7 @@ function list(extra=[],full=false){
 // Both tiers must cover their complete selected test listing without gaps,
 // overlaps or empty runners. The 24-shard tier additionally executes shared
 // functionality on all three phone sizes, rather than only the reference size.
-const QA_MODES=[{count:8,full:false},{count:24,full:true}];
+const QA_MODES=[{count:12,full:false},{count:24,full:true}];
 for(const {count,full} of QA_MODES){
  const baseline=list([],full),shards=[];
  assert.ok(baseline.length>=count,'test count must cover every shard: '+count);
@@ -26,5 +26,6 @@ for(const {count,full} of QA_MODES){
  const combined=shards.flat();
  assert.equal(new Set(combined).size,combined.length,'overlapping shards: '+count);
  assert.deepEqual(combined.sort(),baseline,'shards do not cover selected tests: '+count);
+ if(!full)assert.ok(baseline.length<50,'fast tier must actually reduce scheduled mobile cases');
  console.log('Verified '+baseline.length+' '+(full?'full':'standard')+' phone tests, each scheduled once');
 }
