@@ -13,16 +13,22 @@ test('one map/walking settings screen replaces duplicate layer toggles and fills
   assert.match(css,/#app #dj-map-settings \.dj-map-settings-card \{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important/);
 });
 
-test('all map names share white-on-dark-halo in light, without overriding semantic icons',()=>{
+test('light map labels have dark text with a pale halo, dark theme is reversed',()=>{
   const light=featuredPlaceStyle('light');
-  assert.equal(light.text,'#ffffff');
-  assert.equal(light.halo,'#172c28');
+  const dark=featuredPlaceStyle('dark');
+  assert.equal(light.text,'#26352f');
+  assert.equal(light.halo,'#f6f9f7');
+  assert.equal(dark.text,'#ebf7f3');
+  assert.equal(dark.halo,'#172a30');
   const theme=read('src/ui-environment.js');
-  assert.match(theme,/mapLabelLightPaint=Object\.freeze\(\{color:'#ffffff',halo:'rgba\(18,42,36,0\.97\)'/);
-  assert.match(theme,/semanticSymbolPattern/);
-  assert.match(theme,/mapLabelLightPaint\.color/);
+  assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});"));
+  assert.ok(theme.includes('semanticSymbolPattern'));
+  assert.ok(theme.includes('themeState.value===\'dark\''));
+  assert.ok(theme.includes("'text-color':mapLabelLightPaint.color"));
+  assert.ok(theme.includes("'text-halo-color':mapLabelLightPaint.halo"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':mapLabelLightPaint.color)"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':mapLabelLightPaint.halo)"));
 });
-
 test('popup dim/blur is removed, but existing top-toolbar blur is preserved',()=>{
   const theme=read('src/theme-contract.css');
   const night=read('src/v833-toolbar-personalization.css');
