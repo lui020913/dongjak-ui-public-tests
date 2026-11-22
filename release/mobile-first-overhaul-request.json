@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Exact latest public main protected mobile release: PR #262 mobile UI/theme, PR #263 native PRI institutional gap, PR #264 randomized Gemini design/function QA, PR #266 transit sheet close/reopen and PR #267 weather scale visibility. Includes main test-only fix a027e69 verifying '상단 고정' UI label and independent shortcut switch. Build all shared regressions, deploy isolated Preview, run 12 mobile Playwright shards plus six captured design journeys with adaptive Gemini and functional exploration, then guarded Production with rollback; no bypass.",
-  "attempt": 234,
+  "purpose": "Exact public-main mobile gated release after PR #269: correct 375/390/430px Playwright accessible names to current '상단 바로가기 고정' switches; protect subway 1호선/9호선 badge selection from external pointer/click dismissal. Preserve merged Gemini randomized design/function focus PR #264, weather-scale lifecycle PR #267, current PRI vulnerability GIS, route/transit and theme behavior. Full build & anonymous Preview provenance, 12 phone Playwright shards, six continuous visual captures, six Gemini design reviews, safe autonomous function exploration, guarded Production rollback. No gates waived; block Production on timeout/failures.",
+  "attempt": 235,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #233 was cancelled by concurrent mobile-only-release workflow activity at setup-node with no test failure. Source is unchanged and pre-existing build-test mismatch has already been corrected in main. No other release job was active when this attempt was issued; retry exact verified public source once, preserving all release gates.",
+  "last_retry_reason": "Attempt #234 build+Preview succeeded but mobile phone shards 1,4,9 failed due stale accessible switch selector; 430px shard 9 also lost 9호선 selection and opened route tab; shards 4 and 5 recorded safety/night QA timeouts. PR #269 merged fixes exact label and contains transfer badge interaction, retains real checks. Re-run all gates; investigate any remaining timeouts instead of bypassing.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
