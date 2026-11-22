@@ -41,7 +41,7 @@ test('actual copied production sheet enforces four equal-height community contro
 test('the protection-gap modal groups both real map subviews but never turns middle school into a factor',()=>{
   assert.match(pri,/const middleSchoolOption=\['middleReview','상현중학교 300m 도로 검토 · 점수 미산정'\]/);
   assert.match(pri,/group\.append\(choice\(\.\.\.middleSchoolOption\)\)/);
-  assert.match(pri,/group\.append\(choice\(id,'상도1동 전체 보호 공백 점수 · 그라데이션'\)\)/);
+  assert.match(pri,/group\.append\(choice\(id,'제도적 사각지대 · 상도1동 전체 보호 공백 점수 · 그라데이션'\)\)/);
   assert.match(pri,/const auditBox=el\('section','dj-pri-official-audit'\)/);
   assert.match(pri,/boundaryAudit\?\.size/);
   assert.match(pri,/middleSchoolReview:true/);
