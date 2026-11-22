@@ -297,6 +297,17 @@ html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
     color:var(--dj-theme-ink,#20312e)!important;
     border-color:var(--dj-theme-line,#d3e0d8)!important;
   }
+  html body #app#app#app#app#app #ped-tools-panel
+    :is(.ped-tools-panel-head strong,.ped-nearby-group h4,.ped-nearby-item,.ped-nearby-item strong) {
+    color:var(--dj-theme-ink,#20312e)!important;
+  }
+  html body #app#app#app#app#app #ped-tools-panel .ped-nearby-item {
+    background:var(--dj-theme-surface,#fff)!important;
+    border-color:var(--dj-theme-line,#d3e0d8)!important;
+  }
+  html body #app#app#app#app#app #ped-tools-panel .ped-tools-note {
+    color:var(--dj-theme-muted,#53675e)!important;
+  }
 
   /* iOS settings: the language editor is a child page, not a second hub row. */
   html body #app#app#app#app#app #mine-panel .dj834-settings-group > .dj854-language-section{
