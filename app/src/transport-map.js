@@ -1450,6 +1450,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // The close action is fully processed before the browser can deliver
     // an additional click to the map under the disappearing bottom sheet.
     event?.stopPropagation?.();
+    document.dispatchEvent(new CustomEvent('dongjak:transport-dismiss-start'));
     if(globalThis.window?.DongjakWindowMotion)globalThis.window.DongjakWindowMotion.close(panel,()=>close(true));else close(true);
   });
   // Stop the entire touch sequence at its real target, not just its
@@ -2682,28 +2683,22 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           containerTop:mapBounds?.top||0})
         :-upward;
       const focusZoom=place.kind==='bus'?16.5:15.3;
-      try{map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
-        zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:540});}
+      // Keep the current view when the selected marker is already visible
+      // above the open card; avoid unnecessary re-centering on every tap.
+      const projected=map.project?.([Number(place.lng),Number(place.lat)]);
+      const freeTop=Math.max(mapBounds?.top||0,
+        document.querySelector?.('.topbar')?.getBoundingClientRect?.()?.bottom||0,
+        document.getElementById('dj-v794-toolbar')?.getBoundingClientRect?.()?.bottom||0)+24;
+      const freeBottom=(panel.getBoundingClientRect?.()?.top||viewportHeight)-24;
+      const alreadyVisible=projected&&Number.isFinite(projected.x)&&Number.isFinite(projected.y)
+        &&projected.x>48&&projected.x<(mapBounds?.width||globalThis.innerWidth||400)-48
+        &&projected.y>freeTop-(mapBounds?.top||0)&&projected.y<freeBottom-(mapBounds?.top||0)
+        &&(map.getZoom?.()||0)>=focusZoom-.15;
+      try{if(!alreadyVisible)map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
+        zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:420});}
       catch(error){console.debug('[교통 위치 초점 이동 실패]',error);}
-      // Re-measure after the existing sheet owners finish opening/reflowing.
-      if(phoneFocus){const settleFocus=()=>{
-        if(selected!==place||panel.hidden)return;
-        const bounds=map.getContainer?.()?.getBoundingClientRect?.();
-        const top=panel.getBoundingClientRect?.()?.top;
-        const header=document.querySelector?.('.topbar')?.getBoundingClientRect?.();
-        const tools=document.getElementById('dj-v794-toolbar')?.getBoundingClientRect?.();
-        if(!bounds||!Number.isFinite(top))return;
-        const visibleTop=Math.max(bounds.top,header?.bottom||0,tools?.bottom||0)+24;
-        const target=(visibleTop+Math.max(visibleTop+40,top-40))/2;
-        const offset=target-bounds.top-bounds.height/2;
-        map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offset],
-          zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:280});
-        };
-        if(typeof globalThis.requestAnimationFrame==='function'){
-          globalThis.requestAnimationFrame(()=>globalThis.requestAnimationFrame?.(settleFocus));
-        }
-        if(typeof globalThis.setTimeout==='function')globalThis.setTimeout(settleFocus,420);
-      }
+      // The previous rAF + timeout focus correction moved the camera twice
+      // after the initial easeTo and caused visible jitter. Keep one move.
     }
     kindEl.textContent=place.kind==='bus'?'버스정류장':'지하철역';
     const stationTitle=(place.kind==='subway'&&normalizeStationQueryName(place.name)==='이수')
