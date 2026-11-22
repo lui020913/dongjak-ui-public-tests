@@ -65,10 +65,10 @@ test('two-factor scores enable the existing 제도적 사각지대 row and prese
  assert.equal(linked.segments.filter(s=>s.scores.protectionGap!==null).length,1086);
  assert.equal(linked.segments.filter(s=>segmentScore(linked,s,'protectionGap')===null).length,600);
  assert.ok(linked.segments.some(s=>s.scores.protectionGap===0||s.scores.protectionGap>0));
- assert.equal(linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap,27.1);
- assert.equal(linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap,32.1);
- assert.equal(100-linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap,72.9);
- assert.equal(100-linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap,67.9);
+ assert.ok(Math.abs(linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap-27.1)<1e-9);
+ assert.ok(Math.abs(linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap-32.1)<1e-9);
+ assert.ok(Math.abs((100-linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap)-72.9)<1e-9);
+ assert.ok(Math.abs((100-linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap)-67.9)<1e-9);
  const rendered=displayFeatures(linked,'protectionGap');
  assert.ok(rendered.features.some(f=>f.properties.evaluated===false),'gray segments are rendered rather than silently omitted');
  assert.ok(rendered.features.some(f=>f.properties.evaluated===true),'scored segments are rendered');
