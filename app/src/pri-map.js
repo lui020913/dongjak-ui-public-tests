@@ -95,7 +95,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
      group.append(el('h3','dj-pri-protection-heading','제도적 사각지대'));
      group.append(el('small','dj-pri-protection-summary',
        '상도1동 도로별 1,003개 평가 · 603개 미평가(회색) · 공식 SHP 경계 도로 22개 점수 유지'));
-     group.append(choice(id,'상도1동 전체 보호 공백 점수 · 그라데이션'));
+     group.append(choice(id,'제도적 사각지대 · 상도1동 전체 보호 공백 점수 · 그라데이션'));
      group.append(choice(...middleSchoolOption));
      group.append(el('small','dj-pri-policy-caution',
        '상현중 300m는 172개 도로 구간의 공간 검토이며 신규 위험점수는 NULL입니다. 법정 보호구역 미지정 판정이 아닙니다.'));
