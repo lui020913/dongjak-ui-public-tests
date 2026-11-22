@@ -20,6 +20,9 @@ test('MapLibre labels respect user font size without invalid zoom expression nes
 test('retired map preferences do not change place labels when My Info font size changes',()=>{
  const theme=read('src/ui-environment.js'),settings=read('src/v7120-settings.js');
  assert.doesNotMatch(settings,/dongjak:map-text-scale-change/);
+ const owner=read('src/safety-workbench-v7103.js');
+ assert.match(owner,/djSettingsText/);
+ assert.match(owner,/dongjak:map-text-scale-change/);
  assert.match(theme,/map\.setLayoutProperty\(id,'text-size',textSize\)/);
  assert.match(theme,/semanticSymbolPattern\.test\(layer\.id\)/);
  assert.match(theme,/window\.addEventListener\?\.\('dongjak:map-text-scale-change'/);
