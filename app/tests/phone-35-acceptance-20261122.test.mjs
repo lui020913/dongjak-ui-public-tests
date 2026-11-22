@@ -56,11 +56,11 @@ const checks=[
    contains(s,'--dj-pwa-status-color','const onboarding=visible','themeMeta.setAttribute');
    contains(src('src/mobile-pwa-status-tone-v793.css'),'#dj-ios-pwa-status-sample');
  }],
- ['B02','all map labels have dark text bright halo in light and vice versa',()=>{
+ ['B02','general map labels retain theme contrast and featured places use quieter regular labels',()=>{
    const s=src('src/ui-environment.js');
    contains(s,"mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)'","mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)'");
-   assert.equal(featuredPlaceStyle('light').text,'#26352f');
-   assert.equal(featuredPlaceStyle('dark').text,'#ebf7f3');
+   assert.equal(featuredPlaceStyle('light').text,'#687b70');
+   assert.equal(featuredPlaceStyle('dark').text,'#b9c6bf');
  }],
  ['B03','active and disabled buttons retain distinct surface, text and border colors',()=>{
    const s=src('src/theme-contract.css');
