@@ -159,6 +159,7 @@ export function initTheme({map,app}){
     }
   }
   const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:1.6});
+  const mapLabelLightPaint=Object.freeze({color:'#ffffff',halo:'rgba(18,42,36,0.97)',width:1.6});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   function syncMapLabelContrast(){
     const layers=map.getStyle?.()?.layers;
@@ -180,7 +181,7 @@ export function initTheme({map,app}){
         const original=supplementalLabelBaseline.get(id);
         const desired=themeState.value==='dark'
           ? {'text-color':mapLabelTextPaint.color,'text-halo-color':mapLabelTextPaint.halo,'text-halo-width':mapLabelTextPaint.width}
-          : {'text-color':original.text??null,'text-halo-color':original.halo??null,'text-halo-width':original.width??null};
+          : {'text-color':mapLabelLightPaint.color,'text-halo-color':mapLabelLightPaint.halo,'text-halo-width':mapLabelLightPaint.width};
         for(const [key,value] of Object.entries(desired)){
           const current=read(key);
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
@@ -246,8 +247,9 @@ export function initTheme({map,app}){
     for(const id of ['dj-metro-summary-name','dj-metro-detail-name','dj-metro-detail-name-very-close','dj-nearby-place-names','dongjak-zoom-commercial-names']){
       if(!map.getLayer(id))continue;
       try{
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':id==='dj-nearby-place-names'?'#536e74':'#21483c');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(255,255,255,0.97)');
+        // Public place and station names use white glyphs with a dark outline in both themes.
+        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':'#ffffff');
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(18,42,36,0.97)');
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.

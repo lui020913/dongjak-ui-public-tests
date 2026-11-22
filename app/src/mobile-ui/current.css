@@ -163,14 +163,17 @@
     #app .dj-place-body .dj815-place-folder select {height:34px!important;min-height:34px!important;font-size:12px!important;padding:4px 8px!important;}
     #app #dj-mobile-utilities {max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;border-radius:24px!important;}
     #app #dj-mobile-utilities :is(.dj840-more-quick-actions button,.dj860-more-launch,.dj832-more-feature) {min-height:44px!important;height:44px!important;padding:8px 12px!important;border-radius:999px!important;box-sizing:border-box!important;}
-    #app #dj-map-settings {position:fixed!important;inset:var(--dj910-header-bottom) 12px var(--dj910-dock-bottom)!important;padding:0!important;background:transparent!important;backdrop-filter:none!important;}
-    #app #dj-map-settings .dj-map-settings-card {display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;max-height:none!important;border-radius:24px!important;overflow:hidden!important;}
-    #app #dj-map-settings .dj-map-settings-head {padding:14px!important;flex:0 0 auto!important;}
+    /* Settings is a true full-height page, matching the sign-in surface. */
+    #app #dj-map-settings {position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;height:100dvh!important;margin:0!important;padding:0!important;background:var(--dj-theme-bg,#edf3ef)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+    #app #dj-map-settings .dj-map-settings-card {display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:var(--dj-theme-bg,#edf3ef)!important;box-shadow:none!important;animation:none!important;}
+    #app #dj-map-settings .dj-map-settings-head {padding:calc(env(safe-area-inset-top,0px) + 20px) 18px 14px!important;flex:0 0 auto!important;background:var(--dj-theme-bg,#edf3ef)!important;}
     #app #dj-map-settings .dj-map-settings-head h2 {font-size:20px!important;}
     #app #dj-map-settings .dj-map-settings-head p,#app #dj-map-settings .dj-map-settings-kicker {display:none!important;}
     #app #dj-map-settings .dj-map-settings-content {flex:1 1 0%!important;min-height:0!important;overflow-y:auto!important;padding:12px!important;}
     #app #dj-map-settings .dj-map-settings-footer {padding:10px 12px!important;flex:0 0 auto!important;}
     #app #dj-map-settings .dj-map-settings-footer button {border-radius:999px!important;min-height:40px!important;}
+    /* Safety information uses the same measured dock clearance as other cards. */
+    #app :is(#overview-sheet,#dj832-data-sheet):not([hidden]) {bottom:var(--dj910-dock-bottom,calc(88px + env(safe-area-inset-bottom,0px)))!important;}
     #app #dj-browser-webapp-tip {max-height:calc(100dvh - var(--dj910-header-bottom) - var(--dj910-dock-bottom))!important;overflow-y:auto!important;}
     #app #dj840-map-tip {min-height:44px!important;height:44px!important;max-height:44px!important;padding:0 42px 0 10px!important;border-radius:999px!important;font-size:12px!important;}
     #app #map .maplibregl-ctrl-scale {height:24px!important;min-height:24px!important;max-height:24px!important;padding:0 6px!important;font-size:10px!important;border-radius:999px!important;}

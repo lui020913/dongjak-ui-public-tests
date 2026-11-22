@@ -35,20 +35,9 @@ export function installV877SettingsAndSheets(doc=document,win=window){
       <div class="dj877-pref-row"><label for="dj877-voice-choice"><strong>안내 목소리</strong><small>기기에서 제공되는 한국어 음성을 사용합니다.</small></label><select id="dj877-voice-choice"><option value="auto">기기 기본</option><option value="female">여성</option><option value="male">남성</option><option value="all">전체 한국어 음성</option></select></div>
       <p class="dj877-note">음성 지원 여부와 사용 가능한 목소리는 기기에 따라 다릅니다. 실제 경로 계산·안내는 길찾기에서 시작합니다.</p>
     </details>
-    <details class="dj877-pref-group"><summary>지도 디자인 설정 <span>3D · 레이어</span></summary>
-      <div class="dj877-pref-row"><div><strong>3D 건물</strong><small>지도 확대 시 건물 높이를 표시합니다.</small></div><button type="button" data-dj877-layer="buildings" role="switch" aria-checked="true">켜짐</button></div>
-      <div class="dj877-pref-row"><div><strong>지하철 노선 · 역</strong></div><button type="button" data-dj877-layer="metro" role="switch" aria-checked="true">켜짐</button></div>
-      <div class="dj877-pref-row"><div><strong>버스정류장</strong></div><button type="button" data-dj877-layer="bus" role="switch" aria-checked="true">켜짐</button></div>
-      <div class="dj877-pref-row"><div><strong>동작구 경계</strong></div><button type="button" data-dj877-layer="boundary" role="switch" aria-checked="true">켜짐</button></div>
-      <p class="dj877-note">기존 지도 옵션과 동일한 설정이며 선택 상태는 자동으로 저장됩니다. 테마 및 화면 효과는 아래의 기존 설정에서도 변경할 수 있습니다.</p>
-    </details>`;
+`;
     body.prepend(container);
     const sync=()=>{
-      for(const button of container.querySelectorAll('[data-dj877-layer]')){
-        const source=doc.querySelector(`[data-base-layer="${button.dataset.dj877Layer}"]`);
-        const enabled=source?.getAttribute('aria-pressed')==='true';
-        button.setAttribute('aria-checked',String(enabled));button.textContent=enabled?'켜짐':'꺼짐';
-      }
       for(const [kind,id] of [['voice','nav-voice'],['orientation','nav-orientation']]){
         const source=el(doc,id),button=container.querySelector(`[data-dj877-action="${kind}"]`);
         if(!button||!source)continue;
@@ -60,24 +49,15 @@ export function installV877SettingsAndSheets(doc=document,win=window){
     };
     on(container,'click',event=>{
       const button=event.target.closest('button');if(!button)return;
-      const layer=button.dataset.dj877Layer;
-      if(layer){clickExisting(doc,`[data-base-layer="${layer}"]`);sync();return;}
       const action=button.dataset.dj877Action;
       if(action==='voice')clickExisting(doc,'#nav-voice');
       if(action==='orientation')clickExisting(doc,'#nav-orientation');
-      if(action==='safety'){
-        // Close preferences before entering the original safety tool.
-        clickExisting(doc,'#dj-settings-close');
-        doc.querySelector('#bottom-nav .nav-tab[data-tab="map"]')?.click();
-        const native=el(doc,'map-safety-toggle');native?.click();
-      }
       sync();
     });
     on(container.querySelector('#dj877-voice-choice'),'change',event=>{
       const native=el(doc,'dj816-voice-mode');if(!native)return;
       native.value=event.target.value;native.dispatchEvent(new Event('change',{bubbles:true}));
     });
-    on(doc,'dongjak-base-layer-change',sync);
     on(preferences,'click',sync);
     on(preferences,'keydown',event=>{if(event.key==='Tab')sync();});
     sync();
