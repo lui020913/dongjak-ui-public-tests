@@ -166,7 +166,7 @@
   }
  }
 }
-@keyframes dj-six-page-content-in{from{opacity:.28;translate:0 5px}to{opacity:1;translate:0 0}}
+@keyframes djTabContentReveal{from{opacity:.28;translate:0 5px}to{opacity:1;translate:0 0}}
 @media(prefers-reduced-motion:reduce){
  #app .dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer){animation:none!important;}
 }
