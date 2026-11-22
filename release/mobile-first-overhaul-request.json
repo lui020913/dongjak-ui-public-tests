@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.87",
   "public_work_branch": "main",
-  "purpose": "Retry protected version 9.2.87 (not yet promoted to Production) with merged PR #311 vector map recovery (retain OpenFreeMap vector during slow mobile data), PR #312 visible non-overlapping compact language row, and PR #314 QA fixed-header timing stabilization (outer + inner real entrance animation settles before asserting layer header stays fixed on scrolling, preserving <2px threshold). All prior PR #310 onboarding iOS status color, GI 50:50 safety layers, transport and AI fixes remain unchanged. Require exact-source build, Preview, 12 phone QA shards, desktop policy check, protected Production and rollback verification.",
-  "attempt": 267,
+  "purpose": "Release owner-requested map and language repairs: merged PR #311 preserves OpenFreeMap vector basemap on slow cellular loads, PR #312 replaces oversized language picker hit area with a visible native right-aligned picker in the 62px My Info settings row. PR #314 (merge 3ea178b00f01ce7b9d37e9a0f62dfa407d7dd143) stabilizes the existing mobile layer-sheet fixed-header QA by awaiting outer entrance animation, without removing or weakening the header scroll-invariance test. Keep all previous user features and GIS 50:50 untouched. Require exact-source build, isolated Preview, mandatory 12 mobile QA lanes, PC/tablet gate, protected Production with rollback verification.",
+  "attempt": 268,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Mobile protected release #45016924622 passed 11/12 phone QA; sole fail in 375px layer fixed-header assertion measured expected outer sheet entry movement (140px) as scrolling. PR #314 merged main and source CI #45017427013 passed; test now awaits actual outer/inner animations and stable paint frames without weakening the header scroll threshold. Run full 12-shard phone QA before Production.",
+  "last_retry_reason": "Run #45016924622 failed only shard 1 because outer layer modal was still entering when scroll-lock header coordinate was sampled (140px false drift). Test timing corrected in PR #314; source CI #45017427013 passed. Retry 9.2.87 candidate; no Production reached previously.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
