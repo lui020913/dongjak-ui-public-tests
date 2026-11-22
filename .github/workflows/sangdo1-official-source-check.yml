@@ -1,0 +1,47 @@
+name: Sangdo1 official school catchment ZIP source check
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/sangdo1-official-source-check.yml'
+      - 'scripts/research/sangdo1_school_catchment_source_audit.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-original-official-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Fetch 2026-09-20 Korean official elementary catchment SHP
+        run: python scripts/research/sangdo1_school_catchment_source_audit.py
+      - name: Validate official archive content and immutable source hash
+        run: |
+          python - <<'PY'
+          import hashlib,zipfile,pathlib
+          p=pathlib.Path("school_catchment_20260920_official.zip")
+          if not p.is_file():
+              raise SystemExit("OFFICIAL_SOURCE_UNAVAILABLE: no verified ZIP. Keep 22 boundary school overlaps NULL.")
+          sha=hashlib.sha256(p.read_bytes()).hexdigest()
+          expected="66b7650d5eef3b900061083b3d8f5c8f6dcb8eb00b891e6b03132f08fdca2911"
+          assert sha==expected, f"Changed government source {sha} (expected {expected}); no GIS overwrite"
+          assert zipfile.is_zipfile(p)
+          print("OFFICIAL_SOURCE_VERIFIED_SHA256",sha,"BYTES",p.stat().st_size)
+          PY
+      - name: Produce trusted official GIS audit, without changing production
+        if: success()
+        run: |
+          pip install --quiet pyshp==2.3.1 pyproj==3.7.2 shapely==2.1.2
+          python scripts/research/sangdo1_official_school_catchment_overlay.py
+      - name: Store audit outputs for manual ID-level comparison
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sangdo1-official-school-source-audit-20260920
+          path: |
+            app/public/data/protection-zone/sangdo1_road_catchment_overlay_20260920.csv
+            app/public/data/protection-zone/sangdo1_school_catchment_analysis_20260920_summary.json
+          retention-days: 7
