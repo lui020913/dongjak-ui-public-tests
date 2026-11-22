@@ -1082,3 +1082,35 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   }
  }
 }
+
+/* Screenshot QA: PRI is map content, not an invitation to show the map TIP.
+   Match the root as well as descendants; layer overlays may be DOM portals. */
+@media(max-width:699px){
+  html[data-dj-pri-active="true"] body :is(#dj840-map-tip,#dj-user-tip-close),
+  html:has(#app[data-dj-pri-visible="true"]) body :is(#dj840-map-tip,#dj-user-tip-close),
+  html:has(#app[data-dj-pri-dialog="true"]) body :is(#dj840-map-tip,#dj-user-tip-close){
+    display:none!important;visibility:hidden!important;opacity:0!important;
+    pointer-events:none!important;animation:none!important;
+  }
+  /* Reserve the REAL nav dock clearance, not 92px plus a second safe-area.
+     The latter left a blank strip between the route action and tab bar. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel.page-panel:not([hidden]){
+    padding-bottom:var(--dj910-dock-bottom,calc(96px + env(safe-area-inset-bottom,0px)))!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > #dj910-route-footer{
+    position:relative!important;inset:auto!important;flex:0 0 auto!important;
+    width:100%!important;margin:0!important;padding:8px 14px!important;
+    background:var(--dj-primary-page-bg,#edf3ef)!important;
+    box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-calc{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;min-height:46px!important;
+    gap:0!important;margin:0!important;text-align:center!important;
+    padding:9px 40px!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-calc span:last-child{
+    position:absolute!important;right:17px!important;top:50%!important;
+    transform:translateY(-50%)!important;margin:0!important;
+  }
+}
