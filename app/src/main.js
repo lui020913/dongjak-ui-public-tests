@@ -2111,6 +2111,15 @@ function renderMy() {
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
 let activeComposerFade=null;
+function openComposerWithFade() {
+  activeComposerFade?.cancel();activeComposerFade=null;
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true||typeof communityForm.animate!=='function')return;
+  try{
+    const fade=communityForm.animate([{opacity:0},{opacity:1}],{duration:190,easing:'ease-out'});
+    activeComposerFade=fade;
+    fade.addEventListener('finish',()=>{if(activeComposerFade===fade)activeComposerFade=null;},{once:true});
+  }catch{/* Original form remains visible if animation is unavailable. */}
+}
 function closeComposerWithFade(finish) {
   activeComposerFade?.cancel();
   activeComposerFade=null;
@@ -2157,7 +2166,10 @@ function openCommunityComposer(open,{animate=true}={}) {
     panel?.classList.add('dj9256-composing');
     if(communityComposerOrigin==='map')setMapReportHitLayer(true);
     setCommunityTopbarBlocked(true);
-    if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
+    // One content-only dissolve, whether opened from Map or the Community tab.
+    // Cancelling the older panel slide avoids a second moving full-screen owner.
+    if(panel?.dataset.dj810Animating==='opening')motion?.cancel?.(panel);
+    if(animate)openComposerWithFade();
     return;
   }
   if(communityForm.hidden||communityForm.dataset.dj810Animating==='closing')return;
