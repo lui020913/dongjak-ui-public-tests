@@ -129,3 +129,10 @@ test('released phone dark buildings never override the chosen translucent map wi
  assert.ok(regression.includes("buildingExtrusionAppearance('dark',30).opacity,0.50"));
  assert.ok(next.includes('--djNext-surface:#2c343d'));
 });
+
+test('release workflow Node versions remain valid YAML scalars',()=>{
+ const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
+ const entries=workflow.split('\n').filter(line=>line.includes('node-version:'));
+ assert.ok(entries.length>=4,'Expected all checkout/build/browser Node setup versions');
+ for(const line of entries)assert.match(line,/^\s+node-version:\s*'(22|24)'\s*$/,'Invalid YAML node-version scalar: '+line);
+});
