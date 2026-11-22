@@ -1098,10 +1098,17 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
     padding-bottom:var(--dj910-dock-bottom,calc(96px + env(safe-area-inset-bottom,0px)))!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > #dj910-route-footer{
-    position:relative!important;inset:auto!important;flex:0 0 auto!important;
-    width:100%!important;margin:0!important;padding:8px 14px!important;
+    /* Anchored to actual pill dock clearance. A relative footer was covered
+       by the fixed bottom navigation and route-calc could not receive taps. */
+    position:fixed!important;
+    top:auto!important;
+    bottom:calc(var(--dj910-dock-bottom,76px) + 10px)!important;
+    left:16px!important;right:16px!important;
+    flex:0 0 auto!important;width:auto!important;
+    margin:0!important;padding:0!important;
+    border:0!important;
     background:var(--dj-primary-page-bg,#edf3ef)!important;
-    box-sizing:border-box!important;
+    box-sizing:border-box!important;z-index:5!important;
   }
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel #route-calc{
     display:flex!important;align-items:center!important;justify-content:center!important;
