@@ -6,6 +6,16 @@ test('no design evidence or provider response cannot silently pass',()=>{assert.
 test('known route clipping blocks promotion even if model is unavailable',()=>{assert.equal(evaluateDesign(report({designReview:{status:'unavailable'},flags:[{kind:'surface-horizontal-clipping',selector:'#route-map-card',px:171,count:39,t:10,end:16810}]}),3).status,'defect');});
 test('subjective suggestions remain advisory; corroborable critical candidates hold promotion',()=>{assert.equal(evaluateDesign(report({vision:{findings:[{severity:'suggestion',summary:'style',evidence:['1','2']}]}}),3).status,'pass');assert.equal(evaluateDesign(report({vision:{findings:[{severity:'critical',summary:'clipped',evidence:['1','1']}]}}),3).status,'pass');assert.equal(evaluateDesign(report({vision:{findings:[{severity:'critical',summary:'clipped',evidence:['1','2']}]}}),3).status,'defect');});
 
+test('deterministic release gate requires real measurements, not a passing Gemini review',()=>{
+ const measured=evaluateDesign(report({designReview:{status:'not-reviewed'},vision:undefined}),3,{deterministic:true});
+ assert.equal(measured.status,'measured-pass');
+ assert.equal(measured.reviewMode,'measured-browser-evidence');
+ assert.equal(measured.manualReviewRequired,true);
+ assert.equal(evaluateDesign(report({checkpoints:[],designReview:{status:'not-reviewed'}}),3,{deterministic:true}).status,'evidence-unavailable');
+ assert.equal(evaluateDesign(report({frames:1}),3,{deterministic:true}).status,'evidence-unavailable');
+ assert.equal(evaluateDesign(report({flags:[{kind:'surface-horizontal-clipping',selector:'#route-map-card',px:12,count:4,t:10,end:400}]}),3,{deterministic:true}).status,'defect');
+ assert.equal(evaluateDesign(report({status:'failed'}),3,{deterministic:true}).status,'functional-failure');
+});
 test('genuine 429 quota exhaustion skips ONLY the AI review, with manual review flag',()=>{
  const quota=report({designReview:{status:'unavailable',reason:'Provider HTTP 429 (daily-quota)'},vision:undefined});
  const reviewed=evaluateDesign(quota,3);
