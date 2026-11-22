@@ -132,7 +132,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   function open(){
     // A transport X tap cannot become an AI open through the fading layer.
     // An ordinary AI click remains available after this short gesture guard.
-    if(Date.now()-transportDismissedAt<750)return;
+    if(modal.open||Date.now()-transportDismissedAt<750)return;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     modal.classList.remove('dj887-ai-closing');
     syncProfile();previousFocus=document.activeElement;
@@ -218,7 +218,14 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   // iOS may dispatch a delayed click to the element UNDER a dismissed
   // station/sheet window. The pointer must have started on the AI entry itself.
   let pointerStart=null;
-  const capturePointer=event=>{pointerStart={target:event.target,at:Date.now()};};
+  const capturePointer=event=>{
+    pointerStart={target:event.target,at:Date.now()};
+    // This same pointer sequence may dismiss a sheet that briefly exposes
+    // the AI orb below it. Never reinterpret it as an AI-open gesture.
+    if(event.target?.closest?.('#transport-close,.dj-sheet-chrome-close,.page-dismiss,.dj-place-header-close,#dj-mobile-utilities-close,#djNext-layer-panel .djNext-close,[data-close-page]')){
+      transportDismissedAt=Date.now();
+    }
+  };
   document.addEventListener('pointerdown',capturePointer,true);
   function onExplicitEntryClick(event){
     if(!event.isTrusted)return;
