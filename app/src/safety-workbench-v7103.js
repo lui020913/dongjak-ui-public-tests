@@ -87,6 +87,13 @@ export function installReadableTypeOptions(root=document){
     const b=allowedWeight.has(weight.value)?weight.value:'normal';
     app.dataset.djTypeScale=a;
     app.dataset.djTypeWeight=b;
+    // One typography owner also updates non-transport MapLibre place labels.
+    // The map label engine currently supports three safe scales; clamp xlarge.
+    const mapTextScale=a==='xlarge'?'large':a;
+    if(app.dataset.djSettingsText!==mapTextScale){
+      app.dataset.djSettingsText=mapTextScale;
+      (root.defaultView||globalThis.window)?.dispatchEvent?.(new CustomEvent('dongjak:map-text-scale-change',{detail:{size:mapTextScale}}));
+    }
     try{localStorage.setItem(DJ_TYPE_KEY,JSON.stringify({scale:a,weight:b}));}catch{}
   };
   scale.addEventListener('change',apply);
