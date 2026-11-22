@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.87",
   "public_work_branch": "main",
-  "purpose": "Owner requested fixes shown on iPhone screenshots: vector map appears missing/replaced by bare OSM raster after 12-second emergency fallback; preserve loaded OpenFreeMap vector style with 45s first wait / 90s vector grace and maintain emergency raster only for genuine unavailable source. Make My Info language selector identical single 62px setting row with current language and native select, never an orphan rounded card, source PR #311 merged as 1c85167398338a8cfa3ae05db4e84a58b2e431a3. Keep all PR #306-#310, GIS 50:50, transport and previous visual fixes. Exact-source build, isolated Preview, 12 phone shards, PC policy and guarded Production source verification required.",
-  "attempt": 264,
+  "purpose": "Owner-reported iPhone regression fix PR #311 (merge 1c85167398338a8cfa3ae05db4e84a58b2e431a3): preserve OpenFreeMap vector base map on slow cellular loads instead of replacing it with the bare emergency OSM raster after 12 seconds, using 45-second initial threshold and up to 90-second vector source grace; replace inconsistent standalone language card with the same 62px single-line setting row using its native accessible selector. Preserve all prior onboarding/status theme fixes PR #310 and safety layers, 50:50 PRI GIS scoring, transit, and AI guard. Require exact-source build and tests, isolated Preview, 12 mobile QA shards, PC/tablet policy gate, protected Production promotion and rollback checks.",
+  "attempt": 265,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #311 passed Public app source CI #45015944439, including updated DOM test fixtures, new map fallback decision tests and language row regression tests. Promote exact main source through mobile gates.",
+  "last_retry_reason": "PR #311 merged to main and source CI run 45015944439 succeeded; promote exact vector-basemap recovery + language compact row change using protected mobile-first deployment pipeline.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
