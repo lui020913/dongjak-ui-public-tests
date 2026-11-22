@@ -168,7 +168,7 @@ export function buildingExtrusionAppearance(theme='light',pitch=30,start=10,full
  * Applied only while the night study is enabled; restores ordinary styling off.
  */
 export function nightOcclusionBuildingPaint(appearance={},enabled=false){
-  return enabled?{...appearance,color:'#192c34',opacity:Math.max(0.91,Number(appearance.opacity)||0)}:appearance;
+  return enabled?{...appearance,color:'#192c34',opacity:Math.max(0.98,Number(appearance.opacity)||0)}:appearance;
 }
 
 /** Recolor only native footprint polygons; preserve road and night overlays. */
