@@ -1383,9 +1383,13 @@ test('walking vulnerability remains neutral and suppresses TIP after real layer 
  await open.scrollIntoViewIfNeeded();await open.click();
  const dialog=page.locator('#dj-pri-dialog');
  await expect(dialog).toBeVisible();
- const gap=dialog.getByRole('button',{name:/제도적 사각지대/});
+ const gap=dialog.getByRole('button',{name:'제도적 사각지대',exact:true});
  await expect(gap).toBeEnabled({timeout:30000});
- await gap.click();await expect(dialog).toBeHidden();
+ await gap.click();
+ const detail=dialog.locator('#dj-pri-protection-detail');
+ await expect(detail).toBeVisible();
+ await detail.getByRole('button',{name:/상도1동 전체 보호 공백 점수/}).click();
+ await expect(dialog).toBeHidden();
  const app=page.locator('#app'),tip=page.locator('#dj840-map-tip');
  await expect(app).toHaveAttribute('data-dj-pri-visible','true');
  await expect(page.locator('#dj-pri-legend')).toBeVisible();
@@ -1497,13 +1501,20 @@ test('phone verified protection-gap menu contains SHP audit and NULL middle-scho
  await page.evaluate(()=>document.getElementById('dj-pri-toggle')?.click());
  const dialog=page.locator('#dj-pri-dialog');
  await expect(dialog).toBeVisible();
- const group=dialog.locator('.dj-pri-protection-group');
- await expect(group).toBeVisible({timeout:45000});
- await expect(group.locator('.dj-pri-button')).toHaveCount(2);
- await expect(group).toContainText('공식 SHP 경계 도로 22개 점수 유지');
- await expect(group).toContainText('172개 도로 구간');
- await expect(group).toContainText('NULL');
- await test.info().attach('protection-gap-layer-options.png',{body:await page.screenshot(),contentType:'image/png'});
+ const entry=dialog.getByRole('button',{name:'제도적 사각지대',exact:true});
+ await expect(entry).toBeVisible({timeout:45000});
+ await expect(dialog.getByRole('button',{name:/상현중학교 300m 도로 검토/})).toBeHidden();
+ await entry.click();
+ const detail=dialog.locator('#dj-pri-protection-detail');
+ await expect(detail).toBeVisible();
+ await expect(detail.locator('.dj-pri-protection-action')).toHaveCount(2);
+ await expect(detail).toContainText('SHP 경계 도로 22개');
+ await expect(detail).toContainText('172개 구간');
+ await expect(detail).toContainText('NULL');
+ await test.info().attach('protection-gap-nested-choices.png',{body:await page.screenshot(),contentType:'image/png'});
+ await detail.getByRole('button',{name:/보행 취약도 목록/}).click();
+ await expect(entry).toBeVisible();
+ await expect(detail).toBeHidden();
 });
 
 test('phone speed limit risk is selectable with PDF thresholds and real source links',{tag:'@phone-common'},async({page})=>{
@@ -1529,6 +1540,46 @@ test('phone speed limit risk is selectable with PDF thresholds and real source l
  await expect(legend).toContainText('30km/h 미만 0점');
  await expect(legend).toContainText('50km/h 100점');
  await test.info().attach('sangdo1-speed-limit-risk.png',{body:await page.screenshot(),contentType:'image/png'});
+ await legend.getByRole('button',{name:'끄기'}).click();
+ await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
+});
+
+
+test('phone four-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ await page.evaluate(()=>document.getElementById('dj-pri-toggle')?.click());
+ const dialog=page.locator('#dj-pri-dialog');
+ await expect(dialog).toBeVisible();
+ const composite=dialog.getByRole('button',{name:/종합 보행 취약도 · 4개 지표/});
+ await expect(composite).toBeEnabled({timeout:45000});
+ const ui=await dialog.evaluate(node=>{
+  const r=node.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect();
+  return {left:r.left,right:r.right,bottom:r.bottom,navTop:nav.top,width:r.width};
+ });
+ expect(ui.left).toBeLessThanOrEqual(16);
+ expect(ui.right).toBeGreaterThanOrEqual(page.viewportSize().width-16);
+ expect(ui.bottom).toBeLessThanOrEqual(ui.navTop-3);
+ expect(ui.navTop-ui.bottom).toBeLessThan(30);
+ if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-four-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
+ await composite.click();
+ await expect(dialog).toBeHidden();
+ const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
+ await expect(app).toHaveAttribute('data-dj-pri-mode','current4');
+ await expect(legend).toBeVisible();
+ await expect(legend).toContainText('4개 항목');
+ const rect=await legend.evaluate(node=>{
+  const r=node.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect();
+  return {left:r.left,right:r.right,bottom:r.bottom,navTop:nav.top};
+ });
+ expect(rect.left).toBeLessThanOrEqual(16);
+ expect(rect.right).toBeGreaterThanOrEqual(page.viewportSize().width-16);
+ expect(rect.bottom).toBeLessThanOrEqual(rect.navTop-3);
+ expect(rect.navTop-rect.bottom).toBeLessThan(30);
+ await legend.getByRole('button',{name:'평가 기준 보기'}).click();
+ await expect(legend).toContainText('4개 평가항목');
+ await expect(legend).toContainText('제한속도');
+ if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-four-factor-legend.png',{body:await page.screenshot(),contentType:'image/png'});
  await legend.getByRole('button',{name:'끄기'}).click();
  await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
 });
