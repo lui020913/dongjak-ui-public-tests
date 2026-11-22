@@ -120,8 +120,8 @@ test('layer header height follows the finger, then translates below compact',()=
 
 test('V11 dark sheets and centered guide inherit the established charcoal surface token',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
- assert.match(css, /#app\[data-theme="dark"\]\{--djNext-surface:#23262c;/);
- assert.match(css, /--dj-v4-surface:var\(--djNext-surface,#23262c\);/);
+ assert.match(css, /#app\[data-theme="dark"\]\{--djNext-surface:#2c343d;/);
+ assert.match(css, /--dj-v4-surface:var\(--djNext-surface,#2c343d\);/);
  assert.match(css, /#map-gesture-guide\{background:var\(--dj-v4-surface\)!important/);
  assert.doesNotMatch(css, /#191b1e\b/i);
 });
