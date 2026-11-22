@@ -84,3 +84,26 @@ test('dark phone actions use readable selected text and route disabled colors',(
  assert.match(contract,/background:#404a54!important/);
  assert.match(contract,/color:#17232c!important/);
 });
+
+test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and route footer hugs dock',()=>{
+  const env=read('src/ui-environment.js');
+  const pri=read('src/pri-map.js');
+  const contract=read('src/theme-contract.css');
+  const ui=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const html=read('index.html');
+  assert.match(env,/mapLabelTextPaint=Object\.freeze/);
+  assert.ok(env.includes("color:'#f1f4f6'"));
+  assert.ok(env.includes("halo:'rgba(18,25,32,0.97)'"));
+  assert.ok(env.includes("map.on('styledata',scheduleMapLabelContrast)"));
+  assert.ok(env.includes("supplementalLabelBaseline"));
+  assert.ok(env.includes("'text-halo-width':mapLabelTextPaint.width"));
+  assert.ok(env.includes("themeState.value==='dark'"));
+  assert.ok(pri.includes("doc.documentElement.dataset.djPriActive=id?'true':'false'"));
+  assert.ok(ui.includes('html[data-dj-pri-active="true"]'));
+  assert.ok(ui.includes("padding-bottom:var(--dj910-dock-bottom"));
+  assert.ok(ui.includes("#route-panel #route-calc"));
+  assert.ok(contract.includes("body > .dj-pri-dialog"));
+  assert.ok(contract.includes("color:#f1f4f6!important"));
+  assert.ok(html.includes("var displayTheme=themeReload ? themeReload.theme : 'light'"));
+  assert.ok(!html.includes("localStorage.getItem('dongjak_safety_color_theme_v1')"));
+});
