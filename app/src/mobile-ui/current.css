@@ -1038,7 +1038,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
    background:#323a41!important;color:#e9edf2!important;border-color:#55646e!important;
  }
  /* Nearby information is a content-sized floating sheet, never a full-height dialog. */
- html body #app#app#app #ped-tools-panel:not([hidden]) {
+ html body #app#app#app #ped-tools-panel:not([hidden]):not(.dj871-sheet-expanded) {
    box-sizing:border-box!important;display:block!important;
    left:12px!important;right:12px!important;
    width:calc(100% - 24px)!important;max-width:460px!important;
@@ -1189,7 +1189,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
    overflow-x:hidden!important;overflow-y:auto!important;
    touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
    overscroll-behavior-y:contain!important;
-   padding:14px 16px calc(120px + env(safe-area-inset-bottom,0px))!important;
+   padding:14px 16px 28px!important;
  }
  html body #app#app#app#app #mine-panel .dj834-my-detail {
    display:block!important;position:relative!important;
