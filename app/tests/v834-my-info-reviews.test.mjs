@@ -26,7 +26,8 @@ test('My Info label and menu reuse active cloud account and settings handlers',(
  assert.match(html,/<span>내 정보<\/span><\/button>/);
  assert.match(html,/<h2>내 정보<\/h2>/);
  assert.match(info,/const account=panel\.querySelector\('#dj824-account'\)/);
- for(const item of ['내 프로필 설정','화면 테마','글자 크기·굵기','즐겨찾기 · 내 기록'])assert.ok(info.includes(item));
+ for(const item of ['내 프로필 설정','글자 크기·굵기','지도·도보 설정','즐겨찾기 · 내 기록'])assert.ok(info.includes(item));
+ assert.doesNotMatch(info,/data-dj834-action="theme"/);
  assert.doesNotMatch(info,/지도 &amp; 이동|도보 길찾기|대중교통 지도 표시/);
  assert.match(info,/data-dj834-action="map"/);
  assert.match(info,/data-dj834-action="history"/);
