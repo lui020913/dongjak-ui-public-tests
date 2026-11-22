@@ -31,6 +31,8 @@ const releaseSmokeNames=[
  'bottom dock swipes change',
  'AI full-screen conversation',
  'community tab opens a usable feed',
+ 'phone production settings, cards and nearby overlays follow rendered geometry',
+ 'phone verified protection-gap menu contains SHP audit and NULL middle-school review',
  'walking vulnerability remains neutral'
 ];
 const releaseSmokeGrep=new RegExp(releaseSmokeNames.join('|'));

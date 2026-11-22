@@ -31,3 +31,43 @@
 @media(prefers-reduced-motion:reduce){
   #app .dj-pri-detail-wrap,#app .dj-pri-detail-toggle svg{transition:none!important;}
 }
+
+/* One institutional-gap card contains the scored road layer and its strictly
+   unscored 300m middle-school spatial review. The 22-road SHP audit is evidence,
+   never a new factor or a score adjustment. */
+.dj-pri-actions .dj-pri-protection-group{
+  display:grid;gap:9px;min-width:0;
+  padding:12px;border:1px solid var(--djNext-tool-edge,#c2d4c9);
+  border-radius:17px;background:var(--djNext-tool-base,#f1f6f3);
+  color:var(--djNext-text,#203d32);
+}
+.dj-pri-protection-heading{margin:0;font-size:15px;font-weight:750;line-height:1.4}
+.dj-pri-actions .dj-pri-protection-group>.dj-pri-button{
+  display:block;box-sizing:border-box;width:100%;min-height:46px;
+  border-radius:13px;padding:10px 12px;text-align:left;line-height:1.45;
+  background:var(--djNext-tool-face,#fff);
+}
+.dj-pri-actions .dj-pri-protection-group>.dj-pri-button[aria-pressed=true]{
+  color:#fff;background:var(--djNext-tool-primary,#0d806a);
+}
+.dj-pri-protection-group :is(.dj-pri-protection-summary,.dj-pri-policy-caution){
+  margin:0;color:var(--djNext-muted,#65776e);font-size:11px;line-height:1.55;
+  word-break:keep-all;
+}
+.dj-pri-detail{
+  min-width:0;color:var(--djNext-text,#203d32);
+  font-size:13px;line-height:1.55;word-break:keep-all;
+}
+.dj-pri-detail b{color:var(--djNext-tool-primary,#0d806a)}
+.dj-pri-official-audit{
+  margin-top:10px;padding:10px 12px;
+  border:1px solid var(--djNext-tool-edge,#c2d4c9);
+  border-radius:13px;background:var(--djNext-tool-base,#f1f6f3);
+}
+.dj-pri-official-audit strong{font-size:13px;margin:0}
+.dj-pri-official-audit p{margin:5px 0}
+.dj-pri-official-audit small{color:var(--djNext-muted,#65776e)}
+@media(max-width:699px){
+ .dj-pri-dialog{width:min(420px,calc(100vw - 28px));max-height:calc(100dvh - env(safe-area-inset-top,0px) - 132px)}
+ .dj-pri-dialog::backdrop{background:transparent;backdrop-filter:none}
+}

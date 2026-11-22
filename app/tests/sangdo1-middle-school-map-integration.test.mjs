@@ -16,7 +16,7 @@ test('the REAL PRI map exposes a middle school research-only mode but no new PRI
  assert.ok(ui.includes("middleSchoolReview:true"));
  assert.ok(ui.includes("middleReview'?'#7759a8'"));
  assert.ok(ui.includes("middleReview'?'상현중학교 300m 도로 · 점수 미산정'"));
- assert.ok(ui.includes('중학교 전용 점수 없음'));
+ assert.ok(ui.includes('중학교 위험점수 NULL'));
  assert.ok(!engine.includes('"middleReview"'),'middle-school audit must not become a weighted factor');
  assert.ok(!JSON.parse(manifest).patches.some(x=>/middle.*school/i.test(x)));
 });

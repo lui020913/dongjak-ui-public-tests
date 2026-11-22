@@ -91,9 +91,11 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  const main=read('src/main.js');
  const block=css.split('/* v9.2.72 — one mobile visual system')[1];
  assert.ok(block,'expected final v9.2.72 phone UI stylesheet');
- for(const expected of ['.dj860-onboarding:not([hidden])','.dj860-card','height:100dvh!important','--dj9272-page','.page-panel.dj-tab-content-enter:not([hidden])','djTabContentReveal','#route-map-card #dj804-route-compare{display:none','#route-map-card .dj9272-route-points','#djNext-route-compare','#mine-panel .dj854-language-section','#djNext-layer-panel .djNext-layer-scroll','.metro-arrival-countdown']){
+ for(const expected of ['.dj860-onboarding:not([hidden])','.dj860-card','height:100dvh!important','--dj9272-page','.page-panel.dj-tab-content-enter:not([hidden])','djTabContentReveal','#route-map-card #dj804-route-compare{display:none','#route-map-card .dj9272-route-points','#djNext-route-compare','#djNext-layer-panel .djNext-layer-scroll','.metro-arrival-countdown']){
   assert.ok(block.includes(expected)||css.includes(expected),expected);
  }
+ assert.ok(!css.includes('.dj854-language-section{order:99!important;display:block!important'),'no production orphan language card');
+ assert.ok(!js.includes('host.append(language)'),'no production language-row reparenting');
  assert.ok(js.includes("export function installV9272PhoneExperience"));
  assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
  assert.equal(js.includes("button.insertAdjacentHTML('afterbegin',phoneIcon(key))"),false);

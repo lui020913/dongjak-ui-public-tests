@@ -147,6 +147,12 @@ export function installMyInfo(doc=document){
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;historyBox.hidden=true;
  content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings,historyBox);
+ // All inactive settings views remain mounted for real-time account/history
+ // updates but must never contribute their own layout height. Historically
+ // a versioned !important display:grid on the hidden typography view pushed
+ // every subsequent subpage to the bottom of an iPhone viewport.
+ for(const node of [accountBox,typography,records,languageSettings,themeSettings,mapSettings,historyBox])
+   node.style.setProperty('display','none','important');
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
@@ -185,8 +191,16 @@ export function installMyInfo(doc=document){
    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    const views={profile:accountBox,type:typography,records,language:languageSettings,theme:themeSettings,map:mapSettings,history:historyBox};
    for(const [key,node] of Object.entries(views)){
-     const active=key===view;node.hidden=!active;node.classList.toggle('dj834-view-active',active);
+     const active=key===view;
+     node.hidden=!active;
+     node.classList.toggle('dj834-view-active',active);
+     // Inline important is deliberate: it defeats all historical high-ID
+     // stylesheet display declarations without unmounting data owners.
+     if(active)node.style.removeProperty('display');
+     else node.style.setProperty('display','none','important');
    }
+   content.style.setProperty('margin-top','0','important');
+   content.style.setProperty('padding-top','0','important');
    content.dataset.dj834View=view;
    if(view==='type')syncTypography();if(view==='language'||view==='theme')syncChoices();
    detail.hidden=false;
