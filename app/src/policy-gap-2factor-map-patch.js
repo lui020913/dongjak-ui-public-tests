@@ -1,27 +1,27 @@
 /**
  * Research-only MapLibre overlay for Sangdo1 institutional protection gaps.
  * Uses 300m GIS results combining 2025 police zone polygons & facility points,
- * estimated road width, and 2026 elementary catchments. Never modifies PRI or routing.
+ * 2026 elementary catchments, excluding road width. Never modifies PRI or routing.
  */
-const URL='/data/protection-zone/sangdo1_policy_gap_3source_300m_20261122.geojson';
-const IDS={source:'pza3-data',casing:'pza3-casing',lines:'pza3-score-lines'};
+const URL='/data/protection-zone/sangdo1_policy_gap_2factor_300m_20261122.geojson';
+const IDS={source:'pza2-data',casing:'pza2-casing',lines:'pza2-score-lines'};
 const MODES={combined:['combined_new_score','combined_color','통합'],child:['child_new_score','child_color','어린이'],elderly:['elderly_new_score','elderly_color','노인']};
 const STYLES=[
-'#pza3-panel{display:grid;gap:9px;margin:9px 0;padding:13px;border:1px solid var(--dj-ui-border,#d6e3dc);border-radius:12px;background:var(--dj-ui-field,#f5faf7);color:var(--dj-ui-text,#244437);font-size:12px;line-height:1.5;min-width:0}',
-'#pza3-panel strong{font-size:13px}#pza3-panel p{margin:0;font-size:11px;line-height:1.55;color:var(--dj-ui-subtext,#607970)}',
-'#pza3-panel button{cursor:pointer;border-radius:9px;font-size:12px;font-weight:700}',
-'#pza3-toggle{background:#245f53;color:white;padding:10px 12px;min-height:42px;border:0}',
-'#pza3-toggle[aria-pressed=true]{background:#dcece2;color:#1a5446;border:1px solid #b4d3c1}',
-'#pza3-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}',
-'#pza3-modes button{min-width:0;min-height:36px;border:1px solid #cbdcd2;color:#244437;background:var(--dj-ui-bg,#fff)}',
-'#pza3-modes button[aria-pressed=true]{background:#245f53;color:white}',
-'#pza3-gradient{height:12px;border-radius:5px;background:linear-gradient(90deg,#D64550,#F18C4A 25%,#E5BC52 50%,#7EAF83 75%,#338D80)}',
-'#pza3-ticks{display:flex;justify-content:space-between;font-size:10px}',
-'#pza3-gray{display:flex;gap:6px;align-items:center;font-size:11px}#pza3-gray i{background:#A3AAB4;border-radius:2px;width:15px;height:10px;flex:none}',
-'#pza3-status{font-size:11px;color:var(--dj-ui-subtext,#607970)}',
-'.pza3-popup{font-family:inherit;font-size:12px;line-height:1.5;color:#263e38;max-width:280px}.pza3-popup h3{margin:0 0 6px;font-size:14px}',
-'.pza3-popup dl{display:grid;grid-template-columns:95px minmax(0,1fr);gap:5px 7px;margin:7px 0}.pza3-popup dt{color:#607970}.pza3-popup dd{margin:0;font-weight:650;overflow-wrap:anywhere}',
-'.pza3-popup p{font-size:11px;line-height:1.6;color:#5b7069;margin:9px 0 0}'
+'#pza2-panel{display:grid;gap:9px;margin:9px 0;padding:13px;border:1px solid var(--dj-ui-border,#d6e3dc);border-radius:12px;background:var(--dj-ui-field,#f5faf7);color:var(--dj-ui-text,#244437);font-size:12px;line-height:1.5;min-width:0}',
+'#pza2-panel strong{font-size:13px}#pza2-panel p{margin:0;font-size:11px;line-height:1.55;color:var(--dj-ui-subtext,#607970)}',
+'#pza2-panel button{cursor:pointer;border-radius:9px;font-size:12px;font-weight:700}',
+'#pza2-toggle{background:#245f53;color:white;padding:10px 12px;min-height:42px;border:0}',
+'#pza2-toggle[aria-pressed=true]{background:#dcece2;color:#1a5446;border:1px solid #b4d3c1}',
+'#pza2-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}',
+'#pza2-modes button{min-width:0;min-height:36px;border:1px solid #cbdcd2;color:#244437;background:var(--dj-ui-bg,#fff)}',
+'#pza2-modes button[aria-pressed=true]{background:#245f53;color:white}',
+'#pza2-gradient{height:12px;border-radius:5px;background:linear-gradient(90deg,#D64550,#F18C4A 25%,#E5BC52 50%,#7EAF83 75%,#338D80)}',
+'#pza2-ticks{display:flex;justify-content:space-between;font-size:10px}',
+'#pza2-gray{display:flex;gap:6px;align-items:center;font-size:11px}#pza2-gray i{background:#A3AAB4;border-radius:2px;width:15px;height:10px;flex:none}',
+'#pza2-status{font-size:11px;color:var(--dj-ui-subtext,#607970)}',
+'.pza2-popup{font-family:inherit;font-size:12px;line-height:1.5;color:#263e38;max-width:280px}.pza2-popup h3{margin:0 0 6px;font-size:14px}',
+'.pza2-popup dl{display:grid;grid-template-columns:95px minmax(0,1fr);gap:5px 7px;margin:7px 0}.pza2-popup dt{color:#607970}.pza2-popup dd{margin:0;font-weight:650;overflow-wrap:anywhere}',
+'.pza2-popup p{font-size:11px;line-height:1.6;color:#5b7069;margin:9px 0 0}'
 ].join('');
 const isNum=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 const format=v=>isNum(v)?Number(v).toFixed(1)+'점':'NULL · 평가 제외';
@@ -35,7 +35,7 @@ export function policyGapTeamAverage(five,policy){
  return {score:Math.round((five.reduce((s,n)=>s+n,0)+(has?Number(policy):0))/denominator*10)/10,indicatorCount:denominator};
 }
 export function verifyPolicyGapFeatures(geo){
- if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||!Array.isArray(geo.features)||geo.features.length!==1676)
+ if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||geo.metadata?.schema!=='sangdo1_policy_gap_2factor_v1'||!Array.isArray(geo.features)||geo.features.length!==1676)
   throw new Error('300m 평가 GeoJSON의 기준 또는 도로 구간 수가 다릅니다.');
  const ids=new Set();
  for(const f of geo.features){
@@ -52,47 +52,47 @@ export function verifyPolicyGapFeatures(geo){
  return geo.features.length;
 }
 function popupNode(p,mode){
- const root=document.createElement('section');root.className='pza3-popup';
+ const root=document.createElement('section');root.className='pza2-popup';
  const heading=document.createElement('h3');heading.textContent=(p.road_name||'이름 없는 도로')+' · '+(p.segment_id||'');root.append(heading);
  const dl=document.createElement('dl');
  const items=[['선택한 점수',format(p[MODES[mode][0]])],['어린이',format(p.child_new_score)],['노인',format(p.elderly_new_score)],
-  ['통합 시범점수',format(p.combined_new_score)],['추정 도로폭',isNum(p.width_m)?Number(p.width_m).toFixed(2)+'m':'미확인'],
+  ['통합 시범점수',format(p.combined_new_score)],['학구 적용',p.school_applied_child?'적용':'미적용'],
   ['학구도 교차',p.catchment_names||'해당 자료 없음'],['팀 종합평균',isNum(p.combined_new_score)?'6개 지표 평균':'나머지 5개 지표 평균']];
  for(const [label,value] of items){
   const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);
  }
  root.append(dl);
- const notice=document.createElement('p');notice.textContent='보호구역 경계·시설 위치, 도로폭, 학구도를 결합한 연구용 점수입니다. 실제 통학로, 법적 미지정 또는 보행 위험 확정값이 아닙니다.';root.append(notice);
+ const notice=document.createElement('p');notice.textContent='보호구역 지정 경계·시설점 거리와 동일 초등학교 통학구역을 50:50으로 결합한 연구용 점수입니다. 학구도 미적용·노인 구간은 거리점수만 사용합니다. 도로폭은 제외했습니다. 실제 통학로, 법적 미지정 또는 보행 위험 확정값이 아닙니다.';root.append(notice);
  return root;
 }
 function createPanel(){
  const parent=document.getElementById('walking-vulnerability-layer-controls');
  if(!parent)return null;
- let panel=document.getElementById('pza3-panel');if(panel)return panel;
- if(!document.getElementById('pza3-style')){
-  const style=document.createElement('style');style.id='pza3-style';style.textContent=STYLES;document.head.append(style);
+ let panel=document.getElementById('pza2-panel');if(panel)return panel;
+ if(!document.getElementById('pza2-style')){
+  const style=document.createElement('style');style.id='pza2-style';style.textContent=STYLES;document.head.append(style);
  }
- panel=document.createElement('section');panel.id='pza3-panel';panel.setAttribute('aria-label','보행 취약도 · 300m 제도적 보호 공백 연구지도');
- const header=document.createElement('strong');header.textContent='제도적 보호 공백 · 3자료 평가';
- const note=document.createElement('p');note.textContent='시설·지정 경계 + 도로폭 + 공식 학구도 · 연구용 300m 시범점수';
- const toggle=document.createElement('button');toggle.id='pza3-toggle';toggle.type='button';toggle.textContent='그라데이션 지도 표시';toggle.setAttribute('aria-pressed','false');
- const modes=document.createElement('div');modes.id='pza3-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','어린이 노인 통합 점수 선택');
- for(const [key,mode] of Object.entries(MODES)){const btn=document.createElement('button');btn.type='button';btn.dataset.pza3Mode=key;btn.textContent=mode[2];btn.setAttribute('aria-pressed',String(key==='combined'));modes.append(btn);}
- const gradient=document.createElement('div');gradient.id='pza3-gradient';gradient.setAttribute('aria-label','0점 빨강에서 100점 청록까지 연속 그라데이션');
- const ticks=document.createElement('div');ticks.id='pza3-ticks';
+ panel=document.createElement('section');panel.id='pza2-panel';panel.setAttribute('aria-label','보행 취약도 · 300m 제도적 보호 공백 연구지도');
+ const header=document.createElement('strong');header.textContent='제도적 보호 공백 · 2지표 평가';
+ const note=document.createElement('p');note.textContent='시설·지정 경계 + 공식 초등학교 학구도 · 300m 시범점수';
+ const toggle=document.createElement('button');toggle.id='pza2-toggle';toggle.type='button';toggle.textContent='그라데이션 지도 표시';toggle.setAttribute('aria-pressed','false');
+ const modes=document.createElement('div');modes.id='pza2-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','어린이 노인 통합 점수 선택');
+ for(const [key,mode] of Object.entries(MODES)){const btn=document.createElement('button');btn.type='button';btn.dataset.pza2Mode=key;btn.textContent=mode[2];btn.setAttribute('aria-pressed',String(key==='combined'));modes.append(btn);}
+ const gradient=document.createElement('div');gradient.id='pza2-gradient';gradient.setAttribute('aria-label','0점 빨강에서 100점 청록까지 연속 그라데이션');
+ const ticks=document.createElement('div');ticks.id='pza2-ticks';
  for(const value of ['0','25','50','75','100']){const span=document.createElement('span');span.textContent=value;ticks.append(span);}
- const gray=document.createElement('div');gray.id='pza3-gray';
+ const gray=document.createElement('div');gray.id='pza2-gray';
  const chip=document.createElement('i');chip.setAttribute('aria-hidden','true');gray.append(chip,document.createTextNode('NULL(회색): 300m 평가 범위 밖 · 팀 평균에서 제외'));
- const status=document.createElement('span');status.id='pza3-status';status.setAttribute('role','status');status.textContent='연구지도 꺼짐';
- const caution=document.createElement('p');caution.textContent='임시 가중치 60/25/15 · 학구는 실제 통학로가 아닙니다. 길찾기·PRI 점수에는 적용하지 않습니다.';
+ const status=document.createElement('span');status.id='pza2-status';status.setAttribute('role','status');status.textContent='연구지도 꺼짐';
+ const caution=document.createElement('p');caution.textContent='임시 가중치 50/50 (학구도 해당 도로에 한정) · 학구는 실제 통학로가 아닙니다. 길찾기·PRI 점수에는 적용하지 않습니다.';
  panel.append(header,note,toggle,modes,gradient,ticks,gray,status,caution);
  parent.append(panel);
  return panel;
 }
-export function installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay}={}){
+export function installPolicyGapTwoFactorMap({map,maplibregl,app,nightMode,protectionOverlay}={}){
  if(!map||!maplibregl||!app)return null;
  const panel=createPanel();if(!panel)return null;
- const toggle=panel.querySelector('#pza3-toggle'),status=panel.querySelector('#pza3-status'),modes=panel.querySelector('#pza3-modes');
+ const toggle=panel.querySelector('#pza2-toggle'),status=panel.querySelector('#pza2-status'),modes=panel.querySelector('#pza2-modes');
  if(toggle.dataset.installed==='1')return null;
  toggle.dataset.installed='1';
  let enabled=false,loading=false,destroyed=false,data=null,promise=null,mode='combined',popup=null,handlers=false,focused=false;
@@ -162,8 +162,8 @@ export function installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,pro
   finally{loading=false;toggle.disabled=false;}
  }
  function selectMode(event){
-  const button=event.target.closest('[data-pza3-mode]');if(!button)return;
-  mode=button.dataset.pza3Mode;
+  const button=event.target.closest('[data-pza2-mode]');if(!button)return;
+  mode=button.dataset.pza2Mode;
   modes.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
   if(map.getLayer(IDS.lines))map.setPaintProperty(IDS.lines,'line-color',paint());
   popup?.remove?.();popup=null;
