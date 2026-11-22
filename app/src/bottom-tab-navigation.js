@@ -29,9 +29,9 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(departingAnimation){departingAnimation.cancel?.();departingAnimation=null;}
   if(departing){
    departing.hidden=true;
-   departing.removeAttribute('data-dj-tab-outgoing');
-   departing.style.removeProperty('z-index');
-   departing.style.removeProperty('filter');
+   departing.removeAttribute?.('data-dj-tab-outgoing');
+   departing.style?.removeProperty?.('z-index');
+   departing.style?.removeProperty?.('filter');
    departing=null;
   }
  }
@@ -49,22 +49,23 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   // The incoming panel is already fully opaque underneath it: no map flash.
   if(previous&&!reduced())previous.dataset.djTabOutgoing='true';
   if(!replay(button)){
-   previous?.removeAttribute('data-dj-tab-outgoing');return;
+   previous?.removeAttribute?.('data-dj-tab-outgoing');return;
   }
   if(previous&&previous.dataset.djTabOutgoing==='true'&&previousTab!==app.dataset.tab){
    departing=previous;
-   previous.style.setProperty('z-index','7000','important');
+   previous.style?.setProperty?.('z-index','7000','important');
    if(typeof previous.animate==='function'){
     try{departingAnimation=previous.animate([{filter:'opacity(1)'},{filter:'opacity(0)'}],{
       duration:190,easing:'cubic-bezier(.25,.15,.35,1)',fill:'forwards'
     });}catch{/* A non-animated opaque handoff remains safe. */}
    }
-  }else previous?.removeAttribute('data-dj-tab-outgoing');
+  }else previous?.removeAttribute?.('data-dj-tab-outgoing');
   // The navigation dock itself never fades, scales or shifts.
   if(!reduced()&&app.dataset.tab!=='map'){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
   }
+  if(reduced()){clearEntrance();return;}
   enterTimer=win.setTimeout(clearEntrance,215);
  }
  function select(event){
