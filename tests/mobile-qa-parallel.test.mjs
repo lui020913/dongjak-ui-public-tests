@@ -21,9 +21,16 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\|iOS PWA dimmed status edge\//);
 });
 
-test('visual evidence is mandatory; Gemini reviews are opt-in without accidental gate bypass',()=>{
+test('six design recordings and Gemini reviews are opt-in without bypassing functional release gates',()=>{
  const w=read('.github/workflows/mobile-first-overhaul-preview.yml');
  assert.match(w,/name: Enforce measured UI evidence without Gemini\s+run: node scripts\/live-qa-release-gate\.mjs qa-artifacts --deterministic/);
+ assert.match(w,/visual-capture:\s*\n\s*needs: \[build, preview\]\s*\n\s*# Optional visual recording:[\s\S]*?if: needs\.preview\.result == 'success' && \(vars\.ENABLE_DESIGN_CAPTURE_QA == 'true' \|\| vars\.ENABLE_GEMINI_QA == 'true'\)/);
+ // When neither optional mode is enabled, skipped design jobs do not block
+ // Production. However an opt-in design failure is never treated as a skip.
+ const requiredSkip="vars.ENABLE_DESIGN_CAPTURE_QA != 'true' && vars.ENABLE_GEMINI_QA != 'true' && needs.visual-capture.result == 'skipped'";
+ assert.equal(w.split(requiredSkip).length-1,2);
+ assert.match(w,/needs\.mobile-qa\.result == 'success'/);
+ assert.match(w,/needs\.desktop-tablet-qa\.result == 'success'/);
  assert.match(w,/if: needs\.preview\.result == 'success' && needs\.visual-capture\.result == 'success' && vars\.ENABLE_GEMINI_QA == 'true'/);
  assert.match(w,/if: needs\.preview\.result == 'success' && needs\.visual-qa\.result == 'success' && vars\.ENABLE_GEMINI_QA == 'true'/);
  assert.match(w,/needs\.visual-qa\.result == 'success' \|\| \(vars\.ENABLE_GEMINI_QA != 'true' && needs\.visual-qa\.result == 'skipped'\)/);
@@ -56,7 +63,7 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  assert.match(config,/DONGJAK_FULL_MOBILE_QA==='1'/);
 });
 
-test('exact design evidence is a required Production and Preview notification condition',()=>{
+test('only opted-in design evidence is required for Production and Preview notification',()=>{
  const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
  assert.match(workflow,/visual-capture:\s*\n\s*needs: \[build, preview\]/);
  assert.match(workflow,/visual-qa:\s*\n\s*needs: \[build, preview, visual-capture\]/);
@@ -72,7 +79,7 @@ test('exact design evidence is a required Production and Preview notification co
 
 test('autonomous exploration is required on exact Preview',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');assert.match(w,/explore-qa:\s*\n\s*needs: \[build, preview, visual-qa\]/);assert.match(w,/playwright\.live-qa-explore\.config\.mjs/);assert.match(w,/needs\.explore-qa\.result == 'success'/);});
 
-test('keep six browser captures parallel, serialize Gemini review to avoid 429, and explore only after reviews',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml'),capture=w.slice(w.indexOf('  visual-capture:'),w.indexOf('  visual-qa:')),review=w.slice(w.indexOf('  visual-qa:'),w.indexOf('  explore-qa:')),explore=w.slice(w.indexOf('  explore-qa:'),w.indexOf('  production:'));assert.match(capture,/max-parallel: 6/);assert.doesNotMatch(capture,/GEMINI_API_KEY|--vision/);assert.match(capture,/verify-capture\.mjs qa-artifacts --seal/);assert.match(review,/max-parallel: 1/);assert.match(review,/uses: actions\/download-artifact@v4/);assert.match(review,/verify-capture\.mjs qa-artifacts\n/);assert.match(review,/--vision/);assert.match(explore,/needs\.visual-qa\.result == 'success'/);});
+test('when opt-in is enabled, six capture lanes run in parallel; Gemini remains serialized',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml'),capture=w.slice(w.indexOf('  visual-capture:'),w.indexOf('  visual-qa:')),review=w.slice(w.indexOf('  visual-qa:'),w.indexOf('  explore-qa:')),explore=w.slice(w.indexOf('  explore-qa:'),w.indexOf('  production:'));assert.match(capture,/max-parallel: 6/);assert.doesNotMatch(capture,/GEMINI_API_KEY|--vision/);assert.match(capture,/verify-capture\.mjs qa-artifacts --seal/);assert.match(review,/max-parallel: 1/);assert.match(review,/uses: actions\/download-artifact@v4/);assert.match(review,/verify-capture\.mjs qa-artifacts\n/);assert.match(review,/--vision/);assert.match(explore,/needs\.visual-qa\.result == 'success'/);});
 
 test('debug APK releases are immutable by source SHA even when Android versionName stays unchanged',()=>{
  for(const path of ['.github/workflows/android-apk.yml','.github/workflows/android-debug-publish-retry.yml']){
