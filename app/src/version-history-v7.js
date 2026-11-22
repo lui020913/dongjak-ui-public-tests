@@ -1,6 +1,6 @@
 import {releaseEdition,syncPublicVersion} from './release-editions.js';
 import {buildGenerationCatalog} from './history-generation-catalog.js';
-import {CHANGE_TYPE_GROUPS,classifyReleaseNote} from './public-release-display.js';
+import {CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote} from './public-release-display.js';
 /**
  * v7.0.7: visual presentation is release-first, newest to oldest.
  * The old classification model stays exported for data-integrity checks.
@@ -192,7 +192,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       let parent=archive;
       if(!isCurrent){
         const disclosure=el('details','dj-edition-patch');
-        const first=String(notes[0]||'이전 변경사항');
+        const first=publicReleaseNote(notes[0]||'이전 변경사항',record.version);
         disclosure.append(el('summary','dj-edition-patch-summary',first.slice(0,46)+(first.length>46?'…':'')));
         archive.append(disclosure);parent=disclosure;
       }
@@ -208,7 +208,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       head.append(el('h4','',isCurrent?'최근 변경사항':'이전 변경사항'),el('span','dj-semver-size',type.title));
       article.append(head);
       const ul=el('ul','v707-release-items');
-      for(const description of notes)ul.append(el('li','',description));
+      for(const description of notes)ul.append(el('li','',publicReleaseNote(description,record.version)));
       article.append(ul);parent.append(article);
     }
   }
