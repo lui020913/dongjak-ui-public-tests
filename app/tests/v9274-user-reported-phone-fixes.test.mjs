@@ -33,7 +33,9 @@ test('seven-day source-normalizer validates dates, numbers and does not fabricat
 
 test('PRI keeps score modes and five vulnerability levels with one disclosure',()=>{
  const js=source('src/pri-map.js'),css=source('src/pri-map.css');
- assert.match(js,/PRI ①·② 평균/);
+ assert.match(js,/종합 보행 취약도 · 현재 3개 자료/);
+ assert.match(js,/CURRENT_VULNERABILITY_FACTORS/);
+ assert.doesNotMatch(js,/options\.unshift\(\['pri12'/,'old two-factor preview cannot be a visible choice');
  for(const t of ['낮음','주의','보통','높음','매우 높음','평가 기준 보기','dj-pri-detail-wrap','aria-expanded','data-dj-pri-visible'])assert.ok(js.includes(t)||css.includes(t),t);
  assert.match(css,/grid-template-rows:0fr/);assert.match(css,/grid-template-rows:1fr/);
  assert.match(css,/maplibregl-ctrl-bottom-left/);
