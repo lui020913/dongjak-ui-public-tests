@@ -17,9 +17,9 @@ test('one map/walking settings screen replaces duplicate layer toggles and fills
 test('light map labels have dark text with a pale halo, dark theme is reversed',()=>{
   const light=featuredPlaceStyle('light');
   const dark=featuredPlaceStyle('dark');
-  assert.equal(light.text,'#26352f');
+  assert.equal(light.text,'#6d817b');
   assert.equal(light.halo,'#f6f9f7');
-  assert.equal(dark.text,'#ebf7f3');
+  assert.equal(dark.text,'#cbd6d3');
   assert.equal(dark.halo,'#172a30');
   const theme=read('src/ui-environment.js');
   assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});"));
