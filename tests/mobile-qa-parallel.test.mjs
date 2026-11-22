@@ -58,7 +58,7 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  for(const prefix of ['phone pilot safety symbols','phone night shortcut waits','phone route comparison uses','phone windows share the opaque']){
   assert.equal(cases.find(c=>c.name.startsWith(prefix))?.tag,'@phone-common');
  }
- for(const prefix of ['compact HUD','transport cards','phone toolbar','phone onboarding copy','phone sheets','phone weather','phone report composer','layer header follows','theme confirmation fades','phone update history fades']){
+ for(const prefix of ['compact HUD','transport cards','phone toolbar','phone onboarding copy','phone sheets','phone weather','phone report composer','layer header follows','ordinary light-only startup has no manual theme dialog','phone update history fades']){
   assert.equal(cases.find(c=>c.name.startsWith(prefix))?.tag,'@phone-layout');
  }
  assert.equal(cases.find(c=>c.name.startsWith('phone first-run permission intro'))?.tag,'@phone-platform');
