@@ -89,7 +89,8 @@ test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and ro
   const env=read('src/ui-environment.js');
   const pri=read('src/pri-map.js');
   const contract=read('src/theme-contract.css');
-  const ui=readFileSync(new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
+  const isolated=new URL('../src/mobile-next.css',import.meta.url);
+  const ui=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
   const html=read('index.html');
   assert.match(env,/mapLabelTextPaint=Object\.freeze/);
   assert.ok(env.includes("color:'#f1f4f6'"));
