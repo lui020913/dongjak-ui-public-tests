@@ -9,8 +9,12 @@ test('release QA parallelizes independent tests in the same spec, with all phone
   assert.ok(config.includes(name));
   assert.ok(workflow.includes('--project='+name));
  }
- assert.match(workflow,/fail-fast: false\s+max-parallel: 24\s+matrix:\s+shard: \[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24\]/);
- assert.match(workflow,/--project=mobile390-webkit-header --workers=1 --shard=\$\{\{ matrix\.shard \}\}\/24/);
+ assert.match(workflow,/fail-fast: false\s+max-parallel: 24\s+matrix:\s+shard: \$\{\{ fromJSON\(/);
+  assert.ok(workflow.includes("'[1,2,3,4,5,6,7,8,9,10,11,12]'"),'standard release runs 12 smoke shards');
+ assert.ok(workflow.includes("'[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]'"),'full tier must have 24 shards');
+ assert.ok(workflow.includes("DONGJAK_FULL_MOBILE_QA: ${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && '1' || '0' }}"));
+  assert.ok(workflow.includes("--project=mobile390-webkit-header --workers=1 --shard="));
+  assert.ok(workflow.includes("ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12"));
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
  assert.match(workflow,/desktop-tablet-qa:/);
  assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
@@ -18,7 +22,7 @@ test('release QA parallelizes independent tests in the same spec, with all phone
  assert.match(workflow,/always\(\) && needs\.build\.result == 'success' && needs\.preview\.result == 'success' && needs\.mobile-qa\.result == 'success'/);
   assert.match(workflow,/vars\.ENABLE_GEMINI_QA != 'true' && needs\.visual-qa\.result == 'skipped'/);
   assert.match(workflow,/vars\.ENABLE_GEMINI_QA != 'true' && needs\.explore-qa\.result == 'skipped'/);
- assert.match(config,/grep:\/layer header follows a real pointer\|phone update history fades in place\|iOS PWA dimmed status edge\//);
+ assert.ok(config.includes('grep:fastMobileQA?'));
 });
 
 test('six design recordings and Gemini reviews are opt-in without bypassing functional release gates',()=>{
@@ -36,9 +40,11 @@ test('six design recordings and Gemini reviews are opt-in without bypassing func
  assert.match(w,/needs\.visual-qa\.result == 'success' \|\| \(vars\.ENABLE_GEMINI_QA != 'true' && needs\.visual-qa\.result == 'skipped'\)/);
  assert.match(w,/needs\.explore-qa\.result == 'success' \|\| \(vars\.ENABLE_GEMINI_QA != 'true' && needs\.explore-qa\.result == 'skipped'\)/);
  const shards=read('scripts/verify-mobile-qa-shards.mjs');
- assert.match(shards,/const SHARD_COUNT=24/);
- assert.match(shards,/i<=SHARD_COUNT/);
+ assert.ok(shards.includes('QA_MODES=[{count:12,full:false},{count:24,full:true}]'));
+ assert.match(shards,/i<=count/);
  assert.match(shards,/assert\.deepEqual\(combined\.sort\(\),baseline/);
+ assert.ok(shards.includes("DONGJAK_FAST_MOBILE_QA:full?'0':'1'"));
+ assert.match(w,/needs\.mobile-qa\.result == 'success'/);
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{
@@ -59,7 +65,7 @@ test('mobile coverage policy assigns every case explicitly and preserves all fun
  assert.match(config,/mobile375:\/@phone-layout\//);
  assert.match(config,/mobile390:\/@phone-\(\?:layout\|common\|platform\)\//);
  assert.match(config,/mobile430:\/@phone-\(\?:layout\|platform\)\//);
- assert.match(config,/grep:fullMobileQA\?allPhoneCases:phoneCoverage\[name\]/);
+ assert.ok(config.includes('grep:fullMobileQA?allPhoneCases:(fastMobileQA?releasePhoneCoverage[name]:phoneCoverage[name])'));
  assert.match(config,/DONGJAK_FULL_MOBILE_QA==='1'/);
 });
 
@@ -80,6 +86,25 @@ test('only opted-in design evidence is required for Production and Preview notif
 test('autonomous exploration is required on exact Preview',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml');assert.match(w,/explore-qa:\s*\n\s*needs: \[build, preview, visual-qa\]/);assert.match(w,/playwright\.live-qa-explore\.config\.mjs/);assert.match(w,/needs\.explore-qa\.result == 'success'/);});
 
 test('when opt-in is enabled, six capture lanes run in parallel; Gemini remains serialized',()=>{const w=read('.github/workflows/mobile-first-overhaul-preview.yml'),capture=w.slice(w.indexOf('  visual-capture:'),w.indexOf('  visual-qa:')),review=w.slice(w.indexOf('  visual-qa:'),w.indexOf('  explore-qa:')),explore=w.slice(w.indexOf('  explore-qa:'),w.indexOf('  production:'));assert.match(capture,/max-parallel: 6/);assert.doesNotMatch(capture,/GEMINI_API_KEY|--vision/);assert.match(capture,/verify-capture\.mjs qa-artifacts --seal/);assert.match(review,/max-parallel: 1/);assert.match(review,/uses: actions\/download-artifact@v4/);assert.match(review,/verify-capture\.mjs qa-artifacts\n/);assert.match(review,/--vision/);assert.match(explore,/needs\.visual-qa\.result == 'success'/);});
+
+test('fast mobile release has fewer tests and full auditing remains available',()=>{
+ const config=read('playwright.v911-remote.config.mjs');
+ const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
+ const spec=read('tests/v911-anonymous-ui.spec.mjs');
+ const list=config.split('const releaseSmokeNames=[')[1]?.split('];')[0];
+ assert.ok(list,'missing fast release case list');
+ const selected=[...list.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+ assert.equal(selected.length,15);
+ const all=[...spec.matchAll(/^test\('([^']+)',\{tag:'(@[\w-]+)'\},async\(/gm)].map(x=>({name:x[1],tag:x[2]}));
+ for(const name of selected)assert.equal(all.filter(c=>c.name.includes(name)).length,1,'unmatched or ambiguous smoke case '+name);
+ assert.ok(selected.length<all.filter(c=>c.tag!=='@non-phone').length/2);
+ assert.ok(config.includes("DONGJAK_FAST_MOBILE_QA==='1'"));
+ assert.ok(workflow.includes('DONGJAK_FAST_MOBILE_QA:'));
+ assert.ok(workflow.includes('DONGJAK_FULL_MOBILE_QA:'));
+ assert.ok(workflow.includes("ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12"));
+ assert.ok(workflow.includes("needs.mobile-qa.result == 'success'"));
+ assert.ok(workflow.includes('node scripts/verify-release-source.mjs'));
+});
 
 test('debug APK releases are immutable by source SHA even when Android versionName stays unchanged',()=>{
  for(const path of ['.github/workflows/android-apk.yml','.github/workflows/android-debug-publish-retry.yml']){
