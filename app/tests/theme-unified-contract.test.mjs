@@ -16,7 +16,9 @@ test('one theme stylesheet; native iOS status refresh only after explicit choice
   assert.match(old,/win\.location\.reload\(\)/);
   assert.match(old,/isInstalledIosPhone\(win\)/);
   assert.match(old,/MANUAL_THEME_RELOAD_KEY/);
-  assert.doesNotMatch(env,/requestIosThemeRefresh/);
+  assert.match(env,/requestIosThemeRefresh\(\{win:window,app,map,theme:themeState\.preference\}\)/);
+  assert.match(html,/data-dj-theme-refresh/);
+  assert.match(html,/\.map-startup-overlay\{display:none!important;\}/);
   assert.match(env,/displayTheme\(\{notify:true\}\)/);
   assert.ok(env.includes('createThemeState(getInitialTheme())'));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
@@ -40,6 +42,7 @@ test('night mode does not click theme button or override saved manual choice',()
 test('guest onboarding reappears on a new signed-out session',()=>{
   const tour=read('src/v860-onboarding.js');
   assert.ok(tour.includes("if(authState==='signed-out'||pendingGuestOnboarding)"));
+  assert.ok(tour.includes('seenInMemory=isNativeThemeRefresh'));
   assert.ok(tour.includes("if(!auto)overlay.dataset.dj860Manual='true'"));
 });
 
