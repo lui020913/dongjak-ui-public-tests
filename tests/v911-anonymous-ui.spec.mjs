@@ -700,7 +700,8 @@ test('phone update history fades in place and never paints over bottom navigatio
  await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
   function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
    if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
-    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
+    const opacityAnimation=n.getAnimations?.({subtree:false})?.some(animation=>{const keyframes=animation.effect?.getKeyframes?.()||[];const values=keyframes.map(k=>Number(k.opacity)).filter(Number.isFinite);return values.length>=2&&Math.max(...values)-Math.min(...values)>.5;})||false;
+    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),opacityAnimation,animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
    requestAnimationFrame(tick);}requestAnimationFrame(tick);
  });
  // Click synchronously after starting the in-page sampler: mobile automation
@@ -711,7 +712,7 @@ test('phone update history fades in place and never paints over bottom navigatio
   // The compositor can coalesce frames of a 180ms fade under CI load.
    // Still verify duration, clipping, geometry, intermediate alpha, and monotonicity.
    const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(0);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
-  expect(a.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);
+  expect(a.some(f=>f.opacity>0&&f.opacity<1)||a.some(f=>f.opacityAnimation),'a real opacity animation must exist even when CI coalesces every intermediate paint frame').toBe(true);
   for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i-1].opacity-a[i].opacity:a[i].opacity-a[i-1].opacity).toBeLessThanOrEqual(.03);
  }
 });
