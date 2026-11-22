@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.87",
+  "application_version": "9.2.88",
   "public_work_branch": "main",
-  "purpose": "Release owner-requested map and language repairs: merged PR #311 preserves OpenFreeMap vector basemap on slow cellular loads, PR #312 replaces oversized language picker hit area with a visible native right-aligned picker in the 62px My Info settings row. PR #314 (merge 3ea178b00f01ce7b9d37e9a0f62dfa407d7dd143) stabilizes the existing mobile layer-sheet fixed-header QA by awaiting outer entrance animation, without removing or weakening the header scroll-invariance test. Keep all previous user features and GIS 50:50 untouched. Require exact-source build, isolated Preview, mandatory 12 mobile QA lanes, PC/tablet gate, protected Production with rollback verification.",
-  "attempt": 268,
+  "purpose": "Owner-requested six-group iPhone UI correction from merged PR #316: stabilize onboarding/guide scale and TIP, genuinely crossfade tabs while dock stays fixed, correct route footer and news/community palette, replace My Info language/theme/map options with nested settings, align nearby info and report composer, calculate observed-only 3-factor pedestrian vulnerability and fix its sheet/button, lighten university map labels. Preserve all existing source features and 300m policy gap 50:50 source evidence. Gate deployment by exact-source CI #45021065600, isolated Preview, phone QA, desktop/tablet gate, and protected Production/rollback verification.",
+  "attempt": 269,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run #45016924622 failed only shard 1 because outer layer modal was still entering when scroll-lock header coordinate was sampled (140px false drift). Test timing corrected in PR #314; source CI #45017427013 passed. Retry 9.2.87 candidate; no Production reached previously.",
+  "last_retry_reason": "Source PR #316 merged as 8c431263bc1b6eb8a7bc4a5b6b345935919a1ec3 after full public CI 45021065600 succeeded including three phone widths. This is a new 9.2.88 requested candidate, not a claim that Production is already deployed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
