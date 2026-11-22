@@ -199,13 +199,13 @@ export function installScaleDocking({map,app,overview}={}){
     else setRatio(target);
   };
   const onMotionStart=()=>{
-    if(window.innerWidth>699)return;
+    if(window.innerWidth>699||phoneRenderOwner())return;
     clearTimeout(qualityIdleTimer);
     app.classList.add('dj873-map-moving');
     setRatio(pixelBudget().moving);
   };
   const onMotionStop=()=>{
-    if(window.innerWidth>699)return;
+    if(window.innerWidth>699||phoneRenderOwner())return;
     clearTimeout(qualityIdleTimer);
     qualityIdleTimer=setTimeout(()=>{
       if(map.isMoving?.())return;
