@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.88",
   "public_work_branch": "main",
-  "purpose": "Owner-requested iPhone six-item UI corrections from merged PR #316, QA repairs from merged PR #320, and exact strict GIS release file input correction from merged PR #323 (5322e132485e5e3ea065ca1f9802974282c96052). Keep all Sangdo1 administrative clipped 300m / 50:50 inputs and observation-only current3 vulnerabilities. Build immutable source, deploy isolated Preview, pass all 12 mobile QA lanes and PC/tablet gate, then only protected Production and rollback proof. Do not skip failures.",
-  "attempt": 271,
+  "purpose": "Owner-requested six mobile UI corrections: PR316 + QA PR320 + adminscope build preflight PR323 + release-blocking geometry fix PR324 (5efcf5ef5f6eba341bb8b081e9793ecc3c0a6b8e). Render actual route CTA above bottom nav by measured runtime geometry, confirm physical hit test; preserve observed three-factor vulnerability, 300m 50:50 Sangdo1 GIS, theme and onboarding fixes. Immutable exact source build, isolated Preview, all 12 mobile Playwright QA shards, PC/tablet gate, protected Production verification/rollback; block if any fail.",
+  "attempt": 272,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.88 candidate #45022293695 failed strict GIS preflight because code read 2026-11-22 legacy files despite verifying new 1,606 feature / 683-null Sangdo1 adminscope contract. PR #323 changes only two readFileSync paths to the already-shipped adminscope GIS GeoJSON and factor filenames, preserving all counts and scoring assertions. Prior 9.2.88 #45021281009 failed phone QA; PR #320 corrected. Both candidates never reached Production.",
+  "last_retry_reason": "9.2.88 attempt271 #45022677978 passed build, Preview, PC/tablet and 11/12 phone QA; lane4 failed 180s timeout because bottom nav intercepted center of route-calc despite CSS. PR324 fixes actual DOM geometry at runtime via inline important footer anchor and adds short explicit pointer hit-test before actual click. Source CI #45023632029 succeeded. Retest all 12; prior Production skipped.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
