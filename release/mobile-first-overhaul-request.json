@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.92",
+  "application_version": "9.2.93",
   "public_work_branch": "main",
-  "purpose": "User-uploaded PDF speed-limit relative hazard criterion integrated into walking vulnerability under merged PR #332 (608d8839c472f92867b8a594ca91fff00fca3635): source-backed Sangdo1 206 standard road links, 30km/h below=0, 30=40, 40=80, 50=100 risk points, unsupported/missing speed NULL (grey), no fabricated matching to separate 1686-segment lighting/PRI survey network; 1606 reference Sangdo1 centerlines grey; clickable speed detail and data provenance. Preserve PR328-330 1003 scored + 603 unscored protection gaps, 172 middle-school NULL, official 22 boundary audits, current three-factor composite; existing mobile UI fixes. PR source CI #45034983405 success; GIS and Live QA source checks success. Only promote if SHA-bound Preview, desktop/tablet and ALL 12 mobile QA including real speed UI controls/screenshot pass. Guarded rollback on production failure.",
-  "attempt": 279,
+  "purpose": "PR #333 merged main d6b8667b36d90db198e1b87bb70c60f577d7c976, preserving PR #328-#332. Four-indicator walking vulnerability UI: lighting, actual accident records, protected-zone gap, speed. Conservative geometry-only speed-to-25m-survey crosswalk requires all three samples within 5m same standard link, aligned tangent cosine >=0.91, rejecting conflicting speeds within 8m; unknown stays NULL, no false legal/field validation; observed-only equal weighting >=2 available factors with visible 2-4/4 coverage. Policy-gap ONE list entry opens detail page with original 1003 scored/603 grey and 172 middle-school NULL modes; official SHP 22 audits unchanged. Wide dock-aligned 12px dialog, map legend and road detail popups above measured mobile navigation with TIP suppressed. All PR branch source CI #45037425018, GIS research, official SHP and Live QA passed. Require SHA-bound sealed source rebuild, isolated Preview, real 375/390/430 mobile geometry/screenshots and all 12 QA, desktop/tablet controls, protected Production and final source/API verification, rollback on failure.",
+  "attempt": 280,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New speed-limit vulnerability PDF requested. PR332 source tests passed and merged; 9.2.91 Production previously succeeded. This is new 9.2.92 patch release, not a retry.",
+  "last_retry_reason": "New 9.2.93 release request after passed and merged PR #333, not retry of 9.2.92. Preserve exact code and GIS contracts; do not skip failed mobile acceptance checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
