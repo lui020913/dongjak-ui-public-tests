@@ -35,11 +35,11 @@ export function installCoordinatedShell(doc=document,win=window){
  if(guide){const anchor=guide.querySelector('.dj-guide-release');if(anchor)anchor.before(tipGuide);else guide.append(tipGuide);}
  let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,disposed=false;
  label.hidden=true;
- const isIdleMap=()=>app.dataset.tab==='map'&&!hasOpenMapWindow(doc,app)
+ const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
    &&!doc.querySelector('#map-startup-overlay:not([hidden])');
  const showTip=()=>{
    if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
-   if(app.dataset.djUserTipDismissed==='true')return;
+   if(app.dataset.djUserTipDismissed==='true'||app.dataset.djPriVisible==='true')return;
    if(label.hidden){
      label.hidden=false;label.classList.remove('is-visible');
      (win.requestAnimationFrame||((fn)=>win.setTimeout(fn,0)))(()=>{if(isIdleMap())label.classList.add('is-visible');});
@@ -47,7 +47,7 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  const hideTip=()=>{
    // A sheet owns the screen immediately; do not leave a floating hint under its edge.
-   if(hasOpenMapWindow(doc,app)){
+   if(app.dataset.djPriVisible==='true'||hasOpenMapWindow(doc,app)){
      if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
      label.classList.remove('is-visible');label.hidden=true;return;
    }
@@ -80,7 +80,7 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  const observers=[];
  const observe=(node,opts)=>{if(!node)return;const o=new MutationObserver(sync);o.observe(node,opts);observers.push(o);};
- observe(app,{attributes:true,attributeFilter:['data-tab','data-search-open','data-dj910-sheet-open','data-dj-user-tip-dismissed','class']});
+ observe(app,{attributes:true,attributeFilter:['data-tab','data-search-open','data-dj910-sheet-open','data-dj-pri-visible','data-dj-user-tip-dismissed','class']});
  const surfaceIds=new Set([...PRIMARY_PANELS,...TRANSIENT_PANELS,'map-startup-overlay']);
  const panelObserver=new MutationObserver(records=>{
    if(records.some(r=>r.type==='attributes'?surfaceIds.has(r.target.id):[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&(surfaceIds.has(n.id)||n.matches?.('.dj-place-detail-popup')||[...surfaceIds].some(id=>n.querySelector?.('#'+id))))))sync();
