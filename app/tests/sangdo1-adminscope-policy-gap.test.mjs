@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
-import {scopedPolicyFeatures} from '../src/pri-scope-data.mjs';
+import {scopedPolicyFeatures,scopedCompositeFeatures} from '../src/pri-scope-data.mjs';
 const dir=dirname(fileURLToPath(import.meta.url));
 const load=async name=>JSON.parse(await readFile(resolve(dir,'../public/data/protection-zone/'+name),'utf8'));
 const official=await load('boundary_reference.geojson'),geo=await load('sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson'),registry=await load('sangdo1_admin_facility_registry_20261122.json');
@@ -50,4 +50,15 @@ test('team factor preserves 1,686 shared IDs, null 683 and changed count score 1
  assert.equal(factor.scores.find(x=>x.id==='278148191_3').score,73.0);
  assert.equal(factor.scores.find(x=>x.id==='278024801_2').score,67.9);
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
+});
+
+test('observed-only three-factor map uses exactly the same 1,606 inside-dong fragments',()=>{
+ const example=new Map([['278148191_3',71.5],['278024801_2',67.2]]);
+ const plotted=scopedCompositeFeatures(geo,example);
+ assert.equal(plotted.features.length,1606);
+ assert.equal(plotted.features.filter(x=>x.properties.evaluated).length,2);
+ assert.ok(plotted.features.every(x=>x.geometry.type==='LineString'));
+ assert.ok(plotted.features.filter(x=>x.properties.evaluated).every(x=>[71.5,67.2].includes(x.properties.score)));
+ assert.ok(plotted.features.filter(x=>!x.properties.evaluated).every(x=>x.properties.score===null&&x.properties.displayScore===0));
+ assert.throws(()=>scopedCompositeFeatures({...geo,metadata:{schema:'wrong'}},example),/상도1동/);
 });
