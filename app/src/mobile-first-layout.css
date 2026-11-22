@@ -47,15 +47,15 @@
   }
 
   html body #app#app#app#app#app[data-theme="dark"] {
-    --mf-surface: var(--dj-theme-surface,#303841);
-    --mf-surface-solid: var(--dj-theme-surface,#303841);
+    --mf-surface: var(--dj-theme-surface,#2c343d);
+    --mf-surface-solid: var(--dj-theme-surface,#2c343d);
     --mf-ink: var(--dj-theme-ink,#f1f4f6);
     --mf-muted: var(--dj-theme-muted,#bec8d2);
-    --mf-line: var(--dj-theme-line,#53616d);
+    --mf-line: var(--dj-theme-line,#4d5b65);
     --mf-accent: var(--dj-theme-accent,#79dec5);
     --mf-accent-soft: var(--dj-theme-selected,#285b50);
     --mf-shadow: 0 10px 30px rgba(0,0,0,.32);
-    background: var(--dj-theme-bg,#252b32) !important;
+    background: var(--dj-theme-bg,#22282e) !important;
   }
 
   /* The map is always the full-screen base layer. */
