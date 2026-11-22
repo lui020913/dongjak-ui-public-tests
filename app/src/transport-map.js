@@ -1414,6 +1414,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,vehicleFetcher:globalThis.fetch,onState:state=>{
+    if(state?.status==='error'&&panel.dataset.djBusRoutePreview==='true')resetBusRoutePreview();
     routePresentation=state;syncRoutePresentation();
     if(state?.status==='shown'&&panel.dataset.djBusRoutePreview==='true'&&!panel.hidden){
       requestAnimationFrame(()=>{
@@ -1422,7 +1423,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         if(!Array.isArray(coordinates)||coordinates.length<2)return;
         const xs=coordinates.map(p=>p[0]),ys=coordinates.map(p=>p[1]);
         const covered=Math.max(170,(globalThis.innerHeight||800)-(panel.getBoundingClientRect()?.top||500)+12);
-        map.fitBounds?.([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:{top:210,bottom:covered,right:32,left:32},maxZoom:15.5,duration:600});
+        map.fitBounds?.([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:{top:Math.min(190,Math.floor((globalThis.innerHeight||800)*.22)),bottom:covered,right:32,left:32},maxZoom:15.5,duration:600});
         scheduleRouteClearDock();
       });
     }
