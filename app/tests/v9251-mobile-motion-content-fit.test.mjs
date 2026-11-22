@@ -21,11 +21,11 @@ test('all sliding sheets have a visible, monotonic fade; closing dims before rem
   assert.match(coordinator,/target\.style\.setProperty\('translate'/);
 });
 
-test('transit sheet content size removes empty space but allows full expansion',()=>{
+test('transit sheet reserves a stable default viewport height during async arrivals',()=>{
   const short=compactTransportHeight({header:90,grip:16,body:85,viewport:900});
   const long=compactTransportHeight({header:90,grip:16,body:800,viewport:900});
   // First open must reveal live ETA cards instead of an almost empty header.
-  assert(short>=900*.55);assert.equal(long,612);assert(long<=900*.68);
+  assert.equal(short,558);assert.equal(long,558);assert(long<=900*.68);
   assert(compactTransportHeight({header:0,grip:0,body:0,viewport:900})>=900*.55);
   const css=source('mobile-ui/current.css');
   assert.match(css,/--dj9251-transport-content-height/);
