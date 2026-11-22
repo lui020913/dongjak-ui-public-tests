@@ -15,7 +15,7 @@ const STYLES=[
 '#pza2-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}',
 '#pza2-modes button{min-width:0;min-height:36px;border:1px solid #cbdcd2;color:#244437;background:var(--dj-ui-bg,#fff)}',
 '#pza2-modes button[aria-pressed=true]{background:#245f53;color:white}',
-'#pza2-gradient{height:12px;border-radius:5px;background:linear-gradient(90deg,#D64550,#F18C4A 25%,#E5BC52 50%,#7EAF83 75%,#338D80)}',
+'#pza2-gradient{height:12px;border-radius:5px;background:linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)}',
 '#pza2-ticks{display:flex;justify-content:space-between;font-size:10px}',
 '#pza2-gray{display:flex;gap:6px;align-items:center;font-size:11px}#pza2-gray i{background:#A3AAB4;border-radius:2px;width:15px;height:10px;flex:none}',
 '#pza2-status{font-size:11px;color:var(--dj-ui-subtext,#607970)}',
@@ -24,7 +24,7 @@ const STYLES=[
 '.pza2-popup p{font-size:11px;line-height:1.6;color:#5b7069;margin:9px 0 0}'
 ].join('');
 const isNum=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
-const format=v=>isNum(v)?Number(v).toFixed(1)+'점':'NULL · 평가 제외';
+const format=v=>isNum(v)?Number(v).toFixed(1)+'점 · 위험↑':'NULL · 평가 제외';
 /** Do not replace NULL with 100. Team's five other factors must all be present. */
 export function policyGapTeamAverage(five,policy){
  if(!Array.isArray(five)||five.length!==5||!five.every(v=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=100))
@@ -35,7 +35,7 @@ export function policyGapTeamAverage(five,policy){
  return {score:Math.round((five.reduce((s,n)=>s+n,0)+(has?Number(policy):0))/denominator*10)/10,indicatorCount:denominator};
 }
 export function verifyPolicyGapFeatures(geo){
- if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||geo.metadata?.schema!=='sangdo1_policy_gap_2factor_v1'||!Array.isArray(geo.features)||geo.features.length!==1676)
+ if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||geo.metadata?.schema!=='sangdo1_policy_gap_2factor_risk_v2'||geo.metadata?.score_direction!=='risk'||!Array.isArray(geo.features)||geo.features.length!==1676)
   throw new Error('300m 평가 GeoJSON의 기준 또는 도로 구간 수가 다릅니다.');
  const ids=new Set();
  for(const f of geo.features){
@@ -62,7 +62,7 @@ function popupNode(p,mode){
   const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);
  }
  root.append(dl);
- const notice=document.createElement('p');notice.textContent='보호구역 지정 경계·시설점 거리와 동일 초등학교 통학구역을 50:50으로 결합한 연구용 점수입니다. 학구도 미적용·노인 구간은 거리점수만 사용합니다. 도로폭은 제외했습니다. 실제 통학로, 법적 미지정 또는 보행 위험 확정값이 아닙니다.';root.append(notice);
+ const notice=document.createElement('p');notice.textContent='보호구역 지정 경계·시설점 거리와 동일 초등학교 학구도를 50:50으로 결합한 연구용 위험점수입니다. 높을수록 보호 공백이 크며 빨간색으로 표시합니다. 학구도 미적용·노인 구간은 거리점수만 사용합니다. 도로폭은 제외했습니다. 실제 통학로, 법적 미지정 또는 보행 위험 확정값이 아닙니다.';root.append(notice);
  return root;
 }
 function createPanel(){
@@ -78,7 +78,7 @@ function createPanel(){
  const toggle=document.createElement('button');toggle.id='pza2-toggle';toggle.type='button';toggle.textContent='그라데이션 지도 표시';toggle.setAttribute('aria-pressed','false');
  const modes=document.createElement('div');modes.id='pza2-modes';modes.setAttribute('role','group');modes.setAttribute('aria-label','어린이 노인 통합 점수 선택');
  for(const [key,mode] of Object.entries(MODES)){const btn=document.createElement('button');btn.type='button';btn.dataset.pza2Mode=key;btn.textContent=mode[2];btn.setAttribute('aria-pressed',String(key==='combined'));modes.append(btn);}
- const gradient=document.createElement('div');gradient.id='pza2-gradient';gradient.setAttribute('aria-label','0점 빨강에서 100점 청록까지 연속 그라데이션');
+ const gradient=document.createElement('div');gradient.id='pza2-gradient';gradient.setAttribute('aria-label','0점 청록에서 100점 빨강까지 연속 그라데이션');
  const ticks=document.createElement('div');ticks.id='pza2-ticks';
  for(const value of ['0','25','50','75','100']){const span=document.createElement('span');span.textContent=value;ticks.append(span);}
  const gray=document.createElement('div');gray.id='pza2-gray';
