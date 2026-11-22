@@ -27,7 +27,9 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const label=doc.getElementById('weather-label'),title=doc.getElementById('weather-title');
   if(!app||!widget||!label||!win.matchMedia)return ()=>{};
   const media=win.matchMedia('(min-width: 0px)');
-  let sheet=null,observer=null,dockObserver=null,attached=false,refreshing=false,weekController=null,weekCache=null,weekUpdated=0;
+  let sheet=null,observer=null,dockObserver=null,sheetVisibilityObserver=null,attached=false,refreshing=false,weekController=null,weekCache=null,weekUpdated=0;
+  const syncMapScale=()=>win.dispatchEvent?.(new Event('dongjak:weather-visibility-changed'));
+
   const temperature=text=>{
     const match=String(text||'').match(/-?\d+(?:\.\d+)?\s*(?:°|℃|도|C)?/);
     const number=match?.[0]?.match(/-?\d+(?:\.\d+)?/)?.[0];
@@ -85,7 +87,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     });
     list.replaceChildren(...cards);status.hidden=true;status.textContent='';
   }
-  function close(){if(!sheet||sheet.hidden)return;weekController?.abort();const target=sheet;const finish=()=>{target.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(target,finish);else finish();}
+  function close(){if(!sheet||sheet.hidden)return;weekController?.abort();const target=sheet;const finish=()=>{target.hidden=true;syncMapScale();};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(target,finish);else finish();}
   // Use the ACTUAL shared bottom-tab bounding box. Hardcoded viewport / safe-
   // area offsets caused a large gap under weather on installed iPhone PWAs.
   function syncWeatherDock(){
@@ -100,7 +102,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     const bottom=Math.max(0,Math.ceil(win.innerHeight-rect.top+8));
     sheet.style.setProperty('--dj-weather-panel-bottom',bottom+'px');
   }
-  function open(){if(!sheet)return;sync();win.DongjakWindowLifecycle?.requestOpen(sheet.id);sheet.hidden=false;syncWeatherDock();win.DongjakWindowMotion?.open(sheet);win.requestAnimationFrame?.(syncWeatherDock);void loadWeek();const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}
+  function open(){if(!sheet)return;sync();win.DongjakWindowLifecycle?.requestOpen(sheet.id);sheet.hidden=false;syncMapScale();syncWeatherDock();win.DongjakWindowMotion?.open(sheet);win.requestAnimationFrame?.(syncWeatherDock);void loadWeek();const legacy=doc.getElementById('dj833-weather-sheet');if(legacy)legacy.hidden=true;}
   function ensureSheet(){
     if(sheet)return;
     sheet=doc.createElement('section');sheet.id='dj854-weather-sheet';sheet.hidden=true;
@@ -110,6 +112,10 @@ export function installDesktopWeatherSheet(doc=document,win=window){
       <p class="dj854-weather-detail">상세 기상 정보를 불러오는 중입니다.</p><p class="dj-weather-observed" hidden></p><section class="dj9274-weather-week" aria-label="동작구 7일 날씨 예보"><div class="dj9274-week-head"><h3>7일 예보</h3><small>동작구 기준 · Open-Meteo</small></div><ul></ul><p role="status">예보 준비 중</p></section>
       <div class="dj854-weather-actions"><button type="button" data-weather-refresh>날씨 다시 조회</button><button type="button" data-weather-location>내 위치 날씨</button></div>`;
     app.append(sheet);
+    // Other window owners may hide this sheet directly. Reconcile the map HUD
+    // for every hidden-state change, not only clicks on this close button.
+    sheetVisibilityObserver=new MutationObserver(syncMapScale);
+    sheetVisibilityObserver.observe(sheet,{attributes:true,attributeFilter:['hidden']});
     sheet.querySelector('.dj854-weather-close')?.addEventListener('click',close);
     sheet.querySelector('[data-weather-refresh]')?.addEventListener('click',()=>{
       refreshing=true;try{win.dispatchEvent(new Event('dongjak:weather-refresh'));void loadWeek(true);}finally{refreshing=false;}sync();
@@ -139,10 +145,10 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   }
   function detach(){
     if(!attached)return;
-    attached=false;weekController?.abort();observer?.disconnect();observer=null;dockObserver?.disconnect();dockObserver=null;
+    attached=false;weekController?.abort();observer?.disconnect();observer=null;dockObserver?.disconnect();dockObserver=null;sheetVisibilityObserver?.disconnect();sheetVisibilityObserver=null;
     win.removeEventListener?.('resize',syncWeatherDock);
     win.visualViewport?.removeEventListener?.('resize',syncWeatherDock);
-    label.removeEventListener('click',onLabelClick,true);close();sheet?.remove();sheet=null;
+    label.removeEventListener('click',onLabelClick,true);close();sheet?.remove();sheet=null;syncMapScale();
     delete label.dataset.djTemperature;delete label.dataset.djWeatherIcon;
     widget.removeAttribute('aria-label');
   }
