@@ -16,13 +16,13 @@ test('native vulnerability PRI has the 3-source gap; duplicate map option remove
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_3source_factor.json'));
 });
 
-test('new vulnerability gradient keeps exact semantic colors and the existing charcoal theme',()=>{
+test('new vulnerability gradient uses a restrained semantic palette and the charcoal theme',()=>{
  const css=read('src/theme-contract.css'),pri=read('src/pri-map.js');
  assert.ok(css.includes('var(--dj-theme-selected)'));
- assert.ok(pri.includes('#D64550'));
- assert.ok(pri.includes('#F18C4A'));
- assert.ok(pri.includes('#E5BC52'));
- assert.ok(pri.includes('#7EAF83'));
- assert.ok(pri.includes('#338D80'));
- assert.ok(pri.includes('#A3AAB4'));
+ assert.ok(pri.includes('#CB6563'));
+ assert.ok(pri.includes('#DDA263'));
+ assert.ok(pri.includes('#DBC576'));
+ assert.ok(pri.includes('#82AB94'));
+ assert.ok(pri.includes('#4C948B'));
+ assert.ok(pri.includes('#8D969F'));
 });

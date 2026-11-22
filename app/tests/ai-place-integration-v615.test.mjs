@@ -60,8 +60,8 @@ test('safety and crossing source POIs carry fact fields into shared AI details U
  assert.match(src('vite.config.js'),/onRequestGet/);
 });
 test('fresh visitors start light while saved preferences remain possible',()=>{
- assert.match(src('index.html'),/if\(!chosen\)chosen='light';/);
- assert.match(src('src/ui-environment.js'),/return 'light';/);
+ assert.match(src('index.html'),/var displayTheme=themeReload \? themeReload\.theme : 'light';/);
+ assert.match(src('src/ui-environment.js'),/return firstPaint==='dark'\?'dark':'light';/);
  assert.match(src('src/ui-environment.js'),/safeStorageSet\(THEME_KEY/);
 });
 

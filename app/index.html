@@ -10,16 +10,13 @@
     <link rel="manifest" id="dj-app-manifest" href="/manifest-light.webmanifest" />
     <link rel="apple-touch-icon" id="dj-apple-touch-icon" sizes="180x180" href="/icons/dongjak-ios-home-180.png" />
     <script>
-      // Apply the SAME theme before the first visible frame; no light flash on dark entry.
+      // A fresh app launch begins in light mode. Only the short-lived one-shot
+      // iOS native-status refresh retains a manually chosen theme across reload.
       (function(){
-        var selected=null;
-        try{selected=localStorage.getItem('dongjak_safety_color_theme_v1');}catch(_e){}
-        var chosen=selected==='light'||selected==='dark'?selected:null;
-        if(!chosen)chosen='light';
         var themeReload=null;
         try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
-        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme)||themeReload.theme!==chosen)themeReload=null;
-        var displayTheme=themeReload ? themeReload.theme : chosen;
+        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
+        var displayTheme=themeReload ? themeReload.theme : 'light';
         document.documentElement.dataset.theme=displayTheme;
         var iconSuffix=displayTheme==='dark'?'dark':'light';
         // iOS Home Screen art is independent of the application's light/dark theme.
