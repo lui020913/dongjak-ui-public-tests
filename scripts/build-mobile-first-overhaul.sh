@@ -212,8 +212,8 @@ test -f "$RUNNER_TEMP/app/public/data/pri/sangdo1_protection_gap_2factor_adminsc
 node --input-type=module <<'CHECK_POLICY_GAP'
 import {readFileSync} from 'node:fs';
 const root=process.env.RUNNER_TEMP+'/app/public/data/';
-const geo=JSON.parse(readFileSync(root+'protection-zone/sangdo1_policy_gap_2factor_300m_20261122.geojson','utf8'));
-const factor=JSON.parse(readFileSync(root+'pri/sangdo1_protection_gap_2factor_factor.json','utf8'));
+const geo=JSON.parse(readFileSync(root+'protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson','utf8'));
+const factor=JSON.parse(readFileSync(root+'pri/sangdo1_protection_gap_2factor_adminscope_factor.json','utf8'));
 if(geo.metadata?.schema!=='sangdo1_policy_gap_2factor_adminscope_risk_v3'||geo.metadata?.score_direction!=='risk'||geo.metadata?.base_weight!==50||geo.metadata?.school_weight!==50||geo.features?.length!==1606)throw Error('High-risk-red 50:50 GIS GeoJSON is missing or invalid');
 if(geo.metadata?.administrative_scope_code!=='1159053000'||geo.metadata?.counts?.outside!==70||geo.metadata?.counts?.crossing!==22)throw Error('Reference administrative boundary clip regression');
 if(factor.factor?.id!=='protectionGap'||factor.factor?.scoreDirection!=='risk'||factor.scores?.length!==1686||factor.scores.filter(x=>x.score===null).length!==683)throw Error('High-risk-red 50:50 PRI factor is missing or invalid');
