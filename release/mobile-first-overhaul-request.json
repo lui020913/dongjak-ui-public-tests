@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Protected Preview → 12-shard phone QA → adaptive design/function QA → Production for exact current main containing PR #262 AI/theme/camera/sheet, PR #266 rapid bus/subway reopen, PR #263 PRI institutional-gap, PR #264 adaptive QA and PR #267 weather scale. Release build regression corrected: the layer switch is '상단 고정', not a map visibility switch; frontend/production/mobile-next-build.test.mjs now asserts the actual accessible label. Keep GIS scoring, real transit, all theme behavior and guarded production rollback unchanged.",
-  "attempt": 233,
+  "purpose": "Exact latest public main protected mobile release: PR #262 mobile UI/theme, PR #263 native PRI institutional gap, PR #264 randomized Gemini design/function QA, PR #266 transit sheet close/reopen and PR #267 weather scale visibility. Includes main test-only fix a027e69 verifying '상단 고정' UI label and independent shortcut switch. Build all shared regressions, deploy isolated Preview, run 12 mobile Playwright shards plus six captured design journeys with adaptive Gemini and functional exploration, then guarded Production with rollback; no bypass.",
+  "attempt": 234,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #232 source built the requested UI, but an obsolete build-only assertion still expected pinHeading.textContent='바로가기' although PR #262 had correctly renamed the control to '상단 고정'. Main test-only commit a027e69 fixes this verified single regression. Restart with current main exact source and require all gates.",
+  "last_retry_reason": "Attempt #233 was cancelled by concurrent mobile-only-release workflow activity at setup-node with no test failure. Source is unchanged and pre-existing build-test mismatch has already been corrected in main. No other release job was active when this attempt was issued; retry exact verified public source once, preserving all release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
