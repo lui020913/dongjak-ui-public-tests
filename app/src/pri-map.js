@@ -28,7 +28,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  const detailToggle=button('평가 기준 보기',()=>{const expanded=detailToggle.getAttribute('aria-expanded')!=='true';detailToggle.setAttribute('aria-expanded',String(expanded));detailBody.setAttribute('aria-hidden',String(!expanded));});
  detailToggle.classList.add('dj-pri-detail-toggle');detailToggle.setAttribute('aria-expanded','false');detailToggle.setAttribute('aria-controls','dj-pri-legend-detail-body');
  detailToggle.innerHTML='<span>평가 기준 보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
- const detailWrap=el('div','dj-pri-detail-wrap'),detailBody=el('div','dj-pri-detail-body');detailBody.id='dj-pri-legend-detail-body';detailBody.setAttribute('aria-hidden','true');const modelNote=el('small','dj-pri-model-note','사고다발지 미선정 도로는 임시 안전점수 100점입니다. 실제 무사고 증명이 아닙니다.');detailBody.append(coverage,modelNote);detailWrap.append(detailBody);
+ const detailWrap=el('div','dj-pri-detail-wrap'),detailBody=el('div','dj-pri-detail-body');detailBody.id='dj-pri-legend-detail-body';detailBody.setAttribute('aria-hidden','true');const modelNote=el('small','dj-pri-model-note','미선정 구간은 회색으로 표시합니다. 100점은 시범 평균의 가정값이며 실측 안전도·무사고 확인값이 아닙니다.');detailBody.append(coverage,modelNote);detailWrap.append(detailBody);
  legend.append(label,dismiss,ramp,ends,detailToggle,detailWrap);app.append(legend);
  function acceptDataset(next){dataset=next;lookup=new Map(next.segments.map(s=>[s.id,s]));revision++;activate(null);render();}
  function setDataset(raw){acceptDataset(parseImport(raw,dataset));}
@@ -40,7 +40,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
    for(const [id,name] of options){
      const hasBoth=id==='pri12'&&dataset.segments.some(s=>typeof s.scores.lighting==='number'&&typeof s.scores.accidents==='number');
      const unavailable=id==='pri'?dataset.config.status!=='approved':id==='pri12'?!hasBoth:!available.has(id);
-     const suffix=id==='pri'&&unavailable?' · 기준 미확정':id==='pri12'?(unavailable?' · 두 지수 결측':' · 미선정 100점 시범'):unavailable?' · 미제출':id==='protectionGap'?' · 3자료·300m':id==='lighting'?' · 조명만':'';
+     const suffix=id==='pri'&&unavailable?' · 기준 미확정':id==='pri12'?(unavailable?' · 두 지수 결측':' · 임시값 포함 시범'):unavailable?' · 미제출':id==='protectionGap'?' · 3자료·300m':id==='lighting'?' · 조명만':'';
      const b=button(name+suffix,()=>{activate(id);dialog.close();});
      b.disabled=unavailable;b.setAttribute('aria-pressed',String(mode===id));actions.append(b);
    }
@@ -102,20 +102,20 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
-   if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 100점)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'사고다발지 미선정 구간은 임시 100점 (무사고 뜻 아님)':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+   if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'미선정 구간은 회색 · 시범 평균에만 임시 100점 사용':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#CB6563,#DDA263 25%,#DBC576 50%,#82AB94 75%,#4C948B)':'linear-gradient(90deg,#d74648,#ed9045 25%,#efd05a 50%,#9bc777 75%,#279b80)';
-  modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 반경·기존 지정 경계·추정 도로폭·학구도를 결합한 연구용 점수. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'사고다발지 미선정 도로는 임시 안전점수 100점입니다. 실제 무사고 증명이 아닙니다.';
+  modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 반경·기존 지정 경계·추정 도로폭·학구도를 결합한 연구용 점수. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'미선정 구간은 회색으로 표시합니다. 100점은 시범 평균의 가정값이며 실측 안전도·무사고 확인값이 아닙니다.';
   render();
  }
  function inspect(e){
   if(!mode||app.dataset.tab!=='map'||dialog.open||!map.getLayer(LINE))return;
   const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[LINE,POINT].filter(l=>map.getLayer(l))});
   const s=lookup.get(candidates[0]?.properties?.segmentId);if(!s)return;
-  const v=segmentScore(dataset,s,mode),node=el('div','dj-pri-detail');node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
+  const v=segmentScore(dataset,s,mode),node=el('div','dj-pri-detail');const modeled=mode==='accidents'&&s.evidence?.accidents?.modeled===true;node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',modeled?'미선정 · 임시 100점(평가값 아님)':v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
   const fs=mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
   for(const f of fs){const val=s.scores[f.id],ev=s.evidence[f.id];node.append(el('p','',f.label+': '+(typeof val==='number'?val+'점':'미평가')+(ev?.darkM!==null&&ev?.darkM!==undefined?' · 평균 암부 '+ev.darkM+'m':'')+(ev?.sourceGrade?' · 원본 위험 '+ev.sourceGrade+'등급':'')+(ev?.note?' · '+ev.note:'')),el('small','',f.source+' · '+f.method));}
   if(s.geometry.type==='Point')node.append(el('small','','선형 좌표 부족: 점으로만 표시'));
-  node.append(el('small','','높을수록 안전한 방향의 추정 점수입니다. 사고다발지 미선정 구간의 100점은 임시 기본값이며 실제 무사고 또는 보행안전 보장을 뜻하지 않습니다.'));
+  node.append(el('small','','높을수록 안전한 방향의 추정 점수입니다. 사고다발지 미선정 구간은 회색으로 표시합니다. 내부 임시점수는 실제 무사고 또는 보행안전 확인이 아닙니다.'));
   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);
  }
  let recoveryQueued=false;
