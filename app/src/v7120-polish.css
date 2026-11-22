@@ -112,13 +112,13 @@ html #dj-full-transition .dj-transition-line::before{content:"";position:absolut
 #app#app #dj-map-settings{
   position:fixed;inset:0;z-index:18000;display:flex;align-items:center;justify-content:center;
   padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));
-  background:rgba(17,42,37,.33);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;
 }
 #app#app .dj-map-settings-card{
   width:min(435px,100%);max-height:min(690px,86dvh);display:flex;flex-direction:column;min-height:0;
   overflow:hidden;border-radius:25px;border:1px solid var(--dj-ui-border,#d6e5dd);
   background:var(--dj-ui-bg,#fff);color:var(--dj-ui-text,#153b32);
-  box-shadow:0 25px 70px rgba(12,32,27,.23);animation:dj-polish-rise .25s ease both;
+  box-shadow:0 8px 24px rgba(12,32,27,.13);animation:dj-polish-rise .25s ease both;
 }
 #app#app .dj-map-settings-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 21px 15px;border-bottom:1px solid var(--dj-ui-border,#d6e5dd);}
 #app#app .dj-map-settings-head h2{font-size:22px;line-height:1.2;margin:3px 0 5px;}
