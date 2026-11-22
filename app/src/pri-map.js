@@ -56,20 +56,16 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  // not a guessed iPhone safe-area value from an older release.
  const syncDockClearance=()=>{
   const nav=doc.getElementById('bottom-nav');
-  const bounds=nav?.getBoundingClientRect?.();
-  const resolvedBottom=nav&&win.getComputedStyle?Number.parseFloat(win.getComputedStyle(nav).bottom):NaN;
-  // Browser automation and iOS PWA may expose a layout innerHeight that is
-  // 120px larger than the CSS dynamic viewport. Measuring nav.top against
-  // innerHeight pushed dialogs/legends 120px above their actual dock.
-  // The native dock's resolved CSS bottom + measured box height are instead
-  // already in the SAME coordinate system as CSS fixed bottom.
-  const fromCss=Number.isFinite(resolvedBottom)&&resolvedBottom>=0&&bounds?.height>40
-   ?resolvedBottom+bounds.height+8:NaN;
-  const visualHeight=win.visualViewport?.height??doc.documentElement.clientHeight;
-  const fromVisual=Number.isFinite(visualHeight)&&Number.isFinite(bounds?.top)
-   ?visualHeight-bounds.top+8:NaN;
-  const clearance=Number.isFinite(fromCss)?fromCss:Number.isFinite(fromVisual)?fromVisual:100;
-  doc.documentElement.style.setProperty('--dj-pri-dock-clearance',Math.max(76,Math.min(185,clearance))+'px');
+  const rect=nav?.getBoundingClientRect?.();
+  // The nav can be positioned inside a transformed 100dvh app whose fixed
+  // containing block differs from the body/dialog top layer by ~120px.
+  // Neither window.innerHeight - nav.top NOR computedStyle(nav).bottom are
+  // in the same coordinate system as the body-attached fixed dialog.
+  // Use the ACTUAL dock height together with the native dock's 3px bottom
+  // safe-area padding. This keeps exactly 9px clear even on iOS standalone.
+  const dockHeight=Number.isFinite(rect?.height)&&rect.height>=48&&rect.height<=160?Math.round(rect.height):70;
+  doc.documentElement.style.setProperty('--dj-pri-dock-clearance',
+   'calc(env(safe-area-inset-bottom,0px) + '+(dockHeight+12)+'px)');
  };
  win.addEventListener('resize',syncDockClearance,{passive:true});
  win.visualViewport?.addEventListener?.('resize',syncDockClearance,{passive:true});
