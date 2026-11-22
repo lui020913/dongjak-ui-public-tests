@@ -27,7 +27,8 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const label=doc.getElementById('weather-label'),title=doc.getElementById('weather-title');
   if(!app||!widget||!label||!win.matchMedia)return ()=>{};
   const media=win.matchMedia('(min-width: 0px)');
-  let sheet=null,observer=null,dockObserver=null,sheetVisibilityObserver=null,attached=false,refreshing=false,weekController=null,weekCache=null,weekUpdated=0;
+  let sheet=null,observer=null,dockObserver=null,sheetVisibilityObserver=null,attached=false,refreshing=false,weekController=null,weekCache=null,weekUpdated=0,weekCacheKey='';
+  let weekPlace={latitude:37.4987,longitude:126.9494,name:'동작구'};
   const syncMapScale=()=>win.dispatchEvent?.(new Event('dongjak:weather-visibility-changed'));
 
   const temperature=text=>{
@@ -57,18 +58,28 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     if(main){const paths={'☀':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>','☁':'<path d="M6 18a4 4 0 1 1 .5-8A6 6 0 0 1 18 11a3.5 3.5 0 0 1 0 7Z"/>','☂':'<path d="M5 13a7 7 0 0 1 14 0M12 13v6a2 2 0 0 0 4 0M4 16h16"/>','❄':'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/>','!':'<circle cx="12" cy="12" r="9"/><path d="M12 7v6m0 4h.01"/>'};const icon=doc.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','1.8');icon.setAttribute('stroke-linecap','round');icon.setAttribute('stroke-linejoin','round');icon.setAttribute('aria-hidden','true');icon.innerHTML=paths[iconFor(value)];const text=doc.createElement('span');text.textContent=value||'날씨 정보를 불러오는 중입니다.';main.replaceChildren(icon,text);delete main.dataset.weatherSymbol;}
     if(detail){const text=(label.getAttribute('title')||'상세 기상 정보가 제공되지 않았습니다.').replace(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})(?::\d{2})?/g,'$2.$3. $4 기준');const match=text.match(/(?:\s*·\s*|\s+)(\d{1,2}\.\d{1,2}\.\s*\d{2}:\d{2}\s*기준)\s*$/);detail.textContent=match?text.slice(0,match.index).trim():text;const stamp=sheet.querySelector('.dj-weather-observed');if(stamp){stamp.hidden=!match;stamp.textContent=match?.[1]||'';}}
   }
+  const keyForPlace=place=>String(place.latitude)+','+String(place.longitude);
+  function onWeatherPlaceChange(event){
+    const {latitude,longitude,name}=event?.detail||{};
+    if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180)return;
+    const next={latitude,longitude,name:String(name||'내 위치').slice(0,40)};
+    if(keyForPlace(next)===keyForPlace(weekPlace))return;
+    weekPlace=next;weekController?.abort();weekCache=null;weekCacheKey='';weekUpdated=0;
+    if(sheet&&!sheet.hidden)void loadWeek(true);
+  }
   async function loadWeek(force=false){
     const target=sheet?.querySelector('.dj9274-weather-week');if(!target)return;
     const list=target.querySelector('ul'),status=target.querySelector('[role="status"]');
-    if(!force&&weekCache&&Date.now()-weekUpdated<20*60*1000){renderWeek(weekCache);return;}
+    const requestedPlace={...weekPlace},requestedKey=keyForPlace(requestedPlace);
+    if(!force&&weekCache&&weekCacheKey===requestedKey&&Date.now()-weekUpdated<20*60*1000){renderWeek(weekCache);return;}
     weekController?.abort();const controller=new AbortController();weekController=controller;
     list.replaceChildren();status.hidden=false;status.textContent='7일 예보를 불러오는 중입니다.';
     try{
-      const response=await win.fetch(weeklyWeatherUrl(),{signal:controller.signal});
+      const response=await win.fetch(weeklyWeatherUrl(requestedPlace.latitude,requestedPlace.longitude),{signal:controller.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       const rows=weeklyWeatherRows(await response.json());
-      if(controller!==weekController||controller.signal.aborted)return;
-      weekCache=rows;weekUpdated=Date.now();renderWeek(rows);
+      if(controller!==weekController||controller.signal.aborted||requestedKey!==keyForPlace(weekPlace))return;
+      weekCache=rows;weekCacheKey=requestedKey;weekUpdated=Date.now();renderWeek(rows);
     }catch(error){
       if(controller.signal.aborted||controller!==weekController)return;
       list.replaceChildren();status.hidden=false;status.textContent='7일 예보를 불러오지 못했습니다. 다시 조회를 선택해 주세요.';
@@ -77,6 +88,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   function renderWeek(rows){
     const target=sheet?.querySelector('.dj9274-weather-week');if(!target)return;
     const list=target.querySelector('ul'),status=target.querySelector('[role="status"]');
+    const source=target.querySelector('.dj9274-week-head small');if(source)source.textContent=weekPlace.name+' 기준 · Open-Meteo';
     const cards=rows.map(row=>{
       const li=doc.createElement('li');li.className='dj9274-weather-day';
       const day=doc.createElement('strong');day.textContent=row.dayLabel;
@@ -139,6 +151,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
     observer.observe(label,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['title']});
     if(title)observer.observe(title,{childList:true,characterData:true,subtree:true});
     sync();
+    win.addEventListener?.('dongjak:weather-place-change',onWeatherPlaceChange);
     win.addEventListener?.('resize',syncWeatherDock);
     win.visualViewport?.addEventListener?.('resize',syncWeatherDock);
     const nav=doc.getElementById('bottom-nav');
@@ -147,6 +160,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   function detach(){
     if(!attached)return;
     attached=false;weekController?.abort();observer?.disconnect();observer=null;dockObserver?.disconnect();dockObserver=null;sheetVisibilityObserver?.disconnect();sheetVisibilityObserver=null;
+    win.removeEventListener?.('dongjak:weather-place-change',onWeatherPlaceChange);
     win.removeEventListener?.('resize',syncWeatherDock);
     win.visualViewport?.removeEventListener?.('resize',syncWeatherDock);
     label.removeEventListener('click',onLabelClick,true);close();sheet?.remove();sheet=null;syncMapScale();
