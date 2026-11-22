@@ -146,7 +146,7 @@ export function installMyInfo(doc=document){
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;historyBox.hidden=true;
- content.append(accountBox,typography,records,languageSettings,themeSettings,mapSettings,historyBox);
+ content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings,historyBox);
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
