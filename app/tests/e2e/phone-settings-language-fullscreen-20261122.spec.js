@@ -1,22 +1,27 @@
 import {test,expect} from '@playwright/test';
 import {openMapPage,navTab,clickRealPointer} from './helpers.js';
 
-test('phone My Info language remains aligned and preferences occupy a full viewport',async({page})=>{
+test('phone preferences use nested iPhone-style pages and preserve native settings owners',async({page})=>{
   test.skip(page.viewportSize().width>=700,'phone only');
   test.setTimeout(120000);
   await openMapPage(page);
   await clickRealPointer(page,navTab(page,'mine'),'my info');
-  const group=page.locator('#mine-panel .dj834-my-home .dj834-settings-group').first();
-  const language=group.locator('.dj854-language-section');
+  const language=page.locator('#mine-panel .dj834-my-home .dj854-language-section');
   await expect(language).toBeVisible();
   await expect(language.locator('.dj854-language-icon svg')).toBeVisible();
-  const overlapping=await language.evaluate(node=>{
-    const label=node.querySelector('label')?.getBoundingClientRect();
-    const select=node.querySelector('select')?.getBoundingClientRect();
-    return !label||!select||label.right>select.left+1;
-  });
-  expect(overlapping,'language label cannot overlap selector').toBe(false);
-  await clickRealPointer(page,page.locator('[data-dj834-action="map"]'),'map settings');
+  // The home row no longer contains an interactive native picker.
+  await expect(language.locator('select')).toBeHidden();
+  await clickRealPointer(page,language,'language preference');
+  const detail=page.locator('#mine-panel .dj834-my-detail');
+  await expect(detail).toBeVisible();
+  await expect(detail.locator('.dj834-detail-title')).toContainText('언어');
+  await expect(detail.locator('[data-dj834-language="ko"]')).toBeVisible();
+  await clickRealPointer(page,detail.locator('[data-dj834-language="ko"]'),'Korean');
+  await expect(detail.locator('[data-dj834-language="ko"]')).toHaveAttribute('aria-pressed','true');
+  await clickRealPointer(page,detail.locator('.dj834-detail-back'),'back to preferences');
+  await clickRealPointer(page,page.locator('[data-dj834-action="map"]'),'map settings submenu');
+  await expect(detail.locator('.dj834-detail-title')).toContainText('지도');
+  await clickRealPointer(page,detail.locator('[data-dj834-setting="map"]'),'open map settings');
   const settings=page.locator('#dj-map-settings');
   await expect(settings).toBeVisible();
   await expect.poll(async()=>{

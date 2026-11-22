@@ -20,12 +20,21 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,departing=null,departingAnimation=null,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
   entering?.classList.remove('dj-tab-content-enter');
   entering=null;
+  if(departingAnimation){departingAnimation.cancel?.();departingAnimation=null;}
+  if(departing){
+   const page=departing;
+   page.hidden=true;
+   departing.removeAttribute?.('data-dj-tab-outgoing');
+   departing.style?.removeProperty?.('z-index');
+   departing.style?.removeProperty?.('filter');
+   departing=null;
+  }
  }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return false;
@@ -34,21 +43,32 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  function start(button){
   if(!button||button.disabled||!button.isConnected)return;
-  // A new click cancels only the prior CONTENT animation; never defer the
-  // destination itself. Rapid taps always resolve to the latest real page.
   clearEntrance();
+  const previousTab=app.dataset.tab;
+  const previous=doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
+  // Preserve the outgoing opaque screen through the synchronous navigate.
+  // The incoming panel is already fully opaque underneath it: no map flash.
+  if(previous&&!reduced())previous.dataset.djTabOutgoing='true';
   if(!replay(button))return;
-  // Discard a stale outgoing page that an interrupted sheet animation kept alive.
-  // Never animate a whole page root; its opaque background must exist immediately.
-  for(const page of (doc.querySelectorAll?.('.page-panel[data-page]')||[])){
-    if(page.dataset.page!==app.dataset.tab){win.DongjakWindowMotion?.cancel?.(page);page.hidden=true;}
-  }
-  if(reduced()||app.dataset.tab==='map')return;
-  const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
-  if(!panel)return;
-  entering=panel;
-  panel.classList.add('dj-tab-content-enter');
-  enterTimer=win.setTimeout(clearEntrance,TAB_TRANSITION.contentReveal+30);
+  if(previous&&previous.dataset.djTabOutgoing==='true'&&previousTab!==app.dataset.tab){
+   departing=previous;
+   previous.style?.setProperty?.('z-index','7000','important');
+   if(typeof previous.animate==='function'){
+    try{departingAnimation=previous.animate([{filter:'opacity(1)'},{filter:'opacity(0)'}],{
+      duration:190,easing:'cubic-bezier(.25,.15,.35,1)',fill:'forwards'
+    });}catch{/* A non-animated opaque handoff remains safe. */}
+   }
+  }else previous?.removeAttribute?.('data-dj-tab-outgoing');
+  // We never defer the destination state: replay navigates synchronously before any fade.
+  // The navigation dock itself never fades, scales or shifts.
+  const revealIncoming=()=>{
+   if(reduced()||app.dataset.tab==='map')return;
+   const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
+   if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
+  };
+  revealIncoming();
+  if(reduced()){clearEntrance();return;}
+  enterTimer=win.setTimeout(clearEntrance,215);
  }
  function select(event){
   if(!phone()||replaying)return;
