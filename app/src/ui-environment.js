@@ -86,6 +86,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
+import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
 
 function safeStorageGet(k){try{return localStorage.getItem(k);}catch{return null;}}
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
@@ -244,6 +245,10 @@ export function initTheme({map,app}){
     themeState.toggle();
     safeStorageSet(THEME_KEY,themeState.preference);
     displayTheme({notify:true});
+    // iOS Home Screen PWAs can retain the old native status-bar color despite
+    // updated metadata. Only manual choice triggers a one-shot page refresh.
+    // Night analysis remains temporary and must never trigger a relaunch.
+    if(!themeState.temporary)requestIosThemeRefresh({win:window,app,map,theme:themeState.preference});
   });
   const setTemporaryTheme=next=>{
     if(!themeState.override(next))return;
