@@ -1429,7 +1429,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · ${state.stopCount?`경유 정류소 ${state.stopCount}개 · 확대하면 표시`:'지도 표시 중 · 경유 정류소 조회 불가'}`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
     syncRouteRows();
   }});
-  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();delete panel.dataset.djBusRoutePreview;syncRoutePresentation();};
+  const resetBusRoutePreview=()=>{
+    delete panel.dataset.djBusRoutePreview;
+    for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
+  };
+  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();resetBusRoutePreview();syncRoutePresentation();};
   clearRouteButton.addEventListener('click',clearSelectedBusRoute);
   mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
   function activateBusRoute(event){
@@ -1440,6 +1444,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
       panel.dataset.djBusRoutePreview='true';
       if(panel.classList.contains('dj871-sheet-expanded'))setMobileSheetExpanded(panel,false,document,globalThis.window);
+      panel.style.setProperty('height','clamp(185px,28dvh,255px)','important');
+      panel.style.setProperty('max-height','clamp(185px,28dvh,255px)','important');
+      panel.style.setProperty('min-height','0','important');
+      panel.style.setProperty('overflow','hidden','important');
       panel.querySelector('.dj875-transit-scroll')?.scrollTo?.({top:0,behavior:'instant'});
     }
     syncRoutePresentation();
@@ -1498,7 +1506,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
     windowState.dismiss();
-    panel.hidden=true;selected=null;delete panel.dataset.djBusRoutePreview;seq++;syncRoutePresentation();
+    panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2724,7 +2732,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
     const thisSeq=++seq;
     selected=place;
-    if(!refresh)delete panel.dataset.djBusRoutePreview;
+    if(!refresh)resetBusRoutePreview();
     updateTransportFavorite();
     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));
     visibleServiceHours=null;
