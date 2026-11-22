@@ -422,9 +422,24 @@ export function installScaleDocking({map,app,overview}={}){
           ?['hidden','class']:['hidden','class','aria-hidden','style','data-dj-user-tip-dismissed']});
       }
     }
+    // Another HUD owner can reapply MapLibre control styles after weather
+    // opens. Watch the actual scale nodes so a later inline visibility write
+    // cannot leave the distance ruler visible over a bottom sheet.
+    const corner=scaleElement();
+    for(const node of [corner,corner?.querySelector('.maplibregl-ctrl-scale')]){
+      if(!node||observedNodes.has(node))continue;
+      observedNodes.add(node);
+      mo.observe(node,{attributes:true,attributeFilter:['style','class']});
+    }
   };
   const mo=typeof MutationObserver==='function'?new MutationObserver((records)=>{
     if(records.some(record=>record.type==='childList'))watchOverlayNodes();
+    if(records.some(record=>record.type==='attributes'&&record.attributeName==='style'&&
+      (record.target===scaleElement()||record.target?.classList?.contains('maplibregl-ctrl-scale')))){
+      // Uses idempotent applyImportant; our own hidden write may trigger one
+      // follow-up observer tick but never an infinite render loop.
+      onWeatherVisibility();
+    }
     schedule();
   }):null;
   mo?.observe(overview,{attributes:true,attributeFilter:['hidden','class','data-sheet-state']});
