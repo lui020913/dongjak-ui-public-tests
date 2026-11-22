@@ -576,10 +576,26 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  // The sheet moves vertically during its intentional entry animation.
  // Scroll-lock geometry is meaningful only after that movement settles.
  // Await actual browser animation completion (not a guessed sleep).
- await modal.locator('.djNext-modal-body').evaluate(async node=>{
-   await Promise.all(node.getAnimations({subtree:false}).map(animation=>animation.finished.catch(()=>{})));
+ await modal.evaluate(async node=>{
+   // iOS sheet entry may animate its OUTER surface while the inner scroll
+   // body has no own animation. Await both rather than sampling a moving
+   // header and mistaking its intentional 140px entry for scroll drift.
+   const nodes=[node,node.querySelector('.djNext-modal-body')].filter(Boolean);
+   const animations=[...new Set(nodes.flatMap(el=>el.getAnimations({subtree:false})))];
+   await Promise.all(animations.filter(animation=>{
+     const end=animation.effect?.getComputedTiming?.().endTime;
+     return animation.playState!=='finished' && Number.isFinite(end);
+   }).map(animation=>animation.finished.catch(()=>{})));
  });
  await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
+ // Require the layer header position to settle across actual paint frames
+ // before asserting that the child scrolling area cannot move it.
+ await expect.poll(async()=>{
+   const before=await bounds();
+   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+   const after=await bounds();
+   return before&&after?Math.abs(before.y-after.y)<0.6:false;
+ }).toBe(true);
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  const toggle=modal.getByRole('switch').last();await expect(toggle).toHaveAttribute('aria-checked','false');
