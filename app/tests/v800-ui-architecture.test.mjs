@@ -35,7 +35,7 @@ test('first paint defaults to light without reload splash',()=>{
   assert.ok(h.includes('--start-bg:#22282e'));
   assert.ok(h.includes('background:var(--start-bg)!important'));
   assert.doesNotMatch(h,/data-dj-reload-splash|dj-pwa-transition-v7104/);
-  assert.match(h,/displayTheme=themeReload \? themeReload\.theme : 'light'/);
+  assert.match(h,/var displayTheme='light'/);
 });
 test('mobile and desktop get separate layout, colors and animations',()=>{
   const c=read('src/v800-ui-architecture.css');
