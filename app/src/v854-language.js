@@ -243,7 +243,7 @@ export function installLanguagePreference(doc=document,win=window){
   let section=mine.querySelector('.dj854-language-section');
   if(!section){
     section=doc.createElement('div');section.className='dj854-language-section dj834-language-row';section.dataset.dj834Action='language';section.setAttribute('role','button');section.setAttribute('tabindex','0');section.setAttribute('aria-label','언어 설정 열기');
-    const label=doc.createElement('label');label.htmlFor='dj854-language-select';label.textContent='언어';
+    const label=doc.createElement('label');label.removeAttribute('for');label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
     // Keep the language control inside the existing App & Display settings group.
