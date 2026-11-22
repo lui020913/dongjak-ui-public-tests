@@ -81,11 +81,11 @@ const checks=[
  }],
  ['C01','PRI entry uses the requested walking-vulnerability naming',()=>{
    const s=src('src/pri-map.js');
-   contains(s,'보행 취약도 평가자료','보행 취약도','보행 취약도 · 야간+사고 평균');
+   contains(s,'보행 취약도 평가자료','보행 취약도','PRI 위험점수 · 야간+사고 평균');
  }],
  ['C02','protection gap clearly documents 300m and two-factor 50:50 (no width)',()=>{
    const s=src('src/pri-map.js');
-   contains(s,'300m','기존 보호구역 공간관계','동일 초등학교 학구도 지표를 각각 50%','도로폭은 평가에 사용하지 않습니다');
+   contains(s,'300m 지정 경계·시설 거리','동일 초등학교 학구도(각 50%)','도로폭은 제외합니다');
    const manifest=JSON.parse(src('public/data/pri/manifest.json'));
    assert.ok(manifest.patches.some(p=>p.includes('2factor')));
    assert.ok(!manifest.patches.some(p=>p.includes('3source')));
@@ -94,9 +94,9 @@ const checks=[
    contains(src('src/pri-data.mjs'),'observedFactorScore','modeled===true');
    contains(src('src/pri-map.js'),'#9ba4aa','회색: 미평가·미선정 (평균 제외)');
  }],
- ['C04','risk legend has five distinct levels and zero means most vulnerable',()=>{
+ ['C04','risk legend has five distinct levels and high risk means red and vulnerable',()=>{
    const s=src('src/pri-map.js');
-   for(const t of ['매우 취약','취약','보통','양호','안전','0점은 가장 취약','100점은 상대적으로 양호'])contains(s,t);
+   for(const t of ['낮음','주의','보통','높음','매우 높음','0점은 상대적으로 낮은 취약 신호','100점은 큰 취약 신호'])contains(s,t);
    contains(src('src/pri-map.css'),'grid-template-columns:repeat(5,minmax(0,1fr))');
  }],
  ['C05','PRI road thickness and opacity vary continuously with zoom',()=>{
