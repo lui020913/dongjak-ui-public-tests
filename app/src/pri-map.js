@@ -22,8 +22,22 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  const local=el('small','','직접 불러온 자료는 현재 페이지에서만 사용되며 서버에 전송하지 않습니다.');
  const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);dialog.append(head,intro,status,actions,clear,dataTools);doc.body.append(dialog);
  const legend=el('aside','dj-pri-legend');legend.id='dj-pri-legend';legend.hidden=true;
+ // Keep native map HUD controls out of the PRI data view even when legacy
+ // phone controllers set their own inline `display: ... !important` styles.
+ // Restore each preexisting inline value exactly when the layer is disabled.
+ const savedHudStyle=new Map();
+ const syncPriHud=active=>{
+  for(const id of ['dj840-map-tip','dj-user-tip-close']){
+   const node=doc.getElementById(id);if(!node?.style)continue;
+   if(active){
+    if(!savedHudStyle.has(node))savedHudStyle.set(node,{value:node.style.getPropertyValue('display'),priority:node.style.getPropertyPriority('display')});
+    node.style.setProperty('display','none','important');
+   }
+  }
+  if(!active){for(const [node,old] of savedHudStyle){if(old.value)node.style.setProperty('display',old.value,old.priority);else node.style.removeProperty('display');}savedHudStyle.clear();}
+ };
  const label=el('strong'),ramp=el('div','dj-pri-ramp'),ends=el('div','dj-pri-ends');
- ends.append(el('span','','위험'),el('span','','주의'),el('span','','안전'));
+ ends.append(el('span','','매우 취약'),el('span','','취약'),el('span','','보통'),el('span','','양호'),el('span','','안전'));
  const coverage=el('small'),dismiss=button('끄기',()=>activate(null));
  const detailToggle=button('평가 기준 보기',()=>{const expanded=detailToggle.getAttribute('aria-expanded')!=='true';detailToggle.setAttribute('aria-expanded',String(expanded));detailBody.setAttribute('aria-hidden',String(!expanded));});
  detailToggle.classList.add('dj-pri-detail-toggle');detailToggle.setAttribute('aria-expanded','false');detailToggle.setAttribute('aria-controls','dj-pri-legend-detail-body');
@@ -76,7 +90,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
    // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
    if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
     filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.80,.36],'line-width':['interpolate',['linear'],['zoom'],11.5,1.2,13,1.65,15,2.5,17,4,19,6]}},
+    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.72,.27],'line-width':['interpolate',['linear'],['zoom'],11.5,.7,13,1.1,15,1.8,17,2.8,19,4.1]}},
     priOverlayAnchor(map.getStyle()?.layers));
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
     filter:['==',['geometry-type'],'Point'],
@@ -98,7 +112,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  }
  function activate(id){
   if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>typeof s.scores.lighting==='number'&&typeof s.scores.accidents==='number'):!dataset.factors.some(f=>f.id===id))))return;
-  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;doc.documentElement.dataset.djPriActive=id?'true':'false';popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
+  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
