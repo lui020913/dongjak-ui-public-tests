@@ -1337,3 +1337,29 @@ test('phone primary tabs fill the viewport while preserving the fixed bottom pil
  await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  await expect(page.locator('#app > .topbar')).toBeVisible();
 });
+
+test('walking vulnerability remains neutral and suppresses TIP after real layer activation',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ const top=page.locator('#djNext-layers'),panel=page.locator('#djNext-layer-panel');
+ await tap(page,top);await expect(panel).toBeVisible();
+ const open=panel.locator('[data-layer-key="pri"] .djNext-layer-action');
+ await expect(open).toHaveAttribute('aria-label','보행 취약도 지도 기능');
+ await open.scrollIntoViewIfNeeded();await open.click();
+ const dialog=page.locator('#dj-pri-dialog');
+ await expect(dialog).toBeVisible();
+ const gap=dialog.getByRole('button',{name:/제도적 사각지대/});
+ await expect(gap).toBeEnabled({timeout:30000});
+ await gap.click();await expect(dialog).toBeHidden();
+ const app=page.locator('#app'),tip=page.locator('#dj840-map-tip');
+ await expect(app).toHaveAttribute('data-dj-pri-visible','true');
+ await expect(page.locator('#dj-pri-legend')).toBeVisible();
+ // Force the legacy tip controller's observed mutation path; it must not
+ // resurrect the TIP under any active vulnerability analysis.
+ await page.evaluate(()=>document.getElementById('app').classList.toggle('dj-pri-qa-pulse'));
+ await expect.poll(()=>tip.evaluate(n=>n.hidden)).toBe(true);
+ await expect(tip).toBeHidden();
+ await expect(page.locator('#map .maplibregl-ctrl-scale')).toBeHidden();
+ await page.locator('#dj-pri-legend').getByRole('button',{name:'끄기'}).click();
+ await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
+});
