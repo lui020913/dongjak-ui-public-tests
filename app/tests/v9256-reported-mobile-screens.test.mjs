@@ -40,7 +40,8 @@ test('content-first map information uses measured height without trapping detail
  assert.match(sizing,/--dj9251-facility-content-height/);
  assert.match(facility,/height:100%!important/);
  assert.match(facility,/max-height:none!important;flex:1 1 auto!important/);
- assert.match(sizing,/Math\.floor\(v\*\.60\)/);
+ assert.match(sizing,/Math\.floor\(v\*\.56\)/);
+ assert.match(sizing,/Math\.floor\(v\*\.68\)/);
 });
 test('train marker size is capped at close zoom while opposing directions remain offset',()=>{
  const lanes=read('src/features/liveTransit/train-lanes.js');
