@@ -330,28 +330,11 @@ export function installV9272PhoneExperience({app,doc=document,win=window}){
  if(!app||!win.matchMedia('(max-width:699px)').matches||app.dataset.dj9272Ready==='1')return;
  app.dataset.dj9272Ready='1';
  // AI dialog close and its transition have one owner in v880-supabase-safety-ai.js.
- const mine=doc.getElementById('mine-panel');
- let schedule=0;
- const normalizeMine=()=>{
-  schedule=0;
-  if(!mine)return;
-  const language=mine.querySelector('.dj854-language-section');
-  const home=mine.querySelector('.dj834-my-home');
-  const host=home||mine.querySelector(':scope > .dj836-sheet-body');
-  if(language&&host&&(language.parentElement!==host||language.nextElementSibling))host.append(language);
-  // Legacy menu glyph was a text character. The current line-icon language
-  // remains on original buttons; preserve their events and semantic labels.
-  for(const node of mine.querySelectorAll('.dj834-setting-icon')){
-   if(node.querySelector('svg'))continue;
-   const title=node.closest('button')?.textContent||'';
-   const glyph=/테마|화면/.test(title)?'moon':/지도/.test(title)?'map':/즐겨/.test(title)?'shield':/업데이트/.test(title)?'alert':'layers';
-   node.innerHTML=phoneIcon(glyph);
-  }
- };
- if(mine){
-  const observer=new MutationObserver(()=>{if(!schedule)schedule=win.requestAnimationFrame(normalizeMine)});
-  observer.observe(mine,{childList:true,subtree:true});normalizeMine();
- }
+ // My Info's canonical navigation and language placement are owned by
+ // v834-my-info.js and v854-language.js. The previous MutationObserver
+ // forcibly appended the language row to the bottom of the home screen on
+ // every mutation, creating a second oversized card in real iPhone builds.
+ // This production decorator must not relocate or restyle settings nodes.
  // Subway line selection is owned by transport-map.js. Legacy patches must
  // never reinsert icons into the text-only origin/destination buttons.
  const gps=doc.getElementById('route-gps-start');
