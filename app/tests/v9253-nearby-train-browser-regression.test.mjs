@@ -58,7 +58,8 @@ test('mobile Safari moves map tools beneath actual header rather than fixed gues
 test('category-first community, two-part update editions, onboarding fade remain present',()=>{
   const html=read('index.html'),history=read('src/version-history-v7.js');
   const onboarding=read('src/v860-onboarding.js');
-  assert(html.indexOf('class="community-category-tabs"')<html.indexOf('class="community-heading-row"'));
+  assert(html.indexOf('class="community-category-tabs"')<html.indexOf('class="community-toolbar" role="group"'));
+  assert.equal(html.includes('class="community-heading-row"'),false);
    assert.match(history,/CHANGE_TYPE_GROUPS/);
    assert.match(history,/classifyReleaseNote/);
   assert.match(onboarding,/dj860-swapping/);

@@ -262,26 +262,21 @@ html body #app#app #map-quick-search-dropdown .dj854-search-empty{
   }
 }
 
-/* Shared language selector. */
+/* The hidden preference select owns persistence; the visible language row
+   navigates to the same settings subpage on all viewport widths. */
 #app #mine-panel .dj834-settings-group > .dj854-language-section{
-  display:grid;grid-template-columns:33px minmax(0,1fr) minmax(0,118px);
-  align-items:center;gap:13px;min-height:62px;box-sizing:border-box;
-  margin:0;padding:11px 14px;border:0;border-top:1px solid var(--dj-theme-line,#dce8e1);
+  box-sizing:border-box;display:flex;flex-direction:row;align-items:center;
+  min-width:0;min-height:62px;gap:13px;padding:11px 14px;
+  margin:0;border:0;border-top:1px solid var(--dj-theme-line,#dce8e1);
   border-radius:0;background:transparent;color:var(--dj-theme-ink,#21483b);
 }
 #app #mine-panel .dj854-language-section .dj854-language-icon{
-  background:var(--dj-theme-accent,#35676c);color:#fff;
+  flex:0 0 33px;background:var(--dj-theme-accent,#35676c);color:#fff;
 }
 #app #mine-panel .dj854-language-section label{
-  min-width:0;font-size:15px;font-weight:550;color:var(--dj-theme-ink,#21483b);
+  min-width:0;flex:1;font-size:15px;font-weight:550;color:var(--dj-theme-ink,#21483b);
 }
-#app #mine-panel .dj854-language-section select{
-  display:block;width:100%;min-width:0;max-width:118px;min-height:40px;
-  box-sizing:border-box;padding:6px 8px;border-radius:11px;
-  border:1px solid var(--dj-theme-line,#dce8e1);
-  background:var(--dj-theme-surface,#fff);color:var(--dj-theme-ink,#21483b);
-  font:inherit;font-size:13px;font-weight:650;
-}
+#app #mine-panel .dj854-language-section > select{display:none!important;}
 #app[data-theme="dark"] #mine-panel .dj854-language-section .dj854-language-icon{
   color:var(--dj-theme-ink,#f1f4f6);background:var(--dj-theme-selected,#31535b);
 }

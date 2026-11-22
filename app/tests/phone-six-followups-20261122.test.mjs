@@ -30,7 +30,7 @@ test('language selector is mounted into the account display group after initiali
   assert.match(language,/const ensurePlacement=/);
   assert.ok(language.includes('group.insertBefore(section,history||null)'));
   assert.ok(!language.includes('body.prepend(section)'),'language should not become a separate card');
-  assert.ok(full.includes('.dj834-settings-group > .dj854-language-section select'));
+  assert.ok(full.includes('.dj854-language-section > select'));
   assert.match(full,/touch-action:pan-y!important/);
   assert.ok(full.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
 });

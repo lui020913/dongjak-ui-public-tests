@@ -15,7 +15,8 @@ test('community categories lead the page before sort/search controls',()=>{
  assert(idx>0);
  assert(idx<panel.indexOf('class="dj-page-intro"'));
  assert(idx<panel.indexOf('id="community-search"'));
- assert(idx<panel.indexOf('class="community-heading-row"'));
+ assert(idx<panel.indexOf('class="community-toolbar" role="group"'));
+ assert.equal(panel.includes('class="community-heading-row"'),false);
  assert.equal((panel.match(/class="community-category-tabs"/g)||[]).length,1);
  for(const type of ['전체','보행 불편','개선 제안','동네 질문','동네생활'])assert(panel.includes('data-community-filter="'+type+'"'));
 });
