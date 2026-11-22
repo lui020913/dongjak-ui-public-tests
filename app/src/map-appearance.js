@@ -37,7 +37,7 @@ function proceduralGrass(isDark){
  */
 export const GREEN_PALETTE={
   light:{park:'#a5ca92',forest:'#92bd86'},
-  dark:{park:'#373c40',forest:'#32373b'}
+  dark:{park:'#405248',forest:'#35483f'}
 };
 const forestId=(id='')=>/forest|wood|woodland|treecover|scrub/.test(String(id).toLowerCase());
 const forestTypes=['forest','wood','woodland','trees','wooded','tree','scrub','natural_wood'];
@@ -103,7 +103,7 @@ export function installForestShade({map,app}){
 /** v5.12.6 — Opaque overhead footprints prevent double-shading where native and GIS buildings overlap. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
-  dark:Object.freeze({footprint:'#42474f',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#30343b',nearOpacity:0.88,farOpacity:0.82})
+  dark:Object.freeze({footprint:'#52616b',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#46555f',nearOpacity:0.88,farOpacity:0.82})
 });
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill')return false;
