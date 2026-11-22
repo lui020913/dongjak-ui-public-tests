@@ -38,19 +38,18 @@ export function installPwaStatusTone(doc=document,win=window) {
       }
       if(!bridge){bridge=doc.createElement('div');bridge.id='dj-ios-pwa-status-bridge';bridge.setAttribute('aria-hidden','true');app.appendChild(bridge);}
       const visible=id=>{const n=doc.getElementById(id);return !!n&&!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden';};
-      const dimmed=!!doc.getElementById('dj-ai-search-modal')?.open||(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))||app.classList.contains('map-controls-open')||['map-gesture-guide','djNext-layer-panel','dj860-onboarding','dj854-weather-sheet','dj-map-settings','dj-app-about','version-history-modal','dj833-night-modal','dj840-theme-confirm','dj-transit-signin-prompt','dj832-dongjak-boundary','dj832-info-sheet','dj832-data-sheet','dj-ai-search-modal'].some(id=>id!=='dj-ai-search-modal'&&visible(id));
-      if(root.dataset.djPwaDimmed!==String(dimmed))root.dataset.djPwaDimmed=String(dimmed);
-      // Keep the OS-owned hint stable; a fixed web gradient bridges to the dimmed map.
+      // Opening an information window must not darken or blur the map behind it.
+      // Keep the former status-bridge layer disabled even when older dialog
+      // classes remain on the app. The top toolbar's own blur is unaffected.
+      if(root.dataset.djPwaDimmed!=='false')root.dataset.djPwaDimmed='false';
       const aiOpen=!!doc.getElementById('dj-ai-search-modal')?.open;
       const nightActive=app.dataset.sangdoNight==='on';
-      const nightPrompt=visible('dj833-night-modal');
-      // Before consent, blend the light iOS status surface with the modal
-      // scrim; after activation use the actual night-map tone.
+      // Night consent is a floating card; the native edge stays undimmed.
       const startup=visible('map-startup-overlay');
       const onboarding=visible('dj860-onboarding');
       // The loading surface takes precedence if it briefly overlaps onboarding.
       // Once loading ends, the first-run shell owns exactly its own native status tone.
-      const color=startup?(theme==='dark'?'#22282e':'#edf3ef'):onboarding?(theme==='dark'?'#22282e':'#f5faf7'):nightActive?'#22282e':nightPrompt?(theme==='dark'?'#22282e':'#aab8af'):aiOpen?(theme==='dark'?'#22282e':'#ffffff'):(theme==='dark'?'#22282e':'#edf3ef');
+      const color=startup?(theme==='dark'?'#22282e':'#edf3ef'):onboarding?(theme==='dark'?'#22282e':'#f5faf7'):nightActive?'#22282e':aiOpen?(theme==='dark'?'#22282e':'#ffffff'):(theme==='dark'?'#22282e':'#edf3ef');
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');
