@@ -21,13 +21,13 @@ test('light map labels have dark text with a pale halo, dark theme is reversed',
   assert.equal(dark.text,'#ebf7f3');
   assert.equal(dark.halo,'#172a30');
   const theme=read('src/ui-environment.js');
-  assert.match(theme,/mapLabelLightPaint=Object\\.freeze\\(\\{color:'#26352f',halo:'rgba\\(255,255,255,0\\.97\\)'/);
-  assert.match(theme,/semanticSymbolPattern/);
-  assert.match(theme,/themeState\\.value==='dark'/);
-  assert.match(theme,/mapLabelLightPaint\\.color/);
-  assert.match(theme,/mapLabelLightPaint\\.halo/);
-  assert.match(theme,/map\\.setPaintProperty\\(id,'text-color',themeState\\.value==='dark'\\?'#e9f0f3':mapLabelLightPaint\\.color\\)/);
-  assert.match(theme,/map\\.setPaintProperty\\(id,'text-halo-color',themeState\\.value==='dark'\\?'rgba\\(34,39,45,0\\.95\\)':mapLabelLightPaint\\.halo\\)/);
+  assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});"));
+  assert.ok(theme.includes('semanticSymbolPattern'));
+  assert.ok(theme.includes('themeState.value===\'dark\''));
+  assert.ok(theme.includes("'text-color':mapLabelLightPaint.color"));
+  assert.ok(theme.includes("'text-halo-color':mapLabelLightPaint.halo"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':mapLabelLightPaint.color)"));
+  assert.ok(theme.includes("map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':mapLabelLightPaint.halo)"));
 });
 test('popup dim/blur is removed, but existing top-toolbar blur is preserved',()=>{
   const theme=read('src/theme-contract.css');
