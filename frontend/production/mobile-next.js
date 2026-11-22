@@ -329,26 +329,7 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
 export function installV9272PhoneExperience({app,doc=document,win=window}){
  if(!app||!win.matchMedia('(max-width:699px)').matches||app.dataset.dj9272Ready==='1')return;
  app.dataset.dj9272Ready='1';
- const modal=doc.getElementById('dj-ai-search-modal');
- const reduced=()=>win.matchMedia('(prefers-reduced-motion:reduce)').matches;
- let closing=false,closeTimer=0;
- const closeAi=()=>{
-  if(!modal?.open||closing)return;
-  closing=true;modal.classList.add('dj9272-ai-leave');
-  win.clearTimeout(closeTimer);
-  closeTimer=win.setTimeout(()=>{
-   modal.classList.remove('dj9272-ai-leave');closing=false;
-   if(modal.open)modal.close();
-  },reduced()?0:255);
- };
- doc.addEventListener('click',e=>{
-  if(!modal?.open)return;
-  const closeButton=e.target.closest?.('#dj-ai-search-modal :is(.dj-ai-close,#dj-ai-close,#dj800-ai-search-close,[data-dj-ai-close])');
-  if(!closeButton)return;
-  e.preventDefault();e.stopImmediatePropagation();closeAi();
- },true);
- modal?.addEventListener('cancel',e=>{e.preventDefault();closeAi()});
- modal?.addEventListener('close',()=>{win.clearTimeout(closeTimer);closing=false;modal.classList.remove('dj9272-ai-leave')});
+ // AI dialog close and its transition have one owner in v880-supabase-safety-ai.js.
  const mine=doc.getElementById('mine-panel');
  let schedule=0;
  const normalizeMine=()=>{
