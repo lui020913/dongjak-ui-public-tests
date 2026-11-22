@@ -24,8 +24,9 @@ test('all sliding sheets have a visible, monotonic fade; closing dims before rem
 test('transit sheet content size removes empty space but allows full expansion',()=>{
   const short=compactTransportHeight({header:90,grip:16,body:85,viewport:900});
   const long=compactTransportHeight({header:90,grip:16,body:800,viewport:900});
-  assert(short<300);assert.equal(long,540);assert(long<=900*.60);
-  assert(compactTransportHeight({header:0,grip:0,body:0,viewport:900})>=196);
+  // First open must reveal live ETA cards instead of an almost empty header.
+  assert(short>=900*.55);assert.equal(long,612);assert(long<=900*.68);
+  assert(compactTransportHeight({header:0,grip:0,body:0,viewport:900})>=900*.55);
   const css=source('mobile-ui/current.css');
   assert.match(css,/--dj9251-transport-content-height/);
   assert.match(css,/#transport-sheet:not\(\[hidden\]\):not\(\.dj871-sheet-expanded\)/);
@@ -55,4 +56,29 @@ test('natural transit measurement ignores stretched scroll viewport and hidden r
   const actual=measureFlowContent(body,{getComputedStyle:style});
   assert.equal(actual,127);
   assert.notEqual(actual,body.scrollHeight);
+});
+
+test('transport popup has only one camera focus and no delayed refocus',()=>{
+  const transport=source('transport-map.js');
+  assert.doesNotMatch(transport,/setTimeout\(settleFocus,420\)/);
+  assert.doesNotMatch(transport,/requestAnimationFrame\(\(\)=>globalThis\.requestAnimationFrame\?\.\(settleFocus\)\)/);
+  assert.match(transport,/const alreadyVisible=projected/);
+  assert.match(transport,/dongjak:transport-dismiss-start/);
+  const place=source('place-details.js');
+  assert.match(place,/if\(!visible\)/);
+});
+
+test('AI dialog has one close owner and never opens on a transport close gesture',async()=>{
+  const ai=source('v880-supabase-safety-ai.js');
+  const css=source('v880-supabase-safety-ai.css');
+  const fs=await import('node:fs');
+  const {existsSync,readFileSync}=fs;
+  const local=new URL('../src/mobile-next.js',import.meta.url);
+  const original=new URL('../../frontend/production/mobile-next.js',import.meta.url);
+  const presentation=readFileSync(existsSync(local)?local:original,'utf8');
+  assert.match(ai,/transportDismissedAt/);
+  assert.match(ai,/Date\.now\(\)-transportDismissedAt<750/);
+  assert.match(ai,/modal\.classList\.add\('dj887-ai-closing'\)/);
+  assert.doesNotMatch(presentation,/dj9272-ai-leave/);
+  assert.match(css,/dj9251-ai-content-enter/);
 });
