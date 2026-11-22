@@ -61,10 +61,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   }else previous?.removeAttribute?.('data-dj-tab-outgoing');
   // We never defer the destination state: replay navigates synchronously before any fade.
   // The navigation dock itself never fades, scales or shifts.
-  if(!reduced()&&app.dataset.tab!=='map'){
+  const revealIncoming=()=>{
+   if(reduced()||app.dataset.tab==='map')return;
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
-  }
+  };
+  revealIncoming();
   if(reduced()){clearEntrance();return;}
   enterTimer=win.setTimeout(clearEntrance,215);
  }
