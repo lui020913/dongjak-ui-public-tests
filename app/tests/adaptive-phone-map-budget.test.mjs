@@ -22,7 +22,7 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
  const {installScaleDocking}=await import('../src/map-scale-docking.js');
  const originalWindow=globalThis.window;
  const originalRaf=globalThis.requestAnimationFrame;
- const listeners=new Map(),handlers=new Map(),applied=[];
+ const listeners=new Map(),handlers=new Map(),applied=[];let repeatedMoveClasses=0;
  const mockWindow={
   innerWidth:390,innerHeight:844,devicePixelRatio:3,navigator:{deviceMemory:8},
   matchMedia:()=>({matches:true}),
@@ -33,7 +33,7 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
  const cssStyle={removeProperty(){}};
  const app={ownerDocument:doc,dataset:{tab:'map',djPhoneBudget:'normal'},
   querySelector:()=>null,addEventListener(){},removeEventListener(){},
-  classList:{add(){},remove(){}},style:cssStyle};
+  classList:{add(){repeatedMoveClasses++},remove(){}},style:cssStyle};
  const container={querySelector:()=>null};
  const map={on:(type,cb)=>handlers.set(type,cb),off:type=>handlers.delete(type),
   getContainer:()=>container,getPixelRatio:()=>1.25,setPixelRatio:value=>applied.push(value),
@@ -44,6 +44,7 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
   const dispose=installScaleDocking({map,app,overview});
   handlers.get('movestart')();handlers.get('moveend')();listeners.get('resize')();
   assert.deepEqual(applied,[],'phone DPR belongs to adaptive phone render policy, not HUD');
+  assert.equal(repeatedMoveClasses,0,'HUD must not set a competing phone motion class');
   dispose();
   delete app.dataset.djPhoneBudget;
   const fallback=installScaleDocking({map,app,overview});
