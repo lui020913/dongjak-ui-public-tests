@@ -272,6 +272,8 @@ export function installLanguagePreference(doc=document,win=window){
   // My Info can initialize after this module. Keep language in the actual
   // App & Display group instead of leaving an orphan below My Activity.
   const ensurePlacement=()=>{
+    // Once My Info opens its child Language screen, keep the native picker there.
+    if(section.dataset.djLanguageDetail==='true')return;
     const group=mine.querySelector('.dj834-my-home .dj834-settings-group');
     if(!group)return;
     const history=group.querySelector('[data-dj834-action="history"]');
