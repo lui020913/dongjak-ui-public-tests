@@ -4,22 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" id="dj-browser-theme-color" content="#f3f7f5" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="동작하는 안전지도" />
     <link rel="manifest" id="dj-app-manifest" href="/manifest-light.webmanifest" />
     <link rel="apple-touch-icon" id="dj-apple-touch-icon" sizes="180x180" href="/icons/dongjak-ios-home-180.png" />
     <script>
-      // A fresh app launch begins in light mode. Only the short-lived one-shot
-      // iOS native-status refresh retains a manually chosen theme across reload.
+      // Light is the only ordinary app theme. Night visibility changes the
+      // effective palette after the map has loaded, never at cold start.
       (function(){
-        var themeReload=null;
-        try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
-        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
-        var displayTheme=themeReload ? themeReload.theme : 'light';
-        // iOS native chrome requires a real reload. This one-shot refresh is
-        // NOT a fresh app launch: suppress the loader and guest onboarding.
-        if(themeReload)document.documentElement.dataset.djThemeRefresh='true';
+        try{sessionStorage.removeItem('dj-manual-theme-reload-v1');}catch(_e){}
+        var displayTheme='light';
         document.documentElement.dataset.theme=displayTheme;
         var iconSuffix=displayTheme==='dark'?'dark':'light';
         // iOS Home Screen art is independent of the application's light/dark theme.
