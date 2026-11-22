@@ -51,3 +51,15 @@ test('team factor preserves 1,686 shared IDs, null 683 and changed count score 1
  assert.equal(factor.scores.find(x=>x.id==='278024801_2').score,67.9);
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });
+
+test('protected release validates exactly the Sangdo1 scoped GIS files used by the map',async()=>{
+ const script=await readFile(resolve(dir,'../../scripts/build-mobile-first-overhaul.sh'),'utf8');
+ const geoPath="protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson";
+ const factorPath="pri/sangdo1_protection_gap_2factor_adminscope_factor.json";
+ assert.ok(script.includes("readFileSync(root+'"+geoPath+"'"),'release must inspect active clipped GeoJSON');
+ assert.ok(script.includes("readFileSync(root+'"+factorPath+"'"),'release must inspect active PRI factor');
+ assert.ok(!script.includes("readFileSync(root+'protection-zone/sangdo1_policy_gap_2factor_300m_20261122.geojson'"),'archived scope cannot gate the current release');
+ assert.ok(!script.includes("readFileSync(root+'pri/sangdo1_protection_gap_2factor_factor.json'"),'archived PRI factor cannot gate the current release');
+ assert.ok(script.includes("geo.features?.length!==1606"),'administrative clipping must remain guarded');
+ assert.ok(script.includes("factor.scores.filter(x=>x.score===null).length!==683"),'missing-factor count must remain guarded');
+});
