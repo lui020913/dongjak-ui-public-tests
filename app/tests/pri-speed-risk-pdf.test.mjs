@@ -74,9 +74,9 @@ test('the real vulnerability modal loads and renders the PDF-based mode without 
  assert.match(js,/id==='speed'\?speedRiskDisplay\(speedSource/);
  assert.match(js,/id==='speed'\?Boolean\(speedSource\?\.features\?\.length\)/);
  assert.match(js,/map\.setLayoutProperty\(SPEED_LINE,'visibility',mode==='speed'\?'visible':'none'\)/);
- assert.match(js,/mode==='speed'\?'제한속도 위험도 · 표준노드링크'/);
+ assert.match(js,/id==='speed'\?'제한속도 위험도 · 표준노드링크'/);
  assert.match(js,/score:null,displayScore:0,evaluated:false,middleSchoolReview:true/);
- assert.match(js,/source.*SPEED_RISK_SOURCE/);
+ assert.match(js,/win\.fetch\(SPEED_RISK_SOURCE/);
  const manifest=read('../public/data/pri/manifest.json');
  assert.ok(manifest.patches.every(x=>!x.includes('speed')));
 });
