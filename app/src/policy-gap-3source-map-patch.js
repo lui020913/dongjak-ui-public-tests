@@ -66,13 +66,13 @@ function popupNode(p,mode){
  return root;
 }
 function createPanel(){
- const parent=document.getElementById('protection-zone-controls');
+ const parent=document.getElementById('walking-vulnerability-layer-controls');
  if(!parent)return null;
  let panel=document.getElementById('pza3-panel');if(panel)return panel;
  if(!document.getElementById('pza3-style')){
   const style=document.createElement('style');style.id='pza3-style';style.textContent=STYLES;document.head.append(style);
  }
- panel=document.createElement('section');panel.id='pza3-panel';panel.setAttribute('aria-label','300m 제도적 보호 공백 연구지도');
+ panel=document.createElement('section');panel.id='pza3-panel';panel.setAttribute('aria-label','보행 취약도 · 300m 제도적 보호 공백 연구지도');
  const header=document.createElement('strong');header.textContent='제도적 보호 공백 · 3자료 평가';
  const note=document.createElement('p');note.textContent='시설·지정 경계 + 도로폭 + 공식 학구도 · 연구용 300m 시범점수';
  const toggle=document.createElement('button');toggle.id='pza3-toggle';toggle.type='button';toggle.textContent='그라데이션 지도 표시';toggle.setAttribute('aria-pressed','false');
@@ -86,7 +86,7 @@ function createPanel(){
  const status=document.createElement('span');status.id='pza3-status';status.setAttribute('role','status');status.textContent='연구지도 꺼짐';
  const caution=document.createElement('p');caution.textContent='임시 가중치 60/25/15 · 학구는 실제 통학로가 아닙니다. 길찾기·PRI 점수에는 적용하지 않습니다.';
  panel.append(header,note,toggle,modes,gradient,ticks,gray,status,caution);
- const after=parent.querySelector('.pza-main-actions');if(after)after.insertAdjacentElement('afterend',panel);else parent.append(panel);
+ parent.append(panel);
  return panel;
 }
 export function installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay}={}){

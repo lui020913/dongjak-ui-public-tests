@@ -28,3 +28,16 @@ test('research patch is wired without replacing existing protection or route too
  assert.ok(main.includes("installProtectionZoneMap({map,maplibregl,app,nightMode})"));
  assert.ok(main.includes("installBochaRoadLayer({map,maplibregl,app})"));
 });
+
+test('three-source overlay belongs to Layer → 보행 취약도, not the safety drawer',async()=>{
+ const html=await readFile(path.resolve(here,'../index.html'),'utf8');
+ const source=await readFile(path.resolve(here,'../src/policy-gap-3source-map-patch.js'),'utf8');
+ const optionsStart=html.indexOf('id="map-advanced-controls"');
+ const category=html.indexOf('id="walking-vulnerability-layer-group"');
+ const target=html.indexOf('id="walking-vulnerability-layer-controls"');
+ const base=html.indexOf('id="base-layer-controls"');
+ assert.ok(optionsStart>=0 && category>optionsStart && target>category && base>target,'vulnerability category must appear under map layer drawer');
+ assert.ok(html.slice(category,target).includes('<summary>보행 취약도</summary>'));
+ assert.ok(source.includes("document.getElementById('walking-vulnerability-layer-controls')"));
+ assert.ok(!source.includes("document.getElementById('protection-zone-controls')"));
+});
