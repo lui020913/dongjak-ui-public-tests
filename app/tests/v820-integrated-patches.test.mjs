@@ -22,7 +22,7 @@ test('merged map keeps existing local station indexing and full mobile search pr
 });
 test('place info retains latest mobile pin and offset while enabling save/share',()=>{
   const src=read('src/place-details.js');
-  for(const item of ['desiredY','mobilePin?-15:-4','min(116','toggleSavedPlace','placeShareUrl','recordRecentPlace'])assert.ok(src.includes(item),item);
+  for(const item of ['const visible=point','if(!visible)','mobilePin?-15:-4','min(116','toggleSavedPlace','placeShareUrl','recordRecentPlace'])assert.ok(src.includes(item),item);
 });
 test('routing, comparison and voice picker all operate in the same main integration',()=>{
   const src=read('src/main.js');
