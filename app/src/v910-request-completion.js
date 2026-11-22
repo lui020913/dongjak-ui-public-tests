@@ -103,6 +103,41 @@ export function installRequestCompletion(doc=document,win=window){
       const panel=doc.getElementById('route-panel');
       panel.append(footer);footer.append(calc);
     }
+    // The release overlay has highly specific competing footer rules. A CSS
+    // declaration alone did not prevent the fixed nav intercepting route-calc
+    // in a real 390px Playwright run. Anchor using the actual nav geometry and
+    // inline !important (higher priority than all authored CSS selectors).
+    const footer=doc.getElementById('dj910-route-footer');
+    const route=doc.getElementById('route-panel');
+    if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&visible(nav)&&n&&Number.isFinite(n.top)){
+      const set=(prop,value)=>{
+        if(footer.style.getPropertyValue(prop)!==value||
+            footer.style.getPropertyPriority(prop)!=='important')
+          footer.style.setProperty(prop,value,'important');
+      };
+      const edge=Math.max(8,Math.round((win.innerHeight||h)-n.top+12));
+      set('position','fixed');
+      set('inset','auto');
+      set('bottom',edge+'px');
+      set('left','16px');
+      set('right','16px');
+      set('width','auto');
+      set('margin','0');
+      set('padding','0');
+      set('z-index','7005');
+      set('pointer-events','auto');
+      // Fixed positioning can still have a transformed containing block on
+      // some PWA browsers. Correct any *measured* overlap, not a guessed gap.
+      set('transform','none');
+      const bounds=calc.getBoundingClientRect?.();
+      const delta=bounds?Math.max(0,Math.ceil(bounds.bottom-n.top+10)):0;
+      if(delta>0)set('transform',`translateY(-${delta}px)`);
+      route.dataset.djRouteCtaDocked='true';
+    }else if(footer&&footer.style?.getPropertyPriority?.('position')==='important'){
+      for(const prop of ['position','inset','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
+        footer.style.removeProperty(prop);
+      route?.removeAttribute?.('data-dj-route-cta-docked');
+    }
     const safety=doc.querySelector('#bottom-nav [data-tab="map"] .nav-icon');
     if(safety&&!safety.querySelector('.dj910-map-glyph')){
       safety.replaceChildren();
