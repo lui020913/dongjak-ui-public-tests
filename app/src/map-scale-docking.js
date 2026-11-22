@@ -219,9 +219,18 @@ export function installScaleDocking({map,app,overview}={}){
     if(disposed)return;
     const scale=scaleElement();
     if(scale && window.innerWidth<700 && shouldHideMobileScale(app,app.ownerDocument,window)){
+      const weather=app.ownerDocument.getElementById('dj854-weather-sheet');
+      const weatherOpen=Boolean(weather&&!weather.hidden);
       applyImportant(scale,'visibility','hidden');
       const chip=scale.querySelector('.maplibregl-ctrl-scale');
       if(chip)applyImportant(chip,'visibility','hidden');
+      // Visibility can be rewritten by legacy map HUD controllers. During an
+      // active weather overlay also suppress layout paint; update() restores
+      // the measured scale's original dimensions when the overlay closes.
+      if(weatherOpen){
+        applyImportant(scale,'display','none');
+        if(chip)applyImportant(chip,'display','none');
+      }
     }
     schedule();
   };
@@ -260,6 +269,11 @@ export function installScaleDocking({map,app,overview}={}){
       // a blocker: it occupies a reserved right-hand HUD lane beside the scale.
       const scaleChip=scale.querySelector('.maplibregl-ctrl-scale');
       if(shouldHideMobileScale(app,app.ownerDocument,window)){
+        const weather=app.ownerDocument.getElementById('dj854-weather-sheet');
+        if(weather&&!weather.hidden){
+          applyImportant(scale,'display','none');
+          if(scaleChip)applyImportant(scaleChip,'display','none');
+        }
         applyImportant(scale,'visibility','hidden');
         if(scaleChip)applyImportant(scaleChip,'visibility','hidden');
         return;
