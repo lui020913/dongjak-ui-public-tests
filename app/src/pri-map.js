@@ -1,4 +1,5 @@
 import {parseImport,segmentScore,observedFactorScore,displayFeatures,summarize} from './pri-data.mjs';
+import {scopedPolicyFeatures} from './pri-scope-data.mjs';
 import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import './pri-map.css';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point';
@@ -10,16 +11,6 @@ const protectionGapColors=['case',['get','evaluated'],['interpolate',['linear'],
 /** Shared PRI engine stores normalized safety scores, while all public map labels are risk scores (100-safety). */
 const riskValue=value=>typeof value==='number'&&Number.isFinite(value)?+(100-value).toFixed(1):null;
 const displayRisk=collection=>({...collection,features:collection.features.map(f=>({...f,properties:{...f.properties,score:f.properties.evaluated?riskValue(f.properties.score):null,displayScore:f.properties.evaluated?100-f.properties.displayScore:0}}))});
-// The protection-gap factor uses the SAME 25m segment IDs, but must draw the
-// genuinely clipped inside-dong centerlines rather than the uncut lighting network.
-export function scopedPolicyFeatures(geo){
- if(geo?.metadata?.schema!=='sangdo1_policy_gap_2factor_adminscope_risk_v3'||geo?.metadata?.administrative_scope_code!=='1159053000'||!Array.isArray(geo.features))throw Error('상도1동 경계 GIS 자료가 유효하지 않습니다.');
- return {type:'FeatureCollection',features:geo.features.map(f=>{
-  const score=f.properties?.combined_new_score;
-  const evaluated=typeof score==='number'&&Number.isFinite(score);
-  return {type:'Feature',geometry:f.geometry,properties:{segmentId:f.properties.segment_id,name:f.properties.road_name,score:evaluated?score:null,displayScore:evaluated?score:0,evaluated,modeled:false,lengthM:Number(f.properties.clipped_length_m)||0}};
- })};
-}
 export function installPriMap({map,maplibregl,app,doc=document,win=window,restoreMode=null}){
  if(doc.getElementById('dj-pri-toggle'))return;
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};

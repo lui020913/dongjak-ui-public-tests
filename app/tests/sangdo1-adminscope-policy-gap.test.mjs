@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve} from 'node:path';
-import {scopedPolicyFeatures} from '../src/pri-map.js';
+import {scopedPolicyFeatures} from '../src/pri-scope-data.mjs';
 const dir=dirname(fileURLToPath(import.meta.url));
 const load=async name=>JSON.parse(await readFile(resolve(dir,'../public/data/protection-zone/'+name),'utf8'));
 const official=await load('boundary_reference.geojson'),geo=await load('sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson'),registry=await load('sangdo1_admin_facility_registry_20261122.json');
