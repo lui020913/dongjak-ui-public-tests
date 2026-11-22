@@ -10,7 +10,7 @@
       --dj-primary-page-edge:rgba(47,104,82,.16);
     }
     html body #app#app#app#app#app[data-theme="dark"] {
-      --dj-primary-page-bg:#252b32;
+      --dj-primary-page-bg:#22282e;
       --dj-primary-page-ink:#f1f4f6;
       --dj-primary-page-edge:rgba(190,200,210,.21);
     }
@@ -63,7 +63,7 @@
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body,
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
-      background:var(--dj-primary-page-bg,#252b32)!important;
+      background:var(--dj-primary-page-bg,#22282e)!important;
       color:var(--dj-primary-page-ink,#f1f4f6)!important;
     }
 
