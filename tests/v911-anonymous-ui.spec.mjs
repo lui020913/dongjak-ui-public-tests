@@ -119,7 +119,7 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
- await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(23, 25, 29)'); // Unified charcoal primary page and status edge.
+ await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(34, 40, 46)'); // Unified charcoal primary page and status edge.
 });
 test('phone More functions live in collapsible My Info groups',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
@@ -875,8 +875,8 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
- await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#17191d');
- await expect(sample).toHaveCSS('background-color','rgb(23, 25, 29)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(23, 25, 29)');
+ await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#22282e');
+ await expect(sample).toHaveCSS('background-color','rgb(34, 40, 46)');await expect(page.locator('body')).toHaveCSS('background-color','rgb(34, 40, 46)');
 });
 
 
