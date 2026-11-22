@@ -36,9 +36,9 @@ test('night mode does not click theme button or override saved manual choice',()
   assert.match(env,/safeStorageSet\(THEME_KEY,themeState\.preference\)/);
 });
 
-test('first-run onboarding completion prevents guest reappearance',()=>{
+test('guest onboarding reappears on a new signed-out session',()=>{
   const tour=read('src/v860-onboarding.js');
-  assert.match(tour,/authState==='signed-out'\|\|pendingGuestOnboarding\)&&!readSeen\(win\)/);
+  assert.ok(tour.includes("if(authState==='signed-out'||pendingGuestOnboarding)"));
   assert.ok(tour.includes("if(!auto)overlay.dataset.dj860Manual='true'"));
 });
 
