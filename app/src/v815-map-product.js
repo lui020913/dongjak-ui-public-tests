@@ -134,8 +134,8 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
   waySection.append(wayDetails);
   // Show waypoint and rail choices before the pedestrian route calculation.
   const calcBtn=document.getElementById('route-calc');calcBtn?.before(waySection);
-  const transit=el('section','dj815-route-section');transit.id='dj815-rail-planner';
-  transit.append(el('h3','', '도보 + 지하철 이동안'));
+  const transit=el('details','dj815-route-section');transit.id='dj815-rail-planner';
+  transit.append(el('summary','', '도보 + 지하철 이동안 · 펼쳐보기'));
   transit.append(el('p','dj815-helper','확인된 역사 위치와 노선 순서를 기반으로 탐색합니다. 지하철 운행 시간·배차·실시간 환승 시간은 포함되지 않습니다. 버스 환승 경로는 데이터가 확보될 때까지 계산하지 않습니다.'));
   const findRail=button('지하철 연계 이동안 찾기',renderTransit);
   transit.append(findRail);
