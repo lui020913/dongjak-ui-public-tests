@@ -43,17 +43,37 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
   const body=panel.querySelector('.dj875-transit-scroll');
   const header=panel.querySelector('.transport-panel-head');
   const grip=panel.querySelector(':scope > .handle');
-  let raf=0,disposed=false;
+  let raf=0,disposed=false,settleTimer=0,settleUntil=0;
+  let expanded=panel.classList.contains('dj871-sheet-expanded');
+  let busFloor=0,lastKind='';
   const sync=()=>{
     raf=0;
     if(disposed)return;
-    if(panel.hidden||panel.classList.contains('dj871-sheet-expanded'))return;
+    if(panel.hidden){busFloor=0;lastKind='';return;}
+    const nowExpanded=panel.classList.contains('dj871-sheet-expanded');
+    if(nowExpanded!==expanded){
+      expanded=nowExpanded;
+      // Drag release may still be animating the old sheet transform.
+      // Never recompute the compact height halfway through that motion.
+      settleUntil=Date.now()+240;
+      if(settleTimer)win.clearTimeout(settleTimer);
+      settleTimer=win.setTimeout(()=>{settleTimer=0;schedule();},250);
+    }
+    if(nowExpanded || Date.now()<settleUntil ||
+       panel.classList.contains('dj-sheet-dragging') ||
+       panel.classList.contains('dj889-sheet-transitioning') ||
+       panel.hasAttribute('data-dj810-animating'))return;
     const viewport=win.visualViewport?.height||win.innerHeight;
-    const size=compactTransportHeight({
+    let size=compactTransportHeight({
       viewport,header:header?.getBoundingClientRect().height||0,
       grip:grip?.getBoundingClientRect().height||0,
       body:measureFlowContent(body,win)
     });
+    const kind=panel.dataset.kind||'';
+    if(kind!==lastKind){busFloor=0;lastKind=kind;}
+    // Realtime bus arrival cards can temporarily disappear during refresh.
+    // Holding the current compact floor avoids a visible full-sheet flash.
+    if(kind==='bus'){size=Math.max(size,busFloor);busFloor=size;}
     const value=size+'px';
     if(panel.style.getPropertyValue('--dj9251-transport-content-height')!==value)
       panel.style.setProperty('--dj9251-transport-content-height',value);
@@ -80,6 +100,7 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
   schedule();
   return ()=>{
     disposed=true;
+    if(settleTimer)win.clearTimeout(settleTimer);
     if(raf){win.cancelAnimationFrame?.(raf);win.clearTimeout?.(raf);}
     observer?.disconnect();panel._djCompactResizeObserver?.disconnect();
     delete panel._djCompactResizeObserver;
