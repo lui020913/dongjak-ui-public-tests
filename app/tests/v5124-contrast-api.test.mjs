@@ -30,7 +30,7 @@ test('v5.12.4: base map only changes building footprints when map pitch changes'
   } finally{globalThis.document=previous;}
   assert.equal(changed.length,6);
   assert.ok(changed.every(x=>x[0]==='building'));
-  assert.equal(changed[4][2],0);
+  assert.deepEqual(changed[4][2],['interpolate',['linear'],['zoom'],13,0,15,0]);
   assert.deepEqual(changed[5],['building','fill-antialias',false]);
 });
 
