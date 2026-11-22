@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Release the approved map-layer location correction from PR #261 (merged main 02466b600c867abdb2b0a0dd44d26749bba37685): put the Sangdo1 three-source 300m institutional protection-gap overlay only in Map → Layer → Walking vulnerability (보행 취약도), not the former Safety → Protection zones menu. Preserve 0–100 gradient, gray NULL, child/senior/combined scores, 5/6-team-average rule, all current mobile, theme, PRI, routing and report behavior. PR full app CI run #44969190778 succeeded; require exact-source Preview, 12 mobile browser shards, visual/design QA and guarded Production; never bypass gates.",
-  "attempt": 229,
+  "purpose": "Fix the user-confirmed missing layer in the ACTUAL native PRI walking-vulnerability dialog: PR #263 merges 1,686 Sangdo1 25m policy-gap factor scores into the existing '제도적 사각지대' row, replacing '미제출' with an enabled 3자료·300m selector. 1,086 numeric scores, 600 NULL gray segments, requested 0..100 gradient, original 5/6 average research semantics. Remove the wrong standalone map-options vulnerability group and stop its duplicate overlay. Keep existing PRI, lighting, accidents, theme and route tools. Full source CI #44971197128 passed. Require exact Preview+12 mobile browser shards+design QA+guarded Production without bypass.",
+  "attempt": 230,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Not a retry of a failed source: user corrected the intended navigation location. PR #261 changes only the map layer menu group, the overlay mount target and its regression test; full app CI succeeded. Previous Production attempt #228 remains the rollback baseline until exact new release is verified.",
+  "last_retry_reason": "Earlier production attempt #229 successfully deployed wrong navigation placement, leaving native PRI '제도적 사각지대 · 미제출' disabled in user screenshot. PR #263 corrected data integration to same network and removed stale overlay; 2 outdated test expectations fixed; full CI success. Rebuild exact changed source and preserve prior Production rollback until success.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
