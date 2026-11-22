@@ -1398,3 +1398,103 @@ test('walking vulnerability remains neutral and suppresses TIP after real layer 
  await page.locator('#dj-pri-legend').getByRole('button',{name:'끄기'}).click();
  await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
 });
+
+test('phone production settings, cards and nearby overlays follow rendered geometry',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ await tap(page,tab(page,'mine'));
+ const mine=page.locator('#mine-panel'),home=mine.locator('.dj834-my-home');
+ await expect(home).toBeVisible();
+ const lang=mine.locator('.dj854-language-section');
+ await expect(lang).toBeVisible();
+ const langGeometry=await lang.evaluate(node=>{
+  const r=node.getBoundingClientRect(),parent=node.parentElement,p=parent.getBoundingClientRect(),css=getComputedStyle(node);
+  return {inGroup:parent.classList.contains('dj834-settings-group'),display:css.display,top:r.top,bottom:r.bottom,groupTop:p.top,groupBottom:p.bottom,height:r.height};
+ });
+ expect(langGeometry.inGroup,'language must remain in the normal App & Display list').toBe(true);
+ expect(langGeometry.display).toBe('flex');
+ expect(langGeometry.height).toBeGreaterThanOrEqual(54);
+ expect(langGeometry.height).toBeLessThanOrEqual(76);
+ expect(langGeometry.bottom).toBeLessThanOrEqual(langGeometry.groupBottom+2);
+ if(page.viewportSize().width===390)await test.info().attach('my-info-home.png',{body:await page.screenshot(),contentType:'image/png'});
+
+ const content=mine.locator('.dj834-detail-content'),detail=mine.locator('.dj834-my-detail');
+ for(const key of ['theme','type','map','records','history']){
+  const choice=home.locator('[data-dj834-action="'+key+'"]');
+  await choice.scrollIntoViewIfNeeded();
+  await tap(page,choice);
+  await expect(detail).toBeVisible();
+  const active=content.locator(':scope > .dj834-view-active');
+  await expect(active).toHaveCount(1);
+  await expect(active).toBeVisible();
+  const geometry=await page.evaluate(()=>{
+    const panel=document.getElementById('mine-panel'),nav=document.getElementById('bottom-nav');
+    const title=panel.querySelector('.dj834-detail-title');
+    const active=panel.querySelector('.dj834-detail-content > .dj834-view-active');
+    const body=panel.querySelector(':scope > .dj836-sheet-body');
+    const inactive=[...panel.querySelectorAll('.dj834-detail-content > *')].filter(x=>x!==active);
+    return {titleBottom:title.getBoundingClientRect().bottom,activeTop:active.getBoundingClientRect().top,
+      bodyBottom:body.getBoundingClientRect().bottom,navTop:nav.getBoundingClientRect().top,
+      inactiveVisible:inactive.filter(x=>getComputedStyle(x).display!=='none').map(x=>x.className)};
+  });
+  expect(geometry.inactiveVisible,key+' inactive pages must consume no layout height').toEqual([]);
+  expect(geometry.activeTop-geometry.titleBottom,key+' content should start by its heading').toBeGreaterThanOrEqual(-5);
+  expect(geometry.activeTop-geometry.titleBottom,key+' excessive vertical whitespace').toBeLessThan(180);
+  expect(geometry.bodyBottom,key+' scroll viewport must not sit behind tab dock').toBeLessThanOrEqual(geometry.navTop+3);
+  if(page.viewportSize().width===390&&['theme','records','history'].includes(key))
+   await test.info().attach('my-info-'+key+'.png',{body:await page.screenshot(),contentType:'image/png'});
+  await tap(page,mine.locator('.dj834-detail-back'));
+  await expect(home).toBeVisible();
+ }
+ await tap(page,tab(page,'participate'));
+ const panel=page.locator('#participation-panel'),toolbar=panel.locator('.community-toolbar');
+ await expect(toolbar).toBeVisible();
+ const controls=toolbar.locator(':scope > button, :scope > select');
+ await expect(controls).toHaveCount(4);
+ const cells=await controls.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,display:getComputedStyle(n).display}}));
+ for(let i=0;i<4;i++){
+  expect(cells[i].h,'each community action retains a compact touch target').toBeGreaterThanOrEqual(38);
+  expect(cells[i].h).toBeLessThanOrEqual(48);
+  expect(Math.abs(cells[i].y-cells[0].y),'actions must be on one row').toBeLessThan(3);
+  if(i)expect(cells[i].x,'community controls must increase left-to-right').toBeGreaterThan(cells[i-1].x);
+ }
+ expect(cells[3].x+cells[3].w).toBeLessThanOrEqual(page.viewportSize().width-8);
+ if(page.viewportSize().width===390)await test.info().attach('community-actions.png',{body:await page.screenshot(),contentType:'image/png'});
+ await tap(page,tab(page,'map'));
+ await page.evaluate(()=>{
+  Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,fail)=>queueMicrotask(()=>fail({code:1}))});
+ });
+ await tap(page,page.locator('#djNext-near'));
+ const nearby=page.locator('#ped-tools-panel');
+ await expect(nearby).toBeVisible();
+ await expect(nearby.locator('#ped-tools-status')).toBeVisible();
+ const box=await nearby.evaluate(n=>{const r=n.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect(),s=getComputedStyle(n);return{height:r.height,bottom:r.bottom,navTop:nav.top,display:s.display}});
+ expect(box.height,'nearby sheet should be content-sized').toBeLessThan(310);
+ expect(box.bottom,'nearby sheet must clear the dock').toBeLessThanOrEqual(box.navTop+4);
+ if(page.viewportSize().width===390)await test.info().attach('nearby-compact.png',{body:await page.screenshot(),contentType:'image/png'});
+});
+
+test('phone verified protection-gap menu contains SHP audit and NULL middle-school review',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width!==390,'reference iPhone only');
+ await ready(page);
+ const auditResponse=await page.request.get('/data/protection-zone/sangdo1_22_clipped_official_catchment_audit_20261122.json');
+ expect(auditResponse.ok()).toBe(true);
+ const audit=await auditResponse.json();
+ expect(audit.rows).toHaveLength(22);
+ expect(audit.score_change_required).toBe(0);
+ const geoResponse=await page.request.get('/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson');
+ expect(geoResponse.ok()).toBe(true);
+ const geo=await geoResponse.json();
+ expect(geo.features.filter(f=>f.properties.combined_new_score!==null)).toHaveLength(1003);
+ expect(geo.features.filter(f=>f.properties.combined_new_score===null)).toHaveLength(603);
+ await page.evaluate(()=>document.getElementById('dj-pri-toggle')?.click());
+ const dialog=page.locator('#dj-pri-dialog');
+ await expect(dialog).toBeVisible();
+ const group=dialog.locator('.dj-pri-protection-group');
+ await expect(group).toBeVisible({timeout:45000});
+ await expect(group.locator('.dj-pri-button')).toHaveCount(2);
+ await expect(group).toContainText('공식 SHP 경계 도로 22개 점수 유지');
+ await expect(group).toContainText('172개 도로 구간');
+ await expect(group).toContainText('NULL');
+ await test.info().attach('protection-gap-layer-options.png',{body:await page.screenshot(),contentType:'image/png'});
+});
