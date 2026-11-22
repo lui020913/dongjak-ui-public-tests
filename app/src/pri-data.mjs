@@ -1,5 +1,6 @@
 // PRI normalized safety scores: 100 = safer, 0 = more vulnerable. Original source risk scores remain unchanged in source files.
-// Null denotes genuinely unobserved data; a documented modeled baseline is an explicit score rather than null.
+// Null denotes genuinely unobserved data. Legacy modeled defaults remain in
+// imported raw values for provenance, but are not eligible for displayed scores.
 export const PALETTE=Object.freeze([[0,'#d74648'],[25,'#ed9045'],[50,'#efd05a'],[75,'#9bc777'],[100,'#279b80']]);
 export const TEAM_FACTORS=Object.freeze([["accidents","교통사고 이력 및 위험 지수"],["crossing","신호등·횡단보도 단절 구간"],["sharedRoad","보차혼용 및 보행 공간 위험"],["speed","통행제한속도 및 감속 구간"],["protectionGap","제도적 사각지대"],["lighting","가로등·CCTV 야간 안전 취약점"]].map(([id,label])=>Object.freeze({id,label})));
 const fail=m=>{throw Error(m)};
@@ -76,15 +77,21 @@ export function parseImport(raw,current=null){
  if(raw?.meta?.factor==='가로등·보안등 암부 거리')return adaptLighting(raw);
  return validateBundle(raw);
 }
+// Imported unmatchedScore values are retained as provenance but cannot
+// masquerade as an observation or boost either the two-factor preview or PRI.
+export function observedFactorScore(s,id){
+ const value=s?.scores?.[id];
+ return s?.evidence?.[id]?.modeled===true||!number(value)?null:value;
+}
 export function segmentScore(bundle,s,mode){
  // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
- if(mode==='pri12'){const lighting=s.scores.lighting,accidents=s.scores.accidents;return number(lighting)&&number(accidents)?(lighting+accidents)/2:null;}
- if(mode!=='pri')return number(s.scores[mode])?s.scores[mode]:null;
+ if(mode==='pri12'){const lighting=observedFactorScore(s,'lighting'),accidents=observedFactorScore(s,'accidents');return lighting!==null&&accidents!==null?(lighting+accidents)/2:null;}
+ if(mode!=='pri')return observedFactorScore(s,mode);
  if(bundle.config.status!=='approved')return null;
  let total=0,weight=0,missing=[];
  for(const [k,w] of Object.entries(bundle.config.weights)){
-  const v=s.scores[k];
-  if(!number(v)){missing.push(k);continue;}
+  const v=observedFactorScore(s,k);
+  if(v===null){missing.push(k);continue;}
   total+=v*w;weight+=w;
  }
  // Only the explicitly agreed 6 -> 5 protection-gap fallback is permitted.
