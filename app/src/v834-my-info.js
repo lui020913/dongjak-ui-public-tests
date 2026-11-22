@@ -23,7 +23,7 @@ export function installMyInfo(doc=document){
  <h3 class="dj834-group-title">앱 &amp; 화면</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="theme"><span class="dj834-setting-icon">${symbol('theme')}</span><span>화면 테마</span><small class="dj834-current-theme">변경</small><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="type"><span class="dj834-setting-icon">${symbol('type')}</span><span>글자 크기·굵기</span><span class="dj834-chevron">›</span></button>
- <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
+ <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>앱·지도·도보 설정</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
