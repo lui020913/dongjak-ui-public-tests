@@ -866,15 +866,15 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  await expect(root).toHaveClass(/dj-ios-home-pwa/);
  await expect(bridge).toHaveCount(1);await expect(bridge).toHaveCSS('opacity','0');
  const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
- await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('display','none');
+ await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
  expect(style.gradient).toBe('none');expect(style.pointer).toBe('none');expect(style.height).toBe(0);expect(style.color).toBe('#edf3ef');
  const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
  await test.info().attach('ios-pwa-flat-status',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
- // Verify native dialog top-layer separately without a network request or login.
+ // Opening a native dialog changes the status surface to opaque white, but never dims the page.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
- await expect(root).toHaveAttribute('data-dj-pwa-dimmed','true');await expect(bridge).toHaveCSS('opacity','0');
+ await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
  expect(native).toBe('none'); // The top-layer dialog has no backdrop gradient.
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
