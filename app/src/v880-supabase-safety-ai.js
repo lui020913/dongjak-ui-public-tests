@@ -132,7 +132,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   function open(){
     // A transport X tap cannot become an AI open through the fading layer.
     // An ordinary AI click remains available after this short gesture guard.
-    if(modal.open||Date.now()-transportDismissedAt<750)return;
+    if(modal.open||Date.now()-transportDismissedAt<1600)return;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     modal.classList.remove('dj887-ai-closing');
     syncProfile();previousFocus=document.activeElement;
@@ -235,7 +235,21 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     }
     open();
   }
-  const onOrbOpen=()=>open();
+  // Only the deliberate AI orb pointer/keyboard gesture may dispatch this
+  // synthetic app event. A closing transport sheet can otherwise replay the
+  // orb behind its old hit target after the close animation finishes.
+  let keyboardOrbAt=0;
+  const captureOrbKeyboard=event=>{
+    if((event.key==='Enter'||event.key===' ')&&event.target?.closest?.('#dj890-ai-orb'))keyboardOrbAt=Date.now();
+  };
+  document.addEventListener('keydown',captureOrbKeyboard,true);
+  const onOrbOpen=()=>{
+    const orb=document.getElementById('dj890-ai-orb');
+    const pointerIntent=Boolean(orb&&pointerStart&&Date.now()-pointerStart.at<1400&&orb.contains(pointerStart.target));
+    const keyboardIntent=Boolean(orb&&document.activeElement===orb&&Date.now()-keyboardOrbAt<900);
+    if(!pointerIntent&&!keyboardIntent)return;
+    open();
+  };
   document.addEventListener('dongjak:explicit-ai-open',onOrbOpen);
   trigger?.addEventListener('click',onExplicitEntryClick);
   quickEntry?.addEventListener('click',onExplicitEntryClick);
@@ -257,6 +271,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   return ()=>{
     if(closeTimer)clearTimeout(closeTimer);
     document.removeEventListener('pointerdown',capturePointer,true);
+    document.removeEventListener('keydown',captureOrbKeyboard,true);
     document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);
     document.removeEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
     trigger?.remove();quickEntry?.remove();modal.remove();marker?.remove();
