@@ -12,10 +12,11 @@ test('v8.0.0 retains the original release timeline and all prior releases',()=>{
   assert.equal(RENUMBERED_VERSION_HISTORY.at(-1).version,'v1.0.0');
   assert.equal(JSON.parse(read('package.json')).version,APP_VERSION);
 });
-test('PWA manual theme refresh is iPhone standalone-only and avoids splash',()=>{
+test('light-only PWA startup never enters legacy manual theme splash or reload',()=>{
   const head=read('index.html'),theme=read('src/manual-pwa-theme-reload.js');
   const android=read('platforms/android/entry.js'),pc=read('platforms/pc-chromium/entry.js');
-  assert.match(head,/displayTheme=themeReload \? themeReload\.theme : 'light'/);
+  assert.match(head,/var displayTheme='light'/);
+  assert.doesNotMatch(head,/id="theme-toggle"/);
   assert.doesNotMatch(head,/dj-pwa-transition-v7104|data-dj-reload-splash/);
   assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
   assert.match(theme,/isInstalledIosPhone\(win\)/);
