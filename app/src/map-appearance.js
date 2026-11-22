@@ -103,7 +103,7 @@ export function installForestShade({map,app}){
 /** v5.12.6 — Opaque overhead footprints prevent double-shading where native and GIS buildings overlap. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
-  dark:Object.freeze({footprint:'#52616b',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#46555f',nearOpacity:0.88,farOpacity:0.82})
+  dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.58,farOpacity:0.50})
 });
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill')return false;
@@ -138,11 +138,18 @@ export function buildingPlanVisibility(pitch=0){
   const x=(p-3)/(BUILDING_PLAN_HIDE_PITCH-3);
   return Number(Math.pow(1-x,2.2).toFixed(3));
 }
+/** Fade building mass with map zoom; MapLibre evaluates this continuously while pinch-zooming. */
+export const BUILDING_ZOOM_FADE_START=13.0;
+export const BUILDING_ZOOM_FADE_END=15.0;
+export function buildingZoomOpacityExpression(maxOpacity=1){
+  const opacity=Math.max(0,Math.min(1,Number(maxOpacity)||0));
+  return ['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,opacity];
+}
 export function buildingFootprintPaint(theme='light',pitch=0){
   const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
   return {'fill-color':p.footprint,
     // Fully opaque when looking straight down; completely off in 3D view.
-    'fill-opacity':buildingPlanVisibility(pitch),
+    'fill-opacity':Number((p.footprintOpacity*buildingPlanVisibility(pitch)).toFixed(3)),
     'fill-antialias':false};
 }
 export function buildingFootprintOutlinePaint(theme='light',pitch=0){
@@ -177,11 +184,13 @@ export function installBaseBuildingPalette({map,app}){
   const paint=()=>{
     const theme=app.dataset.theme;
     const colors=buildingFootprintPaint(theme,map.getPitch?.()??0);
+    // Zoom interpolation belongs to the paint expression, not a discrete zoomend repaint.
+    const blended={...colors,'fill-opacity':buildingZoomOpacityExpression(colors['fill-opacity'])};
     if(theme===previousTheme && Math.abs(colors['fill-opacity']-previousOpacity)<0.012)return;
     previousTheme=theme;previousOpacity=colors['fill-opacity'];
     for(const id of ids){
       if(!map.getLayer(id))continue;
-      try{for(const [key,value] of Object.entries(colors))map.setPaintProperty(id,key,value);}
+      try{for(const [key,value] of Object.entries(blended))map.setPaintProperty(id,key,value);}
       catch(error){console.debug('[건물 바닥 색상]',id,error?.message);}
     }
     // Native building outlines would duplicate the extrusion edges in 3D.
