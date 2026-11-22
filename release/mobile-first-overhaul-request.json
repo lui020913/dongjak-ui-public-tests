@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.78",
+  "application_version": "9.2.79",
   "public_work_branch": "main",
-  "purpose": "Finalize all seven owner-requested UI corrections from merged PR #291 plus fixed weather header gesture bug from PR #294: one fullscreen preferences surface, white map place text/dark halo in light mode, undimmed floating windows with restrained shadow, seven-day forecast margins and no expansion by tap or drag, separated light/dark palette, safety sheet nav clearance, language select with icon aligned inside My Info. Verify exact merged main source through sealed build, Preview, all 24 phone browser shards, desktop/tablet, approved protected Production and rollback. Skip only optional design/Gemini capture when disabled.",
-  "attempt": 251,
+  "purpose": "Protected final release of merged PRs #291, #294 and #295. Exactly seven user-requested UI fixes: fullscreen unified map/walking settings, light-mode map label white text with dark halo, no non-header dim/blur and subtle modal shadows, 7-day weather padding with absolutely no expansion/tap/drag, separated light/dark palette, safety information sheet dock spacing, language icon and select alignment. Fix old mobile E2E that wrongly expected a now-removed weather expansion handle. Retain all real 24 phone functional shards, PC/tablet checks, Preview provenance, Production approval and guarded rollback; optional Gemini/capture remains disabled.",
+  "attempt": 252,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous release #44998660931 references PR #291 before final weather expansion controller fix PR #294 (merge bf1fe2ac0bd98d0449cde06261bf48380b37a6c4). New release must include BOTH merges.",
+  "last_retry_reason": "Previous exact-source release run #44998878995 Preview succeeded and 22 other phone tests passed or were progressing, but mobile shards 2/9 failed on obsolete weather .dj-weather-edge-drag visibility assertion, contradicting user's no-expand design. Test-only PR #295 updated this assertion and verified fixed behavior, merged at 51232e035494d2da678cfc2be26b0d326019e845.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
