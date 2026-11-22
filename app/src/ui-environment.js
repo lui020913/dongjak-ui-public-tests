@@ -86,7 +86,6 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
-import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
 
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
 export function getInitialTheme(){
@@ -137,7 +136,7 @@ export function initTheme({map,app}){
   document.documentElement.dataset.theme=themeState.value;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
   // Theme updates are repaint-only. Never create a full-screen transition mask.
-  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#22282e':'#edf3ef';
+  if(browserThemeColor)browserThemeColor.content=themeState.value==='dark'?'#22282e':'#edf3ef';
   if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
   // background base style only; dynamically added route, road width and safety layers are not modified.
@@ -266,7 +265,7 @@ export function initTheme({map,app}){
     app.dataset.djPreferredTheme=themeState.preference;
     app.dataset.djThemeSource=themeState.temporary?'night':'user';
     document.documentElement.dataset.theme=next;
-    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#22282e':'#edf3ef';
+    if(browserThemeColor)browserThemeColor.content=next==='dark'?'#22282e':'#edf3ef';
     if(toggle){
       if(themeState.temporary){
         toggle.textContent='야간 시야 중 · 종료 후 '+(themeState.preference==='dark'?'다크':'라이트');
@@ -287,10 +286,7 @@ export function initTheme({map,app}){
     themeState.toggle();
     safeStorageSet(THEME_KEY,themeState.preference);
     displayTheme({notify:true});
-    // iOS Home Screen PWAs can retain the old native status-bar color despite
-    // updated metadata. Only manual choice triggers a one-shot page refresh.
-    // Night analysis remains temporary and must never trigger a relaunch.
-    if(!themeState.temporary)requestIosThemeRefresh({win:window,app,map,theme:themeState.preference});
+    // Repaint UI and MapLibre in place; avoid loader, onboarding and camera reset.
   });
   const setTemporaryTheme=next=>{
     if(!themeState.override(next))return;
