@@ -38,6 +38,8 @@ test('PRI keeps two score modes and default risk/caution/safe scale, with one di
  assert.match(css,/grid-template-rows:0fr/);assert.match(css,/grid-template-rows:1fr/);
  assert.match(css,/maplibregl-ctrl-bottom-left/);
  assert.match(js,/delete app\.dataset\.djPriVisible/);
+ assert.match(css,/\.dj-pri-button\{[^}]*min-height:44px/);
+ assert.match(css,/\.dj-pri-legend \.dj-pri-button\{min-height:44px/);
 });
 
 test('map scale uses the same visibility blockers as PRI and the layer sheet',()=>{

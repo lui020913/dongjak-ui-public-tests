@@ -137,11 +137,21 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   }catch{}
   const state={...saved};
   const setStatus=value=>safeText(message,value);
-  let quotaNotified=false;
-  function showQuota(until,announce=true){const active=state.metro&&until>Date.now();if(btnMetro){if(active)btnMetro.dataset.liveQuota='true';else delete btnMetro.dataset.liveQuota;}if(active){if(announce&&!quotaNotified){quotaNotified=true;onNotice(METRO_QUOTA_NOTICE);}return true;}quotaNotified=false;return false;}
+  function showQuota(until){
+    const active=state.metro&&until>Date.now();
+    if(btnMetro){
+      if(active)btnMetro.dataset.liveQuota='true';else delete btnMetro.dataset.liveQuota;
+      btnMetro.title=active?'공식 지하철 API 일일 한도 초과 · 자동 재개 예정':'실시간 지하철 표시';
+    }
+    // The persistent inline status already explains the quota. Never spam a toast.
+    return active;
+  }
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,
+    // Rebuilding a live GeoJSON source every 8ms can keep iPhone GPU/CPU awake.
+    // 64ms on phones retains interpolated train motion while reducing work ~8x.
+    renderIntervalMs:window.matchMedia?.('(max-width:699px)')?.matches?64:32,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
@@ -166,7 +176,7 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   });
   function sync(){
     const isMap=app.dataset.tab==='map';
-    const active=isMap&&(state.metro||state.bus);
+    const active=isMap&&!document.hidden&&(state.metro||state.bus);
     const allowMetro=state.metro&&app.dataset.baseMetro!=='off';
     const allowBus=state.bus&&app.dataset.baseBus!=='off';
     btnMetro?.setAttribute('aria-pressed',String(state.metro));
@@ -180,17 +190,18 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
     else if(showQuota(overlay.getStatus().metroQuotaUntil))setStatus(METRO_QUOTA_NOTICE);
     else if(state.metro&&map.getZoom?.()<METRO_LIVE_MIN_ZOOM&&!state.bus)setStatus('실시간 지하철 ON · 지도를 가까이 확대하면 열차가 표시됩니다.');
     else if(!overlay.getStatus().lastUpdate)setStatus('실시간 위치정보 조회 중 · 역간 위치는 추정');
-    if(!state.metro)showQuota(0,false);
+    if(!state.metro)showQuota(0);
   }
   for(const [button,mode] of [[btnMetro,'metro'],[btnBus,'bus']])button?.addEventListener('click',()=>{
     state[mode]=!state[mode];
     try{localStorage.setItem(LIVE_PREF_KEY,JSON.stringify(state));}catch{}
-    sync();void overlay.refresh();
+    sync();if(app.dataset.tab==='map'&&!document.hidden)void overlay.refresh();
   });
   const observer=new MutationObserver(sync);
   observer.observe(app,{attributes:true,attributeFilter:['data-tab']});
   const onBase=()=>sync();document.addEventListener('dongjak-base-layer-change',onBase);
+  const onVisibility=()=>sync();document.addEventListener('visibilitychange',onVisibility);
   sync();
-  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);map.off?.('style.load',synchronizeRailStyle);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
+  const handle={overlay,sync,destroy:()=>{observer.disconnect();document.removeEventListener('dongjak-base-layer-change',onBase);document.removeEventListener('visibilitychange',onVisibility);map.off?.('style.load',synchronizeRailStyle);popupTracker.destroy();overlay.destroy();installedLiveTransit.delete(map);}};
   installedLiveTransit.set(map,handle);return handle;
 }

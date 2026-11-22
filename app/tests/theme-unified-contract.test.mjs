@@ -16,7 +16,8 @@ test('one theme stylesheet; native iOS status refresh only after explicit choice
   assert.match(old,/win\.location\.reload\(\)/);
   assert.match(old,/isInstalledIosPhone\(win\)/);
   assert.match(old,/MANUAL_THEME_RELOAD_KEY/);
-  assert.ok(env.includes("requestIosThemeRefresh({win:window,app,map,theme:themeState.preference})"));
+  assert.doesNotMatch(env,/requestIosThemeRefresh/);
+  assert.match(env,/displayTheme\(\{notify:true\}\)/);
   assert.ok(env.includes('createThemeState(getInitialTheme())'));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
   assert.ok(env.includes('const changed=app.dataset.theme!==next'));

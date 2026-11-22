@@ -132,6 +132,7 @@ import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coor
 import { installRequestCompletion } from './v910-request-completion.js';
 import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
 import {readManualThemeReload} from './manual-pwa-theme-reload.js';
+import './mobile-ux-energy.css';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -155,7 +156,7 @@ function getDevicePosition(options={}) {
 async function startDeviceWatch(onPosition,onError,options={}) {
   if (Capacitor.isNativePlatform()) {
     const id=await Geolocation.watchPosition({
-      ...options, interval:2000, minimumUpdateInterval:1500
+      ...options, interval:options.enableHighAccuracy?2000:5000, minimumUpdateInterval:options.enableHighAccuracy?1500:5000
     },(position,error)=>{
       if(error) onError(error);
       else if(position) onPosition(position);
@@ -577,8 +578,8 @@ new MutationObserver(()=>{
 
 // 이전에 실제 3D 렌더링이 성공했던 OpenFreeMap Bright 스타일을 사용합니다.
 const djPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
-const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency});
-const djNormalPixelRatio=Math.min(1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
+const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,saveData:Boolean(navigator.connection?.saveData)});
+const djNormalPixelRatio=Math.min(djPhone?1.25:1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
 const themeReloadState=readManualThemeReload(window.sessionStorage);
 const map = new maplibregl.Map({
   container: 'map',
@@ -596,7 +597,8 @@ const map = new maplibregl.Map({
   maxPitch: 70,
   // Cap GPU raster size on high-DPI displays (2x DPR costs 4x pixels).
   pixelRatio: djInitialBudget==='economy'?1:djNormalPixelRatio,
-  canvasContextAttributes: { antialias: djInitialBudget!=='economy' }
+  // Mobile multisampling is a substantial and permanent GPU cost; retain it on desktop only.
+  canvasContextAttributes: { antialias: !djPhone && djInitialBudget!=='economy' }
 });
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
@@ -977,7 +979,10 @@ function onGpsPosition(position){
   if(!gpsMarker)gpsMarker=new maplibregl.Marker({color:'#1976d2',scale:0.82}).setLngLat([lng,lat]).addTo(map);
   else gpsMarker.setLngLat([lng,lat]);
   if(gpsFollow && mapReady && app.dataset.tab==='map'){
-    map.easeTo({center:[lng,lat],zoom:Math.max(map.getZoom(),15.5),duration:450});
+    const center=map.getCenter();
+    const deltaMeters=Math.hypot((lng-center.lng)*111195*Math.cos(lat*Math.PI/180),(lat-center.lat)*111195);
+    // GPS noise alone must not trigger a 450ms animated WebGL repaint every fix.
+    if(deltaMeters>15||map.getZoom()<15.5)map.easeTo({center:[lng,lat],zoom:Math.max(map.getZoom(),15.5),duration:450});
   }
   renderGpsStatus(true);
 }
@@ -1005,7 +1010,7 @@ async function startGpsTracking({manual=false}={}){
       const code=errorLocationCode(error);
       if(code===1){stopGpsTracking({forget:true});toast('위치 권한이 거부되었습니다. 설정에서 허용해 주세요.');}
       else if(manual)toast('GPS 신호가 약합니다. 야외에서 다시 확인해 주세요.');
-    },{enableHighAccuracy:true,timeout:20000,maximumAge:6000});
+    },{enableHighAccuracy:false,timeout:20000,maximumAge:15000});
     gpsWatchId=id;
   }catch(error){
     gpsStarting=false;
