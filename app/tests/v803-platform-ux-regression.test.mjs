@@ -42,7 +42,8 @@ test('desktop header and rail use consistent sizing and settings remain interact
   assert.match(css,/grid-template-columns:25px 76px!important/);
   assert.match(css,/border:0!important;border-radius:16px!important/);
   const preferences=read('src/v7120-settings.js');
-  assert.match(preferences,/prefs\.text=b\.dataset\.size;apply\(\)/);
+  assert.doesNotMatch(preferences,/prefs\.text=b\.dataset\.size;apply\(\)/);
+  assert.match(read('src/v834-my-info.js'),/data-dj885-type="scale"/);
   assert.match(preferences,/prefs\.motion=event\.target\.checked/);
   assert.match(preferences,/prefs\.weather=event\.target\.checked/);
   assert.match(preferences,/prefs\.tools=event\.target\.checked/);
