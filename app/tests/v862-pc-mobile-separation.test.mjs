@@ -39,12 +39,12 @@ test('dark map theme restores ground and 3D building colors after zoom',()=>{
   assert.ok(main.includes('buildingExtrusionAppearance(theme,pitch'));
   assert.ok(main.includes('fill-extrusion-color'));
   assert.ok(main.includes('fill-extrusion-opacity'));
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.58);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.50);
+  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.94);
+  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.89);
   assert.equal(buildingExtrusionAppearance('dark',30).color,'#525d66');
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'base-building','source-layer':'building'}),true);
   assert.equal(nativeBuildingExtrusion({type:'fill-extrusion',id:'dongjak-buildings-3d-01','source-layer':'building'}),false);
-  assert.ok(appearance.includes('nearOpacity:0.58,farOpacity:0.50'));
+  assert.ok(appearance.includes('nearOpacity:0.94,farOpacity:0.89'));
 });
 
 test('MapLibre zoom guard restores only base-map ground and vegetation and preserves the map instance',()=>{
