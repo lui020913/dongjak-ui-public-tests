@@ -59,6 +59,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
     });}catch{/* A non-animated opaque handoff remains safe. */}
    }
   }else previous?.removeAttribute?.('data-dj-tab-outgoing');
+  // We never defer the destination state: replay navigates synchronously before any fade.
   // The navigation dock itself never fades, scales or shifts.
   if(!reduced()&&app.dataset.tab!=='map'){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
