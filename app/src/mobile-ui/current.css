@@ -948,3 +948,218 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 }
 
 /* END consolidated v914-mobile-ux-fixes.css */
+
+/* START 2026-11-22 user phone follow-up (8 requested regressions) */
+/* 2026-11-22 phone follow-up: one child view, one scroll lane, stable layers. */
+@layer request-completion {
+@media (max-width:699px) {
+ /* 1. The map-gesture guide is a floating card, not a dimming modal. */
+ html body #app#app#app:has(#map-gesture-guide:not([hidden])) :is(.dj857-window-scrim,.dj-window-backdrop,.dj-modal-scrim,.dj-dialog-dimmer,.dj-sheet-backdrop) {
+   opacity:0!important;visibility:hidden!important;background:transparent!important;
+   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none!important;
+ }
+ html body #app#app#app #map-gesture-guide:not([hidden]){
+   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+   box-shadow:0 10px 32px rgba(26,55,44,.14)!important;
+ }
+ html body #app#app#app #map-gesture-guide::backdrop {background:transparent!important;backdrop-filter:none!important;}
+ /* 2. A true two-sided station navigation pill above live Seoul API rows. */
+ html body #app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors {
+   position:relative!important;top:auto!important;z-index:2!important;
+   background:transparent!important;border:0!important;
+   padding:8px 0 12px!important;margin:0!important;
+   box-shadow:none!important;
+ }
+ html body #app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-neighbor-row {
+   display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+   gap:7px!important;align-items:center!important;padding:4px 0!important;
+ }
+ html body #app#app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next) {
+   display:flex!important;align-items:center!important;justify-content:center!important;
+   min-width:0!important;min-height:42px!important;max-width:100%!important;
+   border-radius:999px!important;
+   background:var(--dj-theme-secondary,#edf5f0)!important;
+   border:1px solid var(--dj-theme-line,#d4e4dc)!important;
+   color:var(--dj-theme-ink,#204338)!important;
+   box-shadow:0 2px 6px rgba(17,58,43,.045)!important;
+   padding:7px 11px!important;gap:5px!important;font-size:12px!important;font-weight:700!important;
+ }
+ html body #app#app#app #transport-sheet[data-kind="subway"] .metro-neighbor-row .metro-rail-current {
+   min-width:0!important;max-width:108px!important;text-align:center!important;
+ }
+ html body #app#app#app #transport-sheet.dj-news-transit-fixed[data-kind="subway"] .transport-arrivals-title {
+   position:relative!important;top:auto!important;z-index:1!important;
+   margin:4px 0 5px!important;padding:8px 0!important;
+   background:transparent!important;
+ }
+ html body #app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals {
+   min-width:0!important;margin:0 0 10px!important;
+ }
+ html body #app#app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next){
+   background:#323a41!important;color:#e9edf2!important;border-color:#55646e!important;
+ }
+ /* 3. Nearby information: compact, self-contained and theme-correct. */
+ html body #app#app#app #ped-tools-panel:not([hidden]){
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+   border:1px solid var(--dj-theme-line,#d3e3d9)!important;
+   border-radius:24px!important;box-shadow:0 12px 32px rgba(28,62,48,.13)!important;
+   padding:16px!important;
+   max-height:calc(100dvh - 160px)!important;
+   overflow-y:auto!important;overscroll-behavior:contain!important;
+ }
+ html body #app#app#app #ped-tools-panel :is(h1,h2,h3){
+   margin:0!important;font-size:19px!important;line-height:1.35!important;
+ }
+ html body #app#app#app #ped-tools-panel :is(p,.ped-tools-note){
+   font-size:13px!important;line-height:1.5!important;
+   word-break:keep-all!important;
+ }
+ html body #app#app#app #ped-tools-panel :is(button,#ped-tools-close){
+   max-width:100%!important;min-height:42px!important;border-radius:16px!important;
+ }
+ html body #app#app#app #ped-tools-panel #ped-tools-close{
+   width:44px!important;height:44px!important;min-width:44px!important;
+   flex:0 0 44px!important;border-radius:50%!important;
+ }
+ /* Community is a full-screen destination, not a squeezed toolbar overlay. */
+ html body #app#app#app #participation-panel:not([hidden]):not(.dj9256-composing) .dj836-sheet-body {
+   display:flex!important;flex-direction:column!important;align-items:stretch!important;
+   gap:10px!important;padding:16px 16px calc(106px + env(safe-area-inset-bottom,0px))!important;
+   overflow-y:auto!important;
+ }
+ html body #app#app#app #participation-panel .community-category-tabs {
+   order:-5!important;max-width:100%!important;margin:0 0 2px!important;
+   padding:2px 1px 7px!important;gap:7px!important;
+ }
+ html body #app#app#app #participation-panel .community-heading-row {
+   order:-4!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+   align-items:center!important;gap:10px!important;margin:0!important;
+ }
+ html body #app#app#app #participation-panel .community-heading-row>div {display:none!important;}
+ html body #app#app#app #participation-panel #community-compose-toggle {
+   grid-column:2!important;min-height:44px!important;
+   border-radius:999px!important;white-space:nowrap!important;
+ }
+ html body #app#app#app #participation-panel .community-heading-row #community-notifications-toggle {
+   grid-column:1!important;grid-row:1!important;justify-self:start!important;
+   min-height:44px!important;min-width:76px!important;border-radius:999px!important;
+ }
+ html body #app#app#app #participation-panel .dj-page-intro{
+   order:-3!important;margin:0!important;font-size:12px!important;line-height:1.4!important;
+ }
+ html body #app#app#app #participation-panel .community-toolbar{
+   order:-1!important;display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;
+   align-items:center!important;gap:8px!important;margin:0!important;padding:0!important;
+ }
+ html body #app#app#app #participation-panel #community-search{
+   order:-2!important;margin:0!important;width:100%!important;min-height:44px!important;
+   border-radius:15px!important;
+ }
+ html body #app#app#app #participation-panel #community-sort {
+   flex:1 1 100px!important;max-width:190px!important;min-height:42px!important;
+   background:var(--dj-theme-surface,#fff)!important;
+ }
+ html body #app#app#app #participation-panel #community-saved-toggle {
+   min-width:76px!important;min-height:42px!important;border-radius:999px!important;
+ }
+ /* 4/5/7. Only the selected My Info subview is rendered. The sheet body,
+    not the document and not the card list, is the sole vertical scroller. */
+ html body #app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+   display:block!important;flex:1 1 0%!important;
+   min-height:0!important;height:auto!important;max-height:none!important;
+   overflow-x:hidden!important;overflow-y:auto!important;
+   touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
+   overscroll-behavior-y:contain!important;
+   padding:14px 16px calc(120px + env(safe-area-inset-bottom,0px))!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-my-detail {
+   display:block!important;position:relative!important;
+   height:auto!important;max-height:none!important;min-height:0!important;
+   overflow:visible!important;padding:4px 0 30px!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-my-detail[hidden],
+ html body #app#app#app#app #mine-panel .dj834-my-home[hidden] {display:none!important;}
+ html body #app#app#app#app #mine-panel .dj834-detail-content > :not(.dj834-view-active),
+ html body #app#app#app#app #mine-panel .dj834-detail-content > [hidden] {
+   display:none!important;visibility:hidden!important;
+ }
+ html body #app#app#app#app #mine-panel #dj-type-settings {
+   display:none!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-detail-content {
+   display:block!important;position:relative!important;
+   min-width:0!important;min-height:0!important;height:auto!important;max-height:none!important;
+   overflow:visible!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-view-active {
+   display:block!important;visibility:visible!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-records-container,
+ html body #app#app#app#app #mine-panel .dj834-history-container{
+   width:100%!important;max-width:100%!important;min-width:0!important;
+   height:auto!important;max-height:none!important;overflow:visible!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container #version-history-list {
+   display:block!important;position:static!important;inset:auto!important;
+   width:100%!important;max-width:100%!important;
+   max-height:none!important;height:auto!important;overflow:visible!important;
+   padding:0!important;margin:0!important;background:transparent!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container :is(.v707-history-columns,.v707-history-timeline,.v707-history-sources) {
+   position:static!important;min-width:0!important;width:100%!important;
+   height:auto!important;max-height:none!important;overflow:visible!important;
+   margin:0!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container .v707-history-summary{
+   position:static!important;padding:0 0 10px!important;margin:0!important;
+   background:transparent!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container .dj-edition-history {
+   margin:9px 0!important;padding:0!important;overflow:hidden!important;
+   border:1px solid var(--dj-theme-line,#d3e3d9)!important;
+   border-radius:17px!important;background:var(--dj-theme-surface,#fff)!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container .dj-edition-summary{
+   padding:14px 15px!important;background:transparent!important;
+   border:0!important;
+ }
+ html body #app#app#app#app #mine-panel .dj834-history-container .dj-edition-patch {
+   margin:6px 10px!important;
+ }
+ /* 6. Tip: no lateral transform or position transition on map resumption. */
+ html body #app#app#app#app#app#app#app #dj840-map-tip:not([hidden]) {
+   position:fixed!important;left:var(--dj-user-tip-left,110px)!important;
+   right:12px!important;width:auto!important;max-width:none!important;
+   transform:none!important;translate:none!important;
+   transition:opacity .15s ease,visibility .15s ease!important;
+   animation:none!important;
+ }
+ html body #app#app#app#app#app#app[data-dj929-tip-returning="true"] #dj840-map-tip,
+ html body #app#app#app#app#app[data-dj929-tip-returning="true"] #dj-user-tip-close{
+   opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+   transition:none!important;
+ }
+ /* 8. AI in and out: opacity only, no panel displacement or scrim. */
+ html body #dj-ai-search-modal[open]:not(.dj887-ai-closing) {
+   transform:none!important;translate:none!important;
+   animation:dj929-ai-fade-in .19s ease-out both!important;
+ }
+ html body #dj-ai-search-modal[open].dj887-ai-closing {
+   transform:none!important;translate:none!important;
+   animation:dj929-ai-fade-out .175s ease-in both!important;
+ }
+ html body #dj-ai-search-modal::backdrop{
+   background:transparent!important;backdrop-filter:none!important;
+   -webkit-backdrop-filter:none!important;
+ }
+}
+}
+@keyframes dj929-ai-fade-in {from{opacity:0}to{opacity:1}}
+@keyframes dj929-ai-fade-out {from{opacity:1}to{opacity:0}}
+@media (prefers-reduced-motion:reduce) {
+ html body #dj-ai-search-modal[open],html body #dj-ai-search-modal[open].dj887-ai-closing{
+   animation:none!important;
+ }
+}
+
+/* END 2026-11-22 user phone follow-up */

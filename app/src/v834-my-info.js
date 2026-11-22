@@ -130,6 +130,11 @@ export function installMyInfo(doc=document){
   if(event.target.closest('[data-dj834-setting="map"]'))doc.dispatchEvent(new Event('dj:open-map-settings'));
  });
  const records=doc.createElement('div');records.className='dj834-records-container';
+ // Reuse the actual release catalog and its existing category/source handlers.
+ // It is a My Info child page on phones rather than a second overlapping modal.
+ const historyBox=doc.createElement('section');historyBox.className='dj834-history-container';
+ const historyList=doc.getElementById('version-history-list');
+ const historyHost=historyList?.parentElement||null;
  for(const child of [...body.children]){
    if(child===heading||child===landing||child===detail)continue;
    records.append(child);
@@ -140,8 +145,8 @@ export function installMyInfo(doc=document){
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;
- content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings);
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;historyBox.hidden=true;
+ content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings,historyBox);
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
@@ -175,13 +180,19 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정'})[view]||'설정';
-   accountBox.hidden=view!=='profile';
-   typography.hidden=view!=='type';
-   records.hidden=view!=='records';languageSettings.hidden=view!=='language';themeSettings.hidden=view!=='theme';mapSettings.hidden=view!=='map';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정',history:'업데이트 내역'})[view]||'설정';
+   if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
+   else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
+   const views={profile:accountBox,type:typography,records,language:languageSettings,theme:themeSettings,map:mapSettings,history:historyBox};
+   for(const [key,node] of Object.entries(views)){
+     const active=key===view;node.hidden=!active;node.classList.toggle('dj834-view-active',active);
+   }
+   content.dataset.dj834View=view;
    if(view==='type')syncTypography();if(view==='language'||view==='theme')syncChoices();
    detail.hidden=false;
    body.scrollTop=0;
+   const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
+   if(panelScroller)panelScroller.scrollTop=0;
    enter(detail);
    if(view==='profile'){
      const toggle=account.querySelector('.dj824-account-toggle');
@@ -190,6 +201,8 @@ export function installMyInfo(doc=document){
    }
  }
  function back(){
+   if(historyList&&historyHost&&historyList.parentElement!==historyHost)historyHost.append(historyList);
+   delete content.dataset.dj834View;
    detail.hidden=true;
    landing.hidden=false;
    body.scrollTop=0;
@@ -207,7 +220,7 @@ export function installMyInfo(doc=document){
      doc.getElementById('map-tools-toggle')?.click();return;
    }
    
-   if(action==='history'){doc.getElementById('version-history-trigger')?.click();return;}
+   if(action==='history'){if(historyList)showDetail('history');else doc.getElementById('version-history-trigger')?.click();return;}
  });
  updateProfile();return true;
 }
