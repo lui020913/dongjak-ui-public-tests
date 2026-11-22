@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.87",
   "public_work_branch": "main",
-  "purpose": "Owner-reported iPhone regression fix PR #311 (merge 1c85167398338a8cfa3ae05db4e84a58b2e431a3): preserve OpenFreeMap vector base map on slow cellular loads instead of replacing it with the bare emergency OSM raster after 12 seconds, using 45-second initial threshold and up to 90-second vector source grace; replace inconsistent standalone language card with the same 62px single-line setting row using its native accessible selector. Preserve all prior onboarding/status theme fixes PR #310 and safety layers, 50:50 PRI GIS scoring, transit, and AI guard. Require exact-source build and tests, isolated Preview, 12 mobile QA shards, PC/tablet policy gate, protected Production promotion and rollback checks.",
-  "attempt": 265,
+  "purpose": "Release owner-requested vector map and compact language row repairs: PR #311 merge 1c85167398338a8cfa3ae05db4e84a58b2e431a3 preserves OpenFreeMap vector source during slow startup; followup PR #312 merge 050f75d4d0ac821e996d55dd235b7039b8f1abac fixes previous mobile QA hit-test failure by replacing the transparent full-row select with a visible native 110px picker, preventing overlap of settings buttons. Preserve all previous GIS 50:50, transit, AI, onboarding and status theme fixes. Source CI #45016691825 passed; mandatory 12 phone QA, Preview and protected Production checks required.",
+  "attempt": 266,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #311 merged to main and source CI run 45015944439 succeeded; promote exact vector-basemap recovery + language compact row change using protected mobile-first deployment pipeline.",
+  "last_retry_reason": "Mobile release run #45016195450 failed phone QA shard 3: the old invisible language selector blocked another menu hit target. PR #312 corrects it and source CI #45016691825 passed. Retry as 9.2.87 (previous candidate never reached Production), no optional Gemini or screenshot lanes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
