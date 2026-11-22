@@ -6,6 +6,9 @@ on:
       - '.github/workflows/sangdo1-official-source-check.yml'
       - 'scripts/research/sangdo1_school_catchment_source_audit.py'
       - 'scripts/research/sangdo1_boundary_22_official_audit.py'
+      - 'app/public/data/protection-zone/sangdo1_22_clipped_official_catchment_audit_20261122.json'
+      - 'app/src/pri-map.js'
+      - 'app/tests/sangdo1-boundary-official-catchment-22.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
