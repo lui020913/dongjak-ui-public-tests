@@ -13,7 +13,8 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  assert.equal(base.segments.length,1686);
  assert.equal(patch.networkVersion,base.networkVersion,'patch must use the exact existing lighting road geometry');
  assert.equal(manifest.bundle,'/data/pri/lighting_segments.json');
- assert.deepEqual(manifest.patches,['/data/pri/sangdo1_accidents_factor.json']);
+ assert.deepEqual(manifest.patches,['/data/pri/sangdo1_accidents_factor.json','/data/pri/sangdo1_protection_gap_3source_factor.json']);
+ assert.equal(read('../public/data/pri/sangdo1_protection_gap_3source_factor.json').networkVersion,base.networkVersion,'third PRI factor must be spatially aligned to the same 25m network');
  assert.equal(patch.sourceRecords.length,3,'only the three Sangdo1 records may be included');
  assert.deepEqual(new Set(patch.sourceRecords.map(r=>r.source_fid)),new Set(['6931875','6838434','6778949']));
  assert.deepEqual(new Set(patch.sourceRecords.map(r=>r.score)),new Set([40,50]));
