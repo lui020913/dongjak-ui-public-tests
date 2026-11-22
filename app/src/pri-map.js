@@ -68,7 +68,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    for(const [id,name] of options){
      const hasBoth=id==='pri12'&&dataset.segments.some(s=>segmentScore(dataset,s,'pri12')!==null);
      const unavailable=id==='pri'?dataset.config.status!=='approved':id==='pri12'?!hasBoth:!available.has(id);
-     const suffix=id==='pri'&&unavailable?' · 기준 미확정':id==='pri12'?(unavailable?' · 두 지수 결측':' · 실측·조사값만'):unavailable?' · 미제출':id==='protectionGap'?' · 3자료·300m':id==='lighting'?' · 조명만':'';
+     const suffix=id==='pri'&&unavailable?' · 기준 미확정':id==='pri12'?(unavailable?' · 두 지수 결측':' · 실측·조사값만'):unavailable?' · 미제출':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명만':'';
      const b=button(name+suffix,()=>{activate(id);dialog.close();});
      b.disabled=unavailable;b.setAttribute('aria-pressed',String(mode===id));actions.append(b);
    }
@@ -135,7 +135,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
    if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#CB6563,#DDA263 25%,#DBC576 50%,#82AB94 75%,#4C948B)':'linear-gradient(90deg,#d74648,#ed9045 25%,#efd05a 50%,#9bc777 75%,#279b80)';
-  modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 반경·기존 지정 경계·추정 도로폭·학구도를 결합한 연구용 점수. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'미선정 구간과 미평가 지표는 회색으로 표시합니다. 과거 데이터의 임시 100점은 화면과 평균에서 제외합니다.';
+  modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 지정 경계·시설 거리와 동일 초등학교 학구도(각 50%)를 결합한 연구용 점수. 학구 미적용·노인 유형은 거리점수만 사용하며 도로폭은 평가에서 제외. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'미선정 구간과 미평가 지표는 회색으로 표시합니다. 과거 데이터의 임시 100점은 화면과 평균에서 제외합니다.';
   render();
  }
  function inspect(e){

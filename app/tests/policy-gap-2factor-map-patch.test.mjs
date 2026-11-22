@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {policyGapTeamAverage,verifyPolicyGapFeatures} from '../src/policy-gap-3source-map-patch.js';
+import {policyGapTeamAverage,verifyPolicyGapFeatures} from '../src/policy-gap-2factor-map-patch.js';
 const here=path.dirname(fileURLToPath(import.meta.url));
 test('gray NULL only excludes policy factor; other five factors remain weighted equally',()=>{
  assert.deepEqual(policyGapTeamAverage([50,60,70,80,40],null),{score:60,indicatorCount:5});
@@ -14,7 +14,7 @@ test('gray NULL only excludes policy factor; other five factors remain weighted 
  assert.throws(()=>policyGapTeamAverage([50,60,70,80,40],101),RangeError);
 });
 test('MapLibre overlay GeoJSON passes expected record and gray-color checks',async()=>{
- const filename=path.resolve(here,'../public/data/protection-zone/sangdo1_policy_gap_3source_300m_20261122.geojson');
+ const filename=path.resolve(here,'../public/data/protection-zone/sangdo1_policy_gap_2factor_300m_20261122.geojson');
  const geo=JSON.parse(await readFile(filename,'utf8'));
  assert.equal(verifyPolicyGapFeatures(geo),1676);
  assert.equal(geo.features.filter(f=>f.properties.combined_new_score===null).length,590);
@@ -36,16 +36,16 @@ test('native PRI vulnerability menu replaces duplicate map-options overlay',asyn
  assert.ok(main.includes('installBochaRoadLayer({map,maplibregl,app})'));
  assert.ok(!html.includes('walking-vulnerability-layer-group'));
  assert.ok(pri.includes("title=el('h2','','보행 취약도')"));
- assert.ok(pri.includes("id==='protectionGap'?' · 3자료·300m'"));
+ assert.ok(pri.includes("id==='protectionGap'?' · 2지표·300m'"));
  assert.ok(pri.includes('protectionGapColors'));
- assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_3source_factor.json'));
+ assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_factor.json'));
 });
-test('three-source factor scores enable the existing 제도적 사각지대 row and preserve 600 gray NULL segments',async()=>{
+test('two-factor scores enable the existing 제도적 사각지대 row and preserve 600 gray NULL segments',async()=>{
  const [{adaptLighting,parseImport,segmentScore,displayFeatures},rawLight,rawAcc,rawGap]=await Promise.all([
   import('../src/pri-data.mjs'),
   readFile(path.resolve(here,'../public/data/pri/lighting_segments.json'),'utf8'),
   readFile(path.resolve(here,'../public/data/pri/sangdo1_accidents_factor.json'),'utf8'),
-  readFile(path.resolve(here,'../public/data/pri/sangdo1_protection_gap_3source_factor.json'),'utf8')
+  readFile(path.resolve(here,'../public/data/pri/sangdo1_protection_gap_2factor_factor.json'),'utf8')
  ]);
  const lighting=adaptLighting(JSON.parse(rawLight)),acc=JSON.parse(rawAcc),gap=JSON.parse(rawGap);
  assert.equal(lighting.networkVersion,gap.networkVersion);
@@ -58,8 +58,8 @@ test('three-source factor scores enable the existing 제도적 사각지대 row 
  assert.equal(linked.segments.filter(s=>s.scores.protectionGap!==null).length,1086);
  assert.equal(linked.segments.filter(s=>segmentScore(linked,s,'protectionGap')===null).length,600);
  assert.ok(linked.segments.some(s=>s.scores.protectionGap===0||s.scores.protectionGap>0));
- assert.equal(linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap,42.8);
- assert.equal(linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap,26.8);
+ assert.equal(linked.segments.find(s=>s.id==='278148191_3').scores.protectionGap,27.1);
+ assert.equal(linked.segments.find(s=>s.id==='278024801_2').scores.protectionGap,32.1);
  const rendered=displayFeatures(linked,'protectionGap');
  assert.ok(rendered.features.some(f=>f.properties.evaluated===false),'gray segments are rendered rather than silently omitted');
  assert.ok(rendered.features.some(f=>f.properties.evaluated===true),'scored segments are rendered');
