@@ -23,7 +23,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
  const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');head.append(title,close);
- const intro=el('p','','상도1동 보행 취약도 · 조명·교통사고·제도적 사각지대·제한속도 4개 항목. 확인된 점수만 동일 가중 평균하며 0점은 낮은 취약 신호, 100점은 큰 취약 신호입니다. 미확인 값은 NULL입니다.');
+ const intro=el('p','','상도1동 보행 취약도 · 조명·교통사고·제도적 사각지대·제한속도 4개 항목. 확인된 점수만 동일 가중 평균하며 0점은 상대적으로 낮은 취약 신호, 100점은 큰 취약 신호입니다. 미확인 값은 NULL입니다.');
  const status=el('p','dj-pri-status','등록된 자료가 없습니다.');status.setAttribute('role','status');
  const actions=el('div','dj-pri-actions');
  const protectionDetail=el('section','dj-pri-protection-detail');
