@@ -3,9 +3,9 @@
   "application_version": "9.2.82",
   "public_work_branch": "main",
   "purpose": "Owner-requested mobile map deployment: apply merged integrated PR #306 (merge c2f67c3b550bc26e16581eeabfb306da2233b6d1), including all A01–E07 35 phone UI acceptance items, dialog backdrops, dark 3D buildings, theme controls, PRI 50:50 risk-v2, and mobile DPR coordination. Preserve validated 300m protection gap GIS high-risk-red and 600 NULL rows. Require exact public source, Preview verification, mobile QA, protected Production approval and guarded rollback.",
-  "attempt": 256,
+  "attempt": 257,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #306 merged to main and source CI #45004707241 succeeded; previous release request targeted #305. Promote updated exact main source through protected Preview→Production release gates; do not claim deployment until verified.",
+  "last_retry_reason": "PR #306 merge c2f67c3b + release regression alignment fix 19c0c693. Run #45005226139 failed on stale production test expectations (dark 3D opacity 0.58/0.50 vs approved 0.94/0.89). Fixed assertions on main; retry exact-source 9.2.82 Preview→12-shard phone QA→protected Production with 50:50 GIS checks preserved.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
