@@ -5,11 +5,12 @@ const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point';
 const EMPTY={type:'FeatureCollection',features:[]};
 const colors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],...PALETTE.flat()], '#9ba4aa'];
 const protectionGapColors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],0,'#CB6563',25,'#DDA263',50,'#DBC576',75,'#82AB94',100,'#4C948B'],'#8D969F'];
-export function installPriMap({map,maplibregl,app,doc=document,win=window}){
+export function installPriMap({map,maplibregl,app,doc=document,win=window,restoreMode=null}){
  if(doc.getElementById('dj-pri-toggle'))return;
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const button=(label,fn)=>{const n=el('button','dj-pri-button',label);n.type='button';n.addEventListener('click',fn);return n;};
  let dataset=null,mode=null,display=EMPTY,fetchStarted=false,revision=0,popup=null,lookup=new Map();
+ let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?restoreMode:null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
  const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());head.append(title,close);
@@ -54,7 +55,10 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  detailToggle.innerHTML='<span>평가 기준 보기</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
  const detailWrap=el('div','dj-pri-detail-wrap'),detailBody=el('div','dj-pri-detail-body');detailBody.id='dj-pri-legend-detail-body';detailBody.setAttribute('aria-hidden','true');const modelNote=el('small','dj-pri-model-note','미평가·미선정 도로는 회색으로 표시하고 임시 100점은 어떠한 평균에도 사용하지 않습니다.');detailBody.append(coverage,modelNote);detailWrap.append(detailBody);
  legend.append(label,dismiss,ramp,ends,detailToggle,detailWrap);app.append(legend);
- function acceptDataset(next){dataset=next;lookup=new Map(next.segments.map(s=>[s.id,s]));revision++;activate(null);render();}
+ function acceptDataset(next){
+  dataset=next;lookup=new Map(next.segments.map(s=>[s.id,s]));revision++;activate(null);render();
+  if(pendingRestore){const requested=pendingRestore;pendingRestore=null;activate(requested);}
+ }
  function setDataset(raw){acceptDataset(parseImport(raw,dataset));}
  function render(){
    actions.replaceChildren();exportButton.disabled=!dataset;focusArea.disabled=!dataset?.segments?.length;
@@ -122,7 +126,9 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  }
  function activate(id){
   if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>segmentScore(dataset,s,'pri12')!==null):!dataset.factors.some(f=>f.id===id))))return;
-  mode=id;if(id)app.dataset.djPriVisible='true';else delete app.dataset.djPriVisible;doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
+  mode=id;if(id){app.dataset.djPriVisible='true';app.dataset.djPriMode=id;}
+  else{delete app.dataset.djPriVisible;delete app.dataset.djPriMode;}
+  doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;display=id?displayFeatures(dataset,id):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
@@ -159,4 +165,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  map.on('idle',recoverLayer);
  map.on('click',inspect);
  render();
+ // Restore this layer only after the exact existing dataset has loaded.
+ // Never force a camera move or re-open a modal during native iOS repaint.
+ if(pendingRestore)void loadDefault();
 }
