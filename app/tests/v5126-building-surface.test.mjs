@@ -4,10 +4,10 @@ import {readFileSync} from 'node:fs';
 import {buildingFootprintPaint,buildingFootprintOutlinePaint,nativeBuildingOutline,installBaseBuildingPalette} from '../src/map-appearance.js';
 const source=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
-test('수직 2D: 두 테마 모두 단색 불투명 건물 면, 폴리곤 외곽선 비활성화',()=>{
+test('수직 2D: 라이트 면 유지, 다크 건물은 반투명하게 표시하고 외곽선 비활성화',()=>{
   for(const theme of ['dark','light']){
     const paint=buildingFootprintPaint(theme,0);
-    assert.equal(paint['fill-opacity'],1);
+    assert.equal(paint['fill-opacity'],theme==='dark'?0.74:1);
     assert.equal(paint['fill-antialias'],false);
     assert.equal(buildingFootprintOutlinePaint(theme,0)['line-opacity'],0);
   }

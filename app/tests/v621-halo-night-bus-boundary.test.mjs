@@ -22,7 +22,7 @@ test('map label halo shrinks once, including basemap post-office and bus labels'
 
 test('night analysis dark building blocks road show-through and restores on exit',()=>{
   const old=buildingExtrusionAppearance('dark',52);
-  assert.ok(old.opacity>0.8);
+  assert.ok(old.opacity<=0.58,'normal dark building remains translucent');
   const night=nightOcclusionBuildingPaint(old,true);
   assert.equal(night.opacity,0.91);
   assert.equal(night.color,'#192c34');

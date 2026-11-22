@@ -125,7 +125,7 @@ export function lightMapLandRole(layer = {}) {
 
 export function districtExteriorThemePaint(theme='light'){
   return theme==='dark'
-    ? {'fill-color':'#111419','fill-opacity':0.76}
+    ? {'fill-color':'#22272d','fill-opacity':0.34}
     : {'fill-color':'#d8e0e3','fill-opacity':0.65};
 }
 
@@ -138,7 +138,7 @@ export function initTheme({map,app}){
   document.documentElement.dataset.theme=themeState.value;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
   // Theme updates are repaint-only. Never create a full-screen transition mask.
-  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#17191d':'#f3f7f5';
+  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#252b32':'#f3f7f5';
   if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
   // background base style only; dynamically added route, road width and safety layers are not modified.
@@ -176,11 +176,14 @@ export function initTheme({map,app}){
         const water=/water|ocean|river|lake|stream/.test(id);
         const green=/park|grass|wood|landcover|forest|green|garden/.test(id);
         const road=/road|motorway|street|transportation|bridge|tunnel|highway/.test(id);
-        if(entry.type==='background')set('background-color','#131416');
-        if(entry.type==='fill')set('fill-color',water?'#1c242a':green?'#34383d':entry.roadRole?'#3d4145':road?'#303438':'#24272b');
-        if(entry.type==='line')set('line-color',water?'#36444d':entry.roadRole?(entry.roadRole==='edge'?'#303438':'#61666b'):road?'#4b5056':'#3d4442');
+        // Balanced dark basemap: distinguish ground, roads, parks and water.
+        // Only the original style baseline is recolored: semantic PRI, route
+        // geometry, transit lines and warning layers keep their own colors.
+        if(entry.type==='background')set('background-color','#22272d');
+        if(entry.type==='fill')set('fill-color',water?'#273741':green?'#303c34':entry.roadRole?'#424952':road?'#39434a':'#2b3138');
+        if(entry.type==='line')set('line-color',water?'#425765':entry.roadRole?(entry.roadRole==='edge'?'#333b44':'#4c5864'):road?'#525e68':'#424a53');
         if(entry.type==='symbol'){
-          set('text-color','#e5e7eb');set('text-halo-color','#181a1e');
+          set('text-color','#e9f0f3');set('text-halo-color','#22272d');
         }
       }
     }
@@ -197,8 +200,8 @@ export function initTheme({map,app}){
     for(const id of ['dj-metro-summary-name','dj-metro-detail-name','dj-metro-detail-name-very-close','dj-nearby-place-names','dongjak-zoom-commercial-names']){
       if(!map.getLayer(id))continue;
       try{
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e6e9ef':id==='dj-nearby-place-names'?'#536e74':'#21483c');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(22,24,27,0.96)':'rgba(255,255,255,0.97)');
+        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':id==='dj-nearby-place-names'?'#536e74':'#21483c');
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(255,255,255,0.97)');
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
@@ -224,7 +227,7 @@ export function initTheme({map,app}){
     app.dataset.djPreferredTheme=themeState.preference;
     app.dataset.djThemeSource=themeState.temporary?'night':'user';
     document.documentElement.dataset.theme=next;
-    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#17191d':'#edf3ef';
+    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#252b32':'#edf3ef';
     if(toggle){
       if(themeState.temporary){
         toggle.textContent='야간 시야 중 · 종료 후 '+(themeState.preference==='dark'?'다크':'라이트');

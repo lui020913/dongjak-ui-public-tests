@@ -5,7 +5,7 @@ import css from './theme-contract.css?raw';
 import {isIosHomeScreenPhone} from './mobile-pwa-status-tone-v793.js';
 
 const STYLE_ID='dj-theme-contract';
-const EDGE=Object.freeze({light:'#edf3ef',dark:'#17191d'});
+const EDGE=Object.freeze({light:'#edf3ef',dark:'#22282e'});
 export function syncThemeSurface({app,doc,win,force=false}) {
   const root=doc.documentElement;
   const theme=app?.dataset?.theme==='dark'?'dark':'light';

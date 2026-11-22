@@ -11,14 +11,14 @@
     --dj-theme-accent:#285b4f;
 }
 :root[data-theme="dark"] {
-    --dj-theme-bg:#17191d;
-    --dj-theme-surface:#23262c;
-    --dj-theme-raised:#2b3037;
-    --dj-theme-ink:#f2f4f7;
-    --dj-theme-muted:#b6bec8;
-    --dj-theme-line:#424952;
-    --dj-theme-selected:#39434e;
-    --dj-theme-accent:#b4c8da;
+    --dj-theme-bg:#22282e;
+    --dj-theme-surface:#2c343d;
+    --dj-theme-raised:#35404a;
+    --dj-theme-ink:#f1f4f6;
+    --dj-theme-muted:#bec8d2;
+    --dj-theme-line:#4d5b65;
+    --dj-theme-selected:#285b50;
+    --dj-theme-accent:#79dec5;
 }
 
 /* Theme contract 2026-11-22: visual surfaces only. Do NOT recolor safety
@@ -45,59 +45,59 @@
     color-scheme:light!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] {
-    /* Stable charcoal hierarchy, not the old green/teal design system. */
-    --dj9272-page:#17191d!important;
-    --dj9272-surface:#23262c!important;
-    --dj9272-ink:#f2f4f7!important;
-    --dj9272-muted:#b6bec8!important;
-    --dj9272-line:#424952!important;
-    --dj9272-tint:#30353c!important;
-    --dj-v4-selected:#39434e!important;
-    --dj-v4-accent:#c0d5e7!important;
-    --djNext-surface:#23262c!important;
-    --djNext-raised:#30353c!important;
-    --djNext-text:#f2f4f7!important;
-    --djNext-muted:#b6bec8!important;
-    --djNext-border:#424952!important;
-    --djNext-active:#b4c8da!important;
+    /* Balanced charcoal hierarchy with emerald-mint interaction accents. */
+    --dj9272-page:#22282e!important;
+    --dj9272-surface:#2c343d!important;
+    --dj9272-ink:#f1f4f6!important;
+    --dj9272-muted:#bec8d2!important;
+    --dj9272-line:#4d5b65!important;
+    --dj9272-tint:#35404a!important;
+    --dj-v4-selected:#285b50!important;
+    --dj-v4-accent:#a0f0da!important;
+    --djNext-surface:#2c343d!important;
+    --djNext-raised:#35404a!important;
+    --djNext-text:#f1f4f6!important;
+    --djNext-muted:#bec8d2!important;
+    --djNext-border:#4d5b65!important;
+    --djNext-active:#79dec5!important;
     --djNext-tile:#343a43!important;
     --djNext-tile-ink:#e0e8f0!important;
-    --djNext-tool-face:#2b3037!important;
-    --djNext-tool-edge:#525a64!important;
+    --djNext-tool-face:#35404a!important;
+    --djNext-tool-edge:#4d5b65!important;
     --djNext-tool-soft-face:#353b44!important;
     --djNext-tool-selected-face:#404b59!important;
-    --djNext-tool-selected-ink:#f2f4f7!important;
-    --dj-primary-page-bg:#17191d!important;
-    --dj-primary-page-ink:#f2f4f7!important;
+    --djNext-tool-selected-ink:#f1f4f6!important;
+    --dj-primary-page-bg:#22282e!important;
+    --dj-primary-page-ink:#f1f4f6!important;
     --dj-primary-page-edge:#373c44!important;
-    --dj800-surface:#23262c!important;
-    --dj800-elevated:#2b3037!important;
-    --dj800-text:#f2f4f7!important;
-    --dj800-muted:#b6bec8!important;
-    --dj800-border:#424952!important;
-    --dj800-accent:#b4c8da!important;
-    --surface:#202329!important;
-    --card:#25292f!important;
-    --panel:#202329!important;
-    --text:#f2f4f7!important;
-    --muted:#b6bec8!important;
-    --border:#424952!important;
-    --mf-bg:#17191d!important;
-    --mf-surface:#23262c!important;
-    --mf-surface-muted:#292d34!important;
-    --mf-surface-raised:#30353c!important;
-    --mf-ink:#f2f4f7!important;
-    --mf-muted:#b6bec8!important;
-    --mf-line:#424952!important;
-    --mf-accent:#b4c8da!important;
-    --mf-accent-soft:#343e4a!important;
-    color:#f2f4f7!important;
-    background-color:#17191d!important;
+    --dj800-surface:#2c343d!important;
+    --dj800-elevated:#35404a!important;
+    --dj800-text:#f1f4f6!important;
+    --dj800-muted:#bec8d2!important;
+    --dj800-border:#4d5b65!important;
+    --dj800-accent:#79dec5!important;
+    --surface:#2c343d!important;
+    --card:#2c343d!important;
+    --panel:#2c343d!important;
+    --text:#f1f4f6!important;
+    --muted:#bec8d2!important;
+    --border:#4d5b65!important;
+    --mf-bg:#22282e!important;
+    --mf-surface:#2c343d!important;
+    --mf-surface-muted:#35404a!important;
+    --mf-surface-raised:#35404a!important;
+    --mf-ink:#f1f4f6!important;
+    --mf-muted:#bec8d2!important;
+    --mf-line:#4d5b65!important;
+    --mf-accent:#79dec5!important;
+    --mf-accent-soft:#285b50!important;
+    color:#f1f4f6!important;
+    background-color:#22282e!important;
     color-scheme:dark!important;
   }
   html[data-theme="dark"],html[data-theme="dark"] body {
     color-scheme:dark!important;
-    background-color:#17191d!important;
+    background-color:#22282e!important;
   }
   html[data-theme="light"],html[data-theme="light"] body {
     color-scheme:light!important;
@@ -108,11 +108,11 @@
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > :is(.dj836-sheet-body,.dj-sheet-chrome),
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden])::after,
   html body #app#app#app#app#app#app#app[data-theme="dark"] #dj910-route-footer {
-    background:#17191d!important;
-    background-color:#17191d!important;
+    background:#22282e!important;
+    background-color:#22282e!important;
     background-image:none!important;
     border-color:#373c44!important;
-    color:#f2f4f7!important;
+    color:#f1f4f6!important;
   }
   /* My info / settings / route cards / list sheets / community / news. */
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
@@ -126,20 +126,20 @@
     .dj833-night-dialog,#dj840-theme-confirm .dj840-dialog,
     #dj854-weather-sheet,.dj860-onboarding .dj860-content
   ) {
-    background:#23262c!important;
-    background-color:#23262c!important;
+    background:#2c343d!important;
+    background-color:#2c343d!important;
     background-image:none!important;
-    border-color:#424952!important;
-    color:#f2f4f7!important;
+    border-color:#4d5b65!important;
+    color:#f1f4f6!important;
     box-shadow:0 4px 15px rgba(0,0,0,.14)!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
     .dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button
   ) {
-    background:#23262c!important;
-    border-color:#424952!important;
-    color:#f2f4f7!important;
-    -webkit-text-fill-color:#f2f4f7!important;
+    background:#2c343d!important;
+    border-color:#4d5b65!important;
+    color:#f1f4f6!important;
+    -webkit-text-fill-color:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel :is(
     .dj834-setting-icon,.dj834-user-avatar,.dj834-profile-symbol
@@ -157,8 +157,8 @@
     #participation-panel .dj-sheet-chrome,.dj-map-settings-head h2,
     .dj-map-settings-group h3,.dj877-pref-group strong
   ) {
-    color:#f2f4f7!important;
-    -webkit-text-fill-color:#f2f4f7!important;
+    color:#f1f4f6!important;
+    -webkit-text-fill-color:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
     #mine-panel .dj834-profile-meta small,#mine-panel .dj834-group-title,
@@ -167,8 +167,8 @@
     .dj-map-settings-head p,.dj877-pref-row small,
     .dj-place-kicker,.dj834-detail-back
   ) {
-    color:#b6bec8!important;
-    -webkit-text-fill-color:#b6bec8!important;
+    color:#bec8d2!important;
+    -webkit-text-fill-color:#bec8d2!important;
   }
   /* Opaque, neutral map header; preserve topbar geometry and AI position. */
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
@@ -176,24 +176,24 @@
     #map-quick-search-dropdown:not([hidden]),.map-quick-search-results,
     #dj890-ai-orb,#dj800-ai-search-trigger
   ) {
-    background:#252a30!important;
-    background-color:#252a30!important;
+    background:#2c343d!important;
+    background-color:#2c343d!important;
     background-image:none!important;
-    border-color:#505761!important;
-    color:#f2f4f7!important;
+    border-color:#4d5b65!important;
+    color:#f1f4f6!important;
     box-shadow:0 4px 13px rgba(0,0,0,.18)!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
     #map-quick-search-query,.map-quick-search-form input,
     #dj890-ai-orb .dj890-ai-orb-text
   ) {
-    color:#f2f4f7!important;
-    -webkit-text-fill-color:#f2f4f7!important;
+    color:#f1f4f6!important;
+    -webkit-text-fill-color:#f1f4f6!important;
     caret-color:#eef1f7!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #map-quick-search-query::placeholder {
-    color:#b6bec8!important;
-    -webkit-text-fill-color:#b6bec8!important;
+    color:#bec8d2!important;
+    -webkit-text-fill-color:#bec8d2!important;
     opacity:1!important;
   }
   /* Toolbar, floating map controls, weather tiles, layer controls. */
@@ -204,18 +204,18 @@
       #dj-v794-toolbar .dj-v794-tool,.map-controls button,
       .maplibregl-ctrl button,#dj-v794-night,#dj-v794-toolbar .dj832-feature-label
     ) {
-      background-color:#292e35!important;
+      background-color:#35404a!important;
       background-image:none!important;
-      border-color:#525a64!important;
-      color:#f2f4f7!important;
-      -webkit-text-fill-color:#f2f4f7!important;
+      border-color:#4d5b65!important;
+      color:#f1f4f6!important;
+      -webkit-text-fill-color:#f1f4f6!important;
     }
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
-    background:#252a30!important;
-    background-color:#252a30!important;
+    background:#2c343d!important;
+    background-color:#2c343d!important;
     background-image:none!important;
-    border-color:#525a64!important;
+    border-color:#4d5b65!important;
     box-shadow:0 3px 15px rgba(0,0,0,.25)!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab {
@@ -224,9 +224,9 @@
     -webkit-text-fill-color:#b8c0ca!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active {
-    background:#39434e!important;
-    color:#e4efff!important;
-    -webkit-text-fill-color:#e4efff!important;
+    background:#285b50!important;
+    color:#a0f0da!important;
+    -webkit-text-fill-color:#a0f0da!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab :is(span,svg) {
     color:inherit!important;
@@ -237,45 +237,45 @@
     .dj-map-settings-card select,#mine-panel input,#mine-panel select,
     #dj-mobile-utilities input,#dj-mobile-utilities select
   ) {
-    background:#2b3037!important;
-    border-color:#525a64!important;
-    color:#f2f4f7!important;
-    -webkit-text-fill-color:#f2f4f7!important;
+    background:#35404a!important;
+    border-color:#4d5b65!important;
+    color:#f1f4f6!important;
+    -webkit-text-fill-color:#f1f4f6!important;
     color-scheme:dark!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
     #dj-map-settings button,#mine-panel button,.dj-map-settings-card button
   ):focus-visible {
-    outline:2px solid #b4c8da!important;
+    outline:2px solid #79dec5!important;
     outline-offset:2px!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] .dj860-onboarding {
-    --dj860-bg:#17191d!important;
-    --dj860-fg:#f2f4f7!important;
-    --dj860-muted:#b6bec8!important;
+    --dj860-bg:#22282e!important;
+    --dj860-fg:#f1f4f6!important;
+    --dj860-muted:#bec8d2!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] .map-startup-overlay {
-    --start-bg:#17191d!important;
-    --start-fg:#f2f4f7!important;
-    --start-muted:#b6bec8!important;
-    --start-track:#424952!important;
-    background:#17191d!important;
+    --start-bg:#22282e!important;
+    --start-fg:#f1f4f6!important;
+    --start-muted:#bec8d2!important;
+    --start-track:#4d5b65!important;
+    background:#22282e!important;
   }
   html.dj-ios-home-pwa[data-theme="dark"] {
-    --dj-pwa-land-tone:#17191d!important;
+    --dj-pwa-land-tone:#22282e!important;
     --dj-pwa-land-tone-rgb:23,25,29!important;
-    --dj-pwa-native-edge:#17191d!important;
-    --dj-pwa-status-color:#17191d!important;
-    background-color:#17191d!important;
+    --dj-pwa-native-edge:#22282e!important;
+    --dj-pwa-status-color:#22282e!important;
+    background-color:#22282e!important;
   }
   html.dj-ios-home-pwa[data-theme="dark"] body #app #dj-ios-pwa-map-seam,
   html.dj-ios-home-pwa[data-theme="dark"] body #dj-ios-pwa-status-sample {
-    background-color:#17191d!important;
-    background:#17191d!important;
+    background-color:#22282e!important;
+    background:#22282e!important;
   }
   html.dj-ios-home-pwa[data-theme="dark"] body #app .topbar .map-quick-search-form {
-    background:#252a30!important;
-    border-color:#505761!important;
+    background:#2c343d!important;
+    border-color:#4d5b65!important;
   }
 }
 /* No extra full-screen mask is introduced by theme changes. */
@@ -287,34 +287,34 @@
 @layer request-completion {
   @media(max-width:699px) {
     html body:has(#app[data-theme="dark"]) #dj-ai-search-modal {
-      --djNext-surface:#23262c!important;
-      --djNext-text:#f2f4f7!important;
-      --djNext-muted:#b6bec8!important;
-      --djNext-border:#424952!important;
-      --dj800-surface:#23262c!important;
-      --dj800-surface-soft:#2b3037!important;
-      --dj800-text:#f2f4f7!important;
+      --djNext-surface:#2c343d!important;
+      --djNext-text:#f1f4f6!important;
+      --djNext-muted:#bec8d2!important;
+      --djNext-border:#4d5b65!important;
+      --dj800-surface:#2c343d!important;
+      --dj800-surface-soft:#35404a!important;
+      --dj800-text:#f1f4f6!important;
       color-scheme:dark!important;
-      background:#23262c!important;
-      color:#f2f4f7!important;
-      border-color:#424952!important;
+      background:#2c343d!important;
+      color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
     html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
       .dj-ai-search-content,.dj-ai-search-header,.dj-ai-search-body,
       .dj-ai-search-history,.dj-ai-search-input,.dj-ai-answer,
       textarea,input:not([type="checkbox"]),select
     ) {
-      background-color:#23262c!important;
-      color:#f2f4f7!important;
-      border-color:#424952!important;
+      background-color:#2c343d!important;
+      color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
     html body:has(#app[data-theme="dark"]) #dj-ai-search-modal :is(
       .dj-ai-muted,.dj-ai-message-meta,small
-    ) {color:#b6bec8!important;}
+    ) {color:#bec8d2!important;}
   }
 }
 
-/* Keep production mobile controls and secondary windows in the same neutral
+/* Keep production mobile controls and secondary windows in the same charcoal
    semantic tokens; positioning, ARIA, animations and gesture styles untouched. */
 @layer request-completion {
   @media(max-width:699px) {
@@ -324,13 +324,13 @@
       #djNext-toolbar #djNext-scroll .djNext-tool,
       .map-actions > button,#dj840-map-tip,#dj-browser-webapp-tip
     ) {
-      --djNext-tool-face:#2b3037!important;
+      --djNext-tool-face:#35404a!important;
       --djNext-tool-soft-face:#343a43!important;
-      --djNext-tool-edge:#525a64!important;
-      --djNext-text:#f2f4f7!important;
-      color:#f2f4f7!important;
-      -webkit-text-fill-color:#f2f4f7!important;
-      border-color:#525a64!important;
+      --djNext-tool-edge:#4d5b65!important;
+      --djNext-text:#f1f4f6!important;
+      color:#f1f4f6!important;
+      -webkit-text-fill-color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
     html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
       #dj854-weather-sheet,#djNext-layer-panel .djNext-modal-body,
@@ -338,32 +338,32 @@
       #dj834-map-settings,#version-history-modal .version-history-dialog,
       #djNext-permissions .djNext-modal-body
     ) {
-      --djNext-surface:#23262c!important;
-      --djNext-text:#f2f4f7!important;
-      --djNext-muted:#b6bec8!important;
-      --djNext-border:#424952!important;
-      --dj9272-page:#17191d!important;
-      --dj9272-surface:#23262c!important;
-      --dj9272-ink:#f2f4f7!important;
-      --dj9272-muted:#b6bec8!important;
-      --dj9272-line:#424952!important;
-      color:#f2f4f7!important;
-      border-color:#424952!important;
+      --djNext-surface:#2c343d!important;
+      --djNext-text:#f1f4f6!important;
+      --djNext-muted:#bec8d2!important;
+      --djNext-border:#4d5b65!important;
+      --dj9272-page:#22282e!important;
+      --dj9272-surface:#2c343d!important;
+      --dj9272-ink:#f1f4f6!important;
+      --dj9272-muted:#bec8d2!important;
+      --dj9272-line:#4d5b65!important;
+      color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
     html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
       #route-panel,#participation-panel,#news-panel,#mine-panel,
       #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
     ) :is(input:not([type="checkbox"]),textarea,select) {
-      background-color:#2b3037!important;
-      color:#f2f4f7!important;
-      caret-color:#f2f4f7!important;
-      border-color:#525a64!important;
+      background-color:#35404a!important;
+      color:#f1f4f6!important;
+      caret-color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
     html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
       #route-panel,#participation-panel,#news-panel,#mine-panel,
       #dj854-weather-sheet,#djNext-layer-panel,#dj-map-settings
     ) :is(input,textarea)::placeholder {
-      color:#b6bec8!important;opacity:1!important;
+      color:#bec8d2!important;opacity:1!important;
     }
     /* Explicit state only: never paint route-line, warning, PRI or transport
        colors with the general monochrome UI palette. */
@@ -371,9 +371,9 @@
       .dj-sheet-chrome-close,.djNext-close,#transport-close,
       #dj-mobile-utilities-close,#dj-settings-close
     ) {
-      background-color:#30353c!important;
-      color:#f2f4f7!important;
-      border-color:#424952!important;
+      background-color:#35404a!important;
+      color:#f1f4f6!important;
+      border-color:#4d5b65!important;
     }
   }
 }
@@ -408,7 +408,7 @@
     border:1px solid var(--dj-theme-line)!important;
   }
   html body #app[data-theme="dark"] #pza3-panel :is(#pza3-toggle,#pza3-modes button)[aria-pressed="true"]{
-    color:#f2f4f7!important;
+    color:#f1f4f6!important;
     background:var(--dj-theme-selected)!important;
     border-color:#677583!important;
   }
@@ -444,93 +444,131 @@
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
     .dongjak-news-tabs,.dongjak-news-item,.news-empty
   ){
-    background:#23262c!important;background-image:none!important;
-    border-color:#424952!important;color:#f2f4f7!important;
+    background:#2c343d!important;background-image:none!important;
+    border-color:#4d5b65!important;color:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button:not(.active){
-    background:#2b3037!important;background-image:none!important;
+    background:#35404a!important;background-image:none!important;
     color:#d4dde5!important;-webkit-text-fill-color:#d4dde5!important;
-    border:1px solid #424952!important;
+    border:1px solid #4d5b65!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button.active{
-    background:#b4c8da!important;background-image:none!important;
+    background:#79dec5!important;background-image:none!important;
     color:#17232c!important;-webkit-text-fill-color:#17232c!important;
-    border:1px solid #b4c8da!important;
+    border:1px solid #79dec5!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
     #dongjak-news-refresh,.dongjak-news-open,.dongjak-news-links a
   ){
-    background:#303741!important;background-image:none!important;
+    background:#35404a!important;background-image:none!important;
     color:#e1ebf5!important;-webkit-text-fill-color:#e1ebf5!important;
     border-color:#505b66!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item strong{
-    color:#f2f4f7!important;-webkit-text-fill-color:#f2f4f7!important;
+    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
     .dongjak-news-item-meta,.dongjak-news-status
-  ){color:#b6bec8!important;-webkit-text-fill-color:#b6bec8!important;}
+  ){color:#bec8d2!important;-webkit-text-fill-color:#bec8d2!important;}
 
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-post,.community-comments,.community-post-preview,.community-post-detail
   ){
-    background:#23262c!important;background-image:none!important;
-    color:#f2f4f7!important;border-color:#424952!important;
+    background:#2c343d!important;background-image:none!important;
+    color:#f1f4f6!important;border-color:#4d5b65!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-post-title,.community-post-body,.community-post-actions button
   ){
     background:transparent!important;background-image:none!important;
-    color:#f2f4f7!important;-webkit-text-fill-color:#f2f4f7!important;
+    color:#f1f4f6!important;-webkit-text-fill-color:#f1f4f6!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-post-meta,.community-summary-count,.community-form-note
-  ){color:#b6bec8!important;-webkit-text-fill-color:#b6bec8!important;}
+  ){color:#bec8d2!important;-webkit-text-fill-color:#bec8d2!important;}
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-filter:not(.active),#community-sort,#community-notifications-toggle,
     #community-saved-toggle:not([aria-pressed="true"]),.dj-community-refresh
   ){
-    background:#2b3037!important;background-image:none!important;
+    background:#35404a!important;background-image:none!important;
     border-color:#505861!important;color:#e1e8f0!important;
     -webkit-text-fill-color:#e1e8f0!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-filter.active,#community-saved-toggle[aria-pressed="true"],#community-compose-toggle
   ){
-    background:#b4c8da!important;background-image:none!important;
-    border-color:#b4c8da!important;color:#17232c!important;
+    background:#79dec5!important;background-image:none!important;
+    border-color:#79dec5!important;color:#17232c!important;
     -webkit-text-fill-color:#17232c!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-post-category,.community-location-link
   ){
-    background:#39434e!important;background-image:none!important;
+    background:#285b50!important;background-image:none!important;
     border-color:#576575!important;color:#e2ecf5!important;
     -webkit-text-fill-color:#e2ecf5!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
     .community-post-actions,.community-comment-row
-  ){border-color:#424952!important;}
+  ){border-color:#4d5b65!important;}
   html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel :is(
     .route-mini-btn,.route-gps-btn,#dj832-waypoint-toggle
   ):not(:disabled){
-    background:#303741!important;background-image:none!important;
+    background:#35404a!important;background-image:none!important;
     border-color:#525b66!important;color:#e1eaf2!important;
     -webkit-text-fill-color:#e1eaf2!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:disabled{
-    background:#343b44!important;background-image:none!important;
+    background:#404a54!important;background-image:none!important;
     color:#b5c1ce!important;-webkit-text-fill-color:#b5c1ce!important;
     border:1px solid #505965!important;opacity:1!important;
     box-shadow:none!important;cursor:not-allowed!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj834-setting-icon{
-    background:#39434e!important;color:#d7e4ef!important;
+    background:#285b50!important;color:#d7e4ef!important;
     -webkit-text-fill-color:#d7e4ef!important;border-color:#525d6a!important;
   }
   html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active{
-    background:#39434e!important;color:#d5f0e7!important;
-    -webkit-text-fill-color:#d5f0e7!important;
+    background:#285b50!important;color:#a0f0da!important;
+    -webkit-text-fill-color:#a0f0da!important;
   }
  }
+}
+
+/* Balanced Dark: emerald-mint is the interaction affordance, never a
+   substitute for PRI severity, transit line or road-risk semantics.
+   Dark-ink on the bright mint CTA meets text contrast; selected tabs use
+   the deeper mint surface and lighter mint glyph. Light mode is unchanged. */
+@layer request-completion {
+  html body #app#app#app#app#app#app#app[data-theme="dark"] {
+    --dj-brand-mint:#79dec5!important;
+    --dj-brand-mint-ink:#17332d!important;
+    --dj-brand-mint-selected:#285b50!important;
+    --dj-brand-mint-selected-ink:#a0f0da!important;
+  }
+  @media(max-width:699px) {
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab:is(.active,[aria-current="page"]) {
+      background:#285b50!important;
+      color:#a0f0da!important;
+      -webkit-text-fill-color:#a0f0da!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:not(:disabled),
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel #community-compose-toggle,
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-permissions .djNext-continue {
+      background:#79dec5!important;
+      background-image:none!important;
+      border-color:#79dec5!important;
+      color:#17332d!important;
+      -webkit-text-fill-color:#17332d!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-shortcut-switch[aria-checked="true"] .djNext-switch-track {
+      background:#79dec5!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #dj890-ai-orb .dj890-ai-orb-glyph,
+      #dj-v794-weather .dj832-tool-icon
+    ) {
+      color:#79dec5!important;
+    }
+  }
 }

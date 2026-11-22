@@ -17,10 +17,10 @@ function firstPaint(saved='dark',pending=null){
   return {theme:document.documentElement.dataset.theme,meta:meta.content};
 }
 test('cold start respects saved manual theme and ignores stale night tokens',()=>{
-  assert.deepEqual(firstPaint('dark'),{theme:'dark',meta:'#17191d'});
+  assert.deepEqual(firstPaint('dark'),{theme:'dark',meta:'#22282e'});
   assert.deepEqual(firstPaint('light'),{theme:'light',meta:'#f3f7f5'});
   const pending={expires:Date.now()+5000,night:null};
-  assert.deepEqual(firstPaint('dark',pending),{theme:'dark',meta:'#17191d'});
+  assert.deepEqual(firstPaint('dark',pending),{theme:'dark',meta:'#22282e'});
 });
 test('new release follows v8.0.2 and preserves original sources',()=>{
   assert.equal(RENUMBERED_VERSION_HISTORY[0].version,'v8.0.3');

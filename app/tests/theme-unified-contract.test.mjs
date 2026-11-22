@@ -48,11 +48,11 @@ test('shared color tokens protect legacy dark selectors and leave safety semanti
   const prod=readFileSync(existsSync(isolated)?isolated:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
   const layout=read('src/mobile-first-layout.css');
   const material=read('src/button-material.css');
-  for(const c of ['#17191d','#23262c','#2b3037','#f2f4f7','#b6bec8'])assert.ok(css.includes(c),c);
+  for(const c of ['#22282e','#2c343d','#35404a','#f1f4f6','#bec8d2','#79dec5','#285b50'])assert.ok(css.includes(c),c);
   for(const token of ['--dj-theme-bg','--dj-theme-surface','--dj-theme-ink','--dj-theme-muted','--dj-theme-line','--dj-theme-accent'])assert.ok(css.includes(token));
   assert.ok(prod.includes('--dj9272-surface:var(--dj-theme-surface'));
   assert.ok(prod.includes('--dj-v4-selected:var(--dj-theme-selected'));
-  assert.ok(layout.includes('var(--dj-theme-surface,#23262c)'));
+  assert.ok(layout.includes('var(--dj-theme-surface,#2c343d)'));
   assert.ok(material.includes('--djNext-tool-selected-face:var(--dj-theme-selected'));
   assert.ok(css.includes('never paint route-line, warning, PRI or transport'));
 });
@@ -63,16 +63,16 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
   assert.ok(controller.includes('isIosHomeScreenPhone(win)'));
   assert.ok(controller.includes('!isIosHomeScreenPhone(win)'));
   assert.ok(ios.includes("themeMeta.setAttribute('content',color)"));
-  assert.equal(JSON.parse(read('public/manifest-dark.webmanifest')).theme_color,'#17191d');
+  assert.equal(JSON.parse(read('public/manifest-dark.webmanifest')).theme_color,'#22282e');
   assert.equal(JSON.parse(read('public/manifest-light.webmanifest')).theme_color,'#edf3ef');
 });
 
 test('mobile full-height primary pages retain the charcoal status-edge base',()=>{
   const css=read('src/mobile-primary-fullscreen.css');
   const contract=read('src/theme-contract.css');
-  assert.match(css,/--dj-primary-page-bg:#17191d/);
-  assert.match(contract,/--dj-theme-bg:#17191d/);
-  assert.match(contract,/--dj-primary-page-bg:#17191d!important/);
+  assert.match(css,/--dj-primary-page-bg:#22282e/);
+  assert.match(contract,/--dj-theme-bg:#22282e/);
+  assert.match(contract,/--dj-primary-page-bg:#22282e!important/);
 });
 
 test('dark phone actions use readable selected text and route disabled colors',()=>{
@@ -81,6 +81,6 @@ test('dark phone actions use readable selected text and route disabled colors',(
  assert.match(contract,/#participation-panel :is\(/);
  assert.match(contract,/\.community-post-category,\.community-location-link/);
  assert.match(contract,/#route-panel #route-calc:disabled/);
- assert.match(contract,/background:#343b44!important/);
+ assert.match(contract,/background:#404a54!important/);
  assert.match(contract,/color:#17232c!important/);
 });

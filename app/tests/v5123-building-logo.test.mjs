@@ -6,7 +6,7 @@ import {markerBoxHidden} from '../src/map-marker-occlusion.js';
 const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 test('위에서 본 건물은 어두운 청회색 면을 유지하면서 충분한 대비를 확보',()=>{
   const p=BUILDING_VISUAL_PALETTE.dark;
-  assert.equal(buildingFootprintPaint('dark')['fill-opacity'],1);
+  assert.equal(buildingFootprintPaint('dark')['fill-opacity'],0.74);
   assert.ok(p.footprintOpacity>0.65);
   assert.notEqual(p.footprint,'#fff');
   assert.ok(p.nearOpacity>p.farOpacity && p.farOpacity>=0.2);

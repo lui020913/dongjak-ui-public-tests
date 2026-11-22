@@ -61,7 +61,7 @@ import {loadBuildingTileFeatures} from './building-assets.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
-import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility} from './map-appearance.js';
+import {installGrassTexture,installForestShade,installBaseBuildingPalette,nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,buildingFootprintOutlinePaint,buildingPlanVisibility,buildingZoomOpacityExpression,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from './map-appearance.js';
 import {bufferedDistrictBounds} from './map-scope.js';
 import {fallbackBoundary} from './fixed-rail-data.js';
 import {isRoadDirectionSymbolLayer} from './map-direction.js';
@@ -214,7 +214,7 @@ let terrainAvailable = false;
 let districtBuildingsReady = false;
 // 건물 외곽은 사용자가 제공한 8개 국가기본도 건물 SHP로부터 생성합니다.
 // 배경 지도 전체 3D 건물은 제거하며, 동작구 안 건물만 별도 GeoJSON으로 표시합니다.
-const BUILDING_ZOOM_MIN = 13.4;
+const BUILDING_ZOOM_MIN = BUILDING_ZOOM_FADE_START;
 const BUILDING_MANIFEST_URL = '/buildings/manifest.json';
 let buildingManifest = null;
 const loadedBuildingTiles = new Map();
@@ -687,10 +687,12 @@ function syncAutomaticTerrain(_pitch) {
 }
 
 function visibleBuilding2D(){
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && map.getZoom() >= BUILDING_ZOOM_MIN;
+  // Loaded layers remain visible across the threshold; minzoom and paint
+  // expressions smoothly fade them rather than flipping visibility on zoomend.
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom() >= BUILDING_ZOOM_MIN;
+  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -709,7 +711,8 @@ function syncTiltWithBuildings() {
   const paintKey=`${theme}/${steppedPitch}/${fillVisible}/${movementIsSlow}`;
   const updateFootprint=paintKey!==lastFootprintPaintKey;
   const footprint=updateFootprint?{...buildingFootprintPaint(theme,steppedPitch),
-    ...(movementIsSlow?{'fill-opacity':0.75}:{})}:null;
+    ...(movementIsSlow?{'fill-opacity':0.65}:{})}:null;
+  if(footprint)footprint['fill-opacity']=buildingZoomOpacityExpression(footprint['fill-opacity']);
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
     if(info.footprintFillId && map.getLayer(info.footprintFillId)){
@@ -731,7 +734,7 @@ function syncTiltWithBuildings() {
     if(map.getLayoutProperty(info.layerId,'visibility')!==desired)
       map.setLayoutProperty(info.layerId,'visibility',desired);
     if(show && (Math.abs(opacity-(info.lastOpacity??-1))>0.045 || info.lastColor!==color)){
-      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',Number(opacity.toFixed(3)));
+      map.setPaintProperty(info.layerId,'fill-extrusion-opacity',buildingZoomOpacityExpression(opacity));
       map.setPaintProperty(info.layerId,'fill-extrusion-color',color);
       info.lastOpacity=opacity;info.lastColor=color;
     }
@@ -766,7 +769,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (!visibleBuilding2D() || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
+  if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
 }
@@ -826,6 +829,7 @@ async function loadOneBuildingSheet(sheet){
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
     const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),map.getPitch());
+    footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']);
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
@@ -835,8 +839,8 @@ async function loadOneBuildingSheet(sheet){
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
       filter:['==',['get','_render3d'],true],minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:visibleBuilding3D()?'visible':'none'},
-      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':buildingStyle.opacity,
-        'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_MIN,0,14,['get','h']],
+      paint:{'fill-extrusion-color':buildingStyle.color,'fill-extrusion-opacity':buildingZoomOpacityExpression(buildingStyle.opacity),
+        'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources});
@@ -895,12 +899,12 @@ function djTrimOffscreenBuildings(sheets){
   lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
 }
 async function loadVisibleBuildingSheets(){
-  if(!visibleBuilding2D()||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
+  if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
   djBuildingBatchBusy=true;
   let interrupted=false;
   try{
     const manifest=await ensureBuildingManifest();
-    if(!visibleBuilding2D())return;
+    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
     const sheets=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     djTrimOffscreenBuildings(sheets);

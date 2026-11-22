@@ -10,9 +10,9 @@
       --dj-primary-page-edge:rgba(47,104,82,.16);
     }
     html body #app#app#app#app#app[data-theme="dark"] {
-      --dj-primary-page-bg:#17191d;
-      --dj-primary-page-ink:#edf6f1;
-      --dj-primary-page-edge:rgba(197,225,211,.18);
+      --dj-primary-page-bg:#22282e;
+      --dj-primary-page-ink:#f1f4f6;
+      --dj-primary-page-edge:rgba(190,200,210,.21);
     }
     /* Map-origin report composition keeps data-tab="map", but opens the
        community panel full-screen. Apply the same chrome exclusion while
@@ -63,8 +63,8 @@
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body,
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
-      background:var(--dj-primary-page-bg,#17191d)!important;
-      color:var(--dj-primary-page-ink,#edf6f1)!important;
+      background:var(--dj-primary-page-bg,#22282e)!important;
+      color:var(--dj-primary-page-ink,#f1f4f6)!important;
     }
 
     html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]) {

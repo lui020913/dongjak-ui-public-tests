@@ -37,7 +37,7 @@ function proceduralGrass(isDark){
  */
 export const GREEN_PALETTE={
   light:{park:'#a5ca92',forest:'#92bd86'},
-  dark:{park:'#373c40',forest:'#32373b'}
+  dark:{park:'#405248',forest:'#35483f'}
 };
 const forestId=(id='')=>/forest|wood|woodland|treecover|scrub/.test(String(id).toLowerCase());
 const forestTypes=['forest','wood','woodland','trees','wooded','tree','scrub','natural_wood'];
@@ -100,10 +100,10 @@ export function installForestShade({map,app}){
   return ids;
 }
 
-/** v5.12.6 — Opaque overhead footprints prevent double-shading where native and GIS buildings overlap. */
+/** Native footprints share a zoom-faded paint model with the GIS building overlays. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
-  dark:Object.freeze({footprint:'#42474f',footprintOpacity:1,obliqueOpacity:0.07,extrusion:'#30343b',nearOpacity:0.88,farOpacity:0.82})
+  dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.58,farOpacity:0.50})
 });
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill')return false;
@@ -138,11 +138,18 @@ export function buildingPlanVisibility(pitch=0){
   const x=(p-3)/(BUILDING_PLAN_HIDE_PITCH-3);
   return Number(Math.pow(1-x,2.2).toFixed(3));
 }
+/** Fade building mass with map zoom; MapLibre evaluates this continuously while pinch-zooming. */
+export const BUILDING_ZOOM_FADE_START=13.0;
+export const BUILDING_ZOOM_FADE_END=15.0;
+export function buildingZoomOpacityExpression(maxOpacity=1){
+  const opacity=Math.max(0,Math.min(1,Number(maxOpacity)||0));
+  return ['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,opacity];
+}
 export function buildingFootprintPaint(theme='light',pitch=0){
   const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
   return {'fill-color':p.footprint,
-    // Fully opaque when looking straight down; completely off in 3D view.
-    'fill-opacity':buildingPlanVisibility(pitch),
+    // Subtle overhead footprints, transparent for dark mode and off in 3D view.
+    'fill-opacity':Number((p.footprintOpacity*buildingPlanVisibility(pitch)).toFixed(3)),
     'fill-antialias':false};
 }
 export function buildingFootprintOutlinePaint(theme='light',pitch=0){
@@ -173,16 +180,35 @@ export function installBaseBuildingPalette({map,app}){
   }
   const ids=map.getStyle().layers.filter(nativeBuildingFootprint).map(x=>x.id);
   const outlineIds=map.getStyle().layers.filter(nativeBuildingOutline).map(x=>x.id);
+  const extrusionIds=map.getStyle().layers.filter(nativeBuildingExtrusion).map(x=>x.id);
+  const originalExtrusions=new Map(extrusionIds.map(id=>[id,{
+    color:map.getPaintProperty?.(id,'fill-extrusion-color'),
+    opacity:map.getPaintProperty?.(id,'fill-extrusion-opacity')
+  }]));
   let previousTheme='',previousOpacity=NaN;
   const paint=()=>{
     const theme=app.dataset.theme;
     const colors=buildingFootprintPaint(theme,map.getPitch?.()??0);
+    // Zoom interpolation belongs to the paint expression, not a discrete zoomend repaint.
+    const blended={...colors,'fill-opacity':buildingZoomOpacityExpression(colors['fill-opacity'])};
     if(theme===previousTheme && Math.abs(colors['fill-opacity']-previousOpacity)<0.012)return;
     previousTheme=theme;previousOpacity=colors['fill-opacity'];
     for(const id of ids){
       if(!map.getLayer(id))continue;
-      try{for(const [key,value] of Object.entries(colors))map.setPaintProperty(id,key,value);}
+      try{for(const [key,value] of Object.entries(blended))map.setPaintProperty(id,key,value);}
       catch(error){console.debug('[건물 바닥 색상]',id,error?.message);}
+    }
+    // Native vector extrusions need the same fade as locally loaded GIS buildings.
+    // Restore their original style on light mode; do not recolor route or safety overlays.
+    for(const id of extrusionIds){
+      if(!map.getLayer(id))continue;
+      try{
+        const original=originalExtrusions.get(id)||{};
+        const c=theme==='dark'?BUILDING_VISUAL_PALETTE.dark.extrusion:(original.color??null);
+        const opacity=theme==='dark'?buildingZoomOpacityExpression(BUILDING_VISUAL_PALETTE.dark.farOpacity):(original.opacity??null);
+        map.setPaintProperty(id,'fill-extrusion-color',c);
+        map.setPaintProperty(id,'fill-extrusion-opacity',opacity);
+      }catch(error){console.debug('[기본지도 3D 건물]',id,error?.message);}
     }
     // Native building outlines would duplicate the extrusion edges in 3D.
     // Keep them hidden in *both* plan and oblique views, leaving road/boundary layers intact.

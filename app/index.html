@@ -37,11 +37,11 @@
         var phone=win.matchMedia && win.matchMedia('(max-width: 699px)').matches;
         var iosHome=Boolean(ios && standalone && phone);
         document.documentElement.classList?.toggle?.('dj-ios-home-pwa',iosHome);
-        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#17191d':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
+        if(iosHome){document.documentElement.style.backgroundColor=displayTheme==='dark'?'#22282e':'#edf3ef';document.documentElement.style.colorScheme=displayTheme;}
         var themeColor=document.getElementById('dj-browser-theme-color');
         if(themeColor)themeColor.content=iosHome
-          ? (displayTheme==='dark'?'#17191d':'#edf3ef')
-          : (displayTheme==='dark'?'#17191d':'#f3f7f5');
+          ? (displayTheme==='dark'?'#22282e':'#edf3ef')
+          : (displayTheme==='dark'?'#22282e':'#f3f7f5');
       })();
     </script>
     <style>
@@ -55,7 +55,7 @@
         opacity:1;transition:opacity .3s ease;overflow:hidden;
       }
       html[data-theme="dark"] .map-startup-overlay{
-        --start-bg:#17191d;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
+        --start-bg:#22282e;--start-fg:#edf7f2;--start-muted:#a0b9af;--start-track:#28443e;
         background:var(--start-bg);
       }
       /* Standalone iPhone pre-paint: the native status strip and the first
@@ -67,7 +67,7 @@
         background:var(--start-bg)!important;
       }
       html.dj-ios-home-pwa[data-theme="dark"] body #app .map-startup-overlay{
-        --start-bg:#17191d;
+        --start-bg:#22282e;
         background:var(--start-bg)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
