@@ -22,6 +22,21 @@ jobs:
         with: {python-version: '3.12'}
       - name: Fetch 2026-09-20 Korean official elementary catchment SHP
         run: python scripts/research/sangdo1_school_catchment_source_audit.py
+      - name: Retry official download on transient upstream timeout
+        run: |
+          for attempt in 1 2 3; do
+            test -s school_catchment_20260920_official.zip && break
+            echo "Official upstream ZIP retry $attempt/3 after transient timeout"
+            sleep "$((attempt * 5))"
+            python - <<'PY'
+          import importlib.util
+          p="scripts/research/sangdo1_school_catchment_source_audit.py"
+          s=importlib.util.spec_from_file_location("official_audit",p)
+          m=importlib.util.module_from_spec(s)
+          s.loader.exec_module(m)
+          m.verify_public_zip()
+          PY
+          done
       - name: Validate official archive content and immutable source hash
         run: |
           python - <<'PY'
