@@ -116,13 +116,12 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
    await tap(page,tab(page,'map'));await expect(page.locator('#route-panel')).toBeHidden();
    await enter(page,'mine-panel','mine');
  }else{await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();}
- await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
- // Theme lives in the iPhone-like nested preferences page, not on the home row.
- await expect(page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]')).toBeVisible();
- await tap(page,page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]'));
- await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
- await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
- await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(34, 40, 46)'); // Unified charcoal primary page and status edge.
+ // Ordinary appearance is light-only; temporary dark styling belongs solely
+ // to the night-visibility feature, not a resurrected settings button.
+ await expect(page.locator('#mine-panel [data-dj834-action=theme]')).toHaveCount(0);
+ await expect(page.locator('#mine-panel [data-dj834-action=map]')).toHaveCount(1);
+ await expect(page.locator('#app')).toHaveAttribute('data-theme','light');
+ await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(237, 243, 239)');
 });
 test('phone More functions live in collapsible My Info groups',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
@@ -711,18 +710,15 @@ test('layer header follows a real pointer upward and downward; content and X sta
 });
 
 
-test('theme confirmation fades in place with its backdrop, unlike bottom sheets',{tag:'@phone-layout'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- const dialog=page.locator('#dj840-theme-confirm'),card=dialog.locator('.dj840-theme-card');
- await page.evaluate(()=>{const rows=[];window.__confirmFrames=rows;const until=performance.now()+35000;
-  function tick(){if(performance.now()>until||window.__confirmFrames!==rows)return;const n=document.getElementById('dj840-theme-confirm'),c=n?.querySelector('.dj840-theme-card');if(n?.dataset.dj810Animating&&c&&!n.hidden){const s=getComputedStyle(n),r=c.getBoundingClientRect();rows.push({phase:n.dataset.dj810Animating,kind:n.dataset.djWindowMotionKind,opacity:Number(s.opacity),duration:Number(n.dataset.djWindowMotionDuration),y:r.y,x:r.x,transform:getComputedStyle(c).transform});}requestAnimationFrame(tick);}requestAnimationFrame(tick);
- });
- // Trigger the original guarded theme button; no theme change on Cancel.
- const theme=page.locator('#theme-toggle');await theme.evaluate(n=>n.click());await expect(dialog).toBeVisible();await expect(card).toBeVisible();await expect.poll(()=>dialog.getAttribute('data-dj810-animating')).toBeNull();
- await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();
- const rows=await page.evaluate(()=>window.__confirmFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){const frames=rows.filter(r=>r.phase===phase);expect(frames.length).toBeGreaterThan(1);expect(frames.every(r=>r.kind==='fade'&&r.duration===duration&&Math.abs(r.x-frames[0].x)<1&&Math.abs(r.y-frames[0].y)<1)).toBe(true);expect(frames.some(r=>r.opacity>0&&r.opacity<1)).toBe(true);}
+test('ordinary light-only startup has no manual theme dialog; night visibility remains available',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ const root=page.locator('#app');
+ await expect(root).toHaveAttribute('data-theme','light');
+ await expect(page.locator('#theme-toggle')).toHaveCount(0);
+ await expect(page.locator('#mine-panel [data-dj834-action=theme]')).toHaveCount(0);
+ await expect(page.locator('#dj840-theme-confirm')).toBeHidden();
+ await expect(page.locator('#night-visibility-toggle')).toHaveCount(1);
 });
-
 
 test('phone update history fades in place and never paints over bottom navigation',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
@@ -894,13 +890,13 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  const root=page.locator('html'),bridge=page.locator('#app > #dj-ios-pwa-status-bridge');
  await expect(root).toHaveClass(/dj-ios-home-pwa/);
  await expect(bridge).toHaveCount(1);await expect(bridge).toHaveCSS('opacity','0');
- const dialog=page.locator('#dj840-theme-confirm');await page.locator('#theme-toggle').evaluate(n=>n.click());await expect(dialog).toBeVisible();
+ const dialog=page.locator('#dj-pri-dialog');await dialog.evaluate(n=>n.showModal());await expect(dialog).toBeVisible();
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
  const style=await bridge.evaluate(n=>{const c=getComputedStyle(n),r=n.getBoundingClientRect();return {gradient:c.backgroundImage,pointer:c.pointerEvents,top:r.top,height:r.height,color:getComputedStyle(document.documentElement).getPropertyValue('--dj-pwa-status-color').trim()};});
  expect(style.gradient).toBe('none');expect(style.pointer).toBe('none');expect(style.height).toBe(0);expect(style.color).toBe('#edf3ef');
  const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
  await test.info().attach('ios-pwa-flat-status',{body:await page.screenshot(),contentType:'image/png'});
- await dialog.getByRole('button',{name:'취소'}).click();await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
+ await dialog.evaluate(n=>n.close());await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
  // Opening a native dialog changes the status surface to opaque white, but never dims the page.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
@@ -1423,7 +1419,9 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  if(page.viewportSize().width===390)await test.info().attach('my-info-home.png',{body:await page.screenshot(),contentType:'image/png'});
 
  const content=mine.locator('.dj834-detail-content'),detail=mine.locator('.dj834-my-detail');
- for(const key of ['theme','type','map','records','history']){
+ await expect(home.locator('[data-dj834-action="theme"]')).toHaveCount(0);
+ await expect(home.locator('[data-dj834-action="map"]')).toHaveCount(1);
+ for(const key of ['type','records','history']){
   const choice=home.locator('[data-dj834-action="'+key+'"]');
   await choice.scrollIntoViewIfNeeded();
   await tap(page,choice);
@@ -1445,7 +1443,7 @@ test('phone production settings, cards and nearby overlays follow rendered geome
   expect(geometry.activeTop-geometry.titleBottom,key+' content should start by its heading').toBeGreaterThanOrEqual(-5);
   expect(geometry.activeTop-geometry.titleBottom,key+' excessive vertical whitespace').toBeLessThan(180);
   expect(geometry.bodyBottom,key+' scroll viewport must not sit behind tab dock').toBeLessThanOrEqual(geometry.navTop+3);
-  if(page.viewportSize().width===390&&['theme','records','history'].includes(key))
+  if(page.viewportSize().width===390&&['records','history'].includes(key))
    await test.info().attach('my-info-'+key+'.png',{body:await page.screenshot(),contentType:'image/png'});
   await tap(page,mine.locator('.dj834-detail-back'));
   await expect(home).toBeVisible();
