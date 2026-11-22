@@ -17,8 +17,8 @@ replace('src/dongjak-verified-data-layers.js',"            data.features=filtere
             data.features=filteredDistrictPoints(verifiedLocations,viewBoundary).features;`);
 replace('src/dongjak-verified-data-layers.js','  function onBoundaryUpdated(){','  async function onBoundaryUpdated(){');
 replace('src/dongjak-verified-data-layers.js','      const clipped=filteredDistrictPoints(raw,boundary);',"      const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;\n      const clipped=filteredDistrictPoints(raw,viewBoundary);");
-// Preserve the shared palette while using a more opaque phone-only dark palette.
-replace('src/map-appearance.js','export function nativeBuildingFootprint(layer={}){',`export const MOBILE_DARK_BUILDING_PALETTE=Object.freeze({...BUILDING_VISUAL_PALETTE.dark,footprint:'#30383d',extrusion:'#353d43',nearOpacity:0.98,farOpacity:0.96});
+// Production must NOT override the user-approved translucent dark building palette.
+replace('src/map-appearance.js','export function nativeBuildingFootprint(layer={}){',`export const MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark;
 export function buildingVisualPalette(theme='light',phone=Boolean(globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)){
   return theme==='dark'&&phone?MOBILE_DARK_BUILDING_PALETTE:BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
 }
