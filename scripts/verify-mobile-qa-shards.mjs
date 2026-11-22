@@ -10,9 +10,10 @@ function list(extra=[]){
  assert.equal(new Set(ids).size,ids.length,'duplicate tests in listing');
  return ids.sort();
 }
+const SHARD_COUNT=24;
 const baseline=list(),shards=[];
-assert.ok(baseline.length>0,'no mobile tests selected');
-for(let i=1;i<=12;i++){const ids=list(['--shard='+i+'/12']);assert.ok(ids.length>0,'empty shard '+i);shards.push(ids);console.log('Shard '+i+': '+ids.length+' tests');}
+assert.ok(baseline.length>=SHARD_COUNT,'test count must cover every mobile shard');
+for(let i=1;i<=SHARD_COUNT;i++){const ids=list(['--shard='+i+'/'+SHARD_COUNT]);assert.ok(ids.length>0,'empty shard '+i);shards.push(ids);console.log('Shard '+i+': '+ids.length+' tests');}
 const combined=shards.flat();
 assert.equal(new Set(combined).size,combined.length,'shards overlap');
 assert.deepEqual(combined.sort(),baseline,'shards must exactly cover selected mobile tests');

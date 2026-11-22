@@ -91,83 +91,10 @@ jobs:
           name: live-qa-smoke-evidence
           path: /tmp/live-qa-smoke/
           retention-days: 3
-  app-smoke:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    needs: smoke
-    runs-on: ubuntu-24.04
-    container: mcr.microsoft.com/playwright:v1.56.1-noble
-    timeout-minutes: 8
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - run: npm install --no-audit --no-fund
-        env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-      - name: Capture one actual mobile journey on approved anonymous Preview
-        env:
-          DONGJAK_TARGET_URL: https://9d136975.dongjak-walk-safety-preview.pages.dev/
-        run: node scripts/live-qa.mjs --ci --smoke-target
-      - name: Summarize real capture
-        if: always()
-        run: node scripts/live-qa-analyze.mjs qa-artifacts
-      - name: Decode original recording and flag transient pixel changes
-        if: always()
-        run: |
-          if ! command -v ffmpeg; then apt-get update -qq && apt-get install -y --no-install-recommends ffmpeg; fi
-          node scripts/live-qa-pixels.mjs qa-artifacts
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: real-app-live-qa-smoke
-          path: qa-artifacts/
-          retention-days: 3
-  journey-smoke:
-    name: Continuous journey ${{ matrix.lane }}
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    needs: check
-    strategy:
-      fail-fast: false
-      max-parallel: 6
-      matrix:
-        lane: [1, 2, 3, 4, 5, 6]
-    runs-on: ubuntu-24.04
-    container: mcr.microsoft.com/playwright:v1.56.1-noble
-    timeout-minutes: 18
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - run: npm install --no-audit --no-fund
-        env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
-      - name: Exercise one continuous journey against public anonymous app
-        env:
-          DONGJAK_TARGET_URL: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'lui020913' && github.event.pull_request.head.ref == 'fix/gemini-schema-compatibility-20261121' && 'https://f6300b78.dongjak-walk-safety-preview.pages.dev/' || 'https://dongjak-walk-safety-preview.pages.dev/' }}
-          QA_LANE: ${{ matrix.lane }}
-          QA_SHARD_TOTAL: '6'
-        run: node scripts/live-qa.mjs --ci --journey
-      - name: Verify all stages were captured in a single scene
-        run: |
-          node --input-type=module -e "import fs from 'node:fs';const root='qa-artifacts/'+fs.readdirSync('qa-artifacts').find(n=>fs.existsSync('qa-artifacts/'+n+'/result.json'));const dirs=fs.readdirSync(root).filter(n=>/^[a-f0-9-]{36}$/.test(n));if(dirs.length!==1)throw Error('Expected exactly one browser scene');const p=root+'/'+dirs[0];const s=JSON.parse(fs.readFileSync(p+'/stage.json'));const m=JSON.parse(fs.readFileSync(p+'/meta.json'));if(s.status!=='passed'||s.index!==s.total||m.status!=='passed'||m.frames<3)throw Error('Incomplete journey');console.log('Captured one continuous scene with '+s.total+' stages');"
-      - name: Collect measurement report
-        if: always()
-        run: node scripts/live-qa-analyze.mjs qa-artifacts
-      - name: Preflight real Gemini response against the previous exact candidate
-        if: ${{ success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'lui020913' && github.event.pull_request.head.ref == 'fix/gemini-schema-compatibility-20261121' }}
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          QA_LANE: ${{ matrix.lane }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then echo "QA_DESIGN_UNAVAILABLE missing configured Gemini key"; exit 1; fi
-          node scripts/live-qa-analyze.mjs qa-artifacts --vision
-          node scripts/live-qa-release-gate.mjs qa-artifacts
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: continuous-journey-${{ matrix.lane }}
-          path: qa-artifacts/
-          retention-days: 3
+  # PR checks validate the capture machinery using the local smoke fixture only.
+  # Replaying six journeys against old Production cannot verify the PR candidate;
+  # the release workflow captures six journeys on its exact SHA-bound Preview.
+  # For manual investigations use workflow_dispatch's capture matrix below.
   capture:
     name: Capture lane ${{ matrix.lane }}
     strategy:
