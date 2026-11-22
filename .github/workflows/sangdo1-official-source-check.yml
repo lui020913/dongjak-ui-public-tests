@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/sangdo1-official-source-check.yml'
       - 'scripts/research/sangdo1_school_catchment_source_audit.py'
+      - 'scripts/research/sangdo1_boundary_22_official_audit.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -36,6 +37,9 @@ jobs:
         run: |
           pip install --quiet pyshp==2.3.1 pyproj==3.7.2 shapely==2.1.2
           python scripts/research/sangdo1_official_school_catchment_overlay.py
+      - name: Compute precise 22 clipped-border road catchment overlaps
+        if: success()
+        run: python scripts/research/sangdo1_boundary_22_official_audit.py
       - name: Store audit outputs for manual ID-level comparison
         if: success()
         uses: actions/upload-artifact@v4
@@ -44,4 +48,5 @@ jobs:
           path: |
             app/public/data/protection-zone/sangdo1_road_catchment_overlay_20260920.csv
             app/public/data/protection-zone/sangdo1_school_catchment_analysis_20260920_summary.json
+            research-results/sangdo1_22_official_school_catchment_audit.json
           retention-days: 7
