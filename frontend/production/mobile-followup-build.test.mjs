@@ -1,20 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildingVisualPalette,buildingFootprintPaint,buildingExtrusionAppearance,BUILDING_VISUAL_PALETTE,MOBILE_DARK_BUILDING_PALETTE} from '../src/map-appearance.js';
+import {buildingFootprintPaint,buildingExtrusionAppearance,buildingZoomOpacityExpression,BUILDING_VISUAL_PALETTE,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END} from '../src/map-appearance.js';
 
-test('Phone dark buildings preserve translucent GIS geometry and the same common palette',()=>{
- assert.equal(buildingVisualPalette('dark',false),BUILDING_VISUAL_PALETTE.dark);
- assert.equal(buildingVisualPalette('dark',true),MOBILE_DARK_BUILDING_PALETTE);
- assert.equal(MOBILE_DARK_BUILDING_PALETTE,BUILDING_VISUAL_PALETTE.dark);
- assert.equal(buildingVisualPalette('light',true),BUILDING_VISUAL_PALETTE.light);
- const previous=globalThis.window;
- try{
-  globalThis.window={matchMedia:()=>({matches:true})};
-  assert.deepEqual(buildingFootprintPaint('dark',0),{'fill-color':'#444d56','fill-opacity':0.74,'fill-antialias':false});
-  assert.equal(buildingFootprintPaint('dark',55)['fill-opacity'],0);
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.58);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.50);
- }finally{if(previous===undefined)delete globalThis.window;else globalThis.window=previous;}
+test('Approved charcoal map keeps translucent dark 3D buildings and smooth zoom fade',()=>{
+ assert.equal(BUILDING_VISUAL_PALETTE.dark.footprint,'#444d56');
+ assert.equal(BUILDING_VISUAL_PALETTE.dark.footprintOpacity,0.74);
+ assert.equal(BUILDING_VISUAL_PALETTE.dark.extrusion,'#525d66');
+ assert.deepEqual(buildingFootprintPaint('dark',0),{'fill-color':'#444d56','fill-opacity':0.74,'fill-antialias':false});
+ assert.equal(buildingFootprintPaint('dark',55)['fill-opacity'],0);
+ assert.equal(buildingExtrusionAppearance('dark',10).opacity,0.58);
+ assert.equal(buildingExtrusionAppearance('dark',30).opacity,0.50);
+ assert.equal(BUILDING_ZOOM_FADE_START,13);
+ assert.equal(BUILDING_ZOOM_FADE_END,15);
+ assert.deepEqual(buildingZoomOpacityExpression(.5),['interpolate',['linear'],['zoom'],13,0,15,.5]);
+ assert.equal(BUILDING_VISUAL_PALETTE.light.footprintOpacity,1);
 });
 
 test('Safety night consent extends the existing shortcut without replacing its capture lifecycle',async()=>{
