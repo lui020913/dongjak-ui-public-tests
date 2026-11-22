@@ -101,6 +101,34 @@ export function installMyInfo(doc=document){
    }
    syncTypography();
  });
+ // iOS Settings-style child screens; each choice uses the existing owner.
+ const languageSettings=doc.createElement('section');languageSettings.className='dj834-choice-settings';
+ languageSettings.innerHTML='<p>앱에서 사용할 언어를 선택하세요.</p><button type="button" data-dj834-language="ko">한국어 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-language="en">English <span aria-hidden="true">✓</span></button>';
+ const themeSettings=doc.createElement('section');themeSettings.className='dj834-choice-settings';
+ themeSettings.innerHTML='<p>화면 색상은 지도와 창에 함께 적용됩니다.</p><button type="button" data-dj834-theme="light">라이트 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-theme="dark">다크 <span aria-hidden="true">✓</span></button>';
+ const mapSettings=doc.createElement('section');mapSettings.className='dj834-choice-settings';
+ mapSettings.innerHTML='<p>지도 표시와 도보 설정을 관리합니다.</p><button type="button" data-dj834-setting="map">지도 및 도보 설정 열기 <span aria-hidden="true">›</span></button>';
+ const syncChoices=()=>{
+  const language=doc.getElementById('dj854-language-select')?.value||'ko';
+  const theme=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'dark':'light';
+  for(const element of languageSettings.querySelectorAll('[data-dj834-language]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Language===language));
+  for(const element of themeSettings.querySelectorAll('[data-dj834-theme]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Theme===theme));
+ };
+ languageSettings.addEventListener('click',event=>{
+  const button=event.target.closest('[data-dj834-language]');if(!button)return;
+  const select=doc.getElementById('dj854-language-select');if(!select)return;
+  if(select.value!==button.dataset.dj834Language){select.value=button.dataset.dj834Language;select.dispatchEvent(new Event('change',{bubbles:true}));}
+  syncChoices();
+ });
+ themeSettings.addEventListener('click',event=>{
+  const button=event.target.closest('[data-dj834-theme]');if(!button)return;
+  const theme=doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme;
+  if(theme!==button.dataset.dj834Theme)doc.getElementById('theme-toggle')?.click();
+  syncChoices();
+ });
+ mapSettings.addEventListener('click',event=>{
+  if(event.target.closest('[data-dj834-setting="map"]'))doc.dispatchEvent(new Event('dj:open-map-settings'));
+ });
  const records=doc.createElement('div');records.className='dj834-records-container';
  for(const child of [...body.children]){
    if(child===heading||child===landing||child===detail)continue;
@@ -112,8 +140,8 @@ export function installMyInfo(doc=document){
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;
- content.append(accountBox,typography,records);
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;
+ content.append(accountBox,typography,records,languageSettings,themeSettings,mapSettings);
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
@@ -147,11 +175,11 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=view==='profile'?'내 프로필 설정':view==='type'?'글자 크기·굵기':'즐겨찾기 · 내 기록';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정'})[view]||'설정';
    accountBox.hidden=view!=='profile';
    typography.hidden=view!=='type';
-   records.hidden=view!=='records';
-   if(view==='type')syncTypography();
+   records.hidden=view!=='records';languageSettings.hidden=view!=='language';themeSettings.hidden=view!=='theme';mapSettings.hidden=view!=='map';
+   if(view==='type')syncTypography();if(view==='language'||view==='theme')syncChoices();
    detail.hidden=false;
    body.scrollTop=0;
    enter(detail);
@@ -171,14 +199,14 @@ export function installMyInfo(doc=document){
  landing.addEventListener('click',event=>{
    const button=event.target.closest('[data-dj834-action]');if(!button)return;
    const action=button.dataset.dj834Action;
-   if(action==='profile'||action==='records'||action==='type'){showDetail(action);return;}
-   if(action==='theme'){doc.getElementById('theme-toggle')?.click();updateProfile();return;}
+   if(['profile','records','type','theme','map','language'].includes(action)){showDetail(action);return;}
+   
    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
    if(action==='transit'){
      doc.querySelector('#bottom-nav [data-tab="map"]')?.click();
      doc.getElementById('map-tools-toggle')?.click();return;
    }
-   if(action==='map'){doc.dispatchEvent(new Event('dj:open-map-settings'));return;}
+   
    if(action==='history'){doc.getElementById('version-history-trigger')?.click();return;}
  });
  updateProfile();return true;
