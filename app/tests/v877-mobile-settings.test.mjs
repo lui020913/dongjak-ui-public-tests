@@ -11,11 +11,14 @@ test('v877 mobile settings feature runs after desktop UI without changing map en
 });
 test('map preferences expose route controls while the legend stays with safety layers',()=>{
  assert.doesNotMatch(module,/dj877-legend-grid/);
- for(const key of ['도보 설정','지도 디자인 설정','nav-voice','nav-orientation','dj816-voice-mode']) assert.ok(module.includes(key),key);
+ for(const key of ['도보 설정','nav-voice','nav-orientation','dj816-voice-mode']) assert.ok(module.includes(key),key);
 });
-test('design toggles reuse base map state and persist through existing owner',()=>{
- assert.match(module,/\[data-base-layer=/);assert.match(module,/clickExisting\(doc,/);
- for(const key of ['metro','bus','buildings','boundary'])assert.match(module,new RegExp(`data-dj877-layer=\\"${key}`));
+test('superseded map design controls are removed; walking options reuse native route state',()=>{
+ assert.doesNotMatch(module,/지도 디자인 설정/);
+ assert.doesNotMatch(module,/data-dj877-layer=/);
+ assert.doesNotMatch(module,/\[data-base-layer=/);
+ assert.match(module,/clickExisting\(doc,'#nav-voice'\)/);
+ assert.match(module,/clickExisting\(doc,'#nav-orientation'\)/);
 });
 test('mobile sheets can expand fully and keep bottom navigation inside frame',()=>{
  for(const key of ['route-panel','participation-panel','news-panel','mine-panel','transport-sheet']) assert.ok(module.includes(key),key);
