@@ -49,7 +49,10 @@ export function installPwaStatusTone(doc=document,win=window) {
       const onboarding=visible('dj860-onboarding');
       // The loading surface takes precedence if it briefly overlaps onboarding.
       // Once loading ends, the first-run shell owns exactly its own native status tone.
-      const color=startup?(theme==='dark'?'#22282e':'#edf3ef'):onboarding?(theme==='dark'?'#22282e':'#f5faf7'):nightActive?'#22282e':aiOpen?(theme==='dark'?'#22282e':'#ffffff'):(theme==='dark'?'#22282e':'#edf3ef');
+      // Onboarding is an ordinary full-screen page, not a white dialog.
+      // Use precisely the same tone as the initial iOS status area and
+      // map/home page; do not switch to a special near-white while it opens.
+      const color=(startup||onboarding)?baselineColor():nightActive?'#22282e':aiOpen?(theme==='dark'?'#22282e':'#ffffff'):baselineColor();
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');

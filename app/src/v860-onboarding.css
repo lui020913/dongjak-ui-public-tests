@@ -280,3 +280,25 @@ html body #app#app#app .dj860-onboarding .dj860-actions {
 @media(prefers-reduced-motion:reduce){
   #app .dj860-onboarding .dj860-slide-ghost{animation:none!important}
 }
+
+
+/* Onboarding light PWA seamless background contract (iPhone).
+ * The native iOS status tone and the full-screen page use exactly #edf3ef.
+ * Do not recolor the illustration or the skip/next controls.
+ * Previous white #dj800-surface applied to the shell, header, copy, footer. */
+@media (max-width:699px){
+  html body #app#app#app:not([data-theme="dark"]) #dj860-onboarding:not([hidden]),
+  html body #app#app#app:not([data-theme="dark"]) #dj860-onboarding:not([hidden]) > .dj860-card,
+  html body #app#app#app:not([data-theme="dark"]) #dj860-onboarding:not([hidden]) > .dj860-card > :is(.dj860-head,.dj860-content,.dj860-footer){
+    background:#edf3ef!important;
+    background-color:#edf3ef!important;
+    background-image:none!important;
+  }
+  /* Keep the image/banners as supplied; remove only the white page edge. */
+  html body #app#app#app:not([data-theme="dark"]) #dj860-onboarding:not([hidden]) .dj860-head{
+    border-bottom-color:transparent!important;
+  }
+  html body #app#app#app:not([data-theme="dark"]) #dj860-onboarding:not([hidden]) .dj860-footer{
+    border-top-color:var(--dj800-border,#d5e1d9)!important;
+  }
+}
