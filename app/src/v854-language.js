@@ -242,7 +242,7 @@ export function installLanguagePreference(doc=document,win=window){
   const body=mine.querySelector('.dj836-sheet-body')||mine;
   let section=mine.querySelector('.dj854-language-section');
   if(!section){
-    section=doc.createElement('div');section.className='dj854-language-section dj834-language-row';
+    section=doc.createElement('div');section.className='dj854-language-section dj834-language-row';section.dataset.dj834Action='language';section.setAttribute('role','button');section.setAttribute('tabindex','0');section.setAttribute('aria-label','언어 설정 열기');
     const label=doc.createElement('label');label.htmlFor='dj854-language-select';label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
@@ -267,6 +267,7 @@ export function installLanguagePreference(doc=document,win=window){
       // an orphan language card into My Info's body or hidden records view.
     }
     select.addEventListener('change',()=>setLanguage(select.value));
+     section.addEventListener('keydown',event=>{if(event.target===section&&(event.key==='Enter'||event.key===' ')){event.preventDefault();section.click();}});
   }
   const select=section.querySelector('select');
   // My Info can initialize after this module. Keep language in the actual
