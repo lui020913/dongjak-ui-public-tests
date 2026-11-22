@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
       - name: Install pinned browser API only
-        run: npm ci --no-audit --no-fund --prefer-offline
+        run: npm install --no-audit --no-fund
       - name: Inspect actual hit target at route calculate button
         run: |
           node --input-type=module <<'JS'
