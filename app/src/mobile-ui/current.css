@@ -44,13 +44,13 @@
   #app[data-dj910-sheet-open="true"] #dj-browser-webapp-tip {display:none!important;}
   #app .dj-theme-switch-flash {backdrop-filter:none!important;-webkit-backdrop-filter:none!important;pointer-events:none!important;animation-duration:180ms!important;}
   /* Theme tokens are owned by theme-contract.css; no local dark palette. */
-  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:var(--dj-theme-surface,#303841)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;box-shadow:0 8px 28px #0003!important;}
-  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:var(--dj-theme-raised,#3a444f)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;}
+  #app[data-theme="dark"] :is(.page-panel,.transport-sheet,.dj-place-detail,.dj-place-header,.maplibregl-popup-content,.dj-map-settings-card,.dj-mobile-utilities-body,.dj854-more-head,#bottom-nav,.map-quick-search-form) {background:var(--dj-theme-surface,#2c343d)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;box-shadow:0 8px 28px #0003!important;}
+  #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.dj834-settings-group,.dj834-profile-card,.dj-place-info-card,.dj-place-favorites-section,.dj877-pref-group,.dj-map-settings-group,.route-card,.transport-arrival-row) {background:var(--dj-theme-raised,#35404a)!important;color:var(--dj-theme-ink,#f1f4f6)!important;border-color:var(--dj-theme-line,#424952)!important;}
   #app[data-theme="dark"] :is(.dj834-setting-icon,.dj834-profile-symbol,.nav-tab,.dj-v794-tool,.dj832-feature) {color:var(--dj-theme-muted,#bec8d2)!important;}
   #app[data-theme="dark"] #bottom-nav .nav-tab.active {color:#a0f0da!important;background:#285b50!important;}
   #app[data-theme="dark"] :is(.dj-place-kicker,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#bec8d2)!important;}
-  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:var(--dj-theme-raised,#3a444f)!important;color:#fff!important;box-shadow:none!important;}
-  html[data-theme="dark"],html[data-theme="dark"] body {background:var(--dj-theme-bg,#252b32)!important;}
+  #app[data-theme="dark"] :is(#dj890-ai-orb,#dj800-ai-search-trigger) {background:var(--dj-theme-raised,#35404a)!important;color:#fff!important;box-shadow:none!important;}
+  html[data-theme="dark"],html[data-theme="dark"] body {background:var(--dj-theme-bg,#22282e)!important;}
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
     #app .topbar {display:flex!important;align-items:center!important;position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;left:12px!important;right:12px!important;width:auto!important;height:50px!important;min-height:50px!important;padding:0!important;gap:8px!important;background:transparent!important;backdrop-filter:none!important;}
     #app .topbar #map-quick-search {display:block!important;flex:1 1 0%!important;min-width:0!important;width:0!important;max-width:none!important;}
@@ -213,11 +213,11 @@
     /* Keep desktop motion on geometric/opacity properties, never the theme
        background. CSS transitions outrank even important theme colors. */
     #app #mine-panel {transition-property:opacity,transform,translate,clip-path!important;}
-    #app[data-theme="dark"] #mine-panel {background:var(--dj-theme-surface,#303841)!important;background-color:var(--dj-theme-surface,#303841)!important;color:var(--dj-theme-ink,#f1f4f6)!important;}
+    #app[data-theme="dark"] #mine-panel {background:var(--dj-theme-surface,#2c343d)!important;background-color:var(--dj-theme-surface,#2c343d)!important;color:var(--dj-theme-ink,#f1f4f6)!important;}
     #app[data-theme="light"] #mine-panel {background:#fff!important;background-color:#fff!important;}
   }
   #app :is(.dj-place-header-close,#transport-close) {background:var(--dj800-elevated,#e8f3ed)!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;color:var(--dj800-text,#263a32)!important;box-sizing:border-box!important;}
-  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:var(--dj-theme-raised,#3a444f)!important;color:var(--dj-theme-ink,#f1f4f6)!important;transition:none!important;}
+  #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:var(--dj-theme-raised,#35404a)!important;color:var(--dj-theme-ink,#f1f4f6)!important;transition:none!important;}
   #app[data-theme="dark"] #mine-panel :is(.dj834-profile-name,.dj834-settings-group>button>span) {color:var(--dj-theme-ink,#f1f4f6)!important;-webkit-text-fill-color:var(--dj-theme-ink,#f1f4f6)!important;}
   #app[data-theme="dark"] #mine-panel :is(.dj834-profile-meta small,.dj834-current-theme,.dj834-chevron) {color:var(--dj-theme-muted,#bec8d2)!important;-webkit-text-fill-color:var(--dj-theme-muted,#bec8d2)!important;}
   @media (max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse) {
