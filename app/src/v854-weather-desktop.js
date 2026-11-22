@@ -28,19 +28,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   if(!app||!widget||!label||!win.matchMedia)return ()=>{};
   const media=win.matchMedia('(min-width: 0px)');
   let sheet=null,observer=null,dockObserver=null,sheetVisibilityObserver=null,attached=false,refreshing=false,weekController=null,weekCache=null,weekUpdated=0;
-  const syncMapScale=()=>{
-    // Same-frame mask: MapLibre/legacy map HUD styles may race with docking.
-    // The docking module remains the geometry owner and restores the scale.
-    const corner=doc.querySelector?.('#map .maplibregl-ctrl-bottom-left');
-    const chip=corner?.querySelector('.maplibregl-ctrl-scale');
-    const weatherOpen=Boolean(sheet&&!sheet.hidden);
-    for(const node of [corner,chip]){
-      if(!node)continue;
-      if(weatherOpen)node.style.setProperty('display','none','important');
-      else if(node.style.getPropertyValue('display')==='none')node.style.removeProperty('display');
-    }
-    win.dispatchEvent?.(new Event('dongjak:weather-visibility-changed'));
-  };
+  const syncMapScale=()=>win.dispatchEvent?.(new Event('dongjak:weather-visibility-changed'));
 
   const temperature=text=>{
     const match=String(text||'').match(/-?\d+(?:\.\d+)?\s*(?:°|℃|도|C)?/);
