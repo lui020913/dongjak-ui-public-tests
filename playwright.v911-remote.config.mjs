@@ -32,8 +32,7 @@ const releaseSmokeNames=[
  'community tab opens a usable feed',
  'walking vulnerability remains neutral'
 ];
-const releaseSmokeGrep=new RegExp(releaseSmokeNames.map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\const journeyQA=process.env.DONGJAK_QA_JOURNEY==='1';
-const fullMobileQA=process.env.DONGJAK_FULL_MOBILE_QA==='1';
+const releaseSmokeGrep=new RegExp(releaseSmokeNames.map(x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&')).join('|'));
 const phoneCoverage={')).join('|'));
 const phoneCoverage={
   mobile375:/@phone-layout/,
