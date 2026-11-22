@@ -61,8 +61,8 @@ test('My Info language and theme use native-style subpages, not orphan language 
  const language=source('v854-language.js');
  const css=source('v9267-phone-surface-regressions.css');
  assert.ok(info.includes('data-dj834-action="language"'));
- assert.ok(info.includes("view==='language'?'언어'"));
- assert.ok(info.includes("view==='theme'?'화면 테마'"));
+ assert.ok(info.includes("language:'언어'"));
+ assert.ok(info.includes("theme:'화면 테마'"));
  assert.ok(info.includes("languageControl.dataset.djLanguageDetail='true'"));
  assert.ok(language.includes("if(section.dataset.djLanguageDetail==='true')return;"));
  assert.ok(css.includes('.dj834-settings-group > .dj854-language-section'));
