@@ -17,8 +17,8 @@ test('야간 건물 바닥과 지붕을 밝은 회색이 아니라 어두운 청
 test('다크 3D 건물은 지면만 어두워지는 현상을 막도록 충분한 불투명도를 유지',()=>{
   const near=buildingExtrusionAppearance('dark',10);
   const far=buildingExtrusionAppearance('dark',30);
-  assert.equal(near.opacity,0.88);
-  assert.equal(far.opacity,0.82);
+  assert.equal(near.opacity,0.58);
+  assert.equal(far.opacity,0.50);
   assert.ok(near.opacity>buildingExtrusionAppearance('light',10).opacity);
   assert.ok(far.opacity>buildingExtrusionAppearance('light',30).opacity);
   assert.ok(buildingExtrusionAppearance('dark',60).opacity===far.opacity);
@@ -40,5 +40,5 @@ test('기존 건물에만 스타일 적용하고 안전 레이어는 보존',()=
   globalThis.document={getElementById:()=>null};
   try{installBaseBuildingPalette({map,app:{dataset:{theme:'dark'}}});}
   finally{globalThis.document=previous;}
-  assert.deepEqual(changed,[['native-building','fill-color','#52616b'],['native-building','fill-opacity',1],['native-building','fill-antialias',false]]);
+  assert.deepEqual(changed,[['native-building','fill-color','#444d56'],['native-building','fill-opacity',['interpolate',['linear'],['zoom'],13,0,15,0.74]],['native-building','fill-antialias',false]]);
 });
