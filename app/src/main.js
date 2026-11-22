@@ -1993,7 +1993,13 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     if (active) b.setAttribute('aria-current','page');
     else b.removeAttribute('aria-current');
   }
-  for (const panel of pagePanels){if(panel.dataset.page!==tab)window.DongjakWindowMotion?.cancel(panel);panel.hidden=panel.dataset.page!==tab;}
+  for (const panel of pagePanels){
+    const outgoing=panel.dataset.djTabOutgoing==='true' && panel.dataset.page!==tab;
+    if(panel.dataset.page!==tab && !outgoing)window.DongjakWindowMotion?.cancel(panel);
+    // The mobile tab transition owner closes this outgoing page after its
+    // 190ms fade. Keep it opaque while the new full-screen panel renders.
+    panel.hidden=panel.dataset.page!==tab && !outgoing;
+  }
   if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}
   if (tab === 'news') dongjakNews.open();
   if (tab === 'mine') renderMy();
