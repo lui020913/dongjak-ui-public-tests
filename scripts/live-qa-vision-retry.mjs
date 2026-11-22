@@ -15,14 +15,24 @@ export function classifyBadRequest(detail){
  if(/mime|image format|image data|invalid image/i.test(detail))return 'image rejected';
  return 'invalid request; no sensitive provider details logged';
 }
+// Respect provider Retry-After; a 429 is a shared quota signal, never a valid design review.
+export function visionRetryDelayMs({status,attempt,headers}={}){
+ if(status!==429)return attempt===1?3000:9000;
+ const header=String(headers?.get?.('retry-after')||'').trim();
+ let ms=null;
+ if(/^\d+(?:\.\d+)?$/.test(header))ms=Number(header)*1000;
+ else if(header){const date=Date.parse(header);if(Number.isFinite(date))ms=date-Date.now();}
+ if(ms!==null&&Number.isFinite(ms))return Math.max(15000,Math.min(120000,Math.ceil(ms)));
+ return [15000,35000,70000,105000][Math.min(3,Math.max(0,(attempt||1)-1))];
+}
 export async function reviewWithRetry({send,ids,wait=ms=>new Promise(r=>setTimeout(r,ms)),maxAttempts=3}){
  const failures=[];
  const schema=evidenceSchema(ids);
  for(let attempt=1;attempt<=maxAttempts;attempt++){
-  let reason,retryable=true;
+  let reason,retryable=true,retryStatus=null,retryHeaders=null;
   try{
    const res=await send({schema,attempt,previousFailure:failures.at(-1)||null});
-   if(!res.ok){reason='Provider HTTP '+res.status;retryable=[408,429,500,502,503,504].includes(res.status);if(res.status===400){let detail='';try{detail=String((await res.json()).error?.message||'');}catch{}reason+=' ('+classifyBadRequest(detail)+')';}}
+   if(!res.ok){reason='Provider HTTP '+res.status;retryStatus=res.status;retryHeaders=res.headers;retryable=[408,429,500,502,503,504].includes(res.status);if(res.status===400){let detail='';try{detail=String((await res.json()).error?.message||'');}catch{}reason+=' ('+classifyBadRequest(detail)+')';}}
    else {
     const candidate=(await res.json()).candidates?.[0];
     if(candidate?.finishReason!=='STOP')throw Error('Incomplete provider response');
@@ -32,7 +42,7 @@ export async function reviewWithRetry({send,ids,wait=ms=>new Promise(r=>setTimeo
   }catch(e){reason=e instanceof SyntaxError?'Invalid JSON response':String(e?.message||'Vision request failed').slice(0,150);}
   failures.push(reason);
   if(!retryable||attempt===maxAttempts)break;
-  await wait(attempt===1?3000:9000);
+  await wait(visionRetryDelayMs({status:retryStatus,attempt,headers:retryHeaders}));
  }
  return {status:'unavailable',reason:failures.at(-1),attempts:failures.length,failures};
 }
