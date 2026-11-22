@@ -875,8 +875,9 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  // Opening a native dialog changes the status surface to opaque white, but never dims the page.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
- const native=await ai.evaluate(n=>getComputedStyle(n,'::backdrop').backgroundImage);
- expect(native).toBe('none'); // The top-layer dialog has no backdrop gradient.
+ const native=await ai.evaluate(n=>({image:getComputedStyle(n,'::backdrop').backgroundImage,color:getComputedStyle(n,'::backdrop').backgroundColor}));
+ expect(native.image).toBe('none'); // The top-layer dialog has no backdrop gradient.
+ expect(native.color).toBe('rgba(0, 0, 0, 0)'); // Nor any default browser dimmer.
  await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.

@@ -21,15 +21,15 @@ test('Balanced Dark is slightly deeper, while mint retains distinct selected/CTA
   assert.match(read('src/mobile-pwa-status-tone-v793.css'),/--dj-pwa-native-edge:#22282e/);
 });
 
-test('Building geometry fades smoothly over two zoom levels, with lower dark alpha',()=>{
+test('Building geometry fades smoothly over two zoom levels, with near-opaque dark mass',()=>{
   assert.equal(BUILDING_ZOOM_FADE_START,13);
   assert.equal(BUILDING_ZOOM_FADE_END,15);
   assert.deepEqual(buildingZoomOpacityExpression(.58),['interpolate',['linear'],['zoom'],13,0,15,.58]);
   assert.equal(BUILDING_VISUAL_PALETTE.light.nearOpacity,.38);
-  assert.equal(BUILDING_VISUAL_PALETTE.dark.nearOpacity,.58);
-  assert.equal(BUILDING_VISUAL_PALETTE.dark.farOpacity,.5);
-  assert.equal(buildingExtrusionAppearance('dark',10).opacity,.58);
-  assert.equal(buildingExtrusionAppearance('dark',30).opacity,.5);
+  assert.equal(BUILDING_VISUAL_PALETTE.dark.nearOpacity,.94);
+  assert.equal(BUILDING_VISUAL_PALETTE.dark.farOpacity,.89);
+  assert.equal(buildingExtrusionAppearance('dark',10).opacity,.94);
+  assert.equal(buildingExtrusionAppearance('dark',30).opacity,.89);
   assert.equal(buildingFootprintPaint('dark',0)['fill-opacity'],.74);
   const main=read('src/main.js');
   assert.match(main,/fill-extrusion-opacity':buildingZoomOpacityExpression\(buildingStyle.opacity\)/);
@@ -59,7 +59,7 @@ test('Native 3D buildings fade on zoom without overriding light styling or unrel
   try{
     globalThis.document={getElementById:()=>null};
     installBaseBuildingPalette({map,app});
-    assert.ok(changed.some(([id,k,v])=>id==='native-building-3d'&&k==='fill-extrusion-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.5))));
+    assert.ok(changed.some(([id,k,v])=>id==='native-building-3d'&&k==='fill-extrusion-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.89))));
     assert.ok(changed.some(([id,k,v])=>id==='native-building'&&k==='fill-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.74))));
     assert.ok(changed.every(([id])=>id!=='dj-night-reach-fill'&&id!=='walking-route-line'));
   }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}

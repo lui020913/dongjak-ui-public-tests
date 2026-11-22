@@ -103,7 +103,7 @@ export function installForestShade({map,app}){
 /** Native footprints share a zoom-faded paint model with the GIS building overlays. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
-  dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.58,farOpacity:0.50})
+  dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.94,farOpacity:0.89})
 });
 export function nativeBuildingFootprint(layer={}){
   if(layer.type!=='fill')return false;
@@ -168,7 +168,7 @@ export function buildingExtrusionAppearance(theme='light',pitch=30,start=10,full
  * Applied only while the night study is enabled; restores ordinary styling off.
  */
 export function nightOcclusionBuildingPaint(appearance={},enabled=false){
-  return enabled?{...appearance,color:'#192c34',opacity:Math.max(0.91,Number(appearance.opacity)||0)}:appearance;
+  return enabled?{...appearance,color:'#192c34',opacity:Math.max(0.98,Number(appearance.opacity)||0)}:appearance;
 }
 
 /** Recolor only native footprint polygons; preserve road and night overlays. */
