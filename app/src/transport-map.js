@@ -1365,6 +1365,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
   let routePresentation=null;
+  let lastFittedRouteId=null;
   function syncRouteClearDock(){
     if(mapClearRouteButton.hidden||document.getElementById('app')?.dataset.tab!=='map')return;
     const shown=node=>{
@@ -1416,7 +1417,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,vehicleFetcher:globalThis.fetch,onState:state=>{
     if(state?.status==='error'&&panel.dataset.djBusRoutePreview==='true')resetBusRoutePreview();
     routePresentation=state;syncRoutePresentation();
-    if(state?.status==='shown'&&panel.dataset.djBusRoutePreview==='true'&&!panel.hidden){
+    if(state?.status==='shown'&&panel.dataset.djBusRoutePreview==='true'&&!panel.hidden&&lastFittedRouteId!==state.id){
+      lastFittedRouteId=state.id;
       requestAnimationFrame(()=>{
         if(panel.hidden||panel.dataset.djBusRoutePreview!=='true'||busRouteOverlay.getActive()?.id!==state.id)return;
         const coordinates=busRouteOverlay.getRouteCoordinates();
@@ -1434,7 +1436,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     delete panel.dataset.djBusRoutePreview;
     for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
   };
-  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();resetBusRoutePreview();syncRoutePresentation();};
+  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
   clearRouteButton.addEventListener('click',clearSelectedBusRoute);
   mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
   function activateBusRoute(event){
@@ -1451,6 +1453,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       panel.style.setProperty('overflow','hidden','important');
       panel.querySelector('.dj875-transit-scroll')?.scrollTo?.({top:0,behavior:'instant'});
     }
+    lastFittedRouteId=null;
     syncRoutePresentation();
     void busRouteOverlay.select({routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType});
   }
