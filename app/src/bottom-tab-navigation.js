@@ -28,7 +28,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   entering=null;
   if(departingAnimation){departingAnimation.cancel?.();departingAnimation=null;}
   if(departing){
-   departing.hidden=true;
+   const page=departing;
+   page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
    departing.style?.removeProperty?.('z-index');
    departing.style?.removeProperty?.('filter');
@@ -48,9 +49,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   // Preserve the outgoing opaque screen through the synchronous navigate.
   // The incoming panel is already fully opaque underneath it: no map flash.
   if(previous&&!reduced())previous.dataset.djTabOutgoing='true';
-  if(!replay(button)){
-   previous?.removeAttribute?.('data-dj-tab-outgoing');return;
-  }
+  if(!replay(button))return;
   if(previous&&previous.dataset.djTabOutgoing==='true'&&previousTab!==app.dataset.tab){
    departing=previous;
    previous.style?.setProperty?.('z-index','7000','important');
