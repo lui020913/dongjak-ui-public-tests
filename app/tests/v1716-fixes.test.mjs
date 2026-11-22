@@ -9,7 +9,7 @@ test('동작구 외부 음영이 다크모드에서 어두운 색으로 바뀐�
     'fill-color':'#d8e0e3', 'fill-opacity':0.65
   });
   assert.deepEqual(districtExteriorThemePaint('dark'), {
-    'fill-color':'#111419', 'fill-opacity':0.76
+    'fill-color':'#22272d', 'fill-opacity':0.34
   });
 });
 
