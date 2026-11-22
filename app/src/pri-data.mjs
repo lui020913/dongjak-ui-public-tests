@@ -84,6 +84,12 @@ export function observedFactorScore(s,id){
  return s?.evidence?.[id]?.modeled===true||!number(value)?null:value;
 }
 export function segmentScore(bundle,s,mode){
+ // Three available factors only. Do not substitute an unobserved accident
+ // default or present a two-factor road as a fully evaluated composite.
+ if(mode==='pri3'){
+  const scores=['lighting','accidents','protectionGap'].map(id=>observedFactorScore(s,id));
+  return scores.every(value=>value!==null)?scores.reduce((sum,value)=>sum+value,0)/3:null;
+ }
  // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
  if(mode==='pri12'){const lighting=observedFactorScore(s,'lighting'),accidents=observedFactorScore(s,'accidents');return lighting!==null&&accidents!==null?(lighting+accidents)/2:null;}
  if(mode!=='pri')return observedFactorScore(s,mode);
