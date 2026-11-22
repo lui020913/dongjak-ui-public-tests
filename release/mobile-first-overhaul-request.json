@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Release confirmed PRI 보행 취약도 graded road overlay visibility recovery (PR #273) plus quota-efficient Gemini QA fix (PR #274). Preserve the 300m three-source protection gap, 1,086 graded and 600 neutral gray segments, the six-factor team aggregation policy, lighting and accidents, all existing UI and APIs. Gemini visual review keeps six independent evidence-grounded goals but reduces image payload, diagnoses 429 quota and avoids blind long retries. Full source CI, isolated Preview, 12 phone QA shards, six design captures/reviews, exploration, protected Production verification required. Do not reuse failed build #44975358497 or bypass checks.",
-  "attempt": 237,
+  "purpose": "Promote PRI 보행 취약도 graded map (PR #273) and safe Gemini quota-aware QA (PRs #274 #276). Keep 300m source data, 1086 scored/600 neutral gray and all existing functional UI. 237 build/Preview/capture6 succeeded but Gemini 3.5 daily API quota exhausted; choose supported lower-cost 3.1 Flash-Lite for actual six evidence-validated design reviews and autonomous functional exploration, using the connected Gemini key and independent per-model quota. All source, 12 phone QA, six capture/vision, exploration and protected Production gates must pass. No fake success or skipped reviews.",
+  "attempt": 238,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 236 code/Preview/mobile12/capture6 passed but Gemini lane5 hit provider HTTP 429 and Production was skipped. PR #274 fixes request pressure and quota diagnostics, removing long blind waits; run a new exact-main build. Preserve Production blocker on any unreviewed evidence.",
+  "last_retry_reason": "Attempt 237 design lane1 provider 429 daily-quota; avoid blind waits. PR #276 changes only default API model for complete visual/exploratory model review, preserves evidence validator and guarded Production. Restart with a new exact main source and verified Preview.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
