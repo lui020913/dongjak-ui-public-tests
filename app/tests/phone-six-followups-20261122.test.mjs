@@ -29,7 +29,7 @@ test('language selector is mounted into the account display group after initiali
   const full=read('mobile-primary-fullscreen.css');
   assert.match(language,/const ensurePlacement=/);
   assert.ok(language.includes('group.insertBefore(section,history||null)'));
-  assert.ok(language.includes('body.prepend(section)'));
+  assert.ok(!language.includes('body.prepend(section)'),'language should not become a separate card');
   assert.ok(full.includes('.dj834-settings-group > .dj854-language-section select'));
   assert.match(full,/touch-action:pan-y!important/);
   assert.ok(full.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));

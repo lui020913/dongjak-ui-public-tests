@@ -4,6 +4,7 @@ import {installFeaturedPlaceLabels} from './featured-place-labels.js';
 import {installReadable3DLabels} from './readable-3d-labels.js';
 import {installMobileMapControls} from './mobile-map-controls.js';
 import {phoneProfile,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
+import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
 import './button-material.css';
 import './browser-install-menu.css';
@@ -618,18 +619,39 @@ installScaleDocking({map,app,overview});
 // This is an emergency fallback only; ordinary navigation uses the original vector map.
 let mapStyleRecovered=false;
 app.dataset.djBasemapSource='loading';
-let mapRecoveryTimer=setTimeout(()=>{
+// A slow cellular connection can take over twelve seconds to stream the
+// OpenFreeMap vector style. Switching styles that early permanently replaces
+// road, building, land-use and transit vector rendering with bare raster OSM.
+const mapRecoveryStartedAt=Date.now();
+let mapRecoveryTimer=0;
+function checkBaseMapRecovery(){
   if(mapReady||mapStyleRecovered)return;
+  let currentStyle=null;
+  try{currentStyle=map.getStyle?.()||null;}catch{}
+  const decision=baseMapRecoveryDecision({
+    mapReady,alreadyRecovered:mapStyleRecovered,style:currentStyle,
+    elapsedMs:Date.now()-mapRecoveryStartedAt
+  });
+  if(decision==='keep')return;
+  if(decision==='wait'||decision==='wait-vector'){
+    if(decision==='wait-vector'){
+      app.dataset.djBasemapSource='vector-loading';
+      status('벡터 기본지도 연결 중 · 원래 지도를 유지합니다');
+    }
+    mapRecoveryTimer=setTimeout(checkBaseMapRecovery,12000);
+    return;
+  }
   mapStyleRecovered=true;
   app.dataset.djBasemapSource='emergency-osm';
-  status('지도 연결 지연 · 임시 기본지도');
+  status('기본지도 연결 실패 · 임시 지도를 표시합니다 (다시 연결하려면 새로고침)');
   try{
     map.setStyle({version:8,sources:{'osm-emergency':{
       type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
       tileSize:256,attribution:'© OpenStreetMap contributors'
     }},layers:[{id:'osm-emergency-base',type:'raster',source:'osm-emergency'}]});
   }catch(error){app.dataset.djBasemapSource='error';console.error('[지도 기본 모드 전환 실패]',error);status('지도 로딩 실패 · 네트워크를 확인한 뒤 새로고침하세요');}
-},12000);
+}
+mapRecoveryTimer=setTimeout(checkBaseMapRecovery,BASE_STYLE_INITIAL_WAIT_MS);
 const quickSearch=initMapQuickSearch({map,maplibregl,app,onPick:()=>{
   // Search is available in every app tab. Selecting a result must reveal the map.
   if(app.dataset.tab!=='map')navigate('map');
