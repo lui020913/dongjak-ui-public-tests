@@ -180,6 +180,11 @@ export function installBaseBuildingPalette({map,app}){
   }
   const ids=map.getStyle().layers.filter(nativeBuildingFootprint).map(x=>x.id);
   const outlineIds=map.getStyle().layers.filter(nativeBuildingOutline).map(x=>x.id);
+  const extrusionIds=map.getStyle().layers.filter(nativeBuildingExtrusion).map(x=>x.id);
+  const originalExtrusions=new Map(extrusionIds.map(id=>[id,{
+    color:map.getPaintProperty?.(id,'fill-extrusion-color'),
+    opacity:map.getPaintProperty?.(id,'fill-extrusion-opacity')
+  }]));
   let previousTheme='',previousOpacity=NaN;
   const paint=()=>{
     const theme=app.dataset.theme;
@@ -192,6 +197,18 @@ export function installBaseBuildingPalette({map,app}){
       if(!map.getLayer(id))continue;
       try{for(const [key,value] of Object.entries(blended))map.setPaintProperty(id,key,value);}
       catch(error){console.debug('[건물 바닥 색상]',id,error?.message);}
+    }
+    // Native vector extrusions need the same fade as locally loaded GIS buildings.
+    // Restore their original style on light mode; do not recolor route or safety overlays.
+    for(const id of extrusionIds){
+      if(!map.getLayer(id))continue;
+      try{
+        const original=originalExtrusions.get(id)||{};
+        const c=theme==='dark'?BUILDING_VISUAL_PALETTE.dark.extrusion:(original.color??null);
+        const opacity=theme==='dark'?buildingZoomOpacityExpression(BUILDING_VISUAL_PALETTE.dark.farOpacity):(original.opacity??null);
+        map.setPaintProperty(id,'fill-extrusion-color',c);
+        map.setPaintProperty(id,'fill-extrusion-opacity',opacity);
+      }catch(error){console.debug('[기본지도 3D 건물]',id,error?.message);}
     }
     // Native building outlines would duplicate the extrusion edges in 3D.
     // Keep them hidden in *both* plan and oblique views, leaving road/boundary layers intact.
