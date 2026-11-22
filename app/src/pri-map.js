@@ -14,7 +14,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const button=(label,fn)=>{const n=el('button','dj-pri-button',label);n.type='button';n.addEventListener('click',fn);return n;};
  let dataset=null,mode=null,display=EMPTY,fetchStarted=false,revision=0,popup=null,lookup=new Map();
- let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?restoreMode:null;
+ let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri'].includes(restoreMode)?'current3':restoreMode):null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
  const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');head.append(title,close);
@@ -132,6 +132,8 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
  }
  function activate(id){
+  // Existing devices may still have the deleted preview mode in local storage.
+  if(id==='pri12'||id==='pri')id='current3';
   if(id&&(!dataset||(id==='current3'?!dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):!dataset.factors.some(f=>f.id===id))))return;
   mode=id;if(id){app.dataset.djPriVisible='true';app.dataset.djPriMode=id;}
   else{delete app.dataset.djPriVisible;delete app.dataset.djPriMode;}
