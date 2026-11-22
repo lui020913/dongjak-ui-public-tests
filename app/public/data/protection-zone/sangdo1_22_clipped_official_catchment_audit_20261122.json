@@ -1,0 +1,409 @@
+{
+  "schema": "sangdo1_22_boundary_exact_school_catchment_audit_v1",
+  "source_original_sha256": "66b7650d5eef3b900061083b3d8f5c8f6dcb8eb00b891e6b03132f08fdca2911",
+  "source_date": "2026-09-20",
+  "source_url": "https://schoolzone.emac.kr/publicData/publicDataList.do",
+  "verification_run_url": "https://github.com/lui020913/dongjak-ui-public-tests/actions/runs/45030228345",
+  "method": "Exact EPSG:meter LineString intersection with original 2026-09-20 official elementary catchment SHP on clipped Sangdo1 road centerlines; preserve all existing risk scores",
+  "road_segment_count": 22,
+  "score_change_required": 0,
+  "nearest_matching_elementary_count": 1,
+  "existing_protected_matching_elementary_count": 1,
+  "caution": "School catchment is not a student route and does not establish legal school-zone protection. Gray/null data remain unknown. Source GeoJSON retains original score fields; verified partial catchment intersections are supplemental.",
+  "rows": [
+    {
+      "segment_id": "171985386_3",
+      "road_name": "상도로34나길",
+      "clipped_length_m": 0.73,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 0.73,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "상도어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 80.2,
+      "original_combined_score": 80.2,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "171985387_0",
+      "road_name": "양녕로",
+      "clipped_length_m": 13.512,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 13.512,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "상도어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 66.5,
+      "original_combined_score": 66.5,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "219872334_1",
+      "road_name": "상도로",
+      "clipped_length_m": 2.3611,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 2.3611,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "상도어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 50,
+      "original_combined_score": 50,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "278024795_6",
+      "road_name": "매봉로",
+      "clipped_length_m": 18.2188,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 18.2188,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "예담어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 69.3,
+      "original_combined_score": 69.3,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "278148193_5",
+      "road_name": "상도로60길",
+      "clipped_length_m": 25.7456,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울봉현초통학구역",
+          "metres": 25.7456,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "331197231_0",
+      "road_name": "이름 없는 보행로",
+      "clipped_length_m": 1.6889,
+      "official_catchment_covered_pct": 0,
+      "official_catchments": [],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "331197231_1",
+      "road_name": "이름 없는 보행로",
+      "clipped_length_m": 4.1412,
+      "official_catchment_covered_pct": 0,
+      "official_catchments": [],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "331197231_9",
+      "road_name": "이름 없는 보행로",
+      "clipped_length_m": 4.8484,
+      "official_catchment_covered_pct": 0,
+      "official_catchments": [],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "467541637_3",
+      "road_name": "매봉로4가길",
+      "clipped_length_m": 10.0161,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 10.0161,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "중앙대부속유치원",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 30.2,
+      "original_combined_score": 30.2,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "467541638_1",
+      "road_name": "매봉로4가길",
+      "clipped_length_m": 6.8327,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 6.8327,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "중앙대부속유치원",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 52.7,
+      "original_combined_score": 52.7,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "467541937_7",
+      "road_name": "상도로",
+      "clipped_length_m": 15.3723,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 15.3723,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "강남유치원",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 33.3,
+      "original_combined_score": 33.3,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "470199635_11",
+      "road_name": "흑석로",
+      "clipped_length_m": 7.4378,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 7.4378,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "서울강남초등학교",
+      "same_elementary_school_overlap_pct": 100,
+      "original_child_score": 0,
+      "original_combined_score": 16,
+      "registered_polygon_protected": true,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "481148806_3",
+      "road_name": "양녕로",
+      "clipped_length_m": 11.127,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 11.127,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "상도어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 79.2,
+      "original_combined_score": 79.2,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "612099146_0",
+      "road_name": "인도",
+      "clipped_length_m": 4.6635,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울봉현초통학구역",
+          "metres": 4.6635,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "777608497_0",
+      "road_name": "이름 없는 보행로",
+      "clipped_length_m": 0.8875,
+      "official_catchment_covered_pct": 0,
+      "official_catchments": [],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "801862817_0",
+      "road_name": "양녕로36길",
+      "clipped_length_m": 14.0637,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 14.0637,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "상도어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 80.9,
+      "original_combined_score": 80.9,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "913232392_0",
+      "road_name": "이름 없는 골목",
+      "clipped_length_m": 9.3961,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 9.3961,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "예담어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 59.8,
+      "original_combined_score": 59.8,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "913233036_2",
+      "road_name": "이름 없는 골목",
+      "clipped_length_m": 6.0453,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 6.0453,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "예담어린이집",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 46,
+      "original_combined_score": 46,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "1122019323_0",
+      "road_name": "서달로",
+      "clipped_length_m": 1.2182,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울은로초통학구역",
+          "metres": 1.2182,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "1122453740_0",
+      "road_name": "이름 없는 골목",
+      "clipped_length_m": 21.3508,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울강남초통학구역",
+          "metres": 21.3508,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": "강남유치원",
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": 33.9,
+      "original_combined_score": 33.9,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "1547465066_5",
+      "road_name": "상도로",
+      "clipped_length_m": 1.106,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울봉현초통학구역",
+          "metres": 1.106,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    },
+    {
+      "segment_id": "1561394479_2",
+      "road_name": "이름 없는 큰 도로",
+      "clipped_length_m": 15.1721,
+      "official_catchment_covered_pct": 100,
+      "official_catchments": [
+        {
+          "catchment": "서울봉현초통학구역",
+          "metres": 15.1721,
+          "percent": 100
+        }
+      ],
+      "nearest_child_facility": null,
+      "same_elementary_school_overlap_pct": null,
+      "original_child_score": null,
+      "original_combined_score": null,
+      "registered_polygon_protected": false,
+      "risk_score_invariant_for_any_school_overlap": true
+    }
+  ]
+}
