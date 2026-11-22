@@ -2378,26 +2378,8 @@ function renderCommunity() {
         communityComposerOrigin='community';openCommunityComposer(true);
       }));
     }
-    actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
+    if(loading||offline||filtered)actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
     empty.append(actions);
-    if(!filtered&&!loading&&!offline){
-      const topics=makeCEl('details','dj-community-starter-topics');
-      topics.append(makeCEl('summary','dj-community-topics-heading','이런 이야기로 시작할 수 있습니다'));
-      for(const [category,label,detail] of [
-        ['보행 불편','보행 불편 공유','보도 단차·통행 방해·어두운 길'],
-        ['개선 제안','우리 동네 개선 제안','보행환경을 개선할 아이디어'],
-        ['동네 질문','동네 질문 남기기','교통·시설·동네생활 질문']
-      ]){
-        const button=communityButton(label,'dj-community-topic',()=>{
-          communityComposerOrigin='community';
-          document.getElementById('community-category').value=category;
-          document.getElementById('community-category').dispatchEvent(new Event('change',{bubbles:true}));
-          openCommunityComposer(true);
-        });
-        button.append(makeCEl('small','',detail));topics.append(button);
-      }
-      empty.append(topics);
-    }
     empty.append(makeCEl('p','dj-community-empty-footnote','로그인 없이 작성하면 이 기기에만 저장됩니다. 공개 등록에는 로그인과 AI 검사가 필요합니다.'));
     root.append(empty);
     return;
