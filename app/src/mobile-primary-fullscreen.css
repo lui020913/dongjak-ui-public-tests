@@ -323,3 +323,95 @@
   }
  }
 }
+
+/* Canonical phone language setting: same compact row as every other setting.
+   The real native select covers the row invisibly for iOS picker/accessibility.
+   Never render an orphan card or a separate language settings panel. */
+@layer request-completion {
+  @media(max-width:699px){
+    html body #app#app#app#app#app #mine-panel .dj834-settings-group > .dj854-language-row:not([hidden]){
+      position:relative!important;
+      display:flex!important;
+      flex-direction:row!important;
+      grid-template-columns:none!important;
+      align-items:center!important;
+      justify-content:flex-start!important;
+      gap:13px!important;
+      width:100%!important;
+      min-height:62px!important;
+      height:62px!important;
+      max-height:62px!important;
+      margin:0!important;
+      padding:11px 14px!important;
+      box-sizing:border-box!important;
+      border:0!important;
+      border-top:1px solid var(--dj800-border,#d3e0d8)!important;
+      border-radius:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+      overflow:hidden!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-settings-group > .dj854-language-row[hidden]{
+      display:none!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj854-language-icon {
+      flex:0 0 36px!important;
+      width:36px!important;
+      min-width:36px!important;
+      height:36px!important;
+      margin:0!important;
+      border-radius:12px!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row label {
+      display:block!important;
+      flex:1 1 auto!important;
+      min-width:0!important;
+      margin:0!important;
+      padding:0!important;
+      font-size:16px!important;
+      line-height:1.35!important;
+      font-weight:650!important;
+      white-space:nowrap!important;
+      text-align:left!important;
+      color:var(--dj800-text,#20312e)!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj854-language-value {
+      flex:0 0 auto!important;
+      display:block!important;
+      margin-left:auto!important;
+      font-size:14px!important;
+      font-weight:500!important;
+      color:var(--dj800-muted,#53675e)!important;
+      white-space:nowrap!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj834-chevron {
+      flex:0 0 auto!important;
+      margin:0 0 0 2px!important;
+      color:var(--dj800-muted,#53675e)!important;
+      font-size:26px!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row > select {
+      position:absolute!important;
+      inset:0!important;
+      display:block!important;
+      width:100%!important;
+      max-width:none!important;
+      height:100%!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:0!important;
+      opacity:0!important;
+      border:0!important;
+      border-radius:0!important;
+      appearance:none!important;
+      -webkit-appearance:none!important;
+      z-index:2!important;
+      cursor:pointer!important;
+      pointer-events:auto!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row:focus-within {
+      outline:2px solid var(--dj800-accent,#0d8875)!important;
+      outline-offset:-2px!important;
+    }
+  }
+}
