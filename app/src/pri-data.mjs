@@ -94,6 +94,7 @@ export function currentVulnerabilityScore(segment){
   return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
 }
 export function segmentScore(bundle,s,mode){
+ if(mode==='current3')return currentVulnerabilityScore(s);
  // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
  if(mode==='pri12'){const lighting=observedFactorScore(s,'lighting'),accidents=observedFactorScore(s,'accidents');return lighting!==null&&accidents!==null?(lighting+accidents)/2:null;}
  if(mode!=='pri')return observedFactorScore(s,mode);
