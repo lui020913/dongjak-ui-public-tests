@@ -122,6 +122,9 @@ export function installMapPreferences(doc=document,win=window){
   const apply=({animateWeather=false}={})=>{
     // Typography is now controlled solely by My Info (no duplicate state).
     delete prefs.text;
+    // Preserve the established fade-only motion contract and migrate old choices.
+    delete prefs.motionStyle;
+    app.dataset.djMotionStyle='soft';
     app.classList.toggle('dj-reduced-animation',prefs.motion==='reduced');
     // v816 compatibility: direct display hiding still happens in commitWeather;
     // it is deferred only for a user-initiated fade-out.
