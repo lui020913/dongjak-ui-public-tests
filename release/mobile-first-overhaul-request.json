@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Deploy merged PR #283 (e393db408a1c50db5093bb16e303fc909a3ae2e9): complete A01–E07 mobile UX implementation coverage, live theme without restart, opaque fixed phone tabs, persistent map state, quota-safe realtime transit, gray unevaluated PRI and explicit 300m five-of-six rule, 44px PRI controls, real seven-day weather, route and onboarding regressions, and mobile render/GPS/polling energy guards. Run exact Preview, all mobile/design/exploration gates and protected Production with no bypass. Physical-device battery/thermal measurement remains manual post-deploy evidence.",
-  "attempt": 245,
+  "purpose": "Single integrated release candidate for merged app fixes PR #283, #284 and #285, plus 24-way phone regression sharding and measured six-lane UI capture. Preserve iPhone PWA native-theme refresh/camera/onboarding, correct PRI TIP/5-tier risk/road width and opacity, opaque full-screen tab switch and categorical update history. Verify exact SHA via Preview, 24 phone shards, six deterministic browser layout/motion captures, desktop/tablet gate and protected Production; Gemini design/exploration is opt-in only, never misreported as a default pass. Do not equate CI success to physical iPhone QA or completion of all 35 UI requests.",
+  "attempt": 246,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #283 source CI run 44986703349 passed the full app regression suite, release metadata check, exact app/ production build, generated entrypoint, twelve mobile shard contract and three phone viewport checks. Request the normal protected release pipeline for the exact merged main source.",
+  "last_retry_reason": "Batch test combined already merged app changes with deterministic design evidence and 24 independent Playwright shards; remove six serialized Gemini requests from default release path without weakening measured clipping or source-provenance gates. Review any incomplete 35-item UI requirements separately after deploy.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
