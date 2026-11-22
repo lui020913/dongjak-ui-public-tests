@@ -667,9 +667,48 @@
     padding:9px 12px 12px!important;box-sizing:border-box!important;
     background:var(--dj800-surface,#fff)!important;border-top:1px solid var(--dj800-border,#d7e6de)!important;
   }
+  #app#app #route-panel .route-card {
+    display:block!important;box-sizing:border-box!important;
+    width:100%!important;min-width:0!important;
+    padding:12px!important;margin:0 0 12px!important;
+    border-radius:18px!important;overflow:visible!important;
+  }
   #app#app #route-panel .route-location-row {
-    min-width:0!important;box-sizing:border-box!important;gap:8px!important;padding:8px 9px!important;
-    border-radius:10px!important;background:var(--dj800-elevated,#f2f8f4)!important;
+    display:flex!important;align-items:center!important;flex-wrap:nowrap!important;
+    min-width:0!important;min-height:58px!important;
+    box-sizing:border-box!important;gap:8px!important;padding:8px 9px!important;
+    border-radius:12px!important;background:var(--dj800-elevated,#f2f8f4)!important;
+  }
+  #app#app #route-panel .route-select-actions {
+    display:flex!important;flex:0 0 auto!important;gap:5px!important;
+    align-items:center!important;width:auto!important;min-width:0!important;
+  }
+  #app#app #route-panel .route-mini-btn {
+    width:auto!important;min-width:42px!important;min-height:38px!important;
+    height:38px!important;padding:5px 8px!important;
+    border-radius:11px!important;font-size:12px!important;
+  }
+  #app#app #route-panel .route-gps-btn {
+    width:auto!important;max-width:100%!important;min-height:38px!important;
+    height:auto!important;padding:7px 10px!important;margin:7px 0!important;
+    border-radius:12px!important;font-size:12px!important;text-align:left!important;
+  }
+  #app#app #route-panel .route-location-divider {
+    height:1px!important;margin:5px 0!important;
+  }
+  #app#app #route-panel .route-calc,
+  #app#app #route-panel #dj910-route-footer .route-calc {
+    min-height:48px!important;max-height:56px!important;
+    padding:10px 14px!important;border-radius:15px!important;
+    font-size:15px!important;
+  }
+  #app#app #route-panel .dj-page-intro {
+    font-size:12px!important;line-height:1.5!important;
+    margin:0 0 10px!important;
+  }
+  #app#app #route-panel .page-note {
+    font-size:11px!important;line-height:1.5!important;
+    margin:8px 0 0!important;
   }
   #app#app #route-panel .route-location-text {min-width:0!important;overflow-wrap:anywhere!important;}
   #app#app #route-panel .route-location-divider {background:var(--dj800-border,#d7e6de)!important;border-color:var(--dj800-border,#d7e6de)!important;}
@@ -998,69 +1037,148 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
  html body #app#app#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .metro-neighbor-row :is(.metro-rail-previous,.metro-rail-next){
    background:#323a41!important;color:#e9edf2!important;border-color:#55646e!important;
  }
- /* 3. Nearby information: compact, self-contained and theme-correct. */
- html body #app#app#app #ped-tools-panel:not([hidden]){
-   background:var(--dj-primary-page-bg,#edf3ef)!important;
+ /* Nearby information is a content-sized floating sheet, never a full-height dialog. */
+ html body #app#app#app #ped-tools-panel:not([hidden]) {
+   box-sizing:border-box!important;display:block!important;
+   left:12px!important;right:12px!important;
+   width:calc(100% - 24px)!important;max-width:460px!important;
+   height:auto!important;min-height:0!important;
+   max-height:min(58dvh,calc(100dvh - 186px))!important;
+   margin:0 auto!important;padding:14px 16px 16px!important;
+   overflow-y:auto!important;overflow-x:hidden!important;
+   overscroll-behavior:contain!important;
    border:1px solid var(--dj-theme-line,#d3e3d9)!important;
-   border-radius:24px!important;box-shadow:0 12px 32px rgba(28,62,48,.13)!important;
-   padding:16px!important;
-   max-height:calc(100dvh - 160px)!important;
-   overflow-y:auto!important;overscroll-behavior:contain!important;
+   border-radius:24px!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;
+   color:var(--dj-primary-page-ink,#203e34)!important;
+   box-shadow:0 10px 28px rgba(28,62,48,.12)!important;
  }
- html body #app#app#app #ped-tools-panel :is(h1,h2,h3){
-   margin:0!important;font-size:19px!important;line-height:1.35!important;
+ html body #app#app#app #ped-tools-panel .ped-tools-panel-head {
+   display:flex!important;align-items:center!important;justify-content:space-between!important;
+   gap:12px!important;width:100%!important;min-height:44px!important;
+   margin:0 0 8px!important;padding:0!important;border:0!important;
  }
- html body #app#app#app #ped-tools-panel :is(p,.ped-tools-note){
-   font-size:13px!important;line-height:1.5!important;
-   word-break:keep-all!important;
+ html body #app#app#app #ped-tools-panel .ped-tools-panel-head #ped-tools-heading {
+   font-size:19px!important;font-weight:750!important;line-height:1.3!important;
  }
- html body #app#app#app #ped-tools-panel :is(button,#ped-tools-close){
-   max-width:100%!important;min-height:42px!important;border-radius:16px!important;
+ html body #app#app#app #ped-tools-panel #ped-tools-close {
+   display:grid!important;place-items:center!important;flex:0 0 42px!important;
+   width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;
+   padding:0!important;margin:0!important;border-radius:50%!important;
+   border:1px solid var(--dj-theme-line,#d3e3d9)!important;
+   background:var(--dj-theme-secondary,#eef6f1)!important;
  }
- html body #app#app#app #ped-tools-panel #ped-tools-close{
-   width:44px!important;height:44px!important;min-width:44px!important;
-   flex:0 0 44px!important;border-radius:50%!important;
+ html body #app#app#app #ped-tools-panel #ped-tools-status {
+   min-height:0!important;margin:0 0 10px!important;padding:0!important;
+   font-size:13px!important;line-height:1.5!important;word-break:keep-all!important;
  }
- /* Community is a full-screen destination, not a squeezed toolbar overlay. */
- html body #app#app#app #participation-panel:not([hidden]):not(.dj9256-composing) .dj836-sheet-body {
+ html body #app#app#app #ped-tools-panel #ped-tools-results {
+   min-height:0!important;margin:0!important;padding:0!important;
+   display:grid!important;gap:8px!important;overflow:visible!important;
+ }
+ html body #app#app#app #ped-tools-panel #ped-tools-results button {
+   width:100%!important;max-width:100%!important;min-height:46px!important;
+   margin:0!important;padding:10px 14px!important;
+   border-radius:15px!important;font-size:14px!important;line-height:1.3!important;
+ }
+ /* Community: filters, search and one action row before distinct post cards. */
+ html body #app#app#app #participation-panel:not([hidden]):not(.dj9256-composing) > .dj836-sheet-body {
    display:flex!important;flex-direction:column!important;align-items:stretch!important;
-   gap:10px!important;padding:16px 16px calc(106px + env(safe-area-inset-bottom,0px))!important;
-   overflow-y:auto!important;
+   gap:10px!important;padding:14px 16px 24px!important;
+   overflow-x:hidden!important;overflow-y:auto!important;
  }
  html body #app#app#app #participation-panel .community-category-tabs {
-   order:-5!important;max-width:100%!important;margin:0 0 2px!important;
-   padding:2px 1px 7px!important;gap:7px!important;
+   order:-5!important;display:flex!important;flex-wrap:nowrap!important;
+   max-width:100%!important;width:100%!important;
+   overflow-x:auto!important;overscroll-behavior-x:contain!important;
+   -webkit-overflow-scrolling:touch!important;scroll-snap-type:x proximity!important;
+   margin:0 0 2px!important;padding:2px 1px 8px!important;gap:8px!important;
  }
- html body #app#app#app #participation-panel .community-heading-row {
-   order:-4!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
-   align-items:center!important;gap:10px!important;margin:0!important;
+ html body #app#app#app #participation-panel .community-category-tabs > button {
+   flex:0 0 auto!important;scroll-snap-align:start!important;
+   min-height:38px!important;padding:7px 13px!important;
+   font-size:13px!important;white-space:nowrap!important;
  }
- html body #app#app#app #participation-panel .community-heading-row>div {display:none!important;}
- html body #app#app#app #participation-panel #community-compose-toggle {
-   grid-column:2!important;min-height:44px!important;
-   border-radius:999px!important;white-space:nowrap!important;
- }
- html body #app#app#app #participation-panel .community-heading-row #community-notifications-toggle {
-   grid-column:1!important;grid-row:1!important;justify-self:start!important;
-   min-height:44px!important;min-width:76px!important;border-radius:999px!important;
- }
- html body #app#app#app #participation-panel .dj-page-intro{
-   order:-3!important;margin:0!important;font-size:12px!important;line-height:1.4!important;
- }
- html body #app#app#app #participation-panel .community-toolbar{
-   order:-1!important;display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;
-   align-items:center!important;gap:8px!important;margin:0!important;padding:0!important;
- }
- html body #app#app#app #participation-panel #community-search{
-   order:-2!important;margin:0!important;width:100%!important;min-height:44px!important;
-   border-radius:15px!important;
- }
- html body #app#app#app #participation-panel #community-sort {
-   flex:1 1 100px!important;max-width:190px!important;min-height:42px!important;
+ html body #app#app#app #participation-panel #community-search {
+   order:-4!important;display:block!important;width:100%!important;
+   height:44px!important;min-height:44px!important;margin:0!important;
+   padding:10px 14px!important;box-sizing:border-box!important;
+   border:1px solid var(--dj-theme-line,#d3e3d9)!important;border-radius:14px!important;
    background:var(--dj-theme-surface,#fff)!important;
+   color:var(--dj-primary-page-ink,#203e34)!important;
  }
- html body #app#app#app #participation-panel #community-saved-toggle {
-   min-width:76px!important;min-height:42px!important;border-radius:999px!important;
+ html body #app#app#app #participation-panel .community-toolbar {
+   order:-3!important;display:grid!important;
+   grid-template-columns: minmax(0,.8fr) minmax(0,1.12fr) minmax(0,.8fr) minmax(0,1.25fr)!important;
+   align-items:stretch!important;gap:6px!important;
+   width:100%!important;min-width:0!important;margin:0!important;padding:0!important;
+ }
+ html body #app#app#app #participation-panel .community-toolbar > :is(button,select) {
+   box-sizing:border-box!important;display:block!important;width:100%!important;
+   min-width:0!important;max-width:none!important;
+   min-height:42px!important;height:42px!important;
+   margin:0!important;padding:6px 5px!important;
+   border:1px solid var(--dj-theme-line,#d3e3d9)!important;
+   border-radius:12px!important;font-size:12px!important;font-weight:650!important;
+   text-align:center!important;white-space:nowrap!important;
+   background:var(--dj-theme-surface,#fff)!important;color:var(--dj-primary-page-ink,#203e34)!important;
+ }
+ html body #app#app#app #participation-panel .community-toolbar #community-compose-toggle {
+   background:var(--dj800-accent,#0d8875)!important;color:#fff!important;border-color:transparent!important;
+ }
+ html body #app#app#app #participation-panel .dj-page-intro {
+   order:-2!important;margin:0 0 2px!important;padding:0!important;
+   font-size:12px!important;line-height:1.4!important;
+   color:var(--dj800-muted,#53675e)!important;
+ }
+ html body #app#app#app #participation-panel #community-list {
+   order:0!important;display:grid!important;gap:10px!important;
+   width:100%!important;min-width:0!important;margin:0!important;
+   padding:0 0 12px!important;
+ }
+ html body #app#app#app #participation-panel .dj-community-feed-status {
+   display:flex!important;align-items:center!important;justify-content:space-between!important;
+   gap:10px!important;margin:0!important;padding:7px 0!important;
+   border:0!important;background:transparent!important;
+ }
+ html body #app#app#app #participation-panel .dj-community-status-label {
+   flex:1 1 auto!important;min-width:0!important;margin:0!important;
+   font-size:12px!important;line-height:1.4!important;
+ }
+ html body #app#app#app #participation-panel .dj-community-refresh {
+   flex:0 0 auto!important;width:auto!important;min-height:36px!important;
+   padding:6px 10px!important;border-radius:999px!important;
+ }
+ html body #app#app#app #participation-panel .community-post {
+   display:block!important;box-sizing:border-box!important;
+   width:100%!important;min-width:0!important;margin:0!important;
+   padding:14px!important;border:1px solid var(--dj-theme-line,#d3e3d9)!important;
+   border-radius:18px!important;background:var(--dj-theme-surface,#fff)!important;
+   color:var(--dj-primary-page-ink,#203e34)!important;
+   box-shadow:0 3px 12px rgba(22,51,39,.055)!important;
+ }
+ html body #app#app#app #participation-panel .community-post-head {
+   display:flex!important;align-items:center!important;justify-content:space-between!important;
+   flex-wrap:wrap!important;gap:6px!important;margin:0 0 10px!important;
+ }
+ html body #app#app#app #participation-panel .community-post-title {
+   display:block!important;width:100%!important;max-width:100%!important;
+   margin:0 0 8px!important;padding:0!important;border:0!important;
+   background:transparent!important;text-align:left!important;
+   font-size:17px!important;font-weight:750!important;line-height:1.4!important;
+   color:var(--dj-primary-page-ink,#203e34)!important;
+ }
+ html body #app#app#app #participation-panel .community-post-body {
+   margin:0 0 9px!important;font-size:14px!important;line-height:1.55!important;
+   overflow-wrap:anywhere!important;
+ }
+ html body #app#app#app #participation-panel .community-summary-count {
+   margin:0!important;font-size:12px!important;
+   color:var(--dj800-muted,#53675e)!important;
+ }
+ html body #app#app#app #participation-panel .community-report-secondary {
+   width:100%!important;min-height:42px!important;margin:0!important;
+   padding:10px 12px!important;
  }
  /* 4/5/7. Only the selected My Info subview is rendered. The sheet body,
     not the document and not the card list, is the sole vertical scroller. */
