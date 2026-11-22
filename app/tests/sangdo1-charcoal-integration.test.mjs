@@ -6,7 +6,7 @@ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('native vulnerability PRI has the 3-source gap; duplicate map option removed',()=>{
  const main=read('src/main.js'),html=read('index.html'),pri=read('src/pri-map.js');
  const manifest=JSON.parse(read('public/data/pri/manifest.json'));
- assert.ok(main.includes('installPriMap({map,maplibregl,app})'));
+ assert.ok(main.includes('installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode})'));
  assert.ok(!main.includes('installPolicyGapThreeSourceMap'));
  assert.ok(main.includes('installNightVisibility'));
  assert.ok(html.includes('theme-contract.js'));
