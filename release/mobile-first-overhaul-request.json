@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.91",
+  "application_version": "9.2.92",
   "public_work_branch": "main",
-  "purpose": "Exact main source after merged PR330 (0dc722ea8a2d459e88bf842eade239b973aacfcc), including merged PR328 and PR329: fix real iPhone My Info vertical blank space and hidden subviews, native language row reparent/card bug, community four-control toolbar and post cards, compact nearby sheet; integrate Sangdo1 1003 scored/603 grey policy-gap road segments, 172 unscored Sanghyeon Middle School 300m subview (NULL, never counted), official school catchment SHP 22 audited clipped roads with unchanged scores and map detail. CI 45032081208 and 3 separate GIS, official source and Live QA checks green. Require SHA-bound isolated Preview, all 12 mobile QA shards including visual layout geometry, desktop/tablet gate, then protected Production with rollback if and only if all gates pass.",
-  "attempt": 278,
+  "purpose": "User-uploaded PDF speed-limit relative hazard criterion integrated into walking vulnerability under merged PR #332 (608d8839c472f92867b8a594ca91fff00fca3635): source-backed Sangdo1 206 standard road links, 30km/h below=0, 30=40, 40=80, 50=100 risk points, unsupported/missing speed NULL (grey), no fabricated matching to separate 1686-segment lighting/PRI survey network; 1606 reference Sangdo1 centerlines grey; clickable speed detail and data provenance. Preserve PR328-330 1003 scored + 603 unscored protection gaps, 172 middle-school NULL, official 22 boundary audits, current three-factor composite; existing mobile UI fixes. PR source CI #45034983405 success; GIS and Live QA source checks success. Only promote if SHA-bound Preview, desktop/tablet and ALL 12 mobile QA including real speed UI controls/screenshot pass. Guarded rollback on production failure.",
+  "attempt": 279,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Preview #45032959734 passed sealed source build, Preview, desktop/tablet and 9/12 mobile browser shards; 3 shards only failed a newly-added nearby geometry assertion performed during a legitimate 350ms sheet entrance. Earlier existing geometry(page,'#ped-tools-panel') waited until settled and passed. main 34937af6c7ab55780fe3690ce894c63cbc07914c now polls the SAME compact size/dock-clearance requirement until transition completes, timeout still fails persistent overlap. Re-run all 12 shards and protected Production gates; no GIS or UX data changed.",
+  "last_retry_reason": "New speed-limit vulnerability PDF requested. PR332 source tests passed and merged; 9.2.91 Production previously succeeded. This is new 9.2.92 patch release, not a retry.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
