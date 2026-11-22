@@ -2147,7 +2147,9 @@ function openCommunityComposer(open,{animate=true}={}) {
     panel?.classList.add('dj9256-composing');
     if(communityComposerOrigin==='map')setMapReportHitLayer(true);
     setCommunityTopbarBlocked(true);
-    if(animate&&panel?.dataset.dj810Animating!=='opening')motion?.open(communityForm);
+    if(animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      communityForm.animate?.([{opacity:0},{opacity:1}],{duration:210,easing:'ease-out'});
+    }
     return;
   }
   if(communityForm.hidden||communityForm.dataset.dj810Animating==='closing')return;
@@ -2162,7 +2164,10 @@ function openCommunityComposer(open,{animate=true}={}) {
     // Cancel both owners synchronously before navigating, without flashing the feed.
     motion?.cancel?.(communityForm);
     if(parent)motion?.cancel?.(parent);
-    done();
+    const fade=!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&communityForm.animate
+      ?communityForm.animate([{opacity:1},{opacity:0}],{duration:180,easing:'ease-in'})
+      :null;
+    if(fade){fade.finished.then(done,done);}else done();
     return;
   }
   const epoch=++communityComposerEpoch;
@@ -2180,7 +2185,10 @@ function openCommunityComposer(open,{animate=true}={}) {
   // 300ms sheet-close owner can be cancelled by the parent and leave the
   // compose view visible indefinitely. End the editor state synchronously.
   motion?.cancel?.(communityForm);
-  finish();
+  const fade=!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&communityForm.animate
+    ?communityForm.animate([{opacity:1},{opacity:0}],{duration:180,easing:'ease-in'})
+    :null;
+  if(fade){fade.finished.then(finish,finish);}else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
@@ -2292,7 +2300,7 @@ const pedestrianTools=initPedestrianTools({
     navigate('participate');communityComposerOrigin=origin;
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
-    openCommunityComposer(true,{animate:!window.matchMedia('(max-width:699px)').matches});
+    openCommunityComposer(true,{animate:true});
     if(!window.matchMedia('(max-width:699px)').matches)document.getElementById('community-title')?.focus({preventScroll:true});
   }
 });
