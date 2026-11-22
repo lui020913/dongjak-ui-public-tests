@@ -263,19 +263,28 @@ html body #app#app #map-quick-search-dropdown .dj854-search-empty{
 }
 
 /* Shared language selector. */
-#app .dj854-language-section{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:0 0 14px;padding:12px 14px;border:1px solid var(--dj800-border,#dce8e1);
-  border-radius:14px;background:var(--dj800-elevated,#f5faf7);color:var(--dj800-text,#21483b);
+#app #mine-panel .dj834-settings-group > .dj854-language-section{
+  display:grid;grid-template-columns:33px minmax(0,1fr) minmax(0,118px);
+  align-items:center;gap:13px;min-height:62px;box-sizing:border-box;
+  margin:0;padding:11px 14px;border:0;border-top:1px solid var(--dj-theme-line,#dce8e1);
+  border-radius:0;background:transparent;color:var(--dj-theme-ink,#21483b);
 }
-#app .dj854-language-section label{font-size:13px;font-weight:750;}
-#app .dj854-language-section select{
-  min-width:118px;min-height:38px;padding:6px 10px;border-radius:10px;
-  border:1px solid var(--dj800-border,#dce8e1);background:var(--dj800-surface,#fff);
-  color:var(--dj800-text,#21483b);font:inherit;font-size:13px;font-weight:650;
+#app #mine-panel .dj854-language-section .dj854-language-icon{
+  background:var(--dj-theme-accent,#35676c);color:#fff;
 }
-#app[data-theme="dark"] .dj854-language-section{background:var(--dj800-elevated,#233c40);}
-#app[data-theme="dark"] .dj854-language-section select{background:var(--dj800-surface,#192e31);}
+#app #mine-panel .dj854-language-section label{
+  min-width:0;font-size:15px;font-weight:550;color:var(--dj-theme-ink,#21483b);
+}
+#app #mine-panel .dj854-language-section select{
+  display:block;width:100%;min-width:0;max-width:118px;min-height:40px;
+  box-sizing:border-box;padding:6px 8px;border-radius:11px;
+  border:1px solid var(--dj-theme-line,#dce8e1);
+  background:var(--dj-theme-surface,#fff);color:var(--dj-theme-ink,#21483b);
+  font:inherit;font-size:13px;font-weight:650;
+}
+#app[data-theme="dark"] #mine-panel .dj854-language-section .dj854-language-icon{
+  color:var(--dj-theme-ink,#f1f4f6);background:var(--dj-theme-selected,#31535b);
+}
 
 /* Desktop weather: compact icon + temperature only; details open in a sheet. */
 @media(min-width:700px){
