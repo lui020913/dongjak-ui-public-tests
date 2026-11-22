@@ -549,7 +549,11 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  expect(place.y).toBeGreaterThanOrEqual(head.y+head.height+3);
  await expect(weather.locator('[data-weather-location]')).toBeVisible();
  await expect(page.locator('#dj840-map-tip')).toBeHidden();
- await expect(weather.locator('.dj-weather-edge-drag')).toBeVisible();
+ // The weather information card intentionally has no grip or expanded state.
+ await expect(weather.locator('.dj-weather-edge-drag')).toHaveCount(0);
+ await expect(weather).toHaveAttribute('data-dj-fixed-size','true');
+ await weather.locator('.dj854-weather-head h2').click();
+ await expect(weather).not.toHaveClass(/dj871-sheet-expanded/);
  // Keep the measured scale on the map only; a weather sheet above the
  // bottom nav must suppress both the MapLibre corner and its scale chip.
  const mapScale=page.locator('#map .maplibregl-ctrl-scale');
