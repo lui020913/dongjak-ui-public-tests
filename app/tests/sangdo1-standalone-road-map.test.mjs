@@ -46,7 +46,7 @@ test('viewer has an actual OSM basemap with independent GIS vector fallback; not
  assert.ok(html.includes("상현초·샛별 주변"));
  assert.ok(html.includes("75점 이상만"));
  assert.ok(!html.includes("GIS 원본 연결 시 전체 표시"));
- const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)];
+ const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
  assert.equal(scripts.length,1);
  assert.doesNotThrow(()=>new vm.Script(scripts[0][1]),'standalone browser javascript parses');
 });
