@@ -11,10 +11,11 @@ const marquee=read('src/v854-tip-marquee.js');
 const flowCss=read('src/v863-onboarding-flow.css');
 const html=read('index.html');
 
-test('guest onboarding respects completed-tour persistence on sign-out',()=>{
+test('guest onboarding opens on every signed-out launch and after logout',()=>{
   assert.match(auth,/djAuthState='checking'/);
   assert.match(auth,/authApp\.dataset\.djAuthState=authenticated\?'signed-in':'signed-out'/);
-  assert.ok(onboarding.includes("if((authState==='signed-out'||pendingGuestOnboarding)&&!readSeen(win))"));
+  assert.ok(onboarding.includes("if(authState==='signed-out'||pendingGuestOnboarding)"));
+  assert.ok(onboarding.includes("lastAuthState==='signed-in'&&authState==='signed-out'"));
   assert.match(onboarding,/open\(\{auto:true,force:true\}\)/);
   assert.match(onboarding,/if\(auto&&\(seenInMemory\|\|readSeen\(win\)\)&&!force\)return/);
 });
