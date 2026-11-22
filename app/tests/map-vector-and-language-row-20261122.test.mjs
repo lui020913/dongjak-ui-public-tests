@@ -41,6 +41,8 @@ test('language selection is one native-accessible compact row, not separate card
   assert.ok(css.includes('.dj834-settings-group > .dj854-language-row:not([hidden])'));
   assert.ok(css.includes('height:62px!important'));
   assert.ok(css.includes('.dj834-language-row > select'));
-  assert.ok(css.includes('opacity:0!important'));
+  assert.ok(css.includes('position:static!important'),'native picker must never cover other settings rows');
+  assert.ok(css.includes('opacity:1!important'),'language picker must be visible, not a page-wide invisible hitbox');
+  assert.ok(css.includes('width:104px!important'),'native picker has a bounded in-row hitbox');
   assert.ok(css.includes('pointer-events:auto!important'));
 });
