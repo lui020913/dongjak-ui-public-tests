@@ -88,3 +88,13 @@ test('active weather suppresses scale paint, while existing dock restores exact 
  assert.match(source,/applyImportant\(scale,'display','block'\)/);
  assert.match(source,/if\(scaleChip\)applyImportant\(scaleChip,'display','flex'\)/);
 });
+
+test('weather sheet suppresses scale paint on same-frame open and releases on close',()=>{
+ const source=contents('../src/v854-weather-desktop.js');
+ assert.match(source,/const syncMapScale=\(\)=>\{/);
+ assert.match(source,/const active=Boolean\(sheet&&!sheet\.hidden\)/);
+ assert.match(source,/if\(active\)node\.style\.setProperty\('display','none','important'\)/);
+ assert.match(source,/else if\(node\.style\.getPropertyValue\('display'\)==='none'\)node\.style\.removeProperty\('display'\)/);
+ assert.match(source,/sheet\.hidden=false;syncMapScale\(\)/);
+ assert.match(source,/target\.hidden=true;syncMapScale\(\)/);
+});
