@@ -55,7 +55,7 @@ test('pre-paint theme switching keeps iOS icon path stable while updating manife
     const doc={documentElement:{dataset:{},classList:{toggle(){}}},getElementById(id){
       return id==='dj-apple-touch-icon'?touch:id==='dj-app-manifest'?manifest:id==='dj-browser-theme-color'?theme:null;
     }};
-    const pending={expires:Date.now()+5000,night:targetMode==='dark'?'on':null};
+    const pending={expires:Date.now()+5000,theme:targetMode,night:targetMode==='dark'?'on':null};
     const localStorage={getItem:()=>targetMode,setItem(){}};
     const sessionStorage={getItem:()=>JSON.stringify(pending),removeItem(){}};
     vm.runInNewContext(boot,{document:doc,localStorage,sessionStorage,Date,navigator:{userAgent:''},window:{matchMedia:()=>({matches:false})}},{timeout:1500});
