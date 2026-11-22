@@ -247,7 +247,9 @@ jobs:
 
   visual-capture:
     needs: [build, preview]
-    if: needs.preview.result == 'success'
+    # Optional visual recording: disabled for fast functional releases unless
+    # requested explicitly or required by an enabled Gemini review.
+    if: needs.preview.result == 'success' && (vars.ENABLE_DESIGN_CAPTURE_QA == 'true' || vars.ENABLE_GEMINI_QA == 'true')
     name: '3. 디자인 화면 촬영 (${{ matrix.lane }}/6)'
     strategy:
       fail-fast: false
@@ -436,7 +438,7 @@ jobs:
   production:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
     if: >-
-      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) }}
+      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && (needs.visual-capture.result == 'success' || (vars.ENABLE_DESIGN_CAPTURE_QA != 'true' && vars.ENABLE_GEMINI_QA != 'true' && needs.visual-capture.result == 'skipped')) && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) }}
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -561,7 +563,7 @@ jobs:
   notify-preview:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
     if: >-
-      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && (needs.visual-capture.result == 'success' || (vars.ENABLE_DESIGN_CAPTURE_QA != 'true' && vars.ENABLE_GEMINI_QA != 'true' && needs.visual-capture.result == 'skipped')) && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -582,7 +584,7 @@ jobs:
           if grep -Fq "$marker" <<< "$comments"; then exit 0; fi
           url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           description="$(printf '%s' "$WORK_DESCRIPTION" | head -n 1 | cut -c1-180)"
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일·디자인 검증 통과) · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Preview 완성 (모바일 검증 통과 (디자인 촬영은 선택사항)) · v%s\n\n작업: %s\n[배포 상세 보기](%s)\n%s' "$APP_VERSION" "$description" "$url" "$marker")"
 
   notify-production:
     needs: [build, production]
@@ -616,7 +618,7 @@ jobs:
             files="$(gh api "repos/$GITHUB_REPOSITORY/compare/$PREVIOUS_PUBLIC_SHA...$DEPLOYED_SHA" --jq '.files[]|select(.filename|startswith("app/src/") or startswith("frontend/production/"))|.filename' | head -n 15 || true)"
           fi
           if [ -z "$files" ]; then files="비교 내역에서 직접 확인 (파일 목록 미확인 또는 앱 소스 변경 없음)"; fi
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 모바일 24개 샤드, 디자인 캡처 6개와 정량 검증, 선택적 Gemini 검증 및 Production 상태 확인 통과\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 모바일 24개 샤드·PC/태블릿 검증·배포 소스 일치 확인, 디자인 촬영 및 Gemini는 선택 실행\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
