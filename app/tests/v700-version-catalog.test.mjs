@@ -32,11 +32,11 @@ test('all legacy and recent original notes are preserved exactly once in the hie
  assert.ok(visible.some(text=>text.startsWith('v7.0.1|')));
 });
 
-test('history presents complete original notes grouped by release, with no hidden disclosure blocks',()=>{
+test('history preserves all original notes in data and shows audited public presentation',()=>{
  const renderer=read('src/version-history-v7.js');
  assert.ok(renderer.includes("el('article','v707-release')"));
  assert.ok(renderer.includes("el('section','v707-history-timeline')"));
- assert.ok(renderer.includes("el('li','',description)"));
+ assert.ok(renderer.includes("el('li','',publicReleaseNote(description,record.version))"));
  assert.ok(renderer.includes("el('aside','v707-history-sources')"));
  assert.ok(renderer.includes('DATA_SOURCE_GROUPS'));
  assert.ok(!renderer.includes("createElement('details')"));
