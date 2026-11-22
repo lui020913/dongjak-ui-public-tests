@@ -51,3 +51,19 @@ test('aria-hidden exiting controls cannot keep the idle map HUD blocked',()=>{
  assert.equal(mobileScaleBlockerVisible(n,win),false);
  assert.equal(shouldHideMobileScale(app(),docWith({'#transport-sheet':[n]}),win),false);
 });
+
+test('weather sheet blocks MapLibre scale throughout entry motion and reliably announces state changes',()=>{
+ const sheet=element({id:'dj854-weather-sheet',rect:{top:0,left:0,right:0,bottom:0,width:0,height:0}});
+ const doc={...docWith(),getElementById:id=>id==='dj854-weather-sheet'?sheet:null};
+ assert.equal(shouldHideMobileScale(app(),doc,win),true,'new sheet blocks even during zero-size entry frame');
+ sheet.hidden=true;
+ assert.equal(shouldHideMobileScale(app(),doc,win),false,'closed sheet restores map-only scale');
+ const weather=contents('../src/v854-weather-desktop.js');
+ const scale=contents('../src/map-scale-docking.js');
+ assert.match(weather,/sheet\.hidden=false;syncMapScale\(\)/);
+ assert.match(weather,/target\.hidden=true;syncMapScale\(\)/);
+ assert.match(weather,/attributeFilter:\['hidden'\]/);
+ assert.match(scale,/window\.addEventListener\('dongjak:weather-visibility-changed',onWeatherVisibility\)/);
+ assert.match(scale,/window\.removeEventListener\('dongjak:weather-visibility-changed',onWeatherVisibility\)/);
+ assert.match(scale,/applyImportant\(chip,'visibility','hidden'\)/);
+});

@@ -150,6 +150,11 @@ export function shouldHideMobileScale(app,doc,view){
   if(!app||!doc||!view)return true;
   if((app.dataset.tab||'map')!=='map'||app.dataset.searchOpen==='true'||app.dataset.dj910SheetOpen==='true')return true;
   if(app.classList.contains('map-controls-open')||app.classList.contains('map-safety-open'))return true;
+  // The weather sheet is an explicit map HUD owner from the moment it opens.
+  // During its entry animation, opacity or bounds may transiently be zero;
+  // do not mistake that first frame for a closed window and show the scale.
+  const weatherSheet=doc.getElementById?.('dj854-weather-sheet');
+  if(weatherSheet && !weatherSheet.hidden)return true;
   for(const selector of MOBILE_SCALE_BLOCKERS){
     for(const node of doc.querySelectorAll(selector)){
       // Some permanently mounted elements (e.g. the waypoints control) are
@@ -207,6 +212,20 @@ export function installScaleDocking({map,app,overview}={}){
   map.on?.('idle',onMotionStop);
   let scheduled=false,disposed=false,previousDesktop=false;
   const scaleElement=()=>map.getContainer?.()?.querySelector('.maplibregl-ctrl-bottom-left');
+  // Dynamic weather sheets may be mounted after the initial overlay observer.
+  // Their explicit lifecycle event must hide MapLibre's inline-important scale
+  // immediately, without waiting for an observer/motion frame.
+  const onWeatherVisibility=()=>{
+    if(disposed)return;
+    const scale=scaleElement();
+    if(scale && window.innerWidth<700 && shouldHideMobileScale(app,app.ownerDocument,window)){
+      applyImportant(scale,'visibility','hidden');
+      const chip=scale.querySelector('.maplibregl-ctrl-scale');
+      if(chip)applyImportant(chip,'visibility','hidden');
+    }
+    schedule();
+  };
+  window.addEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
   const restoreCard=()=>{
     for(const prop of desktopCardProps)overview.style.removeProperty(prop);
   };
@@ -436,6 +455,7 @@ export function installScaleDocking({map,app,overview}={}){
     clearTimeout(qualityIdleTimer);
     app.classList.remove('dj873-map-moving');
     window.removeEventListener('resize',onViewportResize);
+    window.removeEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
     app.removeEventListener('transitionend',schedule,true);
     app.removeEventListener('animationend',schedule,true);
     restoreCard();
