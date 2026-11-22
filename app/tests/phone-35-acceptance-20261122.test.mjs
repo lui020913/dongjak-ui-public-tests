@@ -85,7 +85,7 @@ const checks=[
  }],
  ['C02','protection gap clearly documents 300m and two-factor 50:50 (no width)',()=>{
    const s=src('src/pri-map.js');
-   contains(s,'300m 지정 경계·시설 거리','동일 초등학교 학구도(각 50%)','도로폭은 제외합니다');
+   contains(s,'상도1동 참고 행정경계 내부 도로만 표시','보호시설 9곳의 300m 거리','적용 가능 시 각 50%','도로폭은 제외합니다');
    const manifest=JSON.parse(src('public/data/pri/manifest.json'));
    assert.ok(manifest.patches.some(p=>p.includes('2factor')));
    assert.ok(!manifest.patches.some(p=>p.includes('3source')));

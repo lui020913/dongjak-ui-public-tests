@@ -13,7 +13,7 @@ test('native vulnerability PRI has the 2-factor gap; duplicate map option remove
  assert.ok(html.includes('id="protection-zone-controls"'));
  assert.ok(!html.includes('walking-vulnerability-layer-group'));
  assert.ok(pri.includes('protectionGapColors'));
- assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_factor.json'));
+ assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });
 
 test('new vulnerability gradient uses a restrained semantic palette and the charcoal theme',()=>{
