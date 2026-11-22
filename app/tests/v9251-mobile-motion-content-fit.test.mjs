@@ -32,7 +32,7 @@ test('transit sheet content size removes empty space but allows full expansion',
   assert.match(css,/#transport-sheet:not\(\[hidden\]\):not\(\.dj871-sheet-expanded\)/);
   const js=source('mobile-compact-transport-sheet.js');
   assert.match(js,/MutationObserver/);assert.match(js,/ResizeObserver/);
-  assert.match(js,/if\(panel.hidden\|\|panel.classList.contains\('dj871-sheet-expanded'\)\)return;/);
+  assert.match(js,/if\(nowExpanded \|\| Date\.now\(\)<settleUntil/);
 });
 
 test('facility compact height and AI fade maintain expansion with a transparent modal backdrop',()=>{
@@ -77,7 +77,7 @@ test('AI dialog has one close owner and never opens on a transport close gesture
   const original=new URL('../../frontend/production/mobile-next.js',import.meta.url);
   const presentation=readFileSync(existsSync(local)?local:original,'utf8');
   assert.match(ai,/transportDismissedAt/);
-  assert.match(ai,/Date\.now\(\)-transportDismissedAt<750/);
+  assert.match(ai,/Date\.now\(\)-transportDismissedAt<1600/);
   assert.match(ai,/modal\.classList\.add\('dj887-ai-closing'\)/);
   assert.doesNotMatch(presentation,/dj9272-ai-leave/);
   assert.match(css,/dj9251-ai-content-enter/);
