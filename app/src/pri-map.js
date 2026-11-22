@@ -175,8 +175,8 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    if(revision===before){acceptDataset(next);if(failed.length)status.textContent+=' · 일부 추가 지표를 불러오지 못했습니다.';}
   }catch(e){if(revision===before)status.textContent='서버 PRI 자료를 불러오지 못했습니다. JSON 자료를 직접 불러올 수 있습니다.';}
  }
- toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';void loadDefault();});
- dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;resetDialogView();});
+ toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';syncPriHud(true);void loadDefault();});
+ dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;resetDialogView();syncPriHud(Boolean(mode));});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
  function draw(){
   // isStyleLoaded() also becomes false while tiles are loading. That is not
