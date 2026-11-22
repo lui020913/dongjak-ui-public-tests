@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Exact-main protected Preview→12 phone QA→6 design capture→critical visual/function checks→Production for approved charcoal+mint dark theme and reference-like dark map (PR #275), transparent native+GIS 3D buildings 0.58/0.50 with continuous 13–15 zoom fade, and corrected release-only mobile override (PR #279). Preserve all existing PRI graded protection-gap layer 300m, 1086 graded/600 neutral gray, light theme, live transit, semantic danger colors, Android signing, night analytical occlusion. Source CI runs #44978130442 and #44978844609 passed. Keep all required browser, source, capture and protected deployment gates. Never mark quota-exhausted Gemini reviews as passed; retain clearly indicated manualReviewRequired if workflow policy allows; block actual critical defects.",
-  "attempt": 241,
+  "purpose": "Deploy the approved charcoal/mint and Naver-reference gray map with PRs #275/#279, showing translucent native/GIS 3D buildings 50–58% via continuous zoom13–15 fade. Main browser QA regression now asserts the real approved #22282e (rgb 34,40,46) iPhone native status and My Info full-screen background, rather than old #17191d; keep all original content checks, 12 phone shards, 6 design captures, Gemini evidence and functional review gates and protected Production. Preserve existing 300m PRI graded vulnerability, 1086 scored/600 neutral gray, metro semantic colors, light mode and night-safety occlusion.",
+  "attempt": 242,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #240 still used an older production follow-up script that rewrote mobile dark building opacity to 96–98%, contradicting user-approved translucent 50–58%. PR #279 merged at d2c62ce9 after source CI success and updates production overlay + regression tests. Request full source-pinned rerun with latest main; never promote stale 240.",
+  "last_retry_reason": "Attempt #241 passed exact production build, Cloudflare Preview, six design captures and all six Gemini design lanes, plus 8/12 mobile QA. Four phone browser shards (1,4,7,9) failed only because tests/v911-anonymous-ui.spec.mjs still asserted obsolete #17191d while the actual screenshot/computed color is approved #22282e. Fixed 3 RGB checks and one status color check in test-only main commit 275d16c7; rerun exact source with no skipped functional gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
