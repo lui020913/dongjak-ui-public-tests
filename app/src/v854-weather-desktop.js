@@ -31,7 +31,7 @@ export function installDesktopWeatherSheet(doc=document,win=window){
   const syncMapScale=()=>{
     // Same-frame fail-safe for late MapLibre controls. The map docking module
     // remains the geometry owner; weather only suppresses paint while active.
-    const corner=doc.querySelector('#map .maplibregl-ctrl-bottom-left');
+    const corner=doc.querySelector?.('#map .maplibregl-ctrl-bottom-left');
     const chip=corner?.querySelector('.maplibregl-ctrl-scale');
     const active=Boolean(sheet&&!sheet.hidden);
     for(const node of [corner,chip]){
