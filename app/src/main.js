@@ -687,10 +687,12 @@ function syncAutomaticTerrain(_pitch) {
 }
 
 function visibleBuilding2D(){
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && map.getZoom() >= BUILDING_ZOOM_MIN;
+  // Loaded layers remain visible across the threshold; minzoom and paint
+  // expressions smoothly fade them rather than flipping visibility on zoomend.
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom() >= BUILDING_ZOOM_MIN;
+  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -767,7 +769,7 @@ function getVisibleBBox(){
   return [minX-dx,minY-dy,maxX+dx,maxY+dy];
 }
 function scheduleBuildingLoad(){
-  if (!visibleBuilding2D() || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
+  if (!visibleBuilding2D() || map.getZoom()<BUILDING_ZOOM_MIN || djBuildingBatchBusy || (djPhone&&map.isMoving?.())) return;
   clearTimeout(buildingLoadTimer);
   buildingLoadTimer=setTimeout(()=>{loadVisibleBuildingSheets().catch(err=>console.warn('건물 타일 표시 오류:',err));},230);
 }
@@ -897,12 +899,12 @@ function djTrimOffscreenBuildings(sheets){
   lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
 }
 async function loadVisibleBuildingSheets(){
-  if(!visibleBuilding2D()||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
+  if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN||djBuildingBatchBusy||(djPhone&&map.isMoving?.()))return;
   djBuildingBatchBusy=true;
   let interrupted=false;
   try{
     const manifest=await ensureBuildingManifest();
-    if(!visibleBuilding2D())return;
+    if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
     const sheets=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
     djTrimOffscreenBuildings(sheets);
