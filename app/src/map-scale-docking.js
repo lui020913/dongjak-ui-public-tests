@@ -149,7 +149,7 @@ export function mobileScaleBlockerVisible(node,view){
 export function shouldHideMobileScale(app,doc,view){
   if(!app||!doc||!view)return true;
   // First-launch overlay owns all HUD frames until onboarding/guide resolve.
-  if(app.dataset.dj860AutoResolved!=='true'||app.dataset.djHudGuideHandoff==='true'||doc.querySelector?.('#map-startup-overlay:not([hidden]),#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden])'))return true;
+  if(app.dataset.djHudGuideHandoff==='true')return true;
   if((app.dataset.tab||'map')!=='map'||app.dataset.searchOpen==='true'||app.dataset.dj910SheetOpen==='true'||app.dataset.djPriVisible==='true')return true;
   if(app.classList.contains('map-controls-open')||app.classList.contains('map-safety-open'))return true;
   // The weather sheet is an explicit map HUD owner from the moment it opens.
