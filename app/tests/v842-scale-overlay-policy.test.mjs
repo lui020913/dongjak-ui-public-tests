@@ -67,3 +67,16 @@ test('weather sheet blocks MapLibre scale throughout entry motion and reliably a
  assert.match(scale,/window\.removeEventListener\('dongjak:weather-visibility-changed',onWeatherVisibility\)/);
  assert.match(scale,/applyImportant\(chip,'visibility','hidden'\)/);
 });
+
+test('scale docking reclaims visibility after external MapLibre inline style writes',()=>{
+ const js=contents('../src/map-scale-docking.js');
+ assert.match(js,/corner\?\.querySelector\('\.maplibregl-ctrl-scale'\)/);
+ assert.match(js,/mo\.observe\(node,\{attributes:true,attributeFilter:\['style','class'\]\}\)/);
+ assert.match(js,/record\.target\?\.classList\?\.contains\('maplibregl-ctrl-scale'\)/);
+ assert.match(js,/onWeatherVisibility\(\)/);
+ const active=element({id:'dj854-weather-sheet'});
+ const doc={...docWith(),getElementById:id=>id==='dj854-weather-sheet'?active:null};
+ assert.equal(shouldHideMobileScale(app(),doc,win),true);
+ active.hidden=true;
+ assert.equal(shouldHideMobileScale(app(),doc,win),false);
+});
