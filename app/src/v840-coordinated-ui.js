@@ -90,6 +90,9 @@ export function installCoordinatedShell(doc=document,win=window){
  app.addEventListener('transitionend',sync,true);
  app.addEventListener('animationend',sync,true);
  const interval=win.setInterval(()=>{
+   // Avoid needless layout work and compositing when the map is hidden,
+   // the tab is not Map, or the vulnerability overlay owns the viewport.
+   if(doc.hidden||app.dataset.tab!=='map'||app.dataset.djPriVisible==='true')return;
    // Keep the hint continuously available on an unobstructed map. Only its
    // text cross-fades every ten seconds; it never disappears between cycles.
    advanceTip();
