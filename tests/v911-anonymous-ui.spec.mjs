@@ -117,6 +117,9 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
    await enter(page,'mine-panel','mine');
  }else{await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();}
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
+ // Theme lives in the iPhone-like nested preferences page, not on the home row.
+ await expect(page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]')).toBeVisible();
+ await tap(page,page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
  await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(34, 40, 46)'); // Unified charcoal primary page and status edge.
