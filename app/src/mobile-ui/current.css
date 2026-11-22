@@ -217,7 +217,7 @@
        background. CSS transitions outrank even important theme colors. */
     #app #mine-panel {transition-property:opacity,transform,translate,clip-path!important;}
     #app[data-theme="dark"] #mine-panel {background:var(--dj-theme-surface,#2c343d)!important;background-color:var(--dj-theme-surface,#2c343d)!important;color:var(--dj-theme-ink,#f1f4f6)!important;}
-    #app[data-theme="light"] #mine-panel {background:#fff!important;background-color:#fff!important;}
+    #app[data-theme="light"] #mine-panel {background:var(--dj-theme-bg,#edf3ef)!important;background-color:var(--dj-theme-bg,#edf3ef)!important;}
   }
   #app :is(.dj-place-header-close,#transport-close) {background:var(--dj800-elevated,#e8f3ed)!important;border:1px solid var(--dj800-border,#d7e6de)!important;border-radius:14px!important;color:var(--dj800-text,#263a32)!important;box-sizing:border-box!important;}
   #app[data-theme="dark"] #mine-panel :is(.dj834-profile-card,.dj834-settings-group,.dj834-settings-group>button,.dj834-user-avatar) {background:var(--dj-theme-raised,#35404a)!important;color:var(--dj-theme-ink,#f1f4f6)!important;transition:none!important;}
