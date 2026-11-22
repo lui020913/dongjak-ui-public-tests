@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {ready} from './live-qa-journey-helpers.mjs';
 import {ACTIONS,selectAction,classifyReview,allowedRequest} from '../scripts/live-qa-explore-policy.mjs';
 import {askGeminiModel} from '../scripts/live-qa-explore-model.mjs';
-const dir='qa-explore',key=process.env.GEMINI_API_KEY,model=process.env.GEMINI_MODEL||'gemini-3.5-flash-lite';
+const dir='qa-explore',key=process.env.GEMINI_API_KEY,model=process.env.GEMINI_MODEL||'gemini-3.1-flash-lite';
 const ask=(parts,schema)=>askGeminiModel({parts,schema,key,model});
 const image=f=>({inlineData:{mimeType:'image/png',data:f.bytes.toString('base64')}});
 async function visible(page,a){
