@@ -10,7 +10,7 @@ test('야간 건물 바닥과 지붕을 밝은 회색이 아니라 어두운 청
   const light=BUILDING_VISUAL_PALETTE.light,dark=BUILDING_VISUAL_PALETTE.dark;
   assert.ok(colorLuma(dark.footprint)<colorLuma(light.footprint)*0.15);
   assert.ok(colorLuma(dark.extrusion)<colorLuma(light.extrusion)*0.15);
-  assert.ok(dark.footprintOpacity===1);
+  assert.equal(dark.footprintOpacity,0.74);
   assert.ok(dark.nearOpacity>=0.3 && dark.farOpacity>=0.2);
   assert.equal(buildingFootprintPaint('light')['fill-color'],'#c4d1d0');
 });
