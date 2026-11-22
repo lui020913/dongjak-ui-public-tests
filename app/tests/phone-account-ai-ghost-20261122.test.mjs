@@ -45,7 +45,8 @@ test('language remains in App & Display row regardless of initialization order',
   assert(css.includes('.dj834-settings-group > .dj854-language-section'));
   assert(css.includes('.dj854-language-section[hidden]'));
   assert(css.includes('background:transparent!important'));
-  assert(css.includes('grid-template-columns:36px minmax(0,1fr) 112px'));
+  assert(css.includes('display:flex!important;flex-direction:row!important'));
+  assert(css.includes('.dj854-language-section > select'));
 });
 
 test('light account and font details use the same screen-colored canvas as header',()=>{
