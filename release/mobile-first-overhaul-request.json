@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Deploy the approved charcoal/mint and Naver-reference gray map with PRs #275/#279, showing translucent native/GIS 3D buildings 50–58% via continuous zoom13–15 fade. Main browser QA regression now asserts the real approved #22282e (rgb 34,40,46) iPhone native status and My Info full-screen background, rather than old #17191d; keep all original content checks, 12 phone shards, 6 design captures, Gemini evidence and functional review gates and protected Production. Preserve existing 300m PRI graded vulnerability, 1086 scored/600 neutral gray, metro semantic colors, light mode and night-safety occlusion.",
-  "attempt": 242,
+  "purpose": "Deploy merged PR #281: consistent bright MapLibre map labels with dark text halos (including dynamically added place, road, and transit labels), readable charcoal PRI dialog, muted narrower 300m walking-vulnerability graded/gray road overlay and no TIP while active, compact centered walking-route submit dock, smooth status/header theme continuity, light mode on cold launch and onboarding for each signed-out launch or logout. Preserve 1086 scored/600 gray PRI segments, data and transit semantics, mobile QA 12, design captures/Gemini 6, autonomous exploration, protected Production.",
+  "attempt": 243,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #241 passed exact production build, Cloudflare Preview, six design captures and all six Gemini design lanes, plus 8/12 mobile QA. Four phone browser shards (1,4,7,9) failed only because tests/v911-anonymous-ui.spec.mjs still asserted obsolete #17191d while the actual screenshot/computed color is approved #22282e. Fixed 3 RGB checks and one status color check in test-only main commit 275d16c7; rerun exact source with no skipped functional gates.",
+  "last_retry_reason": "PR #281 passed exact public app source CI #44982914333 following update of eight obsolete dark first-paint / palette tests and final remaining first-paint assertion. Rerun all protected mobile gates on merged source a58bf50f463b6e812cd5ab510c09d4d55f721f0e. No functional QA bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
