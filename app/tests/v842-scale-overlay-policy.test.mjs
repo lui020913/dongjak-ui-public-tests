@@ -80,3 +80,11 @@ test('scale docking reclaims visibility after external MapLibre inline style wri
  active.hidden=true;
  assert.equal(shouldHideMobileScale(app(),doc,win),false);
 });
+
+test('active weather suppresses scale paint, while existing dock restores exact MapLibre size on close',()=>{
+ const source=contents('../src/map-scale-docking.js');
+ assert.match(source,/if\(weatherOpen\)\{\s*applyImportant\(scale,'display','none'\)/);
+ assert.match(source,/if\(weather&&!weather\.hidden\)\{\s*applyImportant\(scale,'display','none'\)/);
+ assert.match(source,/applyImportant\(scale,'display','block'\)/);
+ assert.match(source,/if\(scaleChip\)applyImportant\(scaleChip,'display','flex'\)/);
+});
