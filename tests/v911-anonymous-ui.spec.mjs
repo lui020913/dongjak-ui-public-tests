@@ -576,10 +576,26 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  // The sheet moves vertically during its intentional entry animation.
  // Scroll-lock geometry is meaningful only after that movement settles.
  // Await actual browser animation completion (not a guessed sleep).
- await modal.locator('.djNext-modal-body').evaluate(async node=>{
-   await Promise.all(node.getAnimations({subtree:false}).map(animation=>animation.finished.catch(()=>{})));
+ // The transition may live on the outer modal or the body. Earlier only
+ // waiting for body animations caused a 140px false movement assertion while
+ // the outer sheet was still completing its intended entrance.
+ await modal.evaluate(async node=>{
+   const parts=[node,node.querySelector('.djNext-modal-body')].filter(Boolean);
+   const animations=parts.flatMap(part=>part.getAnimations({subtree:false}));
+   await Promise.all(animations.filter(animation=>
+     animation.playState==='running'&&animation.effect?.getTiming?.().iterations!==Infinity
+   ).map(animation=>animation.finished.catch(()=>{})));
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
  });
  await expect.poll(async()=>{const h=await bounds(),b=await scroll.boundingBox();return h&&b?Math.abs(h.y+h.height-b.y)<2:false}).toBe(true);
+ // Wait for a stable layout across two actual paint frames, then verify the
+ // inner list scroll alone cannot move the fixed layer header.
+ await expect.poll(async()=>{
+   const before=await bounds();
+   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+   const after=await bounds();
+   return Boolean(before&&after&&Math.abs(before.y-after.y)<2);
+ }).toBe(true);
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  const toggle=modal.getByRole('switch').last();await expect(toggle).toHaveAttribute('aria-checked','false');
