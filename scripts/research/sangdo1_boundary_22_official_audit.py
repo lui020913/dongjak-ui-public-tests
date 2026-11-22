@@ -87,6 +87,14 @@ def main():
      "new_risk_score_needed_count":sum(not x["risk_score_invariant_for_any_school_overlap"] for x in report),
      "note":"Current model evaluates same elementary school catchment only; registered protection polygon has risk 0. Exact official SHP may refine explanatory overlap, not necessarily change scores.",
      "rows":report}
+    committed_path=DATA/"sangdo1_22_clipped_official_catchment_audit_20261122.json"
+    if committed_path.exists():
+        committed=json.loads(committed_path.read_text(encoding="utf8"))
+        assert committed["schema"]=="sangdo1_22_boundary_exact_school_catchment_audit_v1"
+        assert committed["source_original_sha256"]==sha
+        assert committed["road_segment_count"]==22 and committed["score_change_required"]==0
+        assert committed["rows"]==report, "Committed official overlap evidence changed; reject unverified values"
+        print("COMMITTED_BOUNDARY_AUDIT_VERIFIED",len(report),sha)
     output=ROOT/"research-results"
     output.mkdir(exist_ok=True)
     (output/"sangdo1_22_official_school_catchment_audit.json").write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding="utf8")
