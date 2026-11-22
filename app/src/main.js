@@ -2110,6 +2110,21 @@ function renderMy() {
 // v15 · 위치 연결형 동네 커뮤니티 (현재 브라우저에만 저장)
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
+let activeComposerFade=null;
+function closeComposerWithFade(finish) {
+  activeComposerFade?.cancel();
+  activeComposerFade=null;
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  if(reduced||typeof communityForm.animate!=='function'){finish();return;}
+  let fade;
+  try{fade=communityForm.animate([{opacity:1},{opacity:0}],{duration:170,easing:'ease-in',fill:'forwards'});}
+  catch{finish();return;}
+  activeComposerFade=fade;
+  fade.addEventListener('finish',()=>{
+    if(activeComposerFade!==fade)return;
+    fade.cancel();activeComposerFade=null;finish();
+  },{once:true});
+}
 function openCommunityComposer(open,{animate=true}={}) {
   const motion=window.DongjakWindowMotion;
   const phone=window.matchMedia('(max-width:699px)').matches;
@@ -2124,6 +2139,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     const wasHidden=communityForm.hidden,wasClosing=communityForm.dataset.dj810Animating==='closing';
     if(!wasHidden&&!wasClosing)return;
     communityComposerEpoch++;
+    if(activeComposerFade){activeComposerFade.cancel();activeComposerFade=null;}
     motion?.cancel?.(communityForm);
     communityForm.dataset.djDialogFade='true';
     if(!communityForm.querySelector(':scope > .djNext-form-scroll')){
@@ -2156,7 +2172,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     // Cancel both owners synchronously before navigating, without flashing the feed.
     motion?.cancel?.(communityForm);
     if(parent)motion?.cancel?.(parent);
-    done();
+    closeComposerWithFade(done);
     return;
   }
   const epoch=++communityComposerEpoch;
@@ -2174,7 +2190,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   // 300ms sheet-close owner can be cancelled by the parent and leave the
   // compose view visible indefinitely. End the editor state synchronously.
   motion?.cancel?.(communityForm);
-  finish();
+  closeComposerWithFade(finish);
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
