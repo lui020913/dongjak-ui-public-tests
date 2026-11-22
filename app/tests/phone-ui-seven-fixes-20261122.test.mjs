@@ -65,7 +65,8 @@ test('safety sheet uses measured navigation clearance and language row lives ins
   assert.match(css,/bottom:var\(--dj910-dock-bottom/);
   assert.match(language,/dj854-language-icon/);
   assert.match(language,/querySelector\('\.dj834-my-home \.dj834-settings-group'\)/);
-  assert.match(langCss,/grid-template-columns:33px minmax\(0,1fr\) minmax\(0,118px\)/);
+  assert.match(langCss,/display:flex;flex-direction:row;align-items:center/);
+  assert.match(langCss,/\.dj854-language-section > select\{display:none!important;\}/);
 });
 
 test('current location weather updates both current conditions and all seven forecast days without stale caching',()=>{
