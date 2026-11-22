@@ -6,7 +6,11 @@
 export function compactTransportHeight({header=0,grip=0,body=0,viewport=0}={}){
   const v=Math.max(320,Number(viewport)||320);
   const natural=Math.ceil(Math.max(0,header)+Math.max(0,grip)+Math.max(0,body)+12);
-  return Math.round(Math.max(196,Math.min(Math.floor(v*.60),natural)));
+  // Show the live arrival section on first open. The former 196px minimum
+  // could leave only the station title/actions visible on an iPhone.
+  // Keep the remainder internally scrollable, never force a 100vh sheet.
+  const minimum=Math.min(Math.floor(v*.68),Math.max(196,Math.floor(v*.56)));
+  return Math.round(Math.min(Math.floor(v*.68),Math.max(minimum,natural)));
 }
 
 /**
