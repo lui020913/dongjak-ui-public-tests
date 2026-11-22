@@ -19,6 +19,27 @@ test('installed iPhone manual theme changes refresh native status chrome without
   assert.match(css,/data-tab.*:not\(\[data-tab="map"\]\).*#map/);
 });
 
+test('PRI map safely hides legacy TIP even with inline important styles and softens congested strokes',()=>{
+  const pri=readFileSync(new URL('../src/pri-map.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/pri-map.css',import.meta.url),'utf8');
+  assert.match(pri,/const savedHudStyle=new Map\(\)/);
+  assert.match(pri,/node\.style\.setProperty\('display','none','important'\)/);
+  assert.match(pri,/syncPriHud\(Boolean\(id\)\)/);
+  assert.match(pri,/savedHudStyle\.clear\(\)/);
+  assert.match(pri,/11\.5,\.7,13,1\.1,15,1\.8,17,2\.8,19,4\.1/);
+  for(const name of ['매우 취약','취약','보통','양호','안전'])assert.ok(pri.includes(name));
+  assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css,/min-height:44px/);
+});
+
+test('opaque phone tab surfaces have a priority cascade owner over legacy production styles',()=>{
+  const css=readFileSync(new URL('../src/mobile-ux-energy.css',import.meta.url),'utf8');
+  assert.match(css,/@layer request-completion/);
+  assert.match(css,/data-tab.*:not\(\[data-tab="map"\]\).*#map/);
+  assert.match(css,/visibility:hidden!important/);
+  assert.match(css,/background-color:var\(--dj-primary-page-bg/);
+});
+
 test('battery policy saves data, suspends hidden animations and restores map clarity',()=>{
   assert.equal(phoneProfile({phone:true,ua:'iPhone',saveData:true}),'economy');
   let ratio=1.25,stops=0;
