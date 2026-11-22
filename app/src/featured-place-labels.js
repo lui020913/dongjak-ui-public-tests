@@ -97,8 +97,8 @@ export function featuredPlaceCollection(){
 export function featuredPlaceStyle(theme='light'){
   const dark=theme==='dark';
   return {
-    text:dark?'#ebf7f3':'#ffffff',
-    halo:dark?'#172a30':'#172c28',
+    text:dark?'#ebf7f3':'#26352f',
+    halo:dark?'#172a30':'#f6f9f7',
     dot:dark?'#7cd2b7':'#147d68',
     dotOutline:dark?'#173137':'#ffffff'
   };
