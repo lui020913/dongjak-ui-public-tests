@@ -1,8 +1,9 @@
-import {parseImport,segmentScore,observedFactorScore,displayFeatures,summarize,CURRENT_VULNERABILITY_FACTORS,currentVulnerabilityCoverage} from './pri-data.mjs';
+import {parseImport,segmentScore,observedFactorScore,displayFeatures,summarize,CURRENT_VULNERABILITY_FACTORS,CURRENT_FOUR_FACTORS,currentVulnerabilityCoverage,currentFourFactorCoverage} from './pri-data.mjs';
 import {scopedPolicyFeatures,scopedCompositeFeatures} from './pri-scope-data.mjs';
 import {buildSanghyeonMiddleSchoolReview} from './sangdo1-middle-school-review.mjs';
 import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import {SPEED_RISK_SOURCE,SPEED_RISK_METADATA,speedLimitRiskScore,speedRiskDisplay,speedRiskCounts,validateSpeedRiskSource} from './pri-speed-risk.mjs';
+import {spatialMatchSpeedFactor} from './pri-speed-spatial-match.mjs';
 import './pri-map.css';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point',SPEED_LINE='dj-pri-speed-line';
 const EMPTY={type:'FeatureCollection',features:[]};
@@ -17,14 +18,18 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  if(doc.getElementById('dj-pri-toggle'))return;
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const button=(label,fn)=>{const n=el('button','dj-pri-button',label);n.type='button';n.addEventListener('click',fn);return n;};
- let dataset=null,mode=null,display=EMPTY,policyScope=null,boundaryAudit=null,speedSource=null,speedMetadata=null,fetchStarted=false,revision=0,popup=null,lookup=new Map();
- let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri'].includes(restoreMode)?'current3':restoreMode):null;
+ let dataset=null,mode=null,display=EMPTY,policyScope=null,boundaryAudit=null,speedSource=null,speedMetadata=null,speedMatchStats=null,fetchStarted=false,revision=0,popup=null,lookup=new Map();
+ let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri','current3'].includes(restoreMode)?'current4':restoreMode):null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
  const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');head.append(title,close);
- const intro=el('p','','상도1동 보행 취약도 위험점수 · 0점은 상대적으로 낮은 취약 신호, 100점은 큰 취약 신호. 각 지표의 점수는 사고 발생 확률이나 법적 지정 누락의 확정값이 아닙니다.');
+ const intro=el('p','','상도1동 보행 취약도 · 조명·교통사고·제도적 사각지대·제한속도 4개 항목. 확인된 점수만 동일 가중 평균하며 0점은 낮은 취약 신호, 100점은 큰 취약 신호입니다. 미확인 값은 NULL입니다.');
  const status=el('p','dj-pri-status','등록된 자료가 없습니다.');status.setAttribute('role','status');
  const actions=el('div','dj-pri-actions');
+ const protectionDetail=el('section','dj-pri-protection-detail');
+ protectionDetail.hidden=true;protectionDetail.setAttribute('aria-label','제도적 사각지대 세부 레이어');
+ const resetDialogView=()=>{actions.hidden=false;protectionDetail.hidden=true;dialog.dataset.djPriView='list';title.textContent='보행 취약도';dialog.scrollTop=0;};
+ const showProtectionDetail=()=>{actions.hidden=true;protectionDetail.hidden=false;dialog.dataset.djPriView='protection';title.textContent='제도적 사각지대';dialog.scrollTop=0;};
  const file=el('input');file.type='file';file.accept='.json,application/json';file.hidden=true;file.id='dj-pri-file';
  const upload=button('JSON 자료 불러오기',()=>file.click());const clear=button('지도 색상 끄기',()=>{activate(null);dialog.close();});
  const focusArea=button('분석 지역으로 이동',()=>{
@@ -45,7 +50,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  });
  const exportButton=button('공통 도로망 JSON 내보내기',()=>{if(!dataset)return;const url=URL.createObjectURL(new Blob([JSON.stringify(dataset,null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download='pri-network.json';a.click();win.setTimeout(()=>URL.revokeObjectURL(url),1000);});
  const local=el('small','','직접 불러온 자료는 현재 페이지에서만 사용되며 서버에 전송하지 않습니다.');
- const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);dialog.append(head,intro,status,actions,focusArea,clear,dataTools);doc.body.append(dialog);
+ const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);dialog.append(head,intro,status,actions,protectionDetail,focusArea,clear,dataTools);doc.body.append(dialog);
  const legend=el('aside','dj-pri-legend');legend.id='dj-pri-legend';legend.hidden=true;
  // Keep native map HUD controls out of the PRI data view even when legacy
  // phone controllers set their own inline `display: ... !important` styles.
@@ -80,31 +85,39 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(observedFactorScore(s,f.id)!==null)available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km'+(speedSource?.features?.length?' · 제한속도 링크 '+speedSource.features.length+'개(별도 도로망)':'');
    // Only the three currently supplied files are eligible; pending team data
    // must never enter the composite as synthetic zeros or safety defaults.
-   const options=[['current3','종합 보행 취약도 · 현재 3개 자료'],...dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)).map(f=>[f.id,f.label]),['speed','제한속도 위험도 · 상도1동 표준노드링크']];
+   const options=[['current4','종합 보행 취약도 · 4개 지표'],...dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)).map(f=>[f.id,f.label]),['speed','제한속도 위험도 · 상도1동 표준노드링크']];
    // The middle-school research review is a SUBVIEW of the institutional
    // protection-gap layer, not a fourth score source or a competing PRI factor.
    // Keep the existing mode and GeoJSON owner; only group its navigation.
    const middleSchoolOption=['middleReview','상현중학교 300m 도로 검토 · 점수 미산정'];
    const choice=(id,name)=>{
-     const eligible=id==='middleReview'?Boolean(policyScope):id==='speed'?Boolean(speedSource?.features?.length):id==='current3'?dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):available.has(id);
-     const suffix=!eligible?' · 미평가':id==='middleReview'?' · 지정자료 미검증':id==='speed'?' · 0·40·80·100점':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
+     const eligible=id==='middleReview'?Boolean(policyScope):id==='speed'?Boolean(speedSource?.features?.length):id==='current4'?dataset.segments.some(s=>currentFourFactorCoverage(s)>=2):id==='current3'?dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):available.has(id);
+     const suffix=!eligible?' · 미평가':id==='middleReview'?' · 지정자료 미검증':id==='speed'?' · 0·40·80·100점':id==='current4'?' · 유효자료만 동일 가중치':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
      const item=button(name+suffix,()=>{activate(id);dialog.close();});
      item.disabled=!eligible;item.setAttribute('aria-pressed',String(mode===id));
      return item;
    };
    for(const [id,name] of options){
      if(id!=='protectionGap'){actions.append(choice(id,name));continue;}
-     const group=el('section','dj-pri-protection-group');
-     group.append(el('h3','dj-pri-protection-heading','제도적 사각지대'));
-     group.append(el('small','dj-pri-protection-summary',
-       '상도1동 도로별 1,003개 평가 · 603개 미평가(회색) · 공식 SHP 경계 도로 22개 점수 유지'));
-     group.append(choice(id,'제도적 사각지대 · 상도1동 전체 보호 공백 점수 · 그라데이션'));
-     group.append(choice(...middleSchoolOption));
-     group.append(el('small','dj-pri-policy-caution',
-       '상현중 300m는 172개 도로 구간의 공간 검토이며 신규 위험점수는 NULL입니다. 법정 보호구역 미지정 판정이 아닙니다.'));
-     actions.append(group);
+     // One single entry on the list; its TWO modes live only in its own
+     // details panel, rather than consuming the main viewport.
+     const entry=button('제도적 사각지대',showProtectionDetail);
+     entry.classList.add('dj-pri-protection-entry');
+     entry.setAttribute('aria-expanded',String(!protectionDetail.hidden));
+     entry.setAttribute('aria-controls','dj-pri-protection-detail');
+     actions.append(entry);
    }
-   const awaiting=dataset.factors.filter(f=>f.id!=='speed'&&!CURRENT_VULNERABILITY_FACTORS.includes(f.id)&&!available.has(f.id));
+   protectionDetail.id='dj-pri-protection-detail';
+   protectionDetail.replaceChildren();
+   const back=button('‹  보행 취약도 목록',resetDialogView);
+   back.classList.add('dj-pri-protection-back');
+   protectionDetail.append(back,
+    el('p','dj-pri-protection-summary','상도1동 1,003개 도로 평가 · 603개 회색 미평가 · 공식 통학구역 SHP 경계 도로 22개 기존 점수 유지'),
+    choice('protectionGap','상도1동 전체 보호 공백 점수 · 그라데이션'),
+    choice(...middleSchoolOption),
+    el('small','dj-pri-policy-caution','상현중학교 300m 공간검토 172개 구간의 신규 위험점수는 NULL입니다. 법정 보호구역 미지정 판정이 아닙니다.'));
+   protectionDetail.querySelectorAll('.dj-pri-button').forEach(node=>node.classList.add('dj-pri-protection-action'));
+   const awaiting=dataset.factors.filter(f=>!CURRENT_FOUR_FACTORS.includes(f.id)&&!available.has(f.id));
    if(awaiting.length)actions.append(el('small','dj-pri-awaiting','후속 지표 '+awaiting.length+'종 미제출 · 현재 종합점수에 포함하지 않습니다.'));
  }
  async function loadDefault(){
@@ -144,11 +157,15 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
     const metadataResponse=await win.fetch(SPEED_RISK_METADATA,{cache:'no-cache'});
     speedMetadata=metadataResponse.ok?await metadataResponse.json():null;
    }catch(error){speedSource=null;speedMetadata=null;failed.push('제한속도 표준노드링크');console.warn('[PRI] speed source unavailable',error);}
+   if(speedSource){
+    try{const matched=spatialMatchSpeedFactor(next,speedSource);next=parseImport(matched.patch,next);speedMatchStats=matched.stats;}
+    catch(error){speedMatchStats=null;failed.push('제한속도 공통망 기하 정합');console.warn('[PRI] speed crosswalk unavailable; scores remain unknown',error);}
+   }
    if(revision===before){acceptDataset(next);if(failed.length)status.textContent+=' · 일부 추가 지표를 불러오지 못했습니다.';}
   }catch(e){if(revision===before)status.textContent='서버 PRI 자료를 불러오지 못했습니다. JSON 자료를 직접 불러올 수 있습니다.';}
  }
- toggle.addEventListener('click',()=>{render();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';void loadDefault();});
- dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;});
+ toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';void loadDefault();});
+ dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;resetDialogView();});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
  function draw(){
   // isStyleLoaded() also becomes false while tiles are loading. That is not
