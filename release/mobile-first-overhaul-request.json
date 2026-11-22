@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.86",
+  "application_version": "9.2.87",
   "public_work_branch": "main",
-  "purpose": "Owner-requested definitive removal of white onboarding background on iPhone. Merged PR #310 (merge 7fc98030f3c9ea241197966ba4c75fefdc6bf8cb) paints actual onboarding shell/card/header/content/footer inline-important #edf3ef BEFORE opening; watches theme changes and matches native status bar, dark #22282e. Prevents legacy cascading whites from reappearing. Preserve onboarding art, buttons, and all previous map, transit, AI, PRI 50:50 GIS and account fixes. Require exact public-source build, Preview, 12 phone QA, PC/tablet policy, guarded Production deploy and rollback.",
-  "attempt": 263,
+  "purpose": "Owner requested fixes shown on iPhone screenshots: vector map appears missing/replaced by bare OSM raster after 12-second emergency fallback; preserve loaded OpenFreeMap vector style with 45s first wait / 90s vector grace and maintain emergency raster only for genuine unavailable source. Make My Info language selector identical single 62px setting row with current language and native select, never an orphan rounded card, source PR #311 merged as 1c85167398338a8cfa3ae05db4e84a58b2e431a3. Keep all PR #306-#310, GIS 50:50, transport and previous visual fixes. Exact-source build, isolated Preview, 12 phone shards, PC policy and guarded Production source verification required.",
+  "attempt": 264,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #310 source CI #45014285190 passed. Deploy actual DOM surface synchronization rather than prior CSS-only PR #309, with source-integrity and mobile-verified guarded Production release.",
+  "last_retry_reason": "PR #311 passed Public app source CI #45015944439, including updated DOM test fixtures, new map fallback decision tests and language row regression tests. Promote exact main source through mobile gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
