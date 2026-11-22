@@ -94,7 +94,7 @@ test('fast mobile release has fewer tests and full auditing remains available',(
  const list=config.split('const releaseSmokeNames=[')[1]?.split('];')[0];
  assert.ok(list,'missing fast release case list');
  const selected=[...list.matchAll(/'([^']+)'/g)].map(x=>x[1]);
- assert.equal(selected.length,18);
+ assert.equal(selected.length,19);
  const all=[...spec.matchAll(/^test\('([^']+)',\{tag:'(@[\w-]+)'\},async\(/gm)].map(x=>({name:x[1],tag:x[2]}));
  for(const name of selected)assert.equal(all.filter(c=>c.name.includes(name)).length,1,'unmatched or ambiguous smoke case '+name);
  assert.ok(selected.length<all.filter(c=>c.tag!=='@non-phone').length/2);

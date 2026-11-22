@@ -33,6 +33,7 @@ const releaseSmokeNames=[
  'community tab opens a usable feed',
  'phone production settings, cards and nearby overlays follow rendered geometry',
  'phone verified protection-gap menu contains SHP audit and NULL middle-school review',
+ 'phone speed limit risk is selectable with PDF thresholds and real source links',
  'walking vulnerability remains neutral'
 ];
 const releaseSmokeGrep=new RegExp(releaseSmokeNames.join('|'));
