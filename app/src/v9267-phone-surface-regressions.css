@@ -280,9 +280,10 @@ html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
 
   /* Nearby map result sheet is visually adjacent to, but clear of, the dock. */
   html body #app#app#app#app#app #ped-tools-panel:not([hidden]) {
-    bottom:calc(102px + env(safe-area-inset-bottom,0px))!important;
+    bottom:var(--dj-ped-nearby-bottom,calc(98px + env(safe-area-inset-bottom,0px)))!important;
     max-height:calc(100dvh - 190px - env(safe-area-inset-top,0px))!important;
-    background:var(--dj-theme-surface,#fff)!important;
+    background:var(--dj-theme-bg,#edf3ef)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     color:var(--dj-theme-ink,#20312e)!important;
     border:1px solid var(--dj-theme-line,#d3e0d8)!important;
     box-shadow:0 8px 22px rgba(20,54,42,.12)!important;
