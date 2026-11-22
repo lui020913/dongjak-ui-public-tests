@@ -74,7 +74,7 @@ export function installMyInfo(doc=document){
    finally{win.URL.revokeObjectURL(url);event.target.value='';}
  });
  const typography=doc.createElement('section');typography.className='dj877-type-settings';
- typography.innerHTML=`<p>메뉴와 창의 글씨 크기·굵기를 조절합니다. 지도 지명 자체는 변경되지 않습니다.</p><div class="dj926-type-preview" aria-label="글자 설정 미리보기">동작하는 안전지도</div>
+ typography.innerHTML=`<p>메뉴와 창의 글씨 크기·굵기를 조절합니다. 일부 지도 지명 크기도 함께 조정됩니다.</p><div class="dj926-type-preview" aria-label="글자 설정 미리보기">동작하는 안전지도</div>
    <div class="dj885-type-field"><span class="dj885-type-label">글자 크기</span><div class="dj885-type-choices" role="group" aria-label="글자 크기 설정"><button type="button" data-dj885-type="scale" data-value="small">작게</button><button type="button" data-dj885-type="scale" data-value="normal">기본</button><button type="button" data-dj885-type="scale" data-value="large">크게</button><button type="button" data-dj885-type="scale" data-value="xlarge">더 크게</button></div></div>
    <div class="dj885-type-field"><span class="dj885-type-label">글자 굵기</span><div class="dj885-type-choices" role="group" aria-label="글자 굵기 설정"><button type="button" data-dj885-type="weight" data-value="normal">기본</button><button type="button" data-dj885-type="weight" data-value="bold">굵게</button></div></div>`;
  const syncTypography=()=>{
