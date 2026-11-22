@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Single integrated release candidate for merged app fixes PR #283, #284 and #285, plus 24-way phone regression sharding and measured six-lane UI capture. Preserve iPhone PWA native-theme refresh/camera/onboarding, correct PRI TIP/5-tier risk/road width and opacity, opaque full-screen tab switch and categorical update history. Verify exact SHA via Preview, 24 phone shards, six deterministic browser layout/motion captures, desktop/tablet gate and protected Production; Gemini design/exploration is opt-in only, never misreported as a default pass. Do not equate CI success to physical iPhone QA or completion of all 35 UI requests.",
-  "attempt": 246,
+  "purpose": "Deploy merged PR #287 (8303c2dc96290f16309e1b31e0e8b6a7321a3701) in one integrated source candidate on top of PRs #283-#286: remove modeled/unassessed accident 100-point input from PRI display and both provisional and approved means, restrict policy gap fallback to the sole missing protectionGap factor, keep gray NULL map segments, prevent PRI layer toggles from moving user's camera, allow explicit focus-area button, restore PRI mode after iPhone PWA theme refresh, synchronize native MapLibre map-label font sizes with user settings, fix periodic TIP reopening and hide the scale during active PRI, and use exact '보행 취약도' label. Run sealed build, exact SHA Preview, all 24 phone shards incl real PRI interaction test, six deterministic design captures, PC/tablet controls, and protected Production without bypass or unearned '35 of 35' claim.",
+  "attempt": 247,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Batch test combined already merged app changes with deterministic design evidence and 24 independent Playwright shards; remove six serialized Gemini requests from default release path without weakening measured clipping or source-provenance gates. Review any incomplete 35-item UI requirements separately after deploy.",
+  "last_retry_reason": "Public source CI #44996142381 succeeded with 1871 tests (1858 pass, 13 skipped, 0 failures) and exact 24 mobile QA partitions. Request real Preview browser and protected Production on merged PR #287 plus all prior UI fixes. Gemini remains opt-in.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
