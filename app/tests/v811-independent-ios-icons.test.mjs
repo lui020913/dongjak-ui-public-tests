@@ -45,7 +45,7 @@ test('theme artwork module does not rewrite the iOS Home Screen icon',()=>{
   }
 });
 
-test('pre-paint theme switching keeps iOS icon path stable while updating manifest',()=>{
+test('light-only prepaint ignores old dark preferences and keeps iOS icon and manifest stable',()=>{
   const boot=index.match(/<script>\s*([\s\S]*?)<\/script>/)?.[1];
   assert.ok(boot);
   for(const targetMode of ['dark','light']){
@@ -60,6 +60,7 @@ test('pre-paint theme switching keeps iOS icon path stable while updating manife
     const sessionStorage={getItem:()=>JSON.stringify(pending),removeItem(){}};
     vm.runInNewContext(boot,{document:doc,localStorage,sessionStorage,Date,navigator:{userAgent:''},window:{matchMedia:()=>({matches:false})}},{timeout:1500});
     assert.equal(touch.href,'/icons/dongjak-ios-home-180.png');
-    assert.equal(manifest.href,`/manifest-${targetMode}.webmanifest`);
+    assert.equal(manifest.href,'/manifest-light.webmanifest');
+    assert.equal(doc.documentElement.dataset.theme,'light');
   }
 });
