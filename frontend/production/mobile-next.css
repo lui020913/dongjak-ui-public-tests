@@ -57,7 +57,7 @@ html body #app#app#app#app#app#app#app #route-map-card:not([hidden]){display:fle
 
 /* Shared mobile surface tokens: do not inherit pale light-mode controls. */
 #app{--djNext-surface:#fff;--djNext-raised:#e5f1eb;--djNext-text:#203d32;--djNext-muted:#62786e;--djNext-border:#d6e4dc;--djNext-active:#087c65;--djNext-tile:#e4efdf;--djNext-tile-ink:#376b57}
-#app[data-theme="dark"]{--djNext-surface:#303841;--djNext-raised:#3a444f;--djNext-text:#f1f4f6;--djNext-muted:#bec8d2;--djNext-border:#53616d;--djNext-active:#79dec5;--djNext-tile:#3a444f;--djNext-tile-ink:#a0f0da}
+#app[data-theme="dark"]{--djNext-surface:#2c343d;--djNext-raised:#35404a;--djNext-text:#f1f4f6;--djNext-muted:#bec8d2;--djNext-border:#4d5b65;--djNext-active:#79dec5;--djNext-tile:#35404a;--djNext-tile-ink:#a0f0da}
 /* Material comes from app/src/button-material.css (shared with dialogs and install gate). */
 html body #app#app#app#app#app#app#app #djNext-rail :is(button.djNext-empty,#djNext-layers){background:var(--djNext-tool-soft-face)!important;border-style:solid!important}
 html body #app#app#app#app#app#app#app #djNext-rail button[aria-pressed="true"]{background:color-mix(in srgb,var(--djNext-tool-selected-face) 86%,transparent)!important;color:var(--djNext-tool-selected-ink)!important;border-color:var(--djNext-active)!important}
@@ -203,8 +203,8 @@ html body #app#app#app#app#app#app#app #djNext-toast:not([hidden]){box-shadow:va
 
 /* v4: mobile route/community screenshots. One scroll owner and a neutral dark palette. */
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"]{
- --dj-v4-surface:var(--djNext-surface,#303841);--dj-v4-card:#3a444f;--dj-v4-control:#3a444f;
- --dj-v4-border:#53616d;--dj-v4-text:#f1f4f6;--dj-v4-muted:#bec8d2;
+ --dj-v4-surface:var(--djNext-surface,#2c343d);--dj-v4-card:#35404a;--dj-v4-control:#35404a;
+ --dj-v4-border:#4d5b65;--dj-v4-text:#f1f4f6;--dj-v4-muted:#bec8d2;
  --dj-v4-selected:var(--dj-theme-selected,#285b50);--dj-v4-accent:var(--dj-theme-accent,#79dec5);
 }
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel,#ped-tools-panel,#dj854-weather-sheet,#transport-sheet,#dj-mobile-utilities,.djNext-modal-body,.dj860-card,.dj-map-settings-card,.dj-about-card,.version-history-dialog){background:var(--dj-v4-surface)!important;color:var(--dj-v4-text)!important;border-color:var(--dj-v4-border)!important}
@@ -625,7 +625,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
 @media(max-width:699px){
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(#ped-tools-close,.dj854-weather-close,#community-compose-close,#version-history-close,#dj-settings-close,.dj832-boundary-x){border-radius:50%!important;aspect-ratio:1!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.dj832-boundary-confirm,.dj854-weather-actions button,#dj-settings-theme,.dj-community-refresh){border-radius:999px!important;}
- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:var(--dj-v4-surface,#303841)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:var(--dj-v4-surface,#2c343d)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-dongjak-boundary :is(.dj832-boundary-x){background:var(--dj-v4-control,#303338)!important;color:var(--dj-v4-text,#edf2ef)!important;border-color:var(--dj-v4-border,#454a52)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] #dj832-boundary-body{color:var(--dj-v4-muted,#c3ccd0)!important}
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app :is(.version-history-head,.dj-map-settings-head,.ped-tools-panel-head){position:relative!important;touch-action:none!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;padding-top:22px!important}
@@ -934,7 +934,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @layer request-completion{
  @media(max-width:699px){
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app {--dj9272-surface:#f5faf7;--dj9272-page:#edf3ef;--dj9272-ink:#193c32;--dj9272-muted:#647c73;--dj9272-line:#d2e2da;--dj9272-tint:#e5f3ed;--dj9272-shadow:0 3px 12px rgba(24,58,46,.075)}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] {--dj9272-surface:var(--dj-theme-surface,#303841);--dj9272-page:var(--dj-theme-bg,#252b32);--dj9272-ink:var(--dj-theme-ink,#f1f4f6);--dj9272-muted:var(--dj-theme-muted,#bec8d2);--dj9272-line:var(--dj-theme-line,#53616d);--dj9272-tint:var(--dj-theme-raised,#2b3037);--dj9272-shadow:0 3px 13px rgba(0,0,0,.25)}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-theme="dark"] {--dj9272-surface:var(--dj-theme-surface,#2c343d);--dj9272-page:var(--dj-theme-bg,#22282e);--dj9272-ink:var(--dj-theme-ink,#f1f4f6);--dj9272-muted:var(--dj-theme-muted,#bec8d2);--dj9272-line:var(--dj-theme-line,#4d5b65);--dj9272-tint:var(--dj-theme-raised,#2b3037);--dj9272-shadow:0 3px 13px rgba(0,0,0,.25)}
   /* Tour occupies the phone from the native status edge to its home indicator.
      The illustration keeps a bounded aspect ratio and text retains a scroll area. */
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj860-onboarding:not([hidden]){position:fixed!important;inset:0!important;display:grid!important;place-items:stretch!important;box-sizing:border-box!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;background:var(--dj9272-page)!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important;z-index:24000!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:opacity 270ms ease!important}
