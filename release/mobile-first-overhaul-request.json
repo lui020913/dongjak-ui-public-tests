@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.83",
+  "application_version": "9.2.84",
   "public_work_branch": "main",
-  "purpose": "Owner-requested Production release of merged PR #307 (merge SHA 564fdda6735952ee17d07fc5c831e02615ea44a4): six iPhone screenshot fixes; light theme status/onboarding/My Info/AI background, AI ghost reopen on transit close, restored light teal accent, single-stroke metro path, bus sheet collapse flicker, language selector and My Info scroll/nav. Maintain all PR #306 fixes and protection gap 50:50 high-risk-red GIS checks. Require exact-source build, Preview, mandatory 12 mobile QA shards, PC/tablet gate, protected Production and rollback.",
-  "attempt": 259,
+  "purpose": "Owner-requested release of merged PR #308 (merge f2ec2040cd9cef76e2079960d55c610ac7207531): resolve remaining My Info profile/text-size white full-screen subpanels, language selector orphan card caused by initialization order, and accidental AI modal open when dismissing bus/subway or MapLibre facilities with X, touch and drag. Preserve PR #306/#307, 50:50 GIS data, and mobile-only product policies. Require exact public source, isolated Preview, mandatory 12 mobile QA shards, protected Production deploy and rollback verification.",
+  "attempt": 260,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Integrated screenshot fixes PR #307 passed source CI #45007546151 and merged into main. Request protected exact-source 9.2.83 release and confirm production provenance and APIs.",
+  "last_retry_reason": "PR #308 source CI #45010500510 succeeded; merged at 2026-11-22T10:05:00Z. Promote exact main source of updated shared AI surface dismiss guard and integrated My Info fixes through protected release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
