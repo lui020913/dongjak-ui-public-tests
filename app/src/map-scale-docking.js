@@ -207,6 +207,20 @@ export function installScaleDocking({map,app,overview}={}){
   map.on?.('idle',onMotionStop);
   let scheduled=false,disposed=false,previousDesktop=false;
   const scaleElement=()=>map.getContainer?.()?.querySelector('.maplibregl-ctrl-bottom-left');
+  // Dynamic weather sheets may be mounted after the initial overlay observer.
+  // Their explicit lifecycle event must hide MapLibre's inline-important scale
+  // immediately, without waiting for an observer/motion frame.
+  const onWeatherVisibility=()=>{
+    if(disposed)return;
+    const scale=scaleElement();
+    if(scale && window.innerWidth<700 && shouldHideMobileScale(app,app.ownerDocument,window)){
+      applyImportant(scale,'visibility','hidden');
+      const chip=scale.querySelector('.maplibregl-ctrl-scale');
+      if(chip)applyImportant(chip,'visibility','hidden');
+    }
+    schedule();
+  };
+  window.addEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
   const restoreCard=()=>{
     for(const prop of desktopCardProps)overview.style.removeProperty(prop);
   };
@@ -436,6 +450,7 @@ export function installScaleDocking({map,app,overview}={}){
     clearTimeout(qualityIdleTimer);
     app.classList.remove('dj873-map-moving');
     window.removeEventListener('resize',onViewportResize);
+    window.removeEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
     app.removeEventListener('transitionend',schedule,true);
     app.removeEventListener('animationend',schedule,true);
     restoreCard();
