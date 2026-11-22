@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.96",
+  "application_version": "9.2.97",
   "public_work_branch": "main",
-  "purpose": "Unified PR333+334+335+336+337 main 0f2a75e919e2e0d53533d8898feb242a9684509d. Four observed indicators light/accidents/institutional protected-zone gap/speed guarded spatial 4-factor, preserve 1003 scored,603 grey,172 Sanghyeon middle-school NULL,22 official SHP boundary audits,206 source speed links with NULL when unmapped. PR334 route clear dock, selected route fit, metro neighbor pill before live API messages, place/camera focus, My Info and community improvements, light-only ordinary theme and temporary night visibility. PR336 restores AI orb after removal of old theme toggle. PR337 corrects persistent 121px PRI dialog/legend/road popup gap using post-layout actual DOM geometry to align to bottom nav at 9px, and verifies light-only layer switch actual off/on state instead of retired dark color. PR337 source CI #45044324346 plus official school and school GIS checks success. 9.2.95 run #45040345787 blocked after six of twelve mobile QA failed (three dock 121px and three stale light switch color), Production skipped. MUST run new exact SHA sealed Preview, ALL 12 mobile browser QA shards at widths 375/390/430, PC/tablet, protected Production and final deployed source/API verification; no bypass on failures.",
-  "attempt": 283,
+  "purpose": "PR #338 mobile design cleanup: 5 requested iPhone surfaces update history/map preferences/type size-weight/walking route/community spacing, ordinary dark theme removed from legacy map preferences, duplicate text state removed, existing fade-only motion and native typography persistence preserved, map label text-size event controlled by single readability owner. Source CI #45051335303 passed after original legacy regression updates. Preserve the institutional gap and 4-factor PRI/GIS inputs, route/transit/community behaviors, temporary night visibility, 1.0 public display. Exact sealed Preview -> 12 phone QA shards 375/390/430 -> desktop/tablet -> guarded Production source/API proof; never bypass failing QA.",
+  "attempt": 284,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.95 protected Production did not run because rendered dialog was still 121px above dock and 3 light-only layer color expectations were stale. PR337 fixes both based on observed geometry and theme behavior. Fresh full 9.2.96 verification, not failed-only retry.",
+  "last_retry_reason": "New PR #338 design consolidation after 9.2.96, no prior 9.2.97 release attempt; test all mobile shards and guarded deploy.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
