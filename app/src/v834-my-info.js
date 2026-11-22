@@ -106,6 +106,10 @@ export function installMyInfo(doc=document){
  languagePanel.innerHTML='<p>앱 화면에 사용할 언어를 선택하세요. 지도 지명과 이용자가 작성한 내용은 번역하지 않습니다.</p>';
  const themePanel=doc.createElement('section');themePanel.className='dj834-theme-detail';themePanel.hidden=true;
  themePanel.innerHTML='<p>앱의 화면 테마를 선택합니다.</p><div role="group" aria-label="화면 테마" class="dj834-theme-choice"><button type="button" data-dj834-theme="light">라이트 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-theme="dark">다크 <span aria-hidden="true">✓</span></button></div>';
+ const mapPanel=doc.createElement('section');mapPanel.className='dj834-options-detail';mapPanel.hidden=true;
+ mapPanel.innerHTML='<p>지도 표시·도보 안내·지도 도구를 관리합니다.</p><div class="dj834-child-actions"><button type="button" data-dj834-child="map-settings">지도·도보 설정 열기 <span aria-hidden="true">›</span></button><button type="button" data-dj834-child="guide">지도 조작 안내 보기 <span aria-hidden="true">›</span></button></div>';
+ const historyPanel=doc.createElement('section');historyPanel.className='dj834-history-detail';historyPanel.hidden=true;
+ historyPanel.innerHTML='<p>앱 개선 및 업데이트 내역을 확인합니다.</p><div class="dj834-child-actions"><button type="button" data-dj834-child="history">전체 업데이트 내역 보기 <span aria-hidden="true">›</span></button></div>';
  const records=doc.createElement('div');records.className='dj834-records-container';
  for(const child of [...body.children]){
    if(child===heading||child===landing||child===detail)continue;
@@ -118,7 +122,7 @@ export function installMyInfo(doc=document){
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;
- content.append(accountBox,typography,records,languagePanel,themePanel);
+ content.append(accountBox,typography,records,languagePanel,themePanel,mapPanel,historyPanel);
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
@@ -156,11 +160,12 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=view==='profile'?'내 프로필 설정':view==='type'?'글자 크기·굵기':view==='language'?'언어':view==='theme'?'화면 테마':'즐겨찾기 · 내 기록';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정',history:'전체 업데이트 내역',records:'즐겨찾기 · 내 기록'})[view]||'내 정보';
    accountBox.hidden=view!=='profile';
    typography.hidden=view!=='type';
    records.hidden=view!=='records';
    languagePanel.hidden=view!=='language';themePanel.hidden=view!=='theme';
+   mapPanel.hidden=view!=='map';historyPanel.hidden=view!=='history';
    if(view==='language'){
      const languageControl=panel.querySelector('.dj854-language-section');
      if(languageControl){languageControl.dataset.djLanguageDetail='true';languageControl.hidden=false;languagePanel.append(languageControl);}
@@ -182,6 +187,17 @@ export function installMyInfo(doc=document){
    enter(landing);
  }
  detail.querySelector('.dj834-detail-back').addEventListener('click',back);
+ const childClick=event=>{
+   const choice=event.target.closest('[data-dj834-child]');if(!choice)return;
+   if(choice.dataset.dj834Child==='map-settings')doc.dispatchEvent(new Event('dj:open-map-settings'));
+   if(choice.dataset.dj834Child==='history')doc.getElementById('version-history-trigger')?.click();
+   if(choice.dataset.dj834Child==='guide'){
+     doc.querySelector('#bottom-nav [data-tab="map"]')?.click();
+     doc.defaultView?.dispatchEvent(new Event('dongjak:open-map-guide'));
+   }
+ };
+ mapPanel.addEventListener('click',childClick);
+ historyPanel.addEventListener('click',childClick);
  themePanel.addEventListener('click',event=>{
    const choice=event.target.closest('[data-dj834-theme]');if(!choice)return;
    const app=doc.getElementById('app');const current=app?.dataset.djPreferredTheme||app?.dataset.theme||'light';
@@ -192,14 +208,13 @@ export function installMyInfo(doc=document){
  landing.addEventListener('click',event=>{
    const button=event.target.closest('[data-dj834-action]');if(!button)return;
    const action=button.dataset.dj834Action;
-   if(['profile','records','type','language','theme'].includes(action)){showDetail(action);return;}
+   if(['profile','records','type','language','theme','map','history'].includes(action)){showDetail(action);return;}
    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
    if(action==='transit'){
      doc.querySelector('#bottom-nav [data-tab="map"]')?.click();
      doc.getElementById('map-tools-toggle')?.click();return;
    }
-   if(action==='map'){doc.dispatchEvent(new Event('dj:open-map-settings'));return;}
-   if(action==='history'){doc.getElementById('version-history-trigger')?.click();return;}
+
  });
  updateProfile();return true;
 }
