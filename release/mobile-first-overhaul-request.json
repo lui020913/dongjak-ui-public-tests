@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Protected mobile release of exact current public main with PR #262 theme/AI/sheet/camera fixes and PR #266 stale transport-close animation cancellation (source CI #44972136955 passed), plus PR #263 Sangdo1 native PRI policy-gap, PR #264 adaptive Gemini QA and PR #267 weather-scale lifecycle fixes. Re-test rapid subway → bus replacement so both arrival rows remain visible rather than translucent or hidden. Require exact-source Preview, all 12 phone browser shards, six design journeys, adaptive visual/function QA and protected Production; never bypass safety or verification gates.",
-  "attempt": 232,
+  "purpose": "Protected Preview → 12-shard phone QA → adaptive design/function QA → Production for exact current main containing PR #262 AI/theme/camera/sheet, PR #266 rapid bus/subway reopen, PR #263 PRI institutional-gap, PR #264 adaptive QA and PR #267 weather scale. Release build regression corrected: the layer switch is '상단 고정', not a map visibility switch; frontend/production/mobile-next-build.test.mjs now asserts the actual accessible label. Keep GIS scoring, real transit, all theme behavior and guarded production rollback unchanged.",
+  "attempt": 233,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt #231 started before PR #266 landed and could not include the verified transport re-open fix. Earlier attempt #230 design capture lane 2 revealed two real bus arrival rows underneath a still-running closing animation; PR #266 cancels obsolete motion and blocks stale callbacks. Retry with full current main source after CI #44972136955 success.",
+  "last_retry_reason": "Attempt #232 source built the requested UI, but an obsolete build-only assertion still expected pinHeading.textContent='바로가기' although PR #262 had correctly renamed the control to '상단 고정'. Main test-only commit a027e69 fixes this verified single regression. Restart with current main exact source and require all gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
