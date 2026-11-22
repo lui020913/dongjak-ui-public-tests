@@ -669,7 +669,7 @@
   }
   #app#app #route-panel .route-card {
     display:block!important;box-sizing:border-box!important;
-    width:100%!important;min-width:0!important;
+    width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;
     padding:12px!important;margin:0 0 12px!important;
     border-radius:18px!important;overflow:visible!important;
   }
@@ -1052,6 +1052,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
    background:var(--dj-primary-page-bg,#edf3ef)!important;
    color:var(--dj-primary-page-ink,#203e34)!important;
    box-shadow:0 10px 28px rgba(28,62,48,.12)!important;
+   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
  }
  html body #app#app#app #ped-tools-panel .ped-tools-panel-head {
    display:flex!important;align-items:center!important;justify-content:space-between!important;
