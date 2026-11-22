@@ -339,7 +339,13 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   let enriched=Promise.resolve();
   if(!p.phone||!p.address||!p.website){
     const controller=new AbortController();
-    popup.on('close',()=>controller.abort());
+    const delayNotice=window.setTimeout(()=>{
+      if(controller.signal.aborted)return;
+      if(!p.address)addressRow.querySelector('strong').textContent='주소 조회 지연 · 외부 지도에서 확인';
+      if(!p.phone)phoneRow.querySelector('strong').textContent='전화번호 조회 지연';
+      if(!p.website)siteRow.querySelector('strong').textContent='홈페이지 조회 지연';
+    },3200);
+    popup.on('close',()=>{controller.abort();window.clearTimeout(delayNotice);});
     enriched=enrich(p,controller.signal).then(found=>{
       if(controller.signal.aborted||controllerAI.signal.aborted)return;
       if(!p.phone&&found.phone){p.phone=found.phone;phoneRow.querySelector('strong').textContent=p.phone;}
@@ -356,7 +362,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       if(!p.address)addressRow.querySelector('strong').textContent='주소 조회 불가';
       if(!p.phone)phoneRow.querySelector('strong').textContent='전화번호 조회 불가';
       if(!p.website)siteRow.querySelector('strong').textContent='홈페이지 조회 불가';
-    });
+    }).finally(()=>window.clearTimeout(delayNotice));
   }
   let pending=false;
   async function loadExplanation(){
