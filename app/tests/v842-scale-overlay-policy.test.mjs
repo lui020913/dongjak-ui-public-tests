@@ -67,3 +67,21 @@ test('weather sheet blocks MapLibre scale throughout entry motion and reliably a
  assert.match(scale,/window\.removeEventListener\('dongjak:weather-visibility-changed',onWeatherVisibility\)/);
  assert.match(scale,/applyImportant\(chip,'visibility','hidden'\)/);
 });
+
+test('weather open masks late scale style writes and close restores the measured scale',()=>{
+ const dock=contents('../src/map-scale-docking.js');
+ const weather=contents('../src/v854-weather-desktop.js');
+ const css=contents('../../frontend/production/mobile-next.css');
+ assert.match(dock,/applyImportant\(scale,'display','none'\)/);
+ assert.match(dock,/applyImportant\(chip,'display','none'\)/);
+ assert.match(dock,/applyImportant\(scaleChip,'display','none'\)/);
+ assert.match(dock,/mo\.observe\(node,\{attributes:true,attributeFilter:\['style','class'\]\}\)/);
+ assert.match(dock,/onWeatherVisibility\(\)/);
+ assert.match(dock,/applyImportant\(scale,'display','block'\)/);
+ assert.match(dock,/applyImportant\(scaleChip,'display','flex'\)/);
+ assert.match(weather,/const weatherOpen=Boolean\(sheet&&!sheet\.hidden\)/);
+ assert.match(weather,/node\.style\.setProperty\('display','none','important'\)/);
+ assert.match(weather,/node\.style\.removeProperty\('display'\)/);
+ assert.match(css,/#dj854-weather-sheet:not\(\[hidden\]\)\{margin-bottom:0!important\}/);
+ assert.doesNotMatch(css,/#dj854-weather-sheet:not\(\[hidden\]\)\{margin-bottom:10px!important\}/);
+});
