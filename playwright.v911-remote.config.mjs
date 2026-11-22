@@ -32,8 +32,7 @@ const releaseSmokeNames=[
  'community tab opens a usable feed',
  'walking vulnerability remains neutral'
 ];
-const releaseSmokeGrep=new RegExp(releaseSmokeNames.map(x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&')).join('|'));
-const phoneCoverage={')).join('|'));
+const releaseSmokeGrep=new RegExp(releaseSmokeNames.join('|'));
 const phoneCoverage={
   mobile375:/@phone-layout/,
   mobile390:/@phone-(?:layout|common|platform)/,
