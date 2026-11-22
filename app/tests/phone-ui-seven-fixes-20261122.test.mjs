@@ -14,12 +14,12 @@ test('one map/walking settings screen replaces duplicate layer toggles and fills
   assert.match(css,/#app #dj-map-settings \.dj-map-settings-card \{display:flex!important;flex-direction:column!important;width:100%!important;height:100%!important/);
 });
 
-test('light map labels have dark text with a pale halo, dark theme is reversed',()=>{
+test('featured light map labels use muted regular text with a pale halo, dark theme is reversed',()=>{
   const light=featuredPlaceStyle('light');
   const dark=featuredPlaceStyle('dark');
-  assert.equal(light.text,'#26352f');
+  assert.equal(light.text,'#687b70');
   assert.equal(light.halo,'#f6f9f7');
-  assert.equal(dark.text,'#ebf7f3');
+  assert.equal(dark.text,'#b9c6bf');
   assert.equal(dark.halo,'#172a30');
   const theme=read('src/ui-environment.js');
   assert.ok(theme.includes("const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});"));
