@@ -1451,7 +1451,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // an additional click to the map under the disappearing bottom sheet.
     event?.stopPropagation?.();
     document.dispatchEvent?.(new CustomEvent('dongjak:transport-dismiss-start'));
-    if(globalThis.window?.DongjakWindowMotion)globalThis.window.DongjakWindowMotion.close(panel,()=>close(true));else close(true);
+    // A newly selected station/stop may reopen before the old close fade
+    // finishes. The old completion must never dismiss the new selection.
+    const closingSequence=seq;
+    if(globalThis.window?.DongjakWindowMotion){
+      globalThis.window.DongjakWindowMotion.close(panel,()=>{
+        if(seq===closingSequence)close(true);
+      });
+    }else close(true);
   });
   // Stop the entire touch sequence at its real target, not just its
   // synthesized click. Keep native button semantics and accessibility.
@@ -2648,6 +2655,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       &&normalizeLineName(selected.selectedLine)!==normalizeLineName(place.selectedLine));
     const openKey=`${place.kind}:${place.id||place.name}:${place.selectedLine||''}`;
     if(!windowState.beginOpen(openKey,{origin,refresh,mapEvent}))return;
+    // Cancel the outgoing animation *before* changing the content. Otherwise
+    // its opacity/clip-path can remain on the next transport card and its
+    // delayed callback may hide the newly opened bus or subway information.
+    globalThis.window?.DongjakWindowMotion?.cancel?.(panel);
     // This domain controller already rejects ghost map gestures. Preserve a
     // validated new selection through the shared window's recent-close guard.
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
