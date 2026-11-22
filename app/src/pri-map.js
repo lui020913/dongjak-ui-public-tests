@@ -261,14 +261,14 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
      el('small','','속도 표준노드링크와 이 조사 도로구간의 1:1 공간대응이 검증되지 않아 점수를 임의로 배정하지 않았습니다. 회색은 저위험 판정이 아닙니다.'));
    }
    node.append(el('small','','점수가 높을수록 잠재적 충돌 피해 심각성이 큰 상대평가입니다. 실제 사고 발생 가능성이나 법정 위험등급이 아닙니다.'));
-   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'284px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'284px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
   }
   const s=lookup.get(selected?.properties?.segmentId);if(!s)return;
   if(mode==='middleReview'){
    const node=el('div','dj-pri-detail');node.append(el('strong','','상현중학교 300m 검토 · '+(s.name||'이름 없는 도로')),el('b','','중학교 관련 보호 공백 점수: 미산정'),el('p','',s.id+' · 상도1동 경계 내부 도로'),el('small','','이 범위는 학교 대표점으로부터 300m이며 공식 보호구역·실제 통학로가 아닙니다. 2025년 경찰청 보호구역 원본에 상현중학교 대응 지정 자료가 없어 법적 공백 판정은 보류합니다. 기존 초등학교·노인시설 점수는 변경하지 않습니다.'));
    const base=selected?.properties?.baselinePolicyScore;
    if(base!==null&&base!==undefined&&Number.isFinite(Number(base)))node.append(el('small','','기존 보호 공백 참고 점수: '+Number(base).toFixed(1)+'점 (중학교 점수가 아님)'));
-   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
   }
   const v=riskValue(segmentScore(dataset,s,mode)),node=el('div','dj-pri-detail');const modeled=mode==='accidents'&&s.evidence?.accidents?.modeled===true;node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',modeled?'미선정 · 미평가':v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
   const fs=mode==='current4'?dataset.factors.filter(f=>CURRENT_FOUR_FACTORS.includes(f.id)):mode==='current3'?dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)):mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
@@ -286,7 +286,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   if(mode==='current4')node.append(el('small','','4개 항목 중 실제 유효 지표 '+currentFourFactorCoverage(s)+'/4 · 결측은 평균에서 제외 · 제한속도 공간 정합 잠정'));
   if(mode==='current3')node.append(el('small','',`유효 지표 ${currentVulnerabilityCoverage(s)}/3 · 미평가 지표는 평균에서 제외`));
    node.append(el('small','','높을수록 상대적으로 큰 취약 신호이며 빨간색으로 표현되는 연구용 위험점수입니다. 미선정·미평가 구간은 회색이며, 내부 임시점수는 표시 및 평균에서 제외됩니다.'));
-  popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);
+  popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);
  }
  let recoveryQueued=false;
  function recoverLayer(){
