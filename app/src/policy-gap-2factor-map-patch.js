@@ -56,7 +56,7 @@ function popupNode(p,mode){
  const heading=document.createElement('h3');heading.textContent=(p.road_name||'이름 없는 도로')+' · '+(p.segment_id||'');root.append(heading);
  const dl=document.createElement('dl');
  const items=[['선택한 점수',format(p[MODES[mode][0]])],['어린이',format(p.child_new_score)],['노인',format(p.elderly_new_score)],
-  ['통합 시범점수',format(p.combined_new_score)],['학구 적용',p.school_applied_child?'적용':'미적용'],
+  ['통합 시범점수',format(p.combined_new_score)],['학구 적용',String(p.school_applied_child)==='true'?'적용':'미적용'],
   ['학구도 교차',p.catchment_names||'해당 자료 없음'],['팀 종합평균',isNum(p.combined_new_score)?'6개 지표 평균':'나머지 5개 지표 평균']];
  for(const [label,value] of items){
   const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;dl.append(dt,dd);
