@@ -63,7 +63,7 @@ test('subway panel has route rail, paired direction cards, real time and timetab
 
 test('3D rendering avoids full per-frame style changes and has measured low-FPS fallback',()=>{
   const js=read('src/main.js');
-  assert.match(js,/djNormalPixelRatio=Math\.min\(1\.5/);
+  assert.match(js,/djNormalPixelRatio=Math\.min\(djPhone\?1\.25:1\.5/);
   assert.match(js,/pixelRatio: djInitialBudget==='economy'\?1:djNormalPixelRatio/);
   assert.match(js,/lastFootprintPaintKey/);
   assert.match(js,/updateFootprint && footprint/);
