@@ -70,3 +70,15 @@ test('debug APK releases are immutable by source SHA even when Android versionNa
   assert.match(workflow,/apksigner" verify --print-certs/,'APK certificate verification is mandatory: '+path);
  }
 });
+
+test('released phone dark buildings never override the chosen translucent map with opaque old values',()=>{
+ const patch=read('scripts/apply-mobile-17-followup.mjs');
+ const regression=read('frontend/production/mobile-followup-build.test.mjs');
+ const next=read('frontend/production/mobile-next-build.test.mjs');
+ assert.ok(patch.includes('MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark'));
+ assert.ok(!patch.includes('nearOpacity:0.98'));
+ assert.ok(!patch.includes('farOpacity:0.96'));
+ assert.ok(regression.includes("buildingExtrusionAppearance('dark',10).opacity,0.58"));
+ assert.ok(regression.includes("buildingExtrusionAppearance('dark',30).opacity,0.50"));
+ assert.ok(next.includes('--djNext-surface:#2c343d'));
+});

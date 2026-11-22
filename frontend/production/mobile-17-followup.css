@@ -19,9 +19,9 @@ html body #app#app#app#app#app#app .dj875-transit-scroll>*+*{margin-top:10px!imp
 html body #app#app#app#app#app#app .dj-place-detail-popup .dj-place-body{padding:8px 12px 14px!important;gap:8px!important;overflow:auto}
 html body #app#app#app#app#app#app .dj-place-detail-popup .dj-place-body :is(.dj815-place-favorite-folder,.dj-place-info,.dj-place-meta){margin:0!important}
 html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls,
-html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls .map-safety-head{background:#191b1f!important;color:#e5e7eb!important;border-color:#363a40!important}
-html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls :is(.dj-safety-overview,details,.dj-safety-nav button){background:#23262b!important;color:#e5e7eb!important;border-color:#363a40!important}
-html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls :is(p,small,.map-safety-head span){color:#aeb7bf!important}
+html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls .map-safety-head{background:#22282e!important;color:#f1f4f6!important;border-color:#4d5b65!important}
+html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls :is(.dj-safety-overview,details,.dj-safety-nav button){background:#2c343d!important;color:#f1f4f6!important;border-color:#4d5b65!important}
+html body #app#app#app#app#app#app[data-theme="dark"] #map-safety-controls :is(p,small,.map-safety-head span){color:#bec8d2!important}
 html body #app#app#app#app#app#app #map-safety-controls .map-safety-head{position:sticky!important;top:0!important;z-index:5!important;flex:0 0 auto!important;margin:0!important;padding:26px 14px 12px!important;border-radius:0!important}
 html body #app#app#app#app#app#app #map-safety-controls.dj871-sheet-expanded{top:var(--dj910-map-top,160px)!important;bottom:var(--dj910-dock-bottom,76px)!important;height:auto!important;max-height:none!important;overflow-y:auto!important}
 html body #app#app#app#app#app#app #dj-v794-toolbar{transition:none!important;animation:none!important}
@@ -32,8 +32,8 @@ html body #app#app#app#app#app#app #dj840-map-tip:not([hidden]){transition:opaci
 html body #app#app#app#app#app#app #dj840-map-tip:not([hidden]):not(.is-visible){opacity:0!important}
 html body #app#app#app#app#app#app #dj840-map-tip.is-visible{opacity:1!important}
 html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj17-more-root,
-html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj17-feature-details{background:#23262b!important;color:#e5e7eb!important;border-color:#363a40!important}
-html body #app#app#app#app#app#app[data-theme="dark"] :is(#map-safety-controls,#mine-panel .dj17-more-root) :is(.dj833-feature-line,.dj834-feature-line,.dj-safety-feature,.dj-safety-card,.dj-safety-section,.dj-safety-group){background:#23262b!important;color:#e5e7eb!important;border-color:#363a40!important}
+html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj17-feature-details{background:#2c343d!important;color:#f1f4f6!important;border-color:#4d5b65!important}
+html body #app#app#app#app#app#app[data-theme="dark"] :is(#map-safety-controls,#mine-panel .dj17-more-root) :is(.dj833-feature-line,.dj834-feature-line,.dj-safety-feature,.dj-safety-card,.dj-safety-section,.dj-safety-group){background:#2c343d!important;color:#f1f4f6!important;border-color:#4d5b65!important}
 #mine-panel .dj17-more-root .dj840-more-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #mine-panel .dj17-more-root .dj840-more-quick-actions button{min-height:44px;border:1px solid var(--mf-border,#d6e2dc);border-radius:14px;background:var(--mf-surface-raised,#f3f7f5);color:inherit}
 #mine-panel .dj17-more-root .dj833-feature-line{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid var(--mf-border,#d6e2dc)}
