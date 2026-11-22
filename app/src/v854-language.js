@@ -245,6 +245,9 @@ export function installLanguagePreference(doc=document,win=window){
     section=doc.createElement('div');section.className='dj854-language-section dj834-language-row';section.dataset.dj834Action='language';section.setAttribute('role','button');section.setAttribute('tabindex','0');section.setAttribute('aria-label','언어 설정 열기');
     const label=doc.createElement('label');/* Language selection lives in the nested settings menu, not this home row. */label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
+    // Preference state is owned by this hidden select; navigation is owned by the visible settings row.
+    // Hiding the legacy native control prevents its old mobile card/picker layout from resurfacing.
+    select.hidden=true;select.tabIndex=-1;
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
     // Keep the language control inside the existing App & Display settings group.
     // It must not float above the profile card or overlap an unrelated selector.
