@@ -88,16 +88,12 @@ import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
 
-function safeStorageGet(k){try{return localStorage.getItem(k);}catch{return null;}}
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
 export function getInitialTheme(){
-  // First paint in index.html resolves the same setting BEFORE the stylesheet is loaded.
+  // The first-paint script owns cold-start light mode and one-shot iOS manual
+  // refreshes. Do not resurrect an older dark preference during app startup.
   const firstPaint=typeof document!=='undefined'?document.documentElement?.dataset?.theme:null;
-  if(firstPaint==='light'||firstPaint==='dark')return firstPaint;
-  const selected=safeStorageGet(THEME_KEY);
-  if(selected==='light'||selected==='dark')return selected;
-  // New visitors start in light mode. Manual selection and night analysis still work.
-  return 'light';
+  return firstPaint==='dark'?'dark':'light';
 }
 export function roadColorRole(layer={}){
   if(!['line','fill'].includes(layer.type))return null;
@@ -138,7 +134,7 @@ export function initTheme({map,app}){
   document.documentElement.dataset.theme=themeState.value;
   const browserThemeColor=document.querySelector('meta[name="theme-color"]');
   // Theme updates are repaint-only. Never create a full-screen transition mask.
-  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#252b32':'#f3f7f5';
+  if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=themeState.value==='dark'?'#22282e':'#edf3ef';
   if(toggle)toggle.textContent=themeState.value==='dark'?'라이트 모드':'다크 모드';
   toggle?.setAttribute('aria-label',themeState.value==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
   // background base style only; dynamically added route, road width and safety layers are not modified.
@@ -227,7 +223,7 @@ export function initTheme({map,app}){
     app.dataset.djPreferredTheme=themeState.preference;
     app.dataset.djThemeSource=themeState.temporary?'night':'user';
     document.documentElement.dataset.theme=next;
-    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#252b32':'#edf3ef';
+    if(browserThemeColor&&!document.documentElement.classList.contains('dj-ios-home-pwa'))browserThemeColor.content=next==='dark'?'#22282e':'#edf3ef';
     if(toggle){
       if(themeState.temporary){
         toggle.textContent='야간 시야 중 · 종료 후 '+(themeState.preference==='dark'?'다크':'라이트');
