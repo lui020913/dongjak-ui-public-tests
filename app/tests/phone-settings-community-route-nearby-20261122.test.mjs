@@ -31,9 +31,11 @@ test('community has exactly one action bar and keeps all button owners',()=>{
 });
 
 test('nearby information sheet shrinks to its content without obscuring bottom navigation',()=>{
-  assert.match(css,/#ped-tools-panel:not\(\[hidden\]\) \{/);
+  assert.match(css,/#ped-tools-panel:not\\(\\[hidden\\]\\):not\\(\\.dj871-sheet-expanded\\) \\{/);
   assert.match(css,/max-height:min\(58dvh,calc\(100dvh - 186px\)\)/);
   assert.match(css,/#ped-tools-panel #ped-tools-close/);
+  assert.match(css,/#mine-panel\.page-panel:not\(\[hidden\]\) > \.dj836-sheet-body/);
+  assert.match(css,/padding:14px 16px 28px!important/);
   assert.match(css,/border-radius:50%!important/);
   assert.match(css,/#ped-tools-panel #ped-tools-results button/);
   const source=read('src/pedestrian-tools.js');
