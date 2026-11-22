@@ -148,7 +148,7 @@ export function mobileScaleBlockerVisible(node,view){
 
 export function shouldHideMobileScale(app,doc,view){
   if(!app||!doc||!view)return true;
-  if((app.dataset.tab||'map')!=='map'||app.dataset.searchOpen==='true'||app.dataset.dj910SheetOpen==='true')return true;
+  if((app.dataset.tab||'map')!=='map'||app.dataset.searchOpen==='true'||app.dataset.dj910SheetOpen==='true'||app.dataset.djPriVisible==='true')return true;
   if(app.classList.contains('map-controls-open')||app.classList.contains('map-safety-open'))return true;
   // The weather sheet is an explicit map HUD owner from the moment it opens.
   // During its entry animation, opacity or bounds may transiently be zero;
