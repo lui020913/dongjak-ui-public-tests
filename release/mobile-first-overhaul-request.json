@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.77",
+  "application_version": "9.2.78",
   "public_work_branch": "main",
-  "purpose": "Owner-requested integrated phone UI release including merged PR #291: fullscreen unified map/walking settings, map label white text/dark outline in light theme, no non-header backdrop dim/blur with soft card shadows, weather 7-day inset and no expansion, strictly separated light/dark palettes, compact safety info dock gap, aligned language preference icon. Preserve Preview, 24 phone QA shards, PC/tablet checks, protected Production environment, provenance marker, API health checks and guarded rollback. Optional design capture/Gemini is not required when disabled.",
-  "attempt": 250,
+  "purpose": "Finalize all seven owner-requested UI corrections from merged PR #291 plus fixed weather header gesture bug from PR #294: one fullscreen preferences surface, white map place text/dark halo in light mode, undimmed floating windows with restrained shadow, seven-day forecast margins and no expansion by tap or drag, separated light/dark palette, safety sheet nav clearance, language select with icon aligned inside My Info. Verify exact merged main source through sealed build, Preview, all 24 phone browser shards, desktop/tablet, approved protected Production and rollback. Skip only optional design/Gemini capture when disabled.",
+  "attempt": 251,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous release run #44998552160 targeted pre-merge commit d3307c1; start exact source release only after merged PR #291 commit 6c781bfd1dddc6dcd35a545f4a57fb971428e764.",
+  "last_retry_reason": "Previous release #44998660931 references PR #291 before final weather expansion controller fix PR #294 (merge bf1fe2ac0bd98d0449cde06261bf48380b37a6c4). New release must include BOTH merges.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
