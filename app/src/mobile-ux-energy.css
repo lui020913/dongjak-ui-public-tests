@@ -1,0 +1,36 @@
+/* Mobile screens must never reveal the live map or prior tab while switching.
+ * Keep their backplates opaque; animate child content only (existing controller).
+ * No backdrop blur / full-root opacity transition: avoids extra iOS GPU passes. */
+@media (max-width:699px) {
+  html body #app#app[data-tab]:not([data-tab="map"]) #map {
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html body #app#app .page-panel[data-page]:not([hidden]) {
+    opacity:1!important;
+    visibility:visible!important;
+    background-color:#edf3ef!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  html body #app#app[data-theme="dark"] .page-panel[data-page]:not([hidden]) {
+    background-color:#22282e!important;
+    color:#f1f4f6!important;
+  }
+  html body #app#app #bottom-nav .nav-tab {
+    min-height:44px!important;
+  }
+  html body #app#app[data-theme="dark"] #bottom-nav .nav-tab.active,
+  html body #app#app[data-theme="dark"] #bottom-nav .nav-tab[aria-current="page"] {
+    background:#285b50!important;color:#f1f4f6!important;
+  }
+  html body #app#app[data-theme="dark"] :is(#dj-pri-dialog,.dj-pri-dialog) .dj-pri-button:disabled {
+    background:#35404a!important;color:#bec8d2!important;
+    border-color:#4d5b65!important;opacity:.65!important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  html body #app .page-panel.dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body) {
+    animation:none!important;
+  }
+}
