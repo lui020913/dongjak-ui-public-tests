@@ -27,6 +27,7 @@ const releaseSmokeNames=[
  'phone search returns a visible',
  'primary tabs reveal content',
  'phone browser install choices',
+ 'iOS PWA status edge stays flat',
  'bottom dock swipes change',
  'AI full-screen conversation',
  'community tab opens a usable feed',
