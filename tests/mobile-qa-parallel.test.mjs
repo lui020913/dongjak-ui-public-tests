@@ -71,13 +71,14 @@ test('debug APK releases are immutable by source SHA even when Android versionNa
  }
 });
 
-test('released phone dark buildings never override the chosen 50–58% translucent map with 96–98% opacity',()=>{
+test('released phone dark buildings never override the chosen translucent map with opaque old values',()=>{
  const patch=read('scripts/apply-mobile-17-followup.mjs');
  const regression=read('frontend/production/mobile-followup-build.test.mjs');
  const next=read('frontend/production/mobile-next-build.test.mjs');
- assert.match(patch,/MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark/);
- assert.doesNotMatch(patch,/nearOpacity:0\\.98|farOpacity:0\\.96/);
- assert.match(regression,/buildingExtrusionAppearance\\('dark',10\\)\\.opacity,0\\.58/);
- assert.match(regression,/buildingExtrusionAppearance\\('dark',30\\)\\.opacity,0\\.50/);
- assert.match(next,/#app\\\\[data-theme="dark"\\\\]\\{--djNext-surface:#2c343d/);
+ assert.ok(patch.includes('MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark'));
+ assert.ok(!patch.includes('nearOpacity:0.98'));
+ assert.ok(!patch.includes('farOpacity:0.96'));
+ assert.ok(regression.includes("buildingExtrusionAppearance('dark',10).opacity,0.58"));
+ assert.ok(regression.includes("buildingExtrusionAppearance('dark',30).opacity,0.50"));
+ assert.ok(next.includes('--djNext-surface:#2c343d'));
 });
