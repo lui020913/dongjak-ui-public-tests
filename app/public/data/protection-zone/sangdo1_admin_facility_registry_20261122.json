@@ -1,0 +1,102 @@
+{
+  "schema": "sangdo1_admin_facility_registry_20261122_v1",
+  "boundary": "1159053000",
+  "source_boundary": "admdongkor 2026-10-01 reference",
+  "protected_facilities": [
+    {
+      "id": "115901010635",
+      "name": "상도어린이집",
+      "type": "어린이",
+      "point_inside_reference": false,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010637",
+      "name": "강남유치원",
+      "type": "어린이",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010638",
+      "name": "서울강남초등학교",
+      "type": "어린이",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010647",
+      "name": "샛별유치원",
+      "type": "어린이",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010648",
+      "name": "서울상현초등학교",
+      "type": "어린이",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010650",
+      "name": "예담어린이집",
+      "type": "어린이",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115901010658",
+      "name": "중앙대부속유치원",
+      "type": "어린이",
+      "point_inside_reference": false,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115902010653",
+      "name": "청송경로당",
+      "type": "노인",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    },
+    {
+      "id": "115902023694",
+      "name": "청남노인요양공동생활가정",
+      "type": "노인",
+      "point_inside_reference": true,
+      "zone_intersects_study": true
+    }
+  ],
+  "outside_reference_facilities_excluded": [
+    "한마음경로당",
+    "행복한숲유치원",
+    "구립흑석어린이집",
+    "시현유치원",
+    "서울삼성학교",
+    "낙원경로당",
+    "서울영본초등학교",
+    "예일어린이집",
+    "서울본동초등학교",
+    "서울신상도초등학교"
+  ],
+  "school_inventory": [
+    {
+      "name": "상현중학교",
+      "type": "중학교",
+      "address": "서울특별시 동작구 사당로2길 2-19",
+      "coordinate": [
+        126.9611626,
+        37.4943029
+      ],
+      "point_inside_reference": true,
+      "analysis_role": "현황만 · 어린이보호구역 점수에는 미포함",
+      "source": "https://findby.co.kr/details/07075-115904157289-st-652beb8a4e0223ae18fba41f"
+    },
+    {
+      "name": "동작고등학교",
+      "type": "고등학교",
+      "analysis_role": "사용자 요청에 따라 제외"
+    }
+  ],
+  "not_scored_unregistered_school_facilities": "병설유치원 등 지정보호구역 원본에서 확인되지 않은 시설은 별도 확인 전 점수 미반영"
+}

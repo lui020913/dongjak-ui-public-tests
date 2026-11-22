@@ -3,7 +3,7 @@
  * Uses 300m GIS results combining 2025 police zone polygons & facility points,
  * 2026 elementary catchments, excluding road width. Never modifies PRI or routing.
  */
-const URL='/data/protection-zone/sangdo1_policy_gap_2factor_300m_20261122.geojson';
+const URL='/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson';
 const IDS={source:'pza2-data',casing:'pza2-casing',lines:'pza2-score-lines'};
 const MODES={combined:['combined_new_score','combined_color','통합'],child:['child_new_score','child_color','어린이'],elderly:['elderly_new_score','elderly_color','노인']};
 const STYLES=[
@@ -35,7 +35,7 @@ export function policyGapTeamAverage(five,policy){
  return {score:Math.round((five.reduce((s,n)=>s+n,0)+(has?Number(policy):0))/denominator*10)/10,indicatorCount:denominator};
 }
 export function verifyPolicyGapFeatures(geo){
- if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||geo.metadata?.schema!=='sangdo1_policy_gap_2factor_risk_v2'||geo.metadata?.score_direction!=='risk'||!Array.isArray(geo.features)||geo.features.length!==1676)
+ if(geo?.type!=='FeatureCollection'||geo.metadata?.radius_m!==300||geo.metadata?.schema!=='sangdo1_policy_gap_2factor_adminscope_risk_v3'||geo.metadata?.administrative_scope_code!=='1159053000'||geo.metadata?.score_direction!=='risk'||!Array.isArray(geo.features)||geo.features.length!==1606)
   throw new Error('300m 평가 GeoJSON의 기준 또는 도로 구간 수가 다릅니다.');
  const ids=new Set();
  for(const f of geo.features){
@@ -82,7 +82,7 @@ function createPanel(){
  const ticks=document.createElement('div');ticks.id='pza2-ticks';
  for(const value of ['0','25','50','75','100']){const span=document.createElement('span');span.textContent=value;ticks.append(span);}
  const gray=document.createElement('div');gray.id='pza2-gray';
- const chip=document.createElement('i');chip.setAttribute('aria-hidden','true');gray.append(chip,document.createTextNode('NULL(회색): 300m 평가 범위 밖 · 팀 평균에서 제외'));
+ const chip=document.createElement('i');chip.setAttribute('aria-hidden','true');gray.append(chip,document.createTextNode('NULL(회색): 상도1동 경계 내 300m 미평가 · 팀 평균에서 제외'));
  const status=document.createElement('span');status.id='pza2-status';status.setAttribute('role','status');status.textContent='연구지도 꺼짐';
  const caution=document.createElement('p');caution.textContent='임시 가중치 50/50 (학구도 해당 도로에 한정) · 학구는 실제 통학로가 아닙니다. 길찾기·PRI 점수에는 적용하지 않습니다.';
  panel.append(header,note,toggle,modes,gradient,ticks,gray,status,caution);
@@ -156,7 +156,7 @@ export function installPolicyGapTwoFactorMap({map,maplibregl,app,nightMode,prote
    if(nightMode?.isEnabled?.())await nightMode.disable?.();
    protectionOverlay?.disable?.({restoreNight:false});
    enabled=true;toggle.setAttribute('aria-pressed','true');toggle.textContent='연구지도 표시 끄기';
-   if(ensure()){focus();notice('1,676개 도로 선형 표시 · 회색은 이 지표 미평가');}
+   if(ensure()){focus();notice('1,606개 상도1동 경계 내 도로 선형 표시 · 회색은 이 지표 미평가');}
    else notice('지도 스타일 준비 중 · 자동 복구 대기');
   }catch(e){deactivate();notice('연구지도 실패: '+(e?.message||'데이터 오류'));}
   finally{loading=false;toggle.disabled=false;}
