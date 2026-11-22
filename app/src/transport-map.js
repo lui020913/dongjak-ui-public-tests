@@ -2744,7 +2744,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         // Selection is rendered by the compact header material, not an inline outer border.
         if(normalizeLineName(place.selectedLine||'')===line)badge.classList.add('dj-active-transfer-line');
         button.append(badge);
-        button.addEventListener('click',()=>{
+        // Treat transfer selection as an interaction within this sheet, never
+        // as an outside click that can dismiss it or activate the route tab.
+        for(const type of ['pointerdown','pointerup','touchstart','touchend']){
+          button.addEventListener(type,event=>event.stopPropagation(),{passive:true});
+        }
+        button.addEventListener('click',event=>{
+          event.preventDefault();event.stopPropagation();
           const current=selected;
           if(!current||current.kind!=='subway'||normalizeLineName(current.selectedLine||'')===line)return;
           // Use current state, not the closure captured when the header was created.
