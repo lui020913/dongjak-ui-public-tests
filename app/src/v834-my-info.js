@@ -17,6 +17,14 @@ export function installMyInfo(doc=document){
  const body=panel.querySelector(':scope > .dj836-sheet-body')||panel;
  if(!heading||!account)return false;
  panel.dataset.dj834Installed='true';
+ // Real iPhone Preview QA confirmed the full-screen My Info scroller reached
+ // behind the floating 70px dock. Production has legacy high-specificity
+ // panel padding:0 rules: reserve dock clearance in the actual DOM owner.
+ // All My Info subpages share this single scroll container.
+ if(doc.defaultView?.matchMedia?.('(max-width:699px)')?.matches){
+   panel.style.setProperty('box-sizing','border-box','important');
+   panel.style.setProperty('padding-bottom','calc(94px + env(safe-area-inset-bottom,0px))','important');
+ }
  const landing=doc.createElement('section');landing.className='dj834-my-home';landing.setAttribute('aria-label','내 정보 설정');
  landing.innerHTML=`<button type="button" class="dj834-profile-card" data-dj834-action="profile">
  <span class="dj834-user-avatar" aria-hidden="true">${symbol('profile')}</span><span class="dj834-profile-meta"><strong class="dj834-profile-name">내 프로필</strong><small>로그인 · 내 프로필 설정</small></span><span class="dj834-chevron">›</span></button>
