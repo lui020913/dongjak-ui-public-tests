@@ -31,7 +31,7 @@ test('community has exactly one action bar and keeps all button owners',()=>{
 });
 
 test('nearby information sheet shrinks to its content without obscuring bottom navigation',()=>{
-  assert.match(css,/#ped-tools-panel:not\\(\\[hidden\\]\\):not\\(\\.dj871-sheet-expanded\\) \\{/);
+  assert.ok(css.includes('#ped-tools-panel:not([hidden]):not(.dj871-sheet-expanded) {'));
   assert.match(css,/max-height:min\(58dvh,calc\(100dvh - 186px\)\)/);
   assert.match(css,/#ped-tools-panel #ped-tools-close/);
   assert.match(css,/#mine-panel\.page-panel:not\(\[hidden\]\) > \.dj836-sheet-body/);
