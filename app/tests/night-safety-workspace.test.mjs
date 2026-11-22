@@ -22,7 +22,8 @@ test('야간 시야는 임시 테마만 변경하고 저장 테마를 복원한�
   assert.match(night,/applyTemporaryTheme\('dark'\)/);
   assert.match(night,/applyTemporaryTheme\(null\)/);
   assert.match(theme,/themeState\.override\(next\)/);
-  assert.match(theme,/safeStorageSet\(THEME_KEY,themeState\.preference\)/);
+  assert.match(theme,/return 'light';/);
+  assert.doesNotMatch(theme,/safeStorageSet\(THEME_KEY/);
   assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme,\s*onActivate:/);
 });
 test('PC 모바일 별도 배치, 안전 메뉴 숨김/접근성 스타일이 존재한다',()=>{

@@ -34,9 +34,9 @@ test('Place popup uses an actual geographic pin and the same mobile-first sheet 
   const place=read('src/place-details.js');
   assert.match(place,/createSelectedLocationPin\(document\)/);
   assert.match(read('src/selected-location-pin.js'),/dj807-facility-pin/);
-  assert.match(place,/const visible=point/);
-  assert.match(place,/if\(!visible\)/);
-  assert.match(place,/offset:\[0,-Math\.round\(Math\.min\(116/);
+  assert.match(place,/const viewportFocus=isPhone/);
+  assert.match(place,/map\.easeTo\?\.\(\{center:\[p\.lng,p\.lat\]/);
+  assert.match(place,/offset:\[0,offsetY\],duration:380/);
   assert.ok(place.includes("anchor:'top'"));
   assert.ok(place.includes("maxWidth:'min(520px, calc(100vw - 24px))'"));
   assert.equal(place.includes('desktopDetail'),false);

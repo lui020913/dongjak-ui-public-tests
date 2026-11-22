@@ -4,15 +4,16 @@ import {readFileSync} from 'node:fs';
 import {phoneProfile,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
 import {TEAM_FACTORS,validateBundle,parseImport,displayFeatures,segmentScore,summarize} from '../src/pri-data.mjs';
 
-test('installed iPhone manual theme changes refresh native status chrome without guest onboarding',()=>{
+test('normal iPhone app remains light while night visibility keeps isolated dark override',()=>{
   const src=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
-  assert.match(src,/requestIosThemeRefresh\(\{win:window,app,map,theme:themeState\.preference\}\)/);
-  assert.match(src,/if\(!themeState\.temporary\)/);
+  assert.doesNotMatch(src,/requestIosThemeRefresh\(/);
+  assert.match(src,/themeState\.override\(next\)/);
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(html,/data-dj-theme-refresh/);
+  assert.match(html,/var displayTheme='light'/);
+  assert.doesNotMatch(html,/id="theme-toggle"/);
   const tour=readFileSync(new URL('../src/v860-onboarding.js',import.meta.url),'utf8');
   assert.match(tour,/seenInMemory=isNativeThemeRefresh/);
-  assert.match(src,/displayTheme\(\{notify:true\}\)/);
+  assert.match(src,/const setTemporaryTheme=next/);
   const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
   assert.match(main,/mobile-ux-energy\.css/);
   const css=readFileSync(new URL('../src/mobile-ux-energy.css',import.meta.url),'utf8');

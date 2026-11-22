@@ -33,7 +33,8 @@ test('v816: night vision does not trigger a blocking splash from dark theme',()=
 });
 test('v816: facility center is biased above midpoint and mobile pin above label',()=>{
   const src=read('src/place-details.js');
-  assert.match(src,/Math\.min\(116,Math\.max\(40,h\*\.10\)\)/);
+  assert.match(src,/const viewportFocus=isPhone/);
+  assert.match(src,/offset:\[0,offsetY\],duration:380/);
   assert.match(src,/mobilePin\?-15:-4/);
 });
 test('v816: dark community boxes and metro neighbors have legible theme contrast/size',()=>{

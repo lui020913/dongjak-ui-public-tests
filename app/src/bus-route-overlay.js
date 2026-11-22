@@ -139,5 +139,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
       active=null;onState({id,route,status:'error',code:error?.code||'ROUTE_PATH_UPSTREAM'});
     }finally{clearTimeout(timer);if(controller===ac)controller=null;}
   }
-  return {select,clear,refreshVehicles,getActive:()=>active,destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
+  return {select,clear,refreshVehicles,getActive:()=>active,
+    getRouteCoordinates:()=>geometry.features.find(feature=>feature.geometry?.type==='LineString')?.geometry?.coordinates||[],
+    destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
 }

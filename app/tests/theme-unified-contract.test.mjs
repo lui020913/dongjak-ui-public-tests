@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 
-test('one theme stylesheet; native iOS status refresh only after explicit choice',()=>{
+test('one theme stylesheet with light-only normal UI and temporary night contrast',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
   const env=read('src/ui-environment.js');
@@ -16,10 +16,11 @@ test('one theme stylesheet; native iOS status refresh only after explicit choice
   assert.match(old,/win\.location\.reload\(\)/);
   assert.match(old,/isInstalledIosPhone\(win\)/);
   assert.match(old,/MANUAL_THEME_RELOAD_KEY/);
-  assert.match(env,/requestIosThemeRefresh\(\{win:window,app,map,theme:themeState\.preference\}\)/);
-  assert.match(html,/data-dj-theme-refresh/);
+  assert.doesNotMatch(env,/requestIosThemeRefresh\(/);
+  assert.match(html,/var displayTheme='light'/);
+  assert.doesNotMatch(html,/id="theme-toggle"/);
   assert.match(html,/\.map-startup-overlay\{display:none!important;\}/);
-  assert.match(env,/displayTheme\(\{notify:true\}\)/);
+  assert.match(env,/const setTemporaryTheme=next/);
   assert.ok(env.includes('createThemeState(getInitialTheme())'));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
   assert.ok(env.includes('const changed=app.dataset.theme!==next'));
@@ -36,7 +37,8 @@ test('night mode does not click theme button or override saved manual choice',()
   assert.match(night,/applyTemporaryTheme\(null\)/);
   assert.doesNotMatch(night,/themeToggle\.click\(/);
   assert.match(env,/themeState\.override\(next\)/);
-  assert.match(env,/safeStorageSet\(THEME_KEY,themeState\.preference\)/);
+  assert.match(env,/return 'light';/);
+  assert.doesNotMatch(env,/safeStorageSet\(THEME_KEY/);
 });
 
 test('guest onboarding reappears on a new signed-out session',()=>{
@@ -109,7 +111,7 @@ test('MapLibre labels stay readable in dark mode, while PRI TIP is hidden and ro
   assert.ok(ui.includes("#route-panel #route-calc"));
   assert.ok(contract.includes("body > .dj-pri-dialog"));
   assert.ok(contract.includes("color:#f1f4f6!important"));
-  assert.ok(html.includes("var displayTheme=themeReload ? themeReload.theme : 'light'"));
+  assert.ok(html.includes("var displayTheme='light'"));
   assert.ok(!html.includes("localStorage.getItem('dongjak_safety_color_theme_v1')"));
 });
 

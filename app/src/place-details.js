@@ -136,18 +136,17 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   }
   const p=placeData({...place,lng:place?.lng??lngLat?.lng,lat:place?.lat??lngLat?.lat});
   if(p.lat==null||p.lng==null)return null;
-  // The selected facility is usually on screen where the visitor tapped.
-  // Do not animate that map camera again simply because its bottom sheet opens.
+  // A facility can be visible near an edge without being centered. Move every
+  // explicit selection to the map's usable area, allowing for a phone sheet.
   try{
     const h=map.getContainer?.().clientHeight||window.innerHeight;
-    const w=map.getContainer?.().clientWidth||window.innerWidth;
-    const point=map.project?.([p.lng,p.lat]);
-    const visible=point&&point.x>=28&&point.x<=w-28&&point.y>=100&&point.y<=h-116;
-    if(!visible){
-      map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
-        offset:[0,-Math.round(Math.min(116,Math.max(40,h*.10)))],duration:380});
-    }
-  }catch(error){console.info('[시설 중심 이동] 현재 지도 보기 유지',error?.message);}
+    const focusTop=document.querySelector('.topbar')?.getBoundingClientRect?.()?.bottom||100;
+    const isPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
+    const viewportFocus=isPhone?Math.max(focusTop+55,Math.min(h*.42,h-180)):h/2;
+    const offsetY=Math.round(viewportFocus-h/2);
+    map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
+      offset:[0,offsetY],duration:380});
+  }catch(error){console.info('[시설 중심 이동] 지도 상태 확인',error?.message);}
   const root=document.createElement('section');root.className='dj-place-detail';
   const sharedSheet=true;
   let popup=null;

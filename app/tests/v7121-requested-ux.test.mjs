@@ -28,9 +28,9 @@ test('a single route-pick hint and accessible place modal use mobile sheet styli
   assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css,/--dj-v724-panel-bottom/);
 });
-test('cold start is light; only a pending iOS PWA reload uses the saved theme',()=>{
-  assert.match(read('index.html'),/var displayTheme=themeReload \? themeReload\.theme : 'light'/);
-  assert.ok(read('index.html').includes("displayTheme=themeReload ? themeReload.theme : 'light'"));
+test('cold start is always light and no pending iOS preference switches it',()=>{
+  assert.match(read('index.html'),/var displayTheme='light'/);
+  assert.doesNotMatch(read('index.html'),/var displayTheme=themeReload/);
   assert.doesNotMatch(read('index.html'),/isMobileEntry&&!pending/);
   const js=read('src/mobile-map-controls.js');
   assert.match(js,/dj-map-guide-initial-shown-v7121/);

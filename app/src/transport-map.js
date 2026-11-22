@@ -29,6 +29,7 @@ import {seoulServiceClock, plannedArrivalsFromTimetable} from './metro-planned-a
 import {saveTimetable,loadTimetable,storeBusObservation,latestBusObservations,displaySeoulObservationTime,expectedBusHeadway} from './transport-timetable-cache.js';
 import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
 import {createSelectedTransportPin,mobileTransportFocusOffset} from './transport-selection-marker.js';
+import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
 
 // v5.2 교통 지도: 고정 지하철 안내 선형 + 배경지도 POI 정류소/역 위치.
 // 서울시 실시간 정보는 별도 서버에 키를 보관하는 transport-proxy.mjs가 준비된 경우에만 표시.
@@ -1364,7 +1365,46 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
   let routePresentation=null;
-  function syncRoutePresentation(){const state=routePresentation;const busSheet=selected?.kind==='bus'&&!panel.hidden;routeStatus.hidden=!state||!busSheet;clearRouteButton.hidden=!state||state.status==='error'||!busSheet;mapClearRouteButton.hidden=!state||state.status==='error';if(state&&state.status!=='error'){mapClearRouteButton.textContent=`${state.route}번 · ${state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':''}해제 ×`;mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';mapClearRouteButton.setAttribute('aria-label',`${state.route}번 버스 노선 표시 해제`);}}
+  let lastFittedRouteId=null;
+  function syncRouteClearDock(){
+    if(mapClearRouteButton.hidden||document.getElementById('app')?.dataset.tab!=='map')return;
+    const shown=node=>{
+      const rect=node?.getBoundingClientRect?.();
+      const style=node&&getComputedStyle(node);
+      return Boolean(node&&!node.hidden&&rect?.height>0&&rect?.width>0&&style?.display!=='none'&&style?.visibility!=='hidden');
+    };
+    const preview=panel.dataset.djBusRoutePreview==='true'&&shown(panel);
+    const blockers=[document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip'),preview?panel:null].filter(shown);
+    const edge=Math.min(globalThis.innerHeight||800,...blockers.map(n=>n.getBoundingClientRect().top));
+    const upper=Math.max(80,...[document.querySelector('.topbar'),document.getElementById('dj-v794-toolbar')].filter(shown).map(n=>n.getBoundingClientRect().bottom+8));
+    const top=Math.max(upper,Math.round(edge-Math.max(34,mapClearRouteButton.getBoundingClientRect()?.height||36)-12));
+    mapClearRouteButton.style.setProperty('top',top+'px','important');
+    mapClearRouteButton.style.setProperty('bottom','auto','important');
+  }
+  function scheduleRouteClearDock(){
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(syncRouteClearDock);
+    else syncRouteClearDock();
+  }
+  function syncRoutePresentation(){
+    const state=routePresentation;
+    const busSheet=selected?.kind==='bus'&&!panel.hidden;
+    const preview=busSheet&&panel.dataset.djBusRoutePreview==='true';
+    routeStatus.hidden=!state||!busSheet||preview;
+    clearRouteButton.hidden=!state||state.status==='error'||!busSheet||preview;
+    mapClearRouteButton.hidden=!state||state.status==='error';
+    if(state&&state.status!=='error'){
+      const status=state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':'';
+      mapClearRouteButton.textContent=state.route+'번 · '+status+'해제 ×';
+      mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';
+      mapClearRouteButton.setAttribute('aria-label',state.route+'번 버스 노선 표시 해제');
+    }
+    scheduleRouteClearDock();
+  }
+  globalThis.addEventListener?.('resize',scheduleRouteClearDock,{passive:true});
+  if(typeof ResizeObserver!=='undefined'){
+    const routeDockObserver=new ResizeObserver(scheduleRouteClearDock);
+    for(const node of [panel,document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip')])if(node)routeDockObserver.observe(node);
+  }
   function syncRouteRows(){
     const active=busRouteOverlay.getActive();
     for(const row of (arrivalsEl.querySelectorAll?.('[data-bus-route-id]')||[])){
@@ -1375,17 +1415,46 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     }
   }
   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,vehicleFetcher:globalThis.fetch,onState:state=>{
+    if(state?.status==='error'&&panel.dataset.djBusRoutePreview==='true')resetBusRoutePreview();
     routePresentation=state;syncRoutePresentation();
+    if(state?.status==='shown'&&panel.dataset.djBusRoutePreview==='true'&&!panel.hidden&&lastFittedRouteId!==state.id){
+      lastFittedRouteId=state.id;
+      requestAnimationFrame(()=>{
+        if(panel.hidden||panel.dataset.djBusRoutePreview!=='true'||busRouteOverlay.getActive()?.id!==state.id)return;
+        const coordinates=busRouteOverlay.getRouteCoordinates();
+        if(!Array.isArray(coordinates)||coordinates.length<2)return;
+        const xs=coordinates.map(p=>p[0]),ys=coordinates.map(p=>p[1]);
+        const covered=Math.max(170,(globalThis.innerHeight||800)-(panel.getBoundingClientRect()?.top||500)+12);
+        map.fitBounds?.([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:{top:Math.min(190,Math.floor((globalThis.innerHeight||800)*.22)),bottom:covered,right:32,left:32},maxZoom:15.5,duration:600});
+        scheduleRouteClearDock();
+      });
+    }
     routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · ${state.stopCount?`경유 정류소 ${state.stopCount}개 · 확대하면 표시`:'지도 표시 중 · 경유 정류소 조회 불가'}`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
     syncRouteRows();
   }});
-  clearRouteButton.addEventListener('click',()=>busRouteOverlay.clear());
-  mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();busRouteOverlay.clear();});
+  const resetBusRoutePreview=()=>{
+    delete panel.dataset.djBusRoutePreview;
+    for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
+  };
+  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
+  clearRouteButton.addEventListener('click',clearSelectedBusRoute);
+  mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
   function activateBusRoute(event){
     const row=event.target?.closest?.('[data-bus-route-id]');
     if(!row||!arrivalsEl.contains(row)||panel.hidden||selected?.kind!=='bus')return;
     if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
     event.preventDefault();event.stopPropagation();
+    if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
+      panel.dataset.djBusRoutePreview='true';
+      if(panel.classList.contains('dj871-sheet-expanded'))setMobileSheetExpanded(panel,false,document,globalThis.window);
+      panel.style.setProperty('height','clamp(185px,28dvh,255px)','important');
+      panel.style.setProperty('max-height','clamp(185px,28dvh,255px)','important');
+      panel.style.setProperty('min-height','0','important');
+      panel.style.setProperty('overflow','hidden','important');
+      panel.querySelector('.dj875-transit-scroll')?.scrollTo?.({top:0,behavior:'instant'});
+    }
+    lastFittedRouteId=null;
+    syncRoutePresentation();
     void busRouteOverlay.select({routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType});
   }
   arrivalsEl.addEventListener('click',activateBusRoute);
@@ -1441,7 +1510,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
     windowState.dismiss();
-    panel.hidden=true;selected=null;seq++;syncRoutePresentation();
+    panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
     if(wasVisible&&restore)onClose();
@@ -2667,6 +2736,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
     const thisSeq=++seq;
     selected=place;
+    if(!refresh)resetBusRoutePreview();
     updateTransportFavorite();
     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));
     visibleServiceHours=null;
@@ -2686,8 +2756,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // the card does not cover its marker.  Changing a transfer line must not
     // move the camera again or re-open the sheet animation.
     if(!sameStationLineChange && !refresh && Number.isFinite(Number(place.lng)) && Number.isFinite(Number(place.lat))
-      && (isDongjak(place.lng,place.lat)===true ||
-          (place.kind==='subway' && isNearBoundary(place.lng,place.lat)===true))){
+      && Number(place.lng)>=125 && Number(place.lng)<=128 && Number(place.lat)>=36 && Number(place.lat)<=39){
       const mapBounds=map.getContainer?.()?.getBoundingClientRect?.();
       const viewportHeight=mapBounds?.height||map.getContainer?.()?.clientHeight||globalThis.innerHeight||800;
       const phoneFocus=true;
@@ -2697,18 +2766,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           containerTop:mapBounds?.top||0})
         :-upward;
       const focusZoom=place.kind==='bus'?16.5:15.3;
-      // Keep the current view when the selected marker is already visible
-      // above the open card; avoid unnecessary re-centering on every tap.
-      const projected=map.project?.([Number(place.lng),Number(place.lat)]);
-      const freeTop=Math.max(mapBounds?.top||0,
-        document.querySelector?.('.topbar')?.getBoundingClientRect?.()?.bottom||0,
-        document.getElementById('dj-v794-toolbar')?.getBoundingClientRect?.()?.bottom||0)+24;
-      const freeBottom=(panel.getBoundingClientRect?.()?.top||viewportHeight)-24;
-      const alreadyVisible=projected&&Number.isFinite(projected.x)&&Number.isFinite(projected.y)
-        &&projected.x>48&&projected.x<(mapBounds?.width||globalThis.innerWidth||400)-48
-        &&projected.y>freeTop-(mapBounds?.top||0)&&projected.y<freeBottom-(mapBounds?.top||0)
-        &&(map.getZoom?.()||0)>=focusZoom-.15;
-      try{if(!alreadyVisible)map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
+      // Always focus a newly selected stop in the unobscured map area.
+      try{map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
         zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:420});}
       catch(error){console.debug('[교통 위치 초점 이동 실패]',error);}
       // The previous rAF + timeout focus correction moved the camera twice
@@ -2825,12 +2884,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         }
       }
     }
-    // Subway compact preview prioritizes live arrivals, not adjacent stations.
-    // Reposition the ORIGINAL node after the real ETA content, preserving its
-    // event handlers and allowing the wrapper to remain the scroll owner.
+    // Keep the same interactive neighbor pill above every API result or error.
     const selectionBox=panel.querySelector?.('.transport-selection-box');
-    if(place.kind==='subway'&&arrivalsEl?.parentNode)
-      arrivalsEl.parentNode.insertBefore(neighborsEl,arrivalsEl.nextSibling);
+    if(place.kind==='subway'&&sectionLive?.parentNode)
+      sectionLive.parentNode.insertBefore(neighborsEl,sectionLive);
     else if(place.kind==='bus'&&selectionBox?.parentNode)
       selectionBox.parentNode.insertBefore(neighborsEl,selectionBox);
     arrivalsEl.setAttribute?.('aria-busy','true');

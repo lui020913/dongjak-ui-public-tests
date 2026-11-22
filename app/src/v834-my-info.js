@@ -29,9 +29,8 @@ export function installMyInfo(doc=document){
  landing.innerHTML=`<button type="button" class="dj834-profile-card" data-dj834-action="profile">
  <span class="dj834-user-avatar" aria-hidden="true">${symbol('profile')}</span><span class="dj834-profile-meta"><strong class="dj834-profile-name">내 프로필</strong><small>로그인 · 내 프로필 설정</small></span><span class="dj834-chevron">›</span></button>
  <h3 class="dj834-group-title">앱 &amp; 화면</h3><div class="dj834-settings-group">
- <button type="button" data-dj834-action="theme"><span class="dj834-setting-icon">${symbol('theme')}</span><span>화면 테마</span><small class="dj834-current-theme">변경</small><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="type"><span class="dj834-setting-icon">${symbol('type')}</span><span>글자 크기·굵기</span><span class="dj834-chevron">›</span></button>
- <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>앱·지도·도보 설정</span><span class="dj834-chevron">›</span></button>
+ <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
@@ -112,30 +111,15 @@ export function installMyInfo(doc=document){
  // iOS Settings-style child screens; each choice uses the existing owner.
  const languageSettings=doc.createElement('section');languageSettings.className='dj834-choice-settings';
  languageSettings.innerHTML='<p>앱에서 사용할 언어를 선택하세요.</p><button type="button" data-dj834-language="ko">한국어 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-language="en">English <span aria-hidden="true">✓</span></button>';
- const themeSettings=doc.createElement('section');themeSettings.className='dj834-choice-settings';
- themeSettings.innerHTML='<p>화면 색상은 지도와 창에 함께 적용됩니다.</p><button type="button" data-dj834-theme="light">라이트 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-theme="dark">다크 <span aria-hidden="true">✓</span></button>';
- const mapSettings=doc.createElement('section');mapSettings.className='dj834-choice-settings';
- mapSettings.innerHTML='<p>지도 표시와 도보 설정을 관리합니다.</p><button type="button" data-dj834-setting="map">지도 및 도보 설정 열기 <span aria-hidden="true">›</span></button>';
  const syncChoices=()=>{
   const language=doc.getElementById('dj854-language-select')?.value||'ko';
-  const theme=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'dark':'light';
   for(const element of languageSettings.querySelectorAll('[data-dj834-language]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Language===language));
-  for(const element of themeSettings.querySelectorAll('[data-dj834-theme]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Theme===theme));
  };
  languageSettings.addEventListener('click',event=>{
   const button=event.target.closest('[data-dj834-language]');if(!button)return;
   const select=doc.getElementById('dj854-language-select');if(!select)return;
   if(select.value!==button.dataset.dj834Language){select.value=button.dataset.dj834Language;select.dispatchEvent(new Event('change',{bubbles:true}));}
   syncChoices();
- });
- themeSettings.addEventListener('click',event=>{
-  const button=event.target.closest('[data-dj834-theme]');if(!button)return;
-  const theme=doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme;
-  if(theme!==button.dataset.dj834Theme)doc.getElementById('theme-toggle')?.click();
-  syncChoices();
- });
- mapSettings.addEventListener('click',event=>{
-  if(event.target.closest('[data-dj834-setting="map"]'))doc.dispatchEvent(new Event('dj:open-map-settings'));
  });
  const records=doc.createElement('div');records.className='dj834-records-container';
  // Reuse the actual release catalog and its existing category/source handlers.
@@ -153,13 +137,13 @@ export function installMyInfo(doc=document){
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;historyBox.hidden=true;
- content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings,historyBox);
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;
+ content.append(accountBox,typography,records);content.append(languageSettings,historyBox);
  // All inactive settings views remain mounted for real-time account/history
  // updates but must never contribute their own layout height. Historically
  // a versioned !important display:grid on the hidden typography view pushed
  // every subsequent subpage to the bottom of an iPhone viewport.
- for(const node of [accountBox,typography,records,languageSettings,themeSettings,mapSettings,historyBox])
+ for(const node of [accountBox,typography,records,languageSettings,historyBox])
    node.style.setProperty('display','none','important');
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
@@ -177,12 +161,9 @@ export function installMyInfo(doc=document){
    const loggedIn=account.querySelector('.dj820-account-panel')?.hidden===false;
    if(name&&loggedIn){profileName.textContent=name;profileSub.textContent='내 프로필 설정';}
    else{profileName.textContent='로그인 또는 회원가입';profileSub.textContent='카카오 · 이메일 계정 관리';}
-   landing.querySelector('.dj834-current-theme').textContent=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'다크':'라이트';
  };
  const observer=new MutationObserver(updateProfile);
  observer.observe(account,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
- const app=doc.getElementById('app');
- if(app)observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-dj-preferred-theme']});
  // iOS PWA may suspend Web Animations when a sheet is being resized or
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
@@ -194,10 +175,10 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정',history:'업데이트 내역'})[view]||'설정';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역'})[view]||'설정';
    if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
-   const views={profile:accountBox,type:typography,records,language:languageSettings,theme:themeSettings,map:mapSettings,history:historyBox};
+   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox};
    for(const [key,node] of Object.entries(views)){
      const active=key===view;
      node.hidden=!active;
@@ -210,7 +191,7 @@ export function installMyInfo(doc=document){
    content.style.setProperty('margin-top','0','important');
    content.style.setProperty('padding-top','0','important');
    content.dataset.dj834View=view;
-   if(view==='type')syncTypography();if(view==='language'||view==='theme')syncChoices();
+   if(view==='type')syncTypography();if(view==='language')syncChoices();
    detail.hidden=false;
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
@@ -234,7 +215,8 @@ export function installMyInfo(doc=document){
  landing.addEventListener('click',event=>{
    const button=event.target.closest('[data-dj834-action]');if(!button)return;
    const action=button.dataset.dj834Action;
-   if(['profile','records','type','theme','map','language'].includes(action)){showDetail(action);return;}
+   if(action==='map'){doc.dispatchEvent(new Event('dj:open-map-settings'));return;}
+  if(['profile','records','type','language'].includes(action)){showDetail(action);return;}
    
    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
    if(action==='transit'){

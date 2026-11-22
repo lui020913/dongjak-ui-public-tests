@@ -23,10 +23,12 @@ const checks=[
    contains(src('src/bottom-tab-navigation.js'),'start(button)','page.hidden=true','clearEntrance()');
    contains(src('src/mobile-ux-energy.css'),'visibility:hidden!important','background-color:var(--dj-primary-page-bg');
  }],
- ['A02','installed iOS manual theme switch reloads once but not normal browsers',()=>{
-   const s=src('src/manual-pwa-theme-reload.js');
-   contains(s,'isInstalledIosPhone(win)','win.sessionStorage.setItem','win.location.reload()');
-   contains(src('src/ui-environment.js'),'requestIosThemeRefresh({win:window,app,map,theme:themeState.preference})');
+ ['A02','public light-only UI has no active manual theme refresh, night visibility remains temporary',()=>{
+   const html=src('index.html'),theme=src('src/ui-environment.js');
+   contains(html,"var displayTheme='light'");
+   assert.doesNotMatch(html,/id="theme-toggle"/);
+   assert.doesNotMatch(theme,/requestIosThemeRefresh\(/);
+   contains(theme,'themeState.override(next)');
  }],
  ['A03','closing another sheet cannot reopen the AI modal accidentally',()=>{
    contains(src('src/v880-supabase-safety-ai.js'),'transportDismissedAt','guardTransportDismiss','pointerStart','onExplicitEntryClick','event.isTrusted');

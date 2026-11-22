@@ -1,0 +1,555 @@
+diff --git a/app/index.html b/app/index.html
+index 25295d62..c4fadb10 100644
+--- a/app/index.html
++++ b/app/index.html
+@@ -4,22 +4,17 @@
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+     <meta name="theme-color" id="dj-browser-theme-color" content="#f3f7f5" />
+-    <meta name="color-scheme" content="light dark" />
++    <meta name="color-scheme" content="light" />
+     <meta name="apple-mobile-web-app-capable" content="yes" />
+     <meta name="apple-mobile-web-app-title" content="동작하는 안전지도" />
+     <link rel="manifest" id="dj-app-manifest" href="/manifest-light.webmanifest" />
+     <link rel="apple-touch-icon" id="dj-apple-touch-icon" sizes="180x180" href="/icons/dongjak-ios-home-180.png" />
+     <script>
+-      // A fresh app launch begins in light mode. Only the short-lived one-shot
+-      // iOS native-status refresh retains a manually chosen theme across reload.
++      // Light is the only ordinary app theme. Night visibility changes the
++      // effective palette after the map has loaded, never at cold start.
+       (function(){
+-        var themeReload=null;
+-        try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
+-        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
+-        var displayTheme=themeReload ? themeReload.theme : 'light';
+-        // iOS native chrome requires a real reload. This one-shot refresh is
+-        // NOT a fresh app launch: suppress the loader and guest onboarding.
+-        if(themeReload)document.documentElement.dataset.djThemeRefresh='true';
++        try{sessionStorage.removeItem('dj-manual-theme-reload-v1');}catch(_e){}
++        var displayTheme='light';
+         document.documentElement.dataset.theme=displayTheme;
+         var iconSuffix=displayTheme==='dark'?'dark':'light';
+         // iOS Home Screen art is independent of the application's light/dark theme.
+@@ -244,7 +239,6 @@ <h1 class="map-startup-title">동작하는 안전지도</h1>
+             <button type="button" class="weather-info" id="weather-label" data-dj-weather-icon="◌" data-dj-temperature="—" title="날씨 상세정보 보기">날씨 조회 중</button>
+             <button type="button" id="weather-my-location" aria-label="내 위치 날씨 보기">내 위치</button>
+           </div>
+-          <button type="button" id="theme-toggle" class="theme-toggle" aria-label="라이트/다크 테마 변경">다크</button>
+           <button type="button" id="version-history-trigger" class="prototype version-history-trigger" aria-haspopup="dialog" aria-controls="version-history-modal" aria-label="업데이트 내역 보기">업데이트</button>
+         </div>
+       </header>
+diff --git a/app/src/bus-route-overlay.js b/app/src/bus-route-overlay.js
+index cea733ad..ac924fb5 100644
+--- a/app/src/bus-route-overlay.js
++++ b/app/src/bus-route-overlay.js
+@@ -139,5 +139,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
+       active=null;onState({id,route,status:'error',code:error?.code||'ROUTE_PATH_UPSTREAM'});
+     }finally{clearTimeout(timer);if(controller===ac)controller=null;}
+   }
+-  return {select,clear,refreshVehicles,getActive:()=>active,destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
++  return {select,clear,refreshVehicles,getActive:()=>active,
++    getRouteCoordinates:()=>geometry.features.find(feature=>feature.geometry?.type==='LineString')?.geometry?.coordinates||[],
++    destroy(){clear();map.off?.('style.load',onStyle);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
+ }
+diff --git a/app/src/main.js b/app/src/main.js
+index 4f15b7f6..501f41ca 100644
+--- a/app/src/main.js
++++ b/app/src/main.js
+@@ -2378,26 +2378,8 @@ function renderCommunity() {
+         communityComposerOrigin='community';openCommunityComposer(true);
+       }));
+     }
+-    actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
++    if(loading||offline||filtered)actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
+     empty.append(actions);
+-    if(!filtered&&!loading&&!offline){
+-      const topics=makeCEl('details','dj-community-starter-topics');
+-      topics.append(makeCEl('summary','dj-community-topics-heading','이런 이야기로 시작할 수 있습니다'));
+-      for(const [category,label,detail] of [
+-        ['보행 불편','보행 불편 공유','보도 단차·통행 방해·어두운 길'],
+-        ['개선 제안','우리 동네 개선 제안','보행환경을 개선할 아이디어'],
+-        ['동네 질문','동네 질문 남기기','교통·시설·동네생활 질문']
+-      ]){
+-        const button=communityButton(label,'dj-community-topic',()=>{
+-          communityComposerOrigin='community';
+-          document.getElementById('community-category').value=category;
+-          document.getElementById('community-category').dispatchEvent(new Event('change',{bubbles:true}));
+-          openCommunityComposer(true);
+-        });
+-        button.append(makeCEl('small','',detail));topics.append(button);
+-      }
+-      empty.append(topics);
+-    }
+     empty.append(makeCEl('p','dj-community-empty-footnote','로그인 없이 작성하면 이 기기에만 저장됩니다. 공개 등록에는 로그인과 AI 검사가 필요합니다.'));
+     root.append(empty);
+     return;
+diff --git a/app/src/place-details.js b/app/src/place-details.js
+index 354610fc..fbfc60ab 100644
+--- a/app/src/place-details.js
++++ b/app/src/place-details.js
+@@ -136,18 +136,17 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
+   }
+   const p=placeData({...place,lng:place?.lng??lngLat?.lng,lat:place?.lat??lngLat?.lat});
+   if(p.lat==null||p.lng==null)return null;
+-  // The selected facility is usually on screen where the visitor tapped.
+-  // Do not animate that map camera again simply because its bottom sheet opens.
++  // A facility can be visible near an edge without being centered. Move every
++  // explicit selection to the map's usable area, allowing for a phone sheet.
+   try{
+     const h=map.getContainer?.().clientHeight||window.innerHeight;
+-    const w=map.getContainer?.().clientWidth||window.innerWidth;
+-    const point=map.project?.([p.lng,p.lat]);
+-    const visible=point&&point.x>=28&&point.x<=w-28&&point.y>=100&&point.y<=h-116;
+-    if(!visible){
+-      map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
+-        offset:[0,-Math.round(Math.min(116,Math.max(40,h*.10)))],duration:380});
+-    }
+-  }catch(error){console.info('[시설 중심 이동] 현재 지도 보기 유지',error?.message);}
++    const focusTop=document.querySelector('.topbar')?.getBoundingClientRect?.()?.bottom||100;
++    const isPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
++    const viewportFocus=isPhone?Math.max(focusTop+55,Math.min(h*.42,h-180)):h/2;
++    const offsetY=Math.round(viewportFocus-h/2);
++    map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
++      offset:[0,offsetY],duration:380});
++  }catch(error){console.info('[시설 중심 이동] 지도 상태 확인',error?.message);}
+   const root=document.createElement('section');root.className='dj-place-detail';
+   const sharedSheet=true;
+   let popup=null;
+diff --git a/app/src/transport-map.js b/app/src/transport-map.js
+index d4ede4da..c111b3f5 100644
+--- a/app/src/transport-map.js
++++ b/app/src/transport-map.js
+@@ -29,6 +29,7 @@ import {seoulServiceClock, plannedArrivalsFromTimetable} from './metro-planned-a
+ import {saveTimetable,loadTimetable,storeBusObservation,latestBusObservations,displaySeoulObservationTime,expectedBusHeadway} from './transport-timetable-cache.js';
+ import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
+ import {createSelectedTransportPin,mobileTransportFocusOffset} from './transport-selection-marker.js';
++import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
+ 
+ // v5.2 교통 지도: 고정 지하철 안내 선형 + 배경지도 POI 정류소/역 위치.
+ // 서울시 실시간 정보는 별도 서버에 키를 보관하는 transport-proxy.mjs가 준비된 경우에만 표시.
+@@ -1364,7 +1365,46 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
+   document.getElementById('app')?.append(mapClearRouteButton);
+   let routePresentation=null;
+-  function syncRoutePresentation(){const state=routePresentation;const busSheet=selected?.kind==='bus'&&!panel.hidden;routeStatus.hidden=!state||!busSheet;clearRouteButton.hidden=!state||state.status==='error'||!busSheet;mapClearRouteButton.hidden=!state||state.status==='error';if(state&&state.status!=='error'){mapClearRouteButton.textContent=`${state.route}번 · ${state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':''}해제 ×`;mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';mapClearRouteButton.setAttribute('aria-label',`${state.route}번 버스 노선 표시 해제`);}}
++  let lastFittedRouteId=null;
++  function syncRouteClearDock(){
++    if(mapClearRouteButton.hidden||document.getElementById('app')?.dataset.tab!=='map')return;
++    const shown=node=>{
++      const rect=node?.getBoundingClientRect?.();
++      const style=node&&getComputedStyle(node);
++      return Boolean(node&&!node.hidden&&rect?.height>0&&rect?.width>0&&style?.display!=='none'&&style?.visibility!=='hidden');
++    };
++    const preview=panel.dataset.djBusRoutePreview==='true'&&shown(panel);
++    const blockers=[document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip'),preview?panel:null].filter(shown);
++    const edge=Math.min(globalThis.innerHeight||800,...blockers.map(n=>n.getBoundingClientRect().top));
++    const upper=Math.max(80,...[document.querySelector('.topbar'),document.getElementById('dj-v794-toolbar')].filter(shown).map(n=>n.getBoundingClientRect().bottom+8));
++    const top=Math.max(upper,Math.round(edge-Math.max(34,mapClearRouteButton.getBoundingClientRect()?.height||36)-12));
++    mapClearRouteButton.style.setProperty('top',top+'px','important');
++    mapClearRouteButton.style.setProperty('bottom','auto','important');
++  }
++  function scheduleRouteClearDock(){
++    if(typeof requestAnimationFrame==='function')requestAnimationFrame(syncRouteClearDock);
++    else syncRouteClearDock();
++  }
++  function syncRoutePresentation(){
++    const state=routePresentation;
++    const busSheet=selected?.kind==='bus'&&!panel.hidden;
++    const preview=busSheet&&panel.dataset.djBusRoutePreview==='true';
++    routeStatus.hidden=!state||!busSheet||preview;
++    clearRouteButton.hidden=!state||state.status==='error'||!busSheet||preview;
++    mapClearRouteButton.hidden=!state||state.status==='error';
++    if(state&&state.status!=='error'){
++      const status=state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':'';
++      mapClearRouteButton.textContent=state.route+'번 · '+status+'해제 ×';
++      mapClearRouteButton.title=state.status==='shown'&&!state.stopCount?'공식 경유 정류소 조회 불가':'확대하면 경유 정류소 표시';
++      mapClearRouteButton.setAttribute('aria-label',state.route+'번 버스 노선 표시 해제');
++    }
++    scheduleRouteClearDock();
++  }
++  globalThis.addEventListener?.('resize',scheduleRouteClearDock,{passive:true});
++  if(typeof ResizeObserver!=='undefined'){
++    const routeDockObserver=new ResizeObserver(scheduleRouteClearDock);
++    for(const node of [panel,document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip')])if(node)routeDockObserver.observe(node);
++  }
+   function syncRouteRows(){
+     const active=busRouteOverlay.getActive();
+     for(const row of (arrivalsEl.querySelectorAll?.('[data-bus-route-id]')||[])){
+@@ -1375,17 +1415,46 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+     }
+   }
+   const busRouteOverlay=createBusRouteOverlay({map,apiBase:TRANSPORT_API_BASE,vehicleFetcher:globalThis.fetch,onState:state=>{
++    if(state?.status==='error'&&panel.dataset.djBusRoutePreview==='true')resetBusRoutePreview();
+     routePresentation=state;syncRoutePresentation();
++    if(state?.status==='shown'&&panel.dataset.djBusRoutePreview==='true'&&!panel.hidden&&lastFittedRouteId!==state.id){
++      lastFittedRouteId=state.id;
++      requestAnimationFrame(()=>{
++        if(panel.hidden||panel.dataset.djBusRoutePreview!=='true'||busRouteOverlay.getActive()?.id!==state.id)return;
++        const coordinates=busRouteOverlay.getRouteCoordinates();
++        if(!Array.isArray(coordinates)||coordinates.length<2)return;
++        const xs=coordinates.map(p=>p[0]),ys=coordinates.map(p=>p[1]);
++        const covered=Math.max(170,(globalThis.innerHeight||800)-(panel.getBoundingClientRect()?.top||500)+12);
++        map.fitBounds?.([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:{top:Math.min(190,Math.floor((globalThis.innerHeight||800)*.22)),bottom:covered,right:32,left:32},maxZoom:15.5,duration:600});
++        scheduleRouteClearDock();
++      });
++    }
+     routeStatus.textContent=!state?'':state.status==='loading'?`${state.route}번 노선 불러오는 중`:state.status==='shown'?`${state.route}번 노선 · ${state.stopCount?`경유 정류소 ${state.stopCount}개 · 확대하면 표시`:'지도 표시 중 · 경유 정류소 조회 불가'}`:`${state.route}번 노선 · ${({ROUTE_PATH_AUTH:'노선 API 이용 권한 미확인',MISSING_BUS_KEY:'노선 API 설정 필요',ROUTE_PATH_RATE_LIMIT:'API 호출 한도 초과',ROUTE_PATH_UNAVAILABLE:'공식 경로 데이터 없음',ROUTE_PATH_FORMAT:'공식 좌표 형식 오류'})[state.code]||'노선 서버 연결 실패'} · 다시 눌러 재시도`;
+     syncRouteRows();
+   }});
+-  clearRouteButton.addEventListener('click',()=>busRouteOverlay.clear());
+-  mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();busRouteOverlay.clear();});
++  const resetBusRoutePreview=()=>{
++    delete panel.dataset.djBusRoutePreview;
++    for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
++  };
++  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
++  clearRouteButton.addEventListener('click',clearSelectedBusRoute);
++  mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
+   function activateBusRoute(event){
+     const row=event.target?.closest?.('[data-bus-route-id]');
+     if(!row||!arrivalsEl.contains(row)||panel.hidden||selected?.kind!=='bus')return;
+     if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
+     event.preventDefault();event.stopPropagation();
++    if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
++      panel.dataset.djBusRoutePreview='true';
++      if(panel.classList.contains('dj871-sheet-expanded'))setMobileSheetExpanded(panel,false,document,globalThis.window);
++      panel.style.setProperty('height','clamp(185px,28dvh,255px)','important');
++      panel.style.setProperty('max-height','clamp(185px,28dvh,255px)','important');
++      panel.style.setProperty('min-height','0','important');
++      panel.style.setProperty('overflow','hidden','important');
++      panel.querySelector('.dj875-transit-scroll')?.scrollTo?.({top:0,behavior:'instant'});
++    }
++    lastFittedRouteId=null;
++    syncRoutePresentation();
+     void busRouteOverlay.select({routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType});
+   }
+   arrivalsEl.addEventListener('click',activateBusRoute);
+@@ -1441,7 +1510,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+     const wasVisible=!panel.hidden;
+     if(wasVisible)markAiSurfaceDismissal();
+     windowState.dismiss();
+-    panel.hidden=true;selected=null;seq++;syncRoutePresentation();
++    panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
+     selectionMarker?.remove?.();selectionMarker=null;
+     document.getElementById('app')?.classList?.remove?.('transport-sheet-open');
+     if(wasVisible&&restore)onClose();
+@@ -2667,6 +2736,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+     if(!sameStationLineChange)globalThis.DongjakWindowLifecycle?.requestOpen?.('transport-sheet');
+     const thisSeq=++seq;
+     selected=place;
++    if(!refresh)resetBusRoutePreview();
+     updateTransportFavorite();
+     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));
+     visibleServiceHours=null;
+@@ -2686,8 +2756,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+     // the card does not cover its marker.  Changing a transfer line must not
+     // move the camera again or re-open the sheet animation.
+     if(!sameStationLineChange && !refresh && Number.isFinite(Number(place.lng)) && Number.isFinite(Number(place.lat))
+-      && (isDongjak(place.lng,place.lat)===true ||
+-          (place.kind==='subway' && isNearBoundary(place.lng,place.lat)===true))){
++      && Number(place.lng)>=125 && Number(place.lng)<=128 && Number(place.lat)>=36 && Number(place.lat)<=39){
+       const mapBounds=map.getContainer?.()?.getBoundingClientRect?.();
+       const viewportHeight=mapBounds?.height||map.getContainer?.()?.clientHeight||globalThis.innerHeight||800;
+       const phoneFocus=true;
+@@ -2697,18 +2766,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+           containerTop:mapBounds?.top||0})
+         :-upward;
+       const focusZoom=place.kind==='bus'?16.5:15.3;
+-      // Keep the current view when the selected marker is already visible
+-      // above the open card; avoid unnecessary re-centering on every tap.
+-      const projected=map.project?.([Number(place.lng),Number(place.lat)]);
+-      const freeTop=Math.max(mapBounds?.top||0,
+-        document.querySelector?.('.topbar')?.getBoundingClientRect?.()?.bottom||0,
+-        document.getElementById('dj-v794-toolbar')?.getBoundingClientRect?.()?.bottom||0)+24;
+-      const freeBottom=(panel.getBoundingClientRect?.()?.top||viewportHeight)-24;
+-      const alreadyVisible=projected&&Number.isFinite(projected.x)&&Number.isFinite(projected.y)
+-        &&projected.x>48&&projected.x<(mapBounds?.width||globalThis.innerWidth||400)-48
+-        &&projected.y>freeTop-(mapBounds?.top||0)&&projected.y<freeBottom-(mapBounds?.top||0)
+-        &&(map.getZoom?.()||0)>=focusZoom-.15;
+-      try{if(!alreadyVisible)map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
++      // Always focus a newly selected stop in the unobscured map area.
++      try{map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
+         zoom:Math.max(map.getZoom?.()||0,focusZoom),duration:420});}
+       catch(error){console.debug('[교통 위치 초점 이동 실패]',error);}
+       // The previous rAF + timeout focus correction moved the camera twice
+@@ -2825,12 +2884,10 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
+         }
+       }
+     }
+-    // Subway compact preview prioritizes live arrivals, not adjacent stations.
+-    // Reposition the ORIGINAL node after the real ETA content, preserving its
+-    // event handlers and allowing the wrapper to remain the scroll owner.
++    // Keep the same interactive neighbor pill above every API result or error.
+     const selectionBox=panel.querySelector?.('.transport-selection-box');
+-    if(place.kind==='subway'&&arrivalsEl?.parentNode)
+-      arrivalsEl.parentNode.insertBefore(neighborsEl,arrivalsEl.nextSibling);
++    if(place.kind==='subway'&&sectionLive?.parentNode)
++      sectionLive.parentNode.insertBefore(neighborsEl,sectionLive);
+     else if(place.kind==='bus'&&selectionBox?.parentNode)
+       selectionBox.parentNode.insertBefore(neighborsEl,selectionBox);
+     arrivalsEl.setAttribute?.('aria-busy','true');
+diff --git a/app/src/ui-environment.js b/app/src/ui-environment.js
+index b6e0a82d..f20c0741 100644
+--- a/app/src/ui-environment.js
++++ b/app/src/ui-environment.js
+@@ -91,15 +91,12 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
+ import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
+ import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
+ import {createThemeState} from './theme-state-core.mjs';
+-import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
+ import {scaleMapLabelSize} from './map-label-text-scale.mjs';
+ 
+-function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
+ export function getInitialTheme(){
+-  // The first-paint script owns cold-start light mode and one-shot iOS manual
+-  // refreshes. Do not resurrect an older dark preference during app startup.
+-  const firstPaint=typeof document!=='undefined'?document.documentElement?.dataset?.theme:null;
+-  return firstPaint==='dark'?'dark':'light';
++  // The public app is light-only. Night visibility can still apply a temporary
++  // dark map theme through setTemporaryTheme; no saved theme is restored.
++  return 'light';
+ }
+ export function roadColorRole(layer={}){
+   if(!['line','fill'].includes(layer.type))return null;
+@@ -133,6 +130,8 @@ export function districtExteriorThemePaint(theme='light'){
+ 
+ export function initTheme({map,app}){
+   const toggle=document.getElementById('theme-toggle');
++  if(toggle){toggle.hidden=true;toggle.disabled=true;toggle.style.setProperty('display','none','important');}
++  try{localStorage.removeItem(THEME_KEY);}catch{}
+   const baseline=new Map();
+   // Dynamically injected labels arrive after initial MapLibre load (park names,
+   // nearby POIs, bus/rail stops). Preserve original paint for light restoration.
+@@ -297,17 +296,7 @@ export function initTheme({map,app}){
+         {detail:{theme:next,preference:themeState.preference}}));
+     }
+   };
+-  toggle?.addEventListener('click',()=>{
+-    // Night analysis changes only the EFFECTIVE style, never the saved choice.
+-    themeState.toggle();
+-    safeStorageSet(THEME_KEY,themeState.preference);
+-    displayTheme({notify:true});
+-    // A live meta/theme-color update cannot reliably recolor native iOS PWA
+-    // status chrome. Only a manual theme choice on installed iPhones performs
+-    // one guarded refresh; its camera/tab and onboarding suppression are saved.
+-    // Ordinary browser and temporary night-visibility changes remain in-place.
+-    if(!themeState.temporary)requestIosThemeRefresh({win:window,app,map,theme:themeState.preference});
+-  });
++  // Only the night-visibility controller may request a temporary theme.
+   const setTemporaryTheme=next=>{
+     if(!themeState.override(next))return;
+     displayTheme();
+diff --git a/app/src/v815-map-product.js b/app/src/v815-map-product.js
+index 20f883ac..c9783ca3 100644
+--- a/app/src/v815-map-product.js
++++ b/app/src/v815-map-product.js
+@@ -134,8 +134,8 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
+   waySection.append(wayDetails);
+   // Show waypoint and rail choices before the pedestrian route calculation.
+   const calcBtn=document.getElementById('route-calc');calcBtn?.before(waySection);
+-  const transit=el('section','dj815-route-section');transit.id='dj815-rail-planner';
+-  transit.append(el('h3','', '도보 + 지하철 이동안'));
++  const transit=el('details','dj815-route-section');transit.id='dj815-rail-planner';
++  transit.append(el('summary','', '도보 + 지하철 이동안 · 펼쳐보기'));
+   transit.append(el('p','dj815-helper','확인된 역사 위치와 노선 순서를 기반으로 탐색합니다. 지하철 운행 시간·배차·실시간 환승 시간은 포함되지 않습니다. 버스 환승 경로는 데이터가 확보될 때까지 계산하지 않습니다.'));
+   const findRail=button('지하철 연계 이동안 찾기',renderTransit);
+   transit.append(findRail);
+diff --git a/app/src/v834-my-info.js b/app/src/v834-my-info.js
+index 4ea5f768..aee4f5fd 100644
+--- a/app/src/v834-my-info.js
++++ b/app/src/v834-my-info.js
+@@ -29,9 +29,8 @@ export function installMyInfo(doc=document){
+  landing.innerHTML=`<button type="button" class="dj834-profile-card" data-dj834-action="profile">
+  <span class="dj834-user-avatar" aria-hidden="true">${symbol('profile')}</span><span class="dj834-profile-meta"><strong class="dj834-profile-name">내 프로필</strong><small>로그인 · 내 프로필 설정</small></span><span class="dj834-chevron">›</span></button>
+  <h3 class="dj834-group-title">앱 &amp; 화면</h3><div class="dj834-settings-group">
+- <button type="button" data-dj834-action="theme"><span class="dj834-setting-icon">${symbol('theme')}</span><span>화면 테마</span><small class="dj834-current-theme">변경</small><span class="dj834-chevron">›</span></button>
+  <button type="button" data-dj834-action="type"><span class="dj834-setting-icon">${symbol('type')}</span><span>글자 크기·굵기</span><span class="dj834-chevron">›</span></button>
+- <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>앱·지도·도보 설정</span><span class="dj834-chevron">›</span></button>
++ <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
+  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
+  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
+  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
+@@ -112,15 +111,9 @@ export function installMyInfo(doc=document){
+  // iOS Settings-style child screens; each choice uses the existing owner.
+  const languageSettings=doc.createElement('section');languageSettings.className='dj834-choice-settings';
+  languageSettings.innerHTML='<p>앱에서 사용할 언어를 선택하세요.</p><button type="button" data-dj834-language="ko">한국어 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-language="en">English <span aria-hidden="true">✓</span></button>';
+- const themeSettings=doc.createElement('section');themeSettings.className='dj834-choice-settings';
+- themeSettings.innerHTML='<p>화면 색상은 지도와 창에 함께 적용됩니다.</p><button type="button" data-dj834-theme="light">라이트 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-theme="dark">다크 <span aria-hidden="true">✓</span></button>';
+- const mapSettings=doc.createElement('section');mapSettings.className='dj834-choice-settings';
+- mapSettings.innerHTML='<p>지도 표시와 도보 설정을 관리합니다.</p><button type="button" data-dj834-setting="map">지도 및 도보 설정 열기 <span aria-hidden="true">›</span></button>';
+  const syncChoices=()=>{
+   const language=doc.getElementById('dj854-language-select')?.value||'ko';
+-  const theme=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'dark':'light';
+   for(const element of languageSettings.querySelectorAll('[data-dj834-language]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Language===language));
+-  for(const element of themeSettings.querySelectorAll('[data-dj834-theme]'))element.setAttribute('aria-pressed',String(element.dataset.dj834Theme===theme));
+  };
+  languageSettings.addEventListener('click',event=>{
+   const button=event.target.closest('[data-dj834-language]');if(!button)return;
+@@ -128,15 +121,6 @@ export function installMyInfo(doc=document){
+   if(select.value!==button.dataset.dj834Language){select.value=button.dataset.dj834Language;select.dispatchEvent(new Event('change',{bubbles:true}));}
+   syncChoices();
+  });
+- themeSettings.addEventListener('click',event=>{
+-  const button=event.target.closest('[data-dj834-theme]');if(!button)return;
+-  const theme=doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme;
+-  if(theme!==button.dataset.dj834Theme)doc.getElementById('theme-toggle')?.click();
+-  syncChoices();
+- });
+- mapSettings.addEventListener('click',event=>{
+-  if(event.target.closest('[data-dj834-setting="map"]'))doc.dispatchEvent(new Event('dj:open-map-settings'));
+- });
+  const records=doc.createElement('div');records.className='dj834-records-container';
+  // Reuse the actual release catalog and its existing category/source handlers.
+  // It is a My Info child page on phones rather than a second overlapping modal.
+@@ -153,13 +137,13 @@ export function installMyInfo(doc=document){
+  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
+  // Keep profile, typography, and saved records in the live DOM so renderMy() can
+  // update #my-points even when the records subview has not been opened yet.
+- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;themeSettings.hidden=true;mapSettings.hidden=true;historyBox.hidden=true;
+- content.append(accountBox,typography,records);content.append(languageSettings,themeSettings,mapSettings,historyBox);
++ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;
++ content.append(accountBox,typography,records);content.append(languageSettings,historyBox);
+  // All inactive settings views remain mounted for real-time account/history
+  // updates but must never contribute their own layout height. Historically
+  // a versioned !important display:grid on the hidden typography view pushed
+  // every subsequent subpage to the bottom of an iPhone viewport.
+- for(const node of [accountBox,typography,records,languageSettings,themeSettings,mapSettings,historyBox])
++ for(const node of [accountBox,typography,records,languageSettings,historyBox])
+    node.style.setProperty('display','none','important');
+  // The language preference may initialize before My Info and be swept into
+  // the inactive records container above. Reparent that *same live control*
+@@ -177,12 +161,9 @@ export function installMyInfo(doc=document){
+    const loggedIn=account.querySelector('.dj820-account-panel')?.hidden===false;
+    if(name&&loggedIn){profileName.textContent=name;profileSub.textContent='내 프로필 설정';}
+    else{profileName.textContent='로그인 또는 회원가입';profileSub.textContent='카카오 · 이메일 계정 관리';}
+-   landing.querySelector('.dj834-current-theme').textContent=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'다크':'라이트';
+  };
+  const observer=new MutationObserver(updateProfile);
+  observer.observe(account,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
+- const app=doc.getElementById('app');
+- if(app)observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-dj-preferred-theme']});
+  // iOS PWA may suspend Web Animations when a sheet is being resized or
+  // the native select is opening. Navigation never waits for an animation.
+  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+@@ -194,10 +175,10 @@ export function installMyInfo(doc=document){
+  }
+  function showDetail(view){
+    landing.hidden=true;
+-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',theme:'화면 테마',map:'앱·지도·도보 설정',history:'업데이트 내역'})[view]||'설정';
++   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역'})[view]||'설정';
+    if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
+    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
+-   const views={profile:accountBox,type:typography,records,language:languageSettings,theme:themeSettings,map:mapSettings,history:historyBox};
++   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox};
+    for(const [key,node] of Object.entries(views)){
+      const active=key===view;
+      node.hidden=!active;
+@@ -210,7 +191,7 @@ export function installMyInfo(doc=document){
+    content.style.setProperty('margin-top','0','important');
+    content.style.setProperty('padding-top','0','important');
+    content.dataset.dj834View=view;
+-   if(view==='type')syncTypography();if(view==='language'||view==='theme')syncChoices();
++   if(view==='type')syncTypography();if(view==='language')syncChoices();
+    detail.hidden=false;
+    body.scrollTop=0;
+    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
+@@ -234,7 +215,8 @@ export function installMyInfo(doc=document){
+  landing.addEventListener('click',event=>{
+    const button=event.target.closest('[data-dj834-action]');if(!button)return;
+    const action=button.dataset.dj834Action;
+-   if(['profile','records','type','theme','map','language'].includes(action)){showDetail(action);return;}
++   if(action==='map'){doc.dispatchEvent(new Event('dj:open-map-settings'));return;}
++  if(['profile','records','type','language'].includes(action)){showDetail(action);return;}
+    
+    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
+    if(action==='transit'){
+diff --git a/frontend/production/mobile-next.css b/frontend/production/mobile-next.css
+index 7ef8fa6d..ade55d34 100644
+--- a/frontend/production/mobile-next.css
++++ b/frontend/production/mobile-next.css
+@@ -680,8 +680,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app #map-quick-search-que
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet [data-bus-route-id][aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--dj-bus-selected-color,#0d806a)!important;background:color-mix(in srgb,var(--dj-bus-selected-color,#0d806a) 12%,var(--dj800-surface,#fff))!important;border-color:var(--dj-bus-selected-color,#0d806a)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-bus-route-clear{border-radius:999px!important;padding:8px 14px!important;min-height:34px!important;font-weight:750!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#203d34)!important;border:1px solid var(--dj800-border,#d7e6de)!important;}
+- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-bus-route-map-clear:not([hidden]){position:fixed!important;top:auto!important;bottom:calc(var(--dj910-dock-bottom,76px) + 12px)!important;left:12px!important;right:12px!important;z-index:2600!important;width:auto!important;max-width:calc(100vw - 24px)!important;opacity:1!important;visibility:visible!important;transition:opacity 150ms ease-out!important}
+- html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:not([data-tab="map"]) #dj-bus-route-map-clear,html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(:is(.page-panel,#transport-sheet,#djNext-layer-panel,.dj-place-detail-popup,#ped-tools-panel,#dj854-weather-sheet,#map-gesture-guide):not([hidden])) #dj-bus-route-map-clear{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
++ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #dj-bus-route-map-clear:not([hidden]){position:fixed!important;top:auto!important;bottom:auto!important;left:auto!important;right:12px!important;z-index:2600!important;width:max-content!important;max-width:min(75vw,250px)!important;opacity:1!important;visibility:visible!important;transition:opacity 150ms ease-out!important}
++ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:not([data-tab="map"]) #dj-bus-route-map-clear,html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app:has(:is(.page-panel,#transport-sheet:not([data-dj-bus-route-preview="true"]),#djNext-layer-panel,.dj-place-detail-popup,#ped-tools-panel,#dj854-weather-sheet,#map-gesture-guide):not([hidden])) #dj-bus-route-map-clear{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app .dj-bus-route-clear[hidden]{display:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup{opacity:1!important;animation:none!important;transition:none!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .maplibregl-popup-content{opacity:1!important;animation:none!important;transition:none!important}
+@@ -1121,3 +1121,74 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
+     transform:translateY(-50%)!important;margin:0!important;
+   }
+ }
++
++
++/* Targeted phone layout repairs: route, composer, My Info and empty Community.
++   Safety-map controls and ordinary bus stop cards remain unchanged. */
++@media(max-width:699px){
++  /* A map-origin issue report is a full-screen editor, not a half-height map sheet. */
++  html body #app#app#app#app#app#app#app #participation-panel.dj9256-composing:not([hidden]){
++    position:fixed!important;top:0!important;bottom:0!important;left:0!important;right:0!important;
++    height:100dvh!important;max-height:none!important;width:100vw!important;
++    transform:none!important;translate:none!important;overflow:hidden!important;
++    border-radius:0!important;padding:0!important;z-index:9000!important;
++  }
++  html body #app#app#app#app#app#app#app #participation-panel.dj9256-composing:not([hidden])>.dj836-sheet-body{
++    display:flex!important;flex-direction:column!important;flex:1 1 0!important;
++    height:auto!important;min-height:0!important;max-height:none!important;
++    overflow:hidden!important;padding:0!important;margin:0!important;
++  }
++  html body #app#app#app#app#app#app#app #participation-panel.dj9256-composing #community-form:not([hidden]){
++    display:flex!important;position:relative!important;inset:auto!important;
++    height:100%!important;min-height:0!important;max-height:none!important;
++    flex:1 1 0!important;overflow:hidden!important;
++  }
++  html body #app#app#app#app#app#app#app #participation-panel.dj9256-composing #community-form>.djNext-form-scroll{
++    flex:1 1 0!important;min-height:0!important;max-height:none!important;
++    overflow-y:auto!important;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
++  }
++  html body #app#app#app#app#app#app#app:has(#participation-panel.dj9256-composing:not([hidden])) #bottom-nav{
++    visibility:hidden!important;pointer-events:none!important;
++  }
++  /* One route CTA, located above the dock, with a real scroll clearance. */
++  html body #app#app#app#app#app#app#app #route-panel .dj836-sheet-body{
++    padding-bottom:110px!important;scroll-padding-bottom:110px!important;
++  }
++  html body #app#app#app#app#app#app#app #route-panel #dj815-rail-planner{
++    min-height:0!important;margin:8px 0!important;padding:10px 12px!important;
++  }
++  html body #app#app#app#app#app#app#app #route-panel #dj815-rail-planner>summary{
++    font-size:15px!important;font-weight:700!important;cursor:pointer;list-style:none;
++  }
++  html body #app#app#app#app#app#app#app #route-panel #dj815-rail-planner>summary::-webkit-details-marker{display:none}
++  html body #app#app#app#app#app#app#app #route-panel .dj815-route-share{
++    display:flex!important;justify-content:flex-end!important;align-items:center!important;
++    min-height:0!important;margin:8px 0!important;padding:0!important;
++    background:transparent!important;border:0!important;box-shadow:none!important;
++  }
++  html body #app#app#app#app#app#app#app #route-panel .dj815-route-share>button{
++    min-height:38px!important;width:auto!important;max-width:100%!important;
++    padding:7px 12px!important;font-size:12px!important;border-radius:999px!important;
++  }
++  /* Smaller settings rows and more restrained separators. */
++  html body #app#app#app#app#app#app#app #mine-panel .dj834-settings-group>button{
++    min-height:49px!important;padding:8px 12px!important;
++    font-size:14px!important;border-bottom-width:1px!important;
++  }
++  html body #app#app#app#app#app#app#app #mine-panel .dj834-group-title{
++    margin:17px 5px 8px!important;
++  }
++  html body #app#app#app#app#app#app#app #mine-panel .dj834-profile-card{
++    min-height:76px!important;padding:12px!important;
++  }
++  /* Avoid a tall empty-state card with an empty suggestions box. */
++  html body #app#app#app#app#app#app#app #participation-panel .dj-community-empty-state{
++    padding:16px!important;margin:12px 0!important;gap:10px!important;
++  }
++  html body #app#app#app#app#app#app#app #participation-panel .community-toolbar{
++    gap:6px!important;margin-bottom:8px!important;
++  }
++  html body #app#app#app#app#app#app#app #participation-panel .community-toolbar :is(button,select){
++    min-height:38px!important;height:38px!important;font-size:12px!important;
++  }
++}

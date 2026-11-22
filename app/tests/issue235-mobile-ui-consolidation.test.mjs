@@ -22,9 +22,9 @@ test('superseded transit badge rings and injected start/end icons are removed, n
  assert.ok(current.includes('min-width:44px!important;min-height:44px!important'));
 });
 
-test('compact subway displays arrival data before optional rail neighbor controls',()=>{
+test('compact subway displays interactive neighbor pill before live arrival and quota messages',()=>{
  const metro=read('src/transport-map.js');
- assert.match(metro,/arrivalsEl\.parentNode\.insertBefore\(neighborsEl,arrivalsEl\.nextSibling\)/);
+ assert.match(metro,/sectionLive\.parentNode\.insertBefore\(neighborsEl,sectionLive\)/);
  assert.doesNotMatch(metro,/liveHeading\.parentNode\.insertBefore\(neighborsEl,liveHeading\)/);
  assert.ok(metro.includes("arrivalsEl.setAttribute?.('aria-busy','true')"));
  assert.match(frontend('mobile-next.css'),/\[data-kind="subway"\]:not\(\.dj871-sheet-expanded\) :is\(#transport-description,#transport-chips\)\{display:none!important\}/);

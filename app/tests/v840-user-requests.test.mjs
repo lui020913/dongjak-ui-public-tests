@@ -75,10 +75,10 @@ test('mobile nav rows and labels have same baseline and iPhone-rounded outer pil
  assert.match(css,/grid-template-rows:38px 18px/);
  assert.match(css,/border-radius:999px!important/);
 });
-test('my info theme value is next to arrow and requests confirmation',()=>{
- assert.match(info,/\.dj834-current-theme/);
- assert.match(css,/\.dj834-current-theme/);
- assert.match(shell,/화면 테마를 전환할까요/);
+test('my info removes unused manual theme row while preserving map settings access',()=>{
+ assert.doesNotMatch(info,/data-dj834-action="theme"/);
+ assert.match(info,/data-dj834-action="map"/);
+ assert.match(info,/dispatchEvent\(new Event\('dj:open-map-settings'\)\)/);
 });
 test('profile save/edit and security recovery modes keep login state',()=>{
  assert.match(account,/savedProfile\?'변경사항 저장':'이름 저장'/);
