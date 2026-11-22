@@ -30,7 +30,9 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const focusArea=button('분석 지역으로 이동',()=>{
   if(!dataset?.segments?.length)return;
   const bounds=new maplibregl.LngLatBounds();
-  if(mode==='middleReview'||mode==='speed'){
+  if(mode==='speed'){
+   for(const feature of speedSource?.features||[])for(const point of feature.geometry.coordinates)bounds.extend(point);
+  }else if(mode==='middleReview'){
    for(const feature of display.features)for(const point of feature.geometry.coordinates)bounds.extend(point);
   }else if(mode==='protectionGap'||mode==='current3'){
    for(const feature of policyScope?.features||[])for(const point of feature.geometry.coordinates)bounds.extend(point);
@@ -75,7 +77,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  function render(){
    actions.replaceChildren();exportButton.disabled=!dataset;focusArea.disabled=!dataset?.segments?.length;
    if(!dataset){status.textContent='등록된 자료가 없습니다. JSON 자료를 불러와 주세요.';return;}
-   const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(observedFactorScore(s,f.id)!==null)available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km';
+   const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(observedFactorScore(s,f.id)!==null)available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km'+(speedSource?.features?.length?' · 제한속도 링크 '+speedSource.features.length+'개(별도 도로망)':'');
    // Only the three currently supplied files are eligible; pending team data
    // must never enter the composite as synthetic zeros or safety defaults.
    const options=[['current3','종합 보행 취약도 · 현재 3개 자료'],...dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)).map(f=>[f.id,f.label]),['speed','제한속도 위험도 · 상도1동 표준노드링크']];
@@ -204,15 +206,36 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;ramp.hidden=id==='middleReview';ends.hidden=id==='middleReview';if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
-   if(id){label.textContent=id==='middleReview'?'상현중학교 300m 도로 · 점수 미산정':id==='speed'?'제한속도 위험도 · 실제 링크':id==='current3'?'종합 보행 취약도 · 3개 자료':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=id==='middleReview'||id==='speed'?{geometryM:0,pointCount:0}:summarize(dataset,id);coverage.textContent=id==='speed'?'상도1동 표준노드링크 '+speedRiskCounts(speedSource.features).total+'개 · 10km/h 23 · 30km/h 68 · 40km/h 20 · 50km/h 95 · 공통 조사도로 미매칭 구간 회색':id==='middleReview'?'상현중학교 대표점 300m 내 도로 '+new Set(display.features.map(f=>f.properties.segmentId)).size+'개 구간 · 중학교 위험점수 NULL · 기존 평가 별도 유지':(id==='protectionGap'||id==='current3')?(policyScope?'상도1동 '+policyScope.features.length+'개 구간 · 평가 '+display.features.filter(f=>f.properties.evaluated).length+'개 · 회색 미평가 '+display.features.filter(f=>!f.properties.evaluated).length+'개'+(id==='protectionGap'?' · 공식 SHP 경계 검증 '+(boundaryAudit?.size??'미확인')+'개 (기존 점수 유지)':''):'경계 검증 자료를 불러오지 못해 표시하지 않습니다.'):'평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title=id==='speed'?'표준노드링크 자료 기준 '+(speedMetadata?.speed_record_updated??'미확인')+' · 조명 도로망에 위험점수 임의 매핑하지 않음':'원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+   if(id){label.textContent=id==='middleReview'?'상현중학교 300m 도로 · 점수 미산정':id==='speed'?'제한속도 위험도 · 표준노드링크':id==='current3'?'종합 보행 취약도 · 3개 자료':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=id==='middleReview'||id==='speed'?{geometryM:0,pointCount:0}:summarize(dataset,id);coverage.textContent=id==='speed'?'상도1동 표준노드링크 '+speedRiskCounts(speedSource.features).total+'개 · 30km/h 미만 '+speedRiskCounts(speedSource.features).observed[0]+' · 30km/h '+speedRiskCounts(speedSource.features).observed[40]+' · 40km/h '+speedRiskCounts(speedSource.features).observed[80]+' · 50km/h '+speedRiskCounts(speedSource.features).observed[100]+' · 공통 조사도로 미매칭 구간 회색':id==='middleReview'?'상현중학교 대표점 300m 내 도로 '+new Set(display.features.map(f=>f.properties.segmentId)).size+'개 구간 · 중학교 위험점수 NULL · 기존 평가 별도 유지':(id==='protectionGap'||id==='current3')?(policyScope?'상도1동 '+policyScope.features.length+'개 구간 · 평가 '+display.features.filter(f=>f.properties.evaluated).length+'개 · 회색 미평가 '+display.features.filter(f=>!f.properties.evaluated).length+'개'+(id==='protectionGap'?' · 공식 SHP 경계 검증 '+(boundaryAudit?.size??'미확인')+'개 (기존 점수 유지)':''):'경계 검증 자료를 불러오지 못해 표시하지 않습니다.'):'평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title=id==='speed'?'표준노드링크 자료 기준 '+(speedMetadata?.speed_record_updated??'미확인')+' · 조명 도로망에 위험점수 임의 매핑하지 않음':'원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)':'linear-gradient(90deg,#279b80,#9bc777 25%,#efd05a 50%,#ed9045 75%,#d74648)';
   modelNote.textContent=id==='speed'?'첨부된 제한속도 위험도 기준: 30km/h 미만 0점, 30km/h 40점, 40km/h 80점, 50km/h 100점. 속도수치가 없거나 표에 없는 제한속도는 NULL(미평가)입니다. 표준노드링크 최고제한속도 수집값(2025-05-12 기준)이며 현장 지정·최신 표지와 다를 수 있습니다. 이는 법정 위험등급이나 실제 사고 확률이 아닌 잠재적 충돌 피해 심각성의 상대점수입니다. 206개 링크는 공통 25m 조사망과 대응 검증 전이므로 기존 3지표 종합·길찾기 점수에 포함하지 않습니다.':id==='middleReview'?'보라색은 상현중학교 대표점 주변 300m 공간검토 도로입니다. 위험등급이나 법정 보호구역 미지정 판정이 아닙니다. 중학교 통학구역·보호구역 지정 고시 미검증이므로 이 레이어의 새 점수는 NULL이며 PRI와 길찾기에는 반영하지 않습니다.':id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 2026-09-20 공식 학구 원본의 절단 도로 재교차를 별도로 검증했고 기존 위험점수가 변하지 않았습니다. 원본 점수와 보호구역 여부는 그대로 유지합니다. 상현중학교는 현황만 포함하고 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
   render();
  }
  function inspect(e){
   if(!mode||app.dataset.tab!=='map'||dialog.open||!map.getLayer(LINE))return;
-  const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[LINE,POINT].filter(l=>map.getLayer(l))});
-  const selected=candidates[0];const s=lookup.get(selected?.properties?.segmentId);if(!s)return;
+  const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[SPEED_LINE,LINE,POINT].filter(l=>map.getLayer(l))});
+  const selected=candidates[0];
+  if(mode==='speed'){
+   if(!selected)return;
+   const properties=selected.properties||{};
+   const node=el('div','dj-pri-detail');
+   if(properties.speedSource==='observed-link'){
+    const speed=Number(properties.speed),score=speedLimitRiskScore(speed);
+    node.append(el('strong','','제한속도 위험도 · 표준노드링크'),
+     el('b','',score===null?'미평가':score.toFixed(0)+' / 100점'),
+     el('p','','수집된 최고제한속도 '+speed+'km/h · 링크 ID '+properties.linkId),
+     el('small','','경계 내 링크 연장 약 '+Number(properties.lengthM).toFixed(1)+'m · 갱신일 '+(properties.updated||'미확인')),
+     el('small','','PDF 상대평가 기준: 30km/h 미만 0점, 30km/h 40점, 40km/h 80점, 50km/h 100점. 이 도로링크 속성은 최신 현장 제한속도·교통안전시설 지정 고시와 다를 수 있습니다.'));
+   }else{
+    node.append(el('strong','','제한속도 위험도 · 공통 조사도로'),
+     el('b','','미평가 (NULL)'),
+     el('p','',(properties.name||'이름 없는 도로')+' · 공통 조사구간 '+(properties.segmentId||'미확인')),
+     el('small','','속도 표준노드링크와 이 조사 도로구간의 1:1 공간대응이 검증되지 않아 점수를 임의로 배정하지 않았습니다. 회색은 저위험 판정이 아닙니다.'));
+   }
+   node.append(el('small','','점수가 높을수록 잠재적 충돌 피해 심각성이 큰 상대평가입니다. 실제 사고 발생 가능성이나 법정 위험등급이 아닙니다.'));
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'284px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+  }
+  const s=lookup.get(selected?.properties?.segmentId);if(!s)return;
   if(mode==='middleReview'){
    const node=el('div','dj-pri-detail');node.append(el('strong','','상현중학교 300m 검토 · '+(s.name||'이름 없는 도로')),el('b','','중학교 관련 보호 공백 점수: 미산정'),el('p','',s.id+' · 상도1동 경계 내부 도로'),el('small','','이 범위는 학교 대표점으로부터 300m이며 공식 보호구역·실제 통학로가 아닙니다. 2025년 경찰청 보호구역 원본에 상현중학교 대응 지정 자료가 없어 법적 공백 판정은 보류합니다. 기존 초등학교·노인시설 점수는 변경하지 않습니다.'));
    const base=selected?.properties?.baselinePolicyScore;
