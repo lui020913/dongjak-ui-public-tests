@@ -53,19 +53,21 @@ jobs:
           node --check scripts/live-qa-analyze.mjs
           node --test tests/live-qa-verify-capture.test.mjs
       - name: Restore previous adaptive Gemini focus history
+        continue-on-error: true
         uses: actions/cache/restore@v4
         with:
           path: qa-state/history.json
-          key: adaptive-gemini-qa-v1-${{ github.run_id }}
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             adaptive-gemini-qa-v1-
       - name: Choose reproducible random design and function focuses
         run: node scripts/live-qa-adaptive-plan.mjs
       - name: Save focus cooldown history (best effort)
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: qa-state/history.json
-          key: adaptive-gemini-qa-v1-${{ github.run_id }}
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Attach focus plan to the exact release run
         uses: actions/upload-artifact@v4
         with:
