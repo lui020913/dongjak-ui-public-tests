@@ -71,7 +71,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    const options=dataset.factors.map(f=>[f.id,f.label]);options.unshift(['pri3','종합 보행 취약도 · 현재 3개 지표']);
    for(const [id,name] of options){
      
-     const unavailable=id==='pri3'?!['lighting','accidents','protectionGap'].every(f=>available.has(f))&&!dataset.segments.some(s=>segmentScore(dataset,s,'pri3')!==null):!available.has(id);
+     const unavailable=id==='pri3'?!dataset.segments.some(s=>segmentScore(dataset,s,'pri3')!==null):!available.has(id);
      const suffix=id==='pri3'?(unavailable?' · 3개 관측값 중첩 구간 없음':' · 관측값 3/3 구간만'):unavailable?' · 미제출':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명만':'';
      const b=button(name+suffix,()=>{activate(id);dialog.close();});
      b.disabled=unavailable;b.setAttribute('aria-pressed',String(mode===id));actions.append(b);
