@@ -77,7 +77,10 @@ async function enter(page,id,key){
  await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
  const frames=await page.evaluate(()=>{window.__auditObserver?.disconnect?.();return window.__auditFrames;});
  expect(frames.every(f=>f.rootOpacity===1)).toBe(true);
- expect(frames.some(f=>f.contentAnimation.includes('djTabContentReveal'))).toBe(true);
+ // The six-issue phone UI replaces the legacy reveal with an opaque handoff
+ // and a content-only animation. Both names are valid, but an actual content
+ // animation is still required: no removing this assertion or allowing 'none'.
+ expect(frames.some(f=>/(?:djTabContentReveal|dj-six-page-content-in)/.test(f.contentAnimation))).toBe(true);
  expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
  await geometry(page,'#'+id);
 }
@@ -117,7 +120,14 @@ test('compact HUD and visible motion; desktop navigation and dark theme',{tag:'@
    await enter(page,'mine-panel','mine');
  }else{await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();}
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
- await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
+ // The My Info root row opens the iOS-style child page; selecting the dark
+ // choice is a second explicit user action, not a toggle on the root row.
+ await expect(page.locator('#mine-panel .dj834-my-detail')).toBeVisible();
+ await tap(page,page.locator('#mine-panel [data-dj834-theme="dark"]'));
+ const themeConfirm=page.locator('#dj840-theme-confirm [data-decision=confirm]');
+ // The optional native web-app confirmation must never be required if the
+ // theme was applied directly (ordinary browser or already-consented PWA).
+ if(await themeConfirm.isVisible())await tap(page,themeConfirm);
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
  await expect(page.locator('#mine-panel')).toHaveCSS('background-color','rgb(34, 40, 46)'); // Unified charcoal primary page and status edge.
 });

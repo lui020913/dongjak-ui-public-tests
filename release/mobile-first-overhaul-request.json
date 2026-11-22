@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.88",
   "public_work_branch": "main",
-  "purpose": "Owner-requested six-group iPhone UI correction from merged PR #316: stabilize onboarding/guide scale and TIP, genuinely crossfade tabs while dock stays fixed, correct route footer and news/community palette, replace My Info language/theme/map options with nested settings, align nearby info and report composer, calculate observed-only 3-factor pedestrian vulnerability and fix its sheet/button, lighten university map labels. Preserve all existing source features and 300m policy gap 50:50 source evidence. Gate deployment by exact-source CI #45021065600, isolated Preview, phone QA, desktop/tablet gate, and protected Production/rollback verification.",
-  "attempt": 269,
+  "purpose": "Repeat exact-source protected 9.2.88 release for merged PR #316 six-group iPhone fixes plus current browser regression compatibility, after a successful Public app source CI. Require isolated Preview, all 12 mobile QA shards, PC/tablet gate, protected Production and rollback verification. Preserve the existing functionality, observed-only >=2-of-3 vulnerability methodology, and 300m policy gap 50:50 evidence.",
+  "attempt": 270,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Source PR #316 merged as 8c431263bc1b6eb8a7bc4a5b6b345935919a1ec3 after full public CI 45021065600 succeeded including three phone widths. This is a new 9.2.88 requested candidate, not a claim that Production is already deployed.",
+  "last_retry_reason": "Retry 9.2.88 after protected release run #45021281009: browser checks used obsolete 'djTabContentReveal' name and assumed root My Info theme row opened an old confirmation directly. The repaired test now measures the current content-only fade and selects the nested dark theme choice, honoring optional consent without skipping theme or layer assertions. No production released from prior attempt.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
