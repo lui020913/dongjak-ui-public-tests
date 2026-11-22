@@ -40,7 +40,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!replay(button))return;
   // Discard a stale outgoing page that an interrupted sheet animation kept alive.
   // Never animate a whole page root; its opaque background must exist immediately.
-  for(const page of doc.querySelectorAll('.page-panel[data-page]')){
+  for(const page of (doc.querySelectorAll?.('.page-panel[data-page]')||[])){
     if(page.dataset.page!==app.dataset.tab){win.DongjakWindowMotion?.cancel?.(page);page.hidden=true;}
   }
   if(reduced()||app.dataset.tab==='map')return;
