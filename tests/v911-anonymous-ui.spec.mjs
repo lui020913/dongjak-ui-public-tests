@@ -609,7 +609,14 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  const toggle=modal.getByRole('switch').last();await expect(toggle).toHaveAttribute('aria-checked','false');
- await expect(toggle.locator('.djNext-switch-track')).toHaveCSS('background-color','rgb(83, 97, 93)');
+ // The ordinary app is light-only. #a5b5ad is its neutral OFF track;
+ // #53615d belonged to the removed dark-mode UI and is no longer a valid
+ // expectation. Verify the switch actually changes appearance and state.
+ const track=toggle.locator('.djNext-switch-track');
+ await expect(track).toHaveCSS('background-color','rgb(165, 181, 173)');
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-checked','true');
+ await expect(track).not.toHaveCSS('background-color','rgb(165, 181, 173)');
+ await toggle.click();await expect(toggle).toHaveAttribute('aria-checked','false');
  await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();
 });
 test('phone report composer has non-overlapping independent header and input scroll',{tag:'@phone-layout'},async({page})=>{

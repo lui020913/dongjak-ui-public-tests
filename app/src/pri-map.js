@@ -54,6 +54,28 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const legend=el('aside','dj-pri-legend');legend.id='dj-pri-legend';legend.hidden=true;
  // Anchor both floating surfaces exactly above the live bottom navigation,
  // not a guessed iPhone safe-area value from an older release.
+ // CSS positioning is not necessarily in the same coordinate system as a
+ // native modal top layer or a MapLibre popup. On a 375–430px phone the
+ // previously rendered dialog remained 121px above the REAL dock despite
+ // changes to its CSS bottom. Correct against the two rendered rectangles,
+ // only after the browser has laid the surface out.
+ const alignPriDockSurface=node=>{
+  if(!node||node.hidden||win.innerWidth>699)return;
+  const nav=doc.getElementById('bottom-nav');
+  if(!nav||nav.hidden)return;
+  const dock=nav.getBoundingClientRect?.();
+  if(!dock||dock.height<40||!Number.isFinite(dock.top))return;
+  node.style.removeProperty('translate');
+  const rect=node.getBoundingClientRect?.();
+  if(!rect||rect.height<1||!Number.isFinite(rect.bottom))return;
+  const shift=Math.round(dock.top-9-rect.bottom);
+  if(Math.abs(shift)>1)node.style.setProperty('translate','0px '+shift+'px','important');
+ };
+ const alignPriDockSurfaces=()=>{
+  if(dialog.open)alignPriDockSurface(dialog);
+  if(!legend.hidden)alignPriDockSurface(legend);
+  if(popup?.getElement?.())alignPriDockSurface(popup.getElement());
+ };
  const syncDockClearance=()=>{
   const nav=doc.getElementById('bottom-nav');
   const rect=nav?.getBoundingClientRect?.();
@@ -66,6 +88,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   const dockHeight=Number.isFinite(rect?.height)&&rect.height>=48&&rect.height<=160?Math.round(rect.height):70;
   doc.documentElement.style.setProperty('--dj-pri-dock-clearance',
    'calc(env(safe-area-inset-bottom,0px) + '+(dockHeight+12)+'px)');
+  alignPriDockSurfaces();
  };
  win.addEventListener('resize',syncDockClearance,{passive:true});
  win.visualViewport?.addEventListener?.('resize',syncDockClearance,{passive:true});
@@ -184,7 +207,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    if(revision===before){acceptDataset(next);if(failed.length)status.textContent+=' · 일부 추가 지표를 불러오지 못했습니다.';}
   }catch(e){if(revision===before)status.textContent='서버 PRI 자료를 불러오지 못했습니다. JSON 자료를 직접 불러올 수 있습니다.';}
  }
- toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();app.dataset.djPriDialog='true';syncPriHud(true);void loadDefault();});
+ toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();alignPriDockSurface(dialog);win.requestAnimationFrame?.(alignPriDockSurfaces);app.dataset.djPriDialog='true';syncPriHud(true);void loadDefault();});
  dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;resetDialogView();syncPriHud(Boolean(mode));});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
  function draw(){
@@ -247,6 +270,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)':'linear-gradient(90deg,#279b80,#9bc777 25%,#efd05a 50%,#ed9045 75%,#d74648)';
   modelNote.textContent=id==='speed'?'첨부된 제한속도 위험도 기준: 30km/h 미만 0점, 30km/h 40점, 40km/h 80점, 50km/h 100점. 속도수치가 없거나 표에 없는 제한속도는 NULL(미평가)입니다. 표준노드링크 최고제한속도 수집값(2025-05-12 기준)이며 현장 지정·최신 표지와 다를 수 있습니다. 이는 법정 위험등급이나 실제 사고 확률이 아닌 잠재적 충돌 피해 심각성의 상대점수입니다. 206개 링크는 공통 25m 조사망과 대응 검증 전이므로 기존 3지표 종합·길찾기 점수에 포함하지 않습니다.':id==='middleReview'?'보라색은 상현중학교 대표점 주변 300m 공간검토 도로입니다. 위험등급이나 법정 보호구역 미지정 판정이 아닙니다. 중학교 통학구역·보호구역 지정 고시 미검증이므로 이 레이어의 새 점수는 NULL이며 PRI와 길찾기에는 반영하지 않습니다.':id==='current4'?'4개 평가항목은 야간 조명·교통사고·제도적 사각지대·제한속도입니다. 상도1동 기준 기하 정합된 제한속도 공통 조사구간 '+(speedMatchStats?.observed??0)+'개만 네 번째 지표로 반영합니다. 같은 항목 가중치는 1이며 유효 관측 2개 이상을 동일하게 평균합니다(점수별 유효 지표 수는 상세정보 표시). 미정합 도로는 제한속도 NULL로 남고 0점이나 안전 100점을 만들지 않습니다. 센터라인 기하 정합은 현장·법정속도 검증이 아닙니다. 높은 점수=취약, 빨간색입니다.':id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 2026-09-20 공식 학구 원본의 절단 도로 재교차를 별도로 검증했고 기존 위험점수가 변하지 않았습니다. 원본 점수와 보호구역 여부는 그대로 유지합니다. 상현중학교는 현황만 포함하고 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
   render();
+  if(id){alignPriDockSurface(legend);win.requestAnimationFrame?.(alignPriDockSurfaces);}
  }
  function inspect(e){
   if(!mode||app.dataset.tab!=='map'||dialog.open||!map.getLayer(LINE))return;
@@ -270,14 +294,14 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
      el('small','','속도 표준노드링크와 이 조사 도로구간의 1:1 공간대응이 검증되지 않아 점수를 임의로 배정하지 않았습니다. 회색은 저위험 판정이 아닙니다.'));
    }
    node.append(el('small','','점수가 높을수록 잠재적 충돌 피해 심각성이 큰 상대평가입니다. 실제 사고 발생 가능성이나 법정 위험등급이 아닙니다.'));
-   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'284px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'284px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);alignPriDockSurface(popup.getElement?.());return;
   }
   const s=lookup.get(selected?.properties?.segmentId);if(!s)return;
   if(mode==='middleReview'){
    const node=el('div','dj-pri-detail');node.append(el('strong','','상현중학교 300m 검토 · '+(s.name||'이름 없는 도로')),el('b','','중학교 관련 보호 공백 점수: 미산정'),el('p','',s.id+' · 상도1동 경계 내부 도로'),el('small','','이 범위는 학교 대표점으로부터 300m이며 공식 보호구역·실제 통학로가 아닙니다. 2025년 경찰청 보호구역 원본에 상현중학교 대응 지정 자료가 없어 법적 공백 판정은 보류합니다. 기존 초등학교·노인시설 점수는 변경하지 않습니다.'));
    const base=selected?.properties?.baselinePolicyScore;
    if(base!==null&&base!==undefined&&Number.isFinite(Number(base)))node.append(el('small','','기존 보호 공백 참고 점수: '+Number(base).toFixed(1)+'점 (중학교 점수가 아님)'));
-   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);alignPriDockSurface(popup.getElement?.());return;
   }
   const v=riskValue(segmentScore(dataset,s,mode)),node=el('div','dj-pri-detail');const modeled=mode==='accidents'&&s.evidence?.accidents?.modeled===true;node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',modeled?'미선정 · 미평가':v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
   const fs=mode==='current4'?dataset.factors.filter(f=>CURRENT_FOUR_FACTORS.includes(f.id)):mode==='current3'?dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)):mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
@@ -295,7 +319,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   if(mode==='current4')node.append(el('small','','4개 항목 중 실제 유효 지표 '+currentFourFactorCoverage(s)+'/4 · 결측은 평균에서 제외 · 제한속도 공간 정합 잠정'));
   if(mode==='current3')node.append(el('small','',`유효 지표 ${currentVulnerabilityCoverage(s)}/3 · 미평가 지표는 평균에서 제외`));
    node.append(el('small','','높을수록 상대적으로 큰 취약 신호이며 빨간색으로 표현되는 연구용 위험점수입니다. 미선정·미평가 구간은 회색이며, 내부 임시점수는 표시 및 평균에서 제외됩니다.'));
-  popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);
+  popup?.remove();popup=new maplibregl.Popup({closeButton:true,className:'dj-pri-map-popup',maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);alignPriDockSurface(popup.getElement?.());
  }
  let recoveryQueued=false;
  function recoverLayer(){
