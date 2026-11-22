@@ -129,7 +129,10 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     }
   };
   if(!readSeen(win))preloadOnboardingImages();
-  let index=0,opened=false,returnFocus=null,seenInMemory=false,pointer=null,closeTimer=0,swapTimer=0,swapEpoch=0;
+  // A manual iOS theme refresh is the same visit, not a new signed-out
+  // session. Preserve the user's current view without reopening onboarding.
+  const isNativeThemeRefresh=doc.documentElement?.dataset?.djThemeRefresh==='true';
+  let index=0,opened=false,returnFocus=null,seenInMemory=isNativeThemeRefresh,pointer=null,closeTimer=0,swapTimer=0,swapEpoch=0;
   // Preserve the outgoing fully painted frame until the replacement is ready.
   let slideGhosts=[];
   function clearSlideGhosts(){
