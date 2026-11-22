@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.76",
+  "application_version": "9.2.77",
   "public_work_branch": "main",
-  "purpose": "Fast protected mobile release of merged app fixes PR #287 and verified captures correction PR #289 using opted-out optional six design recording gate PR #292. User explicitly requests skipping redundant design capture. Preserve public source CI, sealed artifact, exact SHA Preview, 24 parallel phone functional browser shards, PC/tablet, transit service status, Cloudflare production approval, source marker and guarded rollback. Design capture/Gemini must be skipped when opt-in vars ENABLE_DESIGN_CAPTURE_QA and ENABLE_GEMINI_QA are both not true; no fake 'design passed' report.",
-  "attempt": 249,
+  "purpose": "Owner-requested integrated phone UI release including merged PR #291: fullscreen unified map/walking settings, map label white text/dark outline in light theme, no non-header backdrop dim/blur with soft card shadows, weather 7-day inset and no expansion, strictly separated light/dark palettes, compact safety info dock gap, aligned language preference icon. Preserve Preview, 24 phone QA shards, PC/tablet checks, protected Production environment, provenance marker, API health checks and guarded rollback. Optional design capture/Gemini is not required when disabled.",
+  "attempt": 250,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Prior release #44997599200 blocked by a design capture lane, despite user requesting no more design screenshots. Source PR #292 merged and Public CI #44998307141 successful, making 6 captures optional by default while retaining the other protected release gates.",
+  "last_retry_reason": "Previous release run #44998552160 targeted pre-merge commit d3307c1; start exact source release only after merged PR #291 commit 6c781bfd1dddc6dcd35a545f4a57fb971428e764.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
