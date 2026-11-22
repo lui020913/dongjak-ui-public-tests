@@ -17,3 +17,40 @@ test('primary style, elevation, night building occlusion and emergency status re
  assert.match(main,/if\(!interactiveMoving\|\|movementIsSlow\|\|!baseBuildingsVisible\|\|app\.dataset\.sangdoNight==='on'/);
  assert.match(main,/if\(app\.dataset\.sangdoNight==='on'\)movementIsSlow=false/);
 });
+
+test('HUD scale docking never fights the active phone renderer for MapLibre DPR',async()=>{
+ const {installScaleDocking}=await import('../src/map-scale-docking.js');
+ const originalWindow=globalThis.window;
+ const originalRaf=globalThis.requestAnimationFrame;
+ const listeners=new Map(),handlers=new Map(),applied=[];
+ const mockWindow={
+  innerWidth:390,innerHeight:844,devicePixelRatio:3,navigator:{deviceMemory:8},
+  matchMedia:()=>({matches:true}),
+  addEventListener:(type,cb)=>listeners.set(type,cb),
+  removeEventListener:type=>listeners.delete(type)
+ };
+ const doc={querySelectorAll:()=>[]};
+ const cssStyle={removeProperty(){}};
+ const app={ownerDocument:doc,dataset:{tab:'map',djPhoneBudget:'normal'},
+  querySelector:()=>null,addEventListener(){},removeEventListener(){},
+  classList:{add(){},remove(){}},style:cssStyle};
+ const container={querySelector:()=>null};
+ const map={on:(type,cb)=>handlers.set(type,cb),off:type=>handlers.delete(type),
+  getContainer:()=>container,getPixelRatio:()=>1.25,setPixelRatio:value=>applied.push(value),
+  isMoving:()=>false};
+ const overview={style:cssStyle};
+ try{
+  globalThis.window=mockWindow;globalThis.requestAnimationFrame=()=>1;
+  const dispose=installScaleDocking({map,app,overview});
+  handlers.get('movestart')();handlers.get('moveend')();listeners.get('resize')();
+  assert.deepEqual(applied,[],'phone DPR belongs to adaptive phone render policy, not HUD');
+  dispose();
+  delete app.dataset.djPhoneBudget;
+  const fallback=installScaleDocking({map,app,overview});
+  assert.ok(applied.length>0,'other device profiles still use existing HUD quality policy');
+  fallback();
+ }finally{
+  if(originalWindow===undefined)delete globalThis.window;else globalThis.window=originalWindow;
+  if(originalRaf===undefined)delete globalThis.requestAnimationFrame;else globalThis.requestAnimationFrame=originalRaf;
+ }
+});

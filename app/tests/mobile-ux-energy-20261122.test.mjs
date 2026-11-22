@@ -95,3 +95,18 @@ test('nonselected accident areas render gray, not as measured safe 100',()=>{
   assert.equal(road.modeled,true);
   assert.equal(summarize(merged,'accidents').observedM,0);
 });
+
+test('the coordinated mobile shell releases listeners, timers and stale confirmations on disposal',()=>{
+ const src=readFileSync(new URL('../src/v840-coordinated-ui.js',import.meta.url),'utf8');
+ for(const signature of [
+  "mapNavButton?.removeEventListener('click',selectedMap)",
+  "search?.removeEventListener('focusin',sync)",
+  "search?.removeEventListener('focusout',onSearchFocusOut)",
+  "label.removeEventListener('keydown',onTipKeydown)",
+  "guideToggle.removeEventListener('click',onGuideToggle)",
+  "win.clearTimeout(tipFadeTimer)",
+  "win.clearTimeout(searchFocusTimer)",
+  "disposed=true;tipTransitionToken++",
+  "const finish=()=>{if(disposed)return;dialog.hidden=true"
+ ])assert.ok(src.includes(signature),'missing teardown guard: '+signature);
+});

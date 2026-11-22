@@ -15,9 +15,10 @@ export function installCoordinatedShell(doc=document,win=window){
  tipViewport.append(tipText);label.append(tipMark,tipViewport);app.append(label);
  const openGuideFromTip=()=>doc.getElementById('map-gesture-guide-open')?.click();
  label.addEventListener('click',openGuideFromTip);
- label.addEventListener('keydown',event=>{
+ const onTipKeydown=event=>{
    if(event.key==='Enter'||event.key===' '){event.preventDefault();openGuideFromTip();}
- });
+ };
+ label.addEventListener('keydown',onTipKeydown);
  // Show the same hints in the ? panel. The list can be collapsed to save space.
  const guide=doc.getElementById('map-gesture-guide');
  const tipGuide=doc.createElement('section');tipGuide.id='dj841-guide-tips';
@@ -26,14 +27,15 @@ export function installCoordinatedShell(doc=document,win=window){
  guideToggle.innerHTML='<span>지도 이용 TIP</span><span class="dj852-tip-chevron" aria-hidden="true">⌄</span>';
  const guideList=doc.createElement('ul');guideList.id='dj841-guide-tip-list';guideList.hidden=true;tipGuide.classList.add('is-collapsed');
  for(const item of MAP_TIP_MESSAGES){const li=doc.createElement('li');li.textContent=item;guideList.append(li);}
- guideToggle.addEventListener('click',()=>{
+ const onGuideToggle=()=>{
    const expanded=guideToggle.getAttribute('aria-expanded')!=='true';
    guideToggle.setAttribute('aria-expanded',String(expanded));
    guideList.hidden=!expanded;tipGuide.classList.toggle('is-collapsed',!expanded);
- });
+ };
+ guideToggle.addEventListener('click',onGuideToggle);
  tipGuide.append(guideToggle,guideList);
  if(guide){const anchor=guide.querySelector('.dj-guide-release');if(anchor)anchor.before(tipGuide);else guide.append(tipGuide);}
- let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,disposed=false;
+ let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,tipFadeTimer=0,searchFocusTimer=0,disposed=false;
  label.hidden=true;
  const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
    &&!doc.querySelector('#map-startup-overlay:not([hidden])');
@@ -42,7 +44,7 @@ export function installCoordinatedShell(doc=document,win=window){
    if(app.dataset.djUserTipDismissed==='true'||app.dataset.djPriVisible==='true')return;
    if(label.hidden){
      label.hidden=false;label.classList.remove('is-visible');
-     (win.requestAnimationFrame||((fn)=>win.setTimeout(fn,0)))(()=>{if(isIdleMap())label.classList.add('is-visible');});
+     (win.requestAnimationFrame||((fn)=>win.setTimeout(fn,0)))(()=>{if(!disposed&&isIdleMap())label.classList.add('is-visible');});
    }else label.classList.add('is-visible');
  };
  const hideTip=()=>{
@@ -60,14 +62,16 @@ export function installCoordinatedShell(doc=document,win=window){
    const visible=!label.hidden&&label.classList.contains('is-visible')&&isIdleMap();
    const token=++tipTransitionToken;
    const updateText=()=>{
-     if(token!==tipTransitionToken)return;
+     tipFadeTimer=0;
+     if(disposed||token!==tipTransitionToken)return;
      tip=next;tipText.textContent=MAP_TIP_MESSAGES[tip];
      tipText.classList.remove('dj852-tip-copy-fade');
    };
    if(!visible){updateText();return;}
    // Keep the TIP pill itself visible; fade only its changing sentence.
    tipText.classList.add('dj852-tip-copy-fade');
-   win.setTimeout(updateText,170);
+   if(tipFadeTimer)win.clearTimeout(tipFadeTimer);
+   tipFadeTimer=win.setTimeout(updateText,170);
  };
  const sync=()=>{
    if(disposed||queued)return;queued=true;
@@ -103,7 +107,8 @@ export function installCoordinatedShell(doc=document,win=window){
    const overview=doc.getElementById('overview-sheet');if(overview)overview.hidden=true;
    sync();
  };
- nav.querySelector('[data-tab="map"]')?.addEventListener('click',selectedMap);
+ const mapNavButton=nav.querySelector('[data-tab="map"]');
+ mapNavButton?.addEventListener('click',selectedMap);
  const afterClose=(event)=>{
    // Keep original controller as the sole owner of the layer state; collapse visual expansion only.
    const target=event.target.closest?.('#map-safety-close,#map-options-mobile-close,#map-options-desktop-close,#map-safety-backdrop,[data-close-page],#news-close-to-map,#admin-dong-close,.dj-sheet-chrome-close,#dj832-data-sheet .dj832-sheet-close');
@@ -118,7 +123,12 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  doc.addEventListener('click',afterClose);
  const search=doc.getElementById('map-quick-search');
- search?.addEventListener('focusin',sync);search?.addEventListener('focusout',()=>win.setTimeout(sync,0));
+ const onSearchFocusOut=()=>{
+   if(searchFocusTimer)win.clearTimeout(searchFocusTimer);
+   searchFocusTimer=win.setTimeout(()=>{searchFocusTimer=0;sync();},0);
+ };
+ search?.addEventListener('focusin',sync);
+ search?.addEventListener('focusout',onSearchFocusOut);
  // Confirm before triggering the actual theme button; no premature loading overlay.
  const dialog=doc.createElement('section');dialog.id='dj840-theme-confirm';dialog.dataset.djDialogFade='true';dialog.hidden=true;
  dialog.innerHTML='<div class="dj840-theme-card" role="dialog" aria-modal="true" aria-labelledby="dj840-theme-title"><h2 id="dj840-theme-title">화면 테마를 전환할까요?</h2><p>지도와 화면의 밝기를 변경합니다.</p><div><button type="button" data-decision="cancel">취소</button><button type="button" data-decision="confirm">전환</button></div></div>';
@@ -135,14 +145,33 @@ export function installCoordinatedShell(doc=document,win=window){
  const decide=(event)=>{
    const choice=event.target.closest?.('[data-decision]')?.dataset.decision;
    if(!choice)return;
-   const finish=()=>{dialog.hidden=true;if(choice==='confirm'&&theme){theme.dataset.dj840ThemeConfirmed='1';try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}}};
+   const finish=()=>{if(disposed)return;dialog.hidden=true;if(choice==='confirm'&&theme){theme.dataset.dj840ThemeConfirmed='1';try{theme.click();}finally{delete theme.dataset.dj840ThemeConfirmed;}}};
    if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();
  };
  dialog.addEventListener('click',decide);
- const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();};
+ const escape=(event)=>{if(event.key!=='Escape'||dialog.hidden)return;const finish=()=>{if(!disposed)dialog.hidden=true;};if(win.DongjakWindowMotion)win.DongjakWindowMotion.close(dialog,finish);else finish();};
  doc.addEventListener('keydown',escape);
  sync();
- return ()=>{disposed=true;if(hideTimer)win.clearTimeout(hideTimer);app.removeEventListener('transitionend',sync,true);app.removeEventListener('animationend',sync,true);observers.forEach(o=>o.disconnect());win.clearInterval(interval);doc.removeEventListener('click',afterClose);doc.removeEventListener('click',onTheme,true);doc.removeEventListener('keydown',escape);label.removeEventListener('click',openGuideFromTip);dialog.remove();label.remove();tipGuide.remove();delete app.dataset.dj840Installed;};
+ return ()=>{
+   disposed=true;tipTransitionToken++;
+   if(hideTimer)win.clearTimeout(hideTimer);
+   if(tipFadeTimer)win.clearTimeout(tipFadeTimer);
+   if(searchFocusTimer)win.clearTimeout(searchFocusTimer);
+   app.removeEventListener('transitionend',sync,true);
+   app.removeEventListener('animationend',sync,true);
+   observers.forEach(o=>o.disconnect());win.clearInterval(interval);
+   doc.removeEventListener('click',afterClose);
+   doc.removeEventListener('click',onTheme,true);
+   doc.removeEventListener('keydown',escape);
+   mapNavButton?.removeEventListener('click',selectedMap);
+   search?.removeEventListener('focusin',sync);
+   search?.removeEventListener('focusout',onSearchFocusOut);
+   label.removeEventListener('click',openGuideFromTip);
+   label.removeEventListener('keydown',onTipKeydown);
+   guideToggle.removeEventListener('click',onGuideToggle);
+   dialog.remove();label.remove();tipGuide.remove();
+   delete app.dataset.dj840Installed;
+ };
 }
 if(typeof document!=='undefined'){
  const boot=()=>installCoordinatedShell();
