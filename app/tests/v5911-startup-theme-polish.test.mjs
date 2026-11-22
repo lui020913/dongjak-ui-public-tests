@@ -21,7 +21,7 @@ test('first paint defaults to light regardless of hour, without relying on Vite 
   assert.deepEqual(runFirstPaint({hour:7}),{theme:'light',meta:'#f3f7f5'});
 });
 test('saved manual dark mode persists across ordinary app relaunches',()=>{
-  assert.deepEqual(runFirstPaint({saved:'dark',hour:13}),{theme:'dark',meta:'#17191d'});
+  assert.deepEqual(runFirstPaint({saved:'dark',hour:13}),{theme:'dark',meta:'#252b32'});
   assert.deepEqual(runFirstPaint({saved:'light',hour:23}),{theme:'light',meta:'#f3f7f5'});
   assert.match(read('src/ui-environment.js'),/document\.documentElement\.dataset\.theme=themeState\.value/);
 });
