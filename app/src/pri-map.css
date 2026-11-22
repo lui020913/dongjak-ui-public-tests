@@ -31,3 +31,33 @@
 @media(prefers-reduced-motion:reduce){
   #app .dj-pri-detail-wrap,#app .dj-pri-detail-toggle svg{transition:none!important;}
 }
+
+/* Three-source vulnerability panel belongs above the persistent phone tab bar.
+   Keep focus styling accessible without a permanent iOS tap highlight ring. */
+@media (max-width:699px) {
+  html body .dj-pri-dialog[open] {
+    position:fixed!important;
+    top:calc((100dvh - 104px - env(safe-area-inset-bottom,0px))/2)!important;
+    left:50%!important;right:auto!important;bottom:auto!important;
+    transform:translate(-50%,-50%)!important;
+    margin:0!important;
+    max-height:calc(100dvh - 174px - env(safe-area-inset-bottom,0px))!important;
+    max-width:calc(100vw - 32px)!important;
+    background:var(--dj-theme-surface,#fff)!important;
+    color:var(--dj-theme-ink,#20312e)!important;
+    border-color:var(--dj-theme-line,#d3e0d8)!important;
+    -webkit-tap-highlight-color:transparent;
+    scrollbar-width:thin;
+  }
+  html body .dj-pri-dialog .dj-pri-head > button:focus:not(:focus-visible){
+    outline:none!important;box-shadow:none!important;
+  }
+  html body .dj-pri-dialog .dj-pri-head > button:focus-visible{
+    outline:2px solid var(--dj800-accent,#0d8875)!important;
+    outline-offset:2px!important;
+  }
+  html body .dj-pri-dialog::backdrop{
+    background:transparent!important;
+    backdrop-filter:none!important;
+  }
+}
