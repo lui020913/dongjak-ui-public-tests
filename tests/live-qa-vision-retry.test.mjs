@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {evidenceSchema,validateReview,reviewWithRetry,classifyBadRequest} from '../scripts/live-qa-vision-retry.mjs';
+import {evidenceSchema,validateReview,reviewWithRetry,classifyBadRequest,visionRetryDelayMs} from '../scripts/live-qa-vision-retry.mjs';
 const ids=['E01','E02'];
 const good={findings:[{severity:'critical',summary:'화면 잘림',evidence:ids}]};
 const ok=value=>({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(value)}]}}]})});
@@ -10,3 +10,22 @@ test('HTTP 503 then invalid evidence both retry; valid defect returned unchanged
 test('valid finding is never rerolled; permanent HTTP and repeated invalid output fail closed',async()=>{let n=0;const r=await reviewWithRetry({ids,wait:noWait,send:async()=>{n++;return ok(good)}});assert.equal(n,1);assert.equal(r.review.findings[0].severity,'critical');const p=await reviewWithRetry({ids,wait:noWait,send:async()=>({ok:false,status:403})});assert.equal(p.attempts,1);assert.equal(p.status,'unavailable');const b=await reviewWithRetry({ids,wait:noWait,send:async()=>ok({findings:[{severity:'major',summary:'문제',evidence:['bad']}]})});assert.equal(b.attempts,3);assert.equal(b.status,'unavailable');assert.equal(b.review,undefined);});
 
 test('HTTP 400 is classified without leaking raw provider details or retrying malformed requests',async()=>{let n=0;const r=await reviewWithRetry({ids,wait:noWait,send:async()=>{n++;return {ok:false,status:400,json:async()=>({error:{message:'schema produces too many states; private detail'}})}}});assert.equal(n,1);assert.equal(r.reason,'Provider HTTP 400 (schema rejected)');assert.equal(classifyBadRequest('invalid image data'),'image rejected');assert.equal(classifyBadRequest('private string'),'invalid request; no sensitive provider details logged');});
+
+test('Gemini 429 backs off sequentially and respects Retry-After without weakening evidence review',async()=>{
+ assert.equal(visionRetryDelayMs({status:429,attempt:1}),15000);
+ assert.equal(visionRetryDelayMs({status:429,attempt:2}),35000);
+ assert.equal(visionRetryDelayMs({status:429,attempt:3}),70000);
+ assert.equal(visionRetryDelayMs({status:429,attempt:4}),105000);
+ assert.equal(visionRetryDelayMs({status:429,attempt:1,headers:{get:()=> '48'}}),48000);
+ assert.equal(visionRetryDelayMs({status:429,attempt:1,headers:{get:()=> '999'}}),120000);
+ assert.equal(visionRetryDelayMs({status:503,attempt:1}),3000);
+ const delays=[];let count=0;
+ const res=await reviewWithRetry({ids,maxAttempts:5,wait:async ms=>delays.push(ms),send:async()=>++count<=4?{ok:false,status:429,headers:{get:()=>null}}:ok(good)});
+ assert.equal(res.status,'reviewed');
+ assert.equal(res.attempts,5);
+ assert.deepEqual(res.review,good);
+ assert.deepEqual(delays,[15000,35000,70000,105000]);
+ const exhausted=await reviewWithRetry({ids,maxAttempts:2,wait:noWait,send:async()=>({ok:false,status:429})});
+ assert.equal(exhausted.status,'unavailable');
+ assert.equal(exhausted.review,undefined);
+});
