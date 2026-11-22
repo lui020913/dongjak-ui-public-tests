@@ -605,7 +605,7 @@ const map = new maplibregl.Map({
 
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
-installPriMap({map,maplibregl,app});
+installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode});
 installMapResumeRecovery({map,app});
 installViewportSafeMapPopups({map});
 installMobileLayoutCoordinator({app,map});
