@@ -29,13 +29,13 @@ test('canonical compass bearing and artwork are mirrored onto the mobile proxy',
   assert.match(js,/mobile\.style\.transform=bearingTransform/);
   assert.match(js,/compassObserver\.observe/);
 });
-test('first paint respects stored theme without reload splash',()=>{
+test('first paint defaults to light without reload splash',()=>{
   const h=read('index.html');
   assert.ok(h.includes('/* Critical first paint:'));
   assert.ok(h.includes('--start-bg:#22282e'));
   assert.ok(h.includes('background:var(--start-bg)!important'));
   assert.doesNotMatch(h,/data-dj-reload-splash|dj-pwa-transition-v7104/);
-  assert.match(h,/displayTheme=themeReload \? themeReload\.theme : chosen/);
+  assert.match(h,/displayTheme=themeReload \? themeReload\.theme : 'light'/);
 });
 test('mobile and desktop get separate layout, colors and animations',()=>{
   const c=read('src/v800-ui-architecture.css');
