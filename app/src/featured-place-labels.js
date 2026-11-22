@@ -97,7 +97,7 @@ export function featuredPlaceCollection(){
 export function featuredPlaceStyle(theme='light'){
   const dark=theme==='dark';
   return {
-    text:dark?'#ebf7f3':'#26352f',
+    text:dark?'#b9c6bf':'#687b70',
     halo:dark?'#172a30':'#f6f9f7',
     dot:dark?'#7cd2b7':'#147d68',
     dotOutline:dark?'#173137':'#ffffff'
@@ -123,8 +123,8 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
       filter:['!=',['get','name'],'숭실대학교'],
       layout:{
         'text-field':['get','name'],
-        'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Regular'],
-        'text-size':['interpolate',['linear'],['zoom'],12.5,11,15,13,18,14.5],
+        'text-font':['Noto Sans Regular','Open Sans Regular'],
+        'text-size':['interpolate',['linear'],['zoom'],12.5,10.5,15,12,18,13.5],
         'text-variable-anchor':['bottom','top','right','left'],
         'text-radial-offset':1.55,'text-padding':7,
         'text-max-width':14,
@@ -134,7 +134,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
         'text-optional':false,'symbol-sort-key':1
       },
       paint:{'text-color':palette.text,'text-halo-color':palette.halo,
-        'text-halo-width':2.7,'text-halo-blur':0.12}
+        'text-halo-width':1.6,'text-halo-blur':0.12}
     });
   }catch(error){console.warn('[주요시설명] 지도 레이어 설치 실패',error);return ()=>{};}
 
