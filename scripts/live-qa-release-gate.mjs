@@ -10,7 +10,7 @@ export function evaluateDesign(report,lane){
  if(blocked.length)return {status:'defect',findings:blocked};
  // A confirmed provider 429 is not a product defect. Preserve the complete
  // capture and require human visual review; do not present this as AI approval.
- if(scene.designReview?.status==='unavailable'&&/^Provider HTTP 429 \\((?:daily-quota|minute-request-quota|minute-token-quota|quota-type-unknown)\\)$/.test(scene.designReview.reason||''))
+ if(scene.designReview?.status==='unavailable'&&/^Provider HTTP 429 \((?:daily-quota|minute-request-quota|minute-token-quota|quota-type-unknown)\)$/.test(scene.designReview.reason||''))
   return {status:'quota-skipped',findings:[],manualReviewRequired:true,reason:scene.designReview.reason};
  if(scene.designReview?.status!=='reviewed'||!Array.isArray(scene.vision?.findings))return {status:'vision-unavailable',findings:[]};
  const critical=scene.vision.findings.filter(f=>f.severity==='critical'&&new Set(f.evidence).size>=2).map(f=>({kind:'vision-critical-candidate',summary:f.summary,evidence:f.evidence}));
