@@ -97,7 +97,7 @@ export function featuredPlaceCollection(){
 export function featuredPlaceStyle(theme='light'){
   const dark=theme==='dark';
   return {
-    text:dark?'#ebf7f3':'#26352f',
+    text:dark?'#cbd6d3':'#6d817b',
     halo:dark?'#172a30':'#f6f9f7',
     dot:dark?'#7cd2b7':'#147d68',
     dotOutline:dark?'#173137':'#ffffff'
@@ -123,7 +123,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
       filter:['!=',['get','name'],'숭실대학교'],
       layout:{
         'text-field':['get','name'],
-        'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Regular'],
+        'text-font':['Noto Sans Regular','Open Sans Regular'],
         'text-size':['interpolate',['linear'],['zoom'],12.5,11,15,13,18,14.5],
         'text-variable-anchor':['bottom','top','right','left'],
         'text-radial-offset':1.55,'text-padding':7,
@@ -134,7 +134,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
         'text-optional':false,'symbol-sort-key':1
       },
       paint:{'text-color':palette.text,'text-halo-color':palette.halo,
-        'text-halo-width':2.7,'text-halo-blur':0.12}
+        'text-halo-width':1.35,'text-halo-blur':0.12}
     });
   }catch(error){console.warn('[주요시설명] 지도 레이어 설치 실패',error);return ()=>{};}
 
@@ -214,7 +214,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
                 // icon-offset here: MapLibre scales that offset as zoom changes.
                 'icon-offset':[0,0],
                 'text-field':['case',['==',['get','name'],'숭실대학교'],['get','name'],''],
-                'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Regular'],
+                'text-font':['Noto Sans Regular','Open Sans Regular'],
                 'text-size':['interpolate',['linear'],['zoom'],12.5,11,15,13,18,14.5],
                 // The SSU label is centered above its own icon, both at one lng/lat.
                 'text-anchor':'bottom','text-offset':[0,-1.45],
@@ -225,7 +225,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
               paint:{'icon-opacity':1,
                 'text-color':featuredPlaceStyle(app?.dataset?.theme).text,
                 'text-halo-color':featuredPlaceStyle(app?.dataset?.theme).halo,
-                'text-halo-width':2.7,'text-halo-blur':0.12}});
+                'text-halo-width':1.35,'text-halo-blur':0.12}});
             logoLayerInstalled=true;
             lastLogoMode=null;
             applyResponsiveLogoSizing();
