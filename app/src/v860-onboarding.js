@@ -478,25 +478,32 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
 
   const startup=doc.getElementById('map-startup-overlay');
   let startupObserver=null,pendingGuestOnboarding=false;
+  let lastAuthState=app.dataset.djAuthState||'checking';
   const maybeAutoOpen=()=>{
-    // Once the visitor closes the tour on this page, later auth-state events
-    // must not reopen it. A fresh page may still show the guest tour.
+    // Never interrupt startup or re-open a guest tour dismissed during this
+    // visit. A NEW signed-out launch intentionally gets the tour even when a
+    // previous visitor completed it in persistent storage.
     if(seenInMemory){app.dataset.dj860AutoResolved='true';return;}
     if(startup&&!startup.hidden)return;
     const authState=app.dataset.djAuthState||'checking';
     if(authState==='checking')return;
     app.dataset.dj860AutoResolved='true';
-    if((authState==='signed-out'||pendingGuestOnboarding)&&!readSeen(win)){
+    if(authState==='signed-out'||pendingGuestOnboarding){
       pendingGuestOnboarding=false;open({auto:true,force:true});return;
     }
-    // Signed-in first-time visitors still receive the ordinary first-run tour.
-    if(seenInMemory||readSeen(win))return;
+    // Signed-in returning visitors retain their completed-tour preference.
+    if(readSeen(win))return;
     if(!startup||startup.hidden)open({auto:true});
   };
   const onAuthState=event=>{
+    const authState=event.detail?.authenticated===true?'signed-in':event.detail?.authenticated===false?'signed-out':null;
+    if(!authState)return;
+    // A genuine signed-in -> signed-out transition is a new guest session.
+    // Reset only this visit's suppression; do not erase the user's history.
+    if(lastAuthState==='signed-in'&&authState==='signed-out')seenInMemory=false;
+    lastAuthState=authState;
     if(seenInMemory)return;
-    if(event.detail?.authenticated===true){pendingGuestOnboarding=false;maybeAutoOpen();return;}
-    if(event.detail?.authenticated!==false)return;
+    if(authState==='signed-in'){pendingGuestOnboarding=false;maybeAutoOpen();return;}
     markGuideAutoShown();
     if(startup&&!startup.hidden){pendingGuestOnboarding=true;return;}
     pendingGuestOnboarding=false;
