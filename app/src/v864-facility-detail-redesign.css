@@ -15,9 +15,9 @@
   html body #app#app#app#app #map .dj-place-detail-popup .maplibregl-popup-content{
     display:flex!important;flex-direction:column!important;
     box-sizing:border-box!important;width:100%!important;max-width:100%!important;
-    max-height:min(60dvh,calc(100dvh - var(--dj829-panel-bottom,100px) - env(safe-area-inset-top,0px) - 56px))!important;
+    max-height:100%!important;
     min-height:0!important;padding:0!important;margin:0!important;
-    height:var(--dj9251-facility-content-height,auto)!important;
+    height:100%!important;
     overflow:hidden!important;border-radius:22px!important;
     background:var(--dj800-surface,#fff)!important;
     box-shadow:0 14px 34px rgba(18,48,38,.18)!important;
@@ -120,7 +120,7 @@
     display:grid!important;grid-auto-rows:max-content!important;gap:11px!important;
     box-sizing:border-box!important;flex:1 1 auto!important;
     width:100%!important;min-width:0!important;min-height:0!important;
-    max-height:calc(60dvh - 132px)!important;overflow-x:hidden!important;overflow-y:auto!important;
+    max-height:none!important;flex:1 1 auto!important;overflow-x:hidden!important;overflow-y:auto!important;
     margin:0!important;padding:13px 13px calc(18px + env(safe-area-inset-bottom,0px))!important;
     background:var(--dj800-surface,#fff)!important;
     -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;

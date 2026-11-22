@@ -434,3 +434,103 @@
     color:var(--dj-theme-muted)!important;
   }
 }
+
+
+/* Dark phone secondary surfaces: the existing theme contract, not an
+   additional stylesheet. These rules change paint only, never layout,
+   button event handling, map severity colors, or route geometry. */
+@layer request-completion {
+ @media(max-width:699px) {
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
+    .dongjak-news-tabs,.dongjak-news-item,.news-empty
+  ){
+    background:#23262c!important;background-image:none!important;
+    border-color:#424952!important;color:#f2f4f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button:not(.active){
+    background:#2b3037!important;background-image:none!important;
+    color:#d4dde5!important;-webkit-text-fill-color:#d4dde5!important;
+    border:1px solid #424952!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-tabs > button.active{
+    background:#b4c8da!important;background-image:none!important;
+    color:#17232c!important;-webkit-text-fill-color:#17232c!important;
+    border:1px solid #b4c8da!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
+    #dongjak-news-refresh,.dongjak-news-open,.dongjak-news-links a
+  ){
+    background:#303741!important;background-image:none!important;
+    color:#e1ebf5!important;-webkit-text-fill-color:#e1ebf5!important;
+    border-color:#505b66!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel .dongjak-news-item strong{
+    color:#f2f4f7!important;-webkit-text-fill-color:#f2f4f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #news-panel :is(
+    .dongjak-news-item-meta,.dongjak-news-status
+  ){color:#b6bec8!important;-webkit-text-fill-color:#b6bec8!important;}
+
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-post,.community-comments,.community-post-preview,.community-post-detail
+  ){
+    background:#23262c!important;background-image:none!important;
+    color:#f2f4f7!important;border-color:#424952!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-post-title,.community-post-body,.community-post-actions button
+  ){
+    background:transparent!important;background-image:none!important;
+    color:#f2f4f7!important;-webkit-text-fill-color:#f2f4f7!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-post-meta,.community-summary-count,.community-form-note
+  ){color:#b6bec8!important;-webkit-text-fill-color:#b6bec8!important;}
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-filter:not(.active),#community-sort,#community-notifications-toggle,
+    #community-saved-toggle:not([aria-pressed="true"]),.dj-community-refresh
+  ){
+    background:#2b3037!important;background-image:none!important;
+    border-color:#505861!important;color:#e1e8f0!important;
+    -webkit-text-fill-color:#e1e8f0!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-filter.active,#community-saved-toggle[aria-pressed="true"],#community-compose-toggle
+  ){
+    background:#b4c8da!important;background-image:none!important;
+    border-color:#b4c8da!important;color:#17232c!important;
+    -webkit-text-fill-color:#17232c!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-post-category,.community-location-link
+  ){
+    background:#39434e!important;background-image:none!important;
+    border-color:#576575!important;color:#e2ecf5!important;
+    -webkit-text-fill-color:#e2ecf5!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel :is(
+    .community-post-actions,.community-comment-row
+  ){border-color:#424952!important;}
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel :is(
+    .route-mini-btn,.route-gps-btn,#dj832-waypoint-toggle
+  ):not(:disabled){
+    background:#303741!important;background-image:none!important;
+    border-color:#525b66!important;color:#e1eaf2!important;
+    -webkit-text-fill-color:#e1eaf2!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:disabled{
+    background:#343b44!important;background-image:none!important;
+    color:#b5c1ce!important;-webkit-text-fill-color:#b5c1ce!important;
+    border:1px solid #505965!important;opacity:1!important;
+    box-shadow:none!important;cursor:not-allowed!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj834-setting-icon{
+    background:#39434e!important;color:#d7e4ef!important;
+    -webkit-text-fill-color:#d7e4ef!important;border-color:#525d6a!important;
+  }
+  html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab.active{
+    background:#39434e!important;color:#d5f0e7!important;
+    -webkit-text-fill-color:#d5f0e7!important;
+  }
+ }
+}

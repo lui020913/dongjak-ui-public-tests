@@ -126,13 +126,13 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='상단 바로가기 '+selected.length+'/3';list.replaceChildren();
  const groups=[['지도 기능',['pri','pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
- for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';const column=doc.createElement('div');column.className='djNext-layer-columns';const pinHeading=doc.createElement('span');pinHeading.textContent='바로가기';pinHeading.className='djNext-layer-column-label';column.append(heading,pinHeading);list.append(column);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
+ for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';const column=doc.createElement('div');column.className='djNext-layer-columns';const pinHeading=doc.createElement('span');pinHeading.textContent='상단 고정';pinHeading.className='djNext-layer-column-label';column.append(heading,pinHeading);list.append(column);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
  for(const [id,label,icon,selector] of ids.map(id=>PHONE_CHOICES.find(c=>c[0]===id)).filter(Boolean)){
   const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;
  const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');glyph.classList.add('djNext-layer-glyph');action.querySelector('span').className='djNext-layer-label';action.setAttribute('aria-label',label+' 지도 기능');
   const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(!source||source.disabled){state.textContent='준비 중';action.disabled=true;}action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
   const add=doc.createElement('button');add.type='button';add.className='djNext-shortcut-switch';const current=selected.includes(id);
-  add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 바로가기');add.setAttribute('aria-checked',String(current));add.disabled=!current&&selected.length>=3;
+  add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 상단 바로가기 고정');add.title=label+' 상단 바로가기 고정 (지도 표시 설정과 별개)';add.setAttribute('aria-checked',String(current));add.disabled=!current&&selected.length>=3;
   const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);
   add.addEventListener('click',()=>{
    const restoreFocus=doc.activeElement===add;
@@ -329,26 +329,7 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
 export function installV9272PhoneExperience({app,doc=document,win=window}){
  if(!app||!win.matchMedia('(max-width:699px)').matches||app.dataset.dj9272Ready==='1')return;
  app.dataset.dj9272Ready='1';
- const modal=doc.getElementById('dj-ai-search-modal');
- const reduced=()=>win.matchMedia('(prefers-reduced-motion:reduce)').matches;
- let closing=false,closeTimer=0;
- const closeAi=()=>{
-  if(!modal?.open||closing)return;
-  closing=true;modal.classList.add('dj9272-ai-leave');
-  win.clearTimeout(closeTimer);
-  closeTimer=win.setTimeout(()=>{
-   modal.classList.remove('dj9272-ai-leave');closing=false;
-   if(modal.open)modal.close();
-  },reduced()?0:255);
- };
- doc.addEventListener('click',e=>{
-  if(!modal?.open)return;
-  const closeButton=e.target.closest?.('#dj-ai-search-modal :is(.dj-ai-close,#dj-ai-close,#dj800-ai-search-close,[data-dj-ai-close])');
-  if(!closeButton)return;
-  e.preventDefault();e.stopImmediatePropagation();closeAi();
- },true);
- modal?.addEventListener('cancel',e=>{e.preventDefault();closeAi()});
- modal?.addEventListener('close',()=>{win.clearTimeout(closeTimer);closing=false;modal.classList.remove('dj9272-ai-leave')});
+ // AI dialog close and its transition have one owner in v880-supabase-safety-ai.js.
  const mine=doc.getElementById('mine-panel');
  let schedule=0;
  const normalizeMine=()=>{

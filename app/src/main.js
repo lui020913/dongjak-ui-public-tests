@@ -2410,7 +2410,7 @@ bookmarkButton.addEventListener('click',() => {
   toast(p.favorite?'관심 지점에 추가했습니다.':'관심 지점에서 제외했습니다.');
 });
 navigate('map');
-if(themeReloadState?.tab==='mine')map.once('load',()=>requestAnimationFrame(()=>navigate('mine')));
+if(['route','participate','news','mine'].includes(themeReloadState?.tab))map.once('load',()=>requestAnimationFrame(()=>navigate(themeReloadState.tab)));
 const sharedCommunityId=location.hash.match(/^#community=([0-9a-f-]{36})$/i)?.[1];if(sharedCommunityId){communityDeepLink=sharedCommunityId;navigate('participate');}
 function openCommunityNoticesFromPush(){navigate('participate');const panel=document.getElementById('community-notifications');panel.hidden=false;void refreshCommunityNotices();}
 if(location.hash==='#community-notices')openCommunityNoticesFromPush();

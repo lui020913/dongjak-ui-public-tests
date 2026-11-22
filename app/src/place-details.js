@@ -135,27 +135,18 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   }
   const p=placeData({...place,lng:place?.lng??lngLat?.lng,lat:place?.lat??lngLat?.lat});
   if(p.lat==null||p.lng==null)return null;
-  // Every POI click focuses the actual facility representative coordinate,
-  // not the nearby cursor location. Keep station-specific clicks separate.
+  // The selected facility is usually on screen where the visitor tapped.
+  // Do not animate that map camera again simply because its bottom sheet opens.
   try{
-    const useSharedSheetCameraOffset=true;
-    if(useSharedSheetCameraOffset){
-      // Keep the real POI coordinate in the upper part of the map so the
-      // location pin and popup do not go behind the bottom navigation.
-      // MapLibre camera offsets also stay accurate if the zoom level changes.
-      const h=map.getContainer?.().clientHeight||window.innerHeight;
-      const desiredY=Math.min(h*.32,290);
+    const h=map.getContainer?.().clientHeight||window.innerHeight;
+    const w=map.getContainer?.().clientWidth||window.innerWidth;
+    const point=map.project?.([p.lng,p.lat]);
+    const visible=point&&point.x>=28&&point.x<=w-28&&point.y>=100&&point.y<=h-116;
+    if(!visible){
       map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
-        offset:[0,Math.round(desiredY-h/2)],duration:480});
-    }else{
-      // v816: POI marker should sit slightly above viewport center, so the
-      // information card leaves useful map context visible below.
-      const h=map.getContainer?.().clientHeight||window.innerHeight;
-      map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
-        offset:[0,-Math.round(Math.min(116,Math.max(40,h*.10)))],duration:500});
+        offset:[0,-Math.round(Math.min(116,Math.max(40,h*.10)))],duration:380});
     }
-  }
-  catch(error){console.info('[시설 중심 이동] 현재 지도 보기 유지',error?.message);}
+  }catch(error){console.info('[시설 중심 이동] 현재 지도 보기 유지',error?.message);}
   const root=document.createElement('section');root.className='dj-place-detail';
   const sharedSheet=true;
   let popup=null;
@@ -348,7 +339,13 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   let enriched=Promise.resolve();
   if(!p.phone||!p.address||!p.website){
     const controller=new AbortController();
-    popup.on('close',()=>controller.abort());
+    const delayNotice=window.setTimeout(()=>{
+      if(controller.signal.aborted)return;
+      if(!p.address)addressRow.querySelector('strong').textContent='주소 조회 지연 · 외부 지도에서 확인';
+      if(!p.phone)phoneRow.querySelector('strong').textContent='전화번호 조회 지연';
+      if(!p.website)siteRow.querySelector('strong').textContent='홈페이지 조회 지연';
+    },3200);
+    popup.on('close',()=>{controller.abort();window.clearTimeout(delayNotice);});
     enriched=enrich(p,controller.signal).then(found=>{
       if(controller.signal.aborted||controllerAI.signal.aborted)return;
       if(!p.phone&&found.phone){p.phone=found.phone;phoneRow.querySelector('strong').textContent=p.phone;}
@@ -365,7 +362,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       if(!p.address)addressRow.querySelector('strong').textContent='주소 조회 불가';
       if(!p.phone)phoneRow.querySelector('strong').textContent='전화번호 조회 불가';
       if(!p.website)siteRow.querySelector('strong').textContent='홈페이지 조회 불가';
-    });
+    }).finally(()=>window.clearTimeout(delayNotice));
   }
   let pending=false;
   async function loadExplanation(){

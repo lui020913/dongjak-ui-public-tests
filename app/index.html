@@ -18,7 +18,7 @@
         if(!chosen)chosen='light';
         var themeReload=null;
         try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
-        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
+        if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme)||themeReload.theme!==chosen)themeReload=null;
         var displayTheme=themeReload ? themeReload.theme : chosen;
         document.documentElement.dataset.theme=displayTheme;
         var iconSuffix=displayTheme==='dark'?'dark':'light';

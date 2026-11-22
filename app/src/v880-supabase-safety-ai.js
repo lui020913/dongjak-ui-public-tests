@@ -88,6 +88,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   layout.append(header,login,transcript,composer);modal.append(layout);document.body.append(modal);
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
+  let transportDismissedAt=0;
+  const guardTransportDismiss=()=>{transportDismissedAt=Date.now();};
+  document.addEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
   const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   function setStatus(message){status.textContent=message;}
   syncProfile();
@@ -105,8 +108,17 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(!modal.open)return;
     // Full-screen AI is not a bottom sheet. Never translate its native top layer
     // out of the changing keyboard viewport.
-    if(window.matchMedia?.('(max-width:699px)')?.matches||reduce()){
-      input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;
+    if(reduce()){input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;}
+    if(window.matchMedia?.('(max-width:699px)')?.matches){
+      // The native dialog itself stays opaque and stationary. Fade only its
+      // content, then complete the one existing close operation.
+      input.blur();modal.classList.add('dj887-ai-closing');
+      closeTimer=window.setTimeout(()=>{
+        closeTimer=0;
+        if(modal.open)modal.close();
+        modal.classList.remove('dj887-ai-closing');
+      },175);
+      return;
     }
     modal.classList.add('dj887-ai-closing');
     // Explicit bounded completion: never depend on Safari animationend
@@ -118,6 +130,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     },175);
   }
   function open(){
+    // A transport X tap cannot become an AI open through the fading layer.
+    // An ordinary AI click remains available after this short gesture guard.
+    if(modal.open||Date.now()-transportDismissedAt<750)return;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     modal.classList.remove('dj887-ai-closing');
     syncProfile();previousFocus=document.activeElement;
@@ -203,7 +218,14 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   // iOS may dispatch a delayed click to the element UNDER a dismissed
   // station/sheet window. The pointer must have started on the AI entry itself.
   let pointerStart=null;
-  const capturePointer=event=>{pointerStart={target:event.target,at:Date.now()};};
+  const capturePointer=event=>{
+    pointerStart={target:event.target,at:Date.now()};
+    // This same pointer sequence may dismiss a sheet that briefly exposes
+    // the AI orb below it. Never reinterpret it as an AI-open gesture.
+    if(event.target?.closest?.('#transport-close,.dj-sheet-chrome-close,.page-dismiss,.dj-place-header-close,#dj-mobile-utilities-close,#djNext-layer-panel .djNext-close,[data-close-page]')){
+      transportDismissedAt=Date.now();
+    }
+  };
   document.addEventListener('pointerdown',capturePointer,true);
   function onExplicitEntryClick(event){
     if(!event.isTrusted)return;
@@ -236,6 +258,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(closeTimer)clearTimeout(closeTimer);
     document.removeEventListener('pointerdown',capturePointer,true);
     document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);
+    document.removeEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
     trigger?.remove();quickEntry?.remove();modal.remove();marker?.remove();
   };
 }

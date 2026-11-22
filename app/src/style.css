@@ -894,12 +894,7 @@
 .dongjak-news-links a{font-size:12px;font-weight:800;color:#147d65;text-decoration:underline;text-underline-offset:3px;}
 .news-empty{padding:20px 14px;border-radius:13px;border:1px solid #e0eae2;background:#fff;color:#5e7469;font-size:12px;line-height:1.7;}
 .transport-auto-refresh-label{font-size:10px;color:#15765c;white-space:nowrap;}
-#app[data-theme="dark"] .dongjak-news-tabs{background:#25413f;}
-#app[data-theme="dark"] .dongjak-news-tabs button{color:#bfd4cb;}
-#app[data-theme="dark"] .dongjak-news-tabs button.active{color:#fff;background:#117a68;}
-#app[data-theme="dark"] #dongjak-news-refresh,#app[data-theme="dark"] .dongjak-news-item,#app[data-theme="dark"] .news-empty{background:#233b40;color:#e6f1ed;border-color:#405e5c;}
-#app[data-theme="dark"] .dongjak-news-item strong{color:#e6f1ed;}
-#app[data-theme="dark"] .dongjak-news-item-meta,#app[data-theme="dark"] .dongjak-news-status{color:#bfd4cb;}
+/* Dark news palette: see the one shared theme-contract.css owner. */
 #app[data-theme="dark"] .transport-auto-refresh-label{color:#a6dcc9;}
 @media(max-width:360px){.nav-tab{font-size:9px;}.nav-icon{font-size:19px;}}
 

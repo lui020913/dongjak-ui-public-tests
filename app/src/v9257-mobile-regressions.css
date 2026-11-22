@@ -120,12 +120,7 @@
     overflow-y:auto!important;
     overscroll-behavior-y:contain!important;
   }
-  html body #app #route-panel:not([hidden]) #route-calc:disabled{
-    color:#355c50!important;
-    background:#a4d5c9!important;
-    opacity:1!important;
-    cursor:not-allowed!important;
-  }
+  /* Disabled route CTA colors are now resolved by theme-contract.css. */
   html body #app #transport-sheet:not([hidden]) .dj875-transit-scroll{
     min-height:0!important;
     overflow-y:auto!important;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 
-test('exactly one new theme stylesheet and no reload UI on theme toggle',()=>{
+test('one theme stylesheet; native iOS status refresh only after explicit choice',()=>{
   const html=read('index.html');
   const main=read('src/main.js');
   const env=read('src/ui-environment.js');
@@ -13,7 +13,10 @@ test('exactly one new theme stylesheet and no reload UI on theme toggle',()=>{
   assert.doesNotMatch(html,/var pending=null;/);
   assert.doesNotMatch(html,/data-dj-reload-splash="true"/);
   assert.doesNotMatch(main,/installManualThemeReload\(\{/);
-  assert.doesNotMatch(old,/location\.reload\s*\(/);
+  assert.match(old,/win\.location\.reload\(\)/);
+  assert.match(old,/isInstalledIosPhone\(win\)/);
+  assert.match(old,/MANUAL_THEME_RELOAD_KEY/);
+  assert.ok(env.includes("requestIosThemeRefresh({win:window,app,map,theme:themeState.preference})"));
   assert.ok(env.includes('createThemeState(getInitialTheme())'));
   assert.doesNotMatch(env,/suppressPreferenceSave|showThemeTransition|themeFlash/);
   assert.ok(env.includes('const changed=app.dataset.theme!==next'));
@@ -70,4 +73,14 @@ test('mobile full-height primary pages retain the charcoal status-edge base',()=
   assert.match(css,/--dj-primary-page-bg:#17191d/);
   assert.match(contract,/--dj-theme-bg:#17191d/);
   assert.match(contract,/--dj-primary-page-bg:#17191d!important/);
+});
+
+test('dark phone actions use readable selected text and route disabled colors',()=>{
+ const contract=read('src/theme-contract.css');
+ assert.match(contract,/#news-panel \.dongjak-news-tabs > button\.active/);
+ assert.match(contract,/#participation-panel :is\(/);
+ assert.match(contract,/\.community-post-category,\.community-location-link/);
+ assert.match(contract,/#route-panel #route-calc:disabled/);
+ assert.match(contract,/background:#343b44!important/);
+ assert.match(contract,/color:#17232c!important/);
 });
