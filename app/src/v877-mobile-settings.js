@@ -38,11 +38,6 @@ export function installV877SettingsAndSheets(doc=document,win=window){
 `;
     body.prepend(container);
     const sync=()=>{
-      for(const button of container.querySelectorAll('[data-dj877-layer]')){
-        const source=doc.querySelector(`[data-base-layer="${button.dataset.dj877Layer}"]`);
-        const enabled=source?.getAttribute('aria-pressed')==='true';
-        button.setAttribute('aria-checked',String(enabled));button.textContent=enabled?'켜짐':'꺼짐';
-      }
       for(const [kind,id] of [['voice','nav-voice'],['orientation','nav-orientation']]){
         const source=el(doc,id),button=container.querySelector(`[data-dj877-action="${kind}"]`);
         if(!button||!source)continue;
@@ -54,24 +49,15 @@ export function installV877SettingsAndSheets(doc=document,win=window){
     };
     on(container,'click',event=>{
       const button=event.target.closest('button');if(!button)return;
-      const layer=button.dataset.dj877Layer;
-      if(layer){clickExisting(doc,`[data-base-layer="${layer}"]`);sync();return;}
       const action=button.dataset.dj877Action;
       if(action==='voice')clickExisting(doc,'#nav-voice');
       if(action==='orientation')clickExisting(doc,'#nav-orientation');
-      if(action==='safety'){
-        // Close preferences before entering the original safety tool.
-        clickExisting(doc,'#dj-settings-close');
-        doc.querySelector('#bottom-nav .nav-tab[data-tab="map"]')?.click();
-        const native=el(doc,'map-safety-toggle');native?.click();
-      }
       sync();
     });
     on(container.querySelector('#dj877-voice-choice'),'change',event=>{
       const native=el(doc,'dj816-voice-mode');if(!native)return;
       native.value=event.target.value;native.dispatchEvent(new Event('change',{bubbles:true}));
     });
-    on(doc,'dongjak-base-layer-change',sync);
     on(preferences,'click',sync);
     on(preferences,'keydown',event=>{if(event.key==='Tab')sync();});
     sync();
