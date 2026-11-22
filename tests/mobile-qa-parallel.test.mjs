@@ -136,3 +136,12 @@ test('release workflow Node versions remain valid YAML scalars',()=>{
  assert.ok(entries.length>=4,'Expected all checkout/build/browser Node setup versions');
  for(const line of entries)assert.match(line,/^\s+node-version:\s*'(22|24)'\s*$/,'Invalid YAML node-version scalar: '+line);
 });
+
+test('dynamic phone matrix display name safely quotes its nested condition',()=>{
+ const workflow=read('.github/workflows/mobile-first-overhaul-preview.yml');
+ const line=workflow.split('\n').find(entry=>entry.includes('name:')&&entry.includes('3. 모바일 검증'));
+ assert.ok(line,'Missing release QA matrix name');
+ assert.ok(line.trim().startsWith('name: "3. 모바일 검증'),'Expected YAML double-quoted job name');
+ assert.ok(line.trim().endsWith(')"'),'Expected closed YAML double-quoted job name');
+ assert.ok(line.includes("vars.ENABLE_FULL_MOBILE_QA == 'true'"));
+});

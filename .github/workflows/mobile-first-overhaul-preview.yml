@@ -147,7 +147,7 @@ jobs:
     # regression keeps every tagged case and additional device coverage.
     # Explicit exhaustive cross-device audit uses 24 workers and expands the
     # same tagged cases to every phone project. Neither tier skips provenance.
-    name: '3. 모바일 검증 (${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12 }})'
+    name: "3. 모바일 검증 (${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12 }})"
     strategy:
       fail-fast: false
       max-parallel: 24
