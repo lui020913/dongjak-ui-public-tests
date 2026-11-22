@@ -9,8 +9,11 @@ test('release QA parallelizes independent tests in the same spec, with all phone
   assert.ok(config.includes(name));
   assert.ok(workflow.includes('--project='+name));
  }
- assert.match(workflow,/fail-fast: false\s+max-parallel: 24\s+matrix:\s+shard: \[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24\]/);
- assert.match(workflow,/--project=mobile390-webkit-header --workers=1 --shard=\$\{\{ matrix\.shard \}\}\/24/);
+ assert.match(workflow,/fail-fast: false\s+max-parallel: 24\s+matrix:\s+shard: \$\{\{ fromJSON\(/);
+ assert.ok(workflow.includes("'[1,2,3,4,5,6,7,8]'"),'standard tier must have eight shards');
+ assert.ok(workflow.includes("'[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]'"),'full tier must have 24 shards');
+ assert.ok(workflow.includes("DONGJAK_FULL_MOBILE_QA: ${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && '1' || '0' }}"));
+ assert.ok(workflow.includes("--project=mobile390-webkit-header --workers=1 --shard=${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 8 }}"));
  assert.match(workflow,/name: mobile-only-phone-qa-\$\{\{ github\.run_id \}\}-shard-\$\{\{ matrix\.shard \}\}/);
  assert.match(workflow,/desktop-tablet-qa:/);
  assert.match(workflow,/tests\/install-gate-selection\.spec\.mjs/);
@@ -36,9 +39,11 @@ test('six design recordings and Gemini reviews are opt-in without bypassing func
  assert.match(w,/needs\.visual-qa\.result == 'success' \|\| \(vars\.ENABLE_GEMINI_QA != 'true' && needs\.visual-qa\.result == 'skipped'\)/);
  assert.match(w,/needs\.explore-qa\.result == 'success' \|\| \(vars\.ENABLE_GEMINI_QA != 'true' && needs\.explore-qa\.result == 'skipped'\)/);
  const shards=read('scripts/verify-mobile-qa-shards.mjs');
- assert.match(shards,/const SHARD_COUNT=24/);
- assert.match(shards,/i<=SHARD_COUNT/);
+ assert.match(shards,/const QA_MODES=\[\{count:8,full:false\},\{count:24,full:true\}\]/);
+ assert.match(shards,/i<=count/);
  assert.match(shards,/assert\.deepEqual\(combined\.sort\(\),baseline/);
+ assert.match(shards,/DONGJAK_FULL_MOBILE_QA:full\?'1':'0'/);
+ assert.match(w,/needs\.mobile-qa\.result == 'success'/);
 });
 
 test('mobile coverage policy assigns every case explicitly and preserves all functional checks',()=>{
