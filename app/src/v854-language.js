@@ -240,9 +240,9 @@ export function installLanguagePreference(doc=document,win=window){
   const app=doc.getElementById('app'),mine=doc.getElementById('mine-panel');if(!app||!mine)return ()=>{};
   let language='ko';try{language=win.localStorage.getItem(STORAGE_KEY)==='en'?'en':'ko';}catch{}
   const body=mine.querySelector('.dj836-sheet-body')||mine;
-  let section=body.querySelector('.dj854-language-section');
+  let section=mine.querySelector('.dj854-language-section');
   if(!section){
-    section=doc.createElement('section');section.className='dj854-language-section';
+    section=doc.createElement('div');section.className='dj854-language-section dj834-language-row';
     const label=doc.createElement('label');label.htmlFor='dj854-language-select';label.textContent='언어';
     const select=doc.createElement('select');select.id='dj854-language-select';select.setAttribute('aria-label','언어 변경');select.setAttribute('data-dj-no-translate','');
     for(const [value,text] of [['ko','한국어'],['en','English']]){const option=doc.createElement('option');option.value=value;option.textContent=text;select.append(option);}
@@ -251,7 +251,9 @@ export function installLanguagePreference(doc=document,win=window){
     const icon=doc.createElement('span');icon.className='dj834-setting-icon dj854-language-icon';
     icon.setAttribute('aria-hidden','true');
     icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>';
-    section.append(icon,label,select);
+    const value=doc.createElement('span');value.className='dj854-language-value';value.dataset.djNoTranslate='';value.textContent=language==='en'?'English':'한국어';
+    const chevron=doc.createElement('span');chevron.className='dj834-chevron';chevron.textContent='›';chevron.setAttribute('aria-hidden','true');
+    section.append(icon,label,value,chevron,select);
     // Expose the control immediately even before My Info's async list exists.
     // ensurePlacement() moves this very node into the settings group later.
     const existingGroup=mine.querySelector('.dj834-my-home .dj834-settings-group');
@@ -261,7 +263,8 @@ export function installLanguagePreference(doc=document,win=window){
       // This temporary node must not appear as an orphan white card while
       // My Info's account/settings hierarchy is still being assembled.
       section.hidden=true;
-      body.prepend(section);
+      // Keep detached until the actual settings group exists; never insert
+      // an orphan language card into My Info's body or hidden records view.
     }
     select.addEventListener('change',()=>setLanguage(select.value));
   }
@@ -287,6 +290,8 @@ export function installLanguagePreference(doc=document,win=window){
     walk(app,language);
     const languageLabel=section.querySelector('label');if(languageLabel)languageLabel.textContent=language==='en'?'Language':'언어';
     select.setAttribute('aria-label',language==='en'?'Change language':'언어 변경');
+    const valueLabel=section.querySelector('.dj854-language-value');
+    if(valueLabel)valueLabel.textContent=language==='en'?'English':'한국어';
     for(const option of select.options){option.textContent=option.value==='en'?'English':'한국어';}
     win.dispatchEvent(new CustomEvent('dongjak:language-change',{detail:{language}}));
   }
