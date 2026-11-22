@@ -125,7 +125,7 @@ export function lightMapLandRole(layer = {}) {
 
 export function districtExteriorThemePaint(theme='light'){
   return theme==='dark'
-    ? {'fill-color':'#202a32','fill-opacity':0.48}
+    ? {'fill-color':'#22272d','fill-opacity':0.34}
     : {'fill-color':'#d8e0e3','fill-opacity':0.65};
 }
 
@@ -179,11 +179,11 @@ export function initTheme({map,app}){
         // Balanced dark basemap: distinguish ground, roads, parks and water.
         // Only the original style baseline is recolored: semantic PRI, route
         // geometry, transit lines and warning layers keep their own colors.
-        if(entry.type==='background')set('background-color','#29313a');
-        if(entry.type==='fill')set('fill-color',water?'#2f4b56':green?'#405248':entry.roadRole?'#53616d':road?'#48555f':'#333e47');
-        if(entry.type==='line')set('line-color',water?'#55717b':entry.roadRole?(entry.roadRole==='edge'?'#3e4b55':'#697984'):road?'#667681':'#56636b');
+        if(entry.type==='background')set('background-color','#22272d');
+        if(entry.type==='fill')set('fill-color',water?'#273741':green?'#303c34':entry.roadRole?'#424952':road?'#39434a':'#2b3138');
+        if(entry.type==='line')set('line-color',water?'#425765':entry.roadRole?(entry.roadRole==='edge'?'#333b44':'#4c5864'):road?'#525e68':'#424a53');
         if(entry.type==='symbol'){
-          set('text-color','#e9f0f3');set('text-halo-color','#29313a');
+          set('text-color','#e9f0f3');set('text-halo-color','#22272d');
         }
       }
     }
@@ -201,7 +201,7 @@ export function initTheme({map,app}){
       if(!map.getLayer(id))continue;
       try{
         map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':id==='dj-nearby-place-names'?'#536e74':'#21483c');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(41,49,58,0.95)':'rgba(255,255,255,0.97)');
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(255,255,255,0.97)');
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
