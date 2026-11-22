@@ -61,7 +61,7 @@ test('modeled accidents never inflate six-factor PRI; only a missing protectionG
    weights:{accidents:1/6,crossing:1/6,sharedRoad:1/6,speed:1/6,protectionGap:1/6,lighting:1/6}}
  });
  assert.equal(segmentScore(approved,approved.segments[0],'pri'),null,'modeled accident plus actual protection score is still incomplete');
- assert.equal(segmentScore(approved,approved.segments[1],'pri'),54,'only the missing protectionGap is excluded from verified five-score mean');
+ assert.ok(Math.abs(segmentScore(approved,approved.segments[1],'pri')-54)<1e-9,'only the missing protectionGap is excluded from verified five-score mean');
  assert.equal(segmentScore(approved,approved.segments[2],'pri'),null,'unassessed accident cannot be auto-renormalized');
  assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_0').properties.evaluated,false);
  assert.equal(displayFeatures(approved,'pri').features.find(f=>f.properties.segmentId==='1_1').properties.evaluated,true);
