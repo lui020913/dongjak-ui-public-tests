@@ -534,3 +534,41 @@
   }
  }
 }
+
+/* Balanced Dark: emerald-mint is the interaction affordance, never a
+   substitute for PRI severity, transit line or road-risk semantics.
+   Dark-ink on the bright mint CTA meets text contrast; selected tabs use
+   the deeper mint surface and lighter mint glyph. Light mode is unchanged. */
+@layer request-completion {
+  html body #app#app#app#app#app#app#app[data-theme="dark"] {
+    --dj-brand-mint:#79dec5!important;
+    --dj-brand-mint-ink:#17332d!important;
+    --dj-brand-mint-selected:#285b50!important;
+    --dj-brand-mint-selected-ink:#a0f0da!important;
+  }
+  @media(max-width:699px) {
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #bottom-nav .nav-tab:is(.active,[aria-current="page"]) {
+      background:#285b50!important;
+      color:#a0f0da!important;
+      -webkit-text-fill-color:#a0f0da!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #route-panel #route-calc:not(:disabled),
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #participation-panel #community-compose-toggle,
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-permissions .djNext-continue {
+      background:#79dec5!important;
+      background-image:none!important;
+      border-color:#79dec5!important;
+      color:#17332d!important;
+      -webkit-text-fill-color:#17332d!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] #djNext-layer-panel .djNext-shortcut-switch[aria-checked="true"] .djNext-switch-track {
+      background:#79dec5!important;
+    }
+    html body #app#app#app#app#app#app#app[data-theme="dark"] :is(
+      #dj890-ai-orb .dj890-ai-orb-glyph,
+      #dj-v794-weather .dj832-tool-icon
+    ) {
+      color:#79dec5!important;
+    }
+  }
+}
