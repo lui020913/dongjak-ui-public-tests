@@ -25,7 +25,7 @@ export function validateBundle(raw){
   const g=s.geometry,coords=g.type==='Point'?[g.coordinates]:g.coordinates;
   if(!['Point','LineString'].includes(g.type)||!Array.isArray(coords)||!coords.length||coords.length>10000||!coords.every(coord)||g.type==='LineString'&&(s.lengthM<=0||coords.length<2||!coords.some(p=>meters(p,coords[0])>.01)))fail('구간 좌표 오류: '+s.id);
   const scores=Object.create(null);for(const id of ids)scores[id]=null;for(const [k,v] of Object.entries(s.scores)){if(!ids.has(k)||!score(v))fail('등록되지 않은 지표 또는 0~100 범위 오류: '+s.id);scores[k]=v;}
-  const evidence=Object.create(null);if(obj(s.evidence))for(const [k,v] of Object.entries(s.evidence)){if(ids.has(k)&&obj(v))evidence[k]={darkM:number(v.darkM)&&v.darkM>=0?v.darkM:null,sourceGrade:Number.isInteger(v.sourceGrade)&&v.sourceGrade>=1&&v.sourceGrade<=5?v.sourceGrade:null,note:text(v.note)};}
+  const evidence=Object.create(null);if(obj(s.evidence))for(const [k,v] of Object.entries(s.evidence)){if(ids.has(k)&&obj(v))evidence[k]={darkM:number(v.darkM)&&v.darkM>=0?v.darkM:null,sourceGrade:Number.isInteger(v.sourceGrade)&&v.sourceGrade>=1&&v.sourceGrade<=5?v.sourceGrade:null,note:text(v.note),modeled:v.modeled===true};}
   return {id:s.id,wayId:key(s.wayId)?s.wayId:null,sequence:Number.isInteger(s.sequence)&&s.sequence>=0?s.sequence:null,name:text(s.name,200),roadType:text(s.roadType,100),lengthM:s.lengthM,geometry:{type:g.type,coordinates:g.type==='Point'?coords[0].slice():coords.map(p=>p.slice())},scores,evidence};
  });
  const c=raw.config;
@@ -66,7 +66,7 @@ export function mergeFactor(bundle,patch){
   const scores={...s.scores,[factor.id]:observed},evidence={...s.evidence};delete evidence[factor.id];
   if(row&&row.score!==null){const note=text(row.evidence?.note);evidence[factor.id]={...row.evidence,note:(sourceDirection==='risk'?'원본 위험점수 '+row.score+'점 → PRI 안전점수 '+observed+'점. ':'')+note};}
   else if(row&&row.score===null)evidence[factor.id]={note:'이 도로구간은 명시적으로 미평가 처리되었습니다.'};
-  else if(hasBaseline)evidence[factor.id]={note:'임시 기본점수 '+observed+'점 · '+text(patch.unmatchedReason)};
+  else if(hasBaseline)evidence[factor.id]={modeled:true,note:'사고다발지 미선정(평가 확인 아님) · 시범 계산에만 임시 기본점수 '+observed+'점 · '+text(patch.unmatchedReason)};
   return {...s,scores,evidence};
  });
  return validateBundle({...bundle,factors:[...bundle.factors.filter(f=>f.id!==factor.id),factor],segments,config:{status:'draft'}});
@@ -81,14 +81,23 @@ export function segmentScore(bundle,s,mode){
  if(mode==='pri12'){const lighting=s.scores.lighting,accidents=s.scores.accidents;return number(lighting)&&number(accidents)?(lighting+accidents)/2:null;}
  if(mode!=='pri')return number(s.scores[mode])?s.scores[mode]:null;
  if(bundle.config.status!=='approved')return null;
- let total=0;for(const [k,w] of Object.entries(bundle.config.weights)){const v=s.scores[k];if(!number(v))return null;total+=v*w;}return total;
+ let total=0,weight=0,missing=[];
+ for(const [k,w] of Object.entries(bundle.config.weights)){
+  const v=s.scores[k];
+  if(!number(v)){missing.push(k);continue;}
+  total+=v*w;weight+=w;
+ }
+ // Only the explicitly agreed 6 -> 5 protection-gap fallback is permitted.
+ // Do not silently average arbitrary missing factors or inflate their scores.
+ if(missing.length && !(Object.keys(bundle.config.weights).length===6 && missing.length===1 && missing[0]==='protectionGap' && weight>0))return null;
+ return weight>0?total/weight:null;
 }
 // Render interpolation only within observed linework, never create connectors
 // across a missing interval or conflate crossing/parallel road ways.
 export function displayFeatures(bundle,mode){
  const lookup=new Map(bundle.segments.filter(s=>s.wayId!==null&&s.sequence!==null).map(s=>[s.wayId+'_'+s.sequence,s]));
  const features=[];
- const make=(s,g,v,display)=>({type:'Feature',properties:{segmentId:s.id,name:s.name||'이름 없는 도로',score:v,displayScore:display??0,evaluated:v!==null,lengthM:s.lengthM},geometry:g});
+ const make=(s,g,v,display)=>({type:'Feature',properties:{segmentId:s.id,name:s.name||'이름 없는 도로',score:v,displayScore:display??0,evaluated:v!==null && !(mode==='accidents' && s.evidence?.accidents?.modeled===true),modeled:mode==='accidents'&&s.evidence?.accidents?.modeled===true,lengthM:s.lengthM},geometry:g});
  for(const s of bundle.segments){
   const v=segmentScore(bundle,s,mode);
   if(s.geometry.type==='Point'){features.push(make(s,s.geometry,v,v));continue;}
@@ -116,7 +125,7 @@ export function displayFeatures(bundle,mode){
 }
 export function summarize(bundle,mode){
  let totalM=0,observedM=0,lineM=0,pointCount=0,geometryM=0;
- for(const s of bundle.segments){totalM+=s.lengthM;if(s.geometry.type==='Point')pointCount++;else{lineM+=s.lengthM;const cs=s.geometry.coordinates;for(let i=1;i<cs.length;i++)geometryM+=meters(cs[i-1],cs[i]);}if(segmentScore(bundle,s,mode)!==null)observedM+=s.lengthM;}
+ for(const s of bundle.segments){totalM+=s.lengthM;if(s.geometry.type==='Point')pointCount++;else{lineM+=s.lengthM;const cs=s.geometry.coordinates;for(let i=1;i<cs.length;i++)geometryM+=meters(cs[i-1],cs[i]);}if(segmentScore(bundle,s,mode)!==null && !(mode==='accidents'&&s.evidence?.accidents?.modeled===true))observedM+=s.lengthM;}
  return {totalM,observedM,lineM,pointCount,geometryM};
 }
 export function routeExposure(bundle,matchedSegments){
