@@ -1,4 +1,5 @@
 import {parseImport,segmentScore,displayFeatures,summarize,PALETTE} from './pri-data.mjs';
+import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import './pri-map.css';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point';
 const EMPTY={type:'FeatureCollection',features:[]};
@@ -66,20 +67,34 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
  dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
  function draw(){
-  if(!map.isStyleLoaded?.()&&!map.getSource(SOURCE))return;
+  // isStyleLoaded() also becomes false while tiles are loading. That is not
+  // evidence that the MapLibre style cannot accept a new GeoJSON layer.
   try{
+   if(!Array.isArray(map.getStyle?.()?.layers))return false;
    if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:display});
-   if(!map.getLayer(LINE)){
-    // Keep street names readable: insert below the first symbol layer.
-    const before=map.getStyle()?.layers?.find(l=>l.type==='symbol')?.id;
-    map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:12,filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':colors,'line-opacity':.96,'line-width':['interpolate',['linear'],['zoom'],12,1.5,15,3.6,18,7,19,10]}},before);
+   // First-symbol insertion was too low: later district/building fills could
+   // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
+   if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
+    filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-color':colors,'line-opacity':.98,'line-width':['interpolate',['linear'],['zoom'],11.5,2.5,13,3.5,15,5,17,8,19,11]}},
+    priOverlayAnchor(map.getStyle()?.layers));
+   if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
+    filter:['==',['geometry-type'],'Point'],
+    paint:{'circle-radius':4,'circle-color':colors,'circle-stroke-color':'#fff','circle-stroke-width':1.5}},
+    priOverlayAnchor(map.getStyle()?.layers));
+   // Reposition layers if a late building/district overlay was appended above
+   // them, including when the basemap changes its style without a full reset.
+   for(const id of [LINE,POINT]){
+    if(priCoveredByMapLayer(map.getStyle()?.layers,id)){
+     map.moveLayer(id,priOverlayAnchor(map.getStyle()?.layers));
+    }
    }
-   if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:17,filter:['==',['geometry-type'],'Point'],paint:{'circle-radius':3,'circle-color':colors,'circle-stroke-color':'#fff','circle-stroke-width':1}});
    const activeColors=mode==='protectionGap'?protectionGapColors:colors;
-   if(map.getLayer(LINE))map.setPaintProperty(LINE,'line-color',activeColors);
-   if(map.getLayer(POINT))map.setPaintProperty(POINT,'circle-color',activeColors);
+   map.setPaintProperty(LINE,'line-color',activeColors);
+   map.setPaintProperty(POINT,'circle-color',activeColors);
    map.getSource(SOURCE).setData(display);
-  }catch(e){console.warn('[PRI] map layer unavailable',e);}
+   return true;
+  }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
  }
  function activate(id){
   if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>typeof s.scores.lighting==='number'&&typeof s.scores.accidents==='number'):!dataset.factors.some(f=>f.id===id))))return;
@@ -88,6 +103,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   if(id&&dataset.area.startsWith('상도1동')&&dataset.segments.length){const bounds=new maplibregl.LngLatBounds();for(const s of dataset.segments){const ps=s.geometry.type==='Point'?[s.geometry.coordinates]:s.geometry.coordinates;for(const p of ps)bounds.extend(p);}if(!bounds.isEmpty())map.fitBounds(bounds,{padding:{top:155,bottom:140,left:26,right:26},maxZoom:16,duration:450});}
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
    if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 안전점수 · 야간+사고 평균':id==='lighting'?'야간 시야 안전점수 (추정)':id==='accidents'?'사고다발지 안전점수 (미선정 100점)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+(id==='accidents'||id==='pri12'?'사고다발지 미선정 구간은 임시 100점 (무사고 뜻 아님)':'회색: 미평가');coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+  ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#D64550,#F18C4A 25%,#E5BC52 50%,#7EAF83 75%,#338D80)':'linear-gradient(90deg,#d74648,#ed9045 25%,#efd05a 50%,#9bc777 75%,#279b80)';
   modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 반경·기존 지정 경계·추정 도로폭·학구도를 결합한 연구용 점수. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'사고다발지 미선정 도로는 임시 안전점수 100점입니다. 실제 무사고 증명이 아닙니다.';
   render();
  }
@@ -102,5 +118,20 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window}){
   node.append(el('small','','높을수록 안전한 방향의 추정 점수입니다. 사고다발지 미선정 구간의 100점은 임시 기본값이며 실제 무사고 또는 보행안전 보장을 뜻하지 않습니다.'));
   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);
  }
- map.on('style.load',()=>{if(mode)draw();});map.on('load',()=>{if(mode)draw();});map.on('click',inspect);render();
+ let recoveryQueued=false;
+ function recoverLayer(){
+  if(!mode)return;
+  const layers=map.getStyle?.()?.layers;
+  if(map.getSource(SOURCE)&&map.getLayer(LINE)&&map.getLayer(POINT)
+   &&!priCoveredByMapLayer(layers,LINE)&&!priCoveredByMapLayer(layers,POINT))return;
+  if(recoveryQueued)return;
+  recoveryQueued=true;
+  win.setTimeout(()=>{recoveryQueued=false;if(mode)draw();},0);
+ }
+ map.on('style.load',()=>{if(mode)draw();});
+ map.on('load',()=>{if(mode)draw();});
+ map.on('styledata',recoverLayer);
+ map.on('idle',recoverLayer);
+ map.on('click',inspect);
+ render();
 }
