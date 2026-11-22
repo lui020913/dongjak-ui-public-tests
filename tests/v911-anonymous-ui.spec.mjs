@@ -421,6 +421,7 @@ test('PC dark transit surfaces and arrival rows remain readable and unclipped',{
  const app=page.locator('#app');
  await tap(page,tab(page,'mine'));
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
+ await tap(page,page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(app).toHaveAttribute('data-theme','dark');
  await tap(page,tab(page,'map'));
@@ -567,6 +568,7 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  await expect(page.locator('.map-actions > #toggle-road-width')).toBeHidden();
  await tap(page,tab(page,'mine'));
  await tap(page,page.locator('#mine-panel [data-dj834-action=theme]'));
+ await tap(page,page.locator('#mine-panel .dj834-choice-settings:not([hidden]) [data-dj834-theme=dark]'));
  await tap(page,page.locator('#dj840-theme-confirm [data-decision=confirm]'));
  await expect(page.locator('#app')).toHaveAttribute('data-theme','dark');
  await tap(page,tab(page,'map'));
