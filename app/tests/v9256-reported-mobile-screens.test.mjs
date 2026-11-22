@@ -38,7 +38,8 @@ test('weather info has independent header, place and data rows; 0 degrees is nev
 test('content-first map information uses measured height without trapping details behind the dock',()=>{
  const sizing=read('src/mobile-compact-transport-sheet.js'),facility=read('src/v864-facility-detail-redesign.css');
  assert.match(sizing,/--dj9251-facility-content-height/);
- assert.match(facility,/height:var\(--dj9251-facility-content-height,auto\)!important/);
+ assert.match(facility,/height:100%!important/);
+ assert.match(facility,/max-height:none!important;flex:1 1 auto!important/);
  assert.match(sizing,/Math\.floor\(v\*\.60\)/);
 });
 test('train marker size is capped at close zoom while opposing directions remain offset',()=>{
