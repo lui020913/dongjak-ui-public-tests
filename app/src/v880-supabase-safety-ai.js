@@ -222,7 +222,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     pointerStart={target:event.target,at:Date.now()};
     // This same pointer sequence may dismiss a sheet that briefly exposes
     // the AI orb below it. Never reinterpret it as an AI-open gesture.
-    if(event.target?.closest?.('#transport-close,.dj-sheet-chrome-close,.page-dismiss,.dj-place-header-close,#dj-mobile-utilities-close,#djNext-layer-panel .djNext-close,[data-close-page]')){
+    if(event.target?.closest?.('#transport-close,.dj-sheet-chrome-close,.page-dismiss,.dj-place-header-close,#dj-mobile-utilities-close,#djNext-layer-panel .djNext-close,[data-close-page],[aria-label*="닫기"],.maplibregl-popup-close-button,[data-dismiss],.dj-place-close')){
       transportDismissedAt=Date.now();
     }
   };
