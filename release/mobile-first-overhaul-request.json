@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Protected mobile Preview and Production for latest approved charcoal mint dark map, translucent buildings with zoom13-15 gradual reveal, and corrected PRI graded vulnerability overlay. PR #277: Gemini API HTTP 429 quota only means AI review explicitly skipped and marked manualReviewRequired with full captures, never falsely counted as reviewed; actual critical findings, source/missing evidence, browser failures continue to block. Also fixes location denied map center CTA. PR #278 updates two obsolete regression assertions to approved dark palette and opacity values so build can succeed without removing tests. Run source suite, exact Preview, all 12 phone QA, all 6 independent browser captures, optional real Gemini review, 6-target exploration if quota available, and guarded Production verification. Preserve 300m institutional protection gap, 1086 graded and 600 neutral gray, 5-or-6 composite rule, app accessibility and data.",
-  "attempt": 240,
+  "purpose": "Exact-main protected Preview→12 phone QA→6 design capture→critical visual/function checks→Production for approved charcoal+mint dark theme and reference-like dark map (PR #275), transparent native+GIS 3D buildings 0.58/0.50 with continuous 13–15 zoom fade, and corrected release-only mobile override (PR #279). Preserve all existing PRI graded protection-gap layer 300m, 1086 graded/600 neutral gray, light theme, live transit, semantic danger colors, Android signing, night analytical occlusion. Source CI runs #44978130442 and #44978844609 passed. Keep all required browser, source, capture and protected deployment gates. Never mark quota-exhausted Gemini reviews as passed; retain clearly indicated manualReviewRequired if workflow policy allows; block actual critical defects.",
+  "attempt": 241,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Attempt 239 release build failed in two outdated dark-map regression test expectations (mobile-followup-build.test.mjs, mobile-next-build.test.mjs), now updated in PR #278. Attempt 238 had real Gemini critical button hierarchy issue, fixed in PR #277, plus explicit 429 quota-only human review fallback. Rebuild from new exact main.",
+  "last_retry_reason": "Attempt #240 still used an older production follow-up script that rewrote mobile dark building opacity to 96–98%, contradicting user-approved translucent 50–58%. PR #279 merged at d2c62ce9 after source CI success and updates production overlay + regression tests. Request full source-pinned rerun with latest main; never promote stale 240.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
