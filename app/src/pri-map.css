@@ -86,3 +86,25 @@
  html body #dj-pri-dialog .dj-pri-head{position:sticky;top:0;z-index:2;background:var(--djNext-tool-face,#fff);padding:0 0 6px;}
  html body #dj-pri-dialog .dj-pri-status{font-size:12px;line-height:1.5;}
 }
+
+/* Survey-road detail uses the same phone edge-to-edge docking as the
+   assessment chooser/legend. The desktop MapLibre anchored popup is unchanged. */
+@media(max-width:699px){
+ #map .dj-pri-map-popup.maplibregl-popup{
+  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,100px) 12px!important;
+  margin:0!important;transform:none!important;width:auto!important;max-width:none!important;
+  min-width:0!important;z-index:2600!important;
+ }
+ #map .dj-pri-map-popup .maplibregl-popup-content{
+  box-sizing:border-box!important;width:100%!important;max-width:none!important;
+  max-height:min(48dvh,440px);overflow-y:auto;overscroll-behavior:contain;
+  padding:17px 18px;border-radius:20px!important;
+  color:var(--djNext-text,#203d32);background:var(--djNext-tool-face,#fff);
+  box-shadow:0 8px 24px rgba(23,53,40,.14);
+ }
+ #map .dj-pri-map-popup .maplibregl-popup-tip{display:none!important}
+ #map .dj-pri-map-popup .maplibregl-popup-close-button{
+  top:8px;right:8px;min-width:36px;min-height:36px;border-radius:50%;
+  color:var(--djNext-text,#203d32);background:var(--djNext-tool-base,#f1f6f3);
+ }
+}
