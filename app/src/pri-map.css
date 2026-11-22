@@ -32,28 +32,16 @@
   #app .dj-pri-detail-wrap,#app .dj-pri-detail-toggle svg{transition:none!important;}
 }
 
-/* One institutional-gap card contains the scored road layer and its strictly
-   unscored 300m middle-school spatial review. The 22-road SHP audit is evidence,
-   never a new factor or a score adjustment. */
-.dj-pri-actions .dj-pri-protection-group{
-  display:grid;gap:9px;min-width:0;
-  padding:12px;border:1px solid var(--djNext-tool-edge,#c2d4c9);
-  border-radius:17px;background:var(--djNext-tool-base,#f1f6f3);
-  color:var(--djNext-text,#203d32);
-}
-.dj-pri-protection-heading{margin:0;font-size:15px;font-weight:750;line-height:1.4}
-.dj-pri-actions .dj-pri-protection-group>.dj-pri-button{
-  display:block;box-sizing:border-box;width:100%;min-height:46px;
-  border-radius:13px;padding:10px 12px;text-align:left;line-height:1.45;
-  background:var(--djNext-tool-face,#fff);
-}
-.dj-pri-actions .dj-pri-protection-group>.dj-pri-button[aria-pressed=true]{
-  color:#fff;background:var(--djNext-tool-primary,#0d806a);
-}
-.dj-pri-protection-group :is(.dj-pri-protection-summary,.dj-pri-policy-caution){
-  margin:0;color:var(--djNext-muted,#65776e);font-size:11px;line-height:1.55;
-  word-break:keep-all;
-}
+/* A single main-list entry opens the protected TWO-choice detail page. */
+.dj-pri-protection-entry{display:flex!important;align-items:center;justify-content:space-between;width:100%;min-height:50px!important;padding:10px 14px!important;border-radius:15px!important}
+.dj-pri-protection-entry::after{content:'›';font-size:22px;line-height:1;color:var(--djNext-muted,#65776e)}
+.dj-pri-protection-detail{display:grid;gap:11px;min-width:0;padding:4px 0 10px}
+.dj-pri-protection-detail[hidden],.dj-pri-actions[hidden]{display:none!important}
+.dj-pri-protection-detail .dj-pri-protection-action{display:block;width:100%;min-width:0;box-sizing:border-box;min-height:50px;border-radius:14px;padding:11px 14px;text-align:left;line-height:1.45}
+.dj-pri-protection-detail .dj-pri-protection-back{border:0;background:transparent;box-shadow:none;text-align:left;color:var(--djNext-tool-primary,#0d806a);font-size:13px}
+.dj-pri-protection-detail .dj-pri-protection-summary{margin:0;padding:11px 12px;border-radius:12px;background:var(--djNext-tool-base,#f1f6f3);color:var(--djNext-muted,#65776e)}
+.dj-pri-protection-detail .dj-pri-policy-caution{margin-top:1px;font-size:12px;line-height:1.55;color:var(--djNext-muted,#65776e)}
+.dj-pri-dialog[data-dj-pri-view=protection] :is(.dj-pri-status,.dj-pri-data-tools){display:none!important}
 .dj-pri-detail{
   min-width:0;color:var(--djNext-text,#203d32);
   font-size:13px;line-height:1.55;word-break:keep-all;
@@ -70,4 +58,31 @@
 @media(max-width:699px){
  .dj-pri-dialog{width:min(420px,calc(100vw - 28px));max-height:calc(100dvh - env(safe-area-inset-top,0px) - 132px)}
  .dj-pri-dialog::backdrop{background:transparent;backdrop-filter:none}
+}
+
+/* iPhone: anchor the exact view to the measured top of the native tab dock.
+   The modal is outside #app; the legend lives inside #app. A single shared
+   --dj-pri-dock-clearance is measured on entry, avoiding legacy 130px guesses.
+   No second modal, scrim, or body scroll lock is introduced. */
+@media(max-width:699px){
+ html body #dj-pri-dialog.dj-pri-dialog{
+  position:fixed!important;inset:auto 12px var(--dj-pri-dock-clearance,100px) 12px!important;
+  margin:0!important;width:auto!important;min-width:0!important;max-width:none!important;
+  max-height:calc(100dvh - var(--dj-pri-dock-clearance,100px) - max(100px,env(safe-area-inset-top,0px) + 76px))!important;
+  box-sizing:border-box!important;overflow-y:auto!important;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;padding:16px!important;border-radius:22px!important;
+ }
+ #app #dj-pri-legend{
+  position:absolute!important;left:12px!important;right:12px!important;
+  bottom:var(--dj-pri-dock-clearance,100px)!important;
+  width:auto!important;max-width:none!important;margin:0!important;
+  box-sizing:border-box!important;padding:12px 14px!important;border-radius:20px!important;
+ }
+ #app #dj-pri-legend>strong{font-size:14px!important;line-height:1.4;}
+ #app .dj-pri-ends{grid-template-columns:repeat(5,minmax(0,1fr));font-size:10px;gap:1px;}
+ #app .dj-pri-ends span{white-space:nowrap;letter-spacing:-.03em;}
+ html body #dj-pri-dialog .dj-pri-actions{gap:8px;margin:12px 0;}
+ html body #dj-pri-dialog .dj-pri-actions>.dj-pri-button{min-height:48px;border-radius:14px;}
+ html body #dj-pri-dialog .dj-pri-head{position:sticky;top:0;z-index:2;background:var(--djNext-tool-face,#fff);padding:0 0 6px;}
+ html body #dj-pri-dialog .dj-pri-status{font-size:12px;line-height:1.5;}
 }
