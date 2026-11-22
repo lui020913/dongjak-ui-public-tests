@@ -33,7 +33,7 @@ async function journey(page,info,steps,{setup=async()=>{},keepTour=false}={}){
 async function map(page){await tap(page,tab(page,'map'));await expect(page.locator('#app')).toHaveAttribute('data-tab','map');}
 async function pin(page,label,key){
  const modal=page.locator('#djNext-layer-panel');await tap(page,page.locator('#djNext-layers'));await expect(modal).toBeVisible();
- const b=modal.getByRole('switch',{name:label+' 바로가기',exact:true});await b.scrollIntoViewIfNeeded();if(await b.getAttribute('aria-checked')!=='true')await b.click();await expect(b).toHaveAttribute('aria-checked','true');
+ const b=modal.getByRole('switch',{name:label+' 상단 바로가기 고정',exact:true});await b.scrollIntoViewIfNeeded();if(await b.getAttribute('aria-checked')!=='true')await b.click();await expect(b).toHaveAttribute('aria-checked','true');
  await modal.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(modal).toBeHidden();const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await shortcut.scrollIntoViewIfNeeded();return shortcut;
 }
 const denyLocation=page=>page.addInitScript(()=>Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,fail)=>queueMicrotask(()=>fail({code:1}))}));

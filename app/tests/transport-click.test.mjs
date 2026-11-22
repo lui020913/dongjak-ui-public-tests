@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {initTransportMap,normalizeStationQueryName} from '../src/transport-map.js';
 
 class MockNode {
@@ -107,4 +108,13 @@ test('지하철 역명은 공식 API에서 사용하는 역명으로 정규화',
   assert.equal(normalizeStationQueryName('노량진역'),'노량진');
   assert.equal(normalizeStationQueryName('사당역 (2호선)'),'사당');
   assert.equal(normalizeStationQueryName('숭실대입구'),'숭실대입구');
+});
+
+
+test('transfer-line badges contain pointer/click events within the transport sheet',()=>{
+  const source=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
+  assert.match(source,/for\(const type of \['pointerdown','pointerup','touchstart','touchend'\]\)/);
+  assert.match(source,/button\.addEventListener\(type,event=>event\.stopPropagation\(\),\{passive:true\}\)/);
+  assert.match(source,/button\.addEventListener\('click',event=>\{\s*event\.preventDefault\(\);event\.stopPropagation\(\);/);
+  assert.match(source,/void open\(\{\.\.\.current,selectedLine:line\},true\)/);
 });
