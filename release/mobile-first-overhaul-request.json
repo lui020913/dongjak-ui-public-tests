@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.88",
+  "application_version": "9.2.89",
   "public_work_branch": "main",
-  "purpose": "Owner-requested six mobile UI corrections: PR316 + QA PR320 + adminscope build preflight PR323 + release-blocking geometry fix PR324 (5efcf5ef5f6eba341bb8b081e9793ecc3c0a6b8e). Render actual route CTA above bottom nav by measured runtime geometry, confirm physical hit test; preserve observed three-factor vulnerability, 300m 50:50 Sangdo1 GIS, theme and onboarding fixes. Immutable exact source build, isolated Preview, all 12 mobile Playwright QA shards, PC/tablet gate, protected Production verification/rollback; block if any fail.",
-  "attempt": 272,
+  "purpose": "Owner-requested eight iPhone PWA UI regression fixes merged via PR326 (main 823ad0aaa3256e95f846f3d4ebd43838a1aeaf93): no map guide dark scrim; metro previous/next pill buttons and Seoul subway API rows below; nearby and community layout; isolate My Info typography to own view; make favorites/records scroll; prevent TIP flash on map return; inline update history as child settings; opacity-only AI in/out. Exact public app source, isolated Preview, all 12 mobile QA shards, desktop/tablet access gate, protected Production verification/rollback. Release only if green.",
+  "attempt": 273,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.88 attempt271 #45022677978 passed build, Preview, PC/tablet and 11/12 phone QA; lane4 failed 180s timeout because bottom nav intercepted center of route-calc despite CSS. PR324 fixes actual DOM geometry at runtime via inline important footer anchor and adds short explicit pointer hit-test before actual click. Source CI #45023632029 succeeded. Retest all 12; prior Production skipped.",
+  "last_retry_reason": "Follow-up to previously successful 9.2.88 production release #45023810017. New UI fixes PR326 source CI #45025873824 succeeded (all source regressions and three phone viewport checks); main merged squash SHA 823ad0aaa3256e95f846f3d4ebd43838a1aeaf93. Run new full 12-lane phone QA before any protected Production promotion.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
