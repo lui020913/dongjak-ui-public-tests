@@ -205,3 +205,70 @@
     }
   }
 }
+
+/* My Info is a single centered, independently scrollable screen. The
+   language selector lives inside the settings list, never below the dock. */
+@layer request-completion {
+  @media (max-width:699px) {
+    html body #app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+      display:block!important;
+      min-height:0!important;
+      overflow-y:auto!important;
+      overflow-x:hidden!important;
+      -webkit-overflow-scrolling:touch!important;
+      touch-action:pan-y!important;
+      scroll-padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;
+      padding:14px 16px 32px!important;
+    }
+    html body #app#app#app#app #mine-panel .dj834-my-home {
+      width:100%!important;
+      max-width:100%!important;
+      box-sizing:border-box!important;
+      padding:6px 0 24px!important;
+      margin:0 auto!important;
+    }
+    html body #app#app#app#app #mine-panel .dj834-settings-group {
+      box-sizing:border-box!important;
+      width:100%!important;
+    }
+    html body #app#app#app#app #mine-panel .dj854-language-section {
+      box-sizing:border-box!important;
+      display:grid!important;
+      grid-template-columns:40px minmax(0,1fr) minmax(100px,35%)!important;
+      align-items:center!important;
+      gap:10px!important;
+      min-width:0!important;
+      width:100%!important;
+      min-height:66px!important;
+      margin:0!important;
+      padding:10px 14px!important;
+      border:0!important;
+      border-top:1px solid var(--dj-theme-line,#d3e0d8)!important;
+      border-radius:0!important;
+      background:var(--dj-theme-surface,#fff)!important;
+      color:var(--dj-theme-ink,#20312e)!important;
+    }
+    html body #app#app#app#app #mine-panel .dj854-language-section .dj834-setting-icon {
+      width:40px!important;height:40px!important;min-width:40px!important;
+      display:grid!important;place-items:center!important;margin:0!important;
+    }
+    html body #app#app#app#app #mine-panel .dj854-language-section label {
+      display:block!important;min-width:0!important;
+      margin:0!important;font-size:16px!important;
+      font-weight:650!important;text-align:left!important;
+      color:var(--dj-theme-ink,#20312e)!important;
+    }
+    html body #app#app#app#app #mine-panel #dj854-language-select {
+      display:block!important;min-width:0!important;width:100%!important;
+      max-width:100%!important;min-height:42px!important;
+      margin:0!important;padding:7px 8px!important;
+      font-size:14px!important;border:1px solid var(--dj-theme-line,#d3e0d8)!important;
+      border-radius:12px!important;background:var(--dj-theme-raised,#e9f2ed)!important;
+      color:var(--dj-theme-ink,#20312e)!important;
+    }
+    html body #app#app#app#app #bottom-nav:not([hidden]) {
+      grid-template-columns:repeat(5,minmax(0,1fr))!important;
+      justify-content:center!important;
+    }
+  }
+}
