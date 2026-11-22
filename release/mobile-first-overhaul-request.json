@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.81",
+  "application_version": "9.2.82",
   "public_work_branch": "main",
-  "purpose": "Owner-corrected map label contrast release: in LIGHT theme all MapLibre map names dark text #26352f with bright white halo (#f6f9f7 or rgba(255,255,255,0.97)); in DARK theme light text with dark outline. Contains application fix PR #297 (eae0634c45217ef180dc0400c057026fc93b5627), plus restored valid release YAML PRs #299 and #301. Do not revert light labels to white text/dark outline. Require exact successful app build, Preview, mandated mobile QA (fast 12 shards unless explicit full gate), desktop/tablet QA, protected Cloudflare Production with provenance/API checks and guarded rollback.",
-  "attempt": 254,
+  "purpose": "Owner-requested Production release: apply merged PR #305 (a7bd8960567d12f6e7899b077f450fa5b6650f38) to the real mobile 지도앱. 제도적 보호 공백 50:50(보호구역 공간관계·동일 초등학교 통학구역), 도로폭 평가 제외, 높은 위험점수는 빨간색, 회색 600개 NULL 유지. This release replaces stale 3source preflight with exact 2factor risk-v2 guards. Require tested exact public source, verified Preview, 12 mobile QA shards, desktop/tablet install-gate QA, protected Cloudflare Production, API/provenance checks and guarded rollback.",
+  "attempt": 255,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.80 release never started: workflow syntax broken after PR #296 (node-version stray brace and nested name YAML quotes). Fixed via PRs #299 and #301 and regression tests; rerun on exact corrected main source.",
+  "last_retry_reason": "PR #305 (high-risk-red scoring) merged and CI verified; production currently references older public app source. Request exact-source 9.2.82 promotion with upgraded GIS release checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
