@@ -53,6 +53,8 @@ test('parallel official up and down rail tracks collapse to one route stroke',()
 
 test('bus sheet height is stable while collapsing and while arrivals refresh',()=>{
   const compact=read('mobile-compact-transport-sheet.js');
+  const drag=read('dj-v8212-sheet-controller.js');
+  assert.match(drag,/panel\.dispatchEvent\(new CustomEvent\('dongjak:transport-dismiss'\)\)/);
   assert.match(compact,/settleUntil=Date\\.now\\(\\)\\+240/);
   assert.match(compact,/if\\(kind==='bus'\\)\\{size=Math\\.max\\(size,busFloor\\)/);
   assert.match(compact,/panel\\.classList\\.contains\\('dj-sheet-dragging'\\)/);
