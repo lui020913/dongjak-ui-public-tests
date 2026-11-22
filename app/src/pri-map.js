@@ -1,5 +1,6 @@
 import {parseImport,segmentScore,observedFactorScore,displayFeatures,summarize,CURRENT_VULNERABILITY_FACTORS,currentVulnerabilityCoverage} from './pri-data.mjs';
 import {scopedPolicyFeatures,scopedCompositeFeatures} from './pri-scope-data.mjs';
+import {buildSanghyeonMiddleSchoolReview} from './sangdo1-middle-school-review.mjs';
 import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import './pri-map.css';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point';
@@ -28,7 +29,9 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const focusArea=button('분석 지역으로 이동',()=>{
   if(!dataset?.segments?.length)return;
   const bounds=new maplibregl.LngLatBounds();
-  if(mode==='protectionGap'||mode==='current3'){
+  if(mode==='middleReview'){
+   for(const feature of display.features)for(const point of feature.geometry.coordinates)bounds.extend(point);
+  }else if(mode==='protectionGap'||mode==='current3'){
    for(const feature of policyScope?.features||[])for(const point of feature.geometry.coordinates)bounds.extend(point);
   }else for(const seg of dataset.segments){
    const points=seg.geometry.type==='Point'?[seg.geometry.coordinates]:seg.geometry.coordinates;
@@ -74,10 +77,10 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(observedFactorScore(s,f.id)!==null)available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km';
    // Only the three currently supplied files are eligible; pending team data
    // must never enter the composite as synthetic zeros or safety defaults.
-   const options=[['current3','종합 보행 취약도 · 현재 3개 자료'],...dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)).map(f=>[f.id,f.label])];
+   const options=[['current3','종합 보행 취약도 · 현재 3개 자료'],['middleReview','상현중학교 300m 도로 검토 · 점수 미산정'],...dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)).map(f=>[f.id,f.label])];
    for(const [id,name] of options){
-     const eligible=id==='current3'?dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):available.has(id);
-     const suffix=!eligible?' · 미평가':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
+     const eligible=id==='middleReview'?Boolean(policyScope):id==='current3'?dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):available.has(id);
+     const suffix=!eligible?' · 미평가':id==='middleReview'?' · 지정자료 미검증':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
      const item=button(name+suffix,()=>{activate(id);dialog.close();});
      item.disabled=!eligible;item.setAttribute('aria-pressed',String(mode===id));actions.append(item);
    }
@@ -135,9 +138,11 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
      map.moveLayer(id,priOverlayAnchor(map.getStyle()?.layers));
     }
    }
-   const activeColors=mode==='protectionGap'?protectionGapColors:colors;
+   const activeColors=mode==='middleReview'?'#7759a8':mode==='protectionGap'?protectionGapColors:colors;
    map.setPaintProperty(LINE,'line-color',activeColors);
    map.setPaintProperty(POINT,'circle-color',activeColors);
+   map.setPaintProperty(LINE,'line-opacity',mode==='middleReview'?0.95:['case',['get','evaluated'],.72,.27]);
+   map.setPaintProperty(LINE,'line-width',mode==='middleReview'?['interpolate',['linear'],['zoom'],11.5,2.2,13,3,15,4,17,5,19,7]:['interpolate',['linear'],['zoom'],11.5,.7,13,1.1,15,1.8,17,2.8,19,4.1]);
    map.getSource(SOURCE).setData(display);
    return true;
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
@@ -145,23 +150,33 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  function activate(id){
   // Existing devices may still have the deleted preview mode in local storage.
   if(id==='pri12'||id==='pri')id='current3';
-  if(id&&(!dataset||(id==='current3'?!dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):!dataset.factors.some(f=>f.id===id))))return;
+  if(id&&(!dataset||(id==='middleReview'?!policyScope:id==='current3'?!dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):!dataset.factors.some(f=>f.id===id))))return;
   mode=id;if(id){app.dataset.djPriVisible='true';app.dataset.djPriMode=id;}
   else{delete app.dataset.djPriVisible;delete app.dataset.djPriMode;}
-  doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;display=id?(id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):displayRisk(displayFeatures(dataset,id))):EMPTY;
+  doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;
+  if(id==='middleReview'){
+   const review=buildSanghyeonMiddleSchoolReview(policyScope);
+   display={type:'FeatureCollection',features:review.features.flatMap(f=>(f.geometry.type==='MultiLineString'?f.geometry.coordinates:[f.geometry.coordinates]).map((coordinates,i)=>({type:'Feature',geometry:{type:'LineString',coordinates},properties:{segmentId:f.properties.segment_id,name:f.properties.road_name,score:null,displayScore:0,evaluated:false,middleSchoolReview:true,baselinePolicyScore:f.properties.existing_policy_score_0_100,part:i}})))};
+  }else display=id?(id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):displayRisk(displayFeatures(dataset,id))):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
-  toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
-   if(id){label.textContent=id==='current3'?'종합 보행 취약도 · 3개 자료':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent=(id==='protectionGap'||id==='current3')?(policyScope?'상도1동 경계 내 도로 선형 '+policyScope.features.length+'개 · 점수 표시 '+display.features.filter(f=>f.properties.evaluated).length+'개 · 내부 미평가 '+display.features.filter(f=>!f.properties.evaluated).length+'개':'경계 검증 자료를 불러오지 못해 표시하지 않습니다.'):'평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+  toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;ramp.hidden=id==='middleReview';ends.hidden=id==='middleReview';if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
+   if(id){label.textContent=id==='middleReview'?'상현중학교 300m 도로 · 점수 미산정':id==='current3'?'종합 보행 취약도 · 3개 자료':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=id==='middleReview'?{geometryM:0,pointCount:0}:summarize(dataset,id);coverage.textContent=id==='middleReview'?'상현중학교 대표점 300m 이내 도로 선형 '+display.features.length+'개 · 중학교 전용 점수 없음 · 기존 위험점수 별도 유지':(id==='protectionGap'||id==='current3')?(policyScope?'상도1동 경계 내 도로 선형 '+policyScope.features.length+'개 · 점수 표시 '+display.features.filter(f=>f.properties.evaluated).length+'개 · 내부 미평가 '+display.features.filter(f=>!f.properties.evaluated).length+'개':'경계 검증 자료를 불러오지 못해 표시하지 않습니다.'):'평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)':'linear-gradient(90deg,#279b80,#9bc777 25%,#efd05a 50%,#ed9045 75%,#d74648)';
-  modelNote.textContent=id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 잘린 부분의 학구 재교차 자료가 없어 거리만 사용합니다. 상현중학교는 현황만 포함하고 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
+  modelNote.textContent=id==='middleReview'?'보라색은 상현중학교 대표점 주변 300m 공간검토 도로입니다. 위험등급이나 법정 보호구역 미지정 판정이 아닙니다. 중학교 통학구역·보호구역 지정 고시 미검증이므로 이 레이어의 새 점수는 NULL이며 PRI와 길찾기에는 반영하지 않습니다.':id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 잘린 부분의 학구 재교차 자료가 없어 거리만 사용합니다. 상현중학교는 현황만 포함하고 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
   render();
  }
  function inspect(e){
   if(!mode||app.dataset.tab!=='map'||dialog.open||!map.getLayer(LINE))return;
   const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[LINE,POINT].filter(l=>map.getLayer(l))});
-  const s=lookup.get(candidates[0]?.properties?.segmentId);if(!s)return;
+  const selected=candidates[0];const s=lookup.get(selected?.properties?.segmentId);if(!s)return;
+  if(mode==='middleReview'){
+   const node=el('div','dj-pri-detail');node.append(el('strong','','상현중학교 300m 검토 · '+(s.name||'이름 없는 도로')),el('b','','중학교 관련 보호 공백 점수: 미산정'),el('p','',s.id+' · 상도1동 경계 내부 도로'),el('small','','이 범위는 학교 대표점으로부터 300m이며 공식 보호구역·실제 통학로가 아닙니다. 2025년 경찰청 보호구역 원본에 상현중학교 대응 지정 자료가 없어 법적 공백 판정은 보류합니다. 기존 초등학교·노인시설 점수는 변경하지 않습니다.'));
+   const base=selected?.properties?.baselinePolicyScore;
+   if(base!==null&&base!==undefined&&Number.isFinite(Number(base)))node.append(el('small','','기존 보호 공백 참고 점수: '+Number(base).toFixed(1)+'점 (중학교 점수가 아님)'));
+   popup?.remove();popup=new maplibregl.Popup({closeButton:true,maxWidth:'278px'}).setLngLat(e.lngLat).setDOMContent(node).addTo(map);return;
+  }
   const v=riskValue(segmentScore(dataset,s,mode)),node=el('div','dj-pri-detail');const modeled=mode==='accidents'&&s.evidence?.accidents?.modeled===true;node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',modeled?'미선정 · 미평가':v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
   const fs=mode==='current3'?dataset.factors.filter(f=>CURRENT_VULNERABILITY_FACTORS.includes(f.id)):mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
   for(const f of fs){const val=s.scores[f.id],ev=s.evidence[f.id];node.append(el('p','',f.label+' 위험점수: '+(observedFactorScore(s,f.id)!==null?riskValue(val)+'점':'미평가')+(ev?.darkM!==null&&ev?.darkM!==undefined?' · 평균 암부 '+ev.darkM+'m':'')+(ev?.sourceGrade?' · 원본 위험 '+ev.sourceGrade+'등급':'')+(ev?.note?' · '+ev.note:'')),el('small','',f.source+' · '+f.method));}
