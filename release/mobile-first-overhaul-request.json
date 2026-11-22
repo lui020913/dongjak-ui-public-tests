@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.88",
   "public_work_branch": "main",
-  "purpose": "Owner-requested six-group iPhone UI correction from merged PR #316: stabilize onboarding/guide scale and TIP, genuinely crossfade tabs while dock stays fixed, correct route footer and news/community palette, replace My Info language/theme/map options with nested settings, align nearby info and report composer, calculate observed-only 3-factor pedestrian vulnerability and fix its sheet/button, lighten university map labels. Preserve all existing source features and 300m policy gap 50:50 source evidence. Gate deployment by exact-source CI #45021065600, isolated Preview, phone QA, desktop/tablet gate, and protected Production/rollback verification.",
-  "attempt": 269,
+  "purpose": "Retry exact 9.2.88 after PR #320 merged at 8dc66b1f5e1513271b85023c890f58f066aeda68; fixes content-only fade keyframe; corrects all three phone nested-theme test flows; anchors route CTA above real dock clearance in strongest runtime mobile-next.css. Preserve PR #316 improvements and subsequently merged Sangdo1-only policy geography and 300m 50:50 risk scoring. Require exact source CI #45022086773 green, isolated Preview, all 12 phone QA lanes and PC/tablet gate before protected Production and rollback proof.",
+  "attempt": 270,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Source PR #316 merged as 8c431263bc1b6eb8a7bc4a5b6b345935919a1ec3 after full public CI 45021065600 succeeded including three phone widths. This is a new 9.2.88 requested candidate, not a claim that Production is already deployed.",
+  "last_retry_reason": "Prior 9.2.88 run #45021281009 built and deployed Preview successfully but 6/12 phone QA lanes failed: content fade keyframe mismatch, tests used old direct theme row, and route-calc was obscured by fixed bottom navigation. PR #320 repairs these without disabling checks. Rebuild and re-test exact merged source; Production was blocked in prior run.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
