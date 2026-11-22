@@ -1058,3 +1058,27 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav:not([hidden]){z-index:8600!important;}
  }
 }
+
+/* Map-center fallback is a primary action when geolocation is denied.
+   Preserve the existing anonymous location flow and both color themes. */
+@layer request-completion {
+ @media(max-width:699px) {
+  html body #app #ped-tools-results button.ped-nearby-item.dj-nearby-map-center {
+   display:flex!important;align-items:center!important;justify-content:center!important;
+   min-height:48px!important;padding:12px 16px!important;gap:10px!important;
+   border:1px solid #285b50!important;border-radius:14px!important;
+   background:#285b50!important;color:#fff!important;
+   font-size:14px!important;font-weight:750!important;letter-spacing:0!important;
+   box-shadow:0 3px 10px rgba(20,54,46,.18)!important;
+  }
+  html body #app #ped-tools-results button.dj-nearby-map-center::after {
+   content:'›';font-size:24px;line-height:14px;font-weight:500;
+  }
+  html body #app #ped-tools-results button.dj-nearby-map-center:focus-visible {
+   outline:3px solid #85cbb7!important;outline-offset:3px!important;
+  }
+  html body #app[data-theme='dark'] #ped-tools-results button.dj-nearby-map-center {
+   border-color:#70b7a4!important;background:#326d60!important;color:#f7fffc!important;
+  }
+ }
+}
