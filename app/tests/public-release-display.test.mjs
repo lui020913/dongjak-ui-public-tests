@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote} from '../src/public-release-display.js';
+import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote} from '../src/public-release-display.js';
 import {APP_RELEASES,APP_VERSION} from '../src/app-version.js';
 import {RENUMBERED_VERSION_HISTORY} from '../src/version-history.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
@@ -15,6 +15,12 @@ test('pre-release version is fixed, but operational provenance stays independent
  assert.match(read('index.html'),/id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
  assert.match(read('src/v7120-settings.js'),/id="dj-about-version-number">1\.0<\/strong>/);
  assert.doesNotMatch(read('index.html'),/id="version-history-trigger"[^>]*>v\d/);
+});
+test('release history removes only its own internal build number from visible text',()=>{
+ assert.equal(publicReleaseNote('모바일 안정성 개선 (9.2.76)','9.2.76'),'모바일 안정성 개선');
+ assert.equal(publicReleaseNote('디자인 변경 (v9.2.76) · 지도 3D','v9.2.76'),'디자인 변경 · 지도 3D');
+ assert.equal(publicReleaseNote('7일 날씨와 외부 API 1.2.3','9.2.76'),'7일 날씨와 외부 API 1.2.3');
+ assert.ok(read('src/version-history-v7.js').includes('publicReleaseNote(description,record.version)'));
 });
 test('notes are categorized deterministically and archived text is preserved',()=>{
  assert.deepEqual(CHANGE_TYPE_GROUPS.map(x=>x.id),['major','feature','design','fix']);

@@ -7,6 +7,15 @@ export const CHANGE_TYPE_GROUPS=Object.freeze([
   {id:'design',title:'디자인·사용성',description:'화면 구성, 글씨, 아이콘, 애니메이션과 조작'},
   {id:'fix',title:'오류 수정·안정화',description:'오류 해결, 속도, 데이터·서비스 안정성'}
 ]);
+/** Keep internal build identifiers in data attributes, never in user-facing notes. */
+export function publicReleaseNote(note,internalVersion=''){
+  let value=String(note??'');
+  const version=String(internalVersion||'').replace(/^v/i,'');
+  if(!/^\d+\.\d+\.\d+$/.test(version))return value;
+  for(const tag of ['('+version+')','(v'+version+')','（'+version+'）','（v'+version+'）','['+version+']','[v'+version+']'])value=value.replaceAll(tag,'');
+  for(const prefix of [version+' ', 'v'+version+' ',version+': ','v'+version+': '])if(value.startsWith(prefix)){value=value.slice(prefix.length);break;}
+  return value.replace(/\s{2,}/g,' ').trim();
+}
 export function classifyReleaseNote(note,scale='patch'){
   const text=String(note||'');
   if(scale==='major')return 'major';
