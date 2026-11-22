@@ -222,6 +222,12 @@ export function installScaleDocking({map,app,overview}={}){
       applyImportant(scale,'visibility','hidden');
       const chip=scale.querySelector('.maplibregl-ctrl-scale');
       if(chip)applyImportant(chip,'visibility','hidden');
+      // Inline visibility may be reset by another HUD controller; suppress
+      // paint while the weather panel owns the map viewport.
+      if(app.ownerDocument.getElementById('dj854-weather-sheet')?.hidden===false){
+        applyImportant(scale,'display','none');
+        if(chip)applyImportant(chip,'display','none');
+      }
     }
     schedule();
   };
@@ -260,6 +266,10 @@ export function installScaleDocking({map,app,overview}={}){
       // a blocker: it occupies a reserved right-hand HUD lane beside the scale.
       const scaleChip=scale.querySelector('.maplibregl-ctrl-scale');
       if(shouldHideMobileScale(app,app.ownerDocument,window)){
+        if(app.ownerDocument.getElementById('dj854-weather-sheet')?.hidden===false){
+          applyImportant(scale,'display','none');
+          if(scaleChip)applyImportant(scaleChip,'display','none');
+        }
         applyImportant(scale,'visibility','hidden');
         if(scaleChip)applyImportant(scaleChip,'visibility','hidden');
         return;
@@ -422,9 +432,21 @@ export function installScaleDocking({map,app,overview}={}){
           ?['hidden','class']:['hidden','class','aria-hidden','style','data-dj-user-tip-dismissed']});
       }
     }
+    // MapLibre and older HUD handlers can rewrite scale inline styles after
+    // weather opens. Observe scale-only mutations and reassert the mask.
+    const corner=scaleElement();
+    for(const node of [corner,corner?.querySelector('.maplibregl-ctrl-scale')]){
+      if(!node||observedNodes.has(node))continue;
+      observedNodes.add(node);
+      mo.observe(node,{attributes:true,attributeFilter:['style','class']});
+    }
   };
   const mo=typeof MutationObserver==='function'?new MutationObserver((records)=>{
     if(records.some(record=>record.type==='childList'))watchOverlayNodes();
+    if(records.some(record=>record.type==='attributes'&&
+      (record.target===scaleElement()||record.target?.classList?.contains('maplibregl-ctrl-scale')))){
+      onWeatherVisibility();
+    }
     schedule();
   }):null;
   mo?.observe(overview,{attributes:true,attributeFilter:['hidden','class','data-sheet-state']});
