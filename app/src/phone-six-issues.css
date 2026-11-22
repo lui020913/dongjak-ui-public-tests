@@ -34,7 +34,7 @@
     width:auto!important;min-width:0!important;
     flex:0 0 auto!important;margin:0!important;padding:0!important;
     border:0!important;box-shadow:none!important;
-    background:transparent!important;z-index:4!important;
+    background:#edf3ef!important;z-index:4!important;
   }
   html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
     padding-bottom:calc(196px + env(safe-area-inset-bottom,0px))!important;
@@ -143,6 +143,9 @@
   html body #app#app#app#app #dj-pri-legend {
     bottom:calc(100px + env(safe-area-inset-bottom,0px))!important;
     max-height:calc(100dvh - 230px)!important;overflow-y:auto!important;
+  }
+  html body #app#app#app#app#app#app[data-theme="dark"] #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+    background:#22282e!important;
   }
   html body #app#app#app#app[data-theme="dark"] #participation-panel {
     --dj-six-community-card:#2a3438;--dj-six-community-ink:#e9f0ed;
