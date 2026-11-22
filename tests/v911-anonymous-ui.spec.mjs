@@ -1505,3 +1505,30 @@ test('phone verified protection-gap menu contains SHP audit and NULL middle-scho
  await expect(group).toContainText('NULL');
  await test.info().attach('protection-gap-layer-options.png',{body:await page.screenshot(),contentType:'image/png'});
 });
+
+test('phone speed limit risk is selectable with PDF thresholds and real source links',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width!==390,'reference iPhone only');
+ await ready(page);
+ await tap(page,page.locator('#djNext-layers'));
+ const panel=page.locator('#djNext-layer-panel');
+ await expect(panel).toBeVisible();
+ const open=panel.locator('[data-layer-key="pri"] .djNext-layer-action');
+ await open.scrollIntoViewIfNeeded();await open.click();
+ const dialog=page.locator('#dj-pri-dialog');
+ await expect(dialog).toBeVisible();
+ const speed=dialog.getByRole('button',{name:/제한속도 위험도/});
+ await expect(speed).toBeEnabled({timeout:30000});
+ await speed.click();
+ await expect(dialog).toBeHidden();
+ const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
+ await expect(app).toHaveAttribute('data-dj-pri-mode','speed');
+ await expect(legend).toBeVisible();
+ await expect(legend).toContainText('제한속도 위험도');
+ await legend.getByRole('button',{name:'평가 기준 보기'}).click();
+ await expect(legend).toContainText('206개');
+ await expect(legend).toContainText('30km/h 미만 0점');
+ await expect(legend).toContainText('50km/h 100점');
+ await test.info().attach('sangdo1-speed-limit-risk.png',{body:await page.screenshot(),contentType:'image/png'});
+ await legend.getByRole('button',{name:'끄기'}).click();
+ await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
+});
