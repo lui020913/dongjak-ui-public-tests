@@ -8,20 +8,20 @@ import {analyzeOcclusion,occlusionLineFeatures} from '../src/night-occlusion.js'
 
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('overhead buildings remain opaque; 2D plan stops as soon as 3D view takes over',()=>{
+test('light overhead remains opaque, dark footprints translucent; 2D plan stops at 3D pitch',()=>{
   assert.equal(buildingPlanVisibility(0),1);
   assert.equal(buildingPlanVisibility(3),1);
   assert.ok(buildingPlanVisibility(12)<0.26);
   assert.equal(buildingPlanVisibility(19),0);
   assert.equal(buildingPlanVisibility(45),0);
   for(const theme of ['light','dark']){
-    assert.equal(buildingFootprintPaint(theme,0)['fill-opacity'],1);
+    assert.equal(buildingFootprintPaint(theme,0)['fill-opacity'],theme==='dark'?0.74:1);
     assert.equal(buildingFootprintPaint(theme,35)['fill-opacity'],0);
     assert.equal(buildingFootprintOutlinePaint(theme,35)['line-opacity'],0);
   }
   const main=read('src/main.js');
   assert.match(main,/visibleBuilding2D\(\) && \(movementIsSlow \|\| buildingPlanVisibility\(pitch\)>0\)/);
-  assert.match(main,/movementIsSlow\?\{'fill-opacity':0\.75\}/);
+  assert.match(main,/movementIsSlow\?\{'fill-opacity':0\.65\}/);
   assert.match(main,/promoteNightAnalysisLayers\(map\)/);
 });
 
