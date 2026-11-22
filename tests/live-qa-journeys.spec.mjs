@@ -5,14 +5,66 @@ import {join} from 'node:path';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const root=process.env.DONGJAK_LIVE_QA_DIR;
 let checkpointNumber=0;
+// The old captures could contain only the map despite Playwright reporting a
+// weather/layer panel "visible": opacity/clip motions had not painted yet.
+// Capture proof must be both DOM-visible and topmost at a real screen point.
+const CHECKPOINT_SURFACES=Object.freeze({
+ '날씨 창':'#dj854-weather-sheet',
+ '레이어 설정':'#djNext-layer-panel .djNext-modal-body',
+ '주변 안전정보':'#ped-tools-panel',
+ '보행안전 도구':'#map-safety-controls',
+ '지하철 환승':'#transport-sheet',
+ '버스 도착 정보':'#transport-sheet',
+ '시설 상세':'.dj-place-detail-popup',
+ '종합 경로 결과':'#route-map-card',
+ '최단 경로 결과':'#route-map-card',
+ '장소 검색 결과':'#map-quick-search-dropdown',
+ 'AI 연령대 설정':'#dj-ai-search-modal',
+ 'AI 검색 본문':'#dj-ai-search-modal',
+ '음성 입력':'#djNext-voice-panel',
+ '위험 제보 입력창':'#community-form',
+ '커뮤니티 목록':'#participation-panel',
+ '동작 소식':'#news-panel',
+ '온보딩':'#dj860-onboarding',
+ '내 정보 설정':'#mine-panel',
+ '다크 테마':'#mine-panel',
+ '업데이트 내역':'#version-history-modal .version-history-dialog'
+});
+async function paintedSurface(page,selector){
+ return page.evaluate(selector=>{
+  const el=document.querySelector(selector);
+  if(!el||el.closest('[hidden]'))return null;
+  const r=el.getBoundingClientRect();
+  if(!(r.width>20&&r.height>20))return null;
+  for(let p=el;p&&p!==document.body;p=p.parentElement){
+   const style=getComputedStyle(p);
+   if(style.display==='none'||style.visibility!=='visible'||
+      Number(style.opacity)<.985||p.dataset.dj810Animating)return null;
+  }
+  const x=Math.max(1,Math.min(innerWidth-2,r.left+r.width/2));
+  const y=Math.max(1,Math.min(innerHeight-2,r.top+r.height/2));
+  const hit=document.elementFromPoint(x,y);
+  if(!hit||!(el===hit||el.contains(hit)))return null;
+  return {selector,x,y,rect:[r.left,r.top,r.width,r.height],opacity:Number(getComputedStyle(el).opacity),hitId:hit.id||null};
+ },selector);
+}
 async function checkpoint(page,label){
  const id=test.info().annotations.find(a=>a.type==='live-qa-scene')?.description;
  if(!root||!id)return;
+ const selector=CHECKPOINT_SURFACES[label];
+ if(!selector)throw Error('Missing visual checkpoint selector: '+label);
+ await expect.poll(()=>paintedSurface(page,selector),{timeout:15000,intervals:[100,200,300]})
+  .not.toBeNull();
+ // Allow the browser compositor to commit the settled surface before
+ // screenshotting: the earlier map-only snapshots lagged real DOM visibility.
+ await page.waitForTimeout(220);
+ const surface=await paintedSurface(page,selector);
+ if(!surface)throw Error('Checkpoint surface was not painted: '+label);
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  const dir=join(root,id),file='design-'+(++checkpointNumber)+'.png';
- // Capture the currently open panel rather than only the screen after closing it.
- const image=await page.screenshot({timeout:15000});
+ const image=await page.screenshot({animations:'disabled',timeout:15000});
  writeFileSync(join(dir,file),image);
- appendFileSync(join(dir,'design-checkpoints.ndjson'),JSON.stringify({label,file,t:Date.now()})+'\n');
+ appendFileSync(join(dir,'design-checkpoints.ndjson'),JSON.stringify({label,file,t:Date.now(),surface})+'\n');
 }
 
 async function stage(page,info,n,total,label,retry,fn){
