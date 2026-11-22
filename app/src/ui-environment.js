@@ -246,8 +246,9 @@ export function initTheme({map,app}){
     for(const id of ['dj-metro-summary-name','dj-metro-detail-name','dj-metro-detail-name-very-close','dj-nearby-place-names','dongjak-zoom-commercial-names']){
       if(!map.getLayer(id))continue;
       try{
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':id==='dj-nearby-place-names'?'#536e74':'#21483c');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(255,255,255,0.97)');
+        // Public place and station names use white glyphs with a dark outline in both themes.
+        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':'#ffffff');
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(18,42,36,0.97)');
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
