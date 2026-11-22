@@ -159,6 +159,7 @@ export function initTheme({map,app}){
     }
   }
   const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:1.6});
+  const mapLabelLightPaint=Object.freeze({color:'#ffffff',halo:'rgba(18,42,36,0.97)',width:1.6});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   function syncMapLabelContrast(){
     const layers=map.getStyle?.()?.layers;
@@ -180,7 +181,7 @@ export function initTheme({map,app}){
         const original=supplementalLabelBaseline.get(id);
         const desired=themeState.value==='dark'
           ? {'text-color':mapLabelTextPaint.color,'text-halo-color':mapLabelTextPaint.halo,'text-halo-width':mapLabelTextPaint.width}
-          : {'text-color':original.text??null,'text-halo-color':original.halo??null,'text-halo-width':original.width??null};
+          : {'text-color':mapLabelLightPaint.color,'text-halo-color':mapLabelLightPaint.halo,'text-halo-width':mapLabelLightPaint.width};
         for(const [key,value] of Object.entries(desired)){
           const current=read(key);
           if(JSON.stringify(current)!==JSON.stringify(value))map.setPaintProperty(id,key,value);
