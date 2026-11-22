@@ -24,6 +24,7 @@ export function installMyInfo(doc=document){
  <button type="button" data-dj834-action="theme"><span class="dj834-setting-icon">${symbol('theme')}</span><span>화면 테마</span><small class="dj834-current-theme">변경</small><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="type"><span class="dj834-setting-icon">${symbol('type')}</span><span>글자 크기·굵기</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>앱·지도·도보 설정</span><span class="dj834-chevron">›</span></button>
+ <button type="button" data-dj834-action="language"><span class="dj834-setting-icon">${symbol('info')}</span><span>언어</span><small class="dj834-current-language">한국어</small><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
@@ -101,6 +102,10 @@ export function installMyInfo(doc=document){
    }
    syncTypography();
  });
+ const languagePanel=doc.createElement('section');languagePanel.className='dj834-language-detail';languagePanel.hidden=true;
+ languagePanel.innerHTML='<p>앱 화면에 사용할 언어를 선택하세요. 지도 지명과 이용자가 작성한 내용은 번역하지 않습니다.</p>';
+ const themePanel=doc.createElement('section');themePanel.className='dj834-theme-detail';themePanel.hidden=true;
+ themePanel.innerHTML='<p>앱의 화면 테마를 선택합니다.</p><div role="group" aria-label="화면 테마" class="dj834-theme-choice"><button type="button" data-dj834-theme="light">라이트 <span aria-hidden="true">✓</span></button><button type="button" data-dj834-theme="dark">다크 <span aria-hidden="true">✓</span></button></div>';
  const records=doc.createElement('div');records.className='dj834-records-container';
  for(const child of [...body.children]){
    if(child===heading||child===landing||child===detail)continue;
@@ -113,7 +118,7 @@ export function installMyInfo(doc=document){
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;
- content.append(accountBox,typography,records);
+ content.append(accountBox,typography,records,languagePanel,themePanel);
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
  // directly to the App & Display list, preserving the select and listeners.
@@ -130,7 +135,11 @@ export function installMyInfo(doc=document){
    const loggedIn=account.querySelector('.dj820-account-panel')?.hidden===false;
    if(name&&loggedIn){profileName.textContent=name;profileSub.textContent='내 프로필 설정';}
    else{profileName.textContent='로그인 또는 회원가입';profileSub.textContent='카카오 · 이메일 계정 관리';}
-   landing.querySelector('.dj834-current-theme').textContent=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'다크':'라이트';
+   const currentTheme=(doc.getElementById('app')?.dataset.djPreferredTheme||doc.getElementById('app')?.dataset.theme)==='dark'?'dark':'light';
+   landing.querySelector('.dj834-current-theme').textContent=currentTheme==='dark'?'다크':'라이트';
+   for(const button of themePanel.querySelectorAll('[data-dj834-theme]'))button.setAttribute('aria-pressed',String(button.dataset.dj834Theme===currentTheme));
+   const currentLanguage=doc.getElementById('dj854-language-select')?.value||'ko';
+   const languageValue=landing.querySelector('.dj834-current-language');if(languageValue)languageValue.textContent=currentLanguage==='en'?'English':'한국어';
  };
  const observer=new MutationObserver(updateProfile);
  observer.observe(account,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
@@ -147,10 +156,15 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=view==='profile'?'내 프로필 설정':view==='type'?'글자 크기·굵기':'즐겨찾기 · 내 기록';
+   title.textContent=view==='profile'?'내 프로필 설정':view==='type'?'글자 크기·굵기':view==='language'?'언어':view==='theme'?'화면 테마':'즐겨찾기 · 내 기록';
    accountBox.hidden=view!=='profile';
    typography.hidden=view!=='type';
    records.hidden=view!=='records';
+   languagePanel.hidden=view!=='language';themePanel.hidden=view!=='theme';
+   if(view==='language'){
+     const languageControl=panel.querySelector('.dj854-language-section');
+     if(languageControl){languageControl.dataset.djLanguageDetail='true';languageControl.hidden=false;languagePanel.append(languageControl);}
+   }
    if(view==='type')syncTypography();
    detail.hidden=false;
    body.scrollTop=0;
@@ -168,11 +182,17 @@ export function installMyInfo(doc=document){
    enter(landing);
  }
  detail.querySelector('.dj834-detail-back').addEventListener('click',back);
+ themePanel.addEventListener('click',event=>{
+   const choice=event.target.closest('[data-dj834-theme]');if(!choice)return;
+   const app=doc.getElementById('app');const current=app?.dataset.djPreferredTheme||app?.dataset.theme||'light';
+   if(current!==choice.dataset.dj834Theme)doc.getElementById('theme-toggle')?.click();
+   updateProfile();
+ });
+ doc.defaultView?.addEventListener('dongjak:language-change',updateProfile);
  landing.addEventListener('click',event=>{
    const button=event.target.closest('[data-dj834-action]');if(!button)return;
    const action=button.dataset.dj834Action;
-   if(action==='profile'||action==='records'||action==='type'){showDetail(action);return;}
-   if(action==='theme'){doc.getElementById('theme-toggle')?.click();updateProfile();return;}
+   if(['profile','records','type','language','theme'].includes(action)){showDetail(action);return;}
    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
    if(action==='transit'){
      doc.querySelector('#bottom-nav [data-tab="map"]')?.click();
