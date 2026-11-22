@@ -763,3 +763,51 @@
     opacity:0!important;
   }
 }
+
+/* Shared accessible glass-like icon controls. A translucent-looking edge and
+   elevation, but no backdrop blur or scrim (the user asked to remove both). */
+@layer request-completion {
+  @media (max-width:699px) {
+    html body #app#app#app :is(
+      #dj854-weather-sheet .dj854-weather-close,
+      .page-panel .dj-sheet-chrome-close,
+      #djNext-layer-panel .djNext-close
+    ),
+    html body > #dj-ai-search-modal .dj-ai-close {
+      display:inline-flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      flex:0 0 auto!important;
+      min-width:44px!important;
+      min-height:44px!important;
+      border-radius:999px!important;
+      background-color:#f1f6f2!important;
+      color:#20312e!important;
+      border:1px solid #d3e0d8!important;
+      box-shadow:0 2px 9px rgba(12,30,27,.10)!important;
+      -webkit-backdrop-filter:none!important;
+      backdrop-filter:none!important;
+      touch-action:manipulation;
+    }
+    html[data-theme="dark"] body #app#app#app :is(
+      #dj854-weather-sheet .dj854-weather-close,
+      .page-panel .dj-sheet-chrome-close,
+      #djNext-layer-panel .djNext-close
+    ),
+    html[data-theme="dark"] body > #dj-ai-search-modal .dj-ai-close {
+      background-color:#35404a!important;
+      color:#f1f4f6!important;
+      border-color:#4d5b65!important;
+      box-shadow:0 2px 9px rgba(0,0,0,.22)!important;
+    }
+    html body :is(
+      #dj854-weather-sheet .dj854-weather-close,
+      .page-panel .dj-sheet-chrome-close,
+      #djNext-layer-panel .djNext-close,
+      #dj-ai-search-modal .dj-ai-close
+    ):focus-visible{
+      outline:2px solid var(--dj-theme-accent,#285b50)!important;
+      outline-offset:2px!important;
+    }
+  }
+}
