@@ -15,7 +15,7 @@ test('v8.0.0 retains the original release timeline and all prior releases',()=>{
 test('PWA manual theme refresh is iPhone standalone-only and avoids splash',()=>{
   const head=read('index.html'),theme=read('src/manual-pwa-theme-reload.js');
   const android=read('platforms/android/entry.js'),pc=read('platforms/pc-chromium/entry.js');
-  assert.match(head,/displayTheme=themeReload \? themeReload\.theme : chosen/);
+  assert.match(head,/displayTheme=themeReload \? themeReload\.theme : 'light'/);
   assert.doesNotMatch(head,/dj-pwa-transition-v7104|data-dj-reload-splash/);
   assert.match(theme,/export function installManualThemeReload\(\)\{return \(\)=>\{\};\}/);
   assert.match(theme,/isInstalledIosPhone\(win\)/);
