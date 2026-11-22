@@ -1450,7 +1450,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // The close action is fully processed before the browser can deliver
     // an additional click to the map under the disappearing bottom sheet.
     event?.stopPropagation?.();
-    document.dispatchEvent(new CustomEvent('dongjak:transport-dismiss-start'));
+    document.dispatchEvent?.(new CustomEvent('dongjak:transport-dismiss-start'));
     if(globalThis.window?.DongjakWindowMotion)globalThis.window.DongjakWindowMotion.close(panel,()=>close(true));else close(true);
   });
   // Stop the entire touch sequence at its real target, not just its
