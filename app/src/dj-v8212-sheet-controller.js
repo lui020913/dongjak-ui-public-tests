@@ -31,7 +31,7 @@ export const MOBILE_FLOATING_SHEETS=Object.freeze([
   ['map-safety-controls','.map-safety-head','#map-safety-close'],
   ['map-gesture-guide','.dj856-guide-edge-drag','#map-gesture-guide-close','.map-gesture-guide-head'],
   ['dj-mobile-utilities','.dj856-more-edge-drag','#dj-mobile-utilities-close','.dj854-more-head'],
-  ['dj854-weather-sheet','.dj-weather-edge-drag','.dj854-weather-close','.dj854-weather-head'],
+  /* Weather card is fixed-size and must not register any drag/expand handler. */
 ]);
 const INTERACTIVE='button,a,input,textarea,select,label,summary,[role="button"],[contenteditable="true"]';
 const NESTED_HEADERS=[
@@ -191,7 +191,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
       // and a tap on the non-interactive grip/title. This makes expansion usable
       // in mobile Safari even when the OS drops a touchmove before touchend.
       // Action buttons are filtered in down(), so their click behavior is kept.
-      if((id==='ped-tools-panel'||id==='dj854-weather-sheet')&&!g.dragging){
+      if((id==='ped-tools-panel')&&!g.dragging){
         setMobileSheetExpanded(panel,!panel.classList.contains('dj871-sheet-expanded'),doc,win);
         return;
       }
@@ -255,7 +255,7 @@ export function installMobileFloatingSheetController(doc=document,win=window){
   };
   registerSheets();
   cleanups.push(installNestedHeaderDismiss(doc,win));
-  // Weather and other late-created sheets must receive the same header listener.
+  // Late-created floating sheets still get gestures, except the fixed-size weather card.
   const registrationObserver=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1)))registerSheets();});
   registrationObserver.observe(app,{childList:true,subtree:true});
   cleanups.push(()=>registrationObserver.disconnect());
