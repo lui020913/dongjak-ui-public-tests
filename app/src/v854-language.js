@@ -252,6 +252,9 @@ export function installLanguagePreference(doc=document,win=window){
     icon.setAttribute('aria-hidden','true');
     icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>';
     section.append(icon,label,select);
+    // Expose the control immediately even before My Info's async list exists.
+    // ensurePlacement() moves this very node into the settings group later.
+    body.prepend(section);
     select.addEventListener('change',()=>setLanguage(select.value));
   }
   const select=section.querySelector('select');
