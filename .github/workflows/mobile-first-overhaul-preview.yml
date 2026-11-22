@@ -143,15 +143,16 @@ jobs:
   mobile-qa:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    # Standard releases run every selected phone case once on eight workers.
+    # Standard releases run only the core mobile user journeys; the full
+    # regression keeps every tagged case and additional device coverage.
     # Explicit exhaustive cross-device audit uses 24 workers and expands the
     # same tagged cases to every phone project. Neither tier skips provenance.
-    name: '3. 모바일 검증 (${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 8 }})'
+    name: '3. 모바일 검증 (${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12 }})'
     strategy:
       fail-fast: false
       max-parallel: 24
       matrix:
-        shard: ${{ fromJSON(vars.ENABLE_FULL_MOBILE_QA == 'true' && '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]' || '[1,2,3,4,5,6,7,8]') }}
+        shard: ${{ fromJSON(vars.ENABLE_FULL_MOBILE_QA == 'true' && '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]' || '[1,2,3,4,5,6,7,8,9,10,11,12]') }}
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -166,6 +167,7 @@ jobs:
       APP_VERSION: ${{ needs.build.outputs.app_version }}
       BUILD_RUN: ${{ github.run_id }}
       DONGJAK_FULL_MOBILE_QA: ${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && '1' || '0' }}
+      DONGJAK_FAST_MOBILE_QA: ${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && '0' || '1' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -192,7 +194,7 @@ jobs:
         run: >-
           npx playwright test --config=playwright.v911-remote.config.mjs
           --project=mobile375 --project=mobile390 --project=mobile430
-          --project=mobile390-webkit-header --workers=1 --shard=${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 8 }}
+          --project=mobile390-webkit-header --workers=1 --shard=${{ matrix.shard }}/${{ vars.ENABLE_FULL_MOBILE_QA == 'true' && 24 || 12 }}
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
