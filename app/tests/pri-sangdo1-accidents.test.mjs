@@ -29,11 +29,14 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  assert.ok(notSelected.every(s=>s.scores.accidents===100&&/실제 사고 0건/.test(s.evidence.accidents.note)));
  assert.ok(integrated.segments.every(s=>s.scores.lighting>=0&&s.scores.lighting<=100));
  assert.ok(observed.every(s=>s.scores.lighting!==null),'light and accident factors are joined by the same segment ID');
+ const observedIds=new Set(observed.map(s=>s.id));
  for(const s of integrated.segments){
   const value=segmentScore(integrated,s,'pri12');
-  assert.equal(value,(s.scores.lighting+s.scores.accidents)/2,'2/6 preliminary mean must use two safety-direction scores');
+  const expected=observedIds.has(s.id)?(s.scores.lighting+s.scores.accidents)/2:null;
+  assert.equal(value,expected,'only observed overlapping lighting and accident risk scores may enter the preliminary mean');
   assert.equal(segmentScore(integrated,s,'pri'),null,'a 2/6 mean is not an approved 6-factor PRI');
  }
  assert.ok(summarize(integrated,'pri12').observedM>0);
- assert.equal(summarize(integrated,'pri12').observedM,summarize(integrated,'lighting').observedM,'all lighting segments now have a provisional 2-factor mean');
+ assert.equal(summarize(integrated,'pri12').observedM,observed.reduce((n,s)=>n+s.lengthM,0),'only the 76 observed accident-overlap segments contribute');
+ assert.ok(summarize(integrated,'pri12').observedM<summarize(integrated,'lighting').observedM);
 });
