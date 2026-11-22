@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.84",
+  "application_version": "9.2.85",
   "public_work_branch": "main",
-  "purpose": "Release verified merged PR #308 (merge f2ec2040cd9cef76e2079960d55c610ac7207531) to mobile Production: fixes iPhone My Info detail white backgrounds, moves compact language selector into App & Display reliably regardless init order, and prevents transport/facility close taps or swipes from reopening AI via shared dismissal guard. Preserve #306–#307 UI, transit and 50:50 protection gap GIS. Require source exact-match, Preview, 12 mandatory phone QA lanes, PC/tablet gate, protected Production and rollback.",
-  "attempt": 261,
+  "purpose": "Owner-requested iPhone onboarding background/native status-bar unification in merged PR #309 (merge ae999ef75d319dea77db39095d521577d8178644): iOS standalone light status bar, header, main content, footer, and onboarding shell share exactly #edf3ef. Preserve supplied onboarding illustration, skip/next buttons, dark mode, all PR #306-#308 map/AI/settings/GIS fixes. Require exact public source build, isolated Preview, 12 mandatory phone QA shards, PC/tablet gate, protected Production and source verification.",
+  "attempt": 262,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #308 source CI #45010500510 succeeded after updating obsolete language-style assertion; exact application source includes new AI surface dismissal guard and verified compact language settings row. Promote 9.2.84 via protected mobile release.",
+  "last_retry_reason": "Merged PR #309 passed Public app source CI #45011759396 after replacing an outdated iOS onboarding #f5faf7 assertion; release the verified exact-source #edf3ef status/color synchronization through protected Production gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
