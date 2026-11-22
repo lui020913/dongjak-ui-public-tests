@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.79",
+  "application_version": "9.2.80",
   "public_work_branch": "main",
-  "purpose": "Protected final release of merged PRs #291, #294 and #295. Exactly seven user-requested UI fixes: fullscreen unified map/walking settings, light-mode map label white text with dark halo, no non-header dim/blur and subtle modal shadows, 7-day weather padding with absolutely no expansion/tap/drag, separated light/dark palette, safety information sheet dock spacing, language icon and select alignment. Fix old mobile E2E that wrongly expected a now-removed weather expansion handle. Retain all real 24 phone functional shards, PC/tablet checks, Preview provenance, Production approval and guarded rollback; optional Gemini/capture remains disabled.",
-  "attempt": 252,
+  "purpose": "Owner-corrected light map labels, exact PR #297 merge eae0634c45217ef180dc0400c057026fc93b5627: light-theme names dark text (#26352f) plus bright/white halo (rgba(255,255,255,0.97)), dark-theme names light text plus dark halo. Applies to featured facility names, all base-map symbols, nearby place names, subway station names, and commercial labels; do not reverse again. Preserve existing seven UI changes. Run public-source build, exact Preview, required automated functional mobile QA, PC/tablet checks and protected Cloudflare Production promotion with provenance API checks and guarded rollback.",
+  "attempt": 253,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous exact-source release run #44998878995 Preview succeeded and 22 other phone tests passed or were progressing, but mobile shards 2/9 failed on obsolete weather .dj-weather-edge-drag visibility assertion, contradicting user's no-expand design. Test-only PR #295 updated this assertion and verified fixed behavior, merged at 51232e035494d2da678cfc2be26b0d326019e845.",
+  "last_retry_reason": "Correct previously reversed light-theme map-label contrast deployed as 9.2.79; PR #297 updated map paint and its regression tests, CI #45000451159 success. User requested dark letters with light outline in light mode.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
