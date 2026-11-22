@@ -17,6 +17,9 @@
         try{themeReload=JSON.parse(sessionStorage.getItem('dj-manual-theme-reload-v1')||'null');}catch(_e){}
         if(!themeReload||themeReload.expires<Date.now()||!['light','dark'].includes(themeReload.theme))themeReload=null;
         var displayTheme=themeReload ? themeReload.theme : 'light';
+        // iOS native chrome requires a real reload. This one-shot refresh is
+        // NOT a fresh app launch: suppress the loader and guest onboarding.
+        if(themeReload)document.documentElement.dataset.djThemeRefresh='true';
         document.documentElement.dataset.theme=displayTheme;
         var iconSuffix=displayTheme==='dark'?'dark':'light';
         // iOS Home Screen art is independent of the application's light/dark theme.
@@ -68,6 +71,7 @@
         background:var(--start-bg)!important;
       }
       .map-startup-overlay[hidden]{display:none!important;}
+      html[data-dj-theme-refresh="true"] .map-startup-overlay{display:none!important;}
       .map-startup-overlay.is-hidden{opacity:0;pointer-events:none;}
       .map-startup-inner{
         box-sizing:border-box;width:min(340px,calc(100vw - 44px));

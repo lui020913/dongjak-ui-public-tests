@@ -4,9 +4,14 @@ import {readFileSync} from 'node:fs';
 import {phoneProfile,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
 import {TEAM_FACTORS,validateBundle,parseImport,displayFeatures,segmentScore,summarize} from '../src/pri-data.mjs';
 
-test('iOS theme switch no longer requests a reload or PWA relaunch',()=>{
+test('installed iPhone manual theme changes refresh native status chrome without guest onboarding',()=>{
   const src=readFileSync(new URL('../src/ui-environment.js',import.meta.url),'utf8');
-  assert.doesNotMatch(src,/requestIosThemeRefresh/);
+  assert.match(src,/requestIosThemeRefresh\(\{win:window,app,map,theme:themeState\.preference\}\)/);
+  assert.match(src,/if\(!themeState\.temporary\)/);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(html,/data-dj-theme-refresh/);
+  const tour=readFileSync(new URL('../src/v860-onboarding.js',import.meta.url),'utf8');
+  assert.match(tour,/seenInMemory=isNativeThemeRefresh/);
   assert.match(src,/displayTheme\(\{notify:true\}\)/);
   const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
   assert.match(main,/mobile-ux-energy\.css/);
