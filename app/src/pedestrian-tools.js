@@ -173,6 +173,12 @@ export function installPedestrianControlPlacement({app,nav,panel}){
       else app.style.removeProperty('--dj-controls-under-nav');
       lastTop=top;
     }
+    // Measure the actual live dock instead of assuming a fixed iPhone safe-area
+    // inset or a constant tab-bar height. The sheet stops 8px above its top.
+    if(!desktop&&window.innerWidth<=699&&rect.height>0){
+      const bottom=Math.max(0,window.innerHeight-rect.top+8);
+      app.style.setProperty('--dj-ped-nearby-bottom',Math.ceil(bottom)+'px');
+    }else app.style.removeProperty('--dj-ped-nearby-bottom');
     app.classList.toggle('ped-info-open',!panel.hidden);
   };
   const schedule=()=>{if(!disposed&&!frame)frame=requestAnimationFrame(update);};
