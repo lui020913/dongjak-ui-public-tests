@@ -401,7 +401,8 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
     if(type==='skip'){close();return;}
     if(type==='prev'){move(-1);return;}
     if(type==='next'){
-      if(index===ONBOARDING_SLIDES.length-1){app.dataset.djHudGuideHandoff='true';close({afterClose:showMapGuide});}else move(1);
+      if(index===ONBOARDING_SLIDES.length-1)app.dataset.djHudGuideHandoff='true';
+      if(index===ONBOARDING_SLIDES.length-1)close({afterClose:showMapGuide});else move(1);
       return;
     }
     if(type==='dot'){const target=Number(action.dataset.index);if(Number.isInteger(target))transitionSlide(target,target>=index?'next':'prev');return;}
