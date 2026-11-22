@@ -159,7 +159,7 @@ export function initTheme({map,app}){
     }
   }
   const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:1.6});
-  const mapLabelLightPaint=Object.freeze({color:'#ffffff',halo:'rgba(18,42,36,0.97)',width:1.6});
+  const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   function syncMapLabelContrast(){
     const layers=map.getStyle?.()?.layers;
@@ -247,9 +247,9 @@ export function initTheme({map,app}){
     for(const id of ['dj-metro-summary-name','dj-metro-detail-name','dj-metro-detail-name-very-close','dj-nearby-place-names','dongjak-zoom-commercial-names']){
       if(!map.getLayer(id))continue;
       try{
-        // Public place and station names use white glyphs with a dark outline in both themes.
-        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':'#ffffff');
-        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':'rgba(18,42,36,0.97)');
+        // Light map names use dark glyphs with a light halo; dark mode reverses the contrast.
+        map.setPaintProperty(id,'text-color',themeState.value==='dark'?'#e9f0f3':mapLabelLightPaint.color);
+        map.setPaintProperty(id,'text-halo-color',themeState.value==='dark'?'rgba(34,39,45,0.95)':mapLabelLightPaint.halo);
       }catch{}
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
