@@ -62,10 +62,11 @@ test('transport popup has only one camera focus and no delayed refocus',()=>{
   const transport=source('transport-map.js');
   assert.doesNotMatch(transport,/setTimeout\(settleFocus,420\)/);
   assert.doesNotMatch(transport,/requestAnimationFrame\(\(\)=>globalThis\.requestAnimationFrame\?\.\(settleFocus\)\)/);
-  assert.match(transport,/const alreadyVisible=projected/);
+  assert.doesNotMatch(transport,/const alreadyVisible=projected/);
+  assert.match(transport,/Always focus a newly selected stop/);
   assert.match(transport,/dongjak:transport-dismiss-start/);
   const place=source('place-details.js');
-  assert.match(place,/if\(!visible\)/);
+  assert.match(place,/const viewportFocus=isPhone/);
 });
 
 test('AI dialog has one close owner and never opens on a transport close gesture',async()=>{
