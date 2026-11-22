@@ -83,7 +83,7 @@ test('my-info typography enters with a nonblocking fade and retains existing acc
   assert.match(js,/landing\.hidden=true/);
   assert.match(js,/detail\.hidden=false/);
   assert.match(js,/enter\(detail\)/);
-  assert.match(js,/content\.append\(accountBox,typography,records\)/);
+  assert.match(js,/content\.append\(accountBox,typography,records,/);
   assert.doesNotMatch(js,/await animation\.finished/);
   assert.doesNotMatch(js,/지도 &amp; 이동/);
 });
