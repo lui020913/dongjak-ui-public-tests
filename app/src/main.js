@@ -577,7 +577,7 @@ new MutationObserver(()=>{
 
 // 이전에 실제 3D 렌더링이 성공했던 OpenFreeMap Bright 스타일을 사용합니다.
 const djPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
-const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency});
+const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,saveData:Boolean(navigator.connection?.saveData)});
 const djNormalPixelRatio=Math.min(djPhone?1.25:1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
 const themeReloadState=readManualThemeReload(window.sessionStorage);
 const map = new maplibregl.Map({
