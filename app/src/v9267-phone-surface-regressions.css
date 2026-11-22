@@ -246,8 +246,8 @@ html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
   /* Never animate or recreate the persistent dock while switching app pages. */
   html body #app#app#app#app#app > #bottom-nav:not([hidden]) {
     opacity:1!important;visibility:visible!important;
-    /* The dock is positioned at left:50%; retain its centering translation. */
-    transform:translateX(-50%)!important;translate:none!important;scale:1!important;
+    /* Native mobile layout owns dock geometry; do not retranslate the pill. */
+    transform:none!important;translate:none!important;scale:1!important;
     animation:none!important;transition:none!important;
     filter:none!important;backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
