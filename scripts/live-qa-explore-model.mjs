@@ -4,7 +4,7 @@
  */
 const TRANSIENT_STATUS=new Set([408,429,500,502,503,504]);
 export async function askGeminiModel({
-  parts,schema,key,model='gemini-3.5-flash-lite',
+  parts,schema,key,model='gemini-3.1-flash-lite',
   send=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),
   maxAttempts=3,timeoutMs=90000
 }={}){

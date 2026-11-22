@@ -58,7 +58,7 @@ for(const run of dirs){
   const scene={...meta,stages,checkpoints,designReview:{status:'not-reviewed',reason:'Qualitative image review requires explicit vision opt-in or human review'},metrics:{samples:count,p95Ms:p95,allIntervals:frames.filter(f=>Number.isFinite(f.dt)&&f.dt>0).length,over1000Ms:frames.filter(f=>f.dt>=1000).length,maxMs:frames.reduce((m,f)=>Number.isFinite(f.dt)?Math.max(m,f.dt):m,0),over34Ms:intervals.filter(n=>n>34).length,over50Ms:intervals.filter(n=>n>50).length},flags:flags.slice(0,200)};
   if(vision&&(times.length||checkpoints.length)&&report.scenes.filter(s=>s.vision).length<5){
    // Explicit opt-in only, anonymous test captures. No credentials, code or logs in request.
-   const key=process.env.GEMINI_API_KEY, model=process.env.GEMINI_MODEL||'gemini-3.5-flash-lite';
+   const key=process.env.GEMINI_API_KEY, model=process.env.GEMINI_MODEL||'gemini-3.1-flash-lite';
    if(!key||!/^gemini-[a-z0-9.-]+$/.test(model))throw Error('Set Gemini key and valid model for opt-in visual analysis');
    // The complete browser recording and geometry audit remain available in
    // artifacts. Avoid repeatedly billing Gemini for up to twelve full images
