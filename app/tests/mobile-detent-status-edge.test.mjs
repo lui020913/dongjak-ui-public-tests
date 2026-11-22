@@ -8,7 +8,7 @@ test('detent movement and clipping use the same timing and natural compact geome
 });
 test('native iOS map edge is flat and theme-matched without blurring the search surface',()=>{
  const s=read('src/mobile-pwa-status-tone-v793.css');
- assert.match(s,/--dj-pwa-native-edge:#eef3ef/);assert.match(s,/--dj-pwa-native-edge:#17191d/);
+ assert.match(s,/--dj-pwa-native-edge:#eef3ef/);assert.match(s,/--dj-pwa-native-edge:#22282e/);
  assert.match(s,/background:var\(--dj-pwa-native-edge\)!important/);
  assert.doesNotMatch(s,/linear-gradient\(to bottom/);
  assert.match(s,/background:#ffffff!important/);
