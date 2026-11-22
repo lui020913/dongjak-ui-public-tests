@@ -175,7 +175,14 @@ export function installScaleDocking({map,app,overview}={}){
     deviceMemory:window.navigator?.deviceMemory
   });
   let lastAppliedRatio=null;
+  // main.js installs the adaptive phone rendering policy before this HUD dock.
+  // It owns DPR on phones. The HUD dock must not compete on move/idle/resize:
+  // two writers could oscillate 1 -> 1.35 -> 2 DPR and repaint full MapLibre
+  // canvases while the user was simply dragging a bottom sheet.
+  const phoneRenderOwner=()=>window.innerWidth<=699
+    && (app.dataset.djPhoneBudget==='normal'||app.dataset.djPhoneBudget==='economy');
   const setRatio=target=>{
+    if(phoneRenderOwner())return;
     // Some MapLibre builds expose setPixelRatio without getPixelRatio. Keep a
     // local memo to avoid repeated idle -> resize -> idle repaint loops.
     const reported=map.getPixelRatio?.();
