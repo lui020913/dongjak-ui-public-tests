@@ -114,6 +114,15 @@ export function installMyInfo(doc=document){
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;
  content.append(accountBox,typography,records);
+ // The language preference may initialize before My Info and be swept into
+ // the inactive records container above. Reparent that *same live control*
+ // directly to the App & Display list, preserving the select and listeners.
+ const languageControl=panel.querySelector('.dj854-language-section');
+ const displayGroup=landing.querySelector('.dj834-settings-group');
+ if(languageControl&&displayGroup){
+   displayGroup.insertBefore(languageControl,displayGroup.querySelector('[data-dj834-action="history"]'));
+   languageControl.hidden=false;
+ }
  const profileName=landing.querySelector('.dj834-profile-name');
  const profileSub=landing.querySelector('.dj834-profile-meta small');
  const updateProfile=()=>{

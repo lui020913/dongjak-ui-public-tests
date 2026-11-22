@@ -1,3 +1,4 @@
+import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
 import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
 import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
@@ -1438,6 +1439,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const windowState=createTransportWindowLifecycle();
   const close=(restore=true)=>{
     const wasVisible=!panel.hidden;
+    if(wasVisible)markAiSurfaceDismissal();
     windowState.dismiss();
     panel.hidden=true;selected=null;seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
@@ -1450,6 +1452,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // The close action is fully processed before the browser can deliver
     // an additional click to the map under the disappearing bottom sheet.
     event?.stopPropagation?.();
+    markAiSurfaceDismissal();
     document.dispatchEvent?.(new CustomEvent('dongjak:transport-dismiss-start'));
     // A newly selected station/stop may reopen before the old close fade
     // finishes. The old completion must never dismiss the new selection.

@@ -1,3 +1,4 @@
+import {installAiSurfaceDismissGuard,isAiBlockedAfterDismiss,isMapDetailVisible} from './ai-surface-dismiss-guard.js';
 /**
  * v8.9.0 — Replace the visible mobile theme orb with a green AI entry.
  * Keep #theme-toggle in the DOM: night visibility uses its original event
@@ -10,8 +11,10 @@ export function installMobileAiOrb(doc=document,win=window){
   const theme=doc.getElementById('theme-toggle');
   const host=theme?.closest('.header-tools');
   if(!media||!app||!host||!theme)return ()=>{};
+  const releaseDismissGuard=installAiSurfaceDismissGuard(doc);
   let orb=null;
   const openExistingAi=()=>{
+    if(isAiBlockedAfterDismiss()||isMapDetailVisible(doc))return;
     // Never proxy a synthetic .click() and then force showModal() in the next
     // animation frame: that can reopen AI after a transport sheet is dismissed.
     const native=doc.getElementById('dj887-ai-quick-entry')||doc.getElementById('dj-ai-search-entry');
@@ -34,19 +37,33 @@ export function installMobileAiOrb(doc=document,win=window){
     txt.className='dj890-ai-orb-text';
     txt.textContent='AI';
     orb.append(txt);
-    let startedOnOrb=false,pointerAt=0;
-    orb.addEventListener('pointerdown',event=>{startedOnOrb=orb.contains(event.target);pointerAt=Date.now();},true);
+    let startedOnOrb=false,pointerAt=0,keyboardAt=0;
+    orb.addEventListener('pointerdown',event=>{
+      startedOnOrb=!isAiBlockedAfterDismiss()&&orb.contains(event.target);
+      pointerAt=Date.now();
+    },true);
+    orb.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' '||event.key==='Spacebar')keyboardAt=Date.now();
+    });
     orb.addEventListener('click',event=>{
-      if(!event.isTrusted)return;
-      // Click-through after closing a modal must NOT open the underlying AI orb.
-      if(event.detail!==0&&(!startedOnOrb||Date.now()-pointerAt>1400))return;
-      startedOnOrb=false;openExistingAi();
+      if(!event.isTrusted||isAiBlockedAfterDismiss()||isMapDetailVisible(doc)){
+        startedOnOrb=false;return;
+      }
+      // iOS also emits click(detail=0) without a preceding pointer event
+      // after the underlying popup disappears. Only a focused, deliberate
+      // accessibility/keyboard activation may use that path.
+      const pointerIntent=startedOnOrb&&Date.now()-pointerAt<1400;
+      const accessibilityIntent=event.detail===0&&doc.activeElement===orb;
+      const keyboardIntent=event.detail===0&&Date.now()-keyboardAt<1000;
+      startedOnOrb=false;
+      if(!pointerIntent&&!keyboardIntent&&!accessibilityIntent)return;
+      openExistingAi();
     });
     host.insertBefore(orb,theme);
   }
   media.addEventListener?.('change',sync);
   sync();
-  return ()=>{media.removeEventListener?.('change',sync);orb?.remove();orb=null;};
+  return ()=>{media.removeEventListener?.('change',sync);releaseDismissGuard();orb?.remove();orb=null;};
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
   const start=()=>installMobileAiOrb(document,window);

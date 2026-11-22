@@ -254,7 +254,15 @@ export function installLanguagePreference(doc=document,win=window){
     section.append(icon,label,select);
     // Expose the control immediately even before My Info's async list exists.
     // ensurePlacement() moves this very node into the settings group later.
-    body.prepend(section);
+    const existingGroup=mine.querySelector('.dj834-my-home .dj834-settings-group');
+    if(existingGroup){
+      existingGroup.insertBefore(section,existingGroup.querySelector('[data-dj834-action="history"]'));
+    }else{
+      // This temporary node must not appear as an orphan white card while
+      // My Info's account/settings hierarchy is still being assembled.
+      section.hidden=true;
+      body.prepend(section);
+    }
     select.addEventListener('change',()=>setLanguage(select.value));
   }
   const select=section.querySelector('select');
@@ -267,6 +275,7 @@ export function installLanguagePreference(doc=document,win=window){
     if(section.parentElement!==group || (history && section.nextElementSibling!==history)){
       group.insertBefore(section,history||null);
     }
+    if(section.hidden)section.hidden=false;
   };
   ensurePlacement();
   let observer=null,queued=false;const pendingRecords=[];

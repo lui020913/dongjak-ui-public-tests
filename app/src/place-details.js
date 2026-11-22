@@ -1,3 +1,4 @@
+import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
 import {bindReliablePopupClose} from './popup-close-input.js';
@@ -232,6 +233,8 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   closeButton.setAttribute('aria-label','시설 정보 닫기');closeButton.title='닫기';
   closeButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>';
   const disposeCloseInput=bindReliablePopupClose(closeButton,()=>{
+    markAiSurfaceDismissal();
+    document.dispatchEvent(new CustomEvent('dongjak:facility-dismiss-start'));
     const element=popup?.getElement?.();
     const motion=element?.querySelector?.('.maplibregl-popup-content');
     if(element?.dataset.dj912ImmediateDismiss==='true'||!sharedSheet||!motion||window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){popup?.remove();return;}
@@ -318,6 +321,8 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
       else if(action==='collapse'){
         setMobileSheetExpanded(popupElement,false,document,window);
       }else if(action==='dismiss'&&popupElement){
+        markAiSurfaceDismissal();
+        document.dispatchEvent(new CustomEvent('dongjak:facility-dismiss-start'));
         popupElement.style.setProperty('--dj-sheet-drag-y',`${delta}px`);
         dismissMobileSheet(popupElement,document,window,()=>popup?.remove());
       }else settleMobileSheetDrag(popupElement,window);
