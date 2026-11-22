@@ -25,7 +25,7 @@ test('Gemini autonomous anonymous mobile UI exploration',async({page,context})=>
  await page.addInitScript(()=>Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(_ok,fail)=>queueMicrotask(()=>fail({code:1}))}));
  async function snap(label){const id='screen-'+String(evidence.length).padStart(2,'0')+'.png',bytes=await page.screenshot({timeout:15000});writeFileSync(join(dir,id),bytes);const f={id,label,bytes};evidence.push(f);return f;}
  function unavailable(reason){
-  if(/^Model HTTP 429 \\((?:daily-quota|minute-request-quota|minute-token-quota|quota-type-unknown)\\)$/.test(String(reason))){
+  if(/^Model HTTP 429 \((?:daily-quota|minute-request-quota|minute-token-quota|quota-type-unknown)\)$/.test(String(reason))){
    save('quota-skipped');
    console.log('::warning::QA_EXPLORE_QUOTA_SKIPPED '+String(reason)+'; human visual review required');
    return 'quota-skipped';
