@@ -1,0 +1,37 @@
+name: Sangdo1 Middle School 300m GIS research
+on:
+  pull_request:
+    paths:
+      - 'app/src/sangdo1-middle-school-review.mjs'
+      - 'app/src/pri-map.js'
+      - 'app/tests/sangdo1-middle-school-*.test.mjs'
+      - 'scripts/research/sangdo1_school_review_300m.mjs'
+      - '.github/workflows/sangdo1-middle-school-spatial-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  middle-school-spatial-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check app/src/sangdo1-middle-school-review.mjs
+          node --check app/src/pri-map.js
+          node --check scripts/research/sangdo1_school_review_300m.mjs
+      - name: Verify middle-school review and unchanged scoped gap values
+        run: node --test app/tests/sangdo1-middle-school-review.test.mjs app/tests/sangdo1-middle-school-map-integration.test.mjs app/tests/sangdo1-adminscope-policy-gap.test.mjs
+      - name: Export middle-school-only 300m review (NOT a risk score)
+        run: node scripts/research/sangdo1_school_review_300m.mjs --out-dir research-results
+      - name: Upload review GeoJSON, CSV and metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: sangdo1-middle-school-spatial-review
+          path: research-results/
+          retention-days: 14
+          if-no-files-found: error
