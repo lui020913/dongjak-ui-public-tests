@@ -83,7 +83,11 @@ export function observedFactorScore(s,id){
  const value=s?.scores?.[id];
  return s?.evidence?.[id]?.modeled===true||!number(value)?null:value;
 }
+// Keep the historical 3-indicator calculation for old saved datasets and
+// regression comparisons; the primary walking-vulnerability UI uses all four
+// independently evidenced factors (speed is NULL without conservative GIS join).
 export const CURRENT_VULNERABILITY_FACTORS=Object.freeze(['lighting','accidents','protectionGap']);
+export const CURRENT_FOUR_FACTORS=Object.freeze(['lighting','accidents','protectionGap','speed']);
 export function currentVulnerabilityCoverage(segment){
   return CURRENT_VULNERABILITY_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
 }
@@ -93,7 +97,17 @@ export function currentVulnerabilityScore(segment){
   // polygons are NOT a fabricated zero-risk score, nor a blanket 100-safety.
   return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
 }
+export function currentFourFactorCoverage(segment){
+  return CURRENT_FOUR_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
+}
+export function currentFourFactorScore(segment){
+  const values=CURRENT_FOUR_FACTORS.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
+  // The denominator is the number of genuinely observed indicators.
+  // At most four contribute, never replace an unknown speed or accident with zero.
+  return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+}
 export function segmentScore(bundle,s,mode){
+ if(mode==='current4')return currentFourFactorScore(s);
  if(mode==='current3')return currentVulnerabilityScore(s);
  // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
  if(mode==='pri12'){const lighting=observedFactorScore(s,'lighting'),accidents=observedFactorScore(s,'accidents');return lighting!==null&&accidents!==null?(lighting+accidents)/2:null;}
