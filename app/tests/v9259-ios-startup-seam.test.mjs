@@ -38,6 +38,6 @@ test('standalone iPhone loader wins the legacy !important background after CSS h
   for(const rule of [light,dark]){
     assert.match(rule,/background:var\(--start-bg\)!important;/);
     assert.doesNotMatch(rule,/linear-gradient/);
-    assert.match(rule,/--start-bg:#(?:edf3ef|17191d);/);
+    assert.match(rule,/--start-bg:#(?:edf3ef|22282e);/);
   }
 });
