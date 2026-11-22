@@ -86,6 +86,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
 import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
+import {requestIosThemeRefresh} from './manual-pwa-theme-reload.js';
 
 function safeStorageSet(k,v){try{localStorage.setItem(k,v);}catch{}}
 export function getInitialTheme(){
@@ -286,7 +287,11 @@ export function initTheme({map,app}){
     themeState.toggle();
     safeStorageSet(THEME_KEY,themeState.preference);
     displayTheme({notify:true});
-    // Repaint UI and MapLibre in place; avoid loader, onboarding and camera reset.
+    // A live meta/theme-color update cannot reliably recolor native iOS PWA
+    // status chrome. Only a manual theme choice on installed iPhones performs
+    // one guarded refresh; its camera/tab and onboarding suppression are saved.
+    // Ordinary browser and temporary night-visibility changes remain in-place.
+    if(!themeState.temporary)requestIosThemeRefresh({win:window,app,map,theme:themeState.preference});
   });
   const setTemporaryTheme=next=>{
     if(!themeState.override(next))return;
