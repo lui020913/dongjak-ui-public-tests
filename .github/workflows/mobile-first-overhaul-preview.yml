@@ -53,6 +53,7 @@ jobs:
           node --check scripts/live-qa-analyze.mjs
           node --test tests/live-qa-verify-capture.test.mjs
       - name: Restore previous adaptive Gemini focus history
+        if: vars.ENABLE_GEMINI_QA == 'true'
         continue-on-error: true
         uses: actions/cache/restore@v4
         with:
@@ -61,14 +62,17 @@ jobs:
           restore-keys: |
             adaptive-gemini-qa-v1-
       - name: Choose reproducible random design and function focuses
+        if: vars.ENABLE_GEMINI_QA == 'true'
         run: node scripts/live-qa-adaptive-plan.mjs
       - name: Save focus cooldown history (best effort)
+        if: vars.ENABLE_GEMINI_QA == 'true'
         continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: qa-state/history.json
           key: adaptive-gemini-qa-v1-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Attach focus plan to the exact release run
+        if: vars.ENABLE_GEMINI_QA == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: adaptive-qa-plan-${{ github.run_id }}
@@ -139,12 +143,12 @@ jobs:
   mobile-qa:
     needs: [build, preview]
     if: needs.preview.result == 'success'
-    name: '3. 모바일 검증 (${{ matrix.shard }}/12)'
+    name: '3. 모바일 검증 (${{ matrix.shard }}/24)'
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 24
       matrix:
-        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -184,7 +188,7 @@ jobs:
         run: >-
           npx playwright test --config=playwright.v911-remote.config.mjs
           --project=mobile375 --project=mobile390 --project=mobile430
-          --project=mobile390-webkit-header --workers=1 --shard=${{ matrix.shard }}/12
+          --project=mobile390-webkit-header --workers=1 --shard=${{ matrix.shard }}/24
       - name: Confirm tested Preview still matches the exact candidate
         if: always()
         run: |
@@ -297,6 +301,10 @@ jobs:
         run: node scripts/live-qa-verify-candidate.mjs
       - name: Seal exact capture identity
         run: node scripts/live-qa-verify-capture.mjs qa-artifacts --seal
+      # Mandatory and provider-independent: complete recording, geometry,
+      # repeatable persistent clipping, and route/card interaction evidence.
+      - name: Enforce measured UI evidence without Gemini
+        run: node scripts/live-qa-release-gate.mjs qa-artifacts --deterministic
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -308,8 +316,8 @@ jobs:
 
   visual-qa:
     needs: [build, preview, visual-capture]
-    if: needs.preview.result == 'success' && needs.visual-capture.result == 'success'
-    name: '3. Gemini 디자인 분석 (${{ matrix.lane }}/6)'
+    if: needs.preview.result == 'success' && needs.visual-capture.result == 'success' && vars.ENABLE_GEMINI_QA == 'true'
+    name: '선택 검증 · Gemini 디자인 분석 (${{ matrix.lane }}/6)'
     strategy:
       fail-fast: false
       # Keep six independent browser captures parallel; serialize only Gemini API calls to reduce shared 429 quota contention.
@@ -372,8 +380,8 @@ jobs:
 
   explore-qa:
     needs: [build, preview, visual-qa]
-    if: needs.preview.result == 'success' && needs.visual-qa.result == 'success'
-    name: '3. Gemini 자율 탐색'
+    if: needs.preview.result == 'success' && needs.visual-qa.result == 'success' && vars.ENABLE_GEMINI_QA == 'true'
+    name: '선택 검증 · Gemini 자율 탐색'
     runs-on: ubuntu-24.04
     # Run alongside successful Gemini design reviews on the Ubuntu host.
     # This avoids the isolated browser container's Gemini API network timeouts.
@@ -427,7 +435,8 @@ jobs:
 
   production:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
-    if: needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success'
+    if: >-
+      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) }}
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production
@@ -551,7 +560,8 @@ jobs:
 
   notify-preview:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
-    if: ${{ needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && needs.visual-qa.result == 'success' && needs.explore-qa.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    if: >-
+      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && needs.visual-capture.result == 'success' && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Preview 완성'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -606,7 +616,7 @@ jobs:
             files="$(gh api "repos/$GITHUB_REPOSITORY/compare/$PREVIOUS_PUBLIC_SHA...$DEPLOYED_SHA" --jq '.files[]|select(.filename|startswith("app/src/") or startswith("frontend/production/"))|.filename' | head -n 15 || true)"
           fi
           if [ -z "$files" ]; then files="비교 내역에서 직접 확인 (파일 목록 미확인 또는 앱 소스 변경 없음)"; fi
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 기존 모바일 12개 병렬, 디자인 6개 연속 검증, Gemini 자율 탐색 및 Production 상태 확인 통과\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 모바일 24개 샤드, 디자인 캡처 6개와 정량 검증, 선택적 Gemini 검증 및 Production 상태 확인 통과\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
