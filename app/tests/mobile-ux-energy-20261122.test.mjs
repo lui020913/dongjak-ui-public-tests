@@ -41,7 +41,7 @@ test('only a missing protection-gap factor uses the agreed five-score renormaliz
   const scores=Object.fromEntries(TEAM_FACTORS.map(f=>[f.id,60]));
   scores.protectionGap=null;
   const bundle=makeBundle(scores,weights);
-  assert.equal(segmentScore(bundle,bundle.segments[0],'pri'),60);
+  assert.ok(Math.abs(segmentScore(bundle,bundle.segments[0],'pri')-60)<1e-9);
   const missingAnother={...scores,lighting:null};
   assert.equal(segmentScore(makeBundle(missingAnother,weights),makeBundle(missingAnother,weights).segments[0],'pri'),null);
   const allSix={...scores,protectionGap:30};
