@@ -25,7 +25,7 @@
 #app[data-theme="dark"] .dj-ai-search-entry:hover{background:#31544a;}
 
 .dj-ai-search-modal{
-  --ai-bg:#fff;--ai-card:#f5f9f7;--ai-text:#203f36;
+  --ai-bg:#edf3ef;--ai-card:#ffffff;--ai-text:#203f36;
   --ai-muted:#60796e;--ai-line:#d9e8df;--ai-accent:#0d8069;
   --ai-accent-hover:#096c58;--ai-ring:rgba(15,132,106,.18);
   position:fixed;inset:0;margin:auto;box-sizing:border-box;
@@ -331,7 +331,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal .dj-ai-disclaimer{font-size:10px;line-height:1.35}
  html body #dj-ai-search-modal .dj-ai-query,html body #dj-ai-search-modal .dj-ai-submit{min-height:44px}
  html body #dj-ai-search-modal .dj-ai-query::-webkit-search-cancel-button{appearance:none}
- body:has(#dj-ai-search-modal[open]){background:#fff}
+ body:has(#dj-ai-search-modal[open]){background:#edf3ef}
  body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#192d32}
  #dj-ai-search-modal .dj-ai-search-header::before{display:none!important}
  #dj-ai-search-modal .dj-ai-transcript{flex:1 1 0;min-height:0}
