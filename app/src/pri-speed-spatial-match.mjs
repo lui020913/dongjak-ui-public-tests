@@ -90,7 +90,7 @@ export function spatialMatchSpeedFactor(bundle,rawSpeedLinks){
  const edges=sourceEdges(rawSpeedLinks),stats={observed:0,unmatched:0,ambiguous:0,unknownSpeed:0},scores=[];
  for(const road of bundle.segments){
   const result=candidateForRoad(road,edges);
-  if(!(result.kind in stats))throw Error('알 수 없는 공간 정합 상태');
+  if(result.kind!=='matched'&&!(result.kind in stats))throw Error('알 수 없는 공간 정합 상태');
   if(result.kind==='matched'){
    stats.observed++;
    scores.push({id:road.id,score:result.risk,evidence:{
