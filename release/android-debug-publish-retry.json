@@ -1,5 +1,5 @@
 {
-  "run_id": "44560573128",
-  "reason": "Retry after owner saved Contents and Workflows write permissions",
-  "attempt": 4
+  "run_id": "44974279669",
+  "reason": "Verified Production 9bdadda97f987ac1a6faa5a83c10926f8d3e4311 from release run 44973387061 has already built and signed APK; source-pinned immutable tag avoids existing android-debug-v9.2.76 collision. Build job succeeded, source CI 44974856219 passed, PR 272 merged. Reuse artifact without rebuild and publish only after verifying exact Production marker, embedded asset provenance, SHA256 and persistent signature.",
+  "attempt": 5
 }
