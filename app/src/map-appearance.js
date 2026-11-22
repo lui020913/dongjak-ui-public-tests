@@ -100,7 +100,7 @@ export function installForestShade({map,app}){
   return ids;
 }
 
-/** v5.12.6 — Opaque overhead footprints prevent double-shading where native and GIS buildings overlap. */
+/** Native footprints share a zoom-faded paint model with the GIS building overlays. */
 export const BUILDING_VISUAL_PALETTE=Object.freeze({
   light:Object.freeze({footprint:'#c4d1d0',footprintOpacity:1,obliqueOpacity:0.12,extrusion:'#f1f3f1',nearOpacity:0.38,farOpacity:0.22}),
   dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.58,farOpacity:0.50})
@@ -148,7 +148,7 @@ export function buildingZoomOpacityExpression(maxOpacity=1){
 export function buildingFootprintPaint(theme='light',pitch=0){
   const p=BUILDING_VISUAL_PALETTE[theme==='dark'?'dark':'light'];
   return {'fill-color':p.footprint,
-    // Fully opaque when looking straight down; completely off in 3D view.
+    // Subtle overhead footprints, transparent for dark mode and off in 3D view.
     'fill-opacity':Number((p.footprintOpacity*buildingPlanVisibility(pitch)).toFixed(3)),
     'fill-antialias':false};
 }
