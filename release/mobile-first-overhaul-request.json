@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.90",
+  "application_version": "9.2.91",
   "public_work_branch": "main",
-  "purpose": "Owner-requested all UI corrections in three iPhone screenshots and recordings, integrated from PR327 (main b8e972f65a4e3455c4559420c134f9bd5586938d): unify language row and hidden saved selection control; fix My Info child views and dock padding; compact nearby safety sheet but retain swipe-to-expand; consolidate community category/filter/search/write/notifications and readable post cards; compact start/end and route CTA. Full source CI #45029134550 passed, including unit tests, build and three phone viewport checks. Preview first, full mobile QA, desktop/tablet gate, then protected Production only if green.",
-  "attempt": 274,
+  "purpose": "Exact main source after merged PR330 (0dc722ea8a2d459e88bf842eade239b973aacfcc), including merged PR328 and PR329: fix real iPhone My Info vertical blank space and hidden subviews, native language row reparent/card bug, community four-control toolbar and post cards, compact nearby sheet; integrate Sangdo1 1003 scored/603 grey policy-gap road segments, 172 unscored Sanghyeon Middle School 300m subview (NULL, never counted), official school catchment SHP 22 audited clipped roads with unchanged scores and map detail. CI 45032081208 and 3 separate GIS, official source and Live QA checks green. Require SHA-bound isolated Preview, all 12 mobile QA shards including visual layout geometry, desktop/tablet gate, then protected Production with rollback if and only if all gates pass.",
+  "attempt": 275,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous 9.2.89 Production #45026214670 succeeded. PR327 merged after final app source CI #45029134550 success. Rebuild exact main with 9.2.90 for verified Preview and protected deployment.",
+  "last_retry_reason": "Previous 9.2.90 production #45029364548 successful but user iPhone screenshots exposed actual production override and wrong duplicated CSS/DOM; PR330 removes ownership conflicts and adds real layout/official GIS tests. Production only after new Preview verification.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
