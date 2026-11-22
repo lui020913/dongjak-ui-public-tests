@@ -400,3 +400,39 @@ html.dj-ios-home-pwa:has(#app[data-sangdo-night="on"]) {
     animation:none!important;
   }
 }
+
+/* Child settings rows inherit the same iPhone grouped-list materials. */
+@layer request-completion {
+@media (max-width:699px) {
+  html body #app#app#app#app#app #mine-panel .dj834-my-detail :is(.dj834-options-detail,.dj834-history-detail){
+    display:grid!important;gap:14px!important;padding:20px 0!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-my-detail :is(.dj834-options-detail,.dj834-history-detail)[hidden]{
+    display:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-my-detail :is(.dj834-options-detail,.dj834-history-detail)>p{
+    font-size:14px!important;line-height:1.55!important;
+    color:var(--dj-theme-muted,#53675e)!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-child-actions{
+    display:grid!important;
+    border:1px solid var(--dj-theme-line,#d3e0d8)!important;
+    border-radius:18px!important;overflow:hidden!important;
+    background:var(--dj-theme-surface,#fff)!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-child-actions>button{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    min-height:59px!important;padding:12px 18px!important;
+    border:0!important;background:transparent!important;
+    color:var(--dj-theme-ink,#20312e)!important;text-align:left!important;
+    font-size:15px!important;font-weight:600!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-child-actions>button+button{
+    border-top:1px solid var(--dj-theme-line,#d3e0d8)!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-current-language{
+    margin-left:auto!important;font-weight:500!important;
+    color:var(--dj-theme-muted,#53675e)!important;font-size:13px!important;
+  }
+}
+}
