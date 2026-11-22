@@ -148,7 +148,10 @@ export function installDongjakLiveTransit({map,maplibregl,app,isDongjak,onNotice
   }
   const popupTracker=createVehiclePopupTracker(map,maplibregl);
   const overlay=attachLiveTransitOverlay(map,{
-    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,renderIntervalMs:8,
+    stationLines:buildDongjakMetroLines(),minZoom:13.2,metroMinZoom:METRO_LIVE_MIN_ZOOM,intervalMs:60000,maxAgeMs:180000,
+    // Rebuilding a live GeoJSON source every 8ms can keep iPhone GPU/CPU awake.
+    // 64ms on phones retains interpolated train motion while reducing work ~8x.
+    renderIntervalMs:window.matchMedia?.('(max-width:699px)')?.matches?64:32,
     withinDistrict:([lng,lat])=>isDongjak(lng,lat)===true,
     onVehicleClick:info=>popupTracker.open(info),
     onVehiclesRendered:collection=>popupTracker.render(collection),
