@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Protected mobile-first exact-main release: PR #275 balanced dark charcoal (#22282e app, #2c343d surfaces, #35404a cards) with emerald mint #79dec5 and selected #285b50, dark-map color inspired by the user-supplied Naver map recording, translucent 3D buildings 0.58→0.50 with MapLibre continuous zoom fade 13–15 on both native and GIS buildings. Preserve existing Light mode, PRI vulnerability scored/neutral GIS, route geometry, metro line colors, and night analytical occlusion. Includes already merged PRI 300m graded map PR #273 and quota-aware Gemini QA PRs #274/#276. Source CI #44978130442 passed on PR head; require exact new main source build, Preview, twelve phone QA, six real design captures/vision reviews, autonomous function exploration and protected Production verification; no skipped or fake gates.",
-  "attempt": 239,
+  "purpose": "Protected mobile Preview and Production for latest approved charcoal mint dark map, translucent buildings with zoom13-15 gradual reveal, and corrected PRI graded vulnerability overlay. PR #277: Gemini API HTTP 429 quota only means AI review explicitly skipped and marked manualReviewRequired with full captures, never falsely counted as reviewed; actual critical findings, source/missing evidence, browser failures continue to block. Also fixes location denied map center CTA. PR #278 updates two obsolete regression assertions to approved dark palette and opacity values so build can succeed without removing tests. Run source suite, exact Preview, all 12 phone QA, all 6 independent browser captures, optional real Gemini review, 6-target exploration if quota available, and guarded Production verification. Preserve 300m institutional protection gap, 1086 graded and 600 neutral gray, 5-or-6 composite rule, app accessibility and data.",
+  "attempt": 240,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR #275 merged as 58e0afd4902f after source CI success. Previous queued 238 release predates the approved final dark-map, building translucency and smooth zoom fade. Request 239 at current exact main with all required safety and Gemini quota-aware checks; do not promote stale 238 candidate.",
+  "last_retry_reason": "Attempt 239 release build failed in two outdated dark-map regression test expectations (mobile-followup-build.test.mjs, mobile-next-build.test.mjs), now updated in PR #278. Attempt 238 had real Gemini critical button hierarchy issue, fixed in PR #277, plus explicit 429 quota-only human review fallback. Rebuild from new exact main.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
