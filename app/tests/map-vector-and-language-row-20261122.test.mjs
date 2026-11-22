@@ -30,20 +30,20 @@ test('slow 5G load must not replace original OpenFreeMap vector source with OSM 
   assert.ok(app.includes("app.dataset.djBasemapSource='vector-loading'"));
 });
 
-test('language selection is one native-accessible compact row, not separate card',()=>{
+test('language row opens the nested preferences page without an overlapping picker',()=>{
   const js=read('v854-language.js');
   const css=read('mobile-primary-fullscreen.css');
   assert.ok(js.includes("section.className='dj854-language-section dj834-language-row'"));
   assert.ok(js.includes("value.className='dj854-language-value'"));
   assert.ok(js.includes("section.append(icon,label,value,chevron,select)"));
   assert.ok(js.includes("group.insertBefore(section,history||null)"));
+  assert.ok(js.includes('select.hidden=true;select.tabIndex=-1;'));
   assert.ok(!js.includes('body.prepend(section)'));
-  assert.ok(css.includes('.dj834-settings-group > .dj854-language-row:not([hidden])'));
+  assert.ok(css.includes('.dj834-settings-group > .dj854-language-section:not([hidden])'));
   assert.ok(css.includes('height:62px!important'));
-  assert.ok(css.includes('.dj834-language-row > select'));
-  assert.ok(css.includes('position:static!important'));
-  assert.ok(css.includes('opacity:1!important'));
-  assert.ok(css.includes('width:110px!important'));
-  assert.ok(css.includes('pointer-events:auto!important'));
-  assert.ok(!css.includes('inset:0!important;\n      display:block!important;\n      width:100%!important;'),'full-row invisible picker must never block adjacent settings');
+  assert.ok(css.includes('.dj854-language-section > select'));
+  assert.ok(css.includes('display:none!important'));
+  assert.ok(css.includes('.dj854-language-value'));
+  assert.ok(!css.includes('.dj834-settings-group > .dj854-language-row:not([hidden])'),
+    'obsolete selector and competing row implementation are removed');
 });
