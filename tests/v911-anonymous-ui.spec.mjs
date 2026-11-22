@@ -226,7 +226,7 @@ test('all five onboarding illustrations remain uncropped on tablet and desktop',
 async function pinPhoneShortcut(page,label,key){
  const settings=page.locator('#djNext-layer-panel');
  await tap(page,page.locator('#djNext-layers'));await expect(settings).toBeVisible();
- const add=settings.getByRole('switch',{name:label+' 바로가기',exact:true});await add.scrollIntoViewIfNeeded();await add.click();await expect(add).toHaveAttribute('aria-checked','true');
+ const add=settings.getByRole('switch',{name:label+' 상단 바로가기 고정',exact:true});await add.scrollIntoViewIfNeeded();await add.click();await expect(add).toHaveAttribute('aria-checked','true');
  await settings.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(settings).toBeHidden();
  const shortcut=page.locator('#djNext-rail [data-shortcut="'+key+'"]');await expect(shortcut).toBeVisible();await shortcut.scrollIntoViewIfNeeded();return shortcut;
 }
@@ -249,11 +249,11 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  await expect(panel.locator('.djNext-pin')).toHaveCount(0);await expect(panel.getByText('기능 열기',{exact:true})).toHaveCount(0);
  const slopeAction=panel.getByRole('button',{name:'경사도 지도 기능',exact:true});const slopeState=await slopeAction.getAttribute('aria-pressed');
  for(const label of ['보행안전','경사도','야간시야']){
-   const b=panel.getByRole('switch',{name:label+' 바로가기',exact:true});await expect(b).toHaveAttribute('aria-checked','false');await b.scrollIntoViewIfNeeded();await b.click();await expect(b).toHaveAttribute('aria-checked','true');
+   const b=panel.getByRole('switch',{name:label+' 상단 바로가기 고정',exact:true});await expect(b).toHaveAttribute('aria-checked','false');await b.scrollIntoViewIfNeeded();await b.click();await expect(b).toHaveAttribute('aria-checked','true');
  }
  expect(await slopeAction.getAttribute('aria-pressed')).toBe(slopeState);await expect(panel).toBeVisible();
  await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 3/3');
- await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeDisabled();
+ await expect(panel.getByRole('switch',{name:'보차혼용 상단 바로가기 고정',exact:true})).toBeDisabled();
  await expect(rail.locator('[data-shortcut]')).toHaveCount(3);
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dongjak-phone-shortcuts-v2')))).toEqual(['pilot','slope','night']);
@@ -262,9 +262,9 @@ test('phone toolbar has compact adaptive slots, three saved shortcuts maximum an
  const scroll=rail.locator('#djNext-scroll');await expect.poll(()=>scroll.evaluate(n=>n.scrollWidth-n.clientWidth)).toBeGreaterThan(8);await expect(scroll).toHaveAttribute('data-overflow-right','true');
  await scroll.evaluate(n=>{n.scrollLeft=n.scrollWidth;});await expect(scroll).toHaveAttribute('data-overflow-left','true');await assertLayerRight();
  await scroll.evaluate(n=>{n.scrollLeft=0;});await tap(page,page.locator('#djNext-layers'));await expect(panel).toBeVisible();
- const remove=panel.getByRole('switch',{name:'경사도 바로가기',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
+ const remove=panel.getByRole('switch',{name:'경사도 상단 바로가기 고정',exact:true});await remove.scrollIntoViewIfNeeded();await remove.click();await expect(remove).toHaveAttribute('aria-checked','false');
  await expect(panel.locator('.djNext-count')).toHaveText('상단 바로가기 2/3');
- await expect(panel.getByRole('switch',{name:'보차혼용 바로가기',exact:true})).toBeEnabled();
+ await expect(panel.getByRole('switch',{name:'보차혼용 상단 바로가기 고정',exact:true})).toBeEnabled();
  await panel.getByRole('button',{name:'레이어 설정 닫기'}).click();await expect(panel).toBeHidden();
  await expect(rail.locator('.djNext-empty')).toHaveCount(0);
  await expect(rail.locator('button.djNext-tool')).toHaveCount(6);
