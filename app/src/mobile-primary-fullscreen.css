@@ -390,22 +390,37 @@
       color:var(--dj800-muted,#53675e)!important;
       font-size:26px!important;
     }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj854-language-value {
+      display:none!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj834-language-row .dj834-chevron {
+      order:4!important;
+    }
     html body #app#app#app#app#app #mine-panel .dj834-language-row > select {
-      position:absolute!important;
-      inset:0!important;
+      /* Never stretch an invisible selector across surrounding buttons.
+         Only the visible 110px picker receives touches. */
+      position:static!important;
+      inset:auto!important;
+      order:3!important;
+      flex:0 0 110px!important;
       display:block!important;
-      width:100%!important;
-      max-width:none!important;
-      height:100%!important;
-      min-height:0!important;
-      margin:0!important;
-      padding:0!important;
-      opacity:0!important;
+      width:110px!important;
+      max-width:110px!important;
+      height:42px!important;
+      min-height:42px!important;
+      margin:0 0 0 auto!important;
+      padding:6px 2px!important;
+      opacity:1!important;
       border:0!important;
       border-radius:0!important;
+      background:transparent!important;
+      color:var(--dj800-muted,#53675e)!important;
+      font-size:14px!important;
+      font-weight:500!important;
+      text-align:right!important;
       appearance:none!important;
       -webkit-appearance:none!important;
-      z-index:2!important;
+      z-index:auto!important;
       cursor:pointer!important;
       pointer-events:auto!important;
     }

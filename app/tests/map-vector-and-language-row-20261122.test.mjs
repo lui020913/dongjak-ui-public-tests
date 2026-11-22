@@ -41,6 +41,9 @@ test('language selection is one native-accessible compact row, not separate card
   assert.ok(css.includes('.dj834-settings-group > .dj854-language-row:not([hidden])'));
   assert.ok(css.includes('height:62px!important'));
   assert.ok(css.includes('.dj834-language-row > select'));
-  assert.ok(css.includes('opacity:0!important'));
+  assert.ok(css.includes('position:static!important'));
+  assert.ok(css.includes('opacity:1!important'));
+  assert.ok(css.includes('width:110px!important'));
   assert.ok(css.includes('pointer-events:auto!important'));
+  assert.ok(!css.includes('inset:0!important;\n      display:block!important;\n      width:100%!important;'),'full-row invisible picker must never block adjacent settings');
 });
