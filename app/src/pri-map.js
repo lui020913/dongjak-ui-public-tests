@@ -68,11 +68,11 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    actions.replaceChildren();exportButton.disabled=!dataset;focusArea.disabled=!dataset?.segments?.length;
    if(!dataset){status.textContent='등록된 자료가 없습니다. JSON 자료를 불러와 주세요.';return;}
    const available=new Set();for(const s of dataset.segments)for(const f of dataset.factors)if(observedFactorScore(s,f.id)!==null)available.add(f.id);const summary=summarize(dataset,'pri');status.textContent=dataset.area+' · '+dataset.segments.length.toLocaleString('ko-KR')+'개 조사 구간 · 자료 '+available.size+'/'+dataset.factors.length+'종 · 원본 조사연장 '+(summary.totalM/1000).toFixed(2)+' km (공식 도로 총연장 아님) · 좌표 선형 '+(summary.geometryM/1000).toFixed(2)+' km';
-   const options=dataset.factors.map(f=>[f.id,f.label]);options.unshift(['pri12','PRI ①·② 평균 (시범)']);options.unshift(['pri','종합 PRI']);
+   const options=dataset.factors.map(f=>[f.id,f.label]);options.unshift(['pri3','종합 보행 취약도 · 현재 3개 지표']);
    for(const [id,name] of options){
-     const hasBoth=id==='pri12'&&dataset.segments.some(s=>segmentScore(dataset,s,'pri12')!==null);
-     const unavailable=id==='pri'?dataset.config.status!=='approved':id==='pri12'?!hasBoth:!available.has(id);
-     const suffix=id==='pri'&&unavailable?' · 기준 미확정':id==='pri12'?(unavailable?' · 두 지수 결측':' · 실측·조사값만'):unavailable?' · 미제출':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명만':'';
+     
+     const unavailable=id==='pri3'?!['lighting','accidents','protectionGap'].every(f=>available.has(f))&&!dataset.segments.some(s=>segmentScore(dataset,s,'pri3')!==null):!available.has(id);
+     const suffix=id==='pri3'?(unavailable?' · 3개 관측값 중첩 구간 없음':' · 관측값 3/3 구간만'):unavailable?' · 미제출':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명만':'';
      const b=button(name+suffix,()=>{activate(id);dialog.close();});
      b.disabled=unavailable;b.setAttribute('aria-pressed',String(mode===id));actions.append(b);
    }
@@ -129,7 +129,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
  }
  function activate(id){
-  if(id&&(!dataset||(id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>segmentScore(dataset,s,'pri12')!==null):!dataset.factors.some(f=>f.id===id))))return;
+  if(id&&(!dataset||(id==='pri3'?!dataset.segments.some(s=>segmentScore(dataset,s,'pri3')!==null):id==='pri'?dataset.config.status!=='approved':id==='pri12'?!dataset.segments.some(s=>segmentScore(dataset,s,'pri12')!==null):!dataset.factors.some(f=>f.id===id))))return;
   mode=id;if(id){app.dataset.djPriVisible='true';app.dataset.djPriMode=id;}
   else{delete app.dataset.djPriVisible;delete app.dataset.djPriMode;}
   doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;display=id?displayRisk(displayFeatures(dataset,id)):EMPTY;
@@ -137,9 +137,9 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
-   if(id){label.textContent=id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
+   if(id){label.textContent=id==='pri3'?'종합 보행 취약도 (3개 지표)':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=summarize(dataset,id);coverage.textContent='평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title='원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)':'linear-gradient(90deg,#279b80,#9bc777 25%,#efd05a 50%,#ed9045 75%,#d74648)';
-  modelNote.textContent=id==='protectionGap'?'제도적 사각지대: 300m 지정 경계·시설 거리와 동일 초등학교 학구도(각 50%)를 결합한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 학구 미적용·노인 유형은 거리만 사용하고 도로폭은 제외합니다. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
+  modelNote.textContent=id==='pri3'?'세 지표(야간 시야·사고 이력·제도적 사각지대)를 동일 비중(각 1/3)으로 평균한 시험용 취약도입니다. 세 지표가 모두 관측된 도로만 색으로 표시하며 결측 구간과 사고다발지 미선정 구간은 회색입니다. 점수가 높을수록 취약하고 빨간색으로 표시합니다.':id==='protectionGap'?'제도적 사각지대: 300m 지정 경계·시설 거리와 동일 초등학교 학구도(각 50%)를 결합한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 학구 미적용·노인 유형은 거리만 사용하고 도로폭은 제외합니다. 회색은 평가 대상 밖이며 팀 종합평가에서는 나머지 5개 지표만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
   render();
  }
  function inspect(e){
@@ -147,7 +147,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   const candidates=map.queryRenderedFeatures([[e.point.x-4,e.point.y-4],[e.point.x+4,e.point.y+4]],{layers:[LINE,POINT].filter(l=>map.getLayer(l))});
   const s=lookup.get(candidates[0]?.properties?.segmentId);if(!s)return;
   const v=riskValue(segmentScore(dataset,s,mode)),node=el('div','dj-pri-detail');const modeled=mode==='accidents'&&s.evidence?.accidents?.modeled===true;node.append(el('strong','',s.name||'이름 없는 도로'),el('b','',modeled?'미선정 · 미평가':v===null?'미평가':v.toFixed(0)+' / 100점'),el('p','',s.id+' · 원본 조사연장 약 '+s.lengthM.toFixed(1)+'m'));
-  const fs=mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
+  const fs=mode==='pri3'?dataset.factors.filter(f=>['lighting','accidents','protectionGap'].includes(f.id)):mode==='pri'?dataset.factors.filter(f=>Object.hasOwn(dataset.config.weights,f.id)):mode==='pri12'?dataset.factors.filter(f=>['lighting','accidents'].includes(f.id)):dataset.factors.filter(f=>f.id===mode);
   for(const f of fs){const val=s.scores[f.id],ev=s.evidence[f.id];node.append(el('p','',f.label+' 위험점수: '+(observedFactorScore(s,f.id)!==null?riskValue(val)+'점':'미평가')+(ev?.darkM!==null&&ev?.darkM!==undefined?' · 평균 암부 '+ev.darkM+'m':'')+(ev?.sourceGrade?' · 원본 위험 '+ev.sourceGrade+'등급':'')+(ev?.note?' · '+ev.note:'')),el('small','',f.source+' · '+f.method));}
   if(s.geometry.type==='Point')node.append(el('small','','선형 좌표 부족: 점으로만 표시'));
   node.append(el('small','','높을수록 상대적으로 큰 취약 신호이며 빨간색으로 표현되는 연구용 위험점수입니다. 미선정·미평가 구간은 회색이며, 내부 임시점수는 표시 및 평균에서 제외됩니다.'));
