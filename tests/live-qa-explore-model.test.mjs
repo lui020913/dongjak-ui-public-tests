@@ -7,7 +7,7 @@ test('transient HTTP 503 retries with backoff and keeps the real finding',async(
  let n=0,delays=[],urls=[];
  const result=await askGeminiModel({key,parts,schema,send:async(u,o)=>{urls.push(u);assert.equal(o.headers['x-goog-api-key'],key);return ++n===1?{ok:false,status:503}:good({action:'map'});},wait:async ms=>delays.push(ms)});
  assert.deepEqual(result,{action:'map'});assert.equal(n,2);assert.deepEqual(delays,[2500]);
- assert(urls.every(x=>x.endsWith('/gemini-3.5-flash-lite:generateContent')));
+ assert(urls.every(x=>x.endsWith('/gemini-3.1-flash-lite:generateContent')));
 });
 test('network timeout retries without exposing exception internals',async()=>{
  let calls=0;
