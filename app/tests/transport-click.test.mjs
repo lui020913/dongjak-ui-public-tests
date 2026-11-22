@@ -81,7 +81,7 @@ test('rapid transport replacement cancels the outgoing fade and stale close comp
     const openSaved=handlers.get('dongjak:open-saved-transport');
     assert.equal(typeof openSaved,'function');
     const first={kind:'bus',name:'첫 번째 정류장',lng:126.951,lat:37.502,arsId:'20240'};
-    const second={kind:'subway',name:'두 번째 역',lng:126.947,lat:37.509,lines:['7호선'],selectedLine:'7호선'};
+    const second={kind:'bus',name:'두 번째 정류장',lng:126.947,lat:37.509,arsId:'20241'};
     openSaved({detail:{place:first}});
     assert.equal(h.elements.get('transport-sheet').hidden,false);
     h.elements.get('transport-close').click();
@@ -92,7 +92,11 @@ test('rapid transport replacement cancels the outgoing fade and stale close comp
     closedBefore(); // A cancelled animation races a newly opened sheet.
     assert.equal(h.elements.get('transport-sheet').hidden,false,'stale close must not dismiss the new station');
     assert.ok(cancelled>=2,'both new selections clear any old animation owner');
-    await Promise.resolve();
+    // Complete the *current* close as well, so mock fetch/callback work does
+    // not outlive the test fixture and leak into subsequent independent tests.
+    h.elements.get('transport-close').click();
+    pendingClose?.();
+    await new Promise(resolve=>setTimeout(resolve,25));
   }finally{
     if(previousWindow===undefined)delete globalThis.window;
     else globalThis.window=previousWindow;
