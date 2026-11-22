@@ -12,7 +12,8 @@ test('small mobile text option reaches the authoritative select and storage',()=
   assert.match(html,/<option value="small">작게<\/option>/);
   assert.match(get('src/v800-ui-architecture.js'),/<select id="dj800-type-size"><option value="small">작게<\/option>/);
   assert.match(get('src/safety-workbench-v7103.js'),/allowedScale=new Set\(\['small','normal','large','xlarge'\]\)/);
-  assert.match(get('src/v7120-settings.js'),/prefs\.text==='small'\?'small'/);
+  assert.doesNotMatch(get('src/v7120-settings.js'),/prefs\.text==='small'\?'small'/);
+  assert.match(get('src/v834-my-info.js'),/data-dj885-type="scale" data-value="small"/);
   assert.match(js,/realScale\.dispatchEvent\(new Event\('change'/);
 });
 test('transit title is reflowed without removing event handlers and bus explanations are scoped',()=>{

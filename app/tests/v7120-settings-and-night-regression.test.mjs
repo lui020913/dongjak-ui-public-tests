@@ -17,9 +17,9 @@ test('independent mobile icon and shared desktop settings panel are wired',()=>{
   const html=read('index.html'),js=read('src/v7120-settings.js'),css=read('src/v7120-polish.css');
   assert.match(html,/href="\/src\/v7120-polish\.css"/);
   assert.match(html,/src="\/src\/v7120-settings\.js"/);
-  for(const id of ['dj-settings-mobile','dj-settings-pc','dj-map-settings','dj-settings-theme','dj-settings-text','dj-settings-motion','dj-settings-weather','dj-settings-tools']) assert.match(js,new RegExp(id));
+  for(const id of ['dj-settings-mobile','dj-settings-pc','dj-map-settings','dj-settings-motion','dj-settings-weather','dj-settings-tools']) assert.match(js,new RegExp(id));
   assert.match(js,/localStorage\.setItem\(KEY/);
-  assert.match(js,/getElementById\('theme-toggle'\)\?\.click\(\)/);
+  assert.doesNotMatch(js,/dj-settings-theme|dj-settings-text|getElementById\('theme-toggle'\)/);
   assert.match(css,/#dj-settings-mobile/);
   assert.match(css,/map-quick-search-form>\.brand\{display:none!important/);
 });

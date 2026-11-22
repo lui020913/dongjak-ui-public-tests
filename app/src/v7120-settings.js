@@ -9,7 +9,7 @@ export function installMapPreferences(doc=document,win=window){
   const form=header?.querySelector('#map-quick-search .map-quick-search-form');
   if(!app||!form)return ()=>{};
   const root=doc.documentElement;
-  const defaults={text:'normal',motion:'full',weather:true,tools:true};
+  const defaults={motion:'full',weather:true,tools:true};
   let prefs={...defaults};
   try{prefs={...prefs,...JSON.parse(win.localStorage.getItem(KEY)||'{}')};}catch{}
   const safeSave=()=>{try{win.localStorage.setItem(KEY,JSON.stringify(prefs));}catch{}};
@@ -66,8 +66,6 @@ export function installMapPreferences(doc=document,win=window){
     <section class="dj-map-settings-card" role="dialog" aria-modal="true" aria-labelledby="dj-map-settings-title">
       <header class="dj-map-settings-head"><div><span class="dj-map-settings-kicker">MAP PREFERENCES</span><h2 id="dj-map-settings-title">지도 설정</h2><p>이 기기에만 저장되는 화면 설정입니다.</p></div><button type="button" id="dj-settings-close" aria-label="설정 닫기">×</button></header>
       <div class="dj-map-settings-content">
-        <section class="dj-map-settings-group"><h3>화면 모드</h3><p>라이트·다크 테마를 변경합니다.</p><button type="button" id="dj-settings-theme" class="dj-settings-primary">테마 변경</button></section>
-        <section class="dj-map-settings-group"><h3>글자 가독성</h3><p>지도 메뉴와 안내 글씨 크기를 변경합니다.</p><div id="dj-settings-text" class="dj-settings-segment" role="group" aria-label="글자 크기"><button type="button" data-size="small">작게</button><button type="button" data-size="normal">기본</button><button type="button" data-size="large">크게</button></div></section>
         <section class="dj-map-settings-group dj-settings-switch-group"><div><h3>움직임 줄이기</h3><p>플로팅 창 등의 전환 애니메이션을 줄입니다.</p></div><label class="dj-settings-switch"><input type="checkbox" id="dj-settings-motion"><span aria-hidden="true"></span></label></section>
         <section class="dj-map-settings-group dj-settings-switch-group"><div><h3>날씨 표시</h3><p>지도 위 온도 버튼을 표시합니다.</p></div><label class="dj-settings-switch"><input type="checkbox" id="dj-settings-weather"><span aria-hidden="true"></span></label></section>
         <section class="dj-map-settings-group dj-settings-switch-group"><div><h3>지도 조작 버튼</h3><p>도움말·나침반·홈·내 위치 버튼을 표시합니다.</p></div><label class="dj-settings-switch"><input type="checkbox" id="dj-settings-tools"><span aria-hidden="true"></span></label></section>
@@ -77,7 +75,7 @@ export function installMapPreferences(doc=document,win=window){
   app.append(overlay);
   const q=sel=>overlay.querySelector(sel);
   let previousFocus=null;
-  const syncTheme=()=>{const dark=isDark();const icon=dark?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';mobile.querySelector('img').src=icon;pcLogo.querySelector('img').src=icon;q('#dj-settings-theme').textContent=dark?'라이트 모드로 변경':'다크 모드로 변경';};
+  const syncTheme=()=>{const icon=isDark()?'/icons/dongjak-dark-192.png':'/icons/dongjak-light-192.png';mobile.querySelector('img').src=icon;pcLogo.querySelector('img').src=icon;};
   // Weather nodes belong to different responsive breakpoints.  A display:none
   // rule cannot itself fade, so wait for the opacity animation to finish before
   // applying the stored hidden state.  Rapid toggles cancel stale completions.
@@ -122,18 +120,11 @@ export function installMapPreferences(doc=document,win=window){
     });
   };
   const apply=({animateWeather=false}={})=>{
-    if(!['small','normal','large'].includes(prefs.text))prefs.text='normal';
-    const previousTextSize=app.dataset.djSettingsText;
-    app.dataset.djSettingsText=prefs.text;
-    // HTML font-size alone cannot resize text painted inside MapLibre's canvas.
-    if(previousTextSize!==prefs.text){
-      win.dispatchEvent?.(new CustomEvent('dongjak:map-text-scale-change',{detail:{size:prefs.text}}));
-    }
-    // Migration: ignore any old rise/none preference; fade is now the only style.
+    // Typography is now controlled solely by My Info (no duplicate state).
+    delete prefs.text;
+    // Preserve the established fade-only motion contract and migrate old choices.
     delete prefs.motionStyle;
     app.dataset.djMotionStyle='soft';
-    const scaleSelect=doc.getElementById('dj-type-scale');
-    if(scaleSelect){const wanted=prefs.text==='large'?'large':prefs.text==='small'?'small':'normal';if(scaleSelect.value!==wanted){scaleSelect.value=wanted;scaleSelect.dispatchEvent(new Event('change',{bubbles:true}));}}
     app.classList.toggle('dj-reduced-animation',prefs.motion==='reduced');
     // v816 compatibility: direct display hiding still happens in commitWeather;
     // it is deferred only for a user-initiated fade-out.
@@ -142,7 +133,6 @@ export function installMapPreferences(doc=document,win=window){
     q('#dj-settings-motion').checked=prefs.motion==='reduced';
     q('#dj-settings-weather').checked=prefs.weather!==false;
     q('#dj-settings-tools').checked=prefs.tools!==false;
-    q('#dj-settings-text').querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.size===prefs.text)));
     syncTheme();safeSave();
   };
   const close=()=>{if(overlay.hidden)return;const finish=()=>{overlay.hidden=true;app.classList.remove('dj-settings-open');previousFocus?.focus?.();};if(document.defaultView?.DongjakWindowMotion)document.defaultView.DongjakWindowMotion.close(overlay.querySelector('.dj-map-settings-card'),finish);else finish();};
@@ -165,8 +155,6 @@ export function installMapPreferences(doc=document,win=window){
     if(!event.shiftKey&&doc.activeElement===last){event.preventDefault();first?.focus();}
   }};
   doc.addEventListener('keydown',esc,true);
-  q('#dj-settings-theme').addEventListener('click',()=>{close();doc.getElementById('theme-toggle')?.click();});
-  q('#dj-settings-text').addEventListener('click',event=>{const b=event.target.closest('button[data-size]');if(!b)return;prefs.text=b.dataset.size;apply();});
   q('#dj-settings-motion').addEventListener('change',event=>{prefs.motion=event.target.checked?'reduced':'full';apply();});
   q('#dj-settings-weather').addEventListener('change',event=>{prefs.weather=event.target.checked;apply({animateWeather:true});});
   q('#dj-settings-tools').addEventListener('change',event=>{prefs.tools=event.target.checked;apply();});
