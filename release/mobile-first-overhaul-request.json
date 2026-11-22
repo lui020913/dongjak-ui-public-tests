@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.76",
   "public_work_branch": "main",
-  "purpose": "Fix the user-confirmed missing layer in the ACTUAL native PRI walking-vulnerability dialog: PR #263 merges 1,686 Sangdo1 25m policy-gap factor scores into the existing '제도적 사각지대' row, replacing '미제출' with an enabled 3자료·300m selector. 1,086 numeric scores, 600 NULL gray segments, requested 0..100 gradient, original 5/6 average research semantics. Remove the wrong standalone map-options vulnerability group and stop its duplicate overlay. Keep existing PRI, lighting, accidents, theme and route tools. Full source CI #44971197128 passed. Require exact Preview+12 mobile browser shards+design QA+guarded Production without bypass.",
-  "attempt": 230,
+  "purpose": "Protected mobile release of exact public main after PR #264 adaptive Gemini design/function QA and PR #267 weather scale visibility fix (CI #44972113929 success), plus existing PR #263 Sangdo1 native PRI walking-vulnerability policy-gap scores and PR #262 phone lifecycle/transport improvements. New weather lifecycle explicitly hides MapLibre scale for the full active sheet, restoring on close. Preserve complete GIS, transit, route and theme behavior. Require exact-source Preview, 12 mobile browser shards, six design journeys with randomized Gemini review, randomized safe functional exploration, and protected Production; never bypass gates.",
+  "attempt": 231,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Earlier production attempt #229 successfully deployed wrong navigation placement, leaving native PRI '제도적 사각지대 · 미제출' disabled in user screenshot. PR #263 corrected data integration to same network and removed stale overlay; 2 outdated test expectations fixed; full CI success. Rebuild exact changed source and preserve prior Production rollback until success.",
+  "last_retry_reason": "Attempt #230 did not include subsequently merged adaptive QA and weather-scale lifecycle repair. Prior independent app-smoke runs #44971098854 and #44971386420 failed on weather-open scale remaining visible; PR #267 fixes the blocker and lifecycle signal, complete app source CI #44972113929 passed. Rebuild current main and verify real browser smoke before protected promotion.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
