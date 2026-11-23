@@ -21,7 +21,7 @@ test('each route point has one picker, without deleting native map/search/GPS ow
  }
  assert.match(main,/querySelectorAll\('#route-panel \.route-location-menu'\)/);
  assert.doesNotMatch(followup,/hint\.textContent='출발지와 목적지를 선택하면/);
- assert.match(mobile,/\.route-location-menu>summary/);
+ assert.match(read('src/route-experience.css'),/\.route-location-menu>summary/);
  assert.match(mobile,/\.route-location-popover/);
 });
 

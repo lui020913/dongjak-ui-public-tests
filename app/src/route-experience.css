@@ -1,0 +1,395 @@
+/* Canonical visual owner for the walking-route flow, not a new route engine.
+ * All below target the current, mounted route surfaces. No map-layer changes. */
+@layer request-completion {
+  #app {
+    --dj-route-surface:var(--mf-surface,#f8fbf9);
+    --dj-route-raised:var(--mf-surface-raised,#fff);
+    --dj-route-ink:var(--mf-text,#1c312c);
+    --dj-route-muted:var(--mf-muted,#6c7d75);
+    --dj-route-edge:var(--mf-border,#d9e5dd);
+    --dj-route-accent:var(--mf-brand,#167b62);
+    --dj-route-accent-soft:var(--mf-brand-soft,#e8f5ee);
+  }
+  #app[data-theme="dark"] {
+    --dj-route-surface:#23272d;
+    --dj-route-raised:#2c3239;
+    --dj-route-ink:#f1f4f5;
+    --dj-route-muted:#afb9c1;
+    --dj-route-edge:#424b55;
+    --dj-route-accent:#9dc9ba;
+    --dj-route-accent-soft:#374940;
+  }
+  #app #route-panel .dj-page-intro {display:none!important}
+  #app #route-panel .route-location-row {
+    display:flex!important;align-items:center!important;gap:8px!important;
+    position:relative!important;min-height:66px!important;padding:6px 8px!important;
+    border:1px solid var(--dj-route-edge)!important;
+    border-radius:15px!important;background:var(--dj-route-raised)!important;
+    box-shadow:none!important;
+  }
+  #app #route-panel .route-location-row .route-dot {flex:0 0 10px!important}
+  #app #route-panel .route-location-text.dj-route-place-trigger {
+    display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+    align-items:flex-start!important;justify-content:center!important;
+    min-width:0!important;max-width:100%!important;min-height:52px!important;
+    margin:0!important;padding:6px 4px!important;border:0!important;
+    border-radius:10px!important;background:transparent!important;
+    color:var(--dj-route-ink)!important;box-shadow:none!important;text-align:left!important;
+    cursor:pointer!important;
+  }
+  #app #route-panel .route-location-text.dj-route-place-trigger span {
+    color:var(--dj-route-muted)!important;font-size:12px!important;font-weight:620!important;
+    line-height:1.25!important;
+  }
+  #app #route-panel .route-location-text.dj-route-place-trigger strong {
+    display:block!important;max-width:100%!important;font-size:16px!important;
+    font-weight:760!important;line-height:1.45!important;
+    overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+    color:var(--dj-route-ink)!important;
+  }
+  #app #route-panel .route-location-text.dj-route-place-trigger:focus-visible {
+    outline:3px solid var(--dj-route-accent)!important;outline-offset:2px!important;
+  }
+  #app #route-panel .route-location-menu {
+    flex:0 0 39px!important;position:relative!important;min-width:39px!important;
+    margin:0!important;
+  }
+  #app #route-panel .route-location-menu>summary {
+    display:grid!important;place-items:center!important;
+    width:39px!important;height:43px!important;min-width:39px!important;
+    padding:0!important;margin:0!important;
+    color:var(--dj-route-ink)!important;background:var(--dj-route-surface)!important;
+    border:1px solid var(--dj-route-edge)!important;border-radius:12px!important;
+    font-size:20px!important;line-height:1!important;list-style:none!important;
+  }
+  #app #route-panel .route-location-menu>summary::-webkit-details-marker {display:none!important}
+  #app #route-panel .route-location-divider {display:none!important}
+  #app #route-panel #dj-route-swap {
+    display:grid!important;place-items:center!important;position:relative!important;
+    align-self:flex-end!important;z-index:2!important;
+    width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;
+    margin:-10px 16px -10px auto!important;padding:0!important;
+    border:1px solid var(--dj-route-edge)!important;border-radius:12px!important;
+    background:var(--dj-route-raised)!important;color:var(--dj-route-accent)!important;
+    box-shadow:0 2px 7px rgba(18,43,33,.09)!important;font-size:21px!important;
+  }
+  #app #route-panel .route-card {
+    display:flex!important;flex-direction:column!important;gap:10px!important;
+    border:0!important;background:transparent!important;box-shadow:none!important;
+    padding:6px 0 14px!important;margin:0!important;overflow:visible!important;
+  }
+  #app #route-panel #route-calc {
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-height:52px!important;width:100%!important;position:relative!important;
+    margin:5px 0 0!important;border:0!important;border-radius:15px!important;
+    background:var(--dj-route-accent)!important;color:#fff!important;
+    font-size:16px!important;font-weight:760!important;letter-spacing:-.025em!important;
+    box-shadow:none!important;
+  }
+  #app #route-panel #route-calc:disabled {opacity:.43!important}
+  #app #route-panel #route-calc span:last-child {position:absolute!important;right:16px!important}
+  #app #route-panel #route-clear {
+    align-self:center!important;min-height:38px!important;padding:8px 10px!important;
+    border:0!important;background:transparent!important;
+    color:var(--dj-route-muted)!important;font-size:12px!important;font-weight:600!important;
+  }
+  #app #route-panel #route-clear[hidden] {display:none!important}
+  #app #route-panel :is(#route-variants,#route-summary) {display:none!important}
+  #app #dj-route-advanced,#app #dj-route-data-detail {
+    width:100%!important;min-width:0!important;margin:0!important;
+    color:var(--dj-route-muted)!important;border:0!important;background:transparent!important;
+  }
+  #app #dj-route-advanced>summary,#app #dj-route-data-detail>summary {
+    cursor:pointer!important;padding:10px 3px!important;
+    font-size:13px!important;font-weight:680!important;color:var(--dj-route-muted)!important;
+  }
+  #app #dj-route-advanced .dj-route-advanced-body {
+    display:grid!important;gap:8px!important;max-width:100%!important;
+  }
+  #app #dj-route-advanced :is(#dj815-waypoints,#dj815-rail-planner,.dj815-route-share){
+    max-width:100%!important;box-sizing:border-box!important;
+    margin:0!important;
+  }
+  #app #dj-route-data-detail .page-note {
+    margin:0!important;padding:8px 2px 12px!important;font-size:11px!important;
+    line-height:1.55!important;
+  }
+  #app #route-panel .route-place-search {
+    position:relative!important;inset:auto!important;
+    width:100%!important;height:auto!important;max-width:100%!important;
+    min-width:0!important;margin:0!important;padding:4px 0!important;
+    border:0!important;background:transparent!important;box-shadow:none!important;
+  }
+  #app #route-panel .route-place-search[hidden] {display:none!important}
+  #app #route-panel .route-search-form {display:flex!important;gap:8px!important;align-items:center!important}
+  #app #route-panel #route-search-query {
+    flex:1 1 0!important;min-width:0!important;min-height:49px!important;
+    padding:9px 12px!important;border:1px solid var(--dj-route-edge)!important;
+    border-radius:13px!important;background:var(--dj-route-raised)!important;
+    font-size:16px!important;color:var(--dj-route-ink)!important;
+  }
+  #app #route-panel #route-search-submit {
+    flex:0 0 auto!important;min-height:48px!important;padding:8px 16px!important;
+    background:var(--dj-route-accent)!important;color:#fff!important;
+    border-radius:13px!important;font-weight:740!important;
+  }
+  #app #route-panel .route-search-results {
+    display:grid!important;gap:3px!important;max-height:100%!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  #app #route-panel .route-search-item {
+    min-height:54px!important;padding:12px 10px!important;
+    border:0!important;border-bottom:1px solid var(--dj-route-edge)!important;
+    border-radius:0!important;background:transparent!important;color:var(--dj-route-ink)!important;
+  }
+  #app #route-panel #route-search-status {
+    color:var(--dj-route-muted)!important;line-height:1.45!important;
+    font-size:12px!important;margin:8px 0!important;
+  }
+  #app #route-panel .route-search-confirm-actions button {min-height:44px!important}
+  #app #route-map-card:not([hidden]) {
+    display:flex!important;flex-direction:column!important;gap:10px!important;
+    box-sizing:border-box!important;
+    border:1px solid var(--dj-route-edge)!important;
+    background:var(--dj-route-surface)!important;color:var(--dj-route-ink)!important;
+    border-radius:23px!important;padding:17px 16px!important;
+    box-shadow:0 10px 35px rgba(16,45,35,.14)!important;
+  }
+  #app #route-map-card>div:first-child {display:flex!important;gap:4px!important;flex-direction:column!important}
+  #app #route-map-card #route-map-metrics {
+    font-size:clamp(22px,5.5vw,27px)!important;line-height:1.25!important;
+    font-weight:840!important;color:var(--dj-route-ink)!important;
+    letter-spacing:-.04em!important;
+  }
+  #app #route-map-card #route-map-source {
+    color:var(--dj-route-muted)!important;font-size:11px!important;
+    font-weight:620!important;line-height:1.4!important;
+  }
+  #app #dj-route-choice-list[hidden] {display:none!important}
+  #app #dj-route-choice-list {display:grid!important;gap:9px!important;width:100%!important;min-width:0!important}
+  #app .dj-route-choice-title {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important}
+  #app .dj-route-choice-title strong {color:var(--dj-route-ink)!important;font-size:15px!important;font-weight:770!important}
+  #app .dj-route-choice-title small {color:var(--dj-route-muted)!important;font-size:11px!important}
+  #app .dj-route-choice-rows {
+    display:flex!important;gap:9px!important;min-width:0!important;
+    overflow-x:auto!important;scroll-snap-type:x proximity!important;overscroll-behavior-x:contain!important;
+    scrollbar-width:none!important;
+  }
+  #app .dj-route-choice-rows::-webkit-scrollbar {display:none!important}
+  #app .dj-route-choice {
+    display:flex!important;flex:1 0 45%!important;flex-direction:column!important;gap:7px!important;
+    min-width:0!important;text-align:left!important;padding:12px!important;
+    border:1px solid var(--dj-route-edge)!important;border-radius:16px!important;
+    background:var(--dj-route-raised)!important;color:var(--dj-route-ink)!important;
+    scroll-snap-align:start!important;box-shadow:none!important;
+  }
+  #app .dj-route-choice.is-current {
+    border:2px solid var(--dj-route-accent)!important;background:var(--dj-route-accent-soft)!important;
+    padding:11px!important;
+  }
+  #app .dj-route-choice-top {display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:5px!important;min-width:0!important}
+  #app .dj-route-choice-top strong {font-size:14px!important;font-weight:790!important;color:var(--dj-route-ink)!important;white-space:nowrap!important}
+  #app .dj-route-choice-top small {font-size:10px!important;font-weight:650!important;color:var(--dj-route-muted)!important;line-height:1.3!important;text-align:right!important}
+  #app .dj-route-choice-metrics {display:flex!important;flex-wrap:wrap!important;gap:5px 10px!important;align-items:baseline!important}
+  #app .dj-route-choice-metrics b {font-size:25px!important;font-weight:840!important;color:var(--dj-route-ink)!important;letter-spacing:-.04em!important}
+  #app .dj-route-choice-metrics span {font-size:12px!important;color:var(--dj-route-muted)!important}
+  #app .dj-route-choice-pri {align-self:flex-start!important;display:inline-flex!important;
+    max-width:100%!important;border-radius:9px!important;padding:5px 7px!important;
+    font-size:11px!important;line-height:1.25!important;font-weight:760!important;
+    background:#eef2f3!important;color:#61707a!important;
+  }
+  #app .dj-route-choice-pri[data-tone="high"] {background:#ffe7e7!important;color:#b32424!important}
+  #app .dj-route-choice-pri[data-tone="medium"] {background:#fff0d9!important;color:#a35e09!important}
+  #app .dj-route-choice-pri[data-tone="low"] {background:#e8f4ef!important;color:#18654d!important}
+  #app .dj-route-choice-coverage {font-size:10px!important;color:var(--dj-route-muted)!important;line-height:1.35!important}
+  #app .dj-route-choice-hint {margin:0!important;font-size:11px!important;line-height:1.45!important;color:var(--dj-route-muted)!important}
+  #app #route-map-card .route-map-card-actions {
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;margin:0!important;
+  }
+  #app #route-map-card .route-map-card-actions button {
+    min-width:0!important;min-height:43px!important;font-weight:740!important;
+    font-size:13px!important;border-radius:13px!important;
+    padding:10px!important;box-shadow:none!important;
+  }
+  #app #route-map-card #route-guide-start {
+    order:3!important;grid-column:1/-1!important;min-height:51px!important;
+    background:var(--dj-route-accent)!important;color:#fff!important;border:0!important;
+    font-size:16px!important;
+  }
+  #app #route-map-card #route-map-edit {
+    order:1!important;border:1px solid var(--dj-route-edge)!important;
+    color:var(--dj-route-ink)!important;background:var(--dj-route-raised)!important;
+  }
+  #app #route-map-card #route-map-close {
+    order:2!important;border:1px solid var(--dj-route-edge)!important;
+    color:var(--dj-route-muted)!important;background:transparent!important;
+  }
+  #app #dj-route-pri-detail {width:100%!important;margin:0!important;color:var(--dj-route-muted)!important}
+  #app #dj-route-pri-detail>summary {
+    font-size:11px!important;font-weight:640!important;line-height:1.5!important;
+    color:var(--dj-route-muted)!important;cursor:pointer!important;
+    padding:5px 0!important;
+  }
+  #app #dj-route-pri-detail .dj-route-pri-body {display:grid!important;gap:6px!important;padding:8px 0!important}
+  #app #dj-route-pri-detail .dj-route-pri-body p {
+    margin:0!important;font-size:11px!important;line-height:1.5!important;
+    color:var(--dj-route-muted)!important;background:transparent!important;border:0!important;
+  }
+  #app #dj-route-turn-banner {
+    display:none!important;flex-direction:column!important;gap:4px!important;
+    box-sizing:border-box!important;
+    position:fixed!important;left:12px!important;right:12px!important;
+    top:calc(env(safe-area-inset-top,0px) + 8px)!important;
+    z-index:5600!important;padding:16px 18px!important;
+    border-radius:19px!important;border:0!important;
+    background:#126e60!important;color:#fff!important;
+    box-shadow:0 8px 25px rgba(10,52,46,.23)!important;
+  }
+  #app.route-guiding #dj-route-turn-banner {display:flex!important}
+  #app #dj-route-turn-banner .dj-route-turn-kicker {
+    font-size:12px!important;font-weight:650!important;opacity:.88!important;
+  }
+  #app #dj-route-turn-banner #nav-instruction {
+    display:block!important;font-size:clamp(20px,5vw,29px)!important;
+    font-weight:850!important;line-height:1.3!important;
+    letter-spacing:-.045em!important;color:#fff!important;
+    margin:0!important;
+  }
+  #app.route-guiding #nav-live-card:not([hidden]) {
+    box-sizing:border-box!important;background:var(--dj-route-surface)!important;
+    color:var(--dj-route-ink)!important;border:1px solid var(--dj-route-edge)!important;
+    border-radius:21px!important;padding:14px!important;
+    box-shadow:0 8px 25px rgba(15,45,35,.18)!important;
+  }
+  #app #nav-live-card .nav-live-head {display:flex!important;justify-content:space-between!important;gap:8px!important;font-size:12px!important}
+  #app #nav-live-card .nav-live-metrics {
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;margin:8px 0!important;
+  }
+  #app #nav-live-card .nav-live-metrics>div {
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+    gap:5px!important;padding:10px 12px!important;border-radius:12px!important;
+    background:var(--dj-route-raised)!important;
+  }
+  #app #nav-live-card .nav-live-metrics small {font-size:11px!important;color:var(--dj-route-muted)!important}
+  #app #nav-live-card .nav-live-metrics b {font-size:21px!important;font-weight:810!important;color:var(--dj-route-ink)!important}
+  #app #nav-live-card #nav-warning {
+    font-size:11px!important;line-height:1.45!important;color:var(--dj-route-muted)!important;
+    white-space:normal!important;max-height:4.5em!important;min-height:0!important;
+  }
+  #app #nav-live-card .nav-live-options,
+  #app #nav-live-card .nav-live-actions {
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:8px 0 0!important;
+  }
+  #app #nav-live-card :is(.nav-live-options,.nav-live-actions)>button {
+    width:100%!important;min-width:0!important;min-height:42px!important;
+    padding:9px!important;border-radius:12px!important;
+    border:1px solid var(--dj-route-edge)!important;
+    color:var(--dj-route-ink)!important;background:var(--dj-route-raised)!important;
+    font-size:12px!important;font-weight:680!important;
+  }
+  #app #nav-live-card #nav-stop {color:#ad4040!important}
+  #app #nav-live-card .dj804-nav-extra-options:not(:has([data-level="poor"])) {display:none!important}
+  #app #nav-live-card .dj816-voice-box:not([open]) {display:none!important}
+  #app.route-guiding :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,#dj840-map-tip) {display:none!important}
+}
+@media (max-width:699px){
+  @layer request-completion {
+    #app[data-dj-route-stage="input"] #route-panel:not([hidden]) {
+      position:fixed!important;left:12px!important;right:12px!important;
+      top:calc(env(safe-area-inset-top,0px) + 8px)!important;
+      bottom:auto!important;
+      width:calc(100% - 24px)!important;max-width:none!important;
+      height:auto!important;min-height:0!important;
+      max-height:calc(100dvh - 126px - env(safe-area-inset-top,0px))!important;
+      display:flex!important;flex-direction:column!important;
+      border-radius:22px!important;padding:0!important;
+      overflow:hidden!important;transform:none!important;
+      background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj836-sheet-body {
+      flex:1 1 auto!important;min-height:0!important;height:auto!important;
+      padding:8px 17px 14px!important;overflow-y:auto!important;
+      background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome {
+      flex:0 0 auto!important;background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel:not([hidden]) {
+      display:flex!important;flex-direction:column!important;
+      position:fixed!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
+      width:100%!important;max-width:100%!important;height:100dvh!important;
+      max-height:100dvh!important;margin:0!important;
+      padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)!important;
+      border:0!important;border-radius:0!important;overflow:hidden!important;
+      background:var(--dj-route-surface)!important;z-index:5800!important;
+      transform:none!important;box-sizing:border-box!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel .dj-sheet-chrome {
+      flex:0 0 auto!important;min-height:55px!important;
+      padding:0 14px!important;background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel .dj836-sheet-body {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;padding:10px 17px!important;
+      overflow-y:hidden!important;background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel .route-card {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;padding:0!important;overflow:hidden!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel .route-card>
+      :not(#route-place-search){display:none!important}
+    #app[data-dj-route-stage="search"] #route-panel #route-place-search:not([hidden]) {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;height:100%!important;max-height:100%!important;
+      margin:0!important;overflow:hidden!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel #route-search-results {
+      flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
+      max-height:100%!important;
+    }
+    #app[data-dj-route-stage="search"] #route-panel #dj910-route-footer,
+    #app[data-dj-route-stage="search"] #route-panel #route-calc {
+      display:none!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel > #dj910-route-footer {
+      flex:0 0 auto!important;
+      min-height:66px!important;
+      padding:7px 16px 10px!important;
+      border-top:1px solid var(--dj-route-edge)!important;
+      background:var(--dj-route-surface)!important;
+    }
+    #app[data-dj-route-stage="search"] #bottom-nav,
+    #app[data-dj-route-stage="search"] :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,#dj840-map-tip) {display:none!important}
+    #app[data-dj-route-stage="preview"] #route-map-card:not([hidden]) {
+      position:fixed!important;left:12px!important;right:12px!important;
+      width:calc(100% - 24px)!important;max-width:none!important;
+      bottom:calc(78px + env(safe-area-inset-bottom,0px))!important;
+      top:auto!important;transform:none!important;
+      max-height:min(53dvh,440px)!important;
+      overflow-y:auto!important;overscroll-behavior-y:contain!important;
+      z-index:3800!important;
+    }
+    #app[data-dj-route-stage="preview"] .dj-route-choice {flex-basis:47%!important}
+    #app[data-dj-route-stage="guiding"] #nav-live-card:not([hidden]) {
+      position:fixed!important;left:12px!important;right:12px!important;top:auto!important;
+      width:calc(100% - 24px)!important;max-width:none!important;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;
+      max-height:min(43dvh,320px)!important;overflow-y:auto!important;
+      transform:none!important;z-index:4300!important;
+    }
+    #app[data-dj-route-stage="guiding"] .map-actions {
+      bottom:calc(env(safe-area-inset-bottom,0px) + 254px)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-route-data-detail {margin:2px 0 0!important}
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  @layer request-completion {
+    #app #route-panel,#app #route-map-card,#app #dj-route-turn-banner {
+      animation:none!important;transition:none!important;
+    }
+  }
+}

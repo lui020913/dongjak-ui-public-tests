@@ -22,18 +22,18 @@ test('walking route camera fits between real top controls and compact sheet, not
  assert.doesNotMatch(main,/Math\.floor\(window\.innerHeight\*\.61\)/);
 });
 
-test('route result starts compact; four route choices and full-geometry action remain one tap away',()=>{
- const js=prod('mobile-next.js'),css=prod('mobile-next.css');
- assert.match(js,/showCompact\(\);/);
- assert.match(js,/host\.dataset\.dj9272RouteFocus='true'/);
- assert.match(js,/expand\.setAttribute\('aria-expanded','false'\)/);
- assert.match(js,/const variants=\[\['standard'/);
- assert.match(js,/win\.requestAnimationFrame\(\(\)=>win\.requestAnimationFrame/);
- assert.match(css,/\.dj9272-selected-route\{display:none!important/);
- assert.match(css,/#route-map-card\[data-dj9272-route-focus="true"\] \.dj9272-selected-route\{display:flex!important/);
- assert.match(css,/max-height:min\(34dvh,278px\)!important/);
+test('route result presents a compact scrollable two-candidate comparison and full route guidance',()=>{
+ const js=read('src/route-experience-20261123.js'),css=read('src/route-experience.css');
+ const legacy=prod('mobile-next.js');
+ assert.match(js,/routeComparisonItems\(latest\)/);
+ assert.match(js,/sameRoute\(latest\.standard,latest\.gentle\)/);
+ assert.match(js,/native\.click\(\)/);
+ assert.match(js,/topBanner\.id='dj-route-turn-banner'/);
+ assert.match(css,/scroll-snap-type:x proximity/);
+ assert.match(css,/#route-guide-start/);
+ assert.match(css,/max-height:min\(53dvh,440px\)/);
+ assert.doesNotMatch(legacy,/cards\.id='djNext-route-compare'/);
 });
-
 test('community status has no opaque blank white panel and refresh remains a compact action',()=>{
  const css=prod('mobile-next.css');
  assert.match(css,/\.dj-community-status-label\{font-size:12px!important[^}]*border:0!important[^}]*background:transparent!important/);

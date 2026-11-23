@@ -2644,6 +2644,17 @@ function setRouteLocation(which,position) {
   if(position.resolveAddress)void resolveRouteAddress(position);
   return true;
 }
+// UI-only swap request; route state, markers and invalidation stay here.
+window.addEventListener('dongjak:route-swap',()=>{
+  if(navMode){toast('안내를 종료한 뒤 방향을 바꿔 주세요.');return;}
+  if(!routeStart&&!routeEnd)return;
+  const previousStart=routeStart;
+  routeStart=routeEnd;routeEnd=previousStart;
+  invalidateRoute();
+  drawRouteMarkers();
+  updateRouteLabels();
+  toast('출발지와 목적지를 바꿨습니다.');
+});
 window.addEventListener('dongjak:route-select',event=>{
   const {which,place}=event.detail||{};
   if(!['start','end'].includes(which)||!Number.isFinite(Number(place?.lng))||!Number.isFinite(Number(place?.lat)))return;
@@ -2749,18 +2760,29 @@ function beginRouteSearch(which){
   document.getElementById('route-search-query').focus();
 }
 function chooseSearchResult(place){
-  // 검색 결과를 바로 확정하지 않고 실제 지도에 임시 마커로 표시합니다.
   const which=routeSearchTarget;
   if(!which||!Number.isFinite(place.lng)||!Number.isFinite(place.lat))return;
   if(!requireDongjakRouteLocation(place))return;
+  // Waypoints still use the explicit map confirmation because order and exact
+  // entrance position matter. Origin/destination use the chosen search result
+  // immediately: one selection must not launch a redundant confirmation flow.
+  if(which==='waypoint'){
+    closeRouteSearch();
+    routePickMode=which;
+    navigate('map');
+    map.flyTo({center:[place.lng,place.lat],zoom:15.7,duration:680});
+    showTransitRouteConfirmation({kind:place.kind==='subway'?'subway':place.kind==='bus'?'bus':'point',
+      name:place.name||'검색한 위치',lng:place.lng,lat:place.lat,source:'search',address:place.address||'',
+      lines:place.lines||[],arsId:place.arsId||''});
+    syncRoutePresentation();
+    return;
+  }
+  const label=String(place.name||place.address||'선택한 장소');
+  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,kind:place.kind||'place'}))return;
   closeRouteSearch();
-  routePickMode=which;
-  navigate('map');
-  map.flyTo({center:[place.lng,place.lat],zoom:15.7,duration:680});
-  showTransitRouteConfirmation({kind:place.kind==='subway'?'subway':place.kind==='bus'?'bus':'point',
-    name:place.name || '검색한 위치',lng:place.lng,lat:place.lat,source:'search',address:place.address||'',
-    lines:place.lines||[],arsId:place.arsId||''});
-  syncRoutePresentation();
+  map.flyTo({center:[place.lng,place.lat],zoom:15.5,duration:480});
+  navigate('route');
+  toast(which==='start'?'출발지가 설정됐습니다.':'목적지가 설정됐습니다.');
 }
 async function runRouteSearch(event){
   event.preventDefault();
@@ -3086,6 +3108,7 @@ async function calculateRoute() {
       if(standard)standard.priExposure=comparison?.standard||null;
       if(gentle)gentle.priExposure=comparison?.gentle||null;
       showPriRouteAdvice(comparison);
+      window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:comparison}));
       if(comparison?.recommendation&&!priVariantChosenManually&&!navMode){
         selectedRouteVariant=comparison.recommendation;
         applySelectedRouteVariant();

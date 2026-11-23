@@ -91,23 +91,4 @@ html body #app#app#app.route-guiding .map-actions{
     bottom:calc(env(safe-area-inset-bottom) + 225px)!important;
   }
 }
-/* Actual route comparisons: no fictional third travel mode or invented real-time data. */
-#app #dj825-route-options[hidden]{display:none!important;}
-#app #dj825-route-options{display:grid;gap:8px;width:100%;min-width:0;margin-top:12px;padding-top:10px;border-top:1px solid var(--dj-route-border,#d5e5dc);}
-#app .dj825-routes-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-#app .dj825-routes-heading strong{font-size:14px!important;font-weight:800!important;}
-#app .dj825-routes-heading small{font-size:10px;color:var(--dj-route-muted,#6c8178);}
-#app .dj825-routes-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
-#app .dj825-route-row{min-width:0;text-align:left;display:grid;grid-template-columns:1fr auto;align-content:start;gap:5px;padding:11px 9px;border-radius:12px;border:1px solid var(--dj-route-border,#d4e4db);color:var(--dj-route-ink,#19372b);background:var(--dj-route-secondary,#f4faf6);cursor:pointer;}
-#app .dj825-route-row.is-selected{border:2px solid #178b72;background:var(--dj-route-primary,#e5f6ee);padding:10px 8px;}
-#app .dj825-route-name{font-size:12px;font-weight:750;min-width:0;}
-#app .dj825-route-badge{font-size:9px;color:#117c63;white-space:nowrap;}
-#app .dj825-route-meta{grid-column:1/-1;display:flex;gap:8px;align-items:baseline;font-size:12px;}
-#app .dj825-route-meta b{font-size:20px;font-weight:900;color:#12866d;}
-#app .dj825-route-grade{grid-column:1/-1;color:var(--dj-route-muted,#647a72);font-size:10px;}
-#app .dj825-routes-note{font-size:10px!important;line-height:1.45!important;margin:0!important;color:var(--dj-route-muted,#667b72)!important;}
-@media(max-width:699px){
-  html body #app#app#app #route-map-card:not([hidden]):has(#dj825-route-options:not([hidden])){
-    max-height:min(51dvh,430px)!important;overflow-y:auto!important;
-  }
-}
+/* Route comparison presentation is exclusively owned by route-experience.css. */

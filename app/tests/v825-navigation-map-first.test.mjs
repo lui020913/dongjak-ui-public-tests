@@ -29,13 +29,17 @@ test('v8.2.5: navigation voice cues announce only once per corner and stage',()=
   assert.equal(nextTurnCue(turn,8,used).stage,'now');
   assert.match(turnAnnouncement(turn,8),/주변 보행로를 확인/);
 });
-test('v8.2.5: actual route comparison is in map preview and buttons reuse native route selection',()=>{
-  const main=text('src/main.js');const addition=text('src/v825-navigation-experience.js');
+test('route UI: one map-preview comparison uses native route selection and preserves real navigation',()=>{
+  const main=text('src/main.js');
+  const navigation=text('src/v825-navigation-experience.js');
+  const ui=text('src/route-experience-20261123.js');
   assert.match(main,/dongjak:route-variants-ready/);
-  assert.match(addition,/routeComparisonItems\(latest\)/);
-  assert.match(addition,/original\.click\(\)/);
-  assert.match(addition,/selected=id/);
-  assert.match(addition,/isRealTurn\(route\)/);
+  assert.match(main,/dongjak:route-pri-ready/);
+  assert.match(ui,/routeComparisonItems\(latest\)/);
+  assert.match(ui,/native\.click\(\)/);
+  assert.match(ui,/selectedKind\(\)/);
+  assert.match(navigation,/isRealTurn\(route\)/);
+  assert.doesNotMatch(navigation,/dj825-route-options/);
 });
 test('v8.2.5: guiding hides bottom navigation but shows real GPS marker and compact panel',()=>{
   const css=text('src/v825-navigation-experience.css');const main=text('src/main.js');

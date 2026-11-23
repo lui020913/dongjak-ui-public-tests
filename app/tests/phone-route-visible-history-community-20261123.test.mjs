@@ -21,22 +21,24 @@ test('walking route camera always preserves usable window on short mobile',()=>{
  assert.ok(p.top+p.bottom<=480-126,JSON.stringify(p));
  assert.ok(Number.isFinite(p.top)&&Number.isFinite(p.bottom));
 });
-test('map fit is measured after route preview DOM renders',()=>{
- const src=read('../src/main.js');
- const ui=prod('mobile-next.js');
+test('route map fit uses actual preview geometry and the visible map card, not hidden ghost cards',()=>{
+ const src=read('../src/main.js'),ui=read('../src/route-experience-20261123.js');
  assert.match(src,/walkingRouteViewportPadding\(/);
  assert.match(src,/sheetTop:visible\(card\)/);
- assert.match(ui,/requestAnimationFrame\(\(\)=>win\.requestAnimationFrame/);
- assert.match(ui,/showCompact\(\)/);
- assert.match(ui,/aria-controls','djNext-route-compare'/);
+ assert.match(ui,/mapCard\.querySelector\('\.route-map-card-actions'\)\?\.before\(choices\)/);
+ assert.match(ui,/mapCard\.append\(methodology\)/);
 });
-test('phone menu remains interactive while alternate route cards are initially collapsed',()=>{
- const css=prod('mobile-next.css');
- const ui=prod('mobile-next.js');
- assert.match(css,/\.dj9272-selected-route\{display:none!important/);
- assert.match(css,/\[data-dj9272-route-focus="true"\] \.dj9272-selected-route\{display:flex!important/);
- assert.match(css,/\[data-dj9272-route-focus="true"\] #djNext-route-compare\{display:none!important/);
- assert.match(ui,/expand\.setAttribute\('aria-expanded','false'\)/);
+test('phone route cards have a single owner; native route actions and map fit remain',()=>{
+ const old=prod('mobile-next.js');
+ const modern=read('../src/route-experience-20261123.js');
+ const css=read('../src/route-experience.css');
+ assert.match(old,/export function installPhoneRouteComparison\(\)\{return undefined;\}/);
+ assert.doesNotMatch(old,/cards\.id='djNext-route-compare'/);
+ assert.match(modern,/route-map-card/);
+ assert.match(modern,/dongjak:route-pri-ready/);
+ assert.match(modern,/native\.click\(\)/);
+ assert.match(css,/#dj-route-choice-list/);
+ assert.match(css,/#route-guide-start/);
 });
 test('community, typography and history retain source owners but remove redundant UI',()=>{
  const ui=read('../src/version-history-v7.js');

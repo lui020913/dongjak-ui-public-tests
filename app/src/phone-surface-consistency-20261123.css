@@ -134,18 +134,6 @@
   html body #app#app :is(#mine-panel,#version-history-modal) .dj-edition-history .dj-edition-patch-summary {
     padding:12px 4px!important;font-size:12px!important;line-height:1.5!important;
   }
-
-  /* Walking directions: origin and destination remain the primary task. */
-  html body #app#app #route-panel:not([hidden]) .route-card {
-    padding:13px 14px!important;border-radius:20px!important;row-gap:5px!important;
-    box-shadow:0 2px 12px rgba(23,63,48,.035)!important;
-  }
-  html body #app#app #route-panel:not([hidden]) .route-location-row {
-    display:flex!important;align-items:center!important;gap:9px!important;
-    min-width:0!important;padding:10px 0!important;
-  }
-  html body #app#app #route-panel:not([hidden]) .route-location-text {flex:1 1 0!important;min-width:0!important;}
-  html body #app#app #route-panel:not([hidden]) .route-location-text strong {font-size:16px!important;line-height:1.35!important;}
   html body #app#app #route-panel:not([hidden]) .route-select-actions {display:flex!important;flex:0 0 auto!important;gap:6px!important;}
   html body #app#app #route-panel:not([hidden]) .route-select-actions .route-mini-btn {
     min-width:42px!important;min-height:42px!important;padding:8px!important;
@@ -156,16 +144,6 @@
     padding:8px 12px!important;margin:3px 0!important;
     font-size:12px!important;border-radius:12px!important;
   }
-  html body #app#app #route-panel:not([hidden]) .route-location-divider {margin:5px 0!important;}
-  html body #app#app #route-panel:not([hidden]) #route-clear {
-    display:inline-flex!important;align-items:center!important;justify-content:center!important;
-    width:auto!important;max-width:100%!important;min-height:40px!important;
-    margin:9px 0 0 auto!important;padding:8px 10px!important;
-    border:0!important;background:transparent!important;box-shadow:none!important;
-    color:#4e7063!important;font-size:12px!important;font-weight:600!important;
-    text-decoration:underline!important;text-underline-offset:3px!important;
-  }
-  html body #app#app #route-panel:not([hidden]) .page-note {margin:10px 2px!important;font-size:11px!important;line-height:1.55!important;}
 
   /* Community: one horizontal category rail and one compact action toolbar. */
   html body #app#app #participation-panel:not([hidden]):not(.dj9256-composing) .community-category-tabs {
@@ -314,27 +292,7 @@
   html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj833-feature-line:last-child{
     border-bottom:0!important;
   }
-  /* Consolidated interaction surfaces: source elements are grouped in HTML,
-     not duplicated, hidden or reimplemented as decorative buttons. */
-  #app #route-panel .route-location-row{position:relative!important;overflow:visible!important}
-  #app #route-panel .route-location-menu{
-    position:relative!important;flex:0 0 auto!important;margin:0!important;
-    padding:0!important;min-width:0!important;z-index:6;
-  }
   #app #route-panel .route-location-menu[open]{z-index:25}
-  #app #route-panel .route-location-menu>summary{
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    list-style:none!important;cursor:pointer!important;
-    min-width:68px!important;min-height:44px!important;padding:8px 11px!important;
-    border-radius:13px!important;border:1px solid #cbded4!important;
-    background:#eaf4ee!important;color:#24463b!important;
-    font-size:14px!important;font-weight:700!important;box-sizing:border-box!important;
-    -webkit-tap-highlight-color:transparent;
-  }
-  #app #route-panel .route-location-menu>summary::-webkit-details-marker{display:none}
-  #app #route-panel .route-location-menu>summary::after{
-    content:'⌄';font-size:14px;margin-left:7px;color:#52796b;
-  }
   #app #route-panel .route-location-menu[open]>summary{
     background:#dff1e9!important;border-color:#a7cabe!important;
   }
@@ -364,10 +322,6 @@
   #app #route-panel .route-location-popover :is(button:hover,button:focus-visible){
     background:#edf6f0!important;
   }
-  #app #route-panel .route-card{overflow:visible!important}
-  #app #route-panel .route-location-divider{margin:7px 0!important}
-  #app #route-panel>.dj836-sheet-body>.dj-page-intro{margin:3px 2px 12px!important}
-  #app #route-panel .route-location-text strong{font-size:15px!important}
 
   /* Community: search and compose are the only permanent primary actions.
      Sort, saved posts, alerts and refresh share one native details menu. */
@@ -487,7 +441,6 @@
   html body #app#app#app#app #mine-panel .dj834-history-container{
     margin-bottom:0!important;padding-bottom:0!important;
   }
-  html body #app#app#app#app #route-panel #route-clear[hidden] {display:none!important;}
   /* Touch focus must never leave an accidental double green ring. Keyboard
      users still receive a defined accessible focus-visible outline. */
   html body #app#app#app#app :is(#transport-close,.dj-place-header-close,
@@ -640,45 +593,6 @@
       background:#e8f0eb!important;
       border-radius:17px!important;
     }
-    /* Route: a little more air between landmarks, not a stretched empty
-       page. Keep the existing sticky primary action and search popovers. */
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      > .dj836-sheet-body {
-      padding-top:20px!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      > .dj836-sheet-body > .dj-page-intro {
-      margin:3px 2px 17px!important;
-      line-height:1.55!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      .route-card {
-      padding:17px 16px!important;
-      row-gap:9px!important;
-      border-radius:20px!important;
-      overflow:visible!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      .route-location-row {
-      min-height:74px!important;
-      padding:12px 0!important;
-      gap:12px!important;
-      box-sizing:border-box!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      .route-location-divider {
-      margin:7px 0!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      :is(.route-waypoints,.route-waypoint-list,.route-transit-options) {
-      margin-block:10px!important;
-    }
-    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-      > #dj910-route-footer {
-      border:0!important;
-      background:var(--dj-primary-page-bg,#edf3ef)!important;
-      box-shadow:none!important;
-    }
     html body #app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
       background:var(--dj-theme-surface,#2c343d)!important;
       border-color:var(--dj-theme-line,#4d5b65)!important;
@@ -755,33 +669,6 @@
     display:none!important;visibility:hidden!important;
     background:transparent!important;box-shadow:none!important;
     pointer-events:none!important;
-  }
-  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-    > .dj836-sheet-body {
-    display:flex!important;
-    flex-direction:column!important;
-    align-items:stretch!important;
-    justify-content:flex-start!important;
-    padding-top:clamp(44px,9dvh,84px)!important;
-    gap:14px!important;
-  }
-  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-    > .dj836-sheet-body > :is(.dj-page-intro,.route-card,.page-note) {
-    flex:0 0 auto!important;
-  }
-  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-    > .dj836-sheet-body:has(:is(#route-place-search,#route-summary,#route-variants):not([hidden])) {
-    justify-content:flex-start!important;
-  }
-  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-    > .dj836-sheet-body .route-card {
-    padding:16px!important;
-    row-gap:10px!important;
-  }
-  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
-    > .dj836-sheet-body .route-location-row {
-    min-height:66px!important;
-    padding:8px 0!important;
   }
  }
 }

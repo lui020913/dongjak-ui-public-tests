@@ -38,7 +38,17 @@ async function ready(page,{keepTour=false}={}){
  await expect(tour).toBeHidden();
 }
 async function geometry(page,sel){
- const full=page.viewportSize().width<700&&['#route-panel','#participation-panel','#news-panel','#mine-panel'].includes(sel);
+ if(page.viewportSize().width<700 && sel==='#route-panel'){
+  await expect.poll(async()=>{
+    const r=await page.locator(sel).boundingBox();
+    const dock=await page.locator('#bottom-nav').boundingBox();
+    return Boolean(r&&dock&&r.x>=-1&&r.x<=20&&r.y>=0&&r.y<=80&&
+      r.width>=page.viewportSize().width-42&&r.x+r.width<=innerViewportWidth(page)+2&&
+      r.y+r.height<=dock.y-3);
+  }).toBe(true);
+  return;
+ }
+ const full=page.viewportSize().width<700&&['#participation-panel','#news-panel','#mine-panel'].includes(sel);
  if(full){
   await expect.poll(async()=>{const b=await page.locator(sel).boundingBox(),n=await page.locator('#bottom-nav').boundingBox(),h=await page.evaluate(()=>document.documentElement.clientHeight);return Boolean(b&&n&&Math.abs(b.x)<3&&Math.abs(b.y)<3&&Math.abs(b.height-h)<5&&n.y>h-160);}).toBe(true);
   const z=await page.evaluate(id=>{const a=document.querySelector(id),b=document.getElementById('bottom-nav');return [Number(getComputedStyle(a).zIndex),Number(getComputedStyle(b).zIndex)]},sel);
@@ -331,6 +341,10 @@ test('phone sheets keep headers inside and scrollable content above fixed action
  await expect.poll(async()=>{const b=await body.boundingBox(),f=await footer.boundingBox();return b&&f?f.y-(b.y+b.height):-1000;}).toBeGreaterThanOrEqual(-1);
  // The legacy page-note is intentionally hidden on phones. Verify the actual
  // transit planner controls that were reported clipped, not the hidden note.
+ const advanced=body.locator('#dj-route-advanced');
+ await expect(advanced).toBeVisible();
+ await tap(page,advanced.locator(':scope > summary'));
+ await expect(advanced).toHaveAttribute('open','');
  const planner=body.locator('#dj815-rail-planner');
  await expect(planner).toBeVisible();
  const railAction=planner.getByRole('button',{name:'지하철 연계 이동안 찾기'});
@@ -513,13 +527,11 @@ test('phone first-run permission intro handles denial and stops permission-check
  expect(await page.evaluate(()=>window.__permissionMicStopped)).toBe(true);
  await panel.getByRole('button',{name:'계속하기'}).click();await expect(panel).toBeHidden();
 });
-test('phone route comparison uses actual pedestrian graph and does not invent a PRI score',{tag:'@phone-common'},async({page})=>{
+test('phone route comparison uses actual pedestrian graph and conservative PRI evidence',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await page.evaluate(()=>{for(const [which,lng,lat,name] of [['start',126.960,37.510,'검증용 출발지'],['end',126.962,37.512,'검증용 목적지']])window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:{which,place:{lng,lat,name}}}))});
  await expect(page.locator('#route-start-label')).toHaveText('검증용 출발지',{timeout:30000});
  await expect(page.locator('#route-end-label')).toHaveText('검증용 목적지');
- // Verify the real pointer can hit the route CTA, not the pill dock.
- // This used to hang for 180 seconds while the navigation span covered it.
  await expect.poll(()=>page.locator('#route-calc').evaluate(button=>{
   const r=button.getBoundingClientRect(),nav=document.getElementById('bottom-nav')?.getBoundingClientRect();
   const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
@@ -527,26 +539,25 @@ test('phone route comparison uses actual pedestrian graph and does not invent a 
     (hit===button||button.contains(hit)));
  }),{timeout:12000}).toBe(true);
  await page.locator('#route-calc').click({timeout:15000});
- const cards=page.locator('#djNext-route-compare'),summary=page.locator('#route-map-card');
- await expect(summary).toBeVisible({timeout:60000});await expect(cards.locator('button')).toHaveCount(4);
- const assertRouteCardBounds=async()=>{await expect.poll(()=>summary.evaluate(n=>{const r=n.getBoundingClientRect(),w=innerWidth;return {inside:r.left>=-1&&r.right<=w+1&&r.width>0,centred:Math.abs(r.left-(w-r.right))<=2};}),{timeout:10000}).toEqual({inside:true,centred:true});};
- await assertRouteCardBounds();
- // The revised map-first route card starts compact. Alternatives are still
- // available through the visible options button and collapse after choosing.
- await expect(cards).toBeHidden();
- await summary.getByRole('button',{name:'경로 옵션'}).click();
- await expect(cards).toBeVisible();
- for(const id of ['standard','gentle','balanced'])await expect(cards.locator('[data-comparison="'+id+'"]')).toBeEnabled();
- await cards.locator('[data-comparison="balanced"]').click();
- await expect(cards).toBeHidden();
- await expect(cards.locator('[data-comparison="balanced"]')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('#route-map-source')).toContainText('PRI 미반영');
- await summary.getByRole('button',{name:'경로 옵션'}).click();
- await expect(cards).toBeVisible();
- await cards.locator('[data-comparison="standard"]').click();
- await expect(cards).toBeHidden();
- await expect(cards.locator('[data-comparison="standard"]')).toHaveAttribute('aria-pressed','true');
- await assertRouteCardBounds();
+ const cards=page.locator('#dj-route-choice-list .dj-route-choice'),summary=page.locator('#route-map-card');
+ await expect(summary).toBeVisible({timeout:60000});
+ await expect(cards.first()).toBeVisible({timeout:15000});
+ const count=await cards.count();
+ expect(count).toBeGreaterThanOrEqual(1);
+ expect(count).toBeLessThanOrEqual(2);
+ const viewport=page.viewportSize().width;
+ await expect.poll(()=>summary.evaluate(n=>{
+  const r=n.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&r.width>0;
+ })).toBe(true);
+ const labels=await cards.allTextContents();
+ expect(labels.every(x=>!/종합 최적|환승 경로/.test(x))).toBe(true);
+ expect(labels.some(x=>/PRI 미평가|PRI 위험/.test(x))).toBe(true);
+ const pri=page.locator('#dj-route-pri-detail');
+ await expect(pri).toBeVisible();
+ if(count===2){
+  await cards.nth(1).click();
+  await expect(cards.nth(1)).toHaveAttribute('aria-pressed','true');
+ }
  await test.info().attach('phone-real-route-comparison',{body:await page.screenshot(),contentType:'image/png'});
 });
 
@@ -1618,14 +1629,14 @@ test('iPhone final visual contract: compact route, transparent community status 
  await ready(page);
 
  await tap(page,tab(page,'mine'));
- await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const choice=type.locator('[data-dj885-type="scale"][aria-pressed="true"]');
  await expect(choice).toHaveCount(1);
  await expect(choice).toHaveCSS('box-shadow','none');
- await tap(page,page.locator('#mine-panel .dj834-detail-back'));
- await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
 
@@ -1643,23 +1654,22 @@ test('iPhone final visual contract: compact route, transparent community status 
  expect(toolbar.y-(search.y+search.height),'secondary controls should be separated from primary search').toBeGreaterThanOrEqual(8);
 
  await tap(page,tab(page,'map'));
- await expect(page.locator('#djNext-route-compare')).toHaveCount(1);
+ await expect(page.locator('#dj-route-choice-list')).toHaveCount(1);
  await page.evaluate(()=>{
+  const variants=document.getElementById('route-variants');
+  variants.querySelector('[data-route-variant="standard"]')?.setAttribute('aria-pressed','true');
   document.getElementById('route-map-card').hidden=false;
-  dispatchEvent(new CustomEvent('dj-next:route-comparison',{detail:{
-   selected:'standard',standard:{seconds:1300,kilometers:2.8},
-   gentle:{seconds:1450,kilometers:3.1},balanced:{seconds:1320,kilometers:2.9},
-   transit:null
+  dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{
+   standard:{coords:[[126.95,37.5],[126.952,37.501]],seconds:1300,kilometers:2.8},
+   gentle:{coords:[[126.95,37.5],[126.949,37.502]],seconds:1450,kilometers:3.1}
   }}));
  });
  const card=page.locator('#route-map-card');
- await expect(card).toHaveAttribute('data-dj9272-route-focus','true');
- await expect(card.locator('.dj9272-selected-route')).toBeVisible();
- await expect(card.locator('#djNext-route-compare')).toBeHidden();
- await tap(page,card.getByRole('button',{name:'경로 옵션'}));
- await expect(card.locator('#djNext-route-compare')).toBeVisible();
- await tap(page,card.getByRole('button',{name:'옵션 접기'}));
- await expect(card.locator('#djNext-route-compare')).toBeHidden();
+ await expect(card.locator('#dj-route-choice-list .dj-route-choice')).toHaveCount(2);
+ await expect(card.locator('#dj-route-choice-list .dj-route-choice').first()).toBeVisible();
+ await expect(card.locator('#dj-route-choice-list .dj-route-choice-pri').first()).toContainText('PRI 미평가');
+ await expect(card.getByRole('button',{name:'안내 시작'})).toBeVisible();
+
 });
 
 
@@ -1689,40 +1699,30 @@ test('phone selected dock has no color plate and route form is vertically balanc
  await expect(page.locator('#route-panel')).toBeVisible();
  const routeDock=await checkDock('route');
  const form=await page.evaluate(()=>{
-  const body=document.querySelector('#route-panel > .dj836-sheet-body');
-  const intro=body.querySelector(':scope > .dj-page-intro'),card=body.querySelector(':scope > .route-card');
-  const footer=document.getElementById('dj910-route-footer'),cta=document.getElementById('route-calc'),dock=document.getElementById('bottom-nav');
-  const box=n=>{const r=n.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
-  return {body:box(body),intro:box(intro),card:box(card),footer:box(footer),cta:box(cta),dock:box(dock),
-   display:getComputedStyle(body).display,justifyContent:getComputedStyle(body).justifyContent,
-   pageHeight:innerHeight,cardPadding:getComputedStyle(card).paddingTop};
+  const panel=document.querySelector('#route-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
+  const card=body.querySelector(':scope > .route-card'),footer=panel.querySelector(':scope > #dj910-route-footer');
+  const dock=document.getElementById('bottom-nav');
+  const box=n=>{const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height};};
+  return {panel:box(panel),body:box(body),card:box(card),footer:box(footer),dock:box(dock),
+    formDisplay:getComputedStyle(body).display,cardPadding:getComputedStyle(card).paddingTop,
+    swapVisible:getComputedStyle(document.getElementById('dj-route-swap')).display!=='none',
+    advancedClosed:!document.getElementById('dj-route-advanced').open};
  });
- expect(form.display).toBe('flex');
- expect(form.justifyContent).toBe('flex-start');
- expect(form.intro.top-form.body.top,'the form must not cling to the top edge').toBeGreaterThanOrEqual(36);
- expect(form.intro.top-form.body.top,'the form must not be stranded in the vertical center').toBeLessThanOrEqual(125);
- expect(form.card.right,'card must fit inside viewport').toBeLessThanOrEqual(page.viewportSize().width-12);
- expect(form.card.bottom,'card must be clear of the primary action').toBeLessThanOrEqual(form.cta.top-8);
- // Transforms can move the visible button without changing the footer's
- // layout box. Assert actual button geometry and physical hitability.
- await expect.poll(()=>page.evaluate(()=>{
-  const c=document.getElementById('route-calc').getBoundingClientRect();
-  const n=document.getElementById('bottom-nav').getBoundingClientRect();
-  return Math.round(n.top-c.bottom);
- }),{timeout:12000,intervals:[100,250,500]}).toBeGreaterThanOrEqual(3);
- const ctaHit=await page.locator('#route-calc').evaluate(el=>{
-  const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
-  const hit=document.elementFromPoint(x,y);
-  return Boolean(hit&&(hit===el||el.contains(hit)));
- });
- expect(ctaHit,'the actual route action must receive pointer taps').toBe(true);
+ expect(form.formDisplay).toBe('flex');
+ expect(form.panel.top,'route entry is a top-aligned map overlay').toBeGreaterThanOrEqual(0);
+ expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
+ expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
+ expect(form.card.bottom,'route editor must clear the primary action').toBeLessThanOrEqual(form.footer.top+4);
+ expect(form.footer.bottom,'route CTA must clear fixed tab pill').toBeLessThanOrEqual(form.dock.top-3);
+ expect(form.swapVisible).toBe(true);
+ expect(form.advancedClosed).toBe(true);
  await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
  if(page.viewportSize().width===390)await testInfo.attach('real-route-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 
  await tap(page,tab(page,'mine'));
  await expect(page.locator('#mine-panel')).toBeVisible();
  const mineDock=await checkDock('mine');
- await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const contrast=await type.locator('[data-dj885-type="scale"][aria-pressed="true"]').evaluate(active=>{
@@ -1733,8 +1733,8 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(contrast.active.bg,'selected font pill must differ from an unselected one').not.toBe(contrast.inactive.bg);
  expect(contrast.active.color).not.toBe(contrast.inactive.color);
  if(page.viewportSize().width===390)await testInfo.attach('real-font-pills-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
- await tap(page,page.locator('#mine-panel .dj834-detail-back'));
- await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  const history=await page.evaluate(()=>{
   const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
