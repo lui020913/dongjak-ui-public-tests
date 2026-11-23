@@ -856,7 +856,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 #app #participation-panel #community-search{margin:0 0 12px!important;min-height:44px!important;border-color:var(--djNext-border)!important;border-radius:14px!important;}
 #app #participation-panel .dj-page-intro{font-size:12px!important;line-height:1.4!important;margin:0 0 8px!important;}
 #app #participation-panel .dj-community-feed-status{gap:8px!important;margin:8px 0 12px!important;padding:0!important;align-items:center!important;background:transparent!important;border:0!important;box-shadow:none!important;min-height:32px!important;}
-#app #participation-panel .dj-community-status-label{font-size:11px!important;line-height:1.35!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;}
+#app #participation-panel .dj-community-status-label{font-size:12px!important;line-height:1.35!important;padding:0!important;border:0!important;background:transparent!important;border-radius:0!important;}
 #app #participation-panel .dj-community-refresh{width:auto!important;min-height:32px!important;border-radius:10px!important;box-shadow:none!important;font-size:12px!important;padding:6px 10px!important;background:var(--dj9272-tint,#edf5f0)!important;color:var(--dj9272-ink,#24443a)!important;border:1px solid var(--dj9272-line,#d6e4dc)!important;}
 #app #djNext-layer-panel .djNext-layer-scroll::-webkit-scrollbar{display:none;}
 /* Native weather and nearby controllers own state; this section only gives
