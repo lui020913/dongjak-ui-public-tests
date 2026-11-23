@@ -5,7 +5,7 @@ const read=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const html=read('index.html');
 const main=read('src/main.js');
 const my=read('src/v834-my-info.js');
-const mobile=read('../frontend/production/mobile-next.css');
+const mobile=read('src/phone-surface-consistency-20261123.css');
 const followup=read('../frontend/production/mobile-17-followup.js');
 
 test('each route point has one picker, without deleting native map/search/GPS owners',()=>{
