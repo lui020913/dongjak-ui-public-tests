@@ -239,7 +239,7 @@ test('anonymous read-only control census · actual buttons and motion', async ({
       try{await prepare(tab);}
       catch(e){section.outcome.push({label:candidate.label,status:'reset-failed',error:String(e).slice(0,250)});report.failedClicks.push({tab,label:candidate.label,kind:'reset-failed'});continue;}
       const target=candidate.id
-        ? page.locator('[id="'+candidate.id.replace(/["\\]/g,'\\      const target=page.locator(selector).nth(candidate.index);')+'"]')
+        ? page.locator('[id='+JSON.stringify(candidate.id)+']')
         : page.locator(selector).nth(candidate.index);
       const current=await target.evaluate(n=>(n.getAttribute('aria-label')||n.title||n.innerText||n.textContent||'').replace(/\s+/g,' ').trim().slice(0,95)).catch(()=>null);
       if(current===null||current!==candidate.label){
