@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.114",
+  "application_version": "9.2.115",
   "public_work_branch": "main",
-  "purpose": "Owner-approved last safe cleanup stage: PR #366 retires three isolated QA/comment simulation workflows and adds literal GIS source reference preservation guards; PR #369 skips only unsupported non-feature PR recovery attempts. Existing app UI, GIS, PRI values, Supabase, APIs and production rollback remain unchanged. Run exact build, isolated Preview, 12 phone shards, PC/tablet, protected Production, live API and bindings verification without bypass.",
-  "attempt": 305,
+  "purpose": "Owner-authorized safe 2nd CSS duplication cleanup. Exact source PR #370 squash 93fea97278cd05a070256534e188455d2435a94d removes five byte-identical older CSS rules in the same selectors and media scopes; retains all unique declarations and existing UI, GIS, PRI, APIs, Supabase, source provenance and rollback. Require exact sealed build, isolated Preview, twelve mobile QA shards, desktop/tablet, version monotonicity, binding integrity, protected Production and post-deployment health. No bypass.",
+  "attempt": 306,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New protected release after PR #366 full Public app source CI 45118365308 success, PR #369 workflow validation 45118571675 success, and 9.2.113 Production 45118194159 full 12/12 pass + protected Production success. No test skipping or QA override.",
+  "last_retry_reason": "New protected release after PR #370 full source CI 45119344822 success and 9.2.114 full 12/12 Preview + protected Production verification 45118985574 success. New version 9.2.115 prevents same-version code reuse. No weakened gate or alternative artifact.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
