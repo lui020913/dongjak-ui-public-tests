@@ -146,10 +146,11 @@ jobs:
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: |
-          # Prior PR run 45246300051: mobile430 search/dismiss passed.
-          # Only the five interrupted cases need the corrected startup handshake.
-          npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390
-          npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile430 --grep 'completely rebuilt route entry matches reference map-first composition'
+          # Previous run 45247599527: mobile375/mobile390 search passed.
+          # Original run 45246300051: mobile430 search passed.
+          # Retest only the three initial-composition cases previously blocked
+          # by the visible legacy engine shell.
+          npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'completely rebuilt route entry matches reference map-first composition'
       - name: Upload rebuilt route screenshots and traces
         if: ${{ always() && github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         uses: actions/upload-artifact@v4
