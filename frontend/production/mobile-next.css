@@ -1196,6 +1196,12 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 
   /* Consolidated phone controls — actual owners live in app/index.html.
      These styles do not create alternate copies of stateful controls. */
+  /* Explicitly keep native details closed despite legacy !important display
+     overrides that otherwise expose their children on iOS WebKit. */
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options:not([open])>.community-toolbar{display:none!important}
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu:not([open]) .route-location-popover{display:none!important}
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-advanced-tools:not([open])>.dj834-tools-container{display:none!important}
+
   html body #app#app#app#app#app#app#app #participation-panel .community-primary-controls{
     display:grid!important;grid-template-columns:minmax(0,1fr) 112px!important;
     gap:8px!important;align-items:center!important;margin:6px 0 4px!important;
