@@ -417,7 +417,7 @@
       min-width:0!important;
       height:auto!important;
       min-height:0!important;
-      max-height:calc(100dvh - var(--dj910-dock-bottom,88px) - 26px - env(safe-area-inset-top,0px))!important;
+      max-height:min(calc(100dvh - var(--dj910-dock-bottom,88px) - 26px - env(safe-area-inset-top,0px)),calc(var(--dj-route-cta-top,100dvh) - env(safe-area-inset-top,0px) - 24px))!important;
       margin:0!important;
       padding:0!important;
       border:1px solid var(--dj-route-edge)!important;
@@ -447,7 +447,7 @@
       gap:8px!important;
       width:100%!important;
       min-height:0!important;
-      max-height:calc(100dvh - var(--dj910-dock-bottom,88px) - 100px - env(safe-area-inset-top,0px))!important;
+      max-height:min(calc(100dvh - var(--dj910-dock-bottom,88px) - 100px - env(safe-area-inset-top,0px)),calc(var(--dj-route-cta-top,100dvh) - env(safe-area-inset-top,0px) - 97px))!important;
       height:auto!important;
       padding:8px 16px 14px!important;
       overflow-y:auto!important;
