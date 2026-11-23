@@ -206,9 +206,9 @@ export function installMyInfo(doc=document){
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
  function enter(node,direction='forward'){
    if(!node||reducedMotion()||typeof node.animate!=='function')return;
-   const x=direction==='back'?-14:14;
-   try{node.animate([{opacity:.88,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
-     duration:210,easing:'cubic-bezier(.2,.76,.24,1)'
+   const x=direction==='back'?-44:44;
+   try{node.animate([{opacity:1,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
+     duration:360,easing:'cubic-bezier(.18,.72,.24,1)'
    });}catch{/* Appearance must never block navigation. */}
  }
  function showDetail(view){
