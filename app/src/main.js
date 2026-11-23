@@ -78,6 +78,7 @@ import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
+import {recommendPriVariant} from './pri-route-exposure.mjs';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
@@ -2487,8 +2488,13 @@ function syncRoutePresentation() {
     editor.hidden=true;
     const metric=readRouteMetrics();
     document.getElementById('route-map-metrics').textContent = `${metric.duration} · ${metric.distance}`;
-    document.getElementById('route-map-source').textContent=routeResult?.source==='seoul-pedestrian-graph'
-      ? '서울시 도보 네트워크 · 안전도 미평가' : '외부 보행경로 서버 · 안전도 미평가';
+    const exposure=routeResult?.priEvidence;
+    const label=routeResult?.source==='seoul-pedestrian-graph'
+      ? '서울시 도보 네트워크 · 실제 통행안전 미검증'
+      : '외부 보행경로 서버 · 실제 통행안전 미검증';
+    document.getElementById('route-map-source').textContent=exposure?.meanRisk!==null&&Number.isFinite(exposure?.meanRisk)
+      ? label+' · PRI 부분평가 위험 '+Math.round(exposure.meanRisk)+'/100 · 평가구간 '+Math.round(exposure.coverage*100)+'%'
+      : label+' · PRI 평가구간 없음';
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
   }
@@ -2939,7 +2945,11 @@ function routeDataNote(result){
     const grade=Number.isFinite(result.slopeAscentM)?` · 추정 상승 ${Math.round(result.slopeAscentM)}m / 하강 ${Math.round(result.slopeDescentM)}m`:'';
     const unsure=result.slopeUncertainM>0?` · 고도 검증 부족 ${Math.round(result.slopeUncertainM)}m`:'';
     const snap=Math.max(result.snapStartM||0,result.snapEndM||0);
-    return `서울시 동작구 도보 링크 기반${grade}${unsure}${snap>25?` · 지정점과 보행로 사이 최대 ${Math.round(snap)}m`:''} · 보도·통행상태 미검증`;
+    const evidence=result.priEvidence;
+    const pri=evidence?.meanRisk!==null&&Number.isFinite(evidence?.meanRisk)
+      ? ` · PRI 부분평가 위험 ${Math.round(evidence.meanRisk)}/100 (평가구간 ${Math.round(evidence.coverage*100)}%, 평균 ${evidence.meanObservedFactors}/6개 지수)`
+      : ' · PRI 구간별 평가자료 부족';
+    return `서울시 동작구 도보 링크 기반${grade}${unsure}${snap>25?` · 지정점과 보행로 사이 최대 ${Math.round(snap)}m`:''}${pri} · 비교용 연구점수이며 현장 보도·통행 안전 미검증`;
   }
   return result.segmentCount?`경유 ${result.segmentCount}구간의 실제 보행경로 합산 · 이용 데이터가 구간별로 다를 수 있음 · 통행 상태 미검증`:'외부 시험용 도보 경로 서버 결과 · 동작구 도보 네트워크 적용 실패 또는 범위 밖 · 실제 통행 가능 여부 미검증';
 }
@@ -3007,8 +3017,9 @@ async function calculateRoute() {
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
     routeVariants={standard,gentle};
-    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard,gentle}}));
-    selectedRouteVariant=standard?'standard':'gentle';
+    const priDecision=recommendPriVariant(standard,gentle);
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard,gentle,priDecision}}));
+    selectedRouteVariant=priDecision.preferred||(standard?'standard':'gentle');
     applySelectedRouteVariant();
     document.getElementById('route-variants').hidden=false;
     for(const button of document.querySelectorAll('[data-route-variant]')){
@@ -3022,7 +3033,9 @@ async function calculateRoute() {
         ? '두 조건에서 같은 경로가 계산됐습니다. 평지라는 뜻은 아닙니다.'
         : '최단 도보 경로와 경사 회피 우선 경로를 비교할 수 있습니다.')
       : '제공 가능한 보행 경로 한 개만 계산됐습니다.';
-    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}`;
+    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare} · ${priDecision.preferred
+      ? 'PRI 종합지수 부분평가 참고 추천: '+(priDecision.preferred==='standard'?'일반 보행':'경사 회피')+' · '+priDecision.reason
+      : 'PRI 경로 비교: '+priDecision.reason}`;
     navigate('map');
     fitWalkingRoute(routeResult.coords);
     syncRoutePresentation();
