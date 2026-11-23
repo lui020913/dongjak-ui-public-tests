@@ -47,6 +47,7 @@ test('completely rebuilt route entry matches reference map-first composition',as
   // Keep the legacy engine recognized by tab motion, but never painted or hit.
   await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
   await expect(page.locator('#route-panel')).toHaveCSS('pointer-events','none');
+  await expect(page.locator('#dj-walk-map-actions')).toHaveCSS('display','none');
   await expect.poll(async()=>page.evaluate(()=>{
     const host=document.getElementById('dj-route-v3'),shadow=host?.shadowRoot;
     if(!shadow)return false;
@@ -64,6 +65,8 @@ test('completely rebuilt route entry matches reference map-first composition',as
       cta.height>=50 && topClear &&
       Boolean(hit&&(hit===map||map.contains(hit)));
   }),{timeout:15000,intervals:[100,300,500]}).toBe(true);
+  // Reference has one pair of floating controls, never both old and new.
+  await expect(root.locator('.tools button')).toHaveCount(2);
   const measured=await page.evaluate(()=>{
     const shadow=document.getElementById('dj-route-v3').shadowRoot;
     const names=['.header','.route-panel','.tools','.action'];
