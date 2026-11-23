@@ -1653,3 +1653,81 @@ test('iPhone final visual contract: compact route, transparent community status 
  await tap(page,card.getByRole('button',{name:'옵션 접기'}));
  await expect(card.locator('#djNext-route-compare')).toBeHidden();
 });
+
+
+test('phone selected dock has no color plate and route form is vertically balanced',{tag:'@phone-layout'},async({page},testInfo)=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await ready(page);
+ const checkDock=async key=>{
+  const state=await page.locator('#bottom-nav').evaluate((dock,key)=>{
+   const active=dock.querySelector('.nav-tab.active'),inactive=dock.querySelector('.nav-tab:not(.active)');
+   const plate=dock.querySelector('.dj-motion-indicator'),r=dock.getBoundingClientRect();
+   const color=n=>n?getComputedStyle(n).backgroundColor:null;
+   return {key,activeTab:active?.dataset.tab,activeBackground:color(active),
+    activeBefore:active?getComputedStyle(active,'::before').backgroundColor:null,
+    plateDisplay:plate?getComputedStyle(plate).display:'absent',
+    plateVisibility:plate?getComputedStyle(plate).visibility:'absent',
+    selectedInk:active?getComputedStyle(active).color:null,
+    inactiveInk:inactive?getComputedStyle(inactive).color:null,
+    dockBottom:r.bottom,viewportHeight:innerHeight};
+  },key);
+  expect(state.activeTab).toBe(key);
+  expect(['absent','none']).toContain(state.plateDisplay);
+  expect(['transparent','rgba(0, 0, 0, 0)']).toContain(state.activeBackground);
+  expect(state.selectedInk).not.toBe(state.inactiveInk);
+  return state;
+ };
+ await tap(page,tab(page,'route'));
+ await expect(page.locator('#route-panel')).toBeVisible();
+ const routeDock=await checkDock('route');
+ const form=await page.evaluate(()=>{
+  const body=document.querySelector('#route-panel > .dj836-sheet-body');
+  const intro=body.querySelector(':scope > .dj-page-intro'),card=body.querySelector(':scope > .route-card');
+  const footer=document.getElementById('dj910-route-footer'),dock=document.getElementById('bottom-nav');
+  const box=n=>{const r=n.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
+  return {body:box(body),intro:box(intro),card:box(card),footer:box(footer),dock:box(dock),
+   display:getComputedStyle(body).display,justifyContent:getComputedStyle(body).justifyContent,
+   pageHeight:innerHeight,cardPadding:getComputedStyle(card).paddingTop};
+ });
+ expect(form.display).toBe('flex');
+ expect(form.justifyContent).toContain('center');
+ expect(form.intro.top-form.body.top,'the form must not cling to the top edge').toBeGreaterThanOrEqual(32);
+ expect(form.card.right,'card must fit inside viewport').toBeLessThanOrEqual(page.viewportSize().width-12);
+ expect(form.card.bottom,'card must be clear of the primary action').toBeLessThanOrEqual(form.footer.top-8);
+ expect(form.footer.bottom,'primary action must clear the fixed tab pill').toBeLessThanOrEqual(form.dock.top-3);
+ await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
+ if(page.viewportSize().width===390)await testInfo.attach('real-route-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+
+ await tap(page,tab(page,'mine'));
+ await expect(page.locator('#mine-panel')).toBeVisible();
+ const mineDock=await checkDock('mine');
+ await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
+ await expect(type).toBeVisible();
+ const contrast=await type.locator('[data-dj885-type="scale"][aria-pressed="true"]').evaluate(active=>{
+  const group=active.parentElement,inactive=group.querySelector('[aria-pressed="false"]');
+  const css=n=>({bg:getComputedStyle(n).backgroundColor,color:getComputedStyle(n).color});
+  return {active:css(active),inactive:css(inactive)};
+ });
+ expect(contrast.active.bg,'selected font pill must differ from an unselected one').not.toBe(contrast.inactive.bg);
+ expect(contrast.active.color).not.toBe(contrast.inactive.color);
+ if(page.viewportSize().width===390)await testInfo.attach('real-font-pills-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ await tap(page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
+ const history=await page.evaluate(()=>{
+  const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
+  const title=panel.querySelector(':scope > .dj-sheet-chrome .dj834-detail-nav');
+  const dock=document.getElementById('bottom-nav');
+  body.scrollTop=body.scrollHeight;
+  const b=body.getBoundingClientRect(),h=title?.getBoundingClientRect(),n=dock.getBoundingClientRect();
+  return {headerInsideFixedTitle:Boolean(title),headerTop:h?.top??null,scrollportBottom:b.bottom,
+   navTop:n.top,scrollBottom:Math.round(body.scrollTop+body.clientHeight),
+   scrollHeight:body.scrollHeight,headPosition:getComputedStyle(panel.querySelector(':scope > .dj-sheet-chrome')).position};
+ });
+ expect(history.headerInsideFixedTitle,'child title/back must be in the shared fixed header').toBe(true);
+ expect(history.scrollportBottom,'history scroller may not be masked by nav').toBeLessThanOrEqual(history.navTop+3);
+ expect(history.scrollBottom).toBeGreaterThanOrEqual(history.scrollHeight-3);
+ await testInfo.attach('real-history-geometry.json',{body:Buffer.from(JSON.stringify({mineDock,contrast,history},null,2)),contentType:'application/json'});
+ if(page.viewportSize().width===390)await testInfo.attach('real-history-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+});

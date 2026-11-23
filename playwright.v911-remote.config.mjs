@@ -32,6 +32,7 @@ const releaseSmokeNames=[
  'AI full-screen conversation',
  'community tab opens a usable feed',
  'phone production settings, cards and nearby overlays follow rendered geometry',
+ 'phone selected dock has no color plate and route form is vertically balanced',
  'phone verified protection-gap menu contains SHP audit and NULL middle-school review',
  'phone speed limit risk is selectable with PDF thresholds and real source links',
  'phone six-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',
