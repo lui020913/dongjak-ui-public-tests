@@ -25,8 +25,10 @@ test('route map fit uses actual preview geometry and the visible map card, not h
  const src=read('../src/main.js'),ui=read('../src/route-experience-20261123.js');
  assert.match(src,/walkingRouteViewportPadding\(/);
  assert.match(src,/sheetTop:visible\(card\)/);
- assert.match(ui,/mapCard\.querySelector\('\.route-map-card-actions'\)\?\.before\(choices\)/);
- assert.match(ui,/mapCard\.append\(methodology\)/);
+ assert.match(ui,/const actions=mapCard\.querySelector\('\.route-map-card-actions'\)/);
+ assert.match(ui,/actions\?\.before\(choices\)/);
+ assert.doesNotMatch(ui,/mapCard\.append\(methodology\)/);
+ assert.match(ui,/choices\.append\(choiceHead,choiceRows,hint,legend\)/);
 });
 test('phone route cards have a single owner; native route actions and map fit remain',()=>{
  const old=prod('mobile-next.js');

@@ -265,6 +265,11 @@ let routeStart = null;
 let routeEnd = null;
 let routeResult = null;
 let routeVariants = {standard:null,gentle:null};
+// Early route/GPS presentation state: navigate('map') runs during startup,
+// before the route presentation functions occur in the source file.
+const NAV_GESTURE_NAMES=['dragPan','dragRotate','scrollZoom','doubleClickZoom','touchZoomRotate','touchPitch','boxZoom','keyboard'];
+let savedNavGestureState=null;
+let routePriVisuals=null;
 let selectedRouteVariant = 'standard';
 let routeStartMarker = null;
 let routeEndMarker = null;
@@ -1736,7 +1741,7 @@ map.on('load',()=>{
   const firstLabel = map.getStyle().layers.find(layer=>layer.type==='symbol')?.id;
   map.addLayer({id:'walking-route-alternate-line',type:'line',source:'walking-route-alternative',
     layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#bd6980','line-width':['interpolate',['linear'],['zoom'],11,2.8,17,5.1],
+    paint:{'line-color':'#87939b','line-width':['interpolate',['linear'],['zoom'],11,2.8,17,5.1],
       'line-opacity':0.72,'line-dasharray':[1.8,2.4]}},firstLabel);
   map.addLayer({id:'walking-route-outline',type:'line',source:'walking-route',
     layout:{'line-cap':'round','line-join':'round'},
@@ -1746,9 +1751,20 @@ map.on('load',()=>{
   map.addLayer({id:'walking-route-traveled-line',type:'line',source:'walking-route-traveled',
     layout:{'line-cap':'round','line-join':'round'},
     paint:{'line-color':'#929da5','line-width':['interpolate',['linear'],['zoom'],11,3.7,17,7.8]}},firstLabel);
+  // Ordinary, unassessed directions are BLUE, never falsely green/safe.
   map.addLayer({id:'walking-route-line',type:'line',source:'walking-route',
     layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#0a9d78','line-width':['interpolate',['linear'],['zoom'],11,3.5,17,7.5]}},firstLabel);
+    paint:{'line-color':'#2766dc','line-width':['interpolate',['linear'],['zoom'],11,3.5,17,7.5]}},firstLabel);
+  map.addSource('walking-route-pri',{type:'geojson',data:emptyWalkingRoute()});
+  map.addLayer({id:'walking-route-pri-colors',type:'line',source:'walking-route-pri',
+    filter:['!=',['get','tone'],'unknown'],
+    layout:{'line-cap':'round','line-join':'round','visibility':'none'},
+    paint:{'line-color':['get','color'],'line-width':['interpolate',['linear'],['zoom'],11,4,17,8.5]}},firstLabel);
+  map.addLayer({id:'walking-route-pri-unknown',type:'line',source:'walking-route-pri',
+    filter:['==',['get','tone'],'unknown'],
+    layout:{'line-cap':'round','line-join':'round','visibility':'none'},
+    paint:{'line-color':'#85949d','line-width':['interpolate',['linear'],['zoom'],11,4,17,8.5],
+      'line-dasharray':[1.3,1.2]}},firstLabel);
   map.addSource('registered-points',{type:'geojson',data:pointCollection()});
   map.addLayer({id:'registered-points-halo',type:'circle',source:'registered-points',
     paint:{'circle-radius':11,'circle-color':'#ffffff','circle-stroke-color':'#fff','circle-stroke-width':1}});
@@ -1955,6 +1971,8 @@ function saveCommunity(next) {
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
 function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
+  // All non-navigation destinations are unavailable until guidance ends.
+  if(app.classList.contains('route-guiding')&&tab!=='map')return;
   const initialMapEntry = tab === 'map' && firstMapEntryPending;
   if (tab === 'map') firstMapEntryPending = false;
   closeTransportPanel(false);
@@ -2518,6 +2536,20 @@ function clearPriRouteAdvice(){
   priRouteReviewSequence++;priVariantChosenManually=false;
   for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
 }
+function lockRouteMapGestures(locked){
+  if(locked&&savedNavGestureState===null){
+    savedNavGestureState=NAV_GESTURE_NAMES.map(name=>{
+      const control=map?.[name];
+      const enabled=typeof control?.isEnabled==='function'&&control.isEnabled();
+      if(enabled)control.disable();
+      return {control,enabled};
+    });
+  }else if(!locked&&savedNavGestureState!==null){
+    for(const {control,enabled} of savedNavGestureState)
+      if(enabled&&typeof control?.enable==='function')control.enable();
+    savedNavGestureState=null;
+  }
+}
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap;
@@ -2526,9 +2558,11 @@ function syncRoutePresentation() {
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
   app.classList.toggle('route-guiding',guiding);
+  lockRouteMapGestures(guiding);
   document.getElementById('route-pick-hint').hidden=!picking;
   document.getElementById('route-map-card').hidden=!preview;
   document.getElementById('nav-live-card').hidden=!guiding;
+  syncPriRouteLine();
   if (picking) {
     document.getElementById('route-pick-text').textContent = routePickMode==='start'
       ? '지도에서 출발지를 선택하세요.' : routePickMode==='waypoint'
@@ -2584,6 +2618,31 @@ function clearTransitPreview(){
     try{map.getSource(id)?.setData(empty);}catch{}
   }
 }
+function syncPriRouteLine(){
+  const source=map.getSource('walking-route-pri');
+  const measured=routePriVisuals?.[selectedRouteVariant];
+  const enabled=Boolean(routeResult?.coords?.length>=2&&app.dataset.tab==='map'&&!navMode);
+  // Before PRI completes, or when no six-factor data can be loaded, the route
+  // is unassessed (dashed gray), NEVER automatically safe/green or blue.
+  const unknown=enabled?{
+    type:'FeatureCollection',features:[{
+      type:'Feature',properties:{tone:'unknown',color:'#8c969c',observed:false},
+      geometry:{type:'LineString',coordinates:routeResult.coords}
+    }]
+  }:emptyWalkingRoute();
+  if(source)source.setData(enabled&&measured?.features?.length?measured:unknown);
+  for(const id of ['walking-route-pri-colors','walking-route-pri-unknown']){
+    if(map.getLayer(id)){
+      map.setLayoutProperty(id,'visibility',enabled?'visible':'none');
+      // showRouteLine() raises the native white route outline: the PRI
+      // segments MUST be raised after it or white hides the risk colors.
+      if(enabled)map.moveLayer(id);
+    }
+  }
+  if(map.getLayer('walking-route-alternate-line'))
+    map.setLayoutProperty('walking-route-alternate-line','visibility',navMode?'none':'visible');
+  if(map.getLayer('walking-route-line'))map.setPaintProperty('walking-route-line','line-opacity',enabled?0:1);
+}
 function showRouteLine(coords) {
   const src=map.getSource('walking-route');
   if(src)src.setData(lineFeature(coords));
@@ -2593,6 +2652,7 @@ function showRouteLine(coords) {
   if(alternative)alternative.setData(coords?.length?lineFeature(routeVariants[other]?.coords):emptyWalkingRoute());
   const gray=map.getSource('walking-route-traveled');
   if(gray)gray.setData(emptyWalkingRoute());
+  syncPriRouteLine();
 }
 function lineFeature(coords){
   return coords?.length>=2
@@ -2608,6 +2668,7 @@ function paintRouteProgress(progressMeters){
   if(finished)finished.setData(lineFeature(parts.traveled));
 }
 function invalidateRoute() {
+  routePriVisuals=null;
   clearTransitPreview();
   stopNavigation();
   routeResult = null;
@@ -3061,6 +3122,7 @@ function applySelectedRouteVariant(){
     button.setAttribute('aria-pressed',String(button.dataset.routeVariant===selectedRouteVariant));
   }
   if(app.dataset.tab==='map')fitWalkingRoute(result.coords);
+  syncPriRouteLine();
 }
 for(const button of document.querySelectorAll('[data-route-variant]')){
   button.addEventListener('click',()=>{
@@ -3090,6 +3152,7 @@ async function calculateRoute() {
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
     routeVariants={standard,gentle};
+    routePriVisuals=null; // no stale overlay while new path/PRI data is pending
     const thisPriReview=++priRouteReviewSequence,reviewedVariants=routeVariants;
     priVariantChosenManually=false;
     for(const node of [priMapNote,priEditorNote]){
@@ -3105,6 +3168,7 @@ async function calculateRoute() {
         console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
       }
       if(thisPriReview!==priRouteReviewSequence||routeVariants!==reviewedVariants)return;
+      routePriVisuals=comparison?.visuals||null;
       if(standard)standard.priExposure=comparison?.standard||null;
       if(gentle)gentle.priExposure=comparison?.gentle||null;
       showPriRouteAdvice(comparison);
@@ -3303,7 +3367,13 @@ async function autoRerouteFromGps(pos,accuracy){
     const data=await currentPreferredModeResult({lng:pos[0],lat:pos[1]},routeEnd,selectedRouteVariant,controller.signal);
     if(token!==navSessionToken || navMode!=='gps'||controller.signal.aborted)return;
     routeResult=data;
-    routeVariants[selectedRouteVariant]=data;
+    // The new GPS-origin geometry is NOT the previously evaluated route.
+    // Drop the old alternate and all stale PRI coloring/comparison evidence.
+    // Once guidance ends, show only this actually recomputed path as unassessed.
+    routePriVisuals=null;
+    routeVariants={standard:null,gentle:null,[selectedRouteVariant]:data};
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:routeVariants}));
+    window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:null}));
     navIndex=makeRouteIndex(data.coords);
     navProgress=0;navLastUpdateAt=0;
     navLastVoiceKey='';
@@ -3410,6 +3480,12 @@ function stopNavigation(arrived=false) {
   if(arrived) {
     document.getElementById('route-status').textContent='목적지 근처에 도착했습니다. 실제 위치와 보행환경을 확인하세요.';
     toast('목적지 근처에 도착했습니다.');
+    // Arrival is a navigation state transition, not another route computation.
+    // The view shows only existing route estimates and never fabricates actual steps.
+    window.dispatchEvent(new CustomEvent('dongjak:route-arrived',{detail:{
+      kilometers:routeResult?.kilometers??null,
+      seconds:routeResult?.seconds??null
+    }}));
   }
 }
 async function startNavigation() {

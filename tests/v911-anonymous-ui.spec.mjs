@@ -42,9 +42,10 @@ async function geometry(page,sel){
   await expect.poll(async()=>{
     const r=await page.locator(sel).boundingBox();
     const dock=await page.locator('#bottom-nav').boundingBox();
-    return Boolean(r&&dock&&r.x>=-1&&r.x<=20&&r.y>=0&&r.y<=80&&
-      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width+2&&
-      r.y+r.height<=dock.y-3);
+    const vh=page.viewportSize().height;
+    return Boolean(r&&dock&&r.x>=8&&r.x<=20&&r.y>=vh*.20&&r.y<=vh*.78&&
+      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width-8&&
+      r.y+r.height<=dock.y-5);
   }).toBe(true);
   return;
  }
@@ -551,9 +552,10 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  })).toBe(true);
  const labels=await cards.allTextContents();
  expect(labels.every(x=>!/종합 최적|환승 경로/.test(x))).toBe(true);
- expect(labels.some(x=>/PRI 미평가|PRI 위험/.test(x))).toBe(true);
- const pri=page.locator('#dj-route-pri-detail');
- await expect(pri).toBeVisible();
+ expect(labels.some(x=>/PRI 미평가|PRI [0-9.]+점/.test(x))).toBe(true);
+ // No extra third route-details screen. Risk map and legend are inline.
+ await expect(page.locator('#dj-route-pri-detail')).toHaveCount(0);
+ await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
  if(count===2){
   await cards.nth(1).click();
   await expect(cards.nth(1)).toHaveAttribute('aria-pressed','true');
@@ -1711,10 +1713,15 @@ test('phone selected dock has no color plate and route form is vertically balanc
     advancedClosed:!document.getElementById('dj-route-advanced').open};
  });
  expect(form.formDisplay).toBe('flex');
- expect(form.panel.top,'route entry is a top-aligned map overlay').toBeGreaterThanOrEqual(0);
- expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
+ // Real map-first design: the map remains visible above a balanced
+ // bottom entry sheet; no empty top-anchored fullscreen form.
+ expect(form.panel.top,'the route editor must leave useful visible map space').toBeGreaterThanOrEqual(page.viewportSize().height*.20);
+ expect(form.panel.top,'the entry sheet must not be pushed below the visible map').toBeLessThanOrEqual(page.viewportSize().height*.78);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.card.bottom,'route editor must clear the primary action').toBeLessThanOrEqual(form.footer.top+4);
+ expect(form.panel.left,'the editor has consistent phone-edge margins').toBeGreaterThanOrEqual(8);
+ expect(form.panel.right,'the editor has consistent phone-edge margins').toBeLessThanOrEqual(page.viewportSize().width-8);
+ expect(form.card.bottom,'route editor content stays before the sticky primary CTA').toBeLessThanOrEqual(form.footer.top+4);
+ expect(form.panel.bottom,'route editor must clear native bottom tabs').toBeLessThanOrEqual(form.dock.top-5);
  // The existing CTA stays naturally after the route editor, above the nav.
  // The actual button must remain visible and accept the pointer hit.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);

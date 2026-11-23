@@ -134,3 +134,56 @@ export function compareCompositePriRoutes(routes,bundle){
   result.reason='observed-comparison';
   return result;
 }
+
+
+/** Geometry for the *actual* calculated walking route, not a synthesized safer path.
+ * Uses the same <=5m proximity, heading and ambiguous-road rejection as the
+ * six-factor route scoring function. Missing coverage is always gray/dashed.
+ */
+export function routePriColorGeometry(route,observedLines){
+  const coords=route?.coords;
+  if(!Array.isArray(coords)||coords.length<2)return {type:'FeatureCollection',features:[]};
+  const features=[];
+  let current=null;
+  const toneOf=risk=>{
+    if(!Number.isFinite(risk))return ['unknown','#8c969c'];
+    if(risk<21)return ['low','#139861'];
+    if(risk<41)return ['good','#87c84c'];
+    if(risk<61)return ['medium','#f2c63f'];
+    if(risk<81)return ['high','#ef903c'];
+    return ['severe','#d84b4e'];
+  };
+  const add=(from,to,risk)=>{
+    const [tone,color]=toneOf(risk);
+    if(current?.properties.tone===tone&&
+       current.geometry.coordinates.at(-1).every((n,i)=>Math.abs(n-from[i])<1e-9)){
+      current.geometry.coordinates.push(to);return;
+    }
+    current={type:'Feature',properties:{tone,color,observed:Number.isFinite(risk)},geometry:{type:'LineString',coordinates:[from,to]}};
+    features.push(current);
+  };
+  for(let i=1;i<coords.length;i++){
+    const p=coords[i-1],q=coords[i];
+    if(!Array.isArray(p)||!Array.isArray(q)||p.length!==2||q.length!==2||![...p,...q].every(Number.isFinite))
+      return {type:'FeatureCollection',features:[]};
+    const a=XY(p),b=XY(q),length=dist(a,b);
+    if(length<.01)continue;
+    const heading=[(b[0]-a[0])/length,(b[1]-a[1])/length];
+    const parts=Math.min(200,Math.max(1,Math.ceil(length/10)));
+    for(let n=0;n<parts;n++){
+      const t0=n/parts,t1=(n+1)/parts,mid=(t0+t1)/2;
+      const sample=[a[0]+(b[0]-a[0])*mid,a[1]+(b[1]-a[1])*mid];
+      const match=matchedRisk(sample,heading,observedLines.grid);
+      const x=t=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t];
+      add(x(t0),x(t1),match?.risk??null);
+    }
+  }
+  return {type:'FeatureCollection',features};
+}
+export function visualizeCompositePriRoutes(routes,bundle){
+  const lines=buildObservedLines(bundle);
+  return {
+    standard:routePriColorGeometry(routes?.standard,lines),
+    gentle:routePriColorGeometry(routes?.gentle,lines)
+  };
+}

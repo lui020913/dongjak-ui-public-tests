@@ -16,7 +16,7 @@ test('v8.5.2 keeps the map TIP persistent and cross-fades its copy every 10 seco
  assert.match(read('index.html'),/v841-route-and-tips\.js/);
 });
 test('route comparison and visibility toggles ported without touching protected map engine',()=>{
- assert.match(read('src/route-experience-20261123.js'),/mapCard\.querySelector\('\.route-map-card-actions'\)\?\.before\(choices\)/);
+ assert.match(read('src/route-experience-20261123.js'),/actions\?\.before\(choices\)/);
  assert.match(read('src/v831-swipe-feature-toolbar.js'),/VISIBILITY_KEYS/);
  assert.match(read('src/v841-route-and-tips.js'),/onWaypointClick/);
  assert.match(read('src/v841-route-and-tips.js'),/title\.includes\('경유지 검색'\)/);

@@ -37,7 +37,7 @@ test('route UI: one map-preview comparison uses native route selection and prese
   assert.match(main,/dongjak:route-pri-ready/);
   assert.match(ui,/routeComparisonItems\(latest\)/);
   assert.match(ui,/native\.click\(\)/);
-  assert.match(ui,/selectedKind\(\)/);
+  assert.match(ui,/const selected=\(\)=>variants\.querySelector/);
   assert.match(navigation,/isRealTurn\(route\)/);
   assert.doesNotMatch(navigation,/dj825-route-options/);
 });

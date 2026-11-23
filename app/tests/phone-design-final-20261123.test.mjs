@@ -28,10 +28,10 @@ test('route result presents a compact scrollable two-candidate comparison and fu
  assert.match(js,/routeComparisonItems\(latest\)/);
  assert.match(js,/sameRoute\(latest\.standard,latest\.gentle\)/);
  assert.match(js,/native\.click\(\)/);
- assert.match(js,/topBanner\.id='dj-route-turn-banner'/);
- assert.match(css,/scroll-snap-type:x proximity/);
+ assert.match(js,/topBanner=add\('section','dj-route-turn-banner'\)/);
+ assert.match(css,/\.dj-route-choice-rows \{display:flex;flex-direction:column/);
  assert.match(css,/#route-guide-start/);
- assert.match(css,/max-height:min\(53dvh,440px\)/);
+ assert.match(css,/max-height:min\(50dvh,390px\)/);
  assert.doesNotMatch(legacy,/cards\.id='djNext-route-compare'/);
 });
 test('community status has no opaque blank white panel and refresh remains a compact action',()=>{
