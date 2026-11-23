@@ -52,6 +52,10 @@ test('My Info subviews animate by direction without blank-fading the page root',
  assert.match(js,/opacity:\.88,transform/);
  assert.match(css,/\.dj834-detail-nav\{/);
  assert.match(css,/\.dj834-choice-settings > button\{/);
- const more=read('../frontend/production/mobile-17-followup.js');
+ // Production builds inject the same tracked source into the isolated app.
+ // Source CI retains the original frontend file; both inspect the same code.
+ let more;
+ try{more=read('src/mobile-17-followup.js');}
+ catch(error){if(error?.code!=='ENOENT')throw error;more=read('../frontend/production/mobile-17-followup.js');}
  assert.match(more,/s\.textContent='추가 지도 도구'/);
 });
