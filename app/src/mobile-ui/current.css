@@ -1282,3 +1282,37 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 }
 
 /* END 2026-11-22 user phone follow-up */
+
+
+/* My Info history: keep scrolling content behind the fixed pill, without the
+   old opaque 98px panel pseudo-element masking the last update cards.
+   Scoped to this screen; other tabs preserve their existing docking. */
+@media (max-width:699px) {
+  html body #app#app#app#app#app #mine-panel.page-panel:not([hidden])::after {
+    content:none!important;display:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+    scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {
+    box-sizing:border-box!important;min-width:0!important;max-width:100%!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .dj-edition-summary {
+    display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;
+    column-gap:8px!important;align-items:center!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .dj-edition-summary :is(strong,span) {
+    min-width:0!important;max-width:100%!important;
+    overflow-wrap:anywhere!important;word-break:keep-all!important;
+    white-space:normal!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .dj-edition-summary small {
+    min-width:0!important;max-width:100%!important;
+    white-space:nowrap!important;justify-self:end!important;
+    font-variant-numeric:tabular-nums!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .dj-edition-patch-summary {
+    overflow-wrap:anywhere!important;white-space:normal!important;line-height:1.5!important;
+  }
+}
