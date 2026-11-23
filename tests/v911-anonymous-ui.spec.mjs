@@ -1712,12 +1712,15 @@ test('phone selected dock has no color plate and route form is vertically balanc
     advancedClosed:!document.getElementById('dj-route-advanced').open};
  });
  expect(form.formDisplay).toBe('flex');
- expect(form.panel.top,'route entry is a top-aligned map overlay').toBeGreaterThanOrEqual(0);
- expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
+ // Real map-first design: the map remains visible above a balanced
+ // bottom entry sheet; no empty top-anchored fullscreen form.
+ expect(form.panel.top,'the route editor must leave useful visible map space').toBeGreaterThanOrEqual(page.viewportSize().height*.20);
+ expect(form.panel.top,'the entry sheet must not be pushed below the visible map').toBeLessThanOrEqual(page.viewportSize().height*.78);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.panel.left,'new native-like editor spans the available phone width').toBeLessThanOrEqual(2);
+ expect(form.panel.left,'the editor has consistent phone-edge margins').toBeGreaterThanOrEqual(8);
+ expect(form.panel.right,'the editor has consistent phone-edge margins').toBeLessThanOrEqual(page.viewportSize().width-8);
  expect(form.card.bottom,'route editor content stays before the sticky primary CTA').toBeLessThanOrEqual(form.footer.top+4);
- expect(form.panel.bottom,'full-height route editor must stop above native bottom tabs').toBeLessThanOrEqual(form.dock.top+3);
+ expect(form.panel.bottom,'route editor must clear native bottom tabs').toBeLessThanOrEqual(form.dock.top-5);
  // The existing CTA stays naturally after the route editor, above the nav.
  // The actual button must remain visible and accept the pointer hit.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
