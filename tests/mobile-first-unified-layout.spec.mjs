@@ -241,7 +241,7 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
     const card=rect(root.querySelector('.route-panel')),header=rect(root.querySelector('.header'));
     const cta=rect(root.querySelector('.action')),nav=rect(dock);
     const mid=document.elementFromPoint(innerWidth/2,Math.round((card.bottom+cta.top)/2));
-    const hit=document.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
+    const hit=root.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
     return {viewport:[innerWidth,innerHeight],card,header,cta,nav,
       oldClip:getComputedStyle(legacy).clipPath,
       oldPointer:getComputedStyle(legacy).pointerEvents,
