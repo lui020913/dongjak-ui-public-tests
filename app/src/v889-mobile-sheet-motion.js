@@ -10,13 +10,22 @@ const EXPANDED='dj871-sheet-expanded';
 const DRAGGING='dj-sheet-dragging';
 const TRANSITIONING='dj889-sheet-transitioning';
 const PEDESTRIAN_INLINE_BOUNDS=['top','height','max-height','bottom'];
+/** One viewport-space owner for compact AND expanded bottom-sheet docking.
+ * Unlike a CSS safe-area guess this measures the rendered navigation top.
+ */
+export function measuredPhoneDockClearance(navRect,win,{minimum=0,gap=8}={}){
+  if(!Number.isFinite(Number(navRect?.top)))return minimum;
+  const visualBottom=Number(win?.visualViewport?.height)+Number(win?.visualViewport?.offsetTop);
+  const viewportBottom=Number.isFinite(visualBottom)&&visualBottom>0?visualBottom:Number(win?.innerHeight)||0;
+  return Math.max(minimum,Math.ceil(viewportBottom-Number(navRect.top))+gap);
+}
 function syncPedestrianExpandedBounds(panel,doc,win){
   if(panel?.id!=='ped-tools-panel')return;
   const search=doc.getElementById('map-quick-search')?.getBoundingClientRect();
   const toolbar=doc.getElementById('djNext-toolbar')?.getBoundingClientRect();
   const top=Math.ceil(Math.max(96,Number(search?.bottom||0)+12,Number(toolbar?.bottom||0)+10));
   const nav=doc.getElementById('bottom-nav')?.getBoundingClientRect();
-  const dock=Math.max(72,Math.ceil((Number(win.innerHeight)||700)-Number(nav?.top||0)+10));
+  const dock=measuredPhoneDockClearance(nav,win,{minimum:72,gap:8});
   panel.dataset.djSafeExpandedTop=String(top);
   panel.style.setProperty('top',top+'px','important');
   panel.style.setProperty('bottom',dock+'px','important');
