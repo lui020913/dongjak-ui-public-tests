@@ -98,7 +98,7 @@ jobs:
         run: npm test
       - name: Focused walk CTA regression (PR #404 follow-up)
         if: ${{ github.event.pull_request.number == 404 }}
-        run: node --test tests/walk-map-first-approved-20261124.test.mjs
+        run: node --test tests/walk-map-first-approved-20261124.test.mjs tests/v910-request-completion.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source

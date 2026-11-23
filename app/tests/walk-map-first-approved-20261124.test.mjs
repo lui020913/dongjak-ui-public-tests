@@ -22,6 +22,11 @@ test('approved walking input is a real map with a TOP location card and separate
   assert.match(ui,/if\(stage!=='input'\)restoreInputFooter\(\)/);
   assert.match(ui,/const liveRouteFooter=\(\)=>/);
   assert.match(ui,/footerMountObserver\.observe\(panel,\{childList:true\}\)/);
+  const coordinator=read('src/v910-request-completion.js');
+  assert.match(coordinator,/const boundedInput=app\.dataset\.djRouteStage==='input'/);
+  assert.match(coordinator,/const dy=n\.top-12-bounds\.height-bounds\.top/);
+  assert.match(coordinator,/route\.dataset\.djRouteCtaDocked='true'/);
+  assert.doesNotMatch(coordinator,/if\(boundedInput&&footer\)\{\s*for\(const prop/);
   assert.doesNotMatch(ui,/const routeFooter=byId\('dj910-route-footer'\);\s*const footerKeys/);
 });
 
