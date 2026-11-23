@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.116",
+  "application_version": "9.2.117",
   "public_work_branch": "main",
-  "purpose": "Owner-authorized lossless UI/CSS/automation cleanup: PR #371 removes 3 exactly shadowed CSS rules in night, protection and install popup; PR #372 reference-counts mobile surface observers/listeners for repeated bootstrap with unchanged first-run behavior; PR #373 removes 5 obsolete pinned visual diagnostic workflows. All GIS, PRI, transit, auth, Supabase, map data and current production bindings preserved. Require exact source build, isolated Preview, 12 phone shards, desktop/tablet, version monotonicity, protected Production, rollback and post-deploy health; never bypass.",
-  "attempt": 307,
+  "purpose": "Owner-authorized non-destructive transit module cleanup: PR #375 merged at 19d862e0ddd0d1c5b3ee7decaea1615a722bffb7, deleting 4 proven unused local bindings only; historical static contract now asserts general station map centering rather than a dead Jangseungbaegi flag. Full PR CI 45122126005 successful. Preserve all buses, subway geometry, MapLibre focus, GIS, PRI, authentication, AI, CSS and Supabase. Require exact-source build, isolated Preview, 12 independent phone QA shards, PC/tablet checks, protected Production, monotonic version, guarded rollback, binding/API post-deploy verification. No test skips.",
+  "attempt": 308,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New protected release after PR #371 CI 45120366440 success, PR #372 CI 45120558662 success and PR #373 CI 45120762175 success, and 9.2.115 Production 45119896945 success (12/12 phone shards). Distinct version to prevent same-version source reuse; no skipped mandatory checks.",
+  "last_retry_reason": "Verified new source commit: 9.2.116 Production run 45121042371 success, PR #375 exact source CI 45122126005 success. New distinct version 9.2.117; full mandatory QA retained.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
