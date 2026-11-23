@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.119",
+  "application_version": "9.2.120",
   "public_work_branch": "main",
-  "purpose": "Owner-requested minimal community collapsed-options touch repair from PR #381 (squashed source commit 2a6f6ae0a009663ede321fa1198bdcc6369ccb78): hide the four secondary controls only while native '정렬 · 저장 · 알림' details is closed, restoring pointer access and preventing its hidden refresh area from covering the visible empty-state. Preserve the expanded options, normal refresh function, all other UI, map TIP repair shipped in 9.2.118, GIS, PRI, transit, authentication, AI, accounts and Supabase. Full source CI #45143539038 succeeded including real 375/390/430 touch/geometry tests. Require protected exact-source Preview, 12 phone QA shards, desktop/tablet checks, gated Production, integrity and post-deploy verification, guarded rollback. No shortcuts or forced clicks.",
-  "attempt": 310,
+  "purpose": "Owner-requested My Info dock/text overflow repair and six-factor observed PRI walking-route comparison. Source main includes merged PR #382 (94px inline-important outer footer fix; scrolling content gutters and wrap, exact CI #45152755613 success at 375/390/430) and PR #383 (separate Worker, conditional PRI route candidate advice, exact CI #45148780251 success). Preserve base standard/gentle walking routes, GIS and original 6-factor PRI, night visibility, live transit, authentication, AI, accounts, Supabase, and all existing production behavior. Scientific limitation: PRI is only preliminary observed partial coverage; unavailable or ambiguous scores never become zero-risk and do not certify safe routes. Require exact-source protected Preview, twelve phone QA shards, desktop/tablet checks, gated Production, source integrity and post-deploy verification with guarded rollback; no forced clicks, skipped QA or conditional safety bypass.",
+  "attempt": 311,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Production 9.2.118 protected deployment #45142673938 succeeded. PR #381 exact-source CI #45143539038 passed; new community details CSS and two real-touch regression tests merged at 2a6f6ae0a009663ede321fa1198bdcc6369ccb78. New monotonic patch release 9.2.119 only after full mandatory gates.",
+  "last_retry_reason": "Protected Production 9.2.119 release #45144268258 previously succeeded. PR #383 exact source CI #45148780251 succeeded then merged #383; PR #382 exact source CI #45152755613 succeeded including measured My Info 375/390/430 screen geometry and real touch then merged #382. Cut monotonic 9.2.120 patch release only after the full protected gate passes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
