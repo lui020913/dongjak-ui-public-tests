@@ -109,7 +109,15 @@ export function installRequestCompletion(doc=document,win=window){
     // inline !important (higher priority than all authored CSS selectors).
     const footer=doc.getElementById('dj910-route-footer');
     const route=doc.getElementById('route-panel');
-    if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
+    // The new bounded route input page owns an in-flow native footer.
+    // Clear historical fixed positioning when moving into that route stage.
+    // This avoids a transformed ancestor anchoring the button over the fields.
+    const boundedInput=app.dataset.djRouteStage==='input'&&win.innerWidth<700&&route&&!route.hidden;
+    if(boundedInput&&footer){
+      for(const prop of ['position','inset','top','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
+        footer.style.removeProperty(prop);
+      route.removeAttribute('data-dj-route-cta-docked');
+    }else if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
       const set=(prop,value)=>{
         if(footer.style.getPropertyValue(prop)!==value||
             footer.style.getPropertyPriority(prop)!=='important')
