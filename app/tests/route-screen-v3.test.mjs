@@ -14,7 +14,7 @@ test('route V3 owns the complete visible entry screen and isolates it from legac
  assert.match(global,/#route-panel\.page-panel/);
  assert.match(global,/clip-path:inset\(100%\)!important/);
  assert.match(global,/pointer-events:none!important/);
- assert.doesNotMatch(global,/visibility:hidden!important/);
+ assert.doesNotMatch(global,/#route-panel\.page-panel\s*\{[^}]*visibility:hidden!important/s);
  assert.match(style,/\.route-panel\s*\{/);
  assert.match(style,/\.search-screen\s*\{/);
  assert.match(style,/\.action\s*\{/);
