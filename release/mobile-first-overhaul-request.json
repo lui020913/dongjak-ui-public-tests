@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.128",
   "public_work_branch": "main",
-  "purpose": "Protected retry of 9.2.128 iOS Community composer portal release after mandatory source regression found exactly one obsolete map-origin static assertion (app/tests/map-report-opening-intent.test.mjs) expecting previous setMapReportHitLayer(true). The new body-level portal owns hit testing without the old sheet hit-layer promotion. Update only the stale test to verify map origin navigate('participate') and communityComposerPortal.open() with document.body portal mounting. Source implementation, visual styles, keyboard geometry, user data, save, maps, other UI unchanged from 9bd5fbef44cd, which passed focused iPhone390 viewport-contraction test and source build. Run targeted 1 failing Node contract only for PR hotfix; protected release still requires exact-new-SHA Preview, 12 mobile QA, PC/tablet and Production. Never bypass mandatory QA.",
-  "attempt": 332,
+  "purpose": "Protected v9.2.128 retry after attempt332 passed exact-source build, immutable Preview, PC/tablet and 9/12 mobile shards, while three mobile width shards 375/390/430 failed the SAME outdated Playwright locator locating #community-form under #participation-panel. The new body-level portal deliberately moves the original form to #dj-community-editor-portal when open. Correct ONLY the QA locator test to assert portal form visible, legacy bottom tab hidden, close restores original form. No runtime app changes. Run only the three previously failed community browser checks against immutable attempt332 Preview before merge. Then protected exact-new-SHA Preview, all required mobile QA, PC/tablet and guarded Production; preserve Production v9.2.127 until all gates pass.",
+  "attempt": 333,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.128 attempt331 failed before Preview: 1 of 1,515 production Node checks was an obsolete expectation of old map-origin sheet hit-layer promotion; 1,509 checks passed. This hotfix updates that single assertion for the body-level editor portal. Keep existing Production v9.2.127 until all protected gates pass.",
+  "last_retry_reason": "9.2.128 attempt332 run 45249026203: 9/12 mobile shards success plus PC/tablet and Preview success. 2/12, 7/12, 11/12 failed the same obsolete parent-sheet community form Playwright locator on 375/390/430 widths. This PR corrects that test only; app code and iOS keyboard portal remain unchanged.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
