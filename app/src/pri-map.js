@@ -220,7 +220,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
    if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
     filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.72,.27],'line-width':['interpolate',['linear'],['zoom'],11.5,.7,13,1.1,15,1.8,17,2.8,19,4.1]}},
+    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.72,.27],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},
     priOverlayAnchor(map.getStyle()?.layers));
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
     filter:['==',['geometry-type'],'Point'],
@@ -232,7 +232,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
     filter:['==',['get','speedSource'],'observed-link'],
     layout:{'line-cap':'round','line-join':'round','visibility':'none'},
     paint:{'line-color':colors,'line-opacity':.95,
-     'line-width':['interpolate',['linear'],['zoom'],11.5,1.2,13,2,15,3.2,17,5,19,7]}},
+     'line-width':['interpolate',['linear'],['zoom'],11.5,1.4,13,2.4,15,3.8,17,5.7,19,7.8]}},
     priOverlayAnchor(map.getStyle()?.layers));
    // Reposition layers if a late building/district overlay was appended above
    // them, including when the basemap changes its style without a full reset.
@@ -246,7 +246,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    map.setPaintProperty(LINE,'line-color',activeColors);
    map.setPaintProperty(POINT,'circle-color',activeColors);
    map.setPaintProperty(LINE,'line-opacity',mode==='middleReview'?0.95:mode==='speed'?0.28:['case',['get','evaluated'],.72,.27]);
-   map.setPaintProperty(LINE,'line-width',mode==='middleReview'?['interpolate',['linear'],['zoom'],11.5,2.2,13,3,15,4,17,5,19,7]:['interpolate',['linear'],['zoom'],11.5,.7,13,1.1,15,1.8,17,2.8,19,4.1]);
+   map.setPaintProperty(LINE,'line-width',mode==='middleReview'?['interpolate',['linear'],['zoom'],11.5,2.2,13,3,15,4,17,5,19,7]:['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]);
    map.getSource(SOURCE).setData(display);
    return true;
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
