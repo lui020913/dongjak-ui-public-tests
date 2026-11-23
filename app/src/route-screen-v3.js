@@ -159,6 +159,24 @@ export function mountRouteScreenV3(doc=document, win=window) {
   // controller. Making its visibility:hidden caused that controller to
   // revert data-tab to map and redraw the obsolete sheet. Clip the entire
   // rendering tree instead; the genuine new V3 Shadow DOM remains interactive.
+  const oldMapTools=byId('dj-walk-map-actions');
+  const oldMapToolsDisplay=oldMapTools?{
+    value:oldMapTools.style.getPropertyValue('display'),
+    priority:oldMapTools.style.getPropertyPriority('display')
+  }:null;
+  const hideOldMapTools=()=>{
+    // Legacy rule uses a competing !important and :not([hidden]) selector.
+    // Suppress its original map buttons at source, not only via a weak CSS
+    // selector, while leaving the new independent two-button stack intact.
+    if(oldMapTools && (oldMapTools.style.getPropertyValue('display')!=='none' ||
+        oldMapTools.style.getPropertyPriority('display')!=='important'))
+      oldMapTools.style.setProperty('display','none','important');
+  };
+  const restoreOldMapTools=()=>{
+    if(!oldMapTools)return;
+    if(oldMapToolsDisplay?.value)oldMapTools.style.setProperty('display',oldMapToolsDisplay.value,oldMapToolsDisplay.priority);
+    else oldMapTools.style.removeProperty('display');
+  };
   const oldVisualKeys=['clip-path','pointer-events'];
   const previousOldVisual=oldVisualKeys.map(key=>({
     key,value:old.style.getPropertyValue(key),priority:old.style.getPropertyPriority(key)
@@ -182,16 +200,16 @@ export function mountRouteScreenV3(doc=document, win=window) {
     if(next!==active){
       active=next;
       host.hidden=!next;
-      if(next){app.dataset.djRouteScreenV3='1';concealOld();}
+      if(next){app.dataset.djRouteScreenV3='1';concealOld();hideOldMapTools();}
       else{
-        restoreOld();
+        restoreOld();restoreOldMapTools();
         delete app.dataset.djRouteScreenV3;
         searching=null;
         q('[data-v3-screen="search"]').hidden=true;
       }
     }
     if(active){
-      concealOld();
+      concealOld();hideOldMapTools();
       if(searching&&nativeSearch.hidden){
         searching=null;q('[data-v3-screen="search"]').hidden=true;
       }
@@ -247,7 +265,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   sync();
   return ()=>{
     observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();
-    oldStyleObserver.disconnect();restoreOld();
+    oldStyleObserver.disconnect();restoreOld();restoreOldMapTools();
     navObserver?.disconnect();cardObserver?.disconnect();
     cleanups.forEach(fn=>fn());
     if(resizeFrame)win.cancelAnimationFrame?.(resizeFrame);
