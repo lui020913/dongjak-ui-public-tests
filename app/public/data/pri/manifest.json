@@ -2,6 +2,8 @@
   "bundle": "/data/pri/lighting_segments.json",
   "patches": [
     "/data/pri/sangdo1_accidents_factor.json",
-    "/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json"
+    "/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json",
+    "/data/pri/sangdo1_crosswalk_rubric_factor.json",
+    "/data/pri/sangdo1_shared_road_rubric_factor.json"
   ]
 }

@@ -31,12 +31,12 @@ test('seven-day source-normalizer validates dates, numbers and does not fabricat
  assert.equal(missingRain[0].precipitation,null,'missing source precipitation must not appear as 0%');
 });
 
-test('PRI keeps score modes and five vulnerability levels with one disclosure',()=>{
+test('PRI keeps score modes and three validated risk levels with one disclosure',()=>{
  const js=source('src/pri-map.js'),css=source('src/pri-map.css');
- assert.match(js,/종합 보행 취약도 · 4개 지표/);
+ assert.match(js,/종합 보행 취약도 · 6개 지표/);
  assert.match(js,/CURRENT_VULNERABILITY_FACTORS/);
  assert.doesNotMatch(js,/options\.unshift\(\['pri12'/,'old two-factor preview cannot be a visible choice');
- for(const t of ['낮음','주의','보통','높음','매우 높음','평가 기준 보기','dj-pri-detail-wrap','aria-expanded','data-dj-pri-visible'])assert.ok(js.includes(t)||css.includes(t),t);
+ for(const t of ['저위험 (0~39)','주의 (40~69)','고위험 (70~100)','평가 기준 보기','dj-pri-detail-wrap','aria-expanded','data-dj-pri-visible'])assert.ok(js.includes(t)||css.includes(t),t);
  assert.match(css,/grid-template-rows:0fr/);assert.match(css,/grid-template-rows:1fr/);
  assert.match(css,/maplibregl-ctrl-bottom-left/);
  assert.match(js,/delete app\.dataset\.djPriVisible/);

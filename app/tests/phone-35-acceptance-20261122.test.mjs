@@ -96,10 +96,10 @@ const checks=[
    contains(src('src/pri-data.mjs'),'observedFactorScore','modeled===true');
    contains(src('src/pri-map.js'),'#9ba4aa','회색: 미평가·미선정 (평균 제외)');
  }],
- ['C04','risk legend has five distinct levels and high risk means red and vulnerable',()=>{
+ ['C04','PRI legend has three source-derived risk classes and high risk means red',()=>{
    const s=src('src/pri-map.js');
-   for(const t of ['낮음','주의','보통','높음','매우 높음','0점은 상대적으로 낮은 취약 신호','100점은 큰 취약 신호'])contains(s,t);
-   contains(src('src/pri-map.css'),'grid-template-columns:repeat(5,minmax(0,1fr))');
+   for(const t of ['저위험 (0~39)','주의 (40~69)','고위험 (70~100)','각 지수는 100점 만점(높을수록 위험)',"70,'#CF4248'"])contains(s,t);
+   contains(src('src/pri-map.css'),'grid-template-columns:repeat(3,minmax(0,1fr))');
  }],
  ['C05','PRI road thickness and opacity vary continuously with zoom',()=>{
    const s=src('src/pri-map.js');

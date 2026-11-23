@@ -13,7 +13,12 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  assert.equal(base.segments.length,1686);
  assert.equal(patch.networkVersion,base.networkVersion,'patch must use the exact existing lighting road geometry');
  assert.equal(manifest.bundle,'/data/pri/lighting_segments.json');
- assert.deepEqual(manifest.patches,['/data/pri/sangdo1_accidents_factor.json','/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json']);
+ assert.deepEqual(manifest.patches,['/data/pri/sangdo1_accidents_factor.json','/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json','/data/pri/sangdo1_crosswalk_rubric_factor.json','/data/pri/sangdo1_shared_road_rubric_factor.json']);
+ for(const name of ['sangdo1_crosswalk_rubric_factor.json','sangdo1_shared_road_rubric_factor.json']){
+  const rubric=read('../public/data/pri/'+name);
+  assert.equal(rubric.networkVersion,base.networkVersion,'new risk rubric must use the same 1686-segment network');
+  assert.equal(rubric.scores.length,0,'criteria-only source must not invent segment observations');
+ }
  assert.equal(read('../public/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json').networkVersion,base.networkVersion,'third PRI factor must be spatially aligned to the same 25m network');
  assert.equal(patch.sourceRecords.length,3,'only the three Sangdo1 records may be included');
  assert.deepEqual(new Set(patch.sourceRecords.map(r=>r.source_fid)),new Set(['6931875','6838434','6778949']));
