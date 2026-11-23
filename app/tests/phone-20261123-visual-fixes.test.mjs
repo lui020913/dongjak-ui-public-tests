@@ -37,7 +37,7 @@ test('live train forward illumination is neutral radial, not warm yellow cones',
 
 test('nearby guidance dock follows measured tab bar and uses neutral secondary action',()=>{
  const code=read('src/pedestrian-tools.js'),css=read('src/phone-six-issues.css');
- assert.match(code,/Math\.ceil\(viewportBottom-rect\.top\)\+8/);
+ assert.match(code,/measuredPhoneDockClearance\(rect,window,\{minimum:0,gap:8\}\)/);
  assert.match(code,/--dj-nearby-dock-clearance/);
  assert.match(css,/bottom:var\(--dj-nearby-dock-clearance/);
  assert.match(css,/\.dj-nearby-map-center\{/);
