@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.100",
+  "application_version": "9.2.101",
   "public_work_branch": "main",
-  "purpose": "User screenshot iPhone remediation from PR342, source 5bce9b21c02dcae02d1515e7b3d1aa652e0bc421: unify all My Info child menus including map settings with same native back and slide fade, remove duplicate blue quick links and default-style buttons, remove green touch-focus outlines but retain accessible keyboard focus ring, remove duplicate community first-post action and empty route clear, collapse blank fixed 68dvh bus arrival card to content, make place and station/bus selected pin land at real midpoint between top toolbar and sheet top after popup mount; keep mapping/GIS/PRI, real-time transit API and route geometry invariant. Must run sealed Preview, 12 disjoint mobile QA shards at 375/390/430 widths, desktop/tablet QA, guarded Production with source/API proof, then signed debug APK with publish checks. Fail closed on any failed gate.",
-  "attempt": 288,
+  "purpose": "PR342 integrated user-requested iPhone UI fixes plus PR343 updated mobile browser test for single persistent community compose button. Code source 5bce9b21c02dcae02d1515e7b3d1aa652e0bc421, repaired E2E test source 04ccfb8e25643a33fd85ec809d8aeef25c6a910e. Previous 9.2.100 Preview QA shard 7/12 failed only because test required deleted duplicate '첫 글 작성하기' CTA despite actual primary '+ 글쓰기' working. Full source CI passed PR343. Require exact sealed Preview, all 12 phone QA shards 375/390/430px, desktop/tablet, no skips of failing tests, protected Production matched source/API, then Android debug build with SHA. Do not alter PRI/GIS or transport API.",
+  "attempt": 289,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New full source-verified PR342 iPhone screenshots 10:20-10:22 fixes, first attempt internal release 9.2.100",
+  "last_retry_reason": "9.2.100 blocked by obsolete mobile QA expectation in shard 7/12. PR343 corrected test to use real persistent + 글쓰기 without restoring redundant UI. 9.2.101 first attempt.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
