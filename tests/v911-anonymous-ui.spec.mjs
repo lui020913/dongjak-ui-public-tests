@@ -1227,8 +1227,14 @@ test('community tab opens a usable feed and searchable empty state, without fabr
    await expect(compose).toBeVisible();
    await compose.scrollIntoViewIfNeeded();
    await tap(page,compose);
-   await expect(panel.locator('#community-form')).toBeVisible();
-   await tap(page,panel.locator('#community-compose-close'));
+   // The composer is intentionally portaled outside the legacy sheet so
+   // the iOS keyboard cannot drag the entire parent page upward.
+   const editor=page.locator('#dj-community-editor-portal');
+   await expect(editor).toBeVisible();
+   await expect(editor.locator('#community-form')).toBeVisible();
+   await expect(page.locator('#bottom-nav')).toBeHidden();
+   await tap(page,editor.locator('#community-compose-close'));
+   await expect(editor).toBeHidden();
    await expect(panel.locator('#community-form')).toBeHidden();
  }
 });
