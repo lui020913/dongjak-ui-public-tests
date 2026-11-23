@@ -7,9 +7,9 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('approved walking input is a real map with a TOP location card and separate dock-clear CTA',()=>{
   const css=read('src/route-experience.css'),ui=read('src/route-experience-20261123.js');
   assert.match(css,/2026-11-24 approved visual/);
-  assert.match(css,/data-dj-route-stage="input"[\\s\\S]*?#route-panel\.page-panel:not\(\[hidden\]\)[\\s\\S]*?top:0!important;bottom:auto!important/);
-  assert.match(css,/data-dj-route-stage="input"[\\s\\S]*?#route-panel\.page-panel:not\(\[hidden\])[\\s\\S]*?background:transparent!important/);
-  assert.match(css,/position:fixed!important;[\\s\\S]*?bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 8px\)!important/);
+  assert.match(css,/data-dj-route-stage="input"[\s\S]*?#route-panel\.page-panel:not\(\[hidden\]\)[\s\S]*?top:0!important;bottom:auto!important/);
+  assert.match(css,/data-dj-route-stage="input"[\s\S]*?#route-panel\.page-panel:not\(\[hidden\])[\s\S]*?background:transparent!important/);
+  assert.match(css,/position:fixed!important;[\s\S]*?bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 8px\)!important/);
   assert.match(css,/#dj-walk-map-actions\[hidden\]/);
   assert.match(ui,/chrome\?\.querySelector\('\.dj-sheet-chrome-title'\)\?\.before\(inputBack\)/);
   assert.match(ui,/on\(inputBack,'click',\(\)=>nativeClose\?\.click\(\)\)/);
