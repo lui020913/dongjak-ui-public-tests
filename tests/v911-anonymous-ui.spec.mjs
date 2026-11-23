@@ -551,9 +551,10 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  })).toBe(true);
  const labels=await cards.allTextContents();
  expect(labels.every(x=>!/종합 최적|환승 경로/.test(x))).toBe(true);
- expect(labels.some(x=>/PRI 미평가|PRI 위험/.test(x))).toBe(true);
- const pri=page.locator('#dj-route-pri-detail');
- await expect(pri).toBeVisible();
+ expect(labels.some(x=>/PRI 미평가|PRI [0-9.]+점/.test(x))).toBe(true);
+ // No extra third route-details screen. Risk map and legend are inline.
+ await expect(page.locator('#dj-route-pri-detail')).toHaveCount(0);
+ await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
  if(count===2){
   await cards.nth(1).click();
   await expect(cards.nth(1)).toHaveAttribute('aria-pressed','true');
