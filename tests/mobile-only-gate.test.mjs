@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {runInNewContext} from 'node:vm';
+import {readFileSync} from 'node:fs';
 import {applyMobileOnlyGate,isMobilePhoneContext} from '../scripts/apply-mobile-only-gate.mjs';
 
 test('phone-only detector allows iPhone and Android phone browsers, including landscape',()=>{
@@ -86,4 +87,15 @@ test('iPad standalone and browser are both blocked at all viewport sizes; phones
     runInNewContext(code,{document,window});
     assert.equal(document.documentElement.dataset.djMobileOnly,expected?'allowed':'blocked');
   }
+});
+
+
+test('PRI walking route styling source and protected production adapter use the same neutral alternate-line anchor',()=>{
+ const main=readFileSync(new URL('../app/src/main.js',import.meta.url),'utf8');
+ const adapter=readFileSync(new URL('../scripts/apply-mobile-next.mjs',import.meta.url),'utf8');
+ const anchor="paint:{'line-color':'#87939b','line-width'";
+ assert.equal(main.split(anchor).length-1,1,'original walking alternative anchor is unique');
+ assert.ok(adapter.includes(anchor),'protected release adapter must match current walking source');
+ assert.match(main,/walking-route-pri-colors/);
+ assert.match(main,/walking-route-pri-unknown/);
 });
