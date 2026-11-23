@@ -23,7 +23,7 @@ export function crosswalkRisk100(parts){
   let sum=0;
   for(const {id} of CROSSWALK_PARTS){
     const value=parts[id];
-    const score=value==='high'?25:value==='caution'?15:value==='safe'?5:value;
+    const score=value==='high'||value==='고위험'?25:value==='caution'||value==='주의'?15:value==='safe'||value==='안전'?5:value;
     if(![5,15,25].includes(score))return null;
     sum+=score;
   }
