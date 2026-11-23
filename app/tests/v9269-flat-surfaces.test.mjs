@@ -119,9 +119,11 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
 });
 
 
-test('v9.2.72 selecting a route fits the full geometry without hiding other choices',()=>{
+test('route choice preserves every alternative in the option drawer while returning the map to compact focus',()=>{
  const js=productionStyle('mobile-next.js');
  assert.ok(js.includes("win.dispatchEvent(new Event('dj-next:fit-route'))"));
- assert.ok(js.includes("target.click();win.dispatchEvent(new Event('dj-next:fit-route'));"));
- assert.equal(js.includes('target.click();focus();'),false,'a route click must not collapse other alternatives');
+ assert.ok(js.includes("target.click();showCompact({fitMap:true});"));
+ assert.ok(js.includes("expand.addEventListener('click',expandOptions)"));
+ assert.ok(js.includes("host.dataset.dj9272RouteFocus='true'"));
+ assert.ok(js.includes("cards.append(b)"),'alternatives remain in the DOM and are expandable on demand');
 });

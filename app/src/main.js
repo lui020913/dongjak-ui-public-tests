@@ -51,6 +51,7 @@ import './dongjak-import-controls.css';
 import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor,searchCachedTransportPlaces,suppressNativeBusStopGlyphs} from './transport-map.js';
 import {initStationAccessibility} from './station-accessibility.js';
 import {searchPlaces} from './route-search.js';
+import {walkingRouteViewportPadding} from './route-map-focus.js';
 import {initMapQuickSearch} from './map-quick-search.js';
 import {installMapProduct} from './v815-map-product.js';
 import {computeMultiStopRoutes} from './v815-route-planner.js';
@@ -2844,13 +2845,28 @@ function fitWalkingRoute(coords) {
   if(!Array.isArray(coords)||coords.length<2)return;
   const bounds=coords.reduce((b,p)=>b.extend(p),new maplibregl.LngLatBounds(coords[0],coords[0]));
   const mobile=window.matchMedia('(max-width:699px)').matches;
-  const card=document.getElementById('route-map-card');
-  const occupied=mobile&&!card?.hidden?Math.ceil(card?.getBoundingClientRect().height||0):0;
-  // Route selection can compact its result card. Re-measure the actual
-  // unobstructed viewport; do not use a stale fixed 52% bottom inset.
-  const bottom=mobile?Math.min(Math.floor(window.innerHeight*.61),Math.max(124,occupied+26)):185;
-  const top=mobile?Math.max(112,Math.min(166,Math.floor(window.innerHeight-bottom-100))):190;
-  map.fitBounds(bounds,{padding:{top,bottom,left:35,right:35},maxZoom:16.0,duration:780,pitch:0,bearing:0});
+  let padding={top:190,bottom:185,left:35,right:35};
+  if(mobile){
+    const root=map.getContainer?.(),rect=root?.getBoundingClientRect?.();
+    const visible=node=>{
+      if(!node||node.hidden)return false;
+      const box=node.getBoundingClientRect?.();
+      const style=window.getComputedStyle?.(node);
+      return box?.height>0&&style?.visibility!=='hidden'&&style?.display!=='none'&&style?.opacity!=='0';
+    };
+    const toolbarBottom=Math.max(110,...['.topbar','#djNext-toolbar','#dj-v794-toolbar','#dj831-scrollport']
+      .map(selector=>document.querySelector(selector)).filter(visible)
+      .map(node=>node.getBoundingClientRect().bottom));
+    const card=document.getElementById('route-map-card');
+    const nav=document.getElementById('bottom-nav');
+    padding=walkingRouteViewportPadding({
+      mapTop:rect?.top||0,viewportHeight:rect?.height||root?.clientHeight||window.innerHeight,
+      toolbarBottom,sheetTop:visible(card)?card.getBoundingClientRect().top:undefined,
+      navigationTop:visible(nav)?nav.getBoundingClientRect().top:undefined,
+      side:24,minVisible:135
+    });
+  }
+  map.fitBounds(bounds,{padding,maxZoom:16.0,duration:780,pitch:0,bearing:0});
 }
 window.addEventListener('dj-next:fit-route',()=>{
   if(app.dataset.tab==='map'&&routeResult?.coords?.length>=2)fitWalkingRoute(routeResult.coords);

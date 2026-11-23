@@ -187,13 +187,19 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     const heading=el('summary','dj-edition-summary');
     heading.append(el('strong','',type.title),el('span','',type.description),el('small','',records.length+'개 기록'));
     archive.append(heading);timeline.append(archive);
+    // The most recent note already appears above the archived patch list.
+    // Keep original historical notes intact, but never repeat its exact
+    // wording as the very next collapsed disclosure title.
+    const currentTexts=new Set((records.find(({record})=>record===currentRelease)?.notes||[])
+      .map(note=>publicReleaseNote(note,currentRelease?.version)));
     for(const {record,classification,sourceScale,notes} of records){
       const isCurrent=record===currentRelease;
       let parent=archive;
       if(!isCurrent){
         const disclosure=el('details','dj-edition-patch');
         const first=publicReleaseNote(notes[0]||'이전 변경사항',record.version);
-        disclosure.append(el('summary','dj-edition-patch-summary',first.slice(0,46)+(first.length>46?'…':'')));
+        const label=currentTexts.has(first)?'이전 변경 기록 펼치기':first.slice(0,46)+(first.length>46?'…':'');
+        disclosure.append(el('summary','dj-edition-patch-summary',label));
         archive.append(disclosure);parent=disclosure;
       }
       const article=el('article','v707-release');

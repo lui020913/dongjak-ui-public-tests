@@ -1588,3 +1588,52 @@ test('phone four-indicator vulnerability and bottom-docked wide sheets match vis
  await legend.getByRole('button',{name:'끄기'}).click();
  await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
 });
+
+
+test('iPhone final visual contract: compact route, transparent community status and flat settings',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'mobile visual surfaces only');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await ready(page);
+
+ await tap(page,tab(page,'mine'));
+ await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
+ await expect(type).toBeVisible();
+ const choice=type.locator('[data-dj885-type="scale"][aria-pressed="true"]');
+ await expect(choice).toHaveCount(1);
+ await expect(choice).toHaveCSS('box-shadow','none');
+ await tap(page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
+ await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
+
+ await tap(page,tab(page,'participate'));
+ const status=page.locator('#participation-panel .dj-community-feed-status');
+ await expect(status).toBeVisible();
+ await expect(page.locator('#participation-panel .dj-community-status-label')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+ const refresh=page.locator('#participation-panel .dj-community-refresh');
+ const refreshSize=await refresh.boundingBox();
+ expect(refreshSize?.width||0,'refresh should not occupy a full feed row').toBeLessThan(145);
+ const search=await page.locator('#community-search').boundingBox();
+ const toolbar=await page.locator('#participation-panel .community-toolbar').boundingBox();
+ expect(toolbar.y-(search.y+search.height),'search and action rail must not touch').toBeGreaterThanOrEqual(8);
+
+ await tap(page,tab(page,'map'));
+ await expect(page.locator('#djNext-route-compare')).toHaveCount(1);
+ await page.evaluate(()=>{
+  document.getElementById('route-map-card').hidden=false;
+  dispatchEvent(new CustomEvent('dj-next:route-comparison',{detail:{
+   selected:'standard',standard:{seconds:1300,kilometers:2.8},
+   gentle:{seconds:1450,kilometers:3.1},balanced:{seconds:1320,kilometers:2.9},
+   transit:null
+  }}));
+ });
+ const card=page.locator('#route-map-card');
+ await expect(card).toHaveAttribute('data-dj9272-route-focus','true');
+ await expect(card.locator('.dj9272-selected-route')).toBeVisible();
+ await expect(card.locator('#djNext-route-compare')).toBeHidden();
+ await tap(page,card.getByRole('button',{name:'경로 옵션'}));
+ await expect(card.locator('#djNext-route-compare')).toBeVisible();
+ await tap(page,card.getByRole('button',{name:'옵션 접기'}));
+ await expect(card.locator('#djNext-route-compare')).toBeHidden();
+});
