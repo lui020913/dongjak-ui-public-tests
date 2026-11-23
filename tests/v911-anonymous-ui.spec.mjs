@@ -1730,7 +1730,7 @@ test('phone selected dock has no color plate and route form is vertically balanc
    const oldActions=document.getElementById('dj-walk-map-actions');
    if(!head||!card||!cta||!dock||!map||!legacy)return false;
    const mid=document.elementFromPoint(innerWidth/2,Math.round((card.bottom+cta.top)/2));
-   const action=document.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
+   const action=root.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
    return root.querySelectorAll('.tools button').length===2 &&
      card.top>=head.bottom-3&&card.left>=8&&card.right<=innerWidth-8 &&
      card.bottom<=cta.top-24&&cta.bottom<=dock.top-5&&cta.height>=50 &&
