@@ -123,6 +123,30 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   if(instruction)topBanner.append(instruction);
   app.append(topBanner);
 
+  // Only a genuine GPS arrival event opens this completion summary.
+  // Never display an invented travel duration, walked distance or PRI score.
+  const arrival=add('section','dj-walk-arrival');
+  arrival.hidden=true;arrival.setAttribute('role','dialog');
+  arrival.setAttribute('aria-label','도보 안내 완료');
+  const arrivedMark=add('span',null,'dj-walk-arrived-mark');
+  arrivedMark.textContent='✓';
+  const arrivedTitle=add('h2');arrivedTitle.textContent='목적지 근처에 도착했습니다';
+  const arrivedText=add('p');arrivedText.textContent='실제 도착 위치와 보행 환경을 확인하세요. 길안내가 종료되었습니다.';
+  const arrivedConfirm=add('button','dj-walk-arrival-confirm');
+  arrivedConfirm.type='button';arrivedConfirm.textContent='확인';
+  arrival.append(arrivedMark,arrivedTitle,arrivedText,arrivedConfirm);
+  app.append(arrival);
+  const closeArrival=()=>{
+    arrival.hidden=true;delete app.dataset.djWalkArrived;
+  };
+  on(arrivedConfirm,'click',()=>{closeArrival();byId('route-map-close')?.click();});
+  on(byId('route-map-edit'),'click',closeArrival);
+  on(byId('route-map-close'),'click',closeArrival);
+  on(win,'dongjak:route-arrived',()=>{
+    arrival.hidden=false;app.dataset.djWalkArrived='1';
+    arrivedConfirm.focus({preventScroll:true});
+  });
+
   // Full-viewport transparent shield. Its only interactive exception is the
   // original #nav-stop. Suppress touch, mouse, keyboard and map gestures before
   // other feature handlers receive them. GPS/voice update events are untouched.
@@ -229,7 +253,8 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     stateObserver.disconnect();nativeObserver.disconnect();
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
-    top.remove();choices.remove();topBanner.remove();shield.remove();swap.remove();shortcuts.remove();
+    top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
+    delete app.dataset.djWalkArrived;
     delete app.dataset.djWalkV2;
   };
 }
