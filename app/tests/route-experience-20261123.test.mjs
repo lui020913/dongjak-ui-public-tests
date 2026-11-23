@@ -54,3 +54,17 @@ test('search results select origin/destination directly, but waypoints still req
  assert.match(fn,/navigate\('route'\)/);
  assert.match(main,/dongjak:route-pri-ready/);
 });
+test('route input overrides legacy fullscreen pages and bottom tab dock with a real CTA',()=>{
+ const css=read('src/route-experience.css');
+ const owner=read('src/v910-request-completion.js');
+ const marker='v9.2.124 phone hotfix';
+ assert.match(css,/v9\.2\.124 phone hotfix/);
+ const patch=css.slice(css.indexOf(marker));
+ assert.match(patch,/#app#app#app#app#app#app#app\[data-dj-route-stage="input"\]/);
+ assert.match(patch,/max-height:calc\(100dvh - var\(--dj910-dock-bottom,88px\)/);
+ assert.match(patch,/> #dj910-route-footer \{/);
+ assert.match(patch,/bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 12px\)!important/);
+ assert.match(patch,/#route-calc \{[\s\S]*?min-height:52px!important/);
+ assert.match(owner,/'data-dj-route-stage'/);
+ assert.match(owner,/n\.top>0&&n\.height>0/);
+});

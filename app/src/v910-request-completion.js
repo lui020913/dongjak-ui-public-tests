@@ -109,7 +109,7 @@ export function installRequestCompletion(doc=document,win=window){
     // inline !important (higher priority than all authored CSS selectors).
     const footer=doc.getElementById('dj910-route-footer');
     const route=doc.getElementById('route-panel');
-    if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&visible(nav)&&n&&Number.isFinite(n.top)){
+    if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
       const set=(prop,value)=>{
         if(footer.style.getPropertyValue(prop)!==value||
             footer.style.getPropertyPriority(prop)!=='important')
@@ -147,9 +147,9 @@ export function installRequestCompletion(doc=document,win=window){
   }
   function schedule(){if(!frame&&!disposed)frame=win.requestAnimationFrame(sync);}
   const observer=new win.MutationObserver(records=>{
-    if(records.some(r=>r.type==='childList'||['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating'].includes(r.attributeName)))schedule();
+    if(records.some(r=>r.type==='childList'||['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-route-stage'].includes(r.attributeName)))schedule();
   });
-  observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating']});
+  observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-route-stage']});
   win.addEventListener('resize',schedule,{passive:true});
   app.addEventListener('transitionend',schedule,true);
   app.addEventListener('animationend',schedule,true);
