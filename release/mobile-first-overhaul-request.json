@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.107",
+  "application_version": "9.2.108",
   "public_work_branch": "main",
-  "purpose": "Owner-requested PRI six-factor release. PR #354 merged (975578e4d23928b18e1677a133900d3a640200fa). Existing 4-index/5-color legacy mobile regression corrected on main (8b33417e455888e56fd0b657b1fd68fcae50b850). Execute all app tests, exact sealed Preview, mobile and PC/tablet QA, approved Production and Android artifacts; do not bypass any failing checks.",
-  "attempt": 297,
+  "purpose": "User-requested Sangdo1 6-factor PRI release with crosswalk + shared-road risk rubrics 100-point grading and three-band map colors; retains null/missing and shows partial coverage. Correct current6 phone e2e assertions. Require secure build, identical Preview, all 12 phone QA shards, PC/tablet and protected Production exact source. User explicitly requested complete integration/deployment.",
+  "attempt": 298,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.106 run 45109806296: 1465/1471 regression cases passed, exactly 1 assertion still expected obsolete five-color PRI legend in app/tests/mobile-ux-energy-20261122.test.mjs; corrected this source-era test to current three-band 70+ red labels without removing other protections. Retry complete gate with 9.2.107.",
+  "last_retry_reason": "9.2.107 run 45109962945: sealed build and exact Preview passed; PC/tablet passed; 9/12 phone shards passed, the remaining three viewport failures (375/390/430) were all the same old source-level Playwright selector expecting removed four-factor PRI. Updated tests/v911-anonymous-ui.spec.mjs to verify current6 and six-factor legend while preserving measured popup/dock geometry (789d3e0feb913357a3b6a7ed8395f588233f0e14). Re-test all gates; no bypass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
