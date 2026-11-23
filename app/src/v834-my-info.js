@@ -33,7 +33,8 @@ export function installMyInfo(doc=document){
  <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
- <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
+ <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button>
+ <button type="button" data-dj834-action="tools"><span class="dj834-setting-icon">${symbol('map')}</span><span>추가 지도 도구</span><span class="dj834-chevron">›</span></button></div>`;
  const detail=doc.createElement('section');detail.className='dj834-my-detail';detail.hidden=true;
  detail.innerHTML=`<div class="dj834-detail-nav"><button type="button" class="dj834-detail-back" aria-label="내 정보 설정으로 돌아가기">${symbol('back')}</button><h3 class="dj834-detail-title"></h3></div><div class="dj834-detail-content"></div>`;
  const accountBox=doc.createElement('div');accountBox.className='dj834-account-container';accountBox.append(account);
@@ -122,6 +123,9 @@ export function installMyInfo(doc=document){
   syncChoices();
  });
  const records=doc.createElement('div');records.className='dj834-records-container';
+ // Advanced map utilities share the SAME full-screen child navigation as history.
+ // The existing utility body and its event listeners are moved here by mobile-17.
+ const toolsBox=doc.createElement('section');toolsBox.className='dj834-tools-container';
  // Reuse the actual release catalog and its existing category/source handlers.
  // It is a My Info child page on phones rather than a second overlapping modal.
  const historyBox=doc.createElement('section');historyBox.className='dj834-history-container';
@@ -137,13 +141,13 @@ export function installMyInfo(doc=document){
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;
- content.append(accountBox,typography,records);content.append(languageSettings,historyBox);
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;toolsBox.hidden=true;
+ content.append(accountBox,typography,records);content.append(languageSettings,historyBox,toolsBox);
  // All inactive settings views remain mounted for real-time account/history
  // updates but must never contribute their own layout height. Historically
  // a versioned !important display:grid on the hidden typography view pushed
  // every subsequent subpage to the bottom of an iPhone viewport.
- for(const node of [accountBox,typography,records,languageSettings,historyBox])
+ for(const node of [accountBox,typography,records,languageSettings,historyBox,toolsBox])
    node.style.setProperty('display','none','important');
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
@@ -176,10 +180,10 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역'})[view]||'설정';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'추가 지도 도구'})[view]||'설정';
    if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
-   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox};
+   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox,tools:toolsBox};
    for(const [key,node] of Object.entries(views)){
      const active=key===view;
      node.hidden=!active;
@@ -217,7 +221,7 @@ export function installMyInfo(doc=document){
    const button=event.target.closest('[data-dj834-action]');if(!button)return;
    const action=button.dataset.dj834Action;
    if(action==='map'){doc.dispatchEvent(new Event('dj:open-map-settings'));return;}
-  if(['profile','records','type','language'].includes(action)){showDetail(action);return;}
+  if(['profile','records','type','language','tools'].includes(action)){showDetail(action);return;}
    
    if(action==='route'){doc.querySelector('#bottom-nav [data-tab="route"]')?.click();return;}
    if(action==='transit'){
