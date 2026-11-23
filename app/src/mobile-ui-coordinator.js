@@ -12,21 +12,21 @@ export function installMobileLayoutCoordinator({app,map}={}){
   let byMap=activeMobileLayoutCoordinators.get(app);
   if(!byMap){byMap=new Map();activeMobileLayoutCoordinators.set(app,byMap);}
   const key=map??null;
-  let record=byMap.get(key);
-  if(record){
+  const releaseLease=record=>{
     record.refs++;
     let released=false;
     return ()=>{
       if(released)return;
       released=true;
-      record.refs--;
-      if(record.refs===0){
+      if(--record.refs===0){
         record.cleanup();
         byMap.delete(key);
         if(byMap.size===0)activeMobileLayoutCoordinators.delete(app);
       }
     };
-  }
+  };
+  const existing=byMap.get(key);
+  if(existing)return releaseLease(existing);
   const header=app.querySelector('.topbar');
   const nav=app.querySelector('#bottom-nav');
   let raf=0;
@@ -58,17 +58,7 @@ export function installMobileLayoutCoordinator({app,map}={}){
   const cleanup=()=>{if(raf)window.cancelAnimationFrame(raf);observer?.disconnect();mutation.disconnect();
     window.removeEventListener('resize',request);window.removeEventListener('orientationchange',request);
     window.visualViewport?.removeEventListener?.('resize',request);map?.off?.('resize',request);};
-  record={refs:1,cleanup};
+  const record={refs:0,cleanup};
   byMap.set(key,record);
-  let released=false;
-  return ()=>{
-    if(released)return;
-    released=true;
-    record.refs--;
-    if(record.refs===0){
-      record.cleanup();
-      byMap.delete(key);
-      if(byMap.size===0)activeMobileLayoutCoordinators.delete(app);
-    }
-  };
+  return releaseLease(record);
 }
