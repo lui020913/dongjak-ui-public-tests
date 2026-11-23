@@ -108,13 +108,13 @@ jobs:
       - name: Capture live release source before
         run: |
           mkdir -p quality-report/screen-captures
-          curl -fsS --max-time 20 "$DONGJAK_TARGET_URL/release-source.json" > quality-report/screen-captures/live-source-before.json
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/live-source-before.json
       - name: Touch buttons and submenus only on assigned tab
         run: npx playwright test tests/anonymous-control-audit.spec.mjs --project=mobile --workers=1 --reporter=list
       - name: Recheck same release source
         if: always()
         run: |
-          curl -fsS --max-time 20 "$DONGJAK_TARGET_URL/release-source.json" > quality-report/screen-captures/live-source-after.json
+          curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/live-source-after.json
           cmp quality-report/screen-captures/live-source-before.json quality-report/screen-captures/live-source-after.json
       - name: Save per-tab touch, 130ms and 480ms evidence
         if: always()
