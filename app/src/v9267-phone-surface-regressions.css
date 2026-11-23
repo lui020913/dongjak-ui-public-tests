@@ -132,9 +132,15 @@
   html body #app#app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) {
     padding:0!important;
   }
-  html body #app#app#app#app#app#app :is(#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]) > .dj836-sheet-body {
+  html body #app#app#app#app#app#app :is(#participation-panel,#news-panel).page-panel:not([hidden]) > .dj836-sheet-body {
     padding-bottom:calc(94px + env(safe-area-inset-bottom,0px))!important;
     scroll-padding-bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;
+  }
+  /* My Info's own scroller now ends above the dock. Do not add a second
+     invisible 94px content gutter on top of its 73px dock clearance. */
+  html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+    padding-bottom:24px!important;
+    scroll-padding-bottom:24px!important;
   }
   html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
     padding-bottom:16px!important;scroll-padding-bottom:16px!important;
