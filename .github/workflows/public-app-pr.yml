@@ -146,12 +146,25 @@ jobs:
         if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
-      # Run only newly impacted reference layout on 3 mobile viewports.
-      # All 3 native place-search and close cases passed previously.
-      - name: Verify rebuilt walking route UI on three phone sizes
+      # New V3 layout passed at 375/390/430 on unchanged app source
+      # (CI 45252233121). Only the six release smoke runs directly affected
+      # by the replacement route DOM require revalidation now.
+      - name: Test only affected walking release smoke across three phones
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
-        run: npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'completely rebuilt route entry matches reference map-first composition'
+        run: |
+          set -euo pipefail
+          (cd app && ./node_modules/.bin/vite preview --host 127.0.0.1 --port 4173 --strictPort > "$RUNNER_TEMP/walk-v3-vite.log" 2>&1) &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for n in $(seq 1 45); do
+            if curl -fsS --max-time 2 http://127.0.0.1:4173/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          DONGJAK_TARGET_URL=http://127.0.0.1:4173 DONGJAK_FAST_MOBILE_QA=0 \
+          npx playwright test --config=playwright.v911-remote.config.mjs \
+            --project=mobile375 --project=mobile390 --project=mobile430 \
+            --grep 'phone selected dock has no color plate|phone route comparison uses actual pedestrian graph|phone windows share the opaque gradual slide|bottom dock swipes change full-screen tabs'
       - name: Upload route V3 verified viewport captures
         if: ${{ always() && github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         uses: actions/upload-artifact@v4
