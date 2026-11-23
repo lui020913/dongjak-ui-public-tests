@@ -6,7 +6,7 @@ import {queryOverpass} from './safety-layers.js';
 import {fixedMetroStations} from './fixed-rail-lines.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
-import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
+import {setMobileSheetExpanded,measuredPhoneDockClearance} from './v889-mobile-sheet-motion.js';
 
 const EMPTY={type:'FeatureCollection',features:[]};
 const RADIUS_M=850;
@@ -165,7 +165,7 @@ export function installPedestrianControlPlacement({app,nav,panel}){
     // Measure the *rendered* phone dock, rather than adding a fixed 95px.
     // iOS safe-area and bottom-nav heights differ between standalone modes.
     if(!desktop&&rect.height>0&&rect.width>0&&!nav.hidden){
-      const clearance=Math.max(0,Math.ceil(window.innerHeight-rect.top)+9);
+      const clearance=measuredPhoneDockClearance(rect,window,{minimum:0,gap:8});
       const wanted=clearance+'px';
       if(panel.style.getPropertyValue('--dj-nearby-dock-clearance')!==wanted)
         panel.style.setProperty('--dj-nearby-dock-clearance',wanted);
@@ -191,6 +191,7 @@ export function installPedestrianControlPlacement({app,nav,panel}){
   observer.observe(nav,{attributes:true,attributeFilter:['hidden','class','style']});
   window.addEventListener('resize',schedule,{passive:true});
   window.addEventListener('orientationchange',schedule,{passive:true});
+  window.visualViewport?.addEventListener?.('resize',schedule,{passive:true});
   document.fonts?.ready?.then(schedule).catch(()=>{});
   update();
   return ()=>{
@@ -198,6 +199,7 @@ export function installPedestrianControlPlacement({app,nav,panel}){
     resizeObserver?.disconnect();observer.disconnect();
     window.removeEventListener('resize',schedule);
     window.removeEventListener('orientationchange',schedule);
+    window.visualViewport?.removeEventListener?.('resize',schedule);
     app.classList.remove('ped-info-open');
     app.style.removeProperty('--dj-controls-under-nav');
     app.style.removeProperty('--dj-rail-btn-w');app.style.removeProperty('--dj-rail-left');
