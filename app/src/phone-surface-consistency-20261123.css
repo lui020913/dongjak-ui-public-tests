@@ -745,3 +745,42 @@
   }
  }
 }
+
+/* Last-mile phone fixes also apply to the public, unbundled app: do not
+   rely on a simulated stylesheet source check to assert painted geometry. */
+@layer request-completion {
+ @media (max-width:699px) {
+  html body #app#app#app#app#app#app > #bottom-nav:not([hidden])
+    > .dj-motion-indicator {
+    display:none!important;visibility:hidden!important;
+    background:transparent!important;box-shadow:none!important;
+    pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+    > .dj836-sheet-body {
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:safe center!important;
+    gap:14px!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+    > .dj836-sheet-body > :is(.dj-page-intro,.route-card,.page-note) {
+    flex:0 0 auto!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+    > .dj836-sheet-body:has(:is(#route-place-search,#route-summary,#route-variants):not([hidden])) {
+    justify-content:flex-start!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+    > .dj836-sheet-body .route-card {
+    padding:16px!important;
+    row-gap:10px!important;
+  }
+  html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+    > .dj836-sheet-body .route-location-row {
+    min-height:66px!important;
+    padding:8px 0!important;
+  }
+ }
+}
