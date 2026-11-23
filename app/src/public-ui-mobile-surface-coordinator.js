@@ -15,6 +15,12 @@ export function tipHudPositions(layoutHeight,navTop,tipHeight=36,scaleHeight=36,
   const scaleTop=Math.ceil(tipTop-gap-scaleHeight);
   return {tipTop,scaleTop};
 }
+// Match the actual rendered TIP stacking context. The TIP layer is 3200 in
+// Production 9.2.117, so a fixed 2891 leaves its close button unclickable.
+export function tipCloseStackingZ(tipZ){
+  const z=Number.parseInt(String(tipZ),10);
+  return Number.isFinite(z)?Math.max(2891,Math.min(6899,z+1)):2891;
+}
 export function hudScaleCorrection(actualGap,target=12){
   if(!Number.isFinite(actualGap)||!Number.isFinite(target))return 0;
   return actualGap<8||actualGap>16?Math.max(-36,Math.min(36,target-actualGap)):0;
@@ -202,7 +208,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
         important(close,'position','fixed');important(close,'top',Math.round(tipRect.top+(tipRect.height-34)/2)+'px');
         important(close,'right',Math.round(Math.max(0,win.innerWidth-tipRect.right)+7)+'px');important(close,'left','auto');
         important(close,'width','34px');important(close,'height','34px');
-        important(close,'z-index','2891');
+        important(close,'z-index',String(tipCloseStackingZ(win.getComputedStyle(tip).zIndex)));
         set('--dj-user-tip-left',null);set('--dj-user-tip-bottom',null);
       }
     }else{
