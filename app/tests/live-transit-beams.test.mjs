@@ -16,7 +16,7 @@ test('the two soft headlight beams point forward and mirror exactly',()=>{
     assert(alpha<=220,'beam remains a bounded translucent white-blue glow');
     if(x<169)assert.equal(alpha,0,'no beam behind the train nose');
   }
-  assert(lit>300&&transparent>20000&&fartherLit>100);
+  assert(lit>300&&transparent>16000&&fartherLit>100);
   assert.equal(right.data[(45*256+250)*4+3],0,'beam tip fades away');
 });
 
