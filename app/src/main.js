@@ -1966,6 +1966,8 @@ function saveCommunity(next) {
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
 function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
+  // All non-navigation destinations are unavailable until guidance ends.
+  if(app.classList.contains('route-guiding')&&tab!=='map')return;
   const initialMapEntry = tab === 'map' && firstMapEntryPending;
   if (tab === 'map') firstMapEntryPending = false;
   closeTransportPanel(false);
@@ -2529,6 +2531,22 @@ function clearPriRouteAdvice(){
   priRouteReviewSequence++;priVariantChosenManually=false;
   for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
 }
+const NAV_GESTURE_NAMES=['dragPan','dragRotate','scrollZoom','doubleClickZoom','touchZoomRotate','touchPitch','boxZoom','keyboard'];
+let savedNavGestureState=null;
+function lockRouteMapGestures(locked){
+  if(locked&&savedNavGestureState===null){
+    savedNavGestureState=NAV_GESTURE_NAMES.map(name=>{
+      const control=map?.[name];
+      const enabled=typeof control?.isEnabled==='function'&&control.isEnabled();
+      if(enabled)control.disable();
+      return {control,enabled};
+    });
+  }else if(!locked&&savedNavGestureState!==null){
+    for(const {control,enabled} of savedNavGestureState)
+      if(enabled&&typeof control?.enable==='function')control.enable();
+    savedNavGestureState=null;
+  }
+}
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap;
@@ -2537,6 +2555,7 @@ function syncRoutePresentation() {
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
   app.classList.toggle('route-guiding',guiding);
+  lockRouteMapGestures(guiding);
   document.getElementById('route-pick-hint').hidden=!picking;
   document.getElementById('route-map-card').hidden=!preview;
   document.getElementById('nav-live-card').hidden=!guiding;
