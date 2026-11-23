@@ -27,7 +27,7 @@ test('PRI labels distinguish missing evaluation from measured risk and preserve 
  const css=read('src/route-experience.css'),script=read('src/route-experience-20261123.js');
  assert.match(script,/entry\.coverage<0\.65/);
  assert.match(script,/PRI 미평가/);
- assert.match(script,/risk>=67\?'high'/);
+ assert.match(script,/risk>=70\?'high'/);
  assert.match(css,/\.dj-route-choice-pri\[data-tone="high"\]/);
  assert.match(css,/#b32424/);
  assert.match(script,/실제 안전을 보장하지 않습니다/);
