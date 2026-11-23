@@ -391,6 +391,13 @@
     padding:0!important;background:transparent!important;border:0!important;
     box-shadow:none!important;
   }
+  /* Keep controls of a collapsed native <details> out of hit testing.
+   * Legacy high-specificity toolbar rules force display:grid even while
+   * closed, leaving invisible buttons underneath the empty-state card. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-view-options:not([open]) > .community-toolbar {
+    display:none!important;
+    pointer-events:none!important;
+  }
   #app #participation-panel .community-view-options>summary{
     display:flex!important;align-items:center!important;justify-content:flex-start!important;
     gap:6px!important;list-style:none!important;cursor:pointer!important;
