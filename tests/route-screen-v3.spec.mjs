@@ -45,6 +45,8 @@ test('completely rebuilt route entry matches reference map-first composition',as
   await expect(root.locator('#v3-end')).toHaveText('어디로 가시나요?');
   await expect(cta).toBeDisabled();
   await expect(page.locator('#route-panel')).toHaveCSS('visibility','hidden');
+  await expect(page.locator('#route-panel')).toHaveCSS('opacity','0');
+  await expect(page.locator('#route-panel')).toHaveCSS('pointer-events','none');
   await expect.poll(async()=>page.evaluate(()=>{
     const host=document.getElementById('dj-route-v3'),shadow=host?.shadowRoot;
     if(!shadow)return false;
