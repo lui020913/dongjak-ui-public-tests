@@ -39,6 +39,7 @@ import {distanceMeters,makeRouteIndex,nearestOnRoute,splitRoute} from './navigat
 import {bearingDegrees,headingForCamera,shouldAutoReroute,voiceCueKey} from './navigation-experience.js';
 import {installNavVoicePicker,applySelectedNavVoice} from './nav-voice-picker.js';
 import {makeCommunityPost,updateCommunityLike,appendCommunityComment,formatCommunityDate,readCommunityPosts} from './community-store.js';
+import {createCommunityComposerPortal} from './community-composer-portal.js';
 import {installCommunityPushControl} from './community-push-client.js';
 import {getActiveCloudClient} from './v824-favorites-cloud.js';
 import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSharedCommunityLike,addSharedCommunityComment,isCommunitySignedIn,readCommunityNotifications,markCommunityNoticeRead,appealCommunityNotice,setSharedCommunityBookmark,reportSharedCommunity,readCommunityModerationStatus} from './community-cloud.js';
@@ -137,6 +138,7 @@ import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapTex
 import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 import './mobile-ux-energy.css';
 import './v929-phone-followup.js';
+import './community-composer-portal.css';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -1907,6 +1909,7 @@ const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
 let communityComposerOrigin='community',communityComposerEpoch=0;
+let communityComposerPortal=null;
 // A full-screen mobile report must out-rank legacy !important header styles.
 // Store and restore the prior inline display declaration exactly.
 let communityTopbarDisplayRestore=null;
@@ -1987,7 +1990,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);}
+    if(form){window.DongjakWindowMotion?.cancel?.(form);communityComposerPortal?.close();form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2151,91 +2154,53 @@ function renderMy() {
 // v15 · 위치 연결형 동네 커뮤니티 (현재 브라우저에만 저장)
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
+communityComposerPortal=createCommunityComposerPortal(communityForm);
 function openCommunityComposer(open,{animate=true}={}) {
   const motion=window.DongjakWindowMotion;
   const phone=window.matchMedia('(max-width:699px)').matches;
   if(!phone){
+    // Desktop keeps the existing inline editor; mobile portal is never active.
+    communityComposerPortal?.close();
     delete communityForm.dataset.djDialogFade;
     if(open){communityForm.hidden=false;communityForm.scrollIntoView({behavior:'instant',block:'start'});motion?.open(communityForm);return;}
     if(communityForm.hidden)return;
-    const finish=()=>{communityForm.hidden=true;};if(motion)motion.close(communityForm,finish);else finish();return;
+    const finish=()=>{communityForm.hidden=true;};
+    if(motion)motion.close(communityForm,finish);else finish();
+    return;
   }
-  // No second slide over the enclosing sheet. Keep the list hidden until the editor closes.
   if(open){
-    const wasHidden=communityForm.hidden,wasClosing=communityForm.dataset.dj810Animating==='closing';
-    if(!wasHidden&&!wasClosing)return;
+    if(communityComposerPortal?.isOpen())return;
     communityComposerEpoch++;
     motion?.cancel?.(communityForm);
     communityForm.dataset.djDialogFade='true';
-    if(!communityForm.querySelector(':scope > .djNext-form-scroll')){
-      const head=communityForm.querySelector(':scope > .community-form-top');
-      if(head){const sc=document.createElement('div');sc.className='djNext-form-scroll';
-        for(const node of [...communityForm.childNodes])if(node!==head)sc.append(node);
-        communityForm.append(sc);}
-    }
-    communityForm.hidden=false;
-    const sc=communityForm.querySelector('.djNext-form-scroll');
-    // The save action is part of this same form, but stays in a compact
-    // bottom action bar instead of disappearing below a long form scroller.
-    if(sc&&!communityForm.querySelector(':scope > .dj-community-compose-footer')){
-      const save=sc.querySelector('button[type="submit"]');
-      if(save){
-        const footer=document.createElement('div');
-        footer.className='dj-community-compose-footer';
-        footer.append(save);
-        communityForm.append(footer);
-      }
-    }
-    if(sc&&wasHidden)sc.scrollTop=0;
-    // Parent sheet may be entering after the risk-report button: only animate one owner.
+    // The actual DOM form (including the submit listener, attachment fields,
+    // and map-location draft) moves to a body-level portal. Legacy sheet
+    // keyboard insets/animations therefore cannot move the editor or header.
+    communityComposerPortal.open();
     const panel=document.getElementById('participation-panel');
-    // Full-screen editor must own the phone viewport, including the area
-    // beneath the AI toolbar. Existing CSS excludes map chrome on this state.
     panel?.classList.add('dj9256-composing');
-    if(communityComposerOrigin==='map')setMapReportHitLayer(true);
     setCommunityTopbarBlocked(true);
     if(animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      communityForm.animate?.([{opacity:0},{opacity:1}],{duration:210,easing:'ease-out'});
+      communityComposerPortal.portal.animate?.([{opacity:0},{opacity:1}],{duration:170,easing:'ease-out'});
     }
     return;
   }
-  if(communityForm.hidden||communityForm.dataset.dj810Animating==='closing')return;
-  if(communityForm.contains(document.activeElement))document.activeElement.blur();
-  if(communityComposerOrigin==='map'){
-    const parent=document.getElementById('participation-panel');
-    const epoch=++communityComposerEpoch;
-    const done=()=>{if(epoch!==communityComposerEpoch||app.dataset.tab!=='participate')return;communityForm.hidden=true;parent?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);communityComposerOrigin='community';if(parent)delete parent.dataset.djPatchKeyboard;navigate('map',{suppressOverview:true});};
-    // A map-origin report must return directly to the map on phone. A legacy
-    // sheet-exit animation can remain in "closing" when the independent full
-    // page takes over its geometry, leaving an invisible form and visible page.
-    // Cancel both owners synchronously before navigating, without flashing the feed.
-    motion?.cancel?.(communityForm);
-    if(parent)motion?.cancel?.(parent);
-    const fade=!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&communityForm.animate
-      ?communityForm.animate([{opacity:1},{opacity:0}],{duration:180,easing:'ease-in'})
-      :null;
-    if(fade){fade.finished.then(done,done);}else done();
-    return;
+  if(!communityComposerPortal?.isOpen()&&communityForm.hidden)return;
+  communityComposerEpoch++;
+  const mapOrigin=communityComposerOrigin==='map';
+  const panel=document.getElementById('participation-panel');
+  communityComposerPortal?.close();
+  communityForm.hidden=true;
+  panel?.classList.remove('dj9256-composing');
+  setMapReportHitLayer(false);
+  setCommunityTopbarBlocked(false);
+  if(panel)delete panel.dataset.djPatchKeyboard;
+  const listBody=panel?.querySelector('.dj836-sheet-body');
+  if(listBody)listBody.scrollTop=0;
+  if(mapOrigin){
+    communityComposerOrigin='community';
+    navigate('map',{suppressOverview:true});
   }
-  const epoch=++communityComposerEpoch;
-  const finish=()=>{
-    if(epoch!==communityComposerEpoch)return;
-    communityForm.hidden=true;
-    const panel=document.getElementById('participation-panel');
-    panel?.classList.remove('dj9256-composing');
-    setMapReportHitLayer(false);
-    setCommunityTopbarBlocked(false);
-    if(panel)delete panel.dataset.djPatchKeyboard;
-    const listBody=panel?.querySelector('.dj836-sheet-body');if(listBody)listBody.scrollTop=0;
-  };
-  // This editor belongs to an already-visible full-screen page. An old
-  // 300ms sheet-close owner can be cancelled by the parent and leave the
-  // compose view visible indefinitely. End the editor state synchronously.
-  motion?.cancel?.(communityForm);
-  const fade=!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&communityForm.animate
-    ?communityForm.animate([{opacity:1},{opacity:0}],{duration:180,easing:'ease-in'})
-    :null;
-  if(fade){fade.finished.then(finish,finish);}else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
@@ -2290,6 +2255,13 @@ function selectCommunityLocation(lngLat) {
 }
 document.getElementById('community-map-pick').addEventListener('click',()=>{
   if(routePickMode){routePickMode=null;syncRoutePresentation();}
+  // Keep the draft but return the live form to its original parent before
+  // switching tabs. It will be portaled again after the map pick finishes.
+  communityComposerPortal?.close();
+  communityForm.hidden=true;
+  document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
+  setCommunityTopbarBlocked(false);
+  setMapReportHitLayer(false);
   communityPickMode=true;
   navigate('map');
   document.getElementById('community-map-hint').hidden=false;

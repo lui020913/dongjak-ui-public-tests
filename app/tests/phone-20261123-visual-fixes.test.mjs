@@ -76,19 +76,20 @@ test('My Info subviews animate by direction without blank-fading the page root',
  assert.match(more,/\.dj834-tools-container/);
 });
 
-test('community composer fills the viewport with one scrolling form, not the dock-offset feed',()=>{
- const css=read('src/public-ui-production-overlay.css');
+test('community composer is isolated from legacy parent sheet and keyboard layout',()=>{
+ const css=read('src/community-composer-portal.css');
  const ui=read('src/main.js');
- assert.match(css,/#participation-panel#participation-panel\.page-panel:not\(\[hidden\]\):not\(\.dj871-sheet-expanded\):not\(\.dj9256-composing\)/);
- assert.match(css,/#participation-panel\.dj9256-composing:not\(\[hidden\]\)\s*\{[\s\S]*?bottom:0!important;/);
- assert.match(css,/#participation-panel\.dj9256-composing > \.dj836-sheet-body\s*\{[\s\S]*?overflow:hidden!important;/);
- assert.match(css,/#participation-panel #community-form > \.djNext-form-scroll\s*\{[\s\S]*?overflow-y:auto!important;/);
- assert.match(css,/#community-form \.community-form-top\s*\{[\s\S]*?position:relative!important;/);
- assert.match(ui,/sc\.className='djNext-form-scroll'/);
- assert.match(ui,/footer.className='dj-community-compose-footer'/);
- assert.match(css,/#community-form > \.dj-community-compose-footer\s*\{[\s\S]*?flex:0 0 auto!important;/);
- assert.match(css,/data-dj-user-editor-keyboard="true"\] #participation-panel > \.dj836-sheet-body \{[\s\S]*?overflow:hidden!important;/);
- assert.match(css,/#bottom-nav\s*\{\s*visibility:hidden!important;pointer-events:none!important;/);
+ const portal=read('src/community-composer-portal.js');
+ assert.match(ui,/createCommunityComposerPortal\(communityForm\)/);
+ assert.match(ui,/communityComposerPortal\.open\(\)/);
+ assert.match(ui,/communityComposerPortal\?\.close\(\)/);
+ assert.match(portal,/doc\.body\.append\(portal\)/);
+ assert.match(portal,/portal\.append\(form\)/);
+ assert.match(portal,/doc\.body\.dataset\.djCommunityEditor='open'/);
+ assert.match(css,/#dj-community-editor-portal:not\(\[hidden\]\)/);
+ assert.match(css,/#community-form > \.djNext-form-scroll\{/);
+ assert.match(css,/#community-form > \.dj-community-compose-footer\{/);
+ assert.match(css,/#bottom-nav\{visibility:hidden!important/);
 });
 
 test('AI mobile composer follows one visual viewport with no duplicated keyboard inset',()=>{

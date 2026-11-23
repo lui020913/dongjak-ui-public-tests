@@ -338,3 +338,50 @@ test('guidance mode truly blocks map, tabs and keyboard except native end action
   await expect(page.locator('#app')).not.toHaveClass(/route-guiding/);
   await expect(page.locator('#bottom-nav')).toBeVisible();
 });
+
+test('community new post portal stays inside viewport when keyboard contracts',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width!==390,'single targeted iPhone-size keyboard layout check');
+  test.setTimeout(150000);
+  await readyForLiveTouch(page);
+  await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:12000,noWaitAfter:true});
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate',{timeout:15000});
+  await page.locator('#community-compose-toggle').click({timeout:12000,noWaitAfter:true});
+  const portal=page.locator('#dj-community-editor-portal');
+  await expect(portal).toBeVisible();
+  await expect(page.locator('#community-form')).toBeVisible();
+  await expect(page.locator('#bottom-nav')).toBeHidden();
+  await page.locator('#community-nickname').focus();
+  // Chromium has no native iOS software keyboard. Contract the visual
+  // viewport to reproduce the same scrolling/geometry constraint.
+  await page.setViewportSize({width:390,height:530});
+  await expect.poll(()=>page.evaluate(()=>{
+    const portal=document.getElementById('dj-community-editor-portal');
+    return Math.round(portal.getBoundingClientRect().height);
+  }),{timeout:10000}).toBeLessThanOrEqual(530);
+  const geometry=await page.evaluate(()=>{
+    const rect=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};};
+    const parent=document.getElementById('community-form').parentElement;
+    const root=rect('#dj-community-editor-portal');
+    const header=rect('#community-form > .community-form-top');
+    const body=rect('#community-form > .djNext-form-scroll');
+    const footer=rect('#community-form > .dj-community-compose-footer');
+    return {root,header,body,footer,parentId:parent.id,
+      navVisibility:getComputedStyle(document.getElementById('bottom-nav')).visibility,
+      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(document.querySelector('#community-form > .djNext-form-scroll')).overflowY};
+  });
+  await testInfo.attach('community-keyboard-geometry.json',{body:Buffer.from(JSON.stringify(geometry,null,2)),contentType:'application/json'});
+  expect(geometry.parentId).toBe('dj-community-editor-portal');
+  expect(geometry.navVisibility).toBe('hidden');
+  expect(geometry.scrollportOverflow).toBe('auto');
+  expect(geometry.root.top).toBeGreaterThanOrEqual(-1);
+  expect(geometry.root.bottom).toBeLessThanOrEqual(geometry.layoutHeight+2);
+  expect(geometry.header.bottom).toBeLessThanOrEqual(geometry.body.top+2);
+  expect(geometry.body.bottom).toBeLessThanOrEqual(geometry.footer.top+2);
+  expect(geometry.footer.bottom).toBeLessThanOrEqual(geometry.root.bottom+2);
+  await testInfo.attach('community-keyboard-portrait.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  await page.locator('#community-compose-close').click({timeout:12000,noWaitAfter:true});
+  await expect(portal).toBeHidden();
+  await expect(page.locator('#bottom-nav')).toBeVisible();
+  const restored=await page.locator('#community-form').evaluate(node=>node.parentElement?.id);
+  expect(restored).toBe('');
+});
