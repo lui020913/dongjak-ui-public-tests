@@ -1,3 +1,4 @@
+import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
 import {bindHeaderDragInput} from './mobile-header-input.js';
@@ -136,17 +137,6 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   }
   const p=placeData({...place,lng:place?.lng??lngLat?.lng,lat:place?.lat??lngLat?.lat});
   if(p.lat==null||p.lng==null)return null;
-  // A facility can be visible near an edge without being centered. Move every
-  // explicit selection to the map's usable area, allowing for a phone sheet.
-  try{
-    const h=map.getContainer?.().clientHeight||window.innerHeight;
-    const focusTop=document.querySelector('.topbar')?.getBoundingClientRect?.()?.bottom||100;
-    const isPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
-    const viewportFocus=isPhone?Math.max(focusTop+55,Math.min(h*.42,h-180)):h/2;
-    const offsetY=Math.round(viewportFocus-h/2);
-    map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
-      offset:[0,offsetY],duration:380});
-  }catch(error){console.info('[시설 중심 이동] 지도 상태 확인',error?.message);}
   const root=document.createElement('section');root.className='dj-place-detail';
   const sharedSheet=true;
   let popup=null;
@@ -277,6 +267,19 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   popup=new maplibregl.Popup({offset:22,maxWidth:'min(520px, calc(100vw - 24px))',closeButton:false,anchor:'top',className:'dj-place-detail-popup'})
     .setLngLat([p.lng,p.lat]).setDOMContent(root).addTo(map);
   popup.on('close',disposeCloseInput);
+  // The sheet does not exist before addTo(). Measuring it beforehand placed
+  // the pin beneath a tall iPhone card. One post-layout camera move only.
+  const focusSelectedPlace=()=>{
+    if(!popup?.getElement?.()?.isConnected)return;
+    try{
+      const isPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
+      const offsetY=isPhone?usableMapSelectionOffset({map,panel:popup.getElement(),doc:document,win:window}):0;
+      map.easeTo?.({center:[p.lng,p.lat],zoom:Math.max(15.4,map.getZoom?.()||0),
+        offset:[0,offsetY],duration:380});
+    }catch(error){console.info('[시설 가시영역 중심 이동]',error?.message);}
+  };
+  if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(focusSelectedPlace);
+  else focusSelectedPlace();
 
   // Shared mobile-first detail sheet: the non-interactive part of the header is the gesture
   // surface at every viewport. Swipe up to expand; down to collapse or dismiss. Actions retain
