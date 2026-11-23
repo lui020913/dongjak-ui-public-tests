@@ -222,3 +222,37 @@ test('My Info update-history scroller is not masked by a fake footer above the f
   expect(state.bodyBottom,JSON.stringify(state)+' scrollport overlaps dock').toBeLessThanOrEqual(state.navigationTop+3);
   expect(state.navigationTop).toBeGreaterThan(450);
 });
+
+
+test('real phone route editor and CTA clear the bottom dock at all three viewport sizes',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width>=700,'phone-only route overlay');
+  test.setTimeout(150000);
+  await readyForLiveTouch(page);
+  await page.locator('#bottom-nav .nav-tab[data-tab="route"]').click({timeout:12000,noWaitAfter:true});
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','route',{timeout:15000});
+  await expect(page.locator('#route-panel')).toBeVisible();
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','input',{timeout:12000});
+  const snapshot=async()=>page.evaluate(()=>{
+    const panel=document.getElementById('route-panel'),cta=document.getElementById('route-calc'),
+      nav=document.getElementById('bottom-nav'),footer=document.getElementById('dj910-route-footer');
+    const rect=node=>{const b=node?.getBoundingClientRect();return b?{x:b.x,y:b.y,top:b.top,right:b.right,bottom:b.bottom,width:b.width,height:b.height}:null;};
+    const p=rect(panel),b=rect(cta),n=rect(nav),f=rect(footer);
+    const hit=b?document.elementFromPoint(b.x+b.width/2,b.y+b.height/2):null;
+    return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,
+      actualHit:Boolean(cta&&(hit===cta||cta.contains(hit))),
+      routeStage:document.getElementById('app')?.dataset.djRouteStage,
+      panelPosition:panel?getComputedStyle(panel).position:'missing',
+      footerPosition:footer?getComputedStyle(footer).position:'missing'};
+  });
+  await expect.poll(async()=>{
+    const m=await snapshot();
+    return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
+      m.panelPosition==='fixed'&&m.panel.x>=9&&
+      m.panel.right<=m.viewport[0]-9&&m.panel.top>=0&&m.panel.top<=80&&
+      m.panel.bottom<=m.nav.top-5&&m.cta.height>=44&&
+      m.cta.bottom<=m.nav.top-5&&m.actualHit);
+  },{timeout:15000}).toBe(true);
+  const metrics=await snapshot();
+  await testInfo.attach('real-route-cta-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
+  await testInfo.attach('real-route-cta-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+});
