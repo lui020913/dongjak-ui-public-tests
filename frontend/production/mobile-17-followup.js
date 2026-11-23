@@ -44,13 +44,14 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
  }
  const resize=new ResizeObserver(edges);
  function moveMore(){
-  const home=doc.querySelector('#mine-panel .dj834-my-home');
-  const body=doc.querySelector('#dj-mobile-utilities .dj-mobile-utilities-body');
-  if(!home)return;
-  let root=home.querySelector('.dj17-more-root');
-  if(!root){root=doc.createElement('details');root.className='dj17-more-root';const s=doc.createElement('summary');s.textContent='추가 지도 도구';root.append(s);home.append(root)}
-  if(body&&body.parentElement!==root){root.append(body)}
-  const target=root.querySelector('.dj-mobile-utilities-body');
+  const targetHost=doc.querySelector('#mine-panel .dj834-tools-container');
+  const body=doc.querySelector('#dj-mobile-utilities .dj-mobile-utilities-body')
+    ||targetHost?.querySelector('.dj-mobile-utilities-body');
+  if(!targetHost)return;
+  // Never introduce a second independent <details> root on the My Info landing.
+  // The v834 controller exclusively owns child-page navigation and animation.
+  if(body&&body.parentElement!==targetHost)targetHost.append(body);
+  const target=targetHost.querySelector('.dj-mobile-utilities-body');
   if(!target)return;
   const extra=$('dj832-more-features');if(extra&&!target.contains(extra))target.append(extra);
   for(const old of target.querySelectorAll('.dj17-feature-details'))if(!old.querySelector('.dj833-feature-group'))old.remove();
