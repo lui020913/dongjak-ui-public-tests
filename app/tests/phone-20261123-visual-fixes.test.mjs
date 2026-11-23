@@ -83,13 +83,13 @@ test('community composer is isolated from legacy parent sheet and keyboard layou
  assert.match(ui,/createCommunityComposerPortal\(communityForm\)/);
  assert.match(ui,/communityComposerPortal\.open\(\)/);
  assert.match(ui,/communityComposerPortal\?\.close\(\)/);
- assert.match(portal,/doc\.body\.append\(portal\)/);
- assert.match(portal,/portal\.append\(form\)/);
+ assert.match(portal,/doc\.body\.append\(root\)/);
+ assert.match(portal,/root\.append\(form\)/);
  assert.match(portal,/doc\.body\.dataset\.djCommunityEditor='open'/);
- assert.match(css,/#dj-community-editor-portal:not\(\[hidden\]\)/);
- assert.match(css,/#community-form > \.djNext-form-scroll\{/);
- assert.match(css,/#community-form > \.dj-community-compose-footer\{/);
- assert.match(css,/#bottom-nav\{visibility:hidden!important/);
+ assert.match(css,/#dj-community-editor-portal\[hidden\]/);
+ assert.match(css,/#community-form>\.dj-compose-scroll\{/);
+ assert.match(css,/#community-form>\.dj-compose-footer\{/);
+ assert.match(css,/#bottom-nav\{[\s\S]*?visibility:hidden!important/);
 });
 
 test('AI mobile composer follows one visual viewport with no duplicated keyboard inset',()=>{

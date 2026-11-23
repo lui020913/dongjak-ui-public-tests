@@ -135,6 +135,7 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     if(!positioned)scroller.insertBefore(mapOptionsButton,expectedNext);
   };
   const keepFieldVisible=()=>{
+    if(doc.getElementById('dj-community-compose-overlay')?.hidden===false)return;
     const input=doc.activeElement,form=doc.getElementById('community-form'),body=form?.querySelector('.djNext-form-scroll')||doc.querySelector('#participation-panel > .dj836-sheet-body');
     if(!input||!body||!form?.contains(input)||!app.hasAttribute('data-dj-user-editor-keyboard'))return;
     const r=input.getBoundingClientRect(),b=body.getBoundingClientRect(),head=form.querySelector('.community-form-top');
@@ -171,8 +172,9 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     const h=viewportHeight(),n=nav.getBoundingClientRect(),dock=visible(nav)?dockBottom(h,n.top):null;
     set('--dj-user-dock-bottom',dock===null?null:dock+'px');
     const form=doc.getElementById('community-form'),input=doc.activeElement;
-    const focused=Boolean(form&&!form.hidden&&input?.matches('textarea,input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"])')&&form.contains(input));
-    const composerOpen=Boolean(form&&!form.hidden&&!doc.getElementById('participation-panel')?.hidden);
+    const independentComposerOpen=doc.getElementById('dj-community-compose-overlay')?.hidden===false;
+    const focused=Boolean(!independentComposerOpen&&form&&!form.hidden&&input?.matches('textarea,input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"])')&&form.contains(input));
+    const composerOpen=Boolean(!independentComposerOpen&&form&&!form.hidden&&!doc.getElementById('participation-panel')?.hidden);
     if(composerOpen&&!composerWasOpen&&!focused){
       // The native opening action previously scrolled the nested form past
       // its first field. Reset only on opening, never during editing.

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.128",
+  "application_version": "9.2.129",
   "public_work_branch": "main",
-  "purpose": "Protected retry of 9.2.128 iOS Community composer portal release after mandatory source regression found exactly one obsolete map-origin static assertion (app/tests/map-report-opening-intent.test.mjs) expecting previous setMapReportHitLayer(true). The new body-level portal owns hit testing without the old sheet hit-layer promotion. Update only the stale test to verify map origin navigate('participate') and communityComposerPortal.open() with document.body portal mounting. Source implementation, visual styles, keyboard geometry, user data, save, maps, other UI unchanged from 9bd5fbef44cd, which passed focused iPhone390 viewport-contraction test and source build. Run targeted 1 failing Node contract only for PR hotfix; protected release still requires exact-new-SHA Preview, 12 mobile QA, PC/tablet and Production. Never bypass mandatory QA.",
-  "attempt": 332,
+  "purpose": "Complete visual rebuild of Community report/new-post phone screen from scratch. Remove nested legacy sheet composer UI and old keyboard/layout declarations, replace with stable dedicated three-row body-level editor: fixed title and close, independent middle form scroll, fixed save action above visible iOS keyboard. Rebuild field hierarchy, color, typography, margin, issue controls and attachments. Preserve submit/post storage, cloud publication, photos, map location picker and consent IDs, plus all unrelated app panels. Replace obsolete map-sheet test assumption with portal screen intent. First run focused 3-phone keyboard/viewport checks, then require protected exact source Preview, 12 mobile QA shards, PC/tablet, Production and provenance. New visual source must be independently validated, no prior result reuse for changed code.",
+  "attempt": 333,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.128 attempt331 failed before Preview: 1 of 1,515 production Node checks was an obsolete expectation of old map-origin sheet hit-layer promotion; 1,509 checks passed. This hotfix updates that single assertion for the body-level editor portal. Keep existing Production v9.2.127 until all protected gates pass.",
+  "last_retry_reason": "Separate v9.2.128 protected retry attempt332 is a legacy portal keyboard workaround; user explicitly requested to throw away that old report UI and rebuild the entire report screen. Version9.2.129 replaces visual structure with one responsive screen, keeps functional handlers, and leaves existing v9.2.128 release untouched until it completes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

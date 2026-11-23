@@ -1,33 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {communityVisualBounds} from '../src/community-composer-portal.js';
+import {communityVisualBounds,communityVisibleViewport} from '../src/community-composer-portal.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('iOS keyboard viewport uses visual height and offset, not parent sheet or window scroll',()=>{
+test('visible iOS keyboard viewport cannot reflow the page container',()=>{
   assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:844,visualTop:0}),{top:0,height:844});
-  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:480,visualTop:0}),{top:0,height:480});
-  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:440,visualTop:42}),{top:42,height:440});
-  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:900,visualTop:100}),{top:100,height:744});
+  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:510,visualTop:0}),{top:0,height:510});
+  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:460,visualTop:25}),{top:25,height:460});
+  assert.deepEqual(communityVisualBounds({layoutHeight:844,visualHeight:900,visualTop:25}),{top:25,height:819});
+  assert.deepEqual(communityVisibleViewport({innerHeight:844,visualViewport:{offsetTop:0,height:510}}),{top:0,height:510,keyboardInset:334});
 });
-
-test('community editor is a body-level portal with one scrollport and retained submit handler',()=>{
+test('entire composer layout is rebuilt as a body-portal with three distinct rows',()=>{
   const js=read('src/community-composer-portal.js');
   const css=read('src/community-composer-portal.css');
   const main=read('src/main.js');
-  assert.match(js,/doc\.body\.append\(portal\)/);
-  assert.match(js,/portal\.append\(form\)/);
-  assert.match(js,/anchor\.parentNode\.insertBefore\(form,anchor\.nextSibling\)/);
-  assert.match(js,/visual\?\.offsetTop/);
-  assert.match(js,/visual\?\.height/);
-  assert.match(js,/sc\.scrollTop\+=field\.bottom-bounds\.bottom\+16/);
-  assert.match(css,/#dj-community-editor-portal:not\(\[hidden\]\)/);
-  assert.match(css,/#community-form > \.djNext-form-scroll\{/);
-  assert.match(css,/overflow-y:auto!important/);
-  assert.match(css,/#community-form > \.dj-community-compose-footer\{/);
-  assert.match(css,/order:2!important/);
-  assert.match(css,/body\[data-dj-community-editor="open"\] #bottom-nav/);
-  assert.match(main,/communityForm\.addEventListener\('submit',async\(event\)=>/);
+  assert.match(js,/doc\.body\.append\(root\)/);
+  assert.match(js,/root\.append\(form\)/);
+  assert.match(js,/form\.replaceChildren\(header,scroll,footer\)/);
+  assert.match(js,/doc\.body\.dataset\.djCommunityEditor='open'/);
+  assert.match(js,/root\.dataset\.keyboard=/);
+  assert.match(js,/restoreDock\(\)/);
+  assert.match(css,/#dj-community-editor-portal #community-form\s*\{[\s\S]*?grid-template-rows:auto minmax\(0,1fr\) auto!important/);
+  assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-scroll\s*\{[\s\S]*?overflow-y:auto!important/);
+  assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-footer\s*\{/);
+  assert.match(css,/#dj-community-editor-portal #community-form>\.community-form-top\s*\{/);
+  assert.doesNotMatch(css,/#dj-community-editor-portal\[data-keyboard="open"\] #community-form > \.community-form-top/);
   assert.match(main,/communityComposerPortal\.open\(\)/);
+  assert.match(main,/communityForm\.addEventListener\('submit',async\(event\)=>/);
+});
+test('map-origin report, photo and cloud submission logic remain functional',()=>{
+  const main=read('src/main.js');
+  const html=read('index.html');
+  assert.match(main,/navigate\('participate'\);communityComposerOrigin=origin/);
   assert.match(main,/communityComposerPortal\?\.close\(\)/);
+  for(const name of ['community-map-pick','community-photo-input','community-share-publicly','community-title','community-text'])assert.ok(html.includes('id="'+name+'"'));
+  const coord=read('src/public-ui-mobile-surface-coordinator.js');
+  assert.match(coord,/const independentComposerOpen=/);
+  assert.match(coord,/const focused=Boolean\(!independentComposerOpen&&form/);
 });

@@ -10,5 +10,5 @@ test('map-origin risk report is an authorized participation-page opening intent'
  assert.match(main,/navigate\('participate'\);communityComposerOrigin=origin/);
  assert.match(main,/communityComposerPortal\.open\(\)/);
  const portal=readFileSync(new URL('../src/community-composer-portal.js',import.meta.url),'utf8');
- assert.match(portal,/doc\.body\.append\(portal\)/);
+ assert.match(portal,/doc\.body\.append\(root\)/);
 });

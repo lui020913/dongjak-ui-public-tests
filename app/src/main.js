@@ -2159,8 +2159,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   const motion=window.DongjakWindowMotion;
   const phone=window.matchMedia('(max-width:699px)').matches;
   if(!phone){
-    // Desktop keeps the existing inline editor; mobile portal is never active.
-    communityComposerPortal?.close();
+    communityComposerPortal?.restoreDesktop();
     delete communityForm.dataset.djDialogFade;
     if(open){communityForm.hidden=false;communityForm.scrollIntoView({behavior:'instant',block:'start'});motion?.open(communityForm);return;}
     if(communityForm.hidden)return;
@@ -2172,31 +2171,22 @@ function openCommunityComposer(open,{animate=true}={}) {
     if(communityComposerPortal?.isOpen())return;
     communityComposerEpoch++;
     motion?.cancel?.(communityForm);
-    communityForm.dataset.djDialogFade='true';
-    // The actual DOM form (including the submit listener, attachment fields,
-    // and map-location draft) moves to a body-level portal. Legacy sheet
-    // keyboard insets/animations therefore cannot move the editor or header.
+    // No old sheet expansion, parent header movement or native dock sizing.
+    document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
     communityComposerPortal.open();
-    const panel=document.getElementById('participation-panel');
-    panel?.classList.add('dj9256-composing');
-    setCommunityTopbarBlocked(true);
-    if(animate&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      communityComposerPortal.portal.animate?.([{opacity:0},{opacity:1}],{duration:170,easing:'ease-out'});
-    }
+    setMapReportHitLayer(false);
+    setCommunityTopbarBlocked(false);
     return;
   }
-  if(!communityComposerPortal?.isOpen()&&communityForm.hidden)return;
+  if(!communityComposerPortal?.isOpen())return;
   communityComposerEpoch++;
   const mapOrigin=communityComposerOrigin==='map';
   const panel=document.getElementById('participation-panel');
-  communityComposerPortal?.close();
-  communityForm.hidden=true;
+  communityComposerPortal.close();
   panel?.classList.remove('dj9256-composing');
   setMapReportHitLayer(false);
   setCommunityTopbarBlocked(false);
   if(panel)delete panel.dataset.djPatchKeyboard;
-  const listBody=panel?.querySelector('.dj836-sheet-body');
-  if(listBody)listBody.scrollTop=0;
   if(mapOrigin){
     communityComposerOrigin='community';
     navigate('map',{suppressOverview:true});
