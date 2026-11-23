@@ -1629,14 +1629,14 @@ test('iPhone final visual contract: compact route, transparent community status 
  await ready(page);
 
  await tap(page,tab(page,'mine'));
- await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const choice=type.locator('[data-dj885-type="scale"][aria-pressed="true"]');
  await expect(choice).toHaveCount(1);
  await expect(choice).toHaveCSS('box-shadow','none');
- await tap(page.locator('#mine-panel .dj834-detail-back'));
- await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
 
@@ -1710,11 +1710,15 @@ test('phone selected dock has no color plate and route form is vertically balanc
     swapVisible:getComputedStyle(document.getElementById('dj-route-swap')).display!=='none',
     advancedClosed:!document.getElementById('dj-route-advanced').open};
  });
+ await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
  expect(form.formDisplay).toBe('flex');
  expect(form.panel.top,'route entry is a top-aligned map overlay').toBeGreaterThanOrEqual(0);
  expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.card.bottom,'route editor must clear the primary action').toBeLessThanOrEqual(form.footer.top+4);
+ // Compare visible surfaces, not the unscrolled .route-card content box.
+ // A long editable form may extend inside its scrollport, but the entire
+ // clipped panel must remain above the tappable primary action.
+ expect(form.panel.bottom,'visible route editor must clear the primary CTA').toBeLessThanOrEqual(form.cta.top-6);
  // The footer wrapper can extend behind the safe-area dock; only the real CTA
  // determines whether a user can see and tap the route action.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
@@ -1722,13 +1726,13 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(form.ctaHit,'the CTA centre must receive a real pointer event').toBe(true);
  expect(form.swapVisible).toBe(true);
  expect(form.advancedClosed).toBe(true);
- await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
+
  if(page.viewportSize().width===390)await testInfo.attach('real-route-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 
  await tap(page,tab(page,'mine'));
  await expect(page.locator('#mine-panel')).toBeVisible();
  const mineDock=await checkDock('mine');
- await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const contrast=await type.locator('[data-dj885-type="scale"][aria-pressed="true"]').evaluate(active=>{
@@ -1739,8 +1743,8 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(contrast.active.bg,'selected font pill must differ from an unselected one').not.toBe(contrast.inactive.bg);
  expect(contrast.active.color).not.toBe(contrast.inactive.color);
  if(page.viewportSize().width===390)await testInfo.attach('real-font-pills-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
- await tap(page.locator('#mine-panel .dj834-detail-back'));
- await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  const history=await page.evaluate(()=>{
   const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
