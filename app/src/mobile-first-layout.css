@@ -1752,7 +1752,9 @@
       min-height:0!important;
       max-height:none!important;
       margin:0!important;
-      padding:0 0 calc(92px + env(safe-area-inset-bottom,0px))!important;
+      /* The fixed pill owns the bottom inset. The independent page itself
+         must occupy the full height; its INNER scroller supplies clearance. */
+      padding:0!important;
       border:0!important;
       border-radius:0!important;
       background:var(--dj-primary-page-bg,#edf3ef)!important;
@@ -1766,6 +1768,11 @@
       z-index:6500!important;
       visibility:visible!important;
       scale:1!important;
+    }
+    /* Preserve the existing outer inset only on the other three full screens.
+       My Info has no phantom footer; its scrolling content clears the dock. */
+    html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel).page-panel:not([hidden]) {
+      padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;
     }
 
     /* Preserve the established My Info dark palette and existing theme QA. */

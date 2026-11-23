@@ -19,7 +19,11 @@ test('primary tabs have independent full viewport phone surfaces',()=>{
  assert.match(css,/height:100dvh!important/);
  assert.match(css,/inset:0!important/);
  assert.match(css,/border-radius:0!important/);
- assert.match(css,/padding:0 0 calc\(92px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
+ // The full-screen shell is edge-to-edge. Only non-My-Info screens retain
+ // the historical exterior dock inset; My Info scrolls with an interior gutter.
+ assert.match(css,/padding:0!important/);
+ assert.match(css,/:is\(#route-panel,#participation-panel,#news-panel\)\.page-panel:not\(\[hidden\]\) \{\s*padding-bottom:calc\(92px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
+ assert.doesNotMatch(css,/:is\(#route-panel,#participation-panel,#news-panel,#mine-panel\)\.page-panel:not\(\[hidden\]\) \{[^}]*padding:0 0 calc\(92px/);
  assert.match(css,/z-index:8500!important/);
  assert.match(css,/\.dj836-sheet-body/);
  assert.match(css,/overflow-y:auto!important/);
