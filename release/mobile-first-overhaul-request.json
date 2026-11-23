@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.105",
+  "application_version": "9.2.106",
   "public_work_branch": "main",
-  "purpose": "PR350 consolidated actual phone UI controls (community, walking location picker, My Info map utilities); PR351 fixed its source regression test path for isolated release. User expressly requested complete modifications and Production; preserve map/PRI/transport routing APIs. PR350 source CI 45105625838 successful, PR351 source CI 45106075541 successful. Require sealed Preview, all mobile QA shards, PC/tablet, guarded Production exact commit marker and Android APK; no bypass. PR352 fixes transient external Seoul bus upstream 5xx retry with no assertion bypass; all 12 phone shards passed in previous candidate.",
-  "attempt": 295,
+  "purpose": "Owner-requested Sangdo1 six-factor PRI integration: merged PR #354 at 975578e4d23928b18e1677a133900d3a640200fa. Crosswalk 4×25 and shared-road (4+3+2+1)×10 criteria, six equal-weight risk factors, red high-risk ≥70, grey missing and explicit partial n/6. User requested completion and deployment. Preserve original transport, map, GIS, routing and account functions. Run source tests, sealed Preview, 12 phone QA shards, PC/tablet and protected exact Production with provenance; do not bypass checks.",
+  "attempt": 296,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.105 run 45106265961: isolated app build and exact Preview passed; all 12/12 mobile shards passed. PC/tablet QA stopped only at live Seoul bus upstream HTTP 502 ROUTE_PATH_UPSTREAM; PR #352 merged as 785c83cfc3792020baaf539b61aa227ea13e67f6 adds short limited retries while preserving real route coordinate assertions. Recheck all source/Preview/phone/PC/Production gates, no bypass.",
+  "last_retry_reason": "New PRI-only release candidate requested after PR #354 source integration; previous 9.2.105 gated PC/tablet run observed transient external Seoul bus HTTP 502. Retry built-in limited source validation without suppressing real failure. PR #354 source CI was still queued at time of source merge; protected release must independently pass all mandatory tests.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
