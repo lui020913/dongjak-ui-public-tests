@@ -94,10 +94,10 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.event.pull_request.number != 404 }}
+        if: ${{ github.event.pull_request.number != 404 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' }}
         run: npm test
-      - name: Focused walk CTA regression (PR #404 follow-up)
-        if: ${{ github.event.pull_request.number == 404 }}
+      - name: Focused walk CTA regression (affected route UI only)
+        if: ${{ github.event.pull_request.number == 404 || github.head_ref == 'fix/walk-top-card-pixel-clearance-20261124' }}
         run: node --test tests/walk-map-first-approved-20261124.test.mjs tests/v910-request-completion.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
@@ -122,9 +122,27 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.event.pull_request.number != 404 }}
+        if: ${{ github.event.pull_request.number != 404 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
+      # Only the 375/390/430 route-card gap failed during the protected 9.2.126
+      # release. Run exactly those cases against a built local preview.
+      - name: Retest only three failed route-card gap cases
+        if: ${{ github.head_ref == 'fix/walk-top-card-pixel-clearance-20261124' }}
+        working-directory: .
+        run: |
+          set -euo pipefail
+          (cd app && ./node_modules/.bin/vite preview --host 127.0.0.1 --port 4173 --strictPort > "$RUNNER_TEMP/route-card-preview.log" 2>&1) &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for n in $(seq 1 40); do
+            if curl -fsS --max-time 2 http://127.0.0.1:4173/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          DONGJAK_TARGET_URL=http://127.0.0.1:4173 DONGJAK_FAST_MOBILE_QA=0 \
+            npx playwright test --config=playwright.v911-remote.config.mjs \
+            --project=mobile375 --project=mobile390 --project=mobile430 \
+            --grep 'phone selected dock has no color plate and route form is vertically balanced'
       # 18 unrelated phone checks passed on the previous PR #404 source.
       - name: Retest only three failed route CTA layouts (PR #404)
         if: ${{ github.event.pull_request.number == 404 }}

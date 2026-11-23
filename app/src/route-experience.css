@@ -491,9 +491,9 @@
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) .route-card {
       display:flex!important;flex-direction:column!important;align-items:stretch!important;
-      justify-content:flex-start!important;gap:10px!important;
+      justify-content:flex-start!important;gap:8px!important;
       box-sizing:border-box!important;width:100%!important;min-height:0!important;
-      margin:0!important;padding:14px 15px 13px!important;
+      margin:0!important;padding:12px 15px 10px!important;
       border:1px solid var(--walk-border)!important;border-radius:23px!important;
       background:var(--walk-paper)!important;
       box-shadow:0 6px 24px rgba(23,55,44,.12)!important;
