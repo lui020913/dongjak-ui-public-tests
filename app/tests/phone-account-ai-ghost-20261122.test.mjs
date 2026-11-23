@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -36,7 +37,7 @@ test('dismissal guard is shared by popup, transport, and mobile orb entrypoints'
 
 test('language remains in App & Display row regardless of initialization order',()=>{
   const home=source('v834-my-info.js'),language=source('v854-language.js');
-  const css=source('mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   const wrapped=home.indexOf('records.append(child)');
   const correct=home.indexOf('displayGroup.insertBefore(languageControl');
   assert(wrapped!==-1&&correct>wrapped);
@@ -50,7 +51,7 @@ test('language remains in App & Display row regardless of initialization order',
 });
 
 test('light account and font details use the same screen-colored canvas as header',()=>{
-  const css=source('mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   assert(css.includes('Only intentional form inputs and inset photo/profile cards remain elevated'));
   for(const key of ['.dj834-detail-content','.dj834-account-container',
     '.dj877-type-settings','#dj824-account','.dj824-account-details']){

@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -26,7 +27,7 @@ test('transport close is not reinterpreted as a deliberate AI orb activation',()
 
 test('language selector is mounted into the account display group after initialization',()=>{
   const language=read('v854-language.js');
-  const full=read('mobile-primary-fullscreen.css');
+  const full=readPrimaryPhoneCss();
   assert.match(language,/const ensurePlacement=/);
   assert.ok(language.includes('group.insertBefore(section,history||null)'));
   assert.ok(!language.includes('body.prepend(section)'),'language should not become a separate card');

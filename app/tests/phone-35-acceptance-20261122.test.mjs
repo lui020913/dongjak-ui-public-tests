@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 /**
  * The owner's November 22 mobile correction acceptance contract.
  * These 35 checks are implementation-level guardrails, NOT a substitute for
@@ -161,7 +162,7 @@ const checks=[
    contains(src('src/version-history-v7.js'),'releaseEdition','syncPublicVersion');
  }],
  ['E03','community is a full-height opaque screen with nonoverlapping composer',()=>{
-   const s=src('src/mobile-primary-fullscreen.css');
+   const s=readPrimaryPhoneCss();
    contains(s,'#participation-panel','dj9256-composing','height:100dvh!important','#community-compose-close');
  }],
  ['E04','signed-out sessions see onboarding, except native theme refresh restoration',()=>{

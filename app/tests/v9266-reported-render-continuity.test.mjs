@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -20,7 +21,7 @@ test('tour retains opaque old artwork and text until the next decoded image exis
 });
 
 test('primary pages never fade out their own opaque background on tab entry',()=>{
-  const css=read('src/mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   assert.match(css,/\.page-panel:not\(\[hidden\]\):not\(\[data-dj810-animating\]\)/);
   assert.match(css,/animation:none!important;\s*opacity:1!important/);
   assert.doesNotMatch(css,/@keyframes dj-primary-page-enter/);
@@ -29,7 +30,7 @@ test('primary pages never fade out their own opaque background on tab entry',()=
 });
 
 test('community composer and feed use one native-status-matched primary surface',()=>{
-  const css=read('src/mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   const controller=existsSync(new URL('../src/mobile-17-followup.js',import.meta.url))
     ?read('src/mobile-17-followup.js')
     :read('../frontend/production/mobile-17-followup.js');

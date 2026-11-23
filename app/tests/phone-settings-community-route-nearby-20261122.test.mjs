@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -5,7 +6,7 @@ import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const html=read('index.html');
 const css=read('src/mobile-ui/current.css');
-const settings=read('src/mobile-primary-fullscreen.css');
+const settings=readPrimaryPhoneCss();
 const lang=read('src/v854-language.js');
 
 test('language lives in one fixed-height settings row and uses the actual saved preference owner',()=>{

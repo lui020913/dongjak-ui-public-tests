@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -74,7 +75,7 @@ test('iOS PWA status controller owns the status-area meta rather than two writer
 });
 
 test('mobile full-height primary pages retain the charcoal status-edge base',()=>{
-  const css=read('src/mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   const contract=read('src/theme-contract.css');
   assert.match(css,/--dj-primary-page-bg:#22282e/);
   assert.match(contract,/--dj-theme-bg:#22282e/);

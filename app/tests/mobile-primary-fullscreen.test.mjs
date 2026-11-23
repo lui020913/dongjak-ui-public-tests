@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const css=read('src/mobile-primary-fullscreen.css');
+const primary=read('src/mobile-first-layout.css');
+const markerStart='/* BEGIN original mobile-primary-fullscreen.css (verbatim, immediately after mobile-first-layout.css) */';
+const markerEnd='/* END original mobile-primary-fullscreen.css */';
+const css=primary.slice(primary.indexOf(markerStart)+markerStart.length,primary.indexOf(markerEnd));
 const main=read('src/main.js');
 const controller=read('src/dj-v8212-sheet-controller.js');
 const navigation=read('src/bottom-tab-navigation.js');
@@ -23,7 +26,9 @@ test('primary tabs have independent full viewport phone surfaces',()=>{
  assert.match(css,/\.dj-sheet-chrome-grip/);
  assert.match(css,/display:none!important/);
  assert.match(css,/prefers-reduced-motion:reduce/);
- assert.match(main,/import '\.\/mobile-primary-fullscreen\.css'/);
+ assert.match(main,/import '\.\/mobile-first-layout\.css'/);
+ assert.doesNotMatch(main,/import '\.\/mobile-primary-fullscreen\.css'/);
+ assert.equal(existsSync(new URL('../src/mobile-primary-fullscreen.css',import.meta.url)),false);
 });
 
 test('primary pages bypass draggable sheets and reveal content without a full-screen root fade',()=>{
