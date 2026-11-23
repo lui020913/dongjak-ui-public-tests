@@ -34,7 +34,8 @@ html body #app#app#app#app#app#app #dj840-map-tip.is-visible{opacity:1!important
 html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj17-more-root,
 html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel .dj17-feature-details{background:#2c343d!important;color:#f1f4f6!important;border-color:#4d5b65!important}
 html body #app#app#app#app#app#app[data-theme="dark"] :is(#map-safety-controls,#mine-panel .dj17-more-root) :is(.dj833-feature-line,.dj834-feature-line,.dj-safety-feature,.dj-safety-card,.dj-safety-section,.dj-safety-group){background:#2c343d!important;color:#f1f4f6!important;border-color:#4d5b65!important}
-#mine-panel .dj17-more-root .dj840-more-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* The two quick links repeat the App & screen section. Preserve handlers but do not display duplicates. */
+#mine-panel .dj17-more-root .dj840-more-quick-actions{display:none!important}
 #mine-panel .dj17-more-root .dj840-more-quick-actions button{min-height:44px;border:1px solid var(--mf-border,#d6e2dc);border-radius:14px;background:var(--mf-surface-raised,#f3f7f5);color:inherit}
 #mine-panel .dj17-more-root .dj833-feature-line{display:flex;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid var(--mf-border,#d6e2dc)}
 #mine-panel .dj17-more-root .dj832-more-feature{display:flex;flex:1 1 auto;align-items:center;gap:8px;text-align:left;background:none;border:0;color:inherit;min-height:44px}
