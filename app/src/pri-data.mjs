@@ -1,4 +1,4 @@
-import {scaleTenPointRisk} from './pri-new-factor-rules.mjs';
+import {scaleTenPointRisk,crosswalkRisk100,sharedRoadRisk100} from './pri-new-factor-rules.mjs';
 // PRI normalized safety scores: 100 = safer, 0 = more vulnerable. Original source risk scores remain unchanged in source files.
 // Null denotes genuinely unobserved data. Legacy modeled defaults remain in
 // imported raw values for provenance, but are not eligible for displayed scores.
@@ -74,6 +74,17 @@ export function mergeFactor(bundle,patch){
  return validateBundle({...bundle,factors:[...bundle.factors.filter(f=>f.id!==factor.id),factor],segments,config:{status:'draft'}});
 }
 export function parseImport(raw,current=null){
+ if(raw?.type==='pri-factor-rubric'){
+   if(raw.schemaVersion!==1||!Array.isArray(raw.rows)||!['crossing','sharedRoad'].includes(raw.factor?.id)||raw.factor.scoreDirection!=='risk')
+     fail('횡단보도·보차혼용의 완전한 평가항목과 위험점수 방향이 필요합니다.');
+   const grader=raw.factor.id==='crossing'?crosswalkRisk100:sharedRoadRisk100;
+   const scores=raw.rows.map(row=>{
+     const value=grader(row?.components);
+     const title=raw.factor.id==='crossing'?'횡단보도 4개 평가항목':'보차혼용도로 4·3·2·1점 평가항목';
+     return {id:row?.id,score:value,evidence:{note:title+(value===null?' 일부 미확인 · 미평가(NULL)':' 합계 '+value+' / 100점')+' · '+text(row?.note,500)}};
+   });
+   return mergeFactor(current,{schemaVersion:1,type:'pri-factor-scores',networkVersion:raw.networkVersion,factor:raw.factor,scores});
+ }
  if(raw?.type==='pri-factor-scores'){
    if(raw.scoreMax===10){
      if(raw.factor?.id!=='sharedRoad'||raw.factor?.scoreDirection!=='risk'||!Array.isArray(raw.scores))fail('10점 척도는 보차혼용 위험지수에만 적용할 수 있습니다.');
