@@ -1190,10 +1190,12 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  // On a genuinely empty public database, the first-run home must include
  // useful actions. Existing real posts remain visible instead of sample data.
  if(await feed.locator('.dj-community-empty-state').isVisible()){
-   await expect(feed.getByRole('button',{name:'첫 글 작성하기'})).toBeVisible();
-   const firstPost=feed.getByRole('button',{name:'첫 글 작성하기'});
-   await firstPost.scrollIntoViewIfNeeded();
-   await tap(page,firstPost);
+   // The empty feed uses the single persistent '+ 글쓰기' action.
+   // Do not require a second duplicate button in the empty-state card.
+   const compose=panel.locator('#community-compose-toggle');
+   await expect(compose).toBeVisible();
+   await compose.scrollIntoViewIfNeeded();
+   await tap(page,compose);
    await expect(panel.locator('#community-form')).toBeVisible();
    await tap(page,panel.locator('#community-compose-close'));
    await expect(panel.locator('#community-form')).toBeHidden();
