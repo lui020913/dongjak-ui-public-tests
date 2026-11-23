@@ -154,25 +154,34 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   shield.setAttribute('aria-hidden','true');app.append(shield);
   const stop=byId('nav-stop');
   if(stop)stop.textContent='안내 종료';
+  const focusEnd=()=>{
+    if(app.classList.contains('route-guiding')&&stop?.isConnected&&doc.activeElement!==stop)
+      stop.focus({preventScroll:true});
+  };
   const intercept=e=>{
     if(!app.classList.contains('route-guiding'))return;
     if(e.target?.closest?.('#nav-stop'))return;
+    // Window-capture handles Tab before MapLibre or a legacy modal can
+    // consume keyboard input; it is a genuine accessibility focus trap.
     if(e.type==='keydown'&&e.key==='Tab'){
-      e.preventDefault();stop?.focus({preventScroll:true});return;
+      e.preventDefault();e.stopImmediatePropagation();focusEnd();return;
     }
-    // Block both genuine input and scripted UI dispatch. GPS and map
-    // rendering updates are not DOM interaction events and keep running.
+    // The GPS camera is updated programmatically; user-generated map and UI
+    // inputs are blocked while a real walking guidance session is active.
     e.preventDefault?.();
     e.stopImmediatePropagation?.();
     e.stopPropagation?.();
+    if(['pointerdown','click','mousedown','keydown'].includes(e.type))focusEnd();
   };
+  on(win,'keydown',intercept,{capture:true,passive:false});
   for(const type of ['click','dblclick','pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','contextmenu','keydown']){
     on(doc,type,intercept,{capture:true,passive:false});
   }
   const trap=e=>{
-    if(app.classList.contains('route-guiding')&&e.target!==stop)stop?.focus({preventScroll:true});
+    if(app.classList.contains('route-guiding')&&e.target!==stop)focusEnd();
   };
   on(doc,'focusin',trap,true);
+  on(doc,'focusout',()=>{if(app.classList.contains('route-guiding'))queueMicrotask(focusEnd);},true);
 
   let latest=null,assessment=null;
   const riskLabel=entry=>{
