@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.124",
+  "application_version": "9.2.125",
   "public_work_branch": "main",
-  "purpose": "Protected exact-source 9.2.124 release after PR #397 walking route CTA natural footer and PR #398 My Info update-history dock 5px overlap correction. PR #397 passed 11/12 mobile QA groups plus PC/tablet in Preview run 45181470009; sole remaining mobile375 failure was update-history scrollport bottom at 744px vs nav top 739px (threshold navTop+3=742px). PR #398 adjusts only existing My Info phone scrollport bottom inset from 73px to 81px, with full source regression, build and real 375/390/430 browser CI 45182520103 passing. Regenerate NEW exact commit Preview; run all 12 independent mobile QA groups and PC/tablet. Only protected Production with source SHA/version/bindings checks, and rollback on failure. Preserve native route, 6-factor PRI, GPS, map, transit, account, AI, community and unrelated surfaces.",
-  "attempt": 321,
+  "purpose": "Guarded full route-finding UI redesign for approved PR #399, verified source commit 9e7b37b946c766bde4fd925894106a2969e9055e and squash merge a4885a22a164ce53c97b233e5390452aab4c6ed0. Single Naver-style map-first input -> candidate comparison -> real GPS guidance -> completion flow, explicitly NO separate route-details screen. Two genuinely computed pedestrian paths maximum; color ONLY observed road spans on selected route using same conservative six-factor PRI (0 lower risk green, 100 high risk red), unknown gray dashed; never infer unmeasured safety. Guidance mode blocks map gestures, tabs, AI, search, layers, menus, keyboard except the original 'End guidance' control; restoring map gestures after stop. Preserve native routing/GPS/geocoder, buses, subway, auth, AI, community, current production rollback. Full source CI 45211076543 passed all regression/build and real 375/390/430 phone browser tests. Require NEW source-exact Preview, all 12 mobile QA groups plus PC/tablet, protected Production provenance/API/binding/version checks; block and roll back on failure.",
+  "attempt": 322,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-23: Attempt 320 Preview 45181470009 blocked Production after 11/12 mobile shards passed; single 375px My Info history scroller overlapped dock by measured 5px. PR #398 verified 8px additional clearance, source CI success. Attempt 321 uses new source SHA and no previous Preview/QA reuse.",
+  "last_retry_reason": "New feature release 9.2.125 after prior 9.2.124 successfully deployed. No re-use of 9.2.124 test evidence: require full new preview and all mobile QA for exact merge commit.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
