@@ -167,10 +167,11 @@ export function installMyInfo(doc=document){
  // iOS PWA may suspend Web Animations when a sheet is being resized or
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
- function enter(node){
+ function enter(node,direction='forward'){
    if(!node||reducedMotion()||typeof node.animate!=='function')return;
-   try{node.animate([{opacity:.3,transform:'translateY(4px)'},{opacity:1,transform:'translateY(0)'}],{
-     duration:160,easing:'cubic-bezier(.2,.75,.25,1)'
+   const x=direction==='back'?-14:14;
+   try{node.animate([{opacity:.88,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
+     duration:210,easing:'cubic-bezier(.2,.76,.24,1)'
    });}catch{/* Appearance must never block navigation. */}
  }
  function showDetail(view){
@@ -196,7 +197,7 @@ export function installMyInfo(doc=document){
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
    if(panelScroller)panelScroller.scrollTop=0;
-   enter(detail);
+   enter(detail,'forward');
    if(view==='profile'){
      const toggle=account.querySelector('.dj824-account-toggle');
      if(toggle?.getAttribute('aria-expanded')!=='true')toggle?.click();
@@ -209,7 +210,7 @@ export function installMyInfo(doc=document){
    detail.hidden=true;
    landing.hidden=false;
    body.scrollTop=0;
-   enter(landing);
+   enter(landing,'back');
  }
  detail.querySelector('.dj834-detail-back').addEventListener('click',back);
  landing.addEventListener('click',event=>{

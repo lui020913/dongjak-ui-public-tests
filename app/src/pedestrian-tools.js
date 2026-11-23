@@ -162,6 +162,14 @@ export function installPedestrianControlPlacement({app,nav,panel}){
     const desktop=window.innerWidth>=1080;
     const rect=nav.getBoundingClientRect();
     const top=desktop && rect.height>0?`${Math.ceil(rect.bottom+12)}px`:'';
+    // Measure the *rendered* phone dock, rather than adding a fixed 95px.
+    // iOS safe-area and bottom-nav heights differ between standalone modes.
+    if(!desktop&&rect.height>0&&rect.width>0&&!nav.hidden){
+      const clearance=Math.max(0,Math.ceil(window.innerHeight-rect.top)+9);
+      const wanted=clearance+'px';
+      if(panel.style.getPropertyValue('--dj-nearby-dock-clearance')!==wanted)
+        panel.style.setProperty('--dj-nearby-dock-clearance',wanted);
+    }else panel.style.removeProperty('--dj-nearby-dock-clearance');
     if(desktop && rect.width>0){
       app.style.setProperty('--dj-rail-btn-w',`${Math.round(rect.width)}px`);
       app.style.setProperty('--dj-rail-left',`${Math.round(rect.left)}px`);
@@ -193,6 +201,7 @@ export function installPedestrianControlPlacement({app,nav,panel}){
     app.classList.remove('ped-info-open');
     app.style.removeProperty('--dj-controls-under-nav');
     app.style.removeProperty('--dj-rail-btn-w');app.style.removeProperty('--dj-rail-left');
+    panel.style.removeProperty('--dj-nearby-dock-clearance');
   };
 }
 

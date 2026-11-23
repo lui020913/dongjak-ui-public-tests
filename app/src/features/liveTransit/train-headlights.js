@@ -28,8 +28,8 @@ export function withTrainHeadlights(sprite,facing){
         if(alpha(px,py)<180)continue;
         const d=Math.hypot(px-cx,py-y),i=(py*w+px)*4;
         if(d>rim+.5*unit)continue;
-        // Fine dark rim for contrast even on the white roof; warm white luminous core.
-        const color=d<=core?[255,255,244]:d<=core+1.0*unit?[255,228,142]:[44,53,59];
+        // Fine dark rim for contrast even on the white roof; neutral white-blue luminous core.
+        const color=d<=core?[248,252,255]:d<=core+1.0*unit?[219,240,255]:[44,53,59];
         const opacity=d<=core+1.0*unit?Math.min(1,1.15-(d-core)*.10):Math.max(0,Math.min(.78,(rim+.5*unit-d)/unit));
         for(let k=0;k<3;k++)data[i+k]=Math.round(data[i+k]*(1-opacity)+color[k]*opacity);
       }

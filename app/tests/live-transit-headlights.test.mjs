@@ -14,7 +14,7 @@ test('headlights are painted only on the correct leading end; source is not muta
  const r=changed(base,right),l=changed(base,left);
  assert(r.length>20&&l.length>20);assert(r.every(([x])=>x>80));assert(l.every(([x])=>x<15));
  assert.deepEqual(mirror(right).data,left.data);
- assert(r.some(([x,y])=>right.data[(y*96+x)*4]===255));
+ assert(r.some(([x,y])=>{const p=(y*96+x)*4;return right.data[p]===248&&right.data[p+2]===255;}));
 });
 test('transparent boundaries and off-state artwork are retained exactly',()=>{
  const base=artwork(),lit=withTrainHeadlights(base,'right');

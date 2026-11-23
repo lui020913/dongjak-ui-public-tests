@@ -103,7 +103,7 @@ const checks=[
  }],
  ['C05','PRI road thickness and opacity vary continuously with zoom',()=>{
    const s=src('src/pri-map.js');
-   contains(s,'11.5,.7,13,1.1,15,1.8,17,2.8,19,4.1',"['get','evaluated'],.72,.27");
+   contains(s,'11.5,1,13,1.5,15,2.35,17,3.6,19,5.2',"['get','evaluated'],.72,.27");
  }],
  ['C06','opening PRI removes floating TIP and obstructing map scale',()=>{
    contains(src('src/pri-map.js'),'syncPriHud(Boolean(id))',"node.style.setProperty('display','none','important')");

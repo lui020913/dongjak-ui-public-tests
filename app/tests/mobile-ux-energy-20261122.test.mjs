@@ -27,7 +27,7 @@ test('PRI map safely hides legacy TIP even with inline important styles and soft
   assert.match(pri,/node\.style\.setProperty\('display','none','important'\)/);
   assert.match(pri,/syncPriHud\(Boolean\(id\)\)/);
   assert.match(pri,/savedHudStyle\.clear\(\)/);
-  assert.match(pri,/11\.5,\.7,13,1\.1,15,1\.8,17,2\.8,19,4\.1/);
+  assert.match(pri,/11\.5,1,13,1\.5,15,2\.35,17,3\.6,19,5\.2/);
   for(const name of ['낮음','주의','보통','높음','매우 높음'])assert.ok(pri.includes(name));
   assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css,/min-height:44px/);
