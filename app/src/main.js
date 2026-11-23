@@ -78,6 +78,7 @@ import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
+import {loadCompositePriForRoutes,compareCompositePriRoutes} from './pri-route-exposure.mjs';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
@@ -2464,6 +2465,36 @@ void refreshCommunityNotices();window.setInterval(()=>{if(document.visibilitySta
 function emptyWalkingRoute() {
   return {type:'FeatureCollection',features:[]};
 }
+const priMapNote=document.createElement('p');
+priMapNote.id='dj-pri-route-advice';
+priMapNote.className='dj-pri-route-advice';
+priMapNote.setAttribute('role','status');
+priMapNote.hidden=true;
+document.getElementById('route-map-card')?.append(priMapNote);
+const priEditorNote=document.createElement('p');
+priEditorNote.id='dj-pri-route-editor-advice';
+priEditorNote.className='dj-pri-route-advice';
+priEditorNote.hidden=true;
+document.getElementById('route-summary')?.append(priEditorNote);
+function showPriRouteAdvice(result){
+  const explain=entry=>entry?.risk===null||!entry?'자료 없음':
+    entry.risk.toFixed(1)+'점 · 경로 중 관측 '+Math.round(entry.coverage*100)+'% · 평균 '+entry.observedFactorsMean+'/6 지표';
+  const text=!result
+    ? '종합 PRI 자료를 확인하지 못했습니다. 이 경로에 안전도 평가가 적용되지 않았습니다.'
+    : result.recommendation
+    ? '상도1동 종합 PRI 비교(연구용): '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
+      ' 후보의 관측 구간 위험점수가 더 낮습니다. 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
+      '. 실제 통행 위험·안전은 보증하지 않습니다.'
+    : '종합 PRI 경로 비교 보류: '+(result.reason==='same-route'?'동일한 경로입니다.':
+      result.reason==='similar-risk'?'두 후보의 관측 점수 차이가 작습니다.':
+      '두 경로의 조사범위가 부족하거나 서로 달라 공정하게 비교할 수 없습니다.')+
+      ' 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
+      '. 미평가 도로는 안전한 도로로 계산하지 않습니다.';
+  for(const node of [priMapNote,priEditorNote]){node.textContent=text;node.hidden=false;}
+}
+function clearPriRouteAdvice(){
+  for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
+}
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap;
@@ -2487,8 +2518,12 @@ function syncRoutePresentation() {
     editor.hidden=true;
     const metric=readRouteMetrics();
     document.getElementById('route-map-metrics').textContent = `${metric.duration} · ${metric.distance}`;
-    document.getElementById('route-map-source').textContent=routeResult?.source==='seoul-pedestrian-graph'
-      ? '서울시 도보 네트워크 · 안전도 미평가' : '외부 보행경로 서버 · 안전도 미평가';
+    const pri=routeResult?.priExposure;
+    const priInfo=pri?.risk!==null && pri?.coverage>=0.65
+      ? '종합 PRI 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
+      : 'PRI 위험도 미평가';
+    document.getElementById('route-map-source').textContent=(routeResult?.source==='seoul-pedestrian-graph'
+      ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
   }
@@ -2553,6 +2588,7 @@ function invalidateRoute() {
   clearTransitPreview();
   stopNavigation();
   routeResult = null;
+  clearPriRouteAdvice();
   routeVariants = {standard:null,gentle:null};
   document.getElementById('route-variants').hidden=true;
   showRouteLine(null);
@@ -2807,6 +2843,7 @@ function resetRoute() {
   closeRouteSearch();closeTransitRouteConfirmation();
   routePickMode=null;routeStart=null;routeEnd=null;routeResult=null;
   routeWaypoints=[];routeProductTools?.setWaypoints([]);
+  clearPriRouteAdvice();
   routeVariants={standard:null,gentle:null};
   document.getElementById('route-variants').hidden=true;
   routeStartMarker?.remove();routeEndMarker?.remove();
@@ -3007,8 +3044,18 @@ async function calculateRoute() {
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
     routeVariants={standard,gentle};
+    let priComparison=null;
+    try {
+      const composite=await loadCompositePriForRoutes();
+      priComparison=compareCompositePriRoutes({standard,gentle},composite);
+      if(standard)standard.priExposure=priComparison.standard;
+      if(gentle)gentle.priExposure=priComparison.gentle;
+    } catch(error) {
+      console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
+    }
+    showPriRouteAdvice(priComparison);
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard,gentle}}));
-    selectedRouteVariant=standard?'standard':'gentle';
+    selectedRouteVariant=priComparison?.recommendation||(standard?'standard':'gentle');
     applySelectedRouteVariant();
     document.getElementById('route-variants').hidden=false;
     for(const button of document.querySelectorAll('[data-route-variant]')){
@@ -3022,7 +3069,7 @@ async function calculateRoute() {
         ? '두 조건에서 같은 경로가 계산됐습니다. 평지라는 뜻은 아닙니다.'
         : '최단 도보 경로와 경사 회피 우선 경로를 비교할 수 있습니다.')
       : '제공 가능한 보행 경로 한 개만 계산됐습니다.';
-    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}`;
+    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}${priComparison?.recommendation?' · 종합 PRI 관측 구간 기반 상대 저위험 후보 자동 선택':''}`;
     navigate('map');
     fitWalkingRoute(routeResult.coords);
     syncRoutePresentation();
