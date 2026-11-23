@@ -563,8 +563,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 
 /* Shared interaction feedback; visual-only, preserving native click and scroll. */
 @media(max-width:699px){
-  #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:var(--mf-accent-soft,#e1efe9);box-shadow:var(--djNext-tool-shadow);transition:transform 280ms cubic-bezier(.25,.70,.30,1),width 280ms ease,height 280ms ease;will-change:transform}
-  #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{background:#285b50}
+  #app #bottom-nav[data-dj-motion-indicator="ready"]>.dj-motion-indicator{display:none!important;visibility:hidden!important;position:absolute;left:0;top:0;z-index:0;pointer-events:none;border-radius:999px;background:transparent!important;box-shadow:none!important;transition:none!important;will-change:auto!important}
+  #app[data-theme=dark] #bottom-nav>.dj-motion-indicator{display:none!important;background:transparent!important;box-shadow:none!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav[data-dj-motion-indicator="ready"]>.nav-tab{background:transparent!important;box-shadow:none!important;z-index:1}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab:active:not(:disabled){scale:.96!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav > .nav-tab{transition:scale 100ms ease-out!important}
@@ -964,10 +964,10 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   @keyframes djTabContentReveal{from{opacity:.88}to{opacity:1}}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #bottom-nav{z-index:7000!important}
   /* Route editor: a unified location selector and legible type rhythm. */
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body{background:var(--dj9272-page)!important;padding:14px 14px 28px!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj-page-intro{font-size:12px!important;line-height:1.5!important;margin:0 4px 10px!important;color:var(--dj9272-muted)!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-card{padding:12px 14px!important;gap:8px!important;border-radius:20px!important;background:var(--dj9272-surface)!important;border:1px solid var(--dj9272-line)!important;box-shadow:var(--dj9272-shadow)!important}
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-row{min-height:56px!important;display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;padding:4px 0!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj836-sheet-body{background:var(--dj9272-page)!important;padding:18px 14px 28px!important;display:flex!important;flex-direction:column!important;justify-content:safe center!important;row-gap:14px!important;align-items:stretch!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .dj-page-intro{font-size:12px!important;line-height:1.5!important;margin:0 4px 16px!important;flex:0 0 auto!important;color:var(--dj9272-muted)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-card{padding:16px 16px!important;gap:10px!important;flex:0 0 auto!important;border-radius:20px!important;background:var(--dj9272-surface)!important;border:1px solid var(--dj9272-line)!important;box-shadow:var(--dj9272-shadow)!important}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-row{min-height:66px!important;display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;padding:8px 0!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text{display:grid!important;gap:4px!important;overflow-wrap:anywhere!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text span{font-size:12px!important;color:var(--dj9272-muted)!important;font-weight:700!important}
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #route-panel .route-location-text strong{font-size:16px!important;line-height:1.3!important;white-space:normal!important;color:var(--dj9272-ink)!important}
@@ -1312,5 +1312,36 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   }
   html body #app#app#app#app#app#app#app #mine-panel .dj834-detail-content .dj877-type-settings:not([hidden]){
     padding:0 0 12px!important;gap:11px!important;align-content:start!important;
+  }
+}
+
+/* 2026-11-23: measured phone dock. The moving selection plate was a
+   SEPARATE DOM child, not the .nav-tab background. Keep semantic selection
+   through contrasting icon/text alone. Do not change tab event handlers. */
+@media(max-width:699px){
+  #app #bottom-nav>.dj-motion-indicator{
+    display:none!important;visibility:hidden!important;opacity:0!important;
+    box-shadow:none!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+    #bottom-nav>.nav-tab:is(.active,[aria-current="page"]){
+    background:transparent!important;background-image:none!important;
+    box-shadow:none!important;color:#087f6c!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+    #bottom-nav>.nav-tab:is(.active,[aria-current="page"]) :is(.nav-icon,svg,span:last-child){
+    color:inherit!important;-webkit-text-fill-color:currentColor!important;
+  }
+  #app[data-theme="dark"] #bottom-nav>.nav-tab:is(.active,[aria-current="page"]){
+    background:transparent!important;color:#a0f0da!important;
+  }
+  /* Search/results should begin at the top so long lists remain scrollable. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+    #route-panel .dj836-sheet-body:has(#route-place-search:not([hidden])),
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+    #route-panel .dj836-sheet-body:has(#route-summary:not([hidden])),
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app
+    #route-panel .dj836-sheet-body:has(#route-variants:not([hidden])){
+    justify-content:flex-start!important;
   }
 }
