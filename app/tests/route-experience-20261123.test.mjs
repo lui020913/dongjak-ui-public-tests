@@ -35,7 +35,7 @@ test('PRI risk visual is a truthful subset of the real calculated route, unknown
  assert.ok(unknown.features.every(f=>f.properties.tone==='unknown'&&f.properties.color==='#8c969c'));
  const xFactor=111320*Math.cos(37.5*Math.PI/180),yFactor=111320;
  const a=[p[0]*xFactor,p[1]*yFactor],b=[q[0]*xFactor,q[1]*yFactor];
- const line={a,b,length:Math.hypot(b[0]-a[0],b[1]-a[1]),risk:86,coverage:6,id:'one-observed-road'};
+ const line={a,b,length:Math.hypot(b[0]-a[0],b[1]-a[1]),risk:71,coverage:6,id:'one-observed-road'};
  const grid=new Map();
  for(let x=Math.floor(a[0]/50)-1;x<=Math.floor(b[0]/50)+1;x++)
   for(let y=Math.floor(a[1]/50)-1;y<=Math.floor(a[1]/50)+1;y++)grid.set(x+','+y,[line]);
