@@ -97,7 +97,7 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.ok(!css.includes('.dj854-language-section{order:99!important;display:block!important'),'no production orphan language card');
  assert.ok(!js.includes('host.append(language)'),'no production language-row reparenting');
  assert.ok(js.includes("export function installV9272PhoneExperience"));
- assert.ok(read('src/route-experience-20261123.js').includes("mapCard.querySelector('.route-map-card-actions')?.before(choices)"));
+ assert.ok(read('src/route-experience-20261123.js').includes("actions?.before(choices)"));
  assert.equal(js.includes("button.insertAdjacentHTML('afterbegin',phoneIcon(key))"),false);
  assert.ok(js.includes("Math.max(96,Math.round(win.innerHeight*.12))"));
  if(hasSourceScript){
@@ -124,7 +124,7 @@ test('walking routes reuse the native selection and do not invent four extra alt
  const route=read('src/route-experience-20261123.js');
  const css=read('src/route-experience.css');
  assert.ok(!js.includes("cards.append(b)"));
- assert.ok(route.includes("const visible=same?[items[0]]:items;"));
+ assert.ok(route.includes("const available=equal?[items[0]]:items;"));
  assert.ok(route.includes("native.click();"));
  assert.ok(route.includes("routeComparisonItems(latest)"));
  assert.ok(css.includes("#route-map-card #route-guide-start"));
