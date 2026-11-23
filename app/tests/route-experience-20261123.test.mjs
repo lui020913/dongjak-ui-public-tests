@@ -9,7 +9,7 @@ test('route UI is loaded once after legacy controls; native engine still owns ro
  assert.equal(html.split('src="/src/route-experience-20261123.js"').length,2);
  assert.match(script,/native\.click\(\)/);
  assert.match(script,/dongjak:route-swap/);
- assert.match(script,/route-gps-start/);
+ assert.match(html,/id="route-gps-start"/);
  assert.match(script,/nav-instruction/);
  assert.doesNotMatch(script,/fetchPedestrianRoute\(/);
  assert.doesNotMatch(script,/watchPosition\(/);
