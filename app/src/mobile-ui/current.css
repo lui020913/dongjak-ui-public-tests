@@ -1291,9 +1291,14 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   html body #app#app#app#app#app #mine-panel.page-panel:not([hidden])::after {
     content:none!important;display:none!important;
   }
-  html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-    padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
-    scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+  /* Earlier mobile layout rules use an important cascade layer; use that
+     SAME layer for scroll clearance, rather than an ineffective unlayered
+     !important that loses to the layered declarations. */
+  @layer request-completion {
+    html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+      padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+      scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+    }
   }
   html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {
     box-sizing:border-box!important;min-width:0!important;max-width:100%!important;
