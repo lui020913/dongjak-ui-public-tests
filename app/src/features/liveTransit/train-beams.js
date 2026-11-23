@@ -21,14 +21,14 @@ export function createTrainBeamSprite(facing){
     const depth=(x-originX)*direction;
     if(depth<0||depth>TRAIN_BEAM_LENGTH)continue;
     const forwardFade=Math.pow(Math.max(0,1-depth/TRAIN_BEAM_LENGTH),1.3);
-    const radiusY=11+depth*.23;
-    const dx=(depth-17)/49,dy=(y-50)/radiusY;
-    const radialFalloff=Math.exp(-2.0*(dx*dx+dy*dy));
-    const alpha=Math.round(255*Math.min(.38,.38*radialFalloff*forwardFade));
+    const radiusY=15+depth*.30;
+    const dx=(depth-15)/52,dy=(y-50)/radiusY;
+    const radialFalloff=Math.exp(-1.8*(dx*dx+dy*dy));
+    const alpha=Math.round(255*Math.min(.82,.82*radialFalloff*forwardFade));
     if(alpha===0)continue;
     const offset=(y*width+x)*4;
     // Neutral, pale white-blue output: no yellow tint on the map surface.
-    data[offset]=244;data[offset+1]=250;data[offset+2]=255;data[offset+3]=alpha;
+    data[offset]=228;data[offset+1]=244;data[offset+2]=255;data[offset+3]=alpha;
   }
   return {width,height,data};
 }
