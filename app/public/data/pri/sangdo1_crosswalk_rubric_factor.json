@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "type": "pri-factor-scores",
+  "networkVersion": "sangdo1-lighting-__RUNTIME_PLACEHOLDER__",
+  "factor": {
+    "id": "crossing",
+    "label": "횡단보도 보행자 위험도",
+    "scoreDirection": "risk",
+    "estimated": true,
+    "source": "사용자 제공 「보행자 위험도 지수(횡단보도)」 PDF (2026-11-23)",
+    "method": "보행 단절성·도로/지형·보행약자 취약성·야간 및 사고 이력 각 25점. 항목별 고위험 25·주의 15·안전 5를 합산. 완전한 4항목 관측 전에는 구간점수 NULL. 70~100 고위험, 40~69 주의, 0~39 저위험. 이 파일은 평가 기준 등록용으로 실제 도로별 점수가 미제출됨."
+  },
+  "scores": []
+}
