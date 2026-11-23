@@ -1,493 +1,379 @@
-/* Canonical visual owner for the walking-route flow, not a new route engine.
- * All below target the current, mounted route surfaces. No map-layer changes. */
+/* Single canonical mobile walking UI. No duplicate route detail page.
+ * Intentional high specificity wins the historical five-ID fullscreen rules
+ * while limiting all scope to #route-panel / route preview / guide.
+ */
 @layer request-completion {
   #app {
-    --dj-route-surface:var(--mf-surface,#f8fbf9);
-    --dj-route-raised:var(--mf-surface-raised,#fff);
-    --dj-route-ink:var(--mf-text,#1c312c);
-    --dj-route-muted:var(--mf-muted,#6c7d75);
-    --dj-route-edge:var(--mf-border,#d9e5dd);
-    --dj-route-accent:var(--mf-brand,#167b62);
-    --dj-route-accent-soft:var(--mf-brand-soft,#e8f5ee);
+    --walk-bg:var(--dj-primary-page-bg,#edf3ef);
+    --walk-paper:#ffffff;
+    --walk-muted:#627970;
+    --walk-text:#193d33;
+    --walk-border:#dbe9e1;
+    --walk-primary:#137e65;
+    --walk-soft:#eaf5ef;
   }
   #app[data-theme="dark"] {
-    --dj-route-surface:#23272d;
-    --dj-route-raised:#2c3239;
-    --dj-route-ink:#f1f4f5;
-    --dj-route-muted:#afb9c1;
-    --dj-route-edge:#424b55;
-    --dj-route-accent:#9dc9ba;
-    --dj-route-accent-soft:#374940;
+    --walk-bg:#23272d;--walk-paper:#2d3339;--walk-muted:#b7c3c0;
+    --walk-text:#ecf4f1;--walk-border:#45524f;--walk-primary:#72b99c;
+    --walk-soft:#34453f;
   }
   #app #route-panel .dj-page-intro {display:none!important}
-  #app #route-panel .route-location-row {
-    display:flex!important;align-items:center!important;gap:8px!important;
-    position:relative!important;min-height:66px!important;padding:6px 8px!important;
-    border:1px solid var(--dj-route-edge)!important;
-    border-radius:15px!important;background:var(--dj-route-raised)!important;
-    box-shadow:none!important;
+  #app #route-panel #dj-walk-fields {
+    position:relative;display:flex;flex-direction:column;width:100%;min-width:0;
+    border:1px solid var(--walk-border);border-radius:18px;
+    background:var(--walk-paper);box-shadow:0 2px 8px rgba(19,52,40,.035);
+    margin:0;
   }
-  #app #route-panel .route-location-row .route-dot {flex:0 0 10px!important}
-  #app #route-panel .route-location-text.dj-route-place-trigger {
-    display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
-    align-items:flex-start!important;justify-content:center!important;
-    min-width:0!important;max-width:100%!important;min-height:52px!important;
-    margin:0!important;padding:6px 4px!important;border:0!important;
-    border-radius:10px!important;background:transparent!important;
-    color:var(--dj-route-ink)!important;box-shadow:none!important;text-align:left!important;
-    cursor:pointer!important;
+  #app #route-panel #dj-walk-fields .route-location-row {
+    display:flex;align-items:center;gap:10px;min-height:70px;padding:7px 12px;
+    border:0;border-radius:0;background:transparent;box-shadow:none;
   }
-  #app #route-panel .route-location-text.dj-route-place-trigger span {
-    color:var(--dj-route-muted)!important;font-size:12px!important;font-weight:620!important;
-    line-height:1.25!important;
+  #app #route-panel #dj-walk-fields .route-location-row:first-child {
+    border-bottom:1px solid var(--walk-border);
   }
-  #app #route-panel .route-location-text.dj-route-place-trigger strong {
-    display:block!important;max-width:100%!important;font-size:16px!important;
-    font-weight:760!important;line-height:1.45!important;
-    overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
-    color:var(--dj-route-ink)!important;
+  #app #route-panel .route-location-row .route-dot {width:10px;height:10px;flex:0 0 10px}
+  #app #route-panel .route-location-row .route-dot.start {background:#236ae4}
+  #app #route-panel .route-location-row .route-dot.end {background:#ea5964}
+  #app #route-panel .route-location-text.dj-walk-field {
+    display:flex;flex:1;flex-direction:column;justify-content:center;gap:3px;
+    min-width:0;min-height:54px;padding:6px 0;background:transparent;border:0;
+    color:var(--walk-text);text-align:left;cursor:pointer;
   }
-  #app #route-panel .route-location-text.dj-route-place-trigger:focus-visible {
-    outline:3px solid var(--dj-route-accent)!important;outline-offset:2px!important;
+  #app #route-panel .route-location-text.dj-walk-field span {
+    color:var(--walk-muted);font-size:12px;font-weight:650;
   }
-  #app #route-panel .route-location-menu {
-    flex:0 0 39px!important;position:relative!important;min-width:39px!important;
-    margin:0!important;
+  #app #route-panel .route-location-text.dj-walk-field strong {
+    display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;color:var(--walk-text);font-size:16px;
+    font-weight:760;line-height:1.3;
   }
-  #app #route-panel .route-location-menu>summary {
-    display:grid!important;place-items:center!important;
-    width:39px!important;height:43px!important;min-width:39px!important;
-    padding:0!important;margin:0!important;
-    color:var(--dj-route-ink)!important;background:var(--dj-route-surface)!important;
-    border:1px solid var(--dj-route-edge)!important;border-radius:12px!important;
-    font-size:20px!important;line-height:1!important;list-style:none!important;
+  #app #route-panel .route-location-menu {flex:0 0 36px;min-width:36px;position:relative}
+  #app #route-panel .route-location-menu > summary {
+    display:grid;place-items:center;width:36px;height:39px;padding:0;
+    color:var(--walk-muted);background:var(--walk-bg);border:1px solid var(--walk-border);
+    border-radius:11px;font-size:20px;list-style:none;
   }
-  #app #route-panel .route-location-menu>summary::-webkit-details-marker {display:none!important}
-  #app #route-panel .route-location-divider {display:none!important}
+  #app #route-panel .route-location-menu > summary::-webkit-details-marker {display:none}
   #app #route-panel #dj-route-swap {
-    display:grid!important;place-items:center!important;position:relative!important;
-    align-self:flex-end!important;z-index:2!important;
-    width:38px!important;min-width:38px!important;height:38px!important;min-height:38px!important;
-    margin:-10px 16px -10px auto!important;padding:0!important;
-    border:1px solid var(--dj-route-edge)!important;border-radius:12px!important;
-    background:var(--dj-route-raised)!important;color:var(--dj-route-accent)!important;
-    box-shadow:0 2px 7px rgba(18,43,33,.09)!important;font-size:21px!important;
+    display:grid;place-items:center;position:absolute;right:54px;top:50%;
+    z-index:4;transform:translateY(-50%);width:38px;height:38px;
+    margin:0;padding:0;color:var(--walk-primary);
+    background:var(--walk-paper);border:1px solid var(--walk-border);
+    border-radius:12px;box-shadow:0 1px 6px rgba(15,49,36,.11);font-size:22px;
   }
+  #app #route-panel #dj-walk-shortcuts {
+    display:flex;gap:8px;min-width:0;width:100%;flex-wrap:wrap;
+  }
+  #app #route-panel #dj-walk-shortcuts button {
+    flex:1 1 140px;min-height:43px;min-width:0;padding:9px 11px;
+    font-size:12px;font-weight:720;color:var(--walk-text);
+    background:var(--walk-paper);border:1px solid var(--walk-border);
+    border-radius:12px;box-shadow:none;
+  }
+  #app #route-panel #dj-route-advanced,#app #route-panel #dj-route-data-detail {
+    display:block;width:100%;margin:0;padding:0;background:transparent;
+    color:var(--walk-muted);border:0;box-shadow:none;
+  }
+  #app #route-panel #dj-route-advanced > summary,
+  #app #route-panel #dj-route-data-detail > summary {
+    padding:11px 4px;font-size:12px;font-weight:680;color:var(--walk-muted);
+  }
+  #app #route-panel #dj-route-advanced .dj-route-advanced-body {display:grid;gap:9px}
+  #app #route-panel #dj-route-data-detail .page-note {
+    margin:0;padding:5px 4px 12px;background:transparent;
+    font-size:11px;line-height:1.6;color:var(--walk-muted);
+  }
+  #app #route-panel .route-location-divider {display:none!important}
+  #app #route-panel :is(#route-variants,#route-summary) {display:none!important}
   #app #route-panel .route-card {
-    display:flex!important;flex-direction:column!important;gap:10px!important;
-    border:0!important;background:transparent!important;box-shadow:none!important;
-    padding:6px 0 14px!important;margin:0!important;overflow:visible!important;
+    display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;
+    gap:12px;width:100%;min-width:0;margin:0;padding:10px 0 12px;
+    border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;
   }
-  #app #route-panel #route-calc {
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    min-height:52px!important;width:100%!important;position:relative!important;
-    margin:5px 0 0!important;border:0!important;border-radius:15px!important;
-    background:var(--dj-route-accent)!important;color:#fff!important;
-    font-size:16px!important;font-weight:760!important;letter-spacing:-.025em!important;
-    box-shadow:none!important;
-  }
-  #app #route-panel #route-calc:disabled {opacity:.43!important}
-  #app #route-panel #route-calc span:last-child {position:absolute!important;right:16px!important}
   #app #route-panel #route-clear {
-    align-self:center!important;min-height:38px!important;padding:8px 10px!important;
-    border:0!important;background:transparent!important;
-    color:var(--dj-route-muted)!important;font-size:12px!important;font-weight:600!important;
+    align-self:center;min-height:38px;padding:8px 12px;background:transparent;
+    border:0;color:var(--walk-muted);font-size:12px;font-weight:680;
   }
   #app #route-panel #route-clear[hidden] {display:none!important}
-  #app #route-panel :is(#route-variants,#route-summary) {display:none!important}
-  #app #dj-route-advanced,#app #dj-route-data-detail {
-    width:100%!important;min-width:0!important;margin:0!important;
-    color:var(--dj-route-muted)!important;border:0!important;background:transparent!important;
+  #app #route-panel #route-status {
+    display:block;min-height:0;padding:0;margin:0;color:var(--walk-muted);
+    font-size:12px;line-height:1.45;white-space:normal;
   }
-  #app #dj-route-advanced>summary,#app #dj-route-data-detail>summary {
-    cursor:pointer!important;padding:10px 3px!important;
-    font-size:13px!important;font-weight:680!important;color:var(--dj-route-muted)!important;
+  #app #route-panel #dj910-route-footer #route-calc {
+    width:100%;min-height:52px;display:flex;justify-content:center;align-items:center;
+    position:relative;border:0;border-radius:15px;padding:12px 18px;margin:0;
+    background:var(--walk-primary);color:white;font-size:16px;font-weight:780;
+    box-shadow:none;
   }
-  #app #dj-route-advanced .dj-route-advanced-body {
-    display:grid!important;gap:8px!important;max-width:100%!important;
-  }
-  #app #dj-route-advanced :is(#dj815-waypoints,#dj815-rail-planner,.dj815-route-share){
-    max-width:100%!important;box-sizing:border-box!important;
-    margin:0!important;
-  }
-  #app #dj-route-data-detail .page-note {
-    margin:0!important;padding:8px 2px 12px!important;font-size:11px!important;
-    line-height:1.55!important;
-  }
+  #app #route-panel #route-calc:disabled {opacity:.42}
+  #app #route-panel #dj910-route-footer #route-calc span:last-child {position:absolute;right:18px}
   #app #route-panel .route-place-search {
-    position:relative!important;inset:auto!important;
-    width:100%!important;height:auto!important;max-width:100%!important;
-    min-width:0!important;margin:0!important;padding:4px 0!important;
-    border:0!important;background:transparent!important;box-shadow:none!important;
+    display:flex;flex-direction:column;gap:10px;min-height:0;max-height:none;
+    position:relative;inset:auto;margin:0;padding:6px 0;width:100%;
+    background:transparent;border:0;box-shadow:none;
   }
   #app #route-panel .route-place-search[hidden] {display:none!important}
-  #app #route-panel .route-search-form {display:flex!important;gap:8px!important;align-items:center!important}
+  #app #route-panel .route-place-search-head {
+    display:flex;align-items:center;gap:12px;font-weight:750;color:var(--walk-text);
+  }
+  #app #route-panel .route-search-form {display:flex;gap:9px}
   #app #route-panel #route-search-query {
-    flex:1 1 0!important;min-width:0!important;min-height:49px!important;
-    padding:9px 12px!important;border:1px solid var(--dj-route-edge)!important;
-    border-radius:13px!important;background:var(--dj-route-raised)!important;
-    font-size:16px!important;color:var(--dj-route-ink)!important;
+    flex:1;min-width:0;min-height:50px;padding:10px 14px;
+    border:1px solid var(--walk-border);border-radius:13px;
+    background:var(--walk-paper);color:var(--walk-text);font-size:16px;
   }
   #app #route-panel #route-search-submit {
-    flex:0 0 auto!important;min-height:48px!important;padding:8px 16px!important;
-    background:var(--dj-route-accent)!important;color:#fff!important;
-    border-radius:13px!important;font-weight:740!important;
+    flex:0 0 auto;min-height:48px;border-radius:12px;padding:9px 16px;
+    background:var(--walk-primary);color:#fff;font-size:14px;font-weight:750;
   }
-  #app #route-panel .route-search-results {
-    display:grid!important;gap:3px!important;max-height:100%!important;
-    overflow-y:auto!important;overscroll-behavior:contain!important;
+  #app #route-panel #route-search-results {
+    flex:1;min-height:0;max-height:100%;overflow-y:auto;
+    overscroll-behavior:contain;
   }
   #app #route-panel .route-search-item {
-    min-height:54px!important;padding:12px 10px!important;
-    border:0!important;border-bottom:1px solid var(--dj-route-edge)!important;
-    border-radius:0!important;background:transparent!important;color:var(--dj-route-ink)!important;
+    border:0;border-bottom:1px solid var(--walk-border);border-radius:0;
+    background:transparent;color:var(--walk-text);min-height:54px;
+    padding:10px 8px;
   }
   #app #route-panel #route-search-status {
-    color:var(--dj-route-muted)!important;line-height:1.45!important;
-    font-size:12px!important;margin:8px 0!important;
+    margin:0;font-size:12px;line-height:1.45;color:var(--walk-muted);
   }
-  #app #route-panel .route-search-confirm-actions button {min-height:44px!important}
-  #app #route-map-card:not([hidden]) {
-    display:flex!important;flex-direction:column!important;gap:10px!important;
-    box-sizing:border-box!important;
-    border:1px solid var(--dj-route-edge)!important;
-    background:var(--dj-route-surface)!important;color:var(--dj-route-ink)!important;
-    border-radius:23px!important;padding:17px 16px!important;
-    box-shadow:0 10px 35px rgba(16,45,35,.14)!important;
+  #app #dj-walk-map-head {
+    display:none;position:fixed;left:12px;right:12px;
+    top:calc(env(safe-area-inset-top,0px) + 8px);height:62px;
+    z-index:6500;align-items:center;gap:12px;padding:8px 12px;
+    border:1px solid var(--walk-border);border-radius:18px;
+    background:var(--walk-paper);color:var(--walk-text);
+    box-shadow:0 5px 20px rgba(17,47,39,.13);
   }
-  #app #route-map-card>div:first-child {display:flex!important;gap:4px!important;flex-direction:column!important}
-  #app #route-map-card #route-map-metrics {
-    font-size:clamp(22px,5.5vw,27px)!important;line-height:1.25!important;
-    font-weight:840!important;color:var(--dj-route-ink)!important;
-    letter-spacing:-.04em!important;
+  #app #dj-walk-map-head .dj-walk-map-title {
+    display:flex;flex:1;flex-direction:column;gap:2px;
   }
-  #app #route-map-card #route-map-source {
-    color:var(--dj-route-muted)!important;font-size:11px!important;
-    font-weight:620!important;line-height:1.4!important;
+  #app #dj-walk-map-head small {font-size:11px;color:var(--walk-muted)}
+  #app #dj-walk-map-head strong {font-size:17px;font-weight:790}
+  #app #dj-walk-map-head button {
+    flex:0 0 40px;min-height:40px;padding:0;display:grid;place-items:center;
+    color:var(--walk-text);background:var(--walk-bg);border:0;
+    border-radius:13px;font-size:24px;
   }
   #app #dj-route-choice-list[hidden] {display:none!important}
-  #app #dj-route-choice-list {display:grid!important;gap:9px!important;width:100%!important;min-width:0!important}
-  #app .dj-route-choice-title {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important}
-  #app .dj-route-choice-title strong {color:var(--dj-route-ink)!important;font-size:15px!important;font-weight:770!important}
-  #app .dj-route-choice-title small {color:var(--dj-route-muted)!important;font-size:11px!important}
-  #app .dj-route-choice-rows {
-    display:flex!important;gap:9px!important;min-width:0!important;
-    overflow-x:auto!important;scroll-snap-type:x proximity!important;overscroll-behavior-x:contain!important;
-    scrollbar-width:none!important;
-  }
-  #app .dj-route-choice-rows::-webkit-scrollbar {display:none!important}
+  #app #dj-route-choice-list {display:flex;flex-direction:column;gap:9px;width:100%;min-width:0}
+  #app .dj-route-choice-title {display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  #app .dj-route-choice-title strong {color:var(--walk-text);font-weight:800;font-size:15px}
+  #app .dj-route-choice-title small {color:var(--walk-muted);font-size:11px}
+  #app .dj-route-choice-rows {display:flex;flex-direction:column;gap:7px;max-height:37dvh;overflow-y:auto}
   #app .dj-route-choice {
-    display:flex!important;flex:1 0 45%!important;flex-direction:column!important;gap:7px!important;
-    min-width:0!important;text-align:left!important;padding:12px!important;
-    border:1px solid var(--dj-route-edge)!important;border-radius:16px!important;
-    background:var(--dj-route-raised)!important;color:var(--dj-route-ink)!important;
-    scroll-snap-align:start!important;box-shadow:none!important;
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;
+    width:100%;min-width:0;min-height:70px;padding:11px 14px;
+    background:var(--walk-paper);border:1px solid var(--walk-border);
+    color:var(--walk-text);border-radius:14px;text-align:left;box-shadow:none;
   }
-  #app .dj-route-choice.is-current {
-    border:2px solid var(--dj-route-accent)!important;background:var(--dj-route-accent-soft)!important;
-    padding:11px!important;
+  #app .dj-route-choice.is-current {border:2px solid var(--walk-primary);padding:10px 13px;background:var(--walk-soft)}
+  #app .dj-route-choice-head {display:flex;align-items:center;gap:9px;min-width:0}
+  #app .dj-route-choice-head strong {font-size:14px;font-weight:780;white-space:nowrap}
+  #app .dj-route-choice-subtitle {font-size:10px;line-height:1.2;color:var(--walk-muted);font-weight:680}
+  #app .dj-route-choice-metrics {display:flex;align-items:baseline;gap:9px;grid-column:1;grid-row:2}
+  #app .dj-route-choice-metrics b {font-size:21px;font-weight:850;letter-spacing:-.035em;color:var(--walk-text)}
+  #app .dj-route-choice-metrics span {font-size:12px;color:var(--walk-muted)}
+  #app .dj-route-choice-pri {
+    grid-column:2;grid-row:1;justify-self:end;align-self:center;
+    border-radius:8px;padding:5px 7px;font-size:11px;font-weight:770;
+    background:#eef1f2;color:#626e77;white-space:nowrap;
   }
-  #app .dj-route-choice-top {display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:5px!important;min-width:0!important}
-  #app .dj-route-choice-top strong {font-size:14px!important;font-weight:790!important;color:var(--dj-route-ink)!important;white-space:nowrap!important}
-  #app .dj-route-choice-top small {font-size:10px!important;font-weight:650!important;color:var(--dj-route-muted)!important;line-height:1.3!important;text-align:right!important}
-  #app .dj-route-choice-metrics {display:flex!important;flex-wrap:wrap!important;gap:5px 10px!important;align-items:baseline!important}
-  #app .dj-route-choice-metrics b {font-size:25px!important;font-weight:840!important;color:var(--dj-route-ink)!important;letter-spacing:-.04em!important}
-  #app .dj-route-choice-metrics span {font-size:12px!important;color:var(--dj-route-muted)!important}
-  #app .dj-route-choice-pri {align-self:flex-start!important;display:inline-flex!important;
-    max-width:100%!important;border-radius:9px!important;padding:5px 7px!important;
-    font-size:11px!important;line-height:1.25!important;font-weight:760!important;
-    background:#eef2f3!important;color:#61707a!important;
+  #app .dj-route-choice-pri[data-tone="low"] {background:#dcf4e6;color:#116c47}
+  #app .dj-route-choice-pri[data-tone="medium"] {background:#fff0cb;color:#a56a0c}
+  #app .dj-route-choice-pri[data-tone="high"] {background:#ffe2e2;color:#b32424}
+  #app .dj-route-choice-coverage {grid-column:2;grid-row:2;justify-self:end;align-self:center;color:var(--walk-muted);font-size:10px}
+  #app .dj-route-choice-hint {margin:0;color:var(--walk-muted);font-size:11px;line-height:1.35}
+  #app #dj-route-pri-legend {display:flex;align-items:center;flex-wrap:wrap;gap:4px 7px;font-size:10px;color:var(--walk-muted)}
+  #app #dj-route-pri-legend .dj-route-pri-ramp {
+    flex:1 1 125px;height:7px;border-radius:100px;
+    background:linear-gradient(90deg,#139861 0%,#87c84c 26%,#f2c63f 51%,#ef903c 76%,#d84b4e 100%);
   }
-  #app .dj-route-choice-pri[data-tone="high"] {background:#ffe7e7!important;color:#b32424!important}
-  #app .dj-route-choice-pri[data-tone="medium"] {background:#fff0d9!important;color:#a35e09!important}
-  #app .dj-route-choice-pri[data-tone="low"] {background:#e8f4ef!important;color:#18654d!important}
-  #app .dj-route-choice-coverage {font-size:10px!important;color:var(--dj-route-muted)!important;line-height:1.35!important}
-  #app .dj-route-choice-hint {margin:0!important;font-size:11px!important;line-height:1.45!important;color:var(--dj-route-muted)!important}
-  #app #route-map-card .route-map-card-actions {
-    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:8px!important;margin:0!important;
+  #app #dj-route-pri-legend .dj-route-unknown-legend {flex-basis:100%;font-size:10px}
+  #app #route-map-card:not([hidden]) {
+    display:flex;flex-direction:column;gap:10px;
+    background:var(--walk-paper);color:var(--walk-text);
+    border:1px solid var(--walk-border);border-radius:23px;
+    box-shadow:0 8px 25px rgba(23,55,44,.16);padding:14px 16px;
   }
-  #app #route-map-card .route-map-card-actions button {
-    min-width:0!important;min-height:43px!important;font-weight:740!important;
-    font-size:13px!important;border-radius:13px!important;
-    padding:10px!important;box-shadow:none!important;
-  }
+  #app #route-map-card .dj-walk-native-summary {display:none!important}
+  #app #route-map-card .route-map-card-actions {display:flex;gap:8px;margin:0}
+  #app #route-map-card .route-map-card-actions :is(#route-map-edit,#route-map-close) {display:none!important}
   #app #route-map-card #route-guide-start {
-    order:3!important;grid-column:1/-1!important;min-height:51px!important;
-    background:var(--dj-route-accent)!important;color:#fff!important;border:0!important;
-    font-size:16px!important;
-  }
-  #app #route-map-card #route-map-edit {
-    order:1!important;border:1px solid var(--dj-route-edge)!important;
-    color:var(--dj-route-ink)!important;background:var(--dj-route-raised)!important;
-  }
-  #app #route-map-card #route-map-close {
-    order:2!important;border:1px solid var(--dj-route-edge)!important;
-    color:var(--dj-route-muted)!important;background:transparent!important;
-  }
-  #app #dj-route-pri-detail {width:100%!important;margin:0!important;color:var(--dj-route-muted)!important}
-  #app #dj-route-pri-detail>summary {
-    font-size:11px!important;font-weight:640!important;line-height:1.5!important;
-    color:var(--dj-route-muted)!important;cursor:pointer!important;
-    padding:5px 0!important;
-  }
-  #app #dj-route-pri-detail .dj-route-pri-body {display:grid!important;gap:6px!important;padding:8px 0!important}
-  #app #dj-route-pri-detail .dj-route-pri-body p {
-    margin:0!important;font-size:11px!important;line-height:1.5!important;
-    color:var(--dj-route-muted)!important;background:transparent!important;border:0!important;
+    width:100%;min-height:49px;order:1;border:0;border-radius:14px;
+    background:var(--walk-primary);color:#fff;font-size:15px;font-weight:780;
   }
   #app #dj-route-turn-banner {
-    display:none!important;flex-direction:column!important;gap:4px!important;
-    box-sizing:border-box!important;
-    position:fixed!important;left:12px!important;right:12px!important;
-    top:calc(env(safe-area-inset-top,0px) + 8px)!important;
-    z-index:5600!important;padding:16px 18px!important;
-    border-radius:19px!important;border:0!important;
-    background:#126e60!important;color:#fff!important;
-    box-shadow:0 8px 25px rgba(10,52,46,.23)!important;
+    display:none;position:fixed;left:12px;right:12px;
+    top:calc(env(safe-area-inset-top,0px) + 8px);
+    z-index:7300;padding:17px 20px;border-radius:17px;
+    background:#106e59;color:#fff;box-shadow:0 6px 22px rgba(13,44,36,.22);
+    pointer-events:none;
   }
-  #app.route-guiding #dj-route-turn-banner {display:flex!important}
-  #app #dj-route-turn-banner .dj-route-turn-kicker {
-    font-size:12px!important;font-weight:650!important;opacity:.88!important;
-  }
+  #app #dj-route-turn-banner .dj-route-turn-kicker {font-size:12px;font-weight:670;opacity:.84}
   #app #dj-route-turn-banner #nav-instruction {
-    display:block!important;font-size:clamp(20px,5vw,29px)!important;
-    font-weight:850!important;line-height:1.3!important;
-    letter-spacing:-.045em!important;color:#fff!important;
-    margin:0!important;
+    display:block;color:#fff;font-size:clamp(20px,5.2vw,28px);
+    line-height:1.3;font-weight:830;margin-top:6px;letter-spacing:-.025em;
   }
-  #app.route-guiding #nav-live-card:not([hidden]) {
-    box-sizing:border-box!important;background:var(--dj-route-surface)!important;
-    color:var(--dj-route-ink)!important;border:1px solid var(--dj-route-edge)!important;
-    border-radius:21px!important;padding:14px!important;
-    box-shadow:0 8px 25px rgba(15,45,35,.18)!important;
+  #app #dj-walk-guidance-lock {
+    display:none;position:fixed;inset:0;z-index:7200;
+    background:transparent;touch-action:none;overscroll-behavior:contain;
+    pointer-events:auto;
   }
-  #app #nav-live-card .nav-live-head {display:flex!important;justify-content:space-between!important;gap:8px!important;font-size:12px!important}
+  #app #dj-walk-guidance-lock[hidden] {display:none!important}
   #app #nav-live-card .nav-live-metrics {
-    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;margin:8px 0!important;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:8px 0;
   }
-  #app #nav-live-card .nav-live-metrics>div {
-    display:flex!important;flex-direction:column!important;align-items:flex-start!important;
-    gap:5px!important;padding:10px 12px!important;border-radius:12px!important;
-    background:var(--dj-route-raised)!important;
-  }
-  #app #nav-live-card .nav-live-metrics small {font-size:11px!important;color:var(--dj-route-muted)!important}
-  #app #nav-live-card .nav-live-metrics b {font-size:21px!important;font-weight:810!important;color:var(--dj-route-ink)!important}
+  #app #nav-live-card .nav-live-metrics>div {display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:11px;background:var(--walk-bg)}
+  #app #nav-live-card .nav-live-metrics small {font-size:11px;color:var(--walk-muted)}
+  #app #nav-live-card .nav-live-metrics b {font-size:20px;font-weight:800;color:var(--walk-text)}
   #app #nav-live-card #nav-warning {
-    font-size:11px!important;line-height:1.45!important;color:var(--dj-route-muted)!important;
-    white-space:normal!important;max-height:4.5em!important;min-height:0!important;
+    display:block;color:var(--walk-muted);font-size:11px;
+    line-height:1.4;max-height:3em;overflow:hidden;
   }
-  #app #nav-live-card .nav-live-options,
-  #app #nav-live-card .nav-live-actions {
-    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:8px 0 0!important;
-  }
-  #app #nav-live-card :is(.nav-live-options,.nav-live-actions)>button {
-    width:100%!important;min-width:0!important;min-height:42px!important;
-    padding:9px!important;border-radius:12px!important;
-    border:1px solid var(--dj-route-edge)!important;
-    color:var(--dj-route-ink)!important;background:var(--dj-route-raised)!important;
-    font-size:12px!important;font-weight:680!important;
-  }
-  #app #nav-live-card #nav-stop {color:#ad4040!important}
-  #app #nav-live-card .dj804-nav-extra-options:not(:has([data-level="poor"])) {display:none!important}
-  #app #nav-live-card .dj816-voice-box:not([open]) {display:none!important}
-  #app.route-guiding :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,#dj840-map-tip) {display:none!important}
+  #app #nav-live-card #nav-warning.dj825-nav-alert {color:#a44934}
 }
-@media (max-width:699px){
+@media(max-width:699px) {
   @layer request-completion {
-    #app[data-dj-route-stage="input"] #route-panel:not([hidden]) {
-      position:fixed!important;left:12px!important;right:12px!important;
-      top:calc(env(safe-area-inset-top,0px) + 8px)!important;
-      bottom:auto!important;
-      width:calc(100% - 24px)!important;max-width:none!important;
-      height:auto!important;min-height:0!important;
-      max-height:calc(100dvh - 126px - env(safe-area-inset-top,0px))!important;
-      display:flex!important;flex-direction:column!important;
-      border-radius:22px!important;padding:0!important;
-      overflow:hidden!important;transform:none!important;
-      background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="input"] #route-panel .dj836-sheet-body {
-      flex:1 1 auto!important;min-height:0!important;height:auto!important;
-      padding:8px 17px 14px!important;overflow-y:auto!important;
-      background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome {
-      flex:0 0 auto!important;background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel:not([hidden]) {
-      display:flex!important;flex-direction:column!important;
-      position:fixed!important;left:0!important;right:0!important;top:0!important;bottom:0!important;
-      width:100%!important;max-width:100%!important;height:100dvh!important;
-      max-height:100dvh!important;margin:0!important;
-      padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)!important;
-      border:0!important;border-radius:0!important;overflow:hidden!important;
-      background:var(--dj-route-surface)!important;z-index:5800!important;
-      transform:none!important;box-sizing:border-box!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel .dj-sheet-chrome {
-      flex:0 0 auto!important;min-height:55px!important;
-      padding:0 14px!important;background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel .dj836-sheet-body {
-      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
-      min-height:0!important;padding:10px 17px!important;
-      overflow-y:hidden!important;background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel .route-card {
-      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
-      min-height:0!important;padding:0!important;overflow:hidden!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel .route-card>
-      :not(#route-place-search){display:none!important}
-    #app[data-dj-route-stage="search"] #route-panel #route-place-search:not([hidden]) {
-      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
-      min-height:0!important;height:100%!important;max-height:100%!important;
-      margin:0!important;overflow:hidden!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel #route-search-results {
-      flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
-      max-height:100%!important;
-    }
-    #app[data-dj-route-stage="search"] #route-panel #dj910-route-footer,
-    #app[data-dj-route-stage="search"] #route-panel #route-calc {
-      display:none!important;
-    }
-    #app[data-dj-route-stage="input"] #route-panel > #dj910-route-footer {
-      flex:0 0 auto!important;
-      min-height:66px!important;
-      padding:7px 16px 10px!important;
-      border-top:1px solid var(--dj-route-edge)!important;
-      background:var(--dj-route-surface)!important;
-    }
-    #app[data-dj-route-stage="search"] #bottom-nav,
-    #app[data-dj-route-stage="search"] :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,#dj840-map-tip) {display:none!important}
-    #app[data-dj-route-stage="preview"] #route-map-card:not([hidden]) {
-      position:fixed!important;left:12px!important;right:12px!important;
-      width:calc(100% - 24px)!important;max-width:none!important;
-      bottom:calc(78px + env(safe-area-inset-bottom,0px))!important;
-      top:auto!important;transform:none!important;
-      max-height:min(53dvh,440px)!important;
-      overflow-y:auto!important;overscroll-behavior-y:contain!important;
-      z-index:3800!important;
-    }
-    #app[data-dj-route-stage="preview"] .dj-route-choice {flex-basis:47%!important}
-    #app[data-dj-route-stage="guiding"] #nav-live-card:not([hidden]) {
-      position:fixed!important;left:12px!important;right:12px!important;top:auto!important;
-      width:calc(100% - 24px)!important;max-width:none!important;
-      bottom:calc(env(safe-area-inset-bottom,0px) + 10px)!important;
-      max-height:min(43dvh,320px)!important;overflow-y:auto!important;
-      transform:none!important;z-index:4300!important;
-    }
-    #app[data-dj-route-stage="guiding"] .map-actions {
-      bottom:calc(env(safe-area-inset-bottom,0px) + 254px)!important;
-    }
-    #app[data-dj-route-stage="input"] #route-panel #dj-route-data-detail {margin:2px 0 0!important}
-  }
-}
-@media (prefers-reduced-motion:reduce){
-  @layer request-completion {
-    #app #route-panel,#app #route-map-card,#app #dj-route-turn-banner {
-      animation:none!important;transition:none!important;
-    }
-  }
-}
-
-/* v9.2.124 phone hotfix — the legacy five-ID fullscreen page selectors
- * currently win in @layer request-completion. An input route is a bounded
- * map overlay; only the explicit place-search stage uses a full page.
- * These selectors intentionally outrank that legacy selector, without
- * changing any other tab or the native click/routing logic. */
-@layer request-completion {
-  @media (max-width:699px) {
-    html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
+    /* Critical overrides of the old fullscreen/centering/layout cascade. */
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) {
-      position:fixed!important;
-      inset:calc(env(safe-area-inset-top,0px) + 8px) 12px auto 12px!important;
-      top:calc(env(safe-area-inset-top,0px) + 8px)!important;
-      right:12px!important;
-      bottom:auto!important;
-      left:12px!important;
-      display:flex!important;
-      flex-direction:column!important;
-      align-items:stretch!important;
-      width:calc(100vw - 24px)!important;
-      max-width:calc(100vw - 24px)!important;
-      min-width:0!important;
-      height:auto!important;
-      min-height:0!important;
-      max-height:calc(100dvh - var(--dj910-dock-bottom,88px) - 26px - env(safe-area-inset-top,0px))!important;
-      margin:0!important;
-      padding:0!important;
-      border:1px solid var(--dj-route-edge)!important;
-      border-radius:22px!important;
-      background:var(--dj-primary-page-bg,#edf3ef)!important;
-      box-shadow:0 9px 32px rgba(18,45,35,.13)!important;
-      overflow:hidden!important;
-      transform:none!important;
-      translate:none!important;
-      z-index:6500!important;
+      position:fixed!important;inset:0 0 var(--dj910-dock-bottom,88px) 0!important;
+      width:100%!important;max-width:100%!important;height:auto!important;
+      max-height:none!important;min-height:0!important;display:flex!important;
+      flex-direction:column!important;align-items:stretch!important;
+      justify-content:flex-start!important;margin:0!important;padding:env(safe-area-inset-top,0px) 0 0!important;
+      border:0!important;border-radius:0!important;box-shadow:none!important;
+      background:var(--walk-bg)!important;transform:none!important;translate:none!important;
+      overflow:hidden!important;z-index:5700!important;
     }
-    html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
-      position:relative!important;
-      flex:0 0 auto!important;
-      width:100%!important;
-      background:var(--dj-primary-page-bg,#edf3ef)!important;
-      border-bottom:1px solid var(--dj-route-edge)!important;
+      display:flex!important;flex:0 0 60px!important;height:60px!important;
+      min-height:60px!important;margin:0!important;padding:0 18px!important;
+      border-bottom:1px solid var(--walk-border)!important;
+      background:var(--walk-bg)!important;position:relative!important;
     }
-    html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-      display:flex!important;
-      flex:0 1 auto!important;
-      flex-direction:column!important;
-      align-items:stretch!important;
-      justify-content:flex-start!important;
-      gap:8px!important;
-      width:100%!important;
-      min-height:0!important;
-      max-height:calc(100dvh - var(--dj910-dock-bottom,88px) - 100px - env(safe-area-inset-top,0px))!important;
-      height:auto!important;
-      padding:8px 16px 14px!important;
-      overflow-y:auto!important;
-      background:var(--dj-primary-page-bg,#edf3ef)!important;
-      overscroll-behavior:contain!important;
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      justify-content:flex-start!important;align-items:stretch!important;
+      min-height:0!important;max-height:none!important;height:auto!important;
+      overflow-y:auto!important;overscroll-behavior:contain!important;
+      margin:0!important;padding:14px 18px 16px!important;
+      background:var(--walk-bg)!important;
     }
-    html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
-      /* The phone route editor is bounded at the map top. Keep its existing
-       * submit control directly after the scroll body, not detached over
-       * the location fields or behind the bottom tabs. */
-      position:relative!important;
-      inset:auto!important;
-      top:auto!important;
-      right:auto!important;
-      bottom:auto!important;
-      left:auto!important;
-      display:block!important;
-      flex:0 0 auto!important;
-      min-height:0!important;
-      width:100%!important;
-      max-width:100%!important;
-      margin:0!important;
-      padding:8px 16px 12px!important;
-      border:0!important;
-      border-top:1px solid var(--dj-route-edge)!important;
-      background:var(--dj-primary-page-bg,#edf3ef)!important;
-      box-shadow:none!important;
-      transform:none!important;
-      translate:none!important;
-      z-index:3!important;
-      pointer-events:auto!important;
+      position:relative!important;inset:auto!important;top:auto!important;
+      bottom:auto!important;left:auto!important;right:auto!important;
+      display:block!important;flex:0 0 auto!important;width:100%!important;
+      min-height:72px!important;max-width:100%!important;margin:0!important;
+      padding:8px 18px 12px!important;border:0!important;
+      border-top:1px solid var(--walk-border)!important;background:var(--walk-bg)!important;
+      transform:none!important;translate:none!important;box-shadow:none!important;
+      z-index:4!important;pointer-events:auto!important;
     }
-    html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
-      #route-panel.page-panel:not([hidden]) > #dj910-route-footer #route-calc {
-      display:flex!important;
-      width:100%!important;
-      min-height:52px!important;
-      margin:0!important;
-      pointer-events:auto!important;
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) .route-card {
+      display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+      gap:12px!important;padding:0!important;margin:0!important;
+      background:transparent!important;border:0!important;box-shadow:none!important;
+      transform:none!important;min-height:0!important;
     }
+    html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel.page-panel:not([hidden]) {
+      position:fixed!important;inset:0!important;width:100%!important;
+      max-width:100%!important;height:100dvh!important;max-height:100dvh!important;
+      min-height:0!important;display:flex!important;flex-direction:column!important;
+      margin:0!important;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)!important;
+      border:0!important;border-radius:0!important;transform:none!important;
+      background:var(--walk-bg)!important;overflow:hidden!important;z-index:6900!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;overflow:hidden!important;padding:10px 18px!important;
+      background:var(--walk-bg)!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel.page-panel:not([hidden]) .route-card {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;overflow:hidden!important;padding:0!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel .route-card > :not(#route-place-search) {display:none!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel #route-place-search:not([hidden]) {
+      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      min-height:0!important;max-height:100%!important;overflow:hidden!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel #route-search-results {flex:1!important;min-height:0!important;overflow-y:auto!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"]
+      #route-panel > #dj910-route-footer {display:none!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"] #bottom-nav,
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="search"] :is(.topbar,#djNext-toolbar,#dj-v794-toolbar) {
+      display:none!important
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]
+      #dj-walk-map-head {display:flex!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]
+      #route-map-card:not([hidden]) {
+      display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;
+      top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
+      max-height:min(50dvh,390px)!important;overflow-y:auto!important;
+      margin:0!important;padding:14px 15px!important;border-radius:23px!important;
+      transform:none!important;translate:none!important;z-index:6600!important;
+      background:var(--walk-paper)!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #bottom-nav,
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] :is(.topbar,#djNext-toolbar,#dj-v794-toolbar,#dj840-map-tip) {
+      display:none!important
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] .map-actions > :not(#current-location) {
+      display:none!important
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #dj-walk-guidance-lock:not([hidden]) {display:block!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #dj-route-turn-banner {display:flex!important;flex-direction:column!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #nav-live-card:not([hidden]) {
+      display:flex!important;flex-direction:column!important;position:fixed!important;
+      left:12px!important;right:12px!important;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;
+      top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
+      max-height:min(29dvh,235px)!important;overflow-y:auto!important;
+      margin:0!important;padding:14px 16px!important;border:1px solid var(--walk-border)!important;
+      border-radius:20px!important;background:var(--walk-paper)!important;
+      box-shadow:0 7px 22px rgba(14,50,40,.19)!important;
+      z-index:7400!important;transform:none!important;translate:none!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"] :is(.topbar,#djNext-toolbar,#dj-v794-toolbar,#dj840-map-tip,#bottom-nav,.map-actions,#dj-walk-map-head) {
+      display:none!important;pointer-events:none!important
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #nav-live-card :is(.nav-live-options,.dj804-nav-extra-options,.dj816-voice-box) {
+      display:none!important
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #nav-live-card .nav-live-actions {display:flex!important;gap:0!important;margin:6px 0 0!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #nav-live-card .nav-live-actions > :not(#nav-stop) {display:none!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
+      #nav-live-card #nav-stop {
+      display:block!important;flex:1 1 100%!important;width:100%!important;min-height:48px!important;
+      border:1px solid #d95050!important;border-radius:12px!important;
+      background:var(--walk-paper)!important;color:#c13939!important;
+      font-size:15px!important;font-weight:790!important;pointer-events:auto!important;
+    }
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  @layer request-completion {
+    #app #route-panel,#app #route-map-card,#app #nav-live-card,#app #dj-route-turn-banner {animation:none!important;transition:none!important}
   }
 }
