@@ -114,7 +114,15 @@
   }
   html body #app#app :is(#mine-panel,#version-history-modal) .dj-edition-history .v707-release {
     background:transparent!important;border:0!important;border-radius:0!important;
-    box-shadow:none!important;padding:4px 0 10px!important;margin:0!important;
+    box-shadow:none!important;padding:2px 0 7px!important;margin:0!important;
+  }
+  /* The category summary already names the change type. No second floating
+     category badge or nested opaque card inside release details. */
+  html body #app#app :is(#mine-panel,#version-history-modal) .dj-edition-history .v707-release-head .dj-semver-size {
+    display:none!important;
+  }
+  html body #app#app :is(#mine-panel,#version-history-modal) .dj-edition-history .v707-release-items {
+    padding:0 0 0 17px!important;margin:3px 0 5px!important;background:transparent!important;
   }
   html body #app#app :is(#mine-panel,#version-history-modal) .dj-edition-history .v707-release-head {
     padding:4px 0!important;gap:8px!important;border:0!important;background:transparent!important;
