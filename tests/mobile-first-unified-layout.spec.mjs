@@ -211,12 +211,15 @@ test('My Info update-history scroller is not masked by a fake footer above the f
       outerPaddingBottom:panel?parseFloat(getComputedStyle(panel).paddingBottom):null,
       paddingBottom:scroller?parseFloat(getComputedStyle(scroller).paddingBottom):0,
       scrollPaddingBottom:scroller?parseFloat(getComputedStyle(scroller).scrollPaddingBottom):0,
+      scrollViewportBottom:scroller?.getBoundingClientRect().bottom,
       navigationTop:document.getElementById('bottom-nav')?.getBoundingClientRect().top
     };
   });
   expect(state.fakeContent==='none'||state.fakeDisplay==='none',JSON.stringify(state)).toBe(true);
   expect(state.outerPaddingBottom,JSON.stringify(state)).toBe(0);
-  expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
-  expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
+  expect(state.scrollViewportBottom,JSON.stringify(state)).toBeLessThanOrEqual(state.navigationTop+3);
+  expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(16);
+  expect(state.paddingBottom,JSON.stringify(state)).toBeLessThanOrEqual(48);
+  expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(16);
   expect(state.navigationTop).toBeGreaterThan(450);
 });
