@@ -4,11 +4,13 @@ on:
     branches: [main]
     paths:
       - 'tests/visual-screen-inventory.spec.mjs'
+      - 'tests/anonymous-control-audit.spec.mjs'
       - '.github/workflows/public-screen-inventory.yml'
   push:
     branches: [main]
     paths:
       - 'tests/visual-screen-inventory.spec.mjs'
+      - 'tests/anonymous-control-audit.spec.mjs'
       - 'scripts/build-screen-gallery.mjs'
       - 'scripts/compare-screen-inventories.mjs'
       - '.github/workflows/public-screen-inventory.yml'
@@ -46,6 +48,8 @@ jobs:
         run: |
           npm run check:target
           node --check tests/visual-screen-inventory.spec.mjs
+          node --check tests/anonymous-control-audit.spec.mjs
+          node --check scripts/compare-screen-inventories.mjs
           node --check scripts/build-screen-gallery.mjs
       - name: Install Playwright
         run: npm install --no-audit --no-fund
@@ -70,6 +74,53 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: deployed-ui-screen-inventory-${{ matrix.label }}-${{ github.run_id }}
+          path: |
+            quality-report/screen-captures/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 7
+  audit:
+    name: Live UI touch — ${{ matrix.tab }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        tab: [map, route, participate, news, mine]
+    env:
+      CI: 'true'
+      DONGJAK_AUDIT_TAB: ${{ matrix.tab }}
+      DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate independent tab audit
+        run: node --check tests/anonymous-control-audit.spec.mjs
+      - name: Install Playwright
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Capture live release source before
+        run: |
+          mkdir -p quality-report/screen-captures
+          curl -fsS --max-time 20 "$DONGJAK_TARGET_URL/release-source.json" > quality-report/screen-captures/live-source-before.json
+      - name: Touch buttons and submenus only on assigned tab
+        run: npx playwright test tests/anonymous-control-audit.spec.mjs --project=mobile --workers=1 --reporter=list
+      - name: Recheck same release source
+        if: always()
+        run: |
+          curl -fsS --max-time 20 "$DONGJAK_TARGET_URL/release-source.json" > quality-report/screen-captures/live-source-after.json
+          cmp quality-report/screen-captures/live-source-before.json quality-report/screen-captures/live-source-after.json
+      - name: Save per-tab touch, 130ms and 480ms evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-touch-${{ matrix.tab }}-${{ github.run_id }}
           path: |
             quality-report/screen-captures/
             test-results/
