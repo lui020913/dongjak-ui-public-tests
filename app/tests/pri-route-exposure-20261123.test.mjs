@@ -49,6 +49,6 @@ test('route UI explains that PRI is partial and never treats unknown roads as sa
  const worker=readFileSync(new URL('../src/workers/pri-route-worker.mjs',import.meta.url),'utf8');
  assert.match(worker,/compareCompositePriRoutes\(routes,bundle\)/);
  assert.match(main,/미평가 도로는 안전한 도로로 계산하지 않습니다/);
- assert.match(main,/priComparison\?\.recommendation\|\|/);
+ assert.match(main,/comparison\?\.recommendation&&!priVariantChosenManually/);
  assert.match(css,/\.dj-pri-route-advice:not\(\[hidden\]\)/);
 });
