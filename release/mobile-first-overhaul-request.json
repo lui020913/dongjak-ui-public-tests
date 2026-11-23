@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.109",
+  "application_version": "9.2.110",
   "public_work_branch": "main",
-  "purpose": "Owner approved six-index Sangdo1 PRI integration. Six equal-weight risk indices, two new PDF rubrics, 10-to-100 shared-road conversion, 70+ red, NULL grey, accurate per-segment coverage. Preserve all existing GIS and transport functions; run exact source build, Preview, all 12 phone shards, desktop/tablet, protected Production and Android release with no bypass.",
-  "attempt": 299,
+  "purpose": "Owner-authorized non-destructive source cleanup release: deduplicated PRI observed-only 3/4/6 aggregation with identical score semantics; runtime manifest/NULL tests, five empty test placeholder removals. Exact verified GitHub PR #359 merged at 3c0fc6b954eefe0598147e86331ab5e6e3df1d07. Preserve all GIS, UI, APIs and Supabase. Use exact artifact Preview, 12 phone shards, desktop/tablet, protected Production and rollback checks; no bypass.",
+  "attempt": 300,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.108 run 45110510161 blocked before build by fast-mobile 20-case coverage policy: renamed 6-factor PRI E2E journey was not synchronized with releaseSmokeNames. Main commit 5728ab5e2138f8d42b804140892d16ff14230281 updates the exact one entry; test count and protected QA policy remain unchanged. Retry all gates; do not skip any checks.",
+  "last_retry_reason": "New approved release after successful PR #359 source CI 45113071845; no retry or reduced QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
