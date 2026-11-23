@@ -82,7 +82,7 @@ test('my-info typography enters with a nonblocking fade and retains existing acc
   assert.match(js,/function showDetail\(view\)/);
   assert.match(js,/landing\.hidden=true/);
   assert.match(js,/detail\.hidden=false/);
-  assert.match(js,/enter\(detail\)/);
+  assert.match(js,/enter\(detail,'forward'\)/);
   assert.match(js,/content\.append\(accountBox,typography,records\)/);
   assert.doesNotMatch(js,/await animation\.finished/);
   assert.doesNotMatch(js,/지도 &amp; 이동/);
@@ -107,7 +107,7 @@ test('profile back navigation cannot remain locked by suspended iOS animations',
   const source=read('src/v834-my-info.js');
   assert.match(source,/function back\(\)/);
   assert.match(source,/detail\.hidden=true;\s*landing\.hidden=false/);
-  assert.match(source,/enter\(landing\)/);
+  assert.match(source,/enter\(landing,'back'\)/);
   assert.match(source,/reducedMotion\(\)/);
   assert.doesNotMatch(source,/if\(transitioning\)return/);
   assert.doesNotMatch(source,/await fadeOpacity/);
