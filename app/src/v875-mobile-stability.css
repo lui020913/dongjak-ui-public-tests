@@ -82,12 +82,17 @@
     min-height:40px!important;text-align:left!important;
   }
   /* Freeze the transport chrome, scroll data in an isolated child. */
-  html body #app#app#app#app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed:not([hidden]){
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed:not([hidden]):not(.dj871-sheet-expanded){
     display:flex!important;flex-flow:column nowrap!important;
-    height:min(68dvh,700px)!important;
-    max-height:calc(100dvh - var(--dj829-panel-bottom,94px) - 36px)!important;
-    overflow:hidden!important;overscroll-behavior:none!important;padding:0 12px!important;
+    /* A two-route bus stop is not a 68dvh document. Grow with its content. */
+    height:auto!important;min-height:0!important;
+    max-height:min(72dvh,calc(100dvh - var(--dj829-panel-bottom,94px) - 36px))!important;
+    overflow:hidden!important;overscroll-behavior:contain!important;padding:0 12px!important;
     background:var(--dj800-surface,#fff)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed:not(.dj871-sheet-expanded)>.dj875-transit-scroll{
+    flex:0 1 auto!important;min-height:0!important;max-height:calc(72dvh - 155px)!important;
+    overflow-y:auto!important;overscroll-behavior:contain!important;
   }
   html body #app#app#app#app#app#app#app#app#app #transport-sheet.dj-news-transit-fixed>.handle{
     position:relative!important;top:auto!important;left:auto!important;right:auto!important;
