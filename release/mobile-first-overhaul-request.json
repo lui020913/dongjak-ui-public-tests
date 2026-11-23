@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.106",
+  "application_version": "9.2.107",
   "public_work_branch": "main",
-  "purpose": "Owner-requested Sangdo1 six-factor PRI integration: merged PR #354 at 975578e4d23928b18e1677a133900d3a640200fa. Crosswalk 4×25 and shared-road (4+3+2+1)×10 criteria, six equal-weight risk factors, red high-risk ≥70, grey missing and explicit partial n/6. User requested completion and deployment. Preserve original transport, map, GIS, routing and account functions. Run source tests, sealed Preview, 12 phone QA shards, PC/tablet and protected exact Production with provenance; do not bypass checks.",
-  "attempt": 296,
+  "purpose": "Owner-requested PRI six-factor release. PR #354 merged (975578e4d23928b18e1677a133900d3a640200fa). Existing 4-index/5-color legacy mobile regression corrected on main (8b33417e455888e56fd0b657b1fd68fcae50b850). Execute all app tests, exact sealed Preview, mobile and PC/tablet QA, approved Production and Android artifacts; do not bypass any failing checks.",
+  "attempt": 297,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New PRI-only release candidate requested after PR #354 source integration; previous 9.2.105 gated PC/tablet run observed transient external Seoul bus HTTP 502. Retry built-in limited source validation without suppressing real failure. PR #354 source CI was still queued at time of source merge; protected release must independently pass all mandatory tests.",
+  "last_retry_reason": "9.2.106 run 45109806296: 1465/1471 regression cases passed, exactly 1 assertion still expected obsolete five-color PRI legend in app/tests/mobile-ux-energy-20261122.test.mjs; corrected this source-era test to current three-band 70+ red labels without removing other protections. Retry complete gate with 9.2.107.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
