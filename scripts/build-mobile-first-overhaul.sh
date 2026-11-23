@@ -210,8 +210,18 @@ run_private(){
 # The final sealed deployment archive contains only the verified app artifacts.
 test ! -e "$RUNNER_TEMP/app"
 ln -s "$work" "$RUNNER_TEMP/app"
-mkdir -p "$RUNNER_TEMP/scripts"
-cp -R "$GITHUB_WORKSPACE/scripts/research" "$RUNNER_TEMP/scripts/research"
+# The isolated app build contains only app/. Mirror the exact pinned
+# repository-level test dependencies OUTSIDE that app, never into dist.
+# Release monotonicity and batch stamping tests import ../../scripts,
+# while the production contract test reads ../../.github/workflows.
+# Keep the complete sources in sync; do not skip these release guards.
+mkdir -p "$RUNNER_TEMP/scripts" "$RUNNER_TEMP/.github/workflows"
+cp -R "$GITHUB_WORKSPACE/scripts/." "$RUNNER_TEMP/scripts/"
+cp -R "$GITHUB_WORKSPACE/.github/workflows/." "$RUNNER_TEMP/.github/workflows/"
+cmp -s "$GITHUB_WORKSPACE/scripts/build-mobile-first-overhaul.sh" "$RUNNER_TEMP/scripts/build-mobile-first-overhaul.sh"
+cmp -s "$GITHUB_WORKSPACE/scripts/verify-release-monotonic.mjs" "$RUNNER_TEMP/scripts/verify-release-monotonic.mjs"
+cmp -s "$GITHUB_WORKSPACE/.github/workflows/mobile-first-overhaul-preview.yml" "$RUNNER_TEMP/.github/workflows/mobile-first-overhaul-preview.yml"
+echo "CHECKPOINT: exact-root QA source mirror mounted outside release artifact"
 test -s "$RUNNER_TEMP/scripts/research/sangdo1_policy_gap_300m_verify.mjs"
 test -f "$RUNNER_TEMP/app/public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson"
 test -f "$RUNNER_TEMP/app/public/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json"
