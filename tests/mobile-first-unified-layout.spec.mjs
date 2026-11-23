@@ -211,12 +211,17 @@ test('My Info update-history scroller is not masked by a fake footer above the f
       outerPaddingBottom:panel?parseFloat(getComputedStyle(panel).paddingBottom):null,
       paddingBottom:scroller?parseFloat(getComputedStyle(scroller).paddingBottom):0,
       scrollPaddingBottom:scroller?parseFloat(getComputedStyle(scroller).scrollPaddingBottom):0,
+      scrollViewportBottom:scroller?.getBoundingClientRect().bottom,
+      viewportHeight:innerHeight,
       navigationTop:document.getElementById('bottom-nav')?.getBoundingClientRect().top
     };
   });
   expect(state.fakeContent==='none'||state.fakeDisplay==='none',JSON.stringify(state)).toBe(true);
-  expect(state.outerPaddingBottom,JSON.stringify(state)).toBe(0);
-  expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
-  expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
+  expect(Math.abs(state.outerPaddingBottom-(state.viewportHeight-state.navigationTop)),JSON.stringify(state)).toBeLessThanOrEqual(2);
+  expect(state.scrollViewportBottom,JSON.stringify(state)).toBeLessThanOrEqual(state.navigationTop+3);
+  expect(state.scrollViewportBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(state.navigationTop-3);
+  expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(12);
+  expect(state.paddingBottom,JSON.stringify(state)).toBeLessThanOrEqual(28);
+  expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(12);
   expect(state.navigationTop).toBeGreaterThan(450);
 });
