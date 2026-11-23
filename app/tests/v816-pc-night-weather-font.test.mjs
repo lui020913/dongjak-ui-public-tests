@@ -33,7 +33,7 @@ test('v816: night vision does not trigger a blocking splash from dark theme',()=
 });
 test('v816: facility center is biased above midpoint and mobile pin above label',()=>{
   const src=read('src/place-details.js');
-  assert.match(src,/const viewportFocus=isPhone/);
+  assert.match(src,/usableMapSelectionOffset/);
   assert.match(src,/offset:\[0,offsetY\],duration:380/);
   assert.match(src,/mobilePin\?-15:-4/);
 });
