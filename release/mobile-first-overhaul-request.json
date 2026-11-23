@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.125",
+  "application_version": "9.2.126",
   "public_work_branch": "main",
-  "purpose": "Guarded Production delivery of Naver-style map-first walking navigation PR #399, excluding separate route-details screen; PR #400 release adapter anchor fix, PR #401 isolate-aware source bridge check, PR #403 correctly distinguishes raw source vs transformed release route style. Actual candidate options only standard/gentle; six-factor PRI observed road segments colored green/yellow/orange/red (red high risk) and unknown gray dashed; route comparison PRI only; focus-locked GPS guidance allows only 'End Guidance', then restores normal tabs/maps, arrival summary. Source app regression/build PR #403 45222875821 green. Require fresh exact SHA guarded Preview, 12 mobile QA groups, PC/tablet, strict Production SHA/version/API/binding/rollback gates. Never claim safety for unassessed segments.",
-  "attempt": 325,
+  "purpose": "Guarded 9.2.126 delivery after source PR #404: user-approved map-first walking input TOP origin/destination card, live map gap and new native map-control shortcuts, fixed calculate CTA just above five-tab dock. Preserve underlying native place search, route engine, six-factor observed PRI geometry with high-danger red and unassessed gray dashed routes, preview-only PRI comparison, GPS real-turn guidance and single-stop lock, and all other tabs. No independent route algorithm, GPS permission, data-binding or PRI assessment changes. Require full source CI for PR #404, new exact-SHA isolated Preview, all twelve phone QA shards, PC/tablet and fail-closed protected Production SHA/version/API/bindings checks. Never deploy if a phone geometry/hit-test or map-visibility regression is detected.",
+  "attempt": 326,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt 324 failed at one new app Node test, line92, because release adapter correctly replaces raw neutral alternative line with kind-based match expression, whereas regression expected unmodified source. PR #403 verifies exact raw anchor in source checkout and exactly one transformed line in isolated release; app regression and build passed. Attempt325 must run all gates on new source.",
+  "last_retry_reason": "2026-11-24 approved redesign: 9.2.125 walking input footer sheet left excessive empty map space and disconnected primary action. Ship only after PR #404 source CI and real 375/390/430 Playwright checks succeed. Retain 9.2.125 Production if any gate fails.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
