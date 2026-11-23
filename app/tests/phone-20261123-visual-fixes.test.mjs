@@ -75,3 +75,28 @@ test('My Info subviews animate by direction without blank-fading the page root',
  catch(error){if(error?.code!=='ENOENT')throw error;more=read('../frontend/production/mobile-17-followup.js');}
  assert.match(more,/\.dj834-tools-container/);
 });
+
+test('community composer fills the viewport with one scrolling form, not the dock-offset feed',()=>{
+ const css=read('src/public-ui-production-overlay.css');
+ const ui=read('src/main.js');
+ assert.match(css,/#participation-panel#participation-panel\.page-panel:not\(\[hidden\]\):not\(\.dj871-sheet-expanded\):not\(\.dj9256-composing\)/);
+ assert.match(css,/#participation-panel\.dj9256-composing:not\(\[hidden\]\)\s*\{[\s\S]*?bottom:0!important;/);
+ assert.match(css,/#participation-panel\.dj9256-composing > \.dj836-sheet-body\s*\{[\s\S]*?overflow:hidden!important;/);
+ assert.match(css,/#participation-panel #community-form > \.djNext-form-scroll\s*\{[\s\S]*?overflow-y:auto!important;/);
+ assert.match(css,/#community-form \.community-form-top\s*\{[\s\S]*?position:relative!important;/);
+ assert.match(ui,/sc\.className='djNext-form-scroll'/);
+ assert.match(ui,/footer.className='dj-community-compose-footer'/);
+ assert.match(css,/#community-form > \.dj-community-compose-footer\s*\{[\s\S]*?flex:0 0 auto!important;/);
+ assert.match(css,/data-dj-user-editor-keyboard="true"\] #participation-panel > \.dj836-sheet-body \{[\s\S]*?overflow:hidden!important;/);
+ assert.match(css,/#bottom-nav\s*\{\s*visibility:hidden!important;pointer-events:none!important;/);
+});
+
+test('AI mobile composer follows one visual viewport with no duplicated keyboard inset',()=>{
+ const css=read('src/v880-supabase-safety-ai.css');
+ const js=read('src/v891-mobile-hud-ai-logo.js');
+ assert.match(js,/modal\.dataset\.djAiKeyboard=keyboardOpen\?'true':'false'/);
+ assert.match(js,/Math\.min\(Math\.floor\(view\?\.height\|\|win\.innerHeight\),win\.innerHeight-top\)/);
+ assert.match(css,/#dj-ai-search-modal\[data-dj-ai-keyboard="true"\] \.dj-ai-search-body\{padding-bottom:8px!important\}/);
+ assert.match(css,/#dj-ai-search-modal \.dj-ai-transcript\{[^\n]*overflow-y:auto!important/);
+ assert.match(css,/#dj-ai-search-modal \.dj-ai-composer\{position:relative!important;flex:0 0 auto!important/);
+});

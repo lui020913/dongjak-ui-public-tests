@@ -213,7 +213,7 @@
   }
   #app #dj-route-turn-banner .dj-route-turn-kicker {font-size:12px;font-weight:670;opacity:.84}
   #app #dj-route-turn-banner #nav-instruction {
-    display:block;color:#fff;font-size:clamp(20px,5.2vw,28px);
+    display:block;color:#f7fffc!important;font-size:clamp(20px,5.2vw,28px);
     line-height:1.3;font-weight:830;margin-top:6px;letter-spacing:-.025em;
   }
   #app #dj-walk-guidance-lock {
@@ -326,7 +326,7 @@
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"]
       #route-map-card:not([hidden]) {
       display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
-      bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;
       top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
       max-height:min(50dvh,390px)!important;overflow-y:auto!important;
       margin:0!important;padding:14px 15px!important;border-radius:23px!important;
@@ -348,7 +348,7 @@
       #nav-live-card:not([hidden]) {
       display:flex!important;flex-direction:column!important;position:fixed!important;
       left:12px!important;right:12px!important;
-      bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important;
+      bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;
       top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
       max-height:min(29dvh,235px)!important;overflow-y:auto!important;
       margin:0!important;padding:14px 16px!important;border:1px solid var(--walk-border)!important;
@@ -609,4 +609,15 @@
   #app:not([data-dj-route-stage="input"]) #dj-walk-input-back,
   #app:not([data-dj-route-stage="input"]) #dj-walk-mode,
   #app:not([data-dj-route-stage="input"]) #dj-walk-map-actions {display:none!important}
+}
+
+/* Preview-only GPS placement. The mobile-first-shell layer owns the native map
+ * action stack; leave the input/search and active guidance positions untouched. */
+@layer mobile-first-shell {
+  @media (max-width:699px) {
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] .map-actions {
+      top:auto!important;
+      bottom:calc(min(50dvh,390px) + env(safe-area-inset-bottom,0px) + 22px)!important;
+    }
+  }
 }

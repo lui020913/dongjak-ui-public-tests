@@ -108,3 +108,13 @@ test('release mobile-next patch targets the current route source and avoids unsc
  }
  assert.match(main,/enabled\|\|navMode\?'none':'visible'/);
 });
+
+test('only preview and guidance dock positions, preview GPS and turn text contrast change',()=>{
+ const css=read('src/route-experience.css');
+ assert.equal(css.split('bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;').length-1,2);
+ assert.match(css,/data-dj-route-stage="preview"\] \.map-actions/);
+ assert.match(css,/bottom:calc\(min\(50dvh,390px\) \+ env\(safe-area-inset-bottom,0px\) \+ 22px\)!important;/);
+ assert.match(css,/#dj-route-turn-banner #nav-instruction[\s\S]*?color:#f7fffc!important;/);
+ assert.match(css,/data-dj-route-stage="input"/);
+ assert.match(css,/data-dj-route-stage="search"/);
+});

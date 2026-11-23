@@ -321,8 +321,8 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  #dj-ai-search-modal[open]::backdrop{background:transparent!important;background-image:none!important;animation:none!important;backdrop-filter:none!important}
  html:has(#dj-ai-search-modal[open]),body:has(#dj-ai-search-modal[open]){overscroll-behavior:none;overflow:hidden}
  #dj-ai-search-modal[open].dj887-ai-closing{animation:none!important}
- html body #dj-ai-search-modal .dj-ai-search-body{display:flex!important;flex-direction:column!important;box-sizing:border-box;height:100%;min-height:0;padding:env(safe-area-inset-top,0px) 16px max(12px,env(safe-area-inset-bottom,0px))!important;gap:8px!important}
- html body #dj-ai-search-modal .dj-ai-search-header{flex:none;touch-action:auto!important;padding:8px 0 12px;gap:8px;background:var(--ai-bg)}
+ html body #dj-ai-search-modal .dj-ai-search-body{display:flex!important;flex-direction:column!important;box-sizing:border-box;height:100%;min-height:0;padding:env(safe-area-inset-top,0px) 16px max(8px,env(safe-area-inset-bottom,0px))!important;gap:8px!important}
+ html body #dj-ai-search-modal .dj-ai-search-header{position:relative!important;z-index:1!important;flex:none;touch-action:auto!important;padding:8px 0 12px;gap:8px;background:var(--ai-bg)}
  html body #dj-ai-search-modal .dj-ai-search-names h2{font-size:17px}
  html body #dj-ai-search-modal .dj-ai-search-names p{font-size:11px}
  html body #dj-ai-search-modal .dj-ai-search-body{background:var(--ai-bg)}
@@ -334,8 +334,16 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  body:has(#dj-ai-search-modal[open]){background:#edf3ef}
  body:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]){background:#192d32}
  #dj-ai-search-modal .dj-ai-search-header::before{display:none!important}
- #dj-ai-search-modal .dj-ai-transcript{flex:1 1 0;min-height:0}
- #dj-ai-search-modal .dj-ai-composer{flex:none;padding-top:8px;border-top:1px solid var(--ai-line)}
+ #dj-ai-search-modal .dj-ai-transcript{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;scroll-padding-bottom:12px!important}
+ /* Balance welcome text and quick questions in the remaining chat viewport. */
+ #dj-ai-search-modal:not([data-explanation="unset"]) .dj-ai-transcript > .dj-ai-welcome:not([hidden]){
+   max-width:100%!important;margin:auto 0!important;
+ }
+ #dj-ai-search-modal .dj-ai-profile-button{min-height:40px!important;}
+ #dj-ai-search-modal .dj-ai-composer{position:relative!important;flex:0 0 auto!important;min-width:0!important;padding-top:8px;border-top:1px solid var(--ai-line)}
+  /* The iOS keyboard already removes its height from visualViewport. Avoid
+     adding the closed-keyboard safe area again beneath the fixed composer. */
+  html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-search-body{padding-bottom:8px!important}
  #dj-ai-search-modal .dj-ai-search-names h2:focus{outline:none}
  #dj-ai-search-modal .dj-ai-query{font-size:16px!important;border-radius:999px!important;box-shadow:none}
  #dj-ai-search-modal :is(.dj-ai-close,.dj-ai-login,.dj-ai-submit,.dj-ai-map-btn,.dj-ai-example):not(:disabled){border-radius:var(--djNext-tool-pill)!important;box-shadow:var(--djNext-tool-shadow)!important;background-image:var(--djNext-tool-sheen)!important;transition:box-shadow var(--djNext-tool-motion)!important}

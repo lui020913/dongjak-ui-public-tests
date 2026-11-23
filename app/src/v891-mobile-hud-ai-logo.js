@@ -49,14 +49,22 @@ export function installV891HeaderAndAi(doc=document,win=window){
     frame=0;
     if(!modal||!modal.open||!mq.matches){
       for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
+      if(modal)delete modal.dataset.djAiKeyboard;
       return;
     }
     // A focused iOS input can pan the visual viewport as well as resize it.
     // Use one coordinate system; do not combine top/bottom constraints with a height.
     const view=win.visualViewport;
-    const height=Math.max(1,Math.floor(view?.height||win.innerHeight));
     const top=Math.max(0,Math.round(view?.offsetTop||0));
+    // Clamp the dialog to the actually visible viewport; iOS can report
+    // intermediate keyboard frames larger than the remaining layout height.
+    const height=Math.max(1,Math.min(Math.floor(view?.height||win.innerHeight),win.innerHeight-top));
     const inset=mobileKeyboardInset({innerHeight:win.innerHeight,visualHeight:height,offsetTop:top});
+    const query=modal.querySelector('#dj-ai-query');
+    // Use one keyboard state for the composer safe-area. Do not treat an
+    // ordinary scroll/zoom with the input unfocused as an open keyboard.
+    const keyboardOpen=Boolean(query&&doc.activeElement===query&&inset>120);
+    modal.dataset.djAiKeyboard=keyboardOpen?'true':'false';
     modal.style.setProperty('--dj891-ai-keyboard-inset',inset+'px');
     modal.style.setProperty('--dj891-ai-visible-top',top+'px');
     modal.style.setProperty('--dj891-ai-visible-height',height+'px');
@@ -96,6 +104,7 @@ export function installV891HeaderAndAi(doc=document,win=window){
     if(frame)cancel(frame);
     for(const fn of cleanups)fn();
     for(const key of ['--dj891-ai-keyboard-inset','--dj891-ai-visible-height','--dj891-ai-visible-top'])modal?.style.removeProperty(key);
+    if(modal)delete modal.dataset.djAiKeyboard;
   };
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
