@@ -62,6 +62,7 @@ test('primary PRI view is six-factor with a red high-risk ramp and grey for unkn
  assert.match(ui,/\['current6','종합 보행 취약도 · 6개 지표'\]/);
  assert.match(ui,/id==='current6'\?\(policyScope\?scopedCompositeFeatures/);
  assert.match(ui,/currentSixFactorCoverage\(s\)\+'\/6/);
- assert.match(ui,/#d74648/);
+ assert.match(ui,/#CF4248/);
+ assert.match(ui,/\['step',\['get','displayScore'\]/);
  assert.match(ui,/미평가/);
 });
