@@ -350,6 +350,17 @@
       flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
       max-height:100%!important;
     }
+    #app[data-dj-route-stage="search"] #route-panel #dj910-route-footer,
+    #app[data-dj-route-stage="search"] #route-panel #route-calc {
+      display:none!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel > #dj910-route-footer {
+      flex:0 0 auto!important;
+      min-height:66px!important;
+      padding:7px 16px 10px!important;
+      border-top:1px solid var(--dj-route-edge)!important;
+      background:var(--dj-route-surface)!important;
+    }
     #app[data-dj-route-stage="search"] #bottom-nav,
     #app[data-dj-route-stage="search"] :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,#dj840-map-tip) {display:none!important}
     #app[data-dj-route-stage="preview"] #route-map-card:not([hidden]) {
