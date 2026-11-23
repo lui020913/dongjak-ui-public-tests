@@ -315,6 +315,14 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
    });
    cards.append(b);
   }
+  // Refit only after the compact layout has a measured height. Otherwise
+  // the camera fits to yesterday's tall four-option sheet on iPhone PWAs.
+  if(typeof win.requestAnimationFrame==='function'){
+   win.requestAnimationFrame(()=>win.requestAnimationFrame(()=>{
+    if(!host.hidden&&host.dataset.dj9272RouteFocus==='true')
+     win.dispatchEvent(new Event('dj-next:fit-route'));
+   }));
+  }
  }
  const observer=new MutationObserver(syncPoints);
  for(const id of ['route-start-label','route-end-label']){
@@ -327,6 +335,7 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
   const selected=variants.find(([id])=>id===data.selected)||variants[0];
   const chosen=data[data.selected]||data.standard;
   compact.textContent=selected[1]+' · '+(data.selected==='transit'&&chosen?'약 '+Math.ceil(chosen.indicativeMinutes)+'분 (참고)':fmt(chosen));
+  showCompact({fitMap:true});
   syncPoints();
  });
  win.addEventListener('dj-next:route-clear',()=>{data=null;render()});
