@@ -67,6 +67,9 @@ test('GPS guide has only original end button interactive until guide stops',()=>
  assert.match(js,/stopImmediatePropagation/);
  assert.match(js,/'touchstart','touchmove'/);
  assert.match(js,/type==='keydown'&&e\.key==='Tab'/);
+ assert.ok(js.indexOf("if(e.type==='keydown'&&e.key==='Tab')") <
+   js.indexOf("if(e.target?.closest?.('#nav-stop'))"),'Tab must be trapped before allowing the already-focused stop button');
+ assert.match(js,/on\(win,'keydown',intercept/);
  assert.match(css,/#dj-walk-guidance-lock/);
  assert.match(css,/#nav-live-card \.nav-live-actions > :not\(#nav-stop\)/);
  assert.match(css,/display:none!important;pointer-events:none!important/);
