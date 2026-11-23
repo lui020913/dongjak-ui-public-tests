@@ -3365,7 +3365,13 @@ async function autoRerouteFromGps(pos,accuracy){
     const data=await currentPreferredModeResult({lng:pos[0],lat:pos[1]},routeEnd,selectedRouteVariant,controller.signal);
     if(token!==navSessionToken || navMode!=='gps'||controller.signal.aborted)return;
     routeResult=data;
-    routeVariants[selectedRouteVariant]=data;
+    // The new GPS-origin geometry is NOT the previously evaluated route.
+    // Drop the old alternate and all stale PRI coloring/comparison evidence.
+    // Once guidance ends, show only this actually recomputed path as unassessed.
+    routePriVisuals=null;
+    routeVariants={standard:null,gentle:null,[selectedRouteVariant]:data};
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:routeVariants}));
+    window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:null}));
     navIndex=makeRouteIndex(data.coords);
     navProgress=0;navLastUpdateAt=0;
     navLastVoiceKey='';
