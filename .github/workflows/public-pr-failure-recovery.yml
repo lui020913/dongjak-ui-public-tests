@@ -22,12 +22,14 @@ jobs:
         with:
           node-version: '24'
       - run: node --check scripts/gemini-mobile-repair.mjs
+      - run: node --test tests/public-pr-recovery-scope.test.mjs
   recover:
     if: >-
       github.event_name == 'workflow_run' &&
       github.repository == 'lui020913/dongjak-ui-public-tests' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch != 'main' &&
+      startsWith(github.event.workflow_run.head_branch, 'feature/') &&
       github.event.workflow_run.conclusion == 'failure' &&
       (github.event.workflow_run.actor.login == 'lui020913' ||
       github.event.workflow_run.actor.login == 'github-actions[bot]')
