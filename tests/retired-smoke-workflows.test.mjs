@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,readFileSync} from 'node:fs';
-const root=new URL('../../',import.meta.url);
+const root=new URL('../',import.meta.url);
 const path=file=>new URL(file,root);
 const read=file=>readFileSync(path(file),'utf8');
 
