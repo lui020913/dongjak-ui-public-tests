@@ -2490,7 +2490,12 @@ function showPriRouteAdvice(result){
       '두 경로의 조사범위가 부족하거나 서로 달라 공정하게 비교할 수 없습니다.')+
       ' 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
       '. 미평가 도로는 안전한 도로로 계산하지 않습니다.';
-  for(const node of [priMapNote,priEditorNote]){node.textContent=text;node.hidden=false;}
+  const shortText=result?.recommendation
+    ? 'PRI 연구용 상대 저위험 후보: '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
+      ' · 관측 위험도 '+result[result.recommendation].risk.toFixed(1)+'점 · 관측 구간 '+Math.round(result[result.recommendation].coverage*100)+'%'
+    : '종합 PRI 경로 비교 보류 · 평가된 구간이 부족하거나 비교 근거가 충분하지 않습니다.';
+  priMapNote.textContent=shortText;priMapNote.hidden=false;
+  priEditorNote.textContent=text;priEditorNote.hidden=false;
 }
 function clearPriRouteAdvice(){
   for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
