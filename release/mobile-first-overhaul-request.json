@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.124",
   "public_work_branch": "main",
-  "purpose": "Guarded mobile-only release for verified PR #392 (unified walking-route UI): direct departure/arrival search with native location selection, origin/destination swap, one measured walking route comparison surface with six-factor PRI risk and explicit missing-coverage treatment, and GPS turn-first directions. PR #392 passed full public app source CI 45172360182 (unit/regression, production build, 375/390/430px Playwright). Squash merge 547e5e4037a7679368e0dd28929597c30e72a9ff. Require NEW exact-commit Preview, all 12 independent mobile QA groups and PC/tablet checks, protected Production source/version verification and rollback on failure. Preserve map, PRI methods, routing, transit, account, AI, community and existing current live app if any check fails.",
-  "attempt": 317,
+  "purpose": "Retry guarded mobile-only release 9.2.124 after PR #394 QA correction, merged as a4b7b45c35f1d6cfd45409dcedc9006ef58361c7. Base route UX PR #392 was source-CI green. First protected Preview 45173527624 passed build, preview, PC/tablet and six mobile shards, but six mobile shards failed exclusively on two stale QA assertions: undefined innerViewportWidth and checking a footer wrapper rather than actual tappable CTA. PR #394 fixes the JS ReferenceError and asserts 44px target, actual button bounds above the tab dock, and elementFromPoint centre hit (not skipped tests); source CI 45174617316 fully passed including three mobile browser viewport sizes. Rebuild a NEW exact source SHA Preview and run ALL 12 mobile QA groups plus PC/tablet before protected Production; do not reuse failed Preview or its checks. Preserve six-factor PRI, native routing, GPS, transit, map and all unrelated features.",
+  "attempt": 318,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New 9.2.124 route experience release after 9.2.123 Production success (run 45171630426). Do not reuse earlier QA as deployment evidence; test this exact main commit via isolated Preview before promotion.",
+  "last_retry_reason": "2026-11-23: release 9.2.124 attempt 317 Preview workflow 45173527624 failed six phone QA shards (3/12, 9/12, 1/12, 4/12, 8/12, 12/12) on two non-product QA assertion errors; Production correctly skipped. Attempt 318 uses PR #394 fix and fresh verification.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
