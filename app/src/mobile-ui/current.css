@@ -1301,9 +1301,14 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
     html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]) {
       padding-bottom:0!important;
     }
-    html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-      padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
-      scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+    /* Keep the SCROLL VIEWPORT above the fixed five-tab dock. Merely adding
+       106px of padding leaves the viewport itself under the pill: the real
+       Production phone QA rejects that overlap. Reserve the dock once as a
+       flex-child margin; keep only a modest end-of-content scroll gutter. */
+    html body #app#app#app#app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+      margin-bottom:calc(var(--mf-nav-height,68px) + env(safe-area-inset-bottom,0px) + 8px)!important;
+      padding-bottom:20px!important;
+      scroll-padding-bottom:24px!important;
     }
   }
   html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {
