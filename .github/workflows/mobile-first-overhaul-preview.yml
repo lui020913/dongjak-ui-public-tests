@@ -594,7 +594,7 @@ jobs:
 
   notify-production:
     needs: [build, production]
-    if: ${{ needs.production.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && needs.production.result == 'success' && github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main' }}
     name: '알림 · Production 배포 완료'
     runs-on: ubuntu-24.04
     timeout-minutes: 3
@@ -603,6 +603,7 @@ jobs:
       contents: read
     steps:
       - name: Post one GitHub milestone notification
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           APP_VERSION: ${{ needs.build.outputs.app_version }}
@@ -624,7 +625,7 @@ jobs:
             files="$(gh api "repos/$GITHUB_REPOSITORY/compare/$PREVIOUS_PUBLIC_SHA...$DEPLOYED_SHA" --jq '.files[]|select(.filename|startswith("app/src/") or startswith("frontend/production/"))|.filename' | head -n 15 || true)"
           fi
           if [ -z "$files" ]; then files="비교 내역에서 직접 확인 (파일 목록 미확인 또는 앱 소스 변경 없음)"; fi
-          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 모바일 24개 샤드·PC/태블릿 검증·배포 소스 일치 확인, 디자인 촬영 및 Gemini는 선택 실행\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
+          gh issue comment 15 --repo "$GITHUB_REPOSITORY" --body "$(printf '@lui020913 Production 배포 완료 · v%s\n\n작업: %s\n수정 내용: %s\n\n앱 변경 파일 (최대 15개):\n%s\n\n검증: 모바일 샤드·PC/태블릿 검증·배포 소스 일치 확인, 디자인 촬영 및 Gemini는 선택 실행\n[배포 상세 보기](%s)\n이전 Production 비교: %s\n%s' "$APP_VERSION" "$description" "$purpose" "$files" "$url" "${comparison:-이전 소스 미확인}" "$marker")"
 
   announce:
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/main'
