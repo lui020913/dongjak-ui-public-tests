@@ -123,6 +123,13 @@ export function compareCompositePriRoutes(routes,bundle){
     result.reason='same-route';return result;
   }
   if(Math.abs(standard.risk-gentle.risk)<5){result.reason='similar-risk';return result;}
+  // A lower preliminary risk estimate must not silently recommend an
+  // extreme detour. Users can still select the alternative manually.
+  const lower=standard.risk<gentle.risk?standard:gentle;
+  const other=standard.risk<gentle.risk?gentle:standard;
+  if(lower.totalMeters>other.totalMeters*1.25){
+    result.reason='excessive-detour';return result;
+  }
   result.recommendation=standard.risk<gentle.risk?'standard':'gentle';
   result.reason='observed-comparison';
   return result;
