@@ -169,10 +169,15 @@ test('anonymous read-only control census · actual buttons and motion', async ({
     tabs:[], failedClicks:[], warnings:[], counts:{discovered:0,attempted:0,clicked:0,skipped:0,nested:0}
   };
   const errors=[];
-  page.on('pageerror', e=>errors.push(String(e).slice(0,200)));
-  page.on('dialog', d=>d.dismiss().catch(()=>{}));
-  page.on('popup', p=>p.close().catch(()=>{}));
-  await page.route('**/*', route=>{
+  const context=page.context();
+  const attachHandlers=p=>{
+    p.on('pageerror',e=>errors.push(String(e).slice(0,200)));
+    p.on('dialog',d=>d.dismiss().catch(()=>{}));
+    p.on('popup',popup=>popup.close().catch(()=>{}));
+  };
+  attachHandlers(page);
+  context.on('page',attachHandlers);
+  await context.route('**/*', route=>{
     const method=route.request().method().toUpperCase();
     if(['GET','HEAD','OPTIONS'].includes(method)) return route.continue();
     report.warnings.push({kind:'write-request-blocked',method,url:route.request().url().split('?')[0].slice(0,140)});
@@ -202,6 +207,11 @@ test('anonymous read-only control census · actual buttons and motion', async ({
       hit:!!(hit&&(n===hit||n.contains(hit)))};
   }));
   const prepare=async tab=>{
+    // Independent page isolates in-flight app navigation and PWA restoration.
+    if(page&&!page.isClosed()) await page.close({runBeforeUnload:false});
+    page=await context.newPage();
+    await page.setViewportSize(viewport);
+    await page.emulateMedia({colorScheme:'light'});
     await page.goto('/',{waitUntil:'domcontentloaded',timeout:30000});
     await expect(page.locator('#map')).toBeVisible({timeout:30000});
     await selectBrowserWeb(page);
@@ -228,7 +238,9 @@ test('anonymous read-only control census · actual buttons and motion', async ({
       }
       try{await prepare(tab);}
       catch(e){section.outcome.push({label:candidate.label,status:'reset-failed',error:String(e).slice(0,250)});report.failedClicks.push({tab,label:candidate.label,kind:'reset-failed'});continue;}
-      const target=page.locator(selector).nth(candidate.index);
+      const target=candidate.id
+        ? page.locator('[id="'+candidate.id.replace(/["\\]/g,'\\      const target=page.locator(selector).nth(candidate.index);')+'"]')
+        : page.locator(selector).nth(candidate.index);
       const current=await target.evaluate(n=>(n.getAttribute('aria-label')||n.title||n.innerText||n.textContent||'').replace(/\s+/g,' ').trim().slice(0,95)).catch(()=>null);
       if(current===null||current!==candidate.label){
         report.counts.skipped++;
@@ -240,7 +252,13 @@ test('anonymous read-only control census · actual buttons and motion', async ({
       const item={label:candidate.label,id:candidate.id,initialHit:candidate.hit};
       report.counts.attempted++;
       try{
-        await target.click({timeout:6000,noWaitAfter:true});
+        const bounds=await target.boundingBox();
+        if(!bounds||bounds.width<1||bounds.height<1)throw Error('Target has no visible pointer area');
+        const point={x:Math.max(1,Math.min(viewport.width-2,bounds.x+bounds.width/2)),
+          y:Math.max(1,Math.min(viewport.height-2,bounds.y+bounds.height/2))};
+        const unobstructed=await target.evaluate((el,p)=>{const hit=document.elementFromPoint(p.x,p.y);return !!hit&&(el===hit||el.contains(hit));},point);
+        if(!unobstructed)throw Error('Actual finger point is occluded by another surface');
+        await page.touchscreen.tap(point.x,point.y);
         report.counts.clicked++;
         item.status='clicked';
         item.immediate=await summarize();
@@ -263,7 +281,13 @@ test('anonymous read-only control census · actual buttons and motion', async ({
         for(const extra of extras){
           const sub=page.locator(selector).nth(extra.index);
           try{
-            await sub.click({timeout:4500,noWaitAfter:true});
+            const b=await sub.boundingBox();
+            if(!b)throw Error('Nested control has no visible hit area');
+            const x=Math.max(1,Math.min(viewport.width-2,b.x+b.width/2));
+            const y=Math.max(1,Math.min(viewport.height-2,b.y+b.height/2));
+            const hit=await sub.evaluate((el,p)=>{const node=document.elementFromPoint(p.x,p.y);return !!node&&(el===node||el.contains(node));},{x,y});
+            if(!hit)throw Error('Nested finger point occluded');
+            await page.touchscreen.tap(x,y);
             report.counts.nested++;
             await page.waitForTimeout(260);
             item.nestedControls.find(x=>x.label===extra.label).status='clicked';
