@@ -31,7 +31,7 @@ test('My Info moves map settings and release history into its own menu',()=>{
  assert.match(my,/data-dj834-action="map"/);
  assert.match(my,/data-dj834-action="history"/);
  assert.match(my,/data-dj834-action="type"/);
- assert.match(my,/dj:open-map-settings/);
+ assert.match(my,/map:mapBox/);
  assert.match(my,/version-history-trigger/);
  assert.match(css,/dj840-more-quick-actions/);
 });

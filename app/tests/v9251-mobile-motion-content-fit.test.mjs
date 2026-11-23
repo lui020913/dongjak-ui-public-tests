@@ -66,7 +66,7 @@ test('transport popup has only one camera focus and no delayed refocus',()=>{
   assert.match(transport,/Always focus a newly selected stop/);
   assert.match(transport,/dongjak:transport-dismiss-start/);
   const place=source('place-details.js');
-  assert.match(place,/const viewportFocus=isPhone/);
+  assert.match(place,/usableMapSelectionOffset/);
 });
 
 test('AI dialog has one close owner and never opens on a transport close gesture',async()=>{

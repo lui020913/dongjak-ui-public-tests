@@ -53,6 +53,10 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   if(body&&body.parentElement!==targetHost)targetHost.append(body);
   const target=targetHost.querySelector('.dj-mobile-utilities-body');
   if(!target)return;
+  // These old blue quick links duplicate the parent My Info rows for update
+  // history/map preferences. Remove the redundant controls, not their owners.
+  target.querySelector('.dj840-more-quick-actions')?.remove();
+  target.querySelector('.dj834-shortcut-status')?.remove();
   const extra=$('dj832-more-features');if(extra&&!target.contains(extra))target.append(extra);
   for(const old of target.querySelectorAll('.dj17-feature-details'))if(!old.querySelector('.dj833-feature-group'))old.remove();
   for(const group of target.querySelectorAll('.dj833-feature-group')){
@@ -223,7 +227,7 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
     node&&node.textContent.trim()&&!/선택되지 않음|지정되지 않음/.test(node.textContent));
    if(hint.hidden!==ready)hint.hidden=ready;
   }
-  const utilities=doc.querySelector('#mine-panel .dj17-more-root .dj-mobile-utilities-body');
+  const utilities=doc.querySelector('#mine-panel .dj834-tools-container .dj-mobile-utilities-body');
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
   if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);
   const status=utilities?.querySelector('.dj834-shortcut-status');if(status&&status.textContent!=='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.')status.textContent='지도 표시와 상단 바로가기는 레이어 버튼에서 설정할 수 있습니다.';

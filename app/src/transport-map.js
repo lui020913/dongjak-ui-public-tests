@@ -28,7 +28,7 @@ import {verifiedInlineOperatorTimetable} from './metro-inline-schedules.js';
 import {seoulServiceClock, plannedArrivalsFromTimetable} from './metro-planned-arrivals.js';
 import {saveTimetable,loadTimetable,storeBusObservation,latestBusObservations,displaySeoulObservationTime,expectedBusHeadway} from './transport-timetable-cache.js';
 import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
-import {createSelectedTransportPin,mobileTransportFocusOffset} from './transport-selection-marker.js';
+import {createSelectedTransportPin,mobileTransportFocusOffset,usableMapSelectionOffset} from './transport-selection-marker.js';
 import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
 
 // v5.2 교통 지도: 고정 지하철 안내 선형 + 배경지도 POI 정류소/역 위치.
@@ -2757,14 +2757,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     // move the camera again or re-open the sheet animation.
     if(!sameStationLineChange && !refresh && Number.isFinite(Number(place.lng)) && Number.isFinite(Number(place.lat))
       && Number(place.lng)>=125 && Number(place.lng)<=128 && Number(place.lat)>=36 && Number(place.lat)<=39){
-      const mapBounds=map.getContainer?.()?.getBoundingClientRect?.();
-      const viewportHeight=mapBounds?.height||map.getContainer?.()?.clientHeight||globalThis.innerHeight||800;
-      const phoneFocus=true;
-      const upward=Math.round(Math.min(112,Math.max(46,viewportHeight*.10)));
-      const offsetY=phoneFocus
-        ?mobileTransportFocusOffset({viewportHeight,panelTop:panel.getBoundingClientRect?.()?.top,
-          containerTop:mapBounds?.top||0})
-        :-upward;
+      const offsetY=globalThis.matchMedia?.('(max-width:699px)')?.matches
+        ?usableMapSelectionOffset({map,panel,doc:document,win:globalThis.window})
+        :0;
       const focusZoom=place.kind==='bus'?16.5:15.3;
       // Always focus a newly selected stop in the unobscured map area.
       try{map.easeTo?.({center:[Number(place.lng),Number(place.lat)],offset:[0,offsetY],
