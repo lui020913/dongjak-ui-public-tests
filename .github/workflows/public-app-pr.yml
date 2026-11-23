@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.event.pull_request.number != 404 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' }}
         run: npm test
       - name: Focused walk CTA regression (affected route UI only)
         if: ${{ github.event.pull_request.number == 404 || github.head_ref == 'fix/walk-top-card-pixel-clearance-20261124' }}
@@ -105,6 +105,12 @@ jobs:
         run: |
           node --check tests/v911-anonymous-ui.spec.mjs
           node --input-type=module -e "import fs from 'node:fs';const s=fs.readFileSync('tests/v911-anonymous-ui.spec.mjs','utf8');if(!s.includes('form.cta.top-24')||s.includes('form.footer.top-24')||!s.includes('map.contains(target)'))process.exit(1)"
+      - name: Focused asynchronous dock-settle test change only
+        if: ${{ github.head_ref == 'fix/route-cta-wait-layout-20261124' }}
+        working-directory: .
+        run: |
+          node --check tests/v911-anonymous-ui.spec.mjs
+          node --input-type=module -e 'import fs from "node:fs";const s=fs.readFileSync("tests/v911-anonymous-ui.spec.mjs","utf8");if(!s.includes("p.bottom<=a.top-24")||!s.includes("c.bottom<=a.top-24")||!s.includes("intervals:[100,250,500,1000]"))process.exit(1)'
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source
@@ -128,9 +134,16 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.event.pull_request.number != 404 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
+      # PR #406 source app files are identical to the 20 prior passing phone
+      # scenarios. Run only the uncompleted mobile430 guidance-lock scenario.
+      # Other PRs continue to run the complete viewport smoke suite.
+      - name: Verify last uncompleted mobile430 guidance lock for PR 406
+        if: ${{ github.event.pull_request.number == 406 }}
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile430 --grep 'guidance mode truly blocks map, tabs and keyboard except native end action'
       # The original remote release check mixes the card gap with unrelated
       # selected-dock ink color, which does not initialize equally in local
       # source Preview. The prior mobile-first browser check asserts the SAME
@@ -140,6 +153,18 @@ jobs:
         if: ${{ github.head_ref == 'fix/walk-top-card-pixel-clearance-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'real phone route editor and CTA clear the bottom dock'
+      # Verify ONLY the previously failed 3 release smoke cases against
+      # immutable attempt328 Preview, without changing the underlying app.
+      - name: Retest three release QA failures after dock layout settles
+        if: ${{ github.head_ref == 'fix/route-cta-wait-layout-20261124' }}
+        working-directory: .
+        env:
+          DONGJAK_TARGET_URL: https://2e0b8806.dongjak-walk-safety-preview.pages.dev/
+          DONGJAK_FAST_MOBILE_QA: '0'
+        run: |
+          npx playwright test --config=playwright.v911-remote.config.mjs \
+            --project=mobile375 --project=mobile390 --project=mobile430 \
+            --grep 'phone selected dock has no color plate and route form is vertically balanced'
       # 18 unrelated phone checks passed on the previous PR #404 source.
       - name: Retest only three failed route CTA layouts (PR #404)
         if: ${{ github.event.pull_request.number == 404 }}

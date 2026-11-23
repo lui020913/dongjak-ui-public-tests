@@ -3,9 +3,9 @@
   "application_version": "9.2.127",
   "public_work_branch": "main",
   "purpose": "Single protected 9.2.127 release for all owner feedback supplied 2026-11-24, excluding third video. Screenshot 1 preview only: lower route comparison sheet 8px and move native GPS button above comparison. Screenshot 2 guidance only: lower live card 8px and make green-banner turn instruction light. Video 1 community only: full-height isolated composer with fixed header, single form-body scrollport and hidden nav dock. Video 2 AI search only: synchronize iOS visual viewport keyboard geometry, avoid duplicate bottom safe area, pin input composer while transcript scrolls. Preserve the already merged 9.2.126 walking input/search top-card (video 3) exactly unchanged; no walking input/search, route/PRI/GPS computation, services or unrelated tabs changed. Existing previously passed tests must not be manually rerun; mandatory current exact-SHA source/phone/protected release checks must pass. Promote only once after new Preview, 12 independent mobile QA shards, PC/tablet and protected Production gates; do not merge unrelated PR #404/#405.",
-  "attempt": 329,
+  "attempt": 330,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.127 owner four-screen patch rebased onto main 81abdd1aae55, retaining PR #409's corrected real route CTA browser/production QA checks. Previous 9.2.126 Preview is not evidence for this new 9.2.127 source; one protected exact-SHA preview/QA/production promotion only.",
+  "last_retry_reason": "9.2.127 four-screen final candidate rebased onto latest main 565f69c34489 with PR #411 route CTA stable-timing QA preserved. Prior PR #406 source run 45238861166 passed 20/21 mobile browser cases, only mobile430 guidance lock was uncompleted when superseded. Run only that last case in source CI while preserving other PR full validation; protected release still runs all required exact-SHA checks before Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
