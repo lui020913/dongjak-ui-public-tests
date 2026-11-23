@@ -21,14 +21,12 @@ test('walking route camera always preserves usable window on short mobile',()=>{
  assert.ok(p.top+p.bottom<=480-126,JSON.stringify(p));
  assert.ok(Number.isFinite(p.top)&&Number.isFinite(p.bottom));
 });
-test('map fit is measured after route preview DOM renders',()=>{
- const src=read('../src/main.js');
- const ui=prod('mobile-next.js');
+test('route map fit uses actual preview geometry and the visible map card, not hidden ghost cards',()=>{
+ const src=read('../src/main.js'),ui=read('../src/route-experience-20261123.js');
  assert.match(src,/walkingRouteViewportPadding\(/);
  assert.match(src,/sheetTop:visible\(card\)/);
- assert.match(ui,/requestAnimationFrame\(\(\)=>win\.requestAnimationFrame/);
- assert.match(ui,/showCompact\(\)/);
- assert.match(ui,/aria-controls','djNext-route-compare'/);
+ assert.match(ui,/mapCard\.querySelector\('\.route-map-card-actions'\)\?\.before\(choices\)/);
+ assert.match(ui,/mapCard\.append\(methodology\)/);
 });
 test('phone route cards have a single owner; native route actions and map fit remain',()=>{
  const old=prod('mobile-next.js');
