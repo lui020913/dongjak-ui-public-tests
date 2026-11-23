@@ -109,14 +109,27 @@ export function installRequestCompletion(doc=document,win=window){
     // inline !important (higher priority than all authored CSS selectors).
     const footer=doc.getElementById('dj910-route-footer');
     const route=doc.getElementById('route-panel');
-    // The new bounded route input page owns an in-flow native footer.
-    // Clear historical fixed positioning when moving into that route stage.
-    // This avoids a transformed ancestor anchoring the button over the fields.
+    // The approved top-card input requires a bottom-docked native CTA.
+    // Previous v910 versions removed these styles every frame, putting the
+    // calculate button directly across the origin/destination fields.
     const boundedInput=app.dataset.djRouteStage==='input'&&win.innerWidth<700&&route&&!route.hidden;
-    if(boundedInput&&footer){
-      for(const prop of ['position','inset','top','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
-        footer.style.removeProperty(prop);
-      route.removeAttribute('data-dj-route-cta-docked');
+    if(boundedInput&&footer&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
+      const set=(prop,value)=>{
+        if(footer.style.getPropertyValue(prop)!==value||
+            footer.style.getPropertyPriority(prop)!=='important')
+          footer.style.setProperty(prop,value,'important');
+      };
+      const edge=Math.max(8,Math.round((win.innerHeight||h)-n.top+12));
+      set('position','fixed');set('inset','auto');set('top','auto');
+      set('bottom',edge+'px');set('left','12px');set('right','12px');
+      set('width','calc(100vw - 24px)');set('margin','0');set('padding','0');
+      set('z-index','7005');set('pointer-events','auto');set('transform','none');
+      // Compute the real rendered position, including any transformed sheet
+      // containing block, and shift to the actual top of the bottom dock.
+      const bounds=footer.getBoundingClientRect();
+      const dy=n.top-12-bounds.height-bounds.top;
+      if(Math.abs(dy)>1)set('transform','translateY('+Math.round(dy)+'px)');
+      route.dataset.djRouteCtaDocked='true';
     }else if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
       const set=(prop,value)=>{
         if(footer.style.getPropertyValue(prop)!==value||

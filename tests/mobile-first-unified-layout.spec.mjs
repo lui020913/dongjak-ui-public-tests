@@ -249,8 +249,8 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
     return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
       m.panelPosition==='fixed'&&m.panel.x>=-1&&
       m.panel.right<=m.viewport[0]+1&&
-      m.panel.top>=m.viewport[1]*.20&&m.panel.top<m.viewport[1]*.78&&
-      m.panel.bottom<=m.nav.top-5&&m.card&&m.card.bottom<=m.footer.top+4&&m.cta.height>=44&&
+      m.panel.top>=-1&&m.panel.top<=3&&
+      m.panel.bottom<=m.footer.top-24&&m.card&&m.card.bottom<=m.footer.top-24&&m.cta.height>=44&&
       m.cta.bottom<=m.nav.top-5&&m.actualHit);
   },{timeout:15000}).toBe(true);
   const metrics=await snapshot();

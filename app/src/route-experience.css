@@ -415,3 +415,198 @@
   }
   #app[data-dj-walk-arrived="1"] #route-map-card {display:none!important}
 }
+
+
+/* 2026-11-24 approved visual: native map stays visible under a TOP entry card.
+ * Scope only to the idle walking input, keeping search, PRI preview and
+ * one-control GPS guidance on their existing tested native flows. */
+@media (max-width:699px) {
+  @layer request-completion {
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"] > #map {
+      opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) {
+      position:fixed!important;inset:0 0 auto 0!important;
+      top:0!important;bottom:auto!important;left:0!important;right:0!important;
+      display:flex!important;flex-direction:column!important;align-items:stretch!important;
+      justify-content:flex-start!important;box-sizing:border-box!important;
+      width:100vw!important;max-width:100vw!important;min-width:0!important;
+      height:auto!important;min-height:0!important;
+      max-height:min(65dvh,calc(100dvh - 192px))!important;
+      margin:0!important;padding:0!important;
+      background:transparent!important;border:0!important;border-radius:0!important;
+      box-shadow:none!important;overflow:visible!important;
+      transform:none!important;translate:none!important;filter:none!important;
+      z-index:5700!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) > .dj-sheet-chrome {
+      position:relative!important;inset:auto!important;
+      display:flex!important;flex:0 0 auto!important;align-items:center!important;
+      gap:12px!important;box-sizing:border-box!important;
+      width:100%!important;min-height:calc(62px + env(safe-area-inset-top,0px))!important;
+      height:calc(62px + env(safe-area-inset-top,0px))!important;
+      padding:calc(9px + env(safe-area-inset-top,0px)) 18px 9px!important;
+      margin:0!important;border:0!important;box-shadow:none!important;
+      background:var(--walk-bg)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-input-back {
+      display:grid!important;place-items:center!important;
+      flex:0 0 38px!important;width:38px!important;height:42px!important;
+      border:0!important;border-radius:11px!important;
+      background:transparent!important;color:var(--walk-text)!important;
+      font-size:28px!important;line-height:1!important;padding:0!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome-title {
+      flex:1 1 auto!important;min-width:0!important;margin:0!important;
+      justify-content:flex-start!important;gap:0!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome-title .dj-sheet-chrome-icon {
+      display:none!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome-title h2 {
+      margin:0!important;color:var(--walk-text)!important;
+      font-size:21px!important;font-weight:800!important;line-height:1.25!important;
+      letter-spacing:-.035em!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .dj-sheet-chrome-close {
+      display:grid!important;place-items:center!important;
+      flex:0 0 42px!important;width:42px!important;height:42px!important;
+      border:0!important;border-radius:11px!important;
+      background:transparent!important;color:var(--walk-text)!important;
+      margin:0!important;padding:7px!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
+      display:flex!important;flex:0 1 auto!important;flex-direction:column!important;
+      align-items:stretch!important;justify-content:flex-start!important;
+      box-sizing:border-box!important;width:100%!important;height:auto!important;
+      min-height:0!important;max-height:calc(min(65dvh,100dvh - 192px) - 62px - env(safe-area-inset-top,0px))!important;
+      margin:0!important;padding:11px 12px 12px!important;
+      overflow-x:hidden!important;overflow-y:auto!important;
+      background:transparent!important;overscroll-behavior:contain!important;
+      touch-action:pan-y!important;
+    }
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) .route-card {
+      display:flex!important;flex-direction:column!important;align-items:stretch!important;
+      justify-content:flex-start!important;gap:10px!important;
+      box-sizing:border-box!important;width:100%!important;min-height:0!important;
+      margin:0!important;padding:14px 15px 13px!important;
+      border:1px solid var(--walk-border)!important;border-radius:23px!important;
+      background:var(--walk-paper)!important;
+      box-shadow:0 6px 24px rgba(23,55,44,.12)!important;
+      overflow:visible!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-mode {
+      display:inline-flex!important;align-items:center!important;
+      align-self:flex-end!important;gap:7px!important;
+      min-height:34px!important;padding:6px 12px!important;
+      color:#fff!important;background:#18775e!important;border-radius:999px!important;
+      font-size:13px!important;font-weight:790!important;line-height:1!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields {
+      position:relative!important;display:flex!important;flex-direction:column!important;
+      border:0!important;border-radius:0!important;box-shadow:none!important;
+      background:transparent!important;margin:0!important;padding:0!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields::before {
+      content:""!important;position:absolute!important;
+      left:14px!important;top:37px!important;bottom:37px!important;
+      width:2px!important;background:#b3c5bd!important;pointer-events:none!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields .route-location-row {
+      min-height:65px!important;gap:11px!important;
+      padding:5px 8px!important;background:transparent!important;
+      border:0!important;border-radius:0!important;box-shadow:none!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields .route-location-row:first-child {
+      border-bottom:1px solid var(--walk-border)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields .route-dot {
+      position:relative!important;z-index:1!important;width:14px!important;
+      height:14px!important;flex:0 0 14px!important;
+      border:3px solid var(--walk-paper)!important;box-shadow:0 0 0 2px currentColor!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields .route-dot.start {
+      background:#2879ed!important;color:#2879ed!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-fields .route-dot.end {
+      background:#2dbf4c!important;color:#2dbf4c!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .route-location-text.dj-walk-field {
+      min-height:50px!important;padding:3px 0!important;gap:3px!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .route-location-text.dj-walk-field span {
+      font-size:12px!important;color:var(--walk-muted)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel .route-location-text.dj-walk-field strong {
+      font-size:16px!important;font-weight:770!important;color:var(--walk-text)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-route-swap {
+      right:47px!important;width:36px!important;height:36px!important;
+      border-radius:11px!important;background:var(--walk-paper)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-shortcuts {
+      display:flex!important;flex-wrap:nowrap!important;gap:8px!important;
+      padding:4px 0 0!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-walk-shortcuts button {
+      flex:1 1 0%!important;min-width:0!important;min-height:44px!important;
+      padding:8px 5px!important;border:1px solid var(--walk-border)!important;
+      border-radius:12px!important;background:var(--walk-soft)!important;
+      color:var(--walk-text)!important;font-size:12px!important;font-weight:740!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-route-advanced > summary {
+      min-height:28px!important;padding:5px 2px 0!important;
+      font-size:11px!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj-route-data-detail,
+    #app[data-dj-route-stage="input"] #route-panel #route-status:empty {display:none!important}
+    html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
+      #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
+      position:fixed!important;
+      top:auto!important;bottom:calc(var(--dj910-dock-bottom,88px) + 8px)!important;
+      left:12px!important;right:12px!important;
+      display:block!important;box-sizing:border-box!important;
+      width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important;
+      min-height:54px!important;margin:0!important;padding:0!important;
+      border:0!important;border-radius:16px!important;
+      background:transparent!important;box-shadow:none!important;transform:none!important;
+      pointer-events:auto!important;z-index:4!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj910-route-footer #route-calc {
+      width:100%!important;min-height:54px!important;border-radius:16px!important;
+      font-size:16px!important;font-weight:800!important;
+      box-shadow:0 5px 16px rgba(17,72,54,.13)!important;
+    }
+    #app[data-dj-route-stage="input"] #route-panel #dj910-route-footer #route-calc:disabled {
+      background:#9ebcb2!important;opacity:1!important;color:#fff!important;
+      box-shadow:none!important;
+    }
+    #app[data-dj-route-stage="input"] :is(.map-actions,#dj840-map-tip,#dj-browser-webapp-tip) {
+      display:none!important;pointer-events:none!important;
+    }
+    #app[data-dj-route-stage="input"] #dj-walk-map-actions:not([hidden]) {
+      display:flex!important;flex-direction:column!important;gap:10px!important;
+      position:fixed!important;right:14px!important;left:auto!important;
+      width:46px!important;z-index:5800!important;
+    }
+    #app #dj-walk-map-actions[hidden] {display:none!important}
+    #app #dj-walk-map-actions button {
+      display:grid!important;place-items:center!important;
+      min-width:46px!important;width:46px!important;min-height:46px!important;height:46px!important;
+      border:1px solid var(--walk-border)!important;border-radius:50%!important;
+      background:var(--walk-paper)!important;color:var(--walk-primary)!important;
+      box-shadow:0 3px 14px rgba(23,55,44,.13)!important;
+      font-size:22px!important;line-height:1!important;padding:0!important;
+    }
+  }
+}
+/* The input-only back arrow and top card do not leak into full-screen search. */
+@layer request-completion {
+  #app:not([data-dj-route-stage="input"]) #dj-walk-input-back,
+  #app:not([data-dj-route-stage="input"]) #dj-walk-mode,
+  #app:not([data-dj-route-stage="input"]) #dj-walk-map-actions {display:none!important}
+}

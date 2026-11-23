@@ -43,9 +43,9 @@ async function geometry(page,sel){
     const r=await page.locator(sel).boundingBox();
     const dock=await page.locator('#bottom-nav').boundingBox();
     const vh=page.viewportSize().height;
-    return Boolean(r&&dock&&r.x>=8&&r.x<=20&&r.y>=vh*.20&&r.y<=vh*.78&&
-      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width-8&&
-      r.y+r.height<=dock.y-5);
+    return Boolean(r&&dock&&r.x>=-1&&r.x<=2&&r.y>=-1&&r.y<=3&&
+      r.width>=page.viewportSize().width-3&&r.x+r.width<=page.viewportSize().width+1&&
+      r.y+r.height<=dock.y-70);
   }).toBe(true);
   return;
  }
@@ -1713,15 +1713,14 @@ test('phone selected dock has no color plate and route form is vertically balanc
     advancedClosed:!document.getElementById('dj-route-advanced').open};
  });
  expect(form.formDisplay).toBe('flex');
- // Real map-first design: the map remains visible above a balanced
- // bottom entry sheet; no empty top-anchored fullscreen form.
- expect(form.panel.top,'the route editor must leave useful visible map space').toBeGreaterThanOrEqual(page.viewportSize().height*.20);
- expect(form.panel.top,'the entry sheet must not be pushed below the visible map').toBeLessThanOrEqual(page.viewportSize().height*.78);
+ // Approved map-first design: a compact TOP location card leaves the map
+ // unobstructed between the input and its fixed dock-clear CTA.
+ expect(form.panel.top,'route editor starts at the top').toBeLessThanOrEqual(3);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.panel.left,'the editor has consistent phone-edge margins').toBeGreaterThanOrEqual(8);
- expect(form.panel.right,'the editor has consistent phone-edge margins').toBeLessThanOrEqual(page.viewportSize().width-8);
- expect(form.card.bottom,'route editor content stays before the sticky primary CTA').toBeLessThanOrEqual(form.footer.top+4);
- expect(form.panel.bottom,'route editor must clear native bottom tabs').toBeLessThanOrEqual(form.dock.top-5);
+ expect(form.panel.left,'top editor spans the viewport').toBeGreaterThanOrEqual(-1);
+ expect(form.panel.right,'top editor spans the viewport').toBeLessThanOrEqual(page.viewportSize().width+1);
+ expect(form.card.bottom,'the map-visible gap remains below the card').toBeLessThanOrEqual(form.footer.top-24);
+ expect(form.panel.bottom,'the top panel clears the floating CTA').toBeLessThanOrEqual(form.footer.top-24);
  // The existing CTA stays naturally after the route editor, above the nav.
  // The actual button must remain visible and accept the pointer hit.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
