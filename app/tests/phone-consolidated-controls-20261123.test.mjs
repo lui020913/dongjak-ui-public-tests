@@ -6,7 +6,12 @@ const html=read('index.html');
 const main=read('src/main.js');
 const my=read('src/v834-my-info.js');
 const mobile=read('src/phone-surface-consistency-20261123.css');
-const followup=read('../frontend/production/mobile-17-followup.js');
+// In the sealed Preview artifact, frontend/ is intentionally excluded. The
+// production follow-up module is copied into app/src/ by the release builder.
+const followup=(()=>{try{return read('src/mobile-17-followup.js');}catch(error){
+ if(error?.code!=='ENOENT')throw error;
+ return read('../frontend/production/mobile-17-followup.js');
+}})();
 
 test('each route point has one picker, without deleting native map/search/GPS owners',()=>{
  assert.equal((html.match(/class="route-location-menu"/g)||[]).length,2);
