@@ -179,6 +179,14 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
         report.counts.skipped++;
         section.outcome.push({label:candidate.label,status:'dynamic-index-skipped',current});continue;
       }
+      // An HTML details element can have children with nonzero geometry
+      // while they are not user-clickable until the summary is expanded.
+      const inClosedDetails=await target.evaluate(el=>Boolean(el.closest('details:not([open])'))).catch(()=>false);
+      if(inClosedDetails){
+        const parent=target.locator('xpath=ancestor::details[1]');
+        await parent.locator('summary').click({timeout:12000,noWaitAfter:true});
+        await expect(parent).toHaveAttribute('open','',{timeout:7000});
+      }
       if(!(await target.isVisible().catch(()=>false))){
         section.outcome.push({label:candidate.label,status:'not-visible'});report.counts.skipped++;continue;
       }
@@ -237,6 +245,11 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
             const sub=extra.id
               ? page.locator('[id='+JSON.stringify(extra.id)+']')
               : page.getByRole('button',{name:extra.label,exact:true}).first();
+            if(await sub.evaluate(n=>Boolean(n.closest('details:not([open])'))).catch(()=>false)){
+              const parent=sub.locator('xpath=ancestor::details[1]');
+              await parent.locator('summary').click({timeout:12000,noWaitAfter:true});
+              await expect(parent).toHaveAttribute('open','',{timeout:7000});
+            }
             if(!await sub.isVisible().catch(()=>false)){entry.status='not-present-on-reopen';continue;}
             await sub.scrollIntoViewIfNeeded({timeout:7000});
             await page.waitForTimeout(140);

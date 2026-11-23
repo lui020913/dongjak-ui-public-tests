@@ -80,6 +80,11 @@ test('Community refresh: click with fresh locator after re-render',async({page},
   });
   try{
     await setup(page,'participate');
+    // The public refresh control is inside the intentionally collapsed
+    // '정렬 · 저장 · 알림' native details element. Open it as a user first.
+    const menu=page.locator('details.community-view-options');
+    await menu.locator('summary').click({timeout:12000,noWaitAfter:true});
+    await expect(menu).toHaveAttribute('open','',{timeout:7000});
     const target=page.getByRole('button',{name:/새로고침/}).first();
     result.before=await describeHit(page,'.dj-community-refresh');
     result.visibleRefreshLabels=await page.locator('button').evaluateAll(nodes=>nodes.filter(n=>/(새로고침|다시 확인)/.test(n.innerText||'')||/(새로고침|다시 확인)/.test(n.getAttribute('aria-label')||'')).map(n=>({id:n.id,aria:n.getAttribute('aria-label'),text:n.innerText?.slice(0,80),hidden:n.hidden,rect:[n.getBoundingClientRect().x,n.getBoundingClientRect().y,n.getBoundingClientRect().width,n.getBoundingClientRect().height]})));
