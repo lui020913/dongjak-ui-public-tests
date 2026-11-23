@@ -88,18 +88,23 @@ test('one input/editor and no standalone third route-details page',()=>{
 
 test('release mobile-next patch targets the current route source and avoids unscored alternatives',()=>{
  const main=read('src/main.js');
- const sentinel="paint:{'line-color':'#87939b','line-width'";
- assert.equal(main.split(sentinel).length-1,1,'exact release patch anchor must occur once');
- // The full source CI checks the adapter in the repository checkout.
- // Guarded release builds intentionally copy app/ into an isolated tree,
- // where ../scripts is absent; its adapter has already run before testing.
+ const raw="paint:{'line-color':'#87939b','line-width'";
+ const transformed="paint:{'line-color':['match',['get','kind'],'standard','#3978c8'";
+ // The source checkout must contain exactly one raw adapter anchor.
+ // Protected release transforms that very anchor into the route-kind match
+ // before it runs this same test in an isolated app-only tree.
  const adapter=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
  if(existsSync(adapter)){
    const release=readFileSync(adapter,'utf8');
-   assert.ok(release.includes(sentinel),'release adapter must target the current actual source line');
+   assert.equal(main.split(raw).length-1,1,'source adapter anchor occurs once');
+   assert.equal(main.split(transformed).length-1,0,'source checkout must not be prepatched');
+   assert.ok(release.includes(raw),'source release adapter matches current walking-route line');
+   assert.ok(release.includes(transformed),'adapter must keep release-specific alternative route style');
  }else{
-   assert.match(main,/walking-route-pri-colors/,'isolated build keeps observed PRI route colors');
-   assert.match(main,/walking-route-pri-unknown/,'isolated build keeps unassessed segments gray');
+   assert.equal(main.split(raw).length-1,0,'the isolated release should already be transformed');
+   assert.equal(main.split(transformed).length-1,1,'exact released alternative line match occurs once');
+   assert.match(main,/walking-route-pri-colors/,'release retains observed PRI colors');
+   assert.match(main,/walking-route-pri-unknown/,'release retains unknown gray segments');
  }
  assert.match(main,/enabled\|\|navMode\?'none':'visible'/);
 });
