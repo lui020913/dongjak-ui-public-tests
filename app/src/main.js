@@ -1736,7 +1736,7 @@ map.on('load',()=>{
   const firstLabel = map.getStyle().layers.find(layer=>layer.type==='symbol')?.id;
   map.addLayer({id:'walking-route-alternate-line',type:'line',source:'walking-route-alternative',
     layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':'#bd6980','line-width':['interpolate',['linear'],['zoom'],11,2.8,17,5.1],
+    paint:{'line-color':'#87939b','line-width':['interpolate',['linear'],['zoom'],11,2.8,17,5.1],
       'line-opacity':0.72,'line-dasharray':[1.8,2.4]}},firstLabel);
   map.addLayer({id:'walking-route-outline',type:'line',source:'walking-route',
     layout:{'line-cap':'round','line-join':'round'},
@@ -2637,6 +2637,8 @@ function syncPriRouteLine(){
       if(enabled)map.moveLayer(id);
     }
   }
+  if(map.getLayer('walking-route-alternate-line'))
+    map.setLayoutProperty('walking-route-alternate-line','visibility',navMode?'none':'visible');
   if(map.getLayer('walking-route-line'))map.setPaintProperty('walking-route-line','line-opacity',enabled?0:1);
 }
 function showRouteLine(coords) {
