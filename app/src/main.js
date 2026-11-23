@@ -2495,6 +2495,10 @@ function updateRouteCalcAvailability(){
 function updateRouteLabels() {
   document.getElementById('route-start-label').textContent=presentRouteLabel(routeStart);
   document.getElementById('route-end-label').textContent=presentRouteLabel(routeEnd);
+  // Reset is meaningful only after the user has actually selected a location.
+  // Keeping it on the empty route screen adds a purposeless white button.
+  const clear=document.getElementById('route-clear');
+  if(clear)clear.hidden=!(routeStart||routeEnd||routeResult||routeWaypoints.length);
   updateRouteCalcAvailability();
 }
 function makeRouteMarker(position, color) {
