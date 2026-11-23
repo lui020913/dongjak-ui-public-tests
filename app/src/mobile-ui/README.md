@@ -9,3 +9,7 @@
 ## Consolidated historical baseline
 
 The former 26 adjacent `v700`–`v728` mobile CSS imports now live **verbatim in original cascade order** in `app/src/mobile-ui-baseline.css` (same directory as the originals, preserving asset URL resolution). The original 26 files and runtime imports were deleted together. This is a fixed **historical baseline, not a new patch destination**. All newly approved UI changes are applied by editing `app/src/mobile-ui/current.css` or their owned component source, removing superseded rules in the same PR. Avoid future versioned CSS imports.
+
+## Lossless phone primary-page CSS consolidation (2026-11-23)
+
+`mobile-primary-fullscreen.css` was loaded immediately after `mobile-first-layout.css` with no intermediate imports. Its entire contents were appended verbatim to `mobile-first-layout.css` with section markers and the old JS import and standalone stylesheet were removed. Both files shared the same source-directory base, and the retired file contained no `@import`, `@charset`, or relative URLs. Historical per-screen rules and their `@layer` order remain unchanged. Regression checks guard the consolidation and exact phone viewport layout. Do not reintroduce the retired import.

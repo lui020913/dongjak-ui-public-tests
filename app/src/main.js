@@ -128,7 +128,6 @@ import './v889-mobile-visual-polish.css';
 import './public-ui-production-overlay.css';
 import './mobile-ui/current.css';
 import './mobile-first-layout.css';
-import './mobile-primary-fullscreen.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
