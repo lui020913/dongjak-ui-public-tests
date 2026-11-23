@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.121",
+  "application_version": "9.2.123",
   "public_work_branch": "main",
-  "purpose": "User-directed release of merged PR #390: unify iPhone bottom dock without colored selected-tab block, relocate My Info child back/title navigation into the fixed header, use 44px/360ms directional child-screen sliding without page fade, tune walking route form spacing, and improve typography selection pill contrast. PR head 168762d9ebb7602f0c08a91b29aaf8f32cb8c548; merged main 2e78d6781f5df9df2c7b1d7144d5ac264647415f; source CI run 45160404283 succeeded including all unit regressions, app build, and 3 mobile viewports. Retain all existing six-factor PRI scores, observed-only safety-route gates, GIS, map camera and routing, data, login, transit, AI, weather, themes, and bottom navigation functions. Run exact source guarded Preview, 12 disjoint phone QA shards, PC/tablet checks, protected Production with monotonic version and live source/API/binding verification; fail closed and preserve prior deployed app on any failure.",
-  "attempt": 314,
+  "purpose": "Guarded production release for PR #393, merged source fb83e383fa7d64a571672d3b09e4999b06bf8ef4. The previous 9.2.122 exact Preview correctly failed its new phone layout checks, and Production was skipped. This correction replaces over-centered idle walk directions with bounded 9dvh start padding, checks the ACTUAL tappable route CTA geometry and center-point hit target against the pill nav, updates stale assertions to ensure the moving green tab plate is hidden and active icon/text distinct, and repairs Playwright tap arguments. Full public app regression, build, and 3-viewport layout source CI 45169977041 succeeded. Require a NEW exact SHA isolated Preview, independent 12 mobile QA groups including rendered style/geometry, PC/tablet checks, guarded Production version/source/bindings verification, with rollback on any failure. Preserve PRI six-factor average, mapping, route data/computation, GIS, buses/trains, authentication, AI, community, weather, and all other app functions.",
+  "attempt": 316,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New post-PR #390 9.2.121 release; the previous 9.2.120 Production workflow 45155936328 succeeded. This is a version-increased exact-source deployment for new merged UI corrections; no failing checks may be bypassed.",
+  "last_retry_reason": "2026-11-23 9.2.122 protected Preview (workflow 45168306621) failed 4/12 phone QA shards, correctly skipping Production. Shard12/3 reported footer box instead of real route CTA, shard5 expected the intentionally removed moving green plate, shard8 contained malformed tap(page.locator(...)). PR #393 fixes these with updated real browser checks; reuse no QA result from the failed Preview.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
