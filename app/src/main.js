@@ -1951,6 +1951,25 @@ function saveCommunity(next) {
   }
 }
 
+/* My Info scroll height ends at the real floating dock, not a guessed
+ * 92/94px footer. Recompute on viewport changes (including iOS safe areas).
+ * Only this independent screen's own panel/scroll element is touched. */
+function syncMineScrollToDock(){
+  if(app.dataset.tab!=='mine'||!window.matchMedia('(max-width:699px)').matches)return;
+  const mine=document.getElementById('mine-panel'),dock=document.getElementById('bottom-nav');
+  if(!mine||!dock||mine.hidden||dock.hidden)return;
+  const dockTop=dock.getBoundingClientRect().top;
+  if(!Number.isFinite(dockTop)||dockTop<=0)return;
+  const dockGap=Math.max(0,Math.ceil(window.innerHeight-dockTop));
+  mine.style.setProperty('padding-bottom',dockGap+'px','important');
+  const scroll=mine.querySelector(':scope > .dj836-sheet-body');
+  scroll?.style.setProperty('padding-bottom','18px','important');
+  scroll?.style.setProperty('scroll-padding-bottom','18px','important');
+}
+window.addEventListener('resize',()=>{
+  if(app.dataset.tab==='mine')window.requestAnimationFrame(syncMineScrollToDock);
+},{passive:true});
+
 // The first mobile frame is a map, not an automatically opened information sheet.
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
@@ -2007,18 +2026,11 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   if (tab === 'news') dongjakNews.open();
   if (tab === 'mine') {
     renderMy();
-    // The legacy fullscreen sheet controller can apply a 92px *inline*
-    // bottom inset after stylesheet layout. My Info now owns its clearance
-    // inside .dj836-sheet-body, so prevent the outer 94px blank clipping band
-    // even when a runtime !important style beats authored CSS.
-    const mine=document.getElementById('mine-panel');
-    if(mine&&window.matchMedia('(max-width:699px)').matches){
-      mine.style.setProperty('padding-bottom','0px','important');
-      window.requestAnimationFrame(()=>{
-        if(app.dataset.tab==='mine'&&window.matchMedia('(max-width:699px)').matches)
-          mine.style.setProperty('padding-bottom','0px','important');
-      });
-    }
+    // Match the actual pill top on each phone, with a small inner scroller
+    // gutter. The 94px guessed outer footer caused the previous empty strip;
+    // zero outer padding allowed the scroller to run behind the dock.
+    syncMineScrollToDock();
+    window.requestAnimationFrame(syncMineScrollToDock);
   }
   if (tab !== 'map' && routePickMode) {routePickMode=null;closeTransitRouteConfirmation();}
   if (tab === 'map') {
