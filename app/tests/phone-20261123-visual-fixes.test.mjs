@@ -27,8 +27,8 @@ test('live train forward illumination is neutral radial, not warm yellow cones',
  const index=(x,y)=>((y*right.width+x)*4);
  const centre=index(195,50),edge=index(195,10);
  assert(right.data[centre+3]>right.data[edge+3]);
- assert.equal(right.data[centre],244);
- assert.equal(right.data[centre+1],250);
+ assert.equal(right.data[centre],228);
+ assert.equal(right.data[centre+1],244);
  assert.equal(right.data[centre+2],255);
  assert.equal(right.data[index(165,50)+3],0);
  const lamps=read('src/features/liveTransit/train-headlights.js');
@@ -37,7 +37,7 @@ test('live train forward illumination is neutral radial, not warm yellow cones',
 
 test('nearby guidance dock follows measured tab bar and uses neutral secondary action',()=>{
  const code=read('src/pedestrian-tools.js'),css=read('src/phone-six-issues.css');
- assert.match(code,/Math\.ceil\(window\.innerHeight-rect\.top\)\+9/);
+ assert.match(code,/Math\.ceil\(viewportBottom-rect\.top\)\+8/);
  assert.match(code,/--dj-nearby-dock-clearance/);
  assert.match(css,/bottom:var\(--dj-nearby-dock-clearance/);
  assert.match(css,/\.dj-nearby-map-center\{/);
@@ -57,5 +57,5 @@ test('My Info subviews animate by direction without blank-fading the page root',
  let more;
  try{more=read('src/mobile-17-followup.js');}
  catch(error){if(error?.code!=='ENOENT')throw error;more=read('../frontend/production/mobile-17-followup.js');}
- assert.match(more,/s\.textContent='추가 지도 도구'/);
+ assert.match(more,/\.dj834-tools-container/);
 });
