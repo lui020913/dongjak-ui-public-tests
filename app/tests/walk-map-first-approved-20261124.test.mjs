@@ -20,6 +20,9 @@ test('approved walking input is a real map with a TOP location card and separate
   assert.match(ui,/const desired=navRect\.top-12-actual\.height/);
   assert.match(ui,/routeFooter\.style\.setProperty\('transform','translateY\('/);
   assert.match(ui,/if\(stage!=='input'\)restoreInputFooter\(\)/);
+  assert.match(ui,/const liveRouteFooter=\(\)=>/);
+  assert.match(ui,/footerMountObserver\.observe\(panel,\{childList:true\}\)/);
+  assert.doesNotMatch(ui,/const routeFooter=byId\('dj910-route-footer'\);\s*const footerKeys/);
 });
 
 test('input redesign does not replace native place search, route calculation, PRI preview, or locked guidance',()=>{

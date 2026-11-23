@@ -279,20 +279,29 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   // Historic sheet styles can position a fixed footer relative to the
   // top route panel instead of the viewport. Keep the original CTA and its
   // handlers, then correct its *measured* position against the real dock.
-  const routeFooter=byId('dj910-route-footer');
   const footerKeys=['position','top','bottom','left','right','width','max-width','z-index','transform','translate','margin'];
-  const originalFooter=routeFooter?footerKeys.map(key=>({
-    key,value:routeFooter.style.getPropertyValue(key),
-    priority:routeFooter.style.getPropertyPriority(key)
-  })):[];
+  const originalFooterStyles=new WeakMap();
+  // The v910 footer is inserted *after* this presenter mounts. Resolve its
+  // real element at layout time, not once at initial module evaluation.
+  const liveRouteFooter=()=>{
+    const routeFooter=byId('dj910-route-footer');
+    if(routeFooter&&!originalFooterStyles.has(routeFooter))
+      originalFooterStyles.set(routeFooter,footerKeys.map(key=>({
+        key,value:routeFooter.style.getPropertyValue(key),
+        priority:routeFooter.style.getPropertyPriority(key)
+      })));
+    return routeFooter;
+  };
   const restoreInputFooter=()=>{
+    const routeFooter=liveRouteFooter();
     if(!routeFooter)return;
-    for(const {key,value,priority} of originalFooter){
+    for(const {key,value,priority} of originalFooterStyles.get(routeFooter)||[]){
       if(value)routeFooter.style.setProperty(key,value,priority);
       else routeFooter.style.removeProperty(key);
     }
   };
   const pinInputFooter=()=>{
+    const routeFooter=liveRouteFooter();
     if(app.dataset.djRouteStage!=='input'||!routeFooter)return;
     const navRect=byId('bottom-nav')?.getBoundingClientRect();
     if(!navRect?.height)return;
@@ -326,6 +335,12 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   on(win,'resize',positionMapActions);
   const inputResizeObserver=typeof ResizeObserver==='function'?new ResizeObserver(positionMapActions):null;
   inputResizeObserver?.observe(panel);
+  // A later footer insertion does not necessarily resize the top card because
+  // the footer is fixed. Observe the direct child insertion independently.
+  const footerMountObserver=new MutationObserver(()=>{
+    if(app.dataset.djRouteStage==='input')win.requestAnimationFrame?.(positionMapActions);
+  });
+  footerMountObserver.observe(panel,{childList:true});
   let oldStage='';
   const setStage=()=>{
     const stage=app.classList.contains('route-guiding')?'guiding':
@@ -347,6 +362,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   setStage();refreshChoices();
   return ()=>{
     stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
+    footerMountObserver.disconnect();
     restoreInputFooter();
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
