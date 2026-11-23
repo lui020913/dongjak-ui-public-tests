@@ -45,7 +45,7 @@
     gap:8px!important;z-index:1480!important;
   }
   /* Safety map is the first desktop navigation tab. */
-  html body #app#app #bottom-nav>.nav-tab[data-tab="map"]{order:-1!important;}
+  
   html body #app#app #bottom-nav>.nav-tab{order:0!important;}
   html body #app#app #bottom-nav>.nav-tab[data-tab="map"]{order:-1!important;}
   /* Match the three desktop map-tool launchers: same icon box, type scale and height. */
