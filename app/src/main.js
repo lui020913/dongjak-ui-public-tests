@@ -2373,13 +2373,11 @@ function renderCommunity() {
         }
         renderCommunity();
       }));
-    }else if(!loading){
-      actions.append(communityButton('첫 글 작성하기','dj-community-empty-primary',()=>{
-        communityComposerOrigin='community';openCommunityComposer(true);
-      }));
     }
+    // The persistent + 글쓰기 action already opens the same composer.
+    // A second identical call-to-action made the empty state look crowded.
     if(loading||offline||filtered)actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
-    empty.append(actions);
+    if(actions.childElementCount)empty.append(actions);
     empty.append(makeCEl('p','dj-community-empty-footnote','로그인 없이 작성하면 이 기기에만 저장됩니다. 공개 등록에는 로그인과 AI 검사가 필요합니다.'));
     root.append(empty);
     return;
