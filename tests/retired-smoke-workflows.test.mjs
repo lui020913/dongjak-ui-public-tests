@@ -5,8 +5,10 @@ const root=new URL('../',import.meta.url);
 const path=file=>new URL(file,root);
 const read=file=>readFileSync(path(file),'utf8');
 
-test('retire only standalone manual smoke workflows, keep all live recovery owners',()=>{
- for(const name of ['recovery-smoke.yml','recovery-smoke-controller.yml','notification-test.yml'])
+test('retire obsolete pinned visual proof flows, preserve every live recovery and release owner',()=>{
+ for(const name of ['recovery-smoke.yml','recovery-smoke-controller.yml','notification-test.yml',
+  'focused-mobile-alignment-proof.yml','focused-mobile-design-proof.yml',
+  'focused-route-result-proof.yml','focused-theme-diagnostic.yml','route-cta-hit-diagnostic.yml'])
   assert.equal(existsSync(path('.github/workflows/'+name)),false,name+' must stay retired');
  for(const name of ['mobile-release-failure-recovery.yml','public-pr-failure-recovery.yml','ai-ui-recovery.yml','v911-failure-recovery.yml',
    'mobile-first-overhaul-preview.yml','public-uptime.yml'])
