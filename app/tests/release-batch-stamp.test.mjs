@@ -56,6 +56,8 @@ test('release replay sets the internal defer guard before every bump and stamps 
   'isolated build must mirror the release shell for app-side regression');
  assert.ok(build.includes('cp "$GITHUB_WORKSPACE/scripts/verify-release-monotonic.mjs" "$RUNNER_TEMP/scripts/verify-release-monotonic.mjs"'),
   'isolated build must mirror the monotonic gate for app-side regression');
+ assert.ok(build.includes('cp "$GITHUB_WORKSPACE/.github/workflows/mobile-first-overhaul-preview.yml" "$RUNNER_TEMP/.github/workflows/mobile-first-overhaul-preview.yml"'),
+  'isolated build must mirror the protected release workflow for contract regression');
  const bump=readFileSync(new URL('../scripts/bump-app-version.mjs',import.meta.url),'utf8');
  assert.match(bump,/if\(process\.env\.DONGJAK_BATCH_RELEASE_STAMP!=='1'\)/);
  assert.match(bump,/spawnSync\(process\.execPath/);
