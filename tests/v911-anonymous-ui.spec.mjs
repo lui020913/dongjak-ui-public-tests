@@ -1467,6 +1467,10 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  }
  await tap(page,tab(page,'participate'));
  const panel=page.locator('#participation-panel'),toolbar=panel.locator('.community-toolbar');
+ const options=panel.locator('.community-view-options');
+ await expect(options).toBeVisible();
+ await expect(toolbar).toBeHidden();
+ await tap(page,options.locator('summary'));
  await expect(toolbar).toBeVisible();
  const controls=toolbar.locator(':scope > button, :scope > select');
  await expect(controls).toHaveCount(4);
@@ -1618,15 +1622,17 @@ test('iPhone final visual contract: compact route, transparent community status 
  await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
 
  await tap(page,tab(page,'participate'));
- const status=page.locator('#participation-panel .dj-community-feed-status');
- await expect(status).toBeVisible();
- await expect(page.locator('#participation-panel .dj-community-status-label')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
- const refresh=page.locator('#participation-panel .dj-community-refresh');
- const refreshSize=await refresh.boundingBox();
- expect(refreshSize?.width||0,'refresh should not occupy a full feed row').toBeLessThan(145);
+ // No permanent status slab may be inserted above the post list.
+ await expect(page.locator('#participation-panel .dj-community-feed-status')).toHaveCount(0);
  const search=await page.locator('#community-search').boundingBox();
+ const write=await page.locator('#community-compose-toggle').boundingBox();
+ expect(Math.abs(search.y-write.y),'search and compose share one control row').toBeLessThan(3);
+ await tap(page,page.locator('#participation-panel .community-view-options>summary'));
+ const refresh=page.locator('#participation-panel #community-refresh');
+ const refreshSize=await refresh.boundingBox();
+ expect(refreshSize?.width||0,'refresh should remain compact in expanded options').toBeLessThan(145);
  const toolbar=await page.locator('#participation-panel .community-toolbar').boundingBox();
- expect(toolbar.y-(search.y+search.height),'search and action rail must not touch').toBeGreaterThanOrEqual(8);
+ expect(toolbar.y-(search.y+search.height),'secondary controls should be separated from primary search').toBeGreaterThanOrEqual(8);
 
  await tap(page,tab(page,'map'));
  await expect(page.locator('#djNext-route-compare')).toHaveCount(1);

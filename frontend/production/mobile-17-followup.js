@@ -138,8 +138,9 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
   if(community&&editing!==composing){
    composing=editing;
    const listOnly=[':scope > .dj-sheet-chrome','.community-category-tabs','.dj-page-intro',
-    '.community-heading-row','.community-toolbar','#community-sort','#community-search',
-    '#community-notifications','#community-list','.community-report-secondary'];
+    '.community-heading-row','.community-primary-controls','.community-view-options',
+    '.community-toolbar','#community-sort','#community-search',
+    '#community-notifications','#community-list','.community-map-report-link'];
    for(const selector of listOnly)for(const node of community.querySelectorAll(selector)){
     if(editing){
      if(!composerDisplay.has(node))composerDisplay.set(node,{
@@ -217,16 +218,8 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
    });
    community.querySelector(':scope > .dj836-sheet-body')?.scrollTo?.(0,0);
   }else if(!feedActive&&communityFeedOwned)restoreCommunityFeedStyle();
-  const routeCalc=$('route-calc');
-  if(routeCalc){
-   let hint=$('dj9256-route-selection-hint');
-   if(!hint){hint=doc.createElement('p');hint.id='dj9256-route-selection-hint';
-    hint.className='dj9256-route-selection-hint';hint.setAttribute('role','status');
-    hint.textContent='출발지와 목적지를 선택하면 경로를 계산할 수 있습니다.';routeCalc.before(hint);}
-   const ready=[$('route-start-label'),$('route-end-label')].every(node=>
-    node&&node.textContent.trim()&&!/선택되지 않음|지정되지 않음/.test(node.textContent));
-   if(hint.hidden!==ready)hint.hidden=ready;
-  }
+  // The route editor already names origin and destination. No second
+  // redundant instructional line is inserted above its single CTA.
   const utilities=doc.querySelector('#mine-panel .dj834-tools-container .dj-mobile-utilities-body');
   const quick=utilities?.querySelector('.dj840-more-quick-actions'),tour=utilities?.querySelector('.dj860-more-launch');
   if(quick&&tour&&tour.parentElement!==quick)quick.append(tour);

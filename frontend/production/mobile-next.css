@@ -156,7 +156,7 @@ html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-main:
 html body #app#app#app#app#app#app#app #dj854-weather-sheet .dj854-weather-detail{white-space:pre-line!important;line-height:1.55!important;overflow-wrap:anywhere!important;font-size:12px!important}
 html body #app#app#app#app#app#app#app #dj854-weather-sheet [data-weather-location]{background:var(--djNext-active)!important;color:white!important}
 /* Compose is one screen, not a second sheet under the feed toolbar. */
-html body #app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(.community-heading-row,.community-toolbar,#community-list,.community-report-secondary){display:none!important}
+html body #app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(.community-heading-row,.community-toolbar,.community-primary-controls,.community-view-options,#community-list,.community-report-secondary,.community-map-report-link){display:none!important}
 html body #app#app#app#app#app#app#app #participation-panel #community-form .community-form-top{min-height:52px!important;padding:8px 12px!important}
 html body #app#app#app#app#app#app#app #participation-panel .djNext-form-scroll{min-height:0!important;flex:1 1 auto!important;overflow:auto!important;overscroll-behavior:contain;scroll-padding:16px}
 html body #app#app#app#app#app#app#app #participation-panel #community-form :is(input:not([type=file]),textarea,select){font-size:16px!important;max-width:100%!important;box-sizing:border-box!important;scroll-margin:12px}
@@ -255,7 +255,7 @@ html body #app#app#app#app#app#app#app#app#app #participation-panel #community-l
 html body #app#app#app#app#app#app#app#app#app #participation-panel .empty-hint{margin:0!important;min-height:0!important;padding:12px!important;border-radius:12px!important;line-height:1.55!important;word-break:keep-all;overflow-wrap:anywhere}
 html body #app#app#app#app#app#app#app#app#app #participation-panel .community-report-secondary{margin:4px 0 0!important;padding:10px!important;border-radius:12px!important}
 /* Hide every list-only section while editing, even if older modules moved the nodes into a wrapper. */
-html body #app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(.dj-page-intro,.community-heading-row,.community-toolbar,.community-category-tabs,#community-sort,#community-list,.community-report-secondary){display:none!important}
+html body #app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(.dj-page-intro,.community-heading-row,.community-toolbar,.community-primary-controls,.community-view-options,.community-category-tabs,#community-sort,#community-list,.community-report-secondary,.community-map-report-link){display:none!important}
 html body #app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden]))>.dj-sheet-chrome{display:none!important}
 html body #app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden]))>.dj836-sheet-body{display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;height:auto!important;min-height:0!important;overflow:hidden!important}
 html body #app#app#app#app#app#app#app#app#app #participation-panel #community-form:not([hidden]){display:flex!important;flex:1 1 0%!important;flex-direction:column!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;margin:0!important;padding:0!important;gap:0!important;border:0!important;box-sizing:border-box!important}
@@ -441,11 +441,11 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
    Keep the established sheet sizing and scroll owner; do not force a 52dvh
    blank card or introduce a second full-screen compositor. */
 html body #app #participation-panel #community-list .dj-community-empty-state{
-  display:grid;grid-template-columns:36px minmax(0,1fr);
-  grid-template-areas:"icon title" "copy copy" "actions actions" "topics topics" "foot foot";
-  align-items:center;column-gap:8px;row-gap:8px;min-width:0;padding:10px 12px 12px;
-  background:var(--djNext-surface,#fff);color:var(--djNext-text,#254238);
-  border:1px solid var(--djNext-border,#dce9e0);border-radius:20px;
+  display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"title" "copy" "actions";
+  align-items:start;row-gap:7px;min-width:0;padding:14px 4px;
+  background:transparent;color:var(--djNext-text,#254238);
+  border:0;border-radius:0;box-shadow:none;
 }
 html body #app #participation-panel #community-list .dj-community-empty-icon{
   grid-area:icon;display:grid;place-items:center;width:36px;height:36px;border-radius:12px;
@@ -838,7 +838,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-post-preview{background:var(--dj9272-surface,#fff)!important;box-shadow:0 3px 12px rgba(22,51,39,.055)!important;border-radius:18px!important;border-width:1px!important;padding:14px!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-feed-thumb{width:72px!important;height:72px!important;object-fit:cover!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel:has(#community-form:not([hidden])) :is(#community-search,#community-notifications){display:none!important}
-html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel[data-community-detail=true] :is(.community-heading-row,.community-toolbar,#community-search,#community-notifications,.community-report-secondary,.dj-page-intro){display:none!important}
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel[data-community-detail=true] :is(.community-heading-row,.community-toolbar,.community-primary-controls,.community-view-options,#community-search,#community-notifications,.community-report-secondary,.community-map-report-link,.dj-page-intro){display:none!important}
 } }
 
 /* Expanded page sheets must own the noninteractive header even when map chrome descendants override inherited visibility. */
@@ -1192,5 +1192,125 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
   }
   html body #app#app#app#app#app#app#app #participation-panel .community-toolbar :is(button,select){
     min-height:38px!important;height:38px!important;font-size:12px!important;
+  }
+
+  /* Consolidated phone controls — actual owners live in app/index.html.
+     These styles do not create alternate copies of stateful controls. */
+  /* Explicitly keep native details closed despite legacy !important display
+     overrides that otherwise expose their children on iOS WebKit. */
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options:not([open])>.community-toolbar{display:none!important}
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu:not([open]) .route-location-popover{display:none!important}
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-advanced-tools:not([open])>.dj834-tools-container{display:none!important}
+
+  html body #app#app#app#app#app#app#app #participation-panel .community-primary-controls{
+    display:grid!important;grid-template-columns:minmax(0,1fr) 112px!important;
+    gap:8px!important;align-items:center!important;margin:6px 0 4px!important;
+    min-width:0!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-primary-controls #community-search{
+    min-width:0!important;width:100%!important;margin:0!important;
+    height:44px!important;min-height:44px!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-primary-controls #community-compose-toggle{
+    width:112px!important;min-width:0!important;height:44px!important;
+    min-height:44px!important;border-radius:14px!important;padding:7px 5px!important;
+    font-size:13px!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options{
+    display:block!important;border:0!important;border-radius:0!important;
+    padding:0!important;margin:0 0 8px!important;background:transparent!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options>summary{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    list-style:none!important;min-height:38px!important;width:100%!important;
+    padding:5px 6px!important;box-sizing:border-box!important;
+    font-size:12px!important;font-weight:650!important;color:var(--djNext-muted,#61786e)!important;
+    cursor:pointer!important;border:0!important;background:transparent!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options>summary::-webkit-details-marker{display:none!important}
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options[open]>summary span{transform:rotate(180deg)}
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options .community-toolbar{
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    align-items:stretch!important;gap:5px!important;margin:3px 0 8px!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-view-options .community-toolbar :is(select,button){
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    min-height:40px!important;height:40px!important;
+    padding:5px 3px!important;font-size:11px!important;border-radius:11px!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .community-map-report-link{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    width:100%!important;min-height:48px!important;
+    margin:12px 0 6px!important;padding:10px 15px!important;
+    border:1px solid var(--djNext-border,#dce9e0)!important;border-radius:14px!important;
+    background:var(--djNext-surface,#f9fcfa)!important;color:var(--djNext-active,#098871)!important;
+    font-size:13px!important;font-weight:700!important;text-align:left!important;
+    box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel .dj-community-connection-error{
+    margin:4px 0 12px!important;color:#8d5643!important;font-size:12px!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel #community-list .dj-community-empty-state{
+    border:0!important;background:transparent!important;box-shadow:none!important;
+    padding:20px 6px!important;margin:0!important;gap:8px!important;
+  }
+  html body #app#app#app#app#app#app#app #participation-panel #community-list .dj-community-empty-icon{display:none!important}
+
+  /* A single labelled picker per route point; original search, map and GPS
+     action IDs remain intact inside its accessible expanding popover. */
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu{
+    position:relative!important;min-width:62px!important;align-self:center!important;
+    flex:0 0 auto!important;z-index:10!important;
+  }
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu[open]{z-index:25!important}
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu>summary{
+    display:grid!important;place-items:center!important;list-style:none!important;
+    min-width:62px!important;height:42px!important;padding:0 10px!important;
+    border:1px solid var(--djNext-border,#d6e4dc)!important;border-radius:12px!important;
+    background:var(--djNext-raised,#eaf3ed)!important;color:var(--djNext-text,#28473c)!important;
+    font-size:13px!important;font-weight:700!important;cursor:pointer!important;
+    box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app #route-panel .route-location-menu>summary::-webkit-details-marker{display:none!important}
+  html body #app#app#app#app#app#app#app #route-panel .route-location-popover{
+    position:absolute!important;right:0!important;top:calc(100% + 6px)!important;
+    width:max-content!important;max-width:calc(100vw - 44px)!important;
+    padding:8px!important;border-radius:14px!important;z-index:26!important;
+    background:var(--djNext-surface,#fff)!important;
+    border:1px solid var(--djNext-border,#d6e4dc)!important;
+    box-shadow:0 6px 20px rgba(32,66,51,.13)!important;
+  }
+  html body #app#app#app#app#app#app#app #route-panel .route-location-popover .route-select-actions{
+    display:flex!important;flex-wrap:wrap!important;gap:6px!important;
+  }
+  html body #app#app#app#app#app#app#app #route-panel .route-location-popover :is(.route-mini-btn,.route-gps-btn){
+    min-height:42px!important;white-space:nowrap!important;
+    padding:8px!important;font-size:12px!important;flex:1 1 auto!important;margin:0!important;
+  }
+  html body #app#app#app#app#app#app#app #route-panel .route-card{
+    overflow:visible!important;
+  }
+
+  /* Map and walking settings absorb previously separate advanced utilities. */
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-advanced-tools{
+    margin-top:12px!important;padding:0!important;min-width:0!important;
+    border-top:1px solid var(--djNext-border,#d6e4dc)!important;
+    background:transparent!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-advanced-tools>summary{
+    display:flex!important;align-items:center!important;min-height:52px!important;
+    padding:10px 4px!important;cursor:pointer!important;font-size:14px!important;
+    font-weight:700!important;color:var(--djNext-text,#254238)!important;
+  }
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-my-detail:not([hidden]) .dj834-detail-nav{
+    margin:0 0 9px!important;padding:0 0 6px!important;min-height:46px!important;
+  }
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-my-detail:not([hidden]) .dj834-detail-content{
+    margin:0!important;padding:0!important;min-height:0!important;
+  }
+  html body #app#app#app#app#app#app#app #mine-panel .dj834-detail-content .dj877-type-settings:not([hidden]){
+    padding:0 0 12px!important;gap:11px!important;align-content:start!important;
   }
 }

@@ -78,7 +78,8 @@ test('mobile nav rows and labels have same baseline and iPhone-rounded outer pil
 test('my info removes unused manual theme row while preserving map settings access',()=>{
  assert.doesNotMatch(info,/data-dj834-action="theme"/);
  assert.match(info,/data-dj834-action="map"/);
- assert.match(info,/history:historyBox,tools:toolsBox,map:mapBox/);
+ assert.match(info,/history:historyBox,map:mapBox/);
+ assert.match(info,/className='dj834-advanced-tools'/);
 });
 test('profile save/edit and security recovery modes keep login state',()=>{
  assert.match(account,/savedProfile\?'변경사항 저장':'이름 저장'/);

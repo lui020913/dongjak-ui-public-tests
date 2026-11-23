@@ -36,7 +36,8 @@ test('overlapping unavailable panel measurement uses a bounded fallback',()=>{
 
 test('map preferences, release history and advanced tools use one child navigation owner',()=>{
  const info=source('src/v834-my-info.js');
- assert.match(info,/history:historyBox,tools:toolsBox,map:mapBox/);
+ assert.match(info,/history:historyBox,map:mapBox/);
+ assert.match(info,/advancedTools\.append\(advancedTitle,toolsBox\);mapBox\.append\(advancedTools\)/);
  assert.match(info,/\['profile','records','type','language','tools','map'\]/);
  assert.match(info,/if\(view==='map'\)syncMapChoices\(\)/);
  assert.match(info,/enter\(detail,'forward'\)/);

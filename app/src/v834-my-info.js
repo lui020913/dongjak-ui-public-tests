@@ -33,8 +33,7 @@ export function installMyInfo(doc=document){
  <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
- <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button>
- <button type="button" data-dj834-action="tools"><span class="dj834-setting-icon">${symbol('map')}</span><span>추가 지도 도구</span><span class="dj834-chevron">›</span></button></div>`;
+ <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
  const detail=doc.createElement('section');detail.className='dj834-my-detail';detail.hidden=true;
  detail.innerHTML=`<div class="dj834-detail-nav"><button type="button" class="dj834-detail-back" aria-label="내 정보 설정으로 돌아가기">${symbol('back')}</button><h3 class="dj834-detail-title"></h3></div><div class="dj834-detail-content"></div>`;
  const accountBox=doc.createElement('div');accountBox.className='dj834-account-container';accountBox.append(account);
@@ -134,6 +133,12 @@ export function installMyInfo(doc=document){
  <label class="dj834-map-setting-row"><span><strong>날씨 표시</strong><small>지도 위 날씨 버튼을 표시합니다.</small></span><input type="checkbox" data-dj834-native="dj-settings-weather" aria-label="날씨 표시"></label>
  <label class="dj834-map-setting-row"><span><strong>지도 조작 버튼</strong><small>도움말·나침반·홈·내 위치</small></span><input type="checkbox" data-dj834-native="dj-settings-tools" aria-label="지도 조작 버튼"></label>
  <button type="button" class="dj834-map-reset">기본 설정 복원</button>`;
+ // Former "추가 지도 도구" is no longer a competing top-level page. Move
+ // its existing live owner under the related map preferences without cloning
+ // controls or losing the listeners attached by installMobileFollowup.
+ const advancedTools=doc.createElement('details');advancedTools.className='dj834-advanced-tools';
+ const advancedTitle=doc.createElement('summary');advancedTitle.textContent='고급 지도 도구';
+ advancedTools.append(advancedTitle,toolsBox);mapBox.append(advancedTools);
  const syncMapChoices=()=>{
    for(const input of mapBox.querySelectorAll('[data-dj834-native]')){
      const native=doc.getElementById(input.dataset.dj834Native);
@@ -168,13 +173,14 @@ export function installMyInfo(doc=document){
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;toolsBox.hidden=true;mapBox.hidden=true;
- content.append(accountBox,typography,records);content.append(languageSettings,historyBox,toolsBox,mapBox);
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;mapBox.hidden=true;
+ toolsBox.hidden=false; // Its visibility is governed by the enclosing map page and <details>.
+ content.append(accountBox,typography,records);content.append(languageSettings,historyBox,mapBox);
  // All inactive settings views remain mounted for real-time account/history
  // updates but must never contribute their own layout height. Historically
  // a versioned !important display:grid on the hidden typography view pushed
  // every subsequent subpage to the bottom of an iPhone viewport.
- for(const node of [accountBox,typography,records,languageSettings,historyBox,toolsBox,mapBox])
+ for(const node of [accountBox,typography,records,languageSettings,historyBox,mapBox])
    node.style.setProperty('display','none','important');
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
@@ -207,10 +213,11 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'추가 지도 도구',map:'지도·도보 설정'})[view]||'설정';
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
    if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
-   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox,tools:toolsBox,map:mapBox};
+   if(view==='tools'){view='map';advancedTools.open=true;}
+   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox,map:mapBox};
    for(const [key,node] of Object.entries(views)){
      const active=key===view;
      node.hidden=!active;
