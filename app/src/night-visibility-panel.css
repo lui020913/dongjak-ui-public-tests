@@ -132,7 +132,7 @@
     border-radius:18px 18px 12px 12px!important;
     box-shadow:0 -6px 24px rgba(0,0,0,.22)!important;
   }
-  #app #night-visibility-float[data-collapsed="true"]{max-height:85px!important;}
+  
   #app #night-visibility-float .night-visibility-float-head{
     position:relative;padding:19px 12px 12px!important;touch-action:pan-y;
   }

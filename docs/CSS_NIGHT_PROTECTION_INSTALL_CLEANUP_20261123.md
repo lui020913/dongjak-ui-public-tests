@@ -1,0 +1,3 @@
+# Lossless CSS duplicate pruning — 2026-11-23
+
+Removed three earlier **byte-identical normalized CSS declaration blocks** under the **same selector and media scope**, while retaining the later equivalent block. This affects `night-visibility-panel.css`, `protection-zone-map.css`, and `browser-install-menu.css` only. No stylesheet imports, JS, GIS, Supabase, routing, account state, or release controls are modified. The new test preserves critical selectors and rejects reintroduced duplicate blocks. Full CI and phone QA must pass before Production; the current 9.2.115 release must finish before this branch can be promoted.

@@ -25,7 +25,7 @@ html[data-theme=dark] dialog#dj-install-menu{background:#191b1f;color:#f1f4f2}
 html[data-theme=dark] dialog#dj-install-menu::backdrop{background:#191b1f}
 html[data-theme=dark] dialog#dj-install-menu .dj-install-choice,html[data-theme=dark] dialog#dj-install-menu .dj-install-prompt{background:#24282c;border-color:#414849}
 html[data-theme=dark] dialog#dj-install-menu :is(.dj-install-subtitle,.dj-install-status,.dj-install-dismiss,.dj-install-chevron){color:#b4bfba}
-html[data-theme=dark] dialog#dj-install-menu .dj-install-info{background:#293632;color:#e2f0e7}
+
 /* Desktop/tablet keep the phone-only gate; the selector belongs to the page, not a second card. */
 #dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>h1,#dj-mobile-only-screen:has(.dj-install-menu) .dj-mobile-only-message>p{display:none!important}
 #dj-mobile-only-screen .dj-install-menu{width:100%;padding:0;margin:0}
