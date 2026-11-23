@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.110",
+  "application_version": "9.2.111",
   "public_work_branch": "main",
-  "purpose": "Owner-authorized non-destructive source cleanup release: deduplicated PRI observed-only 3/4/6 aggregation with identical score semantics; runtime manifest/NULL tests, five empty test placeholder removals. Exact verified GitHub PR #359 merged at 3c0fc6b954eefe0598147e86331ab5e6e3df1d07. Preserve all GIS, UI, APIs and Supabase. Use exact artifact Preview, 12 phone shards, desktop/tablet, protected Production and rollback checks; no bypass.",
-  "attempt": 300,
+  "purpose": "Owner-approved safe second refactor: 8 exactly shadowed same-scope legacy CSS rules retired; mobile layout coordinator observer/listener setup ref-counted with idempotent release; new lifecycle/CSS/protected release guard tests. Maintain all GIS/PRI/transport/AI/community APIs unchanged. Verified public source CI 45115109924 and PR #360. Require exact-SHA Preview, all twelve phone QA shards, desktop/tablet QA, protected Production and guarded rollback; no bypass.",
+  "attempt": 301,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New approved release after successful PR #359 source CI 45113071845; no retry or reduced QA.",
+  "last_retry_reason": "New small approved source release after PR #360 CI success; Supabase additive five lookup indexes were applied and independently verified without RLS or data changes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
