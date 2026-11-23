@@ -2603,7 +2603,12 @@ function syncPriRouteLine(){
   const enabled=Boolean(colored?.features?.length&&routeResult&&app.dataset.tab==='map'&&!navMode);
   if(source)source.setData(enabled?colored:emptyWalkingRoute());
   for(const id of ['walking-route-pri-colors','walking-route-pri-unknown']){
-    if(map.getLayer(id))map.setLayoutProperty(id,'visibility',enabled?'visible':'none');
+    if(map.getLayer(id)){
+      map.setLayoutProperty(id,'visibility',enabled?'visible':'none');
+      // showRouteLine() raises the native white route outline: the PRI
+      // segments MUST be raised after it or white hides the risk colors.
+      if(enabled)map.moveLayer(id);
+    }
   }
   if(map.getLayer('walking-route-line'))map.setPaintProperty('walking-route-line','line-opacity',enabled?0:1);
 }
