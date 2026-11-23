@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.103",
+  "application_version": "9.2.104",
   "public_work_branch": "main",
-  "purpose": "PR344 complete screenshot-driven iPhone UI fixes on exact main source f260da7911ad5f523876072a40a4c4cf195a5b96: walking route map result defaults compact selected-mode summary and expandable four alternatives instead of obscuring the map, route fitBounds uses actual top toolbar and bottom result/nav geometry (with min visible map), route location search/map and GPS buttons compact but fully functional; community status loses high-specificity opaque white row/pill with smaller refresh and search toolbar spacing; My Info typography choices flat shadowless 11px consistent controls; release history duplicate disclosure summaries and nested badge/extra spacing removed without deleting historical notes. Preserve GIS risk score, pedestrian route coordinates, GPS/navigation, transport APIs, all user data. Must run fully guarded sealed Preview, all 12 mobile QA shards 375/390/430px including new real mobile style tests, desktop/tablet checks, exact-source protected Production/API proof, then signed Android APK public release. Stop on ANY failure; no skipped-failure escape. Public app version remains 1.0. Test-path compatibility PR345 source 1acf20203807db6248ac78c6285425a544ad4aef merged and source CI #45101529534 success; 9.2.103 must use exact sealed Preview, all 12 mobile QA shards 375/390/430px including new real visual layout assertions, PC/tablet, protected Production and Android APK with source proof. No bypass of failed tests.",
-  "attempt": 291,
+  "purpose": "PR344 screenshot-driven mobile UI correction, PR345 sealed test path correction, PR347 explicit open-and-select browser flow for the compact route choice: verified base 02cc9149255b7cf3c6071c9364e4367b21fc96d8. Preserve four actual route variants and PRI-not-applied disclaimers; correctly fit geometry using unobstructed toolbar-to-sheet bounds; remove unnecessary community white status slab and spacing, flatten typography segments, reduce duplicate history labels. Previous 9.2.103 passed sealed source, Preview, desktop and 11/12 phone shards but phone shard 4 browser test tried to click a deliberately collapsed option; PR347 only changes test to explicitly expand and re-collapse. Require all 12 phone shards, PC/tablet, matched-source Preview and protected Production, then source-provenanced Android APK. Stop release on any failure; no bypasses.",
+  "attempt": 292,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.102 stopped before Preview due one new route UI regression test referencing a nonsealed frontend folder. PR #345 merged after full CI success, reading identical generated app/src production assets in isolated build; no application behavior changes. Restart complete gated QA, no skip.",
+  "last_retry_reason": "9.2.103 failed only outdated mobile390 route choice browser click sequence; PR347 source CI success and merged. 9.2.104 protected retry.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
