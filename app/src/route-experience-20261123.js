@@ -136,9 +136,11 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(e.type==='keydown'&&e.key==='Tab'){
       e.preventDefault();stop?.focus({preventScroll:true});return;
     }
-    if(e.isTrusted!==false){
-      e.preventDefault?.();e.stopImmediatePropagation?.();e.stopPropagation?.();
-    }
+    // Block both genuine input and scripted UI dispatch. GPS and map
+    // rendering updates are not DOM interaction events and keep running.
+    e.preventDefault?.();
+    e.stopImmediatePropagation?.();
+    e.stopPropagation?.();
   };
   for(const type of ['click','dblclick','pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','contextmenu','keydown']){
     on(doc,type,intercept,{capture:true,passive:false});
