@@ -23,6 +23,28 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   portal.hidden=true;
   doc.body.append(portal);
   let active=false,raf=0,initialLayoutHeight=0;
+  // Parent tab-dock visibility has competing high-specificity !important
+  // selectors. Save exact inline declarations, then hide with inline !important.
+  // This also removes the dock from keyboard/focus hit testing.
+  let dockRestore=null;
+  const hideDock=()=>{
+    const node=doc.getElementById('bottom-nav');
+    if(!node)return;
+    const keys=['display','visibility','pointer-events'];
+    dockRestore={node,values:keys.map(key=>({
+      key,value:node.style.getPropertyValue(key),priority:node.style.getPropertyPriority(key)
+    }))};
+    for(const key of keys)node.style.setProperty(key,key==='display'?'none':key==='visibility'?'hidden':'none','important');
+  };
+  const restoreDock=()=>{
+    if(!dockRestore)return;
+    const {node,values}=dockRestore;
+    for(const {key,value,priority} of values){
+      if(value)node.style.setProperty(key,value,priority);
+      else node.style.removeProperty(key);
+    }
+    dockRestore=null;
+  };
 
   const ensureStructure=()=>{
     let sc=form.querySelector(':scope > .djNext-form-scroll');
@@ -89,6 +111,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     form.hidden=false;
     portal.hidden=false;
     doc.body.dataset.djCommunityEditor='open';
+    hideDock();
     sc.scrollTop=0;
     activateListeners();
     sync();
@@ -107,6 +130,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     portal.style.removeProperty('--dj-community-visual-height');
     delete portal.dataset.keyboard;
     delete doc.body.dataset.djCommunityEditor;
+    restoreDock();
   }
   return {open,close,isOpen:()=>active,portal};
 }
