@@ -187,3 +187,48 @@ export function visualizeCompositePriRoutes(routes,bundle){
     gentle:routePriColorGeometry(routes?.gentle,lines)
   };
 }
+
+
+/**
+ * Route map geometry colored exclusively with six-factor PRI *observations*.
+ * Each route is sampled along the actual router's polyline. Unknown or ambiguous
+ * segments remain 'unknown' (grey dotted) – never inferred as risk 0.
+ * Map presentation is independent from whether the global 65% recommendation
+ * evidence threshold was met.
+ */
+export function colorizeObservedRoute(route,observedLines){
+ const coords=route?.coords;
+ const empty={type:'FeatureCollection',features:[]};
+ if(!Array.isArray(coords)||coords.length<2)return empty;
+ const features=[];
+ let last=null;
+ const band=value=>value===null?'unknown':
+   value<20?'green':value<40?'lime':value<55?'yellow':
+   value<70?'orange':'red';
+ for(let i=1;i<coords.length;i++){
+   const p=coords[i-1],q=coords[i];
+   if(![p,q].every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(Number.isFinite)))continue;
+   const a=XY(p),b=XY(q),length=dist(a,b);
+   if(length<.01)continue;
+   // Preserve input geometry, including bends. Caps prevent huge map payloads.
+   const count=Math.min(70,Math.max(1,Math.ceil(length/16)));
+   const heading=[(b[0]-a[0])/length,(b[1]-a[1])/length];
+   for(let j=0;j<count;j++){
+     const t0=j/count,t1=(j+1)/count,tm=(t0+t1)/2;
+     const mid=[a[0]+(b[0]-a[0])*tm,a[1]+(b[1]-a[1])*tm];
+     const observation=matchedRisk(mid,heading,observedLines.grid);
+     const risk=Number.isFinite(observation?.risk)?observation.risk:null;
+     const riskBand=band(risk);
+     const from=[p[0]+(q[0]-p[0])*t0,p[1]+(q[1]-p[1])*t0];
+     const to=[p[0]+(q[0]-p[0])*t1,p[1]+(q[1]-p[1])*t1];
+     if(last&&last.properties.riskBand===riskBand){
+       last.geometry.coordinates.push(to);
+     }else{
+       last={type:'Feature',properties:{riskBand,observed:risk!==null,risk},
+         geometry:{type:'LineString',coordinates:[from,to]}};
+       features.push(last);
+     }
+   }
+ }
+ return {type:'FeatureCollection',features};
+}
