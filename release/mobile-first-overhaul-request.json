@@ -5,7 +5,7 @@
   "purpose": "PR350 consolidated actual phone UI controls (community, walking location picker, My Info map utilities); PR351 fixed its source regression test path for isolated release. User expressly requested complete modifications and Production; preserve map/PRI/transport routing APIs. PR350 source CI 45105625838 successful, PR351 source CI 45106075541 successful. Require sealed Preview, all mobile QA shards, PC/tablet, guarded Production exact commit marker and Android APK; no bypass.",
   "attempt": 294,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.105 build 45105873072 stopped before Preview solely because the new source regression test loaded ../frontend/production in a sealed app; PR351 patched generated src/mobile-17-followup.js fallback, source CI 45106075541 success, merged as 9b2c1b4d0c4797bcd9e9576b1a9d3ace3c8a351f. Retry same version under all protected gates.",
+  "last_retry_reason": "9.2.105 build run 45105873072 stopped before Preview because one newly added regression test referenced frontend/production outside the sealed app directory. PR351 repairs only the generated-app test path, source CI passed. Retry same not-yet-deployed 9.2.105 with all protected gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
