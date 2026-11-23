@@ -75,3 +75,13 @@
 #app #dj841-guide-tips li{font-size:12px;line-height:1.5;color:var(--dj800-text,#25473b);}
 
 #app #dj-mobile-utilities .dj841-redundant-more-action{display:none!important;}
+
+/* Six-factor research PRI advice belongs inside the existing route card. */
+#app :is(#route-map-card,#route-summary) > .dj-pri-route-advice:not([hidden]) {
+  display:block;box-sizing:border-box;min-width:0;max-width:100%;
+  margin:6px 0 0;padding:7px 9px;border-radius:10px;
+  border:1px solid var(--dj800-border,#d9e5dd);
+  background:var(--dj800-secondary,#edf5f0);color:var(--dj800-text,#23463b);
+  font-size:11px;line-height:1.5;white-space:normal;
+  overflow-wrap:anywhere;word-break:keep-all;
+}
