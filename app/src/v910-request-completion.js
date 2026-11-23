@@ -132,6 +132,13 @@ export function installRequestCompletion(doc=document,win=window){
       const bounds=calc.getBoundingClientRect?.();
       const delta=bounds?Math.max(0,Math.ceil(bounds.bottom-n.top+10)):0;
       if(delta>0)set('transform',`translateY(-${delta}px)`);
+      // The route sheet has its own scrollport. Size its visible edge against
+      // the REAL submit button, not the fixed footer wrapper or a guessed vh.
+      // Keep this coordinate as viewport pixels so the editor cannot cover
+      // the primary action at 375/390/430px or after browser chrome changes.
+      const hitBounds=calc.getBoundingClientRect?.();
+      if(hitBounds&&hitBounds.height>=36&&Number.isFinite(hitBounds.top))
+        variable('--dj-route-cta-top',Math.max(90,Math.floor(hitBounds.top))+'px');
       route.dataset.djRouteCtaDocked='true';
     }else if(footer&&footer.style?.getPropertyPriority?.('position')==='important'){
       for(const prop of ['position','inset','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
