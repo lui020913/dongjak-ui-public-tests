@@ -531,11 +531,21 @@ test('phone route comparison uses actual pedestrian graph and does not invent a 
  await expect(summary).toBeVisible({timeout:60000});await expect(cards.locator('button')).toHaveCount(4);
  const assertRouteCardBounds=async()=>{await expect.poll(()=>summary.evaluate(n=>{const r=n.getBoundingClientRect(),w=innerWidth;return {inside:r.left>=-1&&r.right<=w+1&&r.width>0,centred:Math.abs(r.left-(w-r.right))<=2};}),{timeout:10000}).toEqual({inside:true,centred:true});};
  await assertRouteCardBounds();
+ // The revised map-first route card starts compact. Alternatives are still
+ // available through the visible options button and collapse after choosing.
+ await expect(cards).toBeHidden();
+ await summary.getByRole('button',{name:'경로 옵션'}).click();
+ await expect(cards).toBeVisible();
  for(const id of ['standard','gentle','balanced'])await expect(cards.locator('[data-comparison="'+id+'"]')).toBeEnabled();
  await cards.locator('[data-comparison="balanced"]').click();
+ await expect(cards).toBeHidden();
  await expect(cards.locator('[data-comparison="balanced"]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#route-map-source')).toContainText('PRI 미반영');
- await cards.locator('[data-comparison="standard"]').click();await expect(cards.locator('[data-comparison="standard"]')).toHaveAttribute('aria-pressed','true');
+ await summary.getByRole('button',{name:'경로 옵션'}).click();
+ await expect(cards).toBeVisible();
+ await cards.locator('[data-comparison="standard"]').click();
+ await expect(cards).toBeHidden();
+ await expect(cards.locator('[data-comparison="standard"]')).toHaveAttribute('aria-pressed','true');
  await assertRouteCardBounds();
  await test.info().attach('phone-real-route-comparison',{body:await page.screenshot(),contentType:'image/png'});
 });
