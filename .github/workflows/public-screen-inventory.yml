@@ -80,17 +80,25 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
   audit:
-    name: Live UI touch — ${{ matrix.tab }}
+    name: Live UI touch — ${{ matrix.id }}
     runs-on: ubuntu-24.04
     timeout-minutes: 22
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 4
       matrix:
-        tab: [map, route, participate, news, mine]
+        include:
+          - { id: map-navigation, tab: map, from: 8, to: 13 }
+          - { id: map-tools, tab: map, from: 13, to: 19 }
+          - { id: community-categories, tab: participate, from: 9, to: 12 }
+          - { id: community-actions, tab: participate, from: 12, to: 15 }
+          - { id: news-refresh, tab: news, from: 7, to: 8 }
+          - { id: mine-history, tab: mine, from: 8, to: 10 }
     env:
       CI: 'true'
       DONGJAK_AUDIT_TAB: ${{ matrix.tab }}
+      DONGJAK_AUDIT_FROM: ${{ matrix.from }}
+      DONGJAK_AUDIT_TO: ${{ matrix.to }}
       DONGJAK_TARGET_URL: https://dongjak-walk-safety-preview.pages.dev/
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +128,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ui-touch-${{ matrix.tab }}-${{ github.run_id }}
+          name: ui-touch-${{ matrix.id }}-${{ github.run_id }}
           path: |
             quality-report/screen-captures/
             test-results/

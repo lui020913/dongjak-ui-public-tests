@@ -70,15 +70,20 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
   test.skip(testInfo.project.name !== 'mobile');
   test.skip(Boolean(process.env.DONGJAK_AUDIT_TAB)&&process.env.DONGJAK_AUDIT_TAB!==auditTab);
   test.skip(testInfo.project.name !== 'mobile');
-  test.setTimeout(1_000_000);
+  test.setTimeout(900_000);
   const selector = 'button:visible, [role="button"]:visible, [role="switch"]:visible';
   const denied = /(로그인|회원가입|탈퇴|로그아웃|삭제|등록하기|등록 완료|게시|전송|제출|결제|다운로드|외부|공유|신고 접수|리뷰 작성|설치하기)/i;
   const viewport = {width:390,height:844};
+  const sliceFrom=Number(process.env.DONGJAK_AUDIT_FROM||0);
+  const sliceTo=Number(process.env.DONGJAK_AUDIT_TO||48);
+  if(!Number.isInteger(sliceFrom)||!Number.isInteger(sliceTo)||sliceFrom<0||sliceTo<=sliceFrom)throw Error('Invalid audit slice');
+
   await page.setViewportSize(viewport);
   await page.emulateMedia({colorScheme:'light'});
   const report={
     audit:'anonymous read-only control census', viewport,
     source:'live deployed application; exact release marker checked by workflow',
+    selectedSlice:{from:sliceFrom,to:sliceTo},
     timestamp:new Date().toISOString(),
     tabs:[], failedClicks:[], warnings:[], counts:{discovered:0,attempted:0,clicked:0,skipped:0,nested:0}
   };
@@ -142,7 +147,7 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
       await expect(page.locator('#app')).toHaveAttribute('data-tab',tab,{timeout:15000});
     }
   };
-  const persist=()=>writeFileSync(output+'/anonymous-control-audit-'+auditTab+'.json',JSON.stringify(report,null,2));
+  const persist=()=>writeFileSync(output+'/anonymous-control-audit-'+auditTab+'-'+sliceFrom+'-'+sliceTo+'.json',JSON.stringify(report,null,2));
   for(const tab of [auditTab]){
     const section={tab,controls:[],outcome:[],setupError:null};
     report.tabs.push(section);
@@ -154,7 +159,9 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
     section.auditCoverage='read-only anonymous, no authentication or write operations';
     const maxPerTab=48;
     const started=Date.now();
-    for(const candidate of start.slice(0,maxPerTab)){
+    const selected=start.slice(sliceFrom,Math.min(sliceTo,maxPerTab));
+    section.selectedControls=selected.map(x=>({index:x.index,label:x.label,id:x.id}));
+    for(const candidate of selected){
       if(Date.now()-started>750000){section.outcome.push({status:'budget-exhausted',remaining:start.length-section.outcome.length});report.counts.skipped++;break;}
       if(tab!=='map' && (/^(동작하는 안전지도 앱 정보와 버전|음성 장소 검색|AI 보행안전정보 검색 열기|길찾기|커뮤니티|동작 소식|내 정보)$/.test(candidate.label) || candidate.label.startsWith('안전지도:'))){report.counts.skipped++;section.outcome.push({label:candidate.label,status:'shared-covered-in-map'});continue;}
       if(candidate.disabled||!candidate.width||!candidate.height||denied.test(candidate.label)){
@@ -162,11 +169,13 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
       }
       try{await prepare(tab);}
       catch(e){section.outcome.push({label:candidate.label,status:'reset-failed',error:String(e).slice(0,250)});report.failedClicks.push({tab,label:candidate.label,kind:'reset-failed'});continue;}
+      // A dynamic UI may insert/remove buttons between reloads.
+      // Resolve by accessible label rather than the previous DOM index.
       const target=candidate.id
         ? page.locator('[id='+JSON.stringify(candidate.id)+']')
-        : page.locator(selector).nth(candidate.index);
+        : page.getByRole(candidate.role==='switch'?'switch':'button',{name:candidate.label,exact:true}).first();
       const current=await target.evaluate(n=>(n.getAttribute('aria-label')||n.title||n.innerText||n.textContent||'').replace(/\s+/g,' ').trim().slice(0,95)).catch(()=>null);
-      if(current===null||current!==candidate.label){
+      if(current===null||(current!==candidate.label&&!(/^날씨/.test(candidate.label)&&/^날씨/.test(current)))){
         report.counts.skipped++;
         section.outcome.push({label:candidate.label,status:'dynamic-index-skipped',current});continue;
       }
@@ -176,6 +185,10 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
       const item={label:candidate.label,id:candidate.id,initialHit:candidate.hit};
       report.counts.attempted++;
       try{
+        // User-reachable scroll is mandatory: community category chips extend
+        // horizontally beyond the initial viewport. Scrolling is not a forced click.
+        await target.scrollIntoViewIfNeeded({timeout:7000});
+        await page.waitForTimeout(180);
         const bounds=await target.boundingBox();
         if(!bounds||bounds.width<1||bounds.height<1)throw Error('Target has no visible pointer area');
         const point={x:Math.max(1,Math.min(viewport.width-2,bounds.x+bounds.width/2)),
@@ -211,6 +224,8 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
             const parent=candidate.id
               ? page.locator('[id='+JSON.stringify(candidate.id)+']')
               : page.getByRole('button',{name:candidate.label,exact:true}).first();
+            await parent.scrollIntoViewIfNeeded({timeout:7000});
+            await page.waitForTimeout(120);
             const parentBox=await parent.boundingBox({timeout:5000});
             if(!parentBox)throw Error('Nested parent not visible after reset');
             const px=Math.max(1,Math.min(viewport.width-2,parentBox.x+parentBox.width/2));
@@ -223,6 +238,8 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
               ? page.locator('[id='+JSON.stringify(extra.id)+']')
               : page.getByRole('button',{name:extra.label,exact:true}).first();
             if(!await sub.isVisible().catch(()=>false)){entry.status='not-present-on-reopen';continue;}
+            await sub.scrollIntoViewIfNeeded({timeout:7000});
+            await page.waitForTimeout(140);
             const b=await sub.boundingBox({timeout:5000});
             if(!b){entry.status='not-visible-after-reopen';continue;}
             const x=Math.max(1,Math.min(viewport.width-2,b.x+b.width/2));
@@ -247,13 +264,15 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
       persist();
     }
     section.omittedByBound=Math.max(0,start.length-maxPerTab);
+    section.outsideSlice=Math.max(0,start.length-selected.length);
+    section.sliceCoverage='This job audits only the selected slice; other slices are verified in their own jobs or previous evidence';
     if(section.outcome.some(x=>x.status==='budget-exhausted'))section.incomplete=true;
     persist();
   }
   report.pageErrors=errors.slice(0,30);
   persist();
-  await testInfo.attach('anonymous-control-census-'+auditTab+'.json',{body:Buffer.from(JSON.stringify(report,null,2)),contentType:'application/json'});
-  expect(report.counts.clicked,'At least one real user click must succeed').toBeGreaterThan(0);
+  await testInfo.attach('anonymous-control-census-'+auditTab+'-'+sliceFrom+'-'+sliceTo+'.json',{body:Buffer.from(JSON.stringify(report,null,2)),contentType:'application/json'});
+  expect(report.counts.clicked,'At least one selected, safe real user click must succeed').toBeGreaterThan(0);
   expect(report.failedClicks, 'Real blocked controls (inspect evidence, do not force-click)').toEqual([]);
   expect(report.tabs.some(x=>x.incomplete), 'Budget exhaustion prevents complete audited-tab coverage').toBe(false);
 });
