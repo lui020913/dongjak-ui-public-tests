@@ -11,12 +11,12 @@ function leafRules(src){
   if(c==='/'&&n==='*'){comment=true;i++;continue;}
   if(c==='"'||c==="'"){quote=c;continue;}
   if(c==='{'){
-   const selector=src.slice(start,i).replace(/\\/\\*[\\s\\S]*?\\*\\//g,'').trim().replace(/\\s+/g,' ');
+   const selector=src.slice(start,i).replace(/\/\*[\s\S]*?\*\//g,'').trim().replace(/\s+/g,' ');
    stack.push({selector,open:i,children:0,scope:stack.map(x=>x.selector).filter(x=>x.startsWith('@')).join('|')});start=i+1;continue;
   }
   if(c==='}'){
    const node=stack.pop();assert.ok(node,'unexpected close');
-   if(node.children===0&&node.selector){const body=src.slice(node.open+1,i).replace(/\\/\\*[\\s\\S]*?\\*\\//g,'').replace(/\\s+/g,'').trim();if(body)rules.push({selector:node.selector,scope:node.scope,body});}
+   if(node.children===0&&node.selector){const body=src.slice(node.open+1,i).replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,'').trim();if(body)rules.push({selector:node.selector,scope:node.scope,body});}
    if(stack.length)stack.at(-1).children++;start=i+1;continue;
   }
   if(c===';'&&stack.length===0)start=i+1;
@@ -33,7 +33,7 @@ test('night, protection and install CSS retain all distinct leaf declarations wi
 });
 test('critical night panel, protection sheet and install popup selectors still exist',()=>{
  const expectations=[
-  ['night-visibility-panel.css','#night-visibility-float[data-collapsed="true"]'],
+  ['night-visibility-panel.css','#app #night-visibility-float[data-collapsed="true"]'],
   ['protection-zone-map.css','#app .pza-road-sheet[hidden]'],
   ['browser-install-menu.css','html[data-theme=dark] dialog#dj-install-menu .dj-install-info']
  ];
