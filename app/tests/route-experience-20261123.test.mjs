@@ -61,10 +61,12 @@ test('route input overrides legacy fullscreen pages and bottom tab dock with a r
  assert.match(css,/v9\.2\.124 phone hotfix/);
  const patch=css.slice(css.indexOf(marker));
  assert.match(patch,/#app#app#app#app#app#app#app\[data-dj-route-stage="input"\]/);
- assert.match(patch,/max-height:min\(calc\(100dvh - var\(--dj910-dock-bottom,88px\)/);
- assert.match(patch,/var\(--dj-route-cta-top,100dvh\)/);
- assert.match(owner,/variable\('--dj-route-cta-top'/);
- assert.match(patch,/> #dj910-route-footer \{/);
+ assert.match(patch,/max-height:calc\(100dvh - var\(--dj910-dock-bottom,88px\) - 104px/);
+ assert.doesNotMatch(patch,/var\(--dj-route-cta-top/);
+ assert.match(owner,/const destination=phone\?app:route/);
+ assert.match(owner,/footer\.parentElement!==destination/);
+ assert.match(owner,/footer\.hidden=phone&&!routeInput/);
+ assert.match(patch,/html body #app#app\[data-dj-route-stage="input"\] > #dj910-route-footer/);
  assert.match(patch,/bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 12px\)!important/);
  assert.match(patch,/#route-calc \{[\s\S]*?min-height:52px!important/);
  assert.match(owner,/'data-dj-route-stage'/);
