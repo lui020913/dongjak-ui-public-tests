@@ -256,3 +256,84 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
   await testInfo.attach('real-route-cta-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
   await testInfo.attach('real-route-cta-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });
+
+
+test('map-first walking route preview only lists actually supplied options and fits the viewport',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width>=700,'phone UI only');
+  test.setTimeout(120000);
+  await readyForLiveTouch(page);
+  await page.evaluate(()=>{
+    const app=document.getElementById('app');
+    app.dataset.tab='map';
+    document.getElementById('route-panel').hidden=true;
+    document.getElementById('route-map-card').hidden=false;
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{
+      standard:{coords:[[126.953,37.503],[126.955,37.506]],seconds:1440,kilometers:1.73},
+      gentle:{coords:[[126.953,37.503],[126.951,37.504],[126.955,37.506]],seconds:1560,kilometers:1.81}
+    }}));
+    window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:{
+      standard:{risk:63.1,coverage:.82},gentle:{risk:22.8,coverage:.91},recommendation:'gentle'
+    }}));
+  });
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','preview');
+  const cards=page.locator('#dj-route-choice-list .dj-route-choice');
+  await expect(cards).toHaveCount(2);
+  await expect(cards.nth(0)).toContainText('24분');
+  await expect(cards.nth(1)).toContainText('26분');
+  await expect(cards.nth(1)).toContainText('PRI 22.8점');
+  await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
+  await expect(page.locator('#route-guide-start')).toBeVisible();
+  await expect(page.locator('#dj-walk-map-head')).toBeVisible();
+  const boxes=await page.evaluate(()=>{
+    const x=id=>document.getElementById(id).getBoundingClientRect();
+    const h=x('dj-walk-map-head'),s=x('route-map-card');
+    return {headBottom:h.bottom,sheetTop:s.top,sheetBottom:s.bottom,vh:innerHeight,headLeft:h.left,sheetRight:s.right,vw:innerWidth};
+  });
+  expect(boxes.headLeft).toBeGreaterThanOrEqual(8);
+  expect(boxes.sheetRight).toBeLessThanOrEqual(boxes.vw-8);
+  expect(boxes.headBottom).toBeLessThan(boxes.sheetTop);
+  expect(boxes.sheetBottom).toBeLessThanOrEqual(boxes.vh-4);
+  await testInfo.attach('walk-map-first-preview.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+});
+
+test('guidance mode truly blocks map, tabs and keyboard except native end action',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width>=700,'phone UI only');
+  test.setTimeout(120000);
+  await readyForLiveTouch(page);
+  await page.evaluate(()=>{
+    const app=document.getElementById('app'),card=document.getElementById('nav-live-card');
+    app.dataset.tab='map';
+    document.getElementById('route-map-card').hidden=true;
+    card.hidden=false;
+    app.classList.add('route-guiding');
+    window.__djWalkMapTouches=0;
+    document.getElementById('map').addEventListener('pointerdown',()=>window.__djWalkMapTouches++);
+  });
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','guiding');
+  await expect(page.locator('#dj-walk-guidance-lock')).toBeVisible();
+  await expect(page.locator('#nav-stop')).toBeVisible();
+  await expect(page.locator('#bottom-nav')).toBeHidden();
+  const state=await page.evaluate(()=>{
+    const card=document.getElementById('nav-live-card').getBoundingClientRect();
+    const stop=document.getElementById('nav-stop').getBoundingClientRect();
+    const hit=document.elementFromPoint(stop.left+stop.width/2,stop.top+stop.height/2);
+    return {cardTop:card.top,cardBottom:card.bottom,stopTop:stop.top,stopBottom:stop.bottom,
+      vh:innerHeight,stopHit:hit?.id==='nav-stop'||document.getElementById('nav-stop').contains(hit),
+      otherVisible:['nav-follow','nav-voice','nav-orientation'].some(id=>{
+        const el=document.getElementById(id),r=el.getBoundingClientRect();
+        return getComputedStyle(el).display!=='none'&&r.width>0&&r.height>0;
+      })};
+  });
+  expect(state.stopHit).toBe(true);
+  expect(state.otherVisible).toBe(false);
+  expect(state.cardTop).toBeGreaterThan(100);
+  expect(state.cardBottom).toBeLessThanOrEqual(state.vh-4);
+  await page.mouse.click(25,Math.round(page.viewportSize().height*.5));
+  expect(await page.evaluate(()=>window.__djWalkMapTouches)).toBe(0);
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#nav-stop')).toBeFocused();
+  await testInfo.attach('walk-locked-guidance.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  await page.locator('#nav-stop').click({timeout:12000});
+  await expect(page.locator('#app')).not.toHaveClass(/route-guiding/);
+  await expect(page.locator('#bottom-nav')).toBeVisible();
+});
