@@ -1767,6 +1767,12 @@
       visibility:visible!important;
       scale:1!important;
     }
+    /* My Info owns a scroll gutter INSIDE its body, unlike the other three
+       pages. Remove the inherited 92px outside-padding in the same cascade
+       layer and directly after the original fullscreen shell declaration. */
+    html body #app#app#app#app#app[data-tab="mine"] #mine-panel.page-panel:not([hidden]) {
+      padding-bottom:0!important;
+    }
 
     /* Preserve the established My Info dark palette and existing theme QA. */
     html body #app#app#app#app#app[data-theme="dark"] #mine-panel.page-panel:not([hidden]),
