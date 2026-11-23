@@ -1,0 +1,16 @@
+
+/* Route entry V3 is a separate screen. Legacy entry layout is an invisible
+   engine adapter for the existing routing/location/search contract, never UI. */
+@media(max-width:699px){
+ html body #app[data-dj-route-screen-v3="1"] #route-panel.page-panel,
+ html body #app[data-dj-route-screen-v3="1"] #route-panel.page-panel *{
+   visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+ }
+ html body #app[data-dj-route-screen-v3="1"] #dj-walk-map-actions,
+ html body #app[data-dj-route-screen-v3="1"] .map-actions{
+   display:none!important;pointer-events:none!important;
+ }
+ html body #app[data-dj-route-screen-v3="1"] #map{
+   visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+ }
+}
