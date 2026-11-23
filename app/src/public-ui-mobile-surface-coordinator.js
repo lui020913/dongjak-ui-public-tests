@@ -31,9 +31,27 @@ export function keyboardBounds(layoutHeight,view,focused){
 export function shouldClearMoreTranslate({mobile,hidden,dragging,automatic,translate}){
   return Boolean(mobile&&!hidden&&!dragging&&automatic&&translate&&translate!=='none'&&translate!=='0px 0px');
 }
+// A shared lease prevents repeated app bootstrap/restore calls from leaving
+// the second caller with an inert disposer. One real observer owner persists
+// until the final consumer releases it; first-load UI behavior is unchanged.
+const activeSurfaceCoordinators=new WeakMap();
+function shareSurfaceCoordinator(app,record){
+  record.refs++;
+  let released=false;
+  return ()=>{
+    if(released)return;
+    released=true;
+    if(--record.refs!==0)return;
+    activeSurfaceCoordinators.delete(app);
+    record.cleanup();
+  };
+}
 export function installMobileSurfaceCoordinator(doc=document,win=window){
   const app=doc.getElementById('app'),nav=doc.getElementById('bottom-nav');
-  if(!app||!nav||app.dataset.djUserSurfaceReady==='1')return ()=>{};
+  if(!app||!nav)return ()=>{};
+  const existing=activeSurfaceCoordinators.get(app);
+  if(existing)return shareSurfaceCoordinator(app,existing);
+  if(app.dataset.djUserSurfaceReady==='1')return ()=>{};
   app.dataset.djUserSurfaceReady='1';
   const media=win.matchMedia('(max-width:1079px)');
   let queued=0,delayed=0,observer=null,resize=null,scaleObserver=null,lastRail=null,lastScale=null,lastMore=null,moreObserver=null,lastTip=null,tipObserver=null,tipClose=null,mapOptionsButton=null,composerWasOpen=false,disposed=false;
@@ -225,5 +243,8 @@ export function installMobileSurfaceCoordinator(doc=document,win=window){
     observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab']});
   }
   schedule();
-  return ()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();scaleObserver?.disconnect();resize?.disconnect();if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
+  const cleanup=()=>{disposed=true;observer?.disconnect();moreObserver?.disconnect();tipObserver?.disconnect();scaleObserver?.disconnect();resize?.disconnect();if(lastScale){lastScale.style.removeProperty('translate');delete lastScale.dataset.djUserHudOffset;}tipClose?.remove();mapOptionsButton?.remove();mapOptionsButton=null;for(const remove of removers)remove();if(queued)win.cancelAnimationFrame(queued);if(delayed)win.clearTimeout(delayed);for(const p of ['--dj-user-dock-bottom','--dj-user-editor-top','--dj-user-editor-bottom','--dj-user-tip-left','--dj-user-tip-bottom'])set(p,null);flag('data-dj-user-editor-keyboard',false);delete app.dataset.djUserTipDismissed;delete app.dataset.djUserSurfaceReady;};
+  const record={refs:0,cleanup};
+  activeSurfaceCoordinators.set(app,record);
+  return shareSurfaceCoordinator(app,record);
 }
