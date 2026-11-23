@@ -5,7 +5,6 @@ on:
       - v8.9.11 anonymous Preview UI gate
       - Sangdo1 bocha reference - isolated Preview
       - Public runner - approved exact Production deployment
-      - Promote previously phone-tested mobile-only artifact to Production
     types: [completed]
 permissions:
   contents: read
