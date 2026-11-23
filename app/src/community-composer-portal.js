@@ -93,6 +93,13 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
 
     scroll=doc.createElement('div');
     scroll.className='dj-compose-scroll';
+    // The shared legacy community stylesheet has higher-specificity flex
+    // declarations. This portal's sole scrolling row must be shrinkable even
+    // when those declarations arrive after this module's stylesheet.
+    for(const [property,value] of [
+      ['flex','1 1 0%'],['height','0px'],['min-height','0px'],
+      ['overflow-y','auto'],['overflow-x','hidden']
+    ])scroll.style.setProperty(property,value,'important');
     helper=doc.createElement('p');
     helper.className='dj-compose-intro';
     helper.textContent='보행 중 불편했던 상황을 알려주세요. 사진과 위치는 선택사항입니다.';

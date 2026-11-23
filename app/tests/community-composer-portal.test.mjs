@@ -21,6 +21,9 @@ test('entire composer layout is rebuilt as a body-portal with three distinct row
   assert.match(js,/doc\.body\.dataset\.djCommunityEditor='open'/);
   assert.match(js,/root\.dataset\.keyboard=/);
   assert.match(js,/restoreDock\(\)/);
+  assert.match(js,/\['flex','1 1 0%'\]/);
+  assert.match(js,/\['height','0px'\]/);
+  assert.match(js,/scroll\.style\.setProperty\(property,value,'important'\)/);
   assert.match(css,/#dj-community-editor-portal #community-form\s*\{[\s\S]*?display:flex!important;[\s\S]*?flex-direction:column!important/);
   assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-scroll\s*\{[\s\S]*?flex:1 1 0%!important;[\s\S]*?height:0!important/);
   assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-scroll\s*\{[\s\S]*?overflow-y:auto!important/);
