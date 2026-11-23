@@ -55,8 +55,8 @@ jobs:
         run: |
           node --check playwright.v911-remote.config.mjs
           node --check tests/v911-anonymous-ui.spec.mjs
-          node --test tests/mobile-qa-parallel.test.mjs
-          node --test tests/retired-smoke-workflows.test.mjs tests/workflow-release-safety-contract.test.mjs
+          node --test tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
+          node --test tests/retired-smoke-workflows.test.mjs
       - name: Install app dependencies
         run: npm ci --no-audit --no-fund --prefer-offline
       - name: Restore versioned security scanner archive
