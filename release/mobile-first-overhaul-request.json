@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.101",
+  "application_version": "9.2.102",
   "public_work_branch": "main",
-  "purpose": "PR342 integrated user-requested iPhone UI fixes plus PR343 updated mobile browser test for single persistent community compose button. Code source 5bce9b21c02dcae02d1515e7b3d1aa652e0bc421, repaired E2E test source 04ccfb8e25643a33fd85ec809d8aeef25c6a910e. Previous 9.2.100 Preview QA shard 7/12 failed only because test required deleted duplicate '첫 글 작성하기' CTA despite actual primary '+ 글쓰기' working. Full source CI passed PR343. Require exact sealed Preview, all 12 phone QA shards 375/390/430px, desktop/tablet, no skips of failing tests, protected Production matched source/API, then Android debug build with SHA. Do not alter PRI/GIS or transport API.",
-  "attempt": 289,
+  "purpose": "PR344 complete screenshot-driven iPhone UI fixes on exact main source f260da7911ad5f523876072a40a4c4cf195a5b96: walking route map result defaults compact selected-mode summary and expandable four alternatives instead of obscuring the map, route fitBounds uses actual top toolbar and bottom result/nav geometry (with min visible map), route location search/map and GPS buttons compact but fully functional; community status loses high-specificity opaque white row/pill with smaller refresh and search toolbar spacing; My Info typography choices flat shadowless 11px consistent controls; release history duplicate disclosure summaries and nested badge/extra spacing removed without deleting historical notes. Preserve GIS risk score, pedestrian route coordinates, GPS/navigation, transport APIs, all user data. Must run fully guarded sealed Preview, all 12 mobile QA shards 375/390/430px including new real mobile style tests, desktop/tablet checks, exact-source protected Production/API proof, then signed Android APK public release. Stop on ANY failure; no skipped-failure escape. Public app version remains 1.0.",
+  "attempt": 290,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.100 blocked by obsolete mobile QA expectation in shard 7/12. PR343 corrected test to use real persistent + 글쓰기 without restoring redundant UI. 9.2.101 first attempt.",
+  "last_retry_reason": "New complete screenshot-driven UI corrections PR344, source CI #45100985948 success; first guarded 9.2.102 attempt.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
