@@ -156,7 +156,7 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
     const started=Date.now();
     for(const candidate of start.slice(0,maxPerTab)){
       if(Date.now()-started>750000){section.outcome.push({status:'budget-exhausted',remaining:start.length-section.outcome.length});report.counts.skipped++;break;}
-      if(tab!=='map' && /^(동작하는 안전지도 앱 정보와 버전|음성 장소 검색|AI 보행안전정보 검색 열기|길찾기|커뮤니티|동작 소식|내 정보|안전지도:)/.test(candidate.label)){report.counts.skipped++;section.outcome.push({label:candidate.label,status:'shared-covered-in-map'});continue;}
+      if(tab!=='map' && (/^(동작하는 안전지도 앱 정보와 버전|음성 장소 검색|AI 보행안전정보 검색 열기|길찾기|커뮤니티|동작 소식|내 정보)$/.test(candidate.label) || candidate.label.startsWith('안전지도:'))){report.counts.skipped++;section.outcome.push({label:candidate.label,status:'shared-covered-in-map'});continue;}
       if(candidate.disabled||!candidate.width||!candidate.height||denied.test(candidate.label)){
         report.counts.skipped++;section.outcome.push({label:candidate.label,status:'safety-skipped'});continue;
       }
@@ -200,7 +200,7 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
         const next=await inventory();
         const existing=new Set(start.map(x=>x.label));
         const extras=next.filter(x=>x.hit&&!x.disabled&&!denied.test(x.label)&&
-          x.label&&!existing.has(x.label)&&x.width>=18&&x.height>=18).slice(0,2);
+          x.label&&!existing.has(x.label)&&x.width>=18&&x.height>=18).slice(0,4);
         item.nestedControls=extras.map(x=>({label:x.label,id:x.id}));
         for(const extra of extras){
           const entry=item.nestedControls.find(x=>x.label===extra.label);
@@ -230,8 +230,12 @@ test('anonymous control census '+auditTab+' (isolated)', async ({ page }, testIn
             const hit=await sub.evaluate((el,p)=>{const node=document.elementFromPoint(p.x,p.y);return !!node&&(el===node||el.contains(node));},{x,y});
             if(!hit){entry.status='touch-occluded';report.failedClicks.push({tab,parent:item.label,label:extra.label,kind:'nested-touch-occluded'});continue;}
             await page.touchscreen.tap(x,y);
+            entry.immediate=await summarize();
+            await page.waitForTimeout(130);
+            entry.motion130=await summarize();
+            await page.waitForTimeout(350);
+            entry.settled480=await summarize();
             report.counts.nested++;
-            await page.waitForTimeout(260);
             entry.status='clicked';
           }catch(e){entry.status='test-unverified';entry.reason=String(e).slice(0,180);}
         }
