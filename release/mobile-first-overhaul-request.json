@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.126",
   "public_work_branch": "main",
-  "purpose": "Protected 9.2.126 release after PR #409 corrects only the phone QA ruler: the user-visible docked CTA top, not the invisible in-flow footer wrapper top, is compared against the top walking input card at a still-required 24px minimum. Source and functionality of the 9.2.126 candidate remain unchanged except QA specification and source SHA. Also assert the live map receives pointer events in the gap. Previous attempt 327 passed PC/tablet and 11/12 mobile shards, with only mobile375 failing the inaccurate wrapper measurement. Do not pretend a Preview pass is Production; all mandatory exact-new-SHA release gates remain fail closed.",
-  "attempt": 328,
+  "purpose": "Protected 9.2.126 rollout retry after targeted PR #411 fixes Playwright snapshot timing: the native route CTA redocks asynchronously after switching into the route input, so stable placement must be awaited before checking unchanged 24px card/panel-to-rendered-CTA clearance and the exposed map pointer hit. App visual/PRI/GPS code unchanged since attempt328. Previous attempt328 passed PC/tablet and 9 of 12 mobile shards, with only the route-screen geometry check failing in phone375/390/430. Require #411 targeted three-width QA pass before release, then exact-new-SHA Preview, all mandatory mobile QA, PC/tablet and protected Production checks; do not bypass any fail-closed deployment gates.",
+  "attempt": 329,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt327 (SHA 897eb4b11c25) completed 11/12 mobile shards and PC/tablet successfully, while mobile375 shard failed comparing .route-card.bottom against the in-flow invisible footer top. Screenshot proves button itself docks above tabs; PR #409 checks actual CTA top (>=24px map gap) and pointer-hittable map. Release only when the new-source protected Preview, mobile, PC/tablet and Production checks all pass.",
+  "last_retry_reason": "2026-11-24: 9.2.126 attempt328 (run 45240224769, source 81abdd1aae5) passed PC/tablet and 9/12 mobile shards. Failed three width checks captured transient native footer position before the CTA settled; failed screenshots show correctly docked CTA and visible map after animation. PR #411 waits for the unchanged 24px and hit-test requirements. Keep Production 9.2.125 if the new release fails.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
