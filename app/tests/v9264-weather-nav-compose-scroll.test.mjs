@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -19,7 +20,7 @@ test('weather card header and city now have separate box geometry',()=>{
  assert.match(css,/\.dj854-weather-place \{\s*display: block !important;\s*margin: 16px 18px 7px !important/);
 });
 test('composer maintains scroll affordance without a second 110px artificial footer',()=>{
- const css=read('src/mobile-primary-fullscreen.css');
+ const css=readPrimaryPhoneCss();
  assert.match(css,/scroll-padding-bottom:calc\(28px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
  assert.match(css,/touch-action:pan-y!important/);
  assert.doesNotMatch(css,/padding-bottom:calc\(110px \+ env\(safe-area-inset-bottom,0px\)\)!important/);
