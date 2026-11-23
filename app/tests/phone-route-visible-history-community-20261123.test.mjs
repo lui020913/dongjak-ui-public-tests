@@ -3,7 +3,15 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {walkingRouteViewportPadding} from '../src/route-map-focus.js';
 
-const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
+const read=p=>{
+  // The guarded mobile release bundles frontend/production files inside
+  // app/src. Source CI retains the repository-wide originals.
+  try{return readFileSync(new URL(p,import.meta.url),'utf8');}
+  catch(error){
+    if(error?.code!=='ENOENT'||!p.startsWith('../../frontend/production/'))throw error;
+    return readFileSync(new URL('../src/'+p.slice('../../frontend/production/'.length),import.meta.url),'utf8');
+  }
+};
 
 test('walking route camera uses actual toolbar and card bounds, not viewport guesses',()=>{
  const p=walkingRouteViewportPadding({viewportHeight:850,mapTop:0,toolbarBottom:205,sheetTop:600,navigationTop:770});
