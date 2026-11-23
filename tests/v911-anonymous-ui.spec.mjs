@@ -43,7 +43,7 @@ async function geometry(page,sel){
     const r=await page.locator(sel).boundingBox();
     const dock=await page.locator('#bottom-nav').boundingBox();
     return Boolean(r&&dock&&r.x>=-1&&r.x<=20&&r.y>=0&&r.y<=80&&
-      r.width>=page.viewportSize().width-42&&r.x+r.width<=innerViewportWidth(page)+2&&
+      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width+2&&
       r.y+r.height<=dock.y-3);
   }).toBe(true);
   return;
@@ -1701,9 +1701,11 @@ test('phone selected dock has no color plate and route form is vertically balanc
  const form=await page.evaluate(()=>{
   const panel=document.querySelector('#route-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
   const card=body.querySelector(':scope > .route-card'),footer=panel.querySelector(':scope > #dj910-route-footer');
-  const dock=document.getElementById('bottom-nav');
+  const dock=document.getElementById('bottom-nav'),cta=document.getElementById('route-calc');
   const box=n=>{const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height};};
-  return {panel:box(panel),body:box(body),card:box(card),footer:box(footer),dock:box(dock),
+  const b=cta.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
+  return {panel:box(panel),body:box(body),card:box(card),footer:box(footer),dock:box(dock),cta:box(cta),
+    ctaHit:hit===cta||cta.contains(hit),ctaVisible:b.width>=40&&b.height>=44,
     formDisplay:getComputedStyle(body).display,cardPadding:getComputedStyle(card).paddingTop,
     swapVisible:getComputedStyle(document.getElementById('dj-route-swap')).display!=='none',
     advancedClosed:!document.getElementById('dj-route-advanced').open};
@@ -1713,7 +1715,11 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
  expect(form.card.bottom,'route editor must clear the primary action').toBeLessThanOrEqual(form.footer.top+4);
- expect(form.footer.bottom,'route CTA must clear fixed tab pill').toBeLessThanOrEqual(form.dock.top-3);
+ // The footer wrapper can extend behind the safe-area dock; only the real CTA
+ // determines whether a user can see and tap the route action.
+ expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
+ expect(form.cta.bottom,'actual route CTA must clear fixed tab pill').toBeLessThanOrEqual(form.dock.top-5);
+ expect(form.ctaHit,'the CTA centre must receive a real pointer event').toBe(true);
  expect(form.swapVisible).toBe(true);
  expect(form.advancedClosed).toBe(true);
  await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
