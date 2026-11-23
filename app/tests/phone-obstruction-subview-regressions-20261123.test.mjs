@@ -54,7 +54,7 @@ test('redundant actions and the 68dvh white sheet were eliminated without changi
  assert.match(transit,/height:auto!important;min-height:0!important/);
  assert.doesNotMatch(transit,/height:min\(68dvh,700px\)!important/);
  const css=source('src/phone-surface-consistency-20261123.css');
- assert.match(css,/#route-panel #route-clear\[hidden\]/);
+ assert.match(source('src/route-experience.css'),/#route-panel #route-clear\[hidden\]/);
  assert.match(css,/\.dj834-tools-container .dj17-feature-details/);
  assert.match(css,/\.dj834-map-setting-row/);
  assert.match(css,/:focus:not\(:focus-visible\)/);
