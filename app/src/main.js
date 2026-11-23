@@ -2003,7 +2003,21 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   }
   if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}
   if (tab === 'news') dongjakNews.open();
-  if (tab === 'mine') renderMy();
+  if (tab === 'mine') {
+    renderMy();
+    // The legacy fullscreen sheet controller can apply a 92px *inline*
+    // bottom inset after stylesheet layout. My Info now owns its clearance
+    // inside .dj836-sheet-body, so prevent the outer 94px blank clipping band
+    // even when a runtime !important style beats authored CSS.
+    const mine=document.getElementById('mine-panel');
+    if(mine&&window.matchMedia('(max-width:699px)').matches){
+      mine.style.setProperty('padding-bottom','0px','important');
+      window.requestAnimationFrame(()=>{
+        if(app.dataset.tab==='mine'&&window.matchMedia('(max-width:699px)').matches)
+          mine.style.setProperty('padding-bottom','0px','important');
+      });
+    }
+  }
   if (tab !== 'map' && routePickMode) {routePickMode=null;closeTransitRouteConfirmation();}
   if (tab === 'map') {
     if(suppressOverview){
