@@ -7,7 +7,7 @@ const history=readFileSync(new URL('../src/version-history-v7.js',import.meta.ur
 
 test('empty community feed is an actual interactive home, not a blank list or fake posts',()=>{
   assert.match(main,/dj-community-empty-state/);
-  assert.match(main,/첫 글 작성하기/);
+  assert.match(main,/community-compose-toggle/);
   assert.match(main,/공개 글 다시 확인/);
   assert.match(main,/공유 게시판 연결을 확인해 주세요/);
   assert.doesNotMatch(main,/communityButton\(label,'dj-community-topic'/);
