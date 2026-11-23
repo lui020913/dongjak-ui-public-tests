@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.128",
+  "application_version": "9.2.129",
   "public_work_branch": "main",
-  "purpose": "Protected v9.2.128 retry after attempt332 passed exact-source build, immutable Preview, PC/tablet and 9/12 mobile shards, while three mobile width shards 375/390/430 failed the SAME outdated Playwright locator locating #community-form under #participation-panel. The new body-level portal deliberately moves the original form to #dj-community-editor-portal when open. Correct ONLY the QA locator test to assert portal form visible, legacy bottom tab hidden, close restores original form. No runtime app changes. Run only the three previously failed community browser checks against immutable attempt332 Preview before merge. Then protected exact-new-SHA Preview, all required mobile QA, PC/tablet and guarded Production; preserve Production v9.2.127 until all gates pass.",
-  "attempt": 333,
+  "purpose": "Rebuild community report writing screen completely with a dedicated fullscreen standalone composer. Eliminate old nested sheet geometry and keyboard behavior, keep fixed header and save footer with a single middle scrollport that shrinks using visualViewport. Mandatory new focused tests cover visual keyboard contraction at 375/390/430, report entry and restoration. Preserve protected current 9.2.128 source plus its updated QA locators and all other map/route/AI behavior. Source CI checks new layout and build; Production requires exact-SHA preview, all phone QA shards, PC/tablet and protected promotion. No duplicate deployment.",
+  "attempt": 334,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.128 attempt332 run 45249026203: 9/12 mobile shards success plus PC/tablet and Preview success. 2/12, 7/12, 11/12 failed the same obsolete parent-sheet community form Playwright locator on 375/390/430 widths. This PR corrects that test only; app code and iOS keyboard portal remain unchanged.",
+  "last_retry_reason": "2026-11-24 new 9.2.129 release candidate after independent UI three-phone test found save footer overflow due content-sized grid row; changed to zero-basis flex scrollport and measured footer fit, rebase onto 9.2.128 main PR# QA parent locator fixes. Do not merge without focused success; don't bypass Production QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
