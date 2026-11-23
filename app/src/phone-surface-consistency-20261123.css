@@ -705,3 +705,43 @@
     }
   }
 }
+
+/* True iOS child navigation: reuse the fixed parent header. The original
+ * detail-nav DOM is moved there by v834-my-info.js, so its back handler and
+ * the existing top-right close button retain their event listeners. */
+@layer request-completion {
+ @media (max-width:699px) {
+  html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]):has(.dj834-my-detail:not([hidden]))
+    > .dj-sheet-chrome > .dj-sheet-chrome-title {
+    display:none!important;
+  }
+  html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden])
+    > .dj-sheet-chrome > .dj834-detail-nav {
+    position:static!important;
+    flex:1 1 auto!important;
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    align-items:center!important;
+    justify-content:start!important;
+    gap:8px!important;
+    min-width:0!important;
+    min-height:44px!important;
+    max-width:none!important;
+    width:auto!important;
+    margin:0!important;
+    padding:0!important;
+    top:auto!important;
+    inset:auto!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    background:transparent!important;
+    z-index:3!important;
+  }
+  html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden])
+    > .dj-sheet-chrome > .dj834-detail-nav .dj834-detail-title {
+    margin:0!important;
+    line-height:1.3!important;
+  }
+ }
+}
