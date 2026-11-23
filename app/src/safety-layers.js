@@ -1,4 +1,5 @@
 import {koreanOSMName} from './korean-labels.js';
+import {registerFacilityIcons,iconName} from './v912-poi-presentation.js';
 import {openPlaceDetails} from './place-details.js';
 
 // v17.11: 안전시설 및 횡단보도는 OSM 기여 데이터로 조회합니다.
@@ -102,6 +103,8 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
   const state = {safety:{loaded:false,busy:false,active:false},crossing:{loaded:false,busy:false,active:false},essentials:{loaded:false,busy:false,active:false},public:{loaded:false,busy:false,active:false}};
   const safeText = (text) => String(text||'').slice(0,140);
   const addLayer = layer => {if (!map.getLayer(layer.id)) map.addLayer(layer);};
+  // Shared vector pictograms replace one-character placeholders on mobile.
+  registerFacilityIcons(map);
   for (const ctl of controls) map.addSource(ctl.source,{type:'geojson',data:empty()});
   // Hospitals remain visible in the entire district view, while other safety POIs appear on zoom-in.
   // This layer is tied to the existing Safety toggle and never represents unverified locations.
@@ -136,12 +139,16 @@ export function installSafetyLayers({map,maplibregl,isDongjak,canOpen=()=>true})
       'circle-color':['match',['get','kind'],...Object.entries(categoryColors).filter(([key])=>['government','district_office','administrative_center','senior_center','daycare','school','park'].includes(key)).flat(),'#638c77'],
       'circle-stroke-color':'#fff','circle-stroke-width':1.8,'circle-opacity':0.92}});
   addLayer({id:'public-glyphs',type:'symbol',source:'dongjak-public-places',minzoom:13.1,
-    layout:{visibility:'none','text-field':['match',['get','kind'],
-      'government','관','district_office','구','administrative_center','동','senior_center','노','daycare','어','school','학','park','공',''],
-      'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':10,
-      'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-allow-overlap':false},
-    paint:{'text-color':'#fff','text-halo-color':'rgba(0,0,0,.14)','text-halo-width':0.3}});
+    layout:{visibility:'none',
+      'icon-image':['match',['get','kind'],'daycare',iconName('school'),
+        'school',iconName('school'),'park',iconName('park'),iconName('civic')],
+      'icon-size':['interpolate',['linear'],['zoom'],13.1,.36,16,.52,18,.66],
+      'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,
+      'icon-padding':3,'icon-optional':false,'icon-pitch-alignment':'viewport',
+      'icon-rotation-alignment':'viewport'}});
   addLayer({id:'public-names',type:'symbol',source:'dongjak-public-places',minzoom:15.2,
+    // Park labels already have one canonical vector owner.
+    filter:['!=',['get','kind'],'park'],
     layout:{visibility:'none','text-field':['get','name'],'text-font':['Noto Sans Regular','Open Sans Regular'],
       'text-size':['interpolate',['linear'],['zoom'],15.2,10,17,12],
       'text-variable-anchor':['top','bottom','right','left'],'text-radial-offset':1.1,
