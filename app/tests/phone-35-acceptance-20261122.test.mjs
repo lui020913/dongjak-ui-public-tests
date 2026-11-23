@@ -116,9 +116,12 @@ const checks=[
    assert.deepEqual(buildingZoomOpacityExpression(far.opacity),['interpolate',['linear'],['zoom'],13,0,15,far.opacity]);
    assert.ok(nightOcclusionBuildingPaint(near,true).opacity>near.opacity);
  }],
- ['D01','route compares four real route options without inventing vulnerability scores',()=>{
+ ['D01','route compares only computed pedestrian candidates and labels unknown PRI honestly',()=>{
    const s=root('tests/v911-anonymous-ui.spec.mjs');
-   contains(s,'phone route comparison uses actual pedestrian graph','data-comparison="balanced"','PRI 미반영');
+   const ux=src('src/route-experience-20261123.js');
+   contains(s,'phone route comparison uses actual pedestrian graph','#dj-route-choice-list','PRI 미평가');
+   contains(ux,'routeComparisonItems(latest)','PRI 미평가','native.click()');
+   assert.doesNotMatch(ux,/data-comparison="balanced"/);
  }],
  ['D02','route guidance supports GPS turns, destinations, and visible route map',()=>{
    const s=src('src/main.js');
