@@ -94,8 +94,11 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: npm test
+      - name: Focused community editor keyboard and portal regression
+        if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
+        run: node --test tests/community-composer-portal.test.mjs tests/phone-20261123-visual-fixes.test.mjs
       - name: Focused walk CTA regression (affected route UI only)
         if: ${{ github.event.pull_request.number == 404 || github.head_ref == 'fix/walk-top-card-pixel-clearance-20261124' }}
         run: node --test tests/walk-map-first-approved-20261124.test.mjs tests/v910-request-completion.test.mjs
@@ -111,7 +114,7 @@ jobs:
         run: |
           node --check tests/v911-anonymous-ui.spec.mjs
           node --input-type=module -e 'import fs from "node:fs";const s=fs.readFileSync("tests/v911-anonymous-ui.spec.mjs","utf8");if(!s.includes("p.bottom<=a.top-24")||!s.includes("c.bottom<=a.top-24")||!s.includes("intervals:[100,250,500,1000]"))process.exit(1)'
-      - name: Verify entirely rebuilt walking screen contract
+      - name: Validate rebuilt walking entry contract
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: node --test tests/route-screen-v3.test.mjs
       - name: Verify release metadata consistency
@@ -137,25 +140,20 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
-      # New independent V3 screen replaces the old route panel visually;
-      # previously passed old-sheet geometry is deliberately not applicable.
-      - name: Check rebuilt walking screen at 375, 390 and 430 pixels
+      # This is a new separate screen; older hidden-sheet geometry cases
+      # do not apply. Prior search interactions passed on 375/390/430.
+      - name: Retest only three rebuilt reference-composition viewports
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
-        run: |
-          # Previous run 45247599527: mobile375/mobile390 search passed.
-          # Original run 45246300051: mobile430 search passed.
-          # Retest only the three initial-composition cases previously blocked
-          # by the visible legacy engine shell.
-          npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'completely rebuilt route entry matches reference map-first composition'
-      - name: Upload rebuilt route screenshots and traces
+        run: npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'completely rebuilt route entry matches reference map-first composition'
+      - name: Upload rebuilt walking route screenshots
         if: ${{ always() && github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         uses: actions/upload-artifact@v4
         with:
-          name: route-screen-v3-viewport-captures
+          name: route-v3-reference-viewport-captures
           path: |
             test-results-route-v3
             playwright-report-route-v3
@@ -167,6 +165,10 @@ jobs:
         if: ${{ github.event.pull_request.number == 406 }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile430 --grep 'guidance mode truly blocks map, tabs and keyboard except native end action'
+      - name: Focused community editor keyboard geometry (390px only)
+        if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
       # The original remote release check mixes the card gap with unrelated
       # selected-dock ink color, which does not initialize equally in local
       # source Preview. The prior mobile-first browser check asserts the SAME
