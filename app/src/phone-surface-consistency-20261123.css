@@ -518,3 +518,190 @@
   }
 }
 }
+
+/* 2026-11-23 iPhone review: one visual system for the dock, child-page
+ * navigation, route form and typography choices. No map/data event changes. */
+@layer request-completion {
+  @media (max-width:699px) {
+    /* An iOS-style dock is a single white floating surface, not an extra
+       pale-green selected block or a tinted band behind the page. */
+    html body #app#app#app#app#app#app > #bottom-nav:not([hidden]) {
+      background:#fff!important;
+      border:1px solid #dce8e1!important;
+      box-shadow:0 7px 24px rgba(25,55,43,.10)!important;
+    }
+    html body #app#app#app#app#app#app > #bottom-nav:not([hidden])
+      > .nav-tab:is(.active,[aria-current="page"]) {
+      background:transparent!important;
+      background-image:none!important;
+      border-color:transparent!important;
+      box-shadow:none!important;
+      color:#087e69!important;
+      -webkit-text-fill-color:#087e69!important;
+    }
+    html body #app#app#app#app#app#app > #bottom-nav:not([hidden])
+      > .nav-tab:is(.active,[aria-current="page"]) :is(.nav-icon,svg,span:last-child) {
+      color:inherit!important;
+      -webkit-text-fill-color:currentColor!important;
+      font-weight:760!important;
+    }
+    html body #app#app#app#app#app#app > #bottom-nav:not([hidden])
+      > .nav-tab:not(.active):not([aria-current="page"]) {
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    /* Fixed child-page navigation lives INSIDE the existing scroller.
+       Its opaque page-colored surface protects headings when lists scroll. */
+    html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden])
+      .dj834-my-detail .dj834-detail-nav {
+      position:sticky!important;
+      top:-14px!important;
+      z-index:40!important;
+      display:grid!important;
+      grid-template-columns:44px minmax(0,1fr)!important;
+      align-items:center!important;
+      column-gap:10px!important;
+      min-height:68px!important;
+      margin:0 -16px 18px!important;
+      padding:10px 16px 12px!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
+      background-color:var(--dj-primary-page-bg,#edf3ef)!important;
+      border:0!important;
+      border-bottom:1px solid var(--dj-primary-page-edge,#d5e4dc)!important;
+      box-shadow:0 2px 5px rgba(25,55,43,.03)!important;
+      isolation:isolate!important;
+    }
+    html body #app#app#app#app#app#app #mine-panel .dj834-detail-back {
+      width:44px!important;height:44px!important;
+      min-width:44px!important;min-height:44px!important;
+      border-radius:13px!important;
+      color:#087e69!important;
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    html body #app#app#app#app#app#app #mine-panel .dj834-detail-title {
+      margin:0!important;
+      min-width:0!important;
+      color:var(--dj-primary-page-ink,#203e34)!important;
+      font-size:19px!important;
+      font-weight:760!important;
+      line-height:1.35!important;
+      letter-spacing:-.035em!important;
+      overflow-wrap:anywhere!important;
+    }
+    /* Explicit pill selection states: inactive and selected controls must
+       not share the same pale-green luminance. */
+    html body #app#app#app#app#app#app #mine-panel .dj885-type-choices {
+      display:grid!important;
+      grid-auto-flow:column!important;
+      grid-auto-columns:minmax(0,1fr)!important;
+      gap:4px!important;
+      padding:4px!important;
+      min-width:0!important;
+      border-radius:18px!important;
+      border:1px solid #ccded4!important;
+      background:#e6f0ea!important;
+      box-shadow:none!important;
+    }
+    html body #app#app#app#app#app#app #mine-panel .dj885-type-choices
+      > button:not([aria-pressed="true"]) {
+      min-width:0!important;
+      min-height:45px!important;
+      border:0!important;
+      border-radius:13px!important;
+      background:transparent!important;
+      background-image:none!important;
+      box-shadow:none!important;
+      color:#4d675d!important;
+      -webkit-text-fill-color:#4d675d!important;
+      font-weight:620!important;
+    }
+    html body #app#app#app#app#app#app #mine-panel .dj885-type-choices
+      > button[aria-pressed="true"] {
+      min-width:0!important;
+      min-height:45px!important;
+      border:1px solid #087763!important;
+      border-radius:13px!important;
+      background:#0b846f!important;
+      background-image:none!important;
+      box-shadow:0 2px 6px rgba(10,85,69,.16)!important;
+      color:#fff!important;
+      -webkit-text-fill-color:#fff!important;
+      font-weight:770!important;
+    }
+    html body #app#app#app#app#app#app #mine-panel
+      .dj885-type-choices > button:focus-visible {
+      outline:2px solid #173f34!important;
+      outline-offset:2px!important;
+    }
+    html body #app#app#app#app#app #mine-panel .dj926-type-preview {
+      color:var(--dj-primary-page-ink,#203e34)!important;
+      border:1px solid #dce8df!important;
+      background:#e8f0eb!important;
+      border-radius:17px!important;
+    }
+    /* Route: a little more air between landmarks, not a stretched empty
+       page. Keep the existing sticky primary action and search popovers. */
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      > .dj836-sheet-body {
+      padding-top:20px!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      > .dj836-sheet-body > .dj-page-intro {
+      margin:3px 2px 17px!important;
+      line-height:1.55!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      .route-card {
+      padding:17px 16px!important;
+      row-gap:9px!important;
+      border-radius:20px!important;
+      overflow:visible!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      .route-location-row {
+      min-height:74px!important;
+      padding:12px 0!important;
+      gap:12px!important;
+      box-sizing:border-box!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      .route-location-divider {
+      margin:7px 0!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      :is(.route-waypoints,.route-waypoint-list,.route-transit-options) {
+      margin-block:10px!important;
+    }
+    html body #app#app#app#app#app#app #route-panel.page-panel:not([hidden])
+      > #dj910-route-footer {
+      border:0!important;
+      background:var(--dj-primary-page-bg,#edf3ef)!important;
+      box-shadow:none!important;
+    }
+    html body #app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden]) {
+      background:var(--dj-theme-surface,#2c343d)!important;
+      border-color:var(--dj-theme-line,#4d5b65)!important;
+    }
+    html body #app#app#app#app#app#app[data-theme="dark"] > #bottom-nav:not([hidden])
+      > .nav-tab:is(.active,[aria-current="page"]) {
+      color:#a0f0da!important;
+      -webkit-text-fill-color:#a0f0da!important;
+      background:transparent!important;
+    }
+    html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel
+      .dj885-type-choices {
+      background:#303c39!important;
+      border-color:#536760!important;
+    }
+    html body #app#app#app#app#app#app[data-theme="dark"] #mine-panel
+      .dj885-type-choices > button:not([aria-pressed="true"]) {
+      color:#cedfd6!important;-webkit-text-fill-color:#cedfd6!important;
+    }
+  }
+  @media (max-width:699px) and (prefers-reduced-motion:reduce) {
+    html body #app#app#app#app#app#app #mine-panel .dj834-detail-nav {
+      scroll-behavior:auto!important;
+    }
+  }
+}
