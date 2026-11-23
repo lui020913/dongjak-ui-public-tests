@@ -2204,6 +2204,14 @@ for (const chip of document.querySelectorAll('.community-filter[data-community-f
   });
 }
 document.getElementById('community-sort').addEventListener('change',renderCommunity);
+document.getElementById('community-refresh').addEventListener('click',()=>void refreshSharedCommunity());
+// Each route point has one location picker. Search/map/GPS remain separate
+// native actions but are no longer three persistent buttons per point.
+for(const menu of document.querySelectorAll('#route-panel .route-location-menu')){
+  menu.addEventListener('click',event=>{
+    if(event.target.closest('button'))queueMicrotask(()=>{menu.open=false;});
+  });
+}
 document.getElementById('community-saved-toggle').addEventListener('click',async()=>{if(!await isCommunitySignedIn()){toast('로그인 후 저장한 글을 볼 수 있습니다.');return;}communitySavedOnly=!communitySavedOnly;communityDetail=null;document.getElementById('community-saved-toggle').setAttribute('aria-pressed',String(communitySavedOnly));renderCommunity();});
 document.getElementById('community-search').addEventListener('input',e=>{communitySearch=e.target.value;communityDetail=null;renderCommunity();});
 document.getElementById('community-notifications-toggle').addEventListener('click',()=>{
@@ -2344,7 +2352,12 @@ async function submitCommunityComment(postId,formEl) {
 function showCommunityReport(postId,commentId,anchor){if(anchor.querySelector('.community-report-form'))return;const form=makeCEl('form','community-report-form');const select=document.createElement('select');select.setAttribute('aria-label','신고 사유');for(const [value,label] of [...Object.entries(moderationReasons).filter(([k])=>!['uncertain','unavailable'].includes(k)),['other','기타']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}const send=makeCEl('button','community-filter','신고 접수');send.type='submit';const close=communityButton('취소','community-filter',()=>form.remove());form.append(select,send,close);form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,select.value);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});anchor.append(form);}
 function renderCommunity() {
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
-  const bar=makeCEl('div','dj-community-feed-status');const status=makeCEl('p','dj-community-status-label',communityCloudStatus);status.setAttribute('role','status');const refresh=communityButton('새로고침','community-filter dj-community-refresh',()=>refreshSharedCommunity());refresh.setAttribute('aria-label','공개 게시글 새로고침');bar.append(status,refresh);root.append(bar);
+  // The always-present feed status was redundant with the controls and empty
+  // state. Only report exceptional connection failures in the actual feed.
+  if(communityCloudStatus.includes('연결 실패')){
+    const error=makeCEl('p','dj-community-connection-error',communityCloudStatus);
+    error.setAttribute('role','status');root.append(error);
+  }
   const all=[...sharedCommunityPosts,...communityPosts];
   if(communityDetail&&!all.some(p=>p.id===communityDetail))communityDetail=null;
   const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail)root.append(communityButton('‹ 목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();if(panel)panel.querySelector('.dj836-sheet-body').scrollTop=communityListScroll;}));
@@ -2360,8 +2373,8 @@ function renderCommunity() {
     const empty=makeCEl('section','dj-community-empty-state');
     empty.setAttribute('aria-label','커뮤니티 게시판 상태');
     empty.append(makeCEl('span','dj-community-empty-icon','✎'));
-    empty.append(makeCEl('h3','dj-community-empty-title',loading?'동네 이야기를 불러오는 중입니다':offline?'공유 게시판 연결을 확인해 주세요':filtered?'조건에 맞는 게시글이 없습니다':'첫 번째 동네 이야기를 기다리고 있습니다'));
-    empty.append(makeCEl('p','dj-community-empty-copy',loading?'공개 게시글을 확인하고 있습니다.':offline?'공개 게시판에 연결하지 못했습니다. 이 기기의 글은 그대로 보관됩니다.':filtered?'검색어·분류를 변경하거나 전체 글을 확인해 주세요.':'아직 공개된 글이 없습니다. 동네의 보행 불편, 개선 아이디어, 생활 질문을 직접 남길 수 있습니다.'));
+    empty.append(makeCEl('h3','dj-community-empty-title',loading?'동네 이야기를 불러오는 중입니다':offline?'공유 게시판 연결을 확인해 주세요':filtered?'조건에 맞는 게시글이 없습니다':'아직 게시글이 없습니다'));
+    empty.append(makeCEl('p','dj-community-empty-copy',loading?'공개 게시글을 확인하고 있습니다.':offline?'공개 게시판에 연결하지 못했습니다. 이 기기의 글은 그대로 보관됩니다.':filtered?'검색어·분류를 변경하거나 전체 글을 확인해 주세요.':'동네의 보행 불편이나 개선 아이디어를 첫 글로 남겨 주세요.'));
     const actions=makeCEl('div','dj-community-empty-actions');
     if(filtered&&!loading){
       actions.append(communityButton('전체 게시글 보기','dj-community-empty-primary',()=>{
@@ -2379,8 +2392,7 @@ function renderCommunity() {
     // A second identical call-to-action made the empty state look crowded.
     if(loading||offline||filtered)actions.append(communityButton(loading?'새로고침':'공개 글 다시 확인','dj-community-empty-secondary',()=>refreshSharedCommunity()));
     if(actions.childElementCount)empty.append(actions);
-    empty.append(makeCEl('p','dj-community-empty-footnote','로그인 없이 작성하면 이 기기에만 저장됩니다. 공개 등록에는 로그인과 AI 검사가 필요합니다.'));
-    root.append(empty);
+     root.append(empty);
     return;
   }
   for (const post of shown) {
