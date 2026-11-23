@@ -9,17 +9,18 @@ async function ready(page){
   }
   await expect(page.locator('#map')).toBeVisible({timeout:45000});
   const overlay=page.locator('#map-startup-overlay');
-  if(await overlay.isVisible()){
-    const next=page.locator('#map-startup-continue');
-    await expect(next).toBeVisible({timeout:45000});
-    await next.click();
-    await expect(overlay).toBeHidden({timeout:30000});
-  }
+  const next=page.locator('#map-startup-continue');
+  // The startup layer appears before the continue action is available.
+  // Use the existing production smoke-test handshake, never force-click.
+  await expect.poll(async()=>!await overlay.isVisible()||await next.isVisible(),
+    {timeout:60000,intervals:[250,500,1000]}).toBe(true);
+  if(await overlay.isVisible()&&await next.isVisible())await next.click();
+  await expect(overlay).toBeHidden({timeout:30000});
   const tour=page.locator('#dj860-onboarding');
-  if(await tour.isVisible({timeout:8000})){
-    await tour.locator('[data-dj860-action="skip"]').click();
-    await expect(tour).toBeHidden({timeout:20000});
-  }
+  await expect(page.locator('#app')).toHaveAttribute('data-dj860-auto-resolved','true',{timeout:45000});
+  await expect(tour).toBeVisible({timeout:30000});
+  await tour.locator('[data-dj860-action="skip"]').click();
+  await expect(tour).toBeHidden({timeout:20000});
   await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-in|signed-out)$/,{timeout:45000});
 }
 async function enterRoute(page){
