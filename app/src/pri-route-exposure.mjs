@@ -150,7 +150,7 @@ export function routePriColorGeometry(route,observedLines){
     if(risk<21)return ['low','#139861'];
     if(risk<41)return ['good','#87c84c'];
     if(risk<61)return ['medium','#f2c63f'];
-    if(risk<81)return ['high','#ef903c'];
+    if(risk<70)return ['high','#ef903c'];
     return ['severe','#d84b4e'];
   };
   const add=(from,to,risk)=>{
