@@ -225,7 +225,12 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       support.textContent=Number.isFinite(entry?.coverage)
         ?'평가 구간 '+Math.round(entry.coverage*100)+'%':'PRI 자료 확인 중';
       button.append(routeName,metric,badge,support);
-      on(button,'click',()=>{if(native&&!native.disabled&&!app.classList.contains('route-guiding'))native.click();});
+      // The choice rows are replaced whenever PRI/selection state updates.
+      // Attach to the ephemeral node directly; do not retain old buttons in
+      // the long-lived disposal list after each render.
+      button.addEventListener('click',()=>{
+        if(native&&!native.disabled&&!app.classList.contains('route-guiding'))native.click();
+      });
       choiceRows.append(button);
     }
     hint.textContent=equal?'두 옵션에서 같은 경로가 계산됐습니다.':
