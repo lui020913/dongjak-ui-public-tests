@@ -241,13 +241,14 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
     return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,
       actualHit:Boolean(cta&&(hit===cta||cta.contains(hit))),
       routeStage:document.getElementById('app')?.dataset.djRouteStage,
+      footerPortaled:footer?.parentElement===document.getElementById('app'),
       panelPosition:panel?getComputedStyle(panel).position:'missing',
       footerPosition:footer?getComputedStyle(footer).position:'missing'};
   });
   await expect.poll(async()=>{
     const m=await snapshot();
     return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
-      m.panelPosition==='fixed'&&m.panel.x>=9&&
+      m.panelPosition==='fixed'&&m.footerPosition==='fixed'&&m.footerPortaled&&m.panel.x>=9&&
       m.panel.right<=m.viewport[0]-9&&m.panel.top>=0&&m.panel.top<=80&&
       m.panel.bottom<=m.nav.top-5&&m.panel.bottom<=m.cta.top-6&&m.cta.height>=44&&
       m.cta.bottom<=m.nav.top-5&&m.actualHit);
