@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.104",
+  "application_version": "9.2.105",
   "public_work_branch": "main",
-  "purpose": "PR344 screenshot-driven mobile UI correction, PR345 sealed test path correction, PR347 explicit open-and-select browser flow for the compact route choice: verified base 02cc9149255b7cf3c6071c9364e4367b21fc96d8. Preserve four actual route variants and PRI-not-applied disclaimers; correctly fit geometry using unobstructed toolbar-to-sheet bounds; remove unnecessary community white status slab and spacing, flatten typography segments, reduce duplicate history labels. Previous 9.2.103 passed sealed source, Preview, desktop and 11/12 phone shards but phone shard 4 browser test tried to click a deliberately collapsed option; PR347 only changes test to explicitly expand and re-collapse. Require all 12 phone shards, PC/tablet, matched-source Preview and protected Production, then source-provenanced Android APK. Stop release on any failure; no bypasses.",
-  "attempt": 292,
+  "purpose": "PR #350 consolidated phone controls in source and passed public app CI run 45105625838. Real DOM cleanup: removed community persistent cloud-status slab and duplicated empty-state notices; one search+write row and collapsible sort/saved/notification/refresh toolbar; single map incident report entry; one native location-selection menu per walking route endpoint preserving search, map and GPS native owners; merged additional map tools into Map & Walking child settings with existing DOM owner, without separate My Info row. Also adjusted actual composer visibility and old regression contracts. Preserve existing GIS/PRI, map selection viewport logic, transport and routing API. Require source provenance, sealed Preview, 12 mobile shards, PC/tablet QA, protected Production and exact-build Android APK, no bypass.",
+  "attempt": 293,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.103 failed only outdated mobile390 route choice browser click sequence; PR347 source CI success and merged. 9.2.104 protected retry.",
+  "last_retry_reason": "Fresh source PR #350 merged to main at 7026b14e34168e7d4dec4e2605a4f10fb18ee02c; predecessor 9.2.104 successful. New structural UI consolidation requires guarded 9.2.105.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
