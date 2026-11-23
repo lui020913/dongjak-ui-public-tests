@@ -48,7 +48,8 @@ test('nearby guidance dock follows measured tab bar and uses neutral secondary a
 test('My Info subviews animate by direction without blank-fading the page root',()=>{
  const js=read('src/v834-my-info.js');
  const css=read('src/phone-surface-consistency-20261123.css');
- assert.match(js,/enter\(content,'forward'\)/);
+ assert.match(js,/enter\(detail,'forward'\)/);
+  assert.match(js,/const target=node===detail\?content:node/);
  assert.match(js,/enter\(landing,'back'\)/);
   // Visible directional motion, without fading content or the page root.
   assert.match(js,/direction==='back'\?-44:44/);
