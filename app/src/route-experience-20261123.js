@@ -160,12 +160,12 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   };
   const intercept=e=>{
     if(!app.classList.contains('route-guiding'))return;
-    if(e.target?.closest?.('#nav-stop'))return;
-    // Window-capture handles Tab before MapLibre or a legacy modal can
-    // consume keyboard input; it is a genuine accessibility focus trap.
+    // Tab must be intercepted EVEN WHEN the end button is already focused.
+    // Otherwise the default browser focus navigation escapes that button.
     if(e.type==='keydown'&&e.key==='Tab'){
       e.preventDefault();e.stopImmediatePropagation();focusEnd();return;
     }
+    if(e.target?.closest?.('#nav-stop'))return;
     // The GPS camera is updated programmatically; user-generated map and UI
     // inputs are blocked while a real walking guidance session is active.
     e.preventDefault?.();
