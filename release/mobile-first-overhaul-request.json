@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.126",
   "public_work_branch": "main",
-  "purpose": "Protected retry of version 9.2.126 after PR #407 fixes only top walking origin/destination card vertical spacing for 375/390/430 phone widths (24px card-to-CTA clearance). Previous 9.2.126 Preview build passed; its PC/tablet official Seoul bus geometry gate succeeded on targeted retry, and 9 of 12 mobile shards passed. Three mobile shard failures were the same 24px card clearance assertion. PR #407 targeted browser checks must pass for all three widths before merge; new source SHA needs new guarded isolated Preview, exact-source mobile and PC/tablet release gates and protected Production. Do not treat an unavailable upstream bus geometry response as valid. Preserve all route/PRI and guidance behavior.",
-  "attempt": 327,
+  "purpose": "Protected 9.2.126 release after PR #409 corrects only the phone QA ruler: the user-visible docked CTA top, not the invisible in-flow footer wrapper top, is compared against the top walking input card at a still-required 24px minimum. Source and functionality of the 9.2.126 candidate remain unchanged except QA specification and source SHA. Also assert the live map receives pointer events in the gap. Previous attempt 327 passed PC/tablet and 11/12 mobile shards, with only mobile375 failing the inaccurate wrapper measurement. Do not pretend a Preview pass is Production; all mandatory exact-new-SHA release gates remain fail closed.",
+  "attempt": 328,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt326 at source e0d8a3fdf2 shipped Preview only; blocked by a 24px route-card-to-CTA gap on mobile375/mobile390/mobile430. PC/tablet bus-route geometry dependency passed when its failed job alone was rerun. PR #407 adjusts compact card whitespace, subject to focused 3-width layout test. Keep production 9.2.125 until all new-source gates pass.",
+  "last_retry_reason": "2026-11-24: attempt327 (SHA 897eb4b11c25) completed 11/12 mobile shards and PC/tablet successfully, while mobile375 shard failed comparing .route-card.bottom against the in-flow invisible footer top. Screenshot proves button itself docks above tabs; PR #409 checks actual CTA top (>=24px map gap) and pointer-hittable map. Release only when the new-source protected Preview, mobile, PC/tablet and Production checks all pass.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
