@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.123",
+  "application_version": "9.2.124",
   "public_work_branch": "main",
-  "purpose": "Guarded production release for PR #393, merged source fb83e383fa7d64a571672d3b09e4999b06bf8ef4. The previous 9.2.122 exact Preview correctly failed its new phone layout checks, and Production was skipped. This correction replaces over-centered idle walk directions with bounded 9dvh start padding, checks the ACTUAL tappable route CTA geometry and center-point hit target against the pill nav, updates stale assertions to ensure the moving green tab plate is hidden and active icon/text distinct, and repairs Playwright tap arguments. Full public app regression, build, and 3-viewport layout source CI 45169977041 succeeded. Require a NEW exact SHA isolated Preview, independent 12 mobile QA groups including rendered style/geometry, PC/tablet checks, guarded Production version/source/bindings verification, with rollback on any failure. Preserve PRI six-factor average, mapping, route data/computation, GIS, buses/trains, authentication, AI, community, weather, and all other app functions.",
-  "attempt": 316,
+  "purpose": "Guarded mobile-only release for verified PR #392 (unified walking-route UI): direct departure/arrival search with native location selection, origin/destination swap, one measured walking route comparison surface with six-factor PRI risk and explicit missing-coverage treatment, and GPS turn-first directions. PR #392 passed full public app source CI 45172360182 (unit/regression, production build, 375/390/430px Playwright). Squash merge 547e5e4037a7679368e0dd28929597c30e72a9ff. Require NEW exact-commit Preview, all 12 independent mobile QA groups and PC/tablet checks, protected Production source/version verification and rollback on failure. Preserve map, PRI methods, routing, transit, account, AI, community and existing current live app if any check fails.",
+  "attempt": 317,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-23 9.2.122 protected Preview (workflow 45168306621) failed 4/12 phone QA shards, correctly skipping Production. Shard12/3 reported footer box instead of real route CTA, shard5 expected the intentionally removed moving green plate, shard8 contained malformed tap(page.locator(...)). PR #393 fixes these with updated real browser checks; reuse no QA result from the failed Preview.",
+  "last_retry_reason": "New 9.2.124 route experience release after 9.2.123 Production success (run 45171630426). Do not reuse earlier QA as deployment evidence; test this exact main commit via isolated Preview before promotion.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
