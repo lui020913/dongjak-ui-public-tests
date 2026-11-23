@@ -171,6 +171,18 @@ export function installMyInfo(doc=document){
  // recreating it so favorite buttons and existing event handlers keep working.
  body.prepend(landing);landing.insertAdjacentElement('afterend',detail);
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
+ const detailNav=detail.querySelector('.dj834-detail-nav');
+ // A phone child page owns the existing fixed screen header, not a second
+ // scrolling title row. Reparent the live navigation node (never clone it).
+ const syncSubpageHeader=()=>{
+   const phone=doc.defaultView?.matchMedia?.('(max-width:699px)')?.matches===true;
+   const useHeader=!detail.hidden&&phone&&heading.classList.contains('dj-sheet-chrome');
+   const host=useHeader?heading:detail;
+   if(detailNav?.parentElement===host)return;
+   if(useHeader)heading.insertBefore(detailNav,heading.querySelector('.dj-sheet-chrome-close'));
+   else detail.prepend(detailNav);
+ };
+ doc.defaultView?.addEventListener('resize',syncSubpageHeader,{passive:true});
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;mapBox.hidden=true;
@@ -232,10 +244,11 @@ export function installMyInfo(doc=document){
    content.dataset.dj834View=view;
    if(view==='type')syncTypography();if(view==='language')syncChoices();if(view==='map')syncMapChoices();
    detail.hidden=false;
+   syncSubpageHeader();
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
    if(panelScroller)panelScroller.scrollTop=0;
-   enter(detail,'forward');
+   enter(content,'forward');
    if(view==='profile'){
      const toggle=account.querySelector('.dj824-account-toggle');
      if(toggle?.getAttribute('aria-expanded')!=='true')toggle?.click();
@@ -246,6 +259,7 @@ export function installMyInfo(doc=document){
    if(historyList&&historyHost&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    delete content.dataset.dj834View;
    detail.hidden=true;
+   syncSubpageHeader();
    landing.hidden=false;
    body.scrollTop=0;
    enter(landing,'back');
