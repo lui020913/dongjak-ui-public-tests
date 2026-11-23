@@ -217,9 +217,12 @@ export function installMyInfo(doc=document){
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
  function enter(node,direction='forward'){
-   if(!node||reducedMotion()||typeof node.animate!=='function')return;
+   // Preserve the stable navigation API while animating body content only.
+   // The child back/title bar remains in the fixed header throughout.
+   const target=node===detail?content:node;
+   if(!target||reducedMotion()||typeof target.animate!=='function')return;
    const x=direction==='back'?-44:44;
-   try{node.animate([{opacity:1,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
+   try{target.animate([{opacity:1,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
      duration:360,easing:'cubic-bezier(.18,.72,.24,1)'
    });}catch{/* Appearance must never block navigation. */}
  }
@@ -248,7 +251,7 @@ export function installMyInfo(doc=document){
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
    if(panelScroller)panelScroller.scrollTop=0;
-   enter(content,'forward');
+   enter(detail,'forward');
    if(view==='profile'){
      const toggle=account.querySelector('.dj824-account-toggle');
      if(toggle?.getAttribute('aria-expanded')!=='true')toggle?.click();
@@ -259,8 +262,8 @@ export function installMyInfo(doc=document){
    if(historyList&&historyHost&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    delete content.dataset.dj834View;
    detail.hidden=true;
-   syncSubpageHeader();
    landing.hidden=false;
+   syncSubpageHeader();
    body.scrollTop=0;
    enter(landing,'back');
  }
