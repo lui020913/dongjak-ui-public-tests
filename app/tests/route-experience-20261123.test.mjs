@@ -88,7 +88,7 @@ test('one input/editor and no standalone third route-details page',()=>{
 
 test('release mobile-next patch targets the current route source and avoids unscored alternatives',()=>{
  const main=read('src/main.js');
- const release=read('scripts/apply-mobile-next.mjs');
+ const release=read('../scripts/apply-mobile-next.mjs');
  const sentinel="paint:{'line-color':'#87939b','line-width'";
  assert.equal(main.split(sentinel).length-1,1,'exact release patch anchor must occur once');
  assert.ok(release.includes(sentinel),'release adapter must target the current actual source line');
