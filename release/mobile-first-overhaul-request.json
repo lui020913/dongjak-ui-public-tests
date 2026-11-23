@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.99",
+  "application_version": "9.2.100",
   "public_work_branch": "main",
-  "purpose": "PR #341 full user-requested integrated iPhone corrections on source 80a9008524cbbbd8b88250a8338748436f757625: replace broken one-Hangul public facility letters with registered vector pictograms, remove duplicate park name writers but retain clickable icons, route Additional Map Tools to shared My Info subpage with same update-history directional animation and consistent card styling, replace over-specific generated mobile-next CSS nearby sheet bottom with actual measured 8px dock clearance shared for compact and expanded including visualViewport resize, make subway frontal radial cold-white glow perceptible while preserving observed direction/rail data, close whole map-settings overlay rather than leave white card backdrop. Source CI #45093053870 success. Preserve PRI four risk factors, 0 green to 100 red, GIS/network data, transit/bus APIs, route search and PWA light primary theme. Must use sealed Preview, all 12 mobile browser QA shards with 375/390/430px, PC/tablet, protected Production source/API proofs and signed Android debug APK. Fail closed.",
-  "attempt": 287,
+  "purpose": "User screenshot iPhone remediation from PR342, source 5bce9b21c02dcae02d1515e7b3d1aa652e0bc421: unify all My Info child menus including map settings with same native back and slide fade, remove duplicate blue quick links and default-style buttons, remove green touch-focus outlines but retain accessible keyboard focus ring, remove duplicate community first-post action and empty route clear, collapse blank fixed 68dvh bus arrival card to content, make place and station/bus selected pin land at real midpoint between top toolbar and sheet top after popup mount; keep mapping/GIS/PRI, real-time transit API and route geometry invariant. Must run sealed Preview, 12 disjoint mobile QA shards at 375/390/430 widths, desktop/tablet QA, guarded Production with source/API proof, then signed debug APK with publish checks. Fail closed on any failed gate.",
+  "attempt": 288,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Fresh corrected whole-app PR341 after 9.2.98; first attempt 9.2.99, no bypass. User-reported iPhone screenshot regressions.",
+  "last_retry_reason": "New full source-verified PR342 iPhone screenshots 10:20-10:22 fixes, first attempt internal release 9.2.100",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
