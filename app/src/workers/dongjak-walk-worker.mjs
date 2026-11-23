@@ -14,7 +14,7 @@ function getPriIndex(){
  if(priIndexPromise)return priIndexPromise;
  priIndexPromise=(async()=>{
   const manifest=await priFetch('/data/pri/manifest.json');
-  const valid=url=>typeof url==='string'&&/^\\/data\\/pri\\/[a-zA-Z0-9_.-]+\\.json$/.test(url);
+  const valid=url=>typeof url==='string'&&url.startsWith('/data/pri/')&&/^[a-zA-Z0-9_.-]+[.]json$/.test(url.slice('/data/pri/'.length));
   if(!valid(manifest.bundle)||!Array.isArray(manifest.patches)||!manifest.patches.every(valid))
    throw new Error('Untrusted PRI manifest');
   const [raw,...patches]=await Promise.all([manifest.bundle,...manifest.patches].map(priFetch));
