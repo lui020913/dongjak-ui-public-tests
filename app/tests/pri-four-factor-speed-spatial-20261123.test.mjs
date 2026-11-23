@@ -66,7 +66,7 @@ test('parallel links with different speed grades are not misattributed to a surv
 test('walking vulnerability UI exposes one policy row with two nested buttons, four-factor map, and dock geometry',()=>{
  const ui=readFileSync(new URL('../src/pri-map.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../src/pri-map.css',import.meta.url),'utf8');
- assert.match(ui,/\['current4','종합 보행 취약도 · 4개 지표'\]/);
+ assert.match(ui,/\['current6','종합 보행 취약도 · 6개 지표'\]/);
  assert.match(ui,/const entry=button\('제도적 사각지대',showProtectionDetail\)/);
  assert.match(ui,/protectionDetail\.append\(back,/);
  assert.match(ui,/choice\('protectionGap','상도1동 전체 보호 공백 점수 · 그라데이션'\)/);
