@@ -1,0 +1,7 @@
+{
+  "source": "public-app",
+  "snapshot_date": "2026-11-23",
+  "purpose": "user-requested full 6-factor PRI site-by-site PDF report; export exact existing public research source files, no deploy",
+  "network_version": "sangdo1-lighting-2026-11-20-b8433fe8",
+  "expected_segments": 1686
+}
