@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.119",
+  "application_version": "9.2.120",
   "public_work_branch": "main",
-  "purpose": "Owner-requested minimal community collapsed-options touch repair from PR #381 (squashed source commit 2a6f6ae0a009663ede321fa1198bdcc6369ccb78): hide the four secondary controls only while native '정렬 · 저장 · 알림' details is closed, restoring pointer access and preventing its hidden refresh area from covering the visible empty-state. Preserve the expanded options, normal refresh function, all other UI, map TIP repair shipped in 9.2.118, GIS, PRI, transit, authentication, AI, accounts and Supabase. Full source CI #45143539038 succeeded including real 375/390/430 touch/geometry tests. Require protected exact-source Preview, 12 phone QA shards, desktop/tablet checks, gated Production, integrity and post-deploy verification, guarded rollback. No shortcuts or forced clicks.",
-  "attempt": 310,
+  "purpose": "Owner-requested limited release: research-only observed six-factor PRI relative exposure advice for existing general/gentle pedestrian routes (#383), and My Info update-history bottom dock mask, 94px inline-important phantom footer, and overflowing summary text repair (#382). Maintain existing route geometry, transport, map, GIS PRI evidence, accounts, authentication, Supabase and signed-in workflows. Do not claim calculated routes are certified safe. Mandatory source CI, exact-source Preview, 12 mobile QA shards, PC/tablet, protected Production, postdeploy integrity verification and guarded rollback; never bypass failure gates.",
+  "attempt": 311,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Production 9.2.118 protected deployment #45142673938 succeeded. PR #381 exact-source CI #45143539038 passed; new community details CSS and two real-touch regression tests merged at 2a6f6ae0a009663ede321fa1198bdcc6369ccb78. New monotonic patch release 9.2.119 only after full mandatory gates.",
+  "last_retry_reason": "Previous protected Production v9.2.119 run #45144268258 succeeded. PR #383 source CI #45148780251 succeeded and merged to main. PR #382 must be merged only after its exact-head full source CI passes; this release request PR must not merge earlier. Next monotonic patch version 9.2.120.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
