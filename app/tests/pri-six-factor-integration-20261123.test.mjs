@@ -38,6 +38,28 @@ test('10-point bocha raw risk imports ×10 without changing risk polarity or zer
  assert.throws(()=>parseImport({...source,scoreMax:5},base),/지원되지 않는/);
 });
 
+test('per-road rubric parts are converted to risk 0-100 only when all four parts are known',()=>{
+ const base=adaptLighting({meta:{factor:'가로등·보안등 암부 거리',segment_m:25,full_score_dark_m:50,기준일:'2026-11-20',자료:'test',가정:'test'},segments:[
+  {id:'1_0',name:'road',len:20,dark:10,score:20,grade:2,pts:[[37.5,126.95],[37.5,126.9502]]},
+  {id:'1_1',name:'road',len:20,dark:10,score:20,grade:2,pts:[[37.5002,126.95],[37.5002,126.9502]]}]});
+ const metadata={source:'team PDF',method:'PDF four parts',scoreDirection:'risk'};
+ const crossing=parseImport({type:'pri-factor-rubric',schemaVersion:1,networkVersion:base.networkVersion,factor:{...metadata,id:'crossing',label:'횡단보도'},rows:[
+  {id:'1_0',components:{discontinuity:'고위험',terrain:'주의',vulnerable:'안전',nightAccident:'고위험'}},
+  {id:'1_1',components:{discontinuity:'고위험',terrain:'주의',vulnerable:null,nightAccident:'고위험'}}
+ ]},base);
+ assert.equal(observedFactorScore(crossing.segments[0],'crossing'),30,'risk 70 -> safety 30');
+ assert.equal(observedFactorScore(crossing.segments[1],'crossing'),null);
+ const bocha=parseImport({type:'pri-factor-rubric',schemaVersion:1,networkVersion:base.networkVersion,factor:{...metadata,id:'sharedRoad',label:'보차혼용'},rows:[
+  {id:'1_0',components:{separation:4,refuge:3,sight:0,speedCalming:0}},
+  {id:'1_1',components:{separation:4,refuge:3,sight:2}}
+ ]},crossing);
+ assert.equal(observedFactorScore(bocha.segments[0],'sharedRoad'),30,'risk 70 -> safety 30');
+ assert.equal(observedFactorScore(bocha.segments[1],'sharedRoad'),null);
+ assert.equal(currentSixFactorCoverage(bocha.segments[0]),3);
+ assert.equal(currentSixFactorCoverage(bocha.segments[1]),1);
+ assert.equal(currentSixFactorScore(bocha.segments[0]),(80+30+30)/3);
+});
+
 test('the new rubrics match exact network version and never invent road risk ratings',()=>{
  const base=adaptLighting(json('../public/data/pri/lighting_segments.json'));
  const a=json('../public/data/pri/sangdo1_crosswalk_rubric_factor.json');
