@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.97",
+  "application_version": "9.2.98",
   "public_work_branch": "main",
-  "purpose": "PR #338 mobile design cleanup: 5 requested iPhone surfaces update history/map preferences/type size-weight/walking route/community spacing, ordinary dark theme removed from legacy map preferences, duplicate text state removed, existing fade-only motion and native typography persistence preserved, map label text-size event controlled by single readability owner. Source CI #45051335303 passed after original legacy regression updates. Preserve the institutional gap and 4-factor PRI/GIS inputs, route/transit/community behaviors, temporary night visibility, 1.0 public display. Exact sealed Preview -> 12 phone QA shards 375/390/430 -> desktop/tablet -> guarded Production source/API proof; never bypass failing QA.",
-  "attempt": 284,
+  "purpose": "PR #339 (merged ad5899f00e764dd93000cb945bccc4e7b0d1f0ff): iPhone requested visual fixes, Metro headlight removes yellow warm beam and adds front-facing neutral white radial glow, PRI four-factor road layer slightly thicker but keeps 0 green to 100 red risk scores, native My Info subordinate menus use directional horizontal transition and consistent layouts, duplicates removed in advanced map tools, surrounding safety information outside Dongjak uses muted secondary button and live measured 9px clearance from bottom dock, expanded night-visibility panel hides interfering upper map actions. Source CI #45089520055 succeeded. Preserve underlying four observed GIS factors/score coverage, train positioning/source, route and app UI semantics, light-only default and temporary night analysis. Must perform sealed Preview, all 12 mobile QA shards at 375/390/430, desktop/tablet checks, protected Production exact source/API verification, then Android APK. No bypass on failed QA. Public display version remains 1.0.",
+  "attempt": 285,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New PR #338 design consolidation after 9.2.96, no prior 9.2.97 release attempt; test all mobile shards and guarded deploy.",
+  "last_retry_reason": "Fresh approved iPhone screenshots and recorded UX findings after 9.2.97; PR #339 UI/visual corrections. This is first 9.2.98 guarded release run.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
