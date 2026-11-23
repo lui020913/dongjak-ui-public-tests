@@ -253,14 +253,15 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
  const transitOption=doc.getElementById('djNext-transit-option');
  transitOption?.addEventListener('click',()=>win.dispatchEvent(new Event('dj-next:open-transit')));
  const points=doc.createElement('div');points.className='dj9272-route-points';points.setAttribute('aria-label','선택한 출발지와 목적지');
+ const compact=doc.createElement('div');compact.className='dj9272-selected-route';compact.setAttribute('aria-live','polite');
  const heading=doc.createElement('div');heading.className='dj9272-compare-heading';heading.textContent='경로 선택';
  const cards=doc.createElement('div');cards.id='djNext-route-compare';cards.className='djNext-route-compare';
  const controls=doc.createElement('div');controls.className='dj9272-route-controls';
  const expand=doc.createElement('button'),fit=doc.createElement('button');
- expand.type='button';expand.textContent='경로 옵션';expand.setAttribute('aria-expanded','true');
+ expand.type='button';expand.textContent='경로 옵션';expand.setAttribute('aria-expanded','false');expand.setAttribute('aria-controls','djNext-route-compare');
  fit.type='button';fit.textContent='전체 경로 보기';fit.setAttribute('aria-label','출발지부터 목적지까지 전체 경로 지도에 맞추기');
  controls.append(expand,fit);
- host.append(points,heading,cards,controls);
+ host.append(points,compact,heading,cards,controls);
  let data=null;
  const variants=[['standard','일반 최단','#3978c8'],['transit','대중교통','#7963b3'],['gentle','경사 회피','#a4742e'],['balanced','종합 최적','#087e68']];
  const fmt=r=>r&&Number.isFinite(r.seconds)&&Number.isFinite(r.kilometers)
@@ -275,11 +276,12 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
    small.textContent=kind;name.textContent=label(id);text.append(small,name);item.append(dot,text);points.append(item);
   }
  };
- const focus=()=>{
+ const showCompact=({fitMap=false}={})=>{
   host.dataset.dj9272RouteFocus='true';
   expand.setAttribute('aria-expanded','false');expand.textContent='경로 옵션';
-  win.setTimeout(()=>win.dispatchEvent(new Event('dj-next:fit-route')),70);
+  if(fitMap)win.setTimeout(()=>win.dispatchEvent(new Event('dj-next:fit-route')),70);
  };
+ const focus=()=>showCompact({fitMap:true});
  const expandOptions=()=>{
   const open=host.dataset.dj9272RouteFocus==='true';
   host.dataset.dj9272RouteFocus=String(!open);
@@ -291,8 +293,13 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
  function render(){
   cards.replaceChildren();syncPoints();
   if(transitOption)transitOption.disabled=!data?.transit;
-  if(!data){delete host.dataset.dj9272RouteFocus;return;}
-  host.dataset.dj9272RouteFocus='false';expand.setAttribute('aria-expanded','true');expand.textContent='옵션 접기';
+  if(!data){delete host.dataset.dj9272RouteFocus;compact.textContent='';return;}
+  // Initial route presentation is compact, preserving real map viewport.
+  // All four alternatives remain one click away and keep their owners.
+  showCompact();
+  const selected=variants.find(([id])=>id===data.selected)||variants[0];
+  const chosen=data[data.selected]||data.standard;
+  compact.textContent=selected[1]+' · '+(data.selected==='transit'&&chosen?'약 '+Math.ceil(chosen.indicativeMinutes)+'분 (참고)':fmt(chosen));
   for(const [id,title,color] of variants){
    const b=doc.createElement('button');b.type='button';b.dataset.comparison=id;b.style.setProperty('--route-accent',color);
    const heading=doc.createElement('strong'),metric=doc.createElement('span');heading.textContent=title;
@@ -302,10 +309,9 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
    b.addEventListener('click',()=>{
     if(id==='transit'){win.dispatchEvent(new Event('dj-next:open-transit'));return;}
     const target=route.querySelector('[data-route-variant="'+id+'"]');
-    // Keep all choices visible after selecting a route. The map still fits
-    // the complete selected geometry, and the explicit Full Route button
-    // remains available to collapse the choice list on demand.
-    if(target&&!target.disabled){target.click();win.dispatchEvent(new Event('dj-next:fit-route'));}
+    // Selection returns to the map-first compact state, while the menu
+    // remains available to compare alternatives again.
+    if(target&&!target.disabled){target.click();showCompact({fitMap:true});}
    });
    cards.append(b);
   }
@@ -318,6 +324,9 @@ export function installPhoneRouteComparison({app,doc=document,win=window}){
  win.addEventListener('dj-next:route-selected',e=>{
   if(!data)return;data={...data,selected:e.detail};
   for(const b of cards.children)b.setAttribute('aria-pressed',String(b.dataset.comparison===data.selected));
+  const selected=variants.find(([id])=>id===data.selected)||variants[0];
+  const chosen=data[data.selected]||data.standard;
+  compact.textContent=selected[1]+' · '+(data.selected==='transit'&&chosen?'약 '+Math.ceil(chosen.indicativeMinutes)+'분 (참고)':fmt(chosen));
   syncPoints();
  });
  win.addEventListener('dj-next:route-clear',()=>{data=null;render()});
