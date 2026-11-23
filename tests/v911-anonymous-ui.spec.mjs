@@ -1700,6 +1700,20 @@ test('phone selected dock has no color plate and route form is vertically balanc
  await tap(page,tab(page,'route'));
  await expect(page.locator('#route-panel')).toBeVisible();
  const routeDock=await checkDock('route');
+ // Native footer position updates on subsequent animation frames. The
+ // instant route-tab snapshot can catch an intermediate CTA position that
+ // is not the final rendered screen. Wait for the ORIGINAL layout standard.
+ await expect.poll(async()=>page.evaluate(()=>{
+   const panel=document.getElementById('route-panel');
+   const card=panel?.querySelector('.route-card');
+   const cta=document.getElementById('route-calc');
+   const dock=document.getElementById('bottom-nav');
+   if(!panel||!card||!cta||!dock)return false;
+   const p=panel.getBoundingClientRect(),c=card.getBoundingClientRect();
+   const a=cta.getBoundingClientRect(),d=dock.getBoundingClientRect();
+   return p.top<=3&&a.height>=44&&
+     p.bottom<=a.top-24&&c.bottom<=a.top-24&&a.bottom<=d.top-5;
+ }),{timeout:30000,intervals:[100,250,500,1000]}).toBe(true);
  const form=await page.evaluate(()=>{
   const panel=document.querySelector('#route-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
   const card=body.querySelector(':scope > .route-card'),footer=panel.querySelector(':scope > #dj910-route-footer');
