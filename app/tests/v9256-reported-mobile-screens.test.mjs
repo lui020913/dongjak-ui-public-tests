@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
@@ -23,7 +24,7 @@ test('composer hides list-only sections using stable state and keeps body indepe
  assert.match(follows,/community\.querySelector\(':scope > \.dj836-sheet-body'\)\?\.scrollTo\?\.\(0,0\)/);
  assert.match(follows,/background:'var\(--dj-primary-page-bg,#edf3ef\)'/);
  assert.doesNotMatch(css,/:is\(\.version-history-head,\.dj-map-settings-head,\.community-form-top,\.ped-tools-panel-head\)/);
- const fullscreen=read('src/mobile-primary-fullscreen.css');
+ const fullscreen=readPrimaryPhoneCss();
  assert.match(fullscreen,/\.dj9256-composing #community-form > \.djNext-form-scroll/);
  assert.match(fullscreen,/padding-bottom:calc\(24px \+ env\(safe-area-inset-bottom/);
  assert.match(fullscreen,/scroll-padding-bottom:calc\(28px \+ env\(safe-area-inset-bottom/);
