@@ -107,7 +107,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   if(!active){for(const [node,old] of savedHudStyle){if(old.value)node.style.setProperty('display',old.value,old.priority);else node.style.removeProperty('display');}savedHudStyle.clear();}
  };
  const label=el('strong'),ramp=el('div','dj-pri-ramp'),ends=el('div','dj-pri-ends');
- ends.append(el('span','','낮음'),el('span','','주의'),el('span','','보통'),el('span','','높음'),el('span','','매우 높음'));
+ ends.append(el('span','','저위험 (0~39)'),el('span','','주의 (40~69)'),el('span','','고위험 (70~100)'));
  const coverage=el('small'),dismiss=button('끄기',()=>activate(null));
  const detailToggle=button('평가 기준 보기',()=>{const expanded=detailToggle.getAttribute('aria-expanded')!=='true';detailToggle.setAttribute('aria-expanded',String(expanded));detailBody.setAttribute('aria-hidden',String(!expanded));});
  detailToggle.classList.add('dj-pri-detail-toggle');detailToggle.setAttribute('aria-expanded','false');detailToggle.setAttribute('aria-controls','dj-pri-legend-detail-body');
