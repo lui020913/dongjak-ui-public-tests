@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.121",
+  "application_version": "9.2.122",
   "public_work_branch": "main",
-  "purpose": "User-directed release of merged PR #390: unify iPhone bottom dock without colored selected-tab block, relocate My Info child back/title navigation into the fixed header, use 44px/360ms directional child-screen sliding without page fade, tune walking route form spacing, and improve typography selection pill contrast. PR head 168762d9ebb7602f0c08a91b29aaf8f32cb8c548; merged main 2e78d6781f5df9df2c7b1d7144d5ac264647415f; source CI run 45160404283 succeeded including all unit regressions, app build, and 3 mobile viewports. Retain all existing six-factor PRI scores, observed-only safety-route gates, GIS, map camera and routing, data, login, transit, AI, weather, themes, and bottom navigation functions. Run exact source guarded Preview, 12 disjoint phone QA shards, PC/tablet checks, protected Production with monotonic version and live source/API/binding verification; fail closed and preserve prior deployed app on any failure.",
-  "attempt": 314,
+  "purpose": "User-directed protected release for merged PR #391, which fixes the actual pale-green moving bottom-tab selection plate (.dj-motion-indicator) in generated production CSS, makes selected icons/text distinguishable without a colored tab background, vertically balances the idle walking-route form with modestly larger card/row spacing and retains fixed CTA clearance. Adds mandatory rendered mobile Playwright acceptance for computed tab/indicator color, 375/390/430 route form geometry, font pill contrast, fixed My Info child header, and full history scroll reachability. PR source 5067abe9e6b5e436a6dbbe1d5dc4681685eeb76b has passing source-CI 45167310442 and Live QA 45167310796; merged main commit 8403f69bd600d4d75c890d84bfe845dfb481152d. Preserve six PRI factor scoring, observed-only safety-route coverage gates, GIS, map camera and routing, data, transit, auth, AI, weather, themes, and all other existing functions. Run exact-source Preview, all mandatory independent mobile shards and PC/tablet checks, guarded Production verification and rollback. No failed browser visual test may be bypassed.",
+  "attempt": 315,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New post-PR #390 9.2.121 release; the previous 9.2.120 Production workflow 45155936328 succeeded. This is a version-increased exact-source deployment for new merged UI corrections; no failing checks may be bypassed.",
+  "last_retry_reason": "New 9.2.122 exact-source UI repair after protected 9.2.121 production succeeded but user's device still rendered tinted active-tab plate and top-heavy walking-route form. Root cause is generated CSS with a separately painted moving .dj-motion-indicator and high-specificity route rules. New actual computed-style/geometry browser acceptance gates must pass before production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
