@@ -1,5 +1,5 @@
 /** Read-only public GIS asset inventory, NOT a deletion list. */
-import {readdirSync,readFileSync,statSync} from 'node:fs';
+import {readdirSync,readFileSync,statSync,existsSync} from 'node:fs';
 import {dirname,join,relative,resolve,sep} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const repository=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -13,7 +13,11 @@ function walk(dir,accept){
 export function inventoryPublicData(root=repository){
  const app=join(root,'app'),folder=join(app,'public','data');
  const assetFiles=walk(folder,()=>true).sort();
- const srcFiles=[join(app,'index.html'),...walk(join(app,'src'),name=>/\.(?:js|mjs|css|html)$/.test(name))];
+ const srcFiles=[join(app,'index.html'),
+  ...['src','functions','server','public/research'].flatMap(dir=>{
+   const full=join(app,dir);
+   return existsSync(full)?walk(full,name=>/\.(?:js|mjs|css|html)$/.test(name)):[];
+  })];
  const sourceFiles=srcFiles.map(path=>({path:relative(app,path),content:readFileSync(path,'utf8')}));
  // Match only literal folder paths, not the directory prefix within a full URL.
  const dynamicFolders=new Set();
