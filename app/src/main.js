@@ -2372,7 +2372,6 @@ function renderCommunity() {
     const filtered=Boolean(all.length||communitySavedOnly||query||communityFilter!=='전체');
     const empty=makeCEl('section','dj-community-empty-state');
     empty.setAttribute('aria-label','커뮤니티 게시판 상태');
-    empty.append(makeCEl('span','dj-community-empty-icon','✎'));
     empty.append(makeCEl('h3','dj-community-empty-title',loading?'동네 이야기를 불러오는 중입니다':offline?'공유 게시판 연결을 확인해 주세요':filtered?'조건에 맞는 게시글이 없습니다':'아직 게시글이 없습니다'));
     empty.append(makeCEl('p','dj-community-empty-copy',loading?'공개 게시글을 확인하고 있습니다.':offline?'공개 게시판에 연결하지 못했습니다. 이 기기의 글은 그대로 보관됩니다.':filtered?'검색어·분류를 변경하거나 전체 글을 확인해 주세요.':'동네의 보행 불편이나 개선 아이디어를 첫 글로 남겨 주세요.'));
     const actions=makeCEl('div','dj-community-empty-actions');
