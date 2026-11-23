@@ -103,7 +103,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   function readablePri(entry){
     if(!entry||!Number.isFinite(entry.risk)||entry.coverage<0.65)return {label:'PRI 미평가',tone:'unknown'};
     const risk=entry.risk;
-    return {label:'PRI 위험 '+risk.toFixed(1)+'점',tone:risk>=67?'high':risk>=34?'medium':'low'};
+    return {label:'PRI 위험 '+risk.toFixed(1)+'점',tone:risk>=70?'high':risk>=40?'medium':'low'};
   }
   function selectedKind(){
     return variants.querySelector('[data-route-variant][aria-pressed="true"]')?.dataset.routeVariant||'standard';
