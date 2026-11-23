@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "type": "pri-factor-scores",
-  "networkVersion": "sangdo1-lighting-__RUNTIME_PLACEHOLDER__",
+  "networkVersion": "sangdo1-lighting-2026-11-20-b8433fe8",
   "factor": {
     "id": "crossing",
     "label": "횡단보도 보행자 위험도",
