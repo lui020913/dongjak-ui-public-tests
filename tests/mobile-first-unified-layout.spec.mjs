@@ -178,7 +178,10 @@ test('map TIP dismiss stays above the TIP pill and works by touch',async({page})
 test('community details hide refresh when closed and expose a tappable refresh when open',async({page})=>{
   test.setTimeout(150000);
   await readyForLiveTouch(page);
-  await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:12000});
+  // This is an SPA tab switch, not a document navigation. Waiting on unrelated
+  // background news/transport requests caused false Playwright click timeouts.
+  // The next assertion still requires the REAL tab state to change.
+  await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:12000,noWaitAfter:true});
   await expect(page.locator('#app')).toHaveAttribute('data-tab','participate',{timeout:15000});
   const details=page.locator('#participation-panel .community-view-options'),
     toolbar=details.locator('.community-toolbar'),
