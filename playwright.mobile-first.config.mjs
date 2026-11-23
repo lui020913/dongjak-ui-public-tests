@@ -16,8 +16,11 @@ const sizes=[
 export default defineConfig({
   testDir:'./tests',
   testMatch:'mobile-first-unified-layout.spec.mjs',
+  // A single software-WebGL browser owns the mobile viewport smoke run.
+  // Three simultaneous map contexts caused nondeterministic pointer-action
+  // timeouts in CI; keep all 12 scenarios and all three viewport projects.
   fullyParallel:true,
-  workers:3,
+  workers:1,
   reporter:[['list'],['html',{outputFolder:'playwright-report-mobile-first',open:'never'}]],
   outputDir:'test-results-mobile-first',
   timeout:30000,
