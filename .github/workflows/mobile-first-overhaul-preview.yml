@@ -508,6 +508,8 @@ jobs:
           previous="$(cf "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
           curl -fsSL --max-time 30 "$PRODUCTION_URL/release-source.json?before=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/production-before-marker.json"
           jq -e '.release_status=="DEPLOYED_PRODUCTION" and (.source_commit|test("^[a-f0-9]{40}$"))' "$RUNNER_TEMP/production-before-marker.json" >/dev/null
+          # Fail closed before touching Cloudflare: never silently roll back to an older app.
+          node scripts/verify-release-monotonic.mjs "$RUNNER_TEMP/production-before-marker.json" "$APP_VERSION" "$SOURCE_SHA"
           prior_public="$(jq -r '.public_ui_source_commit // ""' "$RUNNER_TEMP/production-before-marker.json")"
           if [[ "$prior_public" =~ ^[a-f0-9]{40}$ ]]; then echo "previous_public_sha=$prior_public" >> "$GITHUB_OUTPUT"; fi
           cd "$RUNNER_TEMP/release"
