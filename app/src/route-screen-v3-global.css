@@ -9,9 +9,9 @@
  html body #app[data-dj-route-screen-v3="1"] #route-panel.page-panel{
    clip-path:inset(100%)!important;
  }
- html body #app[data-dj-route-screen-v3="1"] #dj-walk-map-actions,
- html body #app[data-dj-route-screen-v3="1"] .map-actions{
-   display:none!important;pointer-events:none!important;
+ html body #app#app#app#app#app[data-dj-route-screen-v3="1"] #dj-walk-map-actions,
+ html body #app#app#app#app#app[data-dj-route-screen-v3="1"] .map-actions{
+   display:none!important;visibility:hidden!important;pointer-events:none!important;
  }
  html body #app[data-dj-route-screen-v3="1"] #map{
    visibility:visible!important;opacity:1!important;pointer-events:auto!important;
