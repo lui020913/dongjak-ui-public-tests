@@ -212,6 +212,12 @@ test ! -e "$RUNNER_TEMP/app"
 ln -s "$work" "$RUNNER_TEMP/app"
 mkdir -p "$RUNNER_TEMP/scripts"
 cp -R "$GITHUB_WORKSPACE/scripts/research" "$RUNNER_TEMP/scripts/research"
+# App-only archived builds cannot import ../.. root tests without a read-only
+# fixture mirror. These are public CI test sources outside the released app.
+cp "$GITHUB_WORKSPACE/scripts/build-mobile-first-overhaul.sh" "$RUNNER_TEMP/scripts/build-mobile-first-overhaul.sh"
+cp "$GITHUB_WORKSPACE/scripts/verify-release-monotonic.mjs" "$RUNNER_TEMP/scripts/verify-release-monotonic.mjs"
+test -s "$RUNNER_TEMP/scripts/build-mobile-first-overhaul.sh"
+test -s "$RUNNER_TEMP/scripts/verify-release-monotonic.mjs"
 test -s "$RUNNER_TEMP/scripts/research/sangdo1_policy_gap_300m_verify.mjs"
 test -f "$RUNNER_TEMP/app/public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson"
 test -f "$RUNNER_TEMP/app/public/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json"

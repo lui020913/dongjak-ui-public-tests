@@ -52,6 +52,10 @@ test('release replay sets the internal defer guard before every bump and stamps 
  assert.ok(unset>firstBump && stamp>unset && validation>stamp,
   'final stamp must happen after all bumps and before release metadata checks');
  assert.equal((build.match(/node scripts\/stamp-version\.mjs/g)||[]).length,1);
+ assert.ok(build.includes('cp "$GITHUB_WORKSPACE/scripts/build-mobile-first-overhaul.sh" "$RUNNER_TEMP/scripts/build-mobile-first-overhaul.sh"'),
+  'isolated build must mirror the release shell for app-side regression');
+ assert.ok(build.includes('cp "$GITHUB_WORKSPACE/scripts/verify-release-monotonic.mjs" "$RUNNER_TEMP/scripts/verify-release-monotonic.mjs"'),
+  'isolated build must mirror the monotonic gate for app-side regression');
  const bump=readFileSync(new URL('../scripts/bump-app-version.mjs',import.meta.url),'utf8');
  assert.match(bump,/if\(process\.env\.DONGJAK_BATCH_RELEASE_STAMP!=='1'\)/);
  assert.match(bump,/spawnSync\(process\.execPath/);
