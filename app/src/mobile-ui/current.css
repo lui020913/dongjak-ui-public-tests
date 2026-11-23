@@ -1302,8 +1302,10 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
       padding-bottom:0!important;
     }
     html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-      padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
-      scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+      /* The scroll viewport itself ends ABOVE the measured dock, so only
+         a small in-viewport end gutter is needed. */
+      padding-bottom:18px!important;
+      scroll-padding-bottom:18px!important;
     }
   }
   html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {
