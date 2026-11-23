@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.108",
+  "application_version": "9.2.109",
   "public_work_branch": "main",
-  "purpose": "User-requested Sangdo1 6-factor PRI release with crosswalk + shared-road risk rubrics 100-point grading and three-band map colors; retains null/missing and shows partial coverage. Correct current6 phone e2e assertions. Require secure build, identical Preview, all 12 phone QA shards, PC/tablet and protected Production exact source. User explicitly requested complete integration/deployment.",
-  "attempt": 298,
+  "purpose": "Owner approved six-index Sangdo1 PRI integration. Six equal-weight risk indices, two new PDF rubrics, 10-to-100 shared-road conversion, 70+ red, NULL grey, accurate per-segment coverage. Preserve all existing GIS and transport functions; run exact source build, Preview, all 12 phone shards, desktop/tablet, protected Production and Android release with no bypass.",
+  "attempt": 299,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.107 run 45109962945: sealed build and exact Preview passed; PC/tablet passed; 9/12 phone shards passed, the remaining three viewport failures (375/390/430) were all the same old source-level Playwright selector expecting removed four-factor PRI. Updated tests/v911-anonymous-ui.spec.mjs to verify current6 and six-factor legend while preserving measured popup/dock geometry (789d3e0feb913357a3b6a7ed8395f588233f0e14). Re-test all gates; no bypass.",
+  "last_retry_reason": "9.2.108 run 45110510161 blocked before build by fast-mobile 20-case coverage policy: renamed 6-factor PRI E2E journey was not synchronized with releaseSmokeNames. Main commit 5728ab5e2138f8d42b804140892d16ff14230281 updates the exact one entry; test count and protected QA policy remain unchanged. Retry all gates; do not skip any checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
