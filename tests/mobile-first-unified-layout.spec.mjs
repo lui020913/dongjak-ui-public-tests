@@ -114,3 +114,81 @@ test('same mobile-first app shell is used at every viewport',async({page},testIn
   }
 
 });
+
+
+/**
+ * Regression evidence for two confirmed Production hit-target defects.
+ * Anonymous reads only. Require a real pointer hit; never force-click.
+ */
+async function readyForLiveTouch(page){
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  const menu=page.locator('dialog#dj-install-menu[open]');
+  if(await menu.isVisible().catch(()=>false)){
+    await menu.getByRole('button',{name:/웹에서 바로 이용하기/}).click({timeout:12000});
+    await expect(menu).toBeHidden({timeout:12000});
+  }
+  await expect(page.locator('#map')).toBeVisible({timeout:30000});
+  const overlay=page.locator('#map-startup-overlay');
+  if(await overlay.count()){
+    const continueButton=page.locator('#map-startup-continue');
+    await expect.poll(async()=>!await overlay.isVisible().catch(()=>false)||
+      await continueButton.isVisible().catch(()=>false),{timeout:65000}).toBe(true);
+    if(await overlay.isVisible()&&await continueButton.isVisible())await continueButton.click({timeout:10000});
+    await expect(overlay).toBeHidden({timeout:25000});
+  }
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-out|signed-in)$/,{timeout:30000});
+  const tour=page.locator('#dj860-onboarding');
+  for(let n=0;n<3&&await tour.isVisible().catch(()=>false);n++){
+    const skip=tour.locator('[data-dj860-action="skip"]');
+    if(!await skip.isVisible().catch(()=>false))break;
+    await skip.click({timeout:15000});
+    await expect(tour).toBeHidden({timeout:10000});
+  }
+}
+async function realTapAtCenter(page,locator){
+  await expect(locator).toBeVisible({timeout:15000});
+  await locator.scrollIntoViewIfNeeded({timeout:15000});
+  const pt=await locator.evaluate(el=>{
+    const b=el.getBoundingClientRect(),x=Math.round(b.left+b.width/2),y=Math.round(b.top+b.height/2);
+    const hit=document.elementFromPoint(x,y);
+    return{x,y,hit:!!hit&&(el===hit||el.contains(hit)),
+      coveringId:hit?.id||'',coveringClass:String(hit?.className||'').slice(0,120),
+      rect:[b.x,b.y,b.width,b.height]};
+  });
+  expect(pt.hit,'Control must receive actual finger event: '+JSON.stringify(pt)).toBe(true);
+  await page.touchscreen.tap(pt.x,pt.y);
+}
+
+test('map TIP dismiss stays above the TIP pill and works by touch',async({page})=>{
+  test.setTimeout(150000);
+  await readyForLiveTouch(page);
+  const tip=page.locator('#dj840-map-tip'),close=page.locator('#dj-user-tip-close');
+  await expect(tip).toBeVisible({timeout:30000});
+  await expect(close).toBeVisible({timeout:30000});
+  const layers=await page.evaluate(()=>{
+    const tip=document.getElementById('dj840-map-tip'),close=document.getElementById('dj-user-tip-close');
+    return{tip:Number(getComputedStyle(tip).zIndex),close:Number(getComputedStyle(close).zIndex)};
+  });
+  expect(layers.close,'Close control should be above the TIP').toBeGreaterThan(layers.tip);
+  await realTapAtCenter(page,close);
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-user-tip-dismissed','true',{timeout:10000});
+  await expect(tip).toBeHidden({timeout:10000});
+});
+
+test('community details hide refresh when closed and expose a tappable refresh when open',async({page})=>{
+  test.setTimeout(150000);
+  await readyForLiveTouch(page);
+  await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:12000});
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate',{timeout:15000});
+  const details=page.locator('#participation-panel .community-view-options'),
+    toolbar=details.locator('.community-toolbar'),
+    refresh=details.locator('#community-refresh');
+  await expect(details).toBeVisible({timeout:15000});
+  await expect(details).not.toHaveAttribute('open',/.+/);
+  await expect(toolbar).toBeHidden();
+  await realTapAtCenter(page,details.locator('summary'));
+  await expect(details).toHaveAttribute('open','');
+  await expect(toolbar).toBeVisible();
+  await realTapAtCenter(page,refresh);
+  await expect(refresh).toBeVisible();
+});
