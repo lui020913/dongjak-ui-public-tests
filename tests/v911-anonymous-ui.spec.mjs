@@ -780,10 +780,18 @@ test('primary tabs reveal content without fading the opaque page and keep the pi
  await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect(page.locator('#news-panel')).toHaveCSS('opacity','1');await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('content-only');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
- await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toBeVisible();
- await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toHaveCSS('position','absolute');
+ // The older moving selection plate is intentionally hidden. Active icon
+ // and text provide selection without a tinted block.
+ await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toBeHidden();
+ await expect(page.locator('#bottom-nav > .dj-motion-indicator')).toHaveCSS('display','none');
  await expect.poll(()=>page.locator('#bottom-nav').evaluate(el=>getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length)).toBe(5);
- await expect.poll(()=>page.evaluate(()=>{const nav=document.getElementById('bottom-nav'),pill=nav.querySelector('.dj-motion-indicator'),active=nav.querySelector('.nav-tab[aria-current=page]');if(!pill||!active)return 1000;const a=pill.getBoundingClientRect(),b=active.getBoundingClientRect();return Math.abs(a.left-b.left)+Math.abs(a.top-b.top)+Math.abs(a.width-b.width); })).toBeLessThan(4);
+ const selected=await page.locator('#bottom-nav').evaluate(el=>{
+  const active=el.querySelector('.nav-tab[aria-current=page]'),inactive=el.querySelector('.nav-tab:not(.active)');
+  return {background:getComputedStyle(active).backgroundColor,
+   selectedInk:getComputedStyle(active).color,inactiveInk:getComputedStyle(inactive).color};
+ });
+ expect(['transparent','rgba(0, 0, 0, 0)']).toContain(selected.background);
+ expect(selected.selectedInk).not.toBe(selected.inactiveInk);
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh stationary fade for the previous tab.
  await enter(page,'news-panel','news');
@@ -1610,14 +1618,14 @@ test('iPhone final visual contract: compact route, transparent community status 
  await ready(page);
 
  await tap(page,tab(page,'mine'));
- await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const choice=type.locator('[data-dj885-type="scale"][aria-pressed="true"]');
  await expect(choice).toHaveCount(1);
  await expect(choice).toHaveCSS('box-shadow','none');
- await tap(page.locator('#mine-panel .dj834-detail-back'));
- await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
 
@@ -1683,25 +1691,38 @@ test('phone selected dock has no color plate and route form is vertically balanc
  const form=await page.evaluate(()=>{
   const body=document.querySelector('#route-panel > .dj836-sheet-body');
   const intro=body.querySelector(':scope > .dj-page-intro'),card=body.querySelector(':scope > .route-card');
-  const footer=document.getElementById('dj910-route-footer'),dock=document.getElementById('bottom-nav');
+  const footer=document.getElementById('dj910-route-footer'),cta=document.getElementById('route-calc'),dock=document.getElementById('bottom-nav');
   const box=n=>{const r=n.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
-  return {body:box(body),intro:box(intro),card:box(card),footer:box(footer),dock:box(dock),
+  return {body:box(body),intro:box(intro),card:box(card),footer:box(footer),cta:box(cta),dock:box(dock),
    display:getComputedStyle(body).display,justifyContent:getComputedStyle(body).justifyContent,
    pageHeight:innerHeight,cardPadding:getComputedStyle(card).paddingTop};
  });
  expect(form.display).toBe('flex');
- expect(form.justifyContent).toContain('center');
- expect(form.intro.top-form.body.top,'the form must not cling to the top edge').toBeGreaterThanOrEqual(32);
+ expect(form.justifyContent).toBe('flex-start');
+ expect(form.intro.top-form.body.top,'the form must not cling to the top edge').toBeGreaterThanOrEqual(36);
+ expect(form.intro.top-form.body.top,'the form must not be stranded in the vertical center').toBeLessThanOrEqual(125);
  expect(form.card.right,'card must fit inside viewport').toBeLessThanOrEqual(page.viewportSize().width-12);
- expect(form.card.bottom,'card must be clear of the primary action').toBeLessThanOrEqual(form.footer.top-8);
- expect(form.footer.bottom,'primary action must clear the fixed tab pill').toBeLessThanOrEqual(form.dock.top-3);
+ expect(form.card.bottom,'card must be clear of the primary action').toBeLessThanOrEqual(form.cta.top-8);
+ // Transforms can move the visible button without changing the footer's
+ // layout box. Assert actual button geometry and physical hitability.
+ await expect.poll(()=>page.evaluate(()=>{
+  const c=document.getElementById('route-calc').getBoundingClientRect();
+  const n=document.getElementById('bottom-nav').getBoundingClientRect();
+  return Math.round(n.top-c.bottom);
+ }),{timeout:12000,intervals:[100,250,500]}).toBeGreaterThanOrEqual(3);
+ const ctaHit=await page.locator('#route-calc').evaluate(el=>{
+  const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  const hit=document.elementFromPoint(x,y);
+  return Boolean(hit&&(hit===el||el.contains(hit)));
+ });
+ expect(ctaHit,'the actual route action must receive pointer taps').toBe(true);
  await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
  if(page.viewportSize().width===390)await testInfo.attach('real-route-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 
  await tap(page,tab(page,'mine'));
  await expect(page.locator('#mine-panel')).toBeVisible();
  const mineDock=await checkDock('mine');
- await tap(page.locator('#mine-panel [data-dj834-action="type"]'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="type"]'));
  const type=page.locator('#mine-panel .dj877-type-settings:not([hidden])');
  await expect(type).toBeVisible();
  const contrast=await type.locator('[data-dj885-type="scale"][aria-pressed="true"]').evaluate(active=>{
@@ -1712,8 +1733,8 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(contrast.active.bg,'selected font pill must differ from an unselected one').not.toBe(contrast.inactive.bg);
  expect(contrast.active.color).not.toBe(contrast.inactive.color);
  if(page.viewportSize().width===390)await testInfo.attach('real-font-pills-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
- await tap(page.locator('#mine-panel .dj834-detail-back'));
- await tap(page.locator('#mine-panel [data-dj834-action="history"]'));
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
  await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
  const history=await page.evaluate(()=>{
   const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
