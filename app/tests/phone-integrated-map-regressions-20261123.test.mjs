@@ -69,3 +69,11 @@ test('metro source renders white-blue translucent radial pool on known front, ne
  assert.match(m,/\['get','trainBeam'\]/);
  assert.match(m,/TRAIN_BEAM_LAYER/);
 });
+
+test('map settings dismissal fades the entire backdrop without exposing a white frame',()=>{
+ const code=read('src/v7120-settings.js');
+ assert.match(code,/const animation=overlay\.animate\(\[\{opacity:1\},\{opacity:0\}\]/);
+ assert.match(code,/overlay\.hidden=true;app\.classList\.remove\('dj-settings-open'\)/);
+ assert.match(code,/\+\+settingsTransition;closingSettings\?\.cancel/);
+ assert.doesNotMatch(code,/DongjakWindowMotion\.close\(overlay\.querySelector\('\.dj-map-settings-card'/);
+});
