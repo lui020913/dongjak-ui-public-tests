@@ -63,7 +63,8 @@ test('route input overrides legacy fullscreen pages and bottom tab dock with a r
  assert.match(patch,/#app#app#app#app#app#app#app\[data-dj-route-stage="input"\]/);
  assert.match(patch,/max-height:calc\(100dvh - var\(--dj910-dock-bottom,88px\)/);
  assert.match(patch,/> #dj910-route-footer \{/);
- assert.match(patch,/bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 12px\)!important/);
+ assert.match(patch,/> #dj910-route-footer \{[\s\S]*?position:relative!important/);
+ assert.match(owner,/const boundedInput=app\.dataset\.djRouteStage==='input'/);
  assert.match(patch,/#route-calc \{[\s\S]*?min-height:52px!important/);
  assert.match(owner,/'data-dj-route-stage'/);
  assert.match(owner,/n\.top>0&&n\.height>0/);

@@ -456,25 +456,29 @@
     }
     html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) > #dj910-route-footer {
-      position:fixed!important;
-      inset:auto 16px calc(var(--dj910-dock-bottom,88px) + 12px) 16px!important;
-      left:16px!important;
-      right:16px!important;
-      bottom:calc(var(--dj910-dock-bottom,88px) + 12px)!important;
+      /* The phone route editor is bounded at the map top. Keep its existing
+       * submit control directly after the scroll body, not detached over
+       * the location fields or behind the bottom tabs. */
+      position:relative!important;
+      inset:auto!important;
       top:auto!important;
+      right:auto!important;
+      bottom:auto!important;
+      left:auto!important;
       display:block!important;
       flex:0 0 auto!important;
       min-height:0!important;
-      width:auto!important;
-      max-width:none!important;
+      width:100%!important;
+      max-width:100%!important;
       margin:0!important;
-      padding:0!important;
+      padding:8px 16px 12px!important;
       border:0!important;
+      border-top:1px solid var(--dj-route-edge)!important;
       background:var(--dj-primary-page-bg,#edf3ef)!important;
       box-shadow:none!important;
       transform:none!important;
       translate:none!important;
-      z-index:7005!important;
+      z-index:3!important;
       pointer-events:auto!important;
     }
     html body #app#app#app#app#app#app#app[data-dj-route-stage="input"]
