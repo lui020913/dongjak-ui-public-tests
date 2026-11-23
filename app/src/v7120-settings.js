@@ -135,9 +135,33 @@ export function installMapPreferences(doc=document,win=window){
     q('#dj-settings-tools').checked=prefs.tools!==false;
     syncTheme();safeSave();
   };
-  const close=()=>{if(overlay.hidden)return;const finish=()=>{overlay.hidden=true;app.classList.remove('dj-settings-open');previousFocus?.focus?.();};if(document.defaultView?.DongjakWindowMotion)document.defaultView.DongjakWindowMotion.close(overlay.querySelector('.dj-map-settings-card'),finish);else finish();};
+  // Animate the WHOLE overlay, not only its card: otherwise the opaque full-
+  // screen backdrop remains visible as a blank white frame until the card ends.
+  let closingSettings=null,settingsTransition=0;
+  const close=()=>{
+    if(overlay.hidden)return;
+    const token=++settingsTransition;
+    closingSettings?.cancel?.();closingSettings=null;
+    const finish=()=>{
+      if(token!==settingsTransition)return;
+      closingSettings?.cancel?.();closingSettings=null;
+      overlay.hidden=true;app.classList.remove('dj-settings-open');
+      previousFocus?.focus?.();
+    };
+    if(win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||typeof overlay.animate!=='function'){
+      finish();return;
+    }
+    try{
+      const animation=overlay.animate([{opacity:1},{opacity:0}],{
+        duration:175,easing:'cubic-bezier(.2,.66,.35,1)',fill:'forwards'
+      });
+      closingSettings=animation;
+      animation.finished.then(finish).catch(()=>{});
+    }catch{finish();}
+  };
   const open=(event)=>{
     if(event)event.preventDefault();
+    ++settingsTransition;closingSettings?.cancel?.();closingSettings=null;
     previousFocus=doc.activeElement;
     overlay.hidden=false;app.classList.add('dj-settings-open');syncTheme();q('#dj-settings-close').focus();
   };
