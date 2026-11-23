@@ -48,9 +48,10 @@ test('모바일 검색 날씨 축척 및 하단 메뉴 고정',()=>{
 });
 test('커뮤니티는 목록이 제보보다 앞서고, 실제 게시글이 없으면 빈 상태를 표시',()=>{
   const html=read('index.html');
-  assert.ok(html.indexOf('id="community-list"')<html.indexOf('class="community-report-secondary"'));
+  assert.ok(html.indexOf('id="community-list"')<html.indexOf('id="participate-register"'));
+  assert.doesNotMatch(html,/class="community-report-secondary"/);
   assert.match(read('src/main.js'),/dj-community-empty-state/);
-  assert.match(read('src/main.js'),/첫 번째 동네 이야기를 기다리고 있습니다/);
+  assert.match(read('src/main.js'),/아직 게시글이 없습니다/);
   assert.doesNotMatch(read('src/main.js'),/community-example|시연 예시 게시글/);
 });
 test('도로폭 미확인 구간, 뉴스 재시도, 한국어 전용 상호명은 코드를 갖춤',()=>{
