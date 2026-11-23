@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {routeComparisonItems,sameRoute} from '../src/v804-route-comparison.js';
 import {routePriColorGeometry} from '../src/pri-route-exposure.mjs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
@@ -88,9 +88,12 @@ test('one input/editor and no standalone third route-details page',()=>{
 
 test('release mobile-next patch targets the current route source and avoids unscored alternatives',()=>{
  const main=read('src/main.js');
- const release=read('../scripts/apply-mobile-next.mjs');
+ // The protected release runs app tests inside a sealed app/ snapshot.
+ // Validate the repository-root release adapter in tests/mobile-only-gate.test.mjs.
+ const adapter=new URL('../../scripts/apply-mobile-next.mjs',import.meta.url);
+ const release=existsSync(adapter)?readFileSync(adapter,'utf8'):null;
  const sentinel="paint:{'line-color':'#87939b','line-width'";
  assert.equal(main.split(sentinel).length-1,1,'exact release patch anchor must occur once');
- assert.ok(release.includes(sentinel),'release adapter must target the current actual source line');
+ if(release)assert.ok(release.includes(sentinel),'root checkout release adapter must target the current source line');
  assert.match(main,/enabled\|\|navMode\?'none':'visible'/);
 });
