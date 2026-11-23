@@ -2618,9 +2618,17 @@ function clearTransitPreview(){
 let routePriVisuals=null;
 function syncPriRouteLine(){
   const source=map.getSource('walking-route-pri');
-  const colored=routePriVisuals?.[selectedRouteVariant];
-  const enabled=Boolean(colored?.features?.length&&routeResult&&app.dataset.tab==='map'&&!navMode);
-  if(source)source.setData(enabled?colored:emptyWalkingRoute());
+  const measured=routePriVisuals?.[selectedRouteVariant];
+  const enabled=Boolean(routeResult?.coords?.length>=2&&app.dataset.tab==='map'&&!navMode);
+  // Before PRI completes, or when no six-factor data can be loaded, the route
+  // is unassessed (dashed gray), NEVER automatically safe/green or blue.
+  const unknown=enabled?{
+    type:'FeatureCollection',features:[{
+      type:'Feature',properties:{tone:'unknown',color:'#8c969c',observed:false},
+      geometry:{type:'LineString',coordinates:routeResult.coords}
+    }]
+  }:emptyWalkingRoute();
+  if(source)source.setData(enabled&&measured?.features?.length?measured:unknown);
   for(const id of ['walking-route-pri-colors','walking-route-pri-unknown']){
     if(map.getLayer(id)){
       map.setLayoutProperty(id,'visibility',enabled?'visible':'none');
