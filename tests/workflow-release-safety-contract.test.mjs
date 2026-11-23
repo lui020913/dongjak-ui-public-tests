@@ -30,5 +30,6 @@ test('do not retain a misleading notification subscription for the removed workf
  assert.doesNotMatch(read('.github/workflows/development-notifications.yml'),/Promote previously phone-tested mobile-only artifact to Production/);
  const ci=read('.github/workflows/public-app-pr.yml');
  assert.match(ci,/node --test tests\/mobile-qa-parallel\.test\.mjs/);
- assert.match(ci,/node --test tests\/retired-smoke-workflows\.test\.mjs tests\/workflow-release-safety-contract\.test\.mjs/);
+ assert.match(ci,/node --test [^\n]*tests\/retired-smoke-workflows\.test\.mjs/);
+ assert.match(ci,/node --test [^\n]*tests\/workflow-release-safety-contract\.test\.mjs/);
 });
