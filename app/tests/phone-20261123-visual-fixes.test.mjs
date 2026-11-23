@@ -6,12 +6,13 @@ import {CURRENT_FOUR_FACTORS} from '../src/pri-data.mjs';
 
 const read=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
 
-test('all four observed risk scores use the same low-green, high-red map direction',()=>{
+test('all six PRI factors use the same high-red risk direction; four historical factors remain compatible',()=>{
   assert.deepEqual(CURRENT_FOUR_FACTORS,['lighting','accidents','protectionGap','speed']);
   const map=read('src/pri-map.js');
-  assert.match(map,/0,'#279b80'.*100,'#d74648'/);
+  assert.match(map,/\['step',\['get','displayScore'\],'#4C948B',40,'#E0A04A',70,'#CF4248'/);
   assert.match(map,/0,'#4C948B'.*100,'#CB6563'/);
   assert.match(map,/100-f\.properties\.displayScore/);
+  assert.match(map,/id==='current6'\?\(policyScope\?scopedCompositeFeatures/);
   assert.match(map,/id==='current4'\?\(policyScope\?scopedCompositeFeatures/);
   assert.match(map,/높은 점수=취약, 빨간색/);
 });
