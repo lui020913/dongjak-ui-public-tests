@@ -22,3 +22,9 @@ test('History summary title and description cannot force the mobile record count
   assert.match(scope,/\.dj-edition-patch-summary\s*\{[\s\S]*?white-space:normal!important/);
   assert.match(history,/heading\.append\(el\('strong'/);
 });
+
+test('My Info controller never reinstates the stale inline-important 94px outer footer',()=>{
+  const controller=readFileSync(new URL('../src/v834-my-info.js',import.meta.url),'utf8');
+  assert.match(controller,/panel\.style\.removeProperty\('padding-bottom'\)/);
+  assert.doesNotMatch(controller,/setProperty\('padding-bottom','calc\(94px/);
+});
