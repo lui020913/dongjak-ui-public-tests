@@ -2466,6 +2466,7 @@ void refreshCommunityNotices();window.setInterval(()=>{if(document.visibilitySta
 function emptyWalkingRoute() {
   return {type:'FeatureCollection',features:[]};
 }
+let priRouteReviewSequence=0,priVariantChosenManually=false;
 const priMapNote=document.createElement('p');
 priMapNote.id='dj-pri-route-advice';
 priMapNote.className='dj-pri-route-advice';
@@ -2499,6 +2500,7 @@ function showPriRouteAdvice(result){
   priEditorNote.textContent=text;priEditorNote.hidden=false;
 }
 function clearPriRouteAdvice(){
+  priRouteReviewSequence++;priVariantChosenManually=false;
   for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
 }
 function syncRoutePresentation() {
@@ -3028,6 +3030,7 @@ for(const button of document.querySelectorAll('[data-route-variant]')){
     if(navMode){toast('안내 중에는 경로를 변경할 수 없습니다.');return;}
     if(!routeVariants[button.dataset.routeVariant])return;
     selectedRouteVariant=button.dataset.routeVariant;
+    priVariantChosenManually=true;
     applySelectedRouteVariant();
     toast(selectedRouteVariant==='gentle'?'경사 회피 우선 경로를 표시합니다.':'일반 보행 경로를 표시합니다.');
   });
@@ -3050,18 +3053,34 @@ async function calculateRoute() {
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
     routeVariants={standard,gentle};
-    let priComparison=null;
-    try {
-      const composite=await loadCompositePriForRoutes();
-      priComparison=compareCompositePriRoutes({standard,gentle},composite);
-      if(standard)standard.priExposure=priComparison.standard;
-      if(gentle)gentle.priExposure=priComparison.gentle;
-    } catch(error) {
-      console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
+    const thisPriReview=++priRouteReviewSequence,reviewedVariants=routeVariants;
+    priVariantChosenManually=false;
+    for(const node of [priMapNote,priEditorNote]){
+      node.textContent='종합 PRI 관측 구간을 대조하고 있습니다…';node.hidden=false;
     }
-    showPriRouteAdvice(priComparison);
+    // A slow GIS overlay must not hold the already-computed walking route
+    // behind a loading screen. Apply advice only to the still-current result.
+    void (async()=>{
+      let comparison=null;
+      try {
+        const composite=await loadCompositePriForRoutes();
+        comparison=compareCompositePriRoutes({standard,gentle},composite);
+      } catch(error) {
+        console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
+      }
+      if(thisPriReview!==priRouteReviewSequence||routeVariants!==reviewedVariants)return;
+      if(standard)standard.priExposure=comparison?.standard||null;
+      if(gentle)gentle.priExposure=comparison?.gentle||null;
+      showPriRouteAdvice(comparison);
+      if(comparison?.recommendation&&!priVariantChosenManually&&!navMode){
+        selectedRouteVariant=comparison.recommendation;
+        applySelectedRouteVariant();
+        document.getElementById('route-status').textContent+=' · PRI 상대 저위험 후보 선택';
+      }
+      syncRoutePresentation();
+    })();
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard,gentle}}));
-    selectedRouteVariant=priComparison?.recommendation||(standard?'standard':'gentle');
+    selectedRouteVariant=standard?'standard':'gentle';
     applySelectedRouteVariant();
     document.getElementById('route-variants').hidden=false;
     for(const button of document.querySelectorAll('[data-route-variant]')){
@@ -3075,7 +3094,7 @@ async function calculateRoute() {
         ? '두 조건에서 같은 경로가 계산됐습니다. 평지라는 뜻은 아닙니다.'
         : '최단 도보 경로와 경사 회피 우선 경로를 비교할 수 있습니다.')
       : '제공 가능한 보행 경로 한 개만 계산됐습니다.';
-    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}${priComparison?.recommendation?' · 종합 PRI 관측 구간 기반 상대 저위험 후보 자동 선택':''}`;
+    document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}`;
     navigate('map');
     fitWalkingRoute(routeResult.coords);
     syncRoutePresentation();
