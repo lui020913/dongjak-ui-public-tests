@@ -1,5 +1,4 @@
 /** v8.2.5 — UI-only extension. The protected map/routing engine is unchanged. */
-import {routeComparisonItems,sameRoute,metersLabel} from './v804-route-comparison.js';
 import {deriveWalkingTurns,nextTurnCue} from './v825-walk-guidance.js';
 import {makeRouteIndex} from './navigation-geometry.js';
 import {applySelectedNavVoice} from './nav-voice-picker.js';
@@ -13,11 +12,8 @@ const parseRemaining=text=>{
 };
 const isRealTurn=route=>Array.isArray(route?.maneuvers)&&route.maneuvers.some(x=>[9,10,11,12,13,14,15,16,18,19,20,21,23,24,26,27,40,41].includes(Number(x.type)));
 export function installWalkingNavigationExperience(doc=document,win=window){
-  const app=doc.getElementById('app'),card=doc.getElementById('nav-live-card'),preview=doc.getElementById('route-map-card');
-  if(!app||!card||!preview||doc.getElementById('dj825-route-options'))return ()=>{};
-  const comparison=doc.createElement('section');
-  comparison.id='dj825-route-options';comparison.setAttribute('aria-label','추천 도보 경로 비교');comparison.hidden=true;
-  preview.append(comparison);
+  const app=doc.getElementById('app'),card=doc.getElementById('nav-live-card');
+  if(!app||!card)return ()=>{};
   let latest=null,selected='standard',turns=[],index=null,voiced=new Set(),lastRouteToken='',suppressedForReroute=false;
   const getRoute=()=>latest?.[selected]||latest?.standard||latest?.gentle;
   function resetTurnTracking(){
@@ -27,58 +23,15 @@ export function installWalkingNavigationExperience(doc=document,win=window){
     try{index=makeRouteIndex(route.coords);}catch{return;}
     if(!isRealTurn(route))turns=deriveWalkingTurns(route.coords);
   }
-  function syncSelected(){
-    for(const button of comparison.querySelectorAll('[data-dj825-route]')){
-      const chosen=button.dataset.dj825Route===selected;
-      button.setAttribute('aria-pressed',String(chosen));
-      button.classList.toggle('is-selected',chosen);
-    }
-  }
-  function render(){
-    const items=routeComparisonItems(latest);
-    if(!items.length){comparison.hidden=true;comparison.replaceChildren();return;}
-    const shortest=Math.min(...items.map(x=>x.minutes));
-    const duplicate=items.length===2&&sameRoute(latest.standard,latest.gentle);
-    const heading=doc.createElement('div');heading.className='dj825-routes-heading';
-    heading.innerHTML='<strong>추천 도보 경로</strong><small>실제 계산된 보행경로</small>';
-    const rows=doc.createElement('div');rows.className='dj825-routes-list';
-    for(const item of items){
-      const button=doc.createElement('button');button.type='button';
-      button.className='dj825-route-row';button.dataset.dj825Route=item.id;
-      button.setAttribute('aria-label',`${item.label}, 약 ${item.minutes}분, ${metersLabel(item.meters)}. 이 경로 보기`);
-      const title=doc.createElement('span');title.className='dj825-route-name';title.textContent=item.label;
-      const badge=doc.createElement('small');badge.className='dj825-route-badge';
-      badge.textContent=duplicate?'같은 경로':(item.minutes===shortest?'빠른 보행':'경사 고려');
-      const meta=doc.createElement('span');meta.className='dj825-route-meta';
-      const time=doc.createElement('b');time.textContent=`${item.minutes}분`;
-      const distance=doc.createElement('span');distance.textContent=metersLabel(item.meters);
-      meta.append(time,distance);
-      const grade=doc.createElement('small');grade.className='dj825-route-grade';
-      grade.textContent=item.ascent===null?'고도 추정 없음':`추정 상승 ${Math.round(item.ascent)}m`;
-      button.append(title,badge,meta,grade);
-      rows.append(button);
-    }
-    const note=doc.createElement('p');note.className='dj825-routes-note';
-    note.textContent='이동시간은 계산값입니다. 실시간 통제·안전·교통정보를 반영한 순위는 아닙니다.';
-    comparison.replaceChildren(heading,rows,note);comparison.hidden=false;syncSelected();
-  }
   const onVariants=e=>{
     latest=e.detail;
     selected=latest?.standard?'standard':'gentle';
-    resetTurnTracking();render();
-  };
-  const onComparisonClick=e=>{
-    const button=e.target.closest?.('[data-dj825-route]');if(!button)return;
-    const id=button.dataset.dj825Route;
-    if(!latest?.[id])return;
-    const original=doc.querySelector(`#route-variants [data-route-variant="${id}"]`);
-    if(!original||original.disabled)return;
-    original.click();selected=id;resetTurnTracking();syncSelected();
+    resetTurnTracking();
   };
   const onNativeChoice=e=>{
     const button=e.target.closest?.('#route-variants [data-route-variant]');
     if(!button||!latest?.[button.dataset.routeVariant]||button.disabled)return;
-    selected=button.dataset.routeVariant;resetTurnTracking();syncSelected();
+    selected=button.dataset.routeVariant;resetTurnTracking();
   };
   let session=false;
   function updateState(){
@@ -122,11 +75,10 @@ export function installWalkingNavigationExperience(doc=document,win=window){
       win.speechSynthesis.cancel();win.speechSynthesis.speak(utterance);
     }catch{}
   }
-  const onReset=()=>{latest=null;index=null;turns=[];voiced.clear();comparison.hidden=true;};
+  const onReset=()=>{latest=null;index=null;turns=[];voiced.clear();};
   doc.getElementById('route-calc')?.addEventListener('click',onReset);
   doc.getElementById('route-clear')?.addEventListener('click',onReset);
   win.addEventListener('dongjak:route-variants-ready',onVariants);
-  comparison.addEventListener('click',onComparisonClick);
   doc.getElementById('route-variants')?.addEventListener('click',onNativeChoice,true);
   const observer=new MutationObserver(()=>updateState());
   for(const [el,opts] of [
@@ -140,10 +92,9 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   const mapRoot=doc.getElementById('map');
   if(mapRoot)observer.observe(mapRoot,{childList:true,subtree:true});
   updateState();
-  return ()=>{observer.disconnect();comparison.remove();win.removeEventListener('dongjak:route-variants-ready',onVariants);
+  return ()=>{observer.disconnect();win.removeEventListener('dongjak:route-variants-ready',onVariants);
     doc.getElementById('route-calc')?.removeEventListener('click',onReset);
     doc.getElementById('route-clear')?.removeEventListener('click',onReset);
-    comparison.removeEventListener('click',onComparisonClick);
     doc.getElementById('route-variants')?.removeEventListener('click',onNativeChoice,true);
     delete app.dataset.dj825NavActive;delete app.dataset.dj825HasGps;};
 }
