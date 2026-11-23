@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('route V3 owns the complete visible entry screen and isolates it from legacy layout',()=>{
+ const source=read('src/route-screen-v3.js'),style=read('src/route-screen-v3.css'),global=read('src/route-screen-v3-global.css'),index=read('index.html');
+ assert.match(source,/attachShadow\(\{mode:'open'\}\)/);
+ assert.match(source,/doc\.body\.append\(host\)/);
+ assert.match(source,/getElementById\('bottom-nav'\)|byId\('bottom-nav'\)/);
+ assert.match(source,/native\.click\(\)/);
+ assert.match(source,/form\.requestSubmit\(\)/);
+ assert.match(source,/legacyCalc\.click\(\)/);
+ assert.match(global,/data-dj-route-screen-v3="1"/);
+ assert.match(global,/#route-panel\.page-panel/);
+ assert.match(global,/visibility:hidden!important/);
+ assert.match(style,/\.route-panel\s*\{/);
+ assert.match(style,/\.search-screen\s*\{/);
+ assert.match(style,/\.action\s*\{/);
+ assert.match(index,/src\/route-screen-v3\.js/);
+ assert.doesNotMatch(source,/card\.append\(rows\)|card\.prepend\(walkMode\)/);
+});
