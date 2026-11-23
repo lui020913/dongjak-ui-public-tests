@@ -234,11 +234,11 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
   await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','input',{timeout:12000});
   const snapshot=async()=>page.evaluate(()=>{
     const panel=document.getElementById('route-panel'),cta=document.getElementById('route-calc'),
-      nav=document.getElementById('bottom-nav'),footer=document.getElementById('dj910-route-footer');
+      nav=document.getElementById('bottom-nav'),footer=document.getElementById('dj910-route-footer'),card=panel?.querySelector('.route-card');
     const rect=node=>{const b=node?.getBoundingClientRect();return b?{x:b.x,y:b.y,top:b.top,right:b.right,bottom:b.bottom,width:b.width,height:b.height}:null;};
     const p=rect(panel),b=rect(cta),n=rect(nav),f=rect(footer);
     const hit=b?document.elementFromPoint(b.x+b.width/2,b.y+b.height/2):null;
-    return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,
+    return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,card:rect(card),
       actualHit:Boolean(cta&&(hit===cta||cta.contains(hit))),
       routeStage:document.getElementById('app')?.dataset.djRouteStage,
       panelPosition:panel?getComputedStyle(panel).position:'missing',
@@ -249,7 +249,7 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
     return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
       m.panelPosition==='fixed'&&m.panel.x>=9&&
       m.panel.right<=m.viewport[0]-9&&m.panel.top>=0&&m.panel.top<=80&&
-      m.panel.bottom<=m.nav.top-5&&m.cta.height>=44&&
+      m.panel.bottom<=m.nav.top-5&&m.card&&m.card.bottom<=m.footer.top+4&&m.cta.height>=44&&
       m.cta.bottom<=m.nav.top-5&&m.actualHit);
   },{timeout:15000}).toBe(true);
   const metrics=await snapshot();
