@@ -2639,8 +2639,11 @@ function syncPriRouteLine(){
       if(enabled)map.moveLayer(id);
     }
   }
+  // Compare one real candidate at a time; otherwise the legacy release-only
+  // third mode could draw a green alternative that was NOT scored by PRI.
+  // Users switch the native candidate buttons to see each measured line.
   if(map.getLayer('walking-route-alternate-line'))
-    map.setLayoutProperty('walking-route-alternate-line','visibility',navMode?'none':'visible');
+    map.setLayoutProperty('walking-route-alternate-line','visibility',enabled||navMode?'none':'visible');
   if(map.getLayer('walking-route-line'))map.setPaintProperty('walking-route-line','line-opacity',enabled?0:1);
 }
 function showRouteLine(coords) {
