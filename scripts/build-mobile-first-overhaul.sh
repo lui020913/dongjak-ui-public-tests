@@ -55,6 +55,10 @@ if [ "$actual_changes" != "$expected_changes" ]; then echo "::error::Unexpected 
 echo "CHECKPOINT: changed-file allowlist passed"
 # The public app snapshot is still 8.26.1. Reconstruct the released
 # 9.0.0 entry before issuing the new patch, rather than mislabelling it 8.26.2.
+# Historical 8.26.1 -> current-version replay calls bump ~100 times.
+# Each bump still validates/updates package, lock and release history exactly
+# as before; delay only the derived HTML/version-file stamping until the end.
+export DONGJAK_BATCH_RELEASE_STAMP=1
 release_kind="$(jq -er '.release_kind' "$REQUEST")"
 requested_version="$APP_VERSION"
 if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )) && [ "$release_kind" = patch ]; then
@@ -179,6 +183,8 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
     node scripts/bump-app-version.mjs patch "$note" >/dev/null
   done
 fi
+unset DONGJAK_BATCH_RELEASE_STAMP
+node scripts/stamp-version.mjs >/dev/null
 test "$(node -p "require('./package.json').version")" = "$APP_VERSION"
 jq -e --arg version "$APP_VERSION" '.version==$version' public/version.json >/dev/null
 echo "CHECKPOINT: version $APP_VERSION stamped"
