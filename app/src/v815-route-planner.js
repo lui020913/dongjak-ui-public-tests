@@ -14,6 +14,7 @@ export function combineRouteSegments(segments,kind){
   const coords=[],maneuvers=[];
   let seconds=0,kilometers=0,slopeAscentM=0,slopeDescentM=0,slopeUncertainM=0;
   const sourceNames=new Set();
+  let priRiskSum=0,priAssessedM=0,priFactorSum=0,priTotalM=0;
   for(let i=0;i<segments.length;i++){
     const segment=segments[i];
     const overlap=coords.length&&segment.coords.length&&coords.at(-1)[0]===segment.coords[0][0]&&coords.at(-1)[1]===segment.coords[0][1];
@@ -26,8 +27,24 @@ export function combineRouteSegments(segments,kind){
     slopeAscentM+=Number(segment.slopeAscentM)||0;slopeDescentM+=Number(segment.slopeDescentM)||0;
     slopeUncertainM+=Number(segment.slopeUncertainM)||0;
     sourceNames.add(String(segment.source||'unknown'));
+    // Combine only actually observed PRI exposure. Missing legs stay unknown.
+    const evidence=segment.priEvidence;
+    const legM=Number(segment.kilometers)*1000;
+    if(Number.isFinite(legM)&&legM>0)priTotalM+=legM;
+    if(evidence?.meanRisk!==null&&Number.isFinite(evidence?.meanRisk)&&Number.isFinite(evidence?.assessedMeters)){
+      const m=Math.max(0,Math.min(legM,evidence.assessedMeters));
+      priAssessedM+=m;priRiskSum+=m*evidence.meanRisk;
+      priFactorSum+=m*(Number(evidence.meanObservedFactors)||0);
+    }
   }
-  return {coords,maneuvers,seconds,kilometers,slopeAscentM,slopeDescentM,slopeUncertainM,
+  const priEvidence=priTotalM>0?{
+    meanRisk:priAssessedM>0?Math.round(priRiskSum/priAssessedM*10)/10:null,
+    coverage:Math.round(priAssessedM/priTotalM*1000)/1000,
+    assessedMeters:Math.round(priAssessedM*10)/10,totalMeters:Math.round(priTotalM*10)/10,
+    meanObservedFactors:priAssessedM>0?Math.round(priFactorSum/priAssessedM*10)/10:null,
+    ofFactors:6,preliminary:true,source:'sangdo1-observed-PRI'
+  }:null;
+  return {coords,maneuvers,seconds,kilometers,slopeAscentM,slopeDescentM,slopeUncertainM,priEvidence,
     source:sourceNames.size===1?[...sourceNames][0]:'mixed-walking-network',routeMode:kind,
     waypoints:segments.length-1,segmentCount:segments.length,sourceLabel:'경유지 구간별 보행경로 결과 합산 · 실제 현장 통행상태 미검증'};
 }
