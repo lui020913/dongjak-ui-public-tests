@@ -518,15 +518,16 @@ test('phone route comparison uses actual pedestrian graph and does not invent a 
  await page.evaluate(()=>{for(const [which,lng,lat,name] of [['start',126.960,37.510,'검증용 출발지'],['end',126.962,37.512,'검증용 목적지']])window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:{which,place:{lng,lat,name}}}))});
  await expect(page.locator('#route-start-label')).toHaveText('검증용 출발지',{timeout:30000});
  await expect(page.locator('#route-end-label')).toHaveText('검증용 목적지');
- // Verify the real pointer can hit the route CTA, not the pill dock.
- // This used to hang for 180 seconds while the navigation span covered it.
- await expect.poll(()=>page.locator('#route-calc').evaluate(button=>{
-  const r=button.getBoundingClientRect(),nav=document.getElementById('bottom-nav')?.getBoundingClientRect();
-  const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
-  return Boolean(nav&&r.width>0&&r.height>0&&r.bottom<=nav.top-5&&
-    (hit===button||button.contains(hit)));
- }),{timeout:12000}).toBe(true);
- await page.locator('#route-calc').click({timeout:15000});
+ // Verify the REAL browser hitbox before clicking. A covered button must fail
+ // quickly and clearly, rather than hanging for the 180-second test timeout.
+ await expect.poll(()=>page.evaluate(()=>{
+  const button=document.getElementById('route-calc'),nav=document.getElementById('bottom-nav');
+  if(!button||!nav)return false;
+  const r=button.getBoundingClientRect(),n=nav.getBoundingClientRect();
+  const point=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+  return r.width>0&&r.height>0&&r.bottom<=n.top-8&&(point===button||button.contains(point));
+ }),{timeout:12000,message:'Route calculation button must clear the bottom-nav actual pointer hitbox'}).toBe(true);
+ await page.locator('#route-calc').click();
  const cards=page.locator('#djNext-route-compare'),summary=page.locator('#route-map-card');
  await expect(summary).toBeVisible({timeout:60000});await expect(cards.locator('button')).toHaveCount(4);
  const assertRouteCardBounds=async()=>{await expect.poll(()=>summary.evaluate(n=>{const r=n.getBoundingClientRect(),w=innerWidth;return {inside:r.left>=-1&&r.right<=w+1&&r.width>0,centred:Math.abs(r.left-(w-r.right))<=2};}),{timeout:10000}).toEqual({inside:true,centred:true});};
