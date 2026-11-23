@@ -17,13 +17,13 @@ export function installMyInfo(doc=document){
  const body=panel.querySelector(':scope > .dj836-sheet-body')||panel;
  if(!heading||!account)return false;
  panel.dataset.dj834Installed='true';
- // Real iPhone Preview QA confirmed the full-screen My Info scroller reached
- // behind the floating 70px dock. Production has legacy high-specificity
- // panel padding:0 rules: reserve dock clearance in the actual DOM owner.
- // All My Info subpages share this single scroll container.
+ // The fixed pill floats OVER the independent screen; clearance belongs
+ // inside the ONE .dj836-sheet-body scroller (mobile-ui/current.css).
+ // An old 94px inline-important outer padding shortened that scroller,
+ // creating a blank clipped strip and overriding every CSS-only repair.
  if(doc.defaultView?.matchMedia?.('(max-width:699px)')?.matches){
    panel.style.setProperty('box-sizing','border-box','important');
-   panel.style.setProperty('padding-bottom','calc(94px + env(safe-area-inset-bottom,0px))','important');
+   panel.style.removeProperty('padding-bottom');
  }
  const landing=doc.createElement('section');landing.className='dj834-my-home';landing.setAttribute('aria-label','내 정보 설정');
  landing.innerHTML=`<button type="button" class="dj834-profile-card" data-dj834-action="profile">
