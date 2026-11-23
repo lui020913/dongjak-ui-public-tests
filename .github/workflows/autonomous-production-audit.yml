@@ -23,12 +23,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Check current live source is exactly main
+      - name: Check current live app tree matches tested Production
         id: live
         run: |
-          set -eu
+          set -euo pipefail
           curl -fsS --max-time 30 "${DONGJAK_TARGET_URL}release-source.json?audit=$GITHUB_RUN_ID" -o "$RUNNER_TEMP/qa-live.json"
-          node --input-type=module -e 'import fs from "node:fs";const d=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/qa-live.json"));const yes=d.release_status==="DEPLOYED_PRODUCTION"&&d.source_commit===process.env.GITHUB_SHA&&d.public_ui_source_commit===process.env.GITHUB_SHA;fs.appendFileSync(process.env.GITHUB_OUTPUT,"current="+yes+"\n");if(!yes)console.log("Production not identical to current main; skip scheduled source recovery audit.");'
+          # Documentation-only or CI-only main commits must not disable live QA.
+          # If app/ changed, fail closed and skip against the mismatched artifact.
+          node scripts/verify-live-production-source.mjs "$RUNNER_TEMP/qa-live.json"
       - if: steps.live.outputs.current == 'true'
         run: npm install --no-audit --no-fund --prefer-offline
         env:
