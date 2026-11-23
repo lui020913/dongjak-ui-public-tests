@@ -171,6 +171,18 @@ export function installMyInfo(doc=document){
  // recreating it so favorite buttons and existing event handlers keep working.
  body.prepend(landing);landing.insertAdjacentElement('afterend',detail);
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
+ const detailNav=detail.querySelector('.dj834-detail-nav');
+ // A phone child page owns the existing fixed screen header, not a second
+ // scrolling title row. Reparent the live navigation node (never clone it).
+ const syncSubpageHeader=()=>{
+   const phone=doc.defaultView?.matchMedia?.('(max-width:699px)')?.matches===true;
+   const useHeader=!detail.hidden&&phone&&heading.classList.contains('dj-sheet-chrome');
+   const host=useHeader?heading:detail;
+   if(detailNav?.parentElement===host)return;
+   if(useHeader)heading.insertBefore(detailNav,heading.querySelector('.dj-sheet-chrome-close'));
+   else detail.prepend(detailNav);
+ };
+ doc.defaultView?.addEventListener('resize',syncSubpageHeader,{passive:true});
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;mapBox.hidden=true;
@@ -205,10 +217,13 @@ export function installMyInfo(doc=document){
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
  function enter(node,direction='forward'){
-   if(!node||reducedMotion()||typeof node.animate!=='function')return;
-   const x=direction==='back'?-14:14;
-   try{node.animate([{opacity:.88,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
-     duration:210,easing:'cubic-bezier(.2,.76,.24,1)'
+   // Preserve the stable navigation API while animating body content only.
+   // The child back/title bar remains in the fixed header throughout.
+   const target=node===detail?content:node;
+   if(!target||reducedMotion()||typeof target.animate!=='function')return;
+   const x=direction==='back'?-44:44;
+   try{target.animate([{opacity:1,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
+     duration:360,easing:'cubic-bezier(.18,.72,.24,1)'
    });}catch{/* Appearance must never block navigation. */}
  }
  function showDetail(view){
@@ -232,6 +247,7 @@ export function installMyInfo(doc=document){
    content.dataset.dj834View=view;
    if(view==='type')syncTypography();if(view==='language')syncChoices();if(view==='map')syncMapChoices();
    detail.hidden=false;
+   syncSubpageHeader();
    body.scrollTop=0;
    const panelScroller=panel.querySelector(':scope > .dj836-sheet-body');
    if(panelScroller)panelScroller.scrollTop=0;
@@ -247,6 +263,7 @@ export function installMyInfo(doc=document){
    delete content.dataset.dj834View;
    detail.hidden=true;
    landing.hidden=false;
+   syncSubpageHeader();
    body.scrollTop=0;
    enter(landing,'back');
  }
