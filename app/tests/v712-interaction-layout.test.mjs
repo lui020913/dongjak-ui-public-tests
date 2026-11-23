@@ -31,9 +31,10 @@ test('scale sits in the desktop bottom-left corner while mobile still computes a
  assert.match(source,/applyImportant\(scale,'bottom',`\$\{desktopBottomInset\}px`\)/);
  assert.match(source,/applyImportant\(scale,'left',`\$\{desktopLeftInset\}px`\)/);
 });
-test('station popup left on desktop and map centers Jangseungbaegi',()=>{
+test('station popup on desktop and all station pin coordinates retain geographic camera focus',()=>{
  const source=read('src/transport-map.js');
- assert.match(source,/normalizeStationQueryName\(place.name\)==='장승배기'/);
+ assert.match(source,/!sameStationLineChange && !refresh && Number\.isFinite\(Number\(place\.lng\)\)/);
+ assert.doesNotMatch(source,/const jangseungbaegi\s*=/,'retired station-specific variable may not reappear');
  assert.match(source,/panel\.dataset\.stationFocus/);
  assert.match(source,/map\.easeTo\?\.\(\{center:\[Number\(place.lng\),Number\(place.lat\)\]/);
  const css=read('src/mobile-ui-baseline.css');
