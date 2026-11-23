@@ -8,7 +8,7 @@ export function routeComparisonItems(routes){
       meters:Number(r.kilometers)*1000,minutes:Math.ceil(Number(r.seconds)/60),
       ascent:Number.isFinite(Number(r.slopeAscentM))?Number(r.slopeAscentM):null,
       uncertain:Number.isFinite(Number(r.slopeUncertainM))?Number(r.slopeUncertainM):null,
-      source:r.source||'unverified',coords:r.coords}];
+      source:r.source||'unverified',coords:r.coords,priEvidence:r.priEvidence??null}];
   });
 }
 export function sameRoute(a,b){
@@ -58,14 +58,19 @@ export function initRouteComparison(doc=document,win=window){
     const cards=items.map(item=>{
       const ascent=item.ascent!==null?`추정 상승 ${Math.round(item.ascent)}m`:'상승량 자료 없음';
       const uncertain=item.uncertain!==null?` · 고도 미확인 ${Math.round(item.uncertain)}m`:'';
+      const e=item.priEvidence;
+      const pri=e?.meanRisk!==null&&Number.isFinite(e?.meanRisk)
+        ? `PRI 위험 ${Math.round(e.meanRisk)}/100 · 평가구간 ${Math.round(e.coverage*100)}% · 평균 ${e.meanObservedFactors}/6개 지수`
+        : 'PRI 비교 구간 미평가';
       return `<button type="button" class="dj804-compare-card" data-compare-select="${item.id}" aria-label="${item.label} 경로를 지도에 표시">
         <span class="dj804-compare-title">${htmlEscape(item.label)}<span class="dj804-compare-action">지도에서 보기</span></span>
         <span class="dj804-compare-metrics"><b>${metersLabel(item.meters)}</b><b>약 ${item.minutes}분</b></span>
         <span class="dj804-compare-meta">${ascent}${uncertain}</span>
+        <span class="dj804-compare-meta">${pri}</span>
       </button>`;
     }).join('');
     root.innerHTML=`<header><strong>경로 한눈에 비교</strong><small>서울시 보행 링크 기반 · 실제 계산 결과</small></header><div class="dj804-compare-grid">${cards}</div>
-      <p class="dj804-compare-note">${duplicate?'두 조건에서 동일한 경로가 계산됐습니다. ':''}경사도는 지형 추정값이며 보도·계단·현재 통제 여부는 검증되지 않았습니다.</p>`;
+      <p class="dj804-compare-note">${duplicate?'두 조건에서 동일한 경로가 계산됐습니다. ':''}${latest?.priDecision?.preferred?'PRI 종합지수 부분평가에서 위험이 더 낮은 후보를 자동 표시했습니다. ':''}PRI 위험점수는 관측된 지수만 반영한 연구용 부분평가이고, 미평가 도로는 안전한 도로로 계산하지 않습니다. 경사도는 지형 추정값이며 보도·계단·현재 통제 여부는 검증되지 않았습니다.</p>`;
     root.hidden=false;
     sync();
   };
