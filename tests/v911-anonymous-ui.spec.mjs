@@ -1714,7 +1714,9 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(form.panel.top,'route entry is a top-aligned map overlay').toBeGreaterThanOrEqual(0);
  expect(form.panel.top,'route entry header is near screen top').toBeLessThanOrEqual(80);
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.card.bottom,'route editor must clear the primary action').toBeLessThanOrEqual(form.footer.top+4);
+ expect(form.panel.left,'new native-like editor spans the available phone width').toBeLessThanOrEqual(2);
+ expect(form.card.bottom,'route editor content stays before the sticky primary CTA').toBeLessThanOrEqual(form.footer.top+4);
+ expect(form.panel.bottom,'full-height route editor must stop above native bottom tabs').toBeLessThanOrEqual(form.dock.top+3);
  // The existing CTA stays naturally after the route editor, above the nav.
  // The actual button must remain visible and accept the pointer hit.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
