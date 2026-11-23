@@ -1,26 +1,6 @@
 /* v8.4.1: route preview ownership, keyboard-friendly waypoint search, genuine layer toggles */
 @media (max-width:699px){
- /* The floating route RESULT, not the editor, owns the detailed route comparison. */
- html body #app#app#app#app #route-map-card:not([hidden]){
-   box-sizing:border-box!important;max-height:min(60dvh,560px)!important;
-   overflow-y:auto!important;overscroll-behavior-y:contain!important;
-   -webkit-overflow-scrolling:touch!important;
- }
- html body #app#app#app#app #route-map-card:has(#dj804-route-compare:not([hidden])) #dj825-route-options{
-   display:none!important;
- }
- html body #app#app#app#app #route-map-card #dj804-route-compare{
-   width:100%!important;max-width:100%!important;min-width:0!important;
-   margin:8px 0 4px!important;padding:10px!important;
- }
- html body #app#app#app#app #route-map-card #dj804-route-compare .dj804-compare-grid{
-   grid-template-columns:repeat(2,minmax(0,1fr))!important;
- }
- html body #app#app#app#app #route-map-card #dj804-route-compare .dj804-compare-card{
-   padding:10px 9px!important;font-size:12px!important;min-width:0!important;
- }
- html body #app#app#app#app #route-map-card #dj804-route-compare .dj804-compare-metrics{gap:5px!important;font-size:12px!important;}
- html body #app#app#app#app #route-map-card #dj804-route-compare .dj804-compare-meta{font-size:10px!important;}
+ /* One route-choice view is now owned by route-experience.css. */
  /* The expanded editor is temporary and only applies while location search is open. */
  html body #app#app#app#app#app#app[data-tab="route"] #route-panel:not([hidden]):has(#route-place-search:not([hidden])),
  html body #app#app#app#app#app#app #route-panel:not([hidden]):has(#route-place-search:not([hidden])){
