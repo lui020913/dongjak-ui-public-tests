@@ -42,6 +42,11 @@ log.releases.unshift({version,date:new Date().toISOString().slice(0,10),scale:ki
 await write('package.json',pkg);
 await write('package-lock.json',lock);
 await write('src/app-release-log.json',log);
-const run=spawnSync(process.execPath,[file('scripts/stamp-version.mjs')],{stdio:'inherit',cwd:root});
-if(run.status!==0)process.exit(run.status||1);
+// Protected historical replay only: stamp derived version surfaces once after
+// all sequential release-log entries have been reconstructed. Standalone npm
+// version commands keep their existing immediate stamping behavior.
+if(process.env.DONGJAK_BATCH_RELEASE_STAMP!=='1'){
+ const run=spawnSync(process.execPath,[file('scripts/stamp-version.mjs')],{stdio:'inherit',cwd:root});
+ if(run.status!==0)process.exit(run.status||1);
+}
 console.log(`[${kind.toUpperCase()}] Release advanced to v${version}: ${items.length} change note(s).`);
