@@ -239,12 +239,16 @@
     /* Critical overrides of the old fullscreen/centering/layout cascade. */
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) {
-      position:fixed!important;inset:0 0 var(--dj910-dock-bottom,88px) 0!important;
-      width:100%!important;max-width:100%!important;height:auto!important;
-      max-height:none!important;min-height:0!important;display:flex!important;
+      position:fixed!important;
+      inset:auto 10px calc(var(--dj910-dock-bottom,88px) + 8px) 10px!important;
+      top:auto!important;bottom:calc(var(--dj910-dock-bottom,88px) + 8px)!important;
+      width:calc(100vw - 20px)!important;max-width:calc(100vw - 20px)!important;
+      height:auto!important;max-height:min(67dvh,540px)!important;
+      min-height:0!important;display:flex!important;
       flex-direction:column!important;align-items:stretch!important;
-      justify-content:flex-start!important;margin:0!important;padding:env(safe-area-inset-top,0px) 0 0!important;
-      border:0!important;border-radius:0!important;box-shadow:none!important;
+      justify-content:flex-start!important;margin:0!important;padding:0!important;
+      border:1px solid var(--walk-border)!important;border-radius:23px!important;
+      box-shadow:0 10px 34px rgba(18,48,37,.16)!important;
       background:var(--walk-bg)!important;transform:none!important;translate:none!important;
       overflow:hidden!important;z-index:5700!important;
     }
@@ -257,9 +261,9 @@
     }
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="input"]
       #route-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-      display:flex!important;flex:1 1 auto!important;flex-direction:column!important;
+      display:flex!important;flex:0 1 auto!important;flex-direction:column!important;
       justify-content:flex-start!important;align-items:stretch!important;
-      min-height:0!important;max-height:none!important;height:auto!important;
+      min-height:0!important;max-height:calc(67dvh - 132px)!important;height:auto!important;
       overflow-y:auto!important;overscroll-behavior:contain!important;
       margin:0!important;padding:14px 18px 16px!important;
       background:var(--walk-bg)!important;
