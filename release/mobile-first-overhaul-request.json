@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.105",
   "public_work_branch": "main",
-  "purpose": "PR #350 consolidated phone controls in source and passed public app CI run 45105625838. Real DOM cleanup: removed community persistent cloud-status slab and duplicated empty-state notices; one search+write row and collapsible sort/saved/notification/refresh toolbar; single map incident report entry; one native location-selection menu per walking route endpoint preserving search, map and GPS native owners; merged additional map tools into Map & Walking child settings with existing DOM owner, without separate My Info row. Also adjusted actual composer visibility and old regression contracts. Preserve existing GIS/PRI, map selection viewport logic, transport and routing API. Require source provenance, sealed Preview, 12 mobile shards, PC/tablet QA, protected Production and exact-build Android APK, no bypass.",
+  "purpose": "PR350 complete mobile control consolidation, merged SHA 7026b14e34168e7d4dec4e2605a4f10fb18ee02c. Community: remove persistent status rectangle and duplicated blank-state copy, unify search/write, group sort/saved/notices/refresh in an accessible expandable menu, simplify map issue report. Walking directions: replace duplicate search/map buttons per point with a single expandable selection control, preserving native IDs/GPS/search/map handlers and existing four route variants. My Info: move additional map tools into map/walking settings subview and preserve actual controls/events; remove standalone redundant menu. Preserve GIS/PRI/transport/APIs and protected exact-source checks. Full PR350 source CI and phone browser sizes 375/390/430 green. Must complete sealed isolated Preview, 12 mobile QA shards, PC/tablet, required visual QA, guarded Production, and exact Android APK without bypass.",
   "attempt": 293,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Fresh source PR #350 merged to main at 7026b14e34168e7d4dec4e2605a4f10fb18ee02c; predecessor 9.2.104 successful. New structural UI consolidation requires guarded 9.2.105.",
+  "last_retry_reason": "New UI consolidation source: PR350 passed complete source CI and 375/390/430px browser tests. Prior 9.2.104 release succeeded; use independent protected 9.2.105 delivery.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
