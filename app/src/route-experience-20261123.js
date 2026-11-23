@@ -18,6 +18,35 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const on=(el,type,fn,opts)=>{if(!el)return;el.addEventListener(type,fn,opts);remove.push(()=>el.removeEventListener(type,fn,opts));};
   const add=(tag,id,cls)=>{const n=doc.createElement(tag);if(id)n.id=id;if(cls)n.className=cls;return n;};
 
+  // The approved input screen is a map with a compact TOP card, not a modal
+  // white page or a bottom entry sheet. Reuse the native close and GPS actions.
+  const chrome=panel.querySelector(':scope > .dj-sheet-chrome');
+  const nativeClose=chrome?.querySelector('.page-dismiss');
+  const inputBack=add('button','dj-walk-input-back');
+  inputBack.type='button';
+  inputBack.setAttribute('aria-label','길찾기 뒤로 가기');
+  inputBack.textContent='←';
+  chrome?.querySelector('.dj-sheet-chrome-title')?.before(inputBack);
+  on(inputBack,'click',()=>nativeClose?.click());
+
+  const walkMode=add('div','dj-walk-mode');
+  walkMode.innerHTML='<span aria-hidden="true">🚶</span><span>도보</span>';
+  card.prepend(walkMode);
+
+  // These controls call existing handlers. No independent GPS/map state.
+  const mapActions=add('div','dj-walk-map-actions');
+  mapActions.hidden=true;
+  mapActions.setAttribute('aria-label','길찾기 지도 조작');
+  const center=add('button','dj-walk-map-center');
+  center.type='button';center.textContent='⌖';
+  center.setAttribute('aria-label','동작구 지도 중심으로 이동');
+  const locate=add('button','dj-walk-map-locate');
+  locate.type='button';locate.textContent='➤';
+  locate.setAttribute('aria-label','내 위치로 이동');
+  mapActions.append(center,locate);app.append(mapActions);
+  on(center,'click',()=>byId('center-dongjak')?.click());
+  on(locate,'click',()=>byId('current-location')?.click());
+
   // Input: actionable full-height place fields are at the top, not a floating
   // centered card with unused space. Existing native handlers remain intact.
   const heading=panel.querySelector('.dj-sheet-chrome-title h2');
@@ -247,6 +276,20 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const nativeObserver=new MutationObserver(refreshChoices);
   for(const native of variants.querySelectorAll('[data-route-variant]'))
     nativeObserver.observe(native,{attributes:true,attributeFilter:['aria-pressed','disabled']});
+  // Leave map controls only in the truly exposed map gap; on short phones
+  // omit them rather than overlap the location card or the route CTA.
+  const positionMapActions=()=>{
+    if(app.dataset.djRouteStage!=='input'){mapActions.hidden=true;return;}
+    const top=panel.getBoundingClientRect().bottom;
+    const footer=byId('dj910-route-footer')?.getBoundingClientRect();
+    const bottom=footer?.top??win.innerHeight-180;
+    const clear=bottom-top;
+    mapActions.hidden=clear<134;
+    if(!mapActions.hidden)mapActions.style.top=Math.round(top+Math.max(14,(clear-108)/2))+'px';
+  };
+  on(win,'resize',positionMapActions);
+  const inputResizeObserver=typeof ResizeObserver==='function'?new ResizeObserver(positionMapActions):null;
+  inputResizeObserver?.observe(panel);
   let oldStage='';
   const setStage=()=>{
     const stage=app.classList.contains('route-guiding')?'guiding':
@@ -256,6 +299,8 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
     shield.hidden=stage!=='guiding';
+    mapActions.hidden=stage!=='input';
+    if(stage==='input')win.requestAnimationFrame?.(positionMapActions);
     if(stage==='guiding')stop?.focus({preventScroll:true});
   };
   const stateObserver=new MutationObserver(setStage);
@@ -264,10 +309,11 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   // Light updates in guidance are performed by native GPS, not this presenter.
   setStage();refreshChoices();
   return ()=>{
-    stateObserver.disconnect();nativeObserver.disconnect();
+    stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
     top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
+    inputBack.remove();walkMode.remove();mapActions.remove();
     delete app.dataset.djWalkArrived;
     delete app.dataset.djWalkV2;
   };
