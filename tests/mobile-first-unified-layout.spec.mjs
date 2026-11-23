@@ -230,34 +230,40 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
   await readyForLiveTouch(page);
   await page.locator('#bottom-nav .nav-tab[data-tab="route"]').click({timeout:12000,noWaitAfter:true});
   await expect(page.locator('#app')).toHaveAttribute('data-tab','route',{timeout:15000});
-  await expect(page.locator('#route-panel')).toBeVisible();
-  await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','input',{timeout:12000});
-  const snapshot=async()=>page.evaluate(()=>{
-    const panel=document.getElementById('route-panel'),cta=document.getElementById('route-calc'),
-      nav=document.getElementById('bottom-nav'),footer=document.getElementById('dj910-route-footer'),card=panel?.querySelector('.route-card');
-    const rect=node=>{const b=node?.getBoundingClientRect();return b?{x:b.x,y:b.y,top:b.top,right:b.right,bottom:b.bottom,width:b.width,height:b.height}:null;};
-    const p=rect(panel),b=rect(cta),n=rect(nav),f=rect(footer);
-    const hit=b?document.elementFromPoint(b.x+b.width/2,b.y+b.height/2):null;
-    return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,card:rect(card),
-      actualHit:Boolean(cta&&(hit===cta||cta.contains(hit))),
-      routeStage:document.getElementById('app')?.dataset.djRouteStage,
-      panelPosition:panel?getComputedStyle(panel).position:'missing',
-      footerPosition:footer?getComputedStyle(footer).position:'missing'};
+  const route=page.locator('#dj-route-v3');
+  await expect(route).toBeVisible({timeout:15000});
+  const metrics=await page.evaluate(()=>{
+    const host=document.getElementById('dj-route-v3'),root=host?.shadowRoot;
+    const dock=document.getElementById('bottom-nav'),legacy=document.getElementById('route-panel');
+    const oldMap=document.getElementById('dj-walk-map-actions'),map=document.getElementById('map');
+    if(!root||!dock||!legacy||!map)return null;
+    const rect=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height,width:r.width}};
+    const card=rect(root.querySelector('.route-panel')),header=rect(root.querySelector('.header'));
+    const cta=rect(root.querySelector('.action')),nav=rect(dock);
+    const mid=document.elementFromPoint(innerWidth/2,Math.round((card.bottom+cta.top)/2));
+    const hit=document.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
+    return {viewport:[innerWidth,innerHeight],card,header,cta,nav,
+      oldClip:getComputedStyle(legacy).clipPath,
+      oldPointer:getComputedStyle(legacy).pointerEvents,
+      oldMapDisplay:oldMap?getComputedStyle(oldMap).display:'none',
+      tools:root.querySelectorAll('.tools button').length,
+      mapHit:Boolean(mid&&(mid===map||map.contains(mid))),
+      ctaHit:Boolean(hit&&(hit===root.querySelector('.action')||root.querySelector('.action').contains(hit)))};
   });
-  await expect.poll(async()=>{
-    const m=await snapshot();
-    return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
-      m.panelPosition==='fixed'&&m.panel.x>=-1&&
-      m.panel.right<=m.viewport[0]+1&&
-      m.panel.top>=-1&&m.panel.top<=3&&
-      m.panel.bottom<=m.footer.top-24&&m.card&&m.card.bottom<=m.footer.top-24&&m.cta.height>=44&&
-      m.cta.bottom<=m.nav.top-5&&m.actualHit);
-  },{timeout:15000}).toBe(true);
-  const metrics=await snapshot();
-  await testInfo.attach('real-route-cta-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
-  await testInfo.attach('real-route-cta-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  expect(metrics,'new walking route screen should exist').toBeTruthy();
+  expect(metrics.card.top).toBeGreaterThanOrEqual(metrics.header.bottom-3);
+  expect(metrics.card.bottom).toBeLessThanOrEqual(metrics.cta.top-96);
+  expect(metrics.cta.bottom).toBeLessThanOrEqual(metrics.nav.top-5);
+  expect(metrics.cta.height).toBeGreaterThanOrEqual(50);
+  expect(metrics.tools).toBe(2);
+  expect(metrics.oldClip).toBe('inset(100%)');
+  expect(metrics.oldPointer).toBe('none');
+  expect(metrics.oldMapDisplay).toBe('none');
+  expect(metrics.mapHit).toBe(true);
+  expect(metrics.ctaHit).toBe(true);
+  await testInfo.attach('real-route-v3-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
+  await testInfo.attach('real-route-v3-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });
-
 
 test('map-first walking route preview only lists actually supplied options and fits the viewport',async({page},testInfo)=>{
   test.skip(page.viewportSize().width>=700,'phone UI only');
