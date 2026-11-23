@@ -155,19 +155,47 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('[data-v3-screen="search"]').hidden=false;
     q('#v3-query').focus({preventScroll:true});
   };
+  // Legacy panel is NOT the new screen. Retain its hidden engine controls
+  // for native search/routing listeners but fully suppress its pixels, hits
+  // and accessibility while V3 is open. Inline important beats stale eight-ID
+  // route-sheet styles and the old window-motion controller.
+  const oldVisualKeys=['visibility','opacity','pointer-events'];
+  const previousOldVisual=oldVisualKeys.map(key=>({
+    key,value:old.style.getPropertyValue(key),priority:old.style.getPropertyPriority(key)
+  }));
+  const oldAriaHidden=old.getAttribute('aria-hidden');
+  const concealOld=()=>{
+    for(const [key,value] of [['visibility','hidden'],['opacity','0'],['pointer-events','none']]){
+      if(old.style.getPropertyValue(key)!==value||old.style.getPropertyPriority(key)!=='important')
+        old.style.setProperty(key,value,'important');
+    }
+    if(old.getAttribute('aria-hidden')!=='true')old.setAttribute('aria-hidden','true');
+  };
+  const restoreOld=()=>{
+    for(const {key,value,priority} of previousOldVisual){
+      if(value)old.style.setProperty(key,value,priority);
+      else old.style.removeProperty(key);
+    }
+    if(oldAriaHidden===null)old.removeAttribute('aria-hidden');
+    else old.setAttribute('aria-hidden',oldAriaHidden);
+  };
+  const oldStyleObserver=new MutationObserver(()=>{if(active)concealOld();});
+  oldStyleObserver.observe(old,{attributes:true,attributeFilter:['style']});
   const sync=()=>{
     const next=app.dataset.tab==='route'&&win.innerWidth<700&&!app.classList.contains('route-guiding');
     if(next!==active){
       active=next;
       host.hidden=!next;
-      if(next)app.dataset.djRouteScreenV3='1';
+      if(next){app.dataset.djRouteScreenV3='1';concealOld();}
       else{
+        restoreOld();
         delete app.dataset.djRouteScreenV3;
         searching=null;
         q('[data-v3-screen="search"]').hidden=true;
       }
     }
     if(active){
+      concealOld();
       if(searching&&nativeSearch.hidden){
         searching=null;q('[data-v3-screen="search"]').hidden=true;
       }
@@ -223,6 +251,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   sync();
   return ()=>{
     observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();
+    oldStyleObserver.disconnect();restoreOld();
     navObserver?.disconnect();cardObserver?.disconnect();
     cleanups.forEach(fn=>fn());
     if(resizeFrame)win.cancelAnimationFrame?.(resizeFrame);
