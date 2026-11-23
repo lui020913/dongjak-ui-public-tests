@@ -172,7 +172,7 @@ html[data-theme="dark"] body #app#app :is(#mine-panel,#news-panel) :is(.records-
     height:var(--dj800-logo-size)!important;min-height:var(--dj800-logo-size)!important;
     padding:0!important;border-radius:14px!important;
   }
-  html body #app#app .topbar #dj-settings-mobile img{width:100%!important;height:100%!important;object-fit:contain!important;}
+  
   /* The right map-actions rail never appears on top of an open transport,
      admin, route, record or safety sheet. Core compass remains untouched. */
   html body #app#app.dj800-surface-open #dj-mobile-map-actions,

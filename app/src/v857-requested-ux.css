@@ -232,10 +232,7 @@
     -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important;
     box-shadow:none!important;transform:none!important;
   }
-  html body #app#app#app #transport-sheet #transport-neighbors :is(.metro-neighbor-row,.metro-rail-previous,.metro-rail-current,.metro-rail-next){
-    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important;
-    box-shadow:none!important;
-  }
+  
   html body #app#app#app #transport-sheet .transport-arrivals-title{
     margin:10px 0 8px!important;padding-top:8px!important;
   }
@@ -662,16 +659,13 @@ html body #app#app#app #map .dj-place-detail-popup .dj-place-route-actions butto
 }
 html body #app#app#app #map .dj-place-detail-popup .dj815-place-actions{gap:4px!important;}
 @media(max-width:699px){
-  html body #app#app#app #map .dj-place-detail-popup .dj-place-header-actions{gap:3px!important;}
+  
   html body #app#app#app #map .dj-place-detail-popup .dj-place-route-actions{gap:3px!important;}
   html body #app#app#app #map .dj-place-detail-popup .dj-place-route-actions button{
     width:42px!important;min-width:42px!important;height:34px!important;min-height:34px!important;
     padding:0 5px!important;font-size:13px!important;
   }
-  html body #app#app#app #map .dj-place-detail-popup .dj-place-header-actions button:is(.dj854-place-favorite,.dj856-place-share,.dj-place-header-close){
-    flex-basis:32px!important;width:32px!important;min-width:32px!important;max-width:32px!important;
-    height:34px!important;min-height:34px!important;max-height:34px!important;
-  }
+  
 }
 
 html body #app#app#app #map .dj-place-detail-popup.dj856-place-dismissing{
