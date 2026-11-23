@@ -5,7 +5,7 @@
   "purpose": "Owner-requested limited release: research-only observed six-factor PRI relative exposure advice for existing general/gentle pedestrian routes (#383), and My Info update-history bottom dock mask, 94px inline-important phantom footer, and overflowing summary text repair (#382). Maintain existing route geometry, transport, map, GIS PRI evidence, accounts, authentication, Supabase and signed-in workflows. Do not claim calculated routes are certified safe. Mandatory source CI, exact-source Preview, 12 mobile QA shards, PC/tablet, protected Production, postdeploy integrity verification and guarded rollback; never bypass failure gates.",
   "attempt": 311,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous protected Production v9.2.119 run #45144268258 succeeded. PR #383 source CI #45148780251 succeeded and merged to main. PR #382 must be merged only after its exact-head full source CI passes; this release request PR must not merge earlier. Next monotonic patch version 9.2.120.",
+  "last_retry_reason": "Previous protected Production v9.2.119 run #45144268258 succeeded. PR #383 PRI advice exact-head CI #45148780251 passed and merged at 5407dffb2f026ad06be83c55fa611c2dbe719f8f. PR #382 My Info exact-head CI #45152755613 passed the full suite and mobile 375/390/430 tests and merged at 74b2b519af06c9780d98acf62339abdeacc9cc26. Trigger 9.2.120 only through protected Preview, all 12 mobile QA shards, desktop/tablet gate, production integrity verification and rollback policy.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
