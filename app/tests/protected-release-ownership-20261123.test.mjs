@@ -17,3 +17,15 @@ test('production still requires identical tested app artifact and protected QA',
  assert.ok(production.includes('cf -X POST "$api/deployments/$previous/rollback"'));
  assert.ok(production.includes('test "$verified" = 1'));
 });
+
+test('Production milestone always evaluates after optional QA skips and cannot block a good deployment',()=>{
+ const begin=source.indexOf('\n  notify-production:');
+ const end=source.indexOf('\n  announce:',begin);
+ assert.ok(begin>=0&&end>begin);
+ const block=source.slice(begin,end);
+ assert.match(block,/always\(\) && needs\.production\.result == 'success'/);
+ assert.match(block,/continue-on-error: true/);
+ assert.match(block,/deployment-milestone:\$GITHUB_RUN_ID:production/);
+ assert.doesNotMatch(block,/모바일 24개 샤드/);
+ assert.match(block,/모바일 샤드/);
+});
