@@ -1,7 +1,7 @@
 /** Installation entry point. Existing routing / weather / safety state remains owned by v8.0.3. */
 import './v804-new-features.css';
 import './v820-integration-polish.css';
-import {initRouteComparison} from './v804-route-comparison.js';
+// Route comparison is now owned by route-experience-20261123.js.
 import {initNavigationExtras} from './v804-navigation-extras.js';
 import {initWeatherSafety} from './v804-weather-safety.js';
 import {initSafetyReport} from './v804-analysis-report.js';
@@ -34,7 +34,7 @@ export function installV804NewFeatures(doc=document,win=window){
   summary.innerHTML='<span class="dj820-addon-symbol" aria-hidden="true">◈</span><span class="dj820-addon-label"><strong>날씨·보행안전 분석</strong><small>날씨 연계 정보 · 데이터 리포트</small></span><span class="dj820-addon-chevron" aria-hidden="true">⌄</span>';
   container.append(summary,wrap);
   safety.append(container);
-  const cleaners=[initRouteComparison(doc,win),initNavigationExtras(doc,win),initWeatherSafety(doc,win),initSafetyReport(doc,win)];
+  const cleaners=[initNavigationExtras(doc,win),initWeatherSafety(doc,win),initSafetyReport(doc,win)];
   return ()=>{cleaners.forEach(fn=>fn?.());container.remove();};
 }
 if(typeof document!=='undefined'){
