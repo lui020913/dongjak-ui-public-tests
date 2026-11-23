@@ -25,10 +25,13 @@ test('map preview keeps route selected while map renderer remains in map mode',(
  assert.equal(normalizeBottomTabs(e.doc,e.app),'map');
  assert.equal(e.buttons[0].classList.selected,true);
 });
-test('calculated route comparison is inside the floating map result, not route editor',()=>{
- assert.match(compare,/const mapCard=doc\.getElementById\('route-map-card'\)/);
- assert.match(compare,/\(mapCard\|\|variants\.parentElement\)\.appendChild\(root\)/);
- assert.match(css,/:has\(#dj804-route-compare:not\(\[hidden\]\)\) #dj825-route-options/);
+test('calculated route comparison has one owner in the floating map result',()=>{
+ const modern=src('src/route-experience-20261123.js');
+ const modernCss=src('src/route-experience.css');
+ assert.match(modern,/mapCard\.querySelector\('\.route-map-card-actions'\)\?\.before\(choices\)/);
+ assert.match(modern,/choices\.id='dj-route-choice-list'/);
+ assert.match(modernCss,/#dj-route-choice-list/);
+ assert.doesNotMatch(compare,/initRouteComparison/);
 });
 test('waypoint search opens the real route editor first and expands via CSS :has',()=>{
  assert.match(ui,/onWaypointClick/);
