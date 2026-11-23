@@ -64,7 +64,7 @@ test('My Info subviews animate by direction without blank-fading the page root',
   assert.match(css,/\.dj885-type-choices[\s\S]*?button\[aria-pressed="true"\]/);
   assert.match(css,/\.nav-tab:is\(\.active,\[aria-current="page"\]\)/);
   const route=read('src/route-experience.css');
-  assert.match(route,/\.route-location-row[\s\S]*?min-height:66px!important/);
+  assert.match(route,/#dj-walk-fields \.route-location-row[\s\S]*?min-height:70px/);
   assert.match(route,/#dj-route-choice-list/);
  assert.match(css,/\.dj834-detail-nav\{/);
  assert.match(css,/\.dj834-choice-settings > button\{/);
