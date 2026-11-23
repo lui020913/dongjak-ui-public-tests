@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.120",
+  "application_version": "9.2.121",
   "public_work_branch": "main",
-  "purpose": "User-directed release of merged PR #382 (My Info update-history wrapping and dock ghost-footer repair), PR #383 (six-factor observed-only PRI walking-route candidate comparison with conservative coverage gates and original standard/gentle routing preserved), and PR #386 (minimal 73px+safe-area margin reducing actual My Info scrollport beneath fixed dock, exact source CI #45154814115 succeeded). Preserve original map navigation, route geometry, GIS, live transit, night visibility, user data, auth, AI, Supabase, dark/light constraints and all other production functions. Unknown or partial PRI scores must never be represented as safe or as complete six-factor evidence. Protected exact-source build, Preview, 12 independent phone QA shards including 375/390/430 font settings scrollport geometry, desktop/tablet checks, gated Production, postdeploy source integrity and rollback. Never bypass failing tests.",
-  "attempt": 313,
+  "purpose": "User-directed release of merged PR #390: unify iPhone bottom dock without colored selected-tab block, relocate My Info child back/title navigation into the fixed header, use 44px/360ms directional child-screen sliding without page fade, tune walking route form spacing, and improve typography selection pill contrast. PR head 168762d9ebb7602f0c08a91b29aaf8f32cb8c548; merged main 2e78d6781f5df9df2c7b1d7144d5ac264647415f; source CI run 45160404283 succeeded including all unit regressions, app build, and 3 mobile viewports. Retain all existing six-factor PRI scores, observed-only safety-route gates, GIS, map camera and routing, data, login, transit, AI, weather, themes, and bottom navigation functions. Run exact source guarded Preview, 12 disjoint phone QA shards, PC/tablet checks, protected Production with monotonic version and live source/API/binding verification; fail closed and preserve prior deployed app on any failure.",
+  "attempt": 314,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Protected attempt #45154000738 built and deployed Preview successfully but mobile QA 9/12 passed and 3/12 failed: type-settings scroll viewport extended about 70px behind fixed dock on 375/390/430 screens. Source CI passing PR #386, squash main commit 8d54a95d1d4e86f301133a2e39c9b2a91c0eb080, moves My Info inner scrollport above dock without touching other tabs. Retry full guarded pipeline; prior attempt did NOT reach Production.",
+  "last_retry_reason": "New post-PR #390 9.2.121 release; the previous 9.2.120 Production workflow 45155936328 succeeded. This is a version-increased exact-source deployment for new merged UI corrections; no failing checks may be bypassed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
