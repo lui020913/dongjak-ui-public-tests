@@ -1719,9 +1719,17 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
  expect(form.panel.left,'top editor spans the viewport').toBeGreaterThanOrEqual(-1);
  expect(form.panel.right,'top editor spans the viewport').toBeLessThanOrEqual(page.viewportSize().width+1);
- expect(form.card.bottom,'the map-visible gap remains below the card').toBeLessThanOrEqual(form.footer.top-24);
- expect(form.panel.bottom,'the top panel clears the floating CTA').toBeLessThanOrEqual(form.footer.top-24);
- // The existing CTA stays naturally after the route editor, above the nav.
+ // Invisible footer layout starts beneath the card, but the native CTA
+ // itself is docked near the bottom. Measure the rendered button.
+ expect(form.card.bottom,'the map-visible gap remains below the card').toBeLessThanOrEqual(form.cta.top-24);
+ expect(form.panel.bottom,'the top panel clears the actual fixed CTA').toBeLessThanOrEqual(form.cta.top-24);
+ const mapGapHit=await page.evaluate(([top,bottom])=>{
+   const map=document.getElementById('map');
+   const target=document.elementFromPoint(Math.round(innerWidth/2),Math.round((top+bottom)/2));
+   return Boolean(map&&target&&(target===map||map.contains(target)));
+ },[form.panel.bottom,form.cta.top]);
+ expect(mapGapHit,'the live map must receive pointer hits between card and CTA').toBe(true);
+ // Keep the real CTA aligned immediately above the native dock.
  // The actual button must remain visible and accept the pointer hit.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
  expect(form.cta.bottom,'actual route CTA must clear fixed tab pill').toBeLessThanOrEqual(form.dock.top-5);
