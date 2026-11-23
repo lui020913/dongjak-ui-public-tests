@@ -2489,6 +2489,7 @@ function showPriRouteAdvice(result){
       '. 실제 통행 위험·안전은 보증하지 않습니다.'
     : '종합 PRI 경로 비교 보류: '+(result.reason==='same-route'?'동일한 경로입니다.':
       result.reason==='similar-risk'?'두 후보의 관측 점수 차이가 작습니다.':
+      result.reason==='excessive-detour'?'위험점수가 낮은 후보가 25% 넘게 우회하므로 자동 추천하지 않습니다.':
       '두 경로의 조사범위가 부족하거나 서로 달라 공정하게 비교할 수 없습니다.')+
       ' 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
       '. 미평가 도로는 안전한 도로로 계산하지 않습니다.';
