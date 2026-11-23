@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.124",
   "public_work_branch": "main",
-  "purpose": "Retry guarded mobile-only release 9.2.124 after PR #394 QA correction, merged as a4b7b45c35f1d6cfd45409dcedc9006ef58361c7. Base route UX PR #392 was source-CI green. First protected Preview 45173527624 passed build, preview, PC/tablet and six mobile shards, but six mobile shards failed exclusively on two stale QA assertions: undefined innerViewportWidth and checking a footer wrapper rather than actual tappable CTA. PR #394 fixes the JS ReferenceError and asserts 44px target, actual button bounds above the tab dock, and elementFromPoint centre hit (not skipped tests); source CI 45174617316 fully passed including three mobile browser viewport sizes. Rebuild a NEW exact source SHA Preview and run ALL 12 mobile QA groups plus PC/tablet before protected Production; do not reuse failed Preview or its checks. Preserve six-factor PRI, native routing, GPS, transit, map and all unrelated features.",
-  "attempt": 318,
+  "purpose": "Guarded exact-source retry 9.2.124 after actual phone UI repair PR #395, squash merged 77408a39998e249bdb33d5128c49c6f6224428a9. The second Preview (run 45175667227) exposed true route edit-panel fullscreen CSS collision and native CTA under the bottom tabs in 375/390/430px: old high-specificity @layer request-completion styles overrode the unified route UI. PR #395 raises scoped input-stage geometry priority, restores bounded map-first form, positions native route submit over measured tab dock with safe-area clearance, and observes route-stage changes. Source CI run 45177923261 passed FULL regression, app build and NEW real route editor CTA 375/390/430px rendered hit-target screenshot tests. Rebuild a NEW Preview for exact commit; rerun all twelve mobile browser QA groups and PC/tablet; Production only if all pass with source SHA/version integrity. Retain all six-factor PRI, mapping, GPS, transit, auth and unrelated interfaces.",
+  "attempt": 319,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-23: release 9.2.124 attempt 317 Preview workflow 45173527624 failed six phone QA shards (3/12, 9/12, 1/12, 4/12, 8/12, 12/12) on two non-product QA assertion errors; Production correctly skipped. Attempt 318 uses PR #394 fix and fresh verification.",
+  "last_retry_reason": "2026-11-23: guarded 9.2.124 attempt 318 run 45175667227 failed 6/12 mobile shards due real rendered route panel/CTA collision. Production skipped. Attempt 319 fixes the actual UI, not merely the test. Do not reuse Preview results.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
