@@ -1295,6 +1295,12 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
      SAME layer for scroll clearance, rather than an ineffective unlayered
      !important that loses to the layered declarations. */
   @layer request-completion {
+    /* The original fullscreen shell reserves 92px on its OUTER panel,
+       which cuts off the scroller above the fixed dock. The inner scroll
+       gutter below is the sole clearance; no blank opaque footer. */
+    html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]) {
+      padding-bottom:0!important;
+    }
     html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
       padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
       scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
