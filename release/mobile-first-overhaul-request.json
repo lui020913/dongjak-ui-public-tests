@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.125",
   "public_work_branch": "main",
-  "purpose": "Guarded Production delivery of approved map-first walking navigation PR #399; PR #400 fixed the production adapter and PR #401 fixed isolated app-only regression path without changing product UI. No standalone route details screen. Route input → two genuinely computed choices max → observed six-factor PRI green/yellow/orange/red road segments on selected route; gray dashed unobserved → live GPS guidance with only End Guidance operable → arrival/stop restores other app controls. Source CI 45211076543 and 45214467197 passed. PR #401 full-app regressions/build passed and UI unchanged; require NEW source-exact Preview and all 12 mobile QA shards plus PC/tablet, Production provenance/version/API/bindings/rollback. Never promote stale Preview or invent PRI coverage.",
-  "attempt": 324,
+  "purpose": "Guarded Production delivery of Naver-style map-first walking navigation PR #399, excluding separate route-details screen; PR #400 release adapter anchor fix, PR #401 isolate-aware source bridge check, PR #403 correctly distinguishes raw source vs transformed release route style. Actual candidate options only standard/gentle; six-factor PRI observed road segments colored green/yellow/orange/red (red high risk) and unknown gray dashed; route comparison PRI only; focus-locked GPS guidance allows only 'End Guidance', then restores normal tabs/maps, arrival summary. Source app regression/build PR #403 45222875821 green. Require fresh exact SHA guarded Preview, 12 mobile QA groups, PC/tablet, strict Production SHA/version/API/binding/rollback gates. Never claim safety for unassessed segments.",
+  "attempt": 325,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt 323 build blocked at app/tests/route-experience-20261123.test.mjs:91 because its new test attempted to read repo-root scripts outside intentionally isolated app-only release tree. PR #401 preserves full checkout adapter assertion and validates native PRI map layer in release tree; app source unchanged. Attempt 324 must build, preview and retest all mobile lanes.",
+  "last_retry_reason": "2026-11-24: attempt 324 failed at one new app Node test, line92, because release adapter correctly replaces raw neutral alternative line with kind-based match expression, whereas regression expected unmodified source. PR #403 verifies exact raw anchor in source checkout and exactly one transformed line in isolated release; app regression and build passed. Attempt325 must run all gates on new source.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
