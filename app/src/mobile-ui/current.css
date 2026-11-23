@@ -1302,8 +1302,11 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
       padding-bottom:0!important;
     }
     html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
-      padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
-      scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+      /* Stop the scroll viewport at the REAL 70px five-tab dock plus its
+         3px bottom offset; do not make history/type content sit behind it. */
+      margin-bottom:calc(73px + env(safe-area-inset-bottom,0px))!important;
+      padding-bottom:24px!important;
+      scroll-padding-bottom:24px!important;
     }
   }
   html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {
