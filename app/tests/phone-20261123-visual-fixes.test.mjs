@@ -50,7 +50,15 @@ test('My Info subviews animate by direction without blank-fading the page root',
  const css=read('src/phone-surface-consistency-20261123.css');
  assert.match(js,/enter\(detail,'forward'\)/);
  assert.match(js,/enter\(landing,'back'\)/);
- assert.match(js,/opacity:\.88,transform/);
+  // Visible directional motion, without fading content or the page root.
+  assert.match(js,/direction==='back'\?-44:44/);
+  assert.match(js,/opacity:1,transform/);
+  assert.match(js,/duration:360,easing/);
+  assert.doesNotMatch(js,/opacity:\.88,transform/);
+  assert.match(css,/\.dj834-detail-nav\s*\{[\s\S]*?position:sticky!important/);
+  assert.match(css,/\.dj885-type-choices[\s\S]*?button\[aria-pressed="true"\]/);
+  assert.match(css,/\.nav-tab:is\(\.active,\[aria-current="page"\]\)/);
+  assert.match(css,/\.route-location-row[\s\S]*?min-height:74px!important/);
  assert.match(css,/\.dj834-detail-nav\{/);
  assert.match(css,/\.dj834-choice-settings > button\{/);
  // Production builds inject the same tracked source into the isolated app.
