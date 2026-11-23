@@ -350,7 +350,7 @@ test('community composer stays fixed while the phone keyboard viewport contracts
   await expect(editor).toBeVisible({timeout:12000});
   await expect(editor.locator('#community-form')).toBeVisible();
   const inspect=()=>page.evaluate(()=>{
-    const root=document.getElementById('dj-community-compose-overlay');
+    const root=document.getElementById('dj-community-editor-portal');
     const head=root.querySelector('.community-form-top').getBoundingClientRect();
     const scroll=root.querySelector('.dj-compose-scroll').getBoundingClientRect();
     const foot=root.querySelector('.dj-compose-footer').getBoundingClientRect();
