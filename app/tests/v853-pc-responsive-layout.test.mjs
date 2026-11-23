@@ -32,7 +32,7 @@ test('facility detail uses one draggable sheet presentation at every viewport',(
 
 test('transit marker sizing and map camera focus use the same mobile-first geometry',()=>{
  const transport=read('src/transport-map.js');
- assert.ok(transport.includes('const phoneFocus=true'));
+ assert.ok(transport.includes('usableMapSelectionOffset'));
  assert.ok(transport.includes('syncSharedBusPresentation'));
  assert.ok(transport.includes("setLayoutProperty('transport-bus-names','text-offset',[0,1.85])"));
  assert.ok(transport.includes("setLayoutProperty('transport-bus-names-close','text-offset',[0,1.85])"));
