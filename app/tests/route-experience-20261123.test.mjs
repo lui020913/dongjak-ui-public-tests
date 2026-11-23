@@ -84,3 +84,13 @@ test('one input/editor and no standalone third route-details page',()=>{
  assert.match(css,/data-dj-route-stage="guiding"/);
  assert.doesNotMatch(js,/dj-route-pri-detail/);
 });
+
+
+test('release mobile-next patch targets the current route source and avoids unscored alternatives',()=>{
+ const main=read('src/main.js');
+ const release=read('scripts/apply-mobile-next.mjs');
+ const sentinel="paint:{'line-color':'#87939b','line-width'";
+ assert.equal(main.split(sentinel).length-1,1,'exact release patch anchor must occur once');
+ assert.ok(release.includes(sentinel),'release adapter must target the current actual source line');
+ assert.match(main,/enabled\|\|navMode\?'none':'visible'/);
+});
