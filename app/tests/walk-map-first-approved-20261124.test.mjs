@@ -16,6 +16,10 @@ test('approved walking input is a real map with a TOP location card and separate
   assert.match(ui,/on\(center,'click',\(\)=>byId\('center-dongjak'\)\?\.click\(\)\)/);
   assert.match(ui,/on\(locate,'click',\(\)=>byId\('current-location'\)\?\.click\(\)\)/);
   assert.match(ui,/mapActions\.hidden=clear<134/);
+  assert.match(ui,/const navRect=byId\('bottom-nav'\)\?\.getBoundingClientRect\(\)/);
+  assert.match(ui,/const desired=navRect\.top-12-actual\.height/);
+  assert.match(ui,/routeFooter\.style\.setProperty\('transform','translateY\('/);
+  assert.match(ui,/if\(stage!=='input'\)restoreInputFooter\(\)/);
 });
 
 test('input redesign does not replace native place search, route calculation, PRI preview, or locked guidance',()=>{

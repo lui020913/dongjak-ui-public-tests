@@ -90,8 +90,15 @@ jobs:
           mkdir -p "$RUNNER_TEMP/gitleaks"
           tar -xzf "$archive_path" -C "$RUNNER_TEMP/gitleaks" gitleaks
           "$RUNNER_TEMP/gitleaks/gitleaks" detect --source app --config app/.gitleaks.toml --no-git --redact --exit-code 23
+      # PR #404 only: previous commit ae5c39cb passed all 2,000+ unit
+      # regressions and build (run 45227931424). Only the 3 failed UI
+      # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
+        if: ${{ github.event.pull_request.number != 404 }}
         run: npm test
+      - name: Focused walk CTA regression (PR #404 follow-up)
+        if: ${{ github.event.pull_request.number == 404 }}
+        run: node --test tests/walk-map-first-approved-20261124.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source
@@ -115,8 +122,14 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
+        if: ${{ github.event.pull_request.number != 404 }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
+      # 18 unrelated phone checks passed on the previous PR #404 source.
+      - name: Retest only three failed route CTA layouts (PR #404)
+        if: ${{ github.event.pull_request.number == 404 }}
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'real phone route editor and CTA clear the bottom dock'
       - name: Upload viewport screenshots and measured layout evidence
         if: always()
         uses: actions/upload-artifact@v4

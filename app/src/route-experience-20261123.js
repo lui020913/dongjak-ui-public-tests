@@ -276,10 +276,46 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const nativeObserver=new MutationObserver(refreshChoices);
   for(const native of variants.querySelectorAll('[data-route-variant]'))
     nativeObserver.observe(native,{attributes:true,attributeFilter:['aria-pressed','disabled']});
+  // Historic sheet styles can position a fixed footer relative to the
+  // top route panel instead of the viewport. Keep the original CTA and its
+  // handlers, then correct its *measured* position against the real dock.
+  const routeFooter=byId('dj910-route-footer');
+  const footerKeys=['position','top','bottom','left','right','width','max-width','z-index','transform','translate','margin'];
+  const originalFooter=routeFooter?footerKeys.map(key=>({
+    key,value:routeFooter.style.getPropertyValue(key),
+    priority:routeFooter.style.getPropertyPriority(key)
+  })):[];
+  const restoreInputFooter=()=>{
+    if(!routeFooter)return;
+    for(const {key,value,priority} of originalFooter){
+      if(value)routeFooter.style.setProperty(key,value,priority);
+      else routeFooter.style.removeProperty(key);
+    }
+  };
+  const pinInputFooter=()=>{
+    if(app.dataset.djRouteStage!=='input'||!routeFooter)return;
+    const navRect=byId('bottom-nav')?.getBoundingClientRect();
+    if(!navRect?.height)return;
+    const dockOffset=Math.max(8,win.innerHeight-navRect.top+12);
+    for(const [key,value] of [
+      ['position','fixed'],['top','auto'],['bottom',dockOffset+'px'],
+      ['left','12px'],['right','12px'],['width','calc(100vw - 24px)'],
+      ['max-width','calc(100vw - 24px)'],['z-index','7600'],
+      ['transform','none'],['translate','none'],['margin','0']
+    ])routeFooter.style.setProperty(key,value,'important');
+    // Some legacy transformed ancestors remain fixed containing blocks.
+    // Use a measured fallback rather than letting the button hide the fields.
+    const actual=routeFooter.getBoundingClientRect();
+    const desired=navRect.top-12-actual.height;
+    const delta=desired-actual.top;
+    if(Math.abs(delta)>1)
+      routeFooter.style.setProperty('transform','translateY('+Math.round(delta)+'px)','important');
+  };
   // Leave map controls only in the truly exposed map gap; on short phones
   // omit them rather than overlap the location card or the route CTA.
   const positionMapActions=()=>{
     if(app.dataset.djRouteStage!=='input'){mapActions.hidden=true;return;}
+    pinInputFooter();
     const top=panel.getBoundingClientRect().bottom;
     const footer=byId('dj910-route-footer')?.getBoundingClientRect();
     const bottom=footer?.top??win.innerHeight-180;
@@ -299,6 +335,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
     shield.hidden=stage!=='guiding';
+    if(stage!=='input')restoreInputFooter();
     mapActions.hidden=stage!=='input';
     if(stage==='input')win.requestAnimationFrame?.(positionMapActions);
     if(stage==='guiding')stop?.focus({preventScroll:true});
@@ -310,6 +347,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   setStage();refreshChoices();
   return ()=>{
     stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
+    restoreInputFooter();
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
     top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
