@@ -42,9 +42,10 @@ async function geometry(page,sel){
   await expect.poll(async()=>{
     const r=await page.locator(sel).boundingBox();
     const dock=await page.locator('#bottom-nav').boundingBox();
-    return Boolean(r&&dock&&r.x>=-1&&r.x<=20&&r.y>=0&&r.y<=80&&
-      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width+2&&
-      r.y+r.height<=dock.y-3);
+    const vh=page.viewportSize().height;
+    return Boolean(r&&dock&&r.x>=8&&r.x<=20&&r.y>=vh*.20&&r.y<=vh*.78&&
+      r.width>=page.viewportSize().width-42&&r.x+r.width<=page.viewportSize().width-8&&
+      r.y+r.height<=dock.y-5);
   }).toBe(true);
   return;
  }
