@@ -47,7 +47,11 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     const caption=doc.createElement('summary');caption.textContent='경유지·다른 이동 옵션';
     const body=doc.createElement('div');body.className='dj-route-advanced-body';
     tools.forEach(el=>body.append(el));advanced.append(caption,body);
-    const submit=byId('route-calc');submit?.before(advanced);
+    // The native CTA is reparented into a sticky panel footer by v910.
+    // Keep optional controls in the scrolling editor, never inside that footer.
+    const status=byId('route-status');
+    if(status?.parentElement===routeCard)status.before(advanced);
+    else routeCard.append(advanced);
   }
   const disclaimer=panel.querySelector(':scope > .dj836-sheet-body > .page-note');
   if(disclaimer){
