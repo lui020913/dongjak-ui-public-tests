@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.125",
   "public_work_branch": "main",
-  "purpose": "Guarded release 9.2.125 for approved map-first walking routes PR #399 plus source-CI-green production adapter fix PR #400 (squash cde6bd8c3c0bf81f0d2ae933dd446aa6a1177f52). Input → two actually calculated pedestrian candidate comparison → GPS guidance → stop. No separate route-detail step. Selected route colored only where six-factor PRI is spatially observed; red means higher risk; unassessed gray dashed. Real navigation blocks tabs, map gestures, search, layers, AI, and other controls until End Guidance. PR #399 source CI 45211076543 and PR #400 source CI 45214467197 passed. Rebuild a NEW source-exact Preview, run all 12 mobile QA groups plus PC/tablet, enforce protected Production SHA/version/health/rollback gates. Existing routing, GPS, transit and unrelated features remain protected.",
-  "attempt": 323,
+  "purpose": "Guarded Production delivery of approved map-first walking navigation PR #399; PR #400 fixed the production adapter and PR #401 fixed isolated app-only regression path without changing product UI. No standalone route details screen. Route input → two genuinely computed choices max → observed six-factor PRI green/yellow/orange/red road segments on selected route; gray dashed unobserved → live GPS guidance with only End Guidance operable → arrival/stop restores other app controls. Source CI 45211076543 and 45214467197 passed. PR #401 full-app regressions/build passed and UI unchanged; require NEW source-exact Preview and all 12 mobile QA shards plus PC/tablet, Production provenance/version/API/bindings/rollback. Never promote stale Preview or invent PRI coverage.",
+  "attempt": 324,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt 322 failed in build before Preview because scripts/apply-mobile-next.mjs required obsolete alternative walking-route #bd6980 while new PRI route implementation correctly uses neutral #87939b. PR #400 updates exact release adapter patch anchor, source CI green. Retry 323 from NEW exact SHA; do not reuse earlier QA evidence.",
+  "last_retry_reason": "2026-11-24: attempt 323 build blocked at app/tests/route-experience-20261123.test.mjs:91 because its new test attempted to read repo-root scripts outside intentionally isolated app-only release tree. PR #401 preserves full checkout adapter assertion and validates native PRI map layer in release tree; app source unchanged. Attempt 324 must build, preview and retest all mobile lanes.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
