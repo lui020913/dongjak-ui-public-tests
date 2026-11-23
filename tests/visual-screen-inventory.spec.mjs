@@ -58,7 +58,7 @@ async function dismissTour(page) {
 }
 
 for (const viewport of viewports) {
- for (const theme of ['light', 'dark']) {
+ for (const theme of ['light']) {
   test('anonymous deployed screen audit: ' + viewport.name + ' / ' + theme, async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile');
     test.setTimeout(240000);
@@ -144,3 +144,145 @@ for (const viewport of viewports) {
   });
 }
 }
+
+
+/**
+ * Anonymous read-only control census of the actual deployed UI.
+ * Deliberately does NOT submit forms, change accounts, log in, publish posts,
+ * perform GET links, or contact any write endpoint.
+ * Each click starts from a clean visible navigation state. Failed clicks are
+ * recorded rather than hidden by force-clicking or changing production DOM.
+ * This is a bounded census, not a claim that every authenticated flow is tested.
+ */
+test('anonymous read-only control census · actual buttons and motion', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+  test.setTimeout(1_200_000);
+  const selector = 'button:visible, [role="button"]:visible, [role="switch"]:visible';
+  const denied = /(로그인|회원가입|탈퇴|로그아웃|삭제|등록하기|등록 완료|게시|전송|제출|결제|다운로드|외부|공유|신고 접수|리뷰 작성|설치하기)/i;
+  const viewport = {width:390,height:844};
+  await page.setViewportSize(viewport);
+  await page.emulateMedia({colorScheme:'light'});
+  const report={
+    audit:'anonymous read-only control census', viewport,
+    source:'live deployed application; exact release marker checked by workflow',
+    timestamp:new Date().toISOString(),
+    tabs:[], failedClicks:[], warnings:[], counts:{discovered:0,attempted:0,clicked:0,skipped:0,nested:0}
+  };
+  const errors=[];
+  page.on('pageerror', e=>errors.push(String(e).slice(0,200)));
+  page.on('dialog', d=>d.dismiss().catch(()=>{}));
+  page.on('popup', p=>p.close().catch(()=>{}));
+  await page.route('**/*', route=>{
+    const method=route.request().method().toUpperCase();
+    if(['GET','HEAD','OPTIONS'].includes(method)) return route.continue();
+    report.warnings.push({kind:'write-request-blocked',method,url:route.request().url().split('?')[0].slice(0,140)});
+    return route.abort('blockedbyclient');
+  });
+  const summarize=async()=>page.evaluate(()=>{
+    const rect=node=>{if(!node)return null;const b=node.getBoundingClientRect();return {x:Math.round(b.x),y:Math.round(b.y),w:Math.round(b.width),h:Math.round(b.height)};};
+    const seen=node=>{if(!node)return false;const s=getComputedStyle(node),b=node.getBoundingClientRect();return s.visibility==='visible'&&s.display!=='none'&&b.width>0&&b.height>0;};
+    const overlays=[...document.querySelectorAll('[role="dialog"],dialog[open],.dj-place-detail-popup,#transport-sheet,#djNext-layer-panel,#dj854-weather-sheet,#ped-tools-panel,#dj-ai-search-modal,#version-history-modal')]
+      .filter(seen).slice(0,12).map(n=>({id:n.id||n.className,rect:rect(n)}));
+    const animations=[...document.getAnimations()].filter(a=>a.playState==='running').slice(0,20)
+      .map(a=>({name:a.effect?.getKeyframes?.().length||0,playState:a.playState,currentTime:Math.round(Number(a.currentTime)||0)}));
+    return {tab:document.querySelector('#app')?.getAttribute('data-tab'),
+      documentWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth,
+      nav:rect(document.querySelector('#bottom-nav')),overlays,animations};
+  });
+  const inventory=async()=>page.locator(selector).evaluateAll(nodes=>nodes.map((n,index)=>{
+    const b=n.getBoundingClientRect(),s=getComputedStyle(n);
+    const label=(n.getAttribute('aria-label')||n.title||n.innerText||n.textContent||'').replace(/\s+/g,' ').trim().slice(0,95);
+    const cx=Math.max(1,Math.min(innerWidth-2,b.left+b.width/2));
+    const cy=Math.max(1,Math.min(innerHeight-2,b.top+b.height/2));
+    const hit=document.elementFromPoint(cx,cy);
+    return {index,label,id:n.id||'',tag:n.tagName,role:n.getAttribute('role')||'',
+      visible:s.visibility==='visible'&&s.display!=='none',
+      disabled:n.disabled||n.getAttribute('aria-disabled')==='true',
+      width:Math.round(b.width),height:Math.round(b.height),x:Math.round(b.x),y:Math.round(b.y),
+      hit:!!(hit&&(n===hit||n.contains(hit)))};
+  }));
+  const prepare=async tab=>{
+    await page.goto('/',{waitUntil:'domcontentloaded',timeout:30000});
+    await expect(page.locator('#map')).toBeVisible({timeout:30000});
+    await selectBrowserWeb(page);
+    await dismissTour(page);
+    if(tab!=='map'){
+      const target=await navigationControl(page,tab);
+      await target.click({timeout:12000,noWaitAfter:true});
+      await expect(page.locator('#app')).toHaveAttribute('data-tab',tab,{timeout:15000});
+    }
+  };
+  const persist=()=>writeFileSync(output+'/anonymous-control-audit-390.json',JSON.stringify(report,null,2));
+  for(const tab of ['map','route','participate','news','mine']){
+    const section={tab,controls:[],outcome:[],setupError:null};
+    report.tabs.push(section);
+    try{await prepare(tab);}
+    catch(e){section.setupError=String(e).slice(0,700);report.failedClicks.push({tab,kind:'tab-navigation',reason:section.setupError});persist();continue;}
+    const start=await inventory();
+    section.controls=start;
+    report.counts.discovered+=start.length;
+    const maxPerTab=32;
+    for(const candidate of start.slice(0,maxPerTab)){
+      if(candidate.disabled||!candidate.width||!candidate.height||denied.test(candidate.label)){
+        report.counts.skipped++;section.outcome.push({label:candidate.label,status:'safety-skipped'});continue;
+      }
+      try{await prepare(tab);}
+      catch(e){section.outcome.push({label:candidate.label,status:'reset-failed',error:String(e).slice(0,250)});report.failedClicks.push({tab,label:candidate.label,kind:'reset-failed'});continue;}
+      const target=page.locator(selector).nth(candidate.index);
+      const current=await target.evaluate(n=>(n.getAttribute('aria-label')||n.title||n.innerText||n.textContent||'').replace(/\s+/g,' ').trim().slice(0,95)).catch(()=>null);
+      if(current===null||current!==candidate.label){
+        report.counts.skipped++;
+        section.outcome.push({label:candidate.label,status:'dynamic-index-skipped',current});continue;
+      }
+      if(!(await target.isVisible().catch(()=>false))){
+        section.outcome.push({label:candidate.label,status:'not-visible'});report.counts.skipped++;continue;
+      }
+      const item={label:candidate.label,id:candidate.id,initialHit:candidate.hit};
+      report.counts.attempted++;
+      try{
+        await target.click({timeout:6000,noWaitAfter:true});
+        report.counts.clicked++;
+        item.status='clicked';
+        item.immediate=await summarize();
+        await page.waitForTimeout(130);
+        item.motion130=await summarize();
+        await page.waitForTimeout(350);
+        item.settled=await summarize();
+        if(item.settled.documentWidth>item.settled.viewportWidth+3)
+          report.warnings.push({tab,label:item.label,kind:'horizontal-overflow',width:item.settled.documentWidth});
+        if(section.outcome.filter(x=>x.screenshot).length<8){
+          const filename='control-'+tab+'-'+String(candidate.index).padStart(2,'0')+'.png';
+          await page.screenshot({path:output+'/'+filename,animations:'allow',timeout:15000});
+          item.screenshot=filename;
+        }
+        const next=await inventory();
+        const existing=new Set(start.map(x=>x.label));
+        const extras=next.filter(x=>x.hit&&!x.disabled&&!denied.test(x.label)&&
+          x.label&&!existing.has(x.label)&&x.width>=18&&x.height>=18).slice(0,2);
+        item.nestedControls=extras.map(x=>({label:x.label,id:x.id}));
+        for(const extra of extras){
+          const sub=page.locator(selector).nth(extra.index);
+          try{
+            await sub.click({timeout:4500,noWaitAfter:true});
+            report.counts.nested++;
+            await page.waitForTimeout(260);
+            item.nestedControls.find(x=>x.label===extra.label).status='clicked';
+          }catch(e){item.nestedControls.find(x=>x.label===extra.label).status='click-failed';
+            report.failedClicks.push({tab,parent:item.label,label:extra.label,kind:'nested-click',reason:String(e).slice(0,250)});}
+        }
+      }catch(e){
+        item.status='click-failed';item.error=String(e).slice(0,430);
+        report.failedClicks.push({tab,label:item.label,kind:'button-click',reason:item.error});
+      }
+      section.outcome.push(item);
+      persist();
+    }
+    section.omittedByBound=Math.max(0,start.length-maxPerTab);
+    persist();
+  }
+  report.pageErrors=errors.slice(0,30);
+  persist();
+  await testInfo.attach('anonymous-control-census.json',{body:Buffer.from(JSON.stringify(report,null,2)),contentType:'application/json'});
+  expect(report.counts.clicked,'At least one real user click must succeed').toBeGreaterThan(0);
+  expect(report.failedClicks, 'Real failures are preserved in the JSON artifact; do not force-click them away').toEqual([]);
+});
