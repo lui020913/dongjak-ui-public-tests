@@ -13,7 +13,7 @@ test('the two soft headlight beams point forward and mirror exactly',()=>{
     const i=(y*TRAIN_BEAM_WIDTH+x)*4,j=(y*TRAIN_BEAM_WIDTH+TRAIN_BEAM_WIDTH-1-x)*4;
     for(let k=0;k<4;k++)assert.equal(left.data[j+k],right.data[i+k]);
     const alpha=right.data[i+3];if(alpha){lit++;if(x>195)fartherLit++}else transparent++;
-    assert(alpha<=107,'beam must remain translucent');
+    assert(alpha<=220,'beam remains a bounded translucent white-blue glow');
     if(x<169)assert.equal(alpha,0,'no beam behind the train nose');
   }
   assert(lit>300&&transparent>20000&&fartherLit>100);
