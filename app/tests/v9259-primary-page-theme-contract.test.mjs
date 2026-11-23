@@ -1,8 +1,9 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-const css=readFileSync(new URL('../src/mobile-primary-fullscreen.css',import.meta.url),'utf8');
+const css=readPrimaryPhoneCss();
 const status=readFileSync(new URL('../src/mobile-pwa-status-tone-v793.js',import.meta.url),'utf8');
 
 test('all four primary mobile pages use the same theme surface from header through content and footer',()=>{
