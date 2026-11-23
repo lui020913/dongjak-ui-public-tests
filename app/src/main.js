@@ -78,7 +78,7 @@ import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
-import {loadCompositePriForRoutes,compareCompositePriRoutes} from './pri-route-exposure.mjs';
+import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
@@ -3063,8 +3063,7 @@ async function calculateRoute() {
     void (async()=>{
       let comparison=null;
       try {
-        const composite=await loadCompositePriForRoutes();
-        comparison=compareCompositePriRoutes({standard,gentle},composite);
+        comparison=await evaluateCompositePriRouteCandidates({standard,gentle});
       } catch(error) {
         console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
       }
