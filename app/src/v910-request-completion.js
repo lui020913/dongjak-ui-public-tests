@@ -96,20 +96,27 @@ export function installRequestCompletion(doc=document,win=window){
       const lookup=body?.querySelector('.dj-place-official-lookup');
       if(ai&&lookup&&ai.compareDocumentPosition(lookup)&2)body.insertBefore(ai,lookup);
     }
-    // A real sticky footer inside the native scrolling route editor.
+    // The *same native CTA* is portaled outside the bounded route sheet on
+    // phones. A fixed child of that sheet may be positioned relative to the
+    // sheet's containing block, causing a feedback loop between its measured
+    // top and the sheet's computed max-height. Keep the handler and node ID.
     const calc=doc.getElementById('route-calc');
-    if(calc&&!doc.getElementById('dj910-route-footer')){
-      const footer=doc.createElement('div');footer.id='dj910-route-footer';
-      const panel=doc.getElementById('route-panel');
-      panel.append(footer);footer.append(calc);
-    }
-    // The release overlay has highly specific competing footer rules. A CSS
-    // declaration alone did not prevent the fixed nav intercepting route-calc
-    // in a real 390px Playwright run. Anchor using the actual nav geometry and
-    // inline !important (higher priority than all authored CSS selectors).
-    const footer=doc.getElementById('dj910-route-footer');
     const route=doc.getElementById('route-panel');
-    if(footer&&calc&&route&&!route.hidden&&win.innerWidth<700&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
+    let footer=doc.getElementById('dj910-route-footer');
+    if(calc&&!footer&&route){
+      footer=doc.createElement('div');
+      footer.id='dj910-route-footer';
+      route.append(footer);
+      footer.append(calc);
+    }
+    const phone=win.innerWidth<700;
+    const routeInput=Boolean(phone&&route&&!route.hidden&&app.dataset.tab==='route'&&app.dataset.djRouteStage==='input');
+    if(footer&&route){
+      const destination=phone?app:route;
+      if(footer.parentElement!==destination)destination.append(footer);
+      footer.hidden=phone&&!routeInput;
+    }
+    if(footer&&calc&&routeInput&&n&&Number.isFinite(n.top)&&n.top>0&&n.height>0){
       const set=(prop,value)=>{
         if(footer.style.getPropertyValue(prop)!==value||
             footer.style.getPropertyPriority(prop)!=='important')
@@ -126,23 +133,18 @@ export function installRequestCompletion(doc=document,win=window){
       set('padding','0');
       set('z-index','7005');
       set('pointer-events','auto');
-      // Fixed positioning can still have a transformed containing block on
-      // some PWA browsers. Correct any *measured* overlap, not a guessed gap.
       set('transform','none');
+      // Verify and correct against the measured dock. The footer is now a
+      // sibling of the route sheet; its coordinates cannot shrink the sheet.
       const bounds=calc.getBoundingClientRect?.();
       const delta=bounds?Math.max(0,Math.ceil(bounds.bottom-n.top+10)):0;
       if(delta>0)set('transform',`translateY(-${delta}px)`);
-      // The route sheet has its own scrollport. Size its visible edge against
-      // the REAL submit button, not the fixed footer wrapper or a guessed vh.
-      // Keep this coordinate as viewport pixels so the editor cannot cover
-      // the primary action at 375/390/430px or after browser chrome changes.
-      const hitBounds=calc.getBoundingClientRect?.();
-      if(hitBounds&&hitBounds.height>=36&&Number.isFinite(hitBounds.top))
-        variable('--dj-route-cta-top',Math.max(90,Math.floor(hitBounds.top))+'px');
       route.dataset.djRouteCtaDocked='true';
-    }else if(footer&&footer.style?.getPropertyPriority?.('position')==='important'){
-      for(const prop of ['position','inset','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
-        footer.style.removeProperty(prop);
+    }else{
+      if(footer&&footer.style?.getPropertyPriority?.('position')==='important'){
+        for(const prop of ['position','inset','bottom','left','right','width','margin','padding','z-index','pointer-events','transform'])
+          footer.style.removeProperty(prop);
+      }
       route?.removeAttribute?.('data-dj-route-cta-docked');
     }
     const safety=doc.querySelector('#bottom-nav [data-tab="map"] .nav-icon');
