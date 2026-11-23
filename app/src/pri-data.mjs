@@ -113,33 +113,37 @@ export function observedFactorScore(s,id){
 export const CURRENT_VULNERABILITY_FACTORS=Object.freeze(['lighting','accidents','protectionGap']);
 export const CURRENT_FOUR_FACTORS=Object.freeze(['lighting','accidents','protectionGap','speed']);
 export const CURRENT_SIX_FACTORS=Object.freeze([...CURRENT_FOUR_FACTORS,'crossing','sharedRoad']);
-export function currentSixFactorCoverage(segment){
- return CURRENT_SIX_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
+// One observed-only implementation for the legacy 3, interim 4 and research 6
+// factor views. These exported wrappers keep the historical API unchanged.
+function observedFactorValues(segment, ids){
+ return ids.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
 }
-export function currentSixFactorScore(segment){
- const values=CURRENT_SIX_FACTORS.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
- // Full research index is an equal-weight mean of six risk factors.
- // With incomplete survey coverage, show only an explicitly labeled observed-only
- // preliminary mean, never six-factor completion or unobserved zero-risk values.
+function observedFactorCoverage(segment, ids){
+ return observedFactorValues(segment,ids).length;
+}
+function observedFactorMean(segment, ids){
+ const values=observedFactorValues(segment,ids);
+ // NULL and modeled defaults are never treated as zero-risk evidence.
+ // Incomplete coverage yields a preliminary mean of observed factors only.
  return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
 }
+export function currentSixFactorCoverage(segment){
+ return observedFactorCoverage(segment,CURRENT_SIX_FACTORS);
+}
+export function currentSixFactorScore(segment){
+ return observedFactorMean(segment,CURRENT_SIX_FACTORS);
+}
 export function currentVulnerabilityCoverage(segment){
-  return CURRENT_VULNERABILITY_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
+ return observedFactorCoverage(segment,CURRENT_VULNERABILITY_FACTORS);
 }
 export function currentVulnerabilityScore(segment){
-  const values=CURRENT_VULNERABILITY_FACTORS.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
-  // At least two independent observations are required. Unobserved accident
-  // polygons are NOT a fabricated zero-risk score, nor a blanket 100-safety.
-  return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+ return observedFactorMean(segment,CURRENT_VULNERABILITY_FACTORS);
 }
 export function currentFourFactorCoverage(segment){
-  return CURRENT_FOUR_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
+ return observedFactorCoverage(segment,CURRENT_FOUR_FACTORS);
 }
 export function currentFourFactorScore(segment){
-  const values=CURRENT_FOUR_FACTORS.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
-  // The denominator is the number of genuinely observed indicators.
-  // At most four contribute, never replace an unknown speed or accident with zero.
-  return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+ return observedFactorMean(segment,CURRENT_FOUR_FACTORS);
 }
 export function segmentScore(bundle,s,mode){
  if(mode==='current6')return currentSixFactorScore(s);
