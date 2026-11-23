@@ -1700,11 +1700,12 @@ test('phone selected dock has no color plate and route form is vertically balanc
  const routeDock=await checkDock('route');
  const form=await page.evaluate(()=>{
   const panel=document.querySelector('#route-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
-  const card=body.querySelector(':scope > .route-card'),footer=panel.querySelector(':scope > #dj910-route-footer');
+  const card=body.querySelector(':scope > .route-card'),footer=document.getElementById('dj910-route-footer');
   const dock=document.getElementById('bottom-nav'),cta=document.getElementById('route-calc');
   const box=n=>{const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height};};
   const b=cta.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
   return {panel:box(panel),body:box(body),card:box(card),footer:box(footer),dock:box(dock),cta:box(cta),
+    footerPortaled:footer.parentElement===document.getElementById('app'),
     ctaHit:hit===cta||cta.contains(hit),ctaVisible:b.width>=40&&b.height>=44,
     formDisplay:getComputedStyle(body).display,cardPadding:getComputedStyle(card).paddingTop,
     swapVisible:getComputedStyle(document.getElementById('dj-route-swap')).display!=='none',
@@ -1719,6 +1720,7 @@ test('phone selected dock has no color plate and route form is vertically balanc
  // A long editable form may extend inside its scrollport, but the entire
  // clipped panel must remain above the tappable primary action.
  expect(form.panel.bottom,'visible route editor must clear the primary CTA').toBeLessThanOrEqual(form.cta.top-6);
+ expect(form.footerPortaled,'mobile CTA must be outside the clipped directions sheet').toBe(true);
  // The footer wrapper can extend behind the safe-area dock; only the real CTA
  // determines whether a user can see and tap the route action.
  expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
