@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     env:
-      DONGJAK_TARGET_URL: ${{ vars.DONGJAK_TARGET_URL || 'https://v881-integrated-1116.dongjak-walk-safety-preview.pages.dev/' }}
+      DONGJAK_TARGET_URL: ${{ vars.DONGJAK_TARGET_URL || 'https://dongjak-walk-safety-preview.pages.dev/' }}
     steps:
       - uses: actions/checkout@v4
         with:
