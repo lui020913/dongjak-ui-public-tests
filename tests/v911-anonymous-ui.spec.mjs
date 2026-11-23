@@ -1564,13 +1564,13 @@ test('phone speed limit risk is selectable with PDF thresholds and real source l
 });
 
 
-test('phone four-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',{tag:'@phone-layout'},async({page})=>{
+test('phone six-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await ready(page);
  await page.evaluate(()=>document.getElementById('dj-pri-toggle')?.click());
  const dialog=page.locator('#dj-pri-dialog');
  await expect(dialog).toBeVisible();
- const composite=dialog.getByRole('button',{name:/종합 보행 취약도 · 4개 지표/});
+ const composite=dialog.getByRole('button',{name:/종합 보행 취약도 · 6개 지표/});
  await expect(composite).toBeEnabled({timeout:45000});
  const ui=await dialog.evaluate(node=>{
   const r=node.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect();
@@ -1580,13 +1580,13 @@ test('phone four-indicator vulnerability and bottom-docked wide sheets match vis
  expect(ui.right).toBeGreaterThanOrEqual(page.viewportSize().width-16);
  expect(ui.bottom).toBeLessThanOrEqual(ui.navTop-3);
  expect(ui.navTop-ui.bottom).toBeLessThan(30);
- if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-four-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
+ if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-six-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
  await composite.click();
  await expect(dialog).toBeHidden();
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
- await expect(app).toHaveAttribute('data-dj-pri-mode','current4');
+ await expect(app).toHaveAttribute('data-dj-pri-mode','current6');
  await expect(legend).toBeVisible();
- await expect(legend).toContainText('4개 항목');
+ await expect(legend).toContainText('6개 항목');
  const rect=await legend.evaluate(node=>{
   const r=node.getBoundingClientRect(),nav=document.getElementById('bottom-nav').getBoundingClientRect();
   return {left:r.left,right:r.right,bottom:r.bottom,navTop:nav.top};
@@ -1596,9 +1596,9 @@ test('phone four-indicator vulnerability and bottom-docked wide sheets match vis
  expect(rect.bottom).toBeLessThanOrEqual(rect.navTop-3);
  expect(rect.navTop-rect.bottom).toBeLessThan(30);
  await legend.getByRole('button',{name:'평가 기준 보기'}).click();
- await expect(legend).toContainText('4개 평가항목');
+ await expect(legend).toContainText('6개 지수');
  await expect(legend).toContainText('제한속도');
- if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-four-factor-legend.png',{body:await page.screenshot(),contentType:'image/png'});
+ if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-six-factor-legend.png',{body:await page.screenshot(),contentType:'image/png'});
  await legend.getByRole('button',{name:'끄기'}).click();
  await expect(app).not.toHaveAttribute('data-dj-pri-visible','true');
 });
