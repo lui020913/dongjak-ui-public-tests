@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.113",
+  "application_version": "9.2.114",
   "public_work_branch": "main",
-  "purpose": "Owner-approved 9.2.113 safe cleanup retry: verify lossless deferred release stamping and monotonic Production guard, retire v8.26 replay and check real Production uptime. Previous failure was ONLY isolated test fixtures. Keep all app data, GIS, PRI and UI unchanged and run every protected gate.",
-  "attempt": 304,
+  "purpose": "Owner-approved last safe cleanup stage: PR #366 retires three isolated QA/comment simulation workflows and adds literal GIS source reference preservation guards; PR #369 skips only unsupported non-feature PR recovery attempts. Existing app UI, GIS, PRI values, Supabase, APIs and production rollback remain unchanged. Run exact build, isolated Preview, 12 phone shards, PC/tablet, protected Production, live API and bindings verification without bypass.",
+  "attempt": 305,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "9.2.113 run 45117565513 was stopped before Preview: protected app-only QA mirror omitted two root script files and workflow fixture; PR #367 added read-only mirrors outside dist; public CI 45117881838 passed. Retry all build, 12 phones, Preview, PC/tablet, protected Production and rollback with no bypass.",
+  "last_retry_reason": "New protected release after PR #366 full Public app source CI 45118365308 success, PR #369 workflow validation 45118571675 success, and 9.2.113 Production 45118194159 full 12/12 pass + protected Production success. No test skipping or QA override.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
