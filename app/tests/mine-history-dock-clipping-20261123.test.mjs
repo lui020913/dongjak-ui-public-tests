@@ -7,6 +7,7 @@ const history=readFileSync(new URL('../src/version-history-v7.js',import.meta.ur
 
 test('My Info no longer paints an opaque pseudo-element across update history above the dock',()=>{
   const scope=css.slice(css.indexOf('/* My Info history: keep scrolling content'));
+  assert.match(scope,/#mine-panel\.page-panel:not\(\[hidden\]\)\s*\{\s*padding-bottom:0!important/);
   assert.match(scope,/#mine-panel\.page-panel:not\(\[hidden\]\)::after\s*\{\s*content:none!important;display:none!important/);
   assert.match(scope,/\.dj836-sheet-body\s*\{[\s\S]*?padding-bottom:calc\(106px \+ env\(safe-area-inset-bottom/);
   assert.match(scope,/scroll-padding-bottom:calc\(106px \+ env\(safe-area-inset-bottom/);
