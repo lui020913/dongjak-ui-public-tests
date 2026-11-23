@@ -44,8 +44,8 @@ test('completely rebuilt route entry matches reference map-first composition',as
   await expect(root.locator('#v3-start')).toHaveText('현재 위치');
   await expect(root.locator('#v3-end')).toHaveText('어디로 가시나요?');
   await expect(cta).toBeDisabled();
-  await expect(page.locator('#route-panel')).toHaveCSS('visibility','hidden');
-  await expect(page.locator('#route-panel')).toHaveCSS('opacity','0');
+  // Keep the legacy engine recognized by tab motion, but never painted or hit.
+  await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
   await expect(page.locator('#route-panel')).toHaveCSS('pointer-events','none');
   await expect.poll(async()=>page.evaluate(()=>{
     const host=document.getElementById('dj-route-v3'),shadow=host?.shadowRoot;
