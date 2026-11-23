@@ -41,3 +41,38 @@ export function mobileTransportFocusOffset({viewportHeight,panelTop,containerTop
   const clamped=Math.max(90,Math.min(h-90,desired));
   return Math.round(clamped-h/2);
 }
+
+/** Place selected POIs midway between the actual toolbar and the top of the
+ * visible bottom sheet. All measurements are in viewport CSS pixels. Both
+ * facility sheets and bus/metro sheets must use this same camera contract.
+ * Returns a MapLibre camera offset, not a coordinate adjustment.
+ */
+export function usableMapSelectionOffset({map,panel,doc=globalThis.document,win=globalThis.window}={}){
+  const container=map?.getContainer?.();
+  const rect=container?.getBoundingClientRect?.();
+  const viewportHeight=Number(rect?.height)||Number(container?.clientHeight)||Number(win?.innerHeight)||700;
+  const mapTop=Number(rect?.top)||0;
+  const mapBottom=mapTop+viewportHeight;
+  const visible=element=>{
+    if(!element)return false;
+    const box=element.getBoundingClientRect?.();
+    if(!box||!Number.isFinite(box.bottom)||box.height<=0)return false;
+    const style=win?.getComputedStyle?.(element);
+    return !element.hidden&&style?.display!=='none'&&style?.visibility!=='hidden'&&Number(style?.opacity||1)>.01;
+  };
+  const headerSelectors=['.topbar','#djNext-toolbar','#dj-v794-toolbar','#dj831-scrollport'];
+  let top=mapTop+96;
+  for(const selector of headerSelectors){
+    const element=doc?.querySelector?.(selector);
+    if(visible(element))top=Math.max(top,element.getBoundingClientRect().bottom+14);
+  }
+  top=Math.min(top,mapBottom-128);
+  const sheet=panel?.getBoundingClientRect?.();
+  let bottom=Number(sheet?.top);
+  if(!(Number.isFinite(bottom)&&bottom>top+90&&bottom<=mapBottom+20))
+    bottom=mapTop+viewportHeight*.68;
+  bottom=Math.min(mapBottom-20,bottom-18);
+  // Even on small devices retain a clear margin around the selected marker.
+  const center=Math.max(top+32,Math.min(bottom-32,(top+bottom)/2));
+  return Math.round(center-(mapTop+viewportHeight/2));
+}
