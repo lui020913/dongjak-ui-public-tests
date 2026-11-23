@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.129",
   "public_work_branch": "main",
-  "purpose": "Complete visual rebuild of Community report/new-post phone screen from scratch. Remove nested legacy sheet composer UI and old keyboard/layout declarations, replace with stable dedicated three-row body-level editor: fixed title and close, independent middle form scroll, fixed save action above visible iOS keyboard. Rebuild field hierarchy, color, typography, margin, issue controls and attachments. Preserve submit/post storage, cloud publication, photos, map location picker and consent IDs, plus all unrelated app panels. Replace obsolete map-sheet test assumption with portal screen intent. First run focused 3-phone keyboard/viewport checks, then require protected exact source Preview, 12 mobile QA shards, PC/tablet, Production and provenance. New visual source must be independently validated, no prior result reuse for changed code.",
-  "attempt": 333,
+  "purpose": "Rebuild community report writing screen completely with a dedicated fullscreen standalone composer. Eliminate old nested sheet geometry and keyboard behavior, keep fixed header and save footer with a single middle scrollport that shrinks using visualViewport. Mandatory new focused tests cover visual keyboard contraction at 375/390/430, report entry and restoration. Preserve protected current 9.2.128 source plus its updated QA locators and all other map/route/AI behavior. Source CI checks new layout and build; Production requires exact-SHA preview, all phone QA shards, PC/tablet and protected promotion. No duplicate deployment.",
+  "attempt": 334,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Separate v9.2.128 protected retry attempt332 is a legacy portal keyboard workaround; user explicitly requested to throw away that old report UI and rebuild the entire report screen. Version9.2.129 replaces visual structure with one responsive screen, keeps functional handlers, and leaves existing v9.2.128 release untouched until it completes.",
+  "last_retry_reason": "2026-11-24 new 9.2.129 release candidate after independent UI three-phone test found save footer overflow due content-sized grid row; changed to zero-basis flex scrollport and measured footer fit, rebase onto 9.2.128 main PR# QA parent locator fixes. Do not merge without focused success; don't bypass Production QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

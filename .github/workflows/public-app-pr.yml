@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' }}
         run: npm test
       - name: Focused community editor keyboard and portal regression
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
@@ -117,7 +117,8 @@ jobs:
         run: |
           node --check tests/v911-anonymous-ui.spec.mjs
           node --input-type=module -e 'import fs from "node:fs";const s=fs.readFileSync("tests/v911-anonymous-ui.spec.mjs","utf8");if(!s.includes("p.bottom<=a.top-24")||!s.includes("c.bottom<=a.top-24")||!s.includes("intervals:[100,250,500,1000]"))process.exit(1)'
-      - name: Verify completely redesigned community editor and map-origin intent
+      # Only new composer source + previously failing report entry contracts.
+      - name: Verify new community layout and map report entry
         if: ${{ github.head_ref == 'fix/community-editor-from-scratch-20261124' }}
         run: node --test tests/community-composer-portal.test.mjs tests/map-report-opening-intent.test.mjs tests/phone-20261123-visual-fixes.test.mjs
       - name: Verify release metadata consistency
@@ -143,7 +144,7 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' }}
+        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       # PR #406 source app files are identical to the 20 prior passing phone
@@ -157,6 +158,18 @@ jobs:
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
+      # Only the three previously failing community E2E cases, against the
+      # immutable v9.2.128 Preview source (the app is unchanged in this PR).
+      - name: Retest only three community composer portal locator failures
+        if: ${{ github.head_ref == 'fix/community-portal-qa-parent-locator-20261124' }}
+        working-directory: .
+        env:
+          DONGJAK_TARGET_URL: https://a9e80fd4.dongjak-walk-safety-preview.pages.dev
+          DONGJAK_FAST_MOBILE_QA: '0'
+        run: |
+          npx playwright test --config=playwright.v911-remote.config.mjs \
+            --project=mobile375 --project=mobile390 --project=mobile430 \
+            --grep 'community tab opens a usable feed and searchable empty state, without fabricated posts'
       # The original remote release check mixes the card gap with unrelated
       # selected-dock ink color, which does not initialize equally in local
       # source Preview. The prior mobile-first browser check asserts the SAME
@@ -183,7 +196,7 @@ jobs:
         if: ${{ github.event.pull_request.number == 404 }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'real phone route editor and CTA clear the bottom dock'
-      - name: Verify new standalone community editor at 375, 390 and 430px
+      - name: Validate rebuilt community composer keyboard geometry at 3 phone widths
         if: ${{ github.head_ref == 'fix/community-editor-from-scratch-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'community composer stays fixed while the phone keyboard viewport contracts'

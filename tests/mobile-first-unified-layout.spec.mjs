@@ -357,13 +357,19 @@ test('community composer stays fixed while the phone keyboard viewport contracts
     const view=window.visualViewport,box=root.getBoundingClientRect();
     const nav=document.querySelector('#bottom-nav').getBoundingClientRect();
     const hit=document.elementFromPoint(nav.left+nav.width/2,nav.top+nav.height/2);
+    const form=root.querySelector('#community-form');
+    const formBox=form.getBoundingClientRect();
+    const formStyle=getComputedStyle(form),scrollStyle=getComputedStyle(root.querySelector('.dj-compose-scroll'));
     return {parent:root.parentElement.tagName,root:{top:box.top,bottom:box.bottom,height:box.height},
+      form:{top:formBox.top,bottom:formBox.bottom,height:formBox.height,display:formStyle.display,flex:formStyle.flex,minHeight:formStyle.minHeight},
+      scrollSizing:{flex:scrollStyle.flex,height:scrollStyle.height,scrollHeight:root.querySelector('.dj-compose-scroll').scrollHeight},
       head:{top:head.top,bottom:head.bottom},scroll:{top:scroll.top,bottom:scroll.bottom},
       foot:{top:foot.top,bottom:foot.bottom},
       visibleTop:view?.offsetTop??0,visibleHeight:view?.height??innerHeight,
       navHidden:getComputedStyle(document.querySelector('#bottom-nav')).display==='none'||getComputedStyle(document.querySelector('#bottom-nav')).visibility==='hidden'};
   });
   const before=await inspect();
+  console.log('COMMUNITY_EDITOR_GEOMETRY_OPEN '+JSON.stringify(before));
   expect(before.parent).toBe('BODY');
   expect(before.root.top).toBeGreaterThanOrEqual(-2);
   expect(before.head.bottom).toBeLessThan(before.scroll.top+2);
@@ -377,6 +383,7 @@ test('community composer stays fixed while the phone keyboard viewport contracts
   await page.locator('#community-title').fill('보행환경 제보 입력 확인');
   await page.locator('#community-text').fill('키보드가 열려도 작성 화면 전체가 움직이지 않아야 합니다.');
   const after=await inspect();
+  console.log('COMMUNITY_EDITOR_GEOMETRY_KEYBOARD '+JSON.stringify(after));
   expect(Math.abs(after.head.top-before.head.top)).toBeLessThanOrEqual(3);
   expect(after.head.bottom).toBeLessThan(after.scroll.top+2);
   expect(after.scroll.bottom).toBeLessThanOrEqual(after.foot.top+2);
