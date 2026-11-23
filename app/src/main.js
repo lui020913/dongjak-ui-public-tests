@@ -265,6 +265,11 @@ let routeStart = null;
 let routeEnd = null;
 let routeResult = null;
 let routeVariants = {standard:null,gentle:null};
+// Early route/GPS presentation state: navigate('map') runs during startup,
+// before the route presentation functions occur in the source file.
+const NAV_GESTURE_NAMES=['dragPan','dragRotate','scrollZoom','doubleClickZoom','touchZoomRotate','touchPitch','boxZoom','keyboard'];
+let savedNavGestureState=null;
+let routePriVisuals=null;
 let selectedRouteVariant = 'standard';
 let routeStartMarker = null;
 let routeEndMarker = null;
@@ -2531,8 +2536,6 @@ function clearPriRouteAdvice(){
   priRouteReviewSequence++;priVariantChosenManually=false;
   for(const node of [priMapNote,priEditorNote]){node.textContent='';node.hidden=true;}
 }
-const NAV_GESTURE_NAMES=['dragPan','dragRotate','scrollZoom','doubleClickZoom','touchZoomRotate','touchPitch','boxZoom','keyboard'];
-let savedNavGestureState=null;
 function lockRouteMapGestures(locked){
   if(locked&&savedNavGestureState===null){
     savedNavGestureState=NAV_GESTURE_NAMES.map(name=>{
@@ -2615,7 +2618,6 @@ function clearTransitPreview(){
     try{map.getSource(id)?.setData(empty);}catch{}
   }
 }
-let routePriVisuals=null;
 function syncPriRouteLine(){
   const source=map.getSource('walking-route-pri');
   const measured=routePriVisuals?.[selectedRouteVariant];
