@@ -34,7 +34,7 @@ const releaseSmokeNames=[
  'phone production settings, cards and nearby overlays follow rendered geometry',
  'phone verified protection-gap menu contains SHP audit and NULL middle-school review',
  'phone speed limit risk is selectable with PDF thresholds and real source links',
- 'phone four-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',
+ 'phone six-indicator vulnerability and bottom-docked wide sheets match visible dock geometry',
  'walking vulnerability remains neutral'
 ];
 const releaseSmokeGrep=new RegExp(releaseSmokeNames.join('|'));
