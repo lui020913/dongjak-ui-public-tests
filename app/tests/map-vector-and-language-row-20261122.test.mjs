@@ -1,3 +1,4 @@
+import {readPrimaryPhoneCss} from './helpers/primary-phone-css.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -32,7 +33,7 @@ test('slow 5G load must not replace original OpenFreeMap vector source with OSM 
 
 test('language row opens the nested preferences page without an overlapping picker',()=>{
   const js=read('v854-language.js');
-  const css=read('mobile-primary-fullscreen.css');
+  const css=readPrimaryPhoneCss();
   assert.ok(js.includes("section.className='dj854-language-section dj834-language-row'"));
   assert.ok(js.includes("value.className='dj854-language-value'"));
   assert.ok(js.includes("section.append(icon,label,value,chevron,select)"));
