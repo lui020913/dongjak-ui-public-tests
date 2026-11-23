@@ -208,5 +208,143 @@
     flex:0 0 auto!important;width:auto!important;min-height:36px!important;
     padding:6px 10px!important;border-radius:10px!important;font-size:12px!important;
   }
+
+  /* 10:21 iPhone recording: one owner for every My Info child page. */
+  html body #app#app#app#app #mine-panel .dj834-map-settings-container:not([hidden]){
+    display:grid!important;gap:0!important;width:100%!important;min-width:0!important;
+    padding:0!important;margin:0!important;color:var(--dj-primary-page-ink,#203e34)!important;
+    background:transparent!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-summary{
+    margin:0 0 14px!important;padding:0 2px!important;color:#617b70!important;
+    font-size:13px!important;line-height:1.5!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+    gap:16px!important;min-height:77px!important;padding:14px 16px!important;margin:0!important;
+    background:#fff!important;color:#203e34!important;border:1px solid #d8e5de!important;
+    border-bottom:0!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row:nth-of-type(1){
+    border-radius:18px 18px 0 0!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row:nth-of-type(3){
+    border-bottom:1px solid #d8e5de!important;border-radius:0 0 18px 18px!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row > span{
+    display:grid!important;gap:5px!important;flex:1 1 auto!important;min-width:0!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row strong{
+    font-size:15px!important;font-weight:710!important;line-height:1.35!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row small{
+    font-size:12px!important;color:#72877d!important;line-height:1.4!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row input[type=checkbox]{
+    appearance:none!important;-webkit-appearance:none!important;position:relative!important;
+    width:46px!important;height:28px!important;min-width:46px!important;flex:0 0 46px!important;
+    margin:0!important;border-radius:999px!important;border:0!important;
+    background:#b8c9c1!important;box-shadow:inset 0 0 0 1px #adc4b8!important;
+    transition:background-color .18s ease!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row input[type=checkbox]::after{
+    content:''!important;position:absolute!important;width:22px!important;height:22px!important;
+    left:3px!important;top:3px!important;border-radius:50%!important;background:#fff!important;
+    box-shadow:0 1px 3px rgba(25,55,43,.18)!important;transition:transform .18s ease!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row input[type=checkbox]:checked{
+    background:#0c8b76!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-setting-row input[type=checkbox]:checked::after{
+    transform:translateX(18px)!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-map-reset{
+    display:block!important;justify-self:start!important;margin:18px 0 0!important;
+    padding:9px 3px!important;background:transparent!important;
+    border:0!important;border-radius:0!important;box-shadow:none!important;
+    color:#54766b!important;text-decoration:underline!important;text-underline-offset:3px!important;
+    font-size:13px!important;font-weight:600!important;min-height:40px!important;
+  }
+  /* The former additional-tools accordion left native blue quick buttons and
+     a second white background behind the real child-page navigation. */
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container:not([hidden]){
+    display:block!important;background:transparent!important;border:0!important;
+    padding:0!important;margin:0!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container :is(.dj840-more-quick-actions,.dj834-shortcut-status){
+    display:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj-mobile-utilities-body{
+    display:grid!important;gap:10px!important;width:100%!important;min-width:0!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj17-feature-details{
+    width:100%!important;margin:0!important;padding:0!important;
+    background:#fff!important;border:1px solid #d5e4dc!important;
+    border-radius:18px!important;box-shadow:none!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj17-feature-details>summary{
+    display:flex!important;align-items:center!important;min-height:62px!important;
+    padding:16px!important;margin:0!important;border:0!important;
+    background:#fff!important;color:#203d33!important;font-size:16px!important;
+    font-weight:710!important;line-height:1.4!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj17-feature-details>.dj833-feature-group{
+    margin:0!important;padding:4px 12px 12px!important;border:0!important;
+    background:#fff!important;animation:dj834GroupEnter .21s cubic-bezier(.2,.76,.24,1) both;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container :is(button,.dj832-more-feature,.dj833-feature-row){
+    font:inherit!important;font-size:14px!important;font-weight:600!important;
+    color:#25463c!important;-webkit-text-fill-color:#25463c!important;
+    background:transparent!important;border:0!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj833-feature-line{
+    min-height:50px!important;display:flex!important;align-items:center!important;gap:8px!important;
+    padding:6px 0!important;border-bottom:1px solid #e1eae4!important;
+  }
+  html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj833-feature-line:last-child{
+    border-bottom:0!important;
+  }
+  /* No phantom margin or card surface below saved locations / update history. */
+  html body #app#app#app#app #mine-panel .dj834-my-detail,
+  html body #app#app#app#app #mine-panel .dj834-detail-content,
+  html body #app#app#app#app #mine-panel .dj834-records-container,
+  html body #app#app#app#app #mine-panel .dj834-history-container{
+    background:transparent!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app #mine-panel .dj834-records-container,
+  html body #app#app#app#app #mine-panel .dj834-history-container{
+    margin-bottom:0!important;padding-bottom:0!important;
+  }
+  html body #app#app#app#app #route-panel #route-clear[hidden] {display:none!important;}
+  /* Touch focus must never leave an accidental double green ring. Keyboard
+     users still receive a defined accessible focus-visible outline. */
+  html body #app#app#app#app :is(#transport-close,.dj-place-header-close,
+    .dj834-detail-back,#route-map-close,#route-clear,#community-compose-toggle):focus:not(:focus-visible){
+    outline:0!important;outline-offset:0!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-close{
+    outline:0!important;border:1px solid #d8e5dc!important;
+    box-shadow:0 2px 6px rgba(20,51,39,.06)!important;
+    -webkit-tap-highlight-color:transparent!important;
+  }
+  html body #app#app#app#app #map .dj-place-detail-popup .dj-place-header-close:focus:not(:focus-visible){
+    outline:0!important;border-color:#d8e5dc!important;
+    box-shadow:0 2px 6px rgba(20,51,39,.06)!important;
+  }
+  html body #app#app#app#app :is(#transport-close,.dj-place-header-close,
+    .dj834-detail-back,#route-map-close,#community-compose-toggle):focus-visible{
+    outline:2px solid #42685d!important;outline-offset:2px!important;
+  }
+  @keyframes dj834GroupEnter{
+    from{opacity:.88;translate:12px 0}
+    to{opacity:1;translate:0 0}
+  }
+  @media(prefers-reduced-motion:reduce){
+    html body #app#app#app#app#app #mine-panel .dj834-tools-container .dj17-feature-details>.dj833-feature-group{
+      animation:none!important;
+    }
+  }
 }
 }
