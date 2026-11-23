@@ -42,6 +42,13 @@ test('routes shorter than useful assessment distance or without actual linework 
  const comparison=compareCompositePriRoutes({standard:{coords:[A,[126.95008,37.5]]},gentle:routes.gentle},bundle);
  assert.equal(comparison.recommendation,null);
 });
+test('an extreme low-score detour is not silently recommended as a better route',()=>{
+  const longLow={coords:[C,D,C,D]};
+  const comparison=compareCompositePriRoutes({standard:routes.standard,gentle:longLow},bundle);
+  assert.equal(comparison.recommendation,null);
+  assert.equal(comparison.reason,'excessive-detour');
+});
+
 test('route UI explains that PRI is partial and never treats unknown roads as safe',()=>{
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../src/v841-route-and-tips.css',import.meta.url),'utf8');
