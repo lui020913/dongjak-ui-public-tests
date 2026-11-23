@@ -195,3 +195,26 @@ test('community details hide refresh when closed and expose a tappable refresh w
   await realTapAtCenter(page,refresh);
   await expect(refresh).toBeVisible();
 });
+
+
+test('My Info update-history scroller is not masked by a fake footer above the fixed dock',async({page})=>{
+  test.setTimeout(150000);
+  await readyForLiveTouch(page);
+  await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click({timeout:12000,noWaitAfter:true});
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','mine',{timeout:15000});
+  const state=await page.evaluate(()=>{
+    const panel=document.getElementById('mine-panel');
+    const scroller=panel?.querySelector(':scope > .dj836-sheet-body');
+    const fake=panel?getComputedStyle(panel,'::after'):null;
+    return {
+      fakeContent:fake?.content,fakeDisplay:fake?.display,
+      paddingBottom:scroller?parseFloat(getComputedStyle(scroller).paddingBottom):0,
+      scrollPaddingBottom:scroller?parseFloat(getComputedStyle(scroller).scrollPaddingBottom):0,
+      navigationTop:document.getElementById('bottom-nav')?.getBoundingClientRect().top
+    };
+  });
+  expect(state.fakeContent==='none'||state.fakeDisplay==='none',JSON.stringify(state)).toBe(true);
+  expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
+  expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
+  expect(state.navigationTop).toBeGreaterThan(450);
+});
