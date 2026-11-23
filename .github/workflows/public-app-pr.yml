@@ -10,6 +10,9 @@ on:
       - 'tests/retired-smoke-workflows.test.mjs'
       - 'tests/static-data-inventory.test.mjs'
       - 'scripts/audit-static-data-usage.mjs'
+      - 'scripts/verify-live-production-source.mjs'
+      - 'tests/production-app-tree-source-gate.test.mjs'
+      - '.github/workflows/autonomous-production-audit.yml'
       - 'tests/workflow-release-safety-contract.test.mjs'
       - '.github/workflows/public-uptime.yml'
       - '.github/workflows/mobile-only-production-retry.yml'
@@ -59,6 +62,8 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --test tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
           node --test tests/retired-smoke-workflows.test.mjs tests/static-data-inventory.test.mjs
+          node --test tests/production-app-tree-source-gate.test.mjs
+          node --check scripts/verify-live-production-source.mjs
           node scripts/audit-static-data-usage.mjs
       - name: Install app dependencies
         run: npm ci --no-audit --no-fund --prefer-offline
