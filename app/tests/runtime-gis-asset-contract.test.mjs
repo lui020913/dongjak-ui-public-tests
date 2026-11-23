@@ -23,8 +23,8 @@ test('all literal GIS URLs in the runtime source resolve to packaged public file
  const missing=[],observed=new Set();
  for(const file of sourceFiles){
   const value=readFileSync(file,'utf8');
-  for(const m of value.matchAll(/\/data\/[A-Za-z0-9_./-]+\.(?:geojson|json|csv|txt)(?![A-Za-z0-9_-])/g)){
-   const url=m[0];
+  for(const m of value.matchAll(/['"`](\/data\/[A-Za-z0-9_./-]+\.(?:geojson|json|csv|txt))(?=['"`?#])/g)){
+   const url=m[1];
    observed.add(url);
    if(!existsSync(staticFile(url)))missing.push(relative(app,file)+' -> '+url);
   }
