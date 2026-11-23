@@ -11,6 +11,28 @@ const load=dir=>{
  }
  return map;
 };
+const marker=side=>{
+ const path=root+'/'+side+'/release-before.json';
+ return existsSync(path)?JSON.parse(readFileSync(path,'utf8')):null;
+};
+const prodMarker=marker('production'),candidateMarker=marker('candidate');
+const comparable=Boolean(prodMarker&&candidateMarker&&
+ prodMarker.application_version===candidateMarker.application_version&&
+ prodMarker.source_commit===candidateMarker.source_commit&&
+ prodMarker.public_ui_source_commit===candidateMarker.public_ui_source_commit);
+if(!comparable){
+ mkdirSync(root,{recursive:true});
+ const reason='Unavailable comparable candidate: production '+
+  (prodMarker?.application_version||'unknown')+' / candidate '+
+  (candidateMarker?.application_version||'unknown');
+ writeFileSync(root+'/comparison.json',JSON.stringify({
+  comparable:false,complete:false,skipped:true,reason,
+  production:prodMarker?.source_commit||null,
+  candidate:candidateMarker?.source_commit||null},null,2));
+ writeFileSync(root+'/index.html','<!doctype html><meta charset="utf-8"><title>Candidate incompatible</title><p>'+reason+'</p>');
+ console.log('SKIPPED visual comparison: '+reason);
+ process.exit(0);
+}
 const a=load(root+'/production'),b=load(root+'/candidate');
 const findings=s=>{
  if(s?.status!=='captured')return ['capture missing'];

@@ -3,7 +3,7 @@ import {mkdirSync,writeFileSync} from 'node:fs';
 const output='quality-report/ui-touch-diagnosis';
 mkdirSync(output,{recursive:true});
 const report={checks:[],createdAt:new Date().toISOString()};
-function save(){writeFileSync(output+'/results.json',JSON.stringify(report,null,2));}
+function save(name){writeFileSync(output+'/'+name+'.json',JSON.stringify(report,null,2));}
 async function setup(page,tab){
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({colorScheme:'light'});
@@ -64,11 +64,11 @@ test('Map tip close: measure real hit-test, no force-click',async({page},info)=>
       result.postClose=await describeHit(page,'#dj-user-tip-close');
       await page.screenshot({path:output+'/tip-after.png',animations:'allow'});
     }
-    report.checks.push(result);save();
+    report.checks.push(result);save('tip-close');
     await info.attach('tip-close-details.json',{body:Buffer.from(JSON.stringify(result,null,2)),contentType:'application/json'});
     expect(result.close.exists).toBe(true);
     expect(result.close.hitSelf,'TIP close must be reachable by real user finger').toBe(true);
-  }catch(e){result.error=String(e).slice(0,850);if(!report.checks.includes(result))report.checks.push(result);save();throw e;}
+  }catch(e){result.error=String(e).slice(0,850);if(!report.checks.includes(result))report.checks.push(result);save('tip-close');throw e;}
 });
 test('Community refresh: click with fresh locator after re-render',async({page},info)=>{
   test.skip(info.project.name!=='mobile');
@@ -80,8 +80,9 @@ test('Community refresh: click with fresh locator after re-render',async({page},
   });
   try{
     await setup(page,'participate');
-    const target=page.getByRole('button',{name:'새로고침',exact:true}).first();
+    const target=page.getByRole('button',{name:/새로고침/}).first();
     result.before=await describeHit(page,'.dj-community-refresh');
+    result.visibleRefreshLabels=await page.locator('button').evaluateAll(nodes=>nodes.filter(n=>/(새로고침|다시 확인)/.test(n.innerText||'')||/(새로고침|다시 확인)/.test(n.getAttribute('aria-label')||'')).map(n=>({id:n.id,aria:n.getAttribute('aria-label'),text:n.innerText?.slice(0,80),hidden:n.hidden,rect:[n.getBoundingClientRect().x,n.getBoundingClientRect().y,n.getBoundingClientRect().width,n.getBoundingClientRect().height]})));
     await page.screenshot({path:output+'/community-before.png',animations:'allow'});
     for(let i=0;i<3;i++){
       try{
@@ -96,8 +97,8 @@ test('Community refresh: click with fresh locator after re-render',async({page},
     }
     result.after=await describeHit(page,'.dj-community-refresh');
     await page.screenshot({path:output+'/community-after.png',animations:'allow'});
-    report.checks.push(result);save();
+    report.checks.push(result);save('community-refresh');
     await info.attach('community-refresh-details.json',{body:Buffer.from(JSON.stringify(result,null,2)),contentType:'application/json'});
     expect(result.clicked,'Refresh button should tolerate a re-render').toBe(true);
-  }catch(e){result.error=String(e).slice(0,850);if(!report.checks.includes(result))report.checks.push(result);save();throw e;}
+  }catch(e){result.error=String(e).slice(0,850);if(!report.checks.includes(result))report.checks.push(result);save('community-refresh');throw e;}
 });

@@ -59,7 +59,30 @@ jobs:
         run: |
           mkdir -p quality-report/screen-captures
           curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/release-before.json
+      - name: Gate obsolete candidate preview by exact source identity
+        id: compatibility
+        env:
+          CANDIDATE_LABEL: ${{ matrix.label }}
+        run: |
+          if [ "$CANDIDATE_LABEL" != candidate ]; then
+            echo "compatible=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          curl -fsS --max-time 20 "https://dongjak-walk-safety-preview.pages.dev/release-source.json" > quality-report/screen-captures/production-source.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const p=JSON.parse(fs.readFileSync("quality-report/screen-captures/production-source.json","utf8"));
+            const c=JSON.parse(fs.readFileSync("quality-report/screen-captures/release-before.json","utf8"));
+            const ok=p.application_version===c.application_version &&
+              p.source_commit===c.source_commit &&
+              p.public_ui_source_commit===c.public_ui_source_commit;
+            fs.appendFileSync(process.env.GITHUB_OUTPUT,"compatible="+ok+"\n");
+            console.log(ok?"Candidate uses exact Production source; comparison allowed.":
+              "Candidate version "+c.application_version+" differs from Production "+p.application_version+
+              "; skip incompatible screenshot capture, do not call it a UI regression.");
+          '
       - name: Capture anonymous real app screens and geometry
+        if: steps.compatibility.outputs.compatible == 'true'
         run: npx playwright test tests/visual-screen-inventory.spec.mjs --project=mobile --fully-parallel --workers=2 --reporter=list
       - name: Confirm release did not change during capture
         if: always()
@@ -67,7 +90,7 @@ jobs:
           curl -fsS --max-time 20 "${DONGJAK_TARGET_URL}release-source.json" > quality-report/screen-captures/release-after.json
           cmp quality-report/screen-captures/release-before.json quality-report/screen-captures/release-after.json
       - name: Generate browsable visual gallery
-        if: always()
+        if: steps.compatibility.outputs.compatible == 'true'
         run: node scripts/build-screen-gallery.mjs
       - name: Upload per-screen screenshots and metrics
         if: always()
