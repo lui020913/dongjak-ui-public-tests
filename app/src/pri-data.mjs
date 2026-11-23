@@ -1,3 +1,4 @@
+import {scaleTenPointRisk} from './pri-new-factor-rules.mjs';
 // PRI normalized safety scores: 100 = safer, 0 = more vulnerable. Original source risk scores remain unchanged in source files.
 // Null denotes genuinely unobserved data. Legacy modeled defaults remain in
 // imported raw values for provenance, but are not eligible for displayed scores.
@@ -73,7 +74,19 @@ export function mergeFactor(bundle,patch){
  return validateBundle({...bundle,factors:[...bundle.factors.filter(f=>f.id!==factor.id),factor],segments,config:{status:'draft'}});
 }
 export function parseImport(raw,current=null){
- if(raw?.type==='pri-factor-scores')return mergeFactor(current,raw);
+ if(raw?.type==='pri-factor-scores'){
+   if(raw.scoreMax===10){
+     if(raw.factor?.id!=='sharedRoad'||raw.factor?.scoreDirection!=='risk'||!Array.isArray(raw.scores))fail('10점 척도는 보차혼용 위험지수에만 적용할 수 있습니다.');
+     const scores=raw.scores.map(row=>{
+       const scaled=row?.score===null?null:scaleTenPointRisk(row?.score);
+       if(scaled===null&&row?.score!==null)fail('보차혼용 점수는 0~10점 범위여야 합니다.');
+       return {...row,score:scaled,evidence:{...row.evidence,note:'원점수 '+row.score+'/10점 × 10 = '+scaled+'/100점. '+text(row.evidence?.note)}};
+     });
+     return mergeFactor(current,{...raw,scoreMax:100,scores});
+   }
+   if(raw.scoreMax!==undefined&&raw.scoreMax!==100)fail('지원되지 않는 지표 점수 척도입니다.');
+   return mergeFactor(current,raw);
+ }
  if(raw?.meta?.factor==='가로등·보안등 암부 거리')return adaptLighting(raw);
  return validateBundle(raw);
 }
@@ -88,6 +101,17 @@ export function observedFactorScore(s,id){
 // independently evidenced factors (speed is NULL without conservative GIS join).
 export const CURRENT_VULNERABILITY_FACTORS=Object.freeze(['lighting','accidents','protectionGap']);
 export const CURRENT_FOUR_FACTORS=Object.freeze(['lighting','accidents','protectionGap','speed']);
+export const CURRENT_SIX_FACTORS=Object.freeze([...CURRENT_FOUR_FACTORS,'crossing','sharedRoad']);
+export function currentSixFactorCoverage(segment){
+ return CURRENT_SIX_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
+}
+export function currentSixFactorScore(segment){
+ const values=CURRENT_SIX_FACTORS.map(id=>observedFactorScore(segment,id)).filter(value=>value!==null);
+ // Full research index is an equal-weight mean of six risk factors.
+ // With incomplete survey coverage, show only an explicitly labeled observed-only
+ // preliminary mean, never six-factor completion or unobserved zero-risk values.
+ return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+}
 export function currentVulnerabilityCoverage(segment){
   return CURRENT_VULNERABILITY_FACTORS.filter(id=>observedFactorScore(segment,id)!==null).length;
 }
@@ -107,6 +131,7 @@ export function currentFourFactorScore(segment){
   return values.length>=2?values.reduce((sum,value)=>sum+value,0)/values.length:null;
 }
 export function segmentScore(bundle,s,mode){
+ if(mode==='current6')return currentSixFactorScore(s);
  if(mode==='current4')return currentFourFactorScore(s);
  if(mode==='current3')return currentVulnerabilityScore(s);
  // Two of six survey factors: display an explicit preliminary safety mean when both scores are defined (including documented modeled defaults).
