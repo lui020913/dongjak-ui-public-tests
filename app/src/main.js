@@ -3480,6 +3480,12 @@ function stopNavigation(arrived=false) {
   if(arrived) {
     document.getElementById('route-status').textContent='목적지 근처에 도착했습니다. 실제 위치와 보행환경을 확인하세요.';
     toast('목적지 근처에 도착했습니다.');
+    // Arrival is a navigation state transition, not another route computation.
+    // The view shows only existing route estimates and never fabricates actual steps.
+    window.dispatchEvent(new CustomEvent('dongjak:route-arrived',{detail:{
+      kilometers:routeResult?.kilometers??null,
+      seconds:routeResult?.seconds??null
+    }}));
   }
 }
 async function startNavigation() {
