@@ -1,0 +1,43 @@
+name: PRI six-index audited source package (report only)
+on:
+  push:
+    branches: [report/pri-six-factor-source-20261123]
+    paths:
+      - .github/workflows/pri-six-factor-report-export.yml
+permissions:
+  contents: read
+jobs:
+  source-export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Copy immutable submitted scoring sources (no app or deployment change)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pri-report-source
+          cp app/public/data/pri/lighting_segments.json pri-report-source/
+          cp app/public/data/pri/sangdo1_accidents_factor.json pri-report-source/
+          cp app/public/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json pri-report-source/
+          cp app/public/data/pri/sangdo1_crosswalk_rubric_factor.json pri-report-source/
+          cp app/public/data/pri/sangdo1_shared_road_rubric_factor.json pri-report-source/
+          cp app/public/data/pri/manifest.json pri-report-source/
+          cp app/public/data/road-speed/sangdo1_speed_links.geojson pri-report-source/
+          cp app/public/data/road-speed/metadata.json pri-report-source/
+          cp app/public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson pri-report-source/
+          cp app/src/pri-data.mjs pri-report-source/
+          cp app/src/pri-new-factor-rules.mjs pri-report-source/
+          cp app/src/pri-speed-risk.mjs pri-report-source/
+          cp app/src/pri-speed-spatial-match.mjs pri-report-source/
+          printf '%s\n' "$(git rev-parse HEAD)" > pri-report-source/SOURCE_SHA.txt
+          sha256sum pri-report-source/* > pri-report-source/SHA256SUMS.txt
+      - name: Upload report-only source dataset
+        uses: actions/upload-artifact@v4
+        with:
+          name: pri-six-factor-audit-dataset-20261123
+          path: pri-report-source/
+          retention-days: 7
+          if-no-files-found: error
