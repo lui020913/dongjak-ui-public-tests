@@ -2174,7 +2174,19 @@ function openCommunityComposer(open,{animate=true}={}) {
         communityForm.append(sc);}
     }
     communityForm.hidden=false;
-    const sc=communityForm.querySelector('.djNext-form-scroll');if(sc&&wasHidden)sc.scrollTop=0;
+    const sc=communityForm.querySelector('.djNext-form-scroll');
+    // The save action is part of this same form, but stays in a compact
+    // bottom action bar instead of disappearing below a long form scroller.
+    if(sc&&!communityForm.querySelector(':scope > .dj-community-compose-footer')){
+      const save=sc.querySelector('button[type="submit"]');
+      if(save){
+        const footer=document.createElement('div');
+        footer.className='dj-community-compose-footer';
+        footer.append(save);
+        communityForm.append(footer);
+      }
+    }
+    if(sc&&wasHidden)sc.scrollTop=0;
     // Parent sheet may be entering after the risk-report button: only animate one owner.
     const panel=document.getElementById('participation-panel');
     // Full-screen editor must own the phone viewport, including the area

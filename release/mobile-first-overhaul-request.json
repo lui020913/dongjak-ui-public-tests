@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.126",
+  "application_version": "9.2.127",
   "public_work_branch": "main",
-  "purpose": "Protected 9.2.126 rollout retry after targeted PR #411 fixes Playwright snapshot timing: the native route CTA redocks asynchronously after switching into the route input, so stable placement must be awaited before checking unchanged 24px card/panel-to-rendered-CTA clearance and the exposed map pointer hit. App visual/PRI/GPS code unchanged since attempt328. Previous attempt328 passed PC/tablet and 9 of 12 mobile shards, with only the route-screen geometry check failing in phone375/390/430. Require #411 targeted three-width QA pass before release, then exact-new-SHA Preview, all mandatory mobile QA, PC/tablet and protected Production checks; do not bypass any fail-closed deployment gates.",
-  "attempt": 329,
+  "purpose": "Single protected 9.2.127 release for all owner feedback supplied 2026-11-24, excluding third video. Screenshot 1 preview only: lower route comparison sheet 8px and move native GPS button above comparison. Screenshot 2 guidance only: lower live card 8px and make green-banner turn instruction light. Video 1 community only: full-height isolated composer with fixed header, single form-body scrollport and hidden nav dock. Video 2 AI search only: synchronize iOS visual viewport keyboard geometry, avoid duplicate bottom safe area, pin input composer while transcript scrolls. Preserve the already merged 9.2.126 walking input/search top-card (video 3) exactly unchanged; no walking input/search, route/PRI/GPS computation, services or unrelated tabs changed. Existing previously passed tests must not be manually rerun; mandatory current exact-SHA source/phone/protected release checks must pass. Promote only once after new Preview, 12 independent mobile QA shards, PC/tablet and protected Production gates; do not merge unrelated PR #404/#405.",
+  "attempt": 330,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: 9.2.126 attempt328 (run 45240224769, source 81abdd1aae5) passed PC/tablet and 9/12 mobile shards. Failed three width checks captured transient native footer position before the CTA settled; failed screenshots show correctly docked CTA and visible map after animation. PR #411 waits for the unchanged 24px and hit-test requirements. Keep Production 9.2.125 if the new release fails.",
+  "last_retry_reason": "9.2.127 four-screen final candidate rebased onto latest main 565f69c34489 with PR #411 route CTA stable-timing QA preserved. Prior PR #406 source run 45238861166 passed 20/21 mobile browser cases, only mobile430 guidance lock was uncompleted when superseded. Run only that last case in source CI while preserving other PR full validation; protected release still runs all required exact-SHA checks before Production.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
