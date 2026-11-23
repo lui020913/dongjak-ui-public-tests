@@ -214,8 +214,14 @@ test('anonymous read-only control census · actual buttons and motion', async ({
     await page.emulateMedia({colorScheme:'light'});
     await page.goto('/',{waitUntil:'domcontentloaded',timeout:30000});
     await expect(page.locator('#map')).toBeVisible({timeout:30000});
+    // The map DOM is present while an opaque startup overlay still intercepts
+    // every touch. Wait for its actual removal, not only map element visibility.
+    const startup=page.locator('#map-startup-overlay');
+    if(await startup.count())await expect(startup).toBeHidden({timeout:60000});
+    await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-out|signed-in)$/,{timeout:30000});
     await selectBrowserWeb(page);
     await dismissTour(page);
+    await page.waitForTimeout(300);
     if(tab!=='map'){
       const target=await navigationControl(page,tab);
       await target.click({timeout:12000,noWaitAfter:true});
