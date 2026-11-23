@@ -1304,6 +1304,10 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
     html body #app#app#app#app#app #mine-panel.page-panel:not([hidden]) > .dj836-sheet-body {
       padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
       scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+      /* The scrollport itself stops at the top of the fixed 70px pill,
+         while its end-of-list padding remains INSIDE the scrolling content.
+         This keeps detail/type/history viewports clickable above the dock. */
+      margin-bottom:calc(73px + env(safe-area-inset-bottom,0px))!important;
     }
   }
   html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-summary,.dj-edition-patch,.dj-edition-patch-summary) {

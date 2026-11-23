@@ -211,6 +211,7 @@ test('My Info update-history scroller is not masked by a fake footer above the f
       outerPaddingBottom:panel?parseFloat(getComputedStyle(panel).paddingBottom):null,
       paddingBottom:scroller?parseFloat(getComputedStyle(scroller).paddingBottom):0,
       scrollPaddingBottom:scroller?parseFloat(getComputedStyle(scroller).scrollPaddingBottom):0,
+      bodyBottom:scroller?.getBoundingClientRect().bottom,
       navigationTop:document.getElementById('bottom-nav')?.getBoundingClientRect().top
     };
   });
@@ -218,5 +219,6 @@ test('My Info update-history scroller is not masked by a fake footer above the f
   expect(state.outerPaddingBottom,JSON.stringify(state)).toBe(0);
   expect(state.paddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
   expect(state.scrollPaddingBottom,JSON.stringify(state)).toBeGreaterThanOrEqual(94);
+  expect(state.bodyBottom,JSON.stringify(state)+' scrollport overlaps dock').toBeLessThanOrEqual(state.navigationTop+3);
   expect(state.navigationTop).toBeGreaterThan(450);
 });
