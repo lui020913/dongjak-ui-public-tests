@@ -1310,14 +1310,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const kindEl=document.getElementById('transport-kind');
   const description=document.getElementById('transport-description');
   const chips=document.getElementById('transport-chips');
-  const linesEl=document.getElementById('transport-lines');
   const neighborsEl=document.getElementById('transport-neighbors');
   const arrivalsEl=document.getElementById('transport-arrivals');
   const liveTab=document.getElementById('transport-tab-live');
   const hoursTab=document.getElementById('transport-tab-hours');
   const modeTabs=document.getElementById('transport-mode-tabs');
   const sectionLive=document.querySelector?.('.transport-arrivals-title');
-  const sectionHours=document.getElementById('transport-service-hours');
   // Keep a user's tab choice while they compare nearby stations. A new page
   // session still starts in realtime mode; nothing silently claims schedule = live.
   let preferredTransportView='live';
@@ -1352,7 +1350,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const updatedEl=document.getElementById('transport-update-time');
   const serviceHoursEl=document.getElementById('transport-service-hours');
   let officialMetro=fixedMetroStations(),osmTransport=[];
-  const allStationByName=new Map();
   let stops=new Map();
   let selected=null;
   const routeStatus=el('div','transport-empty');
@@ -2748,8 +2745,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     document.getElementById('app')?.classList?.add?.('transport-sheet-open');
     // One selected coordinate pin. Reuse on line changes and remove on close.
     if(!sameStationLineChange)selectionMarker=createSelectedTransportPin({map,maplibregl,place,previous:selectionMarker});
-    const jangseungbaegi = place.kind==='subway'
-      && normalizeStationQueryName(place.name)==='장승배기';
     if(panel.dataset)panel.dataset.stationFocus='default';
     // One geographic focus for both buses and metro.  A negative MapLibre
     // offset locates the selected stop just ABOVE the viewport midpoint, so
