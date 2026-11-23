@@ -41,7 +41,11 @@ replace(main,"let routeVariants = {standard:null,gentle:null};","let routeVarian
 replace(main,"  routeVariants = {standard:null,gentle:null};","  routeGeneration++;routeVariants = {standard:null,gentle:null,balanced:null};\n  window.dispatchEvent(new Event('dj-next:route-clear'));");
 replace(main,"  routeVariants={standard:null,gentle:null};","  routeGeneration++;routeVariants={standard:null,gentle:null,balanced:null};\n  window.dispatchEvent(new Event('dj-next:route-clear'));");
 replace(main,"  if(alternative)alternative.setData(coords?.length?lineFeature(routeVariants[other]?.coords):emptyWalkingRoute());","  if(alternative){\n    const features=coords?.length?Object.entries(routeVariants).filter(([kind,r])=>kind!==selectedRouteVariant&&r?.coords?.length>=2).map(([kind,r])=>({type:'Feature',properties:{kind},geometry:{type:'LineString',coordinates:r.coords}})):[];\n    alternative.setData({type:'FeatureCollection',features});\n  }\n  if(map.getLayer('walking-route-line'))map.setPaintProperty('walking-route-line','line-color',selectedRouteVariant==='balanced'?'#087e68':selectedRouteVariant==='gentle'?'#a4742e':'#3978c8');");
-replace(main,"paint:{'line-color':'#bd6980','line-width'","paint:{'line-color':['match',['get','kind'],'standard','#3978c8','gentle','#a4742e','balanced','#087e68','#bd6980'],'line-width'");
+// The canonical public route baseline now uses neutral #87939b for the
+// unselected candidate, not the historical pink #bd6980. Keep the release
+// patch anchored to the current source instead of failing protected builds.
+// This layer is hidden while the chosen route displays measured PRI colors.
+replace(main,"paint:{'line-color':'#87939b','line-width'","paint:{'line-color':['match',['get','kind'],'standard','#3978c8','gentle','#a4742e','balanced','#087e68','#87939b'],'line-width'");
 replace(main,"function routeDataNote(result){\n  if(!result)return '';","function routeDataNote(result){\n  if(!result)return '';\n  if(result.routeMode==='balanced')return '종합 최적(잠정): 거리·추정 경사·차량 통행 허용 링크 비용을 반영했습니다. PRI·사고·조명·실측 보행안전은 아직 미반영입니다.';");
 replace(main,"    return fetchDongjakPedestrianVariants(from,to,{signal}).then(routes=>routes[which]);","    return fetchDongjakPedestrianVariants(from,to,{signal}).then(routes=>{if(!routes[which])throw Error('선택한 경로를 다시 계산할 수 없습니다.');return routes[which]});");
 replace(main,"  return fetchPedestrianRoute(from,to,which,signal);","  if(which==='balanced')throw Error('이 구간에는 종합 경로 분석자료가 없습니다.');\n  return fetchPedestrianRoute(from,to,which,signal);");
