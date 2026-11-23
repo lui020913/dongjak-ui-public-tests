@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.112",
+  "application_version": "9.2.113",
   "public_work_branch": "main",
-  "purpose": "Owner-approved verified lossless phone CSS consolidation (PR #361, merged 129044c108068fa9879d01bf1fd302926c21cff0). Original mobile-primary-fullscreen.css rules appended verbatim in unchanged cascade order to mobile-first-layout.css; remove one redundant CSS import and standalone source file, retain all primary page behavior. Existing eleven legacy CSS contracts moved to a shared exact-section fixture. Public source full regression and 3-size layout CI passed at 45116152006. Require exact tested Preview, 12/12 phone QA, PC/tablet verification, protected Production and guarded rollback; never bypass.",
-  "attempt": 302,
+  "purpose": "Owner-approved safe cleanup release: protected workflow pruning, actual Production uptime checks, monotonic version and exact-source safety gate, lossless batch version metadata stamping (PRs #362, #364, #365). No JS UI/GIS/API/Supabase functional change. Preserve all existing maps, PRI coverage, community, auth and transport. Strict exact-source Preview, 12 phone shards, PC/tablet, protected Production and rollback with no bypass.",
+  "attempt": 303,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "New verified refactor release after source CI success; preliminary PR checks identified and resolved old test file-path dependencies before any Production promotion.",
+  "last_retry_reason": "New owner-authorized safe cleanup release after PR #365 CI 45117291186 passed and 9.2.112 Production run 45116438129 passed every gate; no retry or exception.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
