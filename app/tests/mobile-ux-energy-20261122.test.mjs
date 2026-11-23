@@ -28,8 +28,8 @@ test('PRI map safely hides legacy TIP even with inline important styles and soft
   assert.match(pri,/syncPriHud\(Boolean\(id\)\)/);
   assert.match(pri,/savedHudStyle\.clear\(\)/);
   assert.match(pri,/11\.5,1,13,1\.5,15,2\.35,17,3\.6,19,5\.2/);
-  for(const name of ['낮음','주의','보통','높음','매우 높음'])assert.ok(pri.includes(name));
-  assert.match(css,/grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  for(const name of ['저위험 (0~39)','주의 (40~69)','고위험 (70~100)'])assert.ok(pri.includes(name));
+  assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(css,/min-height:44px/);
 });
 
