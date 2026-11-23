@@ -155,29 +155,25 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('[data-v3-screen="search"]').hidden=false;
     q('#v3-query').focus({preventScroll:true});
   };
-  // Legacy panel is NOT the new screen. Retain its hidden engine controls
-  // for native search/routing listeners but fully suppress its pixels, hits
-  // and accessibility while V3 is open. Inline important beats stale eight-ID
-  // route-sheet styles and the old window-motion controller.
-  const oldVisualKeys=['visibility','opacity','pointer-events'];
+  // Keep the legacy route panel logically PRESENT for the native tab/sheet
+  // controller. Making its visibility:hidden caused that controller to
+  // revert data-tab to map and redraw the obsolete sheet. Clip the entire
+  // rendering tree instead; the genuine new V3 Shadow DOM remains interactive.
+  const oldVisualKeys=['clip-path','pointer-events'];
   const previousOldVisual=oldVisualKeys.map(key=>({
     key,value:old.style.getPropertyValue(key),priority:old.style.getPropertyPriority(key)
   }));
-  const oldAriaHidden=old.getAttribute('aria-hidden');
   const concealOld=()=>{
-    for(const [key,value] of [['visibility','hidden'],['opacity','0'],['pointer-events','none']]){
+    for(const [key,value] of [['clip-path','inset(100%)'],['pointer-events','none']]){
       if(old.style.getPropertyValue(key)!==value||old.style.getPropertyPriority(key)!=='important')
         old.style.setProperty(key,value,'important');
     }
-    if(old.getAttribute('aria-hidden')!=='true')old.setAttribute('aria-hidden','true');
   };
   const restoreOld=()=>{
     for(const {key,value,priority} of previousOldVisual){
       if(value)old.style.setProperty(key,value,priority);
       else old.style.removeProperty(key);
     }
-    if(oldAriaHidden===null)old.removeAttribute('aria-hidden');
-    else old.setAttribute('aria-hidden',oldAriaHidden);
   };
   const oldStyleObserver=new MutationObserver(()=>{if(active)concealOld();});
   oldStyleObserver.observe(old,{attributes:true,attributeFilter:['style']});
