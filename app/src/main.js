@@ -79,6 +79,7 @@ import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
 import {loadCompositePriForRoutes,compareCompositePriRoutes} from './pri-route-exposure.mjs';
+import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
