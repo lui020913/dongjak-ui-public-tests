@@ -11,7 +11,8 @@ function toAppRoute(result,kind){
     slopeAscentM:result.estimatedTerrainAscentM,slopeDescentM:result.estimatedTerrainDescentM,
     slopeUncertainM:result.estimatedTerrainUncertainMeters,snapStartM:result.startSnapMeters,
     snapEndM:result.endSnapMeters,vehiclePermittedM:result.vehiclePermittedMeters,
-    routeMode:kind, warnings:result.warnings
+    routeMode:kind, warnings:result.warnings,
+    priEvidence:result.priEvidence??null
   };
 }
 function getWorker(){
