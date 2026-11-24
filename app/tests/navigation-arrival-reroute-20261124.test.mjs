@@ -35,7 +35,7 @@ test('real turn geometry yields a distance-specific Korean cue',()=>{
 });
 test('nearby sheet and screen-space marker use scoped canonical CSS',()=>{
   const css=read('src/mobile-ui/current.css');
-  assert.match(css,/:has\(#ped-tools-panel:not\(\[hidden\]\)\)\) .map-actions/);
+  assert.match(css,/:has\(#ped-tools-panel:not\(\[hidden\]\)\) .map-actions/);
   assert.match(css,/dj-round-location-pulse/);
   assert.match(css,/width:38px!important;height:38px!important/);
 });
