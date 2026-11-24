@@ -200,10 +200,10 @@ jobs:
         if: ${{ github.head_ref == 'fix/release-visible-motion-audit-20261124' }}
         working-directory: .
         env:
-          DONGJAK_TARGET_URL: https://public-ui-rc.dongjak-walk-safety-preview.pages.dev
+          DONGJAK_TARGET_URL: https://73cc53dc.dongjak-walk-safety-preview.pages.dev
           DONGJAK_FAST_MOBILE_QA: '1'
         run: |
-          curl -fsS "$DONGJAK_TARGET_URL/release-source.json" | node --input-type=module -e 'let s="";for await(const c of process.stdin)s+=c;const j=JSON.parse(s);if(j.source_commit!=="b8fa0eea21eb0346f924a4458fdac6bdb0ebe8c8")throw Error("Preview source changed")'
+          curl -fsSL "$DONGJAK_TARGET_URL/release-source.json?verify=45344608752" | node --input-type=module -e 'let s="";for await(const c of process.stdin)s+=c;const j=JSON.parse(s);if(j.public_ui_source_commit!=="b8fa0eea21eb0346f924a4458fdac6bdb0ebe8c8"||j.application_version!=="9.2.136"||String(j.build_run)!=="45344608752"||j.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION")throw Error("Preview provenance mismatch: "+JSON.stringify(j))'
           npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'compact HUD and visible motion|primary tabs reveal content'
       # PR431 run 45341079964: 29 passed, 2 skipped, 2 AI keyboard-dismiss failures.
       - name: Retest only two failed AI keyboard dismissals
