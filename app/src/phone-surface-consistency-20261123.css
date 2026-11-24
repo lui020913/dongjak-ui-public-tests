@@ -323,8 +323,7 @@
     background:#edf6f0!important;
   }
 
-  /* Community: search and compose are the only permanent primary actions.
-     Sort, saved posts, alerts and refresh share one native details menu. */
+  /* Community: search and compose followed by one fixed filter bar. */
   #app #participation-panel .community-primary-controls{
     display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
     align-items:center!important;gap:8px!important;width:100%!important;
@@ -345,33 +344,36 @@
     padding:0!important;background:transparent!important;border:0!important;
     box-shadow:none!important;
   }
-  /* Keep controls of a collapsed native <details> out of hit testing.
-   * Legacy high-specificity toolbar rules force display:grid even while
-   * closed, leaving invisible buttons underneath the empty-state card. */
-  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-view-options:not([open]) > .community-toolbar {
-    display:none!important;
-    pointer-events:none!important;
+  /* Fixed controls: no accordion, no invisible hit targets, no list reflow. */
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-view-options > .community-toolbar {
+    display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(66px,1fr) repeat(3,44px)!important;
+    align-items:center!important;gap:5px!important;margin:0!important;padding:0!important;
+    width:100%!important;min-width:0!important;pointer-events:auto!important;
   }
-  #app #participation-panel .community-view-options>summary{
-    display:flex!important;align-items:center!important;justify-content:flex-start!important;
-    gap:6px!important;list-style:none!important;cursor:pointer!important;
-    width:max-content!important;max-width:100%!important;min-height:40px!important;
-    padding:5px 0!important;background:transparent!important;border:0!important;
-    box-shadow:none!important;color:#507368!important;
-    font-size:13px!important;font-weight:650!important;
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar .community-dong-filter-row{
+    display:block!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;
   }
-  #app #participation-panel .community-view-options>summary::-webkit-details-marker{display:none}
-  #app #participation-panel .community-view-options>summary span{font-size:13px!important}
-  #app #participation-panel .community-view-options[open]>.community-toolbar{
-    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    align-items:center!important;gap:6px!important;margin:2px 0 9px!important;
-    padding:0!important;width:100%!important;
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar .community-dong-filter-row>span{
+    position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;
   }
-  #app #participation-panel .community-view-options .community-toolbar :is(button,select){
-    display:block!important;width:100%!important;min-width:0!important;
-    max-width:none!important;min-height:40px!important;height:40px!important;
-    padding:6px!important;margin:0!important;border-radius:12px!important;
-    font-size:12px!important;box-sizing:border-box!important;
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar :is(button,select){
+    display:block!important;width:100%!important;min-width:0!important;max-width:none!important;
+    min-height:44px!important;height:44px!important;padding:4px 5px!important;margin:0!important;
+    border-radius:12px!important;font-size:12px!important;line-height:1.2!important;box-sizing:border-box!important;
+    white-space:nowrap!important;text-overflow:ellipsis!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar :is(#community-sort,#community-dong-filter){
+    flex:initial!important;padding-inline:6px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar #community-refresh{display:grid!important;place-items:center!important;}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar #community-saved-toggle[aria-pressed=true]{
+    background:#147a69!important;color:white!important;border-color:#147a69!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar #community-notifications-toggle.has-unread{
+    position:relative!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel .community-toolbar #community-notifications-toggle.has-unread::after{
+    content:'';position:absolute;right:4px;top:4px;width:6px;height:6px;border-radius:50%;background:#d74b4b;
   }
   #app #participation-panel #community-refresh{background:#edf5ef!important;color:#2e5547!important}
   #app #participation-panel .community-map-report-link{
