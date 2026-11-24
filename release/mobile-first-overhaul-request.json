@@ -3,9 +3,9 @@
   "application_version": "9.2.149",
   "public_work_branch": "main",
   "purpose": "PR461: integrate PR457 visible-map facilities, PR458 equal bus route controls and train visuals, PR459 expandable waypoints, strict Dongjak routing bounds and 54px AI control. Preserve PR460 CSS recovery, unchanged scale visibility and bounded dock layout scheduling.",
-  "attempt": 364,
+  "attempt": 365,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Recovery v9.2.148 Production verified in run 45439927760 attempt 3; user reports UI recovered. Integrated PR461 source CI 45441065903 passed 30/30. Protected Preview and Production gates retained.",
+  "last_retry_reason": "PR462 fixes sealed build anchor mismatch in run 45442805119, validates balanced local and final geometry, and preserves GPS district checks. Source CI 45443832629 passed all 30 jobs. Retry same unreleased version with protected gates intact.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
