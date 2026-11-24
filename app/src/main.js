@@ -2287,8 +2287,28 @@ const issueDetails=document.getElementById('community-issue-details');
 const syncIssueDetails=()=>{issueDetails.hidden=document.getElementById('community-category').value!=='보행 불편';};
 document.getElementById('community-category').addEventListener('change',syncIssueDetails);
 syncIssueDetails();
+// The full-screen composer sits above the app toast; keep feedback beside its submit action.
+function setCommunityPublishFeedback(message='',pending=false){
+  const button=communityForm.querySelector('button[type="submit"]');
+  if(!button)return;
+  let note=communityForm.querySelector('[data-community-publish-feedback]');
+  if(!note&&message){
+    note=document.createElement('p');
+    note.dataset.communityPublishFeedback='true';
+    note.setAttribute('role','status');
+    note.setAttribute('aria-live','polite');
+    note.style.cssText='margin:0 0 8px;font-size:13px;line-height:1.45;overflow-wrap:anywhere;';
+    button.before(note);
+  }
+  if(note){note.textContent=message;note.hidden=!message;note.style.color=pending?'#365c50':'#a12626';}
+}
+communityForm.addEventListener('invalid',event=>{
+  const field=event.target;
+  setCommunityPublishFeedback(field.id==='community-share-publicly'?'공개 게시판 등록에 동의해 주세요.':field.id==='community-title'?'제목을 입력해 주세요.':field.id==='community-text'?'내용을 입력해 주세요.':'필수 입력 항목을 확인해 주세요.');
+},true);
 communityForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
+  if(communityForm.dataset.djPublishing==='true')return;
   const title=document.getElementById('community-title').value.trim();
   const plainBody=document.getElementById('community-text').value.trim();
   const isIssue=document.getElementById('community-category').value==='보행 불편';
@@ -2296,24 +2316,29 @@ communityForm.addEventListener('submit',async(event)=>{
   const priority=document.getElementById('community-priority')?.value||'일반 확인';
   const body=isIssue?`[보행불편 유형: ${kind}] [현장 확인: ${priority}]\n${plainBody}`.slice(0,1200):plainBody;
   const nickname=document.getElementById('community-nickname').value.trim()||'익명 주민';
-  if(!title||!body){toast('제목과 내용을 입력해 주세요.');return;}
-  if(communityForm.dataset.djPublishing==='true')return;
-  const signedIn=await isCommunitySignedIn();
+  if(!title||!plainBody){setCommunityPublishFeedback('제목과 내용을 입력해 주세요.');return;}
   const wantsPublic=Boolean(document.getElementById('community-share-publicly')?.checked);
-  if(wantsPublic&&signedIn&&communityModerationStatus?.ready===false){toast('공개 글 AI 검사를 준비 중입니다. 작성 내용은 유지됩니다.');return;}
-  if(wantsPublic&&!signedIn){toast('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');return;}
-  if(!wantsPublic){toast('공개 등록에 동의해 주세요. 작성 내용은 유지됩니다.');return;}
-  const post=makeCommunityPost({
-    title,body,nickname,category:document.getElementById('community-category').value,
-    photo:communityDraftPhoto,location:communityPickedLocation
-  });
+  if(!wantsPublic){setCommunityPublishFeedback('공개 등록에 동의해 주세요. 작성 내용은 유지됩니다.');return;}
   let outcome=null;
   communityForm.dataset.djPublishing='true';
   const publishButton=communityForm.querySelector('button[type="submit"]');
   if(publishButton)publishButton.disabled=true;
-  try{outcome=await publishCommunityPost(post);}
-  catch(error){toast(error?.message||'서버 등록에 실패했습니다. 작성 내용은 유지됩니다.');return;}
+  setCommunityPublishFeedback('로그인 확인 및 AI 검사 중입니다…',true);
+  try{
+    if(!await isCommunitySignedIn()){
+      setCommunityPublishFeedback('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');
+      return;
+    }
+    // A cached readiness result must not permanently block retries. The server
+    // still enforces authentication, moderation readiness and publication policy.
+    const post=makeCommunityPost({
+      title,body,nickname,category:document.getElementById('community-category').value,
+      photo:communityDraftPhoto,location:communityPickedLocation
+    });
+    outcome=await publishCommunityPost(post);
+  }catch(error){setCommunityPublishFeedback(error?.message||'서버 등록에 실패했습니다. 작성 내용은 유지됩니다.');return;}
   finally{delete communityForm.dataset.djPublishing;if(publishButton)publishButton.disabled=false;}
+  setCommunityPublishFeedback();
   void refreshSharedCommunity();
   communityForm.reset();
   communityDraftPhoto=null;communityPickedLocation=null;
