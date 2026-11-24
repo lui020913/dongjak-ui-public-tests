@@ -48,7 +48,7 @@ export function installWalkingNavigationExperience(doc=document,win=window){
     const warning=doc.getElementById('nav-warning');
     const errorText=warning?.textContent||'';
     warning?.classList.toggle('dj825-nav-alert',/거부|실패|낮아|오차가|정확도가|벗어|급격|재탐색/.test(errorText));
-    if(/다시 찾는 중|새 경로|재탐색에/.test(errorText))suppressedForReroute=true;
+    suppressedForReroute=/다시 찾|새 경로를 찾|재탐색에 실패|벗어|떨어져|급격|정확도가 낮/.test(errorText);
     if(!index||!turns.length||suppressedForReroute)return;
     const accuracyText=doc.getElementById('nav-accuracy')?.textContent||'';
     const accuracy=Number((accuracyText.match(/(?:오차|정확도)\s*(?:약)?\s*(\d+)/)||[])[1]);
@@ -69,8 +69,8 @@ export function installWalkingNavigationExperience(doc=document,win=window){
     }
     const cue=nextTurnCue(next,dist,voiced);
     if(!cue)return;
-    voiced.add(cue.key);
     if(doc.getElementById('nav-voice')?.getAttribute('aria-pressed')!=='true'||doc.hidden)return;
+    voiced.add(cue.key);
     if(!win.speechSynthesis||!win.SpeechSynthesisUtterance)return;
     try{
       const utterance=new win.SpeechSynthesisUtterance(cue.text);
@@ -84,6 +84,9 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   doc.getElementById('route-clear')?.addEventListener('click',onReset);
   win.addEventListener('dongjak:route-variants-ready',onVariants);
   doc.getElementById('route-variants')?.addEventListener('click',onNativeChoice,true);
+  const voice=doc.getElementById('nav-voice');
+  const onVoice=()=>{if(voice?.getAttribute('aria-pressed')==='true'){voiced.clear();updateState();}};
+  voice?.addEventListener('click',onVoice);
   const observer=new MutationObserver(()=>updateState());
   for(const [el,opts] of [
     [app,{attributes:true,attributeFilter:['class']}],
@@ -96,7 +99,7 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   const mapRoot=doc.getElementById('map');
   if(mapRoot)observer.observe(mapRoot,{childList:true,subtree:true});
   updateState();
-  return ()=>{observer.disconnect();cardSize?.disconnect();win.removeEventListener('resize',positionControls);win.removeEventListener('dongjak:route-variants-ready',onVariants);
+  return ()=>{voice?.removeEventListener('click',onVoice);observer.disconnect();cardSize?.disconnect();win.removeEventListener('resize',positionControls);win.removeEventListener('dongjak:route-variants-ready',onVariants);
     doc.getElementById('route-calc')?.removeEventListener('click',onReset);
     doc.getElementById('route-clear')?.removeEventListener('click',onReset);
     doc.getElementById('route-variants')?.removeEventListener('click',onNativeChoice,true);

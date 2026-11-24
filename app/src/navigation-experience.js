@@ -10,10 +10,13 @@ export function bearingDegrees(from,to){
 export function headingForCamera(gpsHeading,currentBearing=0){
   return Number.isFinite(gpsHeading)&&gpsHeading>=0?(gpsHeading%360):currentBearing;
 }
+export function offRouteThreshold(accuracy){
+  return Math.max(20,Math.min(55,accuracy+8));
+}
 export function shouldAutoReroute({offRouteMeters,accuracy,consecutiveSamples,now,lastAttemptAt=-Infinity,pending=false}){
   return !pending && Number.isFinite(accuracy) && accuracy<=40 &&
-    offRouteMeters>Math.max(30,Math.min(68,accuracy*2)) && consecutiveSamples>=3 &&
-    now-lastAttemptAt>=30000;
+    offRouteMeters>offRouteThreshold(accuracy) && consecutiveSamples>=3 &&
+    now-lastAttemptAt>=15000;
 }
 // Announce each relevant distance threshold once per maneuver.
 export function voiceCueKey(maneuverIndex,remainingMeters){

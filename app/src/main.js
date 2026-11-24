@@ -37,7 +37,7 @@ import './map-patch/dj-v5911-place-polish.css';
 import './layout-core.css';
 import {installDongjakMapPatch} from './map-patch/dongjak-map-patch.js';
 import {distanceMeters,makeRouteIndex,nearestOnRoute,splitRoute} from './navigation-geometry.js';
-import {bearingDegrees,headingForCamera,shouldAutoReroute,voiceCueKey,startNavigationCompass,signedHeadingDelta} from './navigation-experience.js';
+import {bearingDegrees,headingForCamera,shouldAutoReroute,offRouteThreshold,voiceCueKey,startNavigationCompass,signedHeadingDelta} from './navigation-experience.js';
 import {installNavVoicePicker,applySelectedNavVoice} from './nav-voice-picker.js';
 import {makeCommunityPost,updateCommunityLike,appendCommunityComment,formatCommunityDate,readCommunityPosts} from './community-store.js';
 import {createCommunityComposerPortal} from './community-composer-portal.js';
@@ -2605,7 +2605,7 @@ function lockRouteMapGestures(locked){
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap;
-  const preview = Boolean(routeResult) && onMap && !picking && !navMode;
+  const preview = Boolean(routeResult) && onMap && !picking && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
@@ -3181,7 +3181,11 @@ async function fetchPreferredPedestrianPair(from,to,signal){
 }
 function currentPreferredModeResult(from,to,which,signal){
   if(routeResult?.source==='seoul-pedestrian-graph'){
-    return fetchDongjakPedestrianVariants(from,to,{signal}).then(routes=>routes[which]);
+    return fetchPreferredPedestrianPair(from,to,signal).then(routes=>{
+      const result=routes[which];
+      if(!result?.coords?.length)throw new Error('선택한 보행 경로를 다시 찾지 못했습니다.');
+      return result;
+    });
   }
   return fetchPedestrianRoute(from,to,which,signal);
 }
@@ -3411,7 +3415,7 @@ function updateNavGuidance(offRoute=false) {
   const seconds=remain/(Math.max(navIndex.total,1))*routeResult.seconds;
   document.getElementById('nav-remain-distance').textContent=formatDistance(remain);
   document.getElementById('nav-remain-time').textContent=`약 ${Math.max(1,Math.ceil(seconds/60))}분`;
-  if(offRoute) {
+  if(offRoute||navReroutePending) {
     document.getElementById('nav-instruction').textContent='경로에서 벗어난 것으로 보입니다';
     return;
   }
@@ -3425,7 +3429,7 @@ function updateNavGuidance(offRoute=false) {
   const distance=Math.max(0,next.at-navProgress);
   document.getElementById('nav-instruction').textContent=distance>20?`${formatDistance(distance)} 앞 · ${turn}`:turn;
   const cue=voiceCueKey(next.index,distance);
-  if(cue)speakNav(distance>20?`${Math.max(10,Math.round(distance/10)*10)}미터 앞에서 ${turn}`:turn,cue);
+  if(cue&&navLastGps&&navLastGps.accuracy<=40)speakNav(distance>20?`${Math.max(10,Math.round(distance/10)*10)}미터 앞에서 ${turn}입니다.`:`${turn}입니다.`,cue);
 }
 async function autoRerouteFromGps(pos,accuracy){
   if(navMode!=='gps'||!routeEnd||navReroutePending||routeWaypoints.length)return;
@@ -3443,6 +3447,7 @@ async function autoRerouteFromGps(pos,accuracy){
   speakNav('경로에서 벗어났습니다. 새로운 도보 경로를 찾겠습니다.',`reroute-${now}`);
   try {
     const data=await currentPreferredModeResult({lng:pos[0],lat:pos[1]},routeEnd,selectedRouteVariant,controller.signal);
+    if(!data?.coords||data.coords.length<2)throw new Error('재탐색 경로 좌표가 부족합니다.');
     if(token!==navSessionToken || navMode!=='gps'||controller.signal.aborted)return;
     routeResult=data;
     // The new GPS-origin geometry is NOT the previously evaluated route.
@@ -3453,13 +3458,13 @@ async function autoRerouteFromGps(pos,accuracy){
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:routeVariants}));
     window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:null}));
     navIndex=makeRouteIndex(data.coords);
-    navProgress=0;navLastUpdateAt=0;
+    navProgress=0;navLastUpdateAt=0;navOffRouteSamples=0;
     navLastVoiceKey='';
     showRouteLine(data.coords);
-    updateNavGuidance();
     document.getElementById('nav-mode-tag').textContent='● GPS 도보 안내';
     document.getElementById('nav-warning').textContent=routeDataNote(data);
-    speakNav('새 경로로 안내하겠습니다.',`reroute-ok-${now}`);
+    navReroutePending=false;
+    updateNavGuidance();
     toast('현재 위치에서 경로를 다시 계산했습니다.');
   } catch(error) {
     if(token!==navSessionToken||controller.signal.aborted)return;
@@ -3514,7 +3519,7 @@ function updateNavState(pos,accuracy=0,heading=NaN) {
     document.getElementById('nav-warning').textContent=routeWaypoints.length?'GPS 정확도가 낮아 경유지 경로 진행을 보류합니다.':'GPS 위치 정확도가 낮아 경로 진행과 자동 재탐색을 보류합니다.';
     return;
   }
-  const offRouteLimit=Math.max(30,Math.min(68,actualAccuracy*2));
+  const offRouteLimit=offRouteThreshold(actualAccuracy);
   navLastOffRouteDistance=nearest.offRouteMeters;
   if(nearest.offRouteMeters>offRouteLimit){
     // 지하철 출입구·고층건물 인근 GPS 튐으로 인한 잘못된 재검색을 막습니다.
@@ -3559,11 +3564,12 @@ function stopNavigation(arrived=false) {
     else showRouteLine(routeResult.coords);
   }
   navMode=null;navIndex=null;navProgress=0;navLastUpdateAt=0;navFollow=true;
+  if(arrived)app.dataset.djWalkArrived='1';
   updateNavButtonLabels();
   syncRoutePresentation();
   if(arrived) {
     document.getElementById('route-status').textContent='목적지 근처에 도착했습니다. 실제 위치와 보행환경을 확인하세요.';
-    toast('목적지 근처에 도착했습니다.');
+    // The dedicated arrival dialog is the sole completion message.
     // Arrival is a navigation state transition, not another route computation.
     // The view shows only existing route estimates and never fabricates actual steps.
     window.dispatchEvent(new CustomEvent('dongjak:route-arrived',{detail:{
@@ -3627,7 +3633,13 @@ document.getElementById('nav-voice').addEventListener('click',()=>{
   navLastVoiceKey='';
   if(!navVoiceEnabled){try{window.speechSynthesis.cancel();}catch{}}
   updateNavButtonLabels();
-  if(navVoiceEnabled)speakNav('도보 음성 안내를 시작합니다.','voice-ready');
+  if(navVoiceEnabled){
+    const next=navNextTurn();
+    if(next&&navIndex&&!navReroutePending&&navLastGps&&navLastGps.accuracy<=40){
+      const distance=Math.max(0,next.at-navProgress);
+      speakNav(distance>20?`${Math.max(10,Math.round(distance/10)*10)}미터 앞에서 ${navTurnName(next.type)}입니다.`:`${navTurnName(next.type)}입니다.`,voiceCueKey(next.index,distance)||'voice-ready');
+    }else speakNav('도보 음성 안내를 시작합니다.','voice-ready');
+  }
 });
 document.getElementById('nav-orientation').addEventListener('click',()=>{
   navHeadingUp=!navHeadingUp;updateNavButtonLabels();

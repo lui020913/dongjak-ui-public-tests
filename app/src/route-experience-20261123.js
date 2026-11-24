@@ -178,6 +178,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   on(byId('route-map-close'),'click',closeArrival);
   on(win,'dongjak:route-arrived',()=>{
     arrival.hidden=false;app.dataset.djWalkArrived='1';
+    mapCard.hidden=true;setStage();
     arrivedConfirm.focus({preventScroll:true});
   });
 
@@ -186,7 +187,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   shield.setAttribute('aria-hidden','true');app.append(shield);
   const stop=byId('nav-stop');
   if(stop)stop.textContent='안내 종료';
-  const allowedControls=()=>[...doc.querySelectorAll('#nav-map-controls:not([hidden]) button,#nav-stop')].filter(el=>!el.disabled);
+  const allowedControls=()=>[...doc.querySelectorAll('#nav-map-controls:not([hidden]) button,#nav-stop,#nav-voice')].filter(el=>!el.disabled);
   const focusEnd=()=>{if(app.classList.contains('route-guiding')&&stop?.isConnected)stop.focus({preventScroll:true});};
   const intercept=e=>{
     if(!app.classList.contains('route-guiding'))return;
@@ -196,6 +197,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       controls[(idx+(e.shiftKey?-1:1)+controls.length)%controls.length]?.focus({preventScroll:true});return;
     }
     if(e.target?.closest?.('#nav-stop,#nav-map-controls'))return;
+    if(e.target?.closest?.('#nav-voice'))return;
     // Allow actual canvas gestures, not POI clicks, marker buttons or other map overlays.
     if(e.target?.closest?.('#map .maplibregl-canvas')&&['pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','dblclick'].includes(e.type))return;
     e.preventDefault?.();e.stopImmediatePropagation?.();e.stopPropagation?.();
@@ -338,7 +340,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   footerMountObserver.observe(panel,{childList:true});
   let oldStage='';
   const setStage=()=>{
-    const stage=app.classList.contains('route-guiding')?'guiding':
+    const stage=app.dataset.djWalkArrived==='1'?'arrived':app.classList.contains('route-guiding')?'guiding':
       !search.hidden&&!panel.hidden?'search':
       !mapCard.hidden?'preview':
       app.dataset.tab==='route'?'input':'none';
@@ -353,7 +355,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(stage==='guiding')stop?.focus({preventScroll:true});
   };
   const stateObserver=new MutationObserver(setStage);
-  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab']});
+  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab','data-dj-walk-arrived']});
   for(const node of [panel,search,mapCard,navCard])stateObserver.observe(node,{attributes:true,attributeFilter:['hidden']});
   // Light updates in guidance are performed by native GPS, not this presenter.
   setStage();refreshChoices();
