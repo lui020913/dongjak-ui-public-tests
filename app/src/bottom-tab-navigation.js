@@ -53,8 +53,13 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
   paint(.12);
   let last=null,elapsed=0;
+  // Map rendering can delay the first frame. Keep the reveal alive until
+  // the first actual frame, then bound cleanup separately from startup.
+  // This avoids dropping a fresh tab transition before it is ever painted.
+  let started=false;
   const step=now=>{
    if(!enterStyles.length)return;
+   if(!started){started=true;if(enterTimer)win.clearTimeout(enterTimer);enterTimer=win.setTimeout(clearEntrance,4500);}
    if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
    last=now;
    const p=Math.min(1,elapsed/300);
@@ -103,7 +108,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
-   if(revealContent(panel,app.dataset.tab)){enterTimer=win.setTimeout(clearEntrance,1600);return;}
+   if(revealContent(panel,app.dataset.tab)){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   }
   if(reduced()){clearEntrance();return;}
   enterTimer=win.setTimeout(clearEntrance,(toMap?TAB_TRANSITION.mapReturn:TAB_TRANSITION.contentReveal)+30);

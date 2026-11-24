@@ -196,15 +196,18 @@ jobs:
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       # Test-only follow-up: same application candidate as Preview 45344608752.
       # Verify actual rendered intermediate opacity in the impacted journeys.
-      - name: Verify actual route and tab motion against exact deployed Preview
+      - name: Verify corrected tab motion against rebuilt candidate
         if: ${{ github.head_ref == 'fix/release-visible-motion-audit-20261124' }}
         working-directory: .
         env:
-          DONGJAK_TARGET_URL: https://73cc53dc.dongjak-walk-safety-preview.pages.dev
+          DONGJAK_TARGET_URL: http://127.0.0.1:4173
           DONGJAK_FAST_MOBILE_QA: '1'
         run: |
-          curl -fsSL "$DONGJAK_TARGET_URL/release-source.json?verify=45344608752" | node --input-type=module -e 'let s="";for await(const c of process.stdin)s+=c;const j=JSON.parse(s);if(j.public_ui_source_commit!=="b8fa0eea21eb0346f924a4458fdac6bdb0ebe8c8"||j.application_version!=="9.2.136"||String(j.build_run)!=="45344608752"||j.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION")throw Error("Preview provenance mismatch: "+JSON.stringify(j))'
-          # Run 45345998802: all three compact HUD cases passed; only this direct news transition remains.
+          (cd app && npx vite preview --host 127.0.0.1 --port 4173 --strictPort) > /tmp/dj-tab-preview.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do curl -fsS "$DONGJAK_TARGET_URL/" >/dev/null && break; sleep 1; done
+          curl -fsS "$DONGJAK_TARGET_URL/" >/dev/null
           npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile390 --grep 'primary tabs reveal content'
       # PR431 run 45341079964: 29 passed, 2 skipped, 2 AI keyboard-dismiss failures.
       - name: Retest only two failed AI keyboard dismissals

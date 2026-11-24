@@ -95,7 +95,7 @@ async function enter(page,id,key){
    await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
    // Test painted intermediate opacity, not a particular CSS animation
    // name. The inline-important rAF owner intentionally disables keyframes.
-   await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&f.contentOpacity>.12&&f.contentOpacity<.98))).toBe(true);
+   await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&f.contentOpacity>.12&&f.contentOpacity<.98)),{message:'visible intermediate content opacity on '+key+' entry'}).toBe(true);
    await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
