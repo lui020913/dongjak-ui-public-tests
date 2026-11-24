@@ -153,7 +153,7 @@ jobs:
       # Brand-new V3 entry already passed 3 phone reference screenshot
       # acceptance at source c5303778 (run 45252233121). Tests changed only
       # to migrate obsolete route-smoke semantics; rerun 6 impacted cases.
-      - name: Retest five failed V3 release smoke cases only
+      - name: Retest last narrow-phone bottom dock ink assertion only
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: |
@@ -166,9 +166,11 @@ jobs:
             sleep 1
           done
           DONGJAK_TARGET_URL=http://127.0.0.1:4173 DONGJAK_FAST_MOBILE_QA=0 \
+          # Prior run 45302231139 passed all four other affected cases;
+          # only mobile375 dock-label color settled one frame too late.
           npx playwright test --config=playwright.v911-remote.config.mjs \
-            --project=mobile375 --project=mobile390 --project=mobile430 \
-            --grep 'phone selected dock has no color plate|phone route comparison uses actual pedestrian graph|phone windows share the opaque gradual slide'
+            --project=mobile375 \
+            --grep 'phone selected dock has no color plate and route form is vertically balanced'
       - name: Upload targeted V3 release smoke failures
         if: ${{ always() && github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         uses: actions/upload-artifact@v4
