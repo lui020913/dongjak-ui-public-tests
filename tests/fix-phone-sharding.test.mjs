@@ -19,7 +19,7 @@ test('matrix shares one source-bound build; failures stay independently retryabl
  assert.match(y,/fix-phone:\s+[\s\S]*?fail-fast: false/);
  assert.match(y,/--workers=1 --shard=/);
  assert.match(y,/sha256sum -c SHA256SUMS/);
- assert.match(y,/git -C "\$GITHUB_WORKSPACE" rev-parse HEAD/);
+ assert.match(y,/git -c safe\.directory="\$GITHUB_WORKSPACE" -C "\$GITHUB_WORKSPACE" rev-parse HEAD/);
  assert.match(y,/fix-phone-gate:[\s\S]*?test "\$PHONE_RESULT" = success/);
  assert.equal((y.match(/run: npm run build/g)||[]).length,1);
 });
