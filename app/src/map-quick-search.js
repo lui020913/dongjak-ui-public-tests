@@ -5,7 +5,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {nearbySearchResults,searchResultSubtitle,searchResultKey,fetchNearbyOfficialPlaces,searchPlaceKind} from './map-search-refinement.js';
+import {searchResultSubtitle,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -73,7 +73,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   dropdownHead.after(body);body.append(filters,feedback,list);
   const actions=document.createElement('div');actions.id='dj-search-entry-actions';actions.hidden=true;
   const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='최근 검색';
-  const nearbyButton=document.createElement('button');nearbyButton.type='button';nearbyButton.textContent='내 주변 시설';
+  const nearbyButton=document.createElement('button');nearbyButton.type='button';nearbyButton.textContent='이 지도에서 검색';
   nearbyButton.id='dj-search-nearby';actions.append(nearbyButton,historyButton);app.append(actions);
   const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
   const syncEntry=()=>{
@@ -301,25 +301,34 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     filters.hidden=true;dropdown.dataset.searchMode='history';setTitle('최근 검색');
     show();render([],true);feedback.textContent='';
   };
-  const openNearby=()=>{
+  const openNearby=async()=>{
+    // Snapshot before the results panel opens. GPS and geolocation permissions
+    // are intentionally not involved in this map-area search.
+    const area=captureVisibleFacilityArea(map);
+    const zoom=Number(map.getZoom?.());
     query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;const active=++seq;
-    filters.hidden=true;dropdown.dataset.searchMode='nearby';setTitle('내 주변 시설');show();list.replaceChildren();
-    feedback.textContent='현재 위치를 확인하고 있습니다…';
-    if(!navigator.geolocation){feedback.textContent='이 기기에서는 위치 정보를 사용할 수 없습니다.';return;}
-    navigator.geolocation.getCurrentPosition(async position=>{
-      if(active!==seq)return;
-      const {longitude:lng,latitude:lat,accuracy}=position.coords;
-      if(!Number.isFinite(lng)||!Number.isFinite(lat)||!Number.isFinite(accuracy)||accuracy>200){feedback.textContent='위치 정확도가 낮습니다. 잠시 후 다시 시도해 주세요.';return;}
-      const origin={lng,lat};const own=new AbortController();controller=own;
-      let external=[],partial=false;const timeout=window.setTimeout(()=>own.abort(),7000);
-      try{external=await fetchNearbyOfficialPlaces(origin,{signal:own.signal});}catch(error){if(active!==seq)return;partial=true;}finally{window.clearTimeout(timeout);}
-      if(active!==seq)return;
-      const stations=Object.entries(VERIFIED_STATIONS).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:name+'역',lng,lat,kind:'subway',category:'지하철·철도역'}));
-      const places=nearbySearchResults(origin,[...searchTransportSnapshot(),...officialSearchSnapshot(),...external,...stations,...localVectorFacilities('',true)]);
-      list.replaceChildren();for(const place of places)list.append(makeResultButton(place));
-      feedback.textContent=places.length?`현재 위치 반경 500m · ${places.length}곳 · 직선거리 순${partial?' · 일부 자료 미연결':''}`:'반경 500m 내 확인된 시설이 없습니다. 자료 범위 밖이거나 데이터가 부족할 수 있습니다.';
-    },()=>{if(active===seq)feedback.textContent='위치 권한 또는 위치 확인에 실패했습니다. 설정에서 권한을 확인해 주세요.';},{enableHighAccuracy:true,timeout:10000,maximumAge:15000});
+    filters.hidden=true;dropdown.dataset.searchMode='nearby';setTitle('이 지도에서 검색');show();list.replaceChildren();
+    if(!area){
+      feedback.textContent='시설을 찾으려면 지도를 조금 더 확대해 주세요.';
+      const expand=document.createElement('button');expand.type='button';expand.className='map-quick-search-suggestion dj-search-zoom-action';expand.textContent='지도 확대';
+      expand.addEventListener('click',()=>{
+        close();query.blur();syncEntry();
+        map.easeTo?.({zoom:Math.max(MIN_VISIBLE_FACILITY_ZOOM,Number.isFinite(zoom)?zoom+1:MIN_VISIBLE_FACILITY_ZOOM),duration:300});
+      });
+      list.append(expand);return;
+    }
+    feedback.textContent='현재 지도에서 시설을 찾고 있습니다…';
+    const own=new AbortController();controller=own;
+    const stations=Object.entries(VERIFIED_STATIONS).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:name+'역',lng,lat,kind:'subway',category:'지하철·철도역'}));
+    const local=[...searchTransportSnapshot(),...officialSearchSnapshot(),...stations,...localVectorFacilities('',true)];
+    let external=[],partial=false;const timeout=window.setTimeout(()=>own.abort(),7000);
+    try{external=await fetchVisibleOfficialPlaces(area,{signal:own.signal});}catch(error){if(active!==seq)return;partial=true;}finally{window.clearTimeout(timeout);}
+    if(active!==seq)return;
+    const {items,total}=visibleFacilityResults(area,[...local,...external]);
+    list.replaceChildren();for(const place of items)list.append(makeResultButton(place));
+    feedback.textContent=items.length?`현재 지도 내 ${total}곳${total>items.length?' · '+items.length+'곳 표시':''}${partial?' · 일부 장소를 불러오지 못했습니다.':''}`:(partial?'현재 지도에서 확인된 시설이 없습니다. 일부 장소를 불러오지 못했습니다.':'현재 지도에서 확인된 시설이 없습니다. 지도를 이동해 다시 검색해 주세요.');
   };
+  map.on?.('movestart',()=>{if(dropdown.dataset.searchMode==='nearby'){close();query.blur();syncEntry();}});
   for(const button of [nearbyButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
   nearbyButton.addEventListener('click',openNearby);historyButton.addEventListener('click',openHistory);
   query.addEventListener('blur',()=>window.setTimeout(syncEntry,0));
