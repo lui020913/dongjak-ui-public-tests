@@ -40,6 +40,13 @@ jobs:
           const routeId=route.j.routes?.map(x=>String(x.routeId??x.busRouteId??'')).find(x=>/^\d{5,15}$/.test(x));
           const bus=await get('/api/transport/live-vehicles?'+new URLSearchParams({modes:'bus',...(routeId?{routeId}:{})}));
           log('bus location',bus,{routeSelected:!!routeId,vehicles:bus.j.bus?.length,availability:bus.j.availability,warnings:bus.j.warnings});
+          // Known official route IDs from scripts/check-live-bus-route.mjs.
+          for(const id of ['100100553','100100112']){
+            const geo=await get('/api/transport/bus/route-path?routeId='+id);
+            log('known route geometry '+id,geo,{coordinates:geo.j.coordinates?.length});
+            const r=await get('/api/transport/live-vehicles?modes=bus&routeId='+id);
+            log('selected bus location '+id,r,{vehicles:r.j.bus?.length,availability:r.j.availability,warnings:r.j.warnings});
+          }
           const categories=['약국','동물약국','편의점','음식점','휴게음식점','카페'];
           for(const category of categories){
             const r=await get('/api/seoul-facilities?'+new URLSearchParams({category,limit:'2000'}));
