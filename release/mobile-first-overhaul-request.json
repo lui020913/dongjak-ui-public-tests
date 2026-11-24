@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.150",
+  "application_version": "9.2.151",
   "public_work_branch": "main",
-  "purpose": "Integrated PR468, PR465, PR466, PR467 and PR469: inline waypoint and per-target search/map/GPS, category-based map/nearby facility results with road addresses and distance, clear pedestrian-risk (PRI) explanation, partial facility recovery and verified brand aliases, selected-bus 15-second refresh, bus detail fade/expanded sheet, direct community filter toolbar.",
-  "attempt": 367,
+  "purpose": "PR472: align search and AI controls, waypoint removal, recent search header, community comment and photo buttons, Android APK download recovery.",
+  "attempt": 368,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
