@@ -82,3 +82,5 @@ test('AI fade completion can close from either animation or timer without duplic
  assert.match(ai,/setTimeout\(finishClose,175\)/);
  assert.match(geometry,/getPropertyValue\(key\)!==value/);
 });
+
+test('phone AI close releases native top layer synchronously',()=>{assert.match(code('src/v880-supabase-safety-ai.js'),/input\.blur\(\);finishClose\(\);/);});

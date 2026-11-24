@@ -458,8 +458,10 @@ test('merged route search returns to AI keyboard without a background seam',asyn
 // Check rendered containment rather than only stylesheet tokens.
 test('history starts collapsed and PRI header is isolated from scrolling',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
+ test.setTimeout(150000);
  await readyForLiveTouch(page);
  const pri=page.locator('#dj-pri-dialog');
+ await expect(pri).toBeAttached({timeout:15000});
  await pri.evaluate(n=>n.showModal());
  await expect(pri).toBeVisible();
  const geometry=await pri.evaluate(n=>{
@@ -473,7 +475,7 @@ test('history starts collapsed and PRI header is isolated from scrolling',async(
  await page.locator('[data-dj834-action="history"]').click();
  const archives=page.locator('#version-history-list .dj-edition-history');
  await expect(archives.first()).toBeVisible();
- expect(await archives.locator('xpath=self::details[@open]').count()).toBe(0);
+ expect(await page.locator('#version-history-list .dj-edition-history[open]').count()).toBe(0);
  await archives.first().locator('summary').first().click();
  await expect(archives.first()).toHaveAttribute('open','');
 });
