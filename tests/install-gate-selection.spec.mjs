@@ -32,10 +32,10 @@ test('PC install gate marks the selected option and always shows Google Play ext
   await expect(guide.locator('.dj-install-guide-notice')).toContainText('설치하지 마세요');
   await expect(guide.locator('ol.dj-install-guide-steps li')).toHaveCount(4);
   if(await guide.locator('.dj-install-guide-unavailable').count()){
-    await expect(guide.locator('.dj-install-guide-unavailable')).toContainText('준비 중');
-    await expect(guide.getByRole('button',{name:'APK 다운로드'})).toHaveCount(0);
+    await expect(guide.locator('.dj-install-guide-unavailable')).toContainText('확인하지 못했습니다');
+    await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toHaveCount(0);
   }else{
-    await expect(guide.getByRole('button',{name:'APK 다운로드'})).toBeVisible();
+    await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toBeVisible();
   }
   const pwa=choices.filter({hasText:'홈 화면에 웹앱 추가'});
   await pwa.click();
