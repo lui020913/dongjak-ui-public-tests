@@ -69,27 +69,39 @@ async function visuallyPresented(locator){
  })).toBe(true);
 }
 async function enter(page,id,key){
- await page.evaluate(id=>{
+ await page.evaluate(({id,key})=>{
    const panel=document.getElementById(id),frames=[];
+   window.__auditStop?.();
    window.__auditFrames=frames;
-   window.__auditObserver?.disconnect?.();
-   const capture=()=>{
-     if(!panel?.classList.contains('dj-tab-content-enter'))return;
-     const c=getComputedStyle(panel),body=panel.querySelector(':scope > .dj836-sheet-body');
-     frames.push({rootOpacity:Number(c.opacity),contentAnimation:body?getComputedStyle(body).animationName:'',y:panel.getBoundingClientRect().y});
-   };
-   const observer=new MutationObserver(capture);
-   observer.observe(panel,{attributes:true,attributeFilter:['class']});
-   window.__auditObserver=observer;
- },id);
- await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
- await expect.poll(()=>page.evaluate(()=>window.__auditFrames.length)).toBeGreaterThan(0);
- await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
- await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
- const frames=await page.evaluate(()=>{window.__auditObserver?.disconnect?.();return window.__auditFrames;});
- expect(frames.every(f=>f.rootOpacity===1)).toBe(true);
- expect(frames.some(f=>f.contentAnimation.includes('djTabContentReveal'))).toBe(true);
- expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
+   let stopped=false,frame=0;
+   window.__auditStop=()=>{stopped=true;cancelAnimationFrame(frame);};
+   function capture(){
+     if(stopped)return;
+     if(panel?.classList.contains('dj-tab-content-enter')&&!panel.hidden){
+       // V3 renders in an independent shadow host. The legacy route-panel
+       // remains an engine adapter and must never serve as visual evidence.
+       const route=key==='route'?document.getElementById('dj-route-v3'):null;
+       const body=route?.shadowRoot?.querySelector('.canvas > .route-panel')||panel.querySelector(':scope > .dj836-sheet-body');
+       if(body&&(!route||!route.hidden)&&body.getClientRects().length){
+         const c=getComputedStyle(panel),actual=getComputedStyle(body);
+         frames.push({rootOpacity:Number(c.opacity),contentOpacity:Number(actual.opacity),y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
+       }
+     }
+     frame=requestAnimationFrame(capture);
+   }
+   capture();
+ },{id,key});
+ try{
+   await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
+   // Test painted intermediate opacity, not a particular CSS animation
+   // name. The inline-important rAF owner intentionally disables keyframes.
+   await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&f.contentOpacity>.12&&f.contentOpacity<.98))).toBe(true);
+   await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
+   await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
+   const frames=await page.evaluate(()=>window.__auditFrames);
+   expect(frames.every(f=>f.rootOpacity===1)).toBe(true);
+   expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
+ }finally{await page.evaluate(()=>window.__auditStop?.());}
  await geometry(page,'#'+id);
 }
 test.afterEach(async({page},info)=>{
