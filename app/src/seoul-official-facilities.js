@@ -141,6 +141,25 @@ export async function queryOfficialPlaces(query,{signal,fetcher=fetch,remoteFall
  }catch(error){if(error?.name==='AbortError')throw error;}}
  return results.slice(0,60);
 }
+/** A failed category must not suppress the remaining official categories. */
+export async function collectOfficialFacilityPages(categories,fetchPage,{maxPages=4}={}){
+ const places=[],ids=new Set(),failed=[],empty=[],truncated=[];
+ for(const category of categories){
+   let count=0;
+   try{
+     for(let page=0;page<maxPages;page++){
+       const json=await fetchPage(category,page);
+       if(!json?.ok||!Array.isArray(json.places))throw new Error('facility page unavailable');
+       count+=json.places.length;
+       for(const p of json.places){if(!ids.has(p.id)){ids.add(p.id);places.push(p);}}
+       if(!json.hasMore)break;
+       if(page===maxPages-1)truncated.push(category);
+     }
+     if(!count)empty.push(category);
+   }catch{failed.push(category);}
+ }
+ return {places,failed,empty,truncated};
+}
 export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOpen=()=>true,app}={}){
  if(!map||!getBoundary)return {ok:false};
  let cache=EMPTY,active=true,timer=null,inflight=false,lastBox='',latest=0,lastAttempt=0,forceRefresh=false;
@@ -164,32 +183,29 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
    inflight=true;forceRefresh=false;lastAttempt=Date.now();
    status('일반시설 최신 정보 조회 중…');
    try{
-     const merged=[],ids=new Set();let officialAvailable=true;
      // Fetch pharmacy independently: commercial rows must never crowd out safety data.
      const wanted=['약국',...(groups.has('convenience')?['동물약국','편의점']:[]),...(groups.has('food')?['음식점','휴게음식점']:[]),...(groups.has('cafe')?['카페']:[])];
-     for(const category of wanted){
-       for(let page=0;page<4;page++){
-         const u=new URL('/api/seoul-facilities',location.origin);
-         u.searchParams.set('bbox',bbox);u.searchParams.set('category',category);u.searchParams.set('limit','1200');u.searchParams.set('offset',String(page*1200));
-         const response=await fetch(u.toString(),{headers:{Accept:'application/json'}});
-         if(!response.ok){officialAvailable=false;break;}
-         const json=await response.json();if(!json.ok){officialAvailable=false;break;}
-         for(const p of json.places||[]){if(!ids.has(p.id)){ids.add(p.id);merged.push(p);}}
-         if(!json.hasMore)break;
-       }
-       if(!officialAvailable)break;
-     }
-     let source='서울시 등록 시설';
-     if(!officialAvailable||!merged.length){
-       // Graceful fallback: Pages deployments without a configured D1 binding
-       // still display real, source-attributed general facilities, never fakes.
-       const osm=await loadOsmGeneralFacilities(bbox);
+     const official=await collectOfficialFacilityPages(wanted,async(category,page)=>{
+       const u=new URL('/api/seoul-facilities',location.origin);
+       u.searchParams.set('bbox',bbox);u.searchParams.set('category',category);u.searchParams.set('limit','1200');u.searchParams.set('offset',String(page*1200));
+       const response=await fetch(u.toString(),{headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});
+       if(!response.ok)throw new Error('facility page unavailable');
+       return response.json();
+     });
+     const merged=[...official.places],ids=new Set(merged.map(p=>p.id));
+     let source='서울시 등록 시설',osmFailed=false;
+     // OSM also supplies categories not present in the Seoul licensing database.
+     // A failed complementary feed must not discard valid official rows.
+     try{
+       const osm=await loadOsmGeneralFacilities(bbox,{signal:AbortSignal.timeout(12000)});
        for(const p of osm){if(!ids.has(p.id)){ids.add(p.id);merged.push(p);}}
-       source='OSM 공개지도 시설';
-     }
+       if(osm.length)source=official.places.length?'서울시·OSM 시설':'OSM 공개지도 시설';
+     }catch{osmFailed=true;}
+     if(!merged.length&&osmFailed&&official.failed.length)throw new Error('facility sources unavailable');
+     const partial=official.failed.length||official.truncated.length||osmFailed;
      const next=officialFeatures(merged,getBoundary());
-     cache=next;searchableGeneralPlaces=merged.slice(0,1500);restore();lastBox=bbox;latest=Date.now();
-     status(`${source} ${next.features.length.toLocaleString()}곳 · 표시 정보는 현장 확인 필요`);
+     cache=next;searchableGeneralPlaces=merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],getBoundary()));restore();lastBox=bbox;latest=Date.now();
+     status(`${source} ${next.features.length.toLocaleString()}곳 · ${partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
    }catch(error){
      status(cache.features.length?`기존 일반시설 ${cache.features.length}곳 표시 중 · 최신 조회 실패`:'일반시설 조회 실패 · 다시 시도해 주세요');
      console.warn('[일반 시설 조회]',String(error?.message||error).slice(0,120));
