@@ -14,7 +14,29 @@ export function displayFacilityCategory(p){
  const raw=String(p.category||p.kind||p.type||'').trim();
  return categoryAliases[raw.toLowerCase()]||(/[가-힣]/.test(raw)?raw:'일반 시설');
 }
+// Group already deduplicated, distance-ranked map-area rows without inventing
+// missing categories or changing the visible-area limit.
+export function groupVisibleFacilities(items){
+  const groups=new Map();
+  for(const place of items){
+    const kind=searchPlaceKind(place);
+    const label=kind==='bus'?'버스정류장':kind==='subway'?'지하철·철도역':displayFacilityCategory(place);
+    if(!groups.has(label))groups.set(label,[]);
+    groups.get(label).push(place);
+  }
+  const priority=label=>label==='지하철·철도역'?0:label==='버스정류장'?1:label==='일반 시설'?3:2;
+  return [...groups].map(([label,rows])=>({label,rows})).sort((a,b)=>priority(a.label)-priority(b.label)||a.label.localeCompare(b.label,'ko'));
+}
 const userAddress=value=>String(value||'').split(/\s*·\s*/).map(v=>v.trim()).filter(v=>v&&!/openstreetmap|nominatim|photon|지도에 등록|운영 여부 미확인|저장된 역 위치|출입구와 다를 수|^ARS\b|^검색 결과$|^OSM\b|^©/i.test(v)).join(' · ');
+// An address needs a Korean road name and building number. A road alone,
+ // a district label, or a nearby reverse-geocoded building is not a POI address.
+export function facilityRoadAddress(p={}){
+  for(const value of [p.roadAddress,p.road_address,p.address]){
+    const address=userAddress(value);
+    if(/(?:^|[\s,])[가-힣0-9·.\-]+(?:대로|로|길)\s*\d+(?:[-–]\d+)?(?=$|[\s,(])/u.test(address))return address;
+  }
+  return '';
+}
 export function searchResultKey(p){
   const kind=kindOf(p),name=String(p.name||'').trim().replace(/역$/,'');
   if(kind==='bus'&&p.arsId)return 'bus:'+String(p.arsId);
@@ -39,19 +61,27 @@ export function distanceMeters(a,b){
   const h=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLng/2)**2;
   return 6371000*2*Math.asin(Math.sqrt(Math.max(0,Math.min(1,h))));
 }
+export function formatFacilityDistance(meters){
+  return '직선거리 '+(meters<1000?Math.round(meters)+'m':(meters/1000).toFixed(1)+'km');
+}
 export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
-  const seen=new Set(),found=[];
+  const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const row={...p,lng,lat},distance=distanceMeters(origin,row),key=searchResultKey(row);
-    if(!Number.isFinite(distance)||distance>radius||seen.has(key))continue;
-    seen.add(key);found.push({...row,distanceMeters:distance});
+    if(!Number.isFinite(distance)||distance>radius)continue;
+    if(seen.has(key)){
+      const prior=seen.get(key),road=facilityRoadAddress(row);
+      if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
+      continue;
+    }
+    const entry={...row,distanceMeters:distance};seen.set(key,entry);found.push(entry);
   }
   return found.sort((a,b)=>a.distanceMeters-b.distanceMeters).slice(0,limit);
 }
-export async function fetchNearbyOfficialPlaces(origin,{signal,fetcher=fetch}={}){
-  const dy=500/111195,dx=dy/Math.cos(origin.lat*Math.PI/180);
+export async function fetchNearbyOfficialPlaces(origin,{signal,fetcher=fetch,radius=500}={}){
+  const dy=radius/111195,dx=dy/Math.cos(origin.lat*Math.PI/180);
   const bbox=[origin.lng-dx,origin.lat-dy,origin.lng+dx,origin.lat+dy];
   if(bbox[0]<126.5||bbox[2]>127.3||bbox[1]<37.2||bbox[3]>37.8)throw new Error('서울시 자료 범위 밖');
   const url=new URL('/api/seoul-facilities',location.origin);url.searchParams.set('bbox',bbox.map(x=>x.toFixed(5)).join(','));url.searchParams.set('limit','1500');
@@ -91,13 +121,19 @@ export function visibleAreaContains(area,p){
   return inside;
 }
 export function visibleFacilityResults(area,items,{limit=60}={}){
-  const seen=new Set(),found=[];
+  const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const row={...p,lng:Number(p.lng),lat:Number(p.lat)};
     if(!visibleAreaContains(area,row))continue;
-    const key=searchResultKey(row);if(seen.has(key))continue;
-    seen.add(key);
+    const key=searchResultKey(row);
+    if(seen.has(key)){
+      const prior=seen.get(key);
+      const road=facilityRoadAddress(row);
+      if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
+      continue;
+    }
+    seen.set(key,row);
     // Do not expose distance from map center as if it were the user's distance.
     delete row.distanceMeters;found.push(row);
   }

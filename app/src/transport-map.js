@@ -1446,6 +1446,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     syncRoutePresentation();
   }
   const busDetail=createBusRouteDetail({panel,
+    onHidden:syncRoutePresentation,
     onClose:()=>clearSelectedBusRoute(),
     onMap:()=>{compactRouteDetail();const coordinates=busRouteOverlay.getRouteCoordinates();
       if(coordinates.length<2)return;
