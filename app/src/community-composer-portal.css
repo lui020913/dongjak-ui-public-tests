@@ -191,10 +191,13 @@ html body[data-dj-community-editor="open"] #app #bottom-nav{
 }
 
 /* Comment controls share the same shape; focused text keeps a quiet border. */
-html body #app#app #participation-panel .community-comment-form :is(.community-comment-submit,.community-comment-photo){
- border-radius:14px!important;min-height:44px!important;min-width:44px!important;width:auto!important;
+@layer request-completion {
+html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-list .community-comment-form :is(.community-comment-submit,.community-comment-photo){
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ border-radius:14px!important;min-height:44px!important;height:44px!important;min-width:48px!important;width:auto!important;
  padding:0 12px!important;flex:none!important;background:#128773!important;color:#fff!important;
- border:1px solid transparent!important;box-shadow:none!important;font-weight:650!important
+ border:1px solid transparent!important;box-shadow:none!important;font-weight:650!important;line-height:1.2!important;box-sizing:border-box!important;
+}
 }
 html body #app#app #participation-panel .community-comment-form input[type=text]:focus{
  outline:none!important;box-shadow:none!important;border:1px solid #b8d1c4!important

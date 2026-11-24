@@ -33,3 +33,12 @@ test('inline waypoint plus and all three search targets share GPS and map action
  assert.match(style,/grid-template-rows:61px auto auto 61px/);
  assert.match(style,/\.search-control-row\{display:grid/);
 });
+
+test('route waypoint deletion has a 44px control and recent heading reserves its own row',()=>{
+ const source=read('src/route-screen-v3.js'),style=read('src/route-screen-v3.css');
+ assert.ok(source.includes("cancel.className='waypoint-control'"));
+ assert.ok(source.includes("b.className='waypoint-control'"));
+ assert.ok(style.includes('width:44px;height:44px;min-width:44px;min-height:44px'));
+ assert.ok(style.includes('grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-height:44px;margin-bottom:8px'));
+ assert.ok(style.includes('.recent-head [data-v3="clear-recent"]'));
+});

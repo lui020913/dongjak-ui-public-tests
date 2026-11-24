@@ -30,12 +30,32 @@ export function androidReleaseAsset(marker,release,variant='release',tagCommitSh
  const name='Dongjak-Safety-Map-v'+v+'-'+variant+'.apk',url='https://github.com/lui020913/dongjak-ui-public-tests/releases/download/'+release.tag_name+'/'+name;
  return release.assets?.some(a=>a.name===name&&a.browser_download_url===url&&a.state==='uploaded')?url:null;
 }
+const PUBLIC_APK_REPO='https://api.github.com/repos/lui020913/dongjak-ui-public-tests';
+/** Same-origin proxy is preferred. If a shared edge IP is rate limited, verify
+ * the exact Production tag and published asset from the browser independently. */
 export async function resolveAndroidDownload(win){
+ const signal=()=>typeof AbortSignal.timeout==='function'?AbortSignal.timeout(6000):undefined;
  try{
-   const response=await win.fetch(ANDROID_DOWNLOAD_PATH,{method:'HEAD',cache:'no-store'});
+   const response=await win.fetch(ANDROID_DOWNLOAD_PATH,{method:'HEAD',cache:'no-store',signal:signal()});
    if(response.ok&&response.headers.get('X-Dongjak-APK-Verified')==='1')return new URL(ANDROID_DOWNLOAD_PATH,win.location.href).href;
  }catch{}
- return null;
+ try{
+   const markerResponse=await win.fetch('/release-source.json',{cache:'no-store',signal:signal()});
+   if(!markerResponse.ok)return null;
+   const marker=await markerResponse.json(),tag=androidReleaseTag(marker,'debug');
+   if(!tag||marker.source_commit!==marker.public_ui_source_commit)return null;
+   const options={cache:'no-store',headers:{Accept:'application/vnd.github+json'},signal:signal()};
+   const [releaseResponse,tagResponse]=await Promise.all([
+     win.fetch(PUBLIC_APK_REPO+'/releases/tags/'+tag,options),
+     win.fetch(PUBLIC_APK_REPO+'/git/ref/tags/'+tag,options)
+   ]);
+   if(!releaseResponse.ok||!tagResponse.ok)return null;
+   const [release,ref]=await Promise.all([releaseResponse.json(),tagResponse.json()]);
+   if(ref?.object?.type!=='commit'||ref.object.sha!==marker.source_commit||release?.tag_name!==tag)return null;
+   const url=androidReleaseAsset(marker,release,'debug',ref.object.sha);
+   const asset=release.assets?.find(a=>a.browser_download_url===url);
+   return url&&Number.isSafeInteger(asset?.size)&&asset.size>0?url:null;
+ }catch{return null;}
 }
 export function androidInstallGuidance(){
  return {title:'Android 앱 설치 안내',
@@ -66,11 +86,11 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
  const setSelected=key=>{selectedKey=key;for(const [name,item] of buttons){const selected=name===key;item.b.setAttribute('aria-pressed',String(selected));item.b.classList.toggle('is-selected',selected);}};
  const showPwaQr=()=>{showInfo(['스마트폰 카메라로 QR코드를 스캔해 접속한 뒤 홈 화면에 추가해 주세요.','iPhone: Safari 공유 메뉴 → 홈 화면에 추가','Android: Chrome 메뉴 → 홈 화면에 추가 또는 앱 설치']);const img=add('img','dj-install-qr',null,info);img.src='/install-qr.png';img.alt='스마트폰으로 동작하는 안전지도에 접속하는 QR코드';info.scrollIntoView?.({block:'nearest',behavior:'instant'});};
- const showAndroidGuide=url=>{const guide=androidInstallGuidance();showInfo([]);info.dataset.androidGuide='true';add('h3','dj-install-guide-title',guide.title,info);add('p','dj-install-guide-intro',guide.intro,info);const instructions=add('ol','dj-install-guide-steps',null,info);for(const line of guide.steps)add('li','',line.replace(/^[0-9]+\.\s*/,''),instructions);add('p','dj-install-guide-notice',guide.notice,info);const help=add('a','dj-install-guide-help','Galaxy 설치 제한 공식 안내',info);help.href=guide.help;help.target='_blank';help.rel='noopener noreferrer';if(url){const download=add('button','dj-install-prompt','APK 다운로드',info);download.type='button';download.setAttribute('aria-label',ANDROID_DOWNLOAD_FILENAME+' 다운로드');download.addEventListener('click',()=>{if(safeDownloadUrl(links.android,'android')===url)win.location.assign(url);});}else{add('p','dj-install-guide-unavailable','현재 검증된 Android APK 다운로드는 준비 중입니다. 배포가 완료되기 전까지는 웹앱을 이용해 주세요.',info);}const web=add('button','dj-install-prompt dj-install-guide-web','웹 또는 웹앱 이용하기',info);web.type='button';web.addEventListener('click',()=>{setSelected('web');if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. QR코드는 ‘홈 화면에 웹앱 추가’에서 확인할 수 있습니다.']);else finish();});info.scrollIntoView?.({block:'nearest',behavior:'instant'});};
+ const showAndroidGuide=url=>{const guide=androidInstallGuidance();showInfo([]);info.dataset.androidGuide='true';add('h3','dj-install-guide-title',guide.title,info);add('p','dj-install-guide-intro',guide.intro,info);const instructions=add('ol','dj-install-guide-steps',null,info);for(const line of guide.steps)add('li','',line.replace(/^[0-9]+\.\s*/,''),instructions);add('p','dj-install-guide-notice',guide.notice,info);const help=add('a','dj-install-guide-help','Galaxy 설치 제한 공식 안내',info);help.href=guide.help;help.target='_blank';help.rel='noopener noreferrer';if(url){const download=add('button','dj-install-prompt','APK 다운로드',info);download.type='button';download.setAttribute('aria-label',ANDROID_DOWNLOAD_FILENAME+' 다운로드');download.addEventListener('click',()=>{if(safeDownloadUrl(links.android,'android')===url)win.location.assign(url);});}else{add('p','dj-install-guide-unavailable','현재 Android APK를 확인하지 못했습니다. 다시 확인하거나 웹앱을 이용해 주세요.',info);}const web=add('button','dj-install-prompt dj-install-guide-web','웹 또는 웹앱 이용하기',info);web.type='button';web.addEventListener('click',()=>{setSelected('web');if(blocked)showInfo(['스마트폰으로 이 사이트에 접속해 주세요. QR코드는 ‘홈 화면에 웹앱 추가’에서 확인할 수 있습니다.']);else finish();});info.scrollIntoView?.({block:'nearest',behavior:'instant'});};
  const finish=()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}if(!blocked&&card.open)card.close();};
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.setAttribute('aria-pressed','false');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
- const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'준비 중':key==='pwa'?'iOS · Android 지원':key==='web'&&blocked?'모바일 전용':'',b);
+ const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':key==='web'&&blocked?'모바일 전용':'',b);
  const selectedBadge=add('span','dj-install-selected','선택됨',b);selectedBadge.setAttribute('aria-hidden','true');
  if(key==='pwa')status.classList.add('dj-install-platforms');
  if(key==='ios'){b.disabled=true;b.dataset.installPaused='true';}else add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');
@@ -86,7 +106,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  if(key==='pwa'){if(blocked){showPwaQr();return;}showInfo(steps(win.navigator.userAgent));if(promptEvent){const install=add('button','dj-install-prompt','웹앱 설치하기',info);install.type='button';install.addEventListener('click',async()=>{const p=promptEvent;promptEvent=null;if(!p)return;install.disabled=true;try{await p.prompt();if((await p.userChoice)?.outcome==='accepted')finish();}catch{}finally{install.remove();}});}return;}
  const url=safeDownloadUrl(links[key],key);
  showAndroidGuide(url);
- if(!url){const retry=await resolveAndroidDownload(win);if(retry){links.android=retry;buttons.get('android').status.textContent='';if(selectedKey==='android')showAndroidGuide(retry);}}
+ if(!url){buttons.get('android').status.textContent='확인 중';const retry=await resolveAndroidDownload(win);if(retry)links.android=retry;buttons.get('android').status.textContent=retry?'다운로드 가능':'다운로드 확인 필요';if(selectedKey==='android')showAndroidGuide(retry);}
  });
  }
  if(blocked){(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
@@ -97,8 +117,8 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  links={}; // iOS native distribution is paused; ignore any configured iOS download URL.
  if(data?.androidAutoRelease===true)links.android=await resolveAndroidDownload(win);
  const androidUrl=safeDownloadUrl(links.android,'android');
- buttons.get('android').status.textContent=androidUrl?'':'준비 중';
+ buttons.get('android').status.textContent=androidUrl?'다운로드 가능':'다운로드 확인 필요';
  if(selectedKey==='android')showAndroidGuide(androidUrl);
- }).catch(()=>{buttons.get('android').status.textContent='준비 중';if(selectedKey==='android')showAndroidGuide(null);});
+ }).catch(()=>{buttons.get('android').status.textContent='다운로드 확인 필요';if(selectedKey==='android')showAndroidGuide(null);});
  return card;
 }
