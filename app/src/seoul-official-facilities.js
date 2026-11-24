@@ -118,7 +118,8 @@ export async function searchOsmGeneralFacilities(term,{signal,fetcher=fetch}={})
    address:String(item.display_name||''),source:'© OpenStreetMap 기여자 · 검색 결과',
    phone:'',website:''})).filter(p=>p.name&&Number.isFinite(p.lng)&&Number.isFinite(p.lat));
 }
-export async function queryOfficialPlaces(query,{signal,fetcher=fetch}={}){
+export function cachedOfficialSearchPlaces(query){return officialSearchPlaces(query,searchableGeneralPlaces,40);}
+export async function queryOfficialPlaces(query,{signal,fetcher=fetch,remoteFallback=true}={}){
  const term=String(query||'').trim();if(term.length<2)return [];
  const cached=officialSearchPlaces(term,searchableGeneralPlaces,40);
  const u=new URL('/api/seoul-facilities',location.origin);
@@ -133,7 +134,7 @@ export async function queryOfficialPlaces(query,{signal,fetcher=fetch}={}){
    if(seen.has(id))continue;seen.add(id);results.push(place);
  }
  // A remote fallback complements current-viewport cache, even when D1 is unavailable.
- if(results.length<7){try{
+ if(remoteFallback&&results.length<7){try{
    const remote=await searchOsmGeneralFacilities(term,{signal,fetcher});
    for(const place of remote){if(!seen.has(place.id)){seen.add(place.id);results.push(place);}}
  }catch(error){if(error?.name==='AbortError')throw error;}}
