@@ -12,9 +12,14 @@ export function installV891HeaderAndAi(doc=document,win=window){
   const cleanups=[];
   let logoObserver=null,modalObserver=null,modal=null,modalWatcher=null,frame=0;
   let layoutHeight=0;
+  let hiddenAppStyle=null;
+  const setMapUnderAi=hide=>{
+    if(hide&&!hiddenAppStyle){hiddenAppStyle={value:app.style.getPropertyValue('opacity'),priority:app.style.getPropertyPriority('opacity')};app.style.setProperty('opacity','0','important');}
+    else if(!hide&&hiddenAppStyle){if(hiddenAppStyle.value)app.style.setProperty('opacity',hiddenAppStyle.value,hiddenAppStyle.priority);else app.style.removeProperty('opacity');hiddenAppStyle=null;}
+  };
   const resetGeometry=()=>{
-    layoutHeight=0;
-    for(const key of ['top','right','bottom','left','height','max-height','min-height','margin','transform','translate'])modal?.style.removeProperty(key);
+    layoutHeight=0;setMapUnderAi(false);
+    for(const key of ['top','right','bottom','left','height','max-height','min-height','margin','transform','translate','animation','opacity'])modal?.style.removeProperty(key);
   };
   const iconUrl='/icons/dongjak-nav-transparent.png';
   const resize=(fn)=>(win.requestAnimationFrame||((cb)=>win.setTimeout(cb,16))).call(win,fn);
@@ -61,13 +66,16 @@ export function installV891HeaderAndAi(doc=document,win=window){
     // A focused iOS input can pan the visual viewport as well as resize it.
     // Use one coordinate system; do not combine top/bottom constraints with a height.
     const view=win.visualViewport;
-    const top=Math.max(0,Math.round(view?.offsetTop||0));
+    const query=modal.querySelector('#dj-ai-query');
+    const editing=Boolean(query&&doc.activeElement===query||modal.dataset.djAiKeyboard==='true');
+    // Safari's rubber-band scroll also changes offsetTop. Without a keyboard
+    // this is not a layout change and must never move the AI page.
+    const top=editing?Math.max(0,Math.round(view?.offsetTop||0)):0;
     // Clamp the dialog to the actually visible viewport; iOS can report
     // intermediate keyboard frames larger than the remaining layout height.
     layoutHeight=Math.max(layoutHeight,win.innerHeight,doc.documentElement?.clientHeight||0);
     const height=Math.max(1,Math.min(Math.floor(view?.height||win.innerHeight),layoutHeight-top));
     const inset=mobileKeyboardInset({innerHeight:layoutHeight,visualHeight:height,offsetTop:top});
-    const query=modal.querySelector('#dj-ai-query');
     // Use one keyboard state for the composer safe-area. Do not treat an
     // ordinary scroll/zoom with the input unfocused as an open keyboard.
     const keyboardOpen=Boolean(inset>120&&(query&&doc.activeElement===query||modal.dataset.djAiKeyboard==='true'));
@@ -78,7 +86,8 @@ export function installV891HeaderAndAi(doc=document,win=window){
     if(modal.style.getPropertyValue('--dj891-ai-visible-top')!==top+'px')modal.style.setProperty('--dj891-ai-visible-top',top+'px');
     if(modal.style.getPropertyValue('--dj891-ai-visible-height')!==height+'px')modal.style.setProperty('--dj891-ai-visible-height',height+'px');
     if(win.matchMedia('(max-width:699px)').matches){
-      for(const [key,value] of Object.entries({top:top+'px',right:'0px',bottom:'auto',left:'0px',height:height+'px','max-height':height+'px','min-height':'0px',margin:'0px',transform:'none',translate:'none'}))if(modal.style.getPropertyValue(key)!==value||modal.style.getPropertyPriority(key)!=='important')modal.style.setProperty(key,value,'important');
+      setMapUnderAi(true);
+      for(const [key,value] of Object.entries({top:top+'px',right:'0px',bottom:'auto',left:'0px',height:height+'px','max-height':height+'px','min-height':'0px',margin:'0px',transform:'none',translate:'none',animation:'none',opacity:'1'}))if(modal.style.getPropertyValue(key)!==value||modal.style.getPropertyPriority(key)!=='important')modal.style.setProperty(key,value,'important');
     }
   };
   const schedule=()=>{

@@ -144,3 +144,26 @@
 #app .dj-edition-patch[open]>.dj-edition-patch-summary::before{content:'−'}
 #app .dj-edition-patch .v707-release{margin:4px 0 10px!important}
 .dj-edition-original{font-size:11px;opacity:.7;margin:4px 0}
+
+/* The category, article and list must share a single inner content gutter. */
+html body #app#app #version-history-list .dj-edition-history{
+ box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow:hidden!important;
+}
+html body #app#app #version-history-list .dj-edition-history .v707-release{
+ box-sizing:border-box!important;min-width:0!important;max-width:100%!important;width:auto!important;
+ margin:0 0 8px!important;padding:12px 14px!important;overflow:hidden!important;
+}
+html body #app#app #version-history-list .dj-edition-history .v707-release-head{
+ display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important;
+ margin:0 0 10px!important;padding:0!important;min-width:0!important;max-width:100%!important;
+}
+html body #app#app #version-history-list .dj-edition-history .v707-release-head h4{
+ margin:0!important;padding:0!important;min-width:0!important;overflow-wrap:anywhere!important;
+}
+html body #app#app #version-history-list .dj-edition-history .v707-release-items{
+ margin:0!important;padding:0 0 0 19px!important;box-sizing:border-box!important;max-width:100%!important;
+}
+html body #app#app #version-history-list .dj-edition-history .v707-release-items li{
+ margin:0 0 7px!important;min-width:0!important;overflow-wrap:anywhere!important;white-space:normal!important;
+}
+

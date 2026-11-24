@@ -395,3 +395,16 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-composer{margin-bottom:0!important;padding-bottom:0!important;}
  html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-search-body{padding-bottom:8px!important;}
 }
+
+/* Safari does not reliably honor overflow:hidden alone on the root.
+   The fixed document is never the transcript's scroll container. */
+@media(max-width:699px){
+ html:has(#dj-ai-search-modal[open]){overflow:hidden!important;overscroll-behavior:none!important}
+ html body:has(#dj-ai-search-modal[open]){
+  position:fixed!important;inset:0!important;width:100%!important;height:100%!important;
+  margin:0!important;overflow:hidden!important;overscroll-behavior:none!important;
+ }
+ html body:has(#dj-ai-search-modal[open]) #app{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+ html body #dj-ai-search-modal[open] .dj-ai-search-body{overflow:hidden!important;overscroll-behavior:none!important}
+ html body #dj-ai-search-modal[open] .dj-ai-transcript{touch-action:pan-y!important;overscroll-behavior-y:none!important;min-height:0!important}
+}

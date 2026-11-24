@@ -621,3 +621,14 @@
     }
   }
 }
+
+/* A route comparison action uses the common 44px hit target and a strong
+   vector glyph, not a small font-dependent arrow. */
+@media(max-width:699px){
+ html body #app#app #dj-walk-map-head :is(.dj-walk-back,.dj-walk-close){
+  flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;
+  border-radius:15px!important;border:1px solid #cbdad2!important;background:#e3ece7!important;color:#173b30!important;
+  padding:0!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
+ }
+ html body #app#app #dj-walk-map-head button svg{width:26px!important;height:26px!important;display:block!important;pointer-events:none}
+}

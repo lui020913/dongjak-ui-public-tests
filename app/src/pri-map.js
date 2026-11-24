@@ -22,14 +22,15 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri','current3','current4'].includes(restoreMode)?'current6':restoreMode):null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
- const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');head.append(title,close);
+ const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');close.setAttribute('aria-label','보행 취약도 닫기');head.append(title,close);
  const intro=el('p','','상도1동 보행 취약도 · 조명·교통사고·제도적 사각지대·제한속도·횡단보도·보차혼용도로 6개 항목. 각 지수는 100점 만점(높을수록 위험)입니다. 구간별 평가된 항목만 동일 가중치로 임시 평균하며, 6/6 미만은 부분평가입니다. 미평가는 회색입니다.');
  const status=el('p','dj-pri-status','등록된 자료가 없습니다.');status.setAttribute('role','status');
  const actions=el('div','dj-pri-actions');
  const protectionDetail=el('section','dj-pri-protection-detail');
  protectionDetail.hidden=true;protectionDetail.setAttribute('aria-label','제도적 사각지대 세부 레이어');
- const resetDialogView=()=>{actions.hidden=false;protectionDetail.hidden=true;dialog.dataset.djPriView='list';title.textContent='보행 취약도';dialog.scrollTop=0;};
- const showProtectionDetail=()=>{actions.hidden=true;protectionDetail.hidden=false;dialog.dataset.djPriView='protection';title.textContent='제도적 사각지대';dialog.scrollTop=0;};
+ const scrollBody=el('div','dj-pri-body');
+ const resetDialogView=()=>{actions.hidden=false;protectionDetail.hidden=true;dialog.dataset.djPriView='list';title.textContent='보행 취약도';scrollBody.scrollTop=0;};
+ const showProtectionDetail=()=>{actions.hidden=true;protectionDetail.hidden=false;dialog.dataset.djPriView='protection';title.textContent='제도적 사각지대';scrollBody.scrollTop=0;};
  const file=el('input');file.type='file';file.accept='.json,application/json';file.hidden=true;file.id='dj-pri-file';
  const upload=button('JSON 자료 불러오기',()=>file.click());const clear=button('지도 색상 끄기',()=>{activate(null);dialog.close();});
  const focusArea=button('분석 지역으로 이동',()=>{
@@ -50,7 +51,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  });
  const exportButton=button('공통 도로망 JSON 내보내기',()=>{if(!dataset)return;const url=URL.createObjectURL(new Blob([JSON.stringify(dataset,null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download='pri-network.json';a.click();win.setTimeout(()=>URL.revokeObjectURL(url),1000);});
  const local=el('small','','직접 불러온 자료는 현재 페이지에서만 사용되며 서버에 전송하지 않습니다.');
- const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);dialog.append(head,intro,status,actions,protectionDetail,focusArea,clear,dataTools);doc.body.append(dialog);
+ const dataTools=el('details','dj-pri-data-tools');dataTools.append(el('summary','','데이터 관리 (현재 기기)'),upload,exportButton,file,local);scrollBody.append(intro,status,actions,protectionDetail,focusArea,clear,dataTools);dialog.append(head,scrollBody);doc.body.append(dialog);
  const legend=el('aside','dj-pri-legend');legend.id='dj-pri-legend';legend.hidden=true;
  // Anchor both floating surfaces exactly above the live bottom navigation,
  // not a guessed iPhone safe-area value from an older release.
