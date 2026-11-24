@@ -1422,3 +1422,35 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   }
  }
 }
+
+/* Night analysis uses the same surface hierarchy as transport and map sheets.
+   Semantic lighting swatches remain untouched. */
+@layer request-completion {
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float:not([hidden]),
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-head,#night-visibility-float-content){
+  background:var(--dj-theme-surface,#2c343d)!important;
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+  border-color:var(--dj-theme-line,#4d5b65)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-actions button,.dj-night-group,.dj-night-group>summary,.night-visibility-stats,.night-result-legend,.night-coverage,.night-occlusion-details){
+  background:var(--dj-theme-raised,#35404a)!important;
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+  border-color:var(--dj-theme-line,#4d5b65)!important;
+  box-shadow:none!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-heading span,.night-visibility-status,.night-visibility-disclaimer,.night-visibility-stat span,.night-visibility-legend,.night-visibility-top p){
+  color:var(--dj-theme-muted,#bec8d2)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-stat strong,.night-visibility-top>strong,.night-visibility-radius-label,.night-visibility-checkbox,.night-result-legend span){
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(#night-visibility-radius-value,.night-visibility-top li button){
+  color:var(--dj-theme-accent,#79dec5)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(input[type="range"],input[type="checkbox"],input[type="radio"]){
+  accent-color:var(--dj-theme-accent,#79dec5)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float .dj-night-group>summary::after{
+  color:var(--dj-theme-muted,#bec8d2)!important;
+ }
+}

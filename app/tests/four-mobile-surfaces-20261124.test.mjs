@@ -21,3 +21,9 @@ test('phone layout isolates nearby scroll and hides terminal without moving stat
  assert.match(read('src/route-experience.css'),/max-height:min\(44dvh,342px\)/);
  assert.match(css,/data-sangdo-night="on"\]:has\(#night-visibility-float/);
 });
+
+test('night panel uses shared surface, raised, border and accent tokens',()=>{
+ const css=read('src/mobile-ui/current.css').split('/* Night analysis uses the same surface hierarchy')[1];
+ assert.ok(css);for(const token of ['surface','raised','ink','muted','line','accent'])assert.ok(css.includes('--dj-theme-'+token));
+ assert.doesNotMatch(css,/\.(?:night-line|night-dot|night-coverage)[:.][^\n]*::before/);
+});

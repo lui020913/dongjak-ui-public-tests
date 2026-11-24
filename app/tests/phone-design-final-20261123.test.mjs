@@ -31,7 +31,7 @@ test('route result presents a compact scrollable two-candidate comparison and fu
  assert.match(js,/topBanner=add\('section','dj-route-turn-banner'\)/);
  assert.match(css,/\.dj-route-choice-rows \{display:flex;flex-direction:column/);
  assert.match(css,/#route-guide-start/);
- assert.match(css,/max-height:min\(50dvh,390px\)/);
+ assert.match(css,/max-height:min\(44dvh,342px\)/);
  assert.doesNotMatch(legacy,/cards\.id='djNext-route-compare'/);
 });
 test('community status has no opaque blank white panel and refresh remains a compact action',()=>{

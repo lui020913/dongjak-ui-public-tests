@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.head_ref != 'fix/gis-release-contract-20261124' && github.head_ref != 'fix/six-ui-final-mobile-20261124' && github.head_ref != 'fix/six-ui-publication-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.head_ref != 'fix/gis-release-contract-20261124' && github.head_ref != 'fix/four-mobile-surfaces-20261124' && github.head_ref != 'fix/six-ui-final-mobile-20261124' && github.head_ref != 'fix/six-ui-publication-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: npm test
       - name: Focused community editor keyboard and portal regression
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
@@ -144,6 +144,9 @@ jobs:
       - name: Retest only two failed GIS regression files and independent research contract
         if: ${{ github.head_ref == 'fix/gis-release-contract-20261124' }}
         run: node --test tests/policy-gap-2factor-map-patch.test.mjs tests/sangdo1-charcoal-integration.test.mjs tests/policy-gap-3source-map-patch.test.mjs
+      - name: Retest two changed route contracts and four phone surfaces with shared night palette
+        if: ${{ github.head_ref == 'fix/four-mobile-surfaces-20261124' }}
+        run: node --test tests/phone-design-final-20261123.test.mjs tests/route-experience-20261123.test.mjs tests/four-mobile-surfaces-20261124.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source

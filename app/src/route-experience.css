@@ -643,3 +643,12 @@
   }
  }
 }
+
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #route-map-card .route-map-card-actions{
+   position:sticky!important;bottom:0!important;z-index:2!important;flex-shrink:0!important;background:var(--walk-paper)!important;
+   padding:8px 0 0!important;
+  }
+ }
+}
