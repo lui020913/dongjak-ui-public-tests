@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.144",
+  "application_version": "9.2.145",
   "public_work_branch": "main",
-  "purpose": "PR453: full-width mobile map search, stable header and single scroll area, explicit recent searches and GPS nearby facility search, verified bus directions; preserves PR452 bus timeline.",
-  "attempt": 358,
+  "purpose": "PR454: independent mobile bus route detail surface, fixed header and scroll geometry, map return and reopen dock, adaptive information view, stable refresh and compact direction display; preserves PR453 map search.",
+  "attempt": 359,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR453 source CI 45420655884 completed successfully. Use existing Preview and protected Production QA; v9.2.143 already assigned to PR452.",
+  "last_retry_reason": "PR454 source CI 45422698590 attempt 2 passed build, full regressions and all 33 phone shards plus aggregate gate. Release through existing Preview and protected Production QA; v9.2.144 production succeeded.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
