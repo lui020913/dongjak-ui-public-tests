@@ -165,9 +165,9 @@ jobs:
             if curl -fsS --max-time 2 http://127.0.0.1:4173/ -o /dev/null; then break; fi
             sleep 1
           done
+          # Prior run 45302231139 passed all four other affected cases.
+          # Only mobile375 selected label ink remains to be verified.
           DONGJAK_TARGET_URL=http://127.0.0.1:4173 DONGJAK_FAST_MOBILE_QA=0 \
-          # Prior run 45302231139 passed all four other affected cases;
-          # only mobile375 dock-label color settled one frame too late.
           npx playwright test --config=playwright.v911-remote.config.mjs \
             --project=mobile375 \
             --grep 'phone selected dock has no color plate and route form is vertically balanced'
