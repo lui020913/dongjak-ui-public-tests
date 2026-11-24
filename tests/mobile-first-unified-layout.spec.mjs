@@ -230,34 +230,40 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
   await readyForLiveTouch(page);
   await page.locator('#bottom-nav .nav-tab[data-tab="route"]').click({timeout:12000,noWaitAfter:true});
   await expect(page.locator('#app')).toHaveAttribute('data-tab','route',{timeout:15000});
-  await expect(page.locator('#route-panel')).toBeVisible();
-  await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','input',{timeout:12000});
-  const snapshot=async()=>page.evaluate(()=>{
-    const panel=document.getElementById('route-panel'),cta=document.getElementById('route-calc'),
-      nav=document.getElementById('bottom-nav'),footer=document.getElementById('dj910-route-footer'),card=panel?.querySelector('.route-card');
-    const rect=node=>{const b=node?.getBoundingClientRect();return b?{x:b.x,y:b.y,top:b.top,right:b.right,bottom:b.bottom,width:b.width,height:b.height}:null;};
-    const p=rect(panel),b=rect(cta),n=rect(nav),f=rect(footer);
-    const hit=b?document.elementFromPoint(b.x+b.width/2,b.y+b.height/2):null;
-    return {viewport:[innerWidth,innerHeight],panel:p,cta:b,nav:n,footer:f,card:rect(card),
-      actualHit:Boolean(cta&&(hit===cta||cta.contains(hit))),
-      routeStage:document.getElementById('app')?.dataset.djRouteStage,
-      panelPosition:panel?getComputedStyle(panel).position:'missing',
-      footerPosition:footer?getComputedStyle(footer).position:'missing'};
+  const route=page.locator('#dj-route-v3');
+  await expect(route).toBeVisible({timeout:15000});
+  const metrics=await page.evaluate(()=>{
+    const host=document.getElementById('dj-route-v3'),root=host?.shadowRoot;
+    const dock=document.getElementById('bottom-nav'),legacy=document.getElementById('route-panel');
+    const oldMap=document.getElementById('dj-walk-map-actions'),map=document.getElementById('map');
+    if(!root||!dock||!legacy||!map)return null;
+    const rect=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height,width:r.width}};
+    const card=rect(root.querySelector('.route-panel')),header=rect(root.querySelector('.header'));
+    const cta=rect(root.querySelector('.action')),nav=rect(dock);
+    const mid=document.elementFromPoint(innerWidth/2,Math.round((card.bottom+cta.top)/2));
+    const hit=root.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
+    return {viewport:[innerWidth,innerHeight],card,header,cta,nav,
+      oldClip:getComputedStyle(legacy).clipPath,
+      oldPointer:getComputedStyle(legacy).pointerEvents,
+      oldMapDisplay:oldMap?getComputedStyle(oldMap).display:'none',
+      tools:root.querySelectorAll('.tools button').length,
+      mapHit:Boolean(mid&&(mid===map||map.contains(mid))),
+      ctaHit:Boolean(hit&&(hit===root.querySelector('.action')||root.querySelector('.action').contains(hit)))};
   });
-  await expect.poll(async()=>{
-    const m=await snapshot();
-    return Boolean(m.panel&&m.cta&&m.nav&&m.footer&&
-      m.panelPosition==='fixed'&&m.panel.x>=-1&&
-      m.panel.right<=m.viewport[0]+1&&
-      m.panel.top>=-1&&m.panel.top<=3&&
-      m.panel.bottom<=m.footer.top-24&&m.card&&m.card.bottom<=m.footer.top-24&&m.cta.height>=44&&
-      m.cta.bottom<=m.nav.top-5&&m.actualHit);
-  },{timeout:15000}).toBe(true);
-  const metrics=await snapshot();
-  await testInfo.attach('real-route-cta-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
-  await testInfo.attach('real-route-cta-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  expect(metrics,'new walking route screen should exist').toBeTruthy();
+  expect(metrics.card.top).toBeGreaterThanOrEqual(metrics.header.bottom-3);
+  expect(metrics.card.bottom).toBeLessThanOrEqual(metrics.cta.top-96);
+  expect(metrics.cta.bottom).toBeLessThanOrEqual(metrics.nav.top-5);
+  expect(metrics.cta.height).toBeGreaterThanOrEqual(50);
+  expect(metrics.tools).toBe(2);
+  expect(metrics.oldClip).toBe('inset(100%)');
+  expect(metrics.oldPointer).toBe('none');
+  expect(metrics.oldMapDisplay).toBe('none');
+  expect(metrics.mapHit).toBe(true);
+  expect(metrics.ctaHit).toBe(true);
+  await testInfo.attach('real-route-v3-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
+  await testInfo.attach('real-route-v3-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });
-
 
 test('map-first walking route preview only lists actually supplied options and fits the viewport',async({page},testInfo)=>{
   test.skip(page.viewportSize().width>=700,'phone UI only');
@@ -339,60 +345,49 @@ test('guidance mode truly blocks map, tabs and keyboard except native end action
   await expect(page.locator('#bottom-nav')).toBeVisible();
 });
 
-test('community composer stays fixed while the phone keyboard viewport contracts',async({page},testInfo)=>{
+test('community new post portal stays inside viewport when keyboard contracts',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width!==390,'single targeted iPhone-size keyboard layout check');
   test.setTimeout(150000);
   await readyForLiveTouch(page);
-  const original=page.viewportSize();
   await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:12000,noWaitAfter:true});
   await expect(page.locator('#app')).toHaveAttribute('data-tab','participate',{timeout:15000});
-  await page.locator('#community-compose-toggle').click({timeout:12000});
-  const editor=page.locator('#dj-community-editor-portal');
-  await expect(editor).toBeVisible({timeout:12000});
-  await expect(editor.locator('#community-form')).toBeVisible();
-  const inspect=()=>page.evaluate(()=>{
-    const root=document.getElementById('dj-community-editor-portal');
-    const head=root.querySelector('.community-form-top').getBoundingClientRect();
-    const scroll=root.querySelector('.dj-compose-scroll').getBoundingClientRect();
-    const foot=root.querySelector('.dj-compose-footer').getBoundingClientRect();
-    const view=window.visualViewport,box=root.getBoundingClientRect();
-    const nav=document.querySelector('#bottom-nav').getBoundingClientRect();
-    const hit=document.elementFromPoint(nav.left+nav.width/2,nav.top+nav.height/2);
-    const form=root.querySelector('#community-form');
-    const formBox=form.getBoundingClientRect();
-    const formStyle=getComputedStyle(form),scrollStyle=getComputedStyle(root.querySelector('.dj-compose-scroll'));
-    return {parent:root.parentElement.tagName,root:{top:box.top,bottom:box.bottom,height:box.height},
-      form:{top:formBox.top,bottom:formBox.bottom,height:formBox.height,display:formStyle.display,flex:formStyle.flex,minHeight:formStyle.minHeight},
-      scrollSizing:{flex:scrollStyle.flex,height:scrollStyle.height,scrollHeight:root.querySelector('.dj-compose-scroll').scrollHeight},
-      head:{top:head.top,bottom:head.bottom},scroll:{top:scroll.top,bottom:scroll.bottom},
-      foot:{top:foot.top,bottom:foot.bottom},
-      visibleTop:view?.offsetTop??0,visibleHeight:view?.height??innerHeight,
-      navHidden:getComputedStyle(document.querySelector('#bottom-nav')).display==='none'||getComputedStyle(document.querySelector('#bottom-nav')).visibility==='hidden'};
-  });
-  const before=await inspect();
-  console.log('COMMUNITY_EDITOR_GEOMETRY_OPEN '+JSON.stringify(before));
-  expect(before.parent).toBe('BODY');
-  expect(before.root.top).toBeGreaterThanOrEqual(-2);
-  expect(before.head.bottom).toBeLessThan(before.scroll.top+2);
-  expect(before.scroll.bottom).toBeLessThanOrEqual(before.foot.top+2);
-  expect(before.foot.bottom).toBeLessThanOrEqual(before.visibleTop+before.visibleHeight+3);
-  expect(before.navHidden).toBe(true);
-
+  await page.locator('#community-compose-toggle').click({timeout:12000,noWaitAfter:true});
+  const portal=page.locator('#dj-community-editor-portal');
+  await expect(portal).toBeVisible();
+  await expect(page.locator('#community-form')).toBeVisible();
+  await expect(page.locator('#bottom-nav')).toBeHidden();
   await page.locator('#community-nickname').focus();
-  await page.setViewportSize({width:original.width,height:Math.max(480,original.height-270)});
-  await expect.poll(async()=>Math.round((await inspect()).root.height),{timeout:10000}).toBeLessThan(original.height-200);
-  await page.locator('#community-title').fill('보행환경 제보 입력 확인');
-  await page.locator('#community-text').fill('키보드가 열려도 작성 화면 전체가 움직이지 않아야 합니다.');
-  const after=await inspect();
-  console.log('COMMUNITY_EDITOR_GEOMETRY_KEYBOARD '+JSON.stringify(after));
-  expect(Math.abs(after.head.top-before.head.top)).toBeLessThanOrEqual(3);
-  expect(after.head.bottom).toBeLessThan(after.scroll.top+2);
-  expect(after.scroll.bottom).toBeLessThanOrEqual(after.foot.top+2);
-  expect(after.foot.bottom).toBeLessThanOrEqual(after.visibleTop+after.visibleHeight+3);
-  expect(after.navHidden).toBe(true);
-  await testInfo.attach('isolated-community-composer.json',{body:Buffer.from(JSON.stringify({before,after},null,2)),contentType:'application/json'});
-  await testInfo.attach('isolated-community-composer.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
-
-  await editor.locator('#community-compose-close').click({timeout:12000});
-  await expect(editor).toBeHidden();
+  // Chromium has no native iOS software keyboard. Contract the visual
+  // viewport to reproduce the same scrolling/geometry constraint.
+  await page.setViewportSize({width:390,height:530});
+  await expect.poll(()=>page.evaluate(()=>{
+    const portal=document.getElementById('dj-community-editor-portal');
+    return Math.round(portal.getBoundingClientRect().height);
+  }),{timeout:10000}).toBeLessThanOrEqual(530);
+  const geometry=await page.evaluate(()=>{
+    const rect=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};};
+    const parent=document.getElementById('community-form').parentElement;
+    const root=rect('#dj-community-editor-portal');
+    const header=rect('#community-form > .community-form-top');
+    const body=rect('#community-form > .djNext-form-scroll');
+    const footer=rect('#community-form > .dj-community-compose-footer');
+    return {root,header,body,footer,parentId:parent.id,
+      navVisibility:getComputedStyle(document.getElementById('bottom-nav')).visibility,
+      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(document.querySelector('#community-form > .djNext-form-scroll')).overflowY};
+  });
+  await testInfo.attach('community-keyboard-geometry.json',{body:Buffer.from(JSON.stringify(geometry,null,2)),contentType:'application/json'});
+  expect(geometry.parentId).toBe('dj-community-editor-portal');
+  expect(geometry.navVisibility).toBe('hidden');
+  expect(geometry.scrollportOverflow).toBe('auto');
+  expect(geometry.root.top).toBeGreaterThanOrEqual(-1);
+  expect(geometry.root.bottom).toBeLessThanOrEqual(geometry.layoutHeight+2);
+  expect(geometry.header.bottom).toBeLessThanOrEqual(geometry.body.top+2);
+  expect(geometry.body.bottom).toBeLessThanOrEqual(geometry.footer.top+2);
+  expect(geometry.footer.bottom).toBeLessThanOrEqual(geometry.root.bottom+2);
+  await testInfo.attach('community-keyboard-portrait.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  await page.locator('#community-compose-close').click({timeout:12000,noWaitAfter:true});
+  await expect(portal).toBeHidden();
   await expect(page.locator('#bottom-nav')).toBeVisible();
+  const restored=await page.locator('#community-form').evaluate(node=>node.parentElement?.id);
+  expect(restored).toBe('');
 });

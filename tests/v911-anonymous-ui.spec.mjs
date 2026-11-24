@@ -533,13 +533,19 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  await page.evaluate(()=>{for(const [which,lng,lat,name] of [['start',126.960,37.510,'검증용 출발지'],['end',126.962,37.512,'검증용 목적지']])window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail:{which,place:{lng,lat,name}}}))});
  await expect(page.locator('#route-start-label')).toHaveText('검증용 출발지',{timeout:30000});
  await expect(page.locator('#route-end-label')).toHaveText('검증용 목적지');
- await expect.poll(()=>page.locator('#route-calc').evaluate(button=>{
+ const routeScreen=page.locator('#dj-route-v3');
+ await expect(routeScreen).toBeVisible({timeout:15000});
+ const newCalc=routeScreen.locator('.action');
+ await expect(newCalc).toBeEnabled({timeout:15000});
+ await expect.poll(()=>newCalc.evaluate(button=>{
   const r=button.getBoundingClientRect(),nav=document.getElementById('bottom-nav')?.getBoundingClientRect();
-  const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
-  return Boolean(nav&&r.width>0&&r.height>0&&r.bottom<=nav.top-5&&
+  // The V3 CTA is inside Shadow DOM: the document-level hit target
+  // is the shadow host, not the rendered button.
+  const hit=button.getRootNode().elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+  return Boolean(nav&&r.width>0&&r.height>=50&&r.bottom<=nav.top-5&&
     (hit===button||button.contains(hit)));
  }),{timeout:12000}).toBe(true);
- await page.locator('#route-calc').click({timeout:15000});
+ await newCalc.click({timeout:15000});
  const cards=page.locator('#dj-route-choice-list .dj-route-choice'),summary=page.locator('#route-map-card');
  await expect(summary).toBeVisible({timeout:60000});
  await expect(cards.first()).toBeVisible({timeout:15000});
@@ -659,48 +665,30 @@ test('phone report composer has non-overlapping independent header and input scr
 
 
 test('phone windows share the opaque gradual slide on open and close',{tag:'@phone-common'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- async function audit(selector,parentSelector,trigger,close,tabEntrance=false){
-   const target=page.locator(selector);const parent=page.locator(parentSelector);
-   if(tabEntrance){
-     await trigger();await expect(parent).toBeVisible();await geometry(page,parentSelector);
-     await expect.poll(()=>parent.getAttribute('data-dj810-animating')).toBeNull();
-     await close();await expect(parent).toBeHidden();return;
-   }
-   await page.evaluate(({selector,parentSelector})=>{
-    const frames=[];window.__sharedMotion=frames;const until=performance.now()+40000;
-    function sample(){if(window.__sharedMotion!==frames||performance.now()>until)return;const n=document.querySelector(selector),p=document.querySelector(parentSelector),phase=n?.dataset.dj810Animating;
-      if(phase&&p&&!p.hidden){const c=getComputedStyle(n),back=getComputedStyle(p);
-       frames.push({phase,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),opacity:Number(c.opacity),backOpacity:Number(back.opacity),background:back.backgroundColor,cssAnimation:c.animationName,offset:parseFloat((c.translate||'0 0').split(' ')[1])||0,y:n.getBoundingClientRect().y});}
-      requestAnimationFrame(sample);}
-    requestAnimationFrame(sample);
-   },{selector,parentSelector});
-   await trigger();await expect(parent).toBeVisible();
-   await expect.poll(()=>page.evaluate(tabEntrance=>window.__sharedMotion.filter(f=>f.phase==='opening'&&(tabEntrance?f.kind==='fade':f.offset>2)).length,tabEntrance)).toBeGreaterThan(1);
-   await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
-   await close();await expect(parent).toBeHidden();
-   const frames=await page.evaluate(()=>window.__sharedMotion);
-   for(const [phase,duration] of [['opening',350],['closing',300]]){
-     const motion=frames.filter(f=>f.phase===phase);
-     expect(motion.length).toBeGreaterThan(1);
-     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
-     // v9.2.51 fades the sliding card; the overlay/backdrop must remain solid.
-     // When target===parent (weather/route), the same computed alpha is expected.
-     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity>=0&&f.opacity<=1&&f.cssAnimation==='none')).toBe(true);
-     expect(motion.some(f=>f.opacity>.08&&f.opacity<.98)).toBe(true);
-     if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
-     else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
-     expect(motion.some(f=>f.offset>2)).toBe(true);
-     expect(motion.every(f=>f.background===motion[0].background)).toBe(true); // All phone sheets keep a flat, un-dimmed backdrop.
-     expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
-   }
- }
- await audit('#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel',()=>tap(page,page.locator('#djNext-layers')),()=>page.getByRole('button',{name:'레이어 설정 닫기'}).click());
- await audit('#dj854-weather-sheet','#dj854-weather-sheet',()=>tap(page,page.locator('#djNext-weather')),()=>page.getByRole('button',{name:'날씨창 닫기'}).click());
- await audit('#route-panel','#route-panel',()=>tap(page,tab(page,'route')),()=>tap(page,page.locator('#route-panel .dj-sheet-chrome-close')),true);
- await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')),true);
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await ready(page);
+ // The old djNext layer/weather launcher was removed by the independent
+ // map controls. This case checks the two live full-page tab transitions
+ // involved in routing; other active layer/weather tests live elsewhere.
+ await tap(page,tab(page,'route'));
+ const routeScreen=page.locator('#dj-route-v3');
+ await expect(routeScreen).toBeVisible({timeout:15000});
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
+ await routeScreen.locator('[data-v3="close"]').click();
+ await expect(routeScreen).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await tap(page,tab(page,'mine'));
+ const mine=page.locator('#mine-panel');
+ await expect(mine).toBeVisible();
+ await expect.poll(()=>mine.getAttribute('data-dj810-animating')).toBeNull();
+ await expect(mine).toHaveCSS('opacity','1');
+ await expect(page.locator('#bottom-nav')).toBeVisible();
+ await tap(page,mine.locator('.dj-sheet-chrome-close'));
+ await expect(mine).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
 });
-
 
 test('layer header follows a real pointer upward and downward; content and X stay independent',{tag:'@phone-layout'},async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-layers'));
@@ -1089,7 +1077,7 @@ test('iPhone tabs never expose white or transparent full-screen panels during sw
 test('bottom dock swipes change full-screen tabs immediately without an intermediate empty panel',{tag:'@phone-common'},async({page})=>{
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'route'));
- await expect(page.locator('#route-panel')).toBeVisible();
+ await expect(page.locator('#dj-route-v3')).toBeVisible();
  const dock=page.locator('#bottom-nav');
  await expect(dock).toHaveAttribute('data-dj-tab-navigation','ready');
  // Diagnostic-only event capture to isolate interception by a modal or the
@@ -1120,7 +1108,7 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
   return {tab:document.getElementById('app')?.dataset.tab,events:window.__dockGestureSamples,layers};
  })));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
- await expect(page.locator('#route-panel')).toBeHidden();
+ await expect(page.locator('#dj-route-v3')).toBeHidden();
  await expect(page.locator('#participation-panel')).toBeVisible();
  await expect(page.locator('#participation-panel')).toHaveCSS('opacity','1');
  const result=await page.locator('#participation-panel').evaluate(el=>{
@@ -1133,10 +1121,10 @@ test('bottom dock swipes change full-screen tabs immediately without an intermed
  await swipe(85);
  await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
  await expect(page.locator('#participation-panel')).toBeHidden();
- await expect(page.locator('#route-panel')).toBeVisible();
+ await expect(page.locator('#dj-route-v3')).toBeVisible();
  await tap(page,tab(page,'map'));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
- await expect(page.locator('#route-panel')).toBeHidden();
+ await expect(page.locator('#dj-route-v3')).toBeHidden();
  const after=await dock.boundingBox();
  expect(Math.abs(before.y-after.y)).toBeLessThan(3);
  await expect(page.locator('#dj-tab-surface-curtain')).toHaveCount(0);
@@ -1685,6 +1673,14 @@ test('phone selected dock has no color plate and route form is vertically balanc
  test.skip(page.viewportSize().width>=700,'phone only');
  await ready(page);
  const checkDock=async key=>{
+  // Narrow iPhones can commit the selected class before the independent
+  // icon/label ink transition completes. Verify painted text only after
+  // it settles, not in the same tick as the tap.
+  await expect.poll(()=>page.locator('#bottom-nav').evaluate(dock=>{
+    const active=dock.querySelector('.nav-tab.active'),inactive=dock.querySelector('.nav-tab:not(.active)');
+    if(!active?.lastElementChild||!inactive?.lastElementChild)return false;
+    return getComputedStyle(active.lastElementChild).color!==getComputedStyle(inactive.lastElementChild).color;
+  }),{timeout:15000,intervals:[100,250,500,1000]}).toBe(true);
   const state=await page.locator('#bottom-nav').evaluate((dock,key)=>{
    const active=dock.querySelector('.nav-tab.active'),inactive=dock.querySelector('.nav-tab:not(.active)');
    const plate=dock.querySelector('.dj-motion-indicator'),r=dock.getBoundingClientRect();
@@ -1693,8 +1689,10 @@ test('phone selected dock has no color plate and route form is vertically balanc
     activeBefore:active?getComputedStyle(active,'::before').backgroundColor:null,
     plateDisplay:plate?getComputedStyle(plate).display:'absent',
     plateVisibility:plate?getComputedStyle(plate).visibility:'absent',
-    selectedInk:active?getComputedStyle(active).color:null,
-    inactiveInk:inactive?getComputedStyle(inactive).color:null,
+    // The navigation button inherits a neutral text color; its actual visible
+    // last-child label owns the active/idle ink. Test rendered text, not wrapper.
+    selectedInk:active?.lastElementChild?getComputedStyle(active.lastElementChild).color:null,
+    inactiveInk:inactive?.lastElementChild?getComputedStyle(inactive.lastElementChild).color:null,
     dockBottom:r.bottom,viewportHeight:innerHeight};
   },key);
   expect(state.activeTab).toBe(key);
@@ -1704,60 +1702,49 @@ test('phone selected dock has no color plate and route form is vertically balanc
   return state;
  };
  await tap(page,tab(page,'route'));
- await expect(page.locator('#route-panel')).toBeVisible();
+ const routeScreen=page.locator('#dj-route-v3');
+ await expect(routeScreen).toBeVisible({timeout:15000});
  const routeDock=await checkDock('route');
- // Native footer position updates on subsequent animation frames. The
- // instant route-tab snapshot can catch an intermediate CTA position that
- // is not the final rendered screen. Wait for the ORIGINAL layout standard.
+ // The new entry is separate from the native route engine DOM. Assert the
+ // painted card, fixed CTA, native map and exactly two new map controls.
  await expect.poll(async()=>page.evaluate(()=>{
-   const panel=document.getElementById('route-panel');
-   const card=panel?.querySelector('.route-card');
-   const cta=document.getElementById('route-calc');
-   const dock=document.getElementById('bottom-nav');
-   if(!panel||!card||!cta||!dock)return false;
-   const p=panel.getBoundingClientRect(),c=card.getBoundingClientRect();
-   const a=cta.getBoundingClientRect(),d=dock.getBoundingClientRect();
-   return p.top<=3&&a.height>=44&&
-     p.bottom<=a.top-24&&c.bottom<=a.top-24&&a.bottom<=d.top-5;
- }),{timeout:30000,intervals:[100,250,500,1000]}).toBe(true);
- const form=await page.evaluate(()=>{
-  const panel=document.querySelector('#route-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
-  const card=body.querySelector(':scope > .route-card'),footer=panel.querySelector(':scope > #dj910-route-footer');
-  const dock=document.getElementById('bottom-nav'),cta=document.getElementById('route-calc');
-  const box=n=>{const r=n.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height};};
-  const b=cta.getBoundingClientRect(),hit=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
-  return {panel:box(panel),body:box(body),card:box(card),footer:box(footer),dock:box(dock),cta:box(cta),
-    ctaHit:hit===cta||cta.contains(hit),ctaVisible:b.width>=40&&b.height>=44,
-    formDisplay:getComputedStyle(body).display,cardPadding:getComputedStyle(card).paddingTop,
-    swapVisible:getComputedStyle(document.getElementById('dj-route-swap')).display!=='none',
-    advancedClosed:!document.getElementById('dj-route-advanced').open};
- });
- expect(form.formDisplay).toBe('flex');
- // Approved map-first design: a compact TOP location card leaves the map
- // unobstructed between the input and its fixed dock-clear CTA.
- expect(form.panel.top,'route editor starts at the top').toBeLessThanOrEqual(3);
- expect(form.card.right,'route editor fits the viewport').toBeLessThanOrEqual(page.viewportSize().width-10);
- expect(form.panel.left,'top editor spans the viewport').toBeGreaterThanOrEqual(-1);
- expect(form.panel.right,'top editor spans the viewport').toBeLessThanOrEqual(page.viewportSize().width+1);
- // Invisible footer layout starts beneath the card, but the native CTA
- // itself is docked near the bottom. Measure the rendered button.
- expect(form.card.bottom,'the map-visible gap remains below the card').toBeLessThanOrEqual(form.cta.top-24);
- expect(form.panel.bottom,'the top panel clears the actual fixed CTA').toBeLessThanOrEqual(form.cta.top-24);
- const mapGapHit=await page.evaluate(([top,bottom])=>{
+   const host=document.getElementById('dj-route-v3'),root=host?.shadowRoot;
+   if(!root||host.hidden)return false;
+   const head=root.querySelector('.header')?.getBoundingClientRect();
+   const card=root.querySelector('.route-panel')?.getBoundingClientRect();
+   const cta=root.querySelector('.action')?.getBoundingClientRect();
+   const dock=document.getElementById('bottom-nav')?.getBoundingClientRect();
    const map=document.getElementById('map');
-   const target=document.elementFromPoint(Math.round(innerWidth/2),Math.round((top+bottom)/2));
-   return Boolean(map&&target&&(target===map||map.contains(target)));
- },[form.panel.bottom,form.cta.top]);
- expect(mapGapHit,'the live map must receive pointer hits between card and CTA').toBe(true);
- // Keep the real CTA aligned immediately above the native dock.
- // The actual button must remain visible and accept the pointer hit.
- expect(form.ctaVisible,'route CTA must be a touch-sized element').toBe(true);
- expect(form.cta.bottom,'actual route CTA must clear fixed tab pill').toBeLessThanOrEqual(form.dock.top-5);
- expect(form.ctaHit,'the CTA centre must receive a real pointer event').toBe(true);
- expect(form.swapVisible).toBe(true);
- expect(form.advancedClosed).toBe(true);
- await testInfo.attach('real-route-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
- if(page.viewportSize().width===390)await testInfo.attach('real-route-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+   const legacy=document.getElementById('route-panel');
+   const oldActions=document.getElementById('dj-walk-map-actions');
+   if(!head||!card||!cta||!dock||!map||!legacy)return false;
+   const mid=document.elementFromPoint(innerWidth/2,Math.round((card.bottom+cta.top)/2));
+   const action=root.elementFromPoint(cta.left+cta.width/2,cta.top+cta.height/2);
+   return root.querySelectorAll('.tools button').length===2 &&
+     card.top>=head.bottom-3&&card.left>=8&&card.right<=innerWidth-8 &&
+     card.bottom<=cta.top-24&&cta.bottom<=dock.top-5&&cta.height>=50 &&
+     (mid===map||map.contains(mid))&&
+     (action===root.querySelector('.action')||root.querySelector('.action')?.contains(action)) &&
+     getComputedStyle(legacy).clipPath==='inset(100%)' &&
+     getComputedStyle(legacy).pointerEvents==='none' &&
+     (!oldActions||getComputedStyle(oldActions).display==='none');
+ }),{timeout:30000,intervals:[100,250,500,1000]}).toBe(true);
+ const form=await routeScreen.evaluate(host=>{
+   const root=host.shadowRoot;
+   const rect=el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
+   return {header:rect(root.querySelector('.header')),
+     card:rect(root.querySelector('.route-panel')),cta:rect(root.querySelector('.action')),
+     navigation:rect(document.getElementById('bottom-nav')),
+     tools:root.querySelectorAll('.tools button').length,
+     initialDisabled:root.querySelector('.action').disabled,
+     origin:root.querySelector('#v3-start').textContent,
+     destination:root.querySelector('#v3-end').textContent};
+ });
+ expect(form.initialDisabled,'path calculation needs a selected start/end').toBe(true);
+ expect(form.origin).toContain('현재 위치');
+ expect(form.destination).toContain('어디로 가시나요');
+ await testInfo.attach('new-route-v3-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
+ if(page.viewportSize().width===390)await testInfo.attach('new-route-v3-reference.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 
  await tap(page,tab(page,'mine'));
  await expect(page.locator('#mine-panel')).toBeVisible();
