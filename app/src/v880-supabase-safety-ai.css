@@ -384,3 +384,14 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal[open] .dj-ai-search-body{flex:1 1 0!important;max-height:100%!important;overflow:hidden!important;justify-content:flex-start!important;}
  #dj-ai-search-modal .dj-ai-welcome{margin:0!important;text-align:left!important;}
 }
+
+/* The top-layer dialog contracts to visualViewport; the underlying document
+   must still paint the same opaque tone in every intermediate keyboard frame.
+   The OS-owned keyboard/accessory bar is not a web layout element. */
+@media(max-width:699px){
+ html:has(#dj-ai-search-modal[open]),html:has(#dj-ai-search-modal[open]) body{background-color:#edf3ef!important;}
+ html:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]),html:has(#app[data-theme="dark"]):has(#dj-ai-search-modal[open]) body{background-color:#191b1f!important;}
+ html body #dj-ai-search-modal[open] > .dj-ai-search-body{height:100%!important;min-height:0!important;box-sizing:border-box!important;}
+ html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-composer{margin-bottom:0!important;padding-bottom:0!important;}
+ html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-search-body{padding-bottom:8px!important;}
+}
