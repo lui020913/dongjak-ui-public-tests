@@ -1541,6 +1541,7 @@ document.getElementById('delete-point').addEventListener('click',()=>{
 
 // 지점 선택 및 빈 지도 클릭은 MapLibre 이벤트로 직접 처리합니다.
 map.on('click',(event)=>{
+  if(navMode==='gps')return;
   // One-tap dismissal: tool drawers must not remain over the map after a map tap.
   if(app.classList.contains('map-controls-open'))closeMapOptions();
   if(app.classList.contains('map-safety-open')&&!app.classList.contains('dj-safety-peek'))syncSafetyMenu(false);
@@ -1788,7 +1789,7 @@ map.on('load',()=>{
     paint:{'circle-radius':8.4,'circle-stroke-color':'#fff','circle-stroke-width':2,
       'circle-color':['match',['get','category'],'보행공간',COLORS['보행공간'],'교차로·시야',COLORS['교차로·시야'],'횡단시설',COLORS['횡단시설'],'조명·시설물',COLORS['조명·시설물'],COLORS['기타']]}});
   map.on('click','registered-points-click',(event)=>{
-    if(addMode || routePickMode)return;
+    if(navMode==='gps'||addMode || routePickMode)return;
     const id=event.features?.[0]?.properties?.pointId;
     const p=points.find(x=>x.id===id);
     if(p)openDetail(p);
@@ -1796,7 +1797,7 @@ map.on('load',()=>{
   map.on('mouseenter','registered-points-click',()=>{map.getCanvas().style.cursor='pointer';});
   map.on('mouseleave','registered-points-click',()=>{map.getCanvas().style.cursor='';});
   drawPoints();
-  installRoadWidthLayer({map, maplibregl, app, canOpen:()=>app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode && detail.hidden && editor.hidden, onError:()=>toast('도로폭 데이터를 불러오지 못했습니다.')});
+  installRoadWidthLayer({map, maplibregl, app, canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode && detail.hidden && editor.hidden, onError:()=>toast('도로폭 데이터를 불러오지 못했습니다.')});
   // 동작구 행정동 경계와 이름은 행정동 GeoJSON 기준으로 따로 표시합니다.
   // 동작구 외곽선을 먼저 불러온 다음 같은 자료의 시군구·행정동 경계를 일치시킵니다.
   // The administrative-district picker uses the same shared bottom-sheet shell on every viewport.
@@ -1817,7 +1818,7 @@ map.on('load',()=>{
     onError:(error)=>console.warn('행정동 자료 조회 실패:',error)});
   // Official-source data overlays are opt-in and lazy-loaded after district boundary is available.
   installDongjakOfficialDataLayers({map,maplibregl,getBoundary:()=>boundaryGeometry,
-    canOpen:()=>!addMode&&!routePickMode&&!communityPickMode});
+    canOpen:()=>!navMode&&!addMode&&!routePickMode&&!communityPickMode});
   const boundaryReady = loadDongjakBoundary();
   boundaryReady.then(adminInit).catch(error=>console.warn('행정동 설치 실패:',error));
   boundaryReady.then(()=>startupLoader.boundaryReady()).catch(()=>startupLoader.error());
@@ -1825,7 +1826,7 @@ map.on('load',()=>{
   // 안전시설/횡단보도는 사용자가 버튼을 눌렀을 때 공개 OSM 자료를 조회합니다.
   boundaryReady.then(()=>{
     installSafetyLayers({map,maplibregl,isDongjak,
-      canOpen:()=>app.dataset.tab==='map'&&!addMode&&!routePickMode&&!communityPickMode});
+      canOpen:()=>!navMode&&app.dataset.tab==='map'&&!addMode&&!routePickMode&&!communityPickMode});
     installBridgeDeck({map,isDongjak});
     installDecorativeParkTrees({map,isDongjak});
   }).catch(error=>console.warn('안전 지도 레이어 초기화 실패',error));
@@ -1846,7 +1847,7 @@ map.on('load',()=>{
   installEducationLayer({map,maplibregl,isDongjak:placeDistrictCheck});
   // OSM에 공개된 버스정류소/지하철 역명 및 일부 노선 태그를 별도 레이어로 표시합니다.
   // 실시간 도착정보는 인증된 서울시 API를 사용하는 중계 서버가 있을 때만 표시합니다.
-  const accessibilityLayer=initStationAccessibility({map,maplibregl,isInDistrict:(lng,lat)=>isDongjak(lng,lat)===true || isNearDongjakBoundary(lng,lat,220),canOpen:()=>app.dataset.tab==='map' && !addMode && !routePickMode});
+  const accessibilityLayer=initStationAccessibility({map,maplibregl,isInDistrict:(lng,lat)=>isDongjak(lng,lat)===true || isNearDongjakBoundary(lng,lat,220),canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode});
   boundaryReady.then(()=>{accessibilityLayer.refreshBoundary();accessibilityLayer.bringToFront();}).catch(()=>{});
   boundaryReady.then(()=>initTransportMap({map, maplibregl, isDongjak,boundaryGeometry,
     getDistrictGeometry:()=>boundaryGeometry,isNearBoundary:isNearDongjakBoundary, onOpen:()=>{
@@ -1862,7 +1863,7 @@ map.on('load',()=>{
     if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label:describeTransitPlace(place)}))return;
     navigate('route');
     toast(which==='start'?'출발지로 지정했습니다.':'목적지로 지정했습니다.');
-  }, canOpen:()=>app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
+  }, canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
     startupLoader.transportReady();
@@ -2298,7 +2299,14 @@ document.getElementById('community-map-cancel').addEventListener('click',()=>{
 });
 // Structured issue fields are relevant to '보행 불편' posts, not general discussion.
 const issueDetails=document.getElementById('community-issue-details');
-const syncIssueDetails=()=>{issueDetails.hidden=document.getElementById('community-category').value!=='보행 불편';};
+const syncIssueDetails=()=>{
+  const category=document.getElementById('community-category').value;
+  const dong=document.getElementById('community-dong');
+  dong.required=category!=='자유게시판';
+  dong.options[0].disabled=dong.required;
+  issueDetails.hidden=category!=='보행 불편';
+  if(!communityPickedLocation)document.getElementById('community-location-label').textContent=category==='보행 불편'?'지도 위치 선택 필수':'위치 지정 없음 · 선택사항';
+};
 document.getElementById('community-category').addEventListener('change',syncIssueDetails);
 syncIssueDetails();
 // The full-screen composer sits above the app toast; keep feedback beside its submit action.
@@ -2318,7 +2326,7 @@ function setCommunityPublishFeedback(message='',pending=false){
 }
 communityForm.addEventListener('invalid',event=>{
   const field=event.target;
-  setCommunityPublishFeedback(field.id==='community-share-publicly'?'공개 게시판 등록에 동의해 주세요.':field.id==='community-title'?'제목을 입력해 주세요.':field.id==='community-text'?'내용을 입력해 주세요.':'필수 입력 항목을 확인해 주세요.');
+  setCommunityPublishFeedback(field.id==='community-share-publicly'?'공개 게시판 등록에 동의해 주세요.':field.id==='community-dong'?'지역을 선택해 주세요.':field.id==='community-title'?'제목을 입력해 주세요.':field.id==='community-text'?'내용을 입력해 주세요.':'필수 입력 항목을 확인해 주세요.');
 },true);
 communityForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
@@ -2331,6 +2339,8 @@ communityForm.addEventListener('submit',async(event)=>{
   const body=isIssue?`[보행불편 유형: ${kind}] [현장 확인: ${priority}]\n${plainBody}`.slice(0,1200):plainBody;
   const nickname=document.getElementById('community-nickname').value.trim()||'익명 주민';
   if(!title||!plainBody){setCommunityPublishFeedback('제목과 내용을 입력해 주세요.');return;}
+  if(document.getElementById('community-category').value!=='자유게시판'&&!document.getElementById('community-dong').value){setCommunityPublishFeedback('지역을 선택해 주세요.');return;}
+  if(isIssue&&(!communityPickedLocation||isDongjak(communityPickedLocation.lng,communityPickedLocation.lat)!==true)){setCommunityPublishFeedback('지도에서 동작구 내 제보 위치를 선택해 주세요.');return;}
   const wantsPublic=Boolean(document.getElementById('community-share-publicly')?.checked);
   if(!wantsPublic){setCommunityPublishFeedback('공개 등록에 동의해 주세요. 작성 내용은 유지됩니다.');return;}
   let outcome=null;
@@ -2358,7 +2368,7 @@ communityForm.addEventListener('submit',async(event)=>{
   communityDraftPhoto=null;communityPickedLocation=null;
   document.getElementById('community-photo-preview').hidden=true;
   document.getElementById('community-photo-image').removeAttribute('src');
-  document.getElementById('community-location-label').textContent='위치 지정 없음 · 선택사항';
+  syncIssueDetails();
   openCommunityComposer(false);
   communityFilter='전체';
   for(const btn of document.querySelectorAll('.community-filter[data-community-filter]')) {
@@ -2596,7 +2606,8 @@ function syncRoutePresentation() {
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
   app.classList.toggle('route-guiding',guiding);
-  lockRouteMapGestures(guiding);
+  lockRouteMapGestures(false);
+  document.getElementById('nav-map-controls').hidden=!guiding;
   document.getElementById('route-pick-hint').hidden=!picking;
   document.getElementById('route-map-card').hidden=!preview;
   document.getElementById('nav-live-card').hidden=!guiding;
@@ -3348,6 +3359,7 @@ function updateNavButtonLabels(){
   document.getElementById('nav-voice').setAttribute('aria-pressed',String(navVoiceEnabled));
   document.getElementById('nav-orientation').textContent=navHeadingUp?'진행방향 보기':'북쪽 고정';
   document.getElementById('nav-orientation').setAttribute('aria-pressed',String(navHeadingUp));
+  document.getElementById('nav-reset-camera')?.setAttribute('aria-pressed',String(navFollow));
   document.getElementById('nav-follow').textContent=navFollow?'◎ 내 위치 따라가기':'◉ 위치 따라가기 켜기';
 }
 function speakNav(text,key='') {
@@ -3561,7 +3573,8 @@ async function startNavigation() {
   if(!hasLocationSupport()){toast('이 기기에서 위치정보를 사용할 수 없습니다.');return;}
   if(!Capacitor.isNativePlatform() && !window.isSecureContext){toast('웹 GPS는 HTTPS 또는 같은 PC의 localhost에서만 사용할 수 있습니다.');return;}
   stopNavigation();
-  navMode='gps';
+  navMode='gps';navHeadingUp=true;
+  map.easeTo({pitch:0,zoom:16.3,duration:250});
   navCompass=startNavigationCompass(window,heading=>{
     if(navMode==='gps'&&navFollow&&navHeadingUp&&navLastGps&&!document.hidden)
       followNavigationPosition(navLastGps.pos,heading,{compassUpdate:true});
@@ -3618,7 +3631,23 @@ document.getElementById('nav-orientation').addEventListener('click',()=>{
   else if(!navHeadingUp)map.easeTo({bearing:0,duration:400});
 });
 // 실제 손가락 드래그로 지도를 움직이면 현재 위치 자동 추적을 일시 정지합니다.
-map.on('dragstart',()=>{if(navMode==='gps'&&navFollow){navFollow=false;updateNavButtonLabels();}});
+function pauseNavigationCamera(){if(navMode==='gps'&&navFollow){navFollow=false;updateNavButtonLabels();}}
+for(const event of ['dragstart','zoomstart','rotatestart','pitchstart'])map.on(event,e=>{if(e.originalEvent)pauseNavigationCamera();});
+document.getElementById('nav-reset-camera').addEventListener('click',()=>{
+ if(navMode!=='gps')return;
+ navFollow=true;navHeadingUp=true;updateNavButtonLabels();
+ const pos=navLastGps?.pos;
+ const compass=navCompass?.heading();
+ const bearing=headingForCamera(Number.isFinite(compass)?compass:navMovementHeading,map.getBearing());
+ map.easeTo({...(pos?{center:pos}:{}),zoom:16.3,pitch:0,bearing,padding:{top:15,bottom:60,left:0,right:0},duration:350});
+});
+document.getElementById('nav-toggle-3d').addEventListener('click',()=>{
+ if(navMode!=='gps')return;
+ pauseNavigationCamera();map.easeTo({pitch:map.getPitch()>10?0:50,duration:300});
+});
+for(const [id,delta] of [['nav-zoom-in',1],['nav-zoom-out',-1]])document.getElementById(id).addEventListener('click',()=>{
+ if(navMode!=='gps')return;pauseNavigationCamera();map.easeTo({zoom:map.getZoom()+delta,duration:220});
+});
 updateNavButtonLabels();
 installNavVoicePicker({onChange:()=>{navLastVoiceKey='';}});
 // 앱을 최소화하거나 화면을 잠그면 브라우저 GPS는 일시 정지될 수 있습니다.
