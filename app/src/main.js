@@ -49,6 +49,7 @@ import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
+import './bus-route-detail.css';
 import './dongjak-import-controls.css';
 import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor,searchCachedTransportPlaces,suppressNativeBusStopGlyphs} from './transport-map.js';
 import {initStationAccessibility} from './station-accessibility.js';

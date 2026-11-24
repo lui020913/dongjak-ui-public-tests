@@ -1,0 +1,54 @@
+@media (max-width:699px){
+  #transport-sheet.dj-bus-detail-open{height:min(77dvh,680px)!important;max-height:min(77dvh,680px)!important;min-height:0!important;overflow:hidden!important;}
+  #transport-sheet.dj-bus-detail-open > :not(.dj-bus-detail){visibility:hidden!important;pointer-events:none!important;}
+  #transport-sheet .dj-bus-detail{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;min-height:0;background:inherit;color:inherit;border-radius:inherit;padding:8px 16px 12px;box-sizing:border-box;}
+  #transport-sheet .dj-bus-detail[hidden]{display:none!important;}
+  .dj-bus-detail::before{content:'';width:36px;height:4px;border-radius:8px;background:#a5aaa7;margin:0 auto 8px;flex:none;}
+  .dj-bus-detail-head,.dj-bus-detail-identity,.dj-bus-detail-actions{display:flex;align-items:center;gap:8px;}
+  .dj-bus-detail-head{justify-content:space-between;padding:4px 0 10px;flex:none;}
+  .dj-bus-detail-kind{background:#3566c1;color:white;border-radius:6px;padding:4px 7px;font-size:12px;}
+  .dj-bus-detail-name{font-size:25px;line-height:1.15;}
+  .dj-bus-detail button{font:inherit;cursor:pointer;color:inherit;border:0;}
+  .dj-bus-detail-close{border-radius:50%;width:40px;height:40px;background:#f0f2f1;font-size:26px!important;flex:none;}
+  .dj-bus-detail-status{font-size:12px;color:#65716b;padding:6px 0 9px;flex:none;border-bottom:1px solid #e9ecea;}
+  .dj-bus-detail-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+  .dj-bus-detail-list{position:relative;}
+  .dj-bus-detail-stop{position:relative;width:100%;display:flex;align-items:stretch;text-align:left;background:transparent;padding:0 0 0 42px;min-height:68px;}
+  .dj-bus-detail-stop::before,.dj-bus-detail-vehicle::before{content:'';position:absolute;left:22px;top:0;bottom:0;width:3px;background:var(--dj-bus-detail-line,#3566c1);}
+  .dj-bus-detail-node{position:absolute;left:18px;top:29px;width:11px;height:11px;background:#fff;border:2px solid var(--dj-bus-detail-line,#3566c1);border-radius:50%;box-sizing:border-box;}
+  .dj-bus-detail-stop-content{display:flex;flex-direction:column;justify-content:center;gap:4px;flex:1;padding:10px 4px;border-bottom:1px solid #e9ecea;min-width:0;overflow-wrap:anywhere;}
+  .dj-bus-detail-stop-content strong{font-size:16px;line-height:1.35;font-weight:600;}
+  .dj-bus-detail-stop-content small{color:#707b75;font-size:12px;line-height:1.35;}
+  .dj-bus-detail-stop[aria-current]{background:#eaf3ff;}
+  .dj-bus-detail-vehicle{position:relative;display:flex;align-items:center;gap:9px;min-height:30px;padding-left:14px;font-size:12px;}
+  .dj-bus-detail-bus{z-index:1;border-radius:5px;background:var(--dj-bus-detail-line,#3566c1);color:#fff;width:19px;height:19px;display:grid;place-items:center;}
+  .dj-bus-detail-vehicle > span:last-child{border:1px solid #d9e1dd;border-radius:6px;padding:3px 7px;overflow-wrap:anywhere;}
+  .dj-bus-detail-actions{padding-top:10px;flex:none;justify-content:space-between;gap:5px;border-top:1px solid #e9ecea;}
+  .dj-bus-detail-actions button{padding:9px 8px;border-radius:20px;background:#eff4fa;color:#225da5;font-size:12px;white-space:nowrap;min-height:40px;}
+  .dj-bus-detail-actions button[aria-pressed=true]{background:#dce9ff;font-weight:700;}
+  .dj-bus-detail-actions button:disabled{opacity:.5;}
+  .dj-bus-detail-message{font-size:13px;color:#65716b;padding:12px 4px;}
+  .dj-bus-detail-info{display:flex;justify-content:space-between;gap:12px;padding:15px 4px;border-bottom:1px solid #e9ecea;font-size:14px;}
+}
+.dj-bus-detail[hidden]{display:none!important;}
+
+.dj-bus-detail[data-bus-category=branch],.dj-bus-detail[data-bus-category=village]{--dj-bus-detail-line:#3d923e;}
+.dj-bus-detail[data-bus-category=metro]{--dj-bus-detail-line:#c63d42;}
+.dj-bus-detail[data-bus-category=circular]{--dj-bus-detail-line:#a77916;}
+.dj-bus-detail .dj-bus-detail-kind{background:var(--dj-bus-detail-line,#3566c1);}
+.dj-bus-detail-unplaced .dj-bus-detail-vehicle::before{display:none;}
+
+@media(max-width:699px){
+  .dj-bus-detail-list{--timeline-x:84px;}
+  .dj-bus-detail-stop{padding-left:calc(var(--timeline-x) + 16px);}
+  .dj-bus-detail-stop::before,.dj-bus-detail-vehicle::before{left:var(--timeline-x);}
+  .dj-bus-detail-node{left:calc(var(--timeline-x) - 4px);}
+  .dj-bus-detail-vehicle{min-height:40px;padding:0 0 0 calc(var(--timeline-x) + 14px);}
+  .dj-bus-detail-vehicle-label{position:absolute;right:calc(100% - var(--timeline-x) + 12px);left:0;text-align:center;font-size:10px;line-height:1.35;}
+  .dj-bus-detail-bus{position:absolute;left:calc(var(--timeline-x) - 8px);width:19px;height:18px;border:2px solid white;box-sizing:border-box;}
+  .dj-bus-detail-bus::before{content:'';position:absolute;inset:2px 2px 6px;background:white;border-radius:1px;}
+  .dj-bus-detail-bus::after{content:'';position:absolute;left:3px;bottom:1px;width:3px;height:3px;background:white;border-radius:50%;box-shadow:7px 0 white;}
+  .dj-bus-detail-unplaced .dj-bus-detail-vehicle{min-height:30px;padding-left:0;}
+  .dj-bus-detail-unplaced .dj-bus-detail-bus{display:none;}
+  .dj-bus-detail-unplaced .dj-bus-detail-vehicle-label{position:static;text-align:left;font-size:12px;}
+}
