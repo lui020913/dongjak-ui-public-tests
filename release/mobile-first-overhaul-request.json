@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.135",
+  "application_version": "9.2.136",
   "public_work_branch": "main",
-  "purpose": "PR430: remove duplicate night-consent and toolbar animations, single centered fade, consistent bottom-tab transitions with fixed map and dock, cancel stale animations; preserve existing navigation, keyboard, routing and GIS.",
-  "attempt": 342,
+  "purpose": "PR431: visible phone tab transitions including V3 route screen, ordinary AI entry/exit fades with keyboard-safe synchronous dismissal, fixed subway closing geometry; preserve routing, GIS, and existing app state.",
+  "attempt": 343,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: PR430 source CI 45332301285 passed 30/33 phone tests; corrected stale test entry selector and focused CI 45335965811 passed the remaining three viewport cases. Merged 341828a691c852eaf0c97c173ab9f75c86ab9ce4. Run protected Preview and Production release gates.",
+  "last_retry_reason": "2026-11-24: PR431 source CI 45341079964 passed 29 phone cases, 2 skipped and 2 AI keyboard dismissal failures. Corrected source CI 45344033102 passed the two remaining viewport cases, AI contract, build and security. Merged ff556beab26213273d3744fd8522ebe280da9999. Run protected Preview and Production release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
