@@ -1309,6 +1309,7 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   const mic=page.locator('#djNext-mic'),query=search.locator('#map-quick-search-query');
   await expect(ai).toBeVisible();
   await expect(mic).toBeVisible();
+  await expect.poll(async()=>{const a=await ai.boundingBox(),s=await search.locator('.map-quick-search-form').boundingBox();return !!a&&!!s&&Math.abs(a.height-s.height)<=1&&Math.abs(a.width-s.height)<=1&&Math.abs(a.y-s.y)<=1&&a.x>=s.x+s.width;}).toBe(true);
   await query.click();
   // Empty focus hides the map toolbar and shows only the two search actions.
   await expect(dropdown).toBeHidden();

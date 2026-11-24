@@ -71,5 +71,5 @@ test('nearby sheet has one document-level drag owner, expands and keeps search h
  assert.match(mobileCss,/#ped-tools-panel\.dj871-sheet-expanded:not\(\[hidden\]\)/);
  assert.match(mobileCss,/#ped-tools-panel\[data-nearby-mode="empty"\]:not\(\.dj871-sheet-expanded\)/);
  assert.match(mobileCss,/:has\(#ped-tools-panel:not\(\[hidden\]\)\) > \.topbar/);
- assert.match(mobileCss,/grid-template-columns:minmax\(0,1fr\) 62px!important/);
+ assert.match(mobileCss,/grid-template-columns:minmax\(0,1fr\) var\(--dj-map-search-control-size,54px\)!important/);
 });
