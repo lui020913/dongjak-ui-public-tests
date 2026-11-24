@@ -61,7 +61,14 @@ echo "CHECKPOINT: changed-file allowlist passed"
 export DONGJAK_BATCH_RELEASE_STAMP=1
 release_kind="$(jq -er '.release_kind' "$REQUEST")"
 requested_version="$APP_VERSION"
-if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )) && [ "$release_kind" = patch ]; then
+replay_v930=false
+if [ "$requested_version" = "9.3.0" ] && [ "$release_kind" = minor ]; then
+  # The source snapshot is still 8.26.1: reconstruct the same 9.2.136
+  # history as the verified Production before the new minor increment.
+  replay_v930=true
+  APP_VERSION=9.2.17
+  release_kind=patch
+elif [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )) && [ "$release_kind" = patch ]; then
   APP_VERSION=9.2.17
 fi
 if { [ "$APP_VERSION" = "9.0.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.1.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.2" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.1.3" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.0" ] && [ "$release_kind" = "minor" ]; } || { [ "$APP_VERSION" = "9.2.1" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.2" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.3" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.4" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.5" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.6" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.7" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.8" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.9" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.10" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.11" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.12" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.13" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.14" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.15" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.16" ] && [ "$release_kind" = "patch" ]; } || { [ "$APP_VERSION" = "9.2.17" ] && [ "$release_kind" = "patch" ]; }; then
@@ -137,8 +144,13 @@ else
   node scripts/bump-app-version.mjs "$(jq -er '.release_kind' "$REQUEST")" "모바일 상단 기능 고정 및 사용자 바로가기 최대 3개 설정" "첫 실행 권한 안내 및 음성 장소 검색" "최단·경사 회피·지하철 연계·잠정 종합 경로 비교" "주변 안전정보·잠금 표시·교통 정보·업데이트 UI 개선" >/dev/null
 fi
 APP_VERSION="$requested_version"
-if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
+target_patch=0
+if [ "$replay_v930" = true ]; then
+  target_patch=136
+elif [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]]; then
   target_patch="${BASH_REMATCH[1]}"
+fi
+if (( target_patch >= 18 )); then
   for ((patch=18; patch<=target_patch; patch++)); do
     case "$patch" in
       18) note="창 간 전환 복원 및 시설 정보창 중복 모션 정리";;
@@ -182,6 +194,9 @@ if [[ "$APP_VERSION" =~ ^9\.2\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 18 )); then
     esac
     node scripts/bump-app-version.mjs patch "$note" >/dev/null
   done
+fi
+if [ "$replay_v930" = true ]; then
+  node scripts/bump-app-version.mjs minor "공통 화면 전환 엔진 및 하단 탭·길찾기·확인창·정보창 최적화" "하위 메뉴 전환 중첩 방지 및 지도 렌더링 갱신 통합" "기존 버전과 동일 조건의 화면 전환 성능 비교 검증" >/dev/null
 fi
 unset DONGJAK_BATCH_RELEASE_STAMP
 node scripts/stamp-version.mjs >/dev/null

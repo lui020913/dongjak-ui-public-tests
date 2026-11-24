@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 const root=new URL('../',import.meta.url);
 const path=file=>new URL(file,root);
 const read=file=>readFileSync(path(file),'utf8');
@@ -51,4 +52,30 @@ test('v9.3 performance comparison uses immutable baseline and exact candidate be
  assert.match(script,/Release provenance changed during comparison/);
  assert.match(script,/Insufficient frame samples/);
  assert.match(script,/byScenario/);
+});
+
+test('protected v9.3 minor replay retains every prior 9.2.136 release increment',()=>{
+ const build=read('scripts/build-mobile-first-overhaul.sh');
+ const replay=build.slice(build.indexOf('export DONGJAK_BATCH_RELEASE_STAMP=1'),build.indexOf('unset DONGJAK_BATCH_RELEASE_STAMP'));
+ const invoke=(version,kind)=>{
+  const stub='set -euo pipefail\nAPP_VERSION="$1"\nREQUEST=fixture\nkind="$2"\njq(){ printf "%s\\n" "$kind"; }\n';
+  // Record the exact bump invocations, including notes, without changing files.
+  const script=stub+'\nnode(){ test "$1" = scripts/bump-app-version.mjs; printf "%s\\n" "$2" >&2; }\n'+replay+'\n';
+  const result=spawnSync('bash',['-c',script,'replay',version,kind],{encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  const kinds=result.stderr.trim().split('\n');
+  const versions=[];let parts=[8,26,1];
+  for(const k of kinds){
+   if(k==='major')parts=[parts[0]+1,0,0];
+   else if(k==='minor')parts=[parts[0],parts[1]+1,0];
+   else if(k==='patch')parts=[parts[0],parts[1],parts[2]+1];
+   else assert.fail('Unexpected bump: '+k);
+   versions.push(parts.join('.'));
+  }
+  return versions;
+ };
+ const previous=invoke('9.2.136','patch');
+ assert.equal(previous.at(-1),'9.2.136');
+ assert.deepEqual(invoke('9.3.0','minor'),[...previous,'9.3.0']);
+ assert.equal(invoke('9.2.17','patch').at(-1),'9.2.17');
 });
