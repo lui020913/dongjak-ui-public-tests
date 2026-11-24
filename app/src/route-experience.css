@@ -364,12 +364,12 @@
       display:none!important
     }
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
-      #nav-live-card .nav-live-actions {display:flex!important;gap:0!important;margin:6px 0 0!important}
+      #nav-live-card .nav-live-actions {display:flex!important;gap:8px!important;margin:6px 0 0!important}
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
-      #nav-live-card .nav-live-actions > :not(#nav-stop) {display:none!important}
+      #nav-live-card .nav-live-actions > :not(#nav-stop):not(#nav-voice) {display:none!important}
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"]
       #nav-live-card #nav-stop {
-      display:block!important;flex:1 1 100%!important;width:100%!important;min-height:48px!important;
+      display:block!important;flex:1 1 0!important;width:auto!important;min-width:0!important;min-height:48px!important;
       border:1px solid #d95050!important;border-radius:12px!important;
       background:var(--walk-paper)!important;color:#c13939!important;
       font-size:15px!important;font-weight:790!important;pointer-events:auto!important;
@@ -413,7 +413,16 @@
     border:0!important;border-radius:14px!important;background:var(--walk-primary)!important;
     color:white!important;font-size:15px!important;font-weight:780!important;
   }
-  #app[data-dj-walk-arrived="1"] #route-map-card {display:none!important}
+  html body #app#app#app#app#app#app#app#app#app[data-dj-walk-arrived="1"] :is(#route-map-card,#nav-live-card,#dj-walk-map-head,#dj-route-turn-banner,#nav-map-controls,.map-actions,#bottom-nav,.topbar,#djNext-toolbar,#dj-v794-toolbar,#dj890-ai-orb,#dj840-map-tip) {display:none!important;pointer-events:none!important}
+  html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"] #nav-live-card #nav-voice {
+    display:block!important;flex:1 1 0!important;min-width:0!important;width:auto!important;min-height:48px!important;
+    border:1px solid var(--walk-border)!important;border-radius:12px!important;
+    background:var(--walk-soft)!important;color:var(--walk-text)!important;font-size:14px!important;
+    pointer-events:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app[data-dj-route-stage="guiding"] #nav-live-card #nav-voice[aria-pressed="true"] {
+    background:var(--walk-primary)!important;color:#fff!important;
+  }
 }
 
 
