@@ -104,7 +104,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     ])scroll.style.setProperty(property,value,'important');
     helper=doc.createElement('p');
     helper.className='dj-compose-intro';
-    helper.textContent='보행 중 불편했던 상황을 알려주세요. 사진과 위치는 선택사항입니다.';
+    helper.textContent='보행 중 불편했던 상황을 공개 게시판에 알려주세요. 사진과 위치는 선택사항입니다.';
     scroll.append(helper);
     for(const node of [...form.childNodes])if(node!==header&&node!==save)scroll.append(node);
     footer=doc.createElement('footer');

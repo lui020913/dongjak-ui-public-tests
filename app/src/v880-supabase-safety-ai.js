@@ -88,6 +88,18 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const composer=el('div','dj-ai-composer');composer.append(form,foot);
   modal.dataset.djDialogFade='true';
   layout.append(header,login,transcript,composer);modal.append(layout);document.body.append(modal);
+  // Prevent touch overscroll from escaping the native dialog into the iOS
+  // document. Only the transcript owns vertical scrolling.
+  let touchY=null;
+  modal.addEventListener('touchstart',event=>{touchY=event.touches[0]?.clientY??null;},{passive:true});
+  modal.addEventListener('touchmove',event=>{
+    if(!window.matchMedia?.('(max-width:699px)')?.matches||event.touches.length!==1)return;
+    const y=event.touches[0].clientY,delta=touchY==null?0:y-touchY;touchY=y;
+    if(!delta)return;
+    const inside=transcript.contains(event.target);
+    const boundary=delta>0?transcript.scrollTop<=1:transcript.scrollTop+transcript.clientHeight>=transcript.scrollHeight-1;
+    if((!inside||boundary)&&event.cancelable)event.preventDefault();
+  },{passive:false});
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
   let transportDismissedAt=0;

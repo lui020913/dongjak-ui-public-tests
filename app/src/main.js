@@ -81,6 +81,7 @@ import {installMapImmersive} from './map-immersive.js';
 import {installDistantHaze} from './distant-haze.js';
 import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibility-map.js';
 import {installPriMap} from './pri-map.js';
+import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -616,6 +617,7 @@ const map = new maplibregl.Map({
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
+installSolidMapLines(map);
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
 installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode});
@@ -1907,7 +1909,7 @@ const dongjakNews=initDongjakNews({app,onToast:toast});
 void dongjakNews.prefetch();
 let communityFilter = '전체';
 let communityNotices=[],communityDetail=null,communitySearch='',communityNoticeSeq=0,communityListScroll=0,communitySavedOnly=false,communityReplyTo=null,communityModerationStatus=null,communityDeepLink=null,communityNoticePrimed=false;
-async function refreshCommunityModerationStatus(){const token=communityRefreshSequence;try{const state=await readCommunityModerationStatus();if(token!==communityRefreshSequence)return;communityModerationStatus=state;const label=document.getElementById('community-moderation-status');if(label){label.hidden=!state||state.ready;label.textContent=state?.ready?'공개 게시글과 댓글은 AI 검사 후 등록됩니다.':'공개 글 AI 검사를 준비 중입니다. 기기 저장은 이용 가능합니다.';}}catch{/* keep prior state */}}
+async function refreshCommunityModerationStatus(){const token=communityRefreshSequence;try{const state=await readCommunityModerationStatus();if(token!==communityRefreshSequence)return;communityModerationStatus=state;const label=document.getElementById('community-moderation-status');if(label){label.hidden=!state||state.ready;label.textContent=state?.ready?'공개 게시글과 댓글은 AI 검사 후 등록됩니다.':'공개 글 AI 검사를 준비 중입니다. 등록할 수 없을 때는 작성 내용이 유지됩니다.';}}catch{/* keep prior state */}}
 function paintCommunityNoticeBadge(){const button=document.getElementById('community-notifications-toggle');if(!button)return;const count=communityNotices.filter(n=>!n.read_at).length;button.textContent=count?'알림 '+count:'알림';button.setAttribute('aria-label',count?'커뮤니티 읽지 않은 알림 '+count+'개':'커뮤니티 알림');button.classList.toggle('has-unread',count>0);const nav=document.querySelector('#bottom-nav [data-tab="participate"]');if(nav)nav.classList.toggle('community-has-unread',count>0);}
 function resetCommunityNotices(){++communityNoticeSeq;communityNotices=[];communityNoticePrimed=false;const panel=document.getElementById('community-notifications');if(panel){panel.hidden=true;panel.replaceChildren();}paintCommunityNoticeBadge();}
 function renderCommunityNotices(){const panel=document.getElementById('community-notifications');if(!panel)return;panel.replaceChildren();void installCommunityPushControl(panel,getActiveCloudClient(),toast).catch(()=>{});if(!communityNotices.length){panel.append(makeCEl('p','','새 알림이 없습니다.'));return;}
@@ -2291,15 +2293,19 @@ communityForm.addEventListener('submit',async(event)=>{
   const wantsPublic=Boolean(document.getElementById('community-share-publicly')?.checked);
   if(wantsPublic&&signedIn&&communityModerationStatus?.ready===false){toast('공개 글 AI 검사를 준비 중입니다. 작성 내용은 유지됩니다.');return;}
   if(wantsPublic&&!signedIn){toast('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');return;}
-  if(!wantsPublic&&communityPosts.length>=35){toast('기기 기록은 최대 35개까지 저장할 수 있습니다.');return;}
+  if(!wantsPublic){toast('공개 등록에 동의해 주세요. 작성 내용은 유지됩니다.');return;}
   const post=makeCommunityPost({
     title,body,nickname,category:document.getElementById('community-category').value,
     photo:communityDraftPhoto,location:communityPickedLocation
   });
-  const publish=Boolean(signedIn&&document.getElementById('community-share-publicly')?.checked);
   let outcome=null;
-  if(publish){communityForm.dataset.djPublishing='true';try{outcome=await publishCommunityPost(post);}catch(error){toast(error?.message||'게시글 등록 실패');return;}finally{delete communityForm.dataset.djPublishing;}void refreshSharedCommunity();}
-  else if(!saveCommunity([post,...communityPosts]))return;
+  communityForm.dataset.djPublishing='true';
+  const publishButton=communityForm.querySelector('button[type="submit"]');
+  if(publishButton)publishButton.disabled=true;
+  try{outcome=await publishCommunityPost(post);}
+  catch(error){toast(error?.message||'서버 등록에 실패했습니다. 작성 내용은 유지됩니다.');return;}
+  finally{delete communityForm.dataset.djPublishing;if(publishButton)publishButton.disabled=false;}
+  void refreshSharedCommunity();
   communityForm.reset();
   communityDraftPhoto=null;communityPickedLocation=null;
   document.getElementById('community-photo-preview').hidden=true;
@@ -2312,7 +2318,7 @@ communityForm.addEventListener('submit',async(event)=>{
     btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
   }
   document.getElementById('community-sort').value='new';
-  renderCommunity();toast(publish?(moderationMessage(outcome,'게시물')||'공개 게시판에 등록했습니다.'):'게시글을 이 기기에 저장했습니다.');
+  renderCommunity();toast(moderationMessage(outcome,'게시물')||'공개 게시판에 등록했습니다.');
 });
 // Shared controls are located in 지도 옵션 to avoid cluttering the main map.
 const pedestrianTools=initPedestrianTools({

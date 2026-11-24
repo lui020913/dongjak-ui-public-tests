@@ -229,7 +229,10 @@ export function installMyInfo(doc=document){
  function showDetail(view){
    landing.hidden=true;
    title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
-   if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox)historyBox.append(historyList);
+   if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox){
+     historyBox.append(historyList);
+     for(const item of historyList.querySelectorAll('details'))item.open=false;
+   }
    else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    if(view==='tools'){view='map';advancedTools.open=true;}
    const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox,map:mapBox};

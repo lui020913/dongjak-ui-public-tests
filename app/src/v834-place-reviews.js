@@ -1,7 +1,6 @@
-/** v8.2.15 facility reviews: guest drafts are device-only, signed-in reviews
- * use the existing Supabase client and RLS-protected public.place_reviews.
- * Never report a device-only record as a shared/published review. */
-import {getActiveCloudClient} from './v824-favorites-cloud.js';
+/** Shared facility reviews use RLS-protected public.place_reviews.
+ * Historical device records are read-only; failed publication retains the form. */
+import {cloudConfiguration,getActiveCloudClient} from './v824-favorites-cloud.js';
 const PREFIX='dj834_facility_reviews_v1:';
 const clean=(value,max=800)=>String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
 export function reviewPlaceKey(place){
@@ -19,9 +18,6 @@ export function validateReview(rating,body){
 }
 function localRead(key){
  try{const raw=JSON.parse(localStorage.getItem(PREFIX+key)||'[]');return Array.isArray(raw)?raw.slice(-20):[];}catch{return [];}
-}
-function localWrite(key,record){
- try{localStorage.setItem(PREFIX+key,JSON.stringify([record]));return true;}catch{return false;}
 }
 function makeElement(tag,className,content){
  const el=document.createElement(tag);if(className)el.className=className;
@@ -43,8 +39,8 @@ export function installPlaceReviews(root,place){
  }
  ratingLabel.append(rating);
  const bodyLabel=makeElement('label',null,'리뷰 내용');const body=makeElement('textarea');body.required=true;body.minLength=5;body.maxLength=800;body.rows=3;body.placeholder='직접 방문한 경험과 시설 이용 정보를 작성해 주세요.';bodyLabel.append(body);
- const buttons=makeElement('div','dj834-review-buttons');const save=makeElement('button','dj834-review-submit','리뷰 저장');save.type='submit';const cancel=makeElement('button','dj834-review-cancel','취소');cancel.type='button';buttons.append(save,cancel);
- const consent=makeElement('p','dj834-review-disclaimer','로그인하지 않으면 이 기기에만 저장됩니다. 로그인 상태의 공개 리뷰는 서버에 리뷰 테이블이 설정된 경우에만 공유됩니다.');
+ const buttons=makeElement('div','dj834-review-buttons');const save=makeElement('button','dj834-review-submit','공개 리뷰 등록');save.type='submit';const cancel=makeElement('button','dj834-review-cancel','취소');cancel.type='button';buttons.append(save,cancel);
+ const consent=makeElement('p','dj834-review-disclaimer','로그인 후 등록하면 리뷰와 표시 이름이 다른 이용자에게 공개됩니다. 서버 등록에 실패하면 작성 내용은 유지됩니다.');
  form.append(ratingLabel,bodyLabel,buttons,consent);
  const list=makeElement('div','dj834-review-list');section.append(heading,status,form,list);
  // Place the review action above the generated AI description.
@@ -67,10 +63,15 @@ export function installPlaceReviews(root,place){
  async function refresh(){
   const local=localRead(key);
   const client=getActiveCloudClient();
-  if(!client){render(local,true);if(!local.length)list.append(makeElement('p','dj834-review-empty','아직 등록된 리뷰가 없습니다.'));return;}
   try{
-   const {data,error}=await client.from('place_reviews').select('id,author_name,body,rating,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);
-   if(error)throw error;
+   let data;
+   if(client){const response=await client.from('place_reviews').select('id,author_name,body,rating,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);if(response.error)throw response.error;data=response.data;}
+   else{
+    const cfg=cloudConfiguration();if(!cfg.configured)throw new Error('공개 서버 설정 없음');
+    const url=new URL(cfg.url.replace(/\/$/,'')+'/rest/v1/place_reviews');
+    url.searchParams.set('select','id,author_name,body,rating,created_at');url.searchParams.set('place_key','eq.'+key);url.searchParams.set('order','created_at.desc');url.searchParams.set('limit','20');
+    const response=await fetch(url,{headers:{apikey:cfg.key},signal:AbortSignal.timeout(10000)});if(!response.ok)throw new Error('공개 리뷰 HTTP '+response.status);data=await response.json();
+   }
    render(Array.isArray(data)?data:[]);
    if(!data?.length&&!local.length)list.append(makeElement('p','dj834-review-empty','아직 등록된 리뷰가 없습니다.'));
    if(local.length){const note=makeElement('p','dj834-review-local-note','이 기기에만 저장된 리뷰');list.append(note);
@@ -92,23 +93,23 @@ export function installPlaceReviews(root,place){
    try{
     const {data:{session},error:sessionError}=await client.auth.getSession();
     if(sessionError)throw sessionError;
-    if(session?.user?.id){
+    if(session?.user?.id&&!session.user.is_anonymous){
      const author=clean(session.user.user_metadata?.display_name||session.user.user_metadata?.full_name||'이용자',32);
      const payload={...record,user_id:session.user.id,author_name:author};
      delete payload.created_at;
-     const {error:saveError}=await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'});
-     if(saveError)throw saveError;
+     const {data:stored,error:saveError}=await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'}).select('id').single();
+     if(saveError||!stored?.id)throw saveError||new Error('서버 등록 확인 실패');
      published=true;
     }else why='로그인하지 않아';
    }catch{why='리뷰 서버가 준비되지 않았거나 연결되지 않아';}
   }else why='서버 연결이 없어';
-  if(published){status.textContent='리뷰가 공개 서버에 저장되었습니다.';}
-  else{
-   const ok=localWrite(key,record);
-   status.textContent=ok?`${why||'공개 서버를 이용할 수 없어'} 이 기기에만 저장했습니다. 다른 사용자는 볼 수 없습니다.`:'리뷰 저장에 실패했습니다. 기기 저장 공간을 확인해 주세요.';
+  save.disabled=false;
+  if(!published){
+   status.textContent=(why||'공개 서버를 이용할 수 없어')+' 공개 등록하지 못했습니다. 로그인과 연결 상태를 확인해 주세요. 작성 내용은 유지됩니다.';
+   form.hidden=false;return;
   }
-  save.disabled=false;form.hidden=false;
-  if(published||localRead(key).length){form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';}
+  status.textContent='리뷰가 공개 서버에 저장되었습니다.';
+  form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';
   await refresh();
  });
  void refresh();return {element:section,close(){alive=false;}};
