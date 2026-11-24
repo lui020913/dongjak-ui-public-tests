@@ -25,6 +25,12 @@ jobs:
             }catch(e){return {http:null,j:{code:e.name}}}
           }
           const log=(label,result,details)=>console.log(JSON.stringify({label,http:result.http,code:result.j.code??null,...details}));
+          const production=await get('/release-source.json');
+          log('Android production marker',production,{version:production.j.application_version,source:production.j.source_commit,publicSource:production.j.public_ui_source_commit,state:production.j.release_status});
+          try{
+            const r=await fetch(root+'/api/android-download.apk',{method:'HEAD',signal:AbortSignal.timeout(20000),cache:'no-store'});
+            console.log(JSON.stringify({label:'Android proxy HEAD',http:r.status,verified:r.headers.get('X-Dongjak-APK-Verified'),size:r.headers.get('content-length')}));
+          }catch(e){console.log(JSON.stringify({label:'Android proxy HEAD',error:e.name}));}
           const status=await get('/api/transport/status');
           log('transport status',status,{bus:status.j.bus,subway:status.j.subway});
           const stations=[['노량진','1'],['대방','1'],['신림','2'],['신림','신림선'],['보라매','신림선']];
