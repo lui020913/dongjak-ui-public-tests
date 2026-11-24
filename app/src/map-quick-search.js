@@ -5,7 +5,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {searchResultSubtitle,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
+import {searchResultSubtitle,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -192,7 +192,16 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
       if(!names.length){const empty=document.createElement('p');empty.className='dj-recent-query-empty';empty.textContent='최근 검색어가 없습니다.';defaults.append(empty);}
       for(const name of names){
         const btn=document.createElement('button');btn.type='button';btn.className='map-quick-search-suggestion';
-        btn.textContent=name;
+        if(explicitHistory){
+          btn.classList.add('dj-search-history-row');
+          // Legacy search chips use competing centered button rules. Give the
+          // history row a dedicated label, not a centered bare text node.
+          const icon=document.createElement('span');icon.className='dj-search-history-icon';icon.setAttribute('aria-hidden','true');
+          icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+          const label=document.createElement('span');label.className='dj-search-history-label';label.textContent=name;
+          btn.append(icon,label);
+          for(const [key,value] of Object.entries({display:'flex','flex-direction':'row','justify-content':'flex-start','align-items':'center','text-align':'left',width:'100%',gap:'10px'}))btn.style.setProperty(key,value,'important');
+        }else btn.textContent=name;
         btn.addEventListener('click',()=>{
           query.value=name;query.dispatchEvent(new Event('input',{bubbles:true}));
           form.classList.add('dj807-has-input');
@@ -325,7 +334,17 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     try{external=await fetchVisibleOfficialPlaces(area,{signal:own.signal});}catch(error){if(active!==seq)return;partial=true;}finally{window.clearTimeout(timeout);}
     if(active!==seq)return;
     const {items,total}=visibleFacilityResults(area,[...local,...external]);
-    list.replaceChildren();for(const place of items)list.append(makeResultButton(place));
+    list.replaceChildren();
+    for(const {label,rows} of groupVisibleFacilities(items)){
+      const group=document.createElement('section');group.className='dj-visible-facility-group';group.setAttribute('aria-label',label);
+      const heading=document.createElement('h3');heading.className='dj-visible-facility-heading';
+      const name=document.createElement('span');name.textContent=label;
+      const count=document.createElement('span');count.className='dj-visible-facility-count';count.textContent=rows.length+'곳';
+      heading.append(name,count);
+      const results=document.createElement('div');results.className='dj-visible-facility-list';
+      for(const place of rows)results.append(makeResultButton(place));
+      group.append(heading,results);list.append(group);
+    }
     feedback.textContent=items.length?`현재 지도 내 ${total}곳${total>items.length?' · '+items.length+'곳 표시':''}${partial?' · 일부 장소를 불러오지 못했습니다.':''}`:(partial?'현재 지도에서 확인된 시설이 없습니다. 일부 장소를 불러오지 못했습니다.':'현재 지도에서 확인된 시설이 없습니다. 지도를 이동해 다시 검색해 주세요.');
   };
   map.on?.('movestart',()=>{if(dropdown.dataset.searchMode==='nearby'){close();query.blur();syncEntry();}});

@@ -1357,6 +1357,14 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   const radius=await dropdown.evaluate(node=>parseFloat(getComputedStyle(node).borderTopLeftRadius));
   expect(radius).toBeGreaterThanOrEqual(18);
   await test.info().attach('search-ai-visible',{body:await page.screenshot(),contentType:'image/png'});
+  await page.locator('#map-quick-search-close').click();await expect(dropdown).toBeHidden();
+  await query.click();await query.fill('노량진');await query.press('Enter');
+  await expect(dropdown).toBeVisible();
+  await page.locator('#map-quick-search-close').click();await expect(dropdown).toBeHidden();
+  await query.click();await page.getByRole('button',{name:'최근 검색',exact:true}).click();
+  const historyRow=dropdown.locator('.dj-search-history-row').filter({hasText:'노량진'}).first();
+  await expect(historyRow).toBeVisible();
+  await expect.poll(()=>historyRow.evaluate(n=>{const r=n.getBoundingClientRect(),label=n.querySelector('.dj-search-history-label').getBoundingClientRect();return getComputedStyle(n).justifyContent==='flex-start'&&getComputedStyle(n.querySelector('.dj-search-history-label')).textAlign==='left'&&label.left-r.left<50;})).toBe(true);
 });
 
 test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'@phone-layout'},async({page})=>{

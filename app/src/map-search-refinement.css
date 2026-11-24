@@ -31,3 +31,12 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="
 html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] .dj815-recent{margin:14px 0 0!important;padding:12px 0 0!important}
 html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-empty{color:var(--dj800-muted,#667b71);font-size:13px;margin:6px 0 12px}
 }}
+
+/* Area-search categories use the same scroll owner as ordinary results. */
+#app #map-quick-search-dropdown[data-search-mode="nearby"] .dj-visible-facility-group{min-width:0;display:block;padding:0;margin:0 0 12px}
+#app #map-quick-search-dropdown[data-search-mode="nearby"] .dj-visible-facility-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 0;padding:9px 8px;border-radius:8px;background:#eff5f1;color:#245345;font-size:13px;font-weight:750;line-height:1.4;text-align:left}
+#app #map-quick-search-dropdown[data-search-mode="nearby"] .dj-visible-facility-count{font-size:12px;color:#637d70;font-weight:500;white-space:nowrap}
+#app #map-quick-search-dropdown[data-search-mode="nearby"] .dj-visible-facility-list{display:flex;flex-direction:column;min-width:0}
+#app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-icon{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;flex:0 0 20px!important;color:#718a7c}
+#app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-icon svg{width:19px;height:19px}
+#app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-label{display:block!important;flex:1 1 0!important;min-width:0!important;text-align:left!important;overflow-wrap:anywhere;font-size:14px;font-weight:600}

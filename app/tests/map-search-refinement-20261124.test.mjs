@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nearbySearchResults,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
+import {nearbySearchResults,groupVisibleFacilities,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
 test('bus direction is authoritative and no ARS ID appears in subtitle',()=>{
  assert.equal(searchResultSubtitle({kind:'bus',direction:'상도역',arsId:'123'}),'버스정류장 · 상도역 방면');
  assert.equal(searchResultSubtitle({kind:'bus',arsId:'123'}),'버스정류장 · 방면 미확인');
@@ -33,4 +33,13 @@ test('visible map facility search limits output without misreporting total',()=>
  const area={polygon:[{lng:126.94,lat:37.49},{lng:126.96,lat:37.49},{lng:126.96,lat:37.51},{lng:126.94,lat:37.51}],center:{lng:126.95,lat:37.5}};
  const rows=visibleFacilityResults(area,[{name:'A',lng:126.951,lat:37.5},{name:'B',lng:126.95,lat:37.5}],{limit:1});
  assert.equal(rows.total,2);assert.equal(rows.items[0].name,'B');
+});
+
+test('visible facilities group by known category and preserve every displayed row',()=>{
+ const rows=[{name:'A',category:'restaurant'},{name:'B',category:'bus'},{name:'C',category:'음식점'},{name:'D',kind:'subway'},{name:'E',category:'unknown'},{name:'F',category:'cafe'}];
+ const groups=groupVisibleFacilities(rows);
+ assert.deepEqual(groups.map(g=>g.label),['지하철·철도역','버스정류장','음식점','카페','일반 시설']);
+ assert.deepEqual(groups.find(g=>g.label==='음식점').rows.map(p=>p.name),['A','C']);
+ assert.equal(groups.reduce((n,g)=>n+g.rows.length,0),rows.length);
+ assert.deepEqual(groupVisibleFacilities([]),[]);
 });
