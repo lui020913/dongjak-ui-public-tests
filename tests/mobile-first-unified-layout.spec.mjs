@@ -365,15 +365,25 @@ test('community new post portal stays inside viewport when keyboard contracts',a
     return Math.round(portal.getBoundingClientRect().height);
   }),{timeout:10000}).toBeLessThanOrEqual(530);
   const geometry=await page.evaluate(()=>{
-    const rect=sel=>{const r=document.querySelector(sel).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};};
-    const parent=document.getElementById('community-form').parentElement;
+    const form=document.getElementById('community-form');
+    const rect=sel=>{
+      const node=typeof sel==='string'?document.querySelector(sel):sel;
+      if(!node)throw new Error('Missing composer geometry element: '+String(sel)+'; children='+[...form.children].map(n=>n.tagName+'.'+n.className).join(','));
+      const r=node.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};
+    };
+    const parent=form.parentElement;
     const root=rect('#dj-community-editor-portal');
     const header=rect('#community-form > .community-form-top');
-    const body=rect('#community-form > .dj-compose-scroll');
-    const footer=rect('#community-form > .dj-compose-footer');
+    // Locate the actual scroll owner and save footer by their field/action
+    // ownership, including if a legacy wrapper is nested by the overlay.
+    const scroll=form.querySelector('#community-nickname')?.closest('.dj-compose-scroll,.djNext-form-scroll');
+    const save=form.querySelector('button[type="submit"]');
+    const saveFooter=save?.closest('.dj-compose-footer,.dj-community-compose-footer');
+    const body=rect(scroll||'missing composer scroll owner');
+    const footer=rect(saveFooter||'missing composer save footer');
     return {root,header,body,footer,parentId:parent.id,
       navVisibility:getComputedStyle(document.getElementById('bottom-nav')).visibility,
-      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(document.querySelector('#community-form > .dj-compose-scroll')).overflowY};
+      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(scroll).overflowY};
   });
   await testInfo.attach('community-keyboard-geometry.json',{body:Buffer.from(JSON.stringify(geometry,null,2)),contentType:'application/json'});
   expect(geometry.parentId).toBe('dj-community-editor-portal');

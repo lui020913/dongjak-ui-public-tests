@@ -176,10 +176,12 @@ jobs:
         if: ${{ github.event.pull_request.number == 419 }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
-      - name: Verify merged route-to-AI keyboard interaction
+      # PR421 source and route-to-AI integration passed run 45308497361.
+      # Test-only follow-up: the remaining PR419 composer locator failure.
+      - name: Verify last community composer geometry case
         if: ${{ github.head_ref == 'integrate/route-search-ai-keyboard-20261124' }}
         working-directory: .
-        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --grep 'merged route search returns to AI keyboard without a background seam'
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
       - name: Verify V3 and community integration at representative phone width
         if: ${{ github.event.pull_request.number == 418 }}
         working-directory: .
