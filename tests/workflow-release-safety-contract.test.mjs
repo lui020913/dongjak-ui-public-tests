@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
+import {assessPerformance} from '../scripts/verify-ui-performance.mjs';
 const root=new URL('../',import.meta.url);
 const path=file=>new URL(file,root);
 const read=file=>readFileSync(path(file),'utf8');
@@ -45,6 +46,8 @@ test('v9.3 performance comparison uses immutable baseline and exact candidate be
  assert.match(performance,/DONGJAK_PERF_BASELINE_COMMIT: 674766692107cba977fe3181e9638493c33c7c8e/);
  assert.match(performance,/DONGJAK_PERF_CANDIDATE_COMMIT: \$\{\{ needs\.build\.outputs\.public_sha \}\}/);
  assert.match(performance,/compare-ui-performance\.mjs "\$BASELINE_URL" "\$CANDIDATE_URL" 3/);
+ assert.match(performance,/node scripts\/verify-ui-performance\.mjs "\$DONGJAK_PERF_OUTPUT"/);
+ assert.ok(performance.indexOf('actions/upload-artifact@v4')<performance.indexOf('node scripts/verify-ui-performance.mjs'));
  assert.match(promotion,/needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, performance-compare\]/);
  assert.match(promotion,/needs\.performance-compare\.result == 'success'/);
  assert.match(promotion,/app_version != '9\.3\.0' && needs\.performance-compare\.result == 'skipped'/);
@@ -78,4 +81,19 @@ test('protected v9.3 minor replay retains every prior 9.2.136 release increment'
  assert.equal(previous.at(-1),'9.2.136');
  assert.deepEqual(invoke('9.3.0','minor'),[...previous,'9.3.0']);
  assert.equal(invoke('9.2.17','patch').at(-1),'9.2.17');
+});
+
+test('performance promotion requires improvement without material severe-stall regression',()=>{
+ const row=(p50,p95,share,click,samples=150)=>({frameIntervalMs:{p50,p95,samples},shareOver50msPct:share,clickDispatchDelayMs:{p50:click}});
+ const baseline=row(50,1266.6,50,36.4);
+ const assess=candidate=>assessPerformance({rounds:3,summary:{baseline,candidate}});
+ const oldCandidate=assess(row(33.4,3049.8,44.3,34.5,149));
+ assert.equal(oldCandidate.pass,false);
+ assert.ok(oldCandidate.reasons.some(x=>x.includes('P95')));
+ assert.equal(assess(row(40,1100,44,34)).pass,true);
+ assert.equal(assess(baseline).pass,false);
+ assert.equal(assess(row(33,1000,60,34)).pass,false);
+ assert.equal(assess(row(33,1000,44,80)).pass,false);
+ assert.equal(assess(row(33,1000,44,34,10)).pass,false);
+ assert.equal(assessPerformance({}).pass,false);
 });
