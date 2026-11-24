@@ -49,13 +49,13 @@ function reviewEditorPortal(form,status,placeName,onClose){
  const anchor=doc.createComment('review-form-origin');form.before(anchor);
  const statusAnchor=doc.createComment('review-status-origin');status.before(statusAnchor);
  const app=doc.getElementById('app'),wasInert=app?.inert;
- host.append(top,status,form);doc.body.append(host);if(app)app.inert=true;
+ host.append(top,status,form);doc.body.append(host);doc.body.dataset.djReviewEditor='open';if(app)app.inert=true;
  const sync=()=>{const v=win.visualViewport;host.style.top=(v?.offsetTop||0)+'px';host.style.height=(v?.height||win.innerHeight)+'px';};
  let closed=false;
  const finish=()=>{if(closed)return;closed=true;
   if(host.contains(doc.activeElement))doc.activeElement.blur();
   win.visualViewport?.removeEventListener('resize',sync);win.visualViewport?.removeEventListener('scroll',sync);win.removeEventListener('resize',sync);
-  anchor.replaceWith(form);statusAnchor.replaceWith(status);form.hidden=true;host.remove();if(app)app.inert=wasInert;onClose?.();
+  anchor.replaceWith(form);statusAnchor.replaceWith(status);form.hidden=true;host.remove();delete doc.body.dataset.djReviewEditor;if(app)app.inert=wasInert;onClose?.();
  };
  close.addEventListener('click',finish);win.visualViewport?.addEventListener('resize',sync,{passive:true});win.visualViewport?.addEventListener('scroll',sync,{passive:true});win.addEventListener('resize',sync,{passive:true});sync();
  return finish;
@@ -83,8 +83,8 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
  const list=makeElement('div','dj834-review-list');section.append(heading,status,form,list);
  // Place the review action above the generated AI description.
  root.append(section);
- let alive=true,ownIds=new Set(),closeEditor=null;
- const openEditor=(record=null)=>{if(closeEditor)return;rating.value=record?String(record.rating):'';body.value=record?.body||'';save.textContent=record?'리뷰 수정 저장':'공개 리뷰 등록';form.hidden=false;write.setAttribute('aria-expanded','true');closeEditor=reviewEditorPortal(form,status,history?place.place_name:place.name,()=>{closeEditor=null;write.setAttribute('aria-expanded','false');});};
+ let alive=true,ownIds=new Set(),closeEditor=null,editingId=null;
+ const openEditor=(record=null)=>{if(closeEditor)return;editingId=record?.id||null;rating.value=record?String(record.rating):'';body.value=record?.body||'';save.textContent=record?'리뷰 수정 저장':'공개 리뷰 등록';form.hidden=false;write.setAttribute('aria-expanded','true');closeEditor=reviewEditorPortal(form,status,history?place.place_name:place.name,()=>{closeEditor=null;write.setAttribute('aria-expanded','false');});};
  if(history)write.hidden=true;
  const render=(rows,local=false)=>{
   if(!alive)return;list.replaceChildren();
@@ -110,12 +110,12 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
   }
  };
  async function refresh(){
-  const local=localRead(key);
+  const local=history?[]:localRead(key);
   const client=getActiveCloudClient();
   try{
    let data;ownIds=new Set();
    if(client){try{const user=await signedReviewUser(client);const own=await client.from('place_reviews').select('id').eq('user_id',user.id).eq('place_key',key);if(!own.error)ownIds=new Set((own.data||[]).map(x=>x.id));}catch{}}
-   if(history){data=await readMyPlaceReviews();data=data.filter(x=>x.place_key===key);ownIds=new Set(data.map(x=>x.id));}
+   if(history){const user=await signedReviewUser(client);const own=await client.from('place_reviews').select('id,place_key,place_name,author_name,rating,body,created_at').eq('user_id',user.id).eq('place_key',key);if(own.error)throw own.error;data=own.data||[];ownIds=new Set(data.map(x=>x.id));}
    else if(client){const response=await client.from('place_reviews').select('id,author_name,body,rating,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);if(response.error)throw response.error;data=response.data;}
    else{
     const cfg=cloudConfiguration();if(!cfg.configured)throw new Error('공개 서버 설정 없음');
@@ -135,7 +135,7 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
  write.addEventListener('click',()=>openEditor());
  cancel.addEventListener('click',()=>closeEditor?.());
  form.addEventListener('submit',async e=>{
-  e.preventDefault();const error=validateReview(rating.value,body.value);
+  e.preventDefault();if(save.disabled)return;const error=validateReview(rating.value,body.value);
   if(error){status.textContent=error;return;}
   save.disabled=true;status.textContent='리뷰를 저장하고 있습니다…';
   const record={place_key:key,place_name:clean(history?place.place_name:place.name,90),rating:Number(rating.value),body:clean(body.value),created_at:new Date().toISOString()};
@@ -148,7 +148,9 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
      const author=clean(session.user.user_metadata?.display_name||session.user.user_metadata?.full_name||'이용자',32);
      const payload={...record,user_id:session.user.id,author_name:author};
      delete payload.created_at;
-     const {data:stored,error:saveError}=await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'}).select('id').single();
+     const {data:stored,error:saveError}=editingId
+       ?await client.from('place_reviews').update({rating:record.rating,body:record.body,updated_at:new Date().toISOString()}).eq('id',editingId).eq('user_id',session.user.id).select('id').single()
+       :await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'}).select('id').single();
      if(saveError||!stored?.id)throw saveError||new Error('서버 등록 확인 실패');
      published=true;
     }else why='로그인하지 않아';
