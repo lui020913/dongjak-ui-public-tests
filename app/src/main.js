@@ -143,7 +143,6 @@ import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 import './mobile-ux-energy.css';
 import './v929-phone-followup.js';
 import './community-composer-portal.css';
-import './v834-place-reviews.css';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
