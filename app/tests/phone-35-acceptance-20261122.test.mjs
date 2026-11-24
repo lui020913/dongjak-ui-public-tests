@@ -119,8 +119,8 @@ const checks=[
  ['D01','route compares only computed pedestrian candidates and labels unknown PRI honestly',()=>{
    const s=root('tests/v911-anonymous-ui.spec.mjs');
    const ux=src('src/route-experience-20261123.js');
-   contains(s,'phone route comparison uses actual pedestrian graph','#dj-route-choice-list','PRI 미평가');
-   contains(ux,'routeComparisonItems(latest)','PRI 미평가','native.click()');
+   contains(s,'phone route comparison uses actual pedestrian graph','#dj-route-choice-list','평가 자료 부족');
+   contains(ux,'routeComparisonItems(latest)','평가 자료 부족','native.click()');
    assert.doesNotMatch(ux,/data-comparison="balanced"/);
  }],
  ['D02','route guidance supports GPS turns, destinations, and visible route map',()=>{
