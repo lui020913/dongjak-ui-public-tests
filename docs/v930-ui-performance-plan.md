@@ -8,6 +8,18 @@ Replace per-frame inline opacity writes on the real V3 route and tab content, an
 ## Stage 2 — prepared independently on stacked candidate
 Stationary confirmations without a synchronized scrim/guide and map shortcut toolbar share the same compositor. One MutationObserver replaces per-target toolbar observers. Existing transit close geometry, sheet gestures, synchronized scrims and guide motion remain untouched. Await stage 1 mobile CI before integration and stage 2 focused checks.
 
+## Stage 3 — map presentation coalescing (stacked candidate)
+Coalesce the camera pitch event's derived building and district border updates to one pending animation frame, flushing the final pending state at pitchend. Preserve immediate night/zoom/terrain/visibility/tile-load actions, original paint formulas, camera movement and safety layers. Unit tests cover a 20-event burst, final state and cancellation; actual frame speed remains unmeasured.
+
+## Stage 4 — nested menu interruption and performance comparison harness
+My Info subpage navigation uses one cancellable native transform animation owner, with its existing direction, duration and fixed header retained. A paired Playwright benchmark (scripts/compare-ui-performance.mjs) alternates exact baseline and candidate URLs, verifies release provenance before and after, measures 900ms rAF windows without per-frame DOM reads or screenshots, reports frame intervals, click dispatch delay, first rAF and supported long tasks. Run after an isolated candidate is available, before Production moves. Lab results are not physical iPhone FPS. Baseline and candidate must have distinct commits.
+
+## Stage 5 — safe detail-sheet compositor and release comparison
+Ordinary non-docked overview/detail/entry sheets use the shared opacity/translate compositor. Preserve docked, clip-path, transit and drag geometry paths. The interrupted slide reads its current translate only at interruption. The v9.3.0 protected release adds an independent browser comparison against immutable v9.2.136 Preview, with exact commit provenance and a JSON artifact. No existing gate is removed; comparison completion is required for v9.3.0. The report is observational, not an invented FPS threshold or a physical-device result.
+
+## Stage 6 — benchmark completeness
+Nine read-only navigation actions now cover tabs, settings forward/back and ordinary AI entry/exit without sending a question. Fresh identical mobile contexts use the existing iPhone user agent. Report pooled and per-scenario p50/p95, frame-interval percentages, first rAF and click dispatch delay; reject empty measurements and changed provenance. Browser lab comparisons do not guarantee physical-device frame rates.
+
 ## Later stages (not implemented yet)
 - Profile window, sheet and nested-menu motion separately; migrate safe fade-only surfaces, then gesture/translation owners with geometry and native close contracts preserved.
 - Coalesce duplicate observers and map updates only after measuring actual call sites; do not disable safety overlays or live navigation.
