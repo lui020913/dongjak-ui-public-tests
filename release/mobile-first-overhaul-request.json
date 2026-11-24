@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.145",
+  "application_version": "9.2.146",
   "public_work_branch": "main",
-  "purpose": "PR454: independent mobile bus route detail surface, fixed header and scroll geometry, map return and reopen dock, adaptive information view, stable refresh and compact direction display; preserves PR453 map search.",
-  "attempt": 359,
+  "purpose": "PR455: exclusive mobile search toolbar, actual recent search list, Korean facility labels, remove technical search metadata, preserve bus directions, nearby facility search and PR454 bus detail.",
+  "attempt": 360,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR454 source CI 45422698590 attempt 2 passed build, full regressions and all 33 phone shards plus aggregate gate. Release through existing Preview and protected Production QA; v9.2.144 production succeeded.",
+  "last_retry_reason": "PR455 source CI 45424965509 passed. v9.2.145 already assigned to PR454. Use existing Preview and protected Production QA.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
