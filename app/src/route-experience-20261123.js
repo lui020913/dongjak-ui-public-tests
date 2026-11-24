@@ -8,6 +8,7 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
  */
 import {routeComparisonItems,sameRoute,metersLabel} from './v804-route-comparison.js';
 import './route-experience.css';
+import {recentPlaces} from './v815-place-store.js';
 
 export function mountWalkingRouteExperience(doc=document,win=window){
   const byId=id=>doc.getElementById(id);
@@ -32,7 +33,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
 
   const walkMode=add('div','dj-walk-mode');
   walkMode.innerHTML='<span aria-hidden="true">🚶</span><span>도보</span>';
-  card.prepend(walkMode);
+  if(chrome){if(nativeClose?.parentNode===chrome)chrome.insertBefore(walkMode,nativeClose);else chrome.append(walkMode);}else card.prepend(walkMode);
 
   // These controls call existing handlers. No independent GPS/map state.
   const mapActions=add('div','dj-walk-map-actions');
@@ -88,14 +89,22 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   on(pick,'click',()=>byId('route-pick-end')?.click());
 
   // Secondary native controls are preserved in one disclosure.
-  const optional=[byId('dj815-waypoints'),byId('dj815-rail-planner'),card.querySelector('.dj815-route-share')].filter(Boolean);
+  const waypointPanel=byId('dj815-waypoints');
+  if(waypointPanel)shortcuts.after(waypointPanel);
+  const recent=add('section','dj-walk-recent');
+  const recentTitle=add('strong');recentTitle.textContent='최근 검색 장소';
+  const recentList=add('div',null,'dj-walk-recent-list');recent.append(recentTitle,recentList);
+  (waypointPanel||shortcuts).after(recent);
+  const refreshRecent=()=>{recentList.replaceChildren();const places=recentPlaces().slice(0,4);recent.hidden=!places.length;for(const place of places){const b=add('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));recentList.append(b);}};
+  on(win,'dongjak:recent-places-change',refreshRecent);refreshRecent();
+  const optional=[byId('dj815-rail-planner'),card.querySelector('.dj815-route-share')].filter(Boolean);
   if(optional.length){
     const details=add('details','dj-route-advanced');
-    const summary=add('summary');summary.textContent='경유지·다른 이동 옵션';
+    const summary=add('summary');summary.textContent='다른 이동 옵션';
     const body=add('div',null,'dj-route-advanced-body');
     optional.forEach(node=>body.append(node));
     details.append(summary,body);
-    shortcuts.after(details);
+    recent.after(details);
   }
   const intro=panel.querySelector('.dj-page-intro');if(intro)intro.hidden=true;
   const note=panel.querySelector(':scope > .dj836-sheet-body > .page-note');
@@ -367,7 +376,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
     top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
-    inputBack.remove();walkMode.remove();mapActions.remove();
+    inputBack.remove();walkMode.remove();mapActions.remove();recent.remove();
     delete app.dataset.djWalkArrived;
     delete app.dataset.djWalkV2;
   };
