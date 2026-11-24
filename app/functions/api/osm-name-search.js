@@ -9,7 +9,7 @@ export function nameQuery(raw){
   if(q.length<2||q.length>40||/[<>"'\\\n\r;[\]{}]/.test(q))return null;
   const known={스타벅스:'스타벅스|Starbucks',투썸:'투썸|Twosome',이디야:'이디야|EDIYA'};
   const terms=facilitySearchTerms(q);
-  const safe=known[q]||terms.map(term=>term.replace(/[.*+?^${}()|[\]\\]/g,'\\const safe=known[q]||q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');')).join('|');
+  const safe=known[q]||terms.map(term=>term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
   // Bounding region extends only slightly outside Dongjak for nearby transit.
   const bbox='37.435,126.87,37.565,127.07';
   return `[out:json][timeout:9];(nwr["name"~"${safe}",i](${bbox});nwr["name:ko"~"${safe}",i](${bbox});nwr["brand"~"${safe}",i](${bbox}););out center tags 45;`;
