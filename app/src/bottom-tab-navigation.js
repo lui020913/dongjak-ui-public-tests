@@ -7,7 +7,7 @@
  * Only the contents of the incoming non-map page receive a light opacity
  * reveal. No curtain, duplicate page, root fade, or delayed map exposure.
  */
-export const TAB_TRANSITION=Object.freeze({contentReveal:140});
+export const TAB_TRANSITION=Object.freeze({contentReveal:260,mapReturn:220});
 export function adjacentTabIndex(index,count,dx,dy){
  if(count<2||index<0||index>=count||Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return -1;
  const next=index+(dx<0?1:-1);
@@ -18,7 +18,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  if(!nav||!app||nav.dataset.djTabNavigation==='ready')return ()=>{};
  nav.dataset.djTabNavigation='ready';
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
- const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true;
+ const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
  let entering=null,enterTimer=0,departing=null,departingAnimation=null,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
@@ -29,10 +29,11 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(departingAnimation){departingAnimation.cancel?.();departingAnimation=null;}
   if(departing){
    const page=departing;
-   page.hidden=true;
+   if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
    departing.style?.removeProperty?.('z-index');
    departing.style?.removeProperty?.('filter');
+   departing.style?.removeProperty?.('pointer-events');
    departing=null;
   }
  }
@@ -46,31 +47,27 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   clearEntrance();
   const previousTab=app.dataset.tab;
   const previous=doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
-  // Preserve the outgoing opaque screen through the synchronous navigate.
-  // The incoming panel is already fully opaque underneath it: no map flash.
-  if(previous&&!reduced()&&button.dataset.tab!=='map')previous.dataset.djTabOutgoing='true';
-  // Map chrome changes its geometry immediately. Do not keep a departing
-  // full-screen page visible against the new map layout.
-  if(!replay(button))return;
-  if(previous&&previous.dataset.djTabOutgoing==='true'&&previousTab!==app.dataset.tab){
+  const destination=button.dataset.tab;
+  const toMap=destination==='map';
+  // Only a map return retains the departing page for a single fade; normal
+  // tab changes reveal the new content once, over its own opaque background.
+  const retain=Boolean(toMap&&previous&&typeof previous.animate==='function'&&!reduced());
+  if(retain)previous.dataset.djTabOutgoing='true';
+  if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
+  if(retain&&previousTab!==app.dataset.tab){
    departing=previous;
-   previous.style?.setProperty?.('z-index','7000','important');
-   if(typeof previous.animate==='function'){
-    try{departingAnimation=previous.animate([{filter:'opacity(1)'},{filter:'opacity(0)'}],{
-      duration:190,easing:'cubic-bezier(.25,.15,.35,1)',fill:'forwards'
-    });}catch{/* A non-animated opaque handoff remains safe. */}
-   }
+   previous.style?.setProperty?.('z-index','6999','important');
+   previous.style?.setProperty?.('pointer-events','none','important');
+   try{departingAnimation=previous.animate([{filter:'opacity(1)'},{filter:'opacity(0)'}],{
+    duration:TAB_TRANSITION.mapReturn,easing:'cubic-bezier(.25,.20,.40,1)',fill:'forwards'
+   });}catch{clearEntrance();}
   }else previous?.removeAttribute?.('data-dj-tab-outgoing');
-  // We never defer the destination state: replay navigates synchronously before any fade.
-  // The navigation dock itself never fades, scales or shifts.
-  const revealIncoming=()=>{
-   if(reduced()||app.dataset.tab==='map')return;
+  if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
-  };
-  revealIncoming();
+  }
   if(reduced()){clearEntrance();return;}
-  enterTimer=win.setTimeout(clearEntrance,215);
+  enterTimer=win.setTimeout(clearEntrance,(toMap?TAB_TRANSITION.mapReturn:TAB_TRANSITION.contentReveal)+30);
  }
  function select(event){
   if(!phone()||replaying)return;

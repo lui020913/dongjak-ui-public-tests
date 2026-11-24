@@ -55,3 +55,16 @@ test('iPhone manual theme switch stores camera before a single native-color refr
   assert.match(pwa,/nightActive=app\.dataset\.sangdoNight==='on'/);
   assert.match(pwa,/data-sangdo-night/);
 });
+
+test('night confirmation has one stationary fade owner, not nested CSS keyframes',()=>{
+ const owner=read('src/v806-unified-ui.js');
+ assert.match(owner,/const fade=[^;]*dj833-night-dialog/);
+ assert.match(night,/querySelector\('\.dj833-night-dialog'\)\.dataset\.djDialogFade='true'/);
+ assert.doesNotMatch(css,/animation:dj9267-night-/);
+ assert.doesNotMatch(html,/src="\/src\/v852-mobile-ux\.js"/);
+});
+test('tab switching uses only incoming reveal or outgoing map return, never both',()=>{
+ assert.match(tab,/const retain=Boolean\(toMap/);
+ assert.match(tab,/if\(!reduced\(\)&&!toMap\)/);
+ assert.match(tab,/pointer-events','none','important'/);
+});

@@ -55,7 +55,7 @@ test('clicking a phone tab renders the destination in the same event with no roo
  assert.equal(panels.mine.hidden,true);
  assert.equal(mineClasses.values.has('dj-tab-content-enter'),false);
  assert.deepEqual(calls,['route','mine','map']);
- assert.deepEqual(TAB_TRANSITION,{contentReveal:140});
+ assert.deepEqual(TAB_TRANSITION,{contentReveal:260,mapReturn:220});
  destroy();
 });
 

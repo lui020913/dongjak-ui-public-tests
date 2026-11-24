@@ -85,7 +85,7 @@ export function installUnifiedUI(doc=document, win=window){
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const tabFade=forceTabFade||(opening&&(tabFadeUntil.get(target.id)||0)>Date.now());
     if(opening)tabFadeUntil.delete(target.id);
-    const fade=isGuide||tabFade||target.dataset.djDialogFade==='true';
+    const fade=isGuide||tabFade||target.dataset.djDialogFade==='true'||target.matches?.('.dj833-night-dialog');
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
     const slideFrom=Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?.12:1);
