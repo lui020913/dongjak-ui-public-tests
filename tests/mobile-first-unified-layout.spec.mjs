@@ -287,7 +287,8 @@ test('map-first walking route preview only lists actually supplied options and f
   await expect(cards).toHaveCount(2);
   await expect(cards.nth(0)).toContainText('24분');
   await expect(cards.nth(1)).toContainText('26분');
-  await expect(cards.nth(1)).toContainText('PRI 22.8점');
+  await expect(cards.nth(1)).toContainText('낮음 · 22.8점');
+  await expect(cards.nth(1)).toContainText('평가 구간 91%');
   await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
   await expect(page.locator('#route-guide-start')).toBeVisible();
   await expect(page.locator('#dj-walk-map-head')).toBeVisible();
