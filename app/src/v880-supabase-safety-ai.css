@@ -395,3 +395,11 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-composer{margin-bottom:0!important;padding-bottom:0!important;}
  html body #dj-ai-search-modal[data-dj-ai-keyboard="true"] .dj-ai-search-body{padding-bottom:8px!important;}
 }
+
+@media(max-width:699px){
+ html:has(#dj-ai-search-modal[open]){overflow:hidden!important;overscroll-behavior:none!important;}
+ html:has(#dj-ai-search-modal[open]) body{position:fixed!important;inset:0!important;width:100%!important;overflow:hidden!important;overscroll-behavior:none!important;}
+ html body #dj-ai-search-modal[open]{overscroll-behavior:none!important;touch-action:pan-y!important;}
+ html body #dj-ai-search-modal[open] .dj-ai-transcript{overscroll-behavior:none!important;touch-action:pan-y!important;}
+ html body #dj-ai-search-modal[open] :is(.dj-ai-search-header,.dj-ai-composer){flex-shrink:0!important;}
+}

@@ -61,11 +61,15 @@ export function installV891HeaderAndAi(doc=document,win=window){
     // A focused iOS input can pan the visual viewport as well as resize it.
     // Use one coordinate system; do not combine top/bottom constraints with a height.
     const view=win.visualViewport;
-    const top=Math.max(0,Math.round(view?.offsetTop||0));
+    const reportedTop=Math.max(0,Math.round(view?.offsetTop||0));
+    const focused=modal.contains(doc.activeElement)&&doc.activeElement?.matches?.('input,textarea');
+    // Ignore transient overscroll/pan when no keyboard owns the viewport.
+    const top=(focused||modal.dataset.djAiKeyboard==='true')?reportedTop:0;
     // Clamp the dialog to the actually visible viewport; iOS can report
     // intermediate keyboard frames larger than the remaining layout height.
     layoutHeight=Math.max(layoutHeight,win.innerHeight,doc.documentElement?.clientHeight||0);
     const height=Math.max(1,Math.min(Math.floor(view?.height||win.innerHeight),layoutHeight-top));
+    if(!focused&&modal.dataset.djAiKeyboard!=='true'&&win.scrollY>0)win.scrollTo(0,0);
     const inset=mobileKeyboardInset({innerHeight:layoutHeight,visualHeight:height,offsetTop:top});
     const query=modal.querySelector('#dj-ai-query');
     // Use one keyboard state for the composer safe-area. Do not treat an

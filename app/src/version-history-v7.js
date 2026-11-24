@@ -183,7 +183,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     if(!records.length)continue;
     const archive=el('details','dj-edition-history');
     archive.dataset.changeType=type.id;
-    archive.open=records.some(({record})=>record===currentRelease);
+    archive.open=false;
     const heading=el('summary','dj-edition-summary');
     heading.append(el('strong','',type.title),el('span','',type.description),el('small','',records.length+'개 기록'));
     archive.append(heading);timeline.append(archive);
@@ -276,6 +276,7 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
       modal.hidden=false;
     }
     list.scrollTop=0;choose('updates');
+    if(opening)for(const disclosure of timeline.querySelectorAll('details[open]'))disclosure.open=false;
     if(opening)window.DongjakWindowMotion?.open(card);
     close.focus({preventScroll:true});
     const normalized=String(version||'').trim().replace(/^v/,'');

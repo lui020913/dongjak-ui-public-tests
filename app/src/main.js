@@ -17,6 +17,7 @@ import {installEducationLayer} from './education-layer.js';
 import {installCivicFacilities} from './civic-facility-layer.js';
 import {installApartmentLabels} from './apartment-labels.js';
 import {initVersionHistory} from './version-history.js';
+import {installSolidMapLines} from './solid-map-lines.js';
 import * as maplibregl from 'maplibre-gl';
 import {Capacitor, CapacitorHttp} from '@capacitor/core';
 import {Geolocation} from '@capacitor/geolocation';
@@ -616,6 +617,7 @@ const map = new maplibregl.Map({
 // The extra compact (i) control duplicated the attribution link in Map Options.
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
+installSolidMapLines(map);
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
 installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode});
@@ -1752,7 +1754,7 @@ map.on('load',()=>{
   map.addLayer({id:'walking-route-alternate-line',type:'line',source:'walking-route-alternative',
     layout:{'line-cap':'round','line-join':'round'},
     paint:{'line-color':'#87939b','line-width':['interpolate',['linear'],['zoom'],11,2.8,17,5.1],
-      'line-opacity':0.72,'line-dasharray':[1.8,2.4]}},firstLabel);
+      'line-opacity':0.72}},firstLabel);
   map.addLayer({id:'walking-route-outline',type:'line',source:'walking-route',
     layout:{'line-cap':'round','line-join':'round'},
     paint:{'line-color':'#ffffff','line-width':['interpolate',['linear'],['zoom'],11,6,17,11],'line-opacity':0.94}},firstLabel);
@@ -1773,8 +1775,7 @@ map.on('load',()=>{
   map.addLayer({id:'walking-route-pri-unknown',type:'line',source:'walking-route-pri',
     filter:['==',['get','tone'],'unknown'],
     layout:{'line-cap':'round','line-join':'round','visibility':'none'},
-    paint:{'line-color':'#85949d','line-width':['interpolate',['linear'],['zoom'],11,4,17,8.5],
-      'line-dasharray':[1.3,1.2]}},firstLabel);
+    paint:{'line-color':'#85949d','line-width':['interpolate',['linear'],['zoom'],11,4,17,8.5]}},firstLabel);
   map.addSource('registered-points',{type:'geojson',data:pointCollection()});
   map.addLayer({id:'registered-points-halo',type:'circle',source:'registered-points',
     paint:{'circle-radius':11,'circle-color':'#ffffff','circle-stroke-color':'#fff','circle-stroke-width':1}});
@@ -2289,17 +2290,16 @@ communityForm.addEventListener('submit',async(event)=>{
   if(communityForm.dataset.djPublishing==='true')return;
   const signedIn=await isCommunitySignedIn();
   const wantsPublic=Boolean(document.getElementById('community-share-publicly')?.checked);
-  if(wantsPublic&&signedIn&&communityModerationStatus?.ready===false){toast('공개 글 AI 검사를 준비 중입니다. 작성 내용은 유지됩니다.');return;}
-  if(wantsPublic&&!signedIn){toast('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');return;}
-  if(!wantsPublic&&communityPosts.length>=35){toast('기기 기록은 최대 35개까지 저장할 수 있습니다.');return;}
+  if(signedIn&&communityModerationStatus?.ready===false){toast('공개 글 AI 검사를 준비 중입니다. 작성 내용은 유지됩니다.');return;}
+  if(!signedIn){toast('공개 게시판에 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');return;}
+  if(!wantsPublic){toast('공개 등록과 게시 전 검수에 동의해 주세요. 작성 내용은 유지됩니다.');return;}
   const post=makeCommunityPost({
     title,body,nickname,category:document.getElementById('community-category').value,
     photo:communityDraftPhoto,location:communityPickedLocation
   });
-  const publish=Boolean(signedIn&&document.getElementById('community-share-publicly')?.checked);
+  const publish=true;
   let outcome=null;
   if(publish){communityForm.dataset.djPublishing='true';try{outcome=await publishCommunityPost(post);}catch(error){toast(error?.message||'게시글 등록 실패');return;}finally{delete communityForm.dataset.djPublishing;}void refreshSharedCommunity();}
-  else if(!saveCommunity([post,...communityPosts]))return;
   communityForm.reset();
   communityDraftPhoto=null;communityPickedLocation=null;
   document.getElementById('community-photo-preview').hidden=true;
@@ -2312,7 +2312,7 @@ communityForm.addEventListener('submit',async(event)=>{
     btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));
   }
   document.getElementById('community-sort').value='new';
-  renderCommunity();toast(publish?(moderationMessage(outcome,'게시물')||'공개 게시판에 등록했습니다.'):'게시글을 이 기기에 저장했습니다.');
+  renderCommunity();toast(moderationMessage(outcome,'게시물')||'공개 게시판에 등록했습니다.');
 });
 // Shared controls are located in 지도 옵션 to avoid cluttering the main map.
 const pedestrianTools=initPedestrianTools({
@@ -2605,7 +2605,7 @@ function syncPriRouteLine(){
   const measured=routePriVisuals?.[selectedRouteVariant];
   const enabled=Boolean(routeResult?.coords?.length>=2&&app.dataset.tab==='map'&&!navMode);
   // Before PRI completes, or when no six-factor data can be loaded, the route
-  // is unassessed (dashed gray), NEVER automatically safe/green or blue.
+  // is unassessed (solid gray), NEVER automatically safe/green or blue.
   const unknown=enabled?{
     type:'FeatureCollection',features:[{
       type:'Feature',properties:{tone:'unknown',color:'#8c969c',observed:false},
@@ -3272,10 +3272,10 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))};
     const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]).filter(Boolean);
     const rail={type:'FeatureCollection',features:railCoords.length>=2?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:railCoords}}]:[]};
-    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null],['dj815-transit-rail',rail,'#bd7735',[2,2]]]){
+    for(const [id,data,color] of [['dj815-transit-walk',walk,'#168f82'],['dj815-transit-rail',rail,'#bd7735']]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(`${id}-line`))map.addLayer({id:`${id}-line`,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},
-        paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
+        paint:{'line-color':color,'line-width':5,'line-opacity':.9}});
     }
     const coords=[...startWalk.coords,...railCoords,...endWalk.coords];
     navigate('map');fitWalkingRoute(coords);

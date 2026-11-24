@@ -135,7 +135,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const choiceRows=add('div',null,'dj-route-choice-rows');
   const hint=add('p',null,'dj-route-choice-hint');
   const legend=add('div','dj-route-pri-legend');
-  legend.innerHTML='<div class="dj-route-pri-ramp" aria-hidden="true"></div><span>낮은 위험</span><span>높은 위험</span><span class="dj-route-unknown-legend">┄ 회색 점선: 미평가</span>';
+  legend.innerHTML='<div class="dj-route-pri-ramp" aria-hidden="true"></div><span>낮은 위험</span><span>높은 위험</span><span class="dj-route-unknown-legend">━ 회색 실선: 미평가</span>';
   choices.append(choiceHead,choiceRows,hint,legend);
   const actions=mapCard.querySelector('.route-map-card-actions');
   actions?.before(choices);
@@ -264,7 +264,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     }
     hint.textContent=equal?'두 옵션에서 같은 경로가 계산됐습니다.':
       rec?'색상은 평가된 도로 구간의 PRI 위험도입니다. 실제 안전을 보장하지 않습니다.':
-      '회색 점선은 미평가 구간입니다. 자료 부족 시 안전 우선 경로를 단정하지 않습니다.';
+      '회색 실선은 미평가 구간입니다. 자료 부족 시 안전 우선 경로를 단정하지 않습니다.';
   }
   const onReady=e=>{latest=e.detail;assessment=null;refreshChoices();};
   const onPri=e=>{assessment=e.detail;refreshChoices();};

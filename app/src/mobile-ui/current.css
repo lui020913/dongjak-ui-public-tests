@@ -1261,11 +1261,11 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
  /* 8. AI in and out: opacity only, no panel displacement or scrim. */
  html body #dj-ai-search-modal[open]:not(.dj887-ai-closing) {
    transform:none!important;translate:none!important;
-   animation:dj929-ai-fade-in .19s ease-out both!important;
+   animation:none!important;opacity:1!important;
  }
  html body #dj-ai-search-modal[open].dj887-ai-closing {
    transform:none!important;translate:none!important;
-   animation:dj929-ai-fade-out .175s ease-in both!important;
+   animation:none!important;opacity:1!important;
  }
  html body #dj-ai-search-modal::backdrop{
    background:transparent!important;backdrop-filter:none!important;
@@ -1350,3 +1350,18 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 .dj-nearby-safety-summary{margin:6px 0 10px;padding:10px 12px;border:1px solid var(--dj800-border,#d7e6de);border-radius:14px;background:var(--dj800-elevated,#edf6f0);color:var(--dj800-text,#203f36);}
 .dj-nearby-safety-summary>summary{cursor:pointer;font-weight:750;min-height:34px;align-content:center;}
 .dj-nearby-safety-content{padding-top:8px;min-width:0;}
+
+/* November 24: contained history, clear route actions, opaque vulnerability header. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app #mine-panel .dj834-history-container :is(.dj-edition-history,.dj-edition-patch,.v707-release){box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow:hidden!important;}
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .dj-edition-history > .v707-release{width:auto!important;margin:6px 0 12px!important;padding:12px 14px!important;}
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .v707-release :is(.v707-release-head,.v707-release-items,li){box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important;white-space:normal!important;}
+  html body #app#app#app#app#app #mine-panel .dj834-history-container .v707-release-items{margin:6px 0!important;padding-inline-start:20px!important;}
+  html body #app#app#app#app#app #dj-walk-map-head :is(#dj-walk-back,#dj-walk-close){background:#d9ebe2!important;color:#143c31!important;border:1px solid #b8d2c6!important;box-shadow:none!important;font-size:25px!important;font-weight:800!important;min-width:44px!important;min-height:44px!important;}
+  html body #app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){isolation:isolate!important;overflow-x:hidden!important;}
+  html body #app#app#app#app#app#app#app #ped-tools-panel :is(.ped-tools-panel-head,.dj-sheet-chrome){position:sticky!important;top:0!important;z-index:20!important;flex-shrink:0!important;background:var(--dj-primary-page-bg,#edf3ef)!important;opacity:1!important;box-shadow:0 7px 0 var(--dj-primary-page-bg,#edf3ef)!important;isolation:isolate!important;}
+  html body #app#app#app#app#app#app#app #ped-tools-panel #ped-tools-close{border:1px solid #d4ded8!important;box-shadow:none!important;outline:none!important;background:#f5f9f6!important;color:#244239!important;}
+  html body #app#app#app#app#app#app#app #ped-tools-panel #ped-tools-close:focus-visible{outline:2px solid #51675c!important;outline-offset:2px!important;}
+ }
+}

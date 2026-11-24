@@ -88,6 +88,17 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const composer=el('div','dj-ai-composer');composer.append(form,foot);
   modal.dataset.djDialogFade='true';
   layout.append(header,login,transcript,composer);modal.append(layout);document.body.append(modal);
+  // iOS can chain a non-scrollable gesture into the root even inside a top-layer dialog.
+  // Leave interior scrolling and text selection native; consume only boundary drags.
+  let touchY=0;
+  modal.addEventListener('touchstart',event=>{touchY=event.touches[0]?.clientY||0;},{passive:true});
+  modal.addEventListener('touchmove',event=>{
+    if(!window.matchMedia?.('(max-width:699px)').matches||event.touches.length!==1)return;
+    const y=event.touches[0].clientY,delta=y-touchY;touchY=y;
+    if(event.target.closest?.('input,textarea,select'))return;
+    const scroll=event.target.closest?.('.dj-ai-transcript');
+    if(!scroll||scroll.scrollHeight<=scroll.clientHeight+1||(delta>0&&scroll.scrollTop<=0)||(delta<0&&scroll.scrollTop+scroll.clientHeight>=scroll.scrollHeight-1))if(event.cancelable)event.preventDefault();
+  },{passive:false});
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
   let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
   let transportDismissedAt=0;

@@ -43,8 +43,8 @@ export function installPlaceReviews(root,place){
  }
  ratingLabel.append(rating);
  const bodyLabel=makeElement('label',null,'리뷰 내용');const body=makeElement('textarea');body.required=true;body.minLength=5;body.maxLength=800;body.rows=3;body.placeholder='직접 방문한 경험과 시설 이용 정보를 작성해 주세요.';bodyLabel.append(body);
- const buttons=makeElement('div','dj834-review-buttons');const save=makeElement('button','dj834-review-submit','리뷰 저장');save.type='submit';const cancel=makeElement('button','dj834-review-cancel','취소');cancel.type='button';buttons.append(save,cancel);
- const consent=makeElement('p','dj834-review-disclaimer','로그인하지 않으면 이 기기에만 저장됩니다. 로그인 상태의 공개 리뷰는 서버에 리뷰 테이블이 설정된 경우에만 공유됩니다.');
+ const buttons=makeElement('div','dj834-review-buttons');const save=makeElement('button','dj834-review-submit','공개 리뷰 등록');save.type='submit';const cancel=makeElement('button','dj834-review-cancel','취소');cancel.type='button';buttons.append(save,cancel);
+ const consent=makeElement('p','dj834-review-disclaimer','로그인 후 공개 리뷰를 등록합니다. 별점과 내용은 다른 이용자에게 공개됩니다.');
  form.append(ratingLabel,bodyLabel,buttons,consent);
  const list=makeElement('div','dj834-review-list');section.append(heading,status,form,list);
  // Place the review action above the generated AI description.
@@ -67,7 +67,7 @@ export function installPlaceReviews(root,place){
  async function refresh(){
   const local=localRead(key);
   const client=getActiveCloudClient();
-  if(!client){render(local,true);if(!local.length)list.append(makeElement('p','dj834-review-empty','아직 등록된 리뷰가 없습니다.'));return;}
+  if(!client){render(local,true);status.textContent='공개 리뷰 서버 연결을 기다리고 있습니다.';return;}
   try{
    const {data,error}=await client.from('place_reviews').select('id,author_name,body,rating,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);
    if(error)throw error;
@@ -87,28 +87,21 @@ export function installPlaceReviews(root,place){
   if(error){status.textContent=error;return;}
   save.disabled=true;status.textContent='리뷰를 저장하고 있습니다…';
   const record={place_key:key,place_name:clean(place.name,90),rating:Number(rating.value),body:clean(body.value),created_at:new Date().toISOString()};
-  let published=false,why='';const client=getActiveCloudClient();
-  if(client){
-   try{
-    const {data:{session},error:sessionError}=await client.auth.getSession();
-    if(sessionError)throw sessionError;
-    if(session?.user?.id){
-     const author=clean(session.user.user_metadata?.display_name||session.user.user_metadata?.full_name||'이용자',32);
-     const payload={...record,user_id:session.user.id,author_name:author};
-     delete payload.created_at;
-     const {error:saveError}=await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'});
-     if(saveError)throw saveError;
-     published=true;
-    }else why='로그인하지 않아';
-   }catch{why='리뷰 서버가 준비되지 않았거나 연결되지 않아';}
-  }else why='서버 연결이 없어';
-  if(published){status.textContent='리뷰가 공개 서버에 저장되었습니다.';}
-  else{
-   const ok=localWrite(key,record);
-   status.textContent=ok?`${why||'공개 서버를 이용할 수 없어'} 이 기기에만 저장했습니다. 다른 사용자는 볼 수 없습니다.`:'리뷰 저장에 실패했습니다. 기기 저장 공간을 확인해 주세요.';
-  }
-  save.disabled=false;form.hidden=false;
-  if(published||localRead(key).length){form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';}
+  const client=getActiveCloudClient();
+  try{
+   if(!client)throw new Error('공개 리뷰 서버에 연결하지 못했습니다. 작성 내용은 유지됩니다.');
+   const {data:{session},error:sessionError}=await client.auth.getSession();
+   if(sessionError)throw sessionError;
+   if(!session?.user?.id||session.user.is_anonymous)throw new Error('공개 리뷰를 등록하려면 로그인해 주세요. 작성 내용은 유지됩니다.');
+   const author=clean(session.user.user_metadata?.display_name||session.user.user_metadata?.full_name||'이용자',32);
+   const payload={...record,user_id:session.user.id,author_name:author};
+   delete payload.created_at;
+   const {data,error:saveError}=await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'}).select('id,place_key,rating,body').single();
+   if(saveError||!data?.id)throw new Error('공개 리뷰 등록에 실패했습니다. 작성 내용은 유지됩니다.');
+   form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';
+   status.textContent='리뷰가 공개 서버에 등록되었습니다.';
+  }catch(error){status.textContent=error?.message||'공개 리뷰 등록에 실패했습니다. 작성 내용은 유지됩니다.';return;}
+  finally{save.disabled=false;}
   await refresh();
  });
  void refresh();return {element:section,close(){alive=false;}};
