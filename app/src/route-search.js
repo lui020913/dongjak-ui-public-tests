@@ -1,3 +1,4 @@
+import {normalizeFacilityName} from './facility-display-names.js';
 import {normalizeKoreanSearch,koreanSearchScore} from './korean-search.js';
 import {IMPORTANT_PLACES} from './important-place-click.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
@@ -24,7 +25,9 @@ export function normalizePlaceSearchResults(payload) {
     const lat = Number(coords?.[1]);
     if (!Number.isFinite(lng) || !Number.isFinite(lat) || lng < 126.78 || lng > 127.20 || lat < 37.4 || lat > 37.7) continue;
     const p = feature?.properties || {};
-    const name = String(p.name || p.street || p.district || p.city || '').trim();
+    const types={convenience:'편의점',supermarket:'마트',cafe:'카페',restaurant:'음식점',fast_food:'패스트푸드',bakery:'제과점'};
+    const rawName=String(p.name || p.street || p.district || p.city || '').trim();
+    const name = normalizeFacilityName(rawName,types[String(p.osm_value||'').toLowerCase()]||'');
     if (!name) continue;
     const address = [...new Set([p.street, p.housenumber, p.district, p.city, p.county, p.state]
       .map(s => String(s || '').trim()).filter(Boolean))].join(' · ');

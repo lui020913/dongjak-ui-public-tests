@@ -1,3 +1,4 @@
+import {normalizeFacilityName} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -21,7 +22,7 @@ export function verifiedWeb(value){
   try{const u=new URL(tidy(value,400));return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}
 }
 export function placeData(raw={}){
-  const name=tidy(raw.name,90)||'이름 미등록';
+  const name=tidy(normalizeFacilityName(raw.name,raw.type||raw.category),90)||'이름 미등록';
   const lon=Number(raw.lng), lat=Number(raw.lat);
   const trusted=verifiedPlaceRecord(name);
   const incomingAddress=tidy(raw.address,220);

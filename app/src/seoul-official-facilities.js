@@ -1,3 +1,4 @@
+import {normalizeFacilityRecord,facilityNameMatches} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
 import {insideBoundary} from './dongjak-verified-data-layers.js';
@@ -9,14 +10,15 @@ const EMPTY={type:'FeatureCollection',features:[]};
 let searchableGeneralPlaces=[];
 export function officialFeatures(places,boundary){
  const seen=new Set(),features=[];
- for(const place of places||[]){
+ for(const rawPlace of places||[]){
+   const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
    const name=String(place.name||'').trim();if(!name)continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
    if(seen.has(key))continue;seen.add(key);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
-     name,category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
+     name,registeredName:place.registeredName||'',category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
      address:String(place.address||''),phone:String(place.phone||''),website:String(place.website||''),
      source:String(place.source||'서울 열린데이터광장 / 동작구'),updated:String(place.updated||'')
    }});
@@ -46,7 +48,7 @@ export function osmGeneralPlaces(elements=[],limit=1100){
      source:'© OpenStreetMap 기여자 · 공개지도 등록정보'});
    if(result.length>=limit)break;
  }
- return result;
+ return result.map(normalizeFacilityRecord);
 }
 export function bboxToOverpass(bbox){
  const n=String(bbox).split(',').map(Number);
@@ -94,9 +96,8 @@ export function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
 export function officialSearchPlaces(query,places=[],limit=20){
  const q=String(query||'').trim().replace(/\s+/g,'').toLowerCase();
  if(q.length<2)return [];
- return places.filter(p=>String(p.name||'').replace(/\s+/g,'').toLowerCase().includes(q)
-   ||String(p.category||'').replace(/\s+/g,'').toLowerCase().includes(q))
-   .slice(0,limit).map(p=>({...p,category:p.category||'시설'}));
+ return places.filter(p=>facilityNameMatches(p,query))
+   .slice(0,limit).map(p=>normalizeFacilityRecord({...p,category:p.category||'시설'}));
 }
 /** Explicit search only: do not query remote OSM on each keystroke.
  * The public provider does not guarantee completeness or verified contact data. */
@@ -130,14 +131,15 @@ export async function queryOfficialPlaces(query,{signal,fetcher=fetch,remoteFall
    if(Array.isArray(json.places))official=json.places;
  }}catch(error){if(error?.name==='AbortError')throw error;}
  const seen=new Set(),results=[];
- for(const place of [...official,...cached]){
+ for(const rawPlace of [...official,...cached]){
+   const place=normalizeFacilityRecord(rawPlace);
    const id=String(place.id||`${place.name}:${place.lng}:${place.lat}`);
    if(seen.has(id))continue;seen.add(id);results.push(place);
  }
  // A remote fallback complements current-viewport cache, even when D1 is unavailable.
  if(remoteFallback&&results.length<7){try{
    const remote=await searchOsmGeneralFacilities(term,{signal,fetcher});
-   for(const place of remote){if(!seen.has(place.id)){seen.add(place.id);results.push(place);}}
+   for(const rawPlace of remote){const place=normalizeFacilityRecord(rawPlace);if(!seen.has(place.id)){seen.add(place.id);results.push(place);}}
  }catch(error){if(error?.name==='AbortError')throw error;}}
  return results.slice(0,60);
 }
@@ -228,7 +230,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
    const [lng,lat]=f.geometry?.coordinates||[];if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
    const prop=f.properties||{};
    openPlaceDetails({map,maplibregl,lngLat:{lng,lat},place:{
-     name:prop.name,type:prop.category,address:prop.address,phone:prop.phone,website:prop.website,
+     name:prop.name,registeredName:prop.registeredName,type:prop.category,address:prop.address,phone:prop.phone,website:prop.website,
      source:prop.source,note:'등록된 공개자료의 정보입니다. 실제 운영 및 이용 가능 여부는 방문 전에 확인해 주세요.',lng,lat
    }});
  };
