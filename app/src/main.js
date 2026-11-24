@@ -86,6 +86,7 @@ import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installProtectionZoneMap} from './protection-zone-map.js';
+import {installPolicyGapThreeSourceMap} from './policy-gap-3source-map-patch.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import {installSangdoSpeedMap} from './sangdo-speed-map.js';
 import {installBochaRoadLayer} from './bocha-road-layer.js';
@@ -1660,6 +1661,7 @@ map.on('load',()=>{
   const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,
     onActivate:()=>protectionOverlay?.disable({restoreNight:false})});
   protectionOverlay=installProtectionZoneMap({map,maplibregl,app,nightMode});
+  installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay});
   installSangdoSpeedMap({map,maplibregl,app});
   installBochaRoadLayer({map,maplibregl,app});
   installNearbyPlaceLabels(map,{maplibregl});
