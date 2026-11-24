@@ -5,7 +5,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {searchResultSubtitle,facilityRoadAddress,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
+import {searchResultSubtitle,facilityRoadAddress,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,nearbySearchResults,fetchNearbyOfficialPlaces,formatFacilityDistance,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -44,7 +44,7 @@ export function mergeMapSearchResults(local=[],remote=[]){
   for(const item of found){if(balanced.length>=12)break;if(!chosen.has(item)){balanced.push(item);chosen.add(item);}}
   return balanced;
 }
-export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
+export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition,errorLocationCode=error=>Number(error?.code)}){
   const shell=document.getElementById('map-quick-search');
   if(!shell)return {close:()=>{}};
   const form=shell.querySelector('form'),query=shell.querySelector('input');
@@ -74,7 +74,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const actions=document.createElement('div');actions.id='dj-search-entry-actions';actions.hidden=true;
   const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='최근 검색';
   const nearbyButton=document.createElement('button');nearbyButton.type='button';nearbyButton.textContent='이 지도에서 검색';
-  nearbyButton.id='dj-search-nearby';actions.append(nearbyButton,historyButton);app.append(actions);
+  const gpsButton=document.createElement('button');gpsButton.type='button';gpsButton.id='dj-search-gps-nearby';gpsButton.textContent='내 주변 검색';
+  nearbyButton.id='dj-search-nearby';actions.append(nearbyButton,gpsButton,historyButton);app.append(actions);
   const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
   const syncEntry=()=>{
     const visible=phoneSearch()&&app.dataset.tab==='map'&&(document.activeElement===query||app.dataset.searchOpen==='true');
@@ -169,10 +170,13 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const makeResultButton=place=>{
     const button=document.createElement('button');button.type='button';button.className='map-quick-search-result';
     const strong=document.createElement('strong');strong.textContent=place.name||'검색 장소';
-    const info=document.createElement('small');info.textContent=searchResultSubtitle({...place,address:''});
+    const info=document.createElement('small');info.textContent=searchResultSubtitle({...place,address:'',distanceMeters:undefined});
     const address=document.createElement('small');address.className='dj-search-road-address';
     const road=facilityRoadAddress(place);address.textContent=road||'도로명 주소 미확인';
     button.append(strong,info,address);
+    if(Number.isFinite(place.distanceMeters)){
+      const distance=document.createElement('span');distance.className='dj-search-distance';distance.textContent=formatFacilityDistance(place.distanceMeters);button.append(distance);
+    }
     button.addEventListener('click',()=>{
       marker?.remove();
       marker=null; // One marker belongs to the canonical place-detail popup.
@@ -312,6 +316,28 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     filters.hidden=true;dropdown.dataset.searchMode='history';setTitle('최근 검색');
     show();render([],true);feedback.textContent='';
   };
+  const renderFacilityTabs=items=>{
+    list.replaceChildren();
+    if(items.length){
+      const groups=[{label:'전체',rows:items},...groupVisibleFacilities(items)];
+      const rail=document.createElement('div');rail.className='dj-visible-facility-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','시설 유형 선택');
+      const results=document.createElement('div');results.className='dj-visible-facility-list';results.setAttribute('aria-label','시설 검색 결과');
+      const buttons=[];
+      const select=index=>{
+        for(const [i,button] of buttons.entries())button.setAttribute('aria-pressed',String(i===index));
+        results.replaceChildren(...groups[index].rows.map(makeResultButton));
+        results.setAttribute('aria-label',groups[index].label+' 시설 검색 결과');
+        // Reset the vertical list without moving the category rail sideways.
+        body.scrollTop=0;
+      };
+      for(const [i,{label,rows}] of groups.entries()){
+        const button=document.createElement('button');button.type='button';button.className='dj-visible-facility-tab';
+        button.textContent=label+' '+rows.length;button.setAttribute('aria-label',label+' '+rows.length+'곳');
+        button.addEventListener('click',()=>select(i));buttons.push(button);rail.append(button);
+      }
+      list.append(rail,results);select(0);
+    }
+  };
   const openNearby=async()=>{
     // Snapshot before the results panel opens. GPS and geolocation permissions
     // are intentionally not involved in this map-area search.
@@ -336,31 +362,44 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     try{external=await fetchVisibleOfficialPlaces(area,{signal:own.signal});}catch(error){if(active!==seq)return;partial=true;}finally{window.clearTimeout(timeout);}
     if(active!==seq)return;
     const {items,total}=visibleFacilityResults(area,[...local,...external]);
-    list.replaceChildren();
-    if(items.length){
-      const groups=[{label:'전체',rows:items},...groupVisibleFacilities(items)];
-      const rail=document.createElement('div');rail.className='dj-visible-facility-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','시설 유형 선택');
-      const results=document.createElement('div');results.className='dj-visible-facility-list';results.setAttribute('aria-label','시설 검색 결과');
-      const buttons=[];
-      const select=index=>{
-        for(const [i,button] of buttons.entries())button.setAttribute('aria-pressed',String(i===index));
-        results.replaceChildren(...groups[index].rows.map(makeResultButton));
-        results.setAttribute('aria-label',groups[index].label+' 시설 검색 결과');
-        // Reset the vertical list without moving the category rail sideways.
-        body.scrollTop=0;
-      };
-      for(const [i,{label,rows}] of groups.entries()){
-        const button=document.createElement('button');button.type='button';button.className='dj-visible-facility-tab';
-        button.textContent=label+' '+rows.length;button.setAttribute('aria-label',label+' '+rows.length+'곳');
-        button.addEventListener('click',()=>select(i));buttons.push(button);rail.append(button);
-      }
-      list.append(rail,results);select(0);
-    }
+    renderFacilityTabs(items);
     feedback.textContent=items.length?`현재 지도 내 ${total}곳${total>items.length?' · '+items.length+'곳 표시':''}${partial?' · 일부 장소를 불러오지 못했습니다.':''}`:(partial?'현재 지도에서 확인된 시설이 없습니다. 일부 장소를 불러오지 못했습니다.':'현재 지도에서 확인된 시설이 없습니다. 지도를 이동해 다시 검색해 주세요.');
   };
+  const openGpsNearby=async()=>{
+    query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;const active=++seq;
+    filters.hidden=true;dropdown.dataset.searchMode='gps-nearby';setTitle('내 주변 검색');show();list.replaceChildren();
+    feedback.textContent='현재 위치를 확인하고 있습니다…';
+    const isCurrent=()=>active===seq&&dropdown.dataset.searchMode==='gps-nearby'&&!dropdown.hidden;
+    const retry=message=>{
+      if(!isCurrent())return;
+      feedback.textContent=message;list.replaceChildren();
+      const button=document.createElement('button');button.type='button';button.className='map-quick-search-suggestion dj-search-zoom-action';button.textContent='현재 위치 다시 확인';
+      button.addEventListener('click',openGpsNearby);list.append(button);
+    };
+    let origin;
+    try{
+      if(typeof getPosition!=='function')throw {code:2};
+      const position=await getPosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000});
+      origin={lng:position?.coords?.longitude,lat:position?.coords?.latitude};
+      if(!Number.isFinite(origin.lng)||!Number.isFinite(origin.lat))throw {code:2};
+    }catch(error){retry(errorLocationCode(error)===1?'위치 권한을 허용해야 내 주변 검색을 이용할 수 있습니다.':'현재 위치를 확인하지 못했습니다. 다시 시도해 주세요.');return;}
+    if(!isCurrent())return;
+    const radius=500,limit=60;
+    feedback.textContent='현재 위치 반경 500m 시설을 찾고 있습니다…';
+    const own=new AbortController();controller=own;
+    const stations=Object.entries(VERIFIED_STATIONS).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:name+'역',lng,lat,kind:'subway',category:'지하철·철도역'}));
+    const local=[...searchTransportSnapshot(),...officialSearchSnapshot(),...stations,...localVectorFacilities('',true)];
+    let external=[],partial=false;const timeout=window.setTimeout(()=>own.abort(),7000);
+    try{external=await fetchNearbyOfficialPlaces(origin,{signal:own.signal,radius});}catch{partial=true;}finally{window.clearTimeout(timeout);}
+    if(!isCurrent())return;
+    const all=nearbySearchResults(origin,[...local,...external],{radius,limit:Infinity});
+    const items=all.slice(0,limit);
+    renderFacilityTabs(items);
+    feedback.textContent=items.length?'반경 500m · 직선거리 가까운 순 · '+all.length+'곳'+(all.length>items.length?' · '+items.length+'곳 표시':'')+(partial?' · 일부 자료 조회 실패':''):'반경 500m 내 확인된 시설이 없습니다.'+(partial?' 일부 자료를 불러오지 못했습니다.':'');
+  };
   map.on?.('movestart',()=>{if(dropdown.dataset.searchMode==='nearby'){close();query.blur();syncEntry();}});
-  for(const button of [nearbyButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
-  nearbyButton.addEventListener('click',openNearby);historyButton.addEventListener('click',openHistory);
+  for(const button of [nearbyButton,gpsButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
+  nearbyButton.addEventListener('click',openNearby);gpsButton.addEventListener('click',openGpsNearby);historyButton.addEventListener('click',openHistory);
   query.addEventListener('blur',()=>window.setTimeout(syncEntry,0));
   const tabWatch=new MutationObserver(()=>{if(app.dataset.tab!=='map')close();syncEntry();});tabWatch.observe(app,{attributes:true,attributeFilter:['data-tab']});
   query.addEventListener('focus',()=>{

@@ -61,19 +61,27 @@ export function distanceMeters(a,b){
   const h=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLng/2)**2;
   return 6371000*2*Math.asin(Math.sqrt(Math.max(0,Math.min(1,h))));
 }
+export function formatFacilityDistance(meters){
+  return '직선거리 '+(meters<1000?Math.round(meters)+'m':(meters/1000).toFixed(1)+'km');
+}
 export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
-  const seen=new Set(),found=[];
+  const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const row={...p,lng,lat},distance=distanceMeters(origin,row),key=searchResultKey(row);
-    if(!Number.isFinite(distance)||distance>radius||seen.has(key))continue;
-    seen.add(key);found.push({...row,distanceMeters:distance});
+    if(!Number.isFinite(distance)||distance>radius)continue;
+    if(seen.has(key)){
+      const prior=seen.get(key),road=facilityRoadAddress(row);
+      if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
+      continue;
+    }
+    const entry={...row,distanceMeters:distance};seen.set(key,entry);found.push(entry);
   }
   return found.sort((a,b)=>a.distanceMeters-b.distanceMeters).slice(0,limit);
 }
-export async function fetchNearbyOfficialPlaces(origin,{signal,fetcher=fetch}={}){
-  const dy=500/111195,dx=dy/Math.cos(origin.lat*Math.PI/180);
+export async function fetchNearbyOfficialPlaces(origin,{signal,fetcher=fetch,radius=500}={}){
+  const dy=radius/111195,dx=dy/Math.cos(origin.lat*Math.PI/180);
   const bbox=[origin.lng-dx,origin.lat-dy,origin.lng+dx,origin.lat+dy];
   if(bbox[0]<126.5||bbox[2]>127.3||bbox[1]<37.2||bbox[3]>37.8)throw new Error('서울시 자료 범위 밖');
   const url=new URL('/api/seoul-facilities',location.origin);url.searchParams.set('bbox',bbox.map(x=>x.toFixed(5)).join(','));url.searchParams.set('limit','1500');

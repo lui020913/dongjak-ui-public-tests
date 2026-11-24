@@ -674,7 +674,7 @@ function checkBaseMapRecovery(){
   }catch(error){app.dataset.djBasemapSource='error';console.error('[지도 기본 모드 전환 실패]',error);status('지도 로딩 실패 · 네트워크를 확인한 뒤 새로고침하세요');}
 }
 mapRecoveryTimer=setTimeout(checkBaseMapRecovery,BASE_STYLE_INITIAL_WAIT_MS);
-const quickSearch=initMapQuickSearch({map,maplibregl,app,onPick:()=>{
+const quickSearch=initMapQuickSearch({map,maplibregl,app,getPosition:getDevicePosition,errorLocationCode,onPick:()=>{
   // Search is available in every app tab. Selecting a result must reveal the map.
   if(app.dataset.tab!=='map')navigate('map');
   closeMapOptions();

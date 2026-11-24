@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nearbySearchResults,facilityRoadAddress,groupVisibleFacilities,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
+import {nearbySearchResults,formatFacilityDistance,facilityRoadAddress,groupVisibleFacilities,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
 test('bus direction is authoritative and no ARS ID appears in subtitle',()=>{
  assert.equal(searchResultSubtitle({kind:'bus',direction:'상도역',arsId:'123'}),'버스정류장 · 상도역 방면');
  assert.equal(searchResultSubtitle({kind:'bus',arsId:'123'}),'버스정류장 · 방면 미확인');
@@ -63,4 +63,17 @@ test('road address requires a road and number and survives duplicate merging',()
  const area={polygon:[{lng:126.94,lat:37.49},{lng:126.96,lat:37.49},{lng:126.96,lat:37.51},{lng:126.94,lat:37.51}],center:{lng:126.95,lat:37.5}};
  const p={name:'시설',lng:126.95,lat:37.5};const rows=visibleFacilityResults(area,[p,{...p,address:'서울특별시 동작구 상도로 141'}]);
  assert.equal(rows.total,1);assert.equal(facilityRoadAddress(rows.items[0]),'서울특별시 동작구 상도로 141');
+});
+
+test('GPS nearby search uses origin, distance sort, 500m radius and preserves addresses',()=>{
+ const origin={lng:126.95,lat:37.5};const a={name:'A',lng:126.951,lat:37.5},b={name:'B',lng:126.953,lat:37.5},far={name:'C',lng:126.96,lat:37.5};
+ const rows=nearbySearchResults(origin,[far,b,a,{...a,address:'서울특별시 동작구 상도로 141'}],{radius:500,limit:60});
+ assert.deepEqual(rows.map(p=>p.name),['A','B']);assert.ok(rows[0].distanceMeters<rows[1].distanceMeters);assert.equal(facilityRoadAddress(rows[0]),'서울특별시 동작구 상도로 141');
+ assert.equal(formatFacilityDistance(120.4),'직선거리 120m');assert.equal(formatFacilityDistance(1200),'직선거리 1.2km');
+});
+test('GPS nearby search is independent from map viewport and ignores stale responses',()=>{
+ const js=readFileSync(new URL('../src/map-quick-search.js',import.meta.url),'utf8');
+ assert.match(js,/gpsButton\.addEventListener\('click',openGpsNearby\)/);
+ const gps=js.slice(js.indexOf('const openGpsNearby=async()=>'),js.indexOf("map.on?.('movestart'"));
+ assert.match(gps,/await getPosition\(/);assert.match(gps,/nearbySearchResults\(origin,/);assert.match(gps,/if\(!isCurrent\(\)\)return/);assert.doesNotMatch(gps,/captureVisibleFacilityArea|getCenter\(/);
 });
