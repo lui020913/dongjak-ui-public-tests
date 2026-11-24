@@ -36,3 +36,13 @@ test('install menu only advertises the same-origin endpoint after verified HEAD'
  assert.equal(await resolveAndroidDownload(win),'https://example.org/api/android-download.apk');
  win.fetch=async()=>new Response(null,{status:503});assert.equal(await resolveAndroidDownload(win),null);
 });
+test('verified browser fallback uses only exact current published APK when proxy is unavailable',async()=>{
+ const calls=[];
+ const win={location:{href:'https://example.org/'},fetch:async u=>{calls.push(u);if(u==='/api/android-download.apk')return new Response(null,{status:503});if(u==='/release-source.json')return Response.json(marker);if(u.endsWith('/releases/tags/'+tag))return Response.json(release);if(u.endsWith('/git/ref/tags/'+tag))return Response.json({object:{type:'commit',sha}});return new Response(null,{status:404});}};
+ assert.equal(await resolveAndroidDownload(win),url);
+ assert.equal(calls.length,4);
+ const original=win.fetch;win.fetch=async u=>u.endsWith('/git/ref/tags/'+tag)?Response.json({object:{type:'commit',sha:'b'.repeat(40)}}):original(u);
+ assert.equal(await resolveAndroidDownload(win),null);
+ win.fetch=async u=>u==='/release-source.json'?Response.json({...marker,release_status:'CANDIDATE_PREVIEW_NOT_PRODUCTION'}):original(u);
+ assert.equal(await resolveAndroidDownload(win),null);
+});

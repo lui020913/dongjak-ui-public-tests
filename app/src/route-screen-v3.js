@@ -109,11 +109,11 @@ export function mountRouteScreenV3(doc=document, win=window) {
     target.hidden=!rows.length&&!pendingWaypoint;
     q('.waypoint-add-row').hidden=rows.length>=5||pendingWaypoint;
     q('[data-v3="waypoint"]').disabled=rows.length>=5||pendingWaypoint;
-    for(const [i,row] of Array.from(rows).entries()){const item=doc.createElement('div');item.className='waypoint-item';const title=doc.createElement('span');title.textContent=(i+1)+'. '+(row.querySelector('.dj815-waypoint-title')?.textContent||'경유지');item.append(title);for(const native of row.querySelectorAll('button')){const b=doc.createElement('button');b.type='button';b.textContent=native.textContent;b.disabled=native.disabled;b.setAttribute('aria-label',native.title||native.textContent);b.addEventListener('click',()=>native.click());item.append(b);}target.append(item);}
+    for(const [i,row] of Array.from(rows).entries()){const item=doc.createElement('div');item.className='waypoint-item';const title=doc.createElement('span');title.textContent=(i+1)+'. '+(row.querySelector('.dj815-waypoint-title')?.textContent||'경유지');item.append(title);for(const native of row.querySelectorAll('button')){const b=doc.createElement('button');b.type='button';b.className='waypoint-control';b.textContent=native.textContent;b.disabled=native.disabled;b.setAttribute('aria-label',native.title||native.textContent);b.addEventListener('click',()=>native.click());item.append(b);}target.append(item);}
     if(pendingWaypoint){
       const item=doc.createElement('div');item.className='waypoint-item waypoint-pending';
       const search=doc.createElement('button');search.type='button';search.className='waypoint-input';search.textContent='경유지 입력';search.addEventListener('click',()=>openSearch('waypoint'));
-      const cancel=doc.createElement('button');cancel.type='button';cancel.textContent='×';cancel.setAttribute('aria-label','경유지 추가 취소');cancel.addEventListener('click',()=>{pendingWaypoint=false;mirrorWaypoints();requestPosition();});
+      const cancel=doc.createElement('button');cancel.type='button';cancel.className='waypoint-control';cancel.textContent='×';cancel.setAttribute('aria-label','경유지 추가 취소');cancel.addEventListener('click',()=>{pendingWaypoint=false;mirrorWaypoints();requestPosition();});
       item.append(search,cancel);target.append(item);
     }
     syncLabels();

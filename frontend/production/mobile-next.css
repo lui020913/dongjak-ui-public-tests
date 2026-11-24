@@ -1357,3 +1357,34 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 @layer request-completion{@media(max-width:699px){
 html body #app#app#app#app#app#app#app[data-dj-search-entry="1"] :is(#djNext-toolbar,#dj-v794-toolbar){display:none!important;visibility:hidden!important;pointer-events:none!important}
 }}
+
+/* The two visible header surfaces share one row and one border-box height.
+   Voice feedback extends the search card downward only, not its top edge. */
+@layer request-completion{
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar:has(#dj890-ai-orb){
+   --dj-map-search-control-size:54px;align-items:start!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > #map-quick-search,
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > .header-tools:has(#dj890-ai-orb){
+   grid-row:1!important;position:relative!important;inset:auto!important;align-self:start!important;
+   margin:0!important;padding:0!important;border:0!important;transform:none!important;translate:none!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > #map-quick-search{grid-column:1!important;}
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > #map-quick-search > .map-quick-search-form{
+   position:relative!important;inset:auto!important;margin:0!important;transform:none!important;translate:none!important;
+   box-sizing:border-box!important;height:calc(var(--dj-map-search-control-size,54px) + var(--dj-voice-extra,0px))!important;
+   min-height:calc(var(--dj-map-search-control-size,54px) + var(--dj-voice-extra,0px))!important;max-height:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > .header-tools:has(#dj890-ai-orb){
+   grid-column:2!important;justify-self:end!important;align-items:flex-start!important;
+   height:var(--dj-map-search-control-size,54px)!important;min-height:var(--dj-map-search-control-size,54px)!important;max-height:var(--dj-map-search-control-size,54px)!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"] > .topbar > .header-tools > #dj890-ai-orb{
+   position:relative!important;inset:auto!important;align-self:start!important;margin:0!important;
+   padding:0!important;transform:none!important;translate:none!important;box-sizing:border-box!important;
+   width:var(--dj-map-search-control-size,54px)!important;min-width:var(--dj-map-search-control-size,54px)!important;max-width:var(--dj-map-search-control-size,54px)!important;
+   height:var(--dj-map-search-control-size,54px)!important;min-height:var(--dj-map-search-control-size,54px)!important;max-height:var(--dj-map-search-control-size,54px)!important;
+  }
+ }
+}
