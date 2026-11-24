@@ -58,3 +58,57 @@ export async function fetchNearbyOfficialPlaces(origin,{signal,fetcher=fetch}={}
   const response=await fetcher(url,{signal});if(!response.ok)throw new Error('시설 조회 실패');
   const data=await response.json();return Array.isArray(data.places)?data.places:[];
 }
+
+/** Capture the actual map canvas footprint before opening the search overlay.
+ * A rotated/pitched view is a quadrilateral, not the enclosing geographic bbox.
+ */
+export const MIN_VISIBLE_FACILITY_ZOOM=16;
+export function captureVisibleFacilityArea(map){
+  const zoom=Number(map.getZoom?.());
+  if(!Number.isFinite(zoom)||zoom<MIN_VISIBLE_FACILITY_ZOOM)return null;
+  const canvas=map.getCanvas?.(),w=canvas?.clientWidth,h=canvas?.clientHeight;
+  if(!(w>0&&h>0)||typeof map.unproject!=='function')return null;
+  const polygon=[[0,0],[w,0],[w,h],[0,h]].map(point=>{
+    const p=map.unproject(point);return {lng:Number(p.lng),lat:Number(p.lat)};
+  });
+  if(polygon.some(p=>!Number.isFinite(p.lng)||!Number.isFinite(p.lat)))return null;
+  const bbox=[Math.min(...polygon.map(p=>p.lng)),Math.min(...polygon.map(p=>p.lat)),Math.max(...polygon.map(p=>p.lng)),Math.max(...polygon.map(p=>p.lat))];
+  // A strongly tilted camera may still cover a very large area at zoom 16.
+  // Reject those views rather than querying an unbounded region.
+  if(distanceMeters({lng:bbox[0],lat:bbox[1]},{lng:bbox[2],lat:bbox[3]})>3000)return null;
+  const center=map.unproject([w/2,h/2]);
+  return {polygon,bbox,center:{lng:center.lng,lat:center.lat}};
+}
+export function visibleAreaContains(area,p){
+  if(!area?.polygon||!Number.isFinite(p.lng)||!Number.isFinite(p.lat))return false;
+  let inside=false;const poly=area.polygon;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const a=poly[j],b=poly[i],dx=b.lng-a.lng,dy=b.lat-a.lat;
+    const cross=(p.lng-a.lng)*dy-(p.lat-a.lat)*dx;
+    if(Math.abs(cross)<1e-12&&p.lng>=Math.min(a.lng,b.lng)-1e-9&&p.lng<=Math.max(a.lng,b.lng)+1e-9&&p.lat>=Math.min(a.lat,b.lat)-1e-9&&p.lat<=Math.max(a.lat,b.lat)+1e-9)return true;
+    if((a.lat>p.lat)!==(b.lat>p.lat)&&p.lng<(b.lng-a.lng)*(p.lat-a.lat)/(b.lat-a.lat)+a.lng)inside=!inside;
+  }
+  return inside;
+}
+export function visibleFacilityResults(area,items,{limit=60}={}){
+  const seen=new Set(),found=[];
+  for(const p of items){
+    if(!p?.name||p.lng==null||p.lat==null)continue;
+    const row={...p,lng:Number(p.lng),lat:Number(p.lat)};
+    if(!visibleAreaContains(area,row))continue;
+    const key=searchResultKey(row);if(seen.has(key))continue;
+    seen.add(key);
+    // Do not expose distance from map center as if it were the user's distance.
+    delete row.distanceMeters;found.push(row);
+  }
+  found.sort((a,b)=>distanceMeters(area.center,a)-distanceMeters(area.center,b));
+  return {items:found.slice(0,limit),total:found.length};
+}
+export async function fetchVisibleOfficialPlaces(area,{signal,fetcher=fetch}={}){
+  const bbox=area?.bbox;
+  if(!bbox||bbox.length!==4||bbox.some(v=>!Number.isFinite(v))||bbox[0]>=bbox[2]||bbox[1]>=bbox[3]||bbox[0]<126.5||bbox[2]>127.3||bbox[1]<37.2||bbox[3]>37.8)throw new Error('서울시 자료 범위 밖');
+  const url=new URL('/api/seoul-facilities',location.origin);
+  url.searchParams.set('bbox',bbox.map(x=>x.toFixed(6)).join(','));url.searchParams.set('limit','1500');
+  const response=await fetcher(url,{signal});if(!response.ok)throw new Error('시설 조회 실패');
+  const data=await response.json();return Array.isArray(data.places)?data.places:[];
+}

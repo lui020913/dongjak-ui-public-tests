@@ -19,7 +19,7 @@ test('opening search does not collapse or disable the independent AI entry',()=>
   const css=readPhoneCss();
   assert.doesNotMatch(css,/:is\(\[data-search-open="true"\],\[data-dj-voice-feedback="true"\]\) \.topbar>\.header-tools:has\(#dj890-ai-orb\)/);
   assert.doesNotMatch(css,/:is\(\[data-search-open="true"\],\[data-dj-voice-feedback="true"\]\) \.topbar #dj890-ai-orb/);
-  assert.match(css,/\.topbar>\.header-tools:has\(#dj890-ai-orb\)\{[^}]*width:62px!important/);
+  assert.match(css,/\.topbar>\.header-tools:has\(#dj890-ai-orb\)\{[^}]*width:var\(--dj-map-search-control-size,54px\)!important/);
 });
 
 test('microphone and search-results layout remain stable during keyboard use',()=>{
