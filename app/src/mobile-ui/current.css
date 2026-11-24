@@ -1365,3 +1365,92 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   html body #app#app#app#app#app#app#app #ped-tools-panel #ped-tools-close:focus-visible{outline:2px solid #51675c!important;outline-offset:2px!important;}
  }
 }
+
+/* Four requested phone fixes: actual scroll owner, terminal slots, and night
+   reading surface. The canonical layer beats older visibility overrides. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){
+   display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app #ped-tools-panel > :is(.ped-tools-panel-head,.dj-sheet-chrome){
+   position:relative!important;top:auto!important;flex:0 0 auto!important;z-index:3!important;
+   margin:0!important;background:var(--dj-primary-page-bg,#edf3ef)!important;box-shadow:none!important;
+   border-bottom:1px solid var(--dj-theme-line,#d3e3d9)!important;
+  }
+  html body #app#app#app#app#app#app#app#app #ped-tools-panel > .dj-nearby-scroll-body{
+   flex:1 1 auto!important;min-height:0!important;max-height:none!important;height:auto!important;
+   overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+   padding:8px 0 4px!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-neighbor-row{
+   grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-previous{grid-column:1!important;grid-row:1!important;}
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-current{grid-column:2!important;grid-row:1!important;width:100%!important;max-width:none!important;}
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-next{grid-column:3!important;grid-row:1!important;}
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors :is(.metro-rail-previous,.metro-rail-next)[hidden]{
+   display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals :is(.metro-planned-notice,.metro-quota-notice){
+   margin:0 0 12px!important;
+  }
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-direction-grid{
+   gap:10px!important;margin-top:10px!important;
+  }
+  html body #app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-direction-grid:has(> :only-child){
+   grid-template-columns:minmax(0,1fr)!important;
+  }
+  /* Expanded night settings are a reading surface; the map HUD is restored
+     automatically when the panel is collapsed or closed. */
+  html body #app#app#app#app#app#app#app#app[data-sangdo-night="on"]:has(#night-visibility-float:not([hidden]):is([data-collapsed="false"],.dj871-sheet-expanded))
+   :is(.topbar,#map-quick-search,#dj-v794-toolbar,#djNext-toolbar,#dj890-ai-orb,.map-actions,#dj912-poi-categories){
+   display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app #night-visibility-float:not([hidden]):is([data-collapsed="false"],.dj871-sheet-expanded){
+   position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 12px)!important;
+   bottom:calc(var(--dj910-dock-bottom,88px) + 8px)!important;
+   height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;
+   display:flex!important;flex-direction:column!important;box-sizing:border-box!important;
+   z-index:6800!important;
+  }
+  html body #app#app#app#app#app#app#app#app #night-visibility-float .night-visibility-float-head{
+   flex:0 0 auto!important;position:relative!important;top:auto!important;z-index:2!important;
+  }
+  html body #app#app#app#app#app#app#app#app #night-visibility-float #night-visibility-float-content:not([hidden]){
+   flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+ }
+}
+
+/* Night analysis uses the same surface hierarchy as transport and map sheets.
+   Semantic lighting swatches remain untouched. */
+@layer request-completion {
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float:not([hidden]),
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-head,#night-visibility-float-content){
+  background:var(--dj-theme-surface,#2c343d)!important;
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+  border-color:var(--dj-theme-line,#4d5b65)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-actions button,.dj-night-group,.dj-night-group>summary,.night-visibility-stats,.night-result-legend,.night-coverage,.night-occlusion-details){
+  background:var(--dj-theme-raised,#35404a)!important;
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+  border-color:var(--dj-theme-line,#4d5b65)!important;
+  box-shadow:none!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-float-heading span,.night-visibility-status,.night-visibility-disclaimer,.night-visibility-stat span,.night-visibility-legend,.night-visibility-top p){
+  color:var(--dj-theme-muted,#bec8d2)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(.night-visibility-stat strong,.night-visibility-top>strong,.night-visibility-radius-label,.night-visibility-checkbox,.night-result-legend span){
+  color:var(--dj-theme-ink,#f1f4f6)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(#night-visibility-radius-value,.night-visibility-top li button){
+  color:var(--dj-theme-accent,#79dec5)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float :is(input[type="range"],input[type="checkbox"],input[type="radio"]){
+  accent-color:var(--dj-theme-accent,#79dec5)!important;
+ }
+ html body #app#app#app#app#app#app#app#app[data-theme="dark"] #night-visibility-float .dj-night-group>summary::after{
+  color:var(--dj-theme-muted,#bec8d2)!important;
+ }
+}

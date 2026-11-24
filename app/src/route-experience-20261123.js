@@ -1,3 +1,4 @@
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 /**
  * Map-first, four-stage walking journey. One route editor, one result chooser,
  * one GPS readout. Native map, search, route choice, PRI and GPS are authoritative.
@@ -123,8 +124,12 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const stopPreview=add('button','dj-walk-close');stopPreview.type='button';
   stopPreview.innerHTML='<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>';stopPreview.setAttribute('aria-label','길찾기 종료');
   top.append(backBtn,head,stopPreview);app.append(top);
-  on(backBtn,'click',()=>byId('route-map-edit')?.click());
-  on(stopPreview,'click',()=>byId('route-map-close')?.click());
+  const leavePreview=id=>{
+    if(app.dataset.djRouteStage!=='preview'||mapCard.hidden)return;
+    exitSurface(mapCard,()=>{if(app.dataset.djRouteStage==='preview'&&!mapCard.hidden)byId(id)?.click();});
+  };
+  on(backBtn,'click',()=>leavePreview('route-map-edit'));
+  on(stopPreview,'click',()=>leavePreview('route-map-close'));
 
   const choices=add('section','dj-route-choice-list');
   choices.setAttribute('aria-label','계산된 도보 경로 비교');
@@ -349,6 +354,8 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       app.dataset.tab==='route'?'input':'none';
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
+    cancelSurfaceMotion(mapCard);
+    if(stage==='preview')revealSurface(mapCard);
     shield.hidden=stage!=='guiding';
     if(stage!=='input')restoreInputFooter();
     mapActions.hidden=stage!=='input';
@@ -361,6 +368,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   // Light updates in guidance are performed by native GPS, not this presenter.
   setStage();refreshChoices();
   return ()=>{
+    cancelSurfaceMotion(mapCard);
     stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
     footerMountObserver.disconnect();
     restoreInputFooter();

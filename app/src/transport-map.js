@@ -1,3 +1,4 @@
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
 import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
@@ -813,8 +814,8 @@ export function createMetroLineCard(line,stationName){
   const previousNode=el('span','metro-rail-previous',`‹ ${prev}`);
   const nextNode=el('span','metro-rail-next',`${next} ›`);
   // A verified terminal has no adjacent destination; do not present a button.
-  if(neighbor.verified&&!neighbor.previous)previousNode.hidden=true;
-  if(neighbor.verified&&!neighbor.next)nextNode.hidden=true;
+  if(neighbor.verified&&!neighbor.previous){previousNode.hidden=true;previousNode.setAttribute('aria-hidden','true');}
+  if(neighbor.verified&&!neighbor.next){nextNode.hidden=true;nextNode.setAttribute('aria-hidden','true');}
   tail.append(previousNode,el('strong','metro-rail-current',`${normalizeStationQueryName(stationName)}역`),nextNode);
   card.append(tail);
   return card;
@@ -1508,6 +1509,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const close=(restore=true)=>{
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
+    cancelSurfaceMotion(panel);
     windowState.dismiss();
     panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
@@ -1529,7 +1531,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       globalThis.window.DongjakWindowMotion.close(panel,()=>{
         if(seq===closingSequence)close(true);
       });
-    }else close(true);
+    }else exitSurface(panel,()=>{if(seq===closingSequence)close(true);});
   });
   // Stop the entire touch sequence at its real target, not just its
   // synthesized click. Keep native button semantics and accessibility.
