@@ -1,3 +1,4 @@
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {createNightPoiIsolation} from './v913-night-poi-isolation.js';
 /**
  * User-supplied Sangdo 1-dong night map -> MapLibre integration.
@@ -268,14 +269,21 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
     quickOff.replaceChildren(symbol,label);
   };
   const updateFloatingVisibility=()=>{
-    if(floating)floating.hidden=!enabled||app.dataset.tab!=='map';
+    if(!floating)return;
+    const hide=!enabled||app.dataset.tab!=='map';
+    if(floating.hidden===hide)return;
+    cancelSurfaceMotion(floating);floating.hidden=hide;
+    if(!hide&&!globalThis.window?.DongjakWindowMotion)revealSurface(floating);
   };
-  const setFloatingCollapsed=collapsed=>{
+  const setFloatingCollapsed=(collapsed,animate=false)=>{
     if(!floatingContent||!floatingCollapse)return;
+    const changed=floatingContent.hidden!==Boolean(collapsed);
+    cancelSurfaceMotion(floatingContent);
     floatingContent.hidden=Boolean(collapsed);
     if(floating){floating.dataset.collapsed=collapsed?'true':'false';if(collapsed)floating.classList.remove('dj871-sheet-expanded');}
     floatingCollapse.textContent=collapsed?'설정·결과 보기':'접기';
     floatingCollapse.setAttribute('aria-expanded',String(!collapsed));
+    if(animate&&changed&&!collapsed)revealSurface(floatingContent,{duration:220});
   };
   const showFloating=()=>{
     floatingSlot?.append?.(controls);
@@ -731,6 +739,7 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   const setMode=async on=>{
     const next=Boolean(on);
     if(enabled===next)return;
+    cancelSurfaceMotion(floating);cancelSurfaceMotion(floatingContent);
     if(next&&nightActivationBlocked(app)){
       const hint=document.getElementById('route-pick-text');
       if(hint&&!document.getElementById('route-pick-hint')?.hidden)
@@ -824,10 +833,10 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   app.dataset.sangdoNight='off';
   app.dataset.djNightReady='true';
   toggle.disabled=false;quickOff.disabled=false;
-  floatingCollapse?.addEventListener('click',()=>setFloatingCollapsed(!floatingContent.hidden));
+  floatingCollapse?.addEventListener('click',()=>setFloatingCollapsed(!floatingContent.hidden,true));
   floatingStop?.addEventListener('click',()=>{
     const win=globalThis.window;
-    if(!win?.DongjakWindowMotion){void setMode(false);return;}
+    if(!win?.DongjakWindowMotion){exitSurface(floating,()=>{if(enabled)void setMode(false);});return;}
     // Night analysis owns map cleanup. A lifecycle replacement must not
     // cancel the native stop action along with the presentation animation.
     let completed=false;
@@ -848,7 +857,7 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
       const delta=Number.isFinite(end)?end-touchStartY:0;
       touchStartY=null;
       if(Math.abs(delta)<45 || !(globalThis.window?.matchMedia?.('(max-width: 700px)').matches))return;
-      setFloatingCollapsed(delta>0);
+      setFloatingCollapsed(delta>0,true);
     },{passive:true});
   }
   for(const control of [radius,excludeMajor,showAlley,showPath])control?.addEventListener('input',rerender);

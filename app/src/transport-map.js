@@ -1,3 +1,4 @@
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
 import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
@@ -1508,6 +1509,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const close=(restore=true)=>{
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
+    cancelSurfaceMotion(panel);
     windowState.dismiss();
     panel.hidden=true;selected=null;resetBusRoutePreview();seq++;syncRoutePresentation();
     selectionMarker?.remove?.();selectionMarker=null;
@@ -1529,7 +1531,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       globalThis.window.DongjakWindowMotion.close(panel,()=>{
         if(seq===closingSequence)close(true);
       });
-    }else close(true);
+    }else exitSurface(panel,()=>{if(seq===closingSequence)close(true);});
   });
   // Stop the entire touch sequence at its real target, not just its
   // synthesized click. Keep native button semantics and accessibility.

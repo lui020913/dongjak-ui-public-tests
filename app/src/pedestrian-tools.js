@@ -1,3 +1,4 @@
+import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 /**
  * Pedestrian information utilities. Data is descriptive, not a route safety certification.
  * This module does not store GPS coordinates or send user locations to a server.
@@ -348,7 +349,9 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   const showPanel=title=>{
     resetNearby();
     window.DongjakWindowLifecycle?.requestOpen(panel.id);
+    const wasHidden=panel.hidden;cancelSurfaceMotion(panel);
     header.textContent=title;panel.hidden=false;
+    if(wasHidden&&!window.DongjakWindowMotion)revealSurface(panel);
     // The map options menu must not overlap this utility panel.
     const app=document.getElementById('app');app?.classList.remove('map-controls-open');
     app?.classList.remove('map-safety-open');
@@ -595,14 +598,16 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
     panel.hidden=true;seq++;restoreOverview();
   };
   mapToolsToggle?.addEventListener('click',onToggleMapTools);
-  const dismissNearby=()=>{seq++;panel.hidden=true;if(overview)delete overview.dataset.pedToolsHidden;};
+  const dismissNearby=()=>{cancelSurfaceMotion(panel);seq++;panel.hidden=true;if(overview)delete overview.dataset.pedToolsHidden;};
   panel.addEventListener('dongjak:ped-dismiss',dismissNearby);
   close?.addEventListener('click',()=>{
     // The X dismisses this utility to the unobstructed map; it does not
     // resurrect a previously covered overview sheet. Other action flows
     // may still call restoreOverview() when returning to their parent.
     const finish=()=>{panel.hidden=true;seq++;if(overview)delete overview.dataset.pedToolsHidden;};
-    if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,finish);else finish();
+    const closingSeq=seq;
+    const complete=()=>{if(seq===closingSeq)finish();};
+    if(window.DongjakWindowMotion)window.DongjakWindowMotion.close(panel,complete);else exitSurface(panel,complete);
   });
   return ()=>{
     panel.removeEventListener('dongjak:ped-dismiss',dismissNearby);

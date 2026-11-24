@@ -146,7 +146,7 @@ jobs:
         run: node --test tests/policy-gap-2factor-map-patch.test.mjs tests/sangdo1-charcoal-integration.test.mjs tests/policy-gap-3source-map-patch.test.mjs
       - name: Retest two changed route contracts and four phone surfaces with shared night palette
         if: ${{ github.head_ref == 'fix/four-mobile-surfaces-20261124' }}
-        run: node --test tests/phone-design-final-20261123.test.mjs tests/route-experience-20261123.test.mjs tests/four-mobile-surfaces-20261124.test.mjs
+        run: node --test tests/phone-design-final-20261123.test.mjs tests/route-experience-20261123.test.mjs tests/four-mobile-surfaces-20261124.test.mjs tests/surface-motion-fallback.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source

@@ -22,7 +22,7 @@ export const MOBILE_FLOATING_SHEETS=Object.freeze([
   ['detail-sheet','.dj856-detail-edge-drag','#close-detail','.detail-topline'],
   ['entry-sheet','.entry-head','#cancel-add'],
   ['pza-road-sheet','.pza-sheet-head','#pza-road-close'],
-  ['night-visibility-float','.night-visibility-float-head','#night-visibility-float-stop'],
+  // Night analysis owns its compact/expanded state and native header gesture.
   ['road-width-legend','.road-width-legend-head','#road-width-legend-close'],
   // Nearby has its own document-captured header gesture owner in pedestrian-tools.js.
   // Registering it here as well caused two simultaneous translations and a
