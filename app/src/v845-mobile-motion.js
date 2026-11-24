@@ -1,6 +1,5 @@
 /** v8.4.5: restores the floating shortcuts using an opacity-only reveal.
  * No copies of toolbar buttons; existing map/route/account owners stay intact. */
-import {startOpacityMotion} from './compositor-motion.js';
 import {hasOpenMapWindow} from './v840-ui-core.js';
 import './v845-mobile-motion.css';
 
@@ -21,18 +20,10 @@ export function installV845ToolbarFade(doc=document,win=window){
     if(original.value)toolbar.style.setProperty('opacity',original.value,original.priority);
     else toolbar.style.removeProperty('opacity');
   };
-  let ready=false, priorClear=false,frame=0,requested=0,disposed=false,compositor=null;
-  const stopFade=()=>{
-    compositor?.cancel();compositor=null;
-    if(frame){win.cancelAnimationFrame(frame);frame=0;}
-    restore();
-  };
+  let ready=false, priorClear=false,frame=0,requested=0,disposed=false;
   const fade=()=>{
     if(!mobile()||reduced())return;
-    stopFade();
-    compositor=startOpacityMotion([toolbar],{from:0,to:1,duration:320,win,onFinish:()=>{compositor=null;}});
-    if(compositor)return;
-    // Compatibility fallback for older environments without CSS transitions.
+    if(frame)win.cancelAnimationFrame(frame);
     const from=win.performance?.now?.()||0;
     const total=320;
     const update=now=>{
@@ -56,21 +47,21 @@ export function installV845ToolbarFade(doc=document,win=window){
     if(disposed)return;
     const clear=mobile()&&mapShortcutsShouldBeVisible(doc,app);
     if(ready&&!priorClear&&clear)fade();
-    if(!clear&&(frame||compositor))stopFade();
+    if(!clear && frame){win.cancelAnimationFrame(frame);frame=0;restore();}
     priorClear=clear;ready=true;
   };
   const schedule=()=>{
     if(requested||disposed)return;
     requested=win.requestAnimationFrame(sync);
   };
-  // One observer can monitor many targets. Its scheduled sync is shared.
-  const observer=new MutationObserver(schedule);
-  const observers=[observer];
+  const observers=[];
   const observed=new WeakSet();
   const observe=node=>{
     if(!node||observed.has(node))return;
     observed.add(node);
-    observer.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open']});
+    const ob=new MutationObserver(schedule);
+    ob.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open']});
+    observers.push(ob);
   };
   observe(app);
   const watchIds=['route-panel','participation-panel','news-panel','mine-panel',
@@ -91,7 +82,8 @@ export function installV845ToolbarFade(doc=document,win=window){
   sync();
   return ()=>{
     disposed=true;if(requested)win.cancelAnimationFrame(requested);
-    stopFade();observers.forEach(ob=>ob.disconnect());popupObserver?.disconnect();
+    if(frame)win.cancelAnimationFrame(frame);
+    restore();observers.forEach(ob=>ob.disconnect());popupObserver?.disconnect();
     doc.removeEventListener('click',click);win.removeEventListener('resize',resize);
     delete app.dataset.dj845ToolbarInstalled;
   };
