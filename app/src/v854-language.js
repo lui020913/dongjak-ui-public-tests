@@ -363,7 +363,7 @@ export function installLanguagePreference(doc=document,win=window){
     const search=doc.getElementById('map-quick-search-query');
     if(search)search.placeholder=language==='en'?'Where are you going?':'어디로 가시나요?';
     walk(app,language);
-    for(const portal of doc.querySelectorAll('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen'))walk(portal,language);
+    for(const portal of (doc.querySelectorAll?.('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')||[]))walk(portal,language);
     const languageLabel=section.querySelector('label');if(languageLabel)languageLabel.textContent=language==='en'?'Language':'언어';
     select.setAttribute('aria-label',language==='en'?'Change language':'언어 변경');
     const valueLabel=section.querySelector('.dj854-language-value');
@@ -390,8 +390,8 @@ export function installLanguagePreference(doc=document,win=window){
   });
   observer.observe(app,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});
   const portalObserver=new MutationObserver(records=>{for(const record of records){if(record.type==='childList'&&record.target===doc.body){for(const node of record.addedNodes){if(node.nodeType===1&&node.matches('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')){walk(node,language);observer.observe(node,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});}}}}});
-  portalObserver.observe(doc.body,{childList:true});
-  for(const portal of doc.querySelectorAll('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen'))observer.observe(portal,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});
+  if(doc.body)portalObserver.observe(doc.body,{childList:true});
+  for(const portal of (doc.querySelectorAll?.('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')||[]))observer.observe(portal,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});
   apply();
   return ()=>{observer?.disconnect();portalObserver.disconnect();};
 }
