@@ -105,12 +105,21 @@ export function installUnifiedUI(doc=document, win=window){
     const nav=element('bottom-nav');
     const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content,.version-history-dialog')&&nav&&!nav.hidden)||false;
     const distance=opening&&tabReplacement.has(target.id)?Math.min(rect.height,36):docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
+    // Pin the measured transit sheet box for the entire close. Legacy
+    // expanded/compact class changes must not turn a closing card fullscreen.
+    const lockTransit=!opening&&target.id==='transport-sheet';
+    const geometry=lockTransit?['position','top','bottom','height','min-height','max-height','box-sizing','margin-top','margin-bottom'].map(key=>[key,target.style.getPropertyValue(key),target.style.getPropertyPriority(key)]):[];
+    if(lockTransit){
+      const boxHeight=target.offsetHeight||rect.height;
+      for(const [key,value] of Object.entries({position:'fixed',top:rect.top+'px',bottom:'auto',height:boxHeight+'px','min-height':boxHeight+'px','max-height':boxHeight+'px','box-sizing':'border-box','margin-top':'0','margin-bottom':'0'}))target.style.setProperty(key,value,'important');
+    }
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
     let liveOffset=opening?distance:0;
     const record={cancel:()=>finish(false),offset:()=>liveOffset};
     const restore=()=>{
+      for(const [key,value,priority] of geometry){if(value)target.style.setProperty(key,value,priority);else target.style.removeProperty(key);}
       if(isGuide)app.style.removeProperty('--dj-guide-fade');
       scrim?.style.removeProperty('--dj-scrim-alpha');
       if(beforeOpacity)target.style.setProperty('opacity',beforeOpacity,beforeOpacityPriority);

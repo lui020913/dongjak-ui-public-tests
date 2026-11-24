@@ -20,22 +20,49 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,departing=null,departingFrame=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
+  if(enterFrame){win.cancelAnimationFrame?.(enterFrame);enterFrame=0;}
+  for(const {node,props} of enterStyles)for(const [key,value,priority] of props){if(value)node.style.setProperty(key,value,priority);else node.style.removeProperty(key);}
+  enterStyles=[];
   entering?.classList.remove('dj-tab-content-enter');
   entering=null;
   if(departingFrame){win.cancelAnimationFrame?.(departingFrame);departingFrame=0;}
   if(departing){
    const page=departing;
-   if(page.dataset.page!==app.dataset.tab)page.hidden=true;
+   if(page.id==='dj-route-v3'){if(app.dataset.tab!=='route')page.hidden=true;page.inert=false;}
+   else if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
    departing.style?.removeProperty?.('z-index');
    departing.style?.removeProperty?.('opacity');
    departing.style?.removeProperty?.('pointer-events');
    departing=null;
   }
+ }
+ // Production styles fix opacity/animation with !important, so CSS keyframes
+ // alone can be invisible. Paint the real content (including V3's shadow DOM).
+ function revealContent(panel,key){
+  const route=key==='route'?doc.getElementById('dj-route-v3'):null;
+  const nodes=route?.shadowRoot?[...route.shadowRoot.querySelectorAll('.canvas > .header,.canvas > .route-panel,.canvas > .tools,.canvas > .action')]:
+   [...(panel?.querySelectorAll?.(':scope > .dj-sheet-chrome,:scope > .dj836-sheet-body')||[])];
+  if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
+  enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)])}));
+  const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
+  for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
+  paint(.12);
+  let last=null,elapsed=0;
+  const step=now=>{
+   if(!enterStyles.length)return;
+   if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
+   last=now;
+   const p=Math.min(1,elapsed/300);
+   paint(.12+.88*p*p*(3-2*p));
+   if(p<1)enterFrame=win.requestAnimationFrame(step);else clearEntrance();
+  };
+  enterFrame=win.requestAnimationFrame(step);
+  return true;
  }
  function replay(button){
   if(!button||button.disabled||!button.isConnected)return false;
@@ -46,7 +73,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!button||button.disabled||!button.isConnected)return;
   clearEntrance();
   const previousTab=app.dataset.tab;
-  const previous=doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
+  const routeHost=previousTab==='route'?doc.getElementById('dj-route-v3'):null;
+  const previous=routeHost&&!routeHost.hidden?routeHost:doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
   const destination=button.dataset.tab;
   const toMap=destination==='map';
   // Only a map return retains the departing page for a single fade; normal
@@ -58,6 +86,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    departing=previous;
    previous.style.setProperty('z-index','6999','important');
    previous.style.setProperty('pointer-events','none','important');
+   if(previous.id==='dj-route-v3')previous.inert=true;
    // Important opacity is deliberate: historical CSS fixes the page to
    // opacity:1 and filter:none, defeating an ordinary WAAPI fade.
    const begin=win.performance.now();
@@ -74,6 +103,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
+   if(revealContent(panel,app.dataset.tab)){enterTimer=win.setTimeout(clearEntrance,1600);return;}
   }
   if(reduced()){clearEntrance();return;}
   enterTimer=win.setTimeout(clearEntrance,(toMap?TAB_TRANSITION.mapReturn:TAB_TRANSITION.contentReveal)+30);

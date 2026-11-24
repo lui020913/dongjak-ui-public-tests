@@ -101,11 +101,30 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if((!inside||boundary)&&event.cancelable)event.preventDefault();
   },{passive:false});
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
-  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
+  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0,keyboardAdjusted=false;
   let transportDismissedAt=0;
   const guardTransportDismiss=()=>{transportDismissedAt=Date.now();};
   document.addEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
-  const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||app?.classList.contains('dj-reduced-animation');
+  // A keyboard-adjusted native top layer must release immediately on close:
+  // mobile viewport/focus transitions can starve both rAF and JS timers.
+  // The ordinary AI page still uses one visible compositor content fade.
+  const keyboardObserver=new MutationObserver(records=>{
+    if(modal.open&&(modal.dataset.djAiKeyboard==='true'||records.some(r=>r.oldValue==='true')))keyboardAdjusted=true;
+  });
+  keyboardObserver.observe(modal,{attributes:true,attributeFilter:['data-dj-ai-keyboard'],attributeOldValue:true});
+  function stopContentMotion(){
+    layout.style.removeProperty('animation');
+    layout.style.removeProperty('transition');
+    layout.style.removeProperty('will-change');
+  }
+  function fadeContent(opening){
+    layout.style.setProperty('transition','none','important');
+    layout.style.setProperty('will-change','opacity','important');
+    layout.style.setProperty('animation',opening
+      ?'dj9251-ai-content-enter 300ms cubic-bezier(.25,.20,.40,1) both'
+      :'dj9251-ai-content-leave 260ms ease-in both','important');
+  }
   function setStatus(message){status.textContent=message;}
   syncProfile();
   login.addEventListener('click',()=>{
@@ -120,10 +139,12 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   function finishClose(){
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     try{if(modal.open)modal.close();}
-    finally{modal.classList.remove('dj887-ai-closing');}
+    finally{stopContentMotion();modal.classList.remove('dj887-ai-closing');}
   }
   layout.addEventListener('animationend',event=>{
-    if(event.target===layout&&event.animationName==='dj9251-ai-content-leave'&&modal.classList.contains('dj887-ai-closing'))finishClose();
+    if(event.target!==layout)return;
+    if(event.animationName==='dj9251-ai-content-leave'&&modal.classList.contains('dj887-ai-closing'))finishClose();
+    if(event.animationName==='dj9251-ai-content-enter'&&!modal.classList.contains('dj887-ai-closing'))layout.style.removeProperty('will-change');
   });
   function exit(){
     if(modal.classList.contains('dj887-ai-closing')){
@@ -136,9 +157,14 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     // out of the changing keyboard viewport.
     if(reduce()){input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;}
     if(window.matchMedia?.('(max-width:699px)')?.matches){
-      // Release the top layer synchronously on phones. A delayed animation
-      // callback can be starved during keyboard/viewport and map updates.
-      input.blur();finishClose();
+      input.blur();
+      // A real keyboard viewport adjustment must never leave a native
+      // dialog blocking the map after a close tap. No delayed top layer.
+      if(keyboardAdjusted||modal.dataset.djAiKeyboard==='true'){finishClose();return;}
+      modal.classList.add('dj887-ai-closing');
+      // Browser-owned animation, without per-frame DOM style mutations.
+      closeTimer=window.setTimeout(finishClose,350);
+      fadeContent(false);
       return;
     }
     modal.classList.add('dj887-ai-closing');
@@ -152,11 +178,14 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(modal.open||Date.now()-transportDismissedAt<1600||isAiBlockedAfterDismiss()||isMapDetailVisible(document))return;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     modal.classList.remove('dj887-ai-closing');
-    syncProfile();previousFocus=document.activeElement;
+    keyboardAdjusted=false;syncProfile();previousFocus=document.activeElement;
     q('#map-safety-close')?.click();
     q('#map-quick-search-close')?.click();
     q('#map-quick-search-query')?.blur();
-    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();}
+    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();
+      if(window.matchMedia?.('(max-width:699px)')?.matches&&!reduce())fadeContent(true);
+      else{stopContentMotion();layout.style.removeProperty('animation');layout.style.removeProperty('transition');}
+    }
     // iOS Safari: focusing the query immediately opens the keyboard before
     // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.
@@ -276,6 +305,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   modal.addEventListener('cancel',event=>{event.preventDefault();exit();});
   modal.addEventListener('click',event=>{if(event.target===modal)exit();});
   modal.addEventListener('close',()=>{
+    stopContentMotion();if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     // HTMLDialogElement's close event can be queued. Never steal focus from
     // the native map search if the visitor has already tapped it while the
     // AI dialog is finishing its 175ms fade. This also preserves keyboard
@@ -288,6 +318,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   });
   return ()=>{
     if(closeTimer)clearTimeout(closeTimer);
+    stopContentMotion();keyboardObserver.disconnect();
     document.removeEventListener('pointerdown',capturePointer,true);
     document.removeEventListener('keydown',captureOrbKeyboard,true);
     document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);

@@ -161,3 +161,24 @@ test('map return keeps only a non-interactive fading page and rapid tab reentry 
  click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(frames.size,0);
  dispose();
 });
+
+
+test('route return fades the actual V3 overlay instead of retaining the legacy route adapter',()=>{
+ const handlers=new Map(),frames=new Map(),timers=new Map();let key=0;
+ const app={dataset:{tab:'route'}},values=new Map();
+ const host={id:'dj-route-v3',dataset:{},hidden:false,inert:false,style:{setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},removeAttribute:k=>{if(k==='data-dj-tab-outgoing')delete host.dataset.djTabOutgoing;}};
+ const legacy={dataset:{page:'route'},hidden:false};
+ const map={dataset:{tab:'map'},isConnected:true,disabled:false,click(){app.dataset.tab='map';legacy.hidden=true;host.hidden=host.dataset.djTabOutgoing!=='true';}};
+ const nav={dataset:{},querySelectorAll:()=>[map],querySelector:()=>map};
+ const doc={getElementById:k=>k==='bottom-nav'?nav:k==='dj-route-v3'?host:null,querySelector:()=>legacy};
+ const win={matchMedia:q=>({matches:q.includes('max-width')}),addEventListener:(n,fn)=>handlers.set(n,fn),removeEventListener(){},setTimeout:fn=>{timers.set(++key,fn);return key;},clearTimeout:k=>timers.delete(k),requestAnimationFrame:fn=>{frames.set(++key,fn);return key;},cancelAnimationFrame:k=>frames.delete(k),performance:{now:()=>0}};
+ const dispose=installBottomTabNavigation({doc,win,app});
+ handlers.get('click')({target:{closest:sel=>sel==='#bottom-nav .nav-tab[data-tab]'?map:null},preventDefault(){},stopImmediatePropagation(){}});
+ assert.equal(legacy.hidden,true);assert.equal(legacy.dataset.djTabOutgoing,undefined);
+ assert.equal(host.hidden,false);assert.equal(host.inert,true);
+ const first=[...frames.entries()][0];frames.delete(first[0]);first[1](110);
+ assert.equal(Number(values.get('opacity')),.5);
+ const second=[...frames.entries()][0];frames.delete(second[0]);second[1](220);
+ assert.equal(host.hidden,true);assert.equal(host.inert,false);assert.equal(values.has('opacity'),false);
+ dispose();
+});

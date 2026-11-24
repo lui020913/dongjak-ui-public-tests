@@ -204,7 +204,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
     const next=app.dataset.tab==='route'&&win.innerWidth<700&&!app.classList.contains('route-guiding');
     if(next!==active){
       active=next;
-      host.hidden=!next;
+      // The tab controller can retain only the real V3 overlay for a map-return fade.
+      // Do not resurrect the legacy route sheet while it is being dismissed.
+      host.hidden=!next&&host.dataset.djTabOutgoing!=='true';
       if(next){app.dataset.djRouteScreenV3='1';concealOld();hideOldMapTools();}
       else{
         restoreOld();restoreOldMapTools();
