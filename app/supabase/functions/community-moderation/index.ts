@@ -67,7 +67,9 @@ Deno.serve(async(req:Request)=>{
  const payload:any={body,nickname,photo};
  if(kind==="post"){
   const title=clip(p.title,70);if(!title||!categories.has(p.category))return send({error:"제목 및 유형을 확인해주세요."},400);
-  Object.assign(payload,{title,category:p.category,lng:null,lat:null});
+  const dongs=new Set(["노량진1동","노량진2동","상도1동","상도2동","상도3동","상도4동","흑석동","사당1동","사당2동","사당3동","사당4동","사당5동","대방동","신대방1동","신대방2동"]);
+  if(p.dong!=null&&p.dong!==""&&!dongs.has(p.dong))return send({error:"행정동을 확인해주세요."},400);
+  Object.assign(payload,{title,category:p.category,dong:p.dong||null,lng:null,lat:null});
   if(p.lng!=null||p.lat!=null){if(!Number.isFinite(p.lng)||!Number.isFinite(p.lat)||p.lng<126||p.lng>128||p.lat<37||p.lat>38)return send({error:"위치 범위를 확인해주세요."},400);payload.lng=p.lng;payload.lat=p.lat;}
  }else{if(typeof p.post_id!=="string"||!uuid.test(p.post_id))return send({error:"게시글을 확인해주세요."},400);payload.post_id=p.post_id;const {data,error}=await client.from("community_posts").select("id").eq("id",p.post_id).maybeSingle();if(error||!data)return send({error:"게시글이 존재하지 않습니다."},404);
   if(p.parent_id!=null){if(typeof p.parent_id!=="string"||!uuid.test(p.parent_id))return send({error:"답글 대상을 확인해주세요."},400);const {data:parent,error:parentError}=await client.from("community_comments").select("id,parent_id").eq("id",p.parent_id).eq("post_id",p.post_id).maybeSingle();if(parentError||!parent||parent.parent_id)return send({error:"답글 대상 댓글이 존재하지 않거나 이미 답글입니다."},400);payload.parent_id=parent.id;}}
