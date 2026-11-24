@@ -190,6 +190,8 @@ export async function onRequestGet({request,env={}}){
   const wantMetro=modes.includes('metro'),wantBus=modes.includes('bus');
   const selectedRoute=query.get('routeId');
   if(selectedRoute!==null&&(!/^\d{5,15}$/.test(selectedRoute)||!wantBus||wantMetro))return result({ok:false,code:'INVALID_ROUTE_ID',metro:[],bus:[]},400);
+  // Selected-route polling runs every 15s; keep the shared cache shorter.
+  if(selectedRoute)headers['Cache-Control']='public, max-age=0, s-maxage=10';
   const cacheUrl=new URL('/api/transport/live-vehicles',request.url);cacheUrl.searchParams.set('modes',modes.sort().join(','));if(selectedRoute)cacheUrl.searchParams.set('routeId',selectedRoute);
   const requestKey=new Request(cacheUrl.toString(),{method:'GET'});
   if(store)try{const cached=await store.match(requestKey);if(cached)return cached;}catch{}

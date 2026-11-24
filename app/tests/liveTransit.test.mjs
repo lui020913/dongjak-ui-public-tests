@@ -172,3 +172,12 @@ test('position endpoint recovers official XML when JSON has no supported row con
 });
 
 test('top-level daily quota code stops all further same-key metro calls and never invokes XML fallback',async()=>{const original=globalThis.fetch,calls=[];globalThis.fetch=async url=>{calls.push(String(url));return new Response(JSON.stringify({status:429,code:'ERROR-337',message:'daily limit'}));};try{const options={request:new Request('https://quota-test.example/api/transport/live-vehicles?modes=metro'),env:{SEOUL_SUBWAY_API_KEY:'QUOTA-TEST-KEY-UNIQUE'}};let res=await onRequestGet(options);assert.equal(res.status,429);assert.equal((await res.json()).code,'ERROR-337');assert.equal(calls.length,1);res=await onRequestGet(options);assert.equal(res.status,429);assert.equal(calls.length,1);}finally{globalThis.fetch=original;}});
+
+test('selected bus route cache expires before the 15 second poll interval',async()=>{
+ const original=globalThis.fetch;globalThis.fetch=async()=>new Response(JSON.stringify({msgHeader:{headerCd:0},msgBody:{itemList:[]}}));
+ try{
+   const response=await onRequestGet({request:new Request('https://example.org/api/transport/live-vehicles?modes=bus&routeId=100100389'),env:{SEOUL_BUS_SERVICE_KEY:'TEST_KEY'}});
+   assert.equal(response.status,200);
+   assert.match(response.headers.get('Cache-Control'),/s-maxage=10(?:$|,)/);
+ }finally{globalThis.fetch=original;}
+});
