@@ -568,3 +568,20 @@ test('night consent has one centered fade and tab handoff keeps the dock fixed',
  const after=await nav.boundingBox();
  for(const key of ['x','y','width','height'])expect(Math.abs(after[key]-before[key])).toBeLessThanOrEqual(2);
 });
+
+test('map search and AI controls share actual top and bottom edges',async({page})=>{
+ test.setTimeout(150000);
+ await readyForLiveTouch(page);
+ const form=page.locator('.topbar .map-quick-search-form'),orb=page.locator('#dj890-ai-orb');
+ await expect(form).toBeVisible();await expect(orb).toBeVisible();
+ const aligned=()=>page.evaluate(()=>{
+  const f=document.querySelector('.topbar .map-quick-search-form')?.getBoundingClientRect(),
+    a=document.getElementById('dj890-ai-orb')?.getBoundingClientRect();
+  return Boolean(f&&a&&Math.abs(f.top-a.top)<=1&&Math.abs(f.bottom-a.bottom)<=1&&Math.abs(f.height-54)<=1&&Math.abs(a.height-54)<=1&&a.left>=f.right+3);
+ });
+ await expect.poll(aligned).toBe(true);
+ await page.locator('#map-quick-search-query').click();
+ await expect.poll(aligned).toBe(true);
+ await page.locator('#map-quick-search-query').fill('상도');
+ await expect.poll(aligned).toBe(true);
+});
