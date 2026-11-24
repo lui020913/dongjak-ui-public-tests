@@ -475,6 +475,8 @@ jobs:
           path: ui-performance-comparison.json
           if-no-files-found: error
           retention-days: 14
+      - name: Require material improvement without severe frame regressions
+        run: node scripts/verify-ui-performance.mjs "$DONGJAK_PERF_OUTPUT"
 
   production:
     needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, performance-compare]
