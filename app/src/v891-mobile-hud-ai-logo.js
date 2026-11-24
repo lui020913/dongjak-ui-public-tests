@@ -70,7 +70,9 @@ export function installV891HeaderAndAi(doc=document,win=window){
     const query=modal.querySelector('#dj-ai-query');
     // Use one keyboard state for the composer safe-area. Do not treat an
     // ordinary scroll/zoom with the input unfocused as an open keyboard.
-    const keyboardOpen=Boolean(query&&doc.activeElement===query&&inset>120);
+    const keyboardOpen=Boolean(inset>120&&(query&&doc.activeElement===query||modal.dataset.djAiKeyboard==='true'));
+    // Keep keyboard padding until the visible viewport expands, not merely
+    // until focus leaves the field (iOS dismiss animation is asynchronous).
     modal.dataset.djAiKeyboard=keyboardOpen?'true':'false';
     modal.style.setProperty('--dj891-ai-keyboard-inset',inset+'px');
     modal.style.setProperty('--dj891-ai-visible-top',top+'px');

@@ -52,7 +52,9 @@ export function installPwaStatusTone(doc=document,win=window) {
       // Onboarding is an ordinary full-screen page, not a white dialog.
       // Use precisely the same tone as the initial iOS status area and
       // map/home page; do not switch to a special near-white while it opens.
-      const color=(startup||onboarding)?baselineColor():nightActive?'#22282e':aiOpen?(theme==='dark'?'#22282e':'#ffffff'):baselineColor();
+      // The full-screen AI surface, root and native status sample must share
+      // one color even while the visual viewport contracts for the keyboard.
+      const color=(startup||onboarding)?baselineColor():aiOpen?(theme==='dark'?'#191b1f':'#edf3ef'):nightActive?'#22282e':baselineColor();
       root.style.setProperty('--dj-pwa-status-color',color);
       root.style.setProperty('background-color',color,'important');
       doc.body.style.setProperty('background-color',color,'important');

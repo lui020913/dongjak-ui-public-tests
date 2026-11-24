@@ -64,3 +64,13 @@ test('compact docking restores the scale corner before measuring, without forcin
  assert.match(js.slice(desktop),/scale\.style\.removeProperty\('display'\)/);
  assert.match(js,/\['top','bottom','left','right','visibility','display'\]\)scale\?\.style\.removeProperty\(prop\)/);
 });
+
+test('AI keyboard surface shares its root and PWA status background, with no white seam',()=>{
+ const tone=code('src/mobile-pwa-status-tone-v793.js'),toneCss=code('src/mobile-pwa-status-tone-v793.css');
+ const ai=code('src/v880-supabase-safety-ai.css'),geometry=code('src/v891-mobile-hud-ai-logo.js');
+ assert.match(tone,/aiOpen\?\(theme==='dark'\?'#191b1f':'#edf3ef'\)/);
+ assert.doesNotMatch(tone,/aiOpen\?[^;]*'#ffffff'/);
+ assert.match(toneCss,/--dj-pwa-status-color:#edf3ef;/);
+ assert.match(ai,/html:has\(#dj-ai-search-modal\[open\]\) body\{background-color:#edf3ef!important/);
+ assert.match(geometry,/inset>120&&\(query&&doc.activeElement===query\|\|modal.dataset.djAiKeyboard==='true'\)/);
+});

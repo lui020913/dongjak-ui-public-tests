@@ -391,3 +391,43 @@ test('community new post portal stays inside viewport when keyboard contracts',a
   const restored=await page.locator('#community-form').evaluate(node=>node.parentElement?.id);
   expect(restored).toBe('');
 });
+
+// A Chromium viewport mock verifies web-owned geometry and color continuity;
+// it does not claim to render the real iOS system keyboard/accessory bar.
+test('AI keyboard contraction keeps the same opaque page background',async({page},testInfo)=>{
+  test.skip(page.viewportSize().width>=700,'phone only');
+  test.setTimeout(120000);
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true});
+    Object.defineProperty(navigator,'platform',{configurable:true,get:()=> 'iPhone'});
+    Object.defineProperty(navigator,'userAgent',{configurable:true,get:()=> 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'});
+    const vv=window.visualViewport;
+    let height=null,top=0;
+    const descriptor=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv),'height');
+    Object.defineProperty(vv,'height',{configurable:true,get:()=>height??descriptor.get.call(vv)});
+    Object.defineProperty(vv,'offsetTop',{configurable:true,get:()=>top});
+    window.__djAiViewport=(h,t=0)=>{height=h;top=t;vv.dispatchEvent(new Event('resize'));};
+  });
+  await readyForLiveTouch(page);
+  await page.locator('#dj890-ai-orb').click({timeout:15000});
+  const modal=page.locator('#dj-ai-search-modal');
+  await expect(modal).toBeVisible();
+  if(await modal.locator('[data-profile="adult"]').isVisible())await modal.locator('[data-profile="adult"]').click();
+  const input=modal.locator('#dj-ai-query');await expect(input).toBeEnabled();
+  await input.focus();
+  const h=page.viewportSize().height;
+  await page.evaluate(height=>window.__djAiViewport(height,0),h-350);
+  await expect(modal).toHaveAttribute('data-dj-ai-keyboard','true');
+  await expect.poll(()=>page.evaluate(()=>{
+    const m=document.getElementById('dj-ai-search-modal'),r=m.getBoundingClientRect(),footer=m.querySelector('.dj-ai-composer').getBoundingClientRect();
+    const bg=getComputedStyle(m).backgroundColor;
+    return {root:getComputedStyle(document.documentElement).backgroundColor===bg,body:getComputedStyle(document.body).backgroundColor===bg,top:Math.abs(r.top-visualViewport.offsetTop)<=2,bottom:Math.abs(r.bottom-visualViewport.height-visualViewport.offsetTop)<=2,footer:r.bottom-footer.bottom>=-2&&r.bottom-footer.bottom<=10};
+  })).toEqual({root:true,body:true,top:true,bottom:true,footer:true});
+  await testInfo.attach('ai-keyboard-contract.png',{body:await page.screenshot(),contentType:'image/png'});
+  await input.evaluate(n=>n.blur());
+  await expect(modal).toHaveAttribute('data-dj-ai-keyboard','true');
+  await page.evaluate(()=>window.__djAiViewport(null));
+  await expect(modal).toHaveAttribute('data-dj-ai-keyboard','false');
+  await modal.getByRole('button',{name:'AI 검색 닫기'}).click();
+  await expect(modal).toBeHidden();
+});
