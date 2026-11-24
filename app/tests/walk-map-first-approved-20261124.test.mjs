@@ -10,7 +10,7 @@ test('approved walking input is a real map with a TOP location card and separate
   // The protected release saw 15.7px on 375px: compact whitespace must
   // preserve the full 24px gap without weakening acceptance checks.
   assert.match(css,/justify-content:flex-start!important;gap:7px!important/);
-  assert.match(css,/margin:0!important;padding:9px 15px 8px!important/);
+  assert.match(css,/margin:0!important;padding:6px 12px 8px!important/);
   assert.match(css,/data-dj-route-stage="input"[\s\S]*?#route-panel\.page-panel:not\(\[hidden\]\)[\s\S]*?top:0!important;bottom:auto!important/);
   assert.match(css,/data-dj-route-stage="input"[\s\S]*?#route-panel\.page-panel:not\(\[hidden\]\)[\s\S]*?background:transparent!important/);
   assert.match(css,/position:fixed!important;[\s\S]*?bottom:calc\(var\(--dj910-dock-bottom,88px\) \+ 8px\)!important/);
