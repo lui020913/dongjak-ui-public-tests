@@ -888,9 +888,11 @@
           <input id="community-search" type="search" placeholder="동네 게시글 검색" aria-label="동네 게시글 검색">
           <button type="button" id="community-compose-toggle" class="community-compose-toggle">＋ 글쓰기</button>
         </div>
-        <details class="community-view-options"><summary aria-label="게시글 정렬 및 보기 옵션">정렬 · 저장 · 알림 <span aria-hidden="true">⌄</span></summary>
-          <div class="community-toolbar" role="group" aria-label="커뮤니티 보기 및 관리">
+        <details class="community-view-options"><summary aria-label="게시글 정렬 및 보기 옵션">지역 · 정렬 · 저장 · 알림 <span aria-hidden="true">⌄</span></summary>
+          <label class="community-dong-filter-row" for="community-dong-filter"><span>지역</span>
             <select id="community-dong-filter" aria-label="행정동별 게시글"><option value="">모든 지역</option><option>노량진1동</option><option>노량진2동</option><option>상도1동</option><option>상도2동</option><option>상도3동</option><option>상도4동</option><option>흑석동</option><option>사당1동</option><option>사당2동</option><option>사당3동</option><option>사당4동</option><option>사당5동</option><option>대방동</option><option>신대방1동</option><option>신대방2동</option></select>
+          </label>
+          <div class="community-toolbar" role="group" aria-label="커뮤니티 보기 및 관리">
             <select id="community-sort" aria-label="게시글 정렬"><option value="new">최신순</option><option value="popular">공감순</option></select>
             <button type="button" id="community-saved-toggle" class="community-notice-toggle" aria-pressed="false" aria-label="저장한 글">저장한 글</button>
             <button type="button" id="community-notifications-toggle" class="community-notice-toggle" aria-label="커뮤니티 알림">알림</button>
