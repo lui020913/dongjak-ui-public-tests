@@ -55,7 +55,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
 
   function updateTitle(){
     const title=header?.querySelector('strong');
-    if(title)title.textContent=doc.getElementById('community-category')?.value==='보행 불편'?'보행환경 제보':'새 게시글';
+    const issue=doc.getElementById('community-category')?.value==='보행 불편';if(title)title.textContent=issue?'보행환경 제보':'새 게시글';if(helper)helper.textContent=issue?'보행 중 불편했던 상황을 공개 게시판에 알려주세요. 지역과 지도 위치는 필수입니다.':'지역은 자유게시판에서만 선택사항이며 사진과 위치는 선택사항입니다.';
   }
   function geometry(){
     frame=0;
