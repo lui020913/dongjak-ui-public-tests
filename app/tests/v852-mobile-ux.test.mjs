@@ -108,11 +108,7 @@ test('profile back navigation cannot remain locked by suspended iOS animations',
   assert.match(source,/function back\(\)/);
   assert.match(source,/detail\.hidden=true;\s*landing\.hidden=false/);
   assert.match(source,/enter\(landing,'back'\)/);
-  assert.match(source,/createSubpageMotion\(\{reduced:reducedMotion\}\)/);
-  const motion=read('src/subpage-motion.js');
-  assert.match(motion,/if\(!target\|\|reduced\(\)/);
-  assert.match(source,/function back\(\)\{\s*motion\.cancel\(\)/);
-  assert.doesNotMatch(motion,/await animation\.finished/);
+  assert.match(source,/reducedMotion\(\)/);
   assert.doesNotMatch(source,/if\(transitioning\)return/);
   assert.doesNotMatch(source,/await fadeOpacity/);
   assert.doesNotMatch(source,/지도 &amp; 이동/);

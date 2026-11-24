@@ -1,4 +1,3 @@
-import {createFrameCoalescer} from './frame-coalescer.js';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -989,18 +988,7 @@ map.on('moveend',()=>{
 // 우클릭/Control+드래그 및 두 손가락 기울이기 조작을 명시적으로 활성화합니다.
 map.dragRotate.enable();
 map.touchPitch.enable();
-// Multiple camera pitch events can arrive in a single rendering frame.
- // Coalesce only derived building/border style updates; camera and safety
- // layers retain their original independent event handlers.
- const pitchPresentation=createFrameCoalescer(()=>{
-   syncTiltWithBuildings();
-   const pitch=map.getPitch();
-   if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-width',2.6+pitch/28);
-   if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-width',10.5+pitch/18);
- });
- map.on('pitch',pitchPresentation.schedule);
- map.on('pitchend',pitchPresentation.flush);
- map.on('remove',pitchPresentation.cancel);
+map.on('pitch',syncTiltWithBuildings);
 // Repaint the added GIS 2D footprint/outline sources when theme changes.
 document.getElementById('theme-toggle')?.addEventListener('click',()=>requestAnimationFrame(syncTiltWithBuildings));
 function gotoDongjak(){
@@ -1172,7 +1160,12 @@ async function loadDongjakBoundary(){
       layout:{'line-cap':'round','line-join':'round'},
       paint:{'line-color':'#0f7f73','line-width':3.35,'line-opacity':0.96}});
     baseLayerControls?.apply();
-    // District border pitch presentation shares the existing coalesced camera listener.
+    map.on('pitch',()=>{
+      const pitch=map.getPitch();
+      // 측면에서 지표면 경계선이 가늘어지는 현상을 보완합니다(수직 벽 모델은 아님).
+      if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-width',2.6+pitch/28);
+      if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-width',10.5+pitch/18);
+    });
     installNeighborDistrictLabels(map,features,boundaryBounds,isDongjak);
     status('동작구 경계 적용 · 지도를 기울이면 건물과 지형이 나타납니다');
     syncTiltWithBuildings();

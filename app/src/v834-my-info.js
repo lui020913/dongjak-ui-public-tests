@@ -1,4 +1,3 @@
-import {createSubpageMotion} from './subpage-motion.js';
 /** v8.2.15: My Info settings hub; existing account controller remains authoritative. */
 const icon=(name)=>({
  profile:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.3-3.7 3-6.1 7-6.1s6.7 2.4 7 6.1"/>',
@@ -217,12 +216,17 @@ export function installMyInfo(doc=document){
  // iOS PWA may suspend Web Animations when a sheet is being resized or
  // the native select is opening. Navigation never waits for an animation.
  const reducedMotion=()=>doc.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
- const motion=createSubpageMotion({reduced:reducedMotion});
  function enter(node,direction='forward'){
-   motion.enter(node===detail?content:node,direction);
+   // Preserve the stable navigation API while animating body content only.
+   // The child back/title bar remains in the fixed header throughout.
+   const target=node===detail?content:node;
+   if(!target||reducedMotion()||typeof target.animate!=='function')return;
+   const x=direction==='back'?-44:44;
+   try{target.animate([{opacity:1,transform:`translateX(${x}px)`},{opacity:1,transform:'translateX(0)'}],{
+     duration:360,easing:'cubic-bezier(.18,.72,.24,1)'
+   });}catch{/* Appearance must never block navigation. */}
  }
  function showDetail(view){
-   motion.cancel();
    landing.hidden=true;
    title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
    if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox){
@@ -258,7 +262,6 @@ export function installMyInfo(doc=document){
    }
  }
  function back(){
-   motion.cancel();
    if(historyList&&historyHost&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    delete content.dataset.dj834View;
    detail.hidden=true;
