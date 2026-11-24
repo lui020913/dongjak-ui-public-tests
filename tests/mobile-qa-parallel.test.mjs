@@ -79,7 +79,7 @@ test('only opted-in design evidence is required for Production and Preview notif
  const capture=workflow.slice(workflow.indexOf('  visual-capture:'),workflow.indexOf('  visual-qa:'));
  for(const job of [capture,visual,explore])assert.equal((job.match(/run: node scripts\/live-qa-verify-candidate\.mjs/g)||[]).length,2);
  assert.match(workflow,/run: node scripts\/live-qa-release-gate\.mjs qa-artifacts/);
- assert.match(workflow,/production:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa\]/);
+ assert.match(workflow,/production:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, performance-compare\]/);
  assert.match(workflow,/notify-preview:\s*\n\s*needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa\]/);
 });
 
