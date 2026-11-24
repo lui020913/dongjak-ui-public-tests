@@ -1306,8 +1306,18 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   await expect(ai).toBeVisible();
   await expect(mic).toBeVisible();
   await query.click();
-  // An empty focus must NOT create a rectangular suggestion box.
+  // Empty focus hides the map toolbar and shows only the two search actions.
   await expect(dropdown).toBeHidden();
+  await expect(page.locator('#dj-search-nearby')).toBeVisible();
+  await expect(page.locator('#djNext-toolbar')).toBeHidden();
+  await page.getByRole('button',{name:'최근 검색',exact:true}).click();
+  await expect(dropdown).toBeVisible();
+  await expect(dropdown.locator('.dj-recent-query-title')).toHaveText('최근 검색어');
+  await expect(dropdown.locator('.map-quick-search-suggestion')).toHaveCount(0);
+  await page.locator('#map-quick-search-close').click();
+  await expect(dropdown).toBeHidden();
+  await expect(page.locator('#djNext-toolbar')).toBeVisible();
+  await query.click();
   await expect(ai).toBeVisible();
   await expect(mic).toBeVisible();
   // The rounded, pill-aligned panel appears only after meaningful input.
@@ -1321,6 +1331,7 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   expect(Math.abs(rb.x+rb.width-(page.viewportSize().width-12))).toBeLessThanOrEqual(2);
   expect(rb.y).toBeGreaterThanOrEqual(Math.max(sb.y+sb.height,ab.y+ab.height)-2);
   await expect(page.locator('#dj-search-nearby')).toBeVisible();
+  await expect(dropdown.locator('.map-quick-search-result small').first()).not.toContainText(/OpenStreetMap|^bus\b|운영 여부 미확인/i);
   const head=dropdown.locator('.map-quick-search-dropdown-head'),body=dropdown.locator('#dj-search-scroll-body');
   const before=await head.boundingBox();await body.evaluate(el=>{el.scrollTop=el.scrollHeight;});
   const after=await head.boundingBox();expect(Math.abs(before.height-after.height)).toBeLessThanOrEqual(1);expect(Math.abs(before.y-after.y)).toBeLessThanOrEqual(1);

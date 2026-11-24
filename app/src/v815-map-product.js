@@ -47,7 +47,7 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
   const mineBody=mine?.querySelector(':scope > .dj836-sheet-body')||mine;
   mineBody?.appendChild(myBox);
   const recentBox=el('section','dj815-recent');
-  const recentHead=el('div','dj815-inline-row');recentHead.append(el('strong','', '최근 검색 장소'));
+  const recentHead=el('div','dj815-inline-row');recentHead.append(el('strong','', '최근 선택한 장소'));
   recentHead.append(button('기록 삭제',()=>{clearRecentPlaces();renderStored();},'dj815-link-button'));
   recentBox.append(recentHead);
   const recentList=el('div','dj815-recent-list');recentBox.append(recentList);

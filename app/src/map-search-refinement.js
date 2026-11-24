@@ -1,4 +1,20 @@
-const kindOf=p=>p.kind==='bus'||/버스정류장/.test(p.category||'')?'bus':p.kind==='subway'||/지하철|철도역/.test(p.category||'')?'subway':'place';
+const categoryAliases=Object.freeze({
+ bus:'버스정류장',bus_stop:'버스정류장',bus_station:'버스터미널',subway:'지하철·철도역',railway:'지하철·철도역',station:'지하철·철도역',train_station:'지하철·철도역',tram_stop:'철도 정류장',
+ restaurant:'음식점',fast_food:'음식점',cafe:'카페',coffee:'카페',convenience:'편의점',supermarket:'마트',pharmacy:'약국',hospital:'병원',clinic:'의원',dentist:'치과',school:'학교',university:'대학교',college:'대학교',kindergarten:'유치원',park:'공원',garden:'정원',library:'도서관',bank:'은행',atm:'ATM',toilets:'화장실',toilet:'화장실',police:'경찰서',fire_station:'소방서',townhall:'공공기관',place_of_worship:'종교시설',church:'교회',parking:'주차장',fuel:'주유소',hotel:'숙박시설',shop:'상점',bakery:'제과점',marketplace:'시장',museum:'박물관',sports_centre:'체육시설',playground:'놀이터',community_centre:'주민시설',post_office:'우체국',shelter:'쉼터',food:'음식점',healthcare:'의료시설'
+});
+const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
+export function searchPlaceKind(p){
+ const values=rawType(p);
+ if(values.some(v=>/^(bus|bus_stop|bus_station|busstop|버스정류장|버스터미널)$/.test(v)||v.includes('버스정류장')))return 'bus';
+ if(values.some(v=>/^(subway|railway|station|train_station|tram_stop|rail)$/.test(v)||/지하철|철도역/.test(v)))return 'subway';
+ return 'place';
+}
+const kindOf=searchPlaceKind;
+export function displayFacilityCategory(p){
+ const raw=String(p.category||p.kind||p.type||'').trim();
+ return categoryAliases[raw.toLowerCase()]||(/[가-힣]/.test(raw)?raw:'일반 시설');
+}
+const userAddress=value=>String(value||'').split(/\s*·\s*/).map(v=>v.trim()).filter(v=>v&&!/openstreetmap|nominatim|photon|지도에 등록|운영 여부 미확인|저장된 역 위치|출입구와 다를 수|^ARS\b|^검색 결과$|^OSM\b|^©/i.test(v)).join(' · ');
 export function searchResultKey(p){
   const kind=kindOf(p),name=String(p.name||'').trim().replace(/역$/,'');
   if(kind==='bus'&&p.arsId)return 'bus:'+String(p.arsId);
@@ -11,8 +27,9 @@ export function searchResultSubtitle(p){
     const known=direction&&!/^\d+$/.test(direction)&&!/^ARS\b/i.test(direction)&&!/^(?:미확인|방면 미확인|방면 정보 없음|정보 없음|unknown|undefined|null|-)$/i.test(direction);
     parts=['버스정류장',known?(direction.endsWith('방면')?direction:direction+' 방면'):'방면 미확인'];
   }else{
-    const address=String(p.address||'').replace(/(?:^|\s*·\s*)ARS\s*\d+/gi,'').trim();
-    parts=[p.category||p.kind||'시설',...(Array.isArray(p.lines)?p.lines:[]),address];
+    const address=userAddress(p.address);
+    const lines=Array.isArray(p.lines)?p.lines:[];
+    parts=[kind==='subway'?'지하철·철도역':displayFacilityCategory(p),...lines,...address.split(' · ').filter(v=>!lines.includes(v))];
   }
   if(Number.isFinite(p.distanceMeters))parts.push(Math.round(p.distanceMeters)+'m');
   return [...new Set(parts.filter(Boolean))].join(' · ');

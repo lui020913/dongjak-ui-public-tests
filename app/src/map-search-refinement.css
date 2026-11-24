@@ -19,3 +19,15 @@
   html body #app#app#app#app#app#app #map-quick-search-dropdown .map-quick-search-result{width:100%!important;min-height:57px!important;padding:10px 4px!important;border:0!important;border-bottom:1px solid #e7eeea!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important}
  }
 }
+
+/* Actual history only; headings never occupy a suggestion cell. */
+#app #map-quick-search-dropdown #map-quick-search-status:empty{display:none!important}
+@media(max-width:699px){@layer request-completion{
+html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] .dj854-search-defaults{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:12px 0 0!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-title{grid-column:1/-1!important;display:block!important;font-size:14px!important;font-weight:750!important;padding:4px 0 8px!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] :is(.map-quick-search-suggestion,.dj815-recent-list button){display:flex!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;width:100%!important;min-height:44px!important;border:0!important;border-bottom:1px solid #e5ece8!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:10px 4px!important;font-size:14px!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] .dj815-recent-list{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;max-height:none!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] .dj815-recent .dj815-inline-row{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown[data-search-mode="history"] .dj815-recent{margin:14px 0 0!important;padding:12px 0 0!important}
+html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-empty{color:var(--dj800-muted,#667b71);font-size:13px;margin:6px 0 12px}
+}}
