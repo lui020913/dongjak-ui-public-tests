@@ -42,3 +42,5 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
 #app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-icon{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;flex:0 0 20px!important;color:#718a7c}
 #app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-icon svg{width:19px;height:19px}
 #app #map-quick-search-dropdown[data-search-mode="history"] .dj-search-history-label{display:block!important;flex:1 1 0!important;min-width:0!important;text-align:left!important;overflow-wrap:anywhere;font-size:14px;font-weight:600}
+
+#app #map-quick-search-dropdown .map-quick-search-result .dj-search-road-address{display:block!important;width:100%;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;text-align:left!important;font-size:12px;color:var(--dj800-muted,#667b71);line-height:1.4;margin-top:2px}

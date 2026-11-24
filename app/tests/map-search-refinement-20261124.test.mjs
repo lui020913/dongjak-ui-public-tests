@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nearbySearchResults,groupVisibleFacilities,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
+import {nearbySearchResults,facilityRoadAddress,groupVisibleFacilities,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
 test('bus direction is authoritative and no ARS ID appears in subtitle',()=>{
  assert.equal(searchResultSubtitle({kind:'bus',direction:'상도역',arsId:'123'}),'버스정류장 · 상도역 방면');
  assert.equal(searchResultSubtitle({kind:'bus',arsId:'123'}),'버스정류장 · 방면 미확인');
@@ -53,4 +53,14 @@ test('map area categories use one horizontal rail and a single filtered result l
  assert.match(js,/setAttribute\('aria-pressed',String\(i===index\)\)/);
  assert.match(css,/\.dj-visible-facility-rail\{[^}]*overflow-x:auto!important;overflow-y:hidden!important/);
  assert.match(css,/\.dj-visible-facility-tab\{[^}]*flex:0 0 auto!important/);
+});
+
+test('road address requires a road and number and survives duplicate merging',()=>{
+ assert.equal(facilityRoadAddress({address:'서울특별시 동작구 상도로19길 1, 1층'}),'서울특별시 동작구 상도로19길 1, 1층');
+ assert.equal(facilityRoadAddress({address:'서울특별시 동작구 상도로'}),'');
+ assert.equal(facilityRoadAddress({address:'동작구 상도동 123-4'}),'');
+ assert.equal(facilityRoadAddress({roadAddress:'서울특별시 동작구 상도로 141',address:'상도동'}),'서울특별시 동작구 상도로 141');
+ const area={polygon:[{lng:126.94,lat:37.49},{lng:126.96,lat:37.49},{lng:126.96,lat:37.51},{lng:126.94,lat:37.51}],center:{lng:126.95,lat:37.5}};
+ const p={name:'시설',lng:126.95,lat:37.5};const rows=visibleFacilityResults(area,[p,{...p,address:'서울특별시 동작구 상도로 141'}]);
+ assert.equal(rows.total,1);assert.equal(facilityRoadAddress(rows.items[0]),'서울특별시 동작구 상도로 141');
 });

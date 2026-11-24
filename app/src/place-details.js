@@ -6,6 +6,7 @@ import {bindReliablePopupClose} from './popup-close-input.js';
 import {sheetDragOffset,sheetStageAction} from './mobile-window-motion.js';
 import {installPlaceReviews} from './v834-place-reviews.js';
 import {verifiedPlaceRecord} from './verified-place-directory.js';
+import {facilityRoadAddress} from './map-search-refinement.js';
 import {createSelectedLocationPin} from './selected-location-pin.js';
 import {toggleSavedPlace,isPlaceSaved,recordRecentPlace,placeShareUrl,shareMapUrl,setSavedPlaceFolder,getPlaceFolders,savedPlaces,placeKey} from './v815-place-store.js';
 import {enableAnchoredPopupDragging} from './draggable-floats.js';
@@ -24,7 +25,7 @@ export function placeData(raw={}){
   const name=tidy(raw.name,90)||'이름 미등록';
   const lon=Number(raw.lng), lat=Number(raw.lat);
   const trusted=verifiedPlaceRecord(name);
-  const incomingAddress=tidy(raw.address,220);
+  const incomingAddress=tidy(facilityRoadAddress(raw),220);
   // A generic label such as '동작구 대표 장소' is not a street address.
   // An OSM-sourced address may belong to another Seoul borough (e.g. 노들섬 in 용산구).
   // Keep only a full street address with a building number, not a generic district label.
@@ -156,7 +157,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
 
   const infoCard=document.createElement('section');infoCard.className='dj-place-info-card';
   const meta=document.createElement('div');meta.className='dj-place-meta';infoCard.append(meta);body.append(infoCard);
-  const addressRow=row(meta,'주소',p.address||'주소 확인 중…');
+  const addressRow=row(meta,'도로명 주소',p.address||'주소 확인 중…');
   const phoneRow=row(meta,'전화번호',p.phone||'전화번호 확인 중…');
   const siteRow=row(meta,'홈페이지','홈페이지 확인 중…');
   function displayWebsite(){
@@ -349,8 +350,8 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     enriched=enrich(p,controller.signal).then(found=>{
       if(controller.signal.aborted||controllerAI.signal.aborted)return;
       if(!p.phone&&found.phone){p.phone=found.phone;phoneRow.querySelector('strong').textContent=p.phone;}
-      if(!p.address&&found.address){
-        p.address=found.address;
+      if(!p.address&&facilityRoadAddress(found)){
+        p.address=facilityRoadAddress(found);
         addressRow.querySelector('strong').textContent=p.address;
       }
       if(!p.website&&found.website){p.website=found.website;displayWebsite();}

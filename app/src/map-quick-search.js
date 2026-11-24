@@ -5,7 +5,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {searchResultSubtitle,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
+import {searchResultSubtitle,facilityRoadAddress,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -30,7 +30,7 @@ export function mergeMapSearchResults(local=[],remote=[]){
     const key=searchResultKey({...item,lng,lat});
     if(seen.has(key)){
       const previous=found.find(p=>searchResultKey(p)===key);
-      if(previous){previous.direction||=item.direction;previous.address||=item.address;previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
+      if(previous){previous.direction||=item.direction;previous.address||=item.address;if(!facilityRoadAddress(previous)&&facilityRoadAddress(item))previous.roadAddress=facilityRoadAddress(item);previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
       continue;
     }
     seen.add(key);found.push({...item,lng,lat});
@@ -169,8 +169,10 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const makeResultButton=place=>{
     const button=document.createElement('button');button.type='button';button.className='map-quick-search-result';
     const strong=document.createElement('strong');strong.textContent=place.name||'검색 장소';
-    const info=document.createElement('small');info.textContent=searchResultSubtitle(place);
-    button.append(strong,info);
+    const info=document.createElement('small');info.textContent=searchResultSubtitle({...place,address:''});
+    const address=document.createElement('small');address.className='dj-search-road-address';
+    const road=facilityRoadAddress(place);address.textContent=road||'도로명 주소 미확인';
+    button.append(strong,info,address);
     button.addEventListener('click',()=>{
       marker?.remove();
       marker=null; // One marker belongs to the canonical place-detail popup.
@@ -243,7 +245,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
         const [lng,lat]=f.geometry.coordinates||[];
         if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
         const id=`${name}-${lng.toFixed(5)}-${lat.toFixed(5)}`;if(visited.has(id))continue;visited.add(id);
-        const row={name,lng,lat,category:kind||'일반 시설',address:'',source:'loaded-map-poi'};
+        const row={name,lng,lat,category:kind||'일반 시설',address:String(p['addr:full']||[p['addr:city'],p['addr:district'],p['addr:street'],p['addr:housenumber']].filter(Boolean).join(' ')||''),source:'loaded-map-poi'};
         const type=searchPlaceKind(row);if(type!=='place')row.kind=type;
         result.push(row);
         if(!nearby&&result.length>=20)return result;

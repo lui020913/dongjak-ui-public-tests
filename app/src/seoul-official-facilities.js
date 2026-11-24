@@ -17,7 +17,7 @@ export function officialFeatures(places,boundary){
    if(seen.has(key))continue;seen.add(key);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
      name,category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
-     address:String(place.address||''),phone:String(place.phone||''),website:String(place.website||''),
+     address:String(place.roadAddress||place.road_address||place.address||''),phone:String(place.phone||''),website:String(place.website||''),
      source:String(place.source||'서울 열린데이터광장 / 동작구'),updated:String(place.updated||'')
    }});
  }
@@ -40,7 +40,7 @@ export function osmGeneralPlaces(elements=[],limit=1100){
    if(!category||!name||!Number.isFinite(lng)||!Number.isFinite(lat))continue;
    const id=`osm-${item.type}-${item.id}`;if(seen.has(id))continue;seen.add(id);
    result.push({id,name,category,lng,lat,
-     address:String(tags['addr:full']||tags['addr:street']||''),
+     address:String(tags['addr:full']||[tags['addr:city'],tags['addr:district'],tags['addr:street'],tags['addr:housenumber']].filter(Boolean).join(' ')),
      phone:String(tags['contact:phone']||tags.phone||''),
      website:String(tags['contact:website']||tags.website||''),
      source:'© OpenStreetMap 기여자 · 공개지도 등록정보'});

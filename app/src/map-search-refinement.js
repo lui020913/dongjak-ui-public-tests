@@ -28,6 +28,15 @@ export function groupVisibleFacilities(items){
   return [...groups].map(([label,rows])=>({label,rows})).sort((a,b)=>priority(a.label)-priority(b.label)||a.label.localeCompare(b.label,'ko'));
 }
 const userAddress=value=>String(value||'').split(/\s*·\s*/).map(v=>v.trim()).filter(v=>v&&!/openstreetmap|nominatim|photon|지도에 등록|운영 여부 미확인|저장된 역 위치|출입구와 다를 수|^ARS\b|^검색 결과$|^OSM\b|^©/i.test(v)).join(' · ');
+// An address needs a Korean road name and building number. A road alone,
+ // a district label, or a nearby reverse-geocoded building is not a POI address.
+export function facilityRoadAddress(p={}){
+  for(const value of [p.roadAddress,p.road_address,p.address]){
+    const address=userAddress(value);
+    if(/(?:^|[\s,])[가-힣0-9·.\-]+(?:대로|로|길)\s*\d+(?:[-–]\d+)?(?=$|[\s,(])/u.test(address))return address;
+  }
+  return '';
+}
 export function searchResultKey(p){
   const kind=kindOf(p),name=String(p.name||'').trim().replace(/역$/,'');
   if(kind==='bus'&&p.arsId)return 'bus:'+String(p.arsId);
@@ -104,13 +113,19 @@ export function visibleAreaContains(area,p){
   return inside;
 }
 export function visibleFacilityResults(area,items,{limit=60}={}){
-  const seen=new Set(),found=[];
+  const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const row={...p,lng:Number(p.lng),lat:Number(p.lat)};
     if(!visibleAreaContains(area,row))continue;
-    const key=searchResultKey(row);if(seen.has(key))continue;
-    seen.add(key);
+    const key=searchResultKey(row);
+    if(seen.has(key)){
+      const prior=seen.get(key);
+      const road=facilityRoadAddress(row);
+      if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
+      continue;
+    }
+    seen.set(key,row);
     // Do not expose distance from map center as if it were the user's distance.
     delete row.distanceMeters;found.push(row);
   }
