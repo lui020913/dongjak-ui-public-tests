@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.131",
+  "application_version": "9.2.132",
   "public_work_branch": "main",
-  "purpose": "PR #418: verified phone surface fixes for facility detail bottom background, report safe area, AI header and keyboard viewport, GPS circular accuracy and duplicate nearby information, community-to-map transition; preserve walking route V3 from PR #413. Protected exact-source Preview, mobile, desktop and Production gates.",
-  "attempt": 336,
+  "purpose": "Combined PR #421: route search/header and automatic multimodal place search (#419), iOS AI keyboard background and dismissal corrections (#420), and verified community geometry. Preserve existing V3 routing and exact-source protected Preview, mobile, PC/tablet and Production gates.",
+  "attempt": 337,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: PR #418 merged at 6c0770af876c after original source CI 45303351968 and V3 integration CI 45305693085 passed. Promote only the exact verified candidate through protected release gates.",
+  "last_retry_reason": "2026-11-24: merged both PR histories at a06347cd6102 after route browser tests (6/6), AI keyboard and route-to-AI integration CI 45308497361, and final composer check CI 45310062945 passed. Single combined release; promote only exact verified candidate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
