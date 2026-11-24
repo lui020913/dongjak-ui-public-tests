@@ -181,41 +181,31 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     arrivedConfirm.focus({preventScroll:true});
   });
 
-  // Full-viewport transparent shield. Its only interactive exception is the
-  // original #nav-stop. Suppress touch, mouse, keyboard and map gestures before
-  // other feature handlers receive them. GPS/voice update events are untouched.
+  // Guidance locks unrelated features, not map camera controls.
   const shield=add('div','dj-walk-guidance-lock');
   shield.setAttribute('aria-hidden','true');app.append(shield);
   const stop=byId('nav-stop');
   if(stop)stop.textContent='안내 종료';
-  const focusEnd=()=>{
-    if(app.classList.contains('route-guiding')&&stop?.isConnected&&doc.activeElement!==stop)
-      stop.focus({preventScroll:true});
-  };
+  const allowedControls=()=>[...doc.querySelectorAll('#nav-map-controls:not([hidden]) button,#nav-stop')].filter(el=>!el.disabled);
+  const focusEnd=()=>{if(app.classList.contains('route-guiding')&&stop?.isConnected)stop.focus({preventScroll:true});};
   const intercept=e=>{
     if(!app.classList.contains('route-guiding'))return;
-    // Tab must be intercepted EVEN WHEN the end button is already focused.
-    // Otherwise the default browser focus navigation escapes that button.
     if(e.type==='keydown'&&e.key==='Tab'){
-      e.preventDefault();e.stopImmediatePropagation();focusEnd();return;
+      const controls=allowedControls(),idx=controls.indexOf(doc.activeElement);
+      e.preventDefault();e.stopImmediatePropagation();
+      controls[(idx+(e.shiftKey?-1:1)+controls.length)%controls.length]?.focus({preventScroll:true});return;
     }
-    if(e.target?.closest?.('#nav-stop'))return;
-    // The GPS camera is updated programmatically; user-generated map and UI
-    // inputs are blocked while a real walking guidance session is active.
-    e.preventDefault?.();
-    e.stopImmediatePropagation?.();
-    e.stopPropagation?.();
+    if(e.target?.closest?.('#nav-stop,#nav-map-controls'))return;
+    // Allow actual canvas gestures, not POI clicks, marker buttons or other map overlays.
+    if(e.target?.closest?.('#map .maplibregl-canvas')&&['pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','dblclick'].includes(e.type))return;
+    e.preventDefault?.();e.stopImmediatePropagation?.();e.stopPropagation?.();
     if(['pointerdown','click','mousedown','keydown'].includes(e.type))focusEnd();
   };
   on(win,'keydown',intercept,{capture:true,passive:false});
-  for(const type of ['click','dblclick','pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','contextmenu','keydown']){
+  for(const type of ['click','dblclick','pointerdown','pointerup','touchstart','touchmove','mousedown','wheel','contextmenu','keydown'])
     on(doc,type,intercept,{capture:true,passive:false});
-  }
-  const trap=e=>{
-    if(app.classList.contains('route-guiding')&&e.target!==stop)focusEnd();
-  };
+  const trap=e=>{if(app.classList.contains('route-guiding')&&!allowedControls().includes(e.target))focusEnd();};
   on(doc,'focusin',trap,true);
-  on(doc,'focusout',()=>{if(app.classList.contains('route-guiding'))queueMicrotask(focusEnd);},true);
 
   let latest=null,assessment=null;
   const riskLabel=entry=>{
