@@ -101,3 +101,23 @@ test('new entry has independent functional destination-search and dismiss',async
   await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
   await expect(root).toBeHidden();
 });
+
+test('inline waypoint grows editor and search actions use the selected target',async({page})=>{
+ test.setTimeout(130000);
+ const root=await enterRoute(page),card=root.locator('.route-panel'),plus=root.locator('[data-v3="waypoint"]');
+ const original=await card.boundingBox();await expect(plus).toBeVisible();await expect(root.locator('.quick,.waypoint-actions')).toHaveCount(0);
+ await plus.click();await expect(root.locator('.waypoint-pending')).toBeVisible();await expect(plus).toBeHidden();
+ await expect.poll(async()=> (await card.boundingBox()).height-original.height).toBeGreaterThan(10);
+ const pending=root.locator('.waypoint-pending');await pending.locator('.waypoint-input').click();
+ const search=root.locator('.search-screen');await expect(search).toBeVisible();await expect(search.locator('#v3-search-title')).toHaveText('경유지 검색');
+ await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+ await root.locator('[data-v3="search-back"]').click();await expect(pending).toBeVisible();await pending.getByRole('button',{name:'경유지 추가 취소'}).click();await expect(plus).toBeVisible();
+ for(const [key,title] of [['start','출발지 검색'],['end','도착지 검색']]){
+  await root.locator('[data-v3="'+key+'"]').click();await expect(search.locator('#v3-search-title')).toHaveText(title);
+  await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+  await root.locator('[data-v3="search-back"]').click();
+ }
+ await root.locator('[data-v3="start"]').click();await search.locator('[data-v3="search-map"]').click();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');await expect(page.locator('#route-pick-hint')).toContainText('출발지');
+ await page.locator('#route-pick-cancel').click();await expect(root).toBeVisible();
+});

@@ -674,7 +674,7 @@ function checkBaseMapRecovery(){
   }catch(error){app.dataset.djBasemapSource='error';console.error('[지도 기본 모드 전환 실패]',error);status('지도 로딩 실패 · 네트워크를 확인한 뒤 새로고침하세요');}
 }
 mapRecoveryTimer=setTimeout(checkBaseMapRecovery,BASE_STYLE_INITIAL_WAIT_MS);
-const quickSearch=initMapQuickSearch({map,maplibregl,app,onPick:()=>{
+const quickSearch=initMapQuickSearch({map,maplibregl,app,getPosition:getDevicePosition,errorLocationCode,onPick:()=>{
   // Search is available in every app tab. Selecting a result must reveal the map.
   if(app.dataset.tab!=='map')navigate('map');
   closeMapOptions();
@@ -2570,21 +2570,21 @@ function showPriRouteAdvice(result){
   const explain=entry=>entry?.risk===null||!entry?'자료 없음':
     entry.risk.toFixed(1)+'점 · 경로 중 관측 '+Math.round(entry.coverage*100)+'% · 평균 '+entry.observedFactorsMean+'/6 지표';
   const text=!result
-    ? '종합 PRI 자료를 확인하지 못했습니다. 이 경로에 안전도 평가가 적용되지 않았습니다.'
+    ? '보행 위험도(PRI) 평가 자료를 확인하지 못했습니다. 안전성을 판단할 수 없습니다.'
     : result.recommendation
-    ? '상도1동 종합 PRI 비교(연구용): '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
+    ? '상도1동 보행 위험도 비교(연구용): '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
       ' 후보의 관측 구간 위험점수가 더 낮습니다. 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
       '. 실제 통행 위험·안전은 보증하지 않습니다.'
-    : '종합 PRI 경로 비교 보류: '+(result.reason==='same-route'?'동일한 경로입니다.':
+    : '보행 위험도 경로 비교 보류: '+(result.reason==='same-route'?'동일한 경로입니다.':
       result.reason==='similar-risk'?'두 후보의 관측 점수 차이가 작습니다.':
       result.reason==='excessive-detour'?'위험점수가 낮은 후보가 25% 넘게 우회하므로 자동 추천하지 않습니다.':
       '두 경로의 조사범위가 부족하거나 서로 달라 공정하게 비교할 수 없습니다.')+
       ' 일반 '+explain(result.standard)+' / 경사 '+explain(result.gentle)+
       '. 미평가 도로는 안전한 도로로 계산하지 않습니다.';
   const shortText=result?.recommendation
-    ? 'PRI 연구용 상대 저위험 후보: '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
+    ? '보행 위험도 연구용 상대 저위험 후보: '+(result.recommendation==='standard'?'일반 보행':'경사 회피')+
       ' · 관측 위험도 '+result[result.recommendation].risk.toFixed(1)+'점 · 관측 구간 '+Math.round(result[result.recommendation].coverage*100)+'%'
-    : '종합 PRI 경로 비교 보류 · 평가된 구간이 부족하거나 비교 근거가 충분하지 않습니다.';
+    : '보행 위험도 비교 보류 · 평가 자료가 부족하거나 비교 근거가 충분하지 않습니다.';
   priMapNote.textContent=shortText;priMapNote.hidden=false;
   priEditorNote.textContent=text;priEditorNote.hidden=false;
 }
@@ -2633,9 +2633,9 @@ function syncRoutePresentation() {
     const metric=readRouteMetrics();
     document.getElementById('route-map-metrics').textContent = `${metric.duration} · ${metric.distance}`;
     const pri=routeResult?.priExposure;
-    const priInfo=pri?.risk!==null && pri?.coverage>=0.65
-      ? '종합 PRI 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
-      : 'PRI 위험도 미평가';
+    const priInfo=Number.isFinite(pri?.risk) && pri?.coverage>=0.65
+      ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
+      : '보행 위험도 평가 자료 부족';
     document.getElementById('route-map-source').textContent=(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
@@ -3030,7 +3030,7 @@ function beginRoutePick(which) {
   routePickMode=which;
   navigate('map');
   syncRoutePresentation();
-  toast(which==='start'?'지도에서 출발지를 선택해 주세요.':'지도에서 목적지를 선택해 주세요.');
+  toast(which==='start'?'지도에서 출발지를 선택해 주세요.':which==='waypoint'?'지도에서 경유지를 선택해 주세요.':'지도에서 목적지를 선택해 주세요.');
 }
 function pickRouteLocation(lngLat,point) {
   if (!routePickMode)return;
@@ -3047,6 +3047,7 @@ function resetRoute() {
   closeRouteSearch();closeTransitRouteConfirmation();
   routePickMode=null;routeStart=null;routeEnd=null;routeResult=null;
   routeWaypoints=[];routeProductTools?.setWaypoints([]);
+  window.dispatchEvent(new CustomEvent('dongjak:route-editor-reset'));
   clearPriRouteAdvice();
   routeVariants={standard:null,gentle:null};
   document.getElementById('route-variants').hidden=true;
@@ -3342,6 +3343,33 @@ document.getElementById('route-gps-start').addEventListener('click',()=>{
   }).catch((error)=>{toast(errorLocationCode(error)===1?'위치 권한이 거부됐습니다.':'현재 위치를 확인하지 못했습니다. 지도에서 선택해 주세요.');
     b.disabled=false;b.textContent='⌖ 현재 위치를 출발지로 지정';
   });
+});
+// Every search target uses the same validated route state and boundary guard.
+let routeSearchGpsPending=false;
+window.addEventListener('dongjak:route-search-current-location',async event=>{
+  const which=event.detail?.which;
+  if(routeSearchGpsPending)return;
+  const finish=()=>window.dispatchEvent(new CustomEvent('dongjak:route-search-gps-finished'));
+  if(navMode||app.dataset.tab!=='route'||!['start','waypoint','end'].includes(which)||routeSearchTarget!==which){finish();return;}
+  if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');finish();return;}
+  if(which==='waypoint'&&routeWaypoints.length>=5){toast('경유지는 최대 5곳입니다.');finish();return;}
+  routeSearchGpsPending=true;
+  const seq=routeSearchSequence;
+  try{
+    const {coords}=await getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000});
+    if(seq!==routeSearchSequence||which!==routeSearchTarget||app.dataset.tab!=='route'||navMode)return;
+    const position={lng:coords.longitude,lat:coords.latitude,name:'현재 위치',label:'현재 위치',resolveAddress:true};
+    if(!requireDongjakRouteLocation(position))return;
+    if(which==='waypoint'){
+      if(routeWaypoints.length>=5)return;
+      routeWaypoints.push(position);invalidateRoute();routeProductTools?.setWaypoints(routeWaypoints);void resolveRouteAddress(position);
+    }else if(!setRouteLocation(which,position))return;
+    closeRouteSearch();
+    navigate('route');
+    toast(which==='start'?'현재 위치를 출발지로 지정했습니다.':which==='waypoint'?'현재 위치를 경유지로 지정했습니다.':'현재 위치를 목적지로 지정했습니다.');
+  }catch(error){
+    if(seq===routeSearchSequence&&which===routeSearchTarget)toast(errorLocationCode(error)===1?'위치 권한이 거부됐습니다.':'현재 위치를 확인하지 못했습니다. 지도에서 선택해 주세요.');
+  }finally{routeSearchGpsPending=false;finish();}
 });
 document.getElementById('route-calc').addEventListener('click',calculateRoute);
 updateRouteCalcAvailability();

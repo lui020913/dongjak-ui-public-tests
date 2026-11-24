@@ -49,11 +49,11 @@ test('PRI score remains conservative and red means danger not safety',()=>{
  const js=read('src/route-experience-20261123.js'),main=read('src/main.js');
  const css=read('src/route-experience.css'),risk=read('src/pri-route-exposure.mjs');
  assert.match(js,/entry\.coverage<\.65/);
- assert.match(js,/PRI 미평가/);
+ assert.match(js,/평가 자료 부족/);
  assert.match(js,/risk>=70\?'high'/);
  assert.match(js,/실제 안전을 보장하지 않습니다/);
  assert.match(css,/#d84b4e/);
- assert.match(js,/회색 실선: 미평가/);
+ assert.match(js,/회색 실선: 평가 자료 부족/);
  assert.match(main,/walking-route-pri-unknown/);
  assert.match(main,/walking-route-pri-colors/);
  assert.match(main,/installSolidMapLines\(map\)/);
@@ -119,4 +119,11 @@ test('only preview and guidance dock positions, preview GPS and turn text contra
  assert.match(css,/#dj-route-turn-banner #nav-instruction[\s\S]*?color:#f7fffc!important;/);
  assert.match(css,/data-dj-route-stage="input"/);
  assert.match(css,/data-dj-route-stage="search"/);
+});
+
+test('route risk help explains real factors and unknown coverage without changing scoring',()=>{
+ const js=readFileSync(new URL('../src/route-experience-20261123.js',import.meta.url),'utf8');
+ assert.match(js,/TEAM_FACTORS/);assert.match(js,/entry.coverage<\.65/);
+ assert.match(js,/priDialog\.showModal\(\)/);assert.match(js,/if\(stage!=='preview'\)closePriHelp\(\)/);
+ assert.match(js,/회색은 위험도 미확인이지 안전하다는 뜻이 아닙니다/);
 });
