@@ -337,7 +337,7 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
  #dj-ai-search-modal .dj-ai-transcript{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;scroll-padding-bottom:12px!important}
  /* Balance welcome text and quick questions in the remaining chat viewport. */
  #dj-ai-search-modal:not([data-explanation="unset"]) .dj-ai-transcript > .dj-ai-welcome:not([hidden]){
-   max-width:100%!important;margin:auto 0!important;
+   max-width:100%!important;margin:0!important;align-self:stretch!important;
  }
  #dj-ai-search-modal .dj-ai-profile-button{min-height:40px!important;}
  #dj-ai-search-modal .dj-ai-composer{position:relative!important;flex:0 0 auto!important;min-width:0!important;padding-top:8px;border-top:1px solid var(--ai-line)}
@@ -376,4 +376,11 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
   html body #dj-ai-search-modal[open] > .dj-ai-search-body {
     animation:none!important;
   }
+}
+
+@media(max-width:699px){
+ html body #dj-ai-search-modal[open]{background:var(--ai-bg)!important;min-height:0!important;box-sizing:border-box!important;}
+ body:has(#dj-ai-search-modal[open]) #app{visibility:hidden!important;pointer-events:none!important;}
+ html body #dj-ai-search-modal[open] .dj-ai-search-body{flex:1 1 0!important;max-height:100%!important;overflow:hidden!important;justify-content:flex-start!important;}
+ #dj-ai-search-modal .dj-ai-welcome{margin:0!important;text-align:left!important;}
 }

@@ -48,7 +48,9 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const previous=doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
   // Preserve the outgoing opaque screen through the synchronous navigate.
   // The incoming panel is already fully opaque underneath it: no map flash.
-  if(previous&&!reduced())previous.dataset.djTabOutgoing='true';
+  if(previous&&!reduced()&&button.dataset.tab!=='map')previous.dataset.djTabOutgoing='true';
+  // Map chrome changes its geometry immediately. Do not keep a departing
+  // full-screen page visible against the new map layout.
   if(!replay(button))return;
   if(previous&&previous.dataset.djTabOutgoing==='true'&&previousTab!==app.dataset.tab){
    departing=previous;

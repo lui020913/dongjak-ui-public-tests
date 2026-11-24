@@ -1331,3 +1331,22 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
     overflow-wrap:anywhere!important;white-space:normal!important;line-height:1.5!important;
   }
 }
+
+/* Phone surface follow-up: full facility content owns its height, not a legacy footer. */
+@layer request-completion{
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) .maplibregl-popup-content,
+  html body #app#app#app#app#app#app#app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) .dj-place-detail{
+    display:flex!important;flex-direction:column!important;flex:1 1 0%!important;min-height:0!important;height:100%!important;max-height:none!important;padding:0!important;overflow:hidden!important;box-sizing:border-box!important;
+  }
+  html body #app#app#app#app#app#app#app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) .dj-place-body{flex:1 1 0%!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;}
+  html body #app#app#app#app#app#app#app #map .dj-place-detail-popup:is(.dj871-place-expanded,.dj871-sheet-expanded) :is(.maplibregl-popup-content,.dj-place-detail)::after{content:none!important;display:none!important;}
+ }
+}
+.dj-current-position-marker{width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;max-width:18px!important;max-height:18px!important;box-sizing:border-box;border:3px solid #fff;border-radius:50%;background:#2877ea;box-shadow:0 0 0 5px #2877ea33;pointer-events:none;}
+.dj-current-position-pulse{position:absolute;inset:-3px;box-sizing:border-box;border-radius:50%;background:#2877ea33;animation:dj-current-position-ripple 1.8s ease-out infinite;pointer-events:none;}
+@keyframes dj-current-position-ripple{from{transform:scale(1);opacity:.7}to{transform:scale(2.8);opacity:0}}
+@media(prefers-reduced-motion:reduce){.dj-current-position-pulse{animation:none;}}
+.dj-nearby-safety-summary{margin:6px 0 10px;padding:10px 12px;border:1px solid var(--dj800-border,#d7e6de);border-radius:14px;background:var(--dj800-elevated,#edf6f0);color:var(--dj800-text,#203f36);}
+.dj-nearby-safety-summary>summary{cursor:pointer;font-weight:750;min-height:34px;align-content:center;}
+.dj-nearby-safety-content{padding-top:8px;min-width:0;}

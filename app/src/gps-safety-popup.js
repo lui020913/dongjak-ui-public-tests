@@ -186,13 +186,9 @@ async function openSnapshot(fromButton=true){
     panel.querySelector('#dj-gps-content').innerHTML=`<p class="dj-gps-failure">${esc(errorLabel(error))}</p>`;
   }
 }
-function boot(){
-  const button=document.getElementById('current-location');
-  if(!button||button.dataset.djGpsPopupInstalled==='1')return;
-  button.dataset.djGpsPopupInstalled='1';
-  // Existing main.js location tracking remains unchanged; snapshot is independently requested on intentional click.
-  button.addEventListener('click',()=>void openSnapshot(true));
-}
-if(typeof document!=='undefined'){
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+// The surrounding-information panel is the sole UI owner. No GPS button listener.
+export async function renderNearbySafetySnapshot(coords,accuracy){
+  if(!validCoord(coords))throw new Error('invalid_gps');
+  const datasets=await fetchSafetyDatasets();
+  return renderSnapshot(analyzeGpsSafety(coords,accuracy,datasets,new Date()));
 }
