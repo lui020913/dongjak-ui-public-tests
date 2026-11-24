@@ -175,7 +175,7 @@ test('map TIP dismiss stays above the TIP pill and works by touch',async({page})
   await expect(tip).toBeHidden({timeout:10000});
 });
 
-test('community details hide refresh when closed and expose a tappable refresh when open',async({page})=>{
+test('community filters remain visible and refresh has a real touch target',async({page})=>{
   test.setTimeout(150000);
   await readyForLiveTouch(page);
   // This is an SPA tab switch, not a document navigation. Waiting on unrelated
@@ -187,13 +187,23 @@ test('community details hide refresh when closed and expose a tappable refresh w
     toolbar=details.locator('.community-toolbar'),
     refresh=details.locator('#community-refresh');
   await expect(details).toBeVisible({timeout:15000});
-  await expect(details).not.toHaveAttribute('open',/.+/);
-  await expect(toolbar).toBeHidden();
-  await realTapAtCenter(page,details.locator('summary'));
-  await expect(details).toHaveAttribute('open','');
+  await expect(details.locator('summary')).toHaveCount(0);
   await expect(toolbar).toBeVisible();
+  const controls=toolbar.locator('#community-dong-filter,#community-sort,#community-saved-toggle,#community-notifications-toggle,#community-refresh');
+  await expect(controls).toHaveCount(5);
+  const cells=await controls.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
+  for(let i=0;i<cells.length;i++){
+    expect(cells[i].h).toBeGreaterThanOrEqual(44);
+    expect(cells[i].w).toBeGreaterThanOrEqual(44);
+    expect(Math.abs(cells[i].y-cells[0].y)).toBeLessThan(3);
+    if(i)expect(cells[i].x).toBeGreaterThanOrEqual(cells[i-1].x+cells[i-1].w-1);
+  }
+  expect(cells.at(-1).x+cells.at(-1).w).toBeLessThanOrEqual(page.viewportSize().width);
+  const before=await toolbar.boundingBox();
   await realTapAtCenter(page,refresh);
   await expect(refresh).toBeVisible();
+  const after=await toolbar.boundingBox();
+  expect(Math.abs(after.y-before.y)).toBeLessThan(3);
 });
 
 
