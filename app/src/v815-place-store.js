@@ -2,6 +2,7 @@
  * sync module uploads only explicit favorites/groups after authentication. */
 const BOOKMARK_KEY='dj-map-v815-bookmarks';
 const RECENT_KEY='dj-map-v815-recent';
+const QUERY_KEY='dj-map-v815-recent-queries';
 const GROUPS_KEY='dj-map-v824-custom-groups';
 export const PLACE_FOLDERS=Object.freeze(['즐겨찾기','집','학교','직장','기타']);
 const normalize=s=>String(s??'').trim().slice(0,100);
@@ -142,9 +143,12 @@ export function mergeFavoritesSnapshots(server,local){
 export function recentPlaces(){return read(RECENT_KEY).map(cleanPlace).filter(Boolean).slice(0,12);}
 export function recordRecentPlace(place){
   const p=cleanPlace(place);if(!p)return false;
-  return write(RECENT_KEY,[p,...recentPlaces().filter(x=>placeKey(x)!==placeKey(p))].slice(0,12));
+  const ok=write(RECENT_KEY,[p,...recentPlaces().filter(x=>placeKey(x)!==placeKey(p))].slice(0,12));if(ok)notifyRecent();return ok;
 }
-export function clearRecentPlaces(){return write(RECENT_KEY,[]);}
+function notifyRecent(){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('dongjak:recent-places-change'));}
+export function recentSearchQueries(){return read(QUERY_KEY).filter(x=>typeof x==='string'&&x.trim().length>=2).map(x=>x.slice(0,80)).slice(0,12);}
+export function recordSearchQuery(query){const q=normalize(query).slice(0,80);if(q.length<2)return false;const ok=write(QUERY_KEY,[q,...recentSearchQueries().filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,12));if(ok)notifyRecent();return ok;}
+export function clearRecentPlaces(){const a=write(RECENT_KEY,[]),b=write(QUERY_KEY,[]);if(a||b)notifyRecent();return a&&b;}
 export function placeShareUrl(place,base){
   const p=cleanPlace(place);if(!p)return '';
   const url=new URL(base||(typeof location!=='undefined'?location.href:'https://example.org/'));

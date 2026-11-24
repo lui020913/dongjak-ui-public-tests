@@ -58,6 +58,7 @@ import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from '.
 import {walkingRouteViewportPadding} from './route-map-focus.js';
 import {initMapQuickSearch} from './map-quick-search.js';
 import {installMapProduct} from './v815-map-product.js';
+import {recentPlaces,recordRecentPlace,clearRecentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
 import {computeMultiStopRoutes} from './v815-route-planner.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {installRoadWidthLayer} from './road-width-layer.js';
@@ -2875,12 +2876,14 @@ function beginRouteSearch(which){
   document.getElementById('route-search-status').textContent='서울·동작구 내 역명, 정류장명, 장소명 또는 주소를 입력하세요.';
   document.getElementById('route-search-query').value='';
   document.getElementById('route-search-submit').disabled=false;
+  paintRecentRouteSearch();
   if(app.dataset.djRouteScreenV3!=='1')document.getElementById('route-search-query').focus();
 }
 function chooseSearchResult(place){
   const which=routeSearchTarget;
   if(!which||!Number.isFinite(place.lng)||!Number.isFinite(place.lat))return;
   if(!requireDongjakRouteLocation(place))return;
+  recordRecentPlace(place);
   // Waypoints still use the explicit map confirmation because order and exact
   // entrance position matter. Origin/destination use the chosen search result
   // immediately: one selection must not launch a redundant confirmation flow.
@@ -2901,6 +2904,17 @@ function chooseSearchResult(place){
   map.flyTo({center:[place.lng,place.lat],zoom:15.5,duration:480});
   navigate('route');
   toast(which==='start'?'출발지가 설정됐습니다.':'목적지가 설정됐습니다.');
+}
+window.addEventListener('dongjak:route-recent-pick',event=>{if(navMode||app.dataset.tab!=='route')return;beginRouteSearch('end');chooseSearchResult(event.detail);});
+function paintRecentRouteSearch(){
+  const places=recentPlaces(),queries=recentSearchQueries();
+  paintRouteSearchResults(places,places.length||queries.length?'최근 검색 기록':'서울·동작구 내 역명, 정류장명, 장소명 또는 주소를 입력하세요.');
+  if(!places.length&&!queries.length)return;
+  const results=document.getElementById('route-search-results');
+  const tools=document.createElement('div');tools.className='dj-recent-search-tools';
+  const clear=document.createElement('button');clear.type='button';clear.textContent='기록 삭제';clear.addEventListener('click',()=>{clearRecentPlaces();paintRecentRouteSearch();});tools.append(clear);
+  for(const q of queries.filter(q=>!places.some(p=>p.name===q))){const b=document.createElement('button');b.type='button';b.textContent=q;b.addEventListener('click',()=>{document.getElementById('route-search-query').value=q;recordSearchQuery(q);document.getElementById('route-search-form').requestSubmit();});tools.append(b);}
+  results.prepend(tools);
 }
 function routeLocalMatches(query){
   return mergeRouteSearchResults(query,routeStationMatches(query),searchCachedTransportPlaces(query),
@@ -2924,6 +2938,7 @@ document.getElementById('route-search-query').addEventListener('input',()=>{
   routeSearchController?.abort();routeSearchController=null;routeSearchSequence++;
   document.getElementById('route-search-submit').disabled=false;
   const query=document.getElementById('route-search-query').value.trim();
+  if(!query){paintRecentRouteSearch();return;}
   const local=query.length>=2?routeLocalMatches(query):[];
   paintRouteSearchResults(local,query.length<2?'장소명 또는 주소를 2글자 이상 입력해 주세요.':
     local.length?`검색 결과 ${local.length}개 · 추가 검색 중`:'장소를 검색하고 있습니다…');
@@ -2938,6 +2953,7 @@ async function runRouteSearch(event){
   document.getElementById('route-search-confirm').hidden=true;
   routeSearchCandidate=null;
   if(query.length<2||query.length>80){paintRouteSearchResults([],'장소명 또는 주소를 2~80자로 입력해 주세요.');document.getElementById('route-search-submit').disabled=false;return;}
+  if(event.isTrusted)recordSearchQuery(query);
   const local=routeLocalMatches(query);
   paintRouteSearchResults(local,local.length?`검색 결과 ${local.length}개 · 추가 검색 중`:'장소를 검색하고 있습니다…');
   document.getElementById('route-search-submit').disabled=true;

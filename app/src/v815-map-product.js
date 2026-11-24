@@ -1,6 +1,6 @@
 /** Non-invasive controls for search history, personal places and the route planner. */
 import {openPlaceDetails} from './place-details.js';
-import {recentPlaces,savedPlaces,getPlaceFolders,createPlaceFolder,renamePlaceFolder,deletePlaceFolder,setSavedPlaceFolder,removeSavedPlace,clearRecentPlaces,recordRecentPlace,shareMapUrl,placeShareUrl,multiStopShareUrl,parseSharedPlace,parseSharedRoute} from './v815-place-store.js';
+import {recentSearchQueries,recentPlaces,savedPlaces,getPlaceFolders,createPlaceFolder,renamePlaceFolder,deletePlaceFolder,setSavedPlaceFolder,removeSavedPlace,clearRecentPlaces,recordRecentPlace,shareMapUrl,placeShareUrl,multiStopShareUrl,parseSharedPlace,parseSharedRoute} from './v815-place-store.js';
 import {installFavoritesCloud} from './v824-favorites-cloud.js';
 import {railTransferOptions} from './v815-route-planner.js';
 const el=(tag,className,text='')=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
@@ -47,12 +47,12 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
   const mineBody=mine?.querySelector(':scope > .dj836-sheet-body')||mine;
   mineBody?.appendChild(myBox);
   const recentBox=el('section','dj815-recent');
-  const recentHead=el('div','dj815-inline-row');recentHead.append(el('strong','', '최근 방문 장소'));
+  const recentHead=el('div','dj815-inline-row');recentHead.append(el('strong','', '최근 검색 장소'));
   recentHead.append(button('기록 삭제',()=>{clearRecentPlaces();renderStored();},'dj815-link-button'));
   recentBox.append(recentHead);
   const recentList=el('div','dj815-recent-list');recentBox.append(recentList);
   const dropdown=document.getElementById('map-quick-search-dropdown');
-  const originalList=quick.querySelector('#map-quick-search-results');
+  const originalList=document.getElementById('map-quick-search-results');
   if(dropdown&&originalList)originalList.after(recentBox);
   function openStored(place){
     navigate?.('map');
@@ -103,11 +103,12 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
         row.append(name,actions);storedList.append(row);
       }
     }
-    const recent=recentPlaces();
+    const recent=recentPlaces();recentBox.hidden=!recent.length&&!recentSearchQueries().length;
     if(!recent.length)recentList.append(el('span','dj815-helper','최근 선택한 장소 없음'));
     for(const place of recent)recentList.append(button(place.name,()=>openStored(place),'dj815-chip'));
   }
   window.addEventListener('dongjak:saved-places-change',renderStored);
+  window.addEventListener('dongjak:recent-places-change',renderStored);
   renderStored();
   // Share deep links only point at explicit user-selected places, never GPS history.
   const shared=parseSharedPlace(window.location.href);

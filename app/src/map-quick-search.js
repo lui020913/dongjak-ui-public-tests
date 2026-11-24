@@ -5,6 +5,7 @@ import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
+import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
 
 export const FRIENDLY_SEARCH_PLACEHOLDERS=Object.freeze([
   '어디로 가시나요?',
@@ -160,13 +161,15 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     list.replaceChildren();
     if(showDefaults){
       const defaults=document.createElement('div');defaults.className='dj854-search-defaults';
-      for(const name of DEFAULT_MAP_SEARCH_TERMS){
+      const previous=recentSearchQueries().filter(q=>!recentPlaces().some(p=>p.name===q));
+      if(previous.length){const title=document.createElement('strong');title.className='dj-recent-query-title';title.textContent='최근 검색어';defaults.append(title);}
+      for(const name of [...new Set([...previous,...DEFAULT_MAP_SEARCH_TERMS])]){
         const btn=document.createElement('button');btn.type='button';btn.className='map-quick-search-suggestion';
         btn.textContent=name;
         btn.addEventListener('click',()=>{
           query.value=name;query.dispatchEvent(new Event('input',{bubbles:true}));
           form.classList.add('dj807-has-input');
-          void performSearch(name);
+          recordSearchQuery(name);void performSearch(name);
         });
         defaults.append(btn);
       }
@@ -255,7 +258,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   }
   const submitSearch=()=>{
     const term=query.value;
-    void performSearch(term);
+    recordSearchQuery(term);void performSearch(term);
     // Submitting is an explicit commitment to search; dismiss the mobile
     // keyboard so the result panel can use the full available viewport.
     query.blur();
@@ -268,7 +271,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   query.addEventListener('focus',()=>{
     const term=query.value.trim();filters.hidden=term.length>0;
     // On phone, focusing an empty field must not create a large blank dropdown.
-    if(phoneSearch()&&term.length<2){close();return;}
+    if(phoneSearch()&&term.length<2&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}
     show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';}
     else {const matches=viewResults(mergeMapSearchResults(localResults(term)));render(matches.length?matches:[]);feedback.textContent=matches.length?'동작구 장소·교통시설 자동완성':'Enter 또는 검색 버튼으로 전체 장소 검색';}
@@ -277,12 +280,13 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     seq++;controller?.abort();controller=null;
     const term=normalizeKoreanSearch(query.value);filters.hidden=term.length>0;
     // Suggestions appear once a query is meaningful, not on input focus alone.
-    if(phoneSearch()&&term.length<2){close();return;}
+    if(phoneSearch()&&term.length<2&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}
     show();
     if(term.length<2){render([],true);feedback.textContent='추천 장소';return;}
     const matches=viewResults(mergeMapSearchResults(localResults(query.value)));render(matches);
     feedback.textContent=matches.length?`장소 추천 ${matches.length}건 · 더 찾으려면 검색`:'검색을 누르면 장소·주소를 조회합니다.';
   });
+  window.addEventListener('dongjak:recent-places-change',()=>{if(!dropdown.hidden&&!query.value.trim()){if(phoneSearch()&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}render([],true);}});
   clearButton.addEventListener('pointerdown',e=>e.preventDefault());
   clearButton.addEventListener('click',()=>{query.value='';query.focus();query.dispatchEvent(new Event('input',{bubbles:true}));});
   closeBtn?.addEventListener('click',()=>{close();query.blur();query.value='';form.classList.remove('dj807-has-input');syncClear();});
