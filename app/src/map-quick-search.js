@@ -1,8 +1,10 @@
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
-import {searchCachedTransportPlaces} from './transport-map.js';
+import {searchCachedTransportPlaces,searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
-import {queryOfficialPlaces} from './seoul-official-facilities.js';
+import {queryOfficialPlaces,officialSearchSnapshot} from './seoul-official-facilities.js';
+import {nearbySearchResults,searchResultSubtitle,searchResultKey,fetchNearbyOfficialPlaces} from './map-search-refinement.js';
+import './map-search-refinement.css';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -26,8 +28,12 @@ export function mergeMapSearchResults(local=[],remote=[]){
   for(const item of [...local,...remote]){
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
-    const key=`${String(item.name||'').replace(/역$/,'').trim()}/${lng.toFixed(4)}/${lat.toFixed(4)}`;
-    if(seen.has(key))continue;
+    const key=searchResultKey({...item,lng,lat});
+    if(seen.has(key)){
+      const previous=found.find(p=>searchResultKey(p)===key);
+      if(previous){previous.direction||=item.direction;previous.address||=item.address;previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
+      continue;
+    }
     seen.add(key);found.push({...item,lng,lat});
   }
   // Reserve room for both columns so a dense OSM POI result does not push
@@ -63,7 +69,21 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   // collapse them so the result area gets the full width and height.
   filters.setAttribute('aria-label','빠른 장소 검색');
   const dropdownHead=dropdown.querySelector('.map-quick-search-dropdown-head');
-  dropdownHead?.after(filters);
+  const title=dropdownHead.querySelector('strong');
+  const body=document.createElement('div');body.id='dj-search-scroll-body';
+  dropdownHead.after(body);body.append(filters,feedback,list);
+  const actions=document.createElement('div');actions.id='dj-search-entry-actions';actions.hidden=true;
+  const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='최근 검색';
+  const nearbyButton=document.createElement('button');nearbyButton.type='button';nearbyButton.textContent='내 주변 시설';
+  nearbyButton.id='dj-search-nearby';actions.append(nearbyButton,historyButton);app.append(actions);
+  const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
+  const syncEntry=()=>{
+    const visible=phoneSearch()&&app.dataset.tab==='map'&&(document.activeElement===query||app.dataset.searchOpen==='true');
+    actions.hidden=!visible;
+    if(visible){const r=shell.getBoundingClientRect(),ai=document.getElementById('dj890-ai-orb');actions.style.top=Math.ceil(Math.max(r.bottom,ai?.getBoundingClientRect().bottom||0)+7)+'px';}
+    if(visible&&phoneSearch())app.dataset.djSearchEntry='1';else delete app.dataset.djSearchEntry;
+  };
+  const setTitle=value=>{title.textContent=value;};
 
   // Keep desktop search in its original rail. On phones its dropdown lives
   // at app level, outside the narrow/transformed search field containing block.
@@ -94,27 +114,32 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   window.setInterval(setFriendlyPlaceholder,10_000);
   // Search is a higher-priority overlay while the keyboard is open. Mobile
   // weather and map controls must not cover the suggestions.
+  const mobileKeys=['position','top','left','right','width','max-width','max-height','display','flex-direction','overflow','padding','box-sizing'];
   const fitDropdown=()=>{
-    if(dropdown.hidden)return;
+    syncEntry();
+    if(!phoneSearch())for(const key of mobileKeys)dropdown.style.removeProperty(key);
+    if(dropdown.hidden||dropdown.classList.contains('dj871-search-leaving'))return;
     const viewport=window.visualViewport;
     const visibleBottom=viewport?viewport.offsetTop+viewport.height:window.innerHeight;
     const anchor=shell.getBoundingClientRect();
-    const top=Math.ceil(anchor.bottom+7);
-    // Search suggestions follow the visible pill (not the full phone width).
-    // The adjacent AI orb remains visible and does not overlap the results.
-    const left=Math.max(10,Math.floor(anchor.left));
-    const width=Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
+    const ai=document.getElementById('dj890-ai-orb');
+    const aiBottom=phoneSearch()&&ai?ai.getBoundingClientRect().bottom:0;
+    const top=Math.ceil(Math.max(anchor.bottom,aiBottom)+7+(actions.hidden?0:actions.getBoundingClientRect().height+7));
+    const left=phoneSearch()?12:Math.max(10,Math.floor(anchor.left));
+    const width=phoneSearch()?window.innerWidth-24:Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
     dropdown.style.setProperty('--dj871-search-left',left+'px');
     dropdown.style.setProperty('--dj871-search-width',width+'px');
-    const available=Math.max(90,Math.floor(visibleBottom-top-12));
-    shell.style.setProperty('--dj-search-results-max',`${Math.max(92,Math.min(520,available))}px`);
+    const available=Math.max(0,Math.floor(visibleBottom-top-12));
+    shell.style.setProperty('--dj-search-results-max',`${Math.min(520,available)}px`);
     dropdown.style.setProperty('--dj871-search-top',`${top}px`);
     dropdown.style.setProperty('--dj871-search-max',`${Math.min(520,available)}px`);
+    if(phoneSearch())for(const [key,value] of Object.entries({position:'fixed',top:top+'px',left:'12px',right:'12px',width:width+'px','max-width':width+'px','max-height':Math.min(520,available)+'px',display:'flex','flex-direction':'column',overflow:'hidden',padding:'0','box-sizing':'border-box'}))dropdown.style.setProperty(key,value,'important');
   };
   const close=()=>{
     seq++;controller?.abort();controller=null;
-    delete app.dataset.searchOpen;
-    syncClear();
+    delete app.dataset.searchOpen;delete dropdown.dataset.searchMode;
+    dropdown.style.removeProperty('display');
+    syncClear();syncEntry();
     shell.style.removeProperty('--dj-search-results-max');
     if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
     if(dropdown.hidden)return;
@@ -145,7 +170,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const makeResultButton=place=>{
     const button=document.createElement('button');button.type='button';button.className='map-quick-search-result';
     const strong=document.createElement('strong');strong.textContent=place.name||'검색 장소';
-    const info=document.createElement('small');info.textContent=[place.category||place.kind,place.address].filter(Boolean).join(' · ');
+    const info=document.createElement('small');info.textContent=searchResultSubtitle(place);
     button.append(strong,info);
     button.addEventListener('click',()=>{
       marker?.remove();
@@ -191,10 +216,10 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     }
     list.append(columns);
   };
-  const localVectorFacilities=(text)=>{
+  const localVectorFacilities=(text,nearby=false)=>{
     // MapLibre loaded vector tiles already carry general OSM POIs. No fictitious records.
     const key=normalizeKoreanSearch(text);
-    if(key.length<2||typeof map.querySourceFeatures!=='function')return [];
+    if((!nearby&&key.length<2)||typeof map.querySourceFeatures!=='function')return [];
     const result=[];const visited=new Set();
     const sources=new Set((map.getStyle?.()?.layers||[]).filter(l=>l['source-layer']==='poi'&&l.source).map(l=>l.source));
     for(const source of sources){
@@ -202,13 +227,13 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
       for(const f of features){
         const p=f.properties||{};const name=String(p['name:ko']||p.name||'').trim();
         const kind=String(p.class||p.subclass||'').trim();
-        if(!name||Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55)continue;
+        if(!name||(!nearby&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
         if(f.geometry?.type!=='Point')continue;
         const [lng,lat]=f.geometry.coordinates||[];
         if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
         const id=`${name}-${lng.toFixed(5)}-${lat.toFixed(5)}`;if(visited.has(id))continue;visited.add(id);
         result.push({name,lng,lat,category:kind||'일반 시설',address:'지도에 등록된 OpenStreetMap 시설 · 운영 여부 미확인',source:'loaded-map-poi'});
-        if(result.length>=20)return result;
+        if(!nearby&&result.length>=20)return result;
       }
     }
     return result;
@@ -230,9 +255,9 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     const rawTerm=String(text||'').trim();
     const term=normalizeKoreanSearch(rawTerm);
     form.classList.toggle('dj807-has-input',Boolean(term));
-    filters.hidden=term.length>0;
+    filters.hidden=phoneSearch()||term.length>0;dropdown.dataset.searchMode=term.length>=2?'results':'history';setTitle(term.length>=2?'검색 결과':'최근 검색');
     controller?.abort();controller=null;const active=++seq;
-    if(term.length<2){show();render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';return;}
+    if(term.length<2){if(phoneSearch()){close();return;}show();render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';return;}
     controller=new AbortController();const signal=controller.signal;
     show();
     const immediate=localResults(term);
@@ -267,30 +292,55 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   // Some mobile PWA shells intercept native form submissions. Explicit button
   // activation must still execute the same search, exactly once.
   searchButton?.addEventListener('click',event=>{event.preventDefault();submitSearch();});
-  const phoneSearch=()=>window.matchMedia?.('(max-width:699px)')?.matches===true;
+  const openHistory=()=>{
+    query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;seq++;
+    filters.hidden=true;dropdown.dataset.searchMode='history';setTitle('최근 검색');
+    show();render([],true);feedback.textContent='최근 검색어와 장소를 다시 선택할 수 있습니다.';
+  };
+  const openNearby=()=>{
+    query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;const active=++seq;
+    filters.hidden=true;dropdown.dataset.searchMode='nearby';setTitle('내 주변 시설');show();list.replaceChildren();
+    feedback.textContent='현재 위치를 확인하고 있습니다…';
+    if(!navigator.geolocation){feedback.textContent='이 기기에서는 위치 정보를 사용할 수 없습니다.';return;}
+    navigator.geolocation.getCurrentPosition(async position=>{
+      if(active!==seq)return;
+      const {longitude:lng,latitude:lat,accuracy}=position.coords;
+      if(!Number.isFinite(lng)||!Number.isFinite(lat)||!Number.isFinite(accuracy)||accuracy>200){feedback.textContent='위치 정확도가 낮습니다. 잠시 후 다시 시도해 주세요.';return;}
+      const origin={lng,lat};const own=new AbortController();controller=own;
+      let external=[],partial=false;const timeout=window.setTimeout(()=>own.abort(),7000);
+      try{external=await fetchNearbyOfficialPlaces(origin,{signal:own.signal});}catch(error){if(active!==seq)return;partial=true;}finally{window.clearTimeout(timeout);}
+      if(active!==seq)return;
+      const stations=Object.entries(VERIFIED_STATIONS).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:name+'역',lng,lat,kind:'subway',category:'지하철·철도역'}));
+      const places=nearbySearchResults(origin,[...searchTransportSnapshot(),...officialSearchSnapshot(),...external,...stations,...localVectorFacilities('',true)]);
+      list.replaceChildren();for(const place of places)list.append(makeResultButton(place));
+      feedback.textContent=places.length?`현재 위치 반경 500m · ${places.length}곳 · 직선거리 순${partial?' · 일부 자료 미연결':''}`:'반경 500m 내 확인된 시설이 없습니다. 자료 범위 밖이거나 데이터가 부족할 수 있습니다.';
+    },()=>{if(active===seq)feedback.textContent='위치 권한 또는 위치 확인에 실패했습니다. 설정에서 권한을 확인해 주세요.';},{enableHighAccuracy:true,timeout:10000,maximumAge:15000});
+  };
+  for(const button of [nearbyButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
+  nearbyButton.addEventListener('click',openNearby);historyButton.addEventListener('click',openHistory);
+  query.addEventListener('blur',()=>window.setTimeout(syncEntry,0));
+  const tabWatch=new MutationObserver(()=>{if(app.dataset.tab!=='map')close();syncEntry();});tabWatch.observe(app,{attributes:true,attributeFilter:['data-tab']});
   query.addEventListener('focus',()=>{
-    const term=query.value.trim();filters.hidden=term.length>0;
-    // On phone, focusing an empty field must not create a large blank dropdown.
-    if(phoneSearch()&&term.length<2&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}
-    show();
-    if(term.length<2){render([],true);feedback.textContent='추천 장소 또는 역명을 선택하세요.';}
-    else {const matches=viewResults(mergeMapSearchResults(localResults(term)));render(matches.length?matches:[]);feedback.textContent=matches.length?'동작구 장소·교통시설 자동완성':'Enter 또는 검색 버튼으로 전체 장소 검색';}
+    const term=query.value.trim();filters.hidden=phoneSearch()||term.length>0;syncEntry();
+    if(phoneSearch()&&term.length<2){close();return;}
+    dropdown.dataset.searchMode=term.length>=2?'results':'history';setTitle(term.length>=2?'검색 결과':'최근 검색');show();
+    if(term.length<2){render([],true);feedback.textContent='최근 검색어와 장소';}
+    else {const matches=viewResults(mergeMapSearchResults(localResults(term)));render(matches);feedback.textContent=matches.length?'동작구 장소·교통시설 자동완성':'Enter 또는 검색 버튼으로 전체 장소 검색';}
   });
   query.addEventListener('input',()=>{
     seq++;controller?.abort();controller=null;
-    const term=normalizeKoreanSearch(query.value);filters.hidden=term.length>0;
-    // Suggestions appear once a query is meaningful, not on input focus alone.
-    if(phoneSearch()&&term.length<2&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}
-    show();
-    if(term.length<2){render([],true);feedback.textContent='추천 장소';return;}
+    const term=normalizeKoreanSearch(query.value);filters.hidden=phoneSearch()||term.length>0;
+    if(phoneSearch()&&term.length<2){close();return;}
+    dropdown.dataset.searchMode=term.length>=2?'results':'history';setTitle(term.length>=2?'검색 결과':'최근 검색');show();
+    if(term.length<2){render([],true);feedback.textContent='최근 검색어와 장소';return;}
     const matches=viewResults(mergeMapSearchResults(localResults(query.value)));render(matches);
     feedback.textContent=matches.length?`장소 추천 ${matches.length}건 · 더 찾으려면 검색`:'검색을 누르면 장소·주소를 조회합니다.';
   });
-  window.addEventListener('dongjak:recent-places-change',()=>{if(!dropdown.hidden&&!query.value.trim()){if(phoneSearch()&&!recentPlaces().length&&!recentSearchQueries().length){close();return;}render([],true);}});
+  window.addEventListener('dongjak:recent-places-change',()=>{if(!dropdown.hidden&&dropdown.dataset.searchMode==='history')render([],true);});
   clearButton.addEventListener('pointerdown',e=>e.preventDefault());
   clearButton.addEventListener('click',()=>{query.value='';query.focus();query.dispatchEvent(new Event('input',{bubbles:true}));});
   closeBtn?.addEventListener('click',()=>{close();query.blur();query.value='';form.classList.remove('dj807-has-input');syncClear();});
-  document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target))close();});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+  document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target)&&!actions.contains(event.target)){close();if(document.activeElement===query)query.blur();syncEntry();}});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();if(document.activeElement===query)query.blur();syncEntry();}});
   return {close,search:performSearch};
 }

@@ -491,6 +491,7 @@ function subwayLineStyle(line){
 let closeActivePanel = () => {};
 let transportBusy = false;
 let cachedTransportPlaces = [];
+export function searchTransportSnapshot(){return cachedTransportPlaces.map(p=>({...p,category:p.kind==='bus'?'버스정류장':'지하철·철도역'}));}
 export function searchCachedTransportPlaces(query) {
   const term = normalizeStationQueryName(query).toLowerCase().replace(/\s/g,'');
   if (term.length < 2) return [];

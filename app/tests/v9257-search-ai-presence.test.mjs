@@ -12,7 +12,7 @@ test('mobile search keeps AI orb visible while search suggestions are open',()=>
   assert.doesNotMatch(css,/:is\(\[data-search-open="true"\],\[data-dj-voice-feedback="true"\]\) \.topbar #dj890-ai-orb/);
   assert.match(css,/\[data-dj-voice-feedback="true"\] \.topbar>\.header-tools:has\(#dj890-ai-orb\)/);
 });
-test('search suggestion panel anchors to actual pill and never spans beneath AI orb',()=>{
+test('search suggestion panel starts below the pill and spans the phone without covering AI',()=>{
   const ui=read('src/map-quick-search.js');
   const css=mobileCss();
   assert.match(ui,/const anchor=shell\.getBoundingClientRect\(\)/);
