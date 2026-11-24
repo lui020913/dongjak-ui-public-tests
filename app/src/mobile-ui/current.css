@@ -1516,7 +1516,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   position:absolute!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
   width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:none!important;max-height:none!important;
   margin:0!important;aspect-ratio:1!important;box-sizing:border-box!important;border-radius:50%!important;
-  transform:translate(-50%,-50%) scale(1);animation:dj-round-location-pulse 1.8s ease-out infinite!important;
+  transform:translate(-50%,-50%) scale(1);transform-origin:center!important;animation:dj-round-location-pulse 1.8s ease-out infinite!important;
  }
 }
 @keyframes dj-round-location-pulse{
