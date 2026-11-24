@@ -594,7 +594,11 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  })).toBe(true);
  const labels=await cards.allTextContents();
  expect(labels.every(x=>!/종합 최적|환승 경로/.test(x))).toBe(true);
- expect(labels.some(x=>/PRI 미평가|PRI [0-9.]+점/.test(x))).toBe(true);
+ expect(labels.some(x=>/평가 자료 부족|(?:낮음|주의|높음) · [0-9.]+점/.test(x))).toBe(true);
+ await page.locator('#dj-route-pri-help').click();
+ const priHelp=page.locator('#dj-route-pri-dialog');await expect(priHelp).toBeVisible();await expect(priHelp.locator('.dj-route-pri-factors li')).toHaveCount(6);
+ await expect(priHelp).toContainText('65%');await priHelp.getByRole('button',{name:'확인',exact:true}).click();await expect(priHelp).toBeHidden();
+ await expect(summary).toBeVisible();
  // No extra third route-details screen. Risk map and legend are inline.
  await expect(page.locator('#dj-route-pri-detail')).toHaveCount(0);
  await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
@@ -1759,7 +1763,7 @@ test('iPhone final visual contract: compact route, transparent community status 
  const card=page.locator('#route-map-card');
  await expect(card.locator('#dj-route-choice-list .dj-route-choice')).toHaveCount(2);
  await expect(card.locator('#dj-route-choice-list .dj-route-choice').first()).toBeVisible();
- await expect(card.locator('#dj-route-choice-list .dj-route-choice-pri').first()).toContainText('PRI 미평가');
+ await expect(card.locator('#dj-route-choice-list .dj-route-choice-pri').first()).toContainText('평가 자료 부족');
  await expect(card.getByRole('button',{name:'안내 시작'})).toBeVisible();
 
 });

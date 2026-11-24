@@ -9,6 +9,7 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
 import {routeComparisonItems,sameRoute,metersLabel} from './v804-route-comparison.js';
 import './route-experience.css';
 import {recentPlaces} from './v815-place-store.js';
+import {TEAM_FACTORS} from './pri-data.mjs';
 
 export function mountWalkingRouteExperience(doc=document,win=window){
   const byId=id=>doc.getElementById(id);
@@ -146,11 +147,33 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const choiceTitle=add('strong');choiceTitle.textContent='추천 도보 경로';
   const choiceSub=add('small');choiceSub.textContent='경로를 눌러 지도 비교';
   choiceHead.append(choiceTitle,choiceSub);
+  const priHeading=add('div',null,'dj-route-pri-heading');
+  const priLabel=add('span');priLabel.textContent='보행 위험도 (PRI)';
+  const priHelp=add('button','dj-route-pri-help');priHelp.type='button';priHelp.textContent='?';priHelp.setAttribute('aria-label','보행 위험도 PRI 설명');priHelp.setAttribute('aria-haspopup','dialog');
+  priHeading.append(priLabel,priHelp);
+  const priDialog=add('dialog','dj-route-pri-dialog');
+  priDialog.setAttribute('aria-labelledby','dj-route-pri-dialog-title');
+  const helpTitle=add('h2','dj-route-pri-dialog-title');helpTitle.textContent='보행 위험도(PRI)란?';
+  const helpClose=add('button',null,'dj-route-pri-close');helpClose.type='button';helpClose.textContent='×';helpClose.setAttribute('aria-label','PRI 설명 닫기');
+  const helpHead=add('header');helpHead.append(helpTitle,helpClose);
+  const helpIntro=add('p');helpIntro.textContent='보행 환경의 잠재적 위험을 수치화한 연구용 지표입니다. 경로의 거리·시간과 함께 조사된 위험도를 비교하는 데 활용합니다.';
+  const factors=add('ul',null,'dj-route-pri-factors');
+  for(const factor of TEAM_FACTORS){const li=add('li');li.textContent=factor.label;factors.append(li);}
+  const helpScale=add('div',null,'dj-route-pri-scale');
+  helpScale.innerHTML='<div class="dj-route-pri-help-ramp" aria-hidden="true"></div><div><span>0~39 낮음</span><span>40~69 주의</span><span>70~100 높음</span></div>';
+  const helpDetails=add('p');helpDetails.textContent='6개 지표는 동일 가중치이며, 실제로 평가된 자료만 반영합니다. 점수가 높을수록 잠재 위험이 큽니다. 현재 조사 범위는 상도1동 중심이며 일부 구간은 부분평가입니다.';
+  const helpUnknown=add('p',null,'dj-route-pri-unknown');helpUnknown.textContent='평가 자료 부족: 경로 중 조사된 구간이 65% 미만이거나 점수를 확인할 수 없는 경우입니다. 회색은 위험도 미확인이지 안전하다는 뜻이 아닙니다. 상대적으로 낮은 점수도 실제 안전이나 사고 확률을 보장하지 않습니다.';
+  const helpDone=add('button',null,'dj-route-pri-done');helpDone.type='button';helpDone.textContent='확인';
+  priDialog.append(helpHead,helpIntro,factors,helpScale,helpDetails,helpUnknown,helpDone);doc.body.append(priDialog);
+  const closePriHelp=()=>{if(priDialog.open)priDialog.close();};
+  on(priHelp,'click',()=>{if(!app.classList.contains('route-guiding')&&!priDialog.open)priDialog.showModal();});
+  on(helpClose,'click',closePriHelp);on(helpDone,'click',closePriHelp);
+  on(priDialog,'click',e=>{if(e.target===priDialog){const r=priDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePriHelp();}});
   const choiceRows=add('div',null,'dj-route-choice-rows');
   const hint=add('p',null,'dj-route-choice-hint');
   const legend=add('div','dj-route-pri-legend');
-  legend.innerHTML='<div class="dj-route-pri-ramp" aria-hidden="true"></div><span>낮은 위험</span><span>높은 위험</span><span class="dj-route-unknown-legend">━ 회색 실선: 미평가</span>';
-  choices.append(choiceHead,choiceRows,hint,legend);
+  legend.innerHTML='<div class="dj-route-pri-ramp" aria-hidden="true"></div><span>낮은 위험</span><span>높은 위험</span><span class="dj-route-unknown-legend">━ 회색 실선: 평가 자료 부족</span>';
+  choices.append(choiceHead,priHeading,choiceRows,hint,legend);
   const actions=mapCard.querySelector('.route-map-card-actions');
   actions?.before(choices);
   const summaryTop=mapCard.querySelector(':scope > div:first-child');
@@ -221,9 +244,9 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   let latest=null,assessment=null;
   const riskLabel=entry=>{
     if(!entry||!Number.isFinite(entry.risk)||!Number.isFinite(entry.coverage)||entry.coverage<.65)
-      return {text:'PRI 미평가',tone:'unknown'};
+      return {text:'평가 자료 부족',tone:'unknown'};
     const risk=entry.risk;
-    return {text:'PRI '+risk.toFixed(1)+'점',tone:risk>=70?'high':risk>=40?'medium':'low'};
+    return {text:(risk>=70?'높음':risk>=40?'주의':'낮음')+' · '+risk.toFixed(1)+'점',tone:risk>=70?'high':risk>=40?'medium':'low'};
   };
   const selected=()=>variants.querySelector('[data-route-variant][aria-pressed="true"]')?.dataset.routeVariant||'standard';
   function refreshChoices(){
@@ -236,7 +259,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     const quick=Math.min(...items.map(x=>x.minutes));
     const rec=assessment?.recommendation;
     // Never call the fastest route "safe" based on unobserved data.
-    choiceSub.textContent=rec?'관측 PRI 상대 저위험 후보 비교':'거리·시간 및 관측 가능한 위험도';
+    choiceSub.textContent=rec?'관측 위험도가 낮은 후보 비교':'거리·시간 및 관측 가능한 위험도';
     for(const item of available){
       const native=variants.querySelector('[data-route-variant="'+item.id+'"]');
       const button=add('button',null,'dj-route-choice');
@@ -246,7 +269,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       if(chosen)button.classList.add('is-current');
       const label=add('strong');label.textContent=item.id==='gentle'?'완만한길':'빠른길';
       const subtitle=add('span',null,'dj-route-choice-subtitle');
-      subtitle.textContent=rec===item.id?'PRI 상대 저위험':item.minutes===quick?'소요시간 우선':'경사 고려';
+      subtitle.textContent=rec===item.id?'상대적 저위험':item.minutes===quick?'소요시간 우선':'경사 고려';
       const routeName=add('span',null,'dj-route-choice-head');
       routeName.append(label,subtitle);
       const metric=add('span',null,'dj-route-choice-metrics');
@@ -258,7 +281,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       const badge=add('span',null,'dj-route-choice-pri');badge.dataset.tone=risk.tone;badge.textContent=risk.text;
       const support=add('small',null,'dj-route-choice-coverage');
       support.textContent=Number.isFinite(entry?.coverage)
-        ?'평가 구간 '+Math.round(entry.coverage*100)+'%':'PRI 자료 확인 중';
+        ?'평가 구간 '+Math.round(entry.coverage*100)+'%':(assessment?'평가 자료 부족':'평가 자료 확인 중');
       button.append(routeName,metric,badge,support);
       // The choice rows are replaced whenever PRI/selection state updates.
       // Attach to the ephemeral node directly; do not retain old buttons in
@@ -269,8 +292,8 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       choiceRows.append(button);
     }
     hint.textContent=equal?'두 옵션에서 같은 경로가 계산됐습니다.':
-      rec?'색상은 평가된 도로 구간의 PRI 위험도입니다. 실제 안전을 보장하지 않습니다.':
-      '회색 실선은 미평가 구간입니다. 자료 부족 시 안전 우선 경로를 단정하지 않습니다.';
+      rec?'색상은 조사된 도로 구간의 보행 위험도입니다. 실제 안전을 보장하지 않습니다.':
+      '회색 실선은 평가 자료가 부족한 구간입니다. 자료 부족 시 안전 우선 경로를 단정하지 않습니다.';
   }
   const onReady=e=>{latest=e.detail;assessment=null;refreshChoices();};
   const onPri=e=>{assessment=e.detail;refreshChoices();};
@@ -355,6 +378,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       app.dataset.tab==='route'?'input':'none';
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
+    if(stage!=='preview')closePriHelp();
     cancelSurfaceMotion(mapCard);
     if(stage==='preview')revealSurface(mapCard);
     shield.hidden=stage!=='guiding';
@@ -375,7 +399,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     restoreInputFooter();
     remove.forEach(fn=>fn());
     delete app.dataset.djRouteStage;
-    top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
+    closePriHelp();priDialog.remove();top.remove();choices.remove();topBanner.remove();shield.remove();arrival.remove();swap.remove();shortcuts.remove();
     inputBack.remove();walkMode.remove();mapActions.remove();recent.remove();
     delete app.dataset.djWalkArrived;
     delete app.dataset.djWalkV2;

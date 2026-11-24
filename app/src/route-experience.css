@@ -660,3 +660,18 @@
   #app .dj-recent-query-title{flex-basis:100%;font-size:12px}
   @media(max-width:699px){#app[data-dj-route-stage="input"] #route-panel #dj815-waypoints{padding:0!important;margin:0!important;background:transparent!important;border:0!important;box-shadow:none!important}#app[data-dj-route-stage="input"] #route-panel #dj815-waypoints>.dj832-waypoint-toggle{min-height:40px!important;width:100%!important;border:1px solid var(--walk-border)!important;border-radius:12px!important;background:var(--walk-soft)!important;color:var(--walk-text)!important}}
 }
+
+/* A native top-layer dialog keeps help separate from route selection. */
+#app .dj-route-pri-heading{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:650;color:#48675b}
+#app #dj-route-pri-help{display:grid;place-items:center;width:28px;height:28px;min-width:28px;min-height:28px;padding:0;border:1px solid #d8e5df;border-radius:50%;background:#fff;color:#346f5f;font-size:15px;font-weight:750;line-height:1}
+#dj-route-pri-dialog{box-sizing:border-box;width:min(420px,calc(100% - 32px));max-height:calc(100dvh - 48px);overflow:auto;overscroll-behavior:contain;border:1px solid #dce8e0;border-radius:22px;background:#fff;color:#243c32;padding:18px;font:inherit;box-shadow:0 12px 44px #142e2440}
+#dj-route-pri-dialog::backdrop{background:#102c2255}
+#dj-route-pri-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#dj-route-pri-dialog h2{margin:0;font-size:19px;line-height:1.35;letter-spacing:-.03em}
+#dj-route-pri-dialog p{font-size:13px;line-height:1.6;margin:12px 0;overflow-wrap:anywhere}
+#dj-route-pri-dialog .dj-route-pri-close{flex:none;width:40px;height:40px;border:0;border-radius:12px;background:#edf4ef;color:#245345;font-size:25px}
+#dj-route-pri-dialog .dj-route-pri-factors{display:grid;gap:6px;padding:10px 10px 10px 27px;margin:10px 0;background:#f2f6f3;border-radius:12px;font-size:13px;line-height:1.5}
+#dj-route-pri-dialog .dj-route-pri-help-ramp{height:9px;border-radius:8px;background:linear-gradient(90deg,#139861,#87c84c 39%,#f2c63f 40%,#ef903c 69%,#d84b4e 70%,#d84b4e)}
+#dj-route-pri-dialog .dj-route-pri-scale>div:last-child{display:flex;justify-content:space-between;gap:4px;margin-top:5px;font-size:11px;color:#49665a}
+#dj-route-pri-dialog .dj-route-pri-unknown{padding:10px;background:#f0f2f3;border-radius:10px;color:#52616b}
+#dj-route-pri-dialog .dj-route-pri-done{width:100%;min-height:46px;border:0;border-radius:13px;background:#147b60;color:#fff;font-size:15px;font-weight:700}
