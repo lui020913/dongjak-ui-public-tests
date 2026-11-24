@@ -41,3 +41,5 @@
 
 /* Hidden inactive My Info subviews stay mounted for renderMy(). */
 #app #mine-panel .dj834-detail-content > [hidden]{display:none!important}
+
+#app .dj-record-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0 0 12px;padding:4px;border-radius:14px;background:#e2ebe6}#app .dj-record-tabs button{min-width:0;min-height:42px;border:0;border-radius:10px;background:transparent;color:#38584b;font-size:clamp(11px,3vw,14px);font-weight:650;padding:4px}#app .dj-record-tabs button[aria-pressed=true]{background:#fff;color:#107964;box-shadow:0 1px 4px #173d3020}#app .dj-record-view[hidden],#app .dj834-records-container .stat-grid[hidden]{display:none!important}#app .dj-own-post{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:13px;border:1px solid #d3e1d9;border-radius:14px;background:#f7faf8;margin-bottom:8px}#app .dj-own-post :is(strong,small,p){grid-column:1/-1;overflow-wrap:anywhere;margin:0}#app .dj-own-post button{min-height:40px;border:1px solid #d3e1d9;border-radius:10px;background:white;color:#20483b}
