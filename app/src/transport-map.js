@@ -1366,10 +1366,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const mapClearRouteButton=el('button','dj-bus-route-clear dj-bus-route-map-clear','노선 표시 해제');
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
+  const routeDock=el('div','dj-bus-detail-dock');routeDock.hidden=true;
+  const reopenRoute=el('button','','노선 상세'),removeRoute=el('button','','해제');reopenRoute.type=removeRoute.type='button';routeDock.append(reopenRoute,removeRoute);document.getElementById('app')?.append(routeDock);
+  let routeChoice=null;
   let routePresentation=null;
   let lastFittedRouteId=null;
   function syncRouteClearDock(){
-    if(mapClearRouteButton.hidden||document.getElementById('app')?.dataset.tab!=='map')return;
+    if((mapClearRouteButton.hidden&&routeDock.hidden)||document.getElementById('app')?.dataset.tab!=='map')return;
     const shown=node=>{
       const rect=node?.getBoundingClientRect?.();
       const style=node&&getComputedStyle(node);
@@ -1380,6 +1383,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const edge=Math.min(globalThis.innerHeight||800,...blockers.map(n=>n.getBoundingClientRect().top));
     const upper=Math.max(80,...[document.querySelector('.topbar'),document.getElementById('dj-v794-toolbar')].filter(shown).map(n=>n.getBoundingClientRect().bottom+8));
     const top=Math.max(upper,Math.round(edge-Math.max(34,mapClearRouteButton.getBoundingClientRect()?.height||36)-12));
+    routeDock.style.setProperty('top',top+'px');
     mapClearRouteButton.style.setProperty('top',top+'px','important');
     mapClearRouteButton.style.setProperty('bottom','auto','important');
   }
@@ -1393,7 +1397,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const preview=busSheet&&panel.dataset.djBusRoutePreview==='true';
     routeStatus.hidden=!state||!busSheet||preview;
     clearRouteButton.hidden=!state||state.status==='error'||!busSheet||preview;
-    mapClearRouteButton.hidden=!state||state.status==='error'||busDetail.isOpen();
+    const mobile=globalThis.matchMedia?.('(max-width:699px)')?.matches;
+    const independent=Boolean(mobile&&routeChoice&&state?.id===routeChoice.routeId);
+    routeDock.hidden=!independent||busDetail.isOpen()||!panel.hidden;
+    if(independent)reopenRoute.textContent=state.route+' 노선 상세';
+    mapClearRouteButton.hidden=!state||state.status==='error'||busDetail.isOpen()||independent&&panel.hidden;
     if(state&&state.status!=='error'){
       const status=state.vehicleStatus==='live'?'버스 '+state.vehicleCount+'대 · ':state.vehicleStatus==='error'?'위치 조회 실패 · ':state.vehicleStatus==='empty'?'운행 위치 없음 · ':'';
       mapClearRouteButton.textContent=state.route+'번 · '+status+'해제 ×';
@@ -1419,21 +1427,17 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   function compactRouteDetail(){
     busDetail.hide();
     lastFittedRouteId=busRouteOverlay.getActive()?.id||null;
-    if(panel.hidden)return;
-    panel.dataset.djBusRoutePreview='true';
-    panel.style.setProperty('height','clamp(185px,28dvh,255px)','important');
-    panel.style.setProperty('max-height','clamp(185px,28dvh,255px)','important');
     syncRoutePresentation();
   }
   const busDetail=createBusRouteDetail({panel,
     onClose:()=>clearSelectedBusRoute(),
     onMap:()=>{compactRouteDetail();const coordinates=busRouteOverlay.getRouteCoordinates();
       if(coordinates.length<2)return;
-      const xs=coordinates.map(p=>p[0]),ys=coordinates.map(p=>p[1]);
-      const covered=Math.max(170,(globalThis.innerHeight||800)-panel.getBoundingClientRect().top+12);
-      map.fitBounds?.([[Math.min(...xs),Math.min(...ys)],[Math.max(...xs),Math.max(...ys)]],{padding:{top:90,bottom:covered,left:32,right:32},maxZoom:15.5,duration:420});
+      // Preserve local map scale; the entire long route may span several districts.
+      const chosen=busRouteOverlay.getRouteStops().find(s=>s.arsId===routeChoice?.arsId);
+      if(chosen)map.easeTo?.({center:[chosen.lng,chosen.lat],zoom:Math.max(map.getZoom?.()||0,14.5),duration:420});
     },
-    onStop:stop=>{compactRouteDetail();const offsetY=usableMapSelectionOffset({map,panel,doc:document,win:globalThis.window});
+    onStop:stop=>{compactRouteDetail();const offsetY=0;
       map.easeTo?.({center:[stop.lng,stop.lat],offset:[0,offsetY],zoom:Math.max(map.getZoom?.()||0,16.5),duration:420});
     },
     onRefresh:()=>void busRouteOverlay.refreshVehicles(),
@@ -1463,7 +1467,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     delete panel.dataset.djBusRoutePreview;
     for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
   };
-  const clearSelectedBusRoute=()=>{busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
+  const clearSelectedBusRoute=()=>{routeChoice=null;busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
+  reopenRoute.addEventListener('click',()=>{if(!routeChoice||!canOpen())return;busDetail.open(routeChoice);const active=busRouteOverlay.getActive();if(active?.id===routeChoice.routeId)busDetail.update(active,busRouteOverlay.getRouteStops(),busRouteOverlay.getRouteVehicles());else void busRouteOverlay.select(routeChoice);syncRoutePresentation();});
+  removeRoute.addEventListener('click',clearSelectedBusRoute);
   clearRouteButton.addEventListener('click',clearSelectedBusRoute);
   mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
   function activateBusRoute(event){
@@ -1471,21 +1477,12 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!row||!arrivalsEl.contains(row)||panel.hidden||selected?.kind!=='bus')return;
     if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
     event.preventDefault();event.stopPropagation();
-    if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
-      panel.dataset.djBusRoutePreview='true';
-      if(panel.classList.contains('dj871-sheet-expanded'))setMobileSheetExpanded(panel,false,document,globalThis.window);
-      panel.style.setProperty('height','clamp(185px,28dvh,255px)','important');
-      panel.style.setProperty('max-height','clamp(185px,28dvh,255px)','important');
-      panel.style.setProperty('min-height','0','important');
-      panel.style.setProperty('overflow','hidden','important');
-      panel.querySelector('.dj875-transit-scroll')?.scrollTo?.({top:0,behavior:'instant'});
-    }
     lastFittedRouteId=null;
     const choice={routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType,arsId:String(selected.arsId||'')};
+    routeChoice=choice;
     if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
+      close(false);
       busDetail.open(choice);
-      panel.style.setProperty('height','min(77dvh,680px)','important');
-      panel.style.setProperty('max-height','min(77dvh,680px)','important');
     }
     syncRoutePresentation();
     const active=busRouteOverlay.getActive();
