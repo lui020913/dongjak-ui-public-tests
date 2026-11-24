@@ -48,16 +48,17 @@ test('nearby guidance dock follows measured tab bar and uses neutral secondary a
 test('My Info subviews animate by direction without blank-fading the page root',()=>{
  const js=read('src/v834-my-info.js');
  const css=read('src/phone-surface-consistency-20261123.css');
+ const motion=read('src/subpage-motion.js');
  assert.match(js,/enter\(detail,'forward'\)/);
-  assert.match(js,/const target=node===detail\?content:node/);
+  assert.match(js,/motion\.enter\(node===detail\?content:node,direction\)/);
  assert.match(js,/enter\(landing,'back'\)/);
   // Visible directional motion, without fading content or the page root.
-  assert.match(js,/direction==='back'\?-44:44/);
-  assert.match(js,/opacity:1,transform/);
-  assert.match(js,/duration:360,easing/);
+  assert.match(motion,/direction==='back'\?-44:44/);
+  assert.match(motion,/opacity:1,transform/);
+  assert.match(motion,/duration:360,easing/);
   assert.match(js,/heading\.insertBefore\(detailNav,heading\.querySelector\('\.dj-sheet-chrome-close'\)\)/);
   assert.match(js,/syncSubpageHeader\(\);/);
-  assert.doesNotMatch(js,/opacity:\.88,transform/);
+  assert.doesNotMatch(motion,/opacity:\.88,transform/);
   assert.match(css,/\.dj834-detail-nav\s*\{[\s\S]*?position:sticky!important/);
   assert.match(css,/True iOS child navigation: reuse the fixed parent header/);
   assert.match(css,/\.dj-sheet-chrome > \.dj834-detail-nav/);
