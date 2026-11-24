@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.139",
+  "application_version": "9.2.140",
   "public_work_branch": "main",
-  "purpose": "PR446: community required region and report location, facility review keyboard isolation and photo, remove Naver lookup, four personal record tabs, English portal labels, owner comment/like activity history and main bell, guidance pan/zoom/3D and GPS reset.",
-  "attempt": 351,
+  "purpose": "PR447: remove records-only opaque dock clearance and unify comment submit/photo buttons. No other feature changes.",
+  "attempt": 352,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR446 merged after successful source CI and 33 independent FIX jobs; additive Supabase schema and edge v9 applied. Run protected Production release gates from stable v9.2.138 lineage; exclude v9.3 performance candidate.",
+  "last_retry_reason": "PR447 merged after successful source CI and all 33 independent FIX jobs. Use protected Production pipeline; stable v9.2.139 lineage, no v9.3 candidate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
