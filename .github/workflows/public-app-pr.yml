@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: npm test
       - name: Focused community editor keyboard and portal regression
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
@@ -161,7 +161,7 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       # Brand-new V3 entry already passed 3 phone reference screenshot
@@ -178,6 +178,16 @@ jobs:
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
       # PR421 source and route-to-AI integration passed run 45308497361.
       # Test-only follow-up: the remaining PR419 composer locator failure.
+      # Release 45310349185: all runtime tests except the stale white status
+      # assertion passed. Test the corrected contract against the unchanged Preview.
+      - name: Retest only failed iOS AI status background contract
+        if: ${{ github.head_ref == 'fix/ai-pwa-status-contract-20261124' }}
+        working-directory: .
+        env:
+          DONGJAK_TARGET_URL: https://70f4d4ce.dongjak-walk-safety-preview.pages.dev/
+        run: |
+          curl -fsSL --max-time 30 "${DONGJAK_TARGET_URL}release-source.json" | node -e 'let s="";process.stdin.on("data",x=>s+=x).on("end",()=>{const d=JSON.parse(s);if(d.public_ui_source_commit!=="cff84ac2d1499c3c07063669517528433c5c6b3e"||d.application_version!=="9.2.132"||d.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION")throw Error("Unexpected Preview source")})'
+          npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile390 --grep 'iOS PWA status edge stays flat when a dialog opens'
       - name: Verify last community composer geometry case
         if: ${{ github.head_ref == 'integrate/route-search-ai-keyboard-20261124' }}
         working-directory: .

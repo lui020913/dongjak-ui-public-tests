@@ -921,13 +921,16 @@ test('iOS PWA status edge stays flat when a dialog opens',{tag:'@phone-common'},
  const sample=page.locator('body > #dj-ios-pwa-status-sample');await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');await expect(sample).toHaveCSS('position','fixed');const sr=await sample.boundingBox();expect(sr.height).toBeGreaterThanOrEqual(6);expect(sr.y).toBe(0);expect(sr.width).toBeGreaterThanOrEqual(page.viewportSize().width*.8);
  await test.info().attach('ios-pwa-flat-status',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.evaluate(n=>n.close());await expect(dialog).toBeHidden();await expect(bridge).toHaveCSS('opacity','0');
- // Opening a native dialog changes the status surface to opaque white, but never dims the page.
+ // The AI dialog, native status sample and page background share one opaque tone; no dimmer.
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();await ai.evaluate(n=>n.showModal());
  await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');await expect(bridge).toHaveCSS('opacity','0');
  const native=await ai.evaluate(n=>({image:getComputedStyle(n,'::backdrop').backgroundImage,color:getComputedStyle(n,'::backdrop').backgroundColor}));
  expect(native.image).toBe('none'); // The top-layer dialog has no backdrop gradient.
  expect(native.color).toBe('rgba(0, 0, 0, 0)'); // Nor any default browser dimmer.
- await expect(sample).toHaveCSS('background-color','rgb(255, 255, 255)');
+ await expect(ai).toHaveCSS('background-color','rgb(237, 243, 239)');
+ await expect(sample).toHaveCSS('background-color','rgb(237, 243, 239)');
+ await expect(root).toHaveCSS('background-color','rgb(237, 243, 239)');
+ await expect(page.locator('body')).toHaveCSS('background-color','rgb(237, 243, 239)');
  await ai.evaluate(n=>n.close());await expect(root).toHaveAttribute('data-dj-pwa-dimmed','false');
  // Dark theme palette is tested in the same DOM without requiring an OS-controlled reload.
  await page.evaluate(()=>document.getElementById('app').dataset.theme='dark');await expect.poll(()=>root.evaluate(n=>getComputedStyle(n).getPropertyValue('--dj-pwa-status-color').trim())).toBe('#22282e');
