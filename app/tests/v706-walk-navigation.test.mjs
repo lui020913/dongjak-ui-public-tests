@@ -10,13 +10,15 @@ test('heading follows north/east/south and preserves current orientation on miss
   assert.equal(headingForCamera(NaN,72),72);
   assert.equal(headingForCamera(275,72),275);
 });
-test('automatic rerouting waits for 3 good GPS samples and a 30-second cooldown',()=>{
+test('automatic rerouting waits for 3 good GPS samples and a 15-second retry cooldown',()=>{
   const base={offRouteMeters:80,accuracy:15,consecutiveSamples:3,now:60000,lastAttemptAt:10000};
   assert.equal(shouldAutoReroute(base),true);
   assert.equal(shouldAutoReroute({...base,consecutiveSamples:2}),false);
   assert.equal(shouldAutoReroute({...base,accuracy:55}),false);
-  assert.equal(shouldAutoReroute({...base,lastAttemptAt:40000}),false);
-  assert.equal(shouldAutoReroute({...base,offRouteMeters:25}),false);
+  assert.equal(shouldAutoReroute({...base,lastAttemptAt:45001}),false);
+  assert.equal(shouldAutoReroute({...base,offRouteMeters:23}),false);
+  assert.equal(shouldAutoReroute({...base,lastAttemptAt:45000}),true);
+  assert.equal(shouldAutoReroute({...base,offRouteMeters:24}),true);
   assert.equal(shouldAutoReroute({...base,pending:true}),false);
 });
 test('voice cues have stable threshold keys and do not announce far away turns',()=>{
