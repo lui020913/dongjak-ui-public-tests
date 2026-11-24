@@ -1454,3 +1454,36 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   color:var(--dj-theme-muted,#bec8d2)!important;
  }
 }
+
+
+/* v9.2.140: Records alone scrolls behind the floating dock. The scroller's
+   internal bottom clearance keeps the final row accessible; no opaque band. */
+@layer request-completion {
+ @media(max-width:699px) {
+   html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]):has(.dj834-detail-content[data-dj834-view="records"]) {
+     bottom:0!important;max-height:none!important;padding-bottom:0!important;
+     background:var(--dj-primary-page-bg,#edf3ef)!important;
+   }
+   html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]):has(.dj834-detail-content[data-dj834-view="records"]) > .dj836-sheet-body {
+     margin-bottom:0!important;
+     padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+     scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+     background:transparent!important;
+   }
+ }
+ /* Both comment actions use the same geometry; this layer overrides older
+    pill-specific rules that otherwise take precedence over unlayered CSS. */
+ html body #app#app#app#app#app #participation-panel .community-comment-form :is(.community-comment-submit,.community-comment-photo) {
+   box-sizing:border-box!important;display:grid!important;place-items:center!important;
+   width:48px!important;min-width:48px!important;max-width:48px!important;
+   height:44px!important;min-height:44px!important;max-height:44px!important;
+   flex:0 0 48px!important;margin:0!important;padding:0 3px!important;
+   border:0!important;border-radius:14px!important;box-shadow:none!important;
+   background:#128773!important;color:#fff!important;
+   font-size:13px!important;font-weight:650!important;line-height:1.15!important;
+   white-space:normal!important;text-align:center!important;
+ }
+ html body #app#app#app#app#app #participation-panel .community-comment-form :is(.community-comment-submit,.community-comment-photo):disabled {
+   opacity:.55!important;
+ }
+}
