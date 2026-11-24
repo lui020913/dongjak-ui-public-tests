@@ -3,9 +3,9 @@
   "application_version": "9.2.133",
   "public_work_branch": "main",
   "purpose": "Six requested UI and public publication fixes (PR424, PR425, PR426) with latest GIS PR255 preserved. Solid map lines, collapsed update history, stationary AI scroll and reliable mobile dismissal, clearer route comparison actions, PRI header and scroll separation, authenticated public community and reviews.",
-  "attempt": 339,
+  "attempt": 340,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: PR426 final focused browser retest CI 45321673050 passed all five previously failing cases; PR424 previously passed 23 mobile cases. Supabase grants corrected with RLS and consent maintained. Use protected Preview, mobile and PC/tablet QA before Production.",
+  "last_retry_reason": "2026-11-24: attempt339 passed 343/345 regression files, failing two obsolete assertions prohibiting the separately merged PR255 research overlay. PR427 corrected these assertions while retaining native 50:50 PRI and independent research data; focused CI 45322732462 succeeded. Retry the same version under all protected release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
