@@ -211,7 +211,7 @@ jobs:
           npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --list --reporter=json > "$RUNNER_TEMP/phone-list.json"
           node scripts/plan-fix-phone-shards.mjs "$RUNNER_TEMP/phone-list.json" >> "$GITHUB_OUTPUT"
           mkdir -p "$RUNNER_TEMP/fix-phone-build"
-          git rev-parse HEAD > "$RUNNER_TEMP/fix-phone-build/SOURCE_SHA"
+          git -c safe.directory="$GITHUB_WORKSPACE" -C "$GITHUB_WORKSPACE" rev-parse HEAD > "$RUNNER_TEMP/fix-phone-build/SOURCE_SHA"
           tar -C app -czf "$RUNNER_TEMP/fix-phone-build/dist.tar.gz" dist
           (cd "$RUNNER_TEMP/fix-phone-build" && sha256sum dist.tar.gz SOURCE_SHA > SHA256SUMS)
       - name: Share exact once-built app with phone shards
@@ -432,7 +432,7 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/fix-phone-build"
           sha256sum -c SHA256SUMS
-          test "$(cat SOURCE_SHA)" = "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+          test "$(cat SOURCE_SHA)" = "$(git -c safe.directory="$GITHUB_WORKSPACE" -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
           tar -xzf dist.tar.gz -C "$GITHUB_WORKSPACE/app"
       - name: Run independent FIX phone case
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --workers=1 --shard=${{ matrix.shard }}/${{ needs.app-build-and-tests.outputs.phone_count }}
