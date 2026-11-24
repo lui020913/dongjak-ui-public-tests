@@ -7,6 +7,8 @@ on:
       - 'tests/mobile-first-layout-contract.test.mjs'
       - 'tests/v911-anonymous-ui.spec.mjs'
       - 'tests/mobile-qa-parallel.test.mjs'
+      - 'tests/fix-phone-sharding.test.mjs'
+      - 'scripts/plan-fix-phone-shards.mjs'
       - 'tests/retired-smoke-workflows.test.mjs'
       - 'tests/static-data-inventory.test.mjs'
       - 'scripts/audit-static-data-usage.mjs'
@@ -30,6 +32,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   app-build-and-tests:
+    outputs:
+      phone_matrix: ${{ steps.phone-plan.outputs.matrix }}
+      phone_count: ${{ steps.phone-plan.outputs.count }}
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -62,7 +67,7 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --test tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
           node --test tests/retired-smoke-workflows.test.mjs tests/static-data-inventory.test.mjs
-          node --test tests/production-app-tree-source-gate.test.mjs
+          node --test tests/production-app-tree-source-gate.test.mjs tests/fix-phone-sharding.test.mjs
           bash -n scripts/build-mobile-first-overhaul.sh
           node --check scripts/compare-ui-performance.mjs
           node --check scripts/verify-live-production-source.mjs
@@ -197,10 +202,27 @@ jobs:
         if: ${{ github.head_ref == 'fix/four-mobile-surfaces-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'map-first walking route preview only lists actually supplied options and fits the viewport'
-      - name: Verify the phone-only layout at three viewport sizes
+      - name: Plan independent phone-only layout cases
+        id: phone-plan
         if: ${{ github.head_ref != 'fix/v930-performance-promotion-guard' && github.head_ref != 'fix/v930-protected-version-replay' && github.head_ref != 'fix/release-visible-motion-audit-20261124' && github.head_ref != 'fix/visible-phone-motion-20261124' && github.head_ref != 'fix/single-motion-owner-tab-transition-20261124' && github.head_ref != 'fix/four-mobile-surfaces-20261124' && github.head_ref != 'fix/gis-release-contract-20261124' && github.head_ref != 'fix/six-ui-final-mobile-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
-        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
+        run: |
+          set -euo pipefail
+          npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --list --reporter=json > "$RUNNER_TEMP/phone-list.json"
+          node scripts/plan-fix-phone-shards.mjs "$RUNNER_TEMP/phone-list.json" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/fix-phone-build"
+          git -c safe.directory="$GITHUB_WORKSPACE" -C "$GITHUB_WORKSPACE" rev-parse HEAD > "$RUNNER_TEMP/fix-phone-build/SOURCE_SHA"
+          tar -C app -czf "$RUNNER_TEMP/fix-phone-build/dist.tar.gz" dist
+          (cd "$RUNNER_TEMP/fix-phone-build" && sha256sum dist.tar.gz SOURCE_SHA > SHA256SUMS)
+      - name: Share exact once-built app with phone shards
+        if: steps.phone-plan.outputs.count != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: fix-phone-build-${{ github.run_id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/fix-phone-build/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
       # Test-only follow-up: same application candidate as Preview 45344608752.
       # Verify actual rendered intermediate opacity in the impacted journeys.
       - name: Verify corrected tab motion against rebuilt candidate
@@ -359,3 +381,93 @@ jobs:
             echo "- Secret scan: passed"
             echo "- Unit tests and production build: passed"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  fix-phone:
+    name: FIX phone (${{ matrix.shard }}/${{ needs.app-build-and-tests.outputs.phone_count }})
+    needs: app-build-and-tests
+    if: needs.app-build-and-tests.outputs.phone_count != ''
+    strategy:
+      fail-fast: false
+      max-parallel: 24
+      matrix:
+        shard: ${{ fromJSON(needs.app-build-and-tests.outputs.phone_matrix) }}
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Restore app dependency downloads
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - name: Restore browser dependency downloads
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/dongjak/browser-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-browser-npm-v1-${{ hashFiles('package.json') }}
+      - name: Install only pinned test and preview runtime dependencies
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: |
+          set -euo pipefail
+          (cd app && npm ci --no-audit --no-fund --prefer-offline) &
+          pid=$!
+          NPM_CONFIG_CACHE="$HOME/.cache/dongjak/browser-npm" npm install --no-audit --no-fund --prefer-offline
+          wait "$pid"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fix-phone-build-${{ github.run_id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/fix-phone-build
+      - name: Verify exact source and unpack shared build
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/fix-phone-build"
+          sha256sum -c SHA256SUMS
+          test "$(cat SOURCE_SHA)" = "$(git -c safe.directory="$GITHUB_WORKSPACE" -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+          tar -xzf dist.tar.gz -C "$GITHUB_WORKSPACE/app"
+      - name: Run independent FIX phone case
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --workers=1 --shard=${{ matrix.shard }}/${{ needs.app-build-and-tests.outputs.phone_count }}
+      - name: Upload failed case evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fix-phone-failure-${{ github.run_id }}-attempt-${{ github.run_attempt }}-shard-${{ matrix.shard }}
+          path: |
+            playwright-report-mobile-first/
+            test-results-mobile-first/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  fix-phone-gate:
+    name: FIX phone aggregate gate
+    needs: [app-build-and-tests, fix-phone]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require source CI and all planned phone cases
+        env:
+          BUILD_RESULT: ${{ needs.app-build-and-tests.result }}
+          PHONE_RESULT: ${{ needs.fix-phone.result }}
+          PHONE_COUNT: ${{ needs.app-build-and-tests.outputs.phone_count }}
+        run: |
+          set -euo pipefail
+          test "$BUILD_RESULT" = success
+          if [ -n "$PHONE_COUNT" ]; then
+            test "$PHONE_RESULT" = success
+          else
+            test "$PHONE_RESULT" = skipped
+          fi
+          echo "FIX phone case count: ${PHONE_COUNT:-targeted legacy checks}" >> "$GITHUB_STEP_SUMMARY"
