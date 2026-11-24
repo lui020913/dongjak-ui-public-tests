@@ -328,7 +328,7 @@
       display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
       bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;
       top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
-      max-height:min(50dvh,390px)!important;overflow-y:auto!important;
+      max-height:min(44dvh,342px)!important;overflow-y:auto!important;
       margin:0!important;padding:14px 15px!important;border-radius:23px!important;
       transform:none!important;translate:none!important;z-index:6600!important;
       background:var(--walk-paper)!important;
@@ -617,7 +617,7 @@
   @media (max-width:699px) {
     html body #app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] .map-actions {
       top:auto!important;
-      bottom:calc(min(50dvh,390px) + env(safe-area-inset-bottom,0px) + 22px)!important;
+      bottom:calc(min(44dvh,342px) + env(safe-area-inset-bottom,0px) + 22px)!important;
     }
   }
 }
@@ -631,4 +631,15 @@
   padding:0!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
  }
  html body #app#app #dj-walk-map-head button svg{width:26px!important;height:26px!important;display:block!important;pointer-events:none}
+}
+
+/* Keep the preview bottom anchored to the screen, not the hidden tab dock. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #route-map-card:not([hidden]){
+   bottom:calc(env(safe-area-inset-bottom,0px) + 2px)!important;
+   top:auto!important;max-height:min(44dvh,342px)!important;
+   overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+ }
 }

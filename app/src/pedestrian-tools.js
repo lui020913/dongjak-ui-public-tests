@@ -219,6 +219,12 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   const close=document.getElementById('ped-tools-close');
   const width=document.getElementById('ped-tools-width');
   if(!accessButton||!nearButton||!reportButton||!panel||!header||!status||!results)return ()=>{};
+  // Keep the header outside the sole scrolling body. Reuse an existing
+  // chrome wrapper if present; move the original live nodes, never clone them.
+  let scrollBody=panel.querySelector(':scope > .dj836-sheet-body');
+  if(!scrollBody){scrollBody=el('div','dj836-sheet-body');panel.append(scrollBody);}
+  for(const node of [status,results,width])if(node&&node.parentElement!==scrollBody)scrollBody.append(node);
+  scrollBody.classList.add('dj-nearby-scroll-body');
   const app=document.getElementById('app');
   const mapToolsToggle=document.getElementById('map-tools-toggle');
   const disposePlacement=installPedestrianControlPlacement({

@@ -88,7 +88,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
   });
 }
 
-import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint} from './map-appearance.js';
+import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
@@ -258,6 +258,7 @@ export function initTheme({map,app}){
     }
     // Keep official and fallback bus-stop names readable even in initial night mode.
     applyBusStopLabelTheme(map,themeState.value);
+    repaintVegetation(map,app); // Include forest shade installed after baseline capture.
     syncMapLabelContrast(); // Base and late map labels share the same theme contrast.
     // existing building polygons are handled separately when each tile is loaded.
     for(const layer of map.getStyle().layers){

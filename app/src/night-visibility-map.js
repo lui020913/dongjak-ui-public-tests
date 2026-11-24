@@ -273,7 +273,7 @@ export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},on
   const setFloatingCollapsed=collapsed=>{
     if(!floatingContent||!floatingCollapse)return;
     floatingContent.hidden=Boolean(collapsed);
-    if(floating)floating.dataset.collapsed=collapsed?'true':'false';
+    if(floating){floating.dataset.collapsed=collapsed?'true':'false';if(collapsed)floating.classList.remove('dj871-sheet-expanded');}
     floatingCollapse.textContent=collapsed?'설정·결과 보기':'접기';
     floatingCollapse.setAttribute('aria-expanded',String(!collapsed));
   };

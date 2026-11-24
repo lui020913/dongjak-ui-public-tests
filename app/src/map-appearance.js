@@ -42,7 +42,18 @@ export const GREEN_PALETTE={
 const forestId=(id='')=>/forest|wood|woodland|treecover|scrub/.test(String(id).toLowerCase());
 const forestTypes=['forest','wood','woodland','trees','wooded','tree','scrub','natural_wood'];
 function isDark(app){return app?.dataset?.theme==='dark';}
-function palette(app){return GREEN_PALETTE[isDark(app)?'dark':'light'];}
+export function vegetationPalette(app){return GREEN_PALETTE[isDark(app)||app?.dataset?.sangdoNight==='on'?'dark':'light'];}
+function palette(app){return vegetationPalette(app);}
+/** Apply the temporary night palette to late-installed forest polygons too.
+ * This is cartographic styling only; never change the lighting data or lines. */
+export function repaintVegetation(map,app){
+ const colors=vegetationPalette(app);
+ for(const layer of map.getStyle()?.layers||[]){
+  if(!isVegetationLayer(layer))continue;
+  const color=forestId(layer.id)?colors.forest:colors.park;
+  try{if(map.getPaintProperty(layer.id,'fill-color')!==color)map.setPaintProperty(layer.id,'fill-color',color);}catch{}
+ }
+}
 export function installGrassTexture({map,app}){
   const ids=map.getStyle().layers.filter(isVegetationLayer).map(l=>l.id);
   const paint=()=>{
