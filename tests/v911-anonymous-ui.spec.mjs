@@ -1515,6 +1515,12 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  await expect(toolbar).toBeHidden();
  await tap(page,options.locator('summary'));
  await expect(toolbar).toBeVisible();
+ const district=options.locator('.community-dong-filter-row #community-dong-filter');
+ await expect(district).toBeVisible();
+ await expect(district.locator('option')).toHaveCount(16);
+ const districtBox=await district.boundingBox();
+ const toolbarBox=await toolbar.boundingBox();
+ expect(districtBox.y+districtBox.height,'district selector must not crowd the four action buttons').toBeLessThanOrEqual(toolbarBox.y+2);
  const controls=toolbar.locator(':scope > button, :scope > select');
  await expect(controls).toHaveCount(4);
  const cells=await controls.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,display:getComputedStyle(n).display}}));
