@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.3.0",
   "public_work_branch": "main",
-  "purpose": "PR438/439: restore exact v9.2.136 bottom tab transitions; retain independently verified map, settings, sheet and toolbar improvements; require measured material performance improvement without severe frame regression before Production.",
-  "attempt": 346,
+  "purpose": "PR440: repair public community post registration retry and visible validation/server feedback; retain current verified UI changes and all protected mobile/performance gates.",
+  "attempt": 347,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 45366597308 failed 4 mobile shards on visible intermediate tab opacity and had P95 frame interval regression (1266.6 to 3049.8ms). PR438 run 45367674874 and PR439 run 45368505725 both passed; merged exact approved corrections. Single protected retry. Preserve all existing QA and performance non-regression gate; do not promote if performance or stability fails.",
+  "last_retry_reason": "Owner requested deployment of merged PR440 (7d3ba6d); full application regression and exact source build passed, release must independently pass existing mobile and performance gates. Previous release failed mobile shard 6 and performance comparison; do not bypass or weaken gates.",
   "release_kind": "minor",
   "beta_number": 1,
   "gemini_repair_count": 0
