@@ -3,7 +3,7 @@ import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-shee
 import {routeVehicleGroups,vehicleLabel,stopHours} from './bus-route-detail-model.mjs';
 
 export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRetry}){
-  const doc=panel.ownerDocument;
+  const doc=panel.ownerDocument??globalThis.document;
   const make=(tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n;};
   const button=(text,action,cls='')=>{const b=make('button',cls,text);b.type='button';b.addEventListener('click',action);return b;};
   const root=make('section','dj-bus-detail');root.hidden=true;root.setAttribute('aria-label','버스 노선 상세');
