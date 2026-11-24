@@ -454,3 +454,26 @@ test('merged route search returns to AI keyboard without a background seam',asyn
   await modal.getByRole('button',{name:'AI 검색 닫기'}).click();
   await expect(modal).toBeHidden();
 });
+
+// Check rendered containment rather than only stylesheet tokens.
+test('history starts collapsed and PRI header is isolated from scrolling',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await readyForLiveTouch(page);
+ const pri=page.locator('#dj-pri-dialog');
+ await pri.evaluate(n=>n.showModal());
+ await expect(pri).toBeVisible();
+ const geometry=await pri.evaluate(n=>{
+  const head=n.querySelector('.dj-pri-head'),body=n.querySelector('.dj-pri-body');
+  const before=head.getBoundingClientRect().top;body.scrollTop=body.scrollHeight;
+  return {stable:Math.abs(head.getBoundingClientRect().top-before)<1,bodyOverflow:getComputedStyle(body).overflowY,contained:body.getBoundingClientRect().top>=head.getBoundingClientRect().bottom-1};
+ });
+ expect(geometry).toEqual({stable:true,bodyOverflow:'auto',contained:true});
+ await pri.evaluate(n=>n.close());
+ await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click();
+ await page.locator('[data-dj834-action="history"]').click();
+ const archives=page.locator('#version-history-list .dj-edition-history');
+ await expect(archives.first()).toBeVisible();
+ expect(await archives.locator('xpath=self::details[@open]').count()).toBe(0);
+ await archives.first().locator('summary').first().click();
+ await expect(archives.first()).toHaveAttribute('open','');
+});

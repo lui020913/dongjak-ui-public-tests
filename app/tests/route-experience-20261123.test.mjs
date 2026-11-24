@@ -53,10 +53,10 @@ test('PRI score remains conservative and red means danger not safety',()=>{
  assert.match(js,/risk>=70\?'high'/);
  assert.match(js,/실제 안전을 보장하지 않습니다/);
  assert.match(css,/#d84b4e/);
- assert.match(js,/회색 점선: 미평가/);
+ assert.match(js,/회색 실선: 미평가/);
  assert.match(main,/walking-route-pri-unknown/);
  assert.match(main,/walking-route-pri-colors/);
- assert.match(main,/'line-dasharray'/);
+ assert.match(main,/installSolidMapLines\(map\)/);
  assert.match(risk,/matchedRisk\(sample,heading,observedLines\.grid\)/);
  assert.match(risk,/result\.reason='excessive-detour'/);
 });
