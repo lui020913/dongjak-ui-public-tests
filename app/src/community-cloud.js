@@ -1,5 +1,5 @@
 import {cloudConfiguration,getActiveCloudClient} from './v824-favorites-cloud.js';
-const POST_FIELDS='id,title,body,nickname,category,photo,lng,lat,created_at';
+const POST_FIELDS='id,title,body,nickname,category,dong,photo,lng,lat,created_at';
 const COMMENT_FIELDS='id,post_id,parent_id,body,nickname,photo,created_at';
 async function select(table,fields,params={}){
  const client=getActiveCloudClient();
@@ -19,14 +19,14 @@ export async function readSharedCommunity(requestedPostId=null){
  u?select('community_posts','id',{owner:u.id}):[],
  u?select('community_likes','post_id',{owner:u.id,ids}):[]
  ]);
- return {authenticated:!!u,posts:rows.map(row=>({id:row.id,title:row.title,body:row.body,nickname:row.nickname,category:row.category,photo:row.photo,location:Number.isFinite(row.lng)&&Number.isFinite(row.lat)?{lng:row.lng,lat:row.lat}:null,created:Date.parse(row.created_at),shared:true,bookmarkOnly:!initialIds.has(row.id),bookmarked:bookmarks.some(x=>x.post_id===row.id),mine:mine.some(x=>x.id===row.id),likes:counts.find(x=>x.post_id===row.id)?.likes||0,liked:liked.some(x=>x.post_id===row.id),comments:comments.filter(x=>x.post_id===row.id).reverse().map(x=>({id:x.id,parentId:x.parent_id,body:x.body,nickname:x.nickname,photo:x.photo,created:Date.parse(x.created_at)}))}))};
+ return {authenticated:!!u,posts:rows.map(row=>({id:row.id,title:row.title,body:row.body,nickname:row.nickname,category:row.category,dong:row.dong||null,photo:row.photo,location:Number.isFinite(row.lng)&&Number.isFinite(row.lat)?{lng:row.lng,lat:row.lat}:null,created:Date.parse(row.created_at),shared:true,bookmarkOnly:!initialIds.has(row.id),bookmarked:bookmarks.some(x=>x.post_id===row.id),mine:mine.some(x=>x.id===row.id),likes:counts.find(x=>x.post_id===row.id)?.likes||0,liked:liked.some(x=>x.post_id===row.id),comments:comments.filter(x=>x.post_id===row.id).reverse().map(x=>({id:x.id,parentId:x.parent_id,body:x.body,nickname:x.nickname,photo:x.photo,created:Date.parse(x.created_at)}))}))};
 }
 async function mutate(table,action,values,id){
  const u=await user(),client=getActiveCloudClient();if(!u||!client)throw new Error('로그인 후 이용해 주세요.');
  let q=client.from(table);if(action==='insert')q=q.insert(values);else q=q.delete().eq(table==='community_posts'?'id':'post_id',id).eq('author_id',u.id);
  const {error}=await q;if(error)throw error;
 }
-export async function publishCommunityPost(p){if(p.photo&&p.photo.length>600000)throw new Error('사진 크기가 큽니다. 사진을 다시 선택해 주세요.');return submitModerated({kind:'post',title:p.title,body:p.body,nickname:p.nickname,category:p.category,photo:p.photo,lng:p.location?.lng??null,lat:p.location?.lat??null});}
+export async function publishCommunityPost(p){if(p.photo&&p.photo.length>600000)throw new Error('사진 크기가 큽니다. 사진을 다시 선택해 주세요.');return submitModerated({kind:'post',title:p.title,body:p.body,nickname:p.nickname,category:p.category,dong:p.dong||null,photo:p.photo,lng:p.location?.lng??null,lat:p.location?.lat??null});}
 export const deleteSharedCommunityPost=id=>mutate('community_posts','delete',null,id);
 export const setSharedCommunityLike=(id,liked)=>mutate('community_likes',liked?'insert':'delete',{post_id:id},id);
 export const addSharedCommunityComment=(id,body,photo=null,parentId=null)=>submitModerated({kind:'comment',post_id:id,body,photo,parent_id:parentId,nickname:'익명 주민'});
