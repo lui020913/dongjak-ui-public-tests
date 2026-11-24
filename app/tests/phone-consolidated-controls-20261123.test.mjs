@@ -25,18 +25,19 @@ test('each route point has one picker, without deleting native map/search/GPS ow
  assert.match(mobile,/\.route-location-popover/);
 });
 
-test('community presents one writing action, optional tools and one permanent refresh owner',()=>{
+test('community presents one writing action, direct tools and one permanent refresh owner',()=>{
  assert.equal((html.match(/id="community-compose-toggle"/g)||[]).length,1);
  assert.equal((html.match(/id="community-refresh"/g)||[]).length,1);
  assert.match(html,/class="community-primary-controls"/);
- assert.match(html,/<details class="community-view-options">/);
+ assert.match(html,/<div class="community-view-options">/);
+ assert.doesNotMatch(html,/<details class="community-view-options">/);
  assert.doesNotMatch(html,/class="community-report-secondary"/);
  assert.match(html,/id="participate-register" class="community-map-report-link"/);
  assert.match(main,/community-refresh'\)\.addEventListener\('click'/);
  assert.doesNotMatch(main,/const bar=makeCEl\('div','dj-community-feed-status'\)/);
  assert.doesNotMatch(main,/dj-community-empty-footnote'/);
  assert.match(followup,/\.community-primary-controls'/);
- assert.match(mobile,/\.community-view-options>summary/);
+ assert.match(mobile,/\.community-view-options > \.community-toolbar/);
 });
 
 test('advanced map tools live inside one map preferences subpage',()=>{

@@ -1,3 +1,4 @@
+import {normalizeFacilityRecord} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {searchCachedTransportPlaces} from './transport-map.js';
@@ -24,7 +25,8 @@ export function isTransitMapSearchResult(item){
 }
 export function mergeMapSearchResults(local=[],remote=[]){
   const found=[],seen=new Set();
-  for(const item of [...local,...remote]){
+  for(const rawItem of [...local,...remote]){
+    const item=normalizeFacilityRecord(rawItem);
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const key=searchResultKey({...item,lng,lat});

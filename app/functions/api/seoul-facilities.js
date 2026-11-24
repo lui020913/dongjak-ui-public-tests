@@ -1,3 +1,4 @@
+import {facilitySearchTerms,normalizeFacilityRecord} from '../../src/facility-display-names.js';
 /** Read-only query for Dongjak official public POIs. No Seoul API key is sent to browsers. */
 const reply=(body,status=200,cache='public, max-age=120')=>Response.json(body,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 const finite=s=>{const n=Number(s);return Number.isFinite(n)?n:null;};
@@ -14,7 +15,14 @@ export async function onRequestGet({request,env}){
    if(!allowed.includes(category)||q.length>80)return reply({ok:false,message:'검색 조건이 올바르지 않습니다.'},400,'no-store');
    const args=[],predicates=[];
    if(category){predicates.push('category=?');args.push(category);}
-   if(q.length>=2){predicates.push("(name LIKE ? ESCAPE '\\' OR category LIKE ? ESCAPE '\\')");const term='%'+q.replace(/[\\%_]/g,'\\$&')+'%';args.push(term,term);}
+   if(q.length>=2){
+     const terms=facilitySearchTerms(q);
+     const like=t=>'%'+t.replace(/[\\%_]/g,'\\$&')+'%';
+     const compact=t=>like(t.replace(/\s+/g,''));
+     predicates.push('('+terms.map(()=>"(name LIKE ? ESCAPE '\\' OR replace(name,' ','') LIKE ? ESCAPE '\\')").join(' OR ')+" OR category LIKE ? ESCAPE '\\')");
+     for(const term of terms)args.push(like(term),compact(term));
+     args.push(like(q));
+   }
    const bbox=params.get('bbox');
    if(bbox){
      const nums=bbox.split(',').map(finite);
@@ -27,6 +35,6 @@ export async function onRequestGet({request,env}){
    const stmt=db.prepare('SELECT id,name,category,lng,lat,address,phone,website,source,updated FROM seoul_facilities'+where+' ORDER BY category,name,id LIMIT ? OFFSET ?');
    const result=await stmt.bind(...args,max,offset).all();
    const status=await db.prepare('SELECT source_id,last_success,row_count,received_count,status FROM seoul_facility_sync ORDER BY source_id').all();
-   return reply({ok:true,configured:true,places:result.results||[],sync:status.results||[],hasMore:(result.results?.length||0)===max});
+   return reply({ok:true,configured:true,places:(result.results||[]).map(normalizeFacilityRecord),sync:status.results||[],hasMore:(result.results?.length||0)===max});
  }catch(error){console.error('[서울시 시설 조회]',String(error?.message||error).slice(0,160));return reply({ok:false,message:'저장된 서울시 시설 데이터를 읽지 못했습니다.',places:[]},503,'no-store');}
 }

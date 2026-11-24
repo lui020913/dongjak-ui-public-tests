@@ -1,3 +1,4 @@
+import {normalizeFacilityName,facilitySearchTerms} from './facility-display-names.js';
 /** Bounded named-POI fallback when an explicit search cannot find a cafe/shop.
  * This is NOT a listing of verified businesses. Public OSM coverage varies. */
 const BOUNDS=[126.87,37.435,127.07,37.565];
@@ -5,12 +6,12 @@ export const searchAliases=Object.freeze({스타벅스:'스타벅스|Starbucks',
 export function normalizeNamedOsm(data,term,limit=20){
   const elements=Array.isArray(data?.elements)?data.elements:[];
   const wanted=String(term||'').trim().toLocaleLowerCase();
-  const aliases=searchAliases[wanted]?.split('|').map(x=>x.toLowerCase())||[wanted];
+  const aliases=[...new Set([...(searchAliases[wanted]?.split('|')||[]),...facilitySearchTerms(wanted)])].map(x=>x.toLowerCase());
   const seen=new Set(),out=[];
   for(const item of elements){
     const tags=item.tags||{};
-    const name=String(tags['name:ko']||tags.name||'').trim();
-    const match=[tags.name,tags['name:ko'],tags.brand].some(x=>aliases.some(a=>String(x||'').toLowerCase().includes(a)));
+    const name=normalizeFacilityName(String(tags['name:ko']||tags.name||'').trim(),tags.amenity==='cafe'?'카페':tags.shop==='convenience'?'편의점':'일반시설');
+    const match=[name,tags.name,tags['name:ko'],tags.brand].some(x=>aliases.some(a=>String(x||'').toLowerCase().includes(a)));
     const lng=Number(item.center?.lon??item.lon),lat=Number(item.center?.lat??item.lat);
     if(!name||!match||!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     if(lng<BOUNDS[0]||lng>BOUNDS[2]||lat<BOUNDS[1]||lat>BOUNDS[3])continue;
