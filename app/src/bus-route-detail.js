@@ -1,4 +1,3 @@
-import './bus-route-detail.css';
 import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-sheet.js';
 
 import {routeVehicleGroups,vehicleLabel,stopHours} from './bus-route-detail-model.mjs';
