@@ -1277,7 +1277,7 @@ test('category-first release history preserves the actual deployment version in 
 });
 
 
-test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@phone-layout'},async({page})=>{
+test('focused map search retains AI orb and full-width suggestions with fixed header',{tag:'@phone-layout'},async({page})=>{
   test.skip(page.viewportSize().width>=700,'phone only');
   await ready(page);
   const ai=page.locator('#dj890-ai-orb'),search=page.locator('#map-quick-search');
@@ -1297,9 +1297,13 @@ test('focused map search retains AI orb and pill-aligned suggestions',{tag:'@pho
   await expect(mic).toBeVisible();
   await expect(ai).toHaveCSS('pointer-events','auto');
   const sb=await search.boundingBox(),rb=await dropdown.boundingBox(),ab=await ai.boundingBox();
-  expect(rb.x).toBeGreaterThanOrEqual(sb.x-2);
-  expect(rb.x+rb.width).toBeLessThanOrEqual(sb.x+sb.width+2);
-  expect(rb.x+rb.width).toBeLessThanOrEqual(ab.x+2);
+  expect(Math.abs(rb.x-12)).toBeLessThanOrEqual(2);
+  expect(Math.abs(rb.x+rb.width-(page.viewportSize().width-12))).toBeLessThanOrEqual(2);
+  expect(rb.y).toBeGreaterThanOrEqual(Math.max(sb.y+sb.height,ab.y+ab.height)-2);
+  await expect(page.locator('#dj-search-nearby')).toBeVisible();
+  const head=dropdown.locator('.map-quick-search-dropdown-head'),body=dropdown.locator('#dj-search-scroll-body');
+  const before=await head.boundingBox();await body.evaluate(el=>{el.scrollTop=el.scrollHeight;});
+  const after=await head.boundingBox();expect(Math.abs(before.height-after.height)).toBeLessThanOrEqual(1);expect(Math.abs(before.y-after.y)).toBeLessThanOrEqual(1);
   const radius=await dropdown.evaluate(node=>parseFloat(getComputedStyle(node).borderTopLeftRadius));
   expect(radius).toBeGreaterThanOrEqual(18);
   await test.info().attach('search-ai-visible',{body:await page.screenshot(),contentType:'image/png'});

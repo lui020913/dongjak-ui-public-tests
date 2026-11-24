@@ -118,6 +118,7 @@ export async function searchOsmGeneralFacilities(term,{signal,fetcher=fetch}={})
    address:String(item.display_name||''),source:'© OpenStreetMap 기여자 · 검색 결과',
    phone:'',website:''})).filter(p=>p.name&&Number.isFinite(p.lng)&&Number.isFinite(p.lat));
 }
+export function officialSearchSnapshot(){return searchableGeneralPlaces.slice();}
 export function cachedOfficialSearchPlaces(query){return officialSearchPlaces(query,searchableGeneralPlaces,40);}
 export async function queryOfficialPlaces(query,{signal,fetcher=fetch,remoteFallback=true}={}){
  const term=String(query||'').trim();if(term.length<2)return [];

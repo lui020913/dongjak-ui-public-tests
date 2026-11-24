@@ -7,11 +7,12 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const readPhoneCss=()=>existsSync(new URL('../src/mobile-next.css',import.meta.url))
   ?read('src/mobile-next.css'):read('../frontend/production/mobile-next.css');
 
-test('empty mobile search focus leaves results hidden only when there is no history or query',()=>{
+test('empty mobile search focus never opens suggestions; recent records have an explicit entry',()=>{
   const js=read('src/map-quick-search.js');
   assert.match(js,/const phoneSearch=\(\)=>window\.matchMedia/);
-  assert.match(js,/if\(phoneSearch\(\)&&term\.length<2&&!recentPlaces\(\)\.length&&!recentSearchQueries\(\)\.length\)\{close\(\);return;\}/);
-  assert.match(js,/if\(term\.length<2\)\{show\(\);render\(\[\],true\)/); // Explicit empty submit still offers suggestions.
+  assert.match(js,/if\(phoneSearch\(\)&&term\.length<2\)\{close\(\);return;\}/);
+  assert.match(js,/historyButton\.addEventListener\('click',openHistory\)/);
+  assert.match(js,/nearbyButton\.addEventListener\('click',openNearby\)/);
 });
 
 test('opening search does not collapse or disable the independent AI entry',()=>{
