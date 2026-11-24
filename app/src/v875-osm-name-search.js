@@ -1,4 +1,4 @@
-import {normalizeFacilityName} from './facility-display-names.js';
+import {normalizeFacilityName,facilitySearchTerms} from './facility-display-names.js';
 /** Bounded named-POI fallback when an explicit search cannot find a cafe/shop.
  * This is NOT a listing of verified businesses. Public OSM coverage varies. */
 const BOUNDS=[126.87,37.435,127.07,37.565];
@@ -6,7 +6,7 @@ export const searchAliases=Object.freeze({스타벅스:'스타벅스|Starbucks',
 export function normalizeNamedOsm(data,term,limit=20){
   const elements=Array.isArray(data?.elements)?data.elements:[];
   const wanted=String(term||'').trim().toLocaleLowerCase();
-  const aliases=searchAliases[wanted]?.split('|').map(x=>x.toLowerCase())||[wanted];
+  const aliases=[...new Set([...(searchAliases[wanted]?.split('|')||[]),...facilitySearchTerms(wanted)])].map(x=>x.toLowerCase());
   const seen=new Set(),out=[];
   for(const item of elements){
     const tags=item.tags||{};

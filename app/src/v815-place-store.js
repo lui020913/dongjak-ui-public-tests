@@ -1,3 +1,4 @@
+import {normalizeFacilityName} from './facility-display-names.js';
 /** Local-first favorites. Guest data stays in this browser; an optional account
  * sync module uploads only explicit favorites/groups after authentication. */
 const BOOKMARK_KEY='dj-map-v815-bookmarks';
@@ -66,7 +67,7 @@ export function placeKey(place){
 export function cleanPlace(place){
   if(!placeKey(place))return null;
   const kind=['bus','subway'].includes(place.kind)?place.kind:'place';
-  const name=normalize(place.name)||'저장한 장소';
+  const name=normalize(kind==='place'?normalizeFacilityName(place.name,place.category||place.type||''):place.name)||'저장한 장소';
   const p={name,address:normalize(place.address),category:normalize(place.category||place.type||place.kind||'장소'),folder:validFolder(place.folder),lng:Number(place.lng),lat:Number(place.lat)};
   if(kind==='bus'){
     p.kind='bus';
