@@ -40,6 +40,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
           <span class="kind">출발지</span><strong class="place" id="v3-start">현재 위치</strong>
         </button>
         <div id="v3-waypoints" class="waypoints" hidden></div>
+        <div class="waypoint-add-row"><button type="button" class="waypoint-add" data-v3="waypoint" aria-label="경유지 추가"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
         <button type="button" class="field second" data-v3="end" aria-label="도착지 검색">
           <span class="kind">도착지</span><strong class="place placeholder" id="v3-end">어디로 가시나요?</strong>
         </button>
@@ -47,11 +48,6 @@ export function mountRouteScreenV3(doc=document, win=window) {
           <svg viewBox="0 0 24 24"><path d="M8 3v17m0 0-4-4m4 4 4-4M16 21V4m0 0-4 4m4-4 4 4"/></svg>
         </button>
       </div>
-      <div class="quick">
-        <button type="button" data-v3="gps"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>현재 위치</button>
-        <button type="button" data-v3="pick"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>지도에서 선택</button>
-      </div>
-      <div class="waypoint-actions"><button type="button" data-v3="waypoint">＋ 경유지 추가</button><button type="button" data-v3="waypoint-map">지도에서 경유지 선택</button></div>
       <section class="recent" id="v3-recent" hidden><div class="recent-head"><strong>최근 검색 장소</strong><button type="button" data-v3="clear-recent">기록 삭제</button></div><div class="recent-list"></div></section>
     </section>
     <div class="tools" aria-label="지도 조작">
@@ -68,10 +64,14 @@ export function mountRouteScreenV3(doc=document, win=window) {
     <section class="search-screen" data-v3-screen="search" role="dialog" aria-label="장소 검색" hidden>
       <div class="search-head"><button type="button" data-v3="search-back" aria-label="검색 닫기">←</button>
         <strong id="v3-search-title">도착지 검색</strong></div>
+      <div class="search-control-row">
       <form class="search-bar" data-v3-form="search">
         <input type="search" id="v3-query" placeholder="역, 건물, 장소, 주소 검색" autocomplete="off" autocapitalize="off" enterkeyhint="search" maxlength="80" aria-label="장소명 또는 주소" />
         <button type="button" class="search-clear" data-v3="clear-query" aria-label="검색어 지우기" hidden>×</button>
       </form>
+      <button type="button" class="search-location" data-v3="search-gps"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/><circle cx="12" cy="12" r="2"/></svg><span>현재 위치</span></button>
+      <button type="button" class="search-location" data-v3="search-map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16m6-14v16"/></svg><span>지도에서 선택</span></button>
+      </div>
       <p class="search-hint" id="v3-search-status" role="status" aria-live="polite">장소명 또는 주소를 검색해 주세요.</p>
       <div class="search-results" id="v3-results" aria-label="장소 검색 결과"></div>
     </section>
@@ -85,7 +85,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     cleanups.push(()=>element.removeEventListener(event,fn,opts));
   };
   let searching=null,active=false,resizeFrame=0,searchTimer=0,composing=false;
-  let pendingWaypoint=false,pendingBaseCount=0;
+  let pendingWaypoint=false,pendingBaseCount=0,searchGpsBusy=false;
   const cancelTimer=()=>{win.clearTimeout(searchTimer);searchTimer=0;};
   const syncViewport=()=>{const vv=win.visualViewport;host.style.setProperty("--v3-search-height",Math.round(vv?.height||win.innerHeight)+"px");};
   const hasValue=node=>node?.textContent?.trim()&&node.textContent.trim()!=='선택되지 않음';
@@ -107,15 +107,14 @@ export function mountRouteScreenV3(doc=document, win=window) {
     const rows=byId('dj815-waypoints')?.querySelectorAll('.dj815-waypoint-row')||[];
     if(pendingWaypoint&&rows.length>pendingBaseCount)pendingWaypoint=false;
     target.hidden=!rows.length&&!pendingWaypoint;
+    q('.waypoint-add-row').hidden=rows.length>=5||pendingWaypoint;
     q('[data-v3="waypoint"]').disabled=rows.length>=5||pendingWaypoint;
-    q('[data-v3="waypoint-map"]').disabled=rows.length>=5||pendingWaypoint;
     for(const [i,row] of Array.from(rows).entries()){const item=doc.createElement('div');item.className='waypoint-item';const title=doc.createElement('span');title.textContent=(i+1)+'. '+(row.querySelector('.dj815-waypoint-title')?.textContent||'경유지');item.append(title);for(const native of row.querySelectorAll('button')){const b=doc.createElement('button');b.type='button';b.textContent=native.textContent;b.disabled=native.disabled;b.setAttribute('aria-label',native.title||native.textContent);b.addEventListener('click',()=>native.click());item.append(b);}target.append(item);}
     if(pendingWaypoint){
       const item=doc.createElement('div');item.className='waypoint-item waypoint-pending';
       const search=doc.createElement('button');search.type='button';search.className='waypoint-input';search.textContent='경유지 입력';search.addEventListener('click',()=>openSearch('waypoint'));
-      const map=doc.createElement('button');map.type='button';map.textContent='지도';map.setAttribute('aria-label','지도에서 경유지 선택');map.addEventListener('click',()=>byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click());
       const cancel=doc.createElement('button');cancel.type='button';cancel.textContent='×';cancel.setAttribute('aria-label','경유지 추가 취소');cancel.addEventListener('click',()=>{pendingWaypoint=false;mirrorWaypoints();requestPosition();});
-      item.append(search,map,cancel);target.append(item);
+      item.append(search,cancel);target.append(item);
     }
     syncLabels();
   };
@@ -123,7 +122,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     const count=byId('dj815-waypoints')?.querySelectorAll('.dj815-waypoint-row').length||0;
     if(count>=5||pendingWaypoint)return;
     pendingBaseCount=count;pendingWaypoint=true;mirrorWaypoints();requestPosition();
-    q('.waypoint-pending')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    q('.waypoint-pending')?.scrollIntoView({block:'nearest',behavior:win.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   };
   const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
@@ -167,7 +166,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
   };
   const finishSearch=()=>{
     if(!searching)return;
-    cancelTimer();composing=false;searching=null;
+    cancelTimer();composing=false;searching=null;searchGpsBusy=false;
+    q('[data-v3="search-gps"]').disabled=false;
     q('#v3-query').blur();
     q('[data-v3-screen="search"]').hidden=true;
     byId('route-search-close')?.click();
@@ -183,7 +183,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('#v3-query').value='';q('[data-v3="clear-query"]').hidden=true;
     syncViewport();
     q('#v3-results').replaceChildren();
-    q('#v3-search-status').textContent='장소명 또는 주소를 입력해 주세요.';
+    q('#v3-search-status').textContent='동작구 내 장소명 또는 주소를 입력해 주세요.';
+    q('[data-v3="search-gps"]').disabled=searchGpsBusy;
     q('[data-v3-screen="search"]').hidden=false;
     mirrorResults();
     q('#v3-query').focus({preventScroll:true});
@@ -259,12 +260,27 @@ export function mountRouteScreenV3(doc=document, win=window) {
   listen(q('[data-v3="start"]'),'click',()=>openSearch('start'));
   listen(q('[data-v3="end"]'),'click',()=>openSearch('end'));
   listen(q('[data-v3="waypoint"]'),'click',addWaypointRow);
-  listen(q('[data-v3="waypoint-map"]'),'click',()=>{addWaypointRow();byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click();});
+
   listen(q('[data-v3="clear-recent"]'),'click',()=>clearRecentPlaces());
   listen(win,'dongjak:recent-places-change',refreshRecent);
   listen(q('[data-v3="swap"]'),'click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-swap')));
-  listen(q('[data-v3="gps"]'),'click',()=>byId('route-gps-start')?.click());
-  listen(q('[data-v3="pick"]'),'click',()=>byId('route-pick-end')?.click());
+  listen(q('[data-v3="search-map"]'),'click',()=>{
+    if(!searching)return;
+    const which=searching;
+    q('#v3-query').blur();
+    if(which==='waypoint')byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click();
+    else byId(which==='start'?'route-pick-start':'route-pick-end')?.click();
+  });
+  listen(q('[data-v3="search-gps"]'),'click',()=>{
+    if(!searching||searchGpsBusy)return;
+    searchGpsBusy=true;q('[data-v3="search-gps"]').disabled=true;
+    q('#v3-query').blur();
+    win.dispatchEvent(new CustomEvent('dongjak:route-search-current-location',{detail:{which:searching}}));
+  });
+  listen(win,'dongjak:route-search-gps-finished',()=>{
+    searchGpsBusy=false;q('[data-v3="search-gps"]').disabled=false;
+  });
+  listen(win,'dongjak:route-editor-reset',()=>{pendingWaypoint=false;pendingBaseCount=0;if(active){mirrorWaypoints();requestPosition();}});
   listen(q('[data-v3="center"]'),'click',()=>byId('center-dongjak')?.click());
   listen(q('[data-v3="locate"]'),'click',()=>byId('current-location')?.click());
   listen(q('[data-v3="calculate"]'),'click',()=>{

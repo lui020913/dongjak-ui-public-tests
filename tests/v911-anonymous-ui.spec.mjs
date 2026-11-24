@@ -594,7 +594,11 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  })).toBe(true);
  const labels=await cards.allTextContents();
  expect(labels.every(x=>!/종합 최적|환승 경로/.test(x))).toBe(true);
- expect(labels.some(x=>/PRI 미평가|PRI [0-9.]+점/.test(x))).toBe(true);
+ expect(labels.some(x=>/평가 자료 부족|(?:낮음|주의|높음) · [0-9.]+점/.test(x))).toBe(true);
+ await page.locator('#dj-route-pri-help').click();
+ const priHelp=page.locator('#dj-route-pri-dialog');await expect(priHelp).toBeVisible();await expect(priHelp.locator('.dj-route-pri-factors li')).toHaveCount(6);
+ await expect(priHelp).toContainText('65%');await priHelp.getByRole('button',{name:'확인',exact:true}).click();await expect(priHelp).toBeHidden();
+ await expect(summary).toBeVisible();
  // No extra third route-details screen. Risk map and legend are inline.
  await expect(page.locator('#dj-route-pri-detail')).toHaveCount(0);
  await expect(page.locator('#dj-route-pri-legend')).toBeVisible();
@@ -712,6 +716,20 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
  await expect(routeScreen).toBeVisible({timeout:15000});
  await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
  await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
+ const editor=routeScreen.locator('.route-panel'),plus=routeScreen.locator('[data-v3="waypoint"]'),search=routeScreen.locator('.search-screen');
+ await expect(plus).toBeVisible();await expect(routeScreen.locator('.quick,.waypoint-actions')).toHaveCount(0);
+ const originalHeight=(await editor.boundingBox()).height;
+ await plus.click();const pending=routeScreen.locator('.waypoint-pending');await expect(pending).toBeVisible();
+ await expect.poll(async()=> (await editor.boundingBox()).height-originalHeight).toBeGreaterThan(10);
+ await pending.locator('.waypoint-input').click();await expect(search).toBeVisible();await expect(search.locator('#v3-search-title')).toHaveText('경유지 검색');
+ await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+ await routeScreen.locator('[data-v3="search-back"]').click();await pending.getByRole('button',{name:'경유지 추가 취소'}).click();await expect(plus).toBeVisible();
+ for(const [key,title] of [['start','출발지 검색'],['end','도착지 검색']]){
+   await routeScreen.locator('[data-v3="'+key+'"]').click();
+   await expect(search.locator('#v3-search-title')).toHaveText(title);
+   await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+   await routeScreen.locator('[data-v3="search-back"]').click();
+ }
  await routeScreen.locator('[data-v3="close"]').click();
  await expect(routeScreen).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
@@ -1343,6 +1361,14 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   const radius=await dropdown.evaluate(node=>parseFloat(getComputedStyle(node).borderTopLeftRadius));
   expect(radius).toBeGreaterThanOrEqual(18);
   await test.info().attach('search-ai-visible',{body:await page.screenshot(),contentType:'image/png'});
+  await page.locator('#map-quick-search-close').click();await expect(dropdown).toBeHidden();
+  await query.click();await query.fill('노량진');await query.press('Enter');
+  await expect(dropdown).toBeVisible();
+  await page.locator('#map-quick-search-close').click();await expect(dropdown).toBeHidden();
+  await query.click();await page.getByRole('button',{name:'최근 검색',exact:true}).click();
+  const historyRow=dropdown.locator('.dj-search-history-row').filter({hasText:'노량진'}).first();
+  await expect(historyRow).toBeVisible();
+  await expect.poll(()=>historyRow.evaluate(n=>{const r=n.getBoundingClientRect(),label=n.querySelector('.dj-search-history-label').getBoundingClientRect();return getComputedStyle(n).justifyContent==='flex-start'&&getComputedStyle(n.querySelector('.dj-search-history-label')).textAlign==='left'&&label.left-r.left<50;})).toBe(true);
 });
 
 test('v9.2.53 category-first community and unobstructed nearby expansion',{tag:'@phone-layout'},async({page})=>{
@@ -1737,7 +1763,7 @@ test('iPhone final visual contract: compact route, transparent community status 
  const card=page.locator('#route-map-card');
  await expect(card.locator('#dj-route-choice-list .dj-route-choice')).toHaveCount(2);
  await expect(card.locator('#dj-route-choice-list .dj-route-choice').first()).toBeVisible();
- await expect(card.locator('#dj-route-choice-list .dj-route-choice-pri').first()).toContainText('PRI 미평가');
+ await expect(card.locator('#dj-route-choice-list .dj-route-choice-pri').first()).toContainText('평가 자료 부족');
  await expect(card.getByRole('button',{name:'안내 시작'})).toBeVisible();
 
 });
