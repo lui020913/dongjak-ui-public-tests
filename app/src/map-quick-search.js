@@ -5,7 +5,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {nearbySearchResults,searchResultSubtitle,searchResultKey,fetchNearbyOfficialPlaces} from './map-search-refinement.js';
+import {nearbySearchResults,searchResultSubtitle,searchResultKey,fetchNearbyOfficialPlaces,searchPlaceKind} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -20,9 +20,7 @@ export const FRIENDLY_SEARCH_PLACEHOLDERS=Object.freeze([
 ]);
 export const DEFAULT_MAP_SEARCH_TERMS=Object.freeze(['노량진역','중앙대학교','보라매공원','동작구청','숭실대입구역']);
 export function isTransitMapSearchResult(item){
-  const kind=String(item?.kind||item?.type||'').toLowerCase();
-  const category=String(item?.category||'');
-  return kind==='bus'||kind==='subway'||/버스정류장|지하철|철도역|대중교통/.test(category);
+  return searchPlaceKind(item)!=='place'||/대중교통/.test(String(item?.category||''));
 }
 export function mergeMapSearchResults(local=[],remote=[]){
   const found=[],seen=new Set();
@@ -187,9 +185,12 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     list.replaceChildren();
     if(showDefaults){
       const defaults=document.createElement('div');defaults.className='dj854-search-defaults';
-      const previous=recentSearchQueries().filter(q=>!recentPlaces().some(p=>p.name===q));
-      if(previous.length){const title=document.createElement('strong');title.className='dj-recent-query-title';title.textContent='최근 검색어';defaults.append(title);}
-      for(const name of [...new Set([...previous,...DEFAULT_MAP_SEARCH_TERMS])]){
+      const previous=[...new Set(recentSearchQueries())];
+      const explicitHistory=phoneSearch()&&dropdown.dataset.searchMode==='history';
+      const heading=document.createElement('strong');heading.className='dj-recent-query-title';heading.textContent=explicitHistory?'최근 검색어':'추천 장소';defaults.append(heading);
+      const names=explicitHistory?previous:[...new Set([...previous,...DEFAULT_MAP_SEARCH_TERMS])];
+      if(!names.length){const empty=document.createElement('p');empty.className='dj-recent-query-empty';empty.textContent='최근 검색어가 없습니다.';defaults.append(empty);}
+      for(const name of names){
         const btn=document.createElement('button');btn.type='button';btn.className='map-quick-search-suggestion';
         btn.textContent=name;
         btn.addEventListener('click',()=>{
@@ -233,7 +234,9 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
         const [lng,lat]=f.geometry.coordinates||[];
         if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
         const id=`${name}-${lng.toFixed(5)}-${lat.toFixed(5)}`;if(visited.has(id))continue;visited.add(id);
-        result.push({name,lng,lat,category:kind||'일반 시설',address:'지도에 등록된 OpenStreetMap 시설 · 운영 여부 미확인',source:'loaded-map-poi'});
+        const row={name,lng,lat,category:kind||'일반 시설',address:'',source:'loaded-map-poi'};
+        const type=searchPlaceKind(row);if(type!=='place')row.kind=type;
+        result.push(row);
         if(!nearby&&result.length>=20)return result;
       }
     }
@@ -246,7 +249,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
       .filter(([name])=>koreanSearchScore(text,name)>=55)
       .slice(0,8).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:`${name}역`,lng,lat,
         category:'지하철·철도역',address:'저장된 역 위치 · 출입구와 다를 수 있습니다'})):[];
-    const all=mergeMapSearchResults([...searchLocalPlaces(text),...localVectorFacilities(text)],[...cached,...stations]);
+    const all=mergeMapSearchResults([...cached,...stations,...searchLocalPlaces(text)],localVectorFacilities(text));
     return rankKoreanSearch(text,all,{limit:20,minScore:55});
   };
   // Search always covers the Dongjak/Seoul source bounds; the former
@@ -269,7 +272,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     let remote=[],official=[],err='';
     try{official=await queryOfficialPlaces(term,{signal});}catch(error){if(error.name==='AbortError')return;}
     try{remote=await searchPlaces(term,{signal});}
-    catch(error){if(error.name==='AbortError')return;err='외부 장소 검색이 불안정하여 저장된 교통시설만 표시합니다.';}
+    catch(error){if(error.name==='AbortError')return;err='일부 장소를 불러오지 못했습니다.';}
     let osmNamed=[];
     // Named businesses such as Starbucks are often missing from Photon/Nominatim.
     // Only search real OpenStreetMap names after an EXPLICIT user submission.
@@ -296,7 +299,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
   const openHistory=()=>{
     query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;seq++;
     filters.hidden=true;dropdown.dataset.searchMode='history';setTitle('최근 검색');
-    show();render([],true);feedback.textContent='최근 검색어와 장소를 다시 선택할 수 있습니다.';
+    show();render([],true);feedback.textContent='';
   };
   const openNearby=()=>{
     query.value='';form.classList.remove('dj807-has-input');query.blur();controller?.abort();controller=null;const active=++seq;

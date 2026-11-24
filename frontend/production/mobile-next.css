@@ -5,7 +5,7 @@
    The dedicated phone rail is never moved or hidden by legacy sheet logic. */
 html body #app#app#app#app#app#app#app #dj-v794-toolbar[data-dj-next-ready="1"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html body #app#app#app#app#app#app#app #djNext-toolbar{position:fixed!important;top:var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px))!important;left:10px!important;right:10px!important;display:flex!important;align-items:center!important;height:54px!important;z-index:3120!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;animation:none!important;transition:opacity 150ms ease-out,visibility 0s linear!important;transform:none!important;translate:none!important}
-html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar{visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important}
+html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"],[data-dj-search-entry="1"]) #djNext-toolbar{visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important}
 #djNext-toolbar{--djNext-tool-size:clamp(40px,calc((100vw - 50px)/6),54px);--djNext-tool-gap:max(6px,calc((100vw - 20px - 6 * var(--djNext-tool-size))/5))}
 #djNext-rail{display:grid!important;grid-template-columns:minmax(0,1fr) var(--djNext-tool-size)!important;gap:var(--djNext-tool-gap)!important;width:100%!important;align-items:center!important;min-width:0!important;box-sizing:border-box;overflow:visible!important}
 #djNext-scroll{display:flex;flex-direction:row;align-items:center;gap:var(--djNext-tool-gap);min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;box-sizing:border-box;padding:6px 4px;margin-inline:-4px}
@@ -17,7 +17,7 @@ html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="tr
 html body #app#app#app#app#app#app#app #djNext-rail #djNext-layers{justify-self:end!important}
 html body #app#app#app#app#app#app#app #djNext-rail button.djNext-tool{width:var(--djNext-tool-size)!important;min-width:var(--djNext-tool-size)!important;max-width:var(--djNext-tool-size)!important;flex:0 0 var(--djNext-tool-size)!important;height:54px!important;max-height:54px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;border:1px solid var(--djNext-tool-edge)!important;border-radius:var(--djNext-tool-square)!important;background:color-mix(in srgb,var(--djNext-tool-face) 82%,transparent)!important;-webkit-backdrop-filter:blur(11px) saturate(1.18)!important;backdrop-filter:blur(11px) saturate(1.18)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.36),0 3px 12px rgba(18,46,35,.12)!important;cursor:pointer;color:var(--djNext-text,#203d32)!important;margin:0!important;padding:3px 0!important;box-sizing:border-box!important;animation:none!important;transition:box-shadow 100ms ease-out,background-color 100ms ease-out!important;white-space:nowrap!important;overflow:hidden!important}
 html body #app#app#app#app#app#app#app[data-tab="map"]:not([data-search-open="true"]) #djNext-toolbar #djNext-rail button.djNext-tool{pointer-events:auto!important;touch-action:manipulation!important}
-html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"]) #djNext-toolbar #djNext-rail button.djNext-tool{pointer-events:none!important;visibility:hidden!important}
+html body #app#app#app#app#app#app#app:is(:not([data-tab="map"]),[data-search-open="true"],[data-dj-search-entry="1"]) #djNext-toolbar #djNext-rail button.djNext-tool{pointer-events:none!important;visibility:hidden!important}
 #djNext-rail button svg{width:22px;height:22px;flex:none;pointer-events:none}
 #djNext-rail button span{pointer-events:none}
 #djNext-rail button span{font-size:11px;font-weight:650;line-height:1.2;letter-spacing:-.055em;max-width:100%;overflow:hidden;text-overflow:ellipsis}
@@ -1346,3 +1346,8 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
     justify-content:flex-start!important;
   }
 }
+
+/* Search focus is an exclusive mobile toolbar state, including empty queries. */
+@layer request-completion{@media(max-width:699px){
+html body #app#app#app#app#app#app#app[data-dj-search-entry="1"] :is(#djNext-toolbar,#dj-v794-toolbar){display:none!important;visibility:hidden!important;pointer-events:none!important}
+}}
