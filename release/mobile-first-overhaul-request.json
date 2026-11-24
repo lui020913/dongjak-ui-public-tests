@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.129",
+  "application_version": "9.2.130",
   "public_work_branch": "main",
-  "purpose": "Rebuild community report writing screen completely with a dedicated fullscreen standalone composer. Eliminate old nested sheet geometry and keyboard behavior, keep fixed header and save footer with a single middle scrollport that shrinks using visualViewport. Mandatory new focused tests cover visual keyboard contraction at 375/390/430, report entry and restoration. Preserve protected current 9.2.128 source plus its updated QA locators and all other map/route/AI behavior. Source CI checks new layout and build; Production requires exact-SHA preview, all phone QA shards, PC/tablet and protected promotion. No duplicate deployment.",
-  "attempt": 334,
+  "purpose": "Replace the entire mobile walking-route entry screen with the approved reference-like map-first composition, independently authored header, top origin/destination card, search panel, map controls, and dock-clear route CTA. Retire the prior route card presentation while preserving authoritative route graph, GPS, PRI color-risk comparison, active guidance lock and all other app functions. PR #413 merged after 375/390/430 reference screenshots and focused affected route smoke tests passed; successful cases were not rerun in source CI. Protected deployment must verify exact source SHA and Preview, phone, desktop and Production promotion without bypassing mandatory gates.",
+  "attempt": 335,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24 new 9.2.129 release candidate after independent UI three-phone test found save footer overflow due content-sized grid row; changed to zero-basis flex scrollport and measured footer fit, rebase onto 9.2.128 main PR# QA parent locator fixes. Do not merge without focused success; don't bypass Production QA.",
+  "last_retry_reason": "2026-11-24: new 9.2.130 protected production release for PR #413 (source merge 7e73ad69cf9b). Previous 9.2.129 Production succeeded; this patch replaces walking route entry UI and updates obsolete smoke geometry to independent V3 screen. Run exact-source release gates; do not use failed/cancelled source CI attempts or skip mandatory Production checks.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
