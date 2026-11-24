@@ -83,4 +83,11 @@ test('AI fade completion can close from either animation or timer without duplic
  assert.match(geometry,/getPropertyValue\(key\)!==value/);
 });
 
-test('phone AI close releases native top layer synchronously',()=>{assert.match(code('src/v880-supabase-safety-ai.js'),/input\.blur\(\);finishClose\(\);/);});
+test('phone AI close fades actual content and releases native top layer with a bounded fallback',()=>{
+ const ai=code('src/v880-supabase-safety-ai.js');
+ assert.match(ai,/input\.blur\(\);\s*modal\.classList\.add\('dj887-ai-closing'\);\s*fadeContent\(false,finishClose\)/);
+ assert.match(ai,/setTimeout\(finishClose,1000\)/);
+ assert.match(ai,/if\(reduce\(\)\)\{input\.blur\(\);[^}]*modal\.close\(\)/);
+ assert.match(ai,/layout\.style\.setProperty\('opacity',String\(from\+\(\(opening\?1:0\)-from\)\*eased\),'important'\)/);
+ assert.match(ai,/if\(finish\)finish\(\);else stopContentMotion\(\)/);
+});
