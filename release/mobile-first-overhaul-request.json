@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.143",
+  "application_version": "9.2.144",
   "public_work_branch": "main",
-  "purpose": "PR452: mobile bus route detail timeline, official stop times and live vehicle details, existing map integration and refresh.",
-  "attempt": 357,
+  "purpose": "PR453: full-width mobile map search, stable header and single scroll area, explicit recent searches and GPS nearby facility search, verified bus directions; preserves PR452 bus timeline.",
+  "attempt": 358,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR452 source CI 45417102076 passed build, regression suite and all 33 phone shards plus aggregate gate. Release through existing Preview and protected Production QA; preserve existing v9.2.142 route editor changes.",
+  "last_retry_reason": "PR453 source CI 45420655884 completed successfully. Use existing Preview and protected Production QA; v9.2.143 already assigned to PR452.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
