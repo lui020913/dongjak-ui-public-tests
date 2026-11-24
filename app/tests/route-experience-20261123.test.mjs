@@ -60,15 +60,17 @@ test('PRI score remains conservative and red means danger not safety',()=>{
  assert.match(risk,/matchedRisk\(sample,heading,observedLines\.grid\)/);
  assert.match(risk,/result\.reason='excessive-detour'/);
 });
-test('GPS guide has only original end button interactive until guide stops',()=>{
+test('GPS guide permits camera controls but locks unrelated features until guide stops',()=>{
  const js=read('src/route-experience-20261123.js'),css=read('src/route-experience.css');
  assert.match(js,/app\.classList\.contains\('route-guiding'\)/);
- assert.match(js,/e\.target\?\.closest\?\.\('#nav-stop'\)/);
+ assert.match(js,/e\.target\?\.closest\?\.\('#nav-stop,#nav-map-controls'\)/);
  assert.match(js,/stopImmediatePropagation/);
+ assert.match(js,/#map \.maplibregl-canvas/);
+ assert.match(js,/allowedControls\(\)/);
  assert.match(js,/'touchstart','touchmove'/);
  assert.match(js,/type==='keydown'&&e\.key==='Tab'/);
  assert.ok(js.indexOf("if(e.type==='keydown'&&e.key==='Tab')") <
-   js.indexOf("if(e.target?.closest?.('#nav-stop'))"),'Tab must be trapped before allowing the already-focused stop button');
+   js.indexOf("if(e.target?.closest?.('#nav-stop,#nav-map-controls'))"),'Tab must be trapped before allowing the already-focused stop button');
  assert.match(js,/on\(win,'keydown',intercept/);
  assert.match(css,/#dj-walk-guidance-lock/);
  assert.match(css,/#nav-live-card \.nav-live-actions > :not\(#nav-stop\)/);
