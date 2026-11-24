@@ -32,7 +32,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(departingFrame){win.cancelAnimationFrame?.(departingFrame);departingFrame=0;}
   if(departing){
    const page=departing;
-   if(page.dataset.page!==app.dataset.tab)page.hidden=true;
+   if(page.id==='dj-route-v3'){if(app.dataset.tab!=='route')page.hidden=true;page.inert=false;}
+   else if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
    departing.style?.removeProperty?.('z-index');
    departing.style?.removeProperty?.('opacity');
@@ -72,7 +73,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!button||button.disabled||!button.isConnected)return;
   clearEntrance();
   const previousTab=app.dataset.tab;
-  const previous=doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
+  const routeHost=previousTab==='route'?doc.getElementById('dj-route-v3'):null;
+  const previous=routeHost&&!routeHost.hidden?routeHost:doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
   const destination=button.dataset.tab;
   const toMap=destination==='map';
   // Only a map return retains the departing page for a single fade; normal
@@ -84,6 +86,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    departing=previous;
    previous.style.setProperty('z-index','6999','important');
    previous.style.setProperty('pointer-events','none','important');
+   if(previous.id==='dj-route-v3')previous.inert=true;
    // Important opacity is deliberate: historical CSS fixes the page to
    // opacity:1 and filter:none, defeating an ordinary WAAPI fade.
    const begin=win.performance.now();
