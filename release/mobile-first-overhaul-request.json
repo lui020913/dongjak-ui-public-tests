@@ -3,9 +3,9 @@
   "application_version": "9.2.146",
   "public_work_branch": "main",
   "purpose": "PR455: exclusive mobile search toolbar, actual recent search list, Korean facility labels, remove technical search metadata, preserve bus directions, nearby facility search and PR454 bus detail.",
-  "attempt": 360,
+  "attempt": 361,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR455 source CI 45424965509 passed. v9.2.145 already assigned to PR454. Use existing Preview and protected Production QA.",
+  "last_retry_reason": "Release 45426190558 failed in sealed mobile-next-build.test.mjs:49 due to a stale exact selector assertion. PR456 updates the assertion for explicit search focus; matched against actual production CSS. App code unchanged; retry v9.2.146 with all protected deployment gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
