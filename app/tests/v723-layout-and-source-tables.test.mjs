@@ -31,7 +31,7 @@ test('v7.0.29 facility popup retains direct contact information without external
   const src=read('src/place-details.js');
   assert.doesNotMatch(src,/map\.naver\.com\/p\/search/);
   assert.doesNotMatch(src,/지도에서 시설 주소·연락처 검색/);
-  assert.match(src,/row\(meta,'주소'/);
+  assert.match(src,/row\(meta,'도로명 주소'/);
   assert.match(src,/row\(meta,'전화번호'/);
 });
 
