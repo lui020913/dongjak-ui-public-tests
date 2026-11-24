@@ -3,11 +3,14 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-test('native vulnerability PRI has the 2-factor gap; duplicate map option removed',()=>{
+test('native vulnerability PRI retains 2-factor gap; research overlay stays independent',()=>{
  const main=read('src/main.js'),html=read('index.html'),pri=read('src/pri-map.js');
  const manifest=JSON.parse(read('public/data/pri/manifest.json'));
  assert.ok(main.includes('installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode})'));
- assert.ok(!main.includes('installPolicyGapThreeSourceMap'));
+ // PR255 added a separate opt-in research overlay. It must never replace the native PRI factor.
+ assert.equal(main.split('installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay})').length-1,1);
+ assert.ok(!pri.includes('installPolicyGapThreeSourceMap'));
+ assert.ok(!manifest.patches.some(p=>p.includes('3source')));
  assert.ok(main.includes('installNightVisibility'));
  assert.ok(html.includes('theme-contract.js'));
  assert.ok(html.includes('id="protection-zone-controls"'));
