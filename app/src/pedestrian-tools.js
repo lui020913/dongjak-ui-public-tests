@@ -508,6 +508,25 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
       const found=nearbyResults([longitude,latitude],nearbyCandidates(map));
       const groups=[...new Set(found.map(p=>p.category))];
       results.replaceChildren();
+      if(!useMapCenter){
+        const safety=el('details','dj-nearby-safety-summary');
+        safety.append(el('summary','','내 위치 보행안전 안내'),el('p','ped-tools-note','펼치면 현재 위치의 보행안전 자료를 확인할 수 있습니다.'));
+        let loaded=false;
+        safety.addEventListener('toggle',async()=>{
+          if(!safety.open||loaded)return;
+          loaded=true;
+          try{
+            const accuracy=Number(position?.coords?.accuracy);
+            const {renderNearbySafetySnapshot}=await import('./gps-safety-popup.js');
+            if(current!==seq||!safety.isConnected)return;
+            const html=await renderNearbySafetySnapshot([longitude,latitude],Number.isFinite(accuracy)?accuracy:null);
+            if(current!==seq||!safety.isConnected)return;
+            const body=el('div','dj-nearby-safety-content');body.innerHTML=html;
+            safety.replaceChildren(safety.firstElementChild,body);
+          }catch{loaded=false;if(safety.isConnected)safety.lastElementChild.textContent='안전정보 자료를 불러오지 못했습니다. 다시 펼쳐 조회해 주세요.';}
+        });
+        results.append(safety);
+      }
       if(!found.length)results.append(el('p','ped-tools-note','이 범위에서 지도에 로드된 시설 자료가 없습니다. 시설이 없다는 뜻은 아닙니다.'));
       for(const kind of groups){
         const section=el('section','ped-nearby-group');const heading=el('h4','',kind);

@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.130",
+  "application_version": "9.2.131",
   "public_work_branch": "main",
-  "purpose": "Replace the entire mobile walking-route entry screen with the approved reference-like map-first composition, independently authored header, top origin/destination card, search panel, map controls, and dock-clear route CTA. Retire the prior route card presentation while preserving authoritative route graph, GPS, PRI color-risk comparison, active guidance lock and all other app functions. PR #413 merged after 375/390/430 reference screenshots and focused affected route smoke tests passed; successful cases were not rerun in source CI. Protected deployment must verify exact source SHA and Preview, phone, desktop and Production promotion without bypassing mandatory gates.",
-  "attempt": 335,
+  "purpose": "PR #418: verified phone surface fixes for facility detail bottom background, report safe area, AI header and keyboard viewport, GPS circular accuracy and duplicate nearby information, community-to-map transition; preserve walking route V3 from PR #413. Protected exact-source Preview, mobile, desktop and Production gates.",
+  "attempt": 336,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: new 9.2.130 protected production release for PR #413 (source merge 7e73ad69cf9b). Previous 9.2.129 Production succeeded; this patch replaces walking route entry UI and updates obsolete smoke geometry to independent V3 screen. Run exact-source release gates; do not use failed/cancelled source CI attempts or skip mandatory Production checks.",
+  "last_retry_reason": "2026-11-24: PR #418 merged at 6c0770af876c after original source CI 45303351968 and V3 integration CI 45305693085 passed. Promote only the exact verified candidate through protected release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0

@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: npm test
       - name: Focused community editor keyboard and portal regression
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
@@ -124,6 +124,15 @@ jobs:
       - name: Verify independent V3 walking screen code contract
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: node --test tests/route-screen-v3.test.mjs
+      # PR 418: exact runtime changes passed source CI 45303351968; main
+      # advanced by independent route V3. Verify the affected integration.
+      - name: Verify phone surface and V3 integration after rebase
+        if: ${{ github.event.pull_request.number == 418 }}
+        run: node --test tests/v595-pedestrian-tools.test.mjs tests/v596-controls-collision.test.mjs tests/v596-header-access-panel-fix.test.mjs tests/v9251-mobile-motion-content-fit.test.mjs tests/phone-20261123-visual-fixes.test.mjs tests/community-composer-portal.test.mjs tests/bottom-tab-navigation.test.mjs tests/route-screen-v3.test.mjs
+      # PR 419: full unit suite passed in 45305464236; base PR 418 passed its release checks.
+      - name: Verify changed route search and community integration contracts
+        if: ${{ github.event.pull_request.number == 419 }}
+        run: node --test tests/route-screen-v3.test.mjs tests/route-search-results-20261124.test.mjs tests/community-composer-portal.test.mjs tests/phone-20261123-visual-fixes.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source
@@ -147,12 +156,25 @@ jobs:
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       # Brand-new V3 entry already passed 3 phone reference screenshot
       # acceptance at source c5303778 (run 45252233121). Tests changed only
       # to migrate obsolete route-smoke semantics; rerun 6 impacted cases.
+      # Recheck changed route header/search directly at three phone widths and the one failed composer case.
+      - name: Verify route header separation and automatic search at all phone widths
+        if: ${{ github.event.pull_request.number == 419 }}
+        working-directory: .
+        run: npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
+      - name: Recheck failed community keyboard geometry with current portal selectors
+        if: ${{ github.event.pull_request.number == 419 }}
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community new post portal stays inside viewport when keyboard contracts'
+      - name: Verify V3 and community integration at representative phone width
+        if: ${{ github.event.pull_request.number == 418 }}
+        working-directory: .
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'community composer stays fixed|same mobile-first app shell|community details'
       - name: Retest last narrow-phone bottom dock ink assertion only
         if: ${{ github.head_ref == 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .

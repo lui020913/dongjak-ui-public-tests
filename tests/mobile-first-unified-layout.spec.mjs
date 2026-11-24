@@ -369,11 +369,11 @@ test('community new post portal stays inside viewport when keyboard contracts',a
     const parent=document.getElementById('community-form').parentElement;
     const root=rect('#dj-community-editor-portal');
     const header=rect('#community-form > .community-form-top');
-    const body=rect('#community-form > .djNext-form-scroll');
-    const footer=rect('#community-form > .dj-community-compose-footer');
+    const body=rect('#community-form > .dj-compose-scroll');
+    const footer=rect('#community-form > .dj-compose-footer');
     return {root,header,body,footer,parentId:parent.id,
       navVisibility:getComputedStyle(document.getElementById('bottom-nav')).visibility,
-      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(document.querySelector('#community-form > .djNext-form-scroll')).overflowY};
+      layoutHeight:innerHeight,scrollportOverflow:getComputedStyle(document.querySelector('#community-form > .dj-compose-scroll')).overflowY};
   });
   await testInfo.attach('community-keyboard-geometry.json',{body:Buffer.from(JSON.stringify(geometry,null,2)),contentType:'application/json'});
   expect(geometry.parentId).toBe('dj-community-editor-portal');
