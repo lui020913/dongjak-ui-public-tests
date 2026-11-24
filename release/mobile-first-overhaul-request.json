@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.134",
+  "application_version": "9.2.135",
   "public_work_branch": "main",
-  "purpose": "PR429: lower route preview with verified four-pixel safe clearance, independent nearby header/body, fixed metro terminal slots and arrivals spacing, unobstructed expanded night panel and shared dark palette, correct vegetation paint and selective window motion. Preserve existing data, GIS, routing and keyboard stability.",
-  "attempt": 341,
+  "purpose": "PR430: remove duplicate night-consent and toolbar animations, single centered fade, consistent bottom-tab transitions with fixed map and dock, cancel stale animations; preserve existing navigation, keyboard, routing and GIS.",
+  "attempt": 342,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: PR429 source CI 45326640766 passed 25/28 browser cases; focused CI 45329527614 passed the remaining three route-preview viewport cases after canonical CSS correction. Merged at 237cfa908dd2c7ba1ada7c6b8b94559ccd9d0b4d. Run all protected release gates.",
+  "last_retry_reason": "2026-11-24: PR430 source CI 45332301285 passed 30/33 phone tests; corrected stale test entry selector and focused CI 45335965811 passed the remaining three viewport cases. Merged 341828a691c852eaf0c97c173ab9f75c86ab9ce4. Run protected Preview and Production release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
