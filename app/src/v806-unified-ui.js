@@ -1,3 +1,4 @@
+import {startOpacityMotion} from './compositor-motion.js';
 import {dispatchLocalClick} from './v865-close-dispatch.js';
 import {createWindowLifecycle} from './window-lifecycle-state.js';
 import {closeClassControlledSurface} from './window-surface-cleanup.js';
@@ -115,7 +116,7 @@ export function installUnifiedUI(doc=document, win=window){
     }
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
-    let finished=false,frame=0,start=null,timeout=0,elapsed=0;
+    let finished=false,frame=0,start=null,timeout=0,elapsed=0,compositor=null;
     let liveOffset=opening?distance:0;
     const record={cancel:()=>finish(false),offset:()=>liveOffset};
     const restore=()=>{
@@ -137,6 +138,7 @@ export function installUnifiedUI(doc=document, win=window){
     function finish(complete){
       if(finished)return;
       finished=true;
+      compositor?.cancel();
       if(frame)win.cancelAnimationFrame?.(frame);
       if(timeout){win.clearTimeout(timeout);animationTimers.delete(timeout);}
       target.removeAttribute('data-dj810-animating');
@@ -160,6 +162,17 @@ export function installUnifiedUI(doc=document, win=window){
       target.style.setProperty('opacity',String(sheetFadeOpacity(progress,opening,slideFrom)),'important');
       target.style.setProperty('translate',`0 ${frame.offset}px`,'important');
       if(docked)target.style.setProperty('clip-path',`inset(0 0 ${frame.clip}px 0 round 24px)`,'important');
+    }
+    // Simple stationary fades share the native opacity compositor with
+    // bottom tabs. Preserve the legacy synchronized scrim/guide and all
+    // slide/clip/drag geometries until their own targeted verification.
+    if(fade&&!scrim&&!isGuide){
+      target.setAttribute('data-dj810-animating',opening?'opening':'closing');
+      target.dataset.djWindowMotionDuration=String(duration);
+      target.dataset.djWindowMotionKind='fade';
+      activeAnimation.set(target,record);
+      compositor=startOpacityMotion([target],{from:guideFrom,to:opening?1:0,duration,win,onFinish:()=>finish(true)});
+      if(compositor)return true;
     }
     target.style.setProperty('will-change',fade?'opacity':docked?'translate,clip-path':'translate','important');
     target.style.setProperty('animation','none','important');

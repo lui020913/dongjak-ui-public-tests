@@ -55,3 +55,11 @@ test('profile and other primary sheets retain opaque backing to prevent WebKit b
  assert.match(css,/backdrop-filter:none!important/);
  assert.match(css,/-webkit-tap-highlight-color:transparent!important/);
 });
+
+
+test('toolbar uses the shared browser compositor and cancels when another map window appears',()=>{
+ assert.match(motion,/import \{startOpacityMotion\} from '\.\/compositor-motion\.js'/);
+ assert.match(motion,/compositor=startOpacityMotion\(\[toolbar\]/);
+ assert.match(motion,/if\(!clear&&\(frame\|\|compositor\)\)stopFade\(\)/);
+ assert.match(motion,/const observer=new MutationObserver\(schedule\)/);
+});

@@ -5,6 +5,9 @@ Baseline: Production v9.2.136, public commit 674766692107cba977fe3181e9638493c33
 ## Stage 1 — compositor tab motion
 Replace per-frame inline opacity writes on the real V3 route and tab content, and the outgoing map handoff, with native CSS opacity transitions. Keep the tested fallback for unsupported environments. No root snapshots; dock and opaque backgrounds remain fixed. One boundary style flush, no per-frame JS style writes, bounded cleanup, cancellation and restoration. Existing reduced-motion policy remains active. Verify real intermediate pixels with existing phone release tests, not CSS names alone.
 
+## Stage 2 — prepared independently on stacked candidate
+Stationary confirmations without a synchronized scrim/guide and map shortcut toolbar share the same compositor. One MutationObserver replaces per-target toolbar observers. Existing transit close geometry, sheet gestures, synchronized scrims and guide motion remain untouched. Await stage 1 mobile CI before integration and stage 2 focused checks.
+
 ## Later stages (not implemented yet)
 - Profile window, sheet and nested-menu motion separately; migrate safe fade-only surfaces, then gesture/translation owners with geometry and native close contracts preserved.
 - Coalesce duplicate observers and map updates only after measuring actual call sites; do not disable safety overlays or live navigation.
