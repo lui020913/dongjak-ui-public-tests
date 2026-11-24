@@ -21,3 +21,23 @@
 #app .dj-place-detail .dj834-review-item small,#app .dj-place-detail .dj834-review-local-note{font-size:11px;color:var(--dj800-muted,#6e867b)}
 #app .dj-place-detail .dj834-review-local-body{font-size:12px;line-height:1.4;margin:0}
 #app .dj-place-detail .dj834-review-empty{font-size:12px!important;color:var(--dj800-muted,#768b80)!important;margin:0!important}
+
+/* Independent visual-viewport editor. The map sheet never moves with the keyboard. */
+.dj834-review-editor-portal{position:fixed!important;left:0;right:0;z-index:2147483001!important;box-sizing:border-box;background:#edf3ef;color:#203a32;display:flex;flex-direction:column;gap:12px;padding: max(16px,env(safe-area-inset-top)) 18px 16px;overflow:auto;overscroll-behavior:contain}
+.dj834-review-editor-portal .dj834-review-editor-header{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:19px;font-weight:750;flex:none}
+.dj834-review-editor-portal .dj834-review-form{display:grid;gap:12px;min-width:0}
+.dj834-review-editor-portal .dj834-review-form label{display:grid;gap:8px;font-size:14px}
+.dj834-review-editor-portal :is(select,textarea){box-sizing:border-box;width:100%;min-width:0;font-size:16px;padding:12px;border:1px solid #cfdfd7;border-radius:12px;background:#fff;color:#203a32}
+.dj834-review-editor-portal textarea{min-height:112px}
+.dj834-review-editor-portal .dj834-review-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dj834-review-editor-portal button,.dj834-review-own-actions button{min-height:42px;border-radius:12px;border:1px solid #cfdfd7;background:#fff;color:#203a32;padding:8px 12px;font-weight:650}
+.dj834-review-editor-portal .dj834-review-submit{background:#128773;color:#fff;border-color:transparent}
+.dj834-review-editor-portal .dj834-review-status,.dj834-review-editor-portal .dj834-review-disclaimer{font-size:12px;line-height:1.5;margin:0}
+.dj834-review-own-actions{display:flex;gap:8px;margin-top:8px}
+.dj834-my-review-history{display:grid;gap:12px;margin-top:16px}
+.dj834-my-review-history .dj834-reviews{display:grid;gap:8px;background:#f5faf7;border:1px solid #d9e6de;padding:14px;border-radius:14px}
+.dj834-my-review-history .dj834-review-item p{white-space:pre-wrap;overflow-wrap:anywhere}
+.dj834-my-review-history .dj834-review-form[hidden],.dj834-my-review-history .dj834-review-open[hidden]{display:none!important}
+
+html body[data-dj-review-editor="open"]{overflow:hidden!important;overscroll-behavior:none!important}
+html body[data-dj-review-editor="open"] #bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}

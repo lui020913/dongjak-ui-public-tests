@@ -189,3 +189,19 @@ html body[data-dj-community-editor="open"] #app #bottom-nav{
   font-size:16px!important;font-weight:800!important;line-height:1.3!important;
   box-shadow:0 3px 9px rgba(13,99,76,.10)!important;
 }
+
+/* Comment controls share the same shape; focused text keeps a quiet border. */
+html body #app#app #participation-panel .community-comment-form :is(.community-comment-submit,.community-comment-photo){
+ border-radius:14px!important;min-height:44px!important;min-width:44px!important;width:auto!important;
+ padding:0 12px!important;flex:none!important;background:#128773!important;color:#fff!important;
+ border:1px solid transparent!important;box-shadow:none!important;font-weight:650!important
+}
+html body #app#app #participation-panel .community-comment-form input[type=text]:focus{
+ outline:none!important;box-shadow:none!important;border:1px solid #b8d1c4!important
+}
+#app .community-post-dong{font-size:12px;color:#35695c;background:#e1efe6;border-radius:9px;padding:3px 7px;flex:none}
+@media(max-width:699px){
+ html body #app#app.dj-community-comment-keyboard #bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+ html body #app#app.dj-community-comment-keyboard #participation-panel:not([hidden]){bottom:auto!important;height:var(--dj-comment-visible-bottom,100dvh)!important;max-height:var(--dj-comment-visible-bottom,100dvh)!important;transform:none!important;translate:none!important}
+ html body #app#app.dj-community-comment-keyboard #participation-panel>.dj836-sheet-body{min-height:0!important;overflow-y:auto!important;padding-bottom:16px!important}
+}

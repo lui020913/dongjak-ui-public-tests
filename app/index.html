@@ -890,6 +890,7 @@
         </div>
         <details class="community-view-options"><summary aria-label="게시글 정렬 및 보기 옵션">정렬 · 저장 · 알림 <span aria-hidden="true">⌄</span></summary>
           <div class="community-toolbar" role="group" aria-label="커뮤니티 보기 및 관리">
+            <select id="community-dong-filter" aria-label="행정동별 게시글"><option value="">모든 지역</option><option>노량진1동</option><option>노량진2동</option><option>상도1동</option><option>상도2동</option><option>상도3동</option><option>상도4동</option><option>흑석동</option><option>사당1동</option><option>사당2동</option><option>사당3동</option><option>사당4동</option><option>사당5동</option><option>대방동</option><option>신대방1동</option><option>신대방2동</option></select>
             <select id="community-sort" aria-label="게시글 정렬"><option value="new">최신순</option><option value="popular">공감순</option></select>
             <button type="button" id="community-saved-toggle" class="community-notice-toggle" aria-pressed="false" aria-label="저장한 글">저장한 글</button>
             <button type="button" id="community-notifications-toggle" class="community-notice-toggle" aria-label="커뮤니티 알림">알림</button>
@@ -900,6 +901,8 @@
         <p id="community-moderation-status" class="community-form-note" hidden></p>
         <form id="community-form" class="community-form" hidden>
           <div class="community-form-top"><strong>새 게시글</strong><button type="button" id="community-compose-close" aria-label="글쓰기 닫기"></button></div>
+          <label for="community-dong">지역 (행정동)</label>
+          <select id="community-dong"><option value="">동작구 전체 · 미지정</option><option>노량진1동</option><option>노량진2동</option><option>상도1동</option><option>상도2동</option><option>상도3동</option><option>상도4동</option><option>흑석동</option><option>사당1동</option><option>사당2동</option><option>사당3동</option><option>사당4동</option><option>사당5동</option><option>대방동</option><option>신대방1동</option><option>신대방2동</option></select>
           <label for="community-category">게시글 유형</label>
           <select id="community-category"><option>보행 불편</option><option>개선 제안</option><option>동네 질문</option><option>동네생활</option><option>생활정보</option><option>교통정보</option><option>자유게시판</option></select>
           <div id="community-issue-details" class="community-issue-details">

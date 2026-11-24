@@ -1,5 +1,6 @@
+export const COMMUNITY_DONGS = ['노량진1동','노량진2동','상도1동','상도2동','상도3동','상도4동','흑석동','사당1동','사당2동','사당3동','사당4동','사당5동','대방동','신대방1동','신대방2동'];
 export const COMMUNITY_CATEGORIES = ['보행 불편','개선 제안','동네 질문','동네생활','생활정보','교통정보','자유게시판'];
-export function makeCommunityPost({title,body,nickname,category,photo=null,location=null}, now=Date.now()) {
+export function makeCommunityPost({title,body,nickname,category,dong='',photo=null,location=null}, now=Date.now()) {
   const cleanCategory=COMMUNITY_CATEGORIES.includes(category)?category:'동네 질문';
   return {
     id: (globalThis.crypto?.randomUUID?.() || `${now}_${Math.random().toString(36).slice(2,9)}`),
@@ -7,6 +8,7 @@ export function makeCommunityPost({title,body,nickname,category,photo=null,locat
     body:String(body||'').trim().slice(0,1200),
     nickname:String(nickname||'익명 주민').trim().slice(0,20)||'익명 주민',
     category:cleanCategory,
+    dong:COMMUNITY_DONGS.includes(dong)?dong:null,
     photo:typeof photo==='string'&&photo.startsWith('data:image/jpeg;base64,')?photo:null,
     location:location&&Number.isFinite(location.lng)&&Number.isFinite(location.lat)?{lng:location.lng,lat:location.lat}:null,
     created:now, likes:0,liked:false,comments:[]
@@ -31,6 +33,7 @@ export function readCommunityPosts(raw) {
         id:p.id,title:p.title.slice(0,70),body:p.body.slice(0,1200),
         nickname:String(p.nickname||'익명 주민').slice(0,20),
         category:COMMUNITY_CATEGORIES.includes(p.category)?p.category:'동네 질문',
+        dong:COMMUNITY_DONGS.includes(p.dong)?p.dong:null,
         photo:typeof p.photo==='string'&&p.photo.startsWith('data:image/jpeg;base64,')?p.photo:null,
         location:p.location&&Number.isFinite(p.location.lng)&&Number.isFinite(p.location.lat)?p.location:null,
         created:Number.isFinite(p.created)?p.created:0,

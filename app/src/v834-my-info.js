@@ -1,3 +1,4 @@
+import {readMyPlaceReviews,installPlaceReviews} from './v834-place-reviews.js';
 /** v8.2.15: My Info settings hub; existing account controller remains authoritative. */
 const icon=(name)=>({
  profile:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.3-3.7 3-6.1 7-6.1s6.7 2.4 7 6.1"/>',
@@ -122,6 +123,26 @@ export function installMyInfo(doc=document){
   syncChoices();
  });
  const records=doc.createElement('div');records.className='dj834-records-container';
+ const reviewHistory=doc.createElement('section');reviewHistory.className='dj834-my-review-history';
+ const reviewTitle=doc.createElement('h3');reviewTitle.textContent='내가 작성한 시설 리뷰';
+ const reviewList=doc.createElement('div');reviewHistory.append(reviewTitle,reviewList);
+ let reviewSequence=0,reviewControllers=[];
+ async function refreshReviewHistory(){
+   const token=++reviewSequence;for(const item of reviewControllers)item.close();reviewControllers=[];
+   reviewList.textContent='내 리뷰를 불러오는 중입니다…';
+   try{
+     const rows=await readMyPlaceReviews();if(token!==reviewSequence)return;
+     reviewList.replaceChildren();
+     if(!rows.length){reviewList.textContent='아직 작성한 공개 리뷰가 없습니다.';return;}
+     for(const record of rows){
+       const host=doc.createElement('div');reviewList.append(host);
+       const item=installPlaceReviews(host,record,{history:true,onChange:()=>void refreshReviewHistory()});
+       if(item)reviewControllers.push(item);
+     }
+   }catch{if(token===reviewSequence)reviewList.textContent='로그인 또는 서버 연결을 확인해 주세요.';}
+ }
+ doc.defaultView?.addEventListener('dongjak:auth-state',()=>{if(!records.hidden)void refreshReviewHistory();else{++reviewSequence;for(const item of reviewControllers)item.close();reviewControllers=[];reviewList.replaceChildren();}});
+
  // Advanced map utilities share the SAME full-screen child navigation as history.
  // The existing utility body and its event listeners are moved here by mobile-17.
  const toolsBox=doc.createElement('section');toolsBox.className='dj834-tools-container';
@@ -169,6 +190,7 @@ export function installMyInfo(doc=document){
  }
  // Account always belongs to profile view. Move the old activity DOM without
  // recreating it so favorite buttons and existing event handlers keep working.
+ records.append(reviewHistory);
  body.prepend(landing);landing.insertAdjacentElement('afterend',detail);
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  const detailNav=detail.querySelector('.dj834-detail-nav');
@@ -248,6 +270,7 @@ export function installMyInfo(doc=document){
    content.style.setProperty('margin-top','0','important');
    content.style.setProperty('padding-top','0','important');
    content.dataset.dj834View=view;
+   if(view==='records')void refreshReviewHistory();
    if(view==='type')syncTypography();if(view==='language')syncChoices();if(view==='map')syncMapChoices();
    detail.hidden=false;
    syncSubpageHeader();

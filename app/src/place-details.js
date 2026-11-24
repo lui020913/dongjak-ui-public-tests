@@ -252,7 +252,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   lookup.target='_blank';lookup.rel='noopener noreferrer';
   lookup.textContent='네이버지도에서 시설 주소·연락처 검색';
   body.append(lookup);
-  installPlaceReviews(body,p);
+  const reviewController=installPlaceReviews(body,p);
   const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';body.append(aiSection);
   aiSection.append(text('strong','AI 시설 안내','dj-place-ai-heading'));
   const fallbackDescription=facilityFallbackDescription(p.name,p.type);
@@ -341,6 +341,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const mobilePin=true;
   const marker=new maplibregl.Marker({element:pin,anchor:'bottom',offset:[0,mobilePin?-15:-4]})
     .setLngLat([p.lng,p.lat]).addTo(map);
+  popup.on('close',()=>{reviewController?.close();});
   popup.on('close',()=>{controllerAI.abort();marker.remove();});
   const cachedInfo=mem.get(cacheKey(p));
   let enriched=Promise.resolve();
