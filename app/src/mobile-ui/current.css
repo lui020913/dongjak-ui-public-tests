@@ -1456,19 +1456,24 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 }
 
 
-/* v9.2.140: Records alone scrolls behind the floating dock. The scroller's
-   internal bottom clearance keeps the final row accessible; no opaque band. */
+/* v9.2.140: Records uses a continuous surface down to the dock, while
+   preserving a separate safe scroll viewport above the floating controls. */
 @layer request-completion {
  @media(max-width:699px) {
    html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]):has(.dj834-detail-content[data-dj834-view="records"]) {
      bottom:0!important;max-height:none!important;padding-bottom:0!important;
      background:var(--dj-primary-page-bg,#edf3ef)!important;
+     box-shadow:none!important;
    }
    html body #app#app#app#app#app#app #mine-panel.page-panel:not([hidden]):has(.dj834-detail-content[data-dj834-view="records"]) > .dj836-sheet-body {
-     margin-bottom:0!important;
-     padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
-     scroll-padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;
+     /* Match the existing dock's actual 70px height and bottom offset.
+        Do not reserve both safe-area and fixed footer padding. */
+     margin-bottom:calc(70px + max(3px,calc(env(safe-area-inset-bottom,0px) - 16px)))!important;
+     padding-bottom:16px!important;
+     scroll-padding-bottom:16px!important;
      background:transparent!important;
+     box-shadow:none!important;
+     border-bottom:0!important;
    }
  }
  /* Both comment actions use the same geometry; this layer overrides older
