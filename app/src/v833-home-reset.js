@@ -83,7 +83,7 @@ export function closeMapWindows(doc=document,win=doc.defaultView||globalThis.win
     ['map-safety-open','map-safety-toggle']]){
     if(app.classList.contains(className))doc.getElementById(buttonId)?.click();
   }
-  for(const panel of doc.querySelectorAll('.page-panel'))panel.hidden=true;
+  for(const panel of doc.querySelectorAll('.page-panel'))if(panel.dataset.djTabOutgoing!=='true')panel.hidden=true;
   const overview=doc.getElementById('overview-sheet');if(overview)overview.hidden=true;
   doc.querySelectorAll('.maplibregl-popup-close-button').forEach(node=>dispatchLocalClick(node,win));
   doc.dispatchEvent(new CustomEvent('dj836:close-overlay-tools'));

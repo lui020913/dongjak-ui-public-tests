@@ -479,3 +479,45 @@ test('history starts collapsed and PRI header is isolated from scrolling',async(
  await archives.first().locator('summary').first().click();
  await expect(archives.first()).toHaveAttribute('open','');
 });
+
+test('night consent has one centered fade and tab handoff keeps the dock fixed',async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ test.setTimeout(180000);
+ await readyForLiveTouch(page);
+ const app=page.locator('#app'),nav=page.locator('#bottom-nav');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ // The public app mounts the V794 toolbar; djNext-layers belongs to a different shell.
+ // Exercise the real V831 consent handler through its visible V794 night shortcut.
+ const night=page.locator('#dj-v794-night');
+ await expect(night).toBeVisible({timeout:15000});
+ await night.click({timeout:15000,noWaitAfter:true});
+ const modal=page.locator('#dj833-night-modal'),card=modal.locator('.dj833-night-dialog');
+ await expect(modal).toBeVisible();
+ await expect(card).toHaveAttribute('data-dj-window-motion-kind','fade');
+ const position=await card.evaluate(n=>{
+  const r=n.getBoundingClientRect(),s=getComputedStyle(n),p=getComputedStyle(n.parentElement);
+  return {centerX:Math.abs(r.x+r.width/2-innerWidth/2),centerY:Math.abs(r.y+r.height/2-innerHeight/2),own:s.animationName,parent:p.animationName,translate:s.translate};
+ });
+ expect(position.centerX).toBeLessThanOrEqual(2);
+ expect(position.centerY).toBeLessThanOrEqual(2);
+ expect(position.own).toBe('none');expect(position.parent).toBe('none');
+ expect(['none','0px','0px 0px']).toContain(position.translate);
+ await modal.locator('[data-choice="no"]').click({timeout:12000,noWaitAfter:true});
+ await expect(modal).toBeHidden();
+ await expect(app).not.toHaveAttribute('data-sangdo-night','on');
+ // Track actual event-driven tab states; do not depend on a fixed sleep.
+ const before=await nav.boundingBox();
+ await nav.locator('[data-tab="mine"]').click({timeout:12000,noWaitAfter:true});
+ await expect(app).toHaveAttribute('data-tab','mine');
+ await expect(page.locator('#mine-panel')).toBeVisible();
+ await nav.locator('[data-tab="news"]').click({timeout:12000,noWaitAfter:true});
+ await expect(app).toHaveAttribute('data-tab','news');
+ await expect(page.locator('#mine-panel')).toBeHidden();
+ await nav.locator('[data-tab="map"]').click({timeout:12000,noWaitAfter:true});
+ await expect(app).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#news-panel')).toBeHidden();
+ await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
+ await expect(page.locator('#map')).toBeVisible();
+ const after=await nav.boundingBox();
+ for(const key of ['x','y','width','height'])expect(Math.abs(after[key]-before[key])).toBeLessThanOrEqual(2);
+});

@@ -14,7 +14,7 @@ export function installV845ToolbarFade(doc=document,win=window){
   if(!app || !toolbar || !win.matchMedia || app.dataset.dj845ToolbarInstalled==='true')return ()=>{};
   app.dataset.dj845ToolbarInstalled='true';
   const mobile=()=>win.matchMedia('(max-width:699px)').matches;
-  const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=()=>win.matchMedia('(prefers-reduced-motion: reduce)').matches||app.classList.contains('dj-reduced-animation');
   const original={value:toolbar.style.getPropertyValue('opacity'),priority:toolbar.style.getPropertyPriority('opacity')};
   const restore=()=>{
     if(original.value)toolbar.style.setProperty('opacity',original.value,original.priority);
@@ -68,7 +68,7 @@ export function installV845ToolbarFade(doc=document,win=window){
     'overview-sheet','transport-sheet','detail-sheet','entry-sheet',
     'map-safety-controls','map-advanced-controls','dj-mobile-utilities',
     'dj832-data-sheet','dj833-weather-sheet','dj833-night-modal',
-    'dj832-info-sheet','dj832-feature-sheet','map-quick-search-dropdown',
+    'dj832-info-sheet','dj832-feature-sheet','map-quick-search-dropdown','djNext-layer-panel','night-visibility-float',
     'map-gesture-guide','dj-map-settings','dj-app-about','version-history-modal',
     'map-startup-overlay','dj840-theme-confirm','dj-transit-signin-prompt'];
   for(const id of watchIds)observe(doc.getElementById(id));

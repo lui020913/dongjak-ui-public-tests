@@ -40,3 +40,13 @@
 }
 
 } /* @layer request-completion */
+
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app[data-tab="map"] .page-panel[data-dj-tab-outgoing="true"]:not([hidden]){
+   display:flex!important;visibility:visible!important;pointer-events:none!important;
+  }
+  html body #app#app#app .page-panel[data-dj-tab-outgoing="true"] *{pointer-events:none!important;}
+  html body #app.dj-reduced-animation .page-panel.dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body){animation:none!important;}
+ }
+}

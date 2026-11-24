@@ -481,7 +481,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    openNightConfirm();
  }
  function openNightConfirm(){
-   if(!nightConfirm)return;
+   if(!nightConfirm||!nightConfirm.hidden)return;
    const card=nightConfirm.querySelector('.dj833-night-dialog');
    // Cancelling a previous exit is essential when tapping the pill quickly.
    // A retained WAAPI transform moved the next consent card sideways.

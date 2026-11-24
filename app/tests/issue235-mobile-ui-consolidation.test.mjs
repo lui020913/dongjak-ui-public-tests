@@ -34,12 +34,13 @@ test('compact subway displays interactive neighbor pill before live arrival and 
 test('mobile bottom tabs never fade the WebGL/root or expose a white intermediate surface',()=>{
  const source=read('src/bottom-tab-navigation.js');
  const css=frontend('mobile-next.css');
- assert.deepEqual(TAB_TRANSITION,{contentReveal:140});
+ assert.deepEqual(TAB_TRANSITION,{contentReveal:260,mapReturn:220});
  assert.equal(adjacentTabIndex(2,5,-70,0),3);
  assert.match(source,/clearEntrance\(\)/);
- assert.match(source,/if\(!replay\(button\)\)return/);
+ assert.match(source,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(source,/panel\.classList\.add\('dj-tab-content-enter'\)/);
- assert.match(source,/if\(reduced\(\)\|\|app\.dataset\.tab==='map'\)return/);
+ assert.match(source,/if\(!reduced\(\)&&!toMap\)/);
+ assert.match(source,/previous\.style\.setProperty\('opacity',String\(1-p\*p\*\(3-2\*p\)\),'important'\)/);
  assert.match(css,/\.page-panel\.dj-tab-content-enter:not\(\[hidden\]\)/);
  assert.match(css,/@keyframes djTabContentReveal/);
  for(const forbidden of ['doc.startViewTransition','skipTransition','queued=button','#dj-tab-surface-curtain','ensureCurtain']){
