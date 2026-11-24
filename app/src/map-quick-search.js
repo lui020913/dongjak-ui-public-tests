@@ -1,10 +1,11 @@
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
-import {searchCachedTransportPlaces,searchTransportSnapshot} from './transport-map.js';
+import {searchCachedTransportPlaces} from './transport-map.js';
+import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
-import {queryOfficialPlaces,officialSearchSnapshot} from './seoul-official-facilities.js';
+import {queryOfficialPlaces} from './seoul-official-facilities.js';
+import {officialSearchSnapshot} from './seoul-official-facilities.js';
 import {nearbySearchResults,searchResultSubtitle,searchResultKey,fetchNearbyOfficialPlaces} from './map-search-refinement.js';
-import './map-search-refinement.css';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';

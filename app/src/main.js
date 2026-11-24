@@ -58,6 +58,7 @@ import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-f
 import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding} from './route-map-focus.js';
 import {initMapQuickSearch} from './map-quick-search.js';
+import './map-search-refinement.css';
 import {installMapProduct} from './v815-map-product.js';
 import {recentPlaces,recordRecentPlace,clearRecentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
 import {computeMultiStopRoutes} from './v815-route-planner.js';
