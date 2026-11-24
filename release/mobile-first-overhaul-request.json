@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.138",
+  "application_version": "9.2.139",
   "public_work_branch": "main",
-  "purpose": "PR442 + PR443 + PR444: guidance compass, owner facility review edit/delete/history, keyboard/comment UI, separate administrative dong filter, verified current Production Android APK discovery and Dongjak Safety Map.apk filename.",
-  "attempt": 350,
+  "purpose": "PR446: community required region and report location, facility review keyboard isolation and photo, remove Naver lookup, four personal record tabs, English portal labels, owner comment/like activity history and main bell, guidance pan/zoom/3D and GPS reset.",
+  "attempt": 351,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Previous v9.2.138 candidate failed only three phone layout shards (2,7,11) due to fifth action in four-control toolbar. Separate dong filter row, retain existing geometry checks and add explicit filter layout check. Include APK source-qualified release fix and same-origin streaming attachment. Keep protected production gates; exclude v9.3 performance candidate.",
+  "last_retry_reason": "PR446 merged after successful source CI and 33 independent FIX jobs; additive Supabase schema and edge v9 applied. Run protected Production release gates from stable v9.2.138 lineage; exclude v9.3 performance candidate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
