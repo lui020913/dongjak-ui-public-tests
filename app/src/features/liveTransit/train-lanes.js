@@ -1,6 +1,6 @@
 // Visual separation only: keep the estimated rail centreline coordinate unchanged.
 // MapLibre rotates icon-offset together with icon-rotate and scales it by icon-size.
-export const TRAIN_ICON_SIZE_STOPS=Object.freeze([11,.81,12.5,.90,13.2,1.00,15.5,1.16,18,1.40]);
+export const TRAIN_ICON_SIZE_STOPS=Object.freeze([11,.45,12.5,.55,13.2,.65,15.5,1.00,18,1.95,20,3.10,22,4.20]);
 export const TRAIN_LANE_GAP=12; // distinct directions without altering source track coordinates
 const LEFT_TRAFFIC=new Set(['1호선']);
 const RIGHT_TRAFFIC=new Set(['2호선','4호선','7호선','9호선','신림선']);

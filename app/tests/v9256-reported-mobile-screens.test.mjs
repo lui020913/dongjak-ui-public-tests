@@ -46,7 +46,7 @@ test('content-first map information uses measured height without trapping detail
 });
 test('train marker size is capped at close zoom while opposing directions remain offset',()=>{
  const lanes=read('src/features/liveTransit/train-lanes.js');
- assert.match(lanes,/15\.5,1\.16,18,1\.40/);
+ assert.match(lanes,/15\.5,1\.00,18,1\.95,20,3\.10,22,4\.20/);
  assert.match(lanes,/TRAIN_LANE_GAP=12/);
 });
 test('news revalidation remains explicitly distinct from stale cached content',()=>{
