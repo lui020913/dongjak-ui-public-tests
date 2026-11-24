@@ -31,9 +31,9 @@ test('live train forward illumination is neutral radial, not warm yellow cones',
  assert.equal(right.data[centre],228);
  assert.equal(right.data[centre+1],244);
  assert.equal(right.data[centre+2],255);
- assert.equal(right.data[index(165,50)+3],0);
- const lamps=read('src/features/liveTransit/train-headlights.js');
- assert.doesNotMatch(lamps,/255,228,142|255,255,244/);
+ assert.equal(right.data[index(120,50)+3],0);
+ const renderer=read('src/features/liveTransit/index.js');
+ assert.doesNotMatch(renderer,/withTrainHeadlights/);
 });
 
 test('nearby guidance dock follows measured tab bar and uses neutral secondary action',()=>{

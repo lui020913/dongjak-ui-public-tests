@@ -59,6 +59,6 @@ test('map-origin full-screen report composer hides the map header and AI orb abo
  assert.ok(css.includes(':has(#participation-panel.dj9256-composing:not([hidden]))'));
  const built=new URL('../src/mobile-next.css',import.meta.url);
  const legacyHeader=readFileSync(existsSync(built)?built:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
- assert.ok(legacyHeader.includes('#app:not(:has(#participation-panel.dj9256-composing:not([hidden]))) .topbar{display:grid!important'),
+ assert.ok(legacyHeader.includes('#app:not(:has(#participation-panel.dj9256-composing:not([hidden]))) .topbar{--dj-map-search-control-size:54px;display:grid!important'),
    'a historical 38-ID header selector must not re-display the search/AI bar above a report composer');
 });

@@ -50,13 +50,19 @@ test('cluster count is positioned via a matching translate vector with the badge
 test('Dongjak endpoint guard rejects boundary unknown or outside, accepts inside',()=>{
   const match=route.match(/function requireDongjakRouteLocation\(position\)\s*\{[\s\S]*?\n\}/);
   assert.ok(match,'central route guard exists');
+  const locationGuard=route.match(/function routeLocationInside\(position\)\s*\{[\s\S]*?\n\}/);
+  assert.ok(locationGuard,'strict coordinate validation helper exists');
   for(const inside of [true,false,null]){
     const messages=[];
     const context=createContext({isDongjak:()=>inside,toast:(msg)=>messages.push(msg)});
-    runInContext(match[0],context);
+    runInContext(locationGuard[0]+'\n'+match[0],context);
     const accepted=runInContext('requireDongjakRouteLocation({lng:126.94,lat:37.49})',context);
     assert.equal(accepted,inside===true);
     assert.equal(messages.length,inside===true?0:1);
+    for(const invalid of [null,{lng:null,lat:37.49},{lng:126.94,lat:Infinity}]){
+      context.invalid=invalid;
+      assert.equal(runInContext('requireDongjakRouteLocation(invalid)',context),false);
+    }
   }
 });
 test('all external route input and compute paths call Dongjak guard',()=>{
