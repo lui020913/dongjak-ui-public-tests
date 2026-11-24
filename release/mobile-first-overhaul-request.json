@@ -2,10 +2,10 @@
   "source": "public-app",
   "application_version": "9.2.140",
   "public_work_branch": "main",
-  "purpose": "PR447: remove records-only opaque dock clearance and unify comment submit/photo buttons. No other feature changes.",
-  "attempt": 352,
+  "purpose": "PR447 + PR448: remove records-only redundant dock background and clearance while maintaining a safe scroll viewport above the dock; unify comment submit/photo button geometry.",
+  "attempt": 353,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR447 merged after successful source CI and all 33 independent FIX jobs. Use protected Production pipeline; stable v9.2.139 lineage, no v9.3 candidate.",
+  "last_retry_reason": "Prior release failed only mobile shards 2,7,11 on records scroll boundary. PR448 corrects dock clearance without weakening geometry assertions; source CI and all 33 FIX jobs passed. Retry protected Production release from corrected source, no v9.3 candidate.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
