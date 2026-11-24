@@ -1,3 +1,4 @@
+import {readMyCommunityPosts,deleteSharedCommunityPost} from './community-cloud.js';
 import {readMyPlaceReviews,installPlaceReviews} from './v834-place-reviews.js';
 /** v8.2.15: My Info settings hub; existing account controller remains authoritative. */
 const icon=(name)=>({
@@ -191,6 +192,36 @@ export function installMyInfo(doc=document){
  // Account always belongs to profile view. Move the old activity DOM without
  // recreating it so favorite buttons and existing event handlers keep working.
  records.append(reviewHistory);
+ const recordTabs=doc.createElement('div');recordTabs.className='dj-record-tabs';recordTabs.setAttribute('role','group');recordTabs.setAttribute('aria-label','내 기록 분류');
+ const recordViews=new Map();
+ const makeRecordView=(key,label,node)=>{
+   const button=doc.createElement('button');button.type='button';button.textContent=label;button.dataset.recordTab=key;recordTabs.append(button);
+   const view=doc.createElement('section');view.className='dj-record-view';view.dataset.recordView=key;if(node)view.append(node);records.append(view);recordViews.set(key,{button,view});
+ };
+ const registered=records.querySelector('#my-points'),favorites=records.querySelector('#my-favorites');
+ for(const node of [registered,favorites])if(node?.previousElementSibling?.classList.contains('page-section-title'))node.previousElementSibling.remove();
+ makeRecordView('points','등록지점',registered);makeRecordView('favorites','관심지점',favorites);
+ const postList=doc.createElement('div');postList.className='records-list';makeRecordView('posts','내 게시물',postList);makeRecordView('reviews','리뷰',reviewHistory);
+ const stats=records.querySelector('.stat-grid');if(stats)stats.hidden=true;
+ records.prepend(recordTabs);
+ let recordTab='points',postSeq=0;
+ async function refreshOwnPosts(){
+   const seq=++postSeq;postList.textContent='내 게시물을 불러오는 중입니다…';
+   try{const posts=await readMyCommunityPosts();if(seq!==postSeq)return;postList.replaceChildren();
+    if(!posts.length){postList.textContent='아직 작성한 게시물이 없습니다.';return;}
+    for(const post of posts){const card=doc.createElement('article');card.className='dj-own-post';
+      const title=doc.createElement('strong');title.textContent=post.title;title.dataset.djNoTranslate='';
+      const body=doc.createElement('p');body.textContent=post.body;body.dataset.djNoTranslate='';
+      const meta=doc.createElement('small');meta.textContent=[post.category,post.dong,new Date(post.created_at).toLocaleDateString()].filter(Boolean).join(' · ');
+      const open=doc.createElement('button');open.type='button';open.textContent='게시물 보기';open.addEventListener('click',()=>doc.defaultView.dispatchEvent(new CustomEvent('dongjak:open-community-post',{detail:{id:post.id}})));
+      const del=doc.createElement('button');del.type='button';del.textContent='삭제';del.addEventListener('click',async()=>{if(!doc.defaultView.confirm('이 게시물을 삭제하시겠습니까?'))return;del.disabled=true;try{await deleteSharedCommunityPost(post.id);await refreshOwnPosts();}catch{del.disabled=false;del.textContent='삭제 실패 · 다시 시도';}});
+      card.append(title,meta,body,open,del);postList.append(card);
+    }
+   }catch{if(seq===postSeq)postList.textContent='로그인 또는 서버 연결을 확인해 주세요.';}
+ }
+ function selectRecordTab(key){recordTab=key;for(const [name,{button,view}] of recordViews){const active=name===key;button.setAttribute('aria-pressed',String(active));view.hidden=!active;}if(key==='posts')void refreshOwnPosts();if(key==='reviews')void refreshReviewHistory();}
+ recordTabs.addEventListener('click',e=>{const button=e.target.closest('[data-record-tab]');if(button)selectRecordTab(button.dataset.recordTab);});
+ selectRecordTab(recordTab);
  body.prepend(landing);landing.insertAdjacentElement('afterend',detail);
  const title=detail.querySelector('.dj834-detail-title');const content=detail.querySelector('.dj834-detail-content');
  const detailNav=detail.querySelector('.dj834-detail-nav');
@@ -270,7 +301,7 @@ export function installMyInfo(doc=document){
    content.style.setProperty('margin-top','0','important');
    content.style.setProperty('padding-top','0','important');
    content.dataset.dj834View=view;
-   if(view==='records')void refreshReviewHistory();
+   if(view==='records')selectRecordTab(recordTab);
    if(view==='type')syncTypography();if(view==='language')syncChoices();if(view==='map')syncMapChoices();
    detail.hidden=false;
    syncSubpageHeader();
