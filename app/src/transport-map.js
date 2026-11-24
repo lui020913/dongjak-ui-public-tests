@@ -1367,7 +1367,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
   const routeDock=el('div','dj-bus-detail-dock');routeDock.hidden=true;routeDock.setAttribute('role','group');routeDock.setAttribute('aria-label','선택한 버스 노선');
-  const reopenRoute=el('button','','노선 상세'),removeRoute=el('button','','해제');reopenRoute.type=removeRoute.type='button';routeDock.append(reopenRoute,removeRoute);document.getElementById('app')?.append(routeDock);
+  const reopenRoute=el('button','','노선 상세'),removeRoute=el('button','','노선 표시 해제');reopenRoute.type=removeRoute.type='button';routeDock.append(reopenRoute,removeRoute);document.getElementById('app')?.append(routeDock);
   let routeChoice=null;
   let routePresentation=null;
   let lastFittedRouteId=null;
