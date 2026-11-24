@@ -36,7 +36,7 @@ import './map-patch/dj-v5911-place-polish.css';
 import './layout-core.css';
 import {installDongjakMapPatch} from './map-patch/dongjak-map-patch.js';
 import {distanceMeters,makeRouteIndex,nearestOnRoute,splitRoute} from './navigation-geometry.js';
-import {bearingDegrees,headingForCamera,shouldAutoReroute,voiceCueKey} from './navigation-experience.js';
+import {bearingDegrees,headingForCamera,shouldAutoReroute,voiceCueKey,startNavigationCompass,signedHeadingDelta} from './navigation-experience.js';
 import {installNavVoicePicker,applySelectedNavVoice} from './nav-voice-picker.js';
 import {makeCommunityPost,updateCommunityLike,appendCommunityComment,formatCommunityDate,readCommunityPosts} from './community-store.js';
 import {createCommunityComposerPortal} from './community-composer-portal.js';
@@ -300,6 +300,8 @@ let navArrived = false;
 // v7.0.6: GPS 보행 내비게이션 — 기기 음성, 이동 방향, 이탈 재탐색(연속 표본 확인).
 let navVoiceEnabled = false; // 사용자의 명시적 터치로만 켭니다.
 let navHeadingUp = true;
+let navCompass = null;
+let navMovementHeading = NaN;
 let navLastGps = null;
 let navOffRouteSamples = 0;
 let navLastOffRouteDistance = 0;
@@ -3432,18 +3434,22 @@ async function autoRerouteFromGps(pos,accuracy){
     if(token===navSessionToken)navReroutePending=false;
   }
 }
-function followNavigationPosition(pos,heading=NaN){
+function followNavigationPosition(pos,heading=NaN,{compassUpdate=false}={}){
   if(!navFollow || app.dataset.tab!=='map')return;
   const xy=map.project(pos);
   const width=map.getCanvas().clientWidth;
   const height=map.getCanvas().clientHeight;
   // 하단 안내 카드 위에 사용자를 배치하여 진행 방향을 읽기 쉽게 유지합니다.
   const offCenter=Math.hypot(xy.x-width/2,xy.y-height*0.43);
-  const bearing=navHeadingUp ? headingForCamera(heading,map.getBearing()) : 0;
-  const rotate=Math.abs((bearing-map.getBearing()+540)%360-180)>12;
+  const compassHeading=navCompass?.heading();
+  const preferred=Number.isFinite(compassHeading)?compassHeading:Number.isFinite(heading)?heading:navMovementHeading;
+  const bearing=navHeadingUp ? headingForCamera(preferred,map.getBearing()) : 0;
+  const rotate=Math.abs(signedHeadingDelta(bearing,map.getBearing()))>(compassUpdate?2:5);
+  // Orientation events never change route progress or trigger GPS rerouting.
+  if(compassUpdate&&!rotate)return;
   if(offCenter>55||rotate||map.getZoom()<16.3){
     map.easeTo({center:pos,zoom:Math.max(map.getZoom(),16.3),bearing,
-      padding:{top:15,bottom:60,left:0,right:0},duration:500,essential:true});
+      padding:{top:15,bottom:60,left:0,right:0},duration:compassUpdate?180:500,essential:true});
   }
 }
 
@@ -3459,6 +3465,7 @@ function updateNavState(pos,accuracy=0,heading=NaN) {
   if(!Number.isFinite(movementHeading)&&navLastGps && actualAccuracy<=40 && navLastGps.accuracy<=40
     && distanceMeters(navLastGps.pos,pos)>12)movementHeading=bearingDegrees(navLastGps.pos,pos);
   navLastGps={pos,accuracy:actualAccuracy};
+  if(Number.isFinite(movementHeading))navMovementHeading=movementHeading;
   if(Number.isFinite(movementHeading))followNavigationPosition(pos,movementHeading);
   else followNavigationPosition(pos);
   // 실제 목적지 인근은 경로 선형 스냅 여부와 무관하게 도착 여부를 확인합니다.
@@ -3502,6 +3509,7 @@ function updateNavState(pos,accuracy=0,heading=NaN) {
 
 function stopNavigation(arrived=false) {
   navSessionToken++;
+  navCompass?.stop();navCompass=null;navMovementHeading=NaN;
   navRerouteController?.abort();navRerouteController=null;navReroutePending=false;
   navOffRouteSamples=0;navLastOffRouteDistance=0;navLastGps=null;navLastVoiceKey='';
   try{window.speechSynthesis?.cancel();}catch{}
@@ -3533,6 +3541,10 @@ async function startNavigation() {
   if(!Capacitor.isNativePlatform() && !window.isSecureContext){toast('웹 GPS는 HTTPS 또는 같은 PC의 localhost에서만 사용할 수 있습니다.');return;}
   stopNavigation();
   navMode='gps';
+  navCompass=startNavigationCompass(window,heading=>{
+    if(navMode==='gps'&&navFollow&&navHeadingUp&&navLastGps&&!document.hidden)
+      followNavigationPosition(navLastGps.pos,heading,{compassUpdate:true});
+  });
   navIndex=makeRouteIndex(routeResult.coords);
   navProgress=0;navLastUpdateAt=0;navFollow=true;
   navLastGps=null;navOffRouteSamples=0;navLastRerouteAt=-Infinity;navLastVoiceKey='';
