@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.146",
+  "application_version": "9.2.147",
   "public_work_branch": "main",
-  "purpose": "PR455: exclusive mobile search toolbar, actual recent search list, Korean facility labels, remove technical search metadata, preserve bus directions, nearby facility search and PR454 bus detail.",
-  "attempt": 361,
+  "purpose": "PR457 + PR458: visible map facility search at sufficient zoom; equal-width bus route detail and clear controls on the right of unchanged scale bar; isolated bus detail without map controls or TIP; stronger train zoom scaling and radial illumination without added headlights.",
+  "attempt": 362,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Release 45426190558 failed in sealed mobile-next-build.test.mjs:49 due to a stale exact selector assertion. PR456 updates the assertion for explicit search focus; matched against actual production CSS. App code unchanged; retry v9.2.146 with all protected deployment gates.",
+  "last_retry_reason": "PR457 source CI 45428839340 and PR458 latest source CI 45432098909 passed. Existing protected Preview and Production QA remain required.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
