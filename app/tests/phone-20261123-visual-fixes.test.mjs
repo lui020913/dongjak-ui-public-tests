@@ -109,9 +109,13 @@ test('GPS and nearby safety have a single deliberate panel owner',()=>{
  assert.match(main,/pitchAlignment:'viewport',rotationAlignment:'viewport'/);
  assert.match(main,/dj-current-position-pulse/);
 });
-test('community uses safe gutters and map handoff never retains outgoing page',()=>{
+test('community uses safe gutters and map handoff retains only a bounded non-interactive visual exit',()=>{
  const portal=read('src/community-composer-portal.js'),tabs=read('src/bottom-tab-navigation.js');
  assert.match(portal,/padding-inline/);
  assert.match(portal,/max\(16px,env\(safe-area-inset-bottom,0px\)\)/);
- assert.match(tabs,/previous&&!reduced\(\)&&button\.dataset\.tab!=='map'/);
+ assert.match(tabs,/const retain=Boolean\(toMap&&previous/);
+ assert.match(tabs,/previous\.style\.setProperty\('pointer-events','none','important'\)/);
+ assert.match(tabs,/if\(page\.dataset\.page!==app\.dataset\.tab\)page\.hidden=true/);
+ assert.match(tabs,/else clearEntrance\(\)/);
+ assert.match(tabs,/if\(!reduced\(\)&&!toMap\)/);
 });

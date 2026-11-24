@@ -112,7 +112,7 @@ test('v9.2.72 full-screen phone tour, real route comparison and safe-area layers
  assert.match(aiMotion,/dj9251-ai-content-leave/);
  assert.doesNotMatch(css,/dj9272AiIn|dj9272AiOut|dj9272-ai-leave/);
  assert.equal(nav.includes('doc.startViewTransition'),false);
- assert.ok(nav.includes("if(!replay(button))return;"));
+ assert.match(nav,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(css,/\.page-panel\.dj-tab-content-enter:not\(\[hidden\]\)/);
  assert.equal(nav.includes("ensureCurtain()"),false);
  assert.ok(!block.includes('filter:brightness(.66)'));

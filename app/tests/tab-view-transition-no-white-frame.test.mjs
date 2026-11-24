@@ -50,7 +50,7 @@ test('phone tab switches real DOM immediately and animates content, never white 
  assert.equal(js.includes("createElement('div')"),false);
  assert.doesNotMatch(css,/::view-transition-(old|new)\(root\)/);
  assert.match(css,/\.page-panel\.dj-tab-content-enter:not\(\[hidden\]\)/);
- assert.deepEqual(TAB_TRANSITION,{contentReveal:140});
+ assert.deepEqual(TAB_TRANSITION,{contentReveal:260,mapReturn:220});
  h.cleanup();
 });
 

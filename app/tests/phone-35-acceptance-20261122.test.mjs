@@ -80,7 +80,7 @@ const checks=[
  }],
  ['B06','native and DOM window backdrops remain undimmed while body transitions stay local',()=>{
    contains(src('src/theme-contract.css'),'User-facing window policy: no native browser dialog backdrop dimming','background-color:transparent!important','opacity:0!important');
-   contains(src('src/bottom-tab-navigation.js'),'contentReveal:140','never defer the');
+   contains(src('src/bottom-tab-navigation.js'),'contentReveal:260','mapReturn:220','same JS tick');
  }],
  ['C01','PRI entry uses the requested walking-vulnerability naming',()=>{
    const s=src('src/pri-map.js');
