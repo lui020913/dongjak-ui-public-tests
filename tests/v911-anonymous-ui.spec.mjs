@@ -712,6 +712,20 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
  await expect(routeScreen).toBeVisible({timeout:15000});
  await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
  await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
+ const editor=routeScreen.locator('.route-panel'),plus=routeScreen.locator('[data-v3="waypoint"]'),search=routeScreen.locator('.search-screen');
+ await expect(plus).toBeVisible();await expect(routeScreen.locator('.quick,.waypoint-actions')).toHaveCount(0);
+ const originalHeight=(await editor.boundingBox()).height;
+ await plus.click();const pending=routeScreen.locator('.waypoint-pending');await expect(pending).toBeVisible();
+ await expect.poll(async()=> (await editor.boundingBox()).height-originalHeight).toBeGreaterThan(10);
+ await pending.locator('.waypoint-input').click();await expect(search).toBeVisible();await expect(search.locator('#v3-search-title')).toHaveText('경유지 검색');
+ await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+ await routeScreen.locator('[data-v3="search-back"]').click();await pending.getByRole('button',{name:'경유지 추가 취소'}).click();await expect(plus).toBeVisible();
+ for(const [key,title] of [['start','출발지 검색'],['end','도착지 검색']]){
+   await routeScreen.locator('[data-v3="'+key+'"]').click();
+   await expect(search.locator('#v3-search-title')).toHaveText(title);
+   await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+   await routeScreen.locator('[data-v3="search-back"]').click();
+ }
  await routeScreen.locator('[data-v3="close"]').click();
  await expect(routeScreen).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
