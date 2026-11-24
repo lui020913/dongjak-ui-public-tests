@@ -143,6 +143,7 @@ import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 import './mobile-ux-energy.css';
 import './v929-phone-followup.js';
 import './community-composer-portal.css';
+import './v834-place-reviews.css';
 
 // MapLibre v6 + Vite: 앞선 3D 실험판에서 검증한 웹 워커 설정을 사용합니다.
 maplibregl.setWorkerUrl(workerUrl);
@@ -2226,8 +2227,10 @@ const syncCommentKeyboard=()=>{
   app.classList.toggle('dj-community-comment-keyboard',Boolean(active));
   if(active){
     const room=Math.max(0,(vv?.offsetTop||0)+(vv?.height||window.innerHeight));
-    app.style.setProperty('--dj-comment-visible-bottom',room+'px');
-    const sc=document.querySelector('#participation-panel>.dj836-sheet-body');
+    const panel=document.getElementById('participation-panel');
+    const panelTop=Math.max(0,panel?.getBoundingClientRect().top||0);
+    app.style.setProperty('--dj-comment-visible-bottom',Math.max(160,room-panelTop)+'px');
+    const sc=panel?.querySelector(':scope>.dj836-sheet-body');
     const box=document.activeElement.getBoundingClientRect();
     if(sc&&box.bottom>room-16)sc.scrollTop+=box.bottom-room+16;
   }else app.style.removeProperty('--dj-comment-visible-bottom');
