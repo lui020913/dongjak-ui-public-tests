@@ -3,6 +3,7 @@
  * Seoul metro: realtimePosition; Seoul bus: getBusPosByRtid.
  */
 import {normalizeBusServiceKey} from '../../../src/bus-service-key.js';
+import {fetchBusRouteStops} from '../../../server/bus-route-path.mjs';
 import {metroQuotaUntil,markMetroQuota,metroQuotaResponse} from '../../../server/metro-quota.mjs';
 const METRO_LINES=['1호선','2호선','4호선','7호선','9호선'];
 const METRO_LINE_IDS={'1001':'1호선','1002':'2호선','1004':'4호선','1007':'7호선','1009':'9호선'};
@@ -51,18 +52,22 @@ export function parseMetroResponse(json,line,now=new Date()){
 }
 function xmlTag(block,tag){return block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'))?.[1]?.trim()||'';}
 export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
+  const root=xml?.ServiceResult??xml;
+  const box=root?.msgBody??root?.MsgBody??root?.response?.body??root?.body??root;
+  const raw=box?.itemList??box?.item??box?.items??[];
+  const rows=raw?.itemList??raw?.item??raw;
   const blocks=typeof xml==='string'?(xml.match(/<itemList(?:\s[^>]*)?>[\s\S]*?<\/itemList>/gi)||[]):
-    (Array.isArray(xml?.msgBody?.itemList??xml?.msgBody?.item)?(xml.msgBody.itemList??xml.msgBody.item):(xml?.msgBody?.itemList??xml?.msgBody?.item)?[xml.msgBody.itemList??xml.msgBody.item]:[]);
+    (Array.isArray(rows)?rows:rows?[rows]:[]);
   return blocks.map(block=>{
     const field=key=>typeof block==='string'?xmlTag(block,key):String(block?.[key]??'');
     const lng=Number(field('gpsX')||field('posX')||field('longitude')),lat=Number(field('gpsY')||field('posY')||field('latitude'));
     const id=field('vehId')||field('plainNo');
-    return {id:id?`bus:${id}`:'',routeId:String(field('routeId')||routeId),routeName:routeName||String(routeId),
+    return {id:id?`bus:${id}`:'',routeId:String(field('routeId')||field('busRouteId')||routeId),routeName:routeName||String(routeId),
       vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm')||field('gpsTime')||field('tm'),now),receivedAt:now.toISOString(),
       ...(field('nextStId')?{nextStopId:field('nextStId')}:{}),
       ...(['0','1'].includes(field('busType'))?{busType:field('busType')}:{}),
       ...(['3','4','5','6'].includes(field('congetion'))?{congestion:field('congetion')}:{})};
-  }).filter(b=>b.id&&xy(b.longitude,b.latitude));
+  }).filter(b=>b.id&&b.routeId===String(routeId)&&xy(b.longitude,b.latitude));
 }
 async function load(url,format='json'){
   const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:format==='json'?'application/json':format==='raw'?'application/json, application/xml, text/xml':'application/xml','User-Agent':'DongjakSafetyMap-Beta/1.0'}});
@@ -164,24 +169,68 @@ export function selectBusRoutes(groups=[],limit=8){
   }
   return [...routes.values()].sort((a,b)=>b.seen-a.seen||a.id.localeCompare(b.id)).slice(0,limit);
 }
-async function busRoute(key,route){
-  const url=`http://ws.bus.go.kr/api/rest/buspos/getBusPosByRtid?ServiceKey=${encodeURIComponent(key)}&busRouteId=${route.id}&resultType=json`;
-  // JSON first, with controlled XML fallback for deployments returning XML despite resultType=json.
-  let body;
-  try{body=await load(url);validProviderJson(body);}catch(err){
-    if(err.message!=='PROVIDER_INVALID_JSON')throw err;
-    body=await load(url.replace('resultType=json','resultType=xml'),'text');
-    if(/<headerCd>(?!0<\/headerCd>)/.test(body))throw new Error('BUS_POSITION_UNAVAILABLE');
+// Decode the response actually returned, not the requested resultType. Never
+// treat a gateway error document or malformed coordinates as an empty route.
+export function decodeBusPosition(raw,route,now=new Date()){
+  const text=String(raw??'').replace(/^\uFEFF/,'').trim();
+  let data,format,header='',gateway='',known=false,rowCount=0;
+  if(text.startsWith('{')){
+    format='json';try{data=JSON.parse(text);}catch{return {code:'BUS_POSITION_FORMAT',format};}
+    const root=data?.ServiceResult??data,box=root?.msgBody??root?.MsgBody??root?.response?.body??root?.body;
+    const h=root?.msgHeader??root?.MsgHeader,g=data?.OpenAPI_ServiceResponse?.cmmMsgHeader??data?.cmmMsgHeader??data?.response?.header;
+    header=String(h?.headerCd??'');gateway=String(g?.returnReasonCode??g?.returnCode??g?.resultCode??g?.errCode??'');
+    const rawRows=box?.itemList??box?.item??box?.items;
+    const rows=rawRows?.itemList??rawRows?.item??rawRows;
+    rowCount=Array.isArray(rows)?rows.length:rows?1:0;
+    known=!!box||!!h;
+  }else if(text.startsWith('<')){
+    format='xml';data=text;header=xmlTag(text,'headerCd');gateway=xmlTag(text,'returnReasonCode')||xmlTag(text,'returnCode')||xmlTag(text,'resultCode');
+    rowCount=(text.match(/<itemList(?:\s[^>]*)?>[\s\S]*?<\/itemList>/gi)||[]).length;known=/<(?:msgBody|msgHeader)\b/i.test(text)||rowCount>0;
+  }else return {code:'BUS_POSITION_FORMAT',format:'unknown'};
+  const safe=v=>/^\d{1,3}$/.test(v)?v:null;
+  const details={format,headerCode:safe(header),gatewayCode:safe(gateway),rawRows:rowCount};
+  if(gateway&&!['0','00'].includes(gateway)){
+    if(gateway==='03')return {list:[],details};
+    return {code:['20','21','30','31','32','33'].includes(gateway)?'BUS_POSITION_AUTH':gateway==='22'?'BUS_POSITION_RATE_LIMIT':'BUS_POSITION_UPSTREAM',details};
   }
-  if(body?.msgHeader?.headerCd!=null&&Number(body.msgHeader.headerCd)!==0)throw new Error('BUS_POSITION_UNAVAILABLE');
-  return parseBusResponse(body,route.id,new Date(),route.name);
+  if(header&&!['0','00'].includes(header)){
+    if(['3','4','7','8'].includes(header))return {list:[],details};
+    return {code:header==='1'?'BUS_POSITION_AUTH':['2','5'].includes(header)?'BUS_POSITION_FORMAT':'BUS_POSITION_UPSTREAM',details};
+  }
+  if(!known)return {code:'BUS_POSITION_FORMAT',details};
+  const list=parseBusResponse(data,route.id,now,route.name);
+  if(rowCount&&!list.length)return {code:'BUS_POSITION_FORMAT',details};
+  return {list,details};
+}
+async function requestBusPosition(key,route,operation,params={}){
+  const url='http://ws.bus.go.kr/api/rest/buspos/'+operation+'?'+new URLSearchParams({ServiceKey:key,busRouteId:route.id,resultType:'json',...params});
+  try{
+    const response=await fetch(url,{signal:AbortSignal.timeout(7000),headers:{Accept:'application/json, application/xml, text/xml'}});
+    const raw=await response.text();
+    const decoded=raw.length<=1500000?decodeBusPosition(raw,route):{code:'BUS_POSITION_FORMAT'};
+    const details={...(decoded.details??{}),http:response.status,operation};
+    if([401,403].includes(response.status))return {code:'BUS_POSITION_AUTH',details};
+    if(response.status===429)return {code:'BUS_POSITION_RATE_LIMIT',details};
+    if(!response.ok)return {code:['BUS_POSITION_AUTH','BUS_POSITION_RATE_LIMIT'].includes(decoded.code)?decoded.code:'BUS_POSITION_UPSTREAM',details};
+    return {...decoded,details};
+  }catch{return {code:'BUS_POSITION_UPSTREAM',details:{operation,http:null}};}
+}
+async function busRoute(key,route,routeKey,allowFallback){
+  const first=await requestBusPosition(key,route,'getBusPosByRtid');
+  if(!first.code||!allowFallback||['BUS_POSITION_AUTH','BUS_POSITION_RATE_LIMIT'].includes(first.code))return first;
+  // Route stops are real official sequences, not a fabricated range.
+  const stops=await fetchBusRouteStops(routeKey||key,route.id);
+  if(!stops.length)return first;
+  const second=await requestBusPosition(key,route,'getBusPosByRouteSt',{startOrd:String(stops[0].seq),endOrd:String(stops[stops.length-1].seq)});
+  return {...second,details:{...second.details,primary:first.details,primaryCode:first.code}};
 }
 export async function onRequestGet({request,env={}}){
   const headers={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff','Cache-Control':'public, max-age=0, s-maxage=20'};
   const result=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{...headers,...(status>=400?{'Cache-Control':'no-store'}:{})}});
   const arrivalKey=pick(env,'SEOUL_SUBWAY_API_KEY','SEOUL_METRO_API_KEY');
   const metroKey=pick(env,'SEOUL_SUBWAY_POSITION_API_KEY')||arrivalKey;
-  const busKey=normalizeBusServiceKey(pick(env,'SEOUL_BUS_SERVICE_KEY','SEOUL_BUS_API_KEY','BUS_API_KEY'));
+  const routeKey=normalizeBusServiceKey(pick(env,'SEOUL_BUS_SERVICE_KEY','SEOUL_BUS_API_KEY','BUS_API_KEY'));
+  const busKey=normalizeBusServiceKey(pick(env,'SEOUL_BUS_POSITION_API_KEY','SEOUL_BUS_POSITION_SERVICE_KEY'))||routeKey;
   if(!metroKey&&!busKey)return result({ok:false,code:'MISSING_KEYS',error:'교통 위치 API 키가 설정되지 않았습니다.',metro:[],bus:[]},503);
   const store=typeof caches!=='undefined'?caches.default:null;
   const query=new URL(request.url).searchParams;
@@ -199,7 +248,7 @@ export async function onRequestGet({request,env={}}){
   const lines=METRO_LINES.filter(line=>requestedLines.includes(line));
   const manual=asCsv(env?.LIVE_TRANSIT_BUS_ROUTE_IDS).filter(id=>/^\d{6,12}$/.test(id)).slice(0,8);
   const stopIds=asCsv(env?.LIVE_TRANSIT_BUS_STATION_IDS||DEFAULT_STATIONS.join(',')).filter(id=>/^\d{5}$/.test(id)).slice(0,4);
-  const warningCodes=[],metro=[],bus=[],metroDiagnostics={};
+  const warningCodes=[],metro=[],bus=[],metroDiagnostics={},busDiagnostics={};
   let quotaUntil=wantMetro?await metroQuotaUntil(request,metroKey):0;
   if(quotaUntil&&!wantBus)return metroQuotaResponse(quotaUntil,{metro:[],bus:[],warnings:['METRO_DAILY_QUOTA'],availability:{metro:!!metroKey,bus:!!busKey,busRoutes:0},metroDiagnostics:{quota:{state:'error',code:'PROVIDER_ERROR-337'}}});
   // A single probe before the remaining lines avoids five simultaneous rejects on an exhausted key.
@@ -214,13 +263,18 @@ export async function onRequestGet({request,env={}}){
     const tag=stopIds.join(',');
     if(discoveredRoutesCache.keyTag===tag&&discoveredRoutesCache.until>Date.now())busRoutes=discoveredRoutesCache.routes;
     else {
-      const groups=await Promise.allSettled(stopIds.map(id=>busRouteAtStop(busKey,id)));
+      const groups=await Promise.allSettled(stopIds.map(id=>busRouteAtStop(routeKey||busKey,id)));
       for(const group of groups)if(group.status==='rejected')warningCodes.push('BUS_ROUTE_DISCOVERY_UNAVAILABLE');
       busRoutes=selectBusRoutes(groups.filter(x=>x.status==='fulfilled').map(x=>x.value),8);
       if(busRoutes.length)discoveredRoutesCache={until:Date.now()+15*60_000,keyTag:tag,routes:busRoutes};
     }
   }
-  const tasks=[...metroTasks,...(wantBus&&busKey?busRoutes.map(async route=>({mode:'bus',list:await busRoute(busKey,route)})):[])];
+  const tasks=[...metroTasks,...(wantBus&&busKey?busRoutes.map(async route=>{
+    const value=await busRoute(busKey,route,routeKey,Boolean(selectedRoute));
+    busDiagnostics[route.id]={state:value.code?'error':value.list.length?'ok':'empty',...(value.code?{code:value.code}:{}),rows:value.list?.length??0,...value.details};
+    if(value.code)warningCodes.push(value.code);
+    return {mode:'bus',list:value.list??[],failed:!!value.code};
+  }):[])];
   const results=await Promise.allSettled(tasks);
   let fulfilled=0;
   for(const r of results){if(r.status==='fulfilled'){
@@ -237,11 +291,11 @@ export async function onRequestGet({request,env={}}){
   if(quotaUntil)warningCodes.unshift('METRO_DAILY_QUOTA');
   const errors=[...new Set(warningCodes)].slice(0,5);
   const data={ok:fulfilled>0,updatedAt:new Date().toISOString(),metro,bus,
-    availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,metroDiagnostics,
+    availability:{metro:!!metroKey,bus:!!busKey,busRoutes:wantBus?busRoutes.length:0},warnings:errors,metroDiagnostics,busDiagnostics,
     ...(quotaUntil?{metroQuota:{code:'ERROR-337',retryAfterSeconds:Math.max(1,Math.ceil((quotaUntil-Date.now())/1000))}}:{ }),
     source:{metro:'서울시 realtimePosition / 실패 시 realtimeStationArrival 실제 역 상태 (추정)',bus:'서울시 getBusPosByRtid (실측 좌표)'}};
   if(quotaUntil&&!metro.length&&!wantBus)return metroQuotaResponse(quotaUntil,data);
-  if(!data.ok){const codes=Object.values(metroDiagnostics).map(x=>x.code).filter(Boolean);return result({...data,error:codes.length?'서울시 열차 위치정보 조회 실패 · '+[...new Set(codes)].join(', '):'실시간 위치 API 응답을 확인하지 못했습니다.'},502);}
+  if(!data.ok){const codes=[...Object.values(metroDiagnostics),...Object.values(busDiagnostics)].map(x=>x.code).filter(Boolean);const busCode=selectedRoute?busDiagnostics[selectedRoute]?.code:null;return result({...data,...(busCode?{code:busCode}:{}),error:codes.length?'실시간 위치정보 조회 실패 · '+[...new Set(codes)].join(', '):'실시간 위치 API 응답을 확인하지 못했습니다.'},busCode==='BUS_POSITION_RATE_LIMIT'?429:busCode==='BUS_POSITION_AUTH'?503:502);}
   const response=result(data);
   if(store)try{await store.put(requestKey,response.clone());}catch{}
   return response;

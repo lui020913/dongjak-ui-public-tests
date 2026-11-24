@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {haversineMeters,linePointAtMeters,projectOnLine,pointBetweenStations} from '../src/features/liveTransit/geometry.js';
 import {busToFeatures,metroToFeatures,payloadToCollection} from '../src/features/liveTransit/normalize.js';
-import {normalizeKST,parseBusResponse,parseMetroResponse,parseMetroArrivalPositions,decodeMetroPayload,selectBusRoutes,onRequestGet} from '../functions/api/transport/live-vehicles.js';
+import {normalizeKST,parseBusResponse,decodeBusPosition,parseMetroResponse,parseMetroArrivalPositions,decodeMetroPayload,selectBusRoutes,onRequestGet} from '../functions/api/transport/live-vehicles.js';
 const NOW=Date.parse('2026-11-13T13:00:00.000Z');
 const line={coordinates:[[126.95,37.51],[126.96,37.51],[126.97,37.52]]};
 const routes={'9호선':{stations:[{name:'A',lngLat:[126.95,37.51]},{name:'B',lngLat:[126.96,37.51]},{name:'C',lngLat:[126.97,37.52]}],geometry:line,segmentTimeSeconds:100}};
@@ -145,7 +145,7 @@ test('API mode bus parses real provider coordinates and does not call metro',asy
     assert.equal(response.status,200);
     assert.equal(payload.bus[0].longitude,126.9499);
     assert.equal(payload.metro.length,0);
-    assert.equal(calls.length,2); // Mock XML requires the safe JSON-to-XML fallback
+    assert.equal(calls.length,1); // Decode returned XML directly; do not waste a second call
     assert(calls.every(x=>x.includes('getBusPosByRtid')));
     assert(!JSON.stringify(payload).includes('SECRET'));
   }finally{globalThis.fetch=original;}
@@ -180,4 +180,24 @@ test('selected bus route cache expires before the 15 second poll interval',async
    assert.equal(response.status,200);
    assert.match(response.headers.get('Cache-Control'),/s-maxage=10(?:$|,)/);
  }finally{globalThis.fetch=original;}
+});
+
+test('bus position decodes official envelopes, no-service and auth errors distinctly',()=>{
+ const route={id:'100100389',name:'N버스'};
+ const row={vehId:'1',gpsX:'126.95',gpsY:'37.51',busRouteId:route.id};
+ assert.equal(decodeBusPosition(JSON.stringify({ServiceResult:{msgHeader:{headerCd:'0'},msgBody:{itemList:row}}}),route).list.length,1);
+ assert.deepEqual(decodeBusPosition('<ServiceResult><msgHeader><headerCd>8</headerCd></msgHeader></ServiceResult>',route).list,[]);
+ assert.equal(decodeBusPosition('<OpenAPI_ServiceResponse><cmmMsgHeader><returnReasonCode>30</returnReasonCode></cmmMsgHeader></OpenAPI_ServiceResponse>',route).code,'BUS_POSITION_AUTH');
+ assert.equal(decodeBusPosition('<html>maintenance</html>',route).code,'BUS_POSITION_FORMAT');
+ assert.equal(decodeBusPosition(JSON.stringify({msgBody:{itemList:{...row,gpsX:'invalid'}}}),route).code,'BUS_POSITION_FORMAT');
+});
+test('selected route recovers official positions through actual stop range',async()=>{
+ const original=globalThis.fetch,calls=[];
+ globalThis.fetch=async url=>{
+  const u=new URL(String(url));calls.push(u);
+  if(u.pathname.endsWith('getBusPosByRtid'))return new Response('unavailable',{status:502});
+  if(u.pathname.endsWith('getStaionByRoute'))return new Response(JSON.stringify({msgBody:{itemList:[{seq:1,stationNm:'A',gpsX:126.95,gpsY:37.5},{seq:12,stationNm:'B',gpsX:126.96,gpsY:37.51}]}}));
+  return new Response(JSON.stringify({msgHeader:{headerCd:0},msgBody:{itemList:[{vehId:'1',gpsX:126.95,gpsY:37.51}]}}));
+ };
+ try{const res=await onRequestGet({request:new Request('https://example.org/api/transport/live-vehicles?modes=bus&routeId=100100389'),env:{SEOUL_BUS_SERVICE_KEY:'ROUTE_KEY',SEOUL_BUS_POSITION_API_KEY:'POSITION_KEY'}});const data=await res.json();assert.equal(res.status,200);assert.equal(data.bus.length,1);assert.equal(calls[2].searchParams.get('endOrd'),'12');assert.equal(calls[0].searchParams.get('ServiceKey'),'POSITION_KEY');assert.equal(calls[1].searchParams.get('ServiceKey'),'ROUTE_KEY');assert.equal(data.busDiagnostics['100100389'].operation,'getBusPosByRouteSt');assert(!JSON.stringify(data).includes('POSITION_KEY'));}finally{globalThis.fetch=original;}
 });
