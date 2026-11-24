@@ -7,6 +7,8 @@ on:
       - 'tests/mobile-first-layout-contract.test.mjs'
       - 'tests/v911-anonymous-ui.spec.mjs'
       - 'tests/mobile-qa-parallel.test.mjs'
+      - 'tests/fix-phone-sharding.test.mjs'
+      - 'scripts/plan-fix-phone-shards.mjs'
       - 'tests/retired-smoke-workflows.test.mjs'
       - 'tests/static-data-inventory.test.mjs'
       - 'scripts/audit-static-data-usage.mjs'
@@ -65,7 +67,7 @@ jobs:
           node --check tests/v911-anonymous-ui.spec.mjs
           node --test tests/mobile-qa-parallel.test.mjs tests/workflow-release-safety-contract.test.mjs
           node --test tests/retired-smoke-workflows.test.mjs tests/static-data-inventory.test.mjs
-          node --test tests/production-app-tree-source-gate.test.mjs
+          node --test tests/production-app-tree-source-gate.test.mjs tests/fix-phone-sharding.test.mjs
           bash -n scripts/build-mobile-first-overhaul.sh
           node --check scripts/compare-ui-performance.mjs
           node --check scripts/verify-live-production-source.mjs
