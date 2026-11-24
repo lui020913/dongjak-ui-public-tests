@@ -1,3 +1,4 @@
+import {installCommunityActivity} from './community-activity.js';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -2530,6 +2531,9 @@ bookmarkButton.addEventListener('click',() => {
 });
 navigate('map');
 if(['route','participate','news','mine'].includes(themeReloadState?.tab))map.once('load',()=>requestAnimationFrame(()=>navigate(themeReloadState.tab)));
+function openActivityPost(id){if(navMode==='gps')return;communityDeepLink=id;navigate('participate');}
+window.addEventListener('dongjak:open-community-post',e=>{if(e.detail?.id)openActivityPost(e.detail.id);});
+installCommunityActivity({openPost:openActivityPost});
 const sharedCommunityId=location.hash.match(/^#community=([0-9a-f-]{36})$/i)?.[1];if(sharedCommunityId){communityDeepLink=sharedCommunityId;navigate('participate');}
 function openCommunityNoticesFromPush(){navigate('participate');const panel=document.getElementById('community-notifications');panel.hidden=false;void refreshCommunityNotices();}
 if(location.hash==='#community-notices')openCommunityNoticesFromPush();
