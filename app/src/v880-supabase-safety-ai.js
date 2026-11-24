@@ -136,10 +136,9 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     // out of the changing keyboard viewport.
     if(reduce()){input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;}
     if(window.matchMedia?.('(max-width:699px)')?.matches){
-      // The native dialog itself stays opaque and stationary. Fade only its
-      // content, then complete the one existing close operation.
-      input.blur();modal.classList.add('dj887-ai-closing');
-      closeTimer=window.setTimeout(finishClose,175);
+      // Release the top layer synchronously on phones. A delayed animation
+      // callback can be starved during keyboard/viewport and map updates.
+      input.blur();finishClose();
       return;
     }
     modal.classList.add('dj887-ai-closing');

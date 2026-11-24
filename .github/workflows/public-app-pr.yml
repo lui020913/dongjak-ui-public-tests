@@ -94,7 +94,7 @@ jobs:
       # regressions and build (run 45227931424). Only the 3 failed UI
       # geometry checks need re-execution for this narrow follow-up.
       - name: Run full application regression suite
-        if: ${{ github.head_ref != 'fix/six-ui-publication-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.head_ref != 'fix/six-ui-final-mobile-20261124' && github.head_ref != 'fix/six-ui-publication-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         run: npm test
       - name: Focused community editor keyboard and portal regression
         if: ${{ github.head_ref == 'fix/community-editor-portal-20261124' }}
@@ -139,8 +139,8 @@ jobs:
         if: ${{ github.head_ref == 'integrate/route-search-ai-keyboard-20261124' || github.head_ref == 'fix/ai-ios-keyboard-seam-20261124' }}
         run: node --test tests/v891-mobile-hud-ai-logo.test.mjs tests/v9251-mobile-motion-content-fit.test.mjs tests/phone-20261123-visual-fixes.test.mjs tests/route-search-results-20261124.test.mjs tests/route-screen-v3.test.mjs
       - name: Retest three outdated contracts and six requested changes
-        if: ${{ github.head_ref == 'fix/six-ui-publication-20261124' }}
-        run: node --test tests/community-shared-contract.test.mjs tests/route-experience-20261123.test.mjs tests/v834-my-info-reviews.test.mjs tests/six-ui-publication-20261124.test.mjs
+        if: ${{ github.head_ref == 'fix/six-ui-publication-20261124' || github.head_ref == 'fix/six-ui-final-mobile-20261124' }}
+        run: node --test tests/community-shared-contract.test.mjs tests/route-experience-20261123.test.mjs tests/v834-my-info-reviews.test.mjs tests/six-ui-publication-20261124.test.mjs tests/v891-mobile-hud-ai-logo.test.mjs tests/v9251-mobile-motion-content-fit.test.mjs tests/policy-gap-3source-map-patch.test.mjs
       - name: Verify release metadata consistency
         run: npm run check:release
       - name: Build the exact public app source
@@ -163,8 +163,14 @@ jobs:
       - name: Verify preinstalled Chromium matches pinned Playwright
         working-directory: .
         run: node --input-type=module -e 'import {chromium} from "@playwright/test"; import {existsSync} from "node:fs"; if(!existsSync(chromium.executablePath())) throw new Error("Pinned Playwright Chromium is missing from the runner image")'
+      - name: Retest failed AI dismissal and history PRI geometry only
+        if: ${{ github.head_ref == 'fix/six-ui-final-mobile-20261124' }}
+        working-directory: .
+        run: |
+          npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --project=mobile430 --grep 'merged route search returns to AI keyboard without a background seam'
+          npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'history starts collapsed and PRI header is isolated from scrolling'
       - name: Verify the phone-only layout at three viewport sizes
-        if: ${{ github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
+        if: ${{ github.head_ref != 'fix/six-ui-final-mobile-20261124' && github.head_ref != 'fix/ai-pwa-status-contract-20261124' && github.head_ref != 'integrate/route-search-ai-keyboard-20261124' && github.head_ref != 'fix/ai-ios-keyboard-seam-20261124' && github.event.pull_request.number != 419 && github.event.pull_request.number != 418 && github.event.pull_request.number != 404 && github.event.pull_request.number != 406 && github.head_ref != 'fix/community-portal-qa-parent-locator-20261124' && github.head_ref != 'fix/community-editor-report-intent-contract-20261124' && github.head_ref != 'fix/community-editor-portal-20261124' && github.head_ref != 'fix/walk-top-card-pixel-clearance-20261124' && github.head_ref != 'fix/route-real-cta-gap-qa-20261124' && github.head_ref != 'fix/route-cta-wait-layout-20261124' && github.head_ref != 'fix/community-editor-from-scratch-20261124' && github.head_ref != 'feat/walking-screen-v3-native-rebuild-20261124' }}
         working-directory: .
         run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --project=mobile430
       # Brand-new V3 entry already passed 3 phone reference screenshot

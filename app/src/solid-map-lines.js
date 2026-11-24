@@ -12,7 +12,9 @@ export function installSolidMapLines(map){
  let queued=false,disposed=false;
  const schedule=()=>{
   if(queued||disposed)return;queued=true;
-  queueMicrotask(()=>{queued=false;if(!disposed)solidifyMapLines(map);});
+  // Yield to rendering and input; styledata can fire again on each paint write.
+  const run=()=>{if(!disposed)solidifyMapLines(map);queued=false;};
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(run,0);
  };
  map.on('styledata',schedule);map.on('load',schedule);schedule();
  return ()=>{disposed=true;map.off('styledata',schedule);map.off('load',schedule);};
