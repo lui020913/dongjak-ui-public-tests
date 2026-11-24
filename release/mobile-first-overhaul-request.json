@@ -3,9 +3,9 @@
   "application_version": "9.2.141",
   "public_work_branch": "main",
   "purpose": "PR449: exclusive walking arrival completion, accuracy-aware automatic reroute, restored turn voice toggle, circular GPS pulse, and nearby safety sheet layout.",
-  "attempt": 354,
+  "attempt": 355,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "PR449 merged after successful Public app source CI run 45405762984 including independent FIX phone gate. Release exact merged stable source through existing Preview and protected Production QA; no v9.3 candidate.",
+  "last_retry_reason": "Release 45407138856 failed before build because mobile-next adapter referenced outdated route source anchors. PR450 updates reroute and preview anchors without changing app code or QA gates. Retry same v9.2.141; PR449 source CI and phone gate already passed.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
