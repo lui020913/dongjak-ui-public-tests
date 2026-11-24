@@ -25,7 +25,7 @@ export function createTrainBeamSprite(facing){
     const alpha=Math.round(255*.82*Math.pow(1-r,1.9));
     if(!alpha)continue;
     const offset=(y*width+x)*4;
-    data[offset]=224;data[offset+1]=245;data[offset+2]=255;data[offset+3]=alpha;
+    data[offset]=228;data[offset+1]=244;data[offset+2]=255;data[offset+3]=alpha;
   }
   return {width,height,data};
 }
