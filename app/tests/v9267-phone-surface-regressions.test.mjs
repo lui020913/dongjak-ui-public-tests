@@ -24,7 +24,7 @@ test('recording mode cannot push the independent AI action down',()=>{
 test('full-screen tabs switch immediately without a white WebGL snapshot or opaque curtain',()=>{
  const local=new URL('../src/mobile-next.css',import.meta.url);
  const material=readFileSync(existsSync(local)?local:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
- assert.match(tab,/if\(!replay\(button\)\)return/);
+ assert.match(tab,/if\(!replay\(button\)\)\{[^}]*return;/);
  assert.match(tab,/clearEntrance\(\)/);
  assert.match(tab,/panel\.classList\.add\('dj-tab-content-enter'\)/);
  assert.doesNotMatch(tab,/doc\.startViewTransition|skipTransition|queued=button/);
@@ -59,7 +59,7 @@ test('iPhone manual theme switch stores camera before a single native-color refr
 test('night confirmation has one stationary fade owner, not nested CSS keyframes',()=>{
  const owner=read('src/v806-unified-ui.js');
  assert.match(owner,/const fade=[^;]*dj833-night-dialog/);
- assert.match(night,/querySelector\('\.dj833-night-dialog'\)\.dataset\.djDialogFade='true'/);
+ assert.doesNotMatch(night,/querySelector\('\.dj833-night-dialog'\)\.dataset\.djDialogFade/); // hidden descendant must not count as an open dialog
  assert.doesNotMatch(css,/animation:dj9267-night-/);
  assert.doesNotMatch(html,/src="\/src\/v852-mobile-ux\.js"/);
 });

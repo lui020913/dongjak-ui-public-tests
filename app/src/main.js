@@ -2033,7 +2033,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
     const outgoing=panel.dataset.djTabOutgoing==='true' && panel.dataset.page!==tab;
     if(panel.dataset.page!==tab && !outgoing)window.DongjakWindowMotion?.cancel(panel);
     // The mobile tab transition owner closes this outgoing page after its
-    // 190ms fade. Keep it opaque while the new full-screen panel renders.
+    // bounded map-return fade. Other tab changes reveal the incoming body.
     panel.hidden=panel.dataset.page!==tab && !outgoing;
   }
   if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}

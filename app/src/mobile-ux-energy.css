@@ -43,7 +43,7 @@
 
 @layer request-completion {
  @media(max-width:699px){
-  html body #app#app#app .page-panel[data-dj-tab-outgoing="true"]:not([hidden]){
+  html body #app#app#app#app#app#app#app#app[data-tab="map"] .page-panel[data-dj-tab-outgoing="true"]:not([hidden]){
    display:flex!important;visibility:visible!important;pointer-events:none!important;
   }
   html body #app#app#app .page-panel[data-dj-tab-outgoing="true"] *{pointer-events:none!important;}

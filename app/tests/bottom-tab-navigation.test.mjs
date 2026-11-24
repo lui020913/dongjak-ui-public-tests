@@ -144,3 +144,20 @@ test('mouse-backed HOME icon swipe recovers even when pointerdown was cancelled 
  assert.equal(app.dataset.tab,'participate');
  dispose();
 });
+
+
+test('map return keeps only a non-interactive fading page and rapid tab reentry clears it',()=>{
+ const handlers=new Map(),timers=new Map(),frames=new Map();let clock=0,key=0;
+ const app={dataset:{tab:'mine'}};
+ const values=new Map();const panel={dataset:{page:'mine'},hidden:false,classList:{add(){},remove(){}},style:{setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},removeAttribute:k=>{if(k==='data-dj-tab-outgoing')delete panel.dataset.djTabOutgoing;}};
+ const buttons=['map','mine'].map(tab=>({dataset:{tab},disabled:false,isConnected:true,click(){app.dataset.tab=tab;panel.hidden=tab!=='mine'&&panel.dataset.djTabOutgoing!=='true';}}));
+ const nav={dataset:{},querySelectorAll:()=>buttons,querySelector:()=>buttons[0]};
+ const doc={getElementById:k=>k==='bottom-nav'?nav:null,querySelector:sel=>sel.includes('data-page="mine"')&&!panel.hidden?panel:null};
+ const win={matchMedia:q=>({matches:q.includes('max-width')}),addEventListener:(n,fn)=>handlers.set(n,fn),removeEventListener(){},setTimeout:fn=>{timers.set(++key,fn);return key;},clearTimeout:k=>timers.delete(k),requestAnimationFrame:fn=>{frames.set(++key,fn);return key;},cancelAnimationFrame:k=>frames.delete(k),performance:{now:()=>clock}};
+ const dispose=installBottomTabNavigation({doc,win,app});
+ const click=tab=>handlers.get('click')({target:{closest:sel=>sel==='#bottom-nav .nav-tab[data-tab]'?buttons.find(b=>b.dataset.tab===tab):null},preventDefault(){},stopImmediatePropagation(){}});
+ click('map');assert.equal(app.dataset.tab,'map');assert.equal(panel.hidden,false);assert.equal(values.get('pointer-events'),'none');
+ const step=[...frames.entries()][0];frames.delete(step[0]);clock=110;step[1](clock);assert.equal(Number(values.get('opacity')),.5);
+ click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(frames.size,0);
+ dispose();
+});

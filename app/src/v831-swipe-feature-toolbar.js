@@ -443,7 +443,6 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    <p>다크 테마로 전환하고 가로등 시야 분석을 켜시겠습니까?</p>
    <p class="dj833-night-notice">조명 범위는 분석상 추정치이며 실제 밝기나 안전도를 의미하지 않습니다.</p>
    <div class="dj833-night-actions"><button type="button" data-choice="no">아니요</button><button type="button" data-choice="yes">예, 시작</button></div></div>`);
-   nightConfirm.querySelector('.dj833-night-dialog').dataset.djDialogFade='true';
    nightConfirm.querySelector('[data-choice="no"]').addEventListener('click',()=>{
      closeNightConfirm(true);
      // On desktop, declining consent must leave the persistent night shortcut
@@ -482,7 +481,7 @@ export function installSwipeFeatureToolbar(doc=document,win=window){
    openNightConfirm();
  }
  function openNightConfirm(){
-   if(!nightConfirm)return;
+   if(!nightConfirm||!nightConfirm.hidden)return;
    const card=nightConfirm.querySelector('.dj833-night-dialog');
    // Cancelling a previous exit is essential when tapping the pill quickly.
    // A retained WAAPI transform moved the next consent card sideways.
