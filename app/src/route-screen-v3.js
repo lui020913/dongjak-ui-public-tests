@@ -72,8 +72,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
       <div class="search-head"><button type="button" data-v3="search-back" aria-label="검색 닫기">←</button>
         <strong id="v3-search-title">도착지 검색</strong></div>
       <form class="search-bar" data-v3-form="search">
-        <input type="search" id="v3-query" placeholder="역, 건물, 장소, 주소 검색" autocomplete="off" aria-label="장소명 또는 주소" />
-        <button type="submit" class="search-go">검색</button>
+        <input type="search" id="v3-query" placeholder="역, 건물, 장소, 주소 검색" autocomplete="off" autocapitalize="off" enterkeyhint="search" maxlength="80" aria-label="장소명 또는 주소" />
+        <button type="button" class="search-clear" data-v3="clear-query" aria-label="검색어 지우기" hidden>×</button>
       </form>
       <p class="search-hint" id="v3-search-status" role="status" aria-live="polite">장소명 또는 주소를 검색해 주세요.</p>
       <div class="search-results" id="v3-results" aria-label="장소 검색 결과"></div>
@@ -87,7 +87,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
     element.addEventListener(event,fn,opts);
     cleanups.push(()=>element.removeEventListener(event,fn,opts));
   };
-  let searching=null,active=false,resizeFrame=0;
+  let searching=null,active=false,resizeFrame=0,searchTimer=0,composing=false;
+  const cancelTimer=()=>{win.clearTimeout(searchTimer);searchTimer=0;};
+  const syncViewport=()=>{const vv=win.visualViewport;host.style.setProperty("--v3-search-height",Math.round(vv?.height||win.innerHeight)+"px");};
   const hasValue=node=>node?.textContent?.trim()&&node.textContent.trim()!=='선택되지 않음';
   const syncLabels=()=>{
     const start=hasValue(legacyStart)?legacyStart.textContent.trim():null;
@@ -139,7 +141,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
   };
   const finishSearch=()=>{
     if(!searching)return;
-    searching=null;
+    cancelTimer();composing=false;searching=null;
+    q('#v3-query').blur();
     q('[data-v3-screen="search"]').hidden=true;
     byId('route-search-close')?.click();
     syncLabels();requestPosition();
@@ -149,7 +152,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
     searching=which;
     byId(which==='start'?'route-search-start':'route-search-end')?.click();
     q('#v3-search-title').textContent=which==='start'?'출발지 검색':'도착지 검색';
-    q('#v3-query').value='';
+    cancelTimer();composing=false;
+    q('#v3-query').value='';q('[data-v3="clear-query"]').hidden=true;
+    syncViewport();
     q('#v3-results').replaceChildren();
     q('#v3-search-status').textContent='장소명 또는 주소를 입력해 주세요.';
     q('[data-v3-screen="search"]').hidden=false;
@@ -204,14 +209,15 @@ export function mountRouteScreenV3(doc=document, win=window) {
       else{
         restoreOld();restoreOldMapTools();
         delete app.dataset.djRouteScreenV3;
-        searching=null;
+        cancelTimer();composing=false;searching=null;
+        q('#v3-query').blur();
         q('[data-v3-screen="search"]').hidden=true;
       }
     }
     if(active){
       concealOld();hideOldMapTools();
       if(searching&&nativeSearch.hidden){
-        searching=null;q('[data-v3-screen="search"]').hidden=true;
+        cancelTimer();composing=false;searching=null;q('#v3-query').blur();q('[data-v3-screen="search"]').hidden=true;
       }
       syncLabels();
       requestPosition();
@@ -231,14 +237,31 @@ export function mountRouteScreenV3(doc=document, win=window) {
     syncLabels();if(!q('[data-v3="calculate"]').disabled)legacyCalc.click();
   });
   listen(q('[data-v3="search-back"]'),'click',finishSearch);
-  listen(q('[data-v3-form="search"]'),'submit',e=>{
-    e.preventDefault();
+  const submitSearch=()=>{
+    cancelTimer();
+    if(!searching||composing)return;
     const nativeQuery=byId('route-search-query'),form=byId('route-search-form');
-    if(!nativeQuery||!form)return;
-    nativeQuery.value=q('#v3-query').value;
+    if(!nativeQuery||!form||nativeQuery.value.trim().length<2)return;
     form.requestSubmit();
     mirrorResults();
-  });
+  };
+  const updateQuery=()=>{
+    cancelTimer();
+    if(!searching)return;
+    const input=q('#v3-query'),nativeQuery=byId('route-search-query');
+    q('[data-v3="clear-query"]').hidden=!input.value;
+    if(!nativeQuery)return;
+    nativeQuery.value=input.value;
+    nativeQuery.dispatchEvent(new Event('input',{bubbles:true}));
+    mirrorResults();
+    if(!composing&&input.value.trim().length>=2)searchTimer=win.setTimeout(submitSearch,450);
+  };
+  listen(q('#v3-query'),'compositionstart',()=>{composing=true;cancelTimer();});
+  listen(q('#v3-query'),'compositionend',()=>{composing=false;updateQuery();});
+  listen(q('#v3-query'),'input',updateQuery);
+  listen(q('[data-v3="clear-query"]'),'click',()=>{q('#v3-query').value='';updateQuery();q('#v3-query').focus({preventScroll:true});});
+  listen(q('[data-v3-form="search"]'),'submit',e=>{e.preventDefault();if(!composing)submitSearch();});
+  listen(win.visualViewport,'resize',syncViewport);
   listen(win,'keydown',e=>{
     if(active&&searching&&e.key==='Escape'){e.preventDefault();finishSearch();}
   });
@@ -264,7 +287,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   cardObserver?.observe(q('.route-panel'));
   sync();
   return ()=>{
-    observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();
+    cancelTimer();observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();
     oldStyleObserver.disconnect();restoreOld();restoreOldMapTools();
     navObserver?.disconnect();cardObserver?.disconnect();
     cleanups.forEach(fn=>fn());

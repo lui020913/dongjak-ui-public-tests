@@ -40,6 +40,8 @@ test('completely rebuilt route entry matches reference map-first composition',as
   const cta=root.locator('.action');
   const nav=page.locator('#bottom-nav');
   await expect(heading).toHaveText('길찾기');
+  await expect(page.locator('#app > .topbar')).toBeHidden();
+  await expect(root.locator('.header')).toHaveCSS('background-color','rgb(237, 243, 239)');
   await expect(root.locator('.mode')).toContainText('도보');
   await expect(root.locator('#v3-start')).toHaveText('현재 위치');
   await expect(root.locator('#v3-end')).toHaveText('어디로 가시나요?');
@@ -84,8 +86,14 @@ test('new entry has independent functional destination-search and dismiss',async
   await expect(search.locator('#v3-search-title')).toHaveText('도착지 검색');
   await expect(page.locator('#route-place-search')).not.toHaveAttribute('hidden');
   await root.locator('#v3-query').fill('상도역');
-  await root.locator('[data-v3-form="search"] .search-go').click();
   await expect(page.locator('#route-search-query')).toHaveValue('상도역');
+  await expect(search.locator('#v3-results button').filter({hasText:'상도역'}).first()).toBeVisible();
+  await expect(search.locator('.search-go')).toHaveCount(0);
+  await expect(search).toHaveCSS('background-color','rgb(237, 243, 239)');
+  await root.locator('[data-v3="clear-query"]').click();
+  await expect(search.locator('#v3-results button')).toHaveCount(0);
+  await root.locator('#v3-query').fill('노량진역');
+  await expect(search.locator('#v3-results button').filter({hasText:'1호선'}).first()).toBeVisible();
   await root.locator('[data-v3="search-back"]').click();
   await expect(search).toBeHidden();
   await expect(page.locator('#route-place-search')).toHaveAttribute('hidden','');

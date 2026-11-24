@@ -495,10 +495,12 @@ export function searchCachedTransportPlaces(query) {
   return cachedTransportPlaces.filter(p => {
     const name=normalizeStationQueryName(p.name).toLowerCase().replace(/\s/g,'');
     return name.includes(term)||String(p.arsId||'').includes(term);
-  }).slice(0,8).map(p=>({
-    name:p.name,lng:p.lng,lat:p.lat,
+  }).sort((a,b)=>Number(b.kind==='subway')-Number(a.kind==='subway')||
+    Number(normalizeStationQueryName(b.name).toLowerCase().replace(/\s/g,'')===term)-Number(normalizeStationQueryName(a.name).toLowerCase().replace(/\s/g,'')===term))
+    .slice(0,20).map(p=>({
+    name:p.name,lng:p.lng,lat:p.lat,kind:p.kind,arsId:p.arsId||'',direction:p.direction||'',lines:p.lines||[],
     label:p.name,category:p.kind==='bus'?'버스정류장':'지하철·철도역',
-    address:[p.arsId?`ARS ${p.arsId}`:'', ...(p.lines||[])].filter(Boolean).join(' · ')
+    address:[p.kind==='bus'&&p.direction?(String(p.direction).endsWith('방면')?p.direction:`${p.direction} 방면`):'', ...(p.lines||[])].filter(Boolean).join(' · ')
   }));
 }
 

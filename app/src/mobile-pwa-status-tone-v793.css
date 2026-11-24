@@ -95,16 +95,15 @@ html.dj-ios-home-pwa[data-dj-pwa-dimmed="true"] body #app > #dj-ios-pwa-status-b
 @media(max-width:699px){
 html.dj-ios-home-pwa:has(#dj-ai-search-modal[open],#djNext-layer-panel:not([hidden])) body #app > #dj-ios-pwa-status-bridge{opacity:0!important;transition:none!important}
 html.dj-ios-home-pwa body #dj-ai-search-modal[open]::backdrop{
-  --dj-pwa-status-color:#ffffff;
-  /* The native iOS status sample is explicitly switched to white while the
-     AI dialog is open by mobile-pwa-status-tone-v793.js. Build this gradient
-     locally: the root's computed --dj-pwa-bridge-gradient is still map-green. */
+  --dj-pwa-status-color:#edf3ef;
+  /* Match the opaque AI page. A transparent top-layer backdrop must never
+     reveal a contrasting white root during iOS keyboard transitions. */
   background-image:none!important;
   background-size:100% var(--dj-pwa-bridge-height)!important;
   background-repeat:no-repeat!important;
   background-position:top center!important;
 }
-html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#22282e}
+html.dj-ios-home-pwa[data-theme="dark"] body #dj-ai-search-modal[open]::backdrop{--dj-pwa-status-color:#191b1f}
 }
 @media(prefers-reduced-motion:reduce){html.dj-ios-home-pwa body #app > #dj-ios-pwa-status-bridge{transition:none!important}}
 

@@ -103,8 +103,20 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#mine-panel [data-dj834-action="profile"]')?.click();
     q('#mine-panel .dj824-account-toggle')?.scrollIntoView({block:'nearest'});
   });
+  // One idempotent close completion for animation, timer and native close.
+  // A delayed iOS keyboard resize must not leave the top layer intercepting taps.
+  function finishClose(){
+    if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
+    try{if(modal.open)modal.close();}
+    finally{modal.classList.remove('dj887-ai-closing');}
+  }
+  layout.addEventListener('animationend',event=>{
+    if(event.target===layout&&event.animationName==='dj9251-ai-content-leave'&&modal.classList.contains('dj887-ai-closing'))finishClose();
+  });
   function exit(){
-    if(modal.classList.contains('dj887-ai-closing'))return;
+    if(modal.classList.contains('dj887-ai-closing')){
+      finishClose();return;
+    }
     abort?.abort();abort=null;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     if(!modal.open)return;
@@ -115,21 +127,13 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
       // The native dialog itself stays opaque and stationary. Fade only its
       // content, then complete the one existing close operation.
       input.blur();modal.classList.add('dj887-ai-closing');
-      closeTimer=window.setTimeout(()=>{
-        closeTimer=0;
-        if(modal.open)modal.close();
-        modal.classList.remove('dj887-ai-closing');
-      },175);
+      closeTimer=window.setTimeout(finishClose,175);
       return;
     }
     modal.classList.add('dj887-ai-closing');
     // Explicit bounded completion: never depend on Safari animationend
     // to release a dialog that owns the whole viewport's hit targets.
-    closeTimer=window.setTimeout(()=>{
-      closeTimer=0;
-      if(modal.open)modal.close();
-      modal.classList.remove('dj887-ai-closing');
-    },175);
+    closeTimer=window.setTimeout(finishClose,175);
   }
   function open(){
     // A transport X tap cannot become an AI open through the fading layer.

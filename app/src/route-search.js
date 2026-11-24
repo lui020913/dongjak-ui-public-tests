@@ -73,23 +73,23 @@ async function queryEndpoint(url,{signal,timeoutMs=2800}={}){
   }finally{clearTimeout(timeoutId);signal?.removeEventListener('abort',abort);}
 }
 /** Places, parks, public facilities and addresses: local results survive network errors. */
-export async function searchPlaces(query,{signal}={}){
+export async function searchPlaces(query,{signal,includeRemote=false}={}){
   const q=String(query||'').trim();
   buildPlaceSearchUrl(q); // same validation used by both endpoints
   const local=searchLocalPlaces(q);
   // Local named places should appear immediately, even when mobile connections are slow.
-  if(local.length)return local;
+  if(local.length&&!includeRemote)return local;
   let lastError;
   for(const endpoint of upstreamEndpoints){
     if(signal?.aborted)throw new DOMException('검색 취소','AbortError');
     try{
       const found=await queryEndpoint(endpoint(q),{signal});
-      if(found.length)return found;
+      if(found.length)return [...local,...found];
     }catch(error){
       if(signal?.aborted)throw new DOMException('검색 취소','AbortError');
       lastError=error;
     }
   }
-  if(lastError)throw lastError;
-  return [];
+  if(lastError&&!local.length)throw lastError;
+  return local;
 }

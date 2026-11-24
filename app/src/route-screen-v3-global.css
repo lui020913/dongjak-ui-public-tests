@@ -17,3 +17,11 @@
    visibility:visible!important;opacity:1!important;pointer-events:auto!important;
  }
 }
+
+/* Route entry owns its header; map-only search and AI never overlap it. */
+@media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app#app[data-dj-route-screen-v3="1"] > .topbar,
+ html body #app#app#app#app#app#app#app#app#app#app[data-dj-route-screen-v3="1"] :is(#map-quick-search,#map-quick-search-dropdown,#dj890-ai-orb,#dj800-ai-search-trigger){
+   visibility:hidden!important;pointer-events:none!important;opacity:0!important;
+ }
+}

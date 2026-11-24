@@ -51,7 +51,9 @@ import './features/liveTransit/live-transit.css';
 import './dongjak-import-controls.css';
 import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor,searchCachedTransportPlaces,suppressNativeBusStopGlyphs} from './transport-map.js';
 import {initStationAccessibility} from './station-accessibility.js';
-import {searchPlaces} from './route-search.js';
+import {searchPlaces,searchLocalPlaces} from './route-search.js';
+import {cachedOfficialSearchPlaces,queryOfficialPlaces} from './seoul-official-facilities.js';
+import {routeStationMatches,mergeRouteSearchResults,routeResultSubtitle} from './route-search-results.js';
 import {walkingRouteViewportPadding} from './route-map-focus.js';
 import {initMapQuickSearch} from './map-quick-search.js';
 import {installMapProduct} from './v815-map-product.js';
@@ -2801,7 +2803,8 @@ function beginRouteSearch(which){
   document.getElementById('route-search-results').replaceChildren();
   document.getElementById('route-search-status').textContent='서울·동작구 내 역명, 정류장명, 장소명 또는 주소를 입력하세요.';
   document.getElementById('route-search-query').value='';
-  document.getElementById('route-search-query').focus();
+  document.getElementById('route-search-submit').disabled=false;
+  if(app.dataset.djRouteScreenV3!=='1')document.getElementById('route-search-query').focus();
 }
 function chooseSearchResult(place){
   const which=routeSearchTarget;
@@ -2828,46 +2831,66 @@ function chooseSearchResult(place){
   navigate('route');
   toast(which==='start'?'출발지가 설정됐습니다.':'목적지가 설정됐습니다.');
 }
+function routeLocalMatches(query){
+  return mergeRouteSearchResults(query,routeStationMatches(query),searchCachedTransportPlaces(query),
+    searchLocalPlaces(query),cachedOfficialSearchPlaces(query));
+}
+function paintRouteSearchResults(matches,message){
+  const results=document.getElementById('route-search-results');
+  results.replaceChildren();
+  document.getElementById('route-search-status').textContent=message;
+  for(const place of matches){
+    const button=document.createElement('button');button.type='button';button.className='route-search-item';
+    const head=document.createElement('strong');head.textContent=place.name;
+    const hint=document.createElement('small');hint.textContent=routeResultSubtitle(place);
+    button.append(head,hint);
+    button.addEventListener('click',()=>chooseSearchResult(place));
+    results.append(button);
+  }
+}
+document.getElementById('route-search-query').addEventListener('input',()=>{
+  if(!routeSearchTarget)return;
+  routeSearchController?.abort();routeSearchController=null;routeSearchSequence++;
+  document.getElementById('route-search-submit').disabled=false;
+  const query=document.getElementById('route-search-query').value.trim();
+  const local=query.length>=2?routeLocalMatches(query):[];
+  paintRouteSearchResults(local,query.length<2?'장소명 또는 주소를 2글자 이상 입력해 주세요.':
+    local.length?`검색 결과 ${local.length}개 · 추가 검색 중`:'장소를 검색하고 있습니다…');
+});
 async function runRouteSearch(event){
   event.preventDefault();
+  if(!routeSearchTarget)return;
   const query=document.getElementById('route-search-query').value.trim();
-  const status=document.getElementById('route-search-status');
-  const results=document.getElementById('route-search-results');
   routeSearchController?.abort();routeSearchController=new AbortController();
   const controller=routeSearchController;
   const seq=++routeSearchSequence;
   document.getElementById('route-search-confirm').hidden=true;
   routeSearchCandidate=null;
-  results.replaceChildren();
-  if(query.length<2){status.textContent='2글자 이상 입력해 주세요.';return;}
-  status.textContent='장소를 검색하고 있습니다…';
+  if(query.length<2||query.length>80){paintRouteSearchResults([],'장소명 또는 주소를 2~80자로 입력해 주세요.');document.getElementById('route-search-submit').disabled=false;return;}
+  const local=routeLocalMatches(query);
+  paintRouteSearchResults(local,local.length?`검색 결과 ${local.length}개 · 추가 검색 중`:'장소를 검색하고 있습니다…');
   document.getElementById('route-search-submit').disabled=true;
+  // Official index and general geocoder are independent. Preserve immediate
+  // local rail/facility results even when either provider is unavailable.
+  const signal=controller.signal;
+  const officialController=new AbortController();
+  const cancelOfficial=()=>officialController.abort();
+  signal.addEventListener('abort',cancelOfficial,{once:true});
+  const timeout=setTimeout(cancelOfficial,3500);
   try{
-    const local=searchCachedTransportPlaces(query);
-    let remote=[];
-    let failed=false;
-    try{remote=await searchPlaces(query,{signal:controller.signal});}
-    catch(error){if(error.name==='AbortError')throw error;failed=true;if(!local.length)throw error;}
-    const matches=[...local];
-    for(const item of remote){
-      const duplicate=matches.some(x=>x.name===item.name && Math.abs(x.lng-item.lng)<0.00015 && Math.abs(x.lat-item.lat)<0.00015);
-      if(!duplicate)matches.push(item);
-    }
-    if(seq!==routeSearchSequence)return;
-    status.textContent=matches.length?`검색 결과 ${matches.length}개${failed?' · 외부 검색이 불안정하여 지도 교통시설만 표시합니다.':''} · 원하는 장소를 눌러 확인하세요.`:'검색 결과가 없습니다. 다른 이름을 입력하거나 지도에서 선택하세요.';
-    for(const place of matches){
-      const button=document.createElement('button');button.type='button';button.className='route-search-item';
-      const head=document.createElement('strong');head.textContent=place.name;
-      const hint=document.createElement('small');hint.textContent=[place.category,place.address].filter(Boolean).join(' · ');
-      button.append(head,hint);
-      button.addEventListener('click',()=>chooseSearchResult(place));
-      results.append(button);
-    }
-  }catch(error){
-    if(seq===routeSearchSequence && error.name!=='AbortError'){
-      status.textContent=error.message?.startsWith('장소 검색')?error.message:'검색 서버에 연결할 수 없습니다. 지도로 위치를 지정해 주세요.';
-    }
-  }finally{if(seq===routeSearchSequence)document.getElementById('route-search-submit').disabled=false;}
+    const [official,remote]=await Promise.allSettled([
+      queryOfficialPlaces(query,{signal:officialController.signal,remoteFallback:false}),
+      searchPlaces(query,{signal,includeRemote:true})
+    ]);
+    if(signal.aborted||seq!==routeSearchSequence)return;
+    const matches=mergeRouteSearchResults(query,local,official.status==='fulfilled'?official.value:[],remote.status==='fulfilled'?remote.value:[]);
+    const partial=official.status==='rejected'||remote.status==='rejected';
+    paintRouteSearchResults(matches,matches.length?`검색 결과 ${matches.length}개${partial?' · 일부 외부 결과를 불러오지 못했습니다.':''}`:
+      partial?'검색 결과가 없습니다. 연결 상태를 확인하거나 지도에서 선택하세요.':'검색 결과가 없습니다. 다른 장소명 또는 주소를 입력하세요.');
+  }finally{
+    clearTimeout(timeout);signal.removeEventListener('abort',cancelOfficial);
+    if(seq===routeSearchSequence)document.getElementById('route-search-submit').disabled=false;
+  }
 }
 document.getElementById('route-search-start').addEventListener('click',()=>beginRouteSearch('start'));
 document.getElementById('route-search-end').addEventListener('click',()=>beginRouteSearch('end'));
