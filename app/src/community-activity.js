@@ -1,0 +1,16 @@
+import {readCommunityActivity,markCommunityActivityRead,isCommunitySignedIn} from './community-cloud.js';
+export function installCommunityActivity({doc=document,win=window,openPost}={}){
+ const app=doc.getElementById('app'),button=doc.getElementById('dj-activity-trigger');if(!app||!button)return;
+ const panel=doc.createElement('section');panel.id='dj-activity-screen';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','알림 기록');
+ panel.innerHTML='<header><button type="button" data-close aria-label="알림 닫기">‹</button><h2>알림 기록</h2><button type="button" data-refresh aria-label="알림 새로고침">↻</button></header><div class="dj-activity-list" aria-live="polite"></div>';
+ doc.body.append(panel);const list=panel.querySelector('.dj-activity-list'),badge=button.querySelector('[data-count]');let seq=0,rows=[],wasInert=false,primed=false;
+ const paint=()=>{const n=rows.filter(r=>!r.read_at).length;badge.hidden=!n;badge.textContent=String(Math.min(99,n))+(n>99?'+':'');button.setAttribute('aria-label',n?'읽지 않은 알림 '+n+'개':'알림');};
+ function close(){if(panel.hidden)return;panel.hidden=true;app.inert=wasInert;delete doc.body.dataset.djActivityOpen;}
+ function render(){list.replaceChildren();if(!rows.length){list.textContent='새 알림이 없습니다.';return;}
+ for(const row of rows){const entry=doc.createElement('button');entry.type='button';entry.className='dj-activity-row';entry.dataset.unread=String(!row.read_at);const label=doc.createElement('strong');label.textContent=row.kind==='comment'?'내 게시물에 댓글이 달렸습니다.':'내 게시물에 공감이 추가되었습니다.';const title=doc.createElement('span');title.textContent=row.post_title;title.dataset.djNoTranslate='';const date=doc.createElement('small');date.textContent=new Date(row.created_at).toLocaleString();entry.append(label,title,date);
+ entry.addEventListener('click',async()=>{if(entry.disabled)return;entry.disabled=true;try{if(!row.read_at)await markCommunityActivityRead(row.id);row.read_at||=new Date().toISOString();paint();close();openPost?.(row.post_id);}catch{entry.disabled=false;label.textContent='읽음 처리 실패 · 다시 시도';}});list.append(entry);}}
+ async function refresh(){const token=++seq;try{const signed=await isCommunitySignedIn();const next=signed?await readCommunityActivity():[];if(token!==seq)return;const fresh=primed&&next.some(n=>!n.read_at&&!rows.some(o=>o.id===n.id));rows=next;primed=signed;paint();if(!panel.hidden){render();if(!signed)list.textContent='로그인 후 알림을 확인할 수 있습니다.';}if(fresh)button.classList.add('has-unread');}catch{if(token===seq&&!panel.hidden)list.textContent='알림을 불러오지 못했습니다.';}}
+ button.addEventListener('click',()=>{if(app.classList.contains('route-guiding'))return;wasInert=app.inert;app.inert=true;panel.hidden=false;doc.body.dataset.djActivityOpen='true';render();void refresh();});
+ panel.querySelector('[data-close]').addEventListener('click',close);panel.querySelector('[data-refresh]').addEventListener('click',refresh);doc.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+ win.addEventListener('dongjak:auth-state',()=>{++seq;rows=[];primed=false;paint();close();void refresh();});doc.addEventListener('visibilitychange',()=>{if(!doc.hidden)void refresh();});win.setInterval(()=>{if(!doc.hidden)void refresh();},30000);void refresh();
+}
