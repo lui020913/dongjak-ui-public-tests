@@ -33,11 +33,15 @@ export function installWalkingNavigationExperience(doc=document,win=window){
     if(!button||!latest?.[button.dataset.routeVariant]||button.disabled)return;
     selected=button.dataset.routeVariant;resetTurnTracking();
   };
+  const controls=doc.getElementById('nav-map-controls');
+  const positionControls=()=>{if(controls&&!controls.hidden&&!card.hidden)controls.style.setProperty('--dj-nav-controls-top',Math.max(60,card.getBoundingClientRect().top-10)+'px');};
+  const cardSize=typeof ResizeObserver==='function'?new ResizeObserver(positionControls):null;cardSize?.observe(card);win.addEventListener('resize',positionControls,{passive:true});
   let session=false;
   function updateState(){
     const guiding=app.classList.contains('route-guiding')&&!card.hidden;
     app.dataset.dj825NavActive=String(guiding);
     if(!guiding){session=false;voiced.clear();return;}
+    positionControls();
     if(!session){session=true;voiced.clear();}
     const marker=doc.querySelector('.nav-position-dot.maplibregl-marker');
     app.dataset.dj825HasGps=String(Boolean(marker));
@@ -92,7 +96,7 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   const mapRoot=doc.getElementById('map');
   if(mapRoot)observer.observe(mapRoot,{childList:true,subtree:true});
   updateState();
-  return ()=>{observer.disconnect();win.removeEventListener('dongjak:route-variants-ready',onVariants);
+  return ()=>{observer.disconnect();cardSize?.disconnect();win.removeEventListener('resize',positionControls);win.removeEventListener('dongjak:route-variants-ready',onVariants);
     doc.getElementById('route-calc')?.removeEventListener('click',onReset);
     doc.getElementById('route-clear')?.removeEventListener('click',onReset);
     doc.getElementById('route-variants')?.removeEventListener('click',onNativeChoice,true);
