@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {parseBusRoutePath,busRoutePathUrl,decodeBusRouteResponse,fetchBusRouteGeometry,parseBusRouteStops,decodeBusRouteStops,fetchBusRouteStops} from '../server/bus-route-path.mjs';
 import {parseSeoulBusArrival} from '../src/transport-data.js';
-import {createBusRouteOverlay,BUS_ROUTE_SOURCE,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,routeVehicleFeatures,BUS_ROUTE_LINE_WIDTH} from '../src/bus-route-overlay.js';
+import {createBusRouteOverlay,BUS_ROUTE_SOURCE,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,routeVehicleFeatures,BUS_ROUTE_LINE_WIDTH,BUS_ROUTE_VEHICLE_REFRESH_MS} from '../src/bus-route-overlay.js';
 const id='100100112';
 const row=(no,gpsX,gpsY)=>({busRouteId:id,no,gpsX,gpsY});
 const body=rows=>({msgBody:{itemList:rows}});
@@ -63,3 +63,24 @@ test('official stop coordinates and names only; zoom-gated map layers survive th
 });
 
 test('selected route live positions reject stale or different routes and do not fabricate a heading',()=>{const now=Date.now(),at=new Date(now).toISOString(),rows=[{id:'bus:1',routeId:id,longitude:126.9,latitude:37.5,observedAt:at},{id:'bus:2',routeId:'100100113',longitude:126.9,latitude:37.5,observedAt:at},{id:'bus:3',routeId:id,longitude:126.9,latitude:37.5,observedAt:new Date(now-200000).toISOString()}];const previous=new Map();const collection=routeVehicleFeatures(rows,id,'150','#3566c1',previous,now);assert.equal(collection.features.length,1);assert.deepEqual(collection.features[0].geometry.coordinates,[126.9,37.5]);assert.equal(collection.features[0].properties.headingKnown,false);assert.deepEqual(BUS_ROUTE_LINE_WIDTH.slice(0,3),['interpolate',['linear'],['zoom']]);});
+
+test('selected bus route polls immediately and every 15 seconds, stopping on clear',async()=>{
+ assert.equal(BUS_ROUTE_VEHICLE_REFRESH_MS,15000);
+ const sources=new Map(),layers=new Map();
+ const map={getSource:k=>sources.get(k),addSource:(k,v)=>sources.set(k,{setData:()=>{}}),getLayer:k=>layers.get(k),addLayer:l=>layers.set(l.id,l),on:()=>{},off:()=>{}};
+ const intervals=[],cleared=[],calls=[];
+ const originalSet=globalThis.setInterval,originalClear=globalThis.clearInterval;
+ globalThis.setInterval=(fn,ms)=>{const handle={fn,ms};intervals.push(handle);return handle;};
+ globalThis.clearInterval=handle=>{cleared.push(handle);};
+ const overlay=createBusRouteOverlay({map,apiBase:'/api/transport',fetcher:async()=>({ok:true,json:async()=>({routeId:id,coordinates:[[126.9,37.5],[126.91,37.51]]})}),vehicleFetcher:async url=>{calls.push(url);return {ok:true,json:async()=>({ok:true,bus:[]})};}});
+ try{
+   await overlay.select({routeId:id,route:'150',routeType:3});
+   await new Promise(resolve=>setImmediate(resolve));
+   assert.equal(calls.length,1);
+   assert.equal(intervals.length,1);assert.equal(intervals[0].ms,15000);
+   intervals[0].fn();await new Promise(resolve=>setImmediate(resolve));
+   assert.equal(calls.length,2);assert.ok(calls.every(url=>url.includes('routeId='+id)));
+   overlay.clear();assert.ok(cleared.includes(intervals[0]));
+   intervals[0].fn();await new Promise(resolve=>setImmediate(resolve));assert.equal(calls.length,2);
+ }finally{overlay.destroy();globalThis.setInterval=originalSet;globalThis.clearInterval=originalClear;}
+});

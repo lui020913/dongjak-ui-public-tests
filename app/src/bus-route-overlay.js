@@ -3,6 +3,7 @@ const CASE=BUS_ROUTE_SOURCE+'-casing',LINE=BUS_ROUTE_SOURCE+'-line';
 export const BUS_ROUTE_STOPS=BUS_ROUTE_SOURCE+'-stops',BUS_ROUTE_STOP_NAMES=BUS_ROUTE_SOURCE+'-stop-names';
 const empty=()=>({type:'FeatureCollection',features:[]});
 const VEHICLES=BUS_ROUTE_SOURCE+'-vehicles',VEHICLE_LAYER=VEHICLES+'-icon',VEHICLE_IMAGE=VEHICLES+'-art';
+export const BUS_ROUTE_VEHICLE_REFRESH_MS=15000;
 const selectedVehicles=new WeakMap();
 export const selectedBusVehicleRoute=map=>selectedVehicles.get(map)||null;
 export const BUS_ROUTE_LINE_WIDTH=['interpolate',['linear'],['zoom'],10,1.4,12,2,14,2.8,16,3.5,18,4.5,20,5.5];
@@ -99,7 +100,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
   }
   function startVehiclePoll(){
     if(!vehicleFetcher)return;
-    void refreshVehicles();vehicleTimer=setInterval(()=>void refreshVehicles(),60000);
+    void refreshVehicles();vehicleTimer=setInterval(()=>void refreshVehicles(),BUS_ROUTE_VEHICLE_REFRESH_MS);
   }
   const onVisibility=()=>{if(!globalThis.document?.hidden)void refreshVehicles();};
   globalThis.document?.addEventListener?.('visibilitychange',onVisibility);
