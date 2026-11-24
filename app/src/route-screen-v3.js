@@ -33,16 +33,13 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></svg>
       </button>
     </header>
-    <section class="route-panel" aria-label="출발지와 도착지">
+    <section class="route-panel" aria-label="출발지, 경유지와 도착지">
       <div class="fields">
-        <span class="track" aria-hidden="true"><svg viewBox="0 0 20 112">
-          <line x1="10" y1="27" x2="10" y2="85"/>
-          <circle class="start" cx="10" cy="23" r="7"/>
-          <circle class="end" cx="10" cy="89" r="7"/>
-        </svg></span>
+        <span class="track" aria-hidden="true"></span>
         <button type="button" class="field first" data-v3="start" aria-label="출발지 검색">
           <span class="kind">출발지</span><strong class="place" id="v3-start">현재 위치</strong>
         </button>
+        <div id="v3-waypoints" class="waypoints" hidden></div>
         <button type="button" class="field second" data-v3="end" aria-label="도착지 검색">
           <span class="kind">도착지</span><strong class="place placeholder" id="v3-end">어디로 가시나요?</strong>
         </button>
@@ -55,7 +52,6 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <button type="button" data-v3="pick"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>지도에서 선택</button>
       </div>
       <div class="waypoint-actions"><button type="button" data-v3="waypoint">＋ 경유지 추가</button><button type="button" data-v3="waypoint-map">지도에서 경유지 선택</button></div>
-      <div id="v3-waypoints" class="waypoints" hidden></div>
       <section class="recent" id="v3-recent" hidden><div class="recent-head"><strong>최근 검색 장소</strong><button type="button" data-v3="clear-recent">기록 삭제</button></div><div class="recent-list"></div></section>
     </section>
     <div class="tools" aria-label="지도 조작">
@@ -89,6 +85,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     cleanups.push(()=>element.removeEventListener(event,fn,opts));
   };
   let searching=null,active=false,resizeFrame=0,searchTimer=0,composing=false;
+  let pendingWaypoint=false,pendingBaseCount=0;
   const cancelTimer=()=>{win.clearTimeout(searchTimer);searchTimer=0;};
   const syncViewport=()=>{const vv=win.visualViewport;host.style.setProperty("--v3-search-height",Math.round(vv?.height||win.innerHeight)+"px");};
   const hasValue=node=>node?.textContent?.trim()&&node.textContent.trim()!=='선택되지 않음';
@@ -101,15 +98,32 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('#v3-end').textContent=end||'어디로 가시나요?';
     q('#v3-end').classList.toggle('placeholder',!end);
     q('[data-v3="end"]').setAttribute('aria-label',end?'도착지 '+end+' 변경':'도착지 검색');
-    const disabled=legacyCalc.disabled||!start||!end;
+    const disabled=legacyCalc.disabled||!start||!end||pendingWaypoint;
     q('[data-v3="calculate"]').disabled=Boolean(disabled);
-    q('#v3-cta-label').textContent=legacyCalc.disabled&&start&&end?'경로 계산 중…':'경로 찾기';
+    q('#v3-cta-label').textContent=pendingWaypoint?'경유지를 선택해 주세요':legacyCalc.disabled&&start&&end?'경로 계산 중…':'경로 찾기';
   };
   const mirrorWaypoints=()=>{
     const target=q('#v3-waypoints');target.replaceChildren();
     const rows=byId('dj815-waypoints')?.querySelectorAll('.dj815-waypoint-row')||[];
-    target.hidden=!rows.length;q('[data-v3="waypoint"]').disabled=rows.length>=5;q('[data-v3="waypoint-map"]').disabled=rows.length>=5;
+    if(pendingWaypoint&&rows.length>pendingBaseCount)pendingWaypoint=false;
+    target.hidden=!rows.length&&!pendingWaypoint;
+    q('[data-v3="waypoint"]').disabled=rows.length>=5||pendingWaypoint;
+    q('[data-v3="waypoint-map"]').disabled=rows.length>=5||pendingWaypoint;
     for(const [i,row] of Array.from(rows).entries()){const item=doc.createElement('div');item.className='waypoint-item';const title=doc.createElement('span');title.textContent=(i+1)+'. '+(row.querySelector('.dj815-waypoint-title')?.textContent||'경유지');item.append(title);for(const native of row.querySelectorAll('button')){const b=doc.createElement('button');b.type='button';b.textContent=native.textContent;b.disabled=native.disabled;b.setAttribute('aria-label',native.title||native.textContent);b.addEventListener('click',()=>native.click());item.append(b);}target.append(item);}
+    if(pendingWaypoint){
+      const item=doc.createElement('div');item.className='waypoint-item waypoint-pending';
+      const search=doc.createElement('button');search.type='button';search.className='waypoint-input';search.textContent='경유지 입력';search.addEventListener('click',()=>openSearch('waypoint'));
+      const map=doc.createElement('button');map.type='button';map.textContent='지도';map.setAttribute('aria-label','지도에서 경유지 선택');map.addEventListener('click',()=>byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click());
+      const cancel=doc.createElement('button');cancel.type='button';cancel.textContent='×';cancel.setAttribute('aria-label','경유지 추가 취소');cancel.addEventListener('click',()=>{pendingWaypoint=false;mirrorWaypoints();requestPosition();});
+      item.append(search,map,cancel);target.append(item);
+    }
+    syncLabels();
+  };
+  const addWaypointRow=()=>{
+    const count=byId('dj815-waypoints')?.querySelectorAll('.dj815-waypoint-row').length||0;
+    if(count>=5||pendingWaypoint)return;
+    pendingBaseCount=count;pendingWaypoint=true;mirrorWaypoints();requestPosition();
+    q('.waypoint-pending')?.scrollIntoView({block:'nearest',behavior:'smooth'});
   };
   const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
@@ -244,8 +258,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
   }
   listen(q('[data-v3="start"]'),'click',()=>openSearch('start'));
   listen(q('[data-v3="end"]'),'click',()=>openSearch('end'));
-  listen(q('[data-v3="waypoint"]'),'click',()=>openSearch('waypoint'));
-  listen(q('[data-v3="waypoint-map"]'),'click',()=>byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click());
+  listen(q('[data-v3="waypoint"]'),'click',addWaypointRow);
+  listen(q('[data-v3="waypoint-map"]'),'click',()=>{addWaypointRow();byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click();});
   listen(q('[data-v3="clear-recent"]'),'click',()=>clearRecentPlaces());
   listen(win,'dongjak:recent-places-change',refreshRecent);
   listen(q('[data-v3="swap"]'),'click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-swap')));

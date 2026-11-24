@@ -46,6 +46,7 @@ import {getActiveCloudClient} from './v824-favorites-cloud.js';
 import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSharedCommunityLike,addSharedCommunityComment,isCommunitySignedIn,readCommunityNotifications,markCommunityNoticeRead,appealCommunityNotice,setSharedCommunityBookmark,reportSharedCommunity,readCommunityModerationStatus} from './community-cloud.js';
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
+import {routeWithinDistrict} from './route-district-guard.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -2739,8 +2740,13 @@ function invalidateRoute() {
   document.getElementById('route-status').textContent='위치를 확인한 뒤 경로 찾기를 눌러주세요.';
   syncRoutePresentation();
 }
+function routeLocationInside(position){
+  if(position?.lng==null||position?.lat==null)return false;
+  const lng=Number(position.lng),lat=Number(position.lat);
+  return Number.isFinite(lng)&&Number.isFinite(lat)?isDongjak(lng,lat):false;
+}
 function requireDongjakRouteLocation(position){
-  const inside=isDongjak(Number(position?.lng),Number(position?.lat));
+  const inside=routeLocationInside(position);
   if(inside!==true){
     if(typeof window!=='undefined'&&typeof CustomEvent!=='undefined'){
       window.dispatchEvent(new CustomEvent('dongjak:route-boundary-denied',{detail:{unavailable:inside===null}}));
@@ -2886,18 +2892,14 @@ function chooseSearchResult(place){
   if(!which||!Number.isFinite(place.lng)||!Number.isFinite(place.lat))return;
   if(!requireDongjakRouteLocation(place))return;
   recordRecentPlace(place);
-  // Waypoints still use the explicit map confirmation because order and exact
-  // entrance position matter. Origin/destination use the chosen search result
-  // immediately: one selection must not launch a redundant confirmation flow.
+  // A validated search result fills the pending inline waypoint; map picking
+  // retains its explicit coordinate confirmation.
   if(which==='waypoint'){
-    closeRouteSearch();
-    routePickMode=which;
-    navigate('map');
-    map.flyTo({center:[place.lng,place.lat],zoom:15.7,duration:680});
-    showTransitRouteConfirmation({kind:place.kind==='subway'?'subway':place.kind==='bus'?'bus':'point',
-      name:place.name||'검색한 위치',lng:place.lng,lat:place.lat,source:'search',address:place.address||'',
-      lines:place.lines||[],arsId:place.arsId||''});
-    syncRoutePresentation();
+    if(navMode||routeWaypoints.length>=5)return;
+    const label=String(place.name||place.address||'선택한 장소');
+    routeWaypoints.push({name:label,label,lng:place.lng,lat:place.lat});
+    invalidateRoute();routeProductTools?.setWaypoints(routeWaypoints);
+    closeRouteSearch();navigate('route');toast('경유지를 추가했습니다.');
     return;
   }
   const label=String(place.name||place.address||'선택한 장소');
@@ -2925,8 +2927,9 @@ function routeLocalMatches(query){
 function paintRouteSearchResults(matches,message){
   const results=document.getElementById('route-search-results');
   results.replaceChildren();
-  document.getElementById('route-search-status').textContent=message;
-  for(const place of matches){
+  const allowed=matches.filter(p=>routeLocationInside(p)===true);
+  document.getElementById('route-search-status').textContent=!boundaryGeometry?'동작구 경계정보를 확인하는 중입니다.':allowed.length!==matches.length?(allowed.length?`동작구 내 검색 결과 ${allowed.length}개`:'동작구 내 검색 결과가 없습니다.'):message;
+  for(const place of allowed){
     const button=document.createElement('button');button.type='button';button.className='route-search-item';
     const head=document.createElement('strong');head.textContent=place.name;
     const hint=document.createElement('small');hint.textContent=routeResultSubtitle(place);
@@ -3120,6 +3123,7 @@ window.addEventListener('dj-next:fit-route',()=>{
   if(app.dataset.tab==='map'&&routeResult?.coords?.length>=2)fitWalkingRoute(routeResult.coords);
 });
 async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
+  if([from,to].some(p=>routeLocationInside(p)!==true))throw new Error('동작구 내 출발지와 도착지만 지원합니다.');
   const useHills=profile==='gentle'?0:0.5;
   const payload={locations:[{lat:from.lat,lon:from.lng},{lat:to.lat,lon:to.lng}],
     costing:'pedestrian',costing_options:{pedestrian:{use_hills:useHills}},
@@ -3167,6 +3171,7 @@ async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
       coords.push(...segment);
     }
     if(coords.length<2)throw new Error('표시할 도보 경로 좌표가 없습니다.');
+    if(!routeWithinDistrict(coords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 경로는 지원하지 않습니다.');
     return {coords,seconds:Number(trip.summary.time),kilometers:Number(trip.summary.length),maneuvers,
       source:'valhalla-external'};
   } finally {clearTimeout(timer);externalSignal?.removeEventListener('abort',externalAbort);}
@@ -3182,9 +3187,13 @@ function routeDataNote(result){
   return result.segmentCount?`경유 ${result.segmentCount}구간의 실제 보행경로 합산 · 이용 데이터가 구간별로 다를 수 있음 · 통행 상태 미검증`:'외부 시험용 도보 경로 서버 결과 · 동작구 도보 네트워크 적용 실패 또는 범위 밖 · 실제 통행 가능 여부 미검증';
 }
 async function fetchPreferredPedestrianPair(from,to,signal){
+  if([from,to].some(p=>routeLocationInside(p)!==true))throw new Error('동작구 내 출발지와 도착지만 지원합니다.');
   try {
     const local=await fetchDongjakPedestrianVariants(from,to,{signal});
-    return {...local,usingLocal:true};
+    const standard=routeWithinDistrict(local.standard?.coords,boundaryGeometry,isDongjak)?local.standard:null;
+    const gentle=routeWithinDistrict(local.gentle?.coords,boundaryGeometry,isDongjak)?local.gentle:null;
+    if(!standard&&!gentle)throw new Error('동작구 내 보행 경로를 찾지 못했습니다.');
+    return {...local,standard,gentle,usingLocal:true};
   }catch(error){
     if(error?.name==='AbortError')throw error;
     console.warn('[서울시 보행 네트워크 경로 전환 실패, 외부 경로 시도]',error);
@@ -3246,10 +3255,17 @@ async function calculateRoute() {
   document.getElementById('route-status').textContent='실제 보행로를 따라 경로를 계산하고 있습니다…';
   document.getElementById('route-summary').hidden=true;
   try {
-    const {standard,gentle,usingLocal}=routeWaypoints.length
-      ? await computeMultiStopRoutes([routeStart,...routeWaypoints,routeEnd],fetchPreferredPedestrianPair,{
+    const requested=[routeStart,...routeWaypoints,routeEnd];
+    const result=routeWaypoints.length
+      ? await computeMultiStopRoutes(requested,fetchPreferredPedestrianPair,{
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
+    const current=[routeStart,...routeWaypoints,routeEnd];
+    if(requested.length!==current.length||requested.some((p,i)=>p!==current[i])||!current.every(p=>routeLocationInside(p)===true))throw new Error('경로 조건이 변경됐습니다. 다시 시도해 주세요.');
+    const {usingLocal}=result;
+    const standard=routeWithinDistrict(result.standard?.coords,boundaryGeometry,isDongjak)?result.standard:null;
+    const gentle=routeWithinDistrict(result.gentle?.coords,boundaryGeometry,isDongjak)?result.gentle:null;
+    if(!standard&&!gentle)throw new Error('동작구 경계 안에서 연결되는 경로를 찾지 못했습니다.');
     routeVariants={standard,gentle};
     routePriVisuals=null; // no stale overlay while new path/PRI data is pending
     const thisPriReview=++priRouteReviewSequence,reviewedVariants=routeVariants;
@@ -3355,6 +3371,8 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!routeStart||!routeEnd)throw new Error('출발지와 목적지가 필요합니다.');
     if(routeWaypoints.length)throw new Error('경유지 없는 두 지점만 지원합니다.');
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');
+    const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]);
+    if(railCoords.some(p=>!p)||!routeWithinDistrict(railCoords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 대중교통 경로는 지원하지 않습니다.');
     const first=await fetchPreferredPedestrianPair(routeStart,plan.origin);
     const last=await fetchPreferredPedestrianPair(plan.destination,routeEnd);
     if(!routeStart||!routeEnd||routeWaypoints.length)throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
@@ -3363,7 +3381,6 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
     invalidateRoute();
     const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))};
-    const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]).filter(Boolean);
     const rail={type:'FeatureCollection',features:railCoords.length>=2?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:railCoords}}]:[]};
     for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null],['dj815-transit-rail',rail,'#bd7735',[2,2]]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
@@ -3451,6 +3468,7 @@ function updateNavGuidance(offRoute=false) {
 }
 async function autoRerouteFromGps(pos,accuracy){
   if(navMode!=='gps'||!routeEnd||navReroutePending||routeWaypoints.length)return;
+  if(isDongjak(pos[0],pos[1])!==true)return;
   // Never silently skip remaining waypoints when GPS rerouting is requested.
   const now=Date.now();
   if(!shouldAutoReroute({offRouteMeters:navLastOffRouteDistance,accuracy,
@@ -3516,6 +3534,11 @@ function followNavigationPosition(pos,heading=NaN,{compassUpdate=false}={}){
 function updateNavState(pos,accuracy=0,heading=NaN) {
   if(!navMode||!navIndex)return;
   if(!pos.every(Number.isFinite))return;
+  if(isDongjak(pos[0],pos[1])!==true){
+    navOffRouteSamples=0;navRerouteController?.abort();
+    document.getElementById('nav-warning').textContent='동작구 경계 밖이거나 경계 확인이 불가해 안내를 일시 중지합니다.';
+    document.getElementById('nav-instruction').textContent='동작구 내에서 안내를 이용해 주세요.';return;
+  }
   const now=performance.now();
   const nearest=nearestOnRoute(navIndex,pos);
   const actualAccuracy=Number.isFinite(accuracy)?accuracy:100;
@@ -3598,6 +3621,7 @@ function stopNavigation(arrived=false) {
 }
 async function startNavigation() {
   if(!routeResult||!routeResult.coords?.length) {toast('먼저 도보 경로를 계산해 주세요.');return;}
+  if(!routeWithinDistrict(routeResult.coords,boundaryGeometry,isDongjak)){toast('동작구 내 경로만 안내할 수 있습니다.');return;}
   if(!hasLocationSupport()){toast('이 기기에서 위치정보를 사용할 수 없습니다.');return;}
   if(!Capacitor.isNativePlatform() && !window.isSecureContext){toast('웹 GPS는 HTTPS 또는 같은 PC의 localhost에서만 사용할 수 있습니다.');return;}
   stopNavigation();
