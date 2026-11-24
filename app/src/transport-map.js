@@ -1366,8 +1366,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const mapClearRouteButton=el('button','dj-bus-route-clear dj-bus-route-map-clear','노선 표시 해제');
   mapClearRouteButton.id='dj-bus-route-map-clear';mapClearRouteButton.type='button';mapClearRouteButton.hidden=true;
   document.getElementById('app')?.append(mapClearRouteButton);
-  const routeDock=el('div','dj-bus-detail-dock');routeDock.hidden=true;routeDock.setAttribute('role','group');routeDock.setAttribute('aria-label','선택한 버스 노선');
-  const reopenRoute=el('button','','노선 상세'),removeRoute=el('button','','노선 표시 해제');reopenRoute.type=removeRoute.type='button';routeDock.append(reopenRoute,removeRoute);document.getElementById('app')?.append(routeDock);
+  const routeDock=el('div','dj-bus-detail-dock');routeDock.hidden=true;
+  const reopenRoute=el('button','','노선 상세'),removeRoute=el('button','','해제');reopenRoute.type=removeRoute.type='button';routeDock.append(reopenRoute,removeRoute);document.getElementById('app')?.append(routeDock);
   let routeChoice=null;
   let routePresentation=null;
   let lastFittedRouteId=null;
@@ -1383,17 +1383,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const edge=Math.min(globalThis.innerHeight||800,...blockers.map(n=>n.getBoundingClientRect().top));
     const upper=Math.max(80,...[document.querySelector('.topbar'),document.getElementById('dj-v794-toolbar')].filter(shown).map(n=>n.getBoundingClientRect().bottom+8));
     const top=Math.max(upper,Math.round(edge-Math.max(34,mapClearRouteButton.getBoundingClientRect()?.height||36)-12));
-    const scale=document.querySelector('#map .maplibregl-ctrl-scale');
-    const scaleRect=shown(scale)?scale.getBoundingClientRect():null;
-    const width=globalThis.innerWidth||390;
-    const left=Math.max(12,Math.ceil((scaleRect?.right||0)+8));
-    const available=Math.max(0,width-left-12);
-    routeDock.style.setProperty('max-width',available+'px');
-    // Right-aligned on the same row as the scale bar; align the lower edges.
-    // Respect the tab/TIP boundary if the scale is temporarily transitioning.
-    const dockHeight=routeDock.getBoundingClientRect()?.height||44;
-    const rowBottom=Math.min(scaleRect?.bottom??edge-10,edge-6);
-    routeDock.style.setProperty('top',Math.max(upper,Math.floor(rowBottom-dockHeight))+'px');
+    routeDock.style.setProperty('top',top+'px');
     mapClearRouteButton.style.setProperty('top',top+'px','important');
     mapClearRouteButton.style.setProperty('bottom','auto','important');
   }
@@ -1421,10 +1411,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     scheduleRouteClearDock();
   }
   globalThis.addEventListener?.('resize',scheduleRouteClearDock,{passive:true});
-  map.on?.('moveend',scheduleRouteClearDock);map.on?.('zoomend',scheduleRouteClearDock);
   if(typeof ResizeObserver!=='undefined'){
     const routeDockObserver=new ResizeObserver(scheduleRouteClearDock);
-    for(const node of [panel,routeDock,document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip'),document.querySelector('#map .maplibregl-ctrl-scale')])if(node)routeDockObserver.observe(node);
+    for(const node of [panel,document.getElementById('bottom-nav'),document.getElementById('dj840-map-tip')])if(node)routeDockObserver.observe(node);
   }
   function syncRouteRows(){
     const active=busRouteOverlay.getActive();

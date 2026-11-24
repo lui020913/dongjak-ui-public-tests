@@ -140,11 +140,10 @@ const checks=[
    const s=src('src/features/liveTransit/index.js');
    contains(s,'LIVE_METRO_LAYER','LIVE_BUS_LAYER','metroMinZoom','attachLayers','source.setData(display)');
  }],
- ['D05','1 line trains run on left, other lines right, facing via radial glow',()=>{
+ ['D05','1 line trains run on left, other lines right, facing via headlights',()=>{
    assert.equal(trainLaneOffset('1호선','right',true),-12);
    assert.equal(trainLaneOffset('7호선','right',true),12);
-   const renderer=src('src/features/liveTransit/index.js');
-   contains(renderer,'trainBeamImageId','trainLaneOffsetExpression');assert.doesNotMatch(renderer,/withTrainHeadlights/);
+   contains(src('src/features/liveTransit/index.js'),'withTrainHeadlights','trainBeamImageId','trainLaneOffsetExpression');
  }],
  ['D06','AI search is explicit, respects profile preferences and does not scroll to last answer',()=>{
    const s=src('src/v880-supabase-safety-ai.js');

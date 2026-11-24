@@ -131,7 +131,6 @@ test('delayed atlas never hides train layer; stationary train recovers and new a
   overlay.start();await waitUntil(()=>typeof resolveAtlas==='function');
   assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal(map.images.size,30);assert(map.images.has('dj-live-train-beam-left'));assert(map.images.has('dj-live-train-beam-right'));
   assert(map.images.has('dj-live-train-9호선-unlit'));assert(map.images.has('dj-live-train-9호선-left-unlit'));
-  assert.deepEqual(map.images.get('dj-live-train-9호선'),map.images.get('dj-live-train-9호선-unlit'),'no added headlight paint');
   const marker=map.getSource(LIVE_SOURCE);await waitUntil(()=>marker.data?.features?.length===1);
   const before=marker.data.features[0].geometry.coordinates;
   styleReady=false;resolveAtlas(atlas);await wait();assert.notEqual(map.images.get('dj-live-train-9호선'),atlas.get('9호선:right'));

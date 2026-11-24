@@ -9,11 +9,10 @@ function screenOffset(line,angle,facing){
   return [-Math.sin(rotation)*y,Math.cos(rotation)*y];
 }
 test('nearby train icons preserve clear sightlines and opposing lane separation',()=>{
-  assert.deepEqual(TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===0),[11,12.5,13.2,15.5,18,20,22]);
+  assert.deepEqual(TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===0),[11,12.5,13.2,15.5,18]);
   const sizes=TRAIN_ICON_SIZE_STOPS.filter((_,i)=>i%2===1);
   assert(sizes.every((v,i)=>v>0&&(i===0||v>=sizes[i-1])));
-  assert(sizes[3]===1&&sizes[4]>=1.8&&sizes[5]>=3&&sizes[6]<=4.3);
-  assert(sizes[6]/sizes[2]>5,'close zoom must visibly enlarge trains');
+  assert(sizes[3]<=1.20&&sizes[4]<=1.45);
   assert(TRAIN_LANE_GAP>=10&&TRAIN_LANE_GAP<=14);
 });
 test('opposing trains remain on correct sides through arbitrary screen rotations and sprite mirroring',()=>{

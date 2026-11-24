@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {nearbySearchResults,searchResultSubtitle,searchResultKey,captureVisibleFacilityArea,visibleFacilityResults,visibleAreaContains,fetchVisibleOfficialPlaces} from '../src/map-search-refinement.js';
+import {nearbySearchResults,searchResultSubtitle,searchResultKey} from '../src/map-search-refinement.js';
 test('bus direction is authoritative and no ARS ID appears in subtitle',()=>{
  assert.equal(searchResultSubtitle({kind:'bus',direction:'상도역',arsId:'123'}),'버스정류장 · 상도역 방면');
  assert.equal(searchResultSubtitle({kind:'bus',arsId:'123'}),'버스정류장 · 방면 미확인');
@@ -17,20 +17,4 @@ test('map tile bus categories and other POIs have Korean labels without technica
  assert.equal(searchResultSubtitle({category:'cafe',address:'지도에 등록된 OpenStreetMap 시설 · 운영 여부 미확인'}),'카페');
  assert.equal(searchResultSubtitle({category:'unknown',address:'서울 동작구 상도로 10 · © OpenStreetMap 기여자'}),'일반 시설 · 서울 동작구 상도로 10');
  assert.equal(searchResultSubtitle({kind:'bus',direction:'상도역',distanceMeters:120}),'버스정류장 · 상도역 방면 · 120m');
-});
-
-test('visible map facility search requires zoom 16 and clips a rotated view rather than bbox alone',()=>{
- const map={getZoom:()=>15,getCanvas:()=>({clientWidth:400,clientHeight:800}),unproject:([x,y])=>({lng:126.95+(x/400+y/800-1)*.003,lat:37.5+(x/400-y/800)*.003})};
- assert.equal(captureVisibleFacilityArea(map),null);
- map.getZoom=()=>16;
- const area=captureVisibleFacilityArea(map);assert.ok(area);
- assert.equal(visibleAreaContains(area,{lng:126.9529,lat:37.5029}),false);
- const rows=visibleFacilityResults(area,[{name:'중심',lng:126.95,lat:37.5,distanceMeters:15},{name:'화면 안',lng:126.951,lat:37.5},{name:'화면 밖',lng:126.9529,lat:37.5029}]);
- assert.deepEqual(rows.items.map(p=>p.name),['중심','화면 안']);assert.equal(rows.items[0].distanceMeters,undefined);
- assert.equal(rows.total,2);
-});
-test('visible map facility search limits output without misreporting total',()=>{
- const area={polygon:[{lng:126.94,lat:37.49},{lng:126.96,lat:37.49},{lng:126.96,lat:37.51},{lng:126.94,lat:37.51}],center:{lng:126.95,lat:37.5}};
- const rows=visibleFacilityResults(area,[{name:'A',lng:126.951,lat:37.5},{name:'B',lng:126.95,lat:37.5}],{limit:1});
- assert.equal(rows.total,2);assert.equal(rows.items[0].name,'B');
 });

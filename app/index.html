@@ -39,6 +39,67 @@
           : (displayTheme==='dark'?'#22282e':'#f3f7f5');
       })();
     </script>
+    <script id="dj-production-style-recovery">
+      // Independent of the application bundle: failed local styles must not
+      // expose an unstyled, interactive map. Vite's hashed CSS is same-origin.
+      (function(){
+        var retries=new WeakSet(), started=false, pending=false, panel=null, deadline=0, timer=0;
+        function localStyles(){
+          return Array.from(document.querySelectorAll('link[rel~="stylesheet"]')).filter(function(link){
+            try{var url=new URL(link.href,location.href);return url.origin===location.origin&&url.pathname.startsWith('/assets/')&&url.pathname.endsWith('.css');}
+            catch(_e){return false;}
+          });
+        }
+        function loaded(link){
+          try{return Boolean(link.sheet&&link.sheet.cssRules.length>0);}
+          catch(_e){return false;}
+        }
+        function show(){
+          if(panel||!document.body)return;
+          panel=document.createElement('div');
+          panel.id='dj-css-recovery';panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');
+          panel.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#edf3ef;color:#183b32;display:grid;place-items:center;padding:24px;box-sizing:border-box;font:16px system-ui,sans-serif;text-align:center';
+          var inner=document.createElement('div');inner.style.cssText='max-width:300px';
+          var title=document.createElement('strong');title.textContent='화면을 다시 준비하고 있습니다';
+          var note=document.createElement('p');note.textContent='화면 구성 파일의 연결을 확인하고 있습니다.';
+          note.style.cssText='font-size:14px;line-height:1.6;color:#526e62';
+          var button=document.createElement('button');button.type='button';button.hidden=true;button.textContent='다시 불러오기';
+          button.style.cssText='border:0;border-radius:12px;background:#176b55;color:white;padding:12px 24px;font:inherit;min-height:44px';
+          button.addEventListener('click',function(){location.reload();});
+          inner.append(title,note,button);panel.append(inner);document.body.append(panel);
+        }
+        function inspect(){
+          if(!started)return;
+          var styles=localStyles(),missing=styles.filter(function(link){return !loaded(link);});
+          if(!missing.length){
+            if(panel){panel.remove();panel=null;window.dispatchEvent(new Event('resize'));}
+            pending=false;deadline=0;clearTimeout(timer);return;
+          }
+          show();
+          if(!pending){pending=true;deadline=Date.now()+12000;}
+          missing.forEach(function(link){
+            if(retries.has(link))return;
+            retries.add(link);
+            var url=new URL(link.href,location.href);url.searchParams.set('dj-css-retry','1');
+            link.href=url.href;
+          });
+          clearTimeout(timer);
+          if(Date.now()<deadline){timer=setTimeout(inspect,300);return;}
+          if(panel){
+            panel.querySelector('strong').textContent='화면 구성 파일을 불러오지 못했습니다';
+            panel.querySelector('p').textContent='네트워크 연결을 확인한 뒤 다시 불러와 주세요.';
+            panel.querySelector('button').hidden=false;
+          }
+        }
+        function start(){if(started)return;started=true;inspect();}
+        document.addEventListener('DOMContentLoaded',start,{once:true});
+        window.addEventListener('load',start,{once:true});
+        window.addEventListener('pageshow',function(){if(started)inspect();});
+        document.addEventListener('visibilitychange',function(){if(!document.hidden&&started)inspect();});
+        document.addEventListener('load',function(event){if(started&&event.target.tagName==='LINK'&&localStyles().includes(event.target))inspect();},true);
+        document.addEventListener('error',function(event){if(started&&event.target.tagName==='LINK'&&localStyles().includes(event.target))inspect();},true);
+      })();
+    </script>
     <style>
       /* Critical first paint: no unstyled logo or white-theme flash. */
       html,body{margin:0;min-height:100%;}
