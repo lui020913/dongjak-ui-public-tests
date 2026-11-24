@@ -205,3 +205,7 @@ html body #app#app #participation-panel .community-comment-form input[type=text]
  html body #app#app.dj-community-comment-keyboard #participation-panel:not([hidden]){bottom:auto!important;height:var(--dj-comment-visible-bottom,100dvh)!important;max-height:var(--dj-comment-visible-bottom,100dvh)!important;transform:none!important;translate:none!important}
  html body #app#app.dj-community-comment-keyboard #participation-panel>.dj836-sheet-body{min-height:0!important;overflow-y:auto!important;padding-bottom:16px!important}
 }
+
+/* A dedicated district selector preserves the original four compact actions. */
+#app #participation-panel .community-dong-filter-row{display:flex;align-items:center;gap:10px;margin:8px 0;min-width:0;font-size:13px;font-weight:650;color:var(--dj800-text,#20483b)}
+#app #participation-panel .community-dong-filter-row select{flex:1;min-width:0;width:auto;min-height:40px;border:1px solid var(--dj800-border,#d5e7dd);border-radius:12px;padding:8px 12px;background:var(--dj800-surface,#fff);color:var(--dj800-text,#20483b);font-size:16px}
