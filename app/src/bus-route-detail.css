@@ -59,8 +59,9 @@
 .dj-bus-detail-actions .dj-bus-detail-refresh{margin-left:auto;width:40px;min-width:40px;height:40px;padding:0;font-size:23px;border-radius:50%;}
 .dj-bus-detail-info strong{min-width:0;text-align:right;overflow-wrap:anywhere;}
 .dj-bus-detail-dock{position:fixed;right:12px;left:auto;transform:none;z-index:3100;display:flex;gap:0;align-items:stretch;white-space:nowrap;background:#fff;border:1px solid #dce6df;border-radius:999px;overflow:hidden;box-shadow:0 2px 8px #183a2420;max-width:calc(100vw - 24px);box-sizing:border-box;}
-.dj-bus-detail-dock button{min-height:40px;min-width:0;border:0;border-radius:0;padding:8px 12px;background:transparent;color:#176b55;font:inherit;font-size:13px;font-weight:600;box-shadow:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.dj-bus-detail-dock button+button{border-left:1px solid #dce6df;flex:none;}
+.dj-bus-detail-dock button{min-height:44px;min-width:0;border:0;border-radius:0;padding:8px 12px;background:transparent;color:#176b55;font:inherit;font-size:13px;font-weight:600;box-shadow:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dj-bus-detail-dock button:first-child{flex:1 1 auto;min-width:0;}
+.dj-bus-detail-dock button+button{border-left:1px solid #dce6df;flex:0 0 80px;min-width:80px;padding-inline:16px;}
 }
 @media(min-width:700px){#dj-bus-route-detail,.dj-bus-detail-dock{display:none!important;}}
 
