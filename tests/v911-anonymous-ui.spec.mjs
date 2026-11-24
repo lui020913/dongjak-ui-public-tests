@@ -166,7 +166,7 @@ test('phone More functions live in collapsible My Info groups',{tag:'@phone-layo
 test('transport cards, transfer tabs, right aligned arrivals and facility grip',{tag:'@phone-layout'},async({page})=>{
  await ready(page);
  // Supply only anonymous synthetic arrival examples; no logged-in account or private records.
- await page.route('**/api/transport/bus?**',r=>r.fulfill({json:{status:'ok',items:[{route:'152',routeType:'3',destination:'삼막사거리',message:'5분후 [4정거장 전]'},{route:'6515',routeType:'4',destination:'경인교육대학교',message:'1분후 [1정거장 전]'}]}}));
+ await page.route('**/api/transport/bus?**',r=>r.fulfill({json:{status:'ok',items:[{routeId:'100100152',route:'152',routeType:'3',destination:'삼막사거리',message:'5분후 [4정거장 전]'},{route:'6515',routeType:'4',destination:'경인교육대학교',message:'1분후 [1정거장 전]'}]}}));
  // Use exposed UI events that open public map selections; no app source is imported.
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'노량진',lng:126.9411,lat:37.5142,lines:['1호선','9호선'],selectedLine:'1호선'}}})));
  const sheet=page.locator('#transport-sheet');await expect(sheet).toBeVisible();
@@ -178,7 +178,27 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'bus',name:'노량진역5번출구',lng:126.9423,lat:37.5133,arsId:'20240'}}})));
  await expect(sheet).toBeVisible();const cards=page.locator('#transport-arrivals .transport-arrival-row');await expect(cards).toHaveCount(2);
  if(compact(page)){await geometry(page,'#transport-sheet');await expect(page.locator('#transport-kind')).toBeHidden();const a=await cards.nth(0).boundingBox(),b=await cards.nth(1).boundingBox();expect(Math.abs(a.y-b.y)).toBeLessThan(3);expect(b.x).toBeGreaterThanOrEqual(a.x+a.width);expect(await cards.first().evaluate(n=>{const l=n.querySelector('.transport-arrival-main').getBoundingClientRect(),r=n.querySelector('.transport-arrival-time').getBoundingClientRect();return r.left>=l.right-1&&r.bottom<=n.getBoundingClientRect().bottom})).toBe(true);}
- await tap(page,page.locator('#transport-close'));await expect(sheet).toBeHidden();
+ if(page.viewportSize().width<700){
+   const routeId='100100152';
+   const stops=Array.from({length:24},(_,i)=>({seq:i+1,stationId:String(1000+i),arsId:i===8?'20240':String(20300+i),name:i===8?'노량진역5번출구·동작구청·동작보건소건강관리청 긴 정류장 이름':'검증 정류장 '+(i+1),lng:126.9423+i*.0001,lat:37.5133+i*.0001,firstTime:'06:00',lastTime:'23:10',direction:i<12?'삼막사거리':'회차 방면'}));
+   await page.route('**/api/transport/bus/route-path?**',r=>r.fulfill({json:{routeId,stops,coordinates:stops.map(s=>[s.lng,s.lat])}}));
+   await page.route('**/api/transport/live-vehicles?**',r=>r.fulfill({json:{ok:true,bus:[{id:'bus:1',routeId,vehicleNumber:'4520',nextStopId:'1009',longitude:126.943,latitude:37.514,observedAt:new Date().toISOString(),receivedAt:new Date().toISOString()}],metro:[]}}));
+   await tap(page,cards.first());
+   const detail=page.locator('#dj-bus-route-detail'),scroller=detail.locator('.dj-bus-detail-scroll'),dock=page.locator('.dj-bus-detail-dock');
+   await expect(sheet).toBeHidden();await expect(detail).toBeVisible();
+   await expect(detail.locator('.dj-bus-detail-stop')).toHaveCount(24);
+   await expect(detail.locator('.dj-bus-detail-stop[aria-current=location]')).toBeVisible();
+   await expect(detail.locator('.dj-bus-detail-vehicle')).toHaveCount(1);
+   await expect.poll(()=>detail.evaluate(n=>{const rect=x=>x.getBoundingClientRect(),head=rect(n.querySelector('.dj-bus-detail-head')),status=rect(n.querySelector('.dj-bus-detail-status')),scroll=rect(n.querySelector('.dj-bus-detail-scroll')),foot=rect(n.querySelector('.dj-bus-detail-actions')),root=rect(n),nav=rect(document.getElementById('bottom-nav'));return n.parentElement.id==='app'&&head.bottom<=status.top+1&&status.bottom<=scroll.top+1&&scroll.bottom<=foot.top+1&&root.bottom<=nav.top-3&&root.top>=0;})).toBe(true);
+   await scroller.evaluate(n=>n.scrollTop=200);const scrollBefore=await scroller.evaluate(n=>n.scrollTop);
+   await tap(page,detail.getByRole('button',{name:'새로고침'}));
+   await expect.poll(()=>scroller.evaluate(n=>n.scrollTop)).toBe(scrollBefore);
+   await tap(page,detail.getByRole('button',{name:'노선정보'}));await expect(detail.locator('.dj-bus-detail-info')).toHaveCount(3);
+   await tap(page,detail.getByRole('button',{name:'노선정보'}));await expect(detail.locator('.dj-bus-detail-stop')).toHaveCount(24);
+   await tap(page,detail.getByRole('button',{name:'지도 보기'}));await expect(detail).toBeHidden();await expect(sheet).toBeHidden();await expect(dock).toBeVisible();await expect(page.locator('.topbar')).toBeVisible();
+   await tap(page,dock.getByRole('button',{name:'152 노선 상세'}));await expect(detail).toBeVisible();await expect(sheet).toBeHidden();
+   await tap(page,detail.getByRole('button',{name:'노선 상세 닫기'}));await expect(detail).toBeHidden();await expect(dock).toBeHidden();
+ }else{await tap(page,page.locator('#transport-close'));await expect(sheet).toBeHidden();}
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:map-place-selected',{detail:{place:{name:'동작도서관',category:'공공기관',address:'서울특별시 동작구 장승배기로 94',lng:126.9304,lat:37.5059}}})));
  const popup=page.locator('.dj-place-detail-popup');await expect(popup).toBeVisible();
  if(compact(page)){await geometry(page,'.dj-place-detail-popup');expect(await popup.evaluate(n=>{const a=n.getBoundingClientRect(),b=n.querySelector('.dj-place-edge-drag').getBoundingClientRect();return Math.abs(a.left+a.width/2-b.left-b.width/2)<3})).toBe(true);}
