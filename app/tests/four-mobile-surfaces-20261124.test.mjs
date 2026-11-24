@@ -29,6 +29,6 @@ test('night panel uses shared surface, raised, border and accent tokens',()=>{
 });
 
 test('preview keeps four pixel minimum bottom clearance above safe area',()=>{
- const css=read('src/route-experience.css').split('/* Keep the preview bottom anchored')[1];
- assert.match(css,/bottom:calc\(env\(safe-area-inset-bottom,0px\) \+ 4px\)!important/);
+ const css=read('src/route-experience.css');
+ assert.match(css,/data-dj-route-stage="preview"\]\s+#route-map-card:not\(\[hidden\]\)\s*\{[^}]*bottom:calc\(env\(safe-area-inset-bottom,0px\) \+ 4px\)!important/);
 });
