@@ -204,7 +204,8 @@ jobs:
           DONGJAK_FAST_MOBILE_QA: '1'
         run: |
           curl -fsSL "$DONGJAK_TARGET_URL/release-source.json?verify=45344608752" | node --input-type=module -e 'let s="";for await(const c of process.stdin)s+=c;const j=JSON.parse(s);if(j.public_ui_source_commit!=="b8fa0eea21eb0346f924a4458fdac6bdb0ebe8c8"||j.application_version!=="9.2.136"||String(j.build_run)!=="45344608752"||j.release_status!=="CANDIDATE_PREVIEW_NOT_PRODUCTION")throw Error("Preview provenance mismatch: "+JSON.stringify(j))'
-          npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile375 --project=mobile390 --project=mobile430 --grep 'compact HUD and visible motion|primary tabs reveal content'
+          # Run 45345998802: all three compact HUD cases passed; only this direct news transition remains.
+          npx playwright test --config=playwright.v911-remote.config.mjs --project=mobile390 --grep 'primary tabs reveal content'
       # PR431 run 45341079964: 29 passed, 2 skipped, 2 AI keyboard-dismiss failures.
       - name: Retest only two failed AI keyboard dismissals
         if: ${{ github.head_ref == 'fix/visible-phone-motion-20261124' }}

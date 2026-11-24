@@ -789,9 +789,9 @@ test('phone search returns a visible local suggestion and clears input safely',{
 test('primary tabs reveal content without fading the opaque page and keep the pill dock',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
- await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.classList.contains('dj-tab-content-enter'))window.__tabMotions.push('content-only')}).observe(panel,{attributes:true,attributeFilter:['class']});});
- await page.evaluate(()=>{window.__visibleTabAlpha=[];let count=0;function sample(){const n=document.querySelector('#news-panel > .dj-sheet-chrome');if(n&&document.getElementById('app').dataset.tab==='news')window.__visibleTabAlpha.push(Number(getComputedStyle(n).opacity));if(++count<240)requestAnimationFrame(sample);}sample();});
- await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.evaluate(()=>window.__visibleTabAlpha.some(a=>a>.12&&a<.95))).toBe(true);await expect(page.locator('#news-panel')).toHaveCSS('opacity','1');await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('content-only');
+ // Use the same real content sampler for direct tab-to-tab and map return.
+ await enter(page,'news-panel','news');
+ await expect(page.locator('#mine-panel')).toBeHidden();
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
  // The older moving selection plate is intentionally hidden. Active icon
