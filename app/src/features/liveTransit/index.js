@@ -5,6 +5,7 @@ import {loadTrainAtlas} from './train-atlas.js';
 import {selectedBusVehicleRoute} from '../../bus-route-overlay.js';
 import {haversineMeters,getDisplayedRailPaths} from './geometry.js';
 import {TRAIN_ICON_SIZE_STOPS,trainLaneOffset,trainLaneOffsetExpression} from './train-lanes.js';
+import {withTrainHeadlights} from './train-headlights.js';
 import {TRAIN_BEAM_LAYER,trainBeamImageId,ensureTrainBeamImages} from './train-beams.js';
 export const LIVE_SOURCE='dongjak-live-vehicles-v827';
 export const LIVE_METRO_LAYER='dongjak-live-metro-v827';
@@ -89,7 +90,7 @@ export function ensureTrainImages(map,atlas=null,replace=false,doc=globalThis.do
       if([true,false].every(lit=>map.hasImage(trainImageId(line,facing,lit)))&&!(replace&&sprite))continue;
       const base=sprite??trainIconImage(color,doc,facing);if(!base)return false;
       for(const lit of [true,false]){
-        const id=trainImageId(line,facing,lit),image=base;
+        const id=trainImageId(line,facing,lit),image=lit?withTrainHeadlights(base,facing):base;
         if(map.hasImage(id)){if(replace&&sprite){if(typeof map.updateImage!=='function')return false;map.updateImage(id,image);}continue;}
         map.addImage(id,image,{pixelRatio:3});
       }
@@ -144,8 +145,8 @@ export function attachLiveTransitOverlay(map,opts={}){
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center','icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-rotate':['coalesce',['get','trainRotation'],0]}}:
       {id:LIVE_METRO_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:metroMinZoom,filter:['==',['get','mode'],'metro'],paint:{...common,'circle-color':['get','color'],
         'circle-radius':['interpolate',['linear'],['zoom'],11,6,13.2,7.5,15.5,10,18,12.8]}});
-    // Put one soft radial light pool BELOW the unchanged train artwork.
-    // Both layers share zoom, rotation and lane offsets.
+    // Put translucent light BELOW the original atlas symbols, never paint over the headlights.
+    // The shared icon offset and heading keep the cones on the correct track side.
     if(beamImages&&map.getLayer(LIVE_METRO_LAYER)?.type==='symbol'&&!map.getLayer(TRAIN_BEAM_LAYER)){
       map.addLayer({id:TRAIN_BEAM_LAYER,type:'symbol',source:LIVE_SOURCE,minzoom:metroMinZoom,
         filter:['all',['==',['get','mode'],'metro'],['==',['get','headingKnown'],true]],
@@ -155,7 +156,7 @@ export function attachLiveTransitOverlay(map,opts={}){
           'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center',
           'icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport',
           'icon-rotate':['coalesce',['get','trainRotation'],0]},
-        paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.45,13.2,.65,15.5,.78,18,.88,22,.88]}
+        paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.38,13.2,.66,15.5,.82,18,.9]}
       },LIVE_METRO_LAYER);
     }
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,

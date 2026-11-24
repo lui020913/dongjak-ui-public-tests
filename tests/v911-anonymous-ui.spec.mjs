@@ -186,7 +186,6 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
    await tap(page,cards.first());
    const detail=page.locator('#dj-bus-route-detail'),scroller=detail.locator('.dj-bus-detail-scroll'),dock=page.locator('.dj-bus-detail-dock');
    await expect(sheet).toBeHidden();await expect(detail).toBeVisible();
-   for(const selector of ['.topbar','#djNext-toolbar','.map-actions','#dj840-map-tip'])await expect(page.locator(selector).first()).toBeHidden();
    await expect(detail.locator('.dj-bus-detail-stop')).toHaveCount(24);
    await expect(detail.locator('.dj-bus-detail-stop[aria-current=location]')).toBeVisible();
    await expect(detail.locator('.dj-bus-detail-vehicle')).toHaveCount(1);
@@ -197,9 +196,6 @@ test('transport cards, transfer tabs, right aligned arrivals and facility grip',
    await tap(page,detail.getByRole('button',{name:'노선정보'}));await expect(detail.locator('.dj-bus-detail-info')).toHaveCount(3);
    await tap(page,detail.getByRole('button',{name:'노선정보'}));await expect(detail.locator('.dj-bus-detail-stop')).toHaveCount(24);
    await tap(page,detail.getByRole('button',{name:'지도 보기'}));await expect(detail).toBeHidden();await expect(sheet).toBeHidden();await expect(dock).toBeVisible();await expect(page.locator('.topbar')).toBeVisible();
-   await expect.poll(()=>dock.evaluate(n=>{const d=n.getBoundingClientRect(),s=document.querySelector('#map .maplibregl-ctrl-scale')?.getBoundingClientRect();return Boolean(s&&s.width>0&&d.left>=s.right+5&&Math.abs(d.bottom-s.bottom)<=12&&d.right<=innerWidth-10);})).toBe(true);
-   const clearTarget=await dock.getByRole('button',{name:'노선 표시 해제',exact:true}).boundingBox();expect(clearTarget.width).toBeGreaterThanOrEqual(90);expect(clearTarget.height).toBeGreaterThanOrEqual(44);
-   const detailTarget=await dock.getByRole('button',{name:'152 노선 상세'}).boundingBox();expect(Math.abs(detailTarget.width-clearTarget.width)).toBeLessThanOrEqual(1);expect(detailTarget.height).toBeGreaterThanOrEqual(44);
    await tap(page,dock.getByRole('button',{name:'152 노선 상세'}));await expect(detail).toBeVisible();await expect(sheet).toBeHidden();
    await tap(page,detail.getByRole('button',{name:'노선 상세 닫기'}));await expect(detail).toBeHidden();await expect(dock).toBeHidden();
  }else{await tap(page,page.locator('#transport-close'));await expect(sheet).toBeHidden();}

@@ -46,7 +46,7 @@
         var retries=new WeakSet(), started=false, pending=false, panel=null, deadline=0, timer=0;
         function localStyles(){
           return Array.from(document.querySelectorAll('link[rel~="stylesheet"]')).filter(function(link){
-            try{var url=new URL(link.href,location.href);return url.origin===location.origin&&/\\/assets\\/[^/]+\\.css$/.test(url.pathname);}
+            try{var url=new URL(link.href,location.href);return url.origin===location.origin&&url.pathname.startsWith('/assets/')&&url.pathname.endsWith('.css');}
             catch(_e){return false;}
           });
         }
