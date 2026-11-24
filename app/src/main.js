@@ -2953,7 +2953,7 @@ async function runRouteSearch(event){
   document.getElementById('route-search-confirm').hidden=true;
   routeSearchCandidate=null;
   if(query.length<2||query.length>80){paintRouteSearchResults([],'장소명 또는 주소를 2~80자로 입력해 주세요.');document.getElementById('route-search-submit').disabled=false;return;}
-  if(event.isTrusted)recordSearchQuery(query);
+  if(event.isTrusted&&app.dataset.djRouteScreenV3!=='1')recordSearchQuery(query);
   const local=routeLocalMatches(query);
   paintRouteSearchResults(local,local.length?`검색 결과 ${local.length}개 · 추가 검색 중`:'장소를 검색하고 있습니다…');
   document.getElementById('route-search-submit').disabled=true;

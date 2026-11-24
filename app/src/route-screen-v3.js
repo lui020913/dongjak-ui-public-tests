@@ -7,6 +7,7 @@
  */
 import viewCSS from './route-screen-v3.css?inline';
 import './route-screen-v3-global.css';
+import {recentPlaces,recentSearchQueries,recordSearchQuery,clearRecentPlaces} from './v815-place-store.js';
 
 export function mountRouteScreenV3(doc=document, win=window) {
   const byId=id=>doc.getElementById(id);
@@ -27,15 +28,12 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <strong class="heading">길찾기</strong>
+      <span class="mode"><svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="m11 7-3 6 5 3 1 5M13 9l4 3 3 1M8 13l-4 6M14 7l-2 8"/></svg>도보</span>
       <button type="button" class="close" data-v3="close" aria-label="길찾기 닫기">
         <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></svg>
       </button>
     </header>
     <section class="route-panel" aria-label="출발지와 도착지">
-      <div class="mode-row"><span class="mode">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="m11 7-3 6 5 3 1 5M13 9l4 3 3 1M8 13l-4 6M14 7l-2 8"/></svg>
-        도보
-      </span></div>
       <div class="fields">
         <span class="track" aria-hidden="true"><svg viewBox="0 0 20 112">
           <line x1="10" y1="27" x2="10" y2="85"/>
@@ -56,6 +54,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <button type="button" data-v3="gps"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>현재 위치</button>
         <button type="button" data-v3="pick"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>지도에서 선택</button>
       </div>
+      <div class="waypoint-actions"><button type="button" data-v3="waypoint">＋ 경유지 추가</button><button type="button" data-v3="waypoint-map">지도에서 경유지 선택</button></div>
+      <div id="v3-waypoints" class="waypoints" hidden></div>
+      <section class="recent" id="v3-recent" hidden><div class="recent-head"><strong>최근 검색 장소</strong><button type="button" data-v3="clear-recent">기록 삭제</button></div><div class="recent-list"></div></section>
     </section>
     <div class="tools" aria-label="지도 조작">
       <button type="button" data-v3="center" aria-label="동작구 지도 중심으로">
@@ -104,6 +105,13 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('[data-v3="calculate"]').disabled=Boolean(disabled);
     q('#v3-cta-label').textContent=legacyCalc.disabled&&start&&end?'경로 계산 중…':'경로 찾기';
   };
+  const mirrorWaypoints=()=>{
+    const target=q('#v3-waypoints');target.replaceChildren();
+    const rows=byId('dj815-waypoints')?.querySelectorAll('.dj815-waypoint-row')||[];
+    target.hidden=!rows.length;q('[data-v3="waypoint"]').disabled=rows.length>=5;q('[data-v3="waypoint-map"]').disabled=rows.length>=5;
+    for(const [i,row] of Array.from(rows).entries()){const item=doc.createElement('div');item.className='waypoint-item';const title=doc.createElement('span');title.textContent=(i+1)+'. '+(row.querySelector('.dj815-waypoint-title')?.textContent||'경유지');item.append(title);for(const native of row.querySelectorAll('button')){const b=doc.createElement('button');b.type='button';b.textContent=native.textContent;b.disabled=native.disabled;b.setAttribute('aria-label',native.title||native.textContent);b.addEventListener('click',()=>native.click());item.append(b);}target.append(item);}
+  };
+  const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
     resizeFrame=0;
     if(!active)return;
@@ -128,6 +136,10 @@ export function mountRouteScreenV3(doc=document, win=window) {
     if(status)q('#v3-search-status').textContent=status;
     const container=q('#v3-results');
     container.replaceChildren();
+    if(!q('#v3-query').value.trim()&&(recentPlaces().length||recentSearchQueries().length)){
+      const tools=doc.createElement('div');tools.className='search-history';const clear=doc.createElement('button');clear.type='button';clear.textContent='기록 삭제';clear.addEventListener('click',()=>{clearRecentPlaces();byId('route-search-query').dispatchEvent(new Event('input',{bubbles:true}));});tools.append(clear);
+      for(const term of recentSearchQueries().filter(t=>!recentPlaces().some(p=>p.name===t))){const b=doc.createElement('button');b.type='button';b.textContent=term;b.addEventListener('click',()=>{q('#v3-query').value=term;recordSearchQuery(term);updateQuery();submitSearch();});tools.append(b);}container.append(tools);
+    }
     for(const native of byId('route-search-results')?.querySelectorAll('button.route-search-item')||[]){
       const button=doc.createElement('button');button.type='button';
       const title=doc.createElement('strong');
@@ -150,14 +162,16 @@ export function mountRouteScreenV3(doc=document, win=window) {
   const openSearch=which=>{
     if(!active)return;
     searching=which;
-    byId(which==='start'?'route-search-start':'route-search-end')?.click();
-    q('#v3-search-title').textContent=which==='start'?'출발지 검색':'도착지 검색';
+    if(which==='waypoint')byId('dj832-waypoint-details')?.querySelector('.dj815-actions button')?.click();else byId(which==='start'?'route-search-start':'route-search-end')?.click();
+    if(nativeSearch.hidden){searching=null;return;}
+    q('#v3-search-title').textContent=which==='start'?'출발지 검색':which==='waypoint'?'경유지 검색':'도착지 검색';
     cancelTimer();composing=false;
     q('#v3-query').value='';q('[data-v3="clear-query"]').hidden=true;
     syncViewport();
     q('#v3-results').replaceChildren();
     q('#v3-search-status').textContent='장소명 또는 주소를 입력해 주세요.';
     q('[data-v3-screen="search"]').hidden=false;
+    mirrorResults();
     q('#v3-query').focus({preventScroll:true});
   };
   // Keep the legacy route panel logically PRESENT for the native tab/sheet
@@ -221,7 +235,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
       if(searching&&nativeSearch.hidden){
         cancelTimer();composing=false;searching=null;q('#v3-query').blur();q('[data-v3-screen="search"]').hidden=true;
       }
-      syncLabels();
+      syncLabels();mirrorWaypoints();refreshRecent();
       requestPosition();
     }
   };
@@ -230,6 +244,10 @@ export function mountRouteScreenV3(doc=document, win=window) {
   }
   listen(q('[data-v3="start"]'),'click',()=>openSearch('start'));
   listen(q('[data-v3="end"]'),'click',()=>openSearch('end'));
+  listen(q('[data-v3="waypoint"]'),'click',()=>openSearch('waypoint'));
+  listen(q('[data-v3="waypoint-map"]'),'click',()=>byId('dj832-waypoint-details')?.querySelectorAll('.dj815-actions button')[1]?.click());
+  listen(q('[data-v3="clear-recent"]'),'click',()=>clearRecentPlaces());
+  listen(win,'dongjak:recent-places-change',refreshRecent);
   listen(q('[data-v3="swap"]'),'click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-swap')));
   listen(q('[data-v3="gps"]'),'click',()=>byId('route-gps-start')?.click());
   listen(q('[data-v3="pick"]'),'click',()=>byId('route-pick-end')?.click());
@@ -262,7 +280,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   listen(q('#v3-query'),'compositionend',()=>{composing=false;updateQuery();});
   listen(q('#v3-query'),'input',updateQuery);
   listen(q('[data-v3="clear-query"]'),'click',()=>{q('#v3-query').value='';updateQuery();q('#v3-query').focus({preventScroll:true});});
-  listen(q('[data-v3-form="search"]'),'submit',e=>{e.preventDefault();if(!composing)submitSearch();});
+  listen(q('[data-v3-form="search"]'),'submit',e=>{e.preventDefault();if(!composing){recordSearchQuery(q('#v3-query').value);submitSearch();}});
   listen(win.visualViewport,'resize',syncViewport);
   listen(win,'keydown',e=>{
     if(active&&searching&&e.key==='Escape'){e.preventDefault();finishSearch();}
@@ -274,6 +292,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
   const labelsObserver=new MutationObserver(syncLabels);
   for(const item of [legacyStart,legacyEnd])labelsObserver.observe(item,{childList:true,subtree:true,characterData:true});
   labelsObserver.observe(legacyCalc,{attributes:true,attributeFilter:['disabled']});
+  const waypointObserver=new MutationObserver(()=>{if(active){mirrorWaypoints();requestPosition();}});
+  const waypointList=byId('dj815-waypoints')?.querySelector('.dj815-waypoint-list');
+  if(waypointList)waypointObserver.observe(waypointList,{childList:true,subtree:true});
   const searchObserver=new MutationObserver(()=>{
     if(searching){
       mirrorResults();
@@ -289,7 +310,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   cardObserver?.observe(q('.route-panel'));
   sync();
   return ()=>{
-    cancelTimer();observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();
+    cancelTimer();observer.disconnect();labelsObserver.disconnect();searchObserver.disconnect();waypointObserver.disconnect();
     oldStyleObserver.disconnect();restoreOld();restoreOldMapTools();
     navObserver?.disconnect();cardObserver?.disconnect();
     cleanups.forEach(fn=>fn());
