@@ -441,10 +441,45 @@ jobs:
           if-no-files-found: ignore
           retention-days: 2
 
+  performance-compare:
+    needs: [build, preview]
+    if: needs.preview.result == 'success' && needs.build.outputs.app_version == '9.3.0'
+    name: 'v9.3 paired browser performance comparison'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 25
+    env:
+      BASELINE_URL: https://e2b501b3.dongjak-walk-safety-preview.pages.dev
+      CANDIDATE_URL: ${{ needs.preview.outputs.preview_url }}
+      DONGJAK_PERF_BASELINE_COMMIT: 674766692107cba977fe3181e9638493c33c7c8e
+      DONGJAK_PERF_CANDIDATE_COMMIT: ${{ needs.build.outputs.public_sha }}
+      DONGJAK_PERF_OUTPUT: ui-performance-comparison.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser test dependency
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm install --no-audit --no-fund
+      - name: Compare immutable baseline and candidate in identical browser conditions
+        run: node scripts/compare-ui-performance.mjs "$BASELINE_URL" "$CANDIDATE_URL" 3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v930-performance-comparison-${{ github.run_id }}
+          path: ui-performance-comparison.json
+          if-no-files-found: error
+          retention-days: 14
+
   production:
-    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa]
+    needs: [build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, performance-compare]
     if: >-
-      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && (needs.visual-capture.result == 'success' || (vars.ENABLE_DESIGN_CAPTURE_QA != 'true' && vars.ENABLE_GEMINI_QA != 'true' && needs.visual-capture.result == 'skipped')) && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) }}
+      ${{ always() && needs.build.result == 'success' && needs.preview.result == 'success' && needs.mobile-qa.result == 'success' && needs.desktop-tablet-qa.result == 'success' && (needs.performance-compare.result == 'success' || (needs.build.outputs.app_version != '9.3.0' && needs.performance-compare.result == 'skipped')) && (needs.visual-capture.result == 'success' || (vars.ENABLE_DESIGN_CAPTURE_QA != 'true' && vars.ENABLE_GEMINI_QA != 'true' && needs.visual-capture.result == 'skipped')) && (needs.visual-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.visual-qa.result == 'skipped')) && (needs.explore-qa.result == 'success' || (vars.ENABLE_GEMINI_QA != 'true' && needs.explore-qa.result == 'skipped')) }}
     name: '4. Production 배포 및 확인'
     runs-on: ubuntu-24.04
     environment: public-cloudflare-production

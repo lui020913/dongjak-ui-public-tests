@@ -33,3 +33,22 @@ test('do not retain a misleading notification subscription for the removed workf
  assert.match(ci,/node --test [^\n]*tests\/retired-smoke-workflows\.test\.mjs/);
  assert.match(ci,/node --test [^\n]*tests\/workflow-release-safety-contract\.test\.mjs/);
 });
+
+
+test('v9.3 performance comparison uses immutable baseline and exact candidate before protected promotion',()=>{
+ const flow=read('.github/workflows/mobile-first-overhaul-preview.yml');
+ const performance=flow.split('\n  performance-compare:')[1].split('\n  production:')[0];
+ const promotion=flow.split('\n  production:')[1].split('\n  notify-production:')[0];
+ assert.match(performance,/needs: \[build, preview\]/);
+ assert.match(performance,/app_version == '9\.3\.0'/);
+ assert.match(performance,/DONGJAK_PERF_BASELINE_COMMIT: 674766692107cba977fe3181e9638493c33c7c8e/);
+ assert.match(performance,/DONGJAK_PERF_CANDIDATE_COMMIT: \$\{\{ needs\.build\.outputs\.public_sha \}\}/);
+ assert.match(performance,/compare-ui-performance\.mjs "\$BASELINE_URL" "\$CANDIDATE_URL" 3/);
+ assert.match(promotion,/needs: \[build, preview, mobile-qa, desktop-tablet-qa, visual-capture, visual-qa, explore-qa, performance-compare\]/);
+ assert.match(promotion,/needs\.performance-compare\.result == 'success'/);
+ assert.match(promotion,/app_version != '9\.3\.0' && needs\.performance-compare\.result == 'skipped'/);
+ const script=read('scripts/compare-ui-performance.mjs');
+ assert.match(script,/Release provenance changed during comparison/);
+ assert.match(script,/Insufficient frame samples/);
+ assert.match(script,/byScenario/);
+});

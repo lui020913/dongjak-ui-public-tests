@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {startOpacityMotion,COMPOSITOR_MOTION} from '../src/compositor-motion.js';
+import {startOpacityMotion,startStyleMotion,COMPOSITOR_MOTION} from '../src/compositor-motion.js';
 function setup(){
  const frames=new Map(),timers=new Map();let seq=0,reads=0;
  const win={CSS:{supports:()=>true},getComputedStyle:n=>{reads++;return {opacity:n.style.getPropertyValue('opacity')}},
@@ -33,4 +33,12 @@ test('missing transitionend still commits once, unsupported browsers retain lega
  const h=setup(),n=h.node();let closed=0;startOpacityMotion([n],{win:h.win,from:1,to:0,onFinish:()=>closed++});h.tick();
  const fn=[...h.timers.values()][0];fn();fn();assert.equal(closed,1);assert.equal(n.props.size,0);
  assert.equal(startOpacityMotion([n],{win:{}}),null);
+});
+
+ test('simple detail slide shares one boundary transition and ignores early opacity completion',()=>{
+ const h=setup(),n=h.node();n.style.setProperty('translate','0 5px','important');let done=0;
+ const motion=startStyleMotion([n],{win:h.win,from:{opacity:'.12',translate:'0 300px'},to:{opacity:'1',translate:'0 0px'},finishProperty:'translate',onFinish:()=>done++});
+ assert.ok(motion);h.tick();assert.equal(h.frames.size,0);assert.equal(n.style.getPropertyValue('transition-property'),'opacity,translate');
+ n.listeners.get('transitionend')({target:n,currentTarget:n,propertyName:'opacity'});assert.equal(done,0);
+ n.listeners.get('transitionend')({target:n,currentTarget:n,propertyName:'translate'});assert.equal(done,1);assert.deepEqual(n.props.get('translate'),['0 5px','important']);
 });
