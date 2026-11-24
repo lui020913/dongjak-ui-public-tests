@@ -74,3 +74,11 @@ test('AI keyboard surface shares its root and PWA status background, with no whi
  assert.match(ai,/html:has\(#dj-ai-search-modal\[open\]\) body\{background-color:#edf3ef!important/);
  assert.match(geometry,/inset>120&&\(query&&doc.activeElement===query\|\|modal.dataset.djAiKeyboard==='true'\)/);
 });
+
+test('AI fade completion can close from either animation or timer without duplicate viewport mutations',()=>{
+ const ai=code('src/v880-supabase-safety-ai.js'),geometry=code('src/v891-mobile-hud-ai-logo.js');
+ assert.match(ai,/function finishClose\(\)/);
+ assert.match(ai,/event.animationName==='dj9251-ai-content-leave'/);
+ assert.match(ai,/setTimeout\(finishClose,175\)/);
+ assert.match(geometry,/getPropertyValue\(key\)!==value/);
+});

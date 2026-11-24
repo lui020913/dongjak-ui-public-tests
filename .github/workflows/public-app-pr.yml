@@ -179,7 +179,7 @@ jobs:
       - name: Verify merged route-to-AI keyboard interaction
         if: ${{ github.head_ref == 'integrate/route-search-ai-keyboard-20261124' }}
         working-directory: .
-        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile390 --grep 'merged route search returns to AI keyboard without a background seam'
+        run: npx playwright test --config=playwright.mobile-first.config.mjs --project=mobile375 --project=mobile390 --grep 'merged route search returns to AI keyboard without a background seam'
       - name: Verify V3 and community integration at representative phone width
         if: ${{ github.event.pull_request.number == 418 }}
         working-directory: .
