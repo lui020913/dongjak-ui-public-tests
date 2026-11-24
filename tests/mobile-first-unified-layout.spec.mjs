@@ -273,6 +273,31 @@ test('real phone route editor and CTA clear the bottom dock at all three viewpor
   expect(metrics.ctaHit).toBe(true);
   await testInfo.attach('real-route-v3-dock.json',{body:Buffer.from(JSON.stringify(metrics,null,2)),contentType:'application/json'});
   await testInfo.attach('real-route-v3-dock.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+  // Seed anonymous local search history, then test the actual controls in the shadow root.
+  await page.evaluate(()=>{
+    localStorage.setItem('dj-map-v815-recent',JSON.stringify([
+      {name:'상도초등학교입구',lng:126.947,lat:37.500},
+      {name:'노량진역5번출구',lng:126.941,lat:37.514},
+      {name:'노량진초등학교앞',lng:126.943,lat:37.511}
+    ]));
+    window.dispatchEvent(new CustomEvent('dongjak:recent-places-change'));
+  });
+  await expect(route.locator('.recent-head')).toBeVisible();
+  await route.locator('[data-v3="waypoint"]').click();
+  const cancel=route.getByRole('button',{name:'경유지 추가 취소'});
+  await expect(cancel).toBeVisible();
+  await expect.poll(async()=>{const r=await cancel.boundingBox();return Boolean(r&&r.width>=44&&r.height>=44);}).toBe(true);
+  const geometry=await route.evaluate(host=>{
+    const s=host.shadowRoot,r=e=>e.getBoundingClientRect(),head=r(s.querySelector('.recent-head')),
+      title=r(s.querySelector('.recent-head strong')),clear=r(s.querySelector('[data-v3="clear-recent"]')),
+      list=r(s.querySelector('.recent-list'));
+    return {headingSeparation:clear.left-title.right,headGap:list.top-head.bottom,clearBottom:clear.bottom,headBottom:head.bottom};
+  });
+  expect(geometry.headingSeparation).toBeGreaterThanOrEqual(6);
+  expect(geometry.headGap).toBeGreaterThanOrEqual(6);
+  expect(geometry.clearBottom).toBeLessThanOrEqual(geometry.headBottom+1);
+  await cancel.click();await expect(route.locator('.waypoint-pending')).toBeHidden();
+
 });
 
 test('map-first walking route preview only lists actually supplied options and fits the viewport',async({page},testInfo)=>{
