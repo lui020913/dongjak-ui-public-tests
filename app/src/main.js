@@ -2605,7 +2605,7 @@ function lockRouteMapGestures(locked){
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap;
-  const preview = Boolean(routeResult) && onMap && !picking && !navMode;
+  const preview = Boolean(routeResult) && onMap && !picking && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
