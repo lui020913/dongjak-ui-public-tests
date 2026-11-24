@@ -303,7 +303,7 @@ test('map-first walking route preview only lists actually supplied options and f
   await testInfo.attach('walk-map-first-preview.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });
 
-test('guidance mode truly blocks map, tabs and keyboard except native end action',async({page},testInfo)=>{
+test('guidance mode allows map camera controls and blocks unrelated tabs',async({page},testInfo)=>{
   test.skip(page.viewportSize().width>=700,'phone UI only');
   test.setTimeout(120000);
   await readyForLiveTouch(page);
@@ -312,6 +312,7 @@ test('guidance mode truly blocks map, tabs and keyboard except native end action
     app.dataset.tab='map';
     document.getElementById('route-map-card').hidden=true;
     card.hidden=false;
+    document.getElementById('nav-map-controls').hidden=false;
     app.classList.add('route-guiding');
     window.__djWalkMapTouches=0;
     document.getElementById('map').addEventListener('pointerdown',()=>window.__djWalkMapTouches++);
@@ -336,9 +337,11 @@ test('guidance mode truly blocks map, tabs and keyboard except native end action
   expect(state.cardTop).toBeGreaterThan(100);
   expect(state.cardBottom).toBeLessThanOrEqual(state.vh-4);
   await page.mouse.click(25,Math.round(page.viewportSize().height*.5));
-  expect(await page.evaluate(()=>window.__djWalkMapTouches)).toBe(0);
+  expect(await page.evaluate(()=>window.__djWalkMapTouches)).toBeGreaterThan(0);
+  await expect(page.locator('#nav-reset-camera')).toBeVisible();
+  await expect(page.locator('#nav-toggle-3d')).toBeVisible();
   await page.keyboard.press('Tab');
-  await expect(page.locator('#nav-stop')).toBeFocused();
+  expect(await page.evaluate(()=>!!document.activeElement.closest('#nav-stop,#nav-map-controls'))).toBe(true);
   await testInfo.attach('walk-locked-guidance.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
   await page.locator('#nav-stop').click({timeout:12000});
   await expect(page.locator('#app')).not.toHaveClass(/route-guiding/);

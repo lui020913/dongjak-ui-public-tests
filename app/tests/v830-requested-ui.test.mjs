@@ -25,7 +25,7 @@ test('mobile POI details float above bottom dock, use scrolling and a single clo
  assert.match(css,/\.maplibregl-popup-close-button::after\{[\s\S]*?rotate\(45deg\)/);
  assert.match(css,/\:has\(> \.dj817-x-svg\)::after/);
  assert.doesNotMatch(source('src/place-details.js'),/root\.append\(source\)|source\.textContent=`주소 조회 출처/);
- assert.match(source('src/place-details.js'),/네이버지도에서 시설 주소·연락처 검색/);
+ assert.doesNotMatch(source('src/place-details.js'),/네이버지도에서 시설 주소·연락처 검색/);
 });
 test('metro neighbor outer background removed while route buttons remain',()=>{
  assert.match(css,/\.metro-neighbor-row\{[\s\S]*?background:transparent!important/);

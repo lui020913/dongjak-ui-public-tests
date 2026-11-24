@@ -27,10 +27,12 @@ test('v7.0.29 official timetable data is presented as HTML tables without invent
   assert.match(src,/rows\.filter/);
 });
 
-test('v7.0.29 facility popup provides source-friendly manual verification',()=>{
+test('v7.0.29 facility popup retains direct contact information without external search',()=>{
   const src=read('src/place-details.js');
-  assert.match(src,/map\.naver\.com\/p\/search/);
-  assert.match(src,/지도에서 시설 주소·연락처 검색/);
+  assert.doesNotMatch(src,/map\.naver\.com\/p\/search/);
+  assert.doesNotMatch(src,/지도에서 시설 주소·연락처 검색/);
+  assert.match(src,/row\(meta,'주소'/);
+  assert.match(src,/row\(meta,'전화번호'/);
 });
 
 test('v7.0.29 mobile safety/transport/option sheet cannot hide nav or trap close button',()=>{

@@ -4,6 +4,77 @@
  */
 const STORAGE_KEY='dongjak_ui_language_v854';
 const KO_TO_EN=Object.freeze({
+"등록지점":"Registered Points",
+"관심지점":"Saved Points",
+"내 게시물":"My Posts",
+"리뷰":"Reviews",
+"내가 작성한 시설 리뷰":"My Facility Reviews",
+"내 기록 분류":"Record Categories",
+"내 게시물을 불러오는 중입니다…":"Loading your posts…",
+"아직 작성한 게시물이 없습니다.":"You have not written any posts.",
+"게시물 보기":"View Post",
+"삭제 실패 · 다시 시도":"Delete failed · Try again",
+"리뷰 작성":"Write a Review",
+"리뷰 작성 및 수정":"Write or Edit Review",
+"시설 방문 리뷰":"Facility Reviews",
+"방문 평가":"Rating",
+"별점 선택":"Choose a rating",
+"리뷰 내용":"Review",
+"공개 리뷰 등록":"Publish Review",
+"리뷰 수정 저장":"Save Review",
+"리뷰 첨부 사진":"Review Photo",
+"사진 첨부":"Attach Photo",
+"사진 제거":"Remove Photo",
+"사진 처리 중입니다.":"Processing photo…",
+"사진을 첨부하지 못했습니다.":"Could not attach the photo.",
+"직접 방문한 경험과 시설 이용 정보를 작성해 주세요.":"Share your visit and experience with the facility.",
+"직접 방문한 경험을 기록할 수 있습니다.":"Record your own visit.",
+"로그인 후 등록하면 리뷰와 표시 이름, 첨부 사진이 다른 이용자에게 공개됩니다. 서버 등록에 실패하면 작성 내용은 유지됩니다.":"Your review, display name and photo will be public. If publishing fails, your draft is retained.",
+"아직 등록된 리뷰가 없습니다.":"No reviews yet.",
+"내 리뷰를 불러오는 중입니다…":"Loading your reviews…",
+"아직 작성한 공개 리뷰가 없습니다.":"You have not published any reviews.",
+"로그인 또는 서버 연결을 확인해 주세요.":"Check your sign-in or server connection.",
+"지역 선택":"Select Area",
+"지역 (행정동)":"Area (Administrative Neighborhood)",
+"행정동별 게시글":"Posts by Area",
+"모든 지역":"All Areas",
+"지역 · 정렬 · 저장 · 알림":"Area · Sort · Saved · Notices",
+"자유게시판":"General Discussion",
+"동네생활":"Neighborhood Life",
+"생활정보":"Local Information",
+"지도 위치 선택 필수":"Map Location Required",
+"지역을 선택해 주세요.":"Select an area.",
+"지도에서 동작구 내 제보 위치를 선택해 주세요.":"Choose a report location in Dongjak-gu on the map.",
+"보행 중 불편했던 상황을 공개 게시판에 알려주세요. 지역과 지도 위치는 필수입니다.":"Report a walking issue. Area and map location are required.",
+"지역은 자유게시판에서만 선택사항이며 사진과 위치는 선택사항입니다.":"Area is optional only in General Discussion. Photos and location are optional.",
+"알림 기록":"Notifications",
+"알림 닫기":"Close Notifications",
+"알림 새로고침":"Refresh Notifications",
+"내 게시물에 댓글이 달렸습니다.":"Someone commented on your post.",
+"내 게시물에 공감이 추가되었습니다.":"Someone liked your post.",
+"로그인 후 알림을 확인할 수 있습니다.":"Sign in to view notifications.",
+"읽음 처리 실패 · 다시 시도":"Could not mark as read · Try again",
+"안내 지도 조작":"Guidance Map Controls",
+"지도 확대":"Zoom In",
+"지도 축소":"Zoom Out",
+"2D·3D 전환":"Toggle 2D/3D",
+"현재 위치로 복귀":"Recenter on My Location",
+"내 정보 설정으로 돌아가기":"Back to My Info",
+"지도 위치 선택":"Select Map Location",
+"위치 지정 없음 · 선택사항":"No Location · Optional",
+"새 게시글":"New Post",
+"보행환경 제보":"Report Walking Issue",
+"이 기기에만 저장된 리뷰":"Reviews on this device",
+"로그인 후 이용해 주세요.":"Please sign in.",
+"보행불편 유형":"Walking Issue Type",
+"현장 확인 필요도":"Inspection Priority",
+"일반 확인":"Standard Check",
+"우선 확인 요청":"Priority Check",
+"글쓰기 닫기":"Close Composer",
+"보도 단차":"Uneven Sidewalk",
+"보행공간 협소":"Narrow Walking Space",
+"조명·시야":"Lighting & Visibility",
+"시설물 장애":"Obstructions",
 "도보 길찾기":"Walking Directions","장소를 지정한 뒤 경로를 선택하면 GPS 이동 안내·경로 이탈 자동 재탐색·선택형 음성 안내를 이용할 수 있습니다.":"Set your places and choose a route to use GPS guidance, rerouting and optional voice directions.","출발지 검색":"Search Start","목적지 검색":"Search Destination","장소명 또는 주소를 입력하고 검색을 누르세요.":"Enter a place or address and press Search.","선택 장소 확인":"Confirm Selected Place","다른 결과":"Other Results","이 위치로 설정":"Use This Location","일반 보행 경로":"Standard Walking Route","동작구 내 서울시 도보 네트워크를 우선 사용합니다. 경사도는 지형 기반 추정이며 무계단·휠체어 통행 가능을 보장하지 않습니다. 범위 밖에서는 외부 경로 서버를 사용합니다.":"Uses the Seoul walking network in Dongjak-gu. Terrain-based slope estimates do not guarantee step-free or wheelchair access. Routes outside this area use an external server.","지도에서 경로 보기 →":"Show Route on Map →","GPS 안내 시작":"Start GPS Guidance","동작구 내에서는 서울시 도보 링크(2026-11-11 수집)로 경로를 계산합니다. 보행자 통행 허용 링크라도 차도와 혼용될 수 있으며 실제 보도·계단·공사 및 통행제한은 검증되지 않았습니다. 동작구 경계 밖, 단절 또는 데이터 오류 시에는 외부 시험용 경로 서버로 출발·도착 좌표를 전송합니다.":"Routes in Dongjak-gu use Seoul walking links collected on 2026-11-11. Pedestrian access may share the roadway; sidewalks, steps, construction and restrictions are unverified. Outside the district, or if local routing fails, start and destination coordinates are sent to an external trial routing server.","선택한 장소":"Selected Place","지도에서 표시된 마커 위치가 맞습니까?":"Is the marked location correct?","도보 경로 · 안전도 미평가":"Walking Route · Safety Not Rated","동작구 소식":"Dongjak News","소식을 조회하지 않았습니다.":"News has not been loaded.","동작구청 공식 공지사항 확인 ↗":"Official District Notices ↗","Google 뉴스에서 더 보기 ↗":"More on Google News ↗","현재 계정·서버 연결이 없으므로 다른 휴대전화나 팀원과 자동 공유되지 않습니다.":"Without an account connection, these records do not sync with other devices or teammates.","즐겨찾기 · 내 기록":"Favorites & Records","계정·즐겨찾기 기능은 기존 카카오·Supabase 연결을 그대로 사용합니다.":"Your existing Kakao and account connection manages favorites.","로그인 전에는 이 기기에 저장됩니다. 이메일 로그인 후에는 서버와 동기화할 수 있습니다.":"Saved on this device before sign-in. Sign in with email to sync with your account.","새 그룹 이름":"New Group Name","새 즐겨찾기 그룹 이름":"New Favorite Group Name","+ 그룹 만들기":"+ Create Group","기록 삭제":"Clear History","이름 변경":"Rename","그룹 삭제":"Delete Group","선택한 지도 위치":"Selected Map Location","확인된 역사 위치와 노선 순서를 기반으로 탐색합니다. 지하철 운행 시간·배차·실시간 환승 시간은 포함되지 않습니다. 버스 환승 경로는 데이터가 확보될 때까지 계산하지 않습니다.":"Uses verified station locations and line order. Subway service times, frequencies and live transfer times are excluded. Bus transfers are unavailable until data is confirmed.","음성 지원 여부와 사용 가능한 목소리는 기기에 따라 다릅니다. 실제 경로 계산·안내는 길찾기에서 시작합니다.":"Voice availability depends on your device. Start route calculation and guidance in Directions.","기존 지도 옵션과 동일한 설정이며 선택 상태는 자동으로 저장됩니다. 테마 및 화면 효과는 아래의 기존 설정에서도 변경할 수 있습니다.":"These controls share Map Options and save your choices automatically. You can change themes and effects below.",
 
 "로그인 또는 회원가입":"Sign in or create an account","카카오 · 이메일 계정 관리":"Kakao · Email account","앱 & 화면":"App & Display","화면 테마":"Color Theme","라이트":"Light","지도 설정 · 범례 · 도보":"Map & Walking Settings","지도·도보 설정":"Map & Walking Settings","앱·지도·도보 설정":"App, Map & Walking Settings","지도 도구":"Map Tools","안전 지도 도구":"Safety Map Tools","태블릿 지도 도구":"Tablet Map Tools","내 활동":"My Activity","우리 동네 이야기":"Neighborhood Stories","보행 불편":"Walking Issues","개선 제안":"Suggestions","동네 질문":"Questions","최신순":"Newest","인기순":"Popular","주변정보":"Nearby","행정동":"Neighborhoods","제보":"Report","지역 뉴스":"Local News","구청 소식":"District News","지도 범례":"Map Legend","도보 설정":"Walking Settings","음성 · 진행방향":"Voice · Orientation","지도 디자인 설정":"Map Design","테마 · 3D · 레이어":"Theme · 3D · Layers","이 기기에만 저장되는 화면 설정입니다.":"These display settings are saved on this device.","기본값 복원":"Reset Defaults","라이트·다크 테마를 변경합니다.":"Choose the light or dark theme.","다크 모드로 변경":"Switch to Dark","라이트 모드로 변경":"Switch to Light","테마 변경":"Change Theme","앱 처음부터 둘러보기":"Explore the App","설치 방법 보기":"Installation Guide","설치 방법 접기":"Hide Installation Guide","웹앱으로 더 편리하게":"Use as a Web App","나중에":"Later","홈 화면에 추가하면 주소창 없이 더 넓은 지도 화면으로 이용할 수 있습니다.":"Add to your home screen for a larger map without the address bar.","보행 중 불편했던 곳을 지도에 남기거나, 개선 아이디어를 기록할 수 있습니다.":"Mark walking issues on the map or share ideas for improvements.","게시글":"Posts","동네 커뮤니티":"Neighborhood Community","보행환경에 관한 이야기와 개선 의견을 이 브라우저에 기록합니다.":"Share walking experiences and improvement ideas in this browser.","+ 글쓰기":"+ New Post","아직 등록된 게시글이 없습니다. 보행 불편이나 개선 의견을 남겨 주세요.":"No posts yet. Share a walking issue or improvement idea.","지도에서 보행환경 제보하기":"Report a Walking Issue on the Map","선택되지 않음":"Not selected","출발지":"Start","목적지":"Destination","지도":"Map","⌖ 현재 위치를 출발지로 지정":"⌖ Use My Location as Start","도보 경로 찾기":"Find Walking Route","도보 + 지하철 이동안":"Walk + Subway","지하철 연계 이동안 찾기":"Find Walk + Subway Route","현재 장소·경유지 공유":"Share Places & Stops","경로 및 지정 위치 초기화":"Clear Route & Places","출발":"Start","도착":"Destination","출발대기":"Awaiting Departure","다시 선택":"Select Again","이 위치 확인":"Confirm Location","선택한 지도 위치":"Selected Map Location","장소 확인":"Confirm Place","지도에서 선택한 장소가 맞습니까?":"Is this the right location?","일반 보행":"Standard Walk","경사 회피 우선":"Avoid Slopes","경로 한눈에 비교":"Compare Routes","지도에서 보기":"Show on Map","GPS 안내":"GPS Guidance","변경":"Edit","종료":"End","교통정보":"Transit","버스정류장":"Bus Stop","지하철역":"Subway Station","시간표":"Timetable","실시간":"Live","조회":"Checked","주소":"Address","전화번호":"Phone","홈페이지":"Website","공식/등록 웹사이트 열기":"Open Website","즐겨찾기 설정":"Favorite Settings","저장 폴더":"Folder","AI 시설 안내":"AI Place Guide","AI 설명 다시 시도":"Retry AI Guide","네이버지도에서 시설 주소·연락처 검색":"Search Address & Contacts on Naver Map","켜짐":"On","꺼짐":"Off","음성 길안내":"Voice Guidance","진행방향 보기":"Follow Direction","안내 목소리":"Guidance Voice","기기 기본":"Device Default","여성":"Female","남성":"Male","전체 한국어 음성":"All Korean Voices","지도 위 온도 버튼을 표시합니다.":"Show the temperature button on the map.","도움말·나침반·홈·내 위치 버튼을 표시합니다.":"Show help, compass, home and location controls.","플로팅 창 등의 전환 애니메이션을 줄입니다.":"Reduce animations for floating windows.","지하철 노선 · 역":"Subway Lines & Stations","동작구 경계":"Dongjak Boundary","3D 건물":"3D Buildings","지도 확대 시 건물 높이를 표시합니다.":"Show building heights when zoomed in.","실제 GPS 길안내에서 사용합니다.":"Used during GPS guidance.","안내 중 지도 방향을 따라갑니다.":"Follow your direction during guidance.","기기에서 제공되는 한국어 음성을 사용합니다.":"Uses Korean voices available on your device.",
@@ -216,7 +287,7 @@ function translateTextNode(node,language){
   if(node.nodeValue!==next){state.rendered=next;node.nodeValue=next;}else state.rendered=next;
 }
 function translateAttributes(element,language){
-  if(!element||element.nodeType!==1||SKIP_TAGS.has(element.tagName))return;
+  if(!element||element.nodeType!==1||SKIP_TAGS.has(element.tagName)||element.closest('[data-dj-no-translate]'))return;
   let state=originalAttrs.get(element);if(!state){state=new Map();originalAttrs.set(element,state);}
   for(const name of ATTRIBUTE_NAMES){
     if(!element.hasAttribute(name))continue;
@@ -292,6 +363,7 @@ export function installLanguagePreference(doc=document,win=window){
     const search=doc.getElementById('map-quick-search-query');
     if(search)search.placeholder=language==='en'?'Where are you going?':'어디로 가시나요?';
     walk(app,language);
+    for(const portal of (doc.querySelectorAll?.('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')||[]))walk(portal,language);
     const languageLabel=section.querySelector('label');if(languageLabel)languageLabel.textContent=language==='en'?'Language':'언어';
     select.setAttribute('aria-label',language==='en'?'Change language':'언어 변경');
     const valueLabel=section.querySelector('.dj854-language-value');
@@ -317,8 +389,11 @@ export function installLanguagePreference(doc=document,win=window){
     });
   });
   observer.observe(app,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});
+  const portalObserver=new MutationObserver(records=>{for(const record of records){if(record.type==='childList'&&record.target===doc.body){for(const node of record.addedNodes){if(node.nodeType===1&&node.matches('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')){walk(node,language);observer.observe(node,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});}}}}});
+  if(doc.body)portalObserver.observe(doc.body,{childList:true});
+  for(const portal of (doc.querySelectorAll?.('#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen')||[]))observer.observe(portal,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTE_NAMES});
   apply();
-  return ()=>{observer?.disconnect();};
+  return ()=>{observer?.disconnect();portalObserver.disconnect();};
 }
 if(typeof document!=='undefined'&&typeof window!=='undefined'){
   const start=()=>installLanguagePreference(document,window);

@@ -218,8 +218,8 @@
   }
   #app #dj-walk-guidance-lock {
     display:none;position:fixed;inset:0;z-index:7200;
-    background:transparent;touch-action:none;overscroll-behavior:contain;
-    pointer-events:auto;
+    background:transparent;overscroll-behavior:contain;
+    pointer-events:none;
   }
   #app #dj-walk-guidance-lock[hidden] {display:none!important}
   #app #nav-live-card .nav-live-metrics {

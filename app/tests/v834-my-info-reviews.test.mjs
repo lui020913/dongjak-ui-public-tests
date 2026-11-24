@@ -37,7 +37,9 @@ test('My Info label and menu reuse active cloud account and settings handlers',(
 test('Reviews are available at every place popup and save text securely',()=>{
  assert.match(popup,/installPlaceReviews\(body,p\)/);
  for(const item of ['리뷰 작성','공개 리뷰 등록','별점 선택','작성 내용은 유지됩니다','place_reviews'])assert.ok(reviews.includes(item));
- assert.match(reviews,/card\.append\(header,makeElement\('p',null,clean\(record\.body\)\)\)/);
+ assert.match(reviews,/reviewBody=makeElement\('p',null,clean\(record\.body\)\)/);
+ assert.match(reviews,/reviewBody\.dataset\.djNoTranslate/);
+ assert.match(reviews,/card\.append\(header,reviewBody\)/);
  assert.match(reviews,/\.upsert\(payload,\{onConflict:'place_key,user_id'\}\)/);
  assert.match(reviews,/\.select\('id'\)\.single\(\)/);assert.doesNotMatch(reviews,/localWrite\(/);
  assert.equal(reviewPlaceKey({name:'중앙대학교',lng:126.9570056,lat:37.5040056}),'중앙대학교|126.95701,37.50401');

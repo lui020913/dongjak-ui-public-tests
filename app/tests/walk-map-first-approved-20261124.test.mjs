@@ -40,7 +40,7 @@ test('input redesign does not replace native place search, route calculation, PR
     assert.match(ui,new RegExp(id));
   assert.match(main,/async function calculateRoute\(/);
   assert.match(ui,/routeComparisonItems\(latest\)/);
-  assert.match(ui,/if\(e\.target\?\.closest\?\.\('#nav-stop'\)\)return/);
+  assert.match(ui,/if\(e\.target\?\.closest\?\.\('#nav-stop,#nav-map-controls'\)\)return/);
   assert.match(ui,/topBanner\.append\(instruction\)/);
   assert.doesNotMatch(ui,/watchPosition\(/);
 });

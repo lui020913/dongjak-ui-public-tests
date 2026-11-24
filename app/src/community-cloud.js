@@ -56,3 +56,18 @@ export async function markCommunityNoticeRead(id){
  const {error}=await client.from('community_notifications').update({read_at:new Date().toISOString()}).eq('id',id);if(error)throw error;
 }
 export const isCommunitySignedIn=async()=>Boolean(await user().catch(()=>null));
+
+export async function readMyCommunityPosts(){
+ const u=await user();if(!u)throw Error('로그인 후 이용해 주세요.');
+ return select('community_posts',POST_FIELDS,{owner:u.id,order:'created_at',limit:200});
+}
+export async function readCommunityActivity(){
+ const client=getActiveCloudClient(),u=await user();if(!client||!u)return [];
+ const {data,error}=await client.from('community_activity_notifications').select('id,post_id,kind,post_title,created_at,read_at').eq('recipient_id',u.id).order('created_at',{ascending:false}).limit(100);
+ if(error)throw error;return data||[];
+}
+export async function markCommunityActivityRead(id){
+ const client=getActiveCloudClient(),u=await user();if(!client||!u)throw Error('로그인 후 이용해 주세요.');
+ const {error}=await client.from('community_activity_notifications').update({read_at:new Date().toISOString()}).eq('id',id).eq('recipient_id',u.id).is('read_at',null);
+ if(error)throw error;
+}

@@ -1,6 +1,7 @@
 /** Shared facility reviews use RLS-protected public.place_reviews.
  * Historical device records are read-only; failed publication retains the form. */
 import {cloudConfiguration,getActiveCloudClient} from './v824-favorites-cloud.js';
+import {compressReviewPhoto,isReviewPhoto} from './review-photo.mjs';
 const PREFIX='dj834_facility_reviews_v1:';
 const clean=(value,max=800)=>String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
 export function reviewPlaceKey(place){
@@ -30,7 +31,7 @@ async function signedReviewUser(client){
 export async function readMyPlaceReviews(){
  const client=getActiveCloudClient();if(!client)throw Error('서버 연결을 확인해 주세요.');
  const user=await signedReviewUser(client);
- const {data,error}=await client.from('place_reviews').select('id,place_key,place_name,author_name,rating,body,created_at').eq('user_id',user.id).order('created_at',{ascending:false});
+ const {data,error}=await client.from('place_reviews').select('id,place_key,place_name,author_name,rating,body,photo,created_at').eq('user_id',user.id).order('created_at',{ascending:false});
  if(error)throw error;return data||[];
 }
 async function deleteOwnReview(id){
@@ -49,13 +50,18 @@ function reviewEditorPortal(form,status,placeName,onClose){
  const anchor=doc.createComment('review-form-origin');form.before(anchor);
  const statusAnchor=doc.createComment('review-status-origin');status.before(statusAnchor);
  const app=doc.getElementById('app'),wasInert=app?.inert;
- host.append(top,status,form);doc.body.append(host);doc.body.dataset.djReviewEditor='open';if(app)app.inert=true;
- const sync=()=>{const v=win.visualViewport;host.style.top=(v?.offsetTop||0)+'px';host.style.height=(v?.height||win.innerHeight)+'px';};
+ const scroll=makeElement('div','dj834-review-editor-scroll');scroll.append(status,form);host.append(top,scroll);
+ const scrollY=win.scrollY||0,previousBodyStyle=doc.body.getAttribute('style');
+ doc.body.append(host);doc.body.dataset.djReviewEditor='open';if(app)app.inert=true;
+ doc.body.style.setProperty('position','fixed','important');doc.body.style.setProperty('inset','0','important');doc.body.style.setProperty('width','100%','important');
+ const initialHeight=Math.max(1,win.innerHeight||doc.documentElement.clientHeight);
+ let frame=0;
+ const sync=()=>{if(frame)return;frame=win.requestAnimationFrame(()=>{frame=0;const v=win.visualViewport;const top=Math.max(0,Math.round(v?.offsetTop||0));const height=Math.max(1,Math.min(Math.round(v?.height||win.innerHeight),Math.max(1,Math.max(initialHeight,win.innerHeight)-top)));host.style.top=top+'px';host.style.height=height+'px';});};
  let closed=false;
  const finish=()=>{if(closed)return;closed=true;
   if(host.contains(doc.activeElement))doc.activeElement.blur();
   win.visualViewport?.removeEventListener('resize',sync);win.visualViewport?.removeEventListener('scroll',sync);win.removeEventListener('resize',sync);
-  anchor.replaceWith(form);statusAnchor.replaceWith(status);form.hidden=true;host.remove();delete doc.body.dataset.djReviewEditor;if(app)app.inert=wasInert;onClose?.();
+  if(frame)win.cancelAnimationFrame(frame);anchor.replaceWith(form);statusAnchor.replaceWith(status);form.hidden=true;host.remove();delete doc.body.dataset.djReviewEditor;if(previousBodyStyle===null)doc.body.removeAttribute('style');else doc.body.setAttribute('style',previousBodyStyle);if(app)app.inert=wasInert;win.scrollTo(0,scrollY);onClose?.();
  };
  close.addEventListener('click',finish);win.visualViewport?.addEventListener('resize',sync,{passive:true});win.visualViewport?.addEventListener('scroll',sync,{passive:true});win.addEventListener('resize',sync,{passive:true});sync();
  return finish;
@@ -78,13 +84,24 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
  ratingLabel.append(rating);
  const bodyLabel=makeElement('label',null,'리뷰 내용');const body=makeElement('textarea');body.required=true;body.minLength=5;body.maxLength=800;body.rows=3;body.placeholder='직접 방문한 경험과 시설 이용 정보를 작성해 주세요.';bodyLabel.append(body);
  const buttons=makeElement('div','dj834-review-buttons');const save=makeElement('button','dj834-review-submit','공개 리뷰 등록');save.type='submit';const cancel=makeElement('button','dj834-review-cancel','취소');cancel.type='button';buttons.append(save,cancel);
- const consent=makeElement('p','dj834-review-disclaimer','로그인 후 등록하면 리뷰와 표시 이름이 다른 이용자에게 공개됩니다. 서버 등록에 실패하면 작성 내용은 유지됩니다.');
- form.append(ratingLabel,bodyLabel,buttons,consent);
+ const consent=makeElement('p','dj834-review-disclaimer','로그인 후 등록하면 리뷰와 표시 이름, 첨부 사진이 다른 이용자에게 공개됩니다. 서버 등록에 실패하면 작성 내용은 유지됩니다.');
+ const photoInput=makeElement('input');photoInput.type='file';photoInput.accept='image/jpeg,image/png,image/webp';photoInput.hidden=true;
+ const photoControls=makeElement('div','dj-review-photo-controls');
+ const pickPhoto=makeElement('button',null,'사진 첨부');pickPhoto.type='button';
+ const removePhoto=makeElement('button',null,'사진 제거');removePhoto.type='button';removePhoto.hidden=true;
+ const photoPreview=makeElement('img','dj-review-photo');photoPreview.alt='리뷰 첨부 사진';photoPreview.hidden=true;
+ let draftPhoto=null,photoSequence=0,photoPending=false;
+ const setPhoto=value=>{draftPhoto=isReviewPhoto(value)?value:null;photoPreview.hidden=!draftPhoto;removePhoto.hidden=!draftPhoto;if(draftPhoto)photoPreview.src=draftPhoto;else photoPreview.removeAttribute('src');};
+ pickPhoto.addEventListener('click',()=>photoInput.click());
+ removePhoto.addEventListener('click',()=>{photoSequence++;photoPending=false;setPhoto(null);});
+ photoInput.addEventListener('change',async()=>{const file=photoInput.files?.[0];photoInput.value='';if(!file)return;const token=++photoSequence;photoPending=true;try{const value=await compressReviewPhoto(file);if(token===photoSequence)setPhoto(value);}catch{if(token===photoSequence)status.textContent='사진을 첨부하지 못했습니다.';}finally{if(token===photoSequence)photoPending=false;}});
+ photoControls.append(pickPhoto,removePhoto,photoInput,photoPreview);
+ form.append(ratingLabel,bodyLabel,photoControls,buttons,consent);
  const list=makeElement('div','dj834-review-list');section.append(heading,status,form,list);
  // Place the review action above the generated AI description.
  root.append(section);
  let alive=true,ownIds=new Set(),closeEditor=null,editingId=null;
- const openEditor=(record=null)=>{if(closeEditor)return;editingId=record?.id||null;rating.value=record?String(record.rating):'';body.value=record?.body||'';save.textContent=record?'리뷰 수정 저장':'공개 리뷰 등록';form.hidden=false;write.setAttribute('aria-expanded','true');closeEditor=reviewEditorPortal(form,status,history?place.place_name:place.name,()=>{closeEditor=null;write.setAttribute('aria-expanded','false');});};
+ const openEditor=(record=null)=>{if(closeEditor)return;editingId=record?.id||null;rating.value=record?String(record.rating):'';body.value=record?.body||'';photoSequence++;photoPending=false;setPhoto(record?.photo);save.textContent=record?'리뷰 수정 저장':'공개 리뷰 등록';form.hidden=false;write.setAttribute('aria-expanded','true');closeEditor=reviewEditorPortal(form,status,history?place.place_name:place.name,()=>{closeEditor=null;write.setAttribute('aria-expanded','false');});};
  if(history)write.hidden=true;
  const render=(rows,local=false)=>{
   if(!alive)return;list.replaceChildren();
@@ -94,7 +111,7 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
    const author=makeElement('strong',null,local?'이 기기 작성':clean(record.author_name,32)||'이용자');
    const stars=makeElement('span','dj834-review-stars','★'.repeat(Math.min(5,Math.max(1,Number(record.rating)||1))));
    header.append(author,stars);
-   card.append(header,makeElement('p',null,clean(record.body)));
+   const reviewBody=makeElement('p',null,clean(record.body));reviewBody.dataset.djNoTranslate='';card.append(header,reviewBody);if(isReviewPhoto(record.photo)){const image=makeElement('img','dj-review-photo');image.src=record.photo;image.alt='리뷰 첨부 사진';image.loading='lazy';card.append(image);}
    const stamp=new Date(record.created_at||Date.now());
    if(Number.isFinite(stamp.getTime()))card.append(makeElement('small',null,stamp.toLocaleDateString('ko-KR')));
    if(!local&&ownIds.has(record.id)){
@@ -115,12 +132,12 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
   try{
    let data;ownIds=new Set();
    if(client){try{const user=await signedReviewUser(client);const own=await client.from('place_reviews').select('id').eq('user_id',user.id).eq('place_key',key);if(!own.error)ownIds=new Set((own.data||[]).map(x=>x.id));}catch{}}
-   if(history){const user=await signedReviewUser(client);const own=await client.from('place_reviews').select('id,place_key,place_name,author_name,rating,body,created_at').eq('user_id',user.id).eq('place_key',key);if(own.error)throw own.error;data=own.data||[];ownIds=new Set(data.map(x=>x.id));}
-   else if(client){const response=await client.from('place_reviews').select('id,author_name,body,rating,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);if(response.error)throw response.error;data=response.data;}
+   if(history){const user=await signedReviewUser(client);const own=await client.from('place_reviews').select('id,place_key,place_name,author_name,rating,body,photo,created_at').eq('user_id',user.id).eq('place_key',key);if(own.error)throw own.error;data=own.data||[];ownIds=new Set(data.map(x=>x.id));}
+   else if(client){const response=await client.from('place_reviews').select('id,author_name,body,rating,photo,created_at').eq('place_key',key).order('created_at',{ascending:false}).limit(20);if(response.error)throw response.error;data=response.data;}
    else{
     const cfg=cloudConfiguration();if(!cfg.configured)throw new Error('공개 서버 설정 없음');
     const url=new URL(cfg.url.replace(/\/$/,'')+'/rest/v1/place_reviews');
-    url.searchParams.set('select','id,author_name,body,rating,created_at');url.searchParams.set('place_key','eq.'+key);url.searchParams.set('order','created_at.desc');url.searchParams.set('limit','20');
+    url.searchParams.set('select','id,author_name,body,rating,photo,created_at');url.searchParams.set('place_key','eq.'+key);url.searchParams.set('order','created_at.desc');url.searchParams.set('limit','20');
     const response=await fetch(url,{headers:{apikey:cfg.key},signal:AbortSignal.timeout(10000)});if(!response.ok)throw new Error('공개 리뷰 HTTP '+response.status);data=await response.json();
    }
    render(Array.isArray(data)?data:[]);
@@ -135,10 +152,10 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
  write.addEventListener('click',()=>openEditor());
  cancel.addEventListener('click',()=>closeEditor?.());
  form.addEventListener('submit',async e=>{
-  e.preventDefault();if(save.disabled)return;const error=validateReview(rating.value,body.value);
+  e.preventDefault();if(save.disabled)return;if(photoPending){status.textContent='사진 처리 중입니다.';return;}const error=validateReview(rating.value,body.value);
   if(error){status.textContent=error;return;}
   save.disabled=true;status.textContent='리뷰를 저장하고 있습니다…';
-  const record={place_key:key,place_name:clean(history?place.place_name:place.name,90),rating:Number(rating.value),body:clean(body.value),created_at:new Date().toISOString()};
+  const record={place_key:key,place_name:clean(history?place.place_name:place.name,90),rating:Number(rating.value),body:clean(body.value),photo:draftPhoto,created_at:new Date().toISOString()};
   let published=false,why='';const client=getActiveCloudClient();
   if(client){
    try{
@@ -149,7 +166,7 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
      const payload={...record,user_id:session.user.id,author_name:author};
      delete payload.created_at;
      const {data:stored,error:saveError}=editingId
-       ?await client.from('place_reviews').update({rating:record.rating,body:record.body,updated_at:new Date().toISOString()}).eq('id',editingId).eq('user_id',session.user.id).select('id').single()
+       ?await client.from('place_reviews').update({rating:record.rating,body:record.body,photo:record.photo,updated_at:new Date().toISOString()}).eq('id',editingId).eq('user_id',session.user.id).select('id').single()
        :await client.from('place_reviews').upsert(payload,{onConflict:'place_key,user_id'}).select('id').single();
      if(saveError||!stored?.id)throw saveError||new Error('서버 등록 확인 실패');
      published=true;
@@ -162,7 +179,7 @@ export function installPlaceReviews(root,place,{history=false,onChange}={}){
    form.hidden=false;return;
   }
   status.textContent='리뷰가 공개 서버에 저장되었습니다.';
-  closeEditor?.();form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';
+  closeEditor?.();form.hidden=true;write.setAttribute('aria-expanded','false');body.value='';rating.value='';setPhoto(null);
   await refresh();onChange?.();
  });
  void refresh();return {element:section,close(){closeEditor?.();alive=false;}};

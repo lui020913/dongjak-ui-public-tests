@@ -92,3 +92,18 @@ html body #app#app#app.route-guiding .map-actions{
   }
 }
 /* Route comparison presentation is exclusively owned by route-experience.css. */
+
+/* Only dedicated camera controls are exposed while guidance is active. */
+#nav-map-controls[hidden]{display:none!important}
+html body #app#app#app.route-guiding #nav-map-controls:not([hidden]){
+ position:fixed!important;right:14px;top:var(--dj-nav-controls-top,35dvh);transform:translateY(-100%);
+ z-index:4200!important;display:flex!important;gap:6px;pointer-events:auto!important;
+}
+html body #app#app#app.route-guiding #nav-map-controls button{
+ width:44px;height:44px;border:1px solid #d2e1d8;border-radius:12px;background:#f7fbf8;color:#20483b;
+ font-size:19px;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 8px #183e3022;pointer-events:auto!important;
+}
+html body #app#app#app.route-guiding #nav-map-controls #nav-reset-camera[aria-pressed="true"]{color:#087f69}
+html body #app#app#app.route-guiding #map,
+html body #app#app#app.route-guiding #map .maplibregl-canvas-container,
+html body #app#app#app.route-guiding #map .maplibregl-canvas{pointer-events:auto!important}

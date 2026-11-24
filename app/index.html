@@ -236,6 +236,7 @@
         </div>
       </section>
         <div class="header-tools">
+          <button type="button" id="dj-activity-trigger" aria-label="알림"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span data-count hidden></span></button>
           <div class="weather-widget" id="weather-widget" aria-label="현재 날씨">
             <span id="weather-title">동작구</span>
             <button type="button" class="weather-info" id="weather-label" data-dj-weather-icon="◌" data-dj-temperature="—" title="날씨 상세정보 보기">날씨 조회 중</button>
@@ -856,6 +857,12 @@
           <button type="button" id="route-map-close">종료</button>
         </div>
       </section>
+      <div id="nav-map-controls" hidden role="group" aria-label="안내 지도 조작">
+        <button type="button" id="nav-zoom-in" aria-label="지도 확대">+</button>
+        <button type="button" id="nav-zoom-out" aria-label="지도 축소">−</button>
+        <button type="button" id="nav-toggle-3d" aria-label="2D·3D 전환">3D</button>
+        <button type="button" id="nav-reset-camera" aria-label="현재 위치로 복귀" aria-pressed="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></button>
+      </div>
       <section id="nav-live-card" class="nav-live-card" aria-label="진행 중인 도보 안내" hidden>
         <div class="nav-live-head"><span id="nav-mode-tag">GPS 안내</span><span id="nav-accuracy">GPS 대기 중</span></div>
         <strong id="nav-instruction">위치를 확인하고 있습니다…</strong>
@@ -904,9 +911,9 @@
         <form id="community-form" class="community-form" hidden>
           <div class="community-form-top"><strong>새 게시글</strong><button type="button" id="community-compose-close" aria-label="글쓰기 닫기"></button></div>
           <label for="community-dong">지역 (행정동)</label>
-          <select id="community-dong"><option value="">동작구 전체 · 미지정</option><option>노량진1동</option><option>노량진2동</option><option>상도1동</option><option>상도2동</option><option>상도3동</option><option>상도4동</option><option>흑석동</option><option>사당1동</option><option>사당2동</option><option>사당3동</option><option>사당4동</option><option>사당5동</option><option>대방동</option><option>신대방1동</option><option>신대방2동</option></select>
+          <select id="community-dong" required><option value="" disabled selected>지역 선택</option><option>노량진1동</option><option>노량진2동</option><option>상도1동</option><option>상도2동</option><option>상도3동</option><option>상도4동</option><option>흑석동</option><option>사당1동</option><option>사당2동</option><option>사당3동</option><option>사당4동</option><option>사당5동</option><option>대방동</option><option>신대방1동</option><option>신대방2동</option></select>
           <label for="community-category">게시글 유형</label>
-          <select id="community-category"><option>보행 불편</option><option>개선 제안</option><option>동네 질문</option><option>동네생활</option><option>생활정보</option><option>교통정보</option><option>자유게시판</option></select>
+          <select id="community-category"><option value="보행 불편">보행 불편</option><option value="개선 제안">개선 제안</option><option value="동네 질문">동네 질문</option><option value="동네생활">동네생활</option><option value="생활정보">생활정보</option><option value="교통정보">교통정보</option><option value="자유게시판">자유게시판</option></select>
           <div id="community-issue-details" class="community-issue-details">
             <label for="community-issue-type">보행불편 유형</label>
             <select id="community-issue-type"><option>보도 단차</option><option>보행공간 협소</option><option>횡단시설</option><option>조명·시야</option><option>시설물 장애</option><option>기타</option></select>

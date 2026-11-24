@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {isReviewPhoto} from '../src/review-photo.mjs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('review photo accepts only bounded JPEG data URLs',()=>{assert.equal(isReviewPhoto('data:image/jpeg;base64,/9j/AAAA'),true);for(const p of [null,'https://example.org/photo.jpg','data:image/svg+xml;base64,AAAA','data:image/jpeg;base64,/9j/'+ 'A'.repeat(410001)])assert.equal(isReviewPhoto(p),false);});
+test('community region and report location validation are applied before public submission',()=>{const main=read('src/main.js'),edge=read('supabase/functions/community-moderation/index.ts');assert.match(main,/dong.required=category!=='자유게시판'/);assert.match(main,/isIssue&&\(!communityPickedLocation\|\|isDongjak/);assert.match(edge,/p.category!=="자유게시판"&&!dongs.has\(p.dong\)/);assert.match(edge,/p.category==="보행 불편"&&\(!Number.isFinite\(p.lng\)/);});
+test('all four history tabs remain mounted and user post data is owner filtered',()=>{const info=read('src/v834-my-info.js'),cloud=read('src/community-cloud.js');for(const name of ['points','favorites','posts','reviews'])assert.ok(info.includes("makeRecordView('"+name+"'"));assert.match(cloud,/select\('community_posts',POST_FIELDS,\{owner:u.id/);});
+test('activity history only exposes owner-scoped rows, marks on selection and links to post',()=>{const cloud=read('src/community-cloud.js'),activity=read('src/community-activity.js');assert.match(cloud,/\.eq\('recipient_id',u.id\)/);assert.match(activity,/await markCommunityActivityRead\(row.id\)/);assert.match(activity,/openPost\?\.\(row.post_id\)/);assert.match(activity,/30000/);});
+test('navigation reset resumes follow and resets zoom pitch and bearing',()=>{const main=read('src/main.js');assert.match(main,/navFollow=true;navHeadingUp=true;updateNavButtonLabels\(\)/);assert.match(main,/zoom:16.3,pitch:0,bearing/);assert.match(main,/\['dragstart','zoomstart','rotatestart','pitchstart'\]/);assert.match(main,/if\(e.originalEvent\)pauseNavigationCamera\(\)/);});
