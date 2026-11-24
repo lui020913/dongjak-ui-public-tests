@@ -1,11 +1,10 @@
 {
   "source": "public-app",
-  "application_version": "9.2.149",
+  "application_version": "9.2.150",
   "public_work_branch": "main",
-  "purpose": "PR461: integrate PR457 visible-map facilities, PR458 equal bus route controls and train visuals, PR459 expandable waypoints, strict Dongjak routing bounds and 54px AI control. Preserve PR460 CSS recovery, unchanged scale visibility and bounded dock layout scheduling.",
-  "attempt": 366,
+  "purpose": "Integrated PR468, PR465, PR466, PR467 and PR469: inline waypoint and per-target search/map/GPS, category-based map/nearby facility results with road addresses and distance, clear pedestrian-risk (PRI) explanation, partial facility recovery and verified brand aliases, selected-bus 15-second refresh, bus detail fade/expanded sheet, direct community filter toolbar.",
+  "attempt": 367,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Run 45445006779 passed sealed integration anchors and 357/358 regression files; PR463 updates outdated literal search-height assertion to shared 54px sizing and checks expanded voice height and fixed AI height. Three exact CSS assertions independently verified. Retry same unreleased version; all protected gates retained.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
