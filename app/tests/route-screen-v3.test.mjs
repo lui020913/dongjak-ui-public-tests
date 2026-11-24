@@ -21,3 +21,15 @@ test('route V3 owns the complete visible entry screen and isolates it from legac
  assert.match(index,/src\/route-screen-v3\.js/);
  assert.doesNotMatch(source,/card\.append\(rows\)|card\.prepend\(walkMode\)/);
 });
+
+test('inline waypoint plus and all three search targets share GPS and map actions',()=>{
+ const source=read('src/route-screen-v3.js'),style=read('src/route-screen-v3.css'),engine=read('src/main.js');
+ assert.match(source,/id="v3-waypoints"[\s\S]*?class="waypoint-add-row"[\s\S]*?data-v3="waypoint"[\s\S]*?data-v3="end"/);
+ assert.doesNotMatch(source,/class="quick"|class="waypoint-actions"|data-v3="waypoint-map"/);
+ assert.match(source,/data-v3="search-gps"/);assert.match(source,/data-v3="search-map"/);
+ assert.match(source,/route-pick-start':'route-pick-end'/);
+ assert.match(engine,/routeSearchTarget!==which/);assert.match(engine,/seq!==routeSearchSequence\|\|which!==routeSearchTarget/);
+ assert.match(engine,/if\(!requireDongjakRouteLocation\(position\)\)return;/);
+ assert.match(style,/grid-template-rows:61px auto auto 61px/);
+ assert.match(style,/\.search-control-row\{display:grid/);
+});

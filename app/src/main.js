@@ -3030,7 +3030,7 @@ function beginRoutePick(which) {
   routePickMode=which;
   navigate('map');
   syncRoutePresentation();
-  toast(which==='start'?'지도에서 출발지를 선택해 주세요.':'지도에서 목적지를 선택해 주세요.');
+  toast(which==='start'?'지도에서 출발지를 선택해 주세요.':which==='waypoint'?'지도에서 경유지를 선택해 주세요.':'지도에서 목적지를 선택해 주세요.');
 }
 function pickRouteLocation(lngLat,point) {
   if (!routePickMode)return;
@@ -3047,6 +3047,7 @@ function resetRoute() {
   closeRouteSearch();closeTransitRouteConfirmation();
   routePickMode=null;routeStart=null;routeEnd=null;routeResult=null;
   routeWaypoints=[];routeProductTools?.setWaypoints([]);
+  window.dispatchEvent(new CustomEvent('dongjak:route-editor-reset'));
   clearPriRouteAdvice();
   routeVariants={standard:null,gentle:null};
   document.getElementById('route-variants').hidden=true;
@@ -3342,6 +3343,33 @@ document.getElementById('route-gps-start').addEventListener('click',()=>{
   }).catch((error)=>{toast(errorLocationCode(error)===1?'위치 권한이 거부됐습니다.':'현재 위치를 확인하지 못했습니다. 지도에서 선택해 주세요.');
     b.disabled=false;b.textContent='⌖ 현재 위치를 출발지로 지정';
   });
+});
+// Every search target uses the same validated route state and boundary guard.
+let routeSearchGpsPending=false;
+window.addEventListener('dongjak:route-search-current-location',async event=>{
+  const which=event.detail?.which;
+  if(routeSearchGpsPending)return;
+  const finish=()=>window.dispatchEvent(new CustomEvent('dongjak:route-search-gps-finished'));
+  if(navMode||app.dataset.tab!=='route'||!['start','waypoint','end'].includes(which)||routeSearchTarget!==which){finish();return;}
+  if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');finish();return;}
+  if(which==='waypoint'&&routeWaypoints.length>=5){toast('경유지는 최대 5곳입니다.');finish();return;}
+  routeSearchGpsPending=true;
+  const seq=routeSearchSequence;
+  try{
+    const {coords}=await getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000});
+    if(seq!==routeSearchSequence||which!==routeSearchTarget||app.dataset.tab!=='route'||navMode)return;
+    const position={lng:coords.longitude,lat:coords.latitude,name:'현재 위치',label:'현재 위치',resolveAddress:true};
+    if(!requireDongjakRouteLocation(position))return;
+    if(which==='waypoint'){
+      if(routeWaypoints.length>=5)return;
+      routeWaypoints.push(position);invalidateRoute();routeProductTools?.setWaypoints(routeWaypoints);void resolveRouteAddress(position);
+    }else if(!setRouteLocation(which,position))return;
+    closeRouteSearch();
+    navigate('route');
+    toast(which==='start'?'현재 위치를 출발지로 지정했습니다.':which==='waypoint'?'현재 위치를 경유지로 지정했습니다.':'현재 위치를 목적지로 지정했습니다.');
+  }catch(error){
+    if(seq===routeSearchSequence&&which===routeSearchTarget)toast(errorLocationCode(error)===1?'위치 권한이 거부됐습니다.':'현재 위치를 확인하지 못했습니다. 지도에서 선택해 주세요.');
+  }finally{routeSearchGpsPending=false;finish();}
 });
 document.getElementById('route-calc').addEventListener('click',calculateRoute);
 updateRouteCalcAvailability();
