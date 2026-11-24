@@ -1552,25 +1552,25 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  const panel=page.locator('#participation-panel'),toolbar=panel.locator('.community-toolbar');
  const options=panel.locator('.community-view-options');
  await expect(options).toBeVisible();
- await expect(toolbar).toBeHidden();
- await tap(page,options.locator('summary'));
+ await expect(options.locator('summary')).toHaveCount(0);
  await expect(toolbar).toBeVisible();
  const district=options.locator('.community-dong-filter-row #community-dong-filter');
  await expect(district).toBeVisible();
  await expect(district.locator('option')).toHaveCount(16);
  const districtBox=await district.boundingBox();
  const toolbarBox=await toolbar.boundingBox();
- expect(districtBox.y+districtBox.height,'district selector must not crowd the four action buttons').toBeLessThanOrEqual(toolbarBox.y+2);
- const controls=toolbar.locator(':scope > button, :scope > select');
- await expect(controls).toHaveCount(4);
+ expect(Math.abs(districtBox.y-toolbarBox.y),'district selector shares the fixed filter row').toBeLessThan(3);
+ const controls=toolbar.locator('#community-dong-filter,#community-sort,#community-saved-toggle,#community-notifications-toggle,#community-refresh');
+ await expect(controls).toHaveCount(5);
  const cells=await controls.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,display:getComputedStyle(n).display}}));
- for(let i=0;i<4;i++){
-  expect(cells[i].h,'each community action retains a compact touch target').toBeGreaterThanOrEqual(38);
+ for(let i=0;i<5;i++){
+  expect(cells[i].h,'each community action retains a compact touch target').toBeGreaterThanOrEqual(44);
+  expect(cells[i].w).toBeGreaterThanOrEqual(44);
   expect(cells[i].h).toBeLessThanOrEqual(48);
   expect(Math.abs(cells[i].y-cells[0].y),'actions must be on one row').toBeLessThan(3);
   if(i)expect(cells[i].x,'community controls must increase left-to-right').toBeGreaterThan(cells[i-1].x);
  }
- expect(cells[3].x+cells[3].w).toBeLessThanOrEqual(page.viewportSize().width-8);
+ expect(cells[4].x+cells[4].w).toBeLessThanOrEqual(page.viewportSize().width-8);
  if(page.viewportSize().width===390)await test.info().attach('community-actions.png',{body:await page.screenshot(),contentType:'image/png'});
  await tap(page,tab(page,'map'));
  await page.evaluate(()=>{
@@ -1716,12 +1716,12 @@ test('iPhone final visual contract: compact route, transparent community status 
  const search=await page.locator('#community-search').boundingBox();
  const write=await page.locator('#community-compose-toggle').boundingBox();
  expect(Math.abs(search.y-write.y),'search and compose share one control row').toBeLessThan(3);
- await tap(page,page.locator('#participation-panel .community-view-options>summary'));
+ await expect(page.locator('#participation-panel .community-view-options summary')).toHaveCount(0);
  const refresh=page.locator('#participation-panel #community-refresh');
  const refreshSize=await refresh.boundingBox();
- expect(refreshSize?.width||0,'refresh should remain compact in expanded options').toBeLessThan(145);
+ expect(refreshSize?.width||0,'refresh should remain compact in the fixed filter row').toBeLessThan(145);
  const toolbar=await page.locator('#participation-panel .community-toolbar').boundingBox();
- expect(toolbar.y-(search.y+search.height),'secondary controls should be separated from primary search').toBeGreaterThanOrEqual(8);
+ expect(toolbar.y-(search.y+search.height),'secondary controls should be separated from primary search').toBeGreaterThanOrEqual(6);
 
  await tap(page,tab(page,'map'));
  await expect(page.locator('#dj-route-choice-list')).toHaveCount(1);
