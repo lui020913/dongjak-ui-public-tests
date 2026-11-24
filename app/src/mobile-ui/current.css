@@ -1492,3 +1492,37 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
    opacity:.55!important;
  }
 }
+
+/* Arrival/nearby: keep screen-space map controls out of the open reading surface. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app:has(#ped-tools-panel:not([hidden])) .map-actions{
+   visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){
+   background:#fff!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #ped-tools-panel > :is(.ped-tools-panel-head,.dj-sheet-chrome){
+   background:inherit!important;box-shadow:none!important;border-bottom:0!important;
+  }
+ }
+ /* Marker outer transform belongs to MapLibre. Animate only a square child,
+    in the viewport plane; never scale its axes independently. */
+ html body #app#app#app#app .dj-current-position-marker {
+  width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;
+  box-sizing:border-box!important;border-radius:50%!important;aspect-ratio:1!important;overflow:visible!important;
+ }
+ html body #app#app#app#app .dj-current-position-marker .dj-current-position-pulse{
+  position:absolute!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+  width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:none!important;max-height:none!important;
+  margin:0!important;aspect-ratio:1!important;box-sizing:border-box!important;border-radius:50%!important;
+  transform:translate(-50%,-50%) scale(1);animation:dj-round-location-pulse 1.8s ease-out infinite!important;
+ }
+}
+@keyframes dj-round-location-pulse{
+ from{transform:translate(-50%,-50%) scale(.55);opacity:.75}
+ to{transform:translate(-50%,-50%) scale(1.35);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+ @layer request-completion{html body #app#app#app#app .dj-current-position-marker .dj-current-position-pulse{animation:none!important;opacity:.35!important}}
+}
