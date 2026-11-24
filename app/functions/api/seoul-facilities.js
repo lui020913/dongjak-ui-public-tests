@@ -24,7 +24,7 @@ export async function onRequestGet({request,env}){
      predicates.push('lng BETWEEN ? AND ? AND lat BETWEEN ? AND ?');args.push(nums[0],nums[2],nums[1],nums[3]);
    }
    const where=predicates.length?' WHERE '+predicates.join(' AND '):'';
-   const stmt=db.prepare('SELECT id,name,category,lng,lat,address,phone,website,source,updated FROM seoul_facilities'+where+' ORDER BY category,name LIMIT ? OFFSET ?');
+   const stmt=db.prepare('SELECT id,name,category,lng,lat,address,phone,website,source,updated FROM seoul_facilities'+where+' ORDER BY category,name,id LIMIT ? OFFSET ?');
    const result=await stmt.bind(...args,max,offset).all();
    const status=await db.prepare('SELECT source_id,last_success,row_count,received_count,status FROM seoul_facility_sync ORDER BY source_id').all();
    return reply({ok:true,configured:true,places:result.results||[],sync:status.results||[],hasMore:(result.results?.length||0)===max});
