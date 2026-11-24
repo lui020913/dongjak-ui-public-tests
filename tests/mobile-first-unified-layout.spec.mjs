@@ -320,6 +320,7 @@ test('guidance mode allows map camera controls and blocks unrelated tabs',async(
   await expect(page.locator('#app')).toHaveAttribute('data-dj-route-stage','guiding');
   await expect(page.locator('#dj-walk-guidance-lock')).toBeVisible();
   await expect(page.locator('#nav-stop')).toBeVisible();
+  await expect(page.locator('#nav-voice')).toBeVisible();
   await expect(page.locator('#bottom-nav')).toBeHidden();
   const state=await page.evaluate(()=>{
     const card=document.getElementById('nav-live-card').getBoundingClientRect();
@@ -327,12 +328,14 @@ test('guidance mode allows map camera controls and blocks unrelated tabs',async(
     const hit=document.elementFromPoint(stop.left+stop.width/2,stop.top+stop.height/2);
     return {cardTop:card.top,cardBottom:card.bottom,stopTop:stop.top,stopBottom:stop.bottom,
       vh:innerHeight,stopHit:hit?.id==='nav-stop'||document.getElementById('nav-stop').contains(hit),
-      otherVisible:['nav-follow','nav-voice','nav-orientation'].some(id=>{
+      voiceHit:(()=>{const v=document.getElementById('nav-voice'),r=v.getBoundingClientRect();return v.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));})(),
+      otherVisible:['nav-follow','nav-orientation'].some(id=>{
         const el=document.getElementById(id),r=el.getBoundingClientRect();
         return getComputedStyle(el).display!=='none'&&r.width>0&&r.height>0;
       })};
   });
   expect(state.stopHit).toBe(true);
+  expect(state.voiceHit).toBe(true);
   expect(state.otherVisible).toBe(false);
   expect(state.cardTop).toBeGreaterThan(100);
   expect(state.cardBottom).toBeLessThanOrEqual(state.vh-4);
@@ -340,8 +343,13 @@ test('guidance mode allows map camera controls and blocks unrelated tabs',async(
   expect(await page.evaluate(()=>window.__djWalkMapTouches)).toBeGreaterThan(0);
   await expect(page.locator('#nav-reset-camera')).toBeVisible();
   await expect(page.locator('#nav-toggle-3d')).toBeVisible();
+  const voice=page.locator('#nav-voice');
+  await voice.click();
+  await expect(voice).toHaveAttribute('aria-pressed','true');
+  await voice.click();
+  await expect(voice).toHaveAttribute('aria-pressed','false');
   await page.keyboard.press('Tab');
-  expect(await page.evaluate(()=>!!document.activeElement.closest('#nav-stop,#nav-map-controls'))).toBe(true);
+  expect(await page.evaluate(()=>!!document.activeElement.closest('#nav-stop,#nav-map-controls,#nav-voice'))).toBe(true);
   await testInfo.attach('walk-locked-guidance.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
   await page.locator('#nav-stop').click({timeout:12000});
   await expect(page.locator('#app')).not.toHaveClass(/route-guiding/);
