@@ -1,11 +1,11 @@
 {
   "source": "public-app",
-  "application_version": "9.2.133",
+  "application_version": "9.2.134",
   "public_work_branch": "main",
-  "purpose": "Six requested UI and public publication fixes (PR424, PR425, PR426) with latest GIS PR255 preserved. Solid map lines, collapsed update history, stationary AI scroll and reliable mobile dismissal, clearer route comparison actions, PRI header and scroll separation, authenticated public community and reviews.",
-  "attempt": 340,
+  "purpose": "PR429: lower route preview with verified four-pixel safe clearance, independent nearby header/body, fixed metro terminal slots and arrivals spacing, unobstructed expanded night panel and shared dark palette, correct vegetation paint and selective window motion. Preserve existing data, GIS, routing and keyboard stability.",
+  "attempt": 341,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt339 passed 343/345 regression files, failing two obsolete assertions prohibiting the separately merged PR255 research overlay. PR427 corrected these assertions while retaining native 50:50 PRI and independent research data; focused CI 45322732462 succeeded. Retry the same version under all protected release gates.",
+  "last_retry_reason": "2026-11-24: PR429 source CI 45326640766 passed 25/28 browser cases; focused CI 45329527614 passed the remaining three route-preview viewport cases after canonical CSS correction. Merged at 237cfa908dd2c7ba1ada7c6b8b94559ccd9d0b4d. Run all protected release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
