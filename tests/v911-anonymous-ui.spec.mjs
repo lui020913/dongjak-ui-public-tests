@@ -1673,6 +1673,14 @@ test('phone selected dock has no color plate and route form is vertically balanc
  test.skip(page.viewportSize().width>=700,'phone only');
  await ready(page);
  const checkDock=async key=>{
+  // Narrow iPhones can commit the selected class before the independent
+  // icon/label ink transition completes. Verify painted text only after
+  // it settles, not in the same tick as the tap.
+  await expect.poll(()=>page.locator('#bottom-nav').evaluate(dock=>{
+    const active=dock.querySelector('.nav-tab.active'),inactive=dock.querySelector('.nav-tab:not(.active)');
+    if(!active?.lastElementChild||!inactive?.lastElementChild)return false;
+    return getComputedStyle(active.lastElementChild).color!==getComputedStyle(inactive.lastElementChild).color;
+  }),{timeout:15000,intervals:[100,250,500,1000]}).toBe(true);
   const state=await page.locator('#bottom-nav').evaluate((dock,key)=>{
    const active=dock.querySelector('.nav-tab.active'),inactive=dock.querySelector('.nav-tab:not(.active)');
    const plate=dock.querySelector('.dj-motion-indicator'),r=dock.getBoundingClientRect();
