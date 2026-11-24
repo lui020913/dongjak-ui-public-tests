@@ -84,6 +84,9 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   doc.getElementById('route-clear')?.addEventListener('click',onReset);
   win.addEventListener('dongjak:route-variants-ready',onVariants);
   doc.getElementById('route-variants')?.addEventListener('click',onNativeChoice,true);
+  const voice=doc.getElementById('nav-voice');
+  const onVoice=()=>{if(voice?.getAttribute('aria-pressed')==='true'){voiced.clear();updateState();}};
+  voice?.addEventListener('click',onVoice);
   const observer=new MutationObserver(()=>updateState());
   for(const [el,opts] of [
     [app,{attributes:true,attributeFilter:['class']}],
@@ -96,7 +99,7 @@ export function installWalkingNavigationExperience(doc=document,win=window){
   const mapRoot=doc.getElementById('map');
   if(mapRoot)observer.observe(mapRoot,{childList:true,subtree:true});
   updateState();
-  return ()=>{observer.disconnect();cardSize?.disconnect();win.removeEventListener('resize',positionControls);win.removeEventListener('dongjak:route-variants-ready',onVariants);
+  return ()=>{voice?.removeEventListener('click',onVoice);observer.disconnect();cardSize?.disconnect();win.removeEventListener('resize',positionControls);win.removeEventListener('dongjak:route-variants-ready',onVariants);
     doc.getElementById('route-calc')?.removeEventListener('click',onReset);
     doc.getElementById('route-clear')?.removeEventListener('click',onReset);
     doc.getElementById('route-variants')?.removeEventListener('click',onNativeChoice,true);
