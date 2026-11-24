@@ -341,7 +341,8 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const mobilePin=true;
   const marker=new maplibregl.Marker({element:pin,anchor:'bottom',offset:[0,mobilePin?-15:-4]})
     .setLngLat([p.lng,p.lat]).addTo(map);
-  popup.on('close',()=>{reviewController?.close();controllerAI.abort();marker.remove();});
+  popup.on('close',()=>{reviewController?.close();});
+  popup.on('close',()=>{controllerAI.abort();marker.remove();});
   const cachedInfo=mem.get(cacheKey(p));
   let enriched=Promise.resolve();
   if(!p.phone||!p.address||!p.website){
