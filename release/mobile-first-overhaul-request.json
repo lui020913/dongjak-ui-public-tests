@@ -1,12 +1,12 @@
 {
   "source": "public-app",
-  "application_version": "9.3.0",
+  "application_version": "9.2.137",
   "public_work_branch": "main",
-  "purpose": "PR440: repair public community post registration retry and visible validation/server feedback; retain current verified UI changes and all protected mobile/performance gates.",
-  "attempt": 347,
+  "purpose": "PR440 only: public community registration fix on exact verified v9.2.136 app; v9.3.0 performance candidate is preserved on separate branch.",
+  "attempt": 348,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "Owner requested deployment of merged PR440 (7d3ba6d); full application regression and exact source build passed, release must independently pass existing mobile and performance gates. Previous release failed mobile shard 6 and performance comparison; do not bypass or weaken gates.",
-  "release_kind": "minor",
+  "last_retry_reason": "Owner requested isolated patch release without v9.3 performance comparison. Restore exact previously deployed app tree plus PR440 only; retain all current protected release gates for this patch.",
+  "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
 }
