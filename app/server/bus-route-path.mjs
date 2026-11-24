@@ -73,7 +73,12 @@ export function parseBusRouteStops(body,routeId){
  return (Array.isArray(raw)?raw:[raw]).flatMap(row=>{
   const id=String(row?.busRouteId??routeId),seq=Number(row?.seq),name=String(row?.stationNm??'').trim(),lng=Number(row?.gpsX),lat=Number(row?.gpsY),arsId=String(row?.arsId??'');
   if(id!==String(routeId)||!Number.isInteger(seq)||seq<1||!name||!Number.isFinite(lng)||!Number.isFinite(lat)||lng<124||lng>132||lat<33||lat>39||seen.has(seq))return [];
-  seen.add(seq);return [{seq,name,lng,lat,arsId}];
+  const clock=value=>{const raw=String(value??'').trim();const m=raw.match(/^(?:\d{8})?([01]\d|2[0-3]):?([0-5]\d)(?:[0-5]\d)?$/);return m?`${m[1]}:${m[2]}`:'';};
+  seen.add(seq);return [{seq,name,lng,lat,arsId,
+    ...(row.station?{stationId:String(row.station)}:{}),
+    ...(row.direction?{direction:String(row.direction)}:{}),
+    ...(clock(row.beginTm)?{firstTime:clock(row.beginTm)}:{}),
+    ...(clock(row.lastTm)?{lastTime:clock(row.lastTm)}:{})}];
  }).sort((a,b)=>a.seq-b.seq);
 }
 export function decodeBusRouteStops(raw,id){
@@ -83,7 +88,7 @@ export function decodeBusRouteStops(raw,id){
   const h=tagged(text,'headerCd');if(h!=null&&!['0','00'].includes(h))return [];
   let blocks=[...text.matchAll(/<itemList\b[^>]*>([\s\S]*?)<\/itemList>/gi)];
   if(!blocks.length)blocks=[...text.matchAll(/<StationList\b[^>]*>([\s\S]*?)<\/StationList>/gi)];
-  data={msgBody:{itemList:blocks.map(m=>Object.fromEntries(['busRouteId','seq','stationNm','gpsX','gpsY','arsId'].map(k=>[k,tagged(m[1],k)])))}};
+  data={msgBody:{itemList:blocks.map(m=>Object.fromEntries(['busRouteId','seq','stationNm','gpsX','gpsY','arsId','station','direction','beginTm','lastTm'].map(k=>[k,tagged(m[1],k)])))}};
  }else return [];
  return parseBusRouteStops(data,id);
 }

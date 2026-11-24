@@ -58,7 +58,10 @@ export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
     const lng=Number(field('gpsX')||field('posX')||field('longitude')),lat=Number(field('gpsY')||field('posY')||field('latitude'));
     const id=field('vehId')||field('plainNo');
     return {id:id?`bus:${id}`:'',routeId:String(field('routeId')||routeId),routeName:routeName||String(routeId),
-      vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm')||field('gpsTime')||field('tm'),now),receivedAt:now.toISOString()};
+      vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm')||field('gpsTime')||field('tm'),now),receivedAt:now.toISOString(),
+      ...(field('nextStId')?{nextStopId:field('nextStId')}:{}),
+      ...(['0','1'].includes(field('busType'))?{busType:field('busType')}:{}),
+      ...(['3','4','5','6'].includes(field('congetion'))?{congestion:field('congetion')}:{})};
   }).filter(b=>b.id&&xy(b.longitude,b.latitude));
 }
 async function load(url,format='json'){
