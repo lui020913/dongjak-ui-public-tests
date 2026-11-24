@@ -27,3 +27,8 @@ test('night panel uses shared surface, raised, border and accent tokens',()=>{
  assert.ok(css);for(const token of ['surface','raised','ink','muted','line','accent'])assert.ok(css.includes('--dj-theme-'+token));
  assert.doesNotMatch(css,/\.(?:night-line|night-dot|night-coverage)[:.][^\n]*::before/);
 });
+
+test('preview keeps four pixel minimum bottom clearance above safe area',()=>{
+ const css=read('src/route-experience.css').split('/* Keep the preview bottom anchored')[1];
+ assert.match(css,/bottom:calc\(env\(safe-area-inset-bottom,0px\) \+ 4px\)!important/);
+});
