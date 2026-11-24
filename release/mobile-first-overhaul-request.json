@@ -3,9 +3,9 @@
   "application_version": "9.2.132",
   "public_work_branch": "main",
   "purpose": "Combined PR #421: route search/header and automatic multimodal place search (#419), iOS AI keyboard background and dismissal corrections (#420), and verified community geometry. Preserve existing V3 routing and exact-source protected Preview, mobile, PC/tablet and Production gates.",
-  "attempt": 337,
+  "attempt": 338,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: merged both PR histories at a06347cd6102 after route browser tests (6/6), AI keyboard and route-to-AI integration CI 45308497361, and final composer check CI 45310062945 passed. Single combined release; promote only exact verified candidate.",
+  "last_retry_reason": "2026-11-24: attempt337 passed build, Preview, desktop/tablet and 11/12 mobile shards; only the obsolete white AI status expectation failed. PR #422 corrected that test without runtime changes and passed the exact original Preview retest in CI 45311482286. Retry the same version under the existing protected release gates.",
   "release_kind": "patch",
   "beta_number": 1,
   "gemini_repair_count": 0
