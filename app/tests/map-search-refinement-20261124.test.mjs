@@ -43,3 +43,14 @@ test('visible facilities group by known category and preserve every displayed ro
  assert.equal(groups.reduce((n,g)=>n+g.rows.length,0),rows.length);
  assert.deepEqual(groupVisibleFacilities([]),[]);
 });
+
+import {readFileSync} from 'node:fs';
+test('map area categories use one horizontal rail and a single filtered result list',()=>{
+ const js=readFileSync(new URL('../src/map-quick-search.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/map-search-refinement.css',import.meta.url),'utf8');
+ assert.match(js,/groups=\[\{label:'전체',rows:items\},\.\.\.groupVisibleFacilities\(items\)\]/);
+ assert.match(js,/results\.replaceChildren\(\.\.\.groups\[index\]\.rows\.map\(makeResultButton\)\)/);
+ assert.match(js,/setAttribute\('aria-pressed',String\(i===index\)\)/);
+ assert.match(css,/\.dj-visible-facility-rail\{[^}]*overflow-x:auto!important;overflow-y:hidden!important/);
+ assert.match(css,/\.dj-visible-facility-tab\{[^}]*flex:0 0 auto!important/);
+});

@@ -335,15 +335,24 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{}}){
     if(active!==seq)return;
     const {items,total}=visibleFacilityResults(area,[...local,...external]);
     list.replaceChildren();
-    for(const {label,rows} of groupVisibleFacilities(items)){
-      const group=document.createElement('section');group.className='dj-visible-facility-group';group.setAttribute('aria-label',label);
-      const heading=document.createElement('h3');heading.className='dj-visible-facility-heading';
-      const name=document.createElement('span');name.textContent=label;
-      const count=document.createElement('span');count.className='dj-visible-facility-count';count.textContent=rows.length+'곳';
-      heading.append(name,count);
-      const results=document.createElement('div');results.className='dj-visible-facility-list';
-      for(const place of rows)results.append(makeResultButton(place));
-      group.append(heading,results);list.append(group);
+    if(items.length){
+      const groups=[{label:'전체',rows:items},...groupVisibleFacilities(items)];
+      const rail=document.createElement('div');rail.className='dj-visible-facility-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','시설 유형 선택');
+      const results=document.createElement('div');results.className='dj-visible-facility-list';results.setAttribute('aria-label','시설 검색 결과');
+      const buttons=[];
+      const select=index=>{
+        for(const [i,button] of buttons.entries())button.setAttribute('aria-pressed',String(i===index));
+        results.replaceChildren(...groups[index].rows.map(makeResultButton));
+        results.setAttribute('aria-label',groups[index].label+' 시설 검색 결과');
+        // Reset the vertical list without moving the category rail sideways.
+        body.scrollTop=0;
+      };
+      for(const [i,{label,rows}] of groups.entries()){
+        const button=document.createElement('button');button.type='button';button.className='dj-visible-facility-tab';
+        button.textContent=label+' '+rows.length;button.setAttribute('aria-label',label+' '+rows.length+'곳');
+        button.addEventListener('click',()=>select(i));buttons.push(button);rail.append(button);
+      }
+      list.append(rail,results);select(0);
     }
     feedback.textContent=items.length?`현재 지도 내 ${total}곳${total>items.length?' · '+items.length+'곳 표시':''}${partial?' · 일부 장소를 불러오지 못했습니다.':''}`:(partial?'현재 지도에서 확인된 시설이 없습니다. 일부 장소를 불러오지 못했습니다.':'현재 지도에서 확인된 시설이 없습니다. 지도를 이동해 다시 검색해 주세요.');
   };
