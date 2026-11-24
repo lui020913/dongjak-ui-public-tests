@@ -46,7 +46,7 @@ test('rail connection remains a clearly indicative plan and requires real nearby
 test('visible custom phone buttons explicitly own pointer hit-testing; hidden tabs do not',()=>{
  const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8');
  assert.match(css,/\[data-tab="map"\]:not\(\[data-search-open="true"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:auto!important;touch-action:manipulation!important\}/);
- assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
+ assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\],\[data-dj-search-entry="1"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
 });
 
 test('new rail is independent from the original toolbar; road width is still available in native My Info layers',()=>{
