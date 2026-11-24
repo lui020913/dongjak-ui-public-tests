@@ -67,6 +67,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     const active=doc.activeElement;
     const keyboard=box.keyboardInset>120&&Boolean(active&&form.contains(active)&&active.matches?.('input,textarea,select'));
     root.dataset.keyboard=keyboard?'open':'closed';
+    footer?.style.setProperty('padding-bottom',keyboard?'10px':'max(16px,env(safe-area-inset-bottom,0px))','important');
   }
   function schedule(){
     if(!root||root.hidden||frame)return;
@@ -98,7 +99,8 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     // when those declarations arrive after this module's stylesheet.
     for(const [property,value] of [
       ['flex','1 1 0%'],['height','0px'],['min-height','0px'],
-      ['overflow-y','auto'],['overflow-x','hidden']
+      ['overflow-y','auto'],['overflow-x','hidden'],
+      ['box-sizing','border-box'],['padding','19px max(16px,env(safe-area-inset-right,0px)) 25px max(16px,env(safe-area-inset-left,0px))']
     ])scroll.style.setProperty(property,value,'important');
     helper=doc.createElement('p');
     helper.className='dj-compose-intro';
@@ -107,6 +109,8 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     for(const node of [...form.childNodes])if(node!==header&&node!==save)scroll.append(node);
     footer=doc.createElement('footer');
     footer.className='dj-compose-footer';
+    footer.style.setProperty('padding-inline','max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))','important');
+    footer.style.setProperty('box-sizing','border-box','important');
     footer.append(save);
     form.replaceChildren(header,scroll,footer);
 

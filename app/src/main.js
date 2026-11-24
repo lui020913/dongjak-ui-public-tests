@@ -1008,7 +1008,13 @@ function onGpsPosition(position){
   gpsLastPosition=[lng,lat];
   gpsLastAccuracy=Number(coords.accuracy)||0;
   outsideDistrictAlert.check(lng,lat,boundaryGeometry,gpsLastAccuracy);
-  if(!gpsMarker)gpsMarker=new maplibregl.Marker({color:'#1976d2',scale:0.82}).setLngLat([lng,lat]).addTo(map);
+  if(!gpsMarker){
+    const marker=document.createElement('div');marker.className='dj-current-position-marker';
+    marker.setAttribute('aria-label','현재 GPS 위치');
+    const pulse=document.createElement('span');pulse.className='dj-current-position-pulse';
+    marker.append(pulse);
+    gpsMarker=new maplibregl.Marker({element:marker,anchor:'center',pitchAlignment:'viewport',rotationAlignment:'viewport'}).setLngLat([lng,lat]).addTo(map);
+  }
   else gpsMarker.setLngLat([lng,lat]);
   if(gpsFollow && mapReady && app.dataset.tab==='map'){
     const center=map.getCenter();

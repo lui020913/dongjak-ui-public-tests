@@ -96,8 +96,22 @@ test('AI mobile composer follows one visual viewport with no duplicated keyboard
  const css=read('src/v880-supabase-safety-ai.css');
  const js=read('src/v891-mobile-hud-ai-logo.js');
  assert.match(js,/modal\.dataset\.djAiKeyboard=keyboardOpen\?'true':'false'/);
- assert.match(js,/Math\.min\(Math\.floor\(view\?\.height\|\|win\.innerHeight\),win\.innerHeight-top\)/);
+ assert.match(js,/Math\.min\(Math\.floor\(view\?\.height\|\|win\.innerHeight\),layoutHeight-top\)/);
  assert.match(css,/#dj-ai-search-modal\[data-dj-ai-keyboard="true"\] \.dj-ai-search-body\{padding-bottom:8px!important\}/);
  assert.match(css,/#dj-ai-search-modal \.dj-ai-transcript\{[^\n]*overflow-y:auto!important/);
  assert.match(css,/#dj-ai-search-modal \.dj-ai-composer\{position:relative!important;flex:0 0 auto!important/);
+});
+
+test('GPS and nearby safety have a single deliberate panel owner',()=>{
+ const gps=read('src/gps-safety-popup.js'),nearby=read('src/pedestrian-tools.js'),main=read('src/main.js');
+ assert.doesNotMatch(gps,/button\.addEventListener\('click',\(\)=>void openSnapshot/);
+ assert.match(nearby,/renderNearbySafetySnapshot\(\[longitude,latitude\]/);
+ assert.match(main,/pitchAlignment:'viewport',rotationAlignment:'viewport'/);
+ assert.match(main,/dj-current-position-pulse/);
+});
+test('community uses safe gutters and map handoff never retains outgoing page',()=>{
+ const portal=read('src/community-composer-portal.js'),tabs=read('src/bottom-tab-navigation.js');
+ assert.match(portal,/padding-inline/);
+ assert.match(portal,/max\(16px,env\(safe-area-inset-bottom,0px\)\)/);
+ assert.match(tabs,/previous&&!reduced\(\)&&button\.dataset\.tab!=='map'/);
 });
