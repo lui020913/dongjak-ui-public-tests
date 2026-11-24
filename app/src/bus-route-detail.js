@@ -1,8 +1,9 @@
 import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-sheet.js';
 
 import {routeVehicleGroups,vehicleLabel,stopHours} from './bus-route-detail-model.mjs';
+import {WINDOW_MOTION} from './mobile-window-motion.js';
 
-export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRetry}){
+export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRetry,onHidden=()=>{}}){
   const doc=panel.ownerDocument??globalThis.document;
   const host=doc.getElementById('app')||panel.parentElement||panel;
   const make=(tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n;};
@@ -21,13 +22,26 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
   const refresh=button('↻',()=>state?.status==='error'?onRetry():onRefresh());refresh.setAttribute('aria-label','새로고침');
   refresh.className='dj-bus-detail-refresh';foot.append(info,mapButton,refresh);root.append(header,status,scroll,foot);host.append(root);
   let selection=null,state=null,stops=[],vehicles=[],view='route',pendingScroll=false,lastSignature='',routeScroll=0;
+  let closeTimer=null;
+  const win=doc.defaultView??globalThis;
+  function cancelClosing(){
+    if(closeTimer!==null)win.clearTimeout(closeTimer);
+    closeTimer=null;delete root.dataset.closing;root.inert=false;root.removeAttribute('aria-hidden');
+  }
+  function finishClosing(){
+    if(root.dataset.closing!=='true')return;
+    root.hidden=true;cancelClosing();onHidden();
+  }
+  root.addEventListener('animationend',event=>{
+    if(event.target===root&&event.animationName==='dj-bus-detail-fade-out')finishClosing();
+  });
   function syncBounds(){if(root.hidden)return;const nav=doc.getElementById('bottom-nav')?.getBoundingClientRect?.();const height=globalThis.innerHeight||800;const dock=nav&&nav.height>0?Math.max(0,height-nav.top):72;root.style.setProperty('--dj-bus-detail-bottom',`${dock+6}px`);}
   globalThis.addEventListener?.('resize',syncBounds,{passive:true});
   if(typeof ResizeObserver==='function'){const nav=doc.getElementById('bottom-nav');if(nav)new ResizeObserver(syncBounds).observe(nav);}
   function setView(next){if(view==='route')routeScroll=scroll.scrollTop;view=next;root.dataset.view=next;lastSignature='';scroll.scrollTop=0;render();if(next==='route')scroll.scrollTop=routeScroll;}
   function vehicleRow(v){const r=make('div','dj-bus-detail-vehicle');const icon=make('span','dj-bus-detail-bus');icon.setAttribute('aria-hidden','true');r.append(icon,make('span','dj-bus-detail-vehicle-label',vehicleLabel(v)));return r;}
   function render(){
-    if(root.hidden)return;
+    if(root.hidden||root.dataset.closing==='true')return;
     const oldTop=scroll.scrollTop;
     const focused=doc.activeElement?.dataset?.stopSeq;
     info.setAttribute('aria-pressed',String(view==='info'));
@@ -65,6 +79,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     if(focused)list.querySelector(`[data-stop-seq="${Number(focused)}"]`)?.focus({preventScroll:true});
   }
   function open(next){
+    cancelClosing();
     selection=next;state=null;stops=[];vehicles=[];view='route';pendingScroll=true;lastSignature='';routeScroll=0;root.dataset.view='route';
     const category=classifyBusRoute(next.route,next.routeType);kind.textContent=BUS_CATEGORY_LABEL[category];root.dataset.busCategory=category;name.textContent=next.route;
     root.hidden=false;syncBounds();render();
@@ -73,6 +88,14 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     if(!selection||next?.id!==selection.routeId)return;
     state=next;stops=nextStops;vehicles=nextVehicles;render();
   }
-  function hide(){root.hidden=true;selection=null;state=null;stops=[];vehicles=[];lastSignature='';}
+  function hide(){
+    if(root.hidden||root.dataset.closing==='true')return;
+    selection=null;state=null;stops=[];vehicles=[];lastSignature='';
+    root.dataset.closing='true';root.inert=true;root.setAttribute('aria-hidden','true');
+    if(win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||!win.matchMedia?.('(max-width:699px)')?.matches){finishClosing();return;}
+    // Keep the sheet mounted while opacity falls; the map controls return only after it is hidden.
+    root.style.setProperty('--dj-bus-close-duration',WINDOW_MOTION.close+'ms');
+    closeTimer=win.setTimeout(finishClosing,WINDOW_MOTION.close+80);
+  }
   return {open,update,hide,isOpen:()=>!root.hidden,getSelection:()=>selection};
 }

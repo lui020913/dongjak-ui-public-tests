@@ -26,3 +26,20 @@ test('bus detail owns a sibling surface and closes the old stop sheet before ope
  assert.match(map,/reopenRoute\.addEventListener/);
  assert.match(ui,/signature===lastSignature/);
 });
+
+test('route detail fades before hiding, removes fake handle, and uses available safe viewport',()=>{
+ const ui=readFileSync(new URL('../src/bus-route-detail.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/bus-route-detail.css',import.meta.url),'utf8');
+ const map=readFileSync(new URL('../src/transport-map.js',import.meta.url),'utf8');
+ assert.ok(ui.includes("event.animationName==='dj-bus-detail-fade-out'"));
+ assert.ok(ui.includes("root.hidden=true;cancelClosing();onHidden()"));
+ assert.ok(ui.includes("root.dataset.closing='true';root.inert=true"));
+ assert.ok(ui.includes("cancelClosing();\n    selection=next"));
+ assert.ok(ui.includes("prefers-reduced-motion: reduce"));
+ assert.ok(css.includes(".dj-bus-detail::before{content:none;display:none;}"));
+ assert.ok(css.includes("@keyframes dj-bus-detail-fade-out{from{opacity:1;}to{opacity:0;}}"));
+ assert.ok(css.includes("inset:max(12px,calc(env(safe-area-inset-top,0px) + 8px))"));
+ assert.ok(css.includes("height:auto;min-height:0;max-height:none;"));
+ assert.ok(!css.includes("77dvh"));
+ assert.ok(map.includes("onHidden:syncRoutePresentation"));
+});
