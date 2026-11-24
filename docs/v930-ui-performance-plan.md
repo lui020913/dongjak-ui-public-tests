@@ -25,3 +25,6 @@ Nine read-only navigation actions now cover tabs, settings forward/back and ordi
 - Coalesce duplicate observers and map updates only after measuring actual call sites; do not disable safety overlays or live navigation.
 - Compare baseline/candidate on physical iOS and Android: frame interval p50/p95, dropped frames, interaction latency, long tasks, memory, visual seams, gesture/keyboard/dismissal invariants. 60fps goal; 120Hz depends on device/browser, not guaranteed.
 - Use protected build/Preview/phone/desktop/Production gates before any publication. No claims of measured FPS improvement without measurement.
+
+## Protected Preview correction
+Run 45366597308 passed 8/12 mobile shards and desktop/tablet, but four tab motion tests failed because native opacity transitions did not expose intermediate content opacity on the actual production CSS. Restore the exact v9.2.136 bottom-tab-navigation implementation (including its bounded frame progression and cleanup); retain other compositor, map and subpage optimizations. Do not weaken visible-frame tests or claim a measured improvement before the paired audit. Production remains protected.

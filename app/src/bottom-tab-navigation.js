@@ -7,7 +7,6 @@
  * Only incoming non-map content is revealed, or the previous page fades on
  * return to the already-live map. No root snapshot or moving dock.
  */
-import {startOpacityMotion,COMPOSITOR_MOTION} from './compositor-motion.js';
 export const TAB_TRANSITION=Object.freeze({contentReveal:260,mapReturn:220});
 export function adjacentTabIndex(index,count,dx,dy){
  if(count<2||index<0||index>=count||Math.abs(dx)<34||Math.abs(dx)<Math.abs(dy)*1.35)return -1;
@@ -21,9 +20,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let opacityMotion=null,entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
-  const motion=opacityMotion;opacityMotion=null;motion?.cancel();
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
   if(enterFrame){win.cancelAnimationFrame?.(enterFrame);enterFrame=0;}
@@ -50,9 +48,6 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const nodes=route?.shadowRoot?[...route.shadowRoot.querySelectorAll('.canvas > .header,.canvas > .route-panel,.canvas > .tools,.canvas > .action')]:
    [...(panel?.querySelectorAll?.(':scope > .dj-sheet-chrome,:scope > .dj836-sheet-body')||[])];
   if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
-  opacityMotion=startOpacityMotion(nodes,{from:.12,to:1,duration:COMPOSITOR_MOTION.tabEnter,win,onFinish:clearEntrance});
-  if(opacityMotion)return true;
-  // Compatibility fallback for environments without CSS transitions.
   enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)])}));
   const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
@@ -97,8 +92,6 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    previous.style.setProperty('z-index','6999','important');
    previous.style.setProperty('pointer-events','none','important');
    if(previous.id==='dj-route-v3')previous.inert=true;
-   opacityMotion=startOpacityMotion([previous],{from:1,to:0,duration:COMPOSITOR_MOTION.tabReturn,win,onFinish:clearEntrance});
-   if(opacityMotion)return;
    // Important opacity is deliberate: historical CSS fixes the page to
    // opacity:1 and filter:none, defeating an ordinary WAAPI fade.
    const begin=win.performance.now();
@@ -115,7 +108,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
-   if(revealContent(panel,app.dataset.tab)){if(!opacityMotion)enterTimer=win.setTimeout(clearEntrance,4500);return;}
+   if(revealContent(panel,app.dataset.tab)){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   }
   if(reduced()){clearEntrance();return;}
   enterTimer=win.setTimeout(clearEntrance,(toMap?TAB_TRANSITION.mapReturn:TAB_TRANSITION.contentReveal)+30);
