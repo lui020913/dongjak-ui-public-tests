@@ -101,11 +101,39 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if((!inside||boundary)&&event.cancelable)event.preventDefault();
   },{passive:false});
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
-  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0;
+  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0,contentFrame=0;
   let transportDismissedAt=0;
   const guardTransportDismiss=()=>{transportDismissedAt=Date.now();};
   document.addEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
-  const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||app?.classList.contains('dj-reduced-animation');
+  // Keep the native dialog and keyboard/status-bar geometry opaque. Paint
+  // the inner content with inline important opacity to beat release CSS.
+  function stopContentMotion(){
+    if(contentFrame)window.cancelAnimationFrame(contentFrame);
+    contentFrame=0;
+    layout.style.removeProperty('opacity');
+    layout.style.removeProperty('will-change');
+  }
+  function fadeContent(opening,finish){
+    const from=opening?.10:Number(getComputedStyle(layout).opacity)||1;
+    stopContentMotion();
+    layout.style.setProperty('animation','none','important');
+    layout.style.setProperty('transition','none','important');
+    layout.style.setProperty('will-change','opacity','important');
+    layout.style.setProperty('opacity',String(from),'important');
+    let last=null,elapsed=0;
+    const duration=opening?300:260;
+    const step=now=>{
+      if(!modal.open){stopContentMotion();return;}
+      if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
+      last=now;
+      const p=Math.min(1,elapsed/duration),eased=p*p*(3-2*p);
+      layout.style.setProperty('opacity',String(from+((opening?1:0)-from)*eased),'important');
+      if(p<1)contentFrame=window.requestAnimationFrame(step);
+      else{contentFrame=0;if(finish)finish();else stopContentMotion();}
+    };
+    contentFrame=window.requestAnimationFrame(step);
+  }
   function setStatus(message){status.textContent=message;}
   syncProfile();
   login.addEventListener('click',()=>{
@@ -120,7 +148,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   function finishClose(){
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     try{if(modal.open)modal.close();}
-    finally{modal.classList.remove('dj887-ai-closing');}
+    finally{stopContentMotion();modal.classList.remove('dj887-ai-closing');}
   }
   layout.addEventListener('animationend',event=>{
     if(event.target===layout&&event.animationName==='dj9251-ai-content-leave'&&modal.classList.contains('dj887-ai-closing'))finishClose();
@@ -136,9 +164,11 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     // out of the changing keyboard viewport.
     if(reduce()){input.blur();window.DongjakWindowMotion?.cancel?.(modal);modal.close();return;}
     if(window.matchMedia?.('(max-width:699px)')?.matches){
-      // Release the top layer synchronously on phones. A delayed animation
-      // callback can be starved during keyboard/viewport and map updates.
-      input.blur();finishClose();
+      input.blur();
+      modal.classList.add('dj887-ai-closing');
+      fadeContent(false,finishClose);
+      // A bounded watchdog still releases native hit targets if rAF stalls.
+      closeTimer=window.setTimeout(finishClose,1000);
       return;
     }
     modal.classList.add('dj887-ai-closing');
@@ -156,7 +186,10 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     q('#map-safety-close')?.click();
     q('#map-quick-search-close')?.click();
     q('#map-quick-search-query')?.blur();
-    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();}
+    if(!modal.open){window.DongjakWindowLifecycle?.requestOpen('dj-ai-search-modal');modal.showModal();
+      if(window.matchMedia?.('(max-width:699px)')?.matches&&!reduce())fadeContent(true);
+      else{stopContentMotion();layout.style.removeProperty('animation');layout.style.removeProperty('transition');}
+    }
     // iOS Safari: focusing the query immediately opens the keyboard before
     // the bottom sheet is laid out. Focus the close button; the user taps the
     // query field when ready, at which point visualViewport handles the lift.
@@ -276,6 +309,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   modal.addEventListener('cancel',event=>{event.preventDefault();exit();});
   modal.addEventListener('click',event=>{if(event.target===modal)exit();});
   modal.addEventListener('close',()=>{
+    stopContentMotion();if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     // HTMLDialogElement's close event can be queued. Never steal focus from
     // the native map search if the visitor has already tapped it while the
     // AI dialog is finishing its 175ms fade. This also preserves keyboard
@@ -288,6 +322,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   });
   return ()=>{
     if(closeTimer)clearTimeout(closeTimer);
+    stopContentMotion();
     document.removeEventListener('pointerdown',capturePointer,true);
     document.removeEventListener('keydown',captureOrbKeyboard,true);
     document.removeEventListener('dongjak:explicit-ai-open',onOrbOpen);

@@ -778,7 +778,8 @@ test('primary tabs reveal content without fading the opaque page and keep the pi
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
  await page.evaluate(()=>{window.__tabMotions=[];const panel=document.getElementById('news-panel');new MutationObserver(()=>{if(panel.classList.contains('dj-tab-content-enter'))window.__tabMotions.push('content-only')}).observe(panel,{attributes:true,attributeFilter:['class']});});
- await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect(page.locator('#news-panel')).toHaveCSS('opacity','1');await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('content-only');
+ await page.evaluate(()=>{window.__visibleTabAlpha=[];let count=0;function sample(){const n=document.querySelector('#news-panel > .dj-sheet-chrome');if(n&&document.getElementById('app').dataset.tab==='news')window.__visibleTabAlpha.push(Number(getComputedStyle(n).opacity));if(++count<240)requestAnimationFrame(sample);}sample();});
+ await tap(page,tab(page,'news'));await expect(page.locator('#news-panel')).toBeVisible();await expect(page.locator('#mine-panel')).toBeHidden();await expect.poll(()=>page.evaluate(()=>window.__visibleTabAlpha.some(a=>a>.12&&a<.95))).toBe(true);await expect(page.locator('#news-panel')).toHaveCSS('opacity','1');await expect.poll(()=>page.locator('#news-panel').getAttribute('data-dj810-animating')).toBeNull();expect(await page.evaluate(()=>window.__tabMotions)).toContain('content-only');
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
  // The older moving selection plate is intentionally hidden. Active icon
@@ -1138,12 +1139,15 @@ test('AI full-screen conversation and inline voice state keep the map task separ
   class MockRecognition{start(){this.onstart?.();}abort(){this.onend?.();}}
   Object.defineProperty(window,'SpeechRecognition',{value:MockRecognition,configurable:true});
  });
- await ready(page);
+ await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  const ai=page.locator('#dj-ai-search-modal');await expect(ai).toBeAttached();
+ await page.evaluate(()=>{window.__aiAlpha=[];let count=0;function sample(){const n=document.querySelector('#dj-ai-search-modal[open] > .dj-ai-search-body');if(n)window.__aiAlpha.push({a:Number(getComputedStyle(n).opacity),closing:n.parentElement.classList.contains('dj887-ai-closing')});if(++count<1200)requestAnimationFrame(sample);}sample();});
  await tap(page,page.locator('#dj890-ai-orb'));await expect(ai).toBeVisible();await expect.poll(async()=>{const b=await ai.boundingBox(),v=page.viewportSize();return b?Math.abs(b.x)+Math.abs(b.y)+Math.abs(b.width-v.width)+Math.abs(b.height-v.height):999}).toBeLessThanOrEqual(5);
  await expect(ai.locator('.dj-ai-transcript')).toBeVisible();await expect(ai.locator('.dj-ai-composer')).toBeVisible();
  await expect(ai.locator('.dj-ai-preferences')).toBeVisible();await expect(ai.locator('#dj-ai-query')).toBeDisabled();await tap(page,ai.locator('[data-profile="senior"]'));await expect(ai.locator('#dj-ai-query')).toBeEnabled();await expect(ai).toHaveAttribute('data-explanation','senior');await expect(ai.locator('.dj-ai-preferences')).toBeHidden();
+ await expect.poll(()=>page.evaluate(()=>window.__aiAlpha.some(x=>!x.closing&&x.a>.1&&x.a<.95))).toBe(true);
  await ai.getByRole('button',{name:'AI 검색 닫기'}).click();await expect(ai).toBeHidden();
+ expect(await page.evaluate(()=>window.__aiAlpha.some(x=>x.closing&&x.a>0&&x.a<.95))).toBe(true);
  const mic=page.locator('#djNext-mic'),shell=page.locator('#map-quick-search'),status=page.locator('#djNext-voice-status');
  const form=page.locator('.map-quick-search-form');const before=await form.boundingBox();await tap(page,mic);await expect(mic).toHaveAttribute('aria-pressed','true');await expect(status).toContainText('듣는 중');await expect(status).toHaveCSS('position','static');
  await expect.poll(async()=>{const b=await form.boundingBox();return b&&before?b.height-before.height:0}).toBeGreaterThan(70);await expect(page.locator('#djNext-voice-panel .djNext-voice-wave')).toBeVisible();await expect.poll(async()=>{const a=await mic.boundingBox(),b=await status.boundingBox();return !!a&&!!b&&b.y>a.y+a.height;}).toBe(true);
@@ -1174,6 +1178,15 @@ test('compact subway sheet shows arrivals before neighbors and has no duplicate 
  await expect(sheet.locator('#transport-share-place')).toHaveCSS('background-image','none');await expect(sheet.locator('#transport-share-place')).toHaveCSS('box-shadow',/^rgba?\([^)]*\) 0px 1px 3px 0px$/);
  const commonShadow=await page.locator('html').evaluate(n=>getComputedStyle(n).getPropertyValue('--djNext-tool-shadow').trim());expect(commonShadow).toMatch(/^0 1px 3px (?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i);await expect.poll(()=>buttons.evaluateAll(ns=>new Set(ns.map(n=>getComputedStyle(n).boxShadow)).size)).toBe(1);
  await expect(sheet.locator('.dj875-transit-scroll')).toHaveCSS('overflow-y','auto');await test.info().attach('compact-metro-v2',{body:await page.screenshot(),contentType:'image/png'});
+ if(page.viewportSize().width<700){
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await expect.poll(()=>sheet.getAttribute('data-dj810-animating')).toBeNull();
+  await page.evaluate(()=>{const n=document.getElementById('transport-sheet');window.__metroClose={height:n.getBoundingClientRect().height,frames:[]};function sample(){if(n.hidden)return;const r=n.getBoundingClientRect();window.__metroClose.frames.push({h:r.height,y:r.y,closing:n.dataset.dj810Animating==='closing'});requestAnimationFrame(sample);}sample();});
+  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
+  const result=await page.evaluate(()=>window.__metroClose);
+  expect(result.frames.some(f=>f.closing)).toBe(true);
+  expect(result.frames.every(f=>f.h<=result.height+3),'Closing sheet must never grow: '+JSON.stringify(result)).toBe(true);
+ }
 });
 
 test('facility close remains actionable when WebKit drops the synthetic click',{tag:'@phone-common'},async({page})=>{
