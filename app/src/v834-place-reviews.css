@@ -38,3 +38,6 @@
 .dj834-my-review-history .dj834-reviews{display:grid;gap:8px;background:#f5faf7;border:1px solid #d9e6de;padding:14px;border-radius:14px}
 .dj834-my-review-history .dj834-review-item p{white-space:pre-wrap;overflow-wrap:anywhere}
 .dj834-my-review-history .dj834-review-form[hidden],.dj834-my-review-history .dj834-review-open[hidden]{display:none!important}
+
+html body[data-dj-review-editor="open"]{overflow:hidden!important;overscroll-behavior:none!important}
+html body[data-dj-review-editor="open"] #bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}
