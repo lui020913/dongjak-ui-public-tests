@@ -1,12 +1,12 @@
 {
   "source": "public-app",
-  "application_version": "9.2.136",
+  "application_version": "9.3.0",
   "public_work_branch": "main",
-  "purpose": "PR431 and PR432: visible tab and AI transitions, keyboard-safe AI dismissal, fixed subway closing geometry, actual frame validation and guarded first-frame timing.",
-  "attempt": 344,
+  "purpose": "PR433–437: compositor tab and detail transitions, cancellable settings motion, coalesced map presentation and toolbar observers; exact-source paired performance comparison before protected Production and APK.",
+  "attempt": 345,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
-  "last_retry_reason": "2026-11-24: attempt343 passed build, Preview, desktop/tablet and 8 mobile shards. Four old animation-name assertions failed. PR432 exact Preview retest 45345998802 passed three compact HUD cases; direct news transition passed subsequent audit, map-to-news timing improved. PR432 merged d0666f7a371466a90cfaf284828933bf3e4b439d. Local test 45347625139 reached unrelated dock radius mismatch (32px vs production 999px) because local Vite build lacks final release CSS injection. Run actual protected release build with production CSS; require all gates to pass.",
-  "release_kind": "patch",
+  "last_retry_reason": "2026-11-24: PR433/434 source and mobile CI passed. PR435 run 45363738545 passed 2075 source tests, two moved subpage assertions corrected in PR436; affected regression and app build passed. PR437 version replay validation 45365401806 passed, preserving 9.2.136 history. Run exact protected candidate checks including all mandatory mobile and desktop/tablet QA and nine-scenario performance comparison. PR436 three-width local QA is independently running; no rerun requested.",
+  "release_kind": "minor",
   "beta_number": 1,
   "gemini_repair_count": 0
 }
