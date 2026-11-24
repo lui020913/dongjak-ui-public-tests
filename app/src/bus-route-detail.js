@@ -46,7 +46,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     const focused=doc.activeElement?.dataset?.stopSeq;
     info.setAttribute('aria-pressed',String(view==='info'));
     refresh.disabled=state?.status==='loading'||!state;mapButton.disabled=state?.status!=='shown';info.disabled=state?.status!=='shown';
-    status.textContent=state?.status==='error'?'공식 노선 조회 실패 · 새로고침으로 재시도':state?.status!=='shown'?'노선 불러오는 중':state.vehicleStatus==='live'?`실시간 차량 ${vehicles.length}대` :state.vehicleStatus==='empty'?'조회된 운행 차량 없음':state.vehicleStatus==='error'?'실시간 위치 조회 실패':'실시간 위치 조회 중';
+    status.textContent=state?.status==='error'?'공식 노선 조회 실패 · 새로고침으로 재시도':state?.status!=='shown'?'노선 불러오는 중':state.vehicleStatus==='live'?`실시간 차량 ${vehicles.length}대` :state.vehicleStatus==='empty'?'조회된 운행 차량 없음':state.vehicleStatus==='error'?(state.vehicleError==='BUS_POSITION_AUTH'?'실시간 위치 API 이용 권한 확인 필요':state.vehicleError==='BUS_POSITION_RATE_LIMIT'?'실시간 조회 한도 초과':state.vehicleError==='BUS_POSITION_FORMAT'?'실시간 위치 응답 확인 불가':'실시간 위치 조회 실패 · 자동 재시도'):'실시간 위치 조회 중';
     const signature=JSON.stringify([view,state?.status,stops,view==='route'?vehicles:[]]);
     if(signature===lastSignature)return;lastSignature=signature;
     const anchor=[...list.children].find(n=>n.dataset?.stopSeq&&n.offsetTop+n.offsetHeight>oldTop);

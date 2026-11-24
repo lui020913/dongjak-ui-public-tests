@@ -82,20 +82,20 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
       map.getSource(VEHICLES).setData(vehicles);
     }catch{}
   }
-  function updateVehicleState(status){if(active){active={...active,vehicleStatus:status,vehicleCount:vehicles.features.length};onState(active);}}
+  function updateVehicleState(status,code=null){if(active){active={...active,vehicleStatus:status,vehicleError:code,vehicleCount:vehicles.features.length};onState(active);}}
   async function refreshVehicles(){
     if(!vehicleFetcher||!active||active.status!=='shown'||vehicleController||globalThis.document?.hidden)return;
     const id=active.id,seq=sequence,ac=new AbortController();vehicleController=ac;
-    const timeout=setTimeout(()=>ac.abort(),12000);
+    const timeout=setTimeout(()=>ac.abort(),27000);
     try{
       const res=await vehicleFetcher(apiBase+'/live-vehicles?'+new URLSearchParams({modes:'bus',routeId:id}),{signal:ac.signal});
       const body=await res.json();
       if(seq!==sequence)return;if(ac.signal.aborted)throw Error('vehicle request timeout');
-      if(!res.ok||body.ok!==true||!Array.isArray(body.bus))throw Error('vehicle feed unavailable');
+      if(!res.ok||body.ok!==true||!Array.isArray(body.bus)){const err=Error('vehicle feed unavailable');err.code=body.code;throw err;}
       vehicles=routeVehicleFeatures(body.bus,id,active.route,active.color,previousVehicles);
       if(vehicles.features.length)selectedVehicles.set(map,id);else selectedVehicles.delete(map);
       drawVehicles();updateVehicleState(vehicles.features.length?'live':'empty');
-    }catch{if(seq===sequence){vehicles=empty();selectedVehicles.delete(map);drawVehicles();updateVehicleState('error');}}
+    }catch(error){if(seq===sequence){vehicles=empty();selectedVehicles.delete(map);drawVehicles();updateVehicleState('error',error.code);}}
     finally{clearTimeout(timeout);if(vehicleController===ac)vehicleController=null;}
   }
   function startVehiclePoll(){
