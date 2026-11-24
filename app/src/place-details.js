@@ -244,14 +244,6 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
     setSavedPlaceFolder(p,folderSelect.value);
   });
   recordRecentPlace(p);
-  // Verified data may not be present in OSM. Offer an explicitly labeled
-  // external place lookup; never claim the search result is a verified address.
-  const lookup=document.createElement('a');
-  lookup.className='dj-place-official-lookup';
-  lookup.href=`https://map.naver.com/p/search/${encodeURIComponent(p.name)}`;
-  lookup.target='_blank';lookup.rel='noopener noreferrer';
-  lookup.textContent='네이버지도에서 시설 주소·연락처 검색';
-  body.append(lookup);
   const reviewController=installPlaceReviews(body,p);
   const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';body.append(aiSection);
   aiSection.append(text('strong','AI 시설 안내','dj-place-ai-heading'));
