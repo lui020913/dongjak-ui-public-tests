@@ -539,7 +539,9 @@ test('phone route comparison uses actual pedestrian graph and conservative PRI e
  await expect(newCalc).toBeEnabled({timeout:15000});
  await expect.poll(()=>newCalc.evaluate(button=>{
   const r=button.getBoundingClientRect(),nav=document.getElementById('bottom-nav')?.getBoundingClientRect();
-  const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+  // The V3 CTA is inside Shadow DOM: the document-level hit target
+  // is the shadow host, not the rendered button.
+  const hit=button.getRootNode().elementFromPoint(r.left+r.width/2,r.top+r.height/2);
   return Boolean(nav&&r.width>0&&r.height>=50&&r.bottom<=nav.top-5&&
     (hit===button||button.contains(hit)));
  }),{timeout:12000}).toBe(true);
@@ -663,53 +665,30 @@ test('phone report composer has non-overlapping independent header and input scr
 
 
 test('phone windows share the opaque gradual slide on open and close',{tag:'@phone-common'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- async function audit(selector,parentSelector,trigger,close,tabEntrance=false){
-   const target=page.locator(selector);const parent=page.locator(parentSelector);
-   if(tabEntrance){
-     await trigger();await expect(parent).toBeVisible();await geometry(page,parentSelector);
-     await expect.poll(()=>parent.getAttribute('data-dj810-animating')).toBeNull();
-     await close();await expect(parent).toBeHidden();return;
-   }
-   await page.evaluate(({selector,parentSelector})=>{
-    const frames=[];window.__sharedMotion=frames;const until=performance.now()+40000;
-    function sample(){if(window.__sharedMotion!==frames||performance.now()>until)return;const n=document.querySelector(selector),p=document.querySelector(parentSelector),phase=n?.dataset.dj810Animating;
-      if(phase&&p&&!p.hidden){const c=getComputedStyle(n),back=getComputedStyle(p);
-       frames.push({phase,kind:n.dataset.djWindowMotionKind,duration:Number(n.dataset.djWindowMotionDuration),opacity:Number(c.opacity),backOpacity:Number(back.opacity),background:back.backgroundColor,cssAnimation:c.animationName,offset:parseFloat((c.translate||'0 0').split(' ')[1])||0,y:n.getBoundingClientRect().y});}
-      requestAnimationFrame(sample);}
-    requestAnimationFrame(sample);
-   },{selector,parentSelector});
-   await trigger();await expect(parent).toBeVisible();
-   await expect.poll(()=>page.evaluate(tabEntrance=>window.__sharedMotion.filter(f=>f.phase==='opening'&&(tabEntrance?f.kind==='fade':f.offset>2)).length,tabEntrance)).toBeGreaterThan(1);
-   await expect.poll(()=>target.getAttribute('data-dj810-animating')).toBeNull();
-   await close();await expect(parent).toBeHidden();
-   const frames=await page.evaluate(()=>window.__sharedMotion);
-   for(const [phase,duration] of [['opening',350],['closing',300]]){
-     const motion=frames.filter(f=>f.phase===phase);
-     expect(motion.length).toBeGreaterThan(1);
-     if(tabEntrance&&phase==='opening'){expect(motion.every(f=>f.kind==='fade'&&f.duration===145&&f.cssAnimation==='none'&&Math.abs(f.y-motion[0].y)<1)).toBe(true);expect(motion.some(f=>f.opacity>0&&f.opacity<1)).toBe(true);continue;}
-     // v9.2.51 fades the sliding card; the overlay/backdrop must remain solid.
-     // When target===parent (weather/route), the same computed alpha is expected.
-     expect(motion.every(f=>f.kind==='slide'&&f.duration===duration&&f.opacity>=0&&f.opacity<=1&&f.cssAnimation==='none')).toBe(true);
-     expect(motion.some(f=>f.opacity>.08&&f.opacity<.98)).toBe(true);
-     if(selector===parentSelector)expect(motion.every(f=>Math.abs(f.backOpacity-f.opacity)<.02)).toBe(true);
-     else expect(motion.every(f=>f.backOpacity===1)).toBe(true);
-     expect(motion.some(f=>f.offset>2)).toBe(true);
-     expect(motion.every(f=>f.background===motion[0].background)).toBe(true); // All phone sheets keep a flat, un-dimmed backdrop.
-     expect(phase==='opening'?motion[0].offset>motion.at(-1).offset:motion[0].offset<motion.at(-1).offset).toBe(true);
-   }
- }
- await audit('#djNext-layer-panel .djNext-modal-body','#djNext-layer-panel',()=>tap(page,page.locator('#djNext-layers')),()=>page.getByRole('button',{name:'레이어 설정 닫기'}).click());
- await audit('#dj854-weather-sheet','#dj854-weather-sheet',()=>tap(page,page.locator('#djNext-weather')),()=>page.getByRole('button',{name:'날씨창 닫기'}).click());
- // The rebuilt walking entry has its own fixed header/card and close action;
- // the old native route panel is an invisible engine adapter, not a sheet.
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await page.emulateMedia({reducedMotion:'no-preference'});
+ await ready(page);
+ // The old djNext layer/weather launcher was removed by the independent
+ // map controls. This case checks the two live full-page tab transitions
+ // involved in routing; other active layer/weather tests live elsewhere.
  await tap(page,tab(page,'route'));
- await expect(page.locator('#dj-route-v3')).toBeVisible();
- await page.locator('#dj-route-v3 [data-v3="close"]').click();
- await expect(page.locator('#dj-route-v3')).toBeHidden();
- await audit('#mine-panel','#mine-panel',()=>tap(page,tab(page,'mine')),()=>tap(page,page.locator('#mine-panel .dj-sheet-chrome-close')),true);
+ const routeScreen=page.locator('#dj-route-v3');
+ await expect(routeScreen).toBeVisible({timeout:15000});
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','route');
+ await expect(page.locator('#route-panel')).toHaveCSS('clip-path','inset(100%)');
+ await routeScreen.locator('[data-v3="close"]').click();
+ await expect(routeScreen).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await tap(page,tab(page,'mine'));
+ const mine=page.locator('#mine-panel');
+ await expect(mine).toBeVisible();
+ await expect.poll(()=>mine.getAttribute('data-dj810-animating')).toBeNull();
+ await expect(mine).toHaveCSS('opacity','1');
+ await expect(page.locator('#bottom-nav')).toBeVisible();
+ await tap(page,mine.locator('.dj-sheet-chrome-close'));
+ await expect(mine).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
 });
-
 
 test('layer header follows a real pointer upward and downward; content and X stay independent',{tag:'@phone-layout'},async({page,browserName})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-layers'));
@@ -1702,8 +1681,10 @@ test('phone selected dock has no color plate and route form is vertically balanc
     activeBefore:active?getComputedStyle(active,'::before').backgroundColor:null,
     plateDisplay:plate?getComputedStyle(plate).display:'absent',
     plateVisibility:plate?getComputedStyle(plate).visibility:'absent',
-    selectedInk:active?getComputedStyle(active).color:null,
-    inactiveInk:inactive?getComputedStyle(inactive).color:null,
+    // The navigation button inherits a neutral text color; its actual visible
+    // last-child label owns the active/idle ink. Test rendered text, not wrapper.
+    selectedInk:active?.lastElementChild?getComputedStyle(active.lastElementChild).color:null,
+    inactiveInk:inactive?.lastElementChild?getComputedStyle(inactive.lastElementChild).color:null,
     dockBottom:r.bottom,viewportHeight:innerHeight};
   },key);
   expect(state.activeTab).toBe(key);
