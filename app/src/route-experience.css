@@ -328,7 +328,7 @@
       display:flex!important;position:fixed!important;left:12px!important;right:12px!important;
       bottom:calc(env(safe-area-inset-bottom,0px) + 4px)!important;
       top:auto!important;width:calc(100% - 24px)!important;max-width:none!important;
-      max-height:min(50dvh,390px)!important;overflow-y:auto!important;
+      max-height:min(44dvh,350px)!important;overflow-y:auto!important;
       margin:0!important;padding:14px 15px!important;border-radius:23px!important;
       transform:none!important;translate:none!important;z-index:6600!important;
       background:var(--walk-paper)!important;
@@ -631,4 +631,20 @@
   padding:0!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
  }
  html body #app#app #dj-walk-map-head button svg{width:26px!important;height:26px!important;display:block!important;pointer-events:none}
+}
+
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #route-map-card:not([hidden]){
+   bottom:calc(max(0px,env(safe-area-inset-bottom,0px) - 8px))!important;
+   gap:8px!important;padding:12px 15px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] #route-map-card .route-map-card-actions{
+   position:sticky!important;bottom:-12px!important;z-index:2!important;background:var(--walk-paper)!important;
+   padding:8px 0 12px!important;margin:0!important;flex-shrink:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app[data-dj-route-stage="preview"] .map-actions{
+   top:auto!important;bottom:calc(min(44dvh,350px) + max(0px,env(safe-area-inset-bottom,0px) - 8px) + 14px)!important;
+  }
+ }
 }

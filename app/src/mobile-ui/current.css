@@ -1365,3 +1365,51 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   html body #app#app#app#app#app#app#app #ped-tools-panel #ped-tools-close:focus-visible{outline:2px solid #51675c!important;outline-offset:2px!important;}
  }
 }
+
+/* 2026-11-24: isolate the four reported phone surfaces. */
+@layer request-completion {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app #ped-tools-panel:not([hidden]){
+   display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #ped-tools-panel .ped-tools-panel-head{
+   position:relative!important;top:auto!important;flex:0 0 auto!important;z-index:2!important;
+   background:var(--dj-primary-page-bg,#edf3ef)!important;box-shadow:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #ped-tools-panel .dj-nearby-scroll{
+   flex:1 1 auto!important;min-height:0!important;max-height:100%!important;overflow-x:hidden!important;
+   overflow-y:auto!important;overscroll-behavior:contain!important;padding:0 0 4px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-neighbor-row{
+   display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-items:center!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-previous{grid-column:1!important;grid-row:1!important}
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-current{grid-column:2!important;grid-row:1!important;max-width:none!important}
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors .metro-rail-next{grid-column:3!important;grid-row:1!important}
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-neighbors :is(.metro-rail-previous,.metro-rail-next)[hidden]{
+   display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals :is(.metro-planned-notice,.metro-quota-notice){
+   margin:0 0 12px!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #transport-sheet[data-kind="subway"] #transport-arrivals .metro-direction-grid:has(> :only-child){
+   grid-template-columns:minmax(0,1fr)!important;
+  }
+  /* The expanded night card owns the reading surface, not the HUD.
+     Keep the compact analysis/map controls unchanged. */
+  html body #app#app#app#app#app#app#app#app#app:has(#night-visibility-float:not([hidden])[data-collapsed="false"]) :is(.topbar,#dj-v794-toolbar,#djNext-toolbar,.map-actions){
+   display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #night-visibility-float:not([hidden])[data-collapsed="false"]{
+   position:fixed!important;top:auto!important;bottom:var(--dj910-dock-bottom,88px)!important;
+   height:auto!important;min-height:0!important;max-height:calc(100dvh - var(--dj910-dock-bottom,88px) - env(safe-area-inset-top,0px) - 20px)!important;
+   z-index:6700!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #night-visibility-float:not([hidden])[data-collapsed="false"] .night-visibility-float-head{
+   flex:0 0 auto!important;position:relative!important;top:auto!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app #night-visibility-float:not([hidden])[data-collapsed="false"] .night-visibility-float-content{
+   flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+ }
+}

@@ -43,6 +43,14 @@ const forestId=(id='')=>/forest|wood|woodland|treecover|scrub/.test(String(id).t
 const forestTypes=['forest','wood','woodland','trees','wooded','tree','scrub','natural_wood'];
 function isDark(app){return app?.dataset?.theme==='dark';}
 function palette(app){return GREEN_PALETTE[isDark(app)?'dark':'light'];}
+/** The night analysis changes the theme programmatically; late vegetation must follow it too. */
+export function refreshVegetationPaint(map,app){
+ const colors=palette(app);
+ for(const layer of map.getStyle()?.layers||[]){
+  if(!isVegetationLayer(layer))continue;
+  try{map.setPaintProperty(layer.id,'fill-pattern',null);map.setPaintProperty(layer.id,'fill-color',forestId(layer.id)?colors.forest:colors.park);}catch{}
+ }
+}
 export function installGrassTexture({map,app}){
   const ids=map.getStyle().layers.filter(isVegetationLayer).map(l=>l.id);
   const paint=()=>{

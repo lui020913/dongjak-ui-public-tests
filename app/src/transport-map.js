@@ -813,8 +813,8 @@ export function createMetroLineCard(line,stationName){
   const previousNode=el('span','metro-rail-previous',`‹ ${prev}`);
   const nextNode=el('span','metro-rail-next',`${next} ›`);
   // A verified terminal has no adjacent destination; do not present a button.
-  if(neighbor.verified&&!neighbor.previous)previousNode.hidden=true;
-  if(neighbor.verified&&!neighbor.next)nextNode.hidden=true;
+  if(neighbor.verified&&!neighbor.previous){previousNode.hidden=true;previousNode.setAttribute('aria-hidden','true');}
+  if(neighbor.verified&&!neighbor.next){nextNode.hidden=true;nextNode.setAttribute('aria-hidden','true');}
   tail.append(previousNode,el('strong','metro-rail-current',`${normalizeStationQueryName(stationName)}역`),nextNode);
   card.append(tail);
   return card;
