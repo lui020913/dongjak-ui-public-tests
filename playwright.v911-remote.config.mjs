@@ -26,6 +26,7 @@ const releaseSmokeNames=[
  'ordinary light-only startup has no manual theme dialog; night visibility remains available',
  'phone search returns a visible',
  'primary tabs reveal content',
+ 'map report fades out over its real destination',
  'phone browser install choices',
  'iOS PWA status edge stays flat',
  'bottom dock swipes change',
@@ -58,5 +59,5 @@ export default defineConfig({
   // worker per runner avoids software-WebGL contention during frame sampling.
   fullyParallel:true,workers:1,retries:0,reporter:[['list'],['html',{open:'never'}],...(process.env.DONGJAK_LIVE_QA_DIR?[['./scripts/live-qa-reporter.mjs']]:[])],
   use:{baseURL:process.env.DONGJAK_TARGET_URL,browserName:'chromium',screenshot:'only-on-failure',trace:'off',video:process.env.DONGJAK_LIVE_QA_DIR?'on':'off',launchOptions:{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}},
-  projects:journeyQA?[{name:'mobile390',grep:/@journey-[1-6]$/,use:{viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone}}]:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:(fastMobileQA?releasePhoneCoverage[name]:phoneCoverage[name]),use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:fastMobileQA?/layer header follows a real pointer/:/layer header follows a real pointer|phone update history fades in place|iOS PWA dimmed status edge/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
+  projects:journeyQA?[{name:'mobile390',grep:/@journey-[1-6]$/,use:{viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone}}]:[...screens.map(([name,width,height,userAgent])=>({name,grep:fullMobileQA?allPhoneCases:(fastMobileQA?releasePhoneCoverage[name]:phoneCoverage[name]),use:{viewport:{width,height},isMobile:true,hasTouch:true,userAgent}})),{name:'mobile390-webkit-header',grep:fastMobileQA?/layer header follows a real pointer|map report fades out over its real destination/:/layer header follows a real pointer|phone update history fades in place|iOS PWA dimmed status edge|map report fades out over its real destination/,use:{browserName:'webkit',viewport:{width:390,height:844},isMobile:true,hasTouch:true,userAgent:iphone,launchOptions:{args:[]}}}]
 });
