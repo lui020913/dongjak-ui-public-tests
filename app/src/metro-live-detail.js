@@ -1,6 +1,7 @@
+import {WINDOW_MOTION} from './mobile-window-motion.js';
 import {LIVE_LINES,directionCode,directionTitle,stationKey,stationSequence,observedTrains} from './metro-live-detail-model.js';
 let active=null;
-export function closeMetroLiveDetail(){active?.close();}
+export function closeMetroLiveDetail(){active?.close(false);}
 export function updateMetroLiveArrivals(line,station,rows){if(active?.line===line&&stationKey(active.station)===stationKey(station))active.setArrivals(rows);}
 export function openMetroLiveDetail({line,direction,station,local,arrivals=[],color,badge,transfers,endpoint='/api/transport/live-vehicles'}){
  closeMetroLiveDetail();const doc=document,win=doc.defaultView,focus=doc.activeElement;
@@ -16,8 +17,13 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
  const refresh=button('↻ 다시 조회',()=>load(),'dj-metro-live-refresh');
  const foot=make('footer','dj-metro-live-footer');foot.append(make('small','','역 상태 기반 위치 · GPS 아님'),refresh);
  root.append(head,meta,tabs,notice,list,foot);doc.body.append(root);
- let timer=null,controller=null,closed=false,rows=[],first=true,signature='',quota=false;
- const close=()=>{if(closed)return;closed=true;win.clearTimeout(timer);controller?.abort();root.close();root.remove();if(active?.close===close)active=null;if(focus?.isConnected)focus.focus({preventScroll:true});};
+ let timer=null,controller=null,closed=false,closing=false,motion=null,closeTimer=null,rows=[],first=true,signature='',quota=false;
+ const finish=()=>{if(closed)return;closed=true;win.clearTimeout(closeTimer);motion?.cancel();root.close();root.remove();if(active?.close===close)active=null;if(focus?.isConnected)focus.focus({preventScroll:true});};
+ const close=(animate=true)=>{if(closed)return;if(closing){if(!animate)finish();return;}closing=true;win.clearTimeout(timer);controller?.abort();root.inert=true;
+  const opacity=win.getComputedStyle(root).opacity;motion?.cancel();
+  if(!animate||win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||!root.animate){finish();return;}
+  motion=root.animate([{opacity},{opacity:0}],{duration:WINDOW_MOTION.close,easing:WINDOW_MOTION.easing,fill:'both'});motion.onfinish=finish;closeTimer=win.setTimeout(finish,WINDOW_MOTION.close+80);
+ };
  active={close,line,station,setArrivals(next){arrivals=next;paint();}};root.addEventListener('cancel',e=>{e.preventDefault();close();});root.addEventListener('click',e=>{if(e.target===root)close();});
  function paint(){
   const seq=stationSequence(line,dir,station,local),trains=observedTrains(rows,line,dir),next=JSON.stringify([dir,seq,trains,arrivals]);
@@ -42,15 +48,15 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
  }
  function setDir(next){dir=next;for(const b of tabs.children)b.setAttribute('aria-pressed',String(b.dataset.direction===dir));first=true;if(rows.length)notice.textContent=observedTrains(rows,line,dir).length?'':'현재 이 방향의 확인된 열차 위치가 없습니다.';paint();}
  for(const d of dirs){const b=button(directionTitle(line,d),()=>setDir(d),'dj-metro-live-tab');b.dataset.direction=d;tabs.append(b);}
- function schedule(){win.clearTimeout(timer);if(!closed&&!quota)timer=win.setTimeout(load,25000);}
+ function schedule(){win.clearTimeout(timer);if(!closed&&!closing&&!quota)timer=win.setTimeout(load,25000);}
  async function load(){
-  if(closed||controller)return;win.clearTimeout(timer);
+  if(closed||closing||controller)return;win.clearTimeout(timer);
   if(!LIVE_LINES.includes(line)){notice.textContent='이 호선은 실시간 위치 API 지원 범위에 포함되지 않습니다.';stamp.textContent='위치 미제공';refresh.disabled=true;paint();return;}
   if(doc.hidden){schedule();return;}
   controller=new AbortController();refresh.disabled=true;
   try{const url=new URL(endpoint,win.location.href);url.searchParams.set('modes','metro');url.searchParams.set('line',line);
    const response=await fetch(url,{signal:controller.signal,cache:'no-store'}),body=await response.json();
-   if(closed)return;
+   if(closed||closing)return;
    quota=Boolean(body.metroQuota)||response.status===429;
    if(!response.ok||!body.ok)throw Error(quota?'실시간 위치 API 조회 한도 초과':'실시간 위치 조회 실패');
    const next=Array.isArray(body.metro)?body.metro:[];
@@ -60,8 +66,8 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
    notice.textContent=valid.length?'': '현재 이 방향의 확인된 열차 위치가 없습니다.';
    if(body.warnings?.includes('METRO_ARRIVAL_FALLBACK'))notice.textContent='도착정보에서 확인된 역 상태만 표시합니다.';
    stamp.textContent=body.updatedAt?new Date(body.updatedAt).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour:'numeric',minute:'2-digit'}):'갱신 시각 미제공';paint();
-  }catch(e){if(!closed){rows=[];stamp.textContent='갱신 실패';notice.textContent=e.message==='실시간 위치 API 조회 한도 초과'?e.message:'실시간 위치 조회 실패 · 다시 조회할 수 있습니다.';paint();}}
-  finally{controller=null;if(!closed){refresh.disabled=quota;schedule();}}
+  }catch(e){if(!closed&&!closing){rows=[];stamp.textContent='갱신 실패';notice.textContent=e.message==='실시간 위치 API 조회 한도 초과'?e.message:'실시간 위치 조회 실패 · 다시 조회할 수 있습니다.';paint();}}
+  finally{controller=null;if(!closed&&!closing){refresh.disabled=quota;schedule();}}
  }
- root.showModal();setDir(dir);void load();return {close};
+ root.showModal();if(root.animate&&!win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)motion=root.animate([{opacity:0},{opacity:1}],{duration:WINDOW_MOTION.open,easing:WINDOW_MOTION.easing});setDir(dir);void load();return {close};
 }
