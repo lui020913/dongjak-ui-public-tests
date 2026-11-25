@@ -79,10 +79,11 @@ const aiMemo=new Map();
 function cacheKey(p){return `${p.name}|${p.lat?.toFixed(4)}|${p.lng?.toFixed(4)}`;}
 const EARTH_METERS=111000;
 export function matchingOsmContact(elements=[],p){
+  if(isFormerPoliceFacility(p?.name)||isRepurposedPoliceFacility(p?.name))return {};
   const candidates=[];
   for(const el of elements){
     const tag=el.tags||{};
-    const n=tidy(tag['name:ko']||tag.name,90);
+    const n=tidy(normalizeFacilityName(tag['name:ko']||tag.name,p.type),90);
     if(n.replace(/\s+/g,'')!==p.name.replace(/\s+/g,''))continue;
     const lng=Number(el.center?.lon??el.lon),lat=Number(el.center?.lat??el.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
@@ -101,7 +102,7 @@ export function matchingOsmContact(elements=[],p){
   return {phone,website,address};
 }
 async function enrich(p,signal){
-  if(p.lat==null||p.lng==null)return {};
+  if(p.lat==null||p.lng==null||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return {};
   const id=cacheKey(p);
   if(mem.has(id))return mem.get(id);
   const safe=p.name.replace(/["\\]/g,'').slice(0,80);
@@ -135,7 +136,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     const lng=Number(place?.lng??lngLat?.lng),lat=Number(place?.lat??lngLat?.lat);
     if(Number.isFinite(lng)&&Number.isFinite(lat)){
       window.dispatchEvent(new CustomEvent('dongjak:route-map-place',{
-        detail:{name:String(place?.name||'선택한 장소').slice(0,90),lng,lat}
+        detail:{name:String(normalizeFacilityName(place?.name,place?.type||place?.category)||'선택한 장소').slice(0,90),lng,lat}
       }));
     }
     return null;
