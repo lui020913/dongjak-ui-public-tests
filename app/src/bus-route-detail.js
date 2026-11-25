@@ -99,8 +99,9 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     void load();
   }
   function open(next){
+    historyRequest?.abort();historyRequest=null;historyDate='';historySeq='';
     cancelClosing();
-    historyRequest?.abort();historyRequest=null;historyDate='';historySeq='';selection=next;state=null;stops=[];vehicles=[];view='route';pendingScroll=true;lastSignature='';routeScroll=0;root.dataset.view='route';
+    selection=next;state=null;stops=[];vehicles=[];view='route';pendingScroll=true;lastSignature='';routeScroll=0;root.dataset.view='route';
     const category=classifyBusRoute(next.route,next.routeType);kind.textContent=BUS_CATEGORY_LABEL[category];root.dataset.busCategory=category;name.textContent=next.route;
     root.hidden=false;syncBounds();render();
   }
