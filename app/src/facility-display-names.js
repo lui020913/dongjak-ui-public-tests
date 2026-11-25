@@ -1,4 +1,4 @@
-import {verifiedDisplayName,verifiedNameAliases} from './verified-place-directory.js';
+import {verifiedDisplayName,verifiedNameAliases,verifiedPlaceRecord} from './verified-place-directory.js';
 /** Shared display aliases for verified retail brands. Never overwrite source records.
  * Restrict operator-only aliases to matching business types; do not infer a branch from its address.
  */
@@ -18,6 +18,8 @@ const genericType=new Set(['','장소','시설','일반시설','일반 시설','
 // operating police office: https://www.seoul.go.kr/news/news_report.do?bbsNo=158&cntPerPage=10&curPage=1&nttNo=442156&srchKey=sj&srchText=STO
 const formerPoliceNames=['상도5치안센터','상도 5치안센터','상도5 치안센터','상도 5 치안센터','상도5파출소','상도5치안센터 (운영 종료)'];
 export const formerPoliceNameVariants=Object.freeze(formerPoliceNames);
+export const repurposedPoliceNameVariants=Object.freeze(verifiedNameAliases.filter(([alias,name])=>name==='동작청소년경찰학교').map(([alias])=>alias));
+export const isRepurposedPoliceFacility=name=>Boolean(verifiedPlaceRecord(name)?.repurposed);
 export function isFormerPoliceFacility(name){return formerPoliceNames.some(n=>fold(n)===fold(name));}
 export function facilityDisplayType(value,name=''){
  const category=normalizeFacilityCategory(value,name);
@@ -40,6 +42,8 @@ export function verifiedFacilityLabelExpression(raw){
 }
 export function normalizeFacilityCategory(value,name=''){
  if(isFormerPoliceFacility(name))return '운영 종료 시설';
+ const verified=verifiedPlaceRecord(name);
+ if(verified?.category)return verified.category;
  const raw=String(value??'').trim();
  const type=TYPE_ALIASES[raw]||TYPE_ALIASES[raw.toLowerCase()]||categoryAliases[raw.toLowerCase()]||raw;
  if(genericType.has(type)){
@@ -172,7 +176,7 @@ export function facilityNameMatches(place,query){
  const q=fold(query);if(!q)return false;
  const normalized=normalizeFacilityRecord(place);
  const categoryTerms=facilityCategorySearchTerms(query);
- if(categoryTerms.length&&isFormerPoliceFacility(normalized.name))return false;
+ if(categoryTerms.length&&(isFormerPoliceFacility(normalized.name)||(categoryTerms.includes('경찰서')&&isRepurposedPoliceFacility(normalized.name))))return false;
  if(categoryTerms.length&&categoryTerms.includes(normalized.category))return true;
  const fields=[normalized.name,normalized.registeredName,normalized.category];
  if(fields.some(v=>fold(v).includes(q)))return true;
