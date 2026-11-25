@@ -160,7 +160,11 @@ test('map return keeps only a non-interactive fading page and rapid tab reentry 
  const tick=t=>{const [id,step]=[...frames.entries()][0];frames.delete(id);clock=t;step(t);};
  tick(500);assert.equal(Number(values.get('opacity')),1,'a delayed first frame must not skip the dissolve');
  tick(540);tick(580);tick(610);assert.equal(Number(values.get('opacity')),.5);
- click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(values.has('display'),false,'active display override must not survive outgoing cleanup');assert.equal(values.has('visibility'),false);assert.equal(frames.size,0);
+ click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('display'),false,'active display override must not survive outgoing cleanup');assert.equal(values.has('visibility'),false);
+ // The mock now supports style reads, so the incoming map-to-tab fade runs too.
+ assert.equal(Number(values.get('opacity')),0);assert.equal(frames.size,1);
+ for(let t=650;t<=970;t+=40)tick(t);
+ assert.equal(values.has('opacity'),false);assert.equal(frames.size,0);
  dispose();
 });
 
