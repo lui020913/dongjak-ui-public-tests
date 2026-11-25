@@ -1,49 +1,113 @@
-/* Isolated button design experiment. No event, layout owner, map data or semantic color changes. */
+/* Button Design V2: isolated Preview. Highest named layer for important visual
+   declarations, shared semantic roles, no DOM or event ownership changes. */
 @layer button-design-preview {
   :root {
+    --dj-button-v2-revision:2;
     --dj-button-primary-radius:14px;
     --dj-button-secondary-radius:12px;
     --dj-button-chip-radius:999px;
     --dj-button-close-radius:50%;
     --dj-button-primary-height:48px;
     --dj-button-secondary-height:44px;
-    --dj-button-ink:#fff;
     --dj-button-accent:#237b65;
+    --dj-button-on-accent:#fff;
+    --dj-button-outline:#a6c5b8;
+    --dj-button-soft:#eef5f1;
+    --dj-button-face:#fff;
+    --dj-button-ink:#235344;
+    --dj-button-disabled:#b5cec3;
+    --dj-button-disabled-ink:#365b4e;
+    --dj-button-active:#155c4a;
   }
-  /* Explicit role selectors rather than all button elements: list rows, map pins,
-     subway line badges, safety status, toggles and bottom navigation are not CTAs. */
-  html body :is(#app,#dj-community-editor-portal) :is(button.primary-btn,button.guide-button,#route-calc,#route-start-gps,#community-compose-toggle,#dj-community-editor-portal button[type="submit"],.dj-compose-footer button[type="submit"],button.dj-place-review-submit,button.dj-review-submit) {
+  :root[data-theme="dark"] {
+    --dj-button-accent:#79dec5;
+    --dj-button-on-accent:#123a30;
+    --dj-button-outline:#537467;
+    --dj-button-soft:#35463f;
+    --dj-button-face:#303e39;
+    --dj-button-ink:#c9f4e5;
+    --dj-button-disabled:#4c6058;
+    --dj-button-disabled-ink:#cad8d1;
+    --dj-button-active:#b0f3dd;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.primary-btn,button.guide-button,#route-calc,#route-start-gps,#route-guide-start,#route-search-accept,#route-transit-accept,#community-compose-toggle,.dj-compose-footer button[type="submit"],.dj834-review-submit,.dj-place-review-submit,.dj-review-submit,#dj-settings-done,.dj-about-done,.djNext-continue,.dj860-next,#map-startup-continue,.page-panel button[type="submit"],.dj-ai-send,#dj800-ai-search-submit):not(.danger-btn):not([data-danger]) {
+    box-sizing:border-box!important;
     border-radius:var(--dj-button-primary-radius)!important;
     min-height:var(--dj-button-primary-height)!important;
+    border:1px solid var(--dj-button-accent)!important;
+    background:var(--dj-button-accent)!important;
+    color:var(--dj-button-on-accent)!important;
     box-shadow:none!important;
-    font-weight:600!important;
+    font-weight:650!important;
+    font-size:15px!important;
   }
-  html body :is(#app,#dj-community-editor-portal) :is(button.subtle-btn,button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button,.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#route-map-edit,#route-map-close,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button) {
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.subtle-btn:not(.danger-btn),button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button:not([aria-pressed]),.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#transport-save-place,#transport-share-place,#route-map-edit,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.dj834-review-buttons button:not(.dj834-review-submit),.dj834-review-own-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button,.dj-place-route-actions>button,.dj815-place-actions>button,.dj-place-header-actions>button,.dj-place-personal-actions>button,.transport-selection-actions>button,.metro-open-schedule,.dj-ai-example,#route-search-back,#route-clear,#route-pick-cancel,#route-transit-retry,#nav-voice,#nav-orientation,#nav-follow,#ped-report-open,#ped-nearby-open,#community-sort,#community-refresh,#dongjak-news-refresh,#dj-settings-theme,#dj-settings-text button):not(.danger-btn):not([data-danger]) {
+    box-sizing:border-box!important;
     border-radius:var(--dj-button-secondary-radius)!important;
     min-height:var(--dj-button-secondary-height)!important;
+    border:1px solid var(--dj-button-outline)!important;
+    background:var(--dj-button-face)!important;
+    color:var(--dj-button-ink)!important;
+    box-shadow:none!important;
+    font-weight:600!important;
+    font-size:14px!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-actions>button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger) {
+    box-sizing:border-box!important;
+    border-radius:var(--dj-button-secondary-radius)!important;
+    border:1px solid var(--dj-button-outline)!important;
+    background:var(--dj-button-face)!important;
+    color:var(--dj-button-ink)!important;
+    box-shadow:0 2px 6px rgba(20,44,38,.16)!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-actions>button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger):not(#map-compass):not(#dj890-ai-orb):not(#dj800-ai-search-trigger) > svg {
+    width:20px!important;height:20px!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.detail-close,button.sheet-dismiss,button.dj-sheet-chrome-close,button.dj834-detail-back,button.dj-place-header-close,button.dj-bus-detail-close,.djNext-close,.dj-ai-close,#dj800-ai-search-close,.dj-map-settings-close,.dj-about-close,#community-compose-close,#transport-close,#map-safety-close,#map-options-mobile-close,#version-history-close,#route-search-close,.dj-route-pri-close,#ped-tools-close,#map-gesture-guide-close,#map-quick-search-close,#route-map-close,#dj-settings-close,#admin-dong-close,#road-width-legend-close,#overview-sheet-close,.dj-community-location-close) {
+    box-sizing:border-box!important;
+    border-radius:var(--dj-button-close-radius)!important;
+    border:1px solid transparent!important;
+    background:var(--dj-button-soft)!important;
+    color:var(--dj-button-ink)!important;
+    box-shadow:none!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.detail-close,button.sheet-dismiss,button.dj-sheet-chrome-close,button.dj834-detail-back,button.dj-place-header-close,button.dj-bus-detail-close,.djNext-close,.dj-ai-close,#dj800-ai-search-close,.dj-map-settings-close,.dj-about-close,#community-compose-close,#transport-close,#map-safety-close,#map-options-mobile-close,#version-history-close,#route-search-close,.dj-route-pri-close,#ped-tools-close,#map-gesture-guide-close,#map-quick-search-close,#route-map-close,#dj-settings-close,#admin-dong-close,#road-width-legend-close,#overview-sheet-close,.dj-community-location-close) > svg {width:20px!important;height:20px!important;}
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.filter-chip,.community-filter,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed],#protection-zone-mode-simple,#protection-zone-mode-detail,.dj-ai-search-entry) {
+    box-sizing:border-box!important;
+    border-radius:var(--dj-button-chip-radius)!important;
+    border:1px solid var(--dj-button-outline)!important;
+    background:var(--dj-button-face)!important;
+    color:var(--dj-button-ink)!important;
     box-shadow:none!important;
     font-weight:600!important;
   }
-  html body #app :is(.map-actions > button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open) {
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.filter-chip,.community-filter,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed],#protection-zone-mode-simple,#protection-zone-mode-detail,.dj-ai-search-entry):is([aria-pressed="true"],[aria-selected="true"],.selected,.active),
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-actions>button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger):is([aria-pressed="true"],[aria-expanded="true"]),
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.subtle-btn:not(.danger-btn),button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button:not([aria-pressed]),.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#transport-save-place,#transport-share-place,#route-map-edit,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.dj834-review-buttons button:not(.dj834-review-submit),.dj834-review-own-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button,.dj-place-route-actions>button,.dj815-place-actions>button,.dj-place-header-actions>button,.dj-place-personal-actions>button,.transport-selection-actions>button,.metro-open-schedule,.dj-ai-example,#route-search-back,#route-clear,#route-pick-cancel,#route-transit-retry,#nav-voice,#nav-orientation,#nav-follow,#ped-report-open,#ped-nearby-open,#community-sort,#community-refresh,#dongjak-news-refresh,#dj-settings-theme,#dj-settings-text button):is([aria-pressed="true"],[aria-selected="true"]) {
+    background:var(--dj-button-soft)!important;
+    border-color:var(--dj-button-accent)!important;
+    color:var(--dj-button-ink)!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.filter-chip,.community-filter,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed],#protection-zone-mode-simple,#protection-zone-mode-detail,.dj-ai-search-entry):is([aria-pressed="true"],[aria-selected="true"],.selected,.active) {
+    background:var(--dj-button-accent)!important;color:var(--dj-button-on-accent)!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.primary-btn,button.guide-button,#route-calc,#route-start-gps,#route-guide-start,#route-search-accept,#route-transit-accept,#community-compose-toggle,.dj-compose-footer button[type="submit"],.dj834-review-submit,.dj-place-review-submit,.dj-review-submit,#dj-settings-done,.dj-about-done,.djNext-continue,.dj860-next,#map-startup-continue,.page-panel button[type="submit"],.dj-ai-send,#dj800-ai-search-submit):is(:disabled,[aria-disabled="true"]) {
+    background:var(--dj-button-disabled)!important;border-color:var(--dj-button-disabled)!important;
+    color:var(--dj-button-disabled-ink)!important;box-shadow:none!important;
+  }
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-actions>button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger):is(:disabled,[aria-disabled="true"]),
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.subtle-btn:not(.danger-btn),button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button:not([aria-pressed]),.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#transport-save-place,#transport-share-place,#route-map-edit,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.dj834-review-buttons button:not(.dj834-review-submit),.dj834-review-own-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button,.dj-place-route-actions>button,.dj815-place-actions>button,.dj-place-header-actions>button,.dj-place-personal-actions>button,.transport-selection-actions>button,.metro-open-schedule,.dj-ai-example,#route-search-back,#route-clear,#route-pick-cancel,#route-transit-retry,#nav-voice,#nav-orientation,#nav-follow,#ped-report-open,#ped-nearby-open,#community-sort,#community-refresh,#dongjak-news-refresh,#dj-settings-theme,#dj-settings-text button):is(:disabled,[aria-disabled="true"]),
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.filter-chip,.community-filter,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed],#protection-zone-mode-simple,#protection-zone-mode-detail,.dj-ai-search-entry):is(:disabled,[aria-disabled="true"]) {opacity:.55!important;}
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(button.primary-btn,button.guide-button,#route-calc,#route-start-gps,#route-guide-start,#route-search-accept,#route-transit-accept,#community-compose-toggle,.dj-compose-footer button[type="submit"],.dj834-review-submit,.dj-place-review-submit,.dj-review-submit,#dj-settings-done,.dj-about-done,.djNext-continue,.dj860-next,#map-startup-continue,.page-panel button[type="submit"],.dj-ai-send,#dj800-ai-search-submit,button.subtle-btn:not(.danger-btn),button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button:not([aria-pressed]),.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#transport-save-place,#transport-share-place,#route-map-edit,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.dj834-review-buttons button:not(.dj834-review-submit),.dj834-review-own-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button,.dj-place-route-actions>button,.dj815-place-actions>button,.dj-place-header-actions>button,.dj-place-personal-actions>button,.transport-selection-actions>button,.metro-open-schedule,.dj-ai-example,#route-search-back,#route-clear,#route-pick-cancel,#route-transit-retry,#nav-voice,#nav-orientation,#nav-follow,#ped-report-open,#ped-nearby-open,#community-sort,#community-refresh,#dongjak-news-refresh,#dj-settings-theme,#dj-settings-text button,.map-actions>button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger,button.detail-close,button.sheet-dismiss,button.dj-sheet-chrome-close,button.dj834-detail-back,button.dj-place-header-close,button.dj-bus-detail-close,.djNext-close,.dj-ai-close,#dj800-ai-search-close,.dj-map-settings-close,.dj-about-close,#community-compose-close,#transport-close,#map-safety-close,#map-options-mobile-close,#version-history-close,#route-search-close,.dj-route-pri-close,#ped-tools-close,#map-gesture-guide-close,#map-quick-search-close,#route-map-close,#dj-settings-close,#admin-dong-close,#road-width-legend-close,#overview-sheet-close,.dj-community-location-close,button.filter-chip,.community-filter,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed],#protection-zone-mode-simple,#protection-zone-mode-detail,.dj-ai-search-entry):focus-visible {
+    outline:2px solid var(--dj-button-accent)!important;outline-offset:2px!important;
+  }
+  /* Keep search/AI alignment, map control footprints, safety severity, route
+     geometry, transport line badges, native switches and navigation unchanged. */
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-quick-search-submit,.route-mini-btn,.route-gps-btn) {
     border-radius:var(--dj-button-secondary-radius)!important;
-    box-shadow:0 1px 4px rgba(20,44,38,.14)!important;
   }
-  html body :is(#app,#dj-community-editor-portal) :is(button.detail-close,button.sheet-dismiss,button.dj-sheet-chrome-close,button.dj834-detail-back,button.dj-place-header-close,button.dj-bus-detail-close,#community-compose-close,#transport-close,#map-safety-close,#map-options-mobile-close,#version-history-close,#route-search-close,.dj-route-pri-close) {
-    border-radius:var(--dj-button-close-radius)!important;
-    box-shadow:none!important;
+  /* A pair of comment/review compose controls retains its layout but shares one shape. */
+  html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.community-comment-form button[type=submit],.community-comment-composer button[type=submit],.dj-community-comment-form button[type=submit],.dj-comment-compose button[type=submit]) {
+    background:var(--dj-button-accent)!important;color:var(--dj-button-on-accent)!important;border-color:var(--dj-button-accent)!important;
   }
-  html body #app :is(button.filter-chip,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed]) {
-    border-radius:var(--dj-button-chip-radius)!important;
-    box-shadow:none!important;
-  }
-  /* Keep existing dimensions for aligned toolbar, search and AI controls. */
-  html body #app :is(.map-quick-search-submit,#dj890-ai-orb,.route-mini-btn,.route-gps-btn) {
-    border-radius:var(--dj-button-secondary-radius)!important;
-  }
-  html body :is(#app,#dj-community-editor-portal) :is(button.primary-btn,button.guide-button,button.subtle-btn,button.photo-upload-button,.dj-bus-detail-actions button,.dj-bus-detail-dock button,button.filter-chip,.map-actions > button):focus-visible {
-    outline:2px solid var(--dj-theme-accent,#237b65)!important;
-    outline-offset:2px!important;
-  }
-  /* Danger, disabled, selected, transit line, safety level and dark-mode colors
-     remain under their existing semantic owners. No transition/transform overrides. */
 }

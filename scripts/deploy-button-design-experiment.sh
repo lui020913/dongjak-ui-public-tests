@@ -2,7 +2,7 @@
 set -euo pipefail
 PRIVATE_REPO="lui020913/dongjak-safety-map"
 PAGES_PROJECT="dongjak-walk-safety-preview"
-PREVIEW_BRANCH="button-design-experiment-20261125"
+PREVIEW_BRANCH="button-design-v2-20261125"
 PREVIEW_URL=""
 SOURCE_SHA="$MOBILE_SOURCE_SHA"
 APP_VERSION="$MOBILE_APP_VERSION"
@@ -24,7 +24,7 @@ previous="$(curl -fsS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_API_TO
 test -n "$previous"
 echo "$previous" > "$RUNNER_TEMP/production-before.txt"
 cd "$release"
-if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch="$PREVIEW_BRANCH" --commit-hash="$SOURCE_SHA" --commit-message="Button design experiment Preview public=$PUBLIC_SHA" >"$RUNNER_TEMP/preview-deploy.log" 2>&1; then
+if ! npx --yes wrangler@4 pages deploy dist --project-name="$PAGES_PROJECT" --branch="$PREVIEW_BRANCH" --commit-hash="$SOURCE_SHA" --commit-message="Button design V2 Preview public=$PUBLIC_SHA" >"$RUNNER_TEMP/preview-deploy.log" 2>&1; then
   echo "::error::Preview deployment failed; deployment diagnostics withheld"
   exit 1
 fi

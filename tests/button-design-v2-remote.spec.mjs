@@ -1,0 +1,56 @@
+import {test,expect} from '@playwright/test';
+async function ready(page){
+  await page.goto('/',{waitUntil:'domcontentloaded'});
+  const menu=page.locator('#dj-install-menu');
+  if(await menu.isVisible({timeout:2000})){
+    await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
+    await expect(menu).toBeHidden();
+  }
+  await expect(page.locator('#map')).toBeVisible({timeout:45000});
+  const overlay=page.locator('#map-startup-overlay');
+  const next=page.locator('#map-startup-continue');
+  // The startup layer appears before the continue action is available.
+  // Use the existing production smoke-test handshake, never force-click.
+  await expect.poll(async()=>!await overlay.isVisible()||await next.isVisible(),
+    {timeout:60000,intervals:[250,500,1000]}).toBe(true);
+  if(await overlay.isVisible()&&await next.isVisible())await next.click();
+  await expect(overlay).toBeHidden({timeout:30000});
+  const tour=page.locator('#dj860-onboarding');
+  await expect(page.locator('#app')).toHaveAttribute('data-dj860-auto-resolved','true',{timeout:45000});
+  await expect(tour).toBeVisible({timeout:30000});
+  await tour.locator('[data-dj860-action="skip"]').click();
+  await expect(tour).toBeHidden({timeout:20000});
+  await expect(page.locator('#app')).toHaveAttribute('data-dj-auth-state',/^(signed-in|signed-out)$/,{timeout:45000});
+}
+
+const baseline='https://480f0fd3.dongjak-walk-safety-preview.pages.dev/';
+const target=process.env.BUTTON_PREVIEW_URL;
+async function inspect(browser,url,info,label){
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,colorScheme:'light'});
+ const page=await context.newPage();
+ try{
+ await page.goto(url,{waitUntil:'domcontentloaded'});
+ // ready() opens the configured base URL; remote comparison uses explicit origin.
+ const menu=page.locator('#dj-install-menu');
+ if(await menu.isVisible({timeout:2000})){await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();await expect(menu).toBeHidden();}
+ await expect(page.locator('#map')).toBeVisible({timeout:45000});
+ const overlay=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
+ await expect.poll(async()=>!await overlay.isVisible()||await next.isVisible(),{timeout:60000}).toBe(true);
+ if(await overlay.isVisible()&&await next.isVisible())await next.click();await expect(overlay).toBeHidden({timeout:30000});
+ const tour=page.locator('#dj860-onboarding');if(await tour.isVisible())await tour.locator('[data-dj860-action="skip"]').click();await expect(tour).toBeHidden({timeout:30000});
+ const result={};
+ const snap=async(name,loc)=>{await expect(loc.first()).toBeVisible({timeout:20000});result[name]=await loc.first().evaluate(e=>{const s=getComputedStyle(e);return {background:s.backgroundColor,border:s.borderTopColor,radius:s.borderTopLeftRadius,color:s.color}});await info.attach(label+'-'+name+'.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});};
+ await snap('map',page.locator('#app .map-actions > button:visible'));
+ await page.locator('#bottom-nav .nav-tab[data-tab="route"]').click({timeout:15000,noWaitAfter:true});const host=page.locator('#dj-route-v3');await snap('route',host.locator('.action'));
+ await host.locator('[data-v3="back"]').click();await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:15000,noWaitAfter:true});await snap('community',page.locator('#community-compose-toggle'));
+ return result;
+ }finally{await context.close()}
+}
+test('deployed V2 differs from V1 in computed styles',async({browser},info)=>{
+ test.setTimeout(300000);
+ expect(target).toMatch(/^https:\/\/[a-z0-9-]+\.dongjak-walk-safety-preview\.pages\.dev\/?$/);
+ const before=await inspect(browser,baseline,info,'v1');const after=await inspect(browser,target,info,'v2');
+ await info.attach('comparison.json',{body:Buffer.from(JSON.stringify({before,after},null,2)),contentType:'application/json'});
+ expect(after.map.border).toBe('rgb(166, 197, 184)');expect(after.route.background).toBe('rgb(181, 206, 195)');expect(after.community.background).toBe('rgb(35, 123, 101)');
+ for(const name of ['map','route','community'])expect(after[name]).not.toEqual(before[name]);
+});

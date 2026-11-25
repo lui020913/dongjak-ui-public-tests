@@ -146,10 +146,14 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 @media(min-width:700px){
   :host{display:none!important}
 }
-/* Button-design experiment: shadow-root controls share the main role geometry.
-   Preserve the fixed 56px route CTA layout and existing semantic states. */
-.header button,.search-head button,.search-clear {border-radius:50%}
-.tools button,.switch,.waypoint-item .waypoint-control,.search-location,.recent-head button,.search-results .search-recent-head button {border-radius:12px}
-.tools button {box-shadow:0 1px 4px rgba(20,44,38,.14)}
-.action {border-radius:14px;box-shadow:none;font-weight:600}
-.recent-list button,.search-history button {border-radius:999px}
+
+/* Button Design V2 — the shadow tree inherits shared palette tokens. */
+.header button,.search-head button,.search-clear {border-radius:50%;background:var(--dj-button-soft,#eef5f1);color:var(--dj-button-ink,#235344)}
+.tools button,.switch,.waypoint-item .waypoint-control,.search-location,.recent-head button,.search-results .search-recent-head button {
+  border-radius:12px;border:1px solid var(--dj-button-outline,#a6c5b8);background:var(--dj-button-face,#fff);color:var(--dj-button-ink,#235344)
+}
+.tools button {box-shadow:0 2px 6px rgba(20,44,38,.16)}
+.tools svg,.switch svg {width:20px;height:20px}
+.action {border-radius:14px;box-shadow:none;font-weight:650;background:var(--dj-button-accent,#237b65);color:var(--dj-button-on-accent,#fff);font-size:16px}
+.action[disabled] {background:var(--dj-button-disabled,#b5cec3);color:var(--dj-button-disabled-ink,#365b4e);box-shadow:none}
+.recent-list button,.search-history button {border-radius:999px;border:1px solid var(--dj-button-outline,#a6c5b8);background:var(--dj-button-face,#fff);color:var(--dj-button-ink,#235344)}
