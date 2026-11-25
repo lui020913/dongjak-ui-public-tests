@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with: {node-version: '24'}
       - uses: actions/cache@v4
@@ -41,7 +42,7 @@ jobs:
           node --check app/src/route-screen-v3.js
           grep -Fq "import './button-design-preview.css';" app/src/main.js
           grep -Fq 'PREVIEW_BRANCH="button-design-experiment-20261125"' scripts/deploy-button-design-experiment.sh
-          ! grep -Fq 'public-cloudflare-production' .github/workflows/button-design-experiment-preview.yml
+          ! grep -Eq '^[[:space:]]*environment: public-cloudflare-production' .github/workflows/button-design-experiment-preview.yml
       - name: Build public source with existing CI placeholder configuration
         working-directory: app
         run: |
