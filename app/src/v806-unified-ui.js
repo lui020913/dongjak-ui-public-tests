@@ -73,7 +73,8 @@ export function installUnifiedUI(doc=document, win=window){
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
-    if(!phone()||!target?.style||reduced()||target.id==='dj-community-editor-portal'||target.dataset.djPrimaryTransition)return false;
+    if(!phone()||!target?.style||reduced())return false;
+    if(target.id==='dj-community-editor-portal'||target.dataset.djPrimaryTransition)return false;
     // Phone primary tabs are independent, opaque full-viewport screens.
     // Their only entrance owner is bottom-tab-navigation.js (content-only
     // reveal). The old 806 surface transition wrote inline opacity:0 and
