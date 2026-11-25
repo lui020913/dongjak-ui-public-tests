@@ -2438,7 +2438,9 @@ const pedestrianTools=initPedestrianTools({
     const origin=app.dataset.tab==='map'?'map':'community';
     // The mobile report is an independent full-screen portal. Keep the real
     // map as its underlying page rather than switching to the community feed.
-    if(!(origin==='map'&&window.matchMedia('(max-width:699px)').matches))navigate('participate');
+    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches){
+      // The live map is already active; do not re-enter or resize it.
+    }else navigate('participate');
     communityComposerOrigin=origin;
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
