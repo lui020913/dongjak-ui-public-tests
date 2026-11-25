@@ -172,6 +172,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     dropdown.classList.remove('dj871-search-leaving');
     if(wasHidden)window.DongjakWindowLifecycle?.requestOpen('map-quick-search-dropdown');
     clearMapResults();selectedMapRows=[];mapFooter.hidden=true;
+    window.dispatchEvent(new Event('dongjak:map-search-opened'));
     dropdown.hidden=false;app.dataset.searchOpen='true';syncClear();fitDropdown();
     if(wasHidden){
       dropdown.classList.remove('dj871-search-entering');
