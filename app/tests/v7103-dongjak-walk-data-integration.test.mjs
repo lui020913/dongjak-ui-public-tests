@@ -61,9 +61,9 @@ test('CCTV-like point filtering never shows points outside the district polygon'
     {type:'Feature',geometry:{type:'Point',coordinates:[NaN,37.50]},properties:{}}
   ]},boundary);
   assert.equal(result.features.length,1);
-  assert.equal(Object.keys(EXTRA_LAYER_DEFS).length,11);
-  assert.equal(EXTRA_LAYER_DEFS['road-incidents'].dynamic,true);
-  assert.equal(EXTRA_LAYER_DEFS['sdot-environment'].dynamic,true);
+  assert.equal(Object.keys(EXTRA_LAYER_DEFS).length,9);
+  assert.equal(EXTRA_LAYER_DEFS['road-incidents'],undefined);
+  assert.equal(EXTRA_LAYER_DEFS['sdot-environment'],undefined);
 });
 
 test('main app connects the local worker router and only loads optional layers on demand',()=>{

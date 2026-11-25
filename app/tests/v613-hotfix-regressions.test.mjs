@@ -6,11 +6,11 @@ import {installImportantPlaceClick} from '../src/important-place-click.js';
 
 const load=name=>readFileSync(new URL(`../src/${name}`,import.meta.url),'utf8');
 
-test('night and protection modes are mutually exclusive in main app wiring',()=>{
+test('legacy night mode cannot restore the removed public protection overlay',()=>{
   const code=load('main.js');
-  assert.match(code,/const nightMode=installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme,/);
-  assert.match(code,/onActivate:\(\)=>protectionOverlay\?\.disable\(\{restoreNight:false\}\)/);
-  assert.match(code,/protectionOverlay=installProtectionZoneMap\(\{map,maplibregl,app,nightMode\}\)/);
+  assert.match(code,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme\}\)/);
+  assert.doesNotMatch(code,/protectionOverlay\?\.disable/);
+  assert.doesNotMatch(code,/installProtectionZoneMap\(/);
   const night=load('night-visibility-map.js');
   assert.match(night,/if\(next\)await onActivate\(\)/);
   assert.match(night,/enable:\(\)=>setMode\(true\)/);

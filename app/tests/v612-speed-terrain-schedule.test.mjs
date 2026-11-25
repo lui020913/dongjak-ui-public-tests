@@ -12,7 +12,8 @@ test('terrain remains enabled regardless of map pitch or island view bounds',()=
   assert.ok(!block.includes('pitch >')&&!block.includes('pitch <'));
   assert.ok(!block.includes('map.getBounds'));
   assert.ok(!block.includes('setTerrain(null)'));
-  assert.match(main,/installSangdoSpeedMap\(\{map,maplibregl,app\}\)/);
+  assert.doesNotMatch(main,/installSangdoSpeedMap\(/);
+  assert.match(main,/installPriMap\(/);
 });
 test('Line 1 and Sillim retain independent live and timetable tabs',()=>{
   assert.equal(isScheduleMergedStation({kind:'subway',selectedLine:'1호선',lines:['1호선','9호선']}),false);
@@ -41,6 +42,7 @@ test('GeoJSON speed overlay loads only real source records and supports filters'
     };
     visit(feature.geometry.coordinates);
   }
-  assert.match(read('index.html'),/id="sangdo-speed-controls"/);
+  assert.doesNotMatch(read('index.html'),/id="sangdo-speed-controls"/);
+  assert.match(read('src/pri-map.js'),/speedRiskDisplay\(/);
   assert.match(read('src/speed-ui-and-scrollbar.css'),/scrollbar-color:#43666b #192f34/);
 });

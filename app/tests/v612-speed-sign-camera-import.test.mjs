@@ -45,6 +45,7 @@ test('camera markers are never manufactured from street names or rows lacking ac
   assert.deepEqual(normalizedCameraPoints([{시군구명:'용산구',설치장소:'점',위도:'37.5022',경도:'126.9512'}]).features,[]);
   assert.deepEqual(normalizedCameraPoints([{시군구명:'동작구',설치장소:'점',위도:'37.6022',경도:'126.9512'}]).features,[]);
   assert.deepEqual(cameraImportPreview(JSON.stringify({type:'FeatureCollection',features:[]}),'sample.geojson').features,[]);
-  assert.match(read('index.html'),/id="sangdo-camera-file"/);
+  assert.doesNotMatch(read('index.html'),/id="sangdo-camera-file"/);
+  assert.match(read('index.html'),/id="pilot-unavailable-camera"[^>]*disabled/);
   assert.match(read('src/version-history-v7.js'),/전국무인교통단속카메라 표준데이터/);
 });

@@ -27,10 +27,11 @@ test('v6.1: empty news upstream fails explicitly, never invents articles',async(
   await assert.rejects(()=>uncached({type:'official',fetchImpl,force:true,now:1794038409000}),{status:502});
 });
 
-test('v6.1: width tool dismisses on one background map click with no extra popup',()=>{
+test('road width remains on after a background click and closes with its explicit X',()=>{
   const originalDoc=globalThis.document, originalWindow=globalThis.window;
   const btn={disabled:false,attributes:{},style:{},listeners:{},setAttribute(k,v){this.attributes[k]=v;},addEventListener(k,fn){this.listeners[k]=fn;},getBoundingClientRect(){return {top:50,left:30};}};
   const legend={hidden:true,offsetHeight:80,style:{setProperty(){}}};
+  const close={listeners:{},addEventListener(k,fn){this.listeners[k]=fn;}};
   const handlers=new Map(),layers=new Map();
   const map={
     addSource(){},getStyle(){return {layers:[{id:'label',type:'symbol'}]};},
@@ -42,14 +43,17 @@ test('v6.1: width tool dismisses on one background map click with no extra popup
     getCanvas(){return {style:{}}}
   };
   const popup=class {constructor(){throw new Error('Should not make popup on map dismissal');}};
-  globalThis.document={getElementById:id=>id==='toggle-road-width'?btn:id==='road-width-legend'?legend:null};
+  globalThis.document={getElementById:id=>id==='toggle-road-width'?btn:id==='road-width-legend'?legend:id==='road-width-legend-close'?close:null};
   globalThis.window={innerWidth:375,innerHeight:780};
   try{
     installRoadWidthLayer({map,maplibregl:{Popup:popup}});
     btn.listeners.click();
     assert.equal(btn.attributes['aria-pressed'],'true');
     assert.equal(legend.hidden,false);
-    handlers.get('click:map')({point:{x:20,y:20},lngLat:{lng:126.94,lat:37.49}});
+    handlers.get('click:map')?.({point:{x:20,y:20},lngLat:{lng:126.94,lat:37.49}});
+    assert.equal(btn.attributes['aria-pressed'],'true');
+    assert.equal(legend.hidden,false);
+    close.listeners.click();
     assert.equal(btn.attributes['aria-pressed'],'false');
     assert.equal(legend.hidden,true);
   }finally{globalThis.document=originalDoc;globalThis.window=originalWindow;}

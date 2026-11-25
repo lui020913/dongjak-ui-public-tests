@@ -22,10 +22,10 @@ test('night view excludes competing drawers and has full night-off label',()=>{
   assert.match(src,/label\.textContent=enabled\?'야간 시야 해제':'야간 시야'/);
   assert.match(css,/#app\[data-tab="map"\]\.map-controls-open #night-visibility-float/);
 });
-test('road width is exclusive card and close X is aligned, no additional clones',()=>{
+test('road width uses exclusive road-layer state and an explicit aligned close X',()=>{
   const src=read('src/road-width-layer.js');
   assert.match(src,/dj-road-width-open/);
-  assert.match(src,/nightButton\?\.getAttribute\('aria-pressed'\)/);
+  assert.match(src,/claimRoadLayer\('width'/);
   assert.match(css,/#app #road-width-legend:not\(\[hidden\]\)/);
   assert.match(css,/#app #road-width-legend-close::before/);
 });

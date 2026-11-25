@@ -25,14 +25,14 @@ test('모바일 상행 하행은 좁은 화면에서도 두 열로 렌더링',()
   assert.match(source('src/main.js'),/import '\.\/mobile-ui-baseline\.css'/);
 });
 
-test('제한속도와 단속카메라는 초기 화면에서 꺼진 상태',()=>{
+test('제한속도는 PRI에 통합하고 단속카메라는 비활성 표시',()=>{
   const js=source('src/sangdo-speed-map.js');
   const html=source('index.html');
   assert.match(js,/let enabled=false,ready=false/);
   assert.match(js,/let cameraEnabled=false,cameraData/);
-  assert.match(html,/id="sangdo-speed-toggle" aria-pressed="false"/);
-  assert.match(html,/id="sangdo-camera-toggle" aria-pressed="false"/);
-  for(const v of [10,30,40,50]) assert.match(html,new RegExp(`value="${v}" \/><i class="speed-${v}"`));
+  assert.doesNotMatch(html,/id="sangdo-speed-toggle"/);
+  assert.match(html,/id="pilot-unavailable-camera"[^>]*disabled aria-pressed="false"/);
+  assert.doesNotMatch(html,/id="sangdo-speed-controls"/);
   assert.match(js,/enabled=enabledSpeeds\(\)\.length>0/);
 });
 
