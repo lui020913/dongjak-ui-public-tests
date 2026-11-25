@@ -1960,7 +1960,6 @@ async function refreshCommunityNotices(){const seq=++communityNoticeSeq;try{cons
 const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 및 비하',spam:'도배 및 스팸',sexual:'음란성 콘텐츠',graphic:'과도하게 자극적인 이미지',privacy:'개인정보 노출',illegal_ad:'불법 광고',uncertain:'운영정책 위반 의심',unavailable:'검사 보류'};
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
-let communityComposerOrigin='community';
 let communityComposerPortal=null;
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
@@ -2009,7 +2008,6 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
     const form=document.getElementById('community-form');
     if(form){communityComposerPortal?.close();form.hidden=true;}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
-    communityComposerOrigin='community';
   }
   immersiveChrome.restore();
   if (addMode) setAddMode(false);
@@ -2187,15 +2185,13 @@ function openCommunityComposer(open,{animate=true}={}) {
   }
   if(open){
     if(communityComposerPortal?.isOpen())return;
-    communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map',animate});
+    communityComposerPortal.open({animate});
     return;
   }
   if(!communityComposerPortal?.isOpen())return;
-  communityComposerPortal.dismiss({animate,onClosed:()=>{
-    communityComposerOrigin='community';
-  }});
+  communityComposerPortal.dismiss({animate});
 }
-document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
+document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
 for (const chip of document.querySelectorAll('.community-filter[data-community-filter]')) {
   chip.addEventListener('click',()=>{
@@ -2263,8 +2259,7 @@ function cancelCommunityTabMotion(){
 function resumeCommunityLocationDraft(){
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
-  const mapOrigin=communityComposerOrigin==='map'&&window.matchMedia('(max-width:699px)').matches;
-  navigate(mapOrigin?'map':'participate',{suppressOverview:mapOrigin,resumeCommunityDraft:true});
+  navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
 }
 function selectCommunityLocation(lngLat) {
@@ -2381,13 +2376,10 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
-    const origin=app.dataset.tab==='map'?'map':'community';
-    // The mobile report is an independent full-screen portal. Keep the real
-    // map as its underlying page rather than switching to the community feed.
-    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches){
-      // The live map is already active; do not re-enter or resize it.
-    }else navigate('participate');
-    communityComposerOrigin=origin;
+    // Risk report opens the same composer as the community tab.
+    cancelCommunityTabMotion();
+    clearCommunityLocationPick();
+    navigate('participate');
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});
