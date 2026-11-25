@@ -1,3 +1,4 @@
+import {normalizeFacilityCategory} from './facility-display-names.js';
 /* Facility display is separate from source data, search and safety-analysis layers. */
 export const POI_GROUPS=Object.freeze([['safety','안전시설','Safety'],['public','공공시설','Public'],['convenience','생활편의','Convenience'],['food','음식점','Food'],['cafe','카페','Café']]);
 export const DEFAULT_POI_GROUPS=Object.freeze(['safety','public']);
@@ -22,7 +23,7 @@ const GLYPHS={
  cafe:['#926d4f','M4 8h13v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M17 9h2a3 3 0 0 1 0 6h-2M3 22h17M8 3v2M12 3v2'],
  other:['#758451','M12 4v14M8 8h8M8 14h8']
 };
-export function facilityPresentation(category){const [group,icon]=TYPES[String(category||'').trim()]||['convenience','other'];return {group,icon,priority:group==='safety'?0:group==='public'?10:20};}
+export function facilityPresentation(category){const [group,icon]=TYPES[normalizeFacilityCategory(category)]||['convenience','other'];return {group,icon,priority:group==='safety'?0:group==='public'?10:20};}
 export function facilitySearchGlyph(category,kind){
  const aliases={'대학교':'학교','유치원':'학교','의료시설':'병원','치과':'병원','정원':'공원','주민시설':'주민센터','제과점':'음식점','시장':'마트','상점':'편의점','ATM':'은행'};
  const type=kind==='bus'||kind==='subway'?kind:facilityPresentation(aliases[category]||category).icon;

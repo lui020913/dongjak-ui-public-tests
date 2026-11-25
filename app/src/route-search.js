@@ -1,4 +1,4 @@
-import {normalizeFacilityName} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory} from './facility-display-names.js';
 import {normalizeKoreanSearch,koreanSearchScore} from './korean-search.js';
 import {IMPORTANT_PLACES} from './important-place-click.js';
 import {DONGJAK_UNIVERSITIES} from './education-layer.js';
@@ -38,8 +38,8 @@ export function normalizePlaceSearchResults(payload) {
     const osmKey = String(p.osm_key || '').toLowerCase();
     const category = osmKey === 'railway' || ['subway', 'station', 'halt'].includes(osmValue)
       ? '지하철·철도역'
-      : osmValue.includes('bus') ? '버스정류장' : '장소';
-    results.push({name, address, lng, lat, category, label: name});
+      : osmValue.includes('bus') ? '버스정류장' : normalizeFacilityCategory(types[osmValue]||osmValue||'장소',rawName);
+    results.push({name, address, lng, lat, category:/[가-힣]/.test(category)||category==='AED'||category==='ATM'?category:'장소', label: name});
   }
   return results.slice(0, 8);
 }

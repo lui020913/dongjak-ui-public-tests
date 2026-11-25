@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeFacilityName,normalizeFacilityRecord,facilityNameMatches,facilitySearchTerms} from '../src/facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityRecord,normalizeFacilityCategory,facilityNameMatches,facilitySearchTerms} from '../src/facility-display-names.js';
 test('verified store operator aliases preserve actual branch suffix and raw record',()=>{
  const p={id:'r:1',name:'(주)코리아세븐 상도점',category:'편의점',lng:126.95,lat:37.49};
  assert.deepEqual(normalizeFacilityRecord(p),{...p,name:'세븐일레븐 상도점',registeredName:p.name});
@@ -24,4 +24,15 @@ test('brand and legal-name search aliases work without removing branch suffix',(
  assert.equal(facilityNameMatches(p,'세븐일레븐 노량진점'),false);
  assert.ok(facilitySearchTerms('세븐일레븐 상도점').includes('코리아세븐 상도점'));
  assert.deepEqual(facilitySearchTerms('일반 상호'),['일반 상호']);
+});
+
+test('public and safety facility categories are canonical without renaming real institutions',()=>{
+ for(const [raw,expected] of [['치안센터','경찰서'],['지구대','경찰서'],['파출소','경찰서'],['police','경찰서'],['119안전센터','소방서'],['fire_station','소방서'],['행정복지센터','주민센터'],['일반음식점','음식점'],['공중화장실','화장실']])assert.equal(normalizeFacilityCategory(raw),expected);
+ const p={name:'상도5치안센터',category:'일반시설',lng:126.95,lat:37.49};
+ assert.deepEqual(normalizeFacilityRecord(p),{...p,category:'경찰서'});
+ assert.equal(facilityNameMatches(p,'경찰서'),true);
+ assert.equal(normalizeFacilityCategory('음식점','경찰서식당'),'음식점');
+ assert.equal(normalizeFacilityCategory('일반시설','치안센터 앞 카페'),'일반시설');
+ assert.equal(normalizeFacilityCategory('치과'),'치과');
+ assert.equal(normalizeFacilityCategory('동물약국'),'동물약국');
 });
