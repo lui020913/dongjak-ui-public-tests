@@ -87,6 +87,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const communityNews=key=>key==='participate'||key==='news';
  function dissolvePrimary(button,previousTab,previous){
   const destination=button.dataset.tab,fromMap=previousTab==='map',toMap=destination==='map';
+  if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
   const records=new Map();let raf=0,timer=0,finished=false,fade=null,after=null;
   const props=['opacity','animation','transition','will-change','display','visibility','z-index','pointer-events'];
   const remember=node=>{if(node?.style?.getPropertyValue&&!records.has(node))records.set(node,props.map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)]));};
@@ -103,7 +104,6 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    delete app.dataset.djPrimaryDissolving;
    if(pageCleanup===cleanup)pageCleanup=null;
   };
-  if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
   pageCleanup=cleanup;app.dataset.djPrimaryDissolving='true';
   if(previous){remember(previous);previous.dataset.djTabOutgoing='true';previous.dataset.djPrimaryTransition='outgoing';}
   if(!replay(button)||app.dataset.tab!==destination){cleanup();return;}
