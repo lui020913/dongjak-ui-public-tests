@@ -142,3 +142,13 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px s
 #app .dj-pri-map-key .dj-pri-key-boundary::before{border-color:#436F9C;}
 #app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #52677E;}
 
+
+/* Expanded PRI legend can reach the GPS toolbar at small phone heights.
+   Suppress only the floating map controls during this disclosure; the dock
+   and normal collapsed PRI map stay unchanged. */
+@media(max-width:699px){
+ html body #app[data-dj-pri-visible="true"][data-tab="map"]:has(#dj-pri-legend:not([hidden]) .dj-pri-detail-toggle[aria-expanded="true"]) .map-actions,
+ html body #app[data-dj-pri-visible="true"][data-tab="map"]:has(#dj-pri-legend:not([hidden]) .dj-pri-detail-toggle[aria-expanded="true"]) .map-actions *{
+  visibility:hidden!important;pointer-events:none!important;
+ }
+}
