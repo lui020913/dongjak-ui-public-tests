@@ -30,7 +30,7 @@ test('inline waypoint plus and all three search targets share GPS and map action
  assert.match(source,/route-pick-start':'route-pick-end'/);
  assert.match(engine,/routeSearchTarget!==which/);assert.match(engine,/seq!==routeSearchSequence\|\|which!==routeSearchTarget/);
  assert.match(engine,/if\(!requireDongjakRouteLocation\(position\)\)return;/);
- assert.match(style,/grid-template-rows:61px auto auto 61px/);
+ assert.match(style,/grid-template-rows:52px auto auto 52px/);
  assert.match(style,/\.search-control-row\{display:grid/);
 });
 
