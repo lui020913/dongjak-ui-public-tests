@@ -96,16 +96,17 @@ export async function fetchStationTimetables({station,line,day,fetchJSON,now=new
     let summary=parseMetroServiceHours(verified,selectedLine,now,day);
     // The FR_CODE endpoint can return an empty response for Korail-operated Line 1.
     // Retry the officially documented station-code endpoint, never fabricate trains.
-    if(!parsedTimes.length && stationCode){
-      const byID=await Promise.allSettled(['1','2'].map(async direction=>({
+    const missingDirections=['1','2'].filter(direction=>!parsedTimes.some(row=>row.directionCode===direction));
+    if(missingDirections.length && stationCode){
+      const byID=await Promise.allSettled(missingDirections.map(async direction=>({
         direction,body:await recordedFetch('SearchSTNTimeTableByIDService',[500,stationCode,day,direction])
       })));
       const verifiedID=byID.filter(x=>x.status==='fulfilled').map(x=>x.value);
       const idRows=parseMetroTimetableRows(verifiedID,selectedLine,day);
       if(idRows.length){
-        parsedTimes=idRows;
-        summary=parseMetroServiceHours(verifiedID,selectedLine,now,day);
-      }else notes.push(`${selectedLine}: 시간표 조회 결과 없음 · 외부코드/역코드 API 모두 미제공 (운영기관 확인 필요)`);
+        parsedTimes=[...parsedTimes,...idRows];
+        summary=[...summary,...parseMetroServiceHours(verifiedID,selectedLine,now,day)];
+      }else notes.push(`${selectedLine}: 일부 또는 전체 방향 시간표 미제공 (운영기관 확인 필요)`);
     }
     items.push(...summary);
     timetable.push(...parsedTimes);
