@@ -881,8 +881,10 @@ test('map report fades out over its real destination without reparenting or resi
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
+   const visible=n=>{if(!n)return false;const c=getComputedStyle(n),r=n.getBoundingClientRect();return c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98&&r.width>0&&r.height>0;};
+   const canvas=document.querySelector('#map .maplibregl-canvas'),dock=document.getElementById('bottom-nav'),topbar=app.querySelector(':scope > .topbar');
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:getComputedStyle(app).visibility==='visible'&&Number(getComputedStyle(app).opacity)>.98&&getComputedStyle(document.getElementById('map')).visibility==='visible'&&Number(getComputedStyle(document.getElementById('map')).opacity)>.98,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:visible(app)&&visible(document.getElementById('map'))&&visible(canvas),chromeVisible:visible(dock)&&visible(topbar),stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
@@ -890,7 +892,9 @@ test('map report fades out over its real destination without reparenting or resi
  await expect(portal).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
- expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map'&&f.mapVisible)).toBe(true);
+ const intermediate=frames.filter(f=>f.opacity>.08&&f.opacity<.95);
+ expect(intermediate.length).toBeGreaterThan(1);
+ expect(intermediate.every(f=>f.tab==='map'&&f.mapVisible&&f.chromeVisible)).toBe(true);
  expect(frames.every(f=>f.stable)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
 });
