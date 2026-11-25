@@ -5,6 +5,7 @@ import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import {SPEED_RISK_SOURCE,SPEED_RISK_METADATA,speedLimitRiskScore,speedRiskDisplay,speedRiskCounts,validateSpeedRiskSource} from './pri-speed-risk.mjs';
 import {spatialMatchSpeedFactor} from './pri-speed-spatial-match.mjs';
 import './pri-map.css';
+import {roadEndpointTransitions} from './pri-road-transitions.mjs';
 import {claimRoadLayer,announcePilotLayer} from './pilot-layer-selection.js';
 const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point',SPEED_LINE='dj-pri-speed-line',CANDIDATE_LINE='dj-pri-candidate-line',BOUNDARY_SOURCE='dj-pri-boundary-source',BOUNDARY_LINE='dj-pri-boundary-line';
 const UNKNOWN_COLOR='#B9C3C2',UNKNOWN_OPACITY=.58,BOUNDARY_COLOR='#FFFFFF';
@@ -13,6 +14,7 @@ const roadWidth=['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,
 const EMPTY={type:'FeatureCollection',features:[]};
 const POLICY_SCOPE_URL='/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson';
 const colors=['case',['get','evaluated'],['step',['get','displayScore'],'#4C948B',40,'#E0A04A',70,'#CF4248'],UNKNOWN_COLOR]; // 0-39 low, 40-69 caution, 70-100 red
+const renderColor=base=>['case',['has','renderColor'],['to-color',['get','renderColor']],base];
 const protectionGapColors=['case',['get','evaluated'],['interpolate',['linear'],['get','displayScore'],0,'#4C948B',25,'#82AB94',50,'#DBC576',75,'#DDA263',100,'#CB6563'],UNKNOWN_COLOR];
 
 /** Shared PRI engine stores normalized safety scores, while all public map labels are risk scores (100-safety). */
@@ -23,7 +25,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const button=(label,fn)=>{const n=el('button','dj-pri-button',label);n.type='button';n.addEventListener('click',fn);return n;};
  let dataset=null,mode=null,display=EMPTY,policyScope=null,priBoundary=null,schoolReview=null,boundaryAudit=null,speedSource=null,speedMetadata=null,speedMatchStats=null,sharedCandidates=null,fetchStarted=false,revision=0,popup=null,lookup=new Map();
- let roadLease=null;
+ let roadLease=null,renderDisplay=EMPTY;
  let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri','current3','current4'].includes(restoreMode)?'current6':restoreMode==='sharedCandidate'?'sharedRoad':restoreMode==='middleReview'?'protectionGap':restoreMode):null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
@@ -197,7 +199,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   // evidence that the MapLibre style cannot accept a new GeoJSON layer.
   try{
    if(!Array.isArray(map.getStyle?.()?.layers))return false;
-   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:display});
+   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:renderDisplay});
    if(priBoundary){
     if(!map.getSource(BOUNDARY_SOURCE))map.addSource(BOUNDARY_SOURCE,{type:'geojson',data:priBoundary});
     if(!map.getLayer(BOUNDARY_LINE))map.addLayer({id:BOUNDARY_LINE,source:BOUNDARY_SOURCE,type:'line',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':BOUNDARY_COLOR,'line-width':1.8,'line-opacity':1}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
@@ -233,11 +235,12 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    map.setLayoutProperty(SPEED_LINE,'visibility',mode==='speed'?'visible':'none');
    map.setLayoutProperty(CANDIDATE_LINE,'visibility',mode==='sharedRoad'?'visible':'none');
    map.setFilter(LINE,mode==='sharedRoad'?['all',['==',['geometry-type'],'LineString'],['!=',['get','sharedCandidate'],true]]:['==',['geometry-type'],'LineString']);
-   map.setPaintProperty(LINE,'line-color',activeColors);
+   map.setPaintProperty(LINE,'line-color',renderColor(activeColors));
+   map.setPaintProperty(SPEED_LINE,'line-color',renderColor(colors));
    map.setPaintProperty(POINT,'circle-color',activeColors);
    map.setPaintProperty(LINE,'line-opacity',['case',['get','evaluated'],mode==='speed'?.28:.88,UNKNOWN_OPACITY]);
    map.setPaintProperty(LINE,'line-width',roadWidth);
-   map.getSource(SOURCE).setData(display);
+   map.getSource(SOURCE).setData(renderDisplay);
    return true;
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
  }
@@ -257,6 +260,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    const source=policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(observedFactorScore(s,'sharedRoad'))]))):EMPTY;
    display={...source,features:source.features.map(f=>({...f,properties:{...f.properties,sharedCandidate:!f.properties.evaluated&&ids.has(f.properties.segmentId)}}))};
   }else display=id?(id==='speed'?speedRiskDisplay(speedSource,policyScope?scopedPolicyFeatures(policyScope).features:[]):id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current6'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current6'))]))):EMPTY):id==='current4'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current4'))]))):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,id))]))):EMPTY)):EMPTY;
+  renderDisplay=roadEndpointTransitions(display,{policy:id==='protectionGap',speed:id==='speed'});
   if(id||map.getSource(SOURCE))draw();
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
