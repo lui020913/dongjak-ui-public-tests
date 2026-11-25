@@ -10,7 +10,11 @@ test('일반 장소와 주소를 검색할 수 있고 특정 역만 검색하는
   assert.ok(searchLocalPlaces('중앙대').some(p=>p.name==='중앙대학교'&&p.category));
   assert.ok(searchLocalPlaces('구청').some(p=>p.name==='동작구청'));
   const cafe=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{name:'테스트 카페',osm_key:'amenity',osm_value:'cafe'}}]});
-  assert.equal(cafe[0].category,'장소');
+  assert.equal(cafe[0].category,'카페');
+  const police=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{name:'상도5치안센터',osm_key:'amenity',osm_value:'police'}}]});
+  assert.equal(police[0].category,'경찰서');assert.equal(police[0].name,'상도5치안센터');
+  const address=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{street:'상도로',housenumber:'10'}}]});
+  assert.equal(address[0].category,'장소');
 });
 test('길찾기·위치 선택 동안 야간시야 활성화를 막고 일반 지도에서는 허용',()=>{
   const classes=new Set(['route-picking']);

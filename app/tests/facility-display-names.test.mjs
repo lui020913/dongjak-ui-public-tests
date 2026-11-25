@@ -47,3 +47,13 @@ test('category aliases reach search, vector subtype and conservative duplicate m
  assert.equal(sameFacility(police,{...police,name:'상도지구대'}),false);
  assert.equal(sameFacility(police,{...police,lng:126.951}),false);
 });
+
+test('OSM search includes fixed facility tags and original public institution names',async()=>{
+ const {nameQuery}=await import('../functions/api/osm-name-search.js');
+ const {normalizeNamedOsm}=await import('../src/v875-osm-name-search.js');
+ const query=nameQuery('경찰서');
+ assert.ok(query.includes('치안센터'));assert.ok(query.includes('police'));
+ assert.equal(nameQuery('경찰서";'),null);
+ const rows=normalizeNamedOsm({elements:[{id:1,type:'node',lon:126.95,lat:37.49,tags:{amenity:'police',name:'상도5치안센터'}}]},'경찰서');
+ assert.equal(rows.length,1);assert.equal(rows[0].category,'경찰서');assert.equal(rows[0].name,'상도5치안센터');
+});
