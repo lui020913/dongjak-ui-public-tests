@@ -101,9 +101,10 @@ async function enter(page,id,key){
    // name. The inline-important rAF owner intentionally disables keyframes.
    await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&((f.contentOpacity>.12&&f.contentOpacity<.98)||(f.outgoingOpacity>.12&&f.outgoingOpacity<.98)))),{message:'visible intermediate cross-dissolve opacity on '+key+' entry'}).toBe(true);
    await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
+   await expect(page.locator('[data-dj-primary-transition]')).toHaveCount(0);
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
-   if(fromMap&&key==='news')expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
+   if(fromMap&&['news','participate'].includes(key))expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
@@ -864,6 +865,24 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh stationary fade for the previous tab.
  await enter(page,'news-panel','news');
+ // Exercise both the X and the tab route back to the real map, not merely
+ // the eventual hidden state. Require multiple intermediate frames.
+ for(const [id,key] of [['news-panel','news'],['participation-panel','participate']]){
+   if(key==='participate')await enter(page,id,key);
+   await page.evaluate(id=>{
+     const panel=document.getElementById(id),app=document.getElementById('app'),map=document.getElementById('map'),dock=document.getElementById('bottom-nav');
+     window.__primaryExitFrames=[];
+     const visible=n=>{const c=getComputedStyle(n);return c.display!=='none'&&c.visibility==='visible'&&Number(c.opacity)>.98&&n.getClientRects().length>0;};
+     const capture=()=>{if(panel.hidden)return;window.__primaryExitFrames.push({alpha:Number(getComputedStyle(panel).opacity),tab:app.dataset.tab,map:visible(map)&&visible(map.querySelector('.maplibregl-canvas')),dock:visible(dock)});requestAnimationFrame(capture);};
+     capture();
+   },id);
+   if(key==='news')await tap(page,page.locator('#news-close-to-map'));
+   else await tap(page,tab(page,'map'));
+   await expect(page.locator('#'+id)).toBeHidden();
+   const frames=await page.evaluate(()=>window.__primaryExitFrames.filter(f=>f.alpha>.08&&f.alpha<.95));
+   expect(frames.length).toBeGreaterThan(1);
+   expect(frames.every(f=>f.tab==='map'&&f.map&&f.dock)).toBe(true);
+ }
 });
 
 
