@@ -746,7 +746,26 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    await routeScreen.locator('[data-v3="'+key+'"]').click();
    await expect(search.locator('#v3-search-title')).toHaveText(title);
    await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+   await expect(routeScreen.locator('.tools')).toBeHidden();
+   await page.evaluate(()=>{
+     const vv=window.visualViewport;
+     Object.defineProperty(vv,'height',{configurable:true,value:Math.round(innerHeight*.58)});
+     vv.dispatchEvent(new Event('resize'));
+   });
+   try{
+     await expect(search).toHaveAttribute('data-keyboard','open');
+     await expect(search).toHaveCSS('padding-bottom','4px');
+     const measured=await search.evaluate(n=>({gap:n.getBoundingClientRect().bottom-n.querySelector('.search-results').getBoundingClientRect().bottom, height:n.getBoundingClientRect().height,viewport:visualViewport.height}));
+     expect(measured.gap).toBeLessThanOrEqual(5);
+     expect(Math.abs(measured.height-measured.viewport)).toBeLessThanOrEqual(2);
+     await expect(routeScreen.locator('.tools')).toBeHidden();
+     await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();
+   }finally{
+     await page.evaluate(()=>{delete window.visualViewport.height;window.visualViewport.dispatchEvent(new Event('resize'));});
+   }
+   await expect(search).toHaveAttribute('data-keyboard','closed');
    await routeScreen.locator('[data-v3="search-back"]').click();
+   await expect(routeScreen.locator('.route-panel')).toBeVisible();
  }
  await routeScreen.locator('[data-v3="back"]').click();
  await expect(routeScreen).toBeHidden();
