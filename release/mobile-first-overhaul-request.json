@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.153",
+  "application_version": "9.2.154",
   "public_work_branch": "main",
-  "purpose": "PR475 and PR476: warm-white forward radial train headlamps, route search scrollbar and recent heading, provisional smartphone requirements on browser welcome, official bus section placement, short vehicle plates and color-coded congestion. Preserve tablet mode and protected production checks.",
-  "attempt": 371,
+  "purpose": "PR477: compact subway destination direction cards, arrow entry to live train route detail, circular line and transfer badges, verified station observations, per-line API cache, 25-second refresh and cancellation on close. Preserve timetable, bus, tablet mode and protected production checks.",
+  "attempt": 372,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
