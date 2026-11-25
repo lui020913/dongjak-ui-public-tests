@@ -5,6 +5,9 @@
   /* The header has no drag behavior: do not display a fake grab handle. */
   .dj-bus-detail::before{content:none;display:none;}
   #app > #dj-bus-route-detail[data-closing=true]:not([hidden]){pointer-events:none;animation:dj-bus-detail-fade-out var(--dj-bus-close-duration,300ms) cubic-bezier(.25,.20,.40,1) both;}
+  #app > #dj-bus-route-detail:not([hidden]):not([data-closing=true]){animation:dj-bus-detail-fade-in 350ms cubic-bezier(.25,.20,.40,1) both;}
+  @keyframes dj-bus-detail-fade-in{from{opacity:0;}to{opacity:1;}}
+  @media(prefers-reduced-motion:reduce){#app > #dj-bus-route-detail:not([hidden]):not([data-closing=true]){animation:none;}}
   @keyframes dj-bus-detail-fade-out{from{opacity:1;}to{opacity:0;}}
   @media(prefers-reduced-motion:reduce){#app > #dj-bus-route-detail[data-closing=true]:not([hidden]){animation:none;opacity:0;}}
   .dj-bus-detail-head,.dj-bus-detail-identity,.dj-bus-detail-actions{display:flex;align-items:center;gap:8px;}
