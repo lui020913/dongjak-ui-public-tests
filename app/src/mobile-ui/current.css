@@ -1132,7 +1132,7 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
    font-size:12px!important;line-height:1.4!important;
    color:var(--dj800-muted,#53675e)!important;
  }
- html body #app#app#app #participation-panel #community-list {
+ html body #app#app#app #participation-panel #community-list:not([hidden]) {
    order:0!important;display:grid!important;gap:10px!important;
    width:100%!important;min-width:0!important;margin:0!important;
    padding:0 0 12px!important;
