@@ -977,6 +977,21 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
  const gate=page.locator('#dj-mobile-only-screen'),menu=gate.locator('#dj-install-menu');
  await expect(menu).toBeVisible({timeout:20000});await expect(gate.locator('#dj-mobile-only-title')).toBeHidden();
  await expect(menu.locator('.dj-install-subtitle')).toContainText('스마트폰');await expect(gate.locator('.dj-mobile-only-devices')).toBeVisible();
+ // The long WebView guidance must wrap rather than exceed the card or
+ // the viewport on both PC and tablet widths.
+ for(const width of [768,1024,1200]){
+   await page.setViewportSize({width,height:950});
+   const guide=menu.locator('.dj-install-performance');
+   await expect(guide).toBeVisible();
+   await expect.poll(()=>guide.evaluate(n=>{
+     const p=n.querySelector('p'),r=n.getBoundingClientRect(),t=p.getBoundingClientRect();
+     const text=document.createRange();text.selectNodeContents(p);
+     return getComputedStyle(p).whiteSpace==='normal'&&p.scrollWidth<=p.clientWidth+1&&
+       r.right<=innerWidth+1&&t.right<=r.right+1&&
+       [...text.getClientRects()].every(b=>b.right<=r.right+1&&b.left>=r.left-1);
+   })).toBe(true);
+ }
+
  const web=menu.getByRole('button',{name:/웹에서 바로 이용하기/}),android=menu.getByRole('button',{name:/Android 앱 다운로드/});
  await expect(web).toContainText('모바일 전용');
  expect(await web.evaluate(n=>getComputedStyle(n).backgroundColor)).toBe(await android.evaluate(n=>getComputedStyle(n).backgroundColor));
