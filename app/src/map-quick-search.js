@@ -73,6 +73,13 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   const title=dropdownHead.querySelector('strong');
   const body=document.createElement('div');body.id='dj-search-scroll-body';
   dropdownHead.after(body);body.append(filters,feedback,list);
+  const mapFooter=document.createElement('div');mapFooter.className='dj-search-map-footer';mapFooter.hidden=true;
+  const mapView=document.createElement('button');mapView.type='button';mapView.className='dj-search-map-view';mapView.textContent='지도에서 보기';mapFooter.append(mapView);dropdown.append(mapFooter);
+  const mapResultsBar=document.createElement('div');mapResultsBar.className='dj-search-map-results-bar';mapResultsBar.hidden=true;
+  const mapResultsLabel=document.createElement('strong'),mapResultsClose=document.createElement('button');mapResultsClose.type='button';mapResultsClose.textContent='×';mapResultsClose.setAttribute('aria-label','검색 시설 표시 닫기');mapResultsBar.append(mapResultsLabel,mapResultsClose);app.append(mapResultsBar);
+  let selectedMapRows=[],resultMarkers=[];
+  const clearMapResults=()=>{for(const marker of resultMarkers)marker.remove();resultMarkers=[];mapResultsBar.hidden=true;};
+  mapResultsClose.addEventListener('click',clearMapResults);
   const actions=document.createElement('div');actions.id='dj-search-entry-actions';actions.hidden=true;
   const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='최근 검색';
   const nearbyButton=document.createElement('button');nearbyButton.type='button';nearbyButton.textContent='이 지도에서 검색';
@@ -116,7 +123,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   window.setInterval(setFriendlyPlaceholder,10_000);
   // Search is a higher-priority overlay while the keyboard is open. Mobile
   // weather and map controls must not cover the suggestions.
-  const mobileKeys=['position','top','left','right','width','max-width','max-height','display','flex-direction','overflow','padding','box-sizing'];
+  const mobileKeys=['position','top','left','right','width','max-width','max-height','height','display','flex-direction','overflow','padding','box-sizing'];
   const fitDropdown=()=>{
     syncEntry();
     if(!phoneSearch())for(const key of mobileKeys)dropdown.style.removeProperty(key);
@@ -131,14 +138,20 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const width=phoneSearch()?window.innerWidth-24:Math.max(140,Math.min(Math.floor(anchor.width),Math.floor(window.innerWidth-left-10)));
     dropdown.style.setProperty('--dj871-search-left',left+'px');
     dropdown.style.setProperty('--dj871-search-width',width+'px');
-    const available=Math.max(0,Math.floor(visibleBottom-top-12));
-    shell.style.setProperty('--dj-search-results-max',`${Math.min(520,available)}px`);
+    const nav=document.getElementById('bottom-nav'),navRect=nav?.getBoundingClientRect();
+    const fullArea=phoneSearch()&&dropdown.dataset.searchMode==='nearby';
+    const navTop=navRect?.height&&navRect.top>top&&navRect.top<=visibleBottom?navRect.top:visibleBottom;
+    const available=Math.max(0,Math.floor((fullArea?navTop:visibleBottom)-top-12));
+    const panelHeight=fullArea?available:Math.min(520,available);
+    shell.style.setProperty('--dj-search-results-max',`${panelHeight}px`);
     dropdown.style.setProperty('--dj871-search-top',`${top}px`);
-    dropdown.style.setProperty('--dj871-search-max',`${Math.min(520,available)}px`);
-    if(phoneSearch())for(const [key,value] of Object.entries({position:'fixed',top:top+'px',left:'12px',right:'12px',width:width+'px','max-width':width+'px','max-height':Math.min(520,available)+'px',display:'flex','flex-direction':'column',overflow:'hidden',padding:'0','box-sizing':'border-box'}))dropdown.style.setProperty(key,value,'important');
+    dropdown.style.setProperty('--dj871-search-max',`${panelHeight}px`);
+    if(fullArea)dropdown.style.setProperty('height',panelHeight+'px','important');else dropdown.style.removeProperty('height');
+    if(phoneSearch())for(const [key,value] of Object.entries({position:'fixed',top:top+'px',left:'12px',right:'12px',width:width+'px','max-width':width+'px','max-height':panelHeight+'px',display:'flex','flex-direction':'column',overflow:'hidden',padding:'0','box-sizing':'border-box'}))dropdown.style.setProperty(key,value,'important');
   };
   const close=()=>{
     seq++;controller?.abort();controller=null;
+    selectedMapRows=[];mapFooter.hidden=true;
     delete app.dataset.searchOpen;delete dropdown.dataset.searchMode;
     dropdown.style.removeProperty('display');
     syncClear();syncEntry();
@@ -158,6 +171,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const wasHidden=dropdown.hidden||dropdown.classList.contains('dj871-search-leaving');
     dropdown.classList.remove('dj871-search-leaving');
     if(wasHidden)window.DongjakWindowLifecycle?.requestOpen('map-quick-search-dropdown');
+    clearMapResults();selectedMapRows=[];mapFooter.hidden=true;
+    window.dispatchEvent(new Event('dongjak:map-search-opened'));
     dropdown.hidden=false;app.dataset.searchOpen='true';syncClear();fitDropdown();
     if(wasHidden){
       dropdown.classList.remove('dj871-search-entering');
@@ -180,7 +195,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       const distance=document.createElement('span');distance.className='dj-search-distance';distance.textContent=formatFacilityDistance(place.distanceMeters);button.append(distance);
     }
     button.addEventListener('click',()=>{
-      marker?.remove();
+      clearMapResults();marker?.remove();
       marker=null; // One marker belongs to the canonical place-detail popup.
       map.flyTo({center:[place.lng,place.lat],zoom:16,duration:700});
       close();query.blur();query.value='';form.classList.remove('dj807-has-input');
@@ -318,8 +333,22 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     filters.hidden=true;dropdown.dataset.searchMode='history';setTitle('최근 검색');
     show();render([],true);feedback.textContent='';
   };
+  mapView.addEventListener('click',()=>{
+    if(!selectedMapRows.length||dropdown.dataset.searchMode!=='nearby')return;
+    const rows=selectedMapRows.filter(place=>Number.isFinite(Number(place.lng))&&Number.isFinite(Number(place.lat))&&place.lng!=null&&place.lat!=null);
+    clearMapResults();close();query.blur();syncEntry();
+    for(const place of rows){
+      const pin=document.createElement('button');pin.type='button';pin.className='dj-search-result-pin';pin.dataset.kind=searchPlaceKind(place);
+      pin.title=place.name||'검색 장소';pin.setAttribute('aria-label',pin.title);
+      pin.textContent=searchPlaceKind(place)==='bus'?'버스':searchPlaceKind(place)==='subway'?'역':'•';
+      pin.addEventListener('pointerdown',event=>event.stopPropagation());
+      pin.addEventListener('click',event=>{event.stopPropagation();makeResultButton(place).click();});
+      resultMarkers.push(new maplibregl.Marker({element:pin,anchor:'center'}).setLngLat([Number(place.lng),Number(place.lat)]).addTo(map));
+    }
+    mapResultsLabel.textContent='검색 시설 '+resultMarkers.length+'곳';mapResultsBar.hidden=!resultMarkers.length;
+  });
   const renderFacilityTabs=items=>{
-    list.replaceChildren();
+    selectedMapRows=[];mapFooter.hidden=true;list.replaceChildren();
     if(items.length){
       const groups=[{label:'전체',rows:items},...groupVisibleFacilities(items)];
       const rail=document.createElement('div');rail.className='dj-visible-facility-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','시설 유형 선택');
@@ -329,6 +358,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
         for(const [i,button] of buttons.entries())button.setAttribute('aria-pressed',String(i===index));
         results.replaceChildren(...groups[index].rows.map(makeResultButton));
         results.setAttribute('aria-label',groups[index].label+' 시설 검색 결과');
+        selectedMapRows=groups[index].rows;mapFooter.hidden=dropdown.dataset.searchMode!=='nearby'||!selectedMapRows.length;
         // Reset the vertical list without moving the category rail sideways.
         body.scrollTop=0;
       };
@@ -403,7 +433,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   for(const button of [nearbyButton,gpsButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
   nearbyButton.addEventListener('click',openNearby);gpsButton.addEventListener('click',openGpsNearby);historyButton.addEventListener('click',openHistory);
   query.addEventListener('blur',()=>window.setTimeout(syncEntry,0));
-  const tabWatch=new MutationObserver(()=>{if(app.dataset.tab!=='map')close();syncEntry();});tabWatch.observe(app,{attributes:true,attributeFilter:['data-tab']});
+  const tabWatch=new MutationObserver(()=>{if(app.dataset.tab!=='map'){close();clearMapResults();}syncEntry();});tabWatch.observe(app,{attributes:true,attributeFilter:['data-tab']});
   query.addEventListener('focus',()=>{
     const term=query.value.trim();filters.hidden=phoneSearch()||term.length>0;syncEntry();
     if(phoneSearch()&&term.length<2){close();return;}
@@ -426,5 +456,5 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   closeBtn?.addEventListener('click',()=>{close();query.blur();query.value='';form.classList.remove('dj807-has-input');syncClear();});
   document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target)&&!actions.contains(event.target)){close();if(document.activeElement===query)query.blur();syncEntry();}});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();if(document.activeElement===query)query.blur();syncEntry();}});
-  return {close,search:performSearch};
+  return {close,clearMapResults,search:performSearch};
 }

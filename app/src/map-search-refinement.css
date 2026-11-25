@@ -82,3 +82,13 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
   }
  }
 }
+
+/* Map-area search: the scroll body alone scrolls; action stays within the sheet. */
+#app #map-quick-search-dropdown .dj-search-map-footer{flex:0 0 auto;display:flex;justify-content:center;padding:10px 14px 12px;border-top:1px solid #e3ece7;background:#fff;box-sizing:border-box;}
+#app #map-quick-search-dropdown .dj-search-map-footer[hidden],#app .dj-search-map-results-bar[hidden]{display:none!important;}
+#app #map-quick-search-dropdown .dj-search-map-view{width:100%;min-height:44px;border:0;border-radius:14px;background:#157b61;color:#fff;font-size:15px;font-weight:700;white-space:nowrap;}
+#app .dj-search-map-results-bar{position:fixed;z-index:119;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);max-width:420px;margin-inline:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 10px 6px 15px;border:1px solid #dce8e0;border-radius:18px;background:#fff;color:#245345;box-shadow:0 3px 12px #153b2420;box-sizing:border-box;}
+#app .dj-search-map-results-bar button{flex:0 0 44px;width:44px;height:44px;padding:0;border:1px solid #dce8e0;border-radius:50%;background:#f1f6f3;color:#24463b;font-size:26px;line-height:1;}
+#app .dj-search-result-pin{display:grid;place-items:center;width:30px;height:30px;min-width:30px;min-height:30px;padding:0;border:2px solid #fff;border-radius:50%;background:#157b61;color:#fff;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px #183e3760;cursor:pointer;}
+#app .dj-search-result-pin[data-kind="bus"]{background:#28699e;}
+#app .dj-search-result-pin[data-kind="subway"]{background:#5f5496;}

@@ -1978,6 +1978,13 @@ function setCommunityTopbarBlocked(blocked){
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
+let communityLocationCard = null;
+function closeCommunityLocation(){
+  communityLocationMarker?.remove();communityLocationMarker=null;
+  communityLocationCard?.remove();communityLocationCard=null;
+}
+window.addEventListener('dongjak:map-search-opened',closeCommunityLocation);
+window.addEventListener('dongjak:map-place-selected',closeCommunityLocation);
 function saveCommunity(next) {
   try {
     localStorage.setItem(communityStorageKey, JSON.stringify(next));
@@ -2004,6 +2011,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
   if((reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
@@ -2087,7 +2095,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
 // Intercept only actual bottom-tab changes before the legacy HOME guard.
 installBottomTabNavigation({doc:document,win:window,app});
 installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
-  const finish=()=>{routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
+  const finish=()=>{if(app.dataset.tab==='route'||routePickMode||routeResult||routeStart||routeEnd||routeWaypoints.length)resetRoute();closeCommunityLocation();quickSearch.clearMapResults?.();routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
   const active=pagePanels.find(p=>!p.hidden);
   // Primary phone tabs are real screens. Do not slide them down as map sheets.
   if(active&&window.matchMedia('(max-width:699px)').matches&&['route','participate','news','mine'].includes(app.dataset.tab)){
@@ -2115,6 +2123,7 @@ for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-
 }
 // Each auxiliary page has a persistent X that returns to the existing map tab.
 function closePrimaryPageToMap(panel){
+  if(panel?.dataset.page==='route')resetRoute();
   const finish=()=>navigate('map',{suppressOverview:true});
   if(panel&&window.matchMedia('(max-width:699px)').matches){
     window.DongjakWindowMotion?.cancel?.(panel);finish();
@@ -2410,14 +2419,17 @@ function communityButton(text,cls,fn) {
 }
 function showCommunityLocation(post) {
   if(!post.location)return;
-  navigate('map');
-  map.flyTo({center:[post.location.lng,post.location.lat],zoom:16.2,pitch:0,duration:800});
-  communityLocationMarker?.remove();
-  communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95})
-    .setLngLat([post.location.lng,post.location.lat])
-    .setPopup(new maplibregl.Popup({offset:22}).setText(`커뮤니티 게시글 · ${post.title}`))
-    .addTo(map);
-  communityLocationMarker.togglePopup();
+  closeCommunityLocation();
+  navigate('map',{suppressOverview:true});
+  quickSearch.close();quickSearch.clearMapResults?.();
+  const lng=Number(post.location.lng),lat=Number(post.location.lat);
+  if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
+  map.flyTo({center:[lng,lat],zoom:16.2,pitch:0,duration:800});
+  communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
+  const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');
+  const copy=makeCEl('div','dj-community-location-copy');copy.append(makeCEl('small','','커뮤니티 제보 위치'),makeCEl('strong','',post.title||'제보 위치'));
+  const dismiss=communityButton('×','dj-community-location-close',closeCommunityLocation);dismiss.setAttribute('aria-label','제보 위치 닫기');
+  card.append(copy,dismiss);app.append(card);communityLocationCard=card;
 }
 async function updateLike(postId) {
   const shared=sharedCommunityPosts.find(p=>p.id===postId);if(shared){try{await setSharedCommunityLike(postId,!shared.liked);await refreshSharedCommunity();}catch(error){toast(error.message||'공감 등록 실패');}return;}
@@ -2518,9 +2530,9 @@ function renderCommunity() {
     const commentForm=makeCEl('form','community-comment-form');
     const input=document.createElement('input');input.type='text';input.required=true;input.maxLength=300;input.placeholder='댓글을 입력하세요';input.setAttribute('aria-label','댓글 입력');
     const send=makeCEl('button','community-comment-submit', '등록');send.type='submit';
-    const commentActionShape=button=>{for(const [key,value] of Object.entries({'border-radius':'14px','height':'44px','min-height':'44px','min-width':'48px','padding':'0 12px','box-sizing':'border-box','box-shadow':'none'}))button.style.setProperty(key,value,'important');return button;};commentActionShape(send);
+    const commentActionShape=button=>{for(const [key,value] of Object.entries({'border-radius':'14px','height':'44px','min-height':'44px','min-width':'48px','padding':'0 12px','white-space':'nowrap','word-break':'keep-all','overflow-wrap':'normal','flex-shrink':'0','width':'max-content','box-sizing':'border-box','box-shadow':'none'}))button.style.setProperty(key,value,'important');return button;};commentActionShape(send);
     const replyLabel=makeCEl('div','community-reply-label');replyLabel.append(makeCEl('span','',communityReplyTo?(communityReplyTo.nickname||'익명 주민')+'님에게 답글':''),communityButton('취소','community-reply-button',()=>{communityReplyTo=null;commentForm.communityParentId=null;replyLabel.hidden=true;input.placeholder='댓글을 입력하세요';}));replyLabel.hidden=!communityReplyTo;commentForm.communityParentId=communityReplyTo?.id||null;commentsArea.append(replyLabel);
-    commentForm.append(input,send);if(post.shared){const file=document.createElement('input');file.type='file';file.accept='image/jpeg,image/png,image/webp';file.hidden=true;const attach=commentActionShape(communityButton('사진','community-comment-photo',()=>file.click()));file.addEventListener('change',async()=>{try{if(file.files?.[0]){commentForm.communityPhoto=await compressPhoto(file.files[0]);attach.textContent='사진 첨부됨';}}catch{toast('사진을 첨부하지 못했습니다.');}finally{file.value='';}});commentForm.append(attach,file);}
+    commentForm.append(input,send);if(post.shared){const file=document.createElement('input');file.type='file';file.accept='image/jpeg,image/png,image/webp';file.hidden=true;const attach=commentActionShape(communityButton('사진','community-comment-photo',()=>file.click()));file.addEventListener('change',async()=>{try{if(file.files?.[0]){commentForm.communityPhoto=await compressPhoto(file.files[0]);attach.textContent='사진';attach.setAttribute('aria-label','사진 첨부됨');attach.setAttribute('aria-pressed','true');}}catch{toast('사진을 첨부하지 못했습니다.');}finally{file.value='';}});commentForm.append(attach,file);}
     commentForm.addEventListener('submit',e=>{e.preventDefault();submitCommunityComment(post.id,commentForm);});
     if(post.shared)commentsArea.append(makeCEl('small','community-form-note','공개 댓글은 텍스트와 첨부 사진을 AI로 검사합니다.'));commentsArea.append(commentForm);card.append(commentsArea);root.append(card);
   }
@@ -2758,8 +2770,21 @@ function requireDongjakRouteLocation(position){
   }
   return true;
 }
+async function fetchRouteRoadAddress(position){
+  try{
+    const q=new URLSearchParams({lat:String(position.lat),lon:String(position.lng)});
+    const response=await fetch('/api/reverse-address?'+q,{signal:AbortSignal.timeout(6500)});
+    if(!response.ok)return null;
+    const data=await response.json();
+    return typeof data.address==='string'&&data.address.trim()?data.address.trim():null;
+  }catch{return null;}
+}
 async function resolveRouteAddress(position){
-  try{const q=new URLSearchParams({lat:String(position.lat),lon:String(position.lng)});const response=await fetch('/api/reverse-address?'+q,{signal:AbortSignal.timeout(6500)});if(!response.ok)return;const data=await response.json();if(typeof data.address==='string'&&data.address){position.label=data.address;position.name=data.address;if(position===routeStart||position===routeEnd)updateRouteLabels();if(routeWaypoints.includes(position))routeProductTools?.setWaypoints(routeWaypoints);}}catch{}
+  const address=await fetchRouteRoadAddress(position);
+  if(!address)return;
+  position.label=address;position.name=address;
+  if(position===routeStart||position===routeEnd)updateRouteLabels();
+  if(routeWaypoints.includes(position))routeProductTools?.setWaypoints(routeWaypoints);
 }
 function setRouteLocation(which,position) {
   if(!requireDongjakRouteLocation(position))return false;
@@ -2853,6 +2878,15 @@ function showTransitRouteConfirmation(place) {
   }
   document.getElementById('route-transit-accept').textContent=routePickMode==='start'?'여기서 출발':routePickMode==='waypoint'?'경유지 추가':'여기로 도착';
   panel.hidden=false;
+  if(place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address){
+    const name=document.getElementById('route-transit-confirm-name'),desc=document.getElementById('route-transit-confirm-desc');
+    name.textContent='주변 도로명 주소 확인 중…';desc.textContent='선택한 좌표와 가장 가까운 도로명 주소를 확인하고 있습니다.';
+    void fetchRouteRoadAddress(place).then(address=>{
+      if(routeTransitCandidate!==place||panel.hidden)return;
+      if(address){place.address=address;name.textContent=address;desc.textContent='선택한 위치의 인근 도로명 주소입니다. 실제 경로는 선택한 좌표를 기준으로 계산합니다.';}
+      else{name.textContent='도로명 주소 미확인';desc.textContent='주소를 불러오지 못했습니다. 선택한 지도 좌표로 경로를 계산합니다.';}
+    });
+  }
 }
 // Some HTML-based facility pins stop the map click from reaching the route
 // picker. In route selection mode they should open the ordinary route candidate
@@ -3008,17 +3042,17 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
   closeTransitRouteConfirmation();
   routePickMode=null;
   const label=place.kind==='point'
-    ?(['search','facility'].includes(place.source) ? place.name : (place.address||'지도에서 선택한 위치'))
+    ?(['search','facility'].includes(place.source) ? place.name : (place.address||'도로명 주소 미확인'))
     :describeTransitPlace(place);
   if(which==='waypoint'){
     if(navMode){toast('안내 중에는 경유지를 추가할 수 없습니다. 안내를 먼저 종료해 주세요.');navigate('route');return;}
     if(routeWaypoints.length>=5){toast('경유지는 최대 5곳입니다.');navigate('route');return;}
-    const waypoint={name:label,lng:place.lng,lat:place.lat,label};routeWaypoints.push(waypoint);if(place.kind==='point'&&!['search','facility'].includes(place.source))void resolveRouteAddress(waypoint);
+    const waypoint={name:label,lng:place.lng,lat:place.lat,label};routeWaypoints.push(waypoint);if(place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address)void resolveRouteAddress(waypoint);
     invalidateRoute();
     routeProductTools?.setWaypoints(routeWaypoints);
     navigate('route');toast('경유지를 추가했습니다.');return;
   }
-  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)}))return;
+  if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label,resolveAddress:place.kind==='point'&&!['search','facility'].includes(place.source)&&!place.address}))return;
   navigate('route');
   toast(which==='start'?'선택한 위치를 출발지로 확정했습니다.':'선택한 위치를 목적지로 확정했습니다.');
 });
@@ -3043,6 +3077,8 @@ function pickRouteLocation(lngLat,point) {
     lng:lngLat.lng,lat:lngLat.lat,lines:[]});
 }
 function resetRoute() {
+  routePriVisuals=null;
+  closeCommunityLocation();
   clearTransitPreview();
   stopNavigation();
   closeRouteSearch();closeTransitRouteConfirmation();
@@ -3335,7 +3371,9 @@ document.getElementById('route-gps-start').addEventListener('click',()=>{
   if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');return;}
   const b=document.getElementById('route-gps-start');b.disabled=true;b.textContent='위치 확인 중…';
   getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000}).then(({coords})=>{
-    const accepted=setRouteLocation('start',{lng:coords.longitude,lat:coords.latitude,label:'현재 위치',resolveAddress:true});
+    const position={lng:coords.longitude,lat:coords.latitude,label:'현재 위치',resolveAddress:true};
+    if(routeLocationInside(position)!==true){toast('동작구 내 위치를 선택해 주세요.');b.disabled=false;b.textContent='⌖ 현재 위치를 출발지로 지정';return;}
+    const accepted=setRouteLocation('start',position);
     if(accepted){
       map.flyTo({center:[coords.longitude,coords.latitude],zoom:15.3,duration:600});
       toast('현재 위치를 출발지로 지정했습니다.');
@@ -3360,7 +3398,11 @@ window.addEventListener('dongjak:route-search-current-location',async event=>{
     const {coords}=await getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000});
     if(seq!==routeSearchSequence||which!==routeSearchTarget||app.dataset.tab!=='route'||navMode)return;
     const position={lng:coords.longitude,lat:coords.latitude,name:'현재 위치',label:'현재 위치',resolveAddress:true};
-    if(!requireDongjakRouteLocation(position))return;
+    const inside=routeLocationInside(position);
+    if(inside!==true){
+      document.getElementById('route-search-status').textContent=inside===null?'동작구 경계정보를 확인하지 못했습니다. 지도에서 다시 선택해 주세요.':'현재 위치가 동작구 밖입니다. 동작구 내 장소를 검색하거나 지도에서 선택해 주세요.';
+      return;
+    }
     if(which==='waypoint'){
       if(routeWaypoints.length>=5)return;
       routeWaypoints.push(position);invalidateRoute();routeProductTools?.setWaypoints(routeWaypoints);void resolveRouteAddress(position);
@@ -3691,7 +3733,7 @@ async function startNavigation() {
 }
 document.getElementById('route-guide-start').addEventListener('click',()=>startNavigation());
 document.getElementById('route-start-gps').addEventListener('click',()=>startNavigation());
-document.getElementById('nav-stop').addEventListener('click',()=>{stopNavigation();toast('안내를 종료했습니다.');});
+document.getElementById('nav-stop').addEventListener('click',()=>{resetRoute();navigate('map',{suppressOverview:true});toast('안내를 종료했습니다.');});
 document.getElementById('nav-follow').addEventListener('click',()=>{
   navFollow=!navFollow;
   updateNavButtonLabels();

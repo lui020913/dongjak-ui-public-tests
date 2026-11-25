@@ -14,7 +14,7 @@ export function createTrainBeamSprite(facing){
   const width=TRAIN_BEAM_WIDTH,height=TRAIN_BEAM_HEIGHT;
   const data=new Uint8Array(width*height*4);
   const direction=facing==='right'?1:-1;
-  const originX=(width-1)/2+direction*50;
+  const originX=(width-1)/2+direction*72;
   const originY=(height-1)/2;
   const radius=TRAIN_BEAM_LENGTH;
   // One circular radial gradient centered just beyond the nose.
@@ -22,10 +22,12 @@ export function createTrainBeamSprite(facing){
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     const r=Math.hypot(x-originX,y-originY)/radius;
     if(r>=1)continue;
-    const alpha=Math.round(255*.82*Math.pow(1-r,1.9));
+    const alpha=Math.round(255*.96*Math.pow(1-r,0.95));
     if(!alpha)continue;
     const offset=(y*width+x)*4;
-    data[offset]=228;data[offset+1]=244;data[offset+2]=255;data[offset+3]=alpha;
+    // Cool cyan halo remains distinguishable on near-white daytime roads.
+    const core=Math.max(0,1-r*3);
+    data[offset]=Math.round(82+160*core);data[offset+1]=Math.round(177+70*core);data[offset+2]=255;data[offset+3]=alpha;
   }
   return {width,height,data};
 }

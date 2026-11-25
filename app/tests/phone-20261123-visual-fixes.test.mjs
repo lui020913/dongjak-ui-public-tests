@@ -28,9 +28,10 @@ test('live train forward illumination is neutral radial, not warm yellow cones',
  const index=(x,y)=>((y*right.width+x)*4);
  const centre=index(195,50),edge=index(195,10);
  assert(right.data[centre+3]>right.data[edge+3]);
- assert.equal(right.data[centre],228);
- assert.equal(right.data[centre+1],244);
+ assert(right.data[centre]<right.data[centre+1]);
+ assert(right.data[centre+1]<right.data[centre+2]);
  assert.equal(right.data[centre+2],255);
+ assert(right.data[centre+3]>180);
  assert.equal(right.data[index(120,50)+3],0);
  const renderer=read('src/features/liveTransit/index.js');
  assert.doesNotMatch(renderer,/withTrainHeadlights/);
