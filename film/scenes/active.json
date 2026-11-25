@@ -20,14 +20,14 @@
     {
       "action": "type",
       "selector": "#map-quick-search-query",
-      "value": "노량진역 1호선",
+      "value": "노량진",
       "delay": 140
     },
     {
       "action": "visible",
       "selector": "#map-quick-search-dropdown .map-quick-search-result",
       "text": "노량진",
-      "text2": "1호선",
+      "text2": "지하철·철도역",
       "index": 0,
       "timeout": 30000
     },
@@ -39,7 +39,7 @@
       "action": "click",
       "selector": "#map-quick-search-dropdown .map-quick-search-result",
       "text": "노량진",
-      "text2": "1호선",
+      "text2": "지하철·철도역",
       "index": 0
     },
     {
@@ -51,6 +51,11 @@
       "action": "contains",
       "selector": "#transport-title",
       "expected": "노량진"
+    },
+    {
+      "action": "click",
+      "selector": "#transport-title [data-dj-line='1호선']",
+      "timeout": 20000
     },
     {
       "action": "visible",
