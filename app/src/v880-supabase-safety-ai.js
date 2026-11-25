@@ -117,13 +117,31 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(closeFrame){window.cancelAnimationFrame(closeFrame);closeFrame=0;}
     for(const node of [modal,layout])for(const prop of ['animation','transition','will-change','opacity'])node.style.removeProperty(prop);
   }
-  function fadeContent(opening){
+  // A single visible-frame compositor owns both directions of the phone AI
+  // dialog. Native keyframes can expire before a congested map paints them.
+  function fadeContent(opening,done=()=>{}){
+    if(closeFrame){window.cancelAnimationFrame(closeFrame);closeFrame=0;}
+    if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     layout.style.setProperty('animation','none','important');
     modal.style.setProperty('transition','none','important');
+    modal.style.setProperty('animation','none','important');
     modal.style.setProperty('will-change','opacity','important');
-    modal.style.setProperty('animation',opening
-      ?'dj9251-ai-content-enter 350ms cubic-bezier(.25,.20,.40,1) both'
-      :'dj9251-ai-content-leave 300ms ease-in both','important');
+    const from=opening?0:Number(getComputedStyle(modal).opacity);
+    const paintAlpha=alpha=>modal.style.setProperty('opacity',String(alpha),'important');
+    const finish=()=>{if(closeFrame)window.cancelAnimationFrame(closeFrame);closeFrame=0;if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}if(opening){paintAlpha(1);modal.style.removeProperty('will-change');}done();};
+    paintAlpha(from);
+    let last=null,elapsed=0;
+    const watchdog=()=>{if(closeTimer)clearTimeout(closeTimer);closeTimer=window.setTimeout(finish,15000);};
+    const paint=now=>{
+      if(!modal.open)return;
+      if(last!==null)elapsed+=Math.min(32,Math.max(0,now-last));
+      last=now;
+      const p=Math.min(1,elapsed/300),eased=p*p*(3-2*p);
+      paintAlpha(opening?eased:from*(1-eased));
+      if(p<1){watchdog();closeFrame=window.requestAnimationFrame(paint);}
+      else finish();
+    };
+    watchdog();closeFrame=window.requestAnimationFrame(paint);
   }
   function setStatus(message){status.textContent=message;}
   syncProfile();
@@ -160,23 +178,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
       // dialog blocking the map after a close tap. No delayed top layer.
       if(keyboardAdjusted||modal.dataset.djAiKeyboard==='true'){finishClose();return;}
       modal.classList.add('dj887-ai-closing');
-      // Inline important opacity owns the painted closing frames, even under
-      // legacy production CSS. Start the clock on the first delivered frame.
-      fadeContent(false);
-      modal.style.setProperty('animation','none','important');
-      modal.style.setProperty('opacity','1','important');
-      closeTimer=window.setTimeout(finishClose,1200);
-      let last=null,elapsed=0;
-      const paint=now=>{
-        if(!modal.open||!modal.classList.contains('dj887-ai-closing'))return;
-        if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
-        last=now;
-        const p=Math.min(1,elapsed/300);
-        modal.style.setProperty('opacity',String(1-p*p*(3-2*p)),'important');
-        if(p<1)closeFrame=window.requestAnimationFrame(paint);
-        else finishClose();
-      };
-      closeFrame=window.requestAnimationFrame(paint);
+      fadeContent(false,finishClose);
       return;
     }
     modal.classList.add('dj887-ai-closing');
