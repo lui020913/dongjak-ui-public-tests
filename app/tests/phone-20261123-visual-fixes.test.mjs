@@ -23,14 +23,14 @@ test('line strokes are mildly thicker at all map zoom levels without changing da
  assert.match(map,/11\.5,1\.4,13,2\.4,15,3\.8,17,5\.7,19,7\.8/);
 });
 
-test('live train forward illumination is neutral radial, not warm yellow cones',()=>{
+test('live train forward illumination is a feathered warm-white radial beam',()=>{
  const right=createTrainBeamSprite('right');
  const index=(x,y)=>((y*right.width+x)*4);
- const centre=index(195,50),edge=index(195,10);
+ const centre=index(180,48),edge=index(195,10);
  assert(right.data[centre+3]>right.data[edge+3]);
- assert(right.data[centre]<right.data[centre+1]);
- assert(right.data[centre+1]<right.data[centre+2]);
- assert.equal(right.data[centre+2],255);
+ assert(right.data[centre]>right.data[centre+1]);
+ assert(right.data[centre+1]>right.data[centre+2]);
+ assert.equal(right.data[centre],255);
  assert(right.data[centre+3]>180);
  assert.equal(right.data[index(120,50)+3],0);
  const renderer=read('src/features/liveTransit/index.js');

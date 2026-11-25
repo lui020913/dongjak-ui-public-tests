@@ -57,14 +57,14 @@ test('nearby compact and expanded panels share an 8px measured dock, not a stale
  assert.match(motion,/measuredPhoneDockClearance\(nav,win,\{minimum:72,gap:8\}\)/);
 });
 
-test('metro source renders white-blue translucent radial pool on known front, never a yellow wedge',()=>{
+test('metro source renders a warm-white radial beam from the known front',()=>{
  const right=createTrainBeamSprite('right'),left=createTrainBeamSprite('left');
  const px=(p,x,y)=>((y*p.width+x)*4);
  const nose=px(right,184,50),far=px(right,235,50);
  assert(right.data[nose+3]>100,'visible nose bloom');
  assert(right.data[far+3]<right.data[nose+3],'radial glow falls off forward');
- assert(right.data[nose]<right.data[nose+1]&&right.data[nose+1]<right.data[nose+2]);
- assert.equal(right.data[nose+2],255);
+ assert(right.data[nose]>right.data[nose+1]&&right.data[nose+1]>right.data[nose+2]);
+ assert.equal(right.data[nose],255);
  assert(right.data[nose+3]>150,'stronger daytime-visible bloom');
  assert.equal(right.data[px(right,120,50)+3],0,'no light far behind the nose');
  assert.equal(left.data[px(left,71,50)+3],right.data[px(right,184,50)+3]);

@@ -42,3 +42,5 @@ test('route waypoint deletion has a 44px control and recent heading reserves its
  assert.ok(style.includes('grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-height:44px;margin-bottom:8px'));
  assert.ok(style.includes('.recent-head [data-v3="clear-recent"]'));
 });
+
+test('search cards keep scrolling without overlay scrollbars and history has a separate aligned header',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/route-screen-v3.css',import.meta.url),'utf8');const js=readFileSync(new URL('../src/route-screen-v3.js',import.meta.url),'utf8');assert.ok(css.includes('overflow-y:auto;overflow-x:hidden;flex:1'));assert.ok(css.includes('.search-results::-webkit-scrollbar{display:none'));assert.ok(css.includes('.search-results .search-recent-head{display:flex;align-items:center;justify-content:space-between'));assert.ok(js.includes("head.className='search-recent-head'"));assert.ok(js.includes('head.append(title,clear)'));});

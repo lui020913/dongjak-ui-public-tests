@@ -81,7 +81,13 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  const brand=add('header','dj-install-brand');
  const logo=add('img','dj-install-logo',null,brand);logo.src='/icons/dongjak-light-512.png';logo.alt='';logo.width=76;logo.height=76;
  const heading=add('h2','','동작하는 안전지도',brand);heading.id='dj-install-heading';add('p','dj-install-subtitle',blocked?'스마트폰에서 이용하실 방법을 선택해 주세요.':'이용하실 방법을 선택해 주세요.',brand);
- const list=add('div','dj-install-list'),info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
+ const list=add('div','dj-install-list');
+ const guide=add('section','dj-install-performance');guide.setAttribute('aria-label','스마트폰 이용 권장 사양');
+ add('h3','','스마트폰 이용 환경',guide);
+ const grid=add('div','dj-install-performance-grid',null,guide);
+ for(const [brandName,min,recommended] of [['갤럭시','S20급','S23급 이상'],['아이폰','11','13 이상']]){const row=add('div','dj-install-performance-device',null,grid);add('strong','',brandName,row);add('span','','최소 · '+min,row);add('span','','권장 · '+recommended,row);}
+ add('p','','웹 기반 지도 및 앱의 WebView 렌더링 특성상 구형 기기에서는 지도 이동·확대 및 3D 이용 시 화면 끊김이 발생할 수 있습니다. 안내 사양은 잠정 기준이며, 미달 기기도 이용할 수 있습니다. 태블릿은 별도 태블릿 모드를 사용합니다.',guide);
+ const info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={},selectedKey=null;
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
  const setSelected=key=>{selectedKey=key;for(const [name,item] of buttons){const selected=name===key;item.b.setAttribute('aria-pressed',String(selected));item.b.classList.toggle('is-selected',selected);}};
