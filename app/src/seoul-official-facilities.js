@@ -89,7 +89,7 @@ export function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
  'text-field':['case',['==',['get','category'],'공원'],'',
     ['step',['zoom'],'',16.5,['case',['==',['get','group'],'safety'],['get','name'],''],17.8,['get','name']]],
  'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],16.5,11,19.5,12.5],
- 'text-offset':[0,1.8],'text-anchor':'top','text-max-width':13,'text-padding':4,'text-optional':true,'text-allow-overlap':false,'icon-optional':false},
+ 'text-offset':[0,1.25],'text-anchor':'top','text-max-width':13,'text-padding':4,'text-optional':true,'text-allow-overlap':false,'icon-optional':false},
  paint:{'text-color':dark?'#e0eee8':'#2e5150','text-halo-color':dark?'#192e2b':'#fff','text-halo-width':1.5}});
  else{map.setFilter(POINTS,filter);map.setPaintProperty(POINTS,'text-color',dark?'#e0eee8':'#2e5150');map.setPaintProperty(POINTS,'text-halo-color',dark?'#192e2b':'#fff');}
 }
