@@ -1513,8 +1513,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const choice={routeId:row.dataset.busRouteId,route:row.dataset.busRouteName,routeType:row.dataset.busRouteType,arsId:String(selected.arsId||'')};
     routeChoice=choice;
     if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
-      close(false);
       busRouteOverlay.setMapVisible(false);
+      close(false);
       busDetail.open(choice);
     }else busRouteOverlay.setMapVisible(true);
     syncRoutePresentation();
