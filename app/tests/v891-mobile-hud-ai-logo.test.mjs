@@ -87,7 +87,10 @@ test('phone AI close dissolves the complete dialog over the map and synchronousl
  const ai=code('src/v880-supabase-safety-ai.js'),css=code('src/v880-supabase-safety-ai.css');
  assert.match(ai,/if\(keyboardAdjusted\|\|modal\.dataset\.djAiKeyboard==='true'\)\{finishClose\(\);return;\}/);
  assert.match(ai,/attributeFilter:\['data-dj-ai-keyboard'\],attributeOldValue:true/);
- assert.match(ai,/setTimeout\(finishClose,350\)/);
+ assert.match(ai,/setTimeout\(finishClose,1200\)/);
+ assert.match(ai,/modal\.style\.setProperty\('opacity',String\(1-p\*p\*\(3-2\*p\)\),'important'\)/);
+ assert.match(ai,/closeFrame=window\.requestAnimationFrame\(paint\)/);
+ assert.match(ai,/if\(modal\.classList\.contains\('dj887-ai-closing'\)\)return;/);
  assert.match(ai,/fadeContent\(false\)/);
  assert.match(ai,/if\(reduce\(\)\)\{input\.blur\(\);[^}]*modal\.close\(\)/);
  assert.match(ai,/dj9251-ai-content-enter 350ms/);
