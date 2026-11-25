@@ -1,3 +1,4 @@
+import {communityNews,createPrimarySurfaceTransition} from './primary-surface-transition.js';
 /**
  * The tab bar updates the real destination synchronously. A browser-level
  * root View Transition is forbidden here: WebGL-backed map snapshots can
@@ -81,64 +82,10 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   replaying=true;
   try{button.click();return true;}finally{replaying=false;}
  }
- // Community/news use a separate, single-owner live compositor. The
- // legacy tab entrance classes and shared opacity loops never run for them.
- let pageCleanup=null;
- const communityNews=key=>key==='participate'||key==='news';
- function dissolvePrimary(button,previousTab,previous){
-  const destination=button.dataset.tab,fromMap=previousTab==='map',toMap=destination==='map';
-  if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
-  const records=new Map();let raf=0,timer=0,finished=false,fade=null;
-  const props=['opacity','animation','transition','will-change','display','visibility','z-index','pointer-events'];
-  const remember=node=>{if(node?.style?.getPropertyValue&&!records.has(node))records.set(node,props.map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)]));};
-  const write=(node,values)=>{if(!node?.style?.setProperty)return;remember(node);for(const [k,v] of Object.entries(values))node.style.setProperty(k,v,'important');};
-  const panelFor=key=>key==='route'&&doc.getElementById('dj-route-v3')&&!doc.getElementById('dj-route-v3').hidden?doc.getElementById('dj-route-v3'):doc.querySelector('.page-panel[data-page="'+key+'"]:not([hidden])');
-  const chrome=[doc.getElementById('map'),app.querySelector?.(':scope > .topbar'),doc.getElementById('djNext-toolbar'),doc.getElementById('dj-v794-toolbar')].filter(Boolean);
-  const oldChrome=fromMap?chrome.filter(n=>!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden').map(n=>[n,win.getComputedStyle(n).display]):[];
-  const cleanup=()=>{
-   if(finished)return;finished=true;
-   if(raf)win.cancelAnimationFrame(raf);if(timer)win.clearTimeout(timer);
-   if(previous){if(previous.id==='dj-route-v3'){previous.hidden=app.dataset.tab!=='route';previous.inert=false;}else if(previous.dataset.page!==app.dataset.tab)previous.hidden=true;delete previous.dataset.djTabOutgoing;}
-   for(const [node,values] of records){delete node.dataset.djPrimaryTransition;for(const [k,v,p] of values){if(v&&!(node.hidden&&['display','visibility','opacity','pointer-events'].includes(k)))node.style.setProperty(k,v,p);else node.style.removeProperty(k);}}
-   delete app.dataset.djPrimaryDissolving;
-   if(pageCleanup===cleanup)pageCleanup=null;
-  };
-  pageCleanup=cleanup;app.dataset.djPrimaryDissolving='true';
-  if(previous){remember(previous);previous.dataset.djTabOutgoing='true';previous.dataset.djPrimaryTransition='outgoing';}
-  if(!replay(button)||app.dataset.tab!==destination){cleanup();return;}
-  const incoming=toMap?null:panelFor(destination);
-  fade=fromMap?incoming:previous;
-  if(!fade?.style?.setProperty){cleanup();return;}
-  // Keep live map controls beneath the page instead of above its fading
-  // footer/header. The common dock remains unchanged above both surfaces.
-  if(fromMap||toMap){
-   const activeChrome=fromMap?oldChrome:chrome.filter(n=>!n.hidden&&win.getComputedStyle(n).display!=='none').map(n=>[n,win.getComputedStyle(n).display]);
-   for(const [node,display] of activeChrome)write(node,{display,visibility:'visible',opacity:'1','pointer-events':'none',...(node.id==='map'?{}:{'z-index':'6498'})});
-  }
-  if(incoming){incoming.dataset.djPrimaryTransition='incoming';write(incoming,{animation:'none',transition:'none',opacity:fromMap?'0':'1','z-index':'7000',visibility:'visible',display:'flex'});}
-  if(previous){previous.hidden=false;if(previous.id==='dj-route-v3')previous.inert=true;write(previous,{animation:'none',transition:'none',opacity:'1','z-index':'7001',visibility:'visible',display:'flex','pointer-events':'none'});}
-  write(fade,{'will-change':'opacity'});
-  // Use a delivered-frame clock for this independent compositor. A busy
-  // WebGL renderer can skip a wall-clock CSS transition entirely; advance
-  // by at most 32ms per rendered frame, never skip the visible dissolve.
-  // The prior live surface and destination stay mounted until completion.
-  let previousFrame=null,elapsed=0;
-  const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,4500);};
-  const paint=now=>{
-   if(finished)return;
-   if(previousFrame!==null)elapsed+=Math.min(32,Math.max(0,now-previousFrame));
-   previousFrame=now;
-   const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
-   write(fade,{opacity:String(fromMap?alpha:1-alpha)});
-   if(progress<1){armWatchdog();raf=win.requestAnimationFrame(paint);}
-   else cleanup();
-  };
-  armWatchdog();
-  raf=win.requestAnimationFrame(paint);
- }
+ const {dissolvePrimary,cancel:cancelPrimary}=createPrimarySurfaceTransition({doc,win,app,replay,reduced});
  function start(button){
   if(!button||button.disabled||!button.isConnected)return;
-  pageCleanup?.();
+  cancelPrimary();
   clearEntrance();
   const previousTab=app.dataset.tab;
   const routeHost=previousTab==='route'?doc.getElementById('dj-route-v3'):null;
@@ -265,7 +212,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  win.addEventListener('mousedown',mouseDown,true);
  win.addEventListener('mouseup',mouseUp,true);
  return ()=>{
-  pageCleanup?.();
+  cancelPrimary();
   clearEntrance();
   if(swipeGuard)win.clearTimeout(swipeGuard);
   swipeGuard=0;gesture=null;mouseGesture=null;suppressClick=false;
