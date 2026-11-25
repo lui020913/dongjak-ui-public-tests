@@ -17,7 +17,7 @@ export function routeVehicleFeatures(rows,routeId,route,color,previous=new Map()
   if(prior&&at>prior.at){const dx=(coord[0]-prior.coord[0])*Math.cos(coord[1]*Math.PI/180),dy=coord[1]-prior.coord[1],distance=Math.hypot(dx,dy)*111000;if(distance>=8&&distance<3000){heading=(Math.atan2(dx,dy)*180/Math.PI+360)%360;headingKnown=true;}}
   previous.set(b.id,{coord,at,heading,headingKnown});
   features.push({type:'Feature',properties:{id:String(b.id),routeId,route,color,heading,headingKnown,observedAt:b.observedAt||'',receivedAt:b.receivedAt||'',
-    ...(b.vehicleNumber?{vehicleNumber:b.vehicleNumber}:{}),...(b.nextStopId?{nextStopId:b.nextStopId}:{}),...(b.busType?{busType:b.busType}:{}),...(b.congestion?{congestion:b.congestion}:{})},geometry:{type:'Point',coordinates:coord}});
+    ...(b.vehicleNumber?{vehicleNumber:b.vehicleNumber}:{}),...(b.nextStopId?{nextStopId:b.nextStopId}:{}),...(Number.isInteger(b.sectionOrder)&&b.sectionOrder>0?{sectionOrder:b.sectionOrder}:{}),...(b.busType?{busType:b.busType}:{}),...(b.congestion?{congestion:b.congestion}:{})},geometry:{type:'Point',coordinates:coord}});
  }
  for(const id of previous.keys())if(!seen.has(id))previous.delete(id);
  return {type:'FeatureCollection',features};
