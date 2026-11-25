@@ -135,7 +135,7 @@ export const MOBILE_SCALE_BLOCKERS=Object.freeze([
 
 export function mobileScaleBlockerVisible(node,view){
   if(!node||node.hidden||node.closest?.('[hidden]')||node.getAttribute?.('aria-hidden')==='true')return false;
-  if(node.classList?.contains('dj871-search-leaving')||(node.dataset?.dj810Animating==='closing'&&node.dataset?.djWindowMotionKind==='fade'))return false;
+  if(node.dataset?.djTabOutgoing==='true'||node.dataset?.closing==='true'||node.classList?.contains('dj887-ai-closing')||node.classList?.contains('dj871-search-leaving')||(node.dataset?.dj810Animating==='closing'&&node.dataset?.djWindowMotionKind==='fade'))return false;
   if(node.id==='toast'&&!node.classList?.contains('show'))return false;
   const style=view?.getComputedStyle?.(node);
   if(style && (style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0))return false;
@@ -434,7 +434,7 @@ export function installScaleDocking({map,app,overview}={}){
         // Never observe TIP style: this updater owns its inline geometry.
         // Observing it would cause a mutation/update feedback loop on iOS.
         mo.observe(node,{attributes:true,attributeFilter:selector===tipSelector
-          ?['hidden','class']:['hidden','class','aria-hidden','style','data-dj-user-tip-dismissed']});
+          ?['hidden','class']:['hidden','class','aria-hidden','style','data-dj-user-tip-dismissed','data-dj810-animating','data-closing','data-dj-tab-outgoing']});
       }
     }
   };
