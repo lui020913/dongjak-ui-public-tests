@@ -1,4 +1,4 @@
-import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -34,7 +34,7 @@ export function placeData(raw={}){
   const validAddress=/^(?:서울특별시|서울시|서울)\s+[^\s]+구\s+.+(?:로|길)\s*\d+(?:[-–]\d+)?/u.test(incomingAddress);
   return {
     name,type:tidy(facilityDisplayType(raw.type||raw.category||'장소',raw.name),30),
-    address:trusted?.address|| (validAddress?incomingAddress:''), phone:former?'':verifiedPhone(trusted?.phone||raw.phone),
+    address:trusted?.address|| (validAddress?incomingAddress:''), phone:former||isRepurposedPoliceFacility(name)?verifiedPhone(trusted?.phone):verifiedPhone(trusted?.phone||raw.phone),
     website:former?'':verifiedWeb(trusted?.website||raw.website),
     source:tidy(trusted?.source||raw.source||'© OpenStreetMap 기여자',140),
     note:tidy(raw.note,250),
@@ -47,6 +47,7 @@ export function placeData(raw={}){
  */
 export function facilityFallbackDescription(name,type){
   if(isFormerPoliceFacility(name))return '이곳은 운영을 종료한 옛 치안센터입니다. 상도동 관할 경찰 업무는 동작경찰서의 상도지구대 등 현행 공식 관서를 확인하세요. 긴급 신고는 112입니다.';
+  if(isRepurposedPoliceFacility(name))return '청소년 대상 범죄예방 교육과 경찰 체험을 위한 교육시설입니다. 현행 지구대·파출소가 아니며, 방문과 프로그램 예약은 경찰청 청소년경찰학교 공식 안내를 확인하세요.';
   const subject=String(name||'해당 시설').trim();
   const value=`${subject} ${type||''}`;
   const guidance=[
@@ -375,7 +376,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   let pending=false;
   async function loadExplanation(){
-    if(controllerAI.signal.aborted||pending||isFormerPoliceFacility(p.name))return;
+    if(controllerAI.signal.aborted||pending||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return;
     pending=true;retry.hidden=true;feedback.textContent=fallbackDescription+'\n\nAI 추가 안내를 확인하는 중입니다…';
     try{
       // Give fast, verified OSM enrichment a chance, but never delay the popup
