@@ -71,8 +71,8 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 .switch {
   grid-column:3;grid-row:3;align-self:center;justify-self:center;
   display:grid;place-items:center;width:38px;height:39px;padding:0;
-  border:1px solid #7a9f93;border-radius:10px;
-  background:#f8fcfa;color:#123f38;
+  border:1px solid #92b5a5;border-radius:10px;
+  background:#fbfdfb;color:#397e6e;
 }
 .switch svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linejoin:round;stroke-linecap:round}
 .waypoint-add-row{grid-column:1/3;grid-row:3;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;height:40px;z-index:1}
@@ -82,7 +82,7 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 .waypoint-add{grid-column:1;justify-self:center;display:grid;place-items:center;width:30px;height:30px;padding:0;border:1.5px solid #a4b9ae;border-radius:50%;background:#fff;color:#176b55;position:relative}
 .waypoint-add::after{content:'';position:absolute;inset:-6px}
 .waypoint-add svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round}
-.recent-list button{min-height:34px;border:1px solid #7a9f93;border-radius:999px;background:#f8fcfa;color:#123f38;font-size:12px;font-weight:700;padding:5px 4px;overflow-wrap:anywhere}
+.recent-list button{min-height:34px;border:1px solid #92b5a5;border-radius:999px;background:#fbfdfb;color:#397e6e;font-size:12px;font-weight:700;padding:5px 4px;overflow-wrap:anywhere}
 .waypoints{grid-column:2;grid-row:2;display:grid;gap:0;min-width:0;margin:0}.waypoints[hidden]{display:none!important}.waypoint-item{position:relative;display:flex;align-items:center;gap:4px;font-size:13px;min-height:54px;padding:4px 0;border-bottom:1px solid #dfe5e2;min-width:0}.waypoint-item::before{content:'';position:absolute;left:-21px;width:10px;height:10px;border:2px solid #82968d;border-radius:50%;background:#fff;box-sizing:border-box}.waypoint-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.waypoint-item button,.recent-head button{border:0;background:#edf3ef;color:#245345;border-radius:8px;padding:6px;min-height:34px;flex:none}.waypoint-item .waypoint-control{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:12px;font-size:21px;line-height:1}.waypoint-item .waypoint-input{flex:1;min-width:0;text-align:left;background:transparent;color:#6e7e77;font-size:14px;}
 .waypoint-pending{box-sizing:border-box;min-height:0;height:54px;animation:waypoint-in .18s ease-out both}@keyframes waypoint-in{from{height:0;padding-block:0;opacity:0}to{height:54px;opacity:1}}@media(prefers-reduced-motion:reduce){.waypoint-pending{animation:none}}
 .recent{margin-top:8px;border-top:1px solid #e1eae4;padding-top:6px}.recent-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-height:44px;margin-bottom:8px;font-size:12px}.recent-head strong{min-width:0;line-height:1.35;overflow-wrap:anywhere}.recent-head [data-v3="clear-recent"]{min-height:36px;white-space:nowrap;padding:6px 10px;justify-self:end;position:static;flex:none}.recent-list,.search-history{display:flex;gap:5px;flex-wrap:wrap}.recent-list button{padding:5px 9px}.search-history button{min-height:32px;padding:6px 9px;border-radius:999px;font-size:12px;color:#19473b}
@@ -91,19 +91,19 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
   display:flex;flex-direction:column;gap:9px;pointer-events:auto;
 }
 .tools button {
-  width:47px;height:47px;border-radius:10px;border:1px solid #16483f;
-  display:grid;place-items:center;background:#16483f;box-shadow:0 3px 8px rgba(20,44,38,.22);
-  color:#fff;padding:0;
+  width:47px;height:47px;border-radius:10px;border:1px solid #92b5a5;
+  display:grid;place-items:center;background:#dcece5;box-shadow:0 2px 5px rgba(20,44,38,.13);
+  color:#275a4b;padding:0;
 }
 .tools svg {width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .action {
   position:fixed;left:16px;right:16px;bottom:var(--v3-cta-bottom, 111px);
   height:56px;display:flex;align-items:center;justify-content:center;gap:13px;
-  border:0;border-radius:10px;background:#123f38;color:#fff;
+  border:0;border-radius:10px;background:#397e6e;color:#fff;
   box-shadow:0 5px 16px rgba(31,84,67,.15);
   font-size:17px;font-weight:700;letter-spacing:-.015em;pointer-events:auto;
 }
-.action[disabled] {background:#d0ddd7;color:#41594e;box-shadow:none;cursor:not-allowed}
+.action[disabled] {background:#d0ddd7;color:#466658;box-shadow:none;cursor:not-allowed}
 .action svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
 .search-screen {
   position:fixed;inset:0;
@@ -118,7 +118,7 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 .search-head strong{font-size:21px;letter-spacing:-.03em}
 .search-control-row{display:grid;grid-template-columns:minmax(0,1fr) 62px 74px;gap:6px;align-items:stretch;flex:none;min-width:0}
 .search-bar{display:flex;align-items:center;gap:2px;padding:0 3px 0 10px;border:1px solid #dbe9e1;border-radius:16px;background:#fff;min-height:56px;min-width:0}
-.search-location{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;height:56px;padding:4px 2px;border:1px solid #7a9f93;border-radius:10px;background:#f8fcfa;color:#123f38;font-size:11px;font-weight:700;white-space:nowrap}
+.search-location{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;height:56px;padding:4px 2px;border:1px solid #92b5a5;border-radius:10px;background:#fbfdfb;color:#397e6e;font-size:11px;font-weight:700;white-space:nowrap}
 .search-location svg{width:21px;height:21px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .search-location:disabled{opacity:.45;cursor:wait}
 @media(max-width:350px){.search-screen{padding-inline:10px}.search-control-row{grid-template-columns:minmax(0,1fr) 57px 68px;gap:4px}.search-location{font-size:10px}.search-bar input{font-size:14px}}
@@ -149,10 +149,10 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 
 
 /* The independently mounted route UI uses the same role palette. */
-.header button,.search-head button,.search-clear{border-radius:50%;background:var(--dj-button-soft,#e4efea);color:var(--dj-button-ink,#123f38)}
-.tools button{background:var(--dj-button-map-face,#16483f);color:var(--dj-button-map-ink,#fff);border-color:var(--dj-button-map-face,#16483f);border-radius:10px}
+.header button,.search-head button,.search-clear{border-radius:50%;background:var(--dj-button-soft,#eaf3ee);color:var(--dj-button-ink,#275a4b)}
+.tools button{background:var(--dj-button-map-face,#dcece5);color:var(--dj-button-map-ink,#275a4b);border-color:var(--dj-button-outline,#92b5a5);border-radius:10px}
 .tools svg,.switch svg{width:20px;height:20px;stroke-width:1.8}
-.switch,.waypoint-item .waypoint-control,.search-location,.recent-head button,.search-results .search-recent-head button{border:1px solid var(--dj-button-outline,#7a9f93);border-radius:10px;background:var(--dj-button-face,#f8fcfa);color:var(--dj-button-ink,#123f38)}
-.action{border-radius:10px;background:var(--dj-button-accent,#123f38);color:var(--dj-button-on-accent,#fff);box-shadow:none}
-.action[disabled]{background:var(--dj-button-disabled,#d0ddd7);color:var(--dj-button-disabled-ink,#41594e);box-shadow:none}
-.recent-list button,.search-history button{border-radius:999px;border:1px solid var(--dj-button-outline,#7a9f93);background:var(--dj-button-face,#f8fcfa);color:var(--dj-button-ink,#123f38)}
+.switch,.waypoint-item .waypoint-control,.search-location,.recent-head button,.search-results .search-recent-head button{border:1px solid var(--dj-button-outline,#92b5a5);border-radius:10px;background:var(--dj-button-face,#fbfdfb);color:var(--dj-button-ink,#275a4b)}
+.action{border-radius:10px;background:var(--dj-button-accent,#397e6e);color:var(--dj-button-on-accent,#fff);box-shadow:none}
+.action[disabled]{background:var(--dj-button-disabled,#d0ddd7);color:var(--dj-button-disabled-ink,#466658);box-shadow:none}
+.recent-list button,.search-history button{border-radius:999px;border:1px solid var(--dj-button-outline,#92b5a5);background:var(--dj-button-face,#fbfdfb);color:var(--dj-button-ink,#275a4b)}

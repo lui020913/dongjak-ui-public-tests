@@ -9,17 +9,17 @@
     --dj-button-close-radius:50%;
     --dj-button-primary-height:50px;
     --dj-button-secondary-height:44px;
-    --dj-button-accent:#123f38;
+    --dj-button-accent:#397e6e;
     --dj-button-on-accent:#fff;
-    --dj-button-outline:#7a9f93;
-    --dj-button-soft:#e4efea;
-    --dj-button-face:#f8fcfa;
-    --dj-button-ink:#123f38;
+    --dj-button-outline:#92b5a5;
+    --dj-button-soft:#eaf3ee;
+    --dj-button-face:#fbfdfb;
+    --dj-button-ink:#275a4b;
     --dj-button-disabled:#d0ddd7;
-    --dj-button-disabled-ink:#41594e;
-    --dj-button-active:#1f6857;
-    --dj-button-map-face:#16483f;
-    --dj-button-map-ink:#ffffff;
+    --dj-button-disabled-ink:#466658;
+    --dj-button-active:#4b8977;
+    --dj-button-map-face:#dcece5;
+    --dj-button-map-ink:#275a4b;
   }
   :root[data-theme="dark"] {
     --dj-button-accent:#79dec5;
@@ -64,8 +64,8 @@
     color:var(--dj-button-ink)!important;
     background:var(--dj-button-map-face)!important;
     color:var(--dj-button-map-ink)!important;
-    border:1px solid var(--dj-button-map-face)!important;
-    box-shadow:0 3px 8px rgba(20,44,38,.22)!important;
+    border:1px solid var(--dj-button-outline)!important;
+    box-shadow:0 2px 5px rgba(20,44,38,.13)!important;
   }
   html body :is(#app,#dj-community-editor-portal,.dj834-review-editor-portal,#dj-activity-screen,#dj-install-menu) :is(.map-actions>button,#dj-walk-map-actions button,#djNext-rail button.djNext-tool,#dj-v794-toolbar .dj-v794-tool,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open,#map-tools-toggle,#map-safety-toggle,#dj890-ai-orb,#dj800-ai-search-trigger,#community-saved-toggle,#community-notifications-toggle,#dj-activity-trigger):not(#map-compass):not(#dj890-ai-orb):not(#dj800-ai-search-trigger) > svg {
     width:20px!important;height:20px!important;

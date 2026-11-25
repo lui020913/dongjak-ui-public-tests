@@ -1,5 +1,5 @@
 {
   "revision": 3,
   "channel": "isolated-preview",
-  "design": "deep teal map controls, unified 10px action geometry, early cascade order, replaced shared material"
+  "design": "light sage map controls, medium teal primary, unified 10px action geometry"
 }

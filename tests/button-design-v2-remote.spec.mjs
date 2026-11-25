@@ -31,6 +31,6 @@ test('deployed V3 differs from V2 in computed styles',async({browser},info)=>{
  const before=await inspect(browser,baseline,info,'v2');const after=await inspect(browser,target,info,'v3');
  await info.attach('comparison.json',{body:Buffer.from(JSON.stringify({before,after},null,2)),contentType:'application/json'});
  console.log('V2/V3 computed button styles',JSON.stringify({before,after}));
- expect(after.map.background).toBe('rgb(22, 72, 63)');expect(after.map.radius).toBe('10px');expect(after.route.background).toBe('rgb(208, 221, 215)');expect(after.route.radius).toBe('10px');expect(after.community.background).toBe('rgb(18, 63, 56)');
+ expect(after.map.background).toBe('rgb(220, 236, 229)');expect(after.map.radius).toBe('10px');expect(after.route.background).toBe('rgb(208, 221, 215)');expect(after.route.radius).toBe('10px');expect(after.community.background).toBe('rgb(57, 126, 110)');
  for(const name of ['map','route','community'])expect(after[name]).not.toEqual(before[name]);
 });
