@@ -32,3 +32,13 @@ test('route entry has one dismiss control and GPS outside district stays in sear
  assert.match(main,/현재 위치가 동작구 밖입니다\. 동작구 내 장소를 검색하거나 지도에서 선택해 주세요\./);
  assert.match(main,/routeTransitCandidate!==place\|\|panel\.hidden/);
 });
+
+test('explicit route exit clears endpoints, candidates, waypoints and PRI instead of only stopping GPS',()=>{
+ const s=read('src/main.js'),reset=s.slice(s.indexOf('function resetRoute()'),s.indexOf('function decodePolyline6('));
+ assert.match(reset,/routeStartMarker\?\.remove\(\);routeEndMarker\?\.remove\(\)/);
+ assert.match(reset,/routeWaypoints=\[\];routeProductTools\?\.setWaypoints\(\[\]\)/);
+ assert.match(reset,/closeRouteSearch\(\);closeTransitRouteConfirmation\(\)/);
+ assert.match(reset,/routePriVisuals=null/);
+ assert.match(s,/getElementById\('nav-stop'\)\.addEventListener\('click',\(\)=>\{resetRoute\(\);navigate\('map'/);
+ assert.match(s,/if\(panel\?\.dataset\.page==='route'\)resetRoute\(\)/);
+});
