@@ -32,9 +32,22 @@ test('facility popup has an ephemeral pin at the exact selected facility coordin
   const shared=read('src/selected-location-pin.js');
   assert.match(shared,/className='dj807-facility-pin'/);
   assert.match(src,/setLngLat\(\[p.lng,p.lat\]\)\.addTo\(map\)/);
-  assert.match(src,/popup\.on\('close',\(\)=>\{controllerAI\.abort\(\);marker\.remove\(\);\}\)/);
+  assert.match(src,/const marker=fromResultMap\?null:new maplibregl\.Marker/);
+  assert.match(src,/popup\.on\('close',\(\)=>\{controllerAI\.abort\(\);marker\?\.remove\(\);\}\)/);
   assert.match(css,/\.dj807-facility-pin/);
   assert.match(css,/dj-place-detail-popup/);
+});
+
+test('nearby map detail keeps result pins and back restores the result map',()=>{
+  const search=read('src/map-quick-search.js');
+  const detail=read('src/place-details.js');
+  const pinHandler=search.match(/pin\.addEventListener\('click',event=>\{[\s\S]*?\n      \}\);/)?.[0];
+  assert.ok(pinHandler,'result pin handler');
+  assert.doesNotMatch(pinHandler,/clearMapResults\(|makeResultButton\(/);
+  assert.match(pinHandler,/fromResultMap:true,onBack/);
+  assert.match(pinHandler,/mapResultsBar\.hidden=false;map\.easeTo\(\{\.\.\.camera,duration:350\}\)/);
+  assert.match(detail,/if\(fromResultMap&&typeof onBack==='function'\)/);
+  assert.match(detail,/popup\?\.once\('close',onBack\);closeButton\.click\(\)/);
 });
 
 test('guide describes mouse and touch controls on distinct rows',()=>{
