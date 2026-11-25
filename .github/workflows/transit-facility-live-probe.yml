@@ -8,55 +8,24 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Check public response codes and coverage without credentials
+      - name: Diagnose public timetable and bus history without secrets
         run: |
           node --input-type=module <<'JS'
           const root='https://dongjak-walk-safety-preview.pages.dev';
-          async function get(path){
+          async function get(path,params={}){
             try{
-              const res=await fetch(root+path,{signal:AbortSignal.timeout(15000),cache:'no-store'});
-              let j={};try{j=await res.json()}catch{}
-              return {http:res.status,j};
-            }catch(e){return {http:null,j:{code:e.name}}}
+              const u=root+path+'?'+new URLSearchParams(params);
+              const res=await fetch(u,{signal:AbortSignal.timeout(60000),cache:'no-store'});
+              const j=await res.json().catch(()=>({}));
+              console.log(JSON.stringify({path,params,http:res.status,status:j.status,code:j.code,notice:j.notice,items:j.items?.length,timetable:j.timetable?.length,arrivals:j.arrivals?.length,timetableKeyConfigured:j.timetableKeyConfigured}));
+              return j;
+            }catch(e){console.log(JSON.stringify({path,params,error:e.name}));return {};}
           }
-          const log=(label,result,details)=>console.log(JSON.stringify({label,http:result.http,code:result.j.code??null,...details}));
-          const production=await get('/release-source.json');
-          log('Android production marker',production,{version:production.j.application_version,source:production.j.source_commit,publicSource:production.j.public_ui_source_commit,state:production.j.release_status});
-          try{
-            const r=await fetch(root+'/api/android-download.apk',{method:'HEAD',signal:AbortSignal.timeout(20000),cache:'no-store'});
-            console.log(JSON.stringify({label:'Android proxy HEAD',http:r.status,verified:r.headers.get('X-Dongjak-APK-Verified'),size:r.headers.get('content-length')}));
-          }catch(e){console.log(JSON.stringify({label:'Android proxy HEAD',error:e.name}));}
-          const status=await get('/api/transport/status');
-          log('transport status',status,{bus:status.j.bus,subway:status.j.subway});
-          const stations=[['노량진','1'],['대방','1'],['신림','2'],['신림','신림선'],['보라매','신림선']];
-          for(const [name,line] of stations){
-            for(const bulk of [false,true]){
-              const p=new URLSearchParams({station:name,line,...(bulk?{mode:'bulk'}:{})});
-              const r=await get('/api/transport/subway?'+p);
-              log(name+' '+line+' '+(bulk?'bulk':'station'),r,{items:r.j.items?.length,sourceStatus:r.j.sourceStatus,sourceMode:r.j.sourceMode,sourceAgeSeconds:r.j.sourceAgeSeconds});
-            }
-          }
-          const route=await get('/api/transport/bus/routes?arsId=20160');
-          log('bus route discovery',route,{routes:route.j.routes?.length});
-          const routeId=route.j.routes?.map(x=>String(x.routeId??x.busRouteId??'')).find(x=>/^\d{5,15}$/.test(x));
-          const bus=await get('/api/transport/live-vehicles?'+new URLSearchParams({modes:'bus',...(routeId?{routeId}:{})}));
-          log('bus location',bus,{routeSelected:!!routeId,vehicles:bus.j.bus?.length,availability:bus.j.availability,warnings:bus.j.warnings});
-          // Known official route IDs from scripts/check-live-bus-route.mjs.
-          for(const id of ['100100553','100100112']){
-            const geo=await get('/api/transport/bus/route-path?routeId='+id);
-            log('known route geometry '+id,geo,{coordinates:geo.j.coordinates?.length});
-            const r=await get('/api/transport/live-vehicles?modes=bus&routeId='+id);
-            log('selected bus location '+id,r,{vehicles:r.j.bus?.length,availability:r.j.availability,warnings:r.j.warnings});
-          }
-          const categories=['약국','동물약국','편의점','음식점','휴게음식점','카페'];
-          for(const category of categories){
-            const r=await get('/api/seoul-facilities?'+new URLSearchParams({category,limit:'2000'}));
-            log('facility '+category,r,{rows:r.j.places?.length,more:r.j.hasMore,sync:r.j.sync?.map(s=>({source:s.source_id,stored:s.row_count,received:s.received_count,status:s.status,lastSuccess:s.last_success}))});
-          }
-          console.log('Empty data during overnight closure does not establish daytime feed failure. This is a read-only probe, not a deployment.');
+          await get('/api/transport/status');
+          await Promise.all([1,2,3].map(day=>get('/api/transport/service-hours',{kind:'subway',station:'상도',line:'7호선',day})));
+          const r=await get('/api/transport/bus/route-path',{routeId:'100100112'});
+          const s=r.stops?.find(s=>s.stationId&&s.name?.includes('상도'))||r.stops?.find(s=>s.stationId);
+          if(s)await Promise.all(['20261015','20261118'].map(date=>get('/api/transport/bus-history',{routeId:'100100112',stationId:s.stationId,seq:s.seq,date})));
           JS
