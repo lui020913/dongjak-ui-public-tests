@@ -20,7 +20,7 @@ export async function handleAndroidDownload({request,env},fetchImpl=fetch){
   if(!url)return unavailable();
   const asset=release.assets.find(a=>a.browser_download_url===url);
   if(!Number.isSafeInteger(asset?.size)||asset.size<=0)return unavailable();
-  const headers={'Content-Type':'application/vnd.android.package-archive','Content-Disposition':'attachment; filename="'+ANDROID_DOWNLOAD_FILENAME+'"','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Dongjak-APK-Verified':'1','Content-Length':String(asset.size)};
+  const headers={'Content-Type':'application/vnd.android.package-archive','Content-Disposition':'attachment; filename="'+ANDROID_DOWNLOAD_FILENAME+'"','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Dongjak-APK-Verified':'1','X-Dongjak-APK-Version':marker.application_version,'Content-Length':String(asset.size)};
   if(request.method==='HEAD')return new Response(null,{status:200,headers});
   const upstream=await fetchImpl(url,{redirect:'follow'});
   if(!upstream.ok||!upstream.body)return unavailable();

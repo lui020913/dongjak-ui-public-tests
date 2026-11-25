@@ -40,6 +40,9 @@ test('PC Android installation guidance is readable when the verified APK is avai
   }
   await expect(guide).toBeVisible();
   await expect(guide.locator('ol.dj-install-guide-steps li')).toHaveCount(4);
+  await expect(guide.locator('ol.dj-install-guide-steps')).toBeHidden();
+  await guide.locator('summary').click();
+  await expect(guide.locator('ol.dj-install-guide-steps')).toBeVisible();
   const fontSize=await guide.locator('ol.dj-install-guide-steps li').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
   expect(fontSize).toBeGreaterThanOrEqual(15);
 });

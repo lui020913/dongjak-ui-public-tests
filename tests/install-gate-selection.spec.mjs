@@ -44,6 +44,8 @@ test('PC install gate marks the selected option and always shows Google Play ext
   await expect(guide).toBeVisible();
   await expect(guide.locator('.dj-install-guide-intro')).toContainText('Google Play 스토어 외부');
   await expect(guide.locator('.dj-install-guide-intro')).toContainText('테스트용 APK');
+  await expect(guide.locator('.dj-install-guide-context')).toContainText('설치 제한이나 보안 안내');
+  await expect(guide.locator('.dj-install-guide-notice')).toContainText('악성·유해 앱');
   await expect(guide.locator('.dj-install-guide-notice')).toContainText('Play Protect');
   await expect(guide.locator('.dj-install-guide-notice')).toContainText('설치하지 마세요');
   await expect(guide.locator('ol.dj-install-guide-steps li')).toHaveCount(4);
@@ -57,6 +59,7 @@ test('PC install gate marks the selected option and always shows Google Play ext
     await expect(guide.locator('.dj-install-guide-unavailable')).toContainText('확인하지 못했습니다');
     await expect(guide.getByRole('button',{name:'다시 확인',exact:true})).toBeEnabled();
     await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toHaveCount(0);
+    await expect(guide.locator('.dj-install-apk-meta')).toHaveCount(0);
   }else{
     await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toBeVisible();
   }
