@@ -70,7 +70,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   registerFacilityIcons(map);
   const hidden=[...Object.values(CIVIC_POI_TYPES).flat(),'hospital','clinic','doctor','doctors','pharmacy','restaurant','cafe','fast_food','food','convenience','supermarket','bakery'];
   for(const native of map.getStyle().layers){
-    if(native.type!=='symbol'||native.source!==source||native['source-layer']!=='poi'||native.id.startsWith('dj-'))continue;
+    if(!['symbol','circle'].includes(native.type)||native.source!==source||native['source-layer']!=='poi'||native.id.startsWith('dj-'))continue;
     try{
       const original=map.getFilter(native.id);
       const exclude=['!', ['any',['in',['get','class'],['literal',hidden]],['in',['get','subclass'],['literal',hidden]]]];
@@ -85,7 +85,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
     try{
       const isSchool=type==='school';
       map.addLayer({id:layerId,type:'symbol',source,'source-layer':'poi',
-        minzoom:safety?13.5:isSchool?14.8:14.2,
+        minzoom:safety?14.5:16,
         filter:civicFilter(type,boundaryGeometry),
         layout:{
           'icon-image':iconId,
