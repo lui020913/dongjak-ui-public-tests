@@ -1978,6 +1978,11 @@ function setCommunityTopbarBlocked(blocked){
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
+let communityLocationCard = null;
+function closeCommunityLocation(){
+  communityLocationMarker?.remove();communityLocationMarker=null;
+  communityLocationCard?.remove();communityLocationCard=null;
+}
 function saveCommunity(next) {
   try {
     localStorage.setItem(communityStorageKey, JSON.stringify(next));
@@ -2004,6 +2009,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
   if((reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
@@ -2410,14 +2416,17 @@ function communityButton(text,cls,fn) {
 }
 function showCommunityLocation(post) {
   if(!post.location)return;
-  navigate('map');
-  map.flyTo({center:[post.location.lng,post.location.lat],zoom:16.2,pitch:0,duration:800});
-  communityLocationMarker?.remove();
-  communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95})
-    .setLngLat([post.location.lng,post.location.lat])
-    .setPopup(new maplibregl.Popup({offset:22}).setText(`커뮤니티 게시글 · ${post.title}`))
-    .addTo(map);
-  communityLocationMarker.togglePopup();
+  closeCommunityLocation();
+  navigate('map',{suppressOverview:true});
+  quickSearch.close();quickSearch.clearMapResults?.();
+  const lng=Number(post.location.lng),lat=Number(post.location.lat);
+  if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
+  map.flyTo({center:[lng,lat],zoom:16.2,pitch:0,duration:800});
+  communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
+  const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');
+  const copy=makeCEl('div','dj-community-location-copy');copy.append(makeCEl('small','','커뮤니티 제보 위치'),makeCEl('strong','',post.title||'제보 위치'));
+  const dismiss=communityButton('×','dj-community-location-close',closeCommunityLocation);dismiss.setAttribute('aria-label','제보 위치 닫기');
+  card.append(copy,dismiss);app.append(card);communityLocationCard=card;
 }
 async function updateLike(postId) {
   const shared=sharedCommunityPosts.find(p=>p.id===postId);if(shared){try{await setSharedCommunityLike(postId,!shared.liked);await refreshSharedCommunity();}catch(error){toast(error.message||'공감 등록 실패');}return;}
@@ -2518,9 +2527,9 @@ function renderCommunity() {
     const commentForm=makeCEl('form','community-comment-form');
     const input=document.createElement('input');input.type='text';input.required=true;input.maxLength=300;input.placeholder='댓글을 입력하세요';input.setAttribute('aria-label','댓글 입력');
     const send=makeCEl('button','community-comment-submit', '등록');send.type='submit';
-    const commentActionShape=button=>{for(const [key,value] of Object.entries({'border-radius':'14px','height':'44px','min-height':'44px','min-width':'48px','padding':'0 12px','box-sizing':'border-box','box-shadow':'none'}))button.style.setProperty(key,value,'important');return button;};commentActionShape(send);
+    const commentActionShape=button=>{for(const [key,value] of Object.entries({'border-radius':'14px','height':'44px','min-height':'44px','min-width':'48px','padding':'0 12px','white-space':'nowrap','word-break':'keep-all','overflow-wrap':'normal','flex-shrink':'0','width':'max-content','box-sizing':'border-box','box-shadow':'none'}))button.style.setProperty(key,value,'important');return button;};commentActionShape(send);
     const replyLabel=makeCEl('div','community-reply-label');replyLabel.append(makeCEl('span','',communityReplyTo?(communityReplyTo.nickname||'익명 주민')+'님에게 답글':''),communityButton('취소','community-reply-button',()=>{communityReplyTo=null;commentForm.communityParentId=null;replyLabel.hidden=true;input.placeholder='댓글을 입력하세요';}));replyLabel.hidden=!communityReplyTo;commentForm.communityParentId=communityReplyTo?.id||null;commentsArea.append(replyLabel);
-    commentForm.append(input,send);if(post.shared){const file=document.createElement('input');file.type='file';file.accept='image/jpeg,image/png,image/webp';file.hidden=true;const attach=commentActionShape(communityButton('사진','community-comment-photo',()=>file.click()));file.addEventListener('change',async()=>{try{if(file.files?.[0]){commentForm.communityPhoto=await compressPhoto(file.files[0]);attach.textContent='사진 첨부됨';}}catch{toast('사진을 첨부하지 못했습니다.');}finally{file.value='';}});commentForm.append(attach,file);}
+    commentForm.append(input,send);if(post.shared){const file=document.createElement('input');file.type='file';file.accept='image/jpeg,image/png,image/webp';file.hidden=true;const attach=commentActionShape(communityButton('사진','community-comment-photo',()=>file.click()));file.addEventListener('change',async()=>{try{if(file.files?.[0]){commentForm.communityPhoto=await compressPhoto(file.files[0]);attach.textContent='사진';attach.setAttribute('aria-label','사진 첨부됨');attach.setAttribute('aria-pressed','true');}}catch{toast('사진을 첨부하지 못했습니다.');}finally{file.value='';}});commentForm.append(attach,file);}
     commentForm.addEventListener('submit',e=>{e.preventDefault();submitCommunityComment(post.id,commentForm);});
     if(post.shared)commentsArea.append(makeCEl('small','community-form-note','공개 댓글은 텍스트와 첨부 사진을 AI로 검사합니다.'));commentsArea.append(commentForm);card.append(commentsArea);root.append(card);
   }
