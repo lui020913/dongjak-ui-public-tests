@@ -1832,3 +1832,55 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #bottom-nav [data-tab="participate"].community-has-unread::after{content:'';position:absolute;right:12%;top:8%;height:7px;width:7px;border-radius:50%;background:#ee6d50;pointer-events:none}
 
 #community-notifications .community-push-control{margin:0 0 10px;align-self:flex-start;}
+
+/* Metro direction cards: compact destination/countdown; independent live route dialog. */
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card{min-width:0!important;background:var(--surface,#fff)!important;border:1px solid #d6dfdc!important;border-radius:12px!important;padding:8px 10px!important;box-shadow:none!important;color:inherit!important;overflow:hidden}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;min-height:44px!important;padding:3px 0 7px!important;gap:4px!important;background:transparent!important;color:inherit!important;border:0!important;border-bottom:1px solid #e1e6e4!important;border-radius:0!important;box-shadow:none!important;text-align:left!important;font-size:14px!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-chevron{font-size:26px;line-height:1;font-weight:400;flex:none}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .transport-arrival-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:5px!important;padding:7px 0!important;min-height:32px!important;border:0!important;background:transparent!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-main{flex:1!important;min-width:0!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-detail strong{font-size:13px!important;font-weight:500!important;overflow-wrap:anywhere}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-time-block{display:flex!important;flex-direction:column!important;align-items:flex-end!important;flex:0 1 auto!important;max-width:55%;text-align:right!important;margin:0!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-countdown{color:#e23f36!important;font-size:14px!important;white-space:normal!important;overflow-wrap:anywhere}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-position{font-size:10px!important}
+#app #transport-sheet[data-kind="subway"] .dj-metro-direction-empty{display:block;padding:10px 0;color:inherit;opacity:.7;font-size:12px}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-metro-direction-card{background:#20302f!important;border-color:#465856!important}
+#app[data-theme="dark"] #transport-sheet[data-kind="subway"] .dj-metro-direction-card .metro-arrival-countdown{color:#ff8178!important}
+dialog.dj-metro-live{box-sizing:border-box;position:fixed;inset:auto 0 max(0px,env(safe-area-inset-bottom)) 0;margin:0 auto;width:min(calc(100% - 20px),520px);height:min(86dvh,820px);max-height:calc(100dvh - 20px);max-width:none;border:1px solid #d6dfdc;border-radius:24px 24px 16px 16px;background:#fff;color:#20322e;padding:0;overflow:hidden;font:inherit;display:flex;flex-direction:column;box-shadow:0 12px 42px #0004;animation:dj-metro-live-in .22s ease-out}
+dialog.dj-metro-live:not([open]){display:none}
+dialog.dj-metro-live::backdrop{background:#14282065}
+@keyframes dj-metro-live-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.dj-metro-live-head,.dj-metro-live-meta,.dj-metro-live-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;flex:none}
+.dj-metro-live-head{border-bottom:1px solid #e0e6e3}
+.dj-metro-live-title{display:flex;align-items:center;gap:8px;font-size:19px;color:var(--metro-live-line)}
+.dj-metro-live button{font:inherit;color:inherit;cursor:pointer;border:0;background:#edf3f0;box-shadow:none}
+.dj-metro-live-back,.dj-metro-live-close{width:44px;height:44px;border-radius:50%;font-size:26px!important}
+.dj-metro-live-stamp{font-size:12px;opacity:.7}
+.dj-metro-live-tabs{display:flex;gap:4px;margin:0 14px 8px;padding:4px;border-radius:13px;background:#edf3f0;flex:none}
+.dj-metro-live-tab{flex:1;min-height:44px;border-radius:10px!important;font-weight:700!important}
+.dj-metro-live-tab[aria-pressed="true"]{background:var(--metro-live-line)!important;color:white!important}
+.dj-metro-live-notice{flex:none;margin:0 14px 6px;font-size:12px;line-height:1.4}
+.dj-metro-live-notice:empty{display:none}
+.dj-metro-live-list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;position:relative}
+.dj-metro-live-row{display:grid;grid-template-columns:minmax(68px,23%) 26px minmax(0,1fr);min-height:64px;align-items:stretch}
+.dj-metro-live-row.current{background:#eef4ef}
+.dj-metro-live-trains{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:4px}
+.dj-metro-live-train-label{display:grid;text-align:center;font-size:11px;line-height:1.3;border:1px solid #d7dfdc;border-radius:6px;padding:4px;overflow-wrap:anywhere}
+.dj-metro-live-train-label small{opacity:.7}
+.dj-metro-live-rail{position:relative;display:grid;place-items:center;background:linear-gradient(to right,transparent calc(50% - 4px),var(--metro-live-line) calc(50% - 4px),var(--metro-live-line) calc(50% + 4px),transparent calc(50% + 4px))}
+.dj-metro-live-dot{width:8px;height:8px;border-radius:50%;background:#fff;z-index:1}
+.dj-metro-live-train-icon{display:grid;place-items:center;width:25px;height:25px;border:2px solid var(--metro-live-line);border-radius:50%;background:white;color:var(--metro-live-line);font-size:18px;font-weight:bold;z-index:1}
+.dj-metro-live-station{padding:12px 8px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-bottom:1px solid #e5ebe8;min-width:0}
+.dj-metro-live-station-name{display:flex;align-items:center;flex-wrap:wrap;gap:5px;font-size:15px}
+.dj-metro-live .metro-badge-number{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;font-size:11px;color:white;flex:none}
+.dj-metro-live .metro-badge-shinlim,.dj-metro-live .metro-badge-gyeongui{font-size:9px;width:29px;height:29px}
+.dj-metro-live-eta{display:flex;gap:7px;flex-wrap:wrap;font-size:12px}
+.dj-metro-live-eta strong{color:#e23f36}
+.dj-metro-live-train-state,.dj-metro-live-extra{font-size:12px;opacity:.8}
+.dj-metro-live-extra{padding:12px 16px;line-height:1.5}
+.dj-metro-live-footer{border-top:1px solid #e5ebe8;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.dj-metro-live-refresh{min-height:44px;border-radius:22px;padding:0 14px;font-weight:700!important}
+.dj-metro-live-refresh:disabled{opacity:.5}
+@media(prefers-color-scheme:dark){dialog.dj-metro-live{background:#172725;color:#e3efeb}.dj-metro-live button,.dj-metro-live-tabs,.dj-metro-live-row.current{background:#283c37}.dj-metro-live-head,.dj-metro-live-station,.dj-metro-live-footer{border-color:#3b5149}}
+@media(prefers-reduced-motion:reduce){dialog.dj-metro-live{animation:none}}

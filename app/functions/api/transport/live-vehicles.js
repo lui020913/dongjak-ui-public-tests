@@ -239,14 +239,16 @@ export async function onRequestGet({request,env={}}){
   if(!modes.length)return result({ok:false,code:'INVALID_MODES',error:'지원하지 않는 교통수단 요청입니다.',metro:[],bus:[]},400);
   const wantMetro=modes.includes('metro'),wantBus=modes.includes('bus');
   const selectedRoute=query.get('routeId');
+  const selectedLine=query.get('line');
+  if(selectedLine!==null&&(!wantMetro||wantBus||!METRO_LINES.includes(selectedLine)))return result({ok:false,code:'INVALID_METRO_LINE',metro:[],bus:[]},400);
   if(selectedRoute!==null&&(!/^\d{5,15}$/.test(selectedRoute)||!wantBus||wantMetro))return result({ok:false,code:'INVALID_ROUTE_ID',metro:[],bus:[]},400);
   // Selected-route polling runs every 15s; keep the shared cache shorter.
   if(selectedRoute)headers['Cache-Control']='public, max-age=0, s-maxage=10';
-  const cacheUrl=new URL('/api/transport/live-vehicles',request.url);cacheUrl.searchParams.set('modes',modes.sort().join(','));if(selectedRoute)cacheUrl.searchParams.set('routeId',selectedRoute);
+  const cacheUrl=new URL('/api/transport/live-vehicles',request.url);cacheUrl.searchParams.set('modes',modes.sort().join(','));if(selectedRoute)cacheUrl.searchParams.set('routeId',selectedRoute);if(selectedLine)cacheUrl.searchParams.set('line',selectedLine);
   const requestKey=new Request(cacheUrl.toString(),{method:'GET'});
   if(store)try{const cached=await store.match(requestKey);if(cached)return cached;}catch{}
   const requestedLines=env?.LIVE_TRANSIT_METRO_LINES?asCsv(env.LIVE_TRANSIT_METRO_LINES):METRO_LINES;
-  const lines=METRO_LINES.filter(line=>requestedLines.includes(line));
+  const lines=METRO_LINES.filter(line=>requestedLines.includes(line)&&(!selectedLine||line===selectedLine));
   const manual=asCsv(env?.LIVE_TRANSIT_BUS_ROUTE_IDS).filter(id=>/^\d{6,12}$/.test(id)).slice(0,8);
   const stopIds=asCsv(env?.LIVE_TRANSIT_BUS_STATION_IDS||DEFAULT_STATIONS.join(',')).filter(id=>/^\d{5}$/.test(id)).slice(0,4);
   const warningCodes=[],metro=[],bus=[],metroDiagnostics={},busDiagnostics={};

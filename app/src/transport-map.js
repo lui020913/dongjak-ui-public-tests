@@ -1,5 +1,7 @@
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {createBusRouteDetail} from './bus-route-detail.js';
+import {openMetroLiveDetail,closeMetroLiveDetail} from './metro-live-detail.js';
+import {directionTitle,directionCode,compactArrival} from './metro-live-detail-model.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
 import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
@@ -902,9 +904,9 @@ function showArrivalsWithProviderStatus(container,place,result){
     container.replaceChildren(...(action?[notice,action]:[notice]));
     return;
   }
-  displayArrivals(container,place.kind,filtered);
+  displayArrivals(container,place.kind,filtered,place);
 }
-function displayArrivals(container,kind,items){
+function displayArrivals(container,kind,items,place=null){
   container.replaceChildren();
   if(!items.length){container.append(el('p','transport-empty','현재 제공되는 도착예정 정보가 없습니다.'));return;}
   if(kind!=='subway'){
@@ -947,13 +949,22 @@ function displayArrivals(container,kind,items){
       if(Object.hasOwn(SUBWAY_LINE_COLORS,line))heading.append(makeLineBadge(line,'metro-panel-badge'));
       heading.append(el('strong','',line));section.append(heading);
     }
-    const grid=el('div','metro-direction-grid');
+    const grid=el('div','metro-direction-grid dj-metro-direction-grid');
+    const knownDirections=line==='2호선'?['내선','외선']:['상행','하행'];
+    if(place)for(const direction of knownDirections)if(!directions.has(direction))directions.set(direction,[]);
     for(const direction of [...directions.keys()].sort((a,b)=>order.indexOf(a)-order.indexOf(b))){
       const subsection=el('section',`metro-arrival-direction-group ${direction==='상행'?'up':direction==='하행'?'down':''}`.trim());
-      const subtitle=el('div',`metro-direction-heading ${direction==='상행'?'up':direction==='하행'?'down':''}`);
-      subtitle.append(el('span','metro-direction-arrow',direction==='상행'?'↑':direction==='하행'?'↓':'•'));
-      subtitle.append(el('strong','',direction));
+      subsection.classList.add('dj-metro-direction-card');
+      const interactive=Boolean(place&&directionCode(direction)!==''&&line!=='호선 미확인');
+      const subtitle=el(interactive?'button':'div','metro-direction-heading dj-metro-direction-heading');
+      subtitle.append(el('strong','',directionTitle(line,direction)));
+      if(interactive){
+        subtitle.type='button';subtitle.append(el('span','dj-metro-direction-chevron','›'));
+        subtitle.setAttribute('aria-label',directionTitle(line,direction)+' 실시간 열차 위치 조회');
+        subtitle.addEventListener('click',()=>openMetroLiveDetail({line,direction,station:place.name,local:STATION_LINE_ORDER[line]||[],arrivals:directions.get(direction)||[],color:subwayLineColor(line),badge:makeLineBadge,transfers:metroTransferBadgeLines,endpoint:TRANSPORT_API_BASE+'/live-vehicles'}));
+      }
       subsection.append(subtitle);
+      if(!directions.get(direction).length)subsection.append(el('small','dj-metro-direction-empty','도착정보 없음'));
       // 9호선만 일반/급행을 별도 소제목 아래 표시합니다.
       // 종류가 확인되지 않으면 일반열차로 단정하지 않습니다.
       const routeGroups=line==='9호선'
@@ -973,14 +984,14 @@ function displayArrivals(container,kind,items){
           const left=el('div','transport-arrival-main metro-arrival-main');
           const desc=el('div','metro-arrival-detail');
           const info=formatMetroArrivalCard(row);
-          desc.append(el('strong','',info.heading));
+          desc.append(el('strong','',info.heading.replace(/행$/,'')));
           const details=line==='9호선'&&['일반','급행'].includes(service)
             ?info.details?.replace(/\s*\(급행\)/g,'').replace(/\s*·\s*(일반|급행)$/,''):info.details;
-          if(details)desc.append(el('small','metro-arrival-route',details));
+          if(details&&line==='9호선'&&service==='종별 미확인')desc.append(el('small','metro-arrival-route',details));
           left.append(desc);
           const right=el('div','metro-arrival-time-block');
           const timeParts=splitMetroArrivalText(info.arrival);
-          right.append(el('strong','metro-arrival-countdown',timeParts.primary));
+          right.append(el('strong','metro-arrival-countdown',compactArrival(timeParts.primary,row.isPlanned)));
           if(row.isPlanned){
             const displayPlannedTime=String(row.plannedTime||'');
             right.append(el('small','metro-planned-time-meta',
@@ -1556,6 +1567,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // request dismissal; they must never simulate a second button click.
   const windowState=createTransportWindowLifecycle();
   const close=(restore=true)=>{
+    closeMetroLiveDetail();
     const wasVisible=!panel.hidden;
     if(wasVisible)markAiSurfaceDismissal();
     cancelSurfaceMotion(panel);
@@ -2276,6 +2288,18 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     syncArrivalAvailability(place,result);
     showArrivalsWithProviderStatus(container,place,result);
     if(place?.kind!=='subway')return;
+    if(!container.querySelector('.dj-metro-direction-card')&&place.selectedLine){
+      const line=normalizeLineName(place.selectedLine);
+      const blank=el('div','dj-metro-direction-grid dj-metro-empty-grid');
+      for(const direction of line==='2호선'?['내선','외선']:['상행','하행']){
+        const card=el('section','dj-metro-direction-card');
+        const b=el('button','dj-metro-direction-heading');b.type='button';
+        b.append(el('strong','',directionTitle(line,direction)),el('span','dj-metro-direction-chevron','›'));
+        b.addEventListener('click',()=>openMetroLiveDetail({line,direction,station:place.name,local:STATION_LINE_ORDER[line]||[],color:subwayLineColor(line),badge:makeLineBadge,transfers:metroTransferBadgeLines,endpoint:TRANSPORT_API_BASE+'/live-vehicles'}));
+        card.append(b,el('small','dj-metro-direction-empty','도착정보 없음'));blank.append(card);
+      }
+      container.append(blank);
+    }
     const hasSelectedLive=result?.sourceStatus==='ok' &&
       arrivalsForSelectedMetroLine(place,result?.items||[]).length>0;
     if(hasSelectedLive)return;
@@ -2299,7 +2323,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(!future.length)return;
     const group=el('div','metro-scheduled-arrivals');
     const cards=el('div','metro-scheduled-arrival-cards');
-    displayArrivals(cards,'subway',future);
+    displayArrivals(cards,'subway',future,place);
     group.append(cards);
     if(passed.length){
       const notice=el('small','metro-plan-direction-ended',`${passed.join('·')} 방향은 계획 막차 시각 경과 · 실시간 운행 종료 확인 아님`);
