@@ -74,3 +74,14 @@
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"]:has(> #dj-bus-route-detail:not([hidden])) :is(.topbar,#djNext-toolbar,#dj-v794-toolbar,#dj831-scrollport,.map-actions,#dj840-map-tip,#dj-user-tip-close,#dj-bus-route-map-clear,.dj-bus-detail-dock){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app[data-tab="map"]:has(> #dj-bus-route-detail:not([hidden])) > #dj-bus-route-detail:not([hidden]){z-index:8200!important;isolation:isolate!important}
 }}
+
+/* Compact vehicle identifiers and explicit occupancy colors. */
+.dj-bus-detail .dj-bus-detail-vehicle-label{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 4px;box-sizing:border-box;}
+.dj-bus-detail .dj-bus-plate{font-variant-numeric:tabular-nums;font-weight:700;line-height:1.15;}
+.dj-bus-detail .dj-bus-congestion{font-size:10px;line-height:1.25;font-weight:700;white-space:nowrap;}
+.dj-bus-detail .dj-bus-congestion[data-tone=low]{color:#16803d;}
+.dj-bus-detail .dj-bus-congestion[data-tone=medium]{color:#986600;}
+.dj-bus-detail .dj-bus-congestion[data-tone=high]{color:#c62828;}
+.dj-bus-detail .dj-bus-low-floor{font-size:10px;line-height:1.15;color:#65716b;}
+.dj-bus-detail .dj-bus-detail-unplaced .dj-bus-detail-vehicle-label{flex-direction:row;gap:7px;padding:5px 8px;}
+@media(max-width:699px){.dj-bus-detail .dj-bus-detail-vehicle{min-height:54px;}.dj-bus-detail .dj-bus-detail-unplaced .dj-bus-detail-vehicle{min-height:30px;}.dj-bus-detail .dj-bus-detail-scroll{scrollbar-width:none;}.dj-bus-detail .dj-bus-detail-scroll::-webkit-scrollbar{display:none;}}
