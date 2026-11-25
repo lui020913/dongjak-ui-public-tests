@@ -34,8 +34,10 @@ test('transit marker sizing and map camera focus use the same mobile-first geome
  const transport=read('src/transport-map.js');
  assert.ok(transport.includes('usableMapSelectionOffset'));
  assert.ok(transport.includes('syncSharedBusPresentation'));
- assert.ok(transport.includes("setLayoutProperty('transport-bus-names','text-offset',[0,1.85])"));
- assert.ok(transport.includes("setLayoutProperty('transport-bus-names-close','text-offset',[0,1.85])"));
+ assert.ok(transport.includes("setLayoutProperty('transport-bus-names','text-offset',[0,1.4])"));
+ assert.ok(transport.includes("setLayoutProperty('transport-bus-names-close','text-offset',[0,1.4])"));
+ assert.equal((transport.match(/'text-offset':\[0,1\.4\]/g)||[]).length,3,'all three bus stop label paths use the closer offset');
+ assert.equal(transport.includes("'text-offset':[0,1.85]"),false,'no stale bus label clearance');
  assert.equal(transport.includes("matchMedia?.('(min-width:1080px)')"),false);
  assert.equal(transport.includes("matchMedia?.('(max-width:1079px)')"),false);
 });
