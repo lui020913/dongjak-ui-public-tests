@@ -934,9 +934,8 @@ function displayArrivals(container,kind,items,place=null){
     }
     return;
   }
-  if(items.some(row=>row.isPlanned)){
-    container.append(el('p','metro-planned-notice',items.every(row=>row.isPlanned)
-      ?'시간표 예상 도착 · 실시간 지연 미반영':'시간표 기준으로 표시된 열차는 실시간 지연을 반영하지 않습니다.'));
+  if(items.some(row=>row.isPlanned)&&!items.every(row=>row.isPlanned)){
+    container.append(el('p','metro-planned-notice','시간표 기준으로 표시된 열차는 실시간 지연을 반영하지 않습니다.'));
   }
   const groups=groupSubwayArrivals(items);
   const order=['상행','하행','내선','외선','방향 미확인'];
@@ -2338,7 +2337,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(liveTab)liveTab.textContent='도착예정';
     if(result?.sourceStatus==='quota'){
       cards.querySelector('.metro-planned-notice')?.remove();
-      const notice=el('p','metro-quota-notice','실시간 API 조회 한도 초과 · 시간표 기준 예상 도착 (실시간 지연 미반영)');
+      const notice=el('p','metro-quota-notice','실시간 API 조회 한도 초과');
       container.replaceChildren(notice,group);
     }else container.replaceChildren(group);
   }
