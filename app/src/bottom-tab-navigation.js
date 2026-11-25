@@ -47,9 +47,9 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  // alone can be invisible. Paint the real content (including V3's shadow DOM).
  function revealContent(panel,key){
   const route=key==='route'?doc.getElementById('dj-route-v3'):null;
-  const nodes=[route||panel].filter(Boolean);
+  const nodes=[route||panel].filter(node=>node?.style?.getPropertyValue);
   if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
-  enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)])}));
+  enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue?.(k)||'',node.style.getPropertyPriority?.(k)||''])}));
   const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
   paint(0);
