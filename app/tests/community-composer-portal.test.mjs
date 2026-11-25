@@ -46,7 +46,11 @@ test('map-origin report, photo and cloud submission logic remain functional',()=
 
 test('phone report uses only its private compositor and no legacy layout owner',()=>{
  const js=read('src/community-composer-portal.js'),main=read('src/main.js'),legacy=read('src/v910-request-completion.js'),coord=read('src/public-ui-mobile-surface-coordinator.js');
- assert.match(js,/root\.animate\(\[\{opacity:from\},\{opacity:to\}\]/);
+ assert.match(js,/root\.style\.setProperty\('opacity',String\(alpha\),'important'\)/);
+ assert.match(js,/Math\.min\(32,Math\.max\(0,now-last\)\)/);
+ assert.match(js,/paint\(from\+\(to-from\)\*eased\)/);
+ assert.match(js,/transitionFrame=win\.requestAnimationFrame\(step\)/);
+ assert.doesNotMatch(js,/root\.animate\(/);
  assert.match(js,/root\.dataset\.composeMotion=/);
  assert.doesNotMatch(js,/dataset\.dj810Animating|fadeMap\(/);
  assert.match(main,/communityComposerPortal\.dismiss\(\{animate,onClosed:/);
