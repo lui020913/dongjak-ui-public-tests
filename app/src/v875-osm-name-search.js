@@ -1,4 +1,4 @@
-import {normalizeFacilityName,facilityOsmCategory,facilityNameMatches,facilitySearchTerms,isFormerPoliceFacility,facilityCategorySearchTerms} from './facility-display-names.js';
+import {normalizeFacilityName,facilityOsmCategory,facilityNameMatches,facilitySearchTerms,isFormerPoliceFacility,isRepurposedPoliceFacility,facilityCategorySearchTerms} from './facility-display-names.js';
 /** Bounded named-POI fallback when an explicit search cannot find a cafe/shop.
  * This is NOT a listing of verified businesses. Public OSM coverage varies. */
 const BOUNDS=[126.87,37.435,127.07,37.565];
@@ -12,6 +12,7 @@ export function normalizeNamedOsm(data,term,limit=20){
     const tags=item.tags||{};
     const rawName=String(tags['name:ko']||tags.name||'').trim();
     if(isFormerPoliceFacility(rawName)&&facilityCategorySearchTerms(wanted).length)continue;
+    if(isRepurposedPoliceFacility(rawName)&&facilityCategorySearchTerms(wanted).includes('경찰서'))continue;
     const category=facilityOsmCategory(tags);
     const name=normalizeFacilityName(rawName,category);
     const match=facilityNameMatches({name,category,registeredName:rawName},wanted)||[name,tags.name,tags['name:ko'],tags.brand].some(x=>aliases.some(a=>String(x||'').toLowerCase().includes(a)));
