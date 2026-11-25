@@ -1944,6 +1944,7 @@ function paintCommunityNoticeBadge(){const button=document.getElementById('commu
 function setCommunityNoticeView(open){
  const panel=document.getElementById('community-notifications'),toggle=document.getElementById('community-notifications-toggle');
  if(!panel||!toggle)return;
+ if(open&&communityDetail){communityDetail=null;communityReplyTo=null;renderCommunity();}
  panel.hidden=!open;toggle.setAttribute('aria-pressed',String(open));
  for(const id of ['community-list','participate-register'])document.getElementById(id).hidden=open;
  if(open)document.querySelector('#participation-panel>.dj836-sheet-body')?.scrollTo({top:0,behavior:'instant'});
