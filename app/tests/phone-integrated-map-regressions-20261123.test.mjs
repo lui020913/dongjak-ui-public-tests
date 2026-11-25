@@ -63,7 +63,9 @@ test('metro source renders white-blue translucent radial pool on known front, ne
  const nose=px(right,184,50),far=px(right,235,50);
  assert(right.data[nose+3]>100,'visible nose bloom');
  assert(right.data[far+3]<right.data[nose+3],'radial glow falls off forward');
- assert.deepEqual(Array.from(right.data.slice(nose,nose+3)),[228,244,255]);
+ assert(right.data[nose]<right.data[nose+1]&&right.data[nose+1]<right.data[nose+2]);
+ assert.equal(right.data[nose+2],255);
+ assert(right.data[nose+3]>150,'stronger daytime-visible bloom');
  assert.equal(right.data[px(right,120,50)+3],0,'no light far behind the nose');
  assert.equal(left.data[px(left,71,50)+3],right.data[px(right,184,50)+3]);
  const m=read('src/features/liveTransit/index.js');
