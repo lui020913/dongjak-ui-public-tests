@@ -60,7 +60,7 @@ test('per-road rubric parts are converted to risk 0-100 only when all four parts
  assert.equal(currentSixFactorScore(bocha.segments[0]),(80+30+30)/3);
 });
 
-test('the new rubrics match exact network version and never invent road risk ratings',()=>{
+test('spatial estimates use the exact network and unverified bocha candidates never enter PRI',()=>{
  const base=adaptLighting(json('../public/data/pri/lighting_segments.json'));
  const a=json('../public/data/pri/sangdo1_crosswalk_rubric_factor.json');
  const b=json('../public/data/pri/sangdo1_shared_road_rubric_factor.json');
@@ -68,15 +68,21 @@ test('the new rubrics match exact network version and never invent road risk rat
  assert.equal(base.networkVersion,b.networkVersion);
  assert.equal(a.factor.scoreDirection,'risk');
  assert.equal(b.factor.scoreDirection,'risk');
- assert.equal(b.scoreMax,10);
- assert.equal(a.scores.length,0);
+ assert.equal(b.scoreMax,100);
+ assert.ok(a.scores.length>0);
+ assert.ok(a.scores.every(s=>s.score>=0&&s.score<=100));
  assert.equal(b.scores.length,0);
+ const candidates=json('../public/data/pri/sangdo1_shared_road_candidates_20261125.json');
+ assert.equal(candidates.networkVersion,base.networkVersion);
+ assert.ok(candidates.scores.length>0);
  const merged=parseImport(b,parseImport(a,base));
  assert.equal(merged.segments.length,1686);
- assert.ok(merged.segments.every(s=>s.scores.crossing===null&&s.scores.sharedRoad===null));
+ assert.equal(merged.segments.filter(s=>observedFactorScore(s,'crossing')!==null).length,a.scores.length);
+ assert.ok(merged.segments.every(s=>s.scores.sharedRoad===null));
  const manifest=json('../public/data/pri/manifest.json');
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_crosswalk_rubric_factor.json'));
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_shared_road_rubric_factor.json'));
+ assert.ok(!manifest.patches.includes('/data/pri/sangdo1_shared_road_candidates_20261125.json'));
 });
 
 test('primary PRI view is six-factor with a red high-risk ramp and grey for unknown',()=>{
