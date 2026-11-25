@@ -95,7 +95,9 @@ test('fast mobile release has fewer tests and full auditing remains available',(
  assert.ok(list,'missing fast release case list');
  const selected=[...list.matchAll(/'([^']+)'/g)].map(x=>x[1]);
  // Add one painted-geometry acceptance case; keep every previous smoke case.
- assert.equal(selected.length,21);
+ assert.equal(selected.length,22);
+ assert.ok(selected.includes('map report fades out over its real destination'));
+ assert.match(config,/grep:fastMobileQA\?\/layer header follows a real pointer\|map report fades out over its real destination\//);
  assert.ok(selected.includes('phone selected dock has no color plate and route form is vertically balanced'));
  const all=[...spec.matchAll(/^test\('([^']+)',\{tag:'(@[\w-]+)'\},async\(/gm)].map(x=>({name:x[1],tag:x[2]}));
  for(const name of selected)assert.equal(all.filter(c=>c.name.includes(name)).length,1,'unmatched or ambiguous smoke case '+name);
