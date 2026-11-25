@@ -34,7 +34,7 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  guideToggle.addEventListener('click',onGuideToggle);
  tipGuide.append(guideToggle,guideList);
- if(guide){const anchor=guide.querySelector('.dj-guide-release');if(anchor)anchor.before(tipGuide);else guide.append(tipGuide);}
+ if(guide){const body=guide.querySelector('.dj856-guide-body');const anchor=body?.querySelector('.map-gesture-guide-remember');if(anchor)anchor.before(tipGuide);else (body||guide).append(tipGuide);}
  let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,tipFadeTimer=0,searchFocusTimer=0,disposed=false;
  label.hidden=true;
  const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.communityPicking!=='true'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
