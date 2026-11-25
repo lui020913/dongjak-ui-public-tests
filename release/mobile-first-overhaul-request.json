@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.180",
+  "application_version": "9.2.181",
   "public_work_branch": "main",
-  "purpose": "Combined release PR511+PR512: retain revised shared-road width rubric and candidate evidence; repair direct community/news cross-dissolve and synchronize search dismissal with animation end. PR512 source CI 38/38 passed. Protected Preview and Production QA.",
-  "attempt": 408,
+  "purpose": "PR515: remove obsolete tablet-mode guidance; show actual resident guidebook PDF size and synchronize size at build time. Public app source CI and FIX phone aggregate passed (38/38). Protected Preview and Production QA.",
+  "attempt": 409,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

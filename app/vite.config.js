@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import {statSync} from 'node:fs';
 import {onRequestGet,onRequestPost} from './functions/api/place-insight.js';
 import {platformHtml} from './platforms/shared/platform-html.js';
 // Cloudflare Pages serves the identical /api/place-insight route in production.
@@ -12,7 +13,7 @@ export default defineConfig(({mode})=>{
 const target=outputs[mode]?mode:'universal';
 const uiOnly=mode==='ui-only';
 return ({
-  define:{__DJ_PLATFORM_BUILD__:JSON.stringify(target)},
+  define:{__DJ_PLATFORM_BUILD__:JSON.stringify(target),__DJ_GUIDEBOOK_BYTES__:JSON.stringify(statSync(new URL('./public/dongjak-guidebook.pdf',import.meta.url)).size)},
   build:{outDir:outputs[target]||'dist',emptyOutDir:true},
 
   plugins:[{name:'dongjak-platform-html',enforce:'pre',transformIndexHtml(html){return platformHtml(html,target);}},
