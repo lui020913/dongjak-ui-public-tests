@@ -38,11 +38,12 @@ test('actual copied production sheet enforces four equal-height community contro
   assert.match(phoneCss,/#ped-tools-panel\.dj871-sheet-expanded:not\(\[hidden\]\)/);
 });
 
-test('the protection-gap main list directly activates one map with separate unscored school geometry',()=>{
+test('the protection-gap main list directly activates one map with consistent risk colors and unscored school detail',()=>{
   assert.match(pri,/for\(const \[id,name\] of options\)actions\.append\(choice\(id,id==='protectionGap'\?'제도적 사각지대':name\)\)/);
   assert.doesNotMatch(pri,/showProtectionDetail|protectionDetail\.append/);
   assert.match(pri,/schoolReview=buildSanghyeonMiddleSchoolReview\(geo\)/);
-  assert.match(pri,/map\.setLayoutProperty\(SCHOOL_LINE,'visibility',mode==='protectionGap'\?'visible':'none'\)/);
+  assert.doesNotMatch(pri,/SCHOOL_LINE|SCHOOL_COLOR|schoolKey/);
+  assert.match(pri,/schoolReview\?\.features\?\.some\(f=>f\.properties\.segment_id===s\.id\)/);
   assert.match(pri,/const auditBox=el\('section','dj-pri-official-audit'\)/);
   assert.match(pri,/boundaryAudit\?\.size/);
   assert.match(pri,/중학교 관련 보호 공백 점수: 미산정 \(NULL\)/);

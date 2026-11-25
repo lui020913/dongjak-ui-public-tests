@@ -75,7 +75,8 @@ test('the real vulnerability modal loads and renders the PDF-based mode without 
  assert.match(js,/id==='speed'\?Boolean\(speedSource\?\.features\?\.length\)/);
  assert.match(js,/map\.setLayoutProperty\(SPEED_LINE,'visibility',mode==='speed'\?'visible':'none'\)/);
  assert.match(js,/id==='speed'\?'제한속도 위험도 · 표준노드링크'/);
- assert.match(js,/score:null,displayScore:0,evaluated:false,middleSchoolReview:true/);
+ assert.match(js,/중학교 관련 보호 공백 점수: 미산정 \(NULL\)/);
+ assert.doesNotMatch(js,/SCHOOL_LINE|SCHOOL_COLOR/);
  assert.match(js,/win\.fetch\(SPEED_RISK_SOURCE/);
  const manifest=read('../public/data/pri/manifest.json');
  assert.ok(manifest.patches.every(x=>!x.includes('speed')));

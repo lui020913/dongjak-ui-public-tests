@@ -16,7 +16,7 @@ test('history collapses on both entry paths and keeps text inside category',()=>
 test('AI and PRI headers stay outside the scrolling content',()=>{
  const ai=read('src/v880-supabase-safety-ai.js'),css=read('src/v880-supabase-safety-ai.css'),pri=read('src/pri-map.js');
  assert.match(ai,/event.cancelable\)event.preventDefault/);assert.match(css,/position:fixed!important;inset:0!important;width:100%!important;height:100%!important/);
- assert.match(pri,/scrollBody.append\(intro,status,actions,protectionDetail,focusArea,clear,dataTools\);dialog.append\(head,scrollBody\)/);
+ assert.match(pri,/scrollBody.append\(intro,status,actions,focusArea,clear,dataTools\);dialog.append\(head,scrollBody\)/);
  assert.match(read('src/pri-map.css'),/\.dj-pri-body\{[\s\S]*?overflow-y:auto!important/);
 });
 test('public submission never silently falls back to private device storage',()=>{

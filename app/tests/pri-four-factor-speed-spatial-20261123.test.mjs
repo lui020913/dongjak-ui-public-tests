@@ -63,14 +63,12 @@ test('parallel links with different speed grades are not misattributed to a surv
  assert.equal(exact.patch.scores[0].score,40);
 });
 
-test('walking vulnerability UI exposes one policy row with two nested buttons, four-factor map, and dock geometry',()=>{
+test('walking vulnerability UI exposes one direct policy row without nested buttons, four-factor map, and dock geometry',()=>{
  const ui=readFileSync(new URL('../src/pri-map.js',import.meta.url),'utf8');
  const css=readFileSync(new URL('../src/pri-map.css',import.meta.url),'utf8');
  assert.match(ui,/\['current6','종합 보행 취약도 · 6개 지표'\]/);
- assert.match(ui,/const entry=button\('제도적 사각지대',showProtectionDetail\)/);
- assert.match(ui,/protectionDetail\.append\(back,/);
- assert.match(ui,/choice\('protectionGap','상도1동 전체 보호 공백 점수 · 그라데이션'\)/);
- assert.match(ui,/choice\(\.\.\.middleSchoolOption\)/);
+ assert.match(ui,/for\(const \[id,name\] of options\)actions\.append\(choice\(id,id==='protectionGap'\?'제도적 사각지대':name\)\)/);
+ assert.doesNotMatch(ui,/showProtectionDetail|protectionDetail\.append|SCHOOL_LINE/);
  assert.match(ui,/spatialMatchSpeedFactor\(next,speedSource\)/);
  assert.match(ui,/id==='current4'\?\(policyScope\?scopedCompositeFeatures\(policyScope/);
  assert.match(ui,/유효 지표 '\+currentFourFactorCoverage\(s\)\+'\/4/);
