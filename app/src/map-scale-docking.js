@@ -224,10 +224,12 @@ export function installScaleDocking({map,app,overview}={}){
   // Dynamic weather sheets may be mounted after the initial overlay observer.
   // Their explicit lifecycle event must hide MapLibre's inline-important scale
   // immediately, without waiting for an observer/motion frame.
+  const markScaleVisible=(scale,visible)=>{if(scale.dataset.djHudVisible!==String(visible))scale.dataset.djHudVisible=String(visible);};
   const onWeatherVisibility=()=>{
     if(disposed)return;
     const scale=scaleElement();
     if(scale && window.innerWidth<700 && shouldHideMobileScale(app,app.ownerDocument,window)){
+      markScaleVisible(scale,false);
       applyImportant(scale,'visibility','hidden');
       const chip=scale.querySelector('.maplibregl-ctrl-scale');
       if(chip)applyImportant(chip,'visibility','hidden');
@@ -269,6 +271,7 @@ export function installScaleDocking({map,app,overview}={}){
       // a blocker: it occupies a reserved right-hand HUD lane beside the scale.
       const scaleChip=scale.querySelector('.maplibregl-ctrl-scale');
       if(shouldHideMobileScale(app,app.ownerDocument,window)){
+        markScaleVisible(scale,false);
         applyImportant(scale,'visibility','hidden');
         if(scaleChip)applyImportant(scaleChip,'visibility','hidden');
         return;
@@ -334,6 +337,7 @@ export function installScaleDocking({map,app,overview}={}){
       // A paired TIP/scalebar row is also visible even when there is no free
       // space below the navigation rail. Preserve the original OR semantics.
       const hudVisibility=(visible||pair)?'visible':'hidden';
+      markScaleVisible(scale,hudVisibility==='visible');
       applyImportant(scale,'visibility',hudVisibility);
       if(scaleChip)applyImportant(scaleChip,'visibility',hudVisibility);
       if(pair){
@@ -356,6 +360,7 @@ export function installScaleDocking({map,app,overview}={}){
       return;
     }
     previousDesktop=true;
+    delete scale.dataset.djHudVisible;
     // Clear phone-only TIP inline positioning when switching to PC/tablet.
     const pcTip=app.querySelector('#dj840-map-tip');
     if(pcTip){
