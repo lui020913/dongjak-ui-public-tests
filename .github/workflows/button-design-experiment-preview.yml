@@ -53,7 +53,7 @@ jobs:
           npm run build
           npm run check:release
       - name: Install pinned browser test runner
-        run: npm ci --no-audit --no-fund --prefer-offline
+        run: npm install --no-audit --no-fund --prefer-offline
       - name: Verify real walking route screens at three mobile sizes
         run: npx playwright test --config=playwright.route-screen-v3.config.mjs
       - name: Save diagnostic browser report
