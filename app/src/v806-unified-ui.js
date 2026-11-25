@@ -294,8 +294,11 @@ export function installUnifiedUI(doc=document, win=window){
   measure();
   const panelHide=(id,{immediate=false}={})=>{
     const node=element(id);if(!node)return;
-    lifecycle.dismiss(id,{global:false});
+    // Primary presentation retains a logically dismissed outgoing page.
+    // Its owner alone releases the visual surface; lifecycle still follows
+    // the committed navigation in sync().
     if(node.dataset.djTabOutgoing==='true')return;
+    lifecycle.dismiss(id,{global:false});
     if(id==='map-quick-search-dropdown'){
       dispatchLocalClick(element('map-quick-search-close'),win);
       if(!node.hidden&&!node.classList.contains('dj871-search-leaving'))node.hidden=true;

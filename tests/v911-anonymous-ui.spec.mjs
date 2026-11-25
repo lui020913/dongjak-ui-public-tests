@@ -88,7 +88,7 @@ async function enter(page,id,key){
          const outgoing=document.querySelector('[data-dj-tab-outgoing="true"]');
          const out=outgoing?getComputedStyle(outgoing):null;
          const map=document.getElementById('map'),app=document.getElementById('app');const mapVisible=!!map&&getComputedStyle(map).visibility==='visible'&&getComputedStyle(map).display!=='none'&&Number(getComputedStyle(map).opacity)>.98&&Number(getComputedStyle(app).opacity)>.98;
-         frames.push({mapVisible,rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
+         frames.push({t:performance.now(),owner:panel.dataset.djPrimaryTransition||null,active:app.dataset.tab,hidden:panel.hidden,mapVisible,rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
        }
      }
      frame=requestAnimationFrame(capture);
@@ -108,7 +108,7 @@ async function enter(page,id,key){
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
- }finally{await page.evaluate(()=>window.__auditStop?.());}
+ }catch(error){console.log('PRIMARY_PAINT_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({frames:window.__auditFrames.slice(-120),tab:document.getElementById('app').dataset.tab,owned:[...document.querySelectorAll('[data-dj-primary-transition]')].map(n=>({id:n.id,phase:n.dataset.djPrimaryTransition,style:n.getAttribute('style')}))}))));throw error;}finally{await page.evaluate(()=>window.__auditStop?.());}
  await geometry(page,'#'+id);
 }
 test.afterEach(async({page},info)=>{
@@ -1292,7 +1292,7 @@ test('AI full-screen conversation and inline voice state keep the map task separ
  await tap(page,page.locator('#dj890-ai-orb'));await expect(ai).toBeVisible();await expect.poll(async()=>{const b=await ai.boundingBox(),v=page.viewportSize();return b?Math.abs(b.x)+Math.abs(b.y)+Math.abs(b.width-v.width)+Math.abs(b.height-v.height):999}).toBeLessThanOrEqual(5);
  await expect(ai.locator('.dj-ai-transcript')).toBeVisible();await expect(ai.locator('.dj-ai-composer')).toBeVisible();
  await expect(ai.locator('.dj-ai-preferences')).toBeVisible();await expect(ai.locator('#dj-ai-query')).toBeDisabled();await tap(page,ai.locator('[data-profile="senior"]'));await expect(ai.locator('#dj-ai-query')).toBeEnabled();await expect(ai).toHaveAttribute('data-explanation','senior');await expect(ai.locator('.dj-ai-preferences')).toBeHidden();
- await expect.poll(()=>page.evaluate(()=>window.__aiAlpha.some(x=>!x.closing&&x.a>.1&&x.a<.95&&x.mapVisible))).toBe(true);
+ try{await expect.poll(()=>page.evaluate(()=>window.__aiAlpha.some(x=>!x.closing&&x.a>.1&&x.a<.95&&x.mapVisible))).toBe(true);}catch(error){console.log('AI_PAINT_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>({samples:window.__aiAlpha.slice(0,100),last:window.__aiAlpha.slice(-10),style:document.getElementById('dj-ai-search-modal').getAttribute('style')}))));throw error;}
  await ai.getByRole('button',{name:'AI 검색 닫기'}).click();await expect(ai).toBeHidden();
  expect(await page.evaluate(()=>window.__aiAlpha.some(x=>x.closing&&x.a>0&&x.a<.95&&x.mapVisible))).toBe(true);
  const mic=page.locator('#djNext-mic'),shell=page.locator('#map-quick-search'),status=page.locator('#djNext-voice-status');
