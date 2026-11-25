@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci
+      - run: npm install --no-save --package-lock=false --no-audit --no-fund @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg fonts-noto-cjk
       - run: node film/record.mjs film/scenes/active.json
