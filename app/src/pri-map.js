@@ -26,7 +26,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
  const head=el('header','dj-pri-head'),title=el('h2','','보행 취약도');const close=button('닫기',()=>dialog.close());close.classList.add('dj-pri-close');close.setAttribute('aria-label','보행 취약도 닫기');head.append(title,close);
- const intro=el('p','','상도1동 보행 취약도 · 조명·교통사고·제도적 사각지대·제한속도·횡단보도·보차혼용도로 6개 항목. 각 지수는 100점 만점(높을수록 위험)입니다. 구간별 평가된 항목만 동일 가중치로 임시 평균하며, 6/6 미만은 부분평가입니다. 미평가는 회색입니다.');
+ const intro=el('p','','상도1동에서 보행 시 주의할 구간을 확인해 보세요. 평가 항목을 하나씩 선택할 수 있습니다. 빨간색은 상대적으로 주의가 필요한 구간, 회색은 아직 평가하지 못한 구간입니다. 실제 안전을 보장하는 등급은 아닙니다.');
  const status=el('p','dj-pri-status','등록된 자료가 없습니다.');status.setAttribute('role','status');
  const actions=el('div','dj-pri-actions');
  const scrollBody=el('div','dj-pri-body');
@@ -128,7 +128,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    const options=[['current6','종합 보행 취약도 · 6개 지표'],...dataset.factors.filter(f=>CURRENT_SIX_FACTORS.includes(f.id)&&f.id!=='speed').map(f=>[f.id,f.label]),['speed','제한속도 위험도 · 상도1동 표준노드링크']];
    const choice=(id,name)=>{
      const eligible=id==='sharedRoad'?Boolean(sharedCandidates?.scores?.length)||available.has(id):id==='protectionGap'?Boolean(policyScope):id==='speed'?Boolean(speedSource?.features?.length):id==='current6'?dataset.segments.some(s=>currentSixFactorCoverage(s)>=2):id==='current4'?dataset.segments.some(s=>currentFourFactorCoverage(s)>=2):id==='current3'?dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):available.has(id);
-     const suffix=!eligible?' · 미평가':id==='sharedRoad'?' · 조사 후보 및 평가':id==='speed'?' · 0·40·80·100점':id==='current6'?' · 6개 동일 가중치·결측 제외':id==='current4'?' · 유효자료만 동일 가중치':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
+     const suffix=!eligible?' · 미평가':id==='sharedRoad'?' · 조사 후보 및 평가':id==='speed'?' · 도로 속도 기준':id==='current6'?' · 평가된 항목 종합':id==='current4'?' · 유효자료만 동일 가중치':id==='current3'?' · 동일 가중치':id==='protectionGap'?' · 2지표·300m':id==='lighting'?' · 조명 자료':'';
      const item=button(name+suffix,()=>{activate(id);dialog.close();});
      // Criteria-only new factors may be opened to inspect grey (unassessed)
      // roads; this must never look like an observed risk score.

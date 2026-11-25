@@ -34,10 +34,10 @@ export function boundaryGeometry(geo){
 }
 export function clipPriDisplay(collection,geo){
  const boundary=boundaryGeometry(geo);if(!boundary.valid)return {type:'FeatureCollection',features:[]};
- // Common-network data has already been geometrically clipped, but native speed
- // links can still cross the boundary. Clip them exactly rather than hide by midpoint.
+ // Clip every rendered road to the authoritative boundary, including native
+ // speed links and imported geometry. Never mutate source observations.
  const out=[];
- for(const f of collection.features){if(f.properties?.speedSource!=='observed-link'){out.push(f);continue;}
+ for(const f of collection.features){if(f.geometry?.type==='Point'){if(boundary.contains(f.geometry.coordinates))out.push(f);continue;}
   const parts=[];
   for(const line of lines(f.geometry)){let part=[];const flush=()=>{if(part.length>=2)parts.push(part);part=[];};
    for(let i=1;i<line.length;i++){const a=line[i-1],b=line[i];const ranges=boundary.pieces(a,b);if(!ranges.length){flush();continue;}

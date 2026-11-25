@@ -23,6 +23,8 @@ test('native speed links are clipped and a gap across a boundary hole is not con
  const speed=f('speed-link:1',-20,120,40);speed.properties.speedSource='observed-link';
  const clipped=clipPriDisplay(fc([speed]),geo).features[0];
  assert.equal(clipped.geometry.type,'MultiLineString');assert.equal(clipped.geometry.coordinates.length,2);assert.equal(clipped.properties.score,40);
+ const common=clipPriDisplay(fc([f('w_5',-20,120,70),f('outside_0',110,120,20)]),geo);
+ assert.equal(common.features.length,1);assert.equal(common.features[0].geometry.type,'MultiLineString');assert.equal(common.features[0].properties.score,70);
 });
 test('public app keeps one thematic layer, light-only theme and clipped PRI data',()=>{
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');

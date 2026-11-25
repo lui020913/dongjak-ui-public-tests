@@ -140,7 +140,7 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px s
 #app .dj-pri-map-key span[hidden]{display:none!important;}
 #app .dj-pri-map-key span::before{content:'';width:18px;height:0;border-top:3px solid #9CA3AF;flex:none;}
 #app .dj-pri-map-key .dj-pri-key-boundary::before{border-color:#436F9C;}
-#app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #8996A3;}
+#app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px solid #8996A3;}
 
 
 /* Expanded PRI legend can reach the GPS toolbar at small phone heights.
@@ -154,4 +154,4 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px s
 }
 
 /* Retired independent analysis surfaces; the original datasets remain intact. */
-#dj-safety-night,#night-visibility-float,#night-visibility-quick-off,#dj-night-consent,#theme-toggle{display:none!important;}
+#dj-safety-night,#night-visibility-float,#night-visibility-quick-off,#dj-night-consent,#dj833-night-modal,#dj-v794-night,#theme-toggle{display:none!important;}
