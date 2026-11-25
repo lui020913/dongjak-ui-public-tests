@@ -51,6 +51,9 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,4500);};
   const paint=now=>{
    if(finished)return;
+   // A programmatic navigation or a newly opened modal must win over a
+   // stale presentation. Never resurrect an already dismissed destination.
+   if(app.dataset.tab!==destination||(incoming&&incoming.hidden)){cleanup();return;}
    if(previousFrame!==null)elapsed+=Math.min(32,Math.max(0,now-previousFrame));
    previousFrame=now;
    const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
