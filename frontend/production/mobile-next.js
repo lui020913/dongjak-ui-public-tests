@@ -187,7 +187,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  communityClose?.addEventListener('click',()=>{
    const revision=++communityCloseRevision;
    win.setTimeout(()=>{
-     if(revision!==communityCloseRevision||app.dataset.tab!=='participate'||!communityForm||communityForm.hidden)return;
+     if(revision!==communityCloseRevision||app.dataset.tab!=='participate'||!communityForm||communityForm.hidden||communityForm.closest('#dj-community-editor-portal'))return;
      win.DongjakWindowMotion?.cancel?.(communityForm);
      communityForm.hidden=true;
      delete communityForm.dataset.dj810Animating;
