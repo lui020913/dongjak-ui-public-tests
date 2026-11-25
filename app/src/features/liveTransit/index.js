@@ -155,7 +155,7 @@ export function attachLiveTransitOverlay(map,opts={}){
           'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-anchor':'center',
           'icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport',
           'icon-rotate':['coalesce',['get','trainRotation'],0]},
-        paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.45,13.2,.65,15.5,.78,18,.88,22,.88]}
+        paint:{'icon-opacity':['interpolate',['linear'],['zoom'],11,.75,13.2,.9,15.5,1,18,1,22,1]}
       },LIVE_METRO_LAYER);
     }
     if(!map.getLayer(LIVE_BUS_LAYER))map.addLayer({id:LIVE_BUS_LAYER,type:'circle',source:LIVE_SOURCE,minzoom:minimumZoom,
