@@ -75,7 +75,7 @@ replace(main,"    document.getElementById('route-map-source').textContent=select
 replace(main,"function applySelectedRouteVariant(){\n  const result=routeVariants[selectedRouteVariant];\n  if(!result)return;","function applySelectedRouteVariant(){\n  const result=routeVariants[selectedRouteVariant];\n  if(!result)return;\n  transitPreview=null;transitGeneration++;clearTransitPreview();");
 // The new route visual invalidation must precede release-only rail reset.
 replace(main,'function invalidateRoute() {\n  routePriVisuals=null;\n  clearTransitPreview();','function invalidateRoute() {\n  routePriVisuals=null;\n  transitPreview=null;transitGeneration++;clearTransitPreview();');
-replace(main,'function resetRoute() {\n  clearTransitPreview();','function resetRoute() {\n  transitPreview=null;transitGeneration++;clearTransitPreview();');
+replace(main,'function resetRoute() {\n  routePriVisuals=null;\n  closeCommunityLocation();\n  clearTransitPreview();','function resetRoute() {\n  routePriVisuals=null;\n  closeCommunityLocation();\n  transitPreview=null;transitGeneration++;clearTransitPreview();');
 replace(main,'    const first=await fetchPreferredPedestrianPair(routeStart,plan.origin);','    const generation=routeGeneration,request=++transitGeneration;\n    const first=await fetchPreferredPedestrianPair(routeStart,plan.origin);');
 replace(main,"    if(!routeStart||!routeEnd||routeWaypoints.length)throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');","    if(generation!==routeGeneration||request!==transitGeneration||!routeStart||!routeEnd||routeWaypoints.length)throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');");
 replace(main,'    invalidateRoute();\n    const walk=','    clearTransitPreview();showRouteLine(null);\n    const walk=');
