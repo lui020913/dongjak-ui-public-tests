@@ -135,6 +135,7 @@ export const MOBILE_SCALE_BLOCKERS=Object.freeze([
 
 export function mobileScaleBlockerVisible(node,view){
   if(!node||node.hidden||node.closest?.('[hidden]')||node.getAttribute?.('aria-hidden')==='true')return false;
+  if(node.classList?.contains('dj871-search-leaving')||(node.dataset?.dj810Animating==='closing'&&node.dataset?.djWindowMotionKind==='fade'))return false;
   if(node.id==='toast'&&!node.classList?.contains('show'))return false;
   const style=view?.getComputedStyle?.(node);
   if(style && (style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0))return false;
