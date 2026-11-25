@@ -2238,6 +2238,8 @@ document.getElementById('community-photo-remove').addEventListener('click',()=>{
   document.getElementById('community-photo-image').removeAttribute('src');
 });
 let communityPickerDockObserver=null;
+let communityPickCandidate=null;
+let communityPickMarker=null;
 function syncCommunityPickerDock(){
   if(!communityPickMode||!window.matchMedia('(max-width:699px)').matches)return;
   const hint=document.getElementById('community-map-hint');
@@ -2249,6 +2251,10 @@ function syncCommunityPickerDock(){
 }
 function clearCommunityLocationPick(){
   communityPickMode=false;
+  communityPickMarker?.remove();communityPickMarker=null;
+  communityPickCandidate=null;
+  document.getElementById('community-map-accept').hidden=true;
+  document.getElementById('community-map-prompt').textContent='지도에서 연결할 위치를 선택해 주세요.';
   const hint=document.getElementById('community-map-hint');
   hint.hidden=true;
   hint.style.removeProperty('--dj-community-picker-bottom');
@@ -2275,11 +2281,32 @@ function selectCommunityLocation(lngLat) {
   const inside=isDongjak(lngLat.lng,lngLat.lat);
   if(inside===null){toast('동작구 경계를 불러오는 중입니다.');return;}
   if(!inside){toast('동작구 안의 위치를 선택해 주세요.');return;}
-  communityPickedLocation={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
-  document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  resumeCommunityLocationDraft();
-  toast('위치를 연결했습니다.');
+  const position={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
+  const candidate={position,address:null,settled:false};
+  communityPickCandidate=candidate;
+  communityPickMarker?.remove();
+  communityPickMarker=new maplibregl.Marker({color:'#ec6d35',scale:1.05}).setLngLat([position.lng,position.lat]).addTo(map);
+  const prompt=document.getElementById('community-map-prompt');
+  prompt.textContent='이 위치가 맞나요? · 주소 확인 중…';
+  document.getElementById('community-map-accept').hidden=false;
+  void fetchRouteRoadAddress(position).then(address=>{
+    candidate.address=address;candidate.settled=true;
+    if(communityPickCandidate===candidate&&communityPickMode)prompt.textContent=address?'이 위치가 맞나요? · '+address:'이 위치가 맞나요? · 도로명 주소 미확인';
+    if(communityPickedLocation===position)renderCommunityPickedAddress(candidate);
+  });
 }
+function renderCommunityPickedAddress(candidate){
+  const {position,address,settled}=candidate;
+  document.getElementById('community-location-label').textContent=address?'선택한 위치 · '+address:!settled?'선택한 위치 · 주소 확인 중…':`선택한 위치 · 주소 미확인 (${position.lat.toFixed(5)}, ${position.lng.toFixed(5)})`;
+}
+function confirmCommunityLocation(){
+  if(!communityPickMode||!communityPickCandidate||app.dataset.tab!=='map')return;
+  const candidate=communityPickCandidate;
+  communityPickedLocation=candidate.position;
+  renderCommunityPickedAddress(candidate);
+  resumeCommunityLocationDraft();
+}
+document.getElementById('community-map-accept').addEventListener('click',confirmCommunityLocation);
 document.getElementById('community-map-pick').addEventListener('click',()=>{
   if(routePickMode){routePickMode=null;syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
