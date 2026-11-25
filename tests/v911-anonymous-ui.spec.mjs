@@ -889,6 +889,7 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
 test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ const mapReference=await page.screenshot({scale:'css'});
  await page.evaluate(()=>{
   window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),map=document.getElementById('map');if(editor&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
  });
@@ -897,6 +898,50 @@ test('map report fades out over its real destination without reparenting or resi
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
  expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
+ // DOM visibility alone cannot prove a WebGL surface has actually been
+ // composited under the editor in Safari. Sample real browser screenshots at
+ // the two endpoints and at a held half-opacity of the same root layer.
+ const editorReference=await page.screenshot({scale:'css'});
+ let halfReference;
+ try{
+   await portal.evaluate(n=>n.style.setProperty('opacity','0.5','important'));
+   await expect(portal).toHaveCSS('opacity','0.5');
+   halfReference=await page.screenshot({scale:'css'});
+ }finally{await portal.evaluate(n=>n.style.setProperty('opacity','1','important'));}
+ const blend=await page.evaluate(async images=>{
+   const decode=async base64=>{
+     const image=new Image();
+     await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src='data:image/png;base64,'+base64;});
+     const c=document.createElement('canvas');c.width=image.width;c.height=image.height;
+     const ctx=c.getContext('2d');ctx.drawImage(image,0,0);
+     return {w:c.width,h:c.height,p:ctx.getImageData(0,0,c.width,c.height).data};
+   };
+   const [map,editor,half]=await Promise.all(images.map(decode));
+   if(map.w!==editor.w||map.w!==half.w||map.h!==editor.h||map.h!==half.h)return {samples:0,blended:0};
+   let samples=0,matched=0;
+   for(let y=Math.floor(map.h*.20);y<map.h*.82;y+=4)for(let x=12;x<map.w-12;x+=4){
+     const k=(y*map.w+x)*4;
+     let contrast=0,projection=0,error=0;
+     for(let c=0;c<3;c++){
+       const d=map.p[k+c]-editor.p[k+c];contrast+=d*d;
+       projection+=(half.p[k+c]-editor.p[k+c])*d;
+       error+=Math.abs(half.p[k+c]-(map.p[k+c]+editor.p[k+c])*.5);
+     }
+     if(contrast<1600)continue;
+     samples++;
+     const mix=projection/contrast;
+     if(mix>=.25&&mix<=.75&&error/3<22)matched++;
+   }
+   return {samples,blended:matched/Math.max(1,samples)};
+ },[mapReference,editorReference,halfReference].map(x=>x.toString('base64')));
+ if(blend.samples<100||blend.blended<.55){
+   console.log('REPORT_PIXEL_BLEND_DIAGNOSTIC',JSON.stringify(blend));
+   await test.info().attach('map-reference',{body:mapReference,contentType:'image/png'});
+   await test.info().attach('editor-reference',{body:editorReference,contentType:'image/png'});
+   await test.info().attach('editor-half-opacity',{body:halfReference,contentType:'image/png'});
+ }
+ expect(blend.samples,'contrasting real map and editor screenshot pixels').toBeGreaterThanOrEqual(100);
+ expect(blend.blended,'actual map/editor pixel compositing at half opacity').toBeGreaterThanOrEqual(.55);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
