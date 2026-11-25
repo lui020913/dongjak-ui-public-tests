@@ -20,7 +20,7 @@ test('empty community feed is an actual interactive home, not a blank list or fa
 
 test('release renderer groups unchanged notes by category without visible build numbers',()=>{
  assert.match(history,/CHANGE_TYPE_GROUPS/);
- assert.match(history,/classifyReleaseNote/);
+ assert.match(history,/historyHighlights/);
  assert.match(history,/dataset\.version/);
  assert.doesNotMatch(history,/현재 빌드: /);
 });
