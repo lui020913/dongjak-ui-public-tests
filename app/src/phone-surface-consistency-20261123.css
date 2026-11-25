@@ -376,7 +376,7 @@
     content:'';position:absolute;right:4px;top:4px;width:6px;height:6px;border-radius:50%;background:#d74b4b;
   }
   #app #participation-panel #community-refresh{background:#edf5ef!important;color:#2e5547!important}
-  #app #participation-panel .community-map-report-link{
+  #app #participation-panel .community-map-report-link:not([hidden]){
     display:flex!important;align-items:center!important;justify-content:space-between!important;
     width:100%!important;min-height:44px!important;padding:10px 2px!important;
     margin:12px 0 0!important;background:transparent!important;

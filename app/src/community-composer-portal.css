@@ -112,6 +112,12 @@ html body[data-dj-community-editor="open"]:not([data-dj-community-map-origin="tr
   font-family:inherit!important;font-size:16px!important;line-height:1.45!important;
   box-shadow:none!important;outline:none;
 }
+/* Direct select children must not flex-shrink or inherit the legacy compressed control line box on iOS. */
+#dj-community-editor-portal .dj-compose-scroll>select{
+  flex:0 0 auto!important;height:48px!important;min-height:48px!important;
+  line-height:normal!important;padding-block:0!important;
+  -webkit-text-fill-color:currentColor!important;
+}
 #dj-community-editor-portal .dj-compose-scroll textarea{
   min-height:116px!important;resize:vertical!important;
 }

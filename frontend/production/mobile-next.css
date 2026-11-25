@@ -242,7 +242,7 @@ html body #app#app#app#app#app#app#app#app#app :is(.page-panel>.dj-sheet-chrome,
 html body #app#app#app#app#app#app#app#app#app[data-theme="dark"] :is(.page-panel>.dj-sheet-chrome,.community-form-top){border-bottom-color:var(--dj-v4-border)!important}
 html body #app#app#app#app#app#app#app#app#app :is(.page-panel .dj-sheet-chrome-close,#community-compose-close,.djNext-close,.dj854-weather-close,#ped-tools-close){width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;flex:0 0 42px!important;border-radius:12px!important;display:grid!important;place-items:center!important;box-sizing:border-box!important}
 /* Community list and editor are two states of the same existing sheet. */
-html body #app#app#app#app#app#app#app#app#app #participation-panel>.dj836-sheet-body{font-size:14px;gap:10px!important;padding:12px 14px 20px!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;scroll-padding-bottom:24px!important;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+html body #app#app#app#app#app#app#app#app#app #participation-panel>.dj836-sheet-body{font-size:14px;gap:10px!important;padding:12px 14px 8px!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;scroll-padding-bottom:12px!important;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 html body #app#app#app#app#app#app#app#app#app #participation-panel .dj-page-intro{margin:0 0 4px!important;line-height:1.55!important;word-break:keep-all;overflow-wrap:anywhere}
 html body #app#app#app#app#app#app#app#app#app #participation-panel .community-heading-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.78fr) minmax(0,1.22fr)!important;align-items:center!important;gap:6px!important;margin:0 0 8px!important;padding:0!important;min-height:0!important}
 html body #app#app#app#app#app#app#app#app#app #participation-panel .community-heading-row>div{display:none!important}
@@ -1247,7 +1247,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
     padding:5px 3px!important;font-size:11px!important;border-radius:11px!important;
     box-shadow:none!important;
   }
-  html body #app#app#app#app#app#app#app #participation-panel .community-map-report-link{
+  html body #app#app#app#app#app#app#app #participation-panel .community-map-report-link:not([hidden]){
     display:flex!important;align-items:center!important;justify-content:space-between!important;
     width:100%!important;min-height:48px!important;
     margin:12px 0 6px!important;padding:10px 15px!important;
