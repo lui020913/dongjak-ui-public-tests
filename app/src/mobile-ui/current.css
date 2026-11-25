@@ -1549,3 +1549,13 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 }
 .dj-metro-live-head{display:grid;grid-template-columns:44px 1fr 44px;}
 .dj-metro-live-title{justify-self:center;}
+
+@layer native-scroll-chrome {
+ @media(max-width:699px){
+  html body #app:has(#map-gesture-guide:not([hidden]))::before,
+  html body #app:has(#map-gesture-guide:not([hidden]))::after,
+  html body #app:has(#map-gesture-guide:not([hidden])) :is(.dj857-window-scrim,.dj-window-backdrop,.dj-modal-scrim,.dj-dialog-dimmer,.dj-sheet-backdrop,#map-gesture-guide)::backdrop {background:transparent!important;backdrop-filter:none!important;box-shadow:none!important;}
+  html body #app:has(#map-gesture-guide:not([hidden])){--dj-guide-fade:0!important;}
+  html body #app .page-panel[data-dj-tab-outgoing="true"]{visibility:visible!important;pointer-events:none!important;}
+ }
+}
