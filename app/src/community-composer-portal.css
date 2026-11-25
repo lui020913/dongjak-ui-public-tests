@@ -196,7 +196,7 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
  display:inline-flex!important;align-items:center!important;justify-content:center!important;
  border-radius:14px!important;min-height:44px!important;height:44px!important;min-width:48px!important;width:auto!important;
  padding:0 12px!important;flex:none!important;background:#128773!important;color:#fff!important;
- border:1px solid transparent!important;box-shadow:none!important;font-weight:650!important;line-height:1.2!important;box-sizing:border-box!important;
+ border:1px solid transparent!important;box-shadow:none!important;font-weight:650!important;line-height:1.2!important;box-sizing:border-box!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;flex-shrink:0!important;
 }
 }
 html body #app#app #participation-panel .community-comment-form input[type=text]:focus{
@@ -215,3 +215,13 @@ html body #app#app #participation-panel .community-comment-form input[type=text]
 
 #app #dj-activity-trigger{position:relative;display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid #d6e3da;border-radius:12px;background:#f5f9f6;color:#224d3e;padding:0}#dj-activity-trigger [data-count]{position:absolute;right:-4px;top:-4px;border-radius:20px;background:#c53e36;color:#fff;font-size:10px;font-weight:700;min-width:17px;padding:2px 3px}#dj-activity-trigger [hidden],#dj-activity-screen[hidden],#app.route-guiding #dj-activity-trigger{display:none!important}
 html body #dj-activity-screen:not([hidden]){position:fixed;inset:0;z-index:2147483002;display:flex;flex-direction:column;background:#edf3ef;color:#203a32;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);box-sizing:border-box;overflow:hidden}#dj-activity-screen header{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:12px 16px;gap:8px;border-bottom:1px solid #d6e3da}#dj-activity-screen h2{font-size:19px;text-align:center;margin:0}#dj-activity-screen header button{width:44px;height:44px;border:0;background:transparent;color:inherit;font-size:28px;border-radius:12px}.dj-activity-list{flex:1;min-height:0;overflow:auto;padding:16px;overscroll-behavior:contain}.dj-activity-row{display:grid;text-align:left;width:100%;gap:7px;margin-bottom:10px;padding:14px;border:1px solid #d6e3da;border-radius:14px;background:#f8fbf9;color:inherit;overflow-wrap:anywhere}.dj-activity-row[data-unread=true]{border-inline-start:4px solid #15836b}.dj-activity-row small{color:#587268}body[data-dj-activity-open=true]{overflow:hidden!important}
+
+/* Fixed report information is app chrome, not a moving MapLibre popup. */
+#app .dj-community-location-card{position:fixed;z-index:120;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 110px);display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;color:#234c40;border:1px solid #dce8e0;border-radius:18px;box-shadow:0 3px 12px #153b2420;box-sizing:border-box;max-width:420px;margin-inline:auto;}
+#app .dj-community-location-copy{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;text-align:left;}
+#app .dj-community-location-copy small{font-size:12px;color:#667c71;}
+#app .dj-community-location-copy strong{font-size:15px;line-height:1.45;white-space:normal;overflow-wrap:anywhere;}
+#app .dj-community-location-close{flex:0 0 44px;width:44px;height:44px;padding:0;display:grid;place-items:center;border:1px solid #dce8e0;border-radius:50%;background:#f1f6f3;color:#24463b;font-size:26px;line-height:1;}
+@layer request-completion{
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-list .community-comment-form input[type=text]{min-width:0!important;width:0!important;flex:1 1 0!important;}
+}
