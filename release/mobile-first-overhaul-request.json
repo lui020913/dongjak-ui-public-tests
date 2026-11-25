@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.173",
+  "application_version": "9.2.174",
   "public_work_branch": "main",
-  "purpose": "PR505: stationary transport close fade using measured painted bounds, no exit translation or clipping; preserve native cleanup and swipe gestures. Source CI passed; protected mobile QA measures intermediate opacity and four edges at Noryangjin and Jangseungbaegi.",
-  "attempt": 398,
+  "purpose": "PR506: remove unnecessary public patch and internal development records; retain concise latest change and curated four-category highlights, data sources, and original source ledger. Source CI passed; require protected mobile QA.",
+  "attempt": 399,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
