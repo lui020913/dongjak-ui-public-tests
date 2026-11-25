@@ -52,3 +52,12 @@ test('map tap stages a marker and road address; only explicit confirmation commi
  assert.match(clear,/communityPickCandidate=null/);
  assert.doesNotMatch(clear,/communityPickedLocation\s*=(?!=)/);
 });
+
+ test('inactive community surface relinquishes inline paint ownership without interrupting a live dissolve',()=>{
+ const nav=section('function navigate(tab,','// Capture mobile HOME');
+ assert.match(nav,/if\(panel\.id==='participation-panel'&&panel\.hidden&&!outgoing\)/);
+ assert.match(nav,/communityComposerPortal\?\.close\(\)/);
+ assert.match(nav,/delete panel\.dataset\.djPrimaryTransition/);
+ assert.match(nav,/\['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'\]/);
+ assert.match(nav,/panel\.style\.removeProperty\(key\)/);
+ });
