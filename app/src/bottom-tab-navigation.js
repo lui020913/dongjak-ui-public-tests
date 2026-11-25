@@ -20,11 +20,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,departingStyles=[],replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],enterObserver=null,departing=null,departingFrame=0,departingStyles=[],replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
   if(enterFrame){win.cancelAnimationFrame?.(enterFrame);enterFrame=0;}
+  enterObserver?.disconnect();enterObserver=null;
   for(const {node,props} of enterStyles)for(const [key,value,priority] of props){if(value)node.style.setProperty(key,value,priority);else node.style.removeProperty(key);}
   enterStyles=[];
   entering?.classList.remove('dj-tab-content-enter');
@@ -51,8 +52,16 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const route=key==='route'?doc.getElementById('dj-route-v3'):null;
   const nodes=[route||panel].filter(node=>node?.style?.getPropertyValue);
   if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
+  for(const node of nodes)win.DongjakWindowMotion?.cancel?.(node);
   enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change',...(aboveOutgoing?['z-index']:[])].map(k=>[k,node.style.getPropertyValue?.(k)||'',node.style.getPropertyPriority?.(k)||''])}));
-  const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
+  let alpha=0;
+  const paint=value=>{alpha=value;for(const node of nodes){const next=String(value);if(node.style.getPropertyValue('opacity')!==next||node.style.getPropertyPriority('opacity')!=='important')node.style.setProperty('opacity',next,'important');}};
+  // Legacy layout observers can write an opaque style after a frame callback.
+  // Keep a single live opacity owner until the destination has fully appeared.
+  if(aboveOutgoing&&typeof win.MutationObserver==='function'){
+   enterObserver=new win.MutationObserver(()=>{if(enterStyles.length)paint(alpha);});
+   for(const node of nodes)enterObserver.observe(node,{attributes:true,attributeFilter:['style']});
+  }
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
   if(aboveOutgoing)for(const node of nodes)node.style.setProperty('z-index','6999','important');
   paint(0);
@@ -109,7 +118,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
     const incoming=doc.querySelector('.page-panel[data-page="'+destination+'"]:not([hidden])');
     previous.style.setProperty('z-index','6998','important');
     previous.style.setProperty('opacity','1','important');
-    if(revealContent(incoming,destination,{aboveOutgoing:true})){enterTimer=win.setTimeout(clearEntrance,4500);return;}
+    if(revealContent(incoming,destination,{aboveOutgoing:true})){enterTimer=win.setTimeout(clearEntrance,6500);return;}
     previous.style.setProperty('z-index','6999','important');
    }
    // Important opacity is deliberate: historical CSS fixes the page to
