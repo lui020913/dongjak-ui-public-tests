@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.166",
+  "application_version": "9.2.167",
   "public_work_branch": "main",
-  "purpose": "PR497: rebuild risk report, community and news live crossfades after deleting legacy owners; responsive install guidance and ten viewport widths; source CI passed.",
-  "attempt": 391,
+  "purpose": "PR498: isolate primary screen compositor and suspend legacy toolbar motion during crossfade; retain PR497 report and responsive text fixes; source CI passed. New version for exact-source protected promotion.",
+  "attempt": 392,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
