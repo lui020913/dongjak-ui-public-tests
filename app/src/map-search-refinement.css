@@ -92,3 +92,9 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
 #app .dj-search-result-pin{display:grid;place-items:center;width:30px;height:30px;min-width:30px;min-height:30px;padding:0;border:2px solid #fff;border-radius:50%;background:#157b61;color:#fff;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px #183e3760;cursor:pointer;}
 #app .dj-search-result-pin[data-kind="bus"]{background:#28699e;}
 #app .dj-search-result-pin[data-kind="subway"]{background:#5f5496;}
+
+@layer native-scroll-chrome {
+ #app#app .dj-search-marker-anchor{width:20px;height:20px;}
+ #app#app .dj-search-result-pin{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;padding:0!important;margin:0!important;border:1.5px solid #fff!important;border-radius:6px!important;background:var(--dj-search-pin-color,#758451)!important;color:white!important;box-shadow:0 1px 3px #183e3738!important;transform:none!important;}
+ #app#app .dj-search-result-pin svg{width:13px;height:13px;pointer-events:none;}
+}
