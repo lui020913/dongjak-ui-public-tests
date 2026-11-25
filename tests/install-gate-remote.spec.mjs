@@ -15,7 +15,7 @@ async function openPreviewGate(page){
 test('PC install gate keeps device illustration, darkens buttons quickly and reveals QR only after PWA action',async({page})=>{
   await openPreviewGate(page);
   await expect(page.locator('#dj-mobile-only-screen .dj-mobile-only-devices')).toBeVisible();
-  await expect(page.locator('#dj-install-menu .dj-install-choice')).toHaveCount(4);
+  await expect(page.locator('#dj-install-menu .dj-install-choice')).toHaveCount(5);
   await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);
 
   const web=page.locator('#dj-install-menu .dj-install-choice').filter({hasText:'웹에서 바로 이용하기'});
