@@ -1469,15 +1469,16 @@ test('category-first release history preserves the actual deployment version in 
  const response=await page.request.get('/version.json');
  expect(response.ok()).toBe(true);
  const version=String((await response.json()).version);
- // The public release screen intentionally groups changes by type, rather than
- // by major/minor/patch editions. The first timeline item can be an archived
- // release; only the explicit current-build marker identifies this deployment.
+ // The latest public note appears once, before the four compact categories.
  const timeline=page.locator('#history-version-timeline');
  const current=timeline.locator('.v707-release[data-current-build="true"]');
  await expect(current.first()).toHaveAttribute('data-version',version);
  await expect(current.first().locator('h4')).toHaveText('최근 변경사항');
- const group=current.first().locator('xpath=ancestor::details[contains(@class,"dj-edition-history")]');
- await expect(group).toHaveAttribute('data-change-type',/^(major|feature|design|fix)$/);
+ await expect(current).toHaveCount(1);
+ await expect(timeline.locator(':scope > .dj-edition-history')).toHaveCount(4);
+ await expect(timeline.locator(':scope > .dj-edition-history[open]')).toHaveCount(0);
+ await expect(timeline.locator('.dj-history-archive[open]')).toHaveCount(0);
+ expect(await timeline.locator('.v707-release-items li').allTextContents()).not.toContain('모바일 안정성 및 상호작용 개선');
  // Historical records still carry unchanged operational SemVer in data-version;
  // the public button and user-visible pre-release name remain simplified.
  await expect(page.locator('#version-history-trigger')).toContainText('업데이트');
