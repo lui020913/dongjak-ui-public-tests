@@ -153,19 +153,22 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   const close=()=>{
     seq++;controller?.abort();controller=null;
     selectedMapRows=[];mapFooter.hidden=true;
-    delete app.dataset.searchOpen;delete dropdown.dataset.searchMode;
-    dropdown.style.removeProperty('display');
+    if(closeTimer)return;
+    const finish=()=>{
+      dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');
+      delete dropdown.dataset.searchMode;dropdown.style.removeProperty('display');
+      shell.style.removeProperty('--dj-search-results-max');closeTimer=null;
+      syncClear();syncEntry();
+    };
+    // Release map chrome now but retain the actual results surface and its
+    // geometry until the end of the dissolve. Never fade over an empty card.
+    delete app.dataset.searchOpen;
     syncClear();syncEntry();
-    shell.style.removeProperty('--dj-search-results-max');
-    if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
-    if(dropdown.hidden)return;
     const mobile=window.matchMedia?.('(max-width:699px)')?.matches;
-    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-    if(!mobile||reduced){dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');return;}
+    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||app.classList.contains('dj-reduced-animation');
+    if(dropdown.hidden||!mobile||reduced){finish();return;}
     dropdown.classList.remove('dj871-search-entering');dropdown.classList.add('dj871-search-leaving');
-    closeTimer=window.setTimeout(()=>{
-      dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');closeTimer=null;
-    },200);
+    closeTimer=window.setTimeout(finish,300);
   };
   const show=()=>{
     if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
