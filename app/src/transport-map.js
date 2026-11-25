@@ -1358,7 +1358,8 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       // A true separate tab, not a scroll link into the realtime section.
       timetableExpanded=true;
       if(visibleServiceHours)renderServiceHours(visibleServiceHours);
-      if(selected&&(!visibleServiceHours||visibleServiceHours.status!=='ok'))void refreshServiceHours(selected,seq);
+      else if(serviceHoursEl)serviceHoursEl.replaceChildren(el('p','transport-hours-notice','계획 운행시간표를 불러오는 중입니다.'));
+      if(selected&&(!visibleServiceHours||!['ok','loading'].includes(visibleServiceHours.status)))void refreshServiceHours(selected,seq);
     }
     // The station title remains visible when changing tabs on small screens.
     const viewport=panel.querySelector?.('.dj875-transit-scroll')||panel;
@@ -2768,6 +2769,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       if(activeSeq!==seq||selected!==place||panel.hidden||selectedDay!==(timetableDay||activeSeoulDay()))return;
       const data=response.ok?body:{status:'error',notice:body.notice||body.error||'운행시간표 조회에 실패했습니다.'};
       if(response.ok&&data.status==='ok'){
+        if(place.kind==='subway'&&Array.isArray(data.timetable)&&data.timetable.length)timetableExpanded=true;
         serviceHoursMemo.set(cacheKey,{at:Date.now(),value:data});
         saveTimetable(place,selectedDay,data);
       }
@@ -2805,6 +2807,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     updateTransportFavorite();
     if(placeKey(favoritePlace(place))&&!sameStationLineChange)recordRecentPlace(favoritePlace(place));
     visibleServiceHours=null;
+    serviceHoursEl?.replaceChildren(el('p','transport-hours-notice','계획 운행시간표를 불러오는 중입니다.'));
     timetableExpanded=false;timetableDay=null;timetableLine='all';timetableDirection='all';
     // Switching a transfer-line tab MUST NOT dismiss/reopen the same sheet.
     if(!sameStationLineChange){onOpen();panel.hidden=false;}

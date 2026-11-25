@@ -43,6 +43,10 @@ export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pa
    }catch(e){throw new Error(e?.message==='HISTORY_REDIRECT'?'HISTORY_REDIRECT':ctrl.signal.aborted?'HISTORY_TIMEOUT':'HISTORY_CONNECTION');}
    if(!res.ok)throw new Error(res.status===401||res.status===403?'HISTORY_AUTH':res.status===429?'HISTORY_QUOTA':res.status===404?'HISTORY_ENDPOINT':res.status===400?'HISTORY_REQUEST':res.status>=300&&res.status<400?'HISTORY_REDIRECT':'HISTORY_UPSTREAM');
    let body;try{body=await res.json();}catch{throw new Error('HISTORY_FORMAT');}
+   const status=Number(body?.responseCode??body?.statusCode??0);
+   if(status===401||status===403)throw new Error('HISTORY_AUTH');
+   if(status===429)throw new Error('HISTORY_QUOTA');
+   if(status>=400)throw new Error('HISTORY_UPSTREAM');
    const rows=extractRows(body);
    if(!rows.length){complete=true;break;}
    const signature=JSON.stringify([rows.length,rows[0],rows.at(-1)]);

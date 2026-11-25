@@ -85,7 +85,7 @@ export function installCompactTransportSheet(doc=globalThis.document,win=globalT
   };
   const observer=typeof MutationObserver==='function'?new MutationObserver(schedule):null;
   observer?.observe(panel,{subtree:true,childList:true,characterData:true,attributes:true,
-    attributeFilter:['hidden','class','data-kind','data-loading-line']});
+    attributeFilter:['hidden','class','data-kind','data-loading-line','data-transport-view']});
   const resize=()=>schedule();
   win.addEventListener?.('resize',resize,{passive:true});
   win.visualViewport?.addEventListener?.('resize',resize,{passive:true});

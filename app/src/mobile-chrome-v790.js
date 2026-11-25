@@ -106,7 +106,7 @@ export function installMobileChrome(doc = document, win = window) {
       </header>
       <div class="dj-mobile-utilities-body" aria-label="추가 지도 기능">
         <div class="dj840-more-quick-actions">
-          <button type="button" id="dj-mobile-history">전체 업데이트 내역</button>
+
           <button type="button" id="dj-mobile-settings">지도 설정</button>
         </div>
       </div>`;
@@ -151,11 +151,6 @@ export function installMobileChrome(doc = document, win = window) {
       event.preventDefault();event.stopPropagation();hideMore();
     });
     panel.addEventListener('dongjak:close-more',event=>hideMore({immediate:event.detail?.immediate===true}));
-    panel.querySelector('#dj-mobile-history')?.addEventListener('click',event=>{
-      event.preventDefault();event.stopPropagation();
-      hideMore({immediate:true});
-      win.requestAnimationFrame?.(()=>doc.getElementById('version-history-trigger')?.click());
-    });
     panel.querySelector('#dj-mobile-settings')?.addEventListener('click',event=>{
       event.preventDefault();event.stopPropagation();
       hideMore({immediate:true});

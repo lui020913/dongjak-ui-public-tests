@@ -43,6 +43,8 @@ export function installMapPreferences(doc=document,win=window){
     <p class="dj803-about-credit">동작구 아이디어 리그 안전팀 시범 운영 프로그램</p>
     <button type="button" class="dj-about-done">닫기</button>
   </section>`;
+  const credit=doc.getElementById('dj-map-attribution-template')?.content?.cloneNode(true);
+  if(credit)about.querySelector('.dj-about-done')?.before(credit);
   app.append(about);
   let aboutFocus=null;
   const closeAbout=()=>{if(about.hidden)return;const finish=()=>{about.hidden=true;aboutFocus?.focus?.();};if(document.defaultView?.DongjakWindowMotion)document.defaultView.DongjakWindowMotion.close(about.querySelector('.dj-about-card'),finish);else finish();};

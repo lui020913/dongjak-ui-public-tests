@@ -1380,3 +1380,17 @@ html body #app#app#app#app#app#app#app[data-dj-search-entry="1"] :is(#djNext-too
   }
  }
 }
+
+/* Keep the live/timetable tabs reachable while hiding only inactive contents. */
+@layer request-completion{
+ @media(max-width:699px){
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="hours"] :is(#transport-arrivals,#transport-neighbors,#transport-lines,#transport-line-section-heading,.transport-selection-box){display:none!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="hours"] .transport-arrivals-title{display:flex!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="hours"] #transport-service-hours{display:grid!important;min-height:0!important;flex:0 0 auto!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="live"] :is(#transport-service-hours,#transport-hours-heading,.transport-hours-disclaimer){display:none!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="hours"] .transport-updated-actions{display:none!important}
+ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #transport-sheet[data-dj-transport-layout="compact-v2"][data-kind="subway"][data-transport-view="hours"] .transport-timetable-controls{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+ }
+}
+
+#app #dj-app-about .dj-map-attribution-details{display:block!important;font-size:12px;line-height:1.5;text-align:left;margin:8px 0;max-width:100%;overflow-wrap:anywhere}
