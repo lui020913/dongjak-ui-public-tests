@@ -41,3 +41,12 @@ test('official speed network never blends with reference roads; policy retains c
  const policy=fc(feature('a',[a,b],0),feature('b',[b,c],25));
  assert.ok(roadEndpointTransitions(policy,{policy:true}).features.length>2);
 });
+
+import {priOverlayAnchor,priCoveredByMapLayer} from '../src/pri-map-layer-order.mjs';
+test('native road paint is below PRI while rail, route and pin overlays stay independent',()=>{
+ const layers=[{id:'land',type:'fill'},{id:'dj-pri-line',type:'line'},{id:'road_minor_casing',type:'line','source-layer':'transportation'},{id:'road_minor',type:'line','source-layer':'transportation'},{id:'transport-rail',type:'line','source-layer':'transportation'},{id:'walking-route-outline',type:'line'},{id:'labels',type:'symbol'}];
+ assert.equal(priOverlayAnchor(layers),'transport-rail');
+ assert.equal(priCoveredByMapLayer(layers,'dj-pri-line'),true);
+ const moved=layers.filter(l=>l.id!=='dj-pri-line');moved.splice(3,0,{id:'dj-pri-line',type:'line'});
+ assert.equal(priCoveredByMapLayer(moved,'dj-pri-line'),false);
+});
