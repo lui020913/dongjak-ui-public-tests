@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.164",
+  "application_version": "9.2.165",
   "public_work_branch": "main",
-  "purpose": "PR493 + PR494 + PR496: GPS heading, nearby facility result pins, AI exit fade and frame-owned risk report crossfade without reinitializing the live map.",
-  "attempt": 389,
+  "purpose": "PR496: risk report live-map crossfade, retaining PR493 and PR494; new patch version required by monotonic Production guard after v9.2.164 went live.",
+  "attempt": 390,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
