@@ -21,6 +21,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Identify cache compatibility
+        id: film-env
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime="$(xcrun simctl list runtimes -j | jq -er '[.runtimes[]|select(.isAvailable and (.identifier|contains("iOS")))]|sort_by(.version|split(".")|map(tonumber))|last|.identifier')"
+          key="$(printf '%s\n' "$(uname -m)" "$(node --version)" "$(xcodebuild -version)" "$(xcrun --sdk iphonesimulator --show-sdk-build-version)" "$runtime" "$RUNNER_TEMP" | shasum -a 256 | cut -d ' ' -f 1)"
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+          echo "FILM_RUNTIME=$runtime" >> "$GITHUB_ENV"
+          echo "$HOME/.dongjak-film-tools/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Restore automation tools
+        id: tools-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.dongjak-film-tools
+            ~/.appium
+          key: ios-film-tools-v1-${{ steps.film-env.outputs.key }}-appium3.9.1-xcuitest12.12.5
+      - name: Restore compiled WebDriverAgent
+        id: wda-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/film-wda/Build/Products
+          key: ios-film-wda-v1-${{ steps.film-env.outputs.key }}-appium3.9.1-xcuitest12.12.5
       - name: Prepare iPhone 15 Pro simulator
         shell: bash
         run: |
@@ -30,17 +54,31 @@ jobs:
           runtime="$(xcrun simctl list runtimes -j | jq -er '[.runtimes[]|select(.isAvailable and (.identifier|contains("iOS")))]|sort_by(.version|split(".")|map(tonumber))|last|.identifier')"
           type="com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro"
           xcrun simctl list devicetypes -j | jq -e --arg t "$type" '.devicetypes|any(.identifier==$t)'
-          udid="$(xcrun simctl create 'Dongjak Film iPhone 15 Pro' "$type" "$runtime")"
+          udid="$(xcrun simctl create 'Dongjak Film iPhone 15 Pro' "$type" "$FILM_RUNTIME")"
           echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
           xcrun simctl boot "$udid"
           xcrun simctl bootstatus "$udid" -b
           xcrun simctl status_bar "$udid" clear
       - name: Install Safari automation
         run: |
-          npm install -g appium@3
-          appium driver install xcuitest@12.12.5
-          appium --version
+          set -euo pipefail
+          if [ "${{ steps.tools-cache.outputs.cache-hit }}" = "true" ] && [ "$(appium --version 2>/dev/null || true)" = "3.9.1" ] && appium driver list --installed 2>&1 | grep -F 'xcuitest@12.12.5'; then
+            echo 'Automation cache hit: installation skipped'
+          else
+            npm install --prefix "$HOME/.dongjak-film-tools" --no-audit --no-fund --save-exact appium@3.9.1
+            appium driver list --installed 2>&1 | grep -F 'xcuitest@12.12.5' || appium driver install xcuitest@12.12.5
+          fi
+          test "$(appium --version)" = "3.9.1"
+          appium driver list --installed 2>&1 | grep -F 'xcuitest@12.12.5'
           command -v ffprobe || brew install ffmpeg
+      - name: Save automation tools immediately
+        if: steps.tools-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.dongjak-film-tools
+            ~/.appium
+          key: ${{ steps.tools-cache.outputs.cache-primary-key }}
       - name: Build WebDriverAgent separately
         shell: bash
         run: |
@@ -48,8 +86,19 @@ jobs:
           mkdir -p film-ios-output
           wda="$HOME/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj"
           test -d "$wda"
+          products="$RUNNER_TEMP/film-wda/Build/Products"
+          if [ "${{ steps.wda-cache.outputs.cache-hit }}" = "true" ] && [ -d "$products/Debug-iphonesimulator/WebDriverAgentRunner-Runner.app" ] && find "$products" -maxdepth 1 -name '*.xctestrun' -print | grep -q .; then
+            echo 'WDA cache hit: compilation skipped'
+          else
           xcodebuild build-for-testing -project "$wda" -scheme WebDriverAgentRunner -derivedDataPath "$RUNNER_TEMP/film-wda" -destination "id=$SIM_UDID" GCC_TREAT_WARNINGS_AS_ERRORS=0 COMPILER_INDEX_STORE_ENABLE=NO -parallel-testing-enabled NO 2>&1 | tee film-ios-output/wda-build.log
+          fi
           test -d "$RUNNER_TEMP/film-wda/Build/Products/Debug-iphonesimulator/WebDriverAgentRunner-Runner.app"
+      - name: Save compiled WDA immediately
+        if: steps.wda-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/film-wda/Build/Products
+          key: ${{ steps.wda-cache.outputs.cache-primary-key }}
       - name: Record real iOS screen
         shell: bash
         run: |

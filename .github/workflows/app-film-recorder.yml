@@ -2,7 +2,7 @@ name: App film recorder — no deployment
 on:
   push:
     branches: ['tools/app-film-recorder']
-    paths: ['film/**', '.github/workflows/app-film-recorder.yml']
+    paths: ['film/record.mjs', '.github/workflows/app-film-recorder.yml']
   workflow_dispatch:
 permissions:
   contents: read

@@ -4,3 +4,6 @@ To change scenes, edit film/scenes/active.json on tools/app-film-recorder; keep 
 
 ## iOS native framebuffer recording
 The isolated macOS workflow opens the deployed website in Apple's actual Mobile Safari on an iPhone 15 Pro simulator and records using simctl io recordVideo --mask=black. No status bar override, no fake overlay. Safari toolbar may be visible; this is not an installed native app or home-screen PWA. Original iPhone pixel dimensions expected 1179×2556. Measured FPS is emitted, not forced to 60. Existing Android/Chromium workflow is retained for diagnostics; use iOS for presentation footage. No deployment or native signing.
+
+## Free-runner cache
+Exact compatibility key includes architecture, Node, Xcode, simulator SDK/runtime and runner temporary path. Appium 3.9.1/XCUITest 12.12.5 and WDA build products are restored independently and saved immediately after successful preparation, even if later recording fails. Cache hits validate tool versions and compiled outputs; first run or incompatible environment rebuilds. Simulators and sessions still start fresh. No credentials, simulator user data, or videos in cache. Linux recorder is not triggered by ordinary iOS scene changes.
