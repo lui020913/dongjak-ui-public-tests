@@ -50,7 +50,7 @@ test('native MapLibre official logo symbol updates on viewport/orientation resiz
     const logo=layers.get(FEATURED_PLACES_LOGOS);
     assert.ok(logo,'official logos must remain on the map');
     assert.deepEqual(logo.layout['icon-size'],featuredLogoSizeExpression('mobile'));
-    assert.deepEqual(layers.get(FEATURED_PLACES_LABELS).layout['text-radial-offset'],1.45);
+    assert.deepEqual(layers.get(FEATURED_PLACES_LABELS).layout['text-radial-offset'],1.12);
     assert.equal(layers.get('dongjak-featured-place-dots').layout.visibility,'none');
     const before=updates.length;
     callbacks.get('resize')();
@@ -61,7 +61,7 @@ test('native MapLibre official logo symbol updates on viewport/orientation resiz
     width=1440;coarse=false;
     windowEvents.get('resize')();
     assert.deepEqual(logo.layout['icon-size'],featuredLogoSizeExpression('desktop'));
-    assert.deepEqual(layers.get(FEATURED_PLACES_LABELS).layout['text-radial-offset'],1.7);
+    assert.deepEqual(layers.get(FEATURED_PLACES_LABELS).layout['text-radial-offset'],1.35);
     assert.equal(layers.get(FEATURED_PLACES_LABELS).layout['text-field'][1],'name');
     cleanup();
     assert.equal(windowEvents.has('resize'),false);
