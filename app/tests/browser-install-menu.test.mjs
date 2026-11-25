@@ -61,6 +61,24 @@ test('Android debug release accepts main target_commitish only when the actual t
  assert.equal(androidReleaseAsset(marker,release,'debug'),null);
 });
 
-test('browser welcome lists provisional smartphone minimum and recommended devices without a device gate',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');for(const value of ['S20급','S23급 이상','아이폰','WebView','잠정 기준','미달 기기도 이용','태블릿 모드'])assert.ok(js.includes(value));assert.ok(js.includes("['아이폰','11','13 이상']"));});
+test('browser welcome lists provisional smartphone minimum and recommended devices without a device gate',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');for(const value of ['S20급','S23급 이상','아이폰','지도·3D','잠정 기준','미달 기기도 이용','태블릿 모드'])assert.ok(js.includes(value));assert.ok(js.includes("['아이폰','11','13 이상']"));});
 
 test('performance guidance wraps inside its card at all screen widths',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');assert.match(css,/\.dj-install-performance\{[^}]*min-width:0;max-width:100%/);assert.match(css,/\.dj-install-performance p\{[^}]*white-space:normal;word-break:keep-all;overflow-wrap:anywhere/);});
+
+
+test('welcome guidebook uses a real same-origin PDF download after PWA choice',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');
+ const {GUIDEBOOK_DOWNLOAD_PATH,GUIDEBOOK_DOWNLOAD_FILENAME}=await import('../src/browser-install-menu.mjs');
+ assert.equal(GUIDEBOOK_DOWNLOAD_PATH,'/dongjak-guidebook.pdf');
+ assert.equal(GUIDEBOOK_DOWNLOAD_FILENAME,'동작하는 안전지도 가이드북.pdf');
+ assert.match(js,/guidebook.href=GUIDEBOOK_DOWNLOAD_PATH/);
+ assert.match(js,/guidebook.download=GUIDEBOOK_DOWNLOAD_FILENAME/);
+ assert.ok(js.indexOf("for(const key of installChoices(env.platform))")<js.indexOf("const guidebook=add('a'"));
+ const pdf=readFileSync(new URL('../public/dongjak-guidebook.pdf',import.meta.url));
+ assert.equal(pdf.subarray(0,5).toString(),'%PDF-');
+ assert.ok(pdf.length>1000 && pdf.subarray(-1024).toString().includes('%%EOF'),'Guidebook must be a complete PDF');
+ const headers=readFileSync(new URL('../public/_headers',import.meta.url),'utf8');
+ assert.match(headers,/Content-Disposition: attachment/);
+ assert.match(headers,/Cache-Control: no-cache/);
+});
