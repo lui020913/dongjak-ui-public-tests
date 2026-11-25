@@ -924,6 +924,19 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(menu).toBeVisible({timeout:20000});
  await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
+ const originalViewport=page.viewportSize();
+ for(const width of [320,375,390,430]){
+   await page.setViewportSize({width,height:originalViewport.height});
+   await expect.poll(()=>menu.evaluate(root=>{
+     const card=root.querySelector('.dj-install-performance'),p=card?.querySelector('p');
+     if(!p)return false;
+     const r=card.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(p);
+     return p.scrollWidth<=p.clientWidth+1&&r.left>=-1&&r.right<=innerWidth+1&&
+       [...range.getClientRects()].every(b=>b.left>=r.left-1&&b.right<=r.right+1)&&
+       [...root.querySelectorAll('.dj-install-choice')].every(b=>b.scrollWidth<=b.clientWidth+1);
+   })).toBe(true);
+ }
+ await page.setViewportSize(originalViewport);
  await page.emulateMedia({reducedMotion:'no-preference'});
  const webChoice=menu.getByRole('button',{name:'웹에서 바로 이용하기'});
  await expect(webChoice).toHaveCSS('transition-property','background-color, box-shadow');
@@ -972,6 +985,12 @@ test('Android verified download shows security instructions before navigation',{
 
 test('PC install notice has one heading, equal actions and stable edge clicks',{tag:'@phone-layout'},async({page})=>{
  await page.setViewportSize({width:1200,height:950});
+ // The test can run in a phone-emulated browser: explicitly model a PC
+ // so a tablet-width resize cannot accidentally boot the mobile app.
+ await page.addInitScript(()=>{
+   Object.defineProperty(navigator,'userAgent',{configurable:true,get:()=> 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'});
+   Object.defineProperty(navigator,'platform',{configurable:true,get:()=> 'Linux x86_64'});
+ });
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const gate=page.locator('#dj-mobile-only-screen'),menu=gate.locator('#dj-install-menu');
@@ -979,7 +998,7 @@ test('PC install notice has one heading, equal actions and stable edge clicks',{
  await expect(menu.locator('.dj-install-subtitle')).toContainText('스마트폰');await expect(gate.locator('.dj-mobile-only-devices')).toBeVisible();
  // The long WebView guidance must wrap rather than exceed the card or
  // the viewport on both PC and tablet widths.
- for(const width of [768,1024,1200]){
+ for(const width of [600,768,1024,1440,1920,1200]){
    await page.setViewportSize({width,height:950});
    const guide=menu.locator('.dj-install-performance');
    await expect(guide).toBeVisible();
