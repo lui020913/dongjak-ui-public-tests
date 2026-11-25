@@ -30,13 +30,13 @@ test('entire composer layout is rebuilt as a body-portal with three distinct row
   assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-footer\s*\{/);
   assert.match(css,/#dj-community-editor-portal #community-form>\.community-form-top\s*\{/);
   assert.doesNotMatch(css,/#dj-community-editor-portal\[data-keyboard="open"\] #community-form > \.community-form-top/);
-  assert.match(main,/communityComposerPortal\.open\(\)/);
+  assert.match(main,/communityComposerPortal\.open\(\{mapOrigin:communityComposerOrigin==='map'\}\)/);
   assert.match(main,/communityForm\.addEventListener\('submit',async\(event\)=>/);
 });
 test('map-origin report, photo and cloud submission logic remain functional',()=>{
   const main=read('src/main.js');
   const html=read('index.html');
-  assert.match(main,/navigate\('participate'\);communityComposerOrigin=origin/);
+  assert.match(main,/else navigate\('participate'\);\s*communityComposerOrigin=origin/);
   assert.match(main,/communityComposerPortal\?\.close\(\)/);
   for(const name of ['community-map-pick','community-photo-input','community-share-publicly','community-title','community-text'])assert.ok(html.includes('id="'+name+'"'));
   const coord=read('src/public-ui-mobile-surface-coordinator.js');

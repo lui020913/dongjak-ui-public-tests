@@ -69,6 +69,7 @@ async function visuallyPresented(locator){
  })).toBe(true);
 }
 async function enter(page,id,key){
+ const fromMap=await page.locator('#app').getAttribute('data-tab')==='map';
  await page.evaluate(({id,key})=>{
    const panel=document.getElementById(id),frames=[];
    window.__auditStop?.();
@@ -86,7 +87,8 @@ async function enter(page,id,key){
          const c=getComputedStyle(route||panel),actual=getComputedStyle(body);
          const outgoing=document.querySelector('[data-dj-tab-outgoing="true"]');
          const out=outgoing?getComputedStyle(outgoing):null;
-         frames.push({rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
+         const map=document.getElementById('map'),app=document.getElementById('app');const mapVisible=!!map&&getComputedStyle(map).visibility==='visible'&&getComputedStyle(map).display!=='none'&&Number(getComputedStyle(map).opacity)>.98&&Number(getComputedStyle(app).opacity)>.98;
+         frames.push({mapVisible,rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
        }
      }
      frame=requestAnimationFrame(capture);
@@ -101,6 +103,7 @@ async function enter(page,id,key){
    await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
+   if(fromMap&&key==='news')expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
@@ -867,15 +870,19 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
 test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await page.evaluate(()=>{
+  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),map=document.getElementById('map');if(editor&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
+ });
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-dj810-animating')).toBeNull();
+ expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:getComputedStyle(app).visibility==='visible'&&Number(getComputedStyle(app).opacity)>.98&&getComputedStyle(document.getElementById('map')).visibility==='visible'&&Number(getComputedStyle(document.getElementById('map')).opacity)>.98,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
@@ -883,7 +890,7 @@ test('map report fades out over its real destination without reparenting or resi
  await expect(portal).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
- expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map')).toBe(true);
+ expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map'&&f.mapVisible)).toBe(true);
  expect(frames.every(f=>f.stable)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
 });
@@ -1085,19 +1092,14 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  try{if(client){await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=8;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y+Math.round(i*18)}]});await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}else{await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y+145,{steps:8});await page.mouse.up();}await expect(panel).toBeVisible();await geometry(page,'#route-panel');}finally{await client?.detach();}
  await tap(page,panel.locator('.dj-sheet-chrome-close'));await expect(panel).toBeHidden();
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
-  await expect(page.locator('#participation-panel')).toHaveClass(/dj9256-composing/);
-  await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
-  await expect(page.locator('#app')).toHaveAttribute('data-dj806-active-surface','participation-panel');
-  await expect(page.locator('#app > .topbar')).toBeHidden();
-  await expect(page.locator('#app > .topbar')).toHaveCSS('display','none');
-  const reportPanel=page.locator('#participation-panel');
-  if(await page.locator('#app').getAttribute('data-tab')==='map'){
-    await expect(reportPanel).toHaveCSS('pointer-events','auto');
-    await expect.poll(()=>reportPanel.evaluate(n=>Number.parseInt(getComputedStyle(n).zIndex,10))).toBeGreaterThanOrEqual(12000);
-  }
+  await expect(page.locator('#participation-panel')).toBeHidden();
+  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+  await expect(page.locator('#dj-community-editor-portal')).toHaveAttribute('data-map-origin','true');
+  await expect(page.locator('#map')).toBeVisible();
+  await expect(page.locator('#app')).toHaveAttribute('inert','');
  const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
  expect(await form.evaluate(n=>Boolean(n.querySelector('#community-share-publicly').compareDocumentPosition(n.querySelector('[type=submit]'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
- await tap(page,form.locator('#community-compose-close'));await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await tap(page,form.locator('#community-compose-close'));await expect(form).toBeHidden();await expect(page.locator('#participation-panel')).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  await tap(page,tab(page,'participate'));await expect(form).toHaveAttribute('hidden','');await expect(page.locator('#community-compose-toggle')).toBeVisible();await tap(page,page.locator('#community-compose-toggle'));await expect(form).toBeVisible();await tap(page,form.locator('#community-compose-close'));await expect(form).toBeHidden();await expect(page.locator('#participation-panel')).toBeVisible();
 });
 

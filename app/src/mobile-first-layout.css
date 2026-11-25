@@ -2056,3 +2056,17 @@
  }
 }
 /* END original mobile-primary-fullscreen.css */
+
+/* While an incoming full screen fades, keep the genuine map controls in
+   their existing positions underneath it. They cannot intercept input. */
+@layer native-scroll-chrome {
+ @media(max-width:699px){
+  #app[data-dj-map-dissolving="true"] > #map{visibility:visible!important;opacity:1!important;display:block!important;}
+  #app[data-dj-map-dissolving="true"] > .topbar{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;}
+  #app[data-dj-map-dissolving="true"] #djNext-toolbar:not([hidden]),#app[data-dj-map-dissolving="true"] #dj-v794-toolbar:not([hidden]){visibility:visible!important;opacity:1!important;pointer-events:none!important;}
+ }
+}
+
+@layer native-scroll-chrome{
+ @media(max-width:699px){#app[data-dj-map-dissolving="true"] .page-panel.dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer){animation:none!important;}}
+}

@@ -112,3 +112,7 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
   #app:not(.dj-reduced-animation) #map-quick-search-dropdown.dj871-search-leaving:not([hidden]){animation:djLiveMapWindowLeave 300ms ease-in both!important;transform:none!important;translate:none!important;pointer-events:none!important;}
  }
 }
+
+/* Nearby result selection preserves its glyph; use a ring, not a replacement pin. */
+#app#app .dj-search-result-pin[aria-current="true"]{outline:2px solid #fff!important;box-shadow:0 0 0 4px var(--dj-search-pin-color,#157b61),0 2px 6px #183e3760!important;}
+#app .dj-place-detail .dj-place-result-back{display:flex!important;align-items:center!important;justify-content:flex-start!important;min-height:44px!important;width:100%!important;padding:8px 12px!important;margin:0 0 8px!important;border:1px solid var(--dj800-border,#dce8e0)!important;border-radius:12px!important;background:var(--dj800-surface,#fff)!important;color:var(--dj800-text,#245345)!important;font-size:14px!important;font-weight:700!important;text-align:left!important;}
