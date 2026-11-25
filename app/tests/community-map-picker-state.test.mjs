@@ -34,3 +34,21 @@ test('programmatic picker cancels both tab motion owners and unregisters listene
  assert.match(tabs,/addEventListener\('dongjak:cancel-tab-transition',cancelExternalTransition\)/);
  assert.match(tabs,/removeEventListener\('dongjak:cancel-tab-transition',cancelExternalTransition\)/);
 });
+
+test('map tap stages a marker and road address; only explicit confirmation commits location',()=>{
+ const select=section('function selectCommunityLocation(', 'function renderCommunityPickedAddress(');
+ assert.match(select,/communityPickCandidate=candidate/);
+ assert.match(select,/new maplibregl\.Marker\(\{color:'#ec6d35',scale:1\.05\}\)/);
+ assert.match(select,/fetchRouteRoadAddress\(position\)/);
+ assert.match(select,/communityPickCandidate===candidate&&communityPickMode/);
+ assert.doesNotMatch(select,/communityPickedLocation\s*=/);
+ assert.doesNotMatch(select,/resumeCommunityLocationDraft\(\)/);
+ const confirm=section('function confirmCommunityLocation(', "document.getElementById('community-map-accept').addEventListener");
+ assert.match(confirm,/communityPickedLocation=candidate\.position/);
+ assert.match(confirm,/renderCommunityPickedAddress\(candidate\)/);
+ assert.match(confirm,/resumeCommunityLocationDraft\(\)/);
+ const clear=section('function clearCommunityLocationPick()', 'function cancelCommunityTabMotion()');
+ assert.match(clear,/communityPickMarker\?\.remove\(\)/);
+ assert.match(clear,/communityPickCandidate=null/);
+ assert.doesNotMatch(clear,/communityPickedLocation\s*=/);
+});
