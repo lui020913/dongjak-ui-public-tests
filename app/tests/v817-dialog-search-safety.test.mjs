@@ -62,7 +62,7 @@ test('v817: latest hotfix notes are unique and inserted above preserved releases
   assert.match(history,/LATEST_V803_UI_PATCH/);
   assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
   assert.match(catalog,/currentRelease\?\[currentRelease\]:\[\]/);
-  assert.match(read('index.html'),/id="version-history-list"/);
+  assert.doesNotMatch(read('index.html'),/id="version-history-list"/);
 });
 
 test('v817: update footer clears the floating tab and duplicate source box is visually absent',()=>{

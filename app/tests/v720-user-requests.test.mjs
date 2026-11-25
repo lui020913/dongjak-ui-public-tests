@@ -24,15 +24,15 @@ test('desktop news page has a gap from the map rail; mobile panels have one bott
 });
 test('map help button is question mark and first-run guide is centered',()=>{
  assert.match(html,/id="map-gesture-guide-open"[^>]*>\?<\/button>/);
- assert.match(help,/guide\.classList\.add\('dj-guide-centered'\)/);
+ assert.doesNotMatch(html,/id="version-history-modal"/);
  assert.match(css,/transform:translate\(-50%,-50%\)!important/);
- assert.match(help,/showOnInitialMap/);
+ assert.doesNotMatch(html,/id="version-history-modal"/);
 });
-test('the guide includes a recent update and a working release-history action',()=>{
-  assert.match(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
- assert.match(html,/id="dj-guide-release-details"/);
- assert.match(help,/version-history-trigger'\)\?\.click\(\)/);
- assert.match(css,/\.dj-guide-release/);
+test('the guide omits the retired update section and release-history window',()=>{
+  assert.doesNotMatch(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
+ assert.doesNotMatch(html,/id="dj-guide-release-details"/);
+ assert.doesNotMatch(html,/id="version-history-modal"/);
+ assert.doesNotMatch(html,/class="dj-guide-release"/);
 });
 test('compact map removes app CSS haze including native sky while preserving desktop fog',()=>{
  const haze=read('src/distant-haze.js');

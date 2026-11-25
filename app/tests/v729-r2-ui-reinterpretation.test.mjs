@@ -9,7 +9,7 @@ test('R2 PC-only styles and history shortcut are replaced by the shared mobile-f
  assert.equal(html.includes('v729-r1-responsive-ui.css'),false);
  assert.equal(html.includes('v729-r2-new-ui.css'),false);
  assert.equal(html.includes('v729-r2-new-ui.js'),false);
- assert.ok(html.includes('id="version-history-trigger"'));
+ assert.ok(!html.includes('id="version-history-trigger"'));
  assert.ok(main.includes("import './mobile-first-layout.css'"));
  assert.ok(css.includes('#dj-v794-toolbar'));
  assert.ok(css.includes('#bottom-nav:not([hidden])'));

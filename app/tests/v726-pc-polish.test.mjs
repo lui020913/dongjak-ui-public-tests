@@ -41,9 +41,9 @@ test('route HUD and road-width legend are positioned as shared sheets above the 
  assert.ok(css.includes('var(--mf-panel-bottom)'));
 });
 
-test('release history remains accessible and the map guide honors reduced motion',()=>{
+test('release history entry is retired and the map guide honors reduced motion',()=>{
  const html=read('index.html'),guide=read('src/v860-onboarding.js');
- assert.ok(html.includes('id="version-history-trigger"'));
+ assert.ok(!html.includes('id="version-history-trigger"'));
  assert.ok(read('src/mobile-first-layout.css').includes('@media (prefers-reduced-motion: reduce)'));
 });
 

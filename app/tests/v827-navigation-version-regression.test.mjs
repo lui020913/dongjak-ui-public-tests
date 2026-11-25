@@ -53,6 +53,6 @@ test('v8.1.1: build metadata and public entrypoints agree with package version',
  assert.equal(ver,APP_VERSION);assert.equal(JSON.parse(read('package-lock.json')).version,ver);
  assert.equal(JSON.parse(read('public/version.json')).version,ver);
  assert.equal(JSON.parse(read('src/build-info.json')).version,ver);
- assert.match(read('index.html'),/id="version-history-trigger"[^>]*>업데이트<\/button>/);
+ assert.doesNotMatch(read('index.html'),/id="version-history-trigger"[^>]*>업데이트<\/button>/);
  assert.match(read('src/v7120-settings.js'),/id="dj-about-version-number">1\.0<\/strong>/);
 });

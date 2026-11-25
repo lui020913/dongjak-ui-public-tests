@@ -33,7 +33,7 @@ test('v8.2.12: concise first-open help preserves all original instructions behin
   assert.equal((html.match(/class="dj807-guide-platform"><b>모바일<\/b>/g)||[]).length,4);
   assert.match(html,/<details class="dj803-ios-install-help dj8212-ios-install-help"/);
   assert.match(html,/<summary aria-expanded="false"><span>iPhone에서 앱처럼 사용하기<\/span><span class="dj852-tip-chevron"/);
-  assert.match(html,/id="dj-guide-release-details"/);
+  assert.doesNotMatch(html,/id="dj-guide-release-details"/);
   assert.match(css,/\.dj807-guide-platform:has\(> b\):first-child\{display:none!important/);
   assert.match(css,/map-gesture-guide dl dd \.dj807-guide-platform\{/);
   assert.match(css,/font-weight:500!important/);

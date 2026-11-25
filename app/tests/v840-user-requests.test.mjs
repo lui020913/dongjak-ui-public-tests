@@ -86,9 +86,9 @@ test('profile save/edit and security recovery modes keep login state',()=>{
  assert.match(account,/securityTab\.hidden=!recoveryMode/);
  assert.match(account,/표시 이름을 저장했습니다/);assert.match(account,/표시 이름이 변경되었습니다/);
 });
-test('help icon is teal and app release UI is not removed',()=>{
+test('help icon is teal and retired app release UI is absent',()=>{
  assert.match(css,/#map-gesture-guide-open/);
- assert.match(html,/version-history-trigger/);
+ assert.doesNotMatch(html,/version-history-trigger/);
 });
 
 test('logically closed or CSS-hidden windows do not suppress the map TIP',()=>{
