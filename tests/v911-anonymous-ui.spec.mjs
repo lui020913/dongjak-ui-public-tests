@@ -897,6 +897,14 @@ test('map report fades out over its real destination without reparenting or resi
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
+ // A hidden attribute alone is not enough: legacy build-time code used
+ // inline display:flex!important to paint the empty feed underneath.
+ await expect(page.locator('#participation-panel')).toHaveCSS('display','none');
+ await expect(page.locator('#participation-panel')).not.toHaveClass(/dj9256-composing/);
+ await expect(portal.locator('#community-form > .dj-compose-scroll')).toHaveCount(1);
+ await expect(portal.locator('#community-form > .dj-compose-footer')).toHaveCount(1);
+ await expect(portal.locator('.djNext-form-scroll')).toHaveCount(0);
+
  expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
  // DOM visibility alone cannot prove a WebGL surface has actually been
  // composited under the editor in Safari. Sample real browser screenshots at
@@ -948,7 +956,7 @@ test('map report fades out over its real destination without reparenting or resi
    const visible=n=>{if(!n)return false;const c=getComputedStyle(n),r=n.getBoundingClientRect();return c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98&&r.width>0&&r.height>0;};
    const canvas=document.querySelector('#map .maplibregl-canvas'),dock=document.getElementById('bottom-nav'),topbar=app.querySelector(':scope > .topbar');
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:visible(app)&&visible(document.getElementById('map'))&&visible(canvas),chromeVisible:visible(dock)&&visible(topbar),stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:visible(app)&&visible(document.getElementById('map'))&&visible(canvas),chromeVisible:visible(dock)&&visible(topbar),feedHidden:getComputedStyle(document.getElementById('participation-panel')).display==='none',stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
@@ -958,7 +966,7 @@ test('map report fades out over its real destination without reparenting or resi
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
  const intermediate=frames.filter(f=>f.opacity>.08&&f.opacity<.95);
  expect(intermediate.length).toBeGreaterThan(1);
- expect(intermediate.every(f=>f.tab==='map'&&f.mapVisible&&f.chromeVisible)).toBe(true);
+ expect(intermediate.every(f=>f.tab==='map'&&f.mapVisible&&f.chromeVisible&&f.feedHidden)).toBe(true);
  expect(frames.every(f=>f.stable)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
 });
