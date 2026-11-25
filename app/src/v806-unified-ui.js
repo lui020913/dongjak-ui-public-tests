@@ -73,7 +73,7 @@ export function installUnifiedUI(doc=document, win=window){
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
   function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
-    if(!phone()||!target?.style||reduced())return false;
+    if(!phone()||!target?.style||reduced()||target.id==='dj-community-editor-portal'||target.dataset.djPrimaryTransition)return false;
     // Phone primary tabs are independent, opaque full-viewport screens.
     // Their only entrance owner is bottom-tab-navigation.js (content-only
     // reveal). The old 806 surface transition wrote inline opacity:0 and
@@ -85,7 +85,7 @@ export function installUnifiedUI(doc=document, win=window){
     const isGuide=target.id==='map-gesture-guide'&&win.matchMedia?.('(max-width:699px)')?.matches;
     const tabFade=forceTabFade||(opening&&(tabFadeUntil.get(target.id)||0)>Date.now());
     if(opening)tabFadeUntil.delete(target.id);
-    const stationary=target.id==='ped-tools-panel'||target.id==='dj-community-editor-portal';
+    const stationary=target.id==='ped-tools-panel';
     const fade=isGuide||stationary||tabFade||target.dataset.djDialogFade==='true'||target.matches?.('.dj833-night-dialog');
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
@@ -540,7 +540,7 @@ export function installUnifiedUI(doc=document, win=window){
       const obs=new MutationObserver(records=>{
         // Ignore known animation-only style writes; a full visibility sweep on
         // every rendered frame forces synchronous style reads on mobile.
-        const moving=node.dataset.dj810Animating||node.classList.contains('dj889-sheet-transitioning')||node.classList.contains('dj-sheet-dragging');
+        const moving=node.dataset.djPrimaryTransition||node.dataset.dj810Animating||node.classList.contains('dj889-sheet-transitioning')||node.classList.contains('dj-sheet-dragging');
         if(moving&&records.every(record=>record.attributeName==='style'))return;
         schedule();
       });
