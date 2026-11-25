@@ -35,7 +35,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    if(page.id==='dj-route-v3'){if(app.dataset.tab!=='route')page.hidden=true;page.inert=false;}
    else if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
-   for(const [key,value,priority] of departingStyles){if(value)departing.style.setProperty(key,value,priority);else departing.style?.removeProperty?.(key);}
+   for(const [key,value,priority] of departingStyles){
+    // A page may have had inline display:flex!important while active.
+    // Never restore that active-only declaration onto a hidden page.
+    if(value&&!(page.hidden&&['display','visibility','opacity','pointer-events'].includes(key)))departing.style.setProperty(key,value,priority);
+    else departing.style?.removeProperty?.(key);
+   }
    departingStyles=[];
    departing=null;
   }
@@ -86,8 +91,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
   if(retain&&app.dataset.tab===destination){
    departing=previous;
-   departingStyles=['z-index','display','visibility','opacity','pointer-events','animation','transition','will-change'].map(key=>[key,previous.style.getPropertyValue?.(key)||'',previous.style.getPropertyPriority?.(key)||'']);
    win.DongjakWindowMotion?.cancel?.(previous);
+   departingStyles=['z-index','display','visibility','opacity','pointer-events','animation','transition','will-change'].map(key=>[key,previous.style.getPropertyValue?.(key)||'',previous.style.getPropertyPriority?.(key)||'']);
    previous.hidden=false;
    previous.style.setProperty('animation','none','important');
    previous.style.setProperty('transition','none','important');
