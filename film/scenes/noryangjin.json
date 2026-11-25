@@ -1,0 +1,82 @@
+{
+  "name": "noryangjin-line1-destination",
+  "viewport": {
+    "width": 430,
+    "height": 932
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1400
+    },
+    {
+      "action": "click",
+      "selector": "#map-quick-search-query"
+    },
+    {
+      "action": "wait",
+      "ms": 450
+    },
+    {
+      "action": "type",
+      "selector": "#map-quick-search-query",
+      "value": "노량진역 1호선",
+      "delay": 140
+    },
+    {
+      "action": "visible",
+      "selector": "#map-quick-search-dropdown .map-quick-search-result",
+      "text": "노량진",
+      "text2": "1호선",
+      "index": 0,
+      "timeout": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 900
+    },
+    {
+      "action": "click",
+      "selector": "#map-quick-search-dropdown .map-quick-search-result",
+      "text": "노량진",
+      "text2": "1호선",
+      "index": 0
+    },
+    {
+      "action": "visible",
+      "selector": "#transport-sheet",
+      "timeout": 30000
+    },
+    {
+      "action": "contains",
+      "selector": "#transport-title",
+      "expected": "노량진"
+    },
+    {
+      "action": "visible",
+      "selector": "#transport-title [data-dj-line='1호선'][aria-pressed='true']"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "click",
+      "selector": "#transport-use-end"
+    },
+    {
+      "action": "visible",
+      "selector": "#dj-route-v3 #v3-end",
+      "timeout": 20000
+    },
+    {
+      "action": "contains",
+      "selector": "#dj-route-v3 #v3-end",
+      "expected": "노량진"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    }
+  ]
+}
