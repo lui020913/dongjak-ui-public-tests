@@ -831,7 +831,7 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await expect(results).toBeHidden();
 });
 
-test('primary tabs cross-dissolve live surfaces and keep the pill dock',{tag:'@phone-common'},async({page})=>{
+test('primary tabs reveal content through live cross-dissolve and keep the pill dock',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
  // Use the same real content sampler for direct tab-to-tab and map return.
