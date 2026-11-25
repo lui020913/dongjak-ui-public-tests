@@ -25,7 +25,11 @@ test('PC install gate marks the selected option and always shows Google Play ext
   expect(pdf.ok()).toBe(true);
   expect(pdf.headers()['content-type']).toContain('application/pdf');
   expect(pdf.headers()['content-disposition']).toContain('attachment');
-  expect((await pdf.body()).subarray(0,5).toString()).toBe('%PDF-');
+  const pdfBytes=await pdf.body();
+  expect(pdfBytes.subarray(0,5).toString()).toBe('%PDF-');
+  const size=pdfBytes.length>=1000000?(pdfBytes.length/1000000).toFixed(1)+' MB':Math.max(1,Math.round(pdfBytes.length/1000))+' KB';
+  await expect(guidebook.locator('.dj-install-status')).toHaveText('PDF · '+size);
+  await expect(page.locator('#dj-install-menu .dj-install-performance')).not.toContainText('태블릿은 별도 모드');
   const [download]=await Promise.all([page.waitForEvent('download'),guidebook.click()]);
   expect(await download.failure()).toBeNull();
   await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);

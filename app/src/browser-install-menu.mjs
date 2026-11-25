@@ -16,6 +16,11 @@ export function safeDownloadUrl(value,platform){
 }
 export const GUIDEBOOK_DOWNLOAD_PATH='/dongjak-guidebook.pdf';
 export const GUIDEBOOK_DOWNLOAD_FILENAME='동작하는 안전지도 가이드북.pdf';
+export function guidebookSizeLabel(bytes){
+ if(!Number.isSafeInteger(bytes)||bytes<=0)return 'PDF';
+ return 'PDF · '+(bytes>=1000000?(bytes/1000000).toFixed(1)+' MB':Math.max(1,Math.round(bytes/1000))+' KB');
+}
+const guidebookBytes=typeof __DJ_GUIDEBOOK_BYTES__==='number'?__DJ_GUIDEBOOK_BYTES__:null;
 export const ANDROID_DOWNLOAD_PATH='/api/android-download.apk';
 export const ANDROID_DOWNLOAD_FILENAME='Dongjak Safety Map.apk';
 export function androidReleaseTag(marker,variant='debug'){
@@ -88,7 +93,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  add('h3','','스마트폰 이용 환경',guide);
  const grid=add('div','dj-install-performance-grid',null,guide);
  for(const [brandName,min,recommended] of [['갤럭시','S20급','S23급 이상'],['아이폰','11','13 이상']]){const row=add('div','dj-install-performance-device',null,grid);add('strong','',brandName,row);add('span','','최소 · '+min,row);add('span','','권장 · '+recommended,row);}
- add('p','','구형 기기는 지도·3D 이용 시 끊김이 발생할 수 있습니다. 사양은 잠정 기준이며, 미달 기기도 이용 가능합니다. 태블릿은 별도 모드를 사용합니다.',guide);
+ add('p','','구형 기기는 지도·3D 이용 시 끊김이 발생할 수 있습니다. 사양은 잠정 기준이며, 미달 기기도 이용 가능합니다.',guide);
  const info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={},selectedKey=null;
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
@@ -124,7 +129,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  guidebook.download=GUIDEBOOK_DOWNLOAD_FILENAME;
  guidebook.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h4M12 10v7m-3-3 3 3 3-3"/></svg>';
  add('span','dj-install-label','가이드북 다운로드',guidebook);
- add('small','dj-install-status','PDF',guidebook);
+ add('small','dj-install-status',guidebookSizeLabel(guidebookBytes),guidebook);
  add('span','dj-install-chevron','›',guidebook).setAttribute('aria-hidden','true');
  if(blocked){(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
  else{const close=add('button','dj-install-dismiss','나중에');close.type='button';close.addEventListener('click',finish);card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);

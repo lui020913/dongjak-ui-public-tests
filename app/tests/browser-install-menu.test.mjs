@@ -63,7 +63,7 @@ test('Android debug release accepts main target_commitish only when the actual t
  assert.equal(androidReleaseAsset(marker,release,'debug'),null);
 });
 
-test('browser welcome lists provisional smartphone minimum and recommended devices without a device gate',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');for(const value of ['S20급','S23급 이상','아이폰','지도·3D','잠정 기준','미달 기기도 이용','태블릿은 별도 모드'])assert.ok(js.includes(value));assert.ok(js.includes("['아이폰','11','13 이상']"));});
+test('browser welcome lists provisional smartphone minimum and recommended devices without a device gate',async()=>{const {readFileSync}=await import('node:fs');const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');for(const value of ['S20급','S23급 이상','아이폰','지도·3D','잠정 기준','미달 기기도 이용'])assert.ok(js.includes(value));assert.ok(js.includes("['아이폰','11','13 이상']"));assert.doesNotMatch(js,/태블릿은 별도 모드/);});
 
 test('performance guidance wraps inside its card at all screen widths',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');assert.match(css,/\.dj-install-performance\{[^}]*min-width:0;max-width:100%/);assert.match(css,/\.dj-install-performance p\{[^}]*white-space:normal;word-break:keep-all;overflow-wrap:anywhere/);});
 
@@ -71,7 +71,7 @@ test('performance guidance wraps inside its card at all screen widths',async()=>
 test('welcome guidebook uses a real same-origin PDF download after PWA choice',async()=>{
  const {readFileSync}=await import('node:fs');
  const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');
- const {GUIDEBOOK_DOWNLOAD_PATH,GUIDEBOOK_DOWNLOAD_FILENAME}=await import('../src/browser-install-menu.mjs');
+ const {GUIDEBOOK_DOWNLOAD_PATH,GUIDEBOOK_DOWNLOAD_FILENAME,guidebookSizeLabel}=await import('../src/browser-install-menu.mjs');
  assert.equal(GUIDEBOOK_DOWNLOAD_PATH,'/dongjak-guidebook.pdf');
  assert.equal(GUIDEBOOK_DOWNLOAD_FILENAME,'동작하는 안전지도 가이드북.pdf');
  assert.match(js,/guidebook.href=GUIDEBOOK_DOWNLOAD_PATH/);
@@ -79,6 +79,13 @@ test('welcome guidebook uses a real same-origin PDF download after PWA choice',a
  assert.ok(js.indexOf("for(const key of installChoices(env.platform))")<js.indexOf("const guidebook=add('a'"));
  const pdf=readFileSync(new URL('../public/dongjak-guidebook.pdf',import.meta.url));
  assert.equal(pdf.subarray(0,5).toString(),'%PDF-');
+ assert.equal(guidebookSizeLabel(1201311),'PDF · 1.2 MB');
+ assert.equal(guidebookSizeLabel(12000),'PDF · 12 KB');
+ assert.equal(guidebookSizeLabel(null),'PDF');
+ assert.equal(guidebookSizeLabel(pdf.length),'PDF · '+(pdf.length>=1000000?(pdf.length/1000000).toFixed(1)+' MB':Math.max(1,Math.round(pdf.length/1000))+' KB'));
+ assert.match(js,/guidebookSizeLabel\(guidebookBytes\)/);
+ const vite=readFileSync(new URL('../vite.config.js',import.meta.url),'utf8');
+ assert.ok(vite.includes("statSync(new URL('./public/dongjak-guidebook.pdf',import.meta.url)).size"));
  assert.ok(pdf.length>1000 && pdf.subarray(-1024).toString().includes('%%EOF'),'Guidebook must be a complete PDF');
  const headers=readFileSync(new URL('../public/_headers',import.meta.url),'utf8');
  assert.match(headers,/Content-Disposition: attachment/);
