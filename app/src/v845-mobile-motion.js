@@ -21,6 +21,8 @@ export function installV845ToolbarFade(doc=document,win=window){
     else toolbar.style.removeProperty('opacity');
   };
   let ready=false, priorClear=false,frame=0,requested=0,disposed=false;
+  const primaryOwnsPaint=()=>app.dataset.djPrimaryDissolving==='true';
+  let wasPrimaryOwned=false;
   const fade=()=>{
     if(!mobile()||reduced())return;
     if(frame)win.cancelAnimationFrame(frame);
@@ -28,6 +30,7 @@ export function installV845ToolbarFade(doc=document,win=window){
     const total=320;
     const update=now=>{
       if(disposed)return;
+      if(primaryOwnsPaint()){frame=0;return;}
       if(!mapShortcutsShouldBeVisible(doc,app)||!mobile()){
         frame=0;restore();return;
       }
@@ -45,7 +48,12 @@ export function installV845ToolbarFade(doc=document,win=window){
   const sync=()=>{
     requested=0;
     if(disposed)return;
+    if(primaryOwnsPaint()){
+      if(frame){win.cancelAnimationFrame(frame);frame=0;}
+      wasPrimaryOwned=true;return;
+    }
     const clear=mobile()&&mapShortcutsShouldBeVisible(doc,app);
+    if(wasPrimaryOwned){wasPrimaryOwned=false;priorClear=clear;ready=true;return;}
     if(ready&&!priorClear&&clear)fade();
     if(!clear && frame){win.cancelAnimationFrame(frame);frame=0;restore();}
     priorClear=clear;ready=true;
@@ -60,7 +68,7 @@ export function installV845ToolbarFade(doc=document,win=window){
     if(!node||observed.has(node))return;
     observed.add(node);
     const ob=new MutationObserver(schedule);
-    ob.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open','data-dj810-animating']});
+    ob.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open','data-dj810-animating','data-dj-primary-dissolving']});
     observers.push(ob);
   };
   observe(app);
