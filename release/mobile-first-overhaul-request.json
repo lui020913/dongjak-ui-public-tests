@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.158",
+  "application_version": "9.2.159",
   "public_work_branch": "main",
-  "purpose": "PR481–483: community selector, live crossfade and delayed-render frame stability.",
-  "attempt": 378,
+  "purpose": "PR484: metro live dismissal, nearby safety distinction, bottom result cards, map search zoom and facility/transit endpoint handoff.",
+  "attempt": 379,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
