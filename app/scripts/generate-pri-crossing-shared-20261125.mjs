@@ -1,7 +1,11 @@
 import {readFileSync,writeFileSync} from 'node:fs';
+import {sharedRoadWidthRisk100} from '../src/pri-new-factor-rules.mjs';
+import {matchSharedRoadWidths,enrichSharedCandidate} from '../src/pri-shared-road-width-match.mjs';
+import {sectionWidths} from '../src/pri-shared-road-cross-section.mjs';
 const read=p=>JSON.parse(readFileSync(new URL('../'+p,import.meta.url),'utf8'));
 const write=(p,data)=>writeFileSync(new URL('../'+p,import.meta.url),JSON.stringify(data,null,2)+'\n');
-function compute(base,scope,boundary,cross,mixed){
+function compute(base,scope,boundary,cross,mixed,widthGeo){
+ const widths=matchSharedRoadWidths(base,widthGeo),widthById=new Map(widths.rows.map(r=>[r.id,r]));
  const sx=111195*Math.cos(37.5*Math.PI/180),sy=111195,xy=([x,y])=>[(x-126.95)*sx,(y-37.5)*sy],distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
  const roadById=new Map(base.segments.map(s=>[s.id,s]));
  let hash=2166136261;for(const c of JSON.stringify(base.segments.map(s=>[s.id,s.pts])))hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;
@@ -17,7 +21,7 @@ function compute(base,scope,boundary,cross,mixed){
  const grouped=new Map();for(const f of scope.features){const id=f.properties.segment_id;if(!roadById.has(id))throw Error("Unknown ID "+id);const parts=f.geometry.type==="LineString"?[f.geometry.coordinates]:f.geometry.coordinates;if(!grouped.has(id))grouped.set(id,[]);grouped.get(id).push(...parts.map(p=>p.map(xy)));}
  // Exact circle/line-segment intersections; union intervals so overlapping buffers count once.
  function coveredFraction(a,b,points,r){const dx=b[0]-a[0],dy=b[1]-a[1],aa=dx*dx+dy*dy;if(!aa)return 0;const intervals=[];for(const {p} of points){const fx=a[0]-p[0],fy=a[1]-p[1],bb=2*(fx*dx+fy*dy),cc=fx*fx+fy*fy-r*r,disc=bb*bb-4*aa*cc;if(disc<0)continue;const q=Math.sqrt(disc),lo=Math.max(0,(-bb-q)/(2*aa)),hi=Math.min(1,(-bb+q)/(2*aa));if(hi>lo)intervals.push([lo,hi]);}intervals.sort((a,b)=>a[0]-b[0]);let end=0,total=0;for(const [lo,hi] of intervals){if(hi>end){total+=hi-Math.max(lo,end);end=hi;}}return Math.min(1,Math.max(0,total));}
- const crossScores=[],mixedScores=[],candidateScores=[],counts={crossing:{eligible:0,edgeUnknown:0,uncertainPoint:0,low:0,caution:0,high:0},shared:{matched:0,ambiguous:0,unmatched:0,eligible:0,confirmedMixed:0,confirmedSeparated:0}};
+ const crossScores=[],mixedScores=[],candidateScores=[],verifiedMatches=[],counts={crossing:{eligible:0,edgeUnknown:0,uncertainPoint:0,low:0,caution:0,high:0},shared:{matched:0,ambiguous:0,unmatched:0,eligible:0,confirmedMixed:0,confirmedSeparated:0}};
  const mixedLines=[];for(const f of mixed.features){const lines=f.geometry.type==="LineString"?[f.geometry.coordinates]:f.geometry.coordinates;for(const l of lines){const p=l.map(xy);mixedLines.push({id:f.properties.segment_id,classification:f.properties.road_class,verified:f.properties.geometry_verified===true,edges:p.slice(1).map((b,i)=>{const a=p[i],len=distance(a,b);return {a,b,len,ux:(b[0]-a[0])/len,uy:(b[1]-a[1])/len};}).filter(e=>e.len>.05)});}}
  for(const [id,parts] of grouped){const road=roadById.get(id),r=radius[road.hw];let length=0,covered=0,uncertain=false,edgeUnknown=false;
   if(r){counts.crossing.eligible++;for(const part of parts)for(let i=1;i<part.length;i++){const a=part[i-1],b=part[i],len=distance(a,b);if(len<.01)continue;length+=len;const fraction=coveredFraction(a,b,eligiblePoints,r);covered+=len*fraction;if(fraction<1-1e-7){if(excludedPoints.some(p=>pointSegment(p,a,b)<=r))uncertain=true;const mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];if(edges.some(([c,d])=>pointSegment(mid,c,d)<=r+len/2))edgeUnknown=true;}}
@@ -32,13 +36,18 @@ function compute(base,scope,boundary,cross,mixed){
   const classifications=new Set(matches.map(m=>m.line.classification));if(classifications.size>1){counts.shared.ambiguous++;continue;}
   const m=matches[0];counts.shared.matched++;
   const note=`PDF 표시선 ${m.line.id} · 동일 선형 전 표본 5m 이내 및 방향 유사도 0.91 이상 · 최대 편차 ${m.worst.toFixed(1)}m`;
-  candidateScores.push({id,score:100,evidence:{note:note+" · 보차혼용·이면도로 표시구간 기반 잠정 후보, 실제 보차 분리 여부 미확인"}});
-  if(m.line.verified&&["verified-mixed","verified-separated"].includes(m.line.classification)){const score=m.line.classification==="verified-mixed"?100:0;mixedScores.push({id,score,evidence:{note:note+" · 원자료 분류 검증 완료"}});counts.shared[score===100?"confirmedMixed":"confirmedSeparated"]++;}
+  candidateScores.push(enrichSharedCandidate({id,score:null,evidence:{note:note+" · 보차혼용·이면도로 표시구간 기반 잠정 후보, 실제 보차 분리 여부 미확인"}},widthById.get(id)));
+  if(m.line.verified&&["verified-mixed","verified-separated"].includes(m.line.classification))verifiedMatches.push({id,classification:m.line.classification,note});
  }
+ const section=sectionWidths(base,widthGeo,new Set(candidateScores.filter(c=>!c.width).map(c=>c.id)));
+ for(const row of section.rows)widthById.set(row.id,row);
+ for(let i=0;i<candidateScores.length;i++){const c=candidateScores[i];if(!c.width&&widthById.has(c.id))candidateScores[i]=enrichSharedCandidate(c,widthById.get(c.id));}
+ for(const {id,classification,note} of verifiedMatches){const width=widthById.get(id);const score=sharedRoadWidthRisk100(classification,width?.conditionalMixedRisk==null?null:width.widthM);if(score!==null){mixedScores.push({id,score,evidence:{note:note+" · 원자료 분류 검증 완료"+(classification==="verified-mixed"?" · 도로폭 추정 "+width.widthM+"m, RW_SN "+(width.roadWidthId??width.roadWidthIds.join(", ")):" · 물리적 분리, 폭 무관")}});counts.shared[classification==="verified-mixed"?"confirmedMixed":"confirmedSeparated"]++;}}
+ counts.shared.crossSection=section.diagnostics;
  const factor=(id,label,source,method,scores)=>({schemaVersion:1,type:"pri-factor-scores",networkVersion,scoreMax:100,factor:{id,label,scoreDirection:"risk",estimated:true,source,method},scores});
- return {cross:factor("crossing","횡단보도 접근성 위험도 (추정)","팀 제출 횡단지점 JSON/PDF 정합본, OSM 공통 25m 도로망 및 상도1동 경계","39개 조사 후보의 합집합 버퍼: OSM primary/secondary 계열 100m, tertiary/residential 50m. 접근권 외부 연장 비율 ×100. 7·24번 불일치 및 경계 외부 미조사 영향 구간은 NULL. 4항목 현장평가·실제 가시거리·안전 판정 아님.",crossScores),shared:factor("sharedRoad","보차혼용도로 위험도 (2안)","팀 제출 보차혼용도로 평가기준표 3쪽 및 C 지도 PDF","2안: 확인된 혼용 100점, 확인된 분리 0점. PDF 표시선은 혼용·이면도로 통합 후보이므로 분류 미확인 상태에서는 NULL. 전 표본 5m 이내·방향 유사도 0.91 이상 공간 정합 후보는 별도 표시.",mixedScores),candidates:factor("sharedRoad","보차혼용·이면도로 표시구간 후보 (추정)","팀 제출 C 지도 PDF 디지털화 237개 선형","공간 정합된 표시구간의 2안 가정값 100점. 분류 검증 전에는 종합 PRI 및 경로 점수에서 제외. 나머지는 NULL.",candidateScores),counts,scope:grouped.size,points:eligiblePoints.length};
+ return {cross:factor("crossing","횡단보도 접근성 위험도 (추정)","팀 제출 횡단지점 JSON/PDF 정합본, OSM 공통 25m 도로망 및 상도1동 경계","39개 조사 후보의 합집합 버퍼: OSM primary/secondary 계열 100m, tertiary/residential 50m. 접근권 외부 연장 비율 ×100. 7·24번 불일치 및 경계 외부 미조사 영향 구간은 NULL. 4항목 현장평가·실제 가시거리·안전 판정 아님.",crossScores),shared:factor("sharedRoad","보차혼용도로 위험도 (도로폭 반영)","팀 제출 상도1동 보차혼용도로 평가기준표 (도로폭적용) 1쪽, C 지도 PDF, 서울시 실폭도로 2026-10 추정폭","보도·차도 분리 확인 0점(폭 무관), 혼용 확인 및 도로폭 4m 미만 100점, 4m 이상 6m 미만 70점, 6m 이상 30점. 미확인 분류 또는 불확실한 혼용 도로폭은 NULL. 기존 실폭도로 폴리곤의 공통 조사도로 길이 가중 중첩률 70% 이상 및 차순위 대비 20%p 이상 우세 시 대표 추정폭 사용(낮은 신뢰도·추정 불가 제외). P10/P90 등은 신뢰도 확인용으로 유지. 대표폭 미정합 후보만 3m 이하 직각 단면 중앙값으로 보완(유효 3개 이상, 전체 60% 이상, 동일 점수 구간 75% 이상 및 P90/P10 2.5 이하). PDF 표시구간은 보차 분리 확인 전 PRI·경로 점수 제외.",mixedScores),candidates:factor("sharedRoad","보차혼용·이면도로 표시구간 후보 (추정)","팀 제출 C 지도 PDF 디지털화 237개 선형","공간 정합된 PDF 보차혼용·이면도로 조사 후보. 점수는 모두 NULL. 도로폭 추정치 및 혼용으로 확인될 경우의 조건부 점수는 참고 정보이며 종합 PRI·경로 점수에서 제외.",candidateScores),counts,scope:grouped.size,points:eligiblePoints.length};
 }
-const result=compute(read("public/data/pri/lighting_segments.json"),read("public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson"),read("public/data/protection-zone/boundary_reference.geojson"),read("public/data/sangdo1-crosswalks-team-review.geojson"),read("public/data/sangdo1-analysis-view/bocha-mixed-roads.geojson"));
+const result=compute(read("public/data/pri/lighting_segments.json"),read("public/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson"),read("public/data/protection-zone/boundary_reference.geojson"),read("public/data/sangdo1-crosswalks-team-review.geojson"),read("public/data/sangdo1-analysis-view/bocha-mixed-roads.geojson"),read("public/data/sangdo1-analysis-view/roadwidth.geojson"));
 write('public/data/pri/sangdo1_crosswalk_rubric_factor.json',result.cross);
 write('public/data/pri/sangdo1_shared_road_rubric_factor.json',result.shared);
 write('public/data/pri/sangdo1_shared_road_candidates_20261125.json',result.candidates);

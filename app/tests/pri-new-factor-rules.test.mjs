@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {crosswalkRisk100,sharedRoadRisk100,sharedRoadBinaryRisk100,scaleTenPointRisk,priRiskBand} from '../src/pri-new-factor-rules.mjs';
+import {crosswalkRisk100,sharedRoadRisk100,sharedRoadBinaryRisk100,sharedRoadWidthRisk100,scaleTenPointRisk,priRiskBand} from '../src/pri-new-factor-rules.mjs';
 
 test('crosswalk: each of four submitted categories is 5/15/25 and missing stays null',()=>{
   const all={discontinuity:'high',terrain:'high',vulnerable:'high',nightAccident:'high'};
@@ -26,4 +26,11 @@ test('bocha: detailed 4+3+2+1 converts 10 to 100, unknown never receives zero',(
   assert.equal(sharedRoadBinaryRisk100('verified-mixed'),100);
   assert.equal(sharedRoadBinaryRisk100('verified-separated'),0);
   assert.equal(sharedRoadBinaryRisk100('unverified'),null);
+});
+
+
+test('updated width rubric uses exact 4m and 6m thresholds and never treats unknown as zero',()=>{
+ for(const [width,expected] of [[0,null],[3.99,100],[4,70],[5.99,70],[6,30],[20,30],[null,null],[NaN,null],['4',null]])assert.equal(sharedRoadWidthRisk100('verified-mixed',width),expected);
+ assert.equal(sharedRoadWidthRisk100('verified-separated',null),0);
+ assert.equal(sharedRoadWidthRisk100('unverified',3),null);
 });

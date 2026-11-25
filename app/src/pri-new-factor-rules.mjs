@@ -47,3 +47,10 @@ export function priRiskBand(value){
   if(!validNumber(value)||value<0||value>100)return 'unassessed';
   return value>=70?'high':value>=40?'caution':'low';
 }
+
+/** Current team rubric: width affects only confirmed mixed roads. */
+export function sharedRoadWidthRisk100(type,width){
+ if(type==='verified-separated')return 0;
+ if(type!=='verified-mixed'||typeof width!=='number'||!Number.isFinite(width)||width<=0)return null;
+ return width<4?100:width<6?70:30;
+}
