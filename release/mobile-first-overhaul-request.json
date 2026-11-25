@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.165",
+  "application_version": "9.2.166",
   "public_work_branch": "main",
-  "purpose": "PR496: risk report live-map crossfade, retaining PR493 and PR494; new patch version required by monotonic Production guard after v9.2.164 went live.",
-  "attempt": 390,
+  "purpose": "PR497: rebuild risk report, community and news live crossfades after deleting legacy owners; responsive install guidance and ten viewport widths; source CI passed.",
+  "attempt": 391,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
