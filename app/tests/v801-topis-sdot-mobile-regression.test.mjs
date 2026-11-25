@@ -8,7 +8,7 @@ const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('v8.0.1 mobile motion and header are preserved while retired feeds cannot be activated',()=>{
   const html=read('index.html');
   assert.match(html,/<title>동작하는 안전지도 · 보행안전 지도<\/title>/);
-  assert.match(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
+  assert.doesNotMatch(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
   assert.match(html,/v800-ui-architecture\.css/);
   assert.match(html,/v800-live-environment\.css/);
   for(const key of ['road-incidents','sdot-environment']){

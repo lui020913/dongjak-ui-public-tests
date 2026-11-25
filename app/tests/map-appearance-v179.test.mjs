@@ -19,7 +19,7 @@ test('도로 중심부 흰색으로 구분하며 철도와 산책로는 보호',
   assert.equal(roadColorRole({type:'line',id:'transport-rail-base'}),null);
   assert.equal(roadColorRole({type:'line',id:'walking-route-line'}),null);
 });
-test('수동 버전 이력만 제공하며 자동 업데이트 배너는 표시하지 않는다',async()=>{
+test('사용자 업데이트 창과 자동 업데이트 배너는 표시하지 않는다',async()=>{
   const [build,publicVersion,html,packageJson]=await Promise.all([
     readFile(new URL('../src/build-info.json',import.meta.url),'utf8'),
     readFile(new URL('../public/version.json',import.meta.url),'utf8'),
@@ -27,7 +27,7 @@ test('수동 버전 이력만 제공하며 자동 업데이트 배너는 표시�
     readFile(new URL('../package.json',import.meta.url),'utf8')]);
   assert.deepEqual(JSON.parse(build),JSON.parse(publicVersion));
   assert.doesNotMatch(html,/id="site-update-banner"/);
-  assert.match(html,/id="version-history-trigger"/);
+  assert.doesNotMatch(html,/id="version-history-trigger"/);
   assert.match(JSON.parse(packageJson).scripts.build,/stamp-version/);
 });
 

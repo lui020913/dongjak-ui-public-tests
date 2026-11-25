@@ -17,7 +17,6 @@ import {installHangangBridgeLabels} from './hangang-bridge-labels.js';
 import {installEducationLayer} from './education-layer.js';
 import {installCivicFacilities} from './civic-facility-layer.js';
 import {installApartmentLabels} from './apartment-labels.js';
-import {initVersionHistory} from './version-history.js';
 import * as maplibregl from 'maplibre-gl';
 import {Capacitor, CapacitorHttp} from '@capacitor/core';
 import {Geolocation} from '@capacitor/geolocation';
@@ -113,7 +112,6 @@ import './draggable-floats.css';
 import './v611-registration-seam.css';
 import './metro-sidepanel-20261110.css';
 import './speed-ui-and-scrollbar.css';
-import './version-history-v7.css';
 import './mobile-ui-baseline.css';
 import './v815-map-product.css';
 import './v880-responsive-tap-guard.css';
@@ -217,7 +215,6 @@ const app = document.getElementById('app');
 app.dataset.tab = 'map'; // First entry always selects 안전지도 on PC and mobile.
 // One shared bottom navigation is used at every viewport width.
 installFloatingPanelUX();
-initVersionHistory();
 
 let toastTimeout;
 let mapReady = false;

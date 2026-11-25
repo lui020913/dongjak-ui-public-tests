@@ -12,10 +12,10 @@ test('v8.0.0 protected MapLibre engine is byte-identical',()=>{
   assert.equal(actual,crypto.createHash('sha256').update(read('src/main.js')).digest('hex'));
   assert.match(read('src/main.js'),/function showTransitRouteConfirmation/);
 });
-test('map data sources moved out of options and retained in history',()=>{
+test('map data sources moved out of options and retained in app information template',()=>{
   const html=read('index.html');
   assert.doesNotMatch(html.slice(html.indexOf('class="map-options-heading"'),html.indexOf('id="stop-gps-tracking"')),/<details class="dj-map-attribution-details"/);
-  assert.match(html.slice(html.indexOf('id="version-history-modal"'),html.indexOf('id="map-tools-toggle"')),/<details class="dj-map-attribution-details"/);
+  assert.match(html,/<template id="dj-map-attribution-template"><details class="dj-map-attribution-details"/);
   assert.doesNotMatch(html,/v1\.0\.0부터 v8\.0\.3까지의 버전별 변경사항/);
   assert.doesNotMatch(read('src/version-history-v7.js'),/버전 번호는 큰 변화/);
 });

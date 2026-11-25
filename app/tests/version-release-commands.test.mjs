@@ -22,7 +22,7 @@ async function fixture(){
     {version:'2.3.4',scale:'patch',date:'2026-11-13',items:['previous fix']},
     {version:'2.3.3',scale:'patch',date:'2026-11-12',items:['older fix']}
   ]});
-  await write('index.html','<title>동작하는 안전지도 · 보행안전 지도 v2.3.4</title><button id="version-history-trigger">v2.3.4</button><strong id="dj-guide-latest-version">v2.3.4</strong><span id="map-startup-version">v2.3.4</span>');
+  await write('index.html','<title>동작하는 안전지도 · 보행안전 지도 v2.3.4</title><span id="map-startup-version">v2.3.4</span>');
   await write('src/v7120-settings.js','<strong id="dj-about-version-number">v2.3.4</strong>');
   return root;
 }
@@ -41,7 +41,7 @@ for(const [kind,expected] of [['major','3.0.0'],['minor','2.4.0'],['patch','2.3.
       assert.equal(log.length,3);
       assert.equal((await read(join(root,'public/version.json'))).version,expected);
       assert.equal((await read(join(root,'src/build-info.json'))).version,expected);
-      assert.match(await readFile(join(root,'index.html'),'utf8'),/version-history-trigger">업데이트<\/button>/);
+      assert.doesNotMatch(await readFile(join(root,'index.html'),'utf8'),/version-history-trigger|dj-guide-latest-version/);
       assert.ok((await readFile(join(root,'index.html'),'utf8')).includes('id="map-startup-version">버전 1.0</span>'));
       assert.match(await readFile(join(root,'src/v7120-settings.js'),'utf8'),/number">1\.0<\/strong>/);
       assert.ok((await readFile(join(root,'src/app-version.js'),'utf8')).includes(`APP_VERSION="${expected}"`));

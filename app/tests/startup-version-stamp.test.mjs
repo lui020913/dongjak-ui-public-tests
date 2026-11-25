@@ -20,7 +20,7 @@ test('startup footer shows stamped package version before the app script runs',a
   assert.match(html,/<span[^>]*id="map-startup-version"[^>]*>버전 1\.0<\/span>/);
   assert.equal((html.match(/id="map-startup-version"/g)||[]).length,1);
   assert.equal(JSON.parse(await readFile(join(root,'public/version.json'),'utf8')).version,version);
-  assert.match(html,/>업데이트<\/button>/);
-  assert.match(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
+  assert.doesNotMatch(html,/>업데이트<\/button>/);
+  assert.doesNotMatch(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
  }finally{await rm(root,{recursive:true,force:true});}
 });

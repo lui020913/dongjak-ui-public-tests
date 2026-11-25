@@ -20,12 +20,13 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
   const info=button('노선정보',()=>setView(view==='info'?'route':'info'));
   const history=button('도착 이력',()=>setView(view==='history'?'route':'history'));
   const mapButton=button('지도 보기',()=>onMap());
-  const refresh=button('↻',()=>state?.status==='error'?onRetry():onRefresh());refresh.setAttribute('aria-label','새로고침');
+  const refresh=button('↻',()=>view==='history'?historyReload?.():state?.status==='error'?onRetry():onRefresh());refresh.setAttribute('aria-label','새로고침');
   refresh.className='dj-bus-detail-refresh';foot.append(info,history,mapButton,refresh);root.append(header,status,scroll,foot);host.append(root);
   let selection=null,state=null,stops=[],vehicles=[],view='route',pendingScroll=false,lastSignature='',routeScroll=0;
   let closeTimer=null;
-  let historyRequest=null;
+  let historyRequest=null,historyReload=null;
   const yesterday=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(Date.now()-86400000));
+  const previousMonthEnd=()=>{const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const [year,month]=today.split('-').map(Number);return new Date(Date.UTC(year,month-1,0)).toISOString().slice(0,10);};
   let historyDate='',historySeq='';
   const win=doc.defaultView??globalThis;
   function cancelClosing(){
@@ -90,12 +91,13 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     const stop=make('select');stop.setAttribute('aria-label','정류장');
     for(const s of stops){if(!/^\d{9,10}$/.test(String(s.stationId||'')))continue;const opt=make('option','',`${s.seq}. ${s.name}${s.direction?' · '+s.direction:''}`);opt.value=String(s.seq);stop.append(opt);}
     const chosen=stops.find(s=>s.arsId===selection.arsId);stop.value=historySeq||String(chosen?.seq||'');if(!stop.value)stop.selectedIndex=0;
-    const date=make('input');date.type='date';date.max=yesterday();date.value=historyDate||date.max;date.setAttribute('aria-label','조회 날짜');
+    const date=make('input');date.type='date';date.max=yesterday();date.value=historyDate||previousMonthEnd();date.setAttribute('aria-label','조회 날짜');
     const result=make('div','dj-bus-history-result');result.setAttribute('aria-live','polite');
     const load=async()=>{historyRequest?.abort();historySeq=stop.value;historyDate=date.value;const s=stops.find(x=>String(x.seq)===stop.value);result.replaceChildren();if(!s||!date.value||date.value>date.max){result.textContent='정류장과 과거 날짜를 선택해 주세요.';return;}const ctrl=new AbortController();historyRequest=ctrl;result.textContent='공식 도착 이력 조회 중…';const params=new URLSearchParams({routeId:selection.routeId,stationId:s.stationId,seq:String(s.seq),date:date.value.replace(/-/g,'')});
       try{const res=await fetch(apiBase+'/bus-history?'+params,{signal:ctrl.signal});const data=await res.json();if(ctrl.signal.aborted||historyRequest!==ctrl)return;result.replaceChildren();if(!res.ok){result.textContent=data.notice||'공식 이력을 확인할 수 없습니다.';return;}const rows=Array.isArray(data.arrivals)?data.arrivals:[];if(!rows.length)result.append(make('p','','제공된 도착 기록이 없습니다. 다른 날짜를 선택해 주세요.'));const groups=new Map();for(const row of rows){const k=row.date+' '+row.time.slice(0,2)+'시';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(row.time.slice(3,5));}for(const [hour,minutes] of groups){const line=make('div','dj-bus-history-hour');line.append(make('strong','',hour.slice(4,6)+'/'+hour.slice(6,8)+' '+hour.slice(9)),make('span','',minutes.join(' · ')));result.append(line);}result.append(make('p','dj-bus-detail-message',data.notice||''),make('p','dj-bus-detail-message',data.source||''));}catch(e){if(!ctrl.signal.aborted&&historyRequest===ctrl)result.textContent='공식 이력 서버 연결 실패 · 다시 조회해 주세요.';}
     };
-    const submit=button('조회',load,'dj-bus-history-submit');controls.append(stop,date,submit);list.append(heading,controls,make('p','dj-bus-detail-message','월 1회 갱신 · 실시간 도착예정 정보와 다릅니다.'),result);
+    historyReload=load;
+    const submit=button('조회',load,'dj-bus-history-submit');controls.append(stop,date,submit);list.append(heading,controls,make('p','dj-bus-detail-message','월 1회 갱신 · 최근 날짜의 기록은 아직 미공개일 수 있습니다.'),result);
     void load();
   }
   function open(next){

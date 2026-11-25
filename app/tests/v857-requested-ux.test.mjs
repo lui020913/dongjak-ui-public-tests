@@ -34,9 +34,9 @@ test('More panel has a fixed header, SVG close control, scroll body and live act
   assert.match(chrome,/dj-mobile-utilities-body/);
   assert.match(chrome,/<svg viewBox="0 0 24 24"/);
   assert.match(features,/panel\.querySelector\('\.dj-mobile-utilities-body'\)/);
-  assert.match(chrome,/id="dj-mobile-history"/);
+  assert.doesNotMatch(chrome,/id="dj-mobile-history"/);
   assert.match(chrome,/id="dj-mobile-settings"/);
-  assert.match(chrome,/version-history-trigger/);
+  assert.doesNotMatch(chrome,/version-history-trigger/);
   assert.match(chrome,/dj:open-map-settings/);
   assert.match(features,/dj800-type-trigger/);
   assert.match(css,/dj-mobile-utilities-body/);

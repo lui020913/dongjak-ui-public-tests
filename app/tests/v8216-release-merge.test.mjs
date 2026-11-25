@@ -18,7 +18,7 @@ test('version and in-app update history are synchronized across every build surf
   assert.equal(publicVersion.version,version);
   assert.equal(buildInfo.version,version);
   assert.match(read('src/app-version.js'),new RegExp(`APP_VERSION="${version.replaceAll('.','\\.')}"`));
-   for(const marker of ['<title>동작하는 안전지도 · 보행안전 지도</title>','id="dj-guide-latest-version">분류별 내역','id="version-history-trigger"','id="map-startup-version" aria-label="앱 버전">버전 1.0']){
+   for(const marker of ['<title>동작하는 안전지도 · 보행안전 지도</title>','id="map-startup-version" aria-label="앱 버전">버전 1.0']){
     assert.ok(read('index.html').includes(marker),marker);
   }
    assert.ok(read('src/v7120-settings.js').includes('id="dj-about-version-number">1.0'));

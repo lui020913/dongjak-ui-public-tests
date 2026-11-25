@@ -139,20 +139,6 @@ html body #app#app #map-gesture-guide details.dj8212-ios-install-help[open] > su
   html body #app#app#app #map-gesture-guide .dj8212-ios-install-help > p{
     font-size:12px!important;line-height:1.48!important;margin:7px 0 0!important;
   }
-  html body #app#app#app #map-gesture-guide .dj-guide-release{
-    margin:7px 0 0!important;padding:8px 10px!important;
-    border-radius:12px!important;
-    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;gap:6px!important;
-  }
-  html body #app#app#app #map-gesture-guide .dj-guide-release-heading{
-    gap:5px!important;justify-content:flex-start!important;font-size:11px!important;
-  }
-  html body #app#app#app #map-gesture-guide .dj-guide-release p{display:none!important;}
-  html body #app#app#app #map-gesture-guide #dj-guide-release-details{
-    font-size:11px!important;font-weight:570!important;
-    line-height:1.25!important;padding:6px 8px!important;margin:0!important;
-  }
   html body #app#app#app #map-gesture-guide .map-gesture-guide-remember{
     display:flex!important;align-items:center!important;
     font-size:12px!important;font-weight:500!important;
@@ -162,11 +148,9 @@ html body #app#app #map-gesture-guide details.dj8212-ios-install-help[open] > su
 @media(max-width:359px){
   html body #app#app#app #map-gesture-guide:not([hidden]){padding:12px!important;}
   html body #app#app#app #map-gesture-guide dl{grid-template-columns:61px minmax(0,1fr)!important;gap:6px!important;}
-  html body #app#app#app #map-gesture-guide .dj-guide-release{grid-template-columns:minmax(0,1fr)!important;}
 }
 @media(max-height:640px) and (max-width:699px){
   html body #app#app#app #map-gesture-guide dl{gap:4px 7px!important;margin:5px 0 4px!important;}
   html body #app#app#app #map-gesture-guide .dj8212-ios-install-help{padding:7px 10px!important;margin-top:4px!important;}
-  html body #app#app#app #map-gesture-guide .dj-guide-release{margin-top:4px!important;padding:6px 8px!important;}
   html body #app#app#app #map-gesture-guide .map-gesture-guide-remember{margin-top:6px!important;}
 }

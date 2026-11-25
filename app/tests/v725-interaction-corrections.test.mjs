@@ -23,7 +23,7 @@ test('the search, theme and version controls share one floating header',()=>{
   assert.ok(css.includes('#theme-toggle'));
   assert.ok(css.includes('#version-history-trigger'));
   assert.ok(environment.includes("themeState.value==='dark'?'라이트 모드':'다크 모드'"));
-  assert.ok(html.includes('id="version-history-trigger"'));
+  assert.ok(!html.includes('id="version-history-trigger"'));
 });
 
 test('night flag switches off BEFORE restoring manual preference',()=>{
@@ -53,9 +53,9 @@ test('neighbor stations have keyboard-select and map movement, no invented stati
   assert.match(js,/void open\(\{\.\.\.destination,selectedLine:line\}\)/);
 });
 
-test('version history remains available from the shared header without a separate PC shortcut',()=>{
+test('the retired version history is absent from the shared header',()=>{
   const html=source('index.html'),css=source('src/mobile-first-layout.css');
-  assert.ok(html.includes('id="version-history-trigger"'));
+  assert.ok(!html.includes('id="version-history-trigger"'));
   assert.ok(css.includes('#version-history-trigger'));
   assert.equal(html.includes('v729-r2-new-ui.js'),false);
 });

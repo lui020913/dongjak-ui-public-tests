@@ -23,9 +23,9 @@ test('PC and mobile independent app icons open the same version history',()=>{
   assert.match(css,/#app#app #dj-app-about\[hidden\]/);
   assert.match(css,/#dj-about-pc/);
 });
-test('mobile more panel offers exactly history and settings, no weather duplication',()=>{
+test('mobile more panel offers settings without retired history, no weather duplication',()=>{
   const script=read('src/mobile-chrome-v790.js');
-  assert.match(script,/id="dj-mobile-history"/);
+  assert.doesNotMatch(script,/id="dj-mobile-history"/);
   assert.match(script,/id="dj-mobile-settings"/);
   assert.doesNotMatch(script,/id="dj-mobile-weather-copy"/);
   assert.match(script,/dispatchEvent\(new CustomEvent\('dj:open-map-settings'\)\)/);

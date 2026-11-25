@@ -23,18 +23,18 @@ test('desktop Safety Map tab is physically first and safety launchers share icon
   assert.match(css,/flex:0 0 18px!important;width:18px!important;height:18px!important/);
 });
 
-test('iPhone guide has three clear installation steps and keeps the latest-update action',()=>{
+test('iPhone guide has three clear installation steps and removes the latest-update action',()=>{
   const html=read('index.html');
   const old=read('src/v809-precision-polish.js');
   const mobile=read('src/mobile-map-controls.js');
   assert.match(html,/class="dj856-ios-install-steps"/);
   assert.equal((html.match(/<div><b>[123]<\/b>/g)||[]).length,3);
-  assert.match(html,/id="dj-guide-release-details"/);
+  assert.doesNotMatch(html,/id="dj-guide-release-details"/);
   assert.match(html,/<summary aria-expanded="false"><span>iPhone에서 앱처럼 사용하기<\/span><span class="dj852-tip-chevron"/);
   assert.match(old,/releaseButton\.remove\(\)/);
   assert.match(mobile,/version-history-trigger'\)\?\.click\(\)/);
-  assert.match(read('src/v856-ui-completion.js'),/releaseSection\.append\(releaseButton\)/);
-  assert.match(read('src/v856-ui-completion.js'),/dongjak:open-release-history/);
+  assert.doesNotMatch(read('src/v856-ui-completion.js'),/releaseSection\.append\(releaseButton\)/);
+  assert.doesNotMatch(read('src/v856-ui-completion.js'),/dongjak:open-release-history/);
 });
 
 test('release-history shortcut opens and highlights the exact version instead of only the first entry',()=>{
@@ -44,7 +44,7 @@ test('release-history shortcut opens and highlights the exact version instead of
   assert.match(history,/dongjak:open-release-history/);
   assert.match(history,/item\.dataset\.version===normalized/);
   assert.match(history,/dj856-release-focus/);
-  assert.match(completion,/detail:\{version\}/);
+  assert.doesNotMatch(completion,/detail:\{version\}/);
 });
 
 test('Nodeul Island marker is a MapLibre geographic symbol, not a lagging DOM Marker',()=>{

@@ -59,11 +59,11 @@ test('v7.0.29 theme icons stay centered and desktop cards track measured left na
   assert.match(css,/#app #map-options-mobile-close::after/);
 });
 
-test('v7.0.29 bus ETA snapshots and scheduled metro table respect provider status',()=>{
+test('scheduled metro table respects provider status and duplicate bus ETA snapshot display is retired',()=>{
   const client=src('src/transport-map.js'),parse=src('src/transport-data.js');
   assert.match(client,/saveTimetable\(place,selectedDay,data\)/);
   assert.match(client,/loadTimetable\(place,selectedDay\)/);
-  assert.match(client,/storeBusObservation\(active\.arsId\|\|next\.arsId/);
-  assert.match(client,/최근 버스 도착예정 관측 기록/);
+  assert.doesNotMatch(client,/storeBusObservation\(active\.arsId\|\|next\.arsId/);
+  assert.doesNotMatch(client,/최근 버스 도착예정 관측 기록/);
   assert.match(parse,/nextMessage:String\(x\.arrmsg2/);
 });

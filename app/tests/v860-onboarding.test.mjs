@@ -52,7 +52,7 @@ test('onboarding can be reopened from More and the map gesture guide without rep
   assert.match(html,/src\/v860-onboarding\.js/);
   assert.ok(html.indexOf('src="/src/v857-requested-ux.js"')<html.indexOf('src="/src/v860-onboarding.js"'));
   assert.match(html,/dj856-guide-head/);
-  assert.match(html,/dj-guide-release-details/);
+  assert.doesNotMatch(html,/dj-guide-release-details/);
 });
 
 test('closing removes only the owning onboarding click listener and cancels the close timer safely',()=>{

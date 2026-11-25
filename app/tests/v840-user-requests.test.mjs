@@ -46,10 +46,10 @@ test('base and imported layers stay more-only even with saved preference',()=>{
  assert.match(toolbar,/!MORE_ONLY_KEYS\.has\(f\[0\]\)&&isPrimary/);
  assert.match(toolbar,/parsed\.filter\(k=>!MORE_ONLY_KEYS\.has\(k\)/);
 });
-test('More menu has a visible fixed title and exposes two working utilities',()=>{
+test('More menu has a visible fixed title and retains settings without retired history',()=>{
  assert.doesNotMatch(toolbar,/title\.textContent=key==='map-dong'/);
  assert.match(toolbar,/title\.textContent=''/);
- assert.match(chrome,/전체 업데이트 내역/);assert.match(chrome,/지도 설정/);
+ assert.doesNotMatch(chrome,/전체 업데이트 내역/);assert.match(chrome,/지도 설정/);
  assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 test('close events collapse toolbar and release obsolete highlights',()=>{
@@ -78,7 +78,7 @@ test('mobile nav rows and labels have same baseline and iPhone-rounded outer pil
 test('my info removes unused manual theme row while preserving map settings access',()=>{
  assert.doesNotMatch(info,/data-dj834-action="theme"/);
  assert.match(info,/data-dj834-action="map"/);
- assert.match(info,/history:historyBox,map:mapBox/);
+ assert.match(info,/language:languageSettings,map:mapBox/);
  assert.match(info,/className='dj834-advanced-tools'/);
 });
 test('profile save/edit and security recovery modes keep login state',()=>{
@@ -86,9 +86,9 @@ test('profile save/edit and security recovery modes keep login state',()=>{
  assert.match(account,/securityTab\.hidden=!recoveryMode/);
  assert.match(account,/표시 이름을 저장했습니다/);assert.match(account,/표시 이름이 변경되었습니다/);
 });
-test('help icon is teal and app release UI is not removed',()=>{
+test('help icon is teal and retired app release UI is absent',()=>{
  assert.match(css,/#map-gesture-guide-open/);
- assert.match(html,/version-history-trigger/);
+ assert.doesNotMatch(html,/version-history-trigger/);
 });
 
 test('logically closed or CSS-hidden windows do not suppress the map TIP',()=>{

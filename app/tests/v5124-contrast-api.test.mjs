@@ -41,7 +41,7 @@ test('v5.12.4: night panel and options use shared theme colors and version menu 
   assert.match(css,/#night-visibility-float\s*\{[^}]*var\(--dj-ui-bg/s);
   assert.match(options,/\.map-advanced-controls #map-status/);
   assert.doesNotMatch(html,/id="version-history-menu"/);
-  assert.match(html,/id="version-history-trigger"/);
+  assert.doesNotMatch(html,/id="version-history-trigger"/);
 });
 
 test('v5.12.4: deployed bus stop auth failure returns a short, key-free diagnostic',async()=>{

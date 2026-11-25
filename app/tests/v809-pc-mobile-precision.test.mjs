@@ -49,9 +49,9 @@ test('mobile motion owner still provides one entrance and exit transition system
  assert.ok(read('src/v810-mobile-sheet-motion.css').includes('@media (prefers-reduced-motion: reduce)'));
 });
 
-test('version history remains in the header; no duplicate release shortcut is mounted',()=>{
+test('version history is retired; no duplicate release shortcut is mounted',()=>{
  const html=read('index.html'),css=read('src/mobile-first-layout.css');
- assert.ok(html.includes('id="version-history-trigger"'));
+ assert.ok(!html.includes('id="version-history-trigger"'));
  assert.ok(css.includes('#version-history-trigger'));
  assert.equal(html.includes('v729-r2-new-ui.js'),false);
 });

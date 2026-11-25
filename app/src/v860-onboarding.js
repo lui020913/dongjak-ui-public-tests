@@ -478,8 +478,9 @@ export function installV860Onboarding({app=document.getElementById('app'),doc=ap
   const guide=doc.getElementById('map-gesture-guide');
   if(guide&&!guide.querySelector('[data-dj860-open]')){
     const button=make('button','dj860-guide-launch','앱 처음부터 둘러보기');button.type='button';button.dataset.dj860Open='true';bindOpenButton(button);
-    const release=guide.querySelector('.dj-guide-release');
-    if(release)release.insertAdjacentElement('afterend',button);else guide.append(button);
+    const body=guide.querySelector('.dj856-guide-body')||guide;
+    const remember=body.querySelector('.map-gesture-guide-remember');
+    body.insertBefore(button,remember||null);
   }
   function ensureMoreEntry(){
     const panel=doc.getElementById('dj-mobile-utilities');

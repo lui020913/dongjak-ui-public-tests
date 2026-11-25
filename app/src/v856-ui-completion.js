@@ -1,5 +1,4 @@
 /** v8.5.6 — final UI completion without modifying protected map/transport cores. */
-import {APP_VERSION} from './app-version.js';
 import './v856-completion.css';
 
 export function installV856UiCompletion({app=document.getElementById('app'),doc=app?.ownerDocument||document,win=window}={}){
@@ -19,35 +18,11 @@ export function installV856UiCompletion({app=document.getElementById('app'),doc=
       for(const tab of originalOrder)nav.insertBefore(tab,rail||null);
     }
   };
-  const syncReleaseVersion=()=>{
-    const label=doc.getElementById('dj-guide-latest-version');
-    if(label&&label.textContent!==`v${APP_VERSION}`)label.textContent=`v${APP_VERSION}`;
-  };
   media?.addEventListener?.('change',syncNavOrder);
   win.addEventListener('resize',syncNavOrder,{passive:true});
   cleanups.push(()=>media?.removeEventListener?.('change',syncNavOrder));
   cleanups.push(()=>win.removeEventListener('resize',syncNavOrder));
-  syncNavOrder();syncReleaseVersion();
-
-  // v8.0.9 removed this shortcut. Recreate it after that legacy module has
-  // run, then capture its click before the legacy generic history handler so
-  // the correct latest release is opened and highlighted.
-  const releaseSection=doc.querySelector('.dj-guide-release');
-  let releaseButton=doc.getElementById('dj-guide-release-details');
-  if(!releaseButton&&releaseSection){
-    releaseButton=doc.createElement('button');releaseButton.type='button';
-    releaseButton.id='dj-guide-release-details';releaseButton.textContent='전체 업데이트 내역 보기';
-    releaseSection.append(releaseButton);
-  }
-  const onReleaseDetails=event=>{
-    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-    const version=doc.getElementById('dj-guide-latest-version')?.textContent?.trim()||`v${APP_VERSION}`;
-    const guide=doc.getElementById('map-gesture-guide');if(guide)guide.hidden=true;
-    const EventCtor=win.CustomEvent||CustomEvent;
-    doc.dispatchEvent(new EventCtor('dongjak:open-release-history',{detail:{version}}));
-  };
-  releaseButton?.addEventListener('click',onReleaseDetails,true);
-  cleanups.push(()=>releaseButton?.removeEventListener('click',onReleaseDetails,true));
+  syncNavOrder();
 
   // Existing metro line badges already update the selected line in the same
   // transport sheet. Suppress only the incidental scroll-to-top and animate

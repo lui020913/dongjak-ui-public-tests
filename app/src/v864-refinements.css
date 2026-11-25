@@ -165,32 +165,7 @@ html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul[hidden] {disp
 html body #app#app#app#app #map-gesture-guide #dj841-guide-tips ul li {
   margin:0 0 5px!important;font-size:12.5px!important;line-height:1.46!important;
 }
-html body #app#app#app#app #map-gesture-guide .dj-guide-release {
-  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;justify-content:space-between!important;gap:8px!important;
-  width:100%!important;min-width:0!important;margin:7px 0 0!important;padding:8px 10px!important;
-}
-html body #app#app#app#app #map-gesture-guide .dj-guide-release-heading {
-  display:flex!important;align-items:center!important;justify-content:flex-start!important;
-  flex-wrap:nowrap!important;gap:7px!important;min-width:0!important;white-space:nowrap!important;
-  font-size:12px!important;
-}
-html body #app#app#app#app #map-gesture-guide #dj-guide-latest-version {
-  flex:none!important;margin:0!important;padding:5px 9px!important;border-radius:999px!important;
-  font-size:12px!important;white-space:nowrap!important;
-}
-html body #app#app#app#app #map-gesture-guide #dj-guide-release-details {
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;
-  justify-self:end!important;align-self:center!important;min-width:0!important;max-width:100%!important;
-  margin:0!important;padding:7px 9px!important;border-radius:10px!important;
-  font-size:11.5px!important;line-height:1.2!important;white-space:nowrap!important;
-}
-html body #app#app#app#app #map-gesture-guide .dj-guide-release p {display:none!important;}
 @media(max-width:360px) {
-  html body #app#app#app#app #map-gesture-guide .dj-guide-release {gap:5px!important;padding:7px!important;}
-  html body #app#app#app#app #map-gesture-guide .dj-guide-release-heading {gap:5px!important;font-size:11px!important;}
-  html body #app#app#app#app #map-gesture-guide #dj-guide-latest-version {padding:4px 7px!important;font-size:11px!important;}
-  html body #app#app#app#app #map-gesture-guide #dj-guide-release-details {padding:6px 7px!important;font-size:10.5px!important;}
 }
 
 /* Map TIP pill: tighten the label gap but reserve a clear right-side inset. */

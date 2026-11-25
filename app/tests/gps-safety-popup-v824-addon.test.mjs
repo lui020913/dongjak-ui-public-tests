@@ -52,7 +52,7 @@ test('HTML independent entry exists and release version is synced',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
   assert.match(pkg.version,/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/); // Allow Major/Minor/Patch increments.
-  assert.match(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
+  assert.doesNotMatch(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
   assert.match(html,/<script type="module" src="\/src\/gps-safety-popup\.js"><\/script>/);
   assert.match(html,/id="current-location"/);
 });

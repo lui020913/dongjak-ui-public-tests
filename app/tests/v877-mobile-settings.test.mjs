@@ -27,12 +27,12 @@ test('mobile sheets can expand fully and keep bottom navigation inside frame',()
  assert.match(module,/createMobileSheetCoordinator/);
  assert.match(text('src/v880-sheet-state.js'),/dj871-sheet-expanded/);
 });
-test('My Info moves map settings and release history into its own menu',()=>{
+test('My Info retains map settings and removes release history',()=>{
  assert.match(my,/data-dj834-action="map"/);
- assert.match(my,/data-dj834-action="history"/);
+ assert.doesNotMatch(my,/data-dj834-action="history"/);
  assert.match(my,/data-dj834-action="type"/);
  assert.match(my,/map:mapBox/);
- assert.match(my,/version-history-trigger/);
+ assert.doesNotMatch(my,/version-history-trigger/);
  assert.match(css,/dj840-more-quick-actions/);
 });
 test('photo picker is local only with resize and reset, preserving cloud account',()=>{

@@ -503,7 +503,7 @@ test('merged route search returns to AI keyboard without a background seam',asyn
 });
 
 // Check rendered containment rather than only stylesheet tokens.
-test('history starts collapsed and PRI header is isolated from scrolling',async({page})=>{
+test('retired update history is absent and PRI header is isolated from scrolling',async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  test.setTimeout(150000);
  await readyForLiveTouch(page);
@@ -519,12 +519,9 @@ test('history starts collapsed and PRI header is isolated from scrolling',async(
  expect(geometry).toEqual({stable:true,bodyOverflow:'auto',contained:true});
  await pri.evaluate(n=>n.close());
  await page.locator('#bottom-nav .nav-tab[data-tab="mine"]').click();
- await page.locator('[data-dj834-action="history"]').click();
- const archives=page.locator('#version-history-list .dj-edition-history');
- await expect(archives.first()).toBeVisible();
- expect(await page.locator('#version-history-list .dj-edition-history[open]').count()).toBe(0);
- await archives.first().locator('summary').first().click();
- await expect(archives.first()).toHaveAttribute('open','');
+ await expect(page.locator('#mine-panel')).toBeVisible();
+ await expect(page.locator('[data-dj834-action="history"],#version-history-modal,#version-history-list,#dj-mobile-history,#dj-guide-release-details')).toHaveCount(0);
+ await expect(page.locator('[data-dj834-action="map"]')).toBeVisible();
 });
 
 test('night consent has one centered fade and tab handoff keeps the dock fixed',async({page})=>{

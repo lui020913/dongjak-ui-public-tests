@@ -25,7 +25,7 @@ test('production app no longer reparents the single language row or restores the
   assert.doesNotMatch(phoneJs,/host\.append\(language\)/);
   assert.doesNotMatch(phoneJs,/normalizeMine/);
   assert.doesNotMatch(phoneCss,/\.dj854-language-section\{order:99!important;display:block!important/);
-  assert.match(myInfo,/displayGroup\.insertBefore\(languageControl/);
+  assert.match(myInfo,/displayGroup\.append\(languageControl/);
   assert.match(myInfo,/node\.style\.setProperty\('display','none','important'\)/);
   assert.match(myInfo,/if\(active\)node\.style\.removeProperty\('display'\)/);
 });

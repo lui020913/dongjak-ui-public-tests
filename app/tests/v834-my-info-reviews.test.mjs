@@ -30,7 +30,7 @@ test('My Info label and menu reuse active cloud account and settings handlers',(
  assert.doesNotMatch(info,/data-dj834-action="theme"/);
  assert.doesNotMatch(info,/지도 &amp; 이동|도보 길찾기|대중교통 지도 표시/);
  assert.match(info,/data-dj834-action="map"/);
- assert.match(info,/data-dj834-action="history"/);
+ assert.doesNotMatch(info,/data-dj834-action="history"/);
  assert.match(info,/\.dj824-account-toggle/);
  assert.match(info,/data-manage-tab="profile"/);
 });
