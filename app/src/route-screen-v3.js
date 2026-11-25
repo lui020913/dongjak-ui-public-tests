@@ -84,7 +84,36 @@ export function mountRouteScreenV3(doc=document, win=window) {
   let searching=null,active=false,resizeFrame=0,searchTimer=0,composing=false;
   let pendingWaypoint=false,pendingBaseCount=0,searchGpsBusy=false;
   const cancelTimer=()=>{win.clearTimeout(searchTimer);searchTimer=0;};
-  const syncViewport=()=>{const vv=win.visualViewport;host.style.setProperty("--v3-search-height",Math.round(vv?.height||win.innerHeight)+"px");};
+  let searchLayoutHeight=0,searchLayoutWidth=0;
+  const searchScreen=q('[data-v3-screen="search"]');
+  const syncViewport=()=>{
+    if(!searching)return;
+    const vv=win.visualViewport;
+    const width=win.innerWidth;
+    const layout=Math.max(win.innerHeight||0,doc.documentElement.clientHeight||0);
+    if(width!==searchLayoutWidth){searchLayoutWidth=width;searchLayoutHeight=layout;}
+    searchLayoutHeight=Math.max(searchLayoutHeight,layout);
+    const top=Math.max(0,Math.round(Number(vv?.offsetTop)||0));
+    const height=Math.max(1,Math.round(Number(vv?.height)||layout||1));
+    host.style.setProperty('--v3-search-top',top+'px');
+    host.style.setProperty('--v3-search-height',height+'px');
+    searchScreen.dataset.keyboard=searchLayoutHeight-top-height>100?'open':'closed';
+  };
+  const setSearchVisible=visible=>{
+    searchScreen.hidden=!visible;
+    if(visible){
+      view.dataset.searchOpen='true';
+      searchLayoutWidth=win.innerWidth;
+      searchLayoutHeight=Math.max(win.innerHeight||0,doc.documentElement.clientHeight||0);
+      syncViewport();
+    }else{
+      delete view.dataset.searchOpen;
+      delete searchScreen.dataset.keyboard;
+      host.style.removeProperty('--v3-search-top');
+      host.style.removeProperty('--v3-search-height');
+      searchLayoutHeight=0;searchLayoutWidth=0;
+    }
+  };
   const hasValue=node=>node?.textContent?.trim()&&node.textContent.trim()!=='선택되지 않음';
   const syncLabels=()=>{
     const start=hasValue(legacyStart)?legacyStart.textContent.trim():null;
@@ -124,7 +153,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().filter((place,i,all)=>all.findIndex(p=>p.name===place.name&&Math.abs(Number(p.lng)-Number(place.lng))<0.0001&&Math.abs(Number(p.lat)-Number(place.lat))<0.0001)===i||!Number.isFinite(Number(place.lng))).slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
     resizeFrame=0;
-    if(!active)return;
+    if(!active||searching)return;
     const nav=dock.getBoundingClientRect();
     if(nav.height&&nav.top>0){
       const bottom=Math.max(12,Math.round(win.innerHeight-nav.top+12));
@@ -166,7 +195,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     cancelTimer();composing=false;searching=null;searchGpsBusy=false;
     q('[data-v3="search-gps"]').disabled=false;
     q('#v3-query').blur();
-    q('[data-v3-screen="search"]').hidden=true;
+    setSearchVisible(false);
     byId('route-search-close')?.click();
     syncLabels();requestPosition();
   };
@@ -178,11 +207,10 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('#v3-search-title').textContent=which==='start'?'출발지 검색':which==='waypoint'?'경유지 검색':'도착지 검색';
     cancelTimer();composing=false;
     q('#v3-query').value='';q('[data-v3="clear-query"]').hidden=true;
-    syncViewport();
     q('#v3-results').replaceChildren();
     q('#v3-search-status').textContent='동작구 내 장소명 또는 주소를 입력해 주세요.';
     q('[data-v3="search-gps"]').disabled=searchGpsBusy;
-    q('[data-v3-screen="search"]').hidden=false;
+    setSearchVisible(true);
     mirrorResults();
     q('#v3-query').focus({preventScroll:true});
   };
@@ -239,13 +267,13 @@ export function mountRouteScreenV3(doc=document, win=window) {
         delete app.dataset.djRouteScreenV3;
         cancelTimer();composing=false;searching=null;
         q('#v3-query').blur();
-        q('[data-v3-screen="search"]').hidden=true;
+        setSearchVisible(false);
       }
     }
     if(active){
       concealOld();hideOldMapTools();
       if(searching&&nativeSearch.hidden){
-        cancelTimer();composing=false;searching=null;q('#v3-query').blur();q('[data-v3-screen="search"]').hidden=true;
+        cancelTimer();composing=false;searching=null;q('#v3-query').blur();setSearchVisible(false);
       }
       syncLabels();mirrorWaypoints();refreshRecent();
       requestPosition();
@@ -310,6 +338,9 @@ export function mountRouteScreenV3(doc=document, win=window) {
   listen(q('[data-v3="clear-query"]'),'click',()=>{q('#v3-query').value='';updateQuery();q('#v3-query').focus({preventScroll:true});});
   listen(q('[data-v3-form="search"]'),'submit',e=>{e.preventDefault();if(!composing){recordSearchQuery(q('#v3-query').value);submitSearch();}});
   listen(win.visualViewport,'resize',syncViewport);
+  listen(win.visualViewport,'scroll',syncViewport);
+  listen(win,'resize',syncViewport);
+  listen(win,'orientationchange',syncViewport);
   listen(win,'keydown',e=>{
     if(active&&searching&&e.key==='Escape'){e.preventDefault();finishSearch();}
   });

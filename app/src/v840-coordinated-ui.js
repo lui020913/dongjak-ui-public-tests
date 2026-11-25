@@ -37,7 +37,7 @@ export function installCoordinatedShell(doc=document,win=window){
  if(guide){const anchor=guide.querySelector('.dj-guide-release');if(anchor)anchor.before(tipGuide);else guide.append(tipGuide);}
  let tip=0,queued=false,tipTransitionToken=0,hideTimer=0,tipFadeTimer=0,searchFocusTimer=0,disposed=false;
  label.hidden=true;
- const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
+ const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.communityPicking!=='true'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
    &&app.dataset.dj860AutoResolved==='true'&&app.dataset.djHudGuideHandoff!=='true'
    &&!doc.querySelector('#map-startup-overlay:not([hidden]),#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden]):not([data-dj810-animating="closing"])');
  const showTip=()=>{
@@ -50,7 +50,7 @@ export function installCoordinatedShell(doc=document,win=window){
  };
  const hideTip=()=>{
    // A sheet owns the screen immediately; do not leave a floating hint under its edge.
-   if(app.dataset.djPriVisible==='true'||hasOpenMapWindow(doc,app)){
+   if(app.dataset.communityPicking==='true'||app.dataset.djPriVisible==='true'||hasOpenMapWindow(doc,app)){
      if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
      label.classList.remove('is-visible');label.hidden=true;return;
    }
@@ -83,6 +83,8 @@ export function installCoordinatedShell(doc=document,win=window){
      else hideTip();
    });
  };
+ const onCommunityPickerVisibility=()=>{if(app.dataset.communityPicking==='true')hideTip();else sync();};
+ win.addEventListener('dongjak:community-picker-visibility',onCommunityPickerVisibility);
  const observers=[];
  const observe=(node,opts)=>{if(!node)return;const o=new MutationObserver(sync);o.observe(node,opts);observers.push(o);};
  observe(app,{attributes:true,attributeFilter:['data-tab','data-search-open','data-dj910-sheet-open','data-dj-pri-visible','data-dj-user-tip-dismissed','class']});
@@ -158,6 +160,7 @@ export function installCoordinatedShell(doc=document,win=window){
    if(hideTimer)win.clearTimeout(hideTimer);
    if(tipFadeTimer)win.clearTimeout(tipFadeTimer);
    if(searchFocusTimer)win.clearTimeout(searchFocusTimer);
+   win.removeEventListener('dongjak:community-picker-visibility',onCommunityPickerVisibility);
    app.removeEventListener('transitionend',sync,true);
    app.removeEventListener('animationend',sync,true);
    observers.forEach(o=>o.disconnect());win.clearInterval(interval);

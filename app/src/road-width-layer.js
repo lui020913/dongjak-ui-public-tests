@@ -54,8 +54,8 @@ export function installRoadWidthLayer({map, maplibregl, app, canOpen = () => tru
       id: FILL_ID, type: 'fill', source: SOURCE_ID,
       layout: {visibility},
       paint: {
-        'fill-color': ['match', ['get','width_class'], '4m 미만', '#D94B45', '4~8m 미만', '#F2A23A', '8m 이상', '#299D78', '#94A3B8'],
-        'fill-opacity': ['case', isReliable, 0.56, 0.28],
+        'fill-color': ['match', ['get','width_class'], '4m 미만', '#D94B45', '4~8m 미만', '#F2A23A', '8m 이상', '#299D78', '#B9C3C2'],
+        'fill-opacity': ['case', ['!', ['in', ['get','width_class'], ['literal',['4m 미만','4~8m 미만','8m 이상']]]], 0.22, isReliable, 0.56, 0.28],
         'fill-antialias': true
       }
     }, firstLabel);

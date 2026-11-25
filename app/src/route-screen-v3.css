@@ -19,6 +19,8 @@ button {cursor:pointer; -webkit-tap-highlight-color:transparent}
 button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offset:2px}
 [hidden]{display:none!important}
 .canvas {position:absolute;inset:0;pointer-events:none}
+.canvas[data-search-open="true"]{background:var(--v3-page-bg)}
+.canvas[data-search-open="true"] > :not(.search-screen){visibility:hidden;pointer-events:none}
 .header {
   position:fixed;
   top:0;left:0;right:0;
@@ -106,13 +108,14 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 .action[disabled] {background:#9bbdb1;color:#fff;box-shadow:none;cursor:not-allowed}
 .action svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
 .search-screen {
-  position:fixed;inset:0;
+  position:fixed;top:var(--v3-search-top,0px);left:0;right:0;
   bottom:auto;height:var(--v3-search-height,100dvh);
   background:var(--v3-page-bg);
   display:flex;flex-direction:column;pointer-events:auto;
   padding:calc(env(safe-area-inset-top,0px) + 13px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);
   z-index:2;overflow:hidden;
 }
+.search-screen[data-keyboard="open"]{padding-bottom:4px}
 .search-head {display:flex;align-items:center;gap:10px;margin-bottom:17px}
 .search-head button{width:41px;height:41px;flex:none;display:grid;place-items:center;border:0;background:transparent;color:#244638;border-radius:12px;font-size:24px}
 .search-head strong{font-size:21px;letter-spacing:-.03em}

@@ -27,6 +27,6 @@ test('new vulnerability gradient uses a restrained semantic palette and the char
  assert.ok(pri.includes('#DBC576'));
  assert.ok(pri.includes('#82AB94'));
  assert.ok(pri.includes('#4C948B'));
- assert.ok(pri.includes("UNKNOWN_COLOR='#687380'"));
+ assert.ok(pri.includes("UNKNOWN_COLOR='#B9C3C2'"));
  assert.match(pri,/100,'#CB6563'\],'?UNKNOWN_COLOR/);
 });

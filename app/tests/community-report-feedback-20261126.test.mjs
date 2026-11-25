@@ -7,7 +7,15 @@ test('map picker uses one persistent, cancellable notice above the phone dock',(
  const pick=main.slice(main.indexOf("document.getElementById('community-map-pick').addEventListener"),main.indexOf("document.getElementById('community-map-cancel').addEventListener"));
  assert.ok(pick.includes("document.getElementById('community-map-hint').hidden=false"));
  assert.ok(!pick.includes("toast("));
- assert.ok(css.includes('bottom:calc(var(--dj-mobile-nav-h'));
+ assert.ok(css.includes('bottom:var(--dj-community-picker-bottom'));
+ assert.ok(main.includes('Math.ceil(host.bottom-dock.top)+12'));
+ assert.ok(main.includes('new ResizeObserver(syncCommunityPickerDock)'));
+ assert.ok(main.includes("delete app.dataset.communityPicking"));
+ const tip=read('src/v840-coordinated-ui.js'),scale=read('src/map-scale-docking.js');
+ assert.ok(tip.includes("app.dataset.communityPicking!=='true'"));
+ assert.ok(scale.includes("app.dataset.communityPicking==='true'"));
+ assert.ok(tip.includes("dongjak:community-picker-visibility"));
+ assert.ok(scale.includes("dongjak:community-picker-visibility"));
 });
 test('report reason has app-owned controls and equal action styling',()=>{
  const report=main.slice(main.indexOf('function showCommunityReport('),main.indexOf('function renderCommunity()'));
