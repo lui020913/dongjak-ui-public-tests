@@ -4,8 +4,8 @@
  * temporarily paint as white on iOS during the two-snapshot dissolve.
  *
  * All full-screen panel backgrounds appear immediately in the same JS tick.
- * Only incoming non-map content is revealed, or the previous page fades on
- * return to the already-live map. No root snapshot or moving dock.
+ * The outgoing opaque page dissolves over the incoming live page.
+ * From the map, the incoming page dissolves over the live map. No root snapshot or moving dock.
  */
 export const TAB_TRANSITION=Object.freeze({contentReveal:260,mapReturn:220});
 export function adjacentTabIndex(index,count,dx,dy){
@@ -36,6 +36,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    else if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
    departing.style?.removeProperty?.('z-index');
+   departing.style?.removeProperty?.('display');
+   departing.style?.removeProperty?.('visibility');
    departing.style?.removeProperty?.('opacity');
    departing.style?.removeProperty?.('pointer-events');
    departing=null;
@@ -45,13 +47,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  // alone can be invisible. Paint the real content (including V3's shadow DOM).
  function revealContent(panel,key){
   const route=key==='route'?doc.getElementById('dj-route-v3'):null;
-  const nodes=route?.shadowRoot?[...route.shadowRoot.querySelectorAll('.canvas > .header,.canvas > .route-panel,.canvas > .tools,.canvas > .action')]:
-   [...(panel?.querySelectorAll?.(':scope > .dj-sheet-chrome,:scope > .dj836-sheet-body')||[])];
+  const nodes=[route||panel].filter(Boolean);
   if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
   enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)])}));
   const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
-  paint(.12);
+  paint(0);
   let last=null,elapsed=0;
   // Map rendering can delay the first frame. Keep the reveal alive until
   // the first actual frame, then bound cleanup separately from startup.
@@ -63,7 +64,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
    last=now;
    const p=Math.min(1,elapsed/300);
-   paint(.12+.88*p*p*(3-2*p));
+   paint(p*p*(3-2*p));
    if(p<1)enterFrame=win.requestAnimationFrame(step);else clearEntrance();
   };
   enterFrame=win.requestAnimationFrame(step);
@@ -84,11 +85,14 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const toMap=destination==='map';
   // Only a map return retains the departing page for a single fade; normal
   // tab changes reveal the new content once, over its own opaque background.
-  const retain=Boolean(toMap&&previous&&typeof win.requestAnimationFrame==='function'&&!reduced());
+  const retain=Boolean(previous&&typeof win.requestAnimationFrame==='function'&&!reduced());
   if(retain)previous.dataset.djTabOutgoing='true';
   if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
-  if(retain&&app.dataset.tab==='map'){
+  if(retain&&app.dataset.tab===destination){
    departing=previous;
+   previous.hidden=false;
+   previous.style.setProperty('display','flex','important');
+   previous.style.setProperty('visibility','visible','important');
    previous.style.setProperty('z-index','6999','important');
    previous.style.setProperty('pointer-events','none','important');
    if(previous.id==='dj-route-v3')previous.inert=true;
@@ -105,6 +109,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    previous.style.setProperty('opacity','1','important');
    departingFrame=win.requestAnimationFrame(fade);
   }else previous?.removeAttribute?.('data-dj-tab-outgoing');
+  if(retain&&departing){enterTimer=win.setTimeout(clearEntrance,1000);return;}
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
