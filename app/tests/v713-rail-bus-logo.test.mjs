@@ -33,7 +33,7 @@ test('v7.0.29 Soongsil symbol and title share one moved map point',()=>{
  const code=read('src/featured-place-labels.js');
  assert.match(code,/'icon-offset':\[0,0\]/);
  assert.match(code,/'text-anchor':'bottom'/);
- assert.match(code,/'text-offset':\[0,-1\.45\]/);
+ assert.match(code,/'text-offset':\[0,-1\.15\]/);
 });
 test('v7.0.29 overview no longer exposes the unnecessary collapse button',()=>{
  assert.doesNotMatch(read('index.html'),/id="overview-sheet-toggle"/);
