@@ -1998,6 +1998,9 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  // Leaving the map by another tab abandons the picker, not the draft.
+  // A later map tap must never resume an unrelated community editor.
+  if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -2250,35 +2253,45 @@ document.getElementById('community-photo-remove').addEventListener('click',()=>{
   document.getElementById('community-photo-preview').hidden=true;
   document.getElementById('community-photo-image').removeAttribute('src');
 });
+function clearCommunityLocationPick(){
+  communityPickMode=false;
+  document.getElementById('community-map-hint').hidden=true;
+}
+function cancelCommunityTabMotion(){
+  window.dispatchEvent(new Event('dongjak:cancel-tab-transition'));
+}
+function resumeCommunityLocationDraft(){
+  clearCommunityLocationPick();
+  cancelCommunityTabMotion();
+  const mapOrigin=communityComposerOrigin==='map'&&window.matchMedia('(max-width:699px)').matches;
+  navigate(mapOrigin?'map':'participate',{suppressOverview:mapOrigin,resumeCommunityDraft:true});
+  openCommunityComposer(true);
+}
 function selectCommunityLocation(lngLat) {
+  if(!communityPickMode||app.dataset.tab!=='map')return;
   const inside=isDongjak(lngLat.lng,lngLat.lat);
   if(inside===null){toast('동작구 경계를 불러오는 중입니다.');return;}
   if(!inside){toast('동작구 안의 위치를 선택해 주세요.');return;}
   communityPickedLocation={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
-  communityPickMode=false;
-  document.getElementById('community-map-hint').hidden=true;
   document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  if(communityComposerOrigin==='map'&&window.matchMedia('(max-width:699px)').matches)navigate('map',{suppressOverview:true,resumeCommunityDraft:true});
-  else navigate('participate',{resumeCommunityDraft:true});
-  openCommunityComposer(true);
+  resumeCommunityLocationDraft();
   toast('위치를 연결했습니다.');
 }
 document.getElementById('community-map-pick').addEventListener('click',()=>{
   if(routePickMode){routePickMode=null;syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
   // switching tabs. It will be portaled again after the map pick finishes.
+  cancelCommunityTabMotion();
   communityComposerPortal?.close();
   communityForm.hidden=true;
+  closeCommunityLocation();
   communityPickMode=true;
-  navigate('map');
+  navigate('map',{suppressOverview:true});
   document.getElementById('community-map-hint').hidden=false;
   toast('지도에서 게시글에 연결할 위치를 선택해 주세요.');
 });
 document.getElementById('community-map-cancel').addEventListener('click',()=>{
-  communityPickMode=false;
-  document.getElementById('community-map-hint').hidden=true;
-  navigate('participate',{resumeCommunityDraft:true});
-  openCommunityComposer(true);
+  if(communityPickMode)resumeCommunityLocationDraft();
 });
 // Structured issue fields are relevant to '보행 불편' posts, not general discussion.
 const issueDetails=document.getElementById('community-issue-details');
@@ -2393,6 +2406,9 @@ function communityButton(text,cls,fn) {
 }
 function showCommunityLocation(post) {
   if(!post.location)return;
+  // Viewing a saved location is read-only, never a pending draft pick.
+  clearCommunityLocationPick();
+  cancelCommunityTabMotion();
   closeCommunityLocation();
   navigate('map',{suppressOverview:true});
   quickSearch.close();quickSearch.clearMapResults?.();
