@@ -354,23 +354,17 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 }
 @media(prefers-reduced-motion:reduce){#dj-ai-search-modal button{transition:none!important}}
 
-/* The iOS native dialog and its opaque status-bar sampling surface MUST remain
- * stationary and opaque. Only its inner content fades, never the backdrop. */
+/* Keep the native dialog stationary; the whole surface fades over the map. */
 @media (max-width:699px) {
   @keyframes dj9251-ai-content-enter {
-    from {opacity:.10}
+    from {opacity:0}
     to {opacity:1}
   }
   @keyframes dj9251-ai-content-leave {
     from {opacity:1}
     to {opacity:0}
   }
-  html body #dj-ai-search-modal[open]:not(.dj887-ai-closing) > .dj-ai-search-body {
-    animation:dj9251-ai-content-enter 230ms cubic-bezier(.24,.72,.34,1) both!important;
-  }
-  html body #dj-ai-search-modal[open].dj887-ai-closing > .dj-ai-search-body {
-    animation:dj9251-ai-content-leave 175ms ease-in both!important;
-  }
+  html body #dj-ai-search-modal[open] > .dj-ai-search-body {animation:none!important;}
 }
 @media (max-width:699px) and (prefers-reduced-motion:reduce) {
   html body #dj-ai-search-modal[open] > .dj-ai-search-body {
@@ -380,7 +374,9 @@ body:has(#app[data-theme="dark"]) .dj-ai-search-modal{
 
 @media(max-width:699px){
  html body #dj-ai-search-modal[open]{background:var(--ai-bg)!important;min-height:0!important;box-sizing:border-box!important;}
- body:has(#dj-ai-search-modal[open]) #app{visibility:hidden!important;pointer-events:none!important;}
+ body:has(#dj-ai-search-modal[open]) #app{pointer-events:none!important;}
+ /* Retain the opaque keyboard sampling behavior only while the native keyboard is active. */
+ body:has(#dj-ai-search-modal[open][data-dj-ai-keyboard="true"]) #app{visibility:hidden!important;}
  html body #dj-ai-search-modal[open] .dj-ai-search-body{flex:1 1 0!important;max-height:100%!important;overflow:hidden!important;justify-content:flex-start!important;}
  #dj-ai-search-modal .dj-ai-welcome{margin:0!important;text-align:left!important;}
 }
