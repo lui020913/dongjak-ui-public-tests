@@ -131,7 +131,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     for(const [target,type] of listeners)target?.addEventListener?.(type,schedule,{passive:true});
     updateTitle();
   }
-  function show({resetScroll=true}={}){
+  function show({resetScroll=true,mapOrigin=false}={}){
     ensure();
     initialLayoutHeight=Math.max(1,Number(win.innerHeight)||Number(doc.documentElement.clientHeight)||1);
     if(form.parentNode!==root)root.append(form);
@@ -141,7 +141,9 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     doc.body.dataset.djCommunityEditor='open';
     const app=doc.getElementById('app');
     if(app){wasAppInert=app.inert;app.inert=true;}
-    hideDock();
+    root.dataset.mapOrigin=String(mapOrigin);
+    if(mapOrigin)doc.body.dataset.djCommunityMapOrigin='true';
+    else{delete doc.body.dataset.djCommunityMapOrigin;hideDock();}
     updateTitle();
     geometry();
     if(resetScroll&&scroll)scroll.scrollTop=0;
@@ -161,6 +163,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     delete root.dataset.closing;
     form.hidden=true;
     delete doc.body.dataset.djCommunityEditor;
+    delete doc.body.dataset.djCommunityMapOrigin;
     if(initialParent&&form.parentNode!==initialParent){
       if(initialNext?.parentNode===initialParent)initialParent.insertBefore(form,initialNext);
       else initialParent.append(form);
@@ -186,6 +189,6 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.remove();
     root=null;scroll=null;footer=null;helper=null;header=null;
   }
-  return {open:()=>show({resetScroll:true}),prepareClose,close:hide,restoreDesktop,
+  return {open:options=>show({resetScroll:true,...options}),prepareClose,close:hide,restoreDesktop,
     isOpen:()=>Boolean(root&&!root.hidden),get portal(){return root;}};
 }
