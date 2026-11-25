@@ -8,6 +8,10 @@ test('notice view owns visibility of notifications, feed and map-report link',()
  assert.match(view,/panel\.hidden=!open/);
  assert.match(view,/\['community-list','participate-register'\]/);
  assert.match(view,/\.hidden=open/);
+ assert.match(view,/getElementById\('community-list'\)\.replaceChildren\(\)/);
+ assert.match(view,/else if\(wasOpen\)renderCommunity\(\)/);
+ assert.match(s,/root\.replaceChildren\(\);\s*\/\/[^\n]+\n\s*if\(!document\.getElementById\('community-notifications'\)\.hidden\)return/);
+ assert.match(read('src/mobile-ui/current.css'),/#community-list:not\(\[hidden\]\)\s*\{\s*order:0!important;display:grid!important/);
  assert.match(s,/setCommunityNoticeView\(panel\.hidden\)/);
  assert.match(s,/function openCommunityNoticesFromPush\(\)\{navigate\('participate'\);setCommunityNoticeView\(true\)/);
  assert.match(css,/#participation-panel #community-list\[hidden\],#participation-panel #participate-register\[hidden\]\{display:none!important\}/);
