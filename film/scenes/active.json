@@ -1,5 +1,5 @@
 {
-  "name": "noryangjin-line1-destination",
+  "name": "noryangjin-station-destination",
   "viewport": {
     "width": 430,
     "height": 932
@@ -44,30 +44,21 @@
     },
     {
       "action": "visible",
-      "selector": "#transport-sheet",
-      "timeout": 30000
-    },
-    {
-      "action": "contains",
-      "selector": "#transport-title",
-      "expected": "노량진"
-    },
-    {
-      "action": "click",
-      "selector": "#transport-title [data-dj-line='1호선']",
+      "selector": ".dj-place-detail-popup .dj-place-header-title",
       "timeout": 20000
     },
     {
-      "action": "visible",
-      "selector": "#transport-title [data-dj-line='1호선'][aria-pressed='true']"
+      "action": "contains",
+      "selector": ".dj-place-detail-popup .dj-place-header-title",
+      "expected": "노량진"
     },
     {
       "action": "wait",
-      "ms": 1600
+      "ms": 1800
     },
     {
       "action": "click",
-      "selector": "#transport-use-end"
+      "selector": ".dj-place-detail-popup .dj-place-route-end"
     },
     {
       "action": "visible",
