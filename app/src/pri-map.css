@@ -141,3 +141,4 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px s
 #app .dj-pri-map-key span::before{content:'';width:18px;height:0;border-top:3px solid #687380;flex:none;}
 #app .dj-pri-map-key .dj-pri-key-boundary::before{border-color:#436F9C;}
 #app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #52677E;}
+
