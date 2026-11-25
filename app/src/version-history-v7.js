@@ -1,6 +1,6 @@
 import {releaseEdition,syncPublicVersion} from './release-editions.js';
 import {buildGenerationCatalog} from './history-generation-catalog.js';
-import {CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote} from './public-release-display.js';
+import {CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote,cleanHistoryNote,historyHighlights} from './public-release-display.js';
 /**
  * v7.0.7: visual presentation is release-first, newest to oldest.
  * The old classification model stays exported for data-integrity checks.
@@ -166,57 +166,68 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   const columns=el('div','v707-history-columns');columns.dataset.activeView='updates';
   const timeline=el('section','v707-history-timeline');timeline.id='history-version-timeline';
   timeline.setAttribute('aria-label','변경 종류별 전체 업데이트 내역');
-  // Group the actual, preserved release notes by user-facing change type.
-  // Internal build numbers and archived identities remain in DOM metadata only.
-  const categorized=new Map(CHANGE_TYPE_GROUPS.map(type=>[type.id,new Map()]));
+  // Latest changes appear once; the archive stays grouped, deduplicated
+  // and collapsed. Keep the source ledger and exact build identity intact.
   const audited=buildGenerationCatalog(releases,releaseEdition).flatMap(group=>group.records);
+  const sourceNotes=audited.flatMap(({record})=>record.sourceItems||record.items||[]);
+  const categorized=new Map(CHANGE_TYPE_GROUPS.map(type=>[type.id,new Map()]));
+  const currentTexts=new Set((currentRelease?.items||[]).map(note=>cleanHistoryNote(note,currentRelease?.version)).filter(Boolean));
+  const seen=new Set(currentTexts);
+  const keyFor=note=>note.replace(/[.!。]+$/,'').trim();
+  for(const note of currentTexts)seen.add(keyFor(note));
+  const makeArticle=(record,notes,current=false)=>{
+    const article=el('article','v707-release');
+    article.dataset.version=String(record.version||'').replace(/^v/,'');
+    article.dataset.releaseType=record.scale||'patch';
+    if(record.sourceVersion)article.dataset.archivedVersion=String(record.sourceVersion);
+    if(current){
+      article.dataset.currentBuild='true';
+      article.classList.add('dj-history-latest');
+      const head=el('header','v707-release-head');
+      head.append(el('h4','','최근 변경사항'));article.append(head);
+    }
+    const ul=el('ul','v707-release-items');
+    for(const description of notes)ul.append(el('li','',publicReleaseNote(description,record.version)));
+    article.append(ul);return article;
+  };
+  if(currentRelease)timeline.append(makeArticle(currentRelease,currentTexts.size?[...currentTexts]:['서비스 이용 환경을 개선했습니다.'],true));
   for(const {record,classification,sourceScale} of audited){
-    const notes=record.sourceItems||record.items||[];
-    for(const note of notes){
+    if(record===currentRelease)continue;
+    for(const note of record.sourceItems||record.items||[]){
+      const first=cleanHistoryNote(note,record.version);
+      if(!first||currentTexts.has(first)||seen.has(keyFor(first)))continue;
+      seen.add(keyFor(first));
       const group=categorized.get(classifyReleaseNote(note,classification));
       if(!group.has(record))group.set(record,{record,classification,sourceScale,notes:[]});
-      group.get(record).notes.push(note);
+      group.get(record).notes.push(first);
     }
   }
+  timeline.append(el('h3','dj-history-section-title','주요 업데이트'));
   for(const type of CHANGE_TYPE_GROUPS){
     const records=[...categorized.get(type.id).values()];
-    if(!records.length)continue;
+    const highlights=historyHighlights(type.id,sourceNotes);
+    if(!records.length&&!highlights.length)continue;
     const archive=el('details','dj-edition-history');
     archive.dataset.changeType=type.id;
-    archive.open=false;
     const heading=el('summary','dj-edition-summary');
-    heading.append(el('strong','',type.title),el('span','',type.description),el('small','',records.length+'개 기록'));
+    heading.append(el('strong','',type.title),el('span','',type.description),el('small','','보기'));
     archive.append(heading);timeline.append(archive);
-    // The most recent note already appears above the archived patch list.
-    // Keep original historical notes intact, but never repeat its exact
-    // wording as the very next collapsed disclosure title.
-    const currentTexts=new Set((records.find(({record})=>record===currentRelease)?.notes||[])
-      .map(note=>publicReleaseNote(note,currentRelease?.version)));
+    if(highlights.length){
+      const bullets=el('ul','dj-history-highlights');
+      for(const note of highlights)bullets.append(el('li','',note));
+      archive.append(bullets);
+    }
+    if(!records.length)continue;
+    const disclosure=el('details','dj-edition-patch dj-history-archive');
+    disclosure.append(el('summary','dj-edition-patch-summary','세부 변경 기록'));
     for(const {record,classification,sourceScale,notes} of records){
-      const isCurrent=record===currentRelease;
-      let parent=archive;
-      if(!isCurrent){
-        const disclosure=el('details','dj-edition-patch');
-        const first=publicReleaseNote(notes[0]||'이전 변경사항',record.version);
-        const label=currentTexts.has(first)?'이전 변경 기록 펼치기':first.slice(0,46)+(first.length>46?'…':'');
-        disclosure.append(el('summary','dj-edition-patch-summary',label));
-        archive.append(disclosure);parent=disclosure;
-      }
-      const article=el('article','v707-release');
-      article.dataset.version=String(record.version||'').replace(/^v/,'');
+      const article=makeArticle(record,notes);
       article.dataset.changeType=type.id;
-      article.dataset.releaseType=record.scale||'patch';
       article.dataset.reviewedScale=classification;
       article.dataset.originalScale=sourceScale;
-      if(record.sourceVersion)article.dataset.archivedVersion=String(record.sourceVersion);
-      if(isCurrent)article.dataset.currentBuild='true';
-      const head=el('header','v707-release-head');
-      head.append(el('h4','',isCurrent?'최근 변경사항':'이전 변경사항'),el('span','dj-semver-size',type.title));
-      article.append(head);
-      const ul=el('ul','v707-release-items');
-      for(const description of notes)ul.append(el('li','',publicReleaseNote(description,record.version)));
-      article.append(ul);parent.append(article);
+      disclosure.append(article);
     }
+    archive.append(disclosure);
   }
   if(currentRelease)void syncPublicVersion({version:currentRelease.version});
   const sources=el('aside','v707-history-sources');sources.id='history-data-sources';
