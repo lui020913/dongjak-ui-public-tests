@@ -17,7 +17,7 @@ export function installMapProduct({map,maplibregl,navigate,getRoutePoints,onWayp
     const place=ev.detail?.place;
     if(!place)return;
     recordRecentPlace(place);
-    openPlaceDetails({map,maplibregl,place:{...place,type:place.category||'장소'}});
+    openPlaceDetails({map,maplibregl,place:{...place,type:place.category||'장소'},fromResultMap:ev.detail?.fromResultMap===true,onBack:ev.detail?.onBack});
     renderStored();
   };
   window.addEventListener('dongjak:map-place-selected',onPicked);
