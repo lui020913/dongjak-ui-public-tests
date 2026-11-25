@@ -41,7 +41,9 @@ test('installation choices expose one persistent selected state and Android alwa
  const guide=androidInstallGuidance();
  assert.match(js,/setSelected=key=>/);
  assert.match(js,/aria-pressed/);
- assert.match(js,/dj-install-selected/);
+ assert.doesNotMatch(js,/dj-install-selected|선택됨/);
+ assert.doesNotMatch(css,/\.dj-install-selected/);
+ assert.doesNotMatch(css,/aria-pressed="true"\] \.dj-install-status\{display:none/);
  assert.match(js,/showAndroidGuide\(url\)/);
  assert.match(css,/\.dj-install-choice\[aria-pressed="true"\]/);
  assert.match(guide.intro,/Google Play 스토어 외부/);
