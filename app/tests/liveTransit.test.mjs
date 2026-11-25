@@ -201,3 +201,11 @@ test('selected route recovers official positions through actual stop range',asyn
  };
  try{const res=await onRequestGet({request:new Request('https://example.org/api/transport/live-vehicles?modes=bus&routeId=100100389'),env:{SEOUL_BUS_SERVICE_KEY:'ROUTE_KEY',SEOUL_BUS_POSITION_API_KEY:'POSITION_KEY'}});const data=await res.json();assert.equal(res.status,200);assert.equal(data.bus.length,1);assert.equal(calls[2].searchParams.get('endOrd'),'12');assert.equal(calls[0].searchParams.get('ServiceKey'),'POSITION_KEY');assert.equal(calls[1].searchParams.get('ServiceKey'),'ROUTE_KEY');assert.equal(data.busDiagnostics['100100389'].operation,'getBusPosByRouteSt');assert(!JSON.stringify(data).includes('POSITION_KEY'));}finally{globalThis.fetch=original;}
 });
+
+test('official bus section order survives both JSON and XML normalization',()=>{
+ const route='100100389',row={vehId:'1',gpsX:'126.95',gpsY:'37.51',sectOrd:'12'};
+ const json=parseBusResponse({msgBody:{itemList:row}},route);
+ const xml=parseBusResponse('<itemList><vehId>1</vehId><gpsX>126.95</gpsX><gpsY>37.51</gpsY><sectOrd>12</sectOrd></itemList>',route);
+ assert.equal(json[0].sectionOrder,12);assert.equal(xml[0].sectionOrder,12);
+ assert.equal(parseBusResponse({msgBody:{itemList:{...row,sectOrd:'0'}}},route)[0].sectionOrder,undefined);
+});

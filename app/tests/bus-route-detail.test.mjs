@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {routeVehicleGroups,vehicleLabel,stopHours} from '../src/bus-route-detail-model.mjs';
+import {routeVehicleGroups,vehicleLabel,vehicleDisplay,stopHours} from '../src/bus-route-detail-model.mjs';
 test('places vehicles only before a uniquely identified next stop',()=>{
   const stops=[{seq:1,stationId:'a'},{seq:2,stationId:'b'},{seq:3,stationId:'c'},{seq:4,stationId:'c'}];
   const valid={id:'1',nextStopId:'b'},ambiguous={id:'2',nextStopId:'c'},missing={id:'3'},first={id:'4',nextStopId:'a'};
@@ -42,4 +42,17 @@ test('route detail fades before hiding, removes fake handle, and uses available 
  assert.ok(css.includes("height:auto;min-height:0;max-height:none;"));
  assert.ok(!css.includes("77dvh"));
  assert.ok(map.includes("onHidden:syncRoutePresentation"));
+});
+
+test('official section order places vehicles with missing or repeated next-stop IDs without GPS guessing',()=>{
+ const stops=[{seq:1,stationId:'101'},{seq:2,stationId:'102'},{seq:3,stationId:'103'},{seq:4,stationId:'102'}];
+ const missing={id:'a',sectionOrder:1}, repeated={id:'b',nextStopId:'102',sectionOrder:3}, zero={id:'c',nextStopId:'0',sectionOrder:2}, conflict={id:'d',nextStopId:'102',sectionOrder:2}, terminal={id:'e',sectionOrder:4};
+ const {groups,unplaced}=routeVehicleGroups(stops,[missing,repeated,zero,conflict,terminal]);
+ assert.deepEqual(groups.get(2),[missing]);assert.deepEqual(groups.get(4),[repeated]);assert.deepEqual(groups.get(3),[zero]);assert.deepEqual(unplaced,[conflict,terminal]);
+});
+
+test('short plate preserves leading zero and congestion has explicit semantic colors',()=>{
+ assert.equal(vehicleLabel({vehicleNumber:'서울70사0721',congestion:3,busType:'1'}),'0721 · 여유 · 저상');
+ assert.equal(vehicleDisplay({congestion:'3'}).tone,'low');assert.equal(vehicleDisplay({congestion:'4'}).tone,'medium');assert.equal(vehicleDisplay({congestion:'5'}).tone,'high');assert.equal(vehicleDisplay({congestion:'6'}).tone,'high');assert.equal(vehicleDisplay({congestion:'0'}).tone,'unknown');
+ const css=readFileSync(new URL('../src/bus-route-detail.css',import.meta.url),'utf8');for(const tone of ['low','medium','high'])assert.ok(css.includes('data-tone='+tone));
 });

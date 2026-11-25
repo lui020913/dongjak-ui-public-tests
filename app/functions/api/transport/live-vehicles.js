@@ -65,6 +65,7 @@ export function parseBusResponse(xml,routeId,now=new Date(),routeName=''){
     return {id:id?`bus:${id}`:'',routeId:String(field('routeId')||field('busRouteId')||routeId),routeName:routeName||String(routeId),
       vehicleNumber:field('plainNo'),longitude:lng,latitude:lat,observedAt:normalizeKST(field('dataTm')||field('gpsTime')||field('tm'),now),receivedAt:now.toISOString(),
       ...(field('nextStId')?{nextStopId:field('nextStId')}:{}),
+      ...(/^\d+$/.test(field('sectOrd'))&&Number(field('sectOrd'))>0?{sectionOrder:Number(field('sectOrd'))}:{}),
       ...(['0','1'].includes(field('busType'))?{busType:field('busType')}:{}),
       ...(['3','4','5','6'].includes(field('congetion'))?{congestion:field('congetion')}:{})};
   }).filter(b=>b.id&&b.routeId===String(routeId)&&xy(b.longitude,b.latitude));
