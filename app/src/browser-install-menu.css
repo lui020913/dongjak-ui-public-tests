@@ -173,10 +173,10 @@ html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
 }
 
 /* Browser welcome: device guidance, not an access gate. */
-#dj-install-menu .dj-install-performance{margin:18px 0 0;padding:14px;border:1px solid #d9e5de;border-radius:14px;background:#f4f8f6;text-align:left;box-sizing:border-box;color:#29483b}
+#dj-install-menu .dj-install-performance{width:100%;min-width:0;max-width:100%;margin:18px 0 0;padding:14px;border:1px solid #d9e5de;border-radius:14px;background:#f4f8f6;text-align:left;box-sizing:border-box;color:#29483b}
 #dj-install-menu .dj-install-performance h3{font-size:15px;margin:0 0 10px;line-height:1.4}
 #dj-install-menu .dj-install-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 #dj-install-menu .dj-install-performance-device{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:13px;line-height:1.4}
 #dj-install-menu .dj-install-performance-device strong{font-size:14px}
-#dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.6;margin:12px 0 0;word-break:keep-all;overflow-wrap:anywhere;color:inherit}
+#dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.6;margin:12px 0 0;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:100%;color:inherit}
 html[data-theme=dark] #dj-install-menu .dj-install-performance{background:#293632;border-color:#53665a;color:#e2f0e7}
