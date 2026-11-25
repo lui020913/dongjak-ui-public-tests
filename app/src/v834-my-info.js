@@ -33,7 +33,7 @@ export function installMyInfo(doc=document){
  <h3 class="dj834-group-title">앱 &amp; 화면</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="type"><span class="dj834-setting-icon">${symbol('type')}</span><span>글자 크기·굵기</span><span class="dj834-chevron">›</span></button>
  <button type="button" data-dj834-action="map"><span class="dj834-setting-icon">${symbol('map')}</span><span>지도·도보 설정</span><span class="dj834-chevron">›</span></button>
- <button type="button" data-dj834-action="history"><span class="dj834-setting-icon">${symbol('info')}</span><span>전체 업데이트 내역</span><span class="dj834-chevron">›</span></button></div>
+ </div>
  <h3 class="dj834-group-title">내 활동</h3><div class="dj834-settings-group">
  <button type="button" data-dj834-action="records"><span class="dj834-setting-icon">${symbol('heart')}</span><span>즐겨찾기 · 내 기록</span><span class="dj834-chevron">›</span></button></div>`;
  const detail=doc.createElement('section');detail.className='dj834-my-detail';detail.hidden=true;
@@ -180,11 +180,6 @@ export function installMyInfo(doc=document){
    doc.getElementById('dj-settings-reset')?.click();
    syncMapChoices();
  });
- // Reuse the actual release catalog and its existing category/source handlers.
- // It is a My Info child page on phones rather than a second overlapping modal.
- const historyBox=doc.createElement('section');historyBox.className='dj834-history-container';
- const historyList=doc.getElementById('version-history-list');
- const historyHost=historyList?.parentElement||null;
  for(const child of [...body.children]){
    if(child===heading||child===landing||child===detail)continue;
    records.append(child);
@@ -238,14 +233,14 @@ export function installMyInfo(doc=document){
  doc.defaultView?.addEventListener('resize',syncSubpageHeader,{passive:true});
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
- accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;historyBox.hidden=true;mapBox.hidden=true;
+ accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;mapBox.hidden=true;
  toolsBox.hidden=false; // Its visibility is governed by the enclosing map page and <details>.
- content.append(accountBox,typography,records);content.append(languageSettings,historyBox,mapBox);
+ content.append(accountBox,typography,records);content.append(languageSettings,mapBox);
  // All inactive settings views remain mounted for real-time account/history
  // updates but must never contribute their own layout height. Historically
  // a versioned !important display:grid on the hidden typography view pushed
  // every subsequent subpage to the bottom of an iPhone viewport.
- for(const node of [accountBox,typography,records,languageSettings,historyBox,mapBox])
+ for(const node of [accountBox,typography,records,languageSettings,mapBox])
    node.style.setProperty('display','none','important');
  // The language preference may initialize before My Info and be swept into
  // the inactive records container above. Reparent that *same live control*
@@ -253,7 +248,7 @@ export function installMyInfo(doc=document){
  const languageControl=panel.querySelector('.dj854-language-section');
  const displayGroup=landing.querySelector('.dj834-settings-group');
  if(languageControl&&displayGroup){
-   displayGroup.insertBefore(languageControl,displayGroup.querySelector('[data-dj834-action="history"]'));
+   displayGroup.append(languageControl);
    languageControl.hidden=false;
  }
  const profileName=landing.querySelector('.dj834-profile-name');
@@ -281,14 +276,9 @@ export function installMyInfo(doc=document){
  }
  function showDetail(view){
    landing.hidden=true;
-   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',history:'업데이트 내역',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
-   if(historyList&&historyHost&&view==='history'&&historyList.parentElement!==historyBox){
-     historyBox.append(historyList);
-     for(const item of historyList.querySelectorAll('details'))item.open=false;
-   }
-   else if(historyList&&historyHost&&view!=='history'&&historyList.parentElement!==historyHost)historyHost.append(historyList);
+   title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
    if(view==='tools'){view='map';advancedTools.open=true;}
-   const views={profile:accountBox,type:typography,records,language:languageSettings,history:historyBox,map:mapBox};
+   const views={profile:accountBox,type:typography,records,language:languageSettings,map:mapBox};
    for(const [key,node] of Object.entries(views)){
      const active=key===view;
      node.hidden=!active;
@@ -316,7 +306,6 @@ export function installMyInfo(doc=document){
    }
  }
  function back(){
-   if(historyList&&historyHost&&historyList.parentElement!==historyHost)historyHost.append(historyList);
    delete content.dataset.dj834View;
    detail.hidden=true;
    landing.hidden=false;
@@ -336,7 +325,6 @@ export function installMyInfo(doc=document){
      doc.getElementById('map-tools-toggle')?.click();return;
    }
    
-   if(action==='history'){if(historyList)showDetail('history');else doc.getElementById('version-history-trigger')?.click();return;}
  });
  updateProfile();return true;
 }
