@@ -123,15 +123,18 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
    for(const child of [...safety.children])if(child!==head)scroll.append(child);
    safety.append(scroll);
   }
-  const form=$('community-form'),formHead=form?.querySelector('.community-form-top');
-  if(form&&!form.hidden&&formHead&&!form.querySelector('.djNext-form-scroll')){
+  const community=$('participation-panel'),form=$('community-form'),formHead=form?.querySelector('.community-form-top');
+  // Only the legacy editor inside the active feed belongs to this controller.
+  // The body-level portal owns its own layout and opacity. Claiming its form
+  // here forces a blank participation panel over the live WebGL map.
+  const editing=Boolean(community&&!community.hidden&&app.dataset.tab==='participate'&&form&&!form.hidden&&community.contains(form));
+  if(editing&&formHead&&!form.querySelector('.djNext-form-scroll')){
    const scroll=doc.createElement('div');scroll.className='djNext-form-scroll';
    for(const child of [...form.childNodes])if(child!==formHead)scroll.append(child);
    form.append(scroll);
   }
   // Composer is its own screen: hide feed controls with inline ownership so
   // legacy highly-specific sheet rules cannot leak category tabs into editing.
-  const community=$('participation-panel'),editing=!!form&&!form.hidden;
   // Closing the map's risk report goes back to Map. A later Community-tab
   // click must not resurrect an off-screen half-sheet from the old controller.
   if(editing&&communityFeedOwned)restoreCommunityFeedStyle();

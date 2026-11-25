@@ -871,18 +871,21 @@ test('map report fades out over its real destination without reparenting or resi
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await page.evaluate(()=>{
-  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),map=document.getElementById('map');if(editor&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
+  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),map=document.getElementById('map');if(editor&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map);window.__reportOpenFrames.push({feedHidden:getComputedStyle(document.getElementById('participation-panel')).display==='none',opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
  });
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-dj810-animating')).toBeNull();
- expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
+ expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.feedHidden&&f.opacity>.08&&f.opacity<.95))).toBe(true);
+ expect(await page.evaluate(()=>window.__reportOpenFrames.every(f=>f.feedHidden))).toBe(true);
+ await expect(portal.locator('#community-form > .dj-compose-scroll')).toHaveCount(1);
+ await expect(portal.locator('.djNext-form-scroll')).toHaveCount(0);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:getComputedStyle(app).visibility==='visible'&&Number(getComputedStyle(app).opacity)>.98&&getComputedStyle(document.getElementById('map')).visibility==='visible'&&Number(getComputedStyle(document.getElementById('map')).opacity)>.98,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({feedHidden:getComputedStyle(document.getElementById('participation-panel')).display==='none',opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:getComputedStyle(app).visibility==='visible'&&Number(getComputedStyle(app).opacity)>.98&&getComputedStyle(document.getElementById('map')).visibility==='visible'&&Number(getComputedStyle(document.getElementById('map')).opacity)>.98,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
@@ -890,8 +893,8 @@ test('map report fades out over its real destination without reparenting or resi
  await expect(portal).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
- expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map'&&f.mapVisible)).toBe(true);
- expect(frames.every(f=>f.stable)).toBe(true);
+ expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map'&&f.mapVisible&&f.feedHidden)).toBe(true);
+ expect(frames.every(f=>f.stable&&f.feedHidden)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
 });
 
