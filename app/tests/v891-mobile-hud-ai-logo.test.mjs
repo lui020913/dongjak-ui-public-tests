@@ -95,3 +95,10 @@ test('phone AI close dissolves the complete dialog over the map and synchronousl
  assert.match(css,/from \{opacity:0\}\s*to \{opacity:1\}/);
  assert.match(css,/from \{opacity:1\}\s*to \{opacity:0\}/);
 });
+
+test('ordinary AI dialog never hides the live map or forces opaque animation frames',()=>{
+ const css=code('src/v880-supabase-safety-ai.css'),geometry=code('src/v891-mobile-hud-ai-logo.js');
+ assert.doesNotMatch(css,/#dj-ai-search-modal\[open\]\) #app\{[^}]*?(?:opacity:0|visibility:hidden)/);
+ assert.doesNotMatch(css,/#dj-ai-search-modal\[open\]\{[^}]*?opacity:1!important/);
+ assert.match(geometry,/setMapUnderAi\(keyboardOpen\)/);
+});
