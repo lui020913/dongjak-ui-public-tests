@@ -18,8 +18,8 @@ export function normalizeFacilityCategory(value,name=''){
  const type=TYPE_ALIASES[raw]||categoryAliases[raw.toLowerCase()]||raw;
  if(genericType.has(type)){
    const label=String(name??'').trim().replace(/\s+/g,'');
-   if(/(?:경찰서|경찰지구대|지구대|파출소|치안센터)$/.test(label))return '경찰서';
    if(/(?:소방서|119안전센터|119구조대|119지역대|소방파출소)$/.test(label))return '소방서';
+   if(/(?:경찰서|경찰지구대|지구대|파출소|치안센터)$/.test(label))return '경찰서';
    if(/(?:행정복지센터|주민센터|동사무소)$/.test(label))return '주민센터';
  }
  return type;
