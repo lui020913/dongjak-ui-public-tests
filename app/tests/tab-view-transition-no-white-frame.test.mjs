@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {TAB_TRANSITION,installBottomTabNavigation} from '../src/bottom-tab-navigation.js';
+import {createPrimarySurfaceTransition} from '../src/primary-surface-transition.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
 function harness({canTransition=true,reduced=false}={}){
@@ -102,4 +103,26 @@ test('external navigation invalidates a pending primary presentation without reo
  assert.equal(h.panel.dataset.djPrimaryTransition,undefined);
  assert.equal(h.values.has('opacity'),false);
  h.cleanup();
+});
+
+
+test('community and news directly dissolve incoming content above an opaque outgoing page in both directions',()=>{
+ for(const [from,to] of [['participate','news'],['news','participate']]){
+  const page=key=>{const values=new Map();return {hidden:false,dataset:{page:key},values,style:{getPropertyValue:k=>values.get(k)||'',getPropertyPriority:()=>'',setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)}};};
+  const previous=page(from),incoming=page(to);incoming.hidden=true;
+  const app={dataset:{tab:from}};let raf=null;let count=0;
+  const win={requestAnimationFrame:fn=>{raf=fn;return ++count;},cancelAnimationFrame:()=>{},setTimeout:()=>1,clearTimeout:()=>{},getComputedStyle:()=>({display:'flex',visibility:'visible'})};
+  const doc={getElementById:()=>null,querySelector:()=>incoming.hidden?null:incoming};
+  const owner=createPrimarySurfaceTransition({doc,win,app,reduced:()=>false,replay:()=>{app.dataset.tab=to;incoming.hidden=false;return true;}});
+  owner.dissolvePrimary({dataset:{tab:to}},from,previous);
+  assert.equal(previous.hidden,false);assert.equal(previous.values.get('opacity'),'1');
+  assert.equal(incoming.values.get('opacity'),'0');assert.ok(Number(incoming.values.get('z-index'))>Number(previous.values.get('z-index')));
+  raf(0);raf(32);const a=Number(incoming.values.get('opacity'));assert.ok(a>0&&a<1);
+  // A late legacy style/hidden write cannot blank or cover the old page.
+  previous.hidden=true;previous.style.setProperty('opacity','0');incoming.style.setProperty('z-index','1');raf(64);
+  assert.equal(previous.hidden,false);assert.equal(previous.values.get('opacity'),'1');assert.equal(incoming.values.get('z-index'),'7001');
+  assert.ok(Number(incoming.values.get('opacity'))>a);
+  for(let i=3;i<=11;i++)raf(i*32);
+  assert.equal(previous.hidden,true);assert.equal(incoming.hidden,false);assert.equal(incoming.values.has('opacity'),false);assert.equal(app.dataset.djPrimaryDissolving,undefined);
+ }
 });

@@ -69,7 +69,9 @@ async function visuallyPresented(locator){
  })).toBe(true);
 }
 async function enter(page,id,key){
- const fromMap=await page.locator('#app').getAttribute('data-tab')==='map';
+ const previousTab=await page.locator('#app').getAttribute('data-tab');
+ const fromMap=previousTab==='map';
+ const directPair=['news','participate'].includes(previousTab)&&['news','participate'].includes(key)&&previousTab!==key;
  await page.evaluate(({id,key})=>{
    const panel=document.getElementById(id),frames=[];
    window.__auditStop?.();
@@ -88,7 +90,7 @@ async function enter(page,id,key){
          const outgoing=document.querySelector('[data-dj-tab-outgoing="true"]');
          const out=outgoing?getComputedStyle(outgoing):null;
          const map=document.getElementById('map'),app=document.getElementById('app');const mapVisible=!!map&&getComputedStyle(map).visibility==='visible'&&getComputedStyle(map).display!=='none'&&Number(getComputedStyle(map).opacity)>.98&&Number(getComputedStyle(app).opacity)>.98;
-         frames.push({t:performance.now(),owner:panel.dataset.djPrimaryTransition||null,active:app.dataset.tab,hidden:panel.hidden,mapVisible,rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
+         frames.push({t:performance.now(),owner:panel.dataset.djPrimaryTransition||null,active:app.dataset.tab,hidden:panel.hidden,mapVisible,rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,rootZ:Number(c.zIndex),outgoingZ:out?Number(out.zIndex):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
        }
      }
      frame=requestAnimationFrame(capture);
@@ -105,6 +107,7 @@ async function enter(page,id,key){
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
    if(fromMap&&['news','participate'].includes(key))expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
+   if(directPair)expect(frames.some(f=>f.visible&&f.rootOpacity>.12&&f.rootOpacity<.98&&f.outgoingOpacity>.98&&f.rootZ>f.outgoingZ)).toBe(true);
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);

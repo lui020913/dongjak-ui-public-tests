@@ -34,3 +34,14 @@ test('v8.7.1: Nodeulseom has a fallback geographic marker and verified facility 
  assert.match(js,/openPlaceDetails\(\{map,maplibregl,place:/);
  assert.match(js,/style\.load/);
 });
+
+
+test('search dismissal releases the whole retained surface on its actual animation end',()=>{
+ const js=read('src/map-quick-search.js');
+ assert.match(js,/event\.target===dropdown&&event\.animationName==='dj871-search-out'\)finishClose\?\.\(\)/);
+ assert.match(js,/closeTimer=window\.setTimeout\(finish,210\)/);
+ assert.doesNotMatch(js,/closeTimer=window\.setTimeout\(finish,300\)/);
+ assert.match(js,/const show=\(\)=>\{\s*cancelClose\(\)/);
+ assert.match(js,/cancelClose\(\);mapFooter\.hidden=true/);
+ assert.match(js,/closeBtn\?\.addEventListener\('click',\(\)=>\{query\.blur\(\)/);
+});

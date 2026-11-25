@@ -105,7 +105,11 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   };
   syncDropdownHost();
   window.addEventListener('resize',syncDropdownHost,{passive:true});
-  let closeTimer=null;
+  let closeTimer=null,finishClose=null;
+  const cancelClose=()=>{if(closeTimer!==null)window.clearTimeout(closeTimer);closeTimer=null;finishClose=null;};
+  dropdown.addEventListener('animationend',event=>{
+    if(event.target===dropdown&&event.animationName==='dj871-search-out')finishClose?.();
+  });
   let controller=null,seq=0,marker=null;
   let placeholderIndex=Math.floor(Math.random()*FRIENDLY_SEARCH_PLACEHOLDERS.length);
   let placeholderTimer=0;
@@ -152,12 +156,13 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   };
   const close=()=>{
     seq++;controller?.abort();controller=null;
-    selectedMapRows=[];mapFooter.hidden=true;
-    if(closeTimer)return;
+    selectedMapRows=[];
+    if(finishClose)return;
     const finish=()=>{
-      dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving');
+      cancelClose();mapFooter.hidden=true;
+      dropdown.hidden=true;dropdown.classList.remove('dj871-search-leaving','dj871-search-entering');
       delete dropdown.dataset.searchMode;dropdown.style.removeProperty('display');
-      shell.style.removeProperty('--dj-search-results-max');closeTimer=null;
+      shell.style.removeProperty('--dj-search-results-max');
       syncClear();syncEntry();
     };
     // Release map chrome now but retain the actual results surface and its
@@ -167,11 +172,14 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const mobile=window.matchMedia?.('(max-width:699px)')?.matches;
     const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||app.classList.contains('dj-reduced-animation');
     if(dropdown.hidden||!mobile||reduced){finish();return;}
+    finishClose=finish;
     dropdown.classList.remove('dj871-search-entering');dropdown.classList.add('dj871-search-leaving');
-    closeTimer=window.setTimeout(finish,300);
+    // CSS exit is 180–185ms; finalize on animationend, with a short
+    // fallback only when the browser does not deliver the event.
+    closeTimer=window.setTimeout(finish,210);
   };
   const show=()=>{
-    if(closeTimer){window.clearTimeout(closeTimer);closeTimer=null;}
+    cancelClose();
     const wasHidden=dropdown.hidden||dropdown.classList.contains('dj871-search-leaving');
     dropdown.classList.remove('dj871-search-leaving');
     if(wasHidden)window.DongjakWindowLifecycle?.requestOpen('map-quick-search-dropdown');
@@ -477,8 +485,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   window.addEventListener('dongjak:recent-places-change',()=>{if(!dropdown.hidden&&dropdown.dataset.searchMode==='history')render([],true);});
   clearButton.addEventListener('pointerdown',e=>e.preventDefault());
   clearButton.addEventListener('click',()=>{query.value='';query.focus();query.dispatchEvent(new Event('input',{bubbles:true}));});
-  closeBtn?.addEventListener('click',()=>{close();query.blur();query.value='';form.classList.remove('dj807-has-input');syncClear();});
-  document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target)&&!actions.contains(event.target)){close();if(document.activeElement===query)query.blur();syncEntry();}});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'){close();if(document.activeElement===query)query.blur();syncEntry();}});
+  closeBtn?.addEventListener('click',()=>{query.blur();query.value='';form.classList.remove('dj807-has-input');close();syncEntry();});
+  document.addEventListener('pointerdown',event=>{if(!shell.contains(event.target)&&!dropdown.contains(event.target)&&!actions.contains(event.target)){if(document.activeElement===query)query.blur();close();syncEntry();}});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){if(document.activeElement===query)query.blur();close();syncEntry();}});
   return {close,clearMapResults,search:performSearch};
 }
