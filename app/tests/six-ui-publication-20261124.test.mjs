@@ -8,9 +8,9 @@ test('solid rendering retains the meaning, geometry and color of every line laye
  const changed=[];const map={getStyle:()=>({layers}),setPaintProperty:(id,key,value)=>{changed.push([id,key,value]);delete layers.find(l=>l.id===id).paint[key]}};
  assert.equal(solidifyMapLines(map),2);assert.equal(solidifyMapLines(map),0);assert.deepEqual(changed.map(x=>x[0]),['route','rail']);assert.equal(layers[0].paint['line-color'],'#85949d');
 });
-test('history collapses on both entry paths and keeps text inside category',()=>{
+test('retired history is absent from My Info while archived renderer remains intact',()=>{
  assert.match(read('src/version-history-v7.js'),/archive.open=false/);
- assert.match(read('src/v834-my-info.js'),/historyList.querySelectorAll\('details'\)/);
+ assert.doesNotMatch(read('src/v834-my-info.js'),/historyList.querySelectorAll\('details'\)/);
  assert.match(read('src/version-history-v7.css'),/v707-release-items li\{[\s\S]*?overflow-wrap:anywhere!important/);
 });
 test('AI and PRI headers stay outside the scrolling content',()=>{

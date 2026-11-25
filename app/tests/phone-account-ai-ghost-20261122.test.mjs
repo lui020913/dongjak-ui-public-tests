@@ -39,7 +39,7 @@ test('language remains in App & Display row regardless of initialization order',
   const home=source('v834-my-info.js'),language=source('v854-language.js');
   const css=readPrimaryPhoneCss();
   const wrapped=home.indexOf('records.append(child)');
-  const correct=home.indexOf('displayGroup.insertBefore(languageControl');
+  const correct=home.indexOf('displayGroup.append(languageControl');
   assert(wrapped!==-1&&correct>wrapped);
   assert(language.includes('section.hidden=true'));
   assert(language.includes('if(section.hidden)section.hidden=false'));
