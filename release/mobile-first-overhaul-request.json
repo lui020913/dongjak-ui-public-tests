@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.182",
+  "application_version": "9.2.183",
   "public_work_branch": "main",
-  "purpose": "PR521 Preview follow-up: exercise disabled layers, keep PRI chooser open until explicit close, verify community-owned report transition and draft map-pick cancellation. Preserve protected release gates.",
-  "attempt": 412,
+  "purpose": "PR526: official bus arrival history and subway timetable direction recovery; preserve existing protected Preview and Production gates; verify live transport API responses.",
+  "attempt": 413,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
