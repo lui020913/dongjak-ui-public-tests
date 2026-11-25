@@ -63,8 +63,8 @@ test('night confirmation has one stationary fade owner, not nested CSS keyframes
  assert.doesNotMatch(css,/animation:dj9267-night-/);
  assert.doesNotMatch(html,/src="\/src\/v852-mobile-ux\.js"/);
 });
-test('tab switching uses only incoming reveal or outgoing map return, never both',()=>{
- assert.match(tab,/const retain=Boolean\(toMap/);
+test('tab switching cross-dissolves live surfaces without duplicate entrance effects',()=>{
+ assert.match(tab,/const retain=Boolean\(previous/);
  assert.match(tab,/if\(!reduced\(\)&&!toMap\)/);
  assert.match(tab,/pointer-events','none','important'/);
 });
