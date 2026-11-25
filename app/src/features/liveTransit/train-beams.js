@@ -5,7 +5,7 @@
  */
 export const TRAIN_BEAM_WIDTH=256;
 export const TRAIN_BEAM_HEIGHT=96;
-export const TRAIN_BEAM_LENGTH=45;
+export const TRAIN_BEAM_LENGTH=78;
 export const TRAIN_BEAM_LAYER='dongjak-live-metro-beams-v9251';
 export const trainBeamImageId=facing=>`dj-live-train-beam-${facing==='left'?'left':'right'}`;
 
@@ -14,15 +14,20 @@ export function createTrainBeamSprite(facing){
   const width=TRAIN_BEAM_WIDTH,height=TRAIN_BEAM_HEIGHT;
   const data=new Uint8Array(width*height*4);
   const direction=facing==='right'?1:-1;
-  const originX=(width-1)/2+direction*72;
+  const originX=(width-1)/2+direction*44;
   const originY=(height-1)/2;
   const radius=TRAIN_BEAM_LENGTH;
-  // One circular radial gradient centered just beyond the nose.
-  // No triangles, paired light dots or hard edges.
+  // Radial rays originate at the train nose and spread only forwards.
+  // Feather both the distance and angular edge; no detached circular pool.
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-    const r=Math.hypot(x-originX,y-originY)/radius;
-    if(r>=1)continue;
-    const alpha=Math.round(255*.96*Math.pow(1-r,0.95));
+    const forward=(x-originX)*direction,side=Math.abs(y-originY);
+    if(forward<=0)continue;
+    const r=Math.hypot(forward,side)/radius;
+    const angle=Math.atan2(side,forward);
+    if(r>=1||angle>=Math.PI*0.28)continue;
+    const t=Math.max(0,Math.min(1,(Math.PI*0.28-angle)/(Math.PI*0.15)));
+    const feather=t*t*(3-2*t);
+    const alpha=Math.round(255*.96*Math.pow(1-r,1.25)*feather);
     if(!alpha)continue;
     const offset=(y*width+x)*4;
     // Warm-white core and soft amber fringe read as an incandescent headlamp.
