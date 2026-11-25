@@ -82,13 +82,13 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   try{button.click();return true;}finally{replaying=false;}
  }
  // Community/news use a separate, single-owner live compositor. The
- // legacy tab entrance classes and rAF opacity loops never run for them.
+ // legacy tab entrance classes and shared opacity loops never run for them.
  let pageCleanup=null;
  const communityNews=key=>key==='participate'||key==='news';
  function dissolvePrimary(button,previousTab,previous){
   const destination=button.dataset.tab,fromMap=previousTab==='map',toMap=destination==='map';
   if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
-  const records=new Map();let raf=0,timer=0,finished=false,fade=null,after=null;
+  const records=new Map();let raf=0,timer=0,finished=false,fade=null;
   const props=['opacity','animation','transition','will-change','display','visibility','z-index','pointer-events'];
   const remember=node=>{if(node?.style?.getPropertyValue&&!records.has(node))records.set(node,props.map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)]));};
   const write=(node,values)=>{if(!node?.style?.setProperty)return;remember(node);for(const [k,v] of Object.entries(values))node.style.setProperty(k,v,'important');};
@@ -98,7 +98,6 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const cleanup=()=>{
    if(finished)return;finished=true;
    if(raf)win.cancelAnimationFrame(raf);if(timer)win.clearTimeout(timer);
-   fade?.removeEventListener('transitionend',after);
    if(previous){if(previous.id==='dj-route-v3'){previous.hidden=app.dataset.tab!=='route';previous.inert=false;}else if(previous.dataset.page!==app.dataset.tab)previous.hidden=true;delete previous.dataset.djTabOutgoing;}
    for(const [node,values] of records){delete node.dataset.djPrimaryTransition;for(const [k,v,p] of values){if(v&&!(node.hidden&&['display','visibility','opacity','pointer-events'].includes(k)))node.style.setProperty(k,v,p);else node.style.removeProperty(k);}}
    delete app.dataset.djPrimaryDissolving;
@@ -119,20 +118,23 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(incoming){incoming.dataset.djPrimaryTransition='incoming';write(incoming,{animation:'none',transition:'none',opacity:fromMap?'0':'1','z-index':'7000',visibility:'visible',display:'flex'});}
   if(previous){previous.hidden=false;if(previous.id==='dj-route-v3')previous.inert=true;write(previous,{animation:'none',transition:'none',opacity:'1','z-index':'7001',visibility:'visible',display:'flex','pointer-events':'none'});}
   write(fade,{'will-change':'opacity'});
-  // Commit the start value before enabling one native opacity transition.
-  // Transitions have cascade priority above legacy important opacity rules.
-  void fade.getBoundingClientRect();
-  after=event=>{if(event.target===fade&&event.propertyName==='opacity')cleanup();};
-  fade.addEventListener('transitionend',after);
-  raf=win.requestAnimationFrame(()=>{
-   raf=win.requestAnimationFrame(()=>{
-    if(finished)return;
-    write(fade,{transition:'opacity 300ms ease-in-out',opacity:fromMap?'1':'0'});
-    if(timer)win.clearTimeout(timer);
-    timer=win.setTimeout(cleanup,1200);
-   });
-  });
-  timer=win.setTimeout(cleanup,4500);
+  // Use a delivered-frame clock for this independent compositor. A busy
+  // WebGL renderer can skip a wall-clock CSS transition entirely; advance
+  // by at most 32ms per rendered frame, never skip the visible dissolve.
+  // The prior live surface and destination stay mounted until completion.
+  let previousFrame=null,elapsed=0;
+  const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,4500);};
+  const paint=now=>{
+   if(finished)return;
+   if(previousFrame!==null)elapsed+=Math.min(32,Math.max(0,now-previousFrame));
+   previousFrame=now;
+   const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
+   write(fade,{opacity:String(fromMap?alpha:1-alpha)});
+   if(progress<1){armWatchdog();raf=win.requestAnimationFrame(paint);}
+   else cleanup();
+  };
+  armWatchdog();
+  raf=win.requestAnimationFrame(paint);
  }
  function start(button){
   if(!button||button.disabled||!button.isConnected)return;
