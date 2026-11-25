@@ -476,7 +476,7 @@ test('merged route search returns to AI keyboard without a background seam',asyn
   await expect(route.locator('#v3-results button').filter({hasText:'상도역'}).first()).toBeVisible();
   await route.locator('[data-v3="search-back"]').click();
   await expect(route.locator('[data-v3-screen="search"]')).toBeHidden();
-  await route.locator('[data-v3="close"]').click();
+  await route.locator('[data-v3="back"]').click();
   await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
   await expect(route).toBeHidden();
   await page.locator('#dj890-ai-orb').click({timeout:15000});
