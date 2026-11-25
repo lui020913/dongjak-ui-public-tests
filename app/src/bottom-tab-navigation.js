@@ -205,6 +205,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   switchAdjacent(event.clientX-initial.x,event.clientY-initial.y,event);
  }
  const cancel=()=>{gesture=null;};
+ const cancelExternalTransition=()=>{cancelPrimary();clearEntrance();};
+ win.addEventListener('dongjak:cancel-tab-transition',cancelExternalTransition);
  win.addEventListener('click',select,true);
  win.addEventListener('pointerdown',down,true);
  win.addEventListener('pointerup',up,{capture:true});
@@ -216,6 +218,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   clearEntrance();
   if(swipeGuard)win.clearTimeout(swipeGuard);
   swipeGuard=0;gesture=null;mouseGesture=null;suppressClick=false;
+  win.removeEventListener('dongjak:cancel-tab-transition',cancelExternalTransition);
   win.removeEventListener('click',select,true);
   win.removeEventListener('pointerdown',down,true);
   win.removeEventListener('pointerup',up,true);
