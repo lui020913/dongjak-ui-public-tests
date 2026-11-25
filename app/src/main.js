@@ -2223,7 +2223,10 @@ function openCommunityComposer(open,{animate=true}={}) {
     // No old sheet expansion, parent header movement or native dock sizing.
     document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
     communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map'});
-    if(animate)motion?.open(communityComposerPortal.portal);
+    if(animate){
+      if(communityComposerOrigin==='map')communityComposerPortal.fadeMap(true);
+      else motion?.open(communityComposerPortal.portal);
+    }
     setMapReportHitLayer(false);
     setCommunityTopbarBlocked(false);
     return;
@@ -2237,7 +2240,12 @@ function openCommunityComposer(open,{animate=true}={}) {
   // Prepare the actual destination behind the full-screen editor, not a
   // blank community surface. Keep the live editor mounted until opacity zero.
   communityComposerPortal.prepareClose();
-  if(mapOrigin){communityComposerOrigin='community';navigate('map',{suppressOverview:true,preserveCommunityComposer:true});}
+  if(mapOrigin){
+    communityComposerOrigin='community';
+    // The map-origin portal never leaves the map. Re-entering its tab here
+    // resets chrome, schedules map.resize and can expose a blank frame.
+    if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true,preserveCommunityComposer:true});
+  }
   const finish=()=>{
     communityComposerPortal.close();
     panel?.classList.remove('dj9256-composing');
@@ -2245,7 +2253,8 @@ function openCommunityComposer(open,{animate=true}={}) {
     setCommunityTopbarBlocked(false);
     if(panel)delete panel.dataset.djPatchKeyboard;
   };
-  if(animate&&motion&&portal)motion.close(portal,finish);else finish();
+  if(animate&&mapOrigin&&portal)communityComposerPortal.fadeMap(false,finish);
+  else if(animate&&motion&&portal)motion.close(portal,finish);else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
@@ -2429,8 +2438,9 @@ const pedestrianTools=initPedestrianTools({
     const origin=app.dataset.tab==='map'?'map':'community';
     // The mobile report is an independent full-screen portal. Keep the real
     // map as its underlying page rather than switching to the community feed.
-    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches)navigate('map',{suppressOverview:true});
-    else navigate('participate');
+    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches){
+      // The live map is already active; do not re-enter or resize it.
+    }else navigate('participate');
     communityComposerOrigin=origin;
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
