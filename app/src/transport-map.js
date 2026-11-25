@@ -1179,7 +1179,7 @@ export function installBasemapBusStopFallback(map,districtGeometry=null){
         'icon-allow-overlap':true,'icon-ignore-placement':true,'icon-padding':1,
         'text-field':['step',['zoom'],'',18.4,['coalesce',['get','name:nonlatin'],['get','name:ko'],['get','name_ko'],['get','name'],'']],
         'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],18.4,10.2,20,12.1],
-        'text-anchor':'top','text-offset':[0,1.85],'text-max-width':13,
+        'text-anchor':'top','text-offset':[0,1.4],'text-max-width':13,
         'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport'},
@@ -1254,7 +1254,7 @@ function labelVisibility(map){
       filter:['all',['!=',['get','label'],'정류장명 미등록'],['!=',['get','label'],'이름 미등록']],
       layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],
         'text-size':['interpolate',['linear'],['zoom'],17.75,10.0,19,11.5],
-        'text-offset':[0,1.85],'text-max-width':18,'text-optional':true,
+        'text-offset':[0,1.4],'text-max-width':18,'text-optional':true,
         'text-anchor':'top',
         'text-allow-overlap':false,'text-ignore-placement':false,'text-padding':2},
       paint:{'text-color':'#18508e','text-halo-color':'#fff','text-halo-width':1.05}},
@@ -1265,7 +1265,7 @@ function labelVisibility(map){
         ['!=',['get','label'],'']],
       layout:{'text-field':['get','label'],'text-font':['Noto Sans Regular','Open Sans Regular'],
         'text-size':['interpolate',['linear'],['zoom'],18.4,10.7,20,12.2],
-        'text-offset':[0,1.85],'text-anchor':'top','text-max-width':14,
+        'text-offset':[0,1.4],'text-anchor':'top','text-max-width':14,
         'text-allow-overlap':false,'text-ignore-placement':false,'text-optional':true,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport'},
       paint:{'text-color':'#18508e','text-halo-color':'rgba(255,255,255,0.97)','text-halo-width':1.05}}
@@ -1286,8 +1286,8 @@ function labelVisibility(map){
     try{
       if(map.getLayer?.('dj-transport-bus-pictogram'))map.setLayoutProperty('dj-transport-bus-pictogram','icon-size',
         ['interpolate',['linear'],['zoom'],16.4,0.262,18.2,0.331,20,0.393]);
-      if(map.getLayer?.('transport-bus-names'))map.setLayoutProperty('transport-bus-names','text-offset',[0,1.85]);
-      if(map.getLayer?.('transport-bus-names-close'))map.setLayoutProperty('transport-bus-names-close','text-offset',[0,1.85]);
+      if(map.getLayer?.('transport-bus-names'))map.setLayoutProperty('transport-bus-names','text-offset',[0,1.4]);
+      if(map.getLayer?.('transport-bus-names-close'))map.setLayoutProperty('transport-bus-names-close','text-offset',[0,1.4]);
     }catch(error){console.debug('[버스정류장 공통 표시 간격]',error?.message);}
   };
   syncSharedBusPresentation();
