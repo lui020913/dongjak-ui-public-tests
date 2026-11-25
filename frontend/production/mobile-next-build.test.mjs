@@ -49,12 +49,12 @@ test('visible custom phone buttons explicitly own pointer hit-testing; hidden ta
  assert.match(css,/:is\(:not\(\[data-tab="map"\]\),\[data-search-open="true"\],\[data-dj-search-entry="1"\]\)[^{]+#djNext-rail button\.djNext-tool\{pointer-events:none!important;visibility:hidden!important\}/);
 });
 
-test('new rail is independent from the original toolbar; road width is still available in native My Info layers',()=>{
+test('new rail is independent and road width is selectable in the layer window',()=>{
  const src=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
  assert.match(src,/host\.id='djNext-toolbar'/);
  assert.match(src,/app\.append\(host\)/);
  assert.doesNotMatch(src,/host=next;rail=/);
- assert.ok(PHONE_CHOICES.every(c=>c[0]!=='width'));
+ assert.ok(PHONE_CHOICES.some(c=>c[0]==='width'));
  assert.match(readFileSync(new URL('../src/v831-swipe-feature-toolbar.js',import.meta.url),'utf8'),/map-road-width.*toggle-road-width/);
  assert.match(src,/invoke\('#weather-label'\)/);
  assert.doesNotMatch(src,/invoke\('#dj-v794-weather'\)/);
