@@ -47,6 +47,7 @@ test('typography options are flat rounded segments, with consistent history chil
  assert.match(css,/\.dj885-type-choices button\{border-radius:11px!important/);
  assert.match(css,/\.dj885-type-choices button\[aria-pressed=true\]\{box-shadow:none!important/);
  assert.match(phone,/\.v707-release-head \.dj-semver-size \{\s*display:none!important/);
- assert.match(history,/currentTexts\.has\(first\)\?'이전 변경 기록 펼치기'/);
- assert.match(history,/for\(const description of notes\)ul\.append\(el\('li'/);
+ assert.doesNotMatch(history,/el\('details','dj-edition-patch/);
+ assert.match(history,/historyHighlights\(type.id,sourceNotes\)/);
+ assert.match(history,/for\(const description of currentTexts\)ul\.append\(el\('li'/);
 });

@@ -61,6 +61,6 @@ test('category-first community, two-part update editions, onboarding fade remain
   assert(html.indexOf('class="community-category-tabs"')<html.indexOf('class="community-toolbar" role="group"'));
   assert.equal(html.includes('class="community-heading-row"'),false);
    assert.match(history,/CHANGE_TYPE_GROUPS/);
-   assert.match(history,/classifyReleaseNote/);
+   assert.match(history,/historyHighlights/);
   assert.match(onboarding,/dj860-swapping/);
 });

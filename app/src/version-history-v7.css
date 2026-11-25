@@ -167,3 +167,10 @@ html body #app#app #version-history-list .dj-edition-history .v707-release-items
  margin:0 0 7px!important;min-width:0!important;overflow-wrap:anywhere!important;white-space:normal!important;
 }
 
+
+/* Public history: one current note card, four summaries, no public patch archive. */
+#app #version-history-list .dj-history-latest{box-sizing:border-box;min-width:0;max-width:100%;margin:4px 0 18px;padding:14px 16px;border:1px solid var(--dj-theme-line,#dbe6df);border-radius:16px;background:var(--dj-theme-surface,#fff);color:inherit;overflow-wrap:anywhere}
+#app #version-history-list .dj-history-section-title{margin:8px 2px 10px;font-size:15px;font-weight:750;line-height:1.45;color:inherit}
+#app #version-history-list .dj-history-highlights{margin:2px 0 10px;padding-inline-start:22px;padding-inline-end:6px;font-size:13px;line-height:1.65;color:inherit;overflow-wrap:anywhere}
+#app #version-history-list .dj-history-highlights li{margin:0 0 7px}
+#app[data-theme="dark"] #version-history-list .dj-history-latest{background:var(--dj-theme-surface,#2c343d);color:var(--dj-theme-ink,#f1f4f6);border-color:var(--dj-theme-line,#424952)}

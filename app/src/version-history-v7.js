@@ -1,6 +1,6 @@
 import {releaseEdition,syncPublicVersion} from './release-editions.js';
 import {buildGenerationCatalog} from './history-generation-catalog.js';
-import {CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote} from './public-release-display.js';
+import {CHANGE_TYPE_GROUPS,publicReleaseNote,cleanHistoryNote,historyHighlights} from './public-release-display.js';
 /**
  * v7.0.7: visual presentation is release-first, newest to oldest.
  * The old classification model stays exported for data-integrity checks.
@@ -166,57 +166,33 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
   const columns=el('div','v707-history-columns');columns.dataset.activeView='updates';
   const timeline=el('section','v707-history-timeline');timeline.id='history-version-timeline';
   timeline.setAttribute('aria-label','변경 종류별 전체 업데이트 내역');
-  // Group the actual, preserved release notes by user-facing change type.
-  // Internal build numbers and archived identities remain in DOM metadata only.
-  const categorized=new Map(CHANGE_TYPE_GROUPS.map(type=>[type.id,new Map()]));
+  // The source ledger remains complete, but only curated user-facing
+  // changes enter the public DOM. No per-patch development archive.
   const audited=buildGenerationCatalog(releases,releaseEdition).flatMap(group=>group.records);
-  for(const {record,classification,sourceScale} of audited){
-    const notes=record.sourceItems||record.items||[];
-    for(const note of notes){
-      const group=categorized.get(classifyReleaseNote(note,classification));
-      if(!group.has(record))group.set(record,{record,classification,sourceScale,notes:[]});
-      group.get(record).notes.push(note);
-    }
+  const sourceNotes=audited.flatMap(({record})=>record.sourceItems||record.items||[]);
+  const currentTexts=[...new Set((currentRelease?.items||[]).map(note=>cleanHistoryNote(note,currentRelease?.version)).filter(Boolean))];
+  if(currentRelease&&currentTexts.length){
+    const article=el('article','v707-release dj-history-latest');
+    article.dataset.version=String(currentRelease.version||'').replace(/^v/,'');
+    article.dataset.currentBuild='true';
+    const head=el('header','v707-release-head');
+    head.append(el('h4','','최근 변경사항'));article.append(head);
+    const ul=el('ul','v707-release-items');
+    for(const description of currentTexts)ul.append(el('li','',publicReleaseNote(description,currentRelease.version)));
+    article.append(ul);timeline.append(article);
   }
+  timeline.append(el('h3','dj-history-section-title','주요 업데이트'));
   for(const type of CHANGE_TYPE_GROUPS){
-    const records=[...categorized.get(type.id).values()];
-    if(!records.length)continue;
+    const highlights=historyHighlights(type.id,sourceNotes);
+    if(!highlights.length)continue;
     const archive=el('details','dj-edition-history');
     archive.dataset.changeType=type.id;
     archive.open=false;
     const heading=el('summary','dj-edition-summary');
-    heading.append(el('strong','',type.title),el('span','',type.description),el('small','',records.length+'개 기록'));
-    archive.append(heading);timeline.append(archive);
-    // The most recent note already appears above the archived patch list.
-    // Keep original historical notes intact, but never repeat its exact
-    // wording as the very next collapsed disclosure title.
-    const currentTexts=new Set((records.find(({record})=>record===currentRelease)?.notes||[])
-      .map(note=>publicReleaseNote(note,currentRelease?.version)));
-    for(const {record,classification,sourceScale,notes} of records){
-      const isCurrent=record===currentRelease;
-      let parent=archive;
-      if(!isCurrent){
-        const disclosure=el('details','dj-edition-patch');
-        const first=publicReleaseNote(notes[0]||'이전 변경사항',record.version);
-        const label=currentTexts.has(first)?'이전 변경 기록 펼치기':first.slice(0,46)+(first.length>46?'…':'');
-        disclosure.append(el('summary','dj-edition-patch-summary',label));
-        archive.append(disclosure);parent=disclosure;
-      }
-      const article=el('article','v707-release');
-      article.dataset.version=String(record.version||'').replace(/^v/,'');
-      article.dataset.changeType=type.id;
-      article.dataset.releaseType=record.scale||'patch';
-      article.dataset.reviewedScale=classification;
-      article.dataset.originalScale=sourceScale;
-      if(record.sourceVersion)article.dataset.archivedVersion=String(record.sourceVersion);
-      if(isCurrent)article.dataset.currentBuild='true';
-      const head=el('header','v707-release-head');
-      head.append(el('h4','',isCurrent?'최근 변경사항':'이전 변경사항'),el('span','dj-semver-size',type.title));
-      article.append(head);
-      const ul=el('ul','v707-release-items');
-      for(const description of notes)ul.append(el('li','',publicReleaseNote(description,record.version)));
-      article.append(ul);parent.append(article);
-    }
+    heading.append(el('strong','',type.title),el('span','',type.description),el('small','','보기'));
+    const bullets=el('ul','dj-history-highlights');
+    for(const note of highlights)bullets.append(el('li','',note));
+    archive.append(heading,bullets);timeline.append(archive);
   }
   if(currentRelease)void syncPublicVersion({version:currentRelease.version});
   const sources=el('aside','v707-history-sources');sources.id='history-data-sources';
@@ -282,10 +258,10 @@ export function initReleaseCatalog({trigger,modal,close,list,recentHistory,legac
     const normalized=String(version||'').trim().replace(/^v/,'');
     if(normalized){
       const focusRelease=()=>{
+        // Old release links open the consolidated public history rather than
+        // resurrecting deleted per-build development cards.
         const target=[...timeline.querySelectorAll('.v707-release')].find(item=>item.dataset.version===normalized);
         if(!target)return;
-        const archive=target.closest('.dj-edition-history');if(archive)archive.open=true;
-         const disclosure=target.closest('.dj-edition-patch');if(disclosure)disclosure.open=true;
         timeline.scrollTo?.({top:Math.max(0,target.offsetTop-timeline.offsetTop-8),behavior:'smooth'});
         target.classList.remove('dj856-release-focus');void target.offsetWidth;target.classList.add('dj856-release-focus');
         window.setTimeout(()=>target.classList.remove('dj856-release-focus'),1500);

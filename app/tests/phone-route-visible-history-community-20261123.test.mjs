@@ -45,7 +45,8 @@ test('phone route cards have a single owner; native route actions and map fit re
 test('community, typography and history retain source owners but remove redundant UI',()=>{
  const ui=read('../src/version-history-v7.js');
  const style=prod('mobile-next.css');
- assert.match(ui,/currentTexts\.has\(first\)/);
+ assert.match(ui,/new Set\(\(currentRelease\?\.items/);
+ assert.doesNotMatch(ui,/el\('details','dj-edition-patch/);
  assert.match(style,/dj-community-feed-status\{[^\n]*background:transparent!important/);
  assert.match(style,/dj885-type-choices button\[aria-pressed=true\]\{box-shadow:none!important/);
 });

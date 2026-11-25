@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote} from '../src/public-release-display.js';
+import {PUBLIC_APP_VERSION,PUBLIC_LOADING_VERSION,CHANGE_TYPE_GROUPS,classifyReleaseNote,publicReleaseNote,cleanHistoryNote,historyHighlights} from '../src/public-release-display.js';
 import {APP_RELEASES,APP_VERSION} from '../src/app-version.js';
 import {RENUMBERED_VERSION_HISTORY} from '../src/version-history.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
@@ -20,7 +20,7 @@ test('release history removes only its own internal build number from visible te
  assert.equal(publicReleaseNote('모바일 안정성 개선 (9.2.76)','9.2.76'),'모바일 안정성 개선');
  assert.equal(publicReleaseNote('디자인 변경 (v9.2.76) · 지도 3D','v9.2.76'),'디자인 변경 · 지도 3D');
  assert.equal(publicReleaseNote('7일 날씨와 외부 API 1.2.3','9.2.76'),'7일 날씨와 외부 API 1.2.3');
- assert.ok(read('src/version-history-v7.js').includes('publicReleaseNote(description,record.version)'));
+ assert.ok(read('src/version-history-v7.js').includes('publicReleaseNote(description,currentRelease.version)'));
 });
 test('notes are categorized deterministically and archived text is preserved',()=>{
  assert.deepEqual(CHANGE_TYPE_GROUPS.map(x=>x.id),['major','feature','design','fix']);
@@ -35,6 +35,19 @@ test('notes are categorized deterministically and archived text is preserved',()
  const history=read('src/version-history-v7.js');
  assert.ok(history.includes('buildGenerationCatalog(releases,releaseEdition)'));
  assert.ok(history.includes('CHANGE_TYPE_GROUPS'));
- assert.ok(history.includes('classifyReleaseNote'));
+ assert.ok(history.includes('historyHighlights'));
  assert.equal(history.includes('현재 빌드: '),false);
+});
+
+test('public timeline hides repetitive placeholders and development notes but keeps actual changes',()=>{
+ assert.equal(cleanHistoryNote('모바일 안정성 및 상호작용 개선 (9.2.90)','9.2.90'),'');
+ assert.equal(cleanHistoryNote('모바일 안정성 및 상호작용 개선','9.2.91'),'');
+ assert.equal(cleanHistoryNote('소스 CI 및 회귀 테스트 추가','9.2.91'),'');
+ assert.equal(cleanHistoryNote('지역 선택 개선; 회귀 테스트 추가','9.2.91'),'지역 선택 개선');
+ assert.equal(cleanHistoryNote('지하철 도착정보 개선 (9.2.91)','9.2.91'),'지하철 도착정보 개선');
+ assert.deepEqual(historyHighlights('fix',['커뮤니티 알림창을 열 때 일반 게시물이 함께 표시되는 문제를 수정했습니다.']),['커뮤니티 알림에 일반 게시물이 함께 표시되는 문제를 수정했습니다.']);
+ const source=read('src/version-history-v7.js');
+ assert.match(source,/new Set\(\(currentRelease\?\.items/);
+ assert.match(source,/historyHighlights\(type.id,sourceNotes\)/);
+ assert.doesNotMatch(source,/el\('details','dj-edition-patch/);
 });

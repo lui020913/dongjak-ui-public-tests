@@ -77,10 +77,11 @@ test('visible release history is categorized and internal records remain availab
  const renderer=await readFile(new URL('../src/version-history-v7.js',import.meta.url),'utf8');
  const history=await readFile(new URL('../src/version-history.js',import.meta.url),'utf8');
  assert.match(renderer,/CHANGE_TYPE_GROUPS/);
- assert.match(renderer,/classifyReleaseNote/);
- assert.match(renderer,/categorized\.get/);
+ assert.match(renderer,/historyHighlights/);
+ assert.match(renderer,/historyHighlights\(type.id,sourceNotes\)/);
  assert.match(renderer,/dataset\.version/);
- assert.match(renderer,/dataset\.archivedVersion/);
+ assert.match(renderer,/record.sourceItems\|\|record.items/);
+ assert.doesNotMatch(renderer,/el\('details','dj-edition-patch/);
  assert.match(renderer,/변경 종류별 전체 업데이트 내역/);
  assert.doesNotMatch(renderer,/현재 빌드: /);
  assert.match(history,/\.\.\.RENUMBERED_VERSION_HISTORY/);
