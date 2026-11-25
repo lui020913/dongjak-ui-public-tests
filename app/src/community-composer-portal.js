@@ -35,37 +35,34 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   let wasAppInert=false;
   let initialLayoutHeight=0;
   let dockRestore=null;
-  let fadeFrame=0,fadeTimer=0,fadeGeneration=0;
-  function cancelMapFade(){
-    fadeGeneration++;
-    if(fadeFrame)win.cancelAnimationFrame(fadeFrame);
-    if(fadeTimer)win.clearTimeout(fadeTimer);
-    fadeFrame=fadeTimer=0;
-    if(root){delete root.dataset.dj810Animating;for(const key of ['opacity','animation','transition','will-change'])root.style.removeProperty(key);}
+  // Private compositor: no shared motion classes, data-dj810 attributes,
+  // animation observers or parent-tab transitions own this dialog.
+  let transition=null,transitionTimer=0;
+  function stopTransition(){
+    if(transitionTimer)win.clearTimeout(transitionTimer);
+    transitionTimer=0;
+    if(transition){transition.onfinish=null;transition.cancel();transition=null;}
   }
-  // The complete report is the only fading layer. The live map and its
-  // chrome stay painted beneath it; no descendant receives its own fade.
-  function fadeMap(opening,done=()=>{}){
+  function dissolve(opening,done=()=>{}){
     if(!root||root.hidden){done();return;}
-    const initial=opening?0:Math.max(0,Math.min(1,Number(win.getComputedStyle(root).opacity)||0));
-    cancelMapFade();
-    const generation=fadeGeneration;
+    const from=opening?0:Number(win.getComputedStyle(root).opacity);
+    stopTransition();
     const reduced=win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches||doc.getElementById('app')?.classList.contains('dj-reduced-animation');
-    if(reduced){done();return;}
-    root.dataset.dj810Animating=opening?'opening':'closing';
-    for(const [key,value] of [['animation','none'],['transition','none'],['will-change','opacity'],['opacity',String(initial)]])root.style.setProperty(key,value,'important');
-    let last=null,elapsed=0;
-    const finish=()=>{if(generation!==fadeGeneration)return;cancelMapFade();done();};
-    const paint=now=>{
-      if(generation!==fadeGeneration||!root||root.hidden)return;
-      if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
-      last=now;
-      const p=Math.min(1,elapsed/300),eased=p*p*(3-2*p);
-      root.style.setProperty('opacity',String(opening?eased:initial*(1-eased)),'important');
-      if(p<1)fadeFrame=win.requestAnimationFrame(paint);else finish();
+    const to=opening?1:0;
+    const finish=()=>{
+      root.style.opacity=String(to);
+      stopTransition();
+      delete root.dataset.composeMotion;
+      done();
     };
-    fadeTimer=win.setTimeout(finish,1200);
-    fadeFrame=win.requestAnimationFrame(paint);
+    if(reduced||typeof root.animate!=='function'){finish();return;}
+    root.dataset.composeMotion=opening?'enter':'exit';
+    root.style.opacity=String(from);
+    // Animate one composited surface. The map is never hidden, resized,
+    // captured or replaced by a solid placeholder during this dissolve.
+    transition=root.animate([{opacity:from},{opacity:to}],{duration:300,easing:'ease-in-out',fill:'both'});
+    transition.onfinish=finish;
+    transitionTimer=win.setTimeout(finish,1200);
   }
   function hideDock(){
     if(dockRestore)return;
@@ -163,9 +160,11 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     for(const [target,type] of listeners)target?.addEventListener?.(type,schedule,{passive:true});
     updateTitle();
   }
-  function show({resetScroll=true,mapOrigin=false}={}){
+  function show({resetScroll=true,mapOrigin=false,animate=true}={}){
     ensure();
-    cancelMapFade();
+    stopTransition();
+    root.style.opacity='1';
+    delete root.dataset.composeMotion;
     initialLayoutHeight=Math.max(1,Number(win.innerHeight)||Number(doc.documentElement.clientHeight)||1);
     if(form.parentNode!==root)root.append(form);
     form.hidden=false;
@@ -181,6 +180,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     geometry();
     if(resetScroll&&scroll)scroll.scrollTop=0;
     schedule();
+    if(animate)dissolve(true);
   }
   function prepareClose(){
     if(!root||root.hidden)return;
@@ -189,11 +189,19 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     doc.body.dataset.djCommunityEditor='closing';
     restoreDock();
   }
+  function dismiss({animate=true,onClosed=()=>{}}={}){
+    if(!root||root.hidden||root.dataset.closing==='true')return;
+    prepareClose();
+    const finish=()=>{hide();onClosed();};
+    if(animate)dissolve(false,finish);else finish();
+  }
   function hide(){
     if(!root||root.hidden)return;
     if(form.contains(doc.activeElement))doc.activeElement.blur();
     root.hidden=true;
-    cancelMapFade();
+    stopTransition();
+    root.style.opacity='1';
+    delete root.dataset.composeMotion;
     delete root.dataset.closing;
     form.hidden=true;
     delete doc.body.dataset.djCommunityEditor;
@@ -223,6 +231,6 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.remove();
     root=null;scroll=null;footer=null;helper=null;header=null;
   }
-  return {open:options=>show({resetScroll:true,...options}),prepareClose,fadeMap,close:hide,restoreDesktop,
+  return {open:options=>show({resetScroll:true,...options}),dismiss,close:hide,restoreDesktop,
     isOpen:()=>Boolean(root&&!root.hidden),get portal(){return root;}};
 }
