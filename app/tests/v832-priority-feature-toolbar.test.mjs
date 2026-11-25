@@ -7,8 +7,9 @@ const css=read('src/v832-priority-feature-toolbar.css');
 const html=read('index.html');
 
 test('important map shortcuts stay on the rail and auxiliary items move to More',()=>{
-  for(const key of ['live-metro','live-bus','safe-accidents','safe-cctv','safe-crosswalk','safe-slope','safe-zones','safe-aed'])
+  for(const key of ['live-metro','live-bus','safe-accidents','safe-cctv','safe-crosswalk','safe-slope','safe-aed'])
     assert.ok(js.includes(`'${key}'`));
+  assert.doesNotMatch(js,/\['safe-zones',/);
   assert.match(js,/FEATURES\.filter\(f=>f\[0\]!=='map-dong'&&!MORE_ONLY_KEYS\.has\(f\[0\]\)&&isPrimary\(f\[0\]\)\)/);
   assert.match(js,/FEATURES\.filter\(f=>!used\.has\(f\[0\]\)&&test\(f\[0\]\)\)/);
   assert.match(js,/panel\.querySelector\('\.dj-mobile-utilities-body'\)\|\|panel\)\.appendChild\(extra\)/);
