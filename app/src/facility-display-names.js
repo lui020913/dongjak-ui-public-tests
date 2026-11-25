@@ -4,7 +4,7 @@ import {verifiedDisplayName,verifiedNameAliases} from './verified-place-director
  */
 const categoryAliases=Object.freeze({
  bus:'버스정류장',bus_stop:'버스정류장',bus_station:'버스터미널',subway:'지하철·철도역',railway:'지하철·철도역',station:'지하철·철도역',train_station:'지하철·철도역',tram_stop:'철도 정류장',
- restaurant:'음식점',fast_food:'음식점',cafe:'카페',coffee:'카페',convenience:'편의점',supermarket:'마트',pharmacy:'약국',hospital:'병원',clinic:'의원',dentist:'치과',school:'학교',university:'대학교',college:'대학교',kindergarten:'유치원',park:'공원',garden:'정원',library:'도서관',bank:'은행',atm:'ATM',toilets:'화장실',toilet:'화장실',police:'경찰서',fire_station:'소방서',townhall:'공공기관',place_of_worship:'종교시설',church:'교회',parking:'주차장',fuel:'주유소',hotel:'숙박시설',shop:'상점',bakery:'제과점',marketplace:'시장',museum:'박물관',sports_centre:'체육시설',playground:'놀이터',community_centre:'주민시설',post_office:'우체국',shelter:'쉼터',food:'음식점',healthcare:'의료시설'
+ restaurant:'음식점',fast_food:'음식점',cafe:'카페',coffee:'카페',convenience:'편의점',supermarket:'마트',pharmacy:'약국',hospital:'병원',clinic:'의원',dentist:'치과',school:'학교',university:'대학교',college:'대학교',kindergarten:'유치원',childcare:'어린이집',social_facility:'복지시설',nursing_home:'복지시설',community_center:'주민시설',public_building:'공공기관',park:'공원',garden:'정원',library:'도서관',bank:'은행',atm:'ATM',toilets:'화장실',toilet:'화장실',police:'경찰서',fire_station:'소방서',townhall:'공공기관',place_of_worship:'종교시설',church:'교회',parking:'주차장',fuel:'주유소',hotel:'숙박시설',shop:'상점',bakery:'제과점',marketplace:'시장',museum:'박물관',sports_centre:'체육시설',playground:'놀이터',community_centre:'주민시설',post_office:'우체국',shelter:'쉼터',food:'음식점',healthcare:'의료시설'
 });
 const TYPE_ALIASES=Object.freeze({
  '치안센터':'경찰서','경찰지구대':'경찰서','지구대':'경찰서','파출소':'경찰서','경찰파출소':'경찰서','경찰시설':'경찰서',
@@ -172,6 +172,7 @@ export function facilityNameMatches(place,query){
  const q=fold(query);if(!q)return false;
  const normalized=normalizeFacilityRecord(place);
  const categoryTerms=facilityCategorySearchTerms(query);
+ if(categoryTerms.length&&isFormerPoliceFacility(normalized.name))return false;
  if(categoryTerms.length&&categoryTerms.includes(normalized.category))return true;
  const fields=[normalized.name,normalized.registeredName,normalized.category];
  if(fields.some(v=>fold(v).includes(q)))return true;
