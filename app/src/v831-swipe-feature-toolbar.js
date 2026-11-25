@@ -95,12 +95,13 @@ export const MORE_ONLY_KEYS=new Set(FEATURES.filter(([key,,selector])=>
   key.startsWith('base-')||key.startsWith('live-')||key==='map-road-width'||
   selector.includes('[data-dj-import=')||selector.includes('[data-base-layer=')||
   selector.includes('[data-live-vehicle=')||selector.includes('toggle-')||
+  ['safe-accessibility','safe-team'].includes(key)
 ).map(([key])=>key));
 // Only true visibility controls get on/off switches. These never pin a layer to the top toolbar.
 const VISIBILITY_KEYS=new Set(FEATURES.filter(([key,,selector])=>
   key.startsWith('base-')||key.startsWith('live-')||selector.includes('[data-dj-import=')||
   ['map-road-width','safe-facilities','safe-crosswalk','safe-essentials','safe-public',
-   'safe-station-access','safe-zones','safe-speed','safe-speed-camera','safe-accessibility','safe-team'].includes(key)
+   'safe-station-access','safe-accessibility','safe-team'].includes(key)
 ).map(([key])=>key));
 const DEFAULT_PRIMARY=['safe-nearby','safe-report'];
 const SHORTCUTS_KEY='dongjak_mobile_shortcut_preferences_v8214';
