@@ -1720,10 +1720,9 @@ test('walking vulnerability remains neutral and suppresses TIP after real layer 
  await expect(gap).toBeEnabled({timeout:30000});
  await expect(gap).toHaveCount(1);
  await gap.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const app=page.locator('#app'),tip=page.locator('#dj840-map-tip');
  await expect(app).toHaveAttribute('data-dj-pri-visible','true');
@@ -1854,10 +1853,9 @@ test('phone verified protection-gap menu contains SHP audit and NULL middle-scho
  await expect(dialog.getByRole('button',{name:/상현중학교 300m 도로 검토/})).toHaveCount(0);
  await expect(dialog.locator('#dj-pri-protection-detail')).toHaveCount(0);
  await entry.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const legend=page.locator('#dj-pri-legend');
  await expect(legend).toBeVisible();
@@ -1887,10 +1885,9 @@ test('phone speed limit risk is selectable with PDF thresholds and real source l
  const speed=dialog.getByRole('button',{name:/제한속도 위험도/});
  await expect(speed).toBeEnabled({timeout:30000});
  await speed.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','speed');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','speed');
+
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','speed');
  await expect(legend).toBeVisible();
@@ -1923,10 +1920,9 @@ test('phone six-indicator vulnerability and bottom-docked wide sheets match visi
  expect(ui.navTop-ui.bottom).toBeLessThan(30);
  if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-six-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
  await composite.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','current6');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','current6');
+
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','current6');
  await expect(legend).toBeVisible();
