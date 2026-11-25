@@ -1463,13 +1463,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   const busDetail=createBusRouteDetail({panel,
     onHidden:syncRoutePresentation,
     onClose:()=>clearSelectedBusRoute(),
-    onMap:()=>{compactRouteDetail();const coordinates=busRouteOverlay.getRouteCoordinates();
+    onMap:()=>{busRouteOverlay.setMapVisible(true);compactRouteDetail();const coordinates=busRouteOverlay.getRouteCoordinates();
       if(coordinates.length<2)return;
       // Preserve local map scale; the entire long route may span several districts.
       const chosen=busRouteOverlay.getRouteStops().find(s=>s.arsId===routeChoice?.arsId);
       if(chosen)map.easeTo?.({center:[chosen.lng,chosen.lat],zoom:Math.max(map.getZoom?.()||0,14.5),duration:420});
     },
-    onStop:stop=>{compactRouteDetail();const offsetY=0;
+    onStop:stop=>{clearSelectedBusRoute();const offsetY=0;
       map.easeTo?.({center:[stop.lng,stop.lat],offset:[0,offsetY],zoom:Math.max(map.getZoom?.()||0,16.5),duration:420});
     },
     onRefresh:()=>void busRouteOverlay.refreshVehicles(),
@@ -1500,7 +1500,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     for(const name of ['height','max-height','min-height','overflow'])panel.style.removeProperty(name);
   };
   const clearSelectedBusRoute=()=>{routeChoice=null;busRouteOverlay.clear();lastFittedRouteId=null;resetBusRoutePreview();syncRoutePresentation();};
-  reopenRoute.addEventListener('click',()=>{if(!routeChoice||!canOpen())return;busDetail.open(routeChoice);const active=busRouteOverlay.getActive();if(active?.id===routeChoice.routeId)busDetail.update(active,busRouteOverlay.getRouteStops(),busRouteOverlay.getRouteVehicles());else void busRouteOverlay.select(routeChoice);syncRoutePresentation();});
+  reopenRoute.addEventListener('click',()=>{if(!routeChoice||!canOpen())return;busRouteOverlay.setMapVisible(false);busDetail.open(routeChoice);const active=busRouteOverlay.getActive();if(active?.id===routeChoice.routeId)busDetail.update(active,busRouteOverlay.getRouteStops(),busRouteOverlay.getRouteVehicles());else void busRouteOverlay.select(routeChoice);syncRoutePresentation();});
   removeRoute.addEventListener('click',clearSelectedBusRoute);
   clearRouteButton.addEventListener('click',clearSelectedBusRoute);
   mapClearRouteButton.addEventListener('click',event=>{event.stopPropagation();clearSelectedBusRoute();});
@@ -1514,8 +1514,9 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     routeChoice=choice;
     if(globalThis.matchMedia?.('(max-width:699px)')?.matches){
       close(false);
+      busRouteOverlay.setMapVisible(false);
       busDetail.open(choice);
-    }
+    }else busRouteOverlay.setMapVisible(true);
     syncRoutePresentation();
     const active=busRouteOverlay.getActive();
     if(active?.id===choice.routeId)busDetail.update(active,busRouteOverlay.getRouteStops(),busRouteOverlay.getRouteVehicles());
