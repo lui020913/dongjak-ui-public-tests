@@ -4,11 +4,12 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 const main=read('main.js'),tabs=read('bottom-tab-navigation.js');
 const section=(start,end)=>main.slice(main.indexOf(start),main.indexOf(end,main.indexOf(start)+start.length));
-test('location picker cancel and selection share a draft resume path returning to the community tab',()=>{
+test('location picker cancel and selection share a draft resume path preserving map origin',()=>{
  const resume=section('function resumeCommunityLocationDraft()', 'function selectCommunityLocation(');
  assert.match(resume,/clearCommunityLocationPick\(\)/);
  assert.match(resume,/cancelCommunityTabMotion\(\)/);
  assert.match(resume,/navigate\('participate',\{resumeCommunityDraft:true\}\)/);
+ assert.ok(resume.includes('if(!communityComposerFromMap||'));
  assert.match(resume,/resumeCommunityDraft:true/);
  assert.match(resume,/openCommunityComposer\(true\)/);
  const pick=section('function selectCommunityLocation(', "document.getElementById('community-map-pick')");

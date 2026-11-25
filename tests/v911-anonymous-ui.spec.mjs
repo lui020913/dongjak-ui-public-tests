@@ -708,15 +708,15 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
 });
 test('phone report composer has non-overlapping independent header and input scroll',{tag:'@phone-layout'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);await tap(page,page.locator('#djNext-report'));
- const form=page.locator('#community-form'),scroll=form.locator('.djNext-form-scroll'),head=form.locator('.community-form-top');
+ const form=page.locator('#community-form'),scroll=form.locator('.dj-compose-scroll'),head=form.locator('.community-form-top');
  await expect(form).toBeVisible();await expect(scroll).toBeVisible();
  const title=form.locator('#community-title');await title.scrollIntoViewIfNeeded();await title.focus();
  const h=await head.boundingBox(),b=await scroll.boundingBox();expect(b.y>=h.y+h.height-1).toBe(true);
  const before=await head.boundingBox();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await head.boundingBox();expect(Math.abs(before.y-after.y)).toBeLessThan(2);
  const submit=form.locator('button[type=submit]');await expect(submit).toBeVisible();
  await expect.poll(async()=>{
-   const btn=await submit.boundingBox(),lane=await scroll.boundingBox(),dock=await page.locator('#bottom-nav').boundingBox();
-   return !!btn&&!!lane&&!!dock&&btn.y>=lane.y&&btn.y+btn.height<=lane.y+lane.height+2&&btn.y+btn.height<dock.y-2;
+   const btn=await submit.boundingBox(),lane=await scroll.boundingBox(),footer=await form.locator('.dj-compose-footer').boundingBox();
+   return !!btn&&!!lane&&!!footer&&footer.y>=lane.y+lane.height-2&&btn.y>=footer.y&&btn.y+btn.height<=footer.y+footer.height+2;
  }).toBe(true);
  await form.locator('#community-compose-close').click();await expect(form).toBeHidden();
 });
@@ -900,30 +900,29 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
 test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- await tap(page,tab(page,'participate'));
- await expect(page.locator('#participation-panel')).toBeVisible();
- await expect(page.locator('#participation-panel')).toHaveCSS('opacity','1');
- const feedReference=await page.screenshot({scale:'css'});
- await tap(page,tab(page,'map'));
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#participation-panel')).toBeHidden();
+ await expect(page.locator('#map')).toBeVisible();
+ const mapReference=await page.screenshot({scale:'css'});
  await page.evaluate(()=>{
-  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),feed=document.getElementById('participation-panel');if(editor&&feed&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(feed);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='participate'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
+  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),feed=document.getElementById('participation-panel'),map=document.getElementById('map');if(editor&&feed&&map&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map),f=getComputedStyle(feed);window.__reportOpenFrames.push({feedHidden:f.display==='none'||f.visibility==='hidden',opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
  });
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
- // Risk report uses the community tab's actual feed as its destination.
- await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
- await expect(page.locator('#participation-panel')).toBeVisible();
+ // Risk report opens over the actual map, never the community feed.
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#participation-panel')).toBeHidden();
  await expect(portal.locator('#community-category')).toHaveValue('보행 불편');
  await expect(page.locator('#participation-panel')).not.toHaveClass(/dj9256-composing/);
  await expect(portal.locator('#community-form > .dj-compose-scroll')).toHaveCount(1);
  await expect(portal.locator('#community-form > .dj-compose-footer')).toHaveCount(1);
  await expect(portal.locator('.djNext-form-scroll')).toHaveCount(0);
 
- expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
- // DOM visibility alone cannot prove the community surface has actually been
+ expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.feedHidden&&f.opacity>.08&&f.opacity<.95))).toBe(true);
+ expect(await page.evaluate(()=>window.__reportOpenFrames.every(f=>f.feedHidden))).toBe(true);
+ // DOM visibility alone cannot prove the map surface has actually been
  // composited under the editor in Safari. Sample real browser screenshots at
  // the two endpoints and at a held half-opacity of the same root layer.
  const editorReference=await page.screenshot({scale:'css'});
@@ -958,35 +957,47 @@ test('map report fades out over its real destination without reparenting or resi
      if(mix>=.25&&mix<=.75&&error/3<22)matched++;
    }
    return {samples,blended:matched/Math.max(1,samples)};
- },[feedReference,editorReference,halfReference].map(x=>x.toString('base64')));
+ },[mapReference,editorReference,halfReference].map(x=>x.toString('base64')));
  if(blend.samples<100||blend.blended<.55){
    console.log('REPORT_PIXEL_BLEND_DIAGNOSTIC',JSON.stringify(blend));
-   await test.info().attach('community-reference',{body:feedReference,contentType:'image/png'});
+   await test.info().attach('map-reference',{body:mapReference,contentType:'image/png'});
    await test.info().attach('editor-reference',{body:editorReference,contentType:'image/png'});
    await test.info().attach('editor-half-opacity',{body:halfReference,contentType:'image/png'});
  }
- expect(blend.samples,'contrasting real community and editor screenshot pixels').toBeGreaterThanOrEqual(100);
- expect(blend.blended,'actual community/editor pixel compositing at half opacity').toBeGreaterThanOrEqual(.55);
+ expect(blend.samples,'contrasting real map and editor screenshot pixels').toBeGreaterThanOrEqual(100);
+ expect(blend.blended,'actual map/editor pixel compositing at half opacity').toBeGreaterThanOrEqual(.55);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
    const visible=n=>{if(!n)return false;const c=getComputedStyle(n),r=n.getBoundingClientRect();return c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98&&r.width>0&&r.height>0;};
-   const feed=document.getElementById('participation-panel'),dock=document.getElementById('bottom-nav');
+   const feed=document.getElementById('participation-panel'),dock=document.getElementById('bottom-nav'),map=document.getElementById('map');
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,feedVisible:visible(app)&&visible(feed),chromeVisible:visible(dock),stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:visible(app)&&visible(map),feedHidden:!visible(feed),chromeVisible:visible(dock),stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
  await tap(page,portal.locator('#community-compose-close'));
  await expect(portal).toBeHidden();
- await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
  const intermediate=frames.filter(f=>f.opacity>.08&&f.opacity<.95);
  expect(intermediate.length).toBeGreaterThan(1);
- expect(intermediate.every(f=>f.tab==='participate'&&f.feedVisible&&f.chromeVisible)).toBe(true);
+ expect(intermediate.every(f=>f.tab==='map'&&f.mapVisible&&f.feedHidden&&f.chromeVisible)).toBe(true);
  expect(frames.every(f=>f.stable)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
- await expect(page.locator('#participation-panel')).toBeVisible();
+ await expect(page.locator('#participation-panel')).toBeHidden();
+ await tap(page,page.locator('#djNext-report'));
+ await expect(portal).toBeVisible();
+ await portal.locator('#community-map-pick').click();
+ await expect(portal).toBeHidden();
+ await expect(page.locator('#community-map-hint')).toBeVisible();
+ await expect(page.locator('#toast')).not.toHaveClass(/\bshow\b/);
+ const hintBox=await page.locator('#community-map-hint').boundingBox(),dockBox=await page.locator('#bottom-nav').boundingBox();
+ expect(hintBox.y+hintBox.height).toBeLessThanOrEqual(dockBox.y+1);
+ await page.locator('#community-map-cancel').click();
+ await expect(portal).toBeVisible();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await tap(page,portal.locator('#community-compose-close'));await expect(portal).toBeHidden();
+ await tap(page,tab(page,'participate'));
  await tap(page,page.locator('#community-compose-toggle'));
  await expect(portal).toBeVisible();
  const title=portal.locator('#community-title');await title.fill('위치 선택 테스트');
@@ -1233,7 +1244,7 @@ test('route title cannot swipe-dismiss the full page; composer report returns di
  await tap(page,page.locator('#djNext-report'));const form=page.locator('#community-form');await expect(form).toBeVisible();
   await expect(page.locator('#participation-panel')).toBeHidden();
   await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
-  await expect(page.locator('#dj-community-editor-portal')).toHaveAttribute('data-map-origin','true');
+  await expect(page.locator('#dj-community-editor-portal')).toBeVisible();
   await expect(page.locator('#map')).toBeVisible();
   await expect(page.locator('#app')).toHaveAttribute('inert','');
  const consent=form.locator('#community-share-publicly');await expect(consent).toHaveCSS('width','20px');
