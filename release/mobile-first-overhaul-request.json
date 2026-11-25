@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.184",
+  "application_version": "9.2.185",
   "public_work_branch": "main",
-  "purpose": "Retry v9.2.184: preserve PR527 facility categories and merge PR529 direct shared community composer, eliminate transient feed flash and duplicate picker hint, report UI and login feedback. Both source CI 38/38 passed; protected Preview and Production QA remain required.",
-  "attempt": 415,
+  "purpose": "PR528: remove duplicate bus ETA observation table and all public update-history UI, restore separate subway planned timetable view, preserve PR527 and PR529. Integrated source CI 38/38 passed; actual bus historical API recovery explicitly excluded; protected Preview and Production QA required.",
+  "attempt": 416,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
