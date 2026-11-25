@@ -1568,3 +1568,8 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   #app:not(.dj-reduced-animation):not([data-dj929-tip-returning="true"]) #dj-user-tip-close:not([hidden]){animation:djHudReturnFade 320ms ease-out both!important;}
  }
 }
+
+/* GPS heading is separate from MapLibre's position transform. */
+.dj-current-position-marker > .dj-current-position-heading{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0;pointer-events:none;z-index:2;}
+.dj-current-position-marker > .dj-current-position-heading[hidden]{display:none!important;}
+.dj-current-position-heading::before{content:"";position:absolute;left:-8px;top:-29px;width:16px;height:19px;background:#2183ef;clip-path:polygon(50% 0,100% 100%,50% 74%,0 100%);filter:drop-shadow(0 1px 1px #fff);}
