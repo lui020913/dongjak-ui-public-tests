@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.152",
+  "application_version": "9.2.153",
   "public_work_branch": "main",
-  "purpose": "PR474: community comment layout, fixed report card and marker cleanup, expanded map search and result pins, walking route entry and GPS/address handling, route exit cleanup, and brighter metro radial illumination. Bus position API recovery excluded. Protected build anchor aligned with route reset cleanup.",
-  "attempt": 370,
+  "purpose": "PR475 and PR476: warm-white forward radial train headlamps, route search scrollbar and recent heading, provisional smartphone requirements on browser welcome, official bus section placement, short vehicle plates and color-coded congestion. Preserve tablet mode and protected production checks.",
+  "attempt": 371,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
