@@ -75,3 +75,30 @@ test('official identity aliases, precise types and closed-site status stay consi
  assert.equal(facilityNameMatches({name:'서울상도동우체국',category:'우체국'},'상도동우체국'),true);
  assert.ok(verifiedFacilityLabelExpression(['get','name']).includes('서울상도동우체국'));
 });
+
+test('all Dongjak resident-office aliases retain administrative identity and exact official address',async()=>{
+ const {verifiedPlaceRecord}=await import('../src/verified-place-directory.js');
+ const dongs=['노량진1동','노량진2동','상도1동','상도2동','상도3동','상도4동','흑석동','사당1동','사당2동','사당3동','사당4동','사당5동','대방동','신대방1동','신대방2동'];
+ for(const dong of dongs){
+  const record=verifiedPlaceRecord(dong+' 주민센터');
+  assert.ok(record?.address.startsWith('서울특별시 동작구 '));
+  assert.match(record.phone,/^02-\d{3}-\d{4}$/);
+  assert.equal(normalizeFacilityName(dong+'행정복지센터','공공기관'),dong+' 주민센터');
+  assert.equal(normalizeFacilityCategory('공공기관',dong+'행정복지센터'),'주민센터');
+  assert.equal(facilityNameMatches({name:dong+' 주민센터',category:'주민센터'},dong+'행정복지센터'),true);
+ }
+ assert.equal(normalizeFacilityName('상도1동 주민센터 앞 약국','약국'),'상도1동 주민센터 앞 약국');
+});
+test('officially repurposed youth school is not an active police result',async()=>{
+ const {normalizeNamedOsm}=await import('../src/v875-osm-name-search.js');
+ const {facilityPresentation}=await import('../src/v912-poi-presentation.js');
+ const p={name:'상도2치안센터',category:'경찰서',lng:126.95,lat:37.49};
+ const row=normalizeFacilityRecord(p);
+ assert.equal(row.name,'동작청소년경찰학교');assert.equal(row.category,'교육시설');assert.equal(row.registeredName,p.name);
+ assert.equal(facilityNameMatches(row,'경찰서'),false);
+ assert.equal(facilityNameMatches(row,'상도2치안센터'),true);
+ assert.equal(facilityPresentation(row.category).icon,'school');
+ const data={elements:[{id:2,type:'node',lon:p.lng,lat:p.lat,tags:{amenity:'police',name:p.name}}]};
+ assert.deepEqual(normalizeNamedOsm(data,'경찰서'),[]);
+ assert.equal(normalizeNamedOsm(data,'상도2치안센터')[0].name,'동작청소년경찰학교');
+});
