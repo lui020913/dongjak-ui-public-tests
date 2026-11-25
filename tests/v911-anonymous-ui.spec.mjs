@@ -101,9 +101,10 @@ async function enter(page,id,key){
    // name. The inline-important rAF owner intentionally disables keyframes.
    await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&((f.contentOpacity>.12&&f.contentOpacity<.98)||(f.outgoingOpacity>.12&&f.outgoingOpacity<.98)))),{message:'visible intermediate cross-dissolve opacity on '+key+' entry'}).toBe(true);
    await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
+   await expect(page.locator('[data-dj-primary-transition]')).toHaveCount(0);
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
-   if(fromMap&&key==='news')expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
+   if(fromMap&&['news','participate'].includes(key))expect(frames.some(f=>f.mapVisible&&f.rootOpacity>.08&&f.rootOpacity<.95)).toBe(true);
    expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
    await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
@@ -864,6 +865,24 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
  await tap(page,tab(page,'map'));await expect(page.locator('#news-panel')).toBeHidden();await expect.poll(()=>page.locator('#app').getAttribute('data-dj-pilot-lock-count')).toBe('0');
  // Returning from the map is a fresh stationary fade for the previous tab.
  await enter(page,'news-panel','news');
+ // Exercise both the X and the tab route back to the real map, not merely
+ // the eventual hidden state. Require multiple intermediate frames.
+ for(const [id,key] of [['news-panel','news'],['participation-panel','participate']]){
+   if(key==='participate')await enter(page,id,key);
+   await page.evaluate(id=>{
+     const panel=document.getElementById(id),app=document.getElementById('app'),map=document.getElementById('map'),dock=document.getElementById('bottom-nav');
+     window.__primaryExitFrames=[];
+     const visible=n=>{const c=getComputedStyle(n);return c.display!=='none'&&c.visibility==='visible'&&Number(c.opacity)>.98&&n.getClientRects().length>0;};
+     const capture=()=>{if(panel.hidden)return;window.__primaryExitFrames.push({alpha:Number(getComputedStyle(panel).opacity),tab:app.dataset.tab,map:visible(map)&&visible(map.querySelector('.maplibregl-canvas')),dock:visible(dock)});requestAnimationFrame(capture);};
+     capture();
+   },id);
+   if(key==='news')await tap(page,page.locator('#news-close-to-map'));
+   else await tap(page,tab(page,'map'));
+   await expect(page.locator('#'+id)).toBeHidden();
+   const frames=await page.evaluate(()=>window.__primaryExitFrames.filter(f=>f.alpha>.08&&f.alpha<.95));
+   expect(frames.length).toBeGreaterThan(1);
+   expect(frames.every(f=>f.tab==='map'&&f.map&&f.dock)).toBe(true);
+ }
 });
 
 
@@ -876,7 +895,7 @@ test('map report fades out over its real destination without reparenting or resi
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
- await expect.poll(()=>portal.getAttribute('data-dj810-animating')).toBeNull();
+ await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
  expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
@@ -905,6 +924,19 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await expect(menu).toBeVisible({timeout:20000});
  await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
+ const originalViewport=page.viewportSize();
+ for(const width of [320,375,390,430]){
+   await page.setViewportSize({width,height:originalViewport.height});
+   await expect.poll(()=>menu.evaluate(root=>{
+     const card=root.querySelector('.dj-install-performance'),p=card?.querySelector('p');
+     if(!p)return false;
+     const r=card.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(p);
+     return p.scrollWidth<=p.clientWidth+1&&r.left>=-1&&r.right<=innerWidth+1&&
+       [...range.getClientRects()].every(b=>b.left>=r.left-1&&b.right<=r.right+1)&&
+       [...root.querySelectorAll('.dj-install-choice')].every(b=>b.scrollWidth<=b.clientWidth+1);
+   })).toBe(true);
+ }
+ await page.setViewportSize(originalViewport);
  await page.emulateMedia({reducedMotion:'no-preference'});
  const webChoice=menu.getByRole('button',{name:'웹에서 바로 이용하기'});
  await expect(webChoice).toHaveCSS('transition-property','background-color, box-shadow');
@@ -953,11 +985,32 @@ test('Android verified download shows security instructions before navigation',{
 
 test('PC install notice has one heading, equal actions and stable edge clicks',{tag:'@phone-layout'},async({page})=>{
  await page.setViewportSize({width:1200,height:950});
+ // The test can run in a phone-emulated browser: explicitly model a PC
+ // so a tablet-width resize cannot accidentally boot the mobile app.
+ await page.addInitScript(()=>{
+   Object.defineProperty(navigator,'userAgent',{configurable:true,get:()=> 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36'});
+   Object.defineProperty(navigator,'platform',{configurable:true,get:()=> 'Linux x86_64'});
+ });
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const gate=page.locator('#dj-mobile-only-screen'),menu=gate.locator('#dj-install-menu');
  await expect(menu).toBeVisible({timeout:20000});await expect(gate.locator('#dj-mobile-only-title')).toBeHidden();
  await expect(menu.locator('.dj-install-subtitle')).toContainText('스마트폰');await expect(gate.locator('.dj-mobile-only-devices')).toBeVisible();
+ // The long WebView guidance must wrap rather than exceed the card or
+ // the viewport on both PC and tablet widths.
+ for(const width of [600,768,1024,1440,1920,1200]){
+   await page.setViewportSize({width,height:950});
+   const guide=menu.locator('.dj-install-performance');
+   await expect(guide).toBeVisible();
+   await expect.poll(()=>guide.evaluate(n=>{
+     const p=n.querySelector('p'),r=n.getBoundingClientRect(),t=p.getBoundingClientRect();
+     const text=document.createRange();text.selectNodeContents(p);
+     return getComputedStyle(p).whiteSpace==='normal'&&p.scrollWidth<=p.clientWidth+1&&
+       r.right<=innerWidth+1&&t.right<=r.right+1&&
+       [...text.getClientRects()].every(b=>b.right<=r.right+1&&b.left>=r.left-1);
+   })).toBe(true);
+ }
+
  const web=menu.getByRole('button',{name:/웹에서 바로 이용하기/}),android=menu.getByRole('button',{name:/Android 앱 다운로드/});
  await expect(web).toContainText('모바일 전용');
  expect(await web.evaluate(n=>getComputedStyle(n).backgroundColor)).toBe(await android.evaluate(n=>getComputedStyle(n).backgroundColor));

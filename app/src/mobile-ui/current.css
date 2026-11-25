@@ -108,7 +108,7 @@
     /* Preserve resting geometry, not a blanket animation ban. The frame owner
        writes inline motion; native fade and staged drag classes remain eligible. */
     #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities):not([hidden]):not([data-dj810-animating]):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj870-more-entering):not(.dj870-more-leaving) {translate:0 0!important;scale:1!important;}
-    #app .page-panel:not([hidden]):not([data-dj810-animating]):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning) {opacity:1!important;}
+    #app .page-panel:not([hidden]):not([data-dj810-animating]):not([data-dj-primary-transition]):not(.dj852-panel-fade-in):not(.dj852-panel-fade-out):not(.dj-sheet-dragging):not(.dj889-sheet-transitioning) {opacity:1!important;}
     #app :is(.page-panel,#transport-sheet,#dj-mobile-utilities)[data-dj810-animating] {animation:none!important;}
     #app #transport-sheet > .handle {position:relative!important;inset:auto!important;display:block!important;width:100%!important;height:16px!important;min-height:16px!important;flex:0 0 16px!important;}
     #app #transport-sheet > .handle::after {position:absolute!important;top:6px!important;left:calc(50% - 20px)!important;width:40px!important;height:4px!important;}

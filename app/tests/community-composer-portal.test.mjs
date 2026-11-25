@@ -30,7 +30,7 @@ test('entire composer layout is rebuilt as a body-portal with three distinct row
   assert.match(css,/#dj-community-editor-portal #community-form>\.dj-compose-footer\s*\{/);
   assert.match(css,/#dj-community-editor-portal #community-form>\.community-form-top\s*\{/);
   assert.doesNotMatch(css,/#dj-community-editor-portal\[data-keyboard="open"\] #community-form > \.community-form-top/);
-  assert.match(main,/communityComposerPortal\.open\(\{mapOrigin:communityComposerOrigin==='map'\}\)/);
+  assert.match(main,/communityComposerPortal\.open\(\{mapOrigin:communityComposerOrigin==='map',animate\}\)/);
   assert.match(main,/communityForm\.addEventListener\('submit',async\(event\)=>/);
 });
 test('map-origin report, photo and cloud submission logic remain functional',()=>{
@@ -42,4 +42,15 @@ test('map-origin report, photo and cloud submission logic remain functional',()=
   const coord=read('src/public-ui-mobile-surface-coordinator.js');
   assert.match(coord,/const independentComposerOpen=/);
   assert.match(coord,/const focused=Boolean\(!independentComposerOpen&&form/);
+});
+
+test('phone report uses only its private compositor and no legacy layout owner',()=>{
+ const js=read('src/community-composer-portal.js'),main=read('src/main.js'),legacy=read('src/v910-request-completion.js'),coord=read('src/public-ui-mobile-surface-coordinator.js');
+ assert.match(js,/root\.animate\(\[\{opacity:from\},\{opacity:to\}\]/);
+ assert.match(js,/root\.dataset\.composeMotion=/);
+ assert.doesNotMatch(js,/dataset\.dj810Animating|fadeMap\(/);
+ assert.match(main,/communityComposerPortal\.dismiss\(\{animate,onClosed:/);
+ assert.doesNotMatch(main,/setMapReportHitLayer|setCommunityTopbarBlocked|motion\?\.open\(communityComposerPortal\.portal\)/);
+ assert.doesNotMatch(legacy,/fitCommunityEditor|djPatchKeyboard|djNext-form-scroll/);
+ assert.doesNotMatch(coord,/dj-community-compose-overlay/);
 });

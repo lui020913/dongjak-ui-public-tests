@@ -1948,53 +1948,8 @@ async function refreshCommunityNotices(){const seq=++communityNoticeSeq;try{cons
 const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 및 비하',spam:'도배 및 스팸',sexual:'음란성 콘텐츠',graphic:'과도하게 자극적인 이미지',privacy:'개인정보 노출',illegal_ad:'불법 광고',uncertain:'운영정책 위반 의심',unavailable:'검사 보류'};
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
-let communityComposerOrigin='community',communityComposerEpoch=0;
+let communityComposerOrigin='community';
 let communityComposerPortal=null;
-// A full-screen mobile report must out-rank legacy !important header styles.
-// Store and restore the prior inline display declaration exactly.
-let communityTopbarDisplayRestore=null;
-// Map-origin editor overlays the active MapLibre canvas, not a selected tab.
-// Keep this short-lived hit layer above WebGL and restore all inline styles.
-let mapReportHitRestore=null;
-function setMapReportHitLayer(active){
-  if(active){
-    if(mapReportHitRestore)return;
-    const targets=[
-      [document.getElementById('participation-panel'),['z-index','pointer-events']],
-      [document.getElementById('community-form'),['pointer-events']],
-      [document.getElementById('community-compose-close'),['pointer-events']]
-    ];
-    mapReportHitRestore=targets.filter(([node])=>node).map(([node,props])=>({
-      node,styles:props.map(key=>({
-        key,value:node.style.getPropertyValue(key),priority:node.style.getPropertyPriority(key)
-      }))
-    }));
-    for(const {node,styles} of mapReportHitRestore)for(const {key} of styles)
-      node.style.setProperty(key,key==='z-index'?'12000':'auto','important');
-  }else if(mapReportHitRestore){
-    for(const {node,styles} of mapReportHitRestore)for(const {key,value,priority} of styles){
-      if(value)node.style.setProperty(key,value,priority);
-      else node.style.removeProperty(key);
-    }
-    mapReportHitRestore=null;
-  }
-}
-function setCommunityTopbarBlocked(blocked){
-  const header=document.querySelector('#app > .topbar');
-  if(!header)return;
-  if(blocked){
-    if(!communityTopbarDisplayRestore)communityTopbarDisplayRestore={
-      value:header.style.getPropertyValue('display'),
-      priority:header.style.getPropertyPriority('display')
-    };
-    header.style.setProperty('display','none','important');
-  }else if(communityTopbarDisplayRestore){
-    const {value,priority}=communityTopbarDisplayRestore;
-    if(value)header.style.setProperty('display',value,priority);
-    else header.style.removeProperty('display');
-    communityTopbarDisplayRestore=null;
-  }
-}
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
 let communityLocationMarker = null;
@@ -2036,9 +1991,8 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
   if(!preserveCommunityComposer&&(reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
     communityDetail=null;
-    communityComposerEpoch++;
     const form=document.getElementById('community-form');
-    if(form){window.DongjakWindowMotion?.cancel?.(form);communityComposerPortal?.close();form.hidden=true;communityPanel?.classList.remove('dj9256-composing');setMapReportHitLayer(false);setCommunityTopbarBlocked(false);}
+    if(form){communityComposerPortal?.close();form.hidden=true;}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
     communityComposerOrigin='community';
   }
@@ -2218,43 +2172,13 @@ function openCommunityComposer(open,{animate=true}={}) {
   }
   if(open){
     if(communityComposerPortal?.isOpen())return;
-    communityComposerEpoch++;
-    motion?.cancel?.(communityForm);
-    // No old sheet expansion, parent header movement or native dock sizing.
-    document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
-    communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map'});
-    if(animate){
-      if(communityComposerOrigin==='map')communityComposerPortal.fadeMap(true);
-      else motion?.open(communityComposerPortal.portal);
-    }
-    setMapReportHitLayer(false);
-    setCommunityTopbarBlocked(false);
+    communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map',animate});
     return;
   }
   if(!communityComposerPortal?.isOpen())return;
-  communityComposerEpoch++;
-  const mapOrigin=communityComposerOrigin==='map';
-  const panel=document.getElementById('participation-panel');
-  const portal=communityComposerPortal.portal;
-  if(portal?.dataset.dj810Animating==='closing'||portal?.dataset.closing==='true')return;
-  // Prepare the actual destination behind the full-screen editor, not a
-  // blank community surface. Keep the live editor mounted until opacity zero.
-  communityComposerPortal.prepareClose();
-  if(mapOrigin){
+  communityComposerPortal.dismiss({animate,onClosed:()=>{
     communityComposerOrigin='community';
-    // The map-origin portal never leaves the map. Re-entering its tab here
-    // resets chrome, schedules map.resize and can expose a blank frame.
-    if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true,preserveCommunityComposer:true});
-  }
-  const finish=()=>{
-    communityComposerPortal.close();
-    panel?.classList.remove('dj9256-composing');
-    setMapReportHitLayer(false);
-    setCommunityTopbarBlocked(false);
-    if(panel)delete panel.dataset.djPatchKeyboard;
-  };
-  if(animate&&mapOrigin&&portal)communityComposerPortal.fadeMap(false,finish);
-  else if(animate&&motion&&portal)motion.close(portal,finish);else finish();
+  }});
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
@@ -2333,9 +2257,6 @@ document.getElementById('community-map-pick').addEventListener('click',()=>{
   // switching tabs. It will be portaled again after the map pick finishes.
   communityComposerPortal?.close();
   communityForm.hidden=true;
-  document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
-  setCommunityTopbarBlocked(false);
-  setMapReportHitLayer(false);
   communityPickMode=true;
   navigate('map');
   document.getElementById('community-map-hint').hidden=false;

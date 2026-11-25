@@ -1783,8 +1783,8 @@
       color:var(--dj-primary-page-ink,#f1f4f6)!important;
     }
 
-    html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]) {
-      /* The page is an opaque surface. Fading the entire page reveals map
+    html body #app#app#app#app#app :is(#route-panel,#participation-panel,#news-panel,#mine-panel).page-panel:not([hidden]):not([data-dj810-animating]):not([data-dj-primary-transition]) {
+      /* The resting page is an opaque surface. Fading the entire page reveals map
          tiles and makes cards/text/dock appear missing mid-transition. */
       animation:none!important;
       opacity:1!important;
@@ -2069,4 +2069,11 @@
 
 @layer native-scroll-chrome{
  @media(max-width:699px){#app[data-dj-map-dissolving="true"] .page-panel.dj-tab-content-enter > :is(.dj-sheet-chrome,.dj836-sheet-body,#dj910-route-footer){animation:none!important;}}
+}
+
+/* Community/news cross-dissolve uses the entire live surface, never nested content animations. */
+@layer native-scroll-chrome {
+ @media(max-width:699px){
+  #app .page-panel[data-dj-primary-transition] > :is(.dj-sheet-chrome,.dj836-sheet-body){animation:none!important;transition:none!important;opacity:1!important;}
+ }
 }
