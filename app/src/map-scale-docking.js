@@ -150,7 +150,7 @@ export function mobileScaleBlockerVisible(node,view){
 export function shouldHideMobileScale(app,doc,view){
   if(!app||!doc||!view)return true;
   // First-launch overlay owns all HUD frames until onboarding/guide resolve.
-  if(app.dataset.djHudGuideHandoff==='true')return true;
+  if(app.dataset.djHudGuideHandoff==='true'||app.dataset.communityPicking==='true')return true;
   if((app.dataset.tab||'map')!=='map'||app.dataset.searchOpen==='true'||app.dataset.dj910SheetOpen==='true'||app.dataset.djPriVisible==='true')return true;
   if(app.classList.contains('map-controls-open')||app.classList.contains('map-safety-open'))return true;
   // The weather sheet is an explicit map HUD owner from the moment it opens.
@@ -238,6 +238,7 @@ export function installScaleDocking({map,app,overview}={}){
     schedule();
   };
   window.addEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
+  window.addEventListener('dongjak:community-picker-visibility',onWeatherVisibility);
   const restoreCard=()=>{
     for(const prop of desktopCardProps)overview.style.removeProperty(prop);
   };
@@ -471,6 +472,7 @@ export function installScaleDocking({map,app,overview}={}){
     app.classList.remove('dj873-map-moving');
     window.removeEventListener('resize',onViewportResize);
     window.removeEventListener('dongjak:weather-visibility-changed',onWeatherVisibility);
+    window.removeEventListener('dongjak:community-picker-visibility',onWeatherVisibility);
     app.removeEventListener('transitionend',schedule,true);
     app.removeEventListener('animationend',schedule,true);
     restoreCard();

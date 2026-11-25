@@ -44,3 +44,16 @@ test('route waypoint deletion has a 44px control and recent heading reserves its
 });
 
 test('search cards keep scrolling without overlay scrollbars and history has a separate aligned header',async()=>{const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/route-screen-v3.css',import.meta.url),'utf8');const js=readFileSync(new URL('../src/route-screen-v3.js',import.meta.url),'utf8');assert.ok(css.includes('overflow-y:auto;overflow-x:hidden;flex:1'));assert.ok(css.includes('.search-results::-webkit-scrollbar{display:none'));assert.ok(css.includes('.search-results .search-recent-head{display:flex;align-items:center;justify-content:space-between'));assert.ok(js.includes("head.className='search-recent-head'"));assert.ok(js.includes('head.append(title,clear)'));});
+
+
+test('route search isolates map controls and drops safe-area padding only while keyboard occupies the viewport',()=>{
+ const source=read('src/route-screen-v3.js'),css=read('src/route-screen-v3.css');
+ assert.ok(source.includes("view.dataset.searchOpen='true'"));
+ assert.ok(source.includes('delete view.dataset.searchOpen'));
+ assert.ok(source.includes('searchLayoutHeight-top-height>100'));
+ assert.ok(source.includes("listen(win.visualViewport,'scroll',syncViewport)"));
+ assert.ok(source.includes('if(!active||searching)return;'));
+ assert.ok(css.includes('.canvas[data-search-open="true"] > :not(.search-screen){visibility:hidden;pointer-events:none}'));
+ assert.ok(css.includes('.search-screen[data-keyboard="open"]{padding-bottom:4px}'));
+ assert.ok(css.includes('top:var(--v3-search-top,0px)'));
+});

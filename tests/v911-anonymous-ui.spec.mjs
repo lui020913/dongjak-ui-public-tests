@@ -746,7 +746,26 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    await routeScreen.locator('[data-v3="'+key+'"]').click();
    await expect(search.locator('#v3-search-title')).toHaveText(title);
    await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
+   await expect(routeScreen.locator('.tools')).toBeHidden();
+   await page.evaluate(()=>{
+     const vv=window.visualViewport;
+     Object.defineProperty(vv,'height',{configurable:true,value:Math.round(innerHeight*.58)});
+     vv.dispatchEvent(new Event('resize'));
+   });
+   try{
+     await expect(search).toHaveAttribute('data-keyboard','open');
+     await expect(search).toHaveCSS('padding-bottom','4px');
+     const measured=await search.evaluate(n=>({gap:n.getBoundingClientRect().bottom-n.querySelector('.search-results').getBoundingClientRect().bottom, height:n.getBoundingClientRect().height,viewport:visualViewport.height}));
+     expect(measured.gap).toBeLessThanOrEqual(5);
+     expect(Math.abs(measured.height-measured.viewport)).toBeLessThanOrEqual(2);
+     await expect(routeScreen.locator('.tools')).toBeHidden();
+     await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();
+   }finally{
+     await page.evaluate(()=>{delete window.visualViewport.height;window.visualViewport.dispatchEvent(new Event('resize'));});
+   }
+   await expect(search).toHaveAttribute('data-keyboard','closed');
    await routeScreen.locator('[data-v3="search-back"]').click();
+   await expect(routeScreen.locator('.route-panel')).toBeVisible();
  }
  await routeScreen.locator('[data-v3="back"]').click();
  await expect(routeScreen).toBeHidden();
@@ -993,9 +1012,13 @@ test('map report fades out over its real destination without reparenting or resi
  await expect(page.locator('#community-map-hint')).toBeVisible();
  await expect(page.locator('#toast')).not.toHaveClass(/\bshow\b/);
  const hintBox=await page.locator('#community-map-hint').boundingBox(),dockBox=await page.locator('#bottom-nav').boundingBox();
- expect(hintBox.y+hintBox.height).toBeLessThanOrEqual(dockBox.y+1);
+ expect(dockBox.y-(hintBox.y+hintBox.height)).toBeGreaterThanOrEqual(10);
+ await expect(page.locator('#dj840-map-tip')).toBeHidden();
+ await expect(page.locator('.maplibregl-ctrl-scale')).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-community-picking','true');
  await page.locator('#community-map-cancel').click();
  await expect(portal).toBeVisible();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#app')).not.toHaveAttribute('data-community-picking','true');
  await tap(page,portal.locator('#community-compose-close'));await expect(portal).toBeHidden();
  await tap(page,tab(page,'participate'));
  await tap(page,page.locator('#community-compose-toggle'));
@@ -1720,10 +1743,9 @@ test('walking vulnerability remains neutral and suppresses TIP after real layer 
  await expect(gap).toBeEnabled({timeout:30000});
  await expect(gap).toHaveCount(1);
  await gap.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const app=page.locator('#app'),tip=page.locator('#dj840-map-tip');
  await expect(app).toHaveAttribute('data-dj-pri-visible','true');
@@ -1854,10 +1876,9 @@ test('phone verified protection-gap menu contains SHP audit and NULL middle-scho
  await expect(dialog.getByRole('button',{name:/상현중학교 300m 도로 검토/})).toHaveCount(0);
  await expect(dialog.locator('#dj-pri-protection-detail')).toHaveCount(0);
  await entry.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const legend=page.locator('#dj-pri-legend');
  await expect(legend).toBeVisible();
@@ -1887,10 +1908,9 @@ test('phone speed limit risk is selectable with PDF thresholds and real source l
  const speed=dialog.getByRole('button',{name:/제한속도 위험도/});
  await expect(speed).toBeEnabled({timeout:30000});
  await speed.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','speed');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','speed');
+
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','speed');
  await expect(legend).toBeVisible();
@@ -1923,10 +1943,9 @@ test('phone six-indicator vulnerability and bottom-docked wide sheets match visi
  expect(ui.navTop-ui.bottom).toBeLessThan(30);
  if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-six-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
  await composite.click();
- await expect(dialog).toBeVisible();
- await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','current6');
- await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','current6');
+
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','current6');
  await expect(legend).toBeVisible();

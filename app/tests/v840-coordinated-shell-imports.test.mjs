@@ -34,7 +34,7 @@ test('v8.4 shell initializes without a runtime ReferenceError', async () => {
     createElement:()=>makeElement(),querySelector:()=>null,querySelectorAll:()=>[],
     addEventListener:()=>{},removeEventListener:()=>{},dispatchEvent:()=>{},
   };
-  const win={requestAnimationFrame:(fn)=>fn(),setInterval:()=>123,clearInterval:()=>{},setTimeout:(fn)=>fn(),queueMicrotask:(fn)=>fn()};
+  const win={addEventListener:()=>{},removeEventListener:()=>{},requestAnimationFrame:(fn)=>fn(),setInterval:()=>123,clearInterval:()=>{},setTimeout:(fn)=>fn(),queueMicrotask:(fn)=>fn()};
   const oldObserver=globalThis.MutationObserver;
   globalThis.MutationObserver=class {observe(){} disconnect(){}};
   try {

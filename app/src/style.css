@@ -307,7 +307,7 @@
 .community-map-hint{position:absolute;top:calc(env(safe-area-inset-top) + 150px);left:50%;transform:translateX(-50%);width:min(430px,calc(100% - 25px));box-sizing:border-box;z-index:1340;background:#253e34;color:#fff;box-shadow:0 8px 20px #21382b39;padding:12px;border-radius:12px;font-size:13px;line-height:1.5;font-weight:700;display:flex;align-items:center;gap:10px}
 .community-map-hint span{flex:1;min-width:0}
 .community-map-hint button{flex:none;background:#fff;border:0;padding:8px 12px;border-radius:9px;color:#155e49;font:inherit;min-height:36px}
-@media(max-width:699px){#app .community-map-hint{top:auto;bottom:calc(var(--dj-mobile-nav-h,calc(70px + env(safe-area-inset-bottom))) + 10px);left:12px;right:12px;width:auto;transform:none;z-index:8100}}
+@media(max-width:699px){#app .community-map-hint{top:auto;bottom:var(--dj-community-picker-bottom,calc(var(--dj829-nav-bottom,env(safe-area-inset-bottom,0px)) + var(--dj829-nav-h,70px) + 12px));left:12px;right:12px;width:auto;transform:none;z-index:8100}}
 .community-map-hint[hidden]{display:none!important}
 /* 페이지 전환 시에도 지도 위치 지정 안내를 보이게 유지 */
 

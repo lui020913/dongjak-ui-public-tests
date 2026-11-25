@@ -95,16 +95,16 @@ const checks=[
  }],
  ['C03','unassessed, modeled and out-of-range segments stay gray and outside score means',()=>{
    contains(src('src/pri-data.mjs'),'observedFactorScore','modeled===true');
-   contains(src('src/pri-map.js'),"UNKNOWN_COLOR='#687380'",'회색: 미평가·미선정 (평균 제외)');
+   contains(src('src/pri-map.js'),"UNKNOWN_COLOR='#B9C3C2'",'회색: 미평가·미선정 (평균 제외)');
  }],
  ['C04','PRI legend has three source-derived risk classes and high risk means red',()=>{
    const s=src('src/pri-map.js');
    for(const t of ['저위험 (0~39)','주의 (40~69)','고위험 (70~100)','각 지수는 100점 만점(높을수록 위험)',"70,'#CF4248'"])contains(s,t);
    contains(src('src/pri-map.css'),'grid-template-columns:repeat(3,minmax(0,1fr))');
  }],
- ['C05','PRI road thickness and opacity vary continuously with zoom',()=>{
+ ['C05','PRI road width varies with zoom and unassessed opacity remains subdued',()=>{
    const s=src('src/pri-map.js');
-   contains(s,"15,['case',['get','evaluated'],2.35,3.4]","['get','evaluated'],.88,.95");
+   contains(s,"15,2.35,17,3.6","['get','evaluated'],.88,UNKNOWN_OPACITY");
  }],
  ['C06','opening PRI removes floating TIP and obstructing map scale',()=>{
    contains(src('src/pri-map.js'),'syncPriHud(Boolean(id))',"node.style.setProperty('display','none','important')");
