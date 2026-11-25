@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 test('help guide has no update UI, but retains app tour and map attribution',()=>{
  const html=read('index.html'),onboarding=read('src/v860-onboarding.js'),main=read('src/main.js');
@@ -18,7 +18,8 @@ test('only official bus timetable remains in station schedule, and route history
  assert.match(detail,/정류장별 실제 도착 이력/);
 });
 test('mobile metro schedule mode hides realtime rows, retains navigation and renders official rows',()=>{
- const css=read('../frontend/production/mobile-next.css'),src=read('src/transport-map.js');
+ const generated=new URL('../src/mobile-next.css',import.meta.url);
+ const css=existsSync(generated)?readFileSync(generated,'utf8'):read('../frontend/production/mobile-next.css'),src=read('src/transport-map.js');
  assert.match(css,/\[data-transport-view="hours"\] :is\(#transport-arrivals,#transport-neighbors,[^}]+\{display:none!important\}/);
  assert.match(css,/\[data-transport-view="hours"\] #transport-service-hours\{display:grid!important/);
  assert.match(src,/if\(place.kind==='subway'&&Array.isArray\(data.timetable\)&&data.timetable.length\)timetableExpanded=true/);
