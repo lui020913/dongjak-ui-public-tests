@@ -231,7 +231,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    }
    const activeColors=mode==='protectionGap'?protectionGapColors:colors;
    if(!map.getSource(JOIN_SOURCE))map.addSource(JOIN_SOURCE,{type:'geojson',data:visualJoins});
-   if(!map.getLayer(JOIN_LINE))map.addLayer({id:JOIN_LINE,source:JOIN_SOURCE,type:'line',minzoom:11.5,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':.88,'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
+   if(!map.getLayer(JOIN_LINE))map.addLayer({id:JOIN_LINE,source:JOIN_SOURCE,type:'line',minzoom:11.5,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':['get','opacity'],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
    map.setLayoutProperty(JOIN_LINE,'visibility',mode&&mode!=='speed'?'visible':'none');
    map.getSource(JOIN_SOURCE).setData(visualJoins);
    for(const layer of [LINE,POINT])map.setLayoutProperty(layer,'visibility',mode?'visible':'none');

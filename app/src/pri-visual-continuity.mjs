@@ -27,7 +27,7 @@ export function priVisualJoins(collection,boundary,mode){
  for(const [id,a] of index){if(!a)continue;const m=id.match(/^(.*)_(\d+)$/),b=index.get(m[1]+'_'+(+m[2]+1));if(!b)continue;
   const p=a.geometry.coordinates.at(-1),q=b.geometry.coordinates[0],d=dist(p,q);if(d<.03||d>5)continue;
   const parts=cut(p,q,polys);if(parts.length!==1||!same(parts[0][0],p)||!same(parts[0][1],q))continue;
-  const c1=riskColor(a.properties,mode),c2=riskColor(b.properties,mode),n=c1===c2?1:16;
-  for(let i=0;i<n;i++){out.push({type:'Feature',geometry:{type:'LineString',coordinates:[mix(p,q,i/n),mix(p,q,(i+1)/n)]},properties:{color:colorMix(c1,c2,(i+.5)/n),visualOnly:true}});}
+  const c1=riskColor(a.properties,mode),c2=riskColor(b.properties,mode),o1=(a.properties.evaluated||a.properties.sharedCandidate) ? .88 : .78,o2=(b.properties.evaluated||b.properties.sharedCandidate) ? .88 : .78,n=c1===c2?1:16;
+  for(let i=0;i<n;i++){out.push({type:'Feature',geometry:{type:'LineString',coordinates:[mix(p,q,i/n),mix(p,q,(i+1)/n)]},properties:{color:colorMix(c1,c2,(i+.5)/n),opacity:o1+(o2-o1)*(i+.5)/n,visualOnly:true}});}
  }return fc(out);
 }
