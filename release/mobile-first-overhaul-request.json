@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.156",
+  "application_version": "9.2.157",
   "public_work_branch": "main",
-  "purpose": "PR479 and follow-up 93d9fb1: explicit bus map display, live detail data independent of map rendering, common returning phone header fade. Run protected build and mobile QA before production.",
-  "attempt": 374,
+  "purpose": "PR480 facility zoom thresholds and native duplicate marker suppression; preserve official logos and safety analysis layers.",
+  "attempt": 375,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
