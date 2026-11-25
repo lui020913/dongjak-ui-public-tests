@@ -157,7 +157,9 @@ test('map return keeps only a non-interactive fading page and rapid tab reentry 
  const dispose=installBottomTabNavigation({doc,win,app});
  const click=tab=>handlers.get('click')({target:{closest:sel=>sel==='#bottom-nav .nav-tab[data-tab]'?buttons.find(b=>b.dataset.tab===tab):null},preventDefault(){},stopImmediatePropagation(){}});
  click('map');assert.equal(app.dataset.tab,'map');assert.equal(panel.hidden,false);assert.equal(values.get('pointer-events'),'none');
- const step=[...frames.entries()][0];frames.delete(step[0]);clock=110;step[1](clock);assert.equal(Number(values.get('opacity')),.5);
+ const tick=t=>{const [id,step]=[...frames.entries()][0];frames.delete(id);clock=t;step(t);};
+ tick(500);assert.equal(Number(values.get('opacity')),1,'a delayed first frame must not skip the dissolve');
+ tick(540);tick(580);tick(610);assert.equal(Number(values.get('opacity')),.5);
  click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(frames.size,0);
  dispose();
 });
@@ -176,9 +178,10 @@ test('route return fades the actual V3 overlay instead of retaining the legacy r
  handlers.get('click')({target:{closest:sel=>sel==='#bottom-nav .nav-tab[data-tab]'?map:null},preventDefault(){},stopImmediatePropagation(){}});
  assert.equal(legacy.hidden,true);assert.equal(legacy.dataset.djTabOutgoing,undefined);
  assert.equal(host.hidden,false);assert.equal(host.inert,true);
- const first=[...frames.entries()][0];frames.delete(first[0]);first[1](110);
+ const tick=t=>{const [id,step]=[...frames.entries()][0];frames.delete(id);step(t);};
+ tick(0);tick(40);tick(80);tick(110);
  assert.equal(Number(values.get('opacity')),.5);
- const second=[...frames.entries()][0];frames.delete(second[0]);second[1](220);
+ tick(150);tick(190);tick(220);
  assert.equal(host.hidden,true);assert.equal(host.inert,false);assert.equal(values.has('opacity'),false);
  dispose();
 });
