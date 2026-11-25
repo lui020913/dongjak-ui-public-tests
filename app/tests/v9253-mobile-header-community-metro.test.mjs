@@ -25,7 +25,7 @@ test('community categories lead the page before sort/search controls',()=>{
 test('history presents categorical headings and keeps exact build metadata only in attributes',()=>{
  const ui=read('src/version-history-v7.js');
  assert(ui.includes('CHANGE_TYPE_GROUPS'));
- assert(ui.includes('classifyReleaseNote'));
+ assert(ui.includes('historyHighlights'));
  assert(ui.includes('dj-edition-history'));
  assert.match(ui,/dataset\.version/);
  assert.match(ui,/dataset\.archivedVersion/);
