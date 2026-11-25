@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {PHONE_CHOICES,normalizePhoneShortcuts,layerDragFrame} from '../src/mobile-next.js';
+import {PHONE_CHOICES,PHONE_UNAVAILABLE_LAYERS,normalizePhoneShortcuts,layerDragFrame} from '../src/mobile-next.js';
 import {DongjakWalkSlopeRouter} from '../src/lib/dongjakWalkSlopeRouter.mjs';
 import {computeMultiStopRoutes,railTransferOptions} from '../src/v815-route-planner.js';
 const load=p=>JSON.parse(readFileSync(new URL('../public/'+p,import.meta.url),'utf8'));
 test('phone shortcuts reject unknown entries and duplicates and persist at most three',()=>{
  assert.deepEqual(normalizePhoneShortcuts(null),[]);
- assert.deepEqual(normalizePhoneShortcuts(['pilot','pilot','invalid','slope','night','bocha']),['pilot','slope','night']);
+ assert.deepEqual(normalizePhoneShortcuts(['pri','pri','invalid','slope','width','aed']),['pri','slope','width']);
  assert.equal(new Set(PHONE_CHOICES.map(x=>x[0])).size,PHONE_CHOICES.length);
  assert.ok(PHONE_CHOICES.every(x=>x[3].startsWith('#')||x[3].startsWith('[')));
 });
@@ -164,3 +164,14 @@ test('compact metro has one layout owner and a single content scroll',()=>{const
 test('button material is shared across app, AI and entry gate',()=>{const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');const tokens=read('button-material.css');assert.ok(tokens.includes(':root:is([data-theme="dark"],:has(#app[data-theme="dark"]))'));assert.ok(read('main.js').includes("import './button-material.css';"));for(const file of ['mobile-next.css','v880-supabase-safety-ai.css','browser-install-menu.css']){const css=read(file);assert.ok(css.includes('var(--djNext-tool-shadow)'));assert.ok(css.includes('var(--djNext-tool-pressed)'));assert.ok(!css.includes('--dj-entry-raised:'));} });
 
 test('layer rows retain one pill control and independent shortcut switch',()=>{const css=readFileSync(new URL('../src/mobile-next.css',import.meta.url),'utf8'),js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 58px!important'));assert.ok(css.includes('border-radius:var(--djNext-tool-pill)!important'));assert.ok(js.includes("glyph.classList.add('djNext-layer-glyph')"));assert.ok(js.includes("pinHeading.textContent='상단 고정'"));assert.ok(js.includes("add.setAttribute('aria-label',label+' 상단 바로가기 고정')"));assert.ok(!js.includes('djNext-shortcut-caption'));assert.ok(js.includes("line.append(action,add)"));});
+
+test('unavailable incident and enforcement camera layers are visible but cannot be pinned',()=>{
+ assert.deepEqual([...PHONE_UNAVAILABLE_LAYERS],['incidents','camera']);
+ assert.deepEqual(normalizePhoneShortcuts(['incidents','camera','zone','sdot','pri']),['pri']);
+ assert.ok(PHONE_CHOICES.some(c=>c[0]==='incidents'));
+ assert.ok(PHONE_CHOICES.some(c=>c[0]==='camera'));
+ assert.ok(PHONE_CHOICES.every(c=>!['zone','sdot'].includes(c[0])));
+ const js=readFileSync(new URL('../src/mobile-next.js',import.meta.url),'utf8');
+ assert.match(js,/add\.disabled=unavailable\|\|/);
+ assert.match(js,/if\(unavailable\)return/);
+});
