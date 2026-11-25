@@ -233,7 +233,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
    // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
    if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
     filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.72,.27],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},
+    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.88,.95],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},
     priOverlayAnchor(map.getStyle()?.layers));
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
     filter:['==',['geometry-type'],'Point'],
