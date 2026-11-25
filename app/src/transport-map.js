@@ -29,7 +29,7 @@ import {busLastServiceStatus} from './bus-last-service.js';
 import {operatorTimetableResources} from './metro-operator-timetables.js';
 import {isScheduleMergedStation} from './metro-schedule-view.js';
 import {verifiedInlineOperatorTimetable} from './metro-inline-schedules.js';
-import {seoulServiceClock} from './metro-planned-arrivals.js';
+import {seoulServiceClock, plannedArrivalsFromTimetable} from './metro-planned-arrivals.js';
 import {saveTimetable,loadTimetable,storeBusObservation,latestBusObservations,displaySeoulObservationTime,expectedBusHeadway} from './transport-timetable-cache.js';
 import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
 import {createSelectedTransportPin,mobileTransportFocusOffset,usableMapSelectionOffset} from './transport-selection-marker.js';
@@ -876,7 +876,7 @@ export function splitMetroArrivalText(value=''){
   return {primary:raw,secondary:''};
 }
 function showArrivalsWithProviderStatus(container,place,result){
-  const filtered=arrivalsForSelectedMetroLine(place,result.items||[]).filter(row=>place.kind!=='subway'||!row.isPlanned);
+  const filtered=arrivalsForSelectedMetroLine(place,result.items||[]);
   const state=place.kind==='subway'?result.sourceStatus:'';
   if(!filtered.length){
     container.replaceChildren();
@@ -933,6 +933,9 @@ function displayArrivals(container,kind,items,place=null){
       container.append(item);
     }
     return;
+  }
+  if(items.some(row=>row.isPlanned)&&!items.every(row=>row.isPlanned)){
+    container.append(el('p','metro-planned-notice','시간표 기준으로 표시된 열차는 실시간 지연을 반영하지 않습니다.'));
   }
   const groups=groupSubwayArrivals(items);
   const order=['상행','하행','내선','외선','방향 미확인'];
@@ -991,8 +994,12 @@ function displayArrivals(container,kind,items,place=null){
           left.append(desc);
           const right=el('div','metro-arrival-time-block');
           const timeParts=splitMetroArrivalText(info.arrival);
-          right.append(el('strong','metro-arrival-countdown',compactArrival(timeParts.primary,false)));
-          if(timeParts.secondary)right.append(el('small','metro-arrival-position',timeParts.secondary));
+          right.append(el('strong','metro-arrival-countdown',compactArrival(timeParts.primary,row.isPlanned)));
+          if(row.isPlanned){
+            const displayPlannedTime=String(row.plannedTime||'');
+            right.append(el('small','metro-planned-time-meta',
+              `${displayPlannedTime ? `${displayPlannedTime} · ` : ''}시간표 기준`));
+          }else if(timeParts.secondary)right.append(el('small','metro-arrival-position',timeParts.secondary));
           item.append(left,right);
           subsection.append(item);
         }
@@ -2275,12 +2282,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     const limited=place?.kind==='subway'&&result?.sourceStatus==='quota';
     const refresh=document.getElementById('transport-refresh');
     if(refresh){refresh.disabled=limited;refresh.title=limited?'서울시 지하철 API 일일 조회량 초과':'';}
-    if(limited){updatedEl.textContent='조회 한도 초과';if(liveTab)liveTab.textContent='실시간';}
+    if(limited){updatedEl.textContent='조회 한도 초과';if(liveTab)liveTab.textContent='도착예정';}
     else if(liveTab)liveTab.textContent='실시간';
     if(panel.dataset)panel.dataset.metroQuota=String(limited);
   }
   async function showArrivalOrPlannedCountdown(container,place,result,activeSeq){
-    // Show verified live arrivals only; timetable data may identify planned last-train passage, never an ETA.
+    // Always show current source status immediately; use an official timetable
+    // only to identify the end of service or show clearly labelled planned ETAs.
     syncArrivalAvailability(place,result);
     showArrivalsWithProviderStatus(container,place,result);
     if(place?.kind!=='subway')return;
@@ -2298,7 +2306,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       container.append(blank);
     }
     const hasSelectedLive=result?.sourceStatus==='ok' &&
-      arrivalsForSelectedMetroLine(place,result?.items||[]).some(row=>!row.isPlanned);
+      arrivalsForSelectedMetroLine(place,result?.items||[]).length>0;
     if(hasSelectedLive)return;
     const line=normalizeLineName(place.selectedLine||'');
     if(!/^(?:[1-9]호선|신림선)$/.test(line))return;
@@ -2315,8 +2323,23 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       else container.replaceChildren(notice);
       return;
     }
-    // Scheduled departures belong exclusively to the separate timetable view.
-
+    if(!['1호선','신림선'].includes(line))return;
+    const future=plannedArrivalsFromTimetable(data?.timetable,line,clock);
+    if(!future.length)return;
+    const group=el('div','metro-scheduled-arrivals');
+    const cards=el('div','metro-scheduled-arrival-cards');
+    displayArrivals(cards,'subway',future,place);
+    group.append(cards);
+    if(passed.length){
+      const notice=el('small','metro-plan-direction-ended',`${passed.join('·')} 방향은 계획 막차 시각 경과 · 실시간 운행 종료 확인 아님`);
+      group.append(notice);
+    }
+    if(liveTab)liveTab.textContent='도착예정';
+    if(result?.sourceStatus==='quota'){
+      cards.querySelector('.metro-planned-notice')?.remove();
+      const notice=el('p','metro-quota-notice','실시간 API 조회 한도 초과');
+      container.replaceChildren(notice,group);
+    }else container.replaceChildren(group);
   }
   let visibleServiceHours=null;
   let timetableExpanded=false,timetableDay=null,timetableLine='all',timetableDirection='all';
