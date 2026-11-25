@@ -83,3 +83,13 @@ test('AI dialog has one close owner and never opens on a transport close gesture
   assert.doesNotMatch(presentation,/dj9272-ai-leave/);
   assert.match(css,/dj9251-ai-content-enter/);
 });
+
+test('transport X uses a stationary fade with measured painted bounds until native hide',()=>{
+  const js=source('v806-unified-ui.js');
+  assert.match(js,/const lockTransit=!opening&&target\.id==='transport-sheet'/);
+  assert.match(js,/const fade=isGuide\|\|stationary\|\|lockTransit/);
+  assert.match(js,/const width=rect\.width\+'px',height=rect\.height\+'px'/);
+  assert.match(js,/'min-width':width,'max-width':width,height,'min-height':height,'max-height':height/);
+  assert.match(js,/if\(lockTransit\)target\.style\.setProperty\('clip-path','none','important'\)/);
+  assert.match(js,/try\{if\(complete&&!opening&&typeof afterClose==='function'\)afterClose\(\);\}\s*finally\{target\.removeAttribute\('data-dj810-animating'\);restore\(\);\}/);
+});
