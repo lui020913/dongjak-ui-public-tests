@@ -33,7 +33,8 @@ test('PC install gate marks the selected option and always shows Google Play ext
   await expect(android).toHaveAttribute('aria-pressed','false');
   await android.click();
   await expect(android).toHaveAttribute('aria-pressed','true');
-  await expect(android.locator('.dj-install-selected')).toBeVisible();
+  await expect(android.locator('.dj-install-selected')).toHaveCount(0);
+  await expect(android.locator('.dj-install-status')).toBeVisible();
   await expect(choices.filter({hasText:'웹에서 바로 이용하기'})).toHaveAttribute('aria-pressed','false');
   const guide=page.locator('#dj-install-menu .dj-install-info[data-android-guide]');
   await expect(guide).toBeVisible();
@@ -69,7 +70,8 @@ test('Android tablet install gate keeps selected state and the same external-dow
     const android=page.locator('#dj-install-menu .dj-install-choice').filter({hasText:'Android 앱 다운로드'});
     await android.click();
     await expect(android).toHaveAttribute('aria-pressed','true');
-    await expect(android.locator('.dj-install-selected')).toBeVisible();
+    await expect(android.locator('.dj-install-selected')).toHaveCount(0);
+  await expect(android.locator('.dj-install-status')).toBeVisible();
     const guide=page.locator('#dj-install-menu .dj-install-info[data-android-guide]');
     await expect(guide).toBeVisible();
     await expect(guide.locator('.dj-install-guide-intro')).toContainText('Google Play 스토어 외부');
