@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.168",
+  "application_version": "9.2.169",
   "public_work_branch": "main",
-  "purpose": "PR499: unify AI dialog frame compositor, retain primary outgoing surfaces, capture Preview paint diagnostics; source CI passed. Protected Preview validation required before Production.",
-  "attempt": 393,
+  "purpose": "PR500: atomic risk-report fade and actual screenshot pixel blend verification; mandatory report transition in Chromium and WebKit release gate. Source CI passed; protected Preview and Production verification required.",
+  "attempt": 394,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
