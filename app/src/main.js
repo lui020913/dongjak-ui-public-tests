@@ -22,6 +22,7 @@ import * as maplibregl from 'maplibre-gl';
 import {Capacitor, CapacitorHttp} from '@capacitor/core';
 import {Geolocation} from '@capacitor/geolocation';
 import './v910-cascade-order.css';
+import './button-design-preview.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import './style.css';

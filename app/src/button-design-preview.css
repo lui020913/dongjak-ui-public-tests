@@ -1,0 +1,49 @@
+/* Isolated button design experiment. No event, layout owner, map data or semantic color changes. */
+@layer button-design-preview {
+  :root {
+    --dj-button-primary-radius:14px;
+    --dj-button-secondary-radius:12px;
+    --dj-button-chip-radius:999px;
+    --dj-button-close-radius:50%;
+    --dj-button-primary-height:48px;
+    --dj-button-secondary-height:44px;
+    --dj-button-ink:#fff;
+    --dj-button-accent:#237b65;
+  }
+  /* Explicit role selectors rather than all button elements: list rows, map pins,
+     subway line badges, safety status, toggles and bottom navigation are not CTAs. */
+  html body :is(#app,#dj-community-editor-portal) :is(button.primary-btn,button.guide-button,#route-calc,#route-start-gps,#community-compose-toggle,#dj-community-editor-portal button[type="submit"],.dj-compose-footer button[type="submit"],button.dj-place-review-submit,button.dj-review-submit) {
+    border-radius:var(--dj-button-primary-radius)!important;
+    min-height:var(--dj-button-primary-height)!important;
+    box-shadow:none!important;
+    font-weight:600!important;
+  }
+  html body :is(#app,#dj-community-editor-portal) :is(button.subtle-btn,button.photo-upload-button,button.community-attach-action,.dj-bus-detail-actions button,.dj-bus-detail-dock button,#transport-use-start,#transport-use-end,#transport-refresh,#route-map-edit,#route-map-close,.dj-map-settings-footer button,.dj-place-actions button,.dj-place-detail-actions button,.dj-place-review-actions button,.community-comment-form button,.community-comment-composer button,.dj-community-comment-form button,.dj-comment-compose button) {
+    border-radius:var(--dj-button-secondary-radius)!important;
+    min-height:var(--dj-button-secondary-height)!important;
+    box-shadow:none!important;
+    font-weight:600!important;
+  }
+  html body #app :is(.map-actions > button,#dj-walk-map-actions button,#nav-map-controls button,#current-location,#map-compass,#center-dongjak,#toggle-road-width,#map-gesture-guide-open) {
+    border-radius:var(--dj-button-secondary-radius)!important;
+    box-shadow:0 1px 4px rgba(20,44,38,.14)!important;
+  }
+  html body :is(#app,#dj-community-editor-portal) :is(button.detail-close,button.sheet-dismiss,button.dj-sheet-chrome-close,button.dj834-detail-back,button.dj-place-header-close,button.dj-bus-detail-close,#community-compose-close,#transport-close,#map-safety-close,#map-options-mobile-close,#version-history-close,#route-search-close,.dj-route-pri-close) {
+    border-radius:var(--dj-button-close-radius)!important;
+    box-shadow:none!important;
+  }
+  html body #app :is(button.filter-chip,.community-toolbar button[aria-pressed],button[data-route-variant],#transport-tab-live,#transport-tab-hours,.dj-bus-detail-actions button[aria-pressed]) {
+    border-radius:var(--dj-button-chip-radius)!important;
+    box-shadow:none!important;
+  }
+  /* Keep existing dimensions for aligned toolbar, search and AI controls. */
+  html body #app :is(.map-quick-search-submit,#dj890-ai-orb,.route-mini-btn,.route-gps-btn) {
+    border-radius:var(--dj-button-secondary-radius)!important;
+  }
+  html body :is(#app,#dj-community-editor-portal) :is(button.primary-btn,button.guide-button,button.subtle-btn,button.photo-upload-button,.dj-bus-detail-actions button,.dj-bus-detail-dock button,button.filter-chip,.map-actions > button):focus-visible {
+    outline:2px solid var(--dj-theme-accent,#237b65)!important;
+    outline-offset:2px!important;
+  }
+  /* Danger, disabled, selected, transit line, safety level and dark-mode colors
+     remain under their existing semantic owners. No transition/transform overrides. */
+}

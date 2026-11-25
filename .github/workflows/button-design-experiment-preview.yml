@@ -1,0 +1,141 @@
+name: Button design experiment — Preview only
+run-name: 'Button design experiment · ${{ github.sha }}'
+on:
+  push:
+    branches: ['experiment/button-design-preview-20261125']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: button-design-experiment-preview-20261125
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/experiment/button-design-preview-20261125'
+    name: '1. 빌드 및 기본 테스트'
+    runs-on: ubuntu-24.04
+    environment: public-source-build
+    timeout-minutes: 65
+    outputs:
+      source_sha: ${{ steps.build.outputs.source_sha }}
+      app_version: ${{ steps.build.outputs.app_version }}
+      public_sha: ${{ steps.build.outputs.public_sha }}
+      css_sha: ${{ steps.build.outputs.css_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Restore public app dependency downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - name: Validate mobile-only overlay and device gate
+        run: |
+          set -euo pipefail
+          node frontend/scripts/verify-mobile-first-overhaul.mjs
+          node --test frontend/production/mobile-first-overhaul.test.mjs tests/mobile-only-gate.test.mjs tests/mobile-qa-parallel.test.mjs
+          node --check scripts/apply-mobile-only-gate.mjs
+          node --check scripts/apply-mobile-next.mjs
+          node --check frontend/production/mobile-next.js
+          node --check frontend/production/mobile-17-followup.js
+          node --check scripts/run-mobile-regressions.mjs
+          node --check playwright.v911-remote.config.mjs
+          node --check tests/v911-anonymous-ui.spec.mjs
+          node --test tests/live-qa-design.test.mjs tests/live-qa-release-gate.test.mjs tests/live-qa-vision-retry.test.mjs tests/live-qa-explore-model.test.mjs tests/live-qa-adaptive-plan.test.mjs
+          node --check scripts/live-qa-analyze.mjs
+          node --test tests/live-qa-verify-capture.test.mjs
+      - name: Restore previous adaptive Gemini focus history
+        if: vars.ENABLE_GEMINI_QA == 'true'
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: qa-state/history.json
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            adaptive-gemini-qa-v1-
+      - name: Choose reproducible random design and function focuses
+        if: vars.ENABLE_GEMINI_QA == 'true'
+        run: node scripts/live-qa-adaptive-plan.mjs
+      - name: Save focus cooldown history (best effort)
+        if: vars.ENABLE_GEMINI_QA == 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: qa-state/history.json
+          key: adaptive-gemini-qa-v1-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Attach focus plan to the exact release run
+        if: vars.ENABLE_GEMINI_QA == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-qa-plan-${{ github.run_id }}
+          path: qa-adaptive-plan.json
+          if-no-files-found: error
+          retention-days: 3
+      - name: Test and build exact public app source
+        id: build
+        env:
+          RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: bash scripts/build-mobile-first-overhaul.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-${{ steps.build.outputs.source_sha }}
+          path: ${{ runner.temp }}/mobile-overhaul.sealed
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 3
+      - name: Remove sealed build after upload
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed" "$RUNNER_TEMP/mobile-overhaul.tar.gz"
+
+  preview:
+    needs: build
+    if: needs.build.result == 'success'
+    name: '2. Preview 배포'
+    runs-on: ubuntu-24.04
+    environment: public-cloudflare-preview
+    timeout-minutes: 30
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+    permissions:
+      contents: read
+    env:
+      MOBILE_SOURCE_SHA: ${{ needs.build.outputs.source_sha }}
+      MOBILE_APP_VERSION: ${{ needs.build.outputs.app_version }}
+      MOBILE_PUBLIC_SHA: ${{ needs.build.outputs.public_sha }}
+      MOBILE_CSS_SHA: ${{ needs.build.outputs.css_sha }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      RELEASE_BUNDLE_KEY: ${{ secrets.RELEASE_BUNDLE_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mobile-first-overhaul-sealed-${{ needs.build.outputs.source_sha }}
+          path: ${{ runner.temp }}
+      - name: Restore public Wrangler package downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dongjak/wrangler-npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-wrangler-v4-npm-v1
+      - name: Deploy exact candidate to isolated Preview only
+        id: deploy
+        run: NPM_CONFIG_CACHE="$HOME/.cache/dongjak/wrangler-npm" bash scripts/deploy-button-design-experiment.sh
+      - name: Remove sealed artifact
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mobile-overhaul.sealed"
+
