@@ -2,7 +2,7 @@
 set -euo pipefail
 PRIVATE_REPO="lui020913/dongjak-safety-map"
 PAGES_PROJECT="dongjak-walk-safety-preview"
-PREVIEW_BRANCH="button-design-v2-20261125"
+PREVIEW_BRANCH="button-design-v3-20261125"
 PREVIEW_URL=""
 SOURCE_SHA="$MOBILE_SOURCE_SHA"
 APP_VERSION="$MOBILE_APP_VERSION"

@@ -44,7 +44,7 @@ jobs:
           node --check app/src/main.js
           node --check app/src/route-screen-v3.js
           grep -Fq "import './button-design-preview.css';" app/src/main.js
-          grep -Fq 'PREVIEW_BRANCH="button-design-v2-20261125"' scripts/deploy-button-design-experiment.sh
+          grep -Fq 'PREVIEW_BRANCH="button-design-v3-20261125"' scripts/deploy-button-design-experiment.sh
           if grep -Eq '^[[:space:]]*environment: public-cloudflare-production' .github/workflows/button-design-experiment-preview.yml; then exit 1; fi
       - name: Build public source with existing CI placeholder configuration
         working-directory: app
@@ -54,7 +54,7 @@ jobs:
           npm run check:release
       - name: Install pinned browser test runner
         run: npm install --no-audit --no-fund --prefer-offline
-      - name: Verify V2 computed styles and capture actual app screens
+      - name: Verify V3 computed styles and capture actual app screens
         run: npx playwright test --config=playwright.button-v2.config.mjs
       - name: Verify affected walking route behavior
         run: npx playwright test --config=playwright.route-screen-v3.config.mjs --project=mobile390
@@ -200,7 +200,7 @@ jobs:
 
 
   compare_deployed:
-    name: '3. V1/V2 실제 배포 화면 비교 (운영 배포 없음)'
+    name: '3. V2/V3 실제 배포 화면 비교 (운영 배포 없음)'
     needs: preview
     runs-on: ubuntu-24.04
     container:
@@ -219,7 +219,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: button-v2-deployed-comparison
+          name: button-v3-deployed-comparison
           path: |
             button-v2-report/
             button-v2-results/

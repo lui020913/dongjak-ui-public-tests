@@ -33,23 +33,24 @@ async function capture(page,info,name,locator){
  await info.attach(name+'.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
  return styles;
 }
-test('V2 visible button contracts and screen capture',async({page},info)=>{
+test('V3 visible button contracts and screen capture',async({page},info)=>{
  test.setTimeout(220000);
  await ready(page);
+ await expect(page.locator('meta[name="dj-button-design-revision"]')).toHaveAttribute('content','3');
  const map=page.locator('#app .map-actions > button:visible').first();
- const m=await capture(page,info,'v2-map',map);
- expect(m.radius).toBe('12px');
- expect(m.background).toBe('rgb(255, 255, 255)');
- expect(m.border).toBe('rgb(166, 197, 184)');
+ const m=await capture(page,info,'v3-map',map);
+ expect(m.radius).toBe('10px');
+ expect(m.background).toBe('rgb(22, 72, 63)');
+ expect(m.border).toBe('rgb(22, 72, 63)');
  await page.locator('#bottom-nav .nav-tab[data-tab="route"]').click({timeout:15000,noWaitAfter:true});
  const host=page.locator('#dj-route-v3');await expect(host).toBeVisible({timeout:20000});
- const r=await capture(page,info,'v2-route',host.locator('.action'));
- expect(r.radius).toBe('14px');expect(r.background).toBe('rgb(181, 206, 195)');
- const tool=await measure(page,host.locator('.tools button'));expect(tool.radius).toBe('12px');expect(tool.border).toBe('rgb(166, 197, 184)');
+ const r=await capture(page,info,'v3-route',host.locator('.action'));
+ expect(r.radius).toBe('10px');expect(r.background).toBe('rgb(208, 221, 215)');
+ const tool=await measure(page,host.locator('.tools button'));expect(tool.radius).toBe('10px');expect(tool.border).toBe('rgb(22, 72, 63)');
  await host.locator('[data-v3="end"]').click();await expect(host.locator('.search-screen')).toBeVisible();
- await capture(page,info,'v2-route-search',host.locator('.search-location'));
+ await capture(page,info,'v3-route-search',host.locator('.search-location'));
  await host.locator('[data-v3="search-back"]').click();await host.locator('[data-v3="back"]').click();
  await page.locator('#bottom-nav .nav-tab[data-tab="participate"]').click({timeout:15000,noWaitAfter:true});
- const c=await capture(page,info,'v2-community',page.locator('#community-compose-toggle'));
- expect(c.radius).toBe('14px');expect(c.background).toBe('rgb(35, 123, 101)');
+ const c=await capture(page,info,'v3-community',page.locator('#community-compose-toggle'));
+ expect(c.radius).toBe('10px');expect(c.background).toBe('rgb(18, 63, 56)');
 });

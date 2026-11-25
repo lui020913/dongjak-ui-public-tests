@@ -1,5 +1,5 @@
 {
-  "revision": 2,
+  "revision": 3,
   "channel": "isolated-preview",
-  "design": "shared role palette and geometry"
+  "design": "deep teal map controls, unified 10px action geometry, early cascade order, replaced shared material"
 }
