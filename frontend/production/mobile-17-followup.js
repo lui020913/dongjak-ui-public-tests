@@ -124,14 +124,17 @@ export function installMobileFollowup({app,map,maplibregl,doc=document,win=windo
    safety.append(scroll);
   }
   const form=$('community-form'),formHead=form?.querySelector('.community-form-top');
-  if(form&&!form.hidden&&formHead&&!form.querySelector('.djNext-form-scroll')){
+  // The independent portal owns its original form, header, scrolling row and
+  // footer. Never wrap it or re-open the legacy participation panel behind it.
+  const portalOwnsForm=Boolean(form?.closest('#dj-community-editor-portal'));
+  if(!portalOwnsForm&&form&&!form.hidden&&formHead&&!form.querySelector('.djNext-form-scroll')){
    const scroll=doc.createElement('div');scroll.className='djNext-form-scroll';
    for(const child of [...form.childNodes])if(child!==formHead)scroll.append(child);
    form.append(scroll);
   }
   // Composer is its own screen: hide feed controls with inline ownership so
   // legacy highly-specific sheet rules cannot leak category tabs into editing.
-  const community=$('participation-panel'),editing=!!form&&!form.hidden;
+  const community=$('participation-panel'),editing=!!form&&!form.hidden&&!portalOwnsForm;
   // Closing the map's risk report goes back to Map. A later Community-tab
   // click must not resurrect an off-screen half-sheet from the old controller.
   if(editing&&communityFeedOwned)restoreCommunityFeedStyle();
