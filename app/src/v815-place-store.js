@@ -69,6 +69,9 @@ export function cleanPlace(place){
   const kind=['bus','subway'].includes(place.kind)?place.kind:'place';
   const name=normalize(kind==='place'?normalizeFacilityName(place.name,place.category||place.type||''):place.name)||'저장한 장소';
   const p={name,address:normalize(place.address),category:normalize(kind==='place'?normalizeFacilityCategory(place.category||place.type||place.kind||'장소',place.name):place.category||place.type||place.kind||'장소'),folder:validFolder(place.folder),lng:Number(place.lng),lat:Number(place.lat)};
+  if(kind==='place'){
+    const raw=normalize(place.registeredName||place.name);if(raw&&raw!==name)p.registeredName=raw;
+  }
   if(kind==='bus'){
     p.kind='bus';
     const ars=String(place.arsId||'').replace(/\D/g,'').slice(0,12);if(ars)p.arsId=ars;

@@ -1,4 +1,4 @@
-import {normalizeFacilityCategory} from './facility-display-names.js';
+import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility} from './facility-display-names.js';
 const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
 export function searchPlaceKind(p){
  const values=rawType(p);
@@ -67,10 +67,11 @@ export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
-    const row={...p,lng,lat},distance=distanceMeters(origin,row),key=searchResultKey(row);
+    const row=normalizeFacilityRecord({...p,lng,lat}),distance=distanceMeters(origin,row),key=searchResultKey(row);
     if(!Number.isFinite(distance)||distance>radius)continue;
-    if(seen.has(key)){
-      const prior=seen.get(key),road=facilityRoadAddress(row);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    if(prior){
+      const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
       continue;
     }
@@ -122,11 +123,11 @@ export function visibleFacilityResults(area,items,{limit=60}={}){
   const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
-    const row={...p,lng:Number(p.lng),lat:Number(p.lat)};
+    const row=normalizeFacilityRecord({...p,lng:Number(p.lng),lat:Number(p.lat)});
     if(!visibleAreaContains(area,row))continue;
     const key=searchResultKey(row);
-    if(seen.has(key)){
-      const prior=seen.get(key);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    if(prior){
       const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
       continue;
