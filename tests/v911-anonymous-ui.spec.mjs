@@ -730,7 +730,7 @@ test('phone windows share the opaque gradual slide on open and close',{tag:'@pho
    await expect(search.locator('[data-v3="search-gps"]')).toBeVisible();await expect(search.locator('[data-v3="search-map"]')).toBeVisible();
    await routeScreen.locator('[data-v3="search-back"]').click();
  }
- await routeScreen.locator('[data-v3="close"]').click();
+ await routeScreen.locator('[data-v3="back"]').click();
  await expect(routeScreen).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  await tap(page,tab(page,'mine'));
@@ -1841,7 +1841,7 @@ test('phone selected dock has no color plate and route form is vertically balanc
      destination:root.querySelector('#v3-end').textContent};
  });
  expect(form.initialDisabled,'path calculation needs a selected start/end').toBe(true);
- expect(form.origin).toContain('현재 위치');
+ expect(form.origin).toContain('출발지를 선택하세요');
  expect(form.destination).toContain('어디로 가시나요');
  await testInfo.attach('new-route-v3-geometry.json',{body:Buffer.from(JSON.stringify({routeDock,form},null,2)),contentType:'application/json'});
  if(page.viewportSize().width===390)await testInfo.attach('new-route-v3-reference.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
