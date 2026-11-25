@@ -1,8 +1,9 @@
 import {createDataLayerFader} from './map-layer-fade-v815.js';
+import {claimRoadLayer,announcePilotLayer} from './pilot-layer-selection.js';
 /**
  * 동작구 실폭도로 기반 대표 도로폭 시각화 (2026-10).
  * 실제 측량이 아닌 폴리곤 형상 기반 추정치. 안전등급 아님.
- * 상도1동 행정경계가 아직 포함되지 않았으므로 동작구 전체를 표시한다.
+ * 상도1동 시범구역에 한정된 표시 자료를 사용한다.
  */
 const SOURCE_ID = 'dongjak-roadwidth-source';
 const FILL_ID = 'dongjak-roadwidth-fill';
@@ -66,37 +67,20 @@ export function installRoadWidthLayer({map, maplibregl, app, canOpen = () => tru
     return;
   }
   const layerFader=createDataLayerFader(map);
-  let shown = false;
+  let shown = false,roadLease=null;
   let activePopup = null;
   const setShown=next=>{
+    const changed=shown!==Boolean(next);
+    if(next)roadLease=claimRoadLayer('width',()=>setShown(false));else{roadLease?.release();roadLease=null;activePopup?.remove();activePopup=null;}
     shown=Boolean(next);
     toggle.setAttribute('aria-pressed',String(shown));
     toggle.title=shown?'도로폭 표시 끄기':'추정 도로폭 보기';
     legend.hidden=!shown;
     app?.classList?.toggle?.('dj-road-width-open',shown);
     for(const id of [FILL_ID,OUTLINE_ID])if(map.getLayer(id))layerFader.apply(id,shown);
+    if(shown&&changed)announcePilotLayer('width');
   };
-  // The road-width panel and safety drawer are mutually exclusive.
-  const safetyButton=document.getElementById('map-safety-toggle');
-  safetyButton?.addEventListener('click',()=>{if(shown)setShown(false);},true);
-  if(app&&typeof MutationObserver!=='undefined'){
-    new MutationObserver(()=>{
-      if(shown&&(app.classList.contains('map-safety-open')||app.classList.contains('map-controls-open')))
-        setShown(false);
-    }).observe(app,{attributes:true,attributeFilter:['class']});
-  }
   toggle.addEventListener('click', () => {
-    if(!shown){
-      // Road width is an independent floating card, not a second card behind
-      // the safety drawer or night report.
-      app?.classList?.remove?.('map-controls-open','map-safety-open');
-      document.getElementById('map-options-backdrop')?.setAttribute('hidden','');
-      document.getElementById('map-safety-backdrop')?.setAttribute('hidden','');
-      const nightButton=document.getElementById('night-visibility-quick-off');
-      if(nightButton?.getAttribute('aria-pressed')==='true')nightButton.click();
-      const overview=document.getElementById('overview-sheet');
-      if(overview)overview.hidden=true;
-    }
     // The final responsive stylesheet docks this summary with all other
     // floating panels. Do not force a position from the button's old coords.
     for(const property of ['top','right','bottom','left','transform'])
@@ -116,21 +100,7 @@ export function installRoadWidthLayer({map, maplibregl, app, canOpen = () => tru
         .addTo(map);
     } catch(error) { console.warn('[roadwidth] 상세정보 팝업 오류',error); }
   });
-  map.on('click',(event)=>{
-    if(!shown||!canOpen())return;
-    if(map.queryRenderedFeatures(event.point,{layers:[FILL_ID]}).length){setShown(false);return;}
-    const interactive=['dj-metro-summary-icon','dj-metro-summary-name','dj-metro-detail-icon','dj-metro-detail-name','transport-bus-stop',
-      'transport-bus-names','metro-access-exits','metro-access-exit-labels','registered-points-click']
-      .filter(id=>map.getLayer(id));
-    if(interactive.length&&map.queryRenderedFeatures(event.point,{layers:interactive}).length){
-      // A stop/station tap is still a map tap: end width mode and let the other
-      // feature's own click handler open its details normally.
-      activePopup?.remove();activePopup=null;setShown(false);return;
-    }
-    // Tap anywhere else: dismiss the temporary width overlay without a noisy popup.
-    activePopup?.remove();activePopup=null;
-    setShown(false);
-  });
+  document.getElementById('road-width-legend-close')?.addEventListener('click',()=>setShown(false));
   map.on('mouseenter', FILL_ID, () => { if(shown && canOpen()) map.getCanvas().style.cursor='pointer'; });
   map.on('mouseleave', FILL_ID, () => { map.getCanvas().style.cursor=''; });
 }

@@ -46,7 +46,7 @@ export function installUnifiedUI(doc=document, win=window){
     snapshot:(id)=>lifecycle.snapshot(id)
   };
   const ids=['admin-dong-picker','overview-sheet','transport-sheet','route-panel',
-    'participation-panel','news-panel','mine-panel','map-gesture-guide','road-width-legend',
+    'participation-panel','news-panel','mine-panel','map-gesture-guide',
     'map-safety-controls','map-advanced-controls','dj800-type-panel','dj-map-settings',
     'dj-app-about','version-history-modal','pza-road-sheet','night-visibility-float',
     'detail-sheet','entry-sheet','ped-tools-panel','dj-mobile-utilities',
@@ -378,12 +378,11 @@ export function installUnifiedUI(doc=document, win=window){
     if(!node?.closest)return '';
     const search=node.closest('#map-quick-search');
     if(search)return 'map-quick-search-dropdown';
-    // Desktop still uses the original community sheet; a phone map report
-    // uses the independent body portal, never the participation page.
-    if(node.closest('#djNext-report,#ped-report-open'))return win.matchMedia?.('(max-width:699px)')?.matches&&app.dataset.tab==='map'?'':'participation-panel';
+    // Both report entry points open the canonical community tab.
+    if(node.closest('#djNext-report,#ped-report-open'))return 'participation-panel';
     const tab=node.closest('#bottom-nav .nav-tab[data-tab]');
     if(tab)return tabPanels[tab.dataset.tab]||'';
-    const opener=node.closest('#map-tools-toggle,#map-safety-toggle,#toggle-road-width,'+
+    const opener=node.closest('#map-tools-toggle,#map-safety-toggle,'+
       '#map-gesture-guide-open,#dj800-type-trigger,#open-admin-dongs,#open-admin-dongs-from-options,[aria-controls],'+
       '#dj-settings-mobile,#dj-settings-pc,#dj-about-pc,#dj-about-mobile,'+
       '#version-history-trigger,#dj-guide-release-details');
@@ -395,7 +394,6 @@ export function installUnifiedUI(doc=document, win=window){
     if(phone()&&opener.id==='dj800-type-trigger')return '';
     const direct={'map-tools-toggle':'map-advanced-controls',
       'map-safety-toggle':'map-safety-controls',
-      'toggle-road-width':'road-width-legend',
       'map-gesture-guide-open':'map-gesture-guide',
       'dj800-type-trigger':'dj800-type-panel',
       'open-admin-dongs':'admin-dong-picker',
@@ -437,9 +435,6 @@ export function installUnifiedUI(doc=document, win=window){
     activeSurface='';
   },true);
   on(doc,'click',event=>{
-    if(win.matchMedia?.('(max-width:699px)')?.matches&&app.dataset.tab==='map'&&event.target?.closest?.('#djNext-report,#ped-report-open')){
-      dismissOthers('');activeSurface='';return;
-    }
     const requested=openingIntent(event);
     const mobileMapTab=win.matchMedia?.('(max-width:699px)')?.matches&&event.target?.closest?.('#bottom-nav .nav-tab[data-tab="map"]');
     if(mobileMapTab){dismissOthers('');activeSurface='';return;}

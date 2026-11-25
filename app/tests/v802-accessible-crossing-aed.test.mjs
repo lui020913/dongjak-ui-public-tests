@@ -59,7 +59,8 @@ test('new accessibility controls use existing v8 safety drawer and map route-sel
   assert.ok(html.includes(`data-dj-import="${key}"`));assert.ok(SAFETY_GLYPH_PATHS[key]?.length);assert.ok(SAFETY_ICON_COLORS[key]);assert.ok(EXTRA_LAYER_DEFS[key]);
  }
  assert.ok(html.indexOf('data-dj-import="audio-signals"')>html.indexOf('id="dj-safety-facilities"'));
- assert.match(layers,/dongjak:route-select/);assert.match(layers,/dongjak:boundary-updated/);
+ assert.match(layers,/dongjak:route-select/);assert.match(layers,/getSangdo1Boundary\(\)/);
+ assert.match(layers,/filteredDistrictPoints\(raw,viewBoundary\)/);
  assert.match(styles,/dj-access-facility-controls/);
  assert.match(read('src/main.js'),/installDongjakOfficialDataLayers/);
  assert.ok(existsSync(join(root,'functions/api/aed.js')));

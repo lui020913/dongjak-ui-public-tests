@@ -4,11 +4,11 @@ import {readFileSync} from 'node:fs';
 import {SAFETY_DESKTOP_PANES} from '../src/v819-safety-one-screen.js';
 const read=file=>readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
 
-test('v819: five desktop categories retain all subcategories',()=>{
-  assert.deepEqual(Object.keys(SAFETY_DESKTOP_PANES),['dj-safety-data','dj-safety-facilities','dj-safety-traffic']);
+test('v819: desktop categories retain current available and disabled subcategories',()=>{
+  assert.deepEqual(Object.keys(SAFETY_DESKTOP_PANES),['dj-safety-data','dj-safety-facilities']);
   assert.equal(SAFETY_DESKTOP_PANES['dj-safety-data'].length,4);
   assert.equal(SAFETY_DESKTOP_PANES['dj-safety-facilities'].length,2);
-  assert.equal(SAFETY_DESKTOP_PANES['dj-safety-traffic'].length,2);
+  assert.equal(SAFETY_DESKTOP_PANES['dj-safety-data'][1],'추가 자료');
   const html=read('index.html');
   for(const id of Object.keys(SAFETY_DESKTOP_PANES))assert.match(html,new RegExp(`id="${id}"`));
   assert.match(html,/v819-safety-one-screen\.css/);

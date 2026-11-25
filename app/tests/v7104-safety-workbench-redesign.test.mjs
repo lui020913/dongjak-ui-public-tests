@@ -8,9 +8,9 @@ import {
 import {installDongjakOfficialDataLayers,EXTRA_LAYER_DEFS} from '../src/dongjak-verified-data-layers.js';
 
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-test('safety drawer uses five accessible groups and function titles rather than team labels',()=>{
+test('safety drawer uses four accessible groups and function titles rather than team labels',()=>{
   const html=source('index.html');
-  for(const group of ['data','facilities','traffic','night','actions']){
+  for(const group of ['data','facilities','night','actions']){
     assert.match(html,new RegExp(`id="dj-safety-${group}"`));
     assert.match(html,new RegExp(`data-dj-safety-target="dj-safety-${group}"`));
   }
@@ -23,7 +23,7 @@ test('safety drawer uses five accessible groups and function titles rather than 
   assert.ok(html.includes('dj-slope-legend'));
   assert.ok(html.includes('dj-standard-legend'));
   assert.ok(html.includes('night-coverage-legend'));
-  assert.ok(html.includes('pza-legend'));
+  assert.ok(!html.includes('id="protection-zone-controls"'));
 });
 
 test('each point layer has its own map pictogram with 1.5x the bus icon size',()=>{

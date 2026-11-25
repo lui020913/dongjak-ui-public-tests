@@ -23,11 +23,11 @@ test('GIS data structures and 10th-analysis labels are intact',async()=>{
  for(const f of road.features){assert.ok(f.properties.road_id);assert.ok(['A','B','C','D','E'].includes(f.properties.evidence_tier));}
  for(const f of radii.features)assert.ok([300,500].includes(f.properties.radius_m));
 });
-test('safety menu hook and feature activation toggles map layers',async()=>{
+test('retired public protection menu stays absent; research module still toggles verified layers in isolation',async()=>{
  const html=await readFile(path.join(root,'index.html'),'utf8');
  const main=await readFile(path.join(root,'src','main.js'),'utf8');
- assert.match(html,/id="protection-zone-controls"/);
- assert.match(main,/installProtectionZoneMap\(\{map,maplibregl,app,nightMode\}\)/);
+ assert.doesNotMatch(html,/id="protection-zone-controls"/);
+ assert.doesNotMatch(main,/installProtectionZoneMap\(/);
  const controls={};
  function element(id,checked=false){return controls[id]={id,checked,disabled:false,textContent:'',attributes:{},events:{},setAttribute(key,val){this.attributes[key]=val;},addEventListener(name,fn){this.events[name]=fn;}};}
  for(const id of ['protection-zone-controls','protection-zone-toggle','protection-zone-status',

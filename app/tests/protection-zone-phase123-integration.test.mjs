@@ -59,7 +59,7 @@ test('public road sheet exists with accessible text and collapsed research form'
  }
  assert.match(html,/<aside id="pza-road-sheet"[^>]*role="dialog"/);
  assert.match(html,/<details id="pza-fieldwork-details">/);
- assert.match(html,/위험등급 아님/);
+ assert.doesNotMatch(html,/id="protection-zone-toggle"/);
  assert.doesNotMatch(html,/id="pza-road-sheet"[^>]*hidden="false"/);
 });
 

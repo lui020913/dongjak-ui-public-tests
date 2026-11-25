@@ -48,7 +48,17 @@ test('installation choices expose one persistent selected state and Android alwa
  assert.match(css,/\.dj-install-choice\[aria-pressed="true"\]/);
  assert.match(guide.intro,/Google Play 스토어 외부/);
  assert.match(guide.intro,/테스트용 APK/);
- assert.match(guide.notice,/Google Play 스토어 외부/);
+ assert.match(guide.detail,/Play 스토어와 동일한 심사/);
+ assert.ok(guide.intro.length+guide.context.length+guide.notice.length<250);
+ assert.match(guide.context,/설치 제한이나 보안 안내/);
+ assert.match(guide.notice,/악성·유해 앱/);
+ assert.match(guide.notice,/웹앱/);
+ assert.match(guide.detail,/악성코드가 없음을 보증하지 않습니다/);
+ assert.match(js,/dj-install-apk-meta/);
+ assert.match(js,/add\('details','dj-install-guide-details'/);
+ assert.match(js,/add\('summary','','설치 방법 및 보안 안내'/);
+ assert.match(js,/if\(androidCheck\)return androidCheck/);
+ assert.match(js,/refreshAndroid\(\);showAndroidGuide\(null\)/);
  assert.match(guide.notice,/Play Protect/);
  assert.match(guide.notice,/설치하지 마세요/);
 });

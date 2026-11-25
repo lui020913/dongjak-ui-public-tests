@@ -347,28 +347,15 @@
         <nav class="dj-safety-nav" aria-label="보행안전 메뉴 바로가기">
           <button type="button" data-dj-safety-target="dj-safety-data">사고·지도자료</button>
           <button type="button" data-dj-safety-target="dj-safety-facilities">안전시설</button>
-          <button type="button" data-dj-safety-target="dj-safety-traffic">보호구역·교통</button>
           <button type="button" data-dj-safety-target="dj-safety-night">야간시야</button>
           <button type="button" data-dj-safety-target="dj-safety-actions">보행도구</button>
         </nav>
         <details class="dj-safety-group" id="dj-safety-data" open>
-          <summary><span class="dj-safety-group-name"><strong>사고·보행환경 데이터</strong><small>돌발정보 · 환경센서 · 사고 · 경사 · CCTV</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
+          <summary><span class="dj-safety-group-name"><strong>사고·보행환경 데이터</strong><small>사고 · 경사 · CCTV</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
           <div class="dj-safety-group-body">
         <section class="dj-import-controls" aria-label="공공자료 기반 보행안전 레이어">
           <div class="dj-section-intro"><span><strong>지도에 표시할 정보</strong><small>레이어를 선택하면 지도에 아이콘과 범례가 적용됩니다.</small></span><button type="button" id="dj-safety-clear-imports" aria-label="추가 보행안전 자료 모두 끄기">모두 끄기</button></div>
           <div class="dj-import-grid">
-            <div class="dj-import-category dj-live-category"><strong>실시간·도시환경</strong><span>TOPIS 돌발정보 · S-DoT 관측</span></div>
-            <div class="dj-import-entry dj-feed-entry" data-dj-entry="road-incidents">
-              <button type="button" data-dj-import="road-incidents" aria-pressed="false" aria-describedby="dj-legend-road-incidents dj-feed-road-status"><span class="dj-feature-mark" data-dj-icon="road-incidents" aria-hidden="true"></span><span class="dj-feature-copy"><b>도로 돌발정보</b><small>TOPIS · 교통사고·통제 등 · 2분마다 갱신 확인</small></span><span class="dj-feature-state">꺼짐</span></button>
-              <div class="dj-feed-meta"><span class="dj-feed-indicator" id="dj-feed-road-status" role="status" aria-live="polite">선택하면 최신 정보를 조회합니다</span><span class="dj-feed-source">서울시 TOPIS</span></div>
-              <p id="dj-legend-road-incidents" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#d46b3b"></i>주황색 주의 아이콘 · 도로상 돌발 지점 <small>차량 통제 ≠ 보도 통제</small></p>
-            </div>
-            <div class="dj-import-entry dj-feed-entry" data-dj-entry="sdot-environment">
-              <button type="button" data-dj-import="sdot-environment" aria-pressed="false" aria-describedby="dj-legend-sdot dj-feed-sdot-status"><span class="dj-feature-mark" data-dj-icon="sdot-environment" aria-hidden="true"></span><span class="dj-feature-copy"><b>도시환경 관측</b><small>S-DoT · 기온·습도·풍속 · 30분마다 갱신 확인</small></span><span class="dj-feature-state">꺼짐</span></button>
-              <div class="dj-feed-meta"><span class="dj-feed-indicator" id="dj-feed-sdot-status" role="status" aria-live="polite">실시간 API 연결 시 현재 관측값 표시</span><span class="dj-feed-source">서울시 S-DoT</span></div>
-              <div id="dj-sdot-summary" class="dj-sdot-summary" hidden aria-live="polite"></div>
-              <p id="dj-legend-sdot" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#a76d31"></i>갈색 온도계 아이콘 · 좌표 확인된 센서만 표시 <small>미세먼지 제외 · 센서 위치 미제공시 지점 미표시</small></p>
-            </div>
             <div class="dj-import-category"><strong>사고·횡단 지점</strong><span>과거 사고기록과 현장 조사 위치</span></div>
             <div class="dj-import-entry" data-dj-entry="accidents">
               <button type="button" data-dj-import="accidents" aria-pressed="false" aria-describedby="dj-legend-accidents"><span class="dj-feature-mark" data-dj-icon="accidents" aria-hidden="true"></span><span class="dj-feature-copy"><b>보행사고 다발지역</b><small>연도별 사고다발지역 기록</small></span><span class="dj-feature-state">꺼짐</span></button>
@@ -382,11 +369,9 @@
               <button type="button" data-dj-import="survey-crosswalk" aria-pressed="false" aria-describedby="dj-legend-crosswalk"><span class="dj-feature-mark" data-dj-icon="survey-crosswalk" aria-hidden="true"></span><span class="dj-feature-copy"><b>상도1동 횡단 지점</b><small>현장 조사 41개 위치</small></span><span class="dj-feature-state">꺼짐</span></button>
               <p id="dj-legend-crosswalk" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#0d9488"></i>청록 횡단 아이콘 · 조사 지점 <small>회색은 재확인 필요</small></p>
             </div>
-            <div class="dj-import-entry" data-dj-entry="bocha-reference">
-              <button type="button" id="sangdo-bocha-toggle" data-bocha-import aria-pressed="false" aria-describedby="sangdo-bocha-status dj-legend-bocha"><span class="dj-feature-mark bocha-feature-mark" aria-hidden="true">↔</span><span class="dj-feature-copy"><b>보차혼용도로·이면도로</b><small>상도1동 · 팀 현황자료 237개 구간</small></span><span class="dj-feature-state">꺼짐</span></button>
-              <p id="dj-legend-bocha" class="dj-feature-legend"><i class="bocha-legend-line"></i>황토색 점선 · 실제 현황자료 표시선 <small>선형 위치는 근사</small></p>
-              <p id="sangdo-bocha-status" class="dj-feature-legend" role="status" aria-live="polite">선택하면 상도1동 현황자료를 표시합니다.</p>
-            </div>
+            <div class="dj-import-category"><strong>추가 자료</strong><span>자료 준비 중</span></div>
+            <div class="dj-import-entry"><button type="button" id="pilot-unavailable-incidents" class="pilot-unavailable-layer" disabled aria-pressed="false"><span class="dj-feature-copy"><b>도로 돌발정보</b><small>자료 준비 중</small></span></button></div>
+            <div class="dj-import-entry"><button type="button" id="pilot-unavailable-camera" class="pilot-unavailable-layer" disabled aria-pressed="false"><span class="dj-feature-copy"><b>무인교통단속카메라</b><small>자료 준비 중</small></span></button></div>
             <div class="dj-import-category"><strong>CCTV 설치시설</strong><span>목적별로 분리 표시</span></div>
             <div class="dj-import-entry" data-dj-entry="cctv-security">
               <button type="button" data-dj-import="cctv-security" aria-pressed="false" aria-describedby="dj-legend-cctv-security"><span class="dj-feature-mark" data-dj-icon="cctv-security" aria-hidden="true"></span><span class="dj-feature-copy"><b>방범·어린이 CCTV</b><small>생활방범·어린이보호 설치지점</small></span><span class="dj-feature-state">꺼짐</span></button>
@@ -423,7 +408,7 @@
   <div class="dj-import-grid">
     <div class="dj-import-entry" data-dj-entry="audio-signals">
       <button type="button" data-dj-import="audio-signals" aria-pressed="false" aria-describedby="dj-legend-audio-signals dj-audio-status"><span class="dj-feature-mark" data-dj-icon="audio-signals" aria-hidden="true"></span><span class="dj-feature-copy"><b>보행자 음향신호기</b><small>서울시 설치 현황 · 횡단보도 음향안내 시설</small></span><span class="dj-feature-state">꺼짐</span></button>
-      <div class="dj-feed-meta"><span id="dj-audio-status" class="dj-feed-indicator" role="status" aria-live="polite">선택하면 동작구 설치 기록을 표시합니다.</span><span class="dj-feed-source">서울시 · 2026.05.28 원본</span></div>
+      <div class="dj-feed-meta"><span id="dj-audio-status" class="dj-feed-indicator" role="status" aria-live="polite">선택하면 상도1동 설치 기록을 표시합니다.</span><span class="dj-feed-source">서울시 · 2026.05.28 원본</span></div>
       <p id="dj-legend-audio-signals" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#178e89"></i>청록색 스피커 · 설치 지점 <small>정상 작동 여부 미확인</small></p>
     </div>
     <div class="dj-import-entry dj-feed-entry" data-dj-entry="official-aed">
@@ -432,7 +417,7 @@
       <p id="dj-legend-official-aed" class="dj-feature-legend"><i class="dj-symbol-dot" style="--dj-dot:#cb4b66"></i>분홍색 심장 아이콘 · AED 등록 위치 <small>24시간 이용·현재 작동 여부 미확인 · 응급시 119</small></p>
     </div>
   </div>
-  <p class="dj-access-caveat">동작구 행정경계로 지점을 제한합니다. AED의 건물 출입과 음향신호기의 작동 상태는 현장에서 확인해야 합니다.</p>
+  <p class="dj-access-caveat">상도1동 시범구역으로 지점을 제한합니다. AED의 건물 출입과 음향신호기의 작동 상태는 현장에서 확인해야 합니다.</p>
 </section>
         <section class="safety-layer-menu" aria-label="안전시설 지도 표시">
           <div class="dj-section-intro"><strong>생활 안전시설</strong><small>공개지도 등록시설 · 위치 확인용</small></div>
@@ -452,80 +437,6 @@
         </div>
         <p class="dj-standard-hint">색상은 시설 종류를 뜻하며, 시설의 운영·이용 가능 여부를 보증하지 않습니다. 지하철 출입구는 별도 교통정보 레이어입니다.</p>
       </div>
-        </section>
-          </div>
-        </details>
-        <details class="dj-safety-group" id="dj-safety-traffic">
-          <summary><span class="dj-safety-group-name"><strong>보호구역·교통안전</strong><small>보호구역 경계 · 제한속도 · 단속시설</small></span><span class="dj-safety-group-count" aria-label="켜진 항목 개수">0개 켜짐</span><span class="dj-safety-group-chevron" aria-hidden="true"></span></summary>
-          <div class="dj-safety-group-body">
-        <section id="protection-zone-controls" class="pza-tool" data-mode="simple" aria-label="상도1동 보호구역 분석">
-          <div class="pza-section-title">
-            <div><strong>상도1동 보행안전 검토</strong><span>보호구역 지정 범위와 생활도로 보행환경 비교</span></div>
-            <span class="pza-research-tag">1~3차 검증 반영</span>
-          </div>
-          <div class="pza-mode-switch" role="group" aria-label="지도 분석 표시 방식">
-            <button type="button" id="protection-zone-mode-simple" aria-pressed="true" aria-controls="pza-advanced-tools">간단 보기</button>
-            <button type="button" id="protection-zone-mode-detail" aria-pressed="false" aria-controls="pza-advanced-tools">상세 분석</button>
-          </div>
-          <p id="pza-mode-guide" class="pza-intro">보호구역 밖의 검토 대상 도로를 선택하면 보행 시 참고사항과 아직 확인되지 않은 정보를 볼 수 있습니다.</p>
-          <div class="pza-overview" aria-label="연구자료 요약">
-            <span><b>9곳</b><small>공개 보호구역 경계</small></span>
-            <span><b>2구간</b><small>보행환경 우선 검토</small></span>
-          </div>
-          <div class="pza-action-row pza-main-actions">
-            <button type="button" id="protection-zone-toggle" aria-pressed="false">지도에 표시하기</button>
-            <button type="button" id="protection-zone-zoom">상도1동 전체 보기</button>
-          </div>
-          <div class="pza-legend" aria-label="보호구역 지도 범례">
-            <span><i class="child"></i>어린이 보호구역 경계</span>
-            <span><i class="senior"></i>노인 보호구역 경계</span>
-            <span><i class="candidate"></i>보행환경 검토 도로(위험등급 아님)</span>
-          </div>
-          <div class="pza-focus-panel" aria-label="우선 현장검토 구간">
-            <div class="pza-focus-title"><strong>보행환경 확인 권장 도로 2곳</strong><small>선택하면 지도에서 해당 위치로 이동합니다.</small></div>
-            <div class="pza-focus-grid">
-              <button type="button" id="protection-zone-focus54"><b>상도로54길</b><span>상현초 인근 · 보행 시 참고사항</span></button>
-              <button type="button" id="protection-zone-focus62"><b>상도로62길</b><span>샛별유치원·청송경로당 인근</span></button>
-            </div>
-          </div>
-          <div id="pza-advanced-tools" class="pza-advanced-tools" hidden>
-            <strong class="pza-subhead">분석자료 선택하기</strong>
-            <p class="pza-intro">공식 학교 배정구역과 시설 반경의 지정 외 도로를 별도 표시합니다. 학구 경계는 기본적으로 꺼져 있습니다.</p>
-            <div class="pza-options" aria-label="보호구역 분석 레이어 표시">
-              <label><input type="checkbox" id="protection-zone-child" checked /> <span>어린이 보호구역 <small>공식 지정 범위</small></span></label>
-              <label><input type="checkbox" id="protection-zone-senior" checked /> <span>노인 보호구역 <small>공식 지정 범위</small></span></label>
-              <label><input type="checkbox" id="protection-zone-candidates" /> <span>검토 후보 125구간 <small>공식 위험등급 아님</small></span></label>
-              <label><input type="checkbox" id="protection-zone-accidents" /> <span>사고다발지역 <small>과거 연도 포함</small></span></label>
-              <label class="pza-full-row"><input type="checkbox" id="protection-zone-catchments" /> <span>2026년 공식 초등학교 통학구역 <small>배정 학구 · 보호구역 또는 실제 통학로 아님</small></span></label>
-              <label class="pza-full-row"><input type="checkbox" id="protection-zone-schoolgap" checked /> <span>초등학교 5개교 300·500m 미지정 검토 <small>19개 시설 대표 좌표 사용 · 다른 자치구 시설 미반영</small></span></label>
-              <label class="pza-full-row"><input type="checkbox" id="protection-zone-radii" /> <span>시설 대표점 300m·500m 참고선 <small>실제 지정 경계가 아닌 거리 분석용</small></span></label>
-            </div>
-            <div class="pza-research-notice"><strong>해석할 때 주의하세요</strong><p>색이 있는 검토 도로는 실제 사고 발생 지점이나 공식 위험도로가 아닙니다. 사고다발지역은 통계 범위이며, 거리 참고선은 법정 보호구역 경계가 아닙니다. 초등학교 미지정 검토 도로는 시설 대표점 기반 연구용 표시이며, 공식 통학구역은 학생의 실제 통행 경로가 아닙니다.</p></div>
-          </div>
-          <span id="protection-zone-status" role="status" aria-live="polite">대기 중 · ‘지도에 표시하기’를 누르면 보호구역을 볼 수 있습니다.</span>
-          <div class="pza-public-notice"><strong>지도를 어떻게 이용하나요?</strong><p>파란색·보라색은 기존 보호구역의 공개 지정 범위입니다. 빨간색 도로를 누르면 보행 중 참고할 사항을 볼 수 있습니다. 빨간색은 사고 위험이 확정된 구간이라는 의미가 아닙니다.</p></div>
-        </section>
-        <section id="sangdo-speed-controls" class="sangdo-speed-tool" aria-label="상도1동 도로별 제한속도">
-          <div class="sangdo-speed-head"><strong>상도1동 도로별 제한속도</strong><span>표준노드링크 속성 · 최고제한속도</span></div>
-          <button type="button" id="sangdo-speed-toggle" aria-pressed="false">제한속도 지도 표시하기</button>
-          <div class="sangdo-speed-filters" role="group" aria-label="표시할 제한속도 선택">
-            <label><input type="checkbox" value="10" /><i class="speed-10"></i>10km/h</label>
-            <label><input type="checkbox" value="30" /><i class="speed-30"></i>30km/h</label>
-            <label><input type="checkbox" value="40" /><i class="speed-40"></i>40km/h</label>
-            <label><input type="checkbox" value="50" /><i class="speed-50"></i>50km/h</label>
-          </div>
-          <p class="dj-standard-hint">범례: 선 색상은 선택한 제한속도(10·30·40·50km/h) 유형을 구분합니다. 속도 제한값은 사고위험 등급이 아닙니다.</p>
-          <div class="sangdo-speed-actions"><button type="button" id="sangdo-speed-zoom">상도1동 제한속도 보기</button><span id="sangdo-speed-status" role="status" aria-live="polite">지도 준비 중</span></div>
-          <div class="sangdo-camera-tool" aria-label="무인교통단속카메라 위치">
-            <strong>무인교통단속카메라</strong>
-            <p class="dj-standard-hint">범례: 카메라 표시점은 등록된 단속시설 위치이며 운영 여부는 별도 확인이 필요합니다.</p>
-            <div class="sangdo-camera-actions">
-              <button type="button" id="sangdo-camera-toggle" aria-pressed="false">단속 지점 표시: 꺼짐</button>
-              <button type="button" id="sangdo-camera-import">단속 좌표 CSV/GeoJSON 가져오기</button>
-              <input id="sangdo-camera-file" type="file" accept=".csv,.json,.geojson,text/csv,application/json" hidden aria-label="무인교통단속카메라 좌표 파일 선택" />
-            </div>
-            <span id="sangdo-camera-status" role="status" aria-live="polite">단속 지점 좌표 미확보 · 표시된 지점 없음</span>
-          </div>
         </section>
           </div>
         </details>

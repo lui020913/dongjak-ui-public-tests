@@ -90,13 +90,9 @@ import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
-import {installProtectionZoneMap} from './protection-zone-map.js';
-import {installPolicyGapThreeSourceMap} from './policy-gap-3source-map-patch.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
-import {installSangdoSpeedMap} from './sangdo-speed-map.js';
-import {installBochaRoadLayer} from './bocha-road-layer.js';
 import './bocha-road-layer.css';
-import './protection-zone-map.css';
+import './pilot-layer-selection.css';
 import './night-visibility.css';
 import './safety-workspace.css';
 import './night-visibility-panel.css';
@@ -327,6 +323,7 @@ function toast(message) {
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 3400);
 }
+window.addEventListener('dongjak:pilot-layer-enabled',()=>{if(!window.matchMedia('(max-width:699px)').matches)toast('상도1동 시범구역 내 자료만 표시됩니다.');});
 function status(message) { statusEl.textContent = message; }
 
 function getOverviewSnapOffsets() {
@@ -1687,15 +1684,8 @@ installMobileMapControls({app,map});
 map.on('load',()=>{
   // Camera-distance haze is active only in the oblique perspective view.
   installDistantHaze({map,app,themeButton:document.getElementById('theme-toggle')});
-  // Protection-zone overlays and night visibility are mutually exclusive.
-  // Preserve the previously verified safety-workspace handoff; v6.0.13 lost it.
-  let protectionOverlay=null;
-  const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,
-    onActivate:()=>protectionOverlay?.disable({restoreNight:false})});
-  protectionOverlay=installProtectionZoneMap({map,maplibregl,app,nightMode});
-  installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay});
-  installSangdoSpeedMap({map,maplibregl,app});
-  installBochaRoadLayer({map,maplibregl,app});
+  // PRI owns the public protection-gap, speed and shared-road analysis.
+  installNightVisibility({map,maplibregl,app,toast,theme:visualTheme});
   installNearbyPlaceLabels(map,{maplibregl});
   installHangangBridgeLabels(map,{maplibregl});
   installImportantPlaceClick({map,maplibregl});
@@ -1960,7 +1950,6 @@ async function refreshCommunityNotices(){const seq=++communityNoticeSeq;try{cons
 const moderationReasons={profanity:'욕설 및 비속어',harassment:'괴롭힘 및 비하',spam:'도배 및 스팸',sexual:'음란성 콘텐츠',graphic:'과도하게 자극적인 이미지',privacy:'개인정보 노출',illegal_ad:'불법 광고',uncertain:'운영정책 위반 의심',unavailable:'검사 보류'};
 const moderationMessage=(result,kind)=>result?.state==='removed'?kind+'이 삭제되었습니다. '+(moderationReasons[result.reason]||'운영정책 위반'):result?.state==='review'?kind+'이 검토 대기 중입니다. 공개되지 않습니다.':null;
 let communityPickMode = false;
-let communityComposerOrigin='community';
 let communityComposerPortal=null;
 let communityPickedLocation = null;
 let communityDraftPhoto = null;
@@ -1998,6 +1987,9 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // the editor's visible state when a parent close animation is interrupted.
   // Selecting or cancelling a map location is the explicit draft-resume path.
   const previousTab=app.dataset.tab;
+  // Leaving the map by another tab abandons the picker, not the draft.
+  // A later map tap must never resume an unrelated community editor.
+  if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -2006,7 +1998,6 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
     const form=document.getElementById('community-form');
     if(form){communityComposerPortal?.close();form.hidden=true;}
     const panel=document.getElementById('participation-panel');if(panel)delete panel.dataset.djPatchKeyboard;
-    communityComposerOrigin='community';
   }
   immersiveChrome.restore();
   if (addMode) setAddMode(false);
@@ -2184,15 +2175,13 @@ function openCommunityComposer(open,{animate=true}={}) {
   }
   if(open){
     if(communityComposerPortal?.isOpen())return;
-    communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map',animate});
+    communityComposerPortal.open({animate});
     return;
   }
   if(!communityComposerPortal?.isOpen())return;
-  communityComposerPortal.dismiss({animate,onClosed:()=>{
-    communityComposerOrigin='community';
-  }});
+  communityComposerPortal.dismiss({animate});
 }
-document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
+document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
 for (const chip of document.querySelectorAll('.community-filter[data-community-filter]')) {
   chip.addEventListener('click',()=>{
@@ -2250,35 +2239,44 @@ document.getElementById('community-photo-remove').addEventListener('click',()=>{
   document.getElementById('community-photo-preview').hidden=true;
   document.getElementById('community-photo-image').removeAttribute('src');
 });
+function clearCommunityLocationPick(){
+  communityPickMode=false;
+  document.getElementById('community-map-hint').hidden=true;
+}
+function cancelCommunityTabMotion(){
+  window.dispatchEvent(new Event('dongjak:cancel-tab-transition'));
+}
+function resumeCommunityLocationDraft(){
+  clearCommunityLocationPick();
+  cancelCommunityTabMotion();
+  navigate('participate',{resumeCommunityDraft:true});
+  openCommunityComposer(true);
+}
 function selectCommunityLocation(lngLat) {
+  if(!communityPickMode||app.dataset.tab!=='map')return;
   const inside=isDongjak(lngLat.lng,lngLat.lat);
   if(inside===null){toast('동작구 경계를 불러오는 중입니다.');return;}
   if(!inside){toast('동작구 안의 위치를 선택해 주세요.');return;}
   communityPickedLocation={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
-  communityPickMode=false;
-  document.getElementById('community-map-hint').hidden=true;
   document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  if(communityComposerOrigin==='map'&&window.matchMedia('(max-width:699px)').matches)navigate('map',{suppressOverview:true,resumeCommunityDraft:true});
-  else navigate('participate',{resumeCommunityDraft:true});
-  openCommunityComposer(true);
+  resumeCommunityLocationDraft();
   toast('위치를 연결했습니다.');
 }
 document.getElementById('community-map-pick').addEventListener('click',()=>{
   if(routePickMode){routePickMode=null;syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
   // switching tabs. It will be portaled again after the map pick finishes.
+  cancelCommunityTabMotion();
   communityComposerPortal?.close();
   communityForm.hidden=true;
+  closeCommunityLocation();
   communityPickMode=true;
-  navigate('map');
+  navigate('map',{suppressOverview:true});
   document.getElementById('community-map-hint').hidden=false;
   toast('지도에서 게시글에 연결할 위치를 선택해 주세요.');
 });
 document.getElementById('community-map-cancel').addEventListener('click',()=>{
-  communityPickMode=false;
-  document.getElementById('community-map-hint').hidden=true;
-  navigate('participate',{resumeCommunityDraft:true});
-  openCommunityComposer(true);
+  if(communityPickMode)resumeCommunityLocationDraft();
 });
 // Structured issue fields are relevant to '보행 불편' posts, not general discussion.
 const issueDetails=document.getElementById('community-issue-details');
@@ -2368,13 +2366,10 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
-    const origin=app.dataset.tab==='map'?'map':'community';
-    // The mobile report is an independent full-screen portal. Keep the real
-    // map as its underlying page rather than switching to the community feed.
-    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches){
-      // The live map is already active; do not re-enter or resize it.
-    }else navigate('participate');
-    communityComposerOrigin=origin;
+    // Risk report opens the same composer as the community tab.
+    cancelCommunityTabMotion();
+    clearCommunityLocationPick();
+    navigate('participate');
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});
@@ -2393,6 +2388,9 @@ function communityButton(text,cls,fn) {
 }
 function showCommunityLocation(post) {
   if(!post.location)return;
+  // Viewing a saved location is read-only, never a pending draft pick.
+  clearCommunityLocationPick();
+  cancelCommunityTabMotion();
   closeCommunityLocation();
   navigate('map',{suppressOverview:true});
   quickSearch.close();quickSearch.clearMapResults?.();

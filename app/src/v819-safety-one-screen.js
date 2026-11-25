@@ -2,9 +2,8 @@
  * Keeps every existing toggle and data ID; only changes which detail set is shown.
  */
 export const SAFETY_DESKTOP_PANES = Object.freeze({
-  'dj-safety-data': ['실시간·환경', '사고·횡단', 'CCTV', '지형·교통약자'],
-  'dj-safety-facilities': ['음향신호기·AED', '생활 안전시설'],
-  'dj-safety-traffic': ['보호구역 검토', '속도·단속시설']
+  'dj-safety-data': ['사고·횡단', '추가 자료', 'CCTV', '지형·교통약자'],
+  'dj-safety-facilities': ['음향신호기·AED', '생활 안전시설']
 });
 
 export function installDesktopSafetyPanes(doc = document, win = window) {

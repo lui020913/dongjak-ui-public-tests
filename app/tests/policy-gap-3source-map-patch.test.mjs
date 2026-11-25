@@ -22,9 +22,9 @@ test('MapLibre overlay GeoJSON passes expected record and gray-color checks',asy
  const bad={...geo,features:geo.features.map((f,i)=>i?f:{...f,properties:{...f.properties,team_average_divisor:99}})};
  assert.throws(()=>verifyPolicyGapFeatures(bad),/평균/);
 });
-test('research patch is wired without replacing existing protection or route tools',async()=>{
+test('research patch is retained offline without duplicate public layer wiring',async()=>{
  const main=await readFile(path.resolve(here,'../src/main.js'),'utf8');
- assert.ok(main.includes("installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay})"));
- assert.ok(main.includes("installProtectionZoneMap({map,maplibregl,app,nightMode})"));
- assert.ok(main.includes("installBochaRoadLayer({map,maplibregl,app})"));
+ assert.doesNotMatch(main,/installPolicyGapThreeSourceMap\(/);
+ assert.doesNotMatch(main,/installProtectionZoneMap\(/);
+ assert.doesNotMatch(main,/installBochaRoadLayer\(/);assert.match(main,/installPriMap\(/);
 });

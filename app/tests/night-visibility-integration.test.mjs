@@ -50,7 +50,7 @@ test('야간 분석 UI와 지도 연결점이 있고 원본 대중교통 코드�
   for(const id of ['night-visibility-toggle','night-visibility-quick-off','night-visibility-radius',
     'night-visibility-exclude-major','night-visibility-show-alley','night-visibility-show-path',
     'night-visibility-top','night-visibility-stats'])assert.match(html,new RegExp(id));
-  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme,\s*onActivate:/);
+  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme\}\)/);
   assert.match(main,/initTransportMap\(/);
   assert.match(js,/dj-night-dark-path/);
   assert.match(js,/getSangdoBoundary\(map\)/);

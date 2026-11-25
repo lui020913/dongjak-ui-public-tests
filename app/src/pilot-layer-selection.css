@@ -1,0 +1,12 @@
+/* Active pilot-layer controls are independent of the dialog. */
+@media(max-width:699px){
+#djNext-active-layers{position:fixed;z-index:3119;top:calc(var(--dj829-tools-top,calc(env(safe-area-inset-top,0px) + 76px)) + 60px);left:10px;right:10px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;pointer-events:auto;padding:2px 0 4px}
+#djNext-active-layers[hidden],#app:not([data-tab="map"]) #djNext-active-layers,#app[data-search-open="true"] #djNext-active-layers{display:none!important}
+#djNext-active-layers .djNext-active-layer-off{flex:0 0 auto;display:flex;align-items:center;gap:5px;min-height:32px;padding:5px 10px;border:1px solid var(--dj-ui-border,#d1ddd6);border-radius:16px;background:var(--dj-ui-bg,#f7faf8);color:var(--dj-ui-text,#29483c);font-family:inherit;font-size:11px;font-weight:600;line-height:1.2;box-shadow:0 2px 5px #0001;white-space:nowrap}
+#djNext-active-layers svg{width:15px;height:15px}
+}
+
+/* Unavailable datasets are visible but neither selectable nor pinnable. */
+#djNext-layer-panel .djNext-layer-row[data-unavailable='true']{opacity:.58;filter:grayscale(1)}
+#djNext-layer-panel .djNext-layer-row[data-unavailable='true'] button:disabled,.pilot-unavailable-layer:disabled{cursor:not-allowed}
+.pilot-unavailable-layer:disabled{opacity:.58;filter:grayscale(1)}

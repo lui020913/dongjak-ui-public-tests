@@ -6,29 +6,28 @@ const icons={road:'<path d="M7 3 4 21M17 3l3 18M12 3v4m0 3v4m0 3v4"/>',building:
 const layerPaths={zone:'<path d="M3 20h18M5 16V8l7-5 7 5v8M9 16v-5h6v5"/>',bocha:'<path d="M5 3v18M19 3v18M12 3v4m0 3v4m0 3v4"/>',livemetro:'<rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 10h12M9 18l-3 4m9-4 3 4M9 14h1m4 0h1"/>',access:'<circle cx="12" cy="4" r="2"/><path d="M5 8h14M12 6v8m0 0-4 7m4-7 4 7"/>',sdot:'<path d="M3 18h18M5 18V9h5v9m4 0V5h5v13M8 12h0m9-3h0"/>',signals:'<path d="M4 10v4h4l5 4V6l-5 4H4zm12-1a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/>',elevator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M7 10l2-2 2 2m2 4 2 2 2-2"/>',crossing:'<path d="M4 4v16m16-16v16M8 5h8m-8 5h8m-8 5h8m-8 5h8"/>',cctv:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvparking:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',cctvother:'<rect x="3" y="5" width="14" height="9" rx="2"/><path d="m17 8 4-2v8l-4-2M9 14v5H5"/>',speed:'<path d="M4 19a10 10 0 1 1 16 0H4ZM12 15l4-6"/>',camera:'<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="4"/><path d="M8 6l2-3h4l2 3"/>'};
 export const PHONE_CHOICES=Object.freeze([
  ['pri','보행 취약도','road','#dj-pri-toggle'],
- ['pilot','보행안전','shield','#map-safety-toggle'],
- ['night','야간시야','moon','#night-visibility-toggle'],
+ ['width','도로폭','road','#toggle-road-width'],
+ ['aed','자동심장충격기','shield','[data-dj-import="official-aed"]'],
  ['slope','경사도','mountain','[data-dj-import="slope"]'],
- ['bocha','보차혼용','bocha','#sangdo-bocha-toggle'],
  ['accident','사고다발','alert','[data-dj-import="accidents"]'],
  ['livebus','실시간 버스','bus','[data-live-vehicle="bus"]'],
  ['livemetro','실시간 지하철','livemetro','[data-live-vehicle="metro"]'],
  ['dong','행정동','map','#open-admin-dongs-from-options'],
  ['cctv','CCTV','cctv','[data-dj-import="cctv-security"]'],
- ['zone','보호구역','zone','#protection-zone-toggle'],
  ['access','교통약자','access','#ped-access-toggle'],
  ['buildings','3D 건물','building','[data-base-layer="buildings"]'],
- ['sdot','도시환경','sdot','[data-dj-import="sdot-environment"]'],
- ['incidents','돌발정보','alert','[data-dj-import="road-incidents"]'],
  ['cctvparking','주정차 CCTV','cctvparking','[data-dj-import="cctv-parking"]'],
  ['cctvother','기타 CCTV','cctvother','[data-dj-import="cctv-other"]'],
  ['crossing','횡단지점','crossing','[data-dj-import="survey-crosswalk"]'],
  ['signals','음향신호기','signals','[data-dj-import="audio-signals"]'],
  ['elevator','승강기','elevator','[data-dj-import="metro-elevator"]'],
- ['speed','제한속도','speed','#sangdo-speed-toggle'],
- ['camera','단속카메라','camera','#sangdo-camera-toggle']
+ ['incidents','돌발정보','alert','#pilot-unavailable-incidents'],
+ ['camera','단속카메라','camera','#pilot-unavailable-camera'],
 ]);
-export function normalizePhoneShortcuts(value){return [...new Set(Array.isArray(value)?value.filter(id=>PHONE_CHOICES.some(c=>c[0]===id)):[])].slice(0,3)}
+export const PHONE_LAYER_TOGGLES=new Set(['width','slope','accident','cctv','cctvparking','cctvother','crossing','signals','elevator','aed','livebus','livemetro','buildings']);
+export const PHONE_PILOT_LAYERS=new Set(['pri','width','slope','accident','cctv','cctvparking','cctvother','crossing','signals','elevator','aed']);
+export const PHONE_UNAVAILABLE_LAYERS=new Set(['incidents','camera']);
+export function normalizePhoneShortcuts(value){return [...new Set(Array.isArray(value)?value.filter(id=>!PHONE_UNAVAILABLE_LAYERS.has(id)&&PHONE_CHOICES.some(c=>c[0]===id)):[])].slice(0,3)}
 const read=(w,k,f)=>{try{return JSON.parse(w.localStorage.getItem(k)||'null')??f}catch{return f}};
 const save=(w,k,v)=>{try{w.localStorage.setItem(k,JSON.stringify(v))}catch{}};
 export const phoneIcon=key=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(layerPaths[key]||icons[key]||icons.layers)+'</svg>';
@@ -99,6 +98,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  app.dataset.djNextInstalled='1';
  const $=id=>doc.getElementById(id),q=s=>doc.querySelector(s);
  let selected=normalizePhoneShortcuts(read(win,KEY,[])),rail=null,toolScroll=null,host=null,scheduled=false,focusReturn=null,slot=null,weather=null;
+ const activeLayers=doc.createElement('div');activeLayers.id='djNext-active-layers';activeLayers.hidden=true;activeLayers.setAttribute('aria-label','현재 지도 레이어 해제');app.append(activeLayers);let activeSignature='';
  const railActions=new WeakMap();
  const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);railActions.set(node,fn);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
@@ -121,20 +121,22 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  close.addEventListener('click',()=>dismiss());panel.addEventListener('click',e=>{if(e.target===panel)dismiss()});
  doc.addEventListener('keydown',e=>{if(panel.hidden)return;if(e.key==='Escape'){dismiss();return}if(e.key==='Tab'){const els=[...panel.querySelectorAll('button:not(:disabled)')];if(!els.length)return;if(e.shiftKey&&doc.activeElement===els[0]){e.preventDefault();els.at(-1).focus()}else if(!e.shiftKey&&doc.activeElement===els.at(-1)){e.preventDefault();els[0].focus()}}});
  const notify=msg=>{let n=$('djNext-toast');if(!n){n=doc.createElement('div');n.id='djNext-toast';n.setAttribute('role','status');app.append(n)}n.textContent=msg;n.hidden=false;win.clearTimeout(n._timer);n._timer=win.setTimeout(()=>n.hidden=true,3500)};
+ win.addEventListener('dongjak:pilot-layer-enabled',()=>notify('상도1동 시범구역 내 자료만 표시됩니다.'));
  function invoke(selector){const b=q(selector);if(!b||b.disabled){notify('현재 사용할 수 없는 기능입니다. 지도 로딩 후 다시 시도해 주세요.');return}b.click()}
  function open(event,idx=null){resetLayerDrag();win.clearTimeout(closeTimer);panel.classList.remove('djNext-leaving');focusReturn=event.target?.closest?.('button')||event.currentTarget;slot=idx;renderList();scroll.scrollTop=0;win.DongjakWindowLifecycle?.requestOpen(panel.id);panel.hidden=false;win.DongjakWindowMotion?.open(body);app.dataset.djNextLayerAction='open';close.focus({preventScroll:true})}
  function update(value){selected=normalizePhoneShortcuts(value);save(win,KEY,selected);renderRail();renderList()}
  function renderList(){const prev=scroll.scrollTop;count.textContent='상단 바로가기 '+selected.length+'/3';list.replaceChildren();
- const groups=[['지도 기능',['pri','pilot','night','dong','buildings','livebus','livemetro','access']],['보행안전 정보',['slope','bocha','accident','zone','sdot','incidents','crossing','signals','elevator','speed','camera','cctv','cctvparking','cctvother']]];
+ const groups=[['지도 기능',['dong','buildings','livebus','livemetro','access']],['도로 분석 · 하나만 선택',['pri','width','slope']],['시설·지점 · 중복 선택 가능',['accident','crossing','signals','elevator','aed','cctv','cctvparking','cctvother','incidents','camera']]];
  for(const [title,ids] of groups){const heading=doc.createElement('h3');heading.textContent=title;heading.className='djNext-group-title';const column=doc.createElement('div');column.className='djNext-layer-columns';const pinHeading=doc.createElement('span');pinHeading.textContent='상단 고정';pinHeading.className='djNext-layer-column-label';column.append(heading,pinHeading);list.append(column);const grid=doc.createElement('div');grid.className='djNext-layer-grid';list.append(grid);
  for(const [id,label,icon,selector] of ids.map(id=>PHONE_CHOICES.find(c=>c[0]===id)).filter(Boolean)){
-  const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;
- const source=q(selector);const action=button(label,icon,()=>{dismiss(true);invoke(selector)});action.className='djNext-layer-action';const glyph=action.querySelector('svg');glyph.classList.add('djNext-layer-glyph');action.querySelector('span').className='djNext-layer-label';action.setAttribute('aria-label',label+' 지도 기능');
-  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(!source||source.disabled){state.textContent='준비 중';action.disabled=true;}action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
+  const line=doc.createElement('div');line.className='djNext-layer-row';line.dataset.layerKey=id;const unavailable=PHONE_UNAVAILABLE_LAYERS.has(id);if(unavailable)line.dataset.unavailable='true';
+ const source=q(selector);const action=button(label,icon,()=>{if(unavailable)return;if(!PHONE_LAYER_TOGGLES.has(id))dismiss(true);invoke(selector);schedule();});action.className='djNext-layer-action';const glyph=action.querySelector('svg');glyph.classList.add('djNext-layer-glyph');action.querySelector('span').className='djNext-layer-label';action.setAttribute('aria-label',label+' 지도 기능');
+  const state=doc.createElement('small');state.className='djNext-layer-state';const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');state.textContent=id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':pressed==='false'&&id!=='pilot'&&id!=='dong'?'꺼짐':'열기';if(unavailable||!source||source.disabled){state.textContent=unavailable?'자료 준비 중':'준비 중';action.disabled=true;}action.append(state);if(pressed!==null&&pressed!==undefined)action.setAttribute('aria-pressed',pressed);
   const add=doc.createElement('button');add.type='button';add.className='djNext-shortcut-switch';const current=selected.includes(id);
-  add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 상단 바로가기 고정');add.title=label+' 상단 바로가기 고정 (지도 표시 설정과 별개)';add.setAttribute('aria-checked',String(current));add.disabled=!current&&selected.length>=3;
+  add.setAttribute('role','switch');add.setAttribute('aria-label',label+' 상단 바로가기 고정');add.title=label+' 상단 바로가기 고정 (지도 표시 설정과 별개)';add.setAttribute('aria-checked',String(current));add.disabled=unavailable||(!current&&selected.length>=3);
   const track=doc.createElement('span');track.className='djNext-switch-track';track.setAttribute('aria-hidden','true');add.append(track);
   add.addEventListener('click',()=>{
+   if(unavailable)return;
    const restoreFocus=doc.activeElement===add;
    if(current){update(selected.filter(x=>x!==id));}else{
     if(selected.length>=3)return;
@@ -144,7 +146,10 @@ export function installPhoneToolbar({app,doc=document,win=window}){
   });
   line.append(action,add);grid.append(line);
  }}scroll.scrollTop=prev;}
- function refresh(){if(!rail)return;const metroState=list.querySelector('[data-layer-key="livemetro"] .djNext-layer-state'),metroSource=q('[data-live-vehicle="metro"]');if(metroState&&metroSource){const label=metroSource.dataset.liveQuota==='true'?'조회 한도 초과':metroSource.getAttribute('aria-pressed')==='true'?'표시 중':'꺼짐';if(metroState.textContent!==label)metroState.textContent=label;}for(const n of rail.querySelectorAll('[data-source]')){const b=q(n.dataset.source);const state=b?.getAttribute('aria-pressed')??b?.getAttribute('aria-expanded');if(state!==null&&state!==undefined&&n.getAttribute('aria-pressed')!==state)n.setAttribute('aria-pressed',state)}
+ function refresh(){if(!rail)return;
+  for(const [id,label,icon,selector] of PHONE_CHOICES){const row=list.querySelector('[data-layer-key="'+id+'"]'),source=q(selector),action=row?.querySelector('.djNext-layer-action'),state=row?.querySelector('.djNext-layer-state');if(!action||!state)continue;const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');const unavailable=PHONE_UNAVAILABLE_LAYERS.has(id);const disabled=unavailable||!source||source.disabled;const labelText=unavailable?'자료 준비 중':id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':disabled?'준비 중':pressed==='false'&&PHONE_LAYER_TOGGLES.has(id)?'꺼짐':'열기';if(state.textContent!==labelText)state.textContent=labelText;if(action.disabled!==disabled)action.disabled=disabled;if(pressed!=null&&action.getAttribute('aria-pressed')!==pressed)action.setAttribute('aria-pressed',pressed);}
+  const active=PHONE_CHOICES.filter(([id,,,selector])=>(PHONE_PILOT_LAYERS.has(id)||PHONE_LAYER_TOGGLES.has(id))&&q(selector)?.getAttribute('aria-pressed')==='true');const signature=active.map(x=>x[0]).join(',');if(activeSignature!==signature){activeSignature=signature;activeLayers.replaceChildren();for(const [id,label,icon,selector] of active){const off=button(label+' 해제',icon,()=>invoke(id==='pri'?'#dj-pri-layer-off':selector));off.className='djNext-active-layer-off';off.setAttribute('aria-label',label+' 레이어 해제');activeLayers.append(off);}activeLayers.hidden=!active.length;}
+  const metroState=list.querySelector('[data-layer-key="livemetro"] .djNext-layer-state'),metroSource=q('[data-live-vehicle="metro"]');if(metroState&&metroSource){const label=metroSource.dataset.liveQuota==='true'?'조회 한도 초과':metroSource.getAttribute('aria-pressed')==='true'?'표시 중':'꺼짐';if(metroState.textContent!==label)metroState.textContent=label;}for(const n of rail.querySelectorAll('[data-source]')){const b=q(n.dataset.source);const state=b?.getAttribute('aria-pressed')??b?.getAttribute('aria-expanded');if(state!==null&&state!==undefined&&n.getAttribute('aria-pressed')!==state)n.setAttribute('aria-pressed',state)}
   const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
   const label=$('weather-label');
   if(weather){const span=weather.querySelector('span');const state=label?.dataset.djWeatherState;const temperature=label?.dataset.djWeatherTemperature;const value=temperature||(state==='error'?'조회 실패':state==='loading'?'조회 중':caption?.textContent||'날씨');if(span.textContent!==value)span.textContent=value;weather.setAttribute('aria-label','날씨 '+value+(temperature&&state==='loading'?' · 이전 값, 갱신 중':temperature&&state==='error'?' · 이전 값, 갱신 실패':''));weather.dataset.weatherState=state||'idle';const symbol=type==='sun'?'sun':type&&type!=='unknown'?'cloud':'sun';if(weather.dataset.symbol!==symbol){weather.querySelector('svg').outerHTML=phoneIcon(symbol);weather.dataset.symbol=symbol}}
@@ -163,7 +168,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  if(!host){host=doc.createElement('nav');host.id='djNext-toolbar';host.setAttribute('aria-label','모바일 지도 주요 기능');rail=doc.createElement('div');rail.id='djNext-rail';rail.setAttribute('role','group');rail.setAttribute('aria-label','주요 지도 기능');toolScroll=doc.createElement('div');toolScroll.id='djNext-scroll';toolScroll.setAttribute('role','group');toolScroll.setAttribute('aria-label','지도 기능 및 바로가기');toolScroll.addEventListener('scroll',refreshRailEdges,{passive:true});rail.append(toolScroll);host.append(rail);app.append(host);if(typeof win.ResizeObserver==='function')new win.ResizeObserver(refreshRailEdges).observe(toolScroll);win.addEventListener('resize',refreshRailEdges,{passive:true});renderRail()}else refresh()
  }
  const schedule=()=>{if(scheduled)return;scheduled=true;win.requestAnimationFrame(sync)};
- new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota','data-dj-weather-state','data-dj-weather-temperature']});
+ new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['data-active','aria-pressed','aria-expanded','data-dj912-weather-icon','data-live-quota','data-dj-weather-state','data-dj-weather-temperature','disabled','data-dj-pri-mode']});
  // The independent phone rail owns its click before legacy document-level
  // overlay/gesture delegates. Do not intercept native or map-surface events.
  win.addEventListener('click',e=>{

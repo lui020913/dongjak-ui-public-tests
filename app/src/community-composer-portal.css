@@ -23,7 +23,7 @@ html body:is([data-dj-community-editor="open"],[data-dj-community-editor="closin
   overscroll-behavior:none!important;
   overflow:hidden!important;
 }
-html body[data-dj-community-editor="open"]:not([data-dj-community-map-origin="true"]) #app #bottom-nav{
+html body[data-dj-community-editor="open"] #app #bottom-nav{
   display:none!important;visibility:hidden!important;pointer-events:none!important;
 }
 #dj-community-editor-portal #community-form{

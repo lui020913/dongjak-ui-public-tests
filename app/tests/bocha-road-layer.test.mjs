@@ -25,14 +25,14 @@ test('invalid and empty data is rejected instead of silently treated as safe',()
  assert.throws(()=>normalizeBochaRoadGeoJSON({type:'Feature',features:[]}),/FeatureCollection/);
 });
 
-test('native safety workbench connects overlay and clear-all without registering it as another imported source',async()=>{
+test('native safety workbench no longer exposes duplicate bocha analysis; shared clear styling is retained',async()=>{
  const [main,html,workbench,baseCss,polishCss,desktopCss]=await Promise.all([
   read('../src/main.js'),read('../index.html'),read('../src/safety-workbench-v7103.js'),
   read('../src/safety-workbench-v7103.css'),read('../src/safety-polish-v7104.css'),read('../src/v819-safety-one-screen.css')
  ]);
- assert.equal(main.split('installBochaRoadLayer({map,maplibregl,app});').length,2);
- assert.equal(html.split('id="sangdo-bocha-toggle"').length,2);
- assert.match(html,/data-bocha-import aria-pressed="false"/);
+ assert.doesNotMatch(main,/installBochaRoadLayer\(/);
+ assert.doesNotMatch(html,/id="sangdo-bocha-toggle"/);
+ assert.doesNotMatch(html,/data-bocha-import aria-pressed="false"/);
  assert.ok(workbench.includes('[data-bocha-import][aria-pressed="true"]:not(:disabled)'));
  for(const css of [baseCss,polishCss,desktopCss]){
   assert.match(css,/button:is\(\[data-dj-import\],\[data-bocha-import\]\)/);

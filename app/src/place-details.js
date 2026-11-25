@@ -122,7 +122,7 @@ async function enrich(p,signal){
   throw new Error('Facility details service unavailable');
 }
 /** Call only after an explicit place click. */
-export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=false,onBack}={}){
+export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=false,onBack,layerContent=null}={}){
   if(!map||!maplibregl?.Popup)return null;
   // Facility overlays have their own click handlers; HTML markers may stop
   // propagation before MapLibre's generic click handler. Route-picking wins:
@@ -175,6 +175,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   displayWebsite();
   if(p.note)infoCard.append(text('p',p.note,'dj-place-note'));
+  if(layerContent)infoCard.replaceChildren(layerContent);
 
   const routeActions=document.createElement('div');routeActions.className='dj-place-route-actions';
   for(const [which,label] of [['start','출발'],['end','도착']]){
@@ -222,7 +223,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   shareButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7.4 6.6 4.4"/></svg>';
   shareButton.addEventListener('click',()=>{void shareMapUrl(placeShareUrl(p),`${p.name} · 동작지도`);});
   personalActions.append(saveButton,shareButton);
-  headerActions.append(personalActions);
+  if(!layerContent)headerActions.append(personalActions);
 
   const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='dj-place-header-close';
   closeButton.setAttribute('aria-label','시설 정보 닫기');closeButton.title='닫기';
@@ -249,9 +250,9 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     if(!isPlaceSaved(p))return;
     setSavedPlaceFolder(p,folderSelect.value);
   });
-  recordRecentPlace(p);
-  const reviewController=installPlaceReviews(body,p);
-  const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';body.append(aiSection);
+  if(!layerContent)recordRecentPlace(p);
+  const reviewController=layerContent?null:installPlaceReviews(body,p);
+  const aiSection=document.createElement('section');aiSection.className='dj-place-ai-section';if(!layerContent)body.append(aiSection);
   aiSection.append(text('strong','AI 시설 안내','dj-place-ai-heading'));
   const fallbackDescription=facilityFallbackDescription(p.name,p.type);
   const feedback=text('div',fallbackDescription,'dj-place-ai-response');
@@ -343,7 +344,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   popup.on('close',()=>{controllerAI.abort();marker?.remove();});
   const cachedInfo=mem.get(cacheKey(p));
   let enriched=Promise.resolve();
-  if(!p.phone||!p.address||!p.website){
+  if(!layerContent&&(!p.phone||!p.address||!p.website)){
     const controller=new AbortController();
     const delayNotice=window.setTimeout(()=>{
       if(controller.signal.aborted)return;
@@ -392,6 +393,6 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   retry.addEventListener('click',loadExplanation);
   // No mandatory user action: generate once immediately on place selection.
-  void loadExplanation();
+  if(!layerContent)void loadExplanation();
   return popup;
 }

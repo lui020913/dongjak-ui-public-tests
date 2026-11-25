@@ -24,7 +24,7 @@ test('MapLibre overlay GeoJSON passes expected record and gray-color checks',asy
  const bad={...geo,features:geo.features.map((f,i)=>i?f:{...f,properties:{...f.properties,team_average_divisor:99}})};
  assert.throws(()=>verifyPolicyGapFeatures(bad),/평균/);
 });
-test('native PRI vulnerability retains its 50:50 factor alongside independent research overlay',async()=>{
+test('native PRI vulnerability retains its 50:50 factor without duplicate public research overlay',async()=>{
  const [main,html,pri,manifestText]=await Promise.all([
   readFile(path.resolve(here,'../src/main.js'),'utf8'),
   readFile(path.resolve(here,'../index.html'),'utf8'),
@@ -33,18 +33,18 @@ test('native PRI vulnerability retains its 50:50 factor alongside independent re
  ]);
  const manifest=JSON.parse(manifestText);
  assert.ok(main.includes('installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode})'));
- // PR255 added a separate opt-in research overlay. It must never replace the native PRI factor.
- assert.equal(main.split('installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay})').length-1,1);
+ // Research data stays intact; the public duplicate entry is retired.
+ assert.doesNotMatch(main,/installPolicyGapThreeSourceMap\(/);
  assert.ok(!pri.includes('installPolicyGapThreeSourceMap'));
  assert.ok(!manifest.patches.some(p=>p.includes('3source')));
- assert.ok(main.includes('installProtectionZoneMap({map,maplibregl,app,nightMode})'));
- assert.ok(main.includes('installBochaRoadLayer({map,maplibregl,app})'));
+ assert.doesNotMatch(main,/installProtectionZoneMap\(/);
+ assert.doesNotMatch(main,/installBochaRoadLayer\(/);
  assert.ok(!html.includes('walking-vulnerability-layer-group'));
  assert.ok(pri.includes("title=el('h2','','보행 취약도')"));
  assert.ok(pri.includes("id==='protectionGap'?' · 2지표·300m'"));
  assert.ok(pri.includes('protectionGapColors'));
  assert.ok(pri.includes('scopedPolicyFeatures(policyScope)'),'policy map must render clipped inside-dong geometry');
- assert.ok(pri.includes('displayRisk(displayFeatures(dataset,id))'),'other factors use standard risk colors');
+ assert.ok(pri.includes('scopedCompositeFeatures(policyScope'),'all other factors use the clipped pilot geometry');
  assert.ok(pri.includes('높을수록 상대적으로 큰 취약 신호'),'popup must say high score is bad');
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });

@@ -13,10 +13,10 @@ test('single motion owner disables earlier controllers and uses direct X lifecyc
   for(const file of ['src/v800-ui-architecture.js','src/v802-panel-motion.js','src/v804-ui-fixes.js','src/v805-responsive-readability.js'])
     assert.match(read(file),/app\.dataset\.dj806Motion==='on'/);
 });
-test('road-width and safety cannot remain active simultaneously',()=>{
+test('road-width selection is exclusive with road overlays, not the safety drawer',()=>{
   const road=read('src/road-width-layer.js');
-  assert.match(road,/safetyButton\?\.addEventListener\('click'/);
-  assert.match(road,/app\.classList\.contains\('map-safety-open'\)/);
+  assert.match(road,/claimRoadLayer\('width'/);
+  assert.doesNotMatch(road,/app\.classList\.contains\('map-safety-open'\)/);
   const css=read('src/v806-unified-ui.css');
   assert.match(css,/--dj806-rail-height/);
   assert.match(read('src/v806-unified-ui.js'),/--dj806-rail-height/);

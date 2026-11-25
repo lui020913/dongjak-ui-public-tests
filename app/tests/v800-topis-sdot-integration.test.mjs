@@ -6,15 +6,16 @@ import {SAFETY_ICON_COLORS,SAFETY_GLYPH_PATHS} from '../src/dongjak-safety-symbo
 import {summarizeDongjakSdot,timestampMillis} from '../server/sdot-environment.mjs';
 import {incidentsToGeoJSON} from '../server/topis-road-incidents.mjs';
 const read=f=>readFileSync(new URL('../'+f,import.meta.url),'utf8');
-test('v8 UI presents TOPIS and S-DoT in the existing unified safety drawer with accessible status & legends',()=>{
+test('TOPIS is an unavailable placeholder; S-DoT public UI is retired',()=>{
  const h=read('index.html');
  for(const key of ['road-incidents','sdot-environment']){
-  assert.ok(h.includes(`data-dj-import="${key}"`));
-  assert.equal(EXTRA_LAYER_DEFS[key].dynamic,true);
+  assert.ok(!h.includes(`data-dj-import="${key}"`));
+  assert.equal(EXTRA_LAYER_DEFS[key],undefined);
   assert.ok(SAFETY_GLYPH_PATHS[key]?.length);
   assert.ok(SAFETY_ICON_COLORS[key]);
  }
- for(const id of ['dj-feed-road-status','dj-feed-sdot-status','dj-sdot-summary'])assert.ok(h.includes(`id="${id}"`));
+ for(const id of ['dj-feed-road-status','dj-feed-sdot-status','dj-sdot-summary'])assert.ok(!h.includes(`id="${id}"`));
+ assert.match(h,/id="pilot-unavailable-incidents"[^>]*disabled/);
  assert.match(h,/v800-ui-architecture\.js/);
  assert.match(read('src/v800-live-environment.css'),/data-feed-state="archive"/);
 });
