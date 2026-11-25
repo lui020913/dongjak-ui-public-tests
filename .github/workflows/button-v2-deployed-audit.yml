@@ -1,0 +1,32 @@
+name: Button V2 deployed comparison only
+on:
+  push:
+    branches: ['experiment/button-design-v2-audit-20261125']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 15
+    env:
+      BUTTON_PREVIEW_URL: https://04d39fc2.dongjak-walk-safety-preview.pages.dev
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - run: npm install --no-audit --no-fund --prefer-offline
+      - run: npx playwright test --config=playwright.button-v2.config.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: button-v2-deployed-comparison
+          path: |
+            button-v2-report/
+            button-v2-results/
+          if-no-files-found: warn
+          retention-days: 7
