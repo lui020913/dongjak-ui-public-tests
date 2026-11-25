@@ -47,7 +47,7 @@ cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobi
 cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
 git diff --check
 echo "CHECKPOINT: whitespace check passed"
-expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-local-routing.js src/dongjak-verified-data-layers.js src/lib/dongjakWalkSlopeRouter.mjs src/main.js src/map-appearance.js src/mobile-first-overhaul.css src/pedestrian-tools.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/transport-map.js src/v815-map-product.js src/v815-route-planner.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js src/v860-onboarding.js src/workers/dongjak-walk-worker.mjs | LC_ALL=C sort)"
+expected_changes="$(printf '%s\n' index.html src/dj-v8212-sheet-controller.js src/dongjak-local-routing.js src/lib/dongjakWalkSlopeRouter.mjs src/main.js src/map-appearance.js src/mobile-first-overhaul.css src/pedestrian-tools.js src/place-details.js src/public-ui-mobile-surface-coordinator.js src/transport-map.js src/v815-map-product.js src/v815-route-planner.js src/v824-favorites-cloud.js src/v831-swipe-feature-toolbar.js src/v840-coordinated-ui.js src/v860-onboarding.js src/workers/dongjak-walk-worker.mjs | LC_ALL=C sort)"
 actual_changes="$(git diff --name-only | LC_ALL=C sort)"
 echo "Expected changed files: $expected_changes"
 echo "Actual changed files: $actual_changes"
