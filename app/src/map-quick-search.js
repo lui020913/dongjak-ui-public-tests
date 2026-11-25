@@ -338,12 +338,14 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     const rows=selectedMapRows.filter(place=>Number.isFinite(Number(place.lng))&&Number.isFinite(Number(place.lat))&&place.lng!=null&&place.lat!=null);
     clearMapResults();close();query.blur();syncEntry();
     for(const place of rows){
+      const markerRoot=document.createElement('div');markerRoot.className='dj-search-marker-anchor';
       const pin=document.createElement('button');pin.type='button';pin.className='dj-search-result-pin';pin.dataset.kind=searchPlaceKind(place);
       pin.title=place.name||'검색 장소';pin.setAttribute('aria-label',pin.title);
       pin.textContent=searchPlaceKind(place)==='bus'?'버스':searchPlaceKind(place)==='subway'?'역':'•';
       pin.addEventListener('pointerdown',event=>event.stopPropagation());
       pin.addEventListener('click',event=>{event.stopPropagation();makeResultButton(place).click();});
-      resultMarkers.push(new maplibregl.Marker({element:pin,anchor:'center'}).setLngLat([Number(place.lng),Number(place.lat)]).addTo(map));
+      markerRoot.append(pin);
+      resultMarkers.push(new maplibregl.Marker({element:markerRoot,anchor:'center'}).setLngLat([Number(place.lng),Number(place.lat)]).addTo(map));
     }
     mapResultsLabel.textContent='검색 시설 '+resultMarkers.length+'곳';mapResultsBar.hidden=!resultMarkers.length;
   });
@@ -381,8 +383,10 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       feedback.textContent='시설을 찾으려면 지도를 조금 더 확대해 주세요.';
       const expand=document.createElement('button');expand.type='button';expand.className='map-quick-search-suggestion dj-search-zoom-action';expand.textContent='지도 확대';
       expand.addEventListener('click',()=>{
-        close();query.blur();syncEntry();
-        map.easeTo?.({zoom:Math.max(MIN_VISIBLE_FACILITY_ZOOM,Number.isFinite(zoom)?zoom+1:MIN_VISIBLE_FACILITY_ZOOM),duration:300});
+        query.blur();expand.disabled=true;
+        const refresh=()=>{if(dropdown.dataset.searchMode==='nearby'&&!dropdown.hidden)void openNearby();};
+        map.once('moveend',refresh);
+        map.easeTo({zoom:Math.max(MIN_VISIBLE_FACILITY_ZOOM,Number.isFinite(zoom)?zoom+1:MIN_VISIBLE_FACILITY_ZOOM),duration:300});
       });
       list.append(expand);return;
     }
@@ -429,7 +433,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     renderFacilityTabs(items);
     feedback.textContent=items.length?'반경 500m · 직선거리 가까운 순 · '+all.length+'곳'+(all.length>items.length?' · '+items.length+'곳 표시':'')+(partial?' · 일부 자료 조회 실패':''):'반경 500m 내 확인된 시설이 없습니다.'+(partial?' 일부 자료를 불러오지 못했습니다.':'');
   };
-  map.on?.('movestart',()=>{if(dropdown.dataset.searchMode==='nearby'){close();query.blur();syncEntry();}});
+  // Keep visible-area search open for its own zoom action.
   for(const button of [nearbyButton,gpsButton,historyButton])button.addEventListener('pointerdown',e=>e.preventDefault());
   nearbyButton.addEventListener('click',openNearby);gpsButton.addEventListener('click',openGpsNearby);historyButton.addEventListener('click',openHistory);
   query.addEventListener('blur',()=>window.setTimeout(syncEntry,0));
