@@ -1,11 +1,12 @@
 import {LIVE_LINES,directionCode,directionTitle,stationKey,stationSequence,observedTrains} from './metro-live-detail-model.js';
 let active=null;
 export function closeMetroLiveDetail(){active?.close();}
+export function updateMetroLiveArrivals(line,station,rows){if(active?.line===line&&stationKey(active.station)===stationKey(station))active.setArrivals(rows);}
 export function openMetroLiveDetail({line,direction,station,local,arrivals=[],color,badge,transfers,endpoint='/api/transport/live-vehicles'}){
  closeMetroLiveDetail();const doc=document,win=doc.defaultView,focus=doc.activeElement;
  const make=(tag,cls,value)=>{const n=doc.createElement(tag);n.className=cls||'';if(value!==undefined)n.textContent=value;return n;};
  const button=(label,fn,cls)=>{const b=make('button',cls,label);b.type='button';b.addEventListener('click',fn);return b;};
- const root=make('dialog','dj-metro-live');root.setAttribute('aria-label','실시간 열차 위치');root.style.setProperty('--metro-live-line',color);
+ const root=make('dialog','dj-metro-live');root.setAttribute('aria-label','실시간 열차 위치');root.dataset.theme=doc.getElementById('app')?.dataset.theme||'light';root.style.setProperty('--metro-live-line',color);
  const head=make('header','dj-metro-live-head'),title=make('strong','dj-metro-live-title');title.append(badge(line),make('span','',line));
  const closeBtn=button('×',()=>close(),'dj-metro-live-close');closeBtn.setAttribute('aria-label','실시간 열차 위치 닫기');head.append(button('‹',()=>close(),'dj-metro-live-back'),title,closeBtn);head.firstChild.setAttribute('aria-label','역 상세로 돌아가기');
  const meta=make('div','dj-metro-live-meta'),stamp=make('span','dj-metro-live-stamp','조회 중');meta.append(make('strong','','실시간 열차 위치 정보'),stamp);
@@ -17,9 +18,9 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
  root.append(head,meta,tabs,notice,list,foot);doc.body.append(root);
  let timer=null,controller=null,closed=false,rows=[],first=true,signature='',quota=false;
  const close=()=>{if(closed)return;closed=true;win.clearTimeout(timer);controller?.abort();root.close();root.remove();if(active?.close===close)active=null;if(focus?.isConnected)focus.focus({preventScroll:true});};
- active={close};root.addEventListener('cancel',e=>{e.preventDefault();close();});root.addEventListener('click',e=>{if(e.target===root)close();});
+ active={close,line,station,setArrivals(next){arrivals=next;paint();}};root.addEventListener('cancel',e=>{e.preventDefault();close();});root.addEventListener('click',e=>{if(e.target===root)close();});
  function paint(){
-  const seq=stationSequence(line,dir,station,local),trains=observedTrains(rows,line,dir),next=JSON.stringify([dir,seq,trains]);
+  const seq=stationSequence(line,dir,station,local),trains=observedTrains(rows,line,dir),next=JSON.stringify([dir,seq,trains,arrivals]);
   if(next===signature&&!first)return;signature=next;
   const top=list.scrollTop;list.replaceChildren();
   const placed=new Set();
@@ -29,7 +30,7 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
    const vehicles=trains.filter(t=>stationKey(t.station)===key);
    const left=make('div','dj-metro-live-trains'),rail=make('div','dj-metro-live-rail'),info=make('div','dj-metro-live-station'),heading=make('div','dj-metro-live-station-name');
    heading.append(make('strong','',key));for(const transfer of transfers(name).filter(l=>l!==line))heading.append(badge(transfer));info.append(heading);
-   if(vehicles.length){for(const v of vehicles){placed.add(v.trainNo);const label=make('div','dj-metro-live-train-label');label.append(make('strong','',v.destination||'행선지 미제공'),make('small','',v.trainNo));left.append(label);}const icon=make('span','dj-metro-live-train-icon','▣');icon.setAttribute('aria-label','열차');rail.append(icon);info.append(make('small','dj-metro-live-train-state',vehicles.map(v=>({'0':'진입','1':'도착','2':'출발','3':'전역 출발'})[v.status]||'상태 미제공').join(' · ')));}
+   if(vehicles.length){for(const v of vehicles){placed.add(v.trainNo);const label=make('div','dj-metro-live-train-label');label.append(make('strong','',v.destination||'행선지 미제공'),make('small','',v.trainNo));left.append(label);}const icon=make('span','dj-metro-live-train-icon');icon.setAttribute('aria-label','열차');const svg=doc.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');const path=doc.createElementNS(svg.namespaceURI,'path');path.setAttribute('d','M6 16V6Q6 3 12 3T18 6V16Q18 19 12 19T6 16ZM6 11H18M9 16H9.1M15 16H15.1M9 19L6 22M15 19L18 22M8 21H16');path.setAttribute('fill','none');path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width','1.8');path.setAttribute('stroke-linecap','round');svg.append(path);icon.append(svg);rail.append(icon);info.append(make('small','dj-metro-live-train-state',vehicles.map(v=>({'0':'진입','1':'도착','2':'출발','3':'전역 출발'})[v.status]||'상태 미제공').join(' · ')));}
    else rail.append(make('span','dj-metro-live-dot'));
    if(current){for(const a of arrivals.filter(a=>directionCode(a.directionType||a.direction)===directionCode(dir)&&!a.isPlanned).slice(0,2)){const text=make('div','dj-metro-live-eta');text.append(make('strong','',a.message||'도착정보 없음'),make('span','',a.destination||''));info.append(text);}}
    r.append(left,rail,info);list.append(r);
@@ -39,7 +40,7 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
   if(first){first=false;const selected=list.querySelector('[aria-current]');if(selected)list.scrollTop=Math.max(0,selected.offsetTop-list.offsetTop-list.clientHeight*.48);}
   else list.scrollTop=top;
  }
- function setDir(next){dir=next;for(const b of tabs.children)b.setAttribute('aria-pressed',String(b.dataset.direction===dir));first=true;paint();}
+ function setDir(next){dir=next;for(const b of tabs.children)b.setAttribute('aria-pressed',String(b.dataset.direction===dir));first=true;if(rows.length)notice.textContent=observedTrains(rows,line,dir).length?'':'현재 이 방향의 확인된 열차 위치가 없습니다.';paint();}
  for(const d of dirs){const b=button(directionTitle(line,d),()=>setDir(d),'dj-metro-live-tab');b.dataset.direction=d;tabs.append(b);}
  function schedule(){win.clearTimeout(timer);if(!closed&&!quota)timer=win.setTimeout(load,25000);}
  async function load(){

@@ -7,8 +7,8 @@ const routes={
  '9호선':'중앙보훈병원 둔촌오륜 올림픽공원 한성백제 송파나루 석촌 석촌고분 삼전 종합운동장 봉은사 삼성중앙 선정릉 언주 신논현 사평 고속터미널 신반포 구반포 동작 흑석 노들 노량진 샛강 여의도 국회의사당 당산 선유도 신목동 염창 등촌 증미 가양 양천향교 마곡나루 신방화 공항시장 김포공항 개화'.split(' '),
  '신림선':'관악산 서울대벤처타운 서원 신림 당곡 보라매병원 보라매공원 보라매 서울지방병무청 대방 샛강'.split(' ')
 };
-const names={'1호선':['소요산','인천·신창'],'4호선':['진접','오이도'],'7호선':['장암','석남'],'9호선':['개화','중앙보훈병원'],'신림선':['샛강','관악산']};
-export function directionCode(value){const v=String(value??'').trim();return /^(0|상행|내선)$/.test(v)?'0':/^(1|하행|외선)$/.test(v)?'1':'';}
+const names={'1호선':['연천','인천·신창'],'4호선':['진접','오이도'],'7호선':['장암','석남'],'9호선':['개화','중앙보훈병원'],'신림선':['샛강','관악산']};
+export function directionCode(value){const v=String(value??'').trim();return /^(0|상행|내선)(?:$|[\s·])/.test(v)?'0':/^(1|하행|외선)(?:$|[\s·])/.test(v)?'1':'';}
 export function directionTitle(line,direction){
  if(line==='2호선')return directionCode(direction)==='0'?'내선 순환':'외선 순환';
  const d=directionCode(direction);if(d==='')return direction;

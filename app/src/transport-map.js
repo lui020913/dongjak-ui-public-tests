@@ -1,6 +1,6 @@
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import {createBusRouteDetail} from './bus-route-detail.js';
-import {openMetroLiveDetail,closeMetroLiveDetail} from './metro-live-detail.js';
+import {openMetroLiveDetail,closeMetroLiveDetail,updateMetroLiveArrivals} from './metro-live-detail.js';
 import {directionTitle,directionCode,compactArrival} from './metro-live-detail-model.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
@@ -951,7 +951,11 @@ function displayArrivals(container,kind,items,place=null){
     }
     const grid=el('div','metro-direction-grid dj-metro-direction-grid');
     const knownDirections=line==='2호선'?['내선','외선']:['상행','하행'];
-    if(place)for(const direction of knownDirections)if(!directions.has(direction))directions.set(direction,[]);
+    if(place){
+      for(const [key,rows] of [...directions]){const code=directionCode(key);if(code!==''&&key!==knownDirections[Number(code)]){directions.delete(key);const target=knownDirections[Number(code)];directions.set(target,[...(directions.get(target)||[]),...rows]);}}
+      for(const direction of knownDirections)if(!directions.has(direction))directions.set(direction,[]);
+      updateMetroLiveArrivals(line,place.name,[...directions.values()].flat());
+    }
     for(const direction of [...directions.keys()].sort((a,b)=>order.indexOf(a)-order.indexOf(b))){
       const subsection=el('section',`metro-arrival-direction-group ${direction==='상행'?'up':direction==='하행'?'down':''}`.trim());
       subsection.classList.add('dj-metro-direction-card');
@@ -961,7 +965,7 @@ function displayArrivals(container,kind,items,place=null){
       if(interactive){
         subtitle.type='button';subtitle.append(el('span','dj-metro-direction-chevron','›'));
         subtitle.setAttribute('aria-label',directionTitle(line,direction)+' 실시간 열차 위치 조회');
-        subtitle.addEventListener('click',()=>openMetroLiveDetail({line,direction,station:place.name,local:STATION_LINE_ORDER[line]||[],arrivals:directions.get(direction)||[],color:subwayLineColor(line),badge:makeLineBadge,transfers:metroTransferBadgeLines,endpoint:TRANSPORT_API_BASE+'/live-vehicles'}));
+        subtitle.addEventListener('click',()=>openMetroLiveDetail({line,direction,station:place.name,local:STATION_LINE_ORDER[line]||[],arrivals:[...directions.values()].flat(),color:subwayLineColor(line),badge:makeLineBadge,transfers:metroTransferBadgeLines,endpoint:TRANSPORT_API_BASE+'/live-vehicles'}));
       }
       subsection.append(subtitle);
       if(!directions.get(direction).length)subsection.append(el('small','dj-metro-direction-empty','도착정보 없음'));
@@ -2290,6 +2294,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     if(place?.kind!=='subway')return;
     if(!container.querySelector('.dj-metro-direction-card')&&place.selectedLine){
       const line=normalizeLineName(place.selectedLine);
+      updateMetroLiveArrivals(line,place.name,[]);
       const blank=el('div','dj-metro-direction-grid dj-metro-empty-grid');
       for(const direction of line==='2호선'?['내선','외선']:['상행','하행']){
         const card=el('section','dj-metro-direction-card');

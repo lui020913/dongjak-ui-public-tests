@@ -1882,5 +1882,8 @@ dialog.dj-metro-live::backdrop{background:#14282065}
 .dj-metro-live-footer{border-top:1px solid #e5ebe8;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 .dj-metro-live-refresh{min-height:44px;border-radius:22px;padding:0 14px;font-weight:700!important}
 .dj-metro-live-refresh:disabled{opacity:.5}
-@media(prefers-color-scheme:dark){dialog.dj-metro-live{background:#172725;color:#e3efeb}.dj-metro-live button,.dj-metro-live-tabs,.dj-metro-live-row.current{background:#283c37}.dj-metro-live-head,.dj-metro-live-station,.dj-metro-live-footer{border-color:#3b5149}}
+dialog.dj-metro-live[data-theme="dark"]{background:#172725;color:#e3efeb}
+.dj-metro-live[data-theme="dark"] button,.dj-metro-live[data-theme="dark"] .dj-metro-live-tabs,.dj-metro-live[data-theme="dark"] .dj-metro-live-row.current{background:#283c37}
+.dj-metro-live[data-theme="dark"] .dj-metro-live-head,.dj-metro-live[data-theme="dark"] .dj-metro-live-station,.dj-metro-live[data-theme="dark"] .dj-metro-live-footer{border-color:#3b5149}
+.dj-metro-live-train-icon svg{width:19px;height:19px;display:block}
 @media(prefers-reduced-motion:reduce){dialog.dj-metro-live{animation:none}}
