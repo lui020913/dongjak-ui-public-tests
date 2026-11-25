@@ -1381,11 +1381,19 @@ test('compact subway sheet shows arrivals before neighbors and has no duplicate 
  if(page.viewportSize().width<700){
   await page.emulateMedia({reducedMotion:'no-preference'});
   await expect.poll(()=>sheet.getAttribute('data-dj810-animating')).toBeNull();
-  await page.evaluate(()=>{const n=document.getElementById('transport-sheet');window.__metroClose={height:n.getBoundingClientRect().height,frames:[]};function sample(){if(n.hidden)return;const r=n.getBoundingClientRect();window.__metroClose.frames.push({h:r.height,y:r.y,closing:n.dataset.dj810Animating==='closing'});requestAnimationFrame(sample);}sample();});
-  await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
-  const result=await page.evaluate(()=>window.__metroClose);
-  expect(result.frames.some(f=>f.closing)).toBe(true);
-  expect(result.frames.every(f=>f.h<=result.height+3),'Closing sheet must never grow: '+JSON.stringify(result)).toBe(true);
+  async function assertStationaryClose(){
+    await expect.poll(()=>sheet.getAttribute('data-dj810-animating')).toBeNull();
+    await page.evaluate(()=>{const n=document.getElementById('transport-sheet');const box=()=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};};window.__metroClose={before:box(),frames:[]};function sample(){if(n.hidden)return;window.__metroClose.frames.push({...box(),alpha:Number(getComputedStyle(n).opacity),closing:n.dataset.dj810Animating==='closing'});requestAnimationFrame(sample);}sample();});
+    await tap(page,sheet.locator('#transport-close'));await expect(sheet).toBeHidden();
+    const result=await page.evaluate(()=>window.__metroClose);
+    expect(result.frames.some(f=>f.closing&&f.alpha>.02&&f.alpha<.98),'Visible intermediate fade frame required').toBe(true);
+    expect(result.frames.every(f=>['x','y','w','h'].every(k=>Math.abs(f[k]-result.before[k])<=3)),'Closing sheet must retain all four edges: '+JSON.stringify(result)).toBe(true);
+  }
+  await assertStationaryClose();
+  // Reproduce the reported single-line station, not just the interchange.
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place:{kind:'subway',name:'장승배기',lng:126.93915,lat:37.504898,lines:['7호선'],selectedLine:'7호선'}}})));
+  await expect(sheet).toBeVisible();await visuallyPresented(sheet);
+  await assertStationaryClose();
  }
 });
 
