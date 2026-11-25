@@ -334,7 +334,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     show();render([],true);feedback.textContent='';
   };
   mapView.addEventListener('click',()=>{
-    if(!selectedMapRows.length||dropdown.dataset.searchMode!=='nearby')return;
+    if(!selectedMapRows.length||!['nearby','gps-nearby'].includes(dropdown.dataset.searchMode))return;
     const rows=selectedMapRows.filter(place=>Number.isFinite(Number(place.lng))&&Number.isFinite(Number(place.lat))&&place.lng!=null&&place.lat!=null);
     clearMapResults();close();query.blur();syncEntry();
     for(const place of rows){
@@ -360,7 +360,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
         for(const [i,button] of buttons.entries())button.setAttribute('aria-pressed',String(i===index));
         results.replaceChildren(...groups[index].rows.map(makeResultButton));
         results.setAttribute('aria-label',groups[index].label+' 시설 검색 결과');
-        selectedMapRows=groups[index].rows;mapFooter.hidden=dropdown.dataset.searchMode!=='nearby'||!selectedMapRows.length;
+        selectedMapRows=groups[index].rows;mapFooter.hidden=!['nearby','gps-nearby'].includes(dropdown.dataset.searchMode)||!selectedMapRows.length;
         // Reset the vertical list without moving the category rail sideways.
         body.scrollTop=0;
       };
