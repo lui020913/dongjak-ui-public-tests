@@ -87,7 +87,8 @@ export function installUnifiedUI(doc=document, win=window){
     const tabFade=forceTabFade||(opening&&(tabFadeUntil.get(target.id)||0)>Date.now());
     if(opening)tabFadeUntil.delete(target.id);
     const stationary=target.id==='ped-tools-panel';
-    const fade=isGuide||stationary||tabFade||target.dataset.djDialogFade==='true'||target.matches?.('.dj833-night-dialog');
+    const lockTransit=!opening&&target.id==='transport-sheet';
+    const fade=isGuide||stationary||lockTransit||tabFade||target.dataset.djDialogFade==='true'||target.matches?.('.dj833-night-dialog');
     const scrim=target.matches?.('.dj-ai-search-modal')?target:target.parentElement?.matches?.('.djNext-modal,#dj-app-about,#version-history-modal')?target.parentElement:null;
     const guideFrom=fade&&Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?0:1);
     const slideFrom=Number.isFinite(fadeFrom)?Math.max(0,Math.min(1,fadeFrom)):(opening?.12:1);
@@ -109,14 +110,18 @@ export function installUnifiedUI(doc=document, win=window){
     const distance=opening&&tabReplacement.has(target.id)?Math.min(rect.height,36):docked?rect.height:Math.max(rect.height,win.innerHeight-rect.top+8);
     // Pin the measured transit sheet box for the entire close. Legacy
     // expanded/compact class changes must not turn a closing card fullscreen.
-    const lockTransit=!opening&&target.id==='transport-sheet';
-    const geometry=lockTransit?['position','top','bottom','height','min-height','max-height','box-sizing','margin-top','margin-bottom'].map(key=>[key,target.style.getPropertyValue(key),target.style.getPropertyPriority(key)]):[];
+    const geometry=lockTransit?['position','top','right','bottom','left','width','min-width','max-width','height','min-height','max-height','box-sizing','margin-top','margin-right','margin-bottom','margin-left','transform','scale'].map(key=>[key,target.style.getPropertyValue(key),target.style.getPropertyPriority(key)]):[];
     if(lockTransit){
-      const boxHeight=target.offsetHeight||rect.height;
-      for(const [key,value] of Object.entries({position:'fixed',top:rect.top+'px',bottom:'auto',height:boxHeight+'px','min-height':boxHeight+'px','max-height':boxHeight+'px','box-sizing':'border-box','margin-top':'0','margin-bottom':'0'}))target.style.setProperty(key,value,'important');
+      // Use the actual painted rectangle, not the untransformed layout height.
+      // No translated/clipped exit: the current compact or expanded card
+      // must retain its four edges until it is fully transparent.
+      const width=rect.width+'px',height=rect.height+'px';
+      for(const [key,value] of Object.entries({position:'fixed',top:rect.top+'px',right:'auto',bottom:'auto',left:rect.left+'px',width,'min-width':width,'max-width':width,height,'min-height':height,'max-height':height,'box-sizing':'border-box','margin-top':'0','margin-right':'0','margin-bottom':'0','margin-left':'0',transform:'none',scale:'1'}))target.style.setProperty(key,value,'important');
+      target.style.setProperty('translate','0 0','important');
     }
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
+    if(lockTransit)target.style.setProperty('clip-path','none','important');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
     let liveOffset=opening?distance:0;
     const record={cancel:()=>finish(false),offset:()=>liveOffset};
@@ -141,12 +146,11 @@ export function installUnifiedUI(doc=document, win=window){
       finished=true;
       if(frame)win.cancelAnimationFrame?.(frame);
       if(timeout){win.clearTimeout(timeout);animationTimers.delete(timeout);}
-      target.removeAttribute('data-dj810-animating');
       if(activeAnimation.get(target)===record)activeAnimation.delete(target);
       // Hide synchronously before clearing the final slide/opacity on closing,
       // otherwise iOS may flash the old visible card for one frame.
       try{if(complete&&!opening&&typeof afterClose==='function')afterClose();}
-      finally{restore();}
+      finally{target.removeAttribute('data-dj810-animating');restore();}
     }
     function setMotion(progress){
       if(scrim)scrim.style.setProperty('--dj-scrim-alpha',String(confirmMotionOpacity(progress,opening)));
