@@ -74,7 +74,10 @@ test('spatial estimates use the exact network and unverified bocha candidates ne
  assert.equal(b.scores.length,0);
  const candidates=json('../public/data/pri/sangdo1_shared_road_candidates_20261125.json');
  assert.equal(candidates.networkVersion,base.networkVersion);
- assert.ok(candidates.scores.length>0);
+ assert.equal(candidates.scores.length,224);
+ assert.ok(candidates.scores.every(s=>s.score===null));
+ assert.equal(candidates.scores.filter(s=>s.width).length,127);
+ assert.equal(candidates.scores.filter(s=>s.width?.conditionalMixedRisk!=null).length,6);
  const merged=parseImport(b,parseImport(a,base));
  assert.equal(merged.segments.length,1686);
  assert.equal(merged.segments.filter(s=>observedFactorScore(s,'crossing')!==null).length,a.scores.length);
