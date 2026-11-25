@@ -2025,6 +2025,14 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
     // The mobile tab transition owner closes this outgoing page after its
     // bounded map-return fade. Other tab changes reveal the incoming body.
     panel.hidden=panel.dataset.page!==tab && !outgoing;
+    // Programmatic returns to the live map do not own an outgoing dissolve.
+    // A cancelled legacy sheet can leave inline display:flex!important on
+    // an inactive community page; hidden alone does not override that style.
+    if(panel.id==='participation-panel'&&panel.hidden&&!outgoing){
+      communityComposerPortal?.close();
+      delete panel.dataset.djPrimaryTransition;
+      for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);
+    }
   }
   if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}
   if (tab === 'news') dongjakNews.open();
@@ -2453,10 +2461,10 @@ function showCommunityLocation(post) {
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
   closeCommunityLocation();
-  navigate('map',{suppressOverview:true});
-  quickSearch.close();quickSearch.clearMapResults?.();
   const lng=Number(post.location.lng),lat=Number(post.location.lat);
   if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
+  navigate('map',{suppressOverview:true});
+  quickSearch.close();quickSearch.clearMapResults?.();
   map.flyTo({center:[lng,lat],zoom:16.2,pitch:0,duration:800});
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
   const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');
