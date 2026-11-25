@@ -135,7 +135,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(retain&&departing){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
-   if(panel){entering=panel;if(!fromMap)panel.classList.add('dj-tab-content-enter');}
+   if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
    if(fromMap){
     // Paint the real canvas beneath the incoming page, never a placeholder.
     const map=doc.getElementById('map');
