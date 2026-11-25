@@ -30,7 +30,7 @@ import {operatorTimetableResources} from './metro-operator-timetables.js';
 import {isScheduleMergedStation} from './metro-schedule-view.js';
 import {verifiedInlineOperatorTimetable} from './metro-inline-schedules.js';
 import {seoulServiceClock, plannedArrivalsFromTimetable} from './metro-planned-arrivals.js';
-import {saveTimetable,loadTimetable,storeBusObservation,latestBusObservations,displaySeoulObservationTime,expectedBusHeadway} from './transport-timetable-cache.js';
+import {saveTimetable,loadTimetable} from './transport-timetable-cache.js';
 import {verifiedKorailLine1Timetable} from './metro-korail-line1.js';
 import {createSelectedTransportPin,mobileTransportFocusOffset,usableMapSelectionOffset} from './transport-selection-marker.js';
 import {setMobileSheetExpanded} from './v889-mobile-sheet-motion.js';
@@ -1358,6 +1358,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       // A true separate tab, not a scroll link into the realtime section.
       timetableExpanded=true;
       if(visibleServiceHours)renderServiceHours(visibleServiceHours);
+      if(selected&&(!visibleServiceHours||visibleServiceHours.status!=='ok'))void refreshServiceHours(selected,seq);
     }
     // The station title remains visible when changing tabs on small screens.
     const viewport=panel.querySelector?.('.dj875-transit-scroll')||panel;
@@ -2246,15 +2247,17 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         :`${TRANSPORT_API_BASE}/service-hours?${new URLSearchParams({kind:'subway',station:name,line,day:clock.day})}`;
       try{
         const ctrl=new AbortController();
-        const timer=setTimeout(()=>ctrl.abort(),6500);
+        const timer=setTimeout(()=>ctrl.abort(),28000);
         let response;
         try{response=await fetch(url,{signal:ctrl.signal});}finally{clearTimeout(timer);}
         if(!response.ok)return null;
         const data=await response.json();
-        return data?.status==='ok'&&Array.isArray(data.timetable)&&data.timetable.length?data:null;
+        if(data?.status==='ok'&&Array.isArray(data.timetable)&&data.timetable.length){saveTimetable(place,clock.day,data);return data;}
+        return null;
       }catch{return null;}
     })();
     arrivalPlanMemo.set(key,{at:Date.now(),promise});
+    void promise.then(data=>{if(!data&&arrivalPlanMemo.get(key)?.promise===promise)arrivalPlanMemo.delete(key);});
     return promise;
   }
   function passedLastTrainDirections(data,clock){
@@ -2368,30 +2371,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     serviceHoursEl.append(section);
     return true;
   }
-  function appendObservedBusHistory(place){
-    if(place?.kind!=='bus'||!place.arsId)return;
-    const observed=latestBusObservations(place.arsId);
-    const section=el('section','dj-v724-observed-bus');
-    section.append(el('strong','dj-v724-bus-label','최근 버스 도착예정 관측 기록'));
-    section.append(el('p','dj-v723-source-note',
-      '이 기기가 앱 실행 중 수신한 도착예정 정보입니다. 실제 도착시각이 아니며, 앱 사용 이전 기록은 제공되지 않습니다.'));
-    if(!observed.length){section.append(el('p','transport-hours-notice','아직 저장된 관측 기록이 없습니다. 실시간 정보를 조회하면 이 기기에 누적됩니다.'));serviceHoursEl.append(section);return;}
-    const table=el('table','dj-v723-timetable-table');
-    const head=el('thead',''),rowHead=el('tr','');
-    for(const title of ['버스 노선','최근 조회','마지막 도착예정','예상 배차'])rowHead.append(el('th','',title));
-    head.append(rowHead);table.append(head);
-    const body=el('tbody','');
-    for(const item of observed){
-      const row=el('tr','');
-      const headway=expectedBusHeadway(item);
-      for(const value of [item.route,displaySeoulObservationTime(item.at),
-        item.confirmedArrivalNotice?'도착 알림 관측':item.message||'미확인',
-        headway===null?'자료 부족':`약 ${headway}분 (1·2차 예정 차이)`])row.append(el('td','',value));
-      body.append(row);
-    }
-    table.append(body);const wrapper=el('div','dj-v723-table-scroll');wrapper.append(table);section.append(wrapper);
-    serviceHoursEl.append(section);
-  }
   function renderServiceHours(data){
     visibleServiceHours=data;
     const serviceClock=seoulServiceClock();
@@ -2407,11 +2386,19 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       `${data.source} · 앱 내 직접 표시 · 공식 계획 시각표 / 실시간 ETA 아님`));
     if(!data||data.status!=='ok'||(!Array.isArray(data.items)||!data.items.length)&&(!Array.isArray(data.timetable)||!data.timetable.length)){
       serviceHoursEl.append(el('p','transport-hours-notice',data?.notice||'이 역의 검증된 시각표 데이터가 아직 확인되지 않았습니다.'));
+      if(selected?.kind==='subway'&&data?.status!=='loading'){
+        const controls=el('div','transport-timetable-controls');
+        const daySelect=el('select','');daySelect.setAttribute('aria-label','운행 요일');
+        for(const [v,label] of [['1','평일'],['2','토요일'],['3','공휴일']])daySelect.append(makeOption(v,label));
+        daySelect.value=timetableDay||activeSeoulDay();
+        daySelect.addEventListener('change',()=>{timetableDay=daySelect.value;void refreshServiceHours(selected,seq);});
+        const retry=el('button','metro-open-schedule','시간표 다시 조회');retry.type='button';retry.addEventListener('click',()=>void refreshServiceHours(selected,seq));
+        controls.append(daySelect,retry);serviceHoursEl.append(controls);
+      }
       if(data?.status!=='ok'&&!hasOperatorSources&&!inAppOperatorLine && selected?.kind==='subway'){
         const a=el('a','transport-timetable-official-link','서울교통공사 공식 시간표 안내');
         a.href='https://www.seoulmetro.co.kr';a.target='_blank';a.rel='noopener noreferrer';serviceHoursEl.append(a);
       }
-      appendObservedBusHistory(selected);
       return;
     }
     const rawTimetableRows=Array.isArray(data.timetable)?data.timetable:[];
@@ -2536,7 +2523,6 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
         }
         table.append(body);const box=el('div','dj-v723-table-scroll');box.append(table);serviceHoursEl.append(box);
       }
-      appendObservedBusHistory(selected);
       return;
     }
 
@@ -2978,7 +2964,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     arrivalsEl.removeAttribute?.('aria-busy');
     if(arrivalsEl.dataset)delete arrivalsEl.dataset.loadingLine;
     if(arrival.state==='ok'){
-      if(place.kind==='bus')storeBusObservation(place.arsId||arrival.arsId,arrival.items||[]);
+
       if(arrival.arsId && !place.arsId){
         place.arsId=arrival.arsId;
         if(title.dataset&&place.kind==='bus'&&/^\d{5}$/.test(String(place.arsId)))title.dataset.dj912Ars=String(place.arsId);
@@ -3007,11 +2993,11 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       const next=await requestArrival(active,{forceRefresh:true});
       if(activeSeq!==seq||selected!==active||panel.hidden)return;
       if(next.state==='ok'){
-        if(active.kind==='bus')storeBusObservation(active.arsId||next.arsId,next.items||[]);
+
         await showArrivalOrPlannedCountdown(arrivalsEl,active,next,activeSeq);
         if(activeSeq!==seq||selected!==active||panel.hidden)return;
         updatedEl.textContent=next.updatedAt?`${next.updatedAt} 갱신`:next.checkedAt?`${next.checkedAt} 조회`:'조회 완료';
-        if(visibleServiceHours)renderServiceHours(visibleServiceHours);
+        if(visibleServiceHours&&panel.dataset.transportView==='hours'&&visibleServiceHours.status==='ok')renderServiceHours(visibleServiceHours);
       }else{
         await showArrivalOrPlannedCountdown(arrivalsEl,active,
           {...next,sourceStatus:next.sourceStatus||'unverified',emptyMessage:next.message||'실시간 정보를 갱신하지 못했습니다.'},activeSeq);

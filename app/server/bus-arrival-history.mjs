@@ -33,9 +33,17 @@ export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pa
  try{
   for(let i=0;i<maxPages&&1+i*pageSize<=9999;i++){
    const url=new URL(ENDPOINT);url.search=new URLSearchParams({apikey:key,startRow:String(1+i*pageSize),rowCnt:String(pageSize),stdrDe:query.date,routeId:query.routeId});
-   const res=await fetcher(url,{signal:ctrl.signal,headers:{Accept:'application/json'},redirect:'error'});
-   if(!res.ok)throw new Error(res.status===401||res.status===403?'HISTORY_AUTH':res.status===429?'HISTORY_QUOTA':'HISTORY_UPSTREAM');
-   const rows=extractRows(await res.json());
+   let res;
+   try{res=await fetcher(url,{signal:ctrl.signal,headers:{Accept:'application/json'},redirect:'manual'});
+     if([301,302,303,307,308].includes(res.status)){
+       const target=new URL(res.headers.get('Location')||'',url);
+       if(target.origin!==url.origin||target.pathname!==url.pathname&&target.pathname!==url.pathname+'/')throw new Error('HISTORY_REDIRECT');
+       target.search=url.search;res=await fetcher(target,{signal:ctrl.signal,headers:{Accept:'application/json'},redirect:'manual'});
+     }
+   }catch(e){throw new Error(e?.message==='HISTORY_REDIRECT'?'HISTORY_REDIRECT':ctrl.signal.aborted?'HISTORY_TIMEOUT':'HISTORY_CONNECTION');}
+   if(!res.ok)throw new Error(res.status===401||res.status===403?'HISTORY_AUTH':res.status===429?'HISTORY_QUOTA':res.status===404?'HISTORY_ENDPOINT':res.status===400?'HISTORY_REQUEST':res.status>=300&&res.status<400?'HISTORY_REDIRECT':'HISTORY_UPSTREAM');
+   let body;try{body=await res.json();}catch{throw new Error('HISTORY_FORMAT');}
+   const rows=extractRows(body);
    if(!rows.length){complete=true;break;}
    const signature=JSON.stringify([rows.length,rows[0],rows.at(-1)]);
    if(signatures.has(signature))break;

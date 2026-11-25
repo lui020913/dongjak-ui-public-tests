@@ -303,21 +303,9 @@
             <button type="button" class="weather-info" id="weather-label" data-dj-weather-icon="◌" data-dj-temperature="—" title="날씨 상세정보 보기">날씨 조회 중</button>
             <button type="button" id="weather-my-location" aria-label="내 위치 날씨 보기">내 위치</button>
           </div>
-          <button type="button" id="version-history-trigger" class="prototype version-history-trigger" aria-haspopup="dialog" aria-controls="version-history-modal" aria-label="업데이트 내역 보기">업데이트</button>
+
         </div>
       </header>
-      <section id="version-history-modal" class="version-history-backdrop" hidden>
-        <div role="dialog" aria-modal="true" aria-labelledby="version-history-heading" class="version-history-dialog">
-          <div class="version-history-head">
-            <div><div class="section-label">UPDATE HISTORY</div><h2 id="version-history-heading">업데이트 내역</h2>
-</div>
-            <button id="version-history-close" type="button" aria-label="업데이트 내역 닫기"></button>
-          </div>
-          <!-- Catalog coverage: v1.0.0부터 recorded, without the previous explanatory header. -->
-          <div id="version-history-list" class="version-history-list"></div>
-          <details class="dj-map-attribution-details"><summary>지도 데이터 출처</summary><p>기본 지도: <a href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap 기여자</a>. 지형 데이터: Mapzen Terrain Tiles 및 원자료 제공자. 철도 실제 선형은 행안부 GIS가 우선이며, 서비스 장애 시 <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap 기여자(ODbL)</a> 자료(<a href="https://github.com/jebowe3/seoul_transportation" target="_blank" rel="noopener noreferrer">공개 선형 미러</a>)를 사용합니다. 조회되지 않는 노선은 역 연결 안내선으로 대체됩니다.</p></details>
-        </div>
-      </section>
       <button type="button" id="map-tools-toggle" class="map-tools-toggle" aria-expanded="false" aria-controls="map-advanced-controls">지도 옵션</button>
       <button type="button" id="map-safety-toggle" class="map-safety-toggle" aria-expanded="false" aria-controls="map-safety-controls" aria-label="보행안전 도구 열기">보행안전</button>
       <button type="button" id="map-safety-backdrop" class="map-safety-backdrop" aria-label="보행안전 메뉴 닫기" hidden></button>
@@ -589,11 +577,6 @@
               </div>
             </div>
           </details>
-          <section class="dj-guide-release" aria-label="최신 업데이트 요약">
-            <div class="dj-guide-release-heading"><span>최근 업데이트</span><strong id="dj-guide-latest-version">분류별 내역</strong></div>
-            <p>지도 창의 드래그·헤더와 검색·시설·대중교통 화면을 개선했습니다.</p>
-            <button id="dj-guide-release-details" type="button">전체 업데이트 내역 보기</button>
-          </section>
           <label class="map-gesture-guide-remember"><input id="map-gesture-guide-hide-next" type="checkbox">다음부터 안내 표시하지 않기</label>
         </div>
       </section>
