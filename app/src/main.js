@@ -2199,6 +2199,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     // No old sheet expansion, parent header movement or native dock sizing.
     document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
     communityComposerPortal.open();
+    if(animate)motion?.open(communityComposerPortal.portal);
     setMapReportHitLayer(false);
     setCommunityTopbarBlocked(false);
     return;
@@ -2207,15 +2208,16 @@ function openCommunityComposer(open,{animate=true}={}) {
   communityComposerEpoch++;
   const mapOrigin=communityComposerOrigin==='map';
   const panel=document.getElementById('participation-panel');
-  communityComposerPortal.close();
-  panel?.classList.remove('dj9256-composing');
-  setMapReportHitLayer(false);
-  setCommunityTopbarBlocked(false);
-  if(panel)delete panel.dataset.djPatchKeyboard;
-  if(mapOrigin){
-    communityComposerOrigin='community';
-    navigate('map',{suppressOverview:true});
-  }
+  const finish=()=>{
+    communityComposerPortal.close();
+    panel?.classList.remove('dj9256-composing');
+    setMapReportHitLayer(false);
+    setCommunityTopbarBlocked(false);
+    if(panel)delete panel.dataset.djPatchKeyboard;
+    if(mapOrigin){communityComposerOrigin='community';navigate('map',{suppressOverview:true});}
+  };
+  const portal=communityComposerPortal.portal;
+  if(animate&&motion&&portal)motion.close(portal,finish);else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
