@@ -1526,3 +1526,17 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
 @media(prefers-reduced-motion:reduce){
  @layer request-completion{html body #app#app#app#app .dj-current-position-marker .dj-current-position-pulse{animation:none!important;opacity:.35!important}}
 }
+
+/* Community native select: retain selected text on iOS and neutral focus. */
+@layer request-completion {
+ html body #app#app#app#app#app#app#app#app #participation-panel #community-dong-filter {
+  color:var(--dj-theme-ink,#244239)!important;-webkit-text-fill-color:var(--dj-theme-ink,#244239)!important;
+  font-size:12px!important;text-indent:0!important;opacity:1!important;min-width:0!important;
+  text-align:left!important;outline:none!important;box-shadow:none!important;
+ }
+ html body #app#app#app#app#app#app#app#app #participation-panel .community-dong-filter-row:focus-within,
+ html body #app#app#app#app#app#app#app#app #participation-panel #community-dong-filter:focus {
+  border-color:var(--dj-theme-line,#d3e3d9)!important;outline:none!important;box-shadow:none!important;
+ }
+ html body #app#app#app#app#app#app#app#app #participation-panel #community-dong-filter:focus-visible {outline:2px solid #82938b!important;outline-offset:1px!important;}
+}

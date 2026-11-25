@@ -114,7 +114,7 @@ test('community uses safe gutters and map handoff retains only a bounded non-int
  const portal=read('src/community-composer-portal.js'),tabs=read('src/bottom-tab-navigation.js');
  assert.match(portal,/padding-inline/);
  assert.match(portal,/max\(16px,env\(safe-area-inset-bottom,0px\)\)/);
- assert.match(tabs,/const retain=Boolean\(toMap&&previous/);
+ assert.match(tabs,/const retain=Boolean\(previous/);
  assert.match(tabs,/previous\.style\.setProperty\('pointer-events','none','important'\)/);
  assert.match(tabs,/if\(page\.dataset\.page!==app\.dataset\.tab\)page\.hidden=true/);
  assert.match(tabs,/else clearEntrance\(\)/);
