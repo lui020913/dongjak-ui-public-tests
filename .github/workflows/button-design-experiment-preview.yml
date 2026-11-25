@@ -12,7 +12,58 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  public_validate:
+    name: '0. 공개 소스 독립 빌드·모바일 UI 확인 (배포 없음)'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 35
+    env:
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm/_cacache
+          key: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-${{ hashFiles('app/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-${{ runner.arch }}-app-npm-v1-
+      - name: Check isolated deployment contract and CSS imports
+        run: |
+          git diff --check HEAD^ HEAD
+          bash -n scripts/deploy-button-design-experiment.sh
+          node --check app/src/main.js
+          node --check app/src/route-screen-v3.js
+          grep -Fq "import './button-design-preview.css';" app/src/main.js
+          grep -Fq 'PREVIEW_BRANCH="button-design-experiment-20261125"' scripts/deploy-button-design-experiment.sh
+          ! grep -Fq 'public-cloudflare-production' .github/workflows/button-design-experiment-preview.yml
+      - name: Build public source with existing CI placeholder configuration
+        working-directory: app
+        run: |
+          npm ci --no-audit --no-fund --prefer-offline
+          npm run build
+          npm run check:release
+      - name: Install pinned browser test runner
+        run: npm ci --no-audit --no-fund --prefer-offline
+      - name: Verify real walking route screens at three mobile sizes
+        run: npx playwright test --config=playwright.route-screen-v3.config.mjs
+      - name: Save diagnostic browser report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: button-experiment-browser-report
+          path: |
+            playwright-report-route-v3/
+            test-results-route-v3/
+          if-no-files-found: warn
+          retention-days: 3
   build:
+    needs: public_validate
     if: github.actor == 'lui020913' && github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/experiment/button-design-preview-20261125'
     name: '1. 빌드 및 기본 테스트'
     runs-on: ubuntu-24.04
