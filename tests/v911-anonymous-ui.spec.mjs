@@ -831,7 +831,8 @@ test('phone retired update history is absent and records navigation stays above 
  test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();
  await expect(page.locator('#mine-panel [data-dj834-action="history"]')).toHaveCount(0);
- await expect(page.locator('#version-history-modal')).toHaveCount(0);
+ await expect(page.locator('#version-history-modal,#version-history-trigger,#dj-mobile-history,#dj-guide-release-details')).toHaveCount(0);
+ await expect(page.locator('#bottom-nav')).toBeVisible();
  await tap(page,page.locator('#mine-panel [data-dj834-action="records"]'));
  const records=page.locator('#mine-panel .dj834-records-container:not([hidden])');
  await expect(records).toBeVisible();
@@ -841,6 +842,11 @@ test('phone retired update history is absent and records navigation stays above 
  const geometry=await page.evaluate(()=>{const body=document.querySelector('#mine-panel > .dj836-sheet-body'),nav=document.getElementById('bottom-nav');return {bottom:body.getBoundingClientRect().bottom,nav:nav.getBoundingClientRect().top};});
  expect(geometry.bottom).toBeLessThanOrEqual(geometry.nav+3);
  await tap(page,page.locator('#mine-panel .dj834-detail-back'));await expect(records).toBeHidden();
+ await tap(page,page.locator('#mine-panel [data-dj834-action="map"]'));
+ await expect(page.locator('#mine-panel .dj834-map-settings-container:not([hidden])')).toBeVisible();
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));
+ await tap(page,tab(page,'map'));
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
 });
 
 test('phone search returns a visible local suggestion and clears input safely',{tag:'@phone-common'},async({page})=>{
@@ -1755,7 +1761,8 @@ test('phone production settings, cards and nearby overlays follow rendered geome
  const content=mine.locator('.dj834-detail-content'),detail=mine.locator('.dj834-my-detail');
  await expect(home.locator('[data-dj834-action="theme"]')).toHaveCount(0);
  await expect(home.locator('[data-dj834-action="map"]')).toHaveCount(1);
- for(const key of ['type','records','history']){
+ await expect(home.locator('[data-dj834-action="history"]')).toHaveCount(0);
+ for(const key of ['type','records','map']){
   const choice=home.locator('[data-dj834-action="'+key+'"]');
   await choice.scrollIntoViewIfNeeded();
   await tap(page,choice);
@@ -1777,7 +1784,7 @@ test('phone production settings, cards and nearby overlays follow rendered geome
   expect(geometry.activeTop-geometry.titleBottom,key+' content should start by its heading').toBeGreaterThanOrEqual(-5);
   expect(geometry.activeTop-geometry.titleBottom,key+' excessive vertical whitespace').toBeLessThan(180);
   expect(geometry.bodyBottom,key+' scroll viewport must not sit behind tab dock').toBeLessThanOrEqual(geometry.navTop+3);
-  if(page.viewportSize().width===390&&['records','history'].includes(key))
+  if(page.viewportSize().width===390&&['records','map'].includes(key))
    await test.info().attach('my-info-'+key+'.png',{body:await page.screenshot(),contentType:'image/png'});
   await tap(page,mine.locator('.dj834-detail-back'));
   await expect(home).toBeVisible();
@@ -2084,7 +2091,7 @@ test('phone selected dock has no color plate and route form is vertically balanc
  await tap(page,page.locator('#mine-panel .dj834-detail-back'));
  await tap(page,page.locator('#mine-panel [data-dj834-action="records"]'));
  await expect(page.locator('#mine-panel .dj834-records-container:not([hidden])')).toBeVisible();
- const history=await page.evaluate(()=>{
+ const recordsGeometry=await page.evaluate(()=>{
   const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
   const title=panel.querySelector(':scope > .dj-sheet-chrome .dj834-detail-nav');
   const dock=document.getElementById('bottom-nav');
@@ -2094,9 +2101,9 @@ test('phone selected dock has no color plate and route form is vertically balanc
    navTop:n.top,scrollBottom:Math.round(body.scrollTop+body.clientHeight),
    scrollHeight:body.scrollHeight,headPosition:getComputedStyle(panel.querySelector(':scope > .dj-sheet-chrome')).position};
  });
- expect(history.headerInsideFixedTitle,'child title/back must be in the shared fixed header').toBe(true);
- expect(history.scrollportBottom,'history scroller may not be masked by nav').toBeLessThanOrEqual(history.navTop+3);
- expect(history.scrollBottom).toBeGreaterThanOrEqual(history.scrollHeight-3);
- await testInfo.attach('real-history-geometry.json',{body:Buffer.from(JSON.stringify({mineDock,contrast,history},null,2)),contentType:'application/json'});
- if(page.viewportSize().width===390)await testInfo.attach('real-history-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
+ expect(recordsGeometry.headerInsideFixedTitle,'child title/back must be in the shared fixed header').toBe(true);
+ expect(recordsGeometry.scrollportBottom,'records scroller may not be masked by nav').toBeLessThanOrEqual(recordsGeometry.navTop+3);
+ expect(recordsGeometry.scrollBottom).toBeGreaterThanOrEqual(recordsGeometry.scrollHeight-3);
+ await testInfo.attach('real-records-geometry.json',{body:Buffer.from(JSON.stringify({mineDock,contrast,recordsGeometry},null,2)),contentType:'application/json'});
+ if(page.viewportSize().width===390)await testInfo.attach('real-records-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });

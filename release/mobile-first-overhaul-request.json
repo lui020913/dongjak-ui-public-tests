@@ -2,7 +2,7 @@
   "source": "public-app",
   "application_version": "9.2.186",
   "public_work_branch": "main",
-  "purpose": "Integrated PR535: community picker dock/HUD, unassessed PRI colors and white Sangdo1 boundary, route keyboard/GPS. Preserve PR529, PR532 and prior main fixes. Replace retired update-history browser QA with actual records navigation and absence checks. Protected Preview/Production gates required.",
+  "purpose": "Integrated PR535 and PR536/537: direct community picker, HUD/dock, unassessed PRI and white boundary, route keyboard/GPS; retain PR528/532 timetable/help fixes. Verify retired update UI absence, real records and map settings at all phone widths, synchronized QA coverage and WebKit selection. Historical bus API recovery excluded. Protected Preview/Production gates required.",
   "attempt": 418,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
