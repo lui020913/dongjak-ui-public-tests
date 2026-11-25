@@ -21,7 +21,10 @@ test('leaving picker or viewing saved post clears selection mode and hint',()=>{
  assert.match(main,/if\(tab!=='map'&&communityPickMode\)clearCommunityLocationPick\(\)/);
  const clear=section('function clearCommunityLocationPick()', 'function cancelCommunityTabMotion()');
  assert.match(clear,/communityPickMode=false/);
- assert.match(clear,/community-map-hint'\)\.hidden=true/);
+ assert.match(clear,/const hint=document\.getElementById\('community-map-hint'\)/);
+ assert.match(clear,/hint\.hidden=true/);
+ assert.match(clear,/communityPickerDockObserver\?\.disconnect\(\)/);
+ assert.match(clear,/delete app\.dataset\.communityPicking/);
  const show=section('function showCommunityLocation(', 'async function updateLike(');
  assert.match(show,/clearCommunityLocationPick\(\);\s*cancelCommunityTabMotion\(\);/);
  assert.doesNotMatch(show,/communityPickMode=true/);
