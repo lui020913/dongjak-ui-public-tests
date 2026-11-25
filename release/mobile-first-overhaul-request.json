@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.177",
+  "application_version": "9.2.178",
   "public_work_branch": "main",
-  "purpose": "PR510: unify institutional protection-gap menu; use only existing policy risk colors and gray unknowns; preserve Sanghyeon school review information in road details without new scores or overlay. Source CI 40/40 passed. Protected Preview and Production QA.",
-  "attempt": 403,
+  "purpose": "Combined release: preserve PR510 institutional protection-gap menu and risk colors; include merged PR508 resident guidebook PDF (original verified), fifth welcome download action, concise smartphone guidance and no selected badge. Supersede pending v9.2.177 run per user request; require full protected Preview, phone and PC/tablet download QA before Production.",
+  "attempt": 404,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
