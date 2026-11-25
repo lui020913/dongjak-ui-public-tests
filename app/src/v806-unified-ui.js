@@ -378,8 +378,8 @@ export function installUnifiedUI(doc=document, win=window){
     if(!node?.closest)return '';
     const search=node.closest('#map-quick-search');
     if(search)return 'map-quick-search-dropdown';
-    // Both report entry points open the canonical community tab.
-    if(node.closest('#djNext-report,#ped-report-open'))return 'participation-panel';
+    // The phone composer is a body-level portal, not a participation sheet.
+    if(node.closest('#djNext-report,#ped-report-open'))return phone()?'':'participation-panel';
     const tab=node.closest('#bottom-nav .nav-tab[data-tab]');
     if(tab)return tabPanels[tab.dataset.tab]||'';
     const opener=node.closest('#map-tools-toggle,#map-safety-toggle,'+

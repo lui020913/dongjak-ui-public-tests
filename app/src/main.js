@@ -2161,6 +2161,7 @@ function renderMy() {
 const communityForm = document.getElementById('community-form');
 const communityPhotoInput = document.getElementById('community-photo-input');
 communityComposerPortal=createCommunityComposerPortal(communityForm);
+let communityComposerFromMap=false;
 function openCommunityComposer(open,{animate=true}={}) {
   const motion=window.DongjakWindowMotion;
   const phone=window.matchMedia('(max-width:699px)').matches;
@@ -2181,7 +2182,7 @@ function openCommunityComposer(open,{animate=true}={}) {
   if(!communityComposerPortal?.isOpen())return;
   communityComposerPortal.dismiss({animate});
 }
-document.getElementById('community-compose-toggle').addEventListener('click',()=>openCommunityComposer(communityForm.hidden));
+document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerFromMap=false;openCommunityComposer(communityForm.hidden);});
 document.getElementById('community-compose-close').addEventListener('click',()=>openCommunityComposer(false));
 for (const chip of document.querySelectorAll('.community-filter[data-community-filter]')) {
   chip.addEventListener('click',()=>{
@@ -2249,7 +2250,7 @@ function cancelCommunityTabMotion(){
 function resumeCommunityLocationDraft(){
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
-  navigate('participate',{resumeCommunityDraft:true});
+  if(!communityComposerFromMap||!window.matchMedia('(max-width:699px)').matches)navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
 }
 function selectCommunityLocation(lngLat) {
@@ -2272,8 +2273,8 @@ document.getElementById('community-map-pick').addEventListener('click',()=>{
   closeCommunityLocation();
   communityPickMode=true;
   navigate('map',{suppressOverview:true});
+  toastEl.classList.remove('show');
   document.getElementById('community-map-hint').hidden=false;
-  toast('지도에서 게시글에 연결할 위치를 선택해 주세요.');
 });
 document.getElementById('community-map-cancel').addEventListener('click',()=>{
   if(communityPickMode)resumeCommunityLocationDraft();
@@ -2366,10 +2367,13 @@ const pedestrianTools=initPedestrianTools({
   onToast:toast,
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
-    // Risk report opens the same composer as the community tab.
+    // On phones the body-level editor opens directly over the live map.
+    // The legacy feed is only needed for the wide-screen inline editor.
     cancelCommunityTabMotion();
     clearCommunityLocationPick();
-    navigate('participate');
+    communityComposerFromMap=window.matchMedia('(max-width:699px)').matches;
+    if(!communityComposerFromMap)navigate('participate');
+    else if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true});
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});
@@ -2417,7 +2421,40 @@ async function submitCommunityComment(postId,formEl) {
   if(!next){toast('댓글은 게시글당 40개까지 등록할 수 있습니다.');return;}
   if(saveCommunity(next))renderCommunity();
 }
-function showCommunityReport(postId,commentId,anchor){if(anchor.querySelector('.community-report-form'))return;const form=makeCEl('form','community-report-form');const select=document.createElement('select');select.setAttribute('aria-label','신고 사유');for(const [value,label] of [...Object.entries(moderationReasons).filter(([k])=>!['uncertain','unavailable'].includes(k)),['other','기타']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}const send=makeCEl('button','community-filter','신고 접수');send.type='submit';const close=communityButton('취소','community-filter',()=>form.remove());form.append(select,send,close);form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,select.value);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});anchor.append(form);}
+function showCommunityLoginRequired(actions,message){
+  let note=actions.nextElementSibling;
+  if(!note?.classList.contains('community-login-feedback')){
+    note=makeCEl('p','community-login-feedback');
+    note.setAttribute('role','status');
+    actions.after(note);
+  }
+  note.textContent=message;
+}
+function showCommunityReport(postId,commentId,anchor){
+  if(anchor.querySelector('.community-report-form'))return;
+  const form=makeCEl('form','community-report-form');
+  const reasons=[...Object.entries(moderationReasons).filter(([k])=>!['uncertain','unavailable'].includes(k)),['other','기타']];
+  let selected=reasons[0][0];
+  const picker=makeCEl('details','community-report-picker');
+  const summary=makeCEl('summary','community-report-selected',reasons[0][1]);
+  summary.setAttribute('aria-label','신고 사유: '+reasons[0][1]);
+  const options=makeCEl('div','community-report-options');
+  for(const [value,label] of reasons){
+    const option=communityButton(label,'community-report-option',()=>{
+      selected=value;summary.textContent=label;summary.setAttribute('aria-label','신고 사유: '+label);
+      for(const b of options.children)b.setAttribute('aria-pressed',String(b===option));
+      picker.open=false;summary.focus();
+    });
+    option.setAttribute('aria-pressed',String(value===selected));options.append(option);
+  }
+  picker.append(summary,options);
+  picker.addEventListener('keydown',e=>{if(e.key==='Escape'&&picker.open){e.stopPropagation();picker.open=false;summary.focus();}});
+  const send=makeCEl('button','community-report-action','신고 접수');send.type='submit';
+  const close=communityButton('취소','community-report-action',()=>form.remove());
+  form.append(picker,send,close);
+  form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,selected);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});
+  anchor.append(form);
+}
 function renderCommunity() {
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
   // Refreshes may arrive during the notification view; never mount feed cards there.
@@ -2481,13 +2518,13 @@ function renderCommunity() {
       card.append(communityButton('⌖ 지도에서 위치 보기','community-location-link',()=>showCommunityLocation(post)));
     }
     const actions=makeCEl('div','community-post-actions');
-    actions.append(communityButton(`${post.liked?'♥':'♡'} 공감 ${post.likes||0}`,`community-like${post.liked?' liked':''}`,()=>updateLike(post.id)));
+    actions.append(communityButton(`${post.liked?'♥':'♡'} 공감 ${post.likes||0}`,`community-like${post.liked?' liked':''}`,async()=>{if(!await isCommunitySignedIn()){showCommunityLoginRequired(actions,'공감하려면 로그인해 주세요.');return;}await updateLike(post.id);}));
     const commentsArea=makeCEl('div','community-comments');
     const commentButton=communityButton(`댓글 ${post.comments?.length||0}`,'community-comment-toggle',()=>{
       commentsArea.hidden=!commentsArea.hidden;
     });
     actions.append(commentButton);
-    if(post.shared){actions.append(communityButton(post.bookmarked?'저장 해제':'저장','community-bookmark',async()=>{try{await setSharedCommunityBookmark(post.id,!post.bookmarked);await refreshSharedCommunity();toast(post.bookmarked?'저장한 글에서 제외했습니다.':'게시글을 저장했습니다.');}catch(e){toast(e.message);}}));actions.append(communityButton('신고','community-report',()=>showCommunityReport(post.id,null,card)));actions.append(communityButton('공유','community-share',async()=>{const target=new URL(location.href);target.hash='community='+post.id;try{if(navigator.share){await navigator.share({title:post.title,url:target.href});}else{await navigator.clipboard.writeText(target.href);toast('게시글 링크를 복사했습니다.');}}catch(e){if(e?.name!=='AbortError')toast('공유하지 못했습니다.');}}));}
+    if(post.shared){actions.append(communityButton(post.bookmarked?'저장 해제':'저장','community-bookmark',async()=>{if(!await isCommunitySignedIn()){showCommunityLoginRequired(actions,'게시글을 저장하려면 로그인해 주세요.');return;}try{await setSharedCommunityBookmark(post.id,!post.bookmarked);await refreshSharedCommunity();toast(post.bookmarked?'저장한 글에서 제외했습니다.':'게시글을 저장했습니다.');}catch(e){toast(e.message);}}));actions.append(communityButton('신고','community-report',()=>showCommunityReport(post.id,null,card)));actions.append(communityButton('공유','community-share',async()=>{const target=new URL(location.href);target.hash='community='+post.id;try{if(navigator.share){await navigator.share({title:post.title,url:target.href});}else{await navigator.clipboard.writeText(target.href);toast('게시글 링크를 복사했습니다.');}}catch(e){if(e?.name!=='AbortError')toast('공유하지 못했습니다.');}}));}
     if(!post.shared||post.mine)actions.append(communityButton('삭제','community-post-delete',async()=>{
       if(!window.confirm(post.shared?'공개 게시글과 댓글을 삭제하시겠습니까?':'이 기기에 저장된 게시글과 댓글을 삭제하시겠습니까?'))return;
       if(post.shared){try{await deleteSharedCommunityPost(post.id);await refreshSharedCommunity();toast('게시글을 삭제했습니다.');}catch(error){toast(error.message||'삭제 실패');}return;}
