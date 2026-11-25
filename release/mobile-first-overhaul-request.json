@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.151",
+  "application_version": "9.2.152",
   "public_work_branch": "main",
-  "purpose": "PR472: align search and AI controls, waypoint removal, recent search header, community comment and photo buttons, Android APK download recovery.",
-  "attempt": 368,
+  "purpose": "PR474: community comment layout, fixed report card and marker cleanup, expanded map search and result pins, walking route entry and GPS/address handling, route exit cleanup, and brighter metro radial illumination. Bus position API recovery excluded.",
+  "attempt": 369,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
