@@ -28,7 +28,9 @@ test('history presents categorical headings and keeps exact build metadata only 
  assert(ui.includes('historyHighlights'));
  assert(ui.includes('dj-edition-history'));
  assert.match(ui,/dataset\.version/);
- assert.match(ui,/dataset\.archivedVersion/);
+ assert.match(ui,/record.sourceItems\|\|record.items\|\|\[\]/);
+ assert.match(ui,/article\.dataset\.currentBuild='true'/);
+ assert.doesNotMatch(ui,/el\('details','dj-edition-patch/);
  assert(!ui.includes('현재 빌드: '));
  assert(!ui.includes("const versionHeading=el('h4','',displayVersion)"));
 });
