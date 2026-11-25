@@ -53,7 +53,7 @@ export function installUnifiedUI(doc=document, win=window){
     'map-quick-search-dropdown',...(win.matchMedia?.('(max-width:699px)')?.matches?['dj854-weather-sheet','djNext-layer-panel']:[])];
   const visible=id=>{
     const node=element(id);
-    if(!node||node.hidden||node.dataset.djTabOutgoing==='true'||content(node)?.dataset?.dj810Animating==='closing'||(id==='dj-mobile-utilities'&&node.getAttribute('aria-hidden')==='true'))return false;
+    if(!node||node.hidden||node.classList.contains('dj871-search-leaving')||node.dataset.djTabOutgoing==='true'||content(node)?.dataset?.dj810Animating==='closing'||(id==='dj-mobile-utilities'&&node.getAttribute('aria-hidden')==='true'))return false;
     if(id==='map-safety-controls'&&!app.classList.contains('map-safety-open'))return false;
     if(id==='map-advanced-controls'&&!app.classList.contains('map-controls-open'))return false;
     const style=win.getComputedStyle(node);
@@ -297,7 +297,7 @@ export function installUnifiedUI(doc=document, win=window){
     if(node.dataset.djTabOutgoing==='true')return;
     if(id==='map-quick-search-dropdown'){
       dispatchLocalClick(element('map-quick-search-close'),win);
-      if(!node.hidden)node.hidden=true;
+      if(!node.hidden&&!node.classList.contains('dj871-search-leaving'))node.hidden=true;
       return;
     }
     if(win.matchMedia?.('(max-width:699px)')?.matches&&['ped-tools-panel','djNext-layer-panel'].includes(id)){
