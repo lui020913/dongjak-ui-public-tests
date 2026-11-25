@@ -1944,10 +1944,14 @@ function paintCommunityNoticeBadge(){const button=document.getElementById('commu
 function setCommunityNoticeView(open){
  const panel=document.getElementById('community-notifications'),toggle=document.getElementById('community-notifications-toggle');
  if(!panel||!toggle)return;
- if(open&&communityDetail){communityDetail=null;communityReplyTo=null;renderCommunity();}
+ const wasOpen=!panel.hidden;
+ if(open&&communityDetail){communityDetail=null;communityReplyTo=null;document.getElementById('participation-panel').dataset.communityDetail='false';}
  panel.hidden=!open;toggle.setAttribute('aria-pressed',String(open));
  for(const id of ['community-list','participate-register'])document.getElementById(id).hidden=open;
- if(open)document.querySelector('#participation-panel>.dj836-sheet-body')?.scrollTo({top:0,behavior:'instant'});
+ if(open){
+  document.getElementById('community-list').replaceChildren();
+  document.querySelector('#participation-panel>.dj836-sheet-body')?.scrollTo({top:0,behavior:'instant'});
+ }else if(wasOpen)renderCommunity();
 }
 function resetCommunityNotices(){++communityNoticeSeq;communityNotices=[];communityNoticePrimed=false;const panel=document.getElementById('community-notifications');if(panel){setCommunityNoticeView(false);panel.replaceChildren();}paintCommunityNoticeBadge();}
 function renderCommunityNotices(){const panel=document.getElementById('community-notifications');if(!panel)return;panel.replaceChildren();void installCommunityPushControl(panel,getActiveCloudClient(),toast).catch(()=>{});if(!communityNotices.length){panel.append(makeCEl('p','','새 알림이 없습니다.'));return;}
@@ -2418,6 +2422,8 @@ async function submitCommunityComment(postId,formEl) {
 function showCommunityReport(postId,commentId,anchor){if(anchor.querySelector('.community-report-form'))return;const form=makeCEl('form','community-report-form');const select=document.createElement('select');select.setAttribute('aria-label','신고 사유');for(const [value,label] of [...Object.entries(moderationReasons).filter(([k])=>!['uncertain','unavailable'].includes(k)),['other','기타']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}const send=makeCEl('button','community-filter','신고 접수');send.type='submit';const close=communityButton('취소','community-filter',()=>form.remove());form.append(select,send,close);form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,select.value);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});anchor.append(form);}
 function renderCommunity() {
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
+  // Refreshes may arrive during the notification view; never mount feed cards there.
+  if(!document.getElementById('community-notifications').hidden)return;
   // The always-present feed status was redundant with the controls and empty
   // state. Only report exceptional connection failures in the actual feed.
   if(communityCloudStatus.includes('연결 실패')){
