@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.178",
+  "application_version": "9.2.179",
   "public_work_branch": "main",
-  "purpose": "Retry v9.2.178 combined PR510 and PR508: prior build, Preview, PC/tablet PDF download and 10/12 phone QA shards passed. Only two obsolete protection-gap submenu tests updated to verify the unified direct map activation, SHP audit, NULL school review and actual legend. Application source, PDF and PRI scores unchanged. Protected release gates retained. Retry: remaining phone QA 8/12 failed only because current-location button intercepted expanded PRI legend close; hide floating map controls while criteria expanded, restore on collapse. Keep real click assertion and all protected gates.",
-  "attempt": 406,
+  "purpose": "PR511: apply revised 100/70/30/0 width rubric; 160 of 224 PDF candidates have conditional width estimates, including 4 perpendicular-section recoveries. Physical separation remains unverified, all candidate scores null, PRI and original width layer unchanged. Source CI 40/40 passed.",
+  "attempt": 407,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
