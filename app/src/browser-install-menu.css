@@ -162,3 +162,13 @@ html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
 #dj-install-menu .dj-install-performance-device strong{font-size:14px}
 #dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.5;margin:8px 0 0;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:100%;color:inherit}
 html[data-theme=dark] #dj-install-menu .dj-install-performance{background:#293632;border-color:#53665a;color:#e2f0e7}
+
+/* Concise Android install guidance; full instructions remain accessible. */
+#dj-install-menu [data-android-guide] .dj-install-guide-intro{font-weight:500!important;line-height:1.5!important;margin:4px 0!important}
+#dj-install-menu [data-android-guide] .dj-install-guide-notice{background:transparent;border:0;padding:0;margin:6px 0!important;font-weight:500;line-height:1.5}
+#dj-install-menu .dj-install-guide-details{margin:12px 0 4px;border-top:1px solid #baccc2;padding-top:10px;min-width:0}
+#dj-install-menu .dj-install-guide-details summary{cursor:pointer;font-size:14px;line-height:1.5;word-break:keep-all}
+#dj-install-menu .dj-install-guide-details summary:focus-visible{outline:2px solid #16836b;outline-offset:3px}
+#dj-install-menu .dj-install-guide-detail{font-weight:400}
+#dj-install-menu [data-android-guide] .dj-install-guide-unavailable{padding:0;border:0;background:transparent;font-weight:500;margin:6px 0!important}
+#dj-install-menu [data-android-guide] .dj-install-prompt:disabled{opacity:.65;cursor:default}
