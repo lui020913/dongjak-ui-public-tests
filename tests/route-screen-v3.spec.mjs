@@ -43,7 +43,7 @@ test('completely rebuilt route entry matches reference map-first composition',as
   await expect(page.locator('#app > .topbar')).toBeHidden();
   await expect(root.locator('.header')).toHaveCSS('background-color','rgb(237, 243, 239)');
   await expect(root.locator('.mode')).toContainText('도보');
-  await expect(root.locator('#v3-start')).toHaveText('현재 위치');
+  await expect(root.locator('#v3-start')).toHaveText('출발지를 선택하세요');
   await expect(root.locator('#v3-end')).toHaveText('어디로 가시나요?');
   await expect(cta).toBeDisabled();
   // Keep the legacy engine recognized by tab motion, but never painted or hit.
@@ -97,7 +97,7 @@ test('new entry has independent functional destination-search and dismiss',async
   await root.locator('[data-v3="search-back"]').click();
   await expect(search).toBeHidden();
   await expect(page.locator('#route-place-search')).toHaveAttribute('hidden','');
-  await root.locator('[data-v3="close"]').click();
+  await root.locator('[data-v3="back"]').click();
   await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
   await expect(root).toBeHidden();
 });
