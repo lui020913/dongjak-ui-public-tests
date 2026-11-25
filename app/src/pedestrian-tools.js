@@ -514,12 +514,12 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
         const timer=setTimeout(finish,2100);map.on?.('idle',finish);
       });
       if(current!==seq)return;
-      const found=nearbyResults([longitude,latitude],nearbyCandidates(map));
+      const found=nearbyResults([longitude,latitude],nearbyCandidates(map).filter(p=>['안전시설','횡단보도','교통약자 시설'].includes(p.category)));
       const groups=[...new Set(found.map(p=>p.category))];
       results.replaceChildren();
-      if(!useMapCenter){
+      {
         const safety=el('details','dj-nearby-safety-summary');
-        safety.append(el('summary','','내 위치 보행안전 안내'),el('p','ped-tools-note','펼치면 현재 위치의 보행안전 자료를 확인할 수 있습니다.'));
+        safety.append(el('summary','',useMapCenter?'지도 중심 보행안전 안내':'내 위치 보행안전 안내'),el('p','ped-tools-note','보행 위험도와 안전자료를 확인하고 있습니다.'));
         let loaded=false;
         safety.addEventListener('toggle',async()=>{
           if(!safety.open||loaded)return;
@@ -534,7 +534,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
             safety.replaceChildren(safety.firstElementChild,body);
           }catch{loaded=false;if(safety.isConnected)safety.lastElementChild.textContent='안전정보 자료를 불러오지 못했습니다. 다시 펼쳐 조회해 주세요.';}
         });
-        results.append(safety);
+        results.append(safety);safety.open=true;
       }
       if(!found.length)results.append(el('p','ped-tools-note','이 범위에서 지도에 로드된 시설 자료가 없습니다. 시설이 없다는 뜻은 아닙니다.'));
       for(const kind of groups){
@@ -573,7 +573,7 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
         results.append(section);
       }
       const accuracy=Number(position?.coords?.accuracy);
-      status.textContent=`${useMapCenter?'지도 중심 기준':'현재 위치 기준'} · 반경 ${RADIUS_M}m${!useMapCenter&&Number.isFinite(accuracy)?' · 위치 정확도 약 '+Math.round(accuracy)+'m':''}\n지도에 로드된 시설만 표시합니다.`;
+      status.textContent=`${useMapCenter?'지도 중심 기준':'현재 위치 기준'} · 반경 ${RADIUS_M}m${!useMapCenter&&Number.isFinite(accuracy)?' · 위치 정확도 약 '+Math.round(accuracy)+'m':''}\n지도에 로드된 안전·횡단·교통약자 시설만 표시합니다.`;
       results.append(el('p','ped-tools-note','경사도·도로폭·시설의 실시간 상태는 원천 데이터가 부족한 곳에서 판단하지 않습니다.'));
     }catch(error){
       if(current!==seq)return;
