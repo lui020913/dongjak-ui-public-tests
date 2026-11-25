@@ -332,7 +332,7 @@ export function filterCommercialPOI(map){
     if(source==='poi' && id!=='dongjak-park-names'){
       try{
         const old=map.getFilter(layer.id);
-        const allowed=['bus','rail','hospital','clinic','pharmacy','police','fire_station','emergency'];
+        const allowed=['bus','rail','emergency'];
         map.setFilter(layer.id,['all',...(old?[old]:[]),['in',['get','class'],['literal',allowed]]]);
         count++;
       }catch(error){console.warn('[POI 정리] 필터 오류',layer.id,error);}
