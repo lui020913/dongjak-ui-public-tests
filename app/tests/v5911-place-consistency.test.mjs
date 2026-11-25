@@ -14,15 +14,23 @@ test('장소 상세정보에는 확인된 연락처/웹주소만 표시하고 �
  assert.equal(verifiedWeb('javascript:alert(1)'),'');
  assert.equal(placeData({name:'학교',lat:37.5,lng:126.95}).phone,'');
 });
-test('OSM 같은 이름·가까운 위치만 연락처 자료로 인정한다',()=>{
- const place=placeData({name:'상도5치안센터',lng:126.952,lat:37.498});
+test('OSM 같은 시설의 정규화된 이름·가까운 위치만 연락처 자료로 인정한다',()=>{
+ const place=placeData({name:'상도동우체국',lng:126.952,lat:37.498});
  const records=[
  {tags:{name:'다른 기관',phone:'02-888-7777'},lat:37.498,lon:126.952},
- {tags:{name:'상도5치안센터',phone:'02-123-0000'},lat:37.54,lon:127.1},
- {tags:{name:'상도5치안센터',phone:'02-822-0101',website:'https://example.com'},lat:37.49801,lon:126.95201}
+ {tags:{name:'상도동우체국',phone:'02-123-0000'},lat:37.54,lon:127.1},
+ {tags:{name:'상도동우체국',phone:'02-822-0101',website:'https://example.com'},lat:37.49801,lon:126.95201}
  ];
  assert.equal(matchingOsmContact(records,place).phone,'02-822-0101');
  assert.equal(matchingOsmContact(records.slice(0,2),place).phone,undefined);
+});
+test('운영 종료·용도 변경된 치안시설의 옛 연락처를 다시 복원하지 않는다',()=>{
+ for(const name of ['상도5치안센터','상도2치안센터']){
+  const place=placeData({name,lng:126.952,lat:37.498,phone:'02-822-0101'});
+  assert.equal(place.phone,'');
+  const records=[{tags:{name,phone:'02-822-0101',website:'https://example.com'},lat:37.49801,lon:126.95201}];
+  assert.deepEqual(matchingOsmContact(records,place),{});
+ }
 });
 test('교량 5곳과 노들섬은 충돌 우선순위 마커를 등록하며 누락시키지 않는다',()=>{
  assert.deepEqual(HANGANG_BRIDGE_REFERENCES.map(p=>p.name),['원효대교','한강철교','한강대교','동작대교','반포대교']);
