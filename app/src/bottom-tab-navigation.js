@@ -83,8 +83,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   const previous=routeHost&&!routeHost.hidden?routeHost:doc.querySelector('.page-panel[data-page="'+previousTab+'"]:not([hidden])');
   const destination=button.dataset.tab;
   const toMap=destination==='map';
-  // Only a map return retains the departing page for a single fade; normal
-  // tab changes reveal the new content once, over its own opaque background.
+  // Retain the outgoing live surface for every non-reduced tab dissolve.
   const retain=Boolean(previous&&typeof win.requestAnimationFrame==='function'&&!reduced());
   if(retain)previous.dataset.djTabOutgoing='true';
   if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
@@ -98,10 +97,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    if(previous.id==='dj-route-v3')previous.inert=true;
    // Important opacity is deliberate: historical CSS fixes the page to
    // opacity:1 and filter:none, defeating an ordinary WAAPI fade.
-   const begin=win.performance.now();
+   let last=null,elapsed=0;
    const fade=now=>{
     if(departing!==previous)return;
-    const p=Math.max(0,Math.min(1,(now-begin)/TAB_TRANSITION.mapReturn));
+    if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
+    last=now;
+    const p=Math.min(1,elapsed/TAB_TRANSITION.mapReturn);
     previous.style.setProperty('opacity',String(1-p*p*(3-2*p)),'important');
     if(p<1)departingFrame=win.requestAnimationFrame(fade);
     else clearEntrance();
@@ -109,7 +110,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    previous.style.setProperty('opacity','1','important');
    departingFrame=win.requestAnimationFrame(fade);
   }else previous?.removeAttribute?.('data-dj-tab-outgoing');
-  if(retain&&departing){enterTimer=win.setTimeout(clearEntrance,1000);return;}
+  if(retain&&departing){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
    if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
