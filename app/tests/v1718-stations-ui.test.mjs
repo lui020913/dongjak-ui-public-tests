@@ -61,7 +61,7 @@ test('교통정보는 노선별 그룹·이전역·다음역을 표시하며 스
     readFile(new URL('../src/style.css',import.meta.url),'utf8')
   ]);
   assert.match(html,/id="transport-neighbors"/);
-  assert.match(source,/function displayArrivals\(container,kind,items\)/);
+  assert.match(source,/function displayArrivals\(container,kind,items,place=null\)/);
   assert.match(source,/function createMetroLineCard\(line,stationName\)/);
   assert.match(css,/\.transport-sheet::-webkit-scrollbar/);
   assert.match(css,/\.metro-overview \.metro-badges/);

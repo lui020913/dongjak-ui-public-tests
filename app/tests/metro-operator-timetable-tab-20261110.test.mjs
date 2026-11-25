@@ -37,6 +37,6 @@ test('status-only is not rendered as 0 second arrival and 7 line countdown remai
   const js=read('src/transport-map.js');
   assert.match(js,/도착시간 미제공/);
   assert.match(js,/state==='status-only'/);
-  assert.match(js,/displayArrivals\(container,place\.kind,filtered\)/);
+  assert.match(js,/displayArrivals\(container,place\.kind,filtered,place\)/);
   assert.match(read('src/transport-freshness.js'),/barvlDt/);
 });
