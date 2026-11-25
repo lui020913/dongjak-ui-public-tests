@@ -374,11 +374,9 @@ export function installUnifiedUI(doc=document, win=window){
     if(!node?.closest)return '';
     const search=node.closest('#map-quick-search');
     if(search)return 'map-quick-search-dropdown';
-    // Map-origin risk reporting opens the real participation page through a
-    // delegated, otherwise hidden button. It is an explicit user intent, not
-    // a ghost modal; without this allowance the lifecycle can dismiss the
-    // editor after the topbar and hit-layer have already been updated.
-    if(node.closest('#djNext-report,#ped-report-open'))return 'participation-panel';
+    // Desktop still uses the original community sheet; a phone map report
+    // uses the independent body portal, never the participation page.
+    if(node.closest('#djNext-report,#ped-report-open'))return win.matchMedia?.('(max-width:699px)')?.matches&&app.dataset.tab==='map'?'':'participation-panel';
     const tab=node.closest('#bottom-nav .nav-tab[data-tab]');
     if(tab)return tabPanels[tab.dataset.tab]||'';
     const opener=node.closest('#map-tools-toggle,#map-safety-toggle,#toggle-road-width,'+
@@ -435,6 +433,9 @@ export function installUnifiedUI(doc=document, win=window){
     activeSurface='';
   },true);
   on(doc,'click',event=>{
+    if(win.matchMedia?.('(max-width:699px)')?.matches&&app.dataset.tab==='map'&&event.target?.closest?.('#djNext-report,#ped-report-open')){
+      dismissOthers('');activeSurface='';return;
+    }
     const requested=openingIntent(event);
     const mobileMapTab=win.matchMedia?.('(max-width:699px)')?.matches&&event.target?.closest?.('#bottom-nav .nav-tab[data-tab="map"]');
     if(mobileMapTab){dismissOthers('');activeSurface='';return;}
