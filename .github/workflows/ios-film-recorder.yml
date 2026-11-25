@@ -8,12 +8,12 @@ permissions:
   contents: read
 concurrency:
   group: isolated-ios-film
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   record:
     if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/tools/app-film-recorder'
     runs-on: macos-26
-    timeout-minutes: 50
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,6 +100,7 @@ jobs:
           path: ${{ runner.temp }}/film-wda/Build/Products
           key: ${{ steps.wda-cache.outputs.cache-primary-key }}
       - name: Record real iOS screen
+        timeout-minutes: 10
         shell: bash
         run: |
           set -euo pipefail
