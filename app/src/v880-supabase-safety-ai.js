@@ -101,7 +101,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if((!inside||boundary)&&event.cancelable)event.preventDefault();
   },{passive:false});
   const revealQuestion=node=>{const box=transcript.getBoundingClientRect(),r=node.getBoundingClientRect();transcript.scrollTop+=r.top-box.top-8;};
-  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0,keyboardAdjusted=false;
+  let pending=false;let marker=null;let previousFocus=null;let abort=null;let closeTimer=0,closeFrame=0,keyboardAdjusted=false;
   let transportDismissedAt=0;
   const guardTransportDismiss=()=>{transportDismissedAt=Date.now();};
   document.addEventListener('dongjak:transport-dismiss-start',guardTransportDismiss);
@@ -114,7 +114,8 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   });
   keyboardObserver.observe(modal,{attributes:true,attributeFilter:['data-dj-ai-keyboard'],attributeOldValue:true});
   function stopContentMotion(){
-    for(const node of [modal,layout])for(const prop of ['animation','transition','will-change'])node.style.removeProperty(prop);
+    if(closeFrame){window.cancelAnimationFrame(closeFrame);closeFrame=0;}
+    for(const node of [modal,layout])for(const prop of ['animation','transition','will-change','opacity'])node.style.removeProperty(prop);
   }
   function fadeContent(opening){
     layout.style.setProperty('animation','none','important');
@@ -146,9 +147,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     if(event.animationName==='dj9251-ai-content-enter'&&!modal.classList.contains('dj887-ai-closing'))modal.style.removeProperty('will-change');
   });
   function exit(){
-    if(modal.classList.contains('dj887-ai-closing')){
-      finishClose();return;
-    }
+    if(modal.classList.contains('dj887-ai-closing'))return;
     abort?.abort();abort=null;
     if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}
     if(!modal.open)return;
@@ -161,9 +160,23 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
       // dialog blocking the map after a close tap. No delayed top layer.
       if(keyboardAdjusted||modal.dataset.djAiKeyboard==='true'){finishClose();return;}
       modal.classList.add('dj887-ai-closing');
-      // Browser-owned animation, without per-frame DOM style mutations.
-      closeTimer=window.setTimeout(finishClose,350);
+      // Inline important opacity owns the painted closing frames, even under
+      // legacy production CSS. Start the clock on the first delivered frame.
       fadeContent(false);
+      modal.style.setProperty('animation','none','important');
+      modal.style.setProperty('opacity','1','important');
+      closeTimer=window.setTimeout(finishClose,1200);
+      let last=null,elapsed=0;
+      const paint=now=>{
+        if(!modal.open||!modal.classList.contains('dj887-ai-closing'))return;
+        if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
+        last=now;
+        const p=Math.min(1,elapsed/300);
+        modal.style.setProperty('opacity',String(1-p*p*(3-2*p)),'important');
+        if(p<1)closeFrame=window.requestAnimationFrame(paint);
+        else finishClose();
+      };
+      closeFrame=window.requestAnimationFrame(paint);
       return;
     }
     modal.classList.add('dj887-ai-closing');
