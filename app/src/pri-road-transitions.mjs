@@ -16,6 +16,25 @@ const color=(p,policy)=>{
 const key=p=>JSON.stringify(p.slice(0,2)); // exact endpoint match only
 const meters=(a,b)=>Math.hypot((b[0]-a[0])*111195*Math.cos((a[1]+b[1])*Math.PI/360),(b[1]-a[1])*111195);
 const interpolate=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+const roadName=e=>String(e.feature.properties?.name||'').trim().replace(/\s+/g,'');
+const direction=(e,k)=>{
+ const points=e.a===k?e.coordinates:[...e.coordinates].reverse(),p=points[0];
+ const q=points.find(x=>key(x)!==key(p));if(!q)return null;
+ const dx=(q[0]-p[0])*Math.cos(p[1]*Math.PI/180),dy=q[1]-p[1],n=Math.hypot(dx,dy);
+ return n?[dx/n,dy/n]:null;
+};
+// At an actual multi-way junction only a unique mutual, nearly straight,
+// same-named road continuation is safe to blend. Other arms retain grade.
+function continuation(entry,k,list){
+ const others=list.filter(x=>x!==entry&&x.feature!==entry.feature);
+ if(list.length===2)return others[0]||null;
+ const n=roadName(entry),d=direction(entry,k);
+ if(!n||!d||/^(이름없는도로|미등록|도로)$/.test(n))return null;
+ const candidates=others.filter(x=>roadName(x)===n).map(x=>{
+  const v=direction(x,k);return {x,dot:v?d[0]*v[0]+d[1]*v[1]:1};
+ }).filter(x=>x.dot<-.92).sort((a,b)=>a.dot-b.dot);
+ return candidates.length===1?candidates[0].x:null;
+}
 export function roadEndpointTransitions(collection,{policy=false,speed=false}={}){
  const ends=new Map(),entries=[];
  for(const feature of collection.features||[]){
@@ -36,8 +55,9 @@ export function roadEndpointTransitions(collection,{policy=false,speed=false}={}
  for(const e of entries){
   const junction=k=>{
    const list=ends.get(k);
-   if(list?.length!==2||list[0].feature===list[1].feature)return null;
-   const other=list.find(x=>x!==e);
+   if(!list||list.length<2)return null;
+   const other=continuation(e,k,list);
+   if(!other||continuation(other,k,list)!==e)return null;
    return other&&hex(other.c)!==hex(e.c)?mix(e.c,other.c,.5):null;
   };
   const left=junction(e.a),right=junction(e.b);
@@ -46,21 +66,23 @@ export function roadEndpointTransitions(collection,{policy=false,speed=false}={}
   for(let i=1;i<points.length;i++)dist.push(dist.at(-1)+meters(points[i-1],points[i]));
   const length=dist.at(-1);
   if(length<=0)continue;
-  const span=Math.min(3,length/3),steps=12;
+  const span=Math.min(5,length/4),steps=16;
   const at=d=>{
    if(d<=0)return points[0];if(d>=length)return points.at(-1);
    let i=1;while(i<dist.length-1&&dist[i]<d)i++;
    return interpolate(points[i-1],points[i],(d-dist[i-1])/(dist[i]-dist[i-1]||1));
   };
-  const cuts=[0,length,...dist];
+  const cuts=[0,length];
   for(let i=1;i<=steps;i++){if(left)cuts.push(span*i/steps);if(right)cuts.push(length-span*i/steps);}
   const sorted=[...new Set(cuts)].sort((a,b)=>a-b);
   const pieces=[];
   for(let i=1;i<sorted.length;i++){
    const a=sorted[i-1],b=sorted[i];if(b-a<1e-7)continue;
    const mid=(a+b)/2;
-   const c=left&&mid<span?mix(left,e.c,mid/span):right&&mid>length-span?mix(e.c,right,(mid-length+span)/span):e.c;
-   pieces.push({type:'Feature',geometry:{type:'LineString',coordinates:[at(a),at(b)]},properties:{...e.feature.properties,renderColor:hex(c)}});
+   const ease=t=>t*t*(3-2*t);
+   const c=left&&mid<span?mix(left,e.c,ease(mid/span)):right&&mid>length-span?mix(e.c,right,ease((mid-length+span)/span)):e.c;
+   const coordinates=[at(a),...points.filter((_,i)=>dist[i]>a&&dist[i]<b),at(b)];
+   pieces.push({type:'Feature',geometry:{type:'LineString',coordinates},properties:{...e.feature.properties,renderColor:hex(c)}});
   }
   if(!output.has(e.feature))output.set(e.feature,new Map());
   output.get(e.feature).set(points,pieces);
