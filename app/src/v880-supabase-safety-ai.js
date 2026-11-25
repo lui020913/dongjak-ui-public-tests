@@ -108,22 +108,21 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
   const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches||app?.classList.contains('dj-reduced-animation');
   // A keyboard-adjusted native top layer must release immediately on close:
   // mobile viewport/focus transitions can starve both rAF and JS timers.
-  // The ordinary AI page still uses one visible compositor content fade.
+  // The ordinary AI page dissolves as a complete surface over the live map.
   const keyboardObserver=new MutationObserver(records=>{
     if(modal.open&&(modal.dataset.djAiKeyboard==='true'||records.some(r=>r.oldValue==='true')))keyboardAdjusted=true;
   });
   keyboardObserver.observe(modal,{attributes:true,attributeFilter:['data-dj-ai-keyboard'],attributeOldValue:true});
   function stopContentMotion(){
-    layout.style.removeProperty('animation');
-    layout.style.removeProperty('transition');
-    layout.style.removeProperty('will-change');
+    for(const node of [modal,layout])for(const prop of ['animation','transition','will-change'])node.style.removeProperty(prop);
   }
   function fadeContent(opening){
-    layout.style.setProperty('transition','none','important');
-    layout.style.setProperty('will-change','opacity','important');
-    layout.style.setProperty('animation',opening
-      ?'dj9251-ai-content-enter 300ms cubic-bezier(.25,.20,.40,1) both'
-      :'dj9251-ai-content-leave 260ms ease-in both','important');
+    layout.style.setProperty('animation','none','important');
+    modal.style.setProperty('transition','none','important');
+    modal.style.setProperty('will-change','opacity','important');
+    modal.style.setProperty('animation',opening
+      ?'dj9251-ai-content-enter 350ms cubic-bezier(.25,.20,.40,1) both'
+      :'dj9251-ai-content-leave 300ms ease-in both','important');
   }
   function setStatus(message){status.textContent=message;}
   syncProfile();
@@ -141,10 +140,10 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     try{if(modal.open)modal.close();}
     finally{stopContentMotion();modal.classList.remove('dj887-ai-closing');}
   }
-  layout.addEventListener('animationend',event=>{
-    if(event.target!==layout)return;
+  modal.addEventListener('animationend',event=>{
+    if(event.target!==modal)return;
     if(event.animationName==='dj9251-ai-content-leave'&&modal.classList.contains('dj887-ai-closing'))finishClose();
-    if(event.animationName==='dj9251-ai-content-enter'&&!modal.classList.contains('dj887-ai-closing'))layout.style.removeProperty('will-change');
+    if(event.animationName==='dj9251-ai-content-enter'&&!modal.classList.contains('dj887-ai-closing'))modal.style.removeProperty('will-change');
   });
   function exit(){
     if(modal.classList.contains('dj887-ai-closing')){

@@ -11,6 +11,8 @@ export const PRIMARY_PANELS=['route-panel','participation-panel','news-panel','m
 export const TRANSIENT_PANELS=['overview-sheet','transport-sheet','detail-sheet','entry-sheet','night-visibility-float','map-safety-controls','map-advanced-controls','dj-mobile-utilities','dj832-data-sheet','dj833-weather-sheet','dj833-night-modal','dj832-info-sheet','dj832-feature-sheet','dj-map-settings','dj-app-about','version-history-modal','route-map-card','nav-live-card','route-pick-hint','map-gesture-guide','ped-tools-panel','djNext-layer-panel','djNext-permissions','dj854-weather-sheet'];
 const visible=(el)=>{
   if(!el||el.hidden||el.closest?.('[hidden]')||el.getAttribute?.('aria-hidden')==='true')return false;
+  if(el.dataset?.djTabOutgoing==='true')return false;
+  if(el.dataset?.dj810Animating==='closing'&&el.dataset?.djWindowMotionKind==='fade')return false;
   const style=el.ownerDocument?.defaultView?.getComputedStyle?.(el);
   return !style||(style.display!=='none'&&style.visibility!=='hidden'&&(!el.getClientRects||el.getClientRects().length>0));
 };

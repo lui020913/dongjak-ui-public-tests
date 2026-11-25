@@ -39,7 +39,7 @@ export function installCoordinatedShell(doc=document,win=window){
  label.hidden=true;
  const isIdleMap=()=>app.dataset.tab==='map'&&app.dataset.djPriVisible!=='true'&&!hasOpenMapWindow(doc,app)
    &&app.dataset.dj860AutoResolved==='true'&&app.dataset.djHudGuideHandoff!=='true'
-   &&!doc.querySelector('#map-startup-overlay:not([hidden]),#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden])');
+   &&!doc.querySelector('#map-startup-overlay:not([hidden]),#dj860-onboarding:not([hidden]),#map-gesture-guide:not([hidden]):not([data-dj810-animating="closing"])');
  const showTip=()=>{
    if(hideTimer){win.clearTimeout(hideTimer);hideTimer=0;}
    if(app.dataset.djUserTipDismissed==='true'||app.dataset.djPriVisible==='true')return;
@@ -90,7 +90,7 @@ export function installCoordinatedShell(doc=document,win=window){
  const panelObserver=new MutationObserver(records=>{
    if(records.some(r=>r.type==='attributes'?surfaceIds.has(r.target.id):[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&(surfaceIds.has(n.id)||n.matches?.('.dj-place-detail-popup')||[...surfaceIds].some(id=>n.querySelector?.('#'+id))))))sync();
  });
- panelObserver.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','aria-hidden','class']});
+ panelObserver.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','aria-hidden','class','data-dj810-animating']});
  observers.push(panelObserver);
  app.addEventListener('transitionend',sync,true);
  app.addEventListener('animationend',sync,true);

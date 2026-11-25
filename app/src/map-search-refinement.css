@@ -103,3 +103,12 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
 @layer native-scroll-chrome {
  #app #map-quick-search-dropdown #map-quick-search-close{flex:0 0 36px!important;width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;min-height:36px!important;max-height:36px!important;aspect-ratio:1!important;border-radius:50%!important;box-sizing:border-box!important;padding:0!important;display:grid!important;place-items:center!important;transform:none!important;scale:1!important;}
 }
+
+@keyframes djLiveMapWindowEnter{from{opacity:0}to{opacity:1}}
+@keyframes djLiveMapWindowLeave{from{opacity:1}to{opacity:0}}
+@layer native-scroll-chrome {
+ @media(max-width:699px) and (prefers-reduced-motion:no-preference){
+  #app:not(.dj-reduced-animation) #map-quick-search-dropdown.dj871-search-entering:not(.dj871-search-leaving){animation:djLiveMapWindowEnter 350ms cubic-bezier(.25,.20,.40,1) both!important;transform:none!important;translate:none!important;}
+  #app:not(.dj-reduced-animation) #map-quick-search-dropdown.dj871-search-leaving:not([hidden]){animation:djLiveMapWindowLeave 300ms ease-in both!important;transform:none!important;translate:none!important;pointer-events:none!important;}
+ }
+}

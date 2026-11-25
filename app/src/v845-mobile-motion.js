@@ -60,7 +60,7 @@ export function installV845ToolbarFade(doc=document,win=window){
     if(!node||observed.has(node))return;
     observed.add(node);
     const ob=new MutationObserver(schedule);
-    ob.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open']});
+    ob.observe(node,{attributes:true,attributeFilter:['hidden','class','data-tab','data-search-open','data-dj810-animating']});
     observers.push(ob);
   };
   observe(app);
