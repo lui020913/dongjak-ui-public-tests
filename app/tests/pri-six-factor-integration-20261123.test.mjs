@@ -76,8 +76,8 @@ test('spatial estimates use the exact network and unverified bocha candidates ne
  assert.equal(candidates.networkVersion,base.networkVersion);
  assert.equal(candidates.scores.length,224);
  assert.ok(candidates.scores.every(s=>s.score===null));
- assert.equal(candidates.scores.filter(s=>s.width).length,156);
- assert.equal(candidates.scores.filter(s=>s.width?.conditionalMixedRisk!=null).length,156);
+ assert.equal(candidates.scores.filter(s=>s.width).length,160);
+ assert.equal(candidates.scores.filter(s=>s.width?.conditionalMixedRisk!=null).length,160);
  const merged=parseImport(b,parseImport(a,base));
  assert.equal(merged.segments.length,1686);
  assert.equal(merged.segments.filter(s=>observedFactorScore(s,'crossing')!==null).length,a.scores.length);

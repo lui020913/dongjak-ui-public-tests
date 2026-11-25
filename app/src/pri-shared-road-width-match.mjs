@@ -31,7 +31,7 @@ export function matchSharedRoadWidths(base,widthGeo){
 }
 export function enrichSharedCandidate(candidate,widthRow){
  const {id,evidence}=candidate;
- const original=evidence.note.split(' · 실폭도로 RW_SN ')[0].split(' · 도로폭 공간 정합 불확실')[0];
- const widthNote=widthRow?` · 실폭도로 RW_SN ${widthRow.roadWidthId} · 도로 중첩률 ${widthRow.overlapPct}% · 대표 추정폭 ${widthRow.widthM??'미확인'}m · P10~P90 ${widthRow.p10M??'미확인'}~${widthRow.p90M??'미확인'}m · ${widthRow.reliability} · ${widthRow.conditionalMixedRisk===null?'폭 기준 불확실: 조건부 점수 미산정':'혼용 확인 시에만 '+widthRow.conditionalMixedRisk+'점(대표폭 기준 조건부 추정)'+(widthRow.stableWidthBand?'':' · 폭 변동/신뢰도 현장 확인 필요')}`:' · 도로폭 공간 정합 불확실: 미산정';
+ const original=evidence.note.split(' · 실폭도로 RW_SN ')[0].split(' · 도로폭 공간 정합 불확실')[0].split(' · 직각 단면 추정')[0];
+ const widthNote=widthRow?.method==='cross-section'?` · 직각 단면 추정 · 실폭도로 RW_SN ${widthRow.roadWidthIds.join(', ')} · 유효 단면 ${widthRow.validSampleCount}/${widthRow.sampleCount} (${widthRow.coveragePct}%) · 중앙값 ${widthRow.widthM}m · P10~P90 ${widthRow.p10M}~${widthRow.p90M}m · 혼용 확인 시에만 ${widthRow.conditionalMixedRisk}점(조건부 추정) · 현장 확인 필요`:widthRow?` · 실폭도로 RW_SN ${widthRow.roadWidthId} · 도로 중첩률 ${widthRow.overlapPct}% · 대표 추정폭 ${widthRow.widthM??'미확인'}m · P10~P90 ${widthRow.p10M??'미확인'}~${widthRow.p90M??'미확인'}m · ${widthRow.reliability} · ${widthRow.conditionalMixedRisk===null?'폭 기준 불확실: 조건부 점수 미산정':'혼용 확인 시에만 '+widthRow.conditionalMixedRisk+'점(대표폭 기준 조건부 추정)'+(widthRow.stableWidthBand?'':' · 폭 변동/신뢰도 현장 확인 필요')}`:' · 도로폭 공간 정합 불확실: 미산정';
  return {id,score:null,width:widthRow??null,evidence:{note:original+widthNote}};
 }
