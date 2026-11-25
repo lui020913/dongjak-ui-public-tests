@@ -1,4 +1,4 @@
-import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
 import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
@@ -16,6 +16,7 @@ const colors={school:'#3f7a70',civic:'#4f718a',sports:'#986e3e'};
 const sourceClasses=['school','town_hall','police','fire_station','post','library','stadium','swimming','sports_centre','fitness_centre'];
 const featuredNames=['동작구청','국립서울현충원','중앙대학교','숭실대학교','총신대학교'];
 const placeDisplayName=['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''];
+const repurposed=['in',placeDisplayName,['literal',repurposedPoliceNameVariants]];
 const operatingFacility=['!',['in',placeDisplayName,['literal',formerPoliceNameVariants]]];
 const notFeatured=['!', ['any',['in',placeDisplayName,['literal',featuredNames]],
   ['==',['slice',placeDisplayName,0,4],'동작구청']]];
@@ -33,7 +34,7 @@ const civicClassFilter=type=>{
     ['in',['get','class'],['literal',CIVIC_POI_TYPES.sports]],
     ['in',['get','subclass'],['literal',['sports_centre','swimming_pool','fitness_centre','sports_hall']]]];
 };
-export const civicFilter=(type,boundary)=>['all',civicClassFilter(type),notFeatured,operatingFacility,['within',boundary],
+export const civicFilter=(type,boundary)=>['all',(type==='school'?['any',civicClassFilter(type),repurposed]:['all',civicClassFilter(type),['!',repurposed]]),notFeatured,operatingFacility,['within',boundary],
   ['!=',['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''],'']];
 
 function buildIcon(type){
