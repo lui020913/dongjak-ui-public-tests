@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.176",
+  "application_version": "9.2.177",
   "public_work_branch": "main",
-  "purpose": "PR509: Sangdo1 reference boundary follows PRI layer, stronger unassessed road contrast, single mixed-road menu with distinct unscored candidates. Existing scores unchanged; source CI 40/40 passed. Protected Preview and Production QA.",
-  "attempt": 402,
+  "purpose": "PR510: unify institutional protection-gap menu; use only existing policy risk colors and gray unknowns; preserve Sanghyeon school review information in road details without new scores or overlay. Source CI 40/40 passed. Protected Preview and Production QA.",
+  "attempt": 403,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
