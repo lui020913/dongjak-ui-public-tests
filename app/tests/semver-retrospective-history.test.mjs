@@ -67,8 +67,10 @@ test('app UI uses reclassified records and keeps source notes out of MapLibre co
   const renderer=read('src/version-history-v7.js');
   const interfaceText=read('src/version-history-v7.css');
   assert.ok(controller.includes('...RENUMBERED_VERSION_HISTORY'));
-  assert.ok(renderer.includes("record.sourceVersion"));
-  assert.ok(renderer.includes('dj-semver-size'));
+  assert.ok(renderer.includes('record.sourceItems||record.items||[]'));
+  assert.ok(renderer.includes('currentRelease.version'));
+  assert.ok(renderer.includes('historyHighlights'));
+  assert.ok(!renderer.includes("el('span','dj-semver-size'"));
   assert.ok(interfaceText.includes('dj-semver-size'));
   assert.ok(VERSION_POLICY.major&&VERSION_POLICY.minor&&VERSION_POLICY.patch);
   assert.ok(!read('src/release-semver.js').includes('maplibregl'));
