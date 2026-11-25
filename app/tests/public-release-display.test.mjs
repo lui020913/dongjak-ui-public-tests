@@ -20,7 +20,7 @@ test('release history removes only its own internal build number from visible te
  assert.equal(publicReleaseNote('모바일 안정성 개선 (9.2.76)','9.2.76'),'모바일 안정성 개선');
  assert.equal(publicReleaseNote('디자인 변경 (v9.2.76) · 지도 3D','v9.2.76'),'디자인 변경 · 지도 3D');
  assert.equal(publicReleaseNote('7일 날씨와 외부 API 1.2.3','9.2.76'),'7일 날씨와 외부 API 1.2.3');
- assert.ok(read('src/version-history-v7.js').includes('publicReleaseNote(description,record.version)'));
+ assert.ok(read('src/version-history-v7.js').includes('publicReleaseNote(description,currentRelease.version)'));
 });
 test('notes are categorized deterministically and archived text is preserved',()=>{
  assert.deepEqual(CHANGE_TYPE_GROUPS.map(x=>x.id),['major','feature','design','fix']);
@@ -35,7 +35,7 @@ test('notes are categorized deterministically and archived text is preserved',()
  const history=read('src/version-history-v7.js');
  assert.ok(history.includes('buildGenerationCatalog(releases,releaseEdition)'));
  assert.ok(history.includes('CHANGE_TYPE_GROUPS'));
- assert.ok(history.includes('classifyReleaseNote'));
+ assert.ok(history.includes('historyHighlights'));
  assert.equal(history.includes('현재 빌드: '),false);
 });
 
@@ -47,7 +47,7 @@ test('public timeline hides repetitive placeholders and development notes but ke
  assert.equal(cleanHistoryNote('지하철 도착정보 개선 (9.2.91)','9.2.91'),'지하철 도착정보 개선');
  assert.deepEqual(historyHighlights('fix',['커뮤니티 알림창을 열 때 일반 게시물이 함께 표시되는 문제를 수정했습니다.']),['커뮤니티 알림에 일반 게시물이 함께 표시되는 문제를 수정했습니다.']);
  const source=read('src/version-history-v7.js');
- assert.match(source,/if\(record===currentRelease\)continue/);
- assert.match(source,/seen\.has\(keyFor\(first\)\)/);
- assert.match(source,/dj-history-archive/);
+ assert.match(source,/new Set\(\(currentRelease\?\.items/);
+ assert.match(source,/historyHighlights\(type.id,sourceNotes\)/);
+ assert.doesNotMatch(source,/el\('details','dj-edition-patch/);
 });
