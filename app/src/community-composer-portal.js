@@ -35,6 +35,37 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   let wasAppInert=false;
   let initialLayoutHeight=0;
   let dockRestore=null;
+  let fadeFrame=0,fadeTimer=0,fadeGeneration=0;
+  function cancelMapFade(){
+    fadeGeneration++;
+    if(fadeFrame)win.cancelAnimationFrame(fadeFrame);
+    if(fadeTimer)win.clearTimeout(fadeTimer);
+    fadeFrame=fadeTimer=0;
+    if(root){delete root.dataset.dj810Animating;for(const key of ['opacity','animation','transition','will-change'])root.style.removeProperty(key);}
+  }
+  // The complete report is the only fading layer. The live map and its
+  // chrome stay painted beneath it; no descendant receives its own fade.
+  function fadeMap(opening,done=()=>{}){
+    if(!root||root.hidden){done();return;}
+    cancelMapFade();
+    const generation=fadeGeneration;
+    const reduced=win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches||doc.getElementById('app')?.classList.contains('dj-reduced-animation');
+    if(reduced){done();return;}
+    root.dataset.dj810Animating=opening?'opening':'closing';
+    for(const [key,value] of [['animation','none'],['transition','none'],['will-change','opacity'],['opacity',opening?'0':'1']])root.style.setProperty(key,value,'important');
+    let last=null,elapsed=0;
+    const finish=()=>{if(generation!==fadeGeneration)return;cancelMapFade();done();};
+    const paint=now=>{
+      if(generation!==fadeGeneration||!root||root.hidden)return;
+      if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
+      last=now;
+      const p=Math.min(1,elapsed/300),eased=p*p*(3-2*p);
+      root.style.setProperty('opacity',String(opening?eased:1-eased),'important');
+      if(p<1)fadeFrame=win.requestAnimationFrame(paint);else finish();
+    };
+    fadeTimer=win.setTimeout(finish,1200);
+    fadeFrame=win.requestAnimationFrame(paint);
+  }
   function hideDock(){
     if(dockRestore)return;
     const node=doc.getElementById('bottom-nav');
@@ -133,6 +164,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   }
   function show({resetScroll=true,mapOrigin=false}={}){
     ensure();
+    cancelMapFade();
     initialLayoutHeight=Math.max(1,Number(win.innerHeight)||Number(doc.documentElement.clientHeight)||1);
     if(form.parentNode!==root)root.append(form);
     form.hidden=false;
@@ -160,6 +192,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     if(!root||root.hidden)return;
     if(form.contains(doc.activeElement))doc.activeElement.blur();
     root.hidden=true;
+    cancelMapFade();
     delete root.dataset.closing;
     form.hidden=true;
     delete doc.body.dataset.djCommunityEditor;
@@ -189,6 +222,6 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.remove();
     root=null;scroll=null;footer=null;helper=null;header=null;
   }
-  return {open:options=>show({resetScroll:true,...options}),prepareClose,close:hide,restoreDesktop,
+  return {open:options=>show({resetScroll:true,...options}),prepareClose,fadeMap,close:hide,restoreDesktop,
     isOpen:()=>Boolean(root&&!root.hidden),get portal(){return root;}};
 }
