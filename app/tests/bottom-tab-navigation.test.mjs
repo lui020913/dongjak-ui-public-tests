@@ -149,7 +149,7 @@ test('mouse-backed HOME icon swipe recovers even when pointerdown was cancelled 
 test('map return keeps only a non-interactive fading page and rapid tab reentry clears it',()=>{
  const handlers=new Map(),timers=new Map(),frames=new Map();let clock=0,key=0;
  const app={dataset:{tab:'mine'}};
- const values=new Map();const panel={dataset:{page:'mine'},hidden:false,classList:{add(){},remove(){}},style:{setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},removeAttribute:k=>{if(k==='data-dj-tab-outgoing')delete panel.dataset.djTabOutgoing;}};
+ const values=new Map([['display','flex'],['visibility','visible']]);const panel={dataset:{page:'mine'},hidden:false,classList:{add(){},remove(){}},style:{getPropertyValue:k=>values.get(k)||'',getPropertyPriority:k=>values.has(k)?'important':'',setProperty:(k,v)=>values.set(k,v),removeProperty:k=>values.delete(k)},removeAttribute:k=>{if(k==='data-dj-tab-outgoing')delete panel.dataset.djTabOutgoing;}};
  const buttons=['map','mine'].map(tab=>({dataset:{tab},disabled:false,isConnected:true,click(){app.dataset.tab=tab;panel.hidden=tab!=='mine'&&panel.dataset.djTabOutgoing!=='true';}}));
  const nav={dataset:{},querySelectorAll:()=>buttons,querySelector:()=>buttons[0]};
  const doc={getElementById:k=>k==='bottom-nav'?nav:null,querySelector:sel=>sel.includes('data-page="mine"')&&!panel.hidden?panel:null};
@@ -160,7 +160,7 @@ test('map return keeps only a non-interactive fading page and rapid tab reentry 
  const tick=t=>{const [id,step]=[...frames.entries()][0];frames.delete(id);clock=t;step(t);};
  tick(500);assert.equal(Number(values.get('opacity')),1,'a delayed first frame must not skip the dissolve');
  tick(540);tick(580);tick(610);assert.equal(Number(values.get('opacity')),.5);
- click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(frames.size,0);
+ click('mine');assert.equal(app.dataset.tab,'mine');assert.equal(panel.hidden,false);assert.equal(panel.dataset.djTabOutgoing,undefined);assert.equal(values.has('opacity'),false);assert.equal(values.has('display'),false,'active display override must not survive outgoing cleanup');assert.equal(values.has('visibility'),false);assert.equal(frames.size,0);
  dispose();
 });
 
