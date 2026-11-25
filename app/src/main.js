@@ -2222,7 +2222,7 @@ function openCommunityComposer(open,{animate=true}={}) {
     motion?.cancel?.(communityForm);
     // No old sheet expansion, parent header movement or native dock sizing.
     document.getElementById('participation-panel')?.classList.remove('dj9256-composing');
-    communityComposerPortal.open();
+    communityComposerPortal.open({mapOrigin:communityComposerOrigin==='map'});
     if(animate)motion?.open(communityComposerPortal.portal);
     setMapReportHitLayer(false);
     setCommunityTopbarBlocked(false);
@@ -2313,7 +2313,8 @@ function selectCommunityLocation(lngLat) {
   communityPickMode=false;
   document.getElementById('community-map-hint').hidden=true;
   document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  navigate('participate',{resumeCommunityDraft:true});
+  if(communityComposerOrigin==='map'&&window.matchMedia('(max-width:699px)').matches)navigate('map',{suppressOverview:true,resumeCommunityDraft:true});
+  else navigate('participate',{resumeCommunityDraft:true});
   openCommunityComposer(true);
   toast('위치를 연결했습니다.');
 }
@@ -2426,7 +2427,11 @@ const pedestrianTools=initPedestrianTools({
   onShowMap:()=>{if(app.dataset.tab!=='map')navigate('map');},
   onReport:()=>{
     const origin=app.dataset.tab==='map'?'map':'community';
-    navigate('participate');communityComposerOrigin=origin;
+    // The mobile report is an independent full-screen portal. Keep the real
+    // map as its underlying page rather than switching to the community feed.
+    if(origin==='map'&&window.matchMedia('(max-width:699px)').matches)navigate('map',{suppressOverview:true});
+    else navigate('participate');
+    communityComposerOrigin=origin;
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});
