@@ -46,10 +46,10 @@ test('base and imported layers stay more-only even with saved preference',()=>{
  assert.match(toolbar,/!MORE_ONLY_KEYS\.has\(f\[0\]\)&&isPrimary/);
  assert.match(toolbar,/parsed\.filter\(k=>!MORE_ONLY_KEYS\.has\(k\)/);
 });
-test('More menu has a visible fixed title and exposes two working utilities',()=>{
+test('More menu has a visible fixed title and retains settings without retired history',()=>{
  assert.doesNotMatch(toolbar,/title\.textContent=key==='map-dong'/);
  assert.match(toolbar,/title\.textContent=''/);
- assert.match(chrome,/전체 업데이트 내역/);assert.match(chrome,/지도 설정/);
+ assert.doesNotMatch(chrome,/전체 업데이트 내역/);assert.match(chrome,/지도 설정/);
  assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 test('close events collapse toolbar and release obsolete highlights',()=>{

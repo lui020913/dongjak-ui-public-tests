@@ -29,7 +29,7 @@ test('More close runs its original handler instead of deferred redispatch',()=>{
 
 test('More quick actions close synchronously before opening their destination',()=>{
   const chrome=read('src/mobile-chrome-v790.js');
-  assert.match(chrome,/dj-mobile-history[\s\S]*?hideMore\(\{immediate:true\}\)[\s\S]*?version-history-trigger/);
+  assert.doesNotMatch(chrome,/dj-mobile-history[\s\S]*?hideMore\(\{immediate:true\}\)[\s\S]*?version-history-trigger/);
   assert.match(chrome,/dj-mobile-settings[\s\S]*?hideMore\(\{immediate:true\}\)[\s\S]*?dj:open-map-settings/);
 });
 

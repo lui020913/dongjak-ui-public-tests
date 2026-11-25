@@ -40,7 +40,7 @@ test('mobile actions reuse existing buttons without changing their parent nodes'
   assert.ok(js.includes("matchMedia('(max-width:1079px), (min-width:1080px) and (max-width:1366px) and (pointer:coarse)')"));
   assert.ok(!js.includes('maplibregl'));
   assert.ok(!js.includes('appendChild(mapToolsToggle)'));
-  assert.ok(js.includes("doc.getElementById('version-history-trigger')?.click()"));
+  assert.ok(!js.includes("doc.getElementById('version-history-trigger')?.click()"));
   assert.doesNotMatch(js, /dj-mobile-weather-location/);
   assert.ok(html.includes('/src/mobile-chrome-v790.css'));
   assert.ok(html.includes('/src/mobile-chrome-v790.js'));
