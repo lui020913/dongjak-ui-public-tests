@@ -90,13 +90,9 @@ import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
-import {installProtectionZoneMap} from './protection-zone-map.js';
-import {installPolicyGapThreeSourceMap} from './policy-gap-3source-map-patch.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
-import {installSangdoSpeedMap} from './sangdo-speed-map.js';
-import {installBochaRoadLayer} from './bocha-road-layer.js';
 import './bocha-road-layer.css';
-import './protection-zone-map.css';
+import './pilot-layer-selection.css';
 import './night-visibility.css';
 import './safety-workspace.css';
 import './night-visibility-panel.css';
@@ -327,6 +323,7 @@ function toast(message) {
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 3400);
 }
+window.addEventListener('dongjak:pilot-layer-enabled',()=>{if(!window.matchMedia('(max-width:699px)').matches)toast('상도1동 시범구역 내 자료만 표시됩니다.');});
 function status(message) { statusEl.textContent = message; }
 
 function getOverviewSnapOffsets() {
@@ -1687,15 +1684,8 @@ installMobileMapControls({app,map});
 map.on('load',()=>{
   // Camera-distance haze is active only in the oblique perspective view.
   installDistantHaze({map,app,themeButton:document.getElementById('theme-toggle')});
-  // Protection-zone overlays and night visibility are mutually exclusive.
-  // Preserve the previously verified safety-workspace handoff; v6.0.13 lost it.
-  let protectionOverlay=null;
-  const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,
-    onActivate:()=>protectionOverlay?.disable({restoreNight:false})});
-  protectionOverlay=installProtectionZoneMap({map,maplibregl,app,nightMode});
-  installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay});
-  installSangdoSpeedMap({map,maplibregl,app});
-  installBochaRoadLayer({map,maplibregl,app});
+  // PRI owns the public protection-gap, speed and shared-road analysis.
+  installNightVisibility({map,maplibregl,app,toast,theme:visualTheme});
   installNearbyPlaceLabels(map,{maplibregl});
   installHangangBridgeLabels(map,{maplibregl});
   installImportantPlaceClick({map,maplibregl});

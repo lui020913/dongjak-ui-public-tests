@@ -16,8 +16,6 @@ const FEATURES = [
   ['base-bus','버스정류장 표시','[data-base-layer="bus"]','bus-stop'],
   ['base-buildings','3D 건물 표시','[data-base-layer="buildings"]','building'],
   ['base-boundary','동작구 경계선 표시','[data-base-layer="boundary"]','boundary'],
-  ['safe-incident','도로 돌발정보','[data-dj-import="road-incidents"]','alert'],
-  ['safe-air','도시환경 관측','[data-dj-import="sdot-environment"]','thermometer'],
   ['safe-accidents','보행사고 다발지역','[data-dj-import="accidents"]','alert-circle'],
   ['safe-cross-survey','상도1동 횡단 지점','[data-dj-import="survey-crosswalk"]','crosswalk'],
   ['safe-cctv','방범·어린이 CCTV','[data-dj-import="cctv-security"]','camera'],
@@ -32,10 +30,6 @@ const FEATURES = [
   ['safe-essentials','약국·편의점','[id="toggle-essentials"]','store'],
   ['safe-public','공공·교육시설','[id="toggle-public-facilities"]','landmark'],
   ['safe-station-access','지하철 출입구·편의시설','[id="toggle-station-accessibility"]','access'],
-  ['safe-zones','어린이·노인 보호구역','[id="protection-zone-toggle"]','school'],
-  ['safe-speed','도로별 제한속도','[id="sangdo-speed-toggle"]','gauge'],
-  ['safe-speed-camera','무인교통단속카메라','[id="sangdo-camera-toggle"]','camera'],
-  ['safe-night-analysis','야간 시야 분석','[id="night-visibility-toggle"]','moon'],
   ['safe-pri','상도1동 PRI 위험도 (야간·사고)','[id="dj-pri-toggle"]','layers'],
   ['safe-accessibility','교통약자 모드','[id="ped-access-toggle"]','access'],
   ['safe-nearby','내 주변 보행정보','[id="ped-nearby-open"]','locate'],
@@ -50,9 +44,6 @@ const FEATURES = [
   ['map-filter-light','조사지점 필터: 조명·시설물','[data-filter="조명·시설물"]','lightbulb'],
   ['map-filter-etc','조사지점 필터: 기타','[data-filter="기타"]','ellipsis'],
   ['safe-team','상도1동 사고 집중 검토','[id="dj-sangdo-team-toggle"]','scan'],
-  ['safe-zone-zoom','상도1동 보호구역 전체 보기','[id="protection-zone-zoom"]','map'],
-  ['safe-speed-zoom','상도1동 제한속도 보기','[id="sangdo-speed-zoom"]','gauge'],
-  ['safe-camera-import','단속카메라 좌표 가져오기','[id="sangdo-camera-import"]','upload'],
   ['safe-outlet-retry','지하철 출구 다시 조회','[id="metro-access-retry"]','refresh'],
   ['safe-clear','추가 보행안전 레이어 모두 끄기','[id="dj-safety-clear-imports"]','eye-off']
 ];
@@ -104,7 +95,6 @@ export const MORE_ONLY_KEYS=new Set(FEATURES.filter(([key,,selector])=>
   key.startsWith('base-')||key.startsWith('live-')||key==='map-road-width'||
   selector.includes('[data-dj-import=')||selector.includes('[data-base-layer=')||
   selector.includes('[data-live-vehicle=')||selector.includes('toggle-')||
-  ['safe-zones','safe-speed','safe-speed-camera','safe-accessibility','safe-team'].includes(key)
 ).map(([key])=>key));
 // Only true visibility controls get on/off switches. These never pin a layer to the top toolbar.
 const VISIBILITY_KEYS=new Set(FEATURES.filter(([key,,selector])=>
@@ -129,7 +119,6 @@ const EXPLANATIONS={
  'safe-cctv':['공개자료에 등록된 방범·어린이보호 CCTV 설치 위치를 확인할 수 있습니다.','설치 위치 참고용으로 실시간 영상·기기 가동 상태·촬영 가능 범위는 확인되지 않습니다.'],
  'safe-crosswalk':['지도 데이터에 등록된 일반 횡단보도를 표시합니다.','표시된 위치는 현장 위치와 다를 수 있습니다. 실제 횡단 여부는 신호와 도로 상황을 확인해야 합니다.'],
  'safe-slope':['지형자료를 바탕으로 추정한 보행로 경사 정보를 표시합니다.','경사도는 실제 현장 측정값과 다를 수 있습니다. 이동 약자에게 적합한 경로를 보장하지 않습니다.'],
- 'safe-zones':['어린이·노인 보호구역으로 등록된 구간의 위치와 경계를 확인합니다.','법정 보호구역의 현재 지정 여부와 상세 범위는 관할 기관의 최신 자료로 재확인해야 합니다.'],
  'safe-elevator':['등록된 지하철 엘리베이터의 위치를 표시합니다.','실시간 운행 상태·고장 여부는 확인되지 않습니다.'],
  'safe-aed':['공공 데이터에 등록된 자동심장충격기(AED) 설치 위치를 표시합니다.','이용 가능 시간이나 실제 설치·운영 여부는 현장 또는 기관에 확인해야 합니다.'],
  'safe-nearby':['현재 위치 주변의 보행정보 안내를 엽니다.','GPS 수신 정확도와 데이터 범위에 따라 주변 정보가 불완전할 수 있습니다.'],
@@ -137,8 +126,6 @@ const EXPLANATIONS={
  'base-bus':['버스정류장 지도 레이어를 켜거나 끕니다.','정류장 명칭과 위치는 확대 수준 및 데이터 범위에 따라 달라질 수 있습니다.'],
  'base-buildings':['지도 위 건물의 3D 표현을 켜거나 끕니다.','건물 형상과 높이는 지도 데이터 기반의 시각화입니다.'],
  'base-boundary':['동작구의 행정 경계 표시를 켜거나 끕니다.','행정구역 표시는 참고용이며 법적 경계 확인을 대신하지 않습니다.'],
- 'safe-incident':['도로 교통사고·통제 등 돌발정보 레이어를 켜거나 끕니다.','실시간 수집이 지연되거나 제공되지 않으면 최신 상황과 다를 수 있습니다.'],
- 'safe-air':['지역 환경 관측값을 확인합니다.','센서 위치와 측정시각을 확인해 해석해야 하며 현 위치의 실측값은 아닙니다.'],
  'safe-cross-survey':['상도1동의 조사 횡단 지점 후보를 표시합니다.','현장 검증 전 조사자료이므로 정식 횡단보도로 단정하지 마십시오.'],
  'safe-parking':['불법주정차 단속 CCTV 설치지점을 표시합니다.','단속 가동 여부나 실시간 감시 여부는 제공되지 않습니다.'],
  'safe-other-cctv':['기타·다목적 CCTV 설치위치를 표시합니다.','실제 촬영범위·정상 작동 여부는 확인되지 않습니다.'],
@@ -147,9 +134,6 @@ const EXPLANATIONS={
  'safe-essentials':['약국·편의점 등 주변 편의시설을 표시합니다.','영업시간과 실제 운영 여부는 별도로 확인해야 합니다.'],
  'safe-public':['공공·교육시설 정보를 표시합니다.','시설 운영시간·출입 가능 여부는 별도 확인이 필요합니다.'],
  'safe-station-access':['지하철역 출입구·접근 관련 시설을 표시합니다.','확대 수준에 따라 출입구 및 시설 표시 여부가 달라집니다.'],
- 'safe-speed':['등록된 도로 제한속도 구간을 표시합니다.','실제 도로의 교통표지와 최신 법정 제한속도를 우선하십시오.'],
- 'safe-speed-camera':['무인교통단속카메라 등록 위치를 표시합니다.','가동 상태와 단속 조건은 제공되지 않습니다.'],
- 'safe-night-analysis':['조명 및 지형·건물 자료를 바탕으로 야간 시야를 분석합니다.','계산 결과는 시뮬레이션이며 실제 현장 조도·시인거리 측정값이 아닙니다.'],
  'safe-pri':['상도1동 25m 도로구간의 야간 시야 및 사고다발지 안전점수, 두 지수의 시범 평균을 볼 수 있습니다.','100점이 상대적으로 양호한 방향입니다. 사고다발지 미선정 구간은 임시 100점이며 무사고를 의미하지 않습니다. 2개 지수 평균은 최종 6개 PRI가 아닙니다.'],
  'safe-accessibility':['교통약자 보행 관련 정보를 강조합니다.','현장의 모든 단차·장애물·엘리베이터 가동 상태를 보증하지 않습니다.'],
  'safe-report':['보행불편 제보 화면을 엽니다.','제보 접수와 처리상태는 해당 기능이 제공하는 확인 화면을 참고하십시오.'],
@@ -162,9 +146,6 @@ const EXPLANATIONS={
  'map-filter-light':['조명·시설물 조사지점만 표시합니다.','현재 등록된 데이터에 따라 표시 지점이 없을 수 있습니다.'],
  'map-filter-etc':['기타 조사지점만 표시합니다.','현재 등록된 데이터에 따라 표시 지점이 없을 수 있습니다.'],
  'safe-team':['상도1동 사고 관련 집중 검토 메뉴를 엽니다.','분석 자료의 품질과 최신성을 확인한 뒤 해석하십시오.'],
- 'safe-zone-zoom':['상도1동 보호구역이 보이도록 지도를 이동합니다.','현재 지정 경계와는 차이가 있을 수 있습니다.'],
- 'safe-speed-zoom':['상도1동 제한속도 구간이 보이도록 지도를 이동합니다.','현장 교통표지와 최신 속도제한 정보를 우선합니다.'],
- 'safe-camera-import':['단속카메라 좌표 파일을 가져오는 관리 기능입니다.','업로드한 좌표 형식과 출처를 확인하십시오.'],
  'safe-outlet-retry':['지하철 출입구 데이터를 다시 요청합니다.','데이터 제공기관 또는 네트워크 오류 시 계속 실패할 수 있습니다.'],
  'safe-clear':['보행안전 추가 레이어를 한 번에 끕니다.','원본 자료를 삭제하지 않고 화면의 표시 설정만 변경합니다.']
 };
