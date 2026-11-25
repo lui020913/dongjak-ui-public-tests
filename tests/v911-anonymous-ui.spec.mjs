@@ -837,6 +837,9 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
  // Use the same real content sampler for direct tab-to-tab and map return.
  await enter(page,'news-panel','news');
  await expect(page.locator('#mine-panel')).toBeHidden();
+ await enter(page,'participation-panel','participate');
+ await enter(page,'news-panel','news');
+ await expect(page.locator('#participation-panel')).toBeHidden();
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
  // The older moving selection plate is intentionally hidden. Active icon

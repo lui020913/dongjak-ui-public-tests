@@ -126,7 +126,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
         'text-font':['Noto Sans Regular','Open Sans Regular'],
         'text-size':['interpolate',['linear'],['zoom'],12.5,11,15,13,18,14.5],
         'text-variable-anchor':['bottom','top','right','left'],
-        'text-radial-offset':1.55,'text-padding':7,
+        'text-radial-offset':1.20,'text-padding':7,
         'text-max-width':14,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
         // There are only five: never suppress a requested name because a road or POI collides.
@@ -186,7 +186,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
     try{
       map.setLayoutProperty?.(FEATURED_PLACES_LOGOS,'icon-size',featuredLogoSizeExpression(mode));
       // A variable-anchor label can choose another side near the screen edge.
-      map.setLayoutProperty?.(nameId,'text-radial-offset',mode==='mobile'?1.45:1.7);
+      map.setLayoutProperty?.(nameId,'text-radial-offset',mode==='mobile'?1.12:1.35);
       lastLogoMode=mode;
     }catch(error){console.warn('[대표시설 로고] 반응형 크기 적용 실패',error);}
   }
@@ -217,7 +217,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
                 'text-font':['Noto Sans Regular','Open Sans Regular'],
                 'text-size':['interpolate',['linear'],['zoom'],12.5,11,15,13,18,14.5],
                 // The SSU label is centered above its own icon, both at one lng/lat.
-                'text-anchor':'bottom','text-offset':[0,-1.45],
+                'text-anchor':'bottom','text-offset':[0,-1.15],
                 'text-allow-overlap':true,'text-ignore-placement':true,
                 'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport',
                 'icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport',

@@ -95,7 +95,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
           'text-field':['step',['zoom'],'',safety?15.5:16.2,['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],'']],
           'text-font':['Noto Sans Regular','Open Sans Regular'],
           'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
-          'text-anchor':'top','text-offset':[0,1.8],'text-max-width':15,
+          'text-anchor':'top','text-offset':[0,1.25],'text-max-width':15,
           'text-optional':true,'text-allow-overlap':false,'text-padding':3,'symbol-sort-key':safety?0:isSchool?4:3
         },paint:{'text-color':['case',['==',['get','class'],'school'], '#315f54','#34566c'],
           'text-halo-color':'#ffffff','text-halo-width':1.7}});

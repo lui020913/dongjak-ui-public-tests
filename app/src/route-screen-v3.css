@@ -146,3 +146,6 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 @media(min-width:700px){
   :host{display:none!important}
 }
+/* Shadow DOM has its own cascade; preserve scrolling without indicators. */
+:host,*{scrollbar-width:none!important;scrollbar-gutter:auto!important;}
+*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}

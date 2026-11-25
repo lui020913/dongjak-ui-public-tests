@@ -20,7 +20,7 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,departingStyles=[],replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
@@ -35,11 +35,8 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    if(page.id==='dj-route-v3'){if(app.dataset.tab!=='route')page.hidden=true;page.inert=false;}
    else if(page.dataset.page!==app.dataset.tab)page.hidden=true;
    departing.removeAttribute?.('data-dj-tab-outgoing');
-   departing.style?.removeProperty?.('z-index');
-   departing.style?.removeProperty?.('display');
-   departing.style?.removeProperty?.('visibility');
-   departing.style?.removeProperty?.('opacity');
-   departing.style?.removeProperty?.('pointer-events');
+   for(const [key,value,priority] of departingStyles){if(value)departing.style.setProperty(key,value,priority);else departing.style?.removeProperty?.(key);}
+   departingStyles=[];
    departing=null;
   }
  }
@@ -89,7 +86,12 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
   if(retain&&app.dataset.tab===destination){
    departing=previous;
+   departingStyles=['z-index','display','visibility','opacity','pointer-events','animation','transition','will-change'].map(key=>[key,previous.style.getPropertyValue?.(key)||'',previous.style.getPropertyPriority?.(key)||'']);
+   win.DongjakWindowMotion?.cancel?.(previous);
    previous.hidden=false;
+   previous.style.setProperty('animation','none','important');
+   previous.style.setProperty('transition','none','important');
+   previous.style.setProperty('will-change','opacity','important');
    previous.style.setProperty('display','flex','important');
    previous.style.setProperty('visibility','visible','important');
    previous.style.setProperty('z-index','6999','important');

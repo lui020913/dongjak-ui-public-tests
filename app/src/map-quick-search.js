@@ -1,3 +1,4 @@
+import {facilitySearchGlyph} from './v912-poi-presentation.js';
 import {normalizeFacilityRecord} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
@@ -6,7 +7,7 @@ import {searchTransportSnapshot} from './transport-map.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
 import {queryOfficialPlaces} from './seoul-official-facilities.js';
 import {officialSearchSnapshot} from './seoul-official-facilities.js';
-import {searchResultSubtitle,facilityRoadAddress,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,nearbySearchResults,fetchNearbyOfficialPlaces,formatFacilityDistance,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
+import {displayFacilityCategory,searchResultSubtitle,facilityRoadAddress,searchResultKey,searchPlaceKind,captureVisibleFacilityArea,visibleFacilityResults,groupVisibleFacilities,fetchVisibleOfficialPlaces,nearbySearchResults,fetchNearbyOfficialPlaces,formatFacilityDistance,MIN_VISIBLE_FACILITY_ZOOM} from './map-search-refinement.js';
 import {searchNamedOsm} from './v875-osm-name-search.js';
 import {normalizeKoreanSearch, koreanSearchScore, rankKoreanSearch} from './korean-search.js';
 import {recentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
@@ -341,7 +342,9 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       const markerRoot=document.createElement('div');markerRoot.className='dj-search-marker-anchor';
       const pin=document.createElement('button');pin.type='button';pin.className='dj-search-result-pin';pin.dataset.kind=searchPlaceKind(place);
       pin.title=place.name||'검색 장소';pin.setAttribute('aria-label',pin.title);
-      pin.textContent=searchPlaceKind(place)==='bus'?'버스':searchPlaceKind(place)==='subway'?'역':'•';
+      const glyph=facilitySearchGlyph(displayFacilityCategory(place),searchPlaceKind(place));
+      pin.style.setProperty('--dj-search-pin-color',glyph.color);
+      pin.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+glyph.path+'"/></svg>';
       pin.addEventListener('pointerdown',event=>event.stopPropagation());
       pin.addEventListener('click',event=>{event.stopPropagation();makeResultButton(place).click();});
       markerRoot.append(pin);

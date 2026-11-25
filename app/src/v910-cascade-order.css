@@ -1,2 +1,9 @@
+
+/* Hide browser scroll chrome without changing scroll containers or input behavior. */
+@layer native-scroll-chrome, request-completion, dj-tablet-unified;
+@layer native-scroll-chrome {
+ html,body,body *,body *::before,body *::after{scrollbar-width:none!important;scrollbar-gutter:auto!important;}
+ html::-webkit-scrollbar,body::-webkit-scrollbar,body *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}
+}
 /* Important declarations in the request layer must precede older tablet layers. */
 @layer request-completion, dj-tablet-unified;

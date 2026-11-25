@@ -3,6 +3,8 @@ export const POI_GROUPS=Object.freeze([['safety','안전시설','Safety'],['publ
 export const DEFAULT_POI_GROUPS=Object.freeze(['safety','public']);
 const TYPES={'약국':['safety','pharmacy'],'동물약국':['convenience','pharmacy'],'병원':['safety','hospital'],'의원':['safety','hospital'],'응급실':['safety','emergency'],'AED':['safety','emergency'],'경찰서':['safety','police'],'소방서':['safety','fire'],'공공기관':['public','civic'],'주민센터':['public','civic'],'학교':['public','school'],'어린이집':['public','school'],'도서관':['public','library'],'복지시설':['public','civic'],'체육시설':['public','sports'],'공원':['public','park'],'편의점':['convenience','store'],'마트':['convenience','store'],'은행':['convenience','bank'],'화장실':['convenience','toilet'],'관광명소':['convenience','park'],'음식점':['food','food'],'휴게음식점':['food','food'],'제과점':['food','food'],'카페':['cafe','cafe']};
 const GLYPHS={
+ bus:['#28699e','M5 4h14v14H5Z M5 11h14 M8 18v3M16 18v3 M8 15h1M15 15h1'],
+ subway:['#5f5496','M6 4h12v14H6Z M6 10h12 M8 18l-2 3M16 18l2 3 M9 14h1M14 14h1'],
  pharmacy:['#18856c','M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6Z'],
  hospital:['#b94c4c','M5 21V4h14v17M3 21h18M9 8h6M12 5v6M9 15h6v6'],
  emergency:['#b43f4c','M3 12h4l3-6 4 12 3-6h4'],
@@ -21,6 +23,11 @@ const GLYPHS={
  other:['#758451','M12 4v14M8 8h8M8 14h8']
 };
 export function facilityPresentation(category){const [group,icon]=TYPES[String(category||'').trim()]||['convenience','other'];return {group,icon,priority:group==='safety'?0:group==='public'?10:20};}
+export function facilitySearchGlyph(category,kind){
+ const aliases={'대학교':'학교','유치원':'학교','의료시설':'병원','치과':'병원','정원':'공원','주민시설':'주민센터','제과점':'음식점','시장':'마트','상점':'편의점','ATM':'은행'};
+ const type=kind==='bus'||kind==='subway'?kind:facilityPresentation(aliases[category]||category).icon;
+ const [color,path]=GLYPHS[type]||GLYPHS.other;return {type,color,path};
+}
 export const iconName=kind=>'dj912-poi-'+kind;
 export function registerFacilityIcons(map){
  if(typeof document==='undefined')return;
