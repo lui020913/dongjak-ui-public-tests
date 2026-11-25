@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.174",
+  "application_version": "9.2.175",
   "public_work_branch": "main",
-  "purpose": "PR506: remove unnecessary public patch and internal development records; retain concise latest change and curated four-category highlights, data sources, and original source ledger. Source CI passed; require protected mobile QA.",
-  "attempt": 399,
+  "purpose": "PR507: add 432 estimated crossing access scores from 50/100m road-class buffers, 224 mixed-road survey candidates, map layer visibility recovery and observed-only composite PRI. Include cumulative PR506 update history cleanup. Source CI 40/40 passed; require protected mobile QA.",
+  "attempt": 400,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
