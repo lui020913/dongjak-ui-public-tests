@@ -17,7 +17,7 @@ async function ready(page,{keepTour=false}={}){
    const menu=page.locator('#dj-install-menu');
    if(!await page.evaluate(()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches))await expect(menu).toBeAttached({timeout:20000});
    if(await menu.isVisible()){
-     await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
+     await expect(menu.locator('.dj-install-choice')).toHaveCount(5);
      await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();
      await expect(menu).toBeHidden();
    }
@@ -975,7 +975,7 @@ test('phone browser install choices are visible and PWA hides them',{tag:'@phone
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('#dj-install-menu');
  await expect(menu).toBeVisible({timeout:20000});
- await expect(menu.locator('.dj-install-choice')).toHaveCount(4);
+ await expect(menu.locator('.dj-install-choice')).toHaveCount(5);
  await expect(menu.locator('.dj-install-logo')).toBeVisible();
  const originalViewport=page.viewportSize();
  for(const width of [320,375,390,430]){
