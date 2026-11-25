@@ -1,0 +1,74 @@
+name: iPhone simulator film — no deployment
+on:
+  push:
+    branches: ['tools/app-film-recorder']
+    paths: ['film/ios-record.mjs', 'film/scenes/**', '.github/workflows/ios-film-recorder.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: isolated-ios-film
+  cancel-in-progress: false
+jobs:
+  record:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/tools/app-film-recorder'
+    runs-on: macos-26
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare iPhone 15 Pro simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcrun simctl list runtimes available
+          runtime="$(xcrun simctl list runtimes -j | jq -er '[.runtimes[]|select(.isAvailable and (.identifier|contains("iOS")))]|sort_by(.version|split(".")|map(tonumber))|last|.identifier')"
+          type="com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro"
+          xcrun simctl list devicetypes -j | jq -e --arg t "$type" '.devicetypes|any(.identifier==$t)'
+          udid="$(xcrun simctl create 'Dongjak Film iPhone 15 Pro' "$type" "$runtime")"
+          echo "SIM_UDID=$udid" >> "$GITHUB_ENV"
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
+          xcrun simctl status_bar "$udid" clear
+      - name: Install Safari automation
+        run: |
+          npm install -g appium@3
+          appium driver install xcuitest@12.12.5
+          appium --version
+          command -v ffprobe || brew install ffmpeg
+      - name: Record real iOS screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p film-ios-output
+          appium --address 127.0.0.1 --port 4723 > "$RUNNER_TEMP/appium-film.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4723/status >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4723/status
+          node --check film/ios-record.mjs
+          node film/ios-record.mjs film/scenes/active.json
+      - name: Capture diagnostic log
+        if: failure()
+        run: |
+          mkdir -p film-ios-output
+          if [ -f "$RUNNER_TEMP/appium-film.log" ]; then tail -n 200 "$RUNNER_TEMP/appium-film.log" > film-ios-output/appium-diagnostic.txt; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iphone-simulator-film
+          path: film-ios-output/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Shut down isolated simulator
+        if: always()
+        run: |
+          if [ -n "${SIM_UDID:-}" ]; then xcrun simctl shutdown "$SIM_UDID" || true; xcrun simctl delete "$SIM_UDID" || true; fi
