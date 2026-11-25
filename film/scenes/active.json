@@ -61,14 +61,14 @@
       "selector": ".dj-place-detail-popup .dj-place-route-end"
     },
     {
-      "action": "visible",
-      "selector": "#dj-route-v3 #v3-end",
-      "timeout": 20000
-    },
-    {
       "action": "contains",
       "selector": "#dj-route-v3 #v3-end",
       "expected": "노량진"
+    },
+    {
+      "action": "visible",
+      "selector": "text=노량진을(를) 목적지로 지정했습니다.",
+      "timeout": 5000
     },
     {
       "action": "wait",
