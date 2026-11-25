@@ -1,4 +1,4 @@
-import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
 import {insideBoundary} from './dongjak-verified-data-layers.js';
@@ -14,7 +14,7 @@ export function officialFeatures(places,boundary){
    const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
-   const name=String(place.name||'').trim();if(!name)continue;
+   const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name))continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
    if(seen.has(key))continue;seen.add(key);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
@@ -27,7 +27,7 @@ export function officialFeatures(places,boundary){
 }
 export const GENERAL_OSM_CATEGORIES=Object.freeze({
  restaurant:'음식점',cafe:'카페',fast_food:'휴게음식점',pharmacy:'약국',
- clinic:'의원',hospital:'병원',library:'도서관',school:'학교',kindergarten:'어린이집',
+ clinic:'의원',hospital:'병원',library:'도서관',school:'학교',kindergarten:'유치원',childcare:'어린이집',
  convenience:'편의점',supermarket:'마트',bakery:'제과점',park:'공원',attraction:'관광명소'
 });
 /** Fallback only: OSM registrations are not Seoul licensing records. */
@@ -56,7 +56,7 @@ export function bboxToOverpass(bbox){
  const [west,south,east,north]=n;
  if(!(west<east&&south<north))throw new Error('invalid bbox');
  const box=[south,west,north,east].map(x=>x.toFixed(5)).join(',');
- return `[out:json][timeout:20];(nwr["amenity"~"^(restaurant|cafe|fast_food|pharmacy|clinic|hospital|library|school|kindergarten)$"](${box});nwr["shop"~"^(convenience|supermarket|bakery)$"](${box});nwr["leisure"="park"](${box});nwr["tourism"="attraction"](${box}););out center tags;`;
+ return `[out:json][timeout:20];(nwr["amenity"~"^(restaurant|cafe|fast_food|pharmacy|clinic|hospital|library|school|kindergarten|childcare)$"](${box});nwr["shop"~"^(convenience|supermarket|bakery)$"](${box});nwr["leisure"="park"](${box});nwr["tourism"="attraction"](${box}););out center tags;`;
 }
 export async function loadOsmGeneralFacilities(bbox,{signal,fetcher=fetch}={}){
  const q=bboxToOverpass(bbox);
