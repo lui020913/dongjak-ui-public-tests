@@ -1477,7 +1477,8 @@ test('category-first release history preserves the actual deployment version in 
  await expect(current).toHaveCount(1);
  await expect(timeline.locator(':scope > .dj-edition-history')).toHaveCount(4);
  await expect(timeline.locator(':scope > .dj-edition-history[open]')).toHaveCount(0);
- await expect(timeline.locator('.dj-history-archive[open]')).toHaveCount(0);
+ await expect(timeline.locator('.dj-edition-patch')).toHaveCount(0);
+ await expect(timeline.locator('.v707-release')).toHaveCount(1);
  expect(await timeline.locator('.v707-release-items li').allTextContents()).not.toContain('모바일 안정성 및 상호작용 개선');
  // Historical records still carry unchanged operational SemVer in data-version;
  // the public button and user-visible pre-release name remain simplified.
