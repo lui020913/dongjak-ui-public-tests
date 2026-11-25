@@ -82,7 +82,7 @@ test('community composer is isolated from legacy parent sheet and keyboard layou
  const ui=read('src/main.js');
  const portal=read('src/community-composer-portal.js');
  assert.match(ui,/createCommunityComposerPortal\(communityForm\)/);
- assert.match(ui,/communityComposerPortal\.open\(\{mapOrigin:communityComposerOrigin==='map',animate\}\)/);
+ assert.match(ui,/communityComposerPortal\.open\(\{animate\}\)/);
  assert.match(ui,/communityComposerPortal\?\.close\(\)/);
  assert.match(portal,/doc\.body\.append\(root\)/);
  assert.match(portal,/root\.append\(form\)/);

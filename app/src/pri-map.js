@@ -254,7 +254,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;
   if(id==='sharedRoad'){
    const ids=new Set((sharedCandidates?.networkVersion===dataset.networkVersion?(sharedCandidates.scores||[]):[]).map(s=>s.id));
-   const source=policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(observedFactorScore(s,'sharedRoad'))]))):displayRisk(displayFeatures(dataset,'sharedRoad'));
+   const source=policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(observedFactorScore(s,'sharedRoad'))]))):EMPTY;
    display={...source,features:source.features.map(f=>({...f,properties:{...f.properties,sharedCandidate:!f.properties.evaluated&&ids.has(f.properties.segmentId)}}))};
   }else display=id?(id==='speed'?speedRiskDisplay(speedSource,policyScope?scopedPolicyFeatures(policyScope).features:[]):id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current6'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current6'))]))):EMPTY):id==='current4'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current4'))]))):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,id))]))):EMPTY)):EMPTY;
   if(id||map.getSource(SOURCE))draw();

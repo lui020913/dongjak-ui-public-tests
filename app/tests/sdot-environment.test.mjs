@@ -37,11 +37,11 @@ test('server endpoint never exposes key and signals not_configured',async()=>{
  const res=await onRequestGet({request:new Request('https://example.com/api/sdot-environment'),env:{}});
  assert.equal(res.status,503);const text=await res.text();assert.doesNotMatch(text,/testSECRETKEY/);
 });
-test('UI has S-DoT toggle and verified-only location file',()=>{
+test('S-DoT public layer stays absent; verified-only research file is retained',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const point=JSON.parse(readFileSync(new URL('../public/data/safety/sdot/dongjak_sdot_locations.geojson',import.meta.url),'utf8'));
- assert.match(html,/data-dj-import="sdot-environment"/);
+ assert.doesNotMatch(html,/data-dj-import="sdot-environment"/);
  assert.deepEqual(point.features,[]);
  const js=readFileSync(new URL('../src/dongjak-verified-data-layers.js',import.meta.url),'utf8');
- assert.match(js,/filteredDistrictPoints\(\{type:'FeatureCollection',features\},boundary\)/);
+ assert.doesNotMatch(js,/'sdot-environment':\{title:/);
 });

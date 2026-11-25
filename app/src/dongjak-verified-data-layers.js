@@ -173,7 +173,7 @@ export function installDongjakOfficialDataLayers({map,maplibregl,getBoundary,can
       enabled.delete(name);toggleDraw(name);
       if(name==='slope'){slopeLease?.release();slopeLease=null;}
       if(detailLayer===name){detailPopup?.remove();detailPopup=null;detailLayer=null;}
-      document.querySelector('button[data-dj-import="'+name+'"]')?.setAttribute('aria-pressed','false');
+      document.querySelector?.('button[data-dj-import="'+name+'"]')?.setAttribute('aria-pressed','false');
       if(defIsDynamic(name)||name==='audio-signals')updateFeedIndicator(name,'표시하지 않음','idle');
       return;
     }

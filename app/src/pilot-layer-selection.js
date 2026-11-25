@@ -14,5 +14,5 @@ export function createRoadLayerSelection(){
 const selection=createRoadLayerSelection();
 export const claimRoadLayer=(key,onRelease)=>selection.claim(key,onRelease);
 export function announcePilotLayer(key){
- if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('dongjak:pilot-layer-enabled',{detail:{key}}));
+ if(typeof window!=='undefined'&&typeof window.dispatchEvent==='function')window.dispatchEvent(new CustomEvent('dongjak:pilot-layer-enabled',{detail:{key}}));
 }
