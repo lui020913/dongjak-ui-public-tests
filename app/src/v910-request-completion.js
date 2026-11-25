@@ -81,9 +81,11 @@ export function installRequestCompletion(doc=document,win=window){
     variable('--dj910-header-bottom',Math.ceil(headerBottom+8)+'px');
     variable('--dj910-map-top',Math.ceil(Math.max(headerBottom,toolsBottom,categoriesBottom)+8)+'px');
     for(const node of [nav,head,toolbar,categories])if(node&&!seen.has(node)){seen.add(node);resize.observe(node);}
-    const painted=n=>visible(n)||(!n.hidden&&(
+    const painted=n=>{
+      if(n.dataset.djTabOutgoing==='true'||(n.dataset.dj810Animating==='closing'&&n.dataset.djWindowMotionKind==='fade'))return false;
+      return visible(n)||(!n.hidden&&(
       n.dataset.dj810Animating==='closing'||n.classList.contains('dj870-more-leaving')
-    )&&n.getClientRects().length>0);
+    )&&n.getClientRects().length>0);};
     const sheetOpen=[...doc.querySelectorAll('.page-panel:not([hidden]),#transport-sheet:not([hidden]),.dj-place-detail-popup,#dj-mobile-utilities:not([hidden]),#route-map-card:not([hidden]),#route-transit-confirm:not([hidden])')].some(painted);
     attr('data-dj910-sheet-open',sheetOpen?'true':'false');
     for(const popup of doc.querySelectorAll('.dj-place-detail-popup')){
@@ -168,9 +170,9 @@ export function installRequestCompletion(doc=document,win=window){
   }
   function schedule(){if(!frame&&!disposed)frame=win.requestAnimationFrame(sync);}
   const observer=new win.MutationObserver(records=>{
-    if(records.some(r=>r.type==='childList'||['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-route-stage'].includes(r.attributeName)))schedule();
+    if(records.some(r=>r.type==='childList'||['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-tab-outgoing','data-dj-route-stage'].includes(r.attributeName)))schedule();
   });
-  observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-route-stage']});
+  observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','aria-hidden','data-tab','data-theme','data-dj810-animating','data-dj-tab-outgoing','data-dj-route-stage']});
   win.addEventListener('resize',schedule,{passive:true});
   app.addEventListener('transitionend',schedule,true);
   app.addEventListener('animationend',schedule,true);
