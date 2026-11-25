@@ -1,3 +1,4 @@
+import {normalizeFacilityRecord} from './facility-display-names.js';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 /**
  * Pedestrian information utilities. Data is descriptive, not a route safety certification.
@@ -65,7 +66,8 @@ export function nearbyResults(center,candidates=[],radius=RADIUS_M,limit=LIMIT){
     const coords=Array.isArray(c.coordinates)?c.coordinates:[c.lng,c.lat];
     const distance=distanceMeters(center,coords);
     if(!Number.isFinite(distance)||distance>radius||distance<0)return [];
-    const category=safeString(c.category||'기타'),name=safeString(c.name);
+    const normalized=normalizeFacilityRecord(c);
+    const category=safeString(normalized.category||'기타'),name=safeString(normalized.name);
     if(!name)return [];
     const key=`${category}:${name}:${coords.map(x=>Number(x).toFixed(4)).join(',')}`;
     if(seen.has(key))return [];
@@ -89,7 +91,7 @@ function candidatesFromSource(map,id,category,defaultName){
       const name=station&&!rawName.includes(station)?`${station.replace(/역$/,'')}역 ${rawName}`:rawName;
       if(!name||name==='이름 미등록')return [];
       const group=id==='dongjak-public-places' ? (p.kind==='school'?'학교':p.kind==='park'?'공원':'공공시설') : category;
-      return [{category:group,name,coordinates:coords,detail:safeString(p.number?`${p.number}번 출구`:p.address||p.description||''),source:'현재 지도에 로드된 자료'}];
+      return [{...normalizeFacilityRecord({category:group,name}),coordinates:coords,detail:safeString(p.number?`${p.number}번 출구`:p.address||p.description||''),source:'현재 지도에 로드된 자료'}];
     });
   }catch{return [];}
 }

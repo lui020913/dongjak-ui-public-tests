@@ -1,4 +1,4 @@
-import {facilitySearchTerms,normalizeFacilityRecord} from '../../src/facility-display-names.js';
+import {facilitySearchTerms,facilityCategorySearchTerms,normalizeFacilityRecord} from '../../src/facility-display-names.js';
 /** Read-only query for Dongjak official public POIs. No Seoul API key is sent to browsers. */
 const reply=(body,status=200,cache='public, max-age=120')=>Response.json(body,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 const finite=s=>{const n=Number(s);return Number.isFinite(n)?n:null;};
@@ -17,11 +17,17 @@ export async function onRequestGet({request,env}){
    if(category){predicates.push('category=?');args.push(category);}
    if(q.length>=2){
      const terms=facilitySearchTerms(q);
+     const categoryTerms=facilityCategorySearchTerms(q);
      const like=t=>'%'+t.replace(/[\\%_]/g,'\\$&')+'%';
      const compact=t=>like(t.replace(/\s+/g,''));
      predicates.push('('+terms.map(()=>"(name LIKE ? ESCAPE '\\' OR replace(name,' ','') LIKE ? ESCAPE '\\')").join(' OR ')+" OR category LIKE ? ESCAPE '\\')");
      for(const term of terms)args.push(like(term),compact(term));
      args.push(like(q));
+     if(categoryTerms.length){
+       const last=predicates.length-1;
+       predicates[last]='('+predicates[last]+' OR category IN ('+categoryTerms.map(()=>'?').join(',')+'))';
+       args.push(...categoryTerms);
+     }
    }
    const bbox=params.get('bbox');
    if(bbox){

@@ -1,7 +1,4 @@
-const categoryAliases=Object.freeze({
- bus:'버스정류장',bus_stop:'버스정류장',bus_station:'버스터미널',subway:'지하철·철도역',railway:'지하철·철도역',station:'지하철·철도역',train_station:'지하철·철도역',tram_stop:'철도 정류장',
- restaurant:'음식점',fast_food:'음식점',cafe:'카페',coffee:'카페',convenience:'편의점',supermarket:'마트',pharmacy:'약국',hospital:'병원',clinic:'의원',dentist:'치과',school:'학교',university:'대학교',college:'대학교',kindergarten:'유치원',park:'공원',garden:'정원',library:'도서관',bank:'은행',atm:'ATM',toilets:'화장실',toilet:'화장실',police:'경찰서',fire_station:'소방서',townhall:'공공기관',place_of_worship:'종교시설',church:'교회',parking:'주차장',fuel:'주유소',hotel:'숙박시설',shop:'상점',bakery:'제과점',marketplace:'시장',museum:'박물관',sports_centre:'체육시설',playground:'놀이터',community_centre:'주민시설',post_office:'우체국',shelter:'쉼터',food:'음식점',healthcare:'의료시설'
-});
+import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility} from './facility-display-names.js';
 const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
 export function searchPlaceKind(p){
  const values=rawType(p);
@@ -12,7 +9,8 @@ export function searchPlaceKind(p){
 const kindOf=searchPlaceKind;
 export function displayFacilityCategory(p){
  const raw=String(p.category||p.kind||p.type||'').trim();
- return categoryAliases[raw.toLowerCase()]||(/[가-힣]/.test(raw)?raw:'일반 시설');
+ const type=normalizeFacilityCategory(raw,p.name);
+ return type==='AED'||/[가-힣]/.test(type)||type==='ATM'?type:'일반 시설';
 }
 // Group already deduplicated, distance-ranked map-area rows without inventing
 // missing categories or changing the visible-area limit.
@@ -69,10 +67,11 @@ export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
-    const row={...p,lng,lat},distance=distanceMeters(origin,row),key=searchResultKey(row);
+    const row=normalizeFacilityRecord({...p,lng,lat}),distance=distanceMeters(origin,row),key=searchResultKey(row);
     if(!Number.isFinite(distance)||distance>radius)continue;
-    if(seen.has(key)){
-      const prior=seen.get(key),road=facilityRoadAddress(row);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    if(prior){
+      const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
       continue;
     }
@@ -124,11 +123,11 @@ export function visibleFacilityResults(area,items,{limit=60}={}){
   const seen=new Map(),found=[];
   for(const p of items){
     if(!p?.name||p.lng==null||p.lat==null)continue;
-    const row={...p,lng:Number(p.lng),lat:Number(p.lat)};
+    const row=normalizeFacilityRecord({...p,lng:Number(p.lng),lat:Number(p.lat)});
     if(!visibleAreaContains(area,row))continue;
     const key=searchResultKey(row);
-    if(seen.has(key)){
-      const prior=seen.get(key);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    if(prior){
       const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
       continue;

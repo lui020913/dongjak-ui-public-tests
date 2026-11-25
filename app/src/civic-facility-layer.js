@@ -1,3 +1,4 @@
+import {normalizeFacilityCategory,facilityOsmCategory} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
 import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
@@ -7,7 +8,7 @@ import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-pres
 
 export const CIVIC_POI_TYPES=Object.freeze({
   school:['school'],
-  civic:['town_hall','police','fire_station','post','library'],
+  civic:['town_hall','police','police_station','police_substation','police_box','fire_station','fire_substation','post','library'],
   sports:['stadium','swimming','sports_centre','fitness_centre']
 });
 
@@ -21,11 +22,11 @@ const civicClassFilter=type=>{
  const matches=values=>['any',['in',['get','class'],['literal',values]],['in',['get','subclass'],['literal',values]]];
  if(type==='hospital')return matches(['hospital','clinic','doctor','doctors']);
  if(type==='pharmacy')return matches(['pharmacy']);
- if(type==='police')return matches(['police']);
- if(type==='fire')return matches(['fire_station']);
+ if(type==='police')return matches(['police','police_station','police_substation','police_box']);
+ if(type==='fire')return matches(['fire_station','fire_substation']);
   if(type==='school')return ['all',['==',['get','class'],'school'],['!=',['get','subclass'],'kindergarten']];
   if(type==='civic')return ['any',
-    ['in',['get','class'],['literal',CIVIC_POI_TYPES.civic.filter(x=>!['police','fire_station'].includes(x))]],
+    ['in',['get','class'],['literal',CIVIC_POI_TYPES.civic.filter(x=>!['police','police_station','police_substation','police_box','fire_station','fire_substation'].includes(x))]],
     ['==',['get','subclass'],'government'],['==',['get','subclass'],'public_building']];
   return ['any',
     ['in',['get','class'],['literal',CIVIC_POI_TYPES.sports]],
@@ -107,7 +108,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
         const placePosition=Array.isArray(coords)&&coords.length>=2&&coords.every(Number.isFinite)
           ?{lng:coords[0],lat:coords[1]}:{lng:event.lngLat.lng,lat:event.lngLat.lat};
         openPlaceDetails({map,maplibregl,lngLat:event.lngLat,place:{...placePosition,
-          name,type:({hospital:'병원',pharmacy:'약국',police:'경찰서',fire:'소방서',school:'학교',civic:'공공기관',sports:'체육시설'})[type],
+          name,type:normalizeFacilityCategory(facilityOsmCategory(tags,({hospital:'병원',pharmacy:'약국',police:'경찰서',fire:'소방서',school:'학교',civic:'공공기관',sports:'체육시설'})[type]),name),
           address:tags['addr:full']||tags.address||'',
           phone:tags['contact:phone']||tags.phone||'',
           website:tags.website||tags['contact:website']||'',

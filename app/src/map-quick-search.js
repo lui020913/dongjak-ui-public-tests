@@ -1,5 +1,5 @@
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
-import {normalizeFacilityRecord} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {searchCachedTransportPlaces} from './transport-map.js';
@@ -31,8 +31,8 @@ export function mergeMapSearchResults(local=[],remote=[]){
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const key=searchResultKey({...item,lng,lat});
-    if(seen.has(key)){
-      const previous=found.find(p=>searchResultKey(p)===key);
+    const previous=found.find(p=>searchResultKey(p)===key||(!isTransitMapSearchResult(item)&&!isTransitMapSearchResult(p)&&sameFacility(p,item)));
+    if(previous){
       if(previous){previous.direction||=item.direction;previous.address||=item.address;if(!facilityRoadAddress(previous)&&facilityRoadAddress(item))previous.roadAddress=facilityRoadAddress(item);previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
       continue;
     }
@@ -272,8 +272,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       let features=[];try{features=map.querySourceFeatures(source,{sourceLayer:'poi'})||[];}catch{continue;}
       for(const f of features){
         const p=f.properties||{};const name=String(p['name:ko']||p.name||'').trim();
-        const kind=String(p.class||p.subclass||'').trim();
-        if(!name||(!nearby&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
+        const kind=facilityOsmCategory(p,String(p.subclass||p.class||'일반 시설').trim());
+        if(!name||(!nearby&&!facilityNameMatches({name,category:kind},text)&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
         if(f.geometry?.type!=='Point')continue;
         const [lng,lat]=f.geometry.coordinates||[];
         if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
@@ -294,7 +294,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       .slice(0,8).map(([name,[lng,lat]])=>({name:name.endsWith('역')?name:`${name}역`,lng,lat,
         category:'지하철·철도역',address:'저장된 역 위치 · 출입구와 다를 수 있습니다'})):[];
     const all=mergeMapSearchResults([...cached,...stations,...searchLocalPlaces(text)],localVectorFacilities(text));
-    return rankKoreanSearch(text,all,{limit:20,minScore:55});
+    return rankKoreanSearch(text,all,{limit:20,minScore:55,getText:item=>facilityNameMatches(item,text)?text:item.name});
   };
   // Search always covers the Dongjak/Seoul source bounds; the former
   // viewport-only checkbox was confusing and silently hid valid matches.
@@ -320,7 +320,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     let osmNamed=[];
     // Named businesses such as Starbucks are often missing from Photon/Nominatim.
     // Only search real OpenStreetMap names after an EXPLICIT user submission.
-    if([...official,...immediate,...remote].length<3){
+    if(facilityCategorySearchTerms(rawTerm).length||[...official,...immediate,...remote].length<3){
       try{osmNamed=await searchNamedOsm(rawTerm,{signal});}
       catch(error){if(error?.name==='AbortError')return;}
     }

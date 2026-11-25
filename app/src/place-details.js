@@ -1,4 +1,4 @@
-import {normalizeFacilityName} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -32,7 +32,7 @@ export function placeData(raw={}){
   // Keep only a full street address with a building number, not a generic district label.
   const validAddress=/^(?:서울특별시|서울시|서울)\s+[^\s]+구\s+.+(?:로|길)\s*\d+(?:[-–]\d+)?/u.test(incomingAddress);
   return {
-    name,type:tidy(raw.type||'장소',30),
+    name,type:tidy(normalizeFacilityCategory(raw.type||raw.category||'장소',raw.name),30),
     address:trusted?.address|| (validAddress?incomingAddress:''), phone:verifiedPhone(trusted?.phone||raw.phone),
     website:verifiedWeb(trusted?.website||raw.website),
     source:tidy(trusted?.source||raw.source||'© OpenStreetMap 기여자',140),

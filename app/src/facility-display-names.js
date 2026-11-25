@@ -1,6 +1,56 @@
 /** Shared display aliases for verified retail brands. Never overwrite source records.
  * Restrict operator-only aliases to matching business types; do not infer a branch from its address.
  */
+const categoryAliases=Object.freeze({
+ bus:'버스정류장',bus_stop:'버스정류장',bus_station:'버스터미널',subway:'지하철·철도역',railway:'지하철·철도역',station:'지하철·철도역',train_station:'지하철·철도역',tram_stop:'철도 정류장',
+ restaurant:'음식점',fast_food:'음식점',cafe:'카페',coffee:'카페',convenience:'편의점',supermarket:'마트',pharmacy:'약국',hospital:'병원',clinic:'의원',dentist:'치과',school:'학교',university:'대학교',college:'대학교',kindergarten:'유치원',park:'공원',garden:'정원',library:'도서관',bank:'은행',atm:'ATM',toilets:'화장실',toilet:'화장실',police:'경찰서',fire_station:'소방서',townhall:'공공기관',place_of_worship:'종교시설',church:'교회',parking:'주차장',fuel:'주유소',hotel:'숙박시설',shop:'상점',bakery:'제과점',marketplace:'시장',museum:'박물관',sports_centre:'체육시설',playground:'놀이터',community_centre:'주민시설',post_office:'우체국',shelter:'쉼터',food:'음식점',healthcare:'의료시설'
+});
+const TYPE_ALIASES=Object.freeze({
+ '치안센터':'경찰서','경찰지구대':'경찰서','지구대':'경찰서','파출소':'경찰서','경찰파출소':'경찰서','경찰시설':'경찰서',
+ '119안전센터':'소방서','119구조대':'소방서','119지역대':'소방서','소방파출소':'소방서','소방시설':'소방서',
+ '행정복지센터':'주민센터','동주민센터':'주민센터','동사무소':'주민센터',
+ '일반음식점':'음식점','커피전문점':'카페','슈퍼마켓':'마트','자동심장충격기':'AED','자동제세동기':'AED',
+ '공중화장실':'화장실','공공화장실':'화장실',police_station:'경찰서',police_substation:'경찰서',police_box:'경찰서',fire:'소방서',fire_substation:'소방서',town_hall:'공공기관',government:'공공기관',public_building:'공공기관',post:'우체국',doctor:'의원',doctors:'의원',defibrillator:'AED',aed:'AED',sports_hall:'체육시설',stadium:'체육시설',fitness_centre:'체육시설',swimming_pool:'체육시설'
+});
+const genericType=new Set(['','장소','시설','일반시설','일반 시설','일반 장소','공공기관','공공시설','주민시설','안전시설','point','other','unknown','amenity','public','civic']);
+export function normalizeFacilityCategory(value,name=''){
+ const raw=String(value??'').trim();
+ const type=TYPE_ALIASES[raw]||TYPE_ALIASES[raw.toLowerCase()]||categoryAliases[raw.toLowerCase()]||raw;
+ if(genericType.has(type)){
+   const label=String(name??'').trim().replace(/\s+/g,'');
+   if(/(?:소방서|119안전센터|119구조대|119지역대|소방파출소)$/.test(label))return '소방서';
+   if(/(?:경찰서|경찰지구대|지구대|파출소|치안센터)$/.test(label))return '경찰서';
+   if(/(?:행정복지센터|주민센터|동사무소)$/.test(label))return '주민센터';
+ }
+ return type;
+}
+export function facilityCategorySearchTerms(query){
+ const raw=String(query??'').trim(),q=fold(raw);
+ if(!q)return [];
+ const pairs=[...Object.entries(TYPE_ALIASES),...Object.entries(categoryAliases)];
+ const match=pairs.find(([a,b])=>fold(a)===q||fold(b)===q);
+ if(!match)return [];
+ const canonical=match[1];
+ return [...new Set([canonical,...pairs.filter(([,b])=>b===canonical).map(([a])=>a)])].slice(0,20);
+}
+export function facilityOsmCategory(tags={},fallback='일반시설'){
+ const rawName=tags['name:ko']||tags['name:nonlatin']||tags.name||'';
+ for(const value of [tags.amenity,tags.shop,tags.leisure,tags.tourism,tags.subclass,tags.class,tags.category]){
+   const type=normalizeFacilityCategory(value,rawName);
+   if(type&&!genericType.has(type)&&(/[가-힣]/.test(type)||['AED','ATM'].includes(type)))return type;
+ }
+ return normalizeFacilityCategory(fallback,rawName);
+}
+// Only merge a normalized name with close coordinates; never merge facilities
+// merely because their categories match. Protect branches and unrelated nearby POIs.
+export function sameFacility(a,b){
+ const x=normalizeFacilityRecord(a),y=normalizeFacilityRecord(b);
+ if(!x.name||!y.name||!fold(x.name)||fold(x.name)!==fold(y.name))return false;
+ if(!genericType.has(x.category||'')&&!genericType.has(y.category||'')&&x.category!==y.category)return false;
+ const coords=[a?.lng,a?.lat,b?.lng,b?.lat];if(coords.some(v=>v==null||!Number.isFinite(Number(v))))return false;
+ const [ax,ay,bx,by]=coords.map(Number);
+ return Math.hypot((ax-bx)*111195*Math.cos((ay+by)*Math.PI/360),(ay-by)*111195)<=15;
+}
 const COMMERCIAL=new Set(['편의점','카페','음식점','휴게음식점','제과점','마트','패스트푸드','일반시설','일반 시설','일반 장소']);
 const rules=[
  {brand:'세븐일레븐',aliases:['세븐일레븐','7-Eleven','7 Eleven','7ELEVEN','세븐 일레븐'],operators:['코리아세븐','한국세븐','Korea Seven'],operatorTypes:['편의점']},
@@ -43,6 +93,7 @@ function prefixMatch(name,alias){
 const explicitOperators=['지에스리테일','GS리테일','GS Retail','비지에프리테일','BGF리테일','코리아세븐','한국세븐','파리크라상','씨제이푸드빌','CJ푸드빌','더본코리아','롯데지알에스','비알코리아'];
 export function normalizeFacilityName(value,category=''){
  const raw=String(value??'').trim();
+ category=normalizeFacilityCategory(category,raw);
  if(!raw||!COMMERCIAL.has(category))return raw;
  let name=stripLegal(trim(raw));
  // A multi-brand operator is removed only when the remaining text explicitly identifies a brand.
@@ -65,13 +116,16 @@ export function normalizeFacilityName(value,category=''){
 }
 export function normalizeFacilityRecord(place){
  const raw=String(place?.registeredName??place?.name??'').trim();
- const name=normalizeFacilityName(place?.name,place?.category??place?.type??'');
- return {...place,name,...(raw&&raw!==name?{registeredName:raw}:{})};
+ const category=normalizeFacilityCategory(place?.category??place?.type??'',raw);
+ const name=normalizeFacilityName(place?.name,category);
+ return {...place,name,...(category?{category}:{}),...(place?.type&&category?{type:category}:{}),...(raw&&raw!==name?{registeredName:raw}:{})};
 }
 /** Query expansion is bounded, parameter-bound in SQL, and keeps a branch suffix if provided. */
 export function facilitySearchTerms(value){
  const raw=String(value??'').trim();if(!raw)return [];
  const q=stripLegal(trim(raw));
+ const categoryTerms=facilityCategorySearchTerms(q);
+ if(categoryTerms.length)return [...new Set([raw,...categoryTerms])].slice(0,20);
  for(const rule of rules){
    const aliases=[rule.brand,...rule.aliases,...rule.operators,...(rule.brand==='세븐일레븐'?['세븐']:rule.brand==='투썸플레이스'?['투썸']:[])];
    for(const alias of aliases){
@@ -86,6 +140,8 @@ export function facilitySearchTerms(value){
 export function facilityNameMatches(place,query){
  const q=fold(query);if(!q)return false;
  const normalized=normalizeFacilityRecord(place);
+ const categoryTerms=facilityCategorySearchTerms(query);
+ if(categoryTerms.length&&categoryTerms.includes(normalized.category))return true;
  const fields=[normalized.name,normalized.registeredName,normalized.category];
  if(fields.some(v=>fold(v).includes(q)))return true;
  // Alternate brand spellings should match only a record with that verified normalized brand.

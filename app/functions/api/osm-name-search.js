@@ -1,4 +1,4 @@
-import {facilitySearchTerms} from '../../src/facility-display-names.js';
+import {facilitySearchTerms,facilityCategorySearchTerms} from '../../src/facility-display-names.js';
 /** Limited read-only Overpass name lookup for real OSM places only. */
 const reply=(body,status=200)=>Response.json(body,{status,headers:{
   'Cache-Control':status===200?'public,max-age=300,s-maxage=300':'no-store',
@@ -12,7 +12,10 @@ export function nameQuery(raw){
   const safe=known[q]||terms.map(term=>term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
   // Bounding region extends only slightly outside Dongjak for nearby transit.
   const bbox='37.435,126.87,37.565,127.07';
-  return `[out:json][timeout:9];(nwr["name"~"${safe}",i](${bbox});nwr["name:ko"~"${safe}",i](${bbox});nwr["brand"~"${safe}",i](${bbox}););out center tags 45;`;
+  const category=facilityCategorySearchTerms(q)[0];
+  const tags={'경찰서':'police','소방서':'fire_station','화장실':'toilets','주민센터':'community_centre','우체국':'post_office','도서관':'library','은행':'bank','약국':'pharmacy','병원':'hospital','의원':'clinic','카페':'cafe','음식점':'restaurant|fast_food'};
+  const tag=tags[category];const tagged=tag?`nwr["amenity"~"^(${tag})$"]["name"](${bbox});`:'';
+  return `[out:json][timeout:9];(nwr["name"~"${safe}",i](${bbox});nwr["name:ko"~"${safe}",i](${bbox});nwr["brand"~"${safe}",i](${bbox});${tagged});out center tags 45;`;
 }
 export async function onRequestGet({request}){
   const query=nameQuery(new URL(request.url).searchParams.get('q'));
