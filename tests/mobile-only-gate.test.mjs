@@ -41,7 +41,8 @@ test('build patch adds accessible mobile-only device notice and preserves deskto
   assert.match(result.indexHtml,/<h1 id="dj-mobile-only-title">모바일로 접속해 주세요<\/h1>/);
   assert.match(result.indexHtml,/<p>동작하는 안전지도는 모바일 웹사이트와 모바일 앱에서 이용할 수 있습니다\.<\/p>/);
   assert.match(result.indexHtml,/<footer class="dj-mobile-only-credit">동작구 아이디어리그 안전팀<\/footer>/);
-  assert.ok(result.indexHtml.includes('@media(min-width:600px){#dj-mobile-only-screen p{white-space:nowrap}}'));
+  assert.doesNotMatch(result.indexHtml,/#dj-mobile-only-screen p\{[^}]*white-space:nowrap/);
+  assert.match(result.indexHtml,/#dj-mobile-only-screen p\{[^}]*white-space:normal/);
   assert.ok(result.indexHtml.includes('width:min(920px,100%)'));
   assert.match(result.indexHtml,/모바일로 접속해 주세요/);
   assert.match(result.indexHtml,/모바일 웹사이트와 모바일 앱/);
