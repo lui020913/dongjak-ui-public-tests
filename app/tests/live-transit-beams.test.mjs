@@ -20,7 +20,7 @@ test('single radial light pool is circular, mirrored and fades smoothly',()=>{
  assert(alpha(219,47)<alpha(199,47));
  assert(alpha(219,47)>100);
  assert.equal(alpha(250,45),0);
- const offset=(47*256+219)*4;assert(right.data[offset]<150);assert.equal(right.data[offset+2],255);
+ const offset=(47*256+219)*4,core=(47*256+199)*4;assert.equal(right.data[offset],255);assert(right.data[offset]>right.data[offset+1]&&right.data[offset+1]>right.data[offset+2]);assert(right.data[core+1]>right.data[offset+1]&&right.data[core+2]>right.data[offset+2]);assert(right.data[core+2]>220);
 });
 
 test('registering beams does not update or replace the existing train atlas',()=>{
