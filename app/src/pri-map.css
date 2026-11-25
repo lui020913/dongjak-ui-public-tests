@@ -133,3 +133,11 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close{
 html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus:not(:focus-visible){outline:none!important}
 html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px solid #536b60!important;outline-offset:2px}
 
+
+/* PRI map line keys: distinct non-score states, no extra menu or overlay owner. */
+#app .dj-pri-map-key{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px 12px;align-items:center;font-size:10px;font-weight:650;line-height:1.3;}
+#app .dj-pri-map-key span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+#app .dj-pri-map-key span[hidden]{display:none!important;}
+#app .dj-pri-map-key span::before{content:'';width:18px;height:0;border-top:3px solid #687380;flex:none;}
+#app .dj-pri-map-key .dj-pri-key-boundary::before{border-color:#436F9C;}
+#app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #52677E;}
