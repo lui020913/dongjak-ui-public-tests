@@ -993,9 +993,13 @@ test('map report fades out over its real destination without reparenting or resi
  await expect(page.locator('#community-map-hint')).toBeVisible();
  await expect(page.locator('#toast')).not.toHaveClass(/\bshow\b/);
  const hintBox=await page.locator('#community-map-hint').boundingBox(),dockBox=await page.locator('#bottom-nav').boundingBox();
- expect(hintBox.y+hintBox.height).toBeLessThanOrEqual(dockBox.y+1);
+ expect(dockBox.y-(hintBox.y+hintBox.height)).toBeGreaterThanOrEqual(10);
+ await expect(page.locator('#dj840-map-tip')).toBeHidden();
+ await expect(page.locator('.maplibregl-ctrl-scale')).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-community-picking','true');
  await page.locator('#community-map-cancel').click();
  await expect(portal).toBeVisible();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#app')).not.toHaveAttribute('data-community-picking','true');
  await tap(page,portal.locator('#community-compose-close'));await expect(portal).toBeHidden();
  await tap(page,tab(page,'participate'));
  await tap(page,page.locator('#community-compose-toggle'));

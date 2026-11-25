@@ -2237,9 +2237,29 @@ document.getElementById('community-photo-remove').addEventListener('click',()=>{
   document.getElementById('community-photo-preview').hidden=true;
   document.getElementById('community-photo-image').removeAttribute('src');
 });
+let communityPickerDockObserver=null;
+function syncCommunityPickerDock(){
+  if(!communityPickMode||!window.matchMedia('(max-width:699px)').matches)return;
+  const hint=document.getElementById('community-map-hint');
+  const dock=document.getElementById('bottom-nav')?.getBoundingClientRect();
+  const host=app.getBoundingClientRect();
+  if(dock&&dock.height>0&&host.height>0){
+    hint.style.setProperty('--dj-community-picker-bottom',Math.max(12,Math.ceil(host.bottom-dock.top)+12)+'px');
+  }
+}
 function clearCommunityLocationPick(){
   communityPickMode=false;
-  document.getElementById('community-map-hint').hidden=true;
+  const hint=document.getElementById('community-map-hint');
+  hint.hidden=true;
+  hint.style.removeProperty('--dj-community-picker-bottom');
+  communityPickerDockObserver?.disconnect();communityPickerDockObserver=null;
+  window.removeEventListener('resize',syncCommunityPickerDock);
+  window.visualViewport?.removeEventListener('resize',syncCommunityPickerDock);
+  window.visualViewport?.removeEventListener('scroll',syncCommunityPickerDock);
+  if(app.dataset.communityPicking==='true'){
+    delete app.dataset.communityPicking;
+    window.dispatchEvent(new Event('dongjak:community-picker-visibility'));
+  }
 }
 function cancelCommunityTabMotion(){
   window.dispatchEvent(new Event('dongjak:cancel-tab-transition'));
@@ -2271,7 +2291,20 @@ document.getElementById('community-map-pick').addEventListener('click',()=>{
   communityPickMode=true;
   navigate('map',{suppressOverview:true});
   toastEl.classList.remove('show');
+  app.dataset.communityPicking='true';
+  syncCommunityPickerDock();
   document.getElementById('community-map-hint').hidden=false;
+  window.dispatchEvent(new Event('dongjak:community-picker-visibility'));
+  if(typeof ResizeObserver==='function'){
+    communityPickerDockObserver?.disconnect();
+    communityPickerDockObserver=new ResizeObserver(syncCommunityPickerDock);
+    communityPickerDockObserver.observe(app);
+    const dock=document.getElementById('bottom-nav');if(dock)communityPickerDockObserver.observe(dock);
+  }
+  window.addEventListener('resize',syncCommunityPickerDock,{passive:true});
+  window.visualViewport?.addEventListener('resize',syncCommunityPickerDock,{passive:true});
+  window.visualViewport?.addEventListener('scroll',syncCommunityPickerDock,{passive:true});
+  requestAnimationFrame(syncCommunityPickerDock);
 });
 document.getElementById('community-map-cancel').addEventListener('click',()=>{
   if(communityPickMode)resumeCommunityLocationDraft();
