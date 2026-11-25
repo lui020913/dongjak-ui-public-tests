@@ -77,14 +77,16 @@ async function enter(page,id,key){
    window.__auditStop=()=>{stopped=true;cancelAnimationFrame(frame);};
    function capture(){
      if(stopped)return;
-     if(panel?.classList.contains('dj-tab-content-enter')&&!panel.hidden){
+     if(panel&&!panel.hidden){
        // V3 renders in an independent shadow host. The legacy route-panel
        // remains an engine adapter and must never serve as visual evidence.
        const route=key==='route'?document.getElementById('dj-route-v3'):null;
        const body=route?.shadowRoot?.querySelector('.canvas > .route-panel')||panel.querySelector(':scope > .dj836-sheet-body');
        if(body&&(!route||!route.hidden)&&body.getClientRects().length){
-         const c=getComputedStyle(panel),actual=getComputedStyle(body);
-         frames.push({rootOpacity:Number(c.opacity),contentOpacity:Number(actual.opacity),y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
+         const c=getComputedStyle(route||panel),actual=getComputedStyle(body);
+         const outgoing=document.querySelector('[data-dj-tab-outgoing="true"]');
+         const out=outgoing?getComputedStyle(outgoing):null;
+         frames.push({rootOpacity:Number(c.opacity),contentOpacity:Number(c.opacity)*Number(actual.opacity),outgoingOpacity:out&&out.visibility==='visible'&&out.display!=='none'?Number(out.opacity):null,y:panel.getBoundingClientRect().y,visible:actual.visibility!=='hidden'&&actual.display!=='none'});
        }
      }
      frame=requestAnimationFrame(capture);
@@ -95,11 +97,12 @@ async function enter(page,id,key){
    await tap(page,tab(page,key));await expect(page.locator('#'+id)).toBeVisible();
    // Test painted intermediate opacity, not a particular CSS animation
    // name. The inline-important rAF owner intentionally disables keyframes.
-   await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&f.contentOpacity>.12&&f.contentOpacity<.98)),{message:'visible intermediate content opacity on '+key+' entry'}).toBe(true);
+   await expect.poll(()=>page.evaluate(()=>window.__auditFrames.some(f=>f.visible&&((f.contentOpacity>.12&&f.contentOpacity<.98)||(f.outgoingOpacity>.12&&f.outgoingOpacity<.98)))),{message:'visible intermediate cross-dissolve opacity on '+key+' entry'}).toBe(true);
    await expect.poll(()=>page.locator('#'+id).getAttribute('data-dj810-animating')).toBeNull();
    await expect(page.locator('#'+id)).toHaveCSS('opacity','1');
    const frames=await page.evaluate(()=>window.__auditFrames);
-   expect(frames.every(f=>f.rootOpacity===1)).toBe(true);
+   expect(frames.every(f=>f.rootOpacity>=0&&f.rootOpacity<=1)).toBe(true);
+   await expect(page.locator('[data-dj-tab-outgoing="true"]')).toHaveCount(0);
    expect(frames.every(f=>Math.abs(f.y-frames[0].y)<1)).toBe(true);
  }finally{await page.evaluate(()=>window.__auditStop?.());}
  await geometry(page,'#'+id);
@@ -828,7 +831,7 @@ test('phone search returns a visible local suggestion and clears input safely',{
  await expect(results).toBeHidden();
 });
 
-test('primary tabs reveal content without fading the opaque page and keep the pill dock',{tag:'@phone-common'},async({page})=>{
+test('primary tabs reveal content through live cross-dissolve and keep the pill dock',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
  // Use the same real content sampler for direct tab-to-tab and map return.
