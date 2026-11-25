@@ -1,6 +1,7 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {spawn,execFileSync} from 'node:child_process';
 import {once} from 'node:events';
+import http from 'node:http';
 const scene=JSON.parse(await readFile(process.argv[2]||'film/scenes/active.json','utf8'));
 const output='film-ios-output', udid=process.env.SIM_UDID;
 const url='https://dongjak-walk-safety-preview.pages.dev/';
@@ -11,10 +12,17 @@ const base='http://127.0.0.1:4723';
 let session, rec, recDone, failure, started=false;
 const logs=[];
 async function request(method,endpoint,body){
-  const r=await fetch(base+endpoint,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(endpoint==='/session'?900000:240000)});
-  const j=await r.json();
-  if(!r.ok||j.value?.error)throw Error(j.value?.message||JSON.stringify(j));
-  return j.value;
+  const payload=body===undefined?undefined:JSON.stringify(body);
+  const limit=endpoint==='/session'?1200000:240000;
+  return new Promise((resolve,reject)=>{
+    const req=http.request(base+endpoint,{method,headers:{'Content-Type':'application/json',...(payload===undefined?{}:{'Content-Length':Buffer.byteLength(payload)})}},res=>{
+      let data='';res.setEncoding('utf8');res.on('data',c=>data+=c);res.on('error',reject);
+      res.on('end',()=>{try{const j=JSON.parse(data);if(res.statusCode>=400||j.value?.error)throw Error(j.value?.message||JSON.stringify(j));resolve(j.value);}catch(e){reject(e);}});
+    });
+    const timer=setTimeout(()=>req.destroy(Error('HTTP deadline '+method+' '+endpoint)),limit);
+    req.on('close',()=>clearTimeout(timer));req.on('error',reject);
+    req.end(payload);
+  });
 }
 const cmd=(method,p,b)=>request(method,'/session/'+session+p,b);
 const execute=(script,args=[])=>cmd('POST','/execute/sync',{script,args});
@@ -98,11 +106,14 @@ async function step(a){
   }
 }
 try{
-  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':true,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':480000,'appium:wdaConnectionTimeout':240000,'appium:wdaStartupRetries':1,'appium:showXcodeLog':true,'appium:derivedDataPath':process.env.RUNNER_TEMP+'/film-wda'};
+  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':true,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':480000,'appium:wdaConnectionTimeout':240000,'appium:wdaStartupRetries':1,'appium:showXcodeLog':true,'appium:usePrebuiltWDA':true,'appium:useNewWDA':false,'appium:derivedDataPath':process.env.RUNNER_TEMP+'/film-wda'};
+  console.log('Creating Safari session using prebuilt WDA');
   const result=await request('POST','/session',{capabilities:{alwaysMatch:capabilities,firstMatch:[{}]}});
   session=result.sessionId;
   if(!session)throw Error('No Safari session ID');
+  console.log('Safari session created');
   await prepare();
+  console.log('Map ready; starting native video');
   // Clear any simulator status bar override: real system-rendered indicators only.
   execFileSync('xcrun',['simctl','status_bar',udid,'clear']);
   // Record from Apple's own simulator framebuffer. No Android/Chromium capture, no composited notch or clock.

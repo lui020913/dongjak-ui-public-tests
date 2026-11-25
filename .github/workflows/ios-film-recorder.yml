@@ -13,7 +13,7 @@ jobs:
   record:
     if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/tools/app-film-recorder'
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,6 +41,15 @@ jobs:
           appium driver install xcuitest@12.12.5
           appium --version
           command -v ffprobe || brew install ffmpeg
+      - name: Build WebDriverAgent separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p film-ios-output
+          wda="$HOME/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj"
+          test -d "$wda"
+          xcodebuild build-for-testing -project "$wda" -scheme WebDriverAgentRunner -derivedDataPath "$RUNNER_TEMP/film-wda" -destination "id=$SIM_UDID" GCC_TREAT_WARNINGS_AS_ERRORS=0 COMPILER_INDEX_STORE_ENABLE=NO -parallel-testing-enabled NO 2>&1 | tee film-ios-output/wda-build.log
+          test -d "$RUNNER_TEMP/film-wda/Build/Products/Debug-iphonesimulator/WebDriverAgentRunner-Runner.app"
       - name: Record real iOS screen
         shell: bash
         run: |
@@ -48,9 +57,12 @@ jobs:
           mkdir -p film-ios-output
           appium --address 127.0.0.1 --port 4723 --log-timestamp --log-no-colors > "$RUNNER_TEMP/appium-film.log" 2>&1 &
           server=$!
-          trap 'kill "$server" 2>/dev/null || true' EXIT
+          tail -n +1 -F "$RUNNER_TEMP/appium-film.log" | awk '!/Proxying.*8100\/status|ECONNREFUSED 127.0.0.1:8100|Matched.*getStatus/ {print; fflush()}' &
+          logtail=$!
+          trap 'kill "$server" "$logtail" 2>/dev/null || true' EXIT
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:4723/status >/dev/null 2>&1; then break; fi
+            kill -0 "$server" || { cat "$RUNNER_TEMP/appium-film.log"; exit 1; }
             sleep 1
           done
           curl -fsS http://127.0.0.1:4723/status
