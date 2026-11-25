@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.161",
+  "application_version": "9.2.162",
   "public_work_branch": "main",
-  "purpose": "PR487 and PR488: native UI motion, compact facility markers and hidden outgoing tab cleanup.",
-  "attempt": 382,
+  "purpose": "PR489: stable report exit over map, circular search close button, bidirectional community/news crossfade.",
+  "attempt": 383,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
