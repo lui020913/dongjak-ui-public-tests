@@ -37,11 +37,11 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   let dockRestore=null;
   // Private compositor: no shared motion classes, data-dj810 attributes,
   // animation observers or parent-tab transitions own this dialog.
-  let transition=null,transitionTimer=0;
+  let transitionFrame=0,transitionTimer=0;
   function stopTransition(){
     if(transitionTimer)win.clearTimeout(transitionTimer);
-    transitionTimer=0;
-    if(transition){transition.onfinish=null;transition.cancel();transition=null;}
+    if(transitionFrame)win.cancelAnimationFrame(transitionFrame);
+    transitionTimer=0;transitionFrame=0;
   }
   function dissolve(opening,done=()=>{}){
     if(!root||root.hidden){done();return;}
@@ -49,20 +49,33 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     stopTransition();
     const reduced=win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches||doc.getElementById('app')?.classList.contains('dj-reduced-animation');
     const to=opening?1:0;
+    const paint=alpha=>root.style.setProperty('opacity',String(alpha),'important');
     const finish=()=>{
-      root.style.opacity=String(to);
       stopTransition();
+      paint(to);
       delete root.dataset.composeMotion;
       done();
     };
-    if(reduced||typeof root.animate!=='function'){finish();return;}
+    if(reduced||typeof win.requestAnimationFrame!=='function'){finish();return;}
     root.dataset.composeMotion=opening?'enter':'exit';
-    root.style.opacity=String(from);
-    // Animate one composited surface. The map is never hidden, resized,
-    // captured or replaced by a solid placeholder during this dissolve.
-    transition=root.animate([{opacity:from},{opacity:to}],{duration:300,easing:'ease-in-out',fill:'both'});
-    transition.onfinish=finish;
-    transitionTimer=win.setTimeout(finish,1200);
+    root.style.setProperty('animation','none','important');
+    root.style.setProperty('transition','none','important');
+    paint(from);
+    // One atomic root opacity, including header, scrolling content and footer.
+    // Avoid Safari's separate WAAPI/WebGL compositor timing and do not fade
+    // individual children. Advance only on delivered visual frames.
+    let last=null,elapsed=0;
+    const watchdog=()=>{if(transitionTimer)win.clearTimeout(transitionTimer);transitionTimer=win.setTimeout(finish,4500);};
+    const step=now=>{
+      if(root.hidden)return;
+      if(last!==null)elapsed+=Math.min(32,Math.max(0,now-last));
+      last=now;
+      const p=Math.min(1,elapsed/300),eased=p*p*(3-2*p);
+      paint(from+(to-from)*eased);
+      if(p<1){watchdog();transitionFrame=win.requestAnimationFrame(step);}
+      else finish();
+    };
+    watchdog();transitionFrame=win.requestAnimationFrame(step);
   }
   function hideDock(){
     if(dockRestore)return;
@@ -163,7 +176,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   function show({resetScroll=true,mapOrigin=false,animate=true}={}){
     ensure();
     stopTransition();
-    root.style.opacity='1';
+    root.style.setProperty('opacity','1','important');
     delete root.dataset.composeMotion;
     initialLayoutHeight=Math.max(1,Number(win.innerHeight)||Number(doc.documentElement.clientHeight)||1);
     if(form.parentNode!==root)root.append(form);
@@ -200,7 +213,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     if(form.contains(doc.activeElement))doc.activeElement.blur();
     root.hidden=true;
     stopTransition();
-    root.style.opacity='1';
+    root.style.setProperty('opacity','1','important');
     delete root.dataset.composeMotion;
     delete root.dataset.closing;
     form.hidden=true;
