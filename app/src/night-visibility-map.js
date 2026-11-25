@@ -221,7 +221,8 @@ export function nightActivationBlocked(app,doc=typeof document!=='undefined'?doc
   });
 }
 
-export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},onActivate=()=>{}}){
+export function installNightVisibility({map,maplibregl,app,theme,toast=()=>{},onActivate=()=>{},retired=false}){
+  if(retired){app.dataset.sangdoNight='off';app.dataset.djNightReady='false';return {isEnabled:()=>false,enable:async()=>false,disable:async()=>false,refresh:()=>{}};}
   const toggle=document.getElementById('night-visibility-toggle');
   const controls=document.getElementById('night-visibility-controls');
   const quickOff=document.getElementById('night-visibility-quick-off');

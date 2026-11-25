@@ -4,9 +4,11 @@ import {buildSanghyeonMiddleSchoolReview} from './sangdo1-middle-school-review.m
 import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 import {SPEED_RISK_SOURCE,SPEED_RISK_METADATA,speedLimitRiskScore,speedRiskDisplay,speedRiskCounts,validateSpeedRiskSource} from './pri-speed-risk.mjs';
 import {spatialMatchSpeedFactor} from './pri-speed-spatial-match.mjs';
+import {clipPriDisplay,priVisualConnectors} from './pri-display-geometry.mjs';
+import {installSingleThematicLayer} from './single-thematic-layer.mjs';
 import './pri-map.css';
-const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point',SPEED_LINE='dj-pri-speed-line',UNKNOWN_CASING='dj-pri-unknown-casing',CANDIDATE_LINE='dj-pri-candidate-line',BOUNDARY_SOURCE='dj-pri-boundary-source',BOUNDARY_CASING='dj-pri-boundary-casing',BOUNDARY_LINE='dj-pri-boundary-line';
-const UNKNOWN_COLOR='#687380',CANDIDATE_COLOR='#52677E',BOUNDARY_COLOR='#436F9C';
+const SOURCE='dj-pri-segments',LINE='dj-pri-line',POINT='dj-pri-point',SPEED_LINE='dj-pri-speed-line',UNKNOWN_CASING='dj-pri-unknown-casing',CANDIDATE_LINE='dj-pri-candidate-line',BOUNDARY_SOURCE='dj-pri-boundary-source',BOUNDARY_CASING='dj-pri-boundary-casing',BOUNDARY_LINE='dj-pri-boundary-line',CONNECTOR_SOURCE='dj-pri-connectors',CONNECTOR_LINE='dj-pri-connector-line';
+const UNKNOWN_COLOR='#9CA3AF',CANDIDATE_COLOR='#8996A3',BOUNDARY_COLOR='#436F9C';
 const EMPTY={type:'FeatureCollection',features:[]};
 const POLICY_SCOPE_URL='/data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson';
 const colors=['case',['get','evaluated'],['step',['get','displayScore'],'#4C948B',40,'#E0A04A',70,'#CF4248'],UNKNOWN_COLOR]; // 0-39 low, 40-69 caution, 70-100 red
@@ -19,7 +21,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  if(doc.getElementById('dj-pri-toggle'))return;
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const button=(label,fn)=>{const n=el('button','dj-pri-button',label);n.type='button';n.addEventListener('click',fn);return n;};
- let dataset=null,mode=null,display=EMPTY,policyScope=null,priBoundary=null,schoolReview=null,boundaryAudit=null,speedSource=null,speedMetadata=null,speedMatchStats=null,sharedCandidates=null,fetchStarted=false,revision=0,popup=null,lookup=new Map();
+ let dataset=null,mode=null,display=EMPTY,connectors=EMPTY,policyScope=null,priBoundary=null,schoolReview=null,boundaryAudit=null,speedSource=null,speedMetadata=null,speedMatchStats=null,sharedCandidates=null,fetchStarted=false,revision=0,popup=null,lookup=new Map();
  let pendingRestore=typeof restoreMode==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,40}$/.test(restoreMode)?(['pri12','pri','current3','current4'].includes(restoreMode)?'current6':restoreMode==='sharedCandidate'?'sharedRoad':restoreMode==='middleReview'?'protectionGap':restoreMode):null;
  const toggle=el('button');toggle.type='button';toggle.id='dj-pri-toggle';toggle.hidden=true;toggle.setAttribute('aria-pressed','false');app.append(toggle);
  const dialog=el('dialog','dj-pri-dialog');dialog.id='dj-pri-dialog';dialog.setAttribute('aria-label','보행 취약도 평가자료');
@@ -187,23 +189,25 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  toggle.addEventListener('click',()=>{render();resetDialogView();syncDockClearance();if(!dialog.open)dialog.showModal();alignPriDockSurface(dialog);win.requestAnimationFrame?.(alignPriDockSurfaces);app.dataset.djPriDialog='true';syncPriHud(true);void loadDefault();});
  dialog.addEventListener('close',()=>{delete app.dataset.djPriDialog;resetDialogView();syncPriHud(Boolean(mode));});
  file.addEventListener('change',async()=>{const f=file.files?.[0];file.value='';if(!f)return;try{if(f.size>20*1024*1024)throw Error('자료는 20MB 이하로 나누어 주세요.');setDataset(JSON.parse(await f.text()));}catch(e){status.textContent='가져오기 실패: '+String(e?.message||e);}});
+ const thematic=installSingleThematicLayer({doc,win,disablePri:()=>{if(mode)activate(null);}});
  function draw(){
   // isStyleLoaded() also becomes false while tiles are loading. That is not
   // evidence that the MapLibre style cannot accept a new GeoJSON layer.
   try{
    if(!Array.isArray(map.getStyle?.()?.layers))return false;
    if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:display});
+   if(!map.getSource(CONNECTOR_SOURCE))map.addSource(CONNECTOR_SOURCE,{type:'geojson',data:connectors});
    if(priBoundary){
     if(!map.getSource(BOUNDARY_SOURCE))map.addSource(BOUNDARY_SOURCE,{type:'geojson',data:priBoundary});
     for(const [id,color,width] of [[BOUNDARY_CASING,'#FFFFFF',4.5],[BOUNDARY_LINE,BOUNDARY_COLOR,2.5]])if(!map.getLayer(id))map.addLayer({id,source:BOUNDARY_SOURCE,type:'line',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':color,'line-width':width,'line-opacity':.95}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
     for(const id of [BOUNDARY_CASING,BOUNDARY_LINE])map.setLayoutProperty(id,'visibility',mode?'visible':'none');
    }
-   if(!map.getLayer(UNKNOWN_CASING))map.addLayer({id:UNKNOWN_CASING,source:SOURCE,type:'line',minzoom:11.5,filter:['all',['==',['geometry-type'],'LineString'],['!', ['get','evaluated']]],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#F7F8FA','line-opacity':.9,'line-width':['interpolate',['linear'],['zoom'],11.5,3.2,13,4.0,15,5.3,17,6.8,19,8.2]}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
+   if(!map.getLayer(UNKNOWN_CASING))map.addLayer({id:UNKNOWN_CASING,source:SOURCE,type:'line',minzoom:11.5,filter:['all',['==',['geometry-type'],'LineString'],['!', ['get','evaluated']]],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#F7F8FA','line-opacity':.45,'line-width':['interpolate',['linear'],['zoom'],11.5,3.2,13,4.0,15,5.3,17,6.8,19,8.2]}},map.getLayer(LINE)?LINE:priOverlayAnchor(map.getStyle()?.layers));
    // First-symbol insertion was too low: later district/building fills could
    // cover every PRI road. Insert AFTER all opaque layers but BEFORE map pins.
    if(!map.getLayer(LINE))map.addLayer({id:LINE,source:SOURCE,type:'line',minzoom:11.5,
     filter:['==',['geometry-type'],'LineString'],layout:{'line-cap':'round','line-join':'round'},
-    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.88,.95],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},
+    paint:{'line-color':colors,'line-opacity':['case',['get','evaluated'],.88,.8],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},
     priOverlayAnchor(map.getStyle()?.layers));
    if(!map.getLayer(POINT))map.addLayer({id:POINT,source:SOURCE,type:'circle',minzoom:16,
     filter:['==',['geometry-type'],'Point'],
@@ -217,24 +221,29 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
     paint:{'line-color':colors,'line-opacity':.95,
      'line-width':['interpolate',['linear'],['zoom'],11.5,1.4,13,2.4,15,3.8,17,5.7,19,7.8]}},
     priOverlayAnchor(map.getStyle()?.layers));
-   if(!map.getLayer(CANDIDATE_LINE))map.addLayer({id:CANDIDATE_LINE,source:SOURCE,type:'line',minzoom:11.5,filter:['==',['get','sharedCandidate'],true],layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':CANDIDATE_COLOR,'line-opacity':1,'line-dasharray':[2,1.4],'line-width':['interpolate',['linear'],['zoom'],11.5,2,13,2.8,15,3.7,17,5,19,6.4]}},priOverlayAnchor(map.getStyle()?.layers));
+   if(!map.getLayer(CANDIDATE_LINE))map.addLayer({id:CANDIDATE_LINE,source:SOURCE,type:'line',minzoom:11.5,filter:['==',['get','sharedCandidate'],true],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':CANDIDATE_COLOR,'line-opacity':.85,'line-width':['interpolate',['linear'],['zoom'],11.5,2,13,2.8,15,3.7,17,5,19,6.4]}},priOverlayAnchor(map.getStyle()?.layers));
+   if(!map.getLayer(CONNECTOR_LINE))map.addLayer({id:CONNECTOR_LINE,source:CONNECTOR_SOURCE,type:'line',minzoom:11.5,layout:{'line-cap':'butt','line-join':'round'},paint:{'line-color':['get','color'],'line-opacity':['case',['get','evaluated'],.88,.8],'line-width':['interpolate',['linear'],['zoom'],11.5,1,13,1.5,15,2.35,17,3.6,19,5.2]}},priOverlayAnchor(map.getStyle()?.layers));
    // Reposition layers if a late building/district overlay was appended above
    // them, including when the basemap changes its style without a full reset.
-   for(const id of [BOUNDARY_CASING,BOUNDARY_LINE,UNKNOWN_CASING,LINE,POINT,SPEED_LINE,CANDIDATE_LINE]){
+   for(const id of [BOUNDARY_CASING,BOUNDARY_LINE,UNKNOWN_CASING,LINE,POINT,SPEED_LINE,CANDIDATE_LINE,CONNECTOR_LINE]){
     if(map.getLayer(id)&&priCoveredByMapLayer(map.getStyle()?.layers,id)){
      map.moveLayer(id,priOverlayAnchor(map.getStyle()?.layers));
     }
    }
    const activeColors=mode==='protectionGap'?protectionGapColors:colors;
    map.setLayoutProperty(SPEED_LINE,'visibility',mode==='speed'?'visible':'none');
+   map.setLayoutProperty(LINE,'visibility',mode?'visible':'none');
+   map.setLayoutProperty(POINT,'visibility',mode?'visible':'none');
+   map.setLayoutProperty(CONNECTOR_LINE,'visibility',mode?'visible':'none');
    map.setLayoutProperty(UNKNOWN_CASING,'visibility',mode?'visible':'none');
    map.setLayoutProperty(CANDIDATE_LINE,'visibility',mode==='sharedRoad'?'visible':'none');
    map.setFilter(LINE,mode==='sharedRoad'?['all',['==',['geometry-type'],'LineString'],['!=',['get','sharedCandidate'],true]]:['==',['geometry-type'],'LineString']);
    map.setPaintProperty(LINE,'line-color',activeColors);
    map.setPaintProperty(POINT,'circle-color',activeColors);
-   map.setPaintProperty(LINE,'line-opacity',mode==='speed'?['case',['get','evaluated'],.28,.95]:['case',['get','evaluated'],.88,.95]);
-   map.setPaintProperty(LINE,'line-width',['interpolate',['linear'],['zoom'],11.5,['case',['get','evaluated'],1,1.8],13,['case',['get','evaluated'],1.5,2.4],15,['case',['get','evaluated'],2.35,3.4],17,['case',['get','evaluated'],3.6,4.8],19,['case',['get','evaluated'],5.2,6.2]]);
+   map.setPaintProperty(LINE,'line-opacity',mode==='speed'?['case',['get','evaluated'],.28,.8]:['case',['get','evaluated'],.88,.8]);
+   map.setPaintProperty(LINE,'line-width',['interpolate',['linear'],['zoom'],11.5,['case',['get','evaluated'],1,1],13,['case',['get','evaluated'],1.5,1.5],15,['case',['get','evaluated'],2.35,2.35],17,['case',['get','evaluated'],3.6,3.6],19,['case',['get','evaluated'],5.2,5.2]]);
    map.getSource(SOURCE).setData(display);
+   map.getSource(CONNECTOR_SOURCE).setData(connectors);
    return true;
   }catch(error){console.warn('[PRI] map layer unavailable; will retry on style update',error);return false;}
  }
@@ -244,21 +253,24 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
   if(id==='sharedCandidate')id='sharedRoad';
   if(id==='middleReview')id='protectionGap';
   if(id&&(!dataset||(id==='protectionGap'?!policyScope:id==='speed'?!speedSource?.features?.length:id==='current6'?!dataset.segments.some(s=>currentSixFactorCoverage(s)>=2):id==='current4'?!dataset.segments.some(s=>currentFourFactorCoverage(s)>=2):id==='current3'?!dataset.segments.some(s=>currentVulnerabilityCoverage(s)>=2):!dataset.factors.some(f=>f.id===id))))return;
+  if(id)thematic.claimPri();else thematic.releasePri();
   mode=id;syncDockClearance();if(id){app.dataset.djPriVisible='true';app.dataset.djPriMode=id;}
   else{delete app.dataset.djPriVisible;delete app.dataset.djPriMode;}
   doc.documentElement.dataset.djPriActive=id?'true':'false';syncPriHud(Boolean(id));popup?.remove();popup=null;
   if(id==='sharedRoad'){
    const ids=new Set((sharedCandidates?.networkVersion===dataset.networkVersion?(sharedCandidates.scores||[]):[]).map(s=>s.id));
-   const source=policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(observedFactorScore(s,'sharedRoad'))]))):displayRisk(displayFeatures(dataset,'sharedRoad'));
+   const source=policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(observedFactorScore(s,'sharedRoad'))]))):EMPTY;
    display={...source,features:source.features.map(f=>({...f,properties:{...f.properties,sharedCandidate:!f.properties.evaluated&&ids.has(f.properties.segmentId)}}))};
-  }else display=id?(id==='speed'?speedRiskDisplay(speedSource,policyScope?scopedPolicyFeatures(policyScope).features:[]):id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current6'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current6'))]))):EMPTY):id==='current4'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current4'))]))):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):(['crossing','sharedRoad'].includes(id)&&policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,id))]))):displayRisk(displayFeatures(dataset,id)))):EMPTY;
+  }else display=id?(id==='speed'?speedRiskDisplay(speedSource,policyScope?scopedPolicyFeatures(policyScope).features:[]):id==='protectionGap'?(policyScope?scopedPolicyFeatures(policyScope):EMPTY):id==='current6'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current6'))]))):EMPTY):id==='current4'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current4'))]))):EMPTY):id==='current3'?(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,'current3'))]))):EMPTY):(policyScope?scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,id))]))):EMPTY)):EMPTY;
+  display=id&&policyScope&&priBoundary?clipPriDisplay(display,priBoundary):EMPTY;
+  connectors=id?priVisualConnectors(display,priBoundary,id):EMPTY;
   if(id||map.getSource(SOURCE))draw();
   // Selecting a layer is not permission to replace the user's camera. Area
   // navigation belongs to the explicit button below, not every mode switch.
   toggle.setAttribute('aria-pressed',String(Boolean(id)));legend.hidden=!id;ramp.hidden=false;ends.hidden=false;candidateKey.hidden=id!=='sharedRoad';unknownKey.hidden=false;boundaryKey.hidden=!priBoundary;if(!id){detailToggle.setAttribute('aria-expanded','false');detailBody.setAttribute('aria-hidden','true');}
    if(id){label.textContent=id==='sharedRoad'?'보차혼용도로 위험도':id==='protectionGap'?'제도적 사각지대':id==='speed'?'제한속도 위험도 · 표준노드링크':id==='current6'?'종합 보행 취약도 · 6개 항목':id==='current4'?'종합 보행 취약도 · 4개 항목':id==='current3'?'종합 보행 취약도 · 3개 자료':id==='pri'?'종합 PRI':id==='pri12'?'PRI 위험점수 · 야간+사고 평균':id==='lighting'?'야간 시야 위험점수 (추정)':id==='accidents'?'사고다발지 위험점수 (미선정 회색)':dataset.factors.find(f=>f.id===id).label;const s=id==='speed'?{geometryM:0,pointCount:0}:summarize(dataset,id);coverage.textContent=id==='sharedRoad'?display.features.filter(f=>f.properties.evaluated).length+'개 평가 · '+display.features.filter(f=>f.properties.sharedCandidate).length+'개 조사 후보(미평가) · 나머지 회색 미평가 · 미확인 점수는 종합 PRI 제외':id==='current6'?'6개 지수 동일 가중치 · 실제로 평가된 자료만 평균한 부분평가 · 상도1동 '+display.features.filter(f=>f.properties.evaluated).length+'개 평가 표시 · 회색 '+display.features.filter(f=>!f.properties.evaluated).length+'개 · 횡단보도 접근성 추정 포함 · 보차혼용 분류 미확인 제외':id==='speed'?'상도1동 표준노드링크 '+speedRiskCounts(speedSource.features).total+'개 · 30km/h 미만 '+speedRiskCounts(speedSource.features).observed[0]+' · 30km/h '+speedRiskCounts(speedSource.features).observed[40]+' · 40km/h '+speedRiskCounts(speedSource.features).observed[80]+' · 50km/h '+speedRiskCounts(speedSource.features).observed[100]+' · 공통 조사도로 미매칭 구간 회색':(id==='protectionGap'||id==='current3'||id==='current4')?(policyScope?'상도1동 '+policyScope.features.length+'개 구간 · 평가 '+display.features.filter(f=>f.properties.evaluated).length+'개 · 회색 미평가 '+display.features.filter(f=>!f.properties.evaluated).length+'개'+(id==='protectionGap'?' · 공식 SHP 경계 검증 '+(boundaryAudit?.size??'미확인')+'개 (기존 점수 유지) · 상현중학교 검토 '+(schoolReview?.metadata?.road_segments??0)+'개 구간 · 중학교 위험점수 NULL':id==='current4'?' · 제한속도 기하 매칭 '+(speedMatchStats?.observed??0)+'개/1,686개 (현장 미확인)':''):'경계 검증 자료를 불러오지 못해 표시하지 않습니다.'):'평가 도로 '+(s.observedM/1000).toFixed(2)+' / '+(s.totalM/1000).toFixed(2)+' km · '+'회색: 미평가·미선정 (평균 제외)';coverage.title=id==='current6'?'완전한 6개 지수 평균은 6/6 평가구간에만 성립합니다. 미평가 값을 0점이나 100점으로 가정하지 않으며 지도 색상은 현재 실제 관측값의 평균을 표시합니다. 구간을 누르면 평가 개수를 확인할 수 있습니다.':id==='current4'?'4개 항목은 동등 가중, 실제 유효한 값만 계산 · 제한속도 공통망 기하 정합 '+(speedMatchStats?.observed??0)+'개(잠정, 현장 미확인)':id==='speed'?'표준노드링크 자료 기준 '+(speedMetadata?.speed_record_updated??'미확인')+' · 조명 도로망에 위험점수 임의 매핑하지 않음':'원본 조사연장 기준 · 좌표 선형 '+(s.geometryM/1000).toFixed(2)+' km'+(s.pointCount?' · 점 구간 '+s.pointCount+'개':'');}
   ramp.style.background=id==='protectionGap'?'linear-gradient(90deg,#4C948B,#82AB94 25%,#DBC576 50%,#DDA263 75%,#CB6563)':'linear-gradient(90deg,#4C948B 0%,#4C948B 39.8%,#E0A04A 40%,#E0A04A 69.8%,#CF4248 70%,#CF4248 100%)';
-  modelNote.textContent=id==='current6'?'6개 지표: 야간 조명·교통사고·제도적 사각지대·제한속도·횡단보도 접근성·보차혼용도로. 유효한 지표 2개 이상을 동일 가중 평균합니다. 횡단보도 접근성은 50/100m 연구용 추정이며 보차혼용도로는 분리 여부와 도로폭 기준으로 확인된 점수만 반영합니다. 미평가 제외, 6개 미만 부분평가.':id==='crossing'?'OSM 도로 위계 대리지표: 집산·국지 후보 50m, 간선 후보 100m. 39개 조사 후보의 접근권 외부 연장 비율 ×100. 좌표 불일치·경계 영향 및 비대상은 미평가. 실제 가시거리·횡단 안전·4항목 현장평가가 아닙니다.':id==='sharedRoad'?'신규 도로폭 기준: 확인된 혼용 4m 미만 100점, 4m 이상 6m 미만 70점, 6m 이상 30점. 물리적 분리 0점(폭 무관). 분류 또는 필요한 폭 미확인 NULL. 청회색 점선은 PDF 보차혼용·이면도로 조사 후보(미평가)입니다. 도로폭 추정 및 조건부 점수는 도로 상세정보에 표시하며 실제 보차 분리 여부 검증 전 PRI에서 제외합니다.':id==='speed'?'첨부된 제한속도 위험도 기준: 30km/h 미만 0점, 30km/h 40점, 40km/h 80점, 50km/h 100점. 속도수치가 없거나 표에 없는 제한속도는 NULL(미평가)입니다. 표준노드링크 최고제한속도 수집값(2025-05-12 기준)이며 현장 지정·최신 표지와 다를 수 있습니다. 이는 법정 위험등급이나 실제 사고 확률이 아닌 잠재적 충돌 피해 심각성의 상대점수입니다. 206개 링크는 공통 25m 조사망과 대응 검증 전이므로 기존 3지표 종합·길찾기 점수에 포함하지 않습니다.':id==='current4'?'4개 평가항목은 야간 조명·교통사고·제도적 사각지대·제한속도입니다. 상도1동 기준 기하 정합된 제한속도 공통 조사구간 '+(speedMatchStats?.observed??0)+'개만 네 번째 지표로 반영합니다. 같은 항목 가중치는 1이며 유효 관측 2개 이상을 동일하게 평균합니다(점수별 유효 지표 수는 상세정보 표시). 미정합 도로는 제한속도 NULL로 남고 0점이나 안전 100점을 만들지 않습니다. 센터라인 기하 정합은 현장·법정속도 검증이 아닙니다. 높은 점수=취약, 빨간색입니다.':id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 2026-09-20 공식 학구 원본의 절단 도로 재교차를 별도로 검증했고 기존 위험점수가 변하지 않았습니다. 원본 점수와 보호구역 여부는 그대로 유지합니다. 상현중학교 300m 검토 여부는 도로 상세정보에서 확인합니다. 지도는 기존 보호 공백 점수의 색상과 회색 미평가 기준을 그대로 사용합니다. 중학교 관련 점수는 미산정(NULL)이며 기존 점수와 종합 PRI에 추가하지 않습니다. 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
+  modelNote.textContent=id==='current6'?'6개 지표: 야간 조명·교통사고·제도적 사각지대·제한속도·횡단보도 접근성·보차혼용도로. 유효한 지표 2개 이상을 동일 가중 평균합니다. 횡단보도 접근성은 50/100m 연구용 추정이며 보차혼용도로는 분리 여부와 도로폭 기준으로 확인된 점수만 반영합니다. 미평가 제외, 6개 미만 부분평가.':id==='lighting'?'PRI 원본 조명 위험도: 가로등·보안등의 3lx 기준 도달범위 추정, 평균 암부거리 / 50m × 100 (최대 100점). 25m 조사도로 자료를 상도1동 경계 내부에 표시합니다. 실제 조도 측정값이 아닙니다.':id==='crossing'?'OSM 도로 위계 대리지표: 집산·국지 후보 50m, 간선 후보 100m. 39개 조사 후보의 접근권 외부 연장 비율 ×100. 좌표 불일치·경계 영향 및 비대상은 미평가. 실제 가시거리·횡단 안전·4항목 현장평가가 아닙니다.':id==='sharedRoad'?'신규 도로폭 기준: 확인된 혼용 4m 미만 100점, 4m 이상 6m 미만 70점, 6m 이상 30점. 물리적 분리 0점(폭 무관). 분류 또는 필요한 폭 미확인 NULL. 청회색 선은 PDF 보차혼용·이면도로 조사 후보(미평가)입니다. 도로폭 추정 및 조건부 점수는 도로 상세정보에 표시하며 실제 보차 분리 여부 검증 전 PRI에서 제외합니다.':id==='speed'?'첨부된 제한속도 위험도 기준: 30km/h 미만 0점, 30km/h 40점, 40km/h 80점, 50km/h 100점. 속도수치가 없거나 표에 없는 제한속도는 NULL(미평가)입니다. 표준노드링크 최고제한속도 수집값(2025-05-12 기준)이며 현장 지정·최신 표지와 다를 수 있습니다. 이는 법정 위험등급이나 실제 사고 확률이 아닌 잠재적 충돌 피해 심각성의 상대점수입니다. 206개 링크는 공통 25m 조사망과 대응 검증 전이므로 기존 3지표 종합·길찾기 점수에 포함하지 않습니다.':id==='current4'?'4개 평가항목은 야간 조명·교통사고·제도적 사각지대·제한속도입니다. 상도1동 기준 기하 정합된 제한속도 공통 조사구간 '+(speedMatchStats?.observed??0)+'개만 네 번째 지표로 반영합니다. 같은 항목 가중치는 1이며 유효 관측 2개 이상을 동일하게 평균합니다(점수별 유효 지표 수는 상세정보 표시). 미정합 도로는 제한속도 NULL로 남고 0점이나 안전 100점을 만들지 않습니다. 센터라인 기하 정합은 현장·법정속도 검증이 아닙니다. 높은 점수=취약, 빨간색입니다.':id==='current3'?'상도1동 참고 행정경계 내부 도로에서 현재 확인된 3개 지표(야간 조명·교통사고·제도적 사각지대)를 동일 가중치로 평균합니다. 미평가 지표를 0점이나 100점으로 대체하지 않으며 유효 지표가 2개 이상인 구간만 표시합니다. 실제 사고다발지 미선정은 안전 판정이 아닙니다. 점수가 높을수록 취약하며 빨간색입니다.':id==='protectionGap'?'제도적 사각지대: 상도1동 참고 행정경계 내부 도로만 표시하고, 경계와 교차하는 보호시설 9곳의 300m 거리와 동일 초등학교 학구도를 결합(적용 가능 시 각 50%)한 연구용 위험점수. 높을수록 공백이 크며 빨간색으로 표시합니다. 경계 교차 22개 구간은 2026-09-20 공식 학구 원본의 절단 도로 재교차를 별도로 검증했고 기존 위험점수가 변하지 않았습니다. 원본 점수와 보호구역 여부는 그대로 유지합니다. 상현중학교 300m 검토 여부는 도로 상세정보에서 확인합니다. 지도는 기존 보호 공백 점수의 색상과 회색 미평가 기준을 그대로 사용합니다. 중학교 관련 점수는 미산정(NULL)이며 기존 점수와 종합 PRI에 추가하지 않습니다. 동작고는 제외합니다. 도로폭은 제외합니다. 회색은 평가 대상 밖이며 현행 3개 자료 종합에서는 유효한 조사값만 평균합니다. 실제 통학로·법적 지정 필요성은 미확인입니다.':'위험점수가 높을수록 취약 신호가 큽니다(빨간색). 미선정·미평가 구간은 회색으로 표시하고 임시 모델값은 평균에서 제외합니다.';
   render();
   if(id){alignPriDockSurface(legend);win.requestAnimationFrame?.(alignPriDockSurfaces);}
  }
@@ -312,7 +324,7 @@ export function installPriMap({map,maplibregl,app,doc=document,win=window,restor
  function recoverLayer(){
   if(!mode)return;
   const layers=map.getStyle?.()?.layers;
-  if(map.getSource(SOURCE)&&map.getLayer(LINE)&&map.getLayer(POINT)&&map.getLayer(UNKNOWN_CASING)&&map.getLayer(CANDIDATE_LINE)
+  if(map.getSource(SOURCE)&&map.getLayer(LINE)&&map.getLayer(POINT)&&map.getLayer(UNKNOWN_CASING)&&map.getLayer(CANDIDATE_LINE)&&map.getSource(CONNECTOR_SOURCE)&&map.getLayer(CONNECTOR_LINE)&&!priCoveredByMapLayer(layers,CONNECTOR_LINE)
    &&(!priBoundary||(map.getSource(BOUNDARY_SOURCE)&&map.getLayer(BOUNDARY_CASING)&&map.getLayer(BOUNDARY_LINE)&&!priCoveredByMapLayer(layers,BOUNDARY_CASING)&&!priCoveredByMapLayer(layers,BOUNDARY_LINE)))
    &&!priCoveredByMapLayer(layers,UNKNOWN_CASING)&&!priCoveredByMapLayer(layers,CANDIDATE_LINE)
    &&(!['speed'].includes(mode)||map.getLayer(SPEED_LINE))
