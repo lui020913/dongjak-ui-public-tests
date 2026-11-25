@@ -28,16 +28,13 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <strong class="heading">길찾기</strong>
-      <span class="mode"><svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="m11 7-3 6 5 3 1 5M13 9l4 3 3 1M8 13l-4 6M14 7l-2 8"/></svg>도보</span>
-      <button type="button" class="close" data-v3="close" aria-label="길찾기 닫기">
-        <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></svg>
-      </button>
+      <span class="mode"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1m-8-5 2-1 2 5"/></svg>도보</span>
     </header>
     <section class="route-panel" aria-label="출발지, 경유지와 도착지">
       <div class="fields">
         <span class="track" aria-hidden="true"></span>
         <button type="button" class="field first" data-v3="start" aria-label="출발지 검색">
-          <span class="kind">출발지</span><strong class="place" id="v3-start">현재 위치</strong>
+          <span class="kind">출발지</span><strong class="place" id="v3-start">출발지를 선택하세요</strong>
         </button>
         <div id="v3-waypoints" class="waypoints" hidden></div>
         <div class="waypoint-add-row"><button type="button" class="waypoint-add" data-v3="waypoint" aria-label="경유지 추가"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
@@ -92,7 +89,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   const syncLabels=()=>{
     const start=hasValue(legacyStart)?legacyStart.textContent.trim():null;
     const end=hasValue(legacyEnd)?legacyEnd.textContent.trim():null;
-    q('#v3-start').textContent=start||'현재 위치';
+    q('#v3-start').textContent=start||'출발지를 선택하세요';
     q('#v3-start').classList.toggle('placeholder',!start);
     q('[data-v3="start"]').setAttribute('aria-label',start?'출발지 '+start+' 변경':'출발지를 검색하거나 현재 위치로 지정');
     q('#v3-end').textContent=end||'어디로 가시나요?';
@@ -124,7 +121,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     pendingBaseCount=count;pendingWaypoint=true;mirrorWaypoints();requestPosition();
     q('.waypoint-pending')?.scrollIntoView({block:'nearest',behavior:win.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   };
-  const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
+  const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().filter((place,i,all)=>all.findIndex(p=>p.name===place.name&&Math.abs(Number(p.lng)-Number(place.lng))<0.0001&&Math.abs(Number(p.lat)-Number(place.lat))<0.0001)===i||!Number.isFinite(Number(place.lng))).slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
     resizeFrame=0;
     if(!active)return;
@@ -254,7 +251,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
       requestPosition();
     }
   };
-  for(const key of ['back','close']){
+  for(const key of ['back']){
     listen(q('[data-v3="'+key+'"]'),'click',()=>old.querySelector('[data-close-page="route"]')?.click());
   }
   listen(q('[data-v3="start"]'),'click',()=>openSearch('start'));
