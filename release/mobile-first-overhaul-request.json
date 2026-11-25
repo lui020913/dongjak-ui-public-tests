@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.181",
+  "application_version": "9.2.182",
   "public_work_branch": "main",
-  "purpose": "PR515: remove obsolete tablet-mode guidance; show actual resident guidebook PDF size and synchronize size at build time. Public app source CI and FIX phone aggregate passed (38/38). Protected Preview and Production QA.",
-  "attempt": 409,
+  "purpose": "PR521: combined Android APK/install fixes, community report location picker, exclusive pilot road layers, independent point layers, disabled incidents/enforcement cameras; protection zones and urban environment removed. Source CI and all 36 FIX phone shards plus aggregate passed (38/38 jobs). Protected Preview and Production QA.",
+  "attempt": 410,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
