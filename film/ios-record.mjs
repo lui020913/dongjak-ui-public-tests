@@ -13,7 +13,7 @@ let session, rec, recDone, failure, started=false;
 const logs=[];
 async function request(method,endpoint,body){
   const payload=body===undefined?undefined:JSON.stringify(body);
-  const limit=endpoint==='/session'?1200000:240000;
+  const limit=endpoint==='/session'?1200000:endpoint.endsWith('/url')?90000:60000;
   return new Promise((resolve,reject)=>{
     const req=http.request(base+endpoint,{method,headers:{'Content-Type':'application/json',...(payload===undefined?{}:{'Content-Length':Buffer.byteLength(payload)})}},res=>{
       let data='';res.setEncoding('utf8');res.on('data',c=>data+=c);res.on('error',reject);
@@ -49,7 +49,16 @@ async function find(a,visible=true){
     return filtered[a.index||0];
   },a.timeout||30000,a.selector);
 }
-const click=async a=>cmd('POST','/element/'+await find(a)+'/click',{});
+// Keep all rendering in actual iOS Safari, but use the web DOM for non-input buttons.
+const domMatch=String.raw`const a=arguments[0];const nodes=Array.from(document.querySelectorAll(a.selector)).filter(n=>{const s=getComputedStyle(n),r=n.getBoundingClientRect(),t=n.innerText||n.textContent||'';return !n.hidden&&s.visibility!=='hidden'&&s.display!=='none'&&r.width>0&&r.height>0&&(!a.text||t.includes(a.text))&&(!a.text2||t.includes(a.text2));});const n=nodes[a.index||0];`;
+async function domVisible(a){return until(()=>execute(domMatch+'return !!n;',[a]),a.timeout||30000,a.selector);}
+async function click(a){
+  await domVisible(a);
+  const kind=await execute(domMatch+'return n?.tagName||null;',[a]);
+  if(kind==='INPUT'||kind==='TEXTAREA')return cmd('POST','/element/'+await find(a)+'/click',{});
+  const clicked=await execute(domMatch+'if(!n||n.disabled)return false;n.click();return true;',[a]);
+  if(!clicked)throw Error('Could not activate '+a.selector);
+}
 const check=(selector,expected)=>execute('const parts=arguments[0].split(" ");let n=document;for(const p of parts){n=n.querySelector(p)||null;if(!n)return false;if(n.shadowRoot)n=n.shadowRoot;}return (n.textContent||"").includes(arguments[1]);',[selector,expected]);
 async function prepare(){
   await cmd('POST','/url',{url});
@@ -57,17 +66,18 @@ async function prepare(){
   const visible=sel=>execute('const n=document.querySelector(arguments[0]);return !!(n&&!n.hidden&&n.getClientRects().length&&getComputedStyle(n).visibility!=="hidden");',[sel]);
   await until(async()=>await visible('#dj-install-menu')||await visible('#map'),90000,'install menu or map');
   if(await visible('#dj-install-menu')){
-    const buttons=await cmd('POST','/elements',{using:'css selector',value:'#dj-install-menu button'});
-    for(const e of buttons){const id=elId(e);if((await cmd('GET','/element/'+id+'/text')).includes('웹에서 바로 이용하기')){await cmd('POST','/element/'+id+'/click',{});break;}}
+    console.log('Activating real website install gate');
+    await click({selector:'#dj-install-menu button',text:'웹에서 바로 이용하기'});
   }
   await until(()=>visible('#map'),90000,'map');
+  console.log('Map visible');
   await until(async()=>!await visible('#map-startup-overlay')||await visible('#map-startup-continue'),90000,'map startup');
   if(await visible('#map-startup-overlay')&&await visible('#map-startup-continue'))await click({selector:'#map-startup-continue'});
   await until(async()=>!await visible('#map-startup-overlay'),60000,'startup hidden');
   await until(()=>execute('return document.querySelector("#app")?.dataset.dj860AutoResolved==="true"'),60000,'onboarding resolved');
   if(await visible('#dj860-onboarding'))await click({selector:'#dj860-onboarding [data-dj860-action="skip"]'});
   await until(async()=>!await visible('#dj860-onboarding'),30000,'onboarding hidden');
-  await find({selector:'#map-quick-search-query'});
+  await domVisible({selector:'#map-quick-search-query'});
   // Let real map assets finish loading; never mock or modify app data.
   await until(()=>execute('return document.querySelector("#map canvas")?.width>0&&document.querySelector("#map canvas")?.height>0'),30000,'map canvas');
   await sleep(4500);
@@ -77,7 +87,7 @@ async function step(a){
     case 'wait':return sleep(a.ms);
     case 'visible':{
       if(a.selector.startsWith('text='))return until(()=>execute('return document.body.innerText.includes(arguments[0])',[a.selector.slice(5)]),a.timeout||30000,a.selector);
-      return find(a);
+      return domVisible(a);
     }
     case 'contains':return until(()=>check(a.selector,a.expected),a.timeout||30000,a.selector);
     case 'click':return click(a);
@@ -106,7 +116,7 @@ async function step(a){
   }
 }
 try{
-  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':true,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':480000,'appium:wdaConnectionTimeout':240000,'appium:wdaStartupRetries':1,'appium:showXcodeLog':true,'appium:usePrebuiltWDA':true,'appium:useNewWDA':false,'appium:derivedDataPath':process.env.RUNNER_TEMP+'/film-wda'};
+  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':false,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':480000,'appium:wdaConnectionTimeout':240000,'appium:wdaStartupRetries':1,'appium:showXcodeLog':true,'appium:usePrebuiltWDA':true,'appium:useNewWDA':false,'appium:derivedDataPath':process.env.RUNNER_TEMP+'/film-wda'};
   console.log('Creating Safari session using prebuilt WDA');
   const result=await request('POST','/session',{capabilities:{alwaysMatch:capabilities,firstMatch:[{}]}});
   session=result.sessionId;
