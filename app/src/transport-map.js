@@ -1459,7 +1459,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     lastFittedRouteId=busRouteOverlay.getActive()?.id||null;
     syncRoutePresentation();
   }
-  const busDetail=createBusRouteDetail({panel,
+  const busDetail=createBusRouteDetail({panel,apiBase:TRANSPORT_API_BASE,
     onHidden:syncRoutePresentation,
     onClose:()=>clearSelectedBusRoute(),
     onMap:()=>{busRouteOverlay.setMapVisible(true);compactRouteDetail();const coordinates=busRouteOverlay.getRouteCoordinates();
@@ -2779,7 +2779,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       let response;
       try{response=await fetch(url,{signal:ctrl.signal});}finally{clearTimeout(timer);}
       const body=await response.json().catch(()=>({}));
-      if(activeSeq!==seq||selected!==place||panel.hidden)return;
+      if(activeSeq!==seq||selected!==place||panel.hidden||selectedDay!==(timetableDay||activeSeoulDay()))return;
       const data=response.ok?body:{status:'error',notice:body.notice||body.error||'운행시간표 조회에 실패했습니다.'};
       if(response.ok&&data.status==='ok'){
         serviceHoursMemo.set(cacheKey,{at:Date.now(),value:data});

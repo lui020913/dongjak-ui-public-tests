@@ -27,11 +27,11 @@ export function extractRows(body){
  if(body&&typeof body==='object'&&('routeId' in body||'route_id' in body))return [body];
  throw new Error('HISTORY_FORMAT');
 }
-export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pageSize=1000,maxPages=20,timeout=18000}={}){
+export async function fetchArrivalHistory(query,key,{fetcher=globalThis.fetch,pageSize=1000,maxPages=10,timeout=18000}={}){
  const all=[];const signatures=new Set();let complete=false;
  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
  try{
-  for(let i=0;i<maxPages;i++){
+  for(let i=0;i<maxPages&&1+i*pageSize<=9999;i++){
    const url=new URL(ENDPOINT);url.search=new URLSearchParams({apikey:key,startRow:String(1+i*pageSize),rowCnt:String(pageSize),stdrDe:query.date,routeId:query.routeId});
    const res=await fetcher(url,{signal:ctrl.signal,headers:{Accept:'application/json'},redirect:'error'});
    if(!res.ok)throw new Error(res.status===401||res.status===403?'HISTORY_AUTH':res.status===429?'HISTORY_QUOTA':'HISTORY_UPSTREAM');

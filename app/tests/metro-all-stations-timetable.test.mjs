@@ -131,3 +131,17 @@ test('1차 역명 검색에서 API 오류 코드가 반환되어도 노선별 �
   assert.equal(out.status,'ok');
   assert.ok(calls.includes('SearchSTNBySubwayLineInfo'));
 });
+
+test('한 방향만 누락된 경우 역코드 API로 누락 방향만 복구',async()=>{
+  const calls=[];
+  const fetchJSON=async(service,parts)=>{
+    calls.push({service,parts});
+    if(service==='SearchInfoBySubwayNameService')return stationLookup([{...fakeStation('상도','7호선','739'),STATION_CD:'2739'}]);
+    if(service==='SearchSTNTimeTableByFRCodeService')return parts[3]==='1'?fakeTrain('1'):{SearchSTNTimeTableByFRCodeService:{row:[]}};
+    if(service==='SearchSTNTimeTableByIDService')return {SearchSTNTimeTableByIDService:fakeTrain('2').SearchSTNTimeTableByFRCodeService};
+    throw Error('unexpected');
+  };
+  const out=await fetchStationTimetables({station:'상도',line:'7호선',day:'1',fetchJSON,now:fixedDate});
+  assert.equal(out.timetable.length,4);
+  assert.deepEqual(calls.filter(x=>x.service==='SearchSTNTimeTableByIDService').map(x=>x.parts[3]),['2']);
+});

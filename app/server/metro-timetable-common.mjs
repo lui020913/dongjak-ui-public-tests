@@ -106,7 +106,7 @@ export async function fetchStationTimetables({station,line,day,fetchJSON,now=new
       if(idRows.length){
         parsedTimes=[...parsedTimes,...idRows];
         summary=[...summary,...parseMetroServiceHours(verifiedID,selectedLine,now,day)];
-      }else notes.push(`${selectedLine}: 일부 또는 전체 방향 시간표 미제공 (운영기관 확인 필요)`);
+      }else notes.push(parsedTimes.length?`${selectedLine}: 일부 방향 시간표 미제공 (운영기관 확인 필요)`:`${selectedLine}: 시간표 조회 결과 없음 · 외부코드/역코드 API 모두 미제공 (운영기관 확인 필요)`);
     }
     items.push(...summary);
     timetable.push(...parsedTimes);
