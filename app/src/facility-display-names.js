@@ -1,3 +1,4 @@
+import {verifiedDisplayName,verifiedNameAliases} from './verified-place-directory.js';
 /** Shared display aliases for verified retail brands. Never overwrite source records.
  * Restrict operator-only aliases to matching business types; do not infer a branch from its address.
  */
@@ -13,7 +14,32 @@ const TYPE_ALIASES=Object.freeze({
  '공중화장실':'화장실','공공화장실':'화장실',police_station:'경찰서',police_substation:'경찰서',police_box:'경찰서',fire:'소방서',fire_substation:'소방서',town_hall:'공공기관',government:'공공기관',public_building:'공공기관',post:'우체국',doctor:'의원',doctors:'의원',defibrillator:'AED',aed:'AED',sports_hall:'체육시설',stadium:'체육시설',fitness_centre:'체육시설',swimming_pool:'체육시설'
 });
 const genericType=new Set(['','장소','시설','일반시설','일반 시설','일반 장소','공공기관','공공시설','주민시설','안전시설','point','other','unknown','amenity','public','civic']);
+// Seoul City confirmed the former Sangdo 5 police site is no longer an
+// operating police office: https://www.seoul.go.kr/news/news_report.do?bbsNo=158&cntPerPage=10&curPage=1&nttNo=442156&srchKey=sj&srchText=STO
+const formerPoliceNames=['상도5치안센터','상도 5치안센터','상도5 치안센터','상도 5 치안센터','상도5파출소','상도5치안센터 (운영 종료)'];
+export const formerPoliceNameVariants=Object.freeze(formerPoliceNames);
+export function isFormerPoliceFacility(name){return formerPoliceNames.some(n=>fold(n)===fold(name));}
+export function facilityDisplayType(value,name=''){
+ const category=normalizeFacilityCategory(value,name);
+ const label=String(name??'').replace(/\s+/g,'');
+ if(category==='경찰서'){
+   if(/지구대$/.test(label))return '지구대';
+   if(/파출소$/.test(label))return '파출소';
+   if(/치안센터$/.test(label))return '치안센터';
+ }
+ if(category==='소방서'){
+   if(/119안전센터$/.test(label))return '119안전센터';
+   if(/119구조대$/.test(label))return '119구조대';
+   if(/119지역대$/.test(label))return '119지역대';
+ }
+ return category;
+}
+export function verifiedFacilityLabelExpression(raw){
+ const pairs=verifiedNameAliases.filter(([a,b])=>a!==b);
+ return pairs.length?['match',raw,...pairs.flat(),raw]:raw;
+}
 export function normalizeFacilityCategory(value,name=''){
+ if(isFormerPoliceFacility(name))return '운영 종료 시설';
  const raw=String(value??'').trim();
  const type=TYPE_ALIASES[raw]||TYPE_ALIASES[raw.toLowerCase()]||categoryAliases[raw.toLowerCase()]||raw;
  if(genericType.has(type)){
@@ -92,7 +118,10 @@ function prefixMatch(name,alias){
 }
 const explicitOperators=['지에스리테일','GS리테일','GS Retail','비지에프리테일','BGF리테일','코리아세븐','한국세븐','파리크라상','씨제이푸드빌','CJ푸드빌','더본코리아','롯데지알에스','비알코리아'];
 export function normalizeFacilityName(value,category=''){
- const raw=String(value??'').trim();
+ const raw=String(value??'').normalize('NFC').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim();
+ if(isFormerPoliceFacility(raw))return '상도5치안센터 (운영 종료)';
+ const verified=verifiedDisplayName(raw);
+ if(verified)return verified;
  category=normalizeFacilityCategory(category,raw);
  if(!raw||!COMMERCIAL.has(category))return raw;
  let name=stripLegal(trim(raw));
@@ -124,6 +153,8 @@ export function normalizeFacilityRecord(place){
 export function facilitySearchTerms(value){
  const raw=String(value??'').trim();if(!raw)return [];
  const q=stripLegal(trim(raw));
+ const verified=verifiedDisplayName(q);
+ if(verified)return [...new Set([raw,verified,...verifiedNameAliases.filter(([,name])=>name===verified).map(([alias])=>alias)])];
  const categoryTerms=facilityCategorySearchTerms(q);
  if(categoryTerms.length)return [...new Set([raw,...categoryTerms])].slice(0,20);
  for(const rule of rules){
