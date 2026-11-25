@@ -19,7 +19,7 @@
   isolation:isolate;
   overscroll-behavior:contain!important;
 }
-html body[data-dj-community-editor="open"]{
+html body:is([data-dj-community-editor="open"],[data-dj-community-editor="closing"]){
   overscroll-behavior:none!important;
   overflow:hidden!important;
 }
@@ -225,3 +225,5 @@ html body #dj-activity-screen:not([hidden]){position:fixed;inset:0;z-index:21474
 @layer request-completion{
  html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #participation-panel #community-list .community-comment-form input[type=text]{min-width:0!important;width:0!important;flex:1 1 0!important;}
 }
+
+#dj-community-editor-portal[data-closing="true"]{pointer-events:none!important;}
