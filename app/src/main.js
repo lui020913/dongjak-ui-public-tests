@@ -1983,6 +1983,8 @@ function closeCommunityLocation(){
   communityLocationMarker?.remove();communityLocationMarker=null;
   communityLocationCard?.remove();communityLocationCard=null;
 }
+window.addEventListener('dongjak:map-search-opened',closeCommunityLocation);
+window.addEventListener('dongjak:map-place-selected',closeCommunityLocation);
 function saveCommunity(next) {
   try {
     localStorage.setItem(communityStorageKey, JSON.stringify(next));
