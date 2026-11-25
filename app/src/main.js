@@ -2095,7 +2095,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
 // Intercept only actual bottom-tab changes before the legacy HOME guard.
 installBottomTabNavigation({doc:document,win:window,app});
 installSafetyHomeGuard({doc:document,win:window,app,onHome:()=>{
-  const finish=()=>{routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
+  const finish=()=>{if(app.dataset.tab==='route'||routePickMode||routeResult||routeStart||routeEnd||routeWaypoints.length)resetRoute();closeCommunityLocation();quickSearch.clearMapResults?.();routePickMode=null;closeTransitRouteConfirmation();quickSearch.close();navigate('map',{suppressOverview:true});};
   const active=pagePanels.find(p=>!p.hidden);
   // Primary phone tabs are real screens. Do not slide them down as map sheets.
   if(active&&window.matchMedia('(max-width:699px)').matches&&['route','participate','news','mine'].includes(app.dataset.tab)){
@@ -2123,6 +2123,7 @@ for(const id of ['map-tools-toggle','map-safety-toggle','night-visibility-quick-
 }
 // Each auxiliary page has a persistent X that returns to the existing map tab.
 function closePrimaryPageToMap(panel){
+  if(panel?.dataset.page==='route')resetRoute();
   const finish=()=>navigate('map',{suppressOverview:true});
   if(panel&&window.matchMedia('(max-width:699px)').matches){
     window.DongjakWindowMotion?.cancel?.(panel);finish();
@@ -3076,6 +3077,8 @@ function pickRouteLocation(lngLat,point) {
     lng:lngLat.lng,lat:lngLat.lat,lines:[]});
 }
 function resetRoute() {
+  routePriVisuals=null;
+  closeCommunityLocation();
   clearTransitPreview();
   stopNavigation();
   closeRouteSearch();closeTransitRouteConfirmation();
@@ -3730,7 +3733,7 @@ async function startNavigation() {
 }
 document.getElementById('route-guide-start').addEventListener('click',()=>startNavigation());
 document.getElementById('route-start-gps').addEventListener('click',()=>startNavigation());
-document.getElementById('nav-stop').addEventListener('click',()=>{stopNavigation();toast('안내를 종료했습니다.');});
+document.getElementById('nav-stop').addEventListener('click',()=>{resetRoute();navigate('map',{suppressOverview:true});toast('안내를 종료했습니다.');});
 document.getElementById('nav-follow').addEventListener('click',()=>{
   navFollow=!navFollow;
   updateNavButtonLabels();
