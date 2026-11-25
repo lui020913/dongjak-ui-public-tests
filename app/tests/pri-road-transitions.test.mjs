@@ -50,3 +50,13 @@ test('native road paint is below PRI while rail, route and pin overlays stay ind
  const moved=layers.filter(l=>l.id!=='dj-pri-line');moved.splice(3,0,{id:'dj-pri-line',type:'line'});
  assert.equal(priCoveredByMapLayer(moved,'dj-pri-line'),false);
 });
+
+test('named through road at a junction blends only its mutual straight continuation',()=>{
+ const branch=feature('side',[b,[126.9503,37.5002]],50,{name:'옆길'});
+ const input=fc(feature('a',[a,[126.95015,37.500001],b],10,{name:'상도로'}),feature('b',[b,c],90,{name:'상도로'}),branch);
+ const output=roadEndpointTransitions(input);
+ assert.ok(output.features.filter(f=>f.properties.segmentId==='a').length>10);
+ assert.ok(output.features.filter(f=>f.properties.segmentId==='b').length>10);
+ assert.deepEqual(output.features.filter(f=>f.properties.segmentId==='side'),[branch]);
+ assert.ok(output.features.some(f=>f.geometry.coordinates.some(p=>p[0]===126.95015&&p[1]===37.500001)));
+});
