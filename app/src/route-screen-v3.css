@@ -126,7 +126,12 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 .search-bar input::placeholder{color:#9ca9a2}
 .search-clear{flex:none;width:30px;height:38px;border:0;background:transparent;color:#54736a;font-size:25px;border-radius:50%}
 .search-hint{font-size:13px;color:#6b7c72;padding:14px 4px;margin:0}
-.search-results{overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.search-results{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.search-results::-webkit-scrollbar{display:none;width:0;height:0}
+.search-results .search-recent-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;min-height:44px;padding:0 2px}
+.search-results .search-recent-head strong{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px}
+.search-results .search-recent-head button{min-height:40px;padding:8px 12px;white-space:nowrap;flex:none;border-radius:12px}
+.search-results > button{min-width:0;overflow-wrap:anywhere}
 .search-results button{flex:none}
 .search-head,.search-bar,.search-hint{flex:none}
 .search-results button{border:1px solid #e3eee8;background:#fff;border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;text-align:left;gap:5px}
