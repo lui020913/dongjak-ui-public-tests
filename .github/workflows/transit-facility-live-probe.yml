@@ -28,4 +28,14 @@ jobs:
           const r=await get('/api/transport/bus/route-path',{routeId:'100100112'});
           const s=r.stops?.find(s=>s.stationId&&s.name?.includes('상도'))||r.stops?.find(s=>s.stationId);
           if(s)await Promise.all(['20261015','20261118'].map(date=>get('/api/transport/bus-history',{routeId:'100100112',stationId:s.stationId,seq:s.seq,date})));
+          const path='/apig/apiman-gateway/tapi/BisTbisClCaralcSttn/1.0';
+          for(const protocol of ['https','http']){
+            try{
+              const u=protocol+'://t-data.seoul.go.kr'+path+'?startRow=1&rowCnt=10&stdrDe=20261015&routeId=100100112';
+              const res=await fetch(u,{redirect:'manual',signal:AbortSignal.timeout(15000)});
+              const loc=res.headers.get('location');
+              let msg='';try{msg=(await res.text()).slice(0,350)}catch{}
+              console.log(JSON.stringify({protocol,status:res.status,redirect:loc?new URL(loc,u).origin+new URL(loc,u).pathname:null,response:msg}));
+            }catch(e){console.log(JSON.stringify({protocol,error:e.name,cause:e.cause?.code}));}
+          }
           JS
