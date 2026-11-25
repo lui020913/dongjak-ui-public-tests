@@ -48,12 +48,18 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // by at most 32ms per rendered frame, never skip the visible dissolve.
   // The prior live surface and destination stay mounted until completion.
   let previousFrame=null,elapsed=0;
-  const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,4500);};
+  // A stalled remote WebGL renderer must not consume the presentation before
+  // the first delivered frame. Bound only a truly unresponsive renderer.
+  const armWatchdog=()=>{if(timer)win.clearTimeout(timer);timer=win.setTimeout(cleanup,15000);};
   const paint=now=>{
    if(finished)return;
    // A programmatic navigation or a newly opened modal must win over a
    // stale presentation. Never resurrect an already dismissed destination.
    if(app.dataset.tab!==destination||(incoming&&incoming.hidden)){cleanup();return;}
+   // The outgoing page is logically dismissed but must remain painted until
+   // this owner releases it. A legacy visibility write cannot skip the fade.
+   if(previous&&previous.hidden)previous.hidden=false;
+   if(previous)write(previous,{display:'flex',visibility:'visible','pointer-events':'none'});
    if(previousFrame!==null)elapsed+=Math.min(32,Math.max(0,now-previousFrame));
    previousFrame=now;
    const progress=Math.min(1,elapsed/300),alpha=progress*progress*(3-2*progress);
