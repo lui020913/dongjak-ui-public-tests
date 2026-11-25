@@ -687,7 +687,15 @@ test('phone weather single window and layer grid dark surfaces, header stays fix
  }).toBe(true);
  const before=await bounds();await scroll.evaluate(n=>n.scrollTop=n.scrollHeight);const after=await bounds();
  expect(Math.abs(before.y-after.y)).toBeLessThan(2);
- const toggle=modal.getByRole('switch').last();await expect(toggle).toHaveAttribute('aria-checked','false');
+ for(const id of ['incidents','camera']){
+   const row=modal.locator('[data-layer-key="'+id+'"]');
+   await expect(row).toHaveAttribute('data-unavailable','true');
+   await expect(row.locator('.djNext-layer-action')).toBeDisabled();
+   await expect(row.getByRole('switch')).toBeDisabled();
+   await expect(row).toContainText('자료 준비 중');
+ }
+ await expect(modal.locator('[data-layer-key="zone"],[data-layer-key="sdot"]')).toHaveCount(0);
+ const toggle=modal.locator('[data-layer-key="elevator"]').getByRole('switch');await expect(toggle).toBeEnabled();await expect(toggle).toHaveAttribute('aria-checked','false');
  // The ordinary app is light-only. #a5b5ad is its neutral OFF track;
  // #53615d belonged to the removed dark-mode UI and is no longer a valid
  // expectation. Verify the switch actually changes appearance and state.
@@ -892,24 +900,30 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
 test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
  test.skip(page.viewportSize().width>=700,'phone only');
  await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
- const mapReference=await page.screenshot({scale:'css'});
+ await tap(page,tab(page,'participate'));
+ await expect(page.locator('#participation-panel')).toBeVisible();
+ await expect(page.locator('#participation-panel')).toHaveCSS('opacity','1');
+ const feedReference=await page.screenshot({scale:'css'});
+ await tap(page,tab(page,'map'));
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
  await page.evaluate(()=>{
-  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),map=document.getElementById('map');if(editor&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(map);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='map'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
+  window.__reportOpenFrames=[];let n=0;const sample=()=>{const editor=document.getElementById('dj-community-editor-portal'),app=document.getElementById('app'),feed=document.getElementById('participation-panel');if(editor&&feed&&!editor.hidden){const a=getComputedStyle(app),m=getComputedStyle(feed);window.__reportOpenFrames.push({opacity:Number(getComputedStyle(editor).opacity),live:app.dataset.tab==='participate'&&a.visibility==='visible'&&Number(a.opacity)>.98&&m.visibility==='visible'&&m.display!=='none'&&Number(m.opacity)>.98});}if(++n<900)requestAnimationFrame(sample);};sample();
  });
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
  await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
- // A hidden attribute alone is not enough: legacy build-time code used
- // inline display:flex!important to paint the empty feed underneath.
- await expect(page.locator('#participation-panel')).toHaveCSS('display','none');
+ // Risk report uses the community tab's actual feed as its destination.
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
+ await expect(page.locator('#participation-panel')).toBeVisible();
+ await expect(portal.locator('#community-category')).toHaveValue('보행 불편');
  await expect(page.locator('#participation-panel')).not.toHaveClass(/dj9256-composing/);
  await expect(portal.locator('#community-form > .dj-compose-scroll')).toHaveCount(1);
  await expect(portal.locator('#community-form > .dj-compose-footer')).toHaveCount(1);
  await expect(portal.locator('.djNext-form-scroll')).toHaveCount(0);
 
  expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
- // DOM visibility alone cannot prove a WebGL surface has actually been
+ // DOM visibility alone cannot prove the community surface has actually been
  // composited under the editor in Safari. Sample real browser screenshots at
  // the two endpoints and at a held half-opacity of the same root layer.
  const editorReference=await page.screenshot({scale:'css'});
@@ -927,16 +941,16 @@ test('map report fades out over its real destination without reparenting or resi
      const ctx=c.getContext('2d');ctx.drawImage(image,0,0);
      return {w:c.width,h:c.height,p:ctx.getImageData(0,0,c.width,c.height).data};
    };
-   const [map,editor,half]=await Promise.all(images.map(decode));
-   if(map.w!==editor.w||map.w!==half.w||map.h!==editor.h||map.h!==half.h)return {samples:0,blended:0};
+   const [feed,editor,half]=await Promise.all(images.map(decode));
+   if(feed.w!==editor.w||feed.w!==half.w||feed.h!==editor.h||feed.h!==half.h)return {samples:0,blended:0};
    let samples=0,matched=0;
-   for(let y=Math.floor(map.h*.20);y<map.h*.82;y+=4)for(let x=12;x<map.w-12;x+=4){
-     const k=(y*map.w+x)*4;
+   for(let y=Math.floor(feed.h*.20);y<feed.h*.82;y+=4)for(let x=12;x<feed.w-12;x+=4){
+     const k=(y*feed.w+x)*4;
      let contrast=0,projection=0,error=0;
      for(let c=0;c<3;c++){
-       const d=map.p[k+c]-editor.p[k+c];contrast+=d*d;
+       const d=feed.p[k+c]-editor.p[k+c];contrast+=d*d;
        projection+=(half.p[k+c]-editor.p[k+c])*d;
-       error+=Math.abs(half.p[k+c]-(map.p[k+c]+editor.p[k+c])*.5);
+       error+=Math.abs(half.p[k+c]-(feed.p[k+c]+editor.p[k+c])*.5);
      }
      if(contrast<1600)continue;
      samples++;
@@ -944,34 +958,46 @@ test('map report fades out over its real destination without reparenting or resi
      if(mix>=.25&&mix<=.75&&error/3<22)matched++;
    }
    return {samples,blended:matched/Math.max(1,samples)};
- },[mapReference,editorReference,halfReference].map(x=>x.toString('base64')));
+ },[feedReference,editorReference,halfReference].map(x=>x.toString('base64')));
  if(blend.samples<100||blend.blended<.55){
    console.log('REPORT_PIXEL_BLEND_DIAGNOSTIC',JSON.stringify(blend));
-   await test.info().attach('map-reference',{body:mapReference,contentType:'image/png'});
+   await test.info().attach('community-reference',{body:feedReference,contentType:'image/png'});
    await test.info().attach('editor-reference',{body:editorReference,contentType:'image/png'});
    await test.info().attach('editor-half-opacity',{body:halfReference,contentType:'image/png'});
  }
- expect(blend.samples,'contrasting real map and editor screenshot pixels').toBeGreaterThanOrEqual(100);
- expect(blend.blended,'actual map/editor pixel compositing at half opacity').toBeGreaterThanOrEqual(.55);
+ expect(blend.samples,'contrasting real community and editor screenshot pixels').toBeGreaterThanOrEqual(100);
+ expect(blend.blended,'actual community/editor pixel compositing at half opacity').toBeGreaterThanOrEqual(.55);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
    window.__reportCloseFrames=[];
    const visible=n=>{if(!n)return false;const c=getComputedStyle(n),r=n.getBoundingClientRect();return c.visibility==='visible'&&c.display!=='none'&&Number(c.opacity)>.98&&r.width>0&&r.height>0;};
-   const canvas=document.querySelector('#map .maplibregl-canvas'),dock=document.getElementById('bottom-nav'),topbar=app.querySelector(':scope > .topbar');
+   const feed=document.getElementById('participation-panel'),dock=document.getElementById('bottom-nav');
    const sample=()=>{if(editor.hidden)return;
-     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,mapVisible:visible(app)&&visible(document.getElementById('map'))&&visible(canvas),chromeVisible:visible(dock)&&visible(topbar),feedHidden:getComputedStyle(document.getElementById('participation-panel')).display==='none',stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,feedVisible:visible(app)&&visible(feed),chromeVisible:visible(dock),stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
      requestAnimationFrame(sample);};
    editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
  });
  await tap(page,portal.locator('#community-compose-close'));
  await expect(portal).toBeHidden();
- await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
  const frames=await page.evaluate(()=>window.__reportCloseFrames);
  const intermediate=frames.filter(f=>f.opacity>.08&&f.opacity<.95);
  expect(intermediate.length).toBeGreaterThan(1);
- expect(intermediate.every(f=>f.tab==='map'&&f.mapVisible&&f.chromeVisible&&f.feedHidden)).toBe(true);
+ expect(intermediate.every(f=>f.tab==='participate'&&f.feedVisible&&f.chromeVisible)).toBe(true);
  expect(frames.every(f=>f.stable)).toBe(true);
  await expect(page.locator('#bottom-nav')).toBeVisible();
+ await expect(page.locator('#participation-panel')).toBeVisible();
+ await tap(page,page.locator('#community-compose-toggle'));
+ await expect(portal).toBeVisible();
+ const title=portal.locator('#community-title');await title.fill('위치 선택 테스트');
+ await portal.locator('#community-map-pick').click();
+ await expect(portal).toBeHidden();await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#community-map-hint')).toBeVisible();
+ await page.locator('#community-map-cancel').click();
+ await expect(portal).toBeVisible();await expect(page.locator('#app')).toHaveAttribute('data-tab','participate');
+ await expect(title).toHaveValue('위치 선택 테스트');
+ await expect(page.locator('#community-map-hint')).toBeHidden();
+ await tap(page,portal.locator('#community-compose-close'));await expect(portal).toBeHidden();
 });
 
 test('phone browser install choices are visible and PWA hides them',{tag:'@phone-layout'},async({page})=>{
@@ -1683,6 +1709,9 @@ test('walking vulnerability remains neutral and suppresses TIP after real layer 
  await expect(gap).toBeEnabled({timeout:30000});
  await expect(gap).toHaveCount(1);
  await gap.click();
+ await expect(dialog).toBeVisible();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+ await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const app=page.locator('#app'),tip=page.locator('#dj840-map-tip');
@@ -1814,6 +1843,9 @@ test('phone verified protection-gap menu contains SHP audit and NULL middle-scho
  await expect(dialog.getByRole('button',{name:/상현중학교 300m 도로 검토/})).toHaveCount(0);
  await expect(dialog.locator('#dj-pri-protection-detail')).toHaveCount(0);
  await entry.click();
+ await expect(dialog).toBeVisible();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
+ await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
  await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','protectionGap');
  const legend=page.locator('#dj-pri-legend');
@@ -1844,6 +1876,9 @@ test('phone speed limit risk is selectable with PDF thresholds and real source l
  const speed=dialog.getByRole('button',{name:/제한속도 위험도/});
  await expect(speed).toBeEnabled({timeout:30000});
  await speed.click();
+ await expect(dialog).toBeVisible();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','speed');
+ await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','speed');
@@ -1877,6 +1912,9 @@ test('phone six-indicator vulnerability and bottom-docked wide sheets match visi
  expect(ui.navTop-ui.bottom).toBeLessThan(30);
  if(page.viewportSize().width===390)await test.info().attach('walking-vulnerability-six-factor-choices.png',{body:await page.screenshot(),contentType:'image/png'});
  await composite.click();
+ await expect(dialog).toBeVisible();
+ await expect(page.locator('#app')).toHaveAttribute('data-dj-pri-mode','current6');
+ await dialog.getByRole('button',{name:'보행 취약도 닫기'}).click();
  await expect(dialog).toBeHidden();
  const app=page.locator('#app'),legend=page.locator('#dj-pri-legend');
  await expect(app).toHaveAttribute('data-dj-pri-mode','current6');
