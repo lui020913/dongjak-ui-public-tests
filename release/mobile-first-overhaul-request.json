@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.155",
+  "application_version": "9.2.156",
   "public_work_branch": "main",
-  "purpose": "PR478 transit detail opacity-only enter/exit, remove legacy metro slide; include merged PR470 diagnostics. Preserve shared station sheet motion, tablet mode and protected production checks.",
-  "attempt": 373,
+  "purpose": "PR479 and follow-up 93d9fb1: explicit bus map display, live detail data independent of map rendering, common returning phone header fade. Run protected build and mobile QA before production.",
+  "attempt": 374,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
