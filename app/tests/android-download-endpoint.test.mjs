@@ -20,7 +20,7 @@ test('exact source-qualified tag matches real published format',()=>{
 test('HEAD checks verified metadata without transferring APK; GET streams requested filename',async()=>{
  const head=fixture({method:'HEAD'});
  const h=await handleAndroidDownload(head.context,head.fetchImpl);
- assert.equal(h.status,200);assert.equal(h.headers.get('X-Dongjak-APK-Verified'),'1');assert.equal(head.calls.length,2);
+ assert.equal(h.status,200);assert.equal(h.headers.get('X-Dongjak-APK-Verified'),'1');assert.equal(h.headers.get('X-Dongjak-APK-Version'),v);assert.equal(h.headers.get('Content-Length'),'4');assert.equal(head.calls.length,2);
  const get=fixture(),g=await handleAndroidDownload(get.context,get.fetchImpl);
  assert.equal(g.status,200);assert.equal(g.headers.get('Content-Disposition'),'attachment; filename="'+ANDROID_DOWNLOAD_FILENAME+'"');
  assert.equal(ANDROID_DOWNLOAD_FILENAME,'Dongjak Safety Map.apk');
@@ -32,14 +32,14 @@ test('preview, mismatched source, draft and missing asset cannot download',async
  }
 });
 test('install menu only advertises the same-origin endpoint after verified HEAD',async()=>{
- const win={location:{href:'https://example.org/'},fetch:async(path,opts)=>{assert.equal(path,'/api/android-download.apk');assert.equal(opts.method,'HEAD');return new Response(null,{headers:{'X-Dongjak-APK-Verified':'1'}});}};
- assert.equal(await resolveAndroidDownload(win),'https://example.org/api/android-download.apk');
+ const win={location:{href:'https://example.org/'},fetch:async(path,opts)=>{assert.equal(path,'/api/android-download.apk');assert.equal(opts.method,'HEAD');return new Response(null,{headers:{'X-Dongjak-APK-Verified':'1','X-Dongjak-APK-Version':v,'Content-Length':'4'}});}};
+ let metadata;assert.equal(await resolveAndroidDownload(win,m=>metadata=m),'https://example.org/api/android-download.apk');assert.deepEqual(metadata,{version:v,size:4});
  win.fetch=async()=>new Response(null,{status:503});assert.equal(await resolveAndroidDownload(win),null);
 });
 test('verified browser fallback uses only exact current published APK when proxy is unavailable',async()=>{
  const calls=[];
  const win={location:{href:'https://example.org/'},fetch:async u=>{calls.push(u);if(u==='/api/android-download.apk')return new Response(null,{status:503});if(u==='/release-source.json')return Response.json(marker);if(u.endsWith('/releases/tags/'+tag))return Response.json(release);if(u.endsWith('/git/ref/tags/'+tag))return Response.json({object:{type:'commit',sha}});return new Response(null,{status:404});}};
- assert.equal(await resolveAndroidDownload(win),url);
+ let metadata;assert.equal(await resolveAndroidDownload(win,m=>metadata=m),url);assert.deepEqual(metadata,{version:v,size:4});
  assert.equal(calls.length,4);
  const original=win.fetch;win.fetch=async u=>u.endsWith('/git/ref/tags/'+tag)?Response.json({object:{type:'commit',sha:'b'.repeat(40)}}):original(u);
  assert.equal(await resolveAndroidDownload(win),null);

@@ -25,7 +25,11 @@ test('PC install gate marks the selected option and always shows Google Play ext
   expect(pdf.ok()).toBe(true);
   expect(pdf.headers()['content-type']).toContain('application/pdf');
   expect(pdf.headers()['content-disposition']).toContain('attachment');
-  expect((await pdf.body()).subarray(0,5).toString()).toBe('%PDF-');
+  const pdfBytes=await pdf.body();
+  expect(pdfBytes.subarray(0,5).toString()).toBe('%PDF-');
+  const size=pdfBytes.length>=1000000?(pdfBytes.length/1000000).toFixed(1)+' MB':Math.max(1,Math.round(pdfBytes.length/1000))+' KB';
+  await expect(guidebook.locator('.dj-install-status')).toHaveText('PDF · '+size);
+  await expect(page.locator('#dj-install-menu .dj-install-performance')).not.toContainText('태블릿은 별도 모드');
   const [download]=await Promise.all([page.waitForEvent('download'),guidebook.click()]);
   expect(await download.failure()).toBeNull();
   await expect(page.locator('#dj-install-menu .dj-install-qr')).toHaveCount(0);
@@ -40,12 +44,22 @@ test('PC install gate marks the selected option and always shows Google Play ext
   await expect(guide).toBeVisible();
   await expect(guide.locator('.dj-install-guide-intro')).toContainText('Google Play 스토어 외부');
   await expect(guide.locator('.dj-install-guide-intro')).toContainText('테스트용 APK');
+  await expect(guide.locator('.dj-install-guide-context')).toContainText('설치 제한이나 보안 안내');
+  await expect(guide.locator('.dj-install-guide-notice')).toContainText('악성·유해 앱');
   await expect(guide.locator('.dj-install-guide-notice')).toContainText('Play Protect');
   await expect(guide.locator('.dj-install-guide-notice')).toContainText('설치하지 마세요');
   await expect(guide.locator('ol.dj-install-guide-steps li')).toHaveCount(4);
+  await expect(guide.locator('ol.dj-install-guide-steps')).toBeHidden();
+  await guide.locator('summary').click();
+  await expect(guide.locator('ol.dj-install-guide-steps')).toBeVisible();
+  await guide.locator('summary').click();
+  await expect(guide.locator('ol.dj-install-guide-steps')).toBeHidden();
+  await expect(android.locator('.dj-install-status')).not.toHaveText('확인 중',{timeout:30000});
   if(await guide.locator('.dj-install-guide-unavailable').count()){
     await expect(guide.locator('.dj-install-guide-unavailable')).toContainText('확인하지 못했습니다');
+    await expect(guide.getByRole('button',{name:'다시 확인',exact:true})).toBeEnabled();
     await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toHaveCount(0);
+    await expect(guide.locator('.dj-install-apk-meta')).toHaveCount(0);
   }else{
     await expect(guide.getByRole('button',{name:'Dongjak Safety Map.apk 다운로드'})).toBeVisible();
   }

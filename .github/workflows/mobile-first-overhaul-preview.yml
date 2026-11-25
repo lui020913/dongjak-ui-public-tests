@@ -617,6 +617,7 @@ jobs:
       contents: read
     steps:
       - name: Post one GitHub milestone notification
+        continue-on-error: true # Notification failure must not block a verified APK build.
         env:
           GH_TOKEN: ${{ github.token }}
           APP_VERSION: ${{ needs.build.outputs.app_version }}
