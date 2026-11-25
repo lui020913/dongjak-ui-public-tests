@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.171",
+  "application_version": "9.2.172",
   "public_work_branch": "main",
-  "purpose": "PR503: community region selection text, exclusive notification view, consistent notice actions, grouped post category and district, reduced bottom spacing. Source CI passed; protected Preview and mobile QA required.",
-  "attempt": 396,
+  "purpose": "PR504: fix notification feed leakage by removing unconditional mobile grid display and suppressing post rendering during notices; restore feed on close. Source CI passed; actual browser regression and protected mobile QA required.",
+  "attempt": 397,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
