@@ -122,7 +122,7 @@ async function enrich(p,signal){
   throw new Error('Facility details service unavailable');
 }
 /** Call only after an explicit place click. */
-export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
+export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=false,onBack}={}){
   if(!map||!maplibregl?.Popup)return null;
   // Facility overlays have their own click handlers; HTML markers may stop
   // propagation before MapLibre's generic click handler. Route-picking wins:
@@ -155,6 +155,10 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   header.append(edge,titleGroup,headerActions);
   root.append(header);
   const body=document.createElement('div');body.className='dj-place-body';root.append(body);
+  if(fromResultMap&&typeof onBack==='function'){
+    const back=document.createElement('button');back.type='button';back.className='dj-place-result-back';back.textContent='‹ 검색 결과 지도로 돌아가기';
+    back.addEventListener('click',()=>{popup?.once('close',onBack);closeButton.click();});body.append(back);
+  }
 
   const infoCard=document.createElement('section');infoCard.className='dj-place-info-card';
   const meta=document.createElement('div');meta.className='dj-place-meta';infoCard.append(meta);body.append(infoCard);
@@ -333,10 +337,10 @@ export function openPlaceDetails({map,maplibregl,place,lngLat}={}){
   const pin=createSelectedLocationPin(document);pin.setAttribute('aria-hidden','true');
   // Keep the selected pin offset consistent with the shared detail sheet.
   const mobilePin=true;
-  const marker=new maplibregl.Marker({element:pin,anchor:'bottom',offset:[0,mobilePin?-15:-4]})
+  const marker=fromResultMap?null:new maplibregl.Marker({element:pin,anchor:'bottom',offset:[0,mobilePin?-15:-4]})
     .setLngLat([p.lng,p.lat]).addTo(map);
   popup.on('close',()=>{reviewController?.close();});
-  popup.on('close',()=>{controllerAI.abort();marker.remove();});
+  popup.on('close',()=>{controllerAI.abort();marker?.remove();});
   const cachedInfo=mem.get(cacheKey(p));
   let enriched=Promise.resolve();
   if(!p.phone||!p.address||!p.website){
