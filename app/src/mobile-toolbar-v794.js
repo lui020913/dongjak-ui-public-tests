@@ -68,6 +68,7 @@ export function installMobileToolbarV794(doc=document, win=window) {
     row.setAttribute('aria-label','모바일 지도 도구');
     for(const c of controls){
       const n=button(c.id,c.label);
+      if(c.id==='dj-v794-night'){n.hidden=true;n.setAttribute('aria-hidden','true');}
       n.innerHTML=`<span class="dj-v794-icon" aria-hidden="true">${c.icon}</span><span class="dj-v794-caption">${c.label}</span>`;
       n.addEventListener('click',()=>{
         // Use original listeners, avoiding a second source of truth.
