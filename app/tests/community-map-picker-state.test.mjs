@@ -41,7 +41,7 @@ test('map tap stages a marker and road address; only explicit confirmation commi
  assert.match(select,/new maplibregl\.Marker\(\{color:'#ec6d35',scale:1\.05\}\)/);
  assert.match(select,/fetchRouteRoadAddress\(position\)/);
  assert.match(select,/communityPickCandidate===candidate&&communityPickMode/);
- assert.doesNotMatch(select,/communityPickedLocation\s*=/);
+ assert.doesNotMatch(select,/communityPickedLocation\s*=(?!=)/);
  assert.doesNotMatch(select,/resumeCommunityLocationDraft\(\)/);
  const confirm=section('function confirmCommunityLocation(', "document.getElementById('community-map-accept').addEventListener");
  assert.match(confirm,/communityPickedLocation=candidate\.position/);
@@ -50,5 +50,5 @@ test('map tap stages a marker and road address; only explicit confirmation commi
  const clear=section('function clearCommunityLocationPick()', 'function cancelCommunityTabMotion()');
  assert.match(clear,/communityPickMarker\?\.remove\(\)/);
  assert.match(clear,/communityPickCandidate=null/);
- assert.doesNotMatch(clear,/communityPickedLocation\s*=/);
+ assert.doesNotMatch(clear,/communityPickedLocation\s*=(?!=)/);
 });
