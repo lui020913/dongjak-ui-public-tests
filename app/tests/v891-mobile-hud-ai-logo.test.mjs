@@ -83,15 +83,15 @@ test('AI fade completion can close from either animation or timer without duplic
  assert.match(geometry,/getPropertyValue\(key\)!==value/);
 });
 
-test('phone AI close fades actual content and synchronously releases a keyboard-adjusted native top layer',()=>{
+test('phone AI close dissolves the complete dialog over the map and synchronously releases a keyboard-adjusted native top layer',()=>{
  const ai=code('src/v880-supabase-safety-ai.js'),css=code('src/v880-supabase-safety-ai.css');
  assert.match(ai,/if\(keyboardAdjusted\|\|modal\.dataset\.djAiKeyboard==='true'\)\{finishClose\(\);return;\}/);
  assert.match(ai,/attributeFilter:\['data-dj-ai-keyboard'\],attributeOldValue:true/);
  assert.match(ai,/setTimeout\(finishClose,350\)/);
  assert.match(ai,/fadeContent\(false\)/);
  assert.match(ai,/if\(reduce\(\)\)\{input\.blur\(\);[^}]*modal\.close\(\)/);
- assert.match(ai,/dj9251-ai-content-enter 300ms/);
- assert.match(ai,/dj9251-ai-content-leave 260ms/);
- assert.match(css,/from \{opacity:\.10\}\s*to \{opacity:1\}/);
+ assert.match(ai,/dj9251-ai-content-enter 350ms/);
+ assert.match(ai,/dj9251-ai-content-leave 300ms/);
+ assert.match(css,/from \{opacity:0\}\s*to \{opacity:1\}/);
  assert.match(css,/from \{opacity:1\}\s*to \{opacity:0\}/);
 });
