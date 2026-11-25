@@ -34,7 +34,7 @@ function harness({canTransition=true,reduced=false}={}){
  const click=()=>events.get('click')({target:{closest:s=>s.includes('.nav-tab')?button:null},
   preventDefault(){},stopImmediatePropagation(){},isTrusted:true});
  return {click,button,app,panel,classNames,cleanup,flush:()=>reset?.(),
-  started:()=>started,delayed:()=>delayed,values,tick:()=>{const [id,fn]=frames.entries().next().value||[];if(fn){frames.delete(id);fn(0);}},end:()=>listeners.get('transitionend')?.({target:panel,propertyName:'opacity'})};
+  started:()=>started,delayed:()=>delayed,values,tick:(now=0)=>{const [id,fn]=frames.entries().next().value||[];if(fn){frames.delete(id);fn(now);}},end:()=>listeners.get('transitionend')?.({target:panel,propertyName:'opacity'})};
 }
 
 test('phone tab switches real DOM immediately and animates content, never white root snapshots',()=>{
@@ -47,14 +47,23 @@ test('phone tab switches real DOM immediately and animates content, never white 
  assert.equal(h.classNames.has('dj-tab-content-enter'),false,'legacy entrance class is not applied');
  assert.equal(h.panel.dataset.djPrimaryTransition,'incoming');
  assert.equal(h.values.get('opacity'),'0');
- h.tick();h.tick();
- assert.equal(h.values.get('transition'),'opacity 300ms ease-in-out');
- assert.equal(h.values.get('opacity'),'1');
- h.end();
+ h.tick(0);h.tick(1000);
+ assert.equal(h.values.get('transition'),'none');
+ const a=Number(h.values.get('opacity'));
+ assert.ok(a>0&&a<.2,'long renderer stall must not skip to the final frame');
+ h.tick(2000);
+ const b=Number(h.values.get('opacity'));
+ assert.ok(b>a&&b<1,'second rendered frame must retain intermediate opacity');
+ for(let i=3;i<=11;i++)h.tick(i*1000);
  assert.equal(h.panel.dataset.djPrimaryTransition,undefined);
  assert.equal(h.values.has('opacity'),false);
  assert.equal(h.values.has('transition'),false);
  assert.equal(h.app.dataset.djPrimaryDissolving,undefined);
+ const primary=read('src/primary-surface-transition.js');
+ const toolbar=read('src/v845-mobile-motion.js');
+ assert.match(read('src/bottom-tab-navigation.js'),/createPrimarySurfaceTransition\(\{doc,win,app,replay,reduced\}\)/);
+ assert.match(primary,/app\.dataset\.tab!==destination\|\|\(incoming&&incoming\.hidden\)/);
+ assert.match(toolbar,/if\(primaryOwnsPaint\(\)\)/);
  const js=read('src/bottom-tab-navigation.js');
  const built=new URL('../src/mobile-next.css',import.meta.url);
  const css=readFileSync(existsSync(built)?built:new URL('../../frontend/production/mobile-next.css',import.meta.url),'utf8');
@@ -82,5 +91,15 @@ test('prefers-reduced-motion renders immediately without any visual animation',(
  assert.equal(h.started(),0);
  assert.equal(h.classNames.has('dj-tab-content-enter'),false);
  assert.equal(h.delayed(),0);
+ h.cleanup();
+});
+
+test('external navigation invalidates a pending primary presentation without reopening it',()=>{
+ const h=harness();h.click();h.tick(0);
+ h.app.dataset.tab='map';h.panel.hidden=true;h.tick(40);
+ assert.equal(h.panel.hidden,true);
+ assert.equal(h.app.dataset.djPrimaryDissolving,undefined);
+ assert.equal(h.panel.dataset.djPrimaryTransition,undefined);
+ assert.equal(h.values.has('opacity'),false);
  h.cleanup();
 });
