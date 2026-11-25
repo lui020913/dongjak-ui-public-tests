@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.183",
+  "application_version": "9.2.184",
   "public_work_branch": "main",
-  "purpose": "PR526: official bus arrival history and subway timetable direction recovery; preserve existing protected Preview and Production gates; verify live transport API responses.",
-  "attempt": 413,
+  "purpose": "PR527: normalize facility categories and names across map, search, nearby safety, details and saved places; preserve registered names, bound category aliases and conservative coordinate deduplication. Source CI and all phone shards passed (38/38 jobs). Protected Preview and Production QA.",
+  "attempt": 414,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
