@@ -57,7 +57,7 @@ test('nearby compact and expanded panels share an 8px measured dock, not a stale
  assert.match(motion,/measuredPhoneDockClearance\(nav,win,\{minimum:72,gap:8\}\)/);
 });
 
-test('metro source renders warm-white translucent radial pool on known front, never a wedge',()=>{
+test('metro source renders a warm-white radial beam from the known front',()=>{
  const right=createTrainBeamSprite('right'),left=createTrainBeamSprite('left');
  const px=(p,x,y)=>((y*p.width+x)*4);
  const nose=px(right,184,50),far=px(right,235,50);
