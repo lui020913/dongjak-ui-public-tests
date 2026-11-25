@@ -47,12 +47,13 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   // chrome stay painted beneath it; no descendant receives its own fade.
   function fadeMap(opening,done=()=>{}){
     if(!root||root.hidden){done();return;}
+    const initial=opening?0:Math.max(0,Math.min(1,Number(win.getComputedStyle(root).opacity)||0));
     cancelMapFade();
     const generation=fadeGeneration;
     const reduced=win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches||doc.getElementById('app')?.classList.contains('dj-reduced-animation');
     if(reduced){done();return;}
     root.dataset.dj810Animating=opening?'opening':'closing';
-    for(const [key,value] of [['animation','none'],['transition','none'],['will-change','opacity'],['opacity',opening?'0':'1']])root.style.setProperty(key,value,'important');
+    for(const [key,value] of [['animation','none'],['transition','none'],['will-change','opacity'],['opacity',String(initial)]])root.style.setProperty(key,value,'important');
     let last=null,elapsed=0;
     const finish=()=>{if(generation!==fadeGeneration)return;cancelMapFade();done();};
     const paint=now=>{
@@ -60,7 +61,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
       if(last!==null)elapsed+=Math.min(48,Math.max(0,now-last));
       last=now;
       const p=Math.min(1,elapsed/300),eased=p*p*(3-2*p);
-      root.style.setProperty('opacity',String(opening?eased:1-eased),'important');
+      root.style.setProperty('opacity',String(opening?eased:initial*(1-eased)),'important');
       if(p<1)fadeFrame=win.requestAnimationFrame(paint);else finish();
     };
     fadeTimer=win.setTimeout(finish,1200);
