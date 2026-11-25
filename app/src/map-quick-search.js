@@ -78,8 +78,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
   const mapView=document.createElement('button');mapView.type='button';mapView.className='dj-search-map-view';mapView.textContent='지도에서 보기';mapFooter.append(mapView);dropdown.append(mapFooter);
   const mapResultsBar=document.createElement('div');mapResultsBar.className='dj-search-map-results-bar';mapResultsBar.hidden=true;
   const mapResultsLabel=document.createElement('strong'),mapResultsClose=document.createElement('button');mapResultsClose.type='button';mapResultsClose.textContent='×';mapResultsClose.setAttribute('aria-label','검색 시설 표시 닫기');mapResultsBar.append(mapResultsLabel,mapResultsClose);app.append(mapResultsBar);
-  let selectedMapRows=[],resultMarkers=[];
-  const clearMapResults=()=>{for(const marker of resultMarkers)marker.remove();resultMarkers=[];mapResultsBar.hidden=true;};
+  let selectedMapRows=[],resultMarkers=[],resultMapCamera=null,selectedResultPin=null;
+  const clearMapResults=()=>{for(const marker of resultMarkers)marker.remove();resultMarkers=[];resultMapCamera=null;selectedResultPin=null;mapResultsBar.hidden=true;};
   mapResultsClose.addEventListener('click',clearMapResults);
   const actions=document.createElement('div');actions.id='dj-search-entry-actions';actions.hidden=true;
   const historyButton=document.createElement('button');historyButton.type='button';historyButton.textContent='최근 검색';
@@ -341,6 +341,7 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
     if(!selectedMapRows.length||!['nearby','gps-nearby'].includes(dropdown.dataset.searchMode))return;
     const rows=selectedMapRows.filter(place=>Number.isFinite(Number(place.lng))&&Number.isFinite(Number(place.lat))&&place.lng!=null&&place.lat!=null);
     clearMapResults();close();query.blur();syncEntry();
+    resultMapCamera={center:map.getCenter(),zoom:map.getZoom(),bearing:map.getBearing(),pitch:map.getPitch()};
     for(const place of rows){
       const markerRoot=document.createElement('div');markerRoot.className='dj-search-marker-anchor';
       const pin=document.createElement('button');pin.type='button';pin.className='dj-search-result-pin';pin.dataset.kind=searchPlaceKind(place);
@@ -349,7 +350,20 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       pin.style.setProperty('--dj-search-pin-color',glyph.color);
       pin.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+glyph.path+'"/></svg>';
       pin.addEventListener('pointerdown',event=>event.stopPropagation());
-      pin.addEventListener('click',event=>{event.stopPropagation();makeResultButton(place).click();});
+      pin.addEventListener('click',event=>{
+        event.stopPropagation();
+        // A pin selection is a child of the existing result map, not a new
+        // text search. Never invoke the list handler that clears all pins.
+        selectedResultPin?.removeAttribute('aria-current');selectedResultPin=pin;pin.setAttribute('aria-current','true');
+        const camera=resultMapCamera;
+        const onBack=()=>{
+          if(!camera||resultMapCamera!==camera)return;
+          selectedResultPin?.removeAttribute('aria-current');selectedResultPin=null;
+          mapResultsBar.hidden=false;map.easeTo({...camera,duration:350});
+        };
+        window.dispatchEvent(new CustomEvent('dongjak:map-place-selected',{detail:{place,fromResultMap:true,onBack}}));
+        onPick(place);
+      });
       markerRoot.append(pin);
       resultMarkers.push(new maplibregl.Marker({element:markerRoot,anchor:'center'}).setLngLat([Number(place.lng),Number(place.lat)]).addTo(map));
     }
