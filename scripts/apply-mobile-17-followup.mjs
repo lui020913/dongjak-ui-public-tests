@@ -11,12 +11,12 @@ for(const ext of ['css','js'])copyFileSync(resolve(publicRoot,'frontend/producti
 replace('src/main.js',"import './mobile-first-overhaul.css';","import './mobile-first-overhaul.css';\nimport './mobile-17-followup.css';\nimport {installMobileFollowup} from './mobile-17-followup.js';");
 replace('src/main.js','installMobileMapControls({app,map});','installMobileMapControls({app,map});\ninstallMobileFollowup({app,map,maplibregl});');
 replace('src/public-ui-mobile-surface-coordinator.js','    if(query&&query.placeholder!==placeholder)query.placeholder=placeholder;','    // The native rotating search placeholder is the sole phone writer.\n    if(!win.matchMedia("(max-width:699px)").matches&&query&&query.placeholder!==placeholder)query.placeholder=placeholder;');
-replace('src/dongjak-verified-data-layers.js',"const SANGDO1_ANALYSIS=new Set(['accidents','cctv-security','cctv-parking','cctv-other','survey-crosswalk','slope']);","const SANGDO1_ANALYSIS=new Set(['accidents','cctv-security','cctv-parking','cctv-other','survey-crosswalk','slope','road-incidents','sdot-environment','audio-signals']);");
-replace('src/dongjak-verified-data-layers.js',"            data.features=filteredDistrictPoints({type:'FeatureCollection',features},boundary).features;",`            const verifiedLocations=filteredDistrictPoints({type:'FeatureCollection',features},boundary);
-            const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;
-            data.features=filteredDistrictPoints(verifiedLocations,viewBoundary).features;`);
-replace('src/dongjak-verified-data-layers.js','  function onBoundaryUpdated(){','  async function onBoundaryUpdated(){');
-replace('src/dongjak-verified-data-layers.js','      const clipped=filteredDistrictPoints(raw,boundary);',"      const viewBoundary=typeof window!=='undefined'?await (await import('./admin-dong-layer.js')).getSangdo1Boundary():boundary;\n      const clipped=filteredDistrictPoints(raw,viewBoundary);");
+// Pilot clipping is now canonical in app source. Do not re-inject retired TOPIS/S-DoT handlers.
+const pilotSource=readFileSync(resolve(root,'src/dongjak-verified-data-layers.js'),'utf8');
+for(const required of ['const SANGDO1_ANALYSIS=new Set(Object.keys(EXTRA_LAYER_DEFS));','getSangdo1Boundary():boundary','filteredDistrictPoints(raw,viewBoundary)']){
+ if(!pilotSource.includes(required))throw Error('Canonical pilot scope contract missing: '+required);
+}
+if(/'road-incidents':\s*\{|\'sdot-environment\':\s*\{/.test(pilotSource))throw Error('Retired public feed definitions must not be injected');
 // Production must NOT override the user-approved translucent dark building palette.
 replace('src/map-appearance.js','export function nativeBuildingFootprint(layer={}){',`export const MOBILE_DARK_BUILDING_PALETTE=BUILDING_VISUAL_PALETTE.dark;
 export function buildingVisualPalette(theme='light',phone=Boolean(globalThis.window?.matchMedia?.('(max-width:699px)')?.matches)){
