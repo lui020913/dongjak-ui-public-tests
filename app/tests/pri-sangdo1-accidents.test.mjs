@@ -17,7 +17,12 @@ test('PRI ② is spatially aligned to the existing Sangdo1 night-visibility road
  for(const name of ['sangdo1_crosswalk_rubric_factor.json','sangdo1_shared_road_rubric_factor.json']){
   const rubric=read('../public/data/pri/'+name);
   assert.equal(rubric.networkVersion,base.networkVersion,'new risk rubric must use the same 1686-segment network');
-  assert.equal(rubric.scores.length,0,'criteria-only source must not invent segment observations');
+  if(name==='sangdo1_crosswalk_rubric_factor.json'){
+   assert.equal(rubric.scores.length,432,'spatially derived access estimates use the approved 50/100m method');
+   const validIds=new Set(base.segments.map(s=>s.id));
+   assert.equal(new Set(rubric.scores.map(s=>s.id)).size,432);
+   assert.ok(rubric.scores.every(s=>validIds.has(s.id)&&Number.isFinite(s.score)&&s.score>=0&&s.score<=100&&/연구용 접근성 추정/.test(s.evidence.note)));
+  }else assert.equal(rubric.scores.length,0,'unverified mixed-road candidates must not enter PRI');
  }
  assert.equal(read('../public/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json').networkVersion,base.networkVersion,'third PRI factor must be spatially aligned to the same 25m network');
  assert.equal(patch.sourceRecords.length,3,'only the three Sangdo1 records may be included');

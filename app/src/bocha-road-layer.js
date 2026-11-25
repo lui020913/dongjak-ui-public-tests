@@ -1,3 +1,4 @@
+import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 const DATA_URL = '/data/sangdo1-analysis-view/bocha-mixed-roads.geojson';
 const SOURCE_ID = 'sangdo1-bocha-road-source';
 const CASING_LAYER_ID = 'sangdo1-bocha-road-casing';
@@ -55,13 +56,14 @@ export function installBochaRoadLayer({map,maplibregl,app}={}) {
   const onLineEnter=()=>{if(enabled)map.getCanvas().style.cursor='pointer';};
   const onLineLeave=()=>{map.getCanvas().style.cursor='';};
   function ensureLayers() {
-    if(destroyed||!data||!map.isStyleLoaded?.())return false;
+    if(destroyed||!data||!Array.isArray(map.getStyle?.()?.layers))return false;
     if(!map.getSource(SOURCE_ID))map.addSource(SOURCE_ID,{type:'geojson',data});
-    const anchor=map.getStyle()?.layers?.find(l=>l.type==='symbol')?.id;
+    const layers=map.getStyle()?.layers?.filter(l=>![CASING_LAYER_ID,LINE_LAYER_ID].includes(l.id));const anchor=priOverlayAnchor(layers);
     for(const def of [
       {id:CASING_LAYER_ID,type:'line',source:SOURCE_ID,minzoom:12.5,layout:{'line-cap':'round','line-join':'round',visibility:enabled?'visible':'none'},paint:{'line-color':'#f7f1e7','line-width':['interpolate',['linear'],['zoom'],12.5,4,17,7.2],'line-opacity':0.92}},
       {id:LINE_LAYER_ID,type:'line',source:SOURCE_ID,minzoom:12.5,layout:{'line-cap':'round','line-join':'round',visibility:enabled?'visible':'none'},paint:{'line-color':'#c98945','line-width':['interpolate',['linear'],['zoom'],12.5,2.1,17,4.1],'line-opacity':0.96,'line-dasharray':[1.5,1.1]}}
     ])if(!map.getLayer(def.id)){if(anchor)map.addLayer(def,anchor);else map.addLayer(def);}
+    for(const id of [CASING_LAYER_ID,LINE_LAYER_ID])if(priCoveredByMapLayer(map.getStyle()?.layers,id))map.moveLayer(id,anchor);
     if(!handlersReady){map.on('click',LINE_LAYER_ID,onLineClick);map.on('mouseenter',LINE_LAYER_ID,onLineEnter);map.on('mouseleave',LINE_LAYER_ID,onLineLeave);handlersReady=true;}
     setVisibility(enabled);return true;
   }
@@ -71,13 +73,13 @@ export function installBochaRoadLayer({map,maplibregl,app}={}) {
     return loadPromise;
   }
   async function waitForStyle() {
-    if(map.isStyleLoaded?.())return;
+    if(Array.isArray(map.getStyle?.()?.layers))return;
     await new Promise((resolve,reject)=>{
       const onIdle=()=>{clearTimeout(timer);resolve();};
       const timer=setTimeout(()=>{map.off('idle',onIdle);reject(new Error('지도 준비시간 초과. 다시 시도하세요.'));},12000);
       map.once('idle',onIdle);
     });
-    if(!map.isStyleLoaded?.())throw new Error('지도 스타일이 준비되지 않았습니다. 다시 시도하세요.');
+    if(!Array.isArray(map.getStyle?.()?.layers))throw new Error('지도 스타일이 준비되지 않았습니다. 다시 시도하세요.');
   }
   const activeMessage=()=>data.features.length+'개 구간 표시 · 평가점수 미연동';
   function disable(){setState(false);setVisibility(false);setStatus('표시 꺼짐');}
@@ -90,7 +92,7 @@ export function installBochaRoadLayer({map,maplibregl,app}={}) {
     finally{loading=false;button.disabled=false;}
   }
   const onStyleLoad=()=>{if(destroyed||!data)return;try{if(ensureLayers())setStatus(enabled?activeMessage():'표시 꺼짐');}catch(e){setState(false);setVisibility(false);setStatus('레이어 복구 실패 · 다시 켜 주세요.');}};
-  const onIdle=()=>{if(enabled&&!map.getLayer(LINE_LAYER_ID))onStyleLoad();};
+  const onIdle=()=>{if(enabled&&(!map.getLayer(LINE_LAYER_ID)||!map.getLayer(CASING_LAYER_ID)||priCoveredByMapLayer(map.getStyle()?.layers,LINE_LAYER_ID)||priCoveredByMapLayer(map.getStyle()?.layers,CASING_LAYER_ID)))onStyleLoad();};
   button.addEventListener('click',toggle);map.on('style.load',onStyleLoad);map.on('idle',onIdle);
   setStatus('선택하면 상도1동 보차혼용도로·이면도로 현황자료를 표시합니다.');
   return {enable:async()=>{if(!enabled)await toggle();},disable:()=>{if(enabled)disable();},destroy:()=>{
