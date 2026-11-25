@@ -98,3 +98,8 @@ html body #app#app#app#app#app#app #map-quick-search-dropdown .dj-recent-query-e
  #app#app .dj-search-result-pin{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;padding:0!important;margin:0!important;border:1.5px solid #fff!important;border-radius:6px!important;background:var(--dj-search-pin-color,#758451)!important;color:white!important;box-shadow:0 1px 3px #183e3738!important;transform:none!important;}
  #app#app .dj-search-result-pin svg{width:13px;height:13px;pointer-events:none;}
 }
+
+/* Fix the actual outer border box, not merely the preferred width. */
+@layer native-scroll-chrome {
+ #app #map-quick-search-dropdown #map-quick-search-close{flex:0 0 36px!important;width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;min-height:36px!important;max-height:36px!important;aspect-ratio:1!important;border-radius:50%!important;box-sizing:border-box!important;padding:0!important;display:grid!important;place-items:center!important;transform:none!important;scale:1!important;}
+}

@@ -59,7 +59,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
   }
   function geometry(){
     frame=0;
-    if(!root||root.hidden)return;
+    if(!root||root.hidden||root.dataset.closing==='true')return;
     const layout=Math.max(initialLayoutHeight,Number(win.innerHeight)||0,Number(doc.documentElement.clientHeight)||0);
     const box=communityVisibleViewport(win,layout);
     root.style.setProperty('--dj-compose-visible-top',box.top+'px');
@@ -70,7 +70,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     footer?.style.setProperty('padding-bottom',keyboard?'10px':'max(16px,env(safe-area-inset-bottom,0px))','important');
   }
   function schedule(){
-    if(!root||root.hidden||frame)return;
+    if(!root||root.hidden||root.dataset.closing==='true'||frame)return;
     frame=win.requestAnimationFrame(geometry);
   }
   function ensure(){
@@ -136,6 +136,7 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     initialLayoutHeight=Math.max(1,Number(win.innerHeight)||Number(doc.documentElement.clientHeight)||1);
     if(form.parentNode!==root)root.append(form);
     form.hidden=false;
+    delete root.dataset.closing;
     root.hidden=false;
     doc.body.dataset.djCommunityEditor='open';
     const app=doc.getElementById('app');
@@ -146,10 +147,18 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     if(resetScroll&&scroll)scroll.scrollTop=0;
     schedule();
   }
+  function prepareClose(){
+    if(!root||root.hidden)return;
+    root.dataset.closing='true';
+    if(frame){win.cancelAnimationFrame(frame);frame=0;}
+    doc.body.dataset.djCommunityEditor='closing';
+    restoreDock();
+  }
   function hide(){
-    if(!root)return;
+    if(!root||root.hidden)return;
     if(form.contains(doc.activeElement))doc.activeElement.blur();
     root.hidden=true;
+    delete root.dataset.closing;
     form.hidden=true;
     delete doc.body.dataset.djCommunityEditor;
     if(initialParent&&form.parentNode!==initialParent){
@@ -177,6 +186,6 @@ export function createCommunityComposerPortal(form,{doc=document,win=window}={})
     root.remove();
     root=null;scroll=null;footer=null;helper=null;header=null;
   }
-  return {open:()=>show({resetScroll:true}),close:hide,restoreDesktop,
+  return {open:()=>show({resetScroll:true}),prepareClose,close:hide,restoreDesktop,
     isOpen:()=>Boolean(root&&!root.hidden),get portal(){return root;}};
 }

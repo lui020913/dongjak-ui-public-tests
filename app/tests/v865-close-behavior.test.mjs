@@ -39,7 +39,7 @@ test('closing a registered-place detail leaves the map unobstructed',()=>{
 
 test('closing an auxiliary page returns to the map without reopening the overview sheet',()=>{
   const main=read('src/main.js');
-  assert.match(main,/function navigate\(tab,\{suppressOverview=false,resumeCommunityDraft=false\}=\{\}\)/);
+  assert.match(main,/function navigate\(tab,\{suppressOverview=false,resumeCommunityDraft=false,preserveCommunityComposer=false\}=\{\}\)/);
   assert.match(main,/if\(suppressOverview\)\{\s*overview\.hidden=true;\s*overviewExplicitOpen=false;/);
   assert.match(main,/function closePrimaryPageToMap\(panel\)/);
   assert.match(main,/const finish=\(\)=>navigate\('map',\{suppressOverview:true\}\)/);

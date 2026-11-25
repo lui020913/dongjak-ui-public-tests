@@ -840,6 +840,10 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
  await enter(page,'participation-panel','participate');
  await enter(page,'news-panel','news');
  await expect(page.locator('#participation-panel')).toBeHidden();
+ await enter(page,'participation-panel','participate');
+ await expect(page.locator('#news-panel')).toBeHidden();
+ await enter(page,'news-panel','news');
+ await expect(page.locator('#participation-panel')).toBeHidden();
  await expect(page.locator('#bottom-nav')).toHaveCSS('border-top-left-radius','999px');
  await expect(page.locator('#bottom-nav')).toHaveAttribute('data-dj-motion-indicator','ready');
  // The older moving selection plate is intentionally hidden. Active icon
@@ -859,6 +863,30 @@ test('primary tabs reveal content through live cross-dissolve and keep the pill 
  await enter(page,'news-panel','news');
 });
 
+
+test('map report fades out over its real destination without reparenting or resizing mid-frame',{tag:'@phone-common'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');
+ await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+ await tap(page,page.locator('#djNext-report'));
+ const portal=page.locator('#dj-community-editor-portal');
+ await visuallyPresented(portal);
+ await expect.poll(()=>portal.getAttribute('data-dj810-animating')).toBeNull();
+ await page.evaluate(()=>{
+   const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
+   window.__reportCloseFrames=[];
+   const sample=()=>{if(editor.hidden)return;
+     window.__reportCloseFrames.push({opacity:Number(getComputedStyle(editor).opacity),tab:app.dataset.tab,stable:form.parentElement===editor&&Math.abs(editor.getBoundingClientRect().height-height)<1});
+     requestAnimationFrame(sample);};
+   editor.querySelector('#community-compose-close').addEventListener('click',()=>requestAnimationFrame(sample),{once:true});
+ });
+ await tap(page,portal.locator('#community-compose-close'));
+ await expect(portal).toBeHidden();
+ await expect(page.locator('#app')).toHaveAttribute('data-tab','map');
+ const frames=await page.evaluate(()=>window.__reportCloseFrames);
+ expect(frames.some(f=>f.opacity>.08&&f.opacity<.95&&f.tab==='map')).toBe(true);
+ expect(frames.every(f=>f.stable)).toBe(true);
+ await expect(page.locator('#bottom-nav')).toBeVisible();
+});
 
 test('phone browser install choices are visible and PWA hides them',{tag:'@phone-layout'},async({page})=>{
  await page.goto('/',{waitUntil:'domcontentloaded'});
@@ -1364,6 +1392,9 @@ test('focused map search retains AI orb and full-width suggestions with fixed he
   const head=dropdown.locator('.map-quick-search-dropdown-head'),body=dropdown.locator('#dj-search-scroll-body');
   const before=await head.boundingBox();await body.evaluate(el=>{el.scrollTop=el.scrollHeight;});
   const after=await head.boundingBox();expect(Math.abs(before.height-after.height)).toBeLessThanOrEqual(1);expect(Math.abs(before.y-after.y)).toBeLessThanOrEqual(1);
+  const closeBox=await dropdown.locator('#map-quick-search-close').boundingBox();
+  expect(Math.abs(closeBox.width-closeBox.height)).toBeLessThanOrEqual(1);
+  await expect(dropdown.locator('#map-quick-search-close')).toHaveCSS('border-top-left-radius','50%');
   const radius=await dropdown.evaluate(node=>parseFloat(getComputedStyle(node).borderTopLeftRadius));
   expect(radius).toBeGreaterThanOrEqual(18);
   await test.info().attach('search-ai-visible',{body:await page.screenshot(),contentType:'image/png'});

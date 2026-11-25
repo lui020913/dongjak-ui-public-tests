@@ -47,13 +47,14 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  }
  // Production styles fix opacity/animation with !important, so CSS keyframes
  // alone can be invisible. Paint the real content (including V3's shadow DOM).
- function revealContent(panel,key){
+ function revealContent(panel,key,{aboveOutgoing=false}={}){
   const route=key==='route'?doc.getElementById('dj-route-v3'):null;
   const nodes=[route||panel].filter(node=>node?.style?.getPropertyValue);
   if(!nodes.length||typeof win.requestAnimationFrame!=='function')return false;
-  enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change'].map(k=>[k,node.style.getPropertyValue?.(k)||'',node.style.getPropertyPriority?.(k)||''])}));
+  enterStyles=nodes.map(node=>({node,props:['opacity','animation','transition','will-change',...(aboveOutgoing?['z-index']:[])].map(k=>[k,node.style.getPropertyValue?.(k)||'',node.style.getPropertyPriority?.(k)||''])}));
   const paint=alpha=>{for(const node of nodes)node.style.setProperty('opacity',String(alpha),'important');};
   for(const node of nodes){node.style.setProperty('animation','none','important');node.style.setProperty('transition','none','important');node.style.setProperty('will-change','opacity','important');}
+  if(aboveOutgoing)for(const node of nodes)node.style.setProperty('z-index','6999','important');
   paint(0);
   let last=null,elapsed=0;
   // Map rendering can delay the first frame. Keep the reveal alive until
@@ -102,6 +103,15 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
    previous.style.setProperty('z-index','6999','important');
    previous.style.setProperty('pointer-events','none','important');
    if(previous.id==='dj-route-v3')previous.inert=true;
+   // Use the same incoming-on-opaque-outgoing dissolve for both directions.
+   const communityNewsPair=(previousTab==='news'&&destination==='participate')||(previousTab==='participate'&&destination==='news');
+   if(communityNewsPair){
+    const incoming=doc.querySelector('.page-panel[data-page="'+destination+'"]:not([hidden])');
+    previous.style.setProperty('z-index','6998','important');
+    previous.style.setProperty('opacity','1','important');
+    if(revealContent(incoming,destination,{aboveOutgoing:true})){enterTimer=win.setTimeout(clearEntrance,4500);return;}
+    previous.style.setProperty('z-index','6999','important');
+   }
    // Important opacity is deliberate: historical CSS fixes the page to
    // opacity:1 and filter:none, defeating an ordinary WAAPI fade.
    let last=null,elapsed=0;

@@ -1996,7 +1996,7 @@ function saveCommunity(next) {
 // The first mobile frame is a map, not an automatically opened information sheet.
 // Explicit later navigation back to 안전지도 opens the full information panel.
 let firstMapEntryPending = true;
-function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
+function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserveCommunityComposer=false}={}) {
   // All non-navigation destinations are unavailable until guidance ends.
   if(app.classList.contains('route-guiding')&&tab!=='map')return;
   const initialMapEntry = tab === 'map' && firstMapEntryPending;
@@ -2010,7 +2010,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false}={}) {
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
-  if((reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
+  if(!preserveCommunityComposer&&(reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
     communityDetail=null;
     communityComposerEpoch++;
     const form=document.getElementById('community-form');
@@ -2208,15 +2208,19 @@ function openCommunityComposer(open,{animate=true}={}) {
   communityComposerEpoch++;
   const mapOrigin=communityComposerOrigin==='map';
   const panel=document.getElementById('participation-panel');
+  const portal=communityComposerPortal.portal;
+  if(portal?.dataset.dj810Animating==='closing'||portal?.dataset.closing==='true')return;
+  // Prepare the actual destination behind the full-screen editor, not a
+  // blank community surface. Keep the live editor mounted until opacity zero.
+  communityComposerPortal.prepareClose();
+  if(mapOrigin){communityComposerOrigin='community';navigate('map',{suppressOverview:true,preserveCommunityComposer:true});}
   const finish=()=>{
     communityComposerPortal.close();
     panel?.classList.remove('dj9256-composing');
     setMapReportHitLayer(false);
     setCommunityTopbarBlocked(false);
     if(panel)delete panel.dataset.djPatchKeyboard;
-    if(mapOrigin){communityComposerOrigin='community';navigate('map',{suppressOverview:true});}
   };
-  const portal=communityComposerPortal.portal;
   if(animate&&motion&&portal)motion.close(portal,finish);else finish();
 }
 document.getElementById('community-compose-toggle').addEventListener('click',()=>{communityComposerOrigin='community';openCommunityComposer(communityForm.hidden);});
