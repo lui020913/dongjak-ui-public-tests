@@ -113,13 +113,13 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
     if(!map.getSource?.(sourceId))map.addSource(sourceId,{type:'geojson',data:featuredPlaceCollection()});
     const palette=featuredPlaceStyle(app?.dataset?.theme);
     if(!map.getLayer?.(dotId))map.addLayer({
-      id:dotId,type:'circle',source:sourceId,minzoom:12.5,
+      id:dotId,type:'circle',source:sourceId,minzoom:14.5,
       paint:{'circle-radius':['interpolate',['linear'],['zoom'],12.5,3.5,16,5],
         'circle-color':palette.dot,'circle-opacity':0.98,
         'circle-stroke-color':palette.dotOutline,'circle-stroke-width':1.8}
     });
     if(!map.getLayer?.(nameId))map.addLayer({
-      id:nameId,type:'symbol',source:sourceId,minzoom:12.5,
+      id:nameId,type:'symbol',source:sourceId,minzoom:14.5,
       filter:['!=',['get','name'],'숭실대학교'],
       layout:{
         'text-field':['get','name'],
@@ -207,7 +207,7 @@ export function installFeaturedPlaceLabels({map,maplibregl,app}={}){
           }
           loaded++;
           if(loaded===imgNames.length&&!failed&&!logoLayerInstalled){
-            map.addLayer({id:FEATURED_PLACES_LOGOS,type:'symbol',source:sourceId,minzoom:12.5,
+            map.addLayer({id:FEATURED_PLACES_LOGOS,type:'symbol',source:sourceId,minzoom:14.5,
               layout:{'icon-image':['get','logo'],'icon-size':featuredLogoSizeExpression(currentFeaturedLogoMode()),
                 'icon-allow-overlap':true,'icon-ignore-placement':true,
                 // Image and name share the same feature/anchor. Never use a pixel
