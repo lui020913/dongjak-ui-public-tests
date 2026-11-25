@@ -20,13 +20,15 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
  const phone=()=>win.matchMedia?.('(max-width:699px)')?.matches===true;
  const reduced=()=>win.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches===true||app.classList?.contains('dj-reduced-animation')===true;
  const tabs=()=>[...nav.querySelectorAll('.nav-tab[data-tab]')];
- let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],departing=null,departingFrame=0,departingStyles=[],replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
+ let entering=null,enterTimer=0,enterFrame=0,enterStyles=[],mapPaintStyles=[],departing=null,departingFrame=0,departingStyles=[],replaying=false,gesture=null,mouseGesture=null,suppressClick=false,swipeGuard=0;
  function clearEntrance(){
   if(enterTimer)win.clearTimeout(enterTimer);
   enterTimer=0;
   if(enterFrame){win.cancelAnimationFrame?.(enterFrame);enterFrame=0;}
   for(const {node,props} of enterStyles)for(const [key,value,priority] of props){if(value)node.style.setProperty(key,value,priority);else node.style.removeProperty(key);}
   enterStyles=[];
+  for(const {node,props} of mapPaintStyles)for(const [key,value,priority] of props){if(value)node.style.setProperty(key,value,priority);else node.style.removeProperty(key);}
+  mapPaintStyles=[];app.removeAttribute?.('data-dj-map-dissolving');
   entering?.classList.remove('dj-tab-content-enter');
   entering=null;
   if(departingFrame){win.cancelAnimationFrame?.(departingFrame);departingFrame=0;}
@@ -90,7 +92,9 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   // Retain the outgoing live surface for every non-reduced tab dissolve.
   const retain=Boolean(previous&&typeof win.requestAnimationFrame==='function'&&!reduced());
   if(retain)previous.dataset.djTabOutgoing='true';
-  if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');return;}
+  const fromMap=previousTab==='map'&&!toMap&&!reduced();
+  if(fromMap)app.dataset.djMapDissolving='true';
+  if(!replay(button)){previous?.removeAttribute?.('data-dj-tab-outgoing');clearEntrance();return;}
   if(retain&&app.dataset.tab===destination){
    departing=previous;
    win.DongjakWindowMotion?.cancel?.(previous);
@@ -131,7 +135,13 @@ export function installBottomTabNavigation({doc=document,win=window,app=doc.getE
   if(retain&&departing){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   if(!reduced()&&!toMap){
    const panel=doc.querySelector('.page-panel[data-page="'+app.dataset.tab+'"]:not([hidden])');
-   if(panel){entering=panel;panel.classList.add('dj-tab-content-enter');}
+   if(panel){entering=panel;if(!fromMap)panel.classList.add('dj-tab-content-enter');}
+   if(fromMap){
+    // Paint the real canvas beneath the incoming page, never a placeholder.
+    const map=doc.getElementById('map');
+    if(map?.style?.getPropertyValue){mapPaintStyles=[{node:map,props:['visibility','opacity','display'].map(k=>[k,map.style.getPropertyValue(k),map.style.getPropertyPriority?.(k)||''])}];
+      for(const [k,v] of Object.entries({visibility:'visible',opacity:'1',display:'block'}))map.style.setProperty(k,v,'important');}
+   }
    if(revealContent(panel,app.dataset.tab)){enterTimer=win.setTimeout(clearEntrance,4500);return;}
   }
   if(reduced()){clearEntrance();return;}
