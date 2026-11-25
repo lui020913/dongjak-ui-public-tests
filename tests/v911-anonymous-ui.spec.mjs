@@ -876,7 +876,7 @@ test('map report fades out over its real destination without reparenting or resi
  await tap(page,page.locator('#djNext-report'));
  const portal=page.locator('#dj-community-editor-portal');
  await visuallyPresented(portal);
- await expect.poll(()=>portal.getAttribute('data-dj810-animating')).toBeNull();
+ await expect.poll(()=>portal.getAttribute('data-compose-motion')).toBeNull();
  expect(await page.evaluate(()=>window.__reportOpenFrames.some(f=>f.live&&f.opacity>.08&&f.opacity<.95))).toBe(true);
  await page.evaluate(()=>{
    const editor=document.getElementById('dj-community-editor-portal'),form=document.getElementById('community-form'),app=document.getElementById('app'),height=editor.getBoundingClientRect().height;
