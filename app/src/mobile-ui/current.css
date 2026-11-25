@@ -1559,3 +1559,12 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
   html body #app .page-panel[data-dj-tab-outgoing="true"]{visibility:visible!important;pointer-events:none!important;}
  }
 }
+
+@keyframes djHudReturnFade{from{opacity:0}to{opacity:1}}
+@layer native-scroll-chrome {
+ @media(max-width:699px) and (prefers-reduced-motion:no-preference){
+  #app:not(.dj-reduced-animation) .maplibregl-ctrl-bottom-left[data-dj-hud-visible="true"],
+  #app:not(.dj-reduced-animation):not([data-dj929-tip-returning="true"]) #dj840-map-tip.is-visible:not([hidden]),
+  #app:not(.dj-reduced-animation):not([data-dj929-tip-returning="true"]) #dj-user-tip-close:not([hidden]){animation:djHudReturnFade 320ms ease-out both!important;}
+ }
+}
