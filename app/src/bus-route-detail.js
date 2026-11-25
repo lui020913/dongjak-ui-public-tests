@@ -1,6 +1,6 @@
 import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-sheet.js';
 
-import {routeVehicleGroups,vehicleLabel,stopHours} from './bus-route-detail-model.mjs';
+import {routeVehicleGroups,vehicleDisplay,stopHours} from './bus-route-detail-model.mjs';
 import {WINDOW_MOTION} from './mobile-window-motion.js';
 
 export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRetry,onHidden=()=>{}}){
@@ -39,7 +39,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
   globalThis.addEventListener?.('resize',syncBounds,{passive:true});
   if(typeof ResizeObserver==='function'){const nav=doc.getElementById('bottom-nav');if(nav)new ResizeObserver(syncBounds).observe(nav);}
   function setView(next){if(view==='route')routeScroll=scroll.scrollTop;view=next;root.dataset.view=next;lastSignature='';scroll.scrollTop=0;render();if(next==='route')scroll.scrollTop=routeScroll;}
-  function vehicleRow(v){const r=make('div','dj-bus-detail-vehicle');const icon=make('span','dj-bus-detail-bus');icon.setAttribute('aria-hidden','true');r.append(icon,make('span','dj-bus-detail-vehicle-label',vehicleLabel(v)));return r;}
+  function vehicleRow(v){const r=make('div','dj-bus-detail-vehicle');const icon=make('span','dj-bus-detail-bus');icon.setAttribute('aria-hidden','true');const d=vehicleDisplay(v),label=make('span','dj-bus-detail-vehicle-label');label.append(make('strong','dj-bus-plate',d.number));if(d.congestion){const c=make('span','dj-bus-congestion',d.congestion);c.dataset.tone=d.tone;label.append(c);}if(d.lowFloor)label.append(make('span','dj-bus-low-floor','저상'));r.append(icon,label);return r;}
   function render(){
     if(root.hidden||root.dataset.closing==='true')return;
     const oldTop=scroll.scrollTop;
