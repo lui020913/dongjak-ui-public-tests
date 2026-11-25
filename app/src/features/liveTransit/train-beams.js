@@ -18,16 +18,16 @@ export function createTrainBeamSprite(facing){
   const originY=(height-1)/2;
   const radius=TRAIN_BEAM_LENGTH;
   // One circular radial gradient centered just beyond the nose.
-  // No triangles, paired light dots, hard edges or yellow tint.
+  // No triangles, paired light dots or hard edges.
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
     const r=Math.hypot(x-originX,y-originY)/radius;
     if(r>=1)continue;
     const alpha=Math.round(255*.96*Math.pow(1-r,0.95));
     if(!alpha)continue;
     const offset=(y*width+x)*4;
-    // Cool cyan halo remains distinguishable on near-white daytime roads.
+    // Warm-white core and soft amber fringe read as an incandescent headlamp.
     const core=Math.max(0,1-r*3);
-    data[offset]=Math.round(82+160*core);data[offset+1]=Math.round(177+70*core);data[offset+2]=255;data[offset+3]=alpha;
+    data[offset]=255;data[offset+1]=Math.round(211+38*core);data[offset+2]=Math.round(138+97*core);data[offset+3]=alpha;
   }
   return {width,height,data};
 }
