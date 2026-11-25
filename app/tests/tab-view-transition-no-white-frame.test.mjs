@@ -61,7 +61,7 @@ test('phone tab switches real DOM immediately and animates content, never white 
  assert.equal(h.app.dataset.djPrimaryDissolving,undefined);
  const primary=read('src/primary-surface-transition.js');
  const toolbar=read('src/v845-mobile-motion.js');
- assert.match(js,/createPrimarySurfaceTransition\(\{doc,win,app,replay,reduced\}\)/);
+ assert.match(read('src/bottom-tab-navigation.js'),/createPrimarySurfaceTransition\(\{doc,win,app,replay,reduced\}\)/);
  assert.match(primary,/app\.dataset\.tab!==destination\|\|\(incoming&&incoming\.hidden\)/);
  assert.match(toolbar,/if\(primaryOwnsPaint\(\)\)/);
  const js=read('src/bottom-tab-navigation.js');
