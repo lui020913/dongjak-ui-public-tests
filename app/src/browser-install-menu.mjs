@@ -14,6 +14,8 @@ export function safeDownloadUrl(value,platform){
  if(platform==='android'&&!(u.pathname.toLowerCase().endsWith('.apk')||u.hostname==='play.google.com'))return null;
  return u.href;}catch{return null;}
 }
+export const GUIDEBOOK_DOWNLOAD_PATH='/dongjak-guidebook.pdf';
+export const GUIDEBOOK_DOWNLOAD_FILENAME='동작하는 안전지도 가이드북.pdf';
 export const ANDROID_DOWNLOAD_PATH='/api/android-download.apk';
 export const ANDROID_DOWNLOAD_FILENAME='Dongjak Safety Map.apk';
 export function androidReleaseTag(marker,variant='debug'){
@@ -86,7 +88,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  add('h3','','스마트폰 이용 환경',guide);
  const grid=add('div','dj-install-performance-grid',null,guide);
  for(const [brandName,min,recommended] of [['갤럭시','S20급','S23급 이상'],['아이폰','11','13 이상']]){const row=add('div','dj-install-performance-device',null,grid);add('strong','',brandName,row);add('span','','최소 · '+min,row);add('span','','권장 · '+recommended,row);}
- add('p','','웹 기반 지도 및 앱의 WebView 렌더링 특성상 구형 기기에서는 지도 이동·확대 및 3D 이용 시 화면 끊김이 발생할 수 있습니다. 안내 사양은 잠정 기준이며, 미달 기기도 이용할 수 있습니다. 태블릿은 별도 태블릿 모드를 사용합니다.',guide);
+ add('p','','구형 기기는 지도·3D 이용 시 끊김이 발생할 수 있습니다. 사양은 잠정 기준이며, 미달 기기도 이용 가능합니다. 태블릿은 별도 모드를 사용합니다.',guide);
  const info=add('div','dj-install-info');info.hidden=true;info.setAttribute('aria-live','polite');
  const buttons=new Map();let promptEvent=null,links={},selectedKey=null;
  const showInfo=texts=>{delete info.dataset.androidGuide;info.replaceChildren();for(const t of texts)add('p','',t,info);info.hidden=false;};
@@ -97,10 +99,9 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  for(const key of installChoices(env.platform)){
  const b=add('button','dj-install-choice',null,list);b.type='button';b.setAttribute('aria-pressed','false');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[key]+'</svg>';add('span','dj-install-label',labels[key],b);
  const status=add('small','dj-install-status',key==='ios'?'추후 업데이트 예정':key==='android'?'확인 중':key==='pwa'?'iOS · Android 지원':key==='web'&&blocked?'모바일 전용':'',b);
- const selectedBadge=add('span','dj-install-selected','선택됨',b);selectedBadge.setAttribute('aria-hidden','true');
  if(key==='pwa')status.classList.add('dj-install-platforms');
  if(key==='ios'){b.disabled=true;b.dataset.installPaused='true';}else add('span','dj-install-chevron','›',b).setAttribute('aria-hidden','true');
- buttons.set(key,{b,status,selectedBadge});
+ buttons.set(key,{b,status});
  b.addEventListener('click',async()=>{
  if(key==='ios')return;
  if(blocked&&selectedKey===key&&!info.hidden){
@@ -115,6 +116,16 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  if(!url){buttons.get('android').status.textContent='확인 중';const retry=await resolveAndroidDownload(win);if(retry)links.android=retry;buttons.get('android').status.textContent=retry?'다운로드 가능':'다운로드 확인 필요';if(selectedKey==='android')showAndroidGuide(retry);}
  });
  }
+ // Download is a separate link, not an install mode: preserve the user's
+ // selected option, dialog and navigation. Replacing the static PDF at
+ // the same path requires no UI changes.
+ const guidebook=add('a','dj-install-choice dj-install-guidebook',null,list);
+ guidebook.href=GUIDEBOOK_DOWNLOAD_PATH;
+ guidebook.download=GUIDEBOOK_DOWNLOAD_FILENAME;
+ guidebook.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h4M12 10v7m-3-3 3 3 3-3"/></svg>';
+ add('span','dj-install-label','가이드북 다운로드',guidebook);
+ add('small','dj-install-status','PDF',guidebook);
+ add('span','dj-install-chevron','›',guidebook).setAttribute('aria-hidden','true');
  if(blocked){(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
  else{const close=add('button','dj-install-dismiss','나중에');close.type='button';close.addEventListener('click',finish);card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);
  let seen=false;try{seen=win.sessionStorage.getItem(INSTALL_SESSION_KEY)==='1';}catch{}if(!seen||new URLSearchParams(win.location.search).get('install')==='1'){if(typeof card.showModal==='function')card.showModal();else card.setAttribute('open','');}}

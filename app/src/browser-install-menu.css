@@ -4,12 +4,12 @@ dialog#dj-install-menu{position:fixed!important;inset:0!important;width:100%!imp
 dialog#dj-install-menu:not([open]){display:none!important}
 dialog#dj-install-menu::backdrop{background:#fff}
 .dj-install-content{box-sizing:border-box;min-width:0;max-width:100%;width:min(100%,480px);min-height:100%;margin:0 auto;padding:max(32px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));display:flex;flex-direction:column;justify-content:center}
-.dj-install-brand{text-align:center;margin-bottom:32px}
+.dj-install-brand{text-align:center;margin-bottom:24px}
 .dj-install-logo{display:block;width:76px;height:76px;object-fit:contain;margin:0 auto 16px;border-radius:18px}
 #dj-install-menu h2{font-size:clamp(23px,6.1vw,28px);line-height:1.35;font-weight:800;letter-spacing:-.045em;margin:0;text-align:center;word-break:keep-all}
 #dj-install-menu .dj-install-subtitle{font-size:14px;color:#64716d;margin:8px 0 0;line-height:1.5;text-align:center;white-space:normal!important;word-break:keep-all}
 .dj-install-list{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:12px}
-#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){display:flex;align-items:center;box-sizing:border-box;min-width:0;max-width:100%;min-height:60px;width:100%;gap:11px;padding:12px 17px;border:1px solid #e1e5e5;border-radius:999px;color:inherit;background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base));box-shadow:var(--djNext-tool-shadow);text-align:left;cursor:pointer;font:inherit}
+#dj-install-menu :is(.dj-install-choice,.dj-install-prompt){display:flex;align-items:center;box-sizing:border-box;min-width:0;max-width:100%;min-height:60px;width:100%;gap:11px;padding:12px 17px;border:1px solid #e1e5e5;border-radius:999px;color:inherit;background:linear-gradient(180deg,var(--djNext-tool-face),var(--djNext-tool-base));box-shadow:var(--djNext-tool-shadow);text-align:left;cursor:pointer;font:inherit;text-decoration:none}
 .dj-install-choice:focus-visible,.dj-install-dismiss:focus-visible{outline:2px solid #16836b;outline-offset:3px}
 .dj-install-choice svg{width:24px;height:24px;flex:none}
 .dj-install-label{flex:1;min-width:0;font-size:15px;font-weight:650;word-break:keep-all;overflow-wrap:anywhere;white-space:normal}
@@ -19,7 +19,7 @@ dialog#dj-install-menu::backdrop{background:#fff}
 .dj-install-info[hidden]{display:none!important}
 .dj-install-info p{font-size:13px!important;margin:4px 0!important;white-space:normal!important;word-break:keep-all}
 #dj-install-menu .dj-install-prompt{justify-content:center;margin-top:10px}
-.dj-install-dismiss{display:block;margin:24px auto 0;background:none;border:0;color:#64716d;padding:10px 20px;cursor:pointer;font:inherit;font-size:14px}
+.dj-install-dismiss{display:block;margin:16px auto 0;background:none;border:0;color:#64716d;padding:10px 20px;cursor:pointer;font:inherit;font-size:14px}
 .dj-install-qr{display:block;width:112px;height:112px;margin:20px auto 0;image-rendering:pixelated}
 html[data-theme=dark] dialog#dj-install-menu{background:#191b1f;color:#f1f4f2}
 html[data-theme=dark] dialog#dj-install-menu::backdrop{background:#191b1f}
@@ -111,22 +111,6 @@ html[data-theme=dark] dialog#dj-install-menu .dj-install-guide-notice{background
  box-shadow:0 0 0 2px #16836b20,var(--djNext-tool-shadow);
  padding:11px 16px;
 }
-#dj-install-menu .dj-install-selected{
- display:none;
- flex:none;
- align-items:center;
- justify-content:center;
- min-height:27px;
- padding:0 9px;
- border-radius:999px;
- background:#16836b;
- color:#fff;
- font-size:12px;
- font-weight:750;
- white-space:nowrap;
-}
-#dj-install-menu .dj-install-choice[aria-pressed="true"] .dj-install-selected{display:inline-flex}
-#dj-install-menu .dj-install-choice[aria-pressed="true"] .dj-install-status{display:none}
 #dj-install-menu .dj-install-guide-intro{font-weight:650!important;line-height:1.7!important}
 #dj-install-menu .dj-install-guide-notice{
  background:#fff5e5;
@@ -156,7 +140,6 @@ html[data-theme=dark] #dj-install-menu .dj-install-choice[aria-pressed="true"]{
  border-color:#62c4a3;
  color:#effaf5;
 }
-html[data-theme=dark] #dj-install-menu .dj-install-selected{background:#62c4a3;color:#102b22}
 html[data-theme=dark] #dj-install-menu .dj-install-guide-notice{
  background:#3b3020;
  border-color:#8d7442;
@@ -168,15 +151,14 @@ html[data-theme=dark] #dj-install-menu .dj-install-guide-unavailable{
  color:#e2f0e7;
 }
 @media(max-width:480px){
- #dj-install-menu .dj-install-selected{font-size:11px;min-height:25px;padding:0 7px}
  #dj-install-menu .dj-install-choice[aria-pressed="true"]{padding:11px 15px}
 }
 
 /* Browser welcome: device guidance, not an access gate. */
-#dj-install-menu .dj-install-performance{width:100%;min-width:0;max-width:100%;margin:18px 0 0;padding:14px;border:1px solid #d9e5de;border-radius:14px;background:#f4f8f6;text-align:left;box-sizing:border-box;color:#29483b}
-#dj-install-menu .dj-install-performance h3{font-size:15px;margin:0 0 10px;line-height:1.4}
+#dj-install-menu .dj-install-performance{width:100%;min-width:0;max-width:100%;margin:12px 0 0;padding:12px;border:1px solid #d9e5de;border-radius:14px;background:#f4f8f6;text-align:left;box-sizing:border-box;color:#29483b}
+#dj-install-menu .dj-install-performance h3{font-size:15px;margin:0 0 6px;line-height:1.4}
 #dj-install-menu .dj-install-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 #dj-install-menu .dj-install-performance-device{display:flex;flex-direction:column;gap:4px;min-width:0;overflow-wrap:anywhere;white-space:normal;font-size:13px;line-height:1.4}
 #dj-install-menu .dj-install-performance-device strong{font-size:14px}
-#dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.6;margin:12px 0 0;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:100%;color:inherit}
+#dj-install-menu .dj-install-performance p{font-size:12px;line-height:1.5;margin:8px 0 0;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;min-width:0;max-width:100%;color:inherit}
 html[data-theme=dark] #dj-install-menu .dj-install-performance{background:#293632;border-color:#53665a;color:#e2f0e7}
