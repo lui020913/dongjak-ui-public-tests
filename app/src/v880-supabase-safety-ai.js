@@ -131,7 +131,7 @@ export function installSupabaseSafetyAi({map,maplibregl,app}={}){
     const finish=()=>{if(closeFrame)window.cancelAnimationFrame(closeFrame);closeFrame=0;if(closeTimer){clearTimeout(closeTimer);closeTimer=0;}if(opening){paintAlpha(1);modal.style.removeProperty('will-change');}done();};
     paintAlpha(from);
     let last=null,elapsed=0;
-    const watchdog=()=>{if(closeTimer)clearTimeout(closeTimer);closeTimer=window.setTimeout(finish,15000);};
+    const watchdog=()=>{if(closeTimer)clearTimeout(closeTimer);closeTimer=window.setTimeout(finish,opening?4500:1200);};
     const paint=now=>{
       if(!modal.open)return;
       if(last!==null)elapsed+=Math.min(32,Math.max(0,now-last));
