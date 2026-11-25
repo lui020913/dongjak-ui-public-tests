@@ -1418,6 +1418,18 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
  await expect(feed.getByRole('button',{name:'전체 게시글 보기'})).toBeVisible();
  await search.blur();
+ // Exercise the actual mobile CSS cascade, not merely the hidden attribute.
+ const notices=panel.locator('#community-notifications');
+ const noticeToggle=panel.locator('#community-notifications-toggle');
+ await noticeToggle.scrollIntoViewIfNeeded();await tap(page,noticeToggle);
+ await expect(notices).toBeVisible();
+ await expect(feed).toBeHidden();
+ await expect(feed.locator(':scope > *')).toHaveCount(0);
+ await expect(panel.locator('#participate-register')).toBeHidden();
+ await noticeToggle.scrollIntoViewIfNeeded();await tap(page,noticeToggle);
+ await expect(notices).toBeHidden();
+ await expect(feed).toBeVisible();
+ await expect(feed.locator('.dj-community-empty-state')).toBeVisible();
  const showAll=feed.getByRole('button',{name:'전체 게시글 보기'});
  await showAll.scrollIntoViewIfNeeded();
  await tap(page,showAll);
