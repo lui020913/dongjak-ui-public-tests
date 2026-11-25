@@ -44,7 +44,8 @@ test('native PRI vulnerability retains its 50:50 factor alongside independent re
  assert.ok(pri.includes("id==='protectionGap'?' · 2지표·300m'"));
  assert.ok(pri.includes('protectionGapColors'));
  assert.ok(pri.includes('scopedPolicyFeatures(policyScope)'),'policy map must render clipped inside-dong geometry');
- assert.ok(pri.includes('displayRisk(displayFeatures(dataset,id))'),'other factors use standard risk colors');
+ assert.ok(pri.includes("const activeColors=mode==='protectionGap'?protectionGapColors:colors"),'other factors use standard risk colors');
+ assert.ok(pri.includes("scopedCompositeFeatures(policyScope,new Map(dataset.segments.map(s=>[s.id,riskValue(segmentScore(dataset,s,id))])))"),'other factors preserve their scores on scoped geometry');
  assert.ok(pri.includes('높을수록 상대적으로 큰 취약 신호'),'popup must say high score is bad');
  assert.ok(manifest.patches.includes('/data/pri/sangdo1_protection_gap_2factor_adminscope_factor.json'));
 });

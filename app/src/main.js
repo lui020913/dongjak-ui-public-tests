@@ -1690,7 +1690,7 @@ map.on('load',()=>{
   // Protection-zone overlays and night visibility are mutually exclusive.
   // Preserve the previously verified safety-workspace handoff; v6.0.13 lost it.
   let protectionOverlay=null;
-  const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,
+  const nightMode=installNightVisibility({map,maplibregl,app,toast,theme:visualTheme,retired:true,
     onActivate:()=>protectionOverlay?.disable({restoreNight:false})});
   protectionOverlay=installProtectionZoneMap({map,maplibregl,app,nightMode});
   installPolicyGapThreeSourceMap({map,maplibregl,app,nightMode,protectionOverlay});

@@ -299,6 +299,8 @@ export function initTheme({map,app}){
   };
   // Only the night-visibility controller may request a temporary theme.
   const setTemporaryTheme=next=>{
+    // The independent night-analysis UI is retired. Public map stays light.
+    if(next==='dark')next=null;
     if(!themeState.override(next))return;
     displayTheme();
   };

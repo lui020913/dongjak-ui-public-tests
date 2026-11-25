@@ -17,9 +17,9 @@ test('all six PRI factors use the same high-red risk direction; four historical 
   assert.match(map,/높은 점수=취약, 빨간색/);
 });
 
-test('line strokes are mildly thicker at all map zoom levels without changing data',()=>{
+test('evaluated and unassessed roads share consistent zoom-dependent width',()=>{
  const map=read('src/pri-map.js');
- assert.match(map,/11\.5,\['case',\['get','evaluated'\],1,1\.8\],13,\['case',\['get','evaluated'\],1\.5,2\.4\],15,\['case',\['get','evaluated'\],2\.35,3\.4\],17,\['case',\['get','evaluated'\],3\.6,4\.8\],19,\['case',\['get','evaluated'\],5\.2,6\.2\]/);
+ assert.match(map,/11\.5,\['case',\['get','evaluated'\],1,1\],13,\['case',\['get','evaluated'\],1\.5,1\.5\],15,\['case',\['get','evaluated'\],2\.35,2\.35\],17,\['case',\['get','evaluated'\],3\.6,3\.6\],19,\['case',\['get','evaluated'\],5\.2,5\.2\]/);
  assert.match(map,/11\.5,1\.4,13,2\.4,15,3\.8,17,5\.7,19,7\.8/);
 });
 

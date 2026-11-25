@@ -24,12 +24,13 @@ const checks=[
    contains(src('src/bottom-tab-navigation.js'),'start(button)','page.hidden=true','clearEntrance()');
    contains(src('src/mobile-ux-energy.css'),'visibility:hidden!important','background-color:var(--dj-primary-page-bg');
  }],
- ['A02','public light-only UI has no active manual theme refresh, night visibility remains temporary',()=>{
+ ['A02','public light-only UI has no active manual theme refresh, independent night analysis is retired',()=>{
    const html=src('index.html'),theme=src('src/ui-environment.js');
    contains(html,"var displayTheme='light'");
    assert.doesNotMatch(html,/id="theme-toggle"/);
    assert.doesNotMatch(theme,/requestIosThemeRefresh\(/);
-   contains(theme,'themeState.override(next)');
+   contains(theme,'themeState.override(next)',"if(next==='dark')next=null;");
+   contains(src('src/main.js'),'retired:true');
  }],
  ['A03','closing another sheet cannot reopen the AI modal accidentally',()=>{
    contains(src('src/v880-supabase-safety-ai.js'),'transportDismissedAt','guardTransportDismiss','pointerStart','onExplicitEntryClick','event.isTrusted');
@@ -95,7 +96,7 @@ const checks=[
  }],
  ['C03','unassessed, modeled and out-of-range segments stay gray and outside score means',()=>{
    contains(src('src/pri-data.mjs'),'observedFactorScore','modeled===true');
-   contains(src('src/pri-map.js'),"UNKNOWN_COLOR='#687380'",'회색: 미평가·미선정 (평균 제외)');
+   contains(src('src/pri-map.js'),"UNKNOWN_COLOR='#9CA3AF'",'회색: 미평가·미선정 (평균 제외)');
  }],
  ['C04','PRI legend has three source-derived risk classes and high risk means red',()=>{
    const s=src('src/pri-map.js');
@@ -104,7 +105,7 @@ const checks=[
  }],
  ['C05','PRI road thickness and opacity vary continuously with zoom',()=>{
    const s=src('src/pri-map.js');
-   contains(s,"15,['case',['get','evaluated'],2.35,3.4]","['get','evaluated'],.88,.95");
+   contains(s,"15,['case',['get','evaluated'],2.35,2.35]","['get','evaluated'],.88,.8");
  }],
  ['C06','opening PRI removes floating TIP and obstructing map scale',()=>{
    contains(src('src/pri-map.js'),'syncPriHud(Boolean(id))',"node.style.setProperty('display','none','important')");

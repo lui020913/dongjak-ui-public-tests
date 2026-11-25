@@ -17,14 +17,16 @@ test('보행안전 메뉴가 지도 옵션 외부의 독립 제어판이며 ID�
   assert.ok(html.indexOf('id="base-layer-controls"')>mapStart);
   assert.match(html,/id="map-safety-toggle"[^>]+aria-expanded="false"/);
 });
-test('야간 시야는 임시 테마만 변경하고 저장 테마를 복원한다',()=>{
+test('독립 야간 시야는 비활성화되고 공개 지도는 라이트 테마를 유지한다',()=>{
   const night=read('src/night-visibility-map.js'),theme=read('src/ui-environment.js'),main=read('src/main.js');
   assert.match(night,/applyTemporaryTheme\('dark'\)/);
   assert.match(night,/applyTemporaryTheme\(null\)/);
   assert.match(theme,/themeState\.override\(next\)/);
+  assert.match(theme,/if\(next==='dark'\)next=null/);
+  assert.match(night,/if\(retired\).*isEnabled:\(\)=>false/);
   assert.match(theme,/return 'light';/);
   assert.doesNotMatch(theme,/safeStorageSet\(THEME_KEY/);
-  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme,\s*onActivate:/);
+  assert.match(main,/installNightVisibility\(\{map,maplibregl,app,toast,theme:visualTheme,retired:true,\s*onActivate:/);
 });
 test('PC 모바일 별도 배치, 안전 메뉴 숨김/접근성 스타일이 존재한다',()=>{
   const css=read('src/safety-workspace.css');
