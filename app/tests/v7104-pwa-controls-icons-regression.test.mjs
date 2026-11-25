@@ -25,12 +25,12 @@ test('light-only PWA startup never enters legacy manual theme splash or reload',
   assert.doesNotMatch(android,/location\.reload/);
   assert.doesNotMatch(pc,/location\.reload/);
 });
-test('more menu and map options omit duplicated controls but the history remains accessible',()=>{
+test('more menu and map options omit duplicated controls and the update window is retired',()=>{
   const more=read('src/mobile-chrome-v790.js');const html=read('index.html');
   for(const name of ['dj-mobile-night','dj-mobile-weather-refresh','dj-mobile-weather-location'])assert.doesNotMatch(more,new RegExp(name));
   assert.doesNotMatch(html,/id="version-history-mobile-trigger"/);
-  assert.match(more,/dj-mobile-history/);
-  assert.match(html,/id="version-history-trigger"/);
+  assert.doesNotMatch(more,/dj-mobile-history/);
+  assert.doesNotMatch(html,/id="version-history-trigger"/);
 });
 test('history summary numbers disappear but individual releases and full notes remain',()=>{
   const v=read('src/version-history-v7.js');

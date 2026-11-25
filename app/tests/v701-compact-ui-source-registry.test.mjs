@@ -54,11 +54,11 @@ test('보행안전·행정동·지도 옵션의 출처 문구는 패널에서 �
     assert.ok(registry.some(source=>source.name===label),`missing source: ${label}`);
 });
 
-test('v7.0.4 변경사항과 데이터 출처를 업데이트 내역에서 함께 확인 가능',()=>{
+test('기존 변경기록과 데이터 출처 레지스트리는 보존하되 안내창 업데이트 항목은 제거',()=>{
   const html=read('index.html');
   const history=read('src/version-history-v7.js');
   const releases=read('src/version-history.js');
-   assert.match(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
+   assert.doesNotMatch(html,/id="dj-guide-latest-version">분류별 내역<\/strong>/);
   assert.match(history,/데이터 출처 및 활용 범위/);
   assert.match(history,/DATA_SOURCE_GROUPS/);
   assert.match(history,/sourcesButton/);

@@ -59,6 +59,6 @@ test('new v6.0 release retains its v1.0.0 predecessor and sixty historic records
   assert.equal(LEGACY_VERSION_HISTORY.at(-1).version,'v1.0');
   assert.equal(LEGACY_VERSION_HISTORY[0].version,'v5.12.11');
   assert.equal(DEVELOPMENT_PHASES.length,7);
-   assert.match(read('index.html'),/>업데이트<\/button>/);
+   assert.doesNotMatch(read('index.html'),/>업데이트<\/button>/);
   assert.ok(read('docs/RELEASE_HISTORY_LEGACY_FULL.md').includes('v5.12.10'));
 });

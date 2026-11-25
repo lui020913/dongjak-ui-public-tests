@@ -27,7 +27,7 @@ test('all four auxiliary pages have X controls and explicit map-return behavior'
   assert.match(html,/id="news-close-to-map"[^>]+><svg[^>]+width="24"[\s\S]*?<\/svg><\/button>/);
   assert.match(html,/id="overview-sheet-close"[^>]+><\/button>/);
   for(const name of ['transport-close','map-safety-close','map-options-desktop-close','map-options-mobile-close',
-    'version-history-close','admin-dong-close','pza-road-close','close-detail','cancel-add'])assert.ok(html.includes(`id="${name}"`));
+    'admin-dong-close','pza-road-close','close-detail','cancel-add'])assert.ok(html.includes(`id="${name}"`));
   assert.match(read('src/main.js'),/querySelectorAll\('\[data-close-page\]'\)/);
   assert.match(read('src/main.js'),/navigate\('map'\)/);
 });

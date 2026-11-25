@@ -56,10 +56,10 @@ test('all public current version surfaces correspond to newest reclassified rele
   assert.equal(json('public/version.json').version,unprefixed);
   assert.equal(json('src/build-info.json').version,unprefixed);
   const html=read('index.html');
-  assert.match(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
-  assert.ok(html.includes('id="dj-guide-latest-version">분류별 내역</strong>'));
+  assert.doesNotMatch(html,/id="version-history-trigger"[^>]*>업데이트<\/button>/);
+  assert.ok(!html.includes('id="dj-guide-latest-version">분류별 내역</strong>'));
   assert.ok(html.includes('id="map-startup-version" aria-label="앱 버전">버전 1.0</span>'));
-  assert.ok(html.includes('v1.0.0부터'));
+  assert.doesNotMatch(html,/id="version-history-modal"/);
 });
 
 test('app UI uses reclassified records and keeps source notes out of MapLibre code',()=>{

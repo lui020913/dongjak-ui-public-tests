@@ -13,7 +13,7 @@ test('v7.0.4 metadata and visible header agree',()=>{
  assert.equal(JSON.parse(read('public/version.json')).version,APP_VERSION);
  assert.equal(JSON.parse(read('src/build-info.json')).version,APP_VERSION);
  assert.equal(VERSION_HISTORY[0].version,'v7.0.29');
- assert.match(read('index.html'),/>업데이트<\/button>/);
+ assert.doesNotMatch(read('index.html'),/>업데이트<\/button>/);
 });
 
 test('all legacy and recent original notes are preserved exactly once in the hierarchy',()=>{
