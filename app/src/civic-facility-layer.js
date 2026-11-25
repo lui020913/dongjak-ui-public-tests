@@ -1,4 +1,4 @@
-import {normalizeFacilityCategory,facilityOsmCategory} from './facility-display-names.js';
+import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
 import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
@@ -16,6 +16,7 @@ const colors={school:'#3f7a70',civic:'#4f718a',sports:'#986e3e'};
 const sourceClasses=['school','town_hall','police','fire_station','post','library','stadium','swimming','sports_centre','fitness_centre'];
 const featuredNames=['동작구청','국립서울현충원','중앙대학교','숭실대학교','총신대학교'];
 const placeDisplayName=['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''];
+const operatingFacility=['!',['in',placeDisplayName,['literal',formerPoliceNameVariants]]];
 const notFeatured=['!', ['any',['in',placeDisplayName,['literal',featuredNames]],
   ['==',['slice',placeDisplayName,0,4],'동작구청']]];
 const civicClassFilter=type=>{
@@ -32,7 +33,7 @@ const civicClassFilter=type=>{
     ['in',['get','class'],['literal',CIVIC_POI_TYPES.sports]],
     ['in',['get','subclass'],['literal',['sports_centre','swimming_pool','fitness_centre','sports_hall']]]];
 };
-export const civicFilter=(type,boundary)=>['all',civicClassFilter(type),notFeatured,['within',boundary],
+export const civicFilter=(type,boundary)=>['all',civicClassFilter(type),notFeatured,operatingFacility,['within',boundary],
   ['!=',['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''],'']];
 
 function buildIcon(type){
@@ -93,7 +94,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
           'icon-size':['interpolate',['linear'],['zoom'],14.3,.65,16,.78,18,.90],
           'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
           'icon-optional':false,
-          'text-field':['step',['zoom'],'',safety?15.5:16.2,['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],'']],
+          'text-field':['step',['zoom'],'',safety?15.5:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
           'text-font':['Noto Sans Regular','Open Sans Regular'],
           'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
           'text-anchor':'top','text-offset':[0,1.25],'text-max-width':15,
@@ -102,7 +103,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
           'text-halo-color':'#ffffff','text-halo-width':1.7}});
       map.on('click',layerId,event=>{
         const feat=event.features?.[0];if(!feat||!maplibregl?.Popup)return;
-        const name=escapeName(feat);if(!name)return;
+        const name=escapeName(feat);if(!name||isFormerPoliceFacility(name))return;
         const tags=feat.properties||{};
         const coords=feat.geometry?.type==='Point'?feat.geometry.coordinates:null;
         const placePosition=Array.isArray(coords)&&coords.length>=2&&coords.every(Number.isFinite)
