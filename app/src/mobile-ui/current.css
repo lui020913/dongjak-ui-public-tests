@@ -1540,3 +1540,12 @@ html body #app#app#app[data-theme="dark"] #map-safety-controls #sangdo-bocha-tog
  }
  html body #app#app#app#app#app#app#app#app #participation-panel #community-dong-filter:focus-visible {outline:2px solid #82938b!important;outline-offset:1px!important;}
 }
+
+@layer request-completion {
+ @media(max-width:699px){
+  #app#app :is(#dj-community-location-card,.dj-search-map-results-bar){position:fixed!important;top:auto!important;bottom:var(--dj910-dock-bottom,88px)!important;left:12px!important;right:12px!important;width:auto!important;max-width:none!important;margin:0!important;transform:none!important;z-index:4702!important;}
+  #app:has(:is(#dj-community-location-card,.dj-search-map-results-bar):not([hidden])) #dj840-map-tip{visibility:hidden!important;pointer-events:none!important;}
+ }
+}
+.dj-metro-live-head{display:grid;grid-template-columns:44px 1fr 44px;}
+.dj-metro-live-title{justify-self:center;}

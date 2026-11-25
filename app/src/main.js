@@ -1864,11 +1864,7 @@ map.on('load',()=>{
     overview.hidden=true;
   }, canPickRoute:()=>Boolean(routePickMode),
   onRoutePick:(place)=>{if(routePickMode)showTransitRouteConfirmation(place);},
-  onRouteSelect:(which,place)=>{
-    if(!setRouteLocation(which,{lng:place.lng,lat:place.lat,label:describeTransitPlace(place)}))return;
-    navigate('route');
-    toast(which==='start'?'출발지로 지정했습니다.':'목적지로 지정했습니다.');
-  }, canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
+  onRouteSelect:(which,place)=>selectExternalRouteLocation(which,place), canOpen:()=>!navMode&&app.dataset.tab==='map' && !addMode && !routePickMode && !communityPickMode})).then(()=>{
     baseLayerControls?.apply();
     accessibilityLayer.bringToFront();
     startupLoader.transportReady();
@@ -2807,16 +2803,20 @@ window.addEventListener('dongjak:route-swap',()=>{
   updateRouteLabels();
   toast('출발지와 목적지를 바꿨습니다.');
 });
-window.addEventListener('dongjak:route-select',event=>{
-  const {which,place}=event.detail||{};
-  if(!['start','end'].includes(which)||!Number.isFinite(Number(place?.lng))||!Number.isFinite(Number(place?.lat)))return;
-  closeTransportPanel(false);
-  closeTransitRouteConfirmation();
-  routePickMode=null;
+function selectExternalRouteLocation(which,place){
+  if(navMode||!['start','end'].includes(which)||place?.lng==null||place?.lat==null||!Number.isFinite(Number(place.lng))||!Number.isFinite(Number(place.lat)))return false;
   const label=String(place.name||'선택한 시설');
-  if(!setRouteLocation(which,{name:label,label,lng:Number(place.lng),lat:Number(place.lat),kind:'place'}))return;
+  if(!setRouteLocation(which,{name:label,label,lng:Number(place.lng),lat:Number(place.lat),kind:place.kind||'place'}))return false;
+  routePickMode=null;
+  closeTransitRouteConfirmation();closeRouteSearch();
+  quickSearch.close();quickSearch.clearMapResults?.();closeTransportPanel(false);
   navigate('route');
+  window.dispatchEvent(new CustomEvent('dongjak:route-endpoint-registered',{detail:{which}}));
   toast(which==='start'?`${label}을(를) 출발지로 지정했습니다.`:`${label}을(를) 목적지로 지정했습니다.`);
+  return true;
+}
+window.addEventListener('dongjak:route-select',event=>{
+  const {which,place}=event.detail||{};selectExternalRouteLocation(which,place);
 });
 function describeTransitPlace(place) {
   const name=String(place?.name||'교통시설').trim();

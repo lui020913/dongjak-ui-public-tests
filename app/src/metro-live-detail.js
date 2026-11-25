@@ -9,7 +9,7 @@ export function openMetroLiveDetail({line,direction,station,local,arrivals=[],co
  const button=(label,fn,cls)=>{const b=make('button',cls,label);b.type='button';b.addEventListener('click',fn);return b;};
  const root=make('dialog','dj-metro-live');root.setAttribute('aria-label','실시간 열차 위치');root.dataset.theme=doc.getElementById('app')?.dataset.theme||'light';root.style.setProperty('--metro-live-line',color);
  const head=make('header','dj-metro-live-head'),title=make('strong','dj-metro-live-title');title.append(badge(line),make('span','',line));
- const closeBtn=button('×',()=>close(),'dj-metro-live-close');closeBtn.setAttribute('aria-label','실시간 열차 위치 닫기');head.append(button('‹',()=>close(),'dj-metro-live-back'),title,closeBtn);head.firstChild.setAttribute('aria-label','역 상세로 돌아가기');
+ const back=button('‹',()=>close(),'dj-metro-live-back');back.setAttribute('aria-label','역 상세로 돌아가기');head.append(back,title);
  const meta=make('div','dj-metro-live-meta'),stamp=make('span','dj-metro-live-stamp','조회 중');meta.append(make('strong','','실시간 열차 위치 정보'),stamp);
  const tabs=make('div','dj-metro-live-tabs');const dirs=line==='2호선'?['내선','외선']:['상행','하행'];let dir=directionCode(direction)==='1'?dirs[1]:dirs[0];
  const list=make('div','dj-metro-live-list');list.tabIndex=0;
