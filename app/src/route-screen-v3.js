@@ -277,6 +277,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   listen(win,'dongjak:route-search-gps-finished',()=>{
     searchGpsBusy=false;q('[data-v3="search-gps"]').disabled=false;
   });
+  listen(win,'dongjak:route-endpoint-registered',()=>{sync();if(active){pendingWaypoint=false;pendingBaseCount=0;mirrorWaypoints();syncLabels();requestPosition();}});
   listen(win,'dongjak:route-editor-reset',()=>{pendingWaypoint=false;pendingBaseCount=0;if(active){mirrorWaypoints();requestPosition();}});
   listen(q('[data-v3="center"]'),'click',()=>byId('center-dongjak')?.click());
   listen(q('[data-v3="locate"]'),'click',()=>byId('current-location')?.click());
