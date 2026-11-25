@@ -255,6 +255,7 @@ let gpsStarting = false;
 let gpsFollow = true;
 let gpsLastPosition = null;
 let gpsLastAccuracy = 0;
+let gpsCompass=null,gpsDeviceHeading=NaN,gpsCourseHeading=NaN,gpsArrowRotation=NaN;
 const outsideDistrictAlert=createOutsideDistrictNotifier(()=>toast('현재 위치는 동작구가 아닙니다. 동작구 내 보행안전 정보 중심으로 제공됩니다.'));
 const GPS_AUTO_KEY = 'dongjak_gps_tracking_optin_v1714';
 // 구버전의 자동 위치 재개 기록 제거: 사용자가 위치 버튼을 눌렀을 때만 시작합니다.
@@ -1013,21 +1014,39 @@ function renderGpsStatus(active){
   const stop=document.getElementById('stop-gps-tracking');
   if(stop)stop.hidden=!active;
 }
+// The arrow is a child of the position marker: MapLibre still owns the
+// outer transform, while the arrow independently follows absolute heading.
+function updateGpsDirection(){
+  const arrow=gpsMarker?.getElement()?.querySelector('.dj-current-position-heading');
+  if(!arrow)return;
+  const heading=Number.isFinite(gpsDeviceHeading)?gpsDeviceHeading:gpsCourseHeading;
+  if(!Number.isFinite(heading)||navMode==='gps'||(!gpsStarting&&gpsWatchId===null)){
+    arrow.hidden=true;gpsArrowRotation=NaN;return;
+  }
+  const relative=heading-map.getBearing();
+  gpsArrowRotation=Number.isFinite(gpsArrowRotation)?gpsArrowRotation+signedHeadingDelta(relative,gpsArrowRotation):relative;
+  arrow.style.transform='rotate('+gpsArrowRotation+'deg)';
+  arrow.hidden=false;
+}
 function onGpsPosition(position){
   const coords=position?.coords;
   if(!coords||!Number.isFinite(coords.latitude)||!Number.isFinite(coords.longitude))return;
   const lng=coords.longitude,lat=coords.latitude;
   gpsLastPosition=[lng,lat];
   gpsLastAccuracy=Number(coords.accuracy)||0;
+  gpsCourseHeading=Number.isFinite(coords.heading)&&coords.heading>=0?coords.heading:NaN;
+  gpsDeviceHeading=gpsCompass?.heading()??NaN;
   outsideDistrictAlert.check(lng,lat,boundaryGeometry,gpsLastAccuracy);
   if(!gpsMarker){
     const marker=document.createElement('div');marker.className='dj-current-position-marker';
     marker.setAttribute('aria-label','현재 GPS 위치');
     const pulse=document.createElement('span');pulse.className='dj-current-position-pulse';
-    marker.append(pulse);
+    const arrow=document.createElement('span');arrow.className='dj-current-position-heading';arrow.hidden=true;arrow.setAttribute('aria-hidden','true');
+    marker.append(pulse,arrow);
     gpsMarker=new maplibregl.Marker({element:marker,anchor:'center',pitchAlignment:'viewport',rotationAlignment:'viewport'}).setLngLat([lng,lat]).addTo(map);
   }
   else gpsMarker.setLngLat([lng,lat]);
+  updateGpsDirection();
   if(gpsFollow && mapReady && app.dataset.tab==='map'){
     const center=map.getCenter();
     const deltaMeters=Math.hypot((lng-center.lng)*111195*Math.cos(lat*Math.PI/180),(lat-center.lat)*111195);
@@ -1039,6 +1058,7 @@ function onGpsPosition(position){
 function stopGpsTracking({forget=false}={}){
   if(gpsWatchId!==null)stopDeviceWatch(gpsWatchId);
   gpsWatchId=null;gpsStarting=false;
+  gpsCompass?.stop();gpsCompass=null;gpsDeviceHeading=NaN;gpsCourseHeading=NaN;gpsArrowRotation=NaN;updateGpsDirection();
   if(forget){try{localStorage.removeItem(GPS_AUTO_KEY);}catch{}}
   renderGpsStatus(false);
 }
@@ -1054,6 +1074,8 @@ async function startGpsTracking({manual=false}={}){
   }
   if(gpsStarting)return;
   gpsStarting=true;
+  // Request iOS orientation permission in the actual GPS button gesture.
+  if(manual&&!gpsCompass)gpsCompass=startNavigationCompass(window,heading=>{gpsDeviceHeading=heading;updateGpsDirection();});
   if(manual)toast('위치 권한을 확인하고 계속 추적합니다.');
   try{
     const id=await startDeviceWatch(onGpsPosition,error=>{
@@ -1064,6 +1086,7 @@ async function startGpsTracking({manual=false}={}){
     gpsWatchId=id;
   }catch(error){
     gpsStarting=false;
+    gpsCompass?.stop();gpsCompass=null;gpsDeviceHeading=NaN;gpsCourseHeading=NaN;updateGpsDirection();
     if(errorLocationCode(error)===1)stopGpsTracking({forget:true});
     if(manual)toast('GPS 추적을 시작하지 못했습니다. 위치 권한을 확인해 주세요.');
     return;
@@ -1075,6 +1098,7 @@ document.getElementById('stop-gps-tracking')?.addEventListener('click',()=>{
   stopGpsTracking({forget:true});gpsFollow=false;toast('위치 추적을 중지했습니다.');
 });
 map.on('dragstart',()=>{gpsFollow=false;});
+map.on('rotate',updateGpsDirection);
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){if(gpsWatchId!==null)stopGpsTracking();}
 });
@@ -3681,7 +3705,7 @@ function stopNavigation(arrived=false) {
     if(arrived && navIndex)paintRouteProgress(navIndex.total);
     else showRouteLine(routeResult.coords);
   }
-  navMode=null;navIndex=null;navProgress=0;navLastUpdateAt=0;navFollow=true;
+  navMode=null;navIndex=null;navProgress=0;navLastUpdateAt=0;navFollow=true;updateGpsDirection();
   if(arrived)app.dataset.djWalkArrived='1';
   updateNavButtonLabels();
   syncRoutePresentation();
@@ -3702,7 +3726,7 @@ async function startNavigation() {
   if(!hasLocationSupport()){toast('이 기기에서 위치정보를 사용할 수 없습니다.');return;}
   if(!Capacitor.isNativePlatform() && !window.isSecureContext){toast('웹 GPS는 HTTPS 또는 같은 PC의 localhost에서만 사용할 수 있습니다.');return;}
   stopNavigation();
-  navMode='gps';navHeadingUp=true;
+  navMode='gps';navHeadingUp=true;updateGpsDirection();
   map.easeTo({pitch:0,zoom:16.3,duration:250});
   navCompass=startNavigationCompass(window,heading=>{
     if(navMode==='gps'&&navFollow&&navHeadingUp&&navLastGps&&!document.hidden)
