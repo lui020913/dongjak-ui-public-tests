@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.185",
+  "application_version": "9.2.186",
   "public_work_branch": "main",
-  "purpose": "Retry v9.2.185 after PR532 restored shared tactile control styling and fixed source/generated timetable regression paths. PR528 and PR532 CI 38/38 passed. Preserve PR527/529; historical bus API recovery excluded. Protected Preview and Production gates required.",
-  "attempt": 417,
+  "purpose": "Integrated PR535: community picker dock/HUD, unassessed PRI colors and white Sangdo1 boundary, route keyboard/GPS. Preserve PR529, PR532 and prior main fixes. Replace retired update-history browser QA with actual records navigation and absence checks. Protected Preview/Production gates required.",
+  "attempt": 418,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

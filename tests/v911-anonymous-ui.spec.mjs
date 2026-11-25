@@ -827,30 +827,20 @@ test('ordinary light-only startup has no manual theme dialog; night visibility r
  await expect(page.locator('#night-visibility-toggle')).toHaveCount(1);
 });
 
-test('phone update history fades in place and never paints over bottom navigation',{tag:'@phone-layout'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');await page.emulateMedia({reducedMotion:'no-preference'});await ready(page);
+test('phone retired update history is absent and records navigation stays above the dock',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
  await tap(page,tab(page,'mine'));await expect(page.locator('#mine-panel')).toBeVisible();
- await expect.poll(()=>page.locator('#mine-panel').getAttribute('data-dj810-animating')).toBeNull();
- const trigger=page.locator('#mine-panel [data-dj834-action="history"]');await trigger.scrollIntoViewIfNeeded();
- const modal=page.locator('#version-history-modal'),card=modal.locator('.version-history-dialog');
- await page.evaluate(()=>{const frames=[];window.__historyMotionFrames=frames;const until=performance.now()+40000;
-  function tick(){if(performance.now()>until||window.__historyMotionFrames!==frames)return;const m=document.getElementById('version-history-modal'),n=m?.querySelector('.version-history-dialog'),nav=document.getElementById('bottom-nav');
-   if(n?.dataset.dj810Animating&&nav&&!m.hidden){const r=n.getBoundingClientRect(),d=m.getBoundingClientRect(),s=getComputedStyle(n),clipped=Number.parseFloat(s.clipPath.slice(6).split(' round ')[0].trim().split(/ +/)[2]||'0')||0;
-    const opacityAnimation=n.getAnimations?.({subtree:false})?.some(animation=>{const keyframes=animation.effect?.getKeyframes?.()||[];const values=keyframes.map(k=>Number(k.opacity)).filter(Number.isFinite);return values.length>=2&&Math.max(...values)-Math.min(...values)>.5;})||false;
-    frames.push({phase:n.dataset.dj810Animating,y:r.top,height:r.height,visibleBottom:Math.min(d.bottom,r.bottom-clipped),navTop:nav.getBoundingClientRect().top,opacity:Number(s.opacity),opacityAnimation,animation:s.animationName,duration:Number(n.dataset.djWindowMotionDuration)});}
-   requestAnimationFrame(tick);}requestAnimationFrame(tick);
- });
- // Click synchronously after starting the in-page sampler: mobile automation
- // can postpone a high-level tap until the entrance has already finished.
- await trigger.evaluate(button=>button.click());await expect(modal).toBeVisible();await expect.poll(()=>card.getAttribute('data-dj810-animating')).toBeNull();const final=await card.boundingBox(),nav=await page.locator('#bottom-nav').boundingBox();expect(final.y+final.height).toBeLessThanOrEqual(nav.y-3);
- await page.evaluate(()=>document.getElementById('version-history-close').click());await expect(modal).toBeHidden();
- const frames=await page.evaluate(()=>window.__historyMotionFrames);for(const [phase,duration] of [['opening',200],['closing',180]]){
-  // The compositor can coalesce frames of a 180ms fade under CI load.
-   // Still verify duration, clipping, geometry, intermediate alpha, and monotonicity.
-   const a=frames.filter(f=>f.phase===phase);expect(a.length).toBeGreaterThan(0);expect(a.every(f=>f.duration===duration&&f.animation==='none'&&Math.abs(f.y-final.y)<=3&&f.visibleBottom<=f.navTop-3&&Math.abs(f.height-final.height)<4)).toBe(true);
-  expect(a.some(f=>f.opacity>0&&f.opacity<1)||a.some(f=>f.opacityAnimation),'a real opacity animation must exist even when CI coalesces every intermediate paint frame').toBe(true);
-  for(let i=1;i<a.length;i++)expect(phase==='opening'?a[i-1].opacity-a[i].opacity:a[i].opacity-a[i-1].opacity).toBeLessThanOrEqual(.03);
- }
+ await expect(page.locator('#mine-panel [data-dj834-action="history"]')).toHaveCount(0);
+ await expect(page.locator('#version-history-modal')).toHaveCount(0);
+ await tap(page,page.locator('#mine-panel [data-dj834-action="records"]'));
+ const records=page.locator('#mine-panel .dj834-records-container:not([hidden])');
+ await expect(records).toBeVisible();
+ await expect(records.locator('[data-record-tab]')).toHaveCount(4);
+ await tap(page,records.locator('[data-record-tab="favorites"]'));
+ await expect(records.locator('[data-record-view="favorites"]')).toBeVisible();
+ const geometry=await page.evaluate(()=>{const body=document.querySelector('#mine-panel > .dj836-sheet-body'),nav=document.getElementById('bottom-nav');return {bottom:body.getBoundingClientRect().bottom,nav:nav.getBoundingClientRect().top};});
+ expect(geometry.bottom).toBeLessThanOrEqual(geometry.nav+3);
+ await tap(page,page.locator('#mine-panel .dj834-detail-back'));await expect(records).toBeHidden();
 });
 
 test('phone search returns a visible local suggestion and clears input safely',{tag:'@phone-common'},async({page})=>{
@@ -1526,29 +1516,12 @@ test('community tab opens a usable feed and searchable empty state, without fabr
  }
 });
 
-test('category-first release history preserves the actual deployment version in the current record',{tag:'@phone-layout'},async({page})=>{
- test.skip(page.viewportSize().width>=700,'phone only');
- await ready(page);
- const response=await page.request.get('/version.json');
- expect(response.ok()).toBe(true);
- const version=String((await response.json()).version);
- // The latest public note appears once, before the four compact categories.
- const timeline=page.locator('#history-version-timeline');
- const current=timeline.locator('.v707-release[data-current-build="true"]');
- await expect(current.first()).toHaveAttribute('data-version',version);
- await expect(current.first().locator('h4')).toHaveText('최근 변경사항');
- await expect(current).toHaveCount(1);
- await expect(timeline.locator(':scope > .dj-edition-history')).toHaveCount(4);
- await expect(timeline.locator(':scope > .dj-edition-history[open]')).toHaveCount(0);
- await expect(timeline.locator('.dj-edition-patch')).toHaveCount(0);
- await expect(timeline.locator('.v707-release')).toHaveCount(1);
- expect(await timeline.locator('.v707-release-items li').allTextContents()).not.toContain('모바일 안정성 및 상호작용 개선');
- // Historical records still carry unchanged operational SemVer in data-version;
- // the public button and user-visible pre-release name remain simplified.
- await expect(page.locator('#version-history-trigger')).toContainText('업데이트');
- await expect(timeline.locator('.v707-release').first()).toHaveAttribute('data-version',/^v?\d+\.\d+\.\d+$/);
+test('retired release history UI stays absent while deployment version metadata remains valid',{tag:'@phone-layout'},async({page})=>{
+ test.skip(page.viewportSize().width>=700,'phone only');await ready(page);
+ const response=await page.request.get('/version.json');expect(response.ok()).toBe(true);
+ expect(String((await response.json()).version)).toMatch(/^\d+\.\d+\.\d+$/);
+ for(const selector of ['#history-version-timeline','#version-history-trigger','#version-history-modal','#dj-guide-release-details','#dj-guide-latest-version'])await expect(page.locator(selector)).toHaveCount(0);
 });
-
 
 test('focused map search retains AI orb and full-width suggestions with fixed header',{tag:'@phone-layout'},async({page})=>{
   test.skip(page.viewportSize().width>=700,'phone only');
@@ -1980,9 +1953,9 @@ test('iPhone final visual contract: compact route, transparent community status 
  await expect(choice).toHaveCount(1);
  await expect(choice).toHaveCSS('box-shadow','none');
  await tap(page,page.locator('#mine-panel .dj834-detail-back'));
- await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
- await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
- await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('업데이트 내역');
+ await tap(page,page.locator('#mine-panel [data-dj834-action="records"]'));
+ await expect(page.locator('#mine-panel .dj834-records-container:not([hidden])')).toBeVisible();
+ await expect(page.locator('#mine-panel .dj834-detail-title')).toHaveText('즐겨찾기 · 내 기록');
 
  await tap(page,tab(page,'participate'));
  // No permanent status slab may be inserted above the post list.
@@ -2109,8 +2082,8 @@ test('phone selected dock has no color plate and route form is vertically balanc
  expect(contrast.active.color).not.toBe(contrast.inactive.color);
  if(page.viewportSize().width===390)await testInfo.attach('real-font-pills-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
  await tap(page,page.locator('#mine-panel .dj834-detail-back'));
- await tap(page,page.locator('#mine-panel [data-dj834-action="history"]'));
- await expect(page.locator('#mine-panel .dj834-history-container:not([hidden])')).toBeVisible();
+ await tap(page,page.locator('#mine-panel [data-dj834-action="records"]'));
+ await expect(page.locator('#mine-panel .dj834-records-container:not([hidden])')).toBeVisible();
  const history=await page.evaluate(()=>{
   const panel=document.getElementById('mine-panel'),body=panel.querySelector(':scope > .dj836-sheet-body');
   const title=panel.querySelector(':scope > .dj-sheet-chrome .dj834-detail-nav');
