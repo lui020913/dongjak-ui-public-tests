@@ -11,7 +11,7 @@ const base='http://127.0.0.1:4723';
 let session, rec, recDone, failure, started=false;
 const logs=[];
 async function request(method,endpoint,body){
-  const r=await fetch(base+endpoint,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(240000)});
+  const r=await fetch(base+endpoint,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(endpoint==='/session'?900000:240000)});
   const j=await r.json();
   if(!r.ok||j.value?.error)throw Error(j.value?.message||JSON.stringify(j));
   return j.value;
@@ -98,7 +98,7 @@ async function step(a){
   }
 }
 try{
-  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':true,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':180000,'appium:wdaConnectionTimeout':180000};
+  const capabilities={platformName:'iOS',browserName:'Safari','appium:automationName':'XCUITest','appium:udid':udid,'appium:deviceName':'iPhone 15 Pro','appium:language':'ko','appium:locale':'ko_KR','appium:newCommandTimeout':300,'appium:nativeWebTap':true,'appium:connectHardwareKeyboard':false,'appium:webkitResponseTimeout':30000,'appium:webviewConnectTimeout':60000,'appium:wdaLaunchTimeout':480000,'appium:wdaConnectionTimeout':240000,'appium:wdaStartupRetries':1,'appium:showXcodeLog':true,'appium:derivedDataPath':process.env.RUNNER_TEMP+'/film-wda'};
   const result=await request('POST','/session',{capabilities:{alwaysMatch:capabilities,firstMatch:[{}]}});
   session=result.sessionId;
   if(!session)throw Error('No Safari session ID');

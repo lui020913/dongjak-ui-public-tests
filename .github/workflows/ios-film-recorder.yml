@@ -13,7 +13,7 @@ jobs:
   record:
     if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.ref == 'refs/heads/tools/app-film-recorder'
     runs-on: macos-26
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,11 +46,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p film-ios-output
-          appium --address 127.0.0.1 --port 4723 > "$RUNNER_TEMP/appium-film.log" 2>&1 &
+          appium --address 127.0.0.1 --port 4723 --log-timestamp --log-no-colors > "$RUNNER_TEMP/appium-film.log" 2>&1 &
           server=$!
           trap 'kill "$server" 2>/dev/null || true' EXIT
           for i in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:4723/status >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:4723/status >/dev/null 2>&1; then break; fi
             sleep 1
           done
           curl -fsS http://127.0.0.1:4723/status
@@ -60,7 +60,7 @@ jobs:
         if: failure()
         run: |
           mkdir -p film-ios-output
-          if [ -f "$RUNNER_TEMP/appium-film.log" ]; then tail -n 200 "$RUNNER_TEMP/appium-film.log" > film-ios-output/appium-diagnostic.txt; fi
+          if [ -f "$RUNNER_TEMP/appium-film.log" ]; then cp "$RUNNER_TEMP/appium-film.log" film-ios-output/appium-diagnostic.txt; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
