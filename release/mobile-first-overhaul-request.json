@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.209",
+  "application_version": "9.2.210",
   "public_work_branch": "main",
-  "purpose": "Verified PR #575 (7464433): fix primary tab cross-dissolve by stable panel identity and logical destination ownership; all 36 independent phone shards and aggregate source CI passed. Include v9.2.208's eight recovered road surfaces (PR #574), v9.2.207 building deduplication and all preceding features; preserve original road/routing/PRI data. Full protected Preview, phone QA and Production required. Supersedes failed v9.2.208 release; no relaxed gates.",
-  "attempt": 444,
+  "purpose": "Verified PR #573 (917925a5): mobile transit route search, bus and rail comparison, transfers, pedestrian PRI, verified arrival information, published base fares, attributed railway geometry, foreground GPS approach advisory. Source CI, endpoint navigation, picker/facility regression and Chromium/WebKit transit detail tests passed. Preserve all v9.2.209 road, building, and transition fixes. Full protected Preview, phone QA and Production required; no relaxed gates. Live transit API, exact total ETA/fare and device GPS limitations remain explicit.",
+  "attempt": 445,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
