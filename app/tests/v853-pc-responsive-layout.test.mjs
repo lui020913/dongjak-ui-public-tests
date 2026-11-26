@@ -19,10 +19,10 @@ test('facility detail uses one draggable sheet presentation at every viewport',(
  assert.ok(detail.includes('const sharedSheet=true'));
  assert.ok(detail.includes("maxWidth:'min(520px, calc(100vw - 24px))'"));
  assert.ok(detail.includes("anchor:'top'"));
- // Folder selector remains hidden until the facility is actually saved.
- assert.ok(detail.includes('folderWrap.hidden=!isPlaceSaved(p)'));
- assert.ok(detail.includes('folderSection.hidden=folderWrap.hidden'));
- assert.ok(detail.includes('folderWrap.hidden=!saved;folderSection.hidden=!saved'));
+ // Bookmark toggling must not append a second sheet row; group editing lives in saved places.
+ assert.doesNotMatch(detail,/folderWrap|folderSection|folderSelect/);
+ assert.match(detail,/toggleSavedPlace\(p\)/);
+ assert.match(read('src/v815-map-product.js'),/setSavedPlaceFolder\(place,select\.value\)/);
  assert.equal(detail.includes('desktopDetail'),false);
  assert.equal(detail.includes("matchMedia?.('(min-width:1080px)')"),false);
  assert.equal(detail.includes("matchMedia?.('(max-width:1079px)')"),false);
