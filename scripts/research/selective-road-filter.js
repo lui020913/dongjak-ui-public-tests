@@ -34,7 +34,7 @@ function createSelectiveRoadReview(map,eligibility,boundary,verified){
       // Only native ground line styling; never edit transport symbols, fills,
       // bridges, tunnels, labels or a different source.
       if(l.type!=='line'||/rail|tram|subway|ferry|aerial|tunnel|bridge/i.test(l.id))continue;
-      const actual=map.getLayer(l.id);
+      const actual=map.getStyle()?.layers?.find(x=>x.id===l.id);
       if(!actual||actual.source!==eligibility.source_name||actual['source-layer']!=='transportation'||actual.type!=='line')continue;
       const old=map.getFilter(l.id);
       if(!same(old,l.filter))continue;
