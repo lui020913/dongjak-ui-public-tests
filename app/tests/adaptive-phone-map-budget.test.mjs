@@ -1,6 +1,6 @@
 
 import test from 'node:test';import assert from 'node:assert/strict';
-import {phoneProfile,nextBudget,offscreenEvictionIds,coalesceViewportWork,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
+import {phoneProfile,normalMapPixelRatio,nextBudget,offscreenEvictionIds,coalesceViewportWork,installPhoneRenderBudget} from '../src/adaptive-phone-map-budget.mjs';
 test('Note9 uses economy, recent iPhone unchanged',()=>{assert.equal(phoneProfile({phone:true,ua:'Android 10; SM-N960N'}),'economy');assert.equal(phoneProfile({phone:true,ua:'Android 15',memory:3}),'economy');assert.equal(phoneProfile({phone:true,ua:'iPhone OS 18',memory:4}),'normal');assert.equal(phoneProfile({phone:false,ua:'Android 10'}),'normal');});
 test('slow frames lower budget and sustained fast frames recover',()=>{let s={level:'normal'};for(let i=0;i<7;i++)s=nextBudget(s,35);assert.equal(s.level,'normal');s=nextBudget(s,35);assert.equal(s.level,'economy');for(let i=0;i<119;i++)s=nextBudget(s,16);assert.equal(s.level,'economy');s=nextBudget(s,16);assert.equal(s.level,'normal');});
 test('visible sheets protected',()=>{assert.deepEqual(offscreenEvictionIds(['a','b','c','d','e'],['b','e'],1),['a','c']);assert.deepEqual(offscreenEvictionIds(['a','b'],['a','b'],0),[]);});
@@ -56,4 +56,28 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
   if(originalWindow===undefined)delete globalThis.window;else globalThis.window=originalWindow;
   if(originalRaf===undefined)delete globalThis.requestAnimationFrame;else globalThis.requestAnimationFrame=originalRaf;
  }
+});
+
+test('high-density phone rendering is capped at 2.5x without upscaling lower DPR devices',()=>{
+ assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18',deviceRatio:3}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:2}),2);
+ assert.equal(normalMapPixelRatio({phone:true,deviceRatio:3}),2);
+ assert.equal(normalMapPixelRatio({phone:false,deviceRatio:3}),1.5);
+});
+test('normal mobile cache retains visible tiles plus at most six offscreen tiles',()=>{
+ const entries=Array.from({length:15},(_,i)=>String(i));
+ const visible=['0','5','8'];
+ const removed=offscreenEvictionIds(entries,visible,6);
+ assert.equal(removed.length,6);
+ assert.ok(removed.every(id=>!visible.includes(id)));
+});
+test('transit teardown removes owned map layers before sources and defers tile work',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ const clear=main.split('function clearTransitPreview(){')[1].split('function syncPriRouteLine(){')[0];
+ assert.match(clear,/restoreTransitBackground\(\)/);
+ assert.ok(clear.indexOf('map.removeLayer')<clear.indexOf('map.removeSource'));
+ assert.match(clear,/-focus-casing/);
+ assert.match(main,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,djRenderBudget.isEconomy\(\)\?2:6\)/);
 });
