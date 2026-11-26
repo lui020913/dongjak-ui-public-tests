@@ -6,6 +6,7 @@
  * geolocation permissions, route state, graph geometry and server responses.
  */
 import viewCSS from './route-screen-v3.css?inline';
+import {mountTransitComparison} from './transit-route-comparison.js';
 import './route-screen-v3-global.css';
 import {recentPlaces,recentSearchQueries,recordSearchQuery,clearRecentPlaces} from './v815-place-store.js';
 
@@ -28,9 +29,10 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <strong class="heading">길찾기</strong>
-      <span class="mode"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1m-8-5 2-1 2 5"/></svg>도보</span>
+      <span class="mode" id="v3-walk-mode"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1m-8-5 2-1 2 5"/></svg>도보</span>
     </header>
     <section class="route-panel" aria-label="출발지, 경유지와 도착지">
+      <div class="transit-mode-toggle" role="group" aria-label="이동 수단"><button type="button" data-transit-mode="walk" aria-pressed="true">도보</button><button type="button" data-transit-mode="transit" aria-pressed="false">대중교통</button></div>
       <div class="fields">
         <span class="track" aria-hidden="true"></span>
         <button type="button" class="field first" data-v3="start" aria-label="출발지 검색">
@@ -82,6 +84,8 @@ export function mountRouteScreenV3(doc=document, win=window) {
     element.addEventListener(event,fn,opts);
     cleanups.push(()=>element.removeEventListener(event,fn,opts));
   };
+  const transit=mountTransitComparison({doc,win,shadow,host,view,app});
+  cleanups.push(transit.dispose);
   let searching=null,active=false,resizeFrame=0,searchTimer=0,composing=false;
   let pendingWaypoint=false,pendingBaseCount=0,searchGpsBusy=false;
   const cancelTimer=()=>{win.clearTimeout(searchTimer);searchTimer=0;};
@@ -127,7 +131,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     q('[data-v3="end"]').setAttribute('aria-label',end?'도착지 '+end+' 변경':'도착지 검색');
     const disabled=legacyCalc.disabled||!start||!end||pendingWaypoint;
     q('[data-v3="calculate"]').disabled=Boolean(disabled);
-    q('#v3-cta-label').textContent=pendingWaypoint?'경유지를 선택해 주세요':legacyCalc.disabled&&start&&end?'경로 계산 중…':'경로 찾기';
+    q('#v3-cta-label').textContent=pendingWaypoint?'경유지를 선택해 주세요':legacyCalc.disabled&&start&&end?'경로 계산 중…':transit.active()?'대중교통 경로 찾기':'경로 찾기';
   };
   const mirrorWaypoints=()=>{
     const target=q('#v3-waypoints');target.replaceChildren();
@@ -313,7 +317,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
   listen(q('[data-v3="center"]'),'click',()=>byId('center-dongjak')?.click());
   listen(q('[data-v3="locate"]'),'click',()=>byId('current-location')?.click());
   listen(q('[data-v3="calculate"]'),'click',()=>{
-    syncLabels();if(!q('[data-v3="calculate"]').disabled)legacyCalc.click();
+    syncLabels();if(!q('[data-v3="calculate"]').disabled){if(transit.active())transit.search();else legacyCalc.click();}
   });
   listen(q('[data-v3="search-back"]'),'click',finishSearch);
   const submitSearch=()=>{
