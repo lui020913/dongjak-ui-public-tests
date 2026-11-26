@@ -1,9 +1,9 @@
 {
   "kind": "ISOLATED_ROAD_REVIEW_NOT_PRODUCTION",
-  "run_id": 45765041438,
-  "artifact_id": 15091631321,
-  "artifact_sha256": "b1c1b4555de6fa5827e84657a18c271a7970f0976866b4f9cc47b514f74e96a8",
-  "review_run_id": 45763031345,
-  "accepted_road_count": 7845,
-  "unresolved_road_count": 426
+  "run_id": 45766391932,
+  "artifact_id": 15091913080,
+  "artifact_sha256": "196860961d2d12463e7b2894f26cff650b2952415fb45c979bafccbc31f96bfd",
+  "review_run_id": 45765644207,
+  "accepted_road_count": 7850,
+  "unresolved_road_count": 421
 }
