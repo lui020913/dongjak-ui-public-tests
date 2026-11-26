@@ -8,8 +8,8 @@ def row(f,status):
     return {**f,"properties":{**f.get("properties",{}),"review_status":status}}
 def main(review,alignment,out):
     s=read(review/"summary.json");a=read(alignment/"summary.json")
-    assert s["candidate_links"]==a["accepted_road_count"]==7845
-    assert s["unresolved_links"]==426 and s["graph_sha256"]==a["source_graph_sha256"]
+    assert s["candidate_links"]==a["accepted_road_count"]==7850
+    assert s["unresolved_links"]==421 and s["graph_sha256"]==a["source_graph_sha256"]
     for rel,digest in a["source_sha256"].items():assert hashlib.sha256((PUBLIC/rel).read_bytes()).hexdigest()==digest
     audit=read(alignment/"alignment-audit.json")
     pairs={
