@@ -1,3 +1,4 @@
+import {isTransitPoiFeature,hasTransportPoiHit} from './poi-click-identity.js';
 import {openPlaceDetails} from './place-details.js';
 export const IMPORTANT_PLACES=Object.freeze([
   {name:'중앙대학교',type:'대학교',address:'서울특별시 동작구 흑석로 84',lng:126.95676,lat:37.50439},
@@ -16,6 +17,7 @@ function knownName(value){
 }
 export function importantPlaceFromFeatures(features=[]){
   for(const feature of features){
+    if(isTransitPoiFeature(feature))continue;
     const props=feature?.properties||{};
     const keys=['name:ko','name:nonlatin','name','name_ko','title'];
     for(const key of keys){
@@ -46,6 +48,7 @@ export function installImportantPlaceClick({map,maplibregl}={}){
     try{features=map.queryRenderedFeatures?.(evt.point)||[];}catch{}
     if(features.some(f=>['dongjak-featured-place-names','dongjak-featured-place-dots',
       'dongjak-featured-place-logos'].includes(f.layer?.id)))return;
+    if(hasTransportPoiHit(map,evt))return;
     const place=importantPlaceFromFeatures(features)||importantPlaceNearPoint(map,evt.point);
     if(!place)return;
     openPlaceDetails({map,maplibregl,place:{...place,source:'기관 공식 주소 / 지도 대표 지점 (출입구 위치 아님)'},lngLat:evt.lngLat});

@@ -1,3 +1,4 @@
+import {samePhysicalBusStop} from './bus-stop-dedup.js';
 import {normalizeFacilityCategory,normalizeFacilityRecord,sameFacility} from './facility-display-names.js';
 const rawType=p=>[p?.kind,p?.type,p?.category].map(v=>String(v||'').trim().toLowerCase());
 export function searchPlaceKind(p){
@@ -64,12 +65,12 @@ export function formatFacilityDistance(meters){
 }
 export function nearbySearchResults(origin,items,{radius=500,limit=30}={}){
   const seen=new Map(),found=[];
-  for(const p of items){
+  for(const p of [...items].sort((a,b)=>Number(Boolean(b?.arsId))-Number(Boolean(a?.arsId)))){
     if(!p?.name||p.lng==null||p.lat==null)continue;
     const lng=Number(p.lng),lat=Number(p.lat);if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const row=normalizeFacilityRecord({...p,lng,lat}),distance=distanceMeters(origin,row),key=searchResultKey(row);
     if(!Number.isFinite(distance)||distance>radius)continue;
-    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='bus'?found.find(p=>searchPlaceKind(p)==='bus'&&samePhysicalBusStop({...p,kind:'bus'},{...row,kind:'bus'})):searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
     if(prior){
       const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;
@@ -126,7 +127,7 @@ export function visibleFacilityResults(area,items,{limit=60}={}){
     const row=normalizeFacilityRecord({...p,lng:Number(p.lng),lat:Number(p.lat)});
     if(!visibleAreaContains(area,row))continue;
     const key=searchResultKey(row);
-    const prior=seen.get(key)||(searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
+    const prior=seen.get(key)||(searchPlaceKind(row)==='bus'?found.find(p=>searchPlaceKind(p)==='bus'&&samePhysicalBusStop({...p,kind:'bus'},{...row,kind:'bus'})):searchPlaceKind(row)==='place'?found.find(p=>searchPlaceKind(p)==='place'&&sameFacility(p,row)):null);
     if(prior){
       const road=facilityRoadAddress(row);
       if(!facilityRoadAddress(prior)&&road)prior.roadAddress=road;

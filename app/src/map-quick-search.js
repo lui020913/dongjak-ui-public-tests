@@ -1,3 +1,4 @@
+import {samePhysicalBusStop} from './bus-stop-dedup.js';
 import {createSearchToolbarCrossfade} from './map-toolbar-crossfade.js';
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
 import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
@@ -27,13 +28,14 @@ export function isTransitMapSearchResult(item){
 }
 export function mergeMapSearchResults(local=[],remote=[]){
   const found=[],seen=new Set();
-  for(const rawItem of [...local,...remote]){
+  const ordered=[...local,...remote].sort((a,b)=>Number(Boolean(b?.arsId))-Number(Boolean(a?.arsId)));
+  for(const rawItem of ordered){
     const item=normalizeFacilityRecord(rawItem);
     if(isUnverifiedPoliceFacility(item.name))continue;
     const lng=Number(item?.lng),lat=Number(item?.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
     const key=searchResultKey({...item,lng,lat});
-    const previous=found.find(p=>searchResultKey(p)===key||(!isTransitMapSearchResult(item)&&!isTransitMapSearchResult(p)&&sameFacility(p,item)));
+    const previous=found.find(p=>searchResultKey(p)===key||(searchPlaceKind(p)==='bus'&&searchPlaceKind(item)==='bus'&&samePhysicalBusStop({...p,kind:'bus'},{...item,kind:'bus',lng,lat}))||(!isTransitMapSearchResult(item)&&!isTransitMapSearchResult(p)&&sameFacility(p,item)));
     if(previous){
       if(previous){previous.direction||=item.direction;previous.address||=item.address;if(!facilityRoadAddress(previous)&&facilityRoadAddress(item))previous.roadAddress=facilityRoadAddress(item);previous.lines=[...new Set([...(previous.lines||[]),...(item.lines||[])])];}
       continue;

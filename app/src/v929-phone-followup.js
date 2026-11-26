@@ -18,21 +18,25 @@ export function installPhoneFollowup(doc=document,win=window){
    const arrange=()=>{
      frame=0;
      if(!neighbors||!heading||!arrivals||!selection)return;
+     // The mobile scroll wrapper owns these nodes after layout initialization.
+     // Use the actual heading parent, not the outer sheet, when moving siblings.
+     const parent=heading.parentNode;
+     if(!parent||!panel.contains(parent))return;
      if(panel.dataset.kind==='subway'){
-       if(neighbors.nextElementSibling!==heading)panel.insertBefore(neighbors,heading);
-       if(heading.nextElementSibling!==arrivals)panel.insertBefore(arrivals,heading.nextSibling);
+       if(neighbors.parentNode!==parent||neighbors.nextElementSibling!==heading)parent.insertBefore(neighbors,heading);
+       if(heading.nextElementSibling!==arrivals)parent.insertBefore(arrivals,heading.nextSibling);
        panel.dataset.dj929StationLayout='true';
      }else{
-       if(heading.nextElementSibling!==arrivals)panel.insertBefore(arrivals,heading.nextSibling);
-       if(arrivals.nextElementSibling!==neighbors)panel.insertBefore(neighbors,arrivals.nextSibling);
+       if(heading.nextElementSibling!==arrivals)parent.insertBefore(arrivals,heading.nextSibling);
+       if(arrivals.nextElementSibling!==neighbors)parent.insertBefore(neighbors,arrivals.nextSibling);
        delete panel.dataset.dj929StationLayout;
      }
    };
    const schedule=()=>{if(!frame)frame=nextFrame(arrange);};
    const mo=new MutationObserver(records=>{
-     if(records.some(r=>r.type==='attributes'||r.target===neighbors||r.type==='childList'&&r.target===panel))schedule();
+     if(records.some(r=>r.type==='attributes'||r.target===neighbors||r.type==='childList'&&(r.target===panel||r.target===heading?.parentNode)))schedule();
    });
-   mo.observe(panel,{attributes:true,attributeFilter:['data-kind'],childList:true});
+   mo.observe(panel,{attributes:true,attributeFilter:['data-kind'],childList:true,subtree:true});
    mo.observe(neighbors,{childList:true});
    cleanups.push(()=>{mo.disconnect();if(frame)win.cancelAnimationFrame?.(frame);});
    arrange();

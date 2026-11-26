@@ -1,3 +1,4 @@
+import {hasTransportPoiHit} from './poi-click-identity.js';
 import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
@@ -9,14 +10,14 @@ const POINTS='dj-seoul-official-points',NAMES='dj-seoul-official-names';
 const EMPTY={type:'FeatureCollection',features:[]};
 let searchableGeneralPlaces=[];
 export function officialFeatures(places,boundary){
- const seen=new Set(),features=[];
+ const seen=new Set(),features=[],accepted=[];
  for(const rawPlace of places||[]){
    const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
    const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
-   const key=`${name.replace(/\s+/g,'').toLowerCase()}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
-   if(seen.has(key))continue;seen.add(key);
+   const key=`${name.replace(/\s+/g,'').toLowerCase()}|${place.category||''}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
+   if(seen.has(key)||accepted.some(p=>sameFacility(p,place)))continue;seen.add(key);accepted.push(place);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
      name,registeredName:place.registeredName||'',category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
      address:String(place.roadAddress||place.road_address||place.address||''),phone:String(place.phone||''),website:String(place.website||''),
@@ -200,13 +201,14 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      // A failed complementary feed must not discard valid official rows.
      try{
        const osm=await loadOsmGeneralFacilities(bbox,{signal:AbortSignal.timeout(12000)});
-       for(const p of osm){if(!ids.has(p.id)){ids.add(p.id);merged.push(p);}}
+       for(const p of osm){if(!ids.has(p.id)&&!merged.some(q=>sameFacility(q,p))){ids.add(p.id);merged.push(p);}}
        if(osm.length)source=official.places.length?'서울시·OSM 시설':'OSM 공개지도 시설';
      }catch{osmFailed=true;}
      if(!merged.length&&osmFailed&&official.failed.length)throw new Error('facility sources unavailable');
      const partial=official.failed.length||official.truncated.length||osmFailed;
      const next=officialFeatures(merged,getBoundary());
-     cache=next;searchableGeneralPlaces=merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],getBoundary()));restore();lastBox=bbox;latest=Date.now();
+     cache=next;searchableGeneralPlaces=merged.filter(p=>insideBoundary([Number(p.lng),Number(p.lat)],getBoundary()));restore();
+     app?.dispatchEvent(new CustomEvent('dongjak:official-facilities-ready',{detail:next.features.map(f=>({...f.properties,lng:f.geometry.coordinates[0],lat:f.geometry.coordinates[1]}))}));lastBox=bbox;latest=Date.now();
      status(`${source} ${next.features.length.toLocaleString()}곳 · ${partial?'일부 자료 조회 제한 · ':''}표시 정보는 현장 확인 필요`);
    }catch(error){
      status(cache.features.length?`기존 일반시설 ${cache.features.length}곳 표시 중 · 최신 조회 실패`:'일반시설 조회 실패 · 다시 시도해 주세요');
@@ -223,7 +225,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  map.on('moveend',schedule);map.on('zoomend',schedule);map.on('style.load',restore);
  const processed=new WeakSet();
  const click=e=>{
-   if(!canOpen()||app?.dataset?.tab!=='map')return;
+   if(!canOpen()||app?.dataset?.tab!=='map'||hasTransportPoiHit(map,e))return;
    if(e.originalEvent&&processed.has(e.originalEvent))return;
    if(e.originalEvent)processed.add(e.originalEvent);
    const f=e.features?.[0];if(!f)return;
