@@ -1,4 +1,4 @@
-import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
+import {normalizeFacilityCategory,facilityOsmCategory,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,isUnverifiedPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
 import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-presentation.js';
@@ -17,7 +17,7 @@ const sourceClasses=['school','town_hall','police','fire_station','post','librar
 const featuredNames=['동작구청','국립서울현충원','중앙대학교','숭실대학교','총신대학교'];
 const placeDisplayName=['coalesce',['get','name:ko'],['get','name:nonlatin'],['get','name'],''];
 const repurposed=['in',placeDisplayName,['literal',repurposedPoliceNameVariants]];
-const operatingFacility=['!',['in',placeDisplayName,['literal',formerPoliceNameVariants]]];
+const operatingFacility=['all',['!',['in',placeDisplayName,['literal',formerPoliceNameVariants]]],['any',repurposed,['!=',['slice',placeDisplayName,-4],'치안센터']]];
 const notFeatured=['!', ['any',['in',placeDisplayName,['literal',featuredNames]],
   ['==',['slice',placeDisplayName,0,4],'동작구청']]];
 const civicClassFilter=type=>{
@@ -104,7 +104,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
           'text-halo-color':'#ffffff','text-halo-width':1.7}});
       map.on('click',layerId,event=>{
         const feat=event.features?.[0];if(!feat||!maplibregl?.Popup)return;
-        const name=escapeName(feat);if(!name||isFormerPoliceFacility(name))return;
+        const name=escapeName(feat);if(!name||(isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name)))return;
         const tags=feat.properties||{};
         const coords=feat.geometry?.type==='Point'?feat.geometry.coordinates:null;
         const placePosition=Array.isArray(coords)&&coords.length>=2&&coords.every(Number.isFinite)

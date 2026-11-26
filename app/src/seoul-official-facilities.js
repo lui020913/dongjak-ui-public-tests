@@ -1,4 +1,4 @@
-import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
 import {insideBoundary} from './dongjak-verified-data-layers.js';
@@ -14,7 +14,7 @@ export function officialFeatures(places,boundary){
    const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
-   const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name))continue;
+   const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
    if(seen.has(key))continue;seen.add(key);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{

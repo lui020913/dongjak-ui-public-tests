@@ -99,6 +99,33 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  const $=id=>doc.getElementById(id),q=s=>doc.querySelector(s);
  let selected=normalizePhoneShortcuts(read(win,KEY,[])),rail=null,toolScroll=null,host=null,scheduled=false,focusReturn=null,slot=null,weather=null;
  const activeLayers=doc.createElement('div');activeLayers.id='djNext-active-layers';activeLayers.hidden=true;activeLayers.setAttribute('aria-label','현재 지도 레이어 해제');app.append(activeLayers);let activeSignature='';
+ // One dock for the existing active-layer controls. The bus route controller
+ // keeps its own detail/clear actions; measure its visible dock as a lower obstacle.
+ let dockFrame=0;
+ const dockObserved=new WeakSet();
+ const dockResize=typeof win.ResizeObserver==='function'?new win.ResizeObserver(()=>scheduleActiveDock()):null;
+ function scheduleActiveDock(){
+  if(dockFrame)return;
+  dockFrame=win.requestAnimationFrame(()=>{
+   dockFrame=0;
+   const nav=$('bottom-nav'),tip=$('dj840-map-tip'),bus=$('dj-bus-route-map-clear'),route=q('.dj-bus-detail-dock'),header=q('.topbar'),toolbar=$('djNext-toolbar');
+   const nodes=[nav,tip,bus,route,header,toolbar];
+   for(const n of nodes)if(n&&!dockObserved.has(n)){dockObserved.add(n);dockResize?.observe(n);}
+   const visible=n=>n&&!n.hidden&&n.getBoundingClientRect().height>0&&win.getComputedStyle(n).visibility!=='hidden'&&win.getComputedStyle(n).display!=='none';
+   const height=doc.documentElement.clientHeight||win.innerHeight;
+   const lower=[nav,tip,bus,route].filter(visible).map(n=>n.getBoundingClientRect().top).filter(y=>y>0&&y<=height);
+   const edge=Math.min(height,...lower);
+   const upper=Math.max(0,...[header,toolbar].filter(visible).map(n=>n.getBoundingClientRect().bottom));
+   const set=(key,value)=>{if(activeLayers.style.getPropertyValue(key)!==value)activeLayers.style.setProperty(key,value);};
+   set('--dj-active-dock-bottom',Math.max(8,Math.ceil(height-edge+8))+'px');
+   set('--dj-active-dock-room',Math.max(0,Math.floor(edge-upper-16))+'px');
+   const navRight=visible(nav)?nav.getBoundingClientRect().right:win.innerWidth-12;
+   set('--dj-active-dock-right',Math.max(10,Math.round(win.innerWidth-navRight))+'px');
+  });
+ }
+ for(const [target,event] of [[win,'resize'],[win.visualViewport,'resize'],[win.visualViewport,'scroll'],[doc,'focusin'],[doc,'focusout']])target?.addEventListener(event,scheduleActiveDock,{passive:true});
+ new win.MutationObserver(records=>{if(records.some(r=>r.type==='childList'||r.target===app||r.target.id==='dj840-map-tip'||r.target.id==='dj-bus-route-map-clear'||r.target.classList?.contains('dj-bus-detail-dock')))scheduleActiveDock();}).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-tab','data-dj910-sheet-open','style']});
+
  const railActions=new WeakMap();
  const button=(label,icon,fn)=>{const node=doc.createElement('button');node.type='button';node.className='djNext-tool';node.innerHTML=phoneIcon(icon);const caption=doc.createElement('span');caption.textContent=label;node.append(caption);node.setAttribute('aria-label',label);railActions.set(node,fn);node.addEventListener('click',fn);return node};
  const panel=doc.createElement('section');panel.id='djNext-layer-panel';panel.className='djNext-modal';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','레이어 및 바로가기');
@@ -148,7 +175,7 @@ export function installPhoneToolbar({app,doc=document,win=window}){
  }}scroll.scrollTop=prev;}
  function refresh(){if(!rail)return;
   for(const [id,label,icon,selector] of PHONE_CHOICES){const row=list.querySelector('[data-layer-key="'+id+'"]'),source=q(selector),action=row?.querySelector('.djNext-layer-action'),state=row?.querySelector('.djNext-layer-state');if(!action||!state)continue;const pressed=source?.getAttribute('aria-pressed')??source?.getAttribute('aria-expanded');const unavailable=PHONE_UNAVAILABLE_LAYERS.has(id);const disabled=unavailable||!source||source.disabled;const labelText=unavailable?'자료 준비 중':id==='livemetro'&&source?.dataset.liveQuota==='true'?'조회 한도 초과':pressed==='true'?'표시 중':disabled?'준비 중':pressed==='false'&&PHONE_LAYER_TOGGLES.has(id)?'꺼짐':'열기';if(state.textContent!==labelText)state.textContent=labelText;if(action.disabled!==disabled)action.disabled=disabled;if(pressed!=null&&action.getAttribute('aria-pressed')!==pressed)action.setAttribute('aria-pressed',pressed);}
-  const active=PHONE_CHOICES.filter(([id,,,selector])=>(PHONE_PILOT_LAYERS.has(id)||PHONE_LAYER_TOGGLES.has(id))&&q(selector)?.getAttribute('aria-pressed')==='true');const signature=active.map(x=>x[0]).join(',');if(activeSignature!==signature){activeSignature=signature;activeLayers.replaceChildren();for(const [id,label,icon,selector] of active){const off=button(label+' 해제',icon,()=>invoke(id==='pri'?'#dj-pri-layer-off':selector));off.className='djNext-active-layer-off';off.setAttribute('aria-label',label+' 레이어 해제');activeLayers.append(off);}activeLayers.hidden=!active.length;}
+  const active=PHONE_CHOICES.filter(([id,,,selector])=>(PHONE_PILOT_LAYERS.has(id)||PHONE_LAYER_TOGGLES.has(id))&&q(selector)?.getAttribute('aria-pressed')==='true');const signature=active.map(x=>x[0]).join(',');if(activeSignature!==signature){activeSignature=signature;activeLayers.replaceChildren();for(const [id,label,icon,selector] of active){const off=button(label+' 해제',icon,()=>invoke(id==='pri'?'#dj-pri-layer-off':selector));off.className='djNext-active-layer-off';off.setAttribute('aria-label',label+' 레이어 해제');activeLayers.append(off);}activeLayers.hidden=!active.length;scheduleActiveDock();}
   const metroState=list.querySelector('[data-layer-key="livemetro"] .djNext-layer-state'),metroSource=q('[data-live-vehicle="metro"]');if(metroState&&metroSource){const label=metroSource.dataset.liveQuota==='true'?'조회 한도 초과':metroSource.getAttribute('aria-pressed')==='true'?'표시 중':'꺼짐';if(metroState.textContent!==label)metroState.textContent=label;}for(const n of rail.querySelectorAll('[data-source]')){const b=q(n.dataset.source);const state=b?.getAttribute('aria-pressed')??b?.getAttribute('aria-expanded');if(state!==null&&state!==undefined&&n.getAttribute('aria-pressed')!==state)n.setAttribute('aria-pressed',state)}
   const native=$('dj-v794-weather'),caption=native?.querySelector('.dj910-weather-temp'),type=native?.querySelector('.dj910-weather-icon')?.dataset.dj912WeatherIcon;
   const label=$('weather-label');
@@ -222,27 +249,29 @@ export function installPhonePermissions({app,doc=document,win=window}){
  for(const h of [10,20,34,46,26,38,18,30,12]){const bar=doc.createElement('i');bar.style.setProperty('--voice-bar',h+'px');wave.append(bar);}
  const feedback=doc.createElement('span');feedback.id='djNext-voice-status';feedback.hidden=true;feedback.setAttribute('role','status');
  voicePanel.append(wave,feedback);form.append(voicePanel);
- let active=null,timer=0;
+ let active=null,timer=0,watchdog=0,latest='';
  const clearMessage=()=>{win.clearTimeout(timer);feedback.hidden=true;voicePanel.setAttribute('aria-hidden','true');delete app.dataset.djVoiceFeedback;};
  const message=(t,sticky=false)=>{win.clearTimeout(timer);feedback.hidden=false;feedback.textContent=t;voicePanel.setAttribute('aria-hidden','false');app.dataset.djVoiceFeedback='true';if(!sticky)timer=win.setTimeout(clearMessage,5000);};
- const reset=()=>{active=null;delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');mic.innerHTML=phoneIcon('mic');};
+ const reset=()=>{win.clearTimeout(watchdog);watchdog=0;active=null;latest='';delete app.dataset.djVoiceListening;mic.setAttribute('aria-pressed','false');mic.setAttribute('aria-label','음성 장소 검색');mic.innerHTML=phoneIcon('mic');};
  const stop=()=>{if(!active)return;const r=active;reset();clearMessage();try{r.abort?.();}catch{}};
+ const commit=value=>{reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new win.Event('input',{bubbles:true}));if(form.requestSubmit)form.requestSubmit();else form.dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));};
+ const arm=(r,ms)=>{win.clearTimeout(watchdog);watchdog=win.setTimeout(()=>{if(active!==r)return;const value=latest;reset();try{r.abort?.();}catch{}if(value)commit(value);else message('음성 인식 응답이 없습니다. 다시 시도해 주세요.');},ms);};
  mic.addEventListener('click',()=>{
-  if(active){stop();return;}
+  if(active){const r=active;try{r.stop();if(active===r)arm(r,2000);}catch{stop();}return;}
   const API=win.SpeechRecognition||win.webkitSpeechRecognition;
   if(!API){message('음성 검색을 지원하지 않는 브라우저입니다.');return;}
   if(doc.activeElement===input)input.blur();
   $('map-quick-search-close')?.click();
-  const r=new API();active=r;r.lang='ko-KR';r.interimResults=true;r.continuous=false;
+  let r;try{r=new API();}catch{message('음성 검색을 시작할 수 없습니다.');return;}active=r;latest='';r.lang='ko-KR';r.interimResults=true;r.continuous=false;
   app.dataset.djVoiceListening='true';mic.setAttribute('aria-pressed','true');mic.setAttribute('aria-label','음성 인식 종료');mic.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';message('음성 인식 준비 중…',true);
-  r.onstart=()=>{if(active===r)message('듣는 중… 말씀해 주세요.',true);};
-  r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;if(!result.isFinal){message(value,true);return;}reset();clearMessage();input.value=value.slice(0,80);input.dispatchEvent(new Event('input',{bubbles:true}));form.requestSubmit?.();};
+  r.onstart=()=>{if(active===r){message('듣는 중… 말씀해 주세요.',true);arm(r,20000);}};
+  r.onresult=e=>{if(active!==r)return;const result=e.results?.[e.resultIndex??0];const value=result?.[0]?.transcript?.trim();if(!value)return;latest=value;if(!result.isFinal){message(value,true);arm(r,20000);return;}commit(value);};
   r.onerror=e=>{if(active!==r)return;reset();const messages={'not-allowed':'마이크 권한을 허용해 주세요.','service-not-allowed':'음성 검색을 이용할 수 없습니다.','no-speech':'음성이 감지되지 않았습니다.','audio-capture':'마이크를 사용할 수 없습니다.','network':'네트워크 연결을 확인해 주세요.','language-not-supported':'한국어 음성 검색을 지원하지 않습니다.'};if(e.error==='aborted')clearMessage();else message(messages[e.error]||'음성 검색을 다시 시도해 주세요.');};
-  r.onend=()=>{if(active===r){reset();clearMessage();}};
+  r.onend=()=>{if(active===r){const value=latest;if(value)commit(value);else{reset();message('인식된 음성이 없습니다. 다시 시도해 주세요.');}}};
   // SpeechRecognition.start owns its native microphone permission request.
   // The optional onboarding permission request stays available. Do not open a
   // second getUserMedia capture on each tap before starting recognition.
-  try{r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다.');}
+  try{arm(r,10000);r.start()}catch{reset();message('음성 검색을 시작할 수 없습니다.');}
  });
  doc.addEventListener('visibilitychange',()=>{if(doc.hidden)stop();});
  input.addEventListener('focus',()=>{stop();clearMessage();});

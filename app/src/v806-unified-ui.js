@@ -72,7 +72,7 @@ export function installUnifiedUI(doc=document, win=window){
   const animationTimers=new Set();
   // Every mobile window uses the same opaque slide. The existing feature
   // remains the owner of visibility, data, route, focus and cleanup.
-  function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false){
+  function playMobileMotion(target,opening,afterClose,fadeFrom,offsetFrom,forceTabFade=false,closingBounds=null,closingClip=null){
     if(!phone()||!target?.style||reduced())return false;
     if(target.id==='dj-community-editor-portal'||target.dataset.djPrimaryTransition)return false;
     // Phone primary tabs are independent, opaque full-viewport screens.
@@ -103,7 +103,7 @@ export function installUnifiedUI(doc=document, win=window){
     const beforeAnimationPriority=target.style.getPropertyPriority('animation');
     const beforeTransition=target.style.getPropertyValue('transition');
     const beforeTransitionPriority=target.style.getPropertyPriority('transition');
-    const rect=target.getBoundingClientRect();
+    const rect=closingBounds||target.getBoundingClientRect();
     if(rect.height<1||rect.width<1)return false;
     const nav=element('bottom-nav');
     const docked=(target.matches?.('.page-panel,#transport-sheet,#dj-mobile-utilities,#ped-tools-panel,.maplibregl-popup-content,.version-history-dialog')&&nav&&!nav.hidden)||false;
@@ -121,7 +121,7 @@ export function installUnifiedUI(doc=document, win=window){
     }
     const beforeClip=target.style.getPropertyValue('clip-path');
     const beforeClipPriority=target.style.getPropertyPriority('clip-path');
-    if(lockTransit)target.style.setProperty('clip-path','none','important');
+    if(lockTransit)target.style.setProperty('clip-path',closingClip||'none','important');
     let finished=false,frame=0,start=null,timeout=0,elapsed=0;
     let liveOffset=opening?distance:0;
     const record={cancel:()=>finish(false),offset:()=>liveOffset};
@@ -253,7 +253,9 @@ export function installUnifiedUI(doc=document, win=window){
       if(target.dataset.dj810Animating==='closing')return;
       const from=target.dataset.dj810Animating==='opening'?Number(win.getComputedStyle(target).opacity):undefined;
       const offset=activeAnimation.get(target)?.offset?.();
-      cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset))finish();
+      const closingBounds=target.id==='transport-sheet'?target.getBoundingClientRect():null;
+      const closingClip=closingBounds?win.getComputedStyle(target).clipPath:null;
+      cancelActive(target);if(!playMobileMotion(target,false,finish,from,offset,false,closingBounds,closingClip))finish();
     },
     closeTab(target,finish){
       if(!target||target.hidden||!phone()||reduced()){finish();return;}

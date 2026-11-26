@@ -67,6 +67,7 @@ import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
+import {createBuildingCoverage,buildingFootprintFilter} from './building-coverage.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
@@ -233,6 +234,7 @@ let building3DLastOpacity = -1;
 let lastBuildingCount = 0;
 let baseLayerControls=null;
 let baseBuildingsVisible=true;
+let buildingCoverage=null;
 
 let overviewSheetState = 'expanded';
 let overviewDrag = null;
@@ -730,7 +732,7 @@ function syncAutomaticTerrain(_pitch) {
 function visibleBuilding2D(){
   // Loaded layers remain visible across the threshold; minzoom and paint
   // expressions smoothly fade them rather than flipping visibility on zoomend.
-  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry);
+  return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
   return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START;
@@ -747,17 +749,17 @@ function syncTiltWithBuildings() {
   const {opacity,color}=appearance;
   // At most one footprint-paint update per ~2 degrees instead of a full
   // setPaintProperty on every mousemove/pitch event for *every* GIS tile.
-  const steppedPitch=Math.round(pitch/2)*2;
-  const fillVisible=visibleBuilding2D() && (movementIsSlow || buildingPlanVisibility(pitch)>0);
-  const paintKey=`${theme}/${steppedPitch}/${fillVisible}/${movementIsSlow}`;
+  const fillVisible=visibleBuilding2D();
+  const paintKey=`${theme}/${fillVisible}/${show}/${movementIsSlow}`;
   const updateFootprint=paintKey!==lastFootprintPaintKey;
-  const footprint=updateFootprint?{...buildingFootprintPaint(theme,steppedPitch),
+  const footprint=updateFootprint?{...buildingFootprintPaint(theme,0),
     ...(movementIsSlow?{'fill-opacity':0.65}:{})}:null;
   if(footprint)footprint['fill-opacity']=buildingZoomOpacityExpression(footprint['fill-opacity']);
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
     if(info.footprintFillId && map.getLayer(info.footprintFillId)){
       const desired=fillVisible?'visible':'none';
+      if(info.footprint3DMode!==show){map.setFilter(info.footprintFillId,buildingFootprintFilter(show));info.footprint3DMode=show;}
       if(map.getLayoutProperty(info.footprintFillId,'visibility')!==desired)
         map.setLayoutProperty(info.footprintFillId,'visibility',desired);
       if(updateFootprint && footprint){
@@ -869,12 +871,12 @@ async function loadOneBuildingSheet(sheet){
     const buildingStyle=nightOcclusionBuildingPaint(
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
-    const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),map.getPitch());
+    const footprintStyle=buildingFootprintPaint(visualTheme.currentTheme(),0);
     footprintStyle['fill-opacity']=buildingZoomOpacityExpression(footprintStyle['fill-opacity']);
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
-      layout:{visibility:visibleBuilding2D() && buildingPlanVisibility(map.getPitch())>0?'visible':'none'},paint:footprintStyle},firstSymbol);
+      filter:buildingFootprintFilter(visibleBuilding3D()),layout:{visibility:visibleBuilding2D()?'visible':'none'},paint:footprintStyle},firstSymbol);
     map.addLayer({id:footprintLineId,type:'line',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:'none'},paint:outlineStyle},firstSymbol);
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
@@ -884,7 +886,8 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
-    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources});
+    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,footprint3DMode:visibleBuilding3D()});
+    buildingCoverage?.setSheet(sheet.sheet,within);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
     syncTiltWithBuildings();
@@ -899,10 +902,10 @@ async function loadOneBuildingSheet(sheet){
 // hitch without delaying the 2D basemap or exhausting mobile memory.
 let initialBuildingWarmupScheduled=false;
 function scheduleInitialBuildingWarmup(){
-  if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||!baseBuildingsVisible||djRenderBudget.isEconomy())return;
+  if(initialBuildingWarmupScheduled||!boundaryGeometry||!mapReady||djRenderBudget.isEconomy())return;
   initialBuildingWarmupScheduled=true;
   const run=async()=>{
-    if(!boundaryGeometry||!baseBuildingsVisible)return;
+    if(!boundaryGeometry)return;
     try{
       const manifest=await ensureBuildingManifest();
       const center=map.getCenter();
@@ -911,7 +914,7 @@ function scheduleInitialBuildingWarmup(){
       // Every sheet is separately parsed/installed; schedule the next sheet on
       // another idle task instead of janking the first interactive map frame.
       for(const sheet of nearby){
-        if(!baseBuildingsVisible)return;
+        if(!boundaryGeometry)return;
         await new Promise(resolve=>{
           if(typeof requestIdleCallback==='function')requestIdleCallback(resolve,{timeout:2200});
           else setTimeout(resolve,350);
@@ -934,7 +937,7 @@ function djTrimOffscreenBuildings(sheets){
     if(map.getStyle().layers.some(l=>l.source===sourceId&&!owned.includes(l.id)))continue;
     try{for(const layerId of owned)if(map.getLayer(layerId))map.removeLayer(layerId);
       if(map.getSource(sourceId))map.removeSource(sourceId);
-      loadedBuildingTiles.delete(id);
+      loadedBuildingTiles.delete(id);buildingCoverage?.removeSheet(id);
     }catch(error){console.debug('[건물 캐시 정리]',error?.message);}
   }
   lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
@@ -1705,7 +1708,8 @@ map.on('load',()=>{
   installMapOrientationControls(map,maplibregl);
   installGrassTexture({map,app});
   installForestShade({map,app});
-  installBaseBuildingPalette({map,app});
+  const nativeBuildingLayers=installBaseBuildingPalette({map,app});
+  buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
   try {
@@ -2846,14 +2850,28 @@ function requireDongjakRouteLocation(position){
   }
   return true;
 }
+function renderedRoadName(position){
+  try{
+    const pt=map.project([position.lng??position.lon,position.lat]);
+    const features=map.queryRenderedFeatures([[pt.x-5,pt.y-5],[pt.x+5,pt.y+5]]);
+    for(const f of features){
+      if(!/transportation|road|street/i.test(f.sourceLayer||f.layer?.['source-layer']||f.layer?.id||''))continue;
+      const props=f.properties||{},name=String(props['name:ko']||props['name:nonlatin']||props.name||'').trim();
+      if(/[가-힣0-9](?:로|길)$/.test(name))return name;
+    }
+  }catch{}
+  return null;
+}
 async function fetchRouteRoadAddress(position){
+  const localRoad=renderedRoadName(position);
+  const fallback=road=>road?'도로명: '+road+' (건물번호 미확인)':null;
   try{
     const q=new URLSearchParams({lat:String(position.lat),lon:String(position.lng)});
     const response=await fetch('/api/reverse-address?'+q,{signal:AbortSignal.timeout(6500)});
-    if(!response.ok)return null;
+    if(!response.ok)return fallback(localRoad);
     const data=await response.json();
-    return typeof data.address==='string'&&data.address.trim()?data.address.trim():null;
-  }catch{return null;}
+    return typeof data.address==='string'&&data.address.trim()?data.address.trim():fallback(localRoad||data.roadName);
+  }catch{return fallback(localRoad);}
 }
 async function resolveRouteAddress(position){
   const address=await fetchRouteRoadAddress(position);

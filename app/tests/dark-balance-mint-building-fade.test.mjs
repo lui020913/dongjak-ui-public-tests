@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {BUILDING_VISUAL_PALETTE,BUILDING_ZOOM_FADE_START,BUILDING_ZOOM_FADE_END,
-  buildingZoomOpacityExpression,buildingExtrusionAppearance,buildingFootprintPaint,
+  buildingZoomOpacityExpression,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprintPaint,
   installBaseBuildingPalette} from '../src/map-appearance.js';
 import {districtExteriorThemePaint} from '../src/ui-environment.js';
 
@@ -60,7 +60,7 @@ test('Native 3D buildings fade on zoom without overriding light styling or unrel
     globalThis.document={getElementById:()=>null};
     installBaseBuildingPalette({map,app});
     assert.ok(changed.some(([id,k,v])=>id==='native-building-3d'&&k==='fill-extrusion-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.89))));
-    assert.ok(changed.some(([id,k,v])=>id==='native-building'&&k==='fill-opacity'&&JSON.stringify(v)===JSON.stringify(buildingZoomOpacityExpression(.74))));
+    assert.ok(changed.some(([id,k,v])=>id==='native-building'&&k==='fill-opacity'&&JSON.stringify(v)===JSON.stringify(nativeBuildingFootprintPaint('dark')['fill-opacity'])));
     assert.ok(changed.every(([id])=>id!=='dj-night-reach-fill'&&id!=='walking-route-line'));
   }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
 });

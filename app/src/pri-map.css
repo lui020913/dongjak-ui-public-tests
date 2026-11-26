@@ -140,7 +140,7 @@ html body #dj-pri-dialog.dj-pri-dialog .dj-pri-close:focus-visible{outline:2px s
 #app .dj-pri-map-key span[hidden]{display:none!important;}
 #app .dj-pri-map-key span::before{content:'';width:18px;height:0;border-top:3px solid #B9C3C2;opacity:.58;flex:none;}
 #app .dj-pri-map-key .dj-pri-key-boundary::before{border-top:2px solid #FFFFFF;opacity:1;filter:drop-shadow(0 0 1px #82908a);}
-#app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #B9C3C2;}
+#app .dj-pri-map-key .dj-pri-key-candidate::before{border-top:3px dashed #c98945;opacity:.96;}
 
 
 /* Expanded PRI legend can reach the GPS toolbar at small phone heights.

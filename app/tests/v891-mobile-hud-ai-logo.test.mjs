@@ -72,7 +72,7 @@ test('AI keyboard surface shares its root and PWA status background, with no whi
  assert.doesNotMatch(tone,/aiOpen\?[^;]*'#ffffff'/);
  assert.match(toneCss,/--dj-pwa-status-color:#edf3ef;/);
  assert.match(ai,/html:has\(#dj-ai-search-modal\[open\]\) body\{background-color:#edf3ef!important/);
- assert.match(geometry,/inset>120&&\(query&&doc.activeElement===query\|\|modal.dataset.djAiKeyboard==='true'\)/);
+  assert.match(geometry,/layoutHeight-height>120&&editing/);
 });
 
 test('AI fade completion can close from either animation or timer without duplicate viewport mutations',()=>{
@@ -106,5 +106,5 @@ test('ordinary AI dialog never hides the live map or forces opaque animation fra
  const css=code('src/v880-supabase-safety-ai.css'),geometry=code('src/v891-mobile-hud-ai-logo.js');
  assert.doesNotMatch(css,/#dj-ai-search-modal\[open\]\) #app\{[^}]*?(?:opacity:0|visibility:hidden)/);
  assert.doesNotMatch(css,/#dj-ai-search-modal\[open\]\{[^}]*?opacity:1!important/);
- assert.match(geometry,/setMapUnderAi\(keyboardOpen\)/);
+ assert.match(geometry,/setMapUnderAi\(editing\)/);
 });
