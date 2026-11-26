@@ -1916,15 +1916,15 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   }
   function refreshStops(){showStops(combineStations());}
   // The authoritative polygon may be updated asynchronously by the admin layer.
-  map.on?.('dongjak:boundary-updated',()=>refreshStops());
+  map.on?.('dongjak:boundary-updated',()=>{refreshStops();void preloadOfficialStaticBusStops();});
   // On each deployment official static data is loaded directly as a local asset.
   // Unlike the live station API, this does not require a secret key or network
   // permission from ws.bus.go.kr. It persists into the highest map zoom.
+  let officialStaticDatasetPromise=null;
   async function preloadOfficialStaticBusStops(){
     try{
-      const response=await fetch('/data/transport/seoul-bus-stops.json',{cache:'force-cache'});
-      if(!response.ok)return false; // source file not imported yet
-      const dataset=await response.json();
+      officialStaticDatasetPromise??=fetch('/data/transport/seoul-bus-stops.json',{cache:'force-cache'}).then(response=>{if(!response.ok)throw Error('static bus file unavailable');return response.json();}).catch(error=>{officialStaticDatasetPromise=null;throw error;});
+      const dataset=await officialStaticDatasetPromise;
       const verified=officialStaticBusPlaces(dataset,isDongjak);
       if(verified.length<20){console.warn('[공식 정류장 정적파일] 동작구 내부 유효 정류장 수 부족');return false;}
       const identifiers=new Set(osmTransport.filter(x=>x.kind==='bus'&&x.arsId).map(x=>x.arsId));
