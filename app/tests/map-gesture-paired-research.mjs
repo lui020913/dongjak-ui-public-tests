@@ -1,0 +1,71 @@
+import {chromium} from '@playwright/test';
+import {writeFileSync,mkdirSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {dismissOnboarding} from './e2e/helpers.js';
+const urls=[process.env.BASELINE_URL,process.env.CANDIDATE_URL];
+assert.ok(urls.every(Boolean));
+const browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
+const report={baseline:process.env.BASELINE_SHA,candidate:process.env.CANDIDATE_SHA,notes:'Same software-rendered Chromium runner; not physical iPhone FPS. Each camera sweep is matched; icons stay enabled.',samples:[]};
+const sites=[{name:'Sangdo',center:[126.94791,37.502834]},{name:'Noryangjin',center:[126.941005,37.513534]}];
+async function sample(url,variant,round){
+ const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,serviceWorkers:'block',userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1'});
+ const page=await ctx.newPage();
+ try{
+  await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+  const menu=page.locator('#dj-install-menu');await menu.waitFor({state:'attached',timeout:30000});
+  if(await menu.isVisible()){await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();await menu.waitFor({state:'hidden'});}
+  const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
+  await page.waitForFunction(()=>{const o=document.querySelector('#map-startup-overlay'),n=document.querySelector('#map-startup-continue');return !o||!o.getClientRects().length||n?.getClientRects().length>0;},{},{timeout:90000});
+  if(await startup.isVisible()&&await next.isVisible())await next.click();
+  await startup.waitFor({state:'hidden',timeout:45000});await dismissOnboarding(page);
+  await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
+  for(const site of sites){
+   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:17.8,pitch:0,bearing:0}),site);
+   await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&!m.isMoving()&&m.getStyle().layers.some(l=>l.type==='symbol'&&/metro|bus|poi/i.test(l.id));},{},{timeout:90000});
+   await page.waitForTimeout(1800);
+   const data=await page.evaluate(async({center})=>{
+    const m=window.__qaMap,frames=[],writes={},restores=[];
+    const label=/poi|metro|bus|civic|facility|featured|name|label|transport/i;
+    const visible=m.getStyle().layers.filter(l=>l.type==='symbol'&&label.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none');
+    const visibleIds=visible.map(l=>l.id);
+    const icons=m.queryRenderedFeatures({layers:visibleIds}).length;
+    let last=0,active=false;
+    const record=(kind,id)=>{if(active&&m.isMoving()&&label.test(String(id)))writes[kind+':'+id]=(writes[kind+':'+id]||0)+1;};
+    for(const kind of ['setLayoutProperty','setPaintProperty','setFilter','moveLayer']){
+     const original=m[kind];if(typeof original!=='function')continue;
+     m[kind]=function(id,...args){record(kind,id);return original.call(this,id,...args);};restores.push(()=>{m[kind]=original;});
+    }
+    for(const id of Object.keys(m.getStyle().sources).filter(x=>label.test(x))){
+     const source=m.getSource(id),original=source?.setData;
+     if(typeof original!=='function')continue;
+     source.setData=function(...args){record('setData',id);return original.apply(this,args);};restores.push(()=>{source.setData=original;});
+    }
+    const frame=()=>{if(!active||!m.isMoving())return;const t=performance.now();if(last)frames.push(t-last);last=t;};
+    m.on('render',frame);
+    try{
+     for(const offset of [.0012,-.0012,.0007]){
+      last=0;active=true;
+      const done=new Promise(resolve=>m.once('moveend',resolve));
+      m.easeTo({center:[center[0]+offset,center[1]+offset*.35],duration:1200,easing:t=>t});
+      await done;active=false;await new Promise(r=>setTimeout(r,450));
+     }
+    }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
+    return {frames,writes,icons,visibleLayers:visibleIds.length,ratio:m.getPixelRatio?.()??null};
+   },site);
+   assert.ok(data.icons>0,'actual visible POI/transport labels required');
+   assert.ok(data.frames.length>=9,'insufficient map frames');
+   report.samples.push({variant,round,site:site.name,...data});
+   console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes}));
+  }
+ }finally{await ctx.close();}
+}
+try{
+ for(let i=0;i<3;i++)for(const n of (i%2?[1,0]:[0,1]))await sample(urls[n],n?'candidate':'baseline',i+1);
+ const stats=rows=>{const a=rows.flatMap(x=>x.frames).sort((x,y)=>x-y);return {samples:a.length,p50:a[Math.floor((a.length-1)*.5)],p95:a[Math.floor((a.length-1)*.95)],slowPct:100*a.filter(x=>x>32).length/a.length,gestureWrites:rows.reduce((n,x)=>n+Object.values(x.writes).reduce((s,v)=>s+v,0),0)};};
+ report.summary=Object.fromEntries(['baseline','candidate'].map(v=>[v,stats(report.samples.filter(x=>x.variant===v))]));
+ console.log('MAP_GESTURE_COMPARISON',JSON.stringify(report.summary));
+ // Do not conceal a regression or claim a physical-device guarantee.
+ assert.equal(report.summary.candidate.gestureWrites,0,'candidate must not mutate monitored POI or label sources/styles during camera motion');
+ const a=report.summary.baseline,z=report.summary.candidate;
+ assert.ok(z.p95<=a.p95*1.20+8&&z.slowPct<=a.slowPct+5,'candidate materially regressed compared with pre-transit source');
+}finally{mkdirSync('audit-map-gesture-output',{recursive:true});writeFileSync('audit-map-gesture-output/results.json',JSON.stringify(report,null,2));await browser.close();}

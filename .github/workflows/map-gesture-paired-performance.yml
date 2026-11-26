@@ -1,0 +1,69 @@
+name: Paired map gesture performance before transit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/tests/map-gesture-paired-research.mjs'
+      - 'app/src/**'
+      - '.github/workflows/map-gesture-paired-performance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: map-gesture-paired-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  compare:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/transit-pill-label-motion-20261127')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASELINE_SHA: 5a286b2869f3dfa3ac33f3e1d9c4179422cadd19
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 5a286b2869f3dfa3ac33f3e1d9c4179422cadd19
+          path: before-transit
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Expose map only in temporary QA checkouts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for p in [Path('app/src/main.js'),Path('before-transit/app/src/main.js')]:
+              s=p.read_text()
+              marker='installSolidMapLines(map);'
+              assert s.count(marker)==1, str(p)
+              p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+          PY
+      - name: Build baseline and candidate
+        run: |
+          npm --prefix before-transit/app ci --no-audit --no-fund
+          npm --prefix before-transit/app run build
+          npm --prefix app ci --no-audit --no-fund
+          npm --prefix app run build
+          cd app
+          npx playwright install --with-deps chromium
+      - name: Run matched map gesture benchmark
+        run: |
+          set -euo pipefail
+          (cd before-transit/app && npx vite preview --host 127.0.0.1 --port 4195 --strictPort) > /tmp/baseline-map.log 2>&1 &
+          (cd app && npx vite preview --host 127.0.0.1 --port 4196 --strictPort) > /tmp/candidate-map.log 2>&1 &
+          for port in 4195 4196; do
+            for i in $(seq 1 60); do curl -fsS "http://127.0.0.1:$port/" >/dev/null && break; sleep 1; done
+            curl -fsS "http://127.0.0.1:$port/" >/dev/null
+          done
+          BASELINE_URL=http://127.0.0.1:4195 CANDIDATE_URL=http://127.0.0.1:4196 CANDIDATE_SHA="$(git rev-parse HEAD)" node app/tests/map-gesture-paired-research.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paired-map-gesture-evidence
+          path: audit-map-gesture-output/
+          retention-days: 7
