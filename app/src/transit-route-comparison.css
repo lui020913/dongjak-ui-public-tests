@@ -1,0 +1,60 @@
+
+:host{--tr-ink:#193d33;--tr-muted:#627970;--tr-paper:#fff;--tr-soft:#edf3ef;--tr-border:#d2dcdb;--tr-primary:#147257}
+:host([data-transit-theme=dark]){--tr-ink:#ecf4f1;--tr-muted:#b7c3c0;--tr-paper:#2d3339;--tr-soft:#34453f;--tr-border:#45524f;--tr-primary:#147257}
+.transit-mode-toggle,.tr-filter{display:flex;gap:3px;background:var(--tr-soft);border-radius:999px;padding:3px}
+.transit-mode-toggle{margin:7px 0 4px}
+.transit-mode-toggle button,.tr-filter button{flex:1;min-width:0;border:0;border-radius:999px;background:transparent;color:var(--tr-muted);font-weight:740;font-size:13px;min-height:40px;padding:5px 7px;display:flex;align-items:center;justify-content:center;gap:5px;transition:background-color 180ms ease,color 180ms ease}
+.transit-mode-toggle button[aria-pressed=true],.tr-filter button[aria-pressed=true]{background:var(--tr-primary);color:#fff}
+.transit-mode-toggle svg,.tr-filter svg,.tr-card svg,.tr-head svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.transit-results{position:fixed;left:12px;right:12px;bottom:var(--v3-cta-bottom,111px);max-height:min(49dvh,440px);display:flex;flex-direction:column;gap:9px;border:1px solid var(--tr-border);border-radius:23px;background:var(--tr-paper);color:var(--tr-ink);padding:12px 14px;pointer-events:auto;box-shadow:0 3px 12px #23463b12;z-index:2;overflow:hidden}
+.tr-grip{width:32px;height:4px;border-radius:999px;background:var(--tr-border);margin:0 auto;flex:none}
+.transit-results h2{font-size:16px;margin:0;flex:1;font-weight:800;letter-spacing:-.025em}.tr-head{display:flex;align-items:center;gap:8px}
+.tr-head button{border:0;background:var(--tr-soft);color:var(--tr-ink);border-radius:50%;width:40px;height:40px;display:grid;place-items:center;flex:none}
+.tr-endpoints{font-size:12px;color:var(--tr-muted);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin:0}
+.tr-filter{flex:none}.tr-filter button{font-size:12px}
+.tr-list{overflow:auto;overscroll-behavior:contain;min-height:0;display:flex;flex-direction:column;gap:7px;padding:1px}
+.tr-card{border:1px solid var(--tr-border);border-radius:17px;padding:10px 11px;color:var(--tr-ink);background:var(--tr-paper);width:100%;text-align:left;display:grid;gap:7px;flex:none;transition:background-color 180ms ease,border-color 180ms ease}
+.tr-card:active{background:var(--tr-soft);border-color:var(--tr-primary)}
+.tr-card:disabled{opacity:.65;cursor:wait}
+.tr-card strong{font-size:15px;font-weight:780;min-width:0;overflow-wrap:anywhere}
+.tr-card small{color:var(--tr-muted);font-size:11px;line-height:1.45}
+.tr-row{display:flex;align-items:center;gap:7px;min-width:0}.tr-row strong{flex:1}
+.tr-bus-icon{color:var(--route-color);display:grid;place-items:center;flex:none}
+.tr-route-names{font-size:13px;font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.tr-track{display:flex;align-items:center;gap:3px;height:19px}.tr-track span{display:flex;align-items:center;justify-content:center;border-radius:999px;min-width:31px;height:100%;background:var(--tr-soft);color:var(--tr-muted);font-size:10px;font-weight:700;padding:0 7px}.tr-track span:nth-child(2){flex:1;background:color-mix(in srgb,var(--route-color) 16%,var(--tr-paper));color:var(--tr-ink);border:1px solid var(--route-color)}
+.tr-card .tr-chevron{margin-left:auto;color:var(--tr-muted);width:15px}
+.tr-note{font-size:11px;color:var(--tr-muted);line-height:1.45;margin:0;overflow-wrap:anywhere}
+.tr-retry{min-height:44px;border-radius:999px;border:0;background:var(--tr-primary);color:white;font-weight:750;padding:8px 14px}
+.canvas[data-transit-mode=transit] .pri-trigger,.canvas[data-transit-mode=transit] .waypoint-add-row{display:none!important}
+.canvas[data-transit-results=true] .action,.canvas[data-transit-results=true] .tools,.canvas[data-transit-results=true] .route-panel{visibility:hidden;pointer-events:none}
+.canvas[data-transit-results=true] .header .mode{display:none}
+@media(max-height:680px){.transit-results{max-height:46dvh;padding:9px 11px;gap:6px}.tr-head button{width:36px;height:36px}.tr-card{padding:8px 10px}.tr-filter button{min-height:36px}}
+@media(prefers-reduced-motion:reduce){.transit-mode-toggle button,.tr-filter button,.tr-card{transition:none}}
+
+.tr-filter button{white-space:nowrap;font-size:clamp(10px,3.1vw,12px);padding-inline:3px}
+.tr-filter button[data-filter=mixed]{flex:1.45}
+.tr-multi-track span{min-width:0;flex:0 1 auto;padding-inline:5px;white-space:nowrap}
+.tr-multi-track span[data-vehicle=true]{flex:1;border:1px solid var(--route-color);background:color-mix(in srgb,var(--route-color) 16%,var(--tr-paper));color:var(--tr-ink)}
+
+.tr-pri-preference{align-self:flex-start;min-height:36px;padding:5px 12px;border-radius:999px;border:1px solid var(--tr-border);background:var(--tr-paper);color:var(--tr-muted);font-size:12px;font-weight:700;transition:background-color 180ms ease,color 180ms ease}
+.tr-pri-preference[aria-pressed=true]{color:var(--tr-ink);background:var(--tr-soft);border-color:var(--tr-primary)}
+.tr-pri-preference:disabled{opacity:.65}
+@media(prefers-reduced-motion:reduce){.tr-pri-preference{transition:none}}
+
+.tr-multi-track{height:auto;min-height:19px;flex-wrap:wrap}.tr-multi-track span{min-height:19px;flex-shrink:1}.tr-multi-track span[data-vehicle=true]{min-width:35px}
+
+.tr-review-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tr-review{min-height:36px;padding:5px 12px;border-radius:999px;border:1px solid var(--tr-border);background:var(--tr-soft);color:var(--tr-ink);font-size:12px;font-weight:740}
+.tr-review:disabled{opacity:.5}
+.tr-review-result{border-top:1px solid var(--tr-border);padding-top:6px}
+.tr-review-label{font-size:11px;font-weight:730;color:var(--tr-ink);background:var(--tr-soft);padding:4px 8px;border-radius:999px;justify-self:start}
+
+/* Preserve real touch targets and prevent header controls from consuming the
+ * entire result sheet on short mobile viewports. The list alone scrolls. */
+.transit-mode-toggle button,.tr-filter button,.tr-pri-preference,.tr-review{min-height:44px}
+.tr-head button{width:44px;height:44px}
+.tr-grip,.tr-head,.tr-endpoints,.tr-review-tools,.tr-note{flex-shrink:0}
+.tr-list{flex:1 1 auto;min-height:56px}
+.tr-card{min-width:0}
+.canvas[data-transit-mode=transit] .fields .switch{grid-row:1/5}
+@media(max-height:680px){.transit-results{max-height:min(64dvh,440px);gap:6px}.tr-note{font-size:10px}}

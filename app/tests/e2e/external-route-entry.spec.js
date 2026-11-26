@@ -61,6 +61,48 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await expect(app).toHaveAttribute('data-tab','route');
    await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
   }
+  if(which==='end'){
+   // Closing the route editor after the first entry intentionally resets
+   // the endpoints. Register the start again through the real app handler.
+   const accepted=await page.evaluate(()=>{
+    const detail={which:'start',place:{kind:'subway',name:'상도',lng:126.94795,lat:37.50283,lines:['7호선']}};
+    window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail}));
+    return detail.accepted;
+   });
+   expect(accepted).toBe(true);
+   await expect(route.locator('#v3-start')).toContainText('상도');
+   await expect(route.locator('#v3-end')).toContainText('상도역');
+   await expect(route.locator('[data-v3="calculate"]')).toBeEnabled({timeout:10000});
+   // Deterministic transit service fixture: real app endpoint state and real
+   // comparison module, without depending on Seoul API availability in CI.
+   const stops=[
+    {seq:1,arsId:'20001',name:'검증 승차 정류장',lng:126.94795,lat:37.50283},
+    {seq:2,arsId:'20002',name:'검증 하차 정류장',lng:126.9481,lat:37.5027}
+   ];
+   const fixture={source:'서울시 버스정류소 위치정보',sourceDate:'2026-11-26',stops:[...stops,...Array.from({length:1000},(_,i)=>({arsId:String(30000+i),name:'검증 외부 '+i,lng:127.1,lat:37.6}))]};
+   await page.route('**/data/transport/seoul-bus-stops.json',r=>r.fulfill({json:fixture}));
+   await page.route('**/api/transport/bus?*',r=>r.fulfill({json:{items:[{routeId:'100000001',route:'검증버스',routeType:'2'}]}}));
+   await page.route('**/api/transport/bus/route-path?*',r=>r.fulfill({json:{routeId:'100000001',coordinates:stops.map(p=>[p.lng,p.lat]),stops}}));
+   await route.locator('[data-transit-mode="transit"]').click();
+   await expect(route.locator('[data-v3="calculate"]')).toContainText('대중교통 경로 찾기');
+   await route.locator('[data-v3="calculate"]').click();
+   const results=route.locator('.transit-results');
+   await expect(results).toBeVisible();
+   await expect(results.locator('.tr-card').filter({hasText:'검증버스'}).first()).toBeVisible({timeout:40000});
+   await results.locator('[data-filter="bus"]').click();
+   await expect(results.locator('[data-filter="bus"]')).toHaveAttribute('aria-pressed','true');
+   await expect(results.locator('.tr-card').first()).toContainText('기본운임 1,200원');
+   await results.locator('.tr-pri-preference').click();
+   await expect(results.locator('.tr-pri-preference')).toHaveAttribute('aria-pressed','false');
+   await route.locator('[data-v3="back"]').click();
+   await expect(results).toBeHidden();
+   await expect(app).toHaveAttribute('data-tab','route');
+   await route.locator('[data-transit-mode="walk"]').click();
+   await expect(route.locator('[data-v3="calculate"]')).toContainText('경로 찾기');
+   await page.unroute('**/data/transport/seoul-bus-stops.json');
+   await page.unroute('**/api/transport/bus?*');
+   await page.unroute('**/api/transport/bus/route-path?*');
+  }
   await route.locator('[data-v3="back"]').click();
   await expect(app).toHaveAttribute('data-tab','map');
   await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);

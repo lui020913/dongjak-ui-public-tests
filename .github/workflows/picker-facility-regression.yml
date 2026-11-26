@@ -8,6 +8,10 @@ on:
       - 'app/tests/map-hud-collision-browser.mjs'
       - 'app/src/place-details.js'
       - 'app/src/main.js'
+      - 'app/src/transit-*.js'
+      - 'app/src/transit-*.mjs'
+      - 'app/src/transit-*.css'
+      - 'app/tests/transit-detail-browser.mjs'
       - 'app/src/v815-place-store.js'
       - 'app/index.html'
       - 'app/tests/global-neutral-focus-browser.mjs'
@@ -65,3 +69,10 @@ jobs:
       - run: node tests/tip-search-crossfade-browser.mjs
       - run: node tests/bus-pill-insets-browser.mjs
       - run: node tests/facility-transit-render-browser.mjs
+      - run: node tests/transit-detail-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: transit-mobile-layout-evidence
+          path: app/test-results/transit-mobile/
+          if-no-files-found: ignore

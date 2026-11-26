@@ -8,6 +8,7 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
  */
 import {routeComparisonItems,sameRoute,metersLabel} from './v804-route-comparison.js';
 import './route-experience.css';
+import {mountTransitDetail} from './transit-route-detail.js';
 import {recentPlaces} from './v815-place-store.js';
 import {TEAM_FACTORS} from './pri-data.mjs';
 
@@ -176,6 +177,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   choices.append(choiceHead,priHeading,choiceRows,hint,legend);
   const actions=mapCard.querySelector('.route-map-card-actions');
   actions?.before(choices);
+  const disposeTransitDetail=mountTransitDetail({doc,win,app,mapCard,actions});
   const summaryTop=mapCard.querySelector(':scope > div:first-child');
   if(summaryTop)summaryTop.classList.add('dj-walk-native-summary');
 
@@ -376,6 +378,10 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       !search.hidden&&!panel.hidden?'search':
       !mapCard.hidden?'preview':
       app.dataset.tab==='route'?'input':'none';
+    if(stage==='preview'){
+      head.querySelector('small').textContent=app.dataset.djTransitPreview?'대중교통 길찾기':'도보 길찾기';
+      head.querySelector('strong').textContent=app.dataset.djTransitPreview?'경로 상세':'경로 비교';
+    }
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
     if(stage!=='preview')closePriHelp();
@@ -388,12 +394,13 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(stage==='guiding')stop?.focus({preventScroll:true});
   };
   const stateObserver=new MutationObserver(setStage);
-  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab','data-dj-walk-arrived']});
+  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab','data-dj-walk-arrived','data-dj-transit-preview']});
   for(const node of [panel,search,mapCard,navCard])stateObserver.observe(node,{attributes:true,attributeFilter:['hidden']});
   // Light updates in guidance are performed by native GPS, not this presenter.
   setStage();refreshChoices();
   return ()=>{
     cancelSurfaceMotion(mapCard);
+    disposeTransitDetail();
     stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
     footerMountObserver.disconnect();
     restoreInputFooter();

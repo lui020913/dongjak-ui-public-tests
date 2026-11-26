@@ -52,6 +52,7 @@ import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.j
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
 import './bus-route-detail.css';
+import {busRouteColor} from './bus-route-overlay.js';
 import './dongjak-import-controls.css';
 import {initTransportMap,closeTransportPanel,baseMapTransitPlace,subwayLineColor,searchCachedTransportPlaces,suppressNativeBusStopGlyphs} from './transport-map.js';
 import {initStationAccessibility} from './station-accessibility.js';
@@ -65,6 +66,8 @@ import {installMapProduct} from './v815-map-product.js';
 import {recentPlaces,recordRecentPlace,clearRecentPlaces,recentSearchQueries,recordSearchQuery} from './v815-place-store.js';
 import {computeMultiStopRoutes} from './v815-route-planner.js';
 import {VERIFIED_STATIONS} from './fixed-rail-data.js';
+import {fetchOfficialRailPaths} from './rail-official-shapes.js';
+import {transitRailSegments} from './transit-rail-geometry.mjs';
 import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
@@ -92,6 +95,8 @@ import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibil
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
+import {chooseTransitWalk} from './transit-walk-priority.mjs';
+import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -2829,13 +2834,13 @@ function syncRoutePresentation() {
     detail.hidden=true;
     editor.hidden=true;
     const metric=readRouteMetrics();
-    document.getElementById('route-map-metrics').textContent = transitPreview?('참고 약 '+Math.ceil(transitPreview.minutes)+'분 · 도보 '+Math.round(transitPreview.walkM)+'m'):`${metric.duration} · ${metric.distance}`;
+    document.getElementById('route-map-metrics').textContent = transitPreview?(Number.isFinite(transitPreview.minutes)?'참고 약 '+Math.ceil(transitPreview.minutes)+'분 · 도보 '+Math.round(transitPreview.walkM)+'m':'도보 '+Math.round(transitPreview.walkM)+'m · 전체 시간 미확인'):`${metric.duration} · ${metric.distance}`;
     const pri=routeResult?.priExposure;
     const priInfo=Number.isFinite(pri?.risk) && pri?.coverage>=0.65
       ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
       : '보행 위험도 평가 자료 부족';
     document.getElementById('route-guide-start').disabled=Boolean(transitPreview);
-    document.getElementById('route-map-source').textContent=transitPreview?'지하철 연계 · 배차·대기 미반영':(routeResult?.source==='seoul-pedestrian-graph'
+    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
@@ -2876,9 +2881,10 @@ function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 function clearTransitPreview(){
-  transitPreview=null;transitGeneration++;
+  transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
+  window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
   const empty={type:'FeatureCollection',features:[]};
-  for(const id of ['dj815-transit-walk','dj815-transit-rail']){
+  for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
     try{map.getSource(id)?.setData(empty);}catch{}
   }
 }
@@ -3675,12 +3681,13 @@ document.getElementById('route-return-map').addEventListener('click',()=>{
   if(!routeResult)return;
   navigate('map');fitWalkingRoute(routeResult.coords);syncRoutePresentation();
 });
-document.getElementById('route-map-edit').addEventListener('click',()=>navigate('route'));
+document.getElementById('route-map-edit').addEventListener('click',()=>{const returning=Boolean(transitPreview);navigate('route');if(returning)window.dispatchEvent(new CustomEvent('dongjak:transit-return-comparison'));});
 document.getElementById('route-map-close').addEventListener('click',resetRoute);
 updateRouteLabels();
 syncRoutePresentation();
 
 // v8.0.3 map-product extension: one route engine, ordered real walking legs.
+let previewRailTransit;
 routeProductTools=installMapProduct({map,maplibregl,navigate,
   getRoutePoints:()=>routeStart&&routeEnd
     ? [routeStart,...routeWaypoints,routeEnd].map(p=>({...p,name:p.name||p.label||'선택한 장소'})) : [],
@@ -3691,35 +3698,212 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!next.every(requireDongjakRouteLocation)){routeProductTools?.setWaypoints(routeWaypoints);return;}
     routeWaypoints=next.map(p=>({...p,label:p.name}));invalidateRoute();
   },
-  onTransitPreview:async plan=>{
+  onTransitPreview:previewRailTransit=async (plan,signal,preferPri=true)=>{
     if(!routeStart||!routeEnd)throw new Error('출발지와 목적지가 필요합니다.');
     if(routeWaypoints.length)throw new Error('경유지 없는 두 지점만 지원합니다.');
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');
     const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]);
     if(railCoords.some(p=>!p)||!routeWithinDistrict(railCoords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 대중교통 경로는 지원하지 않습니다.');
     const from=routeStart,to=routeEnd,requestGeneration=routeRequestGeneration,request=++transitGeneration;
-    const stillCurrent=()=>requestGeneration===routeRequestGeneration&&request===transitGeneration&&routeStart===from&&routeEnd===to&&!routeWaypoints.length&&app.dataset.tab==='route'&&!navMode;
-    const first=await fetchPreferredPedestrianPair(from,plan.origin);
+    const stillCurrent=()=>!signal?.aborted&&requestGeneration===routeRequestGeneration&&request===transitGeneration&&routeStart===from&&routeEnd===to&&!routeWaypoints.length&&app.dataset.tab==='route'&&!navMode;
+    const first=await fetchPreferredPedestrianPair(from,plan.origin,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
-    const last=await fetchPreferredPedestrianPair(plan.destination,to);
+    const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
-    const startWalk=first.standard||first.gentle,endWalk=last.standard||last.gentle;
+    const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
+    const railSegments=transitRailSegments(plan.stops,plan.lines,VERIFIED_STATIONS,await getTransitRailPaths());
+    if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
+    if(!railSegments.length||railSegments.some(s=>!routeWithinDistrict(s.coordinates,boundaryGeometry,isDongjak)))throw new Error('동작구 내 철도 구간을 확인하지 못했습니다.');
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
     invalidateRoute();
     const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))};
-    const rail={type:'FeatureCollection',features:railCoords.length>=2?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:railCoords}}]:[]};
-    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null],['dj815-transit-rail',rail,'#bd7735',[2,2]]]){
+    transitRailData(railSegments);
+    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(`${id}-line`))map.addLayer({id:`${id}-line`,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
     }
-    const coords=[...startWalk.coords,...railCoords,...endWalk.coords];
-    transitPreview={minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
-    navigate('map');fitWalkingRoute(coords);syncRoutePresentation();
+    const coords=[...startWalk.coords,...railSegments.flatMap(s=>s.coordinates),...endWalk.coords];
+    app.dataset.djTransitPreview='rail';
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
+    transitPreview={kind:'rail',minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
+    navigate('map');syncRoutePresentation();publishTransitDetail({...plan,railQuality:transitRailQuality(railSegments)},from,to,startWalk,endWalk);fitWalkingRoute(coords);
   }
 });
 
+
+// Fetch the same attributed network used by the regular railway map, with
+// a bounded timeout and a short cache; unavailable edges stay schematic.
+let transitRailCache=null,transitRailCacheAt=0,transitRailPending=null;
+async function getTransitRailPaths(){
+ if(transitRailCache&&Date.now()-transitRailCacheAt<300000)return transitRailCache;
+ if(!transitRailPending)transitRailPending=fetchOfficialRailPaths(fetch,4000).then(paths=>{transitRailCache=paths;transitRailCacheAt=Date.now();return paths;}).catch(()=>[]).finally(()=>{transitRailPending=null;});
+ return transitRailPending;
+}
+function transitRailData(segments){
+ const color=line=>subwayLineColor(line==='신림'?'신림선':line+'호선');
+ const make=schematic=>({type:'FeatureCollection',features:segments.filter(s=>s.schematic===schematic).map(s=>({type:'Feature',properties:{color:color(s.line),source:s.source},geometry:{type:'LineString',coordinates:s.coordinates}}))});
+ for(const [id,data,dash] of [['dj-transit-rail-verified',make(false),null],['dj-transit-rail-schematic',make(true),[2,2]]]){
+  if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
+  if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
+ }
+}
+function transitRailQuality(segments){
+ return segments.length&&segments.every(s=>!s.schematic)?'verified':segments.some(s=>!s.schematic)?'mixed':'schematic';
+}
+// Assess each pair of alternatives independently, never compare disjoint legs.
+async function selectTransitWalk(pair,preferPri){
+ const valid=r=>Array.isArray(r.coords)&&r.coords.length>=2&&routeWithinDistrict(r.coords,boundaryGeometry,isDongjak);
+ const candidates={standard:pair.standard&&valid(pair.standard)?pair.standard:null,gentle:pair.gentle&&valid(pair.gentle)?pair.gentle:null};
+ let assessment=null;
+ try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500});}catch{}
+ return chooseTransitWalk(candidates,assessment,{preferPri,valid});
+}
+// Assess the two actual walking legs independently, never the vehicle path.
+function publishTransitDetail(plan,from,to,first,last){
+  const preview=transitPreview;
+  const label=p=>p?.name||p?.label||'선택한 장소';
+  const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice});
+  const detail={kind:plan.kind,railQuality:plan.railQuality,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
+    from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,firstTime:plan.origin?.firstTime,lastTime:plan.origin?.lastTime,
+    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:{first:first.transitPri||null,last:last.transitPri||null}};
+  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
+  emit();
+
+}
+
+// Only a verified walking link may connect two different boarding locations.
+async function previewMultiTransit(plan,signal,preferPri=true){
+ const legs=plan.legs;
+ if(!Array.isArray(legs)||(legs.length<2||legs.length>3)||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!routeWithinDistrict(leg.coords,boundaryGeometry,isDongjak)))throw new Error('동작구 내 검증된 환승 경로가 아닙니다.');
+ const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
+ const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
+ const pairs=[[from,legs[0].origin],...legs.slice(1).map((leg,i)=>[legs[i].destination,leg.origin]),[legs.at(-1).destination,to]];
+ const walks=[];
+ for(const [a,b] of pairs){
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   const sameStop=a.arsId&&a.arsId===b.arsId&&a.lng===b.lng&&a.lat===b.lat;
+   if(sameStop||(a.lng===b.lng&&a.lat===b.lat)){walks.push({coords:[],seconds:0,kilometers:0});continue;}
+   const result=await fetchPreferredPedestrianPair(a,b,signal);
+   const selected=await selectTransitWalk(result,preferPri);
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   if(!selected||!routeWithinDistrict(selected.coords,boundaryGeometry,isDongjak))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
+   walks.push(selected);
+ }
+ const paths=legs.some(l=>l.kind==='rail')?await getTransitRailPaths():[];
+ const railSegments=legs.filter(l=>l.kind==='rail').flatMap(l=>transitRailSegments(l.stops,l.lines,VERIFIED_STATIONS,paths));
+ if(legs.some(l=>l.kind==='rail')&&!railSegments.length||railSegments.some(s=>!routeWithinDistrict(s.coordinates,boundaryGeometry,isDongjak)))throw new Error('동작구 내 철도 구간을 확인하지 못했습니다.');
+ if(!current()||!map.isStyleLoaded?.())throw new Error('지도 또는 경로 상태가 변경됐습니다.');
+ invalidateRoute();
+ transitRailData(railSegments);
+ const feature=(coordinates,color)=>({type:'Feature',properties:{color},geometry:{type:'LineString',coordinates}});
+ const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(leg.lines[0]==='신림'?'신림선':leg.lines[0]+'호선');
+ const data=[
+  ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,'#168f82')),false],
+  ['dj-transit-multi-bus',legs.filter(x=>x.kind==='bus').map(x=>feature(x.coords,color(x))),false]
+ ];
+ for(const [id,features,dash] of data){
+  const collection={type:'FeatureCollection',features};
+  if(!map.getSource(id))map.addSource(id,{type:'geojson',data:collection});else map.getSource(id).setData(collection);
+  if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','color'],'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':[2,2]}:{})}});
+ }
+ const stopId='dj-transit-multi-stops';
+ const stopData={type:'FeatureCollection',features:legs.flatMap(leg=>[leg.origin,leg.destination].map(p=>({type:'Feature',properties:{color:color(leg)},geometry:{type:'Point',coordinates:[p.lng,p.lat]}})))};
+ if(!map.getSource(stopId))map.addSource(stopId,{type:'geojson',data:stopData});else map.getSource(stopId).setData(stopData);
+ if(!map.getLayer(stopId+'-circle'))map.addLayer({id:stopId+'-circle',type:'circle',source:stopId,paint:{'circle-radius':5,'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2}});
+ app.dataset.djTransitPreview=plan.kind;
+ window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
+ const preview=transitPreview={kind:plan.kind,changes:legs.length-1,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
+ const label=p=>p?.name||p?.label||'선택한 장소';
+ const detail={kind:plan.kind,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
+ const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
+ navigate('map');syncRoutePresentation();emit();
+ fitWalkingRoute([...walks.flatMap(w=>w.coords),...legs.filter(l=>l.kind==='bus').flatMap(leg=>leg.coords),...railSegments.flatMap(s=>s.coordinates)]);
+
+}
+
+// Transit comparison reuses the same endpoint state and walking graph.
+// Explicit foreground-only position checks reuse the native device API.
+window.addEventListener('dongjak:transit-gps-start',event=>{
+ const {signal,onPosition,onError}=event.detail||{};
+ if(!signal||typeof onPosition!=='function'||typeof onError!=='function')return;
+ let id=null;
+ const preview=transitPreview;
+ const current=()=>!signal.aborted&&Boolean(preview)&&transitPreview===preview&&app.dataset.tab==='map'&&!document.hidden;
+ const stop=()=>{if(id!==null){stopDeviceWatch(id);id=null;}};
+ signal.addEventListener('abort',stop,{once:true});
+ const fail=()=>{if(current())onError();stop();};
+ if(!current()){onError();return;}
+ void (async()=>{
+   try{
+     const options={enableHighAccuracy:true,timeout:12000,maximumAge:0};
+     const first=await getDevicePosition(options);
+     if(!current())return;
+     onPosition(first);
+     const watch=await startDeviceWatch(position=>{if(current())onPosition(position);},fail,options);
+     if(!current())stopDeviceWatch(watch);else id=watch;
+   }catch{fail();}
+ })();
+});
+window.addEventListener('dongjak:transit-route-points',event=>{
+  if(app.dataset.tab!=='route'||navMode)return;
+  event.detail?.accept?.(routeStart&&routeEnd?[routeStart,...routeWaypoints,routeEnd].map(p=>({...p})):[]);
+});
+// Review candidates without changing map state or entering navigation.
+window.addEventListener('dongjak:transit-candidate-review',event=>{
+ const {plan,signal,preferPri,resolve,reject}=event.detail||{};
+ if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
+ void (async()=>{
+  const from=routeStart,to=routeEnd,gen=routeRequestGeneration;
+  const current=()=>!signal?.aborted&&app.dataset.tab==='route'&&!navMode&&routeStart===from&&routeEnd===to&&gen===routeRequestGeneration&&!routeWaypoints.length;
+  if(!from||!to||!current())throw new Error('경로 조건이 변경됐습니다.');
+  const legs=plan.legs||[plan];
+  if(legs.some(leg=>{const coords=leg.kind==='rail'?leg.stops?.map(n=>VERIFIED_STATIONS[n]):leg.coords;return !Array.isArray(coords)||coords.length<2||coords.some(p=>!p)||!routeWithinDistrict(coords,boundaryGeometry,isDongjak);}))throw new Error('교통 구간 확인 불가');
+  const pairs=transitReviewPairs(plan,from,to),walks=[];
+  if(!pairs.length)throw new Error('경로 연결 정보 부족');
+  for(const [a,b] of pairs){
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   if(a.lng===b.lng&&a.lat===b.lat){walks.push({kilometers:0,seconds:0});continue;}
+   const pair=await fetchPreferredPedestrianPair(a,b,signal);
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   const walk=await selectTransitWalk(pair,preferPri);
+   if(!current()||!walk)throw new Error('도보 연결 확인 불가');
+   walks.push(walk);
+  }
+  return summarizeTransitWalks(walks);
+ })().then(resolve,reject);
+});
+window.addEventListener('dongjak:transit-route-preview',event=>{
+  const {plan,signal,resolve,reject,preferPri=true}=event.detail||{};
+  if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
+  void (async()=>{
+    if(!routeStart||!routeEnd||routeWaypoints.length||navMode||app.dataset.tab!=='route')throw new Error('출발지와 목적지를 다시 확인해 주세요.');
+    if(plan.kind==='rail')return previewRailTransit(plan,signal,preferPri);
+    if(plan.kind==='transfer'||plan.kind==='mixed')return previewMultiTransit(plan,signal,preferPri);
+    if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!routeWithinDistrict(plan.coords,boundaryGeometry,isDongjak))throw new Error('동작구 내 검증된 버스 경로가 아닙니다.');
+    const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
+    const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
+    const first=await fetchPreferredPedestrianPair(from,plan.origin,signal);
+    if(!current())throw new Error('경로 조건이 변경됐습니다.');
+    const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
+    if(!current())throw new Error('경로 조건이 변경됐습니다.');
+    const [a,b]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    if(!current())throw new Error('경로 조건이 변경됐습니다.');
+    if(!a||!b||!map.isStyleLoaded?.())throw new Error('실제 보행 연결 경로 또는 지도를 확인하지 못했습니다.');
+    invalidateRoute();
+    const collection=lines=>({type:'FeatureCollection',features:lines.map(coordinates=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates}}))});
+    for(const [id,data,color] of [['dj815-transit-walk',collection([a.coords,b.coords]),'#168f82'],['dj815-transit-bus',collection([plan.coords]),busRouteColor(plan.routeType)]]){
+      if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
+      if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':color,'line-width':5,'line-opacity':.9}});
+    }
+    app.dataset.djTransitPreview='bus';
+    window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
+    transitPreview={kind:'bus',route:String(plan.route),minutes:null,walkM:(a.kilometers+b.kilometers)*1000};
+    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);fitWalkingRoute([...a.coords,...plan.coords,...b.coords]);
+  })().then(resolve,reject);
+});
 
 // ═════════════════════════════════════════════════════════════
 // v14 실시간 도보 안내: GPS watchPosition / 지도 보간 / 진척도 / 안내 카드
