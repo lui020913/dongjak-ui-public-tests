@@ -21,7 +21,7 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  await expect(page.locator('#dj-community-location-card')).toBeVisible();
  await page.locator('#dj-community-location-card').getByRole('button',{name:'제보 위치 닫기'}).click();
  // Actual UI camera change brings the app to the high-zoom review area.
- await expect(app).toHaveAttribute('data-dj-reviewed-base-roads','additive-preview',{timeout:90000});
+ await expect(app).toHaveAttribute('data-dj-reviewed-base-roads','selective-preview',{timeout:90000});
  expect(failed).toEqual([]);
  expect(requested.has('/data/road-display-review/manifest.json')).toBe(true);
  const count=[...requested].filter(p=>/\/road-\d+-\d+-\d+\.geojson$/.test(p)).length;
@@ -31,6 +31,6 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  const canvas=page.locator('#map canvas.maplibregl-canvas').first();const rect=await canvas.boundingBox();
  await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);
  for(let i=0;i<8;i++){await page.mouse.wheel(0,300);await page.waitForTimeout(180);}
- await expect(app).not.toHaveAttribute('data-dj-reviewed-base-roads','additive-preview',{timeout:30000});
- console.log('ACTUAL_APP_BASE_ROAD_QA_OK',JSON.stringify({viewportFiles:count,nativeRetained:true,zoomFallback:true}));
+ await expect(app).not.toHaveAttribute('data-dj-reviewed-base-roads',/preview$/,{timeout:30000});
+ console.log('ACTUAL_APP_BASE_ROAD_QA_OK',JSON.stringify({viewportFiles:count,selectiveNativeReplacement:true,zoomFallback:true}));
 });
