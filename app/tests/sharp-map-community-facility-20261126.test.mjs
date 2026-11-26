@@ -33,6 +33,6 @@ test('facility detail keeps actions and disclosure while allowing content height
  assert.match(main,/dj-place-ai-disclaimer/);
  assert.match(main,/saveButton\.append\(text\('span','저장'/);
  assert.match(main,/shareButton\.append\(text\('span','공유'/);
- assert.match(css,/\.dj-place-detail-popup:not\(\.dj871-sheet-expanded\) \.maplibregl-popup-content\{/);
+ assert.match(css,/\.dj-place-detail-popup:not\(\.dj871-sheet-expanded\):not\(\.dj871-place-expanded\) \.maplibregl-popup-content\{/);
  assert.match(css,/\.dj-place-redundant-folder-heading\{display:none!important\}/);
 });
