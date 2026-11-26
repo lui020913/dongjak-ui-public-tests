@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.212",
+  "application_version": "9.2.213",
   "public_work_branch": "main",
-  "purpose": "Verified PR #579 (62ee0fa6): prevent opaque reviewed road polygons appearing after camera moveend across the entire map. Keep native road presentation and filters stable; retain 185 display-only building trims, original GIS/PRI/routing and transit features from v9.2.211. Reviewed road polygon rendering temporarily disabled, original assets retained. All 38 CI jobs including 36 phone shards, actual idle map tests at three sites, endpoint and picker regression passed. Full protected Preview, phone QA and Production required; no relaxed gates.",
-  "attempt": 447,
+  "purpose": "Verified PR #578 (cfe31aa7): transit-only exterior map fade, restored base map labels, expanded Seoul search rectangle and camera bounds, Dongjak-linked endpoints and cross-boundary transit, conservative unassessed exterior pedestrian legs, normal walking map restoration and accessible boundary dialog. All five CI workflows passed, including 38/38 source jobs, real route entry and picker/facility browser regression, protected overlay and transformed release build. Preserve v9.2.212 idle road overlay fix, building trims and existing PRI data. Existing verified transport network coverage only; external walking safety assessment and physical-device validation remain limited. Full protected Preview, phone QA and Production required; no relaxed gates.",
+  "attempt": 448,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
