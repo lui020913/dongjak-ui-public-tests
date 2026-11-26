@@ -1,5 +1,6 @@
 import {findTransitOptions} from './transit-route-planner.mjs';
 import {busRouteColor} from './bus-route-overlay.js';
+import {subwayLineColor} from './transport-map.js';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import css from './transit-route-comparison.css?inline';
 const icons={
@@ -51,7 +52,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 시간·요금은 확인된 정보만 표시합니다.';
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
-   const card=doc.createElement('button');card.type='button';card.className='tr-card';card.style.setProperty('--route-color',plan.kind==='bus'?busRouteColor(plan.routeType):'#b69b4d');
+   const card=doc.createElement('button');card.type='button';card.className='tr-card';card.style.setProperty('--route-color',plan.kind==='bus'?busRouteColor(plan.routeType):subwayLineColor(railLabel(plan.lines[0])));
    const head=doc.createElement('div');head.className='tr-row';
    const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(plan.kind);
    const title=doc.createElement('strong');title.textContent=plan.kind==='bus'?plan.route+' · 직행버스':[...new Set(plan.lines)].map(railLabel).join(' · ');
@@ -81,12 +82,15 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   catch(e){if(seq===generation&&!disposed){setBusy(false);note('교통정보를 불러오지 못했습니다. 다시 시도해 주세요.',true);}}
   finally{win.clearTimeout(timer);}
  }
+ const back=event=>{if(panel.hidden)return;event.preventDefault();event.stopImmediatePropagation();close({animate:true});};
+ const escape=event=>{if(event.key==='Escape'&&!panel.hidden){event.preventDefault();event.stopImmediatePropagation();close({animate:true});}};
+ q('[data-v3="back"]').addEventListener('click',back,true);win.addEventListener('keydown',escape,true);
  const endpointChanged=()=>close();
- const returnComparison=()=>{const ps=points();if(!cached||key(ps)!==cached.key||ps.length!==2)return;mode='transit';syncMode();options=cached.options;filter=cached.filter;pointKey=cached.key;show(ps);render();};
- const observer=new MutationObserver(()=>{host.dataset.transitTheme=app.dataset.theme||'light';if(app.dataset.tab!=='route'||host.hidden){if(!panel.hidden||busy)close({keepCache:app.dataset.tab==='map'&&Boolean(app.dataset.djTransitPreview)});if(app.dataset.tab!=='map'&&app.dataset.tab!=='route')cached=null;}});
+ const returnComparison=()=>{win.requestAnimationFrame(()=>{if(disposed||app.dataset.tab!=='route'||host.hidden)return;const ps=points();if(!cached||key(ps)!==cached.key||ps.length!==2)return;mode='transit';syncMode();options=cached.options;filter=cached.filter;pointKey=cached.key;show(ps);render();});};
+ const observer=new MutationObserver(()=>{host.dataset.transitTheme=app.dataset.theme||'light';if(app.dataset.tab!=='route'||win.innerWidth>=700){if(!panel.hidden||busy)close({keepCache:app.dataset.tab==='map'&&Boolean(app.dataset.djTransitPreview)});if(app.dataset.tab!=='map'&&app.dataset.tab!=='route')cached=null;}});
  observer.observe(app,{attributes:true,attributeFilter:['data-tab','data-theme']});observer.observe(host,{attributes:true,attributeFilter:['hidden']});
  for(const name of ['dongjak:route-endpoint-registered','dongjak:route-editor-reset','dongjak:route-swap'])win.addEventListener(name,endpointChanged);
  win.addEventListener('dongjak:transit-return-comparison',returnComparison);
  host.dataset.transitTheme=app.dataset.theme||'light';syncMode();
- return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-editor-reset','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);panel.remove();style.remove();}};
+ return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-editor-reset','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);panel.remove();style.remove();}};
 }
