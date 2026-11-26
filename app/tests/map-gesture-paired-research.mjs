@@ -26,11 +26,25 @@ async function sample(url,variant,round){
   for(const site of sites){
    await page.evaluate(({center})=>{const m=window.__qaMap;m.jumpTo({center,zoom:17.8,pitch:0,bearing:0});},site);
    await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&!m.isMoving()&&m.getStyle().layers.some(l=>l.type==='symbol'&&/metro|bus|poi/i.test(l.id));},{},{timeout:90000});
-   await page.waitForTimeout(1800);
+   // A loaded style is not proof that symbol tiles have rendered. Apply the
+   // matched DPR before waiting for real labels so a DPR resize cannot clear
+   // the visible features immediately before the first sample.
+   await page.evaluate(()=>window.__qaMap.setPixelRatio?.(2.5));
+   try{
+    await page.waitForFunction(()=>{
+     const m=window.__qaMap,app=document.getElementById('app');
+     if(app?.dataset?.tab!=='map'||app?.dataset?.djTransitExterior==='true'||m.isMoving()||!m.isStyleLoaded())return false;
+     const ids=m.getStyle().layers.filter(l=>l.type==='symbol'&&/poi|metro|bus|civic|facility|featured|name|label|transport/i.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none').map(l=>l.id);
+     return ids.length>0&&m.queryRenderedFeatures({layers:ids}).length>0;
+    },{},{timeout:90000,polling:500});
+   }catch(error){
+    const state=await page.evaluate(()=>{const m=window.__qaMap,app=document.getElementById('app');return {tab:app?.dataset?.tab,transit:app?.dataset?.djTransitExterior,center:m.getCenter(),zoom:m.getZoom(),style:m.isStyleLoaded(),tiles:m.areTilesLoaded?.(),layers:m.getStyle().layers.filter(l=>l.type==='symbol').map(l=>[l.id,m.getLayoutProperty(l.id,'visibility')||'visible'])};});
+    console.log('MAP_GESTURE_READINESS_FAILURE',JSON.stringify({variant,round,site:site.name,...state}));throw error;
+   }
    const data=await page.evaluate(async({center})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
     // Match quality between revisions, including any adaptive DPR changes.
-    m.setPixelRatio?.(2.5);const originalDpr=m.setPixelRatio;if(originalDpr){m.setPixelRatio=function(){};restores.push(()=>{m.setPixelRatio=originalDpr;});}
+    const originalDpr=m.setPixelRatio;if(originalDpr){m.setPixelRatio=function(){};restores.push(()=>{m.setPixelRatio=originalDpr;});}
     const label=/poi|metro|bus|civic|facility|featured|name|label|transport/i;
     const visible=m.getStyle().layers.filter(l=>l.type==='symbol'&&label.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none');
     const visibleIds=visible.map(l=>l.id);
@@ -69,6 +83,7 @@ async function sample(url,variant,round){
    report.samples.push({variant,round,site:site.name,...data});
    console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,sweeps:data.sweeps,ratio:data.ratio}));
    assert.ok(data.icons>0,'actual visible POI/transport labels required');
+   assert.ok(Math.abs(data.ratio-2.5)<.01,'matched DPR required');
    assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
    assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
   }
