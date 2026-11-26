@@ -5,7 +5,7 @@ import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
 import {installReadable3DLabels} from './readable-3d-labels.js';
 import {installMobileMapControls} from './mobile-map-controls.js';
-import {phoneProfile,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
+import {phoneProfile,normalMapPixelRatio,installPhoneRenderBudget,offscreenEvictionIds} from './adaptive-phone-map-budget.mjs';
 import {baseMapRecoveryDecision,BASE_STYLE_INITIAL_WAIT_MS} from './map-basemap-recovery.mjs';
 import './adaptive-phone-map-budget.css';
 import './button-material.css';
@@ -610,7 +610,7 @@ new MutationObserver(()=>{
 // 이전에 실제 3D 렌더링이 성공했던 OpenFreeMap Bright 스타일을 사용합니다.
 const djPhone=window.matchMedia?.('(max-width:699px)')?.matches===true;
 const djInitialBudget=phoneProfile({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,saveData:Boolean(navigator.connection?.saveData)});
-const djNormalPixelRatio=Math.min(djPhone?1.25:1.5, Math.max(1, Number(globalThis.devicePixelRatio)||1));
+const djNormalPixelRatio=normalMapPixelRatio({phone:djPhone,ua:navigator.userAgent,memory:navigator.deviceMemory,cores:navigator.hardwareConcurrency,deviceRatio:globalThis.devicePixelRatio});
 const themeReloadState=readManualThemeReload(window.sessionStorage);
 const map = new maplibregl.Map({
   container: 'map',
@@ -1445,6 +1445,7 @@ function clearPending(){
 }
 function setAddMode(enabled,{restoreOverview=true}={}){
   if(enabled){
+    closeCommunityLocation();
     immersiveChrome.restore();closeTransportPanel(false);
     app.classList.remove('map-controls-open');
     mapToolsToggle?.setAttribute('aria-expanded','false');
@@ -1969,6 +1970,7 @@ let communityLocationCard = null;
 function closeCommunityLocation(){
   communityLocationMarker?.remove();communityLocationMarker=null;
   communityLocationCard?.remove();communityLocationCard=null;
+  delete app.dataset.communityLocationViewing;
 }
 window.addEventListener('dongjak:map-search-opened',closeCommunityLocation);
 window.addEventListener('dongjak:map-place-selected',closeCommunityLocation);
@@ -2008,6 +2010,11 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if(previousTab!==tab)closePriPreferences();
   if((tab!=='map'||suppressOverview)&&transitPreview)clearTransitPreview();
   if(tab!=='map')closeCommunityLocation();
+  if(tab==='map'&&suppressOverview&&previousTab==='participate'){
+    cancelCommunityTabMotion();
+    const panel=document.getElementById('participation-panel');
+    if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);}
+  }
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
   if(!preserveCommunityComposer&&(reopeningCommunity||(previousTab!==tab&&(previousTab==='participate'||tab==='participate')))&&!communityPickMode&&!resumeCommunityDraft){
@@ -2489,21 +2496,36 @@ function communityButton(text,cls,fn) {
   const btn=makeCEl('button',cls,text);btn.type='button';btn.addEventListener('click',fn);return btn;
 }
 function showCommunityLocation(post) {
-  if(!post.location)return;
-  // Viewing a saved location is read-only, never a pending draft pick.
+  if(!post?.location||post.location.lng==null||post.location.lat==null)return;
+  const lng=Number(post.location.lng),lat=Number(post.location.lat);
+  if(!Number.isFinite(lng)||!Number.isFinite(lat)||Math.abs(lng)>180||Math.abs(lat)>90){toast('제보 위치를 확인할 수 없습니다.');return;}
+  if(navMode){toast('길안내를 종료한 후 위치를 확인해 주세요.');return;}
+  // A read-only map return owns the entire transition. Do not render an
+  // empty community detail or leave a retained outgoing page over the map.
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
   closeCommunityLocation();
-  const lng=Number(post.location.lng),lat=Number(post.location.lat);
-  if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
-  navigate('map',{suppressOverview:true});
   quickSearch.close();quickSearch.clearMapResults?.();
-  map.flyTo({center:[lng,lat],zoom:16.2,pitch:0,duration:800});
+  routePickMode=null;closeTransitRouteConfirmation();
+  invalidateRoute(); // Preserve route editor endpoints, but dismiss the old preview.
+  navigate('map',{suppressOverview:true});
+  app.dataset.communityLocationViewing='true';
+  const panel=document.getElementById('participation-panel');
+  if(panel){window.DongjakWindowMotion?.cancel(panel);delete panel.dataset.djTabOutgoing;delete panel.dataset.djPrimaryTransition;panel.hidden=true;}
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
+  communityLocationMarker.getElement?.()?.classList.add('dj-community-location-marker');
   const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');
   const copy=makeCEl('div','dj-community-location-copy');copy.append(makeCEl('small','','커뮤니티 제보 위치'),makeCEl('strong','',post.title||'제보 위치'));
-  const dismiss=communityButton('×','dj-community-location-close',closeCommunityLocation);dismiss.setAttribute('aria-label','제보 위치 닫기');
+  const dismiss=communityButton('닫기','dj-community-location-close',closeCommunityLocation);dismiss.setAttribute('aria-label','제보 위치 닫기');
   card.append(copy,dismiss);app.append(card);communityLocationCard=card;
+  map.stop?.();map.resize();
+  const targetMarker=communityLocationMarker;
+  requestAnimationFrame(()=>{
+    if(communityLocationMarker!==targetMarker||app.dataset.tab!=='map')return;
+    const rect=map.getContainer().getBoundingClientRect(),cardRect=card.getBoundingClientRect();
+    const offsetY=window.matchMedia('(max-width:699px)').matches?-Math.min(70,Math.max(0,(rect.bottom-cardRect.top)/3)):0;
+    map.easeTo({center:[lng,lat],zoom:Math.max(16.2,map.getZoom()||0),pitch:0,offset:[0,offsetY],duration:380});
+  });
 }
 async function updateLike(postId) {
   const shared=sharedCommunityPosts.find(p=>p.id===postId);if(shared){try{await setSharedCommunityLike(postId,!shared.liked);await refreshSharedCommunity();}catch(error){toast(error.message||'공감 등록 실패');}return;}
@@ -3261,6 +3283,7 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
 });
 
 function beginRoutePick(which) {
+  closeCommunityLocation();
   if(!['start','end','waypoint'].includes(which)||navMode)return;
   quickSearch.close();quickSearch.clearMapResults?.();
   if (addMode) setAddMode(false);

@@ -210,6 +210,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   for(const name of getPlaceFolders()){const option=document.createElement('option');option.value=name;option.textContent=name;folderSelect.append(option);}
   folderSelect.value=savedPlaces().find(item=>placeKey(item)===placeKey(p))?.folder||'즐겨찾기';
   folderWrap.append(folderSelect);folderWrap.hidden=!isPlaceSaved(p);
+  folderHeading.classList.add('dj-place-redundant-folder-heading');
   folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;body.append(folderSection);
 
   const saveButton=document.createElement('button');saveButton.type='button';saveButton.className='dj854-place-favorite';
@@ -221,6 +222,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     saveButton.setAttribute('aria-label',label);saveButton.title=label;
     saveButton.dataset.error=error?'true':'false';
   };
+  saveButton.append(text('span','저장','dj-place-action-label'));
   syncFavorite();
   saveButton.addEventListener('click',()=>{
     const result=toggleSavedPlace(p);
@@ -230,6 +232,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   const shareButton=document.createElement('button');shareButton.type='button';shareButton.className='dj856-place-share';
   shareButton.setAttribute('aria-label','장소 공유');shareButton.title='장소 공유';
   shareButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 7.4 6.6 4.4"/></svg>';
+  shareButton.append(text('span','공유','dj-place-action-label'));
   shareButton.addEventListener('click',()=>{void shareMapUrl(placeShareUrl(p),`${p.name} · 동작지도`);});
   personalActions.append(saveButton,shareButton);
   if(!layerContent)headerActions.append(personalActions);

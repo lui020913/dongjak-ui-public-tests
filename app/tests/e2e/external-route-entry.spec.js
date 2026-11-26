@@ -3,6 +3,7 @@ import {dismissOnboarding,clickRealPointer} from './helpers.js';
 test('real transit detail buttons navigate to the visible route editor, including immediate reopen',async({page})=>{
  test.setTimeout(180000);
  await page.setViewportSize({width:390,height:844});
+ await page.addInitScript(()=>localStorage.setItem('dongjak_safety_community_v15_posts',JSON.stringify([{id:'qa-location',title:'지도 위치 검증 게시글',body:'커뮤니티 위치 전환 회귀 테스트',nickname:'검증 주민',category:'동네 질문',dong:'상도1동',created:Date.now(),location:{lng:126.94795,lat:37.50283},comments:[],likes:0}])));
  await page.goto('/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('#dj-install-menu');
  await expect(menu).toBeAttached({timeout:20000});
@@ -64,4 +65,25 @@ test('real transit detail buttons navigate to the visible route editor, includin
   await expect(app).toHaveAttribute('data-tab','map');
   await expect(page.locator('.dj-route-endpoint-marker,.dj-route-candidate-marker')).toHaveCount(0);
  }
+ // Enter a real feed detail, then use the actual map-location action.
+ await page.locator('#bottom-nav [data-tab="participate"]').click();
+ const post=page.locator('.community-open-detail').filter({hasText:'지도 위치 검증 게시글'});
+ await expect(post).toBeVisible();
+ await post.click();
+ const location=page.locator('.community-location-link');
+ await expect(location).toBeVisible();
+ await location.click();
+ await expect(app).toHaveAttribute('data-tab','map');
+ await expect(page.locator('#participation-panel')).toBeHidden();
+ const locationCard=page.locator('#dj-community-location-card');
+ await expect(locationCard).toBeVisible();
+ await expect(locationCard).toContainText('지도 위치 검증 게시글');
+ await expect(page.locator('.dj-community-location-marker')).toHaveCount(1);
+ await page.waitForTimeout(500);
+ await expect(page.locator('#participation-panel')).toBeHidden();
+ await expect(page.locator('.dj-community-location-marker')).toBeVisible();
+ await expect(page.locator('#dj840-map-tip')).toBeHidden();
+ await locationCard.getByRole('button',{name:'제보 위치 닫기'}).click();
+ await expect(locationCard).toHaveCount(0);
+ await expect(page.locator('.dj-community-location-marker')).toHaveCount(0);
 });

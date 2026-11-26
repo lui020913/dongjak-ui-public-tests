@@ -8,7 +8,7 @@ export const MAP_TIP_MESSAGES=Object.freeze([
   '레이어에서 행정동을 선택하세요.'
 ]);
 export const PRIMARY_PANELS=['route-panel','participation-panel','news-panel','mine-panel','admin-dong-picker'];
-export const TRANSIENT_PANELS=['overview-sheet','transport-sheet','detail-sheet','entry-sheet','night-visibility-float','map-safety-controls','map-advanced-controls','dj-mobile-utilities','dj832-data-sheet','dj833-weather-sheet','dj833-night-modal','dj832-info-sheet','dj832-feature-sheet','dj-map-settings','dj-app-about','version-history-modal','route-map-card','nav-live-card','route-pick-hint','map-gesture-guide','ped-tools-panel','djNext-layer-panel','djNext-permissions','dj854-weather-sheet'];
+export const TRANSIENT_PANELS=['overview-sheet','transport-sheet','detail-sheet','entry-sheet','night-visibility-float','map-safety-controls','map-advanced-controls','dj-mobile-utilities','dj832-data-sheet','dj833-weather-sheet','dj833-night-modal','dj832-info-sheet','dj832-feature-sheet','dj-map-settings','dj-app-about','version-history-modal','route-map-card','nav-live-card','route-pick-hint','dj-community-location-card','map-gesture-guide','ped-tools-panel','djNext-layer-panel','djNext-permissions','dj854-weather-sheet'];
 const visible=(el)=>{
   if(!el||el.hidden||el.closest?.('[hidden]')||el.getAttribute?.('aria-hidden')==='true')return false;
   if(el.dataset?.djTabOutgoing==='true')return false;

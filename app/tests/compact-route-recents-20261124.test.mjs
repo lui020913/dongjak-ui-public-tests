@@ -25,10 +25,11 @@ test('old history migrates and duplicate named facilities with nearby coordinate
   assert.deepEqual(recentSearchQueries(),['노량진','ABC','상도 역']);
  }finally{delete globalThis.localStorage;}
 });
-test('both picker hints use one compact pill and measured nav gap',()=>{
+test('picker hints and report location use one compact pill and reduced measured nav gap',()=>{
  const css=read('src/mobile-first-layout.css'),shadow=read('src/route-screen-v3.css');
- assert.ok(css.includes(':is(#route-pick-hint,#community-map-hint):not([hidden])'));
+ assert.ok(css.includes(':is(#route-pick-hint,#community-map-hint,#dj-community-location-card):not([hidden])'));
  assert.ok(css.includes('var(--dj-user-dock-bottom'));
+ assert.match(css,/\+ 2px\)!important/);
  assert.ok(css.includes('background:#dce7e1'));
  assert.ok(shadow.includes('.search-results .search-recent-head .history-clear'));
 });
