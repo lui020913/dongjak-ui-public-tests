@@ -1,3 +1,4 @@
+import {createNativeTileGuard} from './reviewed-native-tile-guard.mjs';
 import {createSelectiveRoadReview} from './reviewed-native-road-filter.mjs';
 import {reviewedRoadAssets} from './reviewed-road-display-assets.mjs';
 const SOURCE='dj-reviewed-base-road-surfaces';
@@ -15,7 +16,7 @@ export function roadTilesForViewport(tiles,bounds){
  */
 export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enabled=false}){
  if(!enabled)return {dispose(){},refresh:async()=>false};
- let manifest=null,disposed=false,generation=0,timer=0,lastKey='',initializing=null,selective=null,eligibilityPromise=null,readyToken=0;
+ let manifest=null,disposed=false,generation=0,timer=0,lastKey='',initializing=null,selective=null,eligibilityPromise=null,readyToken=0,nativeGuard=null;
  const cache=new Map();
  const hide=()=>{readyToken=0;selective?.restore();if(map.getLayer(LAYER))map.setLayoutProperty(LAYER,'visibility','none');delete app.dataset.djReviewedBaseRoads;};
  async function setupSelective(){
@@ -32,6 +33,8 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
     const actual=map.getStyle()?.sources?.[n.source_name];
     // Match the audited vector source, not merely a coincidentally named one.
     if(!actual||actual.type!=='vector'||actual.url!==native.sources[n.source_name]?.url)return null;
+    nativeGuard=createNativeTileGuard(n);
+    if(!nativeGuard.valid)return null;
     return createSelectiveRoadReview(map,n,geo.features?.[0]?.geometry,true,SOURCE);
   })().catch(()=>null);
   return eligibilityPromise;
@@ -54,7 +57,7 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
   return true;
  }
  async function refresh(){
-  const token=++generation;
+  const token=++generation;readyToken=0;selective?.restore();
   if(disposed||map.getZoom()<16||app.dataset.sangdoNight==='on'){hide();return false;}
   try{
    manifest=manifest||await (initializing??=(assets.manifest()));
@@ -86,18 +89,17 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
    map.setPaintProperty(LAYER,'fill-color',color());
    map.setLayoutProperty(LAYER,'visibility','visible');
    app.dataset.djReviewedBaseRoads='additive-preview';
-   readyToken=token;
    // Wait for the complete viewport asset to be indexed by MapLibre before
    // removing any native feature. A camera move restores all native filters.
    if(manifest.native_reaudit){
      selective=await setupSelective();
-     if(!disposed&&token===generation)applySelective();
+     if(selective&&nativeGuard&&await nativeGuard.verify([b.getWest(),b.getSouth(),b.getEast(),b.getNorth()])&&!disposed&&token===generation){readyToken=token;applySelective();}
    }
    return !disposed&&token===generation;
   }catch(e){if(token===generation){hide();delete app.dataset.djReviewedBaseRoads;console.warn('[road review] native base retained',e.message);}return false;}
  }
  const schedule=()=>{clearTimeout(timer);timer=setTimeout(()=>void refresh(),120);};
- const onStyle=()=>{if(!map.getSource(SOURCE)){selective?.restore();selective=null;eligibilityPromise=null;lastKey='';schedule();}};
+ const onStyle=()=>{if(!map.getSource(SOURCE)){selective?.restore();selective=null;nativeGuard=null;eligibilityPromise=null;lastKey='';schedule();}};
  const onSource=e=>{if(e.sourceId===SOURCE&&e.isSourceLoaded)applySelective();};
  const onMove=()=>{generation++;hide();delete app.dataset.djReviewedBaseRoads;};
  map.on('load',schedule);map.on('moveend',schedule);map.on('movestart',onMove);map.on('styledata',onStyle);map.on('sourcedata',onSource);
