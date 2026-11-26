@@ -14,7 +14,11 @@ test('v8.6.4 facility details use centered title and a separate mobile action ro
   assert.match(source,/\['start','출발'\],\['end','도착'\]/);
   assert.match(source,/headerActions\.append\(routeActions\)/);
   assert.match(source,/personalActions\.append\(saveButton,shareButton\)/);
-  assert.match(source,/headerActions\.append\(closeButton\)/);
+  // The close button now has its own fixed header slot, outside the action row.
+  assert.match(source,/header\.append\(closeButton\)/);
+  assert.doesNotMatch(source,/headerActions\.append\(closeButton\)/);
+  assert.match(source,/bindReliablePopupClose\(closeButton,/);
+  assert.match(source,/popup\.on\('close',disposeCloseInput\)/);
 });
 
 test('v8.6.4 favorite/share/close icons share one centered 40px visual system',()=>{
