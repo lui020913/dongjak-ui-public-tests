@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.207",
+  "application_version": "9.2.208",
   "public_work_branch": "main",
-  "purpose": "Verified PR #572 (f210a5b): deduplicate strictly matched native 2D building footprints only when complete GIS sheets are visible and loaded; preserve named, unmatched and adjacent buildings, restore on zoom-out, eviction and mode changes. Full public source CI and mobile/route/facility regression passed. Retain v9.2.206 road repair and all original spatial/routing/PRI data. Protected Preview, phone QA and Production required. Separate recovered road-surface PR #574 remains under validation.",
-  "attempt": 442,
+  "purpose": "Verified PR #574 (c330f02): restore eight formerly quarantined baseline road surfaces including Sangdo Elementary and Nodeul, with zero measured GIS building intersection and no expansion beyond audited geometry. Separate SHA-256-pinned additive asset; keep all original 12045 reviewed surface data and 258 native road eligibility guards unchanged. Full source CI and actual app mobile QA at three sites passed. Preserve v9.2.207 building deduplication, original routing, PRI, buildings and analysis data. Protected Preview, phone QA and Production required.",
+  "attempt": 443,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
