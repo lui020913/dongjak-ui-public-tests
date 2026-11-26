@@ -1,0 +1,9 @@
+{
+  "kind": "ISOLATED_ROAD_REVIEW_NOT_PRODUCTION",
+  "run_id": 45765041438,
+  "artifact_id": 15091631321,
+  "artifact_sha256": "b1c1b4555de6fa5827e84657a18c271a7970f0976866b4f9cc47b514f74e96a8",
+  "review_run_id": 45763031345,
+  "accepted_road_count": 7845,
+  "unresolved_road_count": 426
+}
