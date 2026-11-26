@@ -63,7 +63,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
    const title=doc.createElement('strong');title.textContent=plan.legs?plan.legs.map(legLabel).join(' + '):plan.kind==='bus'?plan.route+' · 직행버스':legLabel(plan);
    const chevron=doc.createElement('span');chevron.className='tr-chevron';chevron.innerHTML=icon('chevron');head.append(mark,title,chevron);
    const detail=doc.createElement('span');detail.className='tr-route-names';detail.textContent=plan.origin.name+' 승차 → '+plan.destination.name+' 하차';
-   const meta=doc.createElement('small');meta.textContent=plan.legs?'환승 1회 · 전체 시간 미확인':plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
+   const meta=doc.createElement('small');meta.textContent=plan.legs?'환승 '+(plan.legs.length-1)+'회 · 전체 시간 미확인':plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
    const track=doc.createElement('div');track.className='tr-track';if(plan.legs){track.classList.add('tr-multi-track');track.innerHTML='<span>도보</span>'+plan.legs.map((leg,i)=>(i?'<span>환승</span>':'')+'<span data-vehicle="true">'+(leg.kind==='bus'?'버스':'지하철')+'</span>').join('')+'<span>도보</span>';}else track.innerHTML='<span>도보</span><span>'+(plan.kind==='bus'?'버스':'지하철')+'</span><span>도보</span>';track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
    card.append(head,detail,track,meta);
    card.addEventListener('click',async()=>{
