@@ -19,7 +19,11 @@ let packPromise=null;
 export function loadBuildingDisplayTrimPack(){
  if(!packPromise)packPromise=fetch('/data/building-display-road-trims.json',{cache:'force-cache'}).then(async r=>{
   if(!r.ok)throw Error('building display trims unavailable');
-  const pack=await r.json();if(pack?.schema!==1||!pack.sheets)throw Error('invalid building display trims');
+  const bytes=await r.arrayBuffer();
+  if(bytes.byteLength!==136162||!globalThis.crypto?.subtle)throw Error('building display trim size or verification unavailable');
+  const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join('');
+  if(digest!=='851b128fd5f3877b513d41915495667a2eda7d9a61d2ba6d69240d9eec487d08')throw Error('building display trim checksum mismatch');
+  const pack=JSON.parse(new TextDecoder().decode(bytes));if(pack?.schema!==1||!pack.sheets)throw Error('invalid building display trims');
   return pack;
  }).catch(()=>{packPromise=null;return null;});
  return packPromise;
