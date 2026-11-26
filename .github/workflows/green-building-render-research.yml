@@ -1,0 +1,53 @@
+name: Research - Green building app rendering comparison
+on:
+  push:
+    branches: [diagnostic/green-building-render-20261126]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --ipc=host
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: fix-phone-build-45746716101-a2e1078179c6da6c2bf310c692bd15de74b696a9
+          run-id: 45746716101
+          github-token: ${{ github.token }}
+          path: build-input
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-green-building-audit
+          run-id: 45745321396
+          github-token: ${{ github.token }}
+          path: audit-input
+      - name: Verify exact tested build and prepare offline map
+        run: |
+          cd build-input
+          sha256sum -c SHA256SUMS
+          test "$(cat SOURCE_SHA)" = a2e1078179c6da6c2bf310c692bd15de74b696a9
+          tar -xzf dist.tar.gz -C ../app
+          cd ..
+          python -m pip install --quiet shapely==2.1.2
+          python scripts/research/green_building_render_fixture.py
+          npm ci --prefix app
+      - name: Compare actual app 2D and 3D rendering
+        run: node app/tests/green-building-render-research.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: green-building-render-comparison
+          path: audit-render-output/
+          if-no-files-found: warn
+          retention-days: 14
