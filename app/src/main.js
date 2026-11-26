@@ -1,4 +1,5 @@
 import {installCommunityActivity} from './community-activity.js';
+import {splitCommunityReportBody} from './community-report-presentation.js';
 import {installImportantPlaceClick} from './important-place-click.js';
 import {installParkInfoClick} from './park-info-click.js';
 import {installFeaturedPlaceLabels} from './featured-place-labels.js';
@@ -2529,6 +2530,21 @@ function showCommunityReport(postId,commentId,anchor){
   form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;try{await reportSharedCommunity(postId,commentId,selected);form.remove();toast('신고가 접수되었습니다.');}catch(err){toast(err.message);send.disabled=false;}});
   anchor.append(form);
 }
+function communityReportContent(post,detail){
+  const {type,priority,body}=splitCommunityReportBody(post.body,post.category);
+  const content=document.createDocumentFragment();
+  if(detail&&type&&priority){
+    const facts=makeCEl('dl','community-report-facts');
+    for(const [label,value] of [['보행불편 유형',type],['현장 확인',priority]]){
+      const row=makeCEl('div','community-report-fact');
+      row.append(makeCEl('dt','community-report-label',label),makeCEl('dd','community-report-value',value));
+      facts.append(row);
+    }
+    content.append(facts);
+  }
+  content.append(makeCEl('p','community-post-body',body));
+  return content;
+}
 function renderCommunity() {
   const root=document.getElementById('community-list');if(!root)return;root.replaceChildren();
   // Refreshes may arrive during the notification view; never mount feed cards there.
@@ -2541,7 +2557,14 @@ function renderCommunity() {
   }
   const all=[...sharedCommunityPosts,...communityPosts];
   if(communityDetail&&!all.some(p=>p.id===communityDetail))communityDetail=null;
-  const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail)root.append(communityButton('‹ 목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();if(panel)panel.querySelector('.dj836-sheet-body').scrollTop=communityListScroll;}));
+  const detail=Boolean(communityDetail);const panel=document.getElementById('participation-panel');if(panel)panel.dataset.communityDetail=String(detail);if(detail){
+    const back=communityButton('목록으로','community-back',()=>{communityDetail=null;communityReplyTo=null;renderCommunity();const scroll=panel?.querySelector('.dj836-sheet-body');if(scroll)scroll.scrollTop=communityListScroll;});
+    const arrow=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    arrow.setAttribute('viewBox','0 0 24 24');arrow.setAttribute('aria-hidden','true');arrow.classList.add('community-back-arrow');
+    const stroke=document.createElementNS('http://www.w3.org/2000/svg','path');
+    stroke.setAttribute('d','M15 5l-7 7 7 7');stroke.setAttribute('fill','none');stroke.setAttribute('stroke','currentColor');stroke.setAttribute('stroke-width','2.4');stroke.setAttribute('stroke-linecap','round');stroke.setAttribute('stroke-linejoin','round');
+    arrow.append(stroke);back.prepend(arrow);root.append(back);
+  }
   const query=communitySearch.trim().toLowerCase();
   const dongFilter=document.getElementById('community-dong-filter')?.value||'';
   let shown=all.filter(p=>detail?p.id===communityDetail:(communitySavedOnly?Boolean(p.bookmarked):!p.bookmarkOnly)&&(communityFilter==='전체'||p.category===communityFilter)&&(!dongFilter||p.dong===dongFilter)&&(!query||(p.title+' '+p.body).toLowerCase().includes(query)));
@@ -2583,7 +2606,7 @@ function renderCommunity() {
     const cat=makeCEl('span','community-post-category',post.category);
     const meta=makeCEl('span','community-post-meta',`${post.nickname} · ${formatCommunityDate(post.created)}${post.shared?' · 공개':' · 내 기기'}`);
     const tags=makeCEl('div','community-post-tags');tags.append(cat);if(post.dong)tags.append(makeCEl('span','community-post-dong',post.dong));header.append(tags,meta);
-    card.append(header);if(!detail){const open=communityButton(post.title,'community-post-title community-open-detail',()=>{const sc=document.querySelector('#participation-panel>.dj836-sheet-body');communityListScroll=sc?.scrollTop||0;communityDetail=post.id;communityReplyTo=null;renderCommunity();if(sc)sc.scrollTop=0;});card.append(open,makeCEl('p','community-post-body',post.body));if(post.photo){const img=document.createElement('img');img.className='community-feed-thumb';img.src=post.photo;img.alt='첨부 사진';img.loading='lazy';card.append(img);}const mini=makeCEl('p','community-summary-count',`공감 ${post.likes||0} · 댓글 ${post.comments?.length||0}${post.photo?' · 사진':''}${post.location?' · 위치':''}`);card.append(mini);root.append(card);continue;}card.append(makeCEl('h4','community-post-title',post.title),makeCEl('p','community-post-body',post.body));
+    card.append(header);if(!detail){const open=communityButton(post.title,'community-post-title community-open-detail',()=>{const sc=document.querySelector('#participation-panel>.dj836-sheet-body');communityListScroll=sc?.scrollTop||0;communityDetail=post.id;communityReplyTo=null;renderCommunity();if(sc)sc.scrollTop=0;});card.append(open,communityReportContent(post,false));if(post.photo){const img=document.createElement('img');img.className='community-feed-thumb';img.src=post.photo;img.alt='첨부 사진';img.loading='lazy';card.append(img);}const mini=makeCEl('p','community-summary-count',`공감 ${post.likes||0} · 댓글 ${post.comments?.length||0}${post.photo?' · 사진':''}${post.location?' · 위치':''}`);card.append(mini);root.append(card);continue;}card.append(makeCEl('h4','community-post-title',post.title),communityReportContent(post,true));
     if(post.photo){
       const img=document.createElement('img');img.className='community-post-image';
       img.src=post.photo;img.loading='lazy';img.alt='게시글 첨부 사진';card.append(img);

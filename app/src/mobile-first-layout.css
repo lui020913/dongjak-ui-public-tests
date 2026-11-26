@@ -2118,3 +2118,30 @@
   }
  }
 }
+
+/* Community report facts are distinct from the user's story. */
+html body #app #community-list .community-back{
+ display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;
+ gap:7px!important;min-height:44px!important;padding:8px 10px!important;
+ font-size:15px!important;font-weight:700!important;line-height:1.35!important;
+}
+html body #app #community-list .community-back-arrow{
+ width:23px!important;height:23px!important;flex:0 0 23px!important;display:block!important;
+}
+html body #app #community-list .community-report-facts{
+ display:grid;gap:8px;margin:12px 0 16px;padding:12px 14px;
+ border:1px solid var(--mf-line,#d8e5de);border-radius:14px;
+ background:var(--mf-surface,#f2f7f3);color:inherit;
+}
+html body #app #community-list .community-report-fact{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:baseline;gap:12px;
+}
+html body #app #community-list .community-report-label{
+ font-size:13px;font-weight:600;line-height:1.45;color:var(--mf-muted,#59746a);overflow-wrap:anywhere;
+}
+html body #app #community-list .community-report-value{
+ margin:0;font-size:14px;font-weight:750;line-height:1.45;text-align:right;overflow-wrap:anywhere;
+}
+html body #app #community-list .community-post-detail .community-report-facts+.community-post-body{
+ margin-top:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;
+}
