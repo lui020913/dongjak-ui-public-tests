@@ -1,0 +1,55 @@
+name: Stage verified road display assets in dedicated data branch
+on:
+  push:
+    branches: [data/reviewed-road-assets-20261126]
+    paths:
+      - '.github/workflows/stage-reviewed-road-assets.yml'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  stage:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913' && github.ref == 'refs/heads/data/reviewed-road-assets-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact audited archive and stage immutable data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/15100289271 --jq '{name,expired,workflow_run,digest}'
+          gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/15100289271/zip > "$RUNNER_TEMP/road-assets.zip"
+          echo '694fb646f6c6d70a5052cc550ac3f21d46a9404f1668705e36e47223236e18a4  '"$RUNNER_TEMP/road-assets.zip" | sha256sum -c -
+          python - <<'PY'
+          import hashlib,json,os,pathlib,re,zipfile
+          target=pathlib.Path('app/public/data/road-display-review')
+          assert not target.exists()
+          with zipfile.ZipFile(pathlib.Path(os.environ['RUNNER_TEMP'])/'road-assets.zip') as z:
+              entries=z.infolist()
+              assert len(entries)<120 and sum(i.file_size for i in entries)<100*1024*1024
+              assert all(re.fullmatch(r'[A-Za-z0-9_.-]+\.(json|geojson)',i.filename) and i.file_size<8*1024*1024 and not i.is_dir() and (i.external_attr>>16)&0o170000!=0o120000 for i in entries)
+              names=[i.filename for i in entries];assert len(names)==len(set(names))
+              m=json.loads(z.read('manifest.json'))
+              assert m['schema']==1 and m['surface_count']==12045 and m['quarantine']['count']==9 and m['native_reaudit']['eligible_ids']==258
+              assert m['operational_enabled'] is False and m['graph_sha256']=='3f80b417f5b6fe27b0fb7f31c107c0b19f967daf86836cd024d68ea38787607a'
+              assert len(m['tiles'])==90 and len(m['overlays'])==6
+              metadata=[*m['tiles'],*m['overlays'],m['native'],m['quarantine']]
+              assert set(names)=={'manifest.json',*(x['file'] for x in metadata)}
+              for x in metadata:
+                  raw=z.read(x['file']);assert len(raw)==x['bytes'] and hashlib.sha256(raw).hexdigest()==x['sha256']
+              n=json.loads(z.read(m['native']['file']))
+              assert len(n['eligible_native_ids'])==258 and n['surface_count']==12045 and n['audited_tiles'] and len(n['tilejson_sha256'])==64
+              assert all(len(t['sha256'])==64 and t['z']==14 for t in n['audited_tiles'])
+              target.mkdir(parents=True)
+              for x in ['manifest.json',*(x['file'] for x in metadata)]:
+                  (target/x).write_bytes(z.read(x))
+          print('STAGED_VERIFIED_ROAD_ASSETS',len(names),sum(p.stat().st_size for p in target.iterdir()))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- app/public/data/road-display-review
+          git diff --cached --name-only | awk '!/^app\/public\/data\/road-display-review\//{exit 1}'
+          git commit -m 'Stage exact reviewed road display assets (258 native IDs, 90 tiles)'
+          git push origin HEAD:refs/heads/data/reviewed-road-assets-20261126
