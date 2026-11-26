@@ -67,7 +67,7 @@ import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
-import {createBuildingCoverage,buildingFootprintFilter} from './building-coverage.js';
+import {createBuildingCoverage,buildingModeVisibility} from './building-coverage.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
@@ -230,6 +230,8 @@ let buildingManifest = null;
 const loadedBuildingTiles = new Map();
 const buildingLoading = new Set();
 let buildingLoadTimer = null;
+let buildingRetryTimer=null;
+const buildingRetryAfter=new Map();
 let building3DLastOpacity = -1;
 let lastBuildingCount = 0;
 let baseLayerControls=null;
@@ -735,13 +737,14 @@ function visibleBuilding2D(){
   return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START;
+  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom()>=BUILDING_ZOOM_MIN && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
   const pitch=map.getPitch();
   is3D=pitch>=PITCH_BUILDING_START;
   const show=visibleBuilding3D();
+  buildingCoverage?.setExtruding(show);
   const theme=visualTheme.currentTheme();
   const appearance=nightOcclusionBuildingPaint(
     buildingExtrusionAppearance(theme,pitch,PITCH_BUILDING_START,PITCH_BUILDING_FULL),
@@ -749,7 +752,8 @@ function syncTiltWithBuildings() {
   const {opacity,color}=appearance;
   // At most one footprint-paint update per ~2 degrees instead of a full
   // setPaintProperty on every mousemove/pitch event for *every* GIS tile.
-  const fillVisible=visibleBuilding2D();
+  const modeVisibility=buildingModeVisibility(show);
+  const fillVisible=visibleBuilding2D() && !show;
   const paintKey=`${theme}/${fillVisible}/${show}/${movementIsSlow}`;
   const updateFootprint=paintKey!==lastFootprintPaintKey;
   const footprint=updateFootprint?{...buildingFootprintPaint(theme,0),
@@ -758,8 +762,7 @@ function syncTiltWithBuildings() {
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
     if(info.footprintFillId && map.getLayer(info.footprintFillId)){
-      const desired=fillVisible?'visible':'none';
-      if(info.footprint3DMode!==show){map.setFilter(info.footprintFillId,buildingFootprintFilter(show));info.footprint3DMode=show;}
+      const desired=fillVisible?modeVisibility.plan:'none';
       if(map.getLayoutProperty(info.footprintFillId,'visibility')!==desired)
         map.setLayoutProperty(info.footprintFillId,'visibility',desired);
       if(updateFootprint && footprint){
@@ -773,7 +776,7 @@ function syncTiltWithBuildings() {
         map.getLayoutProperty(info.footprintLineId,'visibility')!=='none')
       map.setLayoutProperty(info.footprintLineId,'visibility','none');
     if(!map.getLayer(info.layerId))continue;
-    const desired=show?'visible':'none';
+    const desired=modeVisibility.extrusion;
     if(map.getLayoutProperty(info.layerId,'visibility')!==desired)
       map.setLayoutProperty(info.layerId,'visibility',desired);
     if(show && (Math.abs(opacity-(info.lastOpacity??-1))>0.045 || info.lastColor!==color)){
@@ -852,7 +855,8 @@ export function shouldRender3DBuilding(geometry){
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
 async function loadOneBuildingSheet(sheet){
-  if(loadedBuildingTiles.has(sheet.sheet)||buildingLoading.has(sheet.sheet))return;
+  const existing=loadedBuildingTiles.get(sheet.sheet);
+  if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
     const {features, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
@@ -867,7 +871,14 @@ async function loadOneBuildingSheet(sheet){
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
     const footprintLineId=`dongjak-buildings-outline-${sheet.sheet}`;
-    map.addSource(sourceId,{type:'geojson',data:{type:'FeatureCollection',features:within}});
+    const collection={type:'FeatureCollection',features:within};
+    if(existing){
+      if(successfulSources===totalSources&&map.getSource(sourceId)){
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet);buildingRetryAfter.delete(sheet.sheet);
+      }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
+      return;
+    }
+    map.addSource(sourceId,{type:'geojson',data:collection});
     const buildingStyle=nightOcclusionBuildingPaint(
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
@@ -876,7 +887,7 @@ async function loadOneBuildingSheet(sheet){
     const outlineStyle=buildingFootprintOutlinePaint(visualTheme.currentTheme(),map.getPitch());
     const firstSymbol=map.getStyle().layers.find(l=>l.type==='symbol')?.id;
     map.addLayer({id:footprintFillId,type:'fill',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
-      filter:buildingFootprintFilter(visibleBuilding3D()),layout:{visibility:visibleBuilding2D()?'visible':'none'},paint:footprintStyle},firstSymbol);
+      layout:{visibility:visibleBuilding2D()&&!visibleBuilding3D()?'visible':'none'},paint:footprintStyle},firstSymbol);
     map.addLayer({id:footprintLineId,type:'line',source:sourceId,minzoom:BUILDING_ZOOM_MIN,
       layout:{visibility:'none'},paint:outlineStyle},firstSymbol);
     map.addLayer({id:layerId,type:'fill-extrusion',source:sourceId,
@@ -886,15 +897,16 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-height':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['get','h']],
         'fill-extrusion-base':0}
     },firstSymbol);
-    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,within);
+    loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
+    buildingCoverage?.setSheet(sheet.sheet);
+    if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
     syncTiltWithBuildings();
     // A newly loaded 3D sheet must never cover the active night analysis roads.
     if(app.dataset.sangdoNight==='on')promoteNightAnalysisLayers(map);
     console.info(`[동작하는 안전지도] ${sheet.sheet}번 도엽: 기본+보완 건물 ${within.length.toLocaleString()}개, 소스 ${successfulSources}/${totalSources}개 로딩`);
-  }catch(error){console.warn(`[동작하는 안전지도] ${sheet.sheet}번 건물 데이터 오류:`,error);}
+  }catch(error){buildingRetryAfter.set(sheet.sheet,Date.now()+15000);console.warn(`[동작하는 안전지도] ${sheet.sheet}번 건물 데이터 오류:`,error);}
   finally{buildingLoading.delete(sheet.sheet);}
 }
 // Avoid fetching all 112,000+ building footprints at startup. Loading only the
@@ -950,18 +962,22 @@ async function loadVisibleBuildingSheets(){
     const manifest=await ensureBuildingManifest();
     if(!visibleBuilding2D()||map.getZoom()<BUILDING_ZOOM_MIN)return;
     const bbox=getVisibleBBox();
-    const sheets=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
+    const nearby=manifest.sheets.filter(s=>intersects(s.bbox,bbox));
+    const center=map.getCenter();const sheets=nearestBuildingSheets({sheets:nearby},[center.lng,center.lat],nearby.length);
     djTrimOffscreenBuildings(sheets);
     for(const sheet of sheets){
       if(!visibleBuilding2D()||(djPhone&&map.isMoving?.())){interrupted=true;break;}
-      if(loadedBuildingTiles.has(sheet.sheet)){
+      if(loadedBuildingTiles.get(sheet.sheet)?.complete){
         const old=loadedBuildingTiles.get(sheet.sheet);loadedBuildingTiles.delete(sheet.sheet);loadedBuildingTiles.set(sheet.sheet,old);continue;
       }
       await loadOneBuildingSheet(sheet);
       if(djPhone&&getVisibleBBox().some((v,i)=>Math.abs(v-bbox[i])>0.000001)){interrupted=true;break;}
       if(djRenderBudget.isEconomy())await new Promise(r=>setTimeout(r,0));
     }
-  }finally{djBuildingBatchBusy=false;if(interrupted)scheduleBuildingLoad();}
+  }finally{djBuildingBatchBusy=false;if(interrupted)scheduleBuildingLoad();
+    clearTimeout(buildingRetryTimer);
+    if(buildingRetryAfter.size&&visibleBuilding2D()&&map.getZoom()>=BUILDING_ZOOM_MIN){buildingRetryTimer=setTimeout(()=>scheduleBuildingLoad(),16000);}
+  }
 }
 map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
@@ -1710,6 +1726,7 @@ map.on('load',()=>{
   installForestShade({map,app});
   const nativeBuildingLayers=installBaseBuildingPalette({map,app});
   buildingCoverage=createBuildingCoverage(map,nativeBuildingLayers);
+  buildingCoverage.setExtruding(visibleBuilding3D());
   status('지도 준비 완료 · 동작구 경계 불러오는 중');
   // 공개 Terrarium DEM: API 키 없이 지형을 표시합니다. 지형 데이터의 상세도는 지역별로 다릅니다.
   try {

@@ -38,25 +38,23 @@ export function createCoverageIndex(features){
   });
  }};
 }
+// A single mode owns building rendering. Restore the original 2D layer
+// visibility when the actual GIS extrusion mode ends.
+export function buildingModeVisibility(extruding){
+ return extruding?{plan:'none',extrusion:'visible'}:{plan:'visible',extrusion:'none'};
+}
 export function createBuildingCoverage(map,layers){
- const sheets=new Map(),hidden=new Map();let dirty=false;
+ let extruding=false;
+ const original=new Map();
  const sync=()=>{
-  if(!dirty&&map.isMoving?.())return;dirty=false;
-  const ids=layers.filter(id=>map.getLayer(id));
-  if(!ids.length)return;
-  let features;try{features=map.queryRenderedFeatures({layers:ids});}catch{return;}
-  const seen=new Map();
-  for(const f of features){
-   if(f.id==null||!f.source||!f.sourceLayer)continue;
-   const key=JSON.stringify([f.source,f.sourceLayer,f.id]),target={source:f.source,sourceLayer:f.sourceLayer,id:f.id};
-   const match=[...sheets.values()].some(index=>index.matches(f.geometry));
-   const prior=seen.get(key);seen.set(key,{target,match:match&&(prior?.match??true)});
-  }
-  for(const [key,{target,match}] of seen){
-   try{if(match&&!hidden.has(key)){map.setFeatureState(target,{djGisCovered:true});hidden.set(key,target);}else if(!match&&hidden.has(key)){map.removeFeatureState(target,'djGisCovered');hidden.delete(key);}}catch{}
+  for(const id of layers){
+   if(!map.getLayer(id))continue;
+   const current=map.getLayoutProperty?.(id,'visibility')||'visible';
+   if(!original.has(id))original.set(id,current);
+   const desired=extruding?'none':original.get(id);
+   if(current!==desired)map.setLayoutProperty(id,'visibility',desired);
   }
  };
- const invalidate=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();dirty=true;};
- map.on('idle',sync);
- return {setSheet(id,features){sheets.set(id,createCoverageIndex(features));dirty=true;},removeSheet(id){sheets.delete(id);invalidate();}};
+ map.on('style.load',()=>{original.clear();sync();});
+ return {setExtruding(value){extruding=Boolean(value);sync();},setSheet(){sync();},removeSheet(){sync();}};
 }

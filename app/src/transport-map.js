@@ -3,7 +3,7 @@ import {createBusRouteDetail} from './bus-route-detail.js';
 import {openMetroLiveDetail,closeMetroLiveDetail,updateMetroLiveArrivals} from './metro-live-detail.js';
 import {directionTitle,directionCode,compactArrival} from './metro-live-detail-model.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
-import {createBusRouteOverlay,busRouteColor} from './bus-route-overlay.js';
+import {createBusRouteOverlay,busRouteColor,BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,BUS_ROUTE_STOP_ICONS} from './bus-route-overlay.js';
 import {isMetroDailyQuota,metroQuotaRetryMs} from './features/liveTransit/quota-state.js';
 import {coalesceViewportWork} from './adaptive-phone-map-budget.mjs';
 import {createInFlightRequests} from './arrival-request-coordinator.js';
@@ -3027,6 +3027,13 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     map.on('mouseenter',layerId,()=>{if(canOpen())map.getCanvas().style.cursor='pointer';});
     map.on('mouseleave',layerId,()=>{map.getCanvas().style.cursor='';});
   }
+  for(const layerId of [BUS_ROUTE_STOPS,BUS_ROUTE_STOP_NAMES,BUS_ROUTE_STOP_ICONS])map.on('click',layerId,event=>{
+    if(!canOpen())return;
+    const props=event.features?.[0]?.properties,stop=busRouteOverlay.getRouteStops().find(s=>s.seq===Number(props?.seq));
+    if(!stop)return;
+    event.originalEvent?.stopPropagation();
+    void open({...stop,id:'route-stop:'+String(stop.arsId||stop.seq),kind:'bus',source:'seoul-official-bus-stop',lines:[]},false,'map',event);
+  });
   // 배경 지도의 버스 아이콘과 기차 아이콘은 poi_transit 하나의 레이어에 들어갑니다.
   // 이 이벤트는 외부 위치 검색 서버 없이 작동합니다.
   function tryOpenBasemap(event){
@@ -3042,7 +3049,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
     );
     const candidates=nearby.map(f=>baseMapTransitPlace(f,event.lngLat)).filter(Boolean)
       .filter(p=>(p.kind==='bus'
-        ? (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
+        ? !busRouteOverlay.hasVisibleRouteStops() && (map.getZoom?.()??16)>=15 && isDongjak(p.lng,p.lat)===true
         : isDongjak(p.lng,p.lat)===true||isNearBoundary(p.lng,p.lat)));
     if(!candidates.length)return false;
     // 지도 클릭 지점과 실제 아이콘 좌표 사이의 거리로 가까운 정류소를 선택합니다.
