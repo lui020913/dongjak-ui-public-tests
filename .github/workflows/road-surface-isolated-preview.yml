@@ -34,6 +34,20 @@ jobs:
           path: road-preview-dist
           run-id: 45763031345
           github-token: ${{ github.token }}
+      - name: Download exact hybrid geometry review
+        uses: actions/download-artifact@v4
+        with:
+          name: dongjak-hybrid-road-display-review
+          path: hybrid-review
+          run-id: 45771682292
+          github-token: ${{ github.token }}
+      - name: Download campus review
+        uses: actions/download-artifact@v4
+        with:
+          name: dongjak-campus-road-review
+          path: campus-review
+          run-id: 45771337301
+          github-token: ${{ github.token }}
       - name: Validate provenance and package reviewed overlay comparisons
         run: |
           set -euo pipefail
@@ -43,6 +57,9 @@ jobs:
           cp reviewed/exact-review/unresolved-links.geojson road-preview-dist/corridor-unresolved.geojson
           cp reviewed/exact-review/summary.json road-preview-dist/corridor-summary.json
           cp reviewed/exact-alignment/summary.json road-preview-dist/alignment-summary.json
+          cp hybrid-review/hybrid-road-surfaces.geojson hybrid-review/hybrid-summary.json campus-review/campus-summary.json road-preview-dist/
+          jq -e '.counts.baseline_accepted==4202 and .counts.reviewed_accepted==7852 and .unresolved_source_count==419' road-preview-dist/hybrid-summary.json >/dev/null
+          jq -e '.road_links==448 and .counts.accepted_clear==401 and .counts.unresolved==47' road-preview-dist/campus-summary.json >/dev/null
           cp scripts/research/road-surface-preview.html road-preview-dist/index.html
           python - <<'PY'
           import json,os,pathlib,re
