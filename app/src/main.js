@@ -289,6 +289,8 @@ let selectedRouteVariant = 'standard';
 let routeStartMarker = null;
 let routeEndMarker = null;
 let routeRequestPending = false;
+let routeRequestGeneration=0;
+let routeEndpointMarkerKeys={start:null,end:null};
 let routeWaypoints = [];
 let routeProductTools = null;
 let routeTransitCandidate = null;
@@ -1997,6 +1999,10 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // Leaving the map by another tab abandons the picker, not the draft.
   // A later map tap must never resume an unrelated community editor.
   if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
+  if((tab!=='map'||suppressOverview)&&routePickMode){routePickMode=null;closeTransitRouteConfirmation();}
+  if(previousTab==='route'&&tab!=='route')closeRouteSearch();
+  if(previousTab==='route'&&tab!=='route'&&routeRequestPending&&!routeResult){routeRequestGeneration++;routeRequestPending=false;updateRouteCalcAvailability();}
+  if(previousTab!==tab)closePriPreferences();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -2065,7 +2071,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
       });
     }
   }
-  if (tab !== 'map' && routePickMode) {routePickMode=null;closeTransitRouteConfirmation();}
+  if (tab !== 'map') closeTransitRouteConfirmation();
   if (tab === 'map') {
     if(suppressOverview){
       overview.hidden=true;
@@ -2327,7 +2333,7 @@ function confirmCommunityLocation(){
 }
 document.getElementById('community-map-accept').addEventListener('click',confirmCommunityLocation);
 document.getElementById('community-map-pick').addEventListener('click',()=>{
-  if(routePickMode){routePickMode=null;syncRoutePresentation();}
+  if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
   // switching tabs. It will be portaled again after the map pick finishes.
   cancelCommunityTabMotion();
@@ -2745,6 +2751,8 @@ function syncRoutePresentation() {
   const picking = Boolean(routePickMode) && onMap;
   const preview = Boolean(routeResult) && onMap && !picking && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
+  if(!picking&&routeCandidateMarker)closeTransitRouteConfirmation();
+  drawRouteMarkers(picking||preview||guiding);
   app.classList.toggle('route-picking',picking);
   app.classList.toggle('route-preview',preview || guiding);
   app.classList.toggle('route-guiding',guiding);
@@ -2798,10 +2806,15 @@ function updateRouteLabels() {
 function makeRouteMarker(position, color) {
   return new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
 }
-function drawRouteMarkers() {
-  routeStartMarker?.remove();routeEndMarker?.remove();
-  routeStartMarker=routeStart ? makeRouteMarker(routeStart,'#2563eb') : null;
-  routeEndMarker=routeEnd ? makeRouteMarker(routeEnd,'#0ba876') : null;
+function drawRouteMarkers(visible=app.dataset.tab==='map'&&Boolean(routePickMode||(routeResult&&app.dataset.djWalkArrived!=='1')||navMode)) {
+  const update=(marker,point,key,color)=>{
+    const next=visible&&point?`${point.lng},${point.lat}`:null;
+    if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
+    marker?.remove();routeEndpointMarkerKeys[key]=next;
+    return next?makeRouteMarker(point,color):null;
+  };
+  routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
+  routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 function clearTransitPreview(){
   const empty={type:'FeatureCollection',features:[]};
@@ -2862,6 +2875,7 @@ function paintRouteProgress(progressMeters){
   if(finished)finished.setData(lineFeature(parts.traveled));
 }
 function invalidateRoute() {
+  routeRequestGeneration++;routeRequestPending=false;
   routePriVisuals=null;
   clearTransitPreview();
   stopNavigation();
@@ -3007,7 +3021,7 @@ function selectNamedRouteMapPlace(place){
   return routeMapPickArbiter.named(()=>showTransitRouteConfirmation({...place,lng:Number(place.lng),lat:Number(place.lat)}));
 }
 function showTransitRouteConfirmation(place) {
-  if(!requireDongjakRouteLocation(place))return false;
+  if(!routePickMode||app.dataset.tab!=='map'||!requireDongjakRouteLocation(place))return false;
   immersiveChrome.restore();
   closeTransitRouteConfirmation();
   routeTransitCandidate=place;
@@ -3208,6 +3222,8 @@ document.getElementById('route-transit-accept').addEventListener('click',()=>{
 });
 
 function beginRoutePick(which) {
+  if(!['start','end','waypoint'].includes(which)||navMode)return;
+  quickSearch.close();quickSearch.clearMapResults?.();
   if (addMode) setAddMode(false);
   if (editingPointId) {editingPointId=null;showOverview();}
   closeRouteSearch();
@@ -3231,6 +3247,8 @@ function pickRouteLocation(lngLat,point) {
   });
 }
 function resetRoute() {
+  routeRequestGeneration++;routeRequestPending=false;
+  closePriPreferences();
   routePriVisuals=null;
   closeCommunityLocation();
   clearTransitPreview();
@@ -3243,7 +3261,7 @@ function resetRoute() {
   routeVariants={standard:null,gentle:null};
   document.getElementById('route-variants').hidden=true;
   routeStartMarker?.remove();routeEndMarker?.remove();
-  routeStartMarker=null;routeEndMarker=null;
+  routeStartMarker=null;routeEndMarker=null;routeEndpointMarkerKeys={start:null,end:null};
   showRouteLine(null);
   document.getElementById('route-status').textContent='';
   document.getElementById('route-summary').hidden=true;
@@ -3442,6 +3460,7 @@ async function calculateRoute() {
   if(d<15) {toast('출발지와 목적지가 너무 가깝습니다.');return;}
   if(d>40000) {toast('시범 앱에서는 약 40km 이내의 도보 경로만 계산합니다.');return;}
   routeRequestPending=true;
+  const requestGeneration=++routeRequestGeneration;
   const btn=document.getElementById('route-calc');
   btn.disabled=true;
   document.getElementById('route-status').textContent='실제 보행로를 따라 경로를 계산하고 있습니다…';
@@ -3452,6 +3471,7 @@ async function calculateRoute() {
       ? await computeMultiStopRoutes(requested,fetchPreferredPedestrianPair,{
           onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
+    if(requestGeneration!==routeRequestGeneration)return;
     const current=[routeStart,...routeWaypoints,routeEnd];
     if(requested.length!==current.length||requested.some((p,i)=>p!==current[i])||!current.every(p=>routeLocationInside(p)===true))throw new Error('경로 조건이 변경됐습니다. 다시 시도해 주세요.');
     const {usingLocal}=result;
@@ -3508,6 +3528,7 @@ async function calculateRoute() {
     syncRoutePresentation();
     toast('도보 경로가 지도에 표시됐습니다.');
   } catch(error) {
+    if(requestGeneration!==routeRequestGeneration)return;
     console.error('[동작하는 안전지도] 길찾기 오류:',error);
     const message=error.name==='AbortError'
       ? '경로 서버의 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.'
@@ -3515,16 +3536,25 @@ async function calculateRoute() {
     document.getElementById('route-status').textContent=`길찾기 실패: ${message}`;
     toast('경로를 불러오지 못했습니다. 길찾기 메뉴의 메시지를 확인해 주세요.');
   } finally {
-    routeRequestPending=false;updateRouteCalcAvailability();
+    if(requestGeneration===routeRequestGeneration){routeRequestPending=false;updateRouteCalcAvailability();}
   }
 }
 document.getElementById('route-pick-start').addEventListener('click',()=>beginRoutePick('start'));
 document.getElementById('route-pick-end').addEventListener('click',()=>beginRoutePick('end'));
-document.getElementById('route-pick-cancel').addEventListener('click',()=>{closeTransitRouteConfirmation();routePickMode=null;navigate('route');});
+document.getElementById('route-pick-cancel').addEventListener('click',()=>{closeTransitRouteConfirmation();routePickMode=null;quickSearch.clearMapResults?.();navigate('route');});
+// A different close owner may hide the confirmation directly. Its marker must
+// follow the sheet, even when the original cancel button was not invoked.
+const routeConfirmation=document.getElementById('route-transit-confirm');
+new MutationObserver(()=>{if(routeConfirmation.hidden&&routeCandidateMarker)closeTransitRouteConfirmation();}).observe(routeConfirmation,{attributes:true,attributeFilter:['hidden']});
+window.addEventListener('pagehide',()=>{routePickMode=null;closeTransitRouteConfirmation();closeRouteSearch();drawRouteMarkers(false);});
+window.addEventListener('pageshow',event=>{if(event.persisted)syncRoutePresentation();});
+window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncRoutePresentation();}});
 document.getElementById('route-gps-start').addEventListener('click',()=>{
   if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');return;}
   const b=document.getElementById('route-gps-start');b.disabled=true;b.textContent='위치 확인 중…';
+  const gpsRequestGeneration=routeRequestGeneration;
   getDevicePosition({enableHighAccuracy:true,timeout:13000,maximumAge:10000}).then(({coords})=>{
+    if(gpsRequestGeneration!==routeRequestGeneration||app.dataset.tab!=='route'){b.disabled=false;b.textContent='⌖ 현재 위치를 출발지로 지정';return;}
     const position={lng:coords.longitude,lat:coords.latitude,label:'현재 위치',resolveAddress:true};
     if(routeLocationInside(position)!==true){toast('동작구 내 위치를 선택해 주세요.');b.disabled=false;b.textContent='⌖ 현재 위치를 출발지로 지정';return;}
     const accepted=setRouteLocation('start',position);
