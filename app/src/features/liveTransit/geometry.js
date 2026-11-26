@@ -60,8 +60,10 @@ export function pointBetweenStations(route, from, to, fraction) {
 // One shared snapshot of the exact colored geometry handed to MapLibre.
 // The base/official rail renderer publishes its own index; no extra API request.
 const displayedRailByMap=new WeakMap();
+const displayedRailQualityByMap=new WeakMap();
 const railGraphCache=new WeakMap();
-export function setDisplayedRailPaths(map,paths){if(map&&paths instanceof Map)displayedRailByMap.set(map,paths);}
+export function setDisplayedRailPaths(map,paths,quality){if(map&&paths instanceof Map){displayedRailByMap.set(map,paths);displayedRailQualityByMap.set(map,quality instanceof Map?quality:new Map());}}
+export function getDisplayedRailQuality(map){return displayedRailQualityByMap.get(map);}
 export function getDisplayedRailPaths(map){return displayedRailByMap.get(map);}
 function makeRailGraph(paths){
   if(railGraphCache.has(paths))return railGraphCache.get(paths);
@@ -140,4 +142,11 @@ export function pointBetweenDisplayedStations(paths,from,to,fraction){
   if(!Array.isArray(paths)||!validLngLat(from)||!validLngLat(to))return null;
   const plan=connectedRailPlan(makeRailGraph(paths),from,to);
   return plan?linePointAtMeters(plan.points,plan.length*Math.min(1,Math.max(0,Number(fraction)||0))):null;
+}
+
+/** Return the same continuous path used by the displayed rail network. */
+export function pathBetweenDisplayedStations(paths,from,to){
+ if(!Array.isArray(paths)||!validLngLat(from)||!validLngLat(to))return null;
+ const plan=connectedRailPlan(makeRailGraph(paths),from,to);
+ return plan&&plan.length>=haversineMeters(from,to)*.65?plan.points:null;
 }
