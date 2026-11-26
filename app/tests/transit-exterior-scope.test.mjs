@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle} from '../src/transit-exterior-scope.mjs';
+import {transitEndpointPolicy,transitCoordinatesInScope,transitPointInScope,exteriorMapActive,transitWalkStyle,transitContextBounds,transitContextLayer,createTransitContextLayers} from '../src/transit-exterior-scope.mjs';
 const a={lng:126.95,lat:37.50},b={lng:127.01,lat:37.55},c={lng:127.1,lat:37.6};
 const inside=(lng,lat)=>lng===a.lng&&lat===a.lat;
 test('one endpoint must be in Dongjak; neither endpoint may exceed pilot search rectangle',()=>{
@@ -31,4 +31,26 @@ test('unassessed and crossing walks never display as evaluated',()=>{
  assert.equal(transitWalkStyle({transitPri:{risk:5,coverage:.5}}),'#89958f');
  assert.equal(transitWalkStyle({transitPri:{risk:5,coverage:.9}}),'#168f82');
  assert.equal(transitWalkStyle({}),'#89958f');
+});
+
+test('local render extent is narrower than service search and includes complete detours',()=>{
+ const district=[[126.91,37.47],[126.99,37.53]];
+ const initial=transitContextBounds(district);
+ assert.ok(initial[0][0]>126.78&&initial[1][0]<127.20);
+ const coords=[[a.lng,a.lat],[127.04,37.58],[b.lng,b.lat]];
+ const bounds=transitContextBounds(district,[a,b],coords);
+ for(const [x,y] of coords)assert.ok(x>=bounds[0][0]&&x<=bounds[1][0]&&y>=bounds[0][1]&&y<=bounds[1][1]);
+ assert.ok(bounds[0][0]>126.78&&bounds[1][0]<127.20);
+});
+test('transit context retains ordinary roads and selected route, suspends other layers, and restores prior settings',()=>{
+ const layers=[{id:'road_primary',type:'line','source-layer':'transportation'},{id:'building',type:'fill','source-layer':'building'},{id:'rail',type:'line','source-layer':'transportation'},{id:'dj-transit-multi-stops-circle',type:'circle'},{id:'district-pri',type:'line'},{id:'facility',type:'symbol'},{id:'water',type:'fill','source-layer':'water'}];
+ const visibility=new Map([['facility','none']]);
+ const writes=[];
+ const map={getStyle:()=>({layers}),getLayer:id=>layers.find(x=>x.id===id),getLayoutProperty:id=>visibility.get(id),setLayoutProperty:(id,k,v)=>{visibility.set(id,v);writes.push(id);}};
+ const context=createTransitContextLayers(map);
+ context.enforce();context.enforce();
+ assert.deepEqual(writes,['building','rail','district-pri']);
+ for(const id of ['road_primary','dj-transit-multi-stops-circle','water'])assert.ok(transitContextLayer(map.getLayer(id)));
+ context.restore();
+ assert.equal(visibility.get('building'),'visible');assert.equal(visibility.get('facility'),'none');
 });

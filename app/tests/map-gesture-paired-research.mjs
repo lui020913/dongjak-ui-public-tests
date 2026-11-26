@@ -19,7 +19,9 @@ async function sample(url,variant,round){
   await page.waitForFunction(()=>{const o=document.querySelector('#map-startup-overlay'),n=document.querySelector('#map-startup-continue');return !o||!o.getClientRects().length||n?.getClientRects().length>0;},{},{timeout:90000});
   if(await startup.isVisible()&&await next.isVisible())await next.click();
   await startup.waitFor({state:'hidden',timeout:45000});
-  await page.locator('#dj860-onboarding').waitFor({state:'hidden',timeout:45000});
+  const onboarding=page.locator('#dj860-onboarding');
+  if(await onboarding.isVisible())await onboarding.locator('[data-dj860-action="skip"]').click();
+  await onboarding.waitFor({state:'hidden',timeout:45000});
   await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
   for(const site of sites){
    await page.evaluate(({center})=>{const m=window.__qaMap;m.jumpTo({center,zoom:17.8,pitch:0,bearing:0});},site);
