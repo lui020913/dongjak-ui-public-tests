@@ -1,3 +1,4 @@
+import {hasTransportPoiHit} from './poi-click-identity.js';
 import {normalizeFacilityRecord,facilityNameMatches,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isUnverifiedPoliceFacility} from './facility-display-names.js';
 /** Official Seoul-license POIs complement the existing OSM/safety overlays. */
 import {openPlaceDetails} from './place-details.js';
@@ -224,7 +225,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  map.on('moveend',schedule);map.on('zoomend',schedule);map.on('style.load',restore);
  const processed=new WeakSet();
  const click=e=>{
-   if(!canOpen()||app?.dataset?.tab!=='map')return;
+   if(!canOpen()||app?.dataset?.tab!=='map'||hasTransportPoiHit(map,e))return;
    if(e.originalEvent&&processed.has(e.originalEvent))return;
    if(e.originalEvent)processed.add(e.originalEvent);
    const f=e.features?.[0];if(!f)return;
