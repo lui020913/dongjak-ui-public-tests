@@ -17,13 +17,15 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const q=s=>shadow.querySelector(s);
  const style=doc.createElement('style');style.textContent=css;shadow.append(style);
  const panel=doc.createElement('section');panel.className='transit-results';panel.hidden=true;panel.setAttribute('aria-label','대중교통 경로 비교');
- panel.innerHTML='<div class="tr-grip" aria-hidden="true"></div><div class="tr-head"><h2>대중교통 경로</h2><button type="button" aria-label="경로 결과 닫기">'+icon('close')+'</button></div><p class="tr-endpoints"></p><div class="tr-filter" role="group" aria-label="교통수단 필터"></div><p class="tr-note" role="status" aria-live="polite"></p><div class="tr-list"></div>';
+ panel.innerHTML='<div class="tr-grip" aria-hidden="true"></div><div class="tr-head"><h2>대중교통 경로</h2><button type="button" aria-label="경로 결과 닫기">'+icon('close')+'</button></div><p class="tr-endpoints"></p><button type="button" class="tr-pri-preference" aria-pressed="true">보행 위험도 고려</button><div class="tr-filter" role="group" aria-label="교통수단 필터"></div><p class="tr-note" role="status" aria-live="polite"></p><div class="tr-list"></div>';
  view.append(panel);
- let mode='walk',controller=null,previewController=null,generation=0,options=null,filter='all',disposed=false,pointKey='',cached=null,busy=false;
+ let mode='walk',controller=null,previewController=null,generation=0,options=null,filter='all',disposed=false,pointKey='',cached=null,busy=false,preferPri=true;
  const status=panel.querySelector('.tr-note'),list=panel.querySelector('.tr-list'),filters=panel.querySelector('.tr-filter'),endpoints=panel.querySelector('.tr-endpoints');
+ const preference=panel.querySelector('.tr-pri-preference');
+ preference.addEventListener('click',()=>{if(busy)return;preferPri=!preferPri;preference.setAttribute('aria-pressed',String(preferPri));preference.textContent=preferPri?'보행 위험도 고려':'일반 보행 경로';});
  const points=()=>{let result=[];win.dispatchEvent(new CustomEvent('dongjak:transit-route-points',{detail:{accept:value=>{result=value;}}}));return result;};
  const key=ps=>ps.map(p=>p.lng+','+p.lat).join('/');
- const setBusy=value=>{busy=value;panel.setAttribute('aria-busy',String(value));for(const b of [...filters.children,...list.querySelectorAll('button')])b.disabled=value;};
+ const setBusy=value=>{busy=value;preference.disabled=value;panel.setAttribute('aria-busy',String(value));for(const b of [...filters.children,...list.querySelectorAll('button')])b.disabled=value;};
  const close=({animate=false,keepCache=false}={})=>{
   const seq=++generation;controller?.abort();controller=null;previewController?.abort();previewController=null;setBusy(false);
   if(!keepCache)cached=null;
@@ -67,8 +69,8 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}
     const seq=generation;const request=new AbortController();previewController=request;setBusy(true);cached={key:pointKey,options,filter};
-    status.textContent='실제 보행 연결 구간을 확인하는 중입니다.';
-    try{await new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-route-preview',{detail:{plan,signal:request.signal,resolve,reject}})));if(seq===generation)close({keepCache:true});}
+    status.textContent='실제 보행 연결 및 위험도 자료를 확인하는 중입니다.';
+    try{await new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-route-preview',{detail:{plan,signal:request.signal,resolve,reject,preferPri}})));if(seq===generation)close({keepCache:true});}
     catch(e){if(seq===generation){cached=null;status.textContent=e.message||'경로를 표시하지 못했습니다.';setBusy(false);}}
    });list.append(card);
   }
