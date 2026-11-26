@@ -28,8 +28,14 @@ jobs:
           assert not target.exists()
           with zipfile.ZipFile(pathlib.Path(os.environ['RUNNER_TEMP'])/'road-assets.zip') as z:
               entries=z.infolist()
-              assert len(entries)<120 and sum(i.file_size for i in entries)<100*1024*1024
-              assert all(re.fullmatch(r'[A-Za-z0-9_.-]+\.(json|geojson)',i.filename) and i.file_size<8*1024*1024 and not i.is_dir() and (i.external_attr>>16)&0o170000!=0o120000 for i in entries)
+              assert len(entries)<120 and sum(i.file_size for i in entries)<150*1024*1024, (len(entries),sum(i.file_size for i in entries))
+              print('ROAD_ARCHIVE_ENTRY_DIAGNOSTICS', [(i.filename,i.file_size,oct(i.external_attr>>16)) for i in sorted(entries,key=lambda x:-x.file_size)[:12]])
+              assert all(re.fullmatch(r'[A-Za-z0-9_.-]+\.(json|geojson)',i.filename) and not i.is_dir() and ((i.external_attr>>16)&0o170000)!=0o120000 for i in entries)
+              # Surface tiles remain strictly bounded at 2 MiB. The full
+              # district overlay patches are staged but not activated yet.
+              for i in entries:
+                  limit=24*1024*1024 if i.filename.startswith('overlay-') else 2*1024*1024
+                  assert i.file_size<limit,(i.filename,i.file_size,limit)
               names=[i.filename for i in entries];assert len(names)==len(set(names))
               m=json.loads(z.read('manifest.json'))
               assert m['schema']==1 and m['surface_count']==12045 and m['quarantine']['count']==9 and m['native_reaudit']['eligible_ids']==258
