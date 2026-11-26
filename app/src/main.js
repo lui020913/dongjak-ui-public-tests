@@ -93,6 +93,7 @@ import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibil
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
+import {chooseTransitWalk} from './transit-walk-priority.mjs';
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -3694,7 +3695,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!next.every(requireDongjakRouteLocation)){routeProductTools?.setWaypoints(routeWaypoints);return;}
     routeWaypoints=next.map(p=>({...p,label:p.name}));invalidateRoute();
   },
-  onTransitPreview:previewRailTransit=async (plan,signal)=>{
+  onTransitPreview:previewRailTransit=async (plan,signal,preferPri=true)=>{
     if(!routeStart||!routeEnd)throw new Error('출발지와 목적지가 필요합니다.');
     if(routeWaypoints.length)throw new Error('경유지 없는 두 지점만 지원합니다.');
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');
@@ -3706,7 +3707,8 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
     const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
-    const startWalk=first.standard||first.gentle,endWalk=last.standard||last.gentle;
+    const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
     invalidateRoute();
@@ -3726,23 +3728,29 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
 });
 
 
+// Assess each pair of alternatives independently, never compare disjoint legs.
+async function selectTransitWalk(pair,preferPri){
+ const valid=r=>Array.isArray(r.coords)&&r.coords.length>=2&&routeWithinDistrict(r.coords,boundaryGeometry,isDongjak);
+ const candidates={standard:pair.standard&&valid(pair.standard)?pair.standard:null,gentle:pair.gentle&&valid(pair.gentle)?pair.gentle:null};
+ let assessment=null;
+ try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500});}catch{}
+ return chooseTransitWalk(candidates,assessment,{preferPri,valid});
+}
 // Assess the two actual walking legs independently, never the vehicle path.
 function publishTransitDetail(plan,from,to,first,last){
   const preview=transitPreview;
   const label=p=>p?.name||p?.label||'선택한 장소';
-  const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60))});
+  const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice});
   const detail={kind:plan.kind,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
     from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,
-    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:null};
+    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:{first:first.transitPri||null,last:last.transitPri||null}};
   const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
   emit();
-  void evaluateCompositePriRouteCandidates({standard:first,gentle:last},{factors:priPreferences.getSelected()}).then(result=>{
-    detail.pri={first:result?.standard||null,last:result?.gentle||null};emit();
-  }).catch(()=>{detail.pri={first:null,last:null};emit();});
+
 }
 
 // Only a verified walking link may connect two different boarding locations.
-async function previewMultiTransit(plan,signal){
+async function previewMultiTransit(plan,signal,preferPri=true){
  const legs=plan.legs;
  if(!Array.isArray(legs)||legs.length!==2||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!routeWithinDistrict(leg.coords,boundaryGeometry,isDongjak)))throw new Error('동작구 내 검증된 환승 경로가 아닙니다.');
  const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
@@ -3754,7 +3762,7 @@ async function previewMultiTransit(plan,signal){
    const sameStop=a.arsId&&a.arsId===b.arsId&&a.lng===b.lng&&a.lat===b.lat;
    if(sameStop||(a.lng===b.lng&&a.lat===b.lat)){walks.push({coords:[],seconds:0,kilometers:0});continue;}
    const result=await fetchPreferredPedestrianPair(a,b,signal);
-   const selected=result.standard||result.gentle;
+   const selected=await selectTransitWalk(result,preferPri);
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    if(!selected||!routeWithinDistrict(selected.coords,boundaryGeometry,isDongjak))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
    walks.push(selected);
@@ -3781,20 +3789,11 @@ async function previewMultiTransit(plan,signal){
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
  const preview=transitPreview={kind:plan.kind,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60)})),targets:[legs[0].origin,legs[0].destination,legs[1].origin,legs[1].destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:null};
+ const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice})),targets:[legs[0].origin,legs[0].destination,legs[1].origin,legs[1].destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  fitWalkingRoute([...walks.flatMap(w=>w.coords),...legs.flatMap(leg=>leg.coords)]);
- const factors=priPreferences.getSelected();
- void (async()=>{
-   const results=[];
-   for(const w of walks){
-     if(transitPreview!==preview)return;
-     if(w.coords.length<2){results.push(null);continue;}
-     try{const result=await evaluateCompositePriRouteCandidates({standard:w,gentle:null},{factors});results.push(result?.standard||null);}catch{results.push(null);}
-   }
-   detail.priLegs=results;emit();
- })();
+
 }
 
 // Transit comparison reuses the same endpoint state and walking graph.
@@ -3825,12 +3824,12 @@ window.addEventListener('dongjak:transit-route-points',event=>{
   event.detail?.accept?.(routeStart&&routeEnd?[routeStart,...routeWaypoints,routeEnd].map(p=>({...p})):[]);
 });
 window.addEventListener('dongjak:transit-route-preview',event=>{
-  const {plan,signal,resolve,reject}=event.detail||{};
+  const {plan,signal,resolve,reject,preferPri=true}=event.detail||{};
   if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
   void (async()=>{
     if(!routeStart||!routeEnd||routeWaypoints.length||navMode||app.dataset.tab!=='route')throw new Error('출발지와 목적지를 다시 확인해 주세요.');
-    if(plan.kind==='rail')return previewRailTransit(plan,signal);
-    if(plan.kind==='transfer'||plan.kind==='mixed')return previewMultiTransit(plan,signal);
+    if(plan.kind==='rail')return previewRailTransit(plan,signal,preferPri);
+    if(plan.kind==='transfer'||plan.kind==='mixed')return previewMultiTransit(plan,signal,preferPri);
     if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!routeWithinDistrict(plan.coords,boundaryGeometry,isDongjak))throw new Error('동작구 내 검증된 버스 경로가 아닙니다.');
     const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
     const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
@@ -3838,7 +3837,8 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
-    const a=first.standard||first.gentle,b=last.standard||last.gentle;
+    const [a,b]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
+    if(!current())throw new Error('경로 조건이 변경됐습니다.');
     if(!a||!b||!map.isStyleLoaded?.())throw new Error('실제 보행 연결 경로 또는 지도를 확인하지 못했습니다.');
     invalidateRoute();
     const collection=lines=>({type:'FeatureCollection',features:lines.map(coordinates=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates}}))});
