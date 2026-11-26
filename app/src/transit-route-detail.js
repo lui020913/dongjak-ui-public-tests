@@ -129,7 +129,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  function renderMulti(detail){
   const label=leg=>leg.kind==='bus'?leg.route:[...new Set(leg.lines)].map(railLabel).join(' · ');
   const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(leg.lines[0]));
-  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 1회'),el('small','','전체 시간·요금 미확인 · 지하철 선형은 역 순서 개략 경로'));
+  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 '+(detail.legs.length-1)+'회'),el('small','','전체 시간·요금 미확인 · 지하철 선형은 역 순서 개략 경로'));
   const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
   track.append(el('span','','도보'));
   detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',labels[leg.kind]);v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
@@ -166,7 +166,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
      finally{win.clearTimeout(timer);if(arrivalRequest===controller){arrivalRequest=null;refresh.disabled=false;}}
     });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',label(leg)+' 도착정보 새로고침');arrival.append(message,refresh);board.append(arrival);
    }
-   walkRow(i+1,leg.destination+' 하차'+(i===0?' · 환승':''));
+   walkRow(i+1,leg.destination+' 하차'+(i<detail.legs.length-1?' · 환승':''));
   }
   row('end',detail.to,'목적지');
   const note=el('p','dj-tr-note');note.innerHTML=icon('shield')+'<span>PRI는 실제 도보 연결 구간만 평가합니다. 환승 통로와 차량 내부 안전을 보장하지 않습니다.</span>';
