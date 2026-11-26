@@ -19,9 +19,10 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  await page.locator('.community-location-link').click();
  await expect(app).toHaveAttribute('data-tab','map');await expect(page.locator('#participation-panel')).toBeHidden();
  await expect(page.locator('#dj-community-location-card')).toBeVisible();
- await page.locator('#dj-community-location-card').getByRole('button',{name:'제보 위치 닫기'}).click();
- // Actual UI camera change brings the app to the high-zoom review area.
+ // Wait for the camera jump before closing the location card; closing the
+ // marker too early can legitimately cancel its deferred camera movement.
  await expect(app).toHaveAttribute('data-dj-reviewed-base-roads','selective-preview',{timeout:90000});
+ await page.locator('#dj-community-location-card').getByRole('button',{name:'제보 위치 닫기'}).click();
  expect(failed).toEqual([]);
  expect(requested.has('/data/road-display-review/manifest.json')).toBe(true);
  const count=[...requested].filter(p=>/\/road-\d+-\d+-\d+\.geojson$/.test(p)).length;
