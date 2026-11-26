@@ -69,14 +69,14 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     const {groups,unplaced}=routeVehicleGroups(stops,vehicles);
     let direction='';
     root.dataset.hasVehicles=String(vehicles.length>0);
-    for(const s of stops){
-      if(s.direction&&s.direction!==direction){direction=s.direction;list.append(make('div','dj-bus-detail-direction',direction.endsWith('방면')?direction:direction+' 방면'));}
-      if(view==='route')for(const v of groups.get(s.seq)||[])list.append(vehicleRow(v));
+    for(const [index,s] of stops.entries()){
+      const directionChange=s.direction&&s.direction!==direction;if(directionChange)direction=s.direction;
+      if(index>0){const slot=make('div','dj-bus-detail-vehicle-slot');const group=groups.get(s.seq)||[];slot.dataset.count=String(group.length);if(group.length){const strip=make('div','dj-bus-detail-vehicle-strip');for(const v of group)strip.append(vehicleRow(v));slot.append(strip);}list.append(slot);}
       const r=button('',()=>onStop(s),'dj-bus-detail-stop');r.dataset.stopSeq=String(s.seq);
       const selected=Boolean(selection.arsId&&s.arsId===selection.arsId);
       if(selected)r.setAttribute('aria-current','location');
       const node=make('span','dj-bus-detail-node');node.setAttribute('aria-hidden','true');
-      const content=make('span','dj-bus-detail-stop-content');content.append(make('strong','',s.name),make('small','',stopHours(s)));
+      const content=make('span','dj-bus-detail-stop-content');const title=make('strong','',s.name);title.title=s.name;content.append(title,make('small','',stopHours(s)));if(directionChange)content.append(make('small','dj-bus-detail-inline-direction',direction.endsWith('방면')?direction:direction+' 방면'));
       r.append(node,content);list.append(r);
     }
     if(view==='route'&&unplaced.length){const unknown=make('section','dj-bus-detail-unplaced');unknown.append(make('p','dj-bus-detail-message','정류장 사이 위치를 확인할 수 없는 차량'));for(const v of unplaced)unknown.append(vehicleRow(v));list.append(unknown);}

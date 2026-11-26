@@ -1,3 +1,4 @@
+import {NEUTRAL_BUS_IMAGE,ensureNeutralBusImage} from './live-bus-art.js';
 export const BUS_ROUTE_SOURCE='dj-selected-bus-route';
 const CASE=BUS_ROUTE_SOURCE+'-casing',LINE=BUS_ROUTE_SOURCE+'-line';
 export const BUS_ROUTE_STOPS=BUS_ROUTE_SOURCE+'-stops',BUS_ROUTE_STOP_NAMES=BUS_ROUTE_SOURCE+'-stop-names';
@@ -83,12 +84,19 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
     if(!vehicleFetcher)return;
     try{
       if(!map.getSource(VEHICLES)){if(!vehicles.features.length)return;map.addSource(VEHICLES,{type:'geojson',data:mapVisible?vehicles:empty()});}
-      if(!map.getLayer(VEHICLE_LAYER)){
-        let icon=false;try{icon=vehicleArt(map);}catch{}
-        map.addLayer(icon?{id:VEHICLE_LAYER,type:'symbol',source:VEHICLES,minzoom:11,filter:['==',['get','headingKnown'],true],layout:{'icon-image':VEHICLE_IMAGE,'icon-size':['interpolate',['linear'],['zoom'],11,.68,16,1,19,1.24],'icon-rotate':['get','heading'],'icon-rotation-alignment':'map','icon-pitch-alignment':'map','icon-allow-overlap':true,'icon-ignore-placement':true}}:{id:VEHICLE_LAYER,type:'circle',source:VEHICLES,minzoom:11,paint:{'circle-color':['get','color'],'circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
+      const neutral=ensureNeutralBusImage(map);let directional=false;try{directional=neutral&&vehicleArt(map);}catch{}
+      if(neutral&&map.getLayer(VEHICLE_LAYER)?.type==='circle')map.removeLayer(VEHICLE_LAYER);
+      if(!map.getLayer(VEHICLE_LAYER))map.addLayer(neutral?{id:VEHICLE_LAYER,type:'symbol',source:VEHICLES,minzoom:11,layout:{
+        'icon-image':directional?VEHICLE_IMAGE:NEUTRAL_BUS_IMAGE,
+        'icon-size':['interpolate',['linear'],['zoom'],11,.8,16,1.15,19,1.4],
+        'icon-rotate':directional?['get','heading']:0,
+        'icon-rotation-alignment':directional?'map':'viewport',
+        'icon-pitch-alignment':'viewport','icon-allow-overlap':true,'icon-ignore-placement':true
+      }}:{id:VEHICLE_LAYER,type:'circle',source:VEHICLES,minzoom:11,paint:{'circle-color':'#2672bc','circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
+      if(neutral){
+        map.setFilter?.(VEHICLE_LAYER,directional?['==',['get','headingKnown'],true]:null);
+        if(directional&&!map.getLayer(VEHICLE_LAYER+'-unknown'))map.addLayer({id:VEHICLE_LAYER+'-unknown',type:'symbol',source:VEHICLES,minzoom:11,filter:['!=',['get','headingKnown'],true],layout:{'icon-image':NEUTRAL_BUS_IMAGE,'icon-size':['interpolate',['linear'],['zoom'],11,.8,16,1.15,19,1.4],'icon-rotation-alignment':'viewport','icon-pitch-alignment':'viewport','icon-allow-overlap':true,'icon-ignore-placement':true}});
       }
-      if(!map.getLayer(VEHICLE_LAYER+'-unknown'))map.addLayer({id:VEHICLE_LAYER+'-unknown',type:'circle',source:VEHICLES,minzoom:11,filter:['!=',['get','headingKnown'],true],paint:{'circle-color':['get','color'],'circle-radius':5,'circle-stroke-color':'#fff','circle-stroke-width':1.5}});
-      if(map.getLayer(VEHICLE_LAYER)?.type==='circle')map.setFilter?.(VEHICLE_LAYER,['==',['get','headingKnown'],true]);
       map.getSource(VEHICLES).setData(mapVisible?vehicles:empty());
     }catch{}
   }

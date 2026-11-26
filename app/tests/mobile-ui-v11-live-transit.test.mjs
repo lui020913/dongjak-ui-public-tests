@@ -129,7 +129,7 @@ test('delayed atlas never hides train layer; stationary train recovers and new a
  const overlay=attachLiveTransitOverlay(map,{stationLines:routes,metroMinZoom:12.5,trainIconDocument:doc,loadTrainAtlas:()=>new Promise(r=>{resolveAtlas=r}),getVehicles:async()=>({metro:[metro({status:'1',observedAt:new Date().toISOString()})],bus:[]})});
  try{
   overlay.start();await waitUntil(()=>typeof resolveAtlas==='function');
-  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal(map.images.size,30);assert(map.images.has('dj-live-train-beam-left'));assert(map.images.has('dj-live-train-beam-right'));
+  assert.equal(map.getLayer(LIVE_METRO_LAYER).type,'symbol');assert.equal(map.getLayer(LIVE_METRO_LAYER).minzoom,12.5);assert.equal([...map.images.keys()].filter(id=>id.startsWith('dj-live-train-')).length,30);assert(map.images.has('dj-live-bus-neutral'));assert.equal(map.getLayer(LIVE_BUS_LAYER).type,'symbol');assert(map.images.has('dj-live-train-beam-left'));assert(map.images.has('dj-live-train-beam-right'));
   assert(map.images.has('dj-live-train-9호선-unlit'));assert(map.images.has('dj-live-train-9호선-left-unlit'));
   assert.deepEqual(map.images.get('dj-live-train-9호선'),map.images.get('dj-live-train-9호선-unlit'),'no added headlight paint');
   const marker=map.getSource(LIVE_SOURCE);await waitUntil(()=>marker.data?.features?.length===1);
