@@ -76,8 +76,22 @@ test('transit teardown removes owned map layers before sources and defers tile w
  const {readFileSync}=await import('node:fs');
  const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  const clear=main.split('function clearTransitPreview(){')[1].split('function syncPriRouteLine(){')[0];
- assert.match(clear,/restoreTransitBackground\(\)/);
+ assert.match(clear,/syncTransitExterior\(\)/);
  assert.ok(clear.indexOf('map.removeLayer')<clear.indexOf('map.removeSource'));
  assert.match(clear,/-focus-casing/);
  assert.match(main,/offscreenEvictionIds\(\[\.\.\.loadedBuildingTiles.keys\(\)\],visible,djRenderBudget.isEconomy\(\)\?2:6\)/);
+});
+
+test('transit mode changes only district display and camera extent, not shared basemap filters or buildings',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ const scope=main.split('function syncTransitExterior(force=false){')[1].split('function clearTransitPreview(){')[0];
+ assert.match(scope,/map.setMaxBounds\(active\?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds\(boundaryGeometry\)\)/);
+ assert.match(scope,/district-border','line-opacity',active\?0:0.96/);
+ assert.match(scope,/transitHomeCamera/);
+ assert.doesNotMatch(scope,/setFilter|setStyle|restoreBasemapLabelsOutsideDistrict|clipBasemapLabelsToDistrict|syncTiltWithBuildings|line-dasharray/);
+ const building=main.split('function visibleBuilding3D(){')[1].split('function syncTiltWithBuildings')[0];
+ assert.doesNotMatch(building,/djTransitExterior/);
+ const focus=main.split('function focusTransitRoute(coords){')[1].split('function setTransitPreviewStops')[0];
+ assert.doesNotMatch(focus,/transport-schematic-subway|transport-real-rail-overview|setLayoutProperty/);
 });
