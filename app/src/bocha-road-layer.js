@@ -1,3 +1,4 @@
+import {readDisplayRoadResponse} from './reviewed-road-display-assets.mjs';
 import {priOverlayAnchor,priCoveredByMapLayer} from './pri-map-layer-order.mjs';
 const DATA_URL = '/data/sangdo1-analysis-view/bocha-mixed-roads.geojson';
 const SOURCE_ID = 'sangdo1-bocha-road-source';
@@ -69,7 +70,7 @@ export function installBochaRoadLayer({map,maplibregl,app}={}) {
   }
   async function loadData() {
     if(data)return data;
-    if(!loadPromise)loadPromise=fetch(DATA_URL).then(r=>{if(!r.ok)throw new Error('자료 파일을 불러오지 못했습니다(HTTP '+r.status+').');return r.json();}).then(normalizeBochaRoadGeoJSON).then(result=>(data=result)).catch(e=>{loadPromise=null;throw e;});
+    if(!loadPromise)loadPromise=fetch(DATA_URL).then(r=>{if(!r.ok)throw new Error('자료 파일을 불러오지 못했습니다(HTTP '+r.status+').');return readDisplayRoadResponse(DATA_URL,r);}).then(normalizeBochaRoadGeoJSON).then(result=>(data=result)).catch(e=>{loadPromise=null;throw e;});
     return loadPromise;
   }
   async function waitForStyle() {
