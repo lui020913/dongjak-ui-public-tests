@@ -82,3 +82,15 @@
 @media(max-height:680px){.transit-results{height:min(60dvh,440px,var(--tr-available));padding:0}.transit-results.dj871-sheet-expanded{height:var(--tr-available)}.tr-header{padding:7px 12px 8px}.tr-scroll{padding:9px 12px 12px;gap:7px}}
 
 .tr-note[hidden]{display:none!important}
+
+/* Compact, comparable hierarchy: metric + fare, actual colored lines, endpoints, short evidence. */
+.tr-scroll .tr-card{gap:5px;padding:12px 13px}
+.tr-metrics{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.tr-scroll .tr-metrics strong{font-size:19px;line-height:1.3;font-weight:800}
+.tr-fare-compact{font-size:12px;color:var(--tr-ink);font-weight:650;white-space:nowrap}
+.tr-route-accessible-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.tr-route-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-block:2px}
+.tr-line-badge{border:1px solid var(--line-color);background:color-mix(in srgb,var(--line-color) 12%,var(--tr-paper));color:var(--tr-ink);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:750;line-height:1.25}
+.tr-badge-arrow{color:var(--tr-muted);font-size:16px}
+.tr-scroll .tr-route-names{font-size:12px;font-weight:600}
+.tr-scroll .tr-review-result{padding-top:4px;border-top:0}

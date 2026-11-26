@@ -15,6 +15,7 @@ const icons={
 };
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icons[name]+'</svg>';
 const railLabel=line=>line==='신림'?'신림선':line+'호선';
+const routeMetric=(plan,result,done)=>plan.kind==='rail'&&Number.isFinite(plan.indicativeMinutes)?'이동 약 '+Math.ceil(plan.indicativeMinutes)+'분':result?'도보 '+result.walkMinutes+'분':done?'전체 시간 미확인':'도보 조회 중';
 const legLabel=p=>p.kind==='bus'?p.route:[...new Set(p.lines)].map(railLabel).join(' · ');
 const nameOf=p=>p?.name||p?.label||'선택한 장소';
 export function mountTransitComparison({doc,win,shadow,host,view,app}){
@@ -71,16 +72,18 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
    const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
+   const metrics=doc.createElement('div');metrics.className='tr-metrics';const metric=doc.createElement('strong');metric.textContent=routeMetric(plan,reviewed.get(plan),reviewed.has(plan));const fare=doc.createElement('span');fare.className='tr-fare-compact';fare.textContent=transitFareText(plan).replace('기본운임','기본운임');metrics.append(metric,fare);
    const head=doc.createElement('div');head.className='tr-row';
    const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(lead.kind);
    const title=doc.createElement('strong');title.textContent=plan.legs?plan.legs.map(legLabel).join(' + '):plan.kind==='bus'?plan.route+' · 직행버스':legLabel(plan);
-   const chevron=doc.createElement('span');chevron.className='tr-chevron';chevron.innerHTML=icon('chevron');head.append(mark,title,chevron);
+   const chevron=doc.createElement('span');chevron.className='tr-chevron';chevron.innerHTML=icon('chevron');head.append(mark,title,chevron);head.classList.add('tr-route-accessible-heading');
    const detail=doc.createElement('span');detail.className='tr-route-names';detail.textContent=plan.origin.name+' 승차 → '+plan.destination.name+' 하차';
-   const meta=doc.createElement('small');meta.textContent=plan.legs?'환승 '+(plan.legs.length-1)+'회 · 전체 시간 미확인':plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
-   const track=doc.createElement('div');track.className='tr-track';if(plan.legs){track.classList.add('tr-multi-track');track.innerHTML='<span>도보</span>'+plan.legs.map((leg,i)=>(i?'<span>환승</span>':'')+'<span data-vehicle="true">'+(leg.kind==='bus'?'버스':'지하철')+'</span>').join('')+'<span>도보</span>';}else track.innerHTML='<span>도보</span><span>'+(plan.kind==='bus'?'버스':'지하철')+'</span><span>도보</span>';track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
-   const fare=doc.createElement('small');fare.textContent=transitFareText(plan)+' · 일반 교통카드 (참고 요금)';
-   card.append(head,detail,track,meta,fare);
-   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));card.append(summary);reviewLabels.set(plan,summary);
+   const meta=doc.createElement('small');meta.textContent=(plan.legs?'환승 '+(plan.legs.length-1)+'회':plan.kind==='bus'?'직행 · '+plan.stopCount+'개 정류장':'환승 '+plan.changes+'회')+' · '+(plan.kind==='rail'?'대기 제외 추정':'전체 시간 미확인');
+   const track=doc.createElement('div');track.className='tr-route-badges';track.setAttribute('aria-label','탑승 노선 순서');
+   const legs=plan.legs||[plan];let count=0;
+   for(const leg of legs){for(const line of leg.kind==='bus'?[leg.route]:[...new Set(leg.lines||[])]){if(count++){const arrow=doc.createElement('span');arrow.className='tr-badge-arrow';arrow.textContent='›';track.append(arrow);}const badge=doc.createElement('span');badge.className='tr-line-badge';badge.textContent=leg.kind==='bus'?line:railLabel(line);badge.style.setProperty('--line-color',leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(line)));track.append(badge);}}
+   card.append(metrics,head,track,detail,meta);
+   const summary=doc.createElement('small');summary.className='tr-review-result';summary.textContent=formatTransitReview(reviewed.get(plan),reviewed.has(plan));card.append(summary);reviewLabels.set(plan,{summary,metric});
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}
     const seq=generation;const request=new AbortController();previewController=request;stopReview();setBusy(true);cached={key:pointKey,options,filter,reviewed,preferPri};
@@ -98,7 +101,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   try{
    await reviewAllTransitCandidates(plans,{signal:request.signal,concurrency:2,review:plan=>new Promise((resolve,reject)=>win.dispatchEvent(new CustomEvent('dongjak:transit-candidate-review',{detail:{plan,signal:request.signal,preferPri:policy,walkCache,resolve,reject}}))),onResult:(plan,summary)=>{
     if(seq!==generation||request.signal.aborted||reviewController!==request)return;
-    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label)label.textContent=formatTransitReview(summary,true);
+    reviewed.set(plan,summary);const label=reviewLabels.get(plan);if(label){label.summary.textContent=formatTransitReview(summary,true);label.metric.textContent=routeMetric(plan,summary,true);}
    }});
   }finally{if(reviewController===request)reviewController=null;}
  }

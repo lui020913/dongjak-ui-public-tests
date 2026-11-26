@@ -30,3 +30,12 @@ test('native transportation areas distinguish pedestrian surfaces while ordinary
  assert.equal(color[4],'#ffffff');
  assert.match(src('ui-environment.js'),/entry\.pavedArea\?nativePavedAreaPaint/);
 });
+
+test('official POI source commits are deferred until movement stops; unchanged data and paint are not reapplied',()=>{
+ const s=src('seoul-official-facilities.js');
+ assert.match(s,/if\(!active\|\|map\.isMoving\?\.\(\)\|\|!pendingPublish\)return/);
+ assert.match(s,/appliedFacilityData\.get\(existing\)!==data/);
+ assert.match(s,/map\.on\('movestart',movementStart\)/);
+ assert.match(s,/getPaintProperty\?\.\(POINTS,key\)!==value/);
+ assert.match(s,/b\.getWest\(\)>=w&&b\.getSouth\(\)>=s/);
+});
