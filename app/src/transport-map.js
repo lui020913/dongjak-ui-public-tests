@@ -1861,13 +1861,14 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   // station or bus stop click. Provenance is still available in Data Sources.
   // 실제 철도 OSM 요청은 제거했습니다. 선형은 고정 GeoJSON만 사용합니다.
   let officialStaticStopCount=0;
+  let officialStaticStopIds=new Set();
   function combineStations(){
     const allBuses=osmTransport.filter(x=>x.kind==='bus'&&isDongjak(x.lng,x.lat)===true);
     // One map marker per physical bus stop. Do not merge official opposite-side
     // stops with distinct five-digit ARS IDs.
     // Once the complete district ARS registry is available, only identified
     // boarding points are shown. Unidentified map copies are fallback-only.
-    const buses=deduplicateBusStops(officialStaticStopCount>=400?allBuses.filter(p=>/^\d{5}$/.test(String(p.arsId||''))):allBuses);
+    const buses=deduplicateBusStops(officialStaticStopCount>=400?allBuses.filter(p=>officialStaticStopIds.has(String(p.arsId||''))):allBuses);
     const stations=new Map();
     // OSM 목록은 공식 역사 마스터에 없는 최근 개통역을 보충하는 용도입니다.
     for(const place of osmTransport.filter(x=>x.kind==='subway')){
@@ -1935,6 +1936,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
           osmTransport.push(stop);identifiers.add(stop.arsId);
         }
       }
+      officialStaticStopIds=new Set(verified.map(p=>String(p.arsId)));
       officialStaticStopCount=verified.length;
       refreshStops();
       console.info(`[공식 정류장 정적파일] 동작구 ${officialStaticStopCount}개 적용 · 기준 ${dataset.sourceDate}`);
