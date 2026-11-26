@@ -89,6 +89,12 @@ test('real transit detail buttons navigate to the visible route editor, includin
    const results=route.locator('.transit-results');
    await expect(results).toBeVisible();
    await expect(results.locator('.tr-card').filter({hasText:'검증버스'}).first()).toBeVisible({timeout:40000});
+   await expect(results.locator('.tr-review')).toHaveCount(0);
+   const cards=results.locator('.tr-card');
+   await expect(results.locator('.tr-review-result')).toHaveCount(await cards.count());
+   await expect(results.locator('.tr-note')).toBeHidden();
+   await expect(route.locator('[data-transit-mode="walk"] svg path')).toHaveCount(1);
+
    // Real header drag uses the same staged sheet motion and never covers the V3 back header or dock.
    const handle=results.locator('.tr-header h2');
    const drag=async dy=>{const r=await handle.boundingBox();await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.down();await page.mouse.move(r.x+r.width/2,r.y+r.height/2+dy,{steps:8});await page.mouse.up();};

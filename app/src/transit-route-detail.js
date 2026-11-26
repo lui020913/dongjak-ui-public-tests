@@ -1,3 +1,4 @@
+import {WALK_ICON_PATH} from './route-walk-icon.mjs';
 import {busRouteColor} from './bus-route-overlay.js';
 import {subwayLineColor} from './transport-map.js';
 import {revealSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
@@ -7,7 +8,7 @@ import {transitRailArrival} from './transit-rail-arrival.mjs';
 import {transitFareText,TRANSIT_FARE_SOURCE} from './transit-fare-reference.mjs';
 const labels={walk:'도보',bus:'버스',rail:'지하철'};
 const paths={
- walk:'<circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1"/>',
+ walk:WALK_ICON_PATH,
  bus:'<rect x="5" y="3" width="14" height="16" rx="3"/><path d="M5 12h14M8 19v2m8-2v2M8 15h1m6 0h1"/>',
  rail:'<rect x="5" y="3" width="14" height="15" rx="4"/><path d="M5 11h14M9 18l-3 3m9-3 3 3M8 14h1m6 0h1"/>',
  end:'<circle cx="12" cy="12" r="5"/>',refresh:'<path d="M20 11a8 8 0 1 0-2 6m2-6V4m0 7h-7"/>',shield:'<path d="m12 3 8 4v5c0 5-4 8-8 10-4-2-8-5-8-10V7z"/><path d="m9 12 2 2 4-4"/>'

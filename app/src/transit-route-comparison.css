@@ -44,14 +44,12 @@
 .tr-multi-track{height:auto;min-height:19px;flex-wrap:wrap}.tr-multi-track span{min-height:19px;flex-shrink:1}.tr-multi-track span[data-vehicle=true]{min-width:35px}
 
 .tr-review-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.tr-review{min-height:36px;padding:5px 12px;border-radius:999px;border:1px solid var(--tr-border);background:var(--tr-soft);color:var(--tr-ink);font-size:12px;font-weight:740}
-.tr-review:disabled{opacity:.5}
 .tr-review-result{border-top:1px solid var(--tr-border);padding-top:6px}
 .tr-review-label{font-size:11px;font-weight:730;color:var(--tr-ink);background:var(--tr-soft);padding:4px 8px;border-radius:999px;justify-self:start}
 
 /* Preserve real touch targets and prevent header controls from consuming the
  * entire result sheet on short mobile viewports. The list alone scrolls. */
-.transit-mode-toggle button,.tr-filter button,.tr-pri-preference,.tr-review{min-height:44px}
+.transit-mode-toggle button,.tr-filter button,.tr-pri-preference{min-height:44px}
 .tr-head button{width:44px;height:44px}
 .tr-grip,.tr-head,.tr-endpoints,.tr-review-tools,.tr-note{flex-shrink:0}
 .tr-list{flex:1 1 auto;min-height:56px}
@@ -82,3 +80,5 @@
 .tr-scroll .tr-card strong{font-size:15px;letter-spacing:-.025em}
 .tr-scroll .tr-card small,.tr-scroll .tr-note{font-size:12px;line-height:1.45}
 @media(max-height:680px){.transit-results{height:min(60dvh,440px,var(--tr-available));padding:0}.transit-results.dj871-sheet-expanded{height:var(--tr-available)}.tr-header{padding:7px 12px 8px}.tr-scroll{padding:9px 12px 12px;gap:7px}}
+
+.tr-note[hidden]{display:none!important}

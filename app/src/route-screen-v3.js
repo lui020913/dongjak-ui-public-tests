@@ -1,3 +1,4 @@
+import {WALK_ICON_PATH} from './route-walk-icon.mjs';
 /**
  * Walking route entry V3: a completely new, isolated visual screen.
  * No inherited route-card, legacy sheet layout, footer CSS, or cloned UI.
@@ -29,7 +30,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
         <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <strong class="heading">길찾기</strong>
-      <span class="mode" id="v3-walk-mode"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2 3 5M11 8l-2 5-4 2m6-7 4 4 4 1m-8-5 2-1 2 5"/></svg>도보</span>
+      <span class="mode" id="v3-walk-mode"><svg viewBox="0 0 24 24" aria-hidden="true">${WALK_ICON_PATH}</svg>도보</span>
     </header>
     <section class="route-panel" aria-label="출발지, 경유지와 도착지">
       <div class="transit-mode-toggle" role="group" aria-label="이동 수단"><button type="button" data-transit-mode="walk" aria-pressed="true">도보</button><button type="button" data-transit-mode="transit" aria-pressed="false">대중교통</button></div>

@@ -27,3 +27,21 @@ export function transitReviewPairs(plan,from,to){
  if(!legs.length||legs.length>3||legs.some(l=>!l.origin||!l.destination))return [];
  return [[from,legs[0].origin],...legs.slice(1).map((l,i)=>[legs[i].destination,l.origin]),[legs.at(-1).destination,to]];
 }
+
+/** Process every candidate progressively; keep at most two route evaluations in flight. */
+export async function reviewAllTransitCandidates(plans,{signal,concurrency=2,review,onResult}={}){
+ let cursor=0;
+ async function worker(){
+  while(!signal?.aborted&&cursor<plans.length){
+   const plan=plans[cursor++];let summary=null;
+   try{summary=await review(plan);}catch{}
+   if(!signal?.aborted)onResult(plan,summary);
+  }
+ }
+ await Promise.all(Array.from({length:Math.min(plans.length,Math.max(1,Math.min(2,concurrency)))},worker));
+}
+export function formatTransitReview(result,done=false){
+ if(!done)return '도보 거리·시간 및 PRI 조회 중';
+ if(!result)return '도보 연결 확인 불가';
+ return '도보 '+result.walkM+'m · 약 '+result.walkMinutes+'분 · '+(result.comparable?'관측 PRI '+result.risk.toFixed(1)+'점':'안전 미평가 또는 PRI 자료 부족')+' · 관측 '+Math.round(result.coverage*100)+'%';
+}

@@ -45,3 +45,12 @@ test('search dismissal releases the whole retained surface on its actual animati
  assert.match(js,/cancelClose\(\);mapFooter\.hidden=true/);
  assert.match(js,/closeBtn\?\.addEventListener\('click',\(\)=>\{query\.blur\(\)/);
 });
+
+test('Nodeulseom fallback is compact transparent text with a halo, not a large white placard',()=>{
+ const js=read('src/nearby-place-labels.js');
+ const raster=js.slice(js.indexOf('function ensureNodeulseomRasterText'),js.indexOf('export function installNodeulseomDetailLabel'));
+ assert.match(raster,/canvas.width=64\*2;canvas.height=23\*2/);
+ assert.match(raster,/ctx.strokeText\('노들섬'/);
+ assert.doesNotMatch(raster,/roundRect|fillRect|188\*2|25px/);
+ assert.match(js,/minzoom:11\.1,maxzoom:24/);
+});

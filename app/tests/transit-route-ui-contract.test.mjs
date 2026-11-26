@@ -24,3 +24,12 @@ test('PRI and transit arrival are scoped to verified walking legs and matching r
  assert.ok(detail.includes('String(x.routeId)===String(detail.routeId)'));
  assert.ok(detail.includes('승하차 단계는 직접 전환합니다'));
 });
+
+test('all transit cards show automatic walking review and no redundant global disclaimer',()=>{
+ const code=read('transit-route-comparison.js');
+ assert.doesNotMatch(code,/class="tr-review"|slice\(0,3\)|위험도 우열 미확정|일부 버스 정보 조회 불가/);
+ assert.match(code,/groupsOf\(\)\.all\.filter/);
+ assert.match(code,/formatTransitReview\(reviewed\.get\(plan\),reviewed\.has\(plan\)\)/);
+ assert.match(code,/void reviewCandidates\(\)/);
+ for(const file of ['transit-route-comparison.js','transit-route-detail.js','route-screen-v3.js'])assert.match(read(file),/WALK_ICON_PATH/);
+});

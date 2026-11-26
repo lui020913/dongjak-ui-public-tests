@@ -82,16 +82,15 @@ function ensureNodeulseomRasterText(map){
   const id='dj-nodeulseom-name-glyph';
   if(map.hasImage?.(id))return true;
   if(typeof document==='undefined'||!map.addImage)return false;
-  const canvas=document.createElement('canvas');canvas.width=188*2;canvas.height=51*2;
+  const canvas=document.createElement('canvas');canvas.width=64*2;canvas.height=23*2;
   const ctx=canvas.getContext?.('2d');
-  if(!ctx||typeof ctx.scale!=='function'||typeof ctx.roundRect!=='function')return false;
+  if(!ctx||typeof ctx.scale!=='function'||typeof ctx.strokeText!=='function')return false;
   ctx.scale(2,2);
-  ctx.fillStyle='rgba(255,255,255,0.95)';
-  ctx.strokeStyle='#c8ded5';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.roundRect(1,1,186,49,14);ctx.fill();ctx.stroke();
-  ctx.font='bold 25px "Apple SD Gothic Neo",Pretendard,system-ui,sans-serif';
-  ctx.fillStyle='#185e55';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('노들섬',94,26);
+  ctx.font='600 14px "Apple SD Gothic Neo",Pretendard,system-ui,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.strokeStyle='rgba(247,250,249,0.95)';ctx.lineWidth=3;ctx.lineJoin='round';
+  ctx.strokeText('노들섬',32,11.5);
+  ctx.fillStyle='#536e74';ctx.fillText('노들섬',32,11.5);
   try{map.addImage(id,{width:canvas.width,height:canvas.height,data:ctx.getImageData(0,0,canvas.width,canvas.height).data},{pixelRatio:2});return true;}
   catch(error){console.warn('[노들섬 문자 레이어]',error);return false;}
 }
@@ -108,7 +107,7 @@ export function installNodeulseomDetailLabel(map){
   const hasLabel=ensureNodeulseomRasterText(map);
   // A built-in circle layer still renders if the custom canvas image fails.
   const dotId='dj-nodeulseom-detail-dot';
-  if(!map.getLayer?.(dotId))map.addLayer({id:dotId,type:'circle',source:'dj-nodeulseom-detail-source',minzoom:9.8,
+  if(!map.getLayer?.(dotId))map.addLayer({id:dotId,type:'circle',source:'dj-nodeulseom-detail-source',minzoom:11.1,
     paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,6,15,9,18,12],
       'circle-color':'#18836e','circle-stroke-color':'#ffffff','circle-stroke-width':2.5,
       'circle-opacity':hasIcon?.55:1,'circle-stroke-opacity':hasIcon?.7:1}});
@@ -117,7 +116,7 @@ export function installNodeulseomDetailLabel(map){
   // sprite, icon collision or icon-placement issue can no longer suppress the
   // actual place name requested by the user.
   if(hasIcon&&!map.getLayer?.(pinId)){
-    map.addLayer({id:pinId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:9.8,maxzoom:24,
+    map.addLayer({id:pinId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:11.1,maxzoom:24,
       layout:{'icon-image':'dj-nodeulseom-pin',
         'icon-size':['interpolate',['linear'],['zoom'],10.5,.5,14,.62,18,.76],
         'icon-anchor':'bottom','icon-pitch-alignment':'viewport','icon-rotation-alignment':'viewport',
@@ -125,22 +124,22 @@ export function installNodeulseomDetailLabel(map){
   }
   const nameId='dj-nodeulseom-detail-name';
   if(!map.getLayer?.(nameId)){
-    map.addLayer({id:nameId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:9.8,maxzoom:24,
+    map.addLayer({id:nameId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:11.1,maxzoom:24,
       layout:{'text-field':['get','name'],
         'text-font':['Noto Sans Bold','Noto Sans Regular','Open Sans Semibold','Open Sans Regular'],
-        'text-size':['interpolate',['linear'],['zoom'],10.5,13,14,15,18,18],
+        'text-size':['interpolate',['linear'],['zoom'],11.1,13.5,14.5,15],
         'text-offset':[0,1.7],'text-max-width':8,'text-padding':0,
         'text-pitch-alignment':'viewport','text-rotation-alignment':'viewport','text-keep-upright':true,
         'text-allow-overlap':true,'text-ignore-placement':true,'text-anchor':'top','symbol-sort-key':10000},
-      paint:{'text-color':'#245d65','text-halo-color':'#ffffff','text-halo-width':3.2,'text-halo-blur':0.15}});
+      paint:{'text-color':'#245d65','text-halo-color':'#ffffff','text-halo-width':2.0,'text-halo-blur':0.15}});
   }
   // Canvas text is drawn by the map renderer at geographic coordinates. This
   // remains visible even when the vector tile font stack lacks Korean glyphs.
   const fallbackId='dj-nodeulseom-label-image';
   if(hasLabel&&!map.getLayer?.(fallbackId)){
-    map.addLayer({id:fallbackId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:9.8,maxzoom:24,
+    map.addLayer({id:fallbackId,type:'symbol',source:'dj-nodeulseom-detail-source',minzoom:11.1,maxzoom:24,
       layout:{'icon-image':'dj-nodeulseom-name-glyph','icon-anchor':'top',
-        'icon-offset':[0,1.0],'icon-allow-overlap':true,
+        'icon-offset':[0,1.0],'icon-size':['interpolate',['linear'],['zoom'],11.1,.95,14.5,1.07],'icon-allow-overlap':true,
         'icon-ignore-placement':true,'icon-pitch-alignment':'viewport',
         'icon-rotation-alignment':'viewport','symbol-sort-key':10001},
       paint:{'icon-opacity':1}});
