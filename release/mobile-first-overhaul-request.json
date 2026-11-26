@@ -2,7 +2,7 @@
   "source": "public-app",
   "application_version": "9.2.221",
   "public_work_branch": "main",
-  "purpose": "Solid route-color pill badges in transit comparison and detail, local search/detail crossfades, consistent Sangdo-station-based point label typography and zoom scale, skip label style and promotion work during movement, dedupe unchanged transit filters, keep safety data, common map and community feed lock. Require source CI, Preview, phone QA, Production and APK; actual physical phone frame rate not yet measured.",
+  "purpose": "Integrated transit design and map performance patch: filled route-color pill badges, route search/detail local fades, station-reference label font and zoom sizing, idle-only label style/reorder updates, idempotent native transit filter, shared displayed rail geometry for selected routes, route lines beneath station/POI symbols, transfer labels and teardown regression. Preserve v9.2.220 community dismissal and transit/POI improvements. Require protected source CI, mobile QA, Production and APK; physical device FPS not yet verified.",
   "attempt": 456,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
