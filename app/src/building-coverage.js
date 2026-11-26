@@ -46,7 +46,7 @@ export function buildingModeVisibility(extruding){
 }
 export function createBuildingCoverage(map,layers){
  let extruding=false,dirty=true;
- const original=new Map(),excludedBySheet=new Map(),hidden=new Map();
+ const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),hidden=new Map();
  const clearHidden=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();};
  const sync=()=>{
   for(const id of layers){
@@ -71,7 +71,8 @@ export function createBuildingCoverage(map,layers){
    const area=f.properties?.area_m2;
    const explicitlySmall=typeof area==='number'&&Number.isFinite(area)&&area>0&&area<20;
    const matchedSmall=!isDisplayBuilding(f)&&[...excludedBySheet.values()].some(idx=>idx.matches(f.geometry));
-   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall);
+   const matchedReview=[...reviewBySheet.values()].some(idx=>idx.matches(f.geometry));
+   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall||matchedReview);
    const old=seen.get(key);seen.set(key,{target,hide:hide&&(old?.hide??true)});
   }
   for(const [key,target] of hidden)if(!seen.get(key)?.hide){try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.delete(key);}
@@ -80,5 +81,5 @@ export function createBuildingCoverage(map,layers){
  };
  map.on('style.load',()=>{clearHidden();original.clear();dirty=true;sync();});
  map.on('moveend',()=>{dirty=true;});map.on('idle',reconcile);
- return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[]){excludedBySheet.set(id,createCoverageIndex(excluded));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);clearHidden();dirty=true;sync();}};
+ return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);clearHidden();dirty=true;sync();}};
 }

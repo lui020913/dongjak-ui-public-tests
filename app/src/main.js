@@ -69,6 +69,7 @@ import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
 import {createBuildingCoverage,buildingModeVisibility} from './building-coverage.js';
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
+import {greenReviewPreviewEnabled,partitionGreenReview} from './green-building-review-preview.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
@@ -848,7 +849,8 @@ async function loadOneBuildingSheet(sheet){
     // supplied base+supplement GIS footprints must also be available overhead.
     const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
-    const {visible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const {visible,reviewExcluded}=partitionGreenReview(sheet.sheet,eligible,greenReviewPreviewEnabled(globalThis.location?.search));
     const within=visible.map(f=>({...f,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
@@ -857,7 +859,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -881,7 +883,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,excluded);
+    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;
