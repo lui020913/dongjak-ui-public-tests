@@ -2837,7 +2837,7 @@ function syncRoutePresentation() {
       ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
       : '보행 위험도 평가 자료 부족';
     document.getElementById('route-guide-start').disabled=Boolean(transitPreview);
-    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 1회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'
+    document.getElementById('route-map-source').textContent=transitPreview?(transitPreview.kind==='bus'?'버스 '+transitPreview.route+' · 운행시간·요금 미확인':transitPreview.kind==='rail'?'지하철 연계 · 배차·대기 미반영':'환승 '+transitPreview.changes+'회 · 운행시간·요금 미확인'):(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
@@ -3752,10 +3752,10 @@ function publishTransitDetail(plan,from,to,first,last){
 // Only a verified walking link may connect two different boarding locations.
 async function previewMultiTransit(plan,signal,preferPri=true){
  const legs=plan.legs;
- if(!Array.isArray(legs)||legs.length!==2||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!routeWithinDistrict(leg.coords,boundaryGeometry,isDongjak)))throw new Error('동작구 내 검증된 환승 경로가 아닙니다.');
+ if(!Array.isArray(legs)||(legs.length<2||legs.length>3)||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!routeWithinDistrict(leg.coords,boundaryGeometry,isDongjak)))throw new Error('동작구 내 검증된 환승 경로가 아닙니다.');
  const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
  const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
- const pairs=[[from,legs[0].origin],[legs[0].destination,legs[1].origin],[legs[1].destination,to]];
+ const pairs=[[from,legs[0].origin],...legs.slice(1).map((leg,i)=>[legs[i].destination,leg.origin]),[legs.at(-1).destination,to]];
  const walks=[];
  for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
@@ -3787,9 +3787,9 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  if(!map.getLayer(stopId+'-circle'))map.addLayer({id:stopId+'-circle',type:'circle',source:stopId,paint:{'circle-radius':5,'circle-color':'#fff','circle-stroke-color':['get','color'],'circle-stroke-width':2}});
  app.dataset.djTransitPreview=plan.kind;
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
- const preview=transitPreview={kind:plan.kind,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
+ const preview=transitPreview={kind:plan.kind,changes:legs.length-1,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice})),targets:[legs[0].origin,legs[0].destination,legs[1].origin,legs[1].destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
+ const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  fitWalkingRoute([...walks.flatMap(w=>w.coords),...legs.flatMap(leg=>leg.coords)]);
