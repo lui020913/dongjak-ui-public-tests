@@ -628,6 +628,13 @@ export function indexRenderedMetroRail(collection){
   }
   return lines;
 }
+function renderedRailQuality(collection){
+ const quality=new Map();
+ for(const f of collection?.features||[]){const line=normalizeLineName(f.properties?.line||'');if(!line)continue;
+ const actual=f.properties?.schematic===false&&['MOIS_KR_Subway_2026','OpenStreetMap_ODbL'].includes(f.properties?.source);
+ const prior=quality.get(line);quality.set(line,prior===false?false:actual);}
+ return quality;
+}
 function nearestRenderedRail(point,paths){
   let best=null;
   for(const path of paths||[]){
@@ -1606,7 +1613,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
   let renderedRailPaths=indexRenderedMetroRail(localRailGeometry);
   let lastMetroMarkerItems=[];
   map.addSource('transport-schematic-connections',{type:'geojson',data:localRailGeometry,tolerance:0,buffer:128,maxzoom:19});
-  setDisplayedRailPaths(map,renderedRailPaths);
+  setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(localRailGeometry));
   // 실제 노선 공간정보(행안부 2026) 우선: 도로·하천의 실제 굴곡과 교차점을 보존합니다.
   // 공식 API에 없는 신림선 또는 조회 실패한 호선은 오프라인 안내용 선형을 유지합니다.
   // 외부 자료를 기다리느라 기존 지도를 중단하지 않습니다.
@@ -1619,7 +1626,7 @@ export function initTransportMap({map,maplibregl,isDongjak,isNearBoundary=()=>fa
       source.setData(result.collection);
       // Keep station badges anchored to the actual displayed official curves.
       renderedRailPaths=indexRenderedMetroRail(result.collection);
-      setDisplayedRailPaths(map,renderedRailPaths);
+      setDisplayedRailPaths(map,renderedRailPaths,renderedRailQuality(result.collection));
       if(lastMetroMarkerItems.length)renderMetroMarkers(lastMetroMarkerItems);
       const dataSources=[...new Set(result.collection.features.filter(f=>!f.properties?.schematic).map(f=>f.properties?.source).filter(Boolean))];
        console.info('[지하철 노선] 실제 지형 선형 적용:',result.lines.map(k=>k==='신림'?'신림선':`${k}호선`).join(', '),'출처:',dataSources.join(', '));
