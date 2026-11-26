@@ -2234,3 +2234,6 @@ html body #app #community-list .community-post-detail .community-report-facts+.c
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .dj-place-row{grid-template-columns:64px minmax(0,1fr)!important;gap:5px!important}
  }
 }
+
+/* Explicit location return must never paint a stale white community shell. */
+#participation-panel[data-dj-location-return-hidden='true']{display:none!important;visibility:hidden!important;pointer-events:none!important;}
