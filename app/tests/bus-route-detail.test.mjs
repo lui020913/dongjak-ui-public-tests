@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {routeVehicleGroups,vehicleLabel,vehicleDisplay,stopHours} from '../src/bus-route-detail-model.mjs';
+import {routeVehicleGroups,vehicleLabel,vehicleDisplay,stopHours,vehicleIntervalProgress} from '../src/bus-route-detail-model.mjs';
 test('places vehicles only before a uniquely identified next stop',()=>{
   const stops=[{seq:1,stationId:'a'},{seq:2,stationId:'b'},{seq:3,stationId:'c'},{seq:4,stationId:'c'}];
   const valid={id:'1',nextStopId:'b'},ambiguous={id:'2',nextStopId:'c'},missing={id:'3'},first={id:'4',nextStopId:'a'};
@@ -55,4 +55,16 @@ test('short plate preserves leading zero and congestion has explicit semantic co
  assert.equal(vehicleLabel({vehicleNumber:'서울70사0721',congestion:3,busType:'1'}),'0721 · 여유 · 저상');
  assert.equal(vehicleDisplay({congestion:'3'}).tone,'low');assert.equal(vehicleDisplay({congestion:'4'}).tone,'medium');assert.equal(vehicleDisplay({congestion:'5'}).tone,'high');assert.equal(vehicleDisplay({congestion:'6'}).tone,'high');assert.equal(vehicleDisplay({congestion:'0'}).tone,'unknown');
  const css=readFileSync(new URL('../src/bus-route-detail.css',import.meta.url),'utf8');for(const tone of ['low','medium','high'])assert.ok(css.includes('data-tone='+tone));
+});
+
+test('two buses in one confirmed interval can have different or identical GPS-derived positions',()=>{
+ const a={seq:1,stationId:'a',lng:126.95,lat:37.50},b={seq:2,stationId:'b',lng:126.95,lat:37.504};
+ const v1={id:'1',nextStopId:'b',longitude:126.95,latitude:37.501},v2={id:'2',nextStopId:'b',longitude:126.95,latitude:37.503};
+ assert.equal(routeVehicleGroups([a,b],[v1,v2]).groups.get(2).length,2);
+ assert.ok(Math.abs(vehicleIntervalProgress(a,b,v1)-.25)<1e-8);
+ assert.ok(Math.abs(vehicleIntervalProgress(a,b,v2)-.75)<1e-8);
+ assert.equal(vehicleIntervalProgress(a,b,v1),vehicleIntervalProgress(a,b,{...v1,id:'3'}));
+ assert.equal(vehicleIntervalProgress(a,b,{nextStopId:'b'}),null);
+ assert.equal(vehicleIntervalProgress(a,b,{longitude:127,latitude:37.502}),null);
+ assert.equal(vehicleIntervalProgress(a,a,v1),null);
 });

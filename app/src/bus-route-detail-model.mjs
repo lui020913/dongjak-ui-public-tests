@@ -27,3 +27,22 @@ export function vehicleDisplay(v){
 export function vehicleLabel(v){const d=vehicleDisplay(v);return [d.number,d.congestion,d.lowFloor?'저상':null].filter(Boolean).join(' · ');}
 export function stopHours(s){return s.firstTime||s.lastTime?`${s.firstTime||'미제공'} – ${s.lastTime||'미제공'}`:'첫·막차 정보 미제공';}
 
+
+// GPS-derived schematic progress within an already confirmed official stop interval.
+// Project onto the local stop-to-stop chord, not a different route segment.
+// If coordinates are absent or the curved road makes this approximation unreliable,
+// return null: the UI uses an explicitly labelled interval marker instead.
+export function vehicleIntervalProgress(previous,next,vehicle){
+ const values=[previous?.lng,previous?.lat,next?.lng,next?.lat,vehicle?.longitude,vehicle?.latitude];
+ if(!values.every(Number.isFinite))return null;
+ const [ax,ay,bx,by,x,y]=values;
+ const scale=Math.cos((ay+by)*Math.PI/360);
+ const dx=(bx-ax)*scale,dy=by-ay,px=(x-ax)*scale,py=y-ay;
+ const length2=dx*dx+dy*dy;
+ if(length2<1e-12)return null;
+ const t=(px*dx+py*dy)/length2;
+ const clamped=Math.max(0,Math.min(1,t));
+ const error=Math.hypot(px-clamped*dx,py-clamped*dy)*111000;
+ if(error>80||t<-.15||t>1.15)return null;
+ return clamped;
+}

@@ -91,22 +91,19 @@ html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#a
 
 .dj-bus-history-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:12px 0}.dj-bus-history-controls select{grid-column:1/-1}.dj-bus-history-controls select,.dj-bus-history-controls input,.dj-bus-history-controls button{min-width:0;max-width:100%;padding:10px;border:1px solid #cbd5cf;border-radius:10px;background:transparent;color:inherit;font:inherit}.dj-bus-history-hour{display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid #8883}.dj-bus-history-hour strong{flex:0 0 88px}.dj-bus-history-hour span{flex:1;line-height:1.8;word-break:keep-all}.dj-bus-detail-actions button{min-width:0;white-space:nowrap}
 
-/* Each interval has a fixed height, even with zero or several live buses. */
+/* Compact fixed stop spacing; vehicles are overlaid on the same vertical line.
+   No reserved vehicle space and no horizontal displacement, even when markers overlap. */
 @media(max-width:699px){
- .dj-bus-detail[data-view=route] .dj-bus-detail-list{--timeline-x:64px;--stop-height:72px;--vehicle-slot-height:52px;}
+ .dj-bus-detail[data-view=route] .dj-bus-detail-list{--timeline-x:64px;--stop-height:64px;}
  .dj-bus-detail[data-view=route] .dj-bus-detail-stop{height:var(--stop-height);min-height:var(--stop-height);max-height:var(--stop-height);box-sizing:border-box;}
  .dj-bus-detail[data-view=route] .dj-bus-detail-node{top:calc(50% - 5.5px);}
  .dj-bus-detail[data-view=route] .dj-bus-detail-stop-content{padding-block:4px;gap:2px;overflow:hidden;}
  .dj-bus-detail[data-view=route] .dj-bus-detail-stop-content strong,.dj-bus-detail-inline-direction{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
  .dj-bus-detail-inline-direction{font-size:10px!important;color:#176b55!important;font-weight:600;}
- .dj-bus-detail-vehicle-slot{height:var(--vehicle-slot-height);min-height:var(--vehicle-slot-height);max-height:var(--vehicle-slot-height);position:relative;box-sizing:border-box;}
- .dj-bus-detail-vehicle-slot::before{content:'';position:absolute;left:var(--timeline-x);top:0;bottom:0;width:3px;background:var(--dj-bus-detail-line,#3566c1);}
- .dj-bus-detail-vehicle-strip{height:100%;display:flex;align-items:center;gap:5px;}
- .dj-bus-detail-vehicle-slot[data-count="1"] .dj-bus-detail-vehicle{width:100%;height:100%;min-height:0;}
- .dj-bus-detail-vehicle-slot[data-count="1"] .dj-bus-detail-bus{top:calc(50% - 9px);}
- .dj-bus-detail-vehicle-slot:not([data-count="1"]) .dj-bus-detail-vehicle-strip{margin-left:calc(var(--timeline-x) + 12px);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
- .dj-bus-detail-vehicle-slot:not([data-count="1"]) .dj-bus-detail-vehicle{flex:0 0 auto;min-height:0;height:48px;padding:0;gap:3px;}
- .dj-bus-detail-vehicle-slot:not([data-count="1"]) .dj-bus-detail-vehicle::before{display:none;}
- .dj-bus-detail-vehicle-slot:not([data-count="1"]) .dj-bus-detail-bus{position:relative;left:auto;flex:0 0 19px;}
- .dj-bus-detail-vehicle-slot:not([data-count="1"]) .dj-bus-detail-vehicle-label{position:static;max-height:48px;min-width:44px;padding:2px 3px;gap:1px;}
+ .dj-bus-detail-vehicle-slot{position:relative;height:0;min-height:0;max-height:0;z-index:2;overflow:visible;pointer-events:none;}
+ .dj-bus-detail-vehicle-slot .dj-bus-detail-vehicle{position:absolute;left:0;right:0;top:calc((var(--vehicle-progress,.5) - .5) * var(--stop-height));transform:translateY(-50%);height:48px;min-height:0;padding:0;}
+ .dj-bus-detail-vehicle-slot .dj-bus-detail-vehicle::before{display:none;}
+ .dj-bus-detail-vehicle-slot .dj-bus-detail-bus{top:calc(50% - 9px);}
+ .dj-bus-detail-vehicle-slot .dj-bus-detail-vehicle-label{background:#fff;max-height:48px;padding:2px 3px;gap:1px;}
+ .dj-bus-detail-vehicle-slot [data-position-accuracy=interval] .dj-bus-detail-bus{outline:1px dashed var(--dj-bus-detail-line,#3566c1);outline-offset:1px;}
 }
