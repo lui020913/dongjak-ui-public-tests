@@ -3733,7 +3733,7 @@ function publishTransitDetail(plan,from,to,first,last){
   const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60))});
   const detail={kind:plan.kind,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
     from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,
-    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,first:walk(first),last:walk(last),minutes:preview.minutes,pri:null};
+    stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:null};
   const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
   emit();
   void evaluateCompositePriRouteCandidates({standard:first,gentle:last},{factors:priPreferences.getSelected()}).then(result=>{
@@ -3781,7 +3781,7 @@ async function previewMultiTransit(plan,signal){
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
  const preview=transitPreview={kind:plan.kind,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60)})),priLegs:null};
+ const detail={kind:plan.kind,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60)})),targets:[legs[0].origin,legs[0].destination,legs[1].origin,legs[1].destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:null};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  fitWalkingRoute([...walks.flatMap(w=>w.coords),...legs.flatMap(leg=>leg.coords)]);
@@ -3798,6 +3798,28 @@ async function previewMultiTransit(plan,signal){
 }
 
 // Transit comparison reuses the same endpoint state and walking graph.
+// Explicit foreground-only position checks reuse the native device API.
+window.addEventListener('dongjak:transit-gps-start',event=>{
+ const {signal,onPosition,onError}=event.detail||{};
+ if(!signal||typeof onPosition!=='function'||typeof onError!=='function')return;
+ let id=null;
+ const preview=transitPreview;
+ const current=()=>!signal.aborted&&Boolean(preview)&&transitPreview===preview&&app.dataset.tab==='map'&&!document.hidden;
+ const stop=()=>{if(id!==null){stopDeviceWatch(id);id=null;}};
+ signal.addEventListener('abort',stop,{once:true});
+ const fail=()=>{if(current())onError();stop();};
+ if(!current()){onError();return;}
+ void (async()=>{
+   try{
+     const options={enableHighAccuracy:true,timeout:12000,maximumAge:0};
+     const first=await getDevicePosition(options);
+     if(!current())return;
+     onPosition(first);
+     const watch=await startDeviceWatch(position=>{if(current())onPosition(position);},fail,options);
+     if(!current())stopDeviceWatch(watch);else id=watch;
+   }catch{fail();}
+ })();
+});
 window.addEventListener('dongjak:transit-route-points',event=>{
   if(app.dataset.tab!=='route'||navMode)return;
   event.detail?.accept?.(routeStart&&routeEnd?[routeStart,...routeWaypoints,routeEnd].map(p=>({...p})):[]);
