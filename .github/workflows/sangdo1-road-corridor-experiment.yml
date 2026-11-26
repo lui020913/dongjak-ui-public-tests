@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/research/sangdo1_road_corridor_preview.py'
       - 'scripts/research/sangdo1_joint_corridor_preview.py'
+      - 'scripts/research/sangdo1_corridor_refinement.py'
       - '.github/workflows/sangdo1-road-corridor-experiment.yml'
   workflow_dispatch:
 permissions:
@@ -46,5 +47,28 @@ jobs:
         with:
           name: sangdo1-joint-node-corridor-review
           path: sangdo-joint-review/
+          if-no-files-found: error
+          retention-days: 14
+
+  corridor-refinement:
+    needs: joint-node-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: sangdo1-joint-node-corridor-review
+          path: sangdo-joint-review
+      - run: python scripts/research/sangdo1_corridor_refinement.py --test
+      - run: python scripts/research/sangdo1_corridor_refinement.py sangdo-joint-review sangdo-refined-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sangdo1-refined-corridor-review
+          path: sangdo-refined-review/
           if-no-files-found: error
           retention-days: 14
