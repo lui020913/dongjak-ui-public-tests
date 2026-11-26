@@ -1,6 +1,6 @@
 import {classifyBusRoute,BUS_CATEGORY_LABEL} from './v8215-transit-auth-bus-sheet.js';
 
-import {routeVehicleGroups,vehicleDisplay,stopHours} from './bus-route-detail-model.mjs';
+import {routeVehicleGroups,vehicleDisplay,stopHours,vehicleIntervalProgress} from './bus-route-detail-model.mjs';
 import {WINDOW_MOTION} from './mobile-window-motion.js';
 
 export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRetry,onHidden=()=>{},apiBase='/api/transport'}){
@@ -51,7 +51,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     const focused=doc.activeElement?.dataset?.stopSeq;
     info.setAttribute('aria-pressed',String(view==='info'));history.setAttribute('aria-pressed',String(view==='history'));history.disabled=state?.status!=='shown';
     refresh.disabled=state?.status==='loading'||!state;mapButton.disabled=state?.status!=='shown';info.disabled=state?.status!=='shown';
-    status.textContent=state?.status==='error'?'공식 노선 조회 실패 · 새로고침으로 재시도':state?.status!=='shown'?'노선 불러오는 중':state.vehicleStatus==='live'?`실시간 차량 ${vehicles.length}대` :state.vehicleStatus==='empty'?'조회된 운행 차량 없음':state.vehicleStatus==='error'?(state.vehicleError==='BUS_POSITION_AUTH'?'실시간 위치 API 이용 권한 확인 필요':state.vehicleError==='BUS_POSITION_RATE_LIMIT'?'실시간 조회 한도 초과':state.vehicleError==='BUS_POSITION_FORMAT'?'실시간 위치 응답 확인 불가':'실시간 위치 조회 실패 · 자동 재시도'):'실시간 위치 조회 중';
+    status.textContent=state?.status==='error'?'공식 노선 조회 실패 · 새로고침으로 재시도':state?.status!=='shown'?'노선 불러오는 중':state.vehicleStatus==='live'?`실시간 차량 ${vehicles.length}대 · 구간 내 위치 추정` :state.vehicleStatus==='empty'?'조회된 운행 차량 없음':state.vehicleStatus==='error'?(state.vehicleError==='BUS_POSITION_AUTH'?'실시간 위치 API 이용 권한 확인 필요':state.vehicleError==='BUS_POSITION_RATE_LIMIT'?'실시간 조회 한도 초과':state.vehicleError==='BUS_POSITION_FORMAT'?'실시간 위치 응답 확인 불가':'실시간 위치 조회 실패 · 자동 재시도'):'실시간 위치 조회 중';
     const signature=JSON.stringify([view,state?.status,stops,view==='route'?vehicles:[]]);
     if(signature===lastSignature)return;lastSignature=signature;
     const anchor=[...list.children].find(n=>n.dataset?.stopSeq&&n.offsetTop+n.offsetHeight>oldTop);
@@ -71,7 +71,7 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     root.dataset.hasVehicles=String(vehicles.length>0);
     for(const [index,s] of stops.entries()){
       const directionChange=s.direction&&s.direction!==direction;if(directionChange)direction=s.direction;
-      if(index>0){const slot=make('div','dj-bus-detail-vehicle-slot');const group=groups.get(s.seq)||[];slot.dataset.count=String(group.length);if(group.length){const strip=make('div','dj-bus-detail-vehicle-strip');for(const v of group)strip.append(vehicleRow(v));slot.append(strip);}list.append(slot);}
+      if(index>0){const slot=make('div','dj-bus-detail-vehicle-slot');const group=groups.get(s.seq)||[];slot.dataset.count=String(group.length);for(const v of group){const row=vehicleRow(v);const progress=vehicleIntervalProgress(stops[index-1],s,v);row.style.setProperty('--vehicle-progress',String(progress??.5));row.dataset.positionAccuracy=progress===null?'interval':'estimated';row.setAttribute('aria-label',`${vehicleDisplay(v).number} · ${progress===null?'정류장 구간 내 위치 미확인':'GPS 기반 구간 내 추정 위치'}`);slot.append(row);}list.append(slot);}
       const r=button('',()=>onStop(s),'dj-bus-detail-stop');r.dataset.stopSeq=String(s.seq);
       const selected=Boolean(selection.arsId&&s.arsId===selection.arsId);
       if(selected)r.setAttribute('aria-current','location');

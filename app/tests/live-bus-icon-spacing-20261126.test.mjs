@@ -11,12 +11,17 @@ test('both live bus overlays use a registered neutral bus glyph without heading 
  assert.match(selected,/VEHICLE_LAYER\+'-unknown',type:'symbol'/);
  assert.match(global,/busArt\?\{id:LIVE_BUS_LAYER,type:'symbol'/);
 });
-test('one fixed slot per consecutive stop, regardless of number of vehicles',()=>{
+test('fixed compact stop spacing and overlapping GPS vehicle markers stay on one vertical line',()=>{
  const js=read('src/bus-route-detail.js'),css=read('src/bus-route-detail.css');
- assert.match(js,/if\(index>0\)\{const slot=make\('div','dj-bus-detail-vehicle-slot'\)/);
- assert.match(js,/for\(const v of group\)strip.append\(vehicleRow\(v\)\)/);
- assert.doesNotMatch(js,/for\(const v of groups.get\(s.seq\)\|\|\[\]\)list.append/);
- assert.match(css,/--stop-height:72px;--vehicle-slot-height:52px/);
- assert.match(css,/height:var\(--vehicle-slot-height\);min-height:var\(--vehicle-slot-height\);max-height:var\(--vehicle-slot-height\)/);
- assert.match(css,/overflow-x:auto;overflow-y:hidden/);
+ assert.ok(js.includes('vehicleIntervalProgress(stops[index-1],s,v)'));
+ assert.ok(js.includes("slot.append(row)"));
+ assert.ok(js.includes("progress??.5"));
+ assert.ok(!js.includes('dj-bus-detail-vehicle-strip'));
+ assert.ok(css.includes('--stop-height:64px'));
+ assert.ok(css.includes('height:0;min-height:0;max-height:0'));
+ assert.ok(css.includes('top:calc((var(--vehicle-progress,.5) - .5) * var(--stop-height))'));
+ assert.ok(!css.includes('--vehicle-slot-height'));
+ assert.ok(!css.includes('dj-bus-detail-vehicle-strip'));
+ const overlay=read('src/bus-route-overlay.js');
+ assert.ok(overlay.includes('longitude:f.geometry.coordinates[0],latitude:f.geometry.coordinates[1]'));
 });

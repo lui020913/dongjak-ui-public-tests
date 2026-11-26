@@ -162,7 +162,7 @@ export function createBusRouteOverlay({map,apiBase,fetcher=globalThis.fetch,vehi
   return {select,clear,refreshVehicles,setMapVisible(value){mapVisible=Boolean(value);if(mapVisible&&active&&vehicles.features.length)selectedVehicles.set(map,active.id);else selectedVehicles.delete(map);syncStopFilters();draw();drawVehicles();},getActive:()=>active,
     hasVisibleRouteStops:()=>mapVisible&&geometry.features.some(f=>f.geometry.type==='Point'),
     getRouteStops:()=>active?.status==='shown'?(cache.get(active.id)?.stops||[]):[],
-    getRouteVehicles:()=>vehicles.features.map(f=>f.properties),
+    getRouteVehicles:()=>vehicles.features.map(f=>({...f.properties,longitude:f.geometry.coordinates[0],latitude:f.geometry.coordinates[1]})),
     getRouteCoordinates:()=>geometry.features.find(feature=>feature.geometry?.type==='LineString')?.geometry?.coordinates||[],
     destroy(){clear();map.off?.('style.load',onStyle);map.off?.('idle',syncStopFilters);globalThis.document?.removeEventListener?.('visibilitychange',onVisibility);}};
 }
