@@ -32,7 +32,8 @@ test('community presents one writing action, direct tools and one permanent refr
  assert.match(html,/<div class="community-view-options">/);
  assert.doesNotMatch(html,/<details class="community-view-options">/);
  assert.doesNotMatch(html,/class="community-report-secondary"/);
- assert.match(html,/id="participate-register" class="community-map-report-link"/);
+ assert.doesNotMatch(html,/id="participate-register"|지도에서 보행환경 제보하기/);
+ assert.match(html,/id="ped-report-open"/);
  assert.match(main,/community-refresh'\)\.addEventListener\('click'/);
  assert.doesNotMatch(main,/const bar=makeCEl\('div','dj-community-feed-status'\)/);
  assert.doesNotMatch(main,/dj-community-empty-footnote'/);
@@ -40,11 +41,10 @@ test('community presents one writing action, direct tools and one permanent refr
  assert.match(mobile,/\.community-view-options > \.community-toolbar/);
 });
 
-test('advanced map tools live inside one map preferences subpage',()=>{
+test('map preferences retain ordinary settings without advanced tools',()=>{
  assert.doesNotMatch(my,/data-dj834-action="tools"/);
- assert.match(my,/advancedTools\.append\(advancedTitle,toolsBox\);mapBox\.append\(advancedTools\)/);
- assert.match(my,/toolsBox\.hidden=false/);
+ assert.doesNotMatch(my,/dj834-advanced-tools|advancedTools|toolsBox/);
  assert.match(my,/mapBox:mapBox|map:mapBox/);
- assert.match(my,/if\(view==='tools'\)\{view='map';advancedTools\.open=true;\}/);
- assert.match(mobile,/\.dj834-advanced-tools>summary/);
+ assert.match(my,/if\(view==='tools'\)view='map';/);
+ assert.match(my,/data-dj834-action="map"/);
 });
