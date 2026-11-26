@@ -17,7 +17,7 @@ export function officialFeatures(places,boundary){
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
    const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${place.category||''}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
-   const identityKey=String(place.name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
+   const identityKey=String(place.name||'').normalize('NFKC').toLowerCase().replace(/[\s\-‐‑–’']/g,'');
    const candidates=accepted.get(identityKey)||[];
    if(seen.has(key)||candidates.some(p=>sameFacility(p,place)))continue;seen.add(key);candidates.push(place);accepted.set(identityKey,candidates);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
@@ -203,7 +203,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      // A failed complementary feed must not discard valid official rows.
      try{
        const osm=await loadOsmGeneralFacilities(bbox,{signal:AbortSignal.timeout(12000)});
-       const byName=new Map();const keyFor=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
+       const byName=new Map();const keyFor=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').toLowerCase().replace(/[\s\-‐‑–’']/g,'');
        for(const p of merged){const k=keyFor(p);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(p);}
        for(const p of osm){const k=keyFor(p),candidates=byName.get(k)||[];if(!ids.has(p.id)&&!candidates.some(q=>sameFacility(q,p))){ids.add(p.id);merged.push(p);candidates.push(p);byName.set(k,candidates);}}
        if(osm.length)source=official.places.length?'서울시·OSM 시설':'OSM 공개지도 시설';
