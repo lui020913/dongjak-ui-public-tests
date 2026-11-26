@@ -152,3 +152,11 @@ button:focus-visible,input:focus-visible{outline:3px solid #62a99d;outline-offse
 /* Shadow DOM has its own cascade; preserve scrolling without indicators. */
 :host,*{scrollbar-width:none!important;scrollbar-gutter:auto!important;}
 *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;}
+
+/* Both history-clear actions share the app's muted green pill style. */
+.recent-head [data-v3="clear-recent"],.search-results .search-recent-head .history-clear{
+ appearance:none;-webkit-appearance:none;display:inline-flex;flex-direction:row;align-items:center;justify-content:center;
+ background:#e0ebe5;color:#42675a;border:1px solid #d2e0d8;border-radius:999px;
+ min-height:36px;padding:7px 12px;font-size:12px;font-weight:700;line-height:1.3;box-shadow:none;
+}
+.recent-head [data-v3="clear-recent"]:active,.search-results .search-recent-head .history-clear:active{background:#cddfd5;}

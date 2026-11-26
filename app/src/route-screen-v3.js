@@ -150,7 +150,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     pendingBaseCount=count;pendingWaypoint=true;mirrorWaypoints();requestPosition();
     q('.waypoint-pending')?.scrollIntoView({block:'nearest',behavior:win.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   };
-  const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().filter((place,i,all)=>all.findIndex(p=>p.name===place.name&&Math.abs(Number(p.lng)-Number(place.lng))<0.0001&&Math.abs(Number(p.lat)-Number(place.lat))<0.0001)===i||!Number.isFinite(Number(place.lng))).slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
+  const refreshRecent=()=>{const box=q('#v3-recent'),list=box.querySelector('.recent-list');list.replaceChildren();const places=recentPlaces().slice(0,4);box.hidden=!places.length;for(const place of places){const b=doc.createElement('button');b.type='button';b.textContent=place.name;b.addEventListener('click',()=>win.dispatchEvent(new CustomEvent('dongjak:route-recent-pick',{detail:place})));list.append(b);}};
   const position=()=>{
     resizeFrame=0;
     if(!active||searching)return;
@@ -176,7 +176,7 @@ export function mountRouteScreenV3(doc=document, win=window) {
     const container=q('#v3-results');
     container.replaceChildren();
     if(!q('#v3-query').value.trim()&&(recentPlaces().length||recentSearchQueries().length)){
-      const head=doc.createElement('div');head.className='search-recent-head';const title=doc.createElement('strong');title.textContent='최근 검색 장소';const clear=doc.createElement('button');clear.type='button';clear.textContent='기록 삭제';clear.addEventListener('click',()=>{clearRecentPlaces();byId('route-search-query').dispatchEvent(new Event('input',{bubbles:true}));});head.append(title,clear);container.append(head);const tools=doc.createElement('div');tools.className='search-history';
+      const head=doc.createElement('div');head.className='search-recent-head';const title=doc.createElement('strong');title.textContent='최근 검색 장소';const clear=doc.createElement('button');clear.type='button';clear.className='history-clear';clear.textContent='기록 삭제';clear.addEventListener('click',()=>{clearRecentPlaces();byId('route-search-query').dispatchEvent(new Event('input',{bubbles:true}));});head.append(title,clear);container.append(head);const tools=doc.createElement('div');tools.className='search-history';
       for(const term of recentSearchQueries().filter(t=>!recentPlaces().some(p=>p.name===t))){const b=doc.createElement('button');b.type='button';b.textContent=term;b.addEventListener('click',()=>{q('#v3-query').value=term;recordSearchQuery(term);updateQuery();submitSearch();});tools.append(b);}if(tools.childElementCount)container.append(tools);
     }
     for(const native of byId('route-search-results')?.querySelectorAll('button.route-search-item')||[]){

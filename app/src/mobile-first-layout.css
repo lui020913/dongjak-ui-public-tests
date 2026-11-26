@@ -2145,3 +2145,30 @@ html body #app #community-list .community-report-value{
 html body #app #community-list .community-post-detail .community-report-facts+.community-post-body{
  margin-top:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;
 }
+
+/* Both map-picking hints use the same measured dock clearance (8 + 4px).
+ * Allow wrapping at narrow widths and when the community confirmation appears. */
+@layer mobile-first-shell {
+ @media(max-width:699px){
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#route-pick-hint,#community-map-hint):not([hidden]){
+   position:fixed!important;top:auto!important;bottom:calc(var(--dj-user-dock-bottom, calc(var(--mf-nav-height,68px) + env(safe-area-inset-bottom,0px) + 20px)) + 4px)!important;
+   left:12px!important;right:12px!important;width:auto!important;max-width:none!important;
+   min-height:46px!important;height:auto!important;box-sizing:border-box!important;
+   display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;
+   padding:5px 8px 5px 13px!important;border:1px solid #cddbd3!important;border-radius:999px!important;
+   background:#dce7e1!important;color:#28463b!important;box-shadow:0 4px 14px rgba(30,60,47,.12)!important;
+   transform:none!important;translate:none!important;z-index:8100!important;font-size:12px!important;font-weight:750!important;line-height:1.4!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#route-pick-hint,#community-map-hint) span{
+   flex:1 1 auto!important;min-width:0!important;color:inherit!important;font-size:inherit!important;line-height:inherit!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app :is(#route-pick-hint,#community-map-hint) button:not([hidden]){
+   flex:0 0 auto!important;width:auto!important;min-width:49px!important;height:36px!important;min-height:36px!important;
+   padding:5px 11px!important;border:1px solid #c1d4c9!important;border-radius:999px!important;
+   color:#345b4c!important;background:#eff5f1!important;box-shadow:none!important;font-size:12px!important;font-weight:750!important;
+  }
+  html body #app#app#app#app#app#app#app#app#app#app#app #community-map-accept:not([hidden]){
+   background:#477d67!important;color:#fff!important;border-color:#477d67!important;
+  }
+ }
+}
