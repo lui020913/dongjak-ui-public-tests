@@ -1,3 +1,4 @@
+import {hasTransportPoiHit} from './poi-click-identity.js';
 import {normalizeFacilityCategory,facilityOsmCategory,normalizeFacilityRecord,sameFacility,verifiedFacilityLabelExpression,formerPoliceNameVariants,isFormerPoliceFacility,isUnverifiedPoliceFacility,repurposedPoliceNameVariants} from './facility-display-names.js';
 import {openPlaceDetails} from './place-details.js';
 import {installSeoulOfficialFacilities} from './seoul-official-facilities.js';
@@ -105,6 +106,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
         },paint:{'text-color':['case',['==',['get','class'],'school'], '#315f54','#34566c'],
           'text-halo-color':'#ffffff','text-halo-width':1.7}});
       map.on('click',layerId,event=>{
+        if(hasTransportPoiHit(map,event))return;
         const feat=event.features?.[0];if(!feat||!maplibregl?.Popup)return;
         const name=escapeName(feat);if(!name||(isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name)))return;
         const tags=feat.properties||{};
