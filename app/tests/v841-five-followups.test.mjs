@@ -53,7 +53,7 @@ test('TIP is bold, cycles after reading, hides over popups and appears in help',
  assert.ok(MAP_TIP_MESSAGES.length>=5);
  assert.match(tips,/tipMark\.textContent='TIP'/);
  assert.match(tips,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
- assert.match(core,/'route-map-card','nav-live-card','route-pick-hint','map-gesture-guide'/);
+ assert.match(core,/'route-map-card','nav-live-card','route-pick-hint','dj-community-location-card','map-gesture-guide'/);
  assert.match(tips,/tipGuide\.id='dj841-guide-tips'/);
  assert.match(css,/#dj840-map-tip strong/);
 });
