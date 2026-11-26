@@ -291,6 +291,7 @@ let routeStartMarker = null;
 let routeEndMarker = null;
 let routeRequestPending = false;
 let routeRequestGeneration=0;
+let transitPreview=null,transitGeneration=0;
 let routeEndpointMarkerKeys={start:null,end:null};
 let routeWaypoints = [];
 let routeProductTools = null;
@@ -2005,6 +2006,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
     closeRouteSearch();routeRequestGeneration++;routeRequestPending=false;updateRouteCalcAvailability();
   }
   if(previousTab!==tab)closePriPreferences();
+  if((tab!=='map'||suppressOverview)&&transitPreview)clearTransitPreview();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
   const reopeningCommunity=tab==='participate'&&communityPanel?.hidden;
@@ -2721,7 +2723,7 @@ function syncPriPreferenceLabels(){
 }
 function openPriPreferences(){
   if(navMode||routePickMode||communityPickMode||!['route','map'].includes(app.dataset.tab))return;
-  if(app.dataset.tab==='map'&&!routeResult)return;
+  if(app.dataset.tab==='map'&&(!routeResult||transitPreview))return;
   priPreferences.open();
 }
 for(const parent of [document.getElementById('route-map-card'),document.querySelector('#route-panel .route-card')]){
@@ -2776,7 +2778,7 @@ function lockRouteMapGestures(locked){
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
   const picking = Boolean(routePickMode) && onMap && !communityPickMode && !addMode;
-  const preview = Boolean(routeResult) && onMap && !picking && !communityPickMode && !addMode && !navMode && app.dataset.djWalkArrived!=='1';
+  const preview = Boolean(routeResult||transitPreview) && onMap && !picking && !communityPickMode && !addMode && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
   if(!picking&&routeCandidateMarker)closeTransitRouteConfirmation();
   drawRouteMarkers(picking||preview||guiding);
@@ -2786,7 +2788,12 @@ function syncRoutePresentation() {
   lockRouteMapGestures(false);
   document.getElementById('nav-map-controls').hidden=!guiding;
   document.getElementById('route-pick-hint').hidden=!picking;
-  document.getElementById('route-map-card').hidden=!preview;
+  const mapCard=document.getElementById('route-map-card');
+  mapCard.hidden=!preview;
+  const priTrigger=mapCard.querySelector('.dj-route-pri-trigger');
+  if(priTrigger)priTrigger.hidden=Boolean(transitPreview||!routeResult);
+  const mapPriAdvice=mapCard.querySelector('#dj-pri-route-advice');
+  if(mapPriAdvice)mapPriAdvice.hidden=Boolean(transitPreview||!routeResult||!mapPriAdvice.textContent);
   document.getElementById('nav-live-card').hidden=!guiding;
   syncPriRouteLine();
   if (picking) {
@@ -2800,12 +2807,13 @@ function syncRoutePresentation() {
     detail.hidden=true;
     editor.hidden=true;
     const metric=readRouteMetrics();
-    document.getElementById('route-map-metrics').textContent = `${metric.duration} · ${metric.distance}`;
+    document.getElementById('route-map-metrics').textContent = transitPreview?('참고 약 '+Math.ceil(transitPreview.minutes)+'분 · 도보 '+Math.round(transitPreview.walkM)+'m'):`${metric.duration} · ${metric.distance}`;
     const pri=routeResult?.priExposure;
     const priInfo=Number.isFinite(pri?.risk) && pri?.coverage>=0.65
       ? '보행 위험도(PRI) 부분평가 '+pri.risk.toFixed(1)+'점 · 구간 관측 '+Math.round(pri.coverage*100)+'%'
       : '보행 위험도 평가 자료 부족';
-    document.getElementById('route-map-source').textContent=(routeResult?.source==='seoul-pedestrian-graph'
+    document.getElementById('route-guide-start').disabled=Boolean(transitPreview);
+    document.getElementById('route-map-source').textContent=transitPreview?'지하철 연계 · 배차·대기 미반영':(routeResult?.source==='seoul-pedestrian-graph'
       ? '서울시 도보 네트워크' : '외부 보행경로 서버')+' · '+priInfo;
   } else if (onMap && !picking && detail.hidden && editor.hidden && app.dataset.djSafetyHomeOnly!=='1') {
     showOverviewOnlyWithContent();
@@ -2833,7 +2841,7 @@ function updateRouteLabels() {
 function makeRouteMarker(position, color) {
   return new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
 }
-function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||(routeResult&&app.dataset.djWalkArrived!=='1')||navMode)) {
+function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
     const next=visible&&point?`${point.lng},${point.lat}`:null;
     if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
@@ -2844,6 +2852,7 @@ function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
 function clearTransitPreview(){
+  transitPreview=null;transitGeneration++;
   const empty={type:'FeatureCollection',features:[]};
   for(const id of ['dj815-transit-walk','dj815-transit-rail']){
     try{map.getSource(id)?.setData(empty);}catch{}
@@ -2852,7 +2861,7 @@ function clearTransitPreview(){
 function syncPriRouteLine(){
   const source=map.getSource('walking-route-pri');
   const measured=routePriVisuals?.[selectedRouteVariant];
-  const enabled=Boolean(routeResult?.coords?.length>=2&&app.dataset.tab==='map'&&!navMode);
+  const enabled=Boolean(routeResult?.coords?.length>=2&&app.dataset.tab==='map'&&!navMode&&!transitPreview);
   // Before PRI completes, or when no six-factor data can be loaded, the route
   // is unassessed (dashed gray), NEVER automatically safe/green or blue.
   const unknown=enabled?{
@@ -3456,6 +3465,7 @@ function currentPreferredModeResult(from,to,which,signal){
 function applySelectedRouteVariant(){
   const result=routeVariants[selectedRouteVariant];
   if(!result)return;
+  clearTransitPreview();
   routeResult=result;
   showRouteLine(result.coords);
   const metrics=readRouteMetrics();
@@ -3500,7 +3510,7 @@ async function reviewPriCandidates(reviewedVariants,factors=priPreferences.getSe
   if(gentle)gentle.priExposure=comparison?.gentle||null;
   showPriRouteAdvice(comparison);
   window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:comparison}));
-  if(comparison?.recommendation&&!priVariantChosenManually&&!navMode){
+  if(comparison?.recommendation&&!priVariantChosenManually&&!navMode&&!transitPreview){
     selectedRouteVariant=comparison.recommendation;
     applySelectedRouteVariant();
     const status=document.getElementById('route-status');
@@ -3525,7 +3535,7 @@ async function calculateRoute() {
     const requested=[routeStart,...routeWaypoints,routeEnd];
     const result=routeWaypoints.length
       ? await computeMultiStopRoutes(requested,fetchPreferredPedestrianPair,{
-          onProgress:(n,total)=>{document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
+          onProgress:(n,total)=>{if(requestGeneration===routeRequestGeneration)document.getElementById('route-status').textContent=`경유 경로 ${n}/${total}구간을 계산하고 있습니다…`;}})
       : await fetchPreferredPedestrianPair(routeStart,routeEnd);
     if(requestGeneration!==routeRequestGeneration)return;
     const current=[routeStart,...routeWaypoints,routeEnd];
@@ -3577,7 +3587,7 @@ document.getElementById('route-pick-cancel').addEventListener('click',()=>{close
 // follow the sheet, even when the original cancel button was not invoked.
 const routeConfirmation=document.getElementById('route-transit-confirm');
 new MutationObserver(()=>{if(routeConfirmation.hidden&&routeCandidateMarker)closeTransitRouteConfirmation();}).observe(routeConfirmation,{attributes:true,attributeFilter:['hidden']});
-window.addEventListener('pagehide',()=>{routePickMode=null;closeTransitRouteConfirmation();closeRouteSearch();drawRouteMarkers(false);});
+window.addEventListener('pagehide',()=>{routeRequestGeneration++;routeRequestPending=false;routePickMode=null;closeTransitRouteConfirmation();closeRouteSearch();closePriPreferences();drawRouteMarkers(false);});
 window.addEventListener('pageshow',event=>{if(event.persisted)syncRoutePresentation();});
 window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncRoutePresentation();}});
 document.getElementById('route-gps-start').addEventListener('click',()=>{
@@ -3659,9 +3669,12 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');
     const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]);
     if(railCoords.some(p=>!p)||!routeWithinDistrict(railCoords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 대중교통 경로는 지원하지 않습니다.');
-    const first=await fetchPreferredPedestrianPair(routeStart,plan.origin);
-    const last=await fetchPreferredPedestrianPair(plan.destination,routeEnd);
-    if(!routeStart||!routeEnd||routeWaypoints.length)throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
+    const from=routeStart,to=routeEnd,requestGeneration=routeRequestGeneration,request=++transitGeneration;
+    const stillCurrent=()=>requestGeneration===routeRequestGeneration&&request===transitGeneration&&routeStart===from&&routeEnd===to&&!routeWaypoints.length&&app.dataset.tab==='route'&&!navMode;
+    const first=await fetchPreferredPedestrianPair(from,plan.origin);
+    if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
+    const last=await fetchPreferredPedestrianPair(plan.destination,to);
+    if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
     const startWalk=first.standard||first.gentle,endWalk=last.standard||last.gentle;
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
@@ -3674,7 +3687,8 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
     }
     const coords=[...startWalk.coords,...railCoords,...endWalk.coords];
-    navigate('map');fitWalkingRoute(coords);
+    transitPreview={minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
+    navigate('map');fitWalkingRoute(coords);syncRoutePresentation();
   }
 });
 
@@ -3906,6 +3920,7 @@ function stopNavigation(arrived=false) {
   }
 }
 async function startNavigation() {
+  if(transitPreview){toast('대중교통은 참고 이동안입니다. 도보 경로를 선택해 주세요.');return;}
   if(!routeResult||!routeResult.coords?.length) {toast('먼저 도보 경로를 계산해 주세요.');return;}
   if(!routeWithinDistrict(routeResult.coords,boundaryGeometry,isDongjak)){toast('동작구 내 경로만 안내할 수 있습니다.');return;}
   if(!hasLocationSupport()){toast('이 기기에서 위치정보를 사용할 수 없습니다.');return;}
