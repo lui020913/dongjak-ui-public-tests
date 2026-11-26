@@ -3712,7 +3712,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     invalidateRoute();
     const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))};
     const rail={type:'FeatureCollection',features:railCoords.length>=2?[{type:'Feature',properties:{},geometry:{type:'LineString',coordinates:railCoords}}]:[]};
-    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null],['dj815-transit-rail',rail,'#bd7735',[2,2]]]){
+    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null],['dj815-transit-rail',rail,subwayLineColor(plan.lines[0]==='신림'?'신림선':plan.lines[0]+'호선'),[2,2]]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(`${id}-line`))map.addLayer({id:`${id}-line`,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
@@ -3721,7 +3721,7 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     app.dataset.djTransitPreview='rail';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'rail',minutes:plan.railHeuristicMinutes+(startWalk.seconds+endWalk.seconds)/60,walkM:(startWalk.kilometers+endWalk.kilometers)*1000};
-    navigate('map');fitWalkingRoute(coords);syncRoutePresentation();publishTransitDetail(plan,from,to,startWalk,endWalk);
+    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,startWalk,endWalk);fitWalkingRoute(coords);
   }
 });
 
@@ -3770,7 +3770,7 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
     app.dataset.djTransitPreview='bus';
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
     transitPreview={kind:'bus',route:String(plan.route),minutes:null,walkM:(a.kilometers+b.kilometers)*1000};
-    navigate('map');fitWalkingRoute([...a.coords,...plan.coords,...b.coords]);syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);
+    navigate('map');syncRoutePresentation();publishTransitDetail(plan,from,to,a,b);fitWalkingRoute([...a.coords,...plan.coords,...b.coords]);
   })().then(resolve,reject);
 });
 
