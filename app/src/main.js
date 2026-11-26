@@ -1445,6 +1445,7 @@ function clearPending(){
 }
 function setAddMode(enabled,{restoreOverview=true}={}){
   if(enabled){
+    closeCommunityLocation();
     immersiveChrome.restore();closeTransportPanel(false);
     app.classList.remove('map-controls-open');
     mapToolsToggle?.setAttribute('aria-expanded','false');
@@ -2505,7 +2506,8 @@ function showCommunityLocation(post) {
   cancelCommunityTabMotion();
   closeCommunityLocation();
   quickSearch.close();quickSearch.clearMapResults?.();
-  resetRoute();
+  routePickMode=null;closeTransitRouteConfirmation();
+  invalidateRoute(); // Preserve route editor endpoints, but dismiss the old preview.
   navigate('map',{suppressOverview:true});
   app.dataset.communityLocationViewing='true';
   const panel=document.getElementById('participation-panel');
