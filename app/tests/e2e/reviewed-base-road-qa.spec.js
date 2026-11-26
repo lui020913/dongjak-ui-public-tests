@@ -6,7 +6,7 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  await page.addInitScript(()=>localStorage.setItem('dongjak_safety_community_v15_posts',JSON.stringify([{id:'qa-road-campus',title:'도로 검증 위치',body:'기본 지도 검증',nickname:'검증 주민',category:'동네 질문',dong:'상도1동',created:Date.now(),location:{lng:126.9563,lat:37.5035},comments:[],likes:0}])));
  const requested=new Set(),failed=[];
  page.on('response',r=>{const u=new URL(r.url());if(u.pathname.startsWith('/data/road-display-review/')){if(r.ok())requested.add(u.pathname);else failed.push(u.pathname+':'+r.status())}});
- await page.goto('/?roadReview=1',{waitUntil:'domcontentloaded'});
+ await page.goto('/',{waitUntil:'domcontentloaded'});
  const menu=page.locator('#dj-install-menu');await expect(menu).toBeAttached({timeout:20000});
  if(await menu.isVisible()){await menu.getByRole('button',{name:'웹에서 바로 이용하기'}).click();await expect(menu).toBeHidden();}
  const startup=page.locator('#map-startup-overlay'),next=page.locator('#map-startup-continue');
@@ -21,7 +21,7 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  await expect(page.locator('#dj-community-location-card')).toBeVisible();
  // Wait for the camera jump before closing the location card; closing the
  // marker too early can legitimately cancel its deferred camera movement.
- await expect(app).toHaveAttribute('data-dj-reviewed-base-roads','selective-preview',{timeout:90000});
+ await expect(app).toHaveAttribute('data-dj-reviewed-base-roads','selective-operational',{timeout:90000});
  await page.locator('#dj-community-location-card').getByRole('button',{name:'제보 위치 닫기'}).click();
  expect(failed).toEqual([]);
  expect(requested.has('/data/road-display-review/manifest.json')).toBe(true);
@@ -32,6 +32,6 @@ test('reviewed base roads load only viewport assets in the real mobile app and r
  const canvas=page.locator('#map canvas.maplibregl-canvas').first();const rect=await canvas.boundingBox();
  await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);
  for(let i=0;i<8;i++){await page.mouse.wheel(0,300);await page.waitForTimeout(180);}
- await expect(app).not.toHaveAttribute('data-dj-reviewed-base-roads',/preview$/,{timeout:30000});
+ await expect(app).not.toHaveAttribute('data-dj-reviewed-base-roads',/operational$/,{timeout:30000});
  console.log('ACTUAL_APP_BASE_ROAD_QA_OK',JSON.stringify({viewportFiles:count,selectiveNativeReplacement:true,zoomFallback:true}));
 });
