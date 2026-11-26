@@ -15,9 +15,11 @@ from sangdo1_corridor_refinement import refine_surface
 
 CELL=.35
 CLEAR=MIN_RADIUS+MARGIN
-def solve(original,obstacles,known):
+def solve(original,obstacles,known,endpoints=None):
     if original.length<.1:return None,"short"
-    start,end=Point(original.coords[0]),Point(original.coords[-1])
+    oa,ob=Point(original.coords[0]),Point(original.coords[-1])
+    start,end=endpoints if endpoints is not None else (oa,ob)
+    if max(start.distance(oa),end.distance(ob))>SHIFT+.001:return None,"endpoint_shift_guard"
     if not obstacles.is_empty and min(start.distance(obstacles),end.distance(obstacles))<CLEAR:
         return None,"endpoint_obstructed"
     allowed=original.buffer(SHIFT)
