@@ -67,6 +67,7 @@ export function installCoordinatedShell(doc=document,win=window){
      if(disposed||token!==tipTransitionToken)return;
      tip=next;tipText.textContent=MAP_TIP_MESSAGES[tip];
      tipText.classList.remove('dj852-tip-copy-fade');
+     label.dataset.djTipReadUntil=String(Date.now()+10000);
    };
    if(!visible){updateText();return;}
    // Keep the TIP pill itself visible; fade only its changing sentence.
@@ -99,12 +100,14 @@ export function installCoordinatedShell(doc=document,win=window){
  const interval=win.setInterval(()=>{
    // Avoid needless layout work and compositing when the map is hidden,
    // the tab is not Map, or the vulnerability overlay owns the viewport.
-   if(doc.hidden||app.dataset.tab!=='map'||app.dataset.djPriVisible==='true')return;
+   if(doc.hidden||app.dataset.tab!=='map'||app.dataset.djPriVisible==='true'||!isIdleMap()||label.hidden||!label.classList.contains('is-visible')||tipFadeTimer)return;
+   if(!label.dataset.djTipReadUntil){label.dataset.djTipReadUntil=String(Date.now()+10000);return;}
+   if(Date.now()<Number(label.dataset.djTipReadUntil))return;
    // Keep the hint continuously available on an unobstructed map. Only its
-   // text cross-fades every ten seconds; it never disappears between cycles.
+   // text cross-fades after the entire sentence has been available to read.
    advanceTip();
    sync();
- },10000);
+ },500);
  const selectedMap=()=>{
    const picker=doc.getElementById('admin-dong-picker');if(picker)picker.hidden=true;
    const overview=doc.getElementById('overview-sheet');if(overview)overview.hidden=true;
