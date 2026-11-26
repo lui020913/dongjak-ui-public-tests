@@ -67,7 +67,7 @@ test('Dongjak endpoint guard rejects boundary unknown or outside, accepts inside
 });
 test('all external route input and compute paths call Dongjak guard',()=>{
   assert.match(route,/function setRouteLocation\(which,position\) \{\s*if\(!requireDongjakRouteLocation\(position\)\)return false/);
-  assert.match(route,/function showTransitRouteConfirmation\(place\) \{\s*if\(!requireDongjakRouteLocation\(place\)\)return/);
+  assert.match(route,/function showTransitRouteConfirmation\(place\) \{\s*if\(!routePickMode\|\|app\.dataset\.tab!=='map'\|\|!requireDongjakRouteLocation\(place\)\)return false/);
   assert.match(route,/function chooseSearchResult\(place\)\{[\s\S]*?if\(!requireDongjakRouteLocation\(place\)\)return/);
   assert.match(route,/routeWaypoints\.push\(/);
   assert.match(route,/!next\.every\(requireDongjakRouteLocation\)/);
