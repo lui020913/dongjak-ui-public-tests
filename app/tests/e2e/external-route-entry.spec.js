@@ -89,6 +89,17 @@ test('real transit detail buttons navigate to the visible route editor, includin
    const results=route.locator('.transit-results');
    await expect(results).toBeVisible();
    await expect(results.locator('.tr-card').filter({hasText:'검증버스'}).first()).toBeVisible({timeout:40000});
+   // Real header drag uses the same staged sheet motion and never covers the V3 back header or dock.
+   const handle=results.locator('.tr-header h2');
+   const drag=async dy=>{const r=await handle.boundingBox();await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.down();await page.mouse.move(r.x+r.width/2,r.y+r.height/2+dy,{steps:8});await page.mouse.up();};
+   const compact=await results.boundingBox();
+   await drag(-170);
+   await expect(results).toHaveClass(/dj871-sheet-expanded/);
+   await expect(results).not.toHaveClass(/dj889-sheet-transitioning/);
+   const expanded=await results.boundingBox(),top=await route.locator('.header').boundingBox(),dock=await page.locator('#bottom-nav').boundingBox();
+   expect(expanded.height).toBeGreaterThan(compact.height+35);expect(expanded.y).toBeGreaterThanOrEqual(top.y+top.height+5);expect(expanded.y+expanded.height).toBeLessThanOrEqual(dock.y-6);
+   await drag(100);
+   await expect(results).not.toHaveClass(/dj871-sheet-expanded|dj889-sheet-transitioning/);
    await results.locator('[data-filter="bus"]').click();
    await expect(results.locator('[data-filter="bus"]')).toHaveAttribute('aria-pressed','true');
    await expect(results.locator('.tr-card').first()).toContainText('기본운임 1,200원');

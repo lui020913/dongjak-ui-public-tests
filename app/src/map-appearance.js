@@ -1,4 +1,3 @@
-import {installAdaptiveMapPerformance} from './v7122-map-performance.js';
 // v17.9: cartographic decoration (not measurements of grass or trees).
 // Decorative grass pattern is applied to existing map polygons only.
 export function isVegetationLayer(layer={}) {
@@ -188,12 +187,9 @@ export function nativeBuildingFootprintPaint(theme='light'){
  return {...colors,'fill-opacity':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['case',['boolean',['feature-state','djGisCovered'],false],0,opacity]]};
 }
 /** Recolor only native footprint polygons; preserve road and night overlays. */
-const interactivePerformanceInstalled=new WeakSet();
 export function installBaseBuildingPalette({map,app}){
-  if(!interactivePerformanceInstalled.has(map)){
-    interactivePerformanceInstalled.add(map);
-    installAdaptiveMapPerformance({map,app});
-  }
+  // The main building-mode owner is authoritative. No secondary performance
+  // controller may toggle extrusion visibility during a drag.
   const ids=map.getStyle().layers.filter(nativeBuildingFootprint).map(x=>x.id);
   const outlineIds=map.getStyle().layers.filter(nativeBuildingOutline).map(x=>x.id);
   const extrusionIds=map.getStyle().layers.filter(nativeBuildingExtrusion).map(x=>x.id);

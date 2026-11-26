@@ -14,8 +14,10 @@ test('primary style, elevation, night building occlusion and emergency status re
  assert.match(main,/map\.setTerrain\(\{source:'dongjak-terrain-dem',exaggeration:1\.0\}\)/);
  assert.match(main,/djBasemapSource=mapStyleRecovered\?'emergency-osm':'openfreemap-bright'/);
  assert.match(main,/if\(mapStyleRecovered\)toast\(/);
- assert.match(main,/if\(!interactiveMoving\|\|movementIsSlow\|\|!baseBuildingsVisible\|\|app\.dataset\.sangdoNight==='on'/);
- assert.match(main,/if\(app\.dataset\.sangdoNight==='on'\)movementIsSlow=false/);
+ assert.doesNotMatch(main,/movementIsSlow|interactiveMoving|slowSamples/);
+ assert.match(main,/nextBuildingPitchMode\(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT\)/);
+ assert.match(main,/nightOcclusionBuildingPaint\(/);
+ assert.match(main,/attributeFilter:\['data-sangdo-night'\]/);
 });
 
 test('HUD scale docking never fights the active phone renderer for MapLibre DPR',async()=>{

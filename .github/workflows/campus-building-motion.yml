@@ -1,0 +1,44 @@
+name: Actual campus pavement and stable building motion
+on:
+  pull_request:
+    paths:
+      - 'app/src/main.js'
+      - 'app/tests/campus-building-motion-research.mjs'
+      - '.github/workflows/campus-building-motion.yml'
+permissions:
+  contents: read
+jobs:
+  render:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/campus-white-and-stable-3d-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Check asset and expose map in temporary QA checkout only
+        run: |
+          echo '851b128fd5f3877b513d41915495667a2eda7d9a61d2ba6d69240d9eec487d08  app/public/data/building-display-road-trims.json' | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('app/src/main.js');s=p.read_text()
+          marker='installSolidMapLines(map);'
+          assert s.count(marker)==1
+          p.write_text(s.replace(marker,'globalThis.__qaMap=map;\n'+marker))
+          PY
+      - working-directory: app
+        run: npm ci
+      - working-directory: app
+        run: npx playwright install --with-deps chromium
+      - working-directory: app
+        run: npm run build
+      - run: node app/tests/campus-building-motion-research.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-campus-building-motion-qa
+          path: audit-campus-building-output/
+          retention-days: 7

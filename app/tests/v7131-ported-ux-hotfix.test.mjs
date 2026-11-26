@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {searchLocalPlaces,searchPlaces,normalizePlaceSearchResults} from '../src/route-search.js';
 import {nightActivationBlocked} from '../src/night-visibility-map.js';
-import {installAdaptiveMapPerformance} from '../src/v7122-map-performance.js';
+import {nextBuildingPitchMode,buildingModeVisibility} from '../src/building-coverage.js';
 const dir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>fs.readFileSync(path.join(dir,file),'utf8');
 test('v7.13 search preserves venue & general places, not stations only',async()=>{
@@ -27,20 +27,19 @@ test('location pick, route preview and guidance block night activation',()=>{
   }
   assert.equal(nightActivationBlocked(app,{getElementById:id=>id==='route-transit-confirm'?{hidden:false,getClientRects:()=>[{}]}:null}),true);
 });
-test('adaptive PC 3D budget is attached to live building palette and restores previous visibility',()=>{
+test('building palette has no competing PC visibility writer; pitch hysteresis owns 3D mode',()=>{
   const source=read('src/map-appearance.js');
-  assert.match(source,/installAdaptiveMapPerformance\(\{map,app\}\)/);
-  const events=new Map(),visibility=new Map([['dongjak-buildings-3d-main','visible'],['road-label','visible']]);
-  const map={on:(name,fn)=>events.set(name,fn),off:()=>{},getPitch:()=>42,getStyle:()=>({layers:[{id:'dongjak-buildings-3d-main'},{id:'road-label'}]}),getLayer:id=>visibility.has(id),getLayoutProperty:id=>visibility.get(id),setLayoutProperty:(id,key,value)=>visibility.set(id,value)};
-  let now=0;const app={dataset:{}};
-  const stop=installAdaptiveMapPerformance({map,app,matchMedia:()=>({matches:true}),now:()=>now});
-  events.get('dragstart')();
-  for(const t of [20,60,100,140]){now=t;events.get('render')();}
-  assert.equal(visibility.get('dongjak-buildings-3d-main'),'none');
-  assert.equal(visibility.get('road-label'),'visible');
-  events.get('moveend')();
-  assert.equal(visibility.get('dongjak-buildings-3d-main'),'visible');
-  stop();
+  assert.doesNotMatch(source,/installAdaptiveMapPerformance/);
+  const main=read('src/main.js');
+  assert.doesNotMatch(main,/movementIsSlow|interactiveMoving|slowSamples/);
+  assert.match(main,/buildingPitchActive && loadedBuildingTiles\.size>0/);
+  let active=false;
+  for(const pitch of [10,42,38,10,9,8]){
+    active=nextBuildingPitchMode(active,pitch);
+    assert.deepEqual(buildingModeVisibility(active),{plan:'none',extrusion:'visible'});
+  }
+  active=nextBuildingPitchMode(active,7);
+  assert.deepEqual(buildingModeVisibility(active),{plan:'visible',extrusion:'none'});
 });
 test('search logo hidden only inside search; desktop/mobile standalone icon preserved',()=>{
   const html=read('index.html'),css=read('src/v7131-motion-search-hotfix.css');

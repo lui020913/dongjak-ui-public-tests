@@ -5,7 +5,7 @@ import {mkdir} from 'node:fs/promises';
 const server=await createServer({configFile:false,server:{host:'127.0.0.1',port:5199,strictPort:true},logLevel:'error'});
 await server.listen();
 const base='http://127.0.0.1:5199';
-const html='<meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font:14px system-ui;background:#edf3ef}#app{height:100dvh}#route-map-card{position:fixed;bottom:4px;left:12px;right:12px;max-height:55dvh;overflow:auto;padding:14px;background:#fff;border-radius:23px}#app button{font:inherit}</style><div id="app" data-tab="map"><section id="route-map-card"><div class="actions"></div></section></div><script type="module">import {mountTransitDetail} from "/src/transit-route-detail.js"; const app=document.querySelector("#app"),mapCard=document.querySelector("#route-map-card");mountTransitDetail({doc:document,win:window,app,mapCard,actions:mapCard.querySelector(".actions")});window.detailMounted=true;</script>';
+const html='<meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;font:14px system-ui;background:#edf3ef}#app{height:100dvh}@layer request-completion{#route-map-card{position:fixed;bottom:4px;left:12px;right:12px;max-height:55dvh;overflow:hidden;padding:14px;background:#fff;border-radius:23px;display:flex;flex-direction:column}}#app button{font:inherit}</style><div id="app" data-tab="map" data-dj-route-stage="preview" data-dj-transit-preview="true"><section id="route-map-card"><div class="actions route-map-card-actions"><button id="route-guide-start">안내 시작</button></div></section></div><script type="module">import "/src/route-experience.css"; import {mountTransitDetail} from "/src/transit-route-detail.js"; const app=document.querySelector("#app"),mapCard=document.querySelector("#route-map-card");mountTransitDetail({doc:document,win:window,app,mapCard,actions:mapCard.querySelector(".actions")});window.detailMounted=true;</script>';
 const walk=(meters,minutes)=>({meters,minutes,priChoice:'observed-comparison'});
 const pri={risk:25,coverage:.9};
 const detail={kind:'mixed',railQuality:'mixed',from:'테스트 출발지',to:'테스트 목적지',legs:[
@@ -31,9 +31,17 @@ try{
     assert.match(await root.locator('.dj-tr-fare').innerText(),/1,550원/);
     const geometry=await root.evaluate(n=>{const track=n.querySelector('.dj-tr-order');return {width:n.clientWidth,scroll:n.scrollWidth,trackWidth:track.clientWidth,trackScroll:track.scrollWidth};});
     assert.ok(geometry.scroll<=geometry.width+1&&geometry.trackScroll<=geometry.trackWidth+1,engine+' '+width+' horizontal overflow');
+    assert.equal(await page.locator('#route-guide-start').isVisible(),false);
+    assert.equal(await root.getByRole('button',{name:'단계별 이동안 보기',exact:true}).count(),0);
+    const boundaries=()=>root.evaluate(n=>{const h=n.querySelector('.dj-tr-fixed-head').getBoundingClientRect(),b=n.querySelector('.dj-tr-scroll'),r=b.getBoundingClientRect(),f=n.querySelector('.dj-tr-footer').getBoundingClientRect(),p=n.closest('#route-map-card').getBoundingClientRect();return {head:h.top,headBottom:h.bottom,body:r.top,bodyBottom:r.bottom,footer:f.top,footerBottom:f.bottom,cardBottom:p.bottom,scroll:b.scrollHeight,client:b.clientHeight};});
+    const before=await boundaries();assert.ok(before.client>0&&before.scroll>before.client&&before.headBottom<=before.body+1&&before.bodyBottom<=before.footer+1&&before.footerBottom<=before.cardBottom+1,engine+' '+width+' fixed head and footer bounds '+JSON.stringify(before));
+    await root.locator('.dj-tr-scroll').evaluate(n=>{n.scrollTop=n.scrollHeight;});
+    const after=await boundaries();assert.ok(Math.abs(after.head-before.head)<1&&Math.abs(after.footer-before.footer)<1,engine+' '+width+' header/footer moved');
+    await root.locator('.dj-tr-scroll').evaluate(n=>{n.scrollTop=0;});
     await root.locator('.dj-tr-stops summary').first().click();
     assert.ok(await root.locator('.dj-tr-stops').first().evaluate(n=>n.open));
     await root.locator('.dj-tr-stops summary').first().click();
+    assert.equal(await root.getByRole('button',{name:'안내 시작',exact:true}).count(),1);
     await root.locator('.dj-tr-start').click();
     assert.match(await root.locator('.dj-tr-progress').innerText(),/1 \/ 8/);
     const next=root.locator('[data-step-next]');

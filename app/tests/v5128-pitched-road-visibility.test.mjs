@@ -22,7 +22,8 @@ test('light overhead remains opaque, dark footprints translucent; GIS plan switc
   const main=read('src/main.js');
   assert.match(main,/const fillVisible=visibleBuilding2D\(\) && !show/);
   assert.match(main,/buildingModeVisibility\(show\)/);
-  assert.match(main,/movementIsSlow\?\{'fill-opacity':0\.65\}/);
+  assert.doesNotMatch(main,/movementIsSlow/);
+  assert.match(main,/nextBuildingPitchMode\(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT\)/);
   assert.match(main,/promoteNightAnalysisLayers\(map\)/);
 });
 

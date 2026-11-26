@@ -3,6 +3,7 @@ import {busRouteColor} from './bus-route-overlay.js';
 import {subwayLineColor} from './transport-map.js';
 import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fallback.js';
 import css from './transit-route-comparison.css?inline';
+import {bindTransitSheetHeader} from './transit-sheet-gesture.js';
 import {recommendReviewedTransit} from './transit-candidate-review.mjs';
 import {transitFareText} from './transit-fare-reference.mjs';
 const icons={
@@ -19,8 +20,12 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const q=s=>shadow.querySelector(s);
  const style=doc.createElement('style');style.textContent=css;shadow.append(style);
  const panel=doc.createElement('section');panel.className='transit-results';panel.hidden=true;panel.setAttribute('aria-label','대중교통 경로 비교');
- panel.innerHTML='<div class="tr-grip" aria-hidden="true"></div><div class="tr-head"><h2>대중교통 경로</h2><button type="button" aria-label="경로 결과 닫기">'+icon('close')+'</button></div><p class="tr-endpoints"></p><div class="tr-review-tools"><button type="button" class="tr-pri-preference" aria-pressed="true">보행 위험도 고려</button><button type="button" class="tr-review">도보 비교</button></div><div class="tr-filter" role="group" aria-label="교통수단 필터"></div><p class="tr-note" role="status" aria-live="polite"></p><div class="tr-list"></div>';
+ panel.innerHTML='<header class="tr-header"><div class="tr-grip" aria-hidden="true"></div><div class="tr-head"><h2>추천 대중교통 경로</h2><button type="button" aria-label="경로 결과 닫기">'+icon('close')+'</button></div><p class="tr-endpoints"></p></header><div class="tr-scroll"><div class="tr-review-tools"><button type="button" class="tr-pri-preference" aria-pressed="true">보행 위험도 고려</button><button type="button" class="tr-review">도보 비교</button></div><div class="tr-filter" role="group" aria-label="교통수단 필터"></div><p class="tr-note" role="status" aria-live="polite"></p><div class="tr-list"></div></div>';
  view.append(panel);
+ const safeTop=()=>Math.ceil(q('.header').getBoundingClientRect().bottom+8);
+ const syncBounds=()=>{host.style.setProperty('--tr-sheet-top',safeTop()+'px');host.style.setProperty('--tr-font',win.getComputedStyle(app).fontFamily);};
+ const gesture=bindTransitSheetHeader({doc,win,panel,header:panel.querySelector('.tr-header'),safeTop,onDismiss:()=>close({animate:true})});
+ const resize=()=>{if(!panel.hidden)syncBounds();};win.addEventListener('resize',resize);win.visualViewport?.addEventListener('resize',resize);
  let mode='walk',controller=null,previewController=null,generation=0,options=null,filter='all',disposed=false,pointKey='',cached=null,busy=false,preferPri=true,reviewed=new Map(),recommended=null,reviewNote='';
  const status=panel.querySelector('.tr-note'),list=panel.querySelector('.tr-list'),filters=panel.querySelector('.tr-filter'),endpoints=panel.querySelector('.tr-endpoints');
  const preference=panel.querySelector('.tr-pri-preference'),reviewButton=panel.querySelector('.tr-review');
@@ -33,6 +38,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const close=({animate=false,keepCache=false}={})=>{
   const seq=++generation;controller?.abort();controller=null;previewController?.abort();previewController=null;setBusy(false);
   if(!keepCache){cached=null;resetReview();}
+  gesture.reset();
   const finish=()=>{if(seq!==generation)return;panel.hidden=true;delete view.dataset.transitResults;list.replaceChildren();options=null;reviewButton.disabled=true;};
   cancelSurfaceMotion(panel);
   if(animate&&!panel.hidden){panel.style.pointerEvents='none';exitSurface(panel,()=>{panel.style.removeProperty('pointer-events');finish();});}else{panel.style.removeProperty('pointer-events');finish();}
@@ -52,7 +58,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'||id==='mixed'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;resetReview();render(true);});filters.append(b);
  }
  function note(text,retry=false){status.textContent=text;list.replaceChildren();if(retry){const b=doc.createElement('button');b.type='button';b.className='tr-retry';b.textContent='다시 조회';b.addEventListener('click',search);list.append(b);}}
- function show(ps){cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);}
+ function show(ps){gesture.reset();syncBounds();panel.querySelector('.tr-scroll').scrollTop=0;cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);}
  function render(animate=false){
   if(!options)return;
   list.replaceChildren();
@@ -134,5 +140,5 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  win.addEventListener('dongjak:route-editor-reset',editorReset);
  win.addEventListener('dongjak:transit-return-comparison',returnComparison);
  host.dataset.transitTheme=app.dataset.theme||'light';syncMode();
- return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:route-editor-reset',editorReset);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);panel.remove();style.remove();}};
+ return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:route-editor-reset',editorReset);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);win.removeEventListener('resize',resize);win.visualViewport?.removeEventListener('resize',resize);gesture.dispose();panel.remove();style.remove();}};
 }

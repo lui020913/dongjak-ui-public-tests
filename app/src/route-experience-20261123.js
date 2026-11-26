@@ -174,12 +174,16 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   const hint=add('p',null,'dj-route-choice-hint');
   const legend=add('div','dj-route-pri-legend');
   legend.innerHTML='<div class="dj-route-pri-ramp" aria-hidden="true"></div><span>낮은 위험</span><span>높은 위험</span><span class="dj-route-unknown-legend">━ 회색 실선: 평가 자료 부족</span>';
-  choices.append(choiceHead,priHeading,choiceRows,hint,legend);
+  const choiceScroll=add('div','dj-route-choice-scroll');
+  choiceScroll.append(priHeading,choiceRows,hint,legend);
+  choices.append(choiceHead,choiceScroll);
   const actions=mapCard.querySelector('.route-map-card-actions');
   actions?.before(choices);
   const disposeTransitDetail=mountTransitDetail({doc,win,app,mapCard,actions});
   const summaryTop=mapCard.querySelector(':scope > div:first-child');
   if(summaryTop)summaryTop.classList.add('dj-walk-native-summary');
+  // Keep the optional walking-only PRI controls inside the same scroll body.
+  for(const node of mapCard.querySelectorAll(':scope > .dj-route-pri-trigger, :scope > #dj-pri-route-advice'))choiceScroll.append(node);
 
   // Move the existing live instruction into the top turn HUD, never clone it.
   const topBanner=add('section','dj-route-turn-banner');

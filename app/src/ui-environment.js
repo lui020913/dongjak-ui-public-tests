@@ -109,6 +109,19 @@ export function roadColorRole(layer={}){
   if(!road && !(/transportation/.test(src) && /road|highway|street|motorway/.test(id)))return null;
   return /outline|casing|border|edge|shadow|tunnel/.test(id)?'edge':'surface';
 }
+// OpenMapTiles paved-area polygons (e.g. campus plazas) are distinct from
+// carriageway centerline strokes. Keep their geometry and use a subdued
+// pavement tone rather than the high-contrast white used for linear roads.
+export function nativePavedAreaFill(layer={}){
+ const source=String(layer['source-layer']||'').toLowerCase();
+ const id=String(layer.id||'').toLowerCase();
+ return layer.type==='fill'&&source==='transportation'&&!/rail|metro|subway|tram|water|river|lake|pier|ferry|bridge|tunnel|contour/.test(id);
+}
+export const LIGHT_PAVED_AREA_COLOR='#e5e8e1';
+// The highway-area layer mixes pedestrian plazas with bridges and vehicle roads.
+export function nativePavedAreaPaint(fallback='#ffffff'){
+ return ['case',['all',['==',['get','class'],'path'],['in',['get','subclass'],['literal',['pedestrian','footway','path']]]],LIGHT_PAVED_AREA_COLOR,fallback];
+}
 // v17.11: white roads need a slightly darker surrounding land surface.
 // Apply only to the base-map style; building, route and safety overlays retain their own colors.
 export function lightMapLandRole(layer = {}) {
@@ -151,7 +164,7 @@ export function initTheme({map,app}){
       if(baseline.has(layer.id))continue;
       const read=(property)=>{try{return map.getPaintProperty(layer.id,property);}catch{return undefined;}};
       baseline.set(layer.id,{
-        type:layer.type,id:layer.id,roadRole:roadColorRole(layer),landRole:lightMapLandRole(layer),buildingFootprint:nativeBuildingFootprint(layer),
+        type:layer.type,id:layer.id,roadRole:roadColorRole(layer),landRole:lightMapLandRole(layer),buildingFootprint:nativeBuildingFootprint(layer),pavedArea:nativePavedAreaFill(layer),
         background:layer.type==='background'?read('background-color'):undefined,
         fill:layer.type==='fill'?read('fill-color'):undefined,
         line:layer.type==='line'?read('line-color'):undefined,
@@ -220,7 +233,7 @@ export function initTheme({map,app}){
       }
       if(themeState.value==='light'){
         if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e2e4dc':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
+        if(entry.type==='fill')set('fill-color',entry.pavedArea?nativePavedAreaPaint(entry.roadRole?(entry.roadRole==='edge'?'#d0d8d3':'#ffffff'):entry.fill):entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
         if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
         if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
       }else{

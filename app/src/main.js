@@ -73,7 +73,7 @@ import {installRoadWidthLayer} from './road-width-layer.js';
 import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
-import {createBuildingCoverage,buildingModeVisibility} from './building-coverage.js';
+import {createBuildingCoverage,buildingModeVisibility,nextBuildingPitchMode} from './building-coverage.js';
 import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {greenBuildingFilterEnabled,partitionGreenReview} from './green-building-filter.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
@@ -725,6 +725,8 @@ map.on('error', (e) => {
 // v9: 2D/3D는 별도 모드가 아닙니다. 사용자가 지도를 기울이면 3D 건물이 나타납니다.
 // 지도 조작 제스처로만 기울기를 변경합니다. 슬라이더와 모드 버튼은 사용하지 않습니다.
 const PITCH_BUILDING_START = 10;
+const PITCH_BUILDING_EXIT = 7;
+let buildingPitchActive=false;
 const PITCH_BUILDING_FULL = 30;
 // v6.2: 지형을 기울기에 따라 setTerrain(null)로 해제하면 높이 정보가
 // 평면/입체를 반복하며 사라집니다. 기울기 0°에서도 DEM 소스를 유지합니다.
@@ -734,7 +736,6 @@ let terrainEnabled = false;
 let terrainErrorNotified = false;
 let lastBuildingOpacity = -1;
 let lastPitchStatus = '';
-let movementIsSlow=false;
 let djBuildingBatchBusy=false;
 let lastFootprintPaintKey='';
 function syncAutomaticTerrain(_pitch) {
@@ -759,12 +760,15 @@ function visibleBuilding2D(){
   return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return app.dataset.djTransitExterior!=='true' && baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom()>=BUILDING_ZOOM_MIN && loadedBuildingTiles.size>0;
+  // Camera movement and slow frames are never a visibility predicate.
+  // The minzoom and paint expressions handle zoom without a layout flip.
+  return app.dataset.djTransitExterior!=='true' && baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
   const pitch=map.getPitch();
   is3D=pitch>=PITCH_BUILDING_START;
+  buildingPitchActive=nextBuildingPitchMode(buildingPitchActive,pitch,PITCH_BUILDING_START,PITCH_BUILDING_EXIT);
   const show=visibleBuilding3D();
   buildingCoverage?.setExtruding(show);
   const theme=visualTheme.currentTheme();
@@ -776,10 +780,9 @@ function syncTiltWithBuildings() {
   // setPaintProperty on every mousemove/pitch event for *every* GIS tile.
   const modeVisibility=buildingModeVisibility(show);
   const fillVisible=visibleBuilding2D() && !show;
-  const paintKey=`${theme}/${fillVisible}/${show}/${movementIsSlow}`;
+  const paintKey=`${theme}/${fillVisible}/${show}`;
   const updateFootprint=paintKey!==lastFootprintPaintKey;
-  const footprint=updateFootprint?{...buildingFootprintPaint(theme,0),
-    ...(movementIsSlow?{'fill-opacity':0.65}:{})}:null;
+  const footprint=updateFootprint?{...buildingFootprintPaint(theme,0)}:null;
   if(footprint)footprint['fill-opacity']=buildingZoomOpacityExpression(footprint['fill-opacity']);
   lastFootprintPaintKey=paintKey;
   for(const info of loadedBuildingTiles.values()){
@@ -825,8 +828,6 @@ function syncTiltWithBuildings() {
 // Night analysis changes the 3D building opacity to prevent bright roads
 // showing through translucent roofs. Restore normal opacity when turned off.
 new MutationObserver(()=>{
-  // The night analysis requires the original building occlusion even mid-gesture.
-  if(app.dataset.sangdoNight==='on')movementIsSlow=false;
   syncTiltWithBuildings();
 }).observe(app,{attributes:true,attributeFilter:['data-sangdo-night']});
 
@@ -986,31 +987,9 @@ async function loadVisibleBuildingSheets(){
 }
 map.on('moveend',scheduleBuildingLoad);
 map.on('zoomend',()=>{syncTiltWithBuildings();});
-// Do not delete 3D globally. If sustained frame intervals exceed 45ms during
-// a mouse drag, temporarily draw the lightweight 2D footprints and restore
-// 3D immediately at moveend. Normal-speed moves retain full buildings.
-let interactiveMoving=false,slowSamples=0,lastFrameStamp=0;
-map.on('movestart',()=>{interactiveMoving=true;slowSamples=0;lastFrameStamp=0;});
-map.on('render',()=>{
-  if(!interactiveMoving||movementIsSlow||!baseBuildingsVisible||app.dataset.sangdoNight==='on'||map.getPitch()<PITCH_BUILDING_START)return;
-  const now=performance.now();
-  if(lastFrameStamp){
-    const interval=now-lastFrameStamp;
-    if(interval>(djRenderBudget.isEconomy()?28:45) && interval<320)slowSamples++;
-    else if(interval<=40)slowSamples=Math.max(0,slowSamples-1);
-    if(slowSamples>=(djRenderBudget.isEconomy()?3:7)){
-      // Preserve desktop 3D while dragging; only phones may trade 3D for FPS.
-      if(window.matchMedia?.('(max-width:699px)')?.matches){movementIsSlow=true;syncTiltWithBuildings();}
-      else slowSamples=0;
-    }
-  }
-  lastFrameStamp=now;
-});
-map.on('moveend',()=>{
-  interactiveMoving=false;slowSamples=0;lastFrameStamp=0;
-  if(movementIsSlow){movementIsSlow=false;syncTiltWithBuildings();}
-});
-
+// Preserve the loaded building representation during pan, rotation and pitch.
+// The phone render budget may adapt resolution and defer new tile work, but it
+// never replaces existing 3D layers with flat footprints during a gesture.
 // 우클릭/Control+드래그 및 두 손가락 기울이기 조작을 명시적으로 활성화합니다.
 map.dragRotate.enable();
 map.touchPitch.enable();
@@ -2738,7 +2717,7 @@ priMapNote.id='dj-pri-route-advice';
 priMapNote.className='dj-pri-route-advice';
 priMapNote.setAttribute('role','status');
 priMapNote.hidden=true;
-document.getElementById('route-map-card')?.append(priMapNote);
+(document.getElementById('dj-route-choice-scroll')||document.getElementById('route-map-card'))?.append(priMapNote);
 const priEditorNote=document.createElement('p');
 priEditorNote.id='dj-pri-route-editor-advice';
 priEditorNote.className='dj-pri-route-advice';
@@ -2764,7 +2743,7 @@ for(const parent of [document.getElementById('route-map-card'),document.querySel
   if(!parent)continue;
   const button=document.createElement('button');button.type='button';button.className='dj-route-pri-trigger';
   button.addEventListener('click',openPriPreferences);
-  if(parent.id==='route-map-card')parent.insertBefore(button,priMapNote);else parent.append(button);
+  if(parent.id==='route-map-card')priMapNote.before(button);else parent.append(button);
   priTriggers.push(button);
 }
 window.addEventListener('dongjak:open-route-pri',openPriPreferences);
