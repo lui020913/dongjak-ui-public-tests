@@ -1,0 +1,39 @@
+name: Dongjak residual road and green building source cross-check
+on:
+  push:
+    branches: [audit/remaining-native-road-correspondence-20261126]
+    paths:
+      - 'scripts/research/dongjak_residual_osm_crosscheck.py'
+      - '.github/workflows/dongjak-residual-osm-crosscheck.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-residual-source-evidence
+          path: residual
+          run-id: 45786890876
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-green-building-audit
+          path: green
+          run-id: 45745321396
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_residual_osm_crosscheck.py residual green output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-residual-osm-crosscheck
+          path: output/
+          retention-days: 14
+          if-no-files-found: error
