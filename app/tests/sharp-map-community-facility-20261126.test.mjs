@@ -19,6 +19,10 @@ test('community location exits the feed before showing a guarded marker and uses
  assert.match(show,/cancelCommunityTabMotion\(\)/);
  assert.match(show,/delete panel\.dataset\.djTabOutgoing/);
  assert.match(show,/panel\.hidden=true/);
+ assert.ok(show.indexOf('panel.hidden=true')<show.indexOf("navigate('map',{suppressOverview:true})"),'explicit report action closes its page before map entry');
+ const navigate=main.slice(main.indexOf('function navigate('),main.indexOf('// Capture mobile HOME'));
+ assert.doesNotMatch(navigate,/cancelCommunityTabMotion\(\)/,'ordinary tab transitions must retain their live dissolve owner');
+ assert.match(navigate,/panel\.hidden=panel\.dataset\.page!==tab && !outgoing/);
  assert.match(show,/communityLocationMarker!==targetMarker/);
  assert.match(show,/map\.easeTo\(\{center:\[lng,lat\]/);
  assert.match(main,/communityLocationMarker\?\.remove\(\)/);
