@@ -2146,7 +2146,7 @@ html body #app #community-list .community-post-detail .community-report-facts+.c
  margin-top:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75;
 }
 
-/* Both map-picking hints use the same measured dock clearance (8 + 4px).
+/* Both map-picking hints and the read-only report use the same dock clearance (8 + 2px).
  * Allow wrapping at narrow widths and when the community confirmation appears. */
 @layer mobile-first-shell {
  @media(max-width:699px){
@@ -2218,3 +2218,5 @@ html body #app #community-list .community-post-detail .community-report-facts+.c
   html body #app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app#app #map .dj-place-detail-popup .dj-place-row{grid-template-columns:minmax(64px,auto) minmax(0,1fr)!important;gap:5px!important}
  }
 }
+
+@media(min-width:700px){#app .dj-place-action-label{display:none}}
