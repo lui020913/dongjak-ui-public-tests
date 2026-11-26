@@ -22,8 +22,9 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
  let current=null,arrivalRequest=null,step=null;
  const el=(tag,cls,text)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
  const button=(text,cls,fn)=>{const b=el('button',cls,text);b.type='button';b.addEventListener('click',fn);return b;};
- const same=(a,b)=>a&&b&&a.kind===b.kind&&a.routeId===b.routeId&&a.from===b.from&&a.to===b.to&&a.board===b.board&&a.alight===b.alight&&JSON.stringify(a.lines)===JSON.stringify(b.lines)&&JSON.stringify(a.stops)===JSON.stringify(b.stops);
+ const same=(a,b)=>a&&b&&JSON.stringify(a.legs||[])===JSON.stringify(b.legs||[])&&a.kind===b.kind&&a.routeId===b.routeId&&a.from===b.from&&a.to===b.to&&a.board===b.board&&a.alight===b.alight&&JSON.stringify(a.lines)===JSON.stringify(b.lines)&&JSON.stringify(a.stops)===JSON.stringify(b.stops);
  function updatePri(){
+  if(current.legs){for(const n of root.querySelectorAll('[data-pri-index]')){const i=Number(n.dataset.priIndex);n.textContent=current.walks[i].meters===0?'동일 위치 연결':current.priLegs===null?'평가 자료 확인 중':transitPriText(current.priLegs?.[i]);}return;}
   for(const key of ['first','last']){const n=root.querySelector('[data-pri-leg="'+key+'"]');if(n)n.textContent=current.pri===null?'평가 자료 확인 중':transitPriText(current.pri?.[key]);}
  }
  function updateStep(){
@@ -37,6 +38,7 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   if(!detail){arrivalRequest?.abort();arrivalRequest=null;current=null;step=null;root.hidden=true;root.replaceChildren();cancelSurfaceMotion(root);return;}
   if(same(current,detail)){current=detail;updatePri();return;}
   arrivalRequest?.abort();arrivalRequest=null;current=detail;step=null;root.replaceChildren();root.hidden=false;
+  if(detail.legs){renderMulti(detail);return;}
   const kind=detail.kind,color=kind==='bus'?busRouteColor(detail.routeType):subwayLineColor(railLabel(detail.lines[0]));root.style.setProperty('--tr-line-color',color);
   const name=kind==='bus'?detail.route:[...new Set(detail.lines)].map(railLabel).join(' · ');
   const header=el('div','dj-tr-heading');
@@ -81,11 +83,66 @@ export function mountTransitDetail({doc,win,app,mapCard,actions}){
   const guide=el('div','dj-tr-step-guide');guide.hidden=true;const progress=el('small','dj-tr-progress');
   const controls=el('div','dj-tr-step-controls');
   const prev=button('이전','',()=>{step=Math.max(0,step-1);updateStep();});prev.dataset.stepPrev='';
-  const next=button('다음 단계','',()=>{step=step>=3?null:step+1;updateStep();});next.dataset.stepNext='';
+  const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
   controls.append(prev,next);guide.append(progress,controls,el('small','','자동 GPS·하차 알림이 아닌 수동 이동 순서입니다.'));
   footer.append(start,guide);
   root.append(header,track,timeline,note,footer);updatePri();
  }
+
+ function renderMulti(detail){
+  const label=leg=>leg.kind==='bus'?leg.route:[...new Set(leg.lines)].map(railLabel).join(' · ');
+  const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(railLabel(leg.lines[0]));
+  const header=el('div','dj-tr-heading');header.append(el('strong','',detail.legs.map(label).join(' + ')),el('b','','환승 1회'),el('small','','전체 시간·요금 미확인 · 지하철 선형은 역 순서 개략 경로'));
+  const track=el('div','dj-tr-order dj-tr-multi-order');track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
+  track.append(el('span','','도보'));
+  detail.legs.forEach((leg,i)=>{if(i)track.append(el('span','','환승'));const v=el('span','dj-tr-vehicle',labels[leg.kind]);v.style.setProperty('--vehicle-color',color(leg));track.append(v);});
+  track.append(el('span','','도보'));
+  const timeline=el('div','dj-tr-timeline');
+  function row(type,title,sub,routeColor){
+   const li=el('div','dj-tr-leg');const marker=el('span','dj-tr-marker');marker.innerHTML=icon(type);marker.dataset.kind=type;if(routeColor)marker.style.setProperty('--tr-line-color',routeColor);
+   const body=el('div','dj-tr-leg-body');body.append(el('strong','',title),el('small','',sub));li.append(marker,body);timeline.append(li);return body;
+  }
+  const walkRow=(i,title)=>{
+   const w=detail.walks[i];const body=row('walk',title,w.meters===0?'동일 위치에서 연결':'도보 '+w.meters+'m · 약 '+w.minutes+'분');
+   const pri=el('span','dj-tr-pri');pri.dataset.priIndex=String(i);body.append(pri);
+  };
+  walkRow(0,detail.from);
+  for(let i=0;i<detail.legs.length;i++){
+   const leg=detail.legs[i];
+   const board=row(leg.kind,leg.origin+' 승차',label(leg)+' → '+leg.destination+' 하차',color(leg));
+   const stops=el('details','dj-tr-stops');const summary=el('summary','',Math.max(0,leg.stops.length-1)+(leg.kind==='bus'?'개 정류장 이동':'개 역 이동'));
+   const list=el('ol');for(const stop of leg.stops)list.append(el('li','',stop));stops.append(summary,list);board.append(stops);
+   if(leg.kind==='bus'&&leg.arsId&&leg.routeId){
+    const arrival=el('div','dj-tr-arrival');const message=el('small','','도착정보 조회');
+    const refresh=button('','dj-tr-refresh',async()=>{
+     if(arrivalRequest)return;
+     const controller=new AbortController();arrivalRequest=controller;
+     const timer=win.setTimeout(()=>controller.abort(),10000);refresh.disabled=true;message.textContent='도착정보 조회 중…';
+     try{
+      const base=String(import.meta.env?.VITE_TRANSPORT_API_BASE||'/api/transport').replace(/\/$/,'');
+      const res=await fetch(base+'/bus?'+new URLSearchParams({arsId:leg.arsId}),{signal:controller.signal,cache:'no-store'});
+      if(!res.ok)throw Error('조회 실패');const data=await res.json();
+      if(arrivalRequest!==controller)return;
+      const item=String(data.arsId)===String(leg.arsId)&&data.items?.find(x=>String(x.routeId)===String(leg.routeId));
+      message.textContent=item?(item.message||'도착정보 없음')+(data.checkedAt?' · '+data.checkedAt+' 조회':''):'해당 노선 도착정보 없음';
+     }catch{if(arrivalRequest===controller)message.textContent='도착정보를 확인하지 못했습니다.';}
+     finally{win.clearTimeout(timer);if(arrivalRequest===controller){arrivalRequest=null;refresh.disabled=false;}}
+    });refresh.innerHTML=icon('refresh');refresh.setAttribute('aria-label',label(leg)+' 도착정보 새로고침');arrival.append(message,refresh);board.append(arrival);
+   }
+   walkRow(i+1,leg.destination+' 하차'+(i===0?' · 환승':''));
+  }
+  row('end',detail.to,'목적지');
+  const note=el('p','dj-tr-note');note.innerHTML=icon('shield')+'<span>PRI는 실제 도보 연결 구간만 평가합니다. 환승 통로와 차량 내부 안전을 보장하지 않습니다.</span>';
+  const footer=el('div','dj-tr-footer');
+  const start=button('단계별 이동안 보기','dj-tr-start',()=>{step=0;updateStep();});
+  const guide=el('div','dj-tr-step-guide');guide.hidden=true;
+  const progress=el('small','dj-tr-progress'),controls=el('div','dj-tr-step-controls');
+  const prev=button('이전','',()=>{step=Math.max(0,step-1);updateStep();});prev.dataset.stepPrev='';
+  const next=button('다음 단계','',()=>{step=step>=root.querySelectorAll('.dj-tr-leg').length-1?null:step+1;updateStep();});next.dataset.stepNext='';
+  controls.append(prev,next);guide.append(progress,controls,el('small','','자동 GPS·하차 알림이 아닌 수동 이동 순서입니다.'));
+  footer.append(start,guide);root.append(header,track,timeline,note,footer);updatePri();
+ }
+
  const listener=e=>render(e.detail);win.addEventListener('dongjak:transit-detail',listener);
  return ()=>{win.removeEventListener('dongjak:transit-detail',listener);arrivalRequest?.abort();cancelSurfaceMotion(root);root.remove();};
 }
