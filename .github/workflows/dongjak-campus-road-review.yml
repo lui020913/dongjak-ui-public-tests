@@ -1,0 +1,33 @@
+name: Dongjak Chung-Ang campus road review
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_campus_road_review.py'
+      - '.github/workflows/dongjak-campus-road-review.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'preview/road-surface-geometry-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-exact-free-space-review
+          path: reviewed
+          run-id: 45768516164
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_campus_road_review.py reviewed/exact-review campus-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-campus-road-review
+          path: campus-review/
+          retention-days: 14
+          if-no-files-found: error
