@@ -7,7 +7,7 @@ import {registerFacilityIcons,iconName,DEFAULT_POI_GROUPS} from './v912-poi-pres
  * These points are only rendered inside the verified district polygon. */
 
 export const CIVIC_POI_TYPES=Object.freeze({
-  school:['school'],
+  school:['school','kindergarten','childcare','child_care'],
   civic:['town_hall','police','police_station','police_substation','police_box','fire_station','fire_substation','post','library'],
   sports:['stadium','swimming','sports_centre','fitness_centre']
 });
@@ -26,7 +26,9 @@ const civicClassFilter=type=>{
  if(type==='pharmacy')return matches(['pharmacy']);
  if(type==='police')return matches(['police','police_station','police_substation','police_box']);
  if(type==='fire')return matches(['fire_station','fire_substation']);
-  if(type==='school')return ['all',['==',['get','class'],'school'],['!=',['get','subclass'],'kindergarten']];
+  if(type==='school')return matches(CIVIC_POI_TYPES.school);
+  if(type==='park')return matches(['park','garden','nature_reserve','playground']);
+  if(type==='welfare')return matches(['social_facility','nursing_home','community_centre','community_center','senior_centre','senior_center']);
   if(type==='civic')return ['any',
     ['in',['get','class'],['literal',CIVIC_POI_TYPES.civic.filter(x=>!['police','police_station','police_substation','police_box','fire_station','fire_substation'].includes(x))]],
     ['==',['get','subclass'],'government'],['==',['get','subclass'],'public_building']];
@@ -69,9 +71,9 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   const source=base.source;
   // Keep a single school/civic/sports label system; suppress matching native POI
   // symbols without altering the underlying vector data or transit POIs.
-  const types=['hospital','pharmacy','police','fire','school','civic','sports'];
+  const types=['hospital','pharmacy','police','fire','school','civic','sports','park','welfare'];
   registerFacilityIcons(map);
-  const hidden=[...Object.values(CIVIC_POI_TYPES).flat(),'hospital','clinic','doctor','doctors','pharmacy','restaurant','cafe','fast_food','food','convenience','supermarket','bakery'];
+  const hidden=[...Object.values(CIVIC_POI_TYPES).flat(),'hospital','clinic','doctor','doctors','pharmacy','restaurant','cafe','fast_food','food','convenience','supermarket','bakery','park','garden','nature_reserve','playground','social_facility','nursing_home','community_centre','community_center','senior_centre','senior_center','public_building','government','sports_hall','swimming_pool'];
   for(const native of map.getStyle().layers){
     if(!['symbol','circle'].includes(native.type)||native.source!==source||native['source-layer']!=='poi'||native.id.startsWith('dj-'))continue;
     try{
@@ -81,21 +83,21 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
     }catch(error){console.info('[기본 POI 중복 제거] 레이어별 적용 제외',native.id,error?.message);}
   }
   for(const type of types){
-    const iconId=iconName(type);
+    const iconId=iconName(type==='welfare'?'civic':type);
     const safety=['hospital','pharmacy','police','fire'].includes(type);
     const layerId=`dj-civic-poi-${type}`;
     if(map.getLayer(layerId))continue;
     try{
       const isSchool=type==='school';
       map.addLayer({id:layerId,type:'symbol',source,'source-layer':'poi',
-        minzoom:safety?13.8:type==='school'||type==='civic'?14.2:16,
+        minzoom:safety?13.8:['school','civic','park','welfare'].includes(type)?14.2:16,
         filter:civicFilter(type,boundaryGeometry),
         layout:{
           'icon-image':iconId,
           'icon-size':['interpolate',['linear'],['zoom'],14.3,.65,16,.78,18,.90],
           'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
           'icon-optional':false,
-          'text-field':['step',['zoom'],'',safety?14.8:type==='school'||type==='civic'?15.2:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
+          'text-field':['step',['zoom'],'',safety?14.8:['school','civic','park','welfare'].includes(type)?15.2:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
           'text-font':['Noto Sans Regular','Open Sans Regular'],
           'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
           'text-anchor':'top','text-offset':[0,1.25],'text-max-width':15,
@@ -110,7 +112,7 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
         const placePosition=Array.isArray(coords)&&coords.length>=2&&coords.every(Number.isFinite)
           ?{lng:coords[0],lat:coords[1]}:{lng:event.lngLat.lng,lat:event.lngLat.lat};
         openPlaceDetails({map,maplibregl,lngLat:event.lngLat,place:{...placePosition,
-          name,type:normalizeFacilityCategory(facilityOsmCategory(tags,({hospital:'병원',pharmacy:'약국',police:'경찰서',fire:'소방서',school:'학교',civic:'공공기관',sports:'체육시설'})[type]),name),
+          name,type:normalizeFacilityCategory(facilityOsmCategory(tags,({hospital:'병원',pharmacy:'약국',police:'경찰서',fire:'소방서',school:'학교',civic:'공공기관',sports:'체육시설',park:'공원',welfare:'복지시설'})[type]),name),
           address:tags['addr:full']||tags.address||'',
           phone:tags['contact:phone']||tags.phone||'',
           website:tags.website||tags['contact:website']||'',

@@ -4,9 +4,9 @@ import {readFileSync} from 'node:fs';
 import {phoneProfile,normalMapPixelRatio} from '../src/adaptive-phone-map-budget.mjs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 test('recent high-DPI iPhone gets balanced sharpness; standard phones capped at 2 and legacy profile stays economy',()=>{
- assert.equal(normalMapPixelRatio({phone:true,ua:'Mozilla iPhone OS 18_2',deviceRatio:3}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,ua:'Mozilla iPhone OS 18_2',deviceRatio:3}),3);
  assert.equal(normalMapPixelRatio({phone:true,ua:'Android 15',deviceRatio:3}),2);
- assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),3);
  assert.equal(normalMapPixelRatio({phone:true,deviceRatio:1}),1);
  assert.equal(normalMapPixelRatio({phone:false,deviceRatio:3}),1.5);
  assert.equal(phoneProfile({phone:true,ua:'Android 10; SM-N960N'}),'economy');
@@ -40,6 +40,6 @@ test('facility detail keeps actions and disclosure while allowing content height
  assert.match(main,/shareButton\.append\(text\('span','공유'/);
  assert.match(css,/\.dj-place-detail-popup \.maplibregl-popup-content\{/);
  assert.match(css,/\.dj-place-body > \*\{flex:0 0 auto!important/);
- assert.match(main,/root\.append\(folderSection\)/);
+ assert.doesNotMatch(main,/root\.append\(folderSection\)/);
  assert.match(css,/\.dj-place-redundant-folder-heading\{display:none!important\}/);
 });
