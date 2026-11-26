@@ -19,7 +19,7 @@ export function installTipMarquee(doc=document,win=window){
     const style=win.getComputedStyle(viewport);
     const padding=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
     const available=Math.max(0,viewport.clientWidth-padding);
-    const overflow=Math.max(0,Math.ceil(copy.getBoundingClientRect().width-available));
+    const overflow=Math.max(0,copy.scrollWidth-available,Math.ceil(copy.getBoundingClientRect().width-available));
     const offset=`${-overflow}px`;
     if(node.style.getPropertyValue('--dj854-tip-overflow')!==offset)node.style.setProperty('--dj854-tip-overflow',offset);
     const moving=overflow>0;
