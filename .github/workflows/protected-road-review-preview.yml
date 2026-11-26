@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           req=release/road-surface-preview-request.json
-          jq -e '.kind=="ISOLATED_ROAD_REVIEW_NOT_PRODUCTION" and .accepted_road_count==7852 and .unresolved_road_count==419 and .review_run_id==45768516164 and .run_id==45769852117 and .artifact_id==15094025407 and (.artifact_sha256|test("^[0-9a-f]{64}$"))' "$req" >/dev/null
+          jq -e '.kind=="ISOLATED_ROAD_REVIEW_NOT_PRODUCTION" and .accepted_road_count==7852 and .unresolved_road_count==419 and .review_run_id==45768516164 and .run_id==45772062301 and .artifact_id==15094597791 and (.artifact_sha256|test("^[0-9a-f]{64}$"))' "$req" >/dev/null
           run="$(jq -r .run_id "$req")"
           artifact="$(jq -r .artifact_id "$req")"
           digest="$(jq -r .artifact_sha256 "$req")"
@@ -56,6 +56,12 @@ jobs:
           assert c['candidate_links']==a['accepted_road_count']==7852 and c['unresolved_links']==419
           assert c['graph_sha256']==a['source_graph_sha256']
           assert len(json.loads((p/'overlay-manifest.json').read_text()))==9
+          h=json.loads((p/'hybrid-summary.json').read_text())
+          assert h['counts']['baseline_accepted']==4202 and h['counts']['reviewed_accepted']==7852
+          assert h['source_graph_sha256']==c['graph_sha256']
+          campus=json.loads((p/'campus-summary.json').read_text())
+          assert campus['road_links']==448 and campus['counts']['accepted_clear']==401 and campus['counts']['unresolved']==47
+          assert campus['graph_sha256']==c['graph_sha256']
           for name,entry in json.loads((p/'geojson-chunks.json').read_text()).items():
               assert not (p/name).exists()
               assert sum(len(json.loads((p/part).read_text())['features']) for part in entry['parts'])==entry['count']
