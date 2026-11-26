@@ -1,3 +1,4 @@
+import {hasTransportPoiHit} from './poi-click-identity.js';
 import {nightOwnsLayerOrder} from './v913-night-poi-isolation.js';
 import {openPlaceDetails} from './place-details.js';
 /** Context labels near Dongjak-gu; place coordinates are explicit map anchors. */
@@ -43,6 +44,7 @@ function installNodeulseomInteraction(map,{maplibregl}={}){
   nodeulseomInteractive.add(map);
   let lastPick=0;
   const pick=event=>{
+    if(hasTransportPoiHit(map,event))return;
     const timestamp=Date.now();if(timestamp-lastPick<260)return;
     lastPick=timestamp;
     event.originalEvent?.stopPropagation?.();
