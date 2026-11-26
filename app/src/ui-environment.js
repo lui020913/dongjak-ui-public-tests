@@ -92,6 +92,7 @@ import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFo
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
+import {LABEL_HALO_MAX_PX} from './map-label-halo.js';
 
 export function getInitialTheme(){
   // The public app is light-only. Night visibility can still apply a temporary
@@ -162,8 +163,8 @@ export function initTheme({map,app}){
       });
     }
   }
-  const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:1.6});
-  const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});
+  const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:LABEL_HALO_MAX_PX});
+  const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   function syncMapLabelContrast(){
     const layers=map.getStyle?.()?.layers;
