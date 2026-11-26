@@ -585,8 +585,11 @@ export function initPedestrianTools({map,maplibregl,isDongjak,requestPosition,on
   }
   nearButton.addEventListener('click',()=>void showNearby());
   reportButton.addEventListener('click',()=>{
+    ++seq;
     panel.hidden=true;
-    restoreOverview();
+    resetNearby();
+    // The report's navigation owner decides which surface is visible.
+    // Do not reopen the previous safety overview before the editor.
     onReport();
   });
   width?.addEventListener('click',()=>{
