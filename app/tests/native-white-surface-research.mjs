@@ -51,9 +51,13 @@ try{
    }
    return {overlay:!!m.getLayer('dj-reviewed-base-road-fill'),rows};
   });
+  assert.equal(detail.overlay,false);
+  const surface=detail.rows.find(r=>r.id==='highway-area');
+  if(site.key!=='bamgol'){assert.ok(surface&&surface.count>0,'actual native pedestrian polygons must be present');assert.equal(surface.paint[0],'match');assert.ok(surface.paint[2].includes('path'));assert.equal(surface.paint[3],'#e7e9e2');assert.equal(surface.paint[4],'#ffffff');}
   const stats=await page.evaluate(async()=>{const m=window.__qaMap;const methodNames=['querySourceFeatures','queryRenderedFeatures','setData','setFilter','setPaintProperty','setLayoutProperty'];const counts={},times={},restore=[];for(const k of methodNames){if(typeof m[k]!=='function')continue;const orig=m[k];m[k]=function(...args){const t=performance.now();try{return orig.apply(this,args);}finally{counts[k]=(counts[k]||0)+1;times[k]=(times[k]||0)+performance.now()-t;}};restore.push(()=>{m[k]=orig;});}const frames=[];let last=performance.now(),start=last;const tick=()=>{const n=performance.now();frames.push(n-last);last=n;};m.on('render',tick);for(const offset of [[50,10],[-80,30],[30,-40]]){m.panBy(offset,{duration:400});await new Promise(r=>setTimeout(r,800));}await new Promise(r=>setTimeout(r,1100));m.off('render',tick);restore.forEach(fn=>fn());return {counts,times,frames:frames.length,meanFrameMs:frames.length?frames.reduce((a,b)=>a+b,0)/frames.length:null,elapsed:performance.now()-start};});
   results.push({site:site.key,detail,stats});console.log('WHITE_SURFACE_DIAGNOSTIC',JSON.stringify({site:site.key,overlay:detail.overlay,layers:detail.rows.map(({id,sourceLayer,paint,opacity,count,examples})=>({id,sourceLayer,paint,opacity,count,classes:[...new Set(examples.map(f=>f.properties.class||f.properties.subclass||''))]})),stats}));
   await page.screenshot({path:out+'/'+site.key+'.png'});
  }
+ assert.deepEqual(errors,[]);
  console.log('WHITE_SURFACE_AUDIT_DONE',JSON.stringify({sites:results.length,errors}));
 }finally{writeFileSync(out+'/results.json',JSON.stringify({results,errors},null,2));await ctx.close();await browser.close();server.close();}
