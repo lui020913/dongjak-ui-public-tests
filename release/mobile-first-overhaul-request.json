@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.218",
+  "application_version": "9.2.219",
   "public_work_branch": "main",
-  "purpose": "Protected release of PR #590: shared safety/transit map with temporary district mask and bounds relaxation, restored home camera, stable common symbols/building layers, selected route casing and transit stops, single guide CTA, complete preview overlay cleanup, capped 2.5x high-density rendering, bounded offscreen building cache, cancellable PRI work, and regression coverage. Preserve existing geometry and safety evaluation; require source CI, mobile overlay compatibility, Preview, full phone QA, Production and APK.",
-  "attempt": 453,
+  "purpose": "Protected release of verified PR #592 (05789bb3): compact transit comparison cards with clear metric and base fare, actual route badges, concise safety evidence, shortened detail fare information; defer official POI normalization and source updates during gestures, publish once after 350 ms idle, avoid redundant data/style writes and requests inside cached bounds. Source CI 38/38, real route endpoint navigation, picker/facility regression and overlay compatibility passed. Mock gesture test confirms zero source writes during motion and one after settling; physical phone FPS remains unverified. Preserve v9.2.218 shared map lifecycle and geometry, safety data, all-route walking review. Require protected Preview, mobile QA, Production and APK.",
+  "attempt": 454,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
