@@ -1,0 +1,43 @@
+name: Stage eight verified recovered road surfaces
+on:
+  push:
+    branches: [fix/recovered-road-surfaces-20261126]
+    paths:
+      - '.github/workflows/stage-recovered-road-surfaces.yml'
+permissions:
+  actions: read
+  contents: write
+jobs:
+  stage:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests' && github.actor == 'lui020913' && github.ref == 'refs/heads/fix/recovered-road-surfaces-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned audit archive and stage only accepted display geometry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/"$GITHUB_REPOSITORY"/actions/artifacts/15106969597/zip > "$RUNNER_TEMP/recovered.zip"
+          echo 'ff981fc2e1195487a90507907f33495dc9f9531285f6703a3f059306431bd2e8  '"$RUNNER_TEMP/recovered.zip" | sha256sum -c -
+          python - <<'PY'
+          import hashlib,json,os,pathlib,zipfile
+          z=zipfile.ZipFile(pathlib.Path(os.environ['RUNNER_TEMP'])/'recovered.zip')
+          s=json.loads(z.read('summary.json'))
+          assert s['accepted']==8 and s['remaining_quarantine']==1 and s['graph_unchanged'] and not s['production_changes']
+          rows=[r for r in s['records'] if r['status']=='candidate']
+          assert [r['row'] for r in rows]==[89,319,830,1223,1514,2020,2658,4153]
+          assert all(r['building_overlap_m2']==r['added_area_m2']==r['outside_boundary_m2']==0 for r in rows)
+          raw=z.read('repaired-surfaces.geojson')
+          assert len(raw)==30374 and hashlib.sha256(raw).hexdigest()=='d9ba3f598003ed3e9f5a3898386d4dc9e0af973248d2158e741f20d6d886ba84'
+          data=json.loads(raw);assert data['type']=='FeatureCollection' and len(data['features'])==8
+          target=pathlib.Path('app/public/data/road-display-repair')
+          target.mkdir(parents=True,exist_ok=True)
+          (target/'recovered-surfaces.geojson').write_bytes(raw)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- app/public/data/road-display-repair/recovered-surfaces.geojson
+          git diff --cached --quiet || git commit -m 'Stage eight verified recovered road polygons without changing original road asset tree'
+          git push origin HEAD:refs/heads/fix/recovered-road-surfaces-20261126
