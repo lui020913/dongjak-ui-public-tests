@@ -19,9 +19,9 @@ jobs:
       - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
       - uses: actions/download-artifact@v4
         with:
-          name: dongjak-district-refined-review
+          name: dongjak-joint-endpoint-refinement-review
           path: dongjak-refined-review
-          run-id: 45756265086
+          run-id: 45761994767
           github-token: ${{ github.token }}
       - run: python scripts/research/dongjak_network_layer_alignment.py --test
       - run: python scripts/research/dongjak_road_polygon_alignment.py --test
