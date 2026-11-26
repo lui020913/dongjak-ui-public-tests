@@ -30,7 +30,7 @@ test('빈 지도 클릭 시 시트 접기 및 옵션 닫기, 자동 버전 배�
 test('밝은 테마 건물은 회녹색, 시설 심볼은 캔버스 도형 사용',()=>{
   const building=readFileSync(new URL('../src/map-appearance.js',import.meta.url),'utf8');
   const facility=readFileSync(new URL('../src/station-accessibility.js',import.meta.url),'utf8');
-  assert.match(building,/#c4d1d0/);
+  assert.match(building,/#d2dcdb/);
   assert.match(facility,/registerAccessibilityPictogram/);
 });
 

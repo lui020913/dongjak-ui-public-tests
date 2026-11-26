@@ -12,7 +12,7 @@ test('야간 건물 바닥과 지붕을 밝은 회색이 아니라 어두운 청
   assert.ok(colorLuma(dark.extrusion)<colorLuma(light.extrusion)*0.15);
   assert.equal(dark.footprintOpacity,0.74);
   assert.ok(dark.nearOpacity>=0.3 && dark.farOpacity>=0.2);
-  assert.equal(buildingFootprintPaint('light')['fill-color'],'#c4d1d0');
+  assert.equal(buildingFootprintPaint('light')['fill-color'],'#d2dcdb');
 });
 test('다크 3D 건물은 지면만 어두워지는 현상을 막도록 충분한 불투명도를 유지',()=>{
   const near=buildingExtrusionAppearance('dark',10);

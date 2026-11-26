@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.193",
+  "application_version": "9.2.194",
   "public_work_branch": "main",
-  "purpose": "Remove redundant Later action and its styles from browser welcome; preserve explicit web entry, app downloads, PWA and guidebook. Protected mobile Preview and Production.",
-  "attempt": 425,
+  "purpose": "Set light 2D building color #D2DCDB and filter audited green-area footprints district-wide, preserving facilities, larger and multi-storey buildings, partial overlaps and original safety data. Protected mobile Preview and Production.",
+  "attempt": 426,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

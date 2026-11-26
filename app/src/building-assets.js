@@ -1,3 +1,4 @@
+import {collectGreenReviewCandidates} from './green-building-filter.js';
 /**
  * 기존 국가기본도 + GIS건물통합정보 보완 데이터를 함께 불러옵니다.
  * 파일별 실패를 분리해 한 소스의 실패가 전체 도엽을 숨기지 않도록 합니다.
@@ -23,16 +24,18 @@ export async function loadBuildingTileFeatures(sheet, fetchFn = globalThis.fetch
   }));
   const features=[];
   const errors=[];
+  const reviewCandidates=[];
   let successfulSources=0;
   for(let i=0;i<results.length;i++) {
     const result=results[i];
     if(result.status === 'fulfilled') {
       features.push(...result.value);
+      reviewCandidates.push(...collectGreenReviewCandidates(sheet.sheet,i===0?'base':'supplement',result.value));
       successfulSources++;
     } else {
       errors.push({label:sources[i].label,url:sources[i].url,error:result.reason});
     }
   }
   if(successfulSources === 0) throw new Error('기본 건물과 보완 건물 데이터를 모두 불러오지 못했습니다.');
-  return {features, successfulSources, totalSources:sources.length, errors};
+  return {features, reviewCandidates, successfulSources, totalSources:sources.length, errors};
 }
