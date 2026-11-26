@@ -151,7 +151,7 @@ import './mobile-first-layout.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
-import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict,restoreBasemapLabelsOutsideDistrict} from './ui-environment.js';
+import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
 import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 import './mobile-ux-energy.css';
 import './v929-phone-followup.js';
@@ -762,7 +762,7 @@ function visibleBuilding2D(){
 function visibleBuilding3D(){
   // Camera movement and slow frames are never a visibility predicate.
   // The minzoom and paint expressions handle zoom without a layout flip.
-  return app.dataset.djTransitExterior!=='true' && baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
+  return baseBuildingsVisible && mapReady && Boolean(boundaryGeometry) && buildingPitchActive && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -2027,7 +2027,10 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   app.dataset.tab = tab;
   syncTransitExterior();
   // In HOME mode route-panel synchronization must not reopen safety overview.
-  if(tab==='map'&&suppressOverview)app.dataset.djSafetyHomeOnly='1';
+  if(tab==='map'&&suppressOverview){
+    app.dataset.djSafetyHomeOnly='1';
+    if(!transitPreview&&transitHomeCamera){const camera=transitHomeCamera;transitHomeCamera=null;map.stop();map.jumpTo({...camera,padding:{top:0,bottom:0,left:0,right:0}});}
+  }
   else delete app.dataset.djSafetyHomeOnly;
   // The Safety Map bottom tab is HOME, not an information-sheet trigger.
   // On explicit home navigation, hide both legacy overview and district picker.
@@ -2883,32 +2886,36 @@ function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!
   routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
+// Keep the existing map, style, symbols, buildings and caches. Transit only
+// changes the district mask/boundary and the permitted camera extent.
+var transitHomeCamera;
 function syncTransitExterior(force=false){
  const active=exteriorMapActive({mode:app.dataset.djTransitMode,tab:app.dataset.tab,pick:routePickMode,preview:transitPreview});
  const previous=app.dataset.djTransitExterior==='true';
  if(!force&&active===previous)return;
  app.dataset.djTransitExterior=String(active);
  if(!boundaryGeometry||!mapReady)return;
- const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- const duration=reduced?0:300;
+ if(active&&!previous&&!transitHomeCamera){
+  transitHomeCamera={center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()};
+ }
+ const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:180;
  if(map.getLayer('district-exterior-fade')){
   map.setPaintProperty('district-exterior-fade','fill-opacity-transition',{duration,delay:0});
   map.setPaintProperty('district-exterior-fade','fill-opacity',active?0:districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity']);
  }
- if(map.getLayer('district-border')){
-  map.setPaintProperty('district-border','line-color',active?'#77968a':'#0f7f73');
-  map.setPaintProperty('district-border','line-width',active?1.5:2.6+map.getPitch()/28);
-  map.setPaintProperty('district-border','line-dasharray',active?[3,3]:null);
- }
+ if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-opacity',active?0:0.96);
  if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:(window.matchMedia('(max-width:699px)').matches?0.42:0.92));
- if(active){restoreBasemapLabelsOutsideDistrict(map);map.setMaxBounds(TRANSIT_SEARCH_BOUNDS);if(map.getPitch()>0)map.easeTo({pitch:0,duration});}
- else{if(previous)clipBasemapLabelsToDistrict(map,boundaryGeometry);map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));}
- syncTiltWithBuildings();
+ map.setMaxBounds(active?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds(boundaryGeometry));
+ if(!active&&previous&&app.dataset.tab==='map'&&transitHomeCamera){
+  const camera=transitHomeCamera;transitHomeCamera=null;
+  map.stop();map.jumpTo({...camera,padding:{top:0,bottom:0,left:0,right:0}});
+ }else if(!active&&app.dataset.tab!=='route'&&app.dataset.tab!=='map'){
+  transitHomeCamera=null;
+ }
 }
 function clearTransitPreview(){
   const wasPreview=Boolean(transitPreview);
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
-  restoreTransitBackground();
   syncTransitExterior();
   if(wasPreview)scheduleBuildingLoad();
   window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
@@ -3799,19 +3806,7 @@ async function getTransitRailPaths(){
  return transitRailPending;
 }
 // Selected transit preview is visually distinct from the underlying rail network.
-var transitBackgroundVisibility;
-function restoreTransitBackground(){
- if(!transitBackgroundVisibility)return;
- for(const [id,visibility] of transitBackgroundVisibility)if(map.getLayer(id))map.setLayoutProperty(id,'visibility',visibility);
- transitBackgroundVisibility=null;
-}
 function focusTransitRoute(coords){
- if(!transitBackgroundVisibility)transitBackgroundVisibility=new Map();
- for(const id of ['transport-schematic-subway-casing','transport-schematic-subway','transport-real-rail-overview-casing','transport-real-rail-overview']){
-  if(!map.getLayer(id)||transitBackgroundVisibility.has(id))continue;
-  transitBackgroundVisibility.set(id,map.getLayoutProperty(id,'visibility')||'visible');
-  map.setLayoutProperty(id,'visibility','none');
- }
  for(const id of ['dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-bus','dj815-transit-walk','dj-transit-multi-walk']){
   const line=id+'-line',casing=id+'-focus-casing';
   if(!map.getLayer(line))continue;
