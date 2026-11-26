@@ -1,0 +1,38 @@
+name: Verify mobile release transformation
+on:
+  pull_request:
+    paths:
+      - 'scripts/apply-mobile-next.mjs'
+      - 'scripts/apply-mobile-17-followup.mjs'
+      - '.github/workflows/mobile-release-transformation.yml'
+permissions:
+  contents: read
+jobs:
+  transform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Reconstruct protected release transform on exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/public-application"
+          mkdir -p "$work"
+          git archive HEAD app | tar -x -C "$work" --strip-components=1
+          cd "$work"
+          cp "$GITHUB_WORKSPACE/frontend/production/mobile-first-overhaul.css" src/mobile-first-overhaul.css
+          node "$GITHUB_WORKSPACE/scripts/apply-mobile-only-gate.mjs" "$work"
+          node --input-type=module -e 'import {readFileSync,writeFileSync} from "node:fs"; const f="src/main.js",a="import "+String.fromCharCode(39)+"./mobile-ui/current.css"+String.fromCharCode(39)+";",s=readFileSync(f,"utf8");if(s.split(a).length!==2)throw Error("CSS anchor");writeFileSync(f,s.replace(a,a+"\nimport "+String.fromCharCode(39)+"./mobile-first-overhaul.css"+String.fromCharCode(39)+";"));'
+          node "$GITHUB_WORKSPACE/scripts/apply-mobile-17-followup.mjs" "$work"
+          node "$GITHUB_WORKSPACE/scripts/apply-mobile-next.mjs" "$work"
+          node --check src/main.js
+          node --check src/mobile-next.js
+          cp "$GITHUB_WORKSPACE/frontend/production/mobile-next-build.test.mjs" tests/mobile-next-build.test.mjs
+          cp "$GITHUB_WORKSPACE/frontend/production/mobile-followup-build.test.mjs" tests/mobile-followup-build.test.mjs
+          npm ci
+          node --test tests/mobile-next-build.test.mjs tests/mobile-followup-build.test.mjs
+          npm run build
