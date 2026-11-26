@@ -8,6 +8,7 @@ import {revealSurface,exitSurface,cancelSurfaceMotion} from './surface-motion-fa
  */
 import {routeComparisonItems,sameRoute,metersLabel} from './v804-route-comparison.js';
 import './route-experience.css';
+import {mountTransitDetail} from './transit-route-detail.js';
 import {recentPlaces} from './v815-place-store.js';
 import {TEAM_FACTORS} from './pri-data.mjs';
 
@@ -176,6 +177,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   choices.append(choiceHead,priHeading,choiceRows,hint,legend);
   const actions=mapCard.querySelector('.route-map-card-actions');
   actions?.before(choices);
+  const disposeTransitDetail=mountTransitDetail({doc,win,app,mapCard,actions});
   const summaryTop=mapCard.querySelector(':scope > div:first-child');
   if(summaryTop)summaryTop.classList.add('dj-walk-native-summary');
 
@@ -398,6 +400,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
   setStage();refreshChoices();
   return ()=>{
     cancelSurfaceMotion(mapCard);
+    disposeTransitDetail();
     stateObserver.disconnect();nativeObserver.disconnect();inputResizeObserver?.disconnect();
     footerMountObserver.disconnect();
     restoreInputFooter();
