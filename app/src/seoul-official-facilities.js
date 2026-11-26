@@ -10,14 +10,16 @@ const POINTS='dj-seoul-official-points',NAMES='dj-seoul-official-names';
 const EMPTY={type:'FeatureCollection',features:[]};
 let searchableGeneralPlaces=[];
 export function officialFeatures(places,boundary){
- const seen=new Set(),features=[],accepted=[];
+ const seen=new Set(),features=[],accepted=new Map();
  for(const rawPlace of places||[]){
    const place=normalizeFacilityRecord(rawPlace);
    const lon=Number(place.lng),lat=Number(place.lat);
    if(!Number.isFinite(lon)||!Number.isFinite(lat)||!boundary||!insideBoundary([lon,lat],boundary))continue;
    const name=String(place.name||'').trim();if(!name||isFormerPoliceFacility(name)||isUnverifiedPoliceFacility(name))continue;
    const key=`${name.replace(/\s+/g,'').toLowerCase()}|${place.category||''}|${lon.toFixed(4)}|${lat.toFixed(4)}`;
-   if(seen.has(key)||accepted.some(p=>sameFacility(p,place)))continue;seen.add(key);accepted.push(place);
+   const identityKey=String(place.name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
+   const candidates=accepted.get(identityKey)||[];
+   if(seen.has(key)||candidates.some(p=>sameFacility(p,place)))continue;seen.add(key);candidates.push(place);accepted.set(identityKey,candidates);
    features.push({type:'Feature',id:features.length+1,geometry:{type:'Point',coordinates:[lon,lat]},properties:{
      name,registeredName:place.registeredName||'',category:String(place.category||'시설'),kind:String(place.category||''),...facilityPresentation(place.category),
      address:String(place.roadAddress||place.road_address||place.address||''),phone:String(place.phone||''),website:String(place.website||''),
@@ -201,7 +203,9 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
      // A failed complementary feed must not discard valid official rows.
      try{
        const osm=await loadOsmGeneralFacilities(bbox,{signal:AbortSignal.timeout(12000)});
-       for(const p of osm){if(!ids.has(p.id)&&!merged.some(q=>sameFacility(q,p))){ids.add(p.id);merged.push(p);}}
+       const byName=new Map();const keyFor=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
+       for(const p of merged){const k=keyFor(p);if(!byName.has(k))byName.set(k,[]);byName.get(k).push(p);}
+       for(const p of osm){const k=keyFor(p),candidates=byName.get(k)||[];if(!ids.has(p.id)&&!candidates.some(q=>sameFacility(q,p))){ids.add(p.id);merged.push(p);candidates.push(p);byName.set(k,candidates);}}
        if(osm.length)source=official.places.length?'서울시·OSM 시설':'OSM 공개지도 시설';
      }catch{osmFailed=true;}
      if(!merged.length&&osmFailed&&official.failed.length)throw new Error('facility sources unavailable');
