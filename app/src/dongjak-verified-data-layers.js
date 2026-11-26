@@ -1,3 +1,4 @@
+import {readDisplayRoadResponse} from './reviewed-road-display-assets.mjs';
 import {registerSafetyPictogram,SAFETY_MARKER_LAYOUT_SIZE} from './dongjak-safety-symbols.js';
 import {installSangdoAccidentTeamReview} from './sangdo-accident-team-review.js';
 import {createDataLayerFader} from './map-layer-fade-v815.js';
@@ -150,7 +151,7 @@ export function installDongjakOfficialDataLayers({map,maplibregl,getBoundary,can
           try{const error=await response.json();if(error?.message)message=error.message;}catch{}
           throw new Error(message);}
 
-        const json=await response.json();
+        const json=def.kind==='line'?await readDisplayRoadResponse(file,response):await response.json();
         if(json?.type!=='FeatureCollection'||!Array.isArray(json.features))throw new Error('GeoJSON 데이터 형식 오류');
         if(name==='official-aed')dataMeta.set(name,json.meta||{});
         return json.features;

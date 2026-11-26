@@ -1,3 +1,4 @@
+import {installReviewedBaseRoads} from './reviewed-base-road-layer.mjs';
 import {installCommunityActivity} from './community-activity.js';
 import {splitCommunityReportBody} from './community-report-presentation.js';
 import {installImportantPlaceClick} from './important-place-click.js';
@@ -635,6 +636,8 @@ const map = new maplibregl.Map({
 // Keep source credits in '지도 옵션 > 지도 데이터 출처'; do not overlay the map.
 
 installSolidMapLines(map);
+// Reviewed ground road display: only show when the pinned assets and actual native source pass all guards.
+installReviewedBaseRoads({map,app,enabled:true,requireSelective:true});
 const djRenderBudget=installPhoneRenderBudget({map,app,phone:djPhone,initial:djInitialBudget,normalRatio:djNormalPixelRatio});
 installSupabaseSafetyAi({map,maplibregl,app});
 installPriMap({map,maplibregl,app,restoreMode:themeReloadState?.priMode});

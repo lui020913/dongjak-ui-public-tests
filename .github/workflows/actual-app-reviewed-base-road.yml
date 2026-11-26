@@ -1,0 +1,44 @@
+name: Actual app reviewed base road QA
+on:
+  pull_request:
+    paths:
+      - 'app/src/reviewed-base-road-layer.mjs'
+      - 'app/src/reviewed-road-display-assets.mjs'
+      - 'app/src/reviewed-native-tile-guard.mjs'
+      - 'app/tests/e2e/reviewed-base-road-qa.spec.js'
+      - '.github/workflows/actual-app-reviewed-base-road.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/base-road-operational-activation-20261126'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Verify committed road asset tree
+        run: |
+          test "$(git rev-parse HEAD:app/public/data/road-display-review)" = '832efe31a784023bc06c2041139295a94a93e3e7'
+      - run: |
+          jq -e '.surface_count==12045 and .quarantine.count==9 and (.tiles|length)==90 and .native_reaudit.eligible_ids==258 and .operational_enabled==false' app/public/data/road-display-review/manifest.json
+          jq -e '(.audited_tiles|length)>0 and (.tilejson_sha256|length)==64' app/public/data/road-display-review/native-id-eligibility.json
+      - working-directory: app
+        run: npm ci
+      - working-directory: app
+        run: npx playwright install --with-deps chromium
+      - working-directory: app
+        env:
+          DONGJAK_ROAD_REVIEW_QA: '1'
+        run: npx playwright test --config=playwright.config.mjs --project=mobile tests/e2e/reviewed-base-road-qa.spec.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-app-reviewed-base-road-qa
+          path: app/test-results/
+          retention-days: 7
