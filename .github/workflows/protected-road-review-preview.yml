@@ -1,0 +1,121 @@
+name: Protected isolated road review Preview
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/protected-road-review-preview.yml'
+      - 'release/road-surface-preview-request.json'
+  push:
+    branches: [main]
+    paths:
+      - 'release/road-surface-preview-request.json'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: protected-road-review-preview-${{ github.event_name }}
+  cancel-in-progress: false
+jobs:
+  verify-static:
+    if: github.repository == 'lui020913/dongjak-ui-public-tests'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download exact reviewed static artifact and verify archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          req=release/road-surface-preview-request.json
+          jq -e '.kind=="ISOLATED_ROAD_REVIEW_NOT_PRODUCTION" and .accepted_road_count==7845 and .unresolved_road_count==426 and .review_run_id==45763031345 and .run_id==45765041438 and .artifact_id==15091631321 and (.artifact_sha256|test("^[0-9a-f]{64}$"))' "$req" >/dev/null
+          run="$(jq -r .run_id "$req")"
+          artifact="$(jq -r .artifact_id "$req")"
+          digest="$(jq -r .artifact_sha256 "$req")"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e '.head_branch=="preview/road-surface-geometry-20261126" and .event=="pull_request" and .name=="Road surface isolated visual preview"' >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact" | jq -e --arg digest "sha256:$digest" --argjson run "$run" '.name=="road-surface-visual-preview" and .expired==false and .digest==$digest and .workflow_run.id==$run' >/dev/null
+          curl -fsSL --max-time 120 -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact/zip" -o "$RUNNER_TEMP/review.zip"
+          echo "$digest  $RUNNER_TEMP/review.zip" | sha256sum -c -
+          python - <<'PY'
+          import json,os,pathlib,re,stat,zipfile
+          p=pathlib.Path('review-dist');p.mkdir()
+          with zipfile.ZipFile(pathlib.Path(os.environ['RUNNER_TEMP'])/'review.zip') as z:
+              seen=set()
+              for item in z.infolist():
+                  assert not item.is_dir() and re.fullmatch(r'[A-Za-z0-9_.-]+\.(?:json|geojson|html)',item.filename),item.filename
+                  assert item.filename not in seen and item.file_size<25*1024*1024
+                  assert not stat.S_ISLNK(item.external_attr>>16)
+                  seen.add(item.filename)
+                  (p/item.filename).write_bytes(z.read(item))
+          assert {x.name for x in p.glob('*.html')}=={'index.html'}
+          m=json.loads((p/'manifest.json').read_text())
+          c=json.loads((p/'corridor-summary.json').read_text())
+          a=json.loads((p/'alignment-summary.json').read_text())
+          assert m['preview'] and m['review_run_id']==45763031345
+          assert c['candidate_links']==a['accepted_road_count']==7845 and c['unresolved_links']==426
+          assert c['graph_sha256']==a['source_graph_sha256']
+          assert len(json.loads((p/'overlay-manifest.json').read_text()))==9
+          for name,entry in json.loads((p/'geojson-chunks.json').read_text()).items():
+              assert not (p/name).exists()
+              assert sum(len(json.loads((p/part).read_text())['features']) for part in entry['parts'])==entry['count']
+          print('Verified reviewed static artifact and geometry counts.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-road-review-static
+          path: review-dist/
+          retention-days: 3
+          if-no-files-found: error
+  deploy-preview:
+    if: github.event_name == 'push' && github.actor == 'lui020913' && github.ref == 'refs/heads/main' && github.repository == 'lui020913/dongjak-ui-public-tests'
+    needs: verify-static
+    runs-on: ubuntu-24.04
+    environment: public-cloudflare-preview
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-road-review-static
+          path: review-dist
+      - name: Deploy exact static review to dedicated preview branch only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          project=dongjak-walk-safety-preview
+          branch=road-surface-geometry-preview
+          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$project"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          curl -fsS --max-time 30 -H "$auth" "$api" | jq -e '.success==true and .result.production_branch=="main"' >/dev/null
+          before="$(curl -fsS --max-time 30 -H "$auth" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          sha="$(jq -er '.source_commit' review-dist/manifest.json)"
+          test "$branch" != main
+          if ! npx --yes wrangler@4 pages deploy review-dist --project-name="$project" --branch="$branch" --commit-hash="$sha" --commit-message="Isolated reviewed road geometry; no production promotion" >"$RUNNER_TEMP/road-review-deploy.log" 2>&1;then
+            echo "::error::Dedicated preview upload failed; secret-bearing logs withheld"
+            exit 1
+          fi
+          url=''
+          for n in $(seq 1 12);do
+            url="$(curl -fsS --max-time 30 -H "$auth" "$api/deployments?env=preview&per_page=20" | jq -r --arg branch "$branch" --arg sha "$sha" '[.result[]|select(.deployment_trigger.metadata.branch==$branch and .deployment_trigger.metadata.commit_hash==$sha)]|sort_by(.created_on)|last|.url // empty')"
+            if [ -n "$url" ];then break;fi
+            sleep 5
+          done
+          case "$url" in https://*.dongjak-walk-safety-preview.pages.dev) ;; *) echo "::error::Exact Preview URL missing";exit 1;; esac
+          verified=0
+          for n in $(seq 1 12);do
+            if curl -fsSL --max-time 25 "$url/manifest.json?verify=$GITHUB_RUN_ID-$n" -o "$RUNNER_TEMP/manifest.json" && cmp -s review-dist/manifest.json "$RUNNER_TEMP/manifest.json" && curl -fsSL --max-time 25 "$url/corridor-summary.json?verify=$GITHUB_RUN_ID-$n" | jq -e '.candidate_links==7845 and .unresolved_links==426' >/dev/null;then
+              verified=1;break
+            fi
+            sleep 5
+          done
+          test "$verified" = 1
+          after="$(curl -fsS --max-time 30 -H "$auth" "$api/deployments?env=production&per_page=1" | jq -er '.result[0].id')"
+          test "$before" = "$after"
+          echo "ROAD_REVIEW_PREVIEW=$url"
+          echo "Verified isolated road Preview: $url" >> "$GITHUB_STEP_SUMMARY"
