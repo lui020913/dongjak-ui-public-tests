@@ -17,12 +17,14 @@ class NetworkCrosswalk(base.Crosswalk):
         x,y=b.x-a.x,b.y-a.y;n=math.hypot(x,y)
         return (x/n,y/n) if n>1e-8 else (0,0)
     def align(self,g,link_id=None,scope=None):
+        return self.align_with_limits(g,link_id,scope)
+    def align_with_limits(self,g,link_id=None,scope=None,max_offset=2.5,mean_offset=1.5,max_display_offset=5.5,allowed_edges=None):
         first,status,edge=super().align(g,link_id,scope)
         if status!="no_unique_match" or (link_id is not None and self.ids.get(str(link_id))):return first,status,edge
         if g.geom_type!="LineString" or g.length<3:return first,status,edge
         # Include unsuccessful and special original edges in the match decision.
         # No leap over a missing road, parallel carriageway, or unrelated junction.
-        ix=[self.keys[int(k)] for k in self.tree.query(g.buffer(2.5))]
+        ix=[self.keys[int(k)] for k in self.tree.query(g.buffer(max_offset)) if allowed_edges is None or self.keys[int(k)] in allowed_edges]
         steps=max(2,math.ceil(g.length))
         samples=[g.interpolate(k/steps,normalized=True) for k in range(steps+1)]
         chosen=[]
@@ -30,7 +32,7 @@ class NetworkCrosswalk(base.Crosswalk):
             tx,ty=self.tangent(g,g.length*k/steps);opts=[]
             for i in ix:
                 old=self.original[i];dist=p.distance(old)
-                if dist>2.5:continue
+                if dist>max_offset:continue
                 d=old.project(p);ux,uy=self.tangent(old,d)
                 if abs(tx*ux+ty*uy)<.84:continue
                 opts.append((dist,i,d))
@@ -43,7 +45,7 @@ class NetworkCrosswalk(base.Crosswalk):
                 if not set(self.nodes(i))&set(self.nodes(j)) or min(d,self.original[i].length-d)>2 or min(e,self.original[j].length-e)>2:
                     return g,"chain_ambiguous",None
             chosen.append(best)
-        if sum(x[0] for x in chosen)/len(chosen)>1.5:return g,"chain_offset_guard",None
+        if sum(x[0] for x in chosen)/len(chosen)>mean_offset:return g,"chain_offset_guard",None
         runs=[]
         for dist,i,d in chosen:
             if runs and runs[-1][0]==i:runs[-1][1].append(d)
@@ -73,7 +75,7 @@ class NetworkCrosswalk(base.Crosswalk):
             parts.extend(coords);previous=end_node
         if len(parts)<2:return g,"chain_short_run",None
         result=LineString(parts)
-        if not result.is_simple or not .8*g.length<=result.length<=1.2*g.length or result.hausdorff_distance(g)>5.5:return g,"chain_geometry_guard",None
+        if not result.is_simple or not .8*g.length<=result.length<=1.2*g.length or result.hausdorff_distance(g)>max_display_offset:return g,"chain_geometry_guard",None
         if scope is not None and not scope.buffer(.002).covers(result):return g,"boundary_guard",None
         # Geometry remains on accepted reconstructed road centers; no arbitrary
         # interpolated connector at a mismatched graph junction.
@@ -94,11 +96,11 @@ def regression():
     assert c.align(g)[1]=="chain_joint_guard"
     print("NETWORK_ALIGNMENT_REGRESSION_OK")
 
-def night_display(review,out):
+def night_display(review,out,crosswalk_class=NetworkCrosswalk):
     edges=json.loads((PUBLIC/"data/safety/walk/dongjak_walk_graph.json").read_text())["edges"]
     originals={i:transform(TO_M,LineString(e[6])) for i,e in enumerate(edges) if len(e)>=7 and len(e[6])>=2}
     accepted={f["properties"]["edge_index"]:base.line(f["geometry"]) for f in base.read(review/"candidate-centers.geojson")["features"]}
-    cross=NetworkCrosswalk(originals,accepted,{i:edges[i][0] for i in originals})
+    cross=crosswalk_class(originals,accepted,{i:edges[i][0] for i in originals})
     scope=metric(base.read(PUBLIC/"data/protection-zone/boundary_reference.geojson")["features"][0]["geometry"])
     src=PUBLIC/"data/sangdo1-night/occlusion-road-samples.json"
     raw=src.read_bytes();data=json.loads(raw);counts=Counter();features=[]

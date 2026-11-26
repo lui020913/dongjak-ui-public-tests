@@ -1,0 +1,34 @@
+name: Dongjak official road polygon layer alignment
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/dongjak_road_polygon_alignment.py'
+      - '.github/workflows/dongjak-polygon-layer-alignment.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  polygon-alignment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-district-refined-review
+          path: dongjak-refined-review
+          run-id: 45756265086
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_network_layer_alignment.py --test
+      - run: python scripts/research/dongjak_road_polygon_alignment.py --test
+      - run: python scripts/research/dongjak_road_polygon_alignment.py dongjak-refined-review dongjak-polygon-alignment
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-polygon-road-layer-review
+          path: dongjak-polygon-alignment/
+          if-no-files-found: error
+          retention-days: 14
