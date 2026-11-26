@@ -16,7 +16,7 @@ function insideRing(p,ring){
 function inside(p,polygon){return insideRing(p,polygon[0])&&!polygon.slice(1).some(r=>insideRing(p,r));}
 function box(r){let x=Infinity,y=Infinity,X=-Infinity,Y=-Infinity;for(const p of r){x=Math.min(x,p[0]);y=Math.min(y,p[1]);X=Math.max(X,p[0]);Y=Math.max(Y,p[1]);}return [x,y,X,Y];}
 function keys(b){const result=[];for(let x=Math.floor(b[0]/CELL);x<=Math.floor(b[2]/CELL);x++)for(let y=Math.floor(b[1]/CELL);y<=Math.floor(b[3]/CELL);y++)result.push(x+':'+y);return result;}
-export function createCoverageIndex(features){
+export function createCoverageIndex(features,{strict=false}={}){
  const grid=new Map();
  for(const f of features)for(const polygon of polygons(f.geometry)){
   if(!polygon?.[0]?.length)continue;const bounds=box(polygon[0]);const entry={polygon,bounds};
@@ -33,9 +33,11 @@ export function createCoverageIndex(features){
    return candidates.some(({polygon,bounds:c})=>{
     const overlap=Math.max(0,Math.min(b[2],c[2])-Math.max(b[0],c[0]))*Math.max(0,Math.min(b[3],c[3])-Math.max(b[1],c[1]));
     const area=(b[2]-b[0])*(b[3]-b[1]);
-    if(area<=0||overlap/area<.85||!inside(center,polygon))return false;
-    const samples=ring.slice(0,-1).map(v=>[center[0]+(v[0]-center[0])*.65,center[1]+(v[1]-center[1])*.65]);
-    return samples.filter(v=>inside(v,polygon)).length>=Math.ceil(samples.length*.85);
+    if(area<=0||overlap/area<(strict?.99:.85)||!inside(center,polygon))return false;
+    const inset=strict?.95:.65;
+    const samples=ring.slice(0,-1).map(v=>[center[0]+(v[0]-center[0])*inset,center[1]+(v[1]-center[1])*inset]);
+    if(strict){for(let i=0;i<ring.length-1;i++){const a=ring[i],d=ring[i+1];samples.push([center[0]+((a[0]+d[0])/2-center[0])*inset,center[1]+((a[1]+d[1])/2-center[1])*inset]);}}
+    return samples.length>0&&samples.filter(v=>inside(v,polygon)).length>=Math.ceil(samples.length*(strict?1:.85));
    });
   });
  }};
@@ -47,7 +49,7 @@ export function buildingModeVisibility(extruding){
 }
 export function createBuildingCoverage(map,layers){
  let extruding=false,dirty=true;
- const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),hidden=new Map();
+ const original=new Map(),excludedBySheet=new Map(),reviewBySheet=new Map(),retainedBySheet=new Map(),hidden=new Map();
  const clearHidden=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();};
  const sync=()=>{
   for(const id of layers){
@@ -73,7 +75,13 @@ export function createBuildingCoverage(map,layers){
    const explicitlySmall=typeof area==='number'&&Number.isFinite(area)&&area>0&&area<20;
    const matchedSmall=!isDisplayBuilding(f)&&[...excludedBySheet.values()].some(idx=>idx.matches(f.geometry));
    const matchedReview=!isGreenProtected(f)&&[...reviewBySheet.values()].some(idx=>idx.matches(f.geometry));
-   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall||matchedReview);
+   // GIS is the displayed owner only once the complete sheet is loaded and
+   // fully opaque. A strict match preserves unrelated native buildings.
+   const matchedRetained=map.getZoom?.()>=15&&[...retainedBySheet].some(([id,idx])=>{
+     const source='dongjak-buildings-data-'+id,layer='dongjak-buildings-footprint-'+id;
+     return map.getSource?.(source)&&map.isSourceLoaded?.(source)&&map.getLayer(layer)&&map.getLayoutProperty(layer,'visibility')!=='none'&&idx.matches(f.geometry);
+   });
+   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall||matchedReview||matchedRetained);
    const old=seen.get(key);seen.set(key,{target,hide:hide&&(old?.hide??true)});
   }
   for(const [key,target] of hidden)if(!seen.get(key)?.hide){try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.delete(key);}
@@ -82,5 +90,5 @@ export function createBuildingCoverage(map,layers){
  };
  map.on('style.load',()=>{clearHidden();original.clear();dirty=true;sync();});
  map.on('moveend',()=>{dirty=true;});map.on('idle',reconcile);
- return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);clearHidden();dirty=true;sync();}};
+ return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[],reviewExcluded=[],retained=[]){excludedBySheet.set(id,createCoverageIndex(excluded));reviewBySheet.set(id,createCoverageIndex(reviewExcluded));retainedBySheet.set(id,createCoverageIndex(retained,{strict:true}));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);reviewBySheet.delete(id);retainedBySheet.delete(id);clearHidden();dirty=true;sync();}};
 }

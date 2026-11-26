@@ -875,7 +875,7 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,visible);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
@@ -899,7 +899,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded);
+    buildingCoverage?.setSheet(sheet.sheet,excluded,reviewExcluded,successfulSources===totalSources?visible:[]);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;

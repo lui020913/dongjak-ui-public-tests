@@ -5,6 +5,12 @@
  * Never clone, reparent, hide or resize the WebGL map.
  */
 export const communityNews=key=>key==='participate'||key==='news';
+const PRIMARY_PANEL_IDS=Object.freeze({participate:'participation-panel',news:'news-panel',mine:'mine-panel',route:'route-panel'});
+// A transient legacy hidden write must not make the committed page unfindable.
+export function primaryPanel(doc,key){
+ if(key==='route'){const host=doc.getElementById('dj-route-v3');if(host&&!host.hidden)return host;}
+ const id=PRIMARY_PANEL_IDS[key];return id?(doc.getElementById(id)||doc.querySelector('.page-panel[data-page="'+key+'"]')):null;
+}
 export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
  // Community/news use a separate, single-owner live compositor. The
  // legacy tab entrance classes and shared opacity loops never run for them.
@@ -12,13 +18,16 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
  function dissolvePrimary(button,previousTab,previous){
   pageCleanup?.();
   const destination=button.dataset.tab,fromMap=previousTab==='map',toMap=destination==='map';
-  const directPair=Boolean(previous&&communityNews(previousTab)&&communityNews(destination)&&previousTab!==destination);
+  // The active logical tab owns its real surface even when an earlier layout
+  // observer briefly hid it. Never infer the direct-pair mode from visibility.
+  previous=previous||primaryPanel(doc,previousTab);
+  const directPair=communityNews(previousTab)&&communityNews(destination)&&previousTab!==destination;
   if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
   const records=new Map();let raf=0,timer=0,finished=false,fade=null;
   const props=['opacity','animation','transition','will-change','display','visibility','z-index','pointer-events'];
   const remember=node=>{if(node?.style?.getPropertyValue&&!records.has(node))records.set(node,props.map(k=>[k,node.style.getPropertyValue(k),node.style.getPropertyPriority(k)]));};
   const write=(node,values)=>{if(!node?.style?.setProperty)return;remember(node);for(const [k,v] of Object.entries(values))node.style.setProperty(k,v,'important');};
-  const panelFor=key=>key==='route'&&doc.getElementById('dj-route-v3')&&!doc.getElementById('dj-route-v3').hidden?doc.getElementById('dj-route-v3'):doc.querySelector('.page-panel[data-page="'+key+'"]:not([hidden])');
+  const panelFor=key=>primaryPanel(doc,key);
   const chrome=[doc.getElementById('map'),app.querySelector?.(':scope > .topbar'),doc.getElementById('djNext-toolbar'),doc.getElementById('dj-v794-toolbar')].filter(Boolean);
   const oldChrome=fromMap?chrome.filter(n=>!n.hidden&&win.getComputedStyle(n).display!=='none'&&win.getComputedStyle(n).visibility!=='hidden').map(n=>[n,win.getComputedStyle(n).display]):[];
   const cleanup=()=>{
@@ -36,7 +45,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // Community ↔ news: composite the incoming real page OVER the opaque
   // outgoing page. The incoming alpha reveals its content while the old
   // page fades proportionally underneath, with no exposed map/blank frame.
-  const revealIncoming=fromMap||directPair;
+  const revealIncoming=fromMap||directPair||(!previous&&!toMap);
   fade=revealIncoming?incoming:previous;
   if(!fade?.style?.setProperty){cleanup();return;}
   // Keep live map controls beneath the page instead of above its fading
@@ -45,7 +54,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
    const activeChrome=fromMap?oldChrome:chrome.filter(n=>!n.hidden&&win.getComputedStyle(n).display!=='none').map(n=>[n,win.getComputedStyle(n).display]);
    for(const [node,display] of activeChrome)write(node,{display,visibility:'visible',opacity:'1','pointer-events':'none',...(node.id==='map'?{}:{'z-index':'6498'})});
   }
-  if(incoming){win.DongjakWindowMotion?.cancel?.(incoming);incoming.dataset.djPrimaryTransition='incoming';write(incoming,{animation:'none',transition:'none',opacity:revealIncoming?'0':'1','z-index':directPair?'7001':'7000',visibility:'visible',display:'flex'});}
+  if(incoming){win.DongjakWindowMotion?.cancel?.(incoming);incoming.hidden=false;incoming.dataset.djPrimaryTransition='incoming';write(incoming,{animation:'none',transition:'none',opacity:revealIncoming?'0':'1','z-index':directPair?'7001':'7000',visibility:'visible',display:'flex'});}
   if(previous){previous.hidden=false;if(previous.id==='dj-route-v3')previous.inert=true;write(previous,{animation:'none',transition:'none',opacity:'1','z-index':directPair?'7000':'7001',visibility:'visible',display:'flex','pointer-events':'none'});}
   write(fade,{'will-change':'opacity'});
   // Use a delivered-frame clock for this independent compositor. A busy
@@ -60,7 +69,10 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
    if(finished)return;
    // A programmatic navigation or a newly opened modal must win over a
    // stale presentation. Never resurrect an already dismissed destination.
-   if(app.dataset.tab!==destination||(incoming&&incoming.hidden)){cleanup();return;}
+   if(app.dataset.tab!==destination||app.inert||doc.getElementById('dj-community-editor-portal')?.hidden===false){cleanup();return;}
+   // The logical destination has not changed. Reconcile stale hidden writes
+   // from legacy observers without opening an explicitly dismissed modal.
+   if(incoming&&incoming.hidden)incoming.hidden=false;
    // The outgoing page is logically dismissed but must remain painted until
    // this owner releases it. A legacy visibility write cannot skip the fade.
    if(previous&&previous.hidden)previous.hidden=false;

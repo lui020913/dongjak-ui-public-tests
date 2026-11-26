@@ -12,17 +12,21 @@ test('ordinary release does not install review layers or fetch data',async()=>{
 test('viewport load preserves native roads and hides preview on zoom, night and data failure',async()=>{
  const old=globalThis.MutationObserver;globalThis.MutationObserver=class{observe(){}disconnect(){}};
  try{
- const listeners=new Map(),layers=new Map(),sources=new Map();let zoom=17,fail=false;
+ const listeners=new Map(),layers=new Map(),sources=new Map();let zoom=17,fail=false,recoveredCalls=0,recoveryFail=false;
  const app={dataset:{theme:'light'}},tile={file:'a.geojson',bbox:[126.94,37.49,126.96,37.51],bytes:100,count:1};
  const feature={type:'Feature',properties:{kind:'reviewed'},geometry:{type:'Polygon',coordinates:[[[126.95,37.5],[126.951,37.5],[126.951,37.501],[126.95,37.5]]]}};
  layers.set('native-road',{id:'native-road',type:'line','source-layer':'transportation',source:'openmaptiles'});
  const map={getZoom:()=>zoom,getBounds:()=>({getWest:()=>126.95,getSouth:()=>37.5,getEast:()=>126.951,getNorth:()=>37.501}),getStyle:()=>({sources:{openmaptiles:{}},layers:[...layers.values()]}),getLayer:id=>layers.get(id),getSource:id=>sources.get(id),addSource:(id,s)=>sources.set(id,{...s,setData(data){this.data=data}}),addLayer:l=>layers.set(l.id,l),setLayoutProperty:(id,k,v)=>{const l=layers.get(id);l.layout={...l.layout,[k]:v}},setPaintProperty:(id,k,v)=>{const l=layers.get(id);l.paint={...l.paint,[k]:v}},removeLayer:id=>layers.delete(id),removeSource:id=>sources.delete(id),on:(n,f)=>listeners.set(n,f),off:n=>listeners.delete(n)};
  const assets={manifest:async()=>({tiles:[tile]}),checked:async()=>{if(fail)throw Error('bad');return {type:'FeatureCollection',features:[feature]}}};
+ const repaired={...feature,properties:{kind:'baseline',test:'repaired'}};
+ assets.recovered=async()=>{recoveredCalls++;if(recoveryFail)throw Error('optional missing');return {type:'FeatureCollection',features:[repaired]};};
  const ctrl=installReviewedBaseRoads({map,app,assets,enabled:true});
- assert.equal(await ctrl.refresh(),true);assert.equal(layers.get('dj-reviewed-base-road-fill').layout.visibility,'visible');assert.deepEqual(sources.get('dj-reviewed-base-road-surfaces').data.features,[feature]);assert.equal(layers.get('native-road').layout,undefined);
+ assert.equal(await ctrl.refresh(),true);assert.equal(layers.get('dj-reviewed-base-road-fill').layout.visibility,'visible');assert.deepEqual(sources.get('dj-reviewed-base-road-surfaces').data.features,[feature,repaired]);assert.equal(recoveredCalls,1);assert.equal(layers.get('native-road').layout,undefined);
  zoom=15;assert.equal(await ctrl.refresh(),false);assert.equal(layers.get('dj-reviewed-base-road-fill').layout.visibility,'none');
  zoom=17;app.dataset.sangdoNight='on';assert.equal(await ctrl.refresh(),false);delete app.dataset.sangdoNight;
  assert.equal(await ctrl.refresh(),true);ctrl.dispose();assert.equal(layers.has('dj-reviewed-base-road-fill'),false);assert.equal(layers.has('native-road'),true);
+ recoveryFail=true;const withoutRecovery=installReviewedBaseRoads({map,app,assets,enabled:true});
+ assert.equal(await withoutRecovery.refresh(),true);assert.deepEqual(sources.get('dj-reviewed-base-road-surfaces').data.features,[feature]);withoutRecovery.dispose();
  fail=true;const failed=installReviewedBaseRoads({map,app,assets,enabled:true});assert.equal(await failed.refresh(),false);assert.equal(layers.get('dj-reviewed-base-road-fill').layout.visibility,'none');failed.dispose();
  }finally{globalThis.MutationObserver=old}
 });

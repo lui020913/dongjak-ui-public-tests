@@ -1,6 +1,6 @@
 import {createNativeTileGuard} from './reviewed-native-tile-guard.mjs';
 import {createSelectiveRoadReview} from './reviewed-native-road-filter.mjs';
-import {createRoadDisplayAssets} from './reviewed-road-display-assets.mjs';
+import {createRoadDisplayAssets,RECOVERED_SURFACE_TILE} from './reviewed-road-display-assets.mjs';
 const baseAssets=createRoadDisplayAssets({enabled:true});
 const SOURCE='dj-reviewed-base-road-surfaces';
 const LAYER='dj-reviewed-base-road-fill';
@@ -31,7 +31,7 @@ export function reviewedRoadAnchor(layers=[]){
 export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=false,requireSelective=false}){
  if(!enabled)return {dispose(){},refresh:async()=>false};
  let manifest=null,disposed=false,generation=0,timer=0,lastKey='',initializing=null,selective=null,eligibilityPromise=null,readyToken=0,nativeGuard=null;
- const cache=new Map();
+ const cache=new Map();let recoveredData=null;
  const hide=()=>{readyToken=0;selective?.restore();if(map.getLayer(LAYER)){map.setPaintProperty(LAYER,'fill-opacity',0);map.setLayoutProperty(LAYER,'visibility','none');}delete app.dataset.djReviewedBaseRoads;};
  async function setupSelective(){
   if(!manifest?.native_reaudit||manifest.native_reaudit.exact_surface_count!==manifest.surface_count||manifest.native_reaudit.eligible_ids!==258)return null;
@@ -82,11 +82,12 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
    manifest=manifest||await (initializing??=(assets.manifest().finally(()=>{initializing=null;})));
    if(disposed||token!==generation||!manifest)return false;
    if(!ensureLayer())return false;
-   const b=map.getBounds(),tiles=roadTilesForViewport(manifest.tiles,[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()]);
+   const b=map.getBounds(),bounds=[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()],tiles=roadTilesForViewport(manifest.tiles,bounds);
+   const needsRecovery=typeof assets.recovered==='function'&&roadTilesForViewport([RECOVERED_SURFACE_TILE],bounds).length>0;
    if(!tiles.length){hide();return false;}
    // Bound peak decode cost. Leave the original map intact on wide views.
    if(tiles.length>20||tiles.reduce((n,t)=>n+t.bytes,0)>14*1024*1024){hide();return false;}
-   const key=tiles.map(t=>t.file).sort().join('|');
+   const key=tiles.map(t=>t.file).sort().join('|')+(needsRecovery?'|recovered':'');
    if(key!==lastKey){
     hide();
     const groups=[];
@@ -100,9 +101,14 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
       if(disposed||token!==generation)return false;
       groups.push(...batch);
     }
+    if(needsRecovery){
+      try{recoveredData=recoveredData||await assets.recovered();if(recoveredData)groups.push(recoveredData);}
+      catch(e){console.warn('[road review] optional recovered surfaces unavailable',e.message);}
+    }
+    if(disposed||token!==generation)return false;
     const keep=new Set(tiles.map(t=>t.file));for(const k of cache.keys())if(!keep.has(k))cache.delete(k);
     map.getSource(SOURCE).setData({type:'FeatureCollection',features:groups.flatMap(g=>g.features)});
-    lastKey=key;
+    lastKey=needsRecovery&&!recoveredData?'':key;
    }
    if(disposed||token!==generation)return false;
    map.setPaintProperty(LAYER,'fill-color',color());
@@ -127,5 +133,5 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
  const onMove=()=>{generation++;hide();delete app.dataset.djReviewedBaseRoads;};
  map.on('load',schedule);map.on('moveend',schedule);map.on('movestart',onMove);map.on('styledata',onStyle);map.on('sourcedata',onSource);
  const observer=new MutationObserver(schedule);observer.observe(app,{attributes:true,attributeFilter:['data-theme','data-sangdo-night']});
- return {refresh,dispose(){disposed=true;generation++;clearTimeout(timer);observer.disconnect();map.off('load',schedule);map.off('moveend',schedule);map.off('movestart',onMove);map.off('styledata',onStyle);map.off('sourcedata',onSource);remove();cache.clear();delete app.dataset.djReviewedBaseRoads;}};
+ return {refresh,dispose(){disposed=true;generation++;clearTimeout(timer);observer.disconnect();map.off('load',schedule);map.off('moveend',schedule);map.off('movestart',onMove);map.off('styledata',onStyle);map.off('sourcedata',onSource);remove();cache.clear();recoveredData=null;delete app.dataset.djReviewedBaseRoads;}};
 }
