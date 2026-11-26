@@ -242,6 +242,7 @@ export function initTheme({map,app}){
     // 토글할 때마다 현재 존재하는 레이어의 색상과 불투명도를 별도로 갱신합니다.
     if(map.getLayer('district-exterior-fade')){
       const maskPaint=districtExteriorThemePaint(themeState.value);
+      if(app.dataset.djTransitExterior==='true')maskPaint['fill-opacity']=0;
       for(const [key,value] of Object.entries(maskPaint)){
         try{map.setPaintProperty('district-exterior-fade',key,value);}catch(error){console.warn('[외부지역 마스크] 테마 전환 실패:',error);}
       }
@@ -375,20 +376,28 @@ export function filterCommercialPOI(map){
 
 // 지도 전체를 없애지 않고 경계 내부의 라벨만 남기기 위한 filter expression.
 // 지도 타일 라벨 중 폴리곤·선형 피처는 경계와 교차할 때 일부 누락될 수 있습니다.
+const districtLabelOriginals=new WeakMap();
 export function clipBasemapLabelsToDistrict(map, geometry){
   if(!geometry)return;
   const within=['within',{type:geometry.type,coordinates:geometry.coordinates}];
   let done=0;
+  let originals=districtLabelOriginals.get(map);if(!originals){originals=new Map();districtLabelOriginals.set(map,originals);}
   for(const layer of map.getStyle().layers){
     if(layer.type!=='symbol'||layer.id.startsWith('transport-'))continue;
     // Hangang bridge labels are deliberately north of the district boundary.
     // Do not clip these five named crossings with the Dongjak-only POI filter.
     if(layer.id.startsWith('dongjak-')||layer.id.startsWith('dj-hangang-bridge-'))continue;
     try{
-      const original=map.getFilter(layer.id);
+      if(!originals.has(layer.id))originals.set(layer.id,map.getFilter(layer.id)||null);
+      const original=originals.get(layer.id);
       map.setFilter(layer.id,['all',...(original?[original]:[]),within]);
       done++;
     }catch(error){console.warn('[경계 라벨] 필터 적용 생략',layer.id,error);}
   }
   console.info(`[v17.7] 동작구 경계 내부 라벨만 ${done}개 레이어에 적용`);
+}
+
+/** Restore only the base symbols previously clipped by the district policy. */
+export function restoreBasemapLabelsOutsideDistrict(map){
+ for(const [id,filter] of districtLabelOriginals.get(map)||[]){if(map.getLayer(id))try{map.setFilter(id,filter);}catch{}}
 }

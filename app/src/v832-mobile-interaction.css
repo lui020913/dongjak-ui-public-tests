@@ -155,5 +155,5 @@ html body #app#app[data-theme="dark"] #transport-sheet.dj-news-transit-fixed .tr
 #dj832-dongjak-boundary p{font-size:14px;line-height:1.5;color:#617970;margin:0 0 15px}
 #dj832-dongjak-boundary .dj832-boundary-confirm{min-height:42px;border:0;border-radius:12px;width:100%;background:#12846d;color:#fff;font-size:14px;font-weight:650}
 @keyframes dj832-enter{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-#app[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:#1f3030;color:#e4f4ed;border-color:#4a6c60}
+html[data-theme="dark"] #dj832-dongjak-boundary .dj832-boundary-card{background:#1f3030;color:#e4f4ed;border-color:#4a6c60}
 @media(prefers-reduced-motion:reduce){#dj832-dongjak-boundary .dj832-boundary-card{animation:none!important}}

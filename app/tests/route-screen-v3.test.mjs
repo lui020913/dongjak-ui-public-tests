@@ -29,7 +29,7 @@ test('inline waypoint plus and all three search targets share GPS and map action
  assert.match(source,/data-v3="search-gps"/);assert.match(source,/data-v3="search-map"/);
  assert.match(source,/route-pick-start':'route-pick-end'/);
  assert.match(engine,/routeSearchTarget!==which/);assert.match(engine,/seq!==routeSearchSequence\|\|which!==routeSearchTarget/);
- assert.match(engine,/const inside=routeLocationInside\(position\);\s*if\(inside!==true\)\{\s*document\.getElementById\('route-search-status'\)\.textContent=[^;]+;\s*return;/);
+ assert.match(engine,/const inside=routeLocationInside\(position\);\s*if\(inside!==true&&!transitLocationAllowed\(position,which\)\)\{\s*document\.getElementById\('route-search-status'\)\.textContent=[^;]+;\s*return;/);
  assert.match(style,/grid-template-rows:52px auto auto 52px/);
  assert.match(style,/\.search-control-row\{display:grid/);
 });

@@ -1,0 +1,41 @@
+name: Protected mobile overlay compatibility
+on:
+  pull_request:
+    paths:
+      - 'app/src/**'
+      - 'app/index.html'
+      - 'scripts/apply-mobile-next.mjs'
+      - 'scripts/apply-mobile-only-gate.mjs'
+      - 'scripts/apply-mobile-17-followup.mjs'
+      - 'frontend/production/**'
+      - '.github/workflows/mobile-overlay-compatibility.yml'
+permissions:
+  contents: read
+jobs:
+  overlay-anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply exact protected mobile overlays without deployment
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          git archive HEAD app | tar -x -C "$work" --strip-components=1
+          cp frontend/production/mobile-first-overhaul.css "$work/src/mobile-first-overhaul.css"
+          node scripts/apply-mobile-only-gate.mjs "$work"
+          node --input-type=module - "$work/src/main.js" <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          const file=process.argv[2], source=readFileSync(file,'utf8'), anchor="import './mobile-ui/current.css';";
+          if(source.split(anchor).length!==2)throw Error('Expected unique mobile CSS import');
+          writeFileSync(file,source.replace(anchor,anchor+'\n'+"import './mobile-first-overhaul.css';"));
+          NODE
+          node scripts/apply-mobile-17-followup.mjs "$work"
+          node scripts/apply-mobile-next.mjs "$work"
+          node --check "$work/src/main.js"
+          node --check "$work/src/mobile-next.js"
+          node --check "$work/src/mobile-17-followup.js"

@@ -102,6 +102,35 @@ test('real transit detail buttons navigate to the visible route editor, includin
    await page.unroute('**/data/transport/seoul-bus-stops.json');
    await page.unroute('**/api/transport/bus?*');
    await page.unroute('**/api/transport/bus/route-path?*');
+   // Exterior map is scoped to transit mode, including real route map picking.
+   await expect(app).toHaveAttribute('data-dj-transit-exterior','false');
+   await route.locator('[data-transit-mode="transit"]').click();
+   await expect(app).toHaveAttribute('data-dj-transit-exterior','true');
+   const register=async(which,place)=>page.evaluate(({which,place})=>{const detail={which,place};window.dispatchEvent(new CustomEvent('dongjak:route-select',{detail}));return detail.accepted;},{which,place});
+   const outside={kind:'point',name:'외부 테스트 장소',lng:127.026,lat:37.497};
+   expect(await register('end',outside)).toBe(true);
+   await expect(route.locator('#v3-end')).toContainText(outside.name);
+   await route.locator('[data-v3="end"]').click();
+   await route.locator('[data-v3="search-map"]').click();
+   await expect(app).toHaveAttribute('data-tab','map');
+   await expect(app).toHaveAttribute('data-dj-transit-exterior','true');
+   await page.locator('#route-pick-cancel').click();
+   await expect(app).toHaveAttribute('data-tab','route');
+   expect(await register('start',{...outside,name:'외부 출발지',lng:127.028})).toBe(true);
+   await route.locator('[data-v3="calculate"]').click();
+   await expect(results).toContainText('한 곳은 동작구 안이어야 합니다.');
+   await route.locator('[data-v3="back"]').click();
+   await expect(results).toBeHidden();
+   await route.locator('[data-transit-mode="walk"]').click();
+   await expect(app).toHaveAttribute('data-dj-transit-exterior','false');
+   await expect(route.locator('[data-v3="calculate"]')).toBeDisabled();
+   expect(await register('end',outside)).toBe(false);
+   const denied=page.locator('#dj832-dongjak-boundary');
+   await expect(denied).toBeVisible();
+   expect(await denied.evaluate(el=>el.parentElement===document.body)).toBe(true);
+   await denied.locator('.dj832-boundary-confirm').click({timeout:10000});
+   await expect(denied).toBeHidden();
+
   }
   await route.locator('[data-v3="back"]').click();
   await expect(app).toHaveAttribute('data-tab','map');

@@ -39,6 +39,8 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  };
  const syncMode=()=>{
   view.dataset.transitMode=mode;
+  app.dataset.djTransitMode=mode;
+  win.dispatchEvent(new CustomEvent('dongjak:transit-mode-change',{detail:mode}));
   for(const btn of shadow.querySelectorAll('[data-transit-mode]'))btn.setAttribute('aria-pressed',String(btn.dataset.transitMode===mode));
   q('#v3-walk-mode').hidden=true;
   const cta=q('#v3-cta-label');if(cta)cta.textContent=mode==='transit'?'대중교통 경로 찾기':'경로 찾기';
@@ -58,7 +60,7 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
   reviewButton.disabled=busy||!(groups[filter]||groups.all).length;
   for(const b of filters.children){const id=b.dataset.filter;b.setAttribute('aria-pressed',String(id===filter));const label={all:'전체',bus:'버스',rail:'지하철',mixed:'버스+지하철'}[id];b.textContent=label+' '+groups[id].length;}
   const plans=groups[filter]||groups.all;
-  status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 기본운임은 일반 성인 교통카드 기준이며 실제 요금과 다를 수 있습니다.'+(reviewNote?' '+reviewNote:'');
+  status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 동작구 외부 보행은 안전 미평가입니다. 기본운임은 실제 요금과 다를 수 있습니다.'+(reviewNote?' '+reviewNote:'');
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
    const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
@@ -110,6 +112,8 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  async function search(){
   close();const ps=points();show(ps);filter='all';
   if(ps.length!==2){for(const b of filters.children)b.disabled=true;note('대중교통은 경유지 없는 출발지와 도착지 두 곳을 지원합니다. 경유지를 삭제한 후 다시 조회하세요.');return;}
+  let policy='boundary-unavailable';win.dispatchEvent(new CustomEvent('dongjak:transit-scope-check',{detail:{accept:value=>{policy=value;}}}));
+  if(policy!=='allowed'){for(const b of filters.children)b.disabled=true;note(policy==='both-outside'?'출발지 또는 목적지 중 한 곳은 동작구 안이어야 합니다.':policy==='outside-service-area'?'현재 지원하는 서울 검색 범위 밖입니다.':'동작구 경계정보를 확인하지 못했습니다.');return;}
   pointKey=key(ps);const seq=generation;const requestController=new AbortController();controller=requestController;
   const timer=win.setTimeout(()=>requestController.abort(),35000);
   for(const b of filters.children){b.disabled=true;b.setAttribute('aria-pressed',String(b.dataset.filter==='all'));}
@@ -122,11 +126,13 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const escape=event=>{if(event.key==='Escape'&&!panel.hidden){event.preventDefault();event.stopImmediatePropagation();close({animate:true});}};
  q('[data-v3="back"]').addEventListener('click',back,true);win.addEventListener('keydown',escape,true);
  const endpointChanged=()=>close();
+ const editorReset=()=>{mode='walk';close();syncMode();};
  const returnComparison=()=>{win.requestAnimationFrame(()=>{if(disposed||app.dataset.tab!=='route'||host.hidden)return;const ps=points();if(!cached||key(ps)!==cached.key||ps.length!==2)return;mode='transit';syncMode();options=cached.options;filter=cached.filter;reviewed=cached.reviewed||new Map();recommended=cached.recommended||null;reviewNote=cached.reviewNote||'';pointKey=cached.key;show(ps);render();});};
  const observer=new MutationObserver(()=>{host.dataset.transitTheme=app.dataset.theme||'light';if(app.dataset.tab!=='route'||win.innerWidth>=700){if(!panel.hidden||busy)close({keepCache:app.dataset.tab==='map'&&Boolean(app.dataset.djTransitPreview)});if(app.dataset.tab!=='map'&&app.dataset.tab!=='route')cached=null;}});
  observer.observe(app,{attributes:true,attributeFilter:['data-tab','data-theme']});observer.observe(host,{attributes:true,attributeFilter:['hidden']});
- for(const name of ['dongjak:route-endpoint-registered','dongjak:route-editor-reset','dongjak:route-swap'])win.addEventListener(name,endpointChanged);
+ for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.addEventListener(name,endpointChanged);
+ win.addEventListener('dongjak:route-editor-reset',editorReset);
  win.addEventListener('dongjak:transit-return-comparison',returnComparison);
  host.dataset.transitTheme=app.dataset.theme||'light';syncMode();
- return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-editor-reset','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);panel.remove();style.remove();}};
+ return {active:()=>mode==='transit',search,close,dispose:()=>{disposed=true;close();observer.disconnect();modeButtons.forEach(b=>b.removeEventListener('click',choose));for(const name of ['dongjak:route-endpoint-registered','dongjak:route-swap'])win.removeEventListener(name,endpointChanged);win.removeEventListener('dongjak:route-editor-reset',editorReset);win.removeEventListener('dongjak:transit-return-comparison',returnComparison);q('[data-v3="back"]').removeEventListener('click',back,true);win.removeEventListener('keydown',escape,true);panel.remove();style.remove();}};
 }

@@ -48,6 +48,7 @@ import {readSharedCommunity,publishCommunityPost,deleteSharedCommunityPost,setSh
 import {initPedestrianTools} from './pedestrian-tools.js';
 import {fetchDongjakPedestrianVariants} from './dongjak-local-routing.js';
 import {routeWithinDistrict} from './route-district-guard.mjs';
+import {TRANSIT_SEARCH_BOUNDS,transitPointInScope,transitCoordinatesInScope,transitEndpointPolicy,exteriorMapActive,transitWalkStyle} from './transit-exterior-scope.mjs';
 import {installDongjakOfficialDataLayers} from './dongjak-verified-data-layers.js';
 import {installDongjakLiveTransit} from './features/liveTransit/integrate.js';
 import './features/liveTransit/live-transit.css';
@@ -150,7 +151,7 @@ import './mobile-first-layout.css';
 import './mobile-compact-transport-sheet.js';
 import { installMobileSurfaceCoordinator } from './public-ui-mobile-surface-coordinator.js';
 import { installRequestCompletion } from './v910-request-completion.js';
-import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict} from './ui-environment.js';
+import {initWeatherWidget,initTheme,districtExteriorThemePaint,keepRegularMapText,filterCommercialPOI,clipBasemapLabelsToDistrict,restoreBasemapLabelsOutsideDistrict} from './ui-environment.js';
 import {readManualThemeReload} from './manual-pwa-theme-reload.js';
 import './mobile-ux-energy.css';
 import './v929-phone-followup.js';
@@ -758,7 +759,7 @@ function visibleBuilding2D(){
   return mapReady && Boolean(boundaryGeometry);
 }
 function visibleBuilding3D(){
-  return baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom()>=BUILDING_ZOOM_MIN && loadedBuildingTiles.size>0;
+  return app.dataset.djTransitExterior!=='true' && baseBuildingsVisible && !movementIsSlow && mapReady && Boolean(boundaryGeometry) && map.getPitch() >= PITCH_BUILDING_START && map.getZoom()>=BUILDING_ZOOM_MIN && loadedBuildingTiles.size>0;
 }
 function syncTiltWithBuildings() {
   if (!mapReady) return;
@@ -1181,7 +1182,7 @@ async function loadDongjakBoundary(){
     boundaryBounds=computeBounds(boundaryGeometry);
     if(gpsLastPosition)outsideDistrictAlert.check(...gpsLastPosition,boundaryGeometry,gpsLastAccuracy);
     // 다운로드한 실제 경계 기준 + 10km까지 지도 이동 범위 갱신.
-    map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));
+    map.setMaxBounds(app.dataset.djTransitExterior==='true'?TRANSIT_SEARCH_BOUNDS:bufferedDistrictBounds(boundaryGeometry));
     // 동작구 밖 원본 시설명은 가리되, 추가 자치구 라벨은 별도 심벌로 표시합니다.
     clipBasemapLabelsToDistrict(map,boundaryGeometry);
     // 건물은 검증된 원본 벡터 타일을 유지합니다. 별도 지리 필터로 건물을 누락시키지 않습니다.
@@ -1208,7 +1209,9 @@ async function loadDongjakBoundary(){
       layout:{'line-cap':'round','line-join':'round'},
       paint:{'line-color':'#0f7f73','line-width':3.35,'line-opacity':0.96}});
     baseLayerControls?.apply();
+    syncTransitExterior(true);
     map.on('pitch',()=>{
+      if(app.dataset.djTransitExterior==='true')return;
       const pitch=map.getPitch();
       // 측면에서 지표면 경계선이 가늘어지는 현상을 보완합니다(수직 벽 모델은 아님).
       if(map.getLayer('district-border'))map.setPaintProperty('district-border','line-width',2.6+pitch/28);
@@ -2040,6 +2043,7 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // so the shared ghost-open guard cannot discard the newly opened route tab.
   if(tab==='route')window.DongjakWindowLifecycle?.requestOpen('route-panel');
   app.dataset.tab = tab;
+  syncTransitExterior();
   // In HOME mode route-panel synchronization must not reopen safety overview.
   if(tab==='map'&&suppressOverview)app.dataset.djSafetyHomeOnly='1';
   else delete app.dataset.djSafetyHomeOnly;
@@ -2883,8 +2887,31 @@ function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!
   routeStartMarker=update(routeStartMarker,routeStart,'start','#2563eb');
   routeEndMarker=update(routeEndMarker,routeEnd,'end','#0ba876');
 }
+function syncTransitExterior(force=false){
+ const active=exteriorMapActive({mode:app.dataset.djTransitMode,tab:app.dataset.tab,pick:routePickMode,preview:transitPreview});
+ const previous=app.dataset.djTransitExterior==='true';
+ if(!force&&active===previous)return;
+ app.dataset.djTransitExterior=String(active);
+ if(!boundaryGeometry||!mapReady)return;
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const duration=reduced?0:300;
+ if(map.getLayer('district-exterior-fade')){
+  map.setPaintProperty('district-exterior-fade','fill-opacity-transition',{duration,delay:0});
+  map.setPaintProperty('district-exterior-fade','fill-opacity',active?0:districtExteriorThemePaint(visualTheme.currentTheme())['fill-opacity']);
+ }
+ if(map.getLayer('district-border')){
+  map.setPaintProperty('district-border','line-color',active?'#77968a':'#0f7f73');
+  map.setPaintProperty('district-border','line-width',active?1.5:2.6+map.getPitch()/28);
+  map.setPaintProperty('district-border','line-dasharray',active?[3,3]:null);
+ }
+ if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:(window.matchMedia('(max-width:699px)').matches?0.42:0.92));
+ if(active){restoreBasemapLabelsOutsideDistrict(map);map.setMaxBounds(TRANSIT_SEARCH_BOUNDS);if(map.getPitch()>0)map.easeTo({pitch:0,duration});}
+ else{if(previous)clipBasemapLabelsToDistrict(map,boundaryGeometry);map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));}
+ syncTiltWithBuildings();
+}
 function clearTransitPreview(){
   transitPreview=null;transitGeneration++;delete app.dataset.djTransitPreview;
+  syncTransitExterior();
   window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:null}));
   const empty={type:'FeatureCollection',features:[]};
   for(const id of ['dj815-transit-walk','dj815-transit-rail','dj-transit-rail-verified','dj-transit-rail-schematic','dj815-transit-bus','dj-transit-multi-walk','dj-transit-multi-bus','dj-transit-multi-rail','dj-transit-multi-stops']){
@@ -2962,6 +2989,25 @@ function routeLocationInside(position){
   const lng=Number(position.lng),lat=Number(position.lat);
   return Number.isFinite(lng)&&Number.isFinite(lat)?isDongjak(lng,lat):false;
 }
+function transitLocationAllowed(position,which){
+ return app.dataset.djTransitMode==='transit'&&['start','end'].includes(which)&&Boolean(boundaryGeometry)&&transitPointInScope(position);
+}
+function requireRouteEndpoint(position,which){
+ if(transitLocationAllowed(position,which))return true;
+ return requireDongjakRouteLocation(position);
+}
+function checkTransitScope(){return transitEndpointPolicy(routeStart,routeEnd,isDongjak);}
+function assertTransitScope(){const policy=checkTransitScope();if(policy!=='allowed')throw new Error(policy==='both-outside'?'출발지 또는 목적지 중 한 곳은 동작구 안이어야 합니다.':'지원 범위 또는 경계정보를 확인해 주세요.');}
+window.addEventListener('dongjak:transit-scope-check',event=>event.detail?.accept?.(checkTransitScope()));
+window.addEventListener('dongjak:transit-mode-change',event=>{
+ if(event.detail==='walk'){
+  let changed=false;
+  if(routeStart&&routeLocationInside(routeStart)!==true){routeStart=null;changed=true;}
+  if(routeEnd&&routeLocationInside(routeEnd)!==true){routeEnd=null;changed=true;}
+  if(changed){invalidateRoute();updateRouteLabels();drawRouteMarkers();toast('도보 길찾기는 동작구 안에서만 지원합니다.');}
+ }
+ syncTransitExterior();
+});
 function requireDongjakRouteLocation(position){
   const inside=routeLocationInside(position);
   if(inside!==true){
@@ -3005,7 +3051,7 @@ async function resolveRouteAddress(position){
   if(routeWaypoints.includes(position))routeProductTools?.setWaypoints(routeWaypoints);
 }
 function setRouteLocation(which,position) {
-  if(!requireDongjakRouteLocation(position))return false;
+  if(!requireRouteEndpoint(position,which))return false;
   if (which==='start') routeStart=position;
   else routeEnd=position;
   invalidateRoute();
@@ -3090,7 +3136,7 @@ function selectNamedRouteMapPlace(place){
   return routeMapPickArbiter.named(()=>showTransitRouteConfirmation({...place,lng:Number(place.lng),lat:Number(place.lat)}));
 }
 function showTransitRouteConfirmation(place) {
-  if(!routePickMode||app.dataset.tab!=='map'||!requireDongjakRouteLocation(place))return false;
+  if(!routePickMode||app.dataset.tab!=='map'||!requireRouteEndpoint(place,routePickMode))return false;
   immersiveChrome.restore();
   closeTransitRouteConfirmation();
   routeTransitCandidate=place;
@@ -3149,7 +3195,7 @@ function beginRouteSearch(which){
   document.getElementById('route-place-search').hidden=false;
   document.getElementById('route-search-title').textContent=which==='start'?'출발지 검색':which==='waypoint'?'경유지 검색':'목적지 검색';
   document.getElementById('route-search-results').replaceChildren();
-  document.getElementById('route-search-status').textContent='서울·동작구 내 역명, 정류장명, 장소명 또는 주소를 입력하세요.';
+  document.getElementById('route-search-status').textContent=app.dataset.djTransitMode==='transit'&&which!=='waypoint'?'서울 검색 범위 · 한 곳은 동작구 안이어야 합니다.':'동작구 내 역명, 정류장명, 장소명 또는 주소를 입력하세요.';
   document.getElementById('route-search-query').value='';
   document.getElementById('route-search-submit').disabled=false;
   paintRecentRouteSearch();
@@ -3158,7 +3204,7 @@ function beginRouteSearch(which){
 function chooseSearchResult(place){
   const which=routeSearchTarget;
   if(!which||!Number.isFinite(place.lng)||!Number.isFinite(place.lat))return;
-  if(!requireDongjakRouteLocation(place))return;
+  if(!requireRouteEndpoint(place,which))return;
   recordRecentPlace(place);
   // A validated search result fills the pending inline waypoint; map picking
   // retains its explicit coordinate confirmation.
@@ -3195,8 +3241,8 @@ function routeLocalMatches(query){
 function paintRouteSearchResults(matches,message){
   const results=document.getElementById('route-search-results');
   results.replaceChildren();
-  const allowed=matches.filter(p=>routeLocationInside(p)===true);
-  document.getElementById('route-search-status').textContent=!boundaryGeometry?'동작구 경계정보를 확인하는 중입니다.':allowed.length!==matches.length?(allowed.length?`동작구 내 검색 결과 ${allowed.length}개`:'동작구 내 검색 결과가 없습니다.'):message;
+  const allowed=matches.filter(p=>routeLocationInside(p)===true||transitLocationAllowed(p,routeSearchTarget));
+  document.getElementById('route-search-status').textContent=!boundaryGeometry?'동작구 경계정보를 확인하는 중입니다.':allowed.length!==matches.length?(allowed.length?`지원 범위 검색 결과 ${allowed.length}개`:'지원 범위 검색 결과가 없습니다.'):message;
   for(const place of allowed){
     const button=document.createElement('button');button.type='button';button.className='route-search-item';
     const head=document.createElement('strong');head.textContent=place.name;
@@ -3270,7 +3316,7 @@ document.getElementById('route-transit-retry').addEventListener('click',closeTra
 document.getElementById('route-transit-accept').addEventListener('click',()=>{
   if(!routeTransitCandidate||!routePickMode)return;
   const place=routeTransitCandidate;
-  if(!requireDongjakRouteLocation(place))return;
+  if(!requireRouteEndpoint(place,routePickMode))return;
   const which=routePickMode;
   closeTransitRouteConfirmation();
   routePickMode=null;
@@ -3403,8 +3449,8 @@ function fitWalkingRoute(coords) {
 window.addEventListener('dj-next:fit-route',()=>{
   if(app.dataset.tab==='map'&&routeResult?.coords?.length>=2)fitWalkingRoute(routeResult.coords);
 });
-async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
-  if([from,to].some(p=>routeLocationInside(p)!==true))throw new Error('동작구 내 출발지와 도착지만 지원합니다.');
+async function fetchPedestrianRoute(from,to,profile='standard',externalSignal,{transitExterior=false}={}) {
+  if([from,to].some(p=>transitExterior?!transitPointInScope(p):routeLocationInside(p)!==true))throw new Error('동작구 내 출발지와 도착지만 지원합니다.');
   const useHills=profile==='gentle'?0:0.5;
   const payload={locations:[{lat:from.lat,lon:from.lng},{lat:to.lat,lon:to.lng}],
     costing:'pedestrian',costing_options:{pedestrian:{use_hills:useHills}},
@@ -3452,8 +3498,10 @@ async function fetchPedestrianRoute(from,to,profile='standard',externalSignal) {
       coords.push(...segment);
     }
     if(coords.length<2)throw new Error('표시할 도보 경로 좌표가 없습니다.');
-    if(!routeWithinDistrict(coords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 경로는 지원하지 않습니다.');
-    return {coords,seconds:Number(trip.summary.time),kilometers:Number(trip.summary.length),maneuvers,
+    if(transitExterior?!transitCoordinatesInScope(coords):!routeWithinDistrict(coords,boundaryGeometry,isDongjak))throw new Error('지원 범위를 벗어나는 도보 경로입니다.');
+    const seconds=Number(trip.summary.time),kilometers=Number(trip.summary.length);
+    if(!Number.isFinite(seconds)||seconds<0||!Number.isFinite(kilometers)||kilometers<0)throw new Error('도보 거리 또는 시간 확인 불가');
+    return {coords,seconds,kilometers,maneuvers,
       source:'valhalla-external'};
   } finally {clearTimeout(timer);externalSignal?.removeEventListener('abort',externalAbort);}
 }
@@ -3626,7 +3674,7 @@ const routeConfirmation=document.getElementById('route-transit-confirm');
 new MutationObserver(()=>{if(routeConfirmation.hidden&&routeCandidateMarker)closeTransitRouteConfirmation();}).observe(routeConfirmation,{attributes:true,attributeFilter:['hidden']});
 window.addEventListener('pagehide',()=>{routeRequestGeneration++;routeRequestPending=false;routePickMode=null;closeTransitRouteConfirmation();closeRouteSearch();closePriPreferences();drawRouteMarkers(false);});
 window.addEventListener('pageshow',event=>{if(event.persisted)syncRoutePresentation();});
-window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncRoutePresentation();}});
+window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncTransitExterior();syncRoutePresentation();}});
 document.getElementById('route-gps-start').addEventListener('click',()=>{
   if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');return;}
   const b=document.getElementById('route-gps-start');b.disabled=true;b.textContent='위치 확인 중…';
@@ -3661,7 +3709,7 @@ window.addEventListener('dongjak:route-search-current-location',async event=>{
     if(seq!==routeSearchSequence||which!==routeSearchTarget||app.dataset.tab!=='route'||navMode)return;
     const position={lng:coords.longitude,lat:coords.latitude,name:'현재 위치',label:'현재 위치',resolveAddress:true};
     const inside=routeLocationInside(position);
-    if(inside!==true){
+    if(inside!==true&&!transitLocationAllowed(position,which)){
       document.getElementById('route-search-status').textContent=inside===null?'동작구 경계정보를 확인하지 못했습니다. 지도에서 다시 선택해 주세요.':'현재 위치가 동작구 밖입니다. 동작구 내 장소를 검색하거나 지도에서 선택해 주세요.';
       return;
     }
@@ -3702,28 +3750,29 @@ routeProductTools=installMapProduct({map,maplibregl,navigate,
     routeWaypoints=next.map(p=>({...p,label:p.name}));invalidateRoute();
   },
   onTransitPreview:previewRailTransit=async (plan,signal,preferPri=true)=>{
+    assertTransitScope();
     if(!routeStart||!routeEnd)throw new Error('출발지와 목적지가 필요합니다.');
     if(routeWaypoints.length)throw new Error('경유지 없는 두 지점만 지원합니다.');
     if(navMode)throw new Error('GPS 안내 중에는 다른 이동안을 표시할 수 없습니다.');
     const railCoords=plan.stops.map(name=>VERIFIED_STATIONS[name]);
-    if(railCoords.some(p=>!p)||!routeWithinDistrict(railCoords,boundaryGeometry,isDongjak))throw new Error('동작구 경계를 벗어나는 대중교통 경로는 지원하지 않습니다.');
+    if(railCoords.some(p=>!p)||!transitCoordinatesInScope(railCoords))throw new Error('현재 지원 범위를 벗어나는 철도 경로입니다.');
     const from=routeStart,to=routeEnd,requestGeneration=routeRequestGeneration,request=++transitGeneration;
     const stillCurrent=()=>!signal?.aborted&&requestGeneration===routeRequestGeneration&&request===transitGeneration&&routeStart===from&&routeEnd===to&&!routeWaypoints.length&&app.dataset.tab==='route'&&!navMode;
-    const first=await fetchPreferredPedestrianPair(from,plan.origin,signal);
+    const first=await fetchTransitPedestrianPair(from,plan.origin,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
-    const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
+    const last=await fetchTransitPedestrianPair(plan.destination,to,signal);
     if(!stillCurrent())throw new Error('이동 중 경로 조건이 변경됐습니다. 다시 시도하세요.');
     const [startWalk,endWalk]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
     if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
     if(!startWalk||!endWalk)throw new Error('역과 출발·도착 장소를 연결할 실제 보행경로가 없습니다.');
     const railSegments=transitRailSegments(plan.stops,plan.lines,VERIFIED_STATIONS,await getTransitRailPaths());
     if(!stillCurrent())throw new Error('경로 조건이 변경됐습니다.');
-    if(!railSegments.length||railSegments.some(s=>!routeWithinDistrict(s.coordinates,boundaryGeometry,isDongjak)))throw new Error('동작구 내 철도 구간을 확인하지 못했습니다.');
+    if(!railSegments.length||railSegments.some(s=>!transitCoordinatesInScope(s.coordinates)))throw new Error('지원 범위 내 철도 구간을 확인하지 못했습니다.');
     if(!map.isStyleLoaded?.())throw new Error('지도 스타일을 불러오는 중입니다.');
     invalidateRoute();
-    const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))};
+    const walk={type:'FeatureCollection',features:[startWalk,endWalk].map(r=>({type:'Feature',properties:{color:transitWalkStyle(r)},geometry:{type:'LineString',coordinates:r.coords}}))};
     transitRailData(railSegments);
-    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,'#168f82',null]]){
+    for(const [id,data,color,dash] of [['dj815-transit-walk',walk,['get','color'],null]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(`${id}-line`))map.addLayer({id:`${id}-line`,type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},
         paint:{'line-color':color,'line-width':5,'line-opacity':.9,...(dash?{'line-dasharray':dash}:{})}});
@@ -3757,18 +3806,26 @@ function transitRailQuality(segments){
  return segments.length&&segments.every(s=>!s.schematic)?'verified':segments.some(s=>!s.schematic)?'mixed':'schematic';
 }
 // Assess each pair of alternatives independently, never compare disjoint legs.
+async function fetchTransitPedestrianPair(from,to,signal){
+ if(!transitPointInScope(from)||!transitPointInScope(to))throw new Error('보행 연결 지점이 지원 범위 밖입니다.');
+ if(routeLocationInside(from)===true&&routeLocationInside(to)===true){try{return await fetchPreferredPedestrianPair(from,to,signal);}catch(e){if(signal?.aborted||e?.name==='AbortError')throw e;}}
+ // External legs use the existing bounded pedestrian proxy only. No duplicate
+ // gentle request or fabricated PRI for areas without evaluation coverage.
+ const standard=await fetchPedestrianRoute(from,to,'standard',signal,{transitExterior:true});
+ return {standard:{...standard,transitExterior:!routeWithinDistrict(standard.coords,boundaryGeometry,isDongjak)},gentle:null};
+}
 async function selectTransitWalk(pair,preferPri){
- const valid=r=>Array.isArray(r.coords)&&r.coords.length>=2&&routeWithinDistrict(r.coords,boundaryGeometry,isDongjak);
+ const valid=r=>transitCoordinatesInScope(r.coords);
  const candidates={standard:pair.standard&&valid(pair.standard)?pair.standard:null,gentle:pair.gentle&&valid(pair.gentle)?pair.gentle:null};
  let assessment=null;
- try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500});}catch{}
+ if(!Object.values(candidates).some(r=>r?.transitExterior))try{assessment=await evaluateCompositePriRouteCandidates(candidates,{factors:priPreferences.getSelected(),timeoutMs:4500});}catch{}
  return chooseTransitWalk(candidates,assessment,{preferPri,valid});
 }
 // Assess the two actual walking legs independently, never the vehicle path.
 function publishTransitDetail(plan,from,to,first,last){
   const preview=transitPreview;
   const label=p=>p?.name||p?.label||'선택한 장소';
-  const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice});
+  const walk=r=>({meters:Math.round(r.kilometers*1000),minutes:Math.max(0,Math.ceil(r.seconds/60)),priChoice:r.transitPriChoice,exterior:Boolean(r.transitExterior)});
   const detail={kind:plan.kind,railQuality:plan.railQuality,route:plan.route,routeType:plan.routeType,routeId:plan.routeId,lines:plan.lines||[],changes:plan.changes||0,
     from:label(from),to:label(to),board:label(plan.origin),alight:label(plan.destination),arsId:plan.origin?.arsId,firstTime:plan.origin?.firstTime,lastTime:plan.origin?.lastTime,
     stops:plan.kind==='bus'?plan.stops.map(s=>s.name):plan.stops,targets:[plan.origin,plan.destination,to,to].map(p=>({lat:p.lat,lng:p.lng})),first:walk(first),last:walk(last),minutes:preview.minutes,pri:{first:first.transitPri||null,last:last.transitPri||null}};
@@ -3780,7 +3837,7 @@ function publishTransitDetail(plan,from,to,first,last){
 // Only a verified walking link may connect two different boarding locations.
 async function previewMultiTransit(plan,signal,preferPri=true){
  const legs=plan.legs;
- if(!Array.isArray(legs)||(legs.length<2||legs.length>3)||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!routeWithinDistrict(leg.coords,boundaryGeometry,isDongjak)))throw new Error('동작구 내 검증된 환승 경로가 아닙니다.');
+ if(!Array.isArray(legs)||(legs.length<2||legs.length>3)||legs.some(leg=>!['bus','rail'].includes(leg.kind)||!Array.isArray(leg.coords)||leg.coords.length<2||!transitCoordinatesInScope(leg.coords)))throw new Error('검증된 환승 경로 또는 지원 범위를 확인하지 못했습니다.');
  const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
  const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
  const pairs=[[from,legs[0].origin],...legs.slice(1).map((leg,i)=>[legs[i].destination,leg.origin]),[legs.at(-1).destination,to]];
@@ -3789,22 +3846,22 @@ async function previewMultiTransit(plan,signal,preferPri=true){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    const sameStop=a.arsId&&a.arsId===b.arsId&&a.lng===b.lng&&a.lat===b.lat;
    if(sameStop||(a.lng===b.lng&&a.lat===b.lat)){walks.push({coords:[],seconds:0,kilometers:0});continue;}
-   const result=await fetchPreferredPedestrianPair(a,b,signal);
+   const result=await fetchTransitPedestrianPair(a,b,signal);
    const selected=await selectTransitWalk(result,preferPri);
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
-   if(!selected||!routeWithinDistrict(selected.coords,boundaryGeometry,isDongjak))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
+   if(!selected||!transitCoordinatesInScope(selected.coords))throw new Error('실제 환승 보행 연결을 확인하지 못했습니다.');
    walks.push(selected);
  }
  const paths=legs.some(l=>l.kind==='rail')?await getTransitRailPaths():[];
  const railSegments=legs.filter(l=>l.kind==='rail').flatMap(l=>transitRailSegments(l.stops,l.lines,VERIFIED_STATIONS,paths));
- if(legs.some(l=>l.kind==='rail')&&!railSegments.length||railSegments.some(s=>!routeWithinDistrict(s.coordinates,boundaryGeometry,isDongjak)))throw new Error('동작구 내 철도 구간을 확인하지 못했습니다.');
+ if(legs.some(l=>l.kind==='rail')&&!railSegments.length||railSegments.some(s=>!transitCoordinatesInScope(s.coordinates)))throw new Error('지원 범위 내 철도 구간을 확인하지 못했습니다.');
  if(!current()||!map.isStyleLoaded?.())throw new Error('지도 또는 경로 상태가 변경됐습니다.');
  invalidateRoute();
  transitRailData(railSegments);
  const feature=(coordinates,color)=>({type:'Feature',properties:{color},geometry:{type:'LineString',coordinates}});
  const color=leg=>leg.kind==='bus'?busRouteColor(leg.routeType):subwayLineColor(leg.lines[0]==='신림'?'신림선':leg.lines[0]+'호선');
  const data=[
-  ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,'#168f82')),false],
+  ['dj-transit-multi-walk',walks.filter(x=>x.coords.length>=2).map(x=>feature(x.coords,transitWalkStyle(x))),false],
   ['dj-transit-multi-bus',legs.filter(x=>x.kind==='bus').map(x=>feature(x.coords,color(x))),false]
  ];
  for(const [id,features,dash] of data){
@@ -3820,7 +3877,7 @@ async function previewMultiTransit(plan,signal,preferPri=true){
  window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard:null,gentle:null}}));
  const preview=transitPreview={kind:plan.kind,changes:legs.length-1,minutes:null,walkM:walks.reduce((sum,w)=>sum+w.kilometers*1000,0)};
  const label=p=>p?.name||p?.label||'선택한 장소';
- const detail={kind:plan.kind,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
+ const detail={kind:plan.kind,railQuality:railSegments.length?transitRailQuality(railSegments):null,from:label(from),to:label(to),legs:legs.map(leg=>({...leg,origin:label(leg.origin),destination:label(leg.destination),arsId:leg.origin?.arsId,firstTime:leg.origin?.firstTime,lastTime:leg.origin?.lastTime,stops:leg.kind==='bus'?leg.stops.map(s=>s.name):leg.stops})),walks:walks.map(w=>({meters:Math.round(w.kilometers*1000),minutes:Math.ceil(w.seconds/60),priChoice:w.transitPriChoice,exterior:Boolean(w.transitExterior)})),targets:[...legs.flatMap(leg=>[leg.origin,leg.destination]),to,to].map(p=>({lat:p.lat,lng:p.lng})),priLegs:walks.map(w=>w.transitPri||null)};
  const emit=()=>{if(transitPreview===preview)window.dispatchEvent(new CustomEvent('dongjak:transit-detail',{detail:{...detail}}));};
  navigate('map');syncRoutePresentation();emit();
  fitWalkingRoute([...walks.flatMap(w=>w.coords),...legs.filter(l=>l.kind==='bus').flatMap(leg=>leg.coords),...railSegments.flatMap(s=>s.coordinates)]);
@@ -3862,14 +3919,15 @@ window.addEventListener('dongjak:transit-candidate-review',event=>{
   const from=routeStart,to=routeEnd,gen=routeRequestGeneration;
   const current=()=>!signal?.aborted&&app.dataset.tab==='route'&&!navMode&&routeStart===from&&routeEnd===to&&gen===routeRequestGeneration&&!routeWaypoints.length;
   if(!from||!to||!current())throw new Error('경로 조건이 변경됐습니다.');
+  assertTransitScope();
   const legs=plan.legs||[plan];
-  if(legs.some(leg=>{const coords=leg.kind==='rail'?leg.stops?.map(n=>VERIFIED_STATIONS[n]):leg.coords;return !Array.isArray(coords)||coords.length<2||coords.some(p=>!p)||!routeWithinDistrict(coords,boundaryGeometry,isDongjak);}))throw new Error('교통 구간 확인 불가');
+  if(legs.some(leg=>{const coords=leg.kind==='rail'?leg.stops?.map(n=>VERIFIED_STATIONS[n]):leg.coords;return !Array.isArray(coords)||coords.length<2||coords.some(p=>!p)||!transitCoordinatesInScope(coords);}))throw new Error('교통 구간 확인 불가');
   const pairs=transitReviewPairs(plan,from,to),walks=[];
   if(!pairs.length)throw new Error('경로 연결 정보 부족');
   for(const [a,b] of pairs){
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    if(a.lng===b.lng&&a.lat===b.lat){walks.push({kilometers:0,seconds:0});continue;}
-   const pair=await fetchPreferredPedestrianPair(a,b,signal);
+   const pair=await fetchTransitPedestrianPair(a,b,signal);
    if(!current())throw new Error('경로 조건이 변경됐습니다.');
    const walk=await selectTransitWalk(pair,preferPri);
    if(!current()||!walk)throw new Error('도보 연결 확인 불가');
@@ -3883,21 +3941,22 @@ window.addEventListener('dongjak:transit-route-preview',event=>{
   if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
   void (async()=>{
     if(!routeStart||!routeEnd||routeWaypoints.length||navMode||app.dataset.tab!=='route')throw new Error('출발지와 목적지를 다시 확인해 주세요.');
+    assertTransitScope();
     if(plan.kind==='rail')return previewRailTransit(plan,signal,preferPri);
     if(plan.kind==='transfer'||plan.kind==='mixed')return previewMultiTransit(plan,signal,preferPri);
-    if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!routeWithinDistrict(plan.coords,boundaryGeometry,isDongjak))throw new Error('동작구 내 검증된 버스 경로가 아닙니다.');
+    if(plan.kind!=='bus'||!Array.isArray(plan.coords)||plan.coords.length<2||!transitCoordinatesInScope(plan.coords))throw new Error('검증된 버스 경로 또는 지원 범위를 확인하지 못했습니다.');
     const from=routeStart,to=routeEnd,gen=routeRequestGeneration,req=++transitGeneration;
     const current=()=>!signal?.aborted&&gen===routeRequestGeneration&&req===transitGeneration&&routeStart===from&&routeEnd===to&&app.dataset.tab==='route'&&!navMode&&!routeWaypoints.length;
-    const first=await fetchPreferredPedestrianPair(from,plan.origin,signal);
+    const first=await fetchTransitPedestrianPair(from,plan.origin,signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
-    const last=await fetchPreferredPedestrianPair(plan.destination,to,signal);
+    const last=await fetchTransitPedestrianPair(plan.destination,to,signal);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     const [a,b]=await Promise.all([selectTransitWalk(first,preferPri),selectTransitWalk(last,preferPri)]);
     if(!current())throw new Error('경로 조건이 변경됐습니다.');
     if(!a||!b||!map.isStyleLoaded?.())throw new Error('실제 보행 연결 경로 또는 지도를 확인하지 못했습니다.');
     invalidateRoute();
     const collection=lines=>({type:'FeatureCollection',features:lines.map(coordinates=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates}}))});
-    for(const [id,data,color] of [['dj815-transit-walk',collection([a.coords,b.coords]),'#168f82'],['dj815-transit-bus',collection([plan.coords]),busRouteColor(plan.routeType)]]){
+    for(const [id,data,color] of [['dj815-transit-walk',{type:'FeatureCollection',features:[a,b].map(w=>({type:'Feature',properties:{color:transitWalkStyle(w)},geometry:{type:'LineString',coordinates:w.coords}}))},['get','color']],['dj815-transit-bus',collection([plan.coords]),busRouteColor(plan.routeType)]]){
       if(!map.getSource(id))map.addSource(id,{type:'geojson',data});else map.getSource(id).setData(data);
       if(!map.getLayer(id+'-line'))map.addLayer({id:id+'-line',type:'line',source:id,layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':color,'line-width':5,'line-opacity':.9}});
     }
