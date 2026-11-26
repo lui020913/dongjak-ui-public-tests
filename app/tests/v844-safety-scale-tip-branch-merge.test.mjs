@@ -14,14 +14,14 @@ test('mobile scale follows nav inset with side margin',()=>{
  assert.equal(mobileScaleLeft({mapLeft:0,mapWidth:320,navLeft:-12,scaleWidth:80}),18);
  assert.equal(mobileScaleLeft({mapLeft:0,mapWidth:320,navLeft:290,scaleWidth:80}),222);
 });
-test('retain integrated route and persistent TIP behavior, while changing copy on ten-second ticks',()=>{
+test('retain integrated route and persistent TIP behavior, while changing copy after its reading deadline',()=>{
  const src=read('src/v840-coordinated-ui.js');
  assert.match(src,/tipMark\.textContent='TIP'/);
  assert.match(src,/tipText\.textContent=MAP_TIP_MESSAGES\[tip\]/);
  assert.match(src,/const advanceTip=/);
  assert.match(src,/dj852-tip-copy-fade/);
  assert.doesNotMatch(src,/tipShownThisMapVisit|tipHideTimer|showBriefTip/);
- assert.match(src,/\},10000\)/);
+ assert.match(src,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
  assert.match(src,/label\.addEventListener\('click',openGuideFromTip\)/);
  assert.match(read('index.html'),/v841-route-and-tips\.js/);
  assert.match(read('src/v841-route-and-tips.js'),/onWaypointClick/);
