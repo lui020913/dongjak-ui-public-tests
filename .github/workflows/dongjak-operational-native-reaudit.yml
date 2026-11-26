@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'scripts/research/dongjak_operational_native_reaudit.py'
+      - 'scripts/research/dongjak_native_id_eligibility.py'
       - '.github/workflows/dongjak-operational-native-reaudit.yml'
 permissions:
   contents: read
