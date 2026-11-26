@@ -100,11 +100,12 @@ def regression():
     assert reconstruct(line,box(5,-5,7,5),original)[0] is None
     print("CORRIDOR_REGRESSION_OK")
 
-def main(out):
+def main(out,district=False):
     out.mkdir(parents=True,exist_ok=True)
-    boundary_file=PUBLIC/"data/protection-zone/boundary_reference.geojson"
+    boundary_file=PUBLIC/("data/dongjak_sig_reference.geojson" if district else "data/protection-zone/boundary_reference.geojson")
     bf=json.loads(boundary_file.read_text())["features"][0]
-    assert bf["properties"]["emdnm"]=="상도1동"
+    if district:assert bf["properties"]["SIG_CD"]=="11590"
+    else:assert bf["properties"]["emdnm"]=="상도1동"
     boundary=metric(bf["geometry"]);scope=boundary.buffer(15)
     manifest=json.loads((PUBLIC/"buildings/manifest.json").read_text())
     buildings=[];bfeatures=[]
@@ -157,9 +158,9 @@ def main(out):
     assert baseline and surfaces,"No actual preview data"
     for name,items in (("original-links",baseline),("candidate-centers",centers),("candidate-surfaces",surfaces),("unresolved-links",unresolved),("buildings",bfeatures),("official-roads",[feature(g,{}) for g in official]),("boundary",[feature(boundary,{})])):
         write(out,name,items)
-    summary={"scope":"상도1동","boundary_source":bf["properties"],"graph_sha256":hashlib.sha256(raw).hexdigest(),"building_obstacles":len(buildings),"display_buildings":len(bfeatures),"original_links":len(baseline),"candidate_links":len(centers),"unresolved_links":len(unresolved),"counts":dict(counts),"totals":{k:round(v,2) for k,v in total.items()},"constraints":{"maximum_center_shift_m":SHIFT,"minimum_display_width_m":MIN_RADIUS*2,"building_clearance_m":MARGIN,"fixed_endpoints":True},"limitations":["Display widths are estimates, not measured road widths","Unresolved links are not drawn as reconstructed road surfaces","Source walking graph and actual routing remain untouched","Only unflagged vehicle-permitted links included; bridges, paths and other facilities not replaced","Boundary crossing links outside 15m scope excluded"]}
+    summary={"scope":"동작구" if district else "상도1동","boundary_source":bf["properties"],"graph_sha256":hashlib.sha256(raw).hexdigest(),"building_obstacles":len(buildings),"display_buildings":len(bfeatures),"original_links":len(baseline),"candidate_links":len(centers),"unresolved_links":len(unresolved),"counts":dict(counts),"totals":{k:round(v,2) for k,v in total.items()},"constraints":{"maximum_center_shift_m":SHIFT,"minimum_display_width_m":MIN_RADIUS*2,"building_clearance_m":MARGIN,"fixed_endpoints":True},"limitations":["Display widths are estimates, not measured road widths","Unresolved links are not drawn as reconstructed road surfaces","Source walking graph and actual routing remain untouched","Only unflagged vehicle-permitted links included; bridges, paths and other facilities not replaced","Boundary crossing links outside 15m scope excluded"]}
     (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2))
     print("SANGDO_CORRIDOR_RESULT",json.dumps(summary,ensure_ascii=False))
 if __name__=="__main__":
     if "--test" in sys.argv:regression()
-    else:main(pathlib.Path(sys.argv[1] if len(sys.argv)>1 else "sangdo-corridor-review"))
+    else:main(pathlib.Path(sys.argv[1] if len(sys.argv)>1 else "sangdo-corridor-review"),district="--district" in sys.argv)
