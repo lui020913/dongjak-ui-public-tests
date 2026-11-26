@@ -92,6 +92,7 @@ import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFo
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
+import {LABEL_HALO_MAX_PX} from './map-label-halo.js';
 
 export function getInitialTheme(){
   // The public app is light-only. Night visibility can still apply a temporary
@@ -111,6 +112,11 @@ export function roadColorRole(layer={}){
 }
 // v17.11: white roads need a slightly darker surrounding land surface.
 // Apply only to the base-map style; building, route and safety overlays retain their own colors.
+// OpenMapTiles transportation polygons include pedestrian plazas and paths,
+// not just carriageways. Preserve their geometry but avoid opaque white areas.
+export function nativeHighwayAreaColor(){
+  return ['match',['coalesce',['get','class'],''],['path','pedestrian','footway','cycleway','steps','living_street'],'#e7e9e2','#ffffff'];
+}
 export function lightMapLandRole(layer = {}) {
   if(layer.type==='background')return 'ground';
   if(layer.type!=='fill'||roadColorRole(layer))return null;
@@ -162,8 +168,8 @@ export function initTheme({map,app}){
       });
     }
   }
-  const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:1.6});
-  const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:1.6});
+  const mapLabelTextPaint=Object.freeze({color:'#f1f4f6',halo:'rgba(18,25,32,0.97)',width:LABEL_HALO_MAX_PX});
+  const mapLabelLightPaint=Object.freeze({color:'#26352f',halo:'rgba(255,255,255,0.97)',width:LABEL_HALO_MAX_PX});
   const semanticSymbolPattern=/(?:train[-_]?vehicle|route[-_]?badge|line[-_]?badge|dj-pri-(?:line|point))/i;
   function syncMapLabelContrast(){
     const layers=map.getStyle?.()?.layers;
@@ -220,7 +226,8 @@ export function initTheme({map,app}){
       }
       if(themeState.value==='light'){
         if(entry.type==='background')set('background-color',entry.landRole==='ground'?'#e2e4dc':entry.background);
-        if(entry.type==='fill')set('fill-color',entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
+        if(entry.type==='fill'&&id==='highway-area')set('fill-color',nativeHighwayAreaColor());
+        else if(entry.type==='fill')set('fill-color',entry.roadRole ? (entry.roadRole==='edge'?'#d0d8d3':'#ffffff') : entry.landRole==='vegetation'?'#a5ca92':entry.landRole==='ground'?'#e1e4dc':entry.fill);
         if(entry.type==='line')set('line-color',entry.roadRole ? (entry.roadRole==='edge'?'#cbd4d0':'#ffffff') : entry.line);
         if(entry.type==='symbol') {set('text-color',entry.text);set('text-halo-color',entry.halo);set('text-halo-width',entry.haloWidth);}
       }else{
