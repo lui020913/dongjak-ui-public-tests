@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const scope={console:{warn(){}}};vm.createContext(scope);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'selective-road-filter.js'),'utf8')+'\nthis.create=createSelectiveRoadReview;this.expr=roadExpression;',scope);
+const clone=x=>JSON.parse(JSON.stringify(x));
+const boundary={type:'Polygon',coordinates:[[[0,0],[1,0],[1,1],[0,1],[0,0]]]};
+const base=['all',['==','class','minor'],['!in','brunnel','bridge','tunnel']];
+const layers=[{id:'road',source:'openmaptiles','source-layer':'transportation',type:'line',filter:base},{id:'bridge-road',source:'openmaptiles','source-layer':'transportation',type:'line',filter:base},{id:'rail-road',source:'openmaptiles','source-layer':'transportation',type:'line',filter:base},{id:'road-label',source:'openmaptiles','source-layer':'transportation',type:'symbol',filter:base},{id:'other-source',source:'other','source-layer':'transportation',type:'line',filter:base}];
+const eligibility={eligible_native_ids:[10,20],eligible_id_count:2,source_name:'openmaptiles',minimum_display_zoom:16,style_transport_layers:layers};
+let zoom=17,loaded=true,fail=false;const filters=new Map(layers.map(l=>[l.id,l.filter]));
+const map={getZoom:()=>zoom,getSource:()=>({}),isSourceLoaded:()=>loaded,getStyle:()=>({layers}),getLayer:id=>layers.find(l=>l.id===id),getFilter:id=>filters.get(id),setFilter:(id,f)=>{if(fail&&f!==base)return;filters.set(id,f)}};
+const review=scope.create(map,eligibility,boundary,true);
+assert.equal(review.valid,true);assert.equal(review.update(true),1);const changed=clone(filters.get('road'));assert.equal(changed[0],'all');assert.equal(changed[2][0],'!');assert.deepEqual(changed[2][1][1],['in',['id'],['literal',[10,20]]]);assert.deepEqual(changed[2][1][2],['within',boundary]);
+for(const l of layers.slice(1))assert.deepEqual(filters.get(l.id),base);
+zoom=15;assert.equal(review.update(true),0);assert.deepEqual(filters.get('road'),base);
+zoom=17;loaded=false;assert.equal(review.update(true),0);loaded=true;assert.equal(review.update(true),1);review.update(false);assert.deepEqual(filters.get('road'),base);
+assert.equal(scope.create(map,eligibility,boundary,false).update(true),0);assert.deepEqual(filters.get('road'),base);
+fail=true;assert.equal(review.update(true),0);assert.deepEqual(filters.get('road'),base);
+assert.throws(()=>scope.expr(['unknown','x']));console.log('SELECTIVE_ROAD_GUARDS_OK');
