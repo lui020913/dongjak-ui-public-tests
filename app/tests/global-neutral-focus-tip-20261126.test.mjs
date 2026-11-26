@@ -23,3 +23,15 @@ test('shadow route controls inherit pointer and keyboard focus policy without ho
   assert.match(shadow,/outline:var\(--dj-route-focus-outline,2px solid #596368\)/);
   assert.doesNotMatch(shadow,/:host-context/);
 });
+
+test('TIP text reserves the X lane and rotation waits for full marquee',()=>{
+  const measure=readFileSync(new URL('../src/v854-tip-marquee.js',import.meta.url),'utf8');
+  const shell=readFileSync(new URL('../src/v840-coordinated-ui.js',import.meta.url),'utf8');
+  const motion=readFileSync(new URL('../src/v854-integrated-ui.css',import.meta.url),'utf8');
+  assert.match(html,/margin-inline-end: var\(--dj-tip-close-reserve, 0px\)/);
+  assert.match(measure,/const moving=overflow>0/);
+  assert.match(measure,/durationSeconds\+2/);
+  assert.match(measure,/dataset\.djTipReadUntil/);
+  assert.match(shell,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
+  assert.match(motion,/90%,100%\{transform:translateX\(var\(--dj854-tip-overflow/);
+});
