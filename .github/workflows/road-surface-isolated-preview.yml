@@ -49,7 +49,39 @@ jobs:
           m['review_run_id']=45763031345
           m['source_commit']=os.environ['GITHUB_SHA']
           (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False))
-          assert all(f.stat().st_size<25*1024*1024 for f in p.rglob('*') if f.is_file())
+          # Split oversized GeoJSON by whole features, preserving order and properties.
+          # Keep each published file below the Pages per-asset limit with headroom.
+          limit=8*1024*1024
+          chunks={}
+          for f in sorted(p.rglob('*.geojson')):
+              if f.stat().st_size<limit:continue
+              original=json.loads(f.read_text())
+              assert original['type']=='FeatureCollection',f
+              features=original['features']
+              prefix=b'{"type":"FeatureCollection","features":['
+              suffix=b']}'
+              parts=[];batch=[];size=len(prefix)+len(suffix)
+              def flush():
+                  if not batch:return
+                  target=f.with_name(f.stem+'.part-'+str(len(parts)+1).zfill(3)+'.geojson')
+                  target.write_bytes(prefix+b','.join(batch)+suffix)
+                  assert target.stat().st_size<limit,target
+                  parts.append(target.relative_to(p).as_posix())
+              for feature in features:
+                  b=json.dumps(feature,ensure_ascii=False,separators=(',',':')).encode('utf-8')
+                  assert len(b)+len(prefix)+len(suffix)<limit,('oversized single feature',f)
+                  if size+len(b)+1>=limit:
+                      flush();batch=[];size=len(prefix)+len(suffix)
+                  size+=len(b)+(1 if batch else 0);batch.append(b)
+              flush()
+              check=[g for part in parts for g in json.loads((p/part).read_text())['features']]
+              assert check==features,('geometry loss',f)
+              chunks[f.relative_to(p).as_posix()]={'parts':parts,'count':len(features)}
+              f.unlink()
+              print('GEOJSON_SPLIT',f,len(features),len(parts))
+          (p/'geojson-chunks.json').write_text(json.dumps(chunks,ensure_ascii=False))
+          oversized=[(str(f),f.stat().st_size) for f in p.rglob('*') if f.is_file() and f.stat().st_size>=25*1024*1024]
+          assert not oversized,oversized
           inline=re.findall(r'<script>([\s\S]*?)</script>',(p/'index.html').read_text())
           assert len(inline)==1
           pathlib.Path('/tmp/road-preview-check.js').write_text(inline[0])
