@@ -1,6 +1,7 @@
 import {createNativeTileGuard} from './reviewed-native-tile-guard.mjs';
 import {createSelectiveRoadReview} from './reviewed-native-road-filter.mjs';
-import {reviewedRoadAssets} from './reviewed-road-display-assets.mjs';
+import {createRoadDisplayAssets} from './reviewed-road-display-assets.mjs';
+const baseAssets=createRoadDisplayAssets({enabled:true});
 const SOURCE='dj-reviewed-base-road-surfaces';
 const LAYER='dj-reviewed-base-road-fill';
 const empty=()=>({type:'FeatureCollection',features:[]});
@@ -14,11 +15,11 @@ export function roadTilesForViewport(tiles,bounds){
  * unless the exact reaudited source and district guards are satisfied.
  * Do not modify routing, transport or building layers.
  */
-export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enabled=false}){
+export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=false,requireSelective=false}){
  if(!enabled)return {dispose(){},refresh:async()=>false};
  let manifest=null,disposed=false,generation=0,timer=0,lastKey='',initializing=null,selective=null,eligibilityPromise=null,readyToken=0,nativeGuard=null;
  const cache=new Map();
- const hide=()=>{readyToken=0;selective?.restore();if(map.getLayer(LAYER))map.setLayoutProperty(LAYER,'visibility','none');delete app.dataset.djReviewedBaseRoads;};
+ const hide=()=>{readyToken=0;selective?.restore();if(map.getLayer(LAYER)){map.setPaintProperty(LAYER,'fill-opacity',0);map.setLayoutProperty(LAYER,'visibility','none');}delete app.dataset.djReviewedBaseRoads;};
  async function setupSelective(){
   if(!manifest?.native_reaudit||manifest.native_reaudit.exact_surface_count!==manifest.surface_count||manifest.native_reaudit.eligible_ids!==258)return null;
   if(!eligibilityPromise)eligibilityPromise=(async()=>{
@@ -35,6 +36,10 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
     if(!actual||actual.type!=='vector'||actual.url!==native.sources[n.source_name]?.url)return null;
     nativeGuard=createNativeTileGuard(n);
     if(!nativeGuard.valid)return null;
+    // The actual MapLibre source must use the same versioned template, not
+    // merely the same TileJSON endpoint. A stale source fails open.
+    const liveTiles=map.getSource(n.source_name)?.tiles;
+    if(!Array.isArray(liveTiles)||!liveTiles.length||!liveTiles.every(t=>t===n.tile_template))return null;
     return createSelectiveRoadReview(map,n,geo.features?.[0]?.geometry,true,SOURCE);
   })().catch(()=>null);
   return eligibilityPromise;
@@ -43,7 +48,8 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
   if(!readyToken||readyToken!==generation||disposed||map.getZoom()<16||app.dataset.sangdoNight==='on')return;
   if(!selective||!map.getSource(SOURCE)||!map.isSourceLoaded?.(SOURCE))return;
   const count=selective.update(true);
-  if(count>0)app.dataset.djReviewedBaseRoads='selective-preview';
+  if(count>0){map.setPaintProperty(LAYER,'fill-opacity',1);app.dataset.djReviewedBaseRoads=requireSelective?'selective-operational':'selective-preview';}
+  else if(requireSelective)hide();
  }
  const remove=()=>{hide();if(map.getLayer(LAYER))map.removeLayer(LAYER);if(map.getSource(SOURCE))map.removeSource(SOURCE);lastKey='';};
  const color=()=>app.dataset.theme==='dark'||app.dataset.sangdoNight==='on'?'#39434a':'#ffffff';
@@ -53,7 +59,7 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
   // Below buildings and labels, above native ground-road styling.
   const anchor=style.layers.find(l=>l['source-layer']==='building'&&['fill','fill-extrusion'].includes(l.type))?.id||style.layers.find(l=>l.type==='symbol')?.id;
   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:empty(),tolerance:0,maxzoom:19});
-  if(!map.getLayer(LAYER))map.addLayer({id:LAYER,source:SOURCE,type:'fill',minzoom:16,layout:{visibility:'none'},paint:{'fill-color':color(),'fill-opacity':1,'fill-antialias':true}},anchor);
+  if(!map.getLayer(LAYER))map.addLayer({id:LAYER,source:SOURCE,type:'fill',minzoom:16,layout:{visibility:'none'},paint:{'fill-color':color(),'fill-opacity':0,'fill-antialias':true}},anchor);
   return true;
  }
  async function refresh(){
@@ -87,14 +93,18 @@ export function installReviewedBaseRoads({map,app,assets=reviewedRoadAssets,enab
    }
    if(disposed||token!==generation)return false;
    map.setPaintProperty(LAYER,'fill-color',color());
+   // Visible at zero alpha allows MapLibre to index the source without
+   // exposing unverified road polygons over the original map.
+   map.setPaintProperty(LAYER,'fill-opacity',requireSelective?0:1);
    map.setLayoutProperty(LAYER,'visibility','visible');
-   app.dataset.djReviewedBaseRoads='additive-preview';
+   if(!requireSelective)app.dataset.djReviewedBaseRoads='additive-preview';
    // Wait for the complete viewport asset to be indexed by MapLibre before
    // removing any native feature. A camera move restores all native filters.
    if(manifest.native_reaudit){
      selective=await setupSelective();
      if(selective&&nativeGuard&&await nativeGuard.verify([b.getWest(),b.getSouth(),b.getEast(),b.getNorth()])&&!disposed&&token===generation){readyToken=token;applySelective();}
-   }
+     else if(requireSelective&&token===generation){hide();return false;}
+   }else if(requireSelective){hide();return false;}
    return !disposed&&token===generation;
   }catch(e){if(token===generation){hide();delete app.dataset.djReviewedBaseRoads;console.warn('[road review] native base retained',e.message);}return false;}
  }
