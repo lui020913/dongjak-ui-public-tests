@@ -26,4 +26,6 @@
 #dj-route-pri-dialog [data-pri-apply]{background:var(--pri-accent);border-color:var(--pri-accent);color:#fff}
 #dj-route-pri-dialog :is(button,input):focus-visible{outline:2px solid var(--pri-accent);outline-offset:2px}
 html[data-theme=dark] #dj-route-pri-dialog,body:has(#app[data-theme=dark]) #dj-route-pri-dialog{--pri-bg:#20332f;--pri-ink:#e6f1ec;--pri-muted:#b5c8be;--pri-border:#47635a;--pri-tint:#2a4640;--pri-accent:#208b76}
-#app :is(#route-map-card,#route-summary,.route-card) .dj-route-pri-trigger{display:flex;align-items:center;justify-content:center;min-height:44px;width:100%;box-sizing:border-box;border:1px solid var(--dj800-border,#d3e2da);border-radius:999px;background:var(--dj800-surface,#fff);color:var(--dj800-text,#203d32);font:inherit;font-size:13px;font-weight:700;line-height:1.4;padding:7px 12px}
+#app :is(#route-map-card,#route-summary,.route-card) .dj-route-pri-trigger:not([hidden]){display:flex;align-items:center;justify-content:center;min-height:44px;width:100%;box-sizing:border-box;border:1px solid var(--dj800-border,#d3e2da);border-radius:999px;background:var(--dj800-surface,#fff);color:var(--dj800-text,#203d32);font:inherit;font-size:13px;font-weight:700;line-height:1.4;padding:7px 12px}
+
+#app .dj-route-pri-trigger[hidden]{display:none!important}
