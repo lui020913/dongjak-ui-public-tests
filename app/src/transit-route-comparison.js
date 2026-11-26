@@ -11,6 +11,7 @@ const icons={
 };
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icons[name]+'</svg>';
 const railLabel=line=>line==='신림'?'신림선':line+'호선';
+const legLabel=p=>p.kind==='bus'?p.route:[...new Set(p.lines)].map(railLabel).join(' · ');
 const nameOf=p=>p?.name||p?.label||'선택한 장소';
 export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const q=s=>shadow.querySelector(s);
@@ -39,27 +40,29 @@ export function mountTransitComparison({doc,win,shadow,host,view,app}){
  const choose=e=>{mode=e.currentTarget.dataset.transitMode;close();syncMode();};
  const modeButtons=[...shadow.querySelectorAll('[data-transit-mode]')];modeButtons.forEach(b=>{b.innerHTML=icon(b.dataset.transitMode==='walk'?'walk':'bus')+(b.dataset.transitMode==='walk'?'도보':'대중교통');b.addEventListener('click',choose);});
  panel.querySelector('.tr-head button').addEventListener('click',()=>{close({animate:true});});
- for(const [id,label] of [['all','전체'],['bus','버스'],['rail','지하철']]){
-  const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;render(true);});filters.append(b);
+ for(const [id,label] of [['all','전체'],['bus','버스'],['rail','지하철'],['mixed','버스+지하철']]){
+  const b=doc.createElement('button');b.type='button';b.dataset.filter=id;b.innerHTML=(id==='all'||id==='mixed'?'':icon(id))+label;b.addEventListener('click',()=>{if(busy)return;filter=id;render(true);});filters.append(b);
  }
  function note(text,retry=false){status.textContent=text;list.replaceChildren();if(retry){const b=doc.createElement('button');b.type='button';b.className='tr-retry';b.textContent='다시 조회';b.addEventListener('click',search);list.append(b);}}
  function show(ps){cancelSurfaceMotion(panel);panel.style.removeProperty('pointer-events');endpoints.textContent=ps.map(nameOf).join(' → ');panel.hidden=false;view.dataset.transitResults='true';revealSurface(panel);}
  function render(animate=false){
   if(!options)return;
   list.replaceChildren();
-  for(const b of filters.children){b.setAttribute('aria-pressed',String(b.dataset.filter===filter));const count=b.dataset.filter==='all'?options.bus.length+options.rail.length:options[b.dataset.filter].length;const label=b.dataset.filter==='all'?'전체':b.dataset.filter==='bus'?'버스':'지하철';b.innerHTML=(b.dataset.filter==='all'?'':icon(b.dataset.filter))+label+' '+count;}
-  const plans=[...(filter!=='rail'?options.bus:[]),...(filter!=='bus'?options.rail:[])];
+  const groups={bus:[...options.bus,...(options.busTransfer||[])],rail:options.rail,mixed:options.mixed||[]};
+  groups.all=[...groups.bus,...groups.rail,...groups.mixed];
+  for(const b of filters.children){const id=b.dataset.filter;b.setAttribute('aria-pressed',String(id===filter));const label={all:'전체',bus:'버스',rail:'지하철',mixed:'버스+지하철'}[id];b.textContent=label+' '+groups[id].length;}
+  const plans=groups[filter]||groups.all;
   status.textContent=(options.busStatus==='complete'?'조회 범위 내 이동안입니다.':'일부 버스 정보 조회 불가. ')+' 시간·요금은 확인된 정보만 표시합니다.';
   if(!plans.length){const p=doc.createElement('p');p.className='tr-note';p.textContent='조회 범위에서 확인된 이동안이 없습니다.';list.append(p);}
   for(const plan of plans){
-   const card=doc.createElement('button');card.type='button';card.className='tr-card';card.style.setProperty('--route-color',plan.kind==='bus'?busRouteColor(plan.routeType):subwayLineColor(railLabel(plan.lines[0])));
+   const card=doc.createElement('button');card.type='button';card.className='tr-card';const lead=plan.legs?.[0]||plan;card.style.setProperty('--route-color',lead.kind==='bus'?busRouteColor(lead.routeType):subwayLineColor(railLabel(lead.lines[0])));
    const head=doc.createElement('div');head.className='tr-row';
-   const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(plan.kind);
-   const title=doc.createElement('strong');title.textContent=plan.kind==='bus'?plan.route+' · 직행버스':[...new Set(plan.lines)].map(railLabel).join(' · ');
+   const mark=doc.createElement('span');mark.className='tr-bus-icon';mark.innerHTML=icon(lead.kind);
+   const title=doc.createElement('strong');title.textContent=plan.legs?plan.legs.map(legLabel).join(' + '):plan.kind==='bus'?plan.route+' · 직행버스':legLabel(plan);
    const chevron=doc.createElement('span');chevron.className='tr-chevron';chevron.innerHTML=icon('chevron');head.append(mark,title,chevron);
    const detail=doc.createElement('span');detail.className='tr-route-names';detail.textContent=plan.origin.name+' 승차 → '+plan.destination.name+' 하차';
-   const meta=doc.createElement('small');meta.textContent=plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
-   const track=doc.createElement('div');track.className='tr-track';track.innerHTML='<span>도보</span><span>'+(plan.kind==='bus'?'버스':'지하철')+'</span><span>도보</span>';track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
+   const meta=doc.createElement('small');meta.textContent=plan.legs?'환승 1회 · 전체 시간 미확인':plan.kind==='bus'?plan.stopCount+'개 정류장 이동 · 소요시간 미확인':plan.railStops+'개 역 이동 · 환승 '+plan.changes+'회 · 참고 '+Math.ceil(plan.indicativeMinutes)+'분 (대기 제외, 추정)';
+   const track=doc.createElement('div');track.className='tr-track';if(plan.legs){track.classList.add('tr-multi-track');track.innerHTML='<span>도보</span>'+plan.legs.map((leg,i)=>(i?'<span>환승</span>':'')+'<span data-vehicle="true">'+(leg.kind==='bus'?'버스':'지하철')+'</span>').join('')+'<span>도보</span>';}else track.innerHTML='<span>도보</span><span>'+(plan.kind==='bus'?'버스':'지하철')+'</span><span>도보</span>';track.setAttribute('aria-label','이동 순서, 시간 비율 아님');
    card.append(head,detail,track,meta);
    card.addEventListener('click',async()=>{
     if(busy)return;if(key(points())!==pointKey){close();return;}
