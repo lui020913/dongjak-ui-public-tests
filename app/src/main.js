@@ -2899,9 +2899,9 @@ function syncTransitExterior(force=false){
  if(map.getLayer('district-border')){
   map.setPaintProperty('district-border','line-color',active?'#77968a':'#0f7f73');
   map.setPaintProperty('district-border','line-width',active?1.5:2.6+map.getPitch()/28);
-  map.setPaintProperty('district-border','line-dasharray',active?[3,3]:[1,0]);
+  map.setPaintProperty('district-border','line-dasharray',active?[3,3]:null);
  }
- if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:window.matchMedia('(max-width:699px)').matches?.42:.92);
+ if(map.getLayer('district-border-halo'))map.setPaintProperty('district-border-halo','line-opacity',active?0:(window.matchMedia('(max-width:699px)').matches?0.42:0.92));
  if(active){restoreBasemapLabelsOutsideDistrict(map);map.setMaxBounds(TRANSIT_SEARCH_BOUNDS);if(map.getPitch()>0)map.easeTo({pitch:0,duration});}
  else{if(previous)clipBasemapLabelsToDistrict(map,boundaryGeometry);map.setMaxBounds(bufferedDistrictBounds(boundaryGeometry));}
  syncTiltWithBuildings();
