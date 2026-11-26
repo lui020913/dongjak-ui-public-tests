@@ -3,7 +3,10 @@ import {readFileSync} from 'node:fs';
 import {chromium,webkit} from 'playwright';
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const html=read('../index.html');
-const policy=html.match(/<!-- First cascade layer owns interaction focus[\s\S]*?<\/script>/)?.[0];
+const focus=html.match(/\/\* DJ_INTERACTION_FOCUS_START \*\/([\s\S]*?)\/\* DJ_INTERACTION_FOCUS_END \*\//)?.[1];
+const script=html.match(/<script id="dj-interaction-input">[\s\S]*?<\/script>/)?.[0];
+assert.ok(focus&&script);
+const policy='<style>'+focus+'</style>'+script;
 assert.ok(policy);
 const style=read('../src/style.css'),production=read('../../frontend/production/mobile-next.css'),route=read('../src/route-screen-v3.css');
 for(const engine of [chromium,webkit]){
