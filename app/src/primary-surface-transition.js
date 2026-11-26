@@ -21,6 +21,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
   // The active logical tab owns its real surface even when an earlier layout
   // observer briefly hid it. Never infer the direct-pair mode from visibility.
   previous=previous||primaryPanel(doc,previousTab);
+  if(app.dataset.communityFeedLocked==='true'&&previousTab==='participate'&&destination!=='participate')return replay(button);
   const directPair=communityNews(previousTab)&&communityNews(destination)&&previousTab!==destination;
   if(!win.requestAnimationFrame||!win.getComputedStyle||reduced())return replay(button);
   const records=new Map();let raf=0,timer=0,finished=false,fade=null;
@@ -69,7 +70,7 @@ export function createPrimarySurfaceTransition({doc,win,app,replay,reduced}){
    if(finished)return;
    // A programmatic navigation or a newly opened modal must win over a
    // stale presentation. Never resurrect an already dismissed destination.
-   if(app.dataset.tab!==destination||app.inert||doc.getElementById('dj-community-editor-portal')?.hidden===false){cleanup();return;}
+   if(app.dataset.tab!==destination||app.inert||(app.dataset.communityFeedLocked==='true'&&previousTab==='participate')||doc.getElementById('dj-community-editor-portal')?.hidden===false){cleanup();return;}
    // The logical destination has not changed. Reconcile stale hidden writes
    // from legacy observers without opening an explicitly dismissed modal.
    if(incoming&&incoming.hidden)incoming.hidden=false;

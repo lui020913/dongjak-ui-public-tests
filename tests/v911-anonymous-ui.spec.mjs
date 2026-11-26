@@ -2107,3 +2107,35 @@ test('phone selected dock has no color plate and route form is vertically balanc
  await testInfo.attach('real-records-geometry.json',{body:Buffer.from(JSON.stringify({mineDock,contrast,recordsGeometry},null,2)),contentType:'application/json'});
  if(page.viewportSize().width===390)await testInfo.attach('real-records-after.png',{body:await page.screenshot({animations:'disabled'}),contentType:'image/png'});
 });
+
+test('report location hard-dismisses feed through stale writes and deliberate reentry',{tag:'@phone-common'},async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem('dongjak_safety_community_v15_posts',JSON.stringify([{id:'qa-location',title:'QA 위치 제보',body:'로컬 검증용',nickname:'QA',category:'보행 불편',dong:'상도1동',created:Date.now(),location:{lng:126.953,lat:37.502},comments:[]}]));
+ });
+ await ready(page);
+ const app=page.locator('#app'),feed=page.locator('#participation-panel');
+ for(let i=0;i<2;i++){
+  await tap(page,tab(page,'participate'));
+  await expect(feed).toBeVisible();await expect(feed).toHaveCSS('opacity','1');
+  await tap(page,feed.getByRole('button',{name:'QA 위치 제보',exact:true}));
+  await tap(page,feed.locator('.community-location-link'));
+  await expect(app).toHaveAttribute('data-tab','map');
+  await expect(app).toHaveAttribute('data-community-feed-locked','true');
+  await expect(feed).toBeHidden();
+  await expect(page.locator('#dj-community-location-card')).toBeVisible();
+  // Reproduce a stale animation/controller write without relying on timing.
+  const exposed=await page.evaluate(async()=>{
+   const n=document.getElementById('participation-panel');
+   n.hidden=false;n.inert=false;n.dataset.djTabOutgoing='true';n.style.setProperty('display','flex','important');
+   const samples=[];
+   for(let i=0;i<6;i++){await new Promise(requestAnimationFrame);samples.push(getComputedStyle(n).display!=='none'||!n.hidden||!n.inert);}
+   return samples.some(Boolean);
+  });
+  expect(exposed).toBe(false);
+  await tap(page,page.locator('#dj-community-location-card button'));
+  await expect(feed).toBeHidden();
+ }
+ await tap(page,tab(page,'participate'));
+ await expect(feed).toBeVisible();
+ await expect(app).not.toHaveAttribute('data-community-feed-locked','true');
+});
