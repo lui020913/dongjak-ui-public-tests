@@ -23,12 +23,12 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - uses: actions/download-artifact@v4
         with:
-          name: dongjak-operational-road-display-assets
+          name: dongjak-reaudited-road-display-assets
           path: app/public/data/road-display-review
-          run-id: 45782401894
+          run-id: 45784568908
           github-token: ${{ github.token }}
       - run: |
-          jq -e '.surface_count==12045 and .quarantine.count==9 and (.tiles|length)==90 and .operational_enabled==false' app/public/data/road-display-review/manifest.json
+          jq -e '.surface_count==12045 and .quarantine.count==9 and (.tiles|length)==90 and .native_reaudit.eligible_ids==258 and .operational_enabled==false' app/public/data/road-display-review/manifest.json
       - working-directory: app
         run: npm ci
       - working-directory: app
@@ -36,7 +36,7 @@ jobs:
       - working-directory: app
         env:
           DONGJAK_ROAD_REVIEW_QA: '1'
-        run: npx playwright test --project=mobile tests/e2e/reviewed-base-road-qa.spec.js
+        run: npx playwright test --config=playwright.config.mjs --project=mobile tests/e2e/reviewed-base-road-qa.spec.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:
