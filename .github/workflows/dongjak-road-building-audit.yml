@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/research/dongjak_road_building_audit.py'
       - 'scripts/research/dongjak_road_link_corroboration.py'
+      - 'scripts/research/dongjak_native_vector_audit.py'
       - '.github/workflows/dongjak-road-building-audit.yml'
   workflow_dispatch:
 permissions:
@@ -55,5 +56,22 @@ jobs:
         with:
           name: dongjak-independent-road-link-review
           path: road-link-review/
+          retention-days: 14
+          if-no-files-found: error
+
+  native-basemap-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2 mapbox-vector-tile==2.2.0
+      - run: python scripts/research/dongjak_native_vector_audit.py native-vector-review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-native-vector-review
+          path: native-vector-review/
           retention-days: 14
           if-no-files-found: error
