@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.214",
+  "application_version": "9.2.215",
   "public_work_branch": "main",
-  "purpose": "Protected release of verified PR #581 (bb43cf06): district POI identity, typed apartment labels, authoritative official ARS map stops, cross-source facility deduplication and matching search identity, transit click precedence, dynamic SGIS boundary registry refresh and transit scroll parent correction. Latest CI 38/38, overlay compatibility and picker regression passed; actual map tap test five locations, exact 457 current-boundary ARS IDs and zero page errors. Preserve prior exterior transit scope, white idle overlay fix and building trims; full protected Preview, phone QA and Production required.",
-  "attempt": 449,
+  "purpose": "Protected release of verified integrated PR #585 (d3705bc1): transit recommendation sheet shared header gestures and full-height bounds, fixed route detail header and guidance CTA, removal of duplicate step button; campus pedestrian pavement only in #e5e8e1, preserve bridge and vehicle road paint, stable 3D buildings during slow pan/tilt with single visibility owner and 10/7 degree hysteresis. Integrated source CI 38/38, actual campus and building motion QA, route and picker regressions, and overlay compatibility passed. Preserve v9.2.214 POI and ARS identity changes, geometry and PRI. Full protected Preview, phone QA and Production required.",
+  "attempt": 450,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
