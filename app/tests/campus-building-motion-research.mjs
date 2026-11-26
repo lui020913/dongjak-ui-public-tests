@@ -57,7 +57,8 @@ try{
   console.log('CAMPUS_FILL_EVIDENCE',site.key,JSON.stringify(paint));
   assert.equal(paint.overlay,false);
   assert.ok(paint.fills.length,'native transportation polygon layers must be present');
-  assert.ok(paint.fills.every(f=>f.color==='#e5e8e1'),'native area fill must not reuse white linear road paint');
+  const expectedPaint=['case',['all',['==',['get','class'],'path'],['in',['get','subclass'],['literal',['pedestrian','footway','path']]]],'#e5e8e1','#ffffff'];
+  for(const fill of paint.fills)assert.deepEqual(fill.color,expectedPaint,'pedestrian polygons alone receive pavement tone; bridges and vehicle areas retain original white');
   await page.screenshot({path:out+'/'+site.key+'-plan.png'});
   await page.evaluate(()=>window.__qaMap.jumpTo({pitch:30}));
   await page.waitForFunction(()=>{const m=window.__qaMap;return m.getStyle().layers.some(l=>l.id.startsWith('dongjak-buildings-3d-')&&m.getLayoutProperty(l.id,'visibility')==='visible'&&m.isSourceLoaded(l.source));},{},{timeout:90000});
@@ -89,7 +90,8 @@ try{
   await page.screenshot({path:out+'/'+site.key+'-pitched.png'});
   results.push({site:site.key,paint,motion});
  }
- assert.ok(results[0].paint.features.length>0,'actual central university visible pavement features required; do not claim the campus issue solved if none found');
+ assert.ok(results[0].paint.features.some(f=>f.class==='path'&&f.subclass==='pedestrian'),'actual central university pedestrian pavement required');
+ assert.ok(results[1].paint.features.some(f=>f.class==='bridge'),'actual bridge geometry must be present for preservation check');
  assert.equal(reviewRequests.length,0);assert.deepEqual(errors,[]);
  console.log('CAMPUS_AND_BUILDING_MOTION_REGRESSION_OK',JSON.stringify(results.map(r=>({site:r.site,pavement:r.paint.features.length,frames:r.motion.samples.length}))));
 }finally{writeFileSync(out+'/results.json',JSON.stringify({results,errors,reviewRequests},null,2));await ctx.close();await browser.close();server.close();}
