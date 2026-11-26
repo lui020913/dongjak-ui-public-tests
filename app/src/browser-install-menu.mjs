@@ -179,7 +179,7 @@ export function mountBrowserInstallMenu({doc=document,win=window,steps=()=>[]}={
  add('small','dj-install-status',guidebookSizeLabel(guidebookBytes),guidebook);
  add('span','dj-install-chevron','›',guidebook).setAttribute('aria-hidden','true');
  if(blocked){(gate?.querySelector('.dj-mobile-only-message')||gate||doc.body).append(card);gate?.setAttribute('aria-labelledby',heading.id);}
- else{const close=add('button','dj-install-dismiss','나중에');close.type='button';close.addEventListener('click',finish);card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);
+ else{card.addEventListener('cancel',()=>{try{win.sessionStorage.setItem(INSTALL_SESSION_KEY,'1');}catch{}});doc.body.append(card);
  let seen=false;try{seen=win.sessionStorage.getItem(INSTALL_SESSION_KEY)==='1';}catch{}if(!seen||new URLSearchParams(win.location.search).get('install')==='1'){if(typeof card.showModal==='function')card.showModal();else card.setAttribute('open','');}}
  win.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});win.addEventListener('appinstalled',finish);
  Promise.resolve().then(()=>win.fetch('/download-links.json',{cache:'no-store'})).then(r=>r.ok?r.json():{}).then(data=>{

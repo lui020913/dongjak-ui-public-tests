@@ -101,3 +101,14 @@ test('welcome guidebook uses a real same-origin PDF download after PWA choice',a
  assert.match(headers,/Content-Disposition: attachment/);
  assert.match(headers,/Cache-Control: no-cache/);
 });
+
+
+test('welcome has no redundant later button; explicit web entry stays available',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const js=readFileSync(new URL('../src/browser-install-menu.mjs',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/browser-install-menu.css',import.meta.url),'utf8');
+ assert.doesNotMatch(js,/dj-install-dismiss|나중에/);
+ assert.doesNotMatch(css,/dj-install-dismiss/);
+ assert.match(js,/web:'웹에서 바로 이용하기'/);
+ assert.match(js,/else finish\(\);return;\}/);
+});
