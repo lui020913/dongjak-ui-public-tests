@@ -40,3 +40,16 @@ test('explicit composer ownership cancels the underlying dissolve',()=>{
  app.inert=true;tick(0);
  assert.equal(frames.size,0);assert.equal(news.hidden,true);assert.equal(community.dataset.djPrimaryTransition,undefined);
 });
+
+test('explicit report-location dismissal cannot be reopened by compositor frames',()=>{
+ const {app,news,community,ctrl,tick,frames}=fixture();
+ app.dataset.tab='participate';community.hidden=false;news.hidden=true;
+ ctrl.dissolvePrimary({dataset:{tab:'news'}},'participate',community);
+ assert.equal(community.hidden,false);
+ app.dataset.communityFeedLocked='true';community.hidden=true;
+ tick(32);
+ assert.equal(community.hidden,true);assert.equal(frames.size,0);
+ app.dataset.tab='participate';
+ ctrl.dissolvePrimary({dataset:{tab:'map'}},'participate',community);
+ assert.equal(community.hidden,true);assert.equal(frames.size,0);
+});
