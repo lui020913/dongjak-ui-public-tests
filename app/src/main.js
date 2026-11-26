@@ -95,6 +95,7 @@ import {slimMapTextHalos} from './map-label-halo.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
 import './bocha-road-layer.css';
 import './pilot-layer-selection.css';
+import {installMapHudCollisionGuard} from './map-hud-collision-guard.js';
 import './night-visibility.css';
 import './safety-workspace.css';
 import './night-visibility-panel.css';
@@ -3889,7 +3890,7 @@ document.addEventListener('visibilitychange',()=>{
     document.getElementById('nav-warning').textContent='화면을 끄거나 다른 앱으로 전환하면 위치 추적이 중단될 수 있습니다.';
 });
 
-;(() => {const boot=()=>{installMobileSurfaceCoordinator(document,window);installRequestCompletion(document,window);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();
+;(() => {const boot=()=>{installMobileSurfaceCoordinator(document,window);installRequestCompletion(document,window);installMapHudCollisionGuard(document,window);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();
 
 // Animate only genuine hidden-to-visible transitions of phone map header controls.
 ;(()=>{const boot=()=>{const app=document.getElementById('app');if(!app)return;const phone=matchMedia('(max-width:699px)'),reduced=matchMedia('(prefers-reduced-motion: reduce)');const seen=new WeakMap(),motions=new WeakMap();let frame=0;const scan=()=>{frame=0;const nodes=[...app.querySelectorAll('.topbar,#map-quick-search,#djNext-toolbar,#dj-v794-toolbar,#dj831-scrollport')];for(const node of nodes){const style=getComputedStyle(node),visible=app.dataset.tab==='map'&&node.getClientRects().length>0&&style.visibility==='visible'&&style.display!=='none'&&Number(style.opacity)>0;const prior=seen.get(node);seen.set(node,visible);if(!visible){motions.get(node)?.cancel();motions.delete(node);continue;}if(prior!==false||!phone.matches||reduced.matches||!node.animate)continue;if(nodes.some(parent=>parent!==node&&parent.contains(node)&&motions.has(parent)))continue;if(node.getAnimations?.().some(a=>a.playState==='running'))continue;const motion=node.animate([{opacity:0},{opacity:Number(style.opacity)}],{duration:350,easing:'cubic-bezier(.25,.20,.40,1)'});motions.set(node,motion);motion.onfinish=()=>{if(motions.get(node)===motion)motions.delete(node);};}};const schedule=()=>{if(!frame)frame=requestAnimationFrame(scan);};scan();new MutationObserver(schedule).observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class','style','data-tab','aria-hidden','data-closing']});document.addEventListener('animationend',schedule,true);document.addEventListener('transitionend',schedule,true);phone.addEventListener?.('change',schedule);};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();})();

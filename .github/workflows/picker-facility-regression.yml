@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'app/src/pilot-layer-selection.css'
+      - 'app/src/map-hud-collision-guard.js'
+      - 'app/tests/map-hud-collision-guard.test.mjs'
+      - 'app/tests/map-hud-collision-browser.mjs'
       - 'app/src/place-details.js'
       - 'app/src/main.js'
       - 'app/tests/picker-layer-facility-route-20261126.test.mjs'
@@ -18,4 +21,19 @@ jobs:
         with:
           node-version: '22'
       - run: node --check app/src/main.js && node --check app/src/place-details.js
-      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs
+      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs
+
+  geometry-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/map-hud-collision-browser.mjs

@@ -18,3 +18,10 @@
 #app#app:has(#route-pick-hint:not([hidden]),#community-map-hint:not([hidden]),#route-transit-confirm:not([hidden]),#detail-sheet:not([hidden]),#entry-sheet:not([hidden]),#overview-sheet:not([hidden]),#admin-dong-picker:not([hidden]),#map-gesture-guide:not([hidden]),#pza-road-sheet:not([hidden]),#djNext-layer-panel:not([hidden]),#transport-sheet:not([hidden]),#dj-bus-route-detail:not([hidden]),#route-place-search:not([hidden]),#dj-route-v3:not([hidden]),.dj-place-detail-popup,dialog[open],[role="dialog"][aria-modal="true"]:not([hidden])) #djNext-active-layers{
  display:none!important;visibility:hidden!important;pointer-events:none!important;
 }
+
+/* Retain layout while suppressing paint, taps and focus. The coordinator
+ * remeasures these same rectangles after window motion, without a hide/show loop. */
+#app [data-dj-hud-occluded="true"],
+#app:has(#dj840-map-tip[data-dj-hud-occluded="true"]) #dj-user-tip-close{
+ visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+}
