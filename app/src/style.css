@@ -1820,7 +1820,7 @@ html[data-theme="dark"] #app .map-startup-inner #map-startup-continue,#app[data-
 #community-list .community-post-detail .community-post-body{font-size:15px;color:inherit}
 #community-list .community-back{width:max-content;background:transparent;border:0;color:inherit;font:inherit;padding:9px}
 #community-notifications:not([hidden]){display:grid;gap:10px;padding:0;min-width:0;overflow:visible}
-#participation-panel #community-list[hidden],#participation-panel #participate-register[hidden]{display:none!important}
+#participation-panel #community-list[hidden]{display:none!important}
 .community-notice{display:grid;gap:6px;min-width:0;box-sizing:border-box;border:1px solid var(--dj-theme-line,#d3e3d9);border-radius:18px;background:var(--dj-theme-surface,#fff);padding:14px}
 .community-notice p{margin:0;overflow-wrap:anywhere}
 .community-notice small{opacity:.7}
