@@ -23,9 +23,9 @@ jobs:
       - name: Download exact completed corridor and overlay review
         uses: actions/download-artifact@v4
         with:
-          name: dongjak-final-corridor-and-overlay-review
+          name: dongjak-remaining-fixed-endpoint-review
           path: reviewed
-          run-id: 45763031345
+          run-id: 45765644207
           github-token: ${{ github.token }}
       - name: Download exact completed visual comparison
         uses: actions/download-artifact@v4
@@ -37,16 +37,21 @@ jobs:
       - name: Validate provenance and package reviewed overlay comparisons
         run: |
           set -euo pipefail
-          python scripts/research/package_final_road_overlays.py reviewed/final-review reviewed/final-alignment road-preview-dist
+          python scripts/research/package_final_road_overlays.py reviewed/fine-gap-review reviewed/fine-gap-alignment road-preview-dist
+          cp reviewed/fine-gap-review/candidate-surfaces.geojson road-preview-dist/corridor-surfaces.geojson
+          cp reviewed/fine-gap-review/candidate-centers.geojson road-preview-dist/corridor-centers.geojson
+          cp reviewed/fine-gap-review/unresolved-links.geojson road-preview-dist/corridor-unresolved.geojson
+          cp reviewed/fine-gap-review/summary.json road-preview-dist/corridor-summary.json
+          cp reviewed/fine-gap-alignment/summary.json road-preview-dist/alignment-summary.json
           cp scripts/research/road-surface-preview.html road-preview-dist/index.html
           python - <<'PY'
           import json,os,pathlib,re
           p=pathlib.Path('road-preview-dist')
           m=json.loads((p/'manifest.json').read_text())
           assert m['preview'] and m['building_count']>0
-          assert json.loads((p/'corridor-summary.json').read_text())['candidate_links']==7845
+          assert json.loads((p/'corridor-summary.json').read_text())['candidate_links']==7850
           m['review_source_commit']=m['source_commit']
-          m['review_run_id']=45763031345
+          m['review_run_id']=45765644207
           m['source_commit']=os.environ['GITHUB_SHA']
           (p/'manifest.json').write_text(json.dumps(m,ensure_ascii=False))
           # Split oversized GeoJSON by whole features, preserving order and properties.
