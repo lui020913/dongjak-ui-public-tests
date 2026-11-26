@@ -22,18 +22,21 @@ def main(hybrid,out):
     assert len(names)==1
     name=next(iter(names));src=style['sources'][name]
     tjurl=urllib.parse.urljoin(STYLE,src['url']) if src.get('url') else STYLE
-    tj=json.loads(get(tjurl)) if src.get('url') else src
+    tjraw=get(tjurl) if src.get('url') else json.dumps(src,separators=(',',':')).encode()
+    tj=json.loads(tjraw)
     template=urllib.parse.urljoin(tjurl,tj['tiles'][0])
     z=min(14,int(tj.get('maxzoom',14)))
     assert z==14
     # Include adjacent tiles to catch ID reuse and boundary fragments.
     x0,y0=tilexy(boundary_geo.bounds[0],boundary_geo.bounds[3],z)
     x1,y1=tilexy(boundary_geo.bounds[2],boundary_geo.bounds[1],z)
-    groups=defaultdict(list);counts=Counter()
+    groups=defaultdict(list);counts=Counter();tile_digests=[]
     for x in range(x0-1,x1+2):
       for y in range(y0-1,y1+2):
         yy=2**z-1-y if tj.get('scheme')=='tms' else y
-        tile=decode(get(template.replace('{z}',str(z)).replace('{x}',str(x)).replace('{y}',str(yy))),default_options={'y_coord_down':True})
+        url=template.replace('{z}',str(z)).replace('{x}',str(x)).replace('{y}',str(yy))
+        raw=get(url);tile_digests.append({'z':z,'x':x,'y':y,'url':url,'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw)})
+        tile=decode(raw,default_options={'y_coord_down':True})
         layer=tile.get('transportation',{})
         for f in layer.get('features',[]):
           fid=f.get('id')
@@ -64,7 +67,7 @@ def main(hybrid,out):
             for reason in reasons-{'covered'}:blocked[reason]+=1
     allowed.sort()
     layers=[{'id':l['id'],'type':l['type'],'filter':l.get('filter'),'minzoom':l.get('minzoom'),'maxzoom':l.get('maxzoom')} for l in style['layers'] if l.get('source')==name and l.get('source-layer')=='transportation']
-    result={'source_graph_sha256':report['source_graph_sha256'],'style_sha256':hashlib.sha256(style_raw).hexdigest(),'source_name':name,'tile_zoom':z,'eligible_native_ids':allowed,'eligible_id_count':len(allowed),'excluded_id_reasons_nonexclusive':dict(blocked),'feature_counts':dict(counts),'style_transport_layers':layers,'minimum_display_zoom':16,'operational_enabled':False,'limitations':['Native IDs may change with vector tileset updates or be reused beyond the inspected tiles. Require runtime source/version and district guards.','Only complete coverage accepted; no proof of surveyed road alignment.','Never hide grade-separated, unmatched, outside-district or ID-less roads.']}
+    result={'source_graph_sha256':report['source_graph_sha256'],'style_sha256':hashlib.sha256(style_raw).hexdigest(),'source_name':name,'source_url':src.get('url'),'tilejson_url':tjurl,'tilejson_sha256':hashlib.sha256(tjraw).hexdigest(),'tile_template':template,'audited_tiles':tile_digests,'tile_zoom':z,'eligible_native_ids':allowed,'eligible_id_count':len(allowed),'excluded_id_reasons_nonexclusive':dict(blocked),'feature_counts':dict(counts),'style_transport_layers':layers,'minimum_display_zoom':16,'operational_enabled':False,'limitations':['Native IDs may change with vector tileset updates or be reused beyond the inspected tiles. Require runtime source/version and district guards.','Only complete coverage accepted; no proof of surveyed road alignment.','Never hide grade-separated, unmatched, outside-district or ID-less roads.']}
     (out/'native-id-eligibility.json').write_text(json.dumps(result,ensure_ascii=False,separators=(',',':')))
-    print('NATIVE_ID_ELIGIBILITY_RESULT',json.dumps({k:v for k,v in result.items() if k not in ('eligible_native_ids','style_transport_layers')},ensure_ascii=False))
+    print('NATIVE_ID_ELIGIBILITY_RESULT',json.dumps({k:v for k,v in result.items() if k not in ('eligible_native_ids','style_transport_layers','audited_tiles')},ensure_ascii=False))
 if __name__=='__main__':main(pathlib.Path(sys.argv[1]),pathlib.Path(sys.argv[2]))
