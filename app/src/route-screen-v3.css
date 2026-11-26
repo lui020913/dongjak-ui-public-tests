@@ -167,5 +167,5 @@ input:focus{border-color:#596368}
 .recent-head [data-v3="clear-recent"]:active,.search-results .search-recent-head .history-clear:active{background:#cddfd5;}
 
 /* A single route-settings entry within the existing measured route card. */
-.pri-trigger{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:4px 0 0;padding:7px 12px;border:1px solid var(--dj-pri-trigger-border,#d5e3dc);border-radius:999px;background:var(--dj-pri-trigger-bg,#edf4ef);color:var(--dj-pri-trigger-text,#245547);font:inherit;font-size:13px;font-weight:700;line-height:1.35;text-align:center;pointer-events:auto}
+.pri-trigger{display:block;box-sizing:border-box;width:100%;min-height:44px;margin:4px 0 0;padding:7px 12px;border:1px solid var(--dj-route-pri-border,#d5e3dc);border-radius:999px;background:var(--dj-route-pri-bg,#edf4ef);color:var(--dj-route-pri-ink,#245547);font:inherit;font-size:13px;font-weight:700;line-height:1.35;text-align:center;pointer-events:auto}
 
