@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.195",
+  "application_version": "9.2.196",
   "public_work_branch": "main",
-  "purpose": "Fix overlapping map HUD controls; unify facility and transit route selection; improve expanded detail header and close taps; separate community report facts from body and enlarge list back arrow. Protected mobile Preview, QA and Production. Road geometry research remains isolated.",
-  "attempt": 427,
+  "purpose": "Verified integrated PR #554 (includes all PR #553 changes): capsule text actions, compact nearby safety typography, horizontal metro arrival rows, remove duplicate advanced tools and community map-report entry, open map risk-report composer directly, fix facility/transit route endpoint navigation. Protected mobile Preview, QA and Production.",
+  "attempt": 428,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
