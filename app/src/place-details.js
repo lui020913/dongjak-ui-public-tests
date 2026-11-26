@@ -206,12 +206,12 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   const folderHeading=text('strong','즐겨찾기 그룹','dj-place-section-heading');
   const folderWrap=document.createElement('label');folderWrap.className='dj815-place-folder';
   folderWrap.append(text('span','즐겨찾기 그룹','dj-place-folder-label'));
-  const folderSelect=document.createElement('select');
+  const folderSelect=document.createElement('select');folderSelect.classList.add('dj-shared-favorite-select');folderSelect.setAttribute('aria-label','즐겨찾기 그룹');
   for(const name of getPlaceFolders()){const option=document.createElement('option');option.value=name;option.textContent=name;folderSelect.append(option);}
   folderSelect.value=savedPlaces().find(item=>placeKey(item)===placeKey(p))?.folder||'즐겨찾기';
   folderWrap.append(folderSelect);folderWrap.hidden=!isPlaceSaved(p);
-  folderHeading.classList.add('dj-place-redundant-folder-heading');
-  folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;header.after(folderSection);
+  folderHeading.classList.add('dj-place-redundant-folder-heading');folderHeading.hidden=true;
+  folderSection.append(folderHeading,folderWrap);folderSection.hidden=folderWrap.hidden;root.append(folderSection);
 
   const saveButton=document.createElement('button');saveButton.type='button';saveButton.className='dj854-place-favorite';
   saveButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>';
