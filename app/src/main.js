@@ -2738,7 +2738,7 @@ priMapNote.id='dj-pri-route-advice';
 priMapNote.className='dj-pri-route-advice';
 priMapNote.setAttribute('role','status');
 priMapNote.hidden=true;
-document.getElementById('route-map-card')?.append(priMapNote);
+(document.getElementById('dj-route-choice-scroll')||document.getElementById('route-map-card'))?.append(priMapNote);
 const priEditorNote=document.createElement('p');
 priEditorNote.id='dj-pri-route-editor-advice';
 priEditorNote.className='dj-pri-route-advice';
@@ -2764,7 +2764,7 @@ for(const parent of [document.getElementById('route-map-card'),document.querySel
   if(!parent)continue;
   const button=document.createElement('button');button.type='button';button.className='dj-route-pri-trigger';
   button.addEventListener('click',openPriPreferences);
-  if(parent.id==='route-map-card')parent.insertBefore(button,priMapNote);else parent.append(button);
+  if(parent.id==='route-map-card')priMapNote.before(button);else parent.append(button);
   priTriggers.push(button);
 }
 window.addEventListener('dongjak:open-route-pri',openPriPreferences);
