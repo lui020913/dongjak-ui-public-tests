@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.186",
+  "application_version": "9.2.187",
   "public_work_branch": "main",
-  "purpose": "Integrated PR535 and PR536/537: direct community picker, HUD/dock, unassessed PRI and white boundary, route keyboard/GPS; retain PR528/532 timetable/help fixes. Verify retired update UI absence, real records and map settings at all phone widths, synchronized QA coverage and WebKit selection. Historical bus API recovery excluded. Protected Preview/Production gates required.",
-  "attempt": 418,
+  "purpose": "PR538: restore guide tips, explicit map location confirmation and road address; report button and community map handoff; verified district-wide facility aliases and current-use classification; bus-stop label spacing; smooth PRI road endpoint transitions and road layer order. Source CI and all protected Preview/Production gates required. Existing Sangdo1 pilot data boundary and all prior releases retained. Unverified individual facility records are not asserted as verified.",
+  "attempt": 419,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
