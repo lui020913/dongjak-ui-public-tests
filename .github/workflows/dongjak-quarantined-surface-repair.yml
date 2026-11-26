@@ -1,0 +1,33 @@
+name: Dongjak quarantined road surface repair
+on:
+  push:
+    branches: [audit/remaining-native-road-correspondence-20261126]
+    paths:
+      - 'scripts/research/dongjak_quarantined_surface_repair.py'
+      - '.github/workflows/dongjak-quarantined-surface-repair.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install shapely==2.1.2 pyproj==3.7.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: dongjak-reaudited-road-display-assets
+          path: assets
+          run-id: 45786891095
+          github-token: ${{ github.token }}
+      - run: python scripts/research/dongjak_quarantined_surface_repair.py assets output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dongjak-quarantined-road-surface-review
+          path: output/
+          retention-days: 14
+          if-no-files-found: error
