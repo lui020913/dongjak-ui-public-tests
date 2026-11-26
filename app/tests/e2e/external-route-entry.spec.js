@@ -19,7 +19,13 @@ test('real transit detail buttons navigate to the visible route editor, includin
  for(const [kind,name,lng,lat,which] of [['subway','상도',126.94795,37.50283,'start'],['bus','상도역',126.9481,37.5027,'end']]){
   await page.evaluate(place=>window.dispatchEvent(new CustomEvent('dongjak:open-saved-transport',{detail:{place}})),{kind,name,lng,lat,arsId:kind==='bus'?'20190':'',lines:kind==='subway'?['7호선']:[],selectedLine:'7호선'});
   await expect(sheet).toBeVisible({timeout:15000});
-  await clickRealPointer(page,page.locator('#transport-use-'+which),kind+' '+which);
+  const action=page.locator('#transport-use-'+which);
+  // A newly opened sheet slides in from below the viewport. Wait for real
+  // layout/actionability, then scroll through the native container if needed.
+  // Never force a click or remove overlays to bypass a hit-test failure.
+  await action.scrollIntoViewIfNeeded({timeout:15000});
+  await action.click({trial:true,timeout:20000});
+  await clickRealPointer(page,action,kind+' '+which);
   await expect(app).toHaveAttribute('data-tab','route',{timeout:10000});
   await expect(route).toBeVisible();
   await expect(page.locator('#route-'+which+'-label')).toContainText(name);
