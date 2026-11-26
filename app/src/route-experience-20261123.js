@@ -376,6 +376,10 @@ export function mountWalkingRouteExperience(doc=document,win=window){
       !search.hidden&&!panel.hidden?'search':
       !mapCard.hidden?'preview':
       app.dataset.tab==='route'?'input':'none';
+    if(stage==='preview'){
+      head.querySelector('small').textContent=app.dataset.djTransitPreview?'대중교통 길찾기':'도보 길찾기';
+      head.querySelector('strong').textContent=app.dataset.djTransitPreview?'경로 상세':'경로 비교';
+    }
     if(stage===oldStage)return;
     oldStage=stage;app.dataset.djRouteStage=stage;
     if(stage!=='preview')closePriHelp();
@@ -388,7 +392,7 @@ export function mountWalkingRouteExperience(doc=document,win=window){
     if(stage==='guiding')stop?.focus({preventScroll:true});
   };
   const stateObserver=new MutationObserver(setStage);
-  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab','data-dj-walk-arrived']});
+  stateObserver.observe(app,{attributes:true,attributeFilter:['class','data-tab','data-dj-walk-arrived','data-dj-transit-preview']});
   for(const node of [panel,search,mapCard,navCard])stateObserver.observe(node,{attributes:true,attributeFilter:['hidden']});
   // Light updates in guidance are performed by native GPS, not this presenter.
   setStage();refreshChoices();
