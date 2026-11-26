@@ -58,3 +58,6 @@
 #app .dj-tr-fare small,#app .dj-tr-service-hours{font-size:11px;color:var(--walk-muted,#627970);overflow-wrap:anywhere}
 #app .dj-tr-fare-source{font-size:11px;color:var(--walk-primary,#137e65);text-decoration:underline;width:fit-content}
 #app .dj-tr-gps-status[data-near=true]{font-weight:750;color:var(--walk-primary,#137e65)}
+
+#app .dj-tr-refresh{min-width:44px;min-height:44px}
+#app .dj-tr-leg-body,#app .dj-tr-heading{min-width:0}

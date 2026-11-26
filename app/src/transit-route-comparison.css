@@ -48,3 +48,13 @@
 .tr-review:disabled{opacity:.5}
 .tr-review-result{border-top:1px solid var(--tr-border);padding-top:6px}
 .tr-review-label{font-size:11px;font-weight:730;color:var(--tr-ink);background:var(--tr-soft);padding:4px 8px;border-radius:999px;justify-self:start}
+
+/* Preserve real touch targets and prevent header controls from consuming the
+ * entire result sheet on short mobile viewports. The list alone scrolls. */
+.transit-mode-toggle button,.tr-filter button,.tr-pri-preference,.tr-review{min-height:44px}
+.tr-head button{width:44px;height:44px}
+.tr-grip,.tr-head,.tr-endpoints,.tr-review-tools,.tr-note{flex-shrink:0}
+.tr-list{flex:1 1 auto;min-height:56px}
+.tr-card{min-width:0}
+.canvas[data-transit-mode=transit] .fields .switch{grid-row:1/5}
+@media(max-height:680px){.transit-results{max-height:min(64dvh,440px);gap:6px}.tr-note{font-size:10px}}
