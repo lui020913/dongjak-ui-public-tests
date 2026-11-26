@@ -2,11 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('notice view owns visibility of notifications, feed and map-report link',()=>{
+test('notice view owns visibility of notifications and feed without a redundant map-report link',()=>{
  const s=read('src/main.js'),css=read('src/style.css');
  const view=s.slice(s.indexOf('function setCommunityNoticeView('),s.indexOf('function resetCommunityNotices('));
  assert.match(view,/panel\.hidden=!open/);
- assert.match(view,/\['community-list','participate-register'\]/);
+ assert.match(view,/getElementById\('community-list'\)\.hidden=open/);
+ assert.doesNotMatch(view,/participate-register/);
  assert.match(view,/\.hidden=open/);
  assert.match(view,/getElementById\('community-list'\)\.replaceChildren\(\)/);
  assert.match(view,/else if\(wasOpen\)renderCommunity\(\)/);
@@ -14,7 +15,7 @@ test('notice view owns visibility of notifications, feed and map-report link',()
  assert.match(read('src/mobile-ui/current.css'),/#community-list:not\(\[hidden\]\)\s*\{\s*order:0!important;display:grid!important/);
  assert.match(s,/setCommunityNoticeView\(panel\.hidden\)/);
  assert.match(s,/function openCommunityNoticesFromPush\(\)\{navigate\('participate'\);setCommunityNoticeView\(true\)/);
- assert.match(css,/#participation-panel #community-list\[hidden\],#participation-panel #participate-register\[hidden\]\{display:none!important\}/);
+ assert.match(css,/#participation-panel #community-list\[hidden\]\{display:none!important\}/);
  assert.doesNotMatch(css,/#community-notifications:not\(\[hidden\]\)\{[^}]*max-height/);
 });
 test('notice actions have one shared geometry and card tags stay together',()=>{

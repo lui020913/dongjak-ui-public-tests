@@ -7,7 +7,10 @@ test('phone risk report opens the composer directly over the map; wide screens r
  assert.ok(lifecycle.includes("if(node.closest('#djNext-report,#ped-report-open'))return phone()?'':'participation-panel';"));
  const report=main.slice(main.indexOf('onReport:()=>{'),main.indexOf('function makeCEl('));
  assert.ok(report.includes("if(!communityComposerFromMap)navigate('participate');"));
- assert.ok(report.includes("else if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true});"));
+ assert.ok(report.includes("navigate('map',{suppressOverview:true});"));
+ assert.ok(report.includes("feed.hidden=true;"));
+ assert.ok(report.includes("delete feed.dataset.djTabOutgoing;"));
+ assert.ok(report.indexOf("feed.hidden=true;")<report.indexOf("openCommunityComposer(true,{animate:true})"));
  assert.ok(report.includes("openCommunityComposer(true,{animate:true})"));
  assert.ok(portal.includes('doc.body.append(root)'));
 });

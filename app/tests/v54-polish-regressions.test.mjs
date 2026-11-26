@@ -46,9 +46,10 @@ test('모바일 검색 날씨 축척 및 하단 메뉴 고정',()=>{
   assert.match(css,/maplibregl-ctrl-scale/);
   assert.match(css,/#map-chrome-restore\{display:none!important;\}/);
 });
-test('커뮤니티는 목록이 제보보다 앞서고, 실제 게시글이 없으면 빈 상태를 표시',()=>{
+test('커뮤니티는 중복 제보 버튼 없이 목록과 빈 상태를 표시',()=>{
   const html=read('index.html');
-  assert.ok(html.indexOf('id="community-list"')<html.indexOf('id="participate-register"'));
+  assert.match(html,/id="community-list"/);
+  assert.doesNotMatch(html,/id="participate-register"/);
   assert.doesNotMatch(html,/class="community-report-secondary"/);
   assert.match(read('src/main.js'),/dj-community-empty-state/);
   assert.match(read('src/main.js'),/아직 게시글이 없습니다/);
