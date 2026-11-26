@@ -10,7 +10,7 @@ test('건물 3D는 테마별 불투명도·색상 규칙을 공유하고 새 타
   assert.match(src,/nightOcclusionBuildingPaint\(\s*buildingExtrusionAppearance\(visualTheme\.currentTheme\(\),map\.getPitch\(\)\)/);
   assert.match(src,/loadBuildingTileFeatures\(sheet\)/);
   assert.match(ui,/buildingExtrusionAppearance\(themeState\.value,map\.getPitch/);
-  assert.match(ui,/buildingFootprintPaint\(themeState\.value,map\.getPitch/);
+  assert.match(ui,/nativeBuildingFootprintPaint\(themeState\.value/);
 });
 test('복구된 보완 건물 8개가 manifest에서 유지',async()=>{
   const manifest=JSON.parse(await readFile(new URL('public/buildings/manifest.json',root),'utf8'));

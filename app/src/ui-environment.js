@@ -88,7 +88,7 @@ export function initWeatherWidget({getPosition, onMessage=()=>{}}={}) {
   });
 }
 
-import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,buildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
+import {nightOcclusionBuildingPaint,buildingExtrusionAppearance,nativeBuildingFootprintPaint,nativeBuildingFootprint,repaintVegetation} from './map-appearance.js';
 import {applyBusStopLabelTheme} from './bus-stop-label-theme.js';
 import {createThemeState} from './theme-state-core.mjs';
 import {scaleMapLabelSize} from './map-label-text-scale.mjs';
@@ -214,7 +214,7 @@ export function initTheme({map,app}){
       const id=entry.id.toLowerCase();
       const set=(property,value)=>{try{map.setPaintProperty(entry.id,property,value??null);}catch{}};
       if(entry.buildingFootprint){
-        const colors=buildingFootprintPaint(themeState.value,map.getPitch?.()??0);
+        const colors=nativeBuildingFootprintPaint(themeState.value);
         for(const [property,value] of Object.entries(colors))set(property,value);
         continue;
       }

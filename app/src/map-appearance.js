@@ -117,7 +117,7 @@ export const BUILDING_VISUAL_PALETTE=Object.freeze({
   dark:Object.freeze({footprint:'#444d56',footprintOpacity:0.74,obliqueOpacity:0.07,extrusion:'#525d66',nearOpacity:0.94,farOpacity:0.89})
 });
 export function nativeBuildingFootprint(layer={}){
-  if(layer.type!=='fill')return false;
+  if(layer.type!=='fill'||String(layer.id||'').startsWith('dongjak-buildings-'))return false;
   const id=String(layer.id||'').toLowerCase();
   const sourceLayer=String(layer['source-layer']||'').toLowerCase();
   return (/building/.test(id)||sourceLayer==='building') && !/outline|casing|label|name/.test(id);
@@ -182,6 +182,11 @@ export function nightOcclusionBuildingPaint(appearance={},enabled=false){
   return enabled?{...appearance,color:'#192c34',opacity:Math.max(0.98,Number(appearance.opacity)||0)}:appearance;
 }
 
+/** Keep unmatched base buildings in both views; matched GIS polygons own the footprint. */
+export function nativeBuildingFootprintPaint(theme='light'){
+ const colors=buildingFootprintPaint(theme,0),opacity=colors['fill-opacity'];
+ return {...colors,'fill-opacity':['interpolate',['linear'],['zoom'],BUILDING_ZOOM_FADE_START,0,BUILDING_ZOOM_FADE_END,['case',['boolean',['feature-state','djGisCovered'],false],0,opacity]]};
+}
 /** Recolor only native footprint polygons; preserve road and night overlays. */
 const interactivePerformanceInstalled=new WeakSet();
 export function installBaseBuildingPalette({map,app}){
@@ -199,9 +204,9 @@ export function installBaseBuildingPalette({map,app}){
   let previousTheme='',previousOpacity=NaN;
   const paint=()=>{
     const theme=app.dataset.theme;
-    const colors=buildingFootprintPaint(theme,map.getPitch?.()??0);
+    const colors=buildingFootprintPaint(theme,0);
     // Zoom interpolation belongs to the paint expression, not a discrete zoomend repaint.
-    const blended={...colors,'fill-opacity':buildingZoomOpacityExpression(colors['fill-opacity'])};
+    const blended=nativeBuildingFootprintPaint(theme);
     if(theme===previousTheme && Math.abs(colors['fill-opacity']-previousOpacity)<0.012)return;
     previousTheme=theme;previousOpacity=colors['fill-opacity'];
     for(const id of ids){
