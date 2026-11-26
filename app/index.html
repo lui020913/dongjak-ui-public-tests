@@ -29,6 +29,26 @@
         html[data-dj-focus-input="pointer"] .metro-station-marker:focus .metro-badges {
           outline: none !important;
         }
+        @media (max-width:699px) {
+          #dj840-map-tip > .dj840-tip-copy-viewport {
+            margin-inline-end: var(--dj-tip-close-reserve, 0px) !important;
+            overflow: hidden !important;
+          }
+          #dj840-map-tip > .dj840-tip-copy-viewport > .dj840-tip-copy {
+            flex-shrink: 0 !important;
+            width: max-content !important;
+            white-space: nowrap !important;
+            text-overflow: clip !important;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            #dj840-map-tip:not([hidden]) { height:auto !important; max-height:none !important; }
+            #dj840-map-tip > .dj840-tip-copy-viewport { height:auto !important; }
+            #dj840-map-tip > .dj840-tip-copy-viewport > .dj840-tip-copy {
+              width:100% !important; white-space:normal !important;
+              overflow-wrap:anywhere !important; animation:none !important;
+            }
+          }
+        }
         #dj-user-tip-close {
           appearance: none !important;
           -webkit-appearance: none !important;
