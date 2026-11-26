@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {applyReviewedGeometry,createRoadDisplayAssets} from '../src/reviewed-road-display-assets.mjs';
+import {readFileSync} from 'node:fs';
+import {applyReviewedGeometry,createRoadDisplayAssets,RECOVERED_SURFACE_TILE} from '../src/reviewed-road-display-assets.mjs';
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const path='/data/sangdo1-analysis-view/slope.geojson';
 const g={type:'LineString',coordinates:[[126.95,37.5],[126.951,37.501]]};
@@ -19,3 +20,14 @@ test('display adapter preserves values, identity and source order',()=>{const re
 test('integrity-checked opt-in loads reviewed display geometry',async()=>{const t=setup();const result=await t.run();assert.deepEqual(result.features[0].geometry,g2);assert.deepEqual(result.features[0].properties,data.features[0].properties);assert.equal(t.requests.length,2)});
 test('ordinary build and every failed validation retain original',async()=>{for(const opts of [{enabled:false},{alterMeta:{sha256:'0'.repeat(64)}},{bad:true},{patchData:{...patch,original_sha256:'0'.repeat(64)}},{patchData:{...patch,changes:[{row:9,geometry:g2}]}},{patchData:{...patch,changes:[{row:0,geometry:{type:'Point',coordinates:[0,0]}}]}}]){const t=setup(opts);assert.deepEqual(await t.run(),data);if(opts.enabled===false)assert.equal(t.requests.length,0)}});
 test('unlisted path never reads review assets',async()=>{const t=setup();assert.deepEqual(await t.loader.displayResponse('/data/pri/lighting_segments.json',response(original)),data);assert.equal(t.requests.length,0)});
+
+test('recovered surfaces are exactly the eight audited baseline polygons and fail closed on tampering',async()=>{
+ const raw=readFileSync(new URL('../public/data/road-display-repair/recovered-surfaces.geojson',import.meta.url),'utf8');
+ assert.equal(Buffer.byteLength(raw),RECOVERED_SURFACE_TILE.bytes);assert.equal(digest(raw),RECOVERED_SURFACE_TILE.sha256);
+ const calls=[];const loader=createRoadDisplayAssets({enabled:true,fetcher:async url=>{calls.push(url);return response(raw);}});
+ const d=await loader.recovered();assert.equal(d.features.length,8);
+ assert.ok(d.features.every(f=>f.properties.kind==='baseline'&&['Polygon','MultiPolygon'].includes(f.geometry.type)));
+ assert.deepEqual(calls,['/data/road-display-repair/recovered-surfaces.geojson']);
+ await assert.rejects(createRoadDisplayAssets({enabled:true,fetcher:async()=>response(raw+' ')}).recovered(),/integrity mismatch/);
+ assert.equal(await createRoadDisplayAssets({enabled:false,fetcher:async()=>{throw Error('unexpected fetch')}}).recovered(),null);
+});
