@@ -859,7 +859,7 @@ async function loadOneBuildingSheet(sheet){
   if(existing?.complete||buildingLoading.has(sheet.sheet)||(buildingRetryAfter.get(sheet.sheet)||0)>Date.now())return;
   buildingLoading.add(sheet.sheet);
   try {
-    const {features, reviewCandidates, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
+    const {features, reviewCandidates, displayGeometries, successfulSources, totalSources, errors}=await loadBuildingTileFeatures(sheet);
     for(const problem of errors) console.warn(`[동작하는 안전지도] ${sheet.sheet}번 ${problem.label} 로딩 실패:`,problem.error);
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
@@ -868,7 +868,7 @@ async function loadOneBuildingSheet(sheet){
       isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
     const {visible:eligible,excluded}=partitionDisplayBuildings(districtBuildings);
     const {visible,reviewExcluded}=partitionGreenReview(eligible,reviewCandidates,greenBuildingFilterEnabled(globalThis.location?.search));
-    const within=visible.map(f=>({...f,properties:{...f.properties,_render3d:true}}));
+    const within=visible.map(f=>({...f,geometry:displayGeometries.get(f)||f.geometry,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
@@ -3671,7 +3671,7 @@ const routeConfirmation=document.getElementById('route-transit-confirm');
 new MutationObserver(()=>{if(routeConfirmation.hidden&&routeCandidateMarker)closeTransitRouteConfirmation();}).observe(routeConfirmation,{attributes:true,attributeFilter:['hidden']});
 window.addEventListener('pagehide',()=>{routeRequestGeneration++;routeRequestPending=false;routePickMode=null;closeTransitRouteConfirmation();closeRouteSearch();closePriPreferences();drawRouteMarkers(false);});
 window.addEventListener('pageshow',event=>{if(event.persisted)syncRoutePresentation();});
-window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncRoutePresentation();}});
+window.addEventListener('popstate',()=>{if(routePickMode){routePickMode=null;closeTransitRouteConfirmation();quickSearch.clearMapResults?.();syncTransitExterior();syncRoutePresentation();}});
 document.getElementById('route-gps-start').addEventListener('click',()=>{
   if(!hasLocationSupport()){toast('이 기기에서는 GPS 기능을 사용할 수 없습니다.');return;}
   const b=document.getElementById('route-gps-start');b.disabled=true;b.textContent='위치 확인 중…';
