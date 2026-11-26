@@ -131,7 +131,8 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   let lastViewportKey='';
   const markDirty=()=>{dedupDirty=true;};
   const scheduleReconcile=()=>{
-    if(app?.dataset?.djTransitExterior==='true'||!dedupDirty||dedupTimer||map.isMoving?.())return;
+    if(!dedupDirty||dedupTimer||map.isMoving?.())return;
+    if(app?.dataset?.djTransitExterior==='true')return;
     dedupTimer=setTimeout(()=>{dedupTimer=0;reconcileOfficialDuplicates();},180);
   };
   const identityName=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').toLowerCase().replace(/[\s\-‐‑–’']/g,'');
