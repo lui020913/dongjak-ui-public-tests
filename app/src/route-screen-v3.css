@@ -17,9 +17,8 @@
 button,input {font:inherit}
 button {cursor:pointer; -webkit-tap-highlight-color:transparent}
 button:focus,input:focus{outline:none;box-shadow:none}
-:host-context(html:not([data-dj-focus-input="pointer"])) :is(button,input):focus-visible{outline:2px solid #596368;outline-offset:2px}
+:is(button,input):focus-visible{outline:var(--dj-route-focus-outline,2px solid #596368);outline-offset:2px}
 input:focus{border-color:#596368}
-:host-context(html[data-dj-focus-input="pointer"]) :is(button,input):focus{outline:none;box-shadow:none}
 [hidden]{display:none!important}
 .canvas {position:absolute;inset:0;pointer-events:none}
 .canvas[data-search-open="true"]{background:var(--v3-page-bg)}
