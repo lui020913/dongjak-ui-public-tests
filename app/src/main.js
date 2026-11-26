@@ -2839,7 +2839,9 @@ function updateRouteLabels() {
   updateRouteCalcAvailability();
 }
 function makeRouteMarker(position, color) {
-  return new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
+  const marker=new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
+  marker.getElement?.()?.classList.add('dj-route-endpoint-marker');
+  return marker;
 }
 function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||((routeResult||transitPreview)&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
@@ -3063,6 +3065,7 @@ function showTransitRouteConfirmation(place) {
   routeTransitCandidate=place;
   routeCandidateMarker=new maplibregl.Marker({color:'#ec6d35',scale:1.05})
     .setLngLat([place.lng,place.lat]).addTo(map);
+  routeCandidateMarker.getElement?.()?.classList.add('dj-route-candidate-marker');
   const panel=document.getElementById('route-transit-confirm');
   document.getElementById('route-transit-confirm-name').textContent=place.name;
   document.getElementById('route-transit-confirm-desc').textContent=place.kind==='bus'
@@ -3491,6 +3494,8 @@ for(const button of document.querySelectorAll('[data-route-variant]')){
 }
 async function reviewPriCandidates(reviewedVariants,factors=priPreferences.getSelected()){
   const {standard,gentle}=reviewedVariants;
+  const status=document.getElementById('route-status');
+  status.textContent=status.textContent.split(' · PRI 상대 저위험 후보 선택')[0];
   routePriVisuals=null;
   for(const route of [standard,gentle])if(route)route.priExposure=null;
   const thisPriReview=++priRouteReviewSequence;
