@@ -68,6 +68,7 @@ import {installAdminDongLayer} from './admin-dong-layer.js';
 import {installBaseLayerControls} from './base-layer-controls.js';
 import {loadBuildingTileFeatures} from './building-assets.js';
 import {createBuildingCoverage,buildingModeVisibility} from './building-coverage.js';
+import {isDisplayBuilding,partitionDisplayBuildings} from './building-display-detail.js';
 import {nearestBuildingSheets} from './building-prewarm.js';
 import {installSafetyLayers,installBridgeDeck} from './safety-layers.js';
 import {installMapOrientationControls,installNeighborDistrictLabels,installDecorativeParkTrees} from './map-polish.js';
@@ -831,26 +832,7 @@ async function ensureBuildingManifest(){
 // 좁고 비정상적으로 작은 건물 외곽은 시설물일 가능성이 있어 3D에 표시하지 않습니다.
 // 확정적 건물 판정은 아니며 건축물 전체를 제거하는 기준이 아닙니다.
 export function shouldRender3DBuilding(geometry){
-  const coords=geometry?.coordinates;
-  if(!Array.isArray(coords))return false;
-  const ring=geometry.type==='Polygon'?coords[0]:geometry.type==='MultiPolygon'?coords[0]?.[0]:null;
-  if(!Array.isArray(ring)||ring.length<4)return false;
-  const origin=ring[0];
-  if(!Array.isArray(origin))return false;
-  const latScale=111320,lngScale=111320*Math.cos(origin[1]*Math.PI/180);
-  let xMin=Infinity,xMax=-Infinity,yMin=Infinity,yMax=-Infinity,twiceArea=0;
-  for(let i=0;i<ring.length;i++){
-    const [lng,lat]=ring[i];
-    const x=(lng-origin[0])*lngScale,y=(lat-origin[1])*latScale;
-    const [nextLng,nextLat]=ring[(i+1)%ring.length];
-    const nextX=(nextLng-origin[0])*lngScale,nextY=(nextLat-origin[1])*latScale;
-    xMin=Math.min(xMin,x);xMax=Math.max(xMax,x);
-    yMin=Math.min(yMin,y);yMax=Math.max(yMax,y);
-    twiceArea+=x*nextY-nextX*y;
-  }
-  const area=Math.abs(twiceArea)*0.5;
-  const shortSide=Math.min(xMax-xMin,yMax-yMin);
-  return area>=8 && !(area<28 && shortSide<2.5);
+  return isDisplayBuilding({geometry});
 }
 // v17.12: 기존 국가기본도와 GIS건물 보완 GeoJSON을 모두 로딩합니다.
 
@@ -864,9 +846,10 @@ async function loadOneBuildingSheet(sheet){
     if(!boundaryGeometry)return;
     // Tile-native buildings are incomplete in parts of Sangdo 1-dong. The
     // supplied base+supplement GIS footprints must also be available overhead.
-    const within=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
-      isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type))
-      .map(f=>({...f,properties:{...f.properties,_render3d:shouldRender3DBuilding(f.geometry)}}));
+    const districtBuildings=features.filter(f=>Number.isFinite(f.properties?.x)&&Number.isFinite(f.properties?.y)&&
+      isDongjak(f.properties.x,f.properties.y)===true&&['Polygon','MultiPolygon'].includes(f.geometry?.type));
+    const {visible,excluded}=partitionDisplayBuildings(districtBuildings);
+    const within=visible.map(f=>({...f,properties:{...f.properties,_render3d:true}}));
     const sourceId=`dongjak-buildings-data-${sheet.sheet}`;
     const layerId=`dongjak-buildings-3d-${sheet.sheet}`;
     const footprintFillId=`dongjak-buildings-footprint-${sheet.sheet}`;
@@ -874,11 +857,11 @@ async function loadOneBuildingSheet(sheet){
     const collection={type:'FeatureCollection',features:within};
     if(existing){
       if(successfulSources===totalSources&&map.getSource(sourceId)){
-        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet);buildingRetryAfter.delete(sheet.sheet);
+        map.getSource(sourceId).setData(collection);existing.sourceCount=successfulSources;existing.count=within.length;existing.complete=true;buildingCoverage?.setSheet(sheet.sheet,excluded);buildingRetryAfter.delete(sheet.sheet);
       }else buildingRetryAfter.set(sheet.sheet,Date.now()+15000);
       return;
     }
-    map.addSource(sourceId,{type:'geojson',data:collection});
+    map.addSource(sourceId,{type:'geojson',data:collection,tolerance:0.5,maxzoom:19});
     const buildingStyle=nightOcclusionBuildingPaint(
       buildingExtrusionAppearance(visualTheme.currentTheme(),map.getPitch()),
       app.dataset.sangdoNight==='on'&&visualTheme.currentTheme()==='dark');
@@ -898,7 +881,7 @@ async function loadOneBuildingSheet(sheet){
         'fill-extrusion-base':0}
     },firstSymbol);
     loadedBuildingTiles.set(sheet.sheet,{layerId,footprintFillId,footprintLineId,count:within.length,sourceCount:successfulSources,complete:successfulSources===totalSources,footprint3DMode:visibleBuilding3D()});
-    buildingCoverage?.setSheet(sheet.sheet);
+    buildingCoverage?.setSheet(sheet.sheet,excluded);
     if(successfulSources<totalSources)buildingRetryAfter.set(sheet.sheet,Date.now()+15000);else buildingRetryAfter.delete(sheet.sheet);
     lastBuildingCount=[...loadedBuildingTiles.values()].reduce((sum,t)=>sum+t.count,0);
     building3DLastOpacity=-1;

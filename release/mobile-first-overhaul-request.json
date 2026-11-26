@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.191",
+  "application_version": "9.2.192",
   "public_work_branch": "main",
-  "purpose": "Publish guidebook v26 (PDF · 1.5 MB) and restore compact fixed bus stop spacing, with overlapping vehicle markers on the vertical line using GPS-derived interval estimates only when reliable. Protected mobile Preview and Production.",
-  "attempt": 423,
+  "purpose": "Apply common 20 square metre minimum building footprint display threshold and narrow-shape rule to GIS 2D and 3D, retain named buildings, suppress matching small native footprints conservatively, preserve real buildings on green land; simplify displayed GeoJSON at tile zooms. Protected mobile Preview and Production.",
+  "attempt": 424,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,

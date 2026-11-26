@@ -1,3 +1,4 @@
+import {isDisplayBuilding,hasNamedBuilding} from './building-display-detail.js';
 // A bounded spatial grid for conservatively matching native and loaded GIS
 // footprints. Never hide an unmatched or unidentifiable native building.
 export function buildingFootprintFilter(extruding){
@@ -44,8 +45,9 @@ export function buildingModeVisibility(extruding){
  return extruding?{plan:'none',extrusion:'visible'}:{plan:'visible',extrusion:'none'};
 }
 export function createBuildingCoverage(map,layers){
- let extruding=false;
- const original=new Map();
+ let extruding=false,dirty=true;
+ const original=new Map(),excludedBySheet=new Map(),hidden=new Map();
+ const clearHidden=()=>{for(const target of hidden.values())try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.clear();};
  const sync=()=>{
   for(const id of layers){
    if(!map.getLayer(id))continue;
@@ -55,6 +57,28 @@ export function createBuildingCoverage(map,layers){
    if(current!==desired)map.setLayoutProperty(id,'visibility',desired);
   }
  };
- map.on('style.load',()=>{original.clear();sync();});
- return {setExtruding(value){extruding=Boolean(value);sync();},setSheet(){sync();},removeSheet(){sync();}};
+ // Tile geometry may be clipped. Only hide a native feature when a complete
+ // GIS footprint independently confirms the small shape, or a reliable
+ // explicitly square-metre area is supplied. Never hide from greenery alone.
+ const reconcile=()=>{
+  if(!dirty||extruding||map.isMoving?.()||!map.queryRenderedFeatures||!map.setFeatureState)return;
+  const ids=layers.filter(id=>map.getLayer(id));if(!ids.length)return;
+  let features;try{features=map.queryRenderedFeatures({layers:ids});}catch{return;}
+  const seen=new Map();
+  for(const f of features){
+   if(f.id==null||!f.source||!f.sourceLayer)continue;
+   const key=JSON.stringify([f.source,f.sourceLayer,f.id]),target={source:f.source,sourceLayer:f.sourceLayer,id:f.id};
+   const area=f.properties?.area_m2;
+   const explicitlySmall=typeof area==='number'&&Number.isFinite(area)&&area>0&&area<20;
+   const matchedSmall=!isDisplayBuilding(f)&&[...excludedBySheet.values()].some(idx=>idx.matches(f.geometry));
+   const hide=!hasNamedBuilding(f)&&(explicitlySmall||matchedSmall);
+   const old=seen.get(key);seen.set(key,{target,hide:hide&&(old?.hide??true)});
+  }
+  for(const [key,target] of hidden)if(!seen.get(key)?.hide){try{map.removeFeatureState(target,'djGisCovered');}catch{}hidden.delete(key);}
+  for(const [key,{target,hide}] of seen)if(hide&&!hidden.has(key)){try{map.setFeatureState(target,{djGisCovered:true});hidden.set(key,target);}catch{}}
+  dirty=false;
+ };
+ map.on('style.load',()=>{clearHidden();original.clear();dirty=true;sync();});
+ map.on('moveend',()=>{dirty=true;});map.on('idle',reconcile);
+ return {setExtruding(value){const next=Boolean(value);if(extruding!==next){extruding=next;dirty=true;if(next)clearHidden();}sync();},setSheet(id,excluded=[]){excludedBySheet.set(id,createCoverageIndex(excluded));dirty=true;sync();},removeSheet(id){excludedBySheet.delete(id);clearHidden();dirty=true;sync();}};
 }
