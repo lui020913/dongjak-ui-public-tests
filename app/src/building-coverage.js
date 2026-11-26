@@ -44,6 +44,11 @@ export function createCoverageIndex(features,{strict=false}={}){
 }
 // A single mode owns building rendering. Restore the original 2D layer
 // visibility when the actual GIS extrusion mode ends.
+// Hysteresis prevents layout toggles when fingers oscillate around 10 degrees.
+export function nextBuildingPitchMode(active,pitch,enter=10,exit=7){
+ const angle=Number(pitch);if(!Number.isFinite(angle))return Boolean(active);
+ return active?angle>exit:angle>=enter;
+}
 export function buildingModeVisibility(extruding){
  return extruding?{plan:'none',extrusion:'visible'}:{plan:'visible',extrusion:'none'};
 }
