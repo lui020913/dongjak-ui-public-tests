@@ -127,10 +127,17 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
   }
   // Match actual rendered official identities against currently loaded vector POIs.
   // Do not hide unrelated nearby facilities or use an untyped distance-only mask.
-  let officialByName=new Map(),lastDedupSignature='';
+  let officialByName=new Map(),lastDedupSignature='',dedupDirty=true,dedupTimer=0;
+  let lastViewportKey='';
+  const markDirty=()=>{dedupDirty=true;};
+  const scheduleReconcile=()=>{
+    if(!dedupDirty||dedupTimer||map.isMoving?.())return;
+    dedupTimer=setTimeout(()=>{dedupTimer=0;reconcileOfficialDuplicates();},180);
+  };
   const identityName=p=>String(normalizeFacilityRecord(p).name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
   const reconcileOfficialDuplicates=()=>{
-    if(map.isMoving?.())return;
+    if(map.isMoving?.()||!dedupDirty)return;
+    dedupDirty=false;
     if(!officialByName.size&&!lastDedupSignature)return;
     let features=[];try{features=map.querySourceFeatures(source,{sourceLayer:'poi'})||[];}catch{return;}
     const matches=new Set();
@@ -152,8 +159,11 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
       map.setFilter(id,ids.length?['all',base,['!',['in',['id'],['literal',ids]]]]:base);
     }
   };
-  app?.addEventListener('dongjak:official-facilities-ready',e=>{officialByName=new Map();for(const row of Array.isArray(e.detail)?e.detail:[]){const key=identityName(row);if(!officialByName.has(key))officialByName.set(key,[]);officialByName.get(key).push(row);}reconcileOfficialDuplicates();});
-  map.on('idle',reconcileOfficialDuplicates);
+  app?.addEventListener('dongjak:official-facilities-ready',e=>{officialByName=new Map();for(const row of Array.isArray(e.detail)?e.detail:[]){const key=identityName(row);if(!officialByName.has(key))officialByName.set(key,[]);officialByName.get(key).push(row);}markDirty();scheduleReconcile();});
+  map.on('movestart',()=>{if(dedupTimer){clearTimeout(dedupTimer);dedupTimer=0;}});
+  map.on('moveend',()=>{const c=map.getCenter(),key=[c.lng.toFixed(5),c.lat.toFixed(5),map.getZoom().toFixed(2),map.getPitch().toFixed(1),map.getBearing().toFixed(1)].join('/');if(key!==lastViewportKey){lastViewportKey=key;markDirty();}scheduleReconcile();});
+  map.on('sourcedata',e=>{if(e.sourceId===source&&e.sourceDataType==='content'&&e.tile){markDirty();scheduleReconcile();}});
+  map.on('idle',scheduleReconcile);
   const recolor=()=>{
     const dark=app?.dataset?.theme==='dark';
     for(const type of types){
