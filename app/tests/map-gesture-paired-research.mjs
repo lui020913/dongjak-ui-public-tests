@@ -5,7 +5,7 @@ import {dismissOnboarding} from './e2e/helpers.js';
 const urls=[process.env.BASELINE_URL,process.env.CANDIDATE_URL];
 assert.ok(urls.every(Boolean));
 const browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
-const report={baseline:process.env.BASELINE_SHA,candidate:process.env.CANDIDATE_SHA,notes:'Same software-rendered Chromium runner; not physical iPhone FPS. Each camera sweep is matched; icons stay enabled.',samples:[]};
+const report={baseline:process.env.BASELINE_SHA,candidate:process.env.CANDIDATE_SHA,notes:'Same software-rendered Chromium runner; not physical iPhone FPS. Matched pan AND zoom with equal initial DPR; icons stay enabled.',samples:[]};
 const sites=[{name:'Sangdo',center:[126.94791,37.502834]},{name:'Noryangjin',center:[126.941005,37.513534]}];
 async function sample(url,variant,round){
  const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:3,serviceWorkers:'block',reducedMotion:'no-preference',userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Mobile/15E148 Safari/604.1'});
@@ -20,11 +20,13 @@ async function sample(url,variant,round){
   await startup.waitFor({state:'hidden',timeout:45000});await dismissOnboarding(page);
   await page.waitForFunction(()=>window.__qaMap?.getStyle()?.sources?.openmaptiles,{},{timeout:90000});
   for(const site of sites){
-   await page.evaluate(({center})=>window.__qaMap.jumpTo({center,zoom:17.8,pitch:0,bearing:0}),site);
+   await page.evaluate(({center})=>{const m=window.__qaMap;m.jumpTo({center,zoom:17.8,pitch:0,bearing:0});},site);
    await page.waitForFunction(()=>{const m=window.__qaMap;return m.isStyleLoaded()&&!m.isMoving()&&m.getStyle().layers.some(l=>l.type==='symbol'&&/metro|bus|poi/i.test(l.id));},{},{timeout:90000});
    await page.waitForTimeout(1800);
    const data=await page.evaluate(async({center})=>{
     const m=window.__qaMap,frames=[],writes={},restores=[],sweeps=[];
+    // Match quality between revisions, including any adaptive DPR changes.
+    m.setPixelRatio?.(2.5);const originalDpr=m.setPixelRatio;if(originalDpr){m.setPixelRatio=function(){};restores.push(()=>{m.setPixelRatio=originalDpr;});}
     const label=/poi|metro|bus|civic|facility|featured|name|label|transport/i;
     const visible=m.getStyle().layers.filter(l=>l.type==='symbol'&&label.test(l.id)&&m.getLayoutProperty(l.id,'visibility')!=='none');
     const visibleIds=visible.map(l=>l.id);
@@ -43,18 +45,18 @@ async function sample(url,variant,round){
     const frame=()=>{if(!active)return;const t=performance.now();if(last)frames.push(t-last);last=t;};
     m.on('render',frame);
     try{
-     for(const offset of [.0012,-.0012,.0007]){
+     for(const [offset,zoom] of [[.0012,17.8],[-.0012,16.2],[.0007,18.2],[-.0007,15.2],[.0012,17.8]]){
       // Use a longer matched camera sweep on the software GPU rather than
       // relaxing sample requirements or discarding slow frames.
       const target=[center[0]+offset,center[1]+offset*.35];
-      const before=m.getCenter(),started=performance.now(),count=frames.length;
+      const before=m.getCenter(),beforeZoom=m.getZoom(),started=performance.now(),count=frames.length;
       last=started;active=true;
       const done=new Promise(resolve=>m.once('moveend',resolve));
-      m.easeTo({center:target,duration:4500,essential:true,easing:t=>t});
+      m.easeTo({center:target,zoom,duration:4500,essential:true,easing:t=>t});
       await done;
       const ended=performance.now(),after=m.getCenter();
       active=false;
-      sweeps.push({elapsedMs:ended-started,frames:frames.length-count,from:[before.lng,before.lat],to:[after.lng,after.lat],target,tailMs:ended-last});
+      sweeps.push({elapsedMs:ended-started,frames:frames.length-count,from:[before.lng,before.lat],to:[after.lng,after.lat],target,zoom,beforeZoom,afterZoom:m.getZoom(),tailMs:ended-last});
       await new Promise(r=>setTimeout(r,650));
      }
     }finally{active=false;m.off('render',frame);for(const restore of restores.reverse())restore();}
@@ -63,8 +65,8 @@ async function sample(url,variant,round){
    report.samples.push({variant,round,site:site.name,...data});
    console.log('MAP_GESTURE_SAMPLE',JSON.stringify({variant,round,site:site.name,icons:data.icons,frames:data.frames.length,writes:data.writes,sweeps:data.sweeps,ratio:data.ratio}));
    assert.ok(data.icons>0,'actual visible POI/transport labels required');
-   assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000),'matched camera sweep did not execute');
-   assert.ok(data.frames.length>=9&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
+   assert.ok(data.sweeps.every(x=>Math.hypot(x.to[0]-x.from[0],x.to[1]-x.from[1])>.0004&&Math.hypot(x.target[0]-x.to[0],x.target[1]-x.to[1])<.0001&&x.elapsedMs>=4000&&Math.abs(x.afterZoom-x.zoom)<.02),'matched camera sweep did not execute');
+   assert.ok(data.frames.length>=10&&data.sweeps.every(x=>x.frames>=2),'insufficient map frames');
   }
  }finally{await ctx.close();}
 }

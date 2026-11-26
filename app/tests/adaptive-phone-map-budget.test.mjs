@@ -58,9 +58,9 @@ test('HUD scale docking never fights the active phone renderer for MapLibre DPR'
  }
 });
 
-test('high-density phone rendering is capped at 2x without upscaling lower DPR devices',()=>{
- assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),2);
- assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),2);
+test('high-density phone rendering is capped at 2.5x without upscaling lower DPR devices',()=>{
+ assert.equal(normalMapPixelRatio({phone:true,ua:'iPhone OS 18_2',deviceRatio:3}),2.5);
+ assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:4}),2.5);
  assert.equal(normalMapPixelRatio({phone:true,memory:8,deviceRatio:2}),2);
  assert.equal(normalMapPixelRatio({phone:true,deviceRatio:3}),2);
  assert.equal(normalMapPixelRatio({phone:false,deviceRatio:3}),1.5);

@@ -361,7 +361,14 @@ export function mountRouteScreenV3(doc=document, win=window) {
   });
   listen(win,'resize',requestPosition);
   listen(win,'orientationchange',requestPosition);
-  const observer=new MutationObserver(sync);
+  // The shared map toggles motion/performance classes during gestures. They
+  // must never rebuild the route editor, recent list, waypoints or resize it.
+  let observedRouteState=app.dataset.tab+'|'+app.classList.contains('route-guiding');
+  const observer=new MutationObserver(()=>{
+    const state=app.dataset.tab+'|'+app.classList.contains('route-guiding');
+    if(state===observedRouteState)return;
+    observedRouteState=state;sync();
+  });
   observer.observe(app,{attributes:true,attributeFilter:['data-tab','class']});
   const labelsObserver=new MutationObserver(syncLabels);
   for(const item of [legacyStart,legacyEnd])labelsObserver.observe(item,{childList:true,subtree:true,characterData:true});
