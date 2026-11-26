@@ -86,7 +86,7 @@ def regression():
     assert Crosswalk({0:old},{},{0:"1"}).align(g)[1]=="unresolved_road"
     assert c.align(LineString([(10,-5),(10,5)]))[1]=="no_unique_match"
     print("LAYER_ALIGNMENT_REGRESSION_OK")
-def main(base,out):
+def main(base,out,crosswalk_class=Crosswalk):
     out.mkdir(parents=True,exist_ok=True)
     report=read(base/"summary.json")
     raw=(PUBLIC/"data/safety/walk/dongjak_walk_graph.json").read_bytes()
@@ -95,7 +95,7 @@ def main(base,out):
     original={i:transform(TO_M,LineString(e[6])) for i,e in enumerate(edges) if len(e)>=7 and len(e[6])>=2}
     corrected={f["properties"]["edge_index"]:line(f["geometry"]) for f in read(base/"candidate-centers.geojson")["features"]}
     ids={i:edges[i][0] for i in original}
-    cross=Crosswalk(original,corrected,ids)
+    cross=crosswalk_class(original,corrected,ids)
     pilot=metric(read(PUBLIC/"data/protection-zone/boundary_reference.geojson")["features"][0]["geometry"])
     layers={
       "pri-scoped":"data/protection-zone/sangdo1_policy_gap_2factor_adminscope_300m_20261122.geojson",
