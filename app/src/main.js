@@ -1944,7 +1944,7 @@ function setCommunityNoticeView(open){
  const wasOpen=!panel.hidden;
  if(open&&communityDetail){communityDetail=null;communityReplyTo=null;document.getElementById('participation-panel').dataset.communityDetail='false';}
  panel.hidden=!open;toggle.setAttribute('aria-pressed',String(open));
- for(const id of ['community-list','participate-register'])document.getElementById(id).hidden=open;
+ document.getElementById('community-list').hidden=open;
  if(open){
   document.getElementById('community-list').replaceChildren();
   document.querySelector('#participation-panel>.dj836-sheet-body')?.scrollTo({top:0,behavior:'instant'});
@@ -2012,6 +2012,10 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   if (tab !== 'map') {
     if (!detail.hidden) showOverview();
   }
+  // Programmatic route entry is an explicit user choice, not a delayed
+  // automatic sheet reopen. Authorize it after the preceding close operations
+  // so the shared ghost-open guard cannot discard the newly opened route tab.
+  if(tab==='route')window.DongjakWindowLifecycle?.requestOpen('route-panel');
   app.dataset.tab = tab;
   // In HOME mode route-panel synchronization must not reopen safety overview.
   if(tab==='map'&&suppressOverview)app.dataset.djSafetyHomeOnly='1';
@@ -2127,10 +2131,7 @@ for(const button of document.querySelectorAll('[data-close-page]')){
 }
 document.getElementById('news-close-to-map')?.addEventListener('click',()=>closePrimaryPageToMap(document.getElementById('news-panel')));
 // 경로 상세 결과는 아래 도보 길찾기 핸들러에서 연결합니다.
-document.getElementById('participate-register').addEventListener('click', () => {
-  navigate('map');
-  setAddMode(true);
-});
+
 
 function makeRecord(title, subtitle, callback) {
   const btn = document.createElement('button');
@@ -2448,7 +2449,19 @@ const pedestrianTools=initPedestrianTools({
     clearCommunityLocationPick();
     communityComposerFromMap=window.matchMedia('(max-width:699px)').matches;
     if(!communityComposerFromMap)navigate('participate');
-    else if(app.dataset.tab!=='map')navigate('map',{suppressOverview:true});
+    else {
+      if(communityComposerPortal?.isOpen())return;
+      // Always reconcile the map tab, even if it was already selected.
+      // An interrupted legacy transition can leave the feed painted while
+      // data-tab is still map. Never use the feed as an intermediate surface.
+      const feed=document.getElementById('participation-panel');
+      window.DongjakWindowMotion?.cancel?.(feed);
+      delete feed.dataset.djTabOutgoing;
+      delete feed.dataset.djPrimaryTransition;
+      navigate('map',{suppressOverview:true});
+      feed.hidden=true;
+      for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])feed.style.removeProperty(key);
+    }
     document.getElementById('community-category').value='보행 불편';
     syncIssueDetails();
     openCommunityComposer(true,{animate:true});

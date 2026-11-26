@@ -144,14 +144,59 @@ export function mergeFavoritesSnapshots(server,local){
   for(const p of b.places){const i=places.findIndex(x=>placeKey(x)===placeKey(p));if(i<0)places.push(p);else places[i]=p;}
   return sanitizeFavoritesSnapshot({groups,places});
 }
-export function recentPlaces(){return read(RECENT_KEY).map(cleanPlace).filter(Boolean).slice(0,12);}
+const historyText=s=>String(s??'').normalize('NFKC').trim().replace(/\s+/gu,' ').toLowerCase();
+function recentDistance(a,b){
+  const north=(a.lat-b.lat)*111195,east=(a.lng-b.lng)*111195*Math.cos((a.lat+b.lat)*Math.PI/360);
+  return Math.hypot(north,east);
+}
+export function sameRecentPlace(a,b){
+  const ak=a.kind||'place',bk=b.kind||'place';
+  if(ak!==bk)return false;
+  // Do not merge bus stops with different ARS IDs or opposite directions.
+  if(ak==='bus'||ak==='subway')return placeKey(a)===placeKey(b);
+  const name=historyText(a.name);
+  if(!name||name!==historyText(b.name))return false;
+  const addressA=historyText(a.address),addressB=historyText(b.address);
+  if(addressA&&addressB&&addressA!==addressB)return recentDistance(a,b)<=5;
+  if(addressA&&addressA===addressB)return true;
+  // Different providers often pin the same park/school at different entrances.
+  // Preserve distinct same-named branches farther apart; do not change favorites.
+  return recentDistance(a,b)<=100;
+}
+function uniqueRecentPlaces(raw){
+  const list=[];
+  for(const item of raw){
+    const p=cleanPlace(item);if(!p||list.some(x=>sameRecentPlace(x,p)))continue;
+    list.push(p);if(list.length>=12)break;
+  }
+  return list;
+}
+export function recentPlaces(){
+  const raw=read(RECENT_KEY),list=uniqueRecentPlaces(raw);
+  if(JSON.stringify(raw)!==JSON.stringify(list))write(RECENT_KEY,list);
+  return list;
+}
 export function recordRecentPlace(place){
   const p=cleanPlace(place);if(!p)return false;
-  const ok=write(RECENT_KEY,[p,...recentPlaces().filter(x=>placeKey(x)!==placeKey(p))].slice(0,12));if(ok)notifyRecent();return ok;
+  const ok=write(RECENT_KEY,uniqueRecentPlaces([p,...recentPlaces()]));if(ok)notifyRecent();return ok;
 }
 function notifyRecent(){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('dongjak:recent-places-change'));}
-export function recentSearchQueries(){return read(QUERY_KEY).filter(x=>typeof x==='string'&&x.trim().length>=2).map(x=>x.slice(0,80)).slice(0,12);}
-export function recordSearchQuery(query){const q=normalize(query).slice(0,80);if(q.length<2)return false;const ok=write(QUERY_KEY,[q,...recentSearchQueries().filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,12));if(ok)notifyRecent();return ok;}
+function uniqueRecentQueries(raw){
+  const seen=new Set(),list=[];
+  for(const item of raw){
+    if(typeof item!=='string')continue;
+    const q=item.normalize('NFKC').trim().replace(/\s+/gu,' ').slice(0,80),key=historyText(q);
+    if(q.length<2||seen.has(key))continue;
+    seen.add(key);list.push(q);if(list.length>=12)break;
+  }
+  return list;
+}
+export function recentSearchQueries(){
+  const raw=read(QUERY_KEY),list=uniqueRecentQueries(raw);
+  if(JSON.stringify(raw)!==JSON.stringify(list))write(QUERY_KEY,list);
+  return list;
+}
+export function recordSearchQuery(query){const q=normalize(query).slice(0,80);if(q.length<2)return false;const ok=write(QUERY_KEY,uniqueRecentQueries([q,...recentSearchQueries()]));if(ok)notifyRecent();return ok;}
 export function clearRecentPlaces(){const a=write(RECENT_KEY,[]),b=write(QUERY_KEY,[]);if(a||b)notifyRecent();return a&&b;}
 export function placeShareUrl(place,base){
   const p=cleanPlace(place);if(!p)return '';

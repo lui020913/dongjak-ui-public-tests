@@ -988,7 +988,7 @@ function displayArrivals(container,kind,items,place=null){
           const left=el('div','transport-arrival-main metro-arrival-main');
           const desc=el('div','metro-arrival-detail');
           const info=formatMetroArrivalCard(row);
-          desc.append(el('strong','',info.heading.replace(/행$/,'')));
+          desc.append(el('strong','',info.heading));
           const details=line==='9호선'&&['일반','급행'].includes(service)
             ?info.details?.replace(/\s*\(급행\)/g,'').replace(/\s*·\s*(일반|급행)$/,''):info.details;
           if(details&&line==='9호선'&&service==='종별 미확인')desc.append(el('small','metro-arrival-route',details));

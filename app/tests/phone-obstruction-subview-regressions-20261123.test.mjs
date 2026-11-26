@@ -34,10 +34,10 @@ test('overlapping unavailable panel measurement uses a bounded fallback',()=>{
  assert.equal(usableMapSelectionOffset({map,panel:node(650,844),doc,win}),100);
 });
 
-test('map preferences and advanced tools use one child navigation owner',()=>{
+test('map preferences use one child navigation owner without advanced tools',()=>{
  const info=source('src/v834-my-info.js');
  assert.match(info,/language:languageSettings,map:mapBox/);
- assert.match(info,/advancedTools\.append\(advancedTitle,toolsBox\);mapBox\.append\(advancedTools\)/);
+ assert.doesNotMatch(info,/dj834-advanced-tools|advancedTools|toolsBox/);
  assert.match(info,/\['profile','records','type','language','tools','map'\]/);
  assert.match(info,/if\(view==='map'\)syncMapChoices\(\)/);
  assert.match(info,/enter\(detail,'forward'\)/);

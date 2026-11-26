@@ -79,7 +79,7 @@ test('my info removes unused manual theme row while preserving map settings acce
  assert.doesNotMatch(info,/data-dj834-action="theme"/);
  assert.match(info,/data-dj834-action="map"/);
  assert.match(info,/language:languageSettings,map:mapBox/);
- assert.match(info,/className='dj834-advanced-tools'/);
+ assert.doesNotMatch(info,/dj834-advanced-tools|advancedTools|toolsBox/);
 });
 test('profile save/edit and security recovery modes keep login state',()=>{
  assert.match(account,/savedProfile\?'변경사항 저장':'이름 저장'/);

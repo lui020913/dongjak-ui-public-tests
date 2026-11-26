@@ -144,9 +144,6 @@ export function installMyInfo(doc=document){
  }
  doc.defaultView?.addEventListener('dongjak:auth-state',()=>{if(!records.hidden)void refreshReviewHistory();else{++reviewSequence;for(const item of reviewControllers)item.close();reviewControllers=[];reviewList.replaceChildren();}});
 
- // Advanced map utilities share the SAME full-screen child navigation as history.
- // The existing utility body and its event listeners are moved here by mobile-17.
- const toolsBox=doc.createElement('section');toolsBox.className='dj834-tools-container';
  // My Info never opens a second full-screen settings overlay. The original
  // settings controller remains mounted; these subpage switches proxy its state.
  const mapBox=doc.createElement('section');mapBox.className='dj834-map-settings-container';
@@ -155,12 +152,7 @@ export function installMyInfo(doc=document){
  <label class="dj834-map-setting-row"><span><strong>날씨 표시</strong><small>지도 위 날씨 버튼을 표시합니다.</small></span><input type="checkbox" data-dj834-native="dj-settings-weather" aria-label="날씨 표시"></label>
  <label class="dj834-map-setting-row"><span><strong>지도 조작 버튼</strong><small>도움말·나침반·홈·내 위치</small></span><input type="checkbox" data-dj834-native="dj-settings-tools" aria-label="지도 조작 버튼"></label>
  <button type="button" class="dj834-map-reset">기본 설정 복원</button>`;
- // Former "추가 지도 도구" is no longer a competing top-level page. Move
- // its existing live owner under the related map preferences without cloning
- // controls or losing the listeners attached by installMobileFollowup.
- const advancedTools=doc.createElement('details');advancedTools.className='dj834-advanced-tools';
- const advancedTitle=doc.createElement('summary');advancedTitle.textContent='고급 지도 도구';
- advancedTools.append(advancedTitle,toolsBox);mapBox.append(advancedTools);
+ // The map's dedicated layer picker owns these tools; do not duplicate them in settings.
  const syncMapChoices=()=>{
    for(const input of mapBox.querySelectorAll('[data-dj834-native]')){
      const native=doc.getElementById(input.dataset.dj834Native);
@@ -234,7 +226,6 @@ export function installMyInfo(doc=document){
  // Keep profile, typography, and saved records in the live DOM so renderMy() can
  // update #my-points even when the records subview has not been opened yet.
  accountBox.hidden=true;typography.hidden=true;records.hidden=true;languageSettings.hidden=true;mapBox.hidden=true;
- toolsBox.hidden=false; // Its visibility is governed by the enclosing map page and <details>.
  content.append(accountBox,typography,records);content.append(languageSettings,mapBox);
  // All inactive settings views remain mounted for real-time account/history
  // updates but must never contribute their own layout height. Historically
@@ -277,7 +268,7 @@ export function installMyInfo(doc=document){
  function showDetail(view){
    landing.hidden=true;
    title.textContent=({profile:'내 프로필 설정',type:'글자 크기·굵기',records:'즐겨찾기 · 내 기록',language:'언어',tools:'지도·도보 설정',map:'지도·도보 설정'})[view]||'설정';
-   if(view==='tools'){view='map';advancedTools.open=true;}
+   if(view==='tools')view='map';
    const views={profile:accountBox,type:typography,records,language:languageSettings,map:mapBox};
    for(const [key,node] of Object.entries(views)){
      const active=key===view;

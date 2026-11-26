@@ -30,12 +30,11 @@ test('only park map label owner writes park names; supplementary layers retain c
  assert.match(official,/map\.on\('click',id,click\)/);
 });
 
-test('map settings and advanced tools use the SAME My Info detail/back animation and content owner',()=>{
+test('map settings retain detail/back animation without advanced tools',()=>{
  const info=read('src/v834-my-info.js');
  assert.doesNotMatch(info,/data-dj834-action="history"/);
  assert.doesNotMatch(info,/data-dj834-action="tools"/);
- assert.match(info,/className='dj834-advanced-tools'/);
- assert.match(info,/advancedTools\.append\(advancedTitle,toolsBox\);mapBox\.append\(advancedTools\)/);
+ assert.doesNotMatch(info,/dj834-advanced-tools|advancedTools|toolsBox/);
  assert.match(info,/language:languageSettings,map:mapBox/);
  assert.match(info,/enter\(detail,'forward'\)/);
  assert.match(info,/enter\(landing,'back'\)/);
