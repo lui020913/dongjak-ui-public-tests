@@ -1907,3 +1907,8 @@ dialog.dj-metro-live[data-theme="dark"]{background:#172725;color:#e3efeb}
 .dj-metro-live[data-theme="dark"] .dj-metro-live-head,.dj-metro-live[data-theme="dark"] .dj-metro-live-station,.dj-metro-live[data-theme="dark"] .dj-metro-live-footer{border-color:#3b5149}
 .dj-metro-live-train-icon svg{width:19px;height:19px;display:block}
 
+
+/* Match the two report actions and keep the location confirmation in the existing dock-safe hint. */
+#app .community-report-form button.community-report-action{border-radius:999px!important;min-height:42px;flex:1 1 0;}
+#app .community-map-hint button#community-map-accept[hidden]{display:none!important;}
+#app .community-map-hint button#community-map-accept{background:#f0faf5;color:#155e49;}

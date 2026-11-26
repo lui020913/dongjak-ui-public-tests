@@ -1,7 +1,13 @@
 // Keep PRI lines above every opaque/map-covering layer, while preserving labels and transit pins.
 const COVER_TYPES=new Set(['background','raster','fill','fill-extrusion','hillshade','heatmap']);
 const PRI_IDS=new Set(['dj-pri-line','dj-pri-point','dj-pri-speed-line','dj-pri-candidate-line','dj-pri-boundary-line']);
-const isCover=layer=>layer && COVER_TYPES.has(layer.type) && !PRI_IDS.has(layer.id);
+// Native road surfaces and casings are opaque line paints too. A white
+// transportation stroke above an analysis line can cut it at junctions.
+// Keep application route/transit overlays independent from native roads.
+const nativeRoadPaint=layer=>layer?.type==='line'&&
+ /^(transportation|road|roads)$/.test(String(layer['source-layer']||''))&&
+ !/(rail|subway|tram|ferry|aerialway)/i.test(String(layer.id||''));
+const isCover=layer=>layer && (COVER_TYPES.has(layer.type)||nativeRoadPaint(layer)) && !PRI_IDS.has(layer.id);
 export function priOverlayAnchor(layers=[]){
  if(!Array.isArray(layers))return undefined;
  const others=layers.filter(l=>l?.id&&!PRI_IDS.has(l.id));

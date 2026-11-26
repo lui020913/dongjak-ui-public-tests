@@ -1,4 +1,4 @@
-import {normalizeFacilityName,normalizeFacilityCategory} from './facility-display-names.js';
+import {normalizeFacilityName,normalizeFacilityCategory,facilityDisplayType,isFormerPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 import {usableMapSelectionOffset} from './transport-selection-marker.js';
 import {markAiSurfaceDismissal} from './ai-surface-dismiss-guard.js';
 import {setMobileSheetExpanded,dismissMobileSheet,interruptMobileSheetMotion,settleMobileSheetDrag,clearMobileSheetDrag} from './v889-mobile-sheet-motion.js';
@@ -26,15 +26,16 @@ export function placeData(raw={}){
   const name=tidy(normalizeFacilityName(raw.name,raw.type||raw.category),90)||'이름 미등록';
   const lon=Number(raw.lng), lat=Number(raw.lat);
   const trusted=verifiedPlaceRecord(name);
+  const former=isFormerPoliceFacility(raw.name);
   const incomingAddress=tidy(facilityRoadAddress(raw),220);
   // A generic label such as '동작구 대표 장소' is not a street address.
   // An OSM-sourced address may belong to another Seoul borough (e.g. 노들섬 in 용산구).
   // Keep only a full street address with a building number, not a generic district label.
   const validAddress=/^(?:서울특별시|서울시|서울)\s+[^\s]+구\s+.+(?:로|길)\s*\d+(?:[-–]\d+)?/u.test(incomingAddress);
   return {
-    name,type:tidy(normalizeFacilityCategory(raw.type||raw.category||'장소',raw.name),30),
-    address:trusted?.address|| (validAddress?incomingAddress:''), phone:verifiedPhone(trusted?.phone||raw.phone),
-    website:verifiedWeb(trusted?.website||raw.website),
+    name,type:tidy(facilityDisplayType(raw.type||raw.category||'장소',raw.name),30),
+    address:trusted?.address|| (validAddress?incomingAddress:''), phone:former||isRepurposedPoliceFacility(name)?verifiedPhone(trusted?.phone):verifiedPhone(trusted?.phone||raw.phone),
+    website:former?'':verifiedWeb(trusted?.website||raw.website),
     source:tidy(trusted?.source||raw.source||'© OpenStreetMap 기여자',140),
     note:tidy(raw.note,250),
     lng:Number.isFinite(lon)&&lon>=125&&lon<=128?lon:null,
@@ -45,6 +46,8 @@ export function placeData(raw={}){
  * Explicitly avoids claiming named-site-specific opening hours or services.
  */
 export function facilityFallbackDescription(name,type){
+  if(isFormerPoliceFacility(name))return '이곳은 운영을 종료한 옛 치안센터입니다. 상도동 관할 경찰 업무는 동작경찰서의 상도지구대 등 현행 공식 관서를 확인하세요. 긴급 신고는 112입니다.';
+  if(isRepurposedPoliceFacility(name))return '청소년 대상 범죄예방 교육과 경찰 체험을 위한 교육시설입니다. 현행 지구대·파출소가 아니며, 방문과 프로그램 예약은 경찰청 청소년경찰학교 공식 안내를 확인하세요.';
   const subject=String(name||'해당 시설').trim();
   const value=`${subject} ${type||''}`;
   const guidance=[
@@ -76,10 +79,11 @@ const aiMemo=new Map();
 function cacheKey(p){return `${p.name}|${p.lat?.toFixed(4)}|${p.lng?.toFixed(4)}`;}
 const EARTH_METERS=111000;
 export function matchingOsmContact(elements=[],p){
+  if(isFormerPoliceFacility(p?.name)||isRepurposedPoliceFacility(p?.name))return {};
   const candidates=[];
   for(const el of elements){
     const tag=el.tags||{};
-    const n=tidy(tag['name:ko']||tag.name,90);
+    const n=tidy(normalizeFacilityName(tag['name:ko']||tag.name,p.type),90);
     if(n.replace(/\s+/g,'')!==p.name.replace(/\s+/g,''))continue;
     const lng=Number(el.center?.lon??el.lon),lat=Number(el.center?.lat??el.lat);
     if(!Number.isFinite(lng)||!Number.isFinite(lat))continue;
@@ -98,7 +102,7 @@ export function matchingOsmContact(elements=[],p){
   return {phone,website,address};
 }
 async function enrich(p,signal){
-  if(p.lat==null||p.lng==null)return {};
+  if(p.lat==null||p.lng==null||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return {};
   const id=cacheKey(p);
   if(mem.has(id))return mem.get(id);
   const safe=p.name.replace(/["\\]/g,'').slice(0,80);
@@ -132,7 +136,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
     const lng=Number(place?.lng??lngLat?.lng),lat=Number(place?.lat??lngLat?.lat);
     if(Number.isFinite(lng)&&Number.isFinite(lat)){
       window.dispatchEvent(new CustomEvent('dongjak:route-map-place',{
-        detail:{name:String(place?.name||'선택한 장소').slice(0,90),lng,lat}
+        detail:{name:String(normalizeFacilityName(place?.name,place?.type||place?.category)||'선택한 장소').slice(0,90),lng,lat}
       }));
     }
     return null;
@@ -373,7 +377,7 @@ export function openPlaceDetails({map,maplibregl,place,lngLat,fromResultMap=fals
   }
   let pending=false;
   async function loadExplanation(){
-    if(controllerAI.signal.aborted||pending)return;
+    if(controllerAI.signal.aborted||pending||isFormerPoliceFacility(p.name)||isRepurposedPoliceFacility(p.name))return;
     pending=true;retry.hidden=true;feedback.textContent=fallbackDescription+'\n\nAI 추가 안내를 확인하는 중입니다…';
     try{
       // Give fast, verified OSM enrichment a chance, but never delay the popup

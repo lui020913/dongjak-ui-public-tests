@@ -2025,6 +2025,14 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
     // The mobile tab transition owner closes this outgoing page after its
     // bounded map-return fade. Other tab changes reveal the incoming body.
     panel.hidden=panel.dataset.page!==tab && !outgoing;
+    // Programmatic returns to the live map do not own an outgoing dissolve.
+    // A cancelled legacy sheet can leave inline display:flex!important on
+    // an inactive community page; hidden alone does not override that style.
+    if(panel.id==='participation-panel'&&panel.hidden&&!outgoing){
+      communityComposerPortal?.close();
+      delete panel.dataset.djPrimaryTransition;
+      for(const key of ['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'])panel.style.removeProperty(key);
+    }
   }
   if (tab === 'participate'){renderCommunity();void refreshSharedCommunity();}
   if (tab === 'news') dongjakNews.open();
@@ -2238,6 +2246,8 @@ document.getElementById('community-photo-remove').addEventListener('click',()=>{
   document.getElementById('community-photo-image').removeAttribute('src');
 });
 let communityPickerDockObserver=null;
+let communityPickCandidate=null;
+let communityPickMarker=null;
 function syncCommunityPickerDock(){
   if(!communityPickMode||!window.matchMedia('(max-width:699px)').matches)return;
   const hint=document.getElementById('community-map-hint');
@@ -2249,6 +2259,10 @@ function syncCommunityPickerDock(){
 }
 function clearCommunityLocationPick(){
   communityPickMode=false;
+  communityPickMarker?.remove();communityPickMarker=null;
+  communityPickCandidate=null;
+  document.getElementById('community-map-accept').hidden=true;
+  document.getElementById('community-map-prompt').textContent='지도에서 연결할 위치를 선택해 주세요.';
   const hint=document.getElementById('community-map-hint');
   hint.hidden=true;
   hint.style.removeProperty('--dj-community-picker-bottom');
@@ -2275,11 +2289,32 @@ function selectCommunityLocation(lngLat) {
   const inside=isDongjak(lngLat.lng,lngLat.lat);
   if(inside===null){toast('동작구 경계를 불러오는 중입니다.');return;}
   if(!inside){toast('동작구 안의 위치를 선택해 주세요.');return;}
-  communityPickedLocation={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
-  document.getElementById('community-location-label').textContent=`선택한 위치 · ${communityPickedLocation.lat.toFixed(5)}, ${communityPickedLocation.lng.toFixed(5)}`;
-  resumeCommunityLocationDraft();
-  toast('위치를 연결했습니다.');
+  const position={lng:Number(lngLat.lng.toFixed(6)),lat:Number(lngLat.lat.toFixed(6))};
+  const candidate={position,address:null,settled:false};
+  communityPickCandidate=candidate;
+  communityPickMarker?.remove();
+  communityPickMarker=new maplibregl.Marker({color:'#ec6d35',scale:1.05}).setLngLat([position.lng,position.lat]).addTo(map);
+  const prompt=document.getElementById('community-map-prompt');
+  prompt.textContent='이 위치가 맞나요? · 주소 확인 중…';
+  document.getElementById('community-map-accept').hidden=false;
+  void fetchRouteRoadAddress(position).then(address=>{
+    candidate.address=address;candidate.settled=true;
+    if(communityPickCandidate===candidate&&communityPickMode)prompt.textContent=address?'이 위치가 맞나요? · '+address:'이 위치가 맞나요? · 도로명 주소 미확인';
+    if(communityPickedLocation===position)renderCommunityPickedAddress(candidate);
+  });
 }
+function renderCommunityPickedAddress(candidate){
+  const {position,address,settled}=candidate;
+  document.getElementById('community-location-label').textContent=address?'선택한 위치 · '+address:!settled?'선택한 위치 · 주소 확인 중…':`선택한 위치 · 주소 미확인 (${position.lat.toFixed(5)}, ${position.lng.toFixed(5)})`;
+}
+function confirmCommunityLocation(){
+  if(!communityPickMode||!communityPickCandidate||app.dataset.tab!=='map')return;
+  const candidate=communityPickCandidate;
+  communityPickedLocation=candidate.position;
+  renderCommunityPickedAddress(candidate);
+  resumeCommunityLocationDraft();
+}
+document.getElementById('community-map-accept').addEventListener('click',confirmCommunityLocation);
 document.getElementById('community-map-pick').addEventListener('click',()=>{
   if(routePickMode){routePickMode=null;syncRoutePresentation();}
   // Keep the draft but return the live form to its original parent before
@@ -2426,10 +2461,10 @@ function showCommunityLocation(post) {
   clearCommunityLocationPick();
   cancelCommunityTabMotion();
   closeCommunityLocation();
-  navigate('map',{suppressOverview:true});
-  quickSearch.close();quickSearch.clearMapResults?.();
   const lng=Number(post.location.lng),lat=Number(post.location.lat);
   if(!Number.isFinite(lng)||!Number.isFinite(lat))return;
+  navigate('map',{suppressOverview:true});
+  quickSearch.close();quickSearch.clearMapResults?.();
   map.flyTo({center:[lng,lat],zoom:16.2,pitch:0,duration:800});
   communityLocationMarker=new maplibregl.Marker({color:'#b262ad',scale:0.95}).setLngLat([lng,lat]).addTo(map);
   const card=makeCEl('section','dj-community-location-card');card.id='dj-community-location-card';card.setAttribute('aria-label','커뮤니티 제보 위치');

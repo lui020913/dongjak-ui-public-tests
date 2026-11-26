@@ -1,5 +1,5 @@
 import {facilitySearchGlyph} from './v912-poi-presentation.js';
-import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility} from './facility-display-names.js';
+import {normalizeFacilityRecord,facilityNameMatches,facilityCategorySearchTerms,facilityOsmCategory,sameFacility,isFormerPoliceFacility,isRepurposedPoliceFacility} from './facility-display-names.js';
 /** Map-only search. Queries remote Photon only after explicit form submission. */
 import {searchPlaces,searchLocalPlaces} from './route-search.js';
 import {searchCachedTransportPlaces} from './transport-map.js';
@@ -273,6 +273,8 @@ export function initMapQuickSearch({map,maplibregl,app,onPick=()=>{},getPosition
       for(const f of features){
         const p=f.properties||{};const name=String(p['name:ko']||p.name||'').trim();
         const kind=facilityOsmCategory(p,String(p.subclass||p.class||'일반 시설').trim());
+        if(isFormerPoliceFacility(name)&&(nearby||facilityCategorySearchTerms(text).length))continue;
+        if(!nearby&&isRepurposedPoliceFacility(name)&&facilityCategorySearchTerms(text).includes('경찰서'))continue;
         if(!name||(!nearby&&!facilityNameMatches({name,category:kind},text)&&Math.max(koreanSearchScore(text,name),koreanSearchScore(text,kind))<55))continue;
         if(f.geometry?.type!=='Point')continue;
         const [lng,lat]=f.geometry.coordinates||[];

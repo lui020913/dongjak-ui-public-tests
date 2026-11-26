@@ -12,7 +12,9 @@ test('일반 장소와 주소를 검색할 수 있고 특정 역만 검색하는
   const cafe=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{name:'테스트 카페',osm_key:'amenity',osm_value:'cafe'}}]});
   assert.equal(cafe[0].category,'카페');
   const police=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{name:'상도5치안센터',osm_key:'amenity',osm_value:'police'}}]});
-  assert.equal(police[0].category,'경찰서');assert.equal(police[0].name,'상도5치안센터');
+  assert.equal(police[0].category,'운영 종료 시설');assert.equal(police[0].name,'상도5치안센터 (운영 종료)');
+  const active=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{name:'상도지구대',osm_key:'amenity',osm_value:'police'}}]});
+  assert.equal(active[0].category,'경찰서');assert.equal(active[0].name,'상도지구대');
   const address=normalizePlaceSearchResults({features:[{geometry:{type:'Point',coordinates:[126.955,37.505]},properties:{street:'상도로',housenumber:'10'}}]});
   assert.equal(address[0].category,'장소');
 });
