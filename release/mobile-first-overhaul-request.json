@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.211",
+  "application_version": "9.2.212",
   "public_work_branch": "main",
-  "purpose": "Integrated verified PR #573 transit routing, PR #576 (bb3c0c65) display-only road/building overlap trims for 185 footprints, and PR #577 (76b57efd) protected mobile transform compatibility. PR #576 passed 38/38 CI jobs including 36 mobile shards, real 2D/3D before/after source and screenshot QA, and route endpoint/picker regression. PR #577 transformed build and 24 tests passed. Preserve original GIS buildings, road graph, PRI, heights and routing calculations; no relaxed release gates. Supersedes failed v9.2.210. Full protected Preview, phone QA and Production required.",
-  "attempt": 446,
+  "purpose": "Verified PR #579 (62ee0fa6): prevent opaque reviewed road polygons appearing after camera moveend across the entire map. Keep native road presentation and filters stable; retain 185 display-only building trims, original GIS/PRI/routing and transit features from v9.2.211. Reviewed road polygon rendering temporarily disabled, original assets retained. All 38 CI jobs including 36 phone shards, actual idle map tests at three sites, endpoint and picker regression passed. Full protected Preview, phone QA and Production required; no relaxed gates.",
+  "attempt": 447,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
