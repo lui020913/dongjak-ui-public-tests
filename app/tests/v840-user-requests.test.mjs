@@ -64,9 +64,9 @@ test('search uses actual loaded OSM POIs as candidate facility data',()=>{
  assert.match(search,/loaded-map-poi/);
  assert.match(search,/병원/);assert.match(search,/음식점/);
 });
-test('tips cycle every 10 seconds with map idle only',()=>{
+test('tips cycle after the reading deadline with map idle only',()=>{
  assert.ok(MAP_TIP_MESSAGES.length>=5);
- assert.match(shell,/},10000\)/);
+ assert.match(shell,/Date\.now\(\)<Number\(label\.dataset\.djTipReadUntil\)/);
  assert.match(shell,/app\.dataset\.tab==='map'&&app\.dataset\.communityPicking!=='true'&&app\.dataset\.djPriVisible!=='true'&&!hasOpenMapWindow/);
  assert.match(shell,/const advanceTip=/);
  assert.doesNotMatch(shell,/tipHideTimer|showBriefTip/);
