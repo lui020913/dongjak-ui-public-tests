@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.213",
+  "application_version": "9.2.214",
   "public_work_branch": "main",
-  "purpose": "Verified PR #578 (cfe31aa7): transit-only exterior map fade, restored base map labels, expanded Seoul search rectangle and camera bounds, Dongjak-linked endpoints and cross-boundary transit, conservative unassessed exterior pedestrian legs, normal walking map restoration and accessible boundary dialog. All five CI workflows passed, including 38/38 source jobs, real route entry and picker/facility browser regression, protected overlay and transformed release build. Preserve v9.2.212 idle road overlay fix, building trims and existing PRI data. Existing verified transport network coverage only; external walking safety assessment and physical-device validation remain limited. Full protected Preview, phone QA and Production required; no relaxed gates.",
-  "attempt": 448,
+  "purpose": "Protected release of verified PR #581 (bb43cf06): district POI identity, typed apartment labels, authoritative official ARS map stops, cross-source facility deduplication and matching search identity, transit click precedence, dynamic SGIS boundary registry refresh and transit scroll parent correction. Latest CI 38/38, overlay compatibility and picker regression passed; actual map tap test five locations, exact 457 current-boundary ARS IDs and zero page errors. Preserve prior exterior transit scope, white idle overlay fix and building trims; full protected Preview, phone QA and Production required.",
+  "attempt": 449,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
