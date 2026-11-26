@@ -61,3 +61,16 @@ test('map tap stages a marker and road address; only explicit confirmation commi
  assert.match(nav,/\['display','visibility','opacity','pointer-events','animation','transition','will-change','z-index'\]/);
  assert.match(nav,/panel\.style\.removeProperty\(key\)/);
  });
+
+test('location picker snapshots the actual destination and ignores late duplicate report opens',()=>{
+ const start=section("document.getElementById('community-map-pick').addEventListener","document.getElementById('community-map-cancel').addEventListener");
+ assert.match(start,/communityPickerReturnTab=app\.dataset\.tab==='participate'/);
+ assert.ok(start.indexOf('communityPickerReturnTab=')<start.indexOf("navigate('map'"));
+ const resume=section('function resumeCommunityLocationDraft()', 'function selectCommunityLocation(');
+ assert.ok(resume.indexOf('const returnTab=communityPickerReturnTab')<resume.indexOf('clearCommunityLocationPick()'));
+ assert.match(resume,/if\(returnTab\)communityComposerFromMap=returnTab==='map'/);
+ const report=section('onReport:()=>{','function makeCEl(');
+ assert.ok(report.indexOf('if(communityComposerPortal?.isOpen()||communityPickMode)return')<report.indexOf('communityComposerFromMap='));
+ const toggle=section("document.getElementById('community-compose-toggle').addEventListener","document.getElementById('community-compose-close').addEventListener");
+ assert.match(toggle,/if\(app\.dataset\.tab!=='participate'\)navigate\('participate'\)/);
+});
