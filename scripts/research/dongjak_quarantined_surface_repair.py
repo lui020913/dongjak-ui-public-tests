@@ -10,6 +10,18 @@ from dongjak_road_building_audit import PUBLIC,TO_M,TO_WGS,metric,polygonal
 def read(p):return json.loads(p.read_text())
 def sha(b):return hashlib.sha256(b).hexdigest()
 def write(p,v):p.write_text(json.dumps(v,ensure_ascii=False,separators=(',',':')))
+def metric_roundtrip_recovery(original,obstacles,boundary):
+    # Reconstruct only the already audited, nonconflicting original area in
+    # metric coordinates; never add the spurious geographic make_valid lobe.
+    safe=polygonal(make_valid(original.intersection(boundary).difference(obstacles)))
+    if safe.is_empty:return None
+    geographic=polygonal(make_valid(transform(TO_WGS,safe)))
+    if geographic.is_empty or not geographic.is_valid:return None
+    projected=metric(mapping(geographic))
+    if projected.is_empty or not projected.is_valid:return None
+    if original.symmetric_difference(projected).area>max(.01,original.area*.0001):return None
+    if projected.difference(original).area>.01 or projected.intersection(obstacles).area>.01 or projected.difference(boundary).area>.01:return None
+    return geographic
 def main(assets,out):
     out.mkdir(parents=True,exist_ok=True)
     m=read(assets/'manifest.json')
@@ -44,7 +56,22 @@ def main(assets,out):
         outside=projected.difference(boundary).area
         tolerance=max(.01,original.area*.0001)
         ok=(not fixed.is_empty and fixed.is_valid and not projected.is_empty and projected.is_valid and delta<=tolerance and extra<=.01 and overlap<=.01 and outside<=.01)
-        row={'row':r['row'],'reason':r['reason'],'status':'candidate' if ok else 'retained_quarantine','area_m2':round(projected.area,6),'symmetric_difference_m2':round(delta,6),'added_area_m2':round(extra,6),'building_overlap_m2':round(overlap,6),'outside_boundary_m2':round(outside,6),'sites':[k for k,w in sites.items() if projected.intersects(w)]}
+        method='geographic_make_valid'
+        if not ok and r['row']==4122:
+            # Re-evaluate the lone rejected polygon against all local buildings.
+            # The metric representation is the exact original reference, not a
+            # newly inferred road corridor. No buffer or coordinate shift.
+            local=unary_union([buildings[int(i)] for i in tree.query(original.buffer(.1),predicate='intersects')])
+            alternative=metric_roundtrip_recovery(original,local,boundary)
+            if alternative is not None:
+                fixed=alternative;repaired={**f,'geometry':mapping(fixed)}
+                projected=metric(repaired['geometry'])
+                delta=original.symmetric_difference(projected).area;extra=projected.difference(original).area
+                obs=unary_union([buildings[int(i)] for i in tree.query(projected,predicate='intersects')])
+                overlap=projected.intersection(obs).area;outside=projected.difference(boundary).area
+                ok=delta<=tolerance and extra<=.01 and overlap<=.01 and outside<=.01
+                method='metric_roundtrip_preserving_original'
+        row={'method':method,'row':r['row'],'reason':r['reason'],'status':'candidate' if ok else 'retained_quarantine','area_m2':round(projected.area,6),'symmetric_difference_m2':round(delta,6),'added_area_m2':round(extra,6),'building_overlap_m2':round(overlap,6),'outside_boundary_m2':round(outside,6),'sites':[k for k,w in sites.items() if projected.intersects(w)]}
         rows.append(row)
         if ok:accepted.append({'row':r['row'],'feature':repaired})
     write(out/'repaired-surfaces.json',accepted)
