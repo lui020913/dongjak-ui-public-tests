@@ -91,6 +91,7 @@ import {installNightVisibility,promoteNightAnalysisLayers} from './night-visibil
 import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
+import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
 import {installSupabaseSafetyAi} from './v880-supabase-safety-ai.js';
@@ -2000,8 +2001,9 @@ function navigate(tab,{suppressOverview=false,resumeCommunityDraft=false,preserv
   // A later map tap must never resume an unrelated community editor.
   if(tab!=='map'&&communityPickMode)clearCommunityLocationPick();
   if((tab!=='map'||suppressOverview)&&routePickMode){routePickMode=null;closeTransitRouteConfirmation();}
-  if(previousTab==='route'&&tab!=='route')closeRouteSearch();
-  if(previousTab==='route'&&tab!=='route'&&routeRequestPending&&!routeResult){routeRequestGeneration++;routeRequestPending=false;updateRouteCalcAvailability();}
+  if(previousTab==='route'&&tab!=='route'){
+    closeRouteSearch();routeRequestGeneration++;routeRequestPending=false;updateRouteCalcAvailability();
+  }
   if(previousTab!==tab)closePriPreferences();
   if(tab!=='map')closeCommunityLocation();
   const communityPanel=document.getElementById('participation-panel');
@@ -2706,9 +2708,34 @@ priEditorNote.id='dj-pri-route-editor-advice';
 priEditorNote.className='dj-pri-route-advice';
 priEditorNote.hidden=true;
 document.getElementById('route-summary')?.append(priEditorNote);
+function closePriPreferences(){const dialog=document.getElementById('dj-route-pri-dialog');if(dialog?.open)dialog.close();}
+const priPreferences=installRoutePriPreferences({onApply:factors=>{
+  syncPriPreferenceLabels();
+  if(routeResult&&!navMode){priVariantChosenManually=false;void reviewPriCandidates(routeVariants,factors);}
+}});
+const priTriggers=[];
+function syncPriPreferenceLabels(){
+  const count=priPreferences.getSelected().length;
+  for(const button of priTriggers)button.textContent=`PRI 평가 항목 · ${count}/6`;
+  window.dispatchEvent(new CustomEvent('dongjak:route-pri-factors',{detail:{count}}));
+}
+function openPriPreferences(){
+  if(navMode||routePickMode||communityPickMode||!['route','map'].includes(app.dataset.tab))return;
+  if(app.dataset.tab==='map'&&!routeResult)return;
+  priPreferences.open();
+}
+for(const parent of [document.getElementById('route-map-card'),document.querySelector('#route-panel .route-card')]){
+  if(!parent)continue;
+  const button=document.createElement('button');button.type='button';button.className='dj-route-pri-trigger';
+  button.addEventListener('click',openPriPreferences);
+  if(parent.id==='route-map-card')parent.insertBefore(button,priMapNote);else parent.append(button);
+  priTriggers.push(button);
+}
+window.addEventListener('dongjak:open-route-pri',openPriPreferences);
+syncPriPreferenceLabels();
 function showPriRouteAdvice(result){
   const explain=entry=>entry?.risk===null||!entry?'자료 없음':
-    entry.risk.toFixed(1)+'점 · 경로 중 관측 '+Math.round(entry.coverage*100)+'% · 평균 '+entry.observedFactorsMean+'/6 지표';
+    entry.risk.toFixed(1)+'점 · 경로 중 관측 '+Math.round(entry.coverage*100)+'% · 평균 '+entry.observedFactorsMean+'/'+(result?.selectedFactors?.length||priPreferences.getSelected().length)+' 지표';
   const text=!result
     ? '보행 위험도(PRI) 평가 자료를 확인하지 못했습니다. 안전성을 판단할 수 없습니다.'
     : result.recommendation
@@ -2748,8 +2775,8 @@ function lockRouteMapGestures(locked){
 }
 function syncRoutePresentation() {
   const onMap = app.dataset.tab === 'map';
-  const picking = Boolean(routePickMode) && onMap;
-  const preview = Boolean(routeResult) && onMap && !picking && !navMode && app.dataset.djWalkArrived!=='1';
+  const picking = Boolean(routePickMode) && onMap && !communityPickMode && !addMode;
+  const preview = Boolean(routeResult) && onMap && !picking && !communityPickMode && !addMode && !navMode && app.dataset.djWalkArrived!=='1';
   const guiding = Boolean(routeResult) && Boolean(navMode) && onMap;
   if(!picking&&routeCandidateMarker)closeTransitRouteConfirmation();
   drawRouteMarkers(picking||preview||guiding);
@@ -2806,7 +2833,7 @@ function updateRouteLabels() {
 function makeRouteMarker(position, color) {
   return new maplibregl.Marker({color,scale:0.95}).setLngLat([position.lng,position.lat]).addTo(map);
 }
-function drawRouteMarkers(visible=app.dataset.tab==='map'&&Boolean(routePickMode||(routeResult&&app.dataset.djWalkArrived!=='1')||navMode)) {
+function drawRouteMarkers(visible=app.dataset.tab==='map'&&!communityPickMode&&!addMode&&Boolean(routePickMode||(routeResult&&app.dataset.djWalkArrived!=='1')||navMode)) {
   const update=(marker,point,key,color)=>{
     const next=visible&&point?`${point.lng},${point.lat}`:null;
     if(marker&&routeEndpointMarkerKeys[key]===next&&next)return marker;
@@ -3452,6 +3479,35 @@ for(const button of document.querySelectorAll('[data-route-variant]')){
     toast(selectedRouteVariant==='gentle'?'경사 회피 우선 경로를 표시합니다.':'일반 보행 경로를 표시합니다.');
   });
 }
+async function reviewPriCandidates(reviewedVariants,factors=priPreferences.getSelected()){
+  const {standard,gentle}=reviewedVariants;
+  routePriVisuals=null;
+  for(const route of [standard,gentle])if(route)route.priExposure=null;
+  const thisPriReview=++priRouteReviewSequence;
+  for(const node of [priMapNote,priEditorNote]){
+    node.textContent='선택한 PRI '+factors.length+'개 지표의 관측 구간을 대조하고 있습니다…';node.hidden=false;
+  }
+  syncPriRouteLine();
+  let comparison=null;
+  try {
+    comparison=await evaluateCompositePriRouteCandidates({standard,gentle},{factors});
+  } catch(error) {
+    console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
+  }
+  if(thisPriReview!==priRouteReviewSequence||routeVariants!==reviewedVariants)return;
+  routePriVisuals=comparison?.visuals||null;
+  if(standard)standard.priExposure=comparison?.standard||null;
+  if(gentle)gentle.priExposure=comparison?.gentle||null;
+  showPriRouteAdvice(comparison);
+  window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:comparison}));
+  if(comparison?.recommendation&&!priVariantChosenManually&&!navMode){
+    selectedRouteVariant=comparison.recommendation;
+    applySelectedRouteVariant();
+    const status=document.getElementById('route-status');
+    status.textContent=status.textContent.split(' · PRI 상대 저위험 후보 선택')[0]+' · PRI 상대 저위험 후보 선택';
+  }
+  syncRoutePresentation();
+}
 async function calculateRoute() {
   if(routeRequestPending)return;
   if(!routeStart || !routeEnd) {toast('출발지와 목적지를 모두 지정해 주세요.');return;}
@@ -3479,34 +3535,8 @@ async function calculateRoute() {
     const gentle=routeWithinDistrict(result.gentle?.coords,boundaryGeometry,isDongjak)?result.gentle:null;
     if(!standard&&!gentle)throw new Error('동작구 경계 안에서 연결되는 경로를 찾지 못했습니다.');
     routeVariants={standard,gentle};
-    routePriVisuals=null; // no stale overlay while new path/PRI data is pending
-    const thisPriReview=++priRouteReviewSequence,reviewedVariants=routeVariants;
     priVariantChosenManually=false;
-    for(const node of [priMapNote,priEditorNote]){
-      node.textContent='종합 PRI 관측 구간을 대조하고 있습니다…';node.hidden=false;
-    }
-    // A slow GIS overlay must not hold the already-computed walking route
-    // behind a loading screen. Apply advice only to the still-current result.
-    void (async()=>{
-      let comparison=null;
-      try {
-        comparison=await evaluateCompositePriRouteCandidates({standard,gentle});
-      } catch(error) {
-        console.warn('[PRI route] Partial assessment unavailable; ordinary walking routes preserved',error);
-      }
-      if(thisPriReview!==priRouteReviewSequence||routeVariants!==reviewedVariants)return;
-      routePriVisuals=comparison?.visuals||null;
-      if(standard)standard.priExposure=comparison?.standard||null;
-      if(gentle)gentle.priExposure=comparison?.gentle||null;
-      showPriRouteAdvice(comparison);
-      window.dispatchEvent(new CustomEvent('dongjak:route-pri-ready',{detail:comparison}));
-      if(comparison?.recommendation&&!priVariantChosenManually&&!navMode){
-        selectedRouteVariant=comparison.recommendation;
-        applySelectedRouteVariant();
-        document.getElementById('route-status').textContent+=' · PRI 상대 저위험 후보 선택';
-      }
-      syncRoutePresentation();
-    })();
+    void reviewPriCandidates(routeVariants);
     window.dispatchEvent(new CustomEvent('dongjak:route-variants-ready',{detail:{standard,gentle}}));
     selectedRouteVariant=standard?'standard':'gentle';
     applySelectedRouteVariant();
@@ -3523,6 +3553,7 @@ async function calculateRoute() {
         : '최단 도보 경로와 경사 회피 우선 경로를 비교할 수 있습니다.')
       : '제공 가능한 보행 경로 한 개만 계산됐습니다.';
     document.getElementById('route-status').textContent=`${usingLocal?'서울시 도보 네트워크 사용':'보행 네트워크와 외부 서버 혼합 또는 외부 서버 사용'} · ${routeWaypoints.length?`경유지 ${routeWaypoints.length}곳 · `:''}${compare}`;
+    routeRequestPending=false;updateRouteCalcAvailability();
     navigate('map');
     fitWalkingRoute(routeResult.coords);
     syncRoutePresentation();
