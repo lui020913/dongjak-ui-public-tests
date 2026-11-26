@@ -89,15 +89,37 @@ export function createBusRouteDetail({panel,onClose,onMap,onStop,onRefresh,onRet
     const heading=make('strong','','정류장별 실제 도착 이력');
     const controls=make('div','dj-bus-history-controls');
     const stop=make('select');stop.setAttribute('aria-label','정류장');
-    for(const s of stops){if(!/^\d{9,10}$/.test(String(s.stationId||'')))continue;const opt=make('option','',`${s.seq}. ${s.name}${s.direction?' · '+s.direction:''}`);opt.value=String(s.seq);stop.append(opt);}
+    for(const s of stops){if(!/^\d{9,10}$/.test(String(s.stationId||'')))continue;const opt=make('option','',s.name+(s.direction?' · '+s.direction:''));opt.value=String(s.seq);stop.append(opt);}
     const chosen=stops.find(s=>s.arsId===selection.arsId);stop.value=historySeq||String(chosen?.seq||'');if(!stop.value)stop.selectedIndex=0;
     const date=make('input');date.type='date';date.max=yesterday();date.value=historyDate||previousMonthEnd();date.setAttribute('aria-label','조회 날짜');
     const result=make('div','dj-bus-history-result');result.setAttribute('aria-live','polite');
-    const load=async()=>{historyRequest?.abort();historySeq=stop.value;historyDate=date.value;const s=stops.find(x=>String(x.seq)===stop.value);result.replaceChildren();if(!s||!date.value||date.value>date.max){result.textContent='정류장과 과거 날짜를 선택해 주세요.';return;}const ctrl=new AbortController();historyRequest=ctrl;result.textContent='공식 도착 이력 조회 중…';const params=new URLSearchParams({routeId:selection.routeId,stationId:s.stationId,seq:String(s.seq),date:date.value.replace(/-/g,'')});
-      try{const res=await fetch(apiBase+'/bus-history?'+params,{signal:ctrl.signal});const data=await res.json();if(ctrl.signal.aborted||historyRequest!==ctrl)return;result.replaceChildren();if(!res.ok){result.textContent=data.notice||'공식 이력을 확인할 수 없습니다.';return;}const rows=Array.isArray(data.arrivals)?data.arrivals:[];if(!rows.length)result.append(make('p','','제공된 도착 기록이 없습니다. 다른 날짜를 선택해 주세요.'));const groups=new Map();for(const row of rows){const k=row.date+' '+row.time.slice(0,2)+'시';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(row.time.slice(3,5));}for(const [hour,minutes] of groups){const line=make('div','dj-bus-history-hour');line.append(make('strong','',hour.slice(4,6)+'/'+hour.slice(6,8)+' '+hour.slice(9)),make('span','',minutes.join(' · ')));result.append(line);}result.append(make('p','dj-bus-detail-message',data.notice||''),make('p','dj-bus-detail-message',data.source||''));}catch(e){if(!ctrl.signal.aborted&&historyRequest===ctrl)result.textContent='공식 이력 서버 연결 실패 · 다시 조회해 주세요.';}
+    const load=async()=>{
+      historyRequest?.abort();historySeq=stop.value;historyDate=date.value;const s=stops.find(x=>String(x.seq)===stop.value);
+      result.replaceChildren();
+      if(!s||!date.value||date.value>date.max){result.textContent='정류장과 과거 날짜를 선택해 주세요.';return;}
+      const ctrl=new AbortController();historyRequest=ctrl;
+      result.textContent='공식 도착 이력 조회 중…';
+      const params=new URLSearchParams({routeId:selection.routeId,stationId:s.stationId,seq:String(s.seq),date:date.value.replace(/-/g,'')});
+      try{
+        const res=await fetch(apiBase+'/bus-history?'+params,{signal:ctrl.signal});const data=await res.json();
+        if(ctrl.signal.aborted||historyRequest!==ctrl)return;
+        result.replaceChildren();
+        if(!res.ok){result.textContent=data.notice||'공식 이력을 확인할 수 없습니다.';return;}
+        const rows=Array.isArray(data.arrivals)?data.arrivals.filter(row=>/^\d{8}$/.test(row.date||'')&&/^\d{2}:\d{2}:\d{2}$/.test(row.time||'')):[];
+        if(!rows.length){
+          result.append(make('p','dj-bus-history-empty',data.complete?'선택한 날짜에 제공된 도착 이력이 없습니다.':'전체 조회가 완료되지 않았습니다. 다시 조회해 주세요.'));
+          if(data.complete){const earlier=button('7일 이전 조회',()=>{const d=new Date(date.value+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-7);date.value=d.toISOString().slice(0,10);void load();},'dj-bus-history-submit');result.append(earlier);}
+        }else{
+          result.append(make('p','dj-bus-detail-message',rows.length+'건의 실제 도착 기록'+(data.complete?'':' · 일부 기록')));
+          const groups=new Map();for(const row of rows){const key=row.date+' '+row.time.slice(0,2);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row.time);}
+          for(const [key,times] of groups){const line=make('div','dj-bus-history-hour'),day=key.slice(0,8),hour=key.slice(9);const slots=make('span');for(const t of times){const time=make('time','',t.slice(0,5));time.dateTime=day.slice(0,4)+'-'+day.slice(4,6)+'-'+day.slice(6,8)+'T'+t+'+09:00';slots.append(time);}line.append(make('strong','',day!==historyDate.replace(/-/g,'')?day.slice(4,6)+'/'+day.slice(6,8)+' '+hour+'시':hour+'시'),slots);result.append(line);}
+        }
+        if(!data.complete)result.append(make('p','dj-bus-detail-message',data.notice||'일부 기록만 확인했습니다.'));
+      }catch(e){if(!ctrl.signal.aborted&&historyRequest===ctrl)result.textContent='공식 이력 서버 연결 실패 · 다시 조회해 주세요.';}
     };
     historyReload=load;
-    const submit=button('조회',load,'dj-bus-history-submit');controls.append(stop,date,submit);list.append(heading,controls,make('p','dj-bus-detail-message','월 1회 갱신 · 최근 날짜의 기록은 아직 미공개일 수 있습니다.'),result);
+    const submit=button('조회',load,'dj-bus-history-submit');controls.append(stop,date,submit);
+    list.append(heading,controls,result,make('p','dj-bus-detail-message','서울시 교통빅데이터플랫폼 · 월 1회 갱신. 최근 날짜는 미공개일 수 있습니다.'));
     void load();
   }
   function open(next){

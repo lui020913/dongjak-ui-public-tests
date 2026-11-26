@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --check app/src/main.js && node --check app/src/place-details.js && node --check app/src/transport-map.js
-      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs app/tests/route-map-pick-transit-facility-20261126.test.mjs app/tests/popup-close-input.test.mjs app/tests/transport-click.test.mjs app/tests/community-report-presentation.test.mjs app/tests/v867-transport-window-lifecycle.test.mjs app/tests/compact-route-recents-20261124.test.mjs app/tests/requested-phone-ui-20261126.test.mjs app/tests/remove-community-map-report-link-20261126.test.mjs
+      - run: node --test app/tests/picker-layer-facility-route-20261126.test.mjs app/tests/active-layer-dock-20261126.test.mjs app/tests/v864-facility-detail-redesign.test.mjs app/tests/map-hud-collision-guard.test.mjs app/tests/route-map-pick-transit-facility-20261126.test.mjs app/tests/popup-close-input.test.mjs app/tests/transport-click.test.mjs app/tests/community-report-presentation.test.mjs app/tests/v867-transport-window-lifecycle.test.mjs app/tests/compact-route-recents-20261124.test.mjs app/tests/requested-phone-ui-20261126.test.mjs app/tests/remove-community-map-report-link-20261126.test.mjs app/tests/facility-transit-render-20261126.test.mjs app/tests/bus-arrival-history.test.mjs app/tests/bus-route-path.test.mjs
 
   geometry-browser:
     runs-on: ubuntu-latest
@@ -64,3 +64,4 @@ jobs:
       - run: node tests/toolbar-subtle-shadow-browser.mjs
       - run: node tests/tip-search-crossfade-browser.mjs
       - run: node tests/bus-pill-insets-browser.mjs
+      - run: node tests/facility-transit-render-browser.mjs

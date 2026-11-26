@@ -83,11 +83,11 @@ export function buildLayers(map,data,groups=DEFAULT_POI_GROUPS,dark=false){
  if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data});else map.getSource(SOURCE).setData(data);
  if(map.getLayer(NAMES))map.removeLayer(NAMES);
  const filter=visibleFacilityFilter(groups);
- if(!map.getLayer(POINTS))map.addLayer({id:POINTS,type:'symbol',source:SOURCE,minzoom:14.5,filter,
+ if(!map.getLayer(POINTS))map.addLayer({id:POINTS,type:'symbol',source:SOURCE,minzoom:14,filter,
  layout:{'icon-image':['concat','dj912-poi-',['get','icon']],'icon-size':['interpolate',['linear'],['zoom'],14.5,.62,17,.75,19,1],
  'icon-anchor':'center','icon-padding':5,'icon-allow-overlap':false,'icon-ignore-placement':false,'symbol-sort-key':['get','priority'],
  'text-field':['case',['==',['get','category'],'공원'],'',
-    ['step',['zoom'],'',16.5,['case',['==',['get','group'],'safety'],['get','name'],''],17.8,['get','name']]],
+    ['step',['zoom'],'',15.5,['case',['in',['get','group'],['literal',['safety','public']]],['get','name'],''],17.8,['get','name']]],
  'text-font':['Noto Sans Regular','Open Sans Regular'],'text-size':['interpolate',['linear'],['zoom'],16.5,11,19.5,12.5],
  'text-offset':[0,1.25],'text-anchor':'top','text-max-width':13,'text-padding':4,'text-optional':true,'text-allow-overlap':false,'icon-optional':false},
  paint:{'text-color':dark?'#e0eee8':'#2e5150','text-halo-color':dark?'#192e2b':'#fff','text-halo-width':1.5}});
@@ -177,7 +177,7 @@ export function installSeoulOfficialFacilities({map,maplibregl,getBoundary,canOp
  }
  async function refresh(){
    if(!active||!getBoundary())return;
-   if(map.getZoom?.()<14.5){status('지도를 확대하면 주변 시설을 불러옵니다.');return;}
+   if(map.getZoom?.()<14){status('지도를 확대하면 주변 시설을 불러옵니다.');return;}
    const bbox=targetBBox();if(!bbox)return;
    if(inflight){forceRefresh=true;return;}
    if(!forceRefresh&&bbox===lastBox&&Date.now()-latest<120000)return;

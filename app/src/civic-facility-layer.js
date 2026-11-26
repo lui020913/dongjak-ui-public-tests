@@ -88,14 +88,14 @@ export function installCivicFacilities({map,maplibregl,boundaryGeometry,app}={})
     try{
       const isSchool=type==='school';
       map.addLayer({id:layerId,type:'symbol',source,'source-layer':'poi',
-        minzoom:safety?14.5:16,
+        minzoom:safety?13.8:type==='school'||type==='civic'?14.2:16,
         filter:civicFilter(type,boundaryGeometry),
         layout:{
           'icon-image':iconId,
           'icon-size':['interpolate',['linear'],['zoom'],14.3,.65,16,.78,18,.90],
           'icon-anchor':'center','icon-allow-overlap':false,'icon-ignore-placement':false,'icon-padding':5,
           'icon-optional':false,
-          'text-field':['step',['zoom'],'',safety?15.5:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
+          'text-field':['step',['zoom'],'',safety?14.8:type==='school'||type==='civic'?15.2:16.2,verifiedFacilityLabelExpression(placeDisplayName)],
           'text-font':['Noto Sans Regular','Open Sans Regular'],
           'text-size':['interpolate',['linear'],['zoom'],14.5,10.3,17,12.2],
           'text-anchor':'top','text-offset':[0,1.25],'text-max-width':15,

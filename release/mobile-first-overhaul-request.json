@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.202",
+  "application_version": "9.2.203",
   "public_work_branch": "main",
-  "purpose": "Verified PR #563 on top of released #562: adaptive map clarity with normal 2x and high-capability up to 3x DPR, preserve economy mode; compact content-sized facility sheet with equal pill actions; direct community report location return with marker, guarded camera and matching muted-green picker capsule; 2px reduced nav gap, TIP and scale coordination. Source tests 2245 passed, all CI and actual mobile browser checks passed. Protected Preview, Phone QA and Production; road review remains isolated. Retry: scope immediate community dismissal to report-location action only; preserve ordinary community/news live cross-dissolve, with regression guard.",
-  "attempt": 437,
+  "purpose": "Verified PR #566 (merged 754aa1b): smooth mobile map rendering while retaining economy mode; earlier major/public/safety facilities; stable facility sheet and shared saved-group UI; community outgoing transition guard; bus interval outline removal, exact historical arrival paging and compact full-time display; retain official route geometry. Full source CI, phone aggregate, picker/facility and real route navigation checks passed. Protected Preview and Production QA required; live bus data availability remains to be verified. Road geometry review remains isolated.",
+  "attempt": 438,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
