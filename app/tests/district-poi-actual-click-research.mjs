@@ -70,6 +70,8 @@ try{
    const title=await page.locator('#transport-title').innerText();
    assert.ok(title.includes(site.name)||title.replace(/[.·\s]/g,'')===site.name.replace(/[.·\s]/g,''),'actual selected bus title: '+title);
    assert.equal(await page.locator('.dj-place-detail:visible').count(),0,'no apartment/facility popup may steal the bus hit');
+   const layout=await page.evaluate(()=>{const panel=document.getElementById('transport-sheet'),heading=panel.querySelector('.transport-arrivals-title'),arrivals=document.getElementById('transport-arrivals'),neighbors=document.getElementById('transport-neighbors');return {sameParent:heading.parentNode===arrivals.parentNode&&arrivals.parentNode===neighbors.parentNode,ordered:heading.nextElementSibling===arrivals&&arrivals.nextElementSibling===neighbors};});
+   assert.equal(layout.sameParent,true,'transit nodes remain inside their shared scroll container');assert.equal(layout.ordered,true,'bus section order remains intact');
    await page.screenshot({path:out+'/bus-'+site.arsId+'.png'});
    results.push({arsId:site.arsId,name:site.name,title,hit,transportSheet:true,facilityPopup:false});
    await page.locator('#transport-close').click();await page.locator('#transport-sheet').waitFor({state:'hidden',timeout:15000});
