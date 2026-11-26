@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.197",
+  "application_version": "9.2.198",
   "public_work_branch": "main",
-  "purpose": "Verified PR #555: remove TIP close chrome and green interaction focus rings, retain neutral keyboard focus, preserve startup theme, and show the full TIP sentence before rotation. Full source CI, phone checks and Chromium/WebKit regression passed. Protected mobile Preview, QA and Production; road research PR #550 excluded.",
-  "attempt": 430,
+  "purpose": "Verified PR #556 on top of released PR #555: clean route endpoint and candidate markers on cancellation and tab exit; guard stale requests; consistent saved-place and community pill controls; centered district selector; one selectable six-factor PRI preferences dialog with actual observed-only route comparison and coloring; retain independent PRI explanation. Full source CI, 36 phone regressions and real mobile route-entry browser test passed. Protected Preview, Phone QA and Production. Isolated road review PR #558 does not change app sources and is not included in production road data.",
+  "attempt": 431,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
