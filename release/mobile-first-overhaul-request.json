@@ -1,9 +1,9 @@
 {
   "source": "public-app",
-  "application_version": "9.2.206",
+  "application_version": "9.2.207",
   "public_work_branch": "main",
-  "purpose": "Verified PR #571 (f1c8d1c): correct verified road surface stacking above conflicting native 2D building fills while preserving GIS buildings, extrusions and symbols; retry transient verification and manifest errors. Public source CI and actual app mobile road QA passed at Chung-Ang campus, Sangdo Elementary School and Nodeul/Sayuksin (3/3). No route, PRI or original source geometry changes. Protected Preview, phone QA and Production required; remaining source conflicts and greenery audit are separate.",
-  "attempt": 441,
+  "purpose": "Verified PR #572 (f210a5b): deduplicate strictly matched native 2D building footprints only when complete GIS sheets are visible and loaded; preserve named, unmatched and adjacent buildings, restore on zoom-out, eviction and mode changes. Full public source CI and mobile/route/facility regression passed. Retain v9.2.206 road repair and all original spatial/routing/PRI data. Protected Preview, phone QA and Production required. Separate recovered road-surface PR #574 remains under validation.",
+  "attempt": 442,
   "release_status": "MOBILE_ONLY_PREVIEW_THEN_PROTECTED_PRODUCTION",
   "release_kind": "patch",
   "beta_number": 1,
