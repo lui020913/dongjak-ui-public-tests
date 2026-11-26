@@ -94,6 +94,7 @@ import {installPriMap} from './pri-map.js';
 import {installSolidMapLines} from './solid-map-lines.js';
 import {evaluateCompositePriRouteCandidates} from './pri-route-client.js';
 import {chooseTransitWalk} from './transit-walk-priority.mjs';
+import {summarizeTransitWalks,transitReviewPairs} from './transit-candidate-review.mjs';
 import {installRoutePriPreferences} from './route-pri-preferences.js';
 import './v841-route-and-tips.css';
 import {slimMapTextHalos} from './map-label-halo.js';
@@ -3822,6 +3823,30 @@ window.addEventListener('dongjak:transit-gps-start',event=>{
 window.addEventListener('dongjak:transit-route-points',event=>{
   if(app.dataset.tab!=='route'||navMode)return;
   event.detail?.accept?.(routeStart&&routeEnd?[routeStart,...routeWaypoints,routeEnd].map(p=>({...p})):[]);
+});
+// Review candidates without changing map state or entering navigation.
+window.addEventListener('dongjak:transit-candidate-review',event=>{
+ const {plan,signal,preferPri,resolve,reject}=event.detail||{};
+ if(!plan||typeof resolve!=='function'||typeof reject!=='function')return;
+ void (async()=>{
+  const from=routeStart,to=routeEnd,gen=routeRequestGeneration;
+  const current=()=>!signal?.aborted&&app.dataset.tab==='route'&&!navMode&&routeStart===from&&routeEnd===to&&gen===routeRequestGeneration&&!routeWaypoints.length;
+  if(!from||!to||!current())throw new Error('경로 조건이 변경됐습니다.');
+  const legs=plan.legs||[plan];
+  if(legs.some(leg=>{const coords=leg.kind==='rail'?leg.stops?.map(n=>VERIFIED_STATIONS[n]):leg.coords;return !Array.isArray(coords)||coords.length<2||coords.some(p=>!p)||!routeWithinDistrict(coords,boundaryGeometry,isDongjak);}))throw new Error('교통 구간 확인 불가');
+  const pairs=transitReviewPairs(plan,from,to),walks=[];
+  if(!pairs.length)throw new Error('경로 연결 정보 부족');
+  for(const [a,b] of pairs){
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   if(a.lng===b.lng&&a.lat===b.lat){walks.push({kilometers:0,seconds:0});continue;}
+   const pair=await fetchPreferredPedestrianPair(a,b,signal);
+   if(!current())throw new Error('경로 조건이 변경됐습니다.');
+   const walk=await selectTransitWalk(pair,preferPri);
+   if(!current()||!walk)throw new Error('도보 연결 확인 불가');
+   walks.push(walk);
+  }
+  return summarizeTransitWalks(walks);
+ })().then(resolve,reject);
 });
 window.addEventListener('dongjak:transit-route-preview',event=>{
   const {plan,signal,resolve,reject,preferPri=true}=event.detail||{};
