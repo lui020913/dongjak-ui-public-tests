@@ -11,6 +11,19 @@ export function roadTilesForViewport(tiles,bounds){
  const b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
  return tiles.filter(t=>intersectsBounds(t.bbox,b));
 }
+// The reviewed polygons were checked against the retained GIS footprints.
+ // Native vector footprints are a separate geometry source. Put the exact
+ // verified road surface above native 2D fills but below GIS buildings,
+ // extrusions and symbols, rather than letting the old footprint mask it.
+export function reviewedRoadAnchor(layers=[]){
+ const nativePlan=l=>l?.type==='fill'&&l['source-layer']==='building'&&!String(l.id).startsWith('dongjak-buildings-');
+ const firstProtected=layers.findIndex(l=>l.type==='symbol'||l.type==='fill-extrusion'||String(l.id).startsWith('dongjak-buildings-'));
+ const end=firstProtected<0?layers.length:firstProtected;
+ let lastPlan=-1;
+ for(let i=0;i<end;i++)if(nativePlan(layers[i]))lastPlan=i;
+ if(lastPlan>=0)return layers[lastPlan+1]?.id;
+ return layers.find(l=>l['source-layer']==='building'||l.type==='symbol'||String(l.id).startsWith('dongjak-buildings-'))?.id;
+}
 /** Actual base-map integration, isolated QA only. Keep native roads visible
  * unless the exact reaudited source and district guards are satisfied.
  * Do not modify routing, transport or building layers.
@@ -41,7 +54,7 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
     const liveTiles=map.getSource(n.source_name)?.tiles;
     if(!Array.isArray(liveTiles)||!liveTiles.length||!liveTiles.every(t=>t===n.tile_template))return null;
     return createSelectiveRoadReview(map,n,geo.features?.[0]?.geometry,true,SOURCE);
-  })().catch(()=>null);
+  })().catch(()=>null).then(result=>{if(!result)eligibilityPromise=null;return result;});
   return eligibilityPromise;
  }
  function applySelective(){
@@ -56,8 +69,8 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
  function ensureLayer(){
   const style=map.getStyle();
   if(!style?.sources?.openmaptiles)return false;
-  // Below buildings and labels, above native ground-road styling.
-  const anchor=style.layers.find(l=>l['source-layer']==='building'&&['fill','fill-extrusion'].includes(l.type))?.id||style.layers.find(l=>l.type==='symbol')?.id;
+  // Keep verified surfaces above native 2D footprints, below GIS buildings and labels.
+  const anchor=reviewedRoadAnchor(style.layers);
   if(!map.getSource(SOURCE))map.addSource(SOURCE,{type:'geojson',data:empty(),tolerance:0,maxzoom:19});
   if(!map.getLayer(LAYER))map.addLayer({id:LAYER,source:SOURCE,type:'fill',minzoom:16,layout:{visibility:'none'},paint:{'fill-color':color(),'fill-opacity':0,'fill-antialias':true}},anchor);
   return true;
@@ -66,7 +79,7 @@ export function installReviewedBaseRoads({map,app,assets=baseAssets,enabled=fals
   const token=++generation;readyToken=0;selective?.restore();
   if(disposed||map.getZoom()<16||app.dataset.sangdoNight==='on'){hide();return false;}
   try{
-   manifest=manifest||await (initializing??=(assets.manifest()));
+   manifest=manifest||await (initializing??=(assets.manifest().finally(()=>{initializing=null;})));
    if(disposed||token!==generation||!manifest)return false;
    if(!ensureLayer())return false;
    const b=map.getBounds(),tiles=roadTilesForViewport(manifest.tiles,[b.getWest(),b.getSouth(),b.getEast(),b.getNorth()]);

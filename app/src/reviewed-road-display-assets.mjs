@@ -27,7 +27,7 @@ export function createRoadDisplayAssets({fetcher=globalThis.fetch,enabled=false}
       const r=await fetcher(ROOT+'manifest.json',{cache:'no-cache'});if(!r.ok)return null;
       const m=await r.json();if(m.schema!==1||m.graph_sha256!==GRAPH||m.operational_enabled!==false||!Array.isArray(m.overlays)||!Array.isArray(m.tiles))throw Error('review manifest mismatch');
       return m;
-   })().catch(()=>null);
+   })().catch(()=>null).then(result=>{if(!result)manifestPromise=null;return result;});
    return manifestPromise;
  }
  async function checked(meta,limit=8*1024*1024){

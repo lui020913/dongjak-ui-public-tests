@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {roadTilesForViewport,installReviewedBaseRoads} from '../src/reviewed-base-road-layer.mjs';
+import {roadTilesForViewport,installReviewedBaseRoads,reviewedRoadAnchor} from '../src/reviewed-base-road-layer.mjs';
 test('select by full feature bounding boxes, including features crossing tile borders',()=>{
  const tiles=[{file:'inside',bbox:[126.94,37.49,126.96,37.51]},{file:'outside',bbox:[127,38,127.1,38.1]},{file:'edge',bbox:[126.949,37.501,126.99,37.52]}];
  assert.deepEqual(roadTilesForViewport(tiles,[126.95,37.5,126.951,37.502]).map(x=>x.file),['inside','edge']);
@@ -25,4 +25,11 @@ test('viewport load preserves native roads and hides preview on zoom, night and 
  assert.equal(await ctrl.refresh(),true);ctrl.dispose();assert.equal(layers.has('dj-reviewed-base-road-fill'),false);assert.equal(layers.has('native-road'),true);
  fail=true;const failed=installReviewedBaseRoads({map,app,assets,enabled:true});assert.equal(await failed.refresh(),false);assert.equal(layers.get('dj-reviewed-base-road-fill').layout.visibility,'none');failed.dispose();
  }finally{globalThis.MutationObserver=old}
+});
+
+test('verified roads can cover conflicting native 2D footprints but not GIS footprints, extrusions or labels',()=>{
+ const layers=[{id:'land',type:'fill'},{id:'native-building',type:'fill','source-layer':'building'},{id:'native-road',type:'line','source-layer':'transportation'},{id:'dongjak-buildings-footprint-2',type:'fill'},{id:'dongjak-buildings-3d-2',type:'fill-extrusion'},{id:'poi',type:'symbol'}];
+ assert.equal(reviewedRoadAnchor(layers),'native-road');
+ assert.equal(reviewedRoadAnchor([{id:'land',type:'fill'},{id:'poi',type:'symbol'}]),'poi');
+ assert.equal(reviewedRoadAnchor([{id:'native-building',type:'fill','source-layer':'building'},{id:'native-3d',type:'fill-extrusion','source-layer':'building'}]),'native-3d');
 });
